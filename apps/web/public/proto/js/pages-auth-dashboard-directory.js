@@ -409,7 +409,7 @@ function DashboardHome() {
     const avg = scored.length ? scored.reduce((a, e) => a + e.overall, 0) / scored.length : null;
     return /*#__PURE__*/React.createElement(KpiCard, {
       label: "Avg maturity",
-      value: avg == null ? "—" : avg.toFixed(1),
+      value: avg == null ? "—" : fx(avg, 1),
       sub: avg == null ? "no promoted runs yet" : DMA.helpers.maturityLabel(avg),
       icon: "heatmap",
       accent: "var(--z-dpur)"
@@ -808,7 +808,7 @@ function DashboardEntityCard({
       color: matHex,
       lineHeight: 1
     }
-  }, e.overall?.toFixed(1) || "-"), /*#__PURE__*/React.createElement("div", {
+  }, fx(e.overall, 1) || "-"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 8.5,
       color: matHex,
@@ -829,7 +829,7 @@ function DashboardEntityCard({
     const s = e.pillar_scores?.[p.id];
     return /*#__PURE__*/React.createElement("div", {
       key: p.id,
-      title: `${p.id} · ${s?.toFixed(1) || "-"}`,
+      title: `${p.id} · ${fx(s, 1) || "-"}`,
       style: {
         display: "flex",
         flexDirection: "column",
@@ -853,7 +853,7 @@ function DashboardEntityCard({
         color: "var(--z-body)",
         fontWeight: 600
       }
-    }, s ? s.toFixed(1) : "–")), /*#__PURE__*/React.createElement("div", {
+    }, s ? fx(s, 1) : "–")), /*#__PURE__*/React.createElement("div", {
       style: {
         height: 5,
         background: "var(--z-sep)",
@@ -1145,7 +1145,7 @@ function EntityCard({
       lineHeight: 1,
       letterSpacing: "-.02em"
     }
-  }, e.overall?.toFixed(1) || "-"), /*#__PURE__*/React.createElement("div", {
+  }, fx(e.overall, 1) || "-"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
       color: "var(--z-muted)",
@@ -1188,7 +1188,7 @@ function EntityCard({
         color: "var(--z-dark)",
         marginTop: 2
       }
-    }, s.toFixed(1)));
+    }, fx(s, 1)));
   })) : /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 10

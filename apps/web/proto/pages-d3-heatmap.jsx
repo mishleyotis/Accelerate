@@ -164,8 +164,8 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
                 <div className="fa-meta">
                   <div className="row" style={{ marginBottom: 8 }}>
                     <MaturityChip score={avg} />
-                    <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Peer {peer.toFixed(1)}</span>
-                    {gap > 0.3 ? <span className="b b-below" style={{ marginLeft: "auto" }}>−{gap.toFixed(1)}</span> : <span className="b b-above" style={{ marginLeft: "auto" }}>at peer</span>}
+                    <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>
+                    {gap > 0.3 ? <span className="b b-below" style={{ marginLeft: "auto" }}>−{fx(gap, 1)}</span> : <span className="b b-above" style={{ marginLeft: "auto" }}>at peer</span>}
                   </div>
                   <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.5 }} className="txt-fit-2">{fa.description}</div>
                 </div>
@@ -258,7 +258,7 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
               <button key={s.id} onClick={() => openSubcap({ kind: "subcap", subcap: s })}
                 className={`hm-cell b ${DMA.helpers.maturityClass(s.score)} ${s.thin ? "thin" : ""}`}
                 style={{ flexDirection: "column", height: 56, fontSize: 11, padding: 4, border: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 700 }}>{s.score.toFixed(1)}</div>
+                <div style={{ fontSize: 14, fontWeight: 700 }}>{fx(s.score, 1)}</div>
                 <div style={{ fontSize: 8.5, opacity: .85, fontFamily: "var(--font-mono)" }}>{s.id.split(".").slice(1).join(".")}</div>
               </button>
             ))}
@@ -411,9 +411,9 @@ function PillarHeatmap({ entity, setPillarFocus }) {
               </div>
               <div className="prog"><div className="prog-fill" style={{ width: `${score / 5 * 100}%`, background: DMA.helpers.maturityHex(score) }} /></div>
               <div className="row" style={{ marginTop: 8, fontSize: 11 }}>
-                <span style={{ color: "var(--z-muted)" }}>Peer {peer.toFixed(1)}</span>
+                <span style={{ color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>
                 <span className="spacer" />
-                <span style={{ color: score < peer ? "var(--z-below)" : "var(--z-mid)", fontFamily: "var(--font-mono)" }}>{score >= peer ? "▲" : "▼"} {Math.abs(score - peer).toFixed(1)}</span>
+                <span style={{ color: score < peer ? "var(--z-below)" : "var(--z-mid)", fontFamily: "var(--font-mono)" }}>{score >= peer ? "▲" : "▼"} {fx(Math.abs(score - peer), 1)}</span>
               </div>
               <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 10 }}>{DMA.CATEGORIES.filter(c => c.pillar === p.id).length} categories · click to drill</div>
             </div>
@@ -461,7 +461,7 @@ function CategoryHeatmap({ entity, pillarFocus, catAgg, showPeers, showIssues, s
                     style={{ position: "relative", border: 0, padding: "8px 6px", minHeight: 44 }}
                     title={`${c.name} · ${capCount > 0 ? capCount + " subcaps capped by issues · " : ""}click to drill`}>
                     <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2, gap: 2 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700 }}>{agg.avg.toFixed(1)}</div>
+                      <div style={{ fontSize: 13, fontWeight: 700 }}>{fx(agg.avg, 1)}</div>
                       {agg.thin > 0 ? <div style={{ fontSize: 8, fontWeight: 600 }}>{agg.thin} thin</div> : null}
                     </div>
                     {showIssues && capCount > 0 ? (
@@ -478,7 +478,7 @@ function CategoryHeatmap({ entity, pillarFocus, catAgg, showPeers, showIssues, s
                 <div style={{ fontSize: 11, color: "var(--z-muted)", display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 8 }}>Peer</div>
                 {cats.map(c => (
                   <div key={c.id} className={`hm-cell peer b ${DMA.helpers.maturityClass(catAgg[c.id].peer)}`} style={{ minHeight: 30, padding: "4px 6px" }}>
-                    {catAgg[c.id].peer.toFixed(1)}
+                    {fx(catAgg[c.id].peer, 1)}
                   </div>
                 ))}
               </> : null}
@@ -533,7 +533,7 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
                       <div className="row" style={{ marginBottom: 6, gap: 5 }}>
                         <span className="chip">{c.id}</span>
                         <span className="spacer" />
-                        {subs.length ? <span className={`b ${DMA.helpers.maturityClass(avg)}`}>{avg.toFixed(1)}</span> : <span className="b b-muted">—</span>}
+                        {subs.length ? <span className={`b ${DMA.helpers.maturityClass(avg)}`}>{fx(avg, 1)}</span> : <span className="b b-muted">—</span>}
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }} className="txt-fit-2">{c.name}</div>
                       <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 3 }}>{subs.length} subcaps{thin ? ` · ${thin} thin` : ""}</div>
@@ -571,7 +571,7 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
               <span className="chip">{c.id}</span>
               <span style={{ fontSize: 13, fontWeight: 600 }}>{c.name}</span>
               <span className="spacer" />
-              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{subs.length} subcaps · {clusters.length} capabilities · weight {(c.weight*100).toFixed(0)}%</span>
+              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{subs.length} subcaps · {clusters.length} capabilities · weight {fx((c.weight*100), 0)}%</span>
             </div>
             {clusters.map(cl => {
               const key = `${c.id}.${cl.l1}`;
@@ -582,7 +582,7 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
                 <div key={key} style={{ border: "1px solid var(--z-sep)", borderRadius: 8, marginBottom: 8, overflow: "hidden" }}>
                   <button onClick={() => setOpenClusters(o => ({ ...o, [key]: !open }))}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "9px 12px", background: "var(--z-bg)", border: 0, cursor: "pointer", textAlign: "left" }}>
-                    <span className={`b ${DMA.helpers.maturityClass(avg)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{avg.toFixed(1)}</span>
+                    <span className={`b ${DMA.helpers.maturityClass(avg)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(avg, 1)}</span>
                     <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600, color: "var(--z-dark)" }} className="txt-fit-1">{cl.name}</span>
                     <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{c.id}.{cl.l1}</span>
                     <span className="b b-muted">{cl.items.length}</span>
@@ -597,7 +597,7 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
                         const evCount = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.includes(s.id)).length;
                         return (
                           <button key={s.id} className="subcap-row" onClick={() => onSynth(s)}>
-                            <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{s.score.toFixed(1)}</span>
+                            <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(s.score, 1)}</span>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div className="row" style={{ gap: 6 }}>
                                 <span style={{ fontSize: 12, fontWeight: 500, color: "var(--z-dark)" }} className="txt-fit-1">{s.name}</span>
@@ -607,11 +607,11 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
                               <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 1 }}>{s.id} · {s.confidence} · {evCount} evidence</div>
                             </div>
                             <div style={{ width: 90, flexShrink: 0 }}>
-                              <div style={{ position: "relative", height: 6, background: "var(--z-sep)", borderRadius: 3 }} title={`Score ${s.score.toFixed(1)} · Peer ${s.peerMedian.toFixed(1)}`}>
+                              <div style={{ position: "relative", height: 6, background: "var(--z-sep)", borderRadius: 3 }} title={`Score ${fx(s.score, 1)} · Peer ${fx(s.peerMedian, 1)}`}>
                                 <div style={{ width: `${s.score / 5 * 100}%`, height: "100%", background: DMA.helpers.maturityHex(s.score), borderRadius: 3 }} />
                                 <div style={{ position: "absolute", left: `calc(${s.peerMedian / 5 * 100}% - 1px)`, top: -2, bottom: -2, width: 2, background: "var(--z-dpur)" }} />
                               </div>
-                              <div style={{ fontSize: 9, color: gap > 0 ? "var(--z-below)" : "var(--z-mid)", marginTop: 2, textAlign: "right" }}>{gap > 0 ? `−${gap.toFixed(1)}` : `+${Math.abs(gap).toFixed(1)}`} vs peer</div>
+                              <div style={{ fontSize: 9, color: gap > 0 ? "var(--z-below)" : "var(--z-mid)", marginTop: 2, textAlign: "right" }}>{gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`} vs peer</div>
                             </div>
                             <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
                               {s.platforms.slice(0, 2).map(p => <span key={p} className="b b-teal">{DMA.getPlatform(p)?.short || p}</span>)}
@@ -660,14 +660,14 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
               </div>
               <div className="row" style={{ marginBottom: 8 }}>
                 <MaturityChip score={avg} />
-                <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Peer {peer.toFixed(1)}</span>
+                <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>
                 <span className="spacer" />
                 <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{subs.length} subcaps</span>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: `repeat(${subs.length}, 1fr)`, gap: 2 }}>
                 {subs.map(s => (
                   <div key={s.id} className={`hm-cell b ${DMA.helpers.maturityClass(s.score)}`} style={{ height: 18, fontSize: 9, padding: 0, border: 0 }}>
-                    {s.score.toFixed(1)}
+                    {fx(s.score, 1)}
                   </div>
                 ))}
               </div>
@@ -762,7 +762,7 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
               {subcap?.thin ? <span className="b b-org">THIN</span> : null}
             </div>
             <div className="title" style={{ fontSize: 15 }}>{subcap?.name || category?.name}</div>
-            <div className="sub">{subcap ? `Score ${subcap.score.toFixed(1)} · ${subcap.confidence}` : `${entity.subcaps.filter(s => s.category === category.id).length} subcaps · weight ${(category.weight * 100).toFixed(0)}%`}</div>
+            <div className="sub">{subcap ? `Score ${fx(subcap.score, 1)} · ${subcap.confidence}` : `${entity.subcaps.filter(s => s.category === category.id).length} subcaps · weight ${fx((category.weight * 100), 0)}%`}</div>
           </div>
           <button className="icon-btn" onClick={onClose}><Icon name="x" size={16} /></button>
         </div>
@@ -788,11 +788,11 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
               <span>M1</span><span className="spacer" /><span>M2</span><span className="spacer" /><span>M3</span><span className="spacer" /><span>M4</span><span className="spacer" /><span>M5</span>
             </div>
             <div className="row" style={{ marginTop: 10, fontSize: 12 }}>
-              <span className="row" style={{ gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: DMA.helpers.maturityHex(score) }} /> Entity <strong>{score.toFixed(1)}</strong></span>
+              <span className="row" style={{ gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: DMA.helpers.maturityHex(score) }} /> Entity <strong>{fx(score, 1)}</strong></span>
               <span className="spacer" />
-              <span className="row" style={{ gap: 5 }}><span style={{ width: 2, height: 12, background: "var(--z-dpur)" }} /> Peer <strong>{peer.toFixed(1)}</strong></span>
+              <span className="row" style={{ gap: 5 }}><span style={{ width: 2, height: 12, background: "var(--z-dpur)" }} /> Peer <strong>{fx(peer, 1)}</strong></span>
               <span className="spacer" />
-              <span style={{ fontSize: 11, color: gap > 0 ? "var(--z-below)" : "var(--z-mid)" }}>{gap > 0 ? `−${gap.toFixed(1)}` : `+${Math.abs(gap).toFixed(1)}`}</span>
+              <span style={{ fontSize: 11, color: gap > 0 ? "var(--z-below)" : "var(--z-mid)" }}>{gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`}</span>
             </div>
           </div>
 
@@ -874,7 +874,7 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
               </div>
               <div style={{ fontSize: 12.5, color: "#3B0764", lineHeight: 1.6 }}>
                 {subcap.thin ? `This subcap has thin evidence (${subcap.evidence_count} / 3) - confidence is LOW. The score is provisional.` :
-                  gap > 0.5 ? `Trails peer by ${gap.toFixed(1)} - addressable via the linked recommendation. Closing this lifts the parent category by ${(gap * 0.18).toFixed(2)} points.` :
+                  gap > 0.5 ? `Trails peer by ${fx(gap, 1)} - addressable via the linked recommendation. Closing this lifts the parent category by ${fx((gap * 0.18), 2)} points.` :
                   `At or above peer median. No platform investment needed for this subcap specifically; protect against regression.`}
               </div>
             </div>
@@ -883,7 +883,7 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
         <div className="drawer-foot">
           {subcap ? <button className="btn btn-tertiary" onClick={() => {
             const label = subcap?.name || category?.name || "selection";
-            const text = `${label}\nScore ${subcap?.score?.toFixed(1) ?? "-"} · confidence ${subcap?.confidence ?? "-"} · peer median ${subcap?.peerMedian?.toFixed(1) ?? "-"}.`;
+            const text = `${label}\nScore ${fx(subcap?.score, 1) ?? "-"} · confidence ${subcap?.confidence ?? "-"} · peer median ${fx(subcap?.peerMedian, 1) ?? "-"}.`;
             try { navigator.clipboard.writeText(text); } catch (e) {}
           }}><Icon name="copy" size={13} /> Copy synthesis</button> : <span />}
           <button className="btn btn-secondary" onClick={onClose}>Close</button>

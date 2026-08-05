@@ -461,6 +461,26 @@ function adaptThoughtLeadership(tl) {
   }));
 }
 
+/* Presentation the fixture carried and the contract does not: an icon, a
+   gradient, an illustration. These are not data — nothing about the client is
+   being asserted — but the card's layout needs them, so they are DERIVED
+   deterministically from the focus area's own id. Deterministic matters: the
+   same area keeps the same colour across reloads and across audiences, so a
+   reader is not re-learning the page every visit. */
+const FA_ICONS = ["envelope", "ai", "platform", "heatmap", "stack", "timeline"];
+const FA_GRADIENTS = [
+  ["var(--z-teal)", "var(--m-bld)"], ["var(--z-mid)", "var(--m-cmp)"],
+  ["var(--z-dpur)", "var(--z-lav)"], ["var(--m-cmp)", "var(--m-dif)"],
+  ["var(--z-org)", "var(--m-bld)"], ["var(--z-navy)", "var(--z-mid)"],
+];
+
+function faIndex(id, mod) {
+  let h = 0;
+  const t = String(id || "");
+  for (let i = 0; i < t.length; i++) h = ((h << 5) - h) + t.charCodeAt(i);
+  return Math.abs(h) % mod;
+}
+
 function adaptFocusAreas(focus) {
   return ((focus && focus.focus_areas) || []).map((f) => ({
     id: f.fa_id, name: f.name,
@@ -472,6 +492,13 @@ function adaptFocusAreas(focus) {
     delta: num(f.delta),
     currency_status: f.currency_status || null,
     subcaps: f.involved_subcap_ids || [],
+    // KPI targets are not in the H1 contract: an empty list, never invented
+    // "current vs target" figures for a real client.
+    kpis: [],
+    pillars_weight: null,
+    icon: FA_ICONS[faIndex(f.fa_id, FA_ICONS.length)],
+    colors: FA_GRADIENTS[faIndex(f.fa_id, FA_GRADIENTS.length)],
+    illustration: null,
   }));
 }
 
@@ -652,5 +679,5 @@ Object.assign(window, {
   adaptInsights, adaptRecommendations, adaptTechStack, adaptLeadership,
   adaptThoughtLeadership, adaptFocusAreas, adaptTimeline, adaptIssues,
   adaptRoadmap, adaptStairstep, adaptEvidence, platformChips, scaleMaxOf,
-  headlineOf, sectionStates,
+  headlineOf, sectionStates, faIndex,
 });

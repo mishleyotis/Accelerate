@@ -148,11 +148,18 @@ function MyTweaks() {
 }
 
 /* ── Client-scoped route ─────────────────────────────────────────────
-   In production a client page renders PROMOTED sections or an honest
-   empty state. The prototype's client pages carry illustrative prose
-   about a fictional institution — three cores, an nCino migration, named
-   executive hires — and rendered under a real client's name that is
-   fabrication, so LIVE mode never reaches them. */
+   ONE set of page components, fixture or live. The prototype is the
+   renderer; in production its accessors read the promoted payload through
+   window.DMA_ENTITY, which useLiveEntity installs before the first render
+   and clears on every entity change. There is no second renderer to keep
+   in step, and no path by which the fixture's fictional institution can
+   appear under a real client's name — in LIVE mode every entity-scoped
+   accessor answers null rather than falling back (data.js, and
+   tests/adapter.test.js).
+
+   What LIVE still changes is WHEN we render: nothing is drawn until the
+   promoted pages have arrived, because a page that renders empty and then
+   fills in reads as a page with nothing on it. */
 const LIVE_MODE = typeof window !== "undefined" && !!window.DMA_LIVE;
 
 function ClientRoute({ id, tab, sub }) {
@@ -160,34 +167,51 @@ function ClientRoute({ id, tab, sub }) {
   const entity = DMA.getEntity(id);
   const runId = route.params.run;
   const run = entity && ((runId && entity.runs.find(r => r.id === runId)) || entity.runs[0]);
-  const live = useLivePage(LIVE_MODE && entity ? entity.id : null,
-                           tab === "health" ? "heatmap" : tab,
-                           audience, run && run.run_id);
+  const live = useLiveEntity(LIVE_MODE && entity ? entity.id : null,
+                             audience, run && run.run_id);
 
   if (!entity) {
     return <PageShell title="Not found"><div className="empty"><h3>Entity not found</h3></div></PageShell>;
   }
-  if (LIVE_MODE) {
+  // The directory row carries identity (name, slug, runs, sub-vertical); the
+  // promoted payload carries the assessment (cells, scores, platform fit).
+  // Merged here, once, so every prototype component receives the entity shape
+  // it was written against and none of them needs to know about LIVE.
+  const ent = (LIVE_MODE && live.status === "ready" && live.entity)
+    ? { ...entity, subcaps: live.entity.subcaps, oss: live.entity.oss,
+        pillar_scores: Object.keys(live.entity.pillar_scores || {}).length
+          ? live.entity.pillar_scores : entity.pillar_scores,
+        overall: live.entity.overall != null ? live.entity.overall : entity.overall }
+    : entity;
+  if (LIVE_MODE && live.status === "loading") {
+    return <ClientShell entity={entity} run={run} tab={tab}><SectionLoader /></ClientShell>;
+  }
+  if (LIVE_MODE && live.status === "error") {
     return (
       <ClientShell entity={entity} run={run} tab={tab}>
-        <LiveClientPage entity={entity} run={run} tab={tab} live={live} />
+        <div className="empty">
+          <h3>Nothing promoted for this run</h3>
+          <p>{live.code === "no_promoted_pages"
+            ? "No page of this run has promoted yet, so there is nothing to show."
+            : live.code}</p>
+        </div>
       </ClientShell>
     );
   }
 
   let page = null;
   switch (tab) {
-    case "overview":  page = <ClientOverview entity={entity} run={run} />; break;
-    case "insights":  page = <ClientInsights entity={entity} run={run} />; break;
-    case "heatmap":   page = <ClientHeatmap entity={entity} run={run} />; break;
-    case "platform":  page = <ClientPlatform entity={entity} run={run} />; break;
-    case "context":   page = <ClientContext entity={entity} run={run} />; break;
-    case "health":    page = <ClientHealth entity={entity} run={run} />; break;
-    case "techstack": page = sub ? <ClientTechStackDetail entity={entity} run={run} techId={sub} /> : <ClientTechStack entity={entity} run={run} />; break;
-    case "runs":      page = <ClientRuns entity={entity} />; break;
-    default:          page = <ClientOverview entity={entity} run={run} />;
+    case "overview":  page = <ClientOverview entity={ent} run={run} />; break;
+    case "insights":  page = <ClientInsights entity={ent} run={run} />; break;
+    case "heatmap":   page = <ClientHeatmap entity={ent} run={run} />; break;
+    case "platform":  page = <ClientPlatform entity={ent} run={run} />; break;
+    case "context":   page = <ClientContext entity={ent} run={run} />; break;
+    case "health":    page = <ClientHealth entity={ent} run={run} />; break;
+    case "techstack": page = sub ? <ClientTechStackDetail entity={ent} run={run} techId={sub} /> : <ClientTechStack entity={ent} run={run} />; break;
+    case "runs":      page = <ClientRuns entity={ent} />; break;
+    default:          page = <ClientOverview entity={ent} run={run} />;
   }
-  return <ClientShell entity={entity} run={run} tab={tab}>{page}</ClientShell>;
+  return <ClientShell entity={ent} run={run} tab={tab}>{page}</ClientShell>;
 }
 
 /* ── Router ──────────────────────────────────────────────────────── */

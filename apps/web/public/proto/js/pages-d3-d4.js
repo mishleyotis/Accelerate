@@ -38,11 +38,36 @@ function ClientPlatform({
     });
   }, [platform, entity?.id]);
   const platformData = DMA.PLATFORMS;
+  const selected = DMA.getPlatform(platform) || {
+    id: platform,
+    name: platform,
+    short: platform,
+    features: ""
+  };
   const recs = DMA.recsFor(entity.id);
 
   // Build gap-to-platform mapping from subcaps
   const gaps = entity.subcaps.filter(s => s.score < 3.0 && s.platforms.includes(platform));
   const platformGapCount = pid => entity.subcaps.filter(s => s.score < 3.0 && s.platforms.includes(pid)).length;
+  const livePrereqs = (() => {
+    const out = [];
+    for (const r of recs || []) {
+      for (const q of r.prerequisites || []) {
+        if (!q || typeof q !== "object") continue;
+        out.push({
+          id: q.cell || q.condition || r.id,
+          name: q.condition || q.cell || r.title,
+          min: q.minimum == null ? null : Number(q.minimum),
+          current: q.current == null ? null : Number(q.current),
+          met: q.verdict ? q.verdict === "MET" : q.minimum != null && q.current != null ? Number(q.current) >= Number(q.minimum) : null,
+          basis: q.basis || null,
+          note: q.note || null
+        });
+      }
+    }
+    return out;
+  })();
+  const liveStarters = (DMA.startersFor ? DMA.startersFor(entity.id) || [] : []).slice().sort((a, b) => (a.rank || 99) - (b.rank || 99)).map(x => x.text).filter(Boolean);
   const prerequisites = {
     SF: [{
       id: "P4C1",
@@ -117,12 +142,17 @@ function ClientPlatform({
     }]
   };
   const conversationStarters = {
-    SF: [`${entity.name}'s P4 score of ${entity.pillar_scores.P4.toFixed(1)} in Data Foundation is ${(entity.pillar_scores.P4 - (entity.pillar_scores.P4 + 0.3)).toFixed(1)} below the ${DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase()} peer median. Synovus deployed Data Cloud in Q3 2025 after a similar finding [E-047]. Evidence confirms the root constraint is architectural, not strategic.`, `Three CDO-equivalent hires in your subvertical over the last 12 months - including yours in May 2026 - have led with Data Cloud as the first investment. The 6-9 month integration window before nCino go-live is the highest-leverage moment.`, `Agentforce prerequisites (P4C1 ≥ 2.0, P2C2 ≥ 2.0) are 67% met. The conversation order is: Data Cloud → FSC → Agentforce - not all three at once.`],
+    SF: [`${entity.name}'s P4 score of ${fx(entity.pillar_scores.P4, 1)} in Data Foundation is ${fx(entity.pillar_scores.P4 - (entity.pillar_scores.P4 + 0.3), 1)} below the ${DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase()} peer median. Synovus deployed Data Cloud in Q3 2025 after a similar finding [E-047]. Evidence confirms the root constraint is architectural, not strategic.`, `Three CDO-equivalent hires in your subvertical over the last 12 months - including yours in May 2026 - have led with Data Cloud as the first investment. The 6-9 month integration window before nCino go-live is the highest-leverage moment.`, `Agentforce prerequisites (P4C1 ≥ 2.0, P2C2 ≥ 2.0) are 67% met. The conversation order is: Data Cloud → FSC → Agentforce - not all three at once.`],
     DB: [`${entity.name}'s analytics adoption (Tableau Cloud, 1,800 users) is 1.3 points ahead of its decisioning capability. Mosaic AI on Databricks bridges the gap with existing skill base - no re-platforming.`, `Peer cohort: 22% of regional banks have deployed Databricks for risk decisioning. Capital One and Truist published case studies in 2025.`, `Lakeflow can land on top of the existing Azure footprint - no architectural rework.`],
     TBL: [`Tableau is already deployed at ${entity.name} (1,800 users, 2025 rollout). Tableau Pulse extends to operations leadership with no new infrastructure.`, `Job postings reference "Tableau Pulse Specialist" - the technical curiosity already exists internally.`, `Lower-friction commercial path than introducing a net-new platform - adoption velocity is the differentiator.`],
     TW: [`App store ratings trail regional bank peer median by 0.8 stars. Twilio Engage compresses mobile friction without core replacement.`, `BMO and Truist deployed Twilio in 2025 with 18-point branch deflection within 10 months.`, `Twilio Engage + Service Cloud sequencing reduces operating cost in the branch network while improving NPS.`],
     nCino: [`${entity.name} is mid-migration to nCino core - Workflow Engine is a low-risk extension during go-live.`, `Loan origination cycle is currently 12 days median. First Citizens went from 11 to 4 days post-Workflow Engine deployment.`, `STP rate at 1.8 - Workflow Engine can move this to 3.5 in 6 months on the existing core migration roadmap.`]
   };
+
+  // Live wins; the fixture answers only when there is no promoted data (the
+  // standalone prototype). Never undefined.
+  const prereqRows = livePrereqs.length ? livePrereqs : prerequisites[platform] || [];
+  const starterRows = liveStarters.length ? liveStarters : conversationStarters[platform] || [];
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -153,7 +183,7 @@ function ClientPlatform({
       marginBottom: 16
     }
   }, platformData.map(p => {
-    const score = entity.oss[p.id];
+    const score = (entity.oss || {})[p.id];
     const isSel = p.id === platform;
     return /*#__PURE__*/React.createElement("div", {
       key: p.id,
@@ -187,10 +217,10 @@ function ClientPlatform({
       style: {
         fontSize: 26,
         fontWeight: 200,
-        color: "var(--z-teal)",
+        color: score == null ? "var(--z-muted)" : "var(--z-teal)",
         lineHeight: 1
       }
-    }, score), /*#__PURE__*/React.createElement("div", {
+    }, score == null ? "—" : score), /*#__PURE__*/React.createElement("div", {
       className: "f-mono",
       style: {
         fontSize: 9,
@@ -227,7 +257,7 @@ function ClientPlatform({
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
-  }, /*#__PURE__*/React.createElement("h3", null, "Gap-to-platform mapping \xB7 ", DMA.getPlatform(platform).name), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Gap-to-platform mapping \xB7 ", selected.name), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"
@@ -281,7 +311,7 @@ function ClientPlatform({
         fontFamily: "var(--font-mono)",
         color: "var(--z-below)"
       }
-    }, "\u2212", (s.peerMedian - s.score).toFixed(1))), /*#__PURE__*/React.createElement("td", {
+    }, "\u2212", fx(s.peerMedian - s.score, 1))), /*#__PURE__*/React.createElement("td", {
       "data-label": "Evidence"
     }, rowEv.length ? /*#__PURE__*/React.createElement("span", {
       className: `tier-chip tier-${rowEv[0].tier}`
@@ -309,14 +339,14 @@ function ClientPlatform({
       fontSize: 13,
       fontWeight: 600
     }
-  }, "Readiness \xB7 ", DMA.getPlatform(platform).name), /*#__PURE__*/React.createElement("span", {
+  }, "Readiness \xB7 ", selected.name), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)"
     }
-  }, "click a row to drill in")), prerequisites[platform].map(p => {
+  }, "click a row to drill in")), prereqRows.map(p => {
     const isOpen = openPrereq === p.id;
     const subs = entity.subcaps.filter(s => s.id.startsWith(p.id));
     const ev = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.some(sid => sid.startsWith(p.id)));
@@ -361,7 +391,7 @@ function ClientPlatform({
         fontSize: 11,
         color: "var(--z-muted)"
       }
-    }, "Min ", p.min.toFixed(1), " \xB7 Current ", p.current.toFixed(1), " \xB7 ", subs.length, " subcaps \xB7 ", ev.length, " evidence"), /*#__PURE__*/React.createElement("div", {
+    }, "Min ", fx(p.min, 1), " \xB7 Current ", fx(p.current, 1), " \xB7 ", subs.length, " subcaps \xB7 ", ev.length, " evidence"), /*#__PURE__*/React.createElement("div", {
       className: "prog",
       style: {
         marginTop: 4,
@@ -399,7 +429,7 @@ function ClientPlatform({
         width: 30,
         justifyContent: "center"
       }
-    }, s.score.toFixed(1)), /*#__PURE__*/React.createElement("span", {
+    }, fx(s.score, 1)), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 11.5,
         color: "var(--z-dark)",
@@ -438,7 +468,7 @@ function ClientPlatform({
       title: `${e.title} · ${e.source_pretty}`,
       onClick: () => openEvidence(e.id)
     }, e.id)))) : null) : null);
-  }), prerequisites[platform].some(p => !p.met) ? /*#__PURE__*/React.createElement("div", {
+  }), prereqRows.some(p => p.met === false) ? /*#__PURE__*/React.createElement("div", {
     className: "co co-org",
     style: {
       marginTop: 10
@@ -450,7 +480,7 @@ function ClientPlatform({
     className: "co-title"
   }, "Advisory"), /*#__PURE__*/React.createElement("div", {
     className: "co-body"
-  }, "Lead with the foundation prerequisite conversation before introducing ", DMA.getPlatform(platform).name, "."))) : null)), /*#__PURE__*/React.createElement("div", {
+  }, "Lead with the foundation prerequisite conversation before introducing ", selected.name, "."))) : null)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
@@ -461,7 +491,7 @@ function ClientPlatform({
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
-  }, /*#__PURE__*/React.createElement("h3", null, "Recommendations \xB7 ", DMA.getPlatform(platform).name)), /*#__PURE__*/React.createElement("div", null, recs.filter(r => r.platform === platform).map(r => /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Recommendations \xB7 ", selected.name)), /*#__PURE__*/React.createElement("div", null, recs.filter(r => r.platform === platform).map(r => /*#__PURE__*/React.createElement("div", {
     key: r.id,
     className: "rec-row",
     onClick: () => openRec(r.id),
@@ -546,10 +576,10 @@ function ClientPlatform({
   }, /*#__PURE__*/React.createElement("h3", null, "Conversation starters"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => {
-      const text = conversationStarters[platform].map((cs, i) => `#${i + 1} — ${cs}`).join("\n\n");
+      const text = starterRows.map((cs, i) => `#${i + 1} — ${cs}`).join("\n\n");
       try {
         navigator.clipboard.writeText(text);
-        pushToast(`Copied ${conversationStarters[platform].length} conversation starters`, "success");
+        pushToast(`Copied ${starterRows.length} conversation starters`, "success");
       } catch (e) {
         pushToast("Couldn't access clipboard", "warn");
       }
@@ -561,7 +591,7 @@ function ClientPlatform({
     style: {
       padding: 14
     }
-  }, conversationStarters[platform].map((cs, i) => /*#__PURE__*/React.createElement("div", {
+  }, starterRows.map((cs, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       padding: 10,
@@ -745,8 +775,12 @@ function StairstepCurve({
     const y = stepY(i);
     const w = stepW - 8;
     const h = H - padB - y;
-    const platform = s.platforms[0];
-    const plat = DMA.getPlatform(platform);
+    const platform = (s.platforms || [])[0];
+    const plat = DMA.getPlatform(platform) || {
+      id: platform,
+      name: platform,
+      short: platform
+    };
     const color = i === 0 ? "var(--m-act)" : i === 1 ? "var(--m-bld)" : i === 2 ? "var(--m-cmp)" : "var(--m-dif)";
     return /*#__PURE__*/React.createElement("g", {
       key: i
@@ -828,7 +862,7 @@ function StairstepCurve({
     fill: "var(--z-dark)",
     fontWeight: "700",
     textAnchor: "end"
-  }, C.current.toFixed(1))))), /*#__PURE__*/React.createElement("div", {
+  }, fx(C.current, 1))))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -1239,7 +1273,7 @@ function StepCurveView({
     fontWeight: "700",
     fill: "var(--z-dark)",
     textAnchor: "middle"
-  }, p.m.toFixed(1)), /*#__PURE__*/React.createElement("text", {
+  }, fx(p.m, 1)), /*#__PURE__*/React.createElement("text", {
     x: xFor(p.t),
     y: H - padB + 18,
     fontSize: "10",
@@ -1326,7 +1360,7 @@ function StepCurveView({
     style: {
       color: "#fff"
     }
-  }, points.find(p => p.phase === selectedPhase.phase).m.toFixed(1)), " composite maturity (", Math.round((points.find(p => p.phase === selectedPhase.phase).m - entity.overall) * 100) / 100, " from today). Success metric: ", selectedPhase.metric, "."), /*#__PURE__*/React.createElement("div", {
+  }, fx(points.find(p => p.phase === selectedPhase.phase).m, 1)), " composite maturity (", Math.round((points.find(p => p.phase === selectedPhase.phase).m - entity.overall) * 100) / 100, " from today). Success metric: ", selectedPhase.metric, "."), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",

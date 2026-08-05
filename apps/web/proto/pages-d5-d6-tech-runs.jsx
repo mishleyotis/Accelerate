@@ -361,15 +361,15 @@ function FinChartInteractive({ entity, hoveredYear, setHoveredYear }) {
       <div style={{ display: "flex", alignItems: "flex-end", gap: 14, height: 140, padding: "0 8px" }}>
         {data.map(d => (
           <div key={d.year} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer" }} onMouseEnter={() => setHoveredYear(d.year)} onMouseLeave={() => setHoveredYear(null)}>
-            <div style={{ fontSize: 10, color: hoveredYear === d.year ? "var(--z-teal)" : "var(--z-muted)", fontWeight: hoveredYear === d.year ? 700 : 400 }}>${(d.val / 1e9).toFixed(1)}B</div>
+            <div style={{ fontSize: 10, color: hoveredYear === d.year ? "var(--z-teal)" : "var(--z-muted)", fontWeight: hoveredYear === d.year ? 700 : 400 }}>${fx((d.val / 1e9), 1)}B</div>
             <div style={{ width: "100%", height: `${(d.val / max) * 120}px`, background: hoveredYear === d.year ? "linear-gradient(180deg, var(--z-mid), var(--z-dark2))" : "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0", transition: "background 160ms" }} />
             <div style={{ fontSize: 10, color: "var(--z-muted)" }}>{d.year}</div>
           </div>
         ))}
       </div>
       <div style={{ marginTop: 10, padding: 8, background: "var(--z-lav)", borderRadius: 6, fontSize: 11, color: "var(--z-body)" }}>
-        Total asset CAGR <strong style={{ color: "var(--z-mid)" }}>{(cagr * 100).toFixed(1)}%</strong> · trend classified <strong>{entity.trend}</strong>
-        {hoveredYear ? <span style={{ marginLeft: 8, color: "var(--z-teal)", fontWeight: 600 }}>· {hoveredYear}: ${(data.find(d => d.year === hoveredYear).val / 1e9).toFixed(2)}B</span> : null}
+        Total asset CAGR <strong style={{ color: "var(--z-mid)" }}>{fx((cagr * 100), 1)}%</strong> · trend classified <strong>{entity.trend}</strong>
+        {hoveredYear ? <span style={{ marginLeft: 8, color: "var(--z-teal)", fontWeight: 600 }}>· {hoveredYear}: ${fx((data.find(d => d.year === hoveredYear).val / 1e9), 2)}B</span> : null}
       </div>
     </div>
   );
@@ -507,14 +507,14 @@ function FinChart({ entity }) {
       <div style={{ display: "flex", alignItems: "flex-end", gap: 14, height: 140, padding: "0 8px" }}>
         {data.map(d => (
           <div key={d.year} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-            <div style={{ fontSize: 10, color: "var(--z-muted)" }}>${(d.val / 1e9).toFixed(1)}B</div>
+            <div style={{ fontSize: 10, color: "var(--z-muted)" }}>${fx((d.val / 1e9), 1)}B</div>
             <div style={{ width: "100%", height: `${(d.val / max) * 120}px`, background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0" }} />
             <div style={{ fontSize: 10, color: "var(--z-muted)" }}>{d.year}</div>
           </div>
         ))}
       </div>
       <div style={{ marginTop: 10, padding: 8, background: "var(--z-lav)", borderRadius: 6, fontSize: 11, color: "var(--z-body)" }}>
-        Total asset CAGR <strong style={{ color: "var(--z-mid)" }}>{(cagr * 100).toFixed(1)}%</strong> · trend classified <strong>{entity.trend}</strong>
+        Total asset CAGR <strong style={{ color: "var(--z-mid)" }}>{fx((cagr * 100), 1)}%</strong> · trend classified <strong>{entity.trend}</strong>
       </div>
     </div>
   );
@@ -695,7 +695,7 @@ function VersionDiff({ entity, baseId, targetId, setBase, setTarget }) {
               <td><span className="chip">{d.category}</span></td>
               <td><MaturityChip score={d.base} /></td>
               <td><MaturityChip score={d.target} /></td>
-              <td><span style={{ fontFamily: "var(--font-mono)", color: d.delta > 0 ? "var(--z-mid)" : d.delta < 0 ? "var(--z-below)" : "var(--z-muted)" }}>{d.delta > 0 ? "▲" : d.delta < 0 ? "▼" : "-"} {Math.abs(d.delta).toFixed(1)}</span></td>
+              <td><span style={{ fontFamily: "var(--font-mono)", color: d.delta > 0 ? "var(--z-mid)" : d.delta < 0 ? "var(--z-below)" : "var(--z-muted)" }}>{d.delta > 0 ? "▲" : d.delta < 0 ? "▼" : "-"} {fx(Math.abs(d.delta), 1)}</span></td>
               <td><span style={{ fontSize: 11 }}>{d.evBase} → {d.evTarget}</span></td>
             </tr>
           ))}
@@ -938,7 +938,7 @@ function ClientTechStackDetail({ entity, run, techId }) {
           <div style={{ textAlign: "right", flexShrink: 0 }}>
             <div style={{ fontSize: 10, color: "var(--z-muted)", marginBottom: 4 }}>DMA impact</div>
             <div style={{ fontSize: 32, fontWeight: 200, color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-teal)", lineHeight: 1 }}>
-              {t.status === "ABSENT" ? "−" : "+"}{(impacts.reduce((a, i) => a + Math.abs(i.delta), 0) / Math.max(1, impacts.length)).toFixed(1)}
+              {t.status === "ABSENT" ? "−" : "+"}{fx((impacts.reduce((a, i) => a + Math.abs(i.delta), 0) / Math.max(1, impacts.length)), 1)}
             </div>
             <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 2 }}>avg subcap ceiling {t.status === "ABSENT" ? "blocked" : "uplift"}</div>
           </div>
@@ -1008,9 +1008,9 @@ function ClientTechStackDetail({ entity, run, techId }) {
                       {i.thin ? <div style={{ fontSize: 9.5, color: "var(--z-org)", marginTop: 1 }}>▲ Thin evidence - 1 item</div> : null}
                     </div>
                     <div className="row" style={{ gap: 6 }}>
-                      <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{i.baseline.toFixed(1)} →</span>
-                      <strong style={{ fontSize: 14, color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-mid)" }}>{i.target.toFixed(1)}</strong>
-                      <span style={{ fontSize: 10, color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-mid)", fontWeight: 600 }}>{t.status === "ABSENT" ? "" : "+"}{i.delta.toFixed(1)}</span>
+                      <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{fx(i.baseline, 1)} →</span>
+                      <strong style={{ fontSize: 14, color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-mid)" }}>{fx(i.target, 1)}</strong>
+                      <span style={{ fontSize: 10, color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-mid)", fontWeight: 600 }}>{t.status === "ABSENT" ? "" : "+"}{fx(i.delta, 1)}</span>
                     </div>
                   </div>
                 </div>

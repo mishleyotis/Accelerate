@@ -59,6 +59,18 @@ function useRoute() {
   return route;
 }
 
+/* ── fx ───────────────────────────────────────────────────────────────
+   Fixed-decimal display for a value that may legitimately be absent. The
+   fixture always had a number; a promoted payload may not — a peer median
+   nobody stated, a delta with nothing to compare against, a score on an
+   unscored cell. Rendering 0.0 there asserts a measurement, and crashing on
+   null loses the whole page (React unmounts the tree, so ONE null blanked
+   every route). Absent prints an em dash. */
+function fx(v, digits) {
+  const n = Number(v);
+  return v === null || v === undefined || v === "" || !isFinite(n) ? "—" : n.toFixed(digits === undefined ? 1 : digits);
+}
+
 /* ── Icons ───────────────────────────────────────────────────────── */
 function Icon({
   name,
@@ -666,6 +678,93 @@ function useLivePage(displayId, page, audience, runId) {
   return state;
 }
 
+/* ── useLiveEntity ───────────────────────────────────────────────────
+   Loads everything one client's surfaces need and installs it as
+   window.DMA_ENTITY, so the PROTOTYPE'S OWN components render it: all six
+   promoted pages plus the two grain reads (the evidence store, read per id,
+   and the run's cell grain). Six-plus-two requests once per
+   entity+run+audience, and ETag/304 makes a revisit free.
+
+   It clears window.DMA_ENTITY before it fetches. That single line is the
+   cross-client guarantee: the list accessors (DMA.EVIDENCE, INSIGHT_CARDS,
+   getEvidence …) take no entity argument, because the evidence drawer only
+   knows an e_id — so during a route change they must answer with nothing
+   rather than the previously viewed client's rows. tests/adapter.test.js
+   asserts the line is still here. */
+function useLiveEntity(displayId, audience, runId) {
+  const LIVE = typeof window !== "undefined" && !!window.DMA_LIVE;
+  const [state, setState] = useState(LIVE ? {
+    status: "loading"
+  } : {
+    status: "mock"
+  });
+  useEffect(() => {
+    if (!LIVE) return;
+    if (typeof window !== "undefined") window.DMA_ENTITY = null;
+    if (!displayId) {
+      setState({
+        status: "idle"
+      });
+      return;
+    }
+    let cancelled = false;
+    setState({
+      status: "loading"
+    });
+    const qs = extra => {
+      const q = new URLSearchParams({
+        audience: audience || "internal"
+      });
+      if (runId) q.set("run", runId);
+      for (const k of Object.keys(extra || {})) q.set(k, extra[k]);
+      return q.toString();
+    };
+    const get = path => fetch(path).then(r => r.json().then(body => ({
+      ok: r.ok,
+      body
+    })))
+    // A page an audience may not see (403) or that has nothing promoted is
+    // a legitimate answer, not a failure: it becomes an absent section.
+    .catch(() => ({
+      ok: false,
+      body: null
+    }));
+    const id = encodeURIComponent(displayId);
+    const pages = ["overview", "heatmap", "insights", "platform", "context", "techstack"];
+    Promise.all([...pages.map(p => get(`/api/entity/${id}/${p}?${qs()}`)), get(`/api/entity/${id}/evidence?${qs()}`), get(`/api/entity/${id}/subcaps?${qs()}`)]).then(results => {
+      if (cancelled) return;
+      const byPage = {};
+      pages.forEach((p, i) => {
+        if (results[i].ok) byPage[p] = results[i].body;
+      });
+      const evidence = results[pages.length].ok ? results[pages.length].body : null;
+      const subcaps = results[pages.length + 1].ok ? results[pages.length + 1].body.subcaps || [] : [];
+      if (!Object.keys(byPage).length) {
+        setState({
+          status: "error",
+          code: "no_promoted_pages"
+        });
+        return;
+      }
+      const built = window.buildLiveEntity(displayId, byPage, {
+        evidence,
+        subcaps
+      });
+      window.DMA_ENTITY = built;
+      setState({
+        status: "ready",
+        entity: built,
+        run: built.run,
+        audience: audience || "internal"
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [LIVE, displayId, audience, runId]);
+  return state;
+}
+
 /* The promoted data for one section, or null. `null` never means "render
    the prototype's example content" — in production there is nothing else
    to show, and a fixture rendered under a real client's name is the
@@ -1082,11 +1181,13 @@ Object.assign(window, {
   fmtPct,
   relTime,
   FreshnessDot,
+  fx,
   assetUrl,
   sessionUser,
   grantedRole,
   signOutSession,
   useLivePage,
+  useLiveEntity,
   liveSection,
   liveSectionState
 });

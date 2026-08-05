@@ -11,11 +11,33 @@
    All INTERNAL-only cards respect the audience toggle (hidden for customer).
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* Absent is not empty. In production an accessor returns null when the
+   section did not promote, and a card that renders zeros in that case
+   asserts a measurement nobody made. Each card says which section is
+   missing instead. */
+function CardAbsent({ icon, title, note }) {
+  return (
+    <div className="card flush">
+      <div className="card-head">
+        <div className="row"><Icon name={icon} size={14} /><h3>{title}</h3></div>
+        <span className="b">Not promoted</span>
+      </div>
+      <div className="card-body">
+        <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 }}>
+          {note}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Evidence tier distribution (T1–T5) ────────────────────────────────
    SOURCE: 01_evidence/research_handoff.json :: evidence_summary.tier_distribution */
 function EvidenceTierCard({ entity }) {
   const s = DMA.evidenceSummaryFor(entity.id);
-  const tiers = Object.entries(s.tiers);
+  if (!s) return <CardAbsent icon="evidence" title="Evidence tier distribution"
+    note="This run's evidence store has not been read, so the tier mix cannot be counted." />;
+  const tiers = Object.entries(s.tiers || {});
   const max = Math.max(...tiers.map(([, v]) => v), 1);
   return (
     <div className="card flush" data-source="research_handoff.json :: evidence_summary.tier_distribution">
@@ -51,16 +73,20 @@ function EvidenceTierCard({ entity }) {
 function SentimentCard({ entity, audience }) {
   if (audience === "customer") return null;       // internal-only strip
   const s = DMA.sentimentFor(entity.id);
+  if (!s) return <CardAbsent icon="users" title="Sentiment"
+    note="No sentiment promoted for this run." />;
   const Row = ({ r }) => {
-    const pct = (r.score / (r.scale || 5)) * 100;
+    // No stated scale means no bounds, and a bar drawn on assumed bounds is
+    // a claim the producer never made.
+    const pct = (r.score != null && r.scale) ? (r.score / r.scale) * 100 : null;
     const tone = r.score >= 4 ? "var(--z-teal)" : r.score >= 3 ? "var(--z-org)" : "var(--z-below)";
     return (
       <div style={{ display: "grid", gridTemplateColumns: "120px 1fr 40px", gap: 8, alignItems: "center", padding: "5px 0" }}>
         <div style={{ fontSize: 11, color: "var(--z-body)" }}>{r.source}<span style={{ color: "var(--z-muted)" }}> · {r.metric}</span></div>
         <div style={{ height: 7, background: "var(--z-sep)", borderRadius: 4, overflow: "hidden" }}>
-          <div style={{ width: `${pct}%`, height: "100%", background: tone, borderRadius: 4, transition: "width var(--motion-slow) var(--ease)" }} />
+          {pct == null ? null : <div style={{ width: `${Math.max(0, Math.min(100, pct))}%`, height: "100%", background: tone, borderRadius: 4, transition: "width var(--motion-slow) var(--ease)" }} />}
         </div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: tone, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{r.score.toFixed(1)}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: tone, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{r.score == null ? "—" : fx(r.score, 1)}</div>
       </div>
     );
   };
@@ -68,13 +94,20 @@ function SentimentCard({ entity, audience }) {
     <div className="card flush" data-source="A6_sentiment_data.csv :: employee[],customer[]">
       <div className="card-head">
         <div className="row"><Icon name="users" size={14} /><h3>Sentiment</h3>{s.b2b_b2c_gap ? <span className="b b-org">B2B/B2C gap</span> : null}</div>
-        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Industry avg {s.industry_avg.toFixed(1)}</span>
+        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{s.industry_avg == null ? "" : `Industry avg ${fx(s.industry_avg, 1)}`}</span>
       </div>
       <div className="card-body">
         <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 2 }}>Employee</div>
-        {s.employee.map((r, i) => <Row key={"e" + i} r={r} />)}
+        {(s.employee || []).length ? s.employee.map((r, i) => <Row key={"e" + i} r={r} />)
+          : <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Not established for this run.</div>}
         <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".06em", margin: "10px 0 2px" }}>Customer</div>
-        {s.customer.map((r, i) => <Row key={"c" + i} r={r} />)}
+        {(s.customer || []).length ? s.customer.map((r, i) => <Row key={"c" + i} r={r} />)
+          : <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Not established for this run.</div>}
+        {(s.ungrouped || []).length ? (
+          <React.Fragment>
+            <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".06em", margin: "10px 0 2px" }}>Audience not stated</div>
+            {s.ungrouped.map((r, i) => <Row key={"u" + i} r={r} />)}
+          </React.Fragment>) : null}
       </div>
     </div>
   );
@@ -84,7 +117,11 @@ function SentimentCard({ entity, audience }) {
    SOURCE: 00_entity_profile/financial_baseline.json + entity_profile.json */
 function FinancialTrajectoryCard({ entity }) {
   const f = DMA.financialsFor(entity.id);
-  const maxA = Math.max(...f.total_assets);
+  if (!f || !(f.fy || []).length) return <CardAbsent icon="money"
+    title="Financial trajectory"
+    note="No financial series promoted for this run." />;
+  const values = (f.total_assets || []).filter(v => v != null);
+  const maxA = values.length ? Math.max(...values) : 1;
   return (
     <div className="card flush" data-source="financial_baseline.json :: total_assets[],net_income_m[],nim_pct[]">
       <div className="card-head">
@@ -116,6 +153,8 @@ function FinancialTrajectoryCard({ entity }) {
    SOURCE: 03_scoring_workbook/export_coverage_stats.csv */
 function CoverageByPillarCard({ entity }) {
   const c = DMA.coverageFor(entity.id);
+  if (!c) return <CardAbsent icon="check" title="Evidence coverage"
+    note="No coverage figures promoted for this run." />;
   return (
     <div className="card flush" data-source="export_coverage_stats.csv :: by_pillar[].pct">
       <div className="card-head">
@@ -150,6 +189,8 @@ function CeilingEstimateCard({ entity, audience }) {
   const { openEvidence } = useApp();
   const [open, setOpen] = useState(null);
   const u = DMA.uncertaintyFor(entity.id);
+  if (!u) return <CardAbsent icon="stack" title="Capability ceiling & uncertainty"
+    note="No ceiling estimates promoted for this run." />;
   const rows = Object.entries(u);
   return (
     <div className="card flush" data-source="uncertainty_bands.json :: total,modifiers,evidence ; peer_comparison_table.csv :: *_Ceiling">
@@ -170,12 +211,12 @@ function CeilingEstimateCard({ entity, audience }) {
               <button onClick={() => setOpen(o => o === cat ? null : cat)}
                 style={{ width: "100%", display: "grid", gridTemplateColumns: "128px 1fr 62px 16px", gap: 8, alignItems: "center", padding: "8px 0", background: "none", border: 0, cursor: "pointer", textAlign: "left" }}>
                 <div style={{ fontSize: 10.5, color: "var(--z-body)" }}><span className="f-mono">{cat}</span> {cdef ? cdef.name.slice(0, 14) : ""}</div>
-                <div style={{ position: "relative", height: 8, background: "var(--z-sep)", borderRadius: 4 }} title={`Band ${lo.toFixed(1)}–${hi.toFixed(1)}`}>
+                <div style={{ position: "relative", height: 8, background: "var(--z-sep)", borderRadius: 4 }} title={`Band ${fx(lo, 1)}–${fx(hi, 1)}`}>
                   <div style={{ position: "absolute", left: `${pct(lo)}%`, width: `${pct(hi) - pct(lo)}%`, top: 0, bottom: 0, background: "rgba(124,93,201,.25)", borderRadius: 4 }} />
                   <div style={{ position: "absolute", left: `calc(${pct(d.ceiling)}% - 4px)`, top: -1, width: 8, height: 10, borderRadius: 2, background: tone }} />
                 </div>
                 <div style={{ fontSize: 11, fontWeight: 600, color: tone, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
-                  {d.ceiling.toFixed(1)}<span style={{ color: "var(--z-muted)", fontWeight: 400 }}> ±{d.band}</span>
+                  {fx(d.ceiling, 1)}<span style={{ color: "var(--z-muted)", fontWeight: 400 }}> ±{d.band}</span>
                 </div>
                 <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={12} style={{ color: "var(--z-muted)" }} />
               </button>

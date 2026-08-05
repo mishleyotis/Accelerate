@@ -5,7 +5,8 @@
     "dev": "next dev",
     "build:proto": "babel proto --presets @babel/preset-react --out-dir public/proto/js && node scripts/copy-vendor.js",
     "build": "npm run build:proto && next build",
-    "start": "next start -p ${PORT:-3000}"
+    "start": "next start -p ${PORT:-3000}",
+    "test:web": "node --test tests/*.test.js"
   },
   "dependencies": {
     "next": "14.2.32",

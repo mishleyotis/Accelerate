@@ -52,7 +52,7 @@ function EvidenceDrawer() {
               <Icon name="info" size={14} />
               <div>
                 <div className="co-title">Rationale</div>
-                <div className="co-body">Score {subcap.score.toFixed(1)} · peer median {subcap.peerMedian.toFixed(1)}. {subcap.thin ? "Evidence is below the threshold of 3 - flagged as thin." : "Evidence ceiling: T2 with consistent FACT-class claims."}</div>
+                <div className="co-body">Score {fx(subcap.score, 1)} · peer median {fx(subcap.peerMedian, 1)}. {subcap.thin ? "Evidence is below the threshold of 3 - flagged as thin." : "Evidence ceiling: T2 with consistent FACT-class claims."}</div>
               </div>
             </div>
           ) : null}
@@ -576,7 +576,7 @@ function surfaceMessages(surface, ctx) {
         title: "Subcap narrative",
         sub: ctx?.subcap?.id || "Heatmap selection",
         cache_age: "200ms",
-        body: `${ctx?.subcap?.name || "This subcap"} scores ${ctx?.subcap?.score?.toFixed(1) || "-"}. Peer median is ${ctx?.subcap?.peerMedian?.toFixed(1) || "-"}.\n\nEvidence is ${ctx?.subcap?.thin ? "thin - only " + (ctx?.subcap?.evidence_count || 0) + " items below the threshold of 3" : "consistent across multiple T1–T3 sources"}.\n\nClosing the gap to peer requires investment in the named platform candidates. The exact path differs by subvertical pillar weight.`,
+        body: `${ctx?.subcap?.name || "This subcap"} scores ${fx(ctx?.subcap?.score, 1) || "-"}. Peer median is ${fx(ctx?.subcap?.peerMedian, 1) || "-"}.\n\nEvidence is ${ctx?.subcap?.thin ? "thin - only " + (ctx?.subcap?.evidence_count || 0) + " items below the threshold of 3" : "consistent across multiple T1–T3 sources"}.\n\nClosing the gap to peer requires investment in the named platform candidates. The exact path differs by subvertical pillar weight.`,
       };
     case "platform_story":
       return {
@@ -685,7 +685,7 @@ function NewRunModal() {
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", background: "var(--z-lav)", borderRadius: 6 }}>
                         <Icon name="doc" size={13} />
                         <span style={{ fontSize: 12, flex: 1, minWidth: 0 }} className="txt-trunc">{file.name}</span>
-                        <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{(file.size / 1024).toFixed(0)} KB</span>
+                        <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{fx((file.size / 1024), 0)} KB</span>
                         <button className="icon-btn" style={{ width: 22, height: 22 }} onClick={() => removeFile(i)}><Icon name="x" size={11} /></button>
                       </div>
                     ))}
@@ -852,8 +852,8 @@ function RecommendationModal() {
                         <div className="pbar-fill" style={{ width: `${before / 5 * 100}%`, background: DMA.helpers.maturityHex(before), opacity: .45 }} />
                         <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${after / 5 * 100}%`, background: DMA.helpers.maturityHex(after), borderRadius: 4, transition: "width 1.2s var(--ease)" }} />
                       </div>
-                      <div className="pbar-score">{after.toFixed(1)}</div>
-                      <div className="pbar-delta" style={{ color: "var(--z-mid)" }}>+{(after - before).toFixed(1)}</div>
+                      <div className="pbar-score">{fx(after, 1)}</div>
+                      <div className="pbar-delta" style={{ color: "var(--z-mid)" }}>+{fx((after - before), 1)}</div>
                     </div>
                   );
                 })}

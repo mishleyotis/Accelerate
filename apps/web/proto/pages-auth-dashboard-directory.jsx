@@ -203,7 +203,7 @@ function DashboardHome() {
           const scored = ent.filter(e => e.overall);
           const avg = scored.length ? scored.reduce((a, e) => a + e.overall, 0) / scored.length : null;
           return <KpiCard label="Avg maturity"
-            value={avg == null ? "—" : avg.toFixed(1)}
+            value={avg == null ? "—" : fx(avg, 1)}
             sub={avg == null ? "no promoted runs yet" : DMA.helpers.maturityLabel(avg)}
             icon="heatmap" accent="var(--z-dpur)" />;
         })()}
@@ -352,7 +352,7 @@ function DashboardEntityCard({ e }) {
           <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.35 }} className="txt-fit-2" title={[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}>{[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-          <div style={{ fontSize: 22, fontWeight: 200, color: matHex, lineHeight: 1 }}>{e.overall?.toFixed(1) || "-"}</div>
+          <div style={{ fontSize: 22, fontWeight: 200, color: matHex, lineHeight: 1 }}>{fx(e.overall, 1) || "-"}</div>
           <div style={{ fontSize: 8.5, color: matHex, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em", marginTop: 3, whiteSpace: "nowrap" }}>{matLabel}</div>
         </div>
       </div>
@@ -361,10 +361,10 @@ function DashboardEntityCard({ e }) {
         {DMA.PILLARS.map(p => {
           const s = e.pillar_scores?.[p.id];
           return (
-            <div key={p.id} title={`${p.id} · ${s?.toFixed(1) || "-"}`} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <div key={p.id} title={`${p.id} · ${fx(s, 1) || "-"}`} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                 <span style={{ fontSize: 9, color: "var(--z-muted)", fontWeight: 600 }}>{p.id}</span>
-                <span style={{ fontSize: 9, color: "var(--z-body)", fontWeight: 600 }}>{s ? s.toFixed(1) : "–"}</span>
+                <span style={{ fontSize: 9, color: "var(--z-body)", fontWeight: 600 }}>{s ? fx(s, 1) : "–"}</span>
               </div>
               <div style={{ height: 5, background: "var(--z-sep)", borderRadius: 2.5, overflow: "hidden" }}>
                 {s ? <div style={{ width: `${s / 5 * 100}%`, height: "100%", background: DMA.helpers.maturityHex(s) }} /> : null}
@@ -505,7 +505,7 @@ function EntityCard({ e }) {
           <span className="b b-org" style={{ display: "inline-flex", gap: 4 }}>● IN PROGRESS</span>
         ) : (
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 26, fontWeight: 200, color: "var(--z-teal)", lineHeight: 1, letterSpacing: "-.02em" }}>{e.overall?.toFixed(1) || "-"}</div>
+            <div style={{ fontSize: 26, fontWeight: 200, color: "var(--z-teal)", lineHeight: 1, letterSpacing: "-.02em" }}>{fx(e.overall, 1) || "-"}</div>
             <div style={{ fontSize: 9, color: "var(--z-muted)", marginTop: 2 }}>maturity</div>
           </div>
         )}
@@ -522,7 +522,7 @@ function EntityCard({ e }) {
                 <div style={{ height: 6, background: "var(--z-sep)", borderRadius: 3, overflow: "hidden" }}>
                   <div style={{ width: `${w}%`, height: "100%", background: DMA.helpers.maturityHex(s) }} />
                 </div>
-                <div style={{ fontSize: 10, color: "var(--z-dark)", marginTop: 2 }}>{s.toFixed(1)}</div>
+                <div style={{ fontSize: 10, color: "var(--z-dark)", marginTop: 2 }}>{fx(s, 1)}</div>
               </div>
             );
           })}

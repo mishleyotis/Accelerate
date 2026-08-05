@@ -244,11 +244,18 @@ function MyTweaks() {
 }
 
 /* ── Client-scoped route ─────────────────────────────────────────────
-   In production a client page renders PROMOTED sections or an honest
-   empty state. The prototype's client pages carry illustrative prose
-   about a fictional institution — three cores, an nCino migration, named
-   executive hires — and rendered under a real client's name that is
-   fabrication, so LIVE mode never reaches them. */
+   ONE set of page components, fixture or live. The prototype is the
+   renderer; in production its accessors read the promoted payload through
+   window.DMA_ENTITY, which useLiveEntity installs before the first render
+   and clears on every entity change. There is no second renderer to keep
+   in step, and no path by which the fixture's fictional institution can
+   appear under a real client's name — in LIVE mode every entity-scoped
+   accessor answers null rather than falling back (data.js, and
+   tests/adapter.test.js).
+
+   What LIVE still changes is WHEN we render: nothing is drawn until the
+   promoted pages have arrived, because a page that renders empty and then
+   fills in reads as a page with nothing on it. */
 const LIVE_MODE = typeof window !== "undefined" && !!window.DMA_LIVE;
 function ClientRoute({
   id,
@@ -262,7 +269,7 @@ function ClientRoute({
   const entity = DMA.getEntity(id);
   const runId = route.params.run;
   const run = entity && (runId && entity.runs.find(r => r.id === runId) || entity.runs[0]);
-  const live = useLivePage(LIVE_MODE && entity ? entity.id : null, tab === "health" ? "heatmap" : tab, audience, run && run.run_id);
+  const live = useLiveEntity(LIVE_MODE && entity ? entity.id : null, audience, run && run.run_id);
   if (!entity) {
     return /*#__PURE__*/React.createElement(PageShell, {
       title: "Not found"
@@ -270,79 +277,94 @@ function ClientRoute({
       className: "empty"
     }, /*#__PURE__*/React.createElement("h3", null, "Entity not found")));
   }
-  if (LIVE_MODE) {
+  // The directory row carries identity (name, slug, runs, sub-vertical); the
+  // promoted payload carries the assessment (cells, scores, platform fit).
+  // Merged here, once, so every prototype component receives the entity shape
+  // it was written against and none of them needs to know about LIVE.
+  const ent = LIVE_MODE && live.status === "ready" && live.entity ? {
+    ...entity,
+    subcaps: live.entity.subcaps,
+    oss: live.entity.oss,
+    pillar_scores: Object.keys(live.entity.pillar_scores || {}).length ? live.entity.pillar_scores : entity.pillar_scores,
+    overall: live.entity.overall != null ? live.entity.overall : entity.overall
+  } : entity;
+  if (LIVE_MODE && live.status === "loading") {
     return /*#__PURE__*/React.createElement(ClientShell, {
       entity: entity,
       run: run,
       tab: tab
-    }, /*#__PURE__*/React.createElement(LiveClientPage, {
+    }, /*#__PURE__*/React.createElement(SectionLoader, null));
+  }
+  if (LIVE_MODE && live.status === "error") {
+    return /*#__PURE__*/React.createElement(ClientShell, {
       entity: entity,
       run: run,
-      tab: tab,
-      live: live
-    }));
+      tab: tab
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "empty"
+    }, /*#__PURE__*/React.createElement("h3", null, "Nothing promoted for this run"), /*#__PURE__*/React.createElement("p", null, live.code === "no_promoted_pages" ? "No page of this run has promoted yet, so there is nothing to show." : live.code)));
   }
   let page = null;
   switch (tab) {
     case "overview":
       page = /*#__PURE__*/React.createElement(ClientOverview, {
-        entity: entity,
+        entity: ent,
         run: run
       });
       break;
     case "insights":
       page = /*#__PURE__*/React.createElement(ClientInsights, {
-        entity: entity,
+        entity: ent,
         run: run
       });
       break;
     case "heatmap":
       page = /*#__PURE__*/React.createElement(ClientHeatmap, {
-        entity: entity,
+        entity: ent,
         run: run
       });
       break;
     case "platform":
       page = /*#__PURE__*/React.createElement(ClientPlatform, {
-        entity: entity,
+        entity: ent,
         run: run
       });
       break;
     case "context":
       page = /*#__PURE__*/React.createElement(ClientContext, {
-        entity: entity,
+        entity: ent,
         run: run
       });
       break;
     case "health":
       page = /*#__PURE__*/React.createElement(ClientHealth, {
-        entity: entity,
+        entity: ent,
         run: run
       });
       break;
     case "techstack":
       page = sub ? /*#__PURE__*/React.createElement(ClientTechStackDetail, {
-        entity: entity,
+        entity: ent,
         run: run,
         techId: sub
       }) : /*#__PURE__*/React.createElement(ClientTechStack, {
-        entity: entity,
+        entity: ent,
         run: run
       });
       break;
     case "runs":
       page = /*#__PURE__*/React.createElement(ClientRuns, {
-        entity: entity
+        entity: ent
       });
       break;
     default:
       page = /*#__PURE__*/React.createElement(ClientOverview, {
-        entity: entity,
+        entity: ent,
         run: run
       });
   }
   return /*#__PURE__*/React.createElement(ClientShell, {
-    entity: entity,
+    entity: ent,
     run: run,
     tab: tab
   }, page);

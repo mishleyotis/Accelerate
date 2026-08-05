@@ -20,11 +20,37 @@ function ClientPlatform({ entity, run }) {
   useEffect(() => { setIpSurface("platform_story"); setIpContext({ entity, platform }); }, [platform, entity?.id]);
 
   const platformData = DMA.PLATFORMS;
+  const selected = DMA.getPlatform(platform)
+    || { id: platform, name: platform, short: platform, features: "" };
   const recs = DMA.recsFor(entity.id);
 
   // Build gap-to-platform mapping from subcaps
   const gaps = entity.subcaps.filter(s => s.score < 3.0 && s.platforms.includes(platform));
   const platformGapCount = (pid) => entity.subcaps.filter(s => s.score < 3.0 && s.platforms.includes(pid)).length;
+
+  const livePrereqs = (() => {
+    const out = [];
+    for (const r of recs || []) {
+      for (const q of r.prerequisites || []) {
+        if (!q || typeof q !== "object") continue;
+        out.push({
+          id: q.cell || q.condition || r.id,
+          name: q.condition || q.cell || r.title,
+          min: q.minimum == null ? null : Number(q.minimum),
+          current: q.current == null ? null : Number(q.current),
+          met: q.verdict ? q.verdict === "MET"
+             : (q.minimum != null && q.current != null
+                ? Number(q.current) >= Number(q.minimum) : null),
+          basis: q.basis || null,
+          note: q.note || null,
+        });
+      }
+    }
+    return out;
+  })();
+  const liveStarters = (DMA.startersFor ? (DMA.startersFor(entity.id) || []) : [])
+    .slice().sort((a, b) => (a.rank || 99) - (b.rank || 99))
+    .map(x => x.text).filter(Boolean);
 
   const prerequisites = {
     SF: [
@@ -52,7 +78,7 @@ function ClientPlatform({ entity, run }) {
 
   const conversationStarters = {
     SF: [
-      `${entity.name}'s P4 score of ${entity.pillar_scores.P4.toFixed(1)} in Data Foundation is ${(entity.pillar_scores.P4 - (entity.pillar_scores.P4 + 0.3)).toFixed(1)} below the ${DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase()} peer median. Synovus deployed Data Cloud in Q3 2025 after a similar finding [E-047]. Evidence confirms the root constraint is architectural, not strategic.`,
+      `${entity.name}'s P4 score of ${fx(entity.pillar_scores.P4, 1)} in Data Foundation is ${fx((entity.pillar_scores.P4 - (entity.pillar_scores.P4 + 0.3)), 1)} below the ${DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase()} peer median. Synovus deployed Data Cloud in Q3 2025 after a similar finding [E-047]. Evidence confirms the root constraint is architectural, not strategic.`,
       `Three CDO-equivalent hires in your subvertical over the last 12 months - including yours in May 2026 - have led with Data Cloud as the first investment. The 6-9 month integration window before nCino go-live is the highest-leverage moment.`,
       `Agentforce prerequisites (P4C1 ≥ 2.0, P2C2 ≥ 2.0) are 67% met. The conversation order is: Data Cloud → FSC → Agentforce - not all three at once.`,
     ],
@@ -78,6 +104,13 @@ function ClientPlatform({ entity, run }) {
     ],
   };
 
+  // Live wins; the fixture answers only when there is no promoted data (the
+  // standalone prototype). Never undefined.
+  const prereqRows = livePrereqs.length ? livePrereqs
+    : (prerequisites[platform] || []);
+  const starterRows = liveStarters.length ? liveStarters
+    : (conversationStarters[platform] || []);
+
   return (
     <div>
       <div className="page-head">
@@ -95,7 +128,7 @@ function ClientPlatform({ entity, run }) {
       {/* Platform fit cards */}
       <div className="g5" style={{ marginBottom: 16 }}>
         {platformData.map(p => {
-          const score = entity.oss[p.id];
+          const score = (entity.oss || {})[p.id];
           const isSel = p.id === platform;
           return (
             <div key={p.id} className={`card-tile clickable`} onClick={() => setPlatform(p.id)} style={{ border: isSel ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)", background: isSel ? "var(--z-ice)" : "#fff" }}>
@@ -105,7 +138,7 @@ function ClientPlatform({ entity, run }) {
                   <div style={{ fontSize: 9.5, color: "var(--z-muted)" }}>{p.features.split(" · ").slice(0, 3).join(" · ")}</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 26, fontWeight: 200, color: "var(--z-teal)", lineHeight: 1 }}>{score}</div>
+                  <div style={{ fontSize: 26, fontWeight: 200, color: score == null ? "var(--z-muted)" : "var(--z-teal)", lineHeight: 1 }}>{score == null ? "—" : score}</div>
                   <div className="f-mono" style={{ fontSize: 9, color: "var(--z-muted)" }}>/100 OSS</div>
                 </div>
               </div>
@@ -123,7 +156,7 @@ function ClientPlatform({ entity, run }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 16, marginBottom: 16 }}>
         <div className="card flush">
           <div className="card-head">
-            <h3>Gap-to-platform mapping · {DMA.getPlatform(platform).name}</h3>
+            <h3>Gap-to-platform mapping · {selected.name}</h3>
             <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{gaps.length} high-priority subcap gaps</span>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
@@ -138,7 +171,7 @@ function ClientPlatform({ entity, run }) {
                     <td data-label="Pillar"><span className="b b-purple">{s.pillar}</span></td>
                     <td data-label="Score"><MaturityChip score={s.score} /></td>
                     <td data-label="Peer"><MaturityChip score={s.peerMedian} /></td>
-                    <td data-label="Gap"><span style={{ fontFamily: "var(--font-mono)", color: "var(--z-below)" }}>−{(s.peerMedian - s.score).toFixed(1)}</span></td>
+                    <td data-label="Gap"><span style={{ fontFamily: "var(--font-mono)", color: "var(--z-below)" }}>−{fx((s.peerMedian - s.score), 1)}</span></td>
                     <td data-label="Evidence">{rowEv.length ? <span className={`tier-chip tier-${rowEv[0].tier}`}>{rowEv[0].id}</span> : <span style={{ fontSize: 11, color: "var(--z-body)" }}>{recs.find(r => r.platform === platform)?.feature || "Platform"}</span>}</td>
                   </tr>
                   );
@@ -152,11 +185,11 @@ function ClientPlatform({ entity, run }) {
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="shield" size={16} />
-            <div style={{ fontSize: 13, fontWeight: 600 }}>Readiness · {DMA.getPlatform(platform).name}</div>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>Readiness · {selected.name}</div>
             <span className="spacer" />
             <span style={{ fontSize: 10, color: "var(--z-muted)" }}>click a row to drill in</span>
           </div>
-          {prerequisites[platform].map(p => {
+          {prereqRows.map(p => {
             const isOpen = openPrereq === p.id;
             const subs = entity.subcaps.filter(s => s.id.startsWith(p.id));
             const ev = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.some(sid => sid.startsWith(p.id)));
@@ -169,7 +202,7 @@ function ClientPlatform({ entity, run }) {
                     <span className={`b ${p.met ? "b-above" : "b-org"}`}>{p.met ? "MET" : "PARTIAL"}</span>
                     <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-muted)" }} />
                   </div>
-                  <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Min {p.min.toFixed(1)} · Current {p.current.toFixed(1)} · {subs.length} subcaps · {ev.length} evidence</div>
+                  <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Min {fx(p.min, 1)} · Current {fx(p.current, 1)} · {subs.length} subcaps · {ev.length} evidence</div>
                   <div className="prog" style={{ marginTop: 4, height: 4 }}><div className="prog-fill" style={{ width: `${Math.min(100, p.current / p.min * 100)}%`, background: p.met ? "var(--z-mid)" : "var(--z-org)" }} /></div>
                 </button>
                 {isOpen ? (
@@ -177,7 +210,7 @@ function ClientPlatform({ entity, run }) {
                     {subs.length ? <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", margin: "6px 0 4px" }}>Backing subcaps</div> : null}
                     {subs.slice(0, 6).map(s => (
                       <div key={s.id} className="row" style={{ gap: 6, padding: "3px 0" }}>
-                        <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 30, justifyContent: "center" }}>{s.score.toFixed(1)}</span>
+                        <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 30, justifyContent: "center" }}>{fx(s.score, 1)}</span>
                         <span style={{ fontSize: 11.5, color: "var(--z-dark)", flex: 1, minWidth: 0 }} className="txt-fit-1">{s.name}</span>
                         <span className="f-mono" style={{ fontSize: 9.5, color: "var(--z-muted)" }}>{s.id}</span>
                       </div>
@@ -195,10 +228,10 @@ function ClientPlatform({ entity, run }) {
               </div>
             );
           })}
-          {prerequisites[platform].some(p => !p.met) ? (
+          {prereqRows.some(p => p.met === false) ? (
             <div className="co co-org" style={{ marginTop: 10 }}>
               <Icon name="warn" size={14} />
-              <div><div className="co-title">Advisory</div><div className="co-body">Lead with the foundation prerequisite conversation before introducing {DMA.getPlatform(platform).name}.</div></div>
+              <div><div className="co-title">Advisory</div><div className="co-body">Lead with the foundation prerequisite conversation before introducing {selected.name}.</div></div>
             </div>
           ) : null}
         </div>
@@ -207,7 +240,7 @@ function ClientPlatform({ entity, run }) {
       {/* Recommendation cards + Conversation starters */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
         <div className="card flush">
-          <div className="card-head"><h3>Recommendations · {DMA.getPlatform(platform).name}</h3></div>
+          <div className="card-head"><h3>Recommendations · {selected.name}</h3></div>
           <div>
             {recs.filter(r => r.platform === platform).map(r => (
               <div key={r.id} className="rec-row" onClick={() => openRec(r.id)} title="Open full recommendation" style={{ padding: "12px 18px", borderBottom: "1px solid var(--z-sep)", cursor: "pointer" }}>
@@ -234,12 +267,12 @@ function ClientPlatform({ entity, run }) {
 
         <div className="card flush">
           <div className="card-head"><h3>Conversation starters</h3><button className="btn btn-tertiary btn-sm" onClick={() => {
-            const text = conversationStarters[platform].map((cs, i) => `#${i + 1} — ${cs}`).join("\n\n");
-            try { navigator.clipboard.writeText(text); pushToast(`Copied ${conversationStarters[platform].length} conversation starters`, "success"); }
+            const text = starterRows.map((cs, i) => `#${i + 1} — ${cs}`).join("\n\n");
+            try { navigator.clipboard.writeText(text); pushToast(`Copied ${starterRows.length} conversation starters`, "success"); }
             catch (e) { pushToast("Couldn't access clipboard", "warn"); }
           }}><Icon name="copy" size={12} /> Copy all</button></div>
           <div style={{ padding: 14 }}>
-            {conversationStarters[platform].map((cs, i) => (
+            {starterRows.map((cs, i) => (
               <div key={i} style={{ padding: 10, marginBottom: 8, background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", borderRadius: 8 }}>
                 <div className="row" style={{ marginBottom: 6 }}>
                   <span className="b b-purple">#{i + 1}</span>
@@ -314,8 +347,9 @@ function StairstepCurve({ entity }) {
               const y = stepY(i);
               const w = stepW - 8;
               const h = H - padB - y;
-              const platform = s.platforms[0];
-              const plat = DMA.getPlatform(platform);
+              const platform = (s.platforms || [])[0];
+              const plat = DMA.getPlatform(platform)
+                || { id: platform, name: platform, short: platform };
               const color = i === 0 ? "var(--m-act)" : i === 1 ? "var(--m-bld)" : i === 2 ? "var(--m-cmp)" : "var(--m-dif)";
               return (
                 <g key={i}>
@@ -345,7 +379,7 @@ function StairstepCurve({ entity }) {
             <g>
               <circle cx={padL + 16} cy={stepY(0) - 14} r="20" fill="none" stroke="var(--z-org)" strokeWidth="2" strokeDasharray="4 3" />
               <text x={padL - 6} y={stepY(0) - 30} fontSize="9.5" fill="var(--z-org)" fontWeight="700" textAnchor="end">CURRENT</text>
-              <text x={padL - 6} y={stepY(0) - 17} fontSize="11" fill="var(--z-dark)" fontWeight="700" textAnchor="end">{C.current.toFixed(1)}</text>
+              <text x={padL - 6} y={stepY(0) - 17} fontSize="11" fill="var(--z-dark)" fontWeight="700" textAnchor="end">{fx(C.current, 1)}</text>
             </g>
           </svg>
         </div>
@@ -501,7 +535,7 @@ function StepCurveView({ roadmap, entity }) {
             <g key={i} style={{ cursor: "pointer" }} onClick={() => setSelectedStep(i === selectedStep ? null : i)}>
               <circle cx={xFor(p.t)} cy={yFor(p.m)} r="14" fill="transparent" />
               <circle cx={xFor(p.t)} cy={yFor(p.m)} r={selectedStep === i ? "10" : "7"} fill="#fff" stroke={selectedStep === i ? "var(--z-mid)" : "var(--z-teal)"} strokeWidth="3" />
-              <text x={xFor(p.t)} y={yFor(p.m) - 16} fontSize="11" fontWeight="700" fill="var(--z-dark)" textAnchor="middle">{p.m.toFixed(1)}</text>
+              <text x={xFor(p.t)} y={yFor(p.m) - 16} fontSize="11" fontWeight="700" fill="var(--z-dark)" textAnchor="middle">{fx(p.m, 1)}</text>
               <text x={xFor(p.t)} y={H - padB + 18} fontSize="10" fill={selectedStep === i ? "var(--z-mid)" : "var(--z-muted)"} fontWeight={selectedStep === i ? 700 : 400} textAnchor="middle">{p.label}</text>
               <text x={xFor(p.t)} y={H - padB + 32} fontSize="9" fill="var(--z-muted)" textAnchor="middle">{p.t === 0 ? "0 mo" : `${p.t} mo`}</text>
             </g>
@@ -525,7 +559,7 @@ function StepCurveView({ roadmap, entity }) {
             <span style={{ fontSize: 11, color: "var(--z-mint-lt)" }}>{selectedPhase.duration} · target {selectedPhase.target}</span>
           </div>
           <div style={{ fontSize: 12.5, color: "var(--z-mint-lt)", marginBottom: 10, lineHeight: 1.55 }}>
-            By the end of this phase, {entity.name} reaches <strong style={{ color: "#fff" }}>{points.find(p => p.phase === selectedPhase.phase).m.toFixed(1)}</strong> composite maturity ({Math.round((points.find(p => p.phase === selectedPhase.phase).m - entity.overall) * 100) / 100} from today). Success metric: {selectedPhase.metric}.
+            By the end of this phase, {entity.name} reaches <strong style={{ color: "#fff" }}>{fx(points.find(p => p.phase === selectedPhase.phase).m, 1)}</strong> composite maturity ({Math.round((points.find(p => p.phase === selectedPhase.phase).m - entity.overall) * 100) / 100} from today). Success metric: {selectedPhase.metric}.
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             {selectedPhase.recs.map(rid => {

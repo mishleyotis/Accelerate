@@ -85,13 +85,15 @@ function ClientOverview({ entity, run }) {
                 <ScoreRing score={entity.overall} />
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center", flexWrap: "wrap" }}>
-                    <span className={`b ${DMA.helpers.maturityClass(entity.overall)}`}>{DMA.helpers.maturityLabel(entity.overall).toUpperCase()}</span>
+                    {DMA.helpers.maturityLabel(entity.overall) ? (
+                      <span className={`b ${DMA.helpers.maturityClass(entity.overall)}`}>{DMA.helpers.maturityLabel(entity.overall).toUpperCase()}</span>
+                    ) : null}
                     <span className="b b-ph1">EVIDENCE · {run.evidence_mode}</span>
                     <FreshnessDot date={entity.assessment_date} withLabel />
                     {entity.data_source === "DRIVE_PARSE" ? <span className="b b-ph0">DRIVE PARSE</span> : null}
                   </div>
                   <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.5 }}>
-                    Trails {DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase()} peer median by {((entity.pillar_scores.P1 + entity.pillar_scores.P2 + entity.pillar_scores.P3 + entity.pillar_scores.P4) / 4 - entity.overall - 0.3).toFixed(1)} points. Gap concentrated in P4 Data foundation.
+                    Trails {DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase()} peer median by {fx(((entity.pillar_scores.P1 + entity.pillar_scores.P2 + entity.pillar_scores.P3 + entity.pillar_scores.P4) / 4 - entity.overall - 0.3), 1)} points. Gap concentrated in P4 Data foundation.
                   </div>
                 </div>
               </div>
@@ -108,10 +110,10 @@ function ClientOverview({ entity, run }) {
                     <div className="pbar-name">{p.id} · {p.short}</div>
                     <div className="pbar-track">
                       <div className="pbar-fill" style={{ width: `${w}%`, background: DMA.helpers.maturityHex(s) }} />
-                      <div className="pbar-peer" style={{ left: `calc(${peerL}% - 1px)` }} title={`Peer ${peer.toFixed(1)}`} />
+                      <div className="pbar-peer" style={{ left: `calc(${peerL}% - 1px)` }} title={`Peer ${fx(peer, 1)}`} />
                     </div>
-                    <div className="pbar-score">{s.toFixed(1)}</div>
-                    <div className="pbar-delta" style={{ color: delta < 0 ? "var(--z-below)" : "var(--z-mid)" }}>{delta >= 0 ? "▲" : "▼"} {Math.abs(delta).toFixed(1)}</div>
+                    <div className="pbar-score">{fx(s, 1)}</div>
+                    <div className="pbar-delta" style={{ color: delta < 0 ? "var(--z-below)" : "var(--z-mid)" }}>{delta >= 0 ? "▲" : "▼"} {fx(Math.abs(delta), 1)}</div>
                   </div>
                 );
               })}
@@ -180,7 +182,7 @@ function ScoreRing({ score, size = 110 }) {
         <circle cx={size/2} cy={size/2} r={r} className="ring-fg" stroke={DMA.helpers.maturityHex(score)} strokeWidth="6" strokeDasharray={c} strokeDashoffset={c * (1 - pct)} strokeLinecap="round" />
       </svg>
       <div style={{ position: "absolute", textAlign: "center", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-        <div className="num" style={{ color: DMA.helpers.maturityHex(score), fontSize: size * 0.32, fontWeight: 300, lineHeight: 1 }}>{score.toFixed(1)}</div>
+        <div className="num" style={{ color: DMA.helpers.maturityHex(score), fontSize: size * 0.32, fontWeight: 300, lineHeight: 1 }}>{fx(score, 1)}</div>
       </div>
     </div>
   );
@@ -306,7 +308,7 @@ function SCQACard({ entity, expanded, onToggle, openEvidence }) {
         <button className="btn btn-tertiary btn-sm" onClick={onToggle}>{expanded ? "Collapse ↑" : "Read full ↓"}</button>
       </div>
       <div style={{ fontSize: 14, color: "var(--z-dark)", lineHeight: 1.7, maxWidth: 880 }}>
-        <span style={{ fontWeight: 600 }}>{entity.name}</span> is a mid-tier {DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase()} mid-way through a multi-year digital transformation. Current overall maturity ({entity.overall.toFixed(1)} / 5) trails the peer median by 0.4, with the gap concentrated in P4 Data Foundation. Two recent C-suite hires open a 6-9 month integration window.{" "}
+        <span style={{ fontWeight: 600 }}>{entity.name}</span> is a mid-tier {DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase()} mid-way through a multi-year digital transformation. Current overall maturity ({fx(entity.overall, 1)} / 5) trails the peer median by 0.4, with the gap concentrated in P4 Data Foundation. Two recent C-suite hires open a 6-9 month integration window.{" "}
         {expanded ? (
           <>The institution has invested visibly in front-end channels (Tableau Cloud, Marketing Cloud roles, mobile redesign) but lacks the data substrate to operate any of these as a coherent customer-experience system. Without intervention, fragmentation deepens as nCino lands on top of FIS Profile core, and a future re-platform becomes harder. The strategic question is whether to invest now in a unified customer-data layer ahead of the nCino go-live, or continue to layer point solutions and accept the operating cost. Recommendation: lead the next 9 months with Salesforce Data Cloud + Databricks as the substrate <button className="chip" onClick={() => openEvidence("E-047")}>E-047</button> <button className="chip" onClick={() => openEvidence("E-089")}>E-089</button>.</>
         ) : null}
@@ -317,7 +319,8 @@ function SCQACard({ entity, expanded, onToggle, openEvidence }) {
 
 /* ── Opportunity Surface - platform cards ───────────────────────── */
 function OpportunitySurfaceStrip({ entity, run }) {
-  const sorted = Object.entries(entity.oss).sort((a, b) => b[1] - a[1]);
+  const sorted = Object.entries(entity.oss || {}).sort((a, b) => b[1] - a[1]);
+  if (!sorted.length) return null;
   return (
     <div className="card" style={{ marginBottom: 18 }}>
       <div className="row" style={{ marginBottom: 14 }}>
@@ -332,7 +335,8 @@ function OpportunitySurfaceStrip({ entity, run }) {
       </div>
       <div className="g5">
         {sorted.map(([pid, score]) => {
-          const p = DMA.getPlatform(pid);
+          const p = DMA.getPlatform(pid) || { id: pid, name: pid, short: pid,
+                                              features: "" };
           return (
             <div key={pid} className="card-tile clickable" onClick={() => navigate(`/clients/${entity.id}/platform`, { platform: pid, run: run.id })}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
@@ -548,7 +552,7 @@ function ThoughtLeadershipPanel() {
           {DMA.THOUGHT_LEADERSHIP.map(tl => (
             <div key={tl.id} className="card-tile" style={{ padding: 14 }}>
               <div className="row" style={{ marginBottom: 6 }}>
-                <span className="b b-purple">{tl.type.toUpperCase()}</span>
+                <span className="b b-purple">{String(tl.kind || tl.type || "SIGNAL").toUpperCase()}</span>
                 <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{fmtDate(tl.date)}</span>
               </div>
               <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.4, marginBottom: 6 }}>{tl.title}</div>

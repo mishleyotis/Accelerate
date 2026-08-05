@@ -162,9 +162,9 @@ function ClientOverview({
       alignItems: "center",
       flexWrap: "wrap"
     }
-  }, /*#__PURE__*/React.createElement("span", {
+  }, DMA.helpers.maturityLabel(entity.overall) ? /*#__PURE__*/React.createElement("span", {
     className: `b ${DMA.helpers.maturityClass(entity.overall)}`
-  }, DMA.helpers.maturityLabel(entity.overall).toUpperCase()), /*#__PURE__*/React.createElement("span", {
+  }, DMA.helpers.maturityLabel(entity.overall).toUpperCase()) : null, /*#__PURE__*/React.createElement("span", {
     className: "b b-ph1"
   }, "EVIDENCE \xB7 ", run.evidence_mode), /*#__PURE__*/React.createElement(FreshnessDot, {
     date: entity.assessment_date,
@@ -177,7 +177,7 @@ function ClientOverview({
       color: "var(--z-body)",
       lineHeight: 1.5
     }
-  }, "Trails ", DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase(), " peer median by ", ((entity.pillar_scores.P1 + entity.pillar_scores.P2 + entity.pillar_scores.P3 + entity.pillar_scores.P4) / 4 - entity.overall - 0.3).toFixed(1), " points. Gap concentrated in P4 Data foundation."))) : null, /*#__PURE__*/React.createElement("div", null, DMA.PILLARS.map(p => {
+  }, "Trails ", DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase(), " peer median by ", fx((entity.pillar_scores.P1 + entity.pillar_scores.P2 + entity.pillar_scores.P3 + entity.pillar_scores.P4) / 4 - entity.overall - 0.3, 1), " points. Gap concentrated in P4 Data foundation."))) : null, /*#__PURE__*/React.createElement("div", null, DMA.PILLARS.map(p => {
     const s = entity.pillar_scores[p.id];
     const peer = s + 0.3;
     const w = s / 5 * 100;
@@ -208,15 +208,15 @@ function ClientOverview({
       style: {
         left: `calc(${peerL}% - 1px)`
       },
-      title: `Peer ${peer.toFixed(1)}`
+      title: `Peer ${fx(peer, 1)}`
     })), /*#__PURE__*/React.createElement("div", {
       className: "pbar-score"
-    }, s.toFixed(1)), /*#__PURE__*/React.createElement("div", {
+    }, fx(s, 1)), /*#__PURE__*/React.createElement("div", {
       className: "pbar-delta",
       style: {
         color: delta < 0 ? "var(--z-below)" : "var(--z-mid)"
       }
-    }, delta >= 0 ? "▲" : "▼", " ", Math.abs(delta).toFixed(1)));
+    }, delta >= 0 ? "▲" : "▼", " ", fx(Math.abs(delta), 1)));
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 8,
@@ -405,7 +405,7 @@ function ScoreRing({
       fontWeight: 300,
       lineHeight: 1
     }
-  }, score.toFixed(1))));
+  }, fx(score, 1))));
 }
 
 /* ── Why-now strip · expandable, drillable, per-client ──────────────
@@ -808,7 +808,7 @@ function SCQACard({
     style: {
       fontWeight: 600
     }
-  }, entity.name), " is a mid-tier ", DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase(), " mid-way through a multi-year digital transformation. Current overall maturity (", entity.overall.toFixed(1), " / 5) trails the peer median by 0.4, with the gap concentrated in P4 Data Foundation. Two recent C-suite hires open a 6-9 month integration window.", " ", expanded ? /*#__PURE__*/React.createElement(React.Fragment, null, "The institution has invested visibly in front-end channels (Tableau Cloud, Marketing Cloud roles, mobile redesign) but lacks the data substrate to operate any of these as a coherent customer-experience system. Without intervention, fragmentation deepens as nCino lands on top of FIS Profile core, and a future re-platform becomes harder. The strategic question is whether to invest now in a unified customer-data layer ahead of the nCino go-live, or continue to layer point solutions and accept the operating cost. Recommendation: lead the next 9 months with Salesforce Data Cloud + Databricks as the substrate ", /*#__PURE__*/React.createElement("button", {
+  }, entity.name), " is a mid-tier ", DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase(), " mid-way through a multi-year digital transformation. Current overall maturity (", fx(entity.overall, 1), " / 5) trails the peer median by 0.4, with the gap concentrated in P4 Data Foundation. Two recent C-suite hires open a 6-9 month integration window.", " ", expanded ? /*#__PURE__*/React.createElement(React.Fragment, null, "The institution has invested visibly in front-end channels (Tableau Cloud, Marketing Cloud roles, mobile redesign) but lacks the data substrate to operate any of these as a coherent customer-experience system. Without intervention, fragmentation deepens as nCino lands on top of FIS Profile core, and a future re-platform becomes harder. The strategic question is whether to invest now in a unified customer-data layer ahead of the nCino go-live, or continue to layer point solutions and accept the operating cost. Recommendation: lead the next 9 months with Salesforce Data Cloud + Databricks as the substrate ", /*#__PURE__*/React.createElement("button", {
     className: "chip",
     onClick: () => openEvidence("E-047")
   }, "E-047"), " ", /*#__PURE__*/React.createElement("button", {
@@ -822,7 +822,8 @@ function OpportunitySurfaceStrip({
   entity,
   run
 }) {
-  const sorted = Object.entries(entity.oss).sort((a, b) => b[1] - a[1]);
+  const sorted = Object.entries(entity.oss || {}).sort((a, b) => b[1] - a[1]);
+  if (!sorted.length) return null;
   return /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
@@ -872,7 +873,12 @@ function OpportunitySurfaceStrip({
   }))), /*#__PURE__*/React.createElement("div", {
     className: "g5"
   }, sorted.map(([pid, score]) => {
-    const p = DMA.getPlatform(pid);
+    const p = DMA.getPlatform(pid) || {
+      id: pid,
+      name: pid,
+      short: pid,
+      features: ""
+    };
     return /*#__PURE__*/React.createElement("div", {
       key: pid,
       className: "card-tile clickable",
@@ -1463,7 +1469,7 @@ function ThoughtLeadershipPanel() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "b b-purple"
-  }, tl.type.toUpperCase()), /*#__PURE__*/React.createElement("span", {
+  }, String(tl.kind || tl.type || "SIGNAL").toUpperCase()), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)"

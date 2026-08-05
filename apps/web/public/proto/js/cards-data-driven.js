@@ -11,13 +11,49 @@
    All INTERNAL-only cards respect the audience toggle (hidden for customer).
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* Absent is not empty. In production an accessor returns null when the
+   section did not promote, and a card that renders zeros in that case
+   asserts a measurement nobody made. Each card says which section is
+   missing instead. */
+function CardAbsent({
+  icon,
+  title,
+  note
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card flush"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: icon,
+    size: 14
+  }), /*#__PURE__*/React.createElement("h3", null, title)), /*#__PURE__*/React.createElement("span", {
+    className: "b"
+  }, "Not promoted")), /*#__PURE__*/React.createElement("div", {
+    className: "card-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      lineHeight: 1.55
+    }
+  }, note)));
+}
+
 /* ── Evidence tier distribution (T1–T5) ────────────────────────────────
    SOURCE: 01_evidence/research_handoff.json :: evidence_summary.tier_distribution */
 function EvidenceTierCard({
   entity
 }) {
   const s = DMA.evidenceSummaryFor(entity.id);
-  const tiers = Object.entries(s.tiers);
+  if (!s) return /*#__PURE__*/React.createElement(CardAbsent, {
+    icon: "evidence",
+    title: "Evidence tier distribution",
+    note: "This run's evidence store has not been read, so the tier mix cannot be counted."
+  });
+  const tiers = Object.entries(s.tiers || {});
   const max = Math.max(...tiers.map(([, v]) => v), 1);
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
@@ -98,10 +134,17 @@ function SentimentCard({
 }) {
   if (audience === "customer") return null; // internal-only strip
   const s = DMA.sentimentFor(entity.id);
+  if (!s) return /*#__PURE__*/React.createElement(CardAbsent, {
+    icon: "users",
+    title: "Sentiment",
+    note: "No sentiment promoted for this run."
+  });
   const Row = ({
     r
   }) => {
-    const pct = r.score / (r.scale || 5) * 100;
+    // No stated scale means no bounds, and a bar drawn on assumed bounds is
+    // a claim the producer never made.
+    const pct = r.score != null && r.scale ? r.score / r.scale * 100 : null;
     const tone = r.score >= 4 ? "var(--z-teal)" : r.score >= 3 ? "var(--z-org)" : "var(--z-below)";
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -127,9 +170,9 @@ function SentimentCard({
         borderRadius: 4,
         overflow: "hidden"
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, pct == null ? null : /*#__PURE__*/React.createElement("div", {
       style: {
-        width: `${pct}%`,
+        width: `${Math.max(0, Math.min(100, pct))}%`,
         height: "100%",
         background: tone,
         borderRadius: 4,
@@ -143,7 +186,7 @@ function SentimentCard({
         textAlign: "right",
         fontVariantNumeric: "tabular-nums"
       }
-    }, r.score.toFixed(1)));
+    }, r.score == null ? "—" : fx(r.score, 1)));
   };
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
@@ -162,7 +205,7 @@ function SentimentCard({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, "Industry avg ", s.industry_avg.toFixed(1))), /*#__PURE__*/React.createElement("div", {
+  }, s.industry_avg == null ? "" : `Industry avg ${fx(s.industry_avg, 1)}`)), /*#__PURE__*/React.createElement("div", {
     className: "card-body"
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -172,10 +215,15 @@ function SentimentCard({
       letterSpacing: ".06em",
       marginBottom: 2
     }
-  }, "Employee"), s.employee.map((r, i) => /*#__PURE__*/React.createElement(Row, {
+  }, "Employee"), (s.employee || []).length ? s.employee.map((r, i) => /*#__PURE__*/React.createElement(Row, {
     key: "e" + i,
     r: r
-  })), /*#__PURE__*/React.createElement("div", {
+  })) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, "Not established for this run."), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)",
@@ -183,10 +231,26 @@ function SentimentCard({
       letterSpacing: ".06em",
       margin: "10px 0 2px"
     }
-  }, "Customer"), s.customer.map((r, i) => /*#__PURE__*/React.createElement(Row, {
+  }, "Customer"), (s.customer || []).length ? s.customer.map((r, i) => /*#__PURE__*/React.createElement(Row, {
     key: "c" + i,
     r: r
-  }))));
+  })) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, "Not established for this run."), (s.ungrouped || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)",
+      textTransform: "uppercase",
+      letterSpacing: ".06em",
+      margin: "10px 0 2px"
+    }
+  }, "Audience not stated"), s.ungrouped.map((r, i) => /*#__PURE__*/React.createElement(Row, {
+    key: "u" + i,
+    r: r
+  }))) : null));
 }
 
 /* ── Financial trajectory ──────────────────────────────────────────────
@@ -195,7 +259,13 @@ function FinancialTrajectoryCard({
   entity
 }) {
   const f = DMA.financialsFor(entity.id);
-  const maxA = Math.max(...f.total_assets);
+  if (!f || !(f.fy || []).length) return /*#__PURE__*/React.createElement(CardAbsent, {
+    icon: "money",
+    title: "Financial trajectory",
+    note: "No financial series promoted for this run."
+  });
+  const values = (f.total_assets || []).filter(v => v != null);
+  const maxA = values.length ? Math.max(...values) : 1;
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
     "data-source": "financial_baseline.json :: total_assets[],net_income_m[],nim_pct[]"
@@ -272,6 +342,11 @@ function CoverageByPillarCard({
   entity
 }) {
   const c = DMA.coverageFor(entity.id);
+  if (!c) return /*#__PURE__*/React.createElement(CardAbsent, {
+    icon: "check",
+    title: "Evidence coverage",
+    note: "No coverage figures promoted for this run."
+  });
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
     "data-source": "export_coverage_stats.csv :: by_pillar[].pct"
@@ -359,6 +434,11 @@ function CeilingEstimateCard({
   } = useApp();
   const [open, setOpen] = useState(null);
   const u = DMA.uncertaintyFor(entity.id);
+  if (!u) return /*#__PURE__*/React.createElement(CardAbsent, {
+    icon: "stack",
+    title: "Capability ceiling & uncertainty",
+    note: "No ceiling estimates promoted for this run."
+  });
   const rows = Object.entries(u);
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
@@ -419,7 +499,7 @@ function CeilingEstimateCard({
         background: "var(--z-sep)",
         borderRadius: 4
       },
-      title: `Band ${lo.toFixed(1)}–${hi.toFixed(1)}`
+      title: `Band ${fx(lo, 1)}–${fx(hi, 1)}`
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         position: "absolute",
@@ -448,7 +528,7 @@ function CeilingEstimateCard({
         textAlign: "right",
         fontVariantNumeric: "tabular-nums"
       }
-    }, d.ceiling.toFixed(1), /*#__PURE__*/React.createElement("span", {
+    }, fx(d.ceiling, 1), /*#__PURE__*/React.createElement("span", {
       style: {
         color: "var(--z-muted)",
         fontWeight: 400

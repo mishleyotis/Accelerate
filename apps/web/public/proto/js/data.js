@@ -25,6 +25,7 @@
     return "#139F94";
   }
   function maturityLabel(s) {
+    if (s === null || s === undefined || !isFinite(Number(s))) return null;
     if (s < 2) return "Activating";
     if (s < 3) return "Building";
     if (s < 4) return "Competing";
@@ -2776,6 +2777,20 @@
     };
   }
 
+  /* ── Live registry ───────────────────────────────────────────────
+     useLiveEntity installs the adapted entity here before rendering a
+     client route. Read through a function, never captured in a closure:
+     the object is replaced when the route changes entity, run or audience. */
+  function liveEntity() {
+    return typeof window !== "undefined" && window.DMA_ENTITY || null;
+  }
+  function liveField(id, key) {
+    const L = liveEntity();
+    // Guarded on identity: a stale registry from the previously viewed client
+    // must not answer for this one.
+    return L && (L.id === id || !id) ? L[key] === undefined ? null : L[key] : null;
+  }
+
   /* ── EXPORT ─────────────────────────────────────────────────────── */
   window.DMA = {
     WHY_NOW,
@@ -2791,12 +2806,39 @@
     CATEGORIES,
     VALUE_CHAINS,
     ENTITIES,
-    EVIDENCE,
-    INSIGHT_CARDS,
-    RECOMMENDATIONS,
-    ISSUES,
-    TIMELINE_EVENTS,
-    TECH_STACK,
+    /* Getters, not values: a client route replaces DMA_ENTITY when the
+       entity, run or audience changes, and a captured array would keep
+       rendering the previous client's rows. */
+    get EVIDENCE() {
+      return LIVE ? liveField(null, "evidence") || [] : EVIDENCE;
+    },
+    get INSIGHT_CARDS() {
+      return LIVE ? liveField(null, "insightCards") || [] : INSIGHT_CARDS;
+    },
+    get RECOMMENDATIONS() {
+      return LIVE ? liveField(null, "recommendations") || [] : RECOMMENDATIONS;
+    },
+    get ISSUES() {
+      return LIVE ? liveField(null, "issues") || [] : ISSUES;
+    },
+    get TIMELINE_EVENTS() {
+      return LIVE ? liveField(null, "timeline") || [] : TIMELINE_EVENTS;
+    },
+    get TECH_STACK() {
+      return LIVE ? liveField(null, "techStack") || [] : TECH_STACK;
+    },
+    get LEADERSHIP() {
+      return LIVE ? liveField(null, "leadership") || [] : LEADERSHIP;
+    },
+    get THOUGHT_LEADERSHIP() {
+      return LIVE ? liveField(null, "thoughtLeadership") || [] : THOUGHT_LEADERSHIP;
+    },
+    get FOCUS_AREAS() {
+      return LIVE ? liveField(null, "focusAreas") || [] : FOCUS_AREAS;
+    },
+    get ROADMAP() {
+      return LIVE ? liveField(null, "roadmap") || [] : ROADMAP;
+    },
     QA_GATES,
     IMPORT_AUDIT,
     PENDING_REVIEW,
@@ -2804,12 +2846,8 @@
     PATTERNS,
     PEER_SETS,
     SUBVERTICAL_LABEL,
-    LEADERSHIP,
-    THOUGHT_LEADERSHIP,
-    ROADMAP,
     STAIRSTEP_CLUSTERS,
     EVIDENCE_TIERS,
-    FOCUS_AREAS,
     ROADMAP_IMPACTS,
     ISSUE_CAPS,
     NOTIFICATIONS,
@@ -2823,23 +2861,37 @@
       round1
     },
     getEntity: id => ENTITIES.find(e => e.id === id || e.slug === id),
-    getInsight: id => INSIGHT_CARDS.find(c => c.id === id),
-    getEvidence: id => EVIDENCE.find(e => e.id === id),
+    /* In LIVE these resolve against the viewed entity's promoted payload, so
+       an id from one client can never resolve to another's row. */
+    getInsight: id => (LIVE ? liveField(null, "insightCards") || [] : INSIGHT_CARDS).find(c => c.id === id),
+    getEvidence: id => (LIVE ? liveField(null, "evidence") || [] : EVIDENCE).find(e => e.id === id),
     getSubcap: (entity, id) => entity && entity.subcaps ? entity.subcaps.find(s => s.id === id) : null,
     getCategory: id => CATEGORIES.find(c => c.id === id),
     getPlatform: id => PLATFORMS.find(p => p.id === id),
-    getRecommendation: id => RECOMMENDATIONS.find(r => r.id === id) || RECS_CACHE[id],
-    recsFor,
-    getFocusArea: id => FOCUS_AREAS.find(f => f.id === id),
+    getRecommendation: id => LIVE ? (liveField(null, "recommendations") || []).find(r => r.id === id) : RECOMMENDATIONS.find(r => r.id === id) || RECS_CACHE[id],
+    recsFor: id => LIVE ? liveField(id, "recommendations") || [] : recsFor(id),
+    getFocusArea: id => (LIVE ? liveField(null, "focusAreas") || [] : FOCUS_AREAS).find(f => f.id === id),
     getTier: id => EVIDENCE_TIERS[id],
-    // New-card accessors (default to flagship when an entity has no own data yet)
-    financialsFor: id => FINANCIALS[id] || FINANCIALS["fce-001"],
-    sentimentFor: id => SENTIMENT[id] || SENTIMENT["fce-001"],
-    coverageFor: id => COVERAGE_STATS[id] || COVERAGE_STATS["fce-001"],
-    uncertaintyFor: id => UNCERTAINTY_BANDS[id] || UNCERTAINTY_BANDS["fce-001"],
-    evidenceSummaryFor: id => EVIDENCE_SUMMARY[id] || EVIDENCE_SUMMARY["fce-001"],
+    /* Entity-scoped accessors. In LIVE mode they read the promoted payload
+       through window.DMA_ENTITY (installed by useLiveEntity) and return
+       null/[] when a section did not promote — NEVER the fixture. The
+       flagship fallback below is how the fictional bank's prose used to
+       reach a real client's page, and it is the reason a whole second
+       renderer existed. Outside LIVE the mock answers, unchanged, so the
+       prototype still runs standalone as the design reference. */
+    financialsFor: id => LIVE ? liveField(id, "financials") : FINANCIALS[id] || FINANCIALS["fce-001"],
+    sentimentFor: id => LIVE ? liveField(id, "sentiment") : SENTIMENT[id] || SENTIMENT["fce-001"],
+    coverageFor: id => LIVE ? liveField(id, "coverage") : COVERAGE_STATS[id] || COVERAGE_STATS["fce-001"],
+    uncertaintyFor: id => LIVE ? liveField(id, "uncertainty") : UNCERTAINTY_BANDS[id] || UNCERTAINTY_BANDS["fce-001"],
+    evidenceSummaryFor: id => LIVE ? liveField(id, "evidenceSummary") : EVIDENCE_SUMMARY[id] || EVIDENCE_SUMMARY["fce-001"],
     sourceFor: cardId => SOURCE_MAP[cardId] || null,
-    whyNowFor: id => WHY_NOW[id] || synthWhyNow(id),
+    whyNowFor: id => LIVE ? liveField(id, "whyNow") : WHY_NOW[id] || synthWhyNow(id),
+    /* Per-section provenance for the live run: what promoted, when, by which
+       producer version. The prototype states provenance per card, so a card
+       asks for its own section rather than the page's. */
+    sectionStateFor: key => LIVE ? ((liveEntity() || {}).sectionState || {})[key] || null : null,
+    runFor: id => LIVE ? liveField(id, "run") : null,
+    startersFor: id => LIVE ? liveField(id, "starters") || [] : [],
     insightPriority,
     issueCapsFor: subcapId => {
       const out = [];

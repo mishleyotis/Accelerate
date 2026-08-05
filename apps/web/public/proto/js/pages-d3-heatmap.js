@@ -326,12 +326,12 @@ function FocusAreaView({
           fontSize: 11,
           color: "var(--z-muted)"
         }
-      }, "Peer ", peer.toFixed(1)), gap > 0.3 ? /*#__PURE__*/React.createElement("span", {
+      }, "Peer ", fx(peer, 1)), gap > 0.3 ? /*#__PURE__*/React.createElement("span", {
         className: "b b-below",
         style: {
           marginLeft: "auto"
         }
-      }, "\u2212", gap.toFixed(1)) : /*#__PURE__*/React.createElement("span", {
+      }, "\u2212", fx(gap, 1)) : /*#__PURE__*/React.createElement("span", {
         className: "b b-above",
         style: {
           marginLeft: "auto"
@@ -621,7 +621,7 @@ function FocusAreaView({
       fontSize: 14,
       fontWeight: 700
     }
-  }, s.score.toFixed(1)), /*#__PURE__*/React.createElement("div", {
+  }, fx(s.score, 1)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 8.5,
       opacity: .85,
@@ -981,14 +981,14 @@ function PillarHeatmap({
       style: {
         color: "var(--z-muted)"
       }
-    }, "Peer ", peer.toFixed(1)), /*#__PURE__*/React.createElement("span", {
+    }, "Peer ", fx(peer, 1)), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement("span", {
       style: {
         color: score < peer ? "var(--z-below)" : "var(--z-mid)",
         fontFamily: "var(--font-mono)"
       }
-    }, score >= peer ? "▲" : "▼", " ", Math.abs(score - peer).toFixed(1))), /*#__PURE__*/React.createElement("div", {
+    }, score >= peer ? "▲" : "▼", " ", fx(Math.abs(score - peer), 1))), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
         color: "var(--z-muted)",
@@ -1093,7 +1093,7 @@ function CategoryHeatmap({
           fontSize: 13,
           fontWeight: 700
         }
-      }, agg.avg.toFixed(1)), agg.thin > 0 ? /*#__PURE__*/React.createElement("div", {
+      }, fx(agg.avg, 1)), agg.thin > 0 ? /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 8,
           fontWeight: 600
@@ -1132,7 +1132,7 @@ function CategoryHeatmap({
         minHeight: 30,
         padding: "4px 6px"
       }
-    }, catAgg[c.id].peer.toFixed(1)))) : null, /*#__PURE__*/React.createElement("div", null), cats.map(c => /*#__PURE__*/React.createElement("div", {
+    }, fx(catAgg[c.id].peer, 1)))) : null, /*#__PURE__*/React.createElement("div", null), cats.map(c => /*#__PURE__*/React.createElement("div", {
       key: `l-${c.id}`,
       style: {
         fontSize: 9.5,
@@ -1240,7 +1240,7 @@ function SubcapHeatmap({
           className: "spacer"
         }), subs.length ? /*#__PURE__*/React.createElement("span", {
           className: `b ${DMA.helpers.maturityClass(avg)}`
-        }, avg.toFixed(1)) : /*#__PURE__*/React.createElement("span", {
+        }, fx(avg, 1)) : /*#__PURE__*/React.createElement("span", {
           className: "b b-muted"
         }, "\u2014")), /*#__PURE__*/React.createElement("div", {
           style: {
@@ -1316,7 +1316,7 @@ function SubcapHeatmap({
         fontSize: 11,
         color: "var(--z-muted)"
       }
-    }, subs.length, " subcaps \xB7 ", clusters.length, " capabilities \xB7 weight ", (c.weight * 100).toFixed(0), "%")), clusters.map(cl => {
+    }, subs.length, " subcaps \xB7 ", clusters.length, " capabilities \xB7 weight ", fx(c.weight * 100, 0), "%")), clusters.map(cl => {
       const key = `${c.id}.${cl.l1}`;
       const open = openClusters[key] !== false; // default open
       const avg = cl.items.reduce((a, s) => a + s.score, 0) / cl.items.length;
@@ -1352,7 +1352,7 @@ function SubcapHeatmap({
           justifyContent: "center",
           flexShrink: 0
         }
-      }, avg.toFixed(1)), /*#__PURE__*/React.createElement("span", {
+      }, fx(avg, 1)), /*#__PURE__*/React.createElement("span", {
         style: {
           flex: 1,
           minWidth: 0,
@@ -1403,7 +1403,7 @@ function SubcapHeatmap({
             justifyContent: "center",
             flexShrink: 0
           }
-        }, s.score.toFixed(1)), /*#__PURE__*/React.createElement("div", {
+        }, fx(s.score, 1)), /*#__PURE__*/React.createElement("div", {
           style: {
             flex: 1,
             minWidth: 0
@@ -1446,7 +1446,7 @@ function SubcapHeatmap({
             background: "var(--z-sep)",
             borderRadius: 3
           },
-          title: `Score ${s.score.toFixed(1)} · Peer ${s.peerMedian.toFixed(1)}`
+          title: `Score ${fx(s.score, 1)} · Peer ${fx(s.peerMedian, 1)}`
         }, /*#__PURE__*/React.createElement("div", {
           style: {
             width: `${s.score / 5 * 100}%`,
@@ -1470,7 +1470,7 @@ function SubcapHeatmap({
             marginTop: 2,
             textAlign: "right"
           }
-        }, gap > 0 ? `−${gap.toFixed(1)}` : `+${Math.abs(gap).toFixed(1)}`, " vs peer")), /*#__PURE__*/React.createElement("div", {
+        }, gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`, " vs peer")), /*#__PURE__*/React.createElement("div", {
           style: {
             display: "flex",
             gap: 3,
@@ -1566,7 +1566,7 @@ function ValueChainView({
         fontSize: 11,
         color: "var(--z-muted)"
       }
-    }, "Peer ", peer.toFixed(1)), /*#__PURE__*/React.createElement("span", {
+    }, "Peer ", fx(peer, 1)), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement("span", {
       style: {
@@ -1588,7 +1588,7 @@ function ValueChainView({
         padding: 0,
         border: 0
       }
-    }, s.score.toFixed(1)))));
+    }, fx(s.score, 1)))));
   })), selected ? (() => {
     const vc = DMA.VALUE_CHAINS.find(x => x.id === selected);
     const idx = Math.abs(hashCode(vc.id)) % entity.subcaps.length;
@@ -1766,7 +1766,7 @@ function SynthesisDrawer({
     }
   }, subcap?.name || category?.name), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, subcap ? `Score ${subcap.score.toFixed(1)} · ${subcap.confidence}` : `${entity.subcaps.filter(s => s.category === category.id).length} subcaps · weight ${(category.weight * 100).toFixed(0)}%`)), /*#__PURE__*/React.createElement("button", {
+  }, subcap ? `Score ${fx(subcap.score, 1)} · ${subcap.confidence}` : `${entity.subcaps.filter(s => s.category === category.id).length} subcaps · weight ${fx(category.weight * 100, 0)}%`)), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
     onClick: onClose
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -1867,7 +1867,7 @@ function SynthesisDrawer({
       borderRadius: 3,
       background: DMA.helpers.maturityHex(score)
     }
-  }), " Entity ", /*#__PURE__*/React.createElement("strong", null, score.toFixed(1))), /*#__PURE__*/React.createElement("span", {
+  }), " Entity ", /*#__PURE__*/React.createElement("strong", null, fx(score, 1))), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("span", {
     className: "row",
@@ -1880,14 +1880,14 @@ function SynthesisDrawer({
       height: 12,
       background: "var(--z-dpur)"
     }
-  }), " Peer ", /*#__PURE__*/React.createElement("strong", null, peer.toFixed(1))), /*#__PURE__*/React.createElement("span", {
+  }), " Peer ", /*#__PURE__*/React.createElement("strong", null, fx(peer, 1))), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: gap > 0 ? "var(--z-below)" : "var(--z-mid)"
     }
-  }, gap > 0 ? `−${gap.toFixed(1)}` : `+${Math.abs(gap).toFixed(1)}`))), caps.length > 0 ? /*#__PURE__*/React.createElement("div", {
+  }, gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`))), caps.length > 0 ? /*#__PURE__*/React.createElement("div", {
     className: "co co-org",
     style: {
       marginBottom: 14
@@ -2102,13 +2102,13 @@ function SynthesisDrawer({
       color: "#3B0764",
       lineHeight: 1.6
     }
-  }, subcap.thin ? `This subcap has thin evidence (${subcap.evidence_count} / 3) - confidence is LOW. The score is provisional.` : gap > 0.5 ? `Trails peer by ${gap.toFixed(1)} - addressable via the linked recommendation. Closing this lifts the parent category by ${(gap * 0.18).toFixed(2)} points.` : `At or above peer median. No platform investment needed for this subcap specifically; protect against regression.`)) : null), /*#__PURE__*/React.createElement("div", {
+  }, subcap.thin ? `This subcap has thin evidence (${subcap.evidence_count} / 3) - confidence is LOW. The score is provisional.` : gap > 0.5 ? `Trails peer by ${fx(gap, 1)} - addressable via the linked recommendation. Closing this lifts the parent category by ${fx(gap * 0.18, 2)} points.` : `At or above peer median. No platform investment needed for this subcap specifically; protect against regression.`)) : null), /*#__PURE__*/React.createElement("div", {
     className: "drawer-foot"
   }, subcap ? /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
     onClick: () => {
       const label = subcap?.name || category?.name || "selection";
-      const text = `${label}\nScore ${subcap?.score?.toFixed(1) ?? "-"} · confidence ${subcap?.confidence ?? "-"} · peer median ${subcap?.peerMedian?.toFixed(1) ?? "-"}.`;
+      const text = `${label}\nScore ${fx(subcap?.score, 1) ?? "-"} · confidence ${subcap?.confidence ?? "-"} · peer median ${fx(subcap?.peerMedian, 1) ?? "-"}.`;
       try {
         navigator.clipboard.writeText(text);
       } catch (e) {}

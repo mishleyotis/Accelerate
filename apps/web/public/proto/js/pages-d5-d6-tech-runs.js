@@ -916,7 +916,7 @@ function FinChartInteractive({
       color: hoveredYear === d.year ? "var(--z-teal)" : "var(--z-muted)",
       fontWeight: hoveredYear === d.year ? 700 : 400
     }
-  }, "$", (d.val / 1e9).toFixed(1), "B"), /*#__PURE__*/React.createElement("div", {
+  }, "$", fx(d.val / 1e9, 1), "B"), /*#__PURE__*/React.createElement("div", {
     style: {
       width: "100%",
       height: `${d.val / max * 120}px`,
@@ -942,13 +942,13 @@ function FinChartInteractive({
     style: {
       color: "var(--z-mid)"
     }
-  }, (cagr * 100).toFixed(1), "%"), " \xB7 trend classified ", /*#__PURE__*/React.createElement("strong", null, entity.trend), hoveredYear ? /*#__PURE__*/React.createElement("span", {
+  }, fx(cagr * 100, 1), "%"), " \xB7 trend classified ", /*#__PURE__*/React.createElement("strong", null, entity.trend), hoveredYear ? /*#__PURE__*/React.createElement("span", {
     style: {
       marginLeft: 8,
       color: "var(--z-teal)",
       fontWeight: 600
     }
-  }, "\xB7 ", hoveredYear, ": $", (data.find(d => d.year === hoveredYear).val / 1e9).toFixed(2), "B") : null));
+  }, "\xB7 ", hoveredYear, ": $", fx(data.find(d => d.year === hoveredYear).val / 1e9, 2), "B") : null));
 }
 function SentimentGridInteractive({
   sentOpen,
@@ -1291,7 +1291,7 @@ function FinChart({
       fontSize: 10,
       color: "var(--z-muted)"
     }
-  }, "$", (d.val / 1e9).toFixed(1), "B"), /*#__PURE__*/React.createElement("div", {
+  }, "$", fx(d.val / 1e9, 1), "B"), /*#__PURE__*/React.createElement("div", {
     style: {
       width: "100%",
       height: `${d.val / max * 120}px`,
@@ -1316,7 +1316,7 @@ function FinChart({
     style: {
       color: "var(--z-mid)"
     }
-  }, (cagr * 100).toFixed(1), "%"), " \xB7 trend classified ", /*#__PURE__*/React.createElement("strong", null, entity.trend)));
+  }, fx(cagr * 100, 1), "%"), " \xB7 trend classified ", /*#__PURE__*/React.createElement("strong", null, entity.trend)));
 }
 function SentimentGrid() {
   const sentiments = [{
@@ -1686,7 +1686,7 @@ function VersionDiff({
       fontFamily: "var(--font-mono)",
       color: d.delta > 0 ? "var(--z-mid)" : d.delta < 0 ? "var(--z-below)" : "var(--z-muted)"
     }
-  }, d.delta > 0 ? "▲" : d.delta < 0 ? "▼" : "-", " ", Math.abs(d.delta).toFixed(1))), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+  }, d.delta > 0 ? "▲" : d.delta < 0 ? "▼" : "-", " ", fx(Math.abs(d.delta), 1))), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11
     }
@@ -2290,7 +2290,7 @@ function ClientTechStackDetail({
       color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-teal)",
       lineHeight: 1
     }
-  }, t.status === "ABSENT" ? "−" : "+", (impacts.reduce((a, i) => a + Math.abs(i.delta), 0) / Math.max(1, impacts.length)).toFixed(1)), /*#__PURE__*/React.createElement("div", {
+  }, t.status === "ABSENT" ? "−" : "+", fx(impacts.reduce((a, i) => a + Math.abs(i.delta), 0) / Math.max(1, impacts.length), 1)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)",
@@ -2474,18 +2474,18 @@ function ClientTechStackDetail({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, i.baseline.toFixed(1), " \u2192"), /*#__PURE__*/React.createElement("strong", {
+  }, fx(i.baseline, 1), " \u2192"), /*#__PURE__*/React.createElement("strong", {
     style: {
       fontSize: 14,
       color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-mid)"
     }
-  }, i.target.toFixed(1)), /*#__PURE__*/React.createElement("span", {
+  }, fx(i.target, 1)), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
       color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-mid)",
       fontWeight: 600
     }
-  }, t.status === "ABSENT" ? "" : "+", i.delta.toFixed(1))))))))), /*#__PURE__*/React.createElement("div", {
+  }, t.status === "ABSENT" ? "" : "+", fx(i.delta, 1))))))))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",

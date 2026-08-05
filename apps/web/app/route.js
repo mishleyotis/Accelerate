@@ -41,6 +41,9 @@ const SCRIPTS = [
   "vendor/react.production.min.js",
   "vendor/react-dom.production.min.js",
   "proto/js/data.js",
+  // Before utils.js: useLiveEntity calls buildLiveEntity, and the loader must
+  // not be able to run before the mappings exist.
+  "proto/js/live-adapter.js",
   "proto/js/utils.js",
   "proto/js/chrome.js",
   "proto/js/drawers.js",

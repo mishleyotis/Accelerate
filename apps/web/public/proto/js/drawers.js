@@ -89,7 +89,7 @@ function EvidenceDrawer() {
     className: "co-title"
   }, "Rationale"), /*#__PURE__*/React.createElement("div", {
     className: "co-body"
-  }, "Score ", subcap.score.toFixed(1), " \xB7 peer median ", subcap.peerMedian.toFixed(1), ". ", subcap.thin ? "Evidence is below the threshold of 3 - flagged as thin." : "Evidence ceiling: T2 with consistent FACT-class claims."))) : null, items.length > 1 ? /*#__PURE__*/React.createElement("div", {
+  }, "Score ", fx(subcap.score, 1), " \xB7 peer median ", fx(subcap.peerMedian, 1), ". ", subcap.thin ? "Evidence is below the threshold of 3 - flagged as thin." : "Evidence ceiling: T2 with consistent FACT-class claims."))) : null, items.length > 1 ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 5,
@@ -1170,7 +1170,7 @@ function surfaceMessages(surface, ctx) {
         title: "Subcap narrative",
         sub: ctx?.subcap?.id || "Heatmap selection",
         cache_age: "200ms",
-        body: `${ctx?.subcap?.name || "This subcap"} scores ${ctx?.subcap?.score?.toFixed(1) || "-"}. Peer median is ${ctx?.subcap?.peerMedian?.toFixed(1) || "-"}.\n\nEvidence is ${ctx?.subcap?.thin ? "thin - only " + (ctx?.subcap?.evidence_count || 0) + " items below the threshold of 3" : "consistent across multiple T1–T3 sources"}.\n\nClosing the gap to peer requires investment in the named platform candidates. The exact path differs by subvertical pillar weight.`
+        body: `${ctx?.subcap?.name || "This subcap"} scores ${fx(ctx?.subcap?.score, 1) || "-"}. Peer median is ${fx(ctx?.subcap?.peerMedian, 1) || "-"}.\n\nEvidence is ${ctx?.subcap?.thin ? "thin - only " + (ctx?.subcap?.evidence_count || 0) + " items below the threshold of 3" : "consistent across multiple T1–T3 sources"}.\n\nClosing the gap to peer requires investment in the named platform candidates. The exact path differs by subvertical pillar weight.`
       };
     case "platform_story":
       return {
@@ -1456,7 +1456,7 @@ function NewRunModal() {
       fontSize: 10,
       color: "var(--z-muted)"
     }
-  }, (file.size / 1024).toFixed(0), " KB"), /*#__PURE__*/React.createElement("button", {
+  }, fx(file.size / 1024, 0), " KB"), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
     style: {
       width: 22,
@@ -1920,12 +1920,12 @@ function RecommendationModal() {
       }
     })), /*#__PURE__*/React.createElement("div", {
       className: "pbar-score"
-    }, after.toFixed(1)), /*#__PURE__*/React.createElement("div", {
+    }, fx(after, 1)), /*#__PURE__*/React.createElement("div", {
       className: "pbar-delta",
       style: {
         color: "var(--z-mid)"
       }
-    }, "+", (after - before).toFixed(1)));
+    }, "+", fx(after - before, 1)));
   })), linkedSubcaps.length > 0 ? /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
