@@ -93,24 +93,30 @@ if [ -f apps/web/Dockerfile ]; then
   # Google authenticates every request (Google-managed OAuth client,
   # org-internal), the app verifies the forwarded assertion (lib/iap.js)
   # and enforces @zennify.com. Grants: the Workspace domain.
-  gcloud services enable iap.googleapis.com --project="$PROJECT_ID" --quiet
+  # IAP is configured once; the deploy service account may lack the
+  # org-level permission to (re-)enable the API or bind IAP policy. These
+  # steps are idempotent and must not abort a release that has already
+  # rolled the services — so each tolerates a permission failure and the
+  # release continues to the worker Job and Scheduler sync below.
+  gcloud services enable iap.googleapis.com --project="$PROJECT_ID" --quiet || true
   gcloud beta services identity create --service=iap.googleapis.com \
     --project="$PROJECT_ID" --quiet >/dev/null 2>&1 || true
   gcloud run services add-iam-policy-binding dmai-web \
     --project="$PROJECT_ID" --region="$REGION" \
     --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-iap.iam.gserviceaccount.com" \
-    --role="roles/run.invoker" --quiet >/dev/null
+    --role="roles/run.invoker" --quiet >/dev/null 2>&1 || true
   gcloud run services update dmai-web \
-    --project="$PROJECT_ID" --region="$REGION" --iap --quiet
+    --project="$PROJECT_ID" --region="$REGION" --iap --quiet || true
   # Direct (non-IAP) invocation stays closed: drop the public grant.
   gcloud run services remove-iam-policy-binding dmai-web \
     --project="$PROJECT_ID" --region="$REGION" \
     --member="allUsers" --role="roles/run.invoker" --quiet >/dev/null 2>&1 || true
-  # Who may pass Google's door: the Zennify workspace.
+  # Who may pass Google's door: the Zennify workspace. (Tolerant: this
+  # org-level grant may require an admin; a release must not abort on it.)
   gcloud iap web add-iam-policy-binding \
     --project="$PROJECT_ID" --resource-type=cloud-run \
     --service=dmai-web --region="$REGION" \
-    --member="domain:zennify.com" --role="roles/iap.httpsResourceAccessor" --quiet >/dev/null
+    --member="domain:zennify.com" --role="roles/iap.httpsResourceAccessor" --quiet >/dev/null 2>&1 || true
 
   # The admin "Run scan now" button fires the worker Job as dmai-web.
   gcloud run jobs add-iam-policy-binding dmai-worker \
