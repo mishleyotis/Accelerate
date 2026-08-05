@@ -129,6 +129,40 @@ def test_round_trip_item_grain_section():
     assert got[0]["verbatim_quote"] == "awash in data but no strategy"
 
 
+def test_per_item_citations_survive_the_round_trip():
+    """The defect this pins: why_now's e_ids column was bound to the
+    section envelope, so four signals that were each submitted with their
+    own citation all arrived empty and every card read 'no evidence yet'.
+    At item grain the column is the ITEM's citation list, and the section
+    envelope is the union over items — computed, never stored."""
+    payload = {"signals": [
+        {"wn_id": "WN-1", "trigger": "A merger was announced in June 2026.",
+         "window": "Runs from announcement to conversion.",
+         "e_ids": ["E-CC-004", "E-BCU-032"]},
+        {"wn_id": "WN-2", "trigger": "A leadership evolution dated July 2026.",
+         "window": "New-leadership agendas set within the first quarter.",
+         "e_ids": ["E-CC-003"]}],
+        "produced_at": "2026-08-05T04:00:00+00:00", "producer_version": "test@1",
+        "e_ids": ["E-CC-004", "E-BCU-032", "E-CC-003"], "internal_only": []}
+    built = assemble("overview", "why_now",
+                     write_rows("overview", "why_now", payload))
+    signals = built["data"]["signals"]
+    assert [s["e_ids"] for s in signals] == [["E-CC-004", "E-BCU-032"], ["E-CC-003"]]
+    # the union, in first-seen order, with no duplicates
+    assert built["env"]["e_ids"] == ["E-CC-004", "E-BCU-032", "E-CC-003"]
+
+
+def test_a_reserved_word_column_is_read_under_its_bare_name():
+    """`window` is quoted in the spec because PostgreSQL reserves it. The
+    writer needs the quotes; the reader must not keep them, or the driver's
+    bare key never matches and the field silently vanishes from the card."""
+    assert "window" in readers()[("overview", "why_now")]["item_cols"]
+    for (page, section), r in readers().items():
+        for group in ("item_cols", "section_cols", "env_cols", "sys_cols"):
+            for col in r[group]:
+                assert '"' not in col, f"{page}.{section}.{group}: {col!r} kept its quoting"
+
+
 def test_round_trip_h4_object_maps():
     """H4's pillars/categories are object MAPS, flattened to rows by the
     expander; the reader must put them back under the right key."""

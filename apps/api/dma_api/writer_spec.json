@@ -1404,6 +1404,12 @@
        "nullable": true
       },
       {
+       "column": "kind",
+       "source": "item:kind",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
        "column": "trigger",
        "source": "item:trigger",
        "jsonb": false,

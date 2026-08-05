@@ -54,16 +54,21 @@ def readers() -> dict:
             derived_cols = []
             for c in w["columns"]:
                 kind, _, rest = c["source"].partition(":")
+                # The spec carries SQL identifier quoting for reserved words
+                # ("window"), which the WRITER needs and the reader must not
+                # keep: the driver hands back the bare column name, so a
+                # quoted key never matches and the field silently vanished.
+                col = c["column"].strip('"')
                 if kind == "item":
-                    item_cols[c["column"]] = rest
+                    item_cols[col] = rest
                 elif kind == "section":
-                    section_cols[c["column"]] = rest
+                    section_cols[col] = rest
                 elif kind == "env":
-                    env_cols[c["column"]] = rest
+                    env_cols[col] = rest
                 elif kind == "sys":
-                    sys_cols[c["column"]] = rest
+                    sys_cols[col] = rest
                 elif kind == "skip" and "GENERATED ALWAYS" in rest:
-                    derived_cols.append(c["column"])
+                    derived_cols.append(col)
             out[(page["page"], w["section"])] = {
                 "table": w["table"], "grain": w["grain"],
                 "item_field": w.get("item_field"),
