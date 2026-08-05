@@ -4340,6 +4340,24 @@
               "nullable": true
             },
             {
+              "column": "dma_impact",
+              "source": "item:dma_impact",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "peer_coverage",
+              "source": "item:peer_coverage",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "peer_deployments",
+              "source": "item:peer_deployments",
+              "jsonb": true,
+              "nullable": true
+            },
+            {
               "column": "is_primary_gap",
               "source": "skip:derived from layers[] per layer at serve time, not per item",
               "jsonb": false,

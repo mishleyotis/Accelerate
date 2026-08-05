@@ -141,6 +141,83 @@ def _check_item_evidence(page: str, payload: dict) -> list:
     return out
 
 
+def _check_peer_research(page: str, payload: dict) -> list:
+    """AG-04 — a technographic claim about a NAMED peer carries its source.
+
+    `peer_coverage` renders as an adoption bar and a per-peer verdict beside a
+    named institution. The version this replaces decided that verdict from
+    `hashCode(ts_id + peerName) % 100`, so "✓ deployed" against a real credit
+    union was a function of the characters in a row id. The figure cannot be
+    manufactured and it cannot be asserted bare either: a share with no
+    breakdown is unfalsifiable, and a breakdown whose rows carry no source is
+    the same claim with more words.
+
+    Three things are refused here:
+      · a share with no per-peer breakdown
+      · a `deployed: true` row with no source_url or no as_of
+      · a share that disagrees with its own breakdown by more than one peer
+
+    A peer the producer could NOT establish belongs in the list with
+    `deployed: null`. That is what lets the card say "2 of 5, 3 not
+    established" instead of implying it checked all five.
+    """
+    out = []
+    for name, sec in sections(page).items():
+        body = payload.get(name)
+        if not isinstance(body, dict):
+            continue
+        for fname in sec["fields"]:
+            items = body.get(fname)
+            if not isinstance(items, list):
+                continue
+            for i, item in enumerate(items):
+                if not isinstance(item, dict):
+                    continue
+                cov = item.get("peer_coverage")
+                rows = item.get("peer_deployments")
+                base = f"{name}.{fname}[{i}]"
+                if cov is None and not rows:
+                    continue
+                if cov is not None and not isinstance(rows, list):
+                    out.append(_reason(
+                        "AG-04", name, f"{base}.peer_deployments",
+                        f"peer_coverage is {cov!r} with no per-peer breakdown. The "
+                        "card renders a verdict beside a NAMED institution, so the "
+                        "share needs one row per peer — including the peers you "
+                        "could not establish, with deployed: null. A coverage "
+                        "figure with unknowns behind it is not that figure"))
+                    continue
+                for j, r in enumerate(rows or []):
+                    if not isinstance(r, dict):
+                        continue
+                    if r.get("deployed") is not True:
+                        continue
+                    missing = [k for k in ("source_url", "as_of") if not r.get(k)]
+                    if missing:
+                        out.append(_reason(
+                            "AG-04", name, f"{base}.peer_deployments[{j}]",
+                            f"claims {r.get('peer')!r} runs this product and states "
+                            f"no {' and no '.join(missing)}. A technographic claim "
+                            "about a named institution is a research finding; "
+                            "without a source and a date it is an assertion about "
+                            "someone else's estate on a client's dashboard"))
+                if cov is not None and isinstance(rows, list) and rows:
+                    yes = sum(1 for r in rows
+                              if isinstance(r, dict) and r.get("deployed") is True)
+                    implied = yes / len(rows)
+                    # One peer of tolerance: the producer may legitimately scope
+                    # the share to the established subset. More than that is an
+                    # arithmetic disagreement between a figure and its own basis.
+                    if abs(float(cov) - implied) > (1.0 / len(rows)) + 1e-9:
+                        out.append(_reason(
+                            "AG-04", name, f"{base}.peer_coverage",
+                            f"peer_coverage {cov} disagrees with its own breakdown: "
+                            f"{yes} of {len(rows)} rows say deployed, which is "
+                            f"{implied:.3f}. State the share the breakdown supports, "
+                            "or add the rows the share is counting"))
+    return out
+
+
 def band_for(raw) -> str | None:
     if raw is None:
         return None
@@ -363,6 +440,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
 
     # ── AG-03: every claim-bearing item cites evidence ─────────────────
     reasons.extend(_check_item_evidence(page, payload))
+    reasons.extend(_check_peer_research(page, payload))
 
     sg = _run_v4(conn, run_id, page, payload, encoder)
     return reasons, sg

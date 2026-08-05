@@ -90,3 +90,79 @@ def test_a_state_asserting_a_find_with_no_id_is_a_contradiction():
     reasons = _ag03("heatmap", payload)
     assert len(reasons) == 1
     assert "contradiction" in reasons[0]["message"]
+
+
+# ── AG-04 · a technographic claim about a named peer carries its source ──────
+from dma_mcp.validation2 import _check_peer_research  # noqa: E402
+
+
+def _ts(item):
+    # The payload is keyed by SECTION name; on this page the section is also
+    # called "techstack", so the body nests under it.
+    return {"techstack": {"items": [
+        {"ts_id": "TS-101", "product": "Symitar Episys",
+         "status": "CONFIRMED", "e_ids": ["E-1"], **item}]}}
+
+
+def test_a_share_with_no_breakdown_is_refused():
+    # The version this replaces derived the per-peer verdict from
+    # hashCode(ts_id + peerName), so "deployed" beside a real credit union was a
+    # function of an id's characters.
+    r = _check_peer_research("techstack", _ts({"peer_coverage": 0.6}))
+    assert len(r) == 1 and r[0]["gate_id"] == "AG-04"
+    assert "no per-peer breakdown" in r[0]["message"]
+
+
+def test_a_deployed_row_needs_a_source_and_a_date():
+    r = _check_peer_research("techstack", _ts({
+        "peer_coverage": 0.5,
+        "peer_deployments": [
+            {"peer": "Alliant Credit Union", "deployed": True},
+            {"peer": "CEFCU", "deployed": False},
+        ]}))
+    msgs = " ".join(x["message"] for x in r)
+    assert "Alliant Credit Union" in msgs
+    assert "source_url" in msgs and "as_of" in msgs
+
+
+def test_a_peer_that_could_not_be_established_is_legal_as_null():
+    # This is the whole point: 2 of 5 with 3 unknowns must be expressible.
+    r = _check_peer_research("techstack", _ts({
+        "peer_coverage": 0.4,
+        "peer_deployments": [
+            {"peer": "Alliant Credit Union", "deployed": True,
+             "source_url": "https://example.org/a", "as_of": "2026-03-01"},
+            {"peer": "CEFCU", "deployed": True,
+             "source_url": "https://example.org/b", "as_of": "2025-11-14"},
+            {"peer": "Consumers Credit Union", "deployed": None},
+            {"peer": "GreenState Credit Union", "deployed": None},
+            {"peer": "Lake Michigan Credit Union", "deployed": None},
+        ]}))
+    assert r == []
+
+
+def test_a_share_that_disagrees_with_its_own_breakdown_is_named():
+    r = _check_peer_research("techstack", _ts({
+        "peer_coverage": 0.9,
+        "peer_deployments": [
+            {"peer": "A", "deployed": True, "source_url": "https://x", "as_of": "2026-01-01"},
+            {"peer": "B", "deployed": False},
+            {"peer": "C", "deployed": False},
+        ]}))
+    assert len(r) == 1
+    assert "disagrees with its own breakdown" in r[0]["message"]
+    assert "1 of 3" in r[0]["message"]
+
+
+def test_one_peer_of_tolerance_so_a_scoped_share_passes():
+    # Scoping the share to the established subset is legitimate; being wrong by
+    # more than one peer is not.
+    body = _ts({"peer_coverage": 1.0, "peer_deployments": [
+        {"peer": "A", "deployed": True, "source_url": "https://x", "as_of": "2026-01-01"},
+        {"peer": "B", "deployed": None},
+    ]})
+    assert _check_peer_research("techstack", body) == []
+
+
+def test_a_row_with_neither_field_is_untouched():
+    assert _check_peer_research("techstack", _ts({})) == []
