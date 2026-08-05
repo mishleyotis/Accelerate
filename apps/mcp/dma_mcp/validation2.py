@@ -442,8 +442,71 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_item_evidence(page, payload))
     reasons.extend(_check_peer_research(page, payload))
 
-    sg = _run_v4(conn, run_id, page, payload, encoder)
+    sg = _run_s8(conn, run_id, page, payload)
+    sg.extend(_run_v4(conn, run_id, page, payload, encoder))
     return reasons, sg
+
+
+def _run_s8(conn, run_id, page, payload) -> list:
+    """SG-S8 — sentiment resting on one line discloses and still promotes.
+
+    A single rating is not a sentiment picture, and the common misreading is the
+    other way round: a thin surface read as a finding about the institution. So
+    this is a safeguard, not a block — it renders to the client with its
+    `plain_label`, saying the reading is indicative.
+
+    The count is computed here from the rating rows, never read from a declared
+    `displayed_lines`: a producer that states its own line count is the one
+    thing this gate cannot trust. O9's `bars` and C4's `context_tiles[].rows`
+    are the same dataset at two depths, so whichever page is being submitted,
+    the rows are counted the same way.
+    """
+    sec = {"overview": "sentiment", "context": "context_sentiment"}.get(page)
+    if not sec:
+        return []
+    body = payload.get(sec)
+    if not isinstance(body, dict):
+        return []
+    rows = []
+    for bar in body.get("bars") or []:
+        if isinstance(bar, dict):
+            rows.append(bar)
+    for tile in body.get("context_tiles") or []:
+        if isinstance(tile, dict):
+            rows.extend(r for r in (tile.get("rows") or []) if isinstance(r, dict))
+    # A row with no rating is not a line of sentiment; it is a source that was
+    # searched. Those belong in the ladder, not in the count.
+    rated = [r for r in rows if r.get("rating") is not None]
+    audiences = sorted({str(r.get("audience") or "").lower() for r in rated} - {""})
+    # A self-published figure standing alone is thin whatever the count: it is
+    # one voice about itself.
+    self_published = all(
+        str(r.get("source") or "").lower().find("nps") >= 0 for r in rated) if rated else False
+
+    if not rated:
+        result, detail = "NOT_RUN", {"page": page, "reason": "no rated rows"}
+    elif len(rated) > 1 and not self_published:
+        result, detail = "PASS", {"page": page, "rated_rows": len(rated),
+                                  "audiences": audiences}
+    else:
+        result, detail = "FAIL", {
+            "page": page, "rated_rows": len(rated), "audiences": audiences,
+            "self_published_only": self_published,
+            "note": ("sentiment rests on a single line"
+                     if len(rated) <= 1
+                     else "every rated row is a self-published figure")}
+
+    cur = conn.cursor()
+    cur.execute(
+        """INSERT INTO gate_results
+             (run_id, gate_id, result, not_run_reason, detail, evaluated_at)
+           VALUES (%s,'SG-S8',%s,%s,%s, now())""",
+        (run_id, result, detail.get("reason"), json.dumps(detail)))
+    conn.commit()
+    out = {"gate_id": "SG-S8", "result": result, "page": page, "detail": detail}
+    if result == "NOT_RUN":
+        out["not_run_reason"] = detail.get("reason")
+    return [out]
 
 
 def _run_v4(conn, run_id, page, payload, encoder) -> list:

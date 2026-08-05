@@ -35,6 +35,29 @@ function pfNum(v) {
   return isFinite(n) ? n : null;
 }
 
+/* Renderable text from a payload value.
+   React throws on an object child (#31) and there is no error boundary, so one
+   such value blanks the entire application — that is exactly how the
+   recommendation drawer takes the page down today (it renders the
+   `validation_gate` object raw). Nothing from the payload reaches JSX in this
+   file without passing through here: an object is summarised from its own
+   naming keys, never printed as JSON, and an unusable value becomes null so the
+   surrounding code renders its absent state. */
+function pfText(v) {
+  if (v === null || v === undefined) return null;
+  if (typeof v === "string") return v || null;
+  if (typeof v === "number" || typeof v === "boolean") return String(v);
+  if (Array.isArray(v)) return v.map(pfText).filter(Boolean).join(" · ") || null;
+  if (typeof v === "object") {
+    for (const k of ["statement", "text", "label", "name", "title", "value"]) {
+      const t = pfText(v[k]);
+      if (t) return t;
+    }
+    return null;
+  }
+  return String(v);
+}
+
 /* Evidence chips for a promoted id list.
    Fail-closed on evidence (invariant 4): an id that does not resolve in the
    run's served evidence renders as an unresolved token and is NOT clickable —
@@ -184,7 +207,7 @@ function ClientPlatform({ entity, run }) {
     const rows = (p.gaps || []).filter(g => g.l3_area === area);
     if (!rows.length) continue;
     areaGaps.push(...rows);
-    if (p.story_md) areaStories.push(p.story_md);
+    if (pfText(p.story_md)) areaStories.push(p.story_md);
   }
   // Only render the peer and gap columns when at least one row states a peer
   // figure. Before, every row printed "−-2.5": a unary minus prepended to an
@@ -226,9 +249,12 @@ function ClientPlatform({ entity, run }) {
             composite read from the run, never re-ranked here
           </span>
         </div>
+        {/* alignItems start: an expanded breakdown stretches its grid row, and
+            the three collapsed tiles beside it grew to match, leaving a block of
+            empty card. */}
         <div className="card-body">
           {tiles.length ? (
-            <div className={tiles.length === 5 ? "g5" : "g4"}>
+            <div className={tiles.length === 5 ? "g5" : "g4"} style={{ alignItems: "start" }}>
               {tiles.map((t, i) => {
                 // Keyed by the PROMOTED platform string. The vendor-alias fold
                 // collapsed "Salesforce Data Cloud" and "Service Cloud
@@ -248,7 +274,7 @@ function ClientPlatform({ entity, run }) {
                             <span className="b b-muted f-mono" title="relevance to the assessed gaps">{Number(t.relevance).toFixed(2)}</span>
                           ) : null}
                         </div>
-                        <div style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.3 }}>{t.platform || "Platform not named"}</div>
+                        <div style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.3 }}>{pfText(t.platform) || "Platform not named"}</div>
                       </div>
                       <div style={{ textAlign: "right", flexShrink: 0 }}>
                         <div style={{ fontSize: 26, fontWeight: 200, color: composite === null ? "var(--z-muted)" : "var(--z-teal)", lineHeight: 1 }}>
@@ -266,7 +292,7 @@ function ClientPlatform({ entity, run }) {
                     </div>
                     {t.their_stack_context ? (
                       <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 6, lineHeight: 1.5 }} className={isOpen ? "" : "txt-fit-3"}>
-                        {t.their_stack_context}
+                        {pfText(t.their_stack_context)}
                       </div>
                     ) : null}
                     <div className="row" style={{ marginTop: 8, fontSize: 10, color: "var(--z-mid)" }}>
@@ -302,16 +328,16 @@ function ClientPlatform({ entity, run }) {
                             <div style={{ display: "grid", gap: 4 }}>
                               {t.addressable_cells.map((c, j) => (
                                 <div key={j} className="row" style={{ gap: 5, fontSize: 10, alignItems: "flex-start" }}>
-                                  <span className="chip f-mono" style={{ fontSize: 9, flexShrink: 0 }}>{c.subcap_id}</span>
+                                  <span className="chip f-mono" style={{ fontSize: 9, flexShrink: 0 }}>{pfText(c.subcap_id)}</span>
                                   {pfNum(c.current) !== null ? <MaturityChip score={pfNum(c.current)} /> : null}
-                                  <span style={{ flex: 1, minWidth: 0, color: "var(--z-body)", lineHeight: 1.45 }}>{c.feature_that_addresses_it || c.name || ""}</span>
+                                  <span style={{ flex: 1, minWidth: 0, color: "var(--z-body)", lineHeight: 1.45 }}>{pfText(c.feature_that_addresses_it) || pfText(c.name) || ""}</span>
                                 </div>
                               ))}
                             </div>
                           </>
                         ) : null}
                         {t.rank_rationale ? (
-                          <div style={{ fontSize: 10.5, color: "var(--z-body)", marginTop: 8, lineHeight: 1.55 }}>{t.rank_rationale}</div>
+                          <div style={{ fontSize: 10.5, color: "var(--z-body)", marginTop: 8, lineHeight: 1.55 }}>{pfText(t.rank_rationale)}</div>
                         ) : null}
                       </div>
                     ) : null}
@@ -340,12 +366,12 @@ function ClientPlatform({ entity, run }) {
             {discarded.map((x, i) => (
               <div key={i} className="row" style={{ gap: 10, alignItems: "flex-start", fontSize: 11.5 }}>
                 <span style={{ fontWeight: 500, color: "var(--z-dark)", width: 210, flexShrink: 0, lineHeight: 1.45 }}>
-                  {x.platform || x.name || "Platform not named"}
+                  {pfText(x.platform) || pfText(x.name) || "Platform not named"}
                 </span>
                 {x.relevance != null ? (
                   <span className="b b-muted f-mono" style={{ flexShrink: 0 }} title="relevance to the assessed gaps">{Number(x.relevance).toFixed(2)}</span>
                 ) : null}
-                <span style={{ color: "var(--z-muted)", flex: 1, minWidth: 0, lineHeight: 1.5 }}>{x.reason || x.why_not || "No reason promoted."}</span>
+                <span style={{ color: "var(--z-muted)", flex: 1, minWidth: 0, lineHeight: 1.5 }}>{pfText(x.reason) || pfText(x.why_not) || "No reason promoted."}</span>
               </div>
             ))}
           </div>
@@ -361,7 +387,10 @@ function ClientPlatform({ entity, run }) {
             </div>
             <div className="toggle-row" style={{ flexWrap: "wrap" }}>
               {areas.map(a => (
-                <button key={a} className={a === area ? "on" : ""} onClick={() => setAreaSel(a)}>{a}</button>
+                /* The open readiness row is identified by its index in THIS
+                   area's list, so it is closed on a switch rather than
+                   expanding whatever row happens to land at that index. */
+                <button key={a} className={a === area ? "on" : ""} onClick={() => { setAreaSel(a); setOpenPrereq(null); }}>{a}</button>
               ))}
             </div>
             <span className="spacer" />
@@ -373,14 +402,20 @@ function ClientPlatform({ entity, run }) {
       ) : null}
 
       {/* Selected area — promoted gaps + readiness */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 16, marginBottom: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 380px", gap: 16, marginBottom: 16 }}>
         <div className="card flush">
           <div className="card-head">
             <h3>Gaps this area closes · {area || "no area promoted"}</h3>
             <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{areaGaps.length} promoted gap row{areaGaps.length === 1 ? "" : "s"}</span>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
-            <table className="tbl">
+            {/* The table scrolls inside its own box rather than letting the
+                columns collapse. Between the stacked-card breakpoint (760px)
+                and about 1150px the 1fr side of this grid is narrow enough that
+                a six-column table crushed each cell to ~14px wide and wrapped the
+                catalogue path to one character per line. */}
+            <div style={{ overflowX: "auto" }}>
+            <table className="tbl" style={{ minWidth: 720 }}>
               {/* nowrap on the narrow columns: at this width "PILLAR" and
                   "SCORE" broke mid-word into "PILLA / R" and "SCOR / E". */}
               <thead><tr>
@@ -401,21 +436,21 @@ function ClientPlatform({ entity, run }) {
                   return (
                     <tr key={g.subcap_id || i}>
                       <td data-label="Cell">
-                        <div style={{ fontSize: 12, fontWeight: 500 }}>{g.name || g.subcap_id}</div>
-                        <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{g.subcap_id}</div>
+                        <div style={{ fontSize: 12, fontWeight: 500 }}>{pfText(g.name) || g.subcap_id}</div>
+                        <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{pfText(g.subcap_id)}</div>
                       </td>
-                      <td data-label="Pillar">{g.pillar ? <span className="b b-purple">{g.pillar}</span> : <span className="chip muted">—</span>}</td>
+                      <td data-label="Pillar">{g.pillar ? <span className="b b-purple">{pfText(g.pillar)}</span> : <span className="chip muted">—</span>}</td>
                       <td data-label="Score"><MaturityChip score={cur} /></td>
                       {anyPeer ? (
                         <td data-label="Peer">{peer !== null ? <MaturityChip score={peer} /> : (
-                          <span className="chip muted" title={g.peer_note || ""}>{String(g.peer_basis || "no peer").replace(/_/g, " ")}</span>
+                          <span className="chip muted" title={pfText(g.peer_note) || ""}>{String(g.peer_basis || "no peer").replace(/_/g, " ")}</span>
                         )}</td>
                       ) : (
                         /* Every row here states cannot_estimate with a note
                            explaining why. That is the answer, so it is what the
                            column shows — the old table printed "-". */
                         <td data-label="Peer basis">
-                          <span className="chip muted" title={g.peer_note || ""}>{String(g.peer_basis || "no peer").replace(/_/g, " ")}</span>
+                          <span className="chip muted" title={pfText(g.peer_note) || ""}>{String(g.peer_basis || "no peer").replace(/_/g, " ")}</span>
                         </td>
                       )}
                       {anyPeer ? (
@@ -424,9 +459,9 @@ function ClientPlatform({ entity, run }) {
                         )}</td>
                       ) : null}
                       <td data-label="L4 feature">
-                        <div style={{ fontSize: 11.5, color: "var(--z-dark)" }}>{g.l4_feature || "—"}</div>
+                        <div style={{ fontSize: 11.5, color: "var(--z-dark)" }}>{pfText(g.l4_feature) || "—"}</div>
                         {g.catalogue_path ? (
-                          <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 3, lineHeight: 1.4 }}>{g.catalogue_path}</div>
+                          <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 3, lineHeight: 1.4 }}>{pfText(g.catalogue_path)}</div>
                         ) : null}
                       </td>
                       <td data-label="Evidence"><PlatformEvChips ids={g.e_ids} openEvidence={openEvidence} /></td>
@@ -442,10 +477,11 @@ function ClientPlatform({ entity, run }) {
                 ) : null}
               </tbody>
             </table>
+            </div>
             {areaStories.map((s, i) => (
               <div key={i} style={{ padding: "12px 18px", borderTop: "1px solid var(--z-sep)", fontSize: 12, color: "var(--z-body)", lineHeight: 1.65 }}>
                 <div className="eyebrow" style={{ fontSize: 9.5, marginBottom: 5 }}>What this platform changes</div>
-                {s}
+                {pfText(s)}
               </div>
             ))}
           </div>
@@ -470,11 +506,11 @@ function ClientPlatform({ entity, run }) {
                   <div className="row" style={{ gap: 6, marginBottom: 4 }}>
                     <span style={{ fontSize: 9, color: "var(--z-muted)", letterSpacing: ".06em", textTransform: "uppercase" }}>Condition</span>
                     <span className="spacer" />
-                    {p.basis ? <span className="b b-muted">{p.basis}</span> : null}
+                    {p.basis ? <span className="b b-muted">{pfText(p.basis)}</span> : null}
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--z-dark)", lineHeight: 1.5 }}>{p.condition}</div>
+                  <div style={{ fontSize: 12, color: "var(--z-dark)", lineHeight: 1.5 }}>{pfText(p.condition)}</div>
                   {p.note ? (
-                    <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 4, lineHeight: 1.5 }}>{p.note}</div>
+                    <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 4, lineHeight: 1.5 }}>{pfText(p.note)}</div>
                   ) : null}
                   <div className="row" style={{ gap: 4, marginTop: 5, flexWrap: "wrap" }}>
                     {p.recs.map(rid => (
@@ -496,7 +532,7 @@ function ClientPlatform({ entity, run }) {
               <div key={p.key} style={{ borderBottom: "1px solid var(--z-sep)" }}>
                 <button onClick={() => setOpenPrereq(o => o === idx ? null : idx)} style={{ width: "100%", background: "none", border: 0, cursor: "pointer", textAlign: "left", padding: "10px 0" }}>
                   <div className="row" style={{ marginBottom: 4, gap: 6 }}>
-                    <span className="b b-purple">{p.cell}</span>
+                    <span className="b b-purple">{pfText(p.cell)}</span>
                     <span className="f-mono" style={{ fontSize: 11.5, flex: 1, minWidth: 0 }}>{p.min === null ? "threshold not stated" : `≥ ${p.min.toFixed(1)}`}</span>
                     {v ? (
                       <span className={`b ${v.met ? "b-above" : "b-org"}`} title={v.computed ? "computed from the stated minimum and current value" : "verdict as promoted"}>{v.text}</span>
@@ -562,7 +598,7 @@ function ClientPlatform({ entity, run }) {
       </div>
 
       {/* Recommendation cards + Conversation starters */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
         <div className="card flush">
           <div className="card-head">
             <h3>Recommendations · {area || "no area promoted"}</h3>
@@ -577,15 +613,15 @@ function ClientPlatform({ entity, run }) {
                 <div key={r.id} className="rec-row" onClick={() => openRec(r.id)} title="Open full recommendation" style={{ padding: "12px 18px", borderBottom: "1px solid var(--z-sep)", cursor: "pointer" }}>
                   <div className="row" style={{ marginBottom: 4, gap: 6 }}>
                     <span className="chip">{r.id}</span>
-                    <span style={{ fontWeight: 600, fontSize: 13, flex: 1, minWidth: 0 }}>{r.title}</span>
-                    {r.phase != null ? <span className="b b-teal" style={{ flexShrink: 0 }}>Phase {r.phase}</span> : null}
-                    {r.effort ? <span className="b b-muted" style={{ flexShrink: 0 }} title="effort band">{r.effort}</span> : null}
+                    <span style={{ fontWeight: 600, fontSize: 13, flex: 1, minWidth: 0 }}>{pfText(r.title)}</span>
+                    {r.phase != null ? <span className="b b-teal" style={{ flexShrink: 0 }}>Phase {pfText(r.phase)}</span> : null}
+                    {r.effort ? <span className="b b-muted" style={{ flexShrink: 0 }} title="effort band">{pfText(r.effort)}</span> : null}
                     <Icon name="chevron-r" size={13} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
                   </div>
-                  {r.l4 ? <div style={{ fontSize: 11, color: "var(--z-mid)", marginBottom: 5 }}>{r.l4}</div> : null}
+                  {r.l4 ? <div style={{ fontSize: 11, color: "var(--z-mid)", marginBottom: 5 }}>{pfText(r.l4)}</div> : null}
                   {r.root_cause_text ? (
                     <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55, margin: "6px 0" }} className="txt-fit-3">
-                      {r.root_cause_text}
+                      {pfText(r.root_cause_text)}
                     </div>
                   ) : null}
                   <PlatformEvChips ids={r.root_cause} openEvidence={openEvidence} label="cites" />
@@ -593,8 +629,8 @@ function ClientPlatform({ entity, run }) {
                     {gate && gate.threshold ? (
                       <div>
                         <div className="muted" style={{ fontSize: 10 }}>Readiness gate</div>
-                        <strong className="f-mono" style={{ fontSize: 11 }} title={gate.grain_note || ""}>{gate.threshold}</strong>
-                        {gate.verdict ? <span className={`b ${String(gate.verdict).toUpperCase() === "MET" ? "b-above" : "b-org"}`} style={{ marginLeft: 5 }}>{gate.verdict}</span> : null}
+                        <strong className="f-mono" style={{ fontSize: 11 }} title={pfText(gate.grain_note) || ""}>{pfText(gate.threshold)}</strong>
+                        {gate.verdict ? <span className={`b ${String(gate.verdict).toUpperCase() === "MET" ? "b-above" : "b-org"}`} style={{ marginLeft: 5 }}>{pfText(gate.verdict)}</span> : null}
                       </div>
                     ) : null}
                     <div>
@@ -604,14 +640,14 @@ function ClientPlatform({ entity, run }) {
                     {kpi && kpi.metric ? (
                       <div style={{ gridColumn: "span 2" }}>
                         <div className="muted" style={{ fontSize: 10 }}>KPI</div>
-                        <strong style={{ fontWeight: 500 }}>{kpi.metric}</strong>
+                        <strong style={{ fontWeight: 500 }}>{pfText(kpi.metric)}</strong>
                         {kpi.baseline ? (
                           <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.5 }}>
-                            baseline {kpi.baseline}{kpi.baseline_as_of ? ` · ${kpi.baseline_as_of}` : ""}
+                            baseline {pfText(kpi.baseline)}{kpi.baseline_as_of ? ` · ${kpi.baseline_as_of}` : ""}
                           </div>
                         ) : null}
                         {kpi.target ? (
-                          <div style={{ fontSize: 10.5, color: "var(--z-mid)", marginTop: 2, lineHeight: 1.5 }}>target {kpi.target}</div>
+                          <div style={{ fontSize: 10.5, color: "var(--z-mid)", marginTop: 2, lineHeight: 1.5 }}>target {pfText(kpi.target)}</div>
                         ) : null}
                       </div>
                     ) : null}
@@ -626,6 +662,13 @@ function ClientPlatform({ entity, run }) {
                   : <p>No recommendation promoted in this run.</p>}
               </div>
             ) : null}
+            {/* A recommendation with no `l3_area` belongs to no tab, so it would
+                be unreachable in silence. Counted and stated instead. */}
+            {recs.some(r => !r.l3) ? (
+              <div style={{ padding: "10px 18px", fontSize: 11, color: "var(--z-muted)", borderTop: "1px solid var(--z-sep)" }}>
+                {recs.filter(r => !r.l3).length} promoted recommendation{recs.filter(r => !r.l3).length === 1 ? "" : "s"} state no platform area and appear under no tab: {recs.filter(r => !r.l3).map(r => r.id).join(" · ")}
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -633,8 +676,8 @@ function ClientPlatform({ entity, run }) {
           <div className="card-head"><h3>Conversation starters · {starters.length}</h3><button className="btn btn-tertiary btn-sm" onClick={() => {
             const text = starters.map((s, i) => {
               const head = `#${s.rank != null ? s.rank : i + 1}`;
-              return [`${head} — ${s.text || ""}`,
-                      s.followup_question ? `Follow-up: ${s.followup_question}` : null,
+              return [`${head} — ${pfText(s.text) || ""}`,
+                      s.followup_question ? `Follow-up: ${pfText(s.followup_question)}` : null,
                       (s.e_ids || []).length ? `Evidence: ${s.e_ids.join(", ")}` : null]
                 .filter(Boolean).join("\n");
             }).join("\n\n");
@@ -650,30 +693,30 @@ function ClientPlatform({ entity, run }) {
                       evidence-cited" while citing nothing. What the starter
                       actually states is what it opens on, and its citations. */}
                   {s.opens_on ? <span style={{ fontSize: 10, color: "var(--z-dpur)" }}>opens on {String(s.opens_on).replace(/_/g, " ")}</span> : null}
-                  {s.named_gap_subcap_id ? <span className="chip f-mono" style={{ fontSize: 9 }} title="the gap this starter names">{s.named_gap_subcap_id}</span> : null}
+                  {s.named_gap_subcap_id ? <span className="chip f-mono" style={{ fontSize: 9 }} title="the gap this starter names">{pfText(s.named_gap_subcap_id)}</span> : null}
                   <span className="spacer" />
                   <button className="btn btn-tertiary btn-sm" style={{ color: "var(--z-dpur)" }} onClick={() => {
-                    const one = [s.text, s.followup_question ? `Follow-up: ${s.followup_question}` : null].filter(Boolean).join("\n");
+                    const one = [pfText(s.text), s.followup_question ? `Follow-up: ${pfText(s.followup_question)}` : null].filter(Boolean).join("\n");
                     try { navigator.clipboard.writeText(one); pushToast("Conversation starter copied", "success"); }
                     catch (e) { pushToast("Couldn't access clipboard", "warn"); }
                   }}><Icon name="copy" size={11} /></button>
                 </div>
-                <div style={{ fontSize: 12, color: "#3B0764", lineHeight: 1.6 }}>{s.text}</div>
+                <div style={{ fontSize: 12, color: "#3B0764", lineHeight: 1.6 }}>{pfText(s.text)}</div>
                 {s.their_system_reference ? (
                   <div style={{ fontSize: 11, color: "var(--z-dpur)", marginTop: 6, lineHeight: 1.5 }}>
                     <span style={{ fontSize: 9, letterSpacing: ".06em", textTransform: "uppercase", opacity: .75 }}>Their system · </span>
-                    {s.their_system_reference}
+                    {pfText(s.their_system_reference)}
                   </div>
                 ) : null}
                 {s.peer_reference ? (
                   <div style={{ fontSize: 11, color: "var(--z-dpur)", marginTop: 4, lineHeight: 1.5 }}>
                     <span style={{ fontSize: 9, letterSpacing: ".06em", textTransform: "uppercase", opacity: .75 }}>Peer · </span>
-                    {s.peer_reference}
+                    {pfText(s.peer_reference)}
                   </div>
                 ) : null}
                 {s.followup_question ? (
                   <div style={{ fontSize: 11.5, color: "#3B0764", marginTop: 6, lineHeight: 1.55, paddingLeft: 8, borderLeft: "2px solid var(--ph0-bd)" }}>
-                    {s.followup_question}
+                    {pfText(s.followup_question)}
                   </div>
                 ) : null}
                 <div style={{ marginTop: 6 }}>
@@ -801,7 +844,7 @@ function StairstepCurve({ entity }) {
               const y = stepY(i);
               const h = H - padB - y;
               const color = RUNG_COLORS[i % RUNG_COLORS.length];
-              const lines = wrapSvgLabel(s.label, charsPerLine, 2);
+              const lines = wrapSvgLabel(pfText(s.label), charsPerLine, 2);
               // Cell count and effort only. The blocking findings are chips in
               // the list beside the chart: inside the rung they ran past both
               // edges of the rectangle, because a centred SVG string cannot be
@@ -812,7 +855,7 @@ function StairstepCurve({ entity }) {
               ].filter(Boolean).join(" · ");
               return (
                 <g key={i}>
-                  <title>{`Step ${s.m}: ${s.label}`}</title>
+                  <title>{`Step ${s.m}: ${pfText(s.label) || ""}`}</title>
                   <rect x={x} y={y} width={rungW} height={h} fill={color} rx="6" ry="6" />
                   <circle cx={x + 16} cy={y - 14} r="14" fill="#fff" stroke={color} strokeWidth="2.5" />
                   <text x={x + 16} y={y - 9} fontSize="13" fontWeight="700" fill={color} textAnchor="middle">{s.m}</text>
@@ -858,12 +901,12 @@ function StairstepCurve({ entity }) {
               <div className="row" style={{ marginBottom: 4, gap: 6, flexWrap: "wrap" }}>
                 <span className="b b-purple" style={{ flexShrink: 0 }}>Step {s.m}</span>
                 {i === currentIdx ? <span className="b b-teal" style={{ flexShrink: 0 }}>current</span> : null}
-                {s.effort ? <span className="b b-muted" style={{ flexShrink: 0 }} title="effort band">{s.effort}</span> : null}
-                {(s.blocking || []).map(b => <span key={b} className="b b-org" style={{ flexShrink: 0 }} title="blocking finding">{b}</span>)}
+                {s.effort ? <span className="b b-muted" style={{ flexShrink: 0 }} title="effort band">{pfText(s.effort)}</span> : null}
+                {(s.blocking || []).map(b => <span key={b} className="b b-org" style={{ flexShrink: 0 }} title="blocking finding">{pfText(b)}</span>)}
               </div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.4 }}>{s.label}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.4 }}>{pfText(s.label)}</div>
               {s.note ? (
-                <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55, marginTop: 4 }}>{s.note}</div>
+                <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55, marginTop: 4 }}>{pfText(s.note)}</div>
               ) : null}
               {(s.subcaps || []).length ? (
                 <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 4 }}>{s.subcaps.length} cells covered</div>
@@ -976,7 +1019,7 @@ function ChevronView({ roadmap, recs, openRec }) {
             {r.rationale ? (
               <>
                 <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Why this phase</div>
-                <div style={{ fontSize: 12, marginBottom: 10, lineHeight: 1.5 }}>{r.rationale}</div>
+                <div style={{ fontSize: 12, marginBottom: 10, lineHeight: 1.5 }}>{pfText(r.rationale)}</div>
               </>
             ) : null}
             {(r.depends_on || []).length ? (
@@ -994,12 +1037,12 @@ function ChevronView({ roadmap, recs, openRec }) {
                   <button key={rid} onClick={(e) => { e.stopPropagation(); openRec(rid); }}
                     /* The title ellipsises to one line by design; without this
                        the rest of the sentence is unreachable by any means. */
-                    title={`${rec.id} · ${rec.title}`}
+                    title={`${rec.id} · ${pfText(rec.title) || ""}`}
                     style={{ padding: "6px 8px", background: "rgba(255,255,255,.14)", borderRadius: 5, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6, border: 0, color: "#fff", textAlign: "left", cursor: "pointer", transition: "background 120ms" }}
                     onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,.22)"}
                     onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,.14)"}>
                     <span style={{ fontSize: 10.5, fontWeight: 600, flexShrink: 0 }}>{rec.id}</span>
-                    <span style={{ fontSize: 10.5, color: "rgba(255,255,255,.85)", flex: 1, minWidth: 0 }} className="txt-trunc">{rec.title}</span>
+                    <span style={{ fontSize: 10.5, color: "rgba(255,255,255,.85)", flex: 1, minWidth: 0 }} className="txt-trunc">{pfText(rec.title)}</span>
                     <Icon name="arrow-r" size={11} />
                   </button>
                 ) : (
@@ -1045,16 +1088,16 @@ function CellImpactView({ roadmap, phaseRecs, openRec, impactRows }) {
         return (
           <div key={r.phase} className="card-tile" style={{ padding: 14, borderTop: `3px solid ${r.color}` }}>
             <div className="row" style={{ marginBottom: 4, gap: 6 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: r.color, letterSpacing: ".08em", textTransform: "uppercase", flexShrink: 0 }}>Phase {r.phase}</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: r.color, letterSpacing: ".08em", textTransform: "uppercase", flexShrink: 0 }}>Phase {pfText(r.phase)}</span>
               <strong style={{ fontSize: 12.5, flex: 1, minWidth: 0 }}>{r.label}</strong>
             </div>
             <div className="eyebrow" style={{ fontSize: 9.5, margin: "8px 0 6px" }}>Cells this phase moves</div>
             {rs.map(rec => (
               <div key={rec.id} style={{ marginBottom: 10 }}>
-                <button onClick={() => openRec(rec.id)} title={`${rec.id} · ${rec.title}`}
+                <button onClick={() => openRec(rec.id)} title={`${rec.id} · ${pfText(rec.title) || ""}`}
                   style={{ padding: 0, background: "none", border: 0, cursor: "pointer", textAlign: "left", display: "flex", gap: 6, alignItems: "center", width: "100%" }}>
                   <strong style={{ fontSize: 10.5, color: "var(--z-dark)", flexShrink: 0 }}>{rec.id}</strong>
-                  <span style={{ fontSize: 10.5, color: "var(--z-muted)", flex: 1, minWidth: 0 }} className="txt-trunc">{rec.title}</span>
+                  <span style={{ fontSize: 10.5, color: "var(--z-muted)", flex: 1, minWidth: 0 }} className="txt-trunc">{pfText(rec.title)}</span>
                   <Icon name="arrow-r" size={11} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
                 </button>
                 {(rec.dma_impact || []).length ? (rec.dma_impact || []).map((im, j) => {
@@ -1062,8 +1105,8 @@ function CellImpactView({ roadmap, phaseRecs, openRec, impactRows }) {
                   return (
                     <div key={j} className="row" style={{ padding: "5px 0", borderTop: "1px solid var(--z-sep)", gap: 6, alignItems: "flex-start" }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 11, color: "var(--z-body)", lineHeight: 1.35 }}>{im.name || im.subcap_id}</div>
-                        <div className="f-mono" style={{ fontSize: 9, color: "var(--z-muted)" }}>{im.subcap_id}</div>
+                        <div style={{ fontSize: 11, color: "var(--z-body)", lineHeight: 1.35 }}>{pfText(im.name) || im.subcap_id}</div>
+                        <div className="f-mono" style={{ fontSize: 9, color: "var(--z-muted)" }}>{pfText(im.subcap_id)}</div>
                       </div>
                       <span style={{ flexShrink: 0 }}><MaturityChip score={cur} /></span>
                       <span style={{ fontSize: 10, color: "var(--z-muted)", flexShrink: 0 }}>→</span>
@@ -1087,7 +1130,7 @@ function CellImpactView({ roadmap, phaseRecs, openRec, impactRows }) {
             ) : null}
             {bases.length ? (
               <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--z-sep)", lineHeight: 1.5 }}>
-                {bases.map((b, i) => <div key={i} style={{ marginBottom: 3 }}>{b}</div>)}
+                {bases.map((b, i) => <div key={i} style={{ marginBottom: 3 }}>{pfText(b)}</div>)}
               </div>
             ) : null}
           </div>

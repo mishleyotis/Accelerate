@@ -35,6 +35,29 @@ function pfNum(v) {
   return isFinite(n) ? n : null;
 }
 
+/* Renderable text from a payload value.
+   React throws on an object child (#31) and there is no error boundary, so one
+   such value blanks the entire application — that is exactly how the
+   recommendation drawer takes the page down today (it renders the
+   `validation_gate` object raw). Nothing from the payload reaches JSX in this
+   file without passing through here: an object is summarised from its own
+   naming keys, never printed as JSON, and an unusable value becomes null so the
+   surrounding code renders its absent state. */
+function pfText(v) {
+  if (v === null || v === undefined) return null;
+  if (typeof v === "string") return v || null;
+  if (typeof v === "number" || typeof v === "boolean") return String(v);
+  if (Array.isArray(v)) return v.map(pfText).filter(Boolean).join(" · ") || null;
+  if (typeof v === "object") {
+    for (const k of ["statement", "text", "label", "name", "title", "value"]) {
+      const t = pfText(v[k]);
+      if (t) return t;
+    }
+    return null;
+  }
+  return String(v);
+}
+
 /* Evidence chips for a promoted id list.
    Fail-closed on evidence (invariant 4): an id that does not resolve in the
    run's served evidence renders as an unresolved token and is NOT clickable —
@@ -222,7 +245,7 @@ function ClientPlatform({
     const rows = (p.gaps || []).filter(g => g.l3_area === area);
     if (!rows.length) continue;
     areaGaps.push(...rows);
-    if (p.story_md) areaStories.push(p.story_md);
+    if (pfText(p.story_md)) areaStories.push(p.story_md);
   }
   // Only render the peer and gap columns when at least one row states a peer
   // figure. Before, every row printed "−-2.5": a unary minus prepended to an
@@ -275,7 +298,10 @@ function ClientPlatform({
   }, "composite read from the run, never re-ranked here")), /*#__PURE__*/React.createElement("div", {
     className: "card-body"
   }, tiles.length ? /*#__PURE__*/React.createElement("div", {
-    className: tiles.length === 5 ? "g5" : "g4"
+    className: tiles.length === 5 ? "g5" : "g4",
+    style: {
+      alignItems: "start"
+    }
   }, tiles.map((t, i) => {
     // Keyed by the PROMOTED platform string. The vendor-alias fold
     // collapsed "Salesforce Data Cloud" and "Service Cloud
@@ -319,7 +345,7 @@ function ClientPlatform({
         fontWeight: 600,
         lineHeight: 1.3
       }
-    }, t.platform || "Platform not named")), /*#__PURE__*/React.createElement("div", {
+    }, pfText(t.platform) || "Platform not named")), /*#__PURE__*/React.createElement("div", {
       style: {
         textAlign: "right",
         flexShrink: 0
@@ -352,7 +378,7 @@ function ClientPlatform({
         lineHeight: 1.5
       },
       className: isOpen ? "" : "txt-fit-3"
-    }, t.their_stack_context) : null, /*#__PURE__*/React.createElement("div", {
+    }, pfText(t.their_stack_context)) : null, /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
         marginTop: 8,
@@ -441,7 +467,7 @@ function ClientPlatform({
         fontSize: 9,
         flexShrink: 0
       }
-    }, c.subcap_id), pfNum(c.current) !== null ? /*#__PURE__*/React.createElement(MaturityChip, {
+    }, pfText(c.subcap_id)), pfNum(c.current) !== null ? /*#__PURE__*/React.createElement(MaturityChip, {
       score: pfNum(c.current)
     }) : null, /*#__PURE__*/React.createElement("span", {
       style: {
@@ -450,14 +476,14 @@ function ClientPlatform({
         color: "var(--z-body)",
         lineHeight: 1.45
       }
-    }, c.feature_that_addresses_it || c.name || ""))))) : null, t.rank_rationale ? /*#__PURE__*/React.createElement("div", {
+    }, pfText(c.feature_that_addresses_it) || pfText(c.name) || ""))))) : null, t.rank_rationale ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10.5,
         color: "var(--z-body)",
         marginTop: 8,
         lineHeight: 1.55
       }
-    }, t.rank_rationale) : null) : null);
+    }, pfText(t.rank_rationale)) : null) : null);
   })) : /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
@@ -509,7 +535,7 @@ function ClientPlatform({
       flexShrink: 0,
       lineHeight: 1.45
     }
-  }, x.platform || x.name || "Platform not named"), x.relevance != null ? /*#__PURE__*/React.createElement("span", {
+  }, pfText(x.platform) || pfText(x.name) || "Platform not named"), x.relevance != null ? /*#__PURE__*/React.createElement("span", {
     className: "b b-muted f-mono",
     style: {
       flexShrink: 0
@@ -522,7 +548,7 @@ function ClientPlatform({
       minWidth: 0,
       lineHeight: 1.5
     }
-  }, x.reason || x.why_not || "No reason promoted."))))) : null, areas.length ? /*#__PURE__*/React.createElement("div", {
+  }, pfText(x.reason) || pfText(x.why_not) || "No reason promoted."))))) : null, areas.length ? /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       marginBottom: 16,
@@ -547,10 +573,18 @@ function ClientPlatform({
     style: {
       flexWrap: "wrap"
     }
-  }, areas.map(a => /*#__PURE__*/React.createElement("button", {
+  }, areas.map(a =>
+  /*#__PURE__*/
+  /* The open readiness row is identified by its index in THIS
+     area's list, so it is closed on a switch rather than
+     expanding whatever row happens to land at that index. */
+  React.createElement("button", {
     key: a,
     className: a === area ? "on" : "",
-    onClick: () => setAreaSel(a)
+    onClick: () => {
+      setAreaSel(a);
+      setOpenPrereq(null);
+    }
   }, a))), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("span", {
@@ -561,7 +595,7 @@ function ClientPlatform({
   }, "the L3 area is the unit of recommendation"))) : null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "1fr 380px",
+      gridTemplateColumns: "minmax(0, 1fr) 380px",
       gap: 16,
       marginBottom: 16
     }
@@ -579,8 +613,15 @@ function ClientPlatform({
     style: {
       padding: 0
     }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      overflowX: "auto"
+    }
   }, /*#__PURE__*/React.createElement("table", {
-    className: "tbl"
+    className: "tbl",
+    style: {
+      minWidth: 720
+    }
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Cell"), /*#__PURE__*/React.createElement("th", {
     style: {
       whiteSpace: "nowrap"
@@ -612,17 +653,17 @@ function ClientPlatform({
         fontSize: 12,
         fontWeight: 500
       }
-    }, g.name || g.subcap_id), /*#__PURE__*/React.createElement("div", {
+    }, pfText(g.name) || g.subcap_id), /*#__PURE__*/React.createElement("div", {
       className: "f-mono",
       style: {
         fontSize: 10,
         color: "var(--z-muted)"
       }
-    }, g.subcap_id)), /*#__PURE__*/React.createElement("td", {
+    }, pfText(g.subcap_id))), /*#__PURE__*/React.createElement("td", {
       "data-label": "Pillar"
     }, g.pillar ? /*#__PURE__*/React.createElement("span", {
       className: "b b-purple"
-    }, g.pillar) : /*#__PURE__*/React.createElement("span", {
+    }, pfText(g.pillar)) : /*#__PURE__*/React.createElement("span", {
       className: "chip muted"
     }, "\u2014")), /*#__PURE__*/React.createElement("td", {
       "data-label": "Score"
@@ -634,7 +675,7 @@ function ClientPlatform({
       score: peer
     }) : /*#__PURE__*/React.createElement("span", {
       className: "chip muted",
-      title: g.peer_note || ""
+      title: pfText(g.peer_note) || ""
     }, String(g.peer_basis || "no peer").replace(/_/g, " "))) :
     /*#__PURE__*/
     /* Every row here states cannot_estimate with a note
@@ -644,7 +685,7 @@ function ClientPlatform({
       "data-label": "Peer basis"
     }, /*#__PURE__*/React.createElement("span", {
       className: "chip muted",
-      title: g.peer_note || ""
+      title: pfText(g.peer_note) || ""
     }, String(g.peer_basis || "no peer").replace(/_/g, " "))), anyPeer ? /*#__PURE__*/React.createElement("td", {
       "data-label": "Gap"
     }, delta === null ? /*#__PURE__*/React.createElement("span", {
@@ -663,14 +704,14 @@ function ClientPlatform({
         fontSize: 11.5,
         color: "var(--z-dark)"
       }
-    }, g.l4_feature || "—"), g.catalogue_path ? /*#__PURE__*/React.createElement("div", {
+    }, pfText(g.l4_feature) || "—"), g.catalogue_path ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 9.5,
         color: "var(--z-muted)",
         marginTop: 3,
         lineHeight: 1.4
       }
-    }, g.catalogue_path) : null), /*#__PURE__*/React.createElement("td", {
+    }, pfText(g.catalogue_path)) : null), /*#__PURE__*/React.createElement("td", {
       "data-label": "Evidence"
     }, /*#__PURE__*/React.createElement(PlatformEvChips, {
       ids: g.e_ids,
@@ -679,7 +720,7 @@ function ClientPlatform({
   }), areaGaps.length === 0 ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
     colSpan: anyPeer ? 7 : 6,
     className: "tbl-empty"
-  }, storyPlatforms.length ? `The platform story promoted gap rows for ${storyPlatforms.length} platform${storyPlatforms.length === 1 ? "" : "s"}, none of them in ${area || "this area"}.` : "No platform story promoted for this run, so no gap rows are available.")) : null)), areaStories.map((s, i) => /*#__PURE__*/React.createElement("div", {
+  }, storyPlatforms.length ? `The platform story promoted gap rows for ${storyPlatforms.length} platform${storyPlatforms.length === 1 ? "" : "s"}, none of them in ${area || "this area"}.` : "No platform story promoted for this run, so no gap rows are available.")) : null))), areaStories.map((s, i) => /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       padding: "12px 18px",
@@ -694,7 +735,7 @@ function ClientPlatform({
       fontSize: 9.5,
       marginBottom: 5
     }
-  }, "What this platform changes"), s)))), /*#__PURE__*/React.createElement("div", {
+  }, "What this platform changes"), pfText(s))))), /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
@@ -748,20 +789,20 @@ function ClientPlatform({
         className: "spacer"
       }), p.basis ? /*#__PURE__*/React.createElement("span", {
         className: "b b-muted"
-      }, p.basis) : null), /*#__PURE__*/React.createElement("div", {
+      }, pfText(p.basis)) : null), /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 12,
           color: "var(--z-dark)",
           lineHeight: 1.5
         }
-      }, p.condition), p.note ? /*#__PURE__*/React.createElement("div", {
+      }, pfText(p.condition)), p.note ? /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 11,
           color: "var(--z-muted)",
           marginTop: 4,
           lineHeight: 1.5
         }
-      }, p.note) : null, /*#__PURE__*/React.createElement("div", {
+      }, pfText(p.note)) : null, /*#__PURE__*/React.createElement("div", {
         className: "row",
         style: {
           gap: 4,
@@ -808,7 +849,7 @@ function ClientPlatform({
       }
     }, /*#__PURE__*/React.createElement("span", {
       className: "b b-purple"
-    }, p.cell), /*#__PURE__*/React.createElement("span", {
+    }, pfText(p.cell)), /*#__PURE__*/React.createElement("span", {
       className: "f-mono",
       style: {
         fontSize: 11.5,
@@ -948,7 +989,7 @@ function ClientPlatform({
   }, "A threshold in this area is not met. The unmet prerequisite is the conversation that comes first."))) : null)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr",
+      gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
       gap: 16,
       marginBottom: 16
     }
@@ -990,18 +1031,18 @@ function ClientPlatform({
         flex: 1,
         minWidth: 0
       }
-    }, r.title), r.phase != null ? /*#__PURE__*/React.createElement("span", {
+    }, pfText(r.title)), r.phase != null ? /*#__PURE__*/React.createElement("span", {
       className: "b b-teal",
       style: {
         flexShrink: 0
       }
-    }, "Phase ", r.phase) : null, r.effort ? /*#__PURE__*/React.createElement("span", {
+    }, "Phase ", pfText(r.phase)) : null, r.effort ? /*#__PURE__*/React.createElement("span", {
       className: "b b-muted",
       style: {
         flexShrink: 0
       },
       title: "effort band"
-    }, r.effort) : null, /*#__PURE__*/React.createElement(Icon, {
+    }, pfText(r.effort)) : null, /*#__PURE__*/React.createElement(Icon, {
       name: "chevron-r",
       size: 13,
       style: {
@@ -1014,7 +1055,7 @@ function ClientPlatform({
         color: "var(--z-mid)",
         marginBottom: 5
       }
-    }, r.l4) : null, r.root_cause_text ? /*#__PURE__*/React.createElement("div", {
+    }, pfText(r.l4)) : null, r.root_cause_text ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11.5,
         color: "var(--z-body)",
@@ -1022,7 +1063,7 @@ function ClientPlatform({
         margin: "6px 0"
       },
       className: "txt-fit-3"
-    }, r.root_cause_text) : null, /*#__PURE__*/React.createElement(PlatformEvChips, {
+    }, pfText(r.root_cause_text)) : null, /*#__PURE__*/React.createElement(PlatformEvChips, {
       ids: r.root_cause,
       openEvidence: openEvidence,
       label: "cites"
@@ -1044,13 +1085,13 @@ function ClientPlatform({
       style: {
         fontSize: 11
       },
-      title: gate.grain_note || ""
-    }, gate.threshold), gate.verdict ? /*#__PURE__*/React.createElement("span", {
+      title: pfText(gate.grain_note) || ""
+    }, pfText(gate.threshold)), gate.verdict ? /*#__PURE__*/React.createElement("span", {
       className: `b ${String(gate.verdict).toUpperCase() === "MET" ? "b-above" : "b-org"}`,
       style: {
         marginLeft: 5
       }
-    }, gate.verdict) : null) : null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    }, pfText(gate.verdict)) : null) : null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
       className: "muted",
       style: {
         fontSize: 10
@@ -1068,24 +1109,31 @@ function ClientPlatform({
       style: {
         fontWeight: 500
       }
-    }, kpi.metric), kpi.baseline ? /*#__PURE__*/React.createElement("div", {
+    }, pfText(kpi.metric)), kpi.baseline ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10.5,
         color: "var(--z-muted)",
         marginTop: 2,
         lineHeight: 1.5
       }
-    }, "baseline ", kpi.baseline, kpi.baseline_as_of ? ` · ${kpi.baseline_as_of}` : "") : null, kpi.target ? /*#__PURE__*/React.createElement("div", {
+    }, "baseline ", pfText(kpi.baseline), kpi.baseline_as_of ? ` · ${kpi.baseline_as_of}` : "") : null, kpi.target ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10.5,
         color: "var(--z-mid)",
         marginTop: 2,
         lineHeight: 1.5
       }
-    }, "target ", kpi.target) : null) : null));
+    }, "target ", pfText(kpi.target)) : null) : null));
   }), areaRecs.length === 0 ? /*#__PURE__*/React.createElement("div", {
     className: "empty"
-  }, recs.length ? /*#__PURE__*/React.createElement("p", null, "No recommendation promoted for ", area, ". ", recs.length, " promoted across the other areas.") : /*#__PURE__*/React.createElement("p", null, "No recommendation promoted in this run.")) : null)), /*#__PURE__*/React.createElement("div", {
+  }, recs.length ? /*#__PURE__*/React.createElement("p", null, "No recommendation promoted for ", area, ". ", recs.length, " promoted across the other areas.") : /*#__PURE__*/React.createElement("p", null, "No recommendation promoted in this run.")) : null, recs.some(r => !r.l3) ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 18px",
+      fontSize: 11,
+      color: "var(--z-muted)",
+      borderTop: "1px solid var(--z-sep)"
+    }
+  }, recs.filter(r => !r.l3).length, " promoted recommendation", recs.filter(r => !r.l3).length === 1 ? "" : "s", " state no platform area and appear under no tab: ", recs.filter(r => !r.l3).map(r => r.id).join(" · ")) : null)), /*#__PURE__*/React.createElement("div", {
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
@@ -1094,7 +1142,7 @@ function ClientPlatform({
     onClick: () => {
       const text = starters.map((s, i) => {
         const head = `#${s.rank != null ? s.rank : i + 1}`;
-        return [`${head} — ${s.text || ""}`, s.followup_question ? `Follow-up: ${s.followup_question}` : null, (s.e_ids || []).length ? `Evidence: ${s.e_ids.join(", ")}` : null].filter(Boolean).join("\n");
+        return [`${head} — ${pfText(s.text) || ""}`, s.followup_question ? `Follow-up: ${pfText(s.followup_question)}` : null, (s.e_ids || []).length ? `Evidence: ${s.e_ids.join(", ")}` : null].filter(Boolean).join("\n");
       }).join("\n\n");
       try {
         navigator.clipboard.writeText(text);
@@ -1138,7 +1186,7 @@ function ClientPlatform({
       fontSize: 9
     },
     title: "the gap this starter names"
-  }, s.named_gap_subcap_id) : null, /*#__PURE__*/React.createElement("span", {
+  }, pfText(s.named_gap_subcap_id)) : null, /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
@@ -1146,7 +1194,7 @@ function ClientPlatform({
       color: "var(--z-dpur)"
     },
     onClick: () => {
-      const one = [s.text, s.followup_question ? `Follow-up: ${s.followup_question}` : null].filter(Boolean).join("\n");
+      const one = [pfText(s.text), s.followup_question ? `Follow-up: ${pfText(s.followup_question)}` : null].filter(Boolean).join("\n");
       try {
         navigator.clipboard.writeText(one);
         pushToast("Conversation starter copied", "success");
@@ -1163,7 +1211,7 @@ function ClientPlatform({
       color: "#3B0764",
       lineHeight: 1.6
     }
-  }, s.text), s.their_system_reference ? /*#__PURE__*/React.createElement("div", {
+  }, pfText(s.text)), s.their_system_reference ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-dpur)",
@@ -1177,7 +1225,7 @@ function ClientPlatform({
       textTransform: "uppercase",
       opacity: .75
     }
-  }, "Their system \xB7 "), s.their_system_reference) : null, s.peer_reference ? /*#__PURE__*/React.createElement("div", {
+  }, "Their system \xB7 "), pfText(s.their_system_reference)) : null, s.peer_reference ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-dpur)",
@@ -1191,7 +1239,7 @@ function ClientPlatform({
       textTransform: "uppercase",
       opacity: .75
     }
-  }, "Peer \xB7 "), s.peer_reference) : null, s.followup_question ? /*#__PURE__*/React.createElement("div", {
+  }, "Peer \xB7 "), pfText(s.peer_reference)) : null, s.followup_question ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
       color: "#3B0764",
@@ -1200,7 +1248,7 @@ function ClientPlatform({
       paddingLeft: 8,
       borderLeft: "2px solid var(--ph0-bd)"
     }
-  }, s.followup_question) : null, /*#__PURE__*/React.createElement("div", {
+  }, pfText(s.followup_question)) : null, /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 6
     }
@@ -1420,7 +1468,7 @@ function StairstepCurve({
     const y = stepY(i);
     const h = H - padB - y;
     const color = RUNG_COLORS[i % RUNG_COLORS.length];
-    const lines = wrapSvgLabel(s.label, charsPerLine, 2);
+    const lines = wrapSvgLabel(pfText(s.label), charsPerLine, 2);
     // Cell count and effort only. The blocking findings are chips in
     // the list beside the chart: inside the rung they ran past both
     // edges of the rectangle, because a centred SVG string cannot be
@@ -1428,7 +1476,7 @@ function StairstepCurve({
     const meta = [(s.subcaps || []).length ? `${s.subcaps.length} cells` : null, s.effort ? `effort ${s.effort}` : null].filter(Boolean).join(" · ");
     return /*#__PURE__*/React.createElement("g", {
       key: i
-    }, /*#__PURE__*/React.createElement("title", null, `Step ${s.m}: ${s.label}`), /*#__PURE__*/React.createElement("rect", {
+    }, /*#__PURE__*/React.createElement("title", null, `Step ${s.m}: ${pfText(s.label) || ""}`), /*#__PURE__*/React.createElement("rect", {
       x: x,
       y: y,
       width: rungW,
@@ -1542,28 +1590,28 @@ function StairstepCurve({
       flexShrink: 0
     },
     title: "effort band"
-  }, s.effort) : null, (s.blocking || []).map(b => /*#__PURE__*/React.createElement("span", {
+  }, pfText(s.effort)) : null, (s.blocking || []).map(b => /*#__PURE__*/React.createElement("span", {
     key: b,
     className: "b b-org",
     style: {
       flexShrink: 0
     },
     title: "blocking finding"
-  }, b))), /*#__PURE__*/React.createElement("div", {
+  }, pfText(b)))), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       fontWeight: 600,
       color: "var(--z-dark)",
       lineHeight: 1.4
     }
-  }, s.label), s.note ? /*#__PURE__*/React.createElement("div", {
+  }, pfText(s.label)), s.note ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
       color: "var(--z-body)",
       lineHeight: 1.55,
       marginTop: 4
     }
-  }, s.note) : null, (s.subcaps || []).length ? /*#__PURE__*/React.createElement("div", {
+  }, pfText(s.note)) : null, (s.subcaps || []).length ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)",
@@ -1758,7 +1806,7 @@ function ChevronView({
       marginBottom: 10,
       lineHeight: 1.5
     }
-  }, r.rationale)) : null, (r.depends_on || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, pfText(r.rationale))) : null, (r.depends_on || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "rgba(255,255,255,.7)",
@@ -1795,7 +1843,7 @@ function ChevronView({
       }
       /* The title ellipsises to one line by design; without this
          the rest of the sentence is unreachable by any means. */,
-      title: `${rec.id} · ${rec.title}`,
+      title: `${rec.id} · ${pfText(rec.title) || ""}`,
       style: {
         padding: "6px 8px",
         background: "rgba(255,255,255,.14)",
@@ -1826,7 +1874,7 @@ function ChevronView({
         minWidth: 0
       },
       className: "txt-trunc"
-    }, rec.title), /*#__PURE__*/React.createElement(Icon, {
+    }, pfText(rec.title)), /*#__PURE__*/React.createElement(Icon, {
       name: "arrow-r",
       size: 11
     })) :
@@ -1901,7 +1949,7 @@ function CellImpactView({
         textTransform: "uppercase",
         flexShrink: 0
       }
-    }, "Phase ", r.phase), /*#__PURE__*/React.createElement("strong", {
+    }, "Phase ", pfText(r.phase)), /*#__PURE__*/React.createElement("strong", {
       style: {
         fontSize: 12.5,
         flex: 1,
@@ -1920,7 +1968,7 @@ function CellImpactView({
       }
     }, /*#__PURE__*/React.createElement("button", {
       onClick: () => openRec(rec.id),
-      title: `${rec.id} · ${rec.title}`,
+      title: `${rec.id} · ${pfText(rec.title) || ""}`,
       style: {
         padding: 0,
         background: "none",
@@ -1946,7 +1994,7 @@ function CellImpactView({
         minWidth: 0
       },
       className: "txt-trunc"
-    }, rec.title), /*#__PURE__*/React.createElement(Icon, {
+    }, pfText(rec.title)), /*#__PURE__*/React.createElement(Icon, {
       name: "arrow-r",
       size: 11,
       style: {
@@ -1977,13 +2025,13 @@ function CellImpactView({
           color: "var(--z-body)",
           lineHeight: 1.35
         }
-      }, im.name || im.subcap_id), /*#__PURE__*/React.createElement("div", {
+      }, pfText(im.name) || im.subcap_id), /*#__PURE__*/React.createElement("div", {
         className: "f-mono",
         style: {
           fontSize: 9,
           color: "var(--z-muted)"
         }
-      }, im.subcap_id)), /*#__PURE__*/React.createElement("span", {
+      }, pfText(im.subcap_id))), /*#__PURE__*/React.createElement("span", {
         style: {
           flexShrink: 0
         }
@@ -2036,7 +2084,7 @@ function CellImpactView({
       style: {
         marginBottom: 3
       }
-    }, b))) : null);
+    }, pfText(b)))) : null);
   }));
 }
 Object.assign(window, {

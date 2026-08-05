@@ -575,6 +575,7 @@ function FocusAreaView({
       }, /*#__PURE__*/React.createElement("div", {
         className: "fa-illo",
         style: {
+          height: 116,
           background: `linear-gradient(135deg, ${fa.colors[0]}, ${fa.colors[1]})`
         }
       }, /*#__PURE__*/React.createElement("div", {
@@ -587,8 +588,11 @@ function FocusAreaView({
       }, /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 13,
-          fontWeight: 700
-        }
+          fontWeight: 700,
+          lineHeight: 1.35
+        },
+        className: "txt-fit-2",
+        title: fa.name
       }, fa.name), /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 10.5,
@@ -826,9 +830,10 @@ function FocusAreaView({
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "280px 1fr",
+      gridTemplateColumns: "280px minmax(0, 1fr)",
       gap: 14,
-      marginBottom: 14
+      marginBottom: 14,
+      alignItems: "start"
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "card"
@@ -1348,12 +1353,22 @@ function CategoryHeatmap({
   onSynth
 }) {
   const rows = pillarFocus ? (pillars || []).filter(p => p.id === pillarFocus) : pillars || [];
-  // Build category → has-caps map
+  /* Category → cells the issue register touches. Two counts, because they are
+     two different claims: a LINKED cell is one an issue names, a CAPPED cell is
+     one the register puts a maturity ceiling on. The badge counted links and
+     called them caps behind a padlock, while the cell view showed no cap at all
+     (issueCapsFor only returns a stated level) — the same grid contradicting
+     itself one zoom apart. */
   const catCaps = {};
   Object.values(DMA.ISSUE_CAPS).forEach(info => {
-    Object.keys(info.caps || {}).forEach(sid => {
+    Object.entries(info.caps || {}).forEach(([sid, cap]) => {
       const catId = sid.slice(0, 4);
-      catCaps[catId] = (catCaps[catId] || 0) + 1;
+      const row = catCaps[catId] || (catCaps[catId] = {
+        linked: 0,
+        capped: 0
+      });
+      row.linked += 1;
+      if (cap != null) row.capped += 1;
     });
   });
   return /*#__PURE__*/React.createElement("div", {
@@ -1412,7 +1427,11 @@ function CategoryHeatmap({
       // tooltip, never silently swapped for the stated figure.
       const shown = c.score != null ? c.score : c.cellMean;
       const basis = c.score != null ? `promoted category score${c.source_cell ? ` (${c.source_cell})` : ""}` : c.cellMean != null ? `mean of ${c.cells.length} scored cells — the run promoted no category score` : "no score";
-      const capCount = catCaps[c.id] || 0;
+      const iss = catCaps[c.id] || {
+        linked: 0,
+        capped: 0
+      };
+      const capCount = iss.capped || iss.linked;
       return /*#__PURE__*/React.createElement("button", {
         key: c.id,
         className: `hm-cell b ${DMA.helpers.maturityClass(shown)}`,
@@ -1427,7 +1446,7 @@ function CategoryHeatmap({
           padding: "8px 6px",
           minHeight: 44
         },
-        title: `${c.id} · ${c.name || "not named in the current catalogue"} · ${basis}${capCount > 0 ? ` · ${capCount} subcaps capped by issues` : ""} · click to drill`
+        title: `${c.id} · ${c.name || "not named in the current catalogue"} · ${basis}${iss.capped ? ` · ${iss.capped} subcaps capped by issues` : iss.linked ? ` · ${iss.linked} subcaps linked to issues (no cap level stated)` : ""} · click to drill`
       }, /*#__PURE__*/React.createElement("div", {
         style: {
           display: "flex",
@@ -1460,7 +1479,7 @@ function CategoryHeatmap({
           borderRadius: 3
         }
       }, /*#__PURE__*/React.createElement(Icon, {
-        name: "lock",
+        name: iss.capped ? "lock" : "warn",
         size: 9
       }), capCount) : null);
     }), showPeers ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
@@ -1585,6 +1604,12 @@ function CapabilityHeatmap({
         color: "var(--z-muted)"
       }
     }, groups.length, " capabilities \xB7 ", c.cells.length, " subcaps", c.weight != null ? ` · weight ${fx(c.weight * 100, 0)}%` : "")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-muted)",
+        marginBottom: 8
+      }
+    }, "The run promotes no score and no name at capability grain \u2014 each row is its own cells' mean, labelled with its capability id."), /*#__PURE__*/React.createElement("div", {
       className: "g2",
       style: {
         gap: 8
@@ -1640,7 +1665,7 @@ function CapabilityHeatmap({
           color: "var(--z-muted)",
           marginTop: 4
         }
-      }, "mean of ", g.items.length, " cells \xB7 no capability score promoted"));
+      }, "mean of ", g.items.length, " cell", g.items.length === 1 ? "" : "s"));
     })));
   }));
 }
@@ -1932,10 +1957,11 @@ function SubcapHeatmap({
           style: {
             fontSize: 12,
             fontWeight: 500,
-            color: "var(--z-dark)"
+            color: s.name && s.name !== s.id ? "var(--z-dark)" : "var(--z-muted)",
+            fontStyle: s.name && s.name !== s.id ? "normal" : "italic"
           },
           className: "txt-fit-1"
-        }, s.name), s.thin ? /*#__PURE__*/React.createElement("span", {
+        }, s.name && s.name !== s.id ? s.name : "unnamed in catalogue"), s.thin ? /*#__PURE__*/React.createElement("span", {
           className: "b b-org"
         }, "THIN") : null, caps.length ? /*#__PURE__*/React.createElement("span", {
           className: "b b-org"
@@ -2318,14 +2344,15 @@ function categoryCitationsOf(cells) {
   };
 }
 
-/* The score axis. It was labelled M1 M2 M3 M4 M5 — and M5 does not exist: four
-   bands, on the raw score, strictly less-than. Labelled with the scale's own
-   numbers and the band that owns each range. */
+/* The score axis. It was labelled with five maturity levels, and the fifth does
+   not exist: there are four bands, resolved on the raw score, strictly
+   less-than. Labelled with the scale's own numbers and the band that owns each
+   range. */
 function BandAxis() {
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative",
-      height: 13,
+      height: 15,
       fontSize: 10,
       color: "var(--z-muted)",
       fontFamily: "var(--font-mono)"
@@ -2334,6 +2361,8 @@ function BandAxis() {
     key: t,
     style: {
       position: "absolute",
+      top: 0,
+      lineHeight: "14px",
       left: `${(t - 1) / 4 * 100}%`,
       transform: t === 1 ? "none" : t === 5 ? "translateX(-100%)" : "translateX(-50%)"
     }
@@ -2434,7 +2463,7 @@ function SynthesisDrawer({
     style: {
       fontSize: 15
     }
-  }, subcap ? subcap.name : category.name || `${category.id} · unnamed in catalogue`), /*#__PURE__*/React.createElement("div", {
+  }, subcap ? subcap.name && subcap.name !== subcap.id ? subcap.name : `${subcap.id} · unnamed in catalogue` : category.name || `${category.id} · unnamed in catalogue`), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, subcap ? `Score ${fx(subcap.score, 1)}${subcap.confidence ? ` · ${subcap.confidence}` : ""}` : `${catCells.length} subcaps${category.weight != null ? ` · weight ${fx(category.weight * 100, 0)}%` : ""}`)), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
@@ -2856,9 +2885,15 @@ function IssueRegisterBanner({
   onSubcap,
   openEvidence
 }) {
-  const openIssues = DMA.ISSUES.filter(i => i.status === "OPEN");
+  /* Every promoted issue, with its promoted status printed. This filtered on
+     `status === "OPEN"` — a value the register does not use (this run states
+     ACTIVE, NEW OBLIGATION and REMEDIATED) — so the whole banner vanished while
+     the cells beneath it carried issue markers, and the page contradicted
+     itself. Classifying a promoted status as open or closed is a judgement the
+     run has not made, so the row shows what it says. */
+  const issues = DMA.ISSUES || [];
   const [open, setOpen] = useState(null);
-  if (openIssues.length === 0) return null;
+  if (issues.length === 0) return null;
   return /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
@@ -2883,7 +2918,7 @@ function IssueRegisterBanner({
       fontSize: 13,
       color: "var(--z-dark)"
     }
-  }, "Issue register \xB7 ", openIssues.length, " open"), /*#__PURE__*/React.createElement("span", {
+  }, "Issue register \xB7 ", issues.length, " issue", issues.length === 1 ? "" : "s"), /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
   }, "click an issue to drill in"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
@@ -2899,8 +2934,9 @@ function IssueRegisterBanner({
     style: {
       gap: 8
     }
-  }, openIssues.map(iss => {
+  }, issues.map(iss => {
     const caps = Object.entries(DMA.ISSUE_CAPS[iss.id]?.caps || {});
+    const capped = caps.filter(([, cap]) => cap != null).length;
     const isOpen = open === iss.id;
     // Evidence for the CAPPED cells. Matching on a 4-char prefix meant
     // "anything citing any cell in the same category", so an item that has
@@ -2934,24 +2970,24 @@ function IssueRegisterBanner({
       }
     }, /*#__PURE__*/React.createElement("span", {
       className: "chip"
-    }, iss.id), /*#__PURE__*/React.createElement("span", {
-      className: "b b-muted"
-    }, iss.type), /*#__PURE__*/React.createElement("span", {
+    }, iss.id), iss.title || iss.type ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-muted txt-fit-1"
+    }, iss.title || iss.type) : null, iss.severity ? /*#__PURE__*/React.createElement("span", {
       className: `b ${iss.severity === "CRITICAL" ? "b-below" : iss.severity === "MATERIAL" ? "b-org" : "b-muted"}`
-    }, iss.severity), /*#__PURE__*/React.createElement("span", {
+    }, iss.severity) : null, /*#__PURE__*/React.createElement("span", {
       className: "spacer"
-    }), /*#__PURE__*/React.createElement(Icon, {
+    }), capped ? /*#__PURE__*/React.createElement(Icon, {
       name: "lock",
       size: 11,
       style: {
         color: "var(--z-org)"
       }
-    }), /*#__PURE__*/React.createElement("span", {
+    }) : null, /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 10,
         color: "var(--z-muted)"
       }
-    }, "caps ", caps.length), /*#__PURE__*/React.createElement(Icon, {
+    }, capped ? `caps ${capped}` : `${caps.length} cell${caps.length === 1 ? "" : "s"} linked`), /*#__PURE__*/React.createElement(Icon, {
       name: isOpen ? "chevron-u" : "chevron-d",
       size: 13,
       style: {
@@ -2977,19 +3013,19 @@ function IssueRegisterBanner({
         marginBottom: 8,
         flexWrap: "wrap"
       }
-    }, /*#__PURE__*/React.createElement("span", null, "Status ", /*#__PURE__*/React.createElement("strong", {
+    }, iss.status ? /*#__PURE__*/React.createElement("span", null, "Status ", /*#__PURE__*/React.createElement("strong", {
       style: {
         color: "var(--z-org)"
       }
-    }, iss.status)), /*#__PURE__*/React.createElement("span", null, "Cap ", /*#__PURE__*/React.createElement("strong", {
+    }, iss.status)) : null, iss.cap_value != null ? /*#__PURE__*/React.createElement("span", null, "Cap ", /*#__PURE__*/React.createElement("strong", {
       style: {
         color: "var(--z-dark)"
       }
-    }, "M", iss.cap_value)), /*#__PURE__*/React.createElement("span", null, "Since ", /*#__PURE__*/React.createElement("strong", {
+    }, "M", iss.cap_value)) : /*#__PURE__*/React.createElement("span", null, "no cap level stated"), iss.start ? /*#__PURE__*/React.createElement("span", null, "Since ", /*#__PURE__*/React.createElement("strong", {
       style: {
         color: "var(--z-dark)"
       }
-    }, iss.start)), iss.end ? /*#__PURE__*/React.createElement("span", null, "Resolved ", iss.end) : null), /*#__PURE__*/React.createElement("div", {
+    }, iss.start)) : /*#__PURE__*/React.createElement("span", null, "undated"), iss.end ? /*#__PURE__*/React.createElement("span", null, "Resolved ", iss.end) : null), caps.length ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
         fontWeight: 700,
@@ -2998,7 +3034,7 @@ function IssueRegisterBanner({
         textTransform: "uppercase",
         marginBottom: 4
       }
-    }, "Capped subcaps \xB7 click to drill"), /*#__PURE__*/React.createElement("div", {
+    }, capped ? "Capped subcaps · click to drill" : "Subcaps linked to this issue · click to drill") : null, /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
         flexWrap: "wrap",
@@ -3011,8 +3047,8 @@ function IssueRegisterBanner({
         key: sid,
         className: "chip purple",
         onClick: () => subcap && onSubcap(subcap),
-        title: (subcap?.name || sid) + " · capped at M" + cap
-      }, sid, " \xB7 M", cap, subcap ? ` · ${subcap.name}` : "");
+        title: `${subcap?.name || sid}${cap != null ? ` · capped at M${cap}` : " · linked; no cap level stated"}`
+      }, sid, cap != null ? ` · M${cap}` : "", subcap ? ` · ${subcap.name}` : "");
     })), ev.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,

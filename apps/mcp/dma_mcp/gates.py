@@ -98,6 +98,38 @@ GATES = {
               "Text can pass every identifier check and still not be about "
               "the bundle.",
               "disclose"),
+    "AG-03": ("Every claim-bearing item cites evidence", None,
+              "Per ITEM, not per section: a why-now card, finding, "
+              "recommendation, insight, timeline event, issue, tech row, "
+              "alert, cap, gate result, phase or starter that asserts "
+              "something carries a non-empty evidence list of its own, read "
+              "from the keys its field's contract doc declares. A null-valued "
+              "row and a recorded absence carrying its ladder assert nothing "
+              "and are exempt; a state claiming a find with an empty id list "
+              "is a contradiction, not an empty state.",
+              "The envelope's citations are not enough — a reader drills into "
+              "the item, and an inference cites the source it came from.",
+              "block"),
+    "AG-04": ("A named peer's technographics carry their source", None,
+              "Where peer_coverage is stated, a per-peer breakdown exists "
+              "with one row per peer including the peers that could not be "
+              "established (deployed: null); every deployed row carries a "
+              "source_url and an as_of; and the share agrees with its own "
+              "breakdown to within one peer.",
+              "A verdict beside a NAMED institution was derived from a hash "
+              "of the row id. The claim cannot be manufactured, and a share "
+              "with unknowns behind it is not that share.",
+              "block"),
+    "SG-S8": ("Sentiment rests on more than one line",
+              "Sentiment rests on a single source, so treat it as "
+              "indicative only",
+              "The count of rating rows across all audiences, computed at "
+              "submit and never read from a declared displayed_lines, is "
+              "greater than one; a self-published NPS (T4/T5) standing alone "
+              "is thin whatever the count.",
+              "A single rating is not a sentiment picture, and thinness read "
+              "as a finding is the most common misreading of this surface.",
+              "disclose"),
 }
 
 

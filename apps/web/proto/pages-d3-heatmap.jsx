@@ -406,10 +406,16 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
             const gap = fa.delta != null ? -Number(fa.delta) : deltaOf(peer, avg);
             return (
               <div key={fa.id} className="fa-card" onClick={() => setFocusArea(fa)}>
-                <div className="fa-illo" style={{ background: `linear-gradient(135deg, ${fa.colors[0]}, ${fa.colors[1]})` }}>
+                {/* The prototype's 88px illo was sized for the fixture's
+                    two-word focus-area names. A promoted name is a full
+                    sentence, so the title grew upward from the bottom and ran
+                    UNDER the icon block — the first words of every card were
+                    unreadable. Taller box, name clamped to two lines with the
+                    full text on hover. */}
+                <div className="fa-illo" style={{ height: 116, background: `linear-gradient(135deg, ${fa.colors[0]}, ${fa.colors[1]})` }}>
                   <div className="icon-block"><Icon name={fa.icon} size={16} /></div>
                   <div className="title-block">
-                    <div style={{ fontSize: 13, fontWeight: 700 }}>{fa.name}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.35 }} className="txt-fit-2" title={fa.name}>{fa.name}</div>
                     <div style={{ fontSize: 10.5, opacity: .92 }}>{subs.length} subcaps</div>
                   </div>
                 </div>
@@ -516,8 +522,10 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
       {/* KPI strip with public-vs-private indicators + customization */}
       <CustomizableKpiStrip fa={fa} entity={entity} />
 
-      {/* Composite + subcap grid (unchanged section) */}
-      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 14, marginBottom: 14 }}>
+      {/* Composite + subcap grid. `alignItems: start` so the pillar-share card
+          is the height of its own content: stretched to the cell grid's height
+          it was mostly empty card. */}
+      <div style={{ display: "grid", gridTemplateColumns: "280px minmax(0, 1fr)", gap: 14, marginBottom: 14, alignItems: "start" }}>
         <div className="card">
           <div style={{ fontSize: 11, color: "var(--z-muted)", marginBottom: 8 }}>Where its cells sit, by pillar</div>
           {!fa.pillars_weight || !Object.keys(fa.pillars_weight).length ? (
@@ -748,12 +756,19 @@ function PillarHeatmap({ entity, pillars, setPillarFocus }) {
 /* ─────────────────────── CATEGORY HEATMAP ─────────────────────── */
 function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, setCatFocus, onSynth }) {
   const rows = pillarFocus ? (pillars || []).filter(p => p.id === pillarFocus) : (pillars || []);
-  // Build category → has-caps map
+  /* Category → cells the issue register touches. Two counts, because they are
+     two different claims: a LINKED cell is one an issue names, a CAPPED cell is
+     one the register puts a maturity ceiling on. The badge counted links and
+     called them caps behind a padlock, while the cell view showed no cap at all
+     (issueCapsFor only returns a stated level) — the same grid contradicting
+     itself one zoom apart. */
   const catCaps = {};
   Object.values(DMA.ISSUE_CAPS).forEach(info => {
-    Object.keys(info.caps || {}).forEach(sid => {
+    Object.entries(info.caps || {}).forEach(([sid, cap]) => {
       const catId = sid.slice(0, 4);
-      catCaps[catId] = (catCaps[catId] || 0) + 1;
+      const row = catCaps[catId] || (catCaps[catId] = { linked: 0, capped: 0 });
+      row.linked += 1;
+      if (cap != null) row.capped += 1;
     });
   });
   return (
@@ -786,20 +801,23 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
                   ? `promoted category score${c.source_cell ? ` (${c.source_cell})` : ""}`
                   : (c.cellMean != null ? `mean of ${c.cells.length} scored cells — the run promoted no category score`
                                         : "no score");
-                const capCount = catCaps[c.id] || 0;
+                const iss = catCaps[c.id] || { linked: 0, capped: 0 };
+                const capCount = iss.capped || iss.linked;
                 return (
                   <button key={c.id} className={`hm-cell b ${DMA.helpers.maturityClass(shown)}`}
                     onClick={() => setCatFocus(c.id)}
                     onContextMenu={(e) => { e.preventDefault(); onSynth(c.id); }}
                     style={{ position: "relative", border: 0, padding: "8px 6px", minHeight: 44 }}
-                    title={`${c.id} · ${c.name || "not named in the current catalogue"} · ${basis}${capCount > 0 ? ` · ${capCount} subcaps capped by issues` : ""} · click to drill`}>
+                    title={`${c.id} · ${c.name || "not named in the current catalogue"} · ${basis}${
+                      iss.capped ? ` · ${iss.capped} subcaps capped by issues`
+                        : iss.linked ? ` · ${iss.linked} subcaps linked to issues (no cap level stated)` : ""} · click to drill`}>
                     <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2, gap: 2 }}>
                       <div style={{ fontSize: 13, fontWeight: 700 }}>{fx(shown, 1)}</div>
                       {c.thin > 0 ? <div style={{ fontSize: 8, fontWeight: 600 }}>{c.thin} thin</div> : null}
                     </div>
                     {showIssues && capCount > 0 ? (
                       <span style={{ position: "absolute", top: 3, right: 4, display: "inline-flex", alignItems: "center", gap: 2, fontSize: 9, color: "var(--z-org)", background: "rgba(255,255,255,.85)", padding: "0 3px", borderRadius: 3 }}>
-                        <Icon name="lock" size={9} />
+                        <Icon name={iss.capped ? "lock" : "warn"} size={9} />
                         {capCount}
                       </span>
                     ) : null}
@@ -886,6 +904,12 @@ function CapabilityHeatmap({ entity, cats, catFocus, pillarFocus, showIssues, dr
                 {c.weight != null ? ` · weight ${fx(c.weight * 100, 0)}%` : ""}
               </span>
             </div>
+            {/* Said once for the card rather than on every row: nothing is
+                promoted at this grain, so every figure below is a mean of the
+                cells named beside it. */}
+            <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginBottom: 8 }}>
+              The run promotes no score and no name at capability grain — each row is its own cells' mean, labelled with its capability id.
+            </div>
             <div className="g2" style={{ gap: 8 }}>
               {groups.map(g => {
                 const mean = meanOf(g.items.map(s => s.score));
@@ -903,7 +927,7 @@ function CapabilityHeatmap({ entity, cats, catFocus, pillarFocus, showIssues, dr
                       {thin ? <span className="b b-org">{thin} thin</span> : null}
                       {capped ? <span className="b b-org"><Icon name="lock" size={9} /> {capped}</span> : null}
                     </div>
-                    <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 4 }}>mean of {g.items.length} cells · no capability score promoted</div>
+                    <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 4 }}>mean of {g.items.length} cell{g.items.length === 1 ? "" : "s"}</div>
                   </button>
                 );
               })}
@@ -1037,7 +1061,14 @@ function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers
                             <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(s.score, 1)}</span>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div className="row" style={{ gap: 6 }}>
-                                <span style={{ fontSize: 12, fontWeight: 500, color: "var(--z-dark)" }} className="txt-fit-1">{s.name}</span>
+                                {/* The adapter falls back to the id when the
+                                    catalogue has no name for a cell (every
+                                    P1C5 cell, the category v7.0 dropped), so
+                                    the row printed the id twice and looked
+                                    like a name. Said once, as an absence. */}
+                                <span style={{ fontSize: 12, fontWeight: 500, color: s.name && s.name !== s.id ? "var(--z-dark)" : "var(--z-muted)", fontStyle: s.name && s.name !== s.id ? "normal" : "italic" }} className="txt-fit-1">
+                                  {s.name && s.name !== s.id ? s.name : "unnamed in catalogue"}
+                                </span>
                                 {s.thin ? <span className="b b-org">THIN</span> : null}
                                 {caps.length ? <span className="b b-org"><Icon name="lock" size={9} /> M{caps[0].cap}</span> : null}
                               </div>
@@ -1279,15 +1310,18 @@ function categoryCitationsOf(cells) {
   };
 }
 
-/* The score axis. It was labelled M1 M2 M3 M4 M5 — and M5 does not exist: four
-   bands, on the raw score, strictly less-than. Labelled with the scale's own
-   numbers and the band that owns each range. */
+/* The score axis. It was labelled with five maturity levels, and the fifth does
+   not exist: there are four bands, resolved on the raw score, strictly
+   less-than. Labelled with the scale's own numbers and the band that owns each
+   range. */
 function BandAxis() {
   return (
     <>
-      <div style={{ position: "relative", height: 13, fontSize: 10, color: "var(--z-muted)", fontFamily: "var(--font-mono)" }}>
+      {/* The tick row is sized to its own line box: an absolutely positioned
+          span in a shorter box hangs below it and lands on the band words. */}
+      <div style={{ position: "relative", height: 15, fontSize: 10, color: "var(--z-muted)", fontFamily: "var(--font-mono)" }}>
         {[1, 2, 3, 4, 5].map(t => (
-          <span key={t} style={{ position: "absolute", left: `${(t - 1) / 4 * 100}%`,
+          <span key={t} style={{ position: "absolute", top: 0, lineHeight: "14px", left: `${(t - 1) / 4 * 100}%`,
             transform: t === 1 ? "none" : t === 5 ? "translateX(-100%)" : "translateX(-50%)" }}>{t}</span>
         ))}
       </div>
@@ -1361,7 +1395,9 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
               {subcap ? <span className="chip purple">{subcap.id}</span> : <span className="chip">{category.id}</span>}
               {subcap?.thin ? <span className="b b-org">THIN</span> : null}
             </div>
-            <div className="title" style={{ fontSize: 15 }}>{subcap ? subcap.name : (category.name || `${category.id} · unnamed in catalogue`)}</div>
+            <div className="title" style={{ fontSize: 15 }}>{subcap
+              ? (subcap.name && subcap.name !== subcap.id ? subcap.name : `${subcap.id} · unnamed in catalogue`)
+              : (category.name || `${category.id} · unnamed in catalogue`)}</div>
             <div className="sub">{subcap
               ? `Score ${fx(subcap.score, 1)}${subcap.confidence ? ` · ${subcap.confidence}` : ""}`
               : `${catCells.length} subcaps${category.weight != null ? ` · weight ${fx(category.weight * 100, 0)}%` : ""}`}</div>
@@ -1575,21 +1611,28 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
 }
 
 function IssueRegisterBanner({ entity, onSubcap, openEvidence }) {
-  const openIssues = DMA.ISSUES.filter(i => i.status === "OPEN");
+  /* Every promoted issue, with its promoted status printed. This filtered on
+     `status === "OPEN"` — a value the register does not use (this run states
+     ACTIVE, NEW OBLIGATION and REMEDIATED) — so the whole banner vanished while
+     the cells beneath it carried issue markers, and the page contradicted
+     itself. Classifying a promoted status as open or closed is a judgement the
+     run has not made, so the row shows what it says. */
+  const issues = DMA.ISSUES || [];
   const [open, setOpen] = useState(null);
-  if (openIssues.length === 0) return null;
+  if (issues.length === 0) return null;
   return (
     <div className="card" style={{ marginBottom: 12, padding: 14, background: "rgba(254,151,50,.06)", border: "1px solid rgba(254,151,50,.28)" }}>
       <div className="row" style={{ marginBottom: 10 }}>
         <Icon name="warn" size={14} style={{ color: "var(--z-org)" }} />
-        <strong style={{ fontSize: 13, color: "var(--z-dark)" }}>Issue register · {openIssues.length} open</strong>
+        <strong style={{ fontSize: 13, color: "var(--z-dark)" }}>Issue register · {issues.length} issue{issues.length === 1 ? "" : "s"}</strong>
         <span className="b b-muted">click an issue to drill in</span>
         <span className="spacer" />
         <a href={`#/clients/${entity.id}/context`} style={{ fontSize: 11, color: "var(--z-mid)", fontWeight: 600 }}>Full register →</a>
       </div>
       <div className="g2" style={{ gap: 8 }}>
-        {openIssues.map(iss => {
+        {issues.map(iss => {
           const caps = Object.entries(DMA.ISSUE_CAPS[iss.id]?.caps || {});
+          const capped = caps.filter(([, cap]) => cap != null).length;
           const isOpen = open === iss.id;
           // Evidence for the CAPPED cells. Matching on a 4-char prefix meant
           // "anything citing any cell in the same category", so an item that has
@@ -1601,30 +1644,44 @@ function IssueRegisterBanner({ entity, onSubcap, openEvidence }) {
               <button onClick={() => setOpen(o => o === iss.id ? null : iss.id)} style={{ width: "100%", background: "none", border: 0, cursor: "pointer", textAlign: "left", padding: 10 }}>
                 <div className="row" style={{ marginBottom: 6, gap: 6 }}>
                   <span className="chip">{iss.id}</span>
-                  <span className="b b-muted">{iss.type}</span>
-                  <span className={`b ${iss.severity === "CRITICAL" ? "b-below" : iss.severity === "MATERIAL" ? "b-org" : "b-muted"}`}>{iss.severity}</span>
+                  {iss.title || iss.type ? <span className="b b-muted txt-fit-1">{iss.title || iss.type}</span> : null}
+                  {iss.severity ? <span className={`b ${iss.severity === "CRITICAL" ? "b-below" : iss.severity === "MATERIAL" ? "b-org" : "b-muted"}`}>{iss.severity}</span> : null}
                   <span className="spacer" />
-                  <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} />
-                  <span style={{ fontSize: 10, color: "var(--z-muted)" }}>caps {caps.length}</span>
+                  {/* "caps N" claimed a maturity ceiling for every linked cell.
+                      The register links cells; it states a cap level only
+                      sometimes, and for this run never. Lock and the word cap
+                      appear only where a level is stated. */}
+                  {capped ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} /> : null}
+                  <span style={{ fontSize: 10, color: "var(--z-muted)" }}>
+                    {capped ? `caps ${capped}` : `${caps.length} cell${caps.length === 1 ? "" : "s"} linked`}
+                  </span>
                   <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-muted)" }} />
                 </div>
                 <div style={{ fontSize: 12, color: "var(--z-dark)", lineHeight: 1.5 }} className={isOpen ? "" : "txt-fit-2"}>{iss.desc}</div>
               </button>
               {isOpen ? (
                 <div style={{ padding: "0 10px 10px" }}>
+                  {/* Each fact only when the register states it: "Cap M" with a
+                      null level printed "Cap Mundefined", and an undated issue
+                      printed "Since null". */}
                   <div className="row" style={{ gap: 12, fontSize: 11, color: "var(--z-muted)", marginBottom: 8, flexWrap: "wrap" }}>
-                    <span>Status <strong style={{ color: "var(--z-org)" }}>{iss.status}</strong></span>
-                    <span>Cap <strong style={{ color: "var(--z-dark)" }}>M{iss.cap_value}</strong></span>
-                    <span>Since <strong style={{ color: "var(--z-dark)" }}>{iss.start}</strong></span>
+                    {iss.status ? <span>Status <strong style={{ color: "var(--z-org)" }}>{iss.status}</strong></span> : null}
+                    {iss.cap_value != null ? <span>Cap <strong style={{ color: "var(--z-dark)" }}>M{iss.cap_value}</strong></span> : <span>no cap level stated</span>}
+                    {iss.start ? <span>Since <strong style={{ color: "var(--z-dark)" }}>{iss.start}</strong></span> : <span>undated</span>}
                     {iss.end ? <span>Resolved {iss.end}</span> : null}
                   </div>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 4 }}>Capped subcaps · click to drill</div>
+                  {caps.length ? (
+                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 4 }}>
+                      {capped ? "Capped subcaps · click to drill" : "Subcaps linked to this issue · click to drill"}
+                    </div>
+                  ) : null}
                   <div className="row" style={{ flexWrap: "wrap", gap: 4, marginBottom: ev.length ? 10 : 0 }}>
                     {caps.map(([sid, cap]) => {
                       const subcap = entity.subcaps.find(s => s.id === sid);
                       return (
-                        <button key={sid} className="chip purple" onClick={() => subcap && onSubcap(subcap)} title={(subcap?.name || sid) + " · capped at M" + cap}>
-                          {sid} · M{cap}{subcap ? ` · ${subcap.name}` : ""}
+                        <button key={sid} className="chip purple" onClick={() => subcap && onSubcap(subcap)}
+                          title={`${subcap?.name || sid}${cap != null ? ` · capped at M${cap}` : " · linked; no cap level stated"}`}>
+                          {sid}{cap != null ? ` · M${cap}` : ""}{subcap ? ` · ${subcap.name}` : ""}
                         </button>
                       );
                     })}

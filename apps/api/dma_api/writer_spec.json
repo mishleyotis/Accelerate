@@ -1465,7 +1465,7 @@
             },
             {
               "column": "synthesis",
-              "source": "skip:no contract field (section:synthesis)",
+              "source": "section:synthesis",
               "jsonb": false,
               "nullable": true
             },
@@ -2164,7 +2164,7 @@
             },
             {
               "column": "basis",
-              "source": "skip:no contract field (section:basis)",
+              "source": "skip:hoisted at read from series[].basis \u2014 the contract states basis PER POINT only and mixing definitions across periods is prohibited, so the set has cardinality 1. A section-level basis would be a SECOND place the metric definition is stated, which is how two definitions come to disagree. Validation asserts one distinct basis across the series rather than storing a hoist; live-adapter hoists it for the card.",
               "jsonb": false,
               "nullable": true
             },
@@ -2176,7 +2176,7 @@
             },
             {
               "column": "cagr",
-              "source": "skip:no contract field (section:cagr)",
+              "source": "skip:computed at read from series[].period/value (invariants 8 and 9) \u2014 no source states a CAGR arithmetic, a threshold or a payload key; the only mention rides on STEP 6's 'computed from the series'. `trend` differs because no doc gives a VOLATILE-vs-STABLE threshold, so only the producer can state that. A producer-stated, cited CAGR belongs on O2 firmographics.fields[], whose must-present set names CAGR \u2014 not here. The adapter's cagrOf() computes it from the first and last dated points over the real number of years between them, returning nothing when fewer than two dated points exist.",
               "jsonb": false,
               "nullable": true
             },
@@ -2188,7 +2188,7 @@
             },
             {
               "column": "reading",
-              "source": "skip:no contract field (section:reading)",
+              "source": "section:reading",
               "jsonb": false,
               "nullable": true
             },
@@ -2275,13 +2275,13 @@
             },
             {
               "column": "themes",
-              "source": "skip:no contract field (section:themes)",
+              "source": "section:themes",
               "jsonb": true,
               "nullable": true
             },
             {
               "column": "gap_analysis",
-              "source": "skip:no contract field (section:gap_analysis)",
+              "source": "section:gap_analysis",
               "jsonb": true,
               "nullable": true
             },
@@ -2931,7 +2931,7 @@
             },
             {
               "column": "summary",
-              "source": "skip:no contract field (section:summary)",
+              "source": "skip:no source defines a summary for T2. T2's contract is four counts recomputed from the T1 register, each tile printing its basis, and the Surface Spec states that no prompt block exists for the surface and it renders from server-derived data. The only 'summary line' in the corpus belongs to the TECHSTACK page (T1), not to insights.landscape \u2014 this column's DDL comment imported it across a page boundary (adjudication 2026-08-05). That line is composable at read from techstack_items (count and distinct layer of status='ABSENT') plus layers[].is_primary_gap, so it needs no stored column on either table.",
               "jsonb": false,
               "nullable": true
             },
@@ -4054,19 +4054,25 @@
             },
             {
               "column": "ratings",
-              "source": "skip:no contract field (section:ratings)",
+              "source": "skip:adjudicated 2026-08-05 \u2014 C4 RE-PROJECTS the dataset O9 renders as bars, so the ratings, themes and gap analysis live on overview_sentiment where O9 already stores them, and the two cards cannot disagree. The Surface Spec names context_tiles for C4 and names nothing else. Column retained rather than dropped: nothing has read it, so there is no data to migrate, but it is the only record of the mirror reading and a later stage may decide C4 stores its own projection.",
               "jsonb": true,
               "nullable": true
             },
             {
               "column": "themes",
-              "source": "skip:no contract field (section:themes)",
+              "source": "skip:adjudicated 2026-08-05 \u2014 C4 RE-PROJECTS the dataset O9 renders as bars, so the ratings, themes and gap analysis live on overview_sentiment where O9 already stores them, and the two cards cannot disagree. The Surface Spec names context_tiles for C4 and names nothing else. Column retained rather than dropped: nothing has read it, so there is no data to migrate, but it is the only record of the mirror reading and a later stage may decide C4 stores its own projection.",
               "jsonb": true,
               "nullable": true
             },
             {
               "column": "gap_analysis",
-              "source": "skip:no contract field (section:gap_analysis)",
+              "source": "skip:adjudicated 2026-08-05 \u2014 C4 RE-PROJECTS the dataset O9 renders as bars, so the ratings, themes and gap analysis live on overview_sentiment where O9 already stores them, and the two cards cannot disagree. The Surface Spec names context_tiles for C4 and names nothing else. Column retained rather than dropped: nothing has read it, so there is no data to migrate, but it is the only record of the mirror reading and a later stage may decide C4 stores its own projection.",
+              "jsonb": true,
+              "nullable": true
+            },
+            {
+              "column": "context_tiles",
+              "source": "section:context_tiles",
               "jsonb": true,
               "nullable": true
             },
