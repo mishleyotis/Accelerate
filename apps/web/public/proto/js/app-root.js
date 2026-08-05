@@ -243,6 +243,111 @@ function MyTweaks() {
   })));
 }
 
+/* ── Client-scoped route ─────────────────────────────────────────────
+   In production a client page renders PROMOTED sections or an honest
+   empty state. The prototype's client pages carry illustrative prose
+   about a fictional institution — three cores, an nCino migration, named
+   executive hires — and rendered under a real client's name that is
+   fabrication, so LIVE mode never reaches them. */
+const LIVE_MODE = typeof window !== "undefined" && !!window.DMA_LIVE;
+function ClientRoute({
+  id,
+  tab,
+  sub
+}) {
+  const {
+    route,
+    audience
+  } = useApp();
+  const entity = DMA.getEntity(id);
+  const runId = route.params.run;
+  const run = entity && (runId && entity.runs.find(r => r.id === runId) || entity.runs[0]);
+  const live = useLivePage(LIVE_MODE && entity ? entity.id : null, tab === "health" ? "heatmap" : tab, audience, run && run.run_id);
+  if (!entity) {
+    return /*#__PURE__*/React.createElement(PageShell, {
+      title: "Not found"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "empty"
+    }, /*#__PURE__*/React.createElement("h3", null, "Entity not found")));
+  }
+  if (LIVE_MODE) {
+    return /*#__PURE__*/React.createElement(ClientShell, {
+      entity: entity,
+      run: run,
+      tab: tab
+    }, /*#__PURE__*/React.createElement(LiveClientPage, {
+      entity: entity,
+      run: run,
+      tab: tab,
+      live: live
+    }));
+  }
+  let page = null;
+  switch (tab) {
+    case "overview":
+      page = /*#__PURE__*/React.createElement(ClientOverview, {
+        entity: entity,
+        run: run
+      });
+      break;
+    case "insights":
+      page = /*#__PURE__*/React.createElement(ClientInsights, {
+        entity: entity,
+        run: run
+      });
+      break;
+    case "heatmap":
+      page = /*#__PURE__*/React.createElement(ClientHeatmap, {
+        entity: entity,
+        run: run
+      });
+      break;
+    case "platform":
+      page = /*#__PURE__*/React.createElement(ClientPlatform, {
+        entity: entity,
+        run: run
+      });
+      break;
+    case "context":
+      page = /*#__PURE__*/React.createElement(ClientContext, {
+        entity: entity,
+        run: run
+      });
+      break;
+    case "health":
+      page = /*#__PURE__*/React.createElement(ClientHealth, {
+        entity: entity,
+        run: run
+      });
+      break;
+    case "techstack":
+      page = sub ? /*#__PURE__*/React.createElement(ClientTechStackDetail, {
+        entity: entity,
+        run: run,
+        techId: sub
+      }) : /*#__PURE__*/React.createElement(ClientTechStack, {
+        entity: entity,
+        run: run
+      });
+      break;
+    case "runs":
+      page = /*#__PURE__*/React.createElement(ClientRuns, {
+        entity: entity
+      });
+      break;
+    default:
+      page = /*#__PURE__*/React.createElement(ClientOverview, {
+        entity: entity,
+        run: run
+      });
+  }
+  return /*#__PURE__*/React.createElement(ClientShell, {
+    entity: entity,
+    run: run,
+    tab: tab
+  }, page);
+}
+
 /* ── Router ──────────────────────────────────────────────────────── */
 function Router() {
   const {
@@ -257,85 +362,15 @@ function Router() {
   if (!authed && path !== "/login") return /*#__PURE__*/React.createElement(LoginPage, null);
   if (path === "/login") return /*#__PURE__*/React.createElement(LoginPage, null);
 
-  // Client-scoped routes
+  // Client-scoped routes — a component of its own because it holds hooks
+  // (the live serving-tier read), and a hook inside a router branch would
+  // change hook order as the route changes.
   const m = path.match(/^\/clients\/([^/]+)(?:\/([^/]+))?(?:\/(.+))?$/);
-  if (m) {
-    const id = m[1];
-    const tab = m[2] || "overview";
-    const sub = m[3];
-    const entity = DMA.getEntity(id);
-    if (!entity) return /*#__PURE__*/React.createElement(PageShell, {
-      title: "Not found"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "empty"
-    }, /*#__PURE__*/React.createElement("h3", null, "Entity not found")));
-    const runId = route.params.run;
-    const run = runId && entity.runs.find(r => r.id === runId) || entity.runs[0];
-    let page = null;
-    switch (tab) {
-      case "overview":
-        page = /*#__PURE__*/React.createElement(ClientOverview, {
-          entity: entity,
-          run: run
-        });
-        break;
-      case "insights":
-        page = /*#__PURE__*/React.createElement(ClientInsights, {
-          entity: entity,
-          run: run
-        });
-        break;
-      case "heatmap":
-        page = /*#__PURE__*/React.createElement(ClientHeatmap, {
-          entity: entity,
-          run: run
-        });
-        break;
-      case "platform":
-        page = /*#__PURE__*/React.createElement(ClientPlatform, {
-          entity: entity,
-          run: run
-        });
-        break;
-      case "context":
-        page = /*#__PURE__*/React.createElement(ClientContext, {
-          entity: entity,
-          run: run
-        });
-        break;
-      case "health":
-        page = /*#__PURE__*/React.createElement(ClientHealth, {
-          entity: entity,
-          run: run
-        });
-        break;
-      case "techstack":
-        page = sub ? /*#__PURE__*/React.createElement(ClientTechStackDetail, {
-          entity: entity,
-          run: run,
-          techId: sub
-        }) : /*#__PURE__*/React.createElement(ClientTechStack, {
-          entity: entity,
-          run: run
-        });
-        break;
-      case "runs":
-        page = /*#__PURE__*/React.createElement(ClientRuns, {
-          entity: entity
-        });
-        break;
-      default:
-        page = /*#__PURE__*/React.createElement(ClientOverview, {
-          entity: entity,
-          run: run
-        });
-    }
-    return /*#__PURE__*/React.createElement(ClientShell, {
-      entity: entity,
-      run: run,
-      tab: tab
-    }, page);
-  }
+  if (m) return /*#__PURE__*/React.createElement(ClientRoute, {
+    id: m[1],
+    tab: m[2] || "overview",
+    sub: m[3]
+  });
 
   // Global pages
   if (path === "/" || path === "") return /*#__PURE__*/React.createElement(DashboardHome, null);

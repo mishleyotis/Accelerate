@@ -151,6 +151,56 @@ function sessionUser() {
   };
 }
 
+/* ── Live serving-tier reads (production only) ────────────────────────
+   A client-scoped page's content comes from the promoted serving tables
+   through the API, never from this prototype's fixtures. Three states,
+   all of which the pages must render honestly:
+     loading  the request is in flight
+     ready    sections is an object; a section may still be absent, which
+              means it did not promote — that is a state, not a blank
+     error    with the API's own code (entity_not_found, audience_forbidden,
+              run_superseded …) so the surface can say what happened. */
+function useLivePage(displayId, page, audience, runId) {
+  const LIVE = typeof window !== "undefined" && !!window.DMA_LIVE;
+  const [state, setState] = useState(
+    LIVE ? { status: "loading" } : { status: "mock" });
+  useEffect(() => {
+    if (!LIVE || !displayId || !page) return;
+    let cancelled = false;
+    setState({ status: "loading" });
+    const qs = new URLSearchParams({ audience: audience || "internal" });
+    if (runId) qs.set("run", runId);
+    fetch(`/api/entity/${encodeURIComponent(displayId)}/${page}?${qs}`)
+      .then(r => r.json().then(body => ({ ok: r.ok, status: r.status, body })))
+      .then(({ ok, body }) => {
+        if (cancelled) return;
+        setState(ok ? { status: "ready", sections: body.sections || {},
+                        entity: body.entity, run: body.run,
+                        audience: body.audience }
+                    : { status: "error", code: body.error || "unknown",
+                        detail: body.detail || null });
+      })
+      .catch(() => { if (!cancelled) setState({ status: "error", code: "unreachable" }); });
+    return () => { cancelled = true; };
+  }, [LIVE, displayId, page, audience, runId]);
+  return state;
+}
+
+/* The promoted data for one section, or null. `null` never means "render
+   the prototype's example content" — in production there is nothing else
+   to show, and a fixture rendered under a real client's name is the
+   fabrication this function exists to prevent. */
+function liveSection(live, name) {
+  if (!live || live.status !== "ready") return null;
+  const s = live.sections && live.sections[name];
+  return s && s.data ? s.data : null;
+}
+
+function liveSectionState(live, name) {
+  if (!live || live.status !== "ready") return null;
+  return (live.sections && live.sections[name]) || null;
+}
+
 /* End the app session server-side (cookie cleared), then land on the
    sign-in page. With IAP in front, the Google session itself persists —
    "Continue with Google" re-enters without a password prompt. */
@@ -391,4 +441,5 @@ Object.assign(window, {
   parseHash, buildHash, navigate, useRoute,
   fmtDate, fmtAssets, fmtPct, relTime, FreshnessDot,
   assetUrl, sessionUser, grantedRole, signOutSession,
+  useLivePage, liveSection, liveSectionState,
 });

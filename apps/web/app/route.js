@@ -46,6 +46,7 @@ const SCRIPTS = [
   "proto/js/pages-d3-d4.js",
   "proto/js/pages-d5-d6-tech-runs.js",
   "proto/js/pages-alerts-prospecting-admin.js",
+  "proto/js/pages-live-client.js",
   "proto/js/tweaks-panel.js",
   "proto/js/app-root.js",
 ];

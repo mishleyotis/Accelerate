@@ -147,6 +147,49 @@ function MyTweaks() {
   );
 }
 
+/* ── Client-scoped route ─────────────────────────────────────────────
+   In production a client page renders PROMOTED sections or an honest
+   empty state. The prototype's client pages carry illustrative prose
+   about a fictional institution — three cores, an nCino migration, named
+   executive hires — and rendered under a real client's name that is
+   fabrication, so LIVE mode never reaches them. */
+const LIVE_MODE = typeof window !== "undefined" && !!window.DMA_LIVE;
+
+function ClientRoute({ id, tab, sub }) {
+  const { route, audience } = useApp();
+  const entity = DMA.getEntity(id);
+  const runId = route.params.run;
+  const run = entity && ((runId && entity.runs.find(r => r.id === runId)) || entity.runs[0]);
+  const live = useLivePage(LIVE_MODE && entity ? entity.id : null,
+                           tab === "health" ? "heatmap" : tab,
+                           audience, run && run.run_id);
+
+  if (!entity) {
+    return <PageShell title="Not found"><div className="empty"><h3>Entity not found</h3></div></PageShell>;
+  }
+  if (LIVE_MODE) {
+    return (
+      <ClientShell entity={entity} run={run} tab={tab}>
+        <LiveClientPage entity={entity} run={run} tab={tab} live={live} />
+      </ClientShell>
+    );
+  }
+
+  let page = null;
+  switch (tab) {
+    case "overview":  page = <ClientOverview entity={entity} run={run} />; break;
+    case "insights":  page = <ClientInsights entity={entity} run={run} />; break;
+    case "heatmap":   page = <ClientHeatmap entity={entity} run={run} />; break;
+    case "platform":  page = <ClientPlatform entity={entity} run={run} />; break;
+    case "context":   page = <ClientContext entity={entity} run={run} />; break;
+    case "health":    page = <ClientHealth entity={entity} run={run} />; break;
+    case "techstack": page = sub ? <ClientTechStackDetail entity={entity} run={run} techId={sub} /> : <ClientTechStack entity={entity} run={run} />; break;
+    case "runs":      page = <ClientRuns entity={entity} />; break;
+    default:          page = <ClientOverview entity={entity} run={run} />;
+  }
+  return <ClientShell entity={entity} run={run} tab={tab}>{page}</ClientShell>;
+}
+
 /* ── Router ──────────────────────────────────────────────────────── */
 function Router() {
   const { route, authed } = useApp();
@@ -156,31 +199,11 @@ function Router() {
   if (!authed && path !== "/login") return <LoginPage />;
   if (path === "/login") return <LoginPage />;
 
-  // Client-scoped routes
+  // Client-scoped routes — a component of its own because it holds hooks
+  // (the live serving-tier read), and a hook inside a router branch would
+  // change hook order as the route changes.
   const m = path.match(/^\/clients\/([^/]+)(?:\/([^/]+))?(?:\/(.+))?$/);
-  if (m) {
-    const id = m[1];
-    const tab = m[2] || "overview";
-    const sub = m[3];
-    const entity = DMA.getEntity(id);
-    if (!entity) return <PageShell title="Not found"><div className="empty"><h3>Entity not found</h3></div></PageShell>;
-    const runId = route.params.run;
-    const run = (runId && entity.runs.find(r => r.id === runId)) || entity.runs[0];
-
-    let page = null;
-    switch (tab) {
-      case "overview":  page = <ClientOverview entity={entity} run={run} />; break;
-      case "insights":  page = <ClientInsights entity={entity} run={run} />; break;
-      case "heatmap":   page = <ClientHeatmap entity={entity} run={run} />; break;
-      case "platform":  page = <ClientPlatform entity={entity} run={run} />; break;
-      case "context":   page = <ClientContext entity={entity} run={run} />; break;
-      case "health":    page = <ClientHealth entity={entity} run={run} />; break;
-      case "techstack": page = sub ? <ClientTechStackDetail entity={entity} run={run} techId={sub} /> : <ClientTechStack entity={entity} run={run} />; break;
-      case "runs":      page = <ClientRuns entity={entity} />; break;
-      default:          page = <ClientOverview entity={entity} run={run} />;
-    }
-    return <ClientShell entity={entity} run={run} tab={tab}>{page}</ClientShell>;
-  }
+  if (m) return <ClientRoute id={m[1]} tab={m[2] || "overview"} sub={m[3]} />;
 
   // Global pages
   if (path === "/" || path === "")            return <DashboardHome />;
