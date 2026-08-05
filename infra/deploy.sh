@@ -126,7 +126,7 @@ if [ -f apps/worker/Dockerfile ]; then
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-worker@${SA_DOMAIN}" \
     --network=default --subnet=default --vpc-egress=private-ranges-only \
-    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-worker@${PROJECT_ID}.iam;DB_NAME=dma_insights;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo};MAX_PACKAGES=3" \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-worker@${PROJECT_ID}.iam;DB_NAME=dma_insights;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo};MAX_PACKAGES=${MAX_PACKAGES:-10}" \
     --max-retries=0 --task-timeout=3600 --memory=2Gi --cpu=2 --quiet
   gcloud run jobs add-iam-policy-binding dmai-worker \
     --project="$PROJECT_ID" --region="$REGION" \

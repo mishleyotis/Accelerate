@@ -185,3 +185,76 @@ def test_packages_assemble_from_the_whole_tree_not_only_changed_files():
     # and it carries the artefacts that did NOT change
     assert "manifest" in parts and "report" in parts
     assert parts["report"].name == "DMA_Assessment_Report_A.docx"
+
+
+class _BackfillCursor:
+    """Enough of a cursor for backfill_sections: one SELECT of runs that
+    hold no sections, then INSERTs into document_sections."""
+
+    def __init__(self, runs):
+        self._runs, self.inserted = runs, []
+        self._rows = []
+
+    def execute(self, sql, params=None):
+        if "FROM runs r" in sql:
+            assert "NOT EXISTS" in sql, "must only pick runs with no sections"
+            self._rows = list(self._runs)
+        elif "INSERT INTO document_sections" in sql:
+            self.inserted.append(params)
+        else:                                    # pragma: no cover
+            raise AssertionError(f"unexpected sql: {sql[:60]}")
+
+    def fetchall(self):
+        return self._rows
+
+
+class _BackfillConn:
+    def __init__(self, runs):
+        self.cur = _BackfillCursor(runs)
+        self.commits = 0
+
+    def cursor(self):
+        return self.cur
+
+    def commit(self):
+        self.commits += 1
+
+    def rollback(self):
+        pass
+
+
+def test_backfill_fills_only_runs_whose_folder_ships_a_report(monkeypatch):
+    """Additive recovery for runs ingested before the assembly fix: the
+    sections land against the EXISTING run, and a folder with no report
+    artefact is reported rather than failed."""
+    import job_main
+    from dma_worker.report_parser import ReportSection
+
+    tree = [_f("Has Report - DMA", "DMA_Scoring_Workbook_A.xlsx"),
+            _f("Has Report - DMA", "DMA_Assessment_Report_A.docx"),
+            _f("No Report - DMA", "DMA_Scoring_Workbook_B.xlsx")]
+    groups = job_main._package_groups(tree)
+
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"docx-bytes")
+    monkeypatch.setattr(job_main, "parse_report", lambda p: [
+        ReportSection(section_kind="executive_summary", pillar_id=None,
+                      heading="Executive Summary", body="Body.", page=None),
+        ReportSection(section_kind="pillar_narrative", pillar_id="P1",
+                      heading="Strategy", body="Body.", page=None)])
+
+    conn = _BackfillConn([("run-a", "Has Report - DMA"),
+                          ("run-b", "No Report - DMA")])
+    rc = job_main.backfill_sections(conn, "token", groups)
+
+    assert rc == 0
+    assert len(conn.cur.inserted) == 2, "only run-a's two sections insert"
+    assert {row[0] for row in conn.cur.inserted} == {"run-a"}
+    assert conn.commits == 1, "one commit per backfilled run"
+
+
+def test_backfill_returns_before_the_scan_consumes_the_diff():
+    """run_scan stores the new checksums. A backfill executed after it
+    would swallow that firing's diff, so the changed packages would never
+    be ingested — the backfill branch must precede the scan call."""
+    src = (Path(__file__).resolve().parents[1] / "job_main.py").read_text()
+    assert src.index("BACKFILL_SECTIONS") < src.index("summary = run_scan(")

@@ -162,6 +162,57 @@ def _ingest_one(conn, token, folder, parts):
         return res, rationales
 
 
+def backfill_sections(conn, token, groups) -> int:
+    """One-time recovery for runs ingested before packages were assembled
+    from the whole tree: those runs hold no document_sections because their
+    report was never in the changed set. Re-parsing the report and
+    inserting the sections against the EXISTING run is additive — nothing
+    else in the ingested tier is touched, and no duplicate run is created.
+
+    Matched on runs.source_folder_id, which stores the client folder's
+    name. A run that already has sections is left alone (idempotent), and
+    so is a folder that ships no report."""
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.source_folder_id
+                     FROM runs r
+                    WHERE r.source_folder_id IS NOT NULL
+                      AND NOT EXISTS (SELECT 1 FROM document_sections d
+                                       WHERE d.run_id = r.id)
+                    ORDER BY r.source_folder_id""")
+    todo = cur.fetchall()
+    print(f"backfill: {len(todo)} run(s) with no report sections")
+    filled = skipped = failed = 0
+    for run_id, folder in todo:
+        parts = groups.get(folder) or {}
+        if "report" not in parts:
+            skipped += 1
+            continue
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                rp = os.path.join(td, "report.docx")
+                with open(rp, "wb") as fh:
+                    fh.write(drive.download(token, parts["report"].file_id))
+                sections = parse_report(rp)
+            for sec in sections:
+                cur.execute(
+                    """INSERT INTO document_sections
+                         (run_id, section_kind, pillar_id, heading, body, page,
+                          artefact_id)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s)""",
+                    (run_id, sec.section_kind, sec.pillar_id, sec.heading,
+                     sec.body, sec.page, parts["report"].file_id))
+            conn.commit()
+            print(f"backfill: {folder} -> {len(sections)} sections")
+            filled += 1
+        except Exception as exc:  # noqa: BLE001 — one bad report must not sink the pass
+            conn.rollback()
+            failed += 1
+            print(f"backfill FAILED: {folder}: {exc!r}")
+    print(f"backfill: {filled} filled, {skipped} have no report artefact, "
+          f"{failed} failed")
+    return 1 if failed else 0
+
+
 def main() -> int:
     intake = os.environ["INTAKE_FOLDER_ID"]
     limit = int(os.environ.get("MAX_PACKAGES", "3"))
@@ -192,8 +243,6 @@ def main() -> int:
     print(f"scan: walking intake tree {intake}")
     tree = drive.walk_tree(intake)
     print(f"scan: {len(tree)} files")
-    summary = run_scan(conn, tree, datetime.now(timezone.utc))
-    print(f"scan: new={summary['files_new']} changed={summary['files_changed']}")
 
     # Assemble packages from the WHOLE tree, and let the diff decide which
     # folders to process. Assembling from the changed set only meant a
@@ -202,6 +251,17 @@ def main() -> int:
     # folder with a changed report but an unchanged workbook looked
     # incomplete on every firing.
     groups = _package_groups(tree)
+
+    # Backfill runs BEFORE the scan and returns: run_scan stores the new
+    # checksums, so a backfill executed after it would swallow that
+    # firing's diff and the changed packages would never be ingested.
+    if os.environ.get("BACKFILL_SECTIONS"):
+        rc = backfill_sections(conn, drive.metadata_token(), groups)
+        conn.close()
+        return rc
+
+    summary = run_scan(conn, tree, datetime.now(timezone.utc))
+    print(f"scan: new={summary['files_new']} changed={summary['files_changed']}")
     touched = {f.path_segments[0] if f.path_segments else "?"
                for f in summary["to_process"]}
     # The scoring workbook is what makes a package ingestable; the manifest
