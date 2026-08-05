@@ -230,18 +230,24 @@ function WhyNowStrip({ entity, openEvidence, audience }) {
                     {!isCust && s.strength ? <span className={`b ${STR[s.strength] || "b-muted"}`}>{s.strength}</span> : null}
                   </div>
                   {!openNow ? <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 3, lineHeight: 1.4 }} className="txt-fit-1">{s.impact}</div> : null}
+                  {/* The window comes DOWN, under the header, and reads in
+                      full. The fixture's window was a phrase ("6-9 months") so
+                      it sat beside the label as an unshrinkable badge; the
+                      contract's is 20-40 words naming the closing event, which
+                      first crushed the label to one character per line and then,
+                      once it could shrink, concealed the sentence behind an
+                      ellipsis. Its own row wraps and hides nothing. */}
+                  {s.window ? (
+                    <div style={{ marginTop: 6, display: "flex" }}>
+                      <span style={{ background: "rgba(115,91,161,.14)", color: "var(--z-dpur)",
+                                     borderRadius: 6, padding: "5px 9px", fontSize: 11,
+                                     lineHeight: 1.5, whiteSpace: "normal" }}>
+                        {s.window}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
-                {/* The fixture's window was a phrase ("6-9 months"); the
-                    contract's is 20-40 words naming the closing event. An
-                    unshrinkable badge crushed the label beside it to one
-                    character per line, so the chip truncates and carries the
-                    full sentence in its tooltip — it reads in full in the
-                    expanded drilldown below. */}
-                <span className="b" title={s.window || undefined}
-                  style={{ background: "rgba(115,91,161,.14)", color: "var(--z-dpur)",
-                           flexShrink: 1, minWidth: 0, maxWidth: "38%",
-                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.window}</span>
-                <Icon name={openNow ? "chevron-u" : "chevron-d"} size={15} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
+                <Icon name={openNow ? "chevron-u" : "chevron-d"} size={15} style={{ color: "var(--z-muted)", flexShrink: 0, alignSelf: "flex-start", marginTop: 4 }} />
               </button>
               {/* expanded drilldown */}
               {openNow ? (

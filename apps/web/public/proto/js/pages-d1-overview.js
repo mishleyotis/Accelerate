@@ -546,25 +546,29 @@ function WhyNowStrip({
         lineHeight: 1.4
       },
       className: "txt-fit-1"
-    }, s.impact) : null), /*#__PURE__*/React.createElement("span", {
-      className: "b",
-      title: s.window || undefined,
+    }, s.impact) : null, s.window ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 6,
+        display: "flex"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
       style: {
         background: "rgba(115,91,161,.14)",
         color: "var(--z-dpur)",
-        flexShrink: 1,
-        minWidth: 0,
-        maxWidth: "38%",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap"
+        borderRadius: 6,
+        padding: "5px 9px",
+        fontSize: 11,
+        lineHeight: 1.5,
+        whiteSpace: "normal"
       }
-    }, s.window), /*#__PURE__*/React.createElement(Icon, {
+    }, s.window)) : null), /*#__PURE__*/React.createElement(Icon, {
       name: openNow ? "chevron-u" : "chevron-d",
       size: 15,
       style: {
         color: "var(--z-muted)",
-        flexShrink: 0
+        flexShrink: 0,
+        alignSelf: "flex-start",
+        marginTop: 4
       }
     })), openNow ? /*#__PURE__*/React.createElement("div", {
       style: {
