@@ -109,11 +109,15 @@ function MyTweaks() {
   return (
     <TweaksPanel title="Tweaks">
       <TweakSection title="Persona">
-        <TweakRadio label="Role" value={tweaks.role} onChange={v => setTweak("role", v)} options={[
-          { label: "AE",       value: "AE" },
-          { label: "Analyst",  value: "ANALYST" },
-          { label: "Admin",    value: "ADMIN" },
-        ]} />
+        <TweakRadio label="Role" value={tweaks.role} onChange={v => setTweak("role", v)} options={(() => {
+          const RANK = { AE: 0, ANALYST: 1, ADMIN: 2 };
+          const cap = RANK[grantedRole()] ?? 0;
+          return [
+            { label: "AE",       value: "AE" },
+            { label: "Analyst",  value: "ANALYST" },
+            { label: "Admin",    value: "ADMIN" },
+          ].filter(o => RANK[o.value] <= cap);
+        })()} />
         <TweakRadio label="Audience" value={tweaks.audience_default} onChange={v => setTweak("audience_default", v)} options={[
           { label: "Internal", value: "internal" },
           { label: "Customer", value: "customer" },

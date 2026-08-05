@@ -67,7 +67,7 @@ function Sidebar() {
             <div className="sb-foot-name">{sessionUser().short}</div>
             <div className="sb-foot-role">{role}</div>
           </div>
-          <button className="icon-btn" style={{ color: "rgba(255,255,255,.6)" }} title="Sign out" onClick={() => { setAuthed(false); navigate("/login"); }}>
+          <button className="icon-btn" style={{ color: "rgba(255,255,255,.6)" }} title="Sign out" onClick={() => { setAuthed(false); signOutSession(); }}>
             <Icon name="logout" size={14} />
           </button>
         </div>
@@ -252,7 +252,7 @@ function SettingsPopover({ onClose }) {
   const items = [
     { label: "Profile",          icon: "user",     route: "/admin",       sub: sessionUser().name },
     { label: "Tweaks panel",     icon: "settings", action: () => { try { window.parent.postMessage({ type: "__activate_edit_mode" }, "*"); } catch(e){}; window.dispatchEvent(new MessageEvent("message", { data: { type: "__activate_edit_mode" } })); onClose(); }, sub: "Toggle in-page tweaks" },
-    { label: "Sign out",          icon: "logout",   action: () => { setAuthed(false); navigate("/login"); onClose(); },     sub: "End session" },
+    { label: "Sign out",          icon: "logout",   action: () => { setAuthed(false); signOutSession(); onClose(); },     sub: "End session" },
   ];
   return (
     <div className="popover" style={{ width: 280 }}>
@@ -268,11 +268,15 @@ function SettingsPopover({ onClose }) {
         {/* Production divergence: previewing a lesser view is fine; acting
             ABOVE the server-granted role is not. */}
         <div className="toggle-row" style={{ width: "100%" }}>
-          {[["AE","AE"],["ANALYST","Analyst"],["ADMIN","Admin"]]
-            .filter(([k]) => k !== "ADMIN" || grantedRole() === "ADMIN")
-            .map(([k, l]) => (
-            <button key={k} className={role === k ? "on" : ""} style={{ flex: 1 }} onClick={() => { setRole(k); onClose(); }}>{l}</button>
-          ))}
+          {(() => {
+            const RANK = { AE: 0, ANALYST: 1, ADMIN: 2 };
+            const cap = RANK[grantedRole()] ?? 0;
+            return [["AE","AE"],["ANALYST","Analyst"],["ADMIN","Admin"]]
+              .filter(([k]) => RANK[k] <= cap)
+              .map(([k, l]) => (
+                <button key={k} className={role === k ? "on" : ""} style={{ flex: 1 }} onClick={() => { setRole(k); onClose(); }}>{l}</button>
+              ));
+          })()}
         </div>
       </div>
       <div className="popover-body" style={{ padding: 0 }}>

@@ -122,16 +122,27 @@ function assetUrl(id, fallback) {
    here — nothing hardcodes a person. */
 function sessionUser() {
   const live = (typeof window !== "undefined" && window.DMA_LIVE) || null;
-  const email = live && live.email;
-  if (!email) {
+  if (!live) {
+    // Local prototype preview only (template.html) — never rendered in
+    // production, where DMA_LIVE always exists.
     return { name: "Mishley Otiende", short: "Mishley O.", first: "Mishley",
              initials: "MO", email: "mishley@zennify.com" };
   }
-  const parts = email.split("@")[0].split(/[._-]+/).filter(Boolean)
-    .map(w => w[0].toUpperCase() + w.slice(1));
+  const email = live.email;
+  if (!email) {
+    // Live but unauthenticated: nothing to show but the sign-in gate.
+    return { name: "Not signed in", short: "—", first: "there",
+             initials: "?", email: "" };
+  }
+  // Server-verified display name (lib/identity.js); the client never
+  // invents one when the server provided it.
+  const name = live.name ||
+    email.split("@")[0].split(/[._-]+/).filter(Boolean)
+      .map(w => w[0].toUpperCase() + w.slice(1)).join(" ") || email;
+  const parts = name.split(/\s+/).filter(Boolean);
   const first = parts[0] || email;
   return {
-    name: parts.join(" ") || email,
+    name,
     short: parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : first,
     first,
     initials: (parts.length > 1 ? parts[0][0] + parts[1][0]
@@ -140,12 +151,26 @@ function sessionUser() {
   };
 }
 
+/* End the app session server-side (cookie cleared), then land on the
+   sign-in page. With IAP in front, the Google session itself persists —
+   "Continue with Google" re-enters without a password prompt. */
+function signOutSession() {
+  const done = () => window.location.assign("/login");
+  if (typeof window !== "undefined" && window.DMA_LIVE) {
+    fetch("/api/signout", { method: "POST" }).then(done, done);
+  } else {
+    done();
+  }
+}
+
 /* The role the SERVER granted this session (allowlist). "Acting as" may
    preview a lesser view but never exceed the grant. Local preview
    (no DMA_LIVE) keeps the prototype's free switching. */
 function grantedRole() {
   const live = (typeof window !== "undefined" && window.DMA_LIVE) || null;
-  return live ? (live.role || "ANALYST") : "ADMIN";
+  // AE is what everyone outside the ADMIN/ANALYST allowlists gets — the
+  // default view, granted server-side. Local preview keeps free switching.
+  return live ? (live.role || "AE") : "ADMIN";
 }
 
 /* ── Brand mark ──────────────────────────────────────────────────── */
@@ -365,5 +390,5 @@ Object.assign(window, {
   LoadingScreen, SectionLoader, ConnectionWatcher,
   parseHash, buildHash, navigate, useRoute,
   fmtDate, fmtAssets, fmtPct, relTime, FreshnessDot,
-  assetUrl, sessionUser, grantedRole,
+  assetUrl, sessionUser, grantedRole, signOutSession,
 });

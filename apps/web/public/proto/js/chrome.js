@@ -140,7 +140,7 @@ function Sidebar() {
     title: "Sign out",
     onClick: () => {
       setAuthed(false);
-      navigate("/login");
+      signOutSession();
     }
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "logout",
@@ -612,7 +612,7 @@ function SettingsPopover({
     icon: "logout",
     action: () => {
       setAuthed(false);
-      navigate("/login");
+      signOutSession();
       onClose();
     },
     sub: "End session"
@@ -666,17 +666,25 @@ function SettingsPopover({
     style: {
       width: "100%"
     }
-  }, [["AE", "AE"], ["ANALYST", "Analyst"], ["ADMIN", "Admin"]].filter(([k]) => k !== "ADMIN" || grantedRole() === "ADMIN").map(([k, l]) => /*#__PURE__*/React.createElement("button", {
-    key: k,
-    className: role === k ? "on" : "",
-    style: {
-      flex: 1
-    },
-    onClick: () => {
-      setRole(k);
-      onClose();
-    }
-  }, l)))), /*#__PURE__*/React.createElement("div", {
+  }, (() => {
+    const RANK = {
+      AE: 0,
+      ANALYST: 1,
+      ADMIN: 2
+    };
+    const cap = RANK[grantedRole()] ?? 0;
+    return [["AE", "AE"], ["ANALYST", "Analyst"], ["ADMIN", "Admin"]].filter(([k]) => RANK[k] <= cap).map(([k, l]) => /*#__PURE__*/React.createElement("button", {
+      key: k,
+      className: role === k ? "on" : "",
+      style: {
+        flex: 1
+      },
+      onClick: () => {
+        setRole(k);
+        onClose();
+      }
+    }, l));
+  })())), /*#__PURE__*/React.createElement("div", {
     className: "popover-body",
     style: {
       padding: 0

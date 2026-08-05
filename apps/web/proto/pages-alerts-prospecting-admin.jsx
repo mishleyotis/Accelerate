@@ -378,13 +378,29 @@ function LiveImportStream() {
 /* ── Editable users & roles (Admin) ──────────────────────────────── */
 function AdminUsersCard() {
   const { pushToast } = useApp();
-  // Production divergence: real deployments list the signed-in session
-  // only (the users table arrives with the auth stage); the mock staff
+  // Production divergence: LIVE mode renders the REAL role grants the
+  // server resolves sign-ins against (DMA_LIVE.role_grants, admin
+  // sessions only) — read-only until the users table lands; grants
+  // change via deployment env, never via this card. The mutable mock
   // roster renders solely in local preview.
-  const [users, setUsers] = useState(window.DMA_LIVE ? [
-    { id: 1, name: sessionUser().name, email: sessionUser().email,
-      role: (window.DMA_LIVE.role || "ANALYST"), active: true, last: "now" },
-  ] : [
+  const LIVE = !!window.DMA_LIVE;
+  const liveGrantRows = (() => {
+    if (!LIVE) return null;
+    const g = window.DMA_LIVE.role_grants;
+    if (!g) return [];
+    const nameOf = (e) => {
+      const parts = e.split("@")[0].split(/[._-]+/).filter(Boolean);
+      if (parts.length === 1 && parts[0].length <= 3) return parts[0].toUpperCase();
+      return parts.map(w => w[0].toUpperCase() + w.slice(1)).join(" ") || e;
+    };
+    const me = sessionUser().email;
+    const rows = [];
+    g.admins.forEach((e, i) => rows.push({ id: `adm-${i}`, name: nameOf(e), email: e, role: "ADMIN", active: true, last: e === me ? "now (this session)" : "—" }));
+    g.analysts.filter(e => !g.admins.includes(e)).forEach((e, i) =>
+      rows.push({ id: `ana-${i}`, name: nameOf(e), email: e, role: "ANALYST", active: true, last: e === me ? "now (this session)" : "—" }));
+    return rows;
+  })();
+  const [users, setUsers] = useState(LIVE ? (liveGrantRows || []) : [
     { id: 1, name: "Mishley Andrade", email: "mishley@zennify.com", role: "ANALYST", active: true,  last: "2 min ago"  },
     { id: 2, name: "Dev Patel",       email: "dev@zennify.com",     role: "ADMIN",   active: true,  last: "1 hr ago"   },
     { id: 3, name: "Sara Lin",        email: "sara@zennify.com",    role: "AE",      active: true,  last: "Yesterday"  },
@@ -393,9 +409,16 @@ function AdminUsersCard() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("AE");
 
-  const setRole = (id, role) => { setUsers(us => us.map(u => u.id === id ? { ...u, role } : u)); pushToast(`Role updated to ${role}`, "success"); };
-  const toggleActive = (id) => setUsers(us => us.map(u => u.id === id ? (pushToast(`${u.name} ${u.active ? "deactivated" : "reactivated"}`, u.active ? "warn" : "success"), { ...u, active: !u.active }) : u));
+  const setRole = (id, role) => {
+    if (LIVE) { pushToast("Grants are set per deployment (ADMIN_EMAILS / ANALYST_EMAILS) until the users table lands", "warn"); return; }
+    setUsers(us => us.map(u => u.id === id ? { ...u, role } : u)); pushToast(`Role updated to ${role}`, "success");
+  };
+  const toggleActive = (id) => {
+    if (LIVE) { pushToast("Grants are set per deployment (ADMIN_EMAILS / ANALYST_EMAILS) until the users table lands", "warn"); return; }
+    setUsers(us => us.map(u => u.id === id ? (pushToast(`${u.name} ${u.active ? "deactivated" : "reactivated"}`, u.active ? "warn" : "success"), { ...u, active: !u.active }) : u));
+  };
   const invite = () => {
+    if (LIVE) { pushToast("Invites arrive with the users table; today every @zennify.com Google account signs in as AE automatically", "warn"); return; }
     const email = inviteEmail.trim();
     if (!email) { pushToast("Enter an email to invite", "warn"); return; }
     if (!/@zennify\.com$/i.test(email)) { pushToast("Only @zennify.com addresses can be invited", "warn"); return; }
@@ -438,15 +461,22 @@ function AdminUsersCard() {
           </tbody>
         </table>
       </div>
-      <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-        <input className="inp inp-sm" style={{ flex: 1, minWidth: 200 }} placeholder="name@zennify.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => { if (e.key === "Enter") invite(); }} />
-        <select className="inp inp-sm" value={inviteRole} onChange={e => setInviteRole(e.target.value)} style={{ maxWidth: 130 }} aria-label="Invite role">
-          <option value="AE">AE</option>
-          <option value="ANALYST">Analyst</option>
-          <option value="ADMIN">Admin</option>
-        </select>
-        <button className="btn btn-primary btn-sm" onClick={invite}><Icon name="plus" size={12} /> Invite user</button>
-      </div>
+      {LIVE ? (
+        <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", fontSize: 11.5, color: "var(--z-muted)", display: "flex", gap: 8, alignItems: "flex-start" }}>
+          <Icon name="info" size={13} style={{ flexShrink: 0, marginTop: 1 }} />
+          <span>Every other @zennify.com Google account signs in as <strong>AE</strong> automatically. ADMIN and ANALYST are deploy-time grants (ADMIN_EMAILS / ANALYST_EMAILS); per-user management arrives with the users table.</span>
+        </div>
+      ) : (
+        <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          <input className="inp inp-sm" style={{ flex: 1, minWidth: 200 }} placeholder="name@zennify.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => { if (e.key === "Enter") invite(); }} />
+          <select className="inp inp-sm" value={inviteRole} onChange={e => setInviteRole(e.target.value)} style={{ maxWidth: 130 }} aria-label="Invite role">
+            <option value="AE">AE</option>
+            <option value="ANALYST">Analyst</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+          <button className="btn btn-primary btn-sm" onClick={invite}><Icon name="plus" size={12} /> Invite user</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -454,14 +484,34 @@ function AdminUsersCard() {
 /* ── /admin home + import + audit ────────────────────────────────── */
 function AdminPage() {
   const { role, pushToast } = useApp();
+  const LIVE = !!window.DMA_LIVE;
   const [scanning, setScanning] = useState(false);
-  const [folder, setFolder] = useState("1uvt3kh…2O0P");
-  const [schedule, setSchedule] = useState("6h");
+  const [folder, setFolder] = useState(
+    LIVE ? (window.DMA_LIVE.intake_folder_id || "not configured") : "1uvt3kh…2O0P");
+  const [schedule, setSchedule] = useState(LIVE ? "30m" : "6h");
   const [editingFolder, setEditingFolder] = useState(false);
   const [budgetCap, setBudgetCap] = useState(400);
   const [autoDowngrade, setAutoDowngrade] = useState(true);
   if (role !== "ADMIN") return <PageShell title="Admin"><div className="empty"><div className="icon"><Icon name="lock" size={22} /></div><h3>Admin access required</h3><p>Switch to the Admin role to manage users, ingest, and system settings.</p></div></PageShell>;
-  const runScan = (kind) => { setScanning(true); pushToast(kind === "full" ? "Full Drive rescan started" : "Delta scan started", "success"); setTimeout(() => { setScanning(false); pushToast(`Scan complete: ${kind === "full" ? "187 files" : "3 new candidates"}`, "success"); }, 2000); };
+  // Production divergence: the scan button fires a real execution of the
+  // package-scan worker Job (same Job Cloud Scheduler fires every 30
+  // minutes). No fake progress, no fake counts — the import audit page
+  // shows what the execution actually did.
+  const runScan = (kind) => {
+    if (LIVE) {
+      setScanning(true);
+      fetch("/api/admin/scan", { method: "POST" })
+        .then(r => r.json().then(b => ({ ok: r.ok, b })))
+        .then(({ ok, b }) => {
+          setScanning(false);
+          if (ok) pushToast("Package scan started — new client folders land as the Job completes", "success");
+          else pushToast(b.error || "Scan trigger failed", "warn");
+        })
+        .catch(() => { setScanning(false); pushToast("Scan trigger failed", "warn"); });
+      return;
+    }
+    setScanning(true); pushToast(kind === "full" ? "Full Drive rescan started" : "Delta scan started", "success"); setTimeout(() => { setScanning(false); pushToast(`Scan complete: ${kind === "full" ? "187 files" : "3 new candidates"}`, "success"); }, 2000);
+  };
 
   return (
     <PageShell title="Admin" crumbs={[{ label: "Admin" }]}>
@@ -511,13 +561,15 @@ function AdminPage() {
             <Icon name="drive" size={16} />
             <div style={{ fontWeight: 600, fontSize: 13 }}>Drive crawl</div>
             <span className="spacer" />
-            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Last crawl 2 hr ago</span>
+            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{LIVE ? "History → Import audit" : "Last crawl 2 hr ago"}</span>
           </div>
 
-          {/* Editable target folder */}
+          {/* Target folder: in production this is the deployed intake
+              tree (worker env), shown read-only — editing it here would
+              only pretend to change the Job. */}
           <label className="field-label">Target folder ID</label>
           <div className="row" style={{ gap: 8, marginBottom: 12 }}>
-            {editingFolder ? (
+            {editingFolder && !LIVE ? (
               <input className="inp inp-sm" style={{ flex: 1 }} value={folder} autoFocus
                 onChange={e => setFolder(e.target.value)}
                 onBlur={() => { setEditingFolder(false); pushToast("Target folder updated", "success"); }}
@@ -525,19 +577,29 @@ function AdminPage() {
             ) : (
               <>
                 <span className="f-mono" style={{ flex: 1, fontSize: 12, padding: "7px 10px", background: "var(--z-bg)", borderRadius: 6, border: "1px solid var(--z-sep)" }}>{folder}</span>
-                <button className="btn btn-tertiary btn-sm" onClick={() => setEditingFolder(true)}><Icon name="edit" size={12} /> Edit</button>
+                {LIVE ? (
+                  <button className="btn btn-tertiary btn-sm" onClick={() => pushToast("The intake folder is set on the worker Job (INTAKE_FOLDER_ID) at deploy time", "warn")}><Icon name="lock" size={12} /> Deploy-set</button>
+                ) : (
+                  <button className="btn btn-tertiary btn-sm" onClick={() => setEditingFolder(true)}><Icon name="edit" size={12} /> Edit</button>
+                )}
               </>
             )}
           </div>
 
-          {/* Editable schedule */}
+          {/* Schedule: production runs on the Cloud Scheduler trigger. */}
           <label className="field-label">Crawl schedule</label>
-          <select className="inp inp-sm" value={schedule} onChange={e => { setSchedule(e.target.value); pushToast("Crawl schedule updated", "success"); }} style={{ marginBottom: 14 }}>
-            <option value="1h">Every hour</option>
-            <option value="6h">Every 6 hours</option>
-            <option value="24h">Daily</option>
-            <option value="manual">Manual only</option>
-          </select>
+          {LIVE ? (
+            <div className="f-mono" style={{ fontSize: 12, padding: "7px 10px", background: "var(--z-bg)", borderRadius: 6, border: "1px solid var(--z-sep)", marginBottom: 14 }}>
+              Every 30 minutes · Cloud Scheduler (dmai-package-scan)
+            </div>
+          ) : (
+            <select className="inp inp-sm" value={schedule} onChange={e => { setSchedule(e.target.value); pushToast("Crawl schedule updated", "success"); }} style={{ marginBottom: 14 }}>
+              <option value="1h">Every hour</option>
+              <option value="6h">Every 6 hours</option>
+              <option value="24h">Daily</option>
+              <option value="manual">Manual only</option>
+            </select>
+          )}
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button className="btn btn-primary btn-sm" disabled={scanning} onClick={() => runScan("delta")}>{scanning ? <><span className="spinner" /> Scanning…</> : <><Icon name="refresh" size={12} /> Delta scan</>}</button>
@@ -548,30 +610,55 @@ function AdminPage() {
         </div>
 
         <div className="card">
-          <div className="row" style={{ marginBottom: 12 }}>
-            <Icon name="money" size={16} />
-            <div style={{ fontWeight: 600, fontSize: 13 }}>Vertex AI budget</div>
-            <span className="spacer" />
-            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>$184 / ${budgetCap} · {Math.round(184 / budgetCap * 100)}%</span>
-          </div>
-          <div className="prog"><div className="prog-fill" style={{ width: `${Math.min(100, 184 / budgetCap * 100)}%`, background: 184 / budgetCap > 0.8 ? "var(--z-org)" : "var(--z-teal)" }} /></div>
+          {LIVE ? (
+            /* Production divergence: there is no model budget to show —
+               the serving path performs no inference (charter invariant).
+               Synthesis runs in Claude Cowork against the connector. */
+            <React.Fragment>
+              <div className="row" style={{ marginBottom: 12 }}>
+                <Icon name="insight" size={16} />
+                <div style={{ fontWeight: 600, fontSize: 13 }}>Synthesis pipeline</div>
+              </div>
+              <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.6 }}>
+                This application performs <strong>no inference at request time</strong>.
+                Page content is produced ahead of time by the synthesis agent in
+                Claude Cowork through the DMA connector, validated against
+                structured verdicts, and promoted atomically — all six pages or
+                none. What renders here is exactly what was promoted.
+              </div>
+              <div style={{ marginTop: 12, fontSize: 11.5, color: "var(--z-muted)" }}>
+                Ingestion → scan Job (every 30 min) · Synthesis → Cowork session ·
+                Serving → promoted tables only
+              </div>
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
+              <div className="row" style={{ marginBottom: 12 }}>
+                <Icon name="money" size={16} />
+                <div style={{ fontWeight: 600, fontSize: 13 }}>Vertex AI budget</div>
+                <span className="spacer" />
+                <span style={{ fontSize: 11, color: "var(--z-muted)" }}>$184 / ${budgetCap} · {Math.round(184 / budgetCap * 100)}%</span>
+              </div>
+              <div className="prog"><div className="prog-fill" style={{ width: `${Math.min(100, 184 / budgetCap * 100)}%`, background: 184 / budgetCap > 0.8 ? "var(--z-org)" : "var(--z-teal)" }} /></div>
 
-          {/* Mini per-day bars */}
-          <div style={{ display: "flex", gap: 3, alignItems: "flex-end", height: 36, marginTop: 14 }}>
-            {[12, 18, 9, 22, 14, 28, 19, 24, 11, 16, 21, 17].map((v, i) => (
-              <div key={i} title={`Day ${i + 1} · $${v}`} style={{ flex: 1, height: `${v / 28 * 100}%`, background: i % 3 === 2 ? "var(--z-dpur)" : "var(--z-mid)", borderRadius: 2, opacity: 0.85 }} />
-            ))}
-          </div>
-          <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 4 }}>Flash 76% · Pro 24% · last 12 days</div>
+              {/* Mini per-day bars */}
+              <div style={{ display: "flex", gap: 3, alignItems: "flex-end", height: 36, marginTop: 14 }}>
+                {[12, 18, 9, 22, 14, 28, 19, 24, 11, 16, 21, 17].map((v, i) => (
+                  <div key={i} title={`Day ${i + 1} · $${v}`} style={{ flex: 1, height: `${v / 28 * 100}%`, background: i % 3 === 2 ? "var(--z-dpur)" : "var(--z-mid)", borderRadius: 2, opacity: 0.85 }} />
+                ))}
+              </div>
+              <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 4 }}>Flash 76% · Pro 24% · last 12 days</div>
 
-          {/* Editable budget cap */}
-          <label className="field-label" style={{ marginTop: 14 }}>Monthly budget cap (USD)</label>
-          <input className="inp inp-sm" type="number" min="50" step="50" value={budgetCap} onChange={e => setBudgetCap(Number(e.target.value) || 0)} onBlur={() => pushToast(`Budget cap set to $${budgetCap}`, "success")} style={{ marginBottom: 12 }} />
+              {/* Editable budget cap */}
+              <label className="field-label" style={{ marginTop: 14 }}>Monthly budget cap (USD)</label>
+              <input className="inp inp-sm" type="number" min="50" step="50" value={budgetCap} onChange={e => setBudgetCap(Number(e.target.value) || 0)} onBlur={() => pushToast(`Budget cap set to $${budgetCap}`, "success")} style={{ marginBottom: 12 }} />
 
-          <button className="toggle-pill" onClick={() => { setAutoDowngrade(v => !v); pushToast(`Auto-downgrade to Flash ${!autoDowngrade ? "enabled" : "disabled"}`, "success"); }} aria-pressed={autoDowngrade}>
-            <span className={`toggle-track ${autoDowngrade ? "on" : ""}`}><span className="toggle-knob" /></span>
-            <span style={{ fontSize: 12, color: "var(--z-dark)" }}>Auto-downgrade to Flash at 90% spend</span>
-          </button>
+              <button className="toggle-pill" onClick={() => { setAutoDowngrade(v => !v); pushToast(`Auto-downgrade to Flash ${!autoDowngrade ? "enabled" : "disabled"}`, "success"); }} aria-pressed={autoDowngrade}>
+                <span className={`toggle-track ${autoDowngrade ? "on" : ""}`}><span className="toggle-knob" /></span>
+                <span style={{ fontSize: 12, color: "var(--z-dark)" }}>Auto-downgrade to Flash at 90% spend</span>
+              </button>
+            </React.Fragment>
+          )}
         </div>
       </div>
     </PageShell>
@@ -580,17 +667,40 @@ function AdminPage() {
 
 function ImportPage() {
   const { role, pushToast } = useApp();
+  const LIVE = !!window.DMA_LIVE;
   const [scanning, setScanning] = useState(false);
   const [tab, setTab] = useState("jobs");
   if (role !== "ADMIN") return <PageShell title="Import"><div className="empty"><div className="icon"><Icon name="lock" size={22} /></div><h3>Admin access required</h3></div></PageShell>;
 
-  const jobs = [
+  // Production divergence: LIVE renders the REAL scan ledger
+  // (import_scans via the API) — every row is an actual execution of the
+  // package-scan Job. The mock history renders solely in local preview.
+  const jobs = LIVE ? (window.DMA_LIVE.import_scans || []).map(s => {
+    const ms = s.started_at && s.finished_at ? (new Date(s.finished_at) - new Date(s.started_at)) : null;
+    return {
+      id: `SCAN-${s.id}`,
+      kind: `Package scan · ${s.files_new ?? 0} new / ${s.files_changed ?? 0} changed`,
+      status: (s.status || "").toUpperCase() === "SUCCEEDED" ? "COMPLETED" : (s.status || "?").toUpperCase(),
+      started: s.started_at ? new Date(s.started_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—",
+      files: s.files_seen ?? "—",
+      entities: s.runs_created ?? 0,
+      took: ms == null ? "—" : (ms < 1000 ? "<1 s" : `${Math.round(ms / 1000)} s`),
+    };
+  }) : [
     { id: "IJ-09", kind: "Drive crawl",   status: "COMPLETED",  started: "Jun 4 09:12", files: 187, entities: 6, took: "2 m 14 s" },
     { id: "IJ-08", kind: "Phase 1 ingest", status: "COMPLETED",  started: "Jun 3 17:48", files: 1,   entities: 1, took: "18 s" },
     { id: "IJ-07", kind: "Drive crawl",   status: "COMPLETED",  started: "Jun 3 03:00", files: 182, entities: 0, took: "1 m 56 s" },
     { id: "IJ-06", kind: "Catalog import", status: "FAILED",    started: "Jun 2 14:22", files: 4,   entities: 0, took: "6 s",  err: "Invalid sheet header on P2 tab" },
     { id: "IJ-05", kind: "Drive crawl",   status: "COMPLETED",  started: "Jun 2 03:00", files: 176, entities: 1, took: "1 m 38 s" },
   ];
+  const lastScan = LIVE ? (window.DMA_LIVE.import_scans || [])[0] : null;
+  const runScanLive = () => {
+    setScanning(true);
+    fetch("/api/admin/scan", { method: "POST" })
+      .then(r => r.json().then(b => ({ ok: r.ok, b })))
+      .then(({ ok, b }) => { setScanning(false); pushToast(ok ? "Package scan started" : (b.error || "Scan trigger failed"), ok ? "success" : "warn"); })
+      .catch(() => { setScanning(false); pushToast("Scan trigger failed", "warn"); });
+  };
 
   return (
     <PageShell title="Import & jobs" crumbs={[{ label: "Admin", href: "/admin" }, { label: "Import & jobs" }]}>
@@ -601,10 +711,12 @@ function ImportPage() {
           <div className="sub">Phase 0 Drive crawl · Phase 1 ingest payloads · V7 catalog updates</div>
         </div>
         <div className="actions">
-          <button className="btn btn-tertiary" disabled={scanning} onClick={() => { setScanning(true); setTimeout(() => setScanning(false), 2400); }}>
-            {scanning ? <><span className="spinner" /> Scanning…</> : <><Icon name="refresh" size={13} /> Delta scan</>}
+          <button className="btn btn-tertiary" disabled={scanning} onClick={() => { if (LIVE) { runScanLive(); } else { setScanning(true); setTimeout(() => setScanning(false), 2400); } }}>
+            {scanning ? <><span className="spinner" /> Scanning…</> : <><Icon name="refresh" size={13} /> Run scan now</>}
           </button>
-          <button className="btn btn-secondary" onClick={() => pushToast("Upload payload — drop your app_payload_v1.json file here", "success")}><Icon name="download" size={13} /> Upload payload</button>
+          {LIVE ? null : (
+            <button className="btn btn-secondary" onClick={() => pushToast("Upload payload — drop your app_payload_v1.json file here", "success")}><Icon name="download" size={13} /> Upload payload</button>
+          )}
         </div>
       </div>
 
@@ -649,19 +761,42 @@ function ImportPage() {
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="drive" size={16} />
-            <div style={{ fontWeight: 600 }}>Drive folder · scheduled every 6 hours</div>
+            <div style={{ fontWeight: 600 }}>{LIVE ? "Drive intake · scanned every 30 minutes (Cloud Scheduler)" : "Drive folder · scheduled every 6 hours"}</div>
             <span className="spacer" />
-            <span className="muted" style={{ fontSize: 11 }}>Last crawl 2 h ago</span>
+            <span className="muted" style={{ fontSize: 11 }}>{LIVE
+              ? (lastScan?.started_at ? `Last scan ${new Date(lastScan.started_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}` : "No scans recorded yet")
+              : "Last crawl 2 h ago"}</span>
           </div>
           <div className="g3" style={{ gap: 10 }}>
-            <div className="card-tile"><div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>Candidates</div><div style={{ fontSize: 22, fontWeight: 200, color: "var(--z-teal)", marginTop: 4 }}>187</div></div>
-            <div className="card-tile"><div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>Imported</div><div style={{ fontSize: 22, fontWeight: 200, color: "var(--z-mid)", marginTop: 4 }}>6</div></div>
-            <div className="card-tile"><div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>Audit queue</div><div style={{ fontSize: 22, fontWeight: 200, color: "var(--z-org)", marginTop: 4 }}>{DMA.IMPORT_AUDIT.length}</div></div>
+            <div className="card-tile"><div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>Files seen</div><div style={{ fontSize: 22, fontWeight: 200, color: "var(--z-teal)", marginTop: 4 }}>{LIVE ? (lastScan?.files_seen ?? "—") : 187}</div></div>
+            <div className="card-tile"><div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>{LIVE ? "New / changed" : "Imported"}</div><div style={{ fontSize: 22, fontWeight: 200, color: "var(--z-mid)", marginTop: 4 }}>{LIVE ? `${lastScan?.files_new ?? 0} / ${lastScan?.files_changed ?? 0}` : 6}</div></div>
+            <div className="card-tile"><div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>{LIVE ? "Folders" : "Audit queue"}</div><div style={{ fontSize: 22, fontWeight: 200, color: "var(--z-org)", marginTop: 4 }}>{LIVE ? (lastScan?.folders_seen ?? "—") : DMA.IMPORT_AUDIT.length}</div></div>
           </div>
           <div className="sep" />
           <button className="btn btn-tertiary" onClick={() => navigate("/admin/import/audit")}>Open audit queue <Icon name="arrow-r" size={12} /></button>
         </div>
-      ) : tab === "phase1" ? (
+      ) : tab === "phase1" ? (LIVE ? (
+        <div className="card">
+          <div className="row" style={{ marginBottom: 12 }}>
+            <Icon name="play" size={16} />
+            <div style={{ fontWeight: 600 }}>Synthesis intake · MCP connector</div>
+            <span className="spacer" />
+            <span className="b b-teal">Connector live</span>
+          </div>
+          <p style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6 }}>
+            Serving content enters this application <strong>only</strong> through the
+            DMA connector: the synthesis agent in Claude Cowork submits each page,
+            validation issues a structured verdict, and a run promotes atomically —
+            all six pages or none. There is no payload upload and no ingest API key;
+            nothing else can write serving content.
+          </p>
+          <div className="sep" />
+          <div className="row">
+            <Icon name="evidence" size={14} />
+            <span style={{ fontSize: 12 }}>Ingestion (workbooks, reports, evidence) arrives via the package scan · synthesis via the connector's 13 tools</span>
+          </div>
+        </div>
+      ) : (
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="play" size={16} />
@@ -680,18 +815,24 @@ function ImportPage() {
             <button className="btn btn-secondary" onClick={() => pushToast("Upload payload manually — select app_payload_v1.json", "success")}><Icon name="download" size={13} /> Upload payload manually</button>
           </div>
         </div>
-      ) : (
+      )) : (
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="stack" size={16} />
-            <div style={{ fontWeight: 600 }}>V7 capability catalog</div>
+            <div style={{ fontWeight: 600 }}>Capability catalogue</div>
             <span className="spacer" />
-            <span className="muted" style={{ fontSize: 11 }}>Current: v7.2 · loaded May 1</span>
+            <span className="muted" style={{ fontSize: 11 }}>{LIVE ? `Current: ${window.DMA_LIVE.catalogue_version || "—"}` : "Current: v7.2 · loaded May 1"}</span>
           </div>
-          <p style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6 }}>Updating the catalog creates a new version. Existing runs retain their original catalog reference.</p>
+          <p style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6 }}>Updating the catalogue creates a new version. Existing runs retain their original catalogue reference{LIVE ? " (runs pinned to v5.0 serve against it; cross-version diffs mark the retired ESG category NOT_COMPARABLE)" : ""}.</p>
           <div className="row" style={{ marginTop: 10 }}>
-            <button className="btn btn-tertiary" onClick={() => pushToast("V7.3 catalog uploaded — new runs will use the new version", "success")}><Icon name="download" size={13} /> Upload v7.3</button>
-            <button className="btn btn-tertiary" onClick={() => pushToast("Opening V7 catalog change log", "success")}>View change log</button>
+            {LIVE ? (
+              <button className="btn btn-tertiary" onClick={() => pushToast("Catalogue versions load via the migrate Job (LOAD_CATALOGUES) — no upload from the browser", "warn")}><Icon name="lock" size={13} /> Deploy-managed</button>
+            ) : (
+              <React.Fragment>
+                <button className="btn btn-tertiary" onClick={() => pushToast("V7.3 catalog uploaded — new runs will use the new version", "success")}><Icon name="download" size={13} /> Upload v7.3</button>
+                <button className="btn btn-tertiary" onClick={() => pushToast("Opening V7 catalog change log", "success")}>View change log</button>
+              </React.Fragment>
+            )}
           </div>
         </div>
       )}

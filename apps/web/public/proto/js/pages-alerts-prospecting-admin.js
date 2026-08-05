@@ -851,17 +851,42 @@ function AdminUsersCard() {
   const {
     pushToast
   } = useApp();
-  // Production divergence: real deployments list the signed-in session
-  // only (the users table arrives with the auth stage); the mock staff
+  // Production divergence: LIVE mode renders the REAL role grants the
+  // server resolves sign-ins against (DMA_LIVE.role_grants, admin
+  // sessions only) — read-only until the users table lands; grants
+  // change via deployment env, never via this card. The mutable mock
   // roster renders solely in local preview.
-  const [users, setUsers] = useState(window.DMA_LIVE ? [{
-    id: 1,
-    name: sessionUser().name,
-    email: sessionUser().email,
-    role: window.DMA_LIVE.role || "ANALYST",
-    active: true,
-    last: "now"
-  }] : [{
+  const LIVE = !!window.DMA_LIVE;
+  const liveGrantRows = (() => {
+    if (!LIVE) return null;
+    const g = window.DMA_LIVE.role_grants;
+    if (!g) return [];
+    const nameOf = e => {
+      const parts = e.split("@")[0].split(/[._-]+/).filter(Boolean);
+      if (parts.length === 1 && parts[0].length <= 3) return parts[0].toUpperCase();
+      return parts.map(w => w[0].toUpperCase() + w.slice(1)).join(" ") || e;
+    };
+    const me = sessionUser().email;
+    const rows = [];
+    g.admins.forEach((e, i) => rows.push({
+      id: `adm-${i}`,
+      name: nameOf(e),
+      email: e,
+      role: "ADMIN",
+      active: true,
+      last: e === me ? "now (this session)" : "—"
+    }));
+    g.analysts.filter(e => !g.admins.includes(e)).forEach((e, i) => rows.push({
+      id: `ana-${i}`,
+      name: nameOf(e),
+      email: e,
+      role: "ANALYST",
+      active: true,
+      last: e === me ? "now (this session)" : "—"
+    }));
+    return rows;
+  })();
+  const [users, setUsers] = useState(LIVE ? liveGrantRows || [] : [{
     id: 1,
     name: "Mishley Andrade",
     email: "mishley@zennify.com",
@@ -893,17 +918,31 @@ function AdminUsersCard() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("AE");
   const setRole = (id, role) => {
+    if (LIVE) {
+      pushToast("Grants are set per deployment (ADMIN_EMAILS / ANALYST_EMAILS) until the users table lands", "warn");
+      return;
+    }
     setUsers(us => us.map(u => u.id === id ? {
       ...u,
       role
     } : u));
     pushToast(`Role updated to ${role}`, "success");
   };
-  const toggleActive = id => setUsers(us => us.map(u => u.id === id ? (pushToast(`${u.name} ${u.active ? "deactivated" : "reactivated"}`, u.active ? "warn" : "success"), {
-    ...u,
-    active: !u.active
-  }) : u));
+  const toggleActive = id => {
+    if (LIVE) {
+      pushToast("Grants are set per deployment (ADMIN_EMAILS / ANALYST_EMAILS) until the users table lands", "warn");
+      return;
+    }
+    setUsers(us => us.map(u => u.id === id ? (pushToast(`${u.name} ${u.active ? "deactivated" : "reactivated"}`, u.active ? "warn" : "success"), {
+      ...u,
+      active: !u.active
+    }) : u));
+  };
   const invite = () => {
+    if (LIVE) {
+      pushToast("Invites arrive with the users table; today every @zennify.com Google account signs in as AE automatically", "warn");
+      return;
+    }
     const email = inviteEmail.trim();
     if (!email) {
       pushToast("Enter an email to invite", "warn");
@@ -1001,7 +1040,24 @@ function AdminUsersCard() {
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => toggleActive(u.id)
-  }, u.active ? "Deactivate" : "Reactivate"))))))), /*#__PURE__*/React.createElement("div", {
+  }, u.active ? "Deactivate" : "Reactivate"))))))), LIVE ? /*#__PURE__*/React.createElement("div", {
+    className: "card-body",
+    style: {
+      borderTop: "1px solid var(--z-sep)",
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      display: "flex",
+      gap: 8,
+      alignItems: "flex-start"
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "info",
+    size: 13,
+    style: {
+      flexShrink: 0,
+      marginTop: 1
+    }
+  }), /*#__PURE__*/React.createElement("span", null, "Every other @zennify.com Google account signs in as ", /*#__PURE__*/React.createElement("strong", null, "AE"), " automatically. ADMIN and ANALYST are deploy-time grants (ADMIN_EMAILS / ANALYST_EMAILS); per-user management arrives with the users table.")) : /*#__PURE__*/React.createElement("div", {
     className: "card-body",
     style: {
       borderTop: "1px solid var(--z-sep)",
@@ -1051,9 +1107,10 @@ function AdminPage() {
     role,
     pushToast
   } = useApp();
+  const LIVE = !!window.DMA_LIVE;
   const [scanning, setScanning] = useState(false);
-  const [folder, setFolder] = useState("1uvt3kh…2O0P");
-  const [schedule, setSchedule] = useState("6h");
+  const [folder, setFolder] = useState(LIVE ? window.DMA_LIVE.intake_folder_id || "not configured" : "1uvt3kh…2O0P");
+  const [schedule, setSchedule] = useState(LIVE ? "30m" : "6h");
   const [editingFolder, setEditingFolder] = useState(false);
   const [budgetCap, setBudgetCap] = useState(400);
   const [autoDowngrade, setAutoDowngrade] = useState(true);
@@ -1067,7 +1124,30 @@ function AdminPage() {
     name: "lock",
     size: 22
   })), /*#__PURE__*/React.createElement("h3", null, "Admin access required"), /*#__PURE__*/React.createElement("p", null, "Switch to the Admin role to manage users, ingest, and system settings.")));
+  // Production divergence: the scan button fires a real execution of the
+  // package-scan worker Job (same Job Cloud Scheduler fires every 30
+  // minutes). No fake progress, no fake counts — the import audit page
+  // shows what the execution actually did.
   const runScan = kind => {
+    if (LIVE) {
+      setScanning(true);
+      fetch("/api/admin/scan", {
+        method: "POST"
+      }).then(r => r.json().then(b => ({
+        ok: r.ok,
+        b
+      }))).then(({
+        ok,
+        b
+      }) => {
+        setScanning(false);
+        if (ok) pushToast("Package scan started — new client folders land as the Job completes", "success");else pushToast(b.error || "Scan trigger failed", "warn");
+      }).catch(() => {
+        setScanning(false);
+        pushToast("Scan trigger failed", "warn");
+      });
+      return;
+    }
     setScanning(true);
     pushToast(kind === "full" ? "Full Drive rescan started" : "Delta scan started", "success");
     setTimeout(() => {
@@ -1193,7 +1273,7 @@ function AdminPage() {
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, "Last crawl 2 hr ago")), /*#__PURE__*/React.createElement("label", {
+  }, LIVE ? "History → Import audit" : "Last crawl 2 hr ago")), /*#__PURE__*/React.createElement("label", {
     className: "field-label"
   }, "Target folder ID"), /*#__PURE__*/React.createElement("div", {
     className: "row",
@@ -1201,7 +1281,7 @@ function AdminPage() {
       gap: 8,
       marginBottom: 12
     }
-  }, editingFolder ? /*#__PURE__*/React.createElement("input", {
+  }, editingFolder && !LIVE ? /*#__PURE__*/React.createElement("input", {
     className: "inp inp-sm",
     style: {
       flex: 1
@@ -1229,7 +1309,13 @@ function AdminPage() {
       borderRadius: 6,
       border: "1px solid var(--z-sep)"
     }
-  }, folder), /*#__PURE__*/React.createElement("button", {
+  }, folder), LIVE ? /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-tertiary btn-sm",
+    onClick: () => pushToast("The intake folder is set on the worker Job (INTAKE_FOLDER_ID) at deploy time", "warn")
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "lock",
+    size: 12
+  }), " Deploy-set") : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => setEditingFolder(true)
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -1237,7 +1323,17 @@ function AdminPage() {
     size: 12
   }), " Edit"))), /*#__PURE__*/React.createElement("label", {
     className: "field-label"
-  }, "Crawl schedule"), /*#__PURE__*/React.createElement("select", {
+  }, "Crawl schedule"), LIVE ? /*#__PURE__*/React.createElement("div", {
+    className: "f-mono",
+    style: {
+      fontSize: 12,
+      padding: "7px 10px",
+      background: "var(--z-bg)",
+      borderRadius: 6,
+      border: "1px solid var(--z-sep)",
+      marginBottom: 14
+    }
+  }, "Every 30 minutes \xB7 Cloud Scheduler (dmai-package-scan)") : /*#__PURE__*/React.createElement("select", {
     className: "inp inp-sm",
     value: schedule,
     onChange: e => {
@@ -1282,7 +1378,37 @@ function AdminPage() {
     onClick: () => navigate("/admin/import")
   }, "Job history \u2192"))), /*#__PURE__*/React.createElement("div", {
     className: "card"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, LIVE ?
+  /*#__PURE__*/
+  /* Production divergence: there is no model budget to show —
+     the serving path performs no inference (charter invariant).
+     Synthesis runs in Claude Cowork against the connector. */
+  React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "insight",
+    size: 16
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600,
+      fontSize: 13
+    }
+  }, "Synthesis pipeline")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-body)",
+      lineHeight: 1.6
+    }
+  }, "This application performs ", /*#__PURE__*/React.createElement("strong", null, "no inference at request time"), ". Page content is produced ahead of time by the synthesis agent in Claude Cowork through the DMA connector, validated against structured verdicts, and promoted atomically \u2014 all six pages or none. What renders here is exactly what was promoted."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      fontSize: 11.5,
+      color: "var(--z-muted)"
+    }
+  }, "Ingestion \u2192 scan Job (every 30 min) \xB7 Synthesis \u2192 Cowork session \xB7 Serving \u2192 promoted tables only")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       marginBottom: 12
@@ -1366,13 +1492,14 @@ function AdminPage() {
       fontSize: 12,
       color: "var(--z-dark)"
     }
-  }, "Auto-downgrade to Flash at 90% spend")))));
+  }, "Auto-downgrade to Flash at 90% spend"))))));
 }
 function ImportPage() {
   const {
     role,
     pushToast
   } = useApp();
+  const LIVE = !!window.DMA_LIVE;
   const [scanning, setScanning] = useState(false);
   const [tab, setTab] = useState("jobs");
   if (role !== "ADMIN") return /*#__PURE__*/React.createElement(PageShell, {
@@ -1385,7 +1512,27 @@ function ImportPage() {
     name: "lock",
     size: 22
   })), /*#__PURE__*/React.createElement("h3", null, "Admin access required")));
-  const jobs = [{
+
+  // Production divergence: LIVE renders the REAL scan ledger
+  // (import_scans via the API) — every row is an actual execution of the
+  // package-scan Job. The mock history renders solely in local preview.
+  const jobs = LIVE ? (window.DMA_LIVE.import_scans || []).map(s => {
+    const ms = s.started_at && s.finished_at ? new Date(s.finished_at) - new Date(s.started_at) : null;
+    return {
+      id: `SCAN-${s.id}`,
+      kind: `Package scan · ${s.files_new ?? 0} new / ${s.files_changed ?? 0} changed`,
+      status: (s.status || "").toUpperCase() === "SUCCEEDED" ? "COMPLETED" : (s.status || "?").toUpperCase(),
+      started: s.started_at ? new Date(s.started_at).toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }) : "—",
+      files: s.files_seen ?? "—",
+      entities: s.runs_created ?? 0,
+      took: ms == null ? "—" : ms < 1000 ? "<1 s" : `${Math.round(ms / 1000)} s`
+    };
+  }) : [{
     id: "IJ-09",
     kind: "Drive crawl",
     status: "COMPLETED",
@@ -1427,6 +1574,25 @@ function ImportPage() {
     entities: 1,
     took: "1 m 38 s"
   }];
+  const lastScan = LIVE ? (window.DMA_LIVE.import_scans || [])[0] : null;
+  const runScanLive = () => {
+    setScanning(true);
+    fetch("/api/admin/scan", {
+      method: "POST"
+    }).then(r => r.json().then(b => ({
+      ok: r.ok,
+      b
+    }))).then(({
+      ok,
+      b
+    }) => {
+      setScanning(false);
+      pushToast(ok ? "Package scan started" : b.error || "Scan trigger failed", ok ? "success" : "warn");
+    }).catch(() => {
+      setScanning(false);
+      pushToast("Scan trigger failed", "warn");
+    });
+  };
   return /*#__PURE__*/React.createElement(PageShell, {
     title: "Import & jobs",
     crumbs: [{
@@ -1447,15 +1613,19 @@ function ImportPage() {
     className: "btn btn-tertiary",
     disabled: scanning,
     onClick: () => {
-      setScanning(true);
-      setTimeout(() => setScanning(false), 2400);
+      if (LIVE) {
+        runScanLive();
+      } else {
+        setScanning(true);
+        setTimeout(() => setScanning(false), 2400);
+      }
     }
   }, scanning ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
     className: "spinner"
   }), " Scanning\u2026") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 13
-  }), " Delta scan")), /*#__PURE__*/React.createElement("button", {
+  }), " Run scan now")), LIVE ? null : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
     onClick: () => pushToast("Upload payload — drop your app_payload_v1.json file here", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -1539,14 +1709,19 @@ function ImportPage() {
     style: {
       fontWeight: 600
     }
-  }, "Drive folder \xB7 scheduled every 6 hours"), /*#__PURE__*/React.createElement("span", {
+  }, LIVE ? "Drive intake · scanned every 30 minutes (Cloud Scheduler)" : "Drive folder · scheduled every 6 hours"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("span", {
     className: "muted",
     style: {
       fontSize: 11
     }
-  }, "Last crawl 2 h ago")), /*#__PURE__*/React.createElement("div", {
+  }, LIVE ? lastScan?.started_at ? `Last scan ${new Date(lastScan.started_at).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  })}` : "No scans recorded yet" : "Last crawl 2 h ago")), /*#__PURE__*/React.createElement("div", {
     className: "g3",
     style: {
       gap: 10
@@ -1560,14 +1735,14 @@ function ImportPage() {
       textTransform: "uppercase",
       letterSpacing: ".08em"
     }
-  }, "Candidates"), /*#__PURE__*/React.createElement("div", {
+  }, "Files seen"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 22,
       fontWeight: 200,
       color: "var(--z-teal)",
       marginTop: 4
     }
-  }, "187")), /*#__PURE__*/React.createElement("div", {
+  }, LIVE ? lastScan?.files_seen ?? "—" : 187)), /*#__PURE__*/React.createElement("div", {
     className: "card-tile"
   }, /*#__PURE__*/React.createElement("div", {
     className: "muted",
@@ -1576,14 +1751,14 @@ function ImportPage() {
       textTransform: "uppercase",
       letterSpacing: ".08em"
     }
-  }, "Imported"), /*#__PURE__*/React.createElement("div", {
+  }, LIVE ? "New / changed" : "Imported"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 22,
       fontWeight: 200,
       color: "var(--z-mid)",
       marginTop: 4
     }
-  }, "6")), /*#__PURE__*/React.createElement("div", {
+  }, LIVE ? `${lastScan?.files_new ?? 0} / ${lastScan?.files_changed ?? 0}` : 6)), /*#__PURE__*/React.createElement("div", {
     className: "card-tile"
   }, /*#__PURE__*/React.createElement("div", {
     className: "muted",
@@ -1592,14 +1767,14 @@ function ImportPage() {
       textTransform: "uppercase",
       letterSpacing: ".08em"
     }
-  }, "Audit queue"), /*#__PURE__*/React.createElement("div", {
+  }, LIVE ? "Folders" : "Audit queue"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 22,
       fontWeight: 200,
       color: "var(--z-org)",
       marginTop: 4
     }
-  }, DMA.IMPORT_AUDIT.length))), /*#__PURE__*/React.createElement("div", {
+  }, LIVE ? lastScan?.folders_seen ?? "—" : DMA.IMPORT_AUDIT.length))), /*#__PURE__*/React.createElement("div", {
     className: "sep"
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
@@ -1607,7 +1782,42 @@ function ImportPage() {
   }, "Open audit queue ", /*#__PURE__*/React.createElement(Icon, {
     name: "arrow-r",
     size: 12
-  }))) : tab === "phase1" ? /*#__PURE__*/React.createElement("div", {
+  }))) : tab === "phase1" ? LIVE ? /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "play",
+    size: 16
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600
+    }
+  }, "Synthesis intake \xB7 MCP connector"), /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "b b-teal"
+  }, "Connector live")), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12.5,
+      color: "var(--z-body)",
+      lineHeight: 1.6
+    }
+  }, "Serving content enters this application ", /*#__PURE__*/React.createElement("strong", null, "only"), " through the DMA connector: the synthesis agent in Claude Cowork submits each page, validation issues a structured verdict, and a run promotes atomically \u2014 all six pages or none. There is no payload upload and no ingest API key; nothing else can write serving content."), /*#__PURE__*/React.createElement("div", {
+    className: "sep"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "evidence",
+    size: 14
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12
+    }
+  }, "Ingestion (workbooks, reports, evidence) arrives via the package scan \xB7 synthesis via the connector's 13 tools"))) : /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
@@ -1673,25 +1883,31 @@ function ImportPage() {
     style: {
       fontWeight: 600
     }
-  }, "V7 capability catalog"), /*#__PURE__*/React.createElement("span", {
+  }, "Capability catalogue"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("span", {
     className: "muted",
     style: {
       fontSize: 11
     }
-  }, "Current: v7.2 \xB7 loaded May 1")), /*#__PURE__*/React.createElement("p", {
+  }, LIVE ? `Current: ${window.DMA_LIVE.catalogue_version || "—"}` : "Current: v7.2 · loaded May 1")), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12.5,
       color: "var(--z-body)",
       lineHeight: 1.6
     }
-  }, "Updating the catalog creates a new version. Existing runs retain their original catalog reference."), /*#__PURE__*/React.createElement("div", {
+  }, "Updating the catalogue creates a new version. Existing runs retain their original catalogue reference", LIVE ? " (runs pinned to v5.0 serve against it; cross-version diffs mark the retired ESG category NOT_COMPARABLE)" : "", "."), /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       marginTop: 10
     }
-  }, /*#__PURE__*/React.createElement("button", {
+  }, LIVE ? /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-tertiary",
+    onClick: () => pushToast("Catalogue versions load via the migrate Job (LOAD_CATALOGUES) — no upload from the browser", "warn")
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "lock",
+    size: 13
+  }), " Deploy-managed") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
     onClick: () => pushToast("V7.3 catalog uploaded — new runs will use the new version", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -1700,7 +1916,7 @@ function ImportPage() {
   }), " Upload v7.3"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
     onClick: () => pushToast("Opening V7 catalog change log", "success")
-  }, "View change log"))));
+  }, "View change log")))));
 }
 function ImportAuditPage() {
   const {

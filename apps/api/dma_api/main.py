@@ -148,6 +148,33 @@ def directory():
         conn.close()
 
 
+@app.get("/v1/ops/import-scans")
+def import_scans(limit: int = 20):
+    """Recent package-scan executions — the REAL job history the admin
+    Import & jobs page renders (counts come from the scan ledger itself;
+    nothing here is narrative content)."""
+    limit = max(1, min(int(limit), 100))
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """SELECT id, started_at, finished_at, status, folders_seen,
+                      files_seen, files_new, files_changed, runs_created
+                 FROM import_scans ORDER BY id DESC LIMIT %s""", (limit,))
+        scans = [{
+            "id": r[0],
+            "started_at": r[1].isoformat() if r[1] else None,
+            "finished_at": r[2].isoformat() if r[2] else None,
+            "status": r[3],
+            "folders_seen": r[4], "files_seen": r[5],
+            "files_new": r[6], "files_changed": r[7],
+            "runs_created": r[8],
+        } for r in cur.fetchall()]
+        return {"scans": scans}
+    finally:
+        conn.close()
+
+
 @app.get("/v1/meta")
 def meta():
     conn = _connect()

@@ -1,8 +1,8 @@
-// Interim session gate (pre-stage-5 auth): domain-checked email in an
+// App session: the identity IAP verified (see lib/iap.js) carried in an
 // HMAC-signed httpOnly cookie, 8h expiry — matching the prototype's
-// stated session policy. Replaced by real Google OAuth / IAP when the
-// auth stage lands; nothing here pretends to verify identity beyond the
-// domain assertion, and no client data is served pre-promote.
+// stated session policy. The cookie never CREATES identity; /api/signin
+// mints it only from a verified Google assertion (or the explicit
+// ALLOW_DEV_LOGIN gate in local compose).
 import crypto from "crypto";
 
 const SECRET = process.env.SESSION_SECRET || "dev-only-session-secret";
@@ -14,9 +14,9 @@ function hmac(payload) {
   return crypto.createHmac("sha256", SECRET).update(payload).digest("base64url");
 }
 
-export function sign(email, role) {
+export function sign(email, role, name) {
   const payload = Buffer.from(
-    JSON.stringify({ email, role, exp: Math.floor(Date.now() / 1000) + EIGHT_HOURS })
+    JSON.stringify({ email, role, name, exp: Math.floor(Date.now() / 1000) + EIGHT_HOURS })
   ).toString("base64url");
   return `${payload}.${hmac(payload)}`;
 }

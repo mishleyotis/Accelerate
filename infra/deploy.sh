@@ -73,16 +73,50 @@ if [ -f apps/web/Dockerfile ]; then
     --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
   API_URL="$(gcloud run services describe dmai-api --project="$PROJECT_ID" \
     --region="$REGION" --format='value(status.url)' 2>/dev/null || true)"
-  # Role grants (interim allowlist until the auth stage's users table):
-  # override per deploy with ADMIN_EMAILS/AE_EMAILS in the environment.
+  # Role grants (allowlists until the auth stage's users table): ADMIN and
+  # ANALYST are strictly these emails; every other @zennify.com Google
+  # account signs in as AE. Override per deploy via the environment.
   ADMIN_EMAILS="${ADMIN_EMAILS:-mishley.otiende@zennify.com,dma@zennify.com}"
-  AE_EMAILS="${AE_EMAILS:-}"
+  ANALYST_EMAILS="${ANALYST_EMAILS:-mishley.otiende@zennify.com,dma@zennify.com}"
+  PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
+  # The IAP assertion audience for THIS service — the app rejects
+  # assertions minted for anything else.
+  IAP_AUDIENCE="/projects/${PROJECT_NUMBER}/locations/${REGION}/services/dmai-web"
   gcloud run deploy dmai-web --source=apps/web \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-web@${SA_DOMAIN}" \
-    --set-env-vars="^;^API_URL=${API_URL};ADMIN_EMAILS=${ADMIN_EMAILS};AE_EMAILS=${AE_EMAILS}" \
+    --set-env-vars="^;^API_URL=${API_URL};ADMIN_EMAILS=${ADMIN_EMAILS};ANALYST_EMAILS=${ANALYST_EMAILS};IAP_AUDIENCE=${IAP_AUDIENCE};GCP_PROJECT=${PROJECT_ID};GCP_REGION=${REGION};WORKER_JOB=dmai-worker;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo}" \
     --set-secrets="SESSION_SECRET=dmai-session-secret:latest" \
     --allow-unauthenticated --quiet
+
+  # ── Google sign-in at the door: Cloud Run integrated IAP ─────────────
+  # Google authenticates every request (Google-managed OAuth client,
+  # org-internal), the app verifies the forwarded assertion (lib/iap.js)
+  # and enforces @zennify.com. Grants: the Workspace domain.
+  gcloud services enable iap.googleapis.com --project="$PROJECT_ID" --quiet
+  gcloud beta services identity create --service=iap.googleapis.com \
+    --project="$PROJECT_ID" --quiet >/dev/null 2>&1 || true
+  gcloud run services add-iam-policy-binding dmai-web \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-iap.iam.gserviceaccount.com" \
+    --role="roles/run.invoker" --quiet >/dev/null
+  gcloud run services update dmai-web \
+    --project="$PROJECT_ID" --region="$REGION" --iap --quiet
+  # Direct (non-IAP) invocation stays closed: drop the public grant.
+  gcloud run services remove-iam-policy-binding dmai-web \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --member="allUsers" --role="roles/run.invoker" --quiet >/dev/null 2>&1 || true
+  # Who may pass Google's door: the Zennify workspace.
+  gcloud iap web add-iam-policy-binding \
+    --project="$PROJECT_ID" --resource-type=cloud-run \
+    --service=dmai-web --region="$REGION" \
+    --member="domain:zennify.com" --role="roles/iap.httpsResourceAccessor" --quiet >/dev/null
+
+  # The admin "Run scan now" button fires the worker Job as dmai-web.
+  gcloud run jobs add-iam-policy-binding dmai-worker \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --member="serviceAccount:dmai-web@${SA_DOMAIN}" \
+    --role="roles/run.invoker" --quiet >/dev/null 2>&1 || true
 fi
 
 # --- 3 · worker Job + Scheduler sync (stage 1 / 0.5) ----------------------
