@@ -39,9 +39,12 @@ deliberately narrow:
   · `runs.completed_at` is set ONLY where it is NULL and ONLY from the run's own
     `request_id`, by the same `-YYYYMMDD-` pattern the worker uses. No inference,
     no "today", no borrowing another run's date.
-  · `evidence_index.reference_date` is then backfilled ONLY where NULL, ONLY for
-    those runs, and ONLY from that run's `completed_at`. A row that already
-    carries a reference_date is left exactly as it is.
+  · `evidence_index` is ENTITY-grained — dedup is on (entity_id, content_hash)
+    and there is no run_id on the row — so the run is resolved in two rungs:
+    the run that CITES the row (`evidence_subcap_links.run_id`, earliest where
+    several do), else the entity's sole dated run. An entity with two dated runs
+    is left NULL rather than aged against an assessment that never saw the row.
+    A row that already carries a reference_date is left exactly as it is.
   · `age_months` and `recency_band` need no action: `age_months` is GENERATED and
     recomputes itself, and the band follows the age.
 
@@ -86,17 +89,56 @@ def upgrade() -> None:
         print(f"VERIFY 0021 run: {r[1]} -> completed_at={r[2]}")
     print(f"VERIFY 0021 runs dated from request_id: {len(runs)}")
 
-    # 2 · that date onto the run's own evidence rows, where none is set
-    filled = conn.exec_driver_sql("""
+    # 2 · that date onto the evidence rows, where none is set.
+    #
+    # `evidence_index` is ENTITY-grained — dedup is on (entity_id, content_hash),
+    # so one annual report cited by two runs is one row and there is no run_id to
+    # read. `register_evidence` sets reference_date from the run it was called
+    # with; that run is not recorded on the row. So it is resolved here, in two
+    # rungs, and only where the answer is unambiguous:
+    #
+    #   a  the run that LINKS the row (`evidence_subcap_links.run_id` is
+    #      run-scoped). Where several runs link it, the EARLIEST — a row cannot
+    #      have been registered later than the first run that cited it.
+    #   b  failing that, the entity's own run, but ONLY where the entity has
+    #      exactly ONE dated run. With two, the row could belong to either and
+    #      picking one would age it against an assessment that never saw it.
+    #
+    # Anything still unresolved stays NULL and is counted. A NULL here bands
+    # UNVERIFIED, which is wrong but visible; a guessed date reads as measured.
+    by_link = conn.exec_driver_sql("""
         UPDATE evidence_index e
-           SET reference_date = r.completed_at
-          FROM runs r
-         WHERE e.run_id = r.id
+           SET reference_date = src.dated
+          FROM (SELECT k.e_id, min(r.completed_at) AS dated
+                  FROM evidence_subcap_links k
+                  JOIN runs r ON r.id = k.run_id
+                 WHERE r.completed_at IS NOT NULL
+                 GROUP BY k.e_id) src
+         WHERE e.e_id = src.e_id
            AND e.reference_date IS NULL
-           AND r.completed_at IS NOT NULL
         RETURNING e.e_id
     """).fetchall()
-    print(f"VERIFY 0021 evidence rows given a reference_date: {len(filled)}")
+    print(f"VERIFY 0021 dated from the run that cites them: {len(by_link)}")
+
+    by_entity = conn.exec_driver_sql("""
+        UPDATE evidence_index e
+           SET reference_date = one.dated
+          FROM (SELECT entity_id, min(completed_at) AS dated
+                  FROM runs
+                 WHERE completed_at IS NOT NULL
+                 GROUP BY entity_id
+                HAVING count(*) FILTER (WHERE completed_at IS NOT NULL) = 1) one
+         WHERE e.entity_id = one.entity_id
+           AND e.reference_date IS NULL
+        RETURNING e.e_id
+    """).fetchall()
+    print(f"VERIFY 0021 dated from a sole run on the entity: {len(by_entity)}")
+
+    left = conn.exec_driver_sql("""
+        SELECT count(*) FROM evidence_index WHERE reference_date IS NULL
+    """).fetchone()[0]
+    print(f"VERIFY 0021 still undated (entity has several runs, or none "
+          f"dated): {left}")
 
     after = conn.exec_driver_sql("""
         SELECT count(*) FILTER (WHERE reference_date IS NULL),
