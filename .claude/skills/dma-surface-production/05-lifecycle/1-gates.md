@@ -22,6 +22,59 @@ analytical:
 **Any evidence reason at all fails the submission.** An excerpt is either a copy of
 something a document says or it is not evidence.
 
+## The two gates that block most often
+
+These are the ones a submission actually dies on, so they are named here rather than left
+to be discovered from a verdict.
+
+### AG-03 · every claim-bearing item cites evidence
+
+Fires per ITEM, not per section. If a why-now card, a top finding, a recommendation, an
+insight, a timeline event, an issue, a tech row, an alert, a cap, a gate result, a phase or
+a conversation starter asserts something, its own evidence list must be non-empty. The keys
+it looks for are read from each field's contract `doc` text — `e_ids`,
+`supporting_e_ids`, `evidence_ids`, `new_evidence_ids`, `source_e_id`, `e_id` — so it
+polices whatever the contract declared rather than a hardcoded list.
+
+Three things it deliberately does NOT fire on:
+
+- a row whose value is null (asserting nothing)
+- a recorded absence carrying its ladder (`UNWORKED`, `WORKED_ABSENT`, `NOT_RUN`,
+  `verified_absent`, `verified_sparse`, `cannot_estimate`, `insufficient_cohort`,
+  `empty_state`, `quarantined`)
+- a section-level envelope — the citation belongs at the item
+
+**An inference cites too.** It cites the source the inference was drawn FROM. "No evidence
+yet" on a card that makes a claim is not an empty state, it is an uncited claim, and the
+gate names it as one. If you cannot cite it, do not assert it — run the ladder and emit the
+absence instead.
+
+The contradiction it also catches: an item whose state says `WORKED_FOUND` while its
+evidence list is empty. One of the two is wrong.
+
+### CG-09 · a closed vocabulary takes one of its values
+
+Two registries feed this. The first is generated from the live schema: any field promoted
+into a Postgres enum column. The second is hand-maintained for fields whose column is plain
+TEXT but whose CONTRACT states a closed set — because a TEXT column accepts anything and
+the defect surfaces on the page instead of at submit.
+
+The case that produced it: `context.timeline.events[*].signal` takes
+`POSITIVE │ NEUTRAL │ NEGATIVE`, and a producer wrote the consequence SENTENCE into it. The
+column accepted it, promotion succeeded, and the D5 timeline's Positive/Neutral/Negative
+filters then matched zero of ten events on a page with ten. The consequence sentence belongs
+in `maturity_effect`; `signal` is the direction, in capitals, and nothing else.
+
+Currently policed as contract vocabularies:
+
+| Field | Values |
+|---|---|
+| `context.timeline.events[*].signal` | `POSITIVE │ NEUTRAL │ NEGATIVE` |
+| `techstack.techstack.items[*].status` | `CONFIRMED │ INFERRED │ CLAIMED │ ABSENT` |
+
+Case matters — the renderer compares against the declared spelling, so `positive` misses the
+filter exactly as prose does. Null passes: absent is not wrong, a sentence is.
+
 ## The citation stack
 
 | | Check | Catches |

@@ -33,7 +33,7 @@ there is no partial promote and no half-built page a client could see.
 Read these two, in this order. They apply to every section and are not repeated in the
 page packs.
 
-1. `01-start-here/1-standing-clauses.md` — identity, grain, register, audience. Four rules that
+1. `01-start-here/1-standing-clauses.md` — identity, grain, register, audience, citation. Five rules that
    caused most of the measured defects in this product when they were left implicit.
 2. `01-start-here/2-evidence.md` — tiers, recency, the rank score, the peer fallback ladder, and
    what to do when you cannot establish an id.
@@ -42,8 +42,31 @@ page packs.
 5. `04-craft/4-card-anatomy.md` — the header, sub-header and budget each surface renders into.
 6. `04-craft/1-reasoning.md` — the R-Layer. The only mechanism that catches a claim that is
    well-formed, correctly cited, grain-locked and wrong.
+7. `04-craft/6-fields-the-app-depends-on.md` — every field whose absence degrades a real
+   surface, with the observed consequence. Read it once; it is the difference between a
+   payload that validates and a page that reads.
 
 ## The workflow
+
+### 0 · Vet the workbooks
+
+You are the first reader of the package and the only one who can refuse it. The parser is
+deterministic: handed a workbook whose headers it does not recognise it does not fail, it
+silently produces the wrong thing, and the wrong thing promotes. Peer columns that are really
+statistics have invented peer institutions named "Median"; a `Priority` column read as an id
+pattern dropped all eight recommendations; an unpinned catalogue version left 765 heatmap
+cells nameless.
+
+```bash
+python scripts/vet_workbooks.py <package-dir>    # the mechanical checks
+```
+
+Then read both workbooks yourself for the judgement calls. Refuse a dirty workbook and say
+exactly what is dirty — a refusal is a finding, not a failure. Full checklist, and the
+matching/escalation/enrichment steps that follow it: `02-inputs/4-vetting.md`.
+
+**Scores come from the scoring workbook. Evidence ids, excerpts, ERS and published dates come
+from the research workbook. A score is never taken from the research workbook.**
 
 ### 1 · Orient
 
@@ -362,6 +385,8 @@ assets/          payload skeletons per section
 | File | Read it when |
 |---|---|
 | `01-start-here/1-standing-clauses.md` | Always, before writing any section |
+| `04-craft/6-fields-the-app-depends-on.md` | Once, early — what breaks on the page when a field is missing |
+| `02-inputs/4-vetting.md` | Before parsing anything; when a workbook looks unusual |
 | `01-start-here/2-evidence.md` | Always — tiers, recency, rank score, peer ladder, citation |
 | `02-inputs/1-package.md` | Orienting in the assessment folder; deciding which artefact wins |
 | `02-inputs/3-mcp-tools.md` | Any tool call whose exchange you are unsure of |

@@ -4,7 +4,7 @@ Five sections. INTERNAL ONLY — the whole dashboard is withheld from the custom
 
 **5 sections · 5 surfaces.** Submit with `submit_page_payload(run_id, page='context', payload={...})`.
 
-Read `01-start-here/1-standing-clauses.md` before writing any section on this page. The four standing clauses apply to every section and are not repeated below.
+Read `01-start-here/1-standing-clauses.md` before writing any section on this page. The standing clauses apply to every section and are not repeated below.
 
 ## Sections on this page
 
