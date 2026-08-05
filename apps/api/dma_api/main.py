@@ -12,7 +12,10 @@ from __future__ import annotations
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import JSONResponse
+
+from .pages import ApiError, build_page, etag_for
 
 _pool = {}
 
@@ -144,6 +147,34 @@ def directory():
         return {"entities": list(by_entity.values()),
                 "subvertical_labels": labels,
                 "active_runs": [], "pending_review": []}
+    finally:
+        conn.close()
+
+
+@app.get("/v1/entities/{display_id}/{page}")
+def entity_page(display_id: str, page: str, request: Request,
+                response: Response, audience: str = "internal",
+                run: str | None = None, role: str | None = None,
+                history: bool = False):
+    """One promoted page for one entity, redacted for the audience.
+    ETag is run_id.promoted_epoch.audience; a matching If-None-Match gets
+    304 with no body (TRD §19)."""
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            body = build_page(cur, page, display_id, audience=audience,
+                              run=run, role=role, allow_history=history)
+        except ApiError as e:
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        tag = etag_for(body["run"], body["audience"])
+        if request.headers.get("if-none-match") == tag:
+            return Response(status_code=304, headers={"ETag": tag,
+                                                      "Cache-Control": "private, max-age=0"})
+        response.headers["ETag"] = tag
+        response.headers["Cache-Control"] = "private, max-age=0"
+        return body
     finally:
         conn.close()
 
