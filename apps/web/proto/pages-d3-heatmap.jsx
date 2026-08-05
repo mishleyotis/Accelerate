@@ -46,6 +46,179 @@ function deltaOf(score, peer) {
   return isFinite(d) ? d : null;
 }
 
+function numOf(v) {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return isFinite(n) ? n : null;
+}
+
+/* The mean of the values that exist, or null. Never divides by the full count
+   and never returns 0 for "nothing measured". */
+function meanOf(values) {
+  const vals = (values || []).map(numOf).filter(v => v !== null);
+  if (!vals.length) return null;
+  return vals.reduce((a, v) => a + v, 0) / vals.length;
+}
+
+/* ── The run's own workbook table ────────────────────────────────────────
+   `heatmap.workbook_scores` is the run's promoted pillar and category grain.
+   app-root merges a WHITELIST of live fields onto the directory row and
+   `workbookScores` is not on it, so `entity.workbookScores` is undefined here
+   and every read of it silently fell back: sixteen categories read "Peer —"
+   while the run states a median for all seventeen. Read the merged field
+   first — when app-root starts carrying it this branch stops being used — and
+   otherwise the registry the loader installs, which is the same object. */
+function workbookScoresOf(entity) {
+  if (entity && entity.workbookScores) return entity.workbookScores;
+  const reg = (typeof window !== "undefined" && window.DMA_ENTITY) || null;
+  return (reg && reg.workbookScores) || null;
+}
+
+/* The contract allows either shape for the workbook tables: an id-keyed object
+   ({"P1C1": {score…}}, which is what the API sends) or a list of rows carrying
+   their own id. Both become a list of rows with `id`. */
+function promotedRowsOf(table, idKey) {
+  if (!table) return [];
+  if (Array.isArray(table)) {
+    return table.map(r => ({ ...r, id: r[idKey] || r.id || null }))
+                .filter(r => r.id);
+  }
+  return Object.keys(table).map(k => ({ ...table[k], id: k }));
+}
+
+/* ── Category rows: the RUN's categories, not the catalogue's ────────────
+   The grid iterated `DMA.CATEGORIES` — the current v7.0 catalogue, sixteen
+   entries — so this run's seventeenth, P1C5, rendered nowhere: 30 scored cells
+   and a promoted category score of 2.03 were invisible, the P1 header counted
+   194 cells above four columns covering 164, and the pillar read 3.4 (a mean
+   of four category means) against its promoted 3.11 one zoom away. P1C5 is the
+   ESG category v7.0 removed, so a run pinned to the seventeen-category shape
+   legitimately scores cells the catalogue cannot name.
+
+   Rows are therefore the union of what the run PROMOTED and what it SCORED,
+   sorted by id (PxCy sorts naturally). A category the catalogue cannot name
+   still appears, labelled with its id and marked as unnamed — never dropped,
+   and never given a name from anywhere. */
+function runCategoriesOf(entity) {
+  const ws = workbookScoresOf(entity);
+  const rows = {};
+  for (const r of promotedRowsOf(ws && ws.categories, "category_id")) {
+    rows[r.id] = { id: r.id, score: numOf(r.score), peer: numOf(r.peer_median),
+                   band: r.band || null, source_cell: r.source_cell || null,
+                   promoted: true };
+  }
+  const cells = Array.isArray(entity && entity.subcaps) ? entity.subcaps : [];
+  for (const s of cells) {
+    if (s.category && !rows[s.category]) {
+      rows[s.category] = { id: s.category, score: null, peer: null, band: null,
+                           source_cell: null, promoted: false };
+    }
+  }
+  return Object.keys(rows).sort().map(id => {
+    const cat = DMA.getCategory(id) || null;
+    const mine = cells.filter(s => s.category === id);
+    return {
+      ...rows[id],
+      // The pillar comes from the id itself when the catalogue cannot answer —
+      // deterministic, not inferred.
+      pillar: (cat && cat.pillar) || id.slice(0, 2),
+      name: (cat && cat.name) || null,
+      inCatalogue: !!cat,
+      weight: cat && cat.weight != null ? Number(cat.weight) : null,
+      cells: mine,
+      thin: mine.filter(s => s.thin).length,
+      // Only used where the run promoted no category score; labelled as a mean
+      // wherever it renders, so it is never mistaken for the workbook's figure.
+      cellMean: meanOf(mine.map(s => s.score)),
+    };
+  });
+}
+
+/* Pillar rows, in the same spirit: the promoted pillar score is the pillar's
+   score. A mean of category means is a different number (P1: 3.4 vs 3.11) and
+   the page showed both. */
+function runPillarsOf(entity) {
+  const cats = runCategoriesOf(entity);
+  const ws = workbookScoresOf(entity);
+  const promoted = {};
+  for (const r of promotedRowsOf(ws && ws.pillars, "pillar_id")) promoted[r.id] = r;
+  const ids = [];
+  for (const p of DMA.PILLARS || []) if (!ids.includes(p.id)) ids.push(p.id);
+  for (const c of cats) if (!ids.includes(c.pillar)) ids.push(c.pillar);
+  for (const id of Object.keys(promoted)) if (!ids.includes(id)) ids.push(id);
+  return ids.sort().map(id => {
+    const meta = (DMA.PILLARS || []).find(p => p.id === id) || null;
+    const mine = cats.filter(c => c.pillar === id);
+    const overview = ((entity && entity.pillar_scores) || {})[id];
+    const overviewPeer = ((entity && entity.pillar_peer_medians) || {})[id];
+    return {
+      id,
+      name: (meta && meta.name) || null,
+      short: (meta && meta.short) || null,
+      inCatalogue: !!meta,
+      score: numOf(overview) != null ? numOf(overview)
+                                     : numOf(promoted[id] && promoted[id].score),
+      peer: numOf(overviewPeer) != null ? numOf(overviewPeer)
+                                       : numOf(promoted[id] && promoted[id].peer_median),
+      cats: mine,
+      // Summed from the columns the grid actually draws, so the header count
+      // cannot disagree with them again.
+      cellCount: mine.reduce((a, c) => a + c.cells.length, 0),
+      thin: mine.reduce((a, c) => a + c.thin, 0),
+    };
+  });
+}
+
+/* ── A cell's citations: the list the producer promoted ──────────────────
+   The drawer reverse-derived its evidence list from `DMA.EVIDENCE[].subcaps`
+   — the run-scoped link table — and that disagreed with the cell's own
+   promoted citation list on 65 of 69 cells: P4C1.1.1 promoted four ids and the
+   drawer showed five, including a core-banking item the producer never cited
+   for that cell, while P1C1.1.1 lost one it did. `heatmap.cell_evidence` is
+   what the producer wrote and what the evidence gate checked, so it is what
+   renders. The reverse derivation stays as the fallback for the ~90% of cells
+   that promoted no list, and the caller says which of the two it is showing.
+
+   An id that resolves to nothing in the evidence store is shown as an
+   unresolved id rather than dropped — fail-closed evidence means a dangling
+   citation is visible, not silently absent. */
+function cellCitationsOf(subcapId) {
+  const cell = (typeof DMA.cellEvidenceFor === "function")
+    ? DMA.cellEvidenceFor(subcapId) : null;
+  const ids = (cell && Array.isArray(cell.e_ids)) ? cell.e_ids : [];
+  if (ids.length) {
+    return {
+      basis: "promoted",
+      cell,
+      items: ids.map(id => {
+        const e = DMA.getEvidence(id) || null;
+        return e ? { ...e, resolved: true } : { id, resolved: false };
+      }),
+    };
+  }
+  return {
+    basis: "derived",
+    cell,
+    items: (DMA.EVIDENCE || [])
+      .filter(e => e.subcaps && e.subcaps.includes(subcapId))
+      .map(e => ({ ...e, resolved: true })),
+  };
+}
+
+/* The number of evidence items behind a cell, and where the number came from.
+   The row used to count `DMA.EVIDENCE` rows that list the cell, which is why
+   all 43 cells of P4C1 read "5 evidence" — the link table is coarser than the
+   citation lists. `grounded_on` is the promoted length (invariant 8: it is the
+   length of the citation list, not a stored number to be re-derived). */
+function evidenceCountOf(subcap) {
+  const cell = (typeof DMA.cellEvidenceFor === "function")
+    ? DMA.cellEvidenceFor(subcap.id) : null;
+  const ids = (cell && Array.isArray(cell.e_ids)) ? cell.e_ids : null;
+  if (ids && ids.length) return { n: ids.length, basis: "cited" };
+  if (subcap.evidence_count != null) return { n: subcap.evidence_count, basis: "linked" };
+  return { n: null, basis: null };
+}
+
 function ClientHeatmap({ entity, run }) {
   const route = useRoute();
   const { audience, openEvidence, openInsight, setIpSurface, setIpContext, tweaks, pushToast } = useApp();
@@ -58,28 +231,21 @@ function ClientHeatmap({ entity, run }) {
   const [focusArea, setFocusArea]     = useState(null);
   const [synthSubcap, setSynthSubcap] = useState(null);
 
-  // In customer mode, lock to focus / value_chain views only
+  // In customer mode, lock to focus / value_chain views only. `mode` belongs in
+  // the deps: with `[audience]` alone the effect had already run by the time
+  // "Standard" was clicked, so the internal grid rendered for the customer
+  // audience. The button is also disabled below — the lock should not depend on
+  // an effect winning a race.
   useEffect(() => {
     if (audience === "customer" && mode === "standard") setMode("focus");
-  }, [audience]);
+  }, [audience, mode]);
 
-  // Compute per-category aggregate scores
-  const catAgg = useMemo(() => {
-    const out = {};
-    for (const cat of DMA.CATEGORIES) {
-      const subs = entity.subcaps.filter(s => s.category === cat.id);
-      const avg = subs.reduce((a, s) => a + s.score, 0) / Math.max(1, subs.length);
-      // The category's STATED median where the run promotes one, else the mean
-      // of whatever cell medians exist, else null. Never a null-as-zero mean.
-      const catRow = ((entity.workbookScores || {}).categories || [])
-        .find(c => c.category_id === cat.id) || null;
-      const peer = catRow && catRow.peer_median != null
-        ? Number(catRow.peer_median) : peerMeanOf(subs);
-      const thin = subs.filter(s => s.thin).length;
-      out[cat.id] = { avg, peer, thin, total: subs.length };
-    }
-    return out;
-  }, [entity?.id]);
+  // The run's own category and pillar rows — promoted score, promoted peer
+  // median, the cells it scored — including any category the current catalogue
+  // does not list.
+  const cats = useMemo(() => runCategoriesOf(entity), [entity?.id, entity?.subcaps]);
+  const pillars = useMemo(() => runPillarsOf(entity), [entity?.id, entity?.subcaps]);
+  const overallLabel = DMA.helpers.maturityLabel(entity.overall);
 
   // The cells a focus area names — the ones it actually names. Matching on a
   // 4-char prefix returned every cell in the CATEGORY (so a 7-cell focus area
@@ -104,7 +270,9 @@ function ClientHeatmap({ entity, run }) {
         <div>
           <div className="eyebrow">Maturity heatmap</div>
           <h1>Where {entity.name} is today</h1>
-          <div className="sub">{entity.subcaps.length} subcaps · {entity.subcaps.filter(s => s.thin).length} thin · overall maturity {DMA.helpers.maturityLabel(entity.overall).toLowerCase()}</div>
+          {/* maturityLabel returns null for a null composite, and .toLowerCase()
+              on it took the whole page down. No composite, no band word. */}
+          <div className="sub">{entity.subcaps.length} subcaps · {entity.subcaps.filter(s => s.thin).length} thin{overallLabel ? ` · overall maturity ${overallLabel.toLowerCase()}` : " · no overall score promoted"}</div>
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entity.name} heatmap as PDF…`, "success")}><Icon name="download" size={13} /> Export</button>
@@ -118,7 +286,14 @@ function ClientHeatmap({ entity, run }) {
             <span style={{ fontSize: 11, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>View</span>
             <div className="toggle-row">
               <button className={mode === "focus" ? "on" : ""} onClick={() => { setMode("focus"); setFocusArea(null); }}><Icon name="sparkle" size={11} /> Focus areas</button>
-              <button className={mode === "standard" ? "on" : ""} onClick={() => setMode("standard")}><Icon name="heatmap" size={11} /> Standard</button>
+              {/* The internal grid carries every cell, capped or thin, and is
+                  not part of the customer view. Disabled rather than switched
+                  back a moment later. */}
+              <button className={mode === "standard" ? "on" : ""}
+                disabled={audience === "customer"}
+                title={audience === "customer" ? "the full internal grid is not part of the customer view" : null}
+                style={audience === "customer" ? { opacity: .45, cursor: "not-allowed" } : null}
+                onClick={() => { if (audience !== "customer") setMode("standard"); }}><Icon name="heatmap" size={11} /> Standard</button>
               <button className={mode === "value_chain" ? "on" : ""} onClick={() => setMode("value_chain")}><Icon name="route" size={11} /> Value chain</button>
             </div>
           </div>
@@ -170,13 +345,19 @@ function ClientHeatmap({ entity, run }) {
         <>
           {showIssues ? <IssueRegisterBanner entity={entity} onSubcap={(s) => setSynthSubcap({ kind: "subcap", subcap: s })} openEvidence={openEvidence} /> : null}
           {zoom === "pillar" ? (
-            <PillarHeatmap entity={entity} setPillarFocus={(p) => { setPillarFocus(p); setZoom("category"); }} />
+            <PillarHeatmap entity={entity} pillars={pillars} setPillarFocus={(p) => { setPillarFocus(p); setZoom("category"); }} />
           ) : zoom === "category" ? (
-            <CategoryHeatmap entity={entity} pillarFocus={pillarFocus} catAgg={catAgg} showPeers={showPeers} showIssues={showIssues}
+            <CategoryHeatmap entity={entity} pillars={pillars} pillarFocus={pillarFocus} showPeers={showPeers} showIssues={showIssues}
               setCatFocus={(c) => { setCatFocus(c); setZoom("capability"); }}
               onSynth={(catId) => { setSynthSubcap({ kind: "category", catId }); }} />
+          ) : zoom === "capability" ? (
+            /* Its own grain. The button used to set zoom to "capability" and
+               fall through to the subcap branch, so it produced DOM identical
+               to "Subcap" — a control that did nothing. */
+            <CapabilityHeatmap entity={entity} cats={cats} catFocus={catFocus} pillarFocus={pillarFocus} showIssues={showIssues}
+              drillCategory={(c) => { setCatFocus(c); setZoom("subcap"); }} />
           ) : (
-            <SubcapHeatmap entity={entity} catFocus={catFocus} pillarFocus={pillarFocus} showPeers={showPeers} showIssues={showIssues}
+            <SubcapHeatmap entity={entity} cats={cats} catFocus={catFocus} pillarFocus={pillarFocus} showPeers={showPeers} showIssues={showIssues}
               setCatFocus={setCatFocus}
               onSynth={(s) => setSynthSubcap({ kind: "subcap", subcap: s })} />
           )}
@@ -215,7 +396,12 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
             // in the H1 contract and were unread), then the mean of the cells it
             // names, then nothing. No 2.5/2.8 fallbacks: a hardcoded average is
             // a claim about this client.
-            const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : null;
+            // `entity_score` is the producer's own figure for this focus area
+            // (H1 contract) and it is not the mean of the cells: FA-1 promotes
+            // 1.95 where its 43 cells average 2.0. Read it; the mean only
+            // stands in when the run states none.
+            const avg = numOf(fa.entity_score) != null ? numOf(fa.entity_score)
+                                                       : meanOf(subs.map(s => s.score));
             const peer = fa.peer_score != null ? Number(fa.peer_score) : peerMeanOf(subs);
             const gap = fa.delta != null ? -Number(fa.delta) : deltaOf(peer, avg);
             return (
@@ -235,11 +421,15 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
                     ) : (
                       <span style={{ fontSize: 11, color: "var(--z-muted)" }} title="no peer median is stated at this grain in this run">no peer figure</span>
                     )}
-                    {/* "at peer" is a CLAIM. With no peer figure it was shown on
-                        every card, including the four this client trails. */}
+                    {/* "at peer" is a CLAIM, and it was printed for every card
+                        whose gap was null (i.e. all of them) and for every card
+                        the client leads — where it also understates. The signed
+                        difference between two stated figures says it without
+                        asserting anything. */}
                     {gap == null ? null
-                      : gap > 0.3 ? <span className="b b-below" style={{ marginLeft: "auto" }}>−{fx(gap, 1)}</span>
-                      : <span className="b b-above" style={{ marginLeft: "auto" }}>at peer</span>}
+                      : gap > 0 ? <span className="b b-below" style={{ marginLeft: "auto" }}>−{fx(gap, 1)}</span>
+                      : gap < 0 ? <span className="b b-above" style={{ marginLeft: "auto" }}>+{fx(Math.abs(gap), 1)}</span>
+                      : <span className="b b-muted" style={{ marginLeft: "auto" }}>0.0</span>}
                   </div>
                   <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.5 }} className="txt-fit-2">{fa.description}</div>
                 </div>
@@ -254,9 +444,22 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
   // Selected focus area detail
   const fa = focusArea;
   const subs = subcapsForFocusArea(fa);
-  const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : null;
+  const avg = numOf(fa.entity_score) != null ? numOf(fa.entity_score)
+                                             : meanOf(subs.map(s => s.score));
   const peer = fa.peer_score != null ? Number(fa.peer_score) : peerMeanOf(subs);
-  const insights = DMA.INSIGHT_CARDS.filter(ic => ic.affects.some(sid => fa.subcaps.some(p => sid.startsWith(p.slice(0, 4)))));
+  // Cards this focus area's OWN cells are affected by. Matching on a 4-char
+  // prefix meant "anything in the same category", so a card about a cell this
+  // focus area never names was listed under it — the same fabricated linkage
+  // the cell list already had fixed.
+  const named = new Set(fa.subcaps || []);
+  const insights = DMA.INSIGHT_CARDS.filter(ic => (ic.affects || []).some(sid =>
+    named.has(sid) || [...named].some(n => typeof n === "string" && sid.startsWith(`${n}.`))));
+  // Each fragment of the source line only exists when its value does: a null
+  // page printed " · p. · " and a focus area carries no financial reference at
+  // all, so the label sat there with nothing after it.
+  const srcBits = [fa.source && fa.source.type,
+                   (fa.source && fa.source.page) ? `p.${fa.source.page}` : null,
+                   fa.source && fa.source.doc].filter(Boolean);
 
   return (
     <div>
@@ -294,10 +497,18 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="row" style={{ marginBottom: 4 }}>
               <span className="b b-purple">SOURCE</span>
-              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{fa.source.type} · p.{fa.source.page} · {fa.source.doc}</span>
+              <span style={{ fontSize: 11, color: "var(--z-muted)", minWidth: 0, overflowWrap: "anywhere" }}>
+                {srcBits.length ? srcBits.join(" · ") : "the run states no source for this focus area"}
+              </span>
             </div>
-            <div style={{ fontSize: 12.5, color: "var(--z-dark)", fontStyle: "italic", lineHeight: 1.55 }}>"{fa.strategic_quote.replace(/[“”]/g, "")}"</div>
-            <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 5 }}>Financial reference: {fa.financial_ref}</div>
+            {/* A focus area with no verbatim quote used to throw on .replace and
+                take the page with it. */}
+            {fa.strategic_quote ? (
+              <div style={{ fontSize: 12.5, color: "var(--z-dark)", fontStyle: "italic", lineHeight: 1.55 }}>"{String(fa.strategic_quote).replace(/[“”]/g, "")}"</div>
+            ) : null}
+            {fa.financial_ref ? (
+              <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 5 }}>Financial reference: {fa.financial_ref}</div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -308,7 +519,7 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
       {/* Composite + subcap grid (unchanged section) */}
       <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 14, marginBottom: 14 }}>
         <div className="card">
-          <div style={{ fontSize: 11, color: "var(--z-muted)", marginBottom: 8 }}>Pillar contribution</div>
+          <div style={{ fontSize: 11, color: "var(--z-muted)", marginBottom: 8 }}>Where its cells sit, by pillar</div>
           {!fa.pillars_weight || !Object.keys(fa.pillars_weight).length ? (
             <div style={{ fontSize: 11, color: "var(--z-muted)" }}>
               No cells linked to this focus area.
@@ -321,7 +532,11 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
             </div>
           ))}
           <div className="sep" />
-          <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5 }}>Weights reflect how much each DMA pillar contributes to this focus area composite. {entity.name}'s actual scores drive the bar fill colours.</div>
+          {/* These are SHARES of the cell list beside them (the adapter counts
+              involved_subcap_ids per pillar), not weights in a composite —
+              calling them weights implied the focus area score was a weighted
+              roll-up of pillars, which nothing in the run says. */}
+          <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5 }}>Share of the {(fa.subcaps || []).length} cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for {entity.name}.</div>
         </div>
 
         <div className="card">
@@ -381,9 +596,16 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
 /* ── Customisable KPI strip ─────────────────────────────────────── */
 function CustomizableKpiStrip({ fa, entity }) {
   // Each KPI gets a "source mode": "public" (inferred from public DMA) or "client" (provided / awaiting client input) or "hidden"
-  const [modes, setModes] = useState(() => fa.kpis.reduce((m, k) => { m[k.label] = "public"; return m; }, {}));
+  const kpis = (fa && Array.isArray(fa.kpis)) ? fa.kpis : [];
+  const [modes, setModes] = useState(() => kpis.reduce((m, k) => { m[k.label] = "public"; return m; }, {}));
   const [editing, setEditing] = useState(null);
   const [drafts, setDrafts] = useState({});
+  // The H1 contract carries no KPI baselines or targets, so this is [] for
+  // every focus area of every run today. It rendered anyway: a heading, a
+  // "Customise per client" badge and a six-line explainer over zero tiles —
+  // chrome promising figures that do not exist. Nothing to show, nothing shown;
+  // if a future contract carries kpis the strip returns on its own.
+  if (!kpis.length) return null;
 
   const cycleMode = (label) => {
     setModes(m => ({ ...m, [label]: m[label] === "public" ? "client" : m[label] === "client" ? "hidden" : "public" }));
@@ -402,7 +624,7 @@ function CustomizableKpiStrip({ fa, entity }) {
         <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Toggle each KPI between Public inference · Client-provided · Hidden</span>
       </div>
       <div className="g3">
-        {fa.kpis.map(k => {
+        {kpis.map(k => {
           const mode = modes[k.label];
           const isEditing = editing === k.label;
           const isHidden = mode === "hidden";
@@ -470,40 +692,51 @@ function CustomizableKpiStrip({ fa, entity }) {
 }
 
 /* ─────────────────────── PILLAR HEATMAP ─────────────────────── */
-function PillarHeatmap({ entity, setPillarFocus }) {
+function PillarHeatmap({ entity, pillars, setPillarFocus }) {
   return (
     <div className="card">
       <div className="g4">
-        {DMA.PILLARS.map(p => {
-          const score = entity.pillar_scores[p.id];
-          // The workbook's STATED pillar median, which the run promotes and
-          // which a constant offset was standing in for. Baxter's P1 sits at
-          // 3.11 against a stated 2.9 — ABOVE its peer set — and `score + 0.3`
-          // rendered that as 0.3 BELOW.
-          const peer = (entity.pillar_peer_medians || {})[p.id];
+        {(pillars || []).map(p => {
+          // The promoted pillar score and the workbook's STATED pillar median.
+          // A constant offset used to stand in for the median: Baxter's P1 sits
+          // at 3.11 against a stated 2.9 — ABOVE its peer set — and `score +
+          // 0.3` rendered that as 0.3 BELOW.
+          const score = p.score, peer = p.peer;
+          const delta = deltaOf(score, peer);
           return (
             <div key={p.id} className="card-tile clickable" onClick={() => setPillarFocus(p.id)} style={{ padding: 16 }}>
               <div className="row" style={{ marginBottom: 12 }}>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 11, color: "var(--z-muted)" }}>{p.id}</div>
-                  <div style={{ fontSize: 14, fontWeight: 600 }}>{p.name}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600 }} className="txt-fit-2">{p.name || "not named in the current catalogue"}</div>
                 </div>
                 <span className="spacer" />
                 <MaturityChip score={score} large />
               </div>
-              <div className="prog"><div className="prog-fill" style={{ width: `${score / 5 * 100}%`, background: DMA.helpers.maturityHex(score) }} /></div>
+              {/* A null score drew a zero-width bar in the "nothing measured"
+                  grey, which reads as a measured floor. No score, no bar. */}
+              {score != null ? (
+                <div className="prog"><div className="prog-fill" style={{ width: `${score / 5 * 100}%`, background: DMA.helpers.maturityHex(score) }} /></div>
+              ) : (
+                <div style={{ fontSize: 11, color: "var(--z-muted)" }}>no pillar score promoted</div>
+              )}
               <div className="row" style={{ marginTop: 8, fontSize: 11 }}>
                 {peer != null ? (
                   <>
                     <span style={{ color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>
                     <span className="spacer" />
-                    <span style={{ color: score < peer ? "var(--z-below)" : "var(--z-mid)", fontFamily: "var(--font-mono)" }}>{score >= peer ? "▲" : "▼"} {fx(Math.abs(score - peer), 1)}</span>
+                    {delta != null ? (
+                      <span style={{ color: delta < 0 ? "var(--z-below)" : "var(--z-mid)", fontFamily: "var(--font-mono)" }}>{delta >= 0 ? "▲" : "▼"} {fx(Math.abs(delta), 1)}</span>
+                    ) : null}
                   </>
                 ) : (
                   <span style={{ color: "var(--z-muted)" }} title="the run states no peer median for this pillar">no peer figure stated</span>
                 )}
               </div>
-              <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 10 }}>{DMA.CATEGORIES.filter(c => c.pillar === p.id).length} categories · click to drill</div>
+              {/* Counted from the run's own categories, so a pillar carrying a
+                  category the catalogue dropped (P1C5 here) says five, and the
+                  grid one click away draws five columns. */}
+              <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 10 }}>{p.cats.length} categories · {p.cellCount} subcaps · click to drill</div>
             </div>
           );
         })}
@@ -513,44 +746,56 @@ function PillarHeatmap({ entity, setPillarFocus }) {
 }
 
 /* ─────────────────────── CATEGORY HEATMAP ─────────────────────── */
-function CategoryHeatmap({ entity, pillarFocus, catAgg, showPeers, showIssues, setCatFocus, onSynth }) {
-  const pillars = pillarFocus ? DMA.PILLARS.filter(p => p.id === pillarFocus) : DMA.PILLARS;
+function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, setCatFocus, onSynth }) {
+  const rows = pillarFocus ? (pillars || []).filter(p => p.id === pillarFocus) : (pillars || []);
   // Build category → has-caps map
   const catCaps = {};
   Object.values(DMA.ISSUE_CAPS).forEach(info => {
-    Object.keys(info.caps).forEach(sid => {
+    Object.keys(info.caps || {}).forEach(sid => {
       const catId = sid.slice(0, 4);
       catCaps[catId] = (catCaps[catId] || 0) + 1;
     });
   });
   return (
     <div className="card">
-      {pillars.map(p => {
-        const cats = DMA.CATEGORIES.filter(c => c.pillar === p.id);
-        const avg = cats.reduce((a, c) => a + catAgg[c.id].avg, 0) / Math.max(1, cats.length);
+      {rows.map(p => {
+        const cats = p.cats;
         return (
           <div key={p.id} style={{ marginBottom: 16 }}>
             <div className="row" style={{ marginBottom: 10 }}>
               <span className="b b-purple">{p.id}</span>
-              <span style={{ fontSize: 13, fontWeight: 600 }}>{p.name}</span>
-              <MaturityChip score={avg} />
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{p.name || "not named in the current catalogue"}</span>
+              {/* The PROMOTED pillar score. This was the mean of the category
+                  means — 3.4 for P1 where the run promotes 3.11 — so one page
+                  carried two numbers for the same pillar. */}
+              <MaturityChip score={p.score} />
               <span className="spacer" />
-              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{cats.length} categories · {entity.subcaps.filter(s => s.pillar === p.id).length} subcaps</span>
+              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{cats.length} categories · {p.cellCount} subcaps</span>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: `120px repeat(${cats.length}, 1fr)`, gap: 4 }}>
+            {!cats.length ? (
+              <div style={{ fontSize: 11, color: "var(--z-muted)" }}>This run scored no cells in this pillar.</div>
+            ) : (
+            <div style={{ display: "grid", gridTemplateColumns: `120px repeat(${cats.length}, minmax(0, 1fr))`, gap: 4 }}>
               <div style={{ fontSize: 11, color: "var(--z-muted)", display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 8 }}>Entity</div>
               {cats.map(c => {
-                const agg = catAgg[c.id];
+                // The workbook's own category score. Where the run promotes
+                // none, the mean of the cells it scored — said so in the
+                // tooltip, never silently swapped for the stated figure.
+                const shown = c.score != null ? c.score : c.cellMean;
+                const basis = c.score != null
+                  ? `promoted category score${c.source_cell ? ` (${c.source_cell})` : ""}`
+                  : (c.cellMean != null ? `mean of ${c.cells.length} scored cells — the run promoted no category score`
+                                        : "no score");
                 const capCount = catCaps[c.id] || 0;
                 return (
-                  <button key={c.id} className={`hm-cell b ${DMA.helpers.maturityClass(agg.avg)}`}
+                  <button key={c.id} className={`hm-cell b ${DMA.helpers.maturityClass(shown)}`}
                     onClick={() => setCatFocus(c.id)}
                     onContextMenu={(e) => { e.preventDefault(); onSynth(c.id); }}
                     style={{ position: "relative", border: 0, padding: "8px 6px", minHeight: 44 }}
-                    title={`${c.name} · ${capCount > 0 ? capCount + " subcaps capped by issues · " : ""}click to drill`}>
+                    title={`${c.id} · ${c.name || "not named in the current catalogue"} · ${basis}${capCount > 0 ? ` · ${capCount} subcaps capped by issues` : ""} · click to drill`}>
                     <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2, gap: 2 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700 }}>{fx(agg.avg, 1)}</div>
-                      {agg.thin > 0 ? <div style={{ fontSize: 8, fontWeight: 600 }}>{agg.thin} thin</div> : null}
+                      <div style={{ fontSize: 13, fontWeight: 700 }}>{fx(shown, 1)}</div>
+                      {c.thin > 0 ? <div style={{ fontSize: 8, fontWeight: 600 }}>{c.thin} thin</div> : null}
                     </div>
                     {showIssues && capCount > 0 ? (
                       <span style={{ position: "absolute", top: 3, right: 4, display: "inline-flex", alignItems: "center", gap: 2, fontSize: 9, color: "var(--z-org)", background: "rgba(255,255,255,.85)", padding: "0 3px", borderRadius: 3 }}>
@@ -565,7 +810,7 @@ function CategoryHeatmap({ entity, pillarFocus, catAgg, showPeers, showIssues, s
               {showPeers ? <>
                 <div style={{ fontSize: 11, color: "var(--z-muted)", display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 8 }}>Peer</div>
                 {cats.map(c => {
-                  const pm = catAgg[c.id] ? catAgg[c.id].peer : null;
+                  const pm = c.peer;
                   // A null median banded as maturityClass(null) and printed 0.0,
                   // so all sixteen categories read "Peer 0.0" in the lowest band
                   // — a peer set that scores nothing.
@@ -582,11 +827,86 @@ function CategoryHeatmap({ entity, pillarFocus, catAgg, showPeers, showIssues, s
 
               <div></div>
               {cats.map(c => (
-                <div key={`l-${c.id}`} style={{ fontSize: 9.5, color: "var(--z-muted)", textAlign: "center", padding: "4px 2px 0", lineHeight: 1.3 }}>
+                <div key={`l-${c.id}`} style={{ fontSize: 9.5, color: "var(--z-muted)", textAlign: "center", padding: "4px 2px 0", lineHeight: 1.3, minWidth: 0 }}
+                     title={c.inCatalogue ? `${c.id} · ${c.name}`
+                       : `${c.id} · this run scored ${c.cells.length} cells here; the current catalogue does not list this category, so no name is available`}>
                   <div className="f-mono">{c.id}</div>
-                  <div className="txt-fit-2">{c.name}</div>
+                  {/* A category the catalogue cannot name is labelled with its
+                      id and marked unnamed. Inventing a name for it would be
+                      inventing data; dropping it hid 30 promoted cells. */}
+                  <div className="txt-fit-2" style={c.inCatalogue ? null : { fontStyle: "italic" }}>{c.name || "unnamed in catalogue"}</div>
                 </div>
               ))}
+            </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─────────────────────── CAPABILITY HEATMAP ─────────────────────
+   The capability grain: one row per capability (L1) with the cells beneath it.
+   The run's cell grain carries `capability_id` but no capability NAME, so a row
+   is labelled with its id — the alternative would be inventing one. The mean is
+   computed from the cells because nothing is promoted at this grain, and every
+   row says how many cells it is a mean of. */
+function CapabilityHeatmap({ entity, cats, catFocus, pillarFocus, showIssues, drillCategory }) {
+  const scope = catFocus ? (cats || []).filter(c => c.id === catFocus)
+    : pillarFocus ? (cats || []).filter(c => c.pillar === pillarFocus)
+    : (cats || []);
+  if (!scope.length) {
+    return (
+      <div className="card"><div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+        This run scored no cells in the current selection.
+      </div></div>
+    );
+  }
+  return (
+    <div>
+      {scope.map(c => {
+        const groups = [];
+        const byCap = {};
+        for (const s of c.cells) {
+          const cap = s.capability || `${c.id} · cell carries no capability id`;
+          if (!byCap[cap]) { byCap[cap] = { id: cap, items: [] }; groups.push(byCap[cap]); }
+          byCap[cap].items.push(s);
+        }
+        groups.sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
+        return (
+          <div key={c.id} className="card" style={{ marginBottom: 14 }}>
+            <div className="row" style={{ marginBottom: 12 }}>
+              <span className="chip">{c.id}</span>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{c.name || "unnamed in catalogue"}</span>
+              <MaturityChip score={c.score != null ? c.score : c.cellMean} />
+              <span className="spacer" />
+              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
+                {groups.length} capabilities · {c.cells.length} subcaps
+                {c.weight != null ? ` · weight ${fx(c.weight * 100, 0)}%` : ""}
+              </span>
+            </div>
+            <div className="g2" style={{ gap: 8 }}>
+              {groups.map(g => {
+                const mean = meanOf(g.items.map(s => s.score));
+                const thin = g.items.filter(s => s.thin).length;
+                const capped = showIssues ? g.items.filter(s => DMA.issueCapsFor(s.id).length).length : 0;
+                return (
+                  <button key={g.id} className="card-tile clickable" style={{ padding: 10, textAlign: "left" }}
+                    onClick={() => drillCategory && drillCategory(c.id)}
+                    title={`${g.id} · mean of ${g.items.length} scored cells (no capability score is promoted) · click to read the cells`}>
+                    <div className="row" style={{ gap: 8 }}>
+                      <span className={`b ${DMA.helpers.maturityClass(mean)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(mean, 1)}</span>
+                      <span className="f-mono txt-fit-1" style={{ fontSize: 11.5, fontWeight: 600, color: "var(--z-dark)", minWidth: 0 }}>{g.id}</span>
+                      <span className="spacer" />
+                      <span className="b b-muted" title="cells in this capability">{g.items.length}</span>
+                      {thin ? <span className="b b-org">{thin} thin</span> : null}
+                      {capped ? <span className="b b-org"><Icon name="lock" size={9} /> {capped}</span> : null}
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 4 }}>mean of {g.items.length} cells · no capability score promoted</div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         );
@@ -596,15 +916,18 @@ function CategoryHeatmap({ entity, pillarFocus, catAgg, showPeers, showIssues, s
 }
 
 /* ─────────────────────── SUBCAP HEATMAP ─────────────────────── */
-function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, onSynth, setCatFocus }) {
+function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers, showIssues, onSynth, setCatFocus }) {
   const [openClusters, setOpenClusters] = useState({});
-  const cats = catFocus ? DMA.CATEGORIES.filter(c => c.id === catFocus) :
-               pillarFocus ? DMA.CATEGORIES.filter(c => c.pillar === pillarFocus) :
+  // The run's categories, so a category the current catalogue does not list is
+  // still reachable and its cells still readable.
+  const cats = catFocus ? (allCats || []).filter(c => c.id === catFocus) :
+               pillarFocus ? (allCats || []).filter(c => c.pillar === pillarFocus) :
                null;
 
-  // No category/pillar in focus → show a picker instead of dumping all 102 subcaps
+  // No category/pillar in focus → show a picker instead of dumping all 765 cells
   if (!cats || cats.length === 0) {
-    const pillars = DMA.PILLARS;
+    const pillarIds = [];
+    for (const c of allCats || []) if (!pillarIds.includes(c.pillar)) pillarIds.push(c.pillar);
     return (
       <div className="card" style={{ marginBottom: 14 }}>
         <div className="row" style={{ marginBottom: 4 }}>
@@ -612,28 +935,29 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
           <div style={{ fontSize: 13, fontWeight: 600 }}>Select a category to view its sub-capabilities</div>
         </div>
         <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginBottom: 14 }}>The subcap view drills into one category at a time so you can read the evidence behind each score. Pick a category below.</div>
-        {pillars.map(p => {
-          const pcats = DMA.CATEGORIES.filter(c => c.pillar === p.id);
+        {pillarIds.sort().map(pid => {
+          const meta = (DMA.PILLARS || []).find(p => p.id === pid) || null;
+          const pcats = (allCats || []).filter(c => c.pillar === pid);
           return (
-            <div key={p.id} style={{ marginBottom: 12 }}>
+            <div key={pid} style={{ marginBottom: 12 }}>
               <div className="row" style={{ marginBottom: 6, gap: 6 }}>
-                <span className="b b-purple">{p.id}</span>
-                <span style={{ fontSize: 11.5, fontWeight: 600, color: "var(--z-dark)" }}>{p.short || p.name}</span>
+                <span className="b b-purple">{pid}</span>
+                <span style={{ fontSize: 11.5, fontWeight: 600, color: "var(--z-dark)" }}>{(meta && (meta.short || meta.name)) || "unnamed in catalogue"}</span>
               </div>
               <div className="g4" style={{ gap: 8 }}>
                 {pcats.map(c => {
-                  const subs = entity.subcaps.filter(s => s.category === c.id);
-                  const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : 0;
-                  const thin = subs.filter(s => s.thin).length;
+                  // The promoted category score, else the mean of its cells,
+                  // else nothing. A zero here read as a measured floor.
+                  const shown = c.score != null ? c.score : c.cellMean;
                   return (
-                    <button key={c.id} className="card-tile clickable" style={{ padding: 11, textAlign: "left" }} onClick={() => setCatFocus && setCatFocus(c.id)} disabled={!subs.length}>
+                    <button key={c.id} className="card-tile clickable" style={{ padding: 11, textAlign: "left" }} onClick={() => setCatFocus && setCatFocus(c.id)} disabled={!c.cells.length}>
                       <div className="row" style={{ marginBottom: 6, gap: 5 }}>
                         <span className="chip">{c.id}</span>
                         <span className="spacer" />
-                        {subs.length ? <span className={`b ${DMA.helpers.maturityClass(avg)}`}>{fx(avg, 1)}</span> : <span className="b b-muted">—</span>}
+                        {shown != null ? <span className={`b ${DMA.helpers.maturityClass(shown)}`}>{fx(shown, 1)}</span> : <span className="b b-muted">—</span>}
                       </div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }} className="txt-fit-2">{c.name}</div>
-                      <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 3 }}>{subs.length} subcaps{thin ? ` · ${thin} thin` : ""}</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }} className="txt-fit-2">{c.name || "unnamed in catalogue"}</div>
+                      <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 3 }}>{c.cells.length} subcaps{c.thin ? ` · ${c.thin} thin` : ""}</div>
                     </button>
                   );
                 })}
@@ -654,35 +978,45 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
         </div>
       ) : null}
       {cats.map(c => {
-        const subs = entity.subcaps.filter(s => s.category === c.id);
-        // group into L1 capability clusters (Category → L1 cluster → L2 sub-cap)
+        const subs = c.cells;
+        // Capability clusters, grouped on the cell grain's own `capability`
+        // (capability_id). This grouped on `l1`/`l1name` — keys the live cell
+        // grain has never carried — so every cell in a category fell into one
+        // undefined bucket: all 43 P4C1 cells under a heading reading "P4C1."
+        // and "1 capabilities". The run carries no capability NAME, so a
+        // cluster is labelled with its id rather than an invented title.
         const clusters = [];
-        const byL1 = {};
+        const byCap = {};
         subs.forEach(s => {
-          if (!byL1[s.l1]) { byL1[s.l1] = { l1: s.l1, name: s.l1name, items: [] }; clusters.push(byL1[s.l1]); }
-          byL1[s.l1].items.push(s);
+          const cap = s.capability || `${c.id}·no capability id`;
+          if (!byCap[cap]) { byCap[cap] = { id: cap, named: !!s.capability, items: [] }; clusters.push(byCap[cap]); }
+          byCap[cap].items.push(s);
         });
+        clusters.sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
         return (
           <div key={c.id} className="card" style={{ marginBottom: 14 }}>
             <div className="row" style={{ marginBottom: 12 }}>
               <span className="chip">{c.id}</span>
-              <span style={{ fontSize: 13, fontWeight: 600 }}>{c.name}</span>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{c.name || "unnamed in catalogue"}</span>
               <span className="spacer" />
-              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{subs.length} subcaps · {clusters.length} capabilities · weight {fx((c.weight*100), 0)}%</span>
+              {/* The catalogue states no category weights in this version, and
+                  `null * 100` printed "weight 0%" — a weight of zero is a claim
+                  the catalogue never made. */}
+              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{subs.length} subcaps · {clusters.length} capabilities{c.weight != null ? ` · weight ${fx(c.weight * 100, 0)}%` : ""}</span>
             </div>
             {clusters.map(cl => {
-              const key = `${c.id}.${cl.l1}`;
+              const key = `${c.id}.${cl.id}`;
               const open = openClusters[key] !== false; // default open
-              const avg = cl.items.reduce((a, s) => a + s.score, 0) / cl.items.length;
+              const avg = meanOf(cl.items.map(s => s.score));
               const capped = showIssues ? cl.items.filter(s => DMA.issueCapsFor(s.id).length).length : 0;
               return (
                 <div key={key} style={{ border: "1px solid var(--z-sep)", borderRadius: 8, marginBottom: 8, overflow: "hidden" }}>
                   <button onClick={() => setOpenClusters(o => ({ ...o, [key]: !open }))}
+                    title={`${cl.id} · mean of ${cl.items.length} scored cells (no capability score or name is promoted at this grain)`}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "9px 12px", background: "var(--z-bg)", border: 0, cursor: "pointer", textAlign: "left" }}>
                     <span className={`b ${DMA.helpers.maturityClass(avg)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(avg, 1)}</span>
-                    <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600, color: "var(--z-dark)" }} className="txt-fit-1">{cl.name}</span>
-                    <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{c.id}.{cl.l1}</span>
-                    <span className="b b-muted">{cl.items.length}</span>
+                    <span className="f-mono txt-fit-1" style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }}>{cl.id}</span>
+                    <span style={{ fontSize: 10, color: "var(--z-muted)", flexShrink: 0 }}>{cl.items.length} cells</span>
                     {capped ? <span className="b b-org"><Icon name="lock" size={9} /> {capped}</span> : null}
                     <Icon name={open ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
                   </button>
@@ -693,7 +1027,11 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
                         // null - score is -score, which printed as "+score vs
                         // peer" in the above-peer colour on every row.
                         const gap = deltaOf(s.peerMedian, s.score);
-                        const evCount = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.includes(s.id)).length;
+                        // The cell's own citation count where it promoted a
+                        // list, else the run's link count for the cell. Counting
+                        // evidence rows that mention the cell is a coarser
+                        // number: it made all 43 P4C1 cells read "5 evidence".
+                        const ev = evidenceCountOf(s);
                         return (
                           <button key={s.id} className="subcap-row" onClick={() => onSynth(s)}>
                             <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(s.score, 1)}</span>
@@ -703,12 +1041,20 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
                                 {s.thin ? <span className="b b-org">THIN</span> : null}
                                 {caps.length ? <span className="b b-org"><Icon name="lock" size={9} /> M{caps[0].cap}</span> : null}
                               </div>
-                              <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 1 }}>{s.id} · {s.confidence} · {evCount} evidence</div>
+                              <div className="f-mono txt-fit-1" style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 1 }}
+                                   title={ev.basis === "cited" ? "ids the producer cited for this cell"
+                                     : ev.basis === "linked" ? "evidence items the run links to this cell" : null}>
+                                {s.id}{s.confidence ? ` · ${s.confidence}` : ""}{ev.n != null ? ` · ${ev.n} ${ev.basis}` : " · no evidence count"}
+                              </div>
                             </div>
                             <div style={{ width: 90, flexShrink: 0 }}>
                               <div style={{ position: "relative", height: 6, background: "var(--z-sep)", borderRadius: 3 }}
                                    title={`Score ${fx(s.score, 1)}${s.peerMedian != null ? ` · Peer ${fx(s.peerMedian, 1)}` : " · no peer median stated"}`}>
-                                <div style={{ width: `${s.score / 5 * 100}%`, height: "100%", background: DMA.helpers.maturityHex(s.score), borderRadius: 3 }} />
+                                {/* An unscored cell gets no fill rather than a
+                                    zero-width bar that reads as a floor. */}
+                                {s.score != null ? (
+                                  <div style={{ width: `${s.score / 5 * 100}%`, height: "100%", background: DMA.helpers.maturityHex(s.score), borderRadius: 3 }} />
+                                ) : null}
                                 {/* The tick is a peer POSITION. With a null median it
                                     was drawn at 0%, which reads as a peer set scoring
                                     nothing. No median, no tick. */}
@@ -717,7 +1063,7 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
                                 ) : null}
                               </div>
                               {gap != null ? (
-                                <div style={{ fontSize: 9, color: gap > 0 ? "var(--z-below)" : "var(--z-mid)", marginTop: 2, textAlign: "right" }}>{gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`} vs peer</div>
+                                <div style={{ fontSize: 9, color: gap > 0 ? "var(--z-below)" : gap < 0 ? "var(--z-mid)" : "var(--z-muted)", marginTop: 2, textAlign: "right" }}>{gap > 0 ? `−${fx(gap, 1)}` : gap < 0 ? `+${fx(Math.abs(gap), 1)}` : "0.0"} vs peer</div>
                               ) : (
                                 <div style={{ fontSize: 9, color: "var(--z-muted)", marginTop: 2, textAlign: "right" }}>no peer</div>
                               )}
@@ -761,17 +1107,51 @@ function subcapsForStage(entity, vc) {
 
 function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }) {
   const [selected, setSelected] = useState(null);
+  const chains = DMA.VALUE_CHAINS || [];
+  const state = (typeof DMA.sectionStateFor === "function")
+    ? DMA.sectionStateFor("heatmap.value_chain") : null;
+  const empty = state && state.empty_state;
+
+  /* The section is optional and Baxter's run submitted eight of nine sections
+     without it. With no chains the view rendered its heading, an empty grey
+     badge and "Same 765 subcaps, reorganised by business process" over an empty
+     grid — a promise that the cells had been arranged by business process when
+     nothing had been. The stage arrangement is a claim about this client's
+     operating model, so there is nothing to derive it from; say that it did not
+     promote, and name what the API said. */
+  if (!chains.length) {
+    return (
+      <div className="empty">
+        <div className="icon"><Icon name="route" size={20} /></div>
+        <h3>The value chain section did not promote for this run</h3>
+        <p>
+          {empty
+            ? `${String(empty.kind || "empty").replace(/_/g, " ")}${empty.reason ? ` — ${empty.reason}` : ""}.`
+            : "The run promoted no value-chain stages."}
+        </p>
+        <p style={{ marginTop: 8 }}>
+          Which cells belong to which business process is the producer's claim
+          about {entity.name}'s operating model. The cell grain alone cannot
+          stand it up, so nothing is drawn here until the section promotes.
+        </p>
+      </div>
+    );
+  }
+
+  const mapped = new Set();
+  for (const vc of chains) for (const s of subcapsForStage(entity, vc)) mapped.add(s.id);
   return (
     <div>
       <div className="row" style={{ marginBottom: 12 }}>
         <Icon name="route" size={14} />
         <div style={{ fontSize: 13, fontWeight: 600 }}>Value chain view</div>
-        <span className="b b-muted"></span>
         <span className="spacer" />
-        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Same {entity.subcaps.length} subcaps, reorganised by business process</span>
+        {/* Counted, not asserted: only the cells the stages actually name are
+            arranged by process. */}
+        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{chains.length} stages · {mapped.size} of {entity.subcaps.length} subcaps mapped</span>
       </div>
       <div className="g3" style={{ marginBottom: 14 }}>
-        {DMA.VALUE_CHAINS.map(vc => {
+        {chains.map(vc => {
           // Pick subcaps representative of value chain - sample from subcaps
           const subs = subcapsForStage(entity, vc);
           const scored = subs.filter(s => s.score != null);
@@ -819,7 +1199,7 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
       </div>
 
       {selected ? (() => {
-        const vc = DMA.VALUE_CHAINS.find(x => x.id === selected);
+        const vc = chains.find(x => x.id === selected);
         if (!vc) return null;
         const subs = subcapsForStage(entity, vc);
         const insights = DMA.INSIGHT_CARDS.filter(ic => ic.affects.some(sid => subs.some(s => s.id === sid)));
@@ -870,38 +1250,105 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
   );
 }
 
+/* A category's citations: the union of its cells' promoted lists, in cell order.
+   Falls back to the run's link table only when no cell in the category promoted
+   one, and says which it used. */
+function categoryCitationsOf(cells) {
+  const seen = new Set();
+  const items = [];
+  let withLists = 0;
+  for (const c of cells || []) {
+    const cell = (typeof DMA.cellEvidenceFor === "function") ? DMA.cellEvidenceFor(c.id) : null;
+    const ids = (cell && Array.isArray(cell.e_ids)) ? cell.e_ids : [];
+    if (ids.length) withLists += 1;
+    for (const id of ids) {
+      if (seen.has(id)) continue;
+      seen.add(id);
+      const e = DMA.getEvidence(id) || null;
+      items.push(e ? { ...e, resolved: true } : { id, resolved: false });
+    }
+  }
+  if (items.length) return { basis: "promoted", items, withLists };
+  const ids = new Set((cells || []).map(c => c.id));
+  return {
+    basis: "derived",
+    withLists: 0,
+    items: (DMA.EVIDENCE || [])
+      .filter(e => e.subcaps && e.subcaps.some(sid => ids.has(sid)))
+      .map(e => ({ ...e, resolved: true })),
+  };
+}
+
+/* The score axis. It was labelled M1 M2 M3 M4 M5 — and M5 does not exist: four
+   bands, on the raw score, strictly less-than. Labelled with the scale's own
+   numbers and the band that owns each range. */
+function BandAxis() {
+  return (
+    <>
+      <div style={{ position: "relative", height: 13, fontSize: 10, color: "var(--z-muted)", fontFamily: "var(--font-mono)" }}>
+        {[1, 2, 3, 4, 5].map(t => (
+          <span key={t} style={{ position: "absolute", left: `${(t - 1) / 4 * 100}%`,
+            transform: t === 1 ? "none" : t === 5 ? "translateX(-100%)" : "translateX(-50%)" }}>{t}</span>
+        ))}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 2, fontSize: 9, color: "var(--z-muted)", textAlign: "center" }}>
+        {["Activating", "Building", "Competing", "Differentiating"].map(b => (
+          <span key={b} className="txt-fit-1">{b}</span>
+        ))}
+      </div>
+    </>
+  );
+}
+
 /* ─────────────────────── SYNTHESIS DRAWER ─────────────────────── */
 function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, showIssues }) {
   const subcap = item.subcap;
-  const category = item.catId ? DMA.getCategory(item.catId) : null;
+  const catId = item.catId || (subcap && subcap.category) || null;
+  const cats = useMemo(() => runCategoriesOf(entity), [entity?.id, entity?.subcaps]);
+  // The RUN's category row. Reading `DMA.getCategory` alone meant a category the
+  // current catalogue does not list (P1C5, 30 scored cells) resolved to nothing
+  // and the drawer returned null — no synthesis at all for those cells.
+  const catRow = catId ? (cats.find(c => c.id === catId) || null) : null;
+  const category = item.catId ? (catRow || null) : null;
   if (!subcap && !category) return null;
+  const catCells = catRow ? catRow.cells : [];
 
   // Linked insight cards
-  const linkedIC = subcap ? DMA.INSIGHT_CARDS.filter(ic => ic.affects.includes(subcap.id)) :
-                            DMA.INSIGHT_CARDS.filter(ic => ic.affects.some(sid => sid.startsWith(category.id)));
+  const linkedIC = subcap ? DMA.INSIGHT_CARDS.filter(ic => (ic.affects || []).includes(subcap.id)) :
+                            DMA.INSIGHT_CARDS.filter(ic => (ic.affects || []).some(sid => sid.startsWith(category.id)));
 
-  // Linked evidence (look for evidence that lists this subcap)
-  const linkedEv = subcap ? DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.includes(subcap.id)) :
-                            DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.some(sid => sid.startsWith(category.id)));
+  /* The cell's OWN promoted citation list, which is what the producer wrote and
+     what the evidence gate checked. This used to reverse-derive from
+     `DMA.EVIDENCE[].subcaps` and disagreed with the promoted list on 65 of 69
+     cells — P4C1.1.1 promoted four ids and the drawer showed five, including a
+     core-banking item never cited for that cell; P1C1.1.1 lost one it did cite.
+     The reverse derivation remains the fallback for cells that promoted no
+     list, and the header says which of the two is on screen. */
+  const cit = subcap ? cellCitationsOf(subcap.id) : categoryCitationsOf(catCells);
+  const linkedEv = cit.items;
 
   // Issue caps (subcap only)
   const caps = subcap ? DMA.issueCapsFor(subcap.id) : [];
 
-  // Peer comparison (for category we use category aggregate)
-  const score = subcap ? subcap.score : entity.subcaps.filter(s => s.category === category.id).reduce((a, s, _, arr) => a + s.score / arr.length, 0);
+  // Peer comparison (for a category, the promoted category figures)
+  const score = subcap ? numOf(subcap.score)
+    : (catRow.score != null ? catRow.score : catRow.cellMean);
+  const scoreBasis = subcap ? null
+    : (catRow.score != null
+        ? `promoted category score${catRow.source_cell ? ` · ${catRow.source_cell}` : ""}`
+        : `mean of ${catCells.length} scored cells — the run promoted no category score`);
   // The drawer's peer figure. For a category it was `score + 0.3`; for a cell it
   // was the null cell median, then formatted, then compared. Read the promoted
   // category median where there is one, and inherit it at cell grain labelled a
   // PROXY (the workbook states medians at category grain, not per cell).
-  const catRowForPeer = ((entity.workbookScores || {}).categories || []).find(
-    c => c.category_id === (item.catId || (subcap && subcap.category))) || null;
-  const catPeer = catRowForPeer && catRowForPeer.peer_median != null
-    ? Number(catRowForPeer.peer_median) : null;
+  const catPeer = catRow ? catRow.peer : null;
   const peer = subcap
     ? (subcap.peerMedian != null ? Number(subcap.peerMedian) : catPeer)
     : catPeer;
   const peerIsProxy = !!(subcap && subcap.peerMedian == null && catPeer != null);
-  const gap = peer - score;
+  // `peer - score` with a null peer is -score, which printed as "+2.5" in the
+  // above-peer colour on a cell with no benchmark at all.
+  const gap = deltaOf(peer, score);
 
   return (
     <>
@@ -914,8 +1361,10 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
               {subcap ? <span className="chip purple">{subcap.id}</span> : <span className="chip">{category.id}</span>}
               {subcap?.thin ? <span className="b b-org">THIN</span> : null}
             </div>
-            <div className="title" style={{ fontSize: 15 }}>{subcap?.name || category?.name}</div>
-            <div className="sub">{subcap ? `Score ${fx(subcap.score, 1)} · ${subcap.confidence}` : `${entity.subcaps.filter(s => s.category === category.id).length} subcaps${category.weight != null ? ` · weight ${fx((category.weight * 100), 0)}%` : ""}`}</div>
+            <div className="title" style={{ fontSize: 15 }}>{subcap ? subcap.name : (category.name || `${category.id} · unnamed in catalogue`)}</div>
+            <div className="sub">{subcap
+              ? `Score ${fx(subcap.score, 1)}${subcap.confidence ? ` · ${subcap.confidence}` : ""}`
+              : `${catCells.length} subcaps${category.weight != null ? ` · weight ${fx(category.weight * 100, 0)}%` : ""}`}</div>
           </div>
           <button className="icon-btn" onClick={onClose}><Icon name="x" size={16} /></button>
         </div>
@@ -932,20 +1381,39 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
               {[1,2,3,4,5].map(t => (
                 <div key={t} style={{ position: "absolute", left: `${(t-1)/4 * 100}%`, top: 0, bottom: 0, width: 1, background: "var(--z-sep)" }} />
               ))}
-              {/* Entity marker */}
-              <div style={{ position: "absolute", left: `calc(${(score - 1) / 4 * 100}% - 6px)`, top: 4, width: 12, height: 28, background: DMA.helpers.maturityHex(score), borderRadius: 3, boxShadow: "0 1px 3px rgba(0,0,0,.2)" }} title="Entity" />
-              {/* Peer marker */}
-              <div style={{ position: "absolute", left: `calc(${(peer - 1) / 4 * 100}% - 1px)`, top: 0, bottom: 0, width: 2, background: "var(--z-dpur)" }} title="Peer median" />
+              {/* Both markers are POSITIONS on the scale. With a null value the
+                  arithmetic yields NaN, and a NaN% offset lands the marker at 0 —
+                  a score, or a peer set, of nothing. */}
+              {score != null ? (
+                <div style={{ position: "absolute", left: `calc(${(score - 1) / 4 * 100}% - 6px)`, top: 4, width: 12, height: 28, background: DMA.helpers.maturityHex(score), borderRadius: 3, boxShadow: "0 1px 3px rgba(0,0,0,.2)" }} title="Entity" />
+              ) : null}
+              {peer != null ? (
+                <div style={{ position: "absolute", left: `calc(${(peer - 1) / 4 * 100}% - 1px)`, top: 0, bottom: 0, width: 2, background: "var(--z-dpur)" }} title="Peer median" />
+              ) : null}
             </div>
-            <div className="row" style={{ fontSize: 11, color: "var(--z-muted)" }}>
-              <span>M1</span><span className="spacer" /><span>M2</span><span className="spacer" /><span>M3</span><span className="spacer" /><span>M4</span><span className="spacer" /><span>M5</span>
+            <BandAxis />
+            <div className="row" style={{ marginTop: 10, fontSize: 12, flexWrap: "wrap", gap: 8 }}>
+              <span className="row" style={{ gap: 5 }}>
+                <span style={{ width: 10, height: 10, borderRadius: 3, background: DMA.helpers.maturityHex(score) }} /> Entity <strong>{fx(score, 1)}</strong>
+              </span>
+              <span className="spacer" />
+              {peer != null ? (
+                <span className="row" style={{ gap: 5 }}><span style={{ width: 2, height: 12, background: "var(--z-dpur)" }} /> Peer <strong>{fx(peer, 1)}</strong></span>
+              ) : (
+                <span style={{ fontSize: 11, color: "var(--z-muted)" }} title="no peer median is stated at this grain in this run">no peer median stated</span>
+              )}
+              <span className="spacer" />
+              {gap != null ? (
+                <span style={{ fontSize: 11, color: gap > 0 ? "var(--z-below)" : gap < 0 ? "var(--z-mid)" : "var(--z-muted)" }}>
+                  {gap > 0 ? `−${fx(gap, 1)}` : gap < 0 ? `+${fx(Math.abs(gap), 1)}` : "0.0"}
+                </span>
+              ) : null}
             </div>
-            <div className="row" style={{ marginTop: 10, fontSize: 12 }}>
-              <span className="row" style={{ gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: DMA.helpers.maturityHex(score) }} /> Entity <strong>{fx(score, 1)}</strong></span>
-              <span className="spacer" />
-              <span className="row" style={{ gap: 5 }}><span style={{ width: 2, height: 12, background: "var(--z-dpur)" }} /> Peer <strong>{fx(peer, 1)}</strong></span>
-              <span className="spacer" />
-              <span style={{ fontSize: 11, color: gap > 0 ? "var(--z-below)" : "var(--z-mid)" }}>{gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`}</span>
+            <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 6, lineHeight: 1.45 }}>
+              {scoreBasis ? `${scoreBasis}. ` : ""}
+              {peer == null ? "The run states no peer median at this grain."
+                : peerIsProxy ? `Peer figure is ${catId}'s category median, used as a proxy — the workbook states no median per cell.`
+                : "Peer median as stated for this grain."}
             </div>
           </div>
 
@@ -955,12 +1423,18 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
               <Icon name="lock" size={14} />
               <div style={{ flex: 1 }}>
                 <div className="co-title">Capped by {caps.length} issue{caps.length === 1 ? "" : "s"}</div>
-                {caps.map(c => (
-                  <div key={c.id} style={{ fontSize: 12, marginTop: 4 }}>
-                    <span className="chip" style={{ marginRight: 6 }}>{c.id}</span>
-                    {c.issue?.desc.slice(0, 70)}… <strong>Cap M{c.cap}</strong>
-                  </div>
-                ))}
+                {caps.map(c => {
+                  // An issue whose row did not promote has no description, and
+                  // `.desc.slice` on it took the drawer down.
+                  const desc = (c.issue && (c.issue.desc || c.issue.title)) || null;
+                  return (
+                    <div key={c.id} style={{ fontSize: 12, marginTop: 4 }}>
+                      <span className="chip" style={{ marginRight: 6 }}>{c.id}</span>
+                      {desc ? `${desc.slice(0, 70)}${desc.length > 70 ? "…" : ""} ` : ""}
+                      {c.cap != null ? <strong>Cap M{c.cap}</strong> : <span className="muted">cap level not stated</span>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ) : null}
@@ -974,26 +1448,54 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
               <span className="spacer" />
               <span style={{ fontSize: 10, color: "var(--z-muted)" }}>click an ID to open</span>
             </div>
+            {/* Which list is on screen, stated rather than implied. */}
+            <div style={{ fontSize: 10, color: "var(--z-muted)", marginBottom: 6, lineHeight: 1.45 }}>
+              {cit.basis === "promoted"
+                ? (subcap
+                    ? "The ids the producer cited for this cell (heatmap.cell_evidence)."
+                    : `The ids cited by the ${cit.withLists} cell${cit.withLists === 1 ? "" : "s"} in this category that promoted a citation list.`)
+                : `The run promoted no citation list for this ${subcap ? "cell" : "category"}; these are the evidence items the run links to ${subcap ? "it" : "its cells"}.`}
+            </div>
             {linkedEv.length === 0 ? (
               <div className="co co-org" style={{ marginBottom: 0 }}>
                 <Icon name="warn" size={13} />
                 <div className="co-body">No evidence item directly cites this {subcap ? "subcap" : "category"} in this run — the score is inferred. Treat as provisional until corroborated.</div>
               </div>
             ) : linkedEv.map(e => {
+              // A cited id that resolves to nothing in the evidence store is
+              // shown as unresolved, not dropped: a dangling citation is a
+              // finding, and silently omitting it hides it.
+              if (!e.resolved) {
+                return (
+                  <div key={e.id} className="card-tile" style={{ width: "100%", padding: 11, marginBottom: 6 }}>
+                    <div className="row" style={{ gap: 6 }}>
+                      <span className="chip">{e.id}</span>
+                      <span className="b b-org">UNRESOLVED</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 4 }}>Cited for this cell but not present in this run's evidence store.</div>
+                  </div>
+                );
+              }
               const tier = DMA.getTier(e.tier);
+              // title and source_pretty are both `source_name` for most rows, so
+              // every row printed the same string twice. Show the source only
+              // when it says something the title does not.
+              const showSource = e.source_pretty && e.source_pretty !== e.title;
               return (
                 <button key={e.id} className="card-tile clickable" style={{ width: "100%", padding: 11, marginBottom: 6, textAlign: "left" }} onClick={() => openEvidence(e.id)}>
                   <div className="row" style={{ marginBottom: 4, gap: 6 }}>
                     <span className={`tier-chip tier-${e.tier}`}>{e.id}</span>
-                    <span className="b b-muted" title={tier?.label}>{e.tier} · {e.claim}</span>
+                    <span className="b b-muted" title={tier?.label}>{[e.tier, e.claim].filter(Boolean).join(" · ")}</span>
                     <span className="spacer" />
                     <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{e.recency}</span>
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }} className="txt-fit-1">{e.title}</div>
-                  <div className="row" style={{ gap: 5, marginTop: 3 }}>
-                    <Icon name="drive" size={10} style={{ color: "var(--z-muted)" }} />
-                    <span style={{ fontSize: 10.5, color: "var(--z-mid)", fontWeight: 500 }} className="txt-fit-1">{e.source_pretty}</span>
-                  </div>
+                  {showSource ? (
+                    <div className="row" style={{ gap: 5, marginTop: 3 }}>
+                      <Icon name="drive" size={10} style={{ color: "var(--z-muted)" }} />
+                      <span style={{ fontSize: 10.5, color: "var(--z-mid)", fontWeight: 500 }} className="txt-fit-1">{e.source_pretty}</span>
+                    </div>
+                  ) : null}
                   {e.excerpt ? <div style={{ fontSize: 11, color: "var(--z-body)", lineHeight: 1.5, marginTop: 6, paddingLeft: 8, borderLeft: "2px solid var(--z-sep)", fontStyle: "italic" }}>“{e.excerpt}”</div> : null}
                 </button>
               );
@@ -1054,8 +1556,15 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
         </div>
         <div className="drawer-foot">
           {subcap ? <button className="btn btn-tertiary" onClick={() => {
-            const label = subcap?.name || category?.name || "selection";
-            const text = `${label}\nScore ${fx(subcap?.score, 1) ?? "-"} · confidence ${subcap?.confidence ?? "-"} · peer median ${fx(subcap?.peerMedian, 1) ?? "-"}.`;
+            // Only what the run states. This used to copy "peer median —" for
+            // every cell, which reads as a stated median of nothing.
+            const bits = [
+              subcap.score != null ? `Score ${fx(subcap.score, 1)}` : "no score stated",
+              subcap.confidence ? `confidence ${subcap.confidence}` : null,
+              subcap.peerMedian != null ? `peer median ${fx(subcap.peerMedian, 1)}`
+                : (peerIsProxy ? `peer median ${fx(peer, 1)} (${catId} category proxy)` : "no peer median stated"),
+            ].filter(Boolean);
+            const text = `${subcap.name || subcap.id} (${subcap.id})\n${bits.join(" · ")}.`;
             try { navigator.clipboard.writeText(text); } catch (e) {}
           }}><Icon name="copy" size={13} /> Copy synthesis</button> : <span />}
           <button className="btn btn-secondary" onClick={onClose}>Close</button>
@@ -1082,7 +1591,11 @@ function IssueRegisterBanner({ entity, onSubcap, openEvidence }) {
         {openIssues.map(iss => {
           const caps = Object.entries(DMA.ISSUE_CAPS[iss.id]?.caps || {});
           const isOpen = open === iss.id;
-          const ev = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.some(sid => caps.some(([cid]) => sid.slice(0, 4) === cid.slice(0, 4))));
+          // Evidence for the CAPPED cells. Matching on a 4-char prefix meant
+          // "anything citing any cell in the same category", so an item that has
+          // nothing to do with the issue was listed as its evidence.
+          const cappedIds = new Set(caps.map(([cid]) => cid));
+          const ev = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.some(sid => cappedIds.has(sid)));
           return (
             <div key={iss.id} className="card-tile" style={{ padding: 0, background: "#fff", gridColumn: isOpen ? "1 / -1" : "auto", overflow: "hidden" }}>
               <button onClick={() => setOpen(o => o === iss.id ? null : iss.id)} style={{ width: "100%", background: "none", border: 0, cursor: "pointer", textAlign: "left", padding: 10 }}>

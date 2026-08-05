@@ -46,6 +46,206 @@ function deltaOf(score, peer) {
   const d = Number(score) - Number(peer);
   return isFinite(d) ? d : null;
 }
+function numOf(v) {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return isFinite(n) ? n : null;
+}
+
+/* The mean of the values that exist, or null. Never divides by the full count
+   and never returns 0 for "nothing measured". */
+function meanOf(values) {
+  const vals = (values || []).map(numOf).filter(v => v !== null);
+  if (!vals.length) return null;
+  return vals.reduce((a, v) => a + v, 0) / vals.length;
+}
+
+/* ── The run's own workbook table ────────────────────────────────────────
+   `heatmap.workbook_scores` is the run's promoted pillar and category grain.
+   app-root merges a WHITELIST of live fields onto the directory row and
+   `workbookScores` is not on it, so `entity.workbookScores` is undefined here
+   and every read of it silently fell back: sixteen categories read "Peer —"
+   while the run states a median for all seventeen. Read the merged field
+   first — when app-root starts carrying it this branch stops being used — and
+   otherwise the registry the loader installs, which is the same object. */
+function workbookScoresOf(entity) {
+  if (entity && entity.workbookScores) return entity.workbookScores;
+  const reg = typeof window !== "undefined" && window.DMA_ENTITY || null;
+  return reg && reg.workbookScores || null;
+}
+
+/* The contract allows either shape for the workbook tables: an id-keyed object
+   ({"P1C1": {score…}}, which is what the API sends) or a list of rows carrying
+   their own id. Both become a list of rows with `id`. */
+function promotedRowsOf(table, idKey) {
+  if (!table) return [];
+  if (Array.isArray(table)) {
+    return table.map(r => ({
+      ...r,
+      id: r[idKey] || r.id || null
+    })).filter(r => r.id);
+  }
+  return Object.keys(table).map(k => ({
+    ...table[k],
+    id: k
+  }));
+}
+
+/* ── Category rows: the RUN's categories, not the catalogue's ────────────
+   The grid iterated `DMA.CATEGORIES` — the current v7.0 catalogue, sixteen
+   entries — so this run's seventeenth, P1C5, rendered nowhere: 30 scored cells
+   and a promoted category score of 2.03 were invisible, the P1 header counted
+   194 cells above four columns covering 164, and the pillar read 3.4 (a mean
+   of four category means) against its promoted 3.11 one zoom away. P1C5 is the
+   ESG category v7.0 removed, so a run pinned to the seventeen-category shape
+   legitimately scores cells the catalogue cannot name.
+
+   Rows are therefore the union of what the run PROMOTED and what it SCORED,
+   sorted by id (PxCy sorts naturally). A category the catalogue cannot name
+   still appears, labelled with its id and marked as unnamed — never dropped,
+   and never given a name from anywhere. */
+function runCategoriesOf(entity) {
+  const ws = workbookScoresOf(entity);
+  const rows = {};
+  for (const r of promotedRowsOf(ws && ws.categories, "category_id")) {
+    rows[r.id] = {
+      id: r.id,
+      score: numOf(r.score),
+      peer: numOf(r.peer_median),
+      band: r.band || null,
+      source_cell: r.source_cell || null,
+      promoted: true
+    };
+  }
+  const cells = Array.isArray(entity && entity.subcaps) ? entity.subcaps : [];
+  for (const s of cells) {
+    if (s.category && !rows[s.category]) {
+      rows[s.category] = {
+        id: s.category,
+        score: null,
+        peer: null,
+        band: null,
+        source_cell: null,
+        promoted: false
+      };
+    }
+  }
+  return Object.keys(rows).sort().map(id => {
+    const cat = DMA.getCategory(id) || null;
+    const mine = cells.filter(s => s.category === id);
+    return {
+      ...rows[id],
+      // The pillar comes from the id itself when the catalogue cannot answer —
+      // deterministic, not inferred.
+      pillar: cat && cat.pillar || id.slice(0, 2),
+      name: cat && cat.name || null,
+      inCatalogue: !!cat,
+      weight: cat && cat.weight != null ? Number(cat.weight) : null,
+      cells: mine,
+      thin: mine.filter(s => s.thin).length,
+      // Only used where the run promoted no category score; labelled as a mean
+      // wherever it renders, so it is never mistaken for the workbook's figure.
+      cellMean: meanOf(mine.map(s => s.score))
+    };
+  });
+}
+
+/* Pillar rows, in the same spirit: the promoted pillar score is the pillar's
+   score. A mean of category means is a different number (P1: 3.4 vs 3.11) and
+   the page showed both. */
+function runPillarsOf(entity) {
+  const cats = runCategoriesOf(entity);
+  const ws = workbookScoresOf(entity);
+  const promoted = {};
+  for (const r of promotedRowsOf(ws && ws.pillars, "pillar_id")) promoted[r.id] = r;
+  const ids = [];
+  for (const p of DMA.PILLARS || []) if (!ids.includes(p.id)) ids.push(p.id);
+  for (const c of cats) if (!ids.includes(c.pillar)) ids.push(c.pillar);
+  for (const id of Object.keys(promoted)) if (!ids.includes(id)) ids.push(id);
+  return ids.sort().map(id => {
+    const meta = (DMA.PILLARS || []).find(p => p.id === id) || null;
+    const mine = cats.filter(c => c.pillar === id);
+    const overview = (entity && entity.pillar_scores || {})[id];
+    const overviewPeer = (entity && entity.pillar_peer_medians || {})[id];
+    return {
+      id,
+      name: meta && meta.name || null,
+      short: meta && meta.short || null,
+      inCatalogue: !!meta,
+      score: numOf(overview) != null ? numOf(overview) : numOf(promoted[id] && promoted[id].score),
+      peer: numOf(overviewPeer) != null ? numOf(overviewPeer) : numOf(promoted[id] && promoted[id].peer_median),
+      cats: mine,
+      // Summed from the columns the grid actually draws, so the header count
+      // cannot disagree with them again.
+      cellCount: mine.reduce((a, c) => a + c.cells.length, 0),
+      thin: mine.reduce((a, c) => a + c.thin, 0)
+    };
+  });
+}
+
+/* ── A cell's citations: the list the producer promoted ──────────────────
+   The drawer reverse-derived its evidence list from `DMA.EVIDENCE[].subcaps`
+   — the run-scoped link table — and that disagreed with the cell's own
+   promoted citation list on 65 of 69 cells: P4C1.1.1 promoted four ids and the
+   drawer showed five, including a core-banking item the producer never cited
+   for that cell, while P1C1.1.1 lost one it did. `heatmap.cell_evidence` is
+   what the producer wrote and what the evidence gate checked, so it is what
+   renders. The reverse derivation stays as the fallback for the ~90% of cells
+   that promoted no list, and the caller says which of the two it is showing.
+
+   An id that resolves to nothing in the evidence store is shown as an
+   unresolved id rather than dropped — fail-closed evidence means a dangling
+   citation is visible, not silently absent. */
+function cellCitationsOf(subcapId) {
+  const cell = typeof DMA.cellEvidenceFor === "function" ? DMA.cellEvidenceFor(subcapId) : null;
+  const ids = cell && Array.isArray(cell.e_ids) ? cell.e_ids : [];
+  if (ids.length) {
+    return {
+      basis: "promoted",
+      cell,
+      items: ids.map(id => {
+        const e = DMA.getEvidence(id) || null;
+        return e ? {
+          ...e,
+          resolved: true
+        } : {
+          id,
+          resolved: false
+        };
+      })
+    };
+  }
+  return {
+    basis: "derived",
+    cell,
+    items: (DMA.EVIDENCE || []).filter(e => e.subcaps && e.subcaps.includes(subcapId)).map(e => ({
+      ...e,
+      resolved: true
+    }))
+  };
+}
+
+/* The number of evidence items behind a cell, and where the number came from.
+   The row used to count `DMA.EVIDENCE` rows that list the cell, which is why
+   all 43 cells of P4C1 read "5 evidence" — the link table is coarser than the
+   citation lists. `grounded_on` is the promoted length (invariant 8: it is the
+   length of the citation list, not a stored number to be re-derived). */
+function evidenceCountOf(subcap) {
+  const cell = typeof DMA.cellEvidenceFor === "function" ? DMA.cellEvidenceFor(subcap.id) : null;
+  const ids = cell && Array.isArray(cell.e_ids) ? cell.e_ids : null;
+  if (ids && ids.length) return {
+    n: ids.length,
+    basis: "cited"
+  };
+  if (subcap.evidence_count != null) return {
+    n: subcap.evidence_count,
+    basis: "linked"
+  };
+  return {
+    n: null,
+    basis: null
+  };
+}
 function ClientHeatmap({
   entity,
   run
@@ -69,31 +269,21 @@ function ClientHeatmap({
   const [focusArea, setFocusArea] = useState(null);
   const [synthSubcap, setSynthSubcap] = useState(null);
 
-  // In customer mode, lock to focus / value_chain views only
+  // In customer mode, lock to focus / value_chain views only. `mode` belongs in
+  // the deps: with `[audience]` alone the effect had already run by the time
+  // "Standard" was clicked, so the internal grid rendered for the customer
+  // audience. The button is also disabled below — the lock should not depend on
+  // an effect winning a race.
   useEffect(() => {
     if (audience === "customer" && mode === "standard") setMode("focus");
-  }, [audience]);
+  }, [audience, mode]);
 
-  // Compute per-category aggregate scores
-  const catAgg = useMemo(() => {
-    const out = {};
-    for (const cat of DMA.CATEGORIES) {
-      const subs = entity.subcaps.filter(s => s.category === cat.id);
-      const avg = subs.reduce((a, s) => a + s.score, 0) / Math.max(1, subs.length);
-      // The category's STATED median where the run promotes one, else the mean
-      // of whatever cell medians exist, else null. Never a null-as-zero mean.
-      const catRow = ((entity.workbookScores || {}).categories || []).find(c => c.category_id === cat.id) || null;
-      const peer = catRow && catRow.peer_median != null ? Number(catRow.peer_median) : peerMeanOf(subs);
-      const thin = subs.filter(s => s.thin).length;
-      out[cat.id] = {
-        avg,
-        peer,
-        thin,
-        total: subs.length
-      };
-    }
-    return out;
-  }, [entity?.id]);
+  // The run's own category and pillar rows — promoted score, promoted peer
+  // median, the cells it scored — including any category the current catalogue
+  // does not list.
+  const cats = useMemo(() => runCategoriesOf(entity), [entity?.id, entity?.subcaps]);
+  const pillars = useMemo(() => runPillarsOf(entity), [entity?.id, entity?.subcaps]);
+  const overallLabel = DMA.helpers.maturityLabel(entity.overall);
 
   // The cells a focus area names — the ones it actually names. Matching on a
   // 4-char prefix returned every cell in the CATEGORY (so a 7-cell focus area
@@ -116,7 +306,7 @@ function ClientHeatmap({
     className: "eyebrow"
   }, "Maturity heatmap"), /*#__PURE__*/React.createElement("h1", null, "Where ", entity.name, " is today"), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, entity.subcaps.length, " subcaps \xB7 ", entity.subcaps.filter(s => s.thin).length, " thin \xB7 overall maturity ", DMA.helpers.maturityLabel(entity.overall).toLowerCase())), /*#__PURE__*/React.createElement("div", {
+  }, entity.subcaps.length, " subcaps \xB7 ", entity.subcaps.filter(s => s.thin).length, " thin", overallLabel ? ` · overall maturity ${overallLabel.toLowerCase()}` : " · no overall score promoted")), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
@@ -161,7 +351,15 @@ function ClientHeatmap({
     size: 11
   }), " Focus areas"), /*#__PURE__*/React.createElement("button", {
     className: mode === "standard" ? "on" : "",
-    onClick: () => setMode("standard")
+    disabled: audience === "customer",
+    title: audience === "customer" ? "the full internal grid is not part of the customer view" : null,
+    style: audience === "customer" ? {
+      opacity: .45,
+      cursor: "not-allowed"
+    } : null,
+    onClick: () => {
+      if (audience !== "customer") setMode("standard");
+    }
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "heatmap",
     size: 11
@@ -262,14 +460,15 @@ function ClientHeatmap({
     openEvidence: openEvidence
   }) : null, zoom === "pillar" ? /*#__PURE__*/React.createElement(PillarHeatmap, {
     entity: entity,
+    pillars: pillars,
     setPillarFocus: p => {
       setPillarFocus(p);
       setZoom("category");
     }
   }) : zoom === "category" ? /*#__PURE__*/React.createElement(CategoryHeatmap, {
     entity: entity,
+    pillars: pillars,
     pillarFocus: pillarFocus,
-    catAgg: catAgg,
     showPeers: showPeers,
     showIssues: showIssues,
     setCatFocus: c => {
@@ -282,8 +481,24 @@ function ClientHeatmap({
         catId
       });
     }
+  }) : zoom === "capability" ?
+  /*#__PURE__*/
+  /* Its own grain. The button used to set zoom to "capability" and
+     fall through to the subcap branch, so it produced DOM identical
+     to "Subcap" — a control that did nothing. */
+  React.createElement(CapabilityHeatmap, {
+    entity: entity,
+    cats: cats,
+    catFocus: catFocus,
+    pillarFocus: pillarFocus,
+    showIssues: showIssues,
+    drillCategory: c => {
+      setCatFocus(c);
+      setZoom("subcap");
+    }
   }) : /*#__PURE__*/React.createElement(SubcapHeatmap, {
     entity: entity,
+    cats: cats,
     catFocus: catFocus,
     pillarFocus: pillarFocus,
     showPeers: showPeers,
@@ -346,7 +561,11 @@ function FocusAreaView({
       // in the H1 contract and were unread), then the mean of the cells it
       // names, then nothing. No 2.5/2.8 fallbacks: a hardcoded average is
       // a claim about this client.
-      const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : null;
+      // `entity_score` is the producer's own figure for this focus area
+      // (H1 contract) and it is not the mean of the cells: FA-1 promotes
+      // 1.95 where its 43 cells average 2.0. Read it; the mean only
+      // stands in when the run states none.
+      const avg = numOf(fa.entity_score) != null ? numOf(fa.entity_score) : meanOf(subs.map(s => s.score));
       const peer = fa.peer_score != null ? Number(fa.peer_score) : peerMeanOf(subs);
       const gap = fa.delta != null ? -Number(fa.delta) : deltaOf(peer, avg);
       return /*#__PURE__*/React.createElement("div", {
@@ -397,17 +616,22 @@ function FocusAreaView({
           color: "var(--z-muted)"
         },
         title: "no peer median is stated at this grain in this run"
-      }, "no peer figure"), gap == null ? null : gap > 0.3 ? /*#__PURE__*/React.createElement("span", {
+      }, "no peer figure"), gap == null ? null : gap > 0 ? /*#__PURE__*/React.createElement("span", {
         className: "b b-below",
         style: {
           marginLeft: "auto"
         }
-      }, "\u2212", fx(gap, 1)) : /*#__PURE__*/React.createElement("span", {
+      }, "\u2212", fx(gap, 1)) : gap < 0 ? /*#__PURE__*/React.createElement("span", {
         className: "b b-above",
         style: {
           marginLeft: "auto"
         }
-      }, "at peer")), /*#__PURE__*/React.createElement("div", {
+      }, "+", fx(Math.abs(gap), 1)) : /*#__PURE__*/React.createElement("span", {
+        className: "b b-muted",
+        style: {
+          marginLeft: "auto"
+        }
+      }, "0.0")), /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 12,
           color: "var(--z-body)",
@@ -421,9 +645,18 @@ function FocusAreaView({
   // Selected focus area detail
   const fa = focusArea;
   const subs = subcapsForFocusArea(fa);
-  const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : null;
+  const avg = numOf(fa.entity_score) != null ? numOf(fa.entity_score) : meanOf(subs.map(s => s.score));
   const peer = fa.peer_score != null ? Number(fa.peer_score) : peerMeanOf(subs);
-  const insights = DMA.INSIGHT_CARDS.filter(ic => ic.affects.some(sid => fa.subcaps.some(p => sid.startsWith(p.slice(0, 4)))));
+  // Cards this focus area's OWN cells are affected by. Matching on a 4-char
+  // prefix meant "anything in the same category", so a card about a cell this
+  // focus area never names was listed under it — the same fabricated linkage
+  // the cell list already had fixed.
+  const named = new Set(fa.subcaps || []);
+  const insights = DMA.INSIGHT_CARDS.filter(ic => (ic.affects || []).some(sid => named.has(sid) || [...named].some(n => typeof n === "string" && sid.startsWith(`${n}.`))));
+  // Each fragment of the source line only exists when its value does: a null
+  // page printed " · p. · " and a focus area carries no financial reference at
+  // all, so the label sat there with nothing after it.
+  const srcBits = [fa.source && fa.source.type, fa.source && fa.source.page ? `p.${fa.source.page}` : null, fa.source && fa.source.doc].filter(Boolean);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "card flush",
     style: {
@@ -570,22 +803,24 @@ function FocusAreaView({
   }, "SOURCE"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
-      color: "var(--z-muted)"
+      color: "var(--z-muted)",
+      minWidth: 0,
+      overflowWrap: "anywhere"
     }
-  }, fa.source.type, " \xB7 p.", fa.source.page, " \xB7 ", fa.source.doc)), /*#__PURE__*/React.createElement("div", {
+  }, srcBits.length ? srcBits.join(" · ") : "the run states no source for this focus area")), fa.strategic_quote ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12.5,
       color: "var(--z-dark)",
       fontStyle: "italic",
       lineHeight: 1.55
     }
-  }, "\"", fa.strategic_quote.replace(/[“”]/g, ""), "\""), /*#__PURE__*/React.createElement("div", {
+  }, "\"", String(fa.strategic_quote).replace(/[“”]/g, ""), "\"") : null, fa.financial_ref ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10.5,
       color: "var(--z-muted)",
       marginTop: 5
     }
-  }, "Financial reference: ", fa.financial_ref)))), /*#__PURE__*/React.createElement(CustomizableKpiStrip, {
+  }, "Financial reference: ", fa.financial_ref) : null))), /*#__PURE__*/React.createElement(CustomizableKpiStrip, {
     fa: fa,
     entity: entity
   }), /*#__PURE__*/React.createElement("div", {
@@ -603,7 +838,7 @@ function FocusAreaView({
       color: "var(--z-muted)",
       marginBottom: 8
     }
-  }, "Pillar contribution"), !fa.pillars_weight || !Object.keys(fa.pillars_weight).length ? /*#__PURE__*/React.createElement("div", {
+  }, "Where its cells sit, by pillar"), !fa.pillars_weight || !Object.keys(fa.pillars_weight).length ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"
@@ -650,7 +885,7 @@ function FocusAreaView({
       color: "var(--z-muted)",
       lineHeight: 1.5
     }
-  }, "Weights reflect how much each DMA pillar contributes to this focus area composite. ", entity.name, "'s actual scores drive the bar fill colours.")), /*#__PURE__*/React.createElement("div", {
+  }, "Share of the ", (fa.subcaps || []).length, " cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for ", entity.name, ".")), /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
@@ -753,12 +988,19 @@ function CustomizableKpiStrip({
   entity
 }) {
   // Each KPI gets a "source mode": "public" (inferred from public DMA) or "client" (provided / awaiting client input) or "hidden"
-  const [modes, setModes] = useState(() => fa.kpis.reduce((m, k) => {
+  const kpis = fa && Array.isArray(fa.kpis) ? fa.kpis : [];
+  const [modes, setModes] = useState(() => kpis.reduce((m, k) => {
     m[k.label] = "public";
     return m;
   }, {}));
   const [editing, setEditing] = useState(null);
   const [drafts, setDrafts] = useState({});
+  // The H1 contract carries no KPI baselines or targets, so this is [] for
+  // every focus area of every run today. It rendered anyway: a heading, a
+  // "Customise per client" badge and a six-line explainer over zero tiles —
+  // chrome promising figures that do not exist. Nothing to show, nothing shown;
+  // if a future contract carries kpis the strip returns on its own.
+  if (!kpis.length) return null;
   const cycleMode = label => {
     setModes(m => ({
       ...m,
@@ -798,7 +1040,7 @@ function CustomizableKpiStrip({
     }
   }, "Toggle each KPI between Public inference \xB7 Client-provided \xB7 Hidden")), /*#__PURE__*/React.createElement("div", {
     className: "g3"
-  }, fa.kpis.map(k => {
+  }, kpis.map(k => {
     const mode = modes[k.label];
     const isEditing = editing === k.label;
     const isHidden = mode === "hidden";
@@ -1003,19 +1245,21 @@ function CustomizableKpiStrip({
 /* ─────────────────────── PILLAR HEATMAP ─────────────────────── */
 function PillarHeatmap({
   entity,
+  pillars,
   setPillarFocus
 }) {
   return /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {
     className: "g4"
-  }, DMA.PILLARS.map(p => {
-    const score = entity.pillar_scores[p.id];
-    // The workbook's STATED pillar median, which the run promotes and
-    // which a constant offset was standing in for. Baxter's P1 sits at
-    // 3.11 against a stated 2.9 — ABOVE its peer set — and `score + 0.3`
-    // rendered that as 0.3 BELOW.
-    const peer = (entity.pillar_peer_medians || {})[p.id];
+  }, (pillars || []).map(p => {
+    // The promoted pillar score and the workbook's STATED pillar median.
+    // A constant offset used to stand in for the median: Baxter's P1 sits
+    // at 3.11 against a stated 2.9 — ABOVE its peer set — and `score +
+    // 0.3` rendered that as 0.3 BELOW.
+    const score = p.score,
+      peer = p.peer;
+    const delta = deltaOf(score, peer);
     return /*#__PURE__*/React.createElement("div", {
       key: p.id,
       className: "card-tile clickable",
@@ -1028,7 +1272,11 @@ function PillarHeatmap({
       style: {
         marginBottom: 12
       }
-    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
         color: "var(--z-muted)"
@@ -1037,13 +1285,14 @@ function PillarHeatmap({
       style: {
         fontSize: 14,
         fontWeight: 600
-      }
-    }, p.name)), /*#__PURE__*/React.createElement("span", {
+      },
+      className: "txt-fit-2"
+    }, p.name || "not named in the current catalogue")), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement(MaturityChip, {
       score: score,
       large: true
-    })), /*#__PURE__*/React.createElement("div", {
+    })), score != null ? /*#__PURE__*/React.createElement("div", {
       className: "prog"
     }, /*#__PURE__*/React.createElement("div", {
       className: "prog-fill",
@@ -1051,7 +1300,12 @@ function PillarHeatmap({
         width: `${score / 5 * 100}%`,
         background: DMA.helpers.maturityHex(score)
       }
-    })), /*#__PURE__*/React.createElement("div", {
+    })) : /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-muted)"
+      }
+    }, "no pillar score promoted"), /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
         marginTop: 8,
@@ -1063,12 +1317,12 @@ function PillarHeatmap({
       }
     }, "Peer ", fx(peer, 1)), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
-    }), /*#__PURE__*/React.createElement("span", {
+    }), delta != null ? /*#__PURE__*/React.createElement("span", {
       style: {
-        color: score < peer ? "var(--z-below)" : "var(--z-mid)",
+        color: delta < 0 ? "var(--z-below)" : "var(--z-mid)",
         fontFamily: "var(--font-mono)"
       }
-    }, score >= peer ? "▲" : "▼", " ", fx(Math.abs(score - peer), 1))) : /*#__PURE__*/React.createElement("span", {
+    }, delta >= 0 ? "▲" : "▼", " ", fx(Math.abs(delta), 1)) : null) : /*#__PURE__*/React.createElement("span", {
       style: {
         color: "var(--z-muted)"
       },
@@ -1079,34 +1333,33 @@ function PillarHeatmap({
         color: "var(--z-muted)",
         marginTop: 10
       }
-    }, DMA.CATEGORIES.filter(c => c.pillar === p.id).length, " categories \xB7 click to drill"));
+    }, p.cats.length, " categories \xB7 ", p.cellCount, " subcaps \xB7 click to drill"));
   })));
 }
 
 /* ─────────────────────── CATEGORY HEATMAP ─────────────────────── */
 function CategoryHeatmap({
   entity,
+  pillars,
   pillarFocus,
-  catAgg,
   showPeers,
   showIssues,
   setCatFocus,
   onSynth
 }) {
-  const pillars = pillarFocus ? DMA.PILLARS.filter(p => p.id === pillarFocus) : DMA.PILLARS;
+  const rows = pillarFocus ? (pillars || []).filter(p => p.id === pillarFocus) : pillars || [];
   // Build category → has-caps map
   const catCaps = {};
   Object.values(DMA.ISSUE_CAPS).forEach(info => {
-    Object.keys(info.caps).forEach(sid => {
+    Object.keys(info.caps || {}).forEach(sid => {
       const catId = sid.slice(0, 4);
       catCaps[catId] = (catCaps[catId] || 0) + 1;
     });
   });
   return /*#__PURE__*/React.createElement("div", {
     className: "card"
-  }, pillars.map(p => {
-    const cats = DMA.CATEGORIES.filter(c => c.pillar === p.id);
-    const avg = cats.reduce((a, c) => a + catAgg[c.id].avg, 0) / Math.max(1, cats.length);
+  }, rows.map(p => {
+    const cats = p.cats;
     return /*#__PURE__*/React.createElement("div", {
       key: p.id,
       style: {
@@ -1124,8 +1377,8 @@ function CategoryHeatmap({
         fontSize: 13,
         fontWeight: 600
       }
-    }, p.name), /*#__PURE__*/React.createElement(MaturityChip, {
-      score: avg
+    }, p.name || "not named in the current catalogue"), /*#__PURE__*/React.createElement(MaturityChip, {
+      score: p.score
     }), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement("span", {
@@ -1133,10 +1386,15 @@ function CategoryHeatmap({
         fontSize: 11,
         color: "var(--z-muted)"
       }
-    }, cats.length, " categories \xB7 ", entity.subcaps.filter(s => s.pillar === p.id).length, " subcaps")), /*#__PURE__*/React.createElement("div", {
+    }, cats.length, " categories \xB7 ", p.cellCount, " subcaps")), !cats.length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-muted)"
+      }
+    }, "This run scored no cells in this pillar.") : /*#__PURE__*/React.createElement("div", {
       style: {
         display: "grid",
-        gridTemplateColumns: `120px repeat(${cats.length}, 1fr)`,
+        gridTemplateColumns: `120px repeat(${cats.length}, minmax(0, 1fr))`,
         gap: 4
       }
     }, /*#__PURE__*/React.createElement("div", {
@@ -1149,11 +1407,15 @@ function CategoryHeatmap({
         paddingRight: 8
       }
     }, "Entity"), cats.map(c => {
-      const agg = catAgg[c.id];
+      // The workbook's own category score. Where the run promotes
+      // none, the mean of the cells it scored — said so in the
+      // tooltip, never silently swapped for the stated figure.
+      const shown = c.score != null ? c.score : c.cellMean;
+      const basis = c.score != null ? `promoted category score${c.source_cell ? ` (${c.source_cell})` : ""}` : c.cellMean != null ? `mean of ${c.cells.length} scored cells — the run promoted no category score` : "no score";
       const capCount = catCaps[c.id] || 0;
       return /*#__PURE__*/React.createElement("button", {
         key: c.id,
-        className: `hm-cell b ${DMA.helpers.maturityClass(agg.avg)}`,
+        className: `hm-cell b ${DMA.helpers.maturityClass(shown)}`,
         onClick: () => setCatFocus(c.id),
         onContextMenu: e => {
           e.preventDefault();
@@ -1165,7 +1427,7 @@ function CategoryHeatmap({
           padding: "8px 6px",
           minHeight: 44
         },
-        title: `${c.name} · ${capCount > 0 ? capCount + " subcaps capped by issues · " : ""}click to drill`
+        title: `${c.id} · ${c.name || "not named in the current catalogue"} · ${basis}${capCount > 0 ? ` · ${capCount} subcaps capped by issues` : ""} · click to drill`
       }, /*#__PURE__*/React.createElement("div", {
         style: {
           display: "flex",
@@ -1178,12 +1440,12 @@ function CategoryHeatmap({
           fontSize: 13,
           fontWeight: 700
         }
-      }, fx(agg.avg, 1)), agg.thin > 0 ? /*#__PURE__*/React.createElement("div", {
+      }, fx(shown, 1)), c.thin > 0 ? /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 8,
           fontWeight: 600
         }
-      }, agg.thin, " thin") : null), showIssues && capCount > 0 ? /*#__PURE__*/React.createElement("span", {
+      }, c.thin, " thin") : null), showIssues && capCount > 0 ? /*#__PURE__*/React.createElement("span", {
         style: {
           position: "absolute",
           top: 3,
@@ -1211,7 +1473,7 @@ function CategoryHeatmap({
         paddingRight: 8
       }
     }, "Peer"), cats.map(c => {
-      const pm = catAgg[c.id] ? catAgg[c.id].peer : null;
+      const pm = c.peer;
       // A null median banded as maturityClass(null) and printed 0.0,
       // so all sixteen categories read "Peer 0.0" in the lowest band
       // — a peer set that scores nothing.
@@ -1238,19 +1500,155 @@ function CategoryHeatmap({
         color: "var(--z-muted)",
         textAlign: "center",
         padding: "4px 2px 0",
-        lineHeight: 1.3
-      }
+        lineHeight: 1.3,
+        minWidth: 0
+      },
+      title: c.inCatalogue ? `${c.id} · ${c.name}` : `${c.id} · this run scored ${c.cells.length} cells here; the current catalogue does not list this category, so no name is available`
     }, /*#__PURE__*/React.createElement("div", {
       className: "f-mono"
     }, c.id), /*#__PURE__*/React.createElement("div", {
-      className: "txt-fit-2"
-    }, c.name)))));
+      className: "txt-fit-2",
+      style: c.inCatalogue ? null : {
+        fontStyle: "italic"
+      }
+    }, c.name || "unnamed in catalogue")))));
+  }));
+}
+
+/* ─────────────────────── CAPABILITY HEATMAP ─────────────────────
+   The capability grain: one row per capability (L1) with the cells beneath it.
+   The run's cell grain carries `capability_id` but no capability NAME, so a row
+   is labelled with its id — the alternative would be inventing one. The mean is
+   computed from the cells because nothing is promoted at this grain, and every
+   row says how many cells it is a mean of. */
+function CapabilityHeatmap({
+  entity,
+  cats,
+  catFocus,
+  pillarFocus,
+  showIssues,
+  drillCategory
+}) {
+  const scope = catFocus ? (cats || []).filter(c => c.id === catFocus) : pillarFocus ? (cats || []).filter(c => c.pillar === pillarFocus) : cats || [];
+  if (!scope.length) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card"
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "var(--z-muted)"
+      }
+    }, "This run scored no cells in the current selection."));
+  }
+  return /*#__PURE__*/React.createElement("div", null, scope.map(c => {
+    const groups = [];
+    const byCap = {};
+    for (const s of c.cells) {
+      const cap = s.capability || `${c.id} · cell carries no capability id`;
+      if (!byCap[cap]) {
+        byCap[cap] = {
+          id: cap,
+          items: []
+        };
+        groups.push(byCap[cap]);
+      }
+      byCap[cap].items.push(s);
+    }
+    groups.sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, {
+      numeric: true
+    }));
+    return /*#__PURE__*/React.createElement("div", {
+      key: c.id,
+      className: "card",
+      style: {
+        marginBottom: 14
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        marginBottom: 12
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "chip"
+    }, c.id), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 13,
+        fontWeight: 600
+      }
+    }, c.name || "unnamed in catalogue"), /*#__PURE__*/React.createElement(MaturityChip, {
+      score: c.score != null ? c.score : c.cellMean
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-muted)"
+      }
+    }, groups.length, " capabilities \xB7 ", c.cells.length, " subcaps", c.weight != null ? ` · weight ${fx(c.weight * 100, 0)}%` : "")), /*#__PURE__*/React.createElement("div", {
+      className: "g2",
+      style: {
+        gap: 8
+      }
+    }, groups.map(g => {
+      const mean = meanOf(g.items.map(s => s.score));
+      const thin = g.items.filter(s => s.thin).length;
+      const capped = showIssues ? g.items.filter(s => DMA.issueCapsFor(s.id).length).length : 0;
+      return /*#__PURE__*/React.createElement("button", {
+        key: g.id,
+        className: "card-tile clickable",
+        style: {
+          padding: 10,
+          textAlign: "left"
+        },
+        onClick: () => drillCategory && drillCategory(c.id),
+        title: `${g.id} · mean of ${g.items.length} scored cells (no capability score is promoted) · click to read the cells`
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "row",
+        style: {
+          gap: 8
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        className: `b ${DMA.helpers.maturityClass(mean)}`,
+        style: {
+          width: 34,
+          justifyContent: "center",
+          flexShrink: 0
+        }
+      }, fx(mean, 1)), /*#__PURE__*/React.createElement("span", {
+        className: "f-mono txt-fit-1",
+        style: {
+          fontSize: 11.5,
+          fontWeight: 600,
+          color: "var(--z-dark)",
+          minWidth: 0
+        }
+      }, g.id), /*#__PURE__*/React.createElement("span", {
+        className: "spacer"
+      }), /*#__PURE__*/React.createElement("span", {
+        className: "b b-muted",
+        title: "cells in this capability"
+      }, g.items.length), thin ? /*#__PURE__*/React.createElement("span", {
+        className: "b b-org"
+      }, thin, " thin") : null, capped ? /*#__PURE__*/React.createElement("span", {
+        className: "b b-org"
+      }, /*#__PURE__*/React.createElement(Icon, {
+        name: "lock",
+        size: 9
+      }), " ", capped) : null), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: "var(--z-muted)",
+          marginTop: 4
+        }
+      }, "mean of ", g.items.length, " cells \xB7 no capability score promoted"));
+    })));
   }));
 }
 
 /* ─────────────────────── SUBCAP HEATMAP ─────────────────────── */
 function SubcapHeatmap({
   entity,
+  cats: allCats,
   catFocus,
   pillarFocus,
   showPeers,
@@ -1259,11 +1657,14 @@ function SubcapHeatmap({
   setCatFocus
 }) {
   const [openClusters, setOpenClusters] = useState({});
-  const cats = catFocus ? DMA.CATEGORIES.filter(c => c.id === catFocus) : pillarFocus ? DMA.CATEGORIES.filter(c => c.pillar === pillarFocus) : null;
+  // The run's categories, so a category the current catalogue does not list is
+  // still reachable and its cells still readable.
+  const cats = catFocus ? (allCats || []).filter(c => c.id === catFocus) : pillarFocus ? (allCats || []).filter(c => c.pillar === pillarFocus) : null;
 
-  // No category/pillar in focus → show a picker instead of dumping all 102 subcaps
+  // No category/pillar in focus → show a picker instead of dumping all 765 cells
   if (!cats || cats.length === 0) {
-    const pillars = DMA.PILLARS;
+    const pillarIds = [];
+    for (const c of allCats || []) if (!pillarIds.includes(c.pillar)) pillarIds.push(c.pillar);
     return /*#__PURE__*/React.createElement("div", {
       className: "card",
       style: {
@@ -1288,10 +1689,11 @@ function SubcapHeatmap({
         color: "var(--z-muted)",
         marginBottom: 14
       }
-    }, "The subcap view drills into one category at a time so you can read the evidence behind each score. Pick a category below."), pillars.map(p => {
-      const pcats = DMA.CATEGORIES.filter(c => c.pillar === p.id);
+    }, "The subcap view drills into one category at a time so you can read the evidence behind each score. Pick a category below."), pillarIds.sort().map(pid => {
+      const meta = (DMA.PILLARS || []).find(p => p.id === pid) || null;
+      const pcats = (allCats || []).filter(c => c.pillar === pid);
       return /*#__PURE__*/React.createElement("div", {
-        key: p.id,
+        key: pid,
         style: {
           marginBottom: 12
         }
@@ -1303,21 +1705,21 @@ function SubcapHeatmap({
         }
       }, /*#__PURE__*/React.createElement("span", {
         className: "b b-purple"
-      }, p.id), /*#__PURE__*/React.createElement("span", {
+      }, pid), /*#__PURE__*/React.createElement("span", {
         style: {
           fontSize: 11.5,
           fontWeight: 600,
           color: "var(--z-dark)"
         }
-      }, p.short || p.name)), /*#__PURE__*/React.createElement("div", {
+      }, meta && (meta.short || meta.name) || "unnamed in catalogue")), /*#__PURE__*/React.createElement("div", {
         className: "g4",
         style: {
           gap: 8
         }
       }, pcats.map(c => {
-        const subs = entity.subcaps.filter(s => s.category === c.id);
-        const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : 0;
-        const thin = subs.filter(s => s.thin).length;
+        // The promoted category score, else the mean of its cells,
+        // else nothing. A zero here read as a measured floor.
+        const shown = c.score != null ? c.score : c.cellMean;
         return /*#__PURE__*/React.createElement("button", {
           key: c.id,
           className: "card-tile clickable",
@@ -1326,7 +1728,7 @@ function SubcapHeatmap({
             textAlign: "left"
           },
           onClick: () => setCatFocus && setCatFocus(c.id),
-          disabled: !subs.length
+          disabled: !c.cells.length
         }, /*#__PURE__*/React.createElement("div", {
           className: "row",
           style: {
@@ -1337,9 +1739,9 @@ function SubcapHeatmap({
           className: "chip"
         }, c.id), /*#__PURE__*/React.createElement("span", {
           className: "spacer"
-        }), subs.length ? /*#__PURE__*/React.createElement("span", {
-          className: `b ${DMA.helpers.maturityClass(avg)}`
-        }, fx(avg, 1)) : /*#__PURE__*/React.createElement("span", {
+        }), shown != null ? /*#__PURE__*/React.createElement("span", {
+          className: `b ${DMA.helpers.maturityClass(shown)}`
+        }, fx(shown, 1)) : /*#__PURE__*/React.createElement("span", {
           className: "b b-muted"
         }, "\u2014")), /*#__PURE__*/React.createElement("div", {
           style: {
@@ -1348,13 +1750,13 @@ function SubcapHeatmap({
             color: "var(--z-dark)"
           },
           className: "txt-fit-2"
-        }, c.name), /*#__PURE__*/React.createElement("div", {
+        }, c.name || "unnamed in catalogue"), /*#__PURE__*/React.createElement("div", {
           style: {
             fontSize: 10.5,
             color: "var(--z-muted)",
             marginTop: 3
           }
-        }, subs.length, " subcaps", thin ? ` · ${thin} thin` : ""));
+        }, c.cells.length, " subcaps", c.thin ? ` · ${c.thin} thin` : ""));
       })));
     }));
   }
@@ -1375,21 +1777,30 @@ function SubcapHeatmap({
       color: "var(--z-muted)"
     }
   }, "Showing sub-capabilities for ", catFocus)) : null, cats.map(c => {
-    const subs = entity.subcaps.filter(s => s.category === c.id);
-    // group into L1 capability clusters (Category → L1 cluster → L2 sub-cap)
+    const subs = c.cells;
+    // Capability clusters, grouped on the cell grain's own `capability`
+    // (capability_id). This grouped on `l1`/`l1name` — keys the live cell
+    // grain has never carried — so every cell in a category fell into one
+    // undefined bucket: all 43 P4C1 cells under a heading reading "P4C1."
+    // and "1 capabilities". The run carries no capability NAME, so a
+    // cluster is labelled with its id rather than an invented title.
     const clusters = [];
-    const byL1 = {};
+    const byCap = {};
     subs.forEach(s => {
-      if (!byL1[s.l1]) {
-        byL1[s.l1] = {
-          l1: s.l1,
-          name: s.l1name,
+      const cap = s.capability || `${c.id}·no capability id`;
+      if (!byCap[cap]) {
+        byCap[cap] = {
+          id: cap,
+          named: !!s.capability,
           items: []
         };
-        clusters.push(byL1[s.l1]);
+        clusters.push(byCap[cap]);
       }
-      byL1[s.l1].items.push(s);
+      byCap[cap].items.push(s);
     });
+    clusters.sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, {
+      numeric: true
+    }));
     return /*#__PURE__*/React.createElement("div", {
       key: c.id,
       className: "card",
@@ -1408,17 +1819,17 @@ function SubcapHeatmap({
         fontSize: 13,
         fontWeight: 600
       }
-    }, c.name), /*#__PURE__*/React.createElement("span", {
+    }, c.name || "unnamed in catalogue"), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 11,
         color: "var(--z-muted)"
       }
-    }, subs.length, " subcaps \xB7 ", clusters.length, " capabilities \xB7 weight ", fx(c.weight * 100, 0), "%")), clusters.map(cl => {
-      const key = `${c.id}.${cl.l1}`;
+    }, subs.length, " subcaps \xB7 ", clusters.length, " capabilities", c.weight != null ? ` · weight ${fx(c.weight * 100, 0)}%` : "")), clusters.map(cl => {
+      const key = `${c.id}.${cl.id}`;
       const open = openClusters[key] !== false; // default open
-      const avg = cl.items.reduce((a, s) => a + s.score, 0) / cl.items.length;
+      const avg = meanOf(cl.items.map(s => s.score));
       const capped = showIssues ? cl.items.filter(s => DMA.issueCapsFor(s.id).length).length : 0;
       return /*#__PURE__*/React.createElement("div", {
         key: key,
@@ -1433,6 +1844,7 @@ function SubcapHeatmap({
           ...o,
           [key]: !open
         })),
+        title: `${cl.id} · mean of ${cl.items.length} scored cells (no capability score or name is promoted at this grain)`,
         style: {
           width: "100%",
           display: "flex",
@@ -1452,23 +1864,21 @@ function SubcapHeatmap({
           flexShrink: 0
         }
       }, fx(avg, 1)), /*#__PURE__*/React.createElement("span", {
+        className: "f-mono txt-fit-1",
         style: {
           flex: 1,
           minWidth: 0,
-          fontSize: 12.5,
+          fontSize: 12,
           fontWeight: 600,
           color: "var(--z-dark)"
-        },
-        className: "txt-fit-1"
-      }, cl.name), /*#__PURE__*/React.createElement("span", {
-        className: "f-mono",
+        }
+      }, cl.id), /*#__PURE__*/React.createElement("span", {
         style: {
           fontSize: 10,
-          color: "var(--z-muted)"
+          color: "var(--z-muted)",
+          flexShrink: 0
         }
-      }, c.id, ".", cl.l1), /*#__PURE__*/React.createElement("span", {
-        className: "b b-muted"
-      }, cl.items.length), capped ? /*#__PURE__*/React.createElement("span", {
+      }, cl.items.length, " cells"), capped ? /*#__PURE__*/React.createElement("span", {
         className: "b b-org"
       }, /*#__PURE__*/React.createElement(Icon, {
         name: "lock",
@@ -1492,7 +1902,11 @@ function SubcapHeatmap({
         // null - score is -score, which printed as "+score vs
         // peer" in the above-peer colour on every row.
         const gap = deltaOf(s.peerMedian, s.score);
-        const evCount = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.includes(s.id)).length;
+        // The cell's own citation count where it promoted a
+        // list, else the run's link count for the cell. Counting
+        // evidence rows that mention the cell is a coarser
+        // number: it made all 43 P4C1 cells read "5 evidence".
+        const ev = evidenceCountOf(s);
         return /*#__PURE__*/React.createElement("button", {
           key: s.id,
           className: "subcap-row",
@@ -1529,13 +1943,14 @@ function SubcapHeatmap({
           name: "lock",
           size: 9
         }), " M", caps[0].cap) : null), /*#__PURE__*/React.createElement("div", {
-          className: "f-mono",
+          className: "f-mono txt-fit-1",
           style: {
             fontSize: 10,
             color: "var(--z-muted)",
             marginTop: 1
-          }
-        }, s.id, " \xB7 ", s.confidence, " \xB7 ", evCount, " evidence")), /*#__PURE__*/React.createElement("div", {
+          },
+          title: ev.basis === "cited" ? "ids the producer cited for this cell" : ev.basis === "linked" ? "evidence items the run links to this cell" : null
+        }, s.id, s.confidence ? ` · ${s.confidence}` : "", ev.n != null ? ` · ${ev.n} ${ev.basis}` : " · no evidence count")), /*#__PURE__*/React.createElement("div", {
           style: {
             width: 90,
             flexShrink: 0
@@ -1548,14 +1963,14 @@ function SubcapHeatmap({
             borderRadius: 3
           },
           title: `Score ${fx(s.score, 1)}${s.peerMedian != null ? ` · Peer ${fx(s.peerMedian, 1)}` : " · no peer median stated"}`
-        }, /*#__PURE__*/React.createElement("div", {
+        }, s.score != null ? /*#__PURE__*/React.createElement("div", {
           style: {
             width: `${s.score / 5 * 100}%`,
             height: "100%",
             background: DMA.helpers.maturityHex(s.score),
             borderRadius: 3
           }
-        }), s.peerMedian != null ? /*#__PURE__*/React.createElement("div", {
+        }) : null, s.peerMedian != null ? /*#__PURE__*/React.createElement("div", {
           style: {
             position: "absolute",
             left: `calc(${s.peerMedian / 5 * 100}% - 1px)`,
@@ -1567,11 +1982,11 @@ function SubcapHeatmap({
         }) : null), gap != null ? /*#__PURE__*/React.createElement("div", {
           style: {
             fontSize: 9,
-            color: gap > 0 ? "var(--z-below)" : "var(--z-mid)",
+            color: gap > 0 ? "var(--z-below)" : gap < 0 ? "var(--z-mid)" : "var(--z-muted)",
             marginTop: 2,
             textAlign: "right"
           }
-        }, gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`, " vs peer") : /*#__PURE__*/React.createElement("div", {
+        }, gap > 0 ? `−${fx(gap, 1)}` : gap < 0 ? `+${fx(Math.abs(gap), 1)}` : "0.0", " vs peer") : /*#__PURE__*/React.createElement("div", {
           style: {
             fontSize: 9,
             color: "var(--z-muted)",
@@ -1622,6 +2037,33 @@ function ValueChainView({
   openInsight
 }) {
   const [selected, setSelected] = useState(null);
+  const chains = DMA.VALUE_CHAINS || [];
+  const state = typeof DMA.sectionStateFor === "function" ? DMA.sectionStateFor("heatmap.value_chain") : null;
+  const empty = state && state.empty_state;
+
+  /* The section is optional and Baxter's run submitted eight of nine sections
+     without it. With no chains the view rendered its heading, an empty grey
+     badge and "Same 765 subcaps, reorganised by business process" over an empty
+     grid — a promise that the cells had been arranged by business process when
+     nothing had been. The stage arrangement is a claim about this client's
+     operating model, so there is nothing to derive it from; say that it did not
+     promote, and name what the API said. */
+  if (!chains.length) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "empty"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "icon"
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "route",
+      size: 20
+    })), /*#__PURE__*/React.createElement("h3", null, "The value chain section did not promote for this run"), /*#__PURE__*/React.createElement("p", null, empty ? `${String(empty.kind || "empty").replace(/_/g, " ")}${empty.reason ? ` — ${empty.reason}` : ""}.` : "The run promoted no value-chain stages."), /*#__PURE__*/React.createElement("p", {
+      style: {
+        marginTop: 8
+      }
+    }, "Which cells belong to which business process is the producer's claim about ", entity.name, "'s operating model. The cell grain alone cannot stand it up, so nothing is drawn here until the section promotes."));
+  }
+  const mapped = new Set();
+  for (const vc of chains) for (const s of subcapsForStage(entity, vc)) mapped.add(s.id);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
@@ -1636,20 +2078,18 @@ function ValueChainView({
       fontWeight: 600
     }
   }, "Value chain view"), /*#__PURE__*/React.createElement("span", {
-    className: "b b-muted"
-  }), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, "Same ", entity.subcaps.length, " subcaps, reorganised by business process")), /*#__PURE__*/React.createElement("div", {
+  }, chains.length, " stages \xB7 ", mapped.size, " of ", entity.subcaps.length, " subcaps mapped")), /*#__PURE__*/React.createElement("div", {
     className: "g3",
     style: {
       marginBottom: 14
     }
-  }, DMA.VALUE_CHAINS.map(vc => {
+  }, chains.map(vc => {
     // Pick subcaps representative of value chain - sample from subcaps
     const subs = subcapsForStage(entity, vc);
     const scored = subs.filter(s => s.score != null);
@@ -1723,7 +2163,7 @@ function ValueChainView({
       }
     }, fx(s.score, 1)))));
   })), selected ? (() => {
-    const vc = DMA.VALUE_CHAINS.find(x => x.id === selected);
+    const vc = chains.find(x => x.id === selected);
     if (!vc) return null;
     const subs = subcapsForStage(entity, vc);
     const insights = DMA.INSIGHT_CARDS.filter(ic => ic.affects.some(sid => subs.some(s => s.id === sid)));
@@ -1838,6 +2278,80 @@ function ValueChainView({
   })() : null);
 }
 
+/* A category's citations: the union of its cells' promoted lists, in cell order.
+   Falls back to the run's link table only when no cell in the category promoted
+   one, and says which it used. */
+function categoryCitationsOf(cells) {
+  const seen = new Set();
+  const items = [];
+  let withLists = 0;
+  for (const c of cells || []) {
+    const cell = typeof DMA.cellEvidenceFor === "function" ? DMA.cellEvidenceFor(c.id) : null;
+    const ids = cell && Array.isArray(cell.e_ids) ? cell.e_ids : [];
+    if (ids.length) withLists += 1;
+    for (const id of ids) {
+      if (seen.has(id)) continue;
+      seen.add(id);
+      const e = DMA.getEvidence(id) || null;
+      items.push(e ? {
+        ...e,
+        resolved: true
+      } : {
+        id,
+        resolved: false
+      });
+    }
+  }
+  if (items.length) return {
+    basis: "promoted",
+    items,
+    withLists
+  };
+  const ids = new Set((cells || []).map(c => c.id));
+  return {
+    basis: "derived",
+    withLists: 0,
+    items: (DMA.EVIDENCE || []).filter(e => e.subcaps && e.subcaps.some(sid => ids.has(sid))).map(e => ({
+      ...e,
+      resolved: true
+    }))
+  };
+}
+
+/* The score axis. It was labelled M1 M2 M3 M4 M5 — and M5 does not exist: four
+   bands, on the raw score, strictly less-than. Labelled with the scale's own
+   numbers and the band that owns each range. */
+function BandAxis() {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      height: 13,
+      fontSize: 10,
+      color: "var(--z-muted)",
+      fontFamily: "var(--font-mono)"
+    }
+  }, [1, 2, 3, 4, 5].map(t => /*#__PURE__*/React.createElement("span", {
+    key: t,
+    style: {
+      position: "absolute",
+      left: `${(t - 1) / 4 * 100}%`,
+      transform: t === 1 ? "none" : t === 5 ? "translateX(-100%)" : "translateX(-50%)"
+    }
+  }, t))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+      gap: 2,
+      fontSize: 9,
+      color: "var(--z-muted)",
+      textAlign: "center"
+    }
+  }, ["Activating", "Building", "Competing", "Differentiating"].map(b => /*#__PURE__*/React.createElement("span", {
+    key: b,
+    className: "txt-fit-1"
+  }, b))));
+}
+
 /* ─────────────────────── SYNTHESIS DRAWER ─────────────────────── */
 function SynthesisDrawer({
   entity,
@@ -1848,29 +2362,45 @@ function SynthesisDrawer({
   showIssues
 }) {
   const subcap = item.subcap;
-  const category = item.catId ? DMA.getCategory(item.catId) : null;
+  const catId = item.catId || subcap && subcap.category || null;
+  const cats = useMemo(() => runCategoriesOf(entity), [entity?.id, entity?.subcaps]);
+  // The RUN's category row. Reading `DMA.getCategory` alone meant a category the
+  // current catalogue does not list (P1C5, 30 scored cells) resolved to nothing
+  // and the drawer returned null — no synthesis at all for those cells.
+  const catRow = catId ? cats.find(c => c.id === catId) || null : null;
+  const category = item.catId ? catRow || null : null;
   if (!subcap && !category) return null;
+  const catCells = catRow ? catRow.cells : [];
 
   // Linked insight cards
-  const linkedIC = subcap ? DMA.INSIGHT_CARDS.filter(ic => ic.affects.includes(subcap.id)) : DMA.INSIGHT_CARDS.filter(ic => ic.affects.some(sid => sid.startsWith(category.id)));
+  const linkedIC = subcap ? DMA.INSIGHT_CARDS.filter(ic => (ic.affects || []).includes(subcap.id)) : DMA.INSIGHT_CARDS.filter(ic => (ic.affects || []).some(sid => sid.startsWith(category.id)));
 
-  // Linked evidence (look for evidence that lists this subcap)
-  const linkedEv = subcap ? DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.includes(subcap.id)) : DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.some(sid => sid.startsWith(category.id)));
+  /* The cell's OWN promoted citation list, which is what the producer wrote and
+     what the evidence gate checked. This used to reverse-derive from
+     `DMA.EVIDENCE[].subcaps` and disagreed with the promoted list on 65 of 69
+     cells — P4C1.1.1 promoted four ids and the drawer showed five, including a
+     core-banking item never cited for that cell; P1C1.1.1 lost one it did cite.
+     The reverse derivation remains the fallback for cells that promoted no
+     list, and the header says which of the two is on screen. */
+  const cit = subcap ? cellCitationsOf(subcap.id) : categoryCitationsOf(catCells);
+  const linkedEv = cit.items;
 
   // Issue caps (subcap only)
   const caps = subcap ? DMA.issueCapsFor(subcap.id) : [];
 
-  // Peer comparison (for category we use category aggregate)
-  const score = subcap ? subcap.score : entity.subcaps.filter(s => s.category === category.id).reduce((a, s, _, arr) => a + s.score / arr.length, 0);
+  // Peer comparison (for a category, the promoted category figures)
+  const score = subcap ? numOf(subcap.score) : catRow.score != null ? catRow.score : catRow.cellMean;
+  const scoreBasis = subcap ? null : catRow.score != null ? `promoted category score${catRow.source_cell ? ` · ${catRow.source_cell}` : ""}` : `mean of ${catCells.length} scored cells — the run promoted no category score`;
   // The drawer's peer figure. For a category it was `score + 0.3`; for a cell it
   // was the null cell median, then formatted, then compared. Read the promoted
   // category median where there is one, and inherit it at cell grain labelled a
   // PROXY (the workbook states medians at category grain, not per cell).
-  const catRowForPeer = ((entity.workbookScores || {}).categories || []).find(c => c.category_id === (item.catId || subcap && subcap.category)) || null;
-  const catPeer = catRowForPeer && catRowForPeer.peer_median != null ? Number(catRowForPeer.peer_median) : null;
+  const catPeer = catRow ? catRow.peer : null;
   const peer = subcap ? subcap.peerMedian != null ? Number(subcap.peerMedian) : catPeer : catPeer;
   const peerIsProxy = !!(subcap && subcap.peerMedian == null && catPeer != null);
-  const gap = peer - score;
+  // `peer - score` with a null peer is -score, which printed as "+2.5" in the
+  // above-peer colour on a cell with no benchmark at all.
+  const gap = deltaOf(peer, score);
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "drawer-mask",
     onClick: onClose
@@ -1904,9 +2434,9 @@ function SynthesisDrawer({
     style: {
       fontSize: 15
     }
-  }, subcap?.name || category?.name), /*#__PURE__*/React.createElement("div", {
+  }, subcap ? subcap.name : category.name || `${category.id} · unnamed in catalogue`), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, subcap ? `Score ${fx(subcap.score, 1)} · ${subcap.confidence}` : `${entity.subcaps.filter(s => s.category === category.id).length} subcaps${category.weight != null ? ` · weight ${fx(category.weight * 100, 0)}%` : ""}`)), /*#__PURE__*/React.createElement("button", {
+  }, subcap ? `Score ${fx(subcap.score, 1)}${subcap.confidence ? ` · ${subcap.confidence}` : ""}` : `${catCells.length} subcaps${category.weight != null ? ` · weight ${fx(category.weight * 100, 0)}%` : ""}`)), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
     onClick: onClose
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -1953,7 +2483,7 @@ function SynthesisDrawer({
       width: 1,
       background: "var(--z-sep)"
     }
-  })), /*#__PURE__*/React.createElement("div", {
+  })), score != null ? /*#__PURE__*/React.createElement("div", {
     style: {
       position: "absolute",
       left: `calc(${(score - 1) / 4 * 100}% - 6px)`,
@@ -1965,7 +2495,7 @@ function SynthesisDrawer({
       boxShadow: "0 1px 3px rgba(0,0,0,.2)"
     },
     title: "Entity"
-  }), /*#__PURE__*/React.createElement("div", {
+  }) : null, peer != null ? /*#__PURE__*/React.createElement("div", {
     style: {
       position: "absolute",
       left: `calc(${(peer - 1) / 4 * 100}% - 1px)`,
@@ -1975,25 +2505,13 @@ function SynthesisDrawer({
       background: "var(--z-dpur)"
     },
     title: "Peer median"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      fontSize: 11,
-      color: "var(--z-muted)"
-    }
-  }, /*#__PURE__*/React.createElement("span", null, "M1"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, "M2"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, "M3"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, "M4"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, "M5")), /*#__PURE__*/React.createElement("div", {
+  }) : null), /*#__PURE__*/React.createElement(BandAxis, null), /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       marginTop: 10,
-      fontSize: 12
+      fontSize: 12,
+      flexWrap: "wrap",
+      gap: 8
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "row",
@@ -2009,7 +2527,7 @@ function SynthesisDrawer({
     }
   }), " Entity ", /*#__PURE__*/React.createElement("strong", null, fx(score, 1))), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", {
+  }), peer != null ? /*#__PURE__*/React.createElement("span", {
     className: "row",
     style: {
       gap: 5
@@ -2020,14 +2538,27 @@ function SynthesisDrawer({
       height: 12,
       background: "var(--z-dpur)"
     }
-  }), " Peer ", /*#__PURE__*/React.createElement("strong", null, fx(peer, 1))), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", {
+  }), " Peer ", /*#__PURE__*/React.createElement("strong", null, fx(peer, 1))) : /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
-      color: gap > 0 ? "var(--z-below)" : "var(--z-mid)"
+      color: "var(--z-muted)"
+    },
+    title: "no peer median is stated at this grain in this run"
+  }, "no peer median stated"), /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), gap != null ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: gap > 0 ? "var(--z-below)" : gap < 0 ? "var(--z-mid)" : "var(--z-muted)"
     }
-  }, gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`))), caps.length > 0 ? /*#__PURE__*/React.createElement("div", {
+  }, gap > 0 ? `−${fx(gap, 1)}` : gap < 0 ? `+${fx(Math.abs(gap), 1)}` : "0.0") : null), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)",
+      marginTop: 6,
+      lineHeight: 1.45
+    }
+  }, scoreBasis ? `${scoreBasis}. ` : "", peer == null ? "The run states no peer median at this grain." : peerIsProxy ? `Peer figure is ${catId}'s category median, used as a proxy — the workbook states no median per cell.` : "Peer median as stated for this grain.")), caps.length > 0 ? /*#__PURE__*/React.createElement("div", {
     className: "co co-org",
     style: {
       marginBottom: 14
@@ -2041,18 +2572,25 @@ function SynthesisDrawer({
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "co-title"
-  }, "Capped by ", caps.length, " issue", caps.length === 1 ? "" : "s"), caps.map(c => /*#__PURE__*/React.createElement("div", {
-    key: c.id,
-    style: {
-      fontSize: 12,
-      marginTop: 4
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "chip",
-    style: {
-      marginRight: 6
-    }
-  }, c.id), c.issue?.desc.slice(0, 70), "\u2026 ", /*#__PURE__*/React.createElement("strong", null, "Cap M", c.cap))))) : null, /*#__PURE__*/React.createElement("div", {
+  }, "Capped by ", caps.length, " issue", caps.length === 1 ? "" : "s"), caps.map(c => {
+    // An issue whose row did not promote has no description, and
+    // `.desc.slice` on it took the drawer down.
+    const desc = c.issue && (c.issue.desc || c.issue.title) || null;
+    return /*#__PURE__*/React.createElement("div", {
+      key: c.id,
+      style: {
+        fontSize: 12,
+        marginTop: 4
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "chip",
+      style: {
+        marginRight: 6
+      }
+    }, c.id), desc ? `${desc.slice(0, 70)}${desc.length > 70 ? "…" : ""} ` : "", c.cap != null ? /*#__PURE__*/React.createElement("strong", null, "Cap M", c.cap) : /*#__PURE__*/React.createElement("span", {
+      className: "muted"
+    }, "cap level not stated"));
+  }))) : null, /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 14
     }
@@ -2085,7 +2623,14 @@ function SynthesisDrawer({
       fontSize: 10,
       color: "var(--z-muted)"
     }
-  }, "click an ID to open")), linkedEv.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, "click an ID to open")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)",
+      marginBottom: 6,
+      lineHeight: 1.45
+    }
+  }, cit.basis === "promoted" ? subcap ? "The ids the producer cited for this cell (heatmap.cell_evidence)." : `The ids cited by the ${cit.withLists} cell${cit.withLists === 1 ? "" : "s"} in this category that promoted a citation list.` : `The run promoted no citation list for this ${subcap ? "cell" : "category"}; these are the evidence items the run links to ${subcap ? "it" : "its cells"}.`), linkedEv.length === 0 ? /*#__PURE__*/React.createElement("div", {
     className: "co co-org",
     style: {
       marginBottom: 0
@@ -2096,7 +2641,40 @@ function SynthesisDrawer({
   }), /*#__PURE__*/React.createElement("div", {
     className: "co-body"
   }, "No evidence item directly cites this ", subcap ? "subcap" : "category", " in this run \u2014 the score is inferred. Treat as provisional until corroborated.")) : linkedEv.map(e => {
+    // A cited id that resolves to nothing in the evidence store is
+    // shown as unresolved, not dropped: a dangling citation is a
+    // finding, and silently omitting it hides it.
+    if (!e.resolved) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: e.id,
+        className: "card-tile",
+        style: {
+          width: "100%",
+          padding: 11,
+          marginBottom: 6
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "row",
+        style: {
+          gap: 6
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "chip"
+      }, e.id), /*#__PURE__*/React.createElement("span", {
+        className: "b b-org"
+      }, "UNRESOLVED")), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11,
+          color: "var(--z-muted)",
+          marginTop: 4
+        }
+      }, "Cited for this cell but not present in this run's evidence store."));
+    }
     const tier = DMA.getTier(e.tier);
+    // title and source_pretty are both `source_name` for most rows, so
+    // every row printed the same string twice. Show the source only
+    // when it says something the title does not.
+    const showSource = e.source_pretty && e.source_pretty !== e.title;
     return /*#__PURE__*/React.createElement("button", {
       key: e.id,
       className: "card-tile clickable",
@@ -2118,7 +2696,7 @@ function SynthesisDrawer({
     }, e.id), /*#__PURE__*/React.createElement("span", {
       className: "b b-muted",
       title: tier?.label
-    }, e.tier, " \xB7 ", e.claim), /*#__PURE__*/React.createElement("span", {
+    }, [e.tier, e.claim].filter(Boolean).join(" · ")), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement("span", {
       style: {
@@ -2132,7 +2710,7 @@ function SynthesisDrawer({
         color: "var(--z-dark)"
       },
       className: "txt-fit-1"
-    }, e.title), /*#__PURE__*/React.createElement("div", {
+    }, e.title), showSource ? /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
         gap: 5,
@@ -2151,7 +2729,7 @@ function SynthesisDrawer({
         fontWeight: 500
       },
       className: "txt-fit-1"
-    }, e.source_pretty)), e.excerpt ? /*#__PURE__*/React.createElement("div", {
+    }, e.source_pretty)) : null, e.excerpt ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
         color: "var(--z-body)",
@@ -2257,8 +2835,10 @@ function SynthesisDrawer({
   }, subcap ? /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
     onClick: () => {
-      const label = subcap?.name || category?.name || "selection";
-      const text = `${label}\nScore ${fx(subcap?.score, 1) ?? "-"} · confidence ${subcap?.confidence ?? "-"} · peer median ${fx(subcap?.peerMedian, 1) ?? "-"}.`;
+      // Only what the run states. This used to copy "peer median —" for
+      // every cell, which reads as a stated median of nothing.
+      const bits = [subcap.score != null ? `Score ${fx(subcap.score, 1)}` : "no score stated", subcap.confidence ? `confidence ${subcap.confidence}` : null, subcap.peerMedian != null ? `peer median ${fx(subcap.peerMedian, 1)}` : peerIsProxy ? `peer median ${fx(peer, 1)} (${catId} category proxy)` : "no peer median stated"].filter(Boolean);
+      const text = `${subcap.name || subcap.id} (${subcap.id})\n${bits.join(" · ")}.`;
       try {
         navigator.clipboard.writeText(text);
       } catch (e) {}
@@ -2322,7 +2902,11 @@ function IssueRegisterBanner({
   }, openIssues.map(iss => {
     const caps = Object.entries(DMA.ISSUE_CAPS[iss.id]?.caps || {});
     const isOpen = open === iss.id;
-    const ev = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.some(sid => caps.some(([cid]) => sid.slice(0, 4) === cid.slice(0, 4))));
+    // Evidence for the CAPPED cells. Matching on a 4-char prefix meant
+    // "anything citing any cell in the same category", so an item that has
+    // nothing to do with the issue was listed as its evidence.
+    const cappedIds = new Set(caps.map(([cid]) => cid));
+    const ev = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.some(sid => cappedIds.has(sid)));
     return /*#__PURE__*/React.createElement("div", {
       key: iss.id,
       className: "card-tile",

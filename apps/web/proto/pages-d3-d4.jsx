@@ -1,120 +1,208 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   DMA INSIGHTS · Client pages - D3 Heatmap, D4 Platform Matrix
+   DMA INSIGHTS · Client page — D4 Platform opportunity
+   (heatmap moved to pages-d3-heatmap.jsx)
+
+   The unit of recommendation on this surface is the L3 PLATFORM AREA and its
+   L4 features — not a vendor brand. The page used to open with the static
+   five-vendor catalogue (`DMA.PLATFORMS`: Salesforce / Databricks / Tableau /
+   Twilio / nCino), score it from `entity.oss` through a vendor-alias fold, and
+   filter every panel below by `r.platform === "SF"`. For a real client that
+   produced five tiles reading "—", a readiness list of every recommendation's
+   prerequisites under the heading "Readiness · Salesforce", and "No
+   recommendations for this platform in this run" against eight promoted ones.
+   Nothing on the page came from the run.
+
+   So there are now two independent controls, each keyed on something the
+   payload actually states:
+
+     · the fit tiles ARE the promoted opportunity tiles — platform name,
+       composite, factors, the cells each addresses — read, never re-ranked;
+     · the area toggle selects an L3 area, taken from the recommendations'
+       own `l3_area`, and scopes the gaps, the readiness rows and the
+       recommendation list to it.
+
+   The two cannot be joined: the opportunity tile carries a vendor name and no
+   L3 area, and `platform_story.platforms[]` carries gaps and a story but — per
+   the connector contract — no platform name at all. Rather than guess a
+   pairing (a wrong vendor beside a recommendation is worse than none), each
+   surface renders what it states, and the platform story is filed under the L3
+   area ITS OWN GAP ROWS name.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ═══════════════════════════════════════════════════════════════════════
-   DMA INSIGHTS · Client pages - D4 Platform Matrix + Stairstep + Roadmap
-   (heatmap moved to client-heatmap.jsx)
-   ═══════════════════════════════════════════════════════════════════════ */
+function pfNum(v) {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return isFinite(n) ? n : null;
+}
 
+/* Evidence chips for a promoted id list.
+   Fail-closed on evidence (invariant 4): an id that does not resolve in the
+   run's served evidence renders as an unresolved token and is NOT clickable —
+   a chip that opens an empty drawer reads as evidence that exists. */
+function PlatformEvChips({ ids, openEvidence, label }) {
+  const list = (ids || []).filter(Boolean);
+  if (!list.length) return null;
+  return (
+    <div className="row" style={{ flexWrap: "wrap", gap: 4, alignItems: "center" }}>
+      {label ? (
+        <span style={{ fontSize: 9, color: "var(--z-muted)", letterSpacing: ".06em", textTransform: "uppercase" }}>{label}</span>
+      ) : null}
+      {list.map(eid => {
+        const e = DMA.getEvidence(eid);
+        return e ? (
+          <button key={eid} className={`tier-chip tier-${e.tier}`}
+            style={{ cursor: "pointer", border: 0 }}
+            title={`${e.title || eid} · ${e.source_pretty || ""}`}
+            onClick={ev => { ev.stopPropagation(); openEvidence(eid); }}>{eid}</button>
+        ) : (
+          <span key={eid} className="chip muted" title="cited id — not in this run's served evidence">{eid}</span>
+        );
+      })}
+    </div>
+  );
+}
 
-function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i); return h; }
-window.hashCode = hashCode;
+/* The L3 platform areas this run promoted, in the order the roadmap reaches
+   them (earliest phase first). The area is the recommendation's own `l3_area`;
+   an area is never invented and never renamed. */
+function platformAreasOf(recs, storyPlatforms) {
+  const order = [];
+  const seen = {};
+  const add = (area, phase) => {
+    if (!area) return;
+    if (seen[area] === undefined) { seen[area] = order.length; order.push({ area, phase }); }
+    else if (phase != null) {
+      const cur = order[seen[area]];
+      if (cur.phase == null || Number(phase) < Number(cur.phase)) cur.phase = phase;
+    }
+  };
+  for (const r of recs || []) add(r.l3, r.phase);
+  // A platform story states its area only through its gap rows, so an area
+  // that has a story but no recommendation still gets a tab rather than
+  // leaving the story unreachable.
+  for (const p of storyPlatforms || []) {
+    for (const g of p.gaps || []) add(g.l3_area, null);
+  }
+  return order
+    .slice()
+    .sort((a, b) => (pfNum(a.phase) === null ? 99 : Number(a.phase))
+                  - (pfNum(b.phase) === null ? 99 : Number(b.phase)))
+    .map(x => x.area);
+}
 
-/* ── D4 Platform opportunity matrix ──────────────────────────────── */
+/* One readiness row per DISTINCT prerequisite across the selected area's
+   recommendations, carrying which of them require it.
+
+   Two things were wrong before. Every prerequisite of every recommendation was
+   listed regardless of area (sixteen rows under one platform heading), and the
+   list was keyed by `q.cell || q.condition` — so the five recommendations that
+   each require P4C3 produced five rows with the same React key and one shared
+   open state: clicking any of them expanded all five.
+
+   A cell threshold and a text condition are different shapes, so they are kept
+   apart here rather than flattened into one row that renders the same string
+   twice. P4C3 ≥ 2.0 and P4C3 ≥ 2.5 are DIFFERENT prerequisites with different
+   verdicts, so the key carries the minimum — deduping on the cell alone would
+   silently drop the stricter of the two. */
+function areaPrereqs(recs) {
+  const byKey = new Map();
+  for (const r of recs || []) {
+    for (const q of r.prerequisites || []) {
+      if (!q || typeof q !== "object") continue;
+      const cell = q.cell || null;
+      const cond = q.condition || null;
+      if (!cell && !cond) continue;
+      const min = pfNum(q.minimum);
+      const key = cell ? `cell:${cell}:${min === null ? "" : min}` : `cond:${cond}`;
+      const row = byKey.get(key) || {
+        key,
+        kind: cell ? "cell" : "condition",
+        cell, condition: cond, min,
+        current: pfNum(q.current),
+        verdict: q.verdict || null,
+        basis: q.basis || null,
+        note: q.note || null,
+        recs: [],
+      };
+      if (!row.recs.includes(r.id)) row.recs.push(r.id);
+      byKey.set(key, row);
+    }
+  }
+  return [...byKey.values()]
+    .sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "cell" ? -1 : 1));
+}
+
+/* MET / NOT MET as the run states it. The verdict used to be collapsed to a
+   boolean and re-labelled "PARTIAL", which is a word no payload contains — the
+   run says "NOT MET". Where no verdict was stated but both figures were, the
+   comparison is computed and marked as computed. */
+function prereqVerdict(p) {
+  if (p.verdict) return { text: String(p.verdict), met: String(p.verdict).toUpperCase() === "MET", computed: false };
+  if (p.min !== null && p.current !== null) {
+    const met = p.current >= p.min;
+    return { text: met ? "MET" : "NOT MET", met, computed: true };
+  }
+  return null;
+}
+
+/* ── D4 Platform opportunity ──────────────────────────────────────── */
 function ClientPlatform({ entity, run }) {
   const route = useRoute();
   const { setIpSurface, setIpContext, setIpOpen, openEvidence, openRec, pushToast } = useApp();
-  const [platform, setPlatform] = useState(route.params.platform || "SF");
+
+  const recs = DMA.recsFor(entity.id) || [];
+  const story = DMA.platformStoryFor(entity.id) || null;
+  const opportunity = DMA.opportunityFor(entity.id) || null;
+  const storyPlatforms = (story && story.platforms) || [];
+  const areas = platformAreasOf(recs, storyPlatforms);
+
+  // The route parameter only wins if the run promoted that area; a stale link
+  // must not select a tab that does not exist and blank the page below.
+  const routeArea = route.params.platform && areas.includes(route.params.platform)
+    ? route.params.platform : null;
+  const [areaSel, setAreaSel] = useState(routeArea);
+  const area = (areaSel && areas.includes(areaSel)) ? areaSel : (areas[0] || null);
   const [openPrereq, setOpenPrereq] = useState(null);
-  useEffect(() => { setIpSurface("platform_story"); setIpContext({ entity, platform }); }, [platform, entity?.id]);
+  const [openTile, setOpenTile] = useState(null);
+  useEffect(() => { setIpSurface("platform_story"); setIpContext({ entity, platform: area }); }, [area, entity?.id]);
 
-  const platformData = DMA.PLATFORMS;
-  const selected = DMA.getPlatform(platform)
-    || { id: platform, name: platform, short: platform, features: "" };
-  const recs = DMA.recsFor(entity.id);
+  const oss = entity.oss || {};
+  const tiles = ((opportunity && opportunity.tiles) || []).slice()
+    .sort((a, b) => (pfNum(a.rank) === null ? 99 : Number(a.rank))
+                  - (pfNum(b.rank) === null ? 99 : Number(b.rank)));
 
-  // Build gap-to-platform mapping from subcaps
-  const gaps = entity.subcaps.filter(s => s.score < 3.0 && s.platforms.includes(platform));
-  const platformGapCount = (pid) => entity.subcaps.filter(s => s.score < 3.0 && s.platforms.includes(pid)).length;
+  const areaRecs = recs.filter(r => r.l3 === area)
+    .sort((a, b) => String(a.phase || "").localeCompare(String(b.phase || ""))
+                 || String(a.id).localeCompare(String(b.id)));
 
-  const livePrereqs = (() => {
-    const out = [];
-    for (const r of recs || []) {
-      for (const q of r.prerequisites || []) {
-        if (!q || typeof q !== "object") continue;
-        out.push({
-          id: q.cell || q.condition || r.id,
-          name: q.condition || q.cell || r.title,
-          min: q.minimum == null ? null : Number(q.minimum),
-          current: q.current == null ? null : Number(q.current),
-          met: q.verdict ? q.verdict === "MET"
-             : (q.minimum != null && q.current != null
-                ? Number(q.current) >= Number(q.minimum) : null),
-          basis: q.basis || null,
-          note: q.note || null,
-        });
-      }
-    }
-    return out;
-  })();
-  const liveStarters = (DMA.startersFor ? (DMA.startersFor(entity.id) || []) : [])
-    .slice().sort((a, b) => (a.rank || 99) - (b.rank || 99))
-    .map(x => x.text).filter(Boolean);
+  // The promoted gap rows for this area, with the story that argues for them.
+  // Each row states its own cell, score, peer basis, L4 feature, catalogue path
+  // and evidence — none of which the old generic subcap scan carried.
+  const areaGaps = [];
+  const areaStories = [];
+  for (const p of storyPlatforms) {
+    const rows = (p.gaps || []).filter(g => g.l3_area === area);
+    if (!rows.length) continue;
+    areaGaps.push(...rows);
+    if (p.story_md) areaStories.push(p.story_md);
+  }
+  // Only render the peer and gap columns when at least one row states a peer
+  // figure. Before, every row printed "−-2.5": a unary minus prepended to an
+  // already-negative difference, computed against a peer median that does not
+  // exist for these cells.
+  const anyPeer = areaGaps.some(g => pfNum(g.peer_score) !== null);
 
-  const prerequisites = {
-    SF: [
-      { id: "P4C1", name: "Data foundation", min: 2.0, current: entity.pillar_scores.P4 - 0.1, met: entity.pillar_scores.P4 - 0.1 >= 2.0 },
-      { id: "P2C2", name: "Digital service model", min: 2.0, current: entity.pillar_scores.P2 - 0.2, met: entity.pillar_scores.P2 - 0.2 >= 2.0 },
-      { id: "P1C1", name: "Digital strategy", min: 2.0, current: entity.pillar_scores.P1, met: entity.pillar_scores.P1 >= 2.0 },
-    ],
-    DB: [
-      { id: "P4C1", name: "Data foundation", min: 2.5, current: entity.pillar_scores.P4 - 0.1, met: entity.pillar_scores.P4 - 0.1 >= 2.5 },
-      { id: "P4C2", name: "Analytics & insight", min: 2.0, current: entity.pillar_scores.P4 + 0.6, met: entity.pillar_scores.P4 + 0.6 >= 2.0 },
-    ],
-    TBL: [
-      { id: "P4C1", name: "Data foundation", min: 2.0, current: entity.pillar_scores.P4 - 0.1, met: entity.pillar_scores.P4 - 0.1 >= 2.0 },
-      { id: "P4C2", name: "Analytics & insight", min: 1.5, current: entity.pillar_scores.P4 + 0.6, met: entity.pillar_scores.P4 + 0.6 >= 1.5 },
-    ],
-    TW: [
-      { id: "P2C1", name: "Channel experience", min: 2.0, current: entity.pillar_scores.P2 + 0.1, met: entity.pillar_scores.P2 + 0.1 >= 2.0 },
-      { id: "P2C3", name: "Customer journey", min: 1.5, current: entity.pillar_scores.P2, met: entity.pillar_scores.P2 >= 1.5 },
-    ],
-    nCino: [
-      { id: "P3C1", name: "Workflow automation", min: 1.5, current: entity.pillar_scores.P3, met: entity.pillar_scores.P3 >= 1.5 },
-      { id: "P3C2", name: "Loan origination", min: 1.5, current: entity.pillar_scores.P3 - 0.3, met: entity.pillar_scores.P3 - 0.3 >= 1.5 },
-    ],
-  };
-
-  const conversationStarters = {
-    SF: [
-      `${entity.name}'s P4 score of ${fx(entity.pillar_scores.P4, 1)} in Data Foundation is ${fx((entity.pillar_scores.P4 - (entity.pillar_scores.P4 + 0.3)), 1)} below the ${DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase()} peer median. Synovus deployed Data Cloud in Q3 2025 after a similar finding [E-047]. Evidence confirms the root constraint is architectural, not strategic.`,
-      `Three CDO-equivalent hires in your subvertical over the last 12 months - including yours in May 2026 - have led with Data Cloud as the first investment. The 6-9 month integration window before nCino go-live is the highest-leverage moment.`,
-      `Agentforce prerequisites (P4C1 ≥ 2.0, P2C2 ≥ 2.0) are 67% met. The conversation order is: Data Cloud → FSC → Agentforce - not all three at once.`,
-    ],
-    DB: [
-      `${entity.name}'s analytics adoption (Tableau Cloud, 1,800 users) is 1.3 points ahead of its decisioning capability. Mosaic AI on Databricks bridges the gap with existing skill base - no re-platforming.`,
-      `Peer cohort: 22% of regional banks have deployed Databricks for risk decisioning. Capital One and Truist published case studies in 2025.`,
-      `Lakeflow can land on top of the existing Azure footprint - no architectural rework.`,
-    ],
-    TBL: [
-      `Tableau is already deployed at ${entity.name} (1,800 users, 2025 rollout). Tableau Pulse extends to operations leadership with no new infrastructure.`,
-      `Job postings reference "Tableau Pulse Specialist" - the technical curiosity already exists internally.`,
-      `Lower-friction commercial path than introducing a net-new platform - adoption velocity is the differentiator.`,
-    ],
-    TW: [
-      `App store ratings trail regional bank peer median by 0.8 stars. Twilio Engage compresses mobile friction without core replacement.`,
-      `BMO and Truist deployed Twilio in 2025 with 18-point branch deflection within 10 months.`,
-      `Twilio Engage + Service Cloud sequencing reduces operating cost in the branch network while improving NPS.`,
-    ],
-    nCino: [
-      `${entity.name} is mid-migration to nCino core - Workflow Engine is a low-risk extension during go-live.`,
-      `Loan origination cycle is currently 12 days median. First Citizens went from 11 to 4 days post-Workflow Engine deployment.`,
-      `STP rate at 1.8 - Workflow Engine can move this to 3.5 in 6 months on the existing core migration roadmap.`,
-    ],
-  };
-
-  // Live wins, and in LIVE mode the fixture must not answer AT ALL: both maps
-  // are FCE-specific prose (naming nCino, Synovus, BMO, Truist, "1,800 users",
-  // "12 days median"), and the prerequisite rows invent their `current` figure
-  // by subtracting a constant from a pillar score. Falling back to them under a
-  // real client's name is the fabrication the LIVE rule exists to prevent, so
-  // here an absent promoted list stays absent.
-  const isLive = typeof window !== "undefined" && !!window.DMA_LIVE;
-  const prereqRows = livePrereqs.length ? livePrereqs
-    : (isLive ? [] : (prerequisites[platform] || []));
-  const starterRows = liveStarters.length ? liveStarters
-    : (isLive ? [] : (conversationStarters[platform] || []));
+  const prereqRows = areaPrereqs(areaRecs);
+  const starters = (DMA.startersFor ? (DMA.startersFor(entity.id) || []) : [])
+    .slice().sort((a, b) => (pfNum(a.rank) === null ? 99 : Number(a.rank))
+                          - (pfNum(b.rank) === null ? 99 : Number(b.rank)));
+  // "Why not X" — the platform page's own discarded list where it promoted one,
+  // otherwise the overview's. Never both merged: the two sections word the same
+  // decision differently and a merge would show one platform twice with
+  // conflicting reasons.
+  const discarded = ((story && story.discarded) || []).length
+    ? story.discarded
+    : ((opportunity && opportunity.discarded) || []);
 
   return (
     <div>
@@ -126,106 +214,328 @@ function ClientPlatform({ entity, run }) {
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entity.name} roadmap as PDF…`, "success")}><Icon name="download" size={13} /> Roadmap export</button>
-          <button className="btn btn-secondary" onClick={() => { setIpSurface("platform_story"); setIpContext({ entity, platform }); setIpOpen(true); }}>✦ Platform story</button>
+          <button className="btn btn-secondary" onClick={() => { setIpSurface("platform_story"); setIpContext({ entity, platform: area }); setIpOpen(true); }}>✦ Platform story</button>
         </div>
       </div>
 
-      {/* Platform fit cards */}
-      <div className="g5" style={{ marginBottom: 16 }}>
-        {platformData.map(p => {
-          const score = (entity.oss || {})[p.id];
-          const isSel = p.id === platform;
-          return (
-            <div key={p.id} className={`card-tile clickable`} onClick={() => setPlatform(p.id)} style={{ border: isSel ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)", background: isSel ? "var(--z-ice)" : "#fff" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div>
-                  <div style={{ fontSize: 12.5, fontWeight: 600 }}>{p.name}</div>
-                  <div style={{ fontSize: 9.5, color: "var(--z-muted)" }}>{p.features.split(" · ").slice(0, 3).join(" · ")}</div>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 26, fontWeight: 200, color: score == null ? "var(--z-muted)" : "var(--z-teal)", lineHeight: 1 }}>{score == null ? "—" : score}</div>
-                  <div className="f-mono" style={{ fontSize: 9, color: "var(--z-muted)" }}>/100 OSS</div>
-                </div>
-              </div>
-              <div style={{ marginTop: 10, fontSize: 11, color: "var(--z-body)" }}>
-                <span className="b b-org" style={{ marginRight: 4 }}>{platformGapCount(p.id)} gaps</span>
-                <span className="b b-below">3 absent</span>
-              </div>
-              <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 6 }}>Top: {entity.subcaps.filter(s => s.platforms.includes(p.id) && s.score < 3).slice(0, 2).map(s => s.name).join(" · ")}</div>
+      {/* ── Promoted platform fit tiles ────────────────────────────── */}
+      <div className="card flush" style={{ marginBottom: 16 }}>
+        <div className="card-head">
+          <h3>Platform fit · {tiles.length} promoted</h3>
+          <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
+            composite read from the run, never re-ranked here
+          </span>
+        </div>
+        <div className="card-body">
+          {tiles.length ? (
+            <div className={tiles.length === 5 ? "g5" : "g4"}>
+              {tiles.map((t, i) => {
+                // Keyed by the PROMOTED platform string. The vendor-alias fold
+                // collapsed "Salesforce Data Cloud" and "Service Cloud
+                // consolidation" onto one key and destroyed a tile.
+                const composite = oss[t.platform] != null ? pfNum(oss[t.platform]) : pfNum(t.composite);
+                const cells = (t.addressable_cells || []).length;
+                const isOpen = openTile === (t.platform || i);
+                return (
+                  <div key={t.platform || i} className="card-tile clickable"
+                    onClick={() => setOpenTile(o => o === (t.platform || i) ? null : (t.platform || i))}
+                    style={{ border: isOpen ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)", background: isOpen ? "var(--z-ice)" : "#fff" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div className="row" style={{ gap: 5, marginBottom: 2 }}>
+                          {t.rank != null ? <span className="b b-purple">#{t.rank}</span> : null}
+                          {t.relevance != null ? (
+                            <span className="b b-muted f-mono" title="relevance to the assessed gaps">{Number(t.relevance).toFixed(2)}</span>
+                          ) : null}
+                        </div>
+                        <div style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.3 }}>{t.platform || "Platform not named"}</div>
+                      </div>
+                      <div style={{ textAlign: "right", flexShrink: 0 }}>
+                        <div style={{ fontSize: 26, fontWeight: 200, color: composite === null ? "var(--z-muted)" : "var(--z-teal)", lineHeight: 1 }}>
+                          {composite === null ? "—" : composite.toFixed(1)}
+                        </div>
+                        <div className="f-mono" style={{ fontSize: 9, color: "var(--z-muted)" }}>/100 fit</div>
+                      </div>
+                    </div>
+                    {/* Counts are computed from the tile's own rows (invariant
+                        8). "3 absent" was a literal on all five tiles and the
+                        gap count was a scan of every cell below 3.0 in the
+                        workbook — 346 of them under "Salesforce". */}
+                    <div style={{ marginTop: 10, fontSize: 11 }}>
+                      <span className="b b-org">{cells} cell{cells === 1 ? "" : "s"} addressed</span>
+                    </div>
+                    {t.their_stack_context ? (
+                      <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 6, lineHeight: 1.5 }} className={isOpen ? "" : "txt-fit-3"}>
+                        {t.their_stack_context}
+                      </div>
+                    ) : null}
+                    <div className="row" style={{ marginTop: 8, fontSize: 10, color: "var(--z-mid)" }}>
+                      <span className="spacer" />
+                      <span>{isOpen ? "hide breakdown" : "breakdown"}</span>
+                      <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={12} />
+                    </div>
+                    {isOpen ? (
+                      <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--z-sep)" }}>
+                        {(t.factors || []).length ? (
+                          <>
+                            <div className="eyebrow" style={{ fontSize: 9, marginBottom: 5 }}>Composite factors</div>
+                            {t.factors.map((f, j) => (
+                              <div key={j} className="row" style={{ fontSize: 10, gap: 5, marginBottom: 3 }}>
+                                <span style={{ color: "var(--z-muted)", width: 78, flexShrink: 0 }}
+                                  title={f.weight != null ? `weight ${f.weight}` : ""}>{String(f.name || "").replace(/_/g, " ")}</span>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div className="prog" style={{ height: 4 }}>
+                                    <div className="prog-fill" style={{ width: `${Math.max(0, Math.min(100, (pfNum(f.value) || 0) * 10))}%` }} />
+                                  </div>
+                                </div>
+                                {f.contribution != null ? (
+                                  <span className="f-mono" style={{ fontSize: 9, color: "var(--z-muted)", width: 34, textAlign: "right", flexShrink: 0 }}
+                                    title="contribution to the composite">+{Number(f.contribution).toFixed(1)}</span>
+                                ) : null}
+                              </div>
+                            ))}
+                          </>
+                        ) : null}
+                        {(t.addressable_cells || []).length ? (
+                          <>
+                            <div className="eyebrow" style={{ fontSize: 9, margin: "8px 0 5px" }}>Cells it addresses</div>
+                            <div style={{ display: "grid", gap: 4 }}>
+                              {t.addressable_cells.map((c, j) => (
+                                <div key={j} className="row" style={{ gap: 5, fontSize: 10, alignItems: "flex-start" }}>
+                                  <span className="chip f-mono" style={{ fontSize: 9, flexShrink: 0 }}>{c.subcap_id}</span>
+                                  {pfNum(c.current) !== null ? <MaturityChip score={pfNum(c.current)} /> : null}
+                                  <span style={{ flex: 1, minWidth: 0, color: "var(--z-body)", lineHeight: 1.45 }}>{c.feature_that_addresses_it || c.name || ""}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        ) : null}
+                        {t.rank_rationale ? (
+                          <div style={{ fontSize: 10.5, color: "var(--z-body)", marginTop: 8, lineHeight: 1.55 }}>{t.rank_rationale}</div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
+          ) : (
+            <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+              The opportunity surface did not promote for this run, so no platform fit score is available.
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Selected platform - readiness + recs */}
+      {/* ── Considered and set aside ───────────────────────────────── */}
+      {discarded.length ? (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="row" style={{ marginBottom: 10 }}>
+            <Icon name="filter" size={14} />
+            <div style={{ fontSize: 13, fontWeight: 600 }}>Considered and set aside · {discarded.length}</div>
+            <span className="spacer" />
+            <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}>why the run did not lead with these</span>
+          </div>
+          <div style={{ display: "grid", gap: 7 }}>
+            {discarded.map((x, i) => (
+              <div key={i} className="row" style={{ gap: 10, alignItems: "flex-start", fontSize: 11.5 }}>
+                <span style={{ fontWeight: 500, color: "var(--z-dark)", width: 210, flexShrink: 0, lineHeight: 1.45 }}>
+                  {x.platform || x.name || "Platform not named"}
+                </span>
+                {x.relevance != null ? (
+                  <span className="b b-muted f-mono" style={{ flexShrink: 0 }} title="relevance to the assessed gaps">{Number(x.relevance).toFixed(2)}</span>
+                ) : null}
+                <span style={{ color: "var(--z-muted)", flex: 1, minWidth: 0, lineHeight: 1.5 }}>{x.reason || x.why_not || "No reason promoted."}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* ── Area selector ──────────────────────────────────────────── */}
+      {areas.length ? (
+        <div className="card" style={{ marginBottom: 16, padding: "12px 16px" }}>
+          <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
+            <div style={{ fontSize: 11, color: "var(--z-muted)", letterSpacing: ".06em", textTransform: "uppercase", fontWeight: 700 }}>
+              Platform area
+            </div>
+            <div className="toggle-row" style={{ flexWrap: "wrap" }}>
+              {areas.map(a => (
+                <button key={a} className={a === area ? "on" : ""} onClick={() => setAreaSel(a)}>{a}</button>
+              ))}
+            </div>
+            <span className="spacer" />
+            <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}>
+              the L3 area is the unit of recommendation
+            </span>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Selected area — promoted gaps + readiness */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 16, marginBottom: 16 }}>
         <div className="card flush">
           <div className="card-head">
-            <h3>Gap-to-platform mapping · {selected.name}</h3>
-            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{gaps.length} high-priority subcap gaps</span>
+            <h3>Gaps this area closes · {area || "no area promoted"}</h3>
+            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{areaGaps.length} promoted gap row{areaGaps.length === 1 ? "" : "s"}</span>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
             <table className="tbl">
-              <thead><tr><th>Subcap</th><th>Pillar</th><th>Score</th><th>Peer</th><th>Gap</th><th>Feature / L4</th></tr></thead>
+              {/* nowrap on the narrow columns: at this width "PILLAR" and
+                  "SCORE" broke mid-word into "PILLA / R" and "SCOR / E". */}
+              <thead><tr>
+                <th>Cell</th>
+                <th style={{ whiteSpace: "nowrap" }}>Pillar</th>
+                <th style={{ whiteSpace: "nowrap" }}>Score</th>
+                <th style={{ whiteSpace: "nowrap" }}>{anyPeer ? "Peer" : "Peer basis"}</th>
+                {anyPeer ? <th style={{ whiteSpace: "nowrap" }}>Gap</th> : null}
+                <th>L4 feature</th><th>Evidence</th>
+              </tr></thead>
               <tbody>
-                {gaps.slice(0, 10).map(s => {
-                  const rowEv = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.includes(s.id));
+                {areaGaps.map((g, i) => {
+                  const cur = pfNum(g.current_score);
+                  const peer = pfNum(g.peer_score);
+                  // Computed-or-null: a delta exists only where both figures do,
+                  // and it carries its own sign — no minus is prepended.
+                  const delta = (cur !== null && peer !== null) ? Math.round((cur - peer) * 100) / 100 : null;
                   return (
-                  <tr key={s.id} className={rowEv.length ? "tbl-click" : ""} style={rowEv.length ? { cursor: "pointer" } : null} onClick={rowEv.length ? () => openEvidence(rowEv[0].id) : null} title={rowEv.length ? `Open evidence ${rowEv[0].id}` : "No direct evidence"}>
-                    <td data-label="Subcap"><div style={{ fontSize: 12, fontWeight: 500 }}>{s.name}</div><div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{s.id}</div></td>
-                    <td data-label="Pillar"><span className="b b-purple">{s.pillar}</span></td>
-                    <td data-label="Score"><MaturityChip score={s.score} /></td>
-                    <td data-label="Peer"><MaturityChip score={s.peerMedian} /></td>
-                    <td data-label="Gap"><span style={{ fontFamily: "var(--font-mono)", color: "var(--z-below)" }}>−{fx((s.peerMedian - s.score), 1)}</span></td>
-                    <td data-label="Evidence">{rowEv.length ? <span className={`tier-chip tier-${rowEv[0].tier}`}>{rowEv[0].id}</span> : <span style={{ fontSize: 11, color: "var(--z-body)" }}>{recs.find(r => r.platform === platform)?.feature || "Platform"}</span>}</td>
-                  </tr>
+                    <tr key={g.subcap_id || i}>
+                      <td data-label="Cell">
+                        <div style={{ fontSize: 12, fontWeight: 500 }}>{g.name || g.subcap_id}</div>
+                        <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{g.subcap_id}</div>
+                      </td>
+                      <td data-label="Pillar">{g.pillar ? <span className="b b-purple">{g.pillar}</span> : <span className="chip muted">—</span>}</td>
+                      <td data-label="Score"><MaturityChip score={cur} /></td>
+                      {anyPeer ? (
+                        <td data-label="Peer">{peer !== null ? <MaturityChip score={peer} /> : (
+                          <span className="chip muted" title={g.peer_note || ""}>{String(g.peer_basis || "no peer").replace(/_/g, " ")}</span>
+                        )}</td>
+                      ) : (
+                        /* Every row here states cannot_estimate with a note
+                           explaining why. That is the answer, so it is what the
+                           column shows — the old table printed "-". */
+                        <td data-label="Peer basis">
+                          <span className="chip muted" title={g.peer_note || ""}>{String(g.peer_basis || "no peer").replace(/_/g, " ")}</span>
+                        </td>
+                      )}
+                      {anyPeer ? (
+                        <td data-label="Gap">{delta === null ? <span style={{ color: "var(--z-muted)" }}>—</span> : (
+                          <span className="f-mono" style={{ color: delta < 0 ? "var(--z-below)" : "var(--z-above)" }}>{delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}</span>
+                        )}</td>
+                      ) : null}
+                      <td data-label="L4 feature">
+                        <div style={{ fontSize: 11.5, color: "var(--z-dark)" }}>{g.l4_feature || "—"}</div>
+                        {g.catalogue_path ? (
+                          <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 3, lineHeight: 1.4 }}>{g.catalogue_path}</div>
+                        ) : null}
+                      </td>
+                      <td data-label="Evidence"><PlatformEvChips ids={g.e_ids} openEvidence={openEvidence} /></td>
+                    </tr>
                   );
                 })}
-                {gaps.length === 0 ? <tr><td colSpan={6} className="tbl-empty">No high-priority gaps for this platform - entity already at or above peer median.</td></tr> : null}
+                {areaGaps.length === 0 ? (
+                  <tr><td colSpan={anyPeer ? 7 : 6} className="tbl-empty">
+                    {storyPlatforms.length
+                      ? `The platform story promoted gap rows for ${storyPlatforms.length} platform${storyPlatforms.length === 1 ? "" : "s"}, none of them in ${area || "this area"}.`
+                      : "No platform story promoted for this run, so no gap rows are available."}
+                  </td></tr>
+                ) : null}
               </tbody>
             </table>
+            {areaStories.map((s, i) => (
+              <div key={i} style={{ padding: "12px 18px", borderTop: "1px solid var(--z-sep)", fontSize: 12, color: "var(--z-body)", lineHeight: 1.65 }}>
+                <div className="eyebrow" style={{ fontSize: 9.5, marginBottom: 5 }}>What this platform changes</div>
+                {s}
+              </div>
+            ))}
           </div>
         </div>
 
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="shield" size={16} />
-            <div style={{ fontSize: 13, fontWeight: 600 }}>Readiness · {selected.name}</div>
-            <span className="spacer" />
-            <span style={{ fontSize: 10, color: "var(--z-muted)" }}>click a row to drill in</span>
+            <div style={{ fontSize: 13, fontWeight: 600, flex: 1, minWidth: 0 }}>Readiness</div>
+            <span style={{ fontSize: 10, color: "var(--z-muted)", flexShrink: 0 }}>{prereqRows.length} prerequisite{prereqRows.length === 1 ? "" : "s"}</span>
           </div>
-          {prereqRows.map(p => {
-            const isOpen = openPrereq === p.id;
-            const subs = entity.subcaps.filter(s => s.id.startsWith(p.id));
-            const ev = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.some(sid => sid.startsWith(p.id)));
+          {prereqRows.map((p, idx) => {
+            const v = prereqVerdict(p);
+            if (p.kind === "condition") {
+              /* A text condition has no cell, no minimum and no current value,
+                 so it gets its own row shape. It used to render the SAME string
+                 twice — once as a 317px badge, once as a name span flexed to
+                 0px beside it, which wrapped to one character per line and
+                 produced an 8px-wide, 900px-tall column of letters. */
+              return (
+                <div key={p.key} style={{ borderBottom: "1px solid var(--z-sep)", padding: "10px 0" }}>
+                  <div className="row" style={{ gap: 6, marginBottom: 4 }}>
+                    <span style={{ fontSize: 9, color: "var(--z-muted)", letterSpacing: ".06em", textTransform: "uppercase" }}>Condition</span>
+                    <span className="spacer" />
+                    {p.basis ? <span className="b b-muted">{p.basis}</span> : null}
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--z-dark)", lineHeight: 1.5 }}>{p.condition}</div>
+                  {p.note ? (
+                    <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 4, lineHeight: 1.5 }}>{p.note}</div>
+                  ) : null}
+                  <div className="row" style={{ gap: 4, marginTop: 5, flexWrap: "wrap" }}>
+                    {p.recs.map(rid => (
+                      <button key={rid} className="chip" style={{ cursor: "pointer", border: 0 }} title={`Open ${rid}`}
+                        onClick={() => openRec(rid)}>{rid}</button>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            // Cell threshold. Keyed by index so two thresholds on the same cell
+            // cannot share an open state.
+            const isOpen = openPrereq === idx;
+            const subs = (entity.subcaps || []).filter(s => s.id.startsWith(`${p.cell}.`));
+            const ev = (DMA.EVIDENCE || []).filter(e => e.subcaps && e.subcaps.some(sid => String(sid).startsWith(`${p.cell}.`)));
+            const pct = (p.min !== null && p.current !== null && p.min > 0)
+              ? Math.max(0, Math.min(100, (p.current / p.min) * 100)) : null;
             return (
-              <div key={p.id} style={{ borderBottom: "1px solid var(--z-sep)" }}>
-                <button onClick={() => setOpenPrereq(o => o === p.id ? null : p.id)} style={{ width: "100%", background: "none", border: 0, cursor: "pointer", textAlign: "left", padding: "10px 0" }}>
+              <div key={p.key} style={{ borderBottom: "1px solid var(--z-sep)" }}>
+                <button onClick={() => setOpenPrereq(o => o === idx ? null : idx)} style={{ width: "100%", background: "none", border: 0, cursor: "pointer", textAlign: "left", padding: "10px 0" }}>
                   <div className="row" style={{ marginBottom: 4, gap: 6 }}>
-                    <span className="b b-purple">{p.id}</span>
-                    <span style={{ fontSize: 12, flex: 1 }}>{p.name}</span>
-                    <span className={`b ${p.met ? "b-above" : "b-org"}`}>{p.met ? "MET" : "PARTIAL"}</span>
+                    <span className="b b-purple">{p.cell}</span>
+                    <span className="f-mono" style={{ fontSize: 11.5, flex: 1, minWidth: 0 }}>{p.min === null ? "threshold not stated" : `≥ ${p.min.toFixed(1)}`}</span>
+                    {v ? (
+                      <span className={`b ${v.met ? "b-above" : "b-org"}`} title={v.computed ? "computed from the stated minimum and current value" : "verdict as promoted"}>{v.text}</span>
+                    ) : null}
                     <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-muted)" }} />
                   </div>
-                  <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Min {fx(p.min, 1)} · Current {fx(p.current, 1)} · {subs.length} subcaps · {ev.length} evidence</div>
-                  <div className="prog" style={{ marginTop: 4, height: 4 }}><div className="prog-fill" style={{ width: `${Math.min(100, p.current / p.min * 100)}%`, background: p.met ? "var(--z-mid)" : "var(--z-org)" }} /></div>
+                  <div style={{ fontSize: 11, color: "var(--z-muted)" }}>
+                    Current {p.current === null ? "not stated" : p.current.toFixed(2)} · {subs.length} cells · {ev.length} evidence
+                  </div>
+                  {pct !== null ? (
+                    <div className="prog" style={{ marginTop: 4, height: 4 }}>
+                      <div className="prog-fill" style={{ width: `${pct}%`, background: v && v.met ? "var(--z-mid)" : "var(--z-org)" }} />
+                    </div>
+                  ) : null}
                 </button>
                 {isOpen ? (
                   <div style={{ padding: "2px 0 12px" }}>
-                    {subs.length ? <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", margin: "6px 0 4px" }}>Backing subcaps</div> : null}
+                    <div className="row" style={{ gap: 4, flexWrap: "wrap", marginBottom: 6 }}>
+                      <span style={{ fontSize: 9, color: "var(--z-muted)", letterSpacing: ".06em", textTransform: "uppercase" }}>Required by</span>
+                      {p.recs.map(rid => (
+                        <button key={rid} className="chip" style={{ cursor: "pointer", border: 0 }} title={`Open ${rid}`}
+                          onClick={() => openRec(rid)}>{rid}</button>
+                      ))}
+                    </div>
+                    {subs.length ? <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", margin: "6px 0 4px" }}>Backing cells</div> : null}
                     {subs.slice(0, 6).map(s => (
                       <div key={s.id} className="row" style={{ gap: 6, padding: "3px 0" }}>
-                        <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 30, justifyContent: "center" }}>{fx(s.score, 1)}</span>
+                        <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 30, justifyContent: "center", flexShrink: 0 }}>{fx(s.score, 1)}</span>
                         <span style={{ fontSize: 11.5, color: "var(--z-dark)", flex: 1, minWidth: 0 }} className="txt-fit-1">{s.name}</span>
-                        <span className="f-mono" style={{ fontSize: 9.5, color: "var(--z-muted)" }}>{s.id}</span>
+                        <span className="f-mono" style={{ fontSize: 9.5, color: "var(--z-muted)", flexShrink: 0 }}>{s.id}</span>
                       </div>
                     ))}
+                    {subs.length > 6 ? (
+                      <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 3 }}>+{subs.length - 6} more cells in {p.cell}</div>
+                    ) : null}
                     {ev.length ? (
                       <>
                         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", margin: "8px 0 4px" }}>Evidence · click to open</div>
-                        <div className="row" style={{ flexWrap: "wrap", gap: 4 }}>
-                          {ev.map(e => <button key={e.id} className={`tier-chip tier-${e.tier}`} style={{ cursor: "pointer", border: 0 }} title={`${e.title} · ${e.source_pretty}`} onClick={() => openEvidence(e.id)}>{e.id}</button>)}
-                        </div>
+                        <PlatformEvChips ids={ev.slice(0, 12).map(e => e.id)} openEvidence={openEvidence} />
                       </>
                     ) : null}
                   </div>
@@ -233,10 +543,19 @@ function ClientPlatform({ entity, run }) {
               </div>
             );
           })}
-          {prereqRows.some(p => p.met === false) ? (
+          {prereqRows.length === 0 ? (
+            <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+              {areaRecs.length
+                ? "No prerequisites promoted for this area's recommendations."
+                : "No recommendation promoted for this area, so no readiness gate applies."}
+            </div>
+          ) : null}
+          {prereqRows.some(p => { const v = prereqVerdict(p); return v && !v.met; }) ? (
             <div className="co co-org" style={{ marginTop: 10 }}>
               <Icon name="warn" size={14} />
-              <div><div className="co-title">Advisory</div><div className="co-body">Lead with the foundation prerequisite conversation before introducing {selected.name}.</div></div>
+              <div><div className="co-title">Advisory</div><div className="co-body">
+                A threshold in this area is not met. The unmet prerequisite is the conversation that comes first.
+              </div></div>
             </div>
           ) : null}
         </div>
@@ -245,66 +564,169 @@ function ClientPlatform({ entity, run }) {
       {/* Recommendation cards + Conversation starters */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
         <div className="card flush">
-          <div className="card-head"><h3>Recommendations · {selected.name}</h3></div>
+          <div className="card-head">
+            <h3>Recommendations · {area || "no area promoted"}</h3>
+            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{areaRecs.length} of {recs.length} promoted</span>
+          </div>
           <div>
-            {recs.filter(r => r.platform === platform).map(r => (
-              <div key={r.id} className="rec-row" onClick={() => openRec(r.id)} title="Open full recommendation" style={{ padding: "12px 18px", borderBottom: "1px solid var(--z-sep)", cursor: "pointer" }}>
-                <div className="row" style={{ marginBottom: 4 }}>
-                  <span className="chip">{r.id}</span>
-                  <span style={{ fontWeight: 600, fontSize: 13 }}>{r.title}</span>
-                  <span className="spacer" />
-                  <span className="b b-teal">{r.phase}</span>
-                  <Icon name="chevron-r" size={13} style={{ color: "var(--z-muted)" }} />
+            {areaRecs.map(r => {
+              const gate = r.validation_gate || null;
+              const kpi = r.kpi || null;
+              const impacts = (r.dma_impact || []).length;
+              return (
+                <div key={r.id} className="rec-row" onClick={() => openRec(r.id)} title="Open full recommendation" style={{ padding: "12px 18px", borderBottom: "1px solid var(--z-sep)", cursor: "pointer" }}>
+                  <div className="row" style={{ marginBottom: 4, gap: 6 }}>
+                    <span className="chip">{r.id}</span>
+                    <span style={{ fontWeight: 600, fontSize: 13, flex: 1, minWidth: 0 }}>{r.title}</span>
+                    {r.phase != null ? <span className="b b-teal" style={{ flexShrink: 0 }}>Phase {r.phase}</span> : null}
+                    {r.effort ? <span className="b b-muted" style={{ flexShrink: 0 }} title="effort band">{r.effort}</span> : null}
+                    <Icon name="chevron-r" size={13} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
+                  </div>
+                  {r.l4 ? <div style={{ fontSize: 11, color: "var(--z-mid)", marginBottom: 5 }}>{r.l4}</div> : null}
+                  {r.root_cause_text ? (
+                    <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55, margin: "6px 0" }} className="txt-fit-3">
+                      {r.root_cause_text}
+                    </div>
+                  ) : null}
+                  <PlatformEvChips ids={r.root_cause} openEvidence={openEvidence} label="cites" />
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginTop: 8, fontSize: 11 }}>
+                    {gate && gate.threshold ? (
+                      <div>
+                        <div className="muted" style={{ fontSize: 10 }}>Readiness gate</div>
+                        <strong className="f-mono" style={{ fontSize: 11 }} title={gate.grain_note || ""}>{gate.threshold}</strong>
+                        {gate.verdict ? <span className={`b ${String(gate.verdict).toUpperCase() === "MET" ? "b-above" : "b-org"}`} style={{ marginLeft: 5 }}>{gate.verdict}</span> : null}
+                      </div>
+                    ) : null}
+                    <div>
+                      <div className="muted" style={{ fontSize: 10 }}>Cells it moves</div>
+                      <strong>{impacts}</strong>
+                    </div>
+                    {kpi && kpi.metric ? (
+                      <div style={{ gridColumn: "span 2" }}>
+                        <div className="muted" style={{ fontSize: 10 }}>KPI</div>
+                        <strong style={{ fontWeight: 500 }}>{kpi.metric}</strong>
+                        {kpi.baseline ? (
+                          <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.5 }}>
+                            baseline {kpi.baseline}{kpi.baseline_as_of ? ` · ${kpi.baseline_as_of}` : ""}
+                          </div>
+                        ) : null}
+                        {kpi.target ? (
+                          <div style={{ fontSize: 10.5, color: "var(--z-mid)", marginTop: 2, lineHeight: 1.5 }}>target {kpi.target}</div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-                <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55, margin: "6px 0" }}>
-                  Root cause: {r.root_cause.map(eid => <button key={eid} className="chip" style={{ marginRight: 4 }} onClick={(e) => { e.stopPropagation(); openEvidence(eid); }}>{eid}</button>)}
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 8, fontSize: 11 }}>
-                  <div><div className="muted" style={{ fontSize: 10 }}>Time</div><strong>{r.outcomes.time}</strong></div>
-                  <div><div className="muted" style={{ fontSize: 10 }}>Effort</div><strong>{r.outcomes.effort}</strong></div>
-                  <div style={{ gridColumn: "span 2" }}><div className="muted" style={{ fontSize: 10 }}>Metric</div><strong>{r.outcomes.metric}</strong></div>
-                </div>
+              );
+            })}
+            {areaRecs.length === 0 ? (
+              <div className="empty">
+                {recs.length
+                  ? <p>No recommendation promoted for {area}. {recs.length} promoted across the other areas.</p>
+                  : <p>No recommendation promoted in this run.</p>}
               </div>
-            ))}
-            {recs.filter(r => r.platform === platform).length === 0 ? <div className="empty">No recommendations for this platform in this run.</div> : null}
+            ) : null}
           </div>
         </div>
 
         <div className="card flush">
-          <div className="card-head"><h3>Conversation starters</h3><button className="btn btn-tertiary btn-sm" onClick={() => {
-            const text = starterRows.map((cs, i) => `#${i + 1} — ${cs}`).join("\n\n");
-            try { navigator.clipboard.writeText(text); pushToast(`Copied ${starterRows.length} conversation starters`, "success"); }
+          <div className="card-head"><h3>Conversation starters · {starters.length}</h3><button className="btn btn-tertiary btn-sm" onClick={() => {
+            const text = starters.map((s, i) => {
+              const head = `#${s.rank != null ? s.rank : i + 1}`;
+              return [`${head} — ${s.text || ""}`,
+                      s.followup_question ? `Follow-up: ${s.followup_question}` : null,
+                      (s.e_ids || []).length ? `Evidence: ${s.e_ids.join(", ")}` : null]
+                .filter(Boolean).join("\n");
+            }).join("\n\n");
+            try { navigator.clipboard.writeText(text); pushToast(`Copied ${starters.length} conversation starters`, "success"); }
             catch (e) { pushToast("Couldn't access clipboard", "warn"); }
           }}><Icon name="copy" size={12} /> Copy all</button></div>
           <div style={{ padding: 14 }}>
-            {starterRows.map((cs, i) => (
-              <div key={i} style={{ padding: 10, marginBottom: 8, background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", borderRadius: 8 }}>
-                <div className="row" style={{ marginBottom: 6 }}>
-                  <span className="b b-purple">#{i + 1}</span>
-                  <span style={{ fontSize: 10, color: "var(--z-dpur)" }}>Template-fill · evidence-cited</span>
+            {starters.map((s, i) => (
+              <div key={s.rank != null ? `r${s.rank}` : i} style={{ padding: 10, marginBottom: 8, background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", borderRadius: 8 }}>
+                <div className="row" style={{ marginBottom: 6, gap: 6 }}>
+                  <span className="b b-purple">#{s.rank != null ? s.rank : i + 1}</span>
+                  {/* The card used to be stamped "Template-fill ·
+                      evidence-cited" while citing nothing. What the starter
+                      actually states is what it opens on, and its citations. */}
+                  {s.opens_on ? <span style={{ fontSize: 10, color: "var(--z-dpur)" }}>opens on {String(s.opens_on).replace(/_/g, " ")}</span> : null}
+                  {s.named_gap_subcap_id ? <span className="chip f-mono" style={{ fontSize: 9 }} title="the gap this starter names">{s.named_gap_subcap_id}</span> : null}
                   <span className="spacer" />
                   <button className="btn btn-tertiary btn-sm" style={{ color: "var(--z-dpur)" }} onClick={() => {
-                    try { navigator.clipboard.writeText(cs); pushToast("Conversation starter copied", "success"); }
+                    const one = [s.text, s.followup_question ? `Follow-up: ${s.followup_question}` : null].filter(Boolean).join("\n");
+                    try { navigator.clipboard.writeText(one); pushToast("Conversation starter copied", "success"); }
                     catch (e) { pushToast("Couldn't access clipboard", "warn"); }
                   }}><Icon name="copy" size={11} /></button>
                 </div>
-                <div style={{ fontSize: 12, color: "#3B0764", lineHeight: 1.6 }}>{cs}</div>
+                <div style={{ fontSize: 12, color: "#3B0764", lineHeight: 1.6 }}>{s.text}</div>
+                {s.their_system_reference ? (
+                  <div style={{ fontSize: 11, color: "var(--z-dpur)", marginTop: 6, lineHeight: 1.5 }}>
+                    <span style={{ fontSize: 9, letterSpacing: ".06em", textTransform: "uppercase", opacity: .75 }}>Their system · </span>
+                    {s.their_system_reference}
+                  </div>
+                ) : null}
+                {s.peer_reference ? (
+                  <div style={{ fontSize: 11, color: "var(--z-dpur)", marginTop: 4, lineHeight: 1.5 }}>
+                    <span style={{ fontSize: 9, letterSpacing: ".06em", textTransform: "uppercase", opacity: .75 }}>Peer · </span>
+                    {s.peer_reference}
+                  </div>
+                ) : null}
+                {s.followup_question ? (
+                  <div style={{ fontSize: 11.5, color: "#3B0764", marginTop: 6, lineHeight: 1.55, paddingLeft: 8, borderLeft: "2px solid var(--ph0-bd)" }}>
+                    {s.followup_question}
+                  </div>
+                ) : null}
+                <div style={{ marginTop: 6 }}>
+                  <PlatformEvChips ids={s.e_ids} openEvidence={openEvidence} label="cites" />
+                </div>
               </div>
             ))}
+            {starters.length === 0 ? (
+              <div style={{ fontSize: 12, color: "var(--z-muted)" }}>No conversation starter promoted for this run.</div>
+            ) : null}
           </div>
         </div>
       </div>
 
-      {/* ── Stairstepped Maturity Curve (signature DMA viz) ─────── */}
+      {/* ── Stair-step ladder ─────────────────────────────────────── */}
       <StairstepCurve entity={entity} />
 
-      {/* ── Transformation Roadmap ───────────────────────────── */}
+      {/* ── Transformation Roadmap ───────────────────────────────── */}
       <TransformationRoadmap entity={entity} />
     </div>
   );
 }
 
-/* ── Stairstepped Maturity Curve component ───────────────────────── */
+/* ── Stair-step ladder ───────────────────────────────────────────────
+   The ladder's rungs are ORDERED STEPS, not maturity bands. They used to be
+   drawn as "M1 … M4" in band colours, which asserts that rung 4 is the
+   Differentiating band — the payload says nothing of the kind, and the run's
+   own composite is 2.71. Rungs are numbered and coloured from their index
+   (presentation, deterministic, claiming nothing), and the position marker is
+   the rung the run flags as `current_position` rather than always the first. */
+const RUNG_COLORS = ["var(--z-dark2)", "var(--z-mid)", "var(--z-dpur)",
+                     "var(--z-teal)", "var(--z-purple)"];
+
+/* SVG text does not wrap, and the promoted rung labels are sentences: at one
+   line each they ran straight through the neighbouring rungs. Wrapped on word
+   boundaries to the rectangle's own width, capped at two lines with the full
+   label kept in a <title>. */
+function wrapSvgLabel(text, maxChars, maxLines) {
+  const words = String(text || "").split(/\s+/).filter(Boolean);
+  const lines = [];
+  let cur = "";
+  for (const w of words) {
+    const next = cur ? `${cur} ${w}` : w;
+    if (next.length > maxChars && cur) { lines.push(cur); cur = w; }
+    else cur = next;
+  }
+  if (cur) lines.push(cur);
+  if (lines.length <= maxLines) return lines;
+  const kept = lines.slice(0, maxLines);
+  kept[maxLines - 1] = `${kept[maxLines - 1].slice(0, Math.max(0, maxChars - 1))}…`;
+  return kept;
+}
+
 function StairstepCurve({ entity }) {
   // The default cluster key was hardcoded "P4-data", so any run whose ladder
   // does not carry that theme threw on C.label and blanked the whole lower
@@ -314,49 +736,59 @@ function StairstepCurve({ entity }) {
   const [cluster, setCluster] = useState(null);
   const active = (cluster && clusters[cluster]) ? cluster : keys[0];
   const C = active ? clusters[active] : null;
-  if (!C) {
+  if (!C || !(C.steps || []).length) {
     return (
-      <div className="card">
-        <div className="card-head">
-          <div className="row"><Icon name="stairs" size={14} /><h3>Maturity stair-step</h3></div>
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="row" style={{ marginBottom: 8 }}>
+          <Icon name="stairs" size={14} />
+          <div style={{ fontSize: 13, fontWeight: 600 }}>Maturity stair-step</div>
         </div>
-        <div className="card-body" style={{ fontSize: 12, color: "var(--z-muted)" }}>
+        <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
           No stair-step ladder promoted for this run.
         </div>
       </div>
     );
   }
-  const { openEvidence } = useApp();
 
-  const W = 880, H = 280, padL = 60, padR = 40, padT = 30, padB = 60;
-  const stepW = (W - padL - padR) / 4;
-  // y for each step: M2 lowest, M5 highest
-  const stepY = (i) => H - padB - (i + 1) * (H - padT - padB) / 5;
+  const steps = C.steps;
+  const n = steps.length;
+  // Sized from the rung count, not a hardcoded four: a three- or five-rung
+  // ladder used to be squeezed into or spill out of four columns.
+  const W = 880, H = 420, padL = 60, padR = 40, padT = 40, padB = 70;
+  const stepW = (W - padL - padR) / n;
+  const stepY = (i) => H - padB - (i + 1) * (H - padT - padB) / (n + 1);
+  const rungW = stepW - 8;
+  const charsPerLine = Math.max(10, Math.floor(rungW / 5.9));
+  const monoChars = Math.max(8, Math.floor(rungW / 5.7));
+  // The rung the run marks as the current position (1-based level).
+  const currentIdx = steps.findIndex(s => Number(s.m) === Number(C.current));
 
   return (
     <div className="card" style={{ marginBottom: 16 }}>
       <div className="row" style={{ marginBottom: 14 }}>
-        <div style={{ width: 28, height: 28, borderRadius: 7, background: "var(--z-ice)", color: "var(--z-mid)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 28, height: 28, borderRadius: 7, background: "var(--z-ice)", color: "var(--z-mid)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <Icon name="stairs" size={14} />
         </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 600 }}>Stairstepped maturity curve · {C.label}</div>
-          <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Where {entity.name} is today, and what each rung requires</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>Stair-step ladder · {C.label}</div>
+          <div style={{ fontSize: 11, color: "var(--z-muted)" }}>
+            {n} rung{n === 1 ? "" : "s"} · where {entity.name} stands today, and what each rung requires
+          </div>
         </div>
-        <div className="toggle-row">
-          {Object.entries(clusters).map(([k, v]) => (
-            <button key={k} className={active === k ? "on" : ""} onClick={() => setCluster(k)}>{v.label}</button>
-          ))}
-        </div>
+        {keys.length > 1 ? (
+          <div className="toggle-row">
+            {Object.entries(clusters).map(([k, v]) => (
+              <button key={k} className={active === k ? "on" : ""} onClick={() => setCluster(k)}>{v.label}</button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 18, alignItems: "stretch" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 18, alignItems: "stretch" }}>
         <div style={{ background: "linear-gradient(180deg, var(--z-bg), #fff)", borderRadius: 10, padding: "16px 14px 12px", border: "1px solid var(--z-sep)", position: "relative", overflow: "hidden" }}>
-          {/* Decorative curve illustration */}
           <img src={assetUrl("illo_curvesTR", "brand/illustrations/curves_topright.png")} alt="" style={{ position: "absolute", top: 0, right: 0, width: 320, height: "auto", opacity: .5, pointerEvents: "none" }} />
 
           <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: "block", position: "relative" }}>
-            {/* Baseline arrow */}
             <defs>
               <marker id="arrowH" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--z-purple)"/></marker>
             </defs>
@@ -364,57 +796,78 @@ function StairstepCurve({ entity }) {
             <text x={padL} y={H - padB + 38} fontSize="10" fill="var(--z-muted)">Today</text>
             <text x={W - padR - 36} y={H - padB + 38} fontSize="10" fill="var(--z-mid)" fontWeight="600">Leading</text>
 
-            {/* Step rectangles */}
-            {C.steps.map((s, i) => {
+            {steps.map((s, i) => {
               const x = padL + i * stepW;
               const y = stepY(i);
-              const w = stepW - 8;
               const h = H - padB - y;
-              const platform = (s.platforms || [])[0] || null;
-              const plat = DMA.getPlatform(platform)
-                || { id: platform, name: platform, short: platform };
-              const color = i === 0 ? "var(--m-act)" : i === 1 ? "var(--m-bld)" : i === 2 ? "var(--m-cmp)" : "var(--m-dif)";
+              const color = RUNG_COLORS[i % RUNG_COLORS.length];
+              const lines = wrapSvgLabel(s.label, charsPerLine, 2);
+              // Cell count and effort only. The blocking findings are chips in
+              // the list beside the chart: inside the rung they ran past both
+              // edges of the rectangle, because a centred SVG string cannot be
+              // clipped to its box.
+              const meta = [
+                (s.subcaps || []).length ? `${s.subcaps.length} cells` : null,
+                s.effort ? `effort ${s.effort}` : null,
+              ].filter(Boolean).join(" · ");
               return (
                 <g key={i}>
-                  <rect x={x} y={y} width={w} height={h} fill={color} rx="6" ry="6" opacity={i === 0 ? .6 : 1} />
-                  {/* M-level ellipse */}
+                  <title>{`Step ${s.m}: ${s.label}`}</title>
+                  <rect x={x} y={y} width={rungW} height={h} fill={color} rx="6" ry="6" />
                   <circle cx={x + 16} cy={y - 14} r="14" fill="#fff" stroke={color} strokeWidth="2.5" />
-                  <text x={x + 16} y={y - 9} fontSize="13" fontWeight="700" fill={color} textAnchor="middle">M{s.m}</text>
-                  {/* Step label */}
-                  <text x={x + w/2} y={y + 18} fontSize="12" fontWeight="600" fill={i >= 2 ? "#fff" : "var(--z-dark)"} textAnchor="middle">{s.label}</text>
-                  <text x={x + w/2} y={y + 35} fontSize="9.5" fill={i >= 2 ? "rgba(255,255,255,.85)" : "var(--z-body)"} textAnchor="middle" style={{ fontFamily: "var(--font-mono)" }}>{platform === "-" ? "" : `via ${plat?.short || platform}`}</text>
+                  <text x={x + 16} y={y - 9} fontSize="13" fontWeight="700" fill={color} textAnchor="middle">{s.m}</text>
+                  {lines.map((ln, k) => (
+                    <text key={k} x={x + rungW / 2} y={y + 20 + k * 14} fontSize="11" fontWeight="600" fill="#fff" textAnchor="middle">{ln}</text>
+                  ))}
+                  {meta ? (
+                    <text x={x + rungW / 2} y={y + 22 + lines.length * 14} fontSize="9" fill="rgba(255,255,255,.85)" textAnchor="middle" style={{ fontFamily: "var(--font-mono)" }}>
+                      {meta.length > monoChars ? `${meta.slice(0, monoChars - 1)}…` : meta}
+                    </text>
+                  ) : null}
                 </g>
               );
             })}
 
-            {/* Connectors between steps */}
-            {C.steps.slice(0, -1).map((s, i) => {
+            {steps.slice(0, -1).map((s, i) => {
               const x1 = padL + (i + 1) * stepW - 8;
               const y1 = stepY(i);
               const x2 = padL + (i + 1) * stepW;
-              const y2 = stepY(i + 1) + (H - padB - stepY(i + 1));
-              return (
-                <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--z-dpur)" strokeWidth="2" strokeDasharray="3 3" opacity="0.5" />
-              );
+              const y2 = H - padB;
+              return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--z-dpur)" strokeWidth="2" strokeDasharray="3 3" opacity="0.5" />;
             })}
 
-            {/* Current marker */}
-            <g>
-              <circle cx={padL + 16} cy={stepY(0) - 14} r="20" fill="none" stroke="var(--z-org)" strokeWidth="2" strokeDasharray="4 3" />
-              <text x={padL - 6} y={stepY(0) - 30} fontSize="9.5" fill="var(--z-org)" fontWeight="700" textAnchor="end">CURRENT</text>
-              <text x={padL - 6} y={stepY(0) - 17} fontSize="11" fill="var(--z-dark)" fontWeight="700" textAnchor="end">{fx(C.current, 1)}</text>
-            </g>
+            {/* Position marker — the rung the run flags, not a maturity score.
+                This used to print fx(current, 1) under the word CURRENT, so a
+                rung LEVEL of 1 rendered as "1.0" beside a maturity ladder and
+                read as a composite score of 1.0. */}
+            {currentIdx >= 0 ? (
+              <g>
+                <circle cx={padL + currentIdx * stepW + 16} cy={stepY(currentIdx) - 14} r="20" fill="none" stroke="var(--z-org)" strokeWidth="2" strokeDasharray="4 3" />
+                {/* Both labels clear the r=20 dashed ring (its top edge is
+                    stepY-34); at -40/-29 the second line sat inside it. */}
+                <text x={padL + currentIdx * stepW + 16} y={stepY(currentIdx) - 53} fontSize="9.5" fill="var(--z-org)" fontWeight="700" textAnchor="middle">YOU ARE HERE</text>
+                <text x={padL + currentIdx * stepW + 16} y={stepY(currentIdx) - 40} fontSize="9" fill="var(--z-muted)" textAnchor="middle">{`step ${steps[currentIdx].m} of ${n}`}</text>
+              </g>
+            ) : null}
           </svg>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {C.steps.map((s, i) => (
-            <div key={i} style={{ padding: "10px 12px", background: i === 0 ? "var(--m-act)" : i === 1 ? "rgba(98,215,184,.15)" : i === 2 ? "var(--z-ice)" : "rgba(19,159,148,.10)", borderRadius: 8, border: "1px solid var(--z-sep)" }}>
-              <div className="row" style={{ marginBottom: 4 }}>
-                <span className={`b ${i === 0 ? "b-act" : i === 1 ? "b-bld" : i === 2 ? "b-cmp" : "b-dif"}`}>M{s.m} {s.label}</span>
-                {(s.platforms || []).length && s.platforms[0] !== "-" ? <span style={{ fontSize: 10, color: "var(--z-mid)" }}>{s.platforms.map(p => DMA.getPlatform(p)?.short || p).join(" + ")}</span> : null}
+          {steps.map((s, i) => (
+            <div key={i} style={{ padding: "10px 12px", background: i === currentIdx ? "var(--z-ice)" : "var(--z-bg)", borderRadius: 8, border: i === currentIdx ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)" }}>
+              <div className="row" style={{ marginBottom: 4, gap: 6, flexWrap: "wrap" }}>
+                <span className="b b-purple" style={{ flexShrink: 0 }}>Step {s.m}</span>
+                {i === currentIdx ? <span className="b b-teal" style={{ flexShrink: 0 }}>current</span> : null}
+                {s.effort ? <span className="b b-muted" style={{ flexShrink: 0 }} title="effort band">{s.effort}</span> : null}
+                {(s.blocking || []).map(b => <span key={b} className="b b-org" style={{ flexShrink: 0 }} title="blocking finding">{b}</span>)}
               </div>
-              <div style={{ fontSize: 11.5, color: "var(--z-dark)", lineHeight: 1.55 }}>{s.note}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.4 }}>{s.label}</div>
+              {s.note ? (
+                <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55, marginTop: 4 }}>{s.note}</div>
+              ) : null}
+              {(s.subcaps || []).length ? (
+                <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 4 }}>{s.subcaps.length} cells covered</div>
+              ) : null}
             </div>
           ))}
         </div>
@@ -423,51 +876,62 @@ function StairstepCurve({ entity }) {
   );
 }
 
-/* ── Transformation Roadmap (Pattern J: 3-phase chevrons) ───────── */
+/* ── Transformation Roadmap (Pattern J: phase chevrons) ─────────── */
 function TransformationRoadmap({ entity }) {
-  const { openEvidence, openRec, pushToast } = useApp();
-  const [view, setView] = useState("chevrons"); // chevrons | curve | impact
-  const roadmap = DMA.ROADMAP;
-  const recs = DMA.RECOMMENDATIONS;
+  const { openRec, pushToast } = useApp();
+  const [view, setView] = useState("chevrons"); // chevrons | impact
+  const roadmap = DMA.ROADMAP || [];
+  const recs = DMA.RECOMMENDATIONS || [];
+
+  if (!roadmap.length) {
+    return (
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="row" style={{ marginBottom: 8 }}>
+          <Icon name="route" size={14} />
+          <div style={{ fontSize: 13, fontWeight: 600 }}>Transformation roadmap</div>
+        </div>
+        <div style={{ fontSize: 12, color: "var(--z-muted)" }}>No roadmap promoted for this run.</div>
+      </div>
+    );
+  }
+
+  const phaseRecs = (r) => (r.recs || []).map(rid => recs.find(x => x.id === rid)).filter(Boolean);
+  const impactRows = roadmap.reduce((a, r) => a + phaseRecs(r)
+    .reduce((b, rec) => b + (rec.dma_impact || []).length, 0), 0);
 
   return (
     <div className="card" style={{ marginBottom: 16 }}>
       <div className="row" style={{ marginBottom: 16 }}>
-        <div style={{ width: 28, height: 28, borderRadius: 7, background: "var(--z-ice)", color: "var(--z-mid)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 28, height: 28, borderRadius: 7, background: "var(--z-ice)", color: "var(--z-mid)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <Icon name="route" size={14} />
         </div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 600 }}>Transformation roadmap</div>
-          <div style={{ fontSize: 11, color: "var(--z-muted)" }}>From Assessment Report · 3-phase sequencing aligned to the maturity curve above</div>
+          {/* Was "From Assessment Report · 3-phase sequencing aligned to the
+              maturity curve above" — a sentence from no payload, hardcoded to
+              three phases and claiming an alignment to the ladder that nothing
+              states. Counted from the promoted phases instead. */}
+          <div style={{ fontSize: 11, color: "var(--z-muted)" }}>
+            {roadmap.length} promoted phase{roadmap.length === 1 ? "" : "s"} · {roadmap.reduce((a, r) => a + (r.recs || []).length, 0)} recommendations
+          </div>
         </div>
         <div className="toggle-row">
-          <button className={view === "chevrons" ? "on" : ""} onClick={() => setView("chevrons")}><Icon name="route" size={11} /> Chevrons</button>
-          <button className={view === "curve" ? "on" : ""} onClick={() => setView("curve")}><Icon name="stairs" size={11} /> Step curve</button>
-          <button className={view === "impact" ? "on" : ""} onClick={() => setView("impact")}><Icon name="users" size={11} /> Customer impact</button>
+          <button className={view === "chevrons" ? "on" : ""} onClick={() => setView("chevrons")}><Icon name="route" size={11} /> Phases</button>
+          <button className={view === "impact" ? "on" : ""} onClick={() => setView("impact")}><Icon name="stairs" size={11} /> Cell impact</button>
         </div>
         <button className="btn btn-tertiary btn-sm" onClick={() => pushToast(`Exporting ${entity.name} roadmap (${view} view)…`, "success")}><Icon name="download" size={11} /> Export</button>
       </div>
 
-      {view === "chevrons" ? <ChevronView roadmap={roadmap} recs={recs} openRec={openRec} /> :
-       view === "curve"    ? <StepCurveView roadmap={roadmap} entity={entity} /> :
-                              <CustomerImpactView roadmap={roadmap} recs={recs} openRec={openRec} />}
-
-      <div className="co co-teal" style={{ marginTop: 14 }}>
-        <Icon name="info" size={14} />
-        <div>
-          <div className="co-title">Sequencing rationale</div>
-          {/* Each promoted phase carries its own rationale — "why this phase
-              sits here and not earlier". This was one hardcoded paragraph
-              about the fixture's Lakehouse and Mosaic AI. */}
-          <div className="co-body">
-            {(roadmap || []).some(p => p.rationale)
-              ? (roadmap || []).filter(p => p.rationale)
-                  .map(p => `${p.phase ? `Phase ${p.phase}: ` : ""}${p.rationale}`)
-                  .join(" ")
-              : "No sequencing rationale promoted for this run."}
-          </div>
-        </div>
-      </div>
+      {/* The third view ("Step curve") plotted entity.overall + 0.3 / +0.7 /
+          +1.1 at 6 / 12 / 18 months against an M1–M5 axis, and its drilldown
+          asserted a composite the client would reach and a "success metric"
+          from `phase.metric`, a field the roadmap contract does not carry. All
+          of it was invented — the projection, the horizons, the fifth band —
+          so the view is gone rather than re-dressed. What the run does state
+          about movement is per-cell, and that is the Cell impact view. */}
+      {view === "chevrons"
+        ? <ChevronView roadmap={roadmap} recs={recs} openRec={openRec} />
+        : <CellImpactView roadmap={roadmap} phaseRecs={phaseRecs} openRec={openRec} impactRows={impactRows} />}
     </div>
   );
 }
@@ -476,7 +940,7 @@ function ChevronView({ roadmap, recs, openRec }) {
   return (
     <>
       {/* Chevron header strip */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${roadmap.length}, 1fr)`, gap: 12, marginBottom: 12 }}>
         {roadmap.map((r, i) => (
           <div key={r.phase} style={{ position: "relative" }}>
             <div style={{
@@ -484,32 +948,31 @@ function ChevronView({ roadmap, recs, openRec }) {
               clipPath: i === roadmap.length - 1 ? "polygon(0 0, 100% 0, 100% 100%, 0 100%, 4% 50%)" : "polygon(0 0, 96% 0, 100% 50%, 96% 100%, 0 100%, 4% 50%)",
               color: "#fff", padding: "10px 22px",
               fontSize: 12.5, fontWeight: 600,
-              display: "flex", justifyContent: "space-between", alignItems: "center"
+              display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8
             }}>
-              <div>
+              <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 10, opacity: .8, letterSpacing: ".08em", textTransform: "uppercase" }}>Phase {r.phase}</div>
+                {/* label and duration are BOTH the phase's horizon in the
+                    adapter, so the chevron printed the horizon twice and the
+                    card below printed it a third time. Once, here. */}
                 <div>{r.label}</div>
               </div>
-              {r.duration ? <div style={{ fontSize: 10, opacity: .85, textAlign: "right" }}>{r.duration}</div> : null}
+              <div style={{ fontSize: 10, opacity: .85, textAlign: "right", flexShrink: 0 }}>
+                {(r.recs || []).length} rec{(r.recs || []).length === 1 ? "" : "s"}
+              </div>
             </div>
           </div>
         ))}
       </div>
 
       {/* Phase content cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${roadmap.length}, 1fr)`, gap: 12 }}>
         {roadmap.map(r => (
           <div key={r.phase} style={{ background: r.color, borderRadius: 8, padding: 14, color: "#fff" }}>
             {/* Platform, target maturity and success metric are not fields of the
                 roadmap contract — a phase carries its horizon, its rationale and
                 its recommendation ids. They rendered as three empty labels under
                 three headings. The phase's own rationale is what belongs here. */}
-            {r.horizon ? (
-              <>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Horizon</div>
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>{r.horizon}</div>
-              </>
-            ) : null}
             {r.rationale ? (
               <>
                 <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Why this phase</div>
@@ -525,7 +988,7 @@ function ChevronView({ roadmap, recs, openRec }) {
 
             <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 6 }}>Recommendations</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {r.recs.map(rid => {
+              {(r.recs || []).map(rid => {
                 const rec = recs.find(x => x.id === rid);
                 return rec ? (
                   <button key={rid} onClick={(e) => { e.stopPropagation(); openRec(rid); }}
@@ -535,11 +998,15 @@ function ChevronView({ roadmap, recs, openRec }) {
                     style={{ padding: "6px 8px", background: "rgba(255,255,255,.14)", borderRadius: 5, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6, border: 0, color: "#fff", textAlign: "left", cursor: "pointer", transition: "background 120ms" }}
                     onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,.22)"}
                     onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,.14)"}>
-                    <span style={{ fontSize: 10.5, fontWeight: 600 }}>{rec.id}</span>
+                    <span style={{ fontSize: 10.5, fontWeight: 600, flexShrink: 0 }}>{rec.id}</span>
                     <span style={{ fontSize: 10.5, color: "rgba(255,255,255,.85)", flex: 1, minWidth: 0 }} className="txt-trunc">{rec.title}</span>
                     <Icon name="arrow-r" size={11} />
                   </button>
-                ) : null;
+                ) : (
+                  /* A phase that names a recommendation this run did not serve
+                     says so — it used to render nothing at all. */
+                  <span key={rid} style={{ fontSize: 10.5, color: "rgba(255,255,255,.7)" }}>{rid} · not served in this run</span>
+                );
               })}
             </div>
           </div>
@@ -549,127 +1016,80 @@ function ChevronView({ roadmap, recs, openRec }) {
   );
 }
 
-function StepCurveView({ roadmap, entity }) {
-  const [selectedStep, setSelectedStep] = useState(null);
-  const { openRec } = useApp();
-  // Plot composite maturity over time
-  const points = [
-    { t: 0,  m: entity.overall, label: "Today", phase: null },
-    { t: 6,  m: entity.overall + 0.3, label: "End P1", phase: 1 },
-    { t: 12, m: entity.overall + 0.7, label: "End P2", phase: 2 },
-    { t: 18, m: entity.overall + 1.1, label: "End P3", phase: 3 },
-  ];
-  const W = 880, H = 280, padL = 50, padR = 30, padT = 30, padB = 50;
-  const xFor = (t) => padL + (t / 18) * (W - padL - padR);
-  const yFor = (m) => H - padB - ((m - 1) / 4) * (H - padT - padB);
-  const selectedPhase = selectedStep != null ? roadmap.find(r => r.phase === points[selectedStep].phase) : null;
-  const recs = DMA.RECOMMENDATIONS;
-
-  return (
-    <div>
-      <div style={{ background: "linear-gradient(180deg, var(--z-bg), #fff)", borderRadius: 10, padding: 14, border: "1px solid var(--z-sep)", position: "relative", overflow: "hidden" }}>
-        <img src={assetUrl("illo_curvesTL", "brand/illustrations/curves_topleft.png")} alt="" style={{ position: "absolute", top: 0, left: 0, width: 300, opacity: .4, pointerEvents: "none" }} />
-        <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: "block", position: "relative" }}>
-          {[1,2,3,4,5].map(m => (
-            <g key={m}>
-              <line x1={padL} y1={yFor(m)} x2={W - padR} y2={yFor(m)} stroke="var(--z-sep)" strokeDasharray="3 3" />
-              <text x={padL - 8} y={yFor(m) + 3} fontSize="10" fill="var(--z-muted)" textAnchor="end">M{m}</text>
-            </g>
-          ))}
-          {roadmap.map((r, i) => (
-            <rect key={r.phase} x={xFor(i === 0 ? 0 : (i === 1 ? 6 : 12))} y={padT} width={xFor(6) - padL} height={H - padT - padB} fill={r.color} opacity=".06" />
-          ))}
-          <path d={`M ${xFor(0)} ${yFor(points[0].m)} ${points.slice(1).map(p => `L ${xFor(p.t)} ${yFor(p.m)}`).join(" ")}`} fill="none" stroke="var(--z-teal)" strokeWidth="2.5" />
-          {points.map((p, i) => (
-            <g key={i} style={{ cursor: "pointer" }} onClick={() => setSelectedStep(i === selectedStep ? null : i)}>
-              <circle cx={xFor(p.t)} cy={yFor(p.m)} r="14" fill="transparent" />
-              <circle cx={xFor(p.t)} cy={yFor(p.m)} r={selectedStep === i ? "10" : "7"} fill="#fff" stroke={selectedStep === i ? "var(--z-mid)" : "var(--z-teal)"} strokeWidth="3" />
-              <text x={xFor(p.t)} y={yFor(p.m) - 16} fontSize="11" fontWeight="700" fill="var(--z-dark)" textAnchor="middle">{fx(p.m, 1)}</text>
-              <text x={xFor(p.t)} y={H - padB + 18} fontSize="10" fill={selectedStep === i ? "var(--z-mid)" : "var(--z-muted)"} fontWeight={selectedStep === i ? 700 : 400} textAnchor="middle">{p.label}</text>
-              <text x={xFor(p.t)} y={H - padB + 32} fontSize="9" fill="var(--z-muted)" textAnchor="middle">{p.t === 0 ? "0 mo" : `${p.t} mo`}</text>
-            </g>
-          ))}
-          {roadmap.map((r, i) => {
-            const x = xFor(i === 0 ? 3 : i === 1 ? 9 : 15);
-            return <text key={r.phase} x={x} y={padT - 8} fontSize="11" fontWeight="700" fill={r.color} textAnchor="middle">{String(r.label || `Phase ${r.phase}`).toUpperCase()}</text>;
-          })}
-        </svg>
-        <div style={{ fontSize: 10, color: "var(--z-muted)", textAlign: "center", marginTop: 6 }}>Click any milestone for the phase plan</div>
+/* Per-phase cell movement, from `recommendations[].dma_impact`.
+   This replaces the "Customer impact" view, which read DMA.ROADMAP_IMPACTS —
+   an accessor pointing at the key `roadmapImpacts`, which nothing in the live
+   payload sets and no promoted section carries. It rendered three phase
+   headers with zero rows. `dma_impact` is what the run does state about
+   movement: per cell, its current score, the projected target and the delta —
+   with `target_basis` stating in the producer's own words that the target is a
+   projection, which is printed rather than paraphrased. */
+function CellImpactView({ roadmap, phaseRecs, openRec, impactRows }) {
+  if (!impactRows) {
+    return (
+      <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+        No recommendation in this roadmap promoted a cell-impact table, so there is nothing to show per phase.
       </div>
-
-      {/* Selected phase drilldown */}
-      {selectedPhase ? (
-        <div style={{ marginTop: 12, padding: 16, background: selectedPhase.color, borderRadius: 10, color: "#fff", position: "relative" }}>
-          <button onClick={() => setSelectedStep(null)} className="icon-btn" style={{ position: "absolute", top: 10, right: 10, color: "rgba(255,255,255,.7)" }}><Icon name="x" size={14} /></button>
-          <div className="row" style={{ marginBottom: 10 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.8)", letterSpacing: ".08em", textTransform: "uppercase" }}>Phase {selectedPhase.phase}</span>
-            <strong style={{ fontSize: 16 }}>{selectedPhase.label}</strong>
-            <span className="spacer" />
-            <span style={{ fontSize: 11, color: "var(--z-mint-lt)" }}>{selectedPhase.duration} · target {selectedPhase.target}</span>
-          </div>
-          <div style={{ fontSize: 12.5, color: "var(--z-mint-lt)", marginBottom: 10, lineHeight: 1.55 }}>
-            By the end of this phase, {entity.name} reaches <strong style={{ color: "#fff" }}>{fx(points.find(p => p.phase === selectedPhase.phase).m, 1)}</strong> composite maturity ({Math.round((points.find(p => p.phase === selectedPhase.phase).m - entity.overall) * 100) / 100} from today). Success metric: {selectedPhase.metric}.
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-            {selectedPhase.recs.map(rid => {
-              const r = recs.find(x => x.id === rid);
-              if (!r) return null;
-              return (
-                <button key={rid} onClick={() => openRec(rid)} style={{ padding: "10px 12px", background: "rgba(255,255,255,.16)", border: 0, borderRadius: 6, textAlign: "left", cursor: "pointer", color: "#fff", transition: "background 120ms" }}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,.24)"}
-                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,.16)"}>
-                  <div className="row" style={{ marginBottom: 4 }}>
-                    <span style={{ fontSize: 10.5, fontWeight: 700 }}>{r.id}</span>
-                    <span className="spacer" />
-                    <Icon name="arrow-r" size={11} />
-                  </div>
-                  <div style={{ fontSize: 11.5, fontWeight: 500 }}>{r.title}</div>
-                  <div style={{ fontSize: 10, color: "var(--z-mint-lt)", marginTop: 4 }}>{r.outcomes.time} · effort {r.outcomes.effort}</div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function CustomerImpactView({ roadmap, recs, openRec }) {
-  // For each phase, show customer-facing metrics
+    );
+  }
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(${roadmap.length}, 1fr)`, gap: 12 }}>
       {roadmap.map(r => {
-        // Get impact from ROADMAP_IMPACTS for this phase's recs
-        const impacts = r.recs.map(rid => DMA.ROADMAP_IMPACTS[rid]).filter(Boolean);
-        const merged = {};
-        impacts.forEach(im => Object.entries(im.customer_impact).forEach(([k, v]) => { merged[k] = v; }));
+        const rs = phaseRecs(r);
+        const bases = [];
+        for (const rec of rs) {
+          for (const im of rec.dma_impact || []) {
+            if (im.target_basis && !bases.includes(im.target_basis)) bases.push(im.target_basis);
+          }
+        }
         return (
           <div key={r.phase} className="card-tile" style={{ padding: 14, borderTop: `3px solid ${r.color}` }}>
-            <div className="row" style={{ marginBottom: 10 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: r.color, letterSpacing: ".08em", textTransform: "uppercase" }}>Phase {r.phase}</span>
-              <strong style={{ fontSize: 13 }}>{r.label}</strong>
+            <div className="row" style={{ marginBottom: 4, gap: 6 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: r.color, letterSpacing: ".08em", textTransform: "uppercase", flexShrink: 0 }}>Phase {r.phase}</span>
+              <strong style={{ fontSize: 12.5, flex: 1, minWidth: 0 }}>{r.label}</strong>
             </div>
-            <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 8 }}>Customer-facing impact</div>
-            {Object.entries(merged).map(([k, v]) => (
-              <div key={k} className="row" style={{ padding: "6px 0", borderTop: "1px solid var(--z-sep)" }}>
-                <span style={{ fontSize: 11.5, color: "var(--z-body)", flex: 1 }}>{k.replace(/_/g, " ")}</span>
-                <strong style={{ fontSize: 12, color: "var(--z-mid)" }}>{v}</strong>
+            <div className="eyebrow" style={{ fontSize: 9.5, margin: "8px 0 6px" }}>Cells this phase moves</div>
+            {rs.map(rec => (
+              <div key={rec.id} style={{ marginBottom: 10 }}>
+                <button onClick={() => openRec(rec.id)} title={`${rec.id} · ${rec.title}`}
+                  style={{ padding: 0, background: "none", border: 0, cursor: "pointer", textAlign: "left", display: "flex", gap: 6, alignItems: "center", width: "100%" }}>
+                  <strong style={{ fontSize: 10.5, color: "var(--z-dark)", flexShrink: 0 }}>{rec.id}</strong>
+                  <span style={{ fontSize: 10.5, color: "var(--z-muted)", flex: 1, minWidth: 0 }} className="txt-trunc">{rec.title}</span>
+                  <Icon name="arrow-r" size={11} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
+                </button>
+                {(rec.dma_impact || []).length ? (rec.dma_impact || []).map((im, j) => {
+                  const cur = pfNum(im.current), tgt = pfNum(im.target), d = pfNum(im.delta);
+                  return (
+                    <div key={j} className="row" style={{ padding: "5px 0", borderTop: "1px solid var(--z-sep)", gap: 6, alignItems: "flex-start" }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 11, color: "var(--z-body)", lineHeight: 1.35 }}>{im.name || im.subcap_id}</div>
+                        <div className="f-mono" style={{ fontSize: 9, color: "var(--z-muted)" }}>{im.subcap_id}</div>
+                      </div>
+                      <span style={{ flexShrink: 0 }}><MaturityChip score={cur} /></span>
+                      <span style={{ fontSize: 10, color: "var(--z-muted)", flexShrink: 0 }}>→</span>
+                      <span style={{ flexShrink: 0 }}><MaturityChip score={tgt} /></span>
+                      {d !== null ? (
+                        <span className="f-mono" style={{ fontSize: 10, color: "var(--z-mid)", width: 30, textAlign: "right", flexShrink: 0 }}>{d > 0 ? `+${d.toFixed(1)}` : d.toFixed(1)}</span>
+                      ) : null}
+                    </div>
+                  );
+                }) : (
+                  <div style={{ fontSize: 10.5, color: "var(--z-muted)", padding: "4px 0" }}>No cell impact promoted for this recommendation.</div>
+                )}
               </div>
             ))}
-            <div className="sep" style={{ margin: "10px 0" }} />
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {r.recs.map(rid => {
-                const rec = recs.find(x => x.id === rid);
-                return rec ? (
-                  <button key={rid} onClick={() => openRec(rid)} title={`${rec.id} · ${rec.title}`} style={{ padding: "6px 8px", background: "var(--z-lav)", border: 0, borderRadius: 5, display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left", cursor: "pointer", fontSize: 10.5 }}>
-                    <strong style={{ color: "var(--z-dark)" }}>{rec.id}</strong>
-                    <span style={{ color: "var(--z-muted)", flex: 1, marginLeft: 6 }} className="txt-trunc">{rec.title}</span>
-                    <Icon name="arrow-r" size={11} style={{ color: "var(--z-muted)" }} />
-                  </button>
-                ) : null;
-              })}
-            </div>
+            {!rs.length ? (
+              <div style={{ fontSize: 11, color: "var(--z-muted)" }}>
+                {(r.recs || []).length
+                  ? `This phase names ${r.recs.join(" · ")}, none of them served in this run.`
+                  : "This phase names no recommendation."}
+              </div>
+            ) : null}
+            {bases.length ? (
+              <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--z-sep)", lineHeight: 1.5 }}>
+                {bases.map((b, i) => <div key={i} style={{ marginBottom: 3 }}>{b}</div>)}
+              </div>
+            ) : null}
           </div>
         );
       })}
