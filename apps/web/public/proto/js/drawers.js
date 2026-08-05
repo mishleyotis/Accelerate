@@ -153,13 +153,14 @@ function EvidenceDrawer() {
     }, it.id), /*#__PURE__*/React.createElement("span", {
       className: `tier-chip tier-${it.tier}`,
       title: tier?.desc
-    }, it.tier, " \xB7 ", tier?.label), /*#__PURE__*/React.createElement("span", {
+    }, it.tier, " \xB7 ", tier?.label), it.claim ? /*#__PURE__*/React.createElement("span", {
       className: "b b-purple"
-    }, it.claim), /*#__PURE__*/React.createElement("span", {
+    }, it.claim) : null, /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 10,
         color: "var(--z-muted)"
-      }
+      },
+      title: it.recency_band === "UNVERIFIED" ? "no publication date could be resolved, so the recency ladder cannot rank this item — its claim class is unaffected" : it.published_date || ""
     }, it.recency), role !== "AE" && audience !== "customer" ? /*#__PURE__*/React.createElement("span", {
       style: {
         marginLeft: "auto",

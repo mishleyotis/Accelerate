@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
+from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 
 from .entity_resolution import DMA_ASM, resolve
@@ -92,7 +93,18 @@ _ISOISH = re.compile(r"^\d{4}-\d{2}-\d{2}")
 def _stated_completed_at(manifest: dict):
     """The assessment's stated completion moment, tolerant of the corpus's
     key variants; anything not ISO-shaped is dropped (computed or null —
-    a mangled date must not sink the package or masquerade as data)."""
+    a mangled date must not sink the package or masquerade as data).
+
+    Last resort: the request id's OWN date token. The corpus names every run
+    `DMA-ASM-<ENTITY>-<YYYYMMDD>-<seq>`, so `DMA-ASM-BCU-20260330-0001` states
+    2026-03-30 as plainly as a manifest field would — it is read, not guessed.
+    Reading it matters far beyond a header line: `completed_at` becomes each
+    evidence row's `reference_date`, and with that null the GENERATED
+    `age_months` is null and `recency_band` falls to UNVERIFIED for EVERY item.
+    Baxter served 120 items, 45 of them dated, and all 120 banded UNVERIFIED —
+    which is why a FACT rendered beside an "unverified" label. The ladder, the
+    freshness dot and the age contribution to ERS all depend on this one field.
+    """
     a = manifest.get("assessment")
     candidates = [a.get("date") if isinstance(a, dict) else None,
                   manifest.get("assessment_date"), manifest.get("completed_at"),
@@ -101,7 +113,26 @@ def _stated_completed_at(manifest: dict):
     for c in candidates:
         if isinstance(c, str) and _ISOISH.match(c.strip()):
             return c.strip()
-    return None
+    return _request_id_date(manifest)
+
+
+_REQ_ID_DATE = re.compile(r"-(\d{4})(\d{2})(\d{2})-\d+\s*$")
+
+
+def _request_id_date(manifest: dict):
+    """The YYYYMMDD token in a `DMA-ASM-…-YYYYMMDD-NNNN` request id, as a date.
+
+    Validated by construction: an impossible month or day yields None rather
+    than a string the DATE column would reject and abort the package on.
+    """
+    m = _REQ_ID_DATE.search(str(manifest.get("run_id") or "").strip().upper())
+    if not m:
+        return None
+    y, mo, d = (int(x) for x in m.groups())
+    try:
+        return date(y, mo, d).isoformat()
+    except ValueError:
+        return None
 
 
 def _entity_token(manifest: dict) -> str:

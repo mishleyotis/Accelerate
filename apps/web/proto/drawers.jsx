@@ -130,8 +130,13 @@ function EvidenceDrawer() {
                 <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
                   <span className="chip">{it.id}</span>
                   <span className={`tier-chip tier-${it.tier}`} title={tier?.desc}>{it.tier} · {tier?.label}</span>
-                  <span className="b b-purple">{it.claim}</span>
-                  <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{it.recency}</span>
+                  {it.claim ? <span className="b b-purple">{it.claim}</span> : null}
+                  <span style={{ fontSize: 10, color: "var(--z-muted)" }}
+                        title={it.recency_band === "UNVERIFIED"
+                          ? "no publication date could be resolved, so the recency ladder cannot rank this item — its claim class is unaffected"
+                          : (it.published_date || "")}>
+                    {it.recency}
+                  </span>
                   {role !== "AE" && audience !== "customer" ? <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--z-muted)" }}>ERS <strong style={{ color: "var(--z-mid)" }}>{it.ers}</strong></span> : null}
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)", marginBottom: 5 }}>{it.title}</div>

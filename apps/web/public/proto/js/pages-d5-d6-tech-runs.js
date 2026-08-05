@@ -1968,6 +1968,32 @@ function VersionDiff({
       size: 20
     })), /*#__PURE__*/React.createElement("h3", null, "Pick two runs to compare"), /*#__PURE__*/React.createElement("p", null, "This entity has ", entity.runs.length, " runs."));
   }
+  // A version diff needs BOTH runs' scores. The prototype had only one run's
+  // data, so it synthesised the base from the target:
+  //   base = score - 0.2 - (id.charCodeAt(2) % 5) / 12
+  // — a per-cell offset derived from a character of the cell id. Under a real
+  // client that renders as movement between two assessments that never
+  // happened, with deltas an AE would take into a meeting. In LIVE the base run
+  // has to be READ, and until the two-run read path exists this states what it
+  // needs rather than inventing it.
+  const isLive = typeof window !== "undefined" && !!window.DMA_LIVE;
+  if (isLive) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("h3", null, "Version diff")), /*#__PURE__*/React.createElement("div", {
+      className: "empty",
+      style: {
+        padding: 24
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "icon"
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "info",
+      size: 20
+    })), /*#__PURE__*/React.createElement("h3", null, "Comparing two runs needs both runs' cell scores"), /*#__PURE__*/React.createElement("p", null, "This client has ", entity.runs.length, " run", entity.runs.length === 1 ? "" : "s", " in the register. A diff reads the cell grain of each run and reports the movement between them; it is never derived from one run.", entity.runs.length < 2 ? " With a single run there is nothing to compare yet." : " The two-run cell read is not wired up yet, so no diff is shown rather than an approximated one.")));
+  }
   const diffs = entity.subcaps.slice(0, 18).map(s => {
     const baseScore = DMA.helpers.round1(s.score - 0.2 - s.id.charCodeAt(2) % 5 / 12);
     return {
@@ -2101,19 +2127,9 @@ function ClientTechStack({
     className: "eyebrow"
   }, "Technology intelligence"), /*#__PURE__*/React.createElement("h1", null, "Technology stack - ", entity.name), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, "Confirmed vs absent across the 4 product layers \xB7 Explorium synced ", fmtDate(entity.assessment_date))), /*#__PURE__*/React.createElement("div", {
+  }, allTech.length, " product", allTech.length === 1 ? "" : "s", " across four layers \xB7 detection level per row, from the run's own evidence")), /*#__PURE__*/React.createElement("div", {
     className: "actions"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "b b-teal",
-    style: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 4
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "check",
-    size: 10
-  }), " Explorium synced"), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
     onClick: () => pushToast(`Exporting ${entity.name} tech stack as CSV…`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -2139,55 +2155,58 @@ function ClientTechStack({
     }
   }, "Legend"), [{
     label: "Confirmed",
+    key: "CONFIRMED",
     c: "var(--z-mid)",
     bg: "var(--z-ice)",
-    bd: "rgba(39,187,175,.4)",
-    desc: "Explorium technographic"
+    bd: "rgba(39,187,175,.4)"
   }, {
     label: "Inferred",
+    key: "INFERRED",
     c: "var(--z-dpur)",
     bg: "var(--ph0-lt)",
-    bd: "var(--ph0-bd)",
-    desc: "Job postings · press"
+    bd: "var(--ph0-bd)"
   }, {
-    label: "Partial",
+    label: "Claimed",
+    key: "CLAIMED",
     c: "#7C3500",
     bg: "rgba(254,151,50,.08)",
-    bd: "rgba(254,151,50,.3)",
-    desc: "Limited rollout"
+    bd: "rgba(254,151,50,.3)"
   }, {
     label: "Absent",
+    key: "ABSENT",
     c: "var(--z-below)",
     bg: "rgba(194,80,8,.06)",
-    bd: "rgba(194,80,8,.25)",
-    desc: "Confirmed via Explorium"
-  }].map(s => /*#__PURE__*/React.createElement("div", {
-    key: s.label,
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 6,
-      fontSize: 11.5,
-      color: "var(--z-body)"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      width: 14,
-      height: 14,
-      background: s.bg,
-      border: `1.5px solid ${s.bd}`,
-      borderRadius: 3
-    }
-  }), /*#__PURE__*/React.createElement("strong", {
-    style: {
-      color: s.c
-    }
-  }, s.label), /*#__PURE__*/React.createElement("span", {
-    className: "muted",
-    style: {
-      fontSize: 10.5
-    }
-  }, s.desc))), /*#__PURE__*/React.createElement("span", {
+    bd: "rgba(194,80,8,.25)"
+  }].map(s => {
+    const n = allTech.filter(t => t.status === s.key).length;
+    return /*#__PURE__*/React.createElement("div", {
+      key: s.label,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        fontSize: 11.5,
+        color: "var(--z-body)"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: 14,
+        height: 14,
+        background: s.bg,
+        border: `1.5px solid ${s.bd}`,
+        borderRadius: 3
+      }
+    }), /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: s.c
+      }
+    }, s.label), /*#__PURE__*/React.createElement("span", {
+      className: "muted",
+      style: {
+        fontSize: 10.5
+      }
+    }, n));
+  }), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("div", {
     className: "row",
@@ -2511,46 +2530,76 @@ function ClientTechStackDetail({
   if (!t) return /*#__PURE__*/React.createElement("div", {
     className: "empty"
   }, /*#__PURE__*/React.createElement("h3", null, "Technology not found"));
+
+  // The four charter statuses. The labels named Explorium — a vendor this app
+  // does not call — and included PARTIAL, which no row can carry. Each status
+  // now says what it means, and the row's own detection_basis says how it was
+  // established for THIS product.
   const STATUS_STYLE = {
     CONFIRMED: {
       color: "var(--z-mid)",
-      label: "Confirmed - Explorium"
+      label: "Confirmed — in production"
     },
     INFERRED: {
       color: "var(--z-dpur)",
-      label: "Inferred - job posting · press"
+      label: "Inferred — from dated public signal"
+    },
+    CLAIMED: {
+      color: "#7C3500",
+      label: "Claimed — stated, not corroborated"
     },
     ABSENT: {
       color: "var(--z-below)",
-      label: "Absent - confirmed via Explorium"
-    },
-    PARTIAL: {
-      color: "#7C3500",
-      label: "Partial deployment"
+      label: "Absent — searched and not found"
     }
   };
-  const S = STATUS_STYLE[t.status];
+  const S = STATUS_STYLE[t.status] || {
+    color: "var(--z-muted)",
+    label: t.status || "—"
+  };
 
-  // Build subcap impact rows
-  const impacts = t.subcaps_impact.map(sid => {
-    const subcap = entity.subcaps.find(s => s.id === sid) || {
-      id: sid,
-      name: sid,
-      score: 2.0
-    };
-    const baseline = t.status === "ABSENT" ? subcap.score : Math.max(1, subcap.score - 1.2);
-    const target = t.status === "ABSENT" ? Math.min(5, subcap.score + 1.3) : subcap.score;
-    const delta = target - baseline;
+  // What the DMA impact IS, and how it was arrived at.
+  //
+  // It used to be arithmetic with no source: baseline = score − 1.2 and
+  // target = score + 1.3 for an absent product, two constants that appear
+  // nowhere in the assessment. Asked what the impact was based on, the honest
+  // answer was "nothing". A score is never derived here (rule 1: scores come
+  // from the workbook), so the impact is now the three things that ARE real:
+  // the cells this product is linked to in the register, each cell's SERVED
+  // score and band, and the recommendations that touch the same cells. No
+  // projected target, because no source states one.
+  const recsByCell = {};
+  for (const r of DMA.RECOMMENDATIONS || []) {
+    for (const cid of r.subcaps || r.affects || []) {
+      (recsByCell[cid] = recsByCell[cid] || []).push(r);
+    }
+  }
+  const impacts = (t.subcaps_impact || []).map(sid => {
+    const subcap = entity.subcaps.find(s => s.id === sid) || null;
     return {
-      ...subcap,
-      baseline,
-      target,
-      delta,
-      thin: subcap.thin
+      id: sid,
+      name: subcap ? subcap.name : null,
+      score: subcap ? subcap.score : null,
+      band: subcap && subcap.score != null ? DMA.helpers.maturityLabel(subcap.score) : null,
+      thin: subcap ? subcap.thin : false,
+      recs: recsByCell[sid] || [],
+      known: !!subcap
     };
   });
   const peers = DMA.PEER_SETS[entity.subvertical]?.peers || [];
-  const gapZones = t.status === "ABSENT" ? [`No ${t.layer === "CUST" ? "CRM or member 360 profile layer" : "data foundation"} when ${t.name} is absent.`, `Blocks Agentforce prerequisites (P2C2 + P4C1 must be ≥ 2.0).`, `Creates downstream constraint for any AI/decisioning investment.`, `Operating cost stays elevated - manual workflows persist.`] : [`No integrated AI/ML decisioning layer on top of ${t.name}.`, `No omnichannel servicing (post-origination).`, `Integration bus gap to other cores remains.`, `Self-service analytics not yet exposed to operations leadership.`];
+
+  // What the product does not cover — from the register, not from a template.
+  //
+  // The old version was four hardcoded sentences per branch, identical for
+  // every product and every client, asserting blocked prerequisites and
+  // "elevated operating cost" that no evidence in the run supports. Read under
+  // a vendor's name it reads as an accusation, and it is not data-backed. What
+  // IS in the run: the cells in this product's own pillar that it is NOT
+  // linked to. Stated as available value — what the estate does not yet reach —
+  // never as a failing.
+  const coveredIds = new Set(t.subcaps_impact || []);
+  const samePillar = (entity.subcaps || []).filter(s => t.dma_pillar && String(s.id).startsWith(t.dma_pillar));
+  const notCovered = samePillar.filter(s => !coveredIds.has(s.id)).sort((a, b) => (a.score ?? 9) - (b.score ?? 9)).slice(0, 6);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
@@ -2788,7 +2837,14 @@ function ClientTechStackDetail({
       fontSize: 12,
       color: "var(--z-muted)"
     }
-  }, "No subcap impact mapped.") : /*#__PURE__*/React.createElement("div", {
+  }, "The register links this product to no capability cell, so no assessment impact is claimed for it.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)",
+      lineHeight: 1.55,
+      marginBottom: 8
+    }
+  }, "The ", impacts.length, " cell", impacts.length === 1 ? "" : "s", " this product is linked to in the register, at the score the run assessed them. No projected uplift is shown: nothing in the assessment states one, and a score is never derived here."), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -2803,7 +2859,10 @@ function ClientTechStackDetail({
       border: i.thin ? "1px solid rgba(254,151,50,.3)" : "1px solid transparent"
     }
   }, /*#__PURE__*/React.createElement("div", {
-    className: "row"
+    className: "row",
+    style: {
+      gap: 8
+    }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
@@ -2815,34 +2874,60 @@ function ClientTechStackDetail({
       fontSize: 11,
       color: "var(--z-dark)"
     }
-  }, i.id), i.thin ? /*#__PURE__*/React.createElement("div", {
+  }, i.id), i.name ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-body)",
+      marginTop: 1
+    },
+    className: "txt-fit-1",
+    title: i.name
+  }, i.name) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)",
+      marginTop: 1
+    }
+  }, "not in this run's cell grain"), i.thin ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9.5,
       color: "var(--z-org)",
-      marginTop: 1
+      marginTop: 2
     }
-  }, "\u25B2 Thin evidence - 1 item") : null), /*#__PURE__*/React.createElement("div", {
+  }, "\u25B2 Thin evidence") : null), i.score != null ? /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 6
     }
-  }, /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      fontSize: 14,
+      color: "var(--z-dark)"
+    }
+  }, fx(i.score, 1)), /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted"
+  }, i.band)) : /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, fx(i.baseline, 1), " \u2192"), /*#__PURE__*/React.createElement("strong", {
+  }, "no score")), i.recs.length ? /*#__PURE__*/React.createElement("div", {
+    className: "row",
     style: {
-      fontSize: 14,
-      color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-mid)"
+      gap: 5,
+      flexWrap: "wrap",
+      marginTop: 6
     }
-  }, fx(i.target, 1)), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
-      color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-mid)",
-      fontWeight: 600
+      color: "var(--z-muted)"
     }
-  }, t.status === "ABSENT" ? "" : "+", fx(i.delta, 1))))))))), /*#__PURE__*/React.createElement("div", {
+  }, "ADDRESSED BY"), i.recs.map(r => /*#__PURE__*/React.createElement("span", {
+    key: r.id,
+    className: "chip purple",
+    title: r.title
+  }, r.id))) : null)))))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
@@ -2867,24 +2952,63 @@ function ClientTechStackDetail({
       fontSize: 13,
       fontWeight: 600
     }
-  }, t.status === "ABSENT" ? `Gap zones - what ${t.name} would unlock` : `What ${t.name} does not cover`)), /*#__PURE__*/React.createElement("div", {
+  }, t.status === "ABSENT" ? `Cells ${t.name} is not linked to` : `Where the estate does not yet reach through ${t.name}`)), !t.dma_pillar ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-muted)"
+    }
+  }, "This row states no pillar, so its coverage cannot be placed against the assessment.") : notCovered.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-muted)"
+    }
+  }, "Every ", t.dma_pillar, " cell in this run is linked to this product.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)",
+      lineHeight: 1.55,
+      marginBottom: 8
+    }
+  }, t.dma_pillar, " cells the register does not link to this product, lowest-scoring first \u2014 read from the run, not asserted."), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
       gap: 5
     }
-  }, gapZones.map((g, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
+  }, notCovered.map(sc => /*#__PURE__*/React.createElement("div", {
+    key: sc.id,
     style: {
       padding: "8px 12px",
-      background: "rgba(194,80,8,.05)",
-      border: "1px solid rgba(194,80,8,.15)",
+      background: "var(--z-lav)",
+      border: "1px solid var(--z-sep)",
       borderRadius: 5,
       fontSize: 12,
-      color: "var(--z-below)",
       lineHeight: 1.5
     }
-  }, g)))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "f-mono",
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)"
+    }
+  }, sc.id), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      minWidth: 0,
+      color: "var(--z-dark)"
+    },
+    className: "txt-fit-1",
+    title: sc.name || sc.id
+  }, sc.name || sc.id), sc.score != null ? /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: "var(--z-dark)"
+    }
+  }, fx(sc.score, 1)) : null)))))), /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
@@ -2901,9 +3025,11 @@ function ClientTechStackDetail({
     }
   }, "Peer deployment"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", {
+  }), t.peer_coverage != null ? /*#__PURE__*/React.createElement("span", {
     className: "b b-teal"
-  }, fmtPct(t.peer_coverage), " adopted")), /*#__PURE__*/React.createElement("div", {
+  }, fmtPct(t.peer_coverage), " adopted") : /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted"
+  }, "not researched")), t.peer_coverage != null ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "prog",
     style: {
       marginBottom: 14
@@ -2920,32 +3046,62 @@ function ClientTechStackDetail({
       flexDirection: "column",
       gap: 5
     }
-  }, peers.slice(0, 4).map((p, i) => {
-    const hasIt = Math.abs(hashCode(t.id + p)) % 100 / 100 < t.peer_coverage;
-    return /*#__PURE__*/React.createElement("div", {
-      key: p,
-      style: {
-        padding: "6px 10px",
-        background: hasIt ? "var(--z-ice)" : "var(--z-lav)",
-        borderRadius: 5,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        fontSize: 11.5
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: "var(--z-dark)",
-        fontWeight: 500
-      }
-    }, p), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 10,
-        fontWeight: 600,
-        color: hasIt ? "var(--z-mid)" : "var(--z-muted)"
-      }
-    }, hasIt ? `✓ ${t.name.split(" ")[0]}` : "not detected"));
-  })))), t.status === "ABSENT" ? /*#__PURE__*/React.createElement("div", {
+  }, (t.peer_deployments || []).map(d => /*#__PURE__*/React.createElement("div", {
+    key: d.peer,
+    style: {
+      padding: "6px 10px",
+      background: d.deployed ? "var(--z-ice)" : "var(--z-lav)",
+      borderRadius: 5,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      fontSize: 11.5
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-dark)",
+      fontWeight: 500
+    }
+  }, d.peer), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      fontWeight: 600,
+      color: d.deployed ? "var(--z-mid)" : "var(--z-muted)"
+    },
+    title: d.basis || ""
+  }, d.deployed ? "✓ deployed" : "not found"))))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-body)",
+      lineHeight: 1.6
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginBottom: 8
+    }
+  }, "No peer technographic research is attached to this product for this run, so no adoption figure is shown."), peers.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: ".08em",
+      color: "var(--z-muted)",
+      textTransform: "uppercase",
+      marginBottom: 6
+    }
+  }, "Peer set that would be searched"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 5,
+      flexWrap: "wrap"
+    }
+  }, peers.slice(0, 8).map(x => /*#__PURE__*/React.createElement("span", {
+    key: x,
+    className: "chip"
+  }, x)))) : /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: "var(--z-muted)"
+    }
+  }, "This run states no peer set, so there is no cohort to search against either.")))), t.status === "ABSENT" ? /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       background: "var(--ph0-lt)",

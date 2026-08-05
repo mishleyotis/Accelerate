@@ -300,24 +300,12 @@ function ClientOverview({
       color: "var(--z-muted)"
     }
   }, "extracted from scoring workbook \xB7 evidence index \xB7 peer set")), /*#__PURE__*/React.createElement("div", {
-    className: "cards-grid-3",
-    style: {
-      marginBottom: 16
-    }
-  }, /*#__PURE__*/React.createElement(FinancialTrajectoryCard, {
-    entity: entity
-  }), /*#__PURE__*/React.createElement(CoverageByPillarCard, {
-    entity: entity
-  }), /*#__PURE__*/React.createElement(EvidenceTierCard, {
-    entity: entity
-  })), /*#__PURE__*/React.createElement("div", {
     className: "cards-grid-2",
     style: {
       marginBottom: 18
     }
-  }, /*#__PURE__*/React.createElement(CeilingEstimateCard, {
-    entity: entity,
-    audience: audience
+  }, /*#__PURE__*/React.createElement(FinancialTrajectoryCard, {
+    entity: entity
   }), /*#__PURE__*/React.createElement(SentimentCard, {
     entity: entity,
     audience: audience
@@ -1202,9 +1190,23 @@ function TopFindingsCard({
 function LeadershipPanel({
   audience
 }) {
-  const [enriched, setEnriched] = useState({}); // id → "loading" | "done"
+  /* Contact detail is PROMOTED, not fetched.
+      The prototype simulated an enrichment call: a per-person button set a
+     "loading" flag, a 900ms setTimeout set "done", and the email and LinkedIn
+     came from the fixture. Under a real client the button appeared only when
+     `ex.clay` was truthy — which it never is — so it never appeared at all, and
+     the row said "Email · LinkedIn hidden until enriched" forever.
+      Clay runs in the PRODUCER's session at synthesis time; its output is
+     registered as evidence and written into the roster item (migration 0018), so
+     by the time this panel renders the contact route is already a column in
+     Postgres. That is why there is no spinner here: the values arrive in the
+     same read as the name. The app never calls Clay while serving — it performs
+     no third-party call and no inference at request time. */
+  const LIVE = typeof window !== "undefined" && !!window.DMA_LIVE;
+  const [enriched, setEnriched] = useState({}); // fixture mode only
   const [enrichingAll, setEnrichingAll] = useState(false);
   const enrich = id => {
+    if (LIVE) return;
     setEnriched(e => ({
       ...e,
       [id]: "loading"
@@ -1215,14 +1217,20 @@ function LeadershipPanel({
     })), 900);
   };
   const enrichAll = () => {
+    if (LIVE) return;
     setEnrichingAll(true);
-    DMA.LEADERSHIP.forEach((ex, i) => setTimeout(() => {
-      if (ex.gap_flag) return;
+    const roster = DMA.LEADERSHIP || [];
+    // The completion timer used to hang off the LAST index, so a trailing GAP
+    // row (which returns early) meant "Enriching…" never cleared.
+    const enrichable = roster.filter(x => !x.gap_flag);
+    enrichable.forEach((ex, i) => setTimeout(() => {
       enrich(ex.id);
-      if (i === DMA.LEADERSHIP.length - 1) setTimeout(() => setEnrichingAll(false), 1000);
+      if (i === enrichable.length - 1) setTimeout(() => setEnrichingAll(false), 1000);
     }, i * 240));
+    if (!enrichable.length) setEnrichingAll(false);
   };
-  const anyEnriched = Object.values(enriched).some(v => v === "done");
+  const roster = DMA.LEADERSHIP || [];
+  const withContact = roster.filter(x => !x.gap_flag && (x.email || x.linkedin_url || x.phone)).length;
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1236,7 +1244,13 @@ function LeadershipPanel({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "users",
     size: 15
-  }), " Leadership panel"), /*#__PURE__*/React.createElement("button", {
+  }), " Leadership panel"), LIVE ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)"
+    },
+    title: "Contact detail is established at synthesis time and stored with the run; nothing is fetched when you open this page."
+  }, withContact, " of ", roster.filter(x => !x.gap_flag).length, " with a contact route") : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary btn-sm",
     onClick: enrichAll,
     disabled: enrichingAll
@@ -1255,8 +1269,11 @@ function LeadershipPanel({
       padding: "8px 16px 14px"
     }
   }, DMA.LEADERSHIP.map(ex => {
-    const state = enriched[ex.id]; // undefined | "loading" | "done"
-    const hasClay = ex.clay && !ex.gap_flag;
+    const state = enriched[ex.id]; // fixture mode only
+    // A promoted contact route needs no gate; the fixture's simulated one
+    // still needs its button.
+    const promoted = !ex.gap_flag && (ex.email || ex.linkedin_url || ex.phone);
+    const hasClay = !LIVE && ex.clay && !ex.gap_flag;
     const isEnriched = state === "done" && hasClay;
     return /*#__PURE__*/React.createElement("div", {
       key: ex.id,
@@ -1297,8 +1314,8 @@ function LeadershipPanel({
         fontWeight: 600,
         fontSize: 13
       }
-    }, "-") : isEnriched && ex.clay?.linkedin ? /*#__PURE__*/React.createElement("a", {
-      href: `https://${ex.clay.linkedin}`,
+    }, "-") : ex.linkedin_url || isEnriched && ex.clay?.linkedin ? /*#__PURE__*/React.createElement("a", {
+      href: ex.linkedin_url || `https://${ex.clay.linkedin}`,
       target: "_blank",
       rel: "noreferrer",
       style: {
@@ -1324,19 +1341,89 @@ function LeadershipPanel({
       className: "b b-below"
     }, "GAP") : ex.recent_hire ? /*#__PURE__*/React.createElement("span", {
       className: "b b-org"
-    }, "NEW \xB7 ", ex.tenure_months, " mo") : /*#__PURE__*/React.createElement("span", {
+    }, "NEW \xB7 ", ex.tenure_months, " mo") : ex.tenure_months != null ? /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 10,
         color: "var(--z-muted)"
       }
-    }, "\xB7 ", Math.round(ex.tenure_months / 12), " yr")), /*#__PURE__*/React.createElement("div", {
+    }, "\xB7 ", Math.round(ex.tenure_months / 12), " yr") : null), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11.5,
         color: "var(--z-body)",
         marginTop: 4,
         lineHeight: 1.5
       }
-    }, ex.background), hasClay && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+    }, ex.background), promoted && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 8,
+        padding: "8px 10px",
+        background: "var(--z-ice)",
+        border: "1px solid rgba(39,187,175,.35)",
+        borderRadius: 6
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 4
+      }
+    }, ex.email ? /*#__PURE__*/React.createElement("a", {
+      href: `mailto:${ex.email}`,
+      style: {
+        fontSize: 11,
+        color: "var(--z-mid)",
+        textDecoration: "none",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 5
+      },
+      onClick: e => e.stopPropagation()
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "envelope",
+      size: 11
+    }), " ", ex.email) : null, ex.linkedin_url ? /*#__PURE__*/React.createElement("a", {
+      href: ex.linkedin_url,
+      target: "_blank",
+      rel: "noreferrer",
+      style: {
+        fontSize: 11,
+        color: "var(--z-mid)",
+        textDecoration: "none",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 5
+      },
+      onClick: e => e.stopPropagation()
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "linkedin",
+      size: 11
+    }), " ", String(ex.linkedin_url).replace(/^https?:\/\/(www\.)?/, "")) : null, ex.phone ? /*#__PURE__*/React.createElement("a", {
+      href: `tel:${String(ex.phone).replace(/[^+\d]/g, "")}`,
+      style: {
+        fontSize: 11,
+        color: "var(--z-mid)",
+        textDecoration: "none",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 5
+      },
+      onClick: e => e.stopPropagation()
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "phone",
+      size: 11
+    }), " ", ex.phone) : null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)",
+        marginTop: 2
+      }
+    }, ex.enrichment_basis || "no source stated for this contact route", ex.enriched_at ? ` · established ${ex.enriched_at}` : ""))) : !ex.gap_flag && LIVE && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 8,
+        fontSize: 10.5,
+        color: "var(--z-muted)"
+      }
+    }, "No contact route established for this person in this run.") : hasClay && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 8,
         padding: "8px 10px",
@@ -1402,14 +1489,7 @@ function LeadershipPanel({
       style: {
         color: "var(--z-mid)"
       }
-    }, "Enriched"), /*#__PURE__*/React.createElement("span", {
-      className: "spacer"
-    }), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 10,
-        color: "var(--z-muted)"
-      }
-    }, "via Clay \xB7 just now")), /*#__PURE__*/React.createElement("a", {
+    }, "Enriched")), /*#__PURE__*/React.createElement("a", {
       href: `mailto:${ex.clay.email}`,
       style: {
         fontSize: 11,

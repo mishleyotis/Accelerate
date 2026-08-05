@@ -145,18 +145,19 @@ function ClientOverview({ entity, run }) {
         <LeadershipPanel audience={audience} />
       </div>
 
-      {/* Evidence-driven analytics — sourced from real DMA deliverable files (see SOURCES.md) */}
+      {/* Evidence-driven analytics.
+          Evidence coverage by pillar, the tier-mix card and the capability
+          ceiling / uncertainty card are removed from D1 at the user's request
+          (2026-08-05): they report on the ASSESSMENT's own workings rather than
+          on the institution, and D7 Health is where that belongs. The sections
+          still promote and still serve — nothing was deleted from the pipeline,
+          only from this page. */}
       <div className="section-label" style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "4px 0 12px" }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", textTransform: "uppercase", letterSpacing: ".06em" }}>Evidence &amp; benchmarks</span>
         <span style={{ fontSize: 11, color: "var(--z-muted)" }}>extracted from scoring workbook · evidence index · peer set</span>
       </div>
-      <div className="cards-grid-3" style={{ marginBottom: 16 }}>
-        <FinancialTrajectoryCard entity={entity} />
-        <CoverageByPillarCard entity={entity} />
-        <EvidenceTierCard entity={entity} />
-      </div>
       <div className="cards-grid-2" style={{ marginBottom: 18 }}>
-        <CeilingEstimateCard entity={entity} audience={audience} />
+        <FinancialTrajectoryCard entity={entity} />
         <SentimentCard entity={entity} audience={audience} />
       </div>
 
@@ -495,21 +496,44 @@ function TopFindingsCard({ findings, openFinding, setOpenFinding, openEvidence }
 
 /* ── Leadership panel + Clay enrichment ─────────────────────────── */
 function LeadershipPanel({ audience }) {
-  const [enriched, setEnriched] = useState({}); // id → "loading" | "done"
+  /* Contact detail is PROMOTED, not fetched.
+
+     The prototype simulated an enrichment call: a per-person button set a
+     "loading" flag, a 900ms setTimeout set "done", and the email and LinkedIn
+     came from the fixture. Under a real client the button appeared only when
+     `ex.clay` was truthy — which it never is — so it never appeared at all, and
+     the row said "Email · LinkedIn hidden until enriched" forever.
+
+     Clay runs in the PRODUCER's session at synthesis time; its output is
+     registered as evidence and written into the roster item (migration 0018), so
+     by the time this panel renders the contact route is already a column in
+     Postgres. That is why there is no spinner here: the values arrive in the
+     same read as the name. The app never calls Clay while serving — it performs
+     no third-party call and no inference at request time. */
+  const LIVE = typeof window !== "undefined" && !!window.DMA_LIVE;
+  const [enriched, setEnriched] = useState({}); // fixture mode only
   const [enrichingAll, setEnrichingAll] = useState(false);
   const enrich = (id) => {
+    if (LIVE) return;
     setEnriched(e => ({ ...e, [id]: "loading" }));
     setTimeout(() => setEnriched(e => ({ ...e, [id]: "done" })), 900);
   };
   const enrichAll = () => {
+    if (LIVE) return;
     setEnrichingAll(true);
-    DMA.LEADERSHIP.forEach((ex, i) => setTimeout(() => {
-      if (ex.gap_flag) return;
+    const roster = DMA.LEADERSHIP || [];
+    // The completion timer used to hang off the LAST index, so a trailing GAP
+    // row (which returns early) meant "Enriching…" never cleared.
+    const enrichable = roster.filter(x => !x.gap_flag);
+    enrichable.forEach((ex, i) => setTimeout(() => {
       enrich(ex.id);
-      if (i === DMA.LEADERSHIP.length - 1) setTimeout(() => setEnrichingAll(false), 1000);
+      if (i === enrichable.length - 1) setTimeout(() => setEnrichingAll(false), 1000);
     }, i * 240));
+    if (!enrichable.length) setEnrichingAll(false);
   };
-  const anyEnriched = Object.values(enriched).some(v => v === "done");
+  const roster = DMA.LEADERSHIP || [];
+  const withContact = roster.filter(
+    x => !x.gap_flag && (x.email || x.linkedin_url || x.phone)).length;
 
   return (
     <div className="card flush">
@@ -517,14 +541,24 @@ function LeadershipPanel({ audience }) {
         <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Icon name="users" size={15} /> Leadership panel
         </h3>
-        <button className="btn btn-secondary btn-sm" onClick={enrichAll} disabled={enrichingAll}>
-          {enrichingAll ? <><span className="skel" style={{ width: 10, height: 10, borderRadius: 5 }} /> Enriching…</> : <><Icon name="sparkle" size={11} /> Enrich all via Clay</>}
-        </button>
+        {LIVE ? (
+          <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}
+                title="Contact detail is established at synthesis time and stored with the run; nothing is fetched when you open this page.">
+            {withContact} of {roster.filter(x => !x.gap_flag).length} with a contact route
+          </span>
+        ) : (
+          <button className="btn btn-secondary btn-sm" onClick={enrichAll} disabled={enrichingAll}>
+            {enrichingAll ? <><span className="skel" style={{ width: 10, height: 10, borderRadius: 5 }} /> Enriching…</> : <><Icon name="sparkle" size={11} /> Enrich all via Clay</>}
+          </button>
+        )}
       </div>
       <div style={{ padding: "8px 16px 14px" }}>
         {DMA.LEADERSHIP.map(ex => {
-          const state = enriched[ex.id]; // undefined | "loading" | "done"
-          const hasClay = ex.clay && !ex.gap_flag;
+          const state = enriched[ex.id]; // fixture mode only
+          // A promoted contact route needs no gate; the fixture's simulated one
+          // still needs its button.
+          const promoted = !ex.gap_flag && (ex.email || ex.linkedin_url || ex.phone);
+          const hasClay = !LIVE && ex.clay && !ex.gap_flag;
           const isEnriched = state === "done" && hasClay;
           return (
             <div key={ex.id} style={{ display: "flex", gap: 10, padding: "12px 0", borderBottom: "1px solid var(--z-sep)" }}>
@@ -535,20 +569,55 @@ function LeadershipPanel({ audience }) {
                 <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
                   {ex.gap_flag ? (
                     <span style={{ fontWeight: 600, fontSize: 13 }}>-</span>
-                  ) : isEnriched && ex.clay?.linkedin ? (
-                    <a href={`https://${ex.clay.linkedin}`} target="_blank" rel="noreferrer" style={{ fontWeight: 600, fontSize: 13, color: "var(--z-mid)", textDecoration: "none" }} onClick={e => e.stopPropagation()}>{ex.name}</a>
+                  ) : (ex.linkedin_url || (isEnriched && ex.clay?.linkedin)) ? (
+                    <a href={ex.linkedin_url || `https://${ex.clay.linkedin}`} target="_blank" rel="noreferrer" style={{ fontWeight: 600, fontSize: 13, color: "var(--z-mid)", textDecoration: "none" }} onClick={e => e.stopPropagation()}>{ex.name}</a>
                   ) : (
                     <span style={{ fontWeight: 600, fontSize: 13, color: "var(--z-dark)" }}>{ex.name}</span>
                   )}
                   <span style={{ fontSize: 11, color: "var(--z-mid)", fontWeight: 600 }}>{ex.title}</span>
                   {ex.gap_flag ? <span className="b b-below">GAP</span> :
                    ex.recent_hire ? <span className="b b-org">NEW · {ex.tenure_months} mo</span> :
-                   <span style={{ fontSize: 10, color: "var(--z-muted)" }}>· {Math.round(ex.tenure_months / 12)} yr</span>}
+                   ex.tenure_months != null
+                     ? <span style={{ fontSize: 10, color: "var(--z-muted)" }}>· {Math.round(ex.tenure_months / 12)} yr</span>
+                     : null}
                 </div>
                 <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 4, lineHeight: 1.5 }}>{ex.background}</div>
 
-                {/* Enrichment state */}
-                {hasClay && audience !== "customer" ? (
+                {/* Contact route. Promoted values render straight away and
+                    carry their basis; the fixture's simulated enrichment keeps
+                    its button so the prototype still demonstrates the flow.
+                    Contact detail for a named individual is internal-only. */}
+                {promoted && audience !== "customer" ? (
+                  <div style={{ marginTop: 8, padding: "8px 10px", background: "var(--z-ice)", border: "1px solid rgba(39,187,175,.35)", borderRadius: 6 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      {ex.email ? (
+                        <a href={`mailto:${ex.email}`} style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
+                          <Icon name="envelope" size={11} /> {ex.email}
+                        </a>
+                      ) : null}
+                      {ex.linkedin_url ? (
+                        <a href={ex.linkedin_url} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
+                          <Icon name="linkedin" size={11} /> {String(ex.linkedin_url).replace(/^https?:\/\/(www\.)?/, "")}
+                        </a>
+                      ) : null}
+                      {ex.phone ? (
+                        <a href={`tel:${String(ex.phone).replace(/[^+\d]/g, "")}`} style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
+                          <Icon name="phone" size={11} /> {ex.phone}
+                        </a>
+                      ) : null}
+                      {/* Provenance. A contact route with no stated source is the
+                          one field on this page that would assert without one. */}
+                      <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 2 }}>
+                        {ex.enrichment_basis || "no source stated for this contact route"}
+                        {ex.enriched_at ? ` · established ${ex.enriched_at}` : ""}
+                      </div>
+                    </div>
+                  </div>
+                ) : (!ex.gap_flag && LIVE && audience !== "customer") ? (
+                  <div style={{ marginTop: 8, fontSize: 10.5, color: "var(--z-muted)" }}>
+                    No contact route established for this person in this run.
+                  </div>
+                ) : hasClay && audience !== "customer" ? (
                   <div style={{ marginTop: 8, padding: "8px 10px", background: isEnriched ? "var(--z-ice)" : state === "loading" ? "var(--z-lav)" : "var(--z-bg)", border: `1px solid ${isEnriched ? "rgba(39,187,175,.35)" : "var(--z-sep)"}`, borderRadius: 6 }}>
                     {!state ? (
                       <div className="row" style={{ fontSize: 11 }}>
@@ -569,8 +638,6 @@ function LeadershipPanel({ audience }) {
                         <div className="row" style={{ fontSize: 11, color: "var(--z-mid)" }}>
                           <Icon name="check" size={11} />
                           <strong style={{ color: "var(--z-mid)" }}>Enriched</strong>
-                          <span className="spacer" />
-                          <span style={{ fontSize: 10, color: "var(--z-muted)" }}>via Clay · just now</span>
                         </div>
                         <a href={`mailto:${ex.clay.email}`} style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
                           <Icon name="envelope" size={11} /> {ex.clay.email}

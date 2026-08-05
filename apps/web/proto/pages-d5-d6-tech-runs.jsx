@@ -969,6 +969,34 @@ function VersionDiff({ entity, baseId, targetId, setBase, setTarget }) {
   if (!base || !target) {
     return <div className="empty"><div className="icon"><Icon name="info" size={20} /></div><h3>Pick two runs to compare</h3><p>This entity has {entity.runs.length} runs.</p></div>;
   }
+  // A version diff needs BOTH runs' scores. The prototype had only one run's
+  // data, so it synthesised the base from the target:
+  //   base = score - 0.2 - (id.charCodeAt(2) % 5) / 12
+  // — a per-cell offset derived from a character of the cell id. Under a real
+  // client that renders as movement between two assessments that never
+  // happened, with deltas an AE would take into a meeting. In LIVE the base run
+  // has to be READ, and until the two-run read path exists this states what it
+  // needs rather than inventing it.
+  const isLive = typeof window !== "undefined" && !!window.DMA_LIVE;
+  if (isLive) {
+    return (
+      <div className="card">
+        <div className="card-head"><h3>Version diff</h3></div>
+        <div className="empty" style={{ padding: 24 }}>
+          <div className="icon"><Icon name="info" size={20} /></div>
+          <h3>Comparing two runs needs both runs' cell scores</h3>
+          <p>
+            This client has {entity.runs.length} run{entity.runs.length === 1 ? "" : "s"} in
+            the register. A diff reads the cell grain of each run and reports the
+            movement between them; it is never derived from one run.
+            {entity.runs.length < 2
+              ? " With a single run there is nothing to compare yet."
+              : " The two-run cell read is not wired up yet, so no diff is shown rather than an approximated one."}
+          </p>
+        </div>
+      </div>
+    );
+  }
   const diffs = entity.subcaps.slice(0, 18).map(s => {
     const baseScore = DMA.helpers.round1(s.score - 0.2 - ((s.id.charCodeAt(2) % 5) / 12));
     return { id: s.id, name: s.name, category: s.category, base: baseScore, target: s.score, delta: DMA.helpers.round1(s.score - baseScore), evBase: Math.max(0, s.evidence_count - 1), evTarget: s.evidence_count };
@@ -1044,30 +1072,45 @@ function ClientTechStack({ entity, run }) {
         <div>
           <div className="eyebrow">Technology intelligence</div>
           <h1>Technology stack - {entity.name}</h1>
-          <div className="sub">Confirmed vs absent across the 4 product layers · Explorium synced {fmtDate(entity.assessment_date)}</div>
+          {/* The register's own facts: how many rows, at what detection level.
+              This used to read "Explorium synced <date>" — a vendor this app
+              does not call, beside the ASSESSMENT date rather than any sync. */}
+          <div className="sub">
+            {allTech.length} product{allTech.length === 1 ? "" : "s"} across four
+            layers · detection level per row, from the run's own evidence
+          </div>
         </div>
         <div className="actions">
-          <span className="b b-teal" style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Icon name="check" size={10} /> Explorium synced</span>
           <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entity.name} tech stack as CSV…`, "success")}><Icon name="download" size={13} /> Export</button>
         </div>
       </div>
 
-      {/* Status legend + filters */}
+      {/* Status legend + filters.
+          Four statuses, matching the charter and the payload contract:
+          CONFIRMED · INFERRED · CLAIMED · ABSENT. The old legend showed
+          "Partial", which is not one of them and which no row can ever carry,
+          and hung a grey caption off each one naming Explorium — a vendor this
+          app does not use. Those captions were redundant with the label and
+          wrong about the source, so they are gone; the status itself is the
+          claim, and each ROW states its own detection basis. */}
       <div className="card" style={{ marginBottom: 14, padding: "12px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
           <div className="eyebrow" style={{ margin: 0 }}>Legend</div>
           {[
-            { label: "Confirmed", c: "var(--z-mid)",   bg: "var(--z-ice)",  bd: "rgba(39,187,175,.4)",  desc: "Explorium technographic" },
-            { label: "Inferred",  c: "var(--z-dpur)",  bg: "var(--ph0-lt)", bd: "var(--ph0-bd)",        desc: "Job postings · press" },
-            { label: "Partial",   c: "#7C3500",        bg: "rgba(254,151,50,.08)", bd: "rgba(254,151,50,.3)", desc: "Limited rollout" },
-            { label: "Absent",    c: "var(--z-below)", bg: "rgba(194,80,8,.06)",   bd: "rgba(194,80,8,.25)",   desc: "Confirmed via Explorium" },
-          ].map(s => (
-            <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "var(--z-body)" }}>
-              <span style={{ width: 14, height: 14, background: s.bg, border: `1.5px solid ${s.bd}`, borderRadius: 3 }} />
-              <strong style={{ color: s.c }}>{s.label}</strong>
-              <span className="muted" style={{ fontSize: 10.5 }}>{s.desc}</span>
-            </div>
-          ))}
+            { label: "Confirmed", key: "CONFIRMED", c: "var(--z-mid)",   bg: "var(--z-ice)",  bd: "rgba(39,187,175,.4)" },
+            { label: "Inferred",  key: "INFERRED",  c: "var(--z-dpur)",  bg: "var(--ph0-lt)", bd: "var(--ph0-bd)" },
+            { label: "Claimed",   key: "CLAIMED",   c: "#7C3500",        bg: "rgba(254,151,50,.08)", bd: "rgba(254,151,50,.3)" },
+            { label: "Absent",    key: "ABSENT",    c: "var(--z-below)", bg: "rgba(194,80,8,.06)",   bd: "rgba(194,80,8,.25)" },
+          ].map(s => {
+            const n = allTech.filter(t => t.status === s.key).length;
+            return (
+              <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "var(--z-body)" }}>
+                <span style={{ width: 14, height: 14, background: s.bg, border: `1.5px solid ${s.bd}`, borderRadius: 3 }} />
+                <strong style={{ color: s.c }}>{s.label}</strong>
+                <span className="muted" style={{ fontSize: 10.5 }}>{n}</span>
+              </div>
+            );
+          })}
           <span className="spacer" />
           <div className="row" style={{ gap: 6 }}>
             <span style={{ fontSize: 11, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Layer</span>
@@ -1190,36 +1233,66 @@ function ClientTechStackDetail({ entity, run, techId }) {
   const t = DMA.TECH_STACK.find(x => x.id === techId);
   if (!t) return <div className="empty"><h3>Technology not found</h3></div>;
 
+  // The four charter statuses. The labels named Explorium — a vendor this app
+  // does not call — and included PARTIAL, which no row can carry. Each status
+  // now says what it means, and the row's own detection_basis says how it was
+  // established for THIS product.
   const STATUS_STYLE = {
-    CONFIRMED: { color: "var(--z-mid)",   label: "Confirmed - Explorium" },
-    INFERRED:  { color: "var(--z-dpur)",  label: "Inferred - job posting · press" },
-    ABSENT:    { color: "var(--z-below)", label: "Absent - confirmed via Explorium" },
-    PARTIAL:   { color: "#7C3500",        label: "Partial deployment" },
+    CONFIRMED: { color: "var(--z-mid)",   label: "Confirmed — in production" },
+    INFERRED:  { color: "var(--z-dpur)",  label: "Inferred — from dated public signal" },
+    CLAIMED:   { color: "#7C3500",        label: "Claimed — stated, not corroborated" },
+    ABSENT:    { color: "var(--z-below)", label: "Absent — searched and not found" },
   };
-  const S = STATUS_STYLE[t.status];
+  const S = STATUS_STYLE[t.status] || { color: "var(--z-muted)", label: t.status || "—" };
 
-  // Build subcap impact rows
-  const impacts = t.subcaps_impact.map(sid => {
-    const subcap = entity.subcaps.find(s => s.id === sid) || { id: sid, name: sid, score: 2.0 };
-    const baseline = t.status === "ABSENT" ? subcap.score : Math.max(1, subcap.score - 1.2);
-    const target = t.status === "ABSENT" ? Math.min(5, subcap.score + 1.3) : subcap.score;
-    const delta = target - baseline;
-    return { ...subcap, baseline, target, delta, thin: subcap.thin };
+  // What the DMA impact IS, and how it was arrived at.
+  //
+  // It used to be arithmetic with no source: baseline = score − 1.2 and
+  // target = score + 1.3 for an absent product, two constants that appear
+  // nowhere in the assessment. Asked what the impact was based on, the honest
+  // answer was "nothing". A score is never derived here (rule 1: scores come
+  // from the workbook), so the impact is now the three things that ARE real:
+  // the cells this product is linked to in the register, each cell's SERVED
+  // score and band, and the recommendations that touch the same cells. No
+  // projected target, because no source states one.
+  const recsByCell = {};
+  for (const r of (DMA.RECOMMENDATIONS || [])) {
+    for (const cid of (r.subcaps || r.affects || [])) {
+      (recsByCell[cid] = recsByCell[cid] || []).push(r);
+    }
+  }
+  const impacts = (t.subcaps_impact || []).map(sid => {
+    const subcap = entity.subcaps.find(s => s.id === sid) || null;
+    return {
+      id: sid,
+      name: subcap ? subcap.name : null,
+      score: subcap ? subcap.score : null,
+      band: subcap && subcap.score != null
+        ? DMA.helpers.maturityLabel(subcap.score) : null,
+      thin: subcap ? subcap.thin : false,
+      recs: recsByCell[sid] || [],
+      known: !!subcap,
+    };
   });
 
   const peers = DMA.PEER_SETS[entity.subvertical]?.peers || [];
 
-  const gapZones = t.status === "ABSENT" ? [
-    `No ${t.layer === "CUST" ? "CRM or member 360 profile layer" : "data foundation"} when ${t.name} is absent.`,
-    `Blocks Agentforce prerequisites (P2C2 + P4C1 must be ≥ 2.0).`,
-    `Creates downstream constraint for any AI/decisioning investment.`,
-    `Operating cost stays elevated - manual workflows persist.`,
-  ] : [
-    `No integrated AI/ML decisioning layer on top of ${t.name}.`,
-    `No omnichannel servicing (post-origination).`,
-    `Integration bus gap to other cores remains.`,
-    `Self-service analytics not yet exposed to operations leadership.`,
-  ];
+  // What the product does not cover — from the register, not from a template.
+  //
+  // The old version was four hardcoded sentences per branch, identical for
+  // every product and every client, asserting blocked prerequisites and
+  // "elevated operating cost" that no evidence in the run supports. Read under
+  // a vendor's name it reads as an accusation, and it is not data-backed. What
+  // IS in the run: the cells in this product's own pillar that it is NOT
+  // linked to. Stated as available value — what the estate does not yet reach —
+  // never as a failing.
+  const coveredIds = new Set(t.subcaps_impact || []);
+  const samePillar = (entity.subcaps || []).filter(
+    s => t.dma_pillar && String(s.id).startsWith(t.dma_pillar));
+  const notCovered = samePillar
+    .filter(s => !coveredIds.has(s.id))
+    .sort((a, b) => (a.score ?? 9) - (b.score ?? 9))
+    .slice(0, 6);
 
   return (
     <div>
@@ -1304,25 +1377,52 @@ function ClientTechStackDetail({ entity, run, techId }) {
             <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/heatmap`, { run: run.id })}>Open heatmap <Icon name="arrow-r" size={11} /></button>
           </div>
           {impacts.length === 0 ? (
-            <div style={{ fontSize: 12, color: "var(--z-muted)" }}>No subcap impact mapped.</div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {impacts.map(i => (
-                <div key={i.id} style={{ padding: "8px 12px", background: i.thin ? "rgba(254,151,50,.08)" : "var(--z-ice)", borderRadius: 6, border: i.thin ? "1px solid rgba(254,151,50,.3)" : "1px solid transparent" }}>
-                  <div className="row">
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="f-mono" style={{ fontSize: 11, color: "var(--z-dark)" }}>{i.id}</div>
-                      {i.thin ? <div style={{ fontSize: 9.5, color: "var(--z-org)", marginTop: 1 }}>▲ Thin evidence - 1 item</div> : null}
-                    </div>
-                    <div className="row" style={{ gap: 6 }}>
-                      <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{fx(i.baseline, 1)} →</span>
-                      <strong style={{ fontSize: 14, color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-mid)" }}>{fx(i.target, 1)}</strong>
-                      <span style={{ fontSize: 10, color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-mid)", fontWeight: 600 }}>{t.status === "ABSENT" ? "" : "+"}{fx(i.delta, 1)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+              The register links this product to no capability cell, so no
+              assessment impact is claimed for it.
             </div>
+          ) : (
+            <>
+              <div style={{ fontSize: 11, color: "var(--z-muted)", lineHeight: 1.55, marginBottom: 8 }}>
+                The {impacts.length} cell{impacts.length === 1 ? "" : "s"} this
+                product is linked to in the register, at the score the run
+                assessed them. No projected uplift is shown: nothing in the
+                assessment states one, and a score is never derived here.
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {impacts.map(i => (
+                  <div key={i.id} style={{ padding: "8px 12px", background: i.thin ? "rgba(254,151,50,.08)" : "var(--z-ice)", borderRadius: 6, border: i.thin ? "1px solid rgba(254,151,50,.3)" : "1px solid transparent" }}>
+                    <div className="row" style={{ gap: 8 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="f-mono" style={{ fontSize: 11, color: "var(--z-dark)" }}>{i.id}</div>
+                        {i.name ? (
+                          <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 1 }} className="txt-fit-1" title={i.name}>{i.name}</div>
+                        ) : (
+                          <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 1 }}>
+                            not in this run's cell grain
+                          </div>
+                        )}
+                        {i.thin ? <div style={{ fontSize: 9.5, color: "var(--z-org)", marginTop: 2 }}>▲ Thin evidence</div> : null}
+                      </div>
+                      {i.score != null ? (
+                        <div className="row" style={{ gap: 6 }}>
+                          <strong style={{ fontSize: 14, color: "var(--z-dark)" }}>{fx(i.score, 1)}</strong>
+                          <span className="b b-muted">{i.band}</span>
+                        </div>
+                      ) : <span style={{ fontSize: 11, color: "var(--z-muted)" }}>no score</span>}
+                    </div>
+                    {i.recs.length ? (
+                      <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 6 }}>
+                        <span style={{ fontSize: 10, color: "var(--z-muted)" }}>ADDRESSED BY</span>
+                        {i.recs.map(r => (
+                          <span key={r.id} className="chip purple" title={r.title}>{r.id}</span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -1332,36 +1432,101 @@ function ClientTechStackDetail({ entity, run, techId }) {
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="warn" size={15} style={{ color: "var(--z-below)" }} />
-            <div style={{ fontSize: 13, fontWeight: 600 }}>{t.status === "ABSENT" ? `Gap zones - what ${t.name} would unlock` : `What ${t.name} does not cover`}</div>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>
+              {t.status === "ABSENT"
+                ? `Cells ${t.name} is not linked to`
+                : `Where the estate does not yet reach through ${t.name}`}
+            </div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-            {gapZones.map((g, i) => (
-              <div key={i} style={{ padding: "8px 12px", background: "rgba(194,80,8,.05)", border: "1px solid rgba(194,80,8,.15)", borderRadius: 5, fontSize: 12, color: "var(--z-below)", lineHeight: 1.5 }}>{g}</div>
-            ))}
-          </div>
+          {!t.dma_pillar ? (
+            <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+              This row states no pillar, so its coverage cannot be placed against
+              the assessment.
+            </div>
+          ) : notCovered.length === 0 ? (
+            <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+              Every {t.dma_pillar} cell in this run is linked to this product.
+            </div>
+          ) : (
+            <>
+              <div style={{ fontSize: 11, color: "var(--z-muted)", lineHeight: 1.55, marginBottom: 8 }}>
+                {t.dma_pillar} cells the register does not link to this product,
+                lowest-scoring first — read from the run, not asserted.
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                {notCovered.map(sc => (
+                  <div key={sc.id} style={{ padding: "8px 12px", background: "var(--z-lav)", border: "1px solid var(--z-sep)", borderRadius: 5, fontSize: 12, lineHeight: 1.5 }}>
+                    <div className="row" style={{ gap: 8 }}>
+                      <span className="f-mono" style={{ fontSize: 10.5, color: "var(--z-muted)" }}>{sc.id}</span>
+                      <span style={{ flex: 1, minWidth: 0, color: "var(--z-dark)" }} className="txt-fit-1" title={sc.name || sc.id}>{sc.name || sc.id}</span>
+                      {sc.score != null ? <strong style={{ color: "var(--z-dark)" }}>{fx(sc.score, 1)}</strong> : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
+        {/* Peer deployment.
+            This card claimed a per-peer verdict from a HASH:
+              hasIt = (|hashCode(ts_id + peerName)| % 100)/100 < peer_coverage
+            — so "✓ Symitar" or "not detected" against a NAMED institution was
+            decided by the characters of an id, and peer_coverage itself is null
+            in the payload (the contract has no such field), which made the
+            header read "—% adopted" over a zero-width bar. A technographic
+            claim about a named peer is a research finding; it cannot be
+            manufactured. Until the producer researches and promotes it, the
+            card states what it needs. */}
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="scale" size={15} />
             <div style={{ fontSize: 13, fontWeight: 600 }}>Peer deployment</div>
             <span className="spacer" />
-            <span className="b b-teal">{fmtPct(t.peer_coverage)} adopted</span>
+            {t.peer_coverage != null
+              ? <span className="b b-teal">{fmtPct(t.peer_coverage)} adopted</span>
+              : <span className="b b-muted">not researched</span>}
           </div>
-          <div className="prog" style={{ marginBottom: 14 }}>
-            <div className="prog-fill" style={{ width: `${t.peer_coverage * 100}%`, background: "linear-gradient(90deg, var(--z-teal), var(--z-mid))" }} />
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-            {peers.slice(0, 4).map((p, i) => {
-              const hasIt = ((Math.abs(hashCode(t.id + p)) % 100) / 100) < t.peer_coverage;
-              return (
-                <div key={p} style={{ padding: "6px 10px", background: hasIt ? "var(--z-ice)" : "var(--z-lav)", borderRadius: 5, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11.5 }}>
-                  <span style={{ color: "var(--z-dark)", fontWeight: 500 }}>{p}</span>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: hasIt ? "var(--z-mid)" : "var(--z-muted)" }}>{hasIt ? `✓ ${t.name.split(" ")[0]}` : "not detected"}</span>
-                </div>
-              );
-            })}
-          </div>
+          {t.peer_coverage != null ? (
+            <>
+              <div className="prog" style={{ marginBottom: 14 }}>
+                <div className="prog-fill" style={{ width: `${t.peer_coverage * 100}%`, background: "linear-gradient(90deg, var(--z-teal), var(--z-mid))" }} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                {(t.peer_deployments || []).map(d => (
+                  <div key={d.peer} style={{ padding: "6px 10px", background: d.deployed ? "var(--z-ice)" : "var(--z-lav)", borderRadius: 5, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11.5 }}>
+                    <span style={{ color: "var(--z-dark)", fontWeight: 500 }}>{d.peer}</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: d.deployed ? "var(--z-mid)" : "var(--z-muted)" }}
+                          title={d.basis || ""}>
+                      {d.deployed ? "✓ deployed" : "not found"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.6 }}>
+              <p style={{ marginBottom: 8 }}>
+                No peer technographic research is attached to this product for this
+                run, so no adoption figure is shown.
+              </p>
+              {peers.length ? (
+                <>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>
+                    Peer set that would be searched
+                  </div>
+                  <div className="row" style={{ gap: 5, flexWrap: "wrap" }}>
+                    {peers.slice(0, 8).map(x => <span key={x} className="chip">{x}</span>)}
+                  </div>
+                </>
+              ) : (
+                <p style={{ color: "var(--z-muted)" }}>
+                  This run states no peer set, so there is no cohort to search
+                  against either.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

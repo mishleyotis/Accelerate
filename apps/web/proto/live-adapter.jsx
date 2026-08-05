@@ -459,8 +459,22 @@ function adaptLeadership(leadership, enrichment) {
       critical_role: !!p.domain || isGap,
       recent_hire: p.tenure_months != null && Number(p.tenure_months) <= 6,
       gap_flag: isGap,
+      // Contact route, promoted with the person (migration 0018). Established
+      // in the PRODUCER's session — Clay runs there, its output is registered as
+      // evidence and written into the roster item — so it is already in
+      // Postgres when the page is served and renders in the same read as the
+      // name. No click, no queue, no request-time call.
+      email: p.email || null,
+      linkedin_url: p.linkedin_url || null,
+      phone: p.phone || null,
+      enriched_at: p.enriched_at || null,
+      // Where the contact route came from. "Clay reports it" is not a source;
+      // the document Clay surfaced is, and this is the only field on the panel
+      // that would otherwise carry no provenance.
+      enrichment_basis: p.enrichment_basis || null,
       clay: found ? (found.payload || null) : null,
-      enrichment_status: found ? "stored" : null,
+      enrichment_status: (p.email || p.linkedin_url || p.phone)
+        ? "promoted" : (found ? "stored" : null),
       as_of: p.as_of || null,
       confidence: p.confidence || null,
       evidence: p.source_e_id ? [p.source_e_id] : [],
@@ -647,7 +661,17 @@ function adaptEvidence(evidenceEnvelope) {
     tier: e.tier,
     ers: num(e.ers),
     claim: e.claim_type,
-    recency: e.recency_band || (e.published_date ? e.published_date : "UNVERIFIED"),
+    // The ladder's own token is internal vocabulary. The prototype shows an
+    // AGE beside a claim badge, never the word "UNVERIFIED" — and rendering it
+    // next to a FACT reads as a contradiction ("this is a fact, unverified"),
+    // when all it means is that no date could be resolved to rank the item on.
+    // So: the band when there is one, the date when there is only that, and
+    // "undated" otherwise. `recency_band` carries the raw token for anything
+    // that needs to reason about the rung.
+    recency: (e.recency_band && e.recency_band !== "UNVERIFIED")
+      ? e.recency_band
+      : (e.published_date || "undated"),
+    recency_band: e.recency_band || null,
     published_date: e.published_date,
     age_months: e.age_months,
     identity_ok: e.identity_ok,
