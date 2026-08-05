@@ -129,9 +129,144 @@ test("platform fit comes from the opportunity surface, and an unscored platform 
     { platform: "Databricks", composite: 41 },
     { platform: "Tableau", composite: null },
   ] });
-  assert.strictEqual(oss.SF, 82);
-  assert.strictEqual(oss.DB, 41);
-  assert.ok(!("TBL" in oss), "a zero would read as assessed-and-empty");
+  // Keyed by the PROMOTED platform string, and NOT rounded: a fit score is the
+  // producer's figure, and 82.4 → 82 loses a tenth for no reason.
+  assert.strictEqual(oss.Salesforce, 82.4);
+  assert.strictEqual(oss.Databricks, 41);
+  assert.ok(!("Tableau" in oss), "a zero would read as assessed-and-empty");
+});
+
+test("two tiles for the same vendor both survive", () => {
+  // The regression this keying exists for. Folding onto a vendor alias put
+  // "Salesforce Data Cloud" and "Service Cloud consolidation" on one key "SF",
+  // last write won, and one promoted tile was silently destroyed — four tiles
+  // rendered as three, with the survivor labelled with the other one's name.
+  const w = load(LIVE);
+  const oss = w.adaptOss({ tiles: [
+    { platform: "Salesforce Data Cloud", composite: 70 },
+    { platform: "Service Cloud consolidation", composite: 73 },
+  ] });
+  assert.strictEqual(Object.keys(oss).length, 2, "neither tile is lost");
+  assert.strictEqual(oss["Salesforce Data Cloud"], 70);
+  assert.strictEqual(oss["Service Cloud consolidation"], 73);
+});
+
+test("the roadmap phase carries a label and a colour so the strip can render", () => {
+  // `background: r.color` was undefined under `color:"#fff"` — white on white,
+  // 300px of apparently blank page — and `r.label.toUpperCase()` threw.
+  const w = load(LIVE);
+  const out = w.adaptRoadmap({ phases: [
+    { phase: 1, horizon: "next two quarters", rec_ids: ["REC-001"],
+      rationale: "the backbone lands first" },
+    { phase: 2, rec_ids: [] },
+  ] });
+  assert.strictEqual(out[0].label, "next two quarters");
+  assert.strictEqual(out[1].label, "Phase 2", "a phase with no horizon still labels");
+  assert.ok(out[0].color && out[1].color, "every phase gets a colour");
+  assert.notStrictEqual(out[0].color, out[1].color, "adjacent phases differ");
+  assert.strictEqual(out[0].rationale, "the backbone lands first");
+});
+
+test("the stair-step ladder reaches the accessor's key, in the curve's shape", () => {
+  // data.js reads `stairstepClusters`; buildLiveEntity emitted `stairstep`, so
+  // the curve reported "no ladder promoted" against a promoted ladder.
+  const w = load(LIVE);
+  const c = w.stairstepClustersOf({ ladder: { theme: "Data foundation", steps: [
+    { step_level: 1, label: "Named ownership", entry_condition: "a named owner",
+      unlocks: "a governed source", current_position: true,
+      covered_subcap_ids: ["P4C1.1.1"] },
+    { step_level: 2, label: "One governed record", effort_band: "M" },
+  ] } });
+  const key = Object.keys(c)[0];
+  assert.strictEqual(key, "Data foundation");
+  assert.strictEqual(c[key].steps.length, 2);
+  assert.strictEqual(c[key].steps[0].m, 1, "the rung level, not a maturity band");
+  assert.strictEqual(c[key].current, 1);
+  assert.ok(c[key].steps[0].note.includes("→"), "entry condition → unlocks");
+  assert.deepStrictEqual(c[key].steps[0].platforms, [],
+    "no platform is invented for a rung");
+});
+
+test("an absent ladder yields no clusters rather than a broken one", () => {
+  const w = load(LIVE);
+  assert.deepStrictEqual(w.stairstepClustersOf(null), {});
+  assert.deepStrictEqual(w.stairstepClustersOf({ ladder: { steps: [] } }), {});
+});
+
+test("acquisitions map the contract's keys onto the card's", () => {
+  // The card read a.target/a.date/a.details/a.subcaps/a.evidence; the contract
+  // states target_name/closed_on/effect_note/affected_subcap_ids/e_ids. Passing
+  // rows through raw rendered a blank title and an empty drilldown.
+  const w = load(LIVE);
+  const out = w.adaptAcquisitions({ rows: [{
+    target_name: "HealthCare Associates Credit Union", closed_on: null,
+    kind: "MERGER", status: "ANNOUNCED", effect_note: "member accounts migrate",
+    integration_target: "servicing history", affected_subcap_ids: ["P2C3.1.1"],
+    e_ids: ["E-CC-004"],
+  }] });
+  assert.strictEqual(out[0].target, "HealthCare Associates Credit Union");
+  assert.strictEqual(out[0].kind, "MERGER");
+  assert.ok(out[0].details.includes("member accounts migrate"));
+  assert.deepStrictEqual(out[0].subcaps, ["P2C3.1.1"]);
+  assert.deepStrictEqual(out[0].evidence, ["E-CC-004"]);
+  assert.strictEqual(out[0].date, null, "undated stays null, never a placeholder");
+});
+
+test("issue caps are built from each issue's own linked cells", () => {
+  // DMA.ISSUE_CAPS was {} in LIVE, so no issue could ever show the cells it
+  // caps — the "issues not linked to the DMA" symptom.
+  const w = load(LIVE);
+  const caps = w.issueCapsOf({ issues: [
+    { issue_id: "ISS-003", linked_subcap_ids: ["P2C2.1.1", "P2C3.1.1"] },
+    { issue_id: "ISS-001", linked_subcap_ids: [] },
+  ] });
+  assert.deepStrictEqual(Object.keys(caps), ["ISS-003"]);
+  assert.deepStrictEqual(Object.keys(caps["ISS-003"].caps),
+                        ["P2C2.1.1", "P2C3.1.1"]);
+  assert.strictEqual(caps["ISS-003"].caps["P2C2.1.1"], null,
+    "linkage without a stated cap level does not imply a ceiling");
+});
+
+test("a section's envelope citations reach the card", () => {
+  // e_ids live on the envelope, not in data, so the regulatory card printed
+  // "cites no evidence ids" while the envelope carried two.
+  const w = load(LIVE);
+  const page = { sections: { regulatory_standing: {
+    data: { primary_regulator: "NCUA" }, e_ids: ["E-BCU-001", "E-CC-006"] } } };
+  assert.deepStrictEqual(w.secWithEnv(page, "regulatory_standing").e_ids,
+                         ["E-BCU-001", "E-CC-006"]);
+  // A data field of the same name is never overwritten.
+  const page2 = { sections: { x: { data: { e_ids: ["E-1"] }, e_ids: ["E-2"] } } };
+  assert.deepStrictEqual(w.secWithEnv(page2, "x").e_ids, ["E-1"]);
+});
+
+test("CAGR is computed from the dated points, or null", () => {
+  const w = load(LIVE);
+  const f = w.adaptFinancials({ series: [
+    { period: "FY2023", value: 5.8, unit: "USD billions" },
+    { period: "2025-12", value: 6.5 },
+  ] }, null, null);
+  // (6.5/5.8)^(1/2) - 1
+  assert.ok(Math.abs(f.cagr - 0.0587) < 0.001, `got ${f.cagr}`);
+  assert.strictEqual(f.cagr_basis, "2023–2025 · 2 yr", "the span is named");
+  // One point cannot yield a rate, and a defaulted rate is a fabricated trend.
+  const one = w.adaptFinancials({ series: [{ period: "FY2025", value: 6.5 }] }, null, null);
+  assert.strictEqual(one.cagr, undefined);
+});
+
+test("an off-vocabulary timeline signal becomes unclassified, not neutral", () => {
+  // Coercing prose to "neutral" made ten unclassified events look deliberately
+  // neutral; the filters then matched nothing with no explanation.
+  const w = load(LIVE);
+  const out = w.adaptTimeline({ events: [
+    { event_date: "2016-01-01", title: "a", signal: "POSITIVE" },
+    { event_date: "2018-01-01", title: "b", signal: "The analytics practice predates the strategy." },
+    { event_date: "2020-01-01", title: "c", signal: null },
+  ] });
+  assert.strictEqual(out[0].signal, "positive");
+  assert.strictEqual(out[1].signal, "unclassified");
+  assert.strictEqual(out[2].signal, "unclassified", "absent is not neutral");
+  assert.ok(out[1].signal_raw.startsWith("The analytics"), "the raw value is kept");
 });
 
 test("sentiment groups by the payload's own audience and keeps each scale", () => {

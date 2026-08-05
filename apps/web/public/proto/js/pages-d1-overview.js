@@ -1609,12 +1609,17 @@ function LeadershipPanel({
     }, named.length ? `${named.join(" · ")} absent` : `${gaps.length} absent`), " ", "from evidence");
   })(), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), anyEnriched ? /*#__PURE__*/React.createElement("span", {
+  }), LIVE ? withContact ? /*#__PURE__*/React.createElement("span", {
     style: {
       color: "var(--z-mid)",
       fontWeight: 600
     }
-  }, "\u2713 ", Object.values(enriched).filter(v => v === "done").length, " of ", DMA.LEADERSHIP.filter(x => !x.gap_flag).length, " enriched") : null));
+  }, "\u2713 ", withContact, " of ", roster.filter(x => !x.gap_flag).length, " with a contact route") : null : Object.values(enriched).some(v => v === "done") ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-mid)",
+      fontWeight: 600
+    }
+  }, "\u2713 ", Object.values(enriched).filter(v => v === "done").length, " of ", roster.filter(x => !x.gap_flag).length, " enriched") : null));
 }
 
 /* ── Thought leadership ─────────────────────────────────────────── */

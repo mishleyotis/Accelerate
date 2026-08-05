@@ -1197,6 +1197,10 @@
        client, and the reason the card read close to empty while the section
        carried two regulators, five jurisdictions and a verified absence. */
     regulatoryFor: id => (LIVE ? liveField(id, "regulatory") : null),
+    /* The timeline section's own envelope: the storyline and arc shape. Adapted
+       and read by nothing, so the arc the ten events describe — the tie back to
+       the DMA — appeared on no surface. */
+    timelineMetaFor: id => (LIVE ? liveField(id, "timelineMeta") : null),
     cellEvidenceFor: subcapId => {
       if (!LIVE || !subcapId) return null;
       return (liveField(null, "cellEvidence") || [])

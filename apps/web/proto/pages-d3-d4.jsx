@@ -341,7 +341,7 @@ function StairstepCurve({ entity }) {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, fontWeight: 600 }}>Stairstepped maturity curve · {C.label}</div>
-          <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Where {entity.name} is today → M3 → M4 → M5 · with the platform that enables each step-up</div>
+          <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Where {entity.name} is today, and what each rung requires</div>
         </div>
         <div className="toggle-row">
           {Object.entries(clusters).map(([k, v]) => (
@@ -370,7 +370,7 @@ function StairstepCurve({ entity }) {
               const y = stepY(i);
               const w = stepW - 8;
               const h = H - padB - y;
-              const platform = (s.platforms || [])[0];
+              const platform = (s.platforms || [])[0] || null;
               const plat = DMA.getPlatform(platform)
                 || { id: platform, name: platform, short: platform };
               const color = i === 0 ? "var(--m-act)" : i === 1 ? "var(--m-bld)" : i === 2 ? "var(--m-cmp)" : "var(--m-dif)";
@@ -412,7 +412,7 @@ function StairstepCurve({ entity }) {
             <div key={i} style={{ padding: "10px 12px", background: i === 0 ? "var(--m-act)" : i === 1 ? "rgba(98,215,184,.15)" : i === 2 ? "var(--z-ice)" : "rgba(19,159,148,.10)", borderRadius: 8, border: "1px solid var(--z-sep)" }}>
               <div className="row" style={{ marginBottom: 4 }}>
                 <span className={`b ${i === 0 ? "b-act" : i === 1 ? "b-bld" : i === 2 ? "b-cmp" : "b-dif"}`}>M{s.m} {s.label}</span>
-                {s.platforms[0] !== "-" ? <span style={{ fontSize: 10, color: "var(--z-mid)" }}>{s.platforms.map(p => DMA.getPlatform(p)?.short || p).join(" + ")}</span> : null}
+                {(s.platforms || []).length && s.platforms[0] !== "-" ? <span style={{ fontSize: 10, color: "var(--z-mid)" }}>{s.platforms.map(p => DMA.getPlatform(p)?.short || p).join(" + ")}</span> : null}
               </div>
               <div style={{ fontSize: 11.5, color: "var(--z-dark)", lineHeight: 1.55 }}>{s.note}</div>
             </div>
@@ -490,7 +490,7 @@ function ChevronView({ roadmap, recs, openRec }) {
                 <div style={{ fontSize: 10, opacity: .8, letterSpacing: ".08em", textTransform: "uppercase" }}>Phase {r.phase}</div>
                 <div>{r.label}</div>
               </div>
-              <div style={{ fontSize: 10, opacity: .85, textAlign: "right" }}>{r.duration}</div>
+              {r.duration ? <div style={{ fontSize: 10, opacity: .85, textAlign: "right" }}>{r.duration}</div> : null}
             </div>
           </div>
         ))}
@@ -500,14 +500,28 @@ function ChevronView({ roadmap, recs, openRec }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
         {roadmap.map(r => (
           <div key={r.phase} style={{ background: r.color, borderRadius: 8, padding: 14, color: "#fff" }}>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Platform</div>
-            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>{r.platform}</div>
-
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Target maturity</div>
-            <div style={{ fontSize: 12.5, marginBottom: 10, color: "var(--z-mint-lt)" }}>{r.target}</div>
-
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Success metric</div>
-            <div style={{ fontSize: 12, marginBottom: 10, lineHeight: 1.5 }}>{r.metric}</div>
+            {/* Platform, target maturity and success metric are not fields of the
+                roadmap contract — a phase carries its horizon, its rationale and
+                its recommendation ids. They rendered as three empty labels under
+                three headings. The phase's own rationale is what belongs here. */}
+            {r.horizon ? (
+              <>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Horizon</div>
+                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>{r.horizon}</div>
+              </>
+            ) : null}
+            {r.rationale ? (
+              <>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Why this phase</div>
+                <div style={{ fontSize: 12, marginBottom: 10, lineHeight: 1.5 }}>{r.rationale}</div>
+              </>
+            ) : null}
+            {(r.depends_on || []).length ? (
+              <>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Depends on</div>
+                <div style={{ fontSize: 12, marginBottom: 10 }}>{r.depends_on.join(" · ")}</div>
+              </>
+            ) : null}
 
             <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 6 }}>Recommendations</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -577,7 +591,7 @@ function StepCurveView({ roadmap, entity }) {
           ))}
           {roadmap.map((r, i) => {
             const x = xFor(i === 0 ? 3 : i === 1 ? 9 : 15);
-            return <text key={r.phase} x={x} y={padT - 8} fontSize="11" fontWeight="700" fill={r.color} textAnchor="middle">{r.label.toUpperCase()}</text>;
+            return <text key={r.phase} x={x} y={padT - 8} fontSize="11" fontWeight="700" fill={r.color} textAnchor="middle">{String(r.label || `Phase ${r.phase}`).toUpperCase()}</text>;
           })}
         </svg>
         <div style={{ fontSize: 10, color: "var(--z-muted)", textAlign: "center", marginTop: 6 }}>Click any milestone for the phase plan</div>

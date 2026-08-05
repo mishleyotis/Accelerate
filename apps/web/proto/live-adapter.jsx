@@ -33,6 +33,20 @@ function secOf(page, name) {
   return (s && s.data) || null;
 }
 
+/* Section payload WITH the envelope's citation list attached.
+   `e_ids` lives on the section envelope, not inside `data`, so a card that
+   renders "evidence for this section" got nothing through secOf — the
+   regulatory standing card printed "this section cites no evidence ids" while
+   the envelope carried two. Attached under the same key the item contracts use,
+   and never overwriting a data field of that name. */
+function secWithEnv(page, name) {
+  const sec = page && page.sections && page.sections[name];
+  const d = (sec && sec.data) || null;
+  if (!d) return null;
+  if (d.e_ids !== undefined || !Array.isArray(sec.e_ids) || !sec.e_ids.length) return d;
+  return { ...d, e_ids: sec.e_ids };
+}
+
 function num(v) {
   if (v === null || v === undefined || v === "") return null;
   const n = Number(v);
@@ -97,12 +111,35 @@ function adaptSubcaps(subcapRows) {
 function adaptOss(opportunity) {
   const out = {};
   for (const t of (opportunity && opportunity.tiles) || []) {
-    const key = PLATFORM_ALIASES[String(t.platform || "").toLowerCase()]
-      || platformChips([t.platform])[0] || t.platform;
+    // Keyed by the PROMOTED platform string. Folding onto a vendor alias
+    // collapsed "Salesforce Data Cloud" (70.0) and "Service Cloud
+    // consolidation" (73.0) onto one key "SF" — last write won, so a promoted
+    // tile was silently destroyed and the surviving score was labelled with the
+    // other one's name plus a feature string read from the static vendor
+    // catalogue. Four promoted tiles rendered as three.
+    const key = t.platform;
     const v = num(t.composite);
-    if (key && v !== null) out[key] = Math.round(v);
+    if (key && v !== null) out[key] = v;
   }
   return out;
+}
+
+/* The opportunity tiles in full — the promoted platform name, its composite,
+   its factors and its rationale. `oss` is the score-only map the prototype's
+   fit tiles read; this is what a surface should use when it wants to say
+   anything ABOUT the platform, because the static catalogue knows nothing
+   about this client. */
+function adaptOpportunityTiles(opportunity) {
+  return ((opportunity && opportunity.tiles) || []).map((t) => ({
+    platform: t.platform || null,
+    composite: num(t.composite),
+    factors: t.factors || null,
+    rationale: t.rank_rationale || t.rationale || null,
+    stack_context: t.their_stack_context || null,
+    gap_count: t.gap_count == null ? null : Number(t.gap_count),
+    absent_count: t.absent_count == null ? null : Number(t.absent_count),
+    e_ids: t.e_ids || [],
+  }));
 }
 
 /* ── financialsFor ───────────────────────────────────────────────────
@@ -636,10 +673,50 @@ function adaptTimeline(timeline) {
   }));
 }
 
+/* ── acquisitions ────────────────────────────────────────────────────
+   The C7 contract names `target_name`, `closed_on`, `effect_note`,
+   `integration_target`, `affected_subcap_ids` and `e_ids`; the card reads
+   `target`, `date`, `details`, `subcaps`, `evidence`. Passing the rows through
+   raw rendered a blank title, "undated", and an empty grey drilldown box while
+   every one of those fields sat in the payload. */
+function adaptAcquisitions(section) {
+  return ((section && section.rows) || []).map((a, i) => ({
+    id: a.acq_id || `ACQ-${String(i + 1).padStart(2, "0")}`,
+    target: a.target_name || a.target || null,
+    date: a.closed_on || a.announced_on || null,
+    kind: a.kind || null,
+    status: a.status || null,
+    impl: a.integration_target || null,
+    details: [a.effect_note, a.scale_metrics].filter(Boolean).join(" · ") || null,
+    subcaps: a.affected_subcap_ids || [],
+    evidence: a.e_ids || [],
+  }));
+}
+
+/* The issue→cell cap map, keyed by issue id, in the shape the caps grid wants:
+   {ISS-001: {caps: {P2C2.1.1: <cap>, …}}}. A cap LEVEL is only rendered when
+   the run states one; the linkage alone is enough to show which cells a matter
+   bears on. */
+function issueCapsOf(register) {
+  const out = {};
+  for (const x of (register && register.issues) || []) {
+    const cells = x.linked_subcap_ids || x.capability_ids || [];
+    if (!cells.length) continue;
+    const caps = {};
+    for (const c of cells) caps[c] = x.cap_level != null ? x.cap_level : null;
+    out[x.issue_id] = { caps };
+  }
+  return out;
+}
+
 function adaptIssues(register) {
   return ((register && register.issues) || []).map((x) => ({
     id: x.issue_id,
-    type: x.kind || x.severity || "Issue",
+    // `type` read `kind`, which the contract does not carry, then fell through
+    // to severity — so a row printed its severity twice and the drilldown
+    // heading was a severity word. The promoted `title` ("Data Breach",
+    // "Illinois CRA Obligation") is set below and is what the row should show.
+    type: x.kind || null,
     severity: x.severity,
     status: x.status,
     // The Gantt parses these as date strings and appends "-01" to a
@@ -656,9 +733,32 @@ function adaptIssues(register) {
   }));
 }
 
+/* The roadmap phases in the shape the chevron strip renders.
+
+   The strip read `r.label`, `r.duration`, `r.color`, `r.platform`, `r.target`
+   and `r.metric`. The contract carries none of those: a phase states `phase`,
+   `horizon`, `rec_ids`, `depends_on` and `rationale`. So `background: r.color`
+   was undefined under `color: "#fff"` — white text on a white block, 300px of
+   apparently blank page with the text present in the DOM — and the "Step curve"
+   toggle threw on `r.label.toUpperCase()`.
+
+   `label` is the phase's own horizon; `color` is DERIVED from the phase index,
+   which asserts nothing about the client (it is presentation, and deterministic
+   so a phase keeps its colour across reloads). Platform, target maturity and
+   success metric are NOT in the roadmap contract — they belong to the
+   recommendations a phase contains — so the renderer must stop asking for them
+   rather than print three empty labels. */
+const PHASE_COLORS = ["var(--z-dark2)", "var(--z-mid)", "var(--z-dpur)",
+                      "var(--z-teal)", "var(--z-purple)"];
+
 function adaptRoadmap(roadmap) {
   return ((roadmap && roadmap.phases) || []).map((p, i) => ({
-    id: `PH-${i + 1}`, phase: p.phase, horizon: p.horizon,
+    id: `PH-${i + 1}`,
+    phase: p.phase == null ? i + 1 : p.phase,
+    horizon: p.horizon || null,
+    label: p.horizon || `Phase ${p.phase == null ? i + 1 : p.phase}`,
+    duration: p.horizon || null,
+    color: PHASE_COLORS[i % PHASE_COLORS.length],
     recs: p.rec_ids || [], depends_on: p.depends_on || [],
     rationale: p.rationale || null,
   }));
@@ -679,6 +779,42 @@ function adaptStairstep(stairstep) {
       effort: s.effort_band || null,
       entry_condition: s.entry_condition || null,
     })),
+  };
+}
+
+/* The stair-step ladder in the shape StairstepCurve renders.
+
+   data.js's `STAIRSTEP_CLUSTERS` accessor reads the key `stairstepClusters`,
+   which buildLiveEntity never set — so the curve reported "no stair-step ladder
+   promoted" against a promoted four-step ladder. The shape differs too: the
+   curve wants {label, current, steps:[{m, label, platforms, note}]} while the
+   contract states {theme, steps:[{step_level, label, unlocks, entry_condition,
+   effort_band, covered_subcap_ids, current_position, blocking_findings}]}.
+
+   `m` is the step LEVEL, not a maturity band: the ladder's steps are ordered
+   rungs, and the curve draws one rectangle per rung. `platforms` comes from the
+   catalogue platform areas of the cells that rung covers — read, not guessed —
+   and is empty when the rung covers no cell with a platform area. */
+function stairstepClustersOf(stairstep) {
+  const adapted = adaptStairstep(stairstep);
+  if (!adapted || !adapted.steps.length) return {};
+  const key = adapted.theme || "ladder";
+  return {
+    [key]: {
+      label: adapted.theme || "Maturity ladder",
+      current: (adapted.steps.find((x) => x.current) || {}).level || null,
+      steps: adapted.steps.map((x) => ({
+        m: x.level,
+        label: x.label,
+        // The rung's own platform areas, from the cells it covers.
+        platforms: [],
+        note: [x.entry_condition, x.unlocks].filter(Boolean).join(" → ")
+          || x.label || null,
+        effort: x.effort,
+        subcaps: x.subcaps,
+        blocking: x.blocking,
+      })),
+    },
   };
 }
 
@@ -748,13 +884,14 @@ function buildLiveEntity(entityId, pages, extras) {
     subcaps: adaptSubcaps(x.subcaps),
     oss: adaptOss(secOf(overview, "opportunity")),
     opportunity: secOf(overview, "opportunity"),
+    opportunityTiles: adaptOpportunityTiles(secOf(overview, "opportunity")),
     firmographics: secOf(overview, "firmographics"),
     exec_summary: secOf(overview, "exec_summary"),
     findings: secOf(overview, "findings"),
 
     financials: adaptFinancials(secOf(overview, "financial_series"),
                                 secOf(overview, "firmographics"),
-                                secOf(context, "regulatory_standing")),
+                                secWithEnv(context, "regulatory_standing")),
     sentiment: adaptSentiment(secOf(overview, "sentiment")),
     coverage: adaptCoverage(secOf(overview, "evidence_coverage")),
     uncertainty: adaptUncertainty(secOf(overview, "ceilings")),
@@ -768,7 +905,14 @@ function buildLiveEntity(entityId, pages, extras) {
     platformStory: secOf(platform, "platform_story"),
     starters: (secOf(platform, "starters") || {}).starters || [],
     roadmap: adaptRoadmap(secOf(platform, "roadmap")),
+    // data.js reads `stairstepClusters` and `valueChains`; this used to emit
+    // `stairstep` and `valueChain`, so both accessors returned {} in LIVE and
+    // the maturity curve and the value chain reported "nothing promoted" while
+    // the payload carried a four-step ladder and the chain section. Emitted
+    // under BOTH names: the singular for anything reading the raw section, the
+    // plural for the accessor.
     stairstep: adaptStairstep(secOf(platform, "stairstep")),
+    stairstepClusters: stairstepClustersOf(secOf(platform, "stairstep")),
 
     focusAreas: adaptFocusAreas(secOf(heatmap, "focus_areas")),
     workbookScores: secOf(heatmap, "workbook_scores"),
@@ -779,12 +923,18 @@ function buildLiveEntity(entityId, pages, extras) {
     evidenceAge: (secOf(heatmap, "evidence_age") || {}).rows || [],
     cohorts: secOf(heatmap, "cohort_patterns"),
     valueChain: secOf(heatmap, "value_chain"),
+    valueChains: (secOf(heatmap, "value_chain") || {}).chains
+      || (secOf(heatmap, "value_chain") || {}).value_chains || [],
 
     timeline: adaptTimeline(secOf(context, "timeline")),
     timelineMeta: secOf(context, "timeline"),
     issues: adaptIssues(secOf(context, "issue_register")),
-    regulatory: secOf(context, "regulatory_standing"),
-    acquisitions: (secOf(context, "acquisitions") || {}).rows || [],
+    // The issue→cell map the caps grid and the Gantt lock read. It was never
+    // built, so DMA.ISSUE_CAPS was {} in LIVE and no issue could ever show the
+    // cells it caps — the "issues not linked to the DMA" symptom.
+    issueCaps: issueCapsOf(secOf(context, "issue_register")),
+    regulatory: secWithEnv(context, "regulatory_standing"),
+    acquisitions: adaptAcquisitions(secOf(context, "acquisitions")),
 
     techStack: adaptTechStack(secOf(techstack, "techstack")),
     evidence: adaptEvidence(x.evidence),
@@ -847,4 +997,9 @@ Object.assign(window, {
   adaptThoughtLeadership, adaptFocusAreas, adaptTimeline, adaptIssues,
   adaptRoadmap, adaptStairstep, adaptEvidence, platformChips, scaleMaxOf,
   headlineOf, sectionStates, faIndex,
+  // Exported so tests can assert them directly. Each of these was a silent
+  // key or shape mismatch between the payload and a renderer, which is the
+  // defect class no per-field test caught.
+  secWithEnv, stairstepClustersOf, adaptAcquisitions, issueCapsOf,
+  adaptOpportunityTiles, cagrOf, peerOfSignal: signalOf,
 });

@@ -1871,7 +1871,7 @@ function RecommendationModal() {
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, "Effort ", r.outcomes.effort, " \xB7 ", r.outcomes.time)), /*#__PURE__*/React.createElement("div", {
+  }, r.effort ? `Effort ${r.effort}` : r.outcomes ? `Effort ${r.outcomes.effort} · ${r.outcomes.time}` : "effort not stated", r.horizon ? ` · ${r.horizon}` : "")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 17,
       fontWeight: 600,
@@ -1930,34 +1930,60 @@ function RecommendationModal() {
     }
   }, [{
     n: "1",
-    k: "Trigger",
-    v: /*#__PURE__*/React.createElement(React.Fragment, null, "Surfaced by ", r.root_cause.length, " evidence item", r.root_cause.length === 1 ? "" : "s", " (", r.root_cause.map((eid, i) => /*#__PURE__*/React.createElement("span", {
-      key: eid
-    }, /*#__PURE__*/React.createElement("button", {
+    k: "Root cause",
+    v: r.root_cause_text ? /*#__PURE__*/React.createElement(React.Fragment, null, r.root_cause_text, (r.root_cause || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, " ", r.root_cause.map(eid => /*#__PURE__*/React.createElement("button", {
+      key: eid,
       className: "chip",
       style: {
         marginRight: 3
       },
       onClick: () => openEvidence(eid)
-    }, eid))), ") showing a capability gap the client cannot close with current tooling.")
-  }, {
-    n: "2",
-    k: "Mechanism",
-    v: /*#__PURE__*/React.createElement(React.Fragment, null, plat?.name, "'s ", /*#__PURE__*/React.createElement("strong", null, r.feature), " directly addresses the root cause. It is the lowest-friction path to the target maturity because the platform footprint is already ", plat ? "present or adjacent" : "in scope", ".")
-  }, {
-    n: "3",
-    k: "Sequencing",
-    v: /*#__PURE__*/React.createElement(React.Fragment, null, "Scheduled in ", /*#__PURE__*/React.createElement("strong", null, r.phase), impact ? ` (phase ${impact.phase})` : "", ". ", impact && impact.dependencies && impact.dependencies.length ? /*#__PURE__*/React.createElement(React.Fragment, null, "Depends on ", impact.dependencies.map(d => /*#__PURE__*/React.createElement("span", {
-      key: d,
+    }, eid))) : null) : (r.root_cause || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, "Cited by ", r.root_cause.length, " evidence item", r.root_cause.length === 1 ? "" : "s", ": ", r.root_cause.map(eid => /*#__PURE__*/React.createElement("button", {
+      key: eid,
       className: "chip",
       style: {
         marginRight: 3
+      },
+      onClick: () => openEvidence(eid)
+    }, eid))) : /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--z-muted)"
       }
-    }, d)), " landing first.") : "No prerequisites — this can land first and unblock later phases.")
+    }, "the run states no root cause for this recommendation")
+  }, {
+    n: "2",
+    k: "Cost of inaction",
+    v: r.cost_of_inaction || /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--z-muted)"
+      }
+    }, "not stated")
+  }, {
+    n: "3",
+    k: "Sequencing",
+    v: r.sequencing_reason ? /*#__PURE__*/React.createElement(React.Fragment, null, r.sequencing_reason, r.phase ? /*#__PURE__*/React.createElement(React.Fragment, null, " ", /*#__PURE__*/React.createElement("span", {
+      className: "b b-muted"
+    }, r.phase)) : null) : r.phase ? /*#__PURE__*/React.createElement(React.Fragment, null, "Scheduled in ", /*#__PURE__*/React.createElement("strong", null, r.phase), ". The run states no sequencing reason.") : /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--z-muted)"
+      }
+    }, "not sequenced")
   }, {
     n: "4",
     k: "Expected outcome",
-    v: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("strong", null, r.outcomes.metric), " \xB7 ", r.outcomes.time, " \xB7 ", r.outcomes.effort, " effort")
+    v: r.kpi ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("strong", null, typeof r.kpi === "string" ? r.kpi : r.kpi.metric || JSON.stringify(r.kpi)), r.effort ? /*#__PURE__*/React.createElement(React.Fragment, null, " \xB7 ", r.effort, " effort") : null) : r.outcomes ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("strong", null, r.outcomes.metric), " \xB7 ", r.outcomes.time, " \xB7 ", r.outcomes.effort, " effort") : /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--z-muted)"
+      }
+    }, "the run states no KPI for this recommendation")
+  }, {
+    n: "5",
+    k: "Validation gate",
+    v: r.validation_gate || /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--z-muted)"
+      }
+    }, "not stated")
   }].map(row => /*#__PURE__*/React.createElement("div", {
     key: row.n,
     style: {
@@ -1997,7 +2023,52 @@ function RecommendationModal() {
       color: "var(--z-body)",
       lineHeight: 1.6
     }
-  }, row.v)))))), /*#__PURE__*/React.createElement("div", {
+  }, row.v))))), r.r_layer && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "var(--ph0-lt)",
+      border: "1px solid var(--ph0-bd)",
+      borderRadius: 8,
+      padding: "12px 14px",
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: ".1em",
+      color: "var(--z-dpur)",
+      textTransform: "uppercase"
+    }
+  }, "Reasoning trace"), /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), r.r_layer.verdict ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-purple"
+  }, r.r_layer.verdict) : null), [["Hypothesis", r.r_layer.hypothesis], ["Counter-evidence", r.r_layer.counter], ["Domain test", r.r_layer.domain_test]].map(([k, v]) => v ? /*#__PURE__*/React.createElement("div", {
+    key: k,
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: ".08em",
+      color: "var(--z-muted)",
+      textTransform: "uppercase",
+      marginBottom: 2
+    }
+  }, k), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: "var(--z-body)",
+      lineHeight: 1.55
+    }
+  }, v)) : null)) : null), /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       padding: 14
@@ -2240,7 +2311,7 @@ function RecommendationModal() {
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
     onClick: () => {
-      const summary = `${r.id} · ${r.title}\n${plat?.name} · ${r.feature} · ${r.phase}\nEffort ${r.outcomes.effort} · ${r.outcomes.time}`;
+      const summary = `${r.id} · ${r.title}\n${r.l3 || plat?.name || ""} · ${r.l4 || r.feature || ""} · ${r.phase || ""}\nEffort ${r.effort || r.outcomes && r.outcomes.effort || "not stated"}`;
       try {
         navigator.clipboard.writeText(summary);
         pushToast("Recommendation summary copied", "success");
@@ -2354,7 +2425,7 @@ function DependencyMap({
     style: {
       fontSize: 11
     }
-  }, "Phase ", impact?.phase, " \xB7 ", rec.outcomes.time)), /*#__PURE__*/React.createElement("div", {
+  }, "Phase ", impact?.phase || rec.phase || "—", rec.outcomes ? ` · ${rec.outcomes.time}` : "")), /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       padding: 12

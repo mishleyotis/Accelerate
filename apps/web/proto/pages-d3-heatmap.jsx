@@ -3,6 +3,49 @@
    Multiple view modes · synthesis drawer · working overlays
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* ── Peer figures: read, never derived ──────────────────────────────────
+   Every peer number on this page was manufactured, in four different ways, and
+   all four rendered as a benchmark an AE would quote:
+
+     · pillar zoom     `const peer = score + 0.3` — a constant offset
+     · category zoom   mean of `s.peerMedian` where every value is null, and
+                       `a + null` is `a`, so 16 categories read "Peer 0.0"
+     · subcap rows     `gap = s.peerMedian - s.score` → `null - 1.5` = -1.5,
+                       printed as "+1.5 vs peer" in the ABOVE-peer colour on
+                       every row, with the peer tick pinned at 0%
+     · focus areas     the same null mean, plus hardcoded 2.5/2.8 fallbacks
+
+   Peer medians genuinely do NOT exist at cell grain in this corpus — 0 of 765
+   rows carry one. They exist at CATEGORY and PILLAR grain, which the run
+   promotes and which were sitting unread. So: read the stated median at the
+   grain that has one, inherit the category median at subcap grain and label it
+   a proxy, and where nothing is stated render nothing — no tick, no delta, no
+   "at peer" badge. A missing benchmark is not a benchmark of zero.
+
+   `peerOf` returns {median, basis} where median may be null. Callers must
+   branch on null rather than formatting it. */
+function peerOf(median, basis) {
+  const v = (median === null || median === undefined || median === "") ? null : Number(median);
+  return { median: (v === null || !isFinite(v)) ? null : v, basis: basis || null };
+}
+
+/* The mean of the peer medians that EXIST, or null when none do. Never treats a
+   missing value as zero and never divides by the full count. */
+function peerMeanOf(rows) {
+  const vals = (rows || [])
+    .map(r => (r && r.peerMedian !== null && r.peerMedian !== undefined) ? Number(r.peerMedian) : null)
+    .filter(v => v !== null && isFinite(v));
+  if (!vals.length) return null;
+  return vals.reduce((a, v) => a + v, 0) / vals.length;
+}
+
+/* A delta only exists when both sides do. */
+function deltaOf(score, peer) {
+  if (score == null || peer == null) return null;
+  const d = Number(score) - Number(peer);
+  return isFinite(d) ? d : null;
+}
+
 function ClientHeatmap({ entity, run }) {
   const route = useRoute();
   const { audience, openEvidence, openInsight, setIpSurface, setIpContext, tweaks, pushToast } = useApp();
@@ -26,7 +69,12 @@ function ClientHeatmap({ entity, run }) {
     for (const cat of DMA.CATEGORIES) {
       const subs = entity.subcaps.filter(s => s.category === cat.id);
       const avg = subs.reduce((a, s) => a + s.score, 0) / Math.max(1, subs.length);
-      const peer = subs.reduce((a, s) => a + s.peerMedian, 0) / Math.max(1, subs.length);
+      // The category's STATED median where the run promotes one, else the mean
+      // of whatever cell medians exist, else null. Never a null-as-zero mean.
+      const catRow = ((entity.workbookScores || {}).categories || [])
+        .find(c => c.category_id === cat.id) || null;
+      const peer = catRow && catRow.peer_median != null
+        ? Number(catRow.peer_median) : peerMeanOf(subs);
       const thin = subs.filter(s => s.thin).length;
       out[cat.id] = { avg, peer, thin, total: subs.length };
     }
@@ -163,9 +211,13 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
         <div className="g3">
           {DMA.FOCUS_AREAS.map(fa => {
             const subs = subcapsForFocusArea(fa);
-            const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : 2.5;
-            const peer = subs.length ? subs.reduce((a, s) => a + s.peerMedian, 0) / subs.length : 2.8;
-            const gap = peer - avg;
+            // The focus area's own promoted figures first (peer_score/delta are
+            // in the H1 contract and were unread), then the mean of the cells it
+            // names, then nothing. No 2.5/2.8 fallbacks: a hardcoded average is
+            // a claim about this client.
+            const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : null;
+            const peer = fa.peer_score != null ? Number(fa.peer_score) : peerMeanOf(subs);
+            const gap = fa.delta != null ? -Number(fa.delta) : deltaOf(peer, avg);
             return (
               <div key={fa.id} className="fa-card" onClick={() => setFocusArea(fa)}>
                 <div className="fa-illo" style={{ background: `linear-gradient(135deg, ${fa.colors[0]}, ${fa.colors[1]})` }}>
@@ -177,9 +229,17 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
                 </div>
                 <div className="fa-meta">
                   <div className="row" style={{ marginBottom: 8 }}>
-                    <MaturityChip score={avg} />
-                    <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>
-                    {gap > 0.3 ? <span className="b b-below" style={{ marginLeft: "auto" }}>−{fx(gap, 1)}</span> : <span className="b b-above" style={{ marginLeft: "auto" }}>at peer</span>}
+                    {avg != null ? <MaturityChip score={avg} /> : <span className="b b-muted">no score</span>}
+                    {peer != null ? (
+                      <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>
+                    ) : (
+                      <span style={{ fontSize: 11, color: "var(--z-muted)" }} title="no peer median is stated at this grain in this run">no peer figure</span>
+                    )}
+                    {/* "at peer" is a CLAIM. With no peer figure it was shown on
+                        every card, including the four this client trails. */}
+                    {gap == null ? null
+                      : gap > 0.3 ? <span className="b b-below" style={{ marginLeft: "auto" }}>−{fx(gap, 1)}</span>
+                      : <span className="b b-above" style={{ marginLeft: "auto" }}>at peer</span>}
                   </div>
                   <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.5 }} className="txt-fit-2">{fa.description}</div>
                 </div>
@@ -194,8 +254,8 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
   // Selected focus area detail
   const fa = focusArea;
   const subs = subcapsForFocusArea(fa);
-  const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : 2.5;
-  const peer = subs.length ? subs.reduce((a, s) => a + s.peerMedian, 0) / subs.length : 2.8;
+  const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : null;
+  const peer = fa.peer_score != null ? Number(fa.peer_score) : peerMeanOf(subs);
   const insights = DMA.INSIGHT_CARDS.filter(ic => ic.affects.some(sid => fa.subcaps.some(p => sid.startsWith(p.slice(0, 4)))));
 
   return (
@@ -416,7 +476,11 @@ function PillarHeatmap({ entity, setPillarFocus }) {
       <div className="g4">
         {DMA.PILLARS.map(p => {
           const score = entity.pillar_scores[p.id];
-          const peer = score + 0.3;
+          // The workbook's STATED pillar median, which the run promotes and
+          // which a constant offset was standing in for. Baxter's P1 sits at
+          // 3.11 against a stated 2.9 — ABOVE its peer set — and `score + 0.3`
+          // rendered that as 0.3 BELOW.
+          const peer = (entity.pillar_peer_medians || {})[p.id];
           return (
             <div key={p.id} className="card-tile clickable" onClick={() => setPillarFocus(p.id)} style={{ padding: 16 }}>
               <div className="row" style={{ marginBottom: 12 }}>
@@ -429,9 +493,15 @@ function PillarHeatmap({ entity, setPillarFocus }) {
               </div>
               <div className="prog"><div className="prog-fill" style={{ width: `${score / 5 * 100}%`, background: DMA.helpers.maturityHex(score) }} /></div>
               <div className="row" style={{ marginTop: 8, fontSize: 11 }}>
-                <span style={{ color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>
-                <span className="spacer" />
-                <span style={{ color: score < peer ? "var(--z-below)" : "var(--z-mid)", fontFamily: "var(--font-mono)" }}>{score >= peer ? "▲" : "▼"} {fx(Math.abs(score - peer), 1)}</span>
+                {peer != null ? (
+                  <>
+                    <span style={{ color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>
+                    <span className="spacer" />
+                    <span style={{ color: score < peer ? "var(--z-below)" : "var(--z-mid)", fontFamily: "var(--font-mono)" }}>{score >= peer ? "▲" : "▼"} {fx(Math.abs(score - peer), 1)}</span>
+                  </>
+                ) : (
+                  <span style={{ color: "var(--z-muted)" }} title="the run states no peer median for this pillar">no peer figure stated</span>
+                )}
               </div>
               <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 10 }}>{DMA.CATEGORIES.filter(c => c.pillar === p.id).length} categories · click to drill</div>
             </div>
@@ -494,11 +564,20 @@ function CategoryHeatmap({ entity, pillarFocus, catAgg, showPeers, showIssues, s
 
               {showPeers ? <>
                 <div style={{ fontSize: 11, color: "var(--z-muted)", display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 8 }}>Peer</div>
-                {cats.map(c => (
-                  <div key={c.id} className={`hm-cell peer b ${DMA.helpers.maturityClass(catAgg[c.id].peer)}`} style={{ minHeight: 30, padding: "4px 6px" }}>
-                    {fx(catAgg[c.id].peer, 1)}
-                  </div>
-                ))}
+                {cats.map(c => {
+                  const pm = catAgg[c.id] ? catAgg[c.id].peer : null;
+                  // A null median banded as maturityClass(null) and printed 0.0,
+                  // so all sixteen categories read "Peer 0.0" in the lowest band
+                  // — a peer set that scores nothing.
+                  return pm == null ? (
+                    <div key={c.id} className="hm-cell peer b b-muted" style={{ minHeight: 30, padding: "4px 6px" }}
+                         title="no peer median stated for this category in this run">—</div>
+                  ) : (
+                    <div key={c.id} className={`hm-cell peer b ${DMA.helpers.maturityClass(pm)}`} style={{ minHeight: 30, padding: "4px 6px" }}>
+                      {fx(pm, 1)}
+                    </div>
+                  );
+                })}
               </> : null}
 
               <div></div>
@@ -611,7 +690,9 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
                     <div style={{ display: "flex", flexDirection: "column", gap: 5, padding: "8px 10px" }}>
                       {cl.items.map(s => {
                         const caps = showIssues ? DMA.issueCapsFor(s.id) : [];
-                        const gap = s.peerMedian - s.score;
+                        // null - score is -score, which printed as "+score vs
+                        // peer" in the above-peer colour on every row.
+                        const gap = deltaOf(s.peerMedian, s.score);
                         const evCount = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.includes(s.id)).length;
                         return (
                           <button key={s.id} className="subcap-row" onClick={() => onSynth(s)}>
@@ -625,11 +706,21 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
                               <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 1 }}>{s.id} · {s.confidence} · {evCount} evidence</div>
                             </div>
                             <div style={{ width: 90, flexShrink: 0 }}>
-                              <div style={{ position: "relative", height: 6, background: "var(--z-sep)", borderRadius: 3 }} title={`Score ${fx(s.score, 1)} · Peer ${fx(s.peerMedian, 1)}`}>
+                              <div style={{ position: "relative", height: 6, background: "var(--z-sep)", borderRadius: 3 }}
+                                   title={`Score ${fx(s.score, 1)}${s.peerMedian != null ? ` · Peer ${fx(s.peerMedian, 1)}` : " · no peer median stated"}`}>
                                 <div style={{ width: `${s.score / 5 * 100}%`, height: "100%", background: DMA.helpers.maturityHex(s.score), borderRadius: 3 }} />
-                                <div style={{ position: "absolute", left: `calc(${s.peerMedian / 5 * 100}% - 1px)`, top: -2, bottom: -2, width: 2, background: "var(--z-dpur)" }} />
+                                {/* The tick is a peer POSITION. With a null median it
+                                    was drawn at 0%, which reads as a peer set scoring
+                                    nothing. No median, no tick. */}
+                                {s.peerMedian != null ? (
+                                  <div style={{ position: "absolute", left: `calc(${s.peerMedian / 5 * 100}% - 1px)`, top: -2, bottom: -2, width: 2, background: "var(--z-dpur)" }} />
+                                ) : null}
                               </div>
-                              <div style={{ fontSize: 9, color: gap > 0 ? "var(--z-below)" : "var(--z-mid)", marginTop: 2, textAlign: "right" }}>{gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`} vs peer</div>
+                              {gap != null ? (
+                                <div style={{ fontSize: 9, color: gap > 0 ? "var(--z-below)" : "var(--z-mid)", marginTop: 2, textAlign: "right" }}>{gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`} vs peer</div>
+                              ) : (
+                                <div style={{ fontSize: 9, color: "var(--z-muted)", marginTop: 2, textAlign: "right" }}>no peer</div>
+                              )}
                             </div>
                             <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
                               {s.platforms.slice(0, 2).map(p => <span key={p} className="b b-teal">{DMA.getPlatform(p)?.short || p}</span>)}
@@ -798,7 +889,18 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
 
   // Peer comparison (for category we use category aggregate)
   const score = subcap ? subcap.score : entity.subcaps.filter(s => s.category === category.id).reduce((a, s, _, arr) => a + s.score / arr.length, 0);
-  const peer = subcap ? subcap.peerMedian : score + 0.3;
+  // The drawer's peer figure. For a category it was `score + 0.3`; for a cell it
+  // was the null cell median, then formatted, then compared. Read the promoted
+  // category median where there is one, and inherit it at cell grain labelled a
+  // PROXY (the workbook states medians at category grain, not per cell).
+  const catRowForPeer = ((entity.workbookScores || {}).categories || []).find(
+    c => c.category_id === (item.catId || (subcap && subcap.category))) || null;
+  const catPeer = catRowForPeer && catRowForPeer.peer_median != null
+    ? Number(catRowForPeer.peer_median) : null;
+  const peer = subcap
+    ? (subcap.peerMedian != null ? Number(subcap.peerMedian) : catPeer)
+    : catPeer;
+  const peerIsProxy = !!(subcap && subcap.peerMedian == null && catPeer != null);
   const gap = peer - score;
 
   return (
@@ -813,7 +915,7 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
               {subcap?.thin ? <span className="b b-org">THIN</span> : null}
             </div>
             <div className="title" style={{ fontSize: 15 }}>{subcap?.name || category?.name}</div>
-            <div className="sub">{subcap ? `Score ${fx(subcap.score, 1)} · ${subcap.confidence}` : `${entity.subcaps.filter(s => s.category === category.id).length} subcaps · weight ${fx((category.weight * 100), 0)}%`}</div>
+            <div className="sub">{subcap ? `Score ${fx(subcap.score, 1)} · ${subcap.confidence}` : `${entity.subcaps.filter(s => s.category === category.id).length} subcaps${category.weight != null ? ` · weight ${fx((category.weight * 100), 0)}%` : ""}`}</div>
           </div>
           <button className="icon-btn" onClick={onClose}><Icon name="x" size={16} /></button>
         </div>
@@ -914,22 +1016,41 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
             </div>
           ) : null}
 
-          {/* AI synthesis — explicitly layered AFTER the evidence above */}
-          {subcap ? (
-            <div className="card-tile" style={{ marginBottom: 4, background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", padding: 12 }}>
-              <div className="row" style={{ marginBottom: 6, gap: 6 }}>
-                <Icon name="sparkle" size={13} style={{ color: "var(--z-dpur)" }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: "var(--z-dpur)", letterSpacing: ".08em", textTransform: "uppercase" }}>AI synthesis</span>
-                <span className="spacer" />
-                <span style={{ fontSize: 9.5, color: "var(--z-dpur)", opacity: .85 }}>on the {linkedEv.length} item{linkedEv.length === 1 ? "" : "s"} above</span>
+          {/* The CELL's promoted synthesis.
+              This card was labelled "AI SYNTHESIS · on the N items above" and
+              printed one of three client-side template strings chosen by the
+              gap — including "At or above peer median. No platform investment
+              needed for this subcap specifically" on every cell whose peer
+              figure was null, i.e. all 765. The app runs no model and writes no
+              prose (invariant 1); what belongs here is what the producer wrote
+              for this cell, or an honest absence. */}
+          {subcap ? (() => {
+            const cell = DMA.cellEvidenceFor(subcap.id);
+            const body = cell && (cell.synthesis || cell.narrative || cell.rationale);
+            return (
+              <div className="card-tile" style={{ marginBottom: 4, background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", padding: 12 }}>
+                <div className="row" style={{ marginBottom: 6, gap: 6 }}>
+                  <Icon name="evidence" size={13} style={{ color: "var(--z-dpur)" }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "var(--z-dpur)", letterSpacing: ".08em", textTransform: "uppercase" }}>Cell synthesis</span>
+                  <span className="spacer" />
+                  {cell && (cell.e_ids || []).length ? (
+                    <span style={{ fontSize: 9.5, color: "var(--z-dpur)", opacity: .85 }}>{cell.e_ids.length} cited</span>
+                  ) : null}
+                </div>
+                <div style={{ fontSize: 12.5, color: "#3B0764", lineHeight: 1.6 }}>
+                  {body ? body
+                    : subcap.thin
+                      ? `Evidence is thin (${subcap.evidence_count} of 3). The workbook score stands and the cell carries a dashed outline; the run did not write a synthesis for it.`
+                      : "The run promoted no synthesis for this cell."}
+                </div>
+                {cell && (cell.closure_condition) ? (
+                  <div style={{ fontSize: 11, color: "var(--z-dpur)", marginTop: 6 }}>
+                    Closes on: {cell.closure_condition}
+                  </div>
+                ) : null}
               </div>
-              <div style={{ fontSize: 12.5, color: "#3B0764", lineHeight: 1.6 }}>
-                {subcap.thin ? `This subcap has thin evidence (${subcap.evidence_count} / 3) - confidence is LOW. The score is provisional.` :
-                  gap > 0.5 ? `Trails peer by ${fx(gap, 1)} - addressable via the linked recommendation. Closing this lifts the parent category by ${fx((gap * 0.18), 2)} points.` :
-                  `At or above peer median. No platform investment needed for this subcap specifically; protect against regression.`}
-              </div>
-            </div>
-          ) : null}
+            );
+          })() : null}
         </div>
         <div className="drawer-foot">
           {subcap ? <button className="btn btn-tertiary" onClick={() => {

@@ -983,7 +983,14 @@ function RecommendationModal() {
               <span className="chip">{r.id}</span>
               <span className="b b-teal">{plat?.name} · {r.feature}</span>
               <span className="b b-purple">{r.phase}</span>
-              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Effort {r.outcomes.effort} · {r.outcomes.time}</span>
+              {/* `outcomes` is a fixture-only nested object. A promoted recommendation
+                   states `effort_band` and `kpi_triple`, which the adapter maps to
+                   r.effort and r.kpi — so reading r.outcomes.effort threw a
+                   TypeError and blanked the entire app on any rec click. */}
+              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
+                {r.effort ? `Effort ${r.effort}` : (r.outcomes ? `Effort ${r.outcomes.effort} · ${r.outcomes.time}` : "effort not stated")}
+                {r.horizon ? ` · ${r.horizon}` : ""}
+              </span>
             </div>
             <div style={{ fontSize: 17, fontWeight: 600, color: "var(--z-dark)" }}>{r.title}</div>
           </div>
@@ -1012,12 +1019,40 @@ function RecommendationModal() {
                   <Icon name="sparkle" size={14} style={{ color: "var(--z-dpur)" }} />
                   <div style={{ fontWeight: 600, fontSize: 13 }}>Why this recommendation</div>
                 </div>
+                {/* The producer's own reasoning, in place of four templated
+                    sentences. Every one of these fields is promoted per
+                    recommendation and none was read: root_cause,
+                    cost_of_inaction, sequencing_reason, kpi_triple,
+                    validation_gate and the whole r_layer. The template asserted
+                    things no source states — "the lowest-friction path", "the
+                    platform footprint is already present or adjacent", "no
+                    prerequisites, this can land first" — identically for every
+                    recommendation. That is the "no reasoning engaged" reading. */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {[
-                    { n: "1", k: "Trigger", v: <>Surfaced by {r.root_cause.length} evidence item{r.root_cause.length === 1 ? "" : "s"} ({r.root_cause.map((eid, i) => <span key={eid}><button className="chip" style={{ marginRight: 3 }} onClick={() => openEvidence(eid)}>{eid}</button></span>)}) showing a capability gap the client cannot close with current tooling.</> },
-                    { n: "2", k: "Mechanism", v: <>{plat?.name}'s <strong>{r.feature}</strong> directly addresses the root cause. It is the lowest-friction path to the target maturity because the platform footprint is already {plat ? "present or adjacent" : "in scope"}.</> },
-                    { n: "3", k: "Sequencing", v: <>Scheduled in <strong>{r.phase}</strong>{impact ? ` (phase ${impact.phase})` : ""}. {impact && impact.dependencies && impact.dependencies.length ? <>Depends on {impact.dependencies.map(d => <span key={d} className="chip" style={{ marginRight: 3 }}>{d}</span>)} landing first.</> : "No prerequisites — this can land first and unblock later phases."}</> },
-                    { n: "4", k: "Expected outcome", v: <><strong>{r.outcomes.metric}</strong> · {r.outcomes.time} · {r.outcomes.effort} effort</> },
+                    { n: "1", k: "Root cause", v: r.root_cause_text
+                        ? <>{r.root_cause_text}{(r.root_cause || []).length ? <> {r.root_cause.map(eid => (
+                            <button key={eid} className="chip" style={{ marginRight: 3 }} onClick={() => openEvidence(eid)}>{eid}</button>
+                          ))}</> : null}</>
+                        : (r.root_cause || []).length
+                          ? <>Cited by {r.root_cause.length} evidence item{r.root_cause.length === 1 ? "" : "s"}: {r.root_cause.map(eid => (
+                              <button key={eid} className="chip" style={{ marginRight: 3 }} onClick={() => openEvidence(eid)}>{eid}</button>
+                            ))}</>
+                          : <span style={{ color: "var(--z-muted)" }}>the run states no root cause for this recommendation</span> },
+                    { n: "2", k: "Cost of inaction", v: r.cost_of_inaction
+                        || <span style={{ color: "var(--z-muted)" }}>not stated</span> },
+                    { n: "3", k: "Sequencing", v: r.sequencing_reason
+                        ? <>{r.sequencing_reason}{r.phase ? <> <span className="b b-muted">{r.phase}</span></> : null}</>
+                        : (r.phase
+                            ? <>Scheduled in <strong>{r.phase}</strong>. The run states no sequencing reason.</>
+                            : <span style={{ color: "var(--z-muted)" }}>not sequenced</span>) },
+                    { n: "4", k: "Expected outcome", v: r.kpi
+                      ? <><strong>{typeof r.kpi === "string" ? r.kpi : (r.kpi.metric || JSON.stringify(r.kpi))}</strong>{r.effort ? <> · {r.effort} effort</> : null}</>
+                      : r.outcomes
+                        ? <><strong>{r.outcomes.metric}</strong> · {r.outcomes.time} · {r.outcomes.effort} effort</>
+                        : <span style={{ color: "var(--z-muted)" }}>the run states no KPI for this recommendation</span> },
+                    { n: "5", k: "Validation gate", v: r.validation_gate
+                        || <span style={{ color: "var(--z-muted)" }}>not stated</span> },
                   ].map(row => (
                     <div key={row.n} style={{ display: "flex", gap: 10 }}>
                       <div style={{ width: 22, height: 22, borderRadius: 6, background: "var(--z-lav)", color: "var(--z-dpur)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{row.n}</div>
@@ -1028,6 +1063,24 @@ function RecommendationModal() {
                     </div>
                   ))}
                 </div>
+                {/* The reasoning trace, internal only. */}
+                {r.r_layer && audience !== "customer" ? (
+                  <div style={{ background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", borderRadius: 8, padding: "12px 14px", marginTop: 14 }}>
+                    <div className="row" style={{ marginBottom: 8 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase" }}>Reasoning trace</span>
+                      <span className="spacer" />
+                      {r.r_layer.verdict ? <span className="b b-purple">{r.r_layer.verdict}</span> : null}
+                    </div>
+                    {[["Hypothesis", r.r_layer.hypothesis],
+                      ["Counter-evidence", r.r_layer.counter],
+                      ["Domain test", r.r_layer.domain_test]].map(([k, v]) => v ? (
+                      <div key={k} style={{ marginBottom: 8 }}>
+                        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 2 }}>{k}</div>
+                        <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.55 }}>{v}</div>
+                      </div>
+                    ) : null)}
+                  </div>
+                ) : null}
               </div>
 
               {/* AE notes — persisted, flagged for future synthesis */}
@@ -1121,7 +1174,7 @@ function RecommendationModal() {
           <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Linked from insight cards · {DMA.INSIGHT_CARDS.filter(c => c.rec === r.id).map(c => c.id).join(", ") || "-"}</div>
           <div style={{ display: "flex", gap: 8 }}>
             <button className="btn btn-tertiary" onClick={() => {
-              const summary = `${r.id} · ${r.title}\n${plat?.name} · ${r.feature} · ${r.phase}\nEffort ${r.outcomes.effort} · ${r.outcomes.time}`;
+              const summary = `${r.id} · ${r.title}\n${r.l3 || plat?.name || ""} · ${r.l4 || r.feature || ""} · ${r.phase || ""}\nEffort ${r.effort || (r.outcomes && r.outcomes.effort) || "not stated"}`;
               try { navigator.clipboard.writeText(summary); pushToast("Recommendation summary copied", "success"); }
               catch (e) { pushToast("Couldn't access clipboard", "warn"); }
             }}><Icon name="copy" size={13} /> Copy summary</button>
@@ -1162,7 +1215,7 @@ function DependencyMap({ rec }) {
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--z-dark)" }}>{rec.id}</div>
           <div style={{ fontSize: 11, color: "var(--z-body)", marginTop: 4 }}>{rec.title}</div>
           <div className="sep" />
-          <div style={{ fontSize: 11 }}>Phase {impact?.phase} · {rec.outcomes.time}</div>
+          <div style={{ fontSize: 11 }}>Phase {impact?.phase || rec.phase || "—"}{rec.outcomes ? ` · ${rec.outcomes.time}` : ""}</div>
         </div>
 
         {/* Followups */}

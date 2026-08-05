@@ -708,7 +708,18 @@ function LeadershipPanel({ audience }) {
           );
         })()}
         <span className="spacer" />
-        {anyEnriched ? <span style={{ color: "var(--z-mid)", fontWeight: 600 }}>✓ {Object.values(enriched).filter(v => v === "done").length} of {DMA.LEADERSHIP.filter(x => !x.gap_flag).length} enriched</span> : null}
+        {/* In LIVE this states what the run actually established. In fixture
+            mode it reports the simulated enrichment. It used to read a variable
+            that no longer existed after the panel was rewired — an unconditional
+            reference inside the returned JSX, so D1 threw on every load and the
+            whole page rendered blank. */}
+        {LIVE
+          ? (withContact
+              ? <span style={{ color: "var(--z-mid)", fontWeight: 600 }}>✓ {withContact} of {roster.filter(x => !x.gap_flag).length} with a contact route</span>
+              : null)
+          : (Object.values(enriched).some(v => v === "done")
+              ? <span style={{ color: "var(--z-mid)", fontWeight: 600 }}>✓ {Object.values(enriched).filter(v => v === "done").length} of {roster.filter(x => !x.gap_flag).length} enriched</span>
+              : null)}
       </div>
     </div>
   );

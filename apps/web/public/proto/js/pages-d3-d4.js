@@ -728,7 +728,7 @@ function StairstepCurve({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, "Where ", entity.name, " is today \u2192 M3 \u2192 M4 \u2192 M5 \xB7 with the platform that enables each step-up")), /*#__PURE__*/React.createElement("div", {
+  }, "Where ", entity.name, " is today, and what each rung requires")), /*#__PURE__*/React.createElement("div", {
     className: "toggle-row"
   }, Object.entries(clusters).map(([k, v]) => /*#__PURE__*/React.createElement("button", {
     key: k,
@@ -804,7 +804,7 @@ function StairstepCurve({
     const y = stepY(i);
     const w = stepW - 8;
     const h = H - padB - y;
-    const platform = (s.platforms || [])[0];
+    const platform = (s.platforms || [])[0] || null;
     const plat = DMA.getPlatform(platform) || {
       id: platform,
       name: platform,
@@ -912,7 +912,7 @@ function StairstepCurve({
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: `b ${i === 0 ? "b-act" : i === 1 ? "b-bld" : i === 2 ? "b-cmp" : "b-dif"}`
-  }, "M", s.m, " ", s.label), s.platforms[0] !== "-" ? /*#__PURE__*/React.createElement("span", {
+  }, "M", s.m, " ", s.label), (s.platforms || []).length && s.platforms[0] !== "-" ? /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
       color: "var(--z-mid)"
@@ -1063,13 +1063,13 @@ function ChevronView({
       letterSpacing: ".08em",
       textTransform: "uppercase"
     }
-  }, "Phase ", r.phase), /*#__PURE__*/React.createElement("div", null, r.label)), /*#__PURE__*/React.createElement("div", {
+  }, "Phase ", r.phase), /*#__PURE__*/React.createElement("div", null, r.label)), r.duration ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       opacity: .85,
       textAlign: "right"
     }
-  }, r.duration))))), /*#__PURE__*/React.createElement("div", {
+  }, r.duration) : null)))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "repeat(3, 1fr)",
@@ -1083,7 +1083,7 @@ function ChevronView({
       padding: 14,
       color: "#fff"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, r.horizon ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "rgba(255,255,255,.7)",
@@ -1091,13 +1091,13 @@ function ChevronView({
       textTransform: "uppercase",
       marginBottom: 4
     }
-  }, "Platform"), /*#__PURE__*/React.createElement("div", {
+  }, "Horizon"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       fontWeight: 600,
       marginBottom: 10
     }
-  }, r.platform), /*#__PURE__*/React.createElement("div", {
+  }, r.horizon)) : null, r.rationale ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "rgba(255,255,255,.7)",
@@ -1105,27 +1105,26 @@ function ChevronView({
       textTransform: "uppercase",
       marginBottom: 4
     }
-  }, "Target maturity"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12.5,
-      marginBottom: 10,
-      color: "var(--z-mint-lt)"
-    }
-  }, r.target), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "rgba(255,255,255,.7)",
-      letterSpacing: ".06em",
-      textTransform: "uppercase",
-      marginBottom: 4
-    }
-  }, "Success metric"), /*#__PURE__*/React.createElement("div", {
+  }, "Why this phase"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       marginBottom: 10,
       lineHeight: 1.5
     }
-  }, r.metric), /*#__PURE__*/React.createElement("div", {
+  }, r.rationale)) : null, (r.depends_on || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "rgba(255,255,255,.7)",
+      letterSpacing: ".06em",
+      textTransform: "uppercase",
+      marginBottom: 4
+    }
+  }, "Depends on"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      marginBottom: 10
+    }
+  }, r.depends_on.join(" · "))) : null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "rgba(255,255,255,.7)",
@@ -1328,7 +1327,7 @@ function StepCurveView({
       fontWeight: "700",
       fill: r.color,
       textAnchor: "middle"
-    }, r.label.toUpperCase());
+    }, String(r.label || `Phase ${r.phase}`).toUpperCase());
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,

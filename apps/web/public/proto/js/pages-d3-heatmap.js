@@ -3,6 +3,49 @@
    Multiple view modes · synthesis drawer · working overlays
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* ── Peer figures: read, never derived ──────────────────────────────────
+   Every peer number on this page was manufactured, in four different ways, and
+   all four rendered as a benchmark an AE would quote:
+
+     · pillar zoom     `const peer = score + 0.3` — a constant offset
+     · category zoom   mean of `s.peerMedian` where every value is null, and
+                       `a + null` is `a`, so 16 categories read "Peer 0.0"
+     · subcap rows     `gap = s.peerMedian - s.score` → `null - 1.5` = -1.5,
+                       printed as "+1.5 vs peer" in the ABOVE-peer colour on
+                       every row, with the peer tick pinned at 0%
+     · focus areas     the same null mean, plus hardcoded 2.5/2.8 fallbacks
+
+   Peer medians genuinely do NOT exist at cell grain in this corpus — 0 of 765
+   rows carry one. They exist at CATEGORY and PILLAR grain, which the run
+   promotes and which were sitting unread. So: read the stated median at the
+   grain that has one, inherit the category median at subcap grain and label it
+   a proxy, and where nothing is stated render nothing — no tick, no delta, no
+   "at peer" badge. A missing benchmark is not a benchmark of zero.
+
+   `peerOf` returns {median, basis} where median may be null. Callers must
+   branch on null rather than formatting it. */
+function peerOf(median, basis) {
+  const v = median === null || median === undefined || median === "" ? null : Number(median);
+  return {
+    median: v === null || !isFinite(v) ? null : v,
+    basis: basis || null
+  };
+}
+
+/* The mean of the peer medians that EXIST, or null when none do. Never treats a
+   missing value as zero and never divides by the full count. */
+function peerMeanOf(rows) {
+  const vals = (rows || []).map(r => r && r.peerMedian !== null && r.peerMedian !== undefined ? Number(r.peerMedian) : null).filter(v => v !== null && isFinite(v));
+  if (!vals.length) return null;
+  return vals.reduce((a, v) => a + v, 0) / vals.length;
+}
+
+/* A delta only exists when both sides do. */
+function deltaOf(score, peer) {
+  if (score == null || peer == null) return null;
+  const d = Number(score) - Number(peer);
+  return isFinite(d) ? d : null;
+}
 function ClientHeatmap({
   entity,
   run
@@ -37,7 +80,10 @@ function ClientHeatmap({
     for (const cat of DMA.CATEGORIES) {
       const subs = entity.subcaps.filter(s => s.category === cat.id);
       const avg = subs.reduce((a, s) => a + s.score, 0) / Math.max(1, subs.length);
-      const peer = subs.reduce((a, s) => a + s.peerMedian, 0) / Math.max(1, subs.length);
+      // The category's STATED median where the run promotes one, else the mean
+      // of whatever cell medians exist, else null. Never a null-as-zero mean.
+      const catRow = ((entity.workbookScores || {}).categories || []).find(c => c.category_id === cat.id) || null;
+      const peer = catRow && catRow.peer_median != null ? Number(catRow.peer_median) : peerMeanOf(subs);
       const thin = subs.filter(s => s.thin).length;
       out[cat.id] = {
         avg,
@@ -296,9 +342,13 @@ function FocusAreaView({
       className: "g3"
     }, DMA.FOCUS_AREAS.map(fa => {
       const subs = subcapsForFocusArea(fa);
-      const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : 2.5;
-      const peer = subs.length ? subs.reduce((a, s) => a + s.peerMedian, 0) / subs.length : 2.8;
-      const gap = peer - avg;
+      // The focus area's own promoted figures first (peer_score/delta are
+      // in the H1 contract and were unread), then the mean of the cells it
+      // names, then nothing. No 2.5/2.8 fallbacks: a hardcoded average is
+      // a claim about this client.
+      const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : null;
+      const peer = fa.peer_score != null ? Number(fa.peer_score) : peerMeanOf(subs);
+      const gap = fa.delta != null ? -Number(fa.delta) : deltaOf(peer, avg);
       return /*#__PURE__*/React.createElement("div", {
         key: fa.id,
         className: "fa-card",
@@ -332,14 +382,22 @@ function FocusAreaView({
         style: {
           marginBottom: 8
         }
-      }, /*#__PURE__*/React.createElement(MaturityChip, {
+      }, avg != null ? /*#__PURE__*/React.createElement(MaturityChip, {
         score: avg
-      }), /*#__PURE__*/React.createElement("span", {
+      }) : /*#__PURE__*/React.createElement("span", {
+        className: "b b-muted"
+      }, "no score"), peer != null ? /*#__PURE__*/React.createElement("span", {
         style: {
           fontSize: 11,
           color: "var(--z-muted)"
         }
-      }, "Peer ", fx(peer, 1)), gap > 0.3 ? /*#__PURE__*/React.createElement("span", {
+      }, "Peer ", fx(peer, 1)) : /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 11,
+          color: "var(--z-muted)"
+        },
+        title: "no peer median is stated at this grain in this run"
+      }, "no peer figure"), gap == null ? null : gap > 0.3 ? /*#__PURE__*/React.createElement("span", {
         className: "b b-below",
         style: {
           marginLeft: "auto"
@@ -363,8 +421,8 @@ function FocusAreaView({
   // Selected focus area detail
   const fa = focusArea;
   const subs = subcapsForFocusArea(fa);
-  const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : 2.5;
-  const peer = subs.length ? subs.reduce((a, s) => a + s.peerMedian, 0) / subs.length : 2.8;
+  const avg = subs.length ? subs.reduce((a, s) => a + s.score, 0) / subs.length : null;
+  const peer = fa.peer_score != null ? Number(fa.peer_score) : peerMeanOf(subs);
   const insights = DMA.INSIGHT_CARDS.filter(ic => ic.affects.some(sid => fa.subcaps.some(p => sid.startsWith(p.slice(0, 4)))));
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "card flush",
@@ -953,7 +1011,11 @@ function PillarHeatmap({
     className: "g4"
   }, DMA.PILLARS.map(p => {
     const score = entity.pillar_scores[p.id];
-    const peer = score + 0.3;
+    // The workbook's STATED pillar median, which the run promotes and
+    // which a constant offset was standing in for. Baxter's P1 sits at
+    // 3.11 against a stated 2.9 — ABOVE its peer set — and `score + 0.3`
+    // rendered that as 0.3 BELOW.
+    const peer = (entity.pillar_peer_medians || {})[p.id];
     return /*#__PURE__*/React.createElement("div", {
       key: p.id,
       className: "card-tile clickable",
@@ -995,7 +1057,7 @@ function PillarHeatmap({
         marginTop: 8,
         fontSize: 11
       }
-    }, /*#__PURE__*/React.createElement("span", {
+    }, peer != null ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
       style: {
         color: "var(--z-muted)"
       }
@@ -1006,7 +1068,12 @@ function PillarHeatmap({
         color: score < peer ? "var(--z-below)" : "var(--z-mid)",
         fontFamily: "var(--font-mono)"
       }
-    }, score >= peer ? "▲" : "▼", " ", fx(Math.abs(score - peer), 1))), /*#__PURE__*/React.createElement("div", {
+    }, score >= peer ? "▲" : "▼", " ", fx(Math.abs(score - peer), 1))) : /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--z-muted)"
+      },
+      title: "the run states no peer median for this pillar"
+    }, "no peer figure stated")), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
         color: "var(--z-muted)",
@@ -1143,14 +1210,28 @@ function CategoryHeatmap({
         justifyContent: "flex-end",
         paddingRight: 8
       }
-    }, "Peer"), cats.map(c => /*#__PURE__*/React.createElement("div", {
-      key: c.id,
-      className: `hm-cell peer b ${DMA.helpers.maturityClass(catAgg[c.id].peer)}`,
-      style: {
-        minHeight: 30,
-        padding: "4px 6px"
-      }
-    }, fx(catAgg[c.id].peer, 1)))) : null, /*#__PURE__*/React.createElement("div", null), cats.map(c => /*#__PURE__*/React.createElement("div", {
+    }, "Peer"), cats.map(c => {
+      const pm = catAgg[c.id] ? catAgg[c.id].peer : null;
+      // A null median banded as maturityClass(null) and printed 0.0,
+      // so all sixteen categories read "Peer 0.0" in the lowest band
+      // — a peer set that scores nothing.
+      return pm == null ? /*#__PURE__*/React.createElement("div", {
+        key: c.id,
+        className: "hm-cell peer b b-muted",
+        style: {
+          minHeight: 30,
+          padding: "4px 6px"
+        },
+        title: "no peer median stated for this category in this run"
+      }, "\u2014") : /*#__PURE__*/React.createElement("div", {
+        key: c.id,
+        className: `hm-cell peer b ${DMA.helpers.maturityClass(pm)}`,
+        style: {
+          minHeight: 30,
+          padding: "4px 6px"
+        }
+      }, fx(pm, 1));
+    })) : null, /*#__PURE__*/React.createElement("div", null), cats.map(c => /*#__PURE__*/React.createElement("div", {
       key: `l-${c.id}`,
       style: {
         fontSize: 9.5,
@@ -1408,7 +1489,9 @@ function SubcapHeatmap({
         }
       }, cl.items.map(s => {
         const caps = showIssues ? DMA.issueCapsFor(s.id) : [];
-        const gap = s.peerMedian - s.score;
+        // null - score is -score, which printed as "+score vs
+        // peer" in the above-peer colour on every row.
+        const gap = deltaOf(s.peerMedian, s.score);
         const evCount = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.includes(s.id)).length;
         return /*#__PURE__*/React.createElement("button", {
           key: s.id,
@@ -1464,7 +1547,7 @@ function SubcapHeatmap({
             background: "var(--z-sep)",
             borderRadius: 3
           },
-          title: `Score ${fx(s.score, 1)} · Peer ${fx(s.peerMedian, 1)}`
+          title: `Score ${fx(s.score, 1)}${s.peerMedian != null ? ` · Peer ${fx(s.peerMedian, 1)}` : " · no peer median stated"}`
         }, /*#__PURE__*/React.createElement("div", {
           style: {
             width: `${s.score / 5 * 100}%`,
@@ -1472,7 +1555,7 @@ function SubcapHeatmap({
             background: DMA.helpers.maturityHex(s.score),
             borderRadius: 3
           }
-        }), /*#__PURE__*/React.createElement("div", {
+        }), s.peerMedian != null ? /*#__PURE__*/React.createElement("div", {
           style: {
             position: "absolute",
             left: `calc(${s.peerMedian / 5 * 100}% - 1px)`,
@@ -1481,14 +1564,21 @@ function SubcapHeatmap({
             width: 2,
             background: "var(--z-dpur)"
           }
-        })), /*#__PURE__*/React.createElement("div", {
+        }) : null), gap != null ? /*#__PURE__*/React.createElement("div", {
           style: {
             fontSize: 9,
             color: gap > 0 ? "var(--z-below)" : "var(--z-mid)",
             marginTop: 2,
             textAlign: "right"
           }
-        }, gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`, " vs peer")), /*#__PURE__*/React.createElement("div", {
+        }, gap > 0 ? `−${fx(gap, 1)}` : `+${fx(Math.abs(gap), 1)}`, " vs peer") : /*#__PURE__*/React.createElement("div", {
+          style: {
+            fontSize: 9,
+            color: "var(--z-muted)",
+            marginTop: 2,
+            textAlign: "right"
+          }
+        }, "no peer")), /*#__PURE__*/React.createElement("div", {
           style: {
             display: "flex",
             gap: 3,
@@ -1772,7 +1862,14 @@ function SynthesisDrawer({
 
   // Peer comparison (for category we use category aggregate)
   const score = subcap ? subcap.score : entity.subcaps.filter(s => s.category === category.id).reduce((a, s, _, arr) => a + s.score / arr.length, 0);
-  const peer = subcap ? subcap.peerMedian : score + 0.3;
+  // The drawer's peer figure. For a category it was `score + 0.3`; for a cell it
+  // was the null cell median, then formatted, then compared. Read the promoted
+  // category median where there is one, and inherit it at cell grain labelled a
+  // PROXY (the workbook states medians at category grain, not per cell).
+  const catRowForPeer = ((entity.workbookScores || {}).categories || []).find(c => c.category_id === (item.catId || subcap && subcap.category)) || null;
+  const catPeer = catRowForPeer && catRowForPeer.peer_median != null ? Number(catRowForPeer.peer_median) : null;
+  const peer = subcap ? subcap.peerMedian != null ? Number(subcap.peerMedian) : catPeer : catPeer;
+  const peerIsProxy = !!(subcap && subcap.peerMedian == null && catPeer != null);
   const gap = peer - score;
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "drawer-mask",
@@ -1809,7 +1906,7 @@ function SynthesisDrawer({
     }
   }, subcap?.name || category?.name), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, subcap ? `Score ${fx(subcap.score, 1)} · ${subcap.confidence}` : `${entity.subcaps.filter(s => s.category === category.id).length} subcaps · weight ${fx(category.weight * 100, 0)}%`)), /*#__PURE__*/React.createElement("button", {
+  }, subcap ? `Score ${fx(subcap.score, 1)} · ${subcap.confidence}` : `${entity.subcaps.filter(s => s.category === category.id).length} subcaps${category.weight != null ? ` · weight ${fx(category.weight * 100, 0)}%` : ""}`)), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
     onClick: onClose
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -2103,49 +2200,59 @@ function SynthesisDrawer({
       fontWeight: 600
     },
     className: "txt-fit-1"
-  }, ic.title)))) : null, subcap ? /*#__PURE__*/React.createElement("div", {
-    className: "card-tile",
-    style: {
-      marginBottom: 4,
-      background: "var(--ph0-lt)",
-      border: "1px solid var(--ph0-bd)",
-      padding: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      marginBottom: 6,
-      gap: 6
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "sparkle",
-    size: 13,
-    style: {
-      color: "var(--z-dpur)"
-    }
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: "var(--z-dpur)",
-      letterSpacing: ".08em",
-      textTransform: "uppercase"
-    }
-  }, "AI synthesis"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9.5,
-      color: "var(--z-dpur)",
-      opacity: .85
-    }
-  }, "on the ", linkedEv.length, " item", linkedEv.length === 1 ? "" : "s", " above")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12.5,
-      color: "#3B0764",
-      lineHeight: 1.6
-    }
-  }, subcap.thin ? `This subcap has thin evidence (${subcap.evidence_count} / 3) - confidence is LOW. The score is provisional.` : gap > 0.5 ? `Trails peer by ${fx(gap, 1)} - addressable via the linked recommendation. Closing this lifts the parent category by ${fx(gap * 0.18, 2)} points.` : `At or above peer median. No platform investment needed for this subcap specifically; protect against regression.`)) : null), /*#__PURE__*/React.createElement("div", {
+  }, ic.title)))) : null, subcap ? (() => {
+    const cell = DMA.cellEvidenceFor(subcap.id);
+    const body = cell && (cell.synthesis || cell.narrative || cell.rationale);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card-tile",
+      style: {
+        marginBottom: 4,
+        background: "var(--ph0-lt)",
+        border: "1px solid var(--ph0-bd)",
+        padding: 12
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        marginBottom: 6,
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "evidence",
+      size: 13,
+      style: {
+        color: "var(--z-dpur)"
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        fontWeight: 700,
+        color: "var(--z-dpur)",
+        letterSpacing: ".08em",
+        textTransform: "uppercase"
+      }
+    }, "Cell synthesis"), /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), cell && (cell.e_ids || []).length ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 9.5,
+        color: "var(--z-dpur)",
+        opacity: .85
+      }
+    }, cell.e_ids.length, " cited") : null), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12.5,
+        color: "#3B0764",
+        lineHeight: 1.6
+      }
+    }, body ? body : subcap.thin ? `Evidence is thin (${subcap.evidence_count} of 3). The workbook score stands and the cell carries a dashed outline; the run did not write a synthesis for it.` : "The run promoted no synthesis for this cell."), cell && cell.closure_condition ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-dpur)",
+        marginTop: 6
+      }
+    }, "Closes on: ", cell.closure_condition) : null);
+  })() : null), /*#__PURE__*/React.createElement("div", {
     className: "drawer-foot"
   }, subcap ? /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",

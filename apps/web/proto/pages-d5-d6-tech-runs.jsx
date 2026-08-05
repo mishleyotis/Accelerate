@@ -126,6 +126,23 @@ function ClientContext({ entity, run }) {
           <RangeSlider min={_lo} max={_hi} value={yearRange} onChange={setYearRange} />
         </div>
 
+        {/* The promoted storyline: the arc the events describe, which the
+            Surface Spec calls the tie back to the DMA. It was adapted onto
+            `timelineMeta` and read by no component. */}
+        {(() => {
+          const meta = DMA.timelineMetaFor(entity.id);
+          if (!meta || !meta.storyline) return null;
+          return (
+            <div style={{ background: "var(--z-lav)", borderLeft: "3px solid var(--z-dpur)", borderRadius: "0 8px 8px 0", padding: "10px 14px", marginBottom: 14 }}>
+              <div className="row" style={{ marginBottom: 4 }}>
+                <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase" }}>Storyline</span>
+                {meta.arc_shape ? <span className="b b-purple" style={{ marginLeft: 6 }}>{meta.arc_shape}</span> : null}
+              </div>
+              <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6 }}>{meta.storyline}</div>
+            </div>
+          );
+        })()}
+
         <InteractiveTimeline events={events} setHoverEvent={setHoverEvent} setSelectedEvent={setSelectedEvent} selectedEvent={selectedEvent} hoverEvent={hoverEvent} />
 
         {selectedEvent !== null && events[selectedEvent] ? (
@@ -137,7 +154,13 @@ function ClientContext({ entity, run }) {
       <div className="card flush" style={{ marginBottom: 14 }}>
         <div className="card-head">
           <h3>Issue register · Gantt</h3>
-          <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{issues.filter(i => i.status === "OPEN").length} OPEN · {issues.filter(i => i.status === "RESOLVED").length} RESOLVED · click any bar for detail</span>
+          {/* Counted from the statuses the run actually uses. Hardcoding OPEN and
+              RESOLVED printed "0 OPEN · 0 RESOLVED" against REMEDIATED / ACTIVE /
+              NEW OBLIGATION. */}
+          <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
+            {Object.entries(issues.reduce((a, i) => { const k = i.status || "unstated"; a[k] = (a[k] || 0) + 1; return a; }, {}))
+              .map(([k, n]) => `${n} ${k}`).join(" · ")} · click any bar for detail
+          </span>
         </div>
         <div className="card-body">
           <InteractiveGantt issues={issues} issueOpen={issueOpen} setIssueOpen={setIssueOpen} />
@@ -169,7 +192,7 @@ function ClientContext({ entity, run }) {
             <span className="spacer" />
             <span style={{ fontSize: 10, color: "var(--z-muted)" }}>Click any card for source</span>
           </div>
-          <SentimentGridInteractive sentOpen={sentOpen} setSentOpen={setSentOpen} openEvidence={openEvidence} />
+          <SentimentGridInteractive sentOpen={sentOpen} setSentOpen={setSentOpen} openEvidence={openEvidence} entity={entity} />
         </div>
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
@@ -539,9 +562,10 @@ function EventDetail({ event, onClose, openEvidence, openSubcap }) {
 }
 
 function InteractiveGantt({ issues, issueOpen, setIssueOpen }) {
-  const undated = (issues || []).filter(i => !i.start);
-  issues = (issues || []).filter(i => i.start);
-  if (!issues.length) {
+  const all = issues || [];
+  const undated = all.filter(i => !i.start);
+  const dated = all.filter(i => i.start);
+  if (!dated.length) {
     return (
       <div className="empty" style={{ padding: "18px 0" }}>
         <h3>No dated issues</h3>
@@ -551,46 +575,100 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen }) {
       </div>
     );
   }
-  const start = new Date("2024-01-01");
-  const today = new Date();
-  const months = 36;
+  /* The window comes from the issues, not from a constant.
+
+     The axis was hardcoded to start 2024-01-01 and span 36 months, so an issue
+     opened 2021-10 computed left:-75% width:162% — the bar began five hundred
+     pixels left of its own lane and painted its white text over the id chip and
+     the severity badge. That is the overlapping text on this page. The axis now
+     covers the issues it is drawing, and every bar is clamped inside it. */
+  const at = (d) => {
+    if (!d) return null;
+    const str = String(d);
+    const t = Date.parse(/^\d{4}-\d{2}$/.test(str) ? `${str}-01` : str);
+    return Number.isNaN(t) ? null : t;
+  };
+  const now = Date.now();
+  const stamps = [];
+  for (const i of dated) {
+    const a = at(i.start), b = i.end ? at(i.end) : now;
+    if (a !== null) stamps.push(a);
+    if (b !== null) stamps.push(b);
+  }
+  const lo = Math.min(...stamps);
+  const hi = Math.max(...stamps, now);
+  const span = Math.max(1, hi - lo);
+  const pct = (t) => ((t - lo) / span) * 100;
+  const yearOf = (t) => new Date(t).getUTCFullYear();
+  // One tick per year actually inside the window, labelled with that year —
+  // the old strip printed four year labels and two quarter labels over a
+  // three-year span, with "2027" sitting above 2026-Q4.
+  const years = [];
+  for (let y = yearOf(lo); y <= yearOf(hi); y++) years.push(y);
+
   return (
     <div>
       <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 12, fontSize: 10.5, color: "var(--z-muted)", marginBottom: 6 }}>
         <div></div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: 0 }}>
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} style={{ borderLeft: i === 0 ? "none" : "1px dashed var(--z-sep)", paddingLeft: 4 }}>{`${i % 3 === 0 ? (2024 + Math.floor(i / 3)) : "Q" + ((i % 3) + 1)}`}</div>
-          ))}
+        <div style={{ position: "relative", height: 14 }}>
+          {years.map(y => {
+            const t = Date.parse(`${y}-01-01`);
+            const left = Math.max(0, Math.min(100, pct(t)));
+            return (
+              <div key={y} style={{ position: "absolute", left: `${left}%`, top: 0, paddingLeft: 4, borderLeft: "1px dashed var(--z-sep)", height: 14 }}>{y}</div>
+            );
+          })}
         </div>
       </div>
-      {issues.map(iss => {
-        const startD = new Date(iss.start + (iss.start.length === 7 ? "-01" : ""));
-        const endD = iss.end ? new Date(iss.end + (iss.end.length === 7 ? "-01" : "")) : today;
-        const startPct = ((startD - start) / (1000*60*60*24*30.4) / months) * 100;
-        const widthPct = ((endD - startD) / (1000*60*60*24*30.4) / months) * 100;
+      {dated.map(iss => {
+        const a = at(iss.start);
+        const b = iss.end ? (at(iss.end) ?? now) : now;
+        const left = Math.max(0, Math.min(100, pct(a)));
+        const right = Math.max(0, Math.min(100, pct(Math.max(b, a))));
+        const width = Math.max(2, right - left);
         const color = iss.severity === "CRITICAL" ? "var(--z-below)" : iss.severity === "MATERIAL" ? "var(--z-org)" : "var(--z-muted)";
         const isOpen = issueOpen === iss.id;
+        const capped = Object.keys((DMA.ISSUE_CAPS[iss.id] || {}).caps || {}).length;
         return (
           <button key={iss.id} onClick={() => setIssueOpen(isOpen ? null : iss.id)}
             style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 12, padding: "8px 0", borderTop: "1px solid var(--z-sep)", textAlign: "left", width: "100%", background: isOpen ? "var(--z-lav)" : "transparent", border: "0", borderRadius: 6 }}>
-            <div style={{ padding: "0 8px" }}>
+            <div style={{ padding: "0 8px", minWidth: 0 }}>
               <div className="row">
                 <span className="chip">{iss.id}</span>
-                <span className={`b ${iss.severity === "CRITICAL" ? "b-below" : iss.severity === "MATERIAL" ? "b-org" : "b-muted"}`}>{iss.severity}</span>
-                {Object.keys(DMA.ISSUE_CAPS[iss.id]?.caps || {}).length > 0 ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} /> : null}
+                {iss.severity ? <span className={`b ${iss.severity === "CRITICAL" ? "b-below" : iss.severity === "MATERIAL" ? "b-org" : "b-muted"}`}>{iss.severity}</span> : null}
+                {capped ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${capped} cell${capped === 1 ? "" : "s"} capped`} /> : null}
               </div>
-              <div style={{ fontSize: 12, marginTop: 4 }}>{iss.type}</div>
-              <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 2 }}>{iss.status} {iss.cap_value ? `· cap ${iss.cap_value}` : ""}</div>
+              <div style={{ fontSize: 12, marginTop: 4 }} className="txt-fit-1" title={iss.title || iss.type || ""}>{iss.title || iss.type || "—"}</div>
+              <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 2 }}>{iss.status}{iss.cap_value ? ` · cap ${iss.cap_value}` : ""}</div>
             </div>
             <div style={{ position: "relative", height: 28 }}>
-              <div style={{ position: "absolute", left: `${startPct}%`, width: `${Math.max(2, widthPct)}%`, height: 18, top: 5, background: color, borderRadius: 4, opacity: .85, display: "flex", alignItems: "center", padding: "0 6px", color: "#fff", fontSize: 10, fontWeight: 500, overflow: "hidden", whiteSpace: "nowrap" }} className="txt-trunc">
+              <div title={`${iss.start}${iss.end ? ` → ${iss.end}` : " → open"} · ${iss.desc || ""}`}
+                   style={{ position: "absolute", left: `${left}%`, width: `${width}%`, height: 18, top: 5, background: color, borderRadius: 4, opacity: .85, display: "flex", alignItems: "center", padding: "0 6px", color: "#fff", fontSize: 10, fontWeight: 500, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
                 {iss.desc}
               </div>
             </div>
           </button>
         );
       })}
+      {/* Undated issues are listed rather than dropped: the page head counts
+          them, so silently omitting three of five made the chart disagree with
+          its own header. */}
+      {undated.length ? (
+        <div style={{ borderTop: "1px solid var(--z-sep)", paddingTop: 10, marginTop: 6 }}>
+          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>
+            Undated · {undated.length} · not placeable on a time axis
+          </div>
+          {undated.map(iss => (
+            <button key={iss.id} onClick={() => setIssueOpen(issueOpen === iss.id ? null : iss.id)}
+              style={{ display: "flex", gap: 8, alignItems: "center", width: "100%", textAlign: "left", background: issueOpen === iss.id ? "var(--z-lav)" : "transparent", border: 0, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>
+              <span className="chip">{iss.id}</span>
+              {iss.severity ? <span className="b b-muted">{iss.severity}</span> : null}
+              <span style={{ flex: 1, minWidth: 0, fontSize: 12 }} className="txt-fit-1" title={iss.title || ""}>{iss.title || iss.type || "—"}</span>
+              <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{iss.status}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -602,16 +680,22 @@ function IssueDetail({ issue, entity, onClose, openEvidence }) {
     <div style={{ marginTop: 14, padding: 14, background: "var(--z-lav)", borderRadius: 8, borderLeft: `4px solid ${issue.severity === "CRITICAL" ? "var(--z-below)" : issue.severity === "MATERIAL" ? "var(--z-org)" : "var(--z-muted)"}` }}>
       <div className="row" style={{ marginBottom: 8 }}>
         <span className="chip">{issue.id}</span>
-        <strong style={{ fontSize: 14 }}>{issue.type}</strong>
+        <strong style={{ fontSize: 14 }}>{issue.title || issue.type || "—"}</strong>
         <span className={`b ${issue.severity === "CRITICAL" ? "b-below" : issue.severity === "MATERIAL" ? "b-org" : "b-muted"}`}>{issue.severity}</span>
         <span className="b b-muted">{issue.status}</span>
         <span className="spacer" />
         <button className="icon-btn" onClick={onClose}><Icon name="x" size={14} /></button>
       </div>
       <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.6, marginBottom: 14 }}>{issue.desc}</div>
+      {caps.length === 0 ? (
+        <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginBottom: 12 }}>
+          This matter names no capability cell, so it is not linked to the
+          assessment. An issue that constrains a capability should say which.
+        </div>
+      ) : null}
       {caps.length > 0 ? (
         <div>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 8 }}>Caps placed by this issue · {caps.length}</div>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 8 }}>Cells this matter bears on · {caps.length}</div>
           <div className="g2" style={{ gap: 8 }}>
             {caps.map(([subcapId, capValue]) => {
               const s = entity.subcaps.find(x => x.id === subcapId) || { name: subcapId, score: capValue };
@@ -623,15 +707,26 @@ function IssueDetail({ issue, entity, onClose, openEvidence }) {
                     <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} />
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 500 }}>{s.name}</div>
-                  <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 4 }}>Score capped at M{capValue}</div>
+                  {/* A cap LEVEL is only shown when the run states one; the
+                      linkage alone does not imply a ceiling. */}
+                  <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 4 }}>
+                    {capValue != null
+                      ? `Score capped at M${capValue}`
+                      : (s.score != null ? `Assessed ${fx(s.score, 1)} · no cap level stated` : "no cap level stated")}
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
       ) : null}
+      {/* The issue's OWN cited ids. This used to prefix-sweep the entire
+          evidence store for anything sharing four characters with a capped
+          cell — and since the caps map was empty in LIVE, it swept nothing, so
+          every issue showed no evidence while carrying an e_id of its own. */}
       {(() => {
-        const ev = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.some(sid => caps.some(([cid]) => sid.slice(0, 4) === cid.slice(0, 4))));
+        const own = issue.evidence || [];
+        const ev = own.map(eid => DMA.getEvidence(eid) || { id: eid, tier: "T3" });
         if (!ev.length) return null;
         return (
           <div style={{ marginTop: 14 }}>
@@ -643,62 +738,127 @@ function IssueDetail({ issue, entity, onClose, openEvidence }) {
         );
       })()}
       <div className="row" style={{ marginTop: 12 }}>
-        <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/heatmap`, { hm: "standard", zoom: "subcap" })}>View capped cells in heatmap <Icon name="arrow-r" size={11} /></button>
+        {caps.length ? (
+          <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/heatmap`, { hm: "standard", zoom: "subcap", subcap: caps[0][0] })}>Open {caps[0][0]} in the heatmap <Icon name="arrow-r" size={11} /></button>
+        ) : null}
       </div>
     </div>
   );
 }
 
 function FinChartInteractive({ entity, hoveredYear, setHoveredYear }) {
-  const years = [2022, 2023, 2024, 2025, 2026];
-  const baseAssets = entity.assets || 11e9;
-  const cagr = entity.cagr || 0.06;
-  const data = years.map((y, i) => ({ year: y, val: baseAssets * Math.pow(1 + cagr, i - 4) }));
-  const max = Math.max(...data.map(d => d.val));
+  /* The promoted financial series, and only that.
+
+     This chart used to MANUFACTURE five years of balance sheet:
+
+       baseAssets = entity.assets || 11e9
+       cagr       = entity.cagr   || 0.06
+       val        = baseAssets * (1 + cagr)^(i - 4)
+
+     — a compounded curve from a default asset figure and a default growth rate,
+     rendered as this institution's five-year trajectory. With `assets` stated
+     in billions (6.5) and then divided by 1e9, every bar read "$0.0B", and the
+     footer printed a 6.0% CAGR nobody measured. Inventing a trend line is the
+     single most quotable fabrication on the page: an AE reads growth off it.
+
+     The run promotes three dated points (FY2023 5.8, 2025-Q3 6.24, 2025-12
+     6.5) with a stated trend. Three is what it has, so three is what renders. */
+  const f = DMA.financialsFor(entity.id);
+  const pts = ((f && f.fy) || []).map((label, i) => ({
+    label,
+    val: (f.total_assets || [])[i],
+  })).filter(p => p.val != null);
+
+  if (!pts.length) {
+    return (
+      <div style={{ fontSize: 12, color: "var(--z-muted)", padding: "8px 0" }}>
+        No dated financial points promoted for this run, so no trajectory is drawn.
+      </div>
+    );
+  }
+  const unit = (f && f.unit) || "";
+  const max = Math.max(...pts.map(p => p.val));
+  const money = (v) => `${fx(v, v >= 100 ? 0 : 1)}${unit}`;
   return (
     <div>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 14, height: 140, padding: "0 8px" }}>
-        {data.map(d => (
-          <div key={d.year} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer" }} onMouseEnter={() => setHoveredYear(d.year)} onMouseLeave={() => setHoveredYear(null)}>
-            <div style={{ fontSize: 10, color: hoveredYear === d.year ? "var(--z-teal)" : "var(--z-muted)", fontWeight: hoveredYear === d.year ? 700 : 400 }}>${fx((d.val / 1e9), 1)}B</div>
-            <div style={{ width: "100%", height: `${(d.val / max) * 120}px`, background: hoveredYear === d.year ? "linear-gradient(180deg, var(--z-mid), var(--z-dark2))" : "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0", transition: "background 160ms" }} />
-            <div style={{ fontSize: 10, color: "var(--z-muted)" }}>{d.year}</div>
+        {pts.map(d => (
+          <div key={d.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}
+               onMouseEnter={() => setHoveredYear(d.label)} onMouseLeave={() => setHoveredYear(null)}
+               title={`${d.label} · ${money(d.val)}`}>
+            <div style={{ fontSize: 10, color: hoveredYear === d.label ? "var(--z-teal)" : "var(--z-muted)", fontWeight: hoveredYear === d.label ? 700 : 400 }}>${money(d.val)}</div>
+            <div style={{ width: "100%", height: `${(d.val / max) * 120}px`, background: hoveredYear === d.label ? "linear-gradient(180deg, var(--z-mid), var(--z-dark2))" : "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0", transition: "background 160ms" }} />
+            <div style={{ fontSize: 10, color: "var(--z-muted)" }} className="txt-fit-1">{d.label}</div>
           </div>
         ))}
       </div>
       <div style={{ marginTop: 10, padding: 8, background: "var(--z-lav)", borderRadius: 6, fontSize: 11, color: "var(--z-body)" }}>
-        Total asset CAGR <strong style={{ color: "var(--z-mid)" }}>{fx((cagr * 100), 1)}%</strong> · trend classified <strong>{entity.trend}</strong>
-        {hoveredYear ? <span style={{ marginLeft: 8, color: "var(--z-teal)", fontWeight: 600 }}>· {hoveredYear}: ${fx((data.find(d => d.year === hoveredYear).val / 1e9), 2)}B</span> : null}
+        {pts.length} dated point{pts.length === 1 ? "" : "s"}
+        {f && f.cagr != null ? <> · CAGR <strong style={{ color: "var(--z-mid)" }}>{fx(f.cagr * 100, 1)}%</strong>{f.cagr_basis ? ` (${f.cagr_basis})` : ""}</> : null}
+        {f && f.trend ? <> · trend <strong>{f.trend}</strong></> : null}
+        {f && f.basis ? <span style={{ color: "var(--z-muted)" }}> · {f.basis}</span> : null}
+        {pts.length < 3 ? <span style={{ color: "var(--z-muted)" }}> · fewer than three points: no trend is claimed</span> : null}
       </div>
     </div>
   );
 }
 
-function SentimentGridInteractive({ sentOpen, setSentOpen, openEvidence }) {
-  const sentiments = [
-    { id: "S-01", label: "Glassdoor",       value: 3.8, max: 5,   n: 412,  label2: "Employee", evidence: "E-236", url: "glassdoor.com/Reviews/FCE", drilldown: "Recurring themes: manual processing, spreadsheet-heavy work in ops. Engineering scores 4.2 - front-line ops scores 3.1." },
-    { id: "S-02", label: "App Store",       value: 3.4, max: 5,   n: 8200, label2: "Mobile",   evidence: "E-271", url: "apps.apple.com/...", drilldown: "Recent reviews cite slow transfers, branch dependency. Banking apps for regional peers average 4.2 stars (Forrester Q1 2026)." },
-    { id: "S-03", label: "CFPB complaints", value: 24,  max: 100, n: 24,   label2: "Index",    evidence: null,    url: null, drilldown: "Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3 until reduced below 18." },
-  ];
+function SentimentGridInteractive({ sentOpen, setSentOpen, openEvidence, entity }) {
+  /* Promoted sentiment only.
+
+     This grid was a hardcoded three-item FCE fixture — Glassdoor 3.8 (n=412),
+     App Store 3.4 (n=8,200), a CFPB index of 24, drilldown prose asserting
+     "Caps P2C2.1.1 at M3", and evidence chips E-236 and E-271 — rendered under
+     whichever real client was open. Clicking one of those chips opened the
+     drawer saying the id does not resolve and "a citation that does not resolve
+     is a producer defect": the app blaming the producer for its own fixture. */
+  const sent = DMA.sentimentFor(entity && entity.id);
+  const groups = (sent && sent.groups) || null;
+  const rows = [];
+  for (const g of Object.keys(groups || {})) {
+    for (const b of groups[g] || []) {
+      rows.push({ id: `${g}-${b.label}`, group: g, ...b });
+    }
+  }
+  if (!rows.length) {
+    return (
+      <div style={{ fontSize: 12, color: "var(--z-muted)", lineHeight: 1.6 }}>
+        No sentiment measures promoted for this run.
+        {sent && sent.sources_searched && sent.sources_searched.length ? (
+          <> Searched: {sent.sources_searched.join(" · ")}.</>
+        ) : null}
+      </div>
+    );
+  }
   return (
     <div className="g3" style={{ gap: 10 }}>
-      {sentiments.map(s => {
+      {rows.map(s => {
         const isOpen = sentOpen === s.id;
         return (
           <div key={s.id}>
             <button onClick={() => setSentOpen(isOpen ? null : s.id)} className="card-tile clickable" style={{ padding: 10, width: "100%", textAlign: "left", border: isOpen ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)" }}>
-              <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>{s.label2}</div>
+              <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>{s.group}</div>
               <div className="row" style={{ marginTop: 4 }}>
-                <span style={{ fontSize: 18, fontWeight: 600 }}>{s.value}<span style={{ fontSize: 11, color: "var(--z-muted)", fontWeight: 400 }}>/{s.max}</span></span>
+                <span style={{ fontSize: 18, fontWeight: 600 }}>{fx(s.value, 1)}{s.scale ? <span style={{ fontSize: 11, color: "var(--z-muted)", fontWeight: 400 }}> {s.scale}</span> : null}</span>
                 <span className="spacer" />
                 <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={11} style={{ color: "var(--z-muted)" }} />
               </div>
-              <div style={{ fontSize: 10, color: "var(--z-muted)" }}>{s.label} · n={s.n.toLocaleString()}</div>
+              <div style={{ fontSize: 10, color: "var(--z-muted)" }} className="txt-fit-1"
+                   title={`${s.label}${s.n != null ? ` · n=${s.n}` : ""}`}>
+                {s.label}{s.n != null ? ` · n=${Number(s.n).toLocaleString()}` : ""}
+              </div>
             </button>
             {isOpen ? (
               <div style={{ marginTop: 6, padding: "10px 12px", background: "var(--z-lav)", borderRadius: 6, fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55 }}>
-                {s.drilldown}
-                {s.evidence ? <div style={{ marginTop: 8 }}><button className={`tier-chip tier-T6`} onClick={(e) => { e.stopPropagation(); openEvidence(s.evidence); }}>{s.evidence}</button></div> : null}
+                {s.note || s.reading || "The run stated this measure with no reading."}
+                {(s.e_ids || []).length ? (
+                  <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 7 }}>
+                    {s.e_ids.map(eid => (
+                      <button key={eid} className="chip" style={{ cursor: "pointer", border: 0 }}
+                              onClick={() => openEvidence(eid)}>{eid}</button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             ) : null}
           </div>

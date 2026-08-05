@@ -160,7 +160,43 @@ function ClientContext({
     max: _hi,
     value: yearRange,
     onChange: setYearRange
-  })), /*#__PURE__*/React.createElement(InteractiveTimeline, {
+  })), (() => {
+    const meta = DMA.timelineMetaFor(entity.id);
+    if (!meta || !meta.storyline) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "var(--z-lav)",
+        borderLeft: "3px solid var(--z-dpur)",
+        borderRadius: "0 8px 8px 0",
+        padding: "10px 14px",
+        marginBottom: 14
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        marginBottom: 4
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 9.5,
+        fontWeight: 700,
+        letterSpacing: ".1em",
+        color: "var(--z-dpur)",
+        textTransform: "uppercase"
+      }
+    }, "Storyline"), meta.arc_shape ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-purple",
+      style: {
+        marginLeft: 6
+      }
+    }, meta.arc_shape) : null), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12.5,
+        color: "var(--z-body)",
+        lineHeight: 1.6
+      }
+    }, meta.storyline));
+  })(), /*#__PURE__*/React.createElement(InteractiveTimeline, {
     events: events,
     setHoverEvent: setHoverEvent,
     setSelectedEvent: setSelectedEvent,
@@ -183,7 +219,11 @@ function ClientContext({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, issues.filter(i => i.status === "OPEN").length, " OPEN \xB7 ", issues.filter(i => i.status === "RESOLVED").length, " RESOLVED \xB7 click any bar for detail")), /*#__PURE__*/React.createElement("div", {
+  }, Object.entries(issues.reduce((a, i) => {
+    const k = i.status || "unstated";
+    a[k] = (a[k] || 0) + 1;
+    return a;
+  }, {})).map(([k, n]) => `${n} ${k}`).join(" · "), " \xB7 click any bar for detail")), /*#__PURE__*/React.createElement("div", {
     className: "card-body"
   }, /*#__PURE__*/React.createElement(InteractiveGantt, {
     issues: issues,
@@ -256,7 +296,8 @@ function ClientContext({
   }, "Click any card for source")), /*#__PURE__*/React.createElement(SentimentGridInteractive, {
     sentOpen: sentOpen,
     setSentOpen: setSentOpen,
-    openEvidence: openEvidence
+    openEvidence: openEvidence,
+    entity: entity
   })), /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {
@@ -966,9 +1007,10 @@ function InteractiveGantt({
   issueOpen,
   setIssueOpen
 }) {
-  const undated = (issues || []).filter(i => !i.start);
-  issues = (issues || []).filter(i => i.start);
-  if (!issues.length) {
+  const all = issues || [];
+  const undated = all.filter(i => !i.start);
+  const dated = all.filter(i => i.start);
+  if (!dated.length) {
     return /*#__PURE__*/React.createElement("div", {
       className: "empty",
       style: {
@@ -976,9 +1018,36 @@ function InteractiveGantt({
       }
     }, /*#__PURE__*/React.createElement("h3", null, "No dated issues"), /*#__PURE__*/React.createElement("p", null, undated.length ? `${undated.length} issue${undated.length === 1 ? "" : "s"} recorded without an opened date — a time axis needs a date.` : "No issues recorded for this run."));
   }
-  const start = new Date("2024-01-01");
-  const today = new Date();
-  const months = 36;
+  /* The window comes from the issues, not from a constant.
+      The axis was hardcoded to start 2024-01-01 and span 36 months, so an issue
+     opened 2021-10 computed left:-75% width:162% — the bar began five hundred
+     pixels left of its own lane and painted its white text over the id chip and
+     the severity badge. That is the overlapping text on this page. The axis now
+     covers the issues it is drawing, and every bar is clamped inside it. */
+  const at = d => {
+    if (!d) return null;
+    const str = String(d);
+    const t = Date.parse(/^\d{4}-\d{2}$/.test(str) ? `${str}-01` : str);
+    return Number.isNaN(t) ? null : t;
+  };
+  const now = Date.now();
+  const stamps = [];
+  for (const i of dated) {
+    const a = at(i.start),
+      b = i.end ? at(i.end) : now;
+    if (a !== null) stamps.push(a);
+    if (b !== null) stamps.push(b);
+  }
+  const lo = Math.min(...stamps);
+  const hi = Math.max(...stamps, now);
+  const span = Math.max(1, hi - lo);
+  const pct = t => (t - lo) / span * 100;
+  const yearOf = t => new Date(t).getUTCFullYear();
+  // One tick per year actually inside the window, labelled with that year —
+  // the old strip printed four year labels and two quarter labels over a
+  // three-year span, with "2027" sitting above 2026-Q4.
+  const years = [];
+  for (let y = yearOf(lo); y <= yearOf(hi); y++) years.push(y);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
@@ -990,25 +1059,32 @@ function InteractiveGantt({
     }
   }, /*#__PURE__*/React.createElement("div", null), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "grid",
-      gridTemplateColumns: "repeat(12, 1fr)",
-      gap: 0
+      position: "relative",
+      height: 14
     }
-  }, Array.from({
-    length: 12
-  }).map((_, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      borderLeft: i === 0 ? "none" : "1px dashed var(--z-sep)",
-      paddingLeft: 4
-    }
-  }, `${i % 3 === 0 ? 2024 + Math.floor(i / 3) : "Q" + (i % 3 + 1)}`)))), issues.map(iss => {
-    const startD = new Date(iss.start + (iss.start.length === 7 ? "-01" : ""));
-    const endD = iss.end ? new Date(iss.end + (iss.end.length === 7 ? "-01" : "")) : today;
-    const startPct = (startD - start) / (1000 * 60 * 60 * 24 * 30.4) / months * 100;
-    const widthPct = (endD - startD) / (1000 * 60 * 60 * 24 * 30.4) / months * 100;
+  }, years.map(y => {
+    const t = Date.parse(`${y}-01-01`);
+    const left = Math.max(0, Math.min(100, pct(t)));
+    return /*#__PURE__*/React.createElement("div", {
+      key: y,
+      style: {
+        position: "absolute",
+        left: `${left}%`,
+        top: 0,
+        paddingLeft: 4,
+        borderLeft: "1px dashed var(--z-sep)",
+        height: 14
+      }
+    }, y);
+  }))), dated.map(iss => {
+    const a = at(iss.start);
+    const b = iss.end ? at(iss.end) ?? now : now;
+    const left = Math.max(0, Math.min(100, pct(a)));
+    const right = Math.max(0, Math.min(100, pct(Math.max(b, a))));
+    const width = Math.max(2, right - left);
     const color = iss.severity === "CRITICAL" ? "var(--z-below)" : iss.severity === "MATERIAL" ? "var(--z-org)" : "var(--z-muted)";
     const isOpen = issueOpen === iss.id;
+    const capped = Object.keys((DMA.ISSUE_CAPS[iss.id] || {}).caps || {}).length;
     return /*#__PURE__*/React.createElement("button", {
       key: iss.id,
       onClick: () => setIssueOpen(isOpen ? null : iss.id),
@@ -1026,41 +1102,46 @@ function InteractiveGantt({
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        padding: "0 8px"
+        padding: "0 8px",
+        minWidth: 0
       }
     }, /*#__PURE__*/React.createElement("div", {
       className: "row"
     }, /*#__PURE__*/React.createElement("span", {
       className: "chip"
-    }, iss.id), /*#__PURE__*/React.createElement("span", {
+    }, iss.id), iss.severity ? /*#__PURE__*/React.createElement("span", {
       className: `b ${iss.severity === "CRITICAL" ? "b-below" : iss.severity === "MATERIAL" ? "b-org" : "b-muted"}`
-    }, iss.severity), Object.keys(DMA.ISSUE_CAPS[iss.id]?.caps || {}).length > 0 ? /*#__PURE__*/React.createElement(Icon, {
+    }, iss.severity) : null, capped ? /*#__PURE__*/React.createElement(Icon, {
       name: "lock",
       size: 11,
       style: {
         color: "var(--z-org)"
-      }
+      },
+      title: `${capped} cell${capped === 1 ? "" : "s"} capped`
     }) : null), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 12,
         marginTop: 4
-      }
-    }, iss.type), /*#__PURE__*/React.createElement("div", {
+      },
+      className: "txt-fit-1",
+      title: iss.title || iss.type || ""
+    }, iss.title || iss.type || "—"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
         color: "var(--z-muted)",
         marginTop: 2
       }
-    }, iss.status, " ", iss.cap_value ? `· cap ${iss.cap_value}` : "")), /*#__PURE__*/React.createElement("div", {
+    }, iss.status, iss.cap_value ? ` · cap ${iss.cap_value}` : "")), /*#__PURE__*/React.createElement("div", {
       style: {
         position: "relative",
         height: 28
       }
     }, /*#__PURE__*/React.createElement("div", {
+      title: `${iss.start}${iss.end ? ` → ${iss.end}` : " → open"} · ${iss.desc || ""}`,
       style: {
         position: "absolute",
-        left: `${startPct}%`,
-        width: `${Math.max(2, widthPct)}%`,
+        left: `${left}%`,
+        width: `${width}%`,
         height: 18,
         top: 5,
         background: color,
@@ -1073,11 +1154,58 @@ function InteractiveGantt({
         fontSize: 10,
         fontWeight: 500,
         overflow: "hidden",
-        whiteSpace: "nowrap"
-      },
-      className: "txt-trunc"
+        whiteSpace: "nowrap",
+        textOverflow: "ellipsis"
+      }
     }, iss.desc)));
-  }));
+  }), undated.length ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: "1px solid var(--z-sep)",
+      paddingTop: 10,
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: ".08em",
+      color: "var(--z-muted)",
+      textTransform: "uppercase",
+      marginBottom: 6
+    }
+  }, "Undated \xB7 ", undated.length, " \xB7 not placeable on a time axis"), undated.map(iss => /*#__PURE__*/React.createElement("button", {
+    key: iss.id,
+    onClick: () => setIssueOpen(issueOpen === iss.id ? null : iss.id),
+    style: {
+      display: "flex",
+      gap: 8,
+      alignItems: "center",
+      width: "100%",
+      textAlign: "left",
+      background: issueOpen === iss.id ? "var(--z-lav)" : "transparent",
+      border: 0,
+      borderRadius: 6,
+      padding: "6px 8px",
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "chip"
+  }, iss.id), iss.severity ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted"
+  }, iss.severity) : null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      minWidth: 0,
+      fontSize: 12
+    },
+    className: "txt-fit-1",
+    title: iss.title || ""
+  }, iss.title || iss.type || "—"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)"
+    }
+  }, iss.status)))) : null);
 }
 function IssueDetail({
   issue,
@@ -1106,7 +1234,7 @@ function IssueDetail({
     style: {
       fontSize: 14
     }
-  }, issue.type), /*#__PURE__*/React.createElement("span", {
+  }, issue.title || issue.type || "—"), /*#__PURE__*/React.createElement("span", {
     className: `b ${issue.severity === "CRITICAL" ? "b-below" : issue.severity === "MATERIAL" ? "b-org" : "b-muted"}`
   }, issue.severity), /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
@@ -1125,7 +1253,13 @@ function IssueDetail({
       lineHeight: 1.6,
       marginBottom: 14
     }
-  }, issue.desc), caps.length > 0 ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, issue.desc), caps.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      marginBottom: 12
+    }
+  }, "This matter names no capability cell, so it is not linked to the assessment. An issue that constrains a capability should say which.") : null, caps.length > 0 ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       fontWeight: 700,
@@ -1134,7 +1268,7 @@ function IssueDetail({
       textTransform: "uppercase",
       marginBottom: 8
     }
-  }, "Caps placed by this issue \xB7 ", caps.length), /*#__PURE__*/React.createElement("div", {
+  }, "Cells this matter bears on \xB7 ", caps.length), /*#__PURE__*/React.createElement("div", {
     className: "g2",
     style: {
       gap: 8
@@ -1176,9 +1310,13 @@ function IssueDetail({
         color: "var(--z-muted)",
         marginTop: 4
       }
-    }, "Score capped at M", capValue));
+    }, capValue != null ? `Score capped at M${capValue}` : s.score != null ? `Assessed ${fx(s.score, 1)} · no cap level stated` : "no cap level stated"));
   }))) : null, (() => {
-    const ev = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.some(sid => caps.some(([cid]) => sid.slice(0, 4) === cid.slice(0, 4))));
+    const own = issue.evidence || [];
+    const ev = own.map(eid => DMA.getEvidence(eid) || {
+      id: eid,
+      tier: "T3"
+    });
     if (!ev.length) return null;
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -1214,30 +1352,52 @@ function IssueDetail({
     style: {
       marginTop: 12
     }
-  }, /*#__PURE__*/React.createElement("button", {
+  }, caps.length ? /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => navigate(`/clients/${entity.id}/heatmap`, {
       hm: "standard",
-      zoom: "subcap"
+      zoom: "subcap",
+      subcap: caps[0][0]
     })
-  }, "View capped cells in heatmap ", /*#__PURE__*/React.createElement(Icon, {
+  }, "Open ", caps[0][0], " in the heatmap ", /*#__PURE__*/React.createElement(Icon, {
     name: "arrow-r",
     size: 11
-  }))));
+  })) : null));
 }
 function FinChartInteractive({
   entity,
   hoveredYear,
   setHoveredYear
 }) {
-  const years = [2022, 2023, 2024, 2025, 2026];
-  const baseAssets = entity.assets || 11e9;
-  const cagr = entity.cagr || 0.06;
-  const data = years.map((y, i) => ({
-    year: y,
-    val: baseAssets * Math.pow(1 + cagr, i - 4)
-  }));
-  const max = Math.max(...data.map(d => d.val));
+  /* The promoted financial series, and only that.
+      This chart used to MANUFACTURE five years of balance sheet:
+        baseAssets = entity.assets || 11e9
+       cagr       = entity.cagr   || 0.06
+       val        = baseAssets * (1 + cagr)^(i - 4)
+      — a compounded curve from a default asset figure and a default growth rate,
+     rendered as this institution's five-year trajectory. With `assets` stated
+     in billions (6.5) and then divided by 1e9, every bar read "$0.0B", and the
+     footer printed a 6.0% CAGR nobody measured. Inventing a trend line is the
+     single most quotable fabrication on the page: an AE reads growth off it.
+      The run promotes three dated points (FY2023 5.8, 2025-Q3 6.24, 2025-12
+     6.5) with a stated trend. Three is what it has, so three is what renders. */
+  const f = DMA.financialsFor(entity.id);
+  const pts = (f && f.fy || []).map((label, i) => ({
+    label,
+    val: (f.total_assets || [])[i]
+  })).filter(p => p.val != null);
+  if (!pts.length) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "var(--z-muted)",
+        padding: "8px 0"
+      }
+    }, "No dated financial points promoted for this run, so no trajectory is drawn.");
+  }
+  const unit = f && f.unit || "";
+  const max = Math.max(...pts.map(p => p.val));
+  const money = v => `${fx(v, v >= 100 ? 0 : 1)}${unit}`;
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -1246,29 +1406,29 @@ function FinChartInteractive({
       height: 140,
       padding: "0 8px"
     }
-  }, data.map(d => /*#__PURE__*/React.createElement("div", {
-    key: d.year,
+  }, pts.map(d => /*#__PURE__*/React.createElement("div", {
+    key: d.label,
     style: {
       flex: 1,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      gap: 4,
-      cursor: "pointer"
+      gap: 4
     },
-    onMouseEnter: () => setHoveredYear(d.year),
-    onMouseLeave: () => setHoveredYear(null)
+    onMouseEnter: () => setHoveredYear(d.label),
+    onMouseLeave: () => setHoveredYear(null),
+    title: `${d.label} · ${money(d.val)}`
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
-      color: hoveredYear === d.year ? "var(--z-teal)" : "var(--z-muted)",
-      fontWeight: hoveredYear === d.year ? 700 : 400
+      color: hoveredYear === d.label ? "var(--z-teal)" : "var(--z-muted)",
+      fontWeight: hoveredYear === d.label ? 700 : 400
     }
-  }, "$", fx(d.val / 1e9, 1), "B"), /*#__PURE__*/React.createElement("div", {
+  }, "$", money(d.val)), /*#__PURE__*/React.createElement("div", {
     style: {
       width: "100%",
       height: `${d.val / max * 120}px`,
-      background: hoveredYear === d.year ? "linear-gradient(180deg, var(--z-mid), var(--z-dark2))" : "linear-gradient(180deg, var(--z-teal), var(--z-mid))",
+      background: hoveredYear === d.label ? "linear-gradient(180deg, var(--z-mid), var(--z-dark2))" : "linear-gradient(180deg, var(--z-teal), var(--z-mid))",
       borderRadius: "4px 4px 0 0",
       transition: "background 160ms"
     }
@@ -1276,8 +1436,9 @@ function FinChartInteractive({
     style: {
       fontSize: 10,
       color: "var(--z-muted)"
-    }
-  }, d.year)))), /*#__PURE__*/React.createElement("div", {
+    },
+    className: "txt-fit-1"
+  }, d.label)))), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 10,
       padding: 8,
@@ -1286,60 +1447,60 @@ function FinChartInteractive({
       fontSize: 11,
       color: "var(--z-body)"
     }
-  }, "Total asset CAGR ", /*#__PURE__*/React.createElement("strong", {
+  }, pts.length, " dated point", pts.length === 1 ? "" : "s", f && f.cagr != null ? /*#__PURE__*/React.createElement(React.Fragment, null, " \xB7 CAGR ", /*#__PURE__*/React.createElement("strong", {
     style: {
       color: "var(--z-mid)"
     }
-  }, fx(cagr * 100, 1), "%"), " \xB7 trend classified ", /*#__PURE__*/React.createElement("strong", null, entity.trend), hoveredYear ? /*#__PURE__*/React.createElement("span", {
+  }, fx(f.cagr * 100, 1), "%"), f.cagr_basis ? ` (${f.cagr_basis})` : "") : null, f && f.trend ? /*#__PURE__*/React.createElement(React.Fragment, null, " \xB7 trend ", /*#__PURE__*/React.createElement("strong", null, f.trend)) : null, f && f.basis ? /*#__PURE__*/React.createElement("span", {
     style: {
-      marginLeft: 8,
-      color: "var(--z-teal)",
-      fontWeight: 600
+      color: "var(--z-muted)"
     }
-  }, "\xB7 ", hoveredYear, ": $", fx(data.find(d => d.year === hoveredYear).val / 1e9, 2), "B") : null));
+  }, " \xB7 ", f.basis) : null, pts.length < 3 ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)"
+    }
+  }, " \xB7 fewer than three points: no trend is claimed") : null));
 }
 function SentimentGridInteractive({
   sentOpen,
   setSentOpen,
-  openEvidence
+  openEvidence,
+  entity
 }) {
-  const sentiments = [{
-    id: "S-01",
-    label: "Glassdoor",
-    value: 3.8,
-    max: 5,
-    n: 412,
-    label2: "Employee",
-    evidence: "E-236",
-    url: "glassdoor.com/Reviews/FCE",
-    drilldown: "Recurring themes: manual processing, spreadsheet-heavy work in ops. Engineering scores 4.2 - front-line ops scores 3.1."
-  }, {
-    id: "S-02",
-    label: "App Store",
-    value: 3.4,
-    max: 5,
-    n: 8200,
-    label2: "Mobile",
-    evidence: "E-271",
-    url: "apps.apple.com/...",
-    drilldown: "Recent reviews cite slow transfers, branch dependency. Banking apps for regional peers average 4.2 stars (Forrester Q1 2026)."
-  }, {
-    id: "S-03",
-    label: "CFPB complaints",
-    value: 24,
-    max: 100,
-    n: 24,
-    label2: "Index",
-    evidence: null,
-    url: null,
-    drilldown: "Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3 until reduced below 18."
-  }];
+  /* Promoted sentiment only.
+      This grid was a hardcoded three-item FCE fixture — Glassdoor 3.8 (n=412),
+     App Store 3.4 (n=8,200), a CFPB index of 24, drilldown prose asserting
+     "Caps P2C2.1.1 at M3", and evidence chips E-236 and E-271 — rendered under
+     whichever real client was open. Clicking one of those chips opened the
+     drawer saying the id does not resolve and "a citation that does not resolve
+     is a producer defect": the app blaming the producer for its own fixture. */
+  const sent = DMA.sentimentFor(entity && entity.id);
+  const groups = sent && sent.groups || null;
+  const rows = [];
+  for (const g of Object.keys(groups || {})) {
+    for (const b of groups[g] || []) {
+      rows.push({
+        id: `${g}-${b.label}`,
+        group: g,
+        ...b
+      });
+    }
+  }
+  if (!rows.length) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "var(--z-muted)",
+        lineHeight: 1.6
+      }
+    }, "No sentiment measures promoted for this run.", sent && sent.sources_searched && sent.sources_searched.length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", sent.sources_searched.join(" · "), ".") : null);
+  }
   return /*#__PURE__*/React.createElement("div", {
     className: "g3",
     style: {
       gap: 10
     }
-  }, sentiments.map(s => {
+  }, rows.map(s => {
     const isOpen = sentOpen === s.id;
     return /*#__PURE__*/React.createElement("div", {
       key: s.id
@@ -1359,7 +1520,7 @@ function SentimentGridInteractive({
         textTransform: "uppercase",
         letterSpacing: ".08em"
       }
-    }, s.label2), /*#__PURE__*/React.createElement("div", {
+    }, s.group), /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
         marginTop: 4
@@ -1369,13 +1530,13 @@ function SentimentGridInteractive({
         fontSize: 18,
         fontWeight: 600
       }
-    }, s.value, /*#__PURE__*/React.createElement("span", {
+    }, fx(s.value, 1), s.scale ? /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 11,
         color: "var(--z-muted)",
         fontWeight: 400
       }
-    }, "/", s.max)), /*#__PURE__*/React.createElement("span", {
+    }, " ", s.scale) : null), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement(Icon, {
       name: isOpen ? "chevron-u" : "chevron-d",
@@ -1387,8 +1548,10 @@ function SentimentGridInteractive({
       style: {
         fontSize: 10,
         color: "var(--z-muted)"
-      }
-    }, s.label, " \xB7 n=", s.n.toLocaleString())), isOpen ? /*#__PURE__*/React.createElement("div", {
+      },
+      className: "txt-fit-1",
+      title: `${s.label}${s.n != null ? ` · n=${s.n}` : ""}`
+    }, s.label, s.n != null ? ` · n=${Number(s.n).toLocaleString()}` : "")), isOpen ? /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 6,
         padding: "10px 12px",
@@ -1398,17 +1561,22 @@ function SentimentGridInteractive({
         color: "var(--z-body)",
         lineHeight: 1.55
       }
-    }, s.drilldown, s.evidence ? /*#__PURE__*/React.createElement("div", {
+    }, s.note || s.reading || "The run stated this measure with no reading.", (s.e_ids || []).length ? /*#__PURE__*/React.createElement("div", {
+      className: "row",
       style: {
-        marginTop: 8
+        gap: 5,
+        flexWrap: "wrap",
+        marginTop: 7
       }
-    }, /*#__PURE__*/React.createElement("button", {
-      className: `tier-chip tier-T6`,
-      onClick: e => {
-        e.stopPropagation();
-        openEvidence(s.evidence);
-      }
-    }, s.evidence)) : null) : null);
+    }, s.e_ids.map(eid => /*#__PURE__*/React.createElement("button", {
+      key: eid,
+      className: "chip",
+      style: {
+        cursor: "pointer",
+        border: 0
+      },
+      onClick: () => openEvidence(eid)
+    }, eid))) : null) : null);
   }));
 }
 function Timeline({
