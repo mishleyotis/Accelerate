@@ -75,12 +75,30 @@ def _fetch(url: str):
         return None
 
 
+def _traced(fn):
+    """Log the full traceback of any tool failure to stdout before the SDK
+    wraps it into an isError result — a verdict-shaped error the client can
+    read is useless for defects the SERVER caused (42P18-class driver
+    surprises land here, not in any gate)."""
+    import functools
+    import traceback
+
+    @functools.wraps(fn)
+    def _w(*a, **k):
+        try:
+            return fn(*a, **k)
+        except Exception:
+            print(f"TOOL ERROR in {fn.__name__}:\n{traceback.format_exc()}")
+            raise
+    return _w
+
 token = os.environ.get("MCP_PATH_TOKEN", "dev").strip()
 mcp = MCPServer("dma-insights")
 
 
 # ── read and discover ───────────────────────────────────────────────────
 @mcp.tool()
+@_traced
 def get_report_bundle(run_id: str) -> dict:
     """The parsed assessment: scores with source cells and all four grain
     ids, stated pillar/category grains, evidence, the twelve report
@@ -90,6 +108,7 @@ def get_report_bundle(run_id: str) -> dict:
 
 
 @mcp.tool()
+@_traced
 def get_capability_catalogue(run_id: str) -> dict:
     """Canonical cell ids and NAMES for the run's pinned catalogue version,
     plus the alias bridge. Resolve every cell id and name through this —
@@ -99,6 +118,7 @@ def get_capability_catalogue(run_id: str) -> dict:
 
 
 @mcp.tool()
+@_traced
 def get_page_contract(page: str) -> dict:
     """Field tuples AND per-field doc text, verbatim. The doc is part of
     the contract: for list-of-object fields it is the only place the item
@@ -107,6 +127,7 @@ def get_page_contract(page: str) -> dict:
 
 
 @mcp.tool()
+@_traced
 def get_evidence(run_id: str, e_ids: list) -> dict:
     """The three-way split: found / not_found / foreign. Foreign is the
     dangerous bucket — a real row belonging to another institution; stop,
@@ -116,6 +137,7 @@ def get_evidence(run_id: str, e_ids: list) -> dict:
 
 
 @mcp.tool()
+@_traced
 def get_run_progress(run_id: str) -> dict:
     """Per-page status, what is blocking, and the current claim — so a
     resuming session sees where it left off. Pages already passing must
@@ -125,6 +147,7 @@ def get_run_progress(run_id: str) -> dict:
 
 
 @mcp.tool()
+@_traced
 def get_client_state(display_id: str) -> dict:
     """What is currently served and every prior run — a rerun produced as
     though it were a first run silently empties the longitudinal surfaces."""
@@ -133,6 +156,7 @@ def get_client_state(display_id: str) -> dict:
 
 
 @mcp.tool()
+@_traced
 def list_pending_runs() -> dict:
     """Runs awaiting synthesis (INGESTED/CLAIMED/SYNTHESISING), oldest
     first, with their claim state."""
@@ -158,6 +182,7 @@ def list_pending_runs() -> dict:
 
 # ── claim ───────────────────────────────────────────────────────────────
 @mcp.tool()
+@_traced
 def claim_run(run_id: str, session_id: str, producer_version: str) -> dict:
     """Exclusive expiring lease — one session per run. Refused while
     another session's lease is live; staged work survives a lapse."""
@@ -167,6 +192,7 @@ def claim_run(run_id: str, session_id: str, producer_version: str) -> dict:
 
 # ── write ───────────────────────────────────────────────────────────────
 @mcp.tool()
+@_traced
 def register_evidence(run_id: str, item: dict) -> dict:
     """Mint before you cite. The server allocates the id and computes the
     rank score; dedup is by content, scoped to the entity; the excerpt is
@@ -176,6 +202,7 @@ def register_evidence(run_id: str, item: dict) -> dict:
 
 
 @mcp.tool()
+@_traced
 def submit_page_payload(run_id: str, page: str, payload: dict,
                         provenance: str = "producer",
                         producer_version: str = "") -> dict:
@@ -189,6 +216,7 @@ def submit_page_payload(run_id: str, page: str, payload: dict,
 
 
 @mcp.tool()
+@_traced
 def promote_run(run_id: str) -> dict:
     """All six pages, one transaction, all or nothing. incomplete_run
     names the missing and unpassed pages; re-promotion is idempotent."""
@@ -198,6 +226,7 @@ def promote_run(run_id: str) -> dict:
 
 # ── inspect ─────────────────────────────────────────────────────────────
 @mcp.tool()
+@_traced
 def get_validation_verdict(submission_id: str) -> dict:
     """A prior submission's verdict, with superseded state."""
     with _conn() as c:
@@ -205,6 +234,7 @@ def get_validation_verdict(submission_id: str) -> dict:
 
 
 @mcp.tool()
+@_traced
 def explain_gate(gate_id: str) -> dict:
     """A gate's definition and threshold history — direction of movement
     visible."""
