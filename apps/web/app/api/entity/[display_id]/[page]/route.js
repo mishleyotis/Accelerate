@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { COOKIE, verify } from "../../../../../lib/session";
+import { effectiveRole } from "../../../../../lib/identity";
 
 // The SPA's read path into the serving tier. The session's GRANTED role is
 // forwarded (never a client-supplied one), so the API can refuse a page the
@@ -32,9 +33,15 @@ export async function GET(req, { params }) {
     ? "customer" : "internal";
   const run = url.searchParams.get("run");
   const eIds = url.searchParams.get("e_ids");
+  // "Acting as" is resolved here, against the SESSION's granted role, and it
+  // can only narrow (lib/identity.effectiveRole). So an admin previewing the AE
+  // view gets the server's AE answer — the same 403 on D5 a real AE gets — and
+  // an AE that sends role=ADMIN is still answered as an AE. The client's value
+  // is a request, never a grant.
+  const role = effectiveRole(session.role, url.searchParams.get("role"));
   const target = new URL(`${base}/v1/entities/${encodeURIComponent(display_id)}/${page}`);
   target.searchParams.set("audience", audience);
-  target.searchParams.set("role", session.role);
+  target.searchParams.set("role", role);
   if (run) target.searchParams.set("run", run);
   if (eIds) target.searchParams.set("e_ids", eIds);
 

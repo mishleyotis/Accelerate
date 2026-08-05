@@ -212,7 +212,7 @@ function useLivePage(displayId, page, audience, runId) {
    knows an e_id — so during a route change they must answer with nothing
    rather than the previously viewed client's rows. tests/adapter.test.js
    asserts the line is still here. */
-function useLiveEntity(displayId, audience, runId) {
+function useLiveEntity(displayId, audience, runId, actingRole) {
   const LIVE = typeof window !== "undefined" && !!window.DMA_LIVE;
   const [state, setState] = useState(LIVE ? { status: "loading" } : { status: "mock" });
 
@@ -235,15 +235,19 @@ function useLiveEntity(displayId, audience, runId) {
 
     const qs = (extra) => {
       const q = new URLSearchParams({ audience: audience || "internal" });
+      // The acting-as role travels with every read so the SERVER decides what
+      // the previewed role may see. It can only narrow the session's granted
+      // role (lib/identity.effectiveRole), so this is a request, not a grant.
+      if (actingRole) q.set("role", actingRole);
       if (runId) q.set("run", runId);
       for (const k of Object.keys(extra || {})) q.set(k, extra[k]);
       return q.toString();
     };
     const get = (path) => fetch(path)
-      .then(r => r.json().then(body => ({ ok: r.ok, body })))
+      .then(r => r.json().then(body => ({ ok: r.ok, status: r.status, body })))
       // A page an audience may not see (403) or that has nothing promoted is
       // a legitimate answer, not a failure: it becomes an absent section.
-      .catch(() => ({ ok: false, body: null }));
+      .catch(() => ({ ok: false, status: 0, body: null }));
 
     const id = encodeURIComponent(displayId);
     const pages = ["overview", "heatmap", "insights", "platform", "context",
@@ -255,23 +259,34 @@ function useLiveEntity(displayId, audience, runId) {
     ]).then((results) => {
       if (cancelled) return;
       const byPage = {};
-      pages.forEach((p, i) => { if (results[i].ok) byPage[p] = results[i].body; });
+      // A 403 is the server exercising default-deny, not a fault: the API
+      // withholds a whole dashboard from the customer audience, and an AE has
+      // no route to D5. The reason it sends is what the locked state prints,
+      // so the tab renders "withheld, and why" instead of a white page.
+      const withheld = {};
+      pages.forEach((p, i) => {
+        if (results[i].ok) { byPage[p] = results[i].body; return; }
+        if (results[i].status === 403) {
+          withheld[p] = (results[i].body && results[i].body.detail)
+            || "this dashboard is not available to your role or audience";
+        }
+      });
       const evidence = results[pages.length].ok ? results[pages.length].body : null;
       const subcaps = results[pages.length + 1].ok
         ? (results[pages.length + 1].body.subcaps || []) : [];
 
       if (!Object.keys(byPage).length) {
-        setState({ status: "error", code: "no_promoted_pages" });
+        setState({ status: "error", code: "no_promoted_pages", withheld });
         return;
       }
       const built = window.buildLiveEntity(displayId, byPage,
                                            { evidence, subcaps });
       window.DMA_ENTITY = built;
-      setState({ status: "ready", entity: built,
+      setState({ status: "ready", entity: built, withheld,
                  run: built.run, audience: audience || "internal" });
     });
     return () => { cancelled = true; };
-  }, [LIVE, displayId, audience, runId]);
+  }, [LIVE, displayId, audience, runId, actingRole]);
 
   return state;
 }

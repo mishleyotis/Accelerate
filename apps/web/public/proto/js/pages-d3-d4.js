@@ -1146,7 +1146,10 @@ function ChevronView({
       onClick: e => {
         e.stopPropagation();
         openRec(rid);
-      },
+      }
+      /* The title ellipsises to one line by design; without this
+         the rest of the sentence is unreachable by any means. */,
+      title: `${rec.id} · ${rec.title}`,
       style: {
         padding: "6px 8px",
         background: "rgba(255,255,255,.14)",
@@ -1527,6 +1530,7 @@ function CustomerImpactView({
       return rec ? /*#__PURE__*/React.createElement("button", {
         key: rid,
         onClick: () => openRec(rid),
+        title: `${rec.id} · ${rec.title}`,
         style: {
           padding: "6px 8px",
           background: "var(--z-lav)",

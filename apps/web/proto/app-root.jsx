@@ -15,12 +15,22 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 
 /* ── App provider ────────────────────────────────────────────────── */
 function AppProvider({ children }) {
-  // Production divergence: the session's role seeds the tweaks too —
-  // the tweaks-sync effect below would otherwise clobber it on mount.
-  const _sessionRole =
-    (typeof window !== "undefined" && window.DMA_LIVE && window.DMA_LIVE.role) || TWEAK_DEFAULTS.role;
-  const [tweaks, setTweaks] = useState({ ...TWEAK_DEFAULTS, role: _sessionRole });
-  const [role, setRole] = useState(_sessionRole);
+  // The role the SERVER granted this session. Never settable from the UI: it
+  // decides whether an "acting as" control exists at all, and the proxy clamps
+  // every read against it (lib/identity.effectiveRole).
+  const grantedRole =
+    (typeof window !== "undefined" && window.DMA_LIVE && window.DMA_LIVE.role)
+    || TWEAK_DEFAULTS.role;
+  // Whether this session may preview another role. An AE has exactly one view,
+  // so it gets no toggle rather than a toggle with one dead option.
+  const canActAs = ["ADMIN", "ANALYST"].includes(String(grantedRole).toUpperCase());
+  // EVERY session lands on the AE view. The AE is the reader the pages are
+  // written for, so an analyst or admin should see what the field sees first and
+  // opt into the internal detail deliberately. Previously the landing view was
+  // the granted role, so an admin never saw the page an AE opens.
+  const _landingRole = "AE";
+  const [tweaks, setTweaks] = useState({ ...TWEAK_DEFAULTS, role: _landingRole });
+  const [role, setRole] = useState(_landingRole);
   // Production divergence: the host page verifies the session cookie
   // server-side and passes the verdict in DMA_LIVE.
   const [authed, setAuthed] = useState(
@@ -37,8 +47,11 @@ function AppProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const route = useRoute();
 
-  // Sync role tweak
-  useEffect(() => { setRole(tweaks.role); }, [tweaks.role]);
+  // Sync role tweak — but a session that may not act as another role cannot be
+  // moved off its own view by the tweaks panel either.
+  useEffect(() => {
+    setRole(canActAs ? tweaks.role : grantedRole);
+  }, [tweaks.role, canActAs, grantedRole]);
 
   // Compute alert + active counts
   const openAlerts = DMA.ALERTS.filter(a => a.status === "OPEN").length;
@@ -80,6 +93,7 @@ function AppProvider({ children }) {
   const ctx = {
     tweaks, setTweak,
     role, setRole,
+    grantedRole, canActAs,
     authed, setAuthed,
     audience, setAudience,
     ipOpen, setIpOpen, ipSurface, setIpSurface, ipContext, setIpContext,
@@ -102,22 +116,31 @@ function AppProvider({ children }) {
 
 /* ── Tweaks panel content ────────────────────────────────────────── */
 function MyTweaks() {
-  const { tweaks, setTweak } = useApp();
+  const { tweaks, setTweak, canActAs } = useApp();
   if (!window.TweaksPanel) return null;
   const { TweaksPanel, TweakSection, TweakRadio, TweakToggle, TweakSelect } = window;
 
   return (
     <TweaksPanel title="Tweaks">
       <TweakSection title="Persona">
-        <TweakRadio label="Role" value={tweaks.role} onChange={v => setTweak("role", v)} options={(() => {
-          const RANK = { AE: 0, ANALYST: 1, ADMIN: 2 };
-          const cap = RANK[grantedRole()] ?? 0;
-          return [
-            { label: "AE",       value: "AE" },
-            { label: "Analyst",  value: "ANALYST" },
-            { label: "Admin",    value: "ADMIN" },
-          ].filter(o => RANK[o.value] <= cap);
-        })()} />
+        {/* The Role radio is a DESIGN control for the standalone prototype. In
+            the app it was a second, competing source of truth for the same
+            state as the header's "Acting as": picking a view in the popover
+            left this radio showing the old value, and the next tweaks sync put
+            it back — the choice reverted with no explanation. It renders only
+            where an acting-as control legitimately exists, and the header
+            popover stays the one place to switch. */}
+        {canActAs ? (
+          <TweakRadio label="Role (preview)" value={tweaks.role} onChange={v => setTweak("role", v)} options={(() => {
+            const RANK = { AE: 0, ANALYST: 1, ADMIN: 2 };
+            const cap = RANK[grantedRole()] ?? 0;
+            return [
+              { label: "AE",       value: "AE" },
+              { label: "Analyst",  value: "ANALYST" },
+              { label: "Admin",    value: "ADMIN" },
+            ].filter(o => RANK[o.value] <= cap);
+          })()} />
+        ) : null}
         <TweakRadio label="Audience" value={tweaks.audience_default} onChange={v => setTweak("audience_default", v)} options={[
           { label: "Internal", value: "internal" },
           { label: "Customer", value: "customer" },
@@ -189,12 +212,15 @@ function firmoFields(firmo) {
 }
 
 function ClientRoute({ id, tab, sub }) {
-  const { route, audience } = useApp();
+  const { route, audience, role } = useApp();
   const entity = DMA.getEntity(id);
   const runId = route.params.run;
   const run = entity && ((runId && entity.runs.find(r => r.id === runId)) || entity.runs[0]);
+  // The acting-as role is part of the read key: switching view re-fetches so the
+  // SERVER decides what that role sees, rather than the client hiding fields it
+  // already holds.
   const live = useLiveEntity(LIVE_MODE && entity ? entity.id : null,
-                             audience, run && run.run_id);
+                             audience, run && run.run_id, role);
 
   if (!entity) {
     return <PageShell title="Not found"><div className="empty"><h3>Entity not found</h3></div></PageShell>;
@@ -230,6 +256,27 @@ function ClientRoute({ id, tab, sub }) {
           <p>{live.code === "no_promoted_pages"
             ? "No page of this run has promoted yet, so there is nothing to show."
             : live.code}</p>
+        </div>
+      </ClientShell>
+    );
+  }
+
+  // A dashboard the server refused: a locked state naming the reason, not a
+  // white page. The refusal is the API's (default-deny, invariant 5); the app
+  // reports it rather than re-deciding it.
+  const withheldReason = (LIVE_MODE && live.withheld && live.withheld[tab]) || null;
+  if (withheldReason) {
+    return (
+      <ClientShell entity={ent} run={run} tab={tab}>
+        <div className="empty">
+          <div className="icon"><Icon name="lock" size={20} /></div>
+          <h3>This dashboard is not available in the current view</h3>
+          <p>{withheldReason}</p>
+          <p style={{ marginTop: 8 }}>
+            {audience === "customer"
+              ? "Switch back to the internal audience to read it."
+              : "Ask an administrator if you need access."}
+          </p>
         </div>
       </ClientShell>
     );

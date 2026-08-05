@@ -355,6 +355,15 @@ const SEVERITY_TO_FLAG = {
   medium: "MONITOR",
   low: "MONITOR"
 };
+
+/* A cell id carries its pillar in the leading token: P4C1.3.1 → P4. Reading it
+   is not inference — the catalogue's id scheme guarantees it — so a card whose
+   `pillar_id` the producer left null can still be filed against the right
+   pillar instead of landing in an "other" bucket. */
+function pillarOfCell(cellId) {
+  const m = /^(P[1-4])/.exec(String(cellId || ""));
+  return m ? m[1] : null;
+}
 function adaptInsights(insights, recommendations) {
   const cards = insights && insights.cards || [];
   const recPlatforms = {};
@@ -364,9 +373,17 @@ function adaptInsights(insights, recommendations) {
   return cards.map(c => {
     const authored = c.flag && String(c.flag).toUpperCase();
     const derived = SEVERITY_TO_FLAG[String(c.severity || "").toLowerCase()];
+    // The pillar is DERIVED from the cell the card is about when the producer
+    // left `pillar_id` null — a cell id begins with its pillar, so this is a
+    // read of the id rather than a guess. Baxter promoted eight cards with
+    // pillar_id null on every one, which is why the D2 grouping put all eight
+    // under a single bucket: it was grouping by null.
+    const cells = c.affects || (c.linked_subcap_id ? [c.linked_subcap_id] : []);
+    const pillar = c.pillar_id || pillarOfCell(cells[0]) || null;
     return {
       id: c.ic_id,
-      pillar: c.pillar_id,
+      pillar,
+      pillar_source: c.pillar_id ? "promoted" : pillar ? "derived from cell" : null,
       flag: authored || derived || "MONITOR",
       flag_source: authored ? "authored" : derived ? "severity" : "default",
       confidence: c.confidence,
@@ -559,6 +576,15 @@ function adaptFocusAreas(focus) {
    the contract between the payload and the components, so the mapping happens
    here rather than by touching the components — a page whose rows are keyed
    differently silently renders nothing, or throws on a missing string. */
+/* The three declared signal values, and an honest fourth for anything else.
+   A value the contract does not declare is not silently coerced: the D5 filter
+   row shows an "Unclassified" bucket with its count, so an unusable field is
+   visible on the page rather than expressed as an empty timeline. */
+const SIGNALS = ["positive", "neutral", "negative"];
+function signalOf(v) {
+  const s = String(v == null ? "" : v).trim().toLowerCase();
+  return SIGNALS.includes(s) ? s : "unclassified";
+}
 function adaptTimeline(timeline) {
   const events = timeline && timeline.events || [];
   return events.map((e, i) => ({
@@ -567,9 +593,14 @@ function adaptTimeline(timeline) {
     title: e.title,
     detail: e.body || null,
     kind: e.kind || null,
-    // The prototype colours a dot by signal; the contract's values are the
-    // producer's own words, lower-cased for the class name and nothing more.
-    signal: e.signal ? String(e.signal).toLowerCase() : "neutral",
+    // The contract declares three values. Lower-casing whatever arrived turned a
+    // producer's consequence SENTENCE into a signal class no filter matches, and
+    // defaulting the rest to "neutral" made ten unclassified events look
+    // deliberately neutral. Now an off-vocabulary value becomes "unclassified"
+    // — visible as such, and countable, so the page can say so instead of
+    // showing an empty list. CG-09 refuses it at submit from here on.
+    signal: signalOf(e.signal),
+    signal_raw: e.signal || null,
     cap_impact: (e.capability_ids || [])[0] || null,
     capabilities: e.capability_ids || [],
     maturity_effect: e.maturity_effect || null,
@@ -637,7 +668,11 @@ function adaptEvidence(evidenceEnvelope) {
     published_date: e.published_date,
     age_months: e.age_months,
     identity_ok: e.identity_ok,
-    subcaps: e.subcaps || [],
+    // The drawer's "supports:" chips. The read path names the column
+    // `linked_subcap_ids` (evidence_subcap_links, scoped to this run); the
+    // card's key is `subcaps`. Reading only `e.subcaps` — a key the API never
+    // sent — is why every drawer showed no traceable cell links.
+    subcaps: e.linked_subcap_ids || e.subcaps || [],
     excerpt: e.excerpt || null
   }));
 }

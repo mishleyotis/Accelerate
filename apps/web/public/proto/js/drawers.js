@@ -18,13 +18,24 @@ function EvidenceDrawer() {
   const ev = DMA.getEvidence(evidenceDrawer.evidenceId);
   const subcap = evidenceDrawer.subcap;
   const ic = evidenceDrawer.insight && DMA.getInsight(evidenceDrawer.insight);
+  const LIVE = typeof window !== "undefined" && !!window.DMA_LIVE;
 
   // Pull evidence items
   let items = [];
-  if (ev) items = [ev];else if (ic) items = ic.evidence.map(id => DMA.getEvidence(id)).filter(Boolean);else if (subcap) {
-    // Find evidence items that reference this subcap, plus pad to subcap.evidence_count
+  // Distinguishes "this cell has none" from "the id a card cited does not
+  // resolve" — the drawer used to render both as the tier-filter empty state,
+  // so a dead citation looked like a filter mistake.
+  let unresolved = null;
+  if (ev) items = [ev];else if (ic) items = (ic.evidence || []).map(id => DMA.getEvidence(id)).filter(Boolean);else if (subcap) {
     items = DMA.EVIDENCE.filter(e => e.subcaps && e.subcaps.includes(subcap.id));
-    if (items.length === 0) items = DMA.EVIDENCE.slice(0, Math.max(1, Math.min(subcap.evidence_count, 4)));
+    // Padding with unrelated items presented evidence that does not support
+    // this cell as though it did. Fixture mode keeps it (it is the design
+    // reference for a populated drawer); LIVE never fabricates support.
+    if (items.length === 0 && !LIVE) {
+      items = DMA.EVIDENCE.slice(0, Math.max(1, Math.min(subcap.evidence_count || 1, 4)));
+    }
+  } else if (evidenceDrawer.evidenceId) {
+    unresolved = evidenceDrawer.evidenceId;
   }
 
   // Tier filter
@@ -89,7 +100,10 @@ function EvidenceDrawer() {
     className: "co-title"
   }, "Rationale"), /*#__PURE__*/React.createElement("div", {
     className: "co-body"
-  }, "Score ", fx(subcap.score, 1), " \xB7 peer median ", fx(subcap.peerMedian, 1), ". ", subcap.thin ? "Evidence is below the threshold of 3 - flagged as thin." : "Evidence ceiling: T2 with consistent FACT-class claims."))) : null, items.length > 1 ? /*#__PURE__*/React.createElement("div", {
+  }, "Score ", fx(subcap.score, 1), subcap.peerMedian != null ? ` · peer median ${fx(subcap.peerMedian, 1)}` : " · no peer figure available", subcap.peer_basis === "category_proxy" ? " (peer proxy · category median)" : "", ".", " ", subcap.thin ? `Evidence is below the threshold of 3 — flagged as thin${subcap.closure_condition ? `. Closes on: ${subcap.closure_condition}` : "."}` : items.length ? `Grounded on ${items.length} item${items.length === 1 ? "" : "s"}${(() => {
+    const tiers = [...new Set(items.map(i => i.tier).filter(Boolean))].sort();
+    return tiers.length ? ` · ${tiers.join(", ")}` : "";
+  })()}.` : "No evidence linked at this grain."))) : null, items.length > 1 ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 5,
@@ -118,7 +132,7 @@ function EvidenceDrawer() {
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "evidence",
     size: 20
-  })), /*#__PURE__*/React.createElement("h3", null, "No evidence in this tier"), /*#__PURE__*/React.createElement("p", null, "Try another tier or clear the filter.")) : filtered.map(it => {
+  })), unresolved ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h3", null, unresolved, " is not in this run's evidence store"), /*#__PURE__*/React.createElement("p", null, "The card cites an id this entity and run do not carry. Evidence reads are entity-scoped and fail closed, so nothing is shown. Report it \u2014 a citation that does not resolve is a producer defect.")) : items.length === 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h3", null, "No evidence linked", subcap ? ` to ${subcap.id}` : ""), /*#__PURE__*/React.createElement("p", null, subcap && subcap.thin ? "The cell is flagged thin: it keeps its workbook score and a dashed outline, and its closure condition names what would settle it." : "Nothing is linked at this grain in the promoted run.")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h3", null, "No evidence in this tier"), /*#__PURE__*/React.createElement("p", null, "Try another tier or clear the filter."))) : filtered.map(it => {
     const tier = DMA.getTier(it.tier);
     return /*#__PURE__*/React.createElement("div", {
       key: it.id,
@@ -690,6 +704,9 @@ function IntelligencePanel() {
   // Never show before sign-in (rule of hooks: gate AFTER all hook calls)
   if (!authed) return null;
   const ask = question => {
+    // In LIVE nothing answers: the serving path runs no model (invariant 1),
+    // and the prototype's canned reply is another institution's story.
+    if (IP_LIVE()) return;
     const q = (question || chatInput).trim();
     if (!q) return;
     setChat(c => [...c, {
@@ -799,7 +816,7 @@ function IntelligencePanel() {
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 12
-  }), " Regenerate"), /*#__PURE__*/React.createElement("button", {
+  }), " Replay"), IP_LIVE() ? null : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => pushToast("Routed to Gemini Pro — deeper analysis takes ~8s", "success")
   }, "Deeper \xB7 Pro")) : null, chat.length > 0 ? /*#__PURE__*/React.createElement("div", {
@@ -813,7 +830,7 @@ function IntelligencePanel() {
     className: `ip-message ${m.role}`
   }, m.text, m.role === "ai" && chatStreaming && i === chat.length - 1 ? /*#__PURE__*/React.createElement("span", {
     className: "ip-cursor"
-  }) : null))) : null), !chatStreaming ? /*#__PURE__*/React.createElement("div", {
+  }) : null))) : null), !chatStreaming && STARTERS.length ? /*#__PURE__*/React.createElement("div", {
     className: "ip-chat"
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -824,11 +841,17 @@ function IntelligencePanel() {
       textTransform: "uppercase",
       marginBottom: 6
     }
-  }, chat.length === 0 ? "Try a question" : "Follow-ups"), STARTERS.map((s, i) => /*#__PURE__*/React.createElement("button", {
+  }, IP_LIVE() ? "Conversation starters · promoted" : chat.length === 0 ? "Try a question" : "Follow-ups"), STARTERS.map((s, i) => IP_LIVE() ? /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "ip-starter",
+    style: {
+      cursor: "default"
+    }
+  }, s) : /*#__PURE__*/React.createElement("button", {
     key: i,
     className: "ip-starter",
     onClick: () => ask(s)
-  }, s))) : null, /*#__PURE__*/React.createElement("div", {
+  }, s))) : null, IP_LIVE() ? null : /*#__PURE__*/React.createElement("div", {
     className: "ip-input"
   }, /*#__PURE__*/React.createElement("input", {
     placeholder: "Ask anything about this entity\u2026",
@@ -850,9 +873,13 @@ function WhyNowSignals({
   pushToast
 }) {
   const [open, setOpen] = useState(null);
-  const entId = ctx?.entity?.id || "fce-001";
-  const signals = DMA.whyNowFor(entId);
-  if (!signals || !signals.length) return null;
+  // No fixture fallback: with no entity in context this panel has nothing to
+  // say, and defaulting to fce-001 put the flagship's triggers under whichever
+  // client was open.
+  const entId = ctx?.entity?.id;
+  const wn = entId ? DMA.whyNowFor(entId) : null;
+  const signals = Array.isArray(wn) ? wn : wn && wn.signals || [];
+  if (!signals.length) return null;
   const CAT = {
     core_migration: {
       icon: "refresh",
@@ -1120,7 +1147,81 @@ function WhyNowSignals({
     }, s.window))) : null);
   })));
 }
+
+/* ── Intelligence Panel content ─────────────────────────────────────
+   The panel is a prototype-mode simulation of a chat assistant: canned
+   starters, canned answers, canned surface bodies. In LIVE it cannot be any
+   of that, for two separate reasons:
+
+     · the app performs NO inference at request time (invariant 1), so there
+       is no one to answer a typed question, and
+     · the canned prose names the fixture bank's platforms, peers and
+       evidence ids, which is fabricated content about a real institution.
+       It is globally mounted, so it leaked onto all eight pages.
+
+   In LIVE the panel therefore shows only what the run promoted — the
+   surface's own synthesis and the producer's conversation starters — and the
+   free-text box, the regenerate button and the canned answers are absent.
+   Anything the run did not promote is stated as absent, never filled in. */
+const IP_LIVE = () => typeof window !== "undefined" && !!window.DMA_LIVE;
+function liveStarters(ctx) {
+  const id = ctx?.entity?.id;
+  if (!id) return [];
+  // The producer's D4 conversation starters: talking points, not questions
+  // this app could answer. Rendered read-only in LIVE.
+  return (DMA.startersFor(id) || []).map(s => typeof s === "string" ? s : s && (s.question || s.text || s.starter)).filter(Boolean);
+}
+function liveSurfaceMessages(surface, ctx) {
+  const ent = ctx?.entity?.name || "this entity";
+  const id = ctx?.entity?.id;
+  const absent = what => `${what} did not promote for this run. Nothing is shown rather than filled in — ` + `the panel reads promoted synthesis only and this application runs no model at request time.`;
+  if (surface === "why_now") {
+    const wn = id ? DMA.whyNowFor(id) : null;
+    const body = wn && (wn.synthesis || wn.narrative) || null;
+    return {
+      title: "Why now",
+      sub: wn && wn.window || "Trigger signals",
+      cache_age: "promoted",
+      body: body || (wn && wn.signals && wn.signals.length ? `${wn.signals.length} trigger signal${wn.signals.length === 1 ? "" : "s"} promoted for ${ent}. ` + `Expand a signal below for its claim, evidence and play.` : absent("The why-now synthesis"))
+    };
+  }
+  if (surface === "subcap_narrative") {
+    const sc = ctx?.subcap || {};
+    const cell = DMA.cellEvidenceFor(sc.id) || null;
+    return {
+      title: "Cell synthesis",
+      sub: sc.id || "Heatmap selection",
+      cache_age: "promoted",
+      body: cell && (cell.synthesis || cell.narrative) || absent(`A synthesis for ${sc.id || "this cell"}`)
+    };
+  }
+  if (surface === "platform_story") {
+    const ps = DMA.platformStoryFor(id);
+    return {
+      title: "Platform story",
+      sub: ps && ps.platform || ctx?.platform || "Promoted narrative",
+      cache_age: "promoted",
+      body: ps && (ps.narrative || ps.story || ps.synthesis) || absent("The platform story")
+    };
+  }
+  if (surface === "focus_area") {
+    const fa = ctx?.focusArea || {};
+    return {
+      title: "Focus area synthesis",
+      sub: fa.name || "Strategic priority",
+      cache_age: "promoted",
+      body: fa.synthesis || fa.rationale || fa.quote || absent("A synthesis for this focus area")
+    };
+  }
+  return {
+    title: "Intelligence",
+    sub: "Promoted synthesis",
+    cache_age: "promoted",
+    body: "Select a cell, platform or focus area to read the synthesis the run " + "promoted for it. Nothing here is generated on demand."
+  };
+}
 function starterQuestions(surface, ctx) {
+  if (IP_LIVE()) return liveStarters(ctx);
   const ent = ctx?.entity?.name || "this entity";
   switch (surface) {
     case "why_now":
@@ -1156,6 +1257,7 @@ function answerFor(q, surface, ctx) {
   return `Based on the current run, ${ent} is in the foundation window - the right next conversation is data substrate, not the next channel. The integration window opens with the nCino go-live and closes when a point CDP commitment is made (typically 6 months after the first Data Cloud Architect role posts). Evidence: E-047, E-089, E-112.`;
 }
 function surfaceMessages(surface, ctx) {
+  if (IP_LIVE()) return liveSurfaceMessages(surface, ctx);
   const ent = ctx?.entity?.name || "this entity";
   switch (surface) {
     case "why_now":

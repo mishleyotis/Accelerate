@@ -4,8 +4,17 @@
 
 /* ── D5 Context & timeline ───────────────────────────────────────── */
 function ClientContext({ entity, run }) {
-  const { audience, openEvidence } = useApp();
-  const [yearRange, setYearRange] = useState([2023, 2026]);
+  const { audience, openEvidence, openSubcap } = useApp();
+  // The range comes from the events, not from a constant. It was hardcoded
+  // [2023, 2026] — the prototype fixture's span — so Baxter's timeline opened
+  // having already filtered out everything before 2023, which is six of its ten
+  // events including the 2016 origin the storyline turns on.
+  const _years = (DMA.TIMELINE_EVENTS || [])
+    .map(e => (e.date ? parseInt(String(e.date).slice(0, 4), 10) : NaN))
+    .filter(y => Number.isFinite(y));
+  const _lo = _years.length ? Math.min(..._years) : 2022;
+  const _hi = _years.length ? Math.max(..._years) : 2026;
+  const [yearRange, setYearRange] = useState([_lo, _hi]);
   const [signalFilter, setSignalFilter] = useState("ALL");
   const [hoverEvent, setHoverEvent] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -27,13 +36,23 @@ function ClientContext({ entity, run }) {
   const allEvents = DMA.TIMELINE_EVENTS;
   const issues = DMA.ISSUES;
 
-  // Filter timeline events by year + signal
+  // Filter timeline events by year + signal. An event with no date cannot be
+  // placed on a range, so it is kept rather than dropped by `parseInt(undefined)`
+  // — an undated event is a finding, not something to hide.
   const events = allEvents.filter(e => {
-    const y = parseInt(e.date.slice(0, 4));
-    if (y < yearRange[0] || y > yearRange[1]) return false;
+    const y = e.date ? parseInt(String(e.date).slice(0, 4)) : null;
+    if (y !== null && (y < yearRange[0] || y > yearRange[1])) return false;
     if (signalFilter !== "ALL" && e.signal !== signalFilter) return false;
     return true;
   });
+  // Counts per bucket, so a filter states how many it will match BEFORE it is
+  // pressed. Pressing "Positive" and getting an empty timeline used to be
+  // indistinguishable from a broken page; it was actually a producer writing
+  // prose into the signal field (now refused at submit by CG-09).
+  const signalCounts = allEvents.reduce((a, e) => {
+    a[e.signal] = (a[e.signal] || 0) + 1; return a;
+  }, {});
+  const unclassified = signalCounts.unclassified || 0;
 
   return (
     <div>
@@ -54,13 +73,47 @@ function ClientContext({ entity, run }) {
           <Icon name="timeline" size={16} />
           <div style={{ fontWeight: 600, fontSize: 13 }}>Digital evolution timeline</div>
           <span className="spacer" />
+          {/* Each bucket carries its count, and a bucket with none is disabled
+              rather than pressable-into-nothing. The Unclassified button only
+              exists when the run actually has events the contract's vocabulary
+              does not cover — it is a defect indicator, not a category. */}
           <div className="toggle-row">
-            <button className={signalFilter === "ALL" ? "on" : ""} onClick={() => setSignalFilter("ALL")}>All</button>
-            <button className={signalFilter === "positive" ? "on" : ""} onClick={() => setSignalFilter("positive")} style={{ color: signalFilter === "positive" ? "var(--z-mid)" : "var(--z-muted)" }}>Positive</button>
-            <button className={signalFilter === "neutral" ? "on" : ""} onClick={() => setSignalFilter("neutral")}>Neutral</button>
-            <button className={signalFilter === "negative" ? "on" : ""} onClick={() => setSignalFilter("negative")} style={{ color: signalFilter === "negative" ? "var(--z-below)" : "var(--z-muted)" }}>Negative</button>
+            <button className={signalFilter === "ALL" ? "on" : ""} onClick={() => setSignalFilter("ALL")}>All · {allEvents.length}</button>
+            {[["positive", "Positive", "var(--z-mid)"],
+              ["neutral", "Neutral", null],
+              ["negative", "Negative", "var(--z-below)"]].map(([k, l, c]) => {
+              const n = signalCounts[k] || 0;
+              return (
+                <button key={k} className={signalFilter === k ? "on" : ""}
+                        disabled={!n}
+                        title={n ? `${n} event${n === 1 ? "" : "s"}` : "no events with this signal"}
+                        onClick={() => n && setSignalFilter(k)}
+                        style={{ color: signalFilter === k && c ? c : "var(--z-muted)",
+                                 opacity: n ? 1 : 0.45,
+                                 cursor: n ? "pointer" : "not-allowed" }}>{l} · {n}</button>
+              );
+            })}
+            {unclassified ? (
+              <button className={signalFilter === "unclassified" ? "on" : ""}
+                      title="the run did not state a POSITIVE/NEUTRAL/NEGATIVE signal for these"
+                      onClick={() => setSignalFilter("unclassified")}
+                      style={{ color: "var(--z-org)" }}>Unclassified · {unclassified}</button>
+            ) : null}
           </div>
         </div>
+        {unclassified ? (
+          <div className="co co-org" style={{ marginBottom: 12 }}>
+            <Icon name="warn" size={14} />
+            <div>
+              <div className="co-title">{unclassified} of {allEvents.length} events carry no signal</div>
+              <div className="co-body">
+                The clustering needs POSITIVE, NEUTRAL or NEGATIVE per event. These
+                are shown in date order and excluded from the three buckets — the
+                run has to state the direction for them to cluster.
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {/* Range slider */}
         <div style={{ background: "var(--z-lav)", padding: "12px 16px", borderRadius: 8, marginBottom: 14 }}>
@@ -70,13 +123,13 @@ function ClientContext({ entity, run }) {
             <span className="spacer" />
             <strong style={{ color: "var(--z-dark)" }}>{yearRange[0]} – {yearRange[1]}</strong>
           </div>
-          <RangeSlider min={2022} max={2026} value={yearRange} onChange={setYearRange} />
+          <RangeSlider min={_lo} max={_hi} value={yearRange} onChange={setYearRange} />
         </div>
 
         <InteractiveTimeline events={events} setHoverEvent={setHoverEvent} setSelectedEvent={setSelectedEvent} selectedEvent={selectedEvent} hoverEvent={hoverEvent} />
 
         {selectedEvent !== null && events[selectedEvent] ? (
-          <EventDetail event={events[selectedEvent]} onClose={() => setSelectedEvent(null)} openEvidence={openEvidence} />
+          <EventDetail event={events[selectedEvent]} onClose={() => setSelectedEvent(null)} openEvidence={openEvidence} openSubcap={openSubcap} />
         ) : null}
       </div>
 
@@ -103,27 +156,8 @@ function ClientContext({ entity, run }) {
           </div>
           <FinChartInteractive entity={entity} hoveredYear={hoveredYear} setHoveredYear={setHoveredYear} />
         </div>
-        <div className="card">
-          <div className="row" style={{ marginBottom: 12 }}>
-            <Icon name="shield" size={16} />
-            <div style={{ fontWeight: 600, fontSize: 13 }}>Regulatory standing</div>
-          </div>
-          <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.65 }}>
-            <Row k="Primary regulator" v={entity.regulator} />
-            <Row k="License type" v={entity.license} />
-            <Row k="Jurisdictions" v={entity.footprint?.join(" · ") || "-"} />
-            <div className="sep" />
-            <div className="co co-org" style={{ cursor: "pointer" }} onClick={() => setIssueOpen("IS-014")}>
-              <Icon name="warn" size={14} />
-              <div style={{ flex: 1 }}>
-                <div className="co-title">Open enforcement · IS-014</div>
-                <div className="co-body">{issues[0].desc} · click to view caps</div>
-              </div>
-              <Icon name="arrow-r" size={12} />
-            </div>
-            <button className="btn btn-tertiary btn-sm" style={{ marginTop: 10 }} onClick={() => openEvidence("E-218")}>View evidence <Icon name="arrow-r" size={12} /></button>
-          </div>
-        </div>
+        <RegulatoryStanding entity={entity} issues={issues}
+                            setIssueOpen={setIssueOpen} openEvidence={openEvidence} />
       </div>
 
       {/* Sentiment + acquisitions */}
@@ -189,6 +223,157 @@ function ClientContext({ entity, run }) {
   );
 }
 
+/* ── Regulatory standing (C3) ────────────────────────────────────────
+   Every field here is promoted. The card previously printed the DIRECTORY
+   row's three identity fields and then a hardcoded open-enforcement callout
+   pointing at IS-014 with a "View evidence" button hardcoded to E-218 — an
+   issue and an evidence id that exist in the prototype fixture and in no real
+   run. That is why the card read close to empty and why the button opened a
+   drawer with nothing in it.
+
+   A run with no enforcement action is the common case, and it is a FINDING,
+   not a blank: `absence_of_enforcement` carries the ladder that establishes
+   it, and the card states what was searched. */
+function RegulatoryStanding({ entity, issues, setIssueOpen, openEvidence }) {
+  const reg = DMA.regulatoryFor(entity.id);
+  const [openLadder, setOpenLadder] = useState(false);
+  if (!reg) {
+    return (
+      <div className="card">
+        <div className="row" style={{ marginBottom: 12 }}>
+          <Icon name="shield" size={16} />
+          <div style={{ fontWeight: 600, fontSize: 13 }}>Regulatory standing</div>
+        </div>
+        <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+          The regulatory standing section did not promote for this run.
+        </div>
+      </div>
+    );
+  }
+  const list = (v) => Array.isArray(v) ? v.filter(Boolean) : (v ? [v] : []);
+  const actions = list(reg.enforcement_actions);
+  const absence = reg.absence_of_enforcement || null;
+  const searched = list(absence && absence.sources_searched);
+  // Issues the register carries against a regulatory matter, by id — the link
+  // is the issue's own, never a constant.
+  const regIssues = (issues || []).filter(
+    i => /regulat|enforce|compliance|breach|consent/i.test(
+      `${i.title || ""} ${i.desc || ""} ${i.kind || ""}`));
+
+  return (
+    <div className="card">
+      <div className="row" style={{ marginBottom: 12 }}>
+        <Icon name="shield" size={16} />
+        <div style={{ fontWeight: 600, fontSize: 13 }}>Regulatory standing</div>
+        <span className="spacer" />
+        {actions.length
+          ? <span className="b b-below">{actions.length} action{actions.length === 1 ? "" : "s"}</span>
+          : (absence && absence.verified ? <span className="b b-above">No action found</span> : null)}
+      </div>
+      <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.65 }}>
+        <Row k="Primary regulator" v={reg.primary_regulator || entity.regulator} />
+        {list(reg.additional_regulators).length ? (
+          <Row k="Also regulated by" v={list(reg.additional_regulators).join(" · ")} />
+        ) : null}
+        <Row k="License type" v={reg.license_type || entity.license} />
+        <Row k="Jurisdictions" v={list(reg.jurisdictions).join(" · ")
+                                  || (entity.footprint || []).join(" · ") || "—"} />
+        {reg.charter_date ? <Row k="Chartered" v={String(reg.charter_date).slice(0, 4)} /> : null}
+        <div className="sep" />
+
+        {actions.length ? actions.map((a, i) => (
+          <div key={a.action_id || i} className="co co-org" style={{ marginBottom: 8 }}>
+            <Icon name="warn" size={14} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="co-title">
+                {a.kind || "Enforcement action"}
+                {a.dated_on ? ` · ${a.dated_on}` : ""}
+                {a.status ? ` · ${a.status}` : ""}
+              </div>
+              <div className="co-body">{a.summary || a.title || "—"}</div>
+              {(a.e_ids || []).length ? (
+                <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 6 }}>
+                  {a.e_ids.map(eid => (
+                    <button key={eid} className="chip" style={{ cursor: "pointer", border: 0 }}
+                            onClick={() => openEvidence(eid)}>{eid}</button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )) : (
+          <div className="co co-teal">
+            <Icon name="check" size={14} />
+            <div style={{ flex: 1 }}>
+              <div className="co-title">
+                {absence && absence.verified
+                  ? "No enforcement action found · searched and verified"
+                  : "No enforcement action recorded"}
+              </div>
+              <div className="co-body">
+                {absence && absence.statement
+                  ? absence.statement
+                  : (searched.length
+                      ? `Established against ${searched.length} source${searched.length === 1 ? "" : "s"}.`
+                      : "The run recorded no action and no search ladder, so this is an absence of record rather than a verified absence.")}
+              </div>
+              {searched.length ? (
+                <>
+                  <button className="btn btn-tertiary btn-sm" style={{ marginTop: 8 }}
+                          onClick={() => setOpenLadder(o => !o)}>
+                    {openLadder ? "Hide" : "Show"} what was searched
+                    <Icon name={openLadder ? "chevron-u" : "chevron-d"} size={12} />
+                  </button>
+                  {openLadder ? (
+                    <ul style={{ margin: "8px 0 0 16px", fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.6 }}>
+                      {searched.map((s, i) => <li key={i}>{s}</li>)}
+                    </ul>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+          </div>
+        )}
+
+        {/* Register matters that bear on regulatory standing, linked by their
+            own ids so the click lands on a real issue. */}
+        {regIssues.length ? (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>
+              On the issue register
+            </div>
+            {regIssues.map(i => (
+              <div key={i.id} className="co co-org" style={{ cursor: "pointer", marginBottom: 6 }}
+                   onClick={() => setIssueOpen(i.id)}>
+                <Icon name="warn" size={14} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="co-title">{i.status || "OPEN"} · {i.id}</div>
+                  <div className="co-body">{i.title || i.desc} · click for the cells it caps</div>
+                </div>
+                <Icon name="arrow-r" size={12} />
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {(reg.e_ids || []).length ? (
+          <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 10 }}>
+            <span style={{ fontSize: 10, color: "var(--z-muted)" }}>EVIDENCE</span>
+            {reg.e_ids.map(eid => (
+              <button key={eid} className="chip" style={{ cursor: "pointer", border: 0 }}
+                      onClick={() => openEvidence(eid)}>{eid}</button>
+            ))}
+          </div>
+        ) : (
+          <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 10 }}>
+            This section cites no evidence ids.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Range slider ───────────────────────────────────────────────── */
 function RangeSlider({ min, max, value, onChange }) {
   const [v1, v2] = value;
@@ -213,16 +398,34 @@ function InteractiveTimeline({ events, setHoverEvent, setSelectedEvent, selected
   if (events.length === 0) {
     return <div className="empty" style={{ padding: 30 }}><div className="icon"><Icon name="calendar" size={20} /></div><h3>No events in range</h3><p>Expand the time range or change the signal filter.</p></div>;
   }
-  const minDate = new Date(events[0].date + "-01");
-  const maxDate = new Date(events[events.length - 1].date + "-01");
+  // The prototype's fixture dated events YYYY-MM, so it appended "-01" to make
+  // a parseable date. The contract's `event_date` is a full DATE and arrives
+  // YYYY-MM-DD, which made this "2016-01-01-01" — an Invalid Date, so every
+  // pct was NaN and all ten dots and their labels stacked at the same point.
+  // That is the overlapping text on this page. Parse what actually arrives.
+  const at = (d) => {
+    if (!d) return null;
+    const s = String(d);
+    const t = Date.parse(/^\d{4}-\d{2}$/.test(s) ? `${s}-01` : s);
+    return Number.isNaN(t) ? null : t;
+  };
+  const stamps = events.map(e => at(e.date)).filter(t => t !== null);
+  const minDate = stamps.length ? Math.min(...stamps) : 0;
+  const maxDate = stamps.length ? Math.max(...stamps) : 1;
   const span = Math.max(1, maxDate - minDate);
-  const TONE = { positive: "var(--z-mid)", negative: "var(--z-below)", neutral: "var(--z-purple)" };
+  const TONE = { positive: "var(--z-mid)", negative: "var(--z-below)",
+                 neutral: "var(--z-purple)", unclassified: "var(--z-org)" };
 
   return (
     <div style={{ position: "relative", padding: "20px 8px 50px" }}>
       <div style={{ position: "relative", height: 2, background: "var(--z-sep)", margin: "30px 16px" }}>
         {events.map((e, i) => {
-          const pct = ((new Date(e.date + "-01") - minDate) / span) * 100;
+          const t = at(e.date);
+          // An undated event has no position on a time axis. It renders in the
+          // label row below with "undated" rather than being placed at zero,
+          // which would read as the earliest event in the run.
+          if (t === null) return null;
+          const pct = ((t - minDate) / span) * 100;
           const active = selectedEvent === i || hoverEvent === i;
           return (
             <button key={e.id}
@@ -234,45 +437,103 @@ function InteractiveTimeline({ events, setHoverEvent, setSelectedEvent, selected
           );
         })}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: `repeat(${events.length}, 1fr)`, gap: 6, fontSize: 9.5, color: "var(--z-muted)", padding: "0 8px" }}>
+      {/* The label row is a grid of equal columns, so the labels never overlap
+          however close two events are on the axis above. Each is clickable —
+          the dot is 16px and the title is the real target. */}
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${events.length}, minmax(0, 1fr))`, gap: 6, fontSize: 9.5, color: "var(--z-muted)", padding: "0 8px" }}>
         {events.map((e, i) => (
-          <div key={e.id} style={{ textAlign: "center", lineHeight: 1.4 }}>
-            <div className="f-mono" style={{ color: hoverEvent === i || selectedEvent === i ? TONE[e.signal] : "var(--z-muted)" }}>{e.date}</div>
+          <button key={e.id} onClick={() => setSelectedEvent(i === selectedEvent ? null : i)}
+            onMouseEnter={() => setHoverEvent(i)} onMouseLeave={() => setHoverEvent(null)}
+            title={`${e.date || "undated"} · ${e.title}`}
+            style={{ textAlign: "center", lineHeight: 1.4, background: "none",
+                     border: 0, padding: 0, cursor: "pointer", minWidth: 0 }}>
+            <div className="f-mono" style={{ color: hoverEvent === i || selectedEvent === i ? TONE[e.signal] : "var(--z-muted)" }}>{e.date || "undated"}</div>
             <div className="txt-fit-2" style={{ fontSize: 9.5, color: hoverEvent === i || selectedEvent === i ? "var(--z-dark)" : "var(--z-muted)", fontWeight: hoverEvent === i ? 600 : 400 }}>{e.title}</div>
-          </div>
+          </button>
         ))}
       </div>
     </div>
   );
 }
 
-function EventDetail({ event, onClose, openEvidence }) {
-  const TONE = { positive: "var(--z-mid)", negative: "var(--z-below)", neutral: "var(--z-purple)" };
+/* The event drilldown. It used to print a generic sentence chosen by signal —
+   the same three sentences for every event in every run — and never showed the
+   event's own body, its maturity effect, or the cells it touches. That is why
+   the drilldown read as though it had no detail: the detail was promoted and
+   unread. `openSubcap` makes each affected cell clickable, which is the link
+   from a historical event back to the DMA that was missing. */
+function EventDetail({ event, onClose, openEvidence, openSubcap }) {
+  const TONE = { positive: "var(--z-mid)", negative: "var(--z-below)",
+                 neutral: "var(--z-purple)", unclassified: "var(--z-org)" };
+  const caps = event.capabilities && event.capabilities.length
+    ? event.capabilities : (event.cap_impact ? [event.cap_impact] : []);
   return (
-    <div style={{ marginTop: 16, padding: 14, background: "var(--z-lav)", borderRadius: 8, borderLeft: `4px solid ${TONE[event.signal]}` }}>
-      <div className="row" style={{ marginBottom: 8 }}>
-        <span className="f-mono" style={{ fontSize: 11, color: "var(--z-muted)" }}>{event.date}</span>
-        <strong style={{ fontSize: 14 }}>{event.title}</strong>
-        <span className="b b-purple">{event.cap_impact}</span>
-        <span className="spacer" />
-        <span className="b b-muted">{event.signal.toUpperCase()}</span>
+    <div style={{ marginTop: 16, padding: 14, background: "var(--z-lav)", borderRadius: 8, borderLeft: `4px solid ${TONE[event.signal] || "var(--z-sep)"}` }}>
+      <div className="row" style={{ marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
+        <span className="f-mono" style={{ fontSize: 11, color: "var(--z-muted)" }}>{event.date || "undated"}</span>
+        <strong style={{ fontSize: 14, flex: 1, minWidth: 0 }}>{event.title}</strong>
+        {event.kind ? <span className="b b-purple">{event.kind}</span> : null}
+        {event.claim ? <span className="b b-muted">{event.claim}</span> : null}
+        {event.signal === "unclassified"
+          ? <span className="b b-org" title={event.signal_raw || ""}>NO SIGNAL STATED</span>
+          : <span className="b b-muted">{String(event.signal).toUpperCase()}</span>}
         <button className="icon-btn" onClick={onClose}><Icon name="x" size={14} /></button>
       </div>
-      <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6, marginBottom: 10 }}>
-        {event.signal === "positive" ? "Positive signal - increases the maturity ceiling on the affected capability." :
-         event.signal === "negative" ? "Negative signal - caps the maturity score on the affected capability." :
-         "Neutral signal - context for understanding the entity's trajectory, no direct score effect."}
+
+      {/* What happened — the producer's own words. */}
+      {event.detail ? (
+        <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6, marginBottom: 10 }}>
+          {event.detail}
+        </div>
+      ) : (
+        <div style={{ fontSize: 12, color: "var(--z-muted)", marginBottom: 10 }}>
+          The run recorded this event with no body text.
+        </div>
+      )}
+
+      {/* What it did to maturity — read, never generated from the signal. */}
+      <div style={{ background: "rgba(255,255,255,.6)", border: "1px solid var(--z-sep)", borderRadius: 6, padding: "8px 10px", marginBottom: 10 }}>
+        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 4 }}>
+          Effect on maturity
+        </div>
+        <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55 }}>
+          {event.maturity_effect
+            || (event.signal === "unclassified"
+                ? "Not stated. The run did not classify this event's direction, so no effect is claimed here."
+                : "The run stated a signal but no effect. Nothing is inferred from the signal alone.")}
+        </div>
       </div>
-      {event.evidence.length > 0 ? (
+
+      {caps.length ? (
+        <div className="row" style={{ flexWrap: "wrap", gap: 5, marginBottom: 8 }}>
+          <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Affects:</span>
+          {caps.map(cid => (
+            <button key={cid} className="chip purple" style={{ cursor: "pointer", border: 0 }}
+                    onClick={() => openSubcap && openSubcap(cid)}>{cid}</button>
+          ))}
+        </div>
+      ) : (
+        <div style={{ fontSize: 11, color: "var(--z-muted)", marginBottom: 8 }}>
+          No capability linked — this event is context, not a scored constraint.
+        </div>
+      )}
+
+      {(event.evidence || []).length > 0 ? (
         <div className="row" style={{ flexWrap: "wrap", gap: 6 }}>
           <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Evidence:</span>
           {event.evidence.map(eid => {
             const e = DMA.getEvidence(eid);
-            const tier = e?.tier || "T1";
-            return <button key={eid} className={`tier-chip tier-${tier}`} onClick={() => openEvidence(eid)}>{eid} · {tier}</button>;
+            const tier = e?.tier || "T3";
+            return <button key={eid} className={`tier-chip tier-${tier}`}
+                           title={e ? `${e.title} · ${e.source_pretty}` : eid}
+                           onClick={() => openEvidence(eid)}>{eid} · {tier}</button>;
           })}
         </div>
-      ) : null}
+      ) : (
+        <div style={{ fontSize: 11, color: "var(--z-muted)" }}>
+          This event cites no evidence.
+        </div>
+      )}
     </div>
   );
 }

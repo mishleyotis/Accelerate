@@ -127,6 +127,7 @@ def validate_pass1(page: str, payload: dict) -> list:
                     f"{e!r} is not an evidence id the recogniser accepts"))
         reasons.extend(_check_agent_ids(name, body))
         reasons.extend(_check_enum_fields(page, name, body))
+        reasons.extend(_check_contract_vocabularies(page, name, body))
         reasons.extend(_check_date_fields(page, name, body))
 
     return reasons
@@ -185,6 +186,51 @@ def _check_date_fields(page: str, section: str, body) -> list:
                     "CG-09", section, f"{section}.{jpath}",
                     f"{str(value)[:40]!r} does not resolve to a date — this field is "
                     f"promoted into a DATE column and accepts {DATE_SHAPES}"))
+    return out
+
+
+# Fields whose promoted column is plain TEXT but whose CONTRACT states a closed
+# vocabulary. The generated `enum_fields` registry only knows Postgres enums, so
+# these were policed by nothing: a producer wrote a consequence SENTENCE into
+# `context.timeline.events[*].signal`, the TEXT column accepted it, promotion
+# succeeded, and the Positive/Neutral/Negative filters on D5 then matched zero
+# events on a page with ten of them. A filter that silently matches nothing is
+# worse than a failed submission, so the vocabulary is enforced here.
+#
+# Add a field only where the contract names the values. This is not a place to
+# invent vocabulary — the contract's `doc` text is the source.
+_CONTRACT_VOCABULARIES = {
+    "context.timeline": {
+        "events[*].signal": {
+            "name": "signal",
+            "values": ("POSITIVE", "NEUTRAL", "NEGATIVE"),
+            "note": ("the event's direction for maturity, which the D5 timeline "
+                     "clusters on. The consequence sentence belongs in "
+                     "`maturity_effect`, not here"),
+        },
+    },
+    "techstack.techstack": {
+        "items[*].status": {
+            "name": "status",
+            "values": ("CONFIRMED", "INFERRED", "CLAIMED", "ABSENT"),
+            "note": "required per row; the register renders each state distinctly",
+        },
+    },
+}
+
+
+def _check_contract_vocabularies(page: str, section: str, body) -> list:
+    out = []
+    for path, spec in _CONTRACT_VOCABULARIES.get(f"{page}.{section}", {}).items():
+        for jpath, value in _at_path(body, path):
+            if value is None or value in spec["values"]:
+                continue
+            shown = (value if isinstance(value, str) and len(value) <= 60
+                     else f"{str(value)[:57]}…")
+            out.append(_reason(
+                "CG-09", section, f"{section}.{jpath}",
+                f"{shown!r} is not a value of {spec['name']} — the contract "
+                f"states {' │ '.join(spec['values'])}. {spec['note']}"))
     return out
 
 

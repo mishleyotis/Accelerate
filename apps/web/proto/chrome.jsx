@@ -248,7 +248,8 @@ function NotificationsPopover({ onClose }) {
 }
 
 function SettingsPopover({ onClose }) {
-  const { role, setRole, audience, setAudience, setAuthed } = useApp();
+  const { role, setRole, audience, setAudience, setAuthed,
+          grantedRole: granted, canActAs } = useApp();
   const items = [
     { label: "Profile",          icon: "user",     route: "/admin",       sub: sessionUser().name },
     { label: "Tweaks panel",     icon: "settings", action: () => { try { window.parent.postMessage({ type: "__activate_edit_mode" }, "*"); } catch(e){}; window.dispatchEvent(new MessageEvent("message", { data: { type: "__activate_edit_mode" } })); onClose(); }, sub: "Toggle in-page tweaks" },
@@ -263,22 +264,39 @@ function SettingsPopover({ onClose }) {
           <div style={{ fontSize: 11, color: "var(--z-mid)" }}>{sessionUser().email}</div>
         </div>
       </div>
-      <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--z-sep)" }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>Acting as</div>
-        {/* Production divergence: previewing a lesser view is fine; acting
-            ABOVE the server-granted role is not. */}
-        <div className="toggle-row" style={{ width: "100%" }}>
-          {(() => {
-            const RANK = { AE: 0, ANALYST: 1, ADMIN: 2 };
-            const cap = RANK[grantedRole()] ?? 0;
-            return [["AE","AE"],["ANALYST","Analyst"],["ADMIN","Admin"]]
-              .filter(([k]) => RANK[k] <= cap)
-              .map(([k, l]) => (
-                <button key={k} className={role === k ? "on" : ""} style={{ flex: 1 }} onClick={() => { setRole(k); onClose(); }}>{l}</button>
-              ));
-          })()}
+      {/* "Acting as" exists only for an allow-listed ADMIN or ANALYST. An AE has
+          exactly one view — its own — so it previously rendered a single dead
+          button labelled "AE" that did nothing when pressed. Now it renders
+          nothing at all, and the popover states the granted role instead.
+          Previewing a LESSER view is fine; the proxy clamps every read against
+          the session's granted role (lib/identity.effectiveRole), so this
+          control cannot escalate even if the DOM is edited. */}
+      {canActAs ? (
+        <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--z-sep)" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>Acting as</div>
+          <div className="toggle-row" style={{ width: "100%" }}>
+            {(() => {
+              const RANK = { AE: 0, ANALYST: 1, ADMIN: 2 };
+              const cap = RANK[String(granted).toUpperCase()] ?? 0;
+              return [["AE", "AE"], ["ANALYST", "Analyst"], ["ADMIN", "Admin"]]
+                .filter(([k]) => RANK[k] <= cap)
+                .map(([k, l]) => (
+                  <button key={k} className={role === k ? "on" : ""} style={{ flex: 1 }} onClick={() => { setRole(k); onClose(); }}>{l}</button>
+                ));
+            })()}
+          </div>
+          <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 6 }}>
+            Granted {String(granted).toUpperCase()} · the server answers for the
+            view you pick, so a narrower view shows exactly what that role sees.
+          </div>
         </div>
-      </div>
+      ) : (
+        <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--z-sep)",
+                      fontSize: 11, color: "var(--z-muted)" }}>
+          Signed in as <strong style={{ color: "var(--z-dark)" }}>AE</strong> —
+          the field view. Internal views are allow-listed.
+        </div>
+      )}
       <div className="popover-body" style={{ padding: 0 }}>
         {items.map((it, i) => (
           <button key={i} className="popover-row" style={{ width: "100%", border: 0, background: "none", textAlign: "left" }} onClick={() => { if (it.route) navigate(it.route); if (it.action) it.action(); onClose(); }}>

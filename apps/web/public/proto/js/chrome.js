@@ -582,7 +582,9 @@ function SettingsPopover({
     setRole,
     audience,
     setAudience,
-    setAuthed
+    setAuthed,
+    grantedRole: granted,
+    canActAs
   } = useApp();
   const items = [{
     label: "Profile",
@@ -647,7 +649,7 @@ function SettingsPopover({
       fontSize: 11,
       color: "var(--z-mid)"
     }
-  }, sessionUser().email))), /*#__PURE__*/React.createElement("div", {
+  }, sessionUser().email))), canActAs ? /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "10px 14px",
       borderBottom: "1px solid var(--z-sep)"
@@ -672,7 +674,7 @@ function SettingsPopover({
       ANALYST: 1,
       ADMIN: 2
     };
-    const cap = RANK[grantedRole()] ?? 0;
+    const cap = RANK[String(granted).toUpperCase()] ?? 0;
     return [["AE", "AE"], ["ANALYST", "Analyst"], ["ADMIN", "Admin"]].filter(([k]) => RANK[k] <= cap).map(([k, l]) => /*#__PURE__*/React.createElement("button", {
       key: k,
       className: role === k ? "on" : "",
@@ -684,7 +686,24 @@ function SettingsPopover({
         onClose();
       }
     }, l));
-  })())), /*#__PURE__*/React.createElement("div", {
+  })()), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)",
+      marginTop: 6
+    }
+  }, "Granted ", String(granted).toUpperCase(), " \xB7 the server answers for the view you pick, so a narrower view shows exactly what that role sees.")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 14px",
+      borderBottom: "1px solid var(--z-sep)",
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, "Signed in as ", /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: "var(--z-dark)"
+    }
+  }, "AE"), " \u2014 the field view. Internal views are allow-listed."), /*#__PURE__*/React.createElement("div", {
     className: "popover-body",
     style: {
       padding: 0

@@ -21,7 +21,8 @@ COLS = ("e_id", "origin", "source_name", "source_url", "source_domain",
         "identity_ok", "identity_note")
 
 
-def _row(e_id, tier="T2", claim="FACT", entity="A", identity_ok=True, ers=4.2):
+def _row(e_id, tier="T2", claim="FACT", entity="A", identity_ok=True, ers=4.2,
+         linked=()):
     return {"e_id": e_id, "origin": "PUBLIC_WEB", "source_name": "NCUA",
             "source_url": "https://ncua.gov/x", "source_domain": "ncua.gov",
             "excerpt": "a verbatim excerpt of at least fifty characters, as "
@@ -30,6 +31,10 @@ def _row(e_id, tier="T2", claim="FACT", entity="A", identity_ok=True, ers=4.2):
             "reference_date": None, "age_months": 7, "recency_band": "CURRENT",
             "ers": ers, "specificity": 3, "corroboration": 2,
             "identity_ok": identity_ok, "identity_note": None,
+            # The cells this item was linked to for this run. Selected by the
+            # read path's LEFT JOIN LATERAL over evidence_subcap_links, which is
+            # what makes the drawer's "supports:" chips traceable.
+            "linked_subcap_ids": list(linked),
             "_entity": entity}
 
 
@@ -42,12 +47,16 @@ class _Cur:
 
     def execute(self, sql, params=None):
         self.queries.append(sql)
-        if "WHERE entity_id" in sql:
-            entity = params[0]
+        if "WHERE e.entity_id" in sql:
+            # run_id, when passed, is bound BEFORE entity_id (it sits inside the
+            # lateral), so the entity is the last of the leading params.
+            has_run = "k.run_id = %s" in sql
+            entity = params[1] if has_run else params[0]
             picked = [r for r in self.rows if r["_entity"] == entity]
-            if len(params) > 1:
-                picked = [r for r in picked if r["e_id"] in params[1]]
-            self._out = [tuple(r[c] for c in COLS) for r in picked]
+            if len(params) > (2 if has_run else 1):
+                picked = [r for r in picked if r["e_id"] in params[-1]]
+            self._out = [tuple(r[c] for c in COLS + ("linked_subcap_ids",))
+                         for r in picked]
         elif "WHERE e_id = ANY" in sql:
             wanted = set(params[0])
             self._out = [(r["e_id"],) for r in self.rows if r["e_id"] in wanted]
@@ -109,3 +118,43 @@ def test_the_evidence_route_precedes_the_generic_page_route():
     paths = [r.path for r in m.app.routes if "{display_id}" in getattr(r, "path", "")]
     assert (paths.index("/v1/entities/{display_id}/evidence")
             < paths.index("/v1/entities/{display_id}/{page}"))
+
+
+def test_linked_cells_reach_the_drawer_and_are_run_scoped():
+    """The drawer's traceable cell links.
+
+    `linked_subcap_ids` lives in evidence_subcap_links, not on evidence_index,
+    so the read path joins it. It was not selected at all — every item served
+    `subcaps: []` and clicking an evidence id opened a drawer with no way back
+    to the cells the item supports, which is exactly the reported defect.
+    """
+    cur = _Cur([_row("E-1", entity="A", linked=["P4C1.3.1", "P2C3.1.1"])])
+    res = fetch(cur, "A", ["E-1"], run_id="run-7")
+    assert res["found"] == ["E-1"]
+    assert res["items"][0]["linked_subcap_ids"] == ["P4C1.3.1", "P2C3.1.1"]
+    # Scoped to the run: a prior run's linkage must not answer for this one.
+    assert "k.run_id = %s" in cur.queries[0]
+
+
+def test_an_item_with_no_linkage_still_resolves():
+    """A LEFT JOIN, not an inner one: an unlinked item is still evidence.
+
+    An inner join would have dropped it from `found`, turning a real citation
+    into not_found — a fail-closed gate reporting a fabrication that isn't one.
+    """
+    cur = _Cur([_row("E-2", entity="A", linked=[])])
+    res = fetch(cur, "A", ["E-2"], run_id="run-7")
+    assert res["found"] == ["E-2"]
+    assert res["items"][0]["linked_subcap_ids"] == []
+
+
+def test_the_linkage_survives_customer_redaction():
+    """Redaction strips the grading, not the traceability.
+
+    ERS and its inputs are internal; which cells an item supports is the
+    argument itself, and a customer reading the dashboard needs it.
+    """
+    cur = _Cur([_row("E-3", entity="A", linked=["P1C1.1.1"])])
+    items = redact_items(fetch(cur, "A", ["E-3"])["items"], "customer")
+    assert items[0]["linked_subcap_ids"] == ["P1C1.1.1"]
+    assert all(f not in items[0] for f in INTERNAL_FIELDS)

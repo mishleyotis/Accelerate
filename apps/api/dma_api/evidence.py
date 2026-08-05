@@ -35,33 +35,54 @@ _COLUMNS = ("e_id", "origin", "source_name", "source_url", "source_domain",
             "identity_ok", "identity_note")
 
 
-def _row_to_item(row: tuple) -> dict:
-    item = dict(zip(_COLUMNS, row))
+def _row_to_item(row: tuple, columns=_COLUMNS) -> dict:
+    item = dict(zip(columns, row))
     for k in ("published_date", "reference_date"):
         v = item.get(k)
         item[k] = v.isoformat() if hasattr(v, "isoformat") else v
     for k in ("ers",):
         v = item.get(k)
         item[k] = float(v) if v is not None else None
+    item.setdefault("linked_subcap_ids", [])
+    item["linked_subcap_ids"] = item.get("linked_subcap_ids") or []
     return item
 
 
-def fetch(cur, entity_id, e_ids: list[str] | None = None) -> dict:
+def fetch(cur, entity_id, e_ids: list[str] | None = None,
+          run_id=None) -> dict:
     """Evidence for one entity, optionally filtered to specific ids.
 
     Returns `{items, found, not_found, foreign, distribution}`. The three id
     lists are the drawer's resolution verdict per requested id; they are empty
     when no filter was asked for, because "every id for this entity" cannot
     have a missing one.
+
+    Each item carries `linked_subcap_ids` — the cells this item was linked to
+    in `evidence_subcap_links`, for THIS run. Those links are what make the
+    drawer traceable in both directions: a card cites an id, the drawer names
+    the id's source and excerpt, and these ids walk back to the cells the item
+    actually supports. Read from the link table, never inferred from prose, and
+    scoped to the run so a prior run's linkage cannot answer for this one.
     """
-    sql = f"SELECT {', '.join(_COLUMNS)} FROM evidence_index WHERE entity_id = %s"
-    params: list = [entity_id]
+    columns = _COLUMNS + ("linked_subcap_ids",)
+    # LEFT JOIN LATERAL, not a plain join: an item with no linkage yet is still
+    # an evidence row and must resolve, so `found` stays honest.
+    sql = (f"SELECT {', '.join('e.' + c for c in _COLUMNS)}, "
+           "COALESCE(l.ids, ARRAY[]::TEXT[]) "
+           "FROM evidence_index e "
+           "LEFT JOIN LATERAL ("
+           "  SELECT array_agg(DISTINCT k.subcap_id ORDER BY k.subcap_id) AS ids"
+           "  FROM evidence_subcap_links k"
+           "  WHERE k.e_id = e.e_id"
+           + ("    AND k.run_id = %s" if run_id else "")
+           + ") l ON TRUE WHERE e.entity_id = %s")
+    params: list = ([run_id] if run_id else []) + [entity_id]
     if e_ids:
-        sql += " AND e_id = ANY(%s)"
+        sql += " AND e.e_id = ANY(%s)"
         params.append(list(e_ids))
-    sql += " ORDER BY tier, e_id"
+    sql += " ORDER BY e.tier, e.e_id"
     cur.execute(sql, params)
-    items = [_row_to_item(r) for r in cur.fetchall()]
+    items = [_row_to_item(r, columns) for r in cur.fetchall()]
 
     found = [i["e_id"] for i in items]
     not_found: list[str] = []

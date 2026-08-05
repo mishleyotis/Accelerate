@@ -1185,6 +1185,23 @@
     sectionStateFor: key => LIVE ? ((liveEntity() || {}).sectionState || {})[key] || null : null,
     runFor: id => LIVE ? liveField(id, "run") : null,
     startersFor: id => LIVE ? (liveField(id, "starters") || []) : [],
+    /* The Intelligence panel's LIVE bodies. It used to carry canned prose per
+       surface — the fixture bank's platforms, peers and evidence ids — and it
+       is mounted globally, so it leaked onto every page including health and
+       runs. In LIVE it reads the promoted synthesis for the open surface and
+       nothing else; there is no request-time model to ask. */
+    platformStoryFor: id => (LIVE ? liveField(id, "platformStory") : null),
+    /* C3 regulatory standing. The card used to print the directory row's three
+       identity fields and then a HARDCODED enforcement callout (IS-014) with a
+       hardcoded "view evidence" id (E-218) — a dead click for every real
+       client, and the reason the card read close to empty while the section
+       carried two regulators, five jurisdictions and a verified absence. */
+    regulatoryFor: id => (LIVE ? liveField(id, "regulatory") : null),
+    cellEvidenceFor: subcapId => {
+      if (!LIVE || !subcapId) return null;
+      return (liveField(null, "cellEvidence") || [])
+        .find(c => c.subcap_id === subcapId || c.cell_id === subcapId) || null;
+    },
     insightPriority,
     issueCapsFor: subcapId => {
       // Read the LIVE-gated maps, not the module-level fixtures: this used to

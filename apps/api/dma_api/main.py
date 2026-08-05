@@ -258,7 +258,8 @@ def entity_evidence(display_id: str, request: Request, response: Response,
             return JSONResponse({"error": e.code, "detail": e.detail},
                                 status_code=e.status)
         wanted = [x.strip() for x in (e_ids or "").split(",") if x.strip()]
-        res = ev_fetch(cur, entity_id, wanted or None)
+        res = ev_fetch(cur, entity_id, wanted or None,
+                       run_id=run_meta["run_id"])
         res["items"] = ev_redact(res["items"], audience)
         tag = etag_for(run_meta, f"{audience}.evidence")
         if request.headers.get("if-none-match") == tag:

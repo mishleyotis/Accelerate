@@ -515,6 +515,9 @@ function ChevronView({ roadmap, recs, openRec }) {
                 const rec = recs.find(x => x.id === rid);
                 return rec ? (
                   <button key={rid} onClick={(e) => { e.stopPropagation(); openRec(rid); }}
+                    /* The title ellipsises to one line by design; without this
+                       the rest of the sentence is unreachable by any means. */
+                    title={`${rec.id} · ${rec.title}`}
                     style={{ padding: "6px 8px", background: "rgba(255,255,255,.14)", borderRadius: 5, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6, border: 0, color: "#fff", textAlign: "left", cursor: "pointer", transition: "background 120ms" }}
                     onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,.22)"}
                     onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,.14)"}>
@@ -645,7 +648,7 @@ function CustomerImpactView({ roadmap, recs, openRec }) {
               {r.recs.map(rid => {
                 const rec = recs.find(x => x.id === rid);
                 return rec ? (
-                  <button key={rid} onClick={() => openRec(rid)} style={{ padding: "6px 8px", background: "var(--z-lav)", border: 0, borderRadius: 5, display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left", cursor: "pointer", fontSize: 10.5 }}>
+                  <button key={rid} onClick={() => openRec(rid)} title={`${rec.id} · ${rec.title}`} style={{ padding: "6px 8px", background: "var(--z-lav)", border: 0, borderRadius: 5, display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left", cursor: "pointer", fontSize: 10.5 }}>
                     <strong style={{ color: "var(--z-dark)" }}>{rec.id}</strong>
                     <span style={{ color: "var(--z-muted)", flex: 1, marginLeft: 6 }} className="txt-trunc">{rec.title}</span>
                     <Icon name="arrow-r" size={11} style={{ color: "var(--z-muted)" }} />

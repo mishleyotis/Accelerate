@@ -1654,23 +1654,70 @@ function groupInsights(cards, mode) {
   }));
   const byScore = (a, b) => b.p.score - a.p.score || a.c.id.localeCompare(b.c.id);
   if (mode === "pillar") {
-    return DMA.PILLARS.map(p => ({
+    const groups = DMA.PILLARS.map(p => ({
       key: p.id,
       label: `${p.id} · ${p.short}`,
       color: "purple",
       desc: p.name,
       items: withP.filter(x => x.c.pillar === p.id).sort(byScore)
     })).filter(g => g.items.length);
+    // A card with no pillar and no cell to derive one from is named as such,
+    // not filed under a pillar it was never assigned to.
+    const orphans = withP.filter(x => !x.c.pillar).sort(byScore);
+    if (orphans.length) {
+      groups.push({
+        key: "__nopillar",
+        label: "No pillar stated",
+        color: "org",
+        desc: "the run did not state a pillar and the card cites no cell to derive one from",
+        items: orphans
+      });
+    }
+    return groups;
   }
   if (mode === "theme") {
-    const themes = [...new Set(withP.map(x => x.c.theme || "Other"))];
-    return themes.map(t => ({
-      key: t,
-      label: t,
-      color: "purple",
-      desc: `${withP.filter(x => (x.c.theme || "Other") === t).length} card${withP.filter(x => (x.c.theme || "Other") === t).length === 1 ? "" : "s"}`,
-      items: withP.filter(x => (x.c.theme || "Other") === t).sort(byScore)
-    })).sort((a, b) => b.items[0].p.score - a.items[0].p.score);
+    // "Other" was doing two different jobs: a card the producer themed as
+    // "Other", and a card with NO theme at all. Every Baxter card was the
+    // second kind, so the theme lens showed one bucket called Other and looked
+    // broken. Untriaged cards now group by their pillar with the reason stated,
+    // so the lens still clusters usefully while naming what is missing.
+    const themed = withP.filter(x => x.c.theme);
+    const unthemed = withP.filter(x => !x.c.theme);
+    const groups = [...new Set(themed.map(x => x.c.theme))].map(t => {
+      const items = themed.filter(x => x.c.theme === t).sort(byScore);
+      return {
+        key: t,
+        label: t,
+        color: "purple",
+        desc: `${items.length} card${items.length === 1 ? "" : "s"}`,
+        items
+      };
+    }).sort((a, b) => b.items[0].p.score - a.items[0].p.score);
+    if (unthemed.length) {
+      for (const p of DMA.PILLARS) {
+        const items = unthemed.filter(x => x.c.pillar === p.id).sort(byScore);
+        if (items.length) {
+          groups.push({
+            key: `__untheme-${p.id}`,
+            label: `${p.id} · ${p.short} · no theme stated`,
+            color: "org",
+            desc: `${items.length} card${items.length === 1 ? "" : "s"} the run did not theme — grouped by pillar instead`,
+            items
+          });
+        }
+      }
+      const loose = unthemed.filter(x => !x.c.pillar).sort(byScore);
+      if (loose.length) {
+        groups.push({
+          key: "__untheme-none",
+          label: "No theme and no pillar",
+          color: "org",
+          desc: "the run stated neither, and the cards cite no cell to derive a pillar from",
+          items: loose
+        });
+      }
+    }
+    return groups;
   }
   const defs = [{
     key: 1,
