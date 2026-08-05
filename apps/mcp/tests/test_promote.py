@@ -237,3 +237,13 @@ def test_every_writer_knows_its_own_page():
     from dma_mcp.promote import writer_registry
     for (page, section), w in writer_registry():
         assert w["page"] == page and w["section"] == section
+
+
+def test_alert_status_is_initialised_at_promote():
+    """heatmap_alerts.status has no DDL default and no contract field, so
+    promote must set it — an alert promoted NULL is invisible to the alert
+    dashboard and counts zero in serving_directory.open_alerts. Lowercase, to
+    match alert_action_t, the enum of the actions that move it."""
+    from dma_mcp.promote import LIFECYCLE_INITIAL, _value
+    assert LIFECYCLE_INITIAL["heatmap_alerts"]["status"] == "open"
+    assert _value("const:open", {}, {}, {}) == "open"

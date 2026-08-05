@@ -2288,6 +2288,9 @@ function LiveClientPage({ entity, run, tab, live }) {
   const page = tab === "health" ? "heatmap" : tab;
   const sections = LIVE_PAGE_SECTIONS[page];
 
+  if (tab === "runs") {
+    return <LiveRuns entity={entity} run={run} />;
+  }
   if (!sections) {
     return (
       <div className="empty">
@@ -2485,6 +2488,62 @@ function LiveClientPage({ entity, run, tab, live }) {
     );
   }
   return null;
+}
+
+/* ══ Run register ══════════════════════════════════════════════════
+   Not a promoted page: the run rows come from the directory, which is the
+   one materialised view the app reads for header and rows alike
+   (invariant 8). Active is whichever run promote flagged — never recomputed
+   here, and never inferred from ordering. */
+function LiveRuns({ entity, run }) {
+  const runs = (entity.runs || []).slice();
+  return (
+    <div>
+      <PageHead eyebrow="Run history" title={`${entity.name} · runs`}
+        sub={`${runs.length} promoted run${runs.length === 1 ? "" : "s"}`} />
+      {runs.length ? (
+        <div className="card" style={{ padding: "18px 20px" }}>
+          <div style={{ display: "grid", gap: 6 }}>
+            {runs.map((r, i) => {
+              const active = r.status === "ACTIVE";
+              return (
+                <div key={r.run_id || i} className="card-tile clickable"
+                     style={{ padding: "12px 14px",
+                       borderLeft: active ? "3px solid var(--z-teal)" : undefined }}
+                     onClick={() => navigate(`/clients/${entity.id}/overview`,
+                       { run: r.id })}>
+                  <div className="row" style={{ gap: 8 }}>
+                    <span className="b f-mono">{r.id}</span>
+                    <span className={`b ${active ? "b-ph1" : ""}`}>
+                      {active ? "ACTIVE" : r.status}</span>
+                    {r.overall != null ? <MaturityChip score={r.overall} /> : null}
+                    <span className="spacer" />
+                    {r.subcap_count != null ? (
+                      <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}>
+                        {fmtNum(r.subcap_count)} cells scored</span>) : null}
+                    {r.promoted_at ? (
+                      <span className="muted f-mono" style={{ fontSize: 10 }}>
+                        promoted {fmtDate(r.promoted_at)}</span>) : null}
+                  </div>
+                  <div className="row" style={{ marginTop: 4, gap: 8, fontSize: 9.5,
+                        color: "var(--z-muted)" }}>
+                    <span className="f-mono">{r.run_id}</span>
+                    <span className="spacer" />
+                    {r.date ? <span>assessed {r.date}</span>
+                      : <span>assessment date not stated in the package</span>}
+                    {r.data_source ? <span className="b">{r.data_source}</span> : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div className="empty"><h3>No promoted runs</h3>
+          <p>This entity exists in the register but has never promoted a run.</p></div>
+      )}
+    </div>
+  );
 }
 
 /* ══ H3 · value chain (optional heatmap section) ═══════════════════ */

@@ -89,6 +89,8 @@ def _value(source, ctx, section, item):
         return _walk_path(section, field) if isinstance(section, dict) else None
     if kind == "item":
         return _walk_path(item, field) if isinstance(item, dict) else None
+    if kind == "const":
+        return field                   # a lifecycle initial, not payload data
     raise ValueError(f"unknown source {source!r}")
 
 
@@ -184,6 +186,12 @@ def promote_run(conn, run_id) -> dict:
         raise
 
 
+# table -> {column: initial value}. Lowercase to match alert_action_t
+# (acknowledged · assigned · waived · resolved · reopened), which is the
+# vocabulary the actions that move this column are enumerated in.
+LIFECYCLE_INITIAL = {"heatmap_alerts": {"status": "open"}}
+
+
 def _write_section(cur, writer, ctx, section_payload) -> int:
     """Delete-then-rewrite one section's rows from the live submission.
     promoted_at columns take SQL now() so every row of the promotion
@@ -203,6 +211,15 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
         rows = [None]
 
     cols, exprs, per_row_sources = [], [], []
+    # A queue-lifecycle column the contract does not name, but the queue is
+    # useless without: heatmap_alerts.status has no DDL default, so an alert
+    # promoted with a NULL status is invisible to the alert dashboard and to
+    # serving_directory.open_alerts. The lifecycle itself belongs to
+    # alert_actions; promote only sets the first state.
+    for col, initial in LIFECYCLE_INITIAL.get(table, {}).items():
+        cols.append(col)
+        exprs.append("%s")
+        per_row_sources.append({"column": col, "source": f"const:{initial}"})
     for c in writer["columns"]:
         if c["source"].startswith("skip:"):
             continue

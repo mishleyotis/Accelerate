@@ -3967,6 +3967,12 @@ function LiveClientPage({
   const [cellFilter, setCellFilter] = useState(null);
   const page = tab === "health" ? "heatmap" : tab;
   const sections = LIVE_PAGE_SECTIONS[page];
+  if (tab === "runs") {
+    return /*#__PURE__*/React.createElement(LiveRuns, {
+      entity: entity,
+      run: run
+    });
+  }
   if (!sections) {
     return /*#__PURE__*/React.createElement("div", {
       className: "empty"
@@ -4241,6 +4247,85 @@ function LiveClientPage({
     })) : missing("techstack"));
   }
   return null;
+}
+
+/* ══ Run register ══════════════════════════════════════════════════
+   Not a promoted page: the run rows come from the directory, which is the
+   one materialised view the app reads for header and rows alike
+   (invariant 8). Active is whichever run promote flagged — never recomputed
+   here, and never inferred from ordering. */
+function LiveRuns({
+  entity,
+  run
+}) {
+  const runs = (entity.runs || []).slice();
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(PageHead, {
+    eyebrow: "Run history",
+    title: `${entity.name} · runs`,
+    sub: `${runs.length} promoted run${runs.length === 1 ? "" : "s"}`
+  }), runs.length ? /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      padding: "18px 20px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 6
+    }
+  }, runs.map((r, i) => {
+    const active = r.status === "ACTIVE";
+    return /*#__PURE__*/React.createElement("div", {
+      key: r.run_id || i,
+      className: "card-tile clickable",
+      style: {
+        padding: "12px 14px",
+        borderLeft: active ? "3px solid var(--z-teal)" : undefined
+      },
+      onClick: () => navigate(`/clients/${entity.id}/overview`, {
+        run: r.id
+      })
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "b f-mono"
+    }, r.id), /*#__PURE__*/React.createElement("span", {
+      className: `b ${active ? "b-ph1" : ""}`
+    }, active ? "ACTIVE" : r.status), r.overall != null ? /*#__PURE__*/React.createElement(MaturityChip, {
+      score: r.overall
+    }) : null, /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), r.subcap_count != null ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-muted)"
+      }
+    }, fmtNum(r.subcap_count), " cells scored") : null, r.promoted_at ? /*#__PURE__*/React.createElement("span", {
+      className: "muted f-mono",
+      style: {
+        fontSize: 10
+      }
+    }, "promoted ", fmtDate(r.promoted_at)) : null), /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        marginTop: 4,
+        gap: 8,
+        fontSize: 9.5,
+        color: "var(--z-muted)"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "f-mono"
+    }, r.run_id), /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), r.date ? /*#__PURE__*/React.createElement("span", null, "assessed ", r.date) : /*#__PURE__*/React.createElement("span", null, "assessment date not stated in the package"), r.data_source ? /*#__PURE__*/React.createElement("span", {
+      className: "b"
+    }, r.data_source) : null));
+  }))) : /*#__PURE__*/React.createElement("div", {
+    className: "empty"
+  }, /*#__PURE__*/React.createElement("h3", null, "No promoted runs"), /*#__PURE__*/React.createElement("p", null, "This entity exists in the register but has never promoted a run.")));
 }
 
 /* ══ H3 · value chain (optional heatmap section) ═══════════════════ */
