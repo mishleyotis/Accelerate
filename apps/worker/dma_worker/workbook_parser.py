@@ -141,6 +141,18 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
         detail_tabs = [t for t in wb.sheetnames if re.match(r"P\d+_Scoring_Detail$", t)]
         if detail_tabs:
             return _parse_pillar_scoring(wb, detail_tabs)
+        # Rollup-only variant: recognisably a DMA workbook (stated pillar/
+        # category grains present) but carrying no subcap-grain tabs at
+        # all. The package lands with zero scored cells and its stated
+        # grains — recorded, never guessed, never a crash-requeue loop.
+        if "Pillar_Summary" in wb.sheetnames or "Category_Detail" in wb.sheetnames:
+            out = WorkbookParse(scores=[], observations=[], toggled_out=[])
+            out.observations.append(Observation(
+                "no_subcap_grain_tabs", None,
+                {"tabs": list(wb.sheetnames)[:20],
+                 "note": "rollup-only workbook: stated grains land, no cells"}))
+            out.scored_cells = 0
+            return out
         raise ValueError(f"unrecognised scoring workbook generation: tabs={wb.sheetnames}")
     finally:
         wb.close()
@@ -358,7 +370,17 @@ def parse_evidence_master(path: str) -> list:
         if "Evidence_Master" not in wb.sheetnames:
             return []
         ws = wb["Evidence_Master"]
-        headers, first = _header_map(ws, "Evidence_ID")
+        try:
+            headers, first = _header_map(ws, "Evidence_ID")
+        except ValueError:
+            # Some corpus variants label the id column differently.
+            try:
+                headers, first = _header_map(ws, "E_ID")
+            except ValueError:
+                # No recognisable ledger: the package lands without its
+                # evidence tab (links absent, counts computed zero) rather
+                # than failing wholesale.
+                return []
         out = []
         for row in ws.iter_rows(min_row=first, values_only=True):
             def v(key):

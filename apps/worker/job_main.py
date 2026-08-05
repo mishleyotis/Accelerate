@@ -123,6 +123,17 @@ def main() -> int:
     limit = int(os.environ.get("MAX_PACKAGES", "3"))
     conn = _connect()
 
+    # One scan at a time: the Scheduler fires every 30 minutes and manual
+    # executions overlap it. The session-level lock releases when this
+    # connection closes (or the container dies) — a second execution
+    # exits clean instead of racing the diff into duplicate runs.
+    cur = conn.cursor()
+    cur.execute("SELECT pg_try_advisory_lock(815002)")
+    if not cur.fetchone()[0]:
+        print("scan: another execution holds the scan lock; exiting")
+        conn.close()
+        return 0
+
     if os.environ.get("RESET_SCAN"):
         # One-time recovery: blank every stored checksum so the whole tree
         # rescans as CHANGED. Rows are kept — FKs may point at them, and
