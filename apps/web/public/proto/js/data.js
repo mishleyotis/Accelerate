@@ -1425,6 +1425,12 @@
   }];
 
   /* ── Tech stack entries (5-layer architecture: L1 Strategy · L2 Operations · L3 Customer engagement · L4 Data · L5 Infrastructure) ──────────────────────────────────────────── */
+  const TS_LAYER_FIX = {
+    L2: "OPS",
+    L3: "CUST",
+    L4: "DATA",
+    L5: "INFRA"
+  };
   const TECH_STACK = [
   // L2 Operations & core banking
   {
@@ -2825,7 +2831,13 @@
       return LIVE ? liveField(null, "timeline") || [] : TIMELINE_EVENTS;
     },
     get TECH_STACK() {
-      return LIVE ? liveField(null, "techStack") || [] : TECH_STACK;
+      if (LIVE) return liveField(null, "techStack") || [];
+      // The fixture predates the charter's layer-key correction; mapped on
+      // read so the reference data itself is not rewritten.
+      return TECH_STACK.map(t => ({
+        ...t,
+        layer: TS_LAYER_FIX[t.layer] || t.layer
+      }));
     },
     get LEADERSHIP() {
       return LIVE ? liveField(null, "leadership") || [] : LEADERSHIP;

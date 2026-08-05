@@ -628,6 +628,16 @@ function InteractiveGantt({
   issueOpen,
   setIssueOpen
 }) {
+  const undated = (issues || []).filter(i => !i.start);
+  issues = (issues || []).filter(i => i.start);
+  if (!issues.length) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "empty",
+      style: {
+        padding: "18px 0"
+      }
+    }, /*#__PURE__*/React.createElement("h3", null, "No dated issues"), /*#__PURE__*/React.createElement("p", null, undated.length ? `${undated.length} issue${undated.length === 1 ? "" : "s"} recorded without an opened date — a time axis needs a date.` : "No issues recorded for this run."));
+  }
   const start = new Date("2024-01-01");
   const today = new Date();
   const months = 36;
@@ -1172,6 +1182,8 @@ function Timeline({
 function Gantt({
   issues
 }) {
+  issues = (issues || []).filter(i => i.start);
+  if (!issues.length) return null;
   // Build axis: 2024 Q1 - 2026 Q4
   const months = 36,
     start = new Date("2024-01-01");
@@ -1710,26 +1722,29 @@ function ClientTechStack({
     return true;
   }), [layer, hideAbsent]);
 
-  // Natural layer labels (no L1-L5)
-  const LAYERS = ["L2", "L3", "L4", "L5"];
+  // Charter correction: the layer keys are OPS · CUST · DATA · INFRA, not
+  // L2–L5. L1–L4 already name the EVIDENCE levels, and a register row showing
+  // "L3" next to an evidence level "L3" means two different things in the same
+  // row. Same four labels, same layout, unambiguous keys.
+  const LAYERS = ["OPS", "CUST", "DATA", "INFRA"];
   const LAYER_LABEL = {
-    L2: {
+    OPS: {
       name: "Operations & core banking",
       short: "Operations",
       dma: "P3"
     },
-    L3: {
+    CUST: {
       name: "Customer engagement",
       short: "Customer",
       dma: "P2",
       primary_gap: true
     },
-    L4: {
+    DATA: {
       name: "Data & analytics",
       short: "Data",
       dma: "P4"
     },
-    L5: {
+    INFRA: {
       name: "Infrastructure & cloud",
       short: "Infra",
       dma: "P4"

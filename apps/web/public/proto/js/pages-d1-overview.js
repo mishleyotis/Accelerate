@@ -96,7 +96,7 @@ function ClientOverview({
     }
   }, entity.name), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, DMA.SUBVERTICAL_LABEL[entity.subvertical], " \xB7 ", entity.hq, " \xB7 ", fmtAssets(entity.assets), " assets \xB7 Assessment ", fmtDate(entity.assessment_date))), /*#__PURE__*/React.createElement("div", {
+  }, [DMA.SUBVERTICAL_LABEL[entity.subvertical], entity.hq, entity.assets != null ? `${fmtAssets(entity.assets)} assets` : null, entity.assessment_date ? `Assessment ${fmtDate(entity.assessment_date)}` : null, entity.members != null ? `${entity.members.toLocaleString()} members` : null].filter(Boolean).join(" · "))), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
@@ -1501,7 +1501,7 @@ function ThoughtLeadershipPanel() {
     }
   }, /*#__PURE__*/React.createElement("span", null, tl.author), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("a", {
+  }), tl.url ? /*#__PURE__*/React.createElement("a", {
     href: `https://${tl.url}`,
     target: "_blank",
     rel: "noreferrer",
@@ -1514,7 +1514,7 @@ function ThoughtLeadershipPanel() {
   }, "Open ", /*#__PURE__*/React.createElement(Icon, {
     name: "external",
     size: 10
-  }))))))));
+  })) : null))))));
 }
 function Row({
   k,

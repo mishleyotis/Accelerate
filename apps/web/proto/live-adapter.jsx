@@ -453,11 +453,19 @@ function adaptLeadership(leadership, enrichment) {
    Straight field mappings; each returns [] or null when absent. */
 function adaptThoughtLeadership(tl) {
   return ((tl && tl.entries) || []).map((e, i) => ({
-    id: `TL-${i + 1}`, kind: e.kind, date: e.published_on,
-    headline: e.headline, quote: e.quote,
-    author: e.author_name, author_role: e.author_role,
-    url: e.url, alignment: e.alignment, evidence: e.e_id ? [e.e_id] : [],
-    subcaps: e.linked_subcap_ids || [], claim: e.claim_label,
+    id: `TL-${String(i + 1).padStart(2, "0")}`,
+    kind: e.kind || null,
+    date: e.published_on || null,
+    // The card's keys: title / excerpt / author. The contract's: headline /
+    // quote / author_name.
+    title: e.headline || null,
+    excerpt: e.quote || null,
+    author: [e.author_name, e.author_role].filter(Boolean).join(" · ") || null,
+    url: e.url ? String(e.url).replace(/^https?:\/\//, "") : null,
+    alignment: e.alignment || null,
+    evidence: e.e_id ? [e.e_id] : [],
+    subcaps: e.linked_subcap_ids || [],
+    claim: e.claim_label || null,
   }));
 }
 
@@ -502,21 +510,46 @@ function adaptFocusAreas(focus) {
   }));
 }
 
+/* The prototype's timeline reads {date, title, signal, cap_impact, evidence}
+   and its Gantt reads {start, end, type, desc, cap_value}. Those key names ARE
+   the contract between the payload and the components, so the mapping happens
+   here rather than by touching the components — a page whose rows are keyed
+   differently silently renders nothing, or throws on a missing string. */
 function adaptTimeline(timeline) {
   const events = (timeline && timeline.events) || [];
   return events.map((e, i) => ({
-    id: `TE-${i + 1}`, date: e.event_date, title: e.title, detail: e.body,
-    kind: e.kind, signal: e.signal, maturity_effect: e.maturity_effect,
-    capabilities: e.capability_ids || [], evidence: e.e_ids || [],
-    claim: e.claim_label,
+    id: `TE-${String(i + 1).padStart(2, "0")}`,
+    date: e.event_date || null,
+    title: e.title,
+    detail: e.body || null,
+    kind: e.kind || null,
+    // The prototype colours a dot by signal; the contract's values are the
+    // producer's own words, lower-cased for the class name and nothing more.
+    signal: e.signal ? String(e.signal).toLowerCase() : "neutral",
+    cap_impact: (e.capability_ids || [])[0] || null,
+    capabilities: e.capability_ids || [],
+    maturity_effect: e.maturity_effect || null,
+    evidence: e.e_ids || [],
+    claim: e.claim_label || null,
   }));
 }
 
 function adaptIssues(register) {
   return ((register && register.issues) || []).map((x) => ({
-    id: x.issue_id, title: x.title, severity: x.severity, status: x.status,
-    opened_on: x.opened_on, resolved_on: x.resolved_on,
-    detail: x.rationale, caps: x.linked_subcap_ids || [],
+    id: x.issue_id,
+    type: x.kind || x.severity || "Issue",
+    severity: x.severity,
+    status: x.status,
+    // The Gantt parses these as date strings and appends "-01" to a
+    // month-precision value, so an absent date must not become "" — it would
+    // parse to an Invalid Date and lay the bar out at NaN. Undated issues are
+    // dropped from the chart by the caller instead.
+    start: x.opened_on || null,
+    end: x.resolved_on || null,
+    desc: x.rationale || x.title || null,
+    title: x.title,
+    caps: x.linked_subcap_ids || [],
+    cap_value: null,
     evidence: x.e_ids || [],
   }));
 }

@@ -162,6 +162,32 @@ function MyTweaks() {
    fills in reads as a page with nothing on it. */
 const LIVE_MODE = typeof window !== "undefined" && !!window.DMA_LIVE;
 
+/* The firmographics section states each figure as its own row; the prototype's
+   entity shape reads them as named properties. Mapped by field name, and only
+   where the producer stated a value — a field it left null stays absent so the
+   panel prints a dash rather than a zero. */
+function firmoFields(firmo) {
+  const out = {};
+  for (const f of (firmo && firmo.fields) || []) {
+    if (f.value === null || f.value === undefined || f.value === "") continue;
+    const n = Number(f.value);
+    const num = isFinite(n) ? n : null;
+    switch (f.field) {
+      case "total_assets": out.assets = num; out.assets_unit = f.unit; break;
+      case "employees":    out.employees = num; break;
+      case "branches":     out.branches = num; break;
+      case "primary_regulator": out.regulator = f.value; break;
+      case "member_count": out.members = num; break;
+      case "customer_count": out.customers = num; break;
+      case "net_worth_ratio": out.net_worth_ratio = num; break;
+      case "founded":      out.founded = f.value; break;
+      case "charter":      out.charter = f.value; break;
+      default: break;
+    }
+  }
+  return out;
+}
+
 function ClientRoute({ id, tab, sub }) {
   const { route, audience } = useApp();
   const entity = DMA.getEntity(id);
@@ -178,10 +204,13 @@ function ClientRoute({ id, tab, sub }) {
   // Merged here, once, so every prototype component receives the entity shape
   // it was written against and none of them needs to know about LIVE.
   const ent = (LIVE_MODE && live.status === "ready" && live.entity)
-    ? { ...entity, subcaps: live.entity.subcaps, oss: live.entity.oss,
+    ? { ...entity, ...firmoFields(live.entity.firmographics),
+        subcaps: live.entity.subcaps, oss: live.entity.oss,
         pillar_scores: Object.keys(live.entity.pillar_scores || {}).length
           ? live.entity.pillar_scores : entity.pillar_scores,
-        overall: live.entity.overall != null ? live.entity.overall : entity.overall }
+        overall: live.entity.overall != null ? live.entity.overall : entity.overall,
+        assessment_date: (live.entity.run && live.entity.run.completed_at)
+          || entity.assessment_date || null }
     : entity;
   if (LIVE_MODE && live.status === "loading") {
     return <ClientShell entity={entity} run={run} tab={tab}><SectionLoader /></ClientShell>;

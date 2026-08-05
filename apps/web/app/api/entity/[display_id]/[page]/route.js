@@ -7,8 +7,11 @@ import { COOKIE, verify } from "../../../../../lib/session";
 // role has no route to; audience is a request parameter, which is what makes
 // a customer view shareable, and the API — not the browser — decides what
 // the customer audience may contain.
+// The six promoted pages, plus the two GRAIN reads the surfaces need: the
+// evidence store (read per id, not per page — it is not a promoted section)
+// and the run's cell grain. Both are entity-scoped and fail-closed at the API.
 const PAGES = new Set(["overview", "insights", "heatmap", "platform",
-                       "context", "techstack"]);
+                       "context", "techstack", "evidence", "subcaps"]);
 
 export async function GET(req, { params }) {
   const session = verify(cookies().get(COOKIE)?.value);
@@ -28,10 +31,12 @@ export async function GET(req, { params }) {
   const audience = url.searchParams.get("audience") === "customer"
     ? "customer" : "internal";
   const run = url.searchParams.get("run");
+  const eIds = url.searchParams.get("e_ids");
   const target = new URL(`${base}/v1/entities/${encodeURIComponent(display_id)}/${page}`);
   target.searchParams.set("audience", audience);
   target.searchParams.set("role", session.role);
   if (run) target.searchParams.set("run", run);
+  if (eIds) target.searchParams.set("e_ids", eIds);
 
   const headers = {};
   // Local QA only: on Cloud Run the ID token comes from the metadata

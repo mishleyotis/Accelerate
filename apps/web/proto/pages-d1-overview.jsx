@@ -66,7 +66,13 @@ function ClientOverview({ entity, run }) {
         <div>
           <div className="eyebrow">Entity intelligence</div>
           <h1 style={{ marginBottom: 4 }}>{entity.name}</h1>
-          <div className="sub">{DMA.SUBVERTICAL_LABEL[entity.subvertical]} · {entity.hq} · {fmtAssets(entity.assets)} assets · Assessment {fmtDate(entity.assessment_date)}</div>
+          <div className="sub">{[
+            DMA.SUBVERTICAL_LABEL[entity.subvertical],
+            entity.hq,
+            entity.assets != null ? `${fmtAssets(entity.assets)} assets` : null,
+            entity.assessment_date ? `Assessment ${fmtDate(entity.assessment_date)}` : null,
+            entity.members != null ? `${entity.members.toLocaleString()} members` : null,
+          ].filter(Boolean).join(" · ")}</div>
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast(`Customer-safe scorecard generated · ${entity.name}`, "success")}><Icon name="download" size={13} /> Scorecard</button>
@@ -561,7 +567,7 @@ function ThoughtLeadershipPanel() {
               <div className="row" style={{ fontSize: 10, color: "var(--z-muted)" }}>
                 <span>{tl.author}</span>
                 <span className="spacer" />
-                <a href={`https://${tl.url}`} target="_blank" rel="noreferrer" style={{ color: "var(--z-mid)", display: "inline-flex", alignItems: "center", gap: 3 }}>Open <Icon name="external" size={10} /></a>
+                {tl.url ? <a href={`https://${tl.url}`} target="_blank" rel="noreferrer" style={{ color: "var(--z-mid)", display: "inline-flex", alignItems: "center", gap: 3 }}>Open <Icon name="external" size={10} /></a> : null}
               </div>
             </div>
           ))}

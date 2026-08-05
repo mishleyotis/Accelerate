@@ -698,9 +698,20 @@ function useLiveEntity(displayId, audience, runId) {
   } : {
     status: "mock"
   });
+
+  // The registry is cleared when the IDENTITY changes, not on every effect
+  // run. The effect re-runs whenever audience or run changes too, and clearing
+  // then left a window in which DMA.* answered with nothing while the page was
+  // still mounted — the cards rendered, then emptied. Cross-client bleed is
+  // what the clear is for, so it fires exactly when the client changes.
+  const loadedFor = useRef(null);
   useEffect(() => {
     if (!LIVE) return;
-    if (typeof window !== "undefined") window.DMA_ENTITY = null;
+    const key = `${displayId || ""}`;
+    if (typeof window !== "undefined" && loadedFor.current !== key) {
+      window.DMA_ENTITY = null;
+    }
+    loadedFor.current = key;
     if (!displayId) {
       setState({
         status: "idle"
