@@ -131,16 +131,9 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
         if "2_Scorecard" in wb.sheetnames:
             facets = _parse_assessment(wb["3_Assessment"]) if "3_Assessment" in wb.sheetnames else {}
             return _parse_scorecard(wb["2_Scorecard"], facets)
-        pillar_tabs = [t for t in wb.sheetnames if re.match(r"P\d+_Subcap_Scoring$", t)]
+        pillar_tabs = [t for t in wb.sheetnames if _is_pillar_tab(t)]
         if pillar_tabs:
             return _parse_pillar_scoring(wb, pillar_tabs)
-        # Third shipped generation: P{n}_Scoring_Detail — one row per subcap
-        # with the same normalised columns (SubCap_ID / a score column /
-        # Confidence / Evidence_IDs), plus facet metadata this parser
-        # deliberately ignores (M-level labels are never read).
-        detail_tabs = [t for t in wb.sheetnames if re.match(r"P\d+_Scoring_Detail$", t)]
-        if detail_tabs:
-            return _parse_pillar_scoring(wb, detail_tabs)
         # Rollup-only variant: recognisably a DMA workbook (stated pillar/
         # category grains present) but carrying no subcap-grain tabs at
         # all. The package lands with zero scored cells and its stated
@@ -172,8 +165,26 @@ def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
     result = WorkbookParse(scores=[], observations=[], toggled_out=[])
     for tab in sorted(pillar_tabs):
         ws = wb[tab]
-        headers, first = _header_map(ws, "SubCap_ID")
-        sid_col = headers["subcap_id"]
+        headers = first = None
+        for anchor in ("SubCap_ID", "Sub_Cap_ID", "SubCapability_ID", "Subcap ID"):
+            try:
+                headers, first = _header_map(ws, anchor)
+                break
+            except ValueError:
+                continue
+        if headers is None:
+            # A pillar-shaped tab with no subcapability header is a rollup
+            # or a layout this parser does not read: recorded, never fatal.
+            result.observations.append(Observation(
+                "unrecognised_pillar_tab", None, {"tab": tab}))
+            continue
+        sid_col = next((headers[k] for k in
+                        ("subcap_id", "sub_cap_id", "subcapability_id", "subcap")
+                        if k in headers), None)
+        if sid_col is None:
+            result.observations.append(Observation(
+                "unrecognised_pillar_tab", None, {"tab": tab}))
+            continue
         score_col = next((headers[k] for k in _SCORE_KEYS if k in headers), None)
         if score_col is None:
             result.observations.append(Observation(
@@ -406,6 +417,24 @@ def parse_evidence_master(path: str) -> list:
         return out
     finally:
         wb.close()
+
+
+# Pillar-grain scoring tabs, across every shipped naming convention seen in
+# the corpus: P1_Subcap_Scoring · P1_Scoring_Detail · P1_Scoring · P1 ·
+# P1_RIAs_Broker_Dealers. Anything starting with a pillar token is a
+# candidate; these suffixes mark the tabs that are rollups, logs or
+# metadata rather than subcapability rows.
+_NOT_SCORING = ("rollup", "summary", "benchmark", "peer", "log", "chain",
+                "metadata", "caps", "issue", "priority", "index", "check",
+                "contradiction", "validation", "absent", "linkage", "revision",
+                "recommendation", "weight", "taxonomy", "estimate")
+
+
+def _is_pillar_tab(tab: str) -> bool:
+    if not re.match(r"^P\d+($|[_ ])", tab):
+        return False
+    low = tab.lower()
+    return not any(x in low for x in _NOT_SCORING)
 
 
 _CATEGORY_RE = re.compile(r"^P\d+C\d+$")

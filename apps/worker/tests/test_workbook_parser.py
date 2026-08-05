@@ -217,3 +217,40 @@ def test_peer_grid_nonnumeric_cells_become_none(tmp_path):
     out = parse_peer_benchmarks(str(p))
     assert out[0]["stated_median"] is None
     assert out[0]["peers"] == [("Fake Peer A", Decimal("2.1")), ("Fake Peer B", None)]
+
+
+def test_pillar_tab_naming_variants_across_the_corpus():
+    """Five naming conventions for the same tab kind appear in the intake
+    tree (P1_Subcap_Scoring · P1_Scoring_Detail · P1_Scoring · P1 ·
+    P1_RIAs_Broker_Dealers), and rollups/logs share the pillar prefix
+    without carrying subcapability rows."""
+    from dma_worker.workbook_parser import _is_pillar_tab
+    for tab in ("P1_Subcap_Scoring", "P1_Scoring_Detail", "P1_Scoring", "P1",
+                "P1 Scoring", "P1_RIAs_Broker_Dealers", "P4_Scoring_Detail"):
+        assert _is_pillar_tab(tab), tab
+    for tab in ("Category_Rollup", "Capability_Rollup", "Peer_Benchmark",
+                "Calculation_Chain", "Run_Metadata", "Caps_Applied_Log",
+                "Pillar_Summary", "Executive_Summary", "Gap_Priority",
+                "Issues_Caps", "Critic_Log", "Evidence_Index",
+                "Contradiction_Log", "Absent_Evidence_Log", "P1C1_Detail"):
+        assert not _is_pillar_tab(tab), tab
+
+
+def test_a_pillar_shaped_tab_without_subcap_rows_is_observed_not_fatal(tmp_path):
+    """One package's only pillar tab is a rollup with no SubCap_ID column.
+    It must be recorded and skipped, not raise — a workbook with one odd
+    tab still has three good ones."""
+    from dma_worker.workbook_parser import parse_scoring_workbook
+    wb = openpyxl.Workbook()
+    bad = wb.active
+    bad.title = "P1"                       # pillar-shaped, rollup content
+    bad.append(["Category", "Mean", "Notes"])
+    bad.append(["P1C1", 3.1, "rollup only"])
+    good = wb.create_sheet("P2_Scoring")
+    good.append(["SubCap_ID", "SubCap_Name", "Score", "Confidence"])
+    good.append(["P2C1.1.1", "Fake Onboarding", 2.5, "HIGH"])
+    p = tmp_path / "mixed_tabs.xlsx"
+    wb.save(p)
+    out = parse_scoring_workbook(str(p))
+    assert [s.subcap_id for s in out.scores] == ["P2C1.1.1"]
+    assert any(o.kind == "unrecognised_pillar_tab" for o in out.observations)
