@@ -75,7 +75,7 @@ def _fetch(url: str):
         return None
 
 
-token = os.environ.get("MCP_PATH_TOKEN", "dev")
+token = os.environ.get("MCP_PATH_TOKEN", "dev").strip()
 mcp = MCPServer("dma-insights")
 
 
