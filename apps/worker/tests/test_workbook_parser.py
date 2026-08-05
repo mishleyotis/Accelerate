@@ -161,3 +161,59 @@ def test_grain_summaries_read_stated_values_when_tabs_are_regular(tmp_path):
     assert out["pillars"][0]["source_cell"] == "Pillar_Summary!C2"
     assert [c["category_id"] for c in out["categories"]] == ["P1C1"]
     assert out["categories"][0]["score"] == 1.9
+
+
+def test_scoring_detail_generation_and_score_key_variants(tmp_path):
+    """Third shipped generation: P{n}_Scoring_Detail tabs, plus the
+    corpus's score-column variants (Post-Critic Score / Score_1_to_5).
+    Same subcap-grain parse; M-level labels never read."""
+    from dma_worker.workbook_parser import parse_scoring_workbook
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "P1_Scoring_Detail"
+    ws.append(["Pillar", "Category_Name", "Cap_ID", "SubCap_ID", "SubCap_Name",
+               "M_Level_Label", "Score", "Evidence_IDs", "Confidence"])
+    ws.append(["P1", "Strategy", "P1C1.1", "P1C1.1.1", "Fake Strategy Doc",
+               "M3 (Standardized)", 3.1, "E-029:F1, E-039:F1", "HIGH"])
+    ws.append([])  # blank row must not crash
+    p = tmp_path / "detail_gen.xlsx"
+    wb.save(p)
+    out = parse_scoring_workbook(str(p))
+    assert [s.subcap_id for s in out.scores] == ["P1C1.1.1"]
+    assert out.scores[0].score == Decimal("3.1")
+    assert out.scores[0].evidence_refs == ["E-029", "E-039"]
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "P1_Subcap_Scoring"
+    ws.append(["SubCap ID", "SubCap Name", "Pre-Critic Score", "Post-Critic Score",
+               "Confidence", "Evidence IDs", "Rationale (≥150 chars)"])
+    ws.append(["P1C1.1.1", "Fake", 3.5, 3.0, "HIGH", "E-074", "long enough rationale"])
+    p2 = tmp_path / "critic_gen.xlsx"
+    wb.save(p2)
+    out2 = parse_scoring_workbook(str(p2))
+    assert out2.scores[0].score == Decimal("3.0")   # post-critic wins
+    assert out2.scores[0].rationale == "long enough rationale"
+
+
+def test_fuzzy_date_impossible_month_is_unverified():
+    from dma_worker.workbook_parser import parse_fuzzy_date
+    assert parse_fuzzy_date("2025-13") is None
+    assert parse_fuzzy_date("2025-07") is not None
+
+
+def test_peer_grid_nonnumeric_cells_become_none(tmp_path):
+    from dma_worker.workbook_parser import parse_peer_benchmarks
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Peer_Benchmarks"
+    ws.append(["Category", "Category_Name", "Entity_Score", "Peer_Median",
+               "Fake Peer A", "Fake Peer B"])
+    ws.append([])  # blank row must not crash
+    ws.append(["P1C1", "Strategy", 2.5, "N/A", 2.1, "not scored"])
+    p = tmp_path / "peers.xlsx"
+    wb.save(p)
+    out = parse_peer_benchmarks(str(p))
+    assert out[0]["stated_median"] is None
+    assert out[0]["peers"] == [("Fake Peer A", Decimal("2.1")), ("Fake Peer B", None)]

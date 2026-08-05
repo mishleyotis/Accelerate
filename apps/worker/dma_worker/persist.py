@@ -33,12 +33,83 @@ _HASH_SQL = r"""encode(digest(coalesce(%s,'') || '|' || '' || '|' ||
          'sha256'),'hex')"""
 
 
+def _institution(manifest: dict) -> dict:
+    """Normalise the manifest's identity block. The shipped corpus is
+    heterogeneous — every synthesis run authored its own manifest schema:
+    institution as an object, as a bare string, or absent with the name
+    under entity / entity_name / institution_name (entity itself object
+    or string). One choke point resolves them all; nothing downstream
+    guesses."""
+    inst = manifest.get("institution")
+    d = dict(inst) if isinstance(inst, dict) else (
+        {"name": inst.strip()} if isinstance(inst, str) and inst.strip() else {})
+    if not d.get("name"):
+        for key in ("entity_name", "institution_name"):
+            v = manifest.get(key)
+            if isinstance(v, str) and v.strip():
+                d["name"] = v.strip()
+                break
+        else:
+            e = manifest.get("entity")
+            if isinstance(e, str) and e.strip():
+                d["name"] = e.strip()
+            elif isinstance(e, dict):
+                for key in ("name", "legal_name", "entity_name"):
+                    v = e.get(key)
+                    if isinstance(v, str) and v.strip():
+                        d["name"] = v.strip()
+                        break
+                for key in ("sub_vertical", "subvertical", "size_tier",
+                            "primary_regulator", "geography"):
+                    if not d.get(key) and isinstance(e.get(key), str):
+                        d[key] = e[key]
+    for key, aliases in (("sub_vertical", ("sub_vertical", "subvertical",
+                                           "subvertical_initial")),
+                         ("size_tier", ("size_tier",))):
+        if not d.get(key):
+            for a in aliases:
+                v = manifest.get(a)
+                if isinstance(v, str) and v.strip():
+                    d[key] = v.strip()
+                    break
+    return d
+
+
+def _stated_overall(manifest: dict):
+    """The manifest's STATED overall score — read, never derived. Shapes
+    seen in the corpus: scores.overall (canonical) and a top-level
+    overall_score."""
+    sc = manifest.get("scores")
+    v = sc.get("overall") if isinstance(sc, dict) else None
+    if v is None:
+        v = manifest.get("overall_score")
+    return v if isinstance(v, (int, float)) else None
+
+
+_ISOISH = re.compile(r"^\d{4}-\d{2}-\d{2}")
+
+
+def _stated_completed_at(manifest: dict):
+    """The assessment's stated completion moment, tolerant of the corpus's
+    key variants; anything not ISO-shaped is dropped (computed or null —
+    a mangled date must not sink the package or masquerade as data)."""
+    a = manifest.get("assessment")
+    candidates = [a.get("date") if isinstance(a, dict) else None,
+                  manifest.get("assessment_date"), manifest.get("completed_at"),
+                  manifest.get("generated_at"), manifest.get("execution_timestamp"),
+                  manifest.get("last_updated")]
+    for c in candidates:
+        if isinstance(c, str) and _ISOISH.match(c.strip()):
+            return c.strip()
+    return None
+
+
 def _entity_token(manifest: dict) -> str:
     """The token that qualifies this package's local ids globally."""
     m = DMA_ASM.match(str(manifest.get("run_id", "")).strip().upper())
     if m:
         return m.group("entity")
-    name = manifest.get("institution", {}).get("name") or ""
+    name = _institution(manifest).get("name") or ""
     return re.sub(r"[^A-Z0-9]", "", name.upper())[:8] or "UNK"
 
 
@@ -78,12 +149,17 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                     report_artefact_id: str | None = None,
                     grains: dict | None = None) -> PersistResult:
     cur = conn.cursor()
-    inst = manifest.get("institution", {})
+    inst = _institution(manifest)
+    # Signal 4 of the cascade: the client folder's display name (its
+    # " - DMA" suffix dropped). Lowest confidence — resolves to a
+    # PENDING_REVIEW entity, never an active one.
+    folder_display = re.sub(r"\s*-\s*DMA\s*$", "",
+                            str(source_folder_id or "")).strip() or None
     resolution = resolve(
         manifest_identity=inst.get("name"),
         request_id=manifest.get("run_id"),
         document_header=None,
-        folder_name=None,
+        folder_name=folder_display,
     )
     if resolution is None:
         raise ValueError("package carries no resolvable identity")
@@ -106,23 +182,38 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
         )
         entity_id = cur.fetchone()[0]
 
-    # Pin the catalogue version the assessment was scored against.
-    taxonomy = str(manifest.get("versions", {}).get("taxonomy", "")).strip()
+    # Pin the catalogue version the assessment was scored against. Corpus
+    # variants: versions.taxonomy (canonical) or a top-level
+    # framework_version; only version-shaped values are considered, and
+    # the pin lands only when the version actually exists (FK) — an
+    # unknown version is recorded as an observation, never a crash.
+    versions = manifest.get("versions")
+    taxonomy = (str(versions.get("taxonomy", "")).strip()
+                if isinstance(versions, dict) else "")
+    if not taxonomy:
+        fv = manifest.get("framework_version")
+        fv = str(fv).strip() if isinstance(fv, (str, int, float)) else ""
+        taxonomy = fv if re.match(r"^v?\d+(\.\d+)?$", fv) else ""
     pinned = taxonomy if taxonomy.startswith("v") else (f"v{taxonomy}" if taxonomy else None)
     catalogue_cells = None
+    unknown_version = None
     if pinned:
         cur.execute("SELECT cell_count FROM ccg_versions WHERE version = %s", (pinned,))
         r = cur.fetchone()
-        catalogue_cells = r[0] if r else None
+        if r:
+            catalogue_cells = r[0]
+        else:
+            unknown_version, pinned = pinned, None
 
     cur.execute("SELECT COALESCE(max(run_seq), 0) + 1 FROM runs WHERE entity_id = %s", (entity_id,))
     run_seq = cur.fetchone()[0]
     composite = _round_once(workbook.composite)   # rounded ONCE
     composite_from_manifest = False
-    if composite is None and manifest.get("scores", {}).get("overall") is not None:
+    stated_overall = _stated_overall(manifest)
+    if composite is None and stated_overall is not None:
         # The workbook generation carries no composite figure; the manifest's
         # stated overall is READ (not derived), with its provenance recorded.
-        composite = _round_once(Decimal(str(manifest["scores"]["overall"])))
+        composite = _round_once(Decimal(str(stated_overall)))
         composite_from_manifest = True
     cur.execute(
         """INSERT INTO runs (entity_id, request_id, run_seq, ccg_catalog_version,
@@ -130,8 +221,8 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                              completed_at, source_folder_id)
            VALUES (%s,%s,%s,%s,%s,%s,%s,'INGESTED',%s,%s) RETURNING id""",
         (entity_id, manifest.get("run_id"), run_seq, pinned,
-         workbook.scored_cells, catalogue_cells, composite,
-         manifest.get("assessment", {}).get("date"), source_folder_id),
+         len({s.subcap_id for s in workbook.scores}), catalogue_cells, composite,
+         _stated_completed_at(manifest), source_folder_id),
     )
     run_id = cur.fetchone()[0]
 
@@ -151,8 +242,16 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
             (run_id, json.dumps({"value": str(composite),
                                  "reason": "workbook carries no composite figure"})))
         n_obs += 1
+    if unknown_version:
+        cur.execute(
+            """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
+               VALUES (%s,'unknown_catalogue_version',%s, now())""",
+            (run_id, json.dumps({"stated": unknown_version,
+                                 "reason": "manifest pins a version ccg_versions "
+                                           "does not carry; run left unpinned"})))
+        n_obs += 1
 
-    reference_date = manifest.get("assessment", {}).get("date")
+    reference_date = _stated_completed_at(manifest)
     token = _entity_token(manifest)
     seen_links = set()
     alias: dict[str, str] = {}   # package-local e_id -> the row it resolves to
@@ -168,6 +267,14 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
     def _land_evidence(ev: dict) -> str | None:
         """Insert one package item; return the stored id its local id
         resolves to, or None (recorded) when nothing can hold it."""
+        ers = ev.get("ers")
+        if ers is not None and not (Decimal("1") <= ers <= Decimal("5")):
+            # A stated ERS outside the 1–5 rubric (some packages score on
+            # 0–10): landed as NULL and recorded — never rescaled, a
+            # made-up conversion would be data that was never stated.
+            _observe("ers_out_of_range",
+                     {"package_local_id": ev["e_id"], "stated": str(ers)})
+            ev = {**ev, "ers": None}
         qualified = _qualify(ev["e_id"], token)
         for candidate in (qualified, f"{qualified}-R{run_seq}"):
             cur.execute(
@@ -239,7 +346,17 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                        VALUES (%s,%s,%s,'package') ON CONFLICT DO NOTHING""",
                     (resolved, sid, run_id))
 
+    seen_subcaps: set[str] = set()
     for s in workbook.scores:
+        if s.subcap_id in seen_subcaps:
+            # A workbook that states the same subcap twice: the FIRST row
+            # wins (reading order), the repeat is recorded — never a
+            # unique-violation crash, never a silent overwrite.
+            _observe("duplicate_subcap_row",
+                     {"subcap_id": s.subcap_id, "source_cell": s.source_cell,
+                      "skipped_score": str(s.score)})
+            continue
+        seen_subcaps.add(s.subcap_id)
         cur.execute(
             """INSERT INTO subcap_scores
                  (run_id, subcap_id, capability_id, category_id, pillar_id,
@@ -320,8 +437,8 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
 
     # Manifest-vs-workbook figure check: the workbook (priority 1) wins;
     # a material disagreement is an observation, never silently reconciled.
-    m_overall = manifest.get("scores", {}).get("overall")
-    if m_overall is not None and composite is not None:
+    m_overall = _stated_overall(manifest)
+    if m_overall is not None and composite is not None and not composite_from_manifest:
         if abs(Decimal(str(m_overall)) - composite) > Decimal("0.005"):
             cur.execute(
                 """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
@@ -335,4 +452,4 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
 
     conn.commit()
     return PersistResult(str(entity_id), str(run_id), run_seq,
-                         workbook.scored_cells, n_obs)
+                         len(seen_subcaps), n_obs)

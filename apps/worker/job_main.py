@@ -16,6 +16,7 @@ import json
 import os
 import sys
 import tempfile
+import traceback
 from datetime import datetime, timezone
 
 from dma_worker import drive
@@ -56,6 +57,9 @@ def _package_groups(to_process):
         if name == "run_manifest.json":
             g["manifest"] = f
         elif (name.endswith(".xlsx") and "scoring" in name
+              # weights/toolkit reference books carry "scoring" in their
+              # names but hold no scores (e.g. Pillar{n}_Scoring_Toolkit)
+              and "toolkit" not in name and "weight" not in name
               and not any("research" in s.lower() for s in f.path_segments)):
             g["workbook"] = f
         elif name == "report.docx":
@@ -82,7 +86,9 @@ def _ingest_one(conn, token, folder, parts):
     """Download, parse and persist one package. Atomic: persist_package
     commits once at the end, so an exception anywhere leaves nothing."""
     with tempfile.TemporaryDirectory() as td:
-        manifest = json.loads(drive.download(token, parts["manifest"].file_id))
+        # utf-8-sig: some shipped manifests carry a BOM
+        manifest = json.loads(
+            drive.download(token, parts["manifest"].file_id).decode("utf-8-sig"))
         wb_path = os.path.join(td, "wb.xlsx")
         with open(wb_path, "wb") as fh:
             fh.write(drive.download(token, parts["workbook"].file_id))
@@ -158,6 +164,7 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001 — one bad package must not sink the batch
             conn.rollback()
             failed += 1
+            traceback.print_exc()
             _requeue(conn, parts, folder, f"failed: {exc!r}")
             continue
         print(f"ingest: {folder} -> run {res.run_id} "

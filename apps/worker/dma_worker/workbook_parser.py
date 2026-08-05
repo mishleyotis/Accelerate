@@ -134,6 +134,13 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
         pillar_tabs = [t for t in wb.sheetnames if re.match(r"P\d+_Subcap_Scoring$", t)]
         if pillar_tabs:
             return _parse_pillar_scoring(wb, pillar_tabs)
+        # Third shipped generation: P{n}_Scoring_Detail — one row per subcap
+        # with the same normalised columns (SubCap_ID / a score column /
+        # Confidence / Evidence_IDs), plus facet metadata this parser
+        # deliberately ignores (M-level labels are never read).
+        detail_tabs = [t for t in wb.sheetnames if re.match(r"P\d+_Scoring_Detail$", t)]
+        if detail_tabs:
+            return _parse_pillar_scoring(wb, detail_tabs)
         raise ValueError(f"unrecognised scoring workbook generation: tabs={wb.sheetnames}")
     finally:
         wb.close()
@@ -142,33 +149,51 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
 CONFIDENCE_WORDS = {"HIGH", "MEDIUM", "LOW"}
 
 
+# Score-column names across the shipped variants, in preference order —
+# post-critic beats pre-critic where a critic pass shipped both.
+_SCORE_KEYS = ("score", "post_critic_score", "score_1_to_5",
+               "effective_score", "final_score")
+_NAME_KEYS = ("subcap_name", "subcapability", "sub_cap_name")
+
+
 def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
     result = WorkbookParse(scores=[], observations=[], toggled_out=[])
     for tab in sorted(pillar_tabs):
         ws = wb[tab]
         headers, first = _header_map(ws, "SubCap_ID")
         sid_col = headers["subcap_id"]
-        score_col = headers["score"]
+        score_col = next((headers[k] for k in _SCORE_KEYS if k in headers), None)
+        if score_col is None:
+            result.observations.append(Observation(
+                "missing_score_column", None,
+                {"tab": tab, "headers": sorted(headers)[:20]}))
+            continue
         score_letter = openpyxl.utils.get_column_letter(score_col + 1)
         conf_col = headers.get("confidence")
-        name_col = headers.get("subcap_name")
+        name_col = next((headers[k] for k in _NAME_KEYS if k in headers), None)
         eids_col = headers.get("evidence_ids")
         rationale_col = headers.get("rationale")
+        if rationale_col is None:  # e.g. "Rationale (≥150 chars)"
+            rationale_col = next((v for k, v in headers.items()
+                                  if k.startswith("rationale")), None)
         for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
-            sid = row[sid_col] if sid_col < len(row) else None
+            def cell_at(i, _row=row):
+                return _row[i] if i is not None and i < len(_row) else None
+            sid = cell_at(sid_col)
             sid = str(sid).strip() if sid else None
             if not sid or not SUBCAP_RE.match(sid):
                 continue
             pillar, category, capability = _grain(sid)
-            score = _decimal(row[score_col] if score_col < len(row) else None)
+            score = _decimal(cell_at(score_col))
             cell = f"{tab}!{score_letter}{r}"
             if score == "UNPARSEABLE":
                 result.observations.append(Observation(
                     "unparseable_cell", sid, {"source_cell": cell,
-                                              "raw": str(row[score_col])[:80]}))
+                                              "raw": str(cell_at(score_col))[:80]}))
                 continue
-            refs_raw = str(row[eids_col]) if eids_col is not None and row[eids_col] else ""
-            rationale = str(row[rationale_col]).strip() if rationale_col is not None and row[rationale_col] else None
+            refs_raw = str(cell_at(eids_col) or "")
+            rationale = (str(cell_at(rationale_col)).strip()
+                         if cell_at(rationale_col) else None)
             if score is None:
                 if refs_raw.strip() or rationale:
                     result.observations.append(Observation(
@@ -177,13 +202,13 @@ def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
                     result.toggled_out.append(sid)
                 continue
             conf = None
-            if conf_col is not None and row[conf_col] is not None:
-                c = str(row[conf_col]).strip().upper()
+            if cell_at(conf_col) is not None:
+                c = str(cell_at(conf_col)).strip().upper()
                 conf = c if c in CONFIDENCE_WORDS else None
             result.scores.append(ParsedScore(
                 subcap_id=sid, pillar_id=pillar, category_id=category,
                 capability_id=capability,
-                name=(str(row[name_col]).strip() if name_col is not None and row[name_col] else None),
+                name=(str(cell_at(name_col)).strip() if cell_at(name_col) else None),
                 tier=None, score=score, source_cell=cell,
                 evidence_quality=None, confidence=conf,
                 facets=[], evidence_refs=sorted({m.split(":")[0] for m in EID_RE.findall(refs_raw)}),
@@ -312,14 +337,19 @@ def parse_fuzzy_date(value):
     m = DATE_FUZZY.match(str(value).strip())
     if not m:
         return None
-    year = int(m.group(1))
-    if m.group(2):
-        q = int(m.group(2))
-        month, day = 3 * q, (31, 30, 30, 31)[q - 1]
-        return date(year, month, day)
-    if m.group(3):
-        return date(year, int(m.group(3)), 1)
-    return date(year, 1, 1)
+    try:
+        year = int(m.group(1))
+        if m.group(2):
+            q = int(m.group(2))
+            month, day = 3 * q, (31, 30, 30, 31)[q - 1]
+            return date(year, month, day)
+        if m.group(3):
+            return date(year, int(m.group(3)), 1)
+        return date(year, 1, 1)
+    except ValueError:
+        # e.g. "2025-13" — a month that isn't one. Unparseable → None
+        # (UNVERIFIED); a mangled date never sinks the package.
+        return None
 
 
 def parse_evidence_master(path: str) -> list:
@@ -446,13 +476,21 @@ def parse_peer_benchmarks(path: str) -> list:
             return []
         ws = wb["Peer_Benchmarks"]
         rows = ws.iter_rows(values_only=True)
-        header = next(rows)
+        header = next(rows, None)
+        if not header:
+            return []
         stats = {"category", "category_name", "entity_score", "peer_median",
                  "peer_p25", "peer_p75", "peer_min", "peer_max", "delta_vs_median"}
         peer_cols = [(i, str(h).strip()) for i, h in enumerate(header)
                      if h is not None and _norm(str(h)) not in stats]
+        # Non-numeric cells ("N/A", footnotes) are None here — a peer grid
+        # is data or nothing, and downstream median verification sorts
+        # these values.
+        num = (lambda v: None if (d := _decimal(v)) in (None, "UNPARSEABLE") else d)
         out = []
         for row in rows:
+            if not row:   # read-only mode yields () for blank rows
+                continue
             cat = str(row[0] or "").strip()
             if not _CATEGORY_RE.match(cat):
                 continue
@@ -463,10 +501,10 @@ def parse_peer_benchmarks(path: str) -> list:
                 return None
             out.append({
                 "category_id": cat,
-                "category_name": (str(row[1]).strip() if row[1] else None),
-                "entity_score": _decimal(col("entity_score")),
-                "stated_median": _decimal(col("peer_median")),
-                "peers": [(name, _decimal(row[i]) if i < len(row) else None)
+                "category_name": (str(row[1]).strip() if len(row) > 1 and row[1] else None),
+                "entity_score": num(col("entity_score")),
+                "stated_median": num(col("peer_median")),
+                "peers": [(name, num(row[i]) if i < len(row) else None)
                           for i, name in peer_cols],
             })
         return out
@@ -483,13 +521,18 @@ def parse_recommendations(path: str) -> list:
             return []
         ws = wb["Recommendations"]
         rows = ws.iter_rows(values_only=True)
-        header = [(_norm(str(h)) if h is not None else None) for h in next(rows)]
+        first = next(rows, None)
+        if not first:
+            return []
+        header = [(_norm(str(h)) if h is not None else None) for h in first]
         out = []
         for row in rows:
+            if not row:   # read-only mode yields () for blank rows
+                continue
             rec_id = str(row[0] or "").strip()
             if not rec_id.upper().startswith("REC-"):
                 continue
-            payload = {header[i]: (str(row[i]).strip() if row[i] is not None else None)
+            payload = {header[i]: (str(row[i]).strip() if i < len(row) and row[i] is not None else None)
                        for i in range(len(header)) if header[i]}
             out.append({"rec_id": rec_id, "payload": payload})
         return out
