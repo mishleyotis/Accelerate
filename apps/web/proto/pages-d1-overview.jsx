@@ -817,29 +817,35 @@ function groupInsights(cards, mode) {
     // second kind, so the theme lens showed one bucket called Other and looked
     // broken. Untriaged cards now group by their pillar with the reason stated,
     // so the lens still clusters usefully while naming what is missing.
+    // An insight card has no theme of its own in any contract — the adapter
+    // DERIVES it from the O6 finding that shares the card's cell, so a card
+    // still without one is a card no finding touches.
     const themed = withP.filter(x => x.c.theme);
     const unthemed = withP.filter(x => !x.c.theme);
     const groups = [...new Set(themed.map(x => x.c.theme))]
       .map(t => {
         const items = themed.filter(x => x.c.theme === t).sort(byScore);
+        const why = [...new Set(items.map(x => x.c.theme_source).filter(Boolean))];
         return { key: t, label: t, color: "purple",
-                 desc: `${items.length} card${items.length === 1 ? "" : "s"}`, items };
+                 desc: `${items.length} card${items.length === 1 ? "" : "s"}`
+                       + (why.length ? ` · themed by the ${why.join(" / ")}` : ""),
+                 items };
       })
       .sort((a, b) => b.items[0].p.score - a.items[0].p.score);
     if (unthemed.length) {
       for (const p of DMA.PILLARS) {
         const items = unthemed.filter(x => x.c.pillar === p.id).sort(byScore);
         if (items.length) {
-          groups.push({ key: `__untheme-${p.id}`, label: `${p.id} · ${p.short} · no theme stated`,
+          groups.push({ key: `__untheme-${p.id}`, label: `${p.id} · ${p.short} · no theme derivable`,
             color: "org",
-            desc: `${items.length} card${items.length === 1 ? "" : "s"} the run did not theme — grouped by pillar instead`,
+            desc: `${items.length} card${items.length === 1 ? "" : "s"} whose cells no top finding touches — grouped by pillar instead`,
             items });
         }
       }
       const loose = unthemed.filter(x => !x.c.pillar).sort(byScore);
       if (loose.length) {
         groups.push({ key: "__untheme-none", label: "No theme and no pillar", color: "org",
-          desc: "the run stated neither, and the cards cite no cell to derive a pillar from",
+          desc: "these cards cite no cell, so neither a pillar nor a finding's theme can be derived",
           items: loose });
       }
     }

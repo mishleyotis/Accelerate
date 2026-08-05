@@ -238,6 +238,16 @@ function ClientRoute({ id, tab, sub }) {
         // peer medians and framing sentence stayed unread while the hero
         // rendered a constant offset and a hardcoded gap.
         pillar_peer_medians: live.entity.pillar_peer_medians || {},
+        // The run's own pillar/category table (heatmap.workbook_scores): stated
+        // category scores and peer medians, including categories the CURRENT
+        // catalogue does not list. Every heatmap grain reads it, so a run
+        // scored against v5.0's 17 categories renders all 17 instead of
+        // silently dropping the ones v7.0 killed.
+        workbookScores: live.entity.workbookScores || null,
+        // The per-cell citation lists the producer actually sent. The drawer
+        // resolves these ids rather than reverse-deriving a list from the link
+        // table, which is what made one cell's drawer contradict its payload.
+        cellEvidence: live.entity.cellEvidence || [],
         // CAGR is computed from the promoted financial series (adapter
         // `cagrOf`); footprint is the regulatory section's jurisdictions. Both
         // were adapted and then dropped here, so the firmographics card printed

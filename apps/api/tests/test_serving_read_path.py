@@ -152,6 +152,33 @@ def test_per_item_citations_survive_the_round_trip():
     assert built["env"]["e_ids"] == ["E-CC-004", "E-BCU-032", "E-CC-003"]
 
 
+def test_the_envelope_union_follows_the_column_not_the_key():
+    """The same union, where the item key is NOT `e_ids`.
+
+    insight_cards binds `e_ids <- item:supporting_e_ids`, so the column is
+    consumed by the item and no `env:e_ids` binding remains. The guard tested
+    the payload KEYS for `e_ids` — which by construction is not among them —
+    so every insights section served with no envelope citations while each
+    card carried its own. The test is on the column."""
+    payload = {"cards": [
+        {"ic_id": "IC-01", "title": "Three cores, one member",
+         "severity": "critical", "linked_subcap_id": "P4C1.1.1",
+         "supporting_e_ids": ["E-BCU-016", "E-BCU-020"]},
+        {"ic_id": "IC-02", "title": "Servicing load sits on manual work",
+         "severity": "high", "linked_subcap_id": "P3C2.4.2",
+         "supporting_e_ids": ["E-BCU-020", "E-CC-010"]}],
+        "produced_at": "2026-08-05T04:00:00+00:00", "producer_version": "test@1",
+        "e_ids": ["E-BCU-016", "E-BCU-020", "E-CC-010"], "internal_only": []}
+    built = assemble("insights", "insights",
+                     write_rows("insights", "insights", payload))
+    cards = built["data"]["cards"]
+    assert [c["supporting_e_ids"] for c in cards] == [
+        ["E-BCU-016", "E-BCU-020"], ["E-BCU-020", "E-CC-010"]], \
+        "the per-card citation list is what the adapter reads"
+    assert built["env"]["e_ids"] == ["E-BCU-016", "E-BCU-020", "E-CC-010"], \
+        "deduplicated union in first-seen order, computed not stored"
+
+
 def test_a_reserved_word_column_is_read_under_its_bare_name():
     """`window` is quoted in the spec because PostgreSQL reserves it. The
     writer needs the quotes; the reader must not keep them, or the driver's

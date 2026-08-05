@@ -178,10 +178,21 @@ def assemble(page: str, section: str, rows: list[dict]) -> dict | None:
         # is computed here as the union over the items, never stored
         # (invariant 8). Without this, rebinding e_ids to the item would
         # trade a missing per-card citation for a missing section one.
-        if "e_ids" not in env and "e_ids" in r["item_cols"].values():
+        #
+        # The test is on the COLUMN, not on the payload key. It read
+        # `.values()` — the keys the item lands under — so a writer that
+        # rebinds the e_ids COLUMN to a differently-named item key was missed
+        # exactly where it matters most: insight_cards binds
+        # `e_ids <- item:supporting_e_ids`, so the column was consumed by the
+        # item, no `env:e_ids` remained, and the guard tested for a key that by
+        # construction is not there. Every insights section served with no
+        # envelope citations at all.
+        ev_col = "e_ids" if "e_ids" in r["item_cols"] else None
+        if "e_ids" not in env and ev_col:
+            key = r["item_cols"][ev_col]
             union, seen = [], set()
             for item in items:
-                for e in item.get("e_ids") or []:
+                for e in item.get(key) or []:
                     if e not in seen:
                         seen.add(e)
                         union.append(e)

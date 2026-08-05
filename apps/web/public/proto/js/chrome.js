@@ -908,7 +908,9 @@ function ClientBar({
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     style: {
-      color: "#7C3500"
+      color: "#7C3500",
+      whiteSpace: "nowrap",
+      flexShrink: 0
     },
     onClick: () => setAudience("internal")
   }, "Switch back to Internal \u2192")) : null, isSuperseded ? /*#__PURE__*/React.createElement("div", {

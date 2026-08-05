@@ -22,7 +22,7 @@ analytical:
 **Any evidence reason at all fails the submission.** An excerpt is either a copy of
 something a document says or it is not evidence.
 
-## The two gates that block most often
+## The gates that block most often
 
 These are the ones a submission actually dies on, so they are named here rather than left
 to be discovered from a verdict.
@@ -74,6 +74,54 @@ Currently policed as contract vocabularies:
 
 Case matters — the renderer compares against the declared spelling, so `positive` misses the
 filter exactly as prose does. Null passes: absent is not wrong, a sentence is.
+
+### AG-04 · a named peer's technographics carry their source
+
+Blocks. Fires on any list item anywhere in a payload that carries `peer_coverage` or
+`peer_deployments` — it is not scoped to the tech register, so the same discipline applies
+wherever you compare a named institution's estate.
+
+The card renders a verdict *beside a named credit union*. The version this replaces decided
+that verdict from `hashCode(ts_id + peerName) % 100`, so "✓ deployed" against a real
+institution was a function of the characters in a row id.
+
+Three refusals:
+
+| Refused | Because |
+|---|---|
+| A `peer_coverage` share with no `peer_deployments` breakdown | A share with no basis is unfalsifiable |
+| A `deployed: true` row missing `source_url` or `as_of` | A technographic claim about a named institution is a research finding; undated and unsourced it is an assertion about someone else's estate on a client's dashboard |
+| A share disagreeing with its own breakdown by more than **one peer** (`1 / len(rows)`) | The figure and its basis are two numbers that must be the same number |
+
+**A peer you could not establish belongs in the list as `deployed: null`.** That is what lets
+the card read "2 of 5, 3 not established" rather than implying five were checked. Two of five
+with three unknown is not 40%; it is two of two established, or a share you do not state.
+Rows with `deployed: null` count in the denominator, so scope the share to what the breakdown
+supports.
+
+### SG-S8 · sentiment rests on more than one line
+
+**Discloses — it does not block.** A failing SG-S8 still promotes and renders to the client
+with its plain label: *"Sentiment rests on a single source, so treat it as indicative only"*.
+That is the point. The common misreading of this surface runs the other way — a thin reading
+taken as a finding about the institution — so the thinness is stated on the card rather than
+hidden by a block.
+
+The count is computed at submit from the rating rows and is **never read from a declared
+`displayed_lines`**. A producer stating its own line count is the one input this gate cannot
+trust; `displayed_lines` exists for the renderer, not for the gate.
+
+What counts, and what does not:
+
+- Counted: `overview.sentiment.bars[]` and `context.context_sentiment.context_tiles[].rows[]`
+  — the same dataset at two depths, counted identically whichever page is submitted.
+- **A row with no `rating` is not a line of sentiment.** It is a source you searched, and it
+  belongs in the ladder (`sources_searched`), not in the count.
+- Three results: `PASS` at two or more rated rows · `FAIL` at one · `NOT_RUN` with the reason
+  `no rated rows` when nothing rated was emitted at all.
+- **A self-published NPS standing alone is thin whatever the count.** Where every rated row's
+  source names NPS, the gate fails regardless of how many there are — one voice about itself,
+  repeated, is still one voice.
 
 ## The citation stack
 

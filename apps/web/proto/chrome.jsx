@@ -393,7 +393,12 @@ function ClientBar({ entity, run, tab }) {
           <Icon name="users" size={14} />
           <span><strong>Customer view</strong> - share-safe presentation mode · evidence rationale, ERS, alert counts, and the Context tab are hidden</span>
           <span className="spacer" />
-          <button className="btn btn-tertiary btn-sm" style={{ color: "#7C3500" }} onClick={() => setAudience("internal")}>Switch back to Internal →</button>
+          {/* nowrap + no shrink: at 1024px the flex row squeezed this button to
+              133px against a 150px label and the theme clips rather than
+              ellipsises, so the action read as "Switch back to Inter". */}
+          <button className="btn btn-tertiary btn-sm"
+                  style={{ color: "#7C3500", whiteSpace: "nowrap", flexShrink: 0 }}
+                  onClick={() => setAudience("internal")}>Switch back to Internal →</button>
         </div>
       ) : null}
 

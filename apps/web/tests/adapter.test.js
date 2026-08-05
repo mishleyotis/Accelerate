@@ -332,6 +332,54 @@ test("an insight's flag is authored where authored, derived where not, and says 
                      "an authored flag wins over the derivation");
 });
 
+test("an insight card's theme is derived from the finding sharing its cell", () => {
+  const w = load(LIVE);
+  const findings = { findings: [
+    { f_id: "F-01", theme: "DATA FOUNDATION", linked_subcap_ids: ["P4C1.1.1"] },
+    { f_id: "F-02", theme: "WORKFLOW", linked_subcap_ids: ["P3C2.4.2"] },
+  ] };
+  const cards = w.adaptInsights({ cards: [
+    // exact cell — the strongest rung
+    { ic_id: "IC-1", title: "a", severity: "critical", linked_subcap_id: "P4C1.1.1" },
+    // same category as F-02's cell, not the same cell
+    { ic_id: "IC-2", title: "b", severity: "high", linked_subcap_id: "P3C2.9.9" },
+    // a category no finding touches
+    { ic_id: "IC-3", title: "c", severity: "info", linked_subcap_id: "P1C4.1.1" },
+    // no cell at all
+    { ic_id: "IC-4", title: "d", severity: "info" },
+  ] }, { recommendations: [] }, findings);
+  assert.strictEqual(cards[0].theme, "DATA FOUNDATION");
+  assert.strictEqual(cards[0].theme_source, "finding on the same cell");
+  assert.strictEqual(cards[1].theme, "WORKFLOW");
+  assert.strictEqual(cards[1].theme_source, "finding in P3C2",
+                     "the category rung is used and says so");
+  assert.strictEqual(cards[2].theme, null, "no finding touches P1C4 — no theme");
+  assert.strictEqual(cards[2].theme_source, null);
+  assert.strictEqual(cards[3].theme, null, "no cell, nothing to inherit from");
+});
+
+test("an insight card has no theme when the run promoted no findings", () => {
+  const w = load(LIVE);
+  const cards = w.adaptInsights(
+    { cards: [{ ic_id: "IC-1", title: "a", severity: "critical",
+                linked_subcap_id: "P4C1.1.1" }] }, { recommendations: [] }, null);
+  assert.strictEqual(cards[0].theme, null,
+                     "a derived value is computed or null, never a default");
+});
+
+test("every severity the contract defines maps to a flag", () => {
+  const w = load(LIVE);
+  const cards = w.adaptInsights({ cards: [
+    { ic_id: "IC-1", severity: "critical" }, { ic_id: "IC-2", severity: "high" },
+    { ic_id: "IC-3", severity: "opportunity" }, { ic_id: "IC-4", severity: "info" },
+  ] }, { recommendations: [] }, null);
+  assert.deepStrictEqual(cards.map(c => c.flag),
+                         ["CRITICAL", "OPPORTUNITY", "OPPORTUNITY", "MONITOR"]);
+  assert.deepStrictEqual(cards.map(c => c.flag_source),
+                         ["severity", "severity", "severity", "severity"],
+                         "no contract severity falls through to the default");
+});
+
 test("financial periods come from the series and the footer from firmographics", () => {
   const w = load(LIVE);
   const f = w.adaptFinancials(

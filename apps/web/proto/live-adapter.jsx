@@ -399,8 +399,55 @@ function headlineOf(text) {
    producer authored one it is used, and until the schema carries it the
    severity the contract DOES define stands in — mapped, and recorded as
    derived so the surface can say so. */
+/* The contract's severity vocabulary is critical|high|opportunity|info. Two of
+   the four were missing here and two values the contract never defines were
+   present, so an `opportunity` card fell through to the MONITOR default — the
+   one flag that means "no action". */
 const SEVERITY_TO_FLAG = { critical: "CRITICAL", high: "OPPORTUNITY",
+                           opportunity: "OPPORTUNITY", info: "MONITOR",
                            medium: "MONITOR", low: "MONITOR" };
+
+/* The theme lens on D2 groups cards by `theme`, and an insight card has no such
+   field: the Surface Spec's I1 contract does not define one and `insight_cards`
+   has no column, so every card grouped as null and the lens showed one bucket.
+   The theme is not missing from the run, though — O6 findings carry it, from a
+   closed vocabulary, with the cells each finding bears on. So a card's theme is
+   DERIVED from the finding that shares its cell, exactly as its pillar is
+   derived from the cell id: computed, never stored (invariants 8 and 9), and no
+   invented payload field.
+
+   Two rungs, and which one produced the answer is recorded so the surface can
+   say so. Exact cell first; then the finding's category (P1C1) — a coarser
+   match, but a theme is a category-grain orientation cue in the O6 prompt's own
+   mapping, so it is a fair inheritance. Nothing beyond that: a card whose cell
+   no finding touches has no theme, and the lens names it rather than guessing. */
+function themeIndexOf(findings) {
+  const byCell = {}, byCategory = {};
+  for (const f of (findings && findings.findings) || []) {
+    const theme = f && f.theme ? String(f.theme).toUpperCase() : null;
+    if (!theme) continue;
+    for (const id of f.linked_subcap_ids || []) {
+      const cell = String(id);
+      if (!(cell in byCell)) byCell[cell] = theme;
+      const cat = /^(P[1-4]C\d+)/.exec(cell);
+      if (cat && !(cat[1] in byCategory)) byCategory[cat[1]] = theme;
+    }
+  }
+  return { byCell, byCategory };
+}
+
+function themeForCells(index, cells) {
+  for (const c of cells || []) {
+    if (index.byCell[String(c)]) return [index.byCell[String(c)], "finding on the same cell"];
+  }
+  for (const c of cells || []) {
+    const cat = /^(P[1-4]C\d+)/.exec(String(c));
+    if (cat && index.byCategory[cat[1]]) {
+      return [index.byCategory[cat[1]], `finding in ${cat[1]}`];
+    }
+  }
+  return [null, null];
+}
 
 /* A cell id carries its pillar in the leading token: P4C1.3.1 → P4. Reading it
    is not inference — the catalogue's id scheme guarantees it — so a card whose
@@ -411,8 +458,9 @@ function pillarOfCell(cellId) {
   return m ? m[1] : null;
 }
 
-function adaptInsights(insights, recommendations) {
+function adaptInsights(insights, recommendations, findings) {
   const cards = (insights && insights.cards) || [];
+  const themes = themeIndexOf(findings);
   const recPlatforms = {};
   for (const r of (recommendations && recommendations.recommendations) || []) {
     recPlatforms[r.rec_id] = platformChips([r.l3_area, r.l4_feature]);
@@ -427,6 +475,7 @@ function adaptInsights(insights, recommendations) {
     // under a single bucket: it was grouping by null.
     const cells = c.affects || (c.linked_subcap_id ? [c.linked_subcap_id] : []);
     const pillar = c.pillar_id || pillarOfCell(cells[0]) || null;
+    const [theme, themeWhy] = themeForCells(themes, cells);
     return {
       id: c.ic_id,
       pillar,
@@ -434,7 +483,8 @@ function adaptInsights(insights, recommendations) {
       flag: authored || derived || "MONITOR",
       flag_source: authored ? "authored" : (derived ? "severity" : "default"),
       confidence: c.confidence,
-      theme: c.theme || null,
+      theme: theme,
+      theme_source: theme ? themeWhy : null,
       title: c.title,
       what: c.what_text,
       why: c.why_text,
@@ -900,7 +950,8 @@ function buildLiveEntity(entityId, pages, extras) {
     leadership: adaptLeadership(secOf(overview, "leadership"), x.enrichment),
     thoughtLeadership: adaptThoughtLeadership(secOf(overview, "thought_leadership")),
 
-    insightCards: adaptInsights(secOf(insights, "insights"), recs),
+    insightCards: adaptInsights(secOf(insights, "insights"), recs,
+                                secOf(overview, "findings")),
     recommendations: adaptRecommendations(recs),
     platformStory: secOf(platform, "platform_story"),
     starters: (secOf(platform, "starters") || {}).starters || [],
