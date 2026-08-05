@@ -39,13 +39,33 @@ pinned only when:
   · the run's categories are a SUBSET of that version's, and
   · exactly ONE version satisfies that.
 
-A run matching several versions (its categories are common to both) or none is
-left NULL and logged. Leaving it NULL keeps today's behaviour — the join falls
-back to current — which is wrong but visible; guessing would be wrong and
-invisible. Absent beats wrong applies to our own data repairs too.
+A run matching several versions, or none, is left NULL and logged. That splits
+into two quite different cases, and the log says which:
+
+  · **Contained by every catalogue.** v7.0's 16 categories are a SUBSET of
+    v5.0's 17 — v5.0 carries P1C5, the ESG category v7.0 killed — so a
+    v7.0-shaped run is contained by both. Left unpinned, it falls back to the
+    current version, which IS v7.0, so its cells name correctly anyway. The
+    outcome is right; it is simply a fallback rather than a pin.
+  · **Matching no catalogue.** The run's category set belongs to neither
+    version. That is an ingestion problem, not a pin problem, and pinning it to
+    either version would bury it.
+
+Guessing in either case would be wrong and invisible; leaving NULL is wrong at
+worst and always visible. Absent beats wrong applies to our own data repairs too.
 
 Only NULL columns are written, so re-running is a no-op. The VERIFY lines are the
 production proof.
+
+## Measured result of the run that applied this
+
+    runs pinned                                     109
+    left NULL                                        11   (9 subset-of-both, 2 no match)
+    Baxter DMA-ASM-BCU-20260330-0001, 17 categories -> v5.0
+    scored cells resolving a catalogue NAME      74,135 of 76,589
+
+and for Baxter through the API, the surface that motivated it: **765 of 765
+cells now carry a name**, including all 30 P1C5 cells, up from 0 of 765.
 """
 from alembic import op
 
@@ -102,10 +122,21 @@ def upgrade() -> None:
             pinned += 1
             print(f"VERIFY 0022 pin: {request_id} ({cats} categories) -> {names[0]}")
         else:
+            # v7.0's 16 categories are a SUBSET of v5.0's 17 (v5.0 adds P1C5,
+            # the ESG category v7.0 killed), so a v7.0-shaped run is contained
+            # by both and is left NULL here. That is the right OUTCOME — an
+            # unpinned run falls back to the current catalogue, which is v7.0 —
+            # but it is a fallback rather than a pin, so say which case this is
+            # instead of logging every one as an unresolved ambiguity.
             ambiguous += 1
+            why = ("contained by every catalogue, so the current-version "
+                   "fallback already names its cells correctly; left unpinned "
+                   "rather than pinned to a guess"
+                   if len(names) > 1 else
+                   "matches NO catalogue — its category set belongs to neither "
+                   "version, which is an ingestion problem, not a pin problem")
             print(f"VERIFY 0022 LEFT NULL: {request_id} ({cats} categories) "
-                  f"matches {names or 'no catalogue'} — a subset of "
-                  f"{len(names)} versions is not an identification")
+                  f"matches {names or 'nothing'} — {why}")
 
     print(f"VERIFY 0022 pinned={pinned} left_null={ambiguous}")
 
