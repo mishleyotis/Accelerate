@@ -23,7 +23,8 @@ from dma_worker import drive
 from dma_worker.persist import persist_package
 from dma_worker.report_parser import parse_report
 from dma_worker.scan_runner import run_scan
-from dma_worker.workbook_parser import (parse_evidence_master,
+from dma_worker.workbook_parser import (mine_evidence_from_rationales,
+                                        parse_evidence_master,
                                         parse_grain_summaries,
                                         parse_peer_benchmarks,
                                         parse_recommendations,
@@ -213,6 +214,94 @@ def backfill_sections(conn, token, groups) -> int:
     return 1 if failed else 0
 
 
+def backfill_evidence(conn, token, groups) -> int:
+    """Fill in the evidence text that already-ingested rows never got.
+
+    Evidence rows insert with ON CONFLICT DO NOTHING, so re-ingesting a
+    package cannot repair one — and every row ingested before the ledger's real
+    column names were understood holds a tier and nothing else. This re-parses
+    each run's workbook and fills ONLY the columns that are still null:
+    source_name, source_url, excerpt, claim_type. A value the package already
+    stated is never overwritten, so the pass is additive and idempotent.
+
+    Matched on runs.source_folder_id, which stores the client folder's name.
+    """
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.entity_id, r.source_folder_id, r.run_seq
+                     FROM runs r
+                    WHERE r.source_folder_id IS NOT NULL
+                    ORDER BY r.source_folder_id""")
+    todo = cur.fetchall()
+    print(f"backfill-evidence: {len(todo)} run(s)")
+    filled = skipped = failed = 0
+    for run_id, entity_id, folder, run_seq in todo:
+        parts = groups.get(folder) or {}
+        if "workbook" not in parts:
+            skipped += 1
+            continue
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                p = os.path.join(td, "wb.xlsx")
+                with open(p, "wb") as fh:
+                    fh.write(drive.download(token, parts["workbook"].file_id))
+                ledger = parse_evidence_master(p)
+                wb = parse_scoring_workbook(p)
+            mined = mine_evidence_from_rationales(wb.scores)
+            n = clashes = 0
+            for ev in ledger:
+                m = mined.get(ev["e_id"]) or {}
+                excerpt = ev.get("excerpt") or m.get("excerpt")
+                # Match on ORIGIN and the id's numeric suffix, not on a
+                # reconstructed entity token: the ingest takes the token from
+                # the manifest, which the backfill does not read, and reading
+                # one back off an arbitrary existing id picks up the
+                # connector's own E-CC-nnn namespace instead. origin='package'
+                # is exactly the set the ingest created from this ledger.
+                suffix = ev["e_id"].split("-")[-1]
+                # A savepoint per row: filling in an excerpt can collide with
+                # the (entity_id, content_hash) dedup index when two ledger
+                # rows cite the same url and fact. That is a real duplicate,
+                # recorded and skipped — it must not sink the whole run.
+                cur.execute("SAVEPOINT ev_row")
+                try:
+                    cur.execute(
+                        """UPDATE evidence_index
+                              SET source_name = COALESCE(source_name, %s),
+                                  source_url  = COALESCE(source_url, %s),
+                                  excerpt     = COALESCE(excerpt, %s),
+                                  claim_type  = COALESCE(claim_type, %s)
+                            WHERE entity_id = %s
+                              AND origin = 'package'
+                              AND split_part(e_id, '-', 3) = %s""",
+                        (ev.get("source_name"), ev.get("source_url"), excerpt,
+                         ev.get("claim_type"), entity_id, suffix))
+                    n += cur.rowcount or 0
+                    cur.execute("RELEASE SAVEPOINT ev_row")
+                except Exception:       # noqa: BLE001 — one row, not the run
+                    cur.execute("ROLLBACK TO SAVEPOINT ev_row")
+                    clashes += 1
+            if clashes:
+                cur.execute(
+                    """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
+                       VALUES (%s,'evidence_backfill_dedup_clash',%s, now())""",
+                    (run_id, json.dumps({"rows_skipped": clashes,
+                                         "reason": "filling the excerpt would "
+                                                   "duplicate (entity, content_hash)"})))
+            conn.commit()
+            print(f"backfill-evidence: {folder} -> {n} row(s) filled "
+                  f"({sum(1 for v in mined.values() if v.get('excerpt'))} mined "
+                  f"excerpts{f', {clashes} dedup clash(es)' if clashes else ''})")
+            filled += 1
+        except Exception as exc:  # noqa: BLE001 — one bad workbook sinks nothing
+            conn.rollback()
+            failed += 1
+            print(f"backfill-evidence FAILED: {folder}: {exc!r}")
+    print(f"backfill-evidence: {filled} runs filled, {skipped} without a "
+          f"workbook, {failed} failed")
+    return 1 if failed else 0
+
+
+
 def dump_headers(token, groups, needle: str) -> int:
     """Print every tab's first non-empty rows for one package's workbook.
 
@@ -305,6 +394,11 @@ def main() -> int:
     # firing's diff and the changed packages would never be ingested.
     if os.environ.get("BACKFILL_SECTIONS"):
         rc = backfill_sections(conn, drive.metadata_token(), groups)
+        conn.close()
+        return rc
+
+    if os.environ.get("BACKFILL_EVIDENCE"):
+        rc = backfill_evidence(conn, drive.metadata_token(), groups)
         conn.close()
         return rc
 

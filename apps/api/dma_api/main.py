@@ -180,6 +180,60 @@ def directory():
         conn.close()
 
 
+_SUBCAP_COLS = ("subcap_id", "capability_id", "category_id", "pillar_id",
+                "subcap_name", "l3_platform_areas", "l4_features", "score",
+                "confidence", "peer_median", "peer_n", "peer_basis",
+                "proxy_disclosure", "delta", "linked_evidence_count",
+                "is_thin_evidence", "source_cell")
+
+
+# Declared BEFORE the generic {page} route, like /evidence.
+@app.get("/v1/entities/{display_id}/subcaps")
+def entity_subcaps(display_id: str, request: Request, response: Response,
+                   audience: str = "internal", run: str | None = None,
+                   role: str | None = None, history: bool = False):
+    """The run's cell grain: every scored subcap, as the workbook stated it.
+
+    Not a promoted section — a grain read, the same shape as the evidence
+    store. The heatmap drills to four grains and the platform page names each
+    gap's cell; both need this and the serving tier's H4 writer carries pillars
+    and categories only. `delta` and `is_thin_evidence` are the base table's
+    GENERATED columns: selected here, never recomputed (invariants 8 and 9).
+    """
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            _entity_id, entity, run_meta, _ = resolve_run(
+                cur, display_id, run, history)
+        except ApiError as e:
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        cur.execute(
+            f"SELECT {', '.join(_SUBCAP_COLS)} FROM serving_subcaps "
+            "WHERE run_id = %s ORDER BY subcap_id", (run_meta["run_id"],))
+        rows = []
+        for r in cur.fetchall():
+            d = dict(zip(_SUBCAP_COLS, r))
+            for k in ("score", "peer_median", "delta"):
+                d[k] = float(d[k]) if d[k] is not None else None
+            if audience == "customer":
+                # The proxy disclosure explains an internal peer-basis
+                # decision; the customer sees the basis, not the workings.
+                d.pop("proxy_disclosure", None)
+            rows.append(d)
+        tag = etag_for(run_meta, f"{audience}.subcaps")
+        if request.headers.get("if-none-match") == tag:
+            return Response(status_code=304, headers={"ETag": tag,
+                                                      "Cache-Control": "private, max-age=0"})
+        response.headers["ETag"] = tag
+        response.headers["Cache-Control"] = "private, max-age=0"
+        return {"entity": entity, "run": run_meta, "audience": audience,
+                "subcaps": rows, "count": len(rows)}
+    finally:
+        conn.close()
+
+
 # Declared BEFORE the generic {page} route: FastAPI matches in declaration
 # order, and "evidence" would otherwise be read as a page name.
 @app.get("/v1/entities/{display_id}/evidence")
