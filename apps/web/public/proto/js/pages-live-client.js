@@ -1669,6 +1669,7 @@ function LiveWorkbookGrid({
   const pillars = data.pillars || {};
   const cats = data.categories || {};
   const shown = DMA.PILLARS.filter(p => !pillarFocus || p.id === pillarFocus);
+  const offCatalogue = Object.keys(cats).filter(cid => !DMA.CATEGORIES.some(c => c.id === cid)).sort();
   const catsOf = pid => Object.keys(cats).filter(c => c.startsWith(pid)).sort();
   return /*#__PURE__*/React.createElement("div", {
     className: "card",
@@ -1678,7 +1679,7 @@ function LiveWorkbookGrid({
     }
   }, /*#__PURE__*/React.createElement(SectionHead, {
     title: "Maturity grid",
-    note: `${Object.keys(pillars).length} pillars · ${Object.keys(cats).length} categories, as scored in the workbook`,
+    note: [`${Object.keys(pillars).length} pillars`, `${Object.keys(cats).length} categories, as scored in the workbook`, offCatalogue.length ? `${offCatalogue.join(", ")} not in the current catalogue` : null].filter(Boolean).join(" · "),
     right: /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
@@ -1875,20 +1876,30 @@ function LiveWorkbookGrid({
           padding: "4px 6px"
         }
       }, fmtScore(pm));
-    })) : null, /*#__PURE__*/React.createElement("div", null), ids.map(cid => /*#__PURE__*/React.createElement("div", {
-      key: `l-${cid}`,
-      style: {
-        fontSize: 9,
-        color: "var(--z-muted)",
-        textAlign: "center",
-        padding: "4px 2px 0",
-        lineHeight: 1.3
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "f-mono"
-    }, cid), /*#__PURE__*/React.createElement("div", {
-      className: "txt-fit-2"
-    }, DMA.CAT_NAME ? DMA.CAT_NAME[cid] || "" : (DMA.CATEGORIES.find(c => c.id === cid) || {}).name || "")))));
+    })) : null, /*#__PURE__*/React.createElement("div", null), ids.map(cid => {
+      const cat = DMA.CATEGORIES.find(c => c.id === cid);
+      const label = cat && cat.name && cat.name !== cid ? cat.name : null;
+      return /*#__PURE__*/React.createElement("div", {
+        key: `l-${cid}`,
+        style: {
+          fontSize: 9,
+          color: "var(--z-muted)",
+          textAlign: "center",
+          padding: "4px 2px 0",
+          lineHeight: 1.3
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "f-mono"
+      }, cid), label ? /*#__PURE__*/React.createElement("div", {
+        className: "txt-fit-2"
+      }, label) : !cat ? /*#__PURE__*/React.createElement("div", {
+        className: "txt-fit-2",
+        style: {
+          color: "var(--z-org)"
+        },
+        title: `${cid} is not in catalogue ${window.DMA_LIVE && window.DMA_LIVE.catalogue_version || "current"}; the run scored it, so it renders`
+      }, "off-catalogue") : null);
+    })));
   }), /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
@@ -2028,7 +2039,9 @@ function LiveFocusAreas({
   }));
 }
 
-/* ══ H2 · cell evidence ════════════════════════════════════════════ */
+/* ══ H2 · cell evidence ════════════════════════════════════════════
+   The grid's drill target. 69 flat rows is a list, not a drilldown, so the
+   cells group by category and open on the one the grid was clicked on. */
 function LiveCellEvidence({
   data,
   state,
@@ -2037,13 +2050,26 @@ function LiveCellEvidence({
 }) {
   const all = data && data.cells || [];
   const [q, setQ] = useState("");
+  const [open, setOpen] = useState({});
   if (!all.length) return null;
-  const cells = all.filter(c => {
-    const id = c.cell_id || c.subcap_id || "";
+  const matches = all.filter(c => {
+    const id = c.subcap_id || "";
     if (filter && !String(id).startsWith(filter)) return false;
     if (q && !JSON.stringify(c).toLowerCase().includes(q.toLowerCase())) return false;
     return true;
   });
+  const groups = {};
+  matches.forEach(c => {
+    const cat = String(c.subcap_id || "?").slice(0, 4);
+    (groups[cat] = groups[cat] || []).push(c);
+  });
+  const cats = Object.keys(groups).sort();
+  // A filter or a search is itself the intent to look inside.
+  const forced = !!(filter || q);
+  const catName = cid => {
+    const c = DMA.CATEGORIES.find(x => x.id === cid);
+    return c && c.name && c.name !== cid ? c.name : null;
+  };
   return /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
@@ -2052,7 +2078,7 @@ function LiveCellEvidence({
     }
   }, /*#__PURE__*/React.createElement(SectionHead, {
     title: "Cell evidence",
-    note: `${cells.length} of ${all.length} evidenced cells`,
+    note: `${matches.length} of ${all.length} evidenced cells across ${cats.length} categor${cats.length === 1 ? "y" : "ies"}`,
     right: /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
@@ -2063,7 +2089,8 @@ function LiveCellEvidence({
       style: {
         cursor: "pointer"
       },
-      onClick: onClearFilter
+      onClick: onClearFilter,
+      title: "clear the grid filter"
     }, filter, " \u2715") : null, /*#__PURE__*/React.createElement("input", {
       className: "inp",
       placeholder: "Filter cells\u2026",
@@ -2075,48 +2102,103 @@ function LiveCellEvidence({
         width: 160
       }
     }))
-  }), cells.length ? /*#__PURE__*/React.createElement("div", {
+  }), cats.length ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gap: 6
     }
-  }, cells.map((c, i) => /*#__PURE__*/React.createElement("div", {
-    key: c.cell_id || i,
-    className: "card-tile",
-    style: {
-      padding: "10px 12px"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "f-mono b"
-  }, c.subcap_id), c.grounded_on != null ? /*#__PURE__*/React.createElement("span", {
-    className: `b ${c.grounded_on === 0 ? "b-org" : ""}`,
-    title: "grounded_on \u2014 the length of the citation list, computed by the database"
-  }, c.grounded_on, " cited") : null, /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), (c.e_ids || []).slice(0, 8).map(e => /*#__PURE__*/React.createElement("span", {
-    key: e,
-    className: "chip f-mono",
-    style: {
-      fontSize: 9
-    }
-  }, e)), (c.e_ids || []).length > 8 ? /*#__PURE__*/React.createElement("span", {
-    className: "muted",
-    style: {
-      fontSize: 9.5
-    }
-  }, "+", c.e_ids.length - 8) : null), c.synthesis ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11.5,
-      color: "var(--z-body)",
-      marginTop: 5,
-      lineHeight: 1.5
-    }
-  }, c.synthesis) : null))) : /*#__PURE__*/React.createElement("div", {
+  }, cats.map(cid => {
+    const rows = groups[cid];
+    const cited = rows.reduce((a, c) => a + (c.grounded_on != null ? Number(c.grounded_on) : (c.e_ids || []).length), 0);
+    const thin = rows.filter(c => (c.grounded_on != null ? Number(c.grounded_on) : (c.e_ids || []).length) === 0).length;
+    const isOpen = forced || !!open[cid];
+    return /*#__PURE__*/React.createElement("div", {
+      key: cid,
+      className: "card-tile",
+      style: {
+        padding: 0,
+        overflow: "hidden"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row clickable",
+      style: {
+        gap: 8,
+        padding: "10px 12px",
+        cursor: "pointer"
+      },
+      onClick: () => setOpen(o => ({
+        ...o,
+        [cid]: !o[cid]
+      }))
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: isOpen ? "chevron-d" : "chevron-r",
+      size: 11
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "b f-mono"
+    }, cid), catName(cid) ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        fontWeight: 600
+      }
+    }, catName(cid)) : null, /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-muted)"
+      }
+    }, rows.length, " cell", rows.length === 1 ? "" : "s", " \xB7 ", cited, " citation", cited === 1 ? "" : "s"), thin ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-org",
+      title: "cells with no citation on this run"
+    }, thin, " uncited") : null), isOpen ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        borderTop: "1px solid var(--z-sep)"
+      }
+    }, rows.map((c, i) => {
+      const n = c.grounded_on != null ? Number(c.grounded_on) : (c.e_ids || []).length;
+      return /*#__PURE__*/React.createElement("div", {
+        key: c.subcap_id || i,
+        style: {
+          padding: "8px 12px",
+          borderBottom: i === rows.length - 1 ? 0 : "1px solid var(--z-sep)"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "row",
+        style: {
+          gap: 8
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "f-mono",
+        style: {
+          fontSize: 11,
+          minWidth: 78
+        }
+      }, c.subcap_id), /*#__PURE__*/React.createElement("span", {
+        className: `b ${n === 0 ? "b-org" : ""}`,
+        title: "grounded_on \u2014 the length of the citation list, computed by the database"
+      }, n, " cited"), /*#__PURE__*/React.createElement("span", {
+        className: "spacer"
+      }), (c.e_ids || []).slice(0, 8).map(e => /*#__PURE__*/React.createElement("span", {
+        key: e,
+        className: "chip f-mono",
+        style: {
+          fontSize: 9
+        }
+      }, e)), (c.e_ids || []).length > 8 ? /*#__PURE__*/React.createElement("span", {
+        className: "muted",
+        style: {
+          fontSize: 9.5
+        }
+      }, "+", c.e_ids.length - 8) : null), c.synthesis ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11.5,
+          color: "var(--z-body)",
+          marginTop: 5,
+          lineHeight: 1.5
+        }
+      }, c.synthesis) : null);
+    })) : null);
+  })) : /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
       color: "var(--z-muted)"
@@ -2574,7 +2656,7 @@ function LiveInsights({
         display: "grid",
         gap: 8
       }
-    }, [["What", c.what_text], ["Why", c.why_text], ["So what", c.so_what_text], ["Alternative explanation", c.alternative_explanation], ["Severity rationale", c.severity_rationale], ["Affects", c.affects], ["Validation question", c.validation_question]].map(([k, v]) => v ? /*#__PURE__*/React.createElement("div", {
+    }, [["What", c.what_text], ["Why", c.why_text], ["Alternative explanation", c.alternative_explanation], ["Severity rationale", c.severity_rationale], ["Affects", c.affects], ["Validation question", c.validation_question]].map(([k, v]) => v ? /*#__PURE__*/React.createElement("div", {
       key: k
     }, /*#__PURE__*/React.createElement("div", {
       className: "eyebrow",
@@ -3348,9 +3430,7 @@ function LiveTimeline({
     className: "b f-mono"
   }, e.event_date || "undated"), e.kind ? /*#__PURE__*/React.createElement("span", {
     className: "b b-purple"
-  }, e.kind) : null, e.signal ? /*#__PURE__*/React.createElement("span", {
-    className: "b"
-  }, e.signal) : null, /*#__PURE__*/React.createElement("span", {
+  }, e.kind) : null, /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), e.maturity_effect ? /*#__PURE__*/React.createElement("span", {
     className: "b b-ph1",
@@ -3371,7 +3451,16 @@ function LiveTimeline({
       marginTop: 4,
       lineHeight: 1.5
     }
-  }, e.body) : null, /*#__PURE__*/React.createElement("div", {
+  }, e.body) : null, asText(e.signal) ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-dark)",
+      marginTop: 5,
+      paddingLeft: 9,
+      borderLeft: "2px solid var(--z-lav)",
+      lineHeight: 1.5
+    }
+  }, asText(e.signal)) : null, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       marginTop: 5,

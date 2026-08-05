@@ -1014,12 +1014,18 @@ function LiveWorkbookGrid({ data, state, entity, run, onDrill }) {
   const pillars = data.pillars || {};
   const cats = data.categories || {};
   const shown = DMA.PILLARS.filter((p) => !pillarFocus || p.id === pillarFocus);
+  const offCatalogue = Object.keys(cats)
+    .filter((cid) => !DMA.CATEGORIES.some((c) => c.id === cid)).sort();
   const catsOf = (pid) => Object.keys(cats).filter((c) => c.startsWith(pid)).sort();
 
   return (
     <div className="card" style={{ marginBottom: 18, padding: "18px 20px" }}>
       <SectionHead title="Maturity grid"
-        note={`${Object.keys(pillars).length} pillars · ${Object.keys(cats).length} categories, as scored in the workbook`}
+        note={[`${Object.keys(pillars).length} pillars`,
+               `${Object.keys(cats).length} categories, as scored in the workbook`,
+               offCatalogue.length
+                 ? `${offCatalogue.join(", ")} not in the current catalogue`
+                 : null].filter(Boolean).join(" · ")}
         right={
           <div className="row" style={{ gap: 10 }}>
             <label className="row" style={{ fontSize: 11, cursor: "pointer" }}>
@@ -1133,14 +1139,23 @@ function LiveWorkbookGrid({ data, state, entity, run, onDrill }) {
                 </>
               ) : null}
               <div />
-              {ids.map((cid) => (
-                <div key={`l-${cid}`} style={{ fontSize: 9, color: "var(--z-muted)",
-                      textAlign: "center", padding: "4px 2px 0", lineHeight: 1.3 }}>
-                  <div className="f-mono">{cid}</div>
-                  <div className="txt-fit-2">{DMA.CAT_NAME ? (DMA.CAT_NAME[cid] || "") :
-                    ((DMA.CATEGORIES.find((c) => c.id === cid) || {}).name || "")}</div>
-                </div>
-              ))}
+              {ids.map((cid) => {
+                const cat = DMA.CATEGORIES.find((c) => c.id === cid);
+                const label = cat && cat.name && cat.name !== cid ? cat.name : null;
+                return (
+                  <div key={`l-${cid}`} style={{ fontSize: 9, color: "var(--z-muted)",
+                        textAlign: "center", padding: "4px 2px 0", lineHeight: 1.3 }}>
+                    <div className="f-mono">{cid}</div>
+                    {label ? <div className="txt-fit-2">{label}</div>
+                      : !cat ? (
+                        <div className="txt-fit-2" style={{ color: "var(--z-org)" }}
+                             title={`${cid} is not in catalogue ${
+                               (window.DMA_LIVE && window.DMA_LIVE.catalogue_version) || "current"
+                             }; the run scored it, so it renders`}>
+                          off-catalogue</div>) : null}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
@@ -1219,52 +1234,110 @@ function LiveFocusAreas({ data, state }) {
   );
 }
 
-/* ══ H2 · cell evidence ════════════════════════════════════════════ */
+/* ══ H2 · cell evidence ════════════════════════════════════════════
+   The grid's drill target. 69 flat rows is a list, not a drilldown, so the
+   cells group by category and open on the one the grid was clicked on. */
 function LiveCellEvidence({ data, state, filter, onClearFilter }) {
   const all = (data && data.cells) || [];
   const [q, setQ] = useState("");
+  const [open, setOpen] = useState({});
   if (!all.length) return null;
-  const cells = all.filter((c) => {
-    const id = c.cell_id || c.subcap_id || "";
+
+  const matches = all.filter((c) => {
+    const id = c.subcap_id || "";
     if (filter && !String(id).startsWith(filter)) return false;
     if (q && !JSON.stringify(c).toLowerCase().includes(q.toLowerCase())) return false;
     return true;
   });
+  const groups = {};
+  matches.forEach((c) => {
+    const cat = String(c.subcap_id || "?").slice(0, 4);
+    (groups[cat] = groups[cat] || []).push(c);
+  });
+  const cats = Object.keys(groups).sort();
+  // A filter or a search is itself the intent to look inside.
+  const forced = !!(filter || q);
+  const catName = (cid) => {
+    const c = DMA.CATEGORIES.find((x) => x.id === cid);
+    return c && c.name && c.name !== cid ? c.name : null;
+  };
+
   return (
     <div className="card" style={{ marginBottom: 18, padding: "18px 20px" }}>
       <SectionHead title="Cell evidence"
-        note={`${cells.length} of ${all.length} evidenced cells`}
+        note={`${matches.length} of ${all.length} evidenced cells across ${cats.length} categor${cats.length === 1 ? "y" : "ies"}`}
         right={
           <div className="row" style={{ gap: 8 }}>
             {filter ? (
               <span className="chip purple" style={{ cursor: "pointer" }}
-                    onClick={onClearFilter}>{filter} ✕</span>) : null}
+                    onClick={onClearFilter} title="clear the grid filter">
+                {filter} ✕</span>) : null}
             <input className="inp" placeholder="Filter cells…" value={q}
                    onChange={(e) => setQ(e.target.value)}
                    style={{ fontSize: 11, padding: "4px 8px", width: 160 }} />
           </div>} />
-      {cells.length ? (
+      {cats.length ? (
         <div style={{ display: "grid", gap: 6 }}>
-          {cells.map((c, i) => (
-            <div key={c.cell_id || i} className="card-tile" style={{ padding: "10px 12px" }}>
-              <div className="row" style={{ gap: 8 }}>
-                <span className="f-mono b">{c.subcap_id}</span>
-                {c.grounded_on != null ? (
-                  <span className={`b ${c.grounded_on === 0 ? "b-org" : ""}`}
-                        title="grounded_on — the length of the citation list, computed by the database">
-                    {c.grounded_on} cited</span>) : null}
-                <span className="spacer" />
-                {(c.e_ids || []).slice(0, 8).map((e) => (
-                  <span key={e} className="chip f-mono" style={{ fontSize: 9 }}>{e}</span>))}
-                {(c.e_ids || []).length > 8 ? (
-                  <span className="muted" style={{ fontSize: 9.5 }}>
-                    +{c.e_ids.length - 8}</span>) : null}
+          {cats.map((cid) => {
+            const rows = groups[cid];
+            const cited = rows.reduce(
+              (a, c) => a + (c.grounded_on != null ? Number(c.grounded_on)
+                             : (c.e_ids || []).length), 0);
+            const thin = rows.filter((c) => (c.grounded_on != null
+              ? Number(c.grounded_on) : (c.e_ids || []).length) === 0).length;
+            const isOpen = forced || !!open[cid];
+            return (
+              <div key={cid} className="card-tile" style={{ padding: 0,
+                    overflow: "hidden" }}>
+                <div className="row clickable" style={{ gap: 8, padding: "10px 12px",
+                      cursor: "pointer" }}
+                     onClick={() => setOpen((o) => ({ ...o, [cid]: !o[cid] }))}>
+                  <Icon name={isOpen ? "chevron-d" : "chevron-r"} size={11} />
+                  <span className="b f-mono">{cid}</span>
+                  {catName(cid) ? (
+                    <span style={{ fontSize: 12, fontWeight: 600 }}>
+                      {catName(cid)}</span>) : null}
+                  <span className="spacer" />
+                  <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}>
+                    {rows.length} cell{rows.length === 1 ? "" : "s"} · {cited} citation{cited === 1 ? "" : "s"}</span>
+                  {thin ? <span className="b b-org"
+                    title="cells with no citation on this run">{thin} uncited</span> : null}
+                </div>
+                {isOpen ? (
+                  <div style={{ borderTop: "1px solid var(--z-sep)" }}>
+                    {rows.map((c, i) => {
+                      const n = c.grounded_on != null ? Number(c.grounded_on)
+                        : (c.e_ids || []).length;
+                      return (
+                        <div key={c.subcap_id || i} style={{ padding: "8px 12px",
+                              borderBottom: i === rows.length - 1 ? 0
+                                : "1px solid var(--z-sep)" }}>
+                          <div className="row" style={{ gap: 8 }}>
+                            <span className="f-mono" style={{ fontSize: 11,
+                                  minWidth: 78 }}>{c.subcap_id}</span>
+                            <span className={`b ${n === 0 ? "b-org" : ""}`}
+                                  title="grounded_on — the length of the citation list, computed by the database">
+                              {n} cited</span>
+                            <span className="spacer" />
+                            {(c.e_ids || []).slice(0, 8).map((e) => (
+                              <span key={e} className="chip f-mono"
+                                    style={{ fontSize: 9 }}>{e}</span>))}
+                            {(c.e_ids || []).length > 8 ? (
+                              <span className="muted" style={{ fontSize: 9.5 }}>
+                                +{c.e_ids.length - 8}</span>) : null}
+                          </div>
+                          {c.synthesis ? (
+                            <div style={{ fontSize: 11.5, color: "var(--z-body)",
+                                  marginTop: 5, lineHeight: 1.5 }}>
+                              {c.synthesis}</div>) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : null}
               </div>
-              {c.synthesis ? (
-                <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 5,
-                              lineHeight: 1.5 }}>{c.synthesis}</div>) : null}
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div style={{ fontSize: 11.5, color: "var(--z-muted)" }}>
@@ -1516,7 +1589,6 @@ function LiveInsights({ data, state }) {
               {isOpen ? (
                 <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
                   {[["What", c.what_text], ["Why", c.why_text],
-                    ["So what", c.so_what_text],
                     ["Alternative explanation", c.alternative_explanation],
                     ["Severity rationale", c.severity_rationale],
                     ["Affects", c.affects],
@@ -1932,7 +2004,6 @@ function LiveTimeline({ data, state }) {
             <div className="row" style={{ gap: 8 }}>
               <span className="b f-mono">{e.event_date || "undated"}</span>
               {e.kind ? <span className="b b-purple">{e.kind}</span> : null}
-              {e.signal ? <span className="b">{e.signal}</span> : null}
               <span className="spacer" />
               {e.maturity_effect ? (
                 <span className="b b-ph1" title="effect on assessed maturity">
@@ -1944,6 +2015,10 @@ function LiveTimeline({ data, state }) {
             {e.body ? (
               <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 4,
                             lineHeight: 1.5 }}>{e.body}</div>) : null}
+            {asText(e.signal) ? (
+              <div style={{ fontSize: 11.5, color: "var(--z-dark)", marginTop: 5,
+                            paddingLeft: 9, borderLeft: "2px solid var(--z-lav)",
+                            lineHeight: 1.5 }}>{asText(e.signal)}</div>) : null}
             <div className="row" style={{ marginTop: 5, gap: 4, flexWrap: "wrap" }}>
               {(e.capability_ids || []).map((id) => (
                 <span key={id} className="chip f-mono" style={{ fontSize: 9 }}>{id}</span>))}

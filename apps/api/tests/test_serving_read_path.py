@@ -277,3 +277,17 @@ def test_dotted_item_field_nests_like_the_payload():
     built = assemble("platform", "stairstep", rows)
     assert "ladder.steps" not in built["data"], "the dotted key must not survive"
     assert built["data"]["ladder"]["steps"][0]["label"] == "Lay the integration backbone"
+
+
+def test_catalogue_reads_the_real_ceilings_table():
+    """The stated category names come from the ceilings serving table. Its name
+    is in the writer spec (overview_ceilings) — an invented one takes the whole
+    catalogue endpoint down with 42P01, and the front end boots off it."""
+    spec = json.loads((ROOT / "apps" / "api" / "dma_api" / "writer_spec.json").read_text())
+    tables = {w["table"] for p in spec["specs"] for w in p["writers"]}
+    src = (ROOT / "apps" / "api" / "dma_api" / "main.py").read_text()
+    import re
+    for t in re.findall(r"FROM\s+(\w+)", src):
+        if t.startswith(("overview_", "heatmap_", "insights_", "platform_",
+                         "context_", "techstack_")):
+            assert t in tables, f"{t} is not a serving table in the writer spec"

@@ -73,6 +73,18 @@ _PILLAR_NAMES = {
 }
 
 
+# The sub-vertical vocabulary, as the Surface Specification names it. The
+# serving tier stores the code (SV2), not the label, so the label has to come
+# from the contract rather than from a code echoed back at the reader.
+_SUBVERTICAL_NAMES = {
+    "SV1": "Regional Banks", "SV2": "Credit Unions",
+    "SV3": "Commercial Lending", "SV4": "CIB & Capital Markets",
+    "SV5": "RIAs & Broker-Dealers", "SV6": "Asset Management",
+    "SV7": "Insurance Brokers", "SV8": "Insurance Carriers",
+    "SV9": "Farm Credit",
+}
+
+
 @app.get("/v1/catalogue")
 def catalogue():
     conn = _connect()
@@ -83,10 +95,26 @@ def catalogue():
         cur.execute(
             """SELECT category_id, pillar_id, name FROM ccg_categories
                 WHERE version = %s ORDER BY category_id""", (version,))
-        # name falls back to the id where the version ships none (v7.0) —
-        # promoted surfaces carry the run's own stated names instead.
-        categories = [{"id": c, "pillar": p, "name": n or c, "weight": None}
-                      for c, p, n in cur.fetchall()]
+        rows = cur.fetchall()
+        # v7.0's capability map puts the ID in its Category column, so the
+        # catalogue ships no display names and the loader stored NULL rather
+        # than an id masquerading as a name. The names DO exist — every
+        # promoted run states them on its ceilings rows — so take the most
+        # frequently stated name per category. That is a count over real
+        # promoted data, not a guess, and it stops a grid of bare ids.
+        cur.execute("""SELECT category_id, category_name, count(*) AS n
+                         FROM overview_ceilings
+                        WHERE category_name IS NOT NULL
+                        GROUP BY category_id, category_name
+                        ORDER BY category_id, n DESC, category_name""")
+        stated: dict = {}
+        for cid, cname, _n in cur.fetchall():
+            stated.setdefault(cid, cname)
+        categories = [{"id": c, "pillar": p, "name": n or stated.get(c) or c,
+                       "name_source": ("catalogue" if n
+                                       else ("stated" if stated.get(c) else None)),
+                       "weight": None}
+                      for c, p, n in rows]
         pillars = [{"id": pid, "name": n, "short": s}
                    for pid, (n, s) in _PILLAR_NAMES.items()]
         return {"version": version, "pillars": pillars, "categories": categories}
@@ -117,7 +145,7 @@ def directory():
              scored_cells, completed_at, promoted_at, pillars,
              open_alerts) in cur.fetchall():
             key = (sub_vertical or "UNKNOWN").upper().replace(" ", "_")
-            labels[key] = sub_vertical or "Unknown"
+            labels[key] = _SUBVERTICAL_NAMES.get(key, sub_vertical or "Unknown")
             ent = by_entity.setdefault(str(eid), {
                 "id": display_id, "slug": display_id, "name": name,
                 "domain": None, "subvertical": key,
