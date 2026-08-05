@@ -624,7 +624,13 @@ function DashboardHome() {
       gap: 8,
       fontSize: 11.5
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, window.DMA_LIVE ? /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "muted"
+  }, "Package scan"), /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), /*#__PURE__*/React.createElement("span", null, "not yet scheduled")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("span", {
     className: "muted"
@@ -636,7 +642,7 @@ function DashboardHome() {
     className: "muted"
   }, "Vertex AI budget"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, "$184 / $400")), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", null, "$184 / $400"))), /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("span", {
     className: "muted"

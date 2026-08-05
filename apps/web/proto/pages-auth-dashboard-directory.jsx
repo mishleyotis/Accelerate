@@ -272,9 +272,16 @@ function DashboardHome() {
                   <div style={{ width: 28, height: 28, borderRadius: 7, background: "var(--ph0-lt)", color: "var(--z-dpur)", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="drive" size={14} /></div>
                   <strong style={{ fontSize: 13 }}>System health</strong>
                 </div>
+                {/* Production divergence: real rows only — a crawl time or
+                    budget nothing measures is a default that looks like data.
+                    The scheduled-scan row lights up when the Scheduler lands. */}
                 <div style={{ display: "grid", gap: 8, fontSize: 11.5 }}>
-                  <div className="row"><span className="muted">Drive crawl</span><span className="spacer" /><span>2 hr ago</span></div>
-                  <div className="row"><span className="muted">Vertex AI budget</span><span className="spacer" /><span>$184 / $400</span></div>
+                  {window.DMA_LIVE ? (
+                    <div className="row"><span className="muted">Package scan</span><span className="spacer" /><span>not yet scheduled</span></div>
+                  ) : (<>
+                    <div className="row"><span className="muted">Drive crawl</span><span className="spacer" /><span>2 hr ago</span></div>
+                    <div className="row"><span className="muted">Vertex AI budget</span><span className="spacer" /><span>$184 / $400</span></div>
+                  </>)}
                   <div className="row"><span className="muted">Pending review</span><span className="spacer" /><span>{DMA.PENDING_REVIEW.length} entities</span></div>
                 </div>
                 <button className="btn btn-tertiary btn-sm" style={{ width: "100%", justifyContent: "center", marginTop: 10 }} onClick={() => navigate("/admin")}>Open admin <Icon name="arrow-r" size={11} /></button>

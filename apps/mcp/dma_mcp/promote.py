@@ -140,10 +140,22 @@ def promote_run(conn, run_id) -> dict:
                         WHERE id = ANY(%s)""",
                     ([s["id"] for s in live.values()],))
         conn.commit()
+        # after commit: the directory's materialised view sees the new
+        # promotion. A refresh failure never un-promotes — it is reported.
+        refresh_error = None
+        try:
+            cur.execute("SELECT refresh_serving_directory()")
+            conn.commit()
+        except Exception as e:            # noqa: BLE001 — reported, not silent
+            conn.rollback()
+            refresh_error = str(e)[:200]
         cur.execute("SELECT promoted_at FROM runs WHERE id = %s", (run_id,))
-        return {"promoted": True,
-                "promoted_at": cur.fetchone()[0].isoformat(),
-                "stats": stats}
+        out = {"promoted": True,
+               "promoted_at": cur.fetchone()[0].isoformat(),
+               "stats": stats}
+        if refresh_error:
+            out["directory_refresh_error"] = refresh_error
+        return out
     except Exception:
         conn.rollback()
         raise

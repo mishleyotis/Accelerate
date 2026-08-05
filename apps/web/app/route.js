@@ -61,6 +61,7 @@ export async function GET() {
     pillars: catalogue?.pillars || null,
     categories: catalogue?.categories || null,
     entities: directory?.entities || [],
+    subvertical_labels: directory?.subvertical_labels || {},
     active_runs: directory?.active_runs || [],
     pending_review: directory?.pending_review || [],
   };

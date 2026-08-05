@@ -93,17 +93,57 @@ def catalogue():
 
 @app.get("/v1/directory")
 def directory():
-    """Promoted entities only — the serving tier is the only source the
-    directory may read (stage 4 replaces this with the materialised
-    view). Empty until the first promote is the correct state."""
+    """Promoted entities from the one materialised view the directory is
+    allowed to read (invariant 8; 0013). Shaped for the front-end's
+    entity rows; anything the serving tier does not carry is null, never
+    invented. Empty until the first promote is the correct state."""
     conn = _connect()
     try:
         cur = conn.cursor()
-        cur.execute("SELECT count(*) FROM overview_scores")
-        promoted_rows = cur.fetchone()[0]
-        return {"entities": [] if not promoted_rows else [],
-                "active_runs": [], "pending_review": [],
-                "note": "directory fills as runs promote"}
+        cur.execute("""
+            SELECT entity_id, display_id, legal_name, sub_vertical, size_tier,
+                   run_id, request_id, run_seq, is_active, run_status,
+                   composite, scored_cells, completed_at, promoted_at,
+                   pillars, open_alerts
+              FROM serving_directory
+             ORDER BY entity_id, run_seq DESC""")
+        by_entity: dict = {}
+        labels: dict = {}
+        for (eid, display_id, name, sub_vertical, size_tier, run_id,
+             request_id, run_seq, is_active, run_status, composite,
+             scored_cells, completed_at, promoted_at, pillars,
+             open_alerts) in cur.fetchall():
+            key = (sub_vertical or "UNKNOWN").upper().replace(" ", "_")
+            labels[key] = sub_vertical or "Unknown"
+            ent = by_entity.setdefault(str(eid), {
+                "id": display_id, "slug": display_id, "name": name,
+                "domain": None, "subvertical": key,
+                "size_tier": (size_tier or "").upper() or None,
+                "hq": None, "status": "ACTIVE",
+                "data_source": "DRIVE_PARSE",
+                "open_alerts": 0, "runs": [],
+            })
+            if is_active:
+                ent["overall"] = float(composite) if composite is not None else None
+                ent["assessment_id"] = request_id
+                ent["assessment_date"] = (completed_at.date().isoformat()
+                                          if completed_at else None)
+                ent["open_alerts"] = open_alerts or 0
+                ent["pillar_scores"] = {
+                    p["pillar_id"]: p.get("score")
+                    for p in (pillars or []) if p.get("pillar_id")}
+            ent["runs"].append({
+                "id": request_id, "run_id": str(run_id),
+                "date": (completed_at.date().isoformat() if completed_at else None),
+                "status": "ACTIVE" if is_active else run_status,
+                "data_source": "DRIVE_PARSE",
+                "overall": float(composite) if composite is not None else None,
+                "subcap_count": scored_cells,
+                "promoted_at": promoted_at.isoformat() if promoted_at else None,
+            })
+        return {"entities": list(by_entity.values()),
+                "subvertical_labels": labels,
+                "active_runs": [], "pending_review": []}
     finally:
         conn.close()
 

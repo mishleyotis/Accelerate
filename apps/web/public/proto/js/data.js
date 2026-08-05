@@ -1967,10 +1967,13 @@
     };
   }
   ENTITIES.forEach(e => {
-    if (e.pillar_scores) {
+    if (!LIVE && e.pillar_scores) {
+      // mock-only: the preview generates plausible cells. A LIVE entity
+      // renders only what the serving tier promoted — synthesising cells
+      // from real pillar scores would be fabricated data on a real client.
       e.subcaps = makeSubcaps(scoresForEntity(e));
     } else {
-      e.subcaps = [];
+      e.subcaps = e.subcaps || [];
     }
   });
 
@@ -2145,6 +2148,8 @@
   };
 
   /* ── Subvertical labels ─────────────────────────────────────────── */
+  // Production divergence: live sub-vertical labels merge over the mock
+  // vocabulary (the API derives them from the promoted entities).
   const SUBVERTICAL_LABEL = {
     REGIONAL_BANK: "Regional Bank",
     FARM_CREDIT: "Farm Credit",
@@ -2156,6 +2161,7 @@
     FINTECH_SAAS: "FinTech / SaaS",
     CU: "Credit Union"
   };
+  Object.assign(SUBVERTICAL_LABEL, LIVE && LIVE.subvertical_labels || {});
 
   /* ── Active runs (in-progress dashboard strip) ───────────────────── */
   const ACTIVE_RUNS = LIVE ? LIVE.active_runs || [] : [{
