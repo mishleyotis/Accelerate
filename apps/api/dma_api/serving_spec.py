@@ -168,6 +168,19 @@ def assemble(page: str, section: str, rows: list[dict]) -> dict | None:
         for col, path in r["section_cols"].items():
             if col in rows[0]:
                 _set_path(data, path, _json_maybe(rows[0][col]))
+        # An item-grain section whose e_ids column carries the ITEM's own
+        # citations still owes the envelope its section-level list — so it
+        # is computed here as the union over the items, never stored
+        # (invariant 8). Without this, rebinding e_ids to the item would
+        # trade a missing per-card citation for a missing section one.
+        if "e_ids" not in env and "e_ids" in r["item_cols"].values():
+            union, seen = [], set()
+            for item in items:
+                for e in item.get("e_ids") or []:
+                    if e not in seen:
+                        seen.add(e)
+                        union.append(e)
+            env["e_ids"] = union
     else:
         # H4 map inverse: pillar rows and category rows share one table
         pillars, categories = {}, {}
