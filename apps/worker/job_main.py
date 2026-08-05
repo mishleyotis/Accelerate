@@ -429,6 +429,20 @@ def main() -> int:
     print(f"scan: new={summary['files_new']} changed={summary['files_changed']}")
     touched = {f.path_segments[0] if f.path_segments else "?"
                for f in summary["to_process"]}
+    # Re-ingest one named folder even though its tree has not changed. The
+    # diff is the right default — an unchanged tree must create nothing — but
+    # after a parser fix the tree is unchanged and the extraction is not, and
+    # RESET_SCAN is too blunt: it rescans every client and mints runs for
+    # whichever three the bound happens to reach. Substring match, so the
+    # folder's display name is enough.
+    force = (os.environ.get("FORCE_FOLDER") or "").strip()
+    if force:
+        matched = {k for k in groups if force.lower() in k.lower()}
+        if matched:
+            touched |= matched
+            print(f"FORCE_FOLDER={force!r}: re-ingesting {sorted(matched)}")
+        else:
+            print(f"FORCE_FOLDER={force!r}: no folder matched; nothing forced")
     # The scoring workbook is what makes a package ingestable; the manifest
     # and report are enriching, not gating.
     packages = {k: v for k, v in groups.items() if "workbook" in v and k in touched}

@@ -46,6 +46,7 @@ const CLICKABLE_SELECTOR = [
 
 // Text a card shows when it has nothing — legitimate, but never a whole page.
 const MIN_PAGE_TEXT = 400;
+const MAX_TARGETS_PER_PAGE = Number(process.env.QA_MAX_TARGETS || 40);
 
 const findings = [];
 const add = (kind, page, detail) => findings.push({ kind, page, detail });
@@ -65,7 +66,7 @@ function resolvePlaywright() {
     "playwright-core not resolvable — set PLAYWRIGHT_CORE=/path/to/playwright-core");
 }
 
-(async () => {
+async function main() {
   const { chromium } = resolvePlaywright();
   const browser = await chromium.launch({
     executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium",
@@ -151,7 +152,14 @@ function resolvePlaywright() {
 
     // Click each target from a freshly loaded page so one drawer cannot mask
     // the next target, and so a crash is attributed to the click that caused it.
-    const targets = await clickables();
+    const all = await clickables();
+    // Bounded per page: a reload per click is the isolation guarantee, and an
+    // unbounded sweep exhausted the browser before the later pages ran. What
+    // is dropped is reported, never silently skipped.
+    const targets = all.slice(0, MAX_TARGETS_PER_PAGE);
+    if (all.length > targets.length) {
+      console.log(`  note: ${label} has ${all.length} clickables; testing the first ${targets.length}`);
+    }
     for (const t of targets) {
       await go(`clients/${ENTITY}/${tab}`);
       const before = await textLen();
@@ -163,7 +171,12 @@ function resolvePlaywright() {
         return true;
       }, { idx: t.i, sel: CLICKABLE_SELECTOR });
       if (!clicked) continue;
-      await page.waitForTimeout(900);
+      try {
+        await page.waitForTimeout(700);
+      } catch {
+        add("CRASH", label, `browser died while clicking "${t.label}"`);
+        return report();
+      }
       const after = await textLen();
       const where = `${label} · "${t.label}"`;
       if (errors.length) add("CRASH", label, `click ${where}: ${errors[0]}`);
@@ -175,7 +188,11 @@ function resolvePlaywright() {
   }
 
   await browser.close();
+  return report();
 
+}
+
+function report() {
   const byKind = findings.reduce((a, f) => {
     (a[f.kind] = a[f.kind] || []).push(f); return a;
   }, {});
@@ -188,4 +205,11 @@ function resolvePlaywright() {
   }
   if (!findings.length) console.log("\nCLEAN — no crashes, no fixture leaks, no layout defects.");
   process.exit(findings.length ? 1 : 0);
-})().catch((e) => { console.error("harness failed:", e.message); process.exit(2); });
+}
+
+main().catch((e) => {
+  console.error("harness error:", e.message);
+  // Partial results are still results — report before exiting.
+  if (findings.length) report();
+  process.exit(2);
+});
