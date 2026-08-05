@@ -33,8 +33,14 @@ def _encoder():
     V4 abstains (recorded NOT_RUN), never a crash."""
     global _ENCODER
     if _ENCODER is None and os.environ.get("EMBED_MODEL_DIR"):
-        from dma_mcp.encoder import minilm_encoder
-        _ENCODER = minilm_encoder(os.environ["EMBED_MODEL_DIR"])
+        try:
+            from dma_mcp.encoder import minilm_encoder
+            _ENCODER = minilm_encoder(os.environ["EMBED_MODEL_DIR"])
+        except Exception as e:
+            # V4 is an extra guard, never a fail-closed on a missing
+            # model: a load failure means abstention, not a crash
+            print(f"encoder unavailable ({e}); V4 will abstain")
+            os.environ.pop("EMBED_MODEL_DIR", None)
     return _ENCODER
 
 

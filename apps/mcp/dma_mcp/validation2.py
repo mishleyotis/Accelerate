@@ -133,13 +133,16 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     if not isinstance(payload, dict):
         return reasons, []
 
-    # ── ET: every cited id resolves to this entity and run ─────────────
+    # ── ET: every cited id resolves to this entity and run — collected
+    # from EVERY object in the tree, not just the section envelope (a
+    # fabricated id inside an item is still a fabricated id) ────────────
     cited = {}
     for name, body in payload.items():
         if isinstance(body, dict):
-            for e in body.get("e_ids") or []:
-                if isinstance(e, str):
-                    cited.setdefault(e, name)
+            for _path, obj in _walk(body, name):
+                for e in obj.get("e_ids") or []:
+                    if isinstance(e, str):
+                        cited.setdefault(e, name)
     if cited:
         split = get_evidence(conn, run_id, sorted(cited))
         for e in split.get("not_found", []):
@@ -170,11 +173,14 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
         for path, obj in _walk(body, name):
             grain_id = next((obj[k] for k in _ID_KEYS
                              if isinstance(obj.get(k), str)), None)
-            if grain_id and grain_id in served:
+            if grain_id:
+                quoted_any = None
                 for sk in _SCORE_KEYS:
                     quoted = obj.get(sk)
                     if isinstance(quoted, (int, float)) and not isinstance(quoted, bool):
-                        if abs(float(quoted) - served[grain_id]) > GRAIN_TOLERANCE:
+                        quoted_any = quoted
+                        if grain_id in served and \
+                                abs(float(quoted) - served[grain_id]) > GRAIN_TOLERANCE:
                             reasons.append(_reason(
                                 "CG-07", name, f"{path}.{sk}",
                                 f"quoted {quoted} resolves to {grain_id} = "
@@ -183,19 +189,31 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                                 f"> {GRAIN_TOLERANCE}) — the label and the "
                                 "figure came from different rows; fix the "
                                 "pairing, not the prose"))
+                if quoted_any is not None and grain_id not in served:
+                    # a figure whose named grain this run does not serve
+                    # cannot be checked against anything — that IS the failure
+                    reasons.append(_reason(
+                        "CG-07", name, f"{path}",
+                        f"quoted {quoted_any} names {grain_id}, which this "
+                        "run serves no figure for — a figure that resolves "
+                        "to no served cell cannot be checked and is rejected"))
             for bk, bv in obj.items():
                 if not isinstance(bv, str):
                     continue
-                if bv in _FORBIDDEN_BANDS:
+                if bv in _FORBIDDEN_BANDS or re.search(r"\bM5\b|\bTransformational\b", bv):
+                    # the fifth band must not exist in prose either
+                    # (invariant 6) — not as a field value, not mid-sentence
                     reasons.append(_reason(
                         "CG-08", name, f"{path}.{bk}",
-                        f"{bv!r} does not render — the resolver has four "
-                        "branches; anything at or above 4.0 is "
-                        "Differentiating"))
+                        f"{bv[:80]!r} carries the fifth band — it does not "
+                        "render; the resolver has four branches and "
+                        "anything at or above 4.0 is Differentiating"))
                 elif bv in _BANDS and "band" in bk.lower():
                     raw = next((obj[k] for k in _SCORE_KEYS
                                 if isinstance(obj.get(k), (int, float))
                                 and not isinstance(obj.get(k), bool)), None)
+                    if raw is None and grain_id and grain_id in served:
+                        raw = served[grain_id]   # the served figure IS the raw score
                     if raw is not None and band_for(raw) != bv:
                         reasons.append(_reason(
                             "CG-08", name, f"{path}.{bk}",
@@ -213,7 +231,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                         f"list has {len(obj['e_ids'])} ids — the number IS "
                         "the length of the citation array, never asserted"))
 
-        # ── AG-01: ranked claims carry r_layer with a verdict ──────────
+        # ── AG-01: ranked claims carry r_layer with a verdict — EVERY
+        # list-of-object field of a ranked section, not just the first ──
         if (page, name) in _RANKED_SECTIONS:
             for fname, val in body.items():
                 if isinstance(val, list) and val and all(isinstance(x, dict) for x in val):
@@ -226,7 +245,6 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                                 "r_layer verdict — a verdict you did not "
                                 "write down is a step you can convince "
                                 "yourself you took"))
-                    break   # the section's primary item list only
 
     sg = _run_v4(conn, run_id, page, payload, encoder)
     return reasons, sg

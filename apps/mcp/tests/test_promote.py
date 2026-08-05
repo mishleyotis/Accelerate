@@ -78,6 +78,7 @@ def seeded():
             cur.execute("SELECT id FROM runs WHERE entity_id = %s", (eid,))
             rids = [r[0] for r in cur.fetchall()]
             for rid in rids:
+                cur.execute("DELETE FROM run_manifest WHERE run_id = %s", (rid,))
                 for table in set(SERVING_TABLES.values()) - {"evidence_index"}:
                     cur.execute(f"DELETE FROM {table} WHERE run_id = %s", (rid,))
                 cur.execute("DELETE FROM gate_results WHERE run_id = %s", (rid,))
@@ -96,6 +97,11 @@ def seeded():
                    VALUES (%s,'DMA-ASM-SPB-20260801-01',1,'INGESTED') RETURNING id""",
                 (eid,))
     rid = str(cur.fetchone()[0])
+    # the hero quotes P1 = 2.1; the run must SERVE that figure (stated grain)
+    cur.execute("INSERT INTO run_manifest (run_id, payload) VALUES (%s, %s)",
+                (rid, '{"manifest": {}, "workbook_grains": {"pillars": '
+                      '[{"pillar_id": "P1", "score": 2.1, "peer_median": 3.1}], '
+                      '"categories": []}}'))
     admin.commit()
     yield mcp, admin, rid
     mcp.rollback()

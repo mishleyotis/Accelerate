@@ -43,6 +43,19 @@ def writer_registry() -> list:
     return _SPEC
 
 
+def _walk_path(node, path: str):
+    """Dotted-path get: 'platforms.0.gaps' walks dicts and lists; any miss
+    is None (computed or null, never a KeyError at promote time)."""
+    for seg in path.split("."):
+        if isinstance(node, dict):
+            node = node.get(seg)
+        elif isinstance(node, list) and seg.isdigit() and int(seg) < len(node):
+            node = node[int(seg)]
+        else:
+            return None
+    return node
+
+
 def _value(source, ctx, section, item):
     kind, _, field = source.partition(":")
     if kind == "skip":
@@ -50,10 +63,26 @@ def _value(source, ctx, section, item):
     if kind == "sys":
         return ctx[field]
     if kind == "env" or kind == "section":
-        return section.get(field) if isinstance(section, dict) else None
+        return _walk_path(section, field) if isinstance(section, dict) else None
     if kind == "item":
-        return item.get(field) if isinstance(item, dict) else None
+        return _walk_path(item, field) if isinstance(item, dict) else None
     raise ValueError(f"unknown source {source!r}")
+
+
+def _expand_h4_maps(section_payload: dict) -> list:
+    """heatmap.workbook_scores: the contract's two required fields are
+    OBJECT MAPS (pillars {P1..: {...}}, categories {PxCy: {...}}), not a
+    list — fan both into rows. Order is meaning: pillars first, then
+    categories, each in key order."""
+    rows = []
+    for pid, entry in (section_payload.get("pillars") or {}).items():
+        if isinstance(entry, dict):
+            rows.append({"pillar_id": pid, "category_id": None, **entry})
+    for cid, entry in (section_payload.get("categories") or {}).items():
+        if isinstance(entry, dict):
+            rows.append({"pillar_id": cid.split("C")[0], "category_id": cid,
+                         **entry})
+    return rows
 
 
 def promote_run(conn, run_id) -> dict:
@@ -104,9 +133,12 @@ def promote_run(conn, run_id) -> dict:
         cur.execute("""UPDATE runs SET status = 'PROMOTED', is_active = TRUE,
                                        promoted_at = now()
                         WHERE id = %s""", (run_id,))
+        # stamp by the EXACT ids read at the top of the transaction — a
+        # resubmission racing this promote must never get stamped for
+        # content that was not written
         cur.execute("""UPDATE submissions SET promoted_at = now()
-                        WHERE run_id = %s AND superseded_at IS NULL""",
-                    (run_id,))
+                        WHERE id = ANY(%s)""",
+                    ([s["id"] for s in live.values()],))
         conn.commit()
         cur.execute("SELECT promoted_at FROM runs WHERE id = %s", (run_id,))
         return {"promoted": True,
@@ -127,8 +159,10 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
     cur.execute(f"DELETE FROM {table} WHERE run_id = %s", (ctx["run_id"],))
     if section_payload is None:
         return 0
-    if writer["grain"] == "item":
-        items = section_payload.get(writer["item_field"]) or []
+    if writer.get("expand") == "h4_maps":
+        rows = _expand_h4_maps(section_payload)
+    elif writer["grain"] == "item":
+        items = _walk_path(section_payload, writer["item_field"]) or []
         rows = [i for i in items if isinstance(i, dict)]
     else:
         rows = [None]
@@ -150,7 +184,10 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
             v = _value(c["source"], ctx, section_payload, item)
             if v is ...:
                 v = None
-            if c.get("jsonb") and v is not None:
+            if v is not None and (c.get("jsonb") or isinstance(v, dict)):
+                # dicts serialise for JSONB — and defensively for TEXT
+                # columns whose contract value is an object (lossless,
+                # never a pg8000 type error at promote time)
                 v = json.dumps(v)
             values.append(v)
         cur.execute(

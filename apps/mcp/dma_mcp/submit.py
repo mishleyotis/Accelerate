@@ -63,6 +63,18 @@ def submit_page_payload(conn, run_id, page: str, payload: dict,
                                          "severity": "block"}],
                             "warnings": [], "counts": {}}}
 
+    from .contracts import PAGES
+    if page not in PAGES:
+        # a structured refusal, never a raw enum error from the INSERT
+        return {"submission_id": None,
+                "verdict": {"status": "fail",
+                            "reasons": [{"gate_id": "CG-01", "section": None,
+                                         "path": "page",
+                                         "message": f"unknown page {page!r}; "
+                                                    f"pages are {list(PAGES)}",
+                                         "severity": "block"}],
+                            "warnings": [], "counts": {}}}
+
     reasons = validate_pass1(page, payload)
     # Pass 2 always runs too — more named conflicts per verdict means
     # fewer repair round trips. Its SG results DISCLOSE (warnings), never
