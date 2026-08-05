@@ -1,7 +1,64 @@
 /* ═══════════════════════════════════════════════════════════════════════
    DMA INSIGHTS · Drawer/Modal components - Evidence drawer, Insight modal,
    Intelligence panel, simple toast helpers
+
+   Everything in this file is mounted GLOBALLY (App renders the drawer, the two
+   modals and the panel as siblings of the router), so a TypeError in any of
+   them unmounts the whole tree and blanks the application — not just the
+   surface that opened it. Three shapes were reaching these components from the
+   promoted payload that the fixture never had:
+
+     · a field the fixture nested (`r.outcomes.effort`) where the run states it
+       flat (`effort_band` → `r.effort`);
+     · a field the run states as an OBJECT (`validation_gate`, `kpi_triple`)
+       where the fixture stated a string — React throws #31 on an object child
+       and there is no error boundary above these components;
+     · a vendor id (`r.platform`, `ic.platforms[0]`) looked up in the static
+       five-vendor catalogue, which knows nothing about the client and returns
+       undefined for every promoted value.
+
+   So nothing from the payload reaches JSX in this file without passing through
+   `dwText`, and no lookup into the fixture catalogue decides what a promoted
+   object is called.
    ═══════════════════════════════════════════════════════════════════════ */
+
+/* Renderable text from any payload value. An object is summarised from its own
+   naming keys and an unusable value becomes null, so the caller renders its
+   absent state instead of crashing or printing JSON at a reader. */
+function dwText(v) {
+  if (v === null || v === undefined) return null;
+  if (typeof v === "string") return v || null;
+  if (typeof v === "number" || typeof v === "boolean") return String(v);
+  if (Array.isArray(v)) return v.map(dwText).filter(Boolean).join(" · ") || null;
+  if (typeof v === "object") {
+    for (const k of ["statement", "text", "label", "name", "title", "clause",
+                     "condition", "metric", "value"]) {
+      const t = dwText(v[k]);
+      if (t) return t;
+    }
+    return null;
+  }
+  return String(v);
+}
+
+function dwNum(v) {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return isFinite(n) ? n : null;
+}
+
+/* Score → band → hex through the ONE resolver (DMA.helpers). Null score yields
+   null, never a band: `maturityClass(null)` is not a band and a grey chip that
+   reads "Activating" is a claim the run never made. */
+function dwBand(score) {
+  const n = dwNum(score);
+  if (n === null) return null;
+  return {
+    score: n,
+    label: DMA.helpers.maturityLabel(n),
+    hex: DMA.helpers.maturityHex(n),
+  };
+}
 
 /* ── Evidence drawer ─────────────────────────────────────────────── */
 function EvidenceDrawer() {
@@ -53,7 +110,11 @@ function EvidenceDrawer() {
               {ev ? <span className={`tier-chip tier-${ev.tier}`}>{ev.tier}</span> : null}
             </div>
             <div className="title" style={{ fontSize: 14 }}>{subcap ? subcap.name : ic ? ic.title : ev ? ev.title : "Evidence"}</div>
-            <div className="sub">{items.length} evidence item{items.length === 1 ? "" : "s"}{subcap ? ` · score ${subcap.score} · ${subcap.confidence}` : ""}</div>
+            {/* An unscored cell used to print "score null · undefined" here. */}
+            <div className="sub">{items.length} evidence item{items.length === 1 ? "" : "s"}{subcap
+              ? ` · score ${dwNum(subcap.score) === null ? "not scored" : fx(subcap.score, 1)}${
+                  subcap.confidence ? ` · ${subcap.confidence}` : ""}`
+              : ""}</div>
           </div>
           <button className="icon-btn close" onClick={closeEvidence} aria-label="Close"><Icon name="x" size={16} /></button>
         </div>
@@ -112,8 +173,12 @@ function EvidenceDrawer() {
               ) : items.length === 0 ? (
                 <>
                   <h3>No evidence linked{subcap ? ` to ${subcap.id}` : ""}</h3>
+                  {/* The old copy said the closure condition "names what would
+                      settle it". The served cell row carries no closure_condition
+                      field, so that sentence pointed at something the reader
+                      could never find. */}
                   <p>{subcap && subcap.thin
-                        ? "The cell is flagged thin: it keeps its workbook score and a dashed outline, and its closure condition names what would settle it."
+                        ? "The cell is flagged thin: it keeps its workbook score and renders with a dashed outline. The run states no closure condition for it."
                         : "Nothing is linked at this grain in the promoted run."}</p>
                 </>
               ) : (
@@ -137,20 +202,53 @@ function EvidenceDrawer() {
                           : (it.published_date || "")}>
                     {it.recency}
                   </span>
-                  {role !== "AE" && audience !== "customer" ? <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--z-muted)" }}>ERS <strong style={{ color: "var(--z-mid)" }}>{it.ers}</strong></span> : null}
+                  {/* ERS is computed server-side and may be unset on an item
+                      the store never scored. It used to render as "ERS" with an
+                      empty bold value, which reads as a score of nothing. */}
+                  {role !== "AE" && audience !== "customer" ? (
+                    <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--z-muted)" }}>
+                      ERS <strong style={{ color: dwNum(it.ers) === null ? "var(--z-muted)" : "var(--z-mid)" }}>
+                        {dwNum(it.ers) === null ? "not scored" : it.ers}</strong>
+                    </span>
+                  ) : null}
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)", marginBottom: 5 }}>{it.title}</div>
-                <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55, fontStyle: "italic", padding: "8px 10px", background: tier?.bg || "var(--z-bg)", borderLeft: `3px solid ${tier?.color || "var(--z-teal)"}`, borderRadius: 3 }}>"{it.excerpt}"</div>
+                {/* 27 of this run's 120 served items carry no excerpt. Printing
+                    `"{it.excerpt}"` rendered an empty pair of quote marks in an
+                    italic quote block — a verbatim citation of nothing. The
+                    excerpt is the whole point of the drawer, so its absence is
+                    stated as an absence. */}
+                {dwText(it.excerpt) ? (
+                  <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55, fontStyle: "italic", padding: "8px 10px", background: tier?.bg || "var(--z-bg)", borderLeft: `3px solid ${tier?.color || "var(--z-teal)"}`, borderRadius: 3 }}>"{dwText(it.excerpt)}"</div>
+                ) : (
+                  <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.5, padding: "8px 10px", background: "var(--z-bg)", borderLeft: "3px dashed var(--z-sep)", borderRadius: 3 }}>
+                    No verbatim excerpt is served for this item — the source is
+                    linked below, but nothing here quotes it.
+                  </div>
+                )}
                 <div style={{ marginTop: 6, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <a href={`https://${it.source}`} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>
-                    <Icon name="external" size={11} /> {it.source_pretty || it.source}
-                  </a>
+                  {it.source ? (
+                    <a href={`https://${it.source}`} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <Icon name="external" size={11} /> {it.source_pretty || it.source}
+                    </a>
+                  ) : (
+                    <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{it.source_pretty || "no source url served"}</span>
+                  )}
+                  {/* The traceable cell links (`linked_subcap_ids`, scoped to
+                      this run). Showing the first three silently dropped the
+                      rest, so an item supporting nine cells looked like it
+                      supported three; the remainder is now counted. */}
                   {it.subcaps && it.subcaps.length > 0 ? (
                     <span style={{ fontSize: 10, color: "var(--z-muted)", display: "inline-flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
                       <span>· supports:</span>
-                      {it.subcaps.slice(0, 3).map(sid => <button key={sid} className="chip" onClick={() => openSubcap(sid)}>{sid}</button>)}
+                      {it.subcaps.slice(0, 4).map(sid => <button key={sid} className="chip" onClick={() => openSubcap(sid)}>{sid}</button>)}
+                      {it.subcaps.length > 4 ? (
+                        <span title={it.subcaps.join(" · ")}>+{it.subcaps.length - 4} more</span>
+                      ) : null}
                     </span>
-                  ) : null}
+                  ) : (
+                    <span style={{ fontSize: 10, color: "var(--z-muted)" }}>· no cell links served for this item</span>
+                  )}
                 </div>
               </div>
             );
@@ -158,7 +256,13 @@ function EvidenceDrawer() {
         </div>
         <div className="drawer-foot">
           <button className="btn btn-tertiary" onClick={() => {
-            const lines = filtered.map(it => `${it.id} · ${it.tier} · ${it.title} — "${it.excerpt}" (${it.source_pretty || it.source})`).join("\n");
+            // An item with no excerpt copies as the citation without a quote,
+            // never as an empty pair of quote marks pasted into a deck.
+            const lines = filtered.map(it => [
+              `${it.id} · ${it.tier} · ${it.title}`,
+              dwText(it.excerpt) ? `— "${dwText(it.excerpt)}"` : "— no excerpt served",
+              `(${it.source_pretty || it.source || "no source url"})`,
+            ].join(" ")).join("\n");
             try { navigator.clipboard.writeText(lines); pushToast(`Copied ${filtered.length} citation${filtered.length === 1 ? "" : "s"}`, "success"); }
             catch (e) { pushToast("Couldn't access clipboard", "warn"); }
           }}><Icon name="copy" size={13} /> Copy citation</button>
@@ -181,7 +285,11 @@ function InsightModal() {
   const ic = DMA.getInsight(insightModal);
   if (!ic) return null;
   const rec = ic.rec ? DMA.getRecommendation(ic.rec) : null;
-  const platform = ic.platforms[0] ? DMA.getPlatform(ic.platforms[0]) : null;
+  // The card's own platform chip, rendered as the run states it. Resolving it
+  // through DMA.getPlatform read the static five-vendor catalogue — which knows
+  // nothing about this client — and returned undefined for every promoted
+  // value, so the badge was blank whenever a chip WAS present.
+  const platformChip = dwText((ic.platforms || [])[0]);
 
   return (
     <div className="modal-mask" onClick={closeInsight}>
@@ -190,10 +298,11 @@ function InsightModal() {
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
               <span className={`b ${ic.flag === "CRITICAL" ? "b-below" : ic.flag === "OPPORTUNITY" ? "b-org" : "b-teal"}`}>{ic.flag}</span>
-              <span className="b b-purple">{ic.pillar}</span>
+              {ic.pillar ? <span className="b b-purple">{ic.pillar}</span> : null}
               <span className="chip">{ic.id}</span>
-              {platform ? <span className="b b-teal">{platform.name}</span> : null}
-              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Confidence · {ic.confidence}</span>
+              {platformChip ? <span className="b b-teal">{platformChip}</span> : null}
+              {ic.claim ? <span className="b b-muted">{ic.claim}</span> : null}
+              {ic.confidence ? <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Confidence · {ic.confidence}</span> : null}
             </div>
             <div style={{ fontSize: 17, fontWeight: 600, color: "var(--z-dark)", letterSpacing: "-.005em" }}>{ic.title}</div>
           </div>
@@ -273,7 +382,13 @@ function InsightModal() {
                   {(ic.r_layer.probes_run || []).length ? (
                     <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 4 }}>
                       <span style={{ fontSize: 9.5, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Probes</span>
-                      {ic.r_layer.probes_run.map((x, i) => <span key={i} className="chip" title={x}>{String(x).slice(0, 34)}</span>)}
+                      {/* Truncated silently before, so a probe read as a
+                          sentence that stops mid-word; the ellipsis says it was
+                          cut and the full text stays in the tooltip. */}
+                      {ic.r_layer.probes_run.map((x, i) => {
+                        const t = dwText(x) || "";
+                        return <span key={i} className="chip" title={t}>{t.length > 34 ? `${t.slice(0, 33).trimEnd()}…` : t}</span>;
+                      })}
                     </div>
                   ) : null}
                 </div>
@@ -294,12 +409,22 @@ function InsightModal() {
                   to the assessment grid.
                 </div>
               )}
+              {/* PAGE-KILLER, fixed: this read `DMA.getPlatform(rec.platform).name`.
+                  A promoted recommendation states no `platform` id at all (it
+                  states `l3_area` and `l4_feature`), so the lookup returned
+                  undefined and `.name` threw — unmounting the whole app the
+                  moment an insight card with a linked recommendation opened.
+                  `rec.feature` was the fixture's key for the same reason. */}
               {rec && audience !== "customer" ? (
                 <div className="co co-teal" style={{ marginTop: 12, cursor: "pointer" }} onClick={() => { closeInsight(); openRec(rec.id); }}>
                   <Icon name="platform" size={14} />
                   <div style={{ flex: 1 }}>
                     <div className="co-title">Linked recommendation · click for impact</div>
-                    <div className="co-body"><strong>{rec.id}</strong> - {rec.title}. {DMA.getPlatform(rec.platform).name} · {rec.feature} · {rec.phase}.</div>
+                    <div className="co-body">
+                      <strong>{rec.id}</strong> - {dwText(rec.title)}
+                      {[dwText(rec.l3), dwText(rec.l4), rec.phase ? `phase ${rec.phase}` : null]
+                        .filter(Boolean).map(t => <span key={t}> · {t}</span>)}
+                    </div>
                   </div>
                   <Icon name="arrow-r" size={14} style={{ color: "var(--z-mid)" }} />
                 </div>
@@ -307,19 +432,48 @@ function InsightModal() {
             </div>
           ) : tab === "evidence" ? (
             <div>
-              {ic.evidence.map(eid => {
+              {(ic.evidence || []).length === 0 ? (
+                <div className="empty">
+                  <div className="icon"><Icon name="evidence" size={20} /></div>
+                  <h3>This card cites no evidence</h3>
+                  <p>`supporting_e_ids` is empty on the promoted card, so there is
+                     nothing to open. A ranked claim with no citation is a producer
+                     defect worth reporting.</p>
+                </div>
+              ) : null}
+              {(ic.evidence || []).map(eid => {
                 const e = DMA.getEvidence(eid);
-                if (!e) return null;
+                // Fail closed and SAY so (invariant 4). Returning null for an
+                // unresolved id hid a dead citation completely: a card citing
+                // five ids of which two do not resolve rendered three, and the
+                // tab looked complete.
+                if (!e) return (
+                  <div key={eid} style={{ padding: "12px 0", borderBottom: "1px solid var(--z-sep)" }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <span className="chip muted">{eid}</span>
+                      <span style={{ fontSize: 11.5, color: "var(--z-muted)" }}>
+                        cited id — not in this run's served evidence
+                      </span>
+                    </div>
+                  </div>
+                );
                 return (
                   <div key={eid} style={{ padding: "12px 0", borderBottom: "1px solid var(--z-sep)" }}>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
-                      <span className="chip">{e.id}</span>
-                      <span className="b b-muted">{e.tier}</span>
-                      <span className="b b-purple">{e.claim}</span>
-                      <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--z-muted)" }}>{e.recency} · ERS {e.ers}</span>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
+                      <button className="chip" onClick={() => openEvidence(eid)}>{e.id}</button>
+                      <span className={`tier-chip tier-${e.tier}`}>{e.tier}</span>
+                      {e.claim ? <span className="b b-purple">{e.claim}</span> : null}
+                      <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--z-muted)" }}>
+                        {e.recency}{dwNum(e.ers) === null ? "" : ` · ERS ${e.ers}`}</span>
                     </div>
                     <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{e.title}</div>
-                    <div style={{ fontStyle: "italic", padding: "6px 10px", background: "var(--z-bg)", borderLeft: "2px solid var(--z-teal)", fontSize: 12, color: "var(--z-body)" }}>"{e.excerpt}"</div>
+                    {dwText(e.excerpt) ? (
+                      <div style={{ fontStyle: "italic", padding: "6px 10px", background: "var(--z-bg)", borderLeft: "2px solid var(--z-teal)", fontSize: 12, color: "var(--z-body)" }}>"{dwText(e.excerpt)}"</div>
+                    ) : (
+                      <div style={{ padding: "6px 10px", background: "var(--z-bg)", borderLeft: "2px dashed var(--z-sep)", fontSize: 11.5, color: "var(--z-muted)" }}>
+                        no verbatim excerpt served for this item
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -353,20 +507,94 @@ function InsightModal() {
               </div>
             </div>
           ) : (
+            /* The Linked tab used to print two headings and, in a promoted run,
+               nothing under either: the cell chips were dead spans and the
+               platform row resolved every chip through the static vendor
+               catalogue (`DMA.getPlatform(p)?.name` → undefined). Each row now
+               either navigates somewhere or names the field that is unset — on
+               this run `platform_chips` and `linked_rec_id` are null on all
+               eight cards, and the tab says exactly that rather than showing an
+               empty box. */
             <div style={{ fontSize: 12, color: "var(--z-body)" }}>
-              <p style={{ marginBottom: 10 }}><strong>Subcapabilities affected:</strong></p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-                {ic.affects.map(sid => <span key={sid} className="chip purple">{sid}</span>)}
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 8 }}>
+                Capability cells · {(ic.affects || []).length}
               </div>
-              <p style={{ marginBottom: 10 }}><strong>Implicated platforms:</strong></p>
-              <div style={{ display: "flex", gap: 6 }}>{ic.platforms.map(p => <span key={p} className="b b-teal">{DMA.getPlatform(p)?.name}</span>)}</div>
+              {(ic.affects || []).length ? (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
+                  {ic.affects.map(sid => (
+                    <button key={sid} className="chip purple" onClick={() => { closeInsight(); openSubcap(sid); }}>{sid}</button>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: "var(--z-muted)", marginBottom: 16 }}>
+                  Neither `affects` nor `linked_subcap_id` is set on this card, so
+                  it cannot be traced to the assessment grid.
+                </p>
+              )}
+
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 8 }}>
+                Platforms
+              </div>
+              {(ic.platforms || []).length ? (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+                  {ic.platforms.map(p => <span key={p} className="b b-teal">{dwText(p)}</span>)}
+                </div>
+              ) : (
+                <p style={{ color: "var(--z-muted)", marginBottom: 16 }}>
+                  `platform_chips` is unset on this card and it names no
+                  recommendation to inherit one from, so no platform is implicated
+                  by the run.
+                </p>
+              )}
+
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 8 }}>
+                Recommendation
+              </div>
+              {rec ? (
+                <button className="btn btn-tertiary btn-sm" onClick={() => { closeInsight(); openRec(rec.id); }}>
+                  {rec.id} · {dwText(rec.title)}
+                </button>
+              ) : (
+                <p style={{ color: "var(--z-muted)", marginBottom: 16 }}>
+                  `linked_rec_id` is unset, so this card is not joined to a
+                  recommendation in this run.
+                </p>
+              )}
+
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", margin: "16px 0 8px" }}>
+                Evidence · {(ic.evidence || []).length}
+              </div>
+              {(ic.evidence || []).length ? (
+                <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                  {ic.evidence.map(eid => {
+                    const e = DMA.getEvidence(eid);
+                    return e ? (
+                      <button key={eid} className={`tier-chip tier-${e.tier}`} style={{ cursor: "pointer", border: 0 }}
+                        title={`${e.title || eid} · ${e.source_pretty || ""}`}
+                        onClick={() => openEvidence(eid)}>{eid}</button>
+                    ) : (
+                      <span key={eid} className="chip muted" title="cited id — not in this run's served evidence">{eid}</span>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p style={{ color: "var(--z-muted)" }}>This card cites no evidence ids.</p>
+              )}
             </div>
           )}
         </div>
         <div className="modal-foot">
           <div style={{ display: "flex", gap: 8 }}>
             <button className="btn btn-tertiary" onClick={() => {
-              const text = `${ic.id} · ${ic.flag} · ${ic.pillar}\n${ic.title}\n\nWHAT: ${ic.what}\n\nWHY: ${ic.why}\n\nSO WHAT: ${ic.so_what}`;
+              // "null" and "undefined" used to be pasted into a deck whenever a
+              // field was absent; an absent field is now simply not copied.
+              const text = [
+                [ic.id, ic.flag, ic.pillar].filter(Boolean).join(" · "),
+                dwText(ic.title),
+                dwText(ic.what) ? `\nWHAT: ${dwText(ic.what)}` : null,
+                dwText(ic.why) ? `\nWHY: ${dwText(ic.why)}` : null,
+                dwText(ic.so_what) ? `\nSO WHAT: ${dwText(ic.so_what)}` : null,
+              ].filter(Boolean).join("\n");
               try { navigator.clipboard.writeText(text); pushToast("Insight card copied to clipboard", "success"); }
               catch (e) { pushToast("Couldn't access clipboard", "warn"); }
             }}><Icon name="copy" size={13} /> Copy card</button>
@@ -380,29 +608,45 @@ function InsightModal() {
 }
 
 function Block({ title, body, evIds, onEv, accent }) {
-  // Render body and inject tier-colored E-ID chips for any tokens like [E-047]
+  // PAGE-KILLER, fixed: `body` went straight into `re.exec(body)` and
+  // `body.length`. A card whose promoted field is null (the contract requires
+  // what/why/so-what, but nothing in the serving path enforces it) threw on
+  // `null.length` and blanked the application. An absent field now says so.
+  const text = dwText(body);
+
+  // Inject tier-coloured chips for inline citation tokens. The old pattern
+  // (`E-` + digits) matched none of this run's ids — they are E-BCU-066,
+  // E-CC-004 — so a citation written into the prose stayed plain text.
   const parts = [];
   let last = 0;
-  const re = /\[?E-\d+\]?/g;
+  const src = text || "";
+  const re = /\[?\bE-[A-Z0-9]+(?:-[A-Z0-9]+)*\b\]?/g;
   let m;
-  while ((m = re.exec(body)) !== null) {
-    if (m.index > last) parts.push(body.slice(last, m.index));
+  while ((m = re.exec(src)) !== null) {
+    if (m.index > last) parts.push(src.slice(last, m.index));
     parts.push({ chip: m[0].replace(/[\[\]]/g, "") });
     last = m.index + m[0].length;
   }
-  if (last < body.length) parts.push(body.slice(last));
+  if (last < src.length) parts.push(src.slice(last));
 
+  // Fail closed on evidence (invariant 4): an id that does not resolve in this
+  // run is not clickable and not dressed as a tier. It used to render as a T1
+  // chip that opened an empty drawer, which reads as evidence that exists.
   const renderChip = (id) => {
     const ev = DMA.getEvidence(id);
-    const tier = ev?.tier || "T1";
-    return <button key={id} className={`tier-chip tier-${tier}`} style={{ marginLeft: 4, cursor: "pointer" }} onClick={() => onEv && onEv(id)} title={ev?.title}>{id}<span style={{ fontWeight: 400, opacity: .65, marginLeft: 4 }}>·{tier}</span></button>;
+    if (!ev) return (
+      <span key={id} className="chip muted" style={{ marginLeft: 4 }}
+            title="cited id — not in this run's served evidence">{id}</span>
+    );
+    return <button key={id} className={`tier-chip tier-${ev.tier}`} style={{ marginLeft: 4, cursor: "pointer" }} onClick={() => onEv && onEv(id)} title={ev.title}>{id}<span style={{ fontWeight: 400, opacity: .65, marginLeft: 4 }}>·{ev.tier}</span></button>;
   };
 
   return (
     <div style={{ marginBottom: 14, borderLeft: accent ? "3px solid var(--z-teal)" : "3px solid var(--z-sep)", paddingLeft: 14 }}>
       <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", color: accent ? "var(--z-mid)" : "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>{title}</div>
-      <div style={{ fontSize: 13.5, color: "var(--z-dark)", lineHeight: 1.65 }}>
-        {parts.map((p, i) => typeof p === "string" ? <span key={i}>{p}</span> : renderChip(p.chip))}
+      <div style={{ fontSize: 13.5, color: text ? "var(--z-dark)" : "var(--z-muted)", lineHeight: 1.65 }}>
+        {text ? parts.map((p, i) => typeof p === "string" ? <span key={i}>{p}</span> : renderChip(p.chip))
+              : <span>the run states no text for this field</span>}
         {evIds && evIds.length ? <span style={{ marginLeft: 6 }}>{evIds.map(eid => renderChip(eid))}</span> : null}
       </div>
     </div>
@@ -411,7 +655,7 @@ function Block({ title, body, evIds, onEv, accent }) {
 
 /* ── Intelligence Panel ─────────────────────────────────────────── */
 function IntelligencePanel() {
-  const { ipOpen, setIpOpen, ipSurface, ipContext, authed, pushToast, openEvidence } = useApp();
+  const { ipOpen, setIpOpen, ipSurface, ipContext, authed, pushToast, openEvidence, openSubcap } = useApp();
   const [text, setText] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [chat, setChat] = useState([]);          // [{role: 'user'|'ai', text}]
@@ -419,6 +663,10 @@ function IntelligencePanel() {
   const [chatStreaming, setChatStreaming] = useState(false);
   const messages = useMemo(() => surfaceMessages(ipSurface, ipContext), [ipSurface, ipContext]);
   const bodyRef = useRef(null);
+  // The typewriter slices this, so a surface that returned no body at all would
+  // throw on `null.slice` and unmount the application from a globally mounted
+  // panel. Coerced once, here.
+  const bodyText = String((messages && messages.body) || "");
 
   // Reset on surface change
   useEffect(() => {
@@ -429,14 +677,18 @@ function IntelligencePanel() {
     let i = 0;
     const id = setInterval(() => {
       i += 4;
-      setText(messages.body.slice(0, i));
-      if (i >= messages.body.length) { clearInterval(id); setStreaming(false); }
+      setText(bodyText.slice(0, i));
+      if (i >= bodyText.length) { clearInterval(id); setStreaming(false); }
     }, 16);
     return () => clearInterval(id);
   }, [ipOpen, messages]);
 
+  // Follow the conversation only when there IS one. This fired on the initial
+  // empty chat too, so opening the panel jumped straight to the bottom of the
+  // body — the reader landed on the last line of the synthesis with the whole
+  // story scrolled off above it.
   useEffect(() => {
-    if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+    if (chat.length && bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   }, [chat, chatStreaming]);
 
   const STARTERS = useMemo(() => starterQuestions(ipSurface, ipContext), [ipSurface, ipContext]);
@@ -485,10 +737,17 @@ function IntelligencePanel() {
         <button className="icon-btn" onClick={() => setIpOpen(false)}><Icon name="x" size={14} /></button>
       </div>
       <div ref={bodyRef} className="ip-body">
-        <div style={{ fontSize: 13, lineHeight: 1.65 }}>
+        {/* pre-wrap: every surface body separates its paragraphs with "\n\n",
+            which HTML collapses to a single space — the fixture's three-paragraph
+            meeting prep and the promoted multi-platform story both rendered as
+            one unbroken wall of text. */}
+        <div style={{ fontSize: 13, lineHeight: 1.65, whiteSpace: "pre-wrap" }}>
           {text}{streaming ? <span className="ip-cursor" /> : null}
         </div>
         {!streaming && ipSurface === "why_now" ? <WhyNowSignals ctx={ipContext} openEvidence={openEvidence} pushToast={pushToast} /> : null}
+        {!streaming && messages.detail && messages.detail.kind === "platform_story"
+          ? <PlatformStoryDetail data={messages.detail} openEvidence={openEvidence} openSubcap={openSubcap} />
+          : null}
         {!streaming ? (
           <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
             <button className="btn btn-tertiary btn-sm" onClick={() => {
@@ -500,8 +759,8 @@ function IntelligencePanel() {
               let i = 0;
               const id = setInterval(() => {
                 i += 4;
-                setText(messages.body.slice(0, i));
-                if (i >= messages.body.length) { clearInterval(id); setStreaming(false); }
+                setText(bodyText.slice(0, i));
+                if (i >= bodyText.length) { clearInterval(id); setStreaming(false); }
               }, 16);
             }}><Icon name="refresh" size={12} /> Replay</button>
             {IP_LIVE() ? null : (
@@ -522,10 +781,14 @@ function IntelligencePanel() {
 
       {/* Starters. In LIVE these are the producer's promoted talking points and
           are read-only — clicking one would ask a question nothing can answer. */}
+      {/* maxHeight: the promoted starters are 60–90-word paragraphs, five of
+          them. `.ip-chat` has no bound, so it took most of the panel and
+          squeezed the body — the synthesis this panel exists to show was two
+          visible lines under 700px of starters. It scrolls on its own now. */}
       {!chatStreaming && STARTERS.length ? (
-        <div className="ip-chat">
+        <div className="ip-chat" style={IP_LIVE() ? { maxHeight: "38vh", overflowY: "auto" } : null}>
           <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase", marginBottom: 6 }}>
-            {IP_LIVE() ? "Conversation starters · promoted"
+            {IP_LIVE() ? `Conversation starters · promoted · ${STARTERS.length}`
                        : (chat.length === 0 ? "Try a question" : "Follow-ups")}
           </div>
           {STARTERS.map((s, i) => (
@@ -552,6 +815,147 @@ function IntelligencePanel() {
   );
 }
 
+/* The promoted platform story's structure, under its prose.
+
+   Each gap row states its cell, the cell's measured score, the peer basis (or
+   the note explaining why no peer figure exists at this grain), the L4 feature,
+   the catalogue path and its evidence ids. Flattening that into a sentence loses
+   the traceability, which is the only reason a reader trusts the story — so the
+   rows render as rows, the cell chips open the cell, and the evidence chips open
+   the drawer. An id that does not resolve in this run is shown and NOT clickable
+   (invariant 4, fail closed).
+
+   No colour is taken from the payload: the score's band and hex come from the
+   one resolver via dwBand, and the band word is printed beside the score so the
+   colour is never the only carrier of meaning. */
+function PlatformStoryDetail({ data, openEvidence, openSubcap }) {
+  const [openGaps, setOpenGaps] = useState(true);
+  const [openOut, setOpenOut] = useState(false);
+  const platforms = data.platforms || [];
+  const discarded = data.discarded || [];
+  const gapTotal = platforms.reduce((n, p) => n + ((p.gaps || []).length), 0);
+
+  const evChip = (eid) => {
+    const e = DMA.getEvidence(eid);
+    return e ? (
+      <button key={eid} className={`tier-chip tier-${e.tier}`} style={{ cursor: "pointer", border: 0, fontSize: 9 }}
+        title={`${e.title || eid} · ${e.source_pretty || ""}`}
+        onClick={() => openEvidence(eid)}>{eid}</button>
+    ) : (
+      <span key={eid} className="chip muted" style={{ fontSize: 9 }}
+            title="cited id — not in this run's served evidence">{eid}</span>
+    );
+  };
+
+  return (
+    <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed var(--ph0-bd)" }}>
+      {gapTotal ? (
+        <>
+          <button onClick={() => setOpenGaps(o => !o)}
+            style={{ display: "flex", alignItems: "center", gap: 6, width: "100%", background: "none", border: 0, padding: 0, cursor: "pointer", marginBottom: 8 }}>
+            <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase" }}>
+              Gaps this closes · {gapTotal}
+            </span>
+            <span className="spacer" />
+            <Icon name={openGaps ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-dpur)" }} />
+          </button>
+          {openGaps ? platforms.map((p, pi) => (
+            <div key={pi} style={{ marginBottom: 10 }}>
+              {(p.gaps || []).map((g, gi) => {
+                const band = dwBand(g.current_score);
+                const peer = dwNum(g.peer_score);
+                return (
+                  <div key={g.subcap_id || gi} className="card-tile" style={{ padding: "8px 10px", marginBottom: 6 }}>
+                    <div className="row" style={{ gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+                      {g.subcap_id ? (
+                        <button className="chip purple" style={{ fontSize: 9.5 }}
+                          onClick={() => openSubcap && openSubcap(g.subcap_id)}>{g.subcap_id}</button>
+                      ) : null}
+                      {dwText(g.pillar) ? <span className="b b-muted">{dwText(g.pillar)}</span> : null}
+                      <span style={{ fontSize: 11.5, fontWeight: 600, color: "var(--z-dark)", flex: 1, minWidth: 0, wordBreak: "break-word" }}>
+                        {dwText(g.name) || "cell not named"}
+                      </span>
+                      {band ? (
+                        <span className="row" style={{ gap: 4, flexShrink: 0 }}>
+                          <span style={{ width: 8, height: 8, borderRadius: 2, background: band.hex, display: "inline-block" }} />
+                          <span className="f-mono" style={{ fontSize: 10.5, color: "var(--z-body)" }}>{fx(band.score, 1)}</span>
+                          <span style={{ fontSize: 9.5, color: "var(--z-muted)" }}>{band.label}</span>
+                        </span>
+                      ) : <span style={{ fontSize: 9.5, color: "var(--z-muted)" }}>not scored</span>}
+                    </div>
+                    <div className="row" style={{ gap: 5, marginTop: 4, flexWrap: "wrap" }}>
+                      {peer !== null ? (
+                        <span style={{ fontSize: 9.5, color: "var(--z-muted)" }}>peer {fx(peer, 1)}</span>
+                      ) : dwText(g.peer_basis) ? (
+                        // The basis, with the run's own note as the tooltip. A
+                        // missing peer figure is never rendered as a zero or as a
+                        // delta computed against nothing.
+                        <span className="b b-muted" title={dwText(g.peer_note) || ""}>
+                          peer · {dwText(g.peer_basis).replace(/_/g, " ")}
+                        </span>
+                      ) : null}
+                      {dwText(g.l4_feature) ? (
+                        <span style={{ fontSize: 9.5, color: "var(--z-mid)" }}>L4 · {dwText(g.l4_feature)}</span>
+                      ) : null}
+                    </div>
+                    {/* The catalogue path ends in the L4 feature and the cell
+                        name, so it is shown once, small, and wrapped — it is the
+                        row's provenance, not its headline. */}
+                    {dwText(g.catalogue_path) ? (
+                      <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 3, lineHeight: 1.4, wordBreak: "break-word" }}>
+                        {dwText(g.catalogue_path)}
+                      </div>
+                    ) : null}
+                    {dwText(g.gap) ? (
+                      <div style={{ fontSize: 11, color: "var(--z-body)", marginTop: 4, lineHeight: 1.5 }}>{dwText(g.gap)}</div>
+                    ) : null}
+                    {(g.e_ids || []).length ? (
+                      <div className="row" style={{ gap: 4, marginTop: 5, flexWrap: "wrap" }}>{g.e_ids.map(evChip)}</div>
+                    ) : (
+                      <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 5 }}>no evidence cited for this row</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )) : null}
+        </>
+      ) : null}
+
+      {discarded.length ? (
+        <>
+          <button onClick={() => setOpenOut(o => !o)}
+            style={{ display: "flex", alignItems: "center", gap: 6, width: "100%", background: "none", border: 0, padding: 0, cursor: "pointer", margin: "6px 0 8px" }}>
+            <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase" }}>
+              Considered and set aside · {discarded.length}
+            </span>
+            <span className="spacer" />
+            <Icon name={openOut ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-dpur)" }} />
+          </button>
+          {openOut ? discarded.map((x, i) => {
+            const rel = dwNum(x.relevance);
+            return (
+              <div key={i} style={{ marginBottom: 8 }}>
+                <div className="row" style={{ gap: 5, alignItems: "baseline", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 600, color: "var(--z-dark)", wordBreak: "break-word" }}>
+                    {dwText(x.platform) || dwText(x.name) || "platform not named"}
+                  </span>
+                  {rel === null ? null : (
+                    <span className="b b-muted f-mono" title="relevance to the assessed gaps">{rel.toFixed(2)}</span>
+                  )}
+                </div>
+                {dwText(x.reason) ? (
+                  <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5, marginTop: 2 }}>{dwText(x.reason)}</div>
+                ) : null}
+              </div>
+            );
+          }) : null}
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 function WhyNowSignals({ ctx, openEvidence, pushToast }) {
   const [open, setOpen] = useState(null);
   // No fixture fallback: with no entity in context this panel has nothing to
@@ -561,13 +965,23 @@ function WhyNowSignals({ ctx, openEvidence, pushToast }) {
   const wn = entId ? DMA.whyNowFor(entId) : null;
   const signals = Array.isArray(wn) ? wn : ((wn && wn.signals) || []);
   if (!signals.length) return null;
+  /* Icon and colour per signal CATEGORY. The keys were the fixture's
+     (core_migration, hiring, market); the contract's `kind` vocabulary is
+     M&A · LEADERSHIP · REGULATORY · TECHNOLOGY, so every promoted signal missed
+     the map and fell back to the "market" pairing. Matched case-insensitively
+     against both vocabularies now. The colour is presentation derived from the
+     category, not a claim about the client. */
   const CAT = {
-    core_migration: { icon: "refresh", color: "var(--z-teal)" },
-    leadership:     { icon: "users",   color: "var(--z-dpur)" },
-    hiring:         { icon: "users",   color: "var(--z-mid)" },
-    regulatory:     { icon: "lock",    color: "var(--z-org)" },
-    market:         { icon: "stack",   color: "var(--z-mid)" },
+    "m&a":            { icon: "stack",   color: "var(--z-dpur)" },
+    leadership:       { icon: "users",   color: "var(--z-dpur)" },
+    regulatory:       { icon: "lock",    color: "var(--z-org)" },
+    technology:       { icon: "platform", color: "var(--z-teal)" },
+    core_migration:   { icon: "refresh", color: "var(--z-teal)" },
+    hiring:           { icon: "users",   color: "var(--z-mid)" },
+    market:           { icon: "stack",   color: "var(--z-mid)" },
   };
+  const catOf = (c) => CAT[String(c == null ? "" : c).trim().toLowerCase()]
+    || { icon: "sparkle", color: "var(--z-mid)" };
   const STR = { STRONG: "b-teal", LEADING: "b-purple", SUPPORTING: "b-muted" };
   return (
     <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed var(--ph0-bd)" }} data-source="evidence_index.json (trigger) + timeline_events.csv">
@@ -575,64 +989,111 @@ function WhyNowSignals({ ctx, openEvidence, pushToast }) {
         Trigger signals · click to drill in
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        {signals.map(s => {
-          const isOpen = open === s.id;
-          const cat = CAT[s.category] || CAT.market;
+        {/* Every text colour here was white or white-with-alpha over
+            `rgba(255,255,255,.04)` — and `.ip` is a WHITE panel, so the signal
+            title, the detail, the metric and the dates were painted white on
+            white and read as an empty expanding row. The panel's own tokens are
+            used instead. */}
+        {signals.map((s, si) => {
+          const key = s.id || `WN-${si}`;
+          const isOpen = open === key;
+          const cat = catOf(s.category);
+          const strength = dwText(s.strength);
           return (
-            <div key={s.id} className="wn-signal" style={{ border: "1px solid var(--ph0-bd)", borderRadius: 8, overflow: "hidden", background: "rgba(255,255,255,.04)" }}>
-              <button onClick={() => setOpen(o => o === s.id ? null : s.id)}
+            <div key={key} className="wn-signal" style={{ border: "1px solid var(--ph0-bd)", borderRadius: 8, overflow: "hidden", background: "rgba(255,255,255,.6)" }}>
+              <button onClick={() => setOpen(o => o === key ? null : key)}
                 style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "9px 10px", background: "none", border: 0, cursor: "pointer", textAlign: "left" }}>
                 <span style={{ width: 22, height: 22, borderRadius: 6, background: cat.color, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon name={cat.icon} size={12} /></span>
-                <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600, color: "#fff" }} className="txt-fit-1">{s.label}</span>
-                <span className={`b ${STR[s.strength] || "b-muted"}`}>{s.strength}</span>
-                <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={13} style={{ color: "rgba(255,255,255,.6)", flexShrink: 0 }} />
+                <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600, color: "var(--z-dark)" }} className="txt-fit-1">{dwText(s.label) || key}</span>
+                {/* An empty badge used to render for every promoted signal:
+                    `strength` is not in the why-now contract, so the pill was a
+                    coloured box with no word in it. */}
+                {strength ? <span className={`b ${STR[strength.toUpperCase()] || "b-muted"}`}>{strength}</span> : null}
+                {dwText(s.category) ? <span className="b b-muted">{dwText(s.category)}</span> : null}
+                <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-dpur)", flexShrink: 0 }} />
               </button>
               {isOpen ? (
-                <div style={{ padding: "0 10px 10px", fontSize: 12, lineHeight: 1.6, color: "rgba(255,255,255,.85)" }}>
-                  {/* confidence + claim + metric */}
+                <div style={{ padding: "0 10px 10px", fontSize: 12, lineHeight: 1.6, color: "var(--z-body)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap", marginBottom: 8 }}>
-                    {s.confidence ? <span className="b" style={{ background: "rgba(255,255,255,.12)", color: "#fff" }}>{s.confidence} confidence</span> : null}
-                    {s.claim ? <span className="b" style={{ background: "rgba(255,255,255,.12)", color: "rgba(255,255,255,.85)" }}>{s.claim}</span> : null}
+                    {s.confidence ? <span className="b b-teal">{s.confidence} confidence</span> : null}
+                    {s.claim ? <span className="b b-purple">{s.claim}</span> : null}
                   </div>
-                  {s.metric ? (
-                    <div style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 6, padding: "6px 9px", marginBottom: 8, fontSize: 11.5, color: "#fff", fontFamily: "var(--font-mono, monospace)" }}>{s.metric}</div>
+                  {dwText(s.metric) ? (
+                    <div className="f-mono" style={{ background: "var(--z-bg)", border: "1px solid var(--z-sep)", borderRadius: 6, padding: "6px 9px", marginBottom: 8, fontSize: 11.5, color: "var(--z-dark)" }}>{dwText(s.metric)}</div>
                   ) : null}
-                  <div style={{ marginBottom: 8 }}>{s.detail}</div>
-                  {s.peer_context ? (
+                  {dwText(s.detail) ? <div style={{ marginBottom: 8 }}>{dwText(s.detail)}</div> : null}
+                  {dwText(s.peer_context) ? (
                     <div style={{ marginBottom: 8 }}>
-                      <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "rgba(255,255,255,.5)", textTransform: "uppercase" }}>Peer context · </span>
-                      <span style={{ fontSize: 11.5 }}>{s.peer_context}</span>
+                      <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase" }}>Peer context · </span>
+                      <span style={{ fontSize: 11.5 }}>{dwText(s.peer_context)}</span>
                     </div>
                   ) : null}
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "rgba(255,255,255,.65)", marginBottom: 8 }}>
-                    <Icon name="timeline" size={11} /><span className="f-mono">{s.timeline.date}</span> · {s.timeline.event}
+                  {/* PAGE-KILLER, fixed: `s.timeline.date`. The adapter sets
+                      `timeline` to null for a signal with no `dated_on`, so an
+                      undated signal threw the moment it was expanded and took the
+                      whole application with it. An undated signal now says so —
+                      never "current", per invariant 9. */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "var(--z-muted)", marginBottom: 8 }}>
+                    <Icon name="timeline" size={11} />
+                    {s.timeline && dwText(s.timeline.date)
+                      ? <><span className="f-mono">{dwText(s.timeline.date)}</span>
+                          {dwText(s.timeline.event) ? <span>· {dwText(s.timeline.event)}</span> : null}</>
+                      : <span>undated — no dated source on this signal</span>}
                   </div>
-                  {s.play ? (
-                    <div style={{ background: "rgba(39,187,175,.14)", borderLeft: "2px solid var(--z-teal)", borderRadius: 4, padding: "7px 9px", fontSize: 11.5, color: "#DFF6F2", marginBottom: 6 }}>
-                      <strong style={{ color: "var(--z-teal)" }}>Play · </strong>{s.play}
+                  {dwText(s.play) ? (
+                    <div style={{ background: "var(--z-ice)", borderLeft: "2px solid var(--z-teal)", borderRadius: 4, padding: "7px 9px", fontSize: 11.5, color: "var(--z-dark)", marginBottom: 6 }}>
+                      <strong style={{ color: "var(--z-mid)" }}>Sequence · </strong>{dwText(s.play)}
                     </div>
                   ) : null}
-                  <div style={{ background: "rgba(39,187,175,.14)", borderLeft: "2px solid var(--z-teal)", borderRadius: 4, padding: "7px 9px", fontSize: 11.5, color: "#DFF6F2", marginBottom: 6 }}>
-                    <strong style={{ color: "var(--z-teal)" }}>So what · </strong>{s.impact}
-                  </div>
-                  {s.risk ? (
-                    <div style={{ background: "rgba(254,151,50,.14)", borderLeft: "2px solid var(--z-org)", borderRadius: 4, padding: "7px 9px", fontSize: 11.5, color: "#FEDFC0", marginBottom: 8 }}>
-                      <strong style={{ color: "#FEC07A" }}>Risk if ignored · </strong>{s.risk}
+                  {/* `impact` is not a why-now field; this block rendered "So what
+                      ·" with nothing after it on every signal. The contract's
+                      cost-of-acting-now IS promoted and was read by nothing. */}
+                  {dwText(s.impact) ? (
+                    <div style={{ background: "var(--z-ice)", borderLeft: "2px solid var(--z-teal)", borderRadius: 4, padding: "7px 9px", fontSize: 11.5, color: "var(--z-dark)", marginBottom: 6 }}>
+                      <strong style={{ color: "var(--z-mid)" }}>So what · </strong>{dwText(s.impact)}
+                    </div>
+                  ) : null}
+                  {dwText(s.cost_now) ? (
+                    <div style={{ background: "var(--z-lav)", borderLeft: "2px solid var(--z-dpur)", borderRadius: 4, padding: "7px 9px", fontSize: 11.5, color: "var(--z-dark)", marginBottom: 6 }}>
+                      <strong style={{ color: "var(--z-dpur)" }}>Cost of acting now · </strong>{dwText(s.cost_now)}
+                    </div>
+                  ) : null}
+                  {dwText(s.risk) ? (
+                    <div style={{ background: "rgba(254,151,50,.14)", borderLeft: "2px solid var(--z-org)", borderRadius: 4, padding: "7px 9px", fontSize: 11.5, color: "var(--z-dark)", marginBottom: 8 }}>
+                      <strong style={{ color: "var(--z-org)" }}>Risk if ignored · </strong>{dwText(s.risk)}
+                    </div>
+                  ) : null}
+                  {(s.subcaps || []).length ? (
+                    <div className="row" style={{ gap: 4, flexWrap: "wrap", marginBottom: 8 }}>
+                      <span style={{ fontSize: 9.5, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Cells</span>
+                      {s.subcaps.map(sid => <span key={sid} className="chip purple">{sid}</span>)}
                     </div>
                   ) : null}
                   <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 10, color: "rgba(255,255,255,.5)", textTransform: "uppercase", letterSpacing: ".08em" }}>Evidence</span>
+                    <span style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Evidence</span>
                     {s.evidence && s.evidence.length ? s.evidence.map(eid => {
                       const e = DMA.getEvidence(eid);
-                      return (
-                        <button key={eid} className={`tier-chip tier-${e?.tier || "T3"}`} style={{ cursor: "pointer", border: 0 }}
-                          title={e ? `${e.title} · ${e.source_pretty}` : eid}
+                      // Fail closed: an id that does not resolve is not dressed as
+                      // a T3 citation and does not open an empty drawer.
+                      return e ? (
+                        <button key={eid} className={`tier-chip tier-${e.tier}`} style={{ cursor: "pointer", border: 0 }}
+                          title={`${e.title} · ${e.source_pretty || ""}`}
                           onClick={() => { openEvidence(eid); }}>{eid}</button>
+                      ) : (
+                        <span key={eid} className="chip muted" title="cited id — not in this run's served evidence">{eid}</span>
                       );
-                    }) : <span style={{ fontSize: 11, color: "rgba(255,255,255,.45)" }}>Inferred — confirm in discovery</span>}
+                    }) : <span style={{ fontSize: 11, color: "var(--z-muted)" }}>this signal cites none</span>}
                     <span style={{ flex: 1 }} />
-                    <span className="b" style={{ background: (CAT[s.category] || CAT.market).color, color: "#fff" }}>{s.window}</span>
                   </div>
+                  {/* The window is a SENTENCE in the contract ("the opening runs
+                      from announcement to…"), not a chip. It was rendered as a
+                      coloured badge, which truncated it to an unreadable strip. */}
+                  {dwText(s.window) ? (
+                    <div style={{ fontSize: 11, color: "var(--z-body)", marginTop: 8, lineHeight: 1.5 }}>
+                      <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase" }}>Window · </span>
+                      {dwText(s.window)}
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -678,40 +1139,143 @@ function liveSurfaceMessages(surface, ctx) {
     `the panel reads promoted synthesis only and this application runs no model at request time.`;
 
   if (surface === "why_now") {
+    // `DMA.whyNowFor` returns the ADAPTED ARRAY of signals, not the section, so
+    // `wn.signals` was always undefined and the panel reported that the why-now
+    // synthesis "did not promote" over four promoted trigger signals. The
+    // section's own `narrative_thread` is dropped by the adapter and is
+    // unreachable from here (see ADAPTER CHANGES in the report), so the body
+    // states what the signals ARE rather than inventing a thread.
     const wn = id ? DMA.whyNowFor(id) : null;
-    const body = (wn && (wn.synthesis || wn.narrative)) || null;
+    const signals = Array.isArray(wn) ? wn : ((wn && wn.signals) || []);
+    // Wired for the adapter change requested in the report: when
+    // `whyNowMetaFor` exists it carries the section's own narrative_thread.
+    // Until it lands this is undefined and the body falls through to the
+    // signals, which is the honest reading of what is reachable today.
+    const meta = (typeof DMA.whyNowMetaFor === "function" && id)
+      ? DMA.whyNowMetaFor(id) : null;
+    const authored = dwText(meta && (meta.narrative_thread || meta.synthesis))
+      || (!Array.isArray(wn) && wn ? dwText(wn.synthesis || wn.narrative) : null);
     return {
-      title: "Why now", sub: (wn && wn.window) || "Trigger signals",
+      title: "Why now",
+      sub: signals.length
+        ? `${signals.length} trigger signal${signals.length === 1 ? "" : "s"}`
+        : "Trigger signals",
       cache_age: "promoted",
-      body: body || (wn && wn.signals && wn.signals.length
-        ? `${wn.signals.length} trigger signal${wn.signals.length === 1 ? "" : "s"} promoted for ${ent}. ` +
-          `Expand a signal below for its claim, evidence and play.`
+      body: authored || (signals.length
+        ? `${signals.length} trigger signal${signals.length === 1 ? "" : "s"} promoted for ${ent}` +
+          `${signals.map(s => dwText(s.category)).filter(Boolean).length
+              ? ` — ${[...new Set(signals.map(s => dwText(s.category)).filter(Boolean))].join(" · ")}` : ""}. ` +
+          `The run promotes no separate why-now narrative; expand a signal below for its ` +
+          `claim, its dated evidence and the sequence the producer argues for.`
         : absent("The why-now synthesis")),
     };
   }
   if (surface === "subcap_narrative") {
+    // `cell_evidence` states `synthesis` (null on 59 of this run's 69 cells) plus
+    // the citation list and the server-computed `grounded_on`. When there is no
+    // synthesis the panel says which cell, and what the run DOES hold for it,
+    // instead of a flat "did not promote".
     const sc = ctx?.subcap || {};
     const cell = (DMA.cellEvidenceFor(sc.id) || null);
+    const synth = dwText(cell && cell.synthesis);
+    const cited = (cell && cell.e_ids) || [];
+    const grounded = dwNum(cell && cell.grounded_on);
     return {
       title: "Cell synthesis", sub: sc.id || "Heatmap selection",
       cache_age: "promoted",
-      body: (cell && (cell.synthesis || cell.narrative)) || absent(`A synthesis for ${sc.id || "this cell"}`),
+      body: synth || (cell
+        ? `No cell synthesis promoted for ${sc.id || "this cell"}. The run grounds it on ` +
+          `${grounded === null ? cited.length : grounded} evidence item` +
+          `${(grounded === null ? cited.length : grounded) === 1 ? "" : "s"}` +
+          `${cited.length ? ` (${cited.slice(0, 6).join(", ")}${cited.length > 6 ? ", …" : ""})` : ""} — ` +
+          `open the cell's evidence drawer for the excerpts.`
+        : absent(`A synthesis for ${sc.id || "this cell"}`)),
     };
   }
   if (surface === "platform_story") {
+    /* The promoted platform story: `platforms[]`, each with a ~130-word
+       `story_md` and its own gap rows, plus `discarded[]`.
+
+       This read `ps.narrative || ps.story || ps.synthesis` — three keys the
+       contract does not carry — so the panel declared that the story "did not
+       promote" while the payload held all of it. The subtitle read
+       `ps.platform`, also absent, and fell through to the context value.
+
+       A promoted platform is NOT named: the contract gives it no name field, and
+       the opportunity tiles that do carry a vendor name carry no L3 area, so the
+       two cannot be joined without guessing. The story is therefore filed — here
+       and on the page — under the L3 area its OWN GAP ROWS name, and that area
+       is what the subtitle states. */
     const ps = DMA.platformStoryFor(id);
+    const plats = ((ps && ps.platforms) || []).filter(p => p && typeof p === "object");
+    const discarded = ((ps && ps.discarded) || []).filter(p => p && typeof p === "object");
+    const area = dwText(ctx?.platform);
+    const areasOf = (p) => [...new Set((p.gaps || []).map(g => dwText(g.l3_area)).filter(Boolean))];
+    const named = [...new Set(plats.flatMap(areasOf))];
+    const scoped = area ? plats.filter(p => areasOf(p).includes(area)) : [];
+    const use = scoped.length ? scoped : plats;
+    const stories = use.map(p => dwText(p.story_md)).filter(Boolean);
+    const gapCount = use.reduce((n, p) => n + ((p.gaps || []).length), 0);
+    // An area with no story of its own is said so, and the story that DID
+    // promote is shown under the area it names — never relabelled as this one's.
+    const scopeNote = area && !scoped.length && plats.length
+      ? `No promoted platform story names ${area}.` +
+        (named.length ? ` The run files its story under ${named.join(" · ")}, shown below.` : "")
+      : null;
+    const body = [
+      scopeNote,
+      stories.length ? stories.join("\n\n") : null,
+      !stories.length && (gapCount || discarded.length)
+        ? `No narrative prose promoted for ${area || ent}. The run does state ` +
+          `${gapCount} gap row${gapCount === 1 ? "" : "s"} and ` +
+          `${discarded.length} platform${discarded.length === 1 ? "" : "s"} it set aside — both below.`
+        : null,
+    ].filter(Boolean).join("\n\n");
     return {
-      title: "Platform story", sub: (ps && ps.platform) || ctx?.platform || "Promoted narrative",
+      title: "Platform story",
+      // The subtitle names an area the STORY names, not whatever the caller put
+      // in context — a vendor alias there ("SF") would otherwise be printed as
+      // the subject of a story that never mentions a vendor.
+      sub: (area && (scoped.length || !named.length))
+        ? area
+        : (named.join(" · ") || area || "Promoted narrative"),
       cache_age: "promoted",
-      body: (ps && (ps.narrative || ps.story || ps.synthesis)) || absent("The platform story"),
+      body: body || absent("The platform story"),
+      // Rendered structurally under the prose: gap rows carry a cell id, a score,
+      // a peer basis, a catalogue path and evidence ids, none of which survives
+      // being flattened into a sentence.
+      detail: (use.length || discarded.length)
+        ? { kind: "platform_story", platforms: use, discarded, area }
+        : null,
     };
   }
   if (surface === "focus_area") {
+    /* A focus area has no `synthesis`, `rationale` or `quote` field — the three
+       keys this read — so the panel always said a synthesis did not promote. The
+       H1 contract states a verbatim quote, a currency note and the entity/peer
+       scores with a PROMOTED delta, and that is what the area actually says. */
     const fa = ctx?.focusArea || {};
+    const band = dwBand(fa.entity_score);
+    const peer = dwNum(fa.peer_score);
+    const delta = dwNum(fa.delta);
+    const parts = [
+      dwText(fa.strategic_quote),
+      dwText(fa.description),
+      band ? `Composite ${fx(band.score, 2)} · ${band.label}` +
+             (peer === null ? " · no peer figure stated" : ` · peer ${fx(peer, 2)}`) +
+             (delta === null ? "" : ` · delta ${delta > 0 ? "+" : ""}${fx(delta, 2)} as promoted`) +
+             (dwText(fa.currency_status) ? ` · ${dwText(fa.currency_status).replace(/_/g, " ").toLowerCase()}` : "")
+           : null,
+      (fa.subcaps || []).length
+        ? `${fa.subcaps.length} capability cell${fa.subcaps.length === 1 ? "" : "s"} sit under this area.`
+        : null,
+    ].filter(Boolean);
     return {
-      title: "Focus area synthesis", sub: fa.name || "Strategic priority",
+      title: "Focus area", sub: dwText(fa.name) || "Strategic priority",
       cache_age: "promoted",
-      body: fa.synthesis || fa.rationale || fa.quote || absent("A synthesis for this focus area"),
+      body: parts.length
+        ? `The run promotes no separate narrative for a focus area. What it does state:\n\n${parts.join("\n\n")}`
+        : absent("A synthesis for this focus area"),
     };
   }
   return {
@@ -970,9 +1534,20 @@ function RecommendationModal() {
   if (!recModal) return null;
   const r = DMA.getRecommendation(recModal);
   if (!r) return null;
+  // `r.platform` is a fixture-only key: a promoted recommendation states
+  // `l3_area` and `l4_feature`, never a vendor id, so this lookup into the
+  // static five-vendor catalogue was undefined on every live row. The heading
+  // now prints the run's own L3 area and L4 feature.
   const plat = DMA.getPlatform(r.platform);
+  const area = dwText(r.l3) || (plat && plat.name) || null;
+  const feature = dwText(r.l4) || dwText(r.feature) || null;
   const impact = DMA.ROADMAP_IMPACTS[r.id];
-  const linkedSubcaps = DMA.INSIGHT_CARDS.filter(c => c.rec === r.id).flatMap(c => c.affects);
+  // The promoted per-cell impact table (`dma_impact`): current, target, delta
+  // and the basis for the target. This is the run's own uplift statement, which
+  // is why the DMA-impact tab no longer depends on ROADMAP_IMPACTS — a fixture
+  // map that is empty in LIVE, leaving three headings over three empty boxes.
+  const dmaImpact = (r.dma_impact || []).filter(x => x && typeof x === "object");
+  const linkedSubcaps = DMA.INSIGHT_CARDS.filter(c => c.rec === r.id).flatMap(c => c.affects || []);
 
   return (
     <div className="modal-mask" onClick={closeRec}>
@@ -981,15 +1556,20 @@ function RecommendationModal() {
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
               <span className="chip">{r.id}</span>
-              <span className="b b-teal">{plat?.name} · {r.feature}</span>
-              <span className="b b-purple">{r.phase}</span>
+              {area ? <span className="b b-teal">{area}</span> : null}
+              {feature ? <span className="b b-muted">{feature}</span> : null}
+              {r.phase ? <span className="b b-purple">Phase {r.phase}</span> : null}
+              {r.claim ? <span className="b b-muted">{r.claim}</span> : null}
               {/* `outcomes` is a fixture-only nested object. A promoted recommendation
                    states `effort_band` and `kpi_triple`, which the adapter maps to
                    r.effort and r.kpi — so reading r.outcomes.effort threw a
                    TypeError and blanked the entire app on any rec click. */}
+              {/* `horizon` is the adapter's alias for `phase` on a promoted row,
+                  so printing both rendered "Phase 1 … · 1". It is only shown
+                  when it actually says something the phase badge does not. */}
               <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
                 {r.effort ? `Effort ${r.effort}` : (r.outcomes ? `Effort ${r.outcomes.effort} · ${r.outcomes.time}` : "effort not stated")}
-                {r.horizon ? ` · ${r.horizon}` : ""}
+                {dwText(r.horizon) && dwText(r.horizon) !== String(r.phase) ? ` · ${dwText(r.horizon)}` : ""}
               </span>
             </div>
             <div style={{ fontSize: 17, fontWeight: 600, color: "var(--z-dark)" }}>{r.title}</div>
@@ -1030,8 +1610,8 @@ function RecommendationModal() {
                     recommendation. That is the "no reasoning engaged" reading. */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {[
-                    { n: "1", k: "Root cause", v: r.root_cause_text
-                        ? <>{r.root_cause_text}{(r.root_cause || []).length ? <> {r.root_cause.map(eid => (
+                    { n: "1", k: "Root cause", v: dwText(r.root_cause_text)
+                        ? <>{dwText(r.root_cause_text)}{(r.root_cause || []).length ? <> {r.root_cause.map(eid => (
                             <button key={eid} className="chip" style={{ marginRight: 3 }} onClick={() => openEvidence(eid)}>{eid}</button>
                           ))}</> : null}</>
                         : (r.root_cause || []).length
@@ -1039,20 +1619,45 @@ function RecommendationModal() {
                               <button key={eid} className="chip" style={{ marginRight: 3 }} onClick={() => openEvidence(eid)}>{eid}</button>
                             ))}</>
                           : <span style={{ color: "var(--z-muted)" }}>the run states no root cause for this recommendation</span> },
-                    { n: "2", k: "Cost of inaction", v: r.cost_of_inaction
+                    { n: "2", k: "Cost of inaction", v: dwText(r.cost_of_inaction)
                         || <span style={{ color: "var(--z-muted)" }}>not stated</span> },
-                    { n: "3", k: "Sequencing", v: r.sequencing_reason
-                        ? <>{r.sequencing_reason}{r.phase ? <> <span className="b b-muted">{r.phase}</span></> : null}</>
+                    { n: "3", k: "Sequencing", v: dwText(r.sequencing_reason)
+                        ? <>{dwText(r.sequencing_reason)}{r.phase ? <> <span className="b b-muted">Phase {r.phase}</span></> : null}</>
                         : (r.phase
                             ? <>Scheduled in <strong>{r.phase}</strong>. The run states no sequencing reason.</>
                             : <span style={{ color: "var(--z-muted)" }}>not sequenced</span>) },
+                    /* `kpi_triple` is an OBJECT — metric, baseline, target and
+                       the date the baseline was read. It was collapsed to
+                       `r.kpi.metric` with a JSON.stringify fallback, so the
+                       baseline and the target (the two halves that make a KPI
+                       measurable) never appeared. */
                     { n: "4", k: "Expected outcome", v: r.kpi
-                      ? <><strong>{typeof r.kpi === "string" ? r.kpi : (r.kpi.metric || JSON.stringify(r.kpi))}</strong>{r.effort ? <> · {r.effort} effort</> : null}</>
+                      ? (typeof r.kpi === "string"
+                          ? <><strong>{r.kpi}</strong>{r.effort ? <> · {r.effort} effort</> : null}</>
+                          : <>
+                              <strong>{dwText(r.kpi.metric) || "metric not stated"}</strong>
+                              {r.effort ? <> · {r.effort} effort</> : null}
+                              {dwText(r.kpi.baseline) ? (
+                                <div style={{ marginTop: 3 }}>Baseline · {dwText(r.kpi.baseline)}
+                                  {dwText(r.kpi.baseline_as_of) ? <span className="f-mono" style={{ color: "var(--z-muted)" }}> ({dwText(r.kpi.baseline_as_of)})</span> : null}
+                                </div>) : null}
+                              {dwText(r.kpi.target) ? (
+                                <div style={{ marginTop: 2 }}>Target · {dwText(r.kpi.target)}</div>) : null}
+                            </>)
                       : r.outcomes
                         ? <><strong>{r.outcomes.metric}</strong> · {r.outcomes.time} · {r.outcomes.effort} effort</>
                         : <span style={{ color: "var(--z-muted)" }}>the run states no KPI for this recommendation</span> },
+                    /* PAGE-KILLER, fixed: `v: r.validation_gate` put the raw
+                       object into JSX. A promoted gate is
+                       {threshold, verdict, current_value, cell, grain_note,
+                       backing_cells[]} — React throws #31 on an object child and
+                       there is no error boundary above this modal, so every
+                       recommendation click blanked the entire application. */
                     { n: "5", k: "Validation gate", v: r.validation_gate
-                        || <span style={{ color: "var(--z-muted)" }}>not stated</span> },
+                        ? (typeof r.validation_gate === "string"
+                            ? r.validation_gate
+                            : <ValidationGate gate={r.validation_gate} openSubcap={openSubcap} closeRec={closeRec} />)
+                        : <span style={{ color: "var(--z-muted)" }}>not stated</span> },
                   ].map(row => (
                     <div key={row.n} style={{ display: "flex", gap: 10 }}>
                       <div style={{ width: 22, height: 22, borderRadius: 6, background: "var(--z-lav)", color: "var(--z-dpur)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{row.n}</div>
@@ -1101,36 +1706,107 @@ function RecommendationModal() {
             </div>
           ) : view === "impact" ? (
             <>
-              <div className="g3" style={{ marginBottom: 14 }}>
-                {Object.entries(impact?.customer_impact || {}).map(([k, v]) => (
-                  <div key={k} className="card-tile" style={{ background: "var(--z-ice)", padding: 14 }}>
-                    <div style={{ fontSize: 10, color: "var(--z-mid)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 4 }}>{k.replace(/_/g, " ")}</div>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: "var(--z-dark)" }}>{v}</div>
+              {/* The promoted per-cell impact table. Each row states the cell,
+                  its CURRENT score, the projected TARGET, the delta and the
+                  basis for that target — and the basis says in the run's own
+                  words that the target is a projection, not a measurement, which
+                  is why it is printed beside the bar rather than dropped.
+                  Nothing here is recomputed: the delta renders as promoted. */}
+              {dmaImpact.length ? (
+                <div className="card" style={{ marginBottom: 14, padding: 14 }}>
+                  <div className="row" style={{ marginBottom: 4 }}>
+                    <Icon name="heatmap" size={14} />
+                    <div style={{ fontWeight: 600, fontSize: 13 }}>Projected cell uplift · {dmaImpact.length}</div>
+                    <span className="spacer" />
+                    <span className="b b-org">projection</span>
                   </div>
-                ))}
-              </div>
-
-              {/* Before / after pillar uplift */}
-              <div className="card" style={{ marginBottom: 14, padding: 14 }}>
-                <div className="row" style={{ marginBottom: 12 }}>
-                  <Icon name="heatmap" size={14} />
-                  <div style={{ fontWeight: 600, fontSize: 13 }}>Projected pillar uplift</div>
-                </div>
-                {impact && Object.entries(impact.after).map(([p, after]) => {
-                  const before = impact.before[p];
-                  return (
-                    <div key={p} className="pbar" style={{ pointerEvents: "none" }}>
-                      <div className="pbar-name">{p} · {DMA.PILLARS.find(x => x.id === p)?.short}</div>
-                      <div className="pbar-track" style={{ position: "relative" }}>
-                        <div className="pbar-fill" style={{ width: `${before / 5 * 100}%`, background: DMA.helpers.maturityHex(before), opacity: .45 }} />
-                        <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${after / 5 * 100}%`, background: DMA.helpers.maturityHex(after), borderRadius: 4, transition: "width 1.2s var(--ease)" }} />
+                  <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginBottom: 12 }}>
+                    current score is measured; the target is the run's projection
+                  </div>
+                  {dmaImpact.map((x, i) => {
+                    const cur = dwNum(x.current), tgt = dwNum(x.target), d = dwNum(x.delta);
+                    const curBand = dwBand(cur), tgtBand = dwBand(tgt);
+                    return (
+                      <div key={x.subcap_id || i} style={{ marginBottom: 12 }}>
+                        <div className="row" style={{ gap: 6, marginBottom: 4, flexWrap: "wrap" }}>
+                          {x.subcap_id ? (
+                            <button className="chip purple" onClick={() => { closeRec(); openSubcap(x.subcap_id); }}>{x.subcap_id}</button>
+                          ) : null}
+                          <span style={{ fontSize: 12.5, fontWeight: 600, flex: 1, minWidth: 0 }}>{dwText(x.name) || "cell not named"}</span>
+                          <span className="f-mono" style={{ fontSize: 11.5, color: "var(--z-body)" }}>
+                            {cur === null ? "—" : fx(cur, 1)} → {tgt === null ? "—" : fx(tgt, 1)}
+                          </span>
+                          {d === null ? null : (
+                            <span className="b b-teal">{d > 0 ? "+" : ""}{fx(d, 1)}</span>
+                          )}
+                        </div>
+                        {/* Two bars on one track: the measured score solid, the
+                            projected target as a dashed outline, so the reader
+                            cannot mistake the projection for a score. */}
+                        <div className="pbar-track" style={{ position: "relative", height: 8 }}>
+                          {tgt === null ? null : (
+                            <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${Math.min(100, tgt / 5 * 100)}%`, border: `1px dashed ${tgtBand ? tgtBand.hex : "var(--z-sep)"}`, borderRadius: 4, boxSizing: "border-box" }} />
+                          )}
+                          {cur === null ? null : (
+                            <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${Math.min(100, cur / 5 * 100)}%`, background: curBand.hex, borderRadius: 4 }} />
+                          )}
+                        </div>
+                        <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 4, lineHeight: 1.45 }}>
+                          {curBand ? <>{curBand.label} today{tgtBand && tgtBand.label !== curBand.label ? <> → {tgtBand.label}</> : null} · </> : null}
+                          {dwText(x.target_basis) || "no basis stated for the target"}
+                        </div>
                       </div>
-                      <div className="pbar-score">{fx(after, 1)}</div>
-                      <div className="pbar-delta" style={{ color: "var(--z-mid)" }}>+{fx((after - before), 1)}</div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div style={{ fontSize: 12, color: "var(--z-muted)", marginBottom: 14 }}>
+                  This recommendation states no `dma_impact` rows, so no cell
+                  uplift is claimed for it.
+                </div>
+              )}
+
+              {/* The fixture's customer-impact tiles and pillar bars. Both read
+                  DMA.ROADMAP_IMPACTS, which is empty in LIVE by design (it
+                  carries fixture-shaped uplift figures), so they render only
+                  where that map actually has this recommendation. */}
+              {impact && impact.customer_impact ? (
+                <div className="g3" style={{ marginBottom: 14 }}>
+                  {Object.entries(impact.customer_impact).map(([k, v]) => (
+                    <div key={k} className="card-tile" style={{ background: "var(--z-ice)", padding: 14 }}>
+                      <div style={{ fontSize: 10, color: "var(--z-mid)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 4 }}>{k.replace(/_/g, " ")}</div>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: "var(--z-dark)" }}>{dwText(v)}</div>
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {impact && impact.after && impact.before ? (
+                <div className="card" style={{ marginBottom: 14, padding: 14 }}>
+                  <div className="row" style={{ marginBottom: 12 }}>
+                    <Icon name="heatmap" size={14} />
+                    <div style={{ fontWeight: 600, fontSize: 13 }}>Projected pillar uplift</div>
+                  </div>
+                  {Object.entries(impact.after).map(([p, after]) => {
+                    const before = dwNum(impact.before[p]);
+                    const a = dwNum(after);
+                    return (
+                      <div key={p} className="pbar" style={{ pointerEvents: "none" }}>
+                        <div className="pbar-name">{p} · {DMA.PILLARS.find(x => x.id === p)?.short}</div>
+                        <div className="pbar-track" style={{ position: "relative" }}>
+                          {before === null ? null : <div className="pbar-fill" style={{ width: `${before / 5 * 100}%`, background: DMA.helpers.maturityHex(before), opacity: .45 }} />}
+                          {a === null ? null : <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${a / 5 * 100}%`, background: DMA.helpers.maturityHex(a), borderRadius: 4, transition: "width 1.2s var(--ease)" }} />}
+                        </div>
+                        <div className="pbar-score">{a === null ? "—" : fx(a, 1)}</div>
+                        {/* A delta needs both endpoints; one missing is null, not zero. */}
+                        <div className="pbar-delta" style={{ color: "var(--z-mid)" }}>
+                          {a === null || before === null ? "—" : `${a - before > 0 ? "+" : ""}${fx(a - before, 1)}`}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
 
               {/* Affected subcaps */}
               {linkedSubcaps.length > 0 ? (
@@ -1147,21 +1823,47 @@ function RecommendationModal() {
             </>
           ) : view === "evidence" ? (
             <div>
-              <p style={{ fontSize: 12, color: "var(--z-muted)", marginBottom: 12 }}>The root cause is grounded in the following evidence. Click any chip to open the full source.</p>
-              {r.root_cause.map(eid => {
+              {/* The paragraph used to promise evidence and then render nothing
+                  when `evidence_ids` was empty, and an id that does not resolve
+                  was skipped silently — so a dead citation looked like it had
+                  never been made (invariant 4 is fail-closed AND visible). */}
+              {(r.root_cause || []).length === 0 ? (
+                <div className="empty">
+                  <div className="icon"><Icon name="evidence" size={20} /></div>
+                  <h3>This recommendation cites no evidence</h3>
+                  <p>`evidence_ids` is empty on the promoted row, so the root cause
+                     stated on the Rationale tab is not traceable to a source in
+                     this run.</p>
+                </div>
+              ) : (
+                <p style={{ fontSize: 12, color: "var(--z-muted)", marginBottom: 12 }}>The root cause is grounded in the following evidence. Click any chip to open the full source.</p>
+              )}
+              {(r.root_cause || []).map(eid => {
                 const e = DMA.getEvidence(eid);
-                if (!e) return null;
+                if (!e) return (
+                  <div key={eid} className="row" style={{ padding: "10px 0", borderBottom: "1px solid var(--z-sep)", gap: 8 }}>
+                    <span className="chip muted">{eid}</span>
+                    <span style={{ fontSize: 11.5, color: "var(--z-muted)" }}>cited id — not in this run's served evidence</span>
+                  </div>
+                );
                 const tier = DMA.getTier(e.tier);
                 return (
                   <div key={eid} style={{ padding: "12px 0", borderBottom: "1px solid var(--z-sep)" }}>
-                    <div className="row" style={{ marginBottom: 6 }}>
+                    <div className="row" style={{ marginBottom: 6, flexWrap: "wrap" }}>
                       <button className="chip" onClick={() => openEvidence(eid)}>{e.id}</button>
                       <span className={`tier-chip tier-${e.tier}`}>{e.tier} · {tier?.label}</span>
-                      <span className="b b-purple">{e.claim}</span>
-                      <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--z-muted)" }}>{e.recency} · ERS {e.ers}</span>
+                      {e.claim ? <span className="b b-purple">{e.claim}</span> : null}
+                      <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--z-muted)" }}>
+                        {e.recency}{dwNum(e.ers) === null ? "" : ` · ERS ${e.ers}`}</span>
                     </div>
                     <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 5 }}>{e.title}</div>
-                    <div style={{ fontStyle: "italic", padding: "6px 10px", background: tier?.bg || "var(--z-bg)", borderLeft: `3px solid ${tier?.color}`, fontSize: 12, color: "var(--z-body)" }}>"{e.excerpt}"</div>
+                    {dwText(e.excerpt) ? (
+                      <div style={{ fontStyle: "italic", padding: "6px 10px", background: tier?.bg || "var(--z-bg)", borderLeft: `3px solid ${tier?.color || "var(--z-teal)"}`, fontSize: 12, color: "var(--z-body)" }}>"{dwText(e.excerpt)}"</div>
+                    ) : (
+                      <div style={{ padding: "6px 10px", background: "var(--z-bg)", borderLeft: "3px dashed var(--z-sep)", fontSize: 11.5, color: "var(--z-muted)" }}>
+                        no verbatim excerpt served for this item
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -1174,7 +1876,11 @@ function RecommendationModal() {
           <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Linked from insight cards · {DMA.INSIGHT_CARDS.filter(c => c.rec === r.id).map(c => c.id).join(", ") || "-"}</div>
           <div style={{ display: "flex", gap: 8 }}>
             <button className="btn btn-tertiary" onClick={() => {
-              const summary = `${r.id} · ${r.title}\n${r.l3 || plat?.name || ""} · ${r.l4 || r.feature || ""} · ${r.phase || ""}\nEffort ${r.effort || (r.outcomes && r.outcomes.effort) || "not stated"}`;
+              const summary = [
+                `${r.id} · ${dwText(r.title) || ""}`,
+                [area, feature, r.phase ? `phase ${r.phase}` : null].filter(Boolean).join(" · "),
+                `Effort ${r.effort || (r.outcomes && r.outcomes.effort) || "not stated"}`,
+              ].filter(Boolean).join("\n");
               try { navigator.clipboard.writeText(summary); pushToast("Recommendation summary copied", "success"); }
               catch (e) { pushToast("Couldn't access clipboard", "warn"); }
             }}><Icon name="copy" size={13} /> Copy summary</button>
@@ -1186,25 +1892,84 @@ function RecommendationModal() {
   );
 }
 
+/* A promoted validation gate: the threshold, the verdict, the current value and
+   the cells backing it. Rendered as fields because it IS an object — printing it
+   raw threw React #31 and took the application down (see the caller). */
+function ValidationGate({ gate, openSubcap, closeRec }) {
+  const verdict = dwText(gate.verdict);
+  const cur = dwNum(gate.current_value);
+  const cells = (gate.backing_cells || []).filter(c => c && typeof c === "object");
+  return (
+    <div>
+      <div className="row" style={{ gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
+        {dwText(gate.threshold) ? (
+          <span className="f-mono" style={{ fontSize: 12 }}>{dwText(gate.threshold)}</span>) : null}
+        {verdict ? (
+          <span className={`b ${verdict.toUpperCase() === "MET" ? "b-above" : "b-below"}`}>{verdict}</span>) : null}
+        {cur === null ? null : (
+          <span style={{ fontSize: 11.5, color: "var(--z-muted)" }}>current {fx(cur, 2)}</span>)}
+        {dwText(gate.cell) ? <span className="chip">{dwText(gate.cell)}</span> : null}
+      </div>
+      {dwText(gate.grain_note) ? (
+        <div style={{ fontSize: 11, color: "var(--z-muted)", lineHeight: 1.5, marginBottom: 4 }}>
+          {dwText(gate.grain_note)}
+        </div>) : null}
+      {cells.length ? (
+        <div className="row" style={{ gap: 5, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 9.5, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Backing cells</span>
+          {cells.map((c, i) => {
+            const b = dwBand(c.score);
+            return (
+              <button key={c.subcap_id || i} className="chip"
+                onClick={() => c.subcap_id && (closeRec(), openSubcap(c.subcap_id))}
+                title={[dwText(c.name), b ? `${fx(b.score, 1)} · ${b.label}` : null].filter(Boolean).join(" · ")}>
+                {c.subcap_id || dwText(c.name)}{b ? ` ${fx(b.score, 1)}` : ""}
+              </button>
+            );
+          })}
+        </div>) : null}
+    </div>
+  );
+}
+
+/* Sequencing, from the recommendation's OWN promoted fields.
+
+   This read DMA.ROADMAP_IMPACTS — a fixture map that is empty in LIVE by design
+   — for all three columns. So every promoted recommendation rendered "PHASE -",
+   "No prerequisites · can land first" and "No downstream initiatives", which is
+   not an empty state but three false claims: REC-001 states two prerequisites,
+   REC-003 names it as a predecessor, and the phase is on the row.
+
+   Predecessors are the row's own `dependencies` (rec ids). "Unlocks" is COMPUTED
+   by asking which other promoted recommendations name this one in theirs —
+   invariant 8, one source of truth, so the two columns cannot disagree. */
 function DependencyMap({ rec }) {
   const impact = DMA.ROADMAP_IMPACTS[rec.id];
-  const deps = (impact?.dependencies || []).map(id => DMA.getRecommendation(id)).filter(Boolean);
-  const followups = Object.values(DMA.ROADMAP_IMPACTS).map(x => ({ ...x, _id: Object.keys(DMA.ROADMAP_IMPACTS).find(k => DMA.ROADMAP_IMPACTS[k] === x) })).filter(x => x.dependencies.includes(rec.id));
+  const all = DMA.RECOMMENDATIONS || [];
+  const depIds = (rec.dependencies || []).length ? rec.dependencies
+                                                 : (impact?.dependencies || []);
+  const deps = depIds.map(id => DMA.getRecommendation(id) || { id, title: null }).filter(Boolean);
+  const followups = all.filter(x => (x.dependencies || []).includes(rec.id));
+  const prereqs = (rec.prerequisites || []).filter(q => q && typeof q === "object");
+  const phase = rec.phase != null ? rec.phase : (impact?.phase != null ? impact.phase : null);
+
   return (
     <div>
       <div className="row" style={{ marginBottom: 12 }}>
-        <span className="b b-muted">PHASE {impact?.phase || "-"}</span>
+        <span className="b b-muted">{phase == null ? "PHASE NOT STATED" : `PHASE ${phase}`}</span>
         <span style={{ fontSize: 12 }}>Sequencing position in the transformation roadmap</span>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, alignItems: "stretch" }}>
-        {/* Predecessors */}
+        {/* Predecessors — recommendations this one waits on */}
         <div className="card" style={{ padding: 12 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 8 }}>Prerequisites</div>
-          {deps.length === 0 ? <div className="muted" style={{ fontSize: 12 }}>No prerequisites · can land first</div> : deps.map(d => (
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 8 }}>Waits on</div>
+          {deps.length === 0 ? (
+            <div className="muted" style={{ fontSize: 12 }}>The run names no predecessor recommendation</div>
+          ) : deps.map(d => (
             <div key={d.id} style={{ padding: "8px 10px", background: "var(--z-ice)", borderRadius: 6, marginBottom: 6 }}>
               <div style={{ fontSize: 12, fontWeight: 600 }}>{d.id}</div>
-              <div style={{ fontSize: 10, color: "var(--z-muted)" }}>{d.title}</div>
+              <div style={{ fontSize: 10, color: "var(--z-muted)" }}>{dwText(d.title) || "not in this run's recommendations"}</div>
             </div>
           ))}
         </div>
@@ -1213,26 +1978,63 @@ function DependencyMap({ rec }) {
         <div className="card" style={{ padding: 12, background: "var(--z-lav)", border: "2px solid var(--z-teal)" }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-mid)", textTransform: "uppercase", marginBottom: 8 }}>This initiative</div>
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--z-dark)" }}>{rec.id}</div>
-          <div style={{ fontSize: 11, color: "var(--z-body)", marginTop: 4 }}>{rec.title}</div>
+          <div style={{ fontSize: 11, color: "var(--z-body)", marginTop: 4 }}>{dwText(rec.title)}</div>
           <div className="sep" />
-          <div style={{ fontSize: 11 }}>Phase {impact?.phase || rec.phase || "—"}{rec.outcomes ? ` · ${rec.outcomes.time}` : ""}</div>
+          <div style={{ fontSize: 11 }}>
+            {phase == null ? "Phase not stated" : `Phase ${phase}`}
+            {dwText(rec.horizon) && dwText(rec.horizon) !== String(phase) ? ` · ${dwText(rec.horizon)}` : ""}
+            {rec.effort ? ` · effort ${rec.effort}` : ""}
+          </div>
         </div>
 
-        {/* Followups */}
+        {/* Followups — computed from the other rows' dependencies */}
         <div className="card" style={{ padding: 12 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 8 }}>Unlocks</div>
-          {followups.length === 0 ? <div className="muted" style={{ fontSize: 12 }}>No downstream initiatives</div> : followups.map(d => {
-            const r = DMA.getRecommendation(d._id);
-            if (!r) return null;
+          {followups.length === 0 ? (
+            <div className="muted" style={{ fontSize: 12 }}>No other recommendation names this one as a predecessor</div>
+          ) : followups.map(d => (
+            <div key={d.id} style={{ padding: "8px 10px", background: "var(--ph0-lt)", borderRadius: 6, marginBottom: 6 }}>
+              <div style={{ fontSize: 12, fontWeight: 600 }}>{d.id}</div>
+              <div style={{ fontSize: 10, color: "var(--z-muted)" }}>{dwText(d.title)}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Readiness conditions — the row's own prerequisites. These are not
+          recommendations, so they belong beside the three columns rather than
+          inside them: a cell threshold with its verdict, or a named condition
+          with the basis the producer recorded for it. */}
+      {prereqs.length ? (
+        <div className="card" style={{ padding: 12, marginTop: 12 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 8 }}>
+            Readiness · {prereqs.length} condition{prereqs.length === 1 ? "" : "s"}
+          </div>
+          {prereqs.map((q, i) => {
+            const min = dwNum(q.minimum), cur = dwNum(q.current);
+            const verdict = dwText(q.verdict);
             return (
-              <div key={d._id} style={{ padding: "8px 10px", background: "var(--ph0-lt)", borderRadius: 6, marginBottom: 6 }}>
-                <div style={{ fontSize: 12, fontWeight: 600 }}>{r.id}</div>
-                <div style={{ fontSize: 10, color: "var(--z-muted)" }}>{r.title}</div>
+              <div key={i} className="row" style={{ gap: 8, padding: "6px 0", borderTop: i ? "1px solid var(--z-sep)" : 0, flexWrap: "wrap" }}>
+                {q.cell ? <span className="chip purple">{q.cell}</span> : null}
+                <span style={{ fontSize: 12, flex: 1, minWidth: 0 }}>
+                  {q.cell
+                    ? <span className="f-mono">{q.cell} ≥ {min === null ? "—" : fx(min, 1)}{cur === null ? "" : ` · currently ${fx(cur, 2)}`}</span>
+                    : dwText(q.condition)}
+                </span>
+                {dwText(q.basis) ? <span className="b b-muted">{dwText(q.basis)}</span> : null}
+                {verdict ? (
+                  <span className={`b ${verdict.toUpperCase() === "MET" ? "b-above" : "b-below"}`}>{verdict}</span>
+                ) : null}
               </div>
             );
           })}
+          {prereqs.some(q => dwText(q.note)) ? (
+            <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 8, lineHeight: 1.5 }}>
+              {prereqs.map(q => dwText(q.note)).filter(Boolean).join(" · ")}
+            </div>
+          ) : null}
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
