@@ -10,6 +10,7 @@ function ClientOverview({
     audience,
     openEvidence,
     openInsight,
+    openSubcap,
     role,
     setIpSurface,
     setIpContext,
@@ -63,7 +64,7 @@ function ClientOverview({
     }
   }, entity.name), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, [DMA.SUBVERTICAL_LABEL[entity.subvertical], entity.hq, entity.assets != null ? `${fmtAssets(entity.assets)} assets` : null, entity.assessment_date ? `Assessment ${fmtDate(entity.assessment_date)}` : null, entity.members != null ? `${entity.members.toLocaleString()} members` : null].filter(Boolean).join(" · "))), /*#__PURE__*/React.createElement("div", {
+  }, [DMA.SUBVERTICAL_LABEL[entity.subvertical], entity.hq, entity.assets != null ? `${fmtAssets(entity.assets, entity.assets_unit)} assets` : null, entity.assessment_date ? `Assessment ${fmtDate(entity.assessment_date)}` : null, entity.members != null ? `${entity.members.toLocaleString()} members` : null].filter(Boolean).join(" · "))), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
@@ -236,26 +237,42 @@ function ClientOverview({
     }
   }, "Firmographics"), /*#__PURE__*/React.createElement(Row, {
     k: "Assets",
-    v: fmtAssets(entity.assets)
+    v: fmtAssets(entity.assets, entity.assets_unit)
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Employees",
-    v: entity.employees?.toLocaleString() || "-"
+    v: entity.employees != null ? entity.employees.toLocaleString() : "—"
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Branches",
-    v: entity.branches?.toString() || "-"
-  }), /*#__PURE__*/React.createElement(Row, {
+    v: entity.branches != null ? String(entity.branches) : "—"
+  }), entity.members != null ? /*#__PURE__*/React.createElement(Row, {
+    k: "Members",
+    v: entity.members.toLocaleString()
+  }) : null, entity.customers != null ? /*#__PURE__*/React.createElement(Row, {
+    k: "Customers",
+    v: entity.customers.toLocaleString()
+  }) : null, /*#__PURE__*/React.createElement(Row, {
     k: "CAGR",
-    v: entity.cagr ? `${fmtPct(entity.cagr)} · ${entity.trend}` : "-"
-  }), /*#__PURE__*/React.createElement(Row, {
+    v: entity.cagr != null ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}` : "—"
+  }), entity.net_worth_ratio != null ? /*#__PURE__*/React.createElement(Row, {
+    k: "Net worth ratio",
+    v: `${fx(entity.net_worth_ratio, 2)}%`
+  }) : null, /*#__PURE__*/React.createElement(Row, {
     k: "Regulator",
-    v: entity.regulator
+    v: entity.regulator || "—"
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Footprint",
-    v: entity.footprint?.join(" · ") || "-"
-  })))), /*#__PURE__*/React.createElement(WhyNowStrip, {
+    v: entity.footprint?.length ? entity.footprint.join(" · ") : "—"
+  }), entity.charter ? /*#__PURE__*/React.createElement(Row, {
+    k: "Charter",
+    v: entity.charter
+  }) : null, entity.founded ? /*#__PURE__*/React.createElement(Row, {
+    k: "Founded",
+    v: String(entity.founded).slice(0, 4)
+  }) : null))), /*#__PURE__*/React.createElement(WhyNowStrip, {
     entity: entity,
     openEvidence: openEvidence,
-    audience: audience
+    audience: audience,
+    openSubcap: openSubcap
   }), /*#__PURE__*/React.createElement(SCQACard, {
     entity: entity,
     expanded: scqaExp,
@@ -378,7 +395,8 @@ function ScoreRing({
 function WhyNowStrip({
   entity,
   openEvidence,
-  audience
+  audience,
+  openSubcap
 }) {
   const [open, setOpen] = useState(0); // first signal expanded by default
   const signals = DMA.whyNowFor(entity.id) || [];
@@ -674,7 +692,52 @@ function WhyNowStrip({
         color: "var(--z-body)",
         lineHeight: 1.55
       }
-    }, s.risk)) : null, /*#__PURE__*/React.createElement("div", {
+    }, s.risk)) : null, s.cost_now ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "var(--z-lav)",
+        borderLeft: "3px solid var(--z-dpur)",
+        borderRadius: "0 6px 6px 0",
+        padding: "8px 12px",
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9.5,
+        fontWeight: 700,
+        letterSpacing: ".1em",
+        color: "var(--z-dpur)",
+        textTransform: "uppercase",
+        marginBottom: 2
+      }
+    }, "Cost of acting now"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "var(--z-body)",
+        lineHeight: 1.55
+      }
+    }, s.cost_now)) : null, (s.subcaps || []).length ? /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 5,
+        flexWrap: "wrap",
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 9.5,
+        color: "var(--z-muted)",
+        textTransform: "uppercase",
+        letterSpacing: ".08em"
+      }
+    }, "Bears on"), s.subcaps.map(cid => /*#__PURE__*/React.createElement("button", {
+      key: cid,
+      className: "chip purple",
+      style: {
+        cursor: "pointer",
+        border: 0
+      },
+      onClick: () => openSubcap && openSubcap(cid)
+    }, cid))) : null, /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         alignItems: "center",

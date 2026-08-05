@@ -120,6 +120,32 @@ function adaptOss(opportunity) {
    it and a footer of regulator · footprint · branches · FTE. Periods come
    from the promoted series; the footer figures come from firmographics,
    which is where they are stated. */
+/* Compound annual growth rate over the promoted series.
+   Uses the FIRST and LAST points that carry both a period year and a positive
+   value, and the real number of years between them — not the count of rows,
+   which would be wrong for any series with a gap. Returns {} when it cannot be
+   computed, so the caller spreads nothing and the field stays absent. */
+function cagrOf(series) {
+  const yearOf = s => {
+    const m = /(\d{4})/.exec(String(s.period || ""));
+    return m ? Number(m[1]) : null;
+  };
+  const pts = (series || []).map(s => ({
+    y: yearOf(s),
+    v: num(s.value)
+  })).filter(p => p.y !== null && p.v !== null && p.v > 0).sort((a, b) => a.y - b.y);
+  if (pts.length < 2) return {};
+  const a = pts[0],
+    b = pts[pts.length - 1];
+  const years = b.y - a.y;
+  if (years <= 0) return {};
+  const cagr = Math.pow(b.v / a.v, 1 / years) - 1;
+  if (!isFinite(cagr)) return {};
+  return {
+    cagr,
+    cagr_basis: `${a.y}–${b.y} · ${years} yr`
+  };
+}
 function adaptFinancials(financialSeries, firmographics, regulatory) {
   const series = financialSeries && financialSeries.series || [];
   if (!series.length) return null;
@@ -151,6 +177,13 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
     geography: regulatory && (regulatory.jurisdictions || []).join(" · ") || null,
     headline: last ? `${moneyOf(last)} · ${last.period || ""}`.trim() : null,
     basis: (series.find(s => s.basis) || {}).basis || null,
+    // CAGR is COMPUTED from the dated points, never taken on faith. The card
+    // showed "—" because no contract field carries it and nothing derived it,
+    // while the series states the endpoints it needs. Computed-or-null
+    // (invariant 9): fewer than two dated points, or a non-positive endpoint,
+    // yields null rather than a figure with no basis. `cagr_basis` names the
+    // span so the reader can see what it was computed over.
+    ...cagrOf(series),
     trend: financialSeries.trend || null,
     verified_sparse: !!financialSeries.verified_sparse,
     events: []

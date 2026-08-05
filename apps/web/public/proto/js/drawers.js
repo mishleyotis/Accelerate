@@ -347,7 +347,114 @@ function InsightModal() {
     title: "SO WHAT",
     body: ic.so_what,
     accent: true
+  }), ic.severity_rationale ? /*#__PURE__*/React.createElement(Block, {
+    title: `SEVERITY · ${ic.severity || "—"}`,
+    body: ic.severity_rationale
+  }) : null, ic.alternative && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "var(--z-bg)",
+      border: "1px solid var(--z-sep)",
+      borderRadius: 8,
+      padding: "12px 14px",
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: ".1em",
+      color: "var(--z-muted)",
+      marginBottom: 6,
+      textTransform: "uppercase"
+    }
+  }, "Alternative explanation"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "var(--z-body)",
+      lineHeight: 1.6
+    }
+  }, ic.alternative)) : null, ic.validation_question ? /*#__PURE__*/React.createElement("div", {
+    className: "co co-teal",
+    style: {
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "info",
+    size: 14
   }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "co-title"
+  }, "Ask in discovery"), /*#__PURE__*/React.createElement("div", {
+    className: "co-body"
+  }, ic.validation_question))) : null, ic.r_layer && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "var(--ph0-lt)",
+      border: "1px solid var(--ph0-bd)",
+      borderRadius: 8,
+      padding: "12px 14px",
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: ".1em",
+      color: "var(--z-dpur)",
+      textTransform: "uppercase"
+    }
+  }, "Reasoning trace"), /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), ic.r_layer.verdict ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-purple"
+  }, ic.r_layer.verdict) : null, ic.r_layer.confidence ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted"
+  }, ic.r_layer.confidence) : null), [["Hypothesis", ic.r_layer.hypothesis], ["Counter-evidence", ic.r_layer.counter], ["Domain test", ic.r_layer.domain_test]].map(([k, v]) => v ? /*#__PURE__*/React.createElement("div", {
+    key: k,
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: ".08em",
+      color: "var(--z-muted)",
+      textTransform: "uppercase",
+      marginBottom: 2
+    }
+  }, k), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: "var(--z-body)",
+      lineHeight: 1.55
+    }
+  }, v)) : null), (ic.r_layer.probes_run || []).length ? /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 5,
+      flexWrap: "wrap",
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9.5,
+      color: "var(--z-muted)",
+      textTransform: "uppercase",
+      letterSpacing: ".08em"
+    }
+  }, "Probes"), ic.r_layer.probes_run.map((x, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    className: "chip",
+    title: x
+  }, String(x).slice(0, 34)))) : null) : null, (ic.affects || []).length ? /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--z-lav)",
       borderRadius: 8,
@@ -363,7 +470,7 @@ function InsightModal() {
       marginBottom: 8,
       textTransform: "uppercase"
     }
-  }, "Affects \xB7 ", ic.affects.length, " capabilities"), /*#__PURE__*/React.createElement("div", {
+  }, "Affects \xB7 ", ic.affects.length, " capabilit", ic.affects.length === 1 ? "y" : "ies"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexWrap: "wrap",
@@ -373,7 +480,13 @@ function InsightModal() {
     key: sid,
     className: "chip purple",
     onClick: () => openSubcap(sid)
-  }, sid)))), rec && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+  }, sid)))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      marginTop: 14
+    }
+  }, "This card names no capability cell, so it cannot be traced back to the assessment grid."), rec && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
     className: "co co-teal",
     style: {
       marginTop: 12,

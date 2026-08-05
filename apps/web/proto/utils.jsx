@@ -384,11 +384,21 @@ function fmtDate(s) {
   const d = new Date(s);
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
-function fmtAssets(n) {
+/* Assets, honouring the unit the payload states.
+   The firmographics contract states magnitude in a `unit` field — Baxter's is
+   `{value: "6.5", unit: "USD billions"}` — so the bare number is 6.5, not
+   6_500_000_000. Formatting it by size alone printed "$6.5", which reads as six
+   dollars fifty for a $6.5bn balance sheet. The unit is now applied first. */
+function fmtAssets(n, unit) {
   if (n == null || n === 0) return "-";
-  if (n >= 1e9) return `$${(n/1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `$${(n/1e6).toFixed(0)}M`;
-  return `$${n.toLocaleString()}`;
+  const u = String(unit || "").toLowerCase();
+  const mult = /billion|\bbn\b/.test(u) ? 1e9
+             : /million|\bmm?\b/.test(u) ? 1e6
+             : /thousand|\bk\b/.test(u) ? 1e3 : 1;
+  const v = n * mult;
+  if (v >= 1e9) return `$${(v/1e9).toFixed(1)}B`;
+  if (v >= 1e6) return `$${(v/1e6).toFixed(0)}M`;
+  return `$${v.toLocaleString()}`;
 }
 function fmtPct(n) { return `${(n*100).toFixed(0)}%`; }
 function relTime(s) {

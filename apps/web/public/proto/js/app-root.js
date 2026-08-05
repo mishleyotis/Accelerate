@@ -354,6 +354,16 @@ function ClientRoute({
     // peer medians and framing sentence stayed unread while the hero
     // rendered a constant offset and a hardcoded gap.
     pillar_peer_medians: live.entity.pillar_peer_medians || {},
+    // CAGR is computed from the promoted financial series (adapter
+    // `cagrOf`); footprint is the regulatory section's jurisdictions. Both
+    // were adapted and then dropped here, so the firmographics card printed
+    // an em dash for two values the run actually carries. Whatever this
+    // merge omits reaches no card — that is the failure mode this block
+    // keeps reproducing, so each new field is added here deliberately.
+    cagr: (live.entity.financials && live.entity.financials.cagr) != null ? live.entity.financials.cagr : null,
+    cagr_basis: live.entity.financials && live.entity.financials.cagr_basis || null,
+    footprint: live.entity.regulatory && live.entity.regulatory.jurisdictions || entity.footprint || [],
+    license: live.entity.regulatory && live.entity.regulatory.license_type || entity.license || null,
     framing: live.entity.framing || null,
     posture: live.entity.posture || null,
     posture_basis: live.entity.posture_basis || null,

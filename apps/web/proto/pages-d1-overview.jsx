@@ -3,7 +3,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 function ClientOverview({ entity, run }) {
-  const { audience, openEvidence, openInsight, role, setIpSurface, setIpContext, setIpOpen, tweaks, pushToast } = useApp();
+  const { audience, openEvidence, openInsight, openSubcap, role, setIpSurface, setIpContext, setIpOpen, tweaks, pushToast } = useApp();
   const [findingOpen, setFindingOpen] = useState(null);
   const [scqaExp, setScqaExp] = useState(false);
   const layout = tweaks.overview_layout || "balanced";
@@ -44,7 +44,7 @@ function ClientOverview({ entity, run }) {
           <div className="sub">{[
             DMA.SUBVERTICAL_LABEL[entity.subvertical],
             entity.hq,
-            entity.assets != null ? `${fmtAssets(entity.assets)} assets` : null,
+            entity.assets != null ? `${fmtAssets(entity.assets, entity.assets_unit)} assets` : null,
             entity.assessment_date ? `Assessment ${fmtDate(entity.assessment_date)}` : null,
             entity.members != null ? `${entity.members.toLocaleString()} members` : null,
           ].filter(Boolean).join(" · ")}</div>
@@ -120,18 +120,31 @@ function ClientOverview({ entity, run }) {
           </div>
           <div style={{ background: "var(--z-lav)", borderRadius: 12, padding: 16 }}>
             <div className="eyebrow" style={{ marginBottom: 8 }}>Firmographics</div>
-            <Row k="Assets"     v={fmtAssets(entity.assets)} />
-            <Row k="Employees"  v={entity.employees?.toLocaleString() || "-"} />
-            <Row k="Branches"   v={entity.branches?.toString() || "-"} />
-            <Row k="CAGR"       v={entity.cagr ? `${fmtPct(entity.cagr)} · ${entity.trend}` : "-"} />
-            <Row k="Regulator"  v={entity.regulator} />
-            <Row k="Footprint"  v={entity.footprint?.join(" · ") || "-"} />
+            {/* Every promoted firmographic gets a row. Four of these —
+                members, net worth ratio, founded, charter — were mapped onto
+                the entity and rendered by nothing, so the card looked sparse
+                while the payload carried them. A field the run did not state
+                prints an em dash rather than being hidden: absent and
+                not-asked-for must not look the same. */}
+            <Row k="Assets"     v={fmtAssets(entity.assets, entity.assets_unit)} />
+            <Row k="Employees"  v={entity.employees != null ? entity.employees.toLocaleString() : "—"} />
+            <Row k="Branches"   v={entity.branches != null ? String(entity.branches) : "—"} />
+            {entity.members != null ? <Row k="Members" v={entity.members.toLocaleString()} /> : null}
+            {entity.customers != null ? <Row k="Customers" v={entity.customers.toLocaleString()} /> : null}
+            <Row k="CAGR"       v={entity.cagr != null
+              ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}`
+              : "—"} />
+            {entity.net_worth_ratio != null ? <Row k="Net worth ratio" v={`${fx(entity.net_worth_ratio, 2)}%`} /> : null}
+            <Row k="Regulator"  v={entity.regulator || "—"} />
+            <Row k="Footprint"  v={entity.footprint?.length ? entity.footprint.join(" · ") : "—"} />
+            {entity.charter ? <Row k="Charter" v={entity.charter} /> : null}
+            {entity.founded ? <Row k="Founded" v={String(entity.founded).slice(0, 4)} /> : null}
           </div>
         </div>
       </div>
 
       {/* Why now */}
-      <WhyNowStrip entity={entity} openEvidence={openEvidence} audience={audience} />
+      <WhyNowStrip entity={entity} openEvidence={openEvidence} audience={audience} openSubcap={openSubcap} />
 
       {/* SCQA */}
       <SCQACard entity={entity} expanded={scqaExp} onToggle={() => setScqaExp(o => !o)} openEvidence={openEvidence} />
@@ -191,7 +204,7 @@ function ScoreRing({ score, size = 110 }) {
    Expanded → detail · metric · timeline event · the play · peer context ·
    risk-if-ignored · tier-coded evidence · confidence + claim type.
    Customer view keeps positive framing and strips internal rationale. */
-function WhyNowStrip({ entity, openEvidence, audience }) {
+function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
   const [open, setOpen] = useState(0); // first signal expanded by default
   const signals = DMA.whyNowFor(entity.id) || [];
   const isCust = audience === "customer";
@@ -277,6 +290,29 @@ function WhyNowStrip({ entity, openEvidence, audience }) {
                     <div style={{ background: "rgba(214,109,42,.08)", borderLeft: "3px solid var(--z-org)", borderRadius: "0 6px 6px 0", padding: "8px 12px", marginBottom: 10 }}>
                       <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-org)", textTransform: "uppercase", marginBottom: 2 }}>If ignored</div>
                       <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55 }}>{s.risk}</div>
+                    </div>
+                  ) : null}
+                  {/* The other side of the argument. `cost_of_acting_now` is a
+                      REQUIRED contract field — the honest cost of moving, about
+                      fifty words per signal — and it was adapted onto
+                      `s.cost_now` and read by nothing, so every card argued one
+                      way only. A why-now that states only the upside is the
+                      shallow reading; this is the half that was missing. */}
+                  {s.cost_now ? (
+                    <div style={{ background: "var(--z-lav)", borderLeft: "3px solid var(--z-dpur)", borderRadius: "0 6px 6px 0", padding: "8px 12px", marginBottom: 10 }}>
+                      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase", marginBottom: 2 }}>Cost of acting now</div>
+                      <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55 }}>{s.cost_now}</div>
+                    </div>
+                  ) : null}
+                  {/* The cells this trigger bears on — the link back to the DMA
+                      that the card was missing. */}
+                  {(s.subcaps || []).length ? (
+                    <div className="row" style={{ gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
+                      <span style={{ fontSize: 9.5, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Bears on</span>
+                      {s.subcaps.map(cid => (
+                        <button key={cid} className="chip purple" style={{ cursor: "pointer", border: 0 }}
+                                onClick={() => openSubcap && openSubcap(cid)}>{cid}</button>
+                      ))}
                     </div>
                   ) : null}
                   {/* footer: evidence + confidence/claim */}

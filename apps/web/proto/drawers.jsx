@@ -211,17 +211,89 @@ function InsightModal() {
         <div className="modal-body">
           {tab === "detail" ? (
             <div>
+              {/* WHAT / WHY / SO WHAT were the only three fields this modal read.
+                  The producer promotes eleven per card, and the other six were
+                  adapted onto the object and displayed by nothing — the
+                  severity rationale, the alternative explanation, the
+                  validation question, the claim class and the whole R-Layer
+                  (hypothesis, counter-argument, domain test, probes, verdict).
+                  That is the shallow reading: the reasoning was written,
+                  promoted, stored, served, and never shown. */}
               <Block title="WHAT" body={ic.what} evIds={ic.evidence} onEv={openEvidence} />
               <Block title="WHY" body={ic.why} />
               <Block title="SO WHAT" body={ic.so_what} accent />
-              <div style={{ background: "var(--z-lav)", borderRadius: 8, padding: "12px 14px", marginTop: 14 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", marginBottom: 8, textTransform: "uppercase" }}>Affects · {ic.affects.length} capabilities</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {ic.affects.map(sid => (
-                    <button key={sid} className="chip purple" onClick={() => openSubcap(sid)}>{sid}</button>
-                  ))}
+
+              {ic.severity_rationale ? (
+                <Block title={`SEVERITY · ${ic.severity || "—"}`} body={ic.severity_rationale} />
+              ) : null}
+
+              {/* The counter-case, stated by the producer. A ranked claim that
+                  never shows its alternative reads as an assertion. */}
+              {ic.alternative && audience !== "customer" ? (
+                <div style={{ background: "var(--z-bg)", border: "1px solid var(--z-sep)", borderRadius: 8, padding: "12px 14px", marginTop: 14 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", marginBottom: 6, textTransform: "uppercase" }}>
+                    Alternative explanation
+                  </div>
+                  <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.6 }}>{ic.alternative}</div>
                 </div>
-              </div>
+              ) : null}
+
+              {/* What would settle it. This is the question an AE takes into the
+                  room, and it was invisible. */}
+              {ic.validation_question ? (
+                <div className="co co-teal" style={{ marginTop: 12 }}>
+                  <Icon name="info" size={14} />
+                  <div style={{ flex: 1 }}>
+                    <div className="co-title">Ask in discovery</div>
+                    <div className="co-body">{ic.validation_question}</div>
+                  </div>
+                </div>
+              ) : null}
+
+              {/* The R-Layer. Internal only: it is the producer's reasoning
+                  trace, not client-facing prose. */}
+              {ic.r_layer && audience !== "customer" ? (
+                <div style={{ background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", borderRadius: 8, padding: "12px 14px", marginTop: 14 }}>
+                  <div className="row" style={{ marginBottom: 8 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase" }}>
+                      Reasoning trace
+                    </span>
+                    <span className="spacer" />
+                    {ic.r_layer.verdict ? <span className="b b-purple">{ic.r_layer.verdict}</span> : null}
+                    {ic.r_layer.confidence ? <span className="b b-muted">{ic.r_layer.confidence}</span> : null}
+                  </div>
+                  {[["Hypothesis", ic.r_layer.hypothesis],
+                    ["Counter-evidence", ic.r_layer.counter],
+                    ["Domain test", ic.r_layer.domain_test]].map(([k, v]) => v ? (
+                    <div key={k} style={{ marginBottom: 8 }}>
+                      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 2 }}>{k}</div>
+                      <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.55 }}>{v}</div>
+                    </div>
+                  ) : null)}
+                  {(ic.r_layer.probes_run || []).length ? (
+                    <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 4 }}>
+                      <span style={{ fontSize: 9.5, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Probes</span>
+                      {ic.r_layer.probes_run.map((x, i) => <span key={i} className="chip" title={x}>{String(x).slice(0, 34)}</span>)}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {(ic.affects || []).length ? (
+                <div style={{ background: "var(--z-lav)", borderRadius: 8, padding: "12px 14px", marginTop: 14 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", marginBottom: 8, textTransform: "uppercase" }}>Affects · {ic.affects.length} capabilit{ic.affects.length === 1 ? "y" : "ies"}</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {ic.affects.map(sid => (
+                      <button key={sid} className="chip purple" onClick={() => openSubcap(sid)}>{sid}</button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginTop: 14 }}>
+                  This card names no capability cell, so it cannot be traced back
+                  to the assessment grid.
+                </div>
+              )}
               {rec && audience !== "customer" ? (
                 <div className="co co-teal" style={{ marginTop: 12, cursor: "pointer" }} onClick={() => { closeInsight(); openRec(rec.id); }}>
                   <Icon name="platform" size={14} />
