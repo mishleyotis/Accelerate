@@ -350,7 +350,12 @@ function DashboardHome() {
   const active = ent.filter(e => e.in_progress);
   const recent = ent.filter(e => !e.in_progress).slice().sort((a, b) => new Date(b.assessment_date) - new Date(a.assessment_date));
   const stale = ent.filter(e => e.assessment_date && DMA.helpers.freshnessOf(e.assessment_date).tone !== "ok").slice(0, 3);
-  const totalAlerts = DMA.ALERTS.filter(a => a.status === "OPEN").length;
+  // Directory rows carry open_alerts per entity, counted by serving_directory
+  // from the alerts queue. Fall back to the fixture's own list only when
+  // there is no live directory at all (the prototype, run standalone).
+  const live = typeof window !== "undefined" ? window.DMA_LIVE : null;
+  const totalAlerts = live ? ent.reduce((a, e) => a + (e.open_alerts || 0), 0) : DMA.ALERTS.filter(a => a.status === "OPEN").length;
+  const alertEntities = ent.filter(e => (e.open_alerts || 0) > 0).length;
   return /*#__PURE__*/React.createElement(PageShell, {
     title: "Dashboard",
     crumbs: [{
@@ -394,12 +399,11 @@ function DashboardHome() {
     icon: "bell",
     accent: "var(--z-org)"
   }), /*#__PURE__*/React.createElement(KpiCard, {
-    label: "Insight cards",
-    value: DMA.INSIGHT_CARDS.length * ent.length / 7,
-    sub: "across all runs",
+    label: "Promoted runs",
+    value: ent.reduce((a, e) => a + (e.runs || []).length, 0),
+    sub: "across all entities",
     icon: "insight",
-    accent: "var(--z-mid)",
-    rounding: true
+    accent: "var(--z-mid)"
   }), (() => {
     const scored = ent.filter(e => e.overall);
     const avg = scored.length ? scored.reduce((a, e) => a + e.overall, 0) / scored.length : null;
@@ -552,7 +556,7 @@ function DashboardHome() {
       marginBottom: 10,
       lineHeight: 1.55
     }
-  }, "Thin-evidence alerts across ", new Set(DMA.ALERTS.filter(a => a.status === "OPEN").map(a => a.entity_id)).size, " entities."), /*#__PURE__*/React.createElement("button", {
+  }, "Thin-evidence alerts across ", alertEntities, " ", alertEntities === 1 ? "entity" : "entities", "."), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary btn-sm",
     style: {
       width: "100%",
@@ -651,7 +655,7 @@ function DashboardHome() {
     className: "muted"
   }, "Package scan"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, "not yet scheduled")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", null, live && (live.import_scans || []).length ? `last ${relTime(live.import_scans[0].started_at)}` : "see import & jobs")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("span", {
     className: "muted"
@@ -669,7 +673,7 @@ function DashboardHome() {
     className: "muted"
   }, "Pending review"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, DMA.PENDING_REVIEW.length, " entities"))), /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement("span", null, (live ? live.pending_review || [] : DMA.PENDING_REVIEW).length, " entities"))), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     style: {
       width: "100%",
@@ -788,8 +792,8 @@ function DashboardEntityCard({
       lineHeight: 1.35
     },
     className: "txt-fit-2",
-    title: `${DMA.SUBVERTICAL_LABEL[e.subvertical]} · ${e.hq}`
-  }, DMA.SUBVERTICAL_LABEL[e.subvertical], " \xB7 ", e.hq)), /*#__PURE__*/React.createElement("div", {
+    title: [DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")
+  }, [DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · "))), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "right",
       flexShrink: 0,
@@ -1123,7 +1127,7 @@ function EntityCard({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, DMA.SUBVERTICAL_LABEL[e.subvertical], " \xB7 ", e.hq)), e.in_progress ? /*#__PURE__*/React.createElement("span", {
+  }, [DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · "))), e.in_progress ? /*#__PURE__*/React.createElement("span", {
     className: "b b-org",
     style: {
       display: "inline-flex",

@@ -164,7 +164,14 @@ function DashboardHome() {
   const active = ent.filter(e => e.in_progress);
   const recent = ent.filter(e => !e.in_progress).slice().sort((a, b) => new Date(b.assessment_date) - new Date(a.assessment_date));
   const stale = ent.filter(e => e.assessment_date && DMA.helpers.freshnessOf(e.assessment_date).tone !== "ok").slice(0, 3);
-  const totalAlerts = DMA.ALERTS.filter(a => a.status === "OPEN").length;
+  // Directory rows carry open_alerts per entity, counted by serving_directory
+  // from the alerts queue. Fall back to the fixture's own list only when
+  // there is no live directory at all (the prototype, run standalone).
+  const live = typeof window !== "undefined" ? window.DMA_LIVE : null;
+  const totalAlerts = live
+    ? ent.reduce((a, e) => a + (e.open_alerts || 0), 0)
+    : DMA.ALERTS.filter(a => a.status === "OPEN").length;
+  const alertEntities = ent.filter(e => (e.open_alerts || 0) > 0).length;
 
   return (
     <PageShell title="Dashboard" crumbs={[{ label: "Home" }]}>
@@ -184,7 +191,12 @@ function DashboardHome() {
       <div className="g4" style={{ marginBottom: 14 }}>
         <KpiCard label="Active assessments" value={ent.filter(e => !e.in_progress).length}        sub="all subverticals" icon="users"    accent="var(--z-teal)" />
         <KpiCard label="Open alerts"        value={totalAlerts}                                    sub="thin-evidence"   icon="bell"     accent="var(--z-org)"  />
-        <KpiCard label="Insight cards"      value={DMA.INSIGHT_CARDS.length * ent.length / 7}    sub="across all runs" icon="insight"  accent="var(--z-mid)"  rounding />
+        {/* Insight-card counts are per-run and live on the D4 page; the
+            dashboard reports what the directory knows — promoted runs — and
+            says so, rather than scaling a fixture by entity count. */}
+        <KpiCard label="Promoted runs"
+          value={ent.reduce((a, e) => a + (e.runs || []).length, 0)}
+          sub="across all entities" icon="insight" accent="var(--z-mid)" />
         {/* Production divergence: computed or null, never NaN (invariant 9).
             An average over zero scored entities renders its empty state. */}
         {(() => {
@@ -255,7 +267,7 @@ function DashboardHome() {
                 <strong style={{ fontSize: 13 }}>Needs attention</strong>
                 <span className="b b-org" style={{ marginLeft: "auto" }}>{totalAlerts}</span>
               </div>
-              <p style={{ fontSize: 12, color: "var(--z-body)", marginBottom: 10, lineHeight: 1.55 }}>Thin-evidence alerts across {new Set(DMA.ALERTS.filter(a => a.status === "OPEN").map(a => a.entity_id)).size} entities.</p>
+              <p style={{ fontSize: 12, color: "var(--z-body)", marginBottom: 10, lineHeight: 1.55 }}>Thin-evidence alerts across {alertEntities} {alertEntities === 1 ? "entity" : "entities"}.</p>
               <button className="btn btn-secondary btn-sm" style={{ width: "100%", justifyContent: "center" }} onClick={() => navigate("/alerts")}>Review alerts <Icon name="arrow-r" size={11} /></button>
             </div>
 
@@ -285,13 +297,21 @@ function DashboardHome() {
                     budget nothing measures is a default that looks like data.
                     The scheduled-scan row lights up when the Scheduler lands. */}
                 <div style={{ display: "grid", gap: 8, fontSize: 11.5 }}>
+                  {/* The package scan is a Cloud Scheduler trigger firing the
+                      worker Job, and the admin console reads its real
+                      executions. Asserting a schedule here without reading one
+                      was a placeholder; point at the page that knows. */}
                   {window.DMA_LIVE ? (
-                    <div className="row"><span className="muted">Package scan</span><span className="spacer" /><span>not yet scheduled</span></div>
+                    <div className="row"><span className="muted">Package scan</span><span className="spacer" />
+                      <span>{(live && (live.import_scans || []).length)
+                        ? `last ${relTime(live.import_scans[0].started_at)}`
+                        : "see import & jobs"}</span></div>
                   ) : (<>
                     <div className="row"><span className="muted">Drive crawl</span><span className="spacer" /><span>2 hr ago</span></div>
                     <div className="row"><span className="muted">Vertex AI budget</span><span className="spacer" /><span>$184 / $400</span></div>
                   </>)}
-                  <div className="row"><span className="muted">Pending review</span><span className="spacer" /><span>{DMA.PENDING_REVIEW.length} entities</span></div>
+                  <div className="row"><span className="muted">Pending review</span><span className="spacer" />
+                    <span>{(live ? (live.pending_review || []) : DMA.PENDING_REVIEW).length} entities</span></div>
                 </div>
                 <button className="btn btn-tertiary btn-sm" style={{ width: "100%", justifyContent: "center", marginTop: 10 }} onClick={() => navigate("/admin")}>Open admin <Icon name="arrow-r" size={11} /></button>
               </div>
@@ -329,7 +349,7 @@ function DashboardEntityCard({ e }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.3 }} className="txt-fit-2" title={e.name}>{e.name}</div>
-          <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.35 }} className="txt-fit-2" title={`${DMA.SUBVERTICAL_LABEL[e.subvertical]} · ${e.hq}`}>{DMA.SUBVERTICAL_LABEL[e.subvertical]} · {e.hq}</div>
+          <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.35 }} className="txt-fit-2" title={[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}>{[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
           <div style={{ fontSize: 22, fontWeight: 200, color: matHex, lineHeight: 1 }}>{e.overall?.toFixed(1) || "-"}</div>
@@ -479,7 +499,7 @@ function EntityCard({ e }) {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontWeight: 600, fontSize: 14, color: "var(--z-dark)", marginBottom: 2 }}>{e.name}</div>
-          <div style={{ fontSize: 11, color: "var(--z-muted)" }}>{DMA.SUBVERTICAL_LABEL[e.subvertical]} · {e.hq}</div>
+          <div style={{ fontSize: 11, color: "var(--z-muted)" }}>{[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}</div>
         </div>
         {e.in_progress ? (
           <span className="b b-org" style={{ display: "inline-flex", gap: 4 }}>● IN PROGRESS</span>
