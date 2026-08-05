@@ -369,10 +369,25 @@ def parse_grain_summaries(path: str) -> dict:
     display banding is the app's four-band rule over raw scores."""
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     out = {"pillars": [], "categories": []}
+
+    def _tab_headers(name: str, anchor: str):
+        """A tab whose header row can't be located (or that lacks a Score
+        column) yields no stated grains — H4 then rejects quotes at that
+        grain rather than the whole package failing to ingest."""
+        if name not in wb.sheetnames:
+            return None, None, None
+        ws = wb[name]
+        try:
+            headers, first = _header_map(ws, anchor)
+        except ValueError:
+            return None, None, None
+        if "score" not in headers:
+            return None, None, None
+        return ws, headers, first
+
     try:
-        if "Pillar_Summary" in wb.sheetnames:
-            ws = wb["Pillar_Summary"]
-            headers, first = _header_map(ws, "Pillar")
+        ws, headers, first = _tab_headers("Pillar_Summary", "Pillar")
+        if headers is not None:
             for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
                 def v(key, _row=row):
                     i = headers.get(key)
@@ -389,9 +404,8 @@ def parse_grain_summaries(path: str) -> dict:
                     "peer_median": _num(v("peer_median")),
                     "source_cell": f"Pillar_Summary!{score_col}{r}",
                 })
-        if "Category_Detail" in wb.sheetnames:
-            ws = wb["Category_Detail"]
-            headers, first = _header_map(ws, "Category_ID")
+        ws, headers, first = _tab_headers("Category_Detail", "Category_ID")
+        if headers is not None:
             for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
                 def v(key, _row=row):
                     i = headers.get(key)

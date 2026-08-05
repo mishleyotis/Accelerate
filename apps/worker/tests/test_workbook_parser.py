@@ -114,3 +114,50 @@ def test_composite_read_from_its_cell_raw(synthetic_workbook):
     p = parse_scoring_workbook(synthetic_workbook)
     assert p.composite == Decimal("2.4517")                    # raw; rounded ONCE at persist
     assert p.composite_source_cell == "2_Scorecard!A5"
+
+
+def test_grain_summaries_tolerate_unfamiliar_tab_shapes(tmp_path):
+    """Prod regression (APG Federal Credit Union): a workbook whose
+    Pillar_Summary / Category_Detail tabs carry no recognisable header row
+    must yield NO stated grains — never a ValueError that sinks the whole
+    package. H4's grain lock then simply has nothing to serve at that
+    grain (derived values are computed or null, never defaulted)."""
+    from dma_worker.workbook_parser import parse_grain_summaries
+
+    wb = openpyxl.Workbook()
+    ps = wb.active
+    ps.title = "Pillar_Summary"
+    ps["A1"] = "A narrative block, not a header"
+    ps["B2"] = 3.1
+    cd = wb.create_sheet("Category_Detail")
+    cd["A1"] = "Category rollup (chart source, no Category_ID column)"
+    cd["B3"] = 2.5
+    path = tmp_path / "odd_shape.xlsx"
+    wb.save(path)
+
+    out = parse_grain_summaries(str(path))
+    assert out == {"pillars": [], "categories": []}
+
+
+def test_grain_summaries_read_stated_values_when_tabs_are_regular(tmp_path):
+    from dma_worker.workbook_parser import parse_grain_summaries
+
+    wb = openpyxl.Workbook()
+    ps = wb.active
+    ps.title = "Pillar_Summary"
+    for i, h in enumerate(["Pillar", "Pillar_Name", "Score", "Weight_IB", "Peer_Median"], 1):
+        ps.cell(row=1, column=i, value=h)
+    ps.append(["P1", "Strategy, Governance & Culture", 2.1, 0.25, 2.4])
+    cd = wb.create_sheet("Category_Detail")
+    for i, h in enumerate(["Category_ID", "Category_Name", "Pillar", "Score", "Peer_Median"], 1):
+        cd.cell(row=1, column=i, value=h)
+    cd.append(["P1C1", "Fake Category", "P1", 1.9, 2.2])
+    path = tmp_path / "regular.xlsx"
+    wb.save(path)
+
+    out = parse_grain_summaries(str(path))
+    assert [p["pillar_id"] for p in out["pillars"]] == ["P1"]
+    assert out["pillars"][0]["score"] == 2.1
+    assert out["pillars"][0]["source_cell"] == "Pillar_Summary!C2"
+    assert [c["category_id"] for c in out["categories"]] == ["P1C1"]
+    assert out["categories"][0]["score"] == 1.9
