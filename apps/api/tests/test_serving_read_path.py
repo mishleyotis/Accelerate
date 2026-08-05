@@ -233,3 +233,47 @@ def test_active_run_predicate_matches_the_real_enum():
     assert "FROM entities" not in src and "FROM runs" not in src
     # and the envelope reports status and the active flag separately
     assert '"status": picked[9]' in src and '"is_active": bool(picked[8])' in src
+
+
+def test_generated_columns_are_read_back_read_only():
+    """band, delta, grounded_on, age_months/band/status, share_pct and
+    below_threshold are GENERATED ALWAYS: the database computes them from the
+    promoted values, and they are exactly the figures the surfaces show. The
+    writer never writes them; the reader must still return them."""
+    r = readers()[("heatmap", "evidence_age")]
+    assert set(r["derived_cols"]) == {"age_months", "band", "status"}
+    assert readers()[("heatmap", "workbook_scores")]["derived_cols"] == ["band", "delta"]
+    assert readers()[("overview", "scores")]["derived_cols"] == ["band"]
+    assert readers()[("heatmap", "cell_evidence")]["derived_cols"] == ["grounded_on"]
+
+    # item grain: the DB's value lands on the item, beside the written ones
+    rows = [{"e_id": "E-1", "title": "NCUA data", "source_domain": "ncua.gov",
+             "published_or_asof": "2025-09-01", "reference_date": "2026-03-30",
+             "identity_ok": True, "age_months": 7, "band": "current",
+             "status": "FRESH"}]
+    built = assemble("heatmap", "evidence_age", rows)
+    row = built["data"]["rows"][0]
+    assert row["age_months"] == 7 and row["status"] == "FRESH"
+    assert row["published_or_asof"] == "2025-09-01", "written columns still land"
+
+    # run grain: onto the section object
+    built = assemble("overview", "scores", [{"composite": 2.71, "band": "building"}])
+    assert built["data"]["band"] == "building"
+
+    # a NULL generated value is absent, never a default that looks like data
+    built = assemble("heatmap", "evidence_age",
+                     [{"e_id": "E-2", "age_months": None, "band": None}])
+    assert "age_months" not in built["data"]["rows"][0]
+
+
+def test_dotted_item_field_nests_like_the_payload():
+    """platform.stairstep's item_field is `ladder.steps`. The payload nests it
+    under ladder; assigning the dotted string as a literal key produced a
+    data["ladder.steps"] that no consumer could find, while the section-level
+    ladder.theme landed correctly under ladder — two shapes for one object."""
+    assert readers()[("platform", "stairstep")]["item_field"] == "ladder.steps"
+    rows = [{"step_level": 1, "label": "Lay the integration backbone",
+             "ladder_theme": "Foundation before features", "unlocks": "reusable APIs"}]
+    built = assemble("platform", "stairstep", rows)
+    assert "ladder.steps" not in built["data"], "the dotted key must not survive"
+    assert built["data"]["ladder"]["steps"][0]["label"] == "Lay the integration backbone"

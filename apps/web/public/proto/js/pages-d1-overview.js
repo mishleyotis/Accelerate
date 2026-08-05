@@ -1524,13 +1524,16 @@ function Row({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      color: "var(--z-muted)"
+      color: "var(--z-muted)",
+      flexShrink: 0,
+      whiteSpace: "nowrap"
     }
   }, k), /*#__PURE__*/React.createElement("span", {
     style: {
       color: "var(--z-dark)",
       fontWeight: 500,
-      textAlign: "right"
+      textAlign: "right",
+      minWidth: 0
     }
   }, v));
 }

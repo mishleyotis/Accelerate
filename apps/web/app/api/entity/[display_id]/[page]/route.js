@@ -34,6 +34,11 @@ export async function GET(req, { params }) {
   if (run) target.searchParams.set("run", run);
 
   const headers = {};
+  // Local QA only: on Cloud Run the ID token comes from the metadata
+  // server, which does not exist on a developer machine.
+  if (process.env.API_ID_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.API_ID_TOKEN}`;
+  }
   try {
     const t = await fetch(
       "http://metadata.google.internal/computeMetadata/v1/instance/" +

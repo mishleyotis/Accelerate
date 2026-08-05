@@ -17,7 +17,18 @@ Three reassembly modes, matching the three writer grains:
          the expander that flattened those object maps, run backwards.
 `sys:` columns are the promotion's own stamps and `env:` columns are the
 universal envelope: both belong in the response envelope, never inside
-`data`. `skip:` columns were never written and are not read.
+`data`.
+
+`skip:` columns were never WRITTEN, but one family of them must still be
+READ: the GENERATED ALWAYS columns. band, delta, grounded_on, age_months,
+age_band, age_status, share_pct and below_threshold are computed by the
+database from the promoted values, and they are exactly the figures a
+surface has to show — an evidence row without its age band, or a category
+without its peer delta, is a surface missing its point. The producer may
+send those keys and they are validated at submit, but the DB's value is
+the one that serves (invariants 8 and 9: computed, never stored twice,
+never recomputed in the app). They come back read-only, under the column
+name the schema gives them. Every other `skip:` column stays unread.
 """
 from __future__ import annotations
 
@@ -40,6 +51,7 @@ def readers() -> dict:
     for page in _spec()["specs"]:
         for w in page["writers"]:
             item_cols, section_cols, env_cols, sys_cols = {}, {}, {}, {}
+            derived_cols = []
             for c in w["columns"]:
                 kind, _, rest = c["source"].partition(":")
                 if kind == "item":
@@ -50,11 +62,14 @@ def readers() -> dict:
                     env_cols[c["column"]] = rest
                 elif kind == "sys":
                     sys_cols[c["column"]] = rest
+                elif kind == "skip" and "GENERATED ALWAYS" in rest:
+                    derived_cols.append(c["column"])
             out[(page["page"], w["section"])] = {
                 "table": w["table"], "grain": w["grain"],
                 "item_field": w.get("item_field"),
                 "item_cols": item_cols, "section_cols": section_cols,
                 "env_cols": env_cols, "sys_cols": sys_cols,
+                "derived_cols": derived_cols,
             }
     return out
 
@@ -120,12 +135,21 @@ def assemble(page: str, section: str, rows: list[dict]) -> dict | None:
             if col in row and key not in stamps:
                 stamps[key] = row[col]
 
+    def take_derived(row: dict, target: dict) -> None:
+        """The database's own computed values, read-only. Absent columns are
+        simply absent: a derived value is computed or null, never a default
+        that looks like data (invariant 9)."""
+        for col in r["derived_cols"]:
+            if col in row and row[col] is not None and col not in target:
+                target[col] = _json_maybe(row[col])
+
     if r["grain"] == "run":
         row = rows[0]
         take_env(row)
         for col, path in r["section_cols"].items():
             if col in row:
                 _set_path(data, path, _json_maybe(row[col]))
+        take_derived(row, data)
     elif r["item_field"]:
         items = []
         for row in rows:
@@ -134,8 +158,12 @@ def assemble(page: str, section: str, rows: list[dict]) -> dict | None:
             for col, key in r["item_cols"].items():
                 if col in row:
                     _set_path(item, key, _json_maybe(row[col]))
+            take_derived(row, item)
             items.append(item)
-        data[r["item_field"]] = items
+        # item_field can be a dotted path (`ladder.steps`) — the payload nests
+        # it, so the reader must too. Assigning the dotted string as a literal
+        # key produced a `data["ladder.steps"]` no consumer could ever find.
+        _set_path(data, r["item_field"], items)
         # section-level columns repeat on every row; read them once
         for col, path in r["section_cols"].items():
             if col in rows[0]:
@@ -149,6 +177,7 @@ def assemble(page: str, section: str, rows: list[dict]) -> dict | None:
             for col, key in r["item_cols"].items():
                 if col in row and key not in ("pillar_id", "category_id"):
                     _set_path(item, key, _json_maybe(row[col]))
+            take_derived(row, item)
             cat, pil = row.get("category_id"), row.get("pillar_id")
             if cat:
                 categories[cat] = item

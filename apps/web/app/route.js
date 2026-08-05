@@ -16,6 +16,11 @@ async function apiFetch(path) {
   const base = process.env.API_URL;
   if (!base) return null;
   const headers = {};
+  // Local QA only: on Cloud Run the ID token comes from the metadata
+  // server, which does not exist on a developer machine.
+  if (process.env.API_ID_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.API_ID_TOKEN}`;
+  }
   try {
     const t = await fetch(
       "http://metadata.google.internal/computeMetadata/v1/instance/" +

@@ -570,8 +570,8 @@ function ThoughtLeadershipPanel() {
 function Row({ k, v }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", fontSize: 11.5, gap: 8 }}>
-      <span style={{ color: "var(--z-muted)" }}>{k}</span>
-      <span style={{ color: "var(--z-dark)", fontWeight: 500, textAlign: "right" }}>{v}</span>
+      <span style={{ color: "var(--z-muted)", flexShrink: 0, whiteSpace: "nowrap" }}>{k}</span>
+      <span style={{ color: "var(--z-dark)", fontWeight: 500, textAlign: "right", minWidth: 0 }}>{v}</span>
     </div>
   );
 }
