@@ -12,7 +12,11 @@ work from format sweeps, and the split keeps both legible.
 """
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from .contracts import ENVELOPE, PAGES, sections
+from .dates import ACCEPTED as DATE_SHAPES, resolve as resolve_date
 from .identifiers import EID_TOKEN_RE, agent_id_class
 
 _AGENT_ID_KEYS = ("ic_id", "f_id", "fa_id", "ts_id", "wn_id", "rec_id")
@@ -122,8 +126,80 @@ def validate_pass1(page: str, payload: dict) -> list:
                     "ET-03", name, f"{name}.e_ids[{i}]",
                     f"{e!r} is not an evidence id the recogniser accepts"))
         reasons.extend(_check_agent_ids(name, body))
+        reasons.extend(_check_enum_fields(page, name, body))
+        reasons.extend(_check_date_fields(page, name, body))
 
     return reasons
+
+
+# Payload fields whose promoted column is a Postgres enum. Generated from
+# the live schema and the writer spec (scripts/gen_enum_fields.py), because
+# a value the enum rejects is not a JSON-type error — it type-checks as a
+# string and then aborts the promote transaction, which is the one place a
+# failure must never surface. The first production promote of this
+# connector died exactly there: prose written into an EVIDENCE│HYBRID│
+# INFERRED chip.
+_ENUM_FIELDS = None
+
+
+def _enum_fields() -> dict:
+    global _ENUM_FIELDS
+    if _ENUM_FIELDS is None:
+        try:
+            _ENUM_FIELDS = json.loads(
+                Path(__file__).with_name("enum_fields.json").read_text())["enum_fields"]
+        except Exception:
+            _ENUM_FIELDS = {}
+    return _ENUM_FIELDS
+
+
+def _at_path(body, path):
+    """Yield (json_path, value) for a spec path, following `[*]` lists."""
+    head, _, rest = path.partition("[*].")
+    if not rest:
+        if isinstance(body, dict) and head in body:
+            yield head, body[head]
+        return
+    items = body.get(head) if isinstance(body, dict) else None
+    if isinstance(items, list):
+        for i, item in enumerate(items):
+            if isinstance(item, dict) and rest in item:
+                yield f"{head}[{i}].{rest}", item[rest]
+
+
+def _check_date_fields(page: str, section: str, body) -> list:
+    """A field promoted into a DATE column must resolve to one. Month and
+    quarter precision are legitimate (the prompts ask for them) and resolve;
+    anything else is rejected here rather than aborting the promote."""
+    out = []
+    spec = None
+    try:
+        spec = json.loads(
+            Path(__file__).with_name("enum_fields.json").read_text()).get("date_fields", {})
+    except Exception:
+        return out
+    for path in spec.get(f"{page}.{section}", ()):
+        for jpath, value in _at_path(body, path):
+            if resolve_date(value) is False:
+                out.append(_reason(
+                    "CG-09", section, f"{section}.{jpath}",
+                    f"{str(value)[:40]!r} does not resolve to a date — this field is "
+                    f"promoted into a DATE column and accepts {DATE_SHAPES}"))
+    return out
+
+
+def _check_enum_fields(page: str, section: str, body) -> list:
+    out = []
+    for path, spec in _enum_fields().get(f"{page}.{section}", {}).items():
+        for jpath, value in _at_path(body, path):
+            if value is None or value in spec["values"]:
+                continue
+            shown = value if isinstance(value, str) and len(value) <= 60 else f"{str(value)[:57]}…"
+            out.append(_reason(
+                "CG-09", section, f"{section}.{jpath}",
+                f"{shown!r} is not a value of {spec['enum']} — this field is promoted "
+                f"into an enum column and takes one of {' │ '.join(spec['values'])}"))
+    return out
 
 
 def _check_agent_ids(section, node, path=None) -> list:

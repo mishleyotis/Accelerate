@@ -33,6 +33,9 @@ def writer_registry() -> list:
         by_key = {}
         for page_spec in json.loads(_SPEC_PATH.read_text())["specs"]:
             for w in page_spec["writers"]:
+                # the writer carries its own page so a single writer is
+                # self-describing wherever it is handed on
+                w["page"] = page_spec["page"]
                 by_key[(page_spec["page"], w["section"])] = w
         _SPEC = [((page, section), by_key[(page, section)])
                  for (page, section) in SERVING_TABLES
@@ -54,6 +57,26 @@ def _walk_path(node, path: str):
         else:
             return None
     return node
+
+
+from .dates import resolve as resolve_date
+
+_DATE_FIELDS = None
+
+
+def _date_paths() -> dict:
+    """{(page, section): {field_leaf, …}} for DATE-promoted fields."""
+    global _DATE_FIELDS
+    if _DATE_FIELDS is None:
+        _DATE_FIELDS = {}
+        try:
+            raw = json.loads(_SPEC_PATH.with_name("enum_fields.json").read_text())
+            for key, paths in raw.get("date_fields", {}).items():
+                page, _, section = key.partition(".")
+                _DATE_FIELDS[(page, section)] = {p.split(".")[-1] for p in paths}
+        except Exception:
+            pass
+    return _DATE_FIELDS
 
 
 def _value(source, ctx, section, item):
@@ -189,6 +212,7 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
         else:
             exprs.append("%s")
             per_row_sources.append(c)
+    date_leaves = _date_paths().get((writer["page"], writer["section"]), set())
     written = 0
     for item in rows:
         values = []
@@ -196,6 +220,13 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
             v = _value(c["source"], ctx, section_payload, item)
             if v is ...:
                 v = None
+            if v is not None and c["source"].split(":")[-1].split(".")[-1] in date_leaves:
+                # Month and quarter precision are legitimate in the payload
+                # (the prompts ask for them) and the column is a DATE; the
+                # same resolver the submit gate used converts them, so a
+                # value that reaches here cannot abort the transaction.
+                resolved = resolve_date(v)
+                v = None if resolved is False else resolved
             if v is not None and (c.get("jsonb") or isinstance(v, dict)):
                 # dicts serialise for JSONB — and defensively for TEXT
                 # columns whose contract value is an object (lossless,

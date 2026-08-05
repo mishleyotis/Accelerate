@@ -191,3 +191,25 @@ def test_bad_provenance_is_a_structured_refusal_not_a_db_error(run_row):
                              provenance="derived", producer_version="test@1")
     assert r2["verdict"]["status"] == "fail"
     assert all(x["path"] != "provenance" for x in r2["verdict"]["reasons"])
+
+
+def test_enum_column_values_fail_at_submit_not_at_promote():
+    """A value a serving-tier enum rejects type-checks as a string, so only
+    an explicit gate stops it — the first production promote of this
+    connector aborted on prose written into the EVIDENCE|HYBRID|INFERRED
+    chip, inside the atomic transaction where nothing may fail."""
+    from dma_mcp.validation import _check_enum_fields
+    bad = _check_enum_fields("overview", "scores", {
+        "posture": "MIXED",
+        "posture_basis": "Strategy sits above the peer set while the data layer sits below it."})
+    assert [r["gate_id"] for r in bad] == ["CG-09"]
+    assert "basis_t" in bad[0]["message"]
+    assert "EVIDENCE" in bad[0]["message"] and "HYBRID" in bad[0]["message"]
+    assert _check_enum_fields("overview", "scores",
+                              {"posture": "MIXED", "posture_basis": "HYBRID"}) == []
+    # list-grain fields are checked per item, with the index in the path
+    rows = {"alerts": [{"confidence": "HIGH"}, {"confidence": "quite sure"}]}
+    out = _check_enum_fields("heatmap", "alerts", rows)
+    assert len(out) == 1 and out[0]["path"] == "alerts.alerts[1].confidence"
+    # a null is a legitimate absence, not an enum violation
+    assert _check_enum_fields("heatmap", "alerts", {"alerts": [{"confidence": None}]}) == []

@@ -215,3 +215,25 @@ def test_injected_writer_failure_rolls_back_everything(seeded, monkeypatch):
         assert cur.fetchone()[0] == 0, table
     cur.execute("SELECT enum_label(status) FROM runs WHERE id = %s", (rid,))
     assert cur.fetchone()[0] == "INGESTED"
+
+
+def test_partial_dates_resolve_at_the_writer_boundary():
+    """The prompts accept month and quarter precision; the serving column is
+    a DATE. The writer resolves with the same rule the ingest tier uses, so
+    a legitimate payload cannot abort the promote transaction."""
+    from dma_mcp.dates import resolve
+    from datetime import date
+    assert resolve("2026-07") == date(2026, 7, 1)      # month -> first day
+    assert resolve("2025-Q4") == date(2025, 12, 31)    # quarter -> END (H7 rule)
+    assert resolve("2019") == date(2019, 1, 1)
+    assert resolve("2026-01-15T09:00:00+00:00") == date(2026, 1, 15)
+    assert resolve(None) is None
+    assert resolve("last summer") is False             # rejected, never coerced
+
+
+def test_every_writer_knows_its_own_page():
+    """_write_section resolves date columns by (page, section), so a writer
+    handed on alone must still say which page it belongs to."""
+    from dma_mcp.promote import writer_registry
+    for (page, section), w in writer_registry():
+        assert w["page"] == page and w["section"] == section

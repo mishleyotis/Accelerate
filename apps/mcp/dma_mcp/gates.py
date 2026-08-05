@@ -56,6 +56,12 @@ GATES = {
               "boundaries (<2, <3, <4, >=4); no fifth band exists.",
               "2.97 displays as 3.0 and still bands as Building.",
               "block"),
+    "CG-09": ("Enum-column value", None,
+              "A field promoted into an enum column carries one of that "
+              "enum's values; a value the enum rejects type-checks as a "
+              "string and then aborts the promote transaction.",
+              "posture_basis is the EVIDENCE|HYBRID|INFERRED chip, not prose.",
+              "block"),
     "ET-01": ("Cited ids resolve to this entity and run", None,
               "Every cited e_id resolves in the run's scope; a foreign id "
               "(another institution's row) halts production.",
