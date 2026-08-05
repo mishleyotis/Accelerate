@@ -487,6 +487,213 @@ def parse_evidence_master(path: str) -> list:
         wb.close()
 
 
+# A fact-grain citation and the header the research workbook puts in front of
+# an excerpt block: "[ERS: 4.20] [FACT] [E-012:F1] Source (T2, CURRENT): text".
+_RW_FACT_RE = re.compile(r"\[(E-\d+):(F\d+)\]\s*")
+_RW_HEAD_RE = re.compile(r"^\s*\[ERS:\s*([\d.]+)\]\s*(?:\[([A-Z_]+)\]\s*)?")
+_RW_SRC_PREFIX_RE = re.compile(r"^[^:]{0,120}?\((T[1-5]),\s*[A-Z_]+\):\s*")
+_RW_DETAIL_TABS = ("P1_Scoring_Detail", "P2_Scoring_Detail",
+                   "P3_Scoring_Detail", "P4_Scoring_Detail")
+
+
+def _rw_split_excerpt(blob) -> dict:
+    """{fact_id: verbatim text} out of one Evidence_Excerpt cell.
+
+    Each fact's passage runs to the next fact tag. The first passage carries
+    the source and tier as a prefix ("BCU 2024 Annual Report (PDF) (T2,
+    CURRENT): …") which is provenance, not the quotation, so it is stripped —
+    an excerpt has to be what the document says, byte for byte.
+    """
+    if not blob:
+        return {}
+    text = _RW_HEAD_RE.sub("", str(blob).strip())
+    hits = list(_RW_FACT_RE.finditer(text))
+    out = {}
+    for n, m in enumerate(hits):
+        end = hits[n + 1].start() if n + 1 < len(hits) else len(text)
+        frag = _RW_SRC_PREFIX_RE.sub("", text[m.end():end].strip()).strip(" ;·")
+        if frag:
+            out[f"{m.group(1)}:{m.group(2)}"] = frag
+    return out
+
+
+def parse_research_workbook(path: str) -> dict:
+    """The research workbook — the evidence tier's real authority.
+
+    The scoring workbook's Evidence_Master carries a Fact_Count but no ERS,
+    no publication date and no fact text, which is why every ingested item
+    reached the drawer undated, unranked and with an excerpt scraped out of a
+    rationale. This tab set carries all three, plus the per-subcap linkage at
+    FACT grain and the register of searches that found nothing.
+
+    It never supplies a score: `03_scoring_workbook` is the only authority for
+    a score, and this workbook's Score columns are deliberately ignored.
+
+    → {ledger, links, caps, absent} where `ledger` items match
+    parse_evidence_master's shape so the two merge on e_id.
+    """
+    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    try:
+        out = {"ledger": [], "links": [], "caps": [], "absent": []}
+
+        def tab(name, id_col):
+            if name not in wb.sheetnames:
+                return None, None, None
+            ws = wb[name]
+            try:
+                headers, first = _header_map(ws, id_col)
+            except ValueError:
+                return None, None, None
+            return ws, headers, first
+
+        # ── the ledger: ERS, dates, fact counts, claim classes ────────────
+        ws, headers, first = tab("Evidence_Linkage_Matrix", "Evidence_ID")
+        if headers is not None:
+            for row in ws.iter_rows(min_row=first, values_only=True):
+                def v(*keys, _row=row):
+                    for k in keys:
+                        i = headers.get(k)
+                        if i is not None and i < len(_row) and _row[i] is not None:
+                            return _row[i]
+                    return None
+                e_id = str(v("evidence_id", "e_id") or "").strip()
+                if not e_id.startswith("E-"):
+                    continue
+                tier = str(v("tier") or "").strip().upper()
+                ers = _decimal(v("ers_total", "ers", "ers_score"))
+                facts = _decimal(v("fact_count", "facts"))
+                claim = str(v("claim_types", "claim_type") or "").split(",")[0].strip().upper()
+                out["ledger"].append({
+                    "e_id": e_id,
+                    "source_name": (str(v("source_name")).strip() if v("source_name") else None),
+                    "source_url": (str(v("source_url", "url")).strip() if v("source_url", "url") else None),
+                    "tier": tier if tier in ("T1", "T2", "T3", "T4", "T5") else None,
+                    "ers": None if ers in (None, "UNPARSEABLE") else ers,
+                    "published_date": parse_fuzzy_date(v("date_published", "published")),
+                    "stated_recency": _stated_band(v("recency"),
+                                                   v("date_published", "published")),
+                    "claim_type": claim if claim in ("FACT", "INFERENCE", "HYPOTHESIS",
+                                                     "CEILING_ESTIMATE") else None,
+                    "fact_count": None if facts in (None, "UNPARSEABLE") else int(facts),
+                    "excerpt": None,       # filled from the detail tabs below
+                    "subcaps": [s for s in
+                                (x.strip() for x in
+                                 re.split(r"[,;]", str(v("subcap_mappings", "subcaps") or "")))
+                                if SUBCAP_RE.match(s)],
+                    "signal_direction": (str(v("signal_direction")).strip().upper()
+                                         if v("signal_direction") else None),
+                })
+
+        # ── per-subcap linkage at fact grain, with its verbatim passages ──
+        for name in _RW_DETAIL_TABS:
+            ws, headers, first = tab(name, "SubCap_ID")
+            if headers is None:
+                continue
+            for row in ws.iter_rows(min_row=first, values_only=True):
+                def v(*keys, _row=row):
+                    for k in keys:
+                        i = headers.get(k)
+                        if i is not None and i < len(_row) and _row[i] is not None:
+                            return _row[i]
+                    return None
+                sid = str(v("subcap_id") or "").strip()
+                if not SUBCAP_RE.match(sid):
+                    continue
+                facts = [f.strip() for f in
+                         re.split(r"[,;]", str(v("evidence_ids") or "")) if f.strip()]
+                out["links"].append({
+                    "subcap_id": sid,
+                    # fact ids kept whole — "E-012:F1" is finer than "E-012"
+                    # and the drawer can say which fact carried the claim
+                    "fact_ids": [f for f in facts if f.upper().startswith("E-")],
+                    "e_ids": sorted({f.split(":")[0] for f in facts
+                                     if f.upper().startswith("E-")}),
+                    "excerpts": _rw_split_excerpt(v("evidence_excerpt")),
+                    "source_document": (str(v("source_document")).strip()
+                                        if v("source_document") else None),
+                    "urls": [u.strip() for u in
+                             re.split(r"[,;\s]+", str(v("evidence_urls") or ""))
+                             if u.strip().startswith("http")],
+                    "evidence_tier": (str(v("evidence_tier")).strip().upper()
+                                      if v("evidence_tier") else None),
+                    "diagnostic_question": (str(v("diagnostic_question")).strip()
+                                            if v("diagnostic_question") else None),
+                    "caps_applied": (str(v("caps_applied")).strip()
+                                     if v("caps_applied") else None),
+                })
+
+        # ── the caps log and the absence register ─────────────────────────
+        ws, headers, first = tab("Caps_Applied_Log", "SubCap_ID")
+        if headers is not None:
+            for row in ws.iter_rows(min_row=first, values_only=True):
+                def v(*keys, _row=row):
+                    for k in keys:
+                        i = headers.get(k)
+                        if i is not None and i < len(_row) and _row[i] is not None:
+                            return _row[i]
+                    return None
+                sid = str(v("subcap_id") or "").strip()
+                if not SUBCAP_RE.match(sid):
+                    continue
+                out["caps"].append({
+                    "subcap_id": sid,
+                    "cap_type": (str(v("cap_type")).strip() if v("cap_type") else None),
+                    "cap_reason": (str(v("cap_reason")).strip() if v("cap_reason") else None),
+                    "pre_cap_score": _num(v("pre_cap_score")),
+                    "post_cap_score": _num(v("post_cap_score")),
+                    "e_id": (str(v("evidence_id", "e_id")).strip()
+                             if v("evidence_id", "e_id") else None),
+                })
+
+        # This is the absence protocol's own ladder, already run by the
+        # assessment: which cells were searched, how hard, and what the
+        # highest tier reached was. Emitting a thin alert without it is
+        # emitting an absence with no recorded search.
+        ws, headers, first = tab("Absent_Evidence_Log", "SubCap_ID")
+        if headers is not None:
+            for row in ws.iter_rows(min_row=first, values_only=True):
+                def v(*keys, _row=row):
+                    for k in keys:
+                        i = headers.get(k)
+                        if i is not None and i < len(_row) and _row[i] is not None:
+                            return _row[i]
+                    return None
+                sid = str(v("subcap_id") or "").strip()
+                if not sid or not sid.upper().startswith("P"):
+                    continue
+                out["absent"].append({
+                    "subcap_id": sid,
+                    "name": (str(v("subcapability")).strip() if v("subcapability") else None),
+                    "diagnostic_question": (str(v("diagnostic_question")).strip()
+                                            if v("diagnostic_question") else None),
+                    "search_count": (str(v("search_count")).strip() if v("search_count") else None),
+                    "tiers_searched": (str(v("tiers_searched")).strip() if v("tiers_searched") else None),
+                    "highest_tier_found": (str(v("highest_tier_found")).strip()
+                                           if v("highest_tier_found") else None),
+                    "reason": (str(v("reason")).strip() if v("reason") else None),
+                    "discovery_question": (str(v("discovery_question")).strip()
+                                           if v("discovery_question") else None),
+                    "impact_note": (str(v("impact_note")).strip() if v("impact_note") else None),
+                })
+
+        # Hoist the best passage per evidence item onto the ledger: the
+        # drawer cites an ITEM, so it needs one verbatim excerpt, and the
+        # longest passage is the one that carries the claim rather than a
+        # fragment of it. Floor of 50 chars is the contract's.
+        best: dict = {}
+        for link in out["links"]:
+            for fact_id, text in link["excerpts"].items():
+                e_id = fact_id.split(":")[0]
+                if len(text) >= 50 and len(text) > len(best.get(e_id, "")):
+                    best[e_id] = text
+        for item in out["ledger"]:
+            if best.get(item["e_id"]):
+                item["excerpt"] = best[item["e_id"]][:500]
+        return out
+    finally:
+        wb.close()
+
+
 def mine_evidence_from_rationales(scores: list) -> dict:
     """Verbatim excerpts and subcap links, mined out of the scoring rationales.
 
@@ -566,6 +773,28 @@ def _is_pillar_tab(tab: str) -> bool:
 _CATEGORY_RE = re.compile(r"^P\d+C\d+$")
 _PILLAR_RE = re.compile(r"^P\d+$")
 
+# Peer_Benchmarks stat columns, under every header spelling the corpus uses.
+# Anything NOT in here is a named peer institution, so a missing alias does
+# not degrade gracefully — it invents a peer. Keyed by _norm() output.
+_STAT_ALIASES = {
+    "category": "category", "category_id": "category", "cat": "category",
+    "category_name": "category_name", "name": "category_name",
+    "entity_score": "entity_score", "entity": "entity_score",
+    "score": "entity_score", "our_score": "entity_score",
+    "peer_median": "median", "median": "median", "cohort_median": "median",
+    "peer_p25": "p25", "p25": "p25", "q1": "p25", "percentile_25": "p25",
+    "peer_p75": "p75", "p75": "p75", "q3": "p75", "percentile_75": "p75",
+    "peer_min": "min", "min": "min", "peer_max": "max", "max": "max",
+    "delta_vs_median": "delta", "delta": "delta", "vs_median": "delta",
+    "gap": "delta", "priority": "priority", "subcap_count": "subcap_count",
+    "pillar": "pillar", "level": "level", "confidence": "confidence",
+}
+
+
+def _stat_key(header: str):
+    """The canonical stat a header names, or None when it names a peer."""
+    return _STAT_ALIASES.get(_norm(header))
+
 
 def parse_grain_summaries(path: str) -> dict:
     """The workbook's own STATED pillar and category grains
@@ -596,10 +825,17 @@ def parse_grain_summaries(path: str) -> dict:
         ws, headers, first = _tab_headers("Pillar_Summary", "Pillar")
         if headers is not None:
             for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
-                def v(key, _row=row):
-                    i = headers.get(key)
-                    return _row[i] if i is not None and i < len(_row) else None
-                pid = str(v("pillar") or "").strip()
+                def v(*keys, _row=row):
+                    # first alias that resolves: the corpus spells these
+                    # headers several ways and a single-alias lookup silently
+                    # nulls the column (Pillar_Summary.Weight was read only
+                    # as `weight_ib`, so every pillar weight was null)
+                    for key in keys:
+                        i = headers.get(key)
+                        if i is not None and i < len(_row) and _row[i] is not None:
+                            return _row[i]
+                    return None
+                pid = str(v("pillar", "pillar_id") or "").strip()
                 if not _PILLAR_RE.match(pid):
                     continue
                 score_col = openpyxl.utils.get_column_letter(headers["score"] + 1)
@@ -607,17 +843,20 @@ def parse_grain_summaries(path: str) -> dict:
                     "pillar_id": pid,
                     "name": (str(v("pillar_name")).strip() if v("pillar_name") else None),
                     "score": _num(v("score")),
-                    "weight": _num(v("weight_ib")),
-                    "peer_median": _num(v("peer_median")),
+                    "weight": _num(v("weight_ib", "weight", "weight_pct")),
+                    "peer_median": _num(v("peer_median", "median")),
                     "source_cell": f"Pillar_Summary!{score_col}{r}",
                 })
         ws, headers, first = _tab_headers("Category_Detail", "Category_ID")
         if headers is not None:
             for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
-                def v(key, _row=row):
-                    i = headers.get(key)
-                    return _row[i] if i is not None and i < len(_row) else None
-                cid = str(v("category_id") or "").strip()
+                def v(*keys, _row=row):
+                    for key in keys:
+                        i = headers.get(key)
+                        if i is not None and i < len(_row) and _row[i] is not None:
+                            return _row[i]
+                    return None
+                cid = str(v("category_id", "category") or "").strip()
                 if not _CATEGORY_RE.match(cid):
                     continue
                 score_col = openpyxl.utils.get_column_letter(headers["score"] + 1)
@@ -626,8 +865,8 @@ def parse_grain_summaries(path: str) -> dict:
                     "name": (str(v("category_name")).strip() if v("category_name") else None),
                     "pillar_id": (str(v("pillar")).strip() if v("pillar") else cid.split("C")[0]),
                     "score": _num(v("score")),
-                    "peer_median": _num(v("peer_median")),
-                    "priority_score": _num(v("priority_score")),
+                    "peer_median": _num(v("peer_median", "median")),
+                    "priority_score": _num(v("priority_score", "priority")),
                     "priority_tier": (str(v("priority_tier")).strip() if v("priority_tier") else None),
                     "source_cell": f"Category_Detail!{score_col}{r}",
                 })
@@ -656,10 +895,20 @@ def parse_peer_benchmarks(path: str) -> list:
         header = next(rows, None)
         if not header:
             return []
-        stats = {"category", "category_name", "entity_score", "peer_median",
-                 "peer_p25", "peer_p75", "peer_min", "peer_max", "delta_vs_median"}
+        # A stat column is not a peer. The corpus writes these headers both
+        # ways — `Peer_Median` in some packages, a bare `Median` in others —
+        # and a name that misses this map becomes a PEER NAMED "Median",
+        # which is how 54 of BCU's 144 peer rows arrived as institutions
+        # called Median, P25 and P75.
         peer_cols = [(i, str(h).strip()) for i, h in enumerate(header)
-                     if h is not None and _norm(str(h)) not in stats]
+                     if h is not None and _stat_key(str(h)) is None]
+
+        def col(canonical):
+            """The row's value for a canonical stat, under any of its aliases."""
+            for i, h in enumerate(header):
+                if h is not None and _stat_key(str(h)) == canonical:
+                    return row[i] if i < len(row) else None
+            return None
         # Non-numeric cells ("N/A", footnotes) are None here — a peer grid
         # is data or nothing, and downstream median verification sorts
         # these values.
@@ -671,16 +920,15 @@ def parse_peer_benchmarks(path: str) -> list:
             cat = str(row[0] or "").strip()
             if not _CATEGORY_RE.match(cat):
                 continue
-            def col(key):
-                for i, h in enumerate(header):
-                    if h is not None and _norm(str(h)) == key:
-                        return row[i] if i < len(row) else None
-                return None
+            # The name comes from the column that declares itself a name.
+            # Reading row[1] positionally put a peer's SCORE in the name
+            # field whenever the tab has no Category_Name column.
+            cat_name = col("category_name")
             out.append({
                 "category_id": cat,
-                "category_name": (str(row[1]).strip() if len(row) > 1 and row[1] else None),
+                "category_name": (str(cat_name).strip() or None) if cat_name is not None else None,
                 "entity_score": num(col("entity_score")),
-                "stated_median": num(col("peer_median")),
+                "stated_median": num(col("median")),
                 "peers": [(name, num(row[i]) if i < len(row) else None)
                           for i, name in peer_cols],
             })
@@ -702,15 +950,31 @@ def parse_recommendations(path: str) -> list:
         if not first:
             return []
         header = [(_norm(str(h)) if h is not None else None) for h in first]
+        # The first column is a rec id in some packages and a bare priority
+        # rank in others (BCU's header is `Priority` with values 1..8).
+        # Requiring a REC- prefix dropped every recommendation in those
+        # packages silently, which is why the platform page served none.
+        # A row is a recommendation when it carries content, and the raw
+        # tier keeps whatever identifier arrived — synthesising REC-n from
+        # the rank where the package states no id.
+        id_is_rank = header and header[0] in ("priority", "rank", "order", "no", "num")
         out = []
+        seen = set()
         for row in rows:
             if not row:   # read-only mode yields () for blank rows
                 continue
-            rec_id = str(row[0] or "").strip()
-            if not rec_id.upper().startswith("REC-"):
+            raw = str(row[0] or "").strip()
+            if not raw:
                 continue
             payload = {header[i]: (str(row[i]).strip() if i < len(row) and row[i] is not None else None)
                        for i in range(len(header)) if header[i]}
+            # a row whose only populated cell is the id is a footer or spacer
+            if not any(v for k, v in payload.items() if k != header[0]):
+                continue
+            rec_id = f"REC-{raw}" if id_is_rank or not raw.upper().startswith("REC-") else raw
+            if rec_id in seen:
+                continue
+            seen.add(rec_id)
             out.append({"rec_id": rec_id, "payload": payload})
         return out
     finally:

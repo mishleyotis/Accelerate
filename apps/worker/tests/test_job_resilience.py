@@ -116,16 +116,25 @@ def test_artefact_classification_matches_the_shipped_corpus():
     assert c("ATB_SF_nCino_Scoring_Workbook.xlsx") == ("workbook", 0)
     assert c("DMA_Assessment_Workbook_Achieve.xlsx") == ("workbook", 1)
     assert c("DMA_Workbook_CISBH.xlsx") == ("workbook", 2)
-    for decoy in ("DMA_Research_Workbook_ALLIANT.xlsx",
-                  "Explorium_Tech_Stack_ALLIANT.xlsx",
+    for decoy in ("Explorium_Tech_Stack_ALLIANT.xlsx",
                   "DMA_TechStack_Appendix_1st_Source_Bank.xlsx",
                   "A4_Technology_Stack_Summary_Explorium.xlsx",
                   "Tech_Stack_Appendix_Achieve.xlsx",
                   "Pillar1_Scoring_Toolkit.xlsx",
                   "Weight Summary.xlsx"):
         assert c(decoy) is None, decoy
-    # a scoring workbook under a research path is research material
-    assert c("DMA_Scoring_Workbook_X.xlsx", segs=("Client - DMA", "02_research_workbook")) is None
+
+    # The research workbook is its OWN artefact, not a decoy: it carries the
+    # per-cell fact-grain linkage, the verbatim passage behind each fact, and
+    # the ERS/date ledger the scoring workbook omits. Excluding it left every
+    # ingested evidence item undated and unranked.
+    assert c("DMA_Research_Workbook_ALLIANT.xlsx") == ("research", 0)
+    # it must never be mistaken for the scoring workbook — a score comes from
+    # 03_scoring_workbook and nowhere else
+    assert c("DMA_Research_Workbook_ALLIANT.xlsx")[0] != "workbook"
+    # a workbook under a research path is research material, not a score source
+    assert c("DMA_Scoring_Workbook_X.xlsx",
+             segs=("Client - DMA", "02_research_workbook")) == ("research", 1)
 
     # reports: the assessment report beats a bare report.docx; the research
     # Client Profile is a different artefact and never the report

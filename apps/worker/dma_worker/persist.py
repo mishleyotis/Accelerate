@@ -147,7 +147,8 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                     artefact_id: str | None = None,
                     sections: list | None = None,
                     report_artefact_id: str | None = None,
-                    grains: dict | None = None) -> PersistResult:
+                    grains: dict | None = None,
+                    research: dict | None = None) -> PersistResult:
     cur = conn.cursor()
     inst = _institution(manifest)
     # Signal 4 of the cascade: the client folder's display name (its
@@ -205,6 +206,46 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
         else:
             unknown_version, pinned = pinned, None
 
+    # A package that states no taxonomy version still scored against ONE of
+    # them, and the cells it scored say which. Left unpinned, the serving
+    # view joins the catalogue on the CURRENT version and matches nothing —
+    # BCU's 17-category v5-shaped run served 765 cells with 0 names, which is
+    # the whole heatmap. So infer the pin from the ids themselves: the version
+    # that recognises most of them wins, above a floor, and the inference is
+    # recorded with its coverage rather than passing as a stated fact.
+    inferred_pin = None
+    if pinned is None:
+        scored_ids = sorted({s.subcap_id for s in workbook.scores})
+        if scored_ids:
+            cur.execute(
+                """SELECT version, count(*) FROM ccg_subcaps
+                    WHERE subcap_id = ANY(%s)
+                    GROUP BY version ORDER BY count(*) DESC, version DESC""",
+                (scored_ids,))
+            ranked = cur.fetchall() or []
+            if ranked:
+                top, hits = ranked[0][0], ranked[0][1]
+                coverage = hits / len(scored_ids)
+                runner = ({"version": ranked[1][0],
+                           "coverage": round(ranked[1][1] / len(scored_ids), 3)}
+                          if len(ranked) > 1 else None)
+                if coverage >= 0.6:
+                    pinned = top
+                    cur.execute(
+                        "SELECT cell_count FROM ccg_versions WHERE version = %s", (top,))
+                    r = cur.fetchone()
+                    catalogue_cells = r[0] if r else None
+                inferred_pin = {"chosen": pinned, "candidate": top,
+                                "coverage": round(coverage, 3),
+                                "cells_recognised": hits,
+                                "cells_scored": len(scored_ids),
+                                "runner_up": runner,
+                                "basis": "scored cell ids matched against each "
+                                         "catalogue version; floor 0.60",
+                                "reason": None if coverage >= 0.6 else
+                                          "no version recognises enough of the "
+                                          "scored cells; run left unpinned"}
+
     cur.execute("SELECT COALESCE(max(run_seq), 0) + 1 FROM runs WHERE entity_id = %s", (entity_id,))
     run_seq = cur.fetchone()[0]
     composite = _round_once(workbook.composite)   # rounded ONCE
@@ -249,6 +290,12 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
             (run_id, json.dumps({"stated": unknown_version,
                                  "reason": "manifest pins a version ccg_versions "
                                            "does not carry; run left unpinned"})))
+        n_obs += 1
+    if inferred_pin:
+        cur.execute(
+            """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
+               VALUES (%s,'catalogue_version_inferred',%s, now())""",
+            (run_id, json.dumps(inferred_pin)))
         n_obs += 1
     if not manifest:
         cur.execute(
@@ -355,7 +402,37 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
             "ids_with_excerpt": sum(1 for v in mined.values() if v.get("excerpt")),
             "ids_seen": len(mined)})
 
+    # The research workbook's Evidence_Linkage_Matrix is the ledger of record:
+    # it carries ERS and a publication date for every item, which the scoring
+    # workbook's Evidence_Master omits entirely (0 of 82 for BCU), and a
+    # verbatim passage per fact rather than a scraped fragment. It wins on
+    # those fields; the master still names the source.
+    rledger: dict = {}
+    for item in ((research or {}).get("ledger") or []):
+        if item["e_id"] in rledger:
+            # The same local id reused for a different source is a source-data
+            # defect, not something to reconcile silently.
+            _observe("research_ledger_duplicate_id", {"e_id": item["e_id"]})
+            continue
+        rledger[item["e_id"]] = item
+    if rledger:
+        _observe("research_workbook_ledger", {
+            "rows": len(rledger),
+            "with_ers": sum(1 for x in rledger.values() if x.get("ers") is not None),
+            "with_published_date": sum(1 for x in rledger.values() if x.get("published_date")),
+            "with_excerpt": sum(1 for x in rledger.values() if x.get("excerpt"))})
+
     for ev in (evidence or []):
+        r = rledger.get(ev["e_id"]) or {}
+        # authoritative-where-present, never overwriting a stated value with a
+        # blank one
+        for field in ("ers", "published_date", "stated_recency", "tier",
+                      "fact_count", "claim_type"):
+            if r.get(field) is not None and ev.get(field) is None:
+                ev = {**ev, field: r[field]}
+        if r.get("excerpt"):
+            # a verbatim 50–500 char passage beats a mined fragment
+            ev = {**ev, "excerpt": r["excerpt"]}
         m = mined.get(ev["e_id"]) or {}
         if not ev.get("excerpt") and m.get("excerpt"):
             ev = {**ev, "excerpt": m["excerpt"]}
@@ -376,6 +453,42 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                     """INSERT INTO evidence_subcap_links (e_id, subcap_id, run_id, link_basis)
                        VALUES (%s,%s,%s,'package') ON CONFLICT DO NOTHING""",
                     (resolved, sid, run_id))
+
+    # The research workbook links each cell to the FACTS that support it, which
+    # is finer than the scoring row's five-per-cell citation and is what makes
+    # a cell's drawer specific rather than category-wide. Linked here so the
+    # basis is visible: 'research_workbook' says a human mapped this fact to
+    # this cell, which outranks a proximity link.
+    rlinks = (research or {}).get("links") or []
+    if rlinks:
+        landed_links = 0
+        for link in rlinks:
+            for e_id in link.get("e_ids", []):
+                resolved = alias.get(e_id)
+                if not resolved:
+                    continue
+                key = (resolved, link["subcap_id"])
+                if key in seen_links:
+                    continue
+                seen_links.add(key)
+                cur.execute(
+                    """INSERT INTO evidence_subcap_links (e_id, subcap_id, run_id, link_basis)
+                       VALUES (%s,%s,%s,'research_workbook') ON CONFLICT DO NOTHING""",
+                    (resolved, link["subcap_id"], run_id))
+                landed_links += 1
+        _observe("research_workbook_links", {
+            "cells": len({l["subcap_id"] for l in rlinks}),
+            "links_written": landed_links,
+            "cells_with_verbatim_excerpt": sum(1 for l in rlinks if l.get("excerpts"))})
+    # The assessment's own absence register: which cells were searched, how
+    # hard, and the highest tier reached. A thin cell without this is an
+    # absence with no recorded search.
+    rabsent = (research or {}).get("absent") or []
+    if rabsent:
+        _observe("research_workbook_absences", {
+            "rows": len(rabsent),
+            "cells": [a["subcap_id"] for a in rabsent][:40],
+            "reasons": sorted({a.get("reason") for a in rabsent if a.get("reason")})})
 
     seen_subcaps: set[str] = set()
     for s in workbook.scores:

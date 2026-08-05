@@ -28,6 +28,7 @@ from dma_worker.workbook_parser import (mine_evidence_from_rationales,
                                         parse_grain_summaries,
                                         parse_peer_benchmarks,
                                         parse_recommendations,
+                                        parse_research_workbook,
                                         parse_scoring_workbook)
 
 
@@ -63,9 +64,18 @@ def _classify_artefact(f):
         # run_manifest.json canonical; L1_run_manifest.json / MANIFEST.json seen.
         return "manifest", (0 if name == "run_manifest.json" else 1)
     if name.endswith((".xlsx", ".xlsm")):
-        if any(d in name for d in _WB_DECOYS):
+        # The research workbook is its own artefact, not a decoy. It carries
+        # the evidence tier's authority — per-subcap linkage at fact grain,
+        # the verbatim passage behind each fact, and the ERS/date ledger the
+        # scoring workbook omits — so excluding it left every ingested item
+        # undated, unranked and with a scraped excerpt. It never supplies a
+        # score; `scoring` remains the only authority for that.
+        in_research_folder = any("research" in s.lower() for s in f.path_segments)
+        if "research" in name or in_research_folder:
+            if "workbook" in name or "research" in name:
+                return "research", (0 if "research_workbook" in name else 1)
             return None
-        if any("research" in s.lower() for s in f.path_segments):
+        if any(d in name for d in _WB_DECOYS):
             return None
         if "scoring" in name:
             return "workbook", 0
@@ -144,6 +154,17 @@ def _ingest_one(conn, token, folder, parts):
                 fh.write(drive.download(token, parts["report"].file_id))
             sections = parse_report(rp)
 
+        research = {}
+        if "research" in parts:
+            rw_path = os.path.join(td, "research.xlsx")
+            with open(rw_path, "wb") as fh:
+                fh.write(drive.download(token, parts["research"].file_id))
+            research = parse_research_workbook(rw_path)
+            print(f"ingest: {folder} research workbook — "
+                  f"{len(research.get('ledger') or [])} ledger rows, "
+                  f"{len(research.get('links') or [])} linked cells, "
+                  f"{len(research.get('absent') or [])} recorded absences")
+
         wb = parse_scoring_workbook(wb_path)
         res = persist_package(
             conn,
@@ -158,6 +179,7 @@ def _ingest_one(conn, token, folder, parts):
             report_artefact_id=(parts["report"].file_id
                                 if "report" in parts else None),
             grains=parse_grain_summaries(wb_path),
+            research=research,
         )
         rationales = {s.subcap_id: s.rationale for s in wb.scores if s.rationale}
         return res, rationales
