@@ -250,6 +250,16 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                                  "reason": "manifest pins a version ccg_versions "
                                            "does not carry; run left unpinned"})))
         n_obs += 1
+    if not manifest:
+        cur.execute(
+            """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
+               VALUES (%s,'manifest_absent',%s, now())""",
+            (run_id, json.dumps({
+                "source_folder_id": source_folder_id,
+                "reason": "package ships no manifest: identity from the folder "
+                          "name (cascade signal 4, PENDING_REVIEW), scores from "
+                          "the workbook, no stated overall and no pinned version"})))
+        n_obs += 1
 
     reference_date = _stated_completed_at(manifest)
     token = _entity_token(manifest)

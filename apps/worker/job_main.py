@@ -44,27 +44,65 @@ def _connect():
         enable_iam_auth=True, ip_type="PRIVATE")
 
 
+# Artefact naming across the shipped corpus is not standardised — every
+# synthesis run named its own files. These lists come from the intake tree
+# itself (76 of 105 client folders were being skipped on naming alone).
+_WB_DECOYS = ("research", "techstack", "tech_stack", "tech stack",
+              "technology_stack", "technology stack", "explorium", "toolkit",
+              "weight", "appendix", "template", "tracker")
+_RPT_DECOYS = ("profile", "template")
+
+
+def _classify_artefact(f):
+    """(kind, rank) for a package artefact, or None. Lower rank wins when a
+    folder holds more than one candidate of a kind: the canonical name beats
+    a variant, and a scoring workbook beats an assessment workbook."""
+    name = f.name.lower()
+    if name.endswith(".json") and "manifest" in name:
+        # run_manifest.json canonical; L1_run_manifest.json / MANIFEST.json seen.
+        return "manifest", (0 if name == "run_manifest.json" else 1)
+    if name.endswith((".xlsx", ".xlsm")):
+        if any(d in name for d in _WB_DECOYS):
+            return None
+        if any("research" in s.lower() for s in f.path_segments):
+            return None
+        if "scoring" in name:
+            return "workbook", 0
+        if "assessment" in name:      # DMA_Assessment_Workbook_<client>.xlsx
+            return "workbook", 1
+        if "workbook" in name:        # DMA_Workbook_<client>.xlsx
+            return "workbook", 2
+        return None
+    if name.endswith(".docx"):
+        if any(d in name for d in _RPT_DECOYS):
+            return None              # the research Client Profile is a different artefact
+        if "assessment_report" in name or "assessment report" in name:
+            return "report", 0
+        if name == "report.docx":
+            return "report", 1
+        if "report" in name:
+            return "report", 2
+        return None
+    return None
+
+
 def _package_groups(to_process):
     """Group changed files by client folder (the first path segment) and
-    keep the ones a package needs, by artefact kind. Returns ALL groups —
-    the caller splits complete packages from partial ones (a folder whose
+    keep the best candidate per artefact kind. Returns ALL groups — the
+    caller splits ingestable packages from partial ones (a folder whose
     manifest arrived before its workbook must retry, not vanish)."""
     groups: dict = {}
+    ranks: dict = {}
     for f in to_process:
         root = f.path_segments[0] if f.path_segments else "?"
-        g = groups.setdefault(root, {})
-        name = f.name.lower()
-        if name == "run_manifest.json":
-            g["manifest"] = f
-        elif (name.endswith(".xlsx") and "scoring" in name
-              # weights/toolkit reference books carry "scoring" in their
-              # names but hold no scores (e.g. Pillar{n}_Scoring_Toolkit)
-              and "toolkit" not in name and "weight" not in name
-              and not any("research" in s.lower() for s in f.path_segments)):
-            g["workbook"] = f
-        elif name == "report.docx":
-            g["report"] = f
-        g.setdefault("folder", root)
+        g = groups.setdefault(root, {"folder": root})
+        r = ranks.setdefault(root, {})
+        c = _classify_artefact(f)
+        if not c:
+            continue
+        kind, rank = c
+        if kind not in g or rank < r[kind]:
+            g[kind], r[kind] = f, rank
     return groups
 
 
@@ -86,9 +124,15 @@ def _ingest_one(conn, token, folder, parts):
     """Download, parse and persist one package. Atomic: persist_package
     commits once at the end, so an exception anywhere leaves nothing."""
     with tempfile.TemporaryDirectory() as td:
-        # utf-8-sig: some shipped manifests carry a BOM
-        manifest = json.loads(
-            drive.download(token, parts["manifest"].file_id).decode("utf-8-sig"))
+        # The scoring workbook is the authority; a package that ships no
+        # manifest still ingests, with identity from the folder name (the
+        # cascade's signal 4 → PENDING_REVIEW) and an observation recorded.
+        if "manifest" in parts:
+            # utf-8-sig: some shipped manifests carry a BOM
+            manifest = json.loads(
+                drive.download(token, parts["manifest"].file_id).decode("utf-8-sig"))
+        else:
+            manifest = {}
         wb_path = os.path.join(td, "wb.xlsx")
         with open(wb_path, "wb") as fh:
             fh.write(drive.download(token, parts["workbook"].file_id))
@@ -152,8 +196,10 @@ def main() -> int:
     print(f"scan: new={summary['files_new']} changed={summary['files_changed']}")
 
     groups = _package_groups(summary["to_process"])
-    packages = {k: v for k, v in groups.items()
-                if "manifest" in v and "workbook" in v}
+    # The scoring workbook is what makes a package ingestable; the manifest
+    # and report are enriching, not gating (76 of 105 client folders were
+    # skipped when both were required).
+    packages = {k: v for k, v in groups.items() if "workbook" in v}
     partial = {k: v for k, v in groups.items() if k not in packages
                and any(a in v for a in ("manifest", "workbook", "report"))}
     if not packages and not partial:

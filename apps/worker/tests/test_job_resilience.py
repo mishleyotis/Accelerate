@@ -92,3 +92,69 @@ def test_requeue_without_report_touches_only_present_artefacts():
     _requeue(conn, parts, "X - DMA", "incomplete package")
     assert prior[parts["workbook"].file_id] == ""
     assert prior["unrelated"] == "zzz"
+
+
+def test_artefact_classification_matches_the_shipped_corpus():
+    """Naming is not standardised across the corpus — these are the real
+    names from the intake tree (76 of 105 folders were skipped on naming
+    alone). Decoys must never be mistaken for the scoring workbook."""
+    from job_main import _classify_artefact
+
+    def c(name, segs=("Client - DMA",)):
+        return _classify_artefact(FileStat(file_id=name, path_segments=(*segs, name),
+                                           name=name, checksum="a", size_bytes=1,
+                                           mime_type=""))
+
+    # manifests: canonical wins over variants
+    assert c("run_manifest.json") == ("manifest", 0)
+    assert c("L1_run_manifest.json") == ("manifest", 1)
+    assert c("MANIFEST.json") == ("manifest", 1)
+    assert c("PACKAGE_MANIFEST.md") is None          # markdown is not a manifest
+
+    # workbooks: scoring beats assessment; every decoy rejected
+    assert c("DMA_Scoring_Workbook_BCU_20260330.xlsx") == ("workbook", 0)
+    assert c("ATB_SF_nCino_Scoring_Workbook.xlsx") == ("workbook", 0)
+    assert c("DMA_Assessment_Workbook_Achieve.xlsx") == ("workbook", 1)
+    assert c("DMA_Workbook_CISBH.xlsx") == ("workbook", 2)
+    for decoy in ("DMA_Research_Workbook_ALLIANT.xlsx",
+                  "Explorium_Tech_Stack_ALLIANT.xlsx",
+                  "DMA_TechStack_Appendix_1st_Source_Bank.xlsx",
+                  "A4_Technology_Stack_Summary_Explorium.xlsx",
+                  "Tech_Stack_Appendix_Achieve.xlsx",
+                  "Pillar1_Scoring_Toolkit.xlsx",
+                  "Weight Summary.xlsx"):
+        assert c(decoy) is None, decoy
+    # a scoring workbook under a research path is research material
+    assert c("DMA_Scoring_Workbook_X.xlsx", segs=("Client - DMA", "02_research_workbook")) is None
+
+    # reports: the assessment report beats a bare report.docx; the research
+    # Client Profile is a different artefact and never the report
+    assert c("DMA_Assessment_Report_BCU_20260330.docx") == ("report", 0)
+    assert c("Report.docx") == ("report", 1)
+    assert c("DMA_Client_Profile_BCU_20260330.docx") is None
+
+
+def test_workbook_alone_is_ingestable_and_best_candidate_wins():
+    """A package that ships no manifest still ingests (identity falls to the
+    folder name, PENDING_REVIEW); and where a folder holds two candidates of
+    a kind, the canonical one is chosen."""
+    files = [
+        _f("Two Candidates - DMA", "L1_run_manifest.json"),
+        _f("Two Candidates - DMA", "run_manifest.json"),
+        _f("Two Candidates - DMA", "DMA_Assessment_Workbook_X.xlsx"),
+        _f("Two Candidates - DMA", "DMA_Scoring_Workbook_X.xlsx"),
+        _f("Two Candidates - DMA", "DMA_Assessment_Report_X.docx"),
+        _f("No Manifest - DMA", "ATB_SF_nCino_Scoring_Workbook.xlsx"),
+        _f("Manifest Only - DMA", "run_manifest.json"),
+    ]
+    groups = _package_groups(files)
+    g = groups["Two Candidates - DMA"]
+    assert g["manifest"].name == "run_manifest.json"
+    assert g["workbook"].name == "DMA_Scoring_Workbook_X.xlsx"
+    assert g["report"].name == "DMA_Assessment_Report_X.docx"
+
+    ingestable = {k: v for k, v in groups.items() if "workbook" in v}
+    partial = {k: v for k, v in groups.items() if k not in ingestable
+               and any(a in v for a in ("manifest", "workbook", "report"))}
+    assert set(ingestable) == {"Two Candidates - DMA", "No Manifest - DMA"}
+    assert set(partial) == {"Manifest Only - DMA"}
