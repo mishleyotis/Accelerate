@@ -213,3 +213,47 @@ def test_enum_column_values_fail_at_submit_not_at_promote():
     assert len(out) == 1 and out[0]["path"] == "alerts.alerts[1].confidence"
     # a null is a legitimate absence, not an enum violation
     assert _check_enum_fields("heatmap", "alerts", {"alerts": [{"confidence": None}]}) == []
+
+
+def test_the_contract_accepts_the_two_fields_the_charter_requires():
+    """CG-04 refused `r_layer` and `narrative_thread` on 32 of 34 sections.
+
+    Both are bound by the writers with a `section:` source, AG-01 BLOCKS a
+    ranked or causal claim carrying no r_layer, and every page owes a
+    narrative_thread — yet a producer sending either got "field 'r_layer' is
+    not in the overview.scores contract". That is why a real promoted run had
+    r_layer null on 30 of 34 sections and narrative_thread null on 32 of 34:
+    the gate was refusing its own requirement.
+
+    Acceptance follows the WRITER, so a section with nowhere to store one still
+    refuses it — a field that promotes into nothing is the defect the registry
+    exists to prevent.
+    """
+    from dma_mcp.contracts import sections, SECTION_META
+    import json as _json
+    from pathlib import Path as _Path
+
+    spec = _json.loads(
+        (_Path(__file__).resolve().parents[1] / "dma_mcp" / "writer_spec.json").read_text())
+    bound = {}
+    for page_spec in spec["specs"]:
+        for w in page_spec["writers"]:
+            bound[(page_spec["page"], w["section"])] = {
+                c["source"].partition(":")[2] for c in w["columns"]
+                if c["source"].startswith("section:")}
+
+    checked = 0
+    for (page, name), cols in bound.items():
+        fields = sections(page)[name]["fields"]
+        for key in SECTION_META:
+            if key in cols:
+                assert key in fields, f"{page}.{name} binds {key} but refuses it"
+            else:
+                assert key not in fields or page + "." + name == "overview.scores", \
+                    f"{page}.{name} accepts {key} with nowhere to store it"
+            checked += 1
+    assert checked >= 60, "the whole registry should have been walked"
+    # and the counts are the measured ones, so a writer_spec edit that drops a
+    # binding shows up here rather than as a silently-null column
+    assert sum("r_layer" in sections(p)[s]["fields"] for (p, s) in bound) == 28
+    assert sum("narrative_thread" in sections(p)[s]["fields"] for (p, s) in bound) == 33

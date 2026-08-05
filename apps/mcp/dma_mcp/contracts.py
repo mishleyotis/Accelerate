@@ -13,9 +13,11 @@ keys are stated, and get_page_contract returns it verbatim.
 from __future__ import annotations
 
 import json
+from functools import lru_cache
 from pathlib import Path
 
-_DATA = Path(__file__).with_name("contracts_data.json")
+_HERE = Path(__file__).parent
+_DATA = _HERE / "contracts_data.json"
 
 PAGES = ("heatmap", "overview", "insights", "platform", "context", "techstack")
 
@@ -93,6 +95,64 @@ SERVING_TABLES = {
 }
 
 
+#: Section metadata the WRITER binds with a `section:` source but which no
+#: surface contract lists as a field. Accepted per section, and only where that
+#: section's writer actually binds the column — so a section with nowhere to
+#: store one still refuses it, which is right: a field that promotes into
+#: nothing is the defect this whole registry exists to prevent.
+#:
+#: Without this, CG-04 refused the two fields the charter REQUIRES. AG-01 blocks
+#: a ranked or causal claim carrying no `r_layer`, and every page owes a
+#: `narrative_thread` — yet a producer sending either got
+#: "field 'r_layer' is not in the overview.scores contract". That is why a real
+#: promoted run had `r_layer` null on 30 of 34 sections and `narrative_thread`
+#: null on 32 of 34: not producer laziness, a gate refusing its own requirement.
+#: Optional, because 6 of the 34 writers bind r_layer at ITEM grain instead
+#: (an insight card carries its own), and a required-everywhere field would then
+#: fail the sections that legitimately have none.
+SECTION_META = {
+    "r_layer": {
+        "required": False, "type": "object", "item_type": None,
+        "doc": "The recorded reasoning for this section's ranked or causal "
+               "claims: {hypothesis, counter, domain_test, probes_run[], "
+               "verdict, confidence}. AG-01 blocks a ranked or causal claim "
+               "without one. Where the claims are per item (an insight card, a "
+               "recommendation), the item carries its own and this stays null.",
+    },
+    "narrative_thread": {
+        "required": False, "type": "string", "item_type": None,
+        "doc": "45-75 words tracing the line through this page's surfaces in "
+               "render order, written last from what was actually produced. A "
+               "page is not a container for surfaces; if the thread cannot be "
+               "written, the surfaces are not yet a page.",
+    },
+}
+
+
+@lru_cache(maxsize=1)
+def _section_bound_meta() -> dict:
+    """(page, section) -> the SECTION_META keys that section's writer binds.
+
+    Read straight from writer_spec.json rather than through promote, which
+    imports this module — the derivation must not create an import cycle, and
+    reading the spec is the same single source of truth either way.
+    """
+    spec = json.loads((_HERE / "writer_spec.json").read_text())
+    out = {}
+    for page_spec in spec["specs"]:
+        for w in page_spec["writers"]:
+            bound = {c["source"].partition(":")[2] for c in w["columns"]
+                     if c["source"].startswith("section:")}
+            out[(page_spec["page"], w["section"])] = bound
+    return out
+
+
+def _section_meta_for(page: str, name: str) -> dict:
+    """Which SECTION_META keys this section's writer can actually store."""
+    bound = _section_bound_meta().get((page, name), set())
+    return {k: v for k, v in SECTION_META.items() if k in bound}
+
+
 def _load() -> dict:
     with open(_DATA) as f:
         data = json.load(f)
@@ -104,7 +164,14 @@ def _load() -> dict:
             overlap = set(sec["fields"]) & set(ENVELOPE)
             if overlap:
                 raise ValueError(f"{page}.{name} redefines envelope: {overlap}")
-            sec["fields"] = {**sec["fields"], **ENVELOPE}
+            # A section that declares one of these ITSELF keeps its own
+            # definition — `overview.scores` names narrative_thread in the
+            # contract, which is exactly why it was one of the only two
+            # sections that ever promoted one. The contract wins; the meta
+            # fills in for the 32 sections whose contract is silent.
+            meta = {k: v for k, v in _section_meta_for(page, name).items()
+                    if k not in sec["fields"]}
+            sec["fields"] = {**sec["fields"], **ENVELOPE, **meta}
     return data
 
 
