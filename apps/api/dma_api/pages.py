@@ -27,52 +27,49 @@ def _rows(cur, table: str, run_id) -> list[dict]:
 
 
 def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
-    """The entity and the run to serve: the pinned run when asked for, else
-    the active promoted one."""
-    cur.execute("""SELECT id, display_id, legal_name, sub_vertical, size_tier
-                     FROM entities WHERE display_id = %s""", (display_id,))
-    ent = cur.fetchone()
-    if ent is None:
-        raise ApiError(404, "entity_not_found", f"no entity {display_id!r}")
-    entity_id = ent[0]
-
+    """The entity and the run to serve, read from the ONE materialised view
+    svc_api is granted (0013). Not the base tables: svc_api holds no SELECT
+    on entities or runs by design, and resolving the active run in two
+    places is how a header and its rows come to disagree."""
+    cur.execute("""SELECT entity_id, display_id, legal_name, sub_vertical, size_tier,
+                          run_id, request_id, run_seq, is_active, run_status,
+                          composite, scored_cells, catalogue_cells,
+                          ccg_catalog_version, completed_at, promoted_at
+                     FROM serving_directory
+                    WHERE display_id = %s
+                    ORDER BY is_active DESC, promoted_at DESC""", (display_id,))
+    rows = cur.fetchall()
+    if not rows:
+        # No promoted run for this entity — including an entity that exists
+        # but has never promoted, which is the same fact to a reader.
+        raise ApiError(404, "entity_not_found",
+                       f"no promoted run for {display_id!r}")
     if run:
-        cur.execute("""SELECT id, request_id, completed_at, promoted_at,
-                              ccg_catalog_version, scored_cells, catalogue_cells,
-                              status, composite, is_active
-                         FROM runs WHERE id = %s AND entity_id = %s""",
-                    (run, entity_id))
-        row = cur.fetchone()
-        if row is None:
+        picked = next((r for r in rows if str(r[5]) == str(run)), None)
+        if picked is None:
             raise ApiError(404, "entity_not_found",
-                           f"run {run} does not belong to {display_id}")
-        if not row[9] and not allow_history:
+                           f"run {run} has no promoted rows under {display_id}")
+        if not picked[8] and not allow_history:
             raise ApiError(409, "run_superseded",
                            "the pinned run is no longer active; pass "
                            "history=true to read it deliberately")
     else:
-        cur.execute("""SELECT id, request_id, completed_at, promoted_at,
-                              ccg_catalog_version, scored_cells, catalogue_cells,
-                              status, composite, is_active
-                         FROM runs
-                        WHERE entity_id = %s AND is_active
-                          AND promoted_at IS NOT NULL
-                        ORDER BY promoted_at DESC LIMIT 1""", (entity_id,))
-        row = cur.fetchone()
-        if row is None:
+        picked = rows[0]
+        if not picked[8]:
             raise ApiError(404, "entity_not_found",
-                           f"{display_id} has no promoted run")
+                           f"{display_id} has no active promoted run")
 
-    entity = {"display_id": ent[1], "entity_name": ent[2],
-              "sub_vertical": ent[3], "size_tier": ent[4]}
-    run_meta = {"run_id": str(row[0]), "request_id": row[1],
-                "completed_at": row[2].isoformat() if row[2] else None,
-                "promoted_at": row[3].isoformat() if row[3] else None,
-                "ccg_catalog_version": row[4], "scored_cells": row[5],
-                "catalogue_cells": row[6], "status": row[7],
-              "is_active": bool(row[9]),
-                "composite": float(row[8]) if row[8] is not None else None}
-    return entity_id, entity, run_meta, row[3]
+    entity = {"display_id": picked[1], "entity_name": picked[2],
+              "sub_vertical": picked[3], "size_tier": picked[4]}
+    run_meta = {"run_id": str(picked[5]), "request_id": picked[6],
+                "run_seq": picked[7],
+                "completed_at": picked[14].isoformat() if picked[14] else None,
+                "promoted_at": picked[15].isoformat() if picked[15] else None,
+                "ccg_catalog_version": picked[13], "scored_cells": picked[11],
+                "catalogue_cells": picked[12], "status": picked[9],
+                "is_active": bool(picked[8]),
+                "composite": float(picked[10]) if picked[10] is not None else None}
+    return picked[0], entity, run_meta, picked[15]
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
@@ -107,6 +104,24 @@ def build_page(cur, page: str, display_id: str, audience: str = "internal",
     out_sections = {}
     for section in sections:
         r = readers()[(page, section)]
+        if r["grain"] == "none":
+            # The evidence store is not a per-run serving table: promote
+            # writes no rows for it (its writer grain is "none") and it is
+            # keyed by evidence id, not run. Saying so is honest; querying
+            # it by run_id would be a column that does not exist. The
+            # store is read through the evidence drawer, per id.
+            out_sections[section] = {
+                "data": None, "data_source": "external",
+                "provenance": None, "produced_at": None,
+                "producer_version": None, "e_ids": [],
+                "empty_state": {
+                    "kind": "served_from_evidence_store",
+                    "reason": ("this section's rows live in the run's evidence "
+                               "store and are read by evidence id rather than "
+                               "by page"),
+                    "sources_searched": []},
+            }
+            continue
         rows = _rows(cur, r["table"], run_meta["run_id"])
         built = assemble(page, section, rows)
         if built is None:

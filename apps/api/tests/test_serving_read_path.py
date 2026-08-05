@@ -227,6 +227,9 @@ def test_active_run_predicate_matches_the_real_enum():
     the one promote flagged: is_active AND promoted_at IS NOT NULL."""
     src = (ROOT / "apps" / "api" / "dma_api" / "pages.py").read_text()
     assert "status = 'ACTIVE'" not in src
-    assert "AND is_active" in src and "promoted_at IS NOT NULL" in src
-    # and the run envelope reports both, so a caller can tell them apart
-    assert '"status": row[7]' in src and '"is_active": bool(row[9])' in src
+    # resolution reads the one view svc_api is granted, never the base
+    # tables (svc_api holds no SELECT on entities or runs by design)
+    assert "FROM serving_directory" in src
+    assert "FROM entities" not in src and "FROM runs" not in src
+    # and the envelope reports status and the active flag separately
+    assert '"status": picked[9]' in src and '"is_active": bool(picked[8])' in src
