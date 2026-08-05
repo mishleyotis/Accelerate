@@ -309,7 +309,9 @@ function adaptWhyNow(whyNow) {
   return signals.map(s => ({
     id: s.wn_id,
     label: s.trigger_label || headlineOf(s.trigger),
-    category: s.category || null,
+    // the contract's field is `kind` (M&A · LEADERSHIP · REGULATORY ·
+    // TECHNOLOGY); the card renders it as the signal's category badge
+    category: s.kind || s.category || null,
     strength: s.strength || null,
     window: s.window || null,
     confidence: s.confidence || null,

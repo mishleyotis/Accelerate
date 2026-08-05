@@ -564,7 +564,7 @@ function WhyNowStrip({
         fontWeight: 600,
         color: "var(--z-dark)"
       }
-    }, s.label), !isCust ? /*#__PURE__*/React.createElement("span", {
+    }, s.label), !isCust && s.strength ? /*#__PURE__*/React.createElement("span", {
       className: `b ${STR[s.strength] || "b-muted"}`
     }, s.strength) : null), !openNow ? /*#__PURE__*/React.createElement("div", {
       style: {
@@ -576,10 +576,16 @@ function WhyNowStrip({
       className: "txt-fit-1"
     }, s.impact) : null), /*#__PURE__*/React.createElement("span", {
       className: "b",
+      title: s.window || undefined,
       style: {
         background: "rgba(115,91,161,.14)",
         color: "var(--z-dpur)",
-        flexShrink: 0
+        flexShrink: 1,
+        minWidth: 0,
+        maxWidth: "38%",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap"
       }
     }, s.window), /*#__PURE__*/React.createElement(Icon, {
       name: openNow ? "chevron-u" : "chevron-d",

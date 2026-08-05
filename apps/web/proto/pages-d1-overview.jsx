@@ -238,11 +238,20 @@ function WhyNowStrip({ entity, openEvidence, audience }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)" }}>{s.label}</span>
-                    {!isCust ? <span className={`b ${STR[s.strength] || "b-muted"}`}>{s.strength}</span> : null}
+                    {!isCust && s.strength ? <span className={`b ${STR[s.strength] || "b-muted"}`}>{s.strength}</span> : null}
                   </div>
                   {!openNow ? <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 3, lineHeight: 1.4 }} className="txt-fit-1">{s.impact}</div> : null}
                 </div>
-                <span className="b" style={{ background: "rgba(115,91,161,.14)", color: "var(--z-dpur)", flexShrink: 0 }}>{s.window}</span>
+                {/* The fixture's window was a phrase ("6-9 months"); the
+                    contract's is 20-40 words naming the closing event. An
+                    unshrinkable badge crushed the label beside it to one
+                    character per line, so the chip truncates and carries the
+                    full sentence in its tooltip — it reads in full in the
+                    expanded drilldown below. */}
+                <span className="b" title={s.window || undefined}
+                  style={{ background: "rgba(115,91,161,.14)", color: "var(--z-dpur)",
+                           flexShrink: 1, minWidth: 0, maxWidth: "38%",
+                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.window}</span>
                 <Icon name={openNow ? "chevron-u" : "chevron-d"} size={15} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
               </button>
               {/* expanded drilldown */}

@@ -1752,7 +1752,11 @@ function ClientTechStack({
   };
   const byLayer = {};
   LAYERS.forEach(L => byLayer[L] = list.filter(t => t.layer === L));
-  const absentCount = allTech.filter(t => t.status === "ABSENT" && (t.layer === "L3" || t.layer === "L4")).length;
+
+  // Layer keys are OPS · CUST · DATA · INFRA (charter correction); the
+  // customer-engagement and data layers are the ones whose absence gates
+  // downstream AI/decisioning work.
+  const absentCount = allTech.filter(t => t.status === "ABSENT" && (t.layer === "CUST" || t.layer === "DATA")).length;
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -2208,7 +2212,7 @@ function ClientTechStackDetail({
     };
   });
   const peers = DMA.PEER_SETS[entity.subvertical]?.peers || [];
-  const gapZones = t.status === "ABSENT" ? [`No ${t.layer === "L3" ? "CRM or member 360 profile layer" : "data foundation"} when ${t.name} is absent.`, `Blocks Agentforce prerequisites (P2C2 + P4C1 must be ≥ 2.0).`, `Creates downstream constraint for any AI/decisioning investment.`, `Operating cost stays elevated - manual workflows persist.`] : [`No integrated AI/ML decisioning layer on top of ${t.name}.`, `No omnichannel servicing (post-origination).`, `Integration bus gap to other cores remains.`, `Self-service analytics not yet exposed to operations leadership.`];
+  const gapZones = t.status === "ABSENT" ? [`No ${t.layer === "CUST" ? "CRM or member 360 profile layer" : "data foundation"} when ${t.name} is absent.`, `Blocks Agentforce prerequisites (P2C2 + P4C1 must be ≥ 2.0).`, `Creates downstream constraint for any AI/decisioning investment.`, `Operating cost stays elevated - manual workflows persist.`] : [`No integrated AI/ML decisioning layer on top of ${t.name}.`, `No omnichannel servicing (post-origination).`, `Integration bus gap to other cores remains.`, `Self-service analytics not yet exposed to operations leadership.`];
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
