@@ -1492,15 +1492,48 @@ function ClientTechStackDetail({ entity, run, techId }) {
             <div style={{ fontSize: 22, fontWeight: 700, color: "var(--z-dark)", marginBottom: 6 }}>{t.name}</div>
             <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.55, maxWidth: 720 }}>{t.note}</div>
           </div>
+          {/* The headline number here was the mean ABSOLUTE PEER DELTA of the
+              linked cells, printed as "avg subcap ceiling uplift". A peer delta
+              is not a ceiling and it is not an uplift, no source states an
+              uplift for any product, and with the fabricated baseline removed
+              it rendered "+—". It is replaced by the count it can honestly
+              show; the explanation itself is prose and gets the width it needs
+              below. */}
           <div style={{ textAlign: "right", flexShrink: 0 }}>
-            <div style={{ fontSize: 10, color: "var(--z-muted)", marginBottom: 4 }}>DMA impact</div>
-            <div style={{ fontSize: 32, fontWeight: 200, color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-teal)", lineHeight: 1 }}>
-              {t.status === "ABSENT" ? "−" : "+"}{fx((impacts.reduce((a, i) => a + Math.abs(i.delta), 0) / Math.max(1, impacts.length)), 1)}
+            <div style={{ fontSize: 10, color: "var(--z-muted)", marginBottom: 4 }}>Assessed cells</div>
+            <div style={{ fontSize: 32, fontWeight: 200, color: "var(--z-teal)", lineHeight: 1 }}>
+              {impacts.length}
             </div>
-            <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 2 }}>avg subcap ceiling {t.status === "ABSENT" ? "blocked" : "uplift"}</div>
+            <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 2 }}>
+              linked in the register
+            </div>
           </div>
         </div>
       </div>
+
+      {/* The producer's own explanation of what this product bears on. This is
+          the answer to "what is the DMA impact based off?", and it was promoted
+          and served long before anything rendered it. Full width, above the
+          two columns, because it is prose and the reader came here for it. */}
+      {t.dma_impact ? (
+        <div className="card" style={{ marginBottom: 14, borderLeft: "3px solid var(--z-teal)" }}>
+          <div className="row" style={{ marginBottom: 8 }}>
+            <Icon name="target" size={15} />
+            <div style={{ fontSize: 13, fontWeight: 600 }}>What this bears on in the assessment</div>
+          </div>
+          <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.6, maxWidth: 860 }}>
+            {t.dma_impact}
+          </div>
+        </div>
+      ) : (
+        <div className="card" style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+            The run states no assessment impact for this row. The linked cells and
+            their served scores are below; the reasoning that connects them was
+            not written.
+          </div>
+        </div>
+      )}
 
       {/* 2-col: Evidence + DMA assessment impact */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
@@ -1517,16 +1550,26 @@ function ClientTechStackDetail({ entity, run, techId }) {
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {/* Always show source signals first */}
-              {t.source.map((src, i) => (
-                <div key={i} style={{ padding: "8px 10px", background: i === 0 ? "var(--z-ice)" : "var(--z-lav)", borderLeft: `3px solid ${i === 0 ? "var(--z-teal)" : "var(--z-sep)"}`, borderRadius: 4 }}>
-                  <div className="row" style={{ marginBottom: 3, fontSize: 11 }}>
-                    <span className={`b ${src === "Explorium" ? "b-teal" : src === "Press release" ? "b-purple" : src === "Job posting" ? "b-ph1" : "b-muted"}`}>{src}</span>
-                    <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{src === "Explorium" ? "Technographic · Q4 refresh" : "Detected"}</span>
+              {/* The detection basis, as the sentence the producer wrote.
+                  It used to render inside a BADGE — the whole basis string as a
+                  pill — with a canned sentence underneath keyed off the source
+                  name ("Confirmed active deployment - high confidence signal"),
+                  which is invented text on a page whose job is provenance. A
+                  96-word basis then overflowed the badge and pushed the whole
+                  document into horizontal scroll at every width. It is prose;
+                  it wraps. */}
+              {t.note ? (
+                <div style={{ padding: "10px 12px", background: "var(--z-ice)",
+                              borderLeft: "3px solid var(--z-teal)", borderRadius: 4,
+                              minWidth: 0 }}>
+                  <div style={{ fontSize: 10, color: "var(--z-muted)", marginBottom: 4,
+                                letterSpacing: ".06em", textTransform: "uppercase" }}>
+                    How this was detected
                   </div>
-                  <div style={{ fontSize: 11.5, color: "var(--z-dark)" }}>{src === "Explorium" ? `Confirmed active deployment - high confidence signal` : src === "Job posting" ? `Active job listings reference the platform - intent signal` : `Public mention confirms deployment scope`}</div>
+                  <div style={{ fontSize: 12, color: "var(--z-dark)", lineHeight: 1.55,
+                                overflowWrap: "anywhere" }}>{t.note}</div>
                 </div>
-              ))}
+              ) : null}
               {t.evidence.map(eid => {
                 const e = DMA.getEvidence(eid);
                 if (!e) return null;

@@ -2873,20 +2873,56 @@ function ClientTechStackDetail({
       color: "var(--z-muted)",
       marginBottom: 4
     }
-  }, "DMA impact"), /*#__PURE__*/React.createElement("div", {
+  }, "Assessed cells"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 32,
       fontWeight: 200,
-      color: t.status === "ABSENT" ? "var(--z-below)" : "var(--z-teal)",
+      color: "var(--z-teal)",
       lineHeight: 1
     }
-  }, t.status === "ABSENT" ? "−" : "+", fx(impacts.reduce((a, i) => a + Math.abs(i.delta), 0) / Math.max(1, impacts.length), 1)), /*#__PURE__*/React.createElement("div", {
+  }, impacts.length), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)",
       marginTop: 2
     }
-  }, "avg subcap ceiling ", t.status === "ABSENT" ? "blocked" : "uplift")))), /*#__PURE__*/React.createElement("div", {
+  }, "linked in the register")))), t.dma_impact ? /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      marginBottom: 14,
+      borderLeft: "3px solid var(--z-teal)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "target",
+    size: 15
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600
+    }
+  }, "What this bears on in the assessment")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "var(--z-body)",
+      lineHeight: 1.6,
+      maxWidth: 860
+    }
+  }, t.dma_impact)) : /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-muted)"
+    }
+  }, "The run states no assessment impact for this row. The linked cells and their served scores are below; the reasoning that connects them was not written.")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
@@ -2926,33 +2962,30 @@ function ClientTechStackDetail({
       flexDirection: "column",
       gap: 8
     }
-  }, t.source.map((src, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
+  }, t.note ? /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "8px 10px",
-      background: i === 0 ? "var(--z-ice)" : "var(--z-lav)",
-      borderLeft: `3px solid ${i === 0 ? "var(--z-teal)" : "var(--z-sep)"}`,
-      borderRadius: 4
+      padding: "10px 12px",
+      background: "var(--z-ice)",
+      borderLeft: "3px solid var(--z-teal)",
+      borderRadius: 4,
+      minWidth: 0
     }
   }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      marginBottom: 3,
-      fontSize: 11
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    className: `b ${src === "Explorium" ? "b-teal" : src === "Press release" ? "b-purple" : src === "Job posting" ? "b-ph1" : "b-muted"}`
-  }, src), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
-      color: "var(--z-muted)"
+      color: "var(--z-muted)",
+      marginBottom: 4,
+      letterSpacing: ".06em",
+      textTransform: "uppercase"
     }
-  }, src === "Explorium" ? "Technographic · Q4 refresh" : "Detected")), /*#__PURE__*/React.createElement("div", {
+  }, "How this was detected"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 11.5,
-      color: "var(--z-dark)"
+      fontSize: 12,
+      color: "var(--z-dark)",
+      lineHeight: 1.55,
+      overflowWrap: "anywhere"
     }
-  }, src === "Explorium" ? `Confirmed active deployment - high confidence signal` : src === "Job posting" ? `Active job listings reference the platform - intent signal` : `Public mention confirms deployment scope`))), t.evidence.map(eid => {
+  }, t.note)) : null, t.evidence.map(eid => {
     const e = DMA.getEvidence(eid);
     if (!e) return null;
     return /*#__PURE__*/React.createElement("div", {

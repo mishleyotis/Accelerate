@@ -502,3 +502,33 @@ test("the layer rollup is empty, never a fixture, when the run has no register",
   assert.deepStrictEqual(w.DMA.TECH_LAYERS, [],
                          "LIVE with nothing promoted returns [] and not the prototype's");
 });
+
+test("the tech item carries the fields its detail page exists to explain", () => {
+  // dma_impact, peer_coverage and peer_deployments were promoted and served,
+  // and the adapter dropped all three — so the drilldown fell back to
+  // arithmetic in no source while the producer's explanation sat unread.
+  const w = load(LIVE);
+  const out = w.adaptTechStack({ items: [{
+    ts_id: "TS-201", product: "Lumin Digital Banking", vendor: "Lumin Digital",
+    layer: "CUST", pillar_id: "P2", status: "CONFIRMED",
+    linked_subcap_ids: ["P2C3.1.1"],
+    dma_impact: "The digital banking platform is the member's front door.",
+    peer_coverage: 0.4,
+    peer_deployments: [{ peer: "CEFCU", deployed: true, source_url: "https://x", as_of: "2026-01-01" },
+                       { peer: "Alliant", deployed: null }],
+  }] });
+  assert.strictEqual(out[0].dma_impact, "The digital banking platform is the member's front door.");
+  assert.strictEqual(out[0].peer_coverage, 0.4, "a stated share must survive the adapter");
+  assert.strictEqual(out[0].peer_deployments.length, 2);
+  assert.strictEqual(out[0].peer_deployments[1].deployed, null,
+                     "an unestablished peer stays null and is not dropped");
+});
+
+test("a tech row with no promoted impact says so rather than computing one", () => {
+  const w = load(LIVE);
+  const out = w.adaptTechStack({ items: [{ ts_id: "TS-1", product: "X", status: "INFERRED" }] });
+  assert.strictEqual(out[0].dma_impact, null);
+  assert.strictEqual(out[0].peer_coverage, null,
+                     "0 would read as a researched share of zero");
+  assert.deepStrictEqual(out[0].peer_deployments, []);
+});

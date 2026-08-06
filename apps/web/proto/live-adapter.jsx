@@ -602,7 +602,13 @@ function adaptTechStack(techstack) {
     evidence: t.e_ids || [],
     subcaps_impact: t.linked_subcap_ids || [],
     dma_pillar: t.pillar_id,
-    peer_coverage: null,
+    // The three fields the detail page exists to explain. They were promoted,
+    // served, and dropped here — so the drilldown fell back to arithmetic in no
+    // source ("avg subcap ceiling uplift" from the peer delta) while the
+    // producer's actual explanation sat unread in the payload.
+    dma_impact: t.dma_impact || null,
+    peer_coverage: t.peer_coverage != null ? t.peer_coverage : null,
+    peer_deployments: t.peer_deployments || [],
   }));
 }
 
