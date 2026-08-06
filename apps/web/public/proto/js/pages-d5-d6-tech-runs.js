@@ -2248,6 +2248,7 @@ function ClientTechStack({
   const [layer, setLayer] = useState("ALL");
   const [hideAbsent, setHideAbsent] = useState(false);
   const allTech = DMA.TECH_STACK;
+  const layerRollup = DMA.TECH_LAYERS || [];
   const list = useMemo(() => allTech.filter(t => {
     if (layer !== "ALL" && t.layer !== layer) return false;
     if (hideAbsent && t.status === "ABSENT") return false;
@@ -2265,11 +2266,15 @@ function ClientTechStack({
       short: "Operations",
       dma: "P3"
     },
+    // No `primary_gap` here. It used to be hardcoded true on CUST, so every
+    // client's customer layer wore PRIMARY GAP LAYER whatever their register
+    // said — and on this one CUST is the BEST covered layer (11 confirmed of
+    // 23) while DATA has none confirmed at all. It is a judgement the payload
+    // makes, per layer, in `layers[].is_primary_gap`.
     CUST: {
       name: "Customer engagement",
       short: "Customer",
-      dma: "P2",
-      primary_gap: true
+      dma: "P2"
     },
     DATA: {
       name: "Data & analytics",
@@ -2428,9 +2433,13 @@ function ClientTechStack({
     l: "Absent",
     v: allTech.filter(t => t.status === "ABSENT").length,
     c: "var(--z-below)"
-  }, {
-    l: "Primary gaps",
-    v: allTech.filter(t => t.primary_gap).length,
+  },
+  // Counted from the promoted rollup, which states it per LAYER. It
+  // used to count a per-row `primary_gap` no adapter emits, so the
+  // tile read 0 on every client while a layer card wore the badge.
+  {
+    l: "Primary gap layers",
+    v: layerRollup.filter(x => x && x.is_primary_gap).length,
     c: "var(--z-blue)"
   }].map(s => /*#__PURE__*/React.createElement("div", {
     key: s.l,
@@ -2457,7 +2466,14 @@ function ClientTechStack({
     const LM = LAYER_LABEL[L];
     const techList = byLayer[L];
     if (!techList || techList.length === 0) return null;
-    const isPrimaryGap = LM.primary_gap;
+    // The promoted rollup decides this, and it carries its own detected /
+    // expected counts. Fall back to counting the rows on screen so the
+    // card still states a real ratio when the run promoted no rollup —
+    // never to a constant.
+    const roll = (layerRollup || []).find(x => x && x.layer === L) || null;
+    const isPrimaryGap = !!(roll && roll.is_primary_gap);
+    const detected = roll && roll.detected != null ? roll.detected : techList.filter(t => t.status !== "ABSENT").length;
+    const expected = roll && roll.expected != null ? roll.expected : techList.length;
     return /*#__PURE__*/React.createElement("div", {
       key: L,
       className: "card",
@@ -2488,12 +2504,12 @@ function ClientTechStack({
       className: "spacer"
     }), /*#__PURE__*/React.createElement("span", {
       className: "b b-teal"
-    }, LM.dma), /*#__PURE__*/React.createElement("span", {
+    }, roll && roll.pillar_id || LM.dma), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 11,
         color: "var(--z-muted)"
       }
-    }, techList.filter(t => t.status !== "ABSENT").length, " of ", techList.length, " detected")), /*#__PURE__*/React.createElement("div", {
+    }, detected, " of ", expected, " detected")), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         flexDirection: "column",

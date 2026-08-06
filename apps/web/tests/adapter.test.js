@@ -460,3 +460,45 @@ test("section provenance is carried per section, as the prototype states it", ()
   assert.strictEqual(s.e_ids.length, 2);
   assert.ok(s.produced_at, "when it promoted must be renderable per card");
 });
+
+test("the tech layer rollup is computed from the register, not read from it", () => {
+  const w = load(LIVE);
+  const ts = { items: [
+    { ts_id: "TS-1", layer: "OPS",  pillar_id: "P3", status: "CONFIRMED" },
+    { ts_id: "TS-2", layer: "OPS",  pillar_id: "P3", status: "INFERRED" },
+    { ts_id: "TS-3", layer: "CUST", pillar_id: "P2", status: "CONFIRMED" },
+    { ts_id: "TS-4", layer: "CUST", pillar_id: "P2", status: "CONFIRMED" },
+    // DATA: nothing confirmed, and one slot searched and not found
+    { ts_id: "TS-5", layer: "DATA", pillar_id: "P4", status: "INFERRED" },
+    { ts_id: "TS-6", layer: "DATA", pillar_id: "P4", status: "ABSENT" },
+  ] };
+  const rows = w.techLayersOf(ts);
+  assert.deepStrictEqual(rows.map(r => r.layer), ["OPS", "CUST", "DATA"],
+                         "only layers the register actually uses");
+  const data = rows.find(r => r.layer === "DATA");
+  assert.strictEqual(data.expected, 2, "an ABSENT row is a slot, so it counts");
+  assert.strictEqual(data.detected, 1, "...but it is not detected");
+  assert.strictEqual(data.is_primary_gap, true, "fewest confirmed wins");
+  assert.match(data.basis, /0 confirmed of 2/);
+  assert.strictEqual(rows.find(r => r.layer === "CUST").is_primary_gap, false,
+                     "the best-covered layer is never the gap");
+  assert.strictEqual(data.pillar_id, "P4", "the pillar comes off the rows");
+});
+
+test("a tie in the layer rollup flags nothing rather than guessing", () => {
+  const w = load(LIVE);
+  const rows = w.techLayersOf({ items: [
+    { layer: "OPS",  status: "INFERRED" }, { layer: "OPS",  status: "INFERRED" },
+    { layer: "DATA", status: "INFERRED" }, { layer: "DATA", status: "INFERRED" },
+  ] });
+  assert.deepStrictEqual(rows.map(r => r.is_primary_gap), [false, false],
+    "both layers have 0 confirmed and the same ratio — inventing a winner is the defect");
+});
+
+test("the layer rollup is empty, never a fixture, when the run has no register", () => {
+  const w = load(LIVE);
+  assert.deepStrictEqual(w.techLayersOf(null), []);
+  assert.deepStrictEqual(w.techLayersOf({ items: [] }), []);
+  assert.deepStrictEqual(w.DMA.TECH_LAYERS, [],
+                         "LIVE with nothing promoted returns [] and not the prototype's");
+});

@@ -533,6 +533,61 @@ function adaptRecommendations(recommendations) {
 /* ── TECH_STACK ──────────────────────────────────────────────────────
    Four required statuses and the corrected layer keys (OPS · CUST · DATA ·
    INFRA — never L2–L5, which collide with the evidence levels L1–L4). */
+/* The layer rollup, COMPUTED from the register rather than read from it.
+   `techstack.layers` is a contract field the producer asserts and the gate
+   checks, but no column stores it, so a promoted rollup serves back empty —
+   and it does not need to be stored, because every ingredient is on the item
+   rows the app already holds. Counts are computed, never stored, where a
+   source of truth exists (invariant 8), and the register IS that source.
+
+   `expected` counts every slot the producer placed at the layer INCLUDING the
+   ones recorded ABSENT, because an ABSENT row is a slot searched and not
+   found — which is exactly what "6 of 8 detected" means.
+
+   The primary-gap judgement is derived by a stated rule rather than a
+   constant: the layer with the fewest CONFIRMED rows, tie-broken by the lowest
+   detected ratio. Where that still ties, NOTHING is flagged — a tie means the
+   register does not single a layer out, and inventing one would be the same
+   defect as the hardcoded flag this replaces (every client's CUST layer wore
+   PRIMARY GAP LAYER regardless of its own register; on Baxter, CUST is the
+   best-covered layer at 11 confirmed of 23 while DATA has none confirmed at
+   all). `basis` travels with the flag so the card can say why. */
+function techLayersOf(techstack) {
+  const items = (techstack && techstack.items) || [];
+  if (!items.length) return [];
+  const order = ["OPS", "CUST", "DATA", "INFRA"];
+  const rows = [];
+  for (const layer of order) {
+    const at = items.filter(t => t && t.layer === layer);
+    if (!at.length) continue;
+    const absent = at.filter(t => t.status === "ABSENT").length;
+    const confirmed = at.filter(t => t.status === "CONFIRMED").length;
+    rows.push({
+      layer,
+      pillar_id: (at.find(t => t.pillar_id) || {}).pillar_id || null,
+      detected: at.length - absent,
+      expected: at.length,
+      confirmed,
+      is_primary_gap: false,
+      basis: null,
+    });
+  }
+  if (!rows.length) return rows;
+  const fewest = Math.min(...rows.map(r => r.confirmed));
+  let cands = rows.filter(r => r.confirmed === fewest);
+  if (cands.length > 1) {
+    const ratio = r => (r.expected ? r.detected / r.expected : 1);
+    const lowest = Math.min(...cands.map(ratio));
+    cands = cands.filter(r => ratio(r) === lowest);
+  }
+  if (cands.length === 1) {
+    cands[0].is_primary_gap = true;
+    cands[0].basis = `${cands[0].confirmed} confirmed of ${cands[0].expected} `
+      + `— fewer than any other layer`;
+  }
+  return rows;
+}
+
 function adaptTechStack(techstack) {
   return ((techstack && techstack.items) || []).map((t) => ({
     id: t.ts_id,
@@ -988,6 +1043,7 @@ function buildLiveEntity(entityId, pages, extras) {
     acquisitions: adaptAcquisitions(secOf(context, "acquisitions")),
 
     techStack: adaptTechStack(secOf(techstack, "techstack")),
+    techLayers: techLayersOf(secOf(techstack, "techstack")),
     evidence: adaptEvidence(x.evidence),
     landscape: secOf(insights, "landscape"),
 
@@ -1051,6 +1107,6 @@ Object.assign(window, {
   // Exported so tests can assert them directly. Each of these was a silent
   // key or shape mismatch between the payload and a renderer, which is the
   // defect class no per-field test caught.
-  secWithEnv, stairstepClustersOf, adaptAcquisitions, issueCapsOf,
+  secWithEnv, stairstepClustersOf, adaptAcquisitions, issueCapsOf, techLayersOf,
   adaptOpportunityTiles, cagrOf, peerOfSignal: signalOf,
 });

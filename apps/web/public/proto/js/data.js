@@ -2845,6 +2845,13 @@
         layer: TS_LAYER_FIX[t.layer] || t.layer
       }));
     },
+    /* The promoted layer rollup (detected/expected/is_primary_gap per layer).
+       In LIVE it returns [] rather than a fixture, and the layer cards fall
+       back to counting the rows they draw — never to a constant. The fixture
+       has no rollup of its own, so the prototype path is [] too. */
+    get TECH_LAYERS() {
+      return LIVE ? liveField(null, "techLayers") || [] : [];
+    },
     get LEADERSHIP() {
       return LIVE ? liveField(null, "leadership") || [] : LEADERSHIP;
     },

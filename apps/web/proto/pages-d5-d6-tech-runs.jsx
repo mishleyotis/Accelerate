@@ -1201,6 +1201,7 @@ function ClientTechStack({ entity, run }) {
   const [hideAbsent, setHideAbsent] = useState(false);
 
   const allTech = DMA.TECH_STACK;
+  const layerRollup = DMA.TECH_LAYERS || [];
   const list = useMemo(() => allTech.filter(t => {
     if (layer !== "ALL" && t.layer !== layer) return false;
     if (hideAbsent && t.status === "ABSENT") return false;
@@ -1214,7 +1215,12 @@ function ClientTechStack({ entity, run }) {
   const LAYERS = ["OPS", "CUST", "DATA", "INFRA"];
   const LAYER_LABEL = {
     OPS:   { name: "Operations & core banking",  short: "Operations", dma: "P3" },
-    CUST:  { name: "Customer engagement",        short: "Customer",   dma: "P2", primary_gap: true },
+    // No `primary_gap` here. It used to be hardcoded true on CUST, so every
+    // client's customer layer wore PRIMARY GAP LAYER whatever their register
+    // said — and on this one CUST is the BEST covered layer (11 confirmed of
+    // 23) while DATA has none confirmed at all. It is a judgement the payload
+    // makes, per layer, in `layers[].is_primary_gap`.
+    CUST:  { name: "Customer engagement",        short: "Customer",   dma: "P2" },
     DATA:  { name: "Data & analytics",           short: "Data",       dma: "P4" },
     INFRA: { name: "Infrastructure & cloud",     short: "Infra",      dma: "P4" },
   };
@@ -1292,7 +1298,10 @@ function ClientTechStack({ entity, run }) {
           { l: "Confirmed",   v: allTech.filter(t => t.status === "CONFIRMED").length,  c: "var(--z-mid)" },
           { l: "Inferred",    v: allTech.filter(t => t.status === "INFERRED").length,   c: "var(--z-dpur)" },
           { l: "Absent",      v: allTech.filter(t => t.status === "ABSENT").length,     c: "var(--z-below)" },
-          { l: "Primary gaps", v: allTech.filter(t => t.primary_gap).length,            c: "var(--z-blue)" },
+          // Counted from the promoted rollup, which states it per LAYER. It
+          // used to count a per-row `primary_gap` no adapter emits, so the
+          // tile read 0 on every client while a layer card wore the badge.
+          { l: "Primary gap layers", v: layerRollup.filter(x => x && x.is_primary_gap).length, c: "var(--z-blue)" },
         ].map(s => (
           <div key={s.l} className="card-tile" style={{ borderLeft: `3px solid ${s.c}` }}>
             <div style={{ fontSize: 10, color: "var(--z-muted)", letterSpacing: ".08em", textTransform: "uppercase" }}>{s.l}</div>
@@ -1306,15 +1315,23 @@ function ClientTechStack({ entity, run }) {
         const LM = LAYER_LABEL[L];
         const techList = byLayer[L];
         if (!techList || techList.length === 0) return null;
-        const isPrimaryGap = LM.primary_gap;
+        // The promoted rollup decides this, and it carries its own detected /
+        // expected counts. Fall back to counting the rows on screen so the
+        // card still states a real ratio when the run promoted no rollup —
+        // never to a constant.
+        const roll = (layerRollup || []).find(x => x && x.layer === L) || null;
+        const isPrimaryGap = !!(roll && roll.is_primary_gap);
+        const detected = roll && roll.detected != null
+          ? roll.detected : techList.filter(t => t.status !== "ABSENT").length;
+        const expected = roll && roll.expected != null ? roll.expected : techList.length;
         return (
           <div key={L} className="card" style={{ marginBottom: 12, padding: 16, borderColor: isPrimaryGap ? "var(--z-blue)" : "var(--z-sep)", borderWidth: isPrimaryGap ? 1.5 : 1, borderStyle: "solid" }}>
             <div className="row" style={{ marginBottom: 12 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: "var(--z-dark)" }}>{LM.name}</div>
               {isPrimaryGap ? <span className="b b-ph1" style={{ background: "var(--ph1-lt)" }}>PRIMARY GAP LAYER</span> : null}
               <span className="spacer" />
-              <span className="b b-teal">{LM.dma}</span>
-              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{techList.filter(t => t.status !== "ABSENT").length} of {techList.length} detected</span>
+              <span className="b b-teal">{(roll && roll.pillar_id) || LM.dma}</span>
+              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{detected} of {expected} detected</span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {techList.map(t => <TechRow key={t.id} t={t} entity={entity} run={run} />)}
