@@ -2574,6 +2574,12 @@
               "nullable": true
             },
             {
+              "column": "mix_implication",
+              "source": "section:mix_implication",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
               "column": "r_layer",
               "source": "section:r_layer",
               "jsonb": true,
@@ -2592,7 +2598,7 @@
               "nullable": true
             }
           ],
-          "notes": "O10 + O11 in one table (DDL comment: 'serves O10 and O11'). O10 fields map 1:1 (overall_pct, per_pillar [{pillar_id, pillar_name, pct, cells_total, cells_covered, below_gate}], gate_pct, denominator_definition, note \u2014 note is the only optional one). COMPOSED COLUMN: tier_distribution has NO payload key of that name \u2014 the writer assembles the O11 census object {item_count, fact_count, tiers[], claim_classes[], self_sourced_pct, mix_implication} from the contract's six separate section fields, exactly the shape the DDL comment states. overall_pct/gate_pct are NUMERIC(5,1) \u2014 never rounded across the gate (79.6 stays 79.6)."
+          "notes": "O10 + O11 in one table (DDL comment: 'serves O10 and O11'). O10 fields map 1:1 (overall_pct, per_pillar [{pillar_id, pillar_name, pct, cells_total, cells_covered, below_gate}], gate_pct, denominator_definition, note \u2014 note is the only optional one). COMPOSED COLUMN: tier_distribution has NO payload key of that name \u2014 the writer assembles the O11 census object {item_count, fact_count, tiers[], claim_classes[], self_sourced_pct, mix_implication} from the contract's six separate section fields, exactly the shape the DDL comment states. overall_pct/gate_pct are NUMERIC(5,1) \u2014 never rounded across the gate (79.6 stays 79.6). MIX_IMPLICATION (0023): required by the contract and previously unstored \u2014 validated at submit and then discarded at promotion."
         },
         {
           "section": "thought_leadership",
@@ -3487,6 +3493,12 @@
               "nullable": true
             },
             {
+              "column": "sequencing_basis",
+              "source": "section:sequencing_basis",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
               "column": "r_layer",
               "source": "section:r_layer",
               "jsonb": true,
@@ -3505,7 +3517,7 @@
               "nullable": true
             }
           ],
-          "notes": "COLUMN/KEY AMBIGUITY TO ADJUDICATE: the DDL comment on capabilities TEXT[] says 'the rec ids assigned to this phase; ids must resolve', so it is mapped from item:rec_ids (the referential-integrity gate is on rec_ids). But the contract carries BOTH rec_ids[] (skill/section_templates, adopted per _notes) AND capabilities[] (Surface Spec prompt) as separate item keys \u2014 the contract's capabilities[] then has no column of its own; the DDL likely predates the split. NO COLUMN: phase_id (skill-added identifier) rides nowhere \u2014 the BIGSERIAL id plus phase (SMALLINT, order is meaning) serve the table. NO COLUMN, SECTION-LEVEL: sequencing_basis (required string, prerequisites|undetermined) has no home \u2014 the migration's own pattern stores section-level fields of item-grain sections on every row (cf. overview_why_now.synthesis, context_timeline.storyline), so this needs a column or an explicit ride in r_layer; flag, do not drop silently. provenance: item carries analyst|derived, matching provenance_t directly; fills the envelope provenance column per row. e_ids: phases carry no per-item citation list, so the section envelope's e_ids stamps every row. r_layer: NULL."
+          "notes": "COLUMN/KEY AMBIGUITY TO ADJUDICATE: the DDL comment on capabilities TEXT[] says 'the rec ids assigned to this phase; ids must resolve', so it is mapped from item:rec_ids (the referential-integrity gate is on rec_ids). But the contract carries BOTH rec_ids[] (skill/section_templates, adopted per _notes) AND capabilities[] (Surface Spec prompt) as separate item keys \u2014 the contract's capabilities[] then has no column of its own; the DDL likely predates the split. NO COLUMN: phase_id (skill-added identifier) rides nowhere \u2014 the BIGSERIAL id plus phase (SMALLINT, order is meaning) serve the table. NO COLUMN, SECTION-LEVEL: sequencing_basis (required string, prerequisites|undetermined) has no home \u2014 the migration's own pattern stores section-level fields of item-grain sections on every row (cf. overview_why_now.synthesis, context_timeline.storyline), so this needs a column or an explicit ride in r_layer; flag, do not drop silently. provenance: item carries analyst|derived, matching provenance_t directly; fills the envelope provenance column per row. e_ids: phases carry no per-item citation list, so the section envelope's e_ids stamps every row. r_layer: NULL. SEQUENCING_BASIS (0023): required by the contract and previously unstored \u2014 validated at submit and then discarded at promotion."
         },
         {
           "section": "stairstep",
@@ -4418,6 +4430,12 @@
               "nullable": true
             },
             {
+              "column": "dropped",
+              "source": "section:dropped",
+              "jsonb": true,
+              "nullable": true
+            },
+            {
               "column": "r_layer",
               "source": "section:r_layer",
               "jsonb": true,
@@ -4436,7 +4454,7 @@
               "nullable": true
             }
           ],
-          "notes": "NAME MISMATCH: contract item key is `product`, column is `name` \u2014 the contract's own _notes record that the TRD representative contract called this field `name` while the Surface Spec/skill REISSUED prompt use `product` (vendor and product are separate fields; product wins in the payload); the DDL kept the TRD spelling `name`, so the writer maps item.product -> name. NO-ITEM-KEY COLUMN: `is_primary_gap` is not in the item shape \u2014 it is carried per layer in the section-level `layers[]` rollup ({layer, pillar_id, detected, expected, is_primary_gap}); the writer fills each row by matching item.layer to its layers[] entry and copying that entry's is_primary_gap flag (matches the \u00a706 DDL comment on techstack_items placing the flag per row). E_IDS: on this item-grain table the row-level `e_ids` takes each item's own e_ids[] (the contract requires every item to cite the evidence placing it in the estate \u2014 an uncitable item goes to dropped[]), not the section-envelope union; same item-over-section rule as r_layer. CONTRACT FIELDS WITH NO COLUMN: (a) item key `as_of` has no column and this table has no JSONB payload carrier \u2014 it is validated in the payload but not persisted, flag if row-level dating is later needed; (b) section field `layers[]` is not stored beyond the per-row is_primary_gap derivation \u2014 the T2 landscape strip and the four layer cards recompute detected-of-expected counts from this register at read (invariant 8, and insights_landscape.summary's comment says counts are NEVER stored); (c) section field `dropped[]` ({candidate, reason}) has no column \u2014 not persisted in the serving tier by this writer; (d) optional `compliance_attestations[]` (plain strings) has no column \u2014 not persisted here. NARRATIVE_THREAD: the techstack section contract declares no narrative_thread field; the skill puts the page-level thread on each page's lead section and techstack has exactly one section, so if the payload carries one it lands here via the envelope path \u2014 NULL is correct when absent. R_LAYER: items do not carry r_layer, so section-level (nullable, NULL when the section has none). STATUS is the table's only payload NOT NULL \u2014 CONFIRMED|INFERRED|CLAIMED|ABSENT required per row because the landscape strip recomputes its four counts from this column. UNIQUENESS: 0008 creates UNIQUE INDEX techstack_items_ts_uq ON (run_id, ts_id) \u2014 ts_id is agent-minted (TS-nnn) and must be unique within the run, so delete-then-insert ordering inside the promote transaction matters. GENERATED columns: none on this table."
+          "notes": "NAME MISMATCH: contract item key is `product`, column is `name` \u2014 the contract's own _notes record that the TRD representative contract called this field `name` while the Surface Spec/skill REISSUED prompt use `product` (vendor and product are separate fields; product wins in the payload); the DDL kept the TRD spelling `name`, so the writer maps item.product -> name. NO-ITEM-KEY COLUMN: `is_primary_gap` is not in the item shape \u2014 it is carried per layer in the section-level `layers[]` rollup ({layer, pillar_id, detected, expected, is_primary_gap}); the writer fills each row by matching item.layer to its layers[] entry and copying that entry's is_primary_gap flag (matches the \u00a706 DDL comment on techstack_items placing the flag per row). E_IDS: on this item-grain table the row-level `e_ids` takes each item's own e_ids[] (the contract requires every item to cite the evidence placing it in the estate \u2014 an uncitable item goes to dropped[]), not the section-envelope union; same item-over-section rule as r_layer. CONTRACT FIELDS WITH NO COLUMN: (a) item key `as_of` has no column and this table has no JSONB payload carrier \u2014 it is validated in the payload but not persisted, flag if row-level dating is later needed; (b) section field `layers[]` is not stored beyond the per-row is_primary_gap derivation \u2014 the T2 landscape strip and the four layer cards recompute detected-of-expected counts from this register at read (invariant 8, and insights_landscape.summary's comment says counts are NEVER stored); (c) section field `dropped[]` ({candidate, reason}) has no column \u2014 not persisted in the serving tier by this writer; (d) optional `compliance_attestations[]` (plain strings) has no column \u2014 not persisted here. NARRATIVE_THREAD: the techstack section contract declares no narrative_thread field; the skill puts the page-level thread on each page's lead section and techstack has exactly one section, so if the payload carries one it lands here via the envelope path \u2014 NULL is correct when absent. R_LAYER: items do not carry r_layer, so section-level (nullable, NULL when the section has none). STATUS is the table's only payload NOT NULL \u2014 CONFIRMED|INFERRED|CLAIMED|ABSENT required per row because the landscape strip recomputes its four counts from this column. UNIQUENESS: 0008 creates UNIQUE INDEX techstack_items_ts_uq ON (run_id, ts_id) \u2014 ts_id is agent-minted (TS-nnn) and must be unique within the run, so delete-then-insert ordering inside the promote transaction matters. GENERATED columns: none on this table. DROPPED (0023): section-grain on an item-grain table, repeated per row and read once \u2014 the same shape overview_firmographics uses for sub_vertical_undefined. The sibling required field `layers` is deliberately NOT bound: every ingredient of the rollup is on these item rows, so it is recomputed at read (invariant 8) and a column would be a second answer that could disagree with the rows beneath it."
         }
       ]
     }

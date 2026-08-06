@@ -352,3 +352,85 @@ def test_catalogue_reads_the_real_ceilings_table():
         if t.startswith(("overview_", "heatmap_", "insights_", "platform_",
                          "context_", "techstack_")):
             assert t in tables, f"{t} is not a serving table in the writer spec"
+
+
+def test_a_required_field_is_either_stored_or_deliberately_computed():
+    """The defect class this whole registry keeps hitting, pinned.
+
+    A REQUIRED contract field with no column is validated, promoted into
+    nothing, and gone — that is how `context_sentiment.context_tiles`, the
+    leadership contact route and `techstack.dropped` each rendered empty under
+    a real client's name. But the answer is not "give every required field a
+    column": some are COUNTS, and counts are computed, never stored, where a
+    source of truth exists (invariant 8).
+
+    So every required field must be one or the other, on purpose. This test
+    lists the deliberate exceptions by name; anything else that loses its
+    column shows up here rather than as an empty card.
+    """
+    import json
+    from pathlib import Path
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "mcp"))
+    from dma_mcp.contracts import sections, ENVELOPE, SECTION_META
+
+    # Required, and deliberately NOT persisted — each recomputed at read from a
+    # source of truth that already exists, with that source named.
+    COMPUTED_AT_READ = {
+        ("overview", "firmographics", "undated_pct"): "share of fields[] with no as_of",
+        ("overview", "evidence_coverage", "item_count"): "census of the evidence store",
+        ("overview", "evidence_coverage", "fact_count"): "census of the evidence store",
+        ("overview", "evidence_coverage", "tiers"): "tier histogram of the evidence store",
+        ("overview", "evidence_coverage", "claim_classes"): "claim histogram of the evidence store",
+        ("overview", "evidence_coverage", "self_sourced_pct"): "share of items on the entity's own domains",
+        ("insights", "landscape", "tiles"): "recomputed from the techstack register",
+        ("insights", "landscape", "reconciles_to_register"): "the assertion, not the counts",
+        ("techstack", "techstack", "layers"): "rollup over techstack_items (techLayersOf)",
+        ("heatmap", "cell_evidence", "linking_stats"): "reach counters over cells[]",
+        ("heatmap", "evidence_age", "stale_pct"): "share of rows[] banded stale",
+        ("heatmap", "evidence_age", "undated_pct"): "share of rows[] with no date",
+        # Not computed — read from a DIFFERENT table. The connector writes every
+        # SG result to `gate_results` as it runs (see _run_s8), and that table is
+        # what renders to the client with its plain_label and NOT_RUN reason. A
+        # column here would be a second copy of a record the run already keeps,
+        # free to disagree with the gate that produced it.
+        ("heatmap", "safeguard_gates", "gates"): "gate_results, written by the connector",
+        # Not written by promote at all: heatmap.evidence serves straight from
+        # the INGESTED evidence_index, which is read-only once scanned.
+        ("heatmap", "evidence", "evidence"): "evidence_index (ingested tier)",
+        # H4's object-map grain: these are containers that _expand_h4_maps turns
+        # into rows keyed by pillar_id / category_id, not fields of their own.
+        ("heatmap", "workbook_scores", "pillars"): "expanded to rows by _expand_h4_maps",
+        ("heatmap", "workbook_scores", "categories"): "expanded to rows by _expand_h4_maps",
+    }
+
+    spec = json.loads(
+        (Path(__file__).resolve().parents[1] / "dma_api" / "writer_spec.json").read_text())
+    bound = {}
+    for page_spec in spec["specs"]:
+        for w in page_spec["writers"]:
+            keys = set()
+            for c in w["columns"]:
+                kind, _, rest = c["source"].partition(":")
+                if kind in ("item", "section"):
+                    keys.add(rest.split(".")[0])
+            bound[(page_spec["page"], w["section"])] = (keys, w.get("item_field"))
+
+    orphans = []
+    for (page, name), (keys, item_field) in bound.items():
+        fields = sections(page)[name]["fields"]
+        for fname, spec_f in fields.items():
+            if not spec_f.get("required"):
+                continue
+            if fname in ENVELOPE or fname in SECTION_META:
+                continue          # env: / section: bindings, checked elsewhere
+            if fname in keys or fname == item_field:
+                continue          # stored
+            if (page, name, fname) in COMPUTED_AT_READ:
+                continue          # deliberate, and the source is named above
+            orphans.append(f"{page}.{name}.{fname}")
+
+    assert not orphans, (
+        "required contract fields with no column and no recorded reason — each "
+        "is validated at submit and then discarded at promotion: "
+        + ", ".join(sorted(orphans)))
