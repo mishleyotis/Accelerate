@@ -2705,6 +2705,72 @@ function ClientTechStack({
     size: 11
   }))));
 }
+
+/* The row's right rail — SOURCES, derived from the row's own citations.
+   ─────────────────────────────────────────────────────────────────────
+   The prototype's rail carries short source-kind chips ("Explorium", "Job
+   posting", "Press release") and a "Since YYYY-MM". Neither is a field the
+   payload has: `techstack_items` has no source-kind column and no `as_of`
+   column, so a producer that sent one would have it validated at submit and
+   discarded at promotion. Rather than fake the rail from constants — the
+   defect that put a 150-character detection sentence in a grey badge and
+   overflowed every row — it is COMPUTED from what the row genuinely cites.
+
+   Each chip is one DISTINCT source behind this row, labelled with the
+   registrable domain of its URL and toned by the best evidence tier from that
+   source. That is the same question the prototype's rail answers — what kind
+   of source establishes this row — asked of data the run actually holds.
+
+   The date line is a CITATION date, never a deployment date, and it says so:
+   a press release published 2025-04 does not mean the product arrived then,
+   and labelling it "Since" would assert exactly that. Rows whose citations
+   carry no published date show no date line at all (invariant 9). */
+function techRowSources(t) {
+  const TIER_RANK = {
+    T1: 1,
+    T2: 2,
+    T3: 3,
+    T4: 4,
+    T5: 5
+  };
+  const byDomain = new Map();
+  let newest = null;
+  for (const eid of t.evidence || []) {
+    const e = DMA.getEvidence(eid);
+    if (!e) continue;
+    const host = String(e.source || "").split("/")[0].replace(/^www\./, "");
+    if (host) {
+      // The registrable pair, so `vibeprospecting.explorium.ai` and
+      // `explorium.ai` are one source rather than two chips saying it twice.
+      const parts = host.split(".");
+      const label = parts.length > 2 ? parts.slice(-2).join(".") : host;
+      const rank = TIER_RANK[e.tier] || 9;
+      const prev = byDomain.get(label);
+      if (!prev || rank < prev.rank) byDomain.set(label, {
+        label,
+        rank,
+        tier: e.tier
+      });
+    }
+    if (e.published_date && (!newest || e.published_date > newest)) {
+      newest = e.published_date;
+    }
+  }
+  const chips = [...byDomain.values()].sort((a, b) => a.rank - b.rank);
+  let citedTo = null;
+  if (newest) {
+    const d = new Date(`${String(newest).slice(0, 10)}T00:00:00Z`);
+    citedTo = Number.isNaN(d.getTime()) ? null : d.toLocaleDateString("en-US", {
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC"
+    });
+  }
+  return {
+    chips,
+    citedTo
+  };
+}
 function TechRow({
   t,
   entity,
@@ -2739,6 +2805,7 @@ function TechRow({
     }
   };
   const S = STATUS_STYLE[t.status] || STATUS_STYLE.CONFIRMED;
+  const rail = techRowSources(t);
   return /*#__PURE__*/React.createElement("button", {
     onClick: () => navigate(`/clients/${entity.id}/techstack/${t.id}`, {
       run: run.id
@@ -2803,7 +2870,16 @@ function TechRow({
       ev.stopPropagation();
       openEvidence(eid);
     }
-  }, eid))), t.subcaps_impact && t.subcaps_impact.length > 0 ? /*#__PURE__*/React.createElement("div", {
+  }, eid))), t.note ? /*#__PURE__*/React.createElement("div", {
+    className: "txt-fit-1",
+    title: t.note,
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-body)",
+      lineHeight: 1.5,
+      marginTop: 3
+    }
+  }, t.note) : null, t.subcaps_impact && t.subcaps_impact.length > 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 4,
@@ -2817,23 +2893,35 @@ function TechRow({
     style: {
       display: "flex",
       flexDirection: "column",
-      gap: 4,
+      gap: 3,
       alignItems: "flex-end",
-      maxWidth: 160
+      flexShrink: 0,
+      maxWidth: 150
     }
-  }, t.source.map((src, i) => /*#__PURE__*/React.createElement("span", {
-    key: i,
-    className: `b ${src === "Explorium" ? "b-teal" : src === "Press release" ? "b-purple" : src === "Job posting" ? "b-ph1" : "b-muted"}`,
+  }, rail.chips.slice(0, 3).map(c => /*#__PURE__*/React.createElement("span", {
+    key: c.label,
+    className: `b ${c.rank <= 2 ? "b-teal" : c.rank === 3 ? "b-purple" : "b-muted"}`,
+    title: `${c.tier} source`,
+    style: {
+      fontSize: 9,
+      maxWidth: 150,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, c.label)), rail.chips.length > 3 ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted",
     style: {
       fontSize: 9
-    }
-  }, src)), t.since ? /*#__PURE__*/React.createElement("span", {
+    },
+    title: rail.chips.slice(3).map(c => c.label).join(" · ")
+  }, "+", rail.chips.length - 3, " more") : null, rail.citedTo ? /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 9.5,
       color: "var(--z-muted)",
       marginTop: 2
     }
-  }, "Since ", t.since) : null));
+  }, "Cited to ", rail.citedTo) : null));
 }
 
 /* ── Tech stack drilldown (s42) ──────────────────────────────────── */
@@ -2916,6 +3004,7 @@ function ClientTechStackDetail({
   // IS in the run: the cells in this product's own pillar that it is NOT
   // linked to. Stated as available value — what the estate does not yet reach —
   // never as a failing.
+  const rail = techRowSources(t);
   const coveredIds = new Set(t.subcaps_impact || []);
   const samePillar = (entity.subcaps || []).filter(s => t.dma_pillar && String(s.id).startsWith(t.dma_pillar));
   const notCovered = samePillar.filter(s => !coveredIds.has(s.id)).sort((a, b) => (a.score ?? 9) - (b.score ?? 9)).slice(0, 6);
@@ -2962,7 +3051,14 @@ function ClientTechStackDetail({
       color: S.color,
       border: `1px solid ${S.color}22`
     }
-  }, S.label), t.since ? /*#__PURE__*/React.createElement("span", {
+  }, S.label), rail.chips.map(c => /*#__PURE__*/React.createElement("span", {
+    key: c.label,
+    className: `b ${c.rank <= 2 ? "b-teal" : c.rank === 3 ? "b-purple" : "b-muted"}`,
+    title: `${c.tier} source`,
+    style: {
+      fontSize: 9.5
+    }
+  }, c.label)), rail.citedTo ? /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)",
@@ -2970,7 +3066,7 @@ function ClientTechStackDetail({
       padding: "2px 8px",
       borderRadius: 3
     }
-  }, "Since ", t.since) : null), /*#__PURE__*/React.createElement("div", {
+  }, "Cited to ", rail.citedTo) : null), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -3030,18 +3126,32 @@ function ClientTechStackDetail({
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
-      marginBottom: 8
+      marginBottom: 4
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       fontWeight: 600
     }
-  }, "What this bears on in the assessment")), /*#__PURE__*/React.createElement("div", {
+  }, "DMA assessment impact"), /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)"
+    }
+  }, "Capability \xB7 coverage \xB7 boundary \xB7 pathway")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)",
+      marginBottom: 8,
+      lineHeight: 1.5
+    }
+  }, "What ", t.name, " covers in this estate, which assessed cells that reaches, where the product's own documented boundary stops, and the work that carries the estate across it. No score is derived here."), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       color: "var(--z-body)",
-      lineHeight: 1.6,
+      lineHeight: 1.65,
       maxWidth: 860
     }
   }, t.dma_impact)) : /*#__PURE__*/React.createElement("div", {
@@ -3051,8 +3161,15 @@ function ClientTechStackDetail({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
+      fontSize: 13,
+      fontWeight: 600,
+      marginBottom: 6
+    }
+  }, "DMA assessment impact"), /*#__PURE__*/React.createElement("div", {
+    style: {
       fontSize: 12,
-      color: "var(--z-muted)"
+      color: "var(--z-muted)",
+      lineHeight: 1.6
     }
   }, "The run states no assessment impact for this row. The linked cells and their served scores are below; the reasoning that connects them was not written.")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3094,30 +3211,7 @@ function ClientTechStackDetail({
       flexDirection: "column",
       gap: 8
     }
-  }, t.note ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "10px 12px",
-      background: "var(--z-ice)",
-      borderLeft: "3px solid var(--z-teal)",
-      borderRadius: 4,
-      minWidth: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)",
-      marginBottom: 4,
-      letterSpacing: ".06em",
-      textTransform: "uppercase"
-    }
-  }, "How this was detected"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: "var(--z-dark)",
-      lineHeight: 1.55,
-      overflowWrap: "anywhere"
-    }
-  }, t.note)) : null, t.evidence.map(eid => {
+  }, t.evidence.map(eid => {
     const e = DMA.getEvidence(eid);
     if (!e) return null;
     return /*#__PURE__*/React.createElement("div", {
@@ -3171,7 +3265,7 @@ function ClientTechStackDetail({
       fontSize: 13,
       fontWeight: 600
     }
-  }, "DMA assessment impact"), /*#__PURE__*/React.createElement("span", {
+  }, "Cells this product is linked to"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
@@ -3372,53 +3466,108 @@ function ClientTechStackDetail({
       fontSize: 13,
       fontWeight: 600
     }
-  }, "Peer deployment"), /*#__PURE__*/React.createElement("span", {
+  }, "Peer platform comparison"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), t.peer_coverage != null ? /*#__PURE__*/React.createElement("span", {
     className: "b b-teal"
-  }, fmtPct(t.peer_coverage), " adopted") : /*#__PURE__*/React.createElement("span", {
+  }, fmtPct(t.peer_coverage), " adopted") : (t.peer_deployments || []).length ? /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
-  }, "not researched")), t.peer_coverage != null ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    className: "prog",
-    style: {
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "prog-fill",
-    style: {
-      width: `${t.peer_coverage * 100}%`,
-      background: "linear-gradient(90deg, var(--z-teal), var(--z-mid))"
-    }
-  })), /*#__PURE__*/React.createElement("div", {
+  }, "no share stated") : /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted"
+  }, "not researched")), (t.peer_deployments || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, (() => {
+    const rows = t.peer_deployments || [];
+    const yes = rows.filter(d => d.deployed === true).length;
+    const no = rows.filter(d => d.deployed === false).length;
+    const unknown = rows.length - yes - no;
+    return /*#__PURE__*/React.createElement(React.Fragment, null, t.peer_coverage != null ? /*#__PURE__*/React.createElement("div", {
+      className: "prog",
+      style: {
+        marginBottom: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "prog-fill",
+      style: {
+        width: `${t.peer_coverage * 100}%`,
+        background: "linear-gradient(90deg, var(--z-teal), var(--z-mid))"
+      }
+    })) : null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-muted)",
+        marginBottom: 8,
+        lineHeight: 1.5
+      }
+    }, yes, " of ", rows.length, " named peer", rows.length === 1 ? "" : "s", " established on this platform \xB7 ", no, " searched and not found", unknown ? ` · ${unknown} not established either way` : "", "."));
+  })(), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
-      gap: 5
+      gap: 6
     }
-  }, (t.peer_deployments || []).map(d => /*#__PURE__*/React.createElement("div", {
-    key: d.peer,
-    style: {
-      padding: "6px 10px",
-      background: d.deployed ? "var(--z-ice)" : "var(--z-lav)",
-      borderRadius: 5,
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      fontSize: 11.5
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: "var(--z-dark)",
-      fontWeight: 500
-    }
-  }, d.peer), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      fontWeight: 600,
-      color: d.deployed ? "var(--z-mid)" : "var(--z-muted)"
-    },
-    title: d.basis || ""
-  }, d.deployed ? "✓ deployed" : "not found"))))) : /*#__PURE__*/React.createElement("div", {
+  }, (t.peer_deployments || []).map(d => {
+    const yes = d.deployed === true,
+      no = d.deployed === false;
+    return /*#__PURE__*/React.createElement("div", {
+      key: d.peer,
+      style: {
+        padding: "8px 10px",
+        background: yes ? "var(--z-ice)" : "var(--z-lav)",
+        border: `1px solid ${yes ? "rgba(39,187,175,.35)" : "var(--z-sep)"}`,
+        borderRadius: 5,
+        fontSize: 11.5
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        minWidth: 0,
+        color: "var(--z-dark)",
+        fontWeight: 600
+      }
+    }, d.peer), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 9.5,
+        fontWeight: 700,
+        letterSpacing: ".04em",
+        textTransform: "uppercase",
+        color: yes ? "var(--z-mid)" : no ? "var(--z-below)" : "var(--z-muted)"
+      }
+    }, yes ? "Deployed" : no ? "Not found" : "Not established")), d.basis ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-body)",
+        lineHeight: 1.5,
+        marginTop: 4,
+        overflowWrap: "anywhere"
+      }
+    }, d.basis) : null, d.source_url || d.as_of ? /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 6,
+        marginTop: 5,
+        flexWrap: "wrap"
+      }
+    }, d.source_url ? /*#__PURE__*/React.createElement("a", {
+      href: d.source_url,
+      target: "_blank",
+      rel: "noreferrer",
+      className: "f-mono",
+      style: {
+        fontSize: 9.5,
+        color: "var(--z-mid)",
+        overflowWrap: "anywhere"
+      }
+    }, String(d.source_url).replace(/^https?:\/\/(www\.)?/, "").slice(0, 44)) : null, d.as_of ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 9.5,
+        color: "var(--z-muted)"
+      }
+    }, "as of ", d.as_of) : null) : null);
+  }))) : /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: "var(--z-body)",
@@ -3450,46 +3599,77 @@ function ClientTechStackDetail({
     style: {
       color: "var(--z-muted)"
     }
-  }, "This run states no peer set, so there is no cohort to search against either.")))), t.status === "ABSENT" ? /*#__PURE__*/React.createElement("div", {
-    className: "card",
-    style: {
-      background: "var(--ph0-lt)",
-      border: "1px solid var(--ph0-bd)"
+  }, "This run states no peer set, so there is no cohort to search against either.")))), (() => {
+    if (t.status !== "ABSENT") return null;
+    const seen = new Set();
+    const linked = [];
+    for (const i of impacts) {
+      for (const r of i.recs) {
+        if (!seen.has(r.id)) {
+          seen.add(r.id);
+          linked.push(r);
+        }
+      }
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      marginBottom: 8
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "sparkle",
-    size: 15,
-    style: {
-      color: "var(--z-dpur)"
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13,
-      fontWeight: 700,
-      color: "var(--z-dpur)"
-    }
-  }, "Zennify recommendation"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-tertiary btn-sm",
-    onClick: () => navigate(`/clients/${entity.id}/platform`, {
-      run: run.id
-    })
-  }, "See platform matrix ", /*#__PURE__*/React.createElement(Icon, {
-    name: "arrow-r",
-    size: 11
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13,
-      color: "#3B0764",
-      lineHeight: 1.65
-    }
-  }, t.name, " is the bridge between ", entity.name, "'s current architecture and a unified customer experience. Sequence it after the foundation prerequisites are met (see Readiness Index in D4 Platform).")) : null);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card",
+      style: {
+        background: "var(--ph0-lt)",
+        border: "1px solid var(--ph0-bd)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        marginBottom: 8
+      }
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "sparkle",
+      size: 15,
+      style: {
+        color: "var(--z-dpur)"
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        fontWeight: 700,
+        color: "var(--z-dpur)"
+      }
+    }, "On the platform roadmap"), /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-tertiary btn-sm",
+      onClick: () => navigate(`/clients/${entity.id}/platform`, {
+        run: run.id
+      })
+    }, "See platform matrix ", /*#__PURE__*/React.createElement(Icon, {
+      name: "arrow-r",
+      size: 11
+    }))), linked.length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 6
+      }
+    }, linked.map(r => /*#__PURE__*/React.createElement("div", {
+      key: r.id,
+      style: {
+        fontSize: 12.5,
+        color: "#3B0764",
+        lineHeight: 1.55
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "chip purple",
+      style: {
+        marginRight: 6
+      }
+    }, r.id), r.title))) : /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12.5,
+        color: "#3B0764",
+        lineHeight: 1.65
+      }
+    }, "No promoted recommendation names a cell this row is linked to. The pathway stated above is the argument for the work; the roadmap has not yet sequenced it."));
+  })());
 }
 
 /* ── Runs list ───────────────────────────────────────────────────── */

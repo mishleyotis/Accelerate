@@ -1501,6 +1501,57 @@ function ClientTechStack({ entity, run }) {
   );
 }
 
+/* The row's right rail — SOURCES, derived from the row's own citations.
+   ─────────────────────────────────────────────────────────────────────
+   The prototype's rail carries short source-kind chips ("Explorium", "Job
+   posting", "Press release") and a "Since YYYY-MM". Neither is a field the
+   payload has: `techstack_items` has no source-kind column and no `as_of`
+   column, so a producer that sent one would have it validated at submit and
+   discarded at promotion. Rather than fake the rail from constants — the
+   defect that put a 150-character detection sentence in a grey badge and
+   overflowed every row — it is COMPUTED from what the row genuinely cites.
+
+   Each chip is one DISTINCT source behind this row, labelled with the
+   registrable domain of its URL and toned by the best evidence tier from that
+   source. That is the same question the prototype's rail answers — what kind
+   of source establishes this row — asked of data the run actually holds.
+
+   The date line is a CITATION date, never a deployment date, and it says so:
+   a press release published 2025-04 does not mean the product arrived then,
+   and labelling it "Since" would assert exactly that. Rows whose citations
+   carry no published date show no date line at all (invariant 9). */
+function techRowSources(t) {
+  const TIER_RANK = { T1: 1, T2: 2, T3: 3, T4: 4, T5: 5 };
+  const byDomain = new Map();
+  let newest = null;
+  for (const eid of t.evidence || []) {
+    const e = DMA.getEvidence(eid);
+    if (!e) continue;
+    const host = String(e.source || "").split("/")[0].replace(/^www\./, "");
+    if (host) {
+      // The registrable pair, so `vibeprospecting.explorium.ai` and
+      // `explorium.ai` are one source rather than two chips saying it twice.
+      const parts = host.split(".");
+      const label = parts.length > 2 ? parts.slice(-2).join(".") : host;
+      const rank = TIER_RANK[e.tier] || 9;
+      const prev = byDomain.get(label);
+      if (!prev || rank < prev.rank) byDomain.set(label, { label, rank, tier: e.tier });
+    }
+    if (e.published_date && (!newest || e.published_date > newest)) {
+      newest = e.published_date;
+    }
+  }
+  const chips = [...byDomain.values()].sort((a, b) => a.rank - b.rank);
+  let citedTo = null;
+  if (newest) {
+    const d = new Date(`${String(newest).slice(0, 10)}T00:00:00Z`);
+    citedTo = Number.isNaN(d.getTime())
+      ? null
+      : d.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+  }
+  return { chips, citedTo };
+}
+
 function TechRow({ t, entity, run }) {
   const { openEvidence } = useApp();
   // The four charter statuses (CONFIRMED · INFERRED · CLAIMED · ABSENT). The
@@ -1513,6 +1564,7 @@ function TechRow({ t, entity, run }) {
     CLAIMED:   { bg: "rgba(254,151,50,.08)",  bd: "rgba(254,151,50,.3)",  color: "#7C3500" },
   };
   const S = STATUS_STYLE[t.status] || STATUS_STYLE.CONFIRMED;
+  const rail = techRowSources(t);
 
   return (
     <button onClick={() => navigate(`/clients/${entity.id}/techstack/${t.id}`, { run: run.id })}
@@ -1533,26 +1585,51 @@ function TechRow({ t, entity, run }) {
             <button key={eid} className="chip purple" style={{ fontSize: 10, padding: "1px 5px" }} onClick={(ev) => { ev.stopPropagation(); openEvidence(eid); }}>{eid}</button>
           ))}
         </div>
-        {/* No detection-basis prose here. The gray basis sentence under every
-            product name made the register read as paragraphs instead of a
-            scannable list; the basis renders once, on the detail page, under
-            "How this was detected". The row keeps its scent — status word,
-            evidence level, citation chips — and the click opens the detail. */}
+        {/* ONE muted line, clamped to one line, exactly as the prototype has
+            it. This is `detection_basis`, which the contract defines as ONE
+            CLAUSE and CG-12 budgets to 160 characters and a single sentence —
+            so it is already the short field, and what was wrong was the
+            producer's use of it, not the slot. The version this replaces put
+            the whole basis SENTENCE in the right rail as a badge, where a
+            150-character paragraph overflowed every row; the version after
+            that dropped the line entirely, which cost the register the scent
+            the prototype's row carries. It belongs here, one line, with the
+            full text on hover and the argument in dma_impact on the detail. */}
+        {t.note ? (
+          <div className="txt-fit-1" title={t.note}
+               style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.5, marginTop: 3 }}>
+            {t.note}
+          </div>
+        ) : null}
         {t.subcaps_impact && t.subcaps_impact.length > 0 ? (
           <div style={{ display: "flex", gap: 4, marginTop: 6, flexWrap: "wrap" }}>
             {t.subcaps_impact.map(s => <span key={s} className="chip">{s}</span>)}
           </div>
         ) : null}
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end", maxWidth: 160 }}>
-        {t.source.map((src, i) => (
-          <span key={i} className={`b ${
-            src === "Explorium" ? "b-teal" :
-            src === "Press release" ? "b-purple" :
-            src === "Job posting" ? "b-ph1" : "b-muted"
-          }`} style={{ fontSize: 9 }}>{src}</span>
+      <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "flex-end", flexShrink: 0, maxWidth: 150 }}>
+        {rail.chips.slice(0, 3).map(c => (
+          <span key={c.label}
+                className={`b ${c.rank <= 2 ? "b-teal" : c.rank === 3 ? "b-purple" : "b-muted"}`}
+                title={`${c.tier} source`}
+                style={{ fontSize: 9, maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {c.label}
+          </span>
         ))}
-        {t.since ? <span style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 2 }}>Since {t.since}</span> : null}
+        {rail.chips.length > 3 ? (
+          <span className="b b-muted" style={{ fontSize: 9 }}
+                title={rail.chips.slice(3).map(c => c.label).join(" · ")}>
+            +{rail.chips.length - 3} more
+          </span>
+        ) : null}
+        {/* A citation date, never a deployment date. The payload states no
+            `since` for any row, and reading one off a press release would
+            assert the product arrived when the press release was written. */}
+        {rail.citedTo ? (
+          <span style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 2 }}>
+            Cited to {rail.citedTo}
+          </span>
+        ) : null}
       </div>
     </button>
   );
@@ -1617,6 +1694,7 @@ function ClientTechStackDetail({ entity, run, techId }) {
   // IS in the run: the cells in this product's own pillar that it is NOT
   // linked to. Stated as available value — what the estate does not yet reach —
   // never as a failing.
+  const rail = techRowSources(t);
   const coveredIds = new Set(t.subcaps_impact || []);
   const samePillar = (entity.subcaps || []).filter(
     s => t.dma_pillar && String(s.id).startsWith(t.dma_pillar));
@@ -1648,7 +1726,16 @@ function ClientTechStackDetail({ entity, run, techId }) {
             </span>
           ) : null}
           <span className="b b-teal" style={{ background: t.status === "ABSENT" ? "rgba(194,80,8,.10)" : t.status === "INFERRED" ? "var(--ph0-lt)" : "var(--z-ice)", color: S.color, border: `1px solid ${S.color}22` }}>{S.label}</span>
-          {t.since ? <span style={{ fontSize: 11, color: "var(--z-muted)", background: "var(--z-lav)", padding: "2px 8px", borderRadius: 3 }}>Since {t.since}</span> : null}
+          {/* The same rail the register row carries, so a reader arriving here
+              recognises the row they clicked. Sources are the row's OWN
+              citations; the date is a citation date and is labelled as one —
+              the payload states no deployment date for any product. */}
+          {rail.chips.map(c => (
+            <span key={c.label}
+                  className={`b ${c.rank <= 2 ? "b-teal" : c.rank === 3 ? "b-purple" : "b-muted"}`}
+                  title={`${c.tier} source`} style={{ fontSize: 9.5 }}>{c.label}</span>
+          ))}
+          {rail.citedTo ? <span style={{ fontSize: 11, color: "var(--z-muted)", background: "var(--z-lav)", padding: "2px 8px", borderRadius: 3 }}>Cited to {rail.citedTo}</span> : null}
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
           <div style={{ minWidth: 0, flex: 1 }}>
@@ -1674,25 +1761,43 @@ function ClientTechStackDetail({ entity, run, techId }) {
         </div>
       </div>
 
-      {/* The producer's own explanation of what this product bears on. This is
-          the answer to "what is the DMA impact based off?", and it was promoted
-          and served long before anything rendered it. Full width, above the
-          two columns, because it is prose and the reader came here for it. */}
+      {/* The DMA assessment impact — the reader's whole reason for opening this
+          page, so it is full width and it is first.
+
+          It used to be headed "What this bears on in the assessment" and it
+          used to EXPLAIN THE SCORE, which is not what a reader is asking. The
+          question under a product name is: what does THIS platform, at the
+          edition this institution runs, actually cover here; which assessed
+          cells does that reach; where does the product's own documented
+          boundary stop; and what work carries the estate across that boundary.
+          The contract asks the producer for exactly those four moves in 40-90
+          words, so the card names them rather than leaving the reader to find
+          them in a paragraph. */}
       {t.dma_impact ? (
         <div className="card" style={{ marginBottom: 14, borderLeft: "3px solid var(--z-teal)" }}>
           {/* No icon. `target` is not in the icon set, so it fell through to
               the fallback glyph and painted a stray dot in front of the
               heading — a bullet on a heading that is not a list. */}
-          <div className="row" style={{ marginBottom: 8 }}>
-            <div style={{ fontSize: 13, fontWeight: 600 }}>What this bears on in the assessment</div>
+          <div className="row" style={{ marginBottom: 4 }}>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>DMA assessment impact</div>
+            <span className="spacer" />
+            <span style={{ fontSize: 10, color: "var(--z-muted)" }}>
+              Capability · coverage · boundary · pathway
+            </span>
           </div>
-          <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.6, maxWidth: 860 }}>
+          <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginBottom: 8, lineHeight: 1.5 }}>
+            What {t.name} covers in this estate, which assessed cells that
+            reaches, where the product's own documented boundary stops, and the
+            work that carries the estate across it. No score is derived here.
+          </div>
+          <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.65, maxWidth: 860 }}>
             {t.dma_impact}
           </div>
         </div>
       ) : (
         <div className="card" style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>DMA assessment impact</div>
+          <div style={{ fontSize: 12, color: "var(--z-muted)", lineHeight: 1.6 }}>
             The run states no assessment impact for this row. The linked cells and
             their served scores are below; the reasoning that connects them was
             not written.
@@ -1715,26 +1820,11 @@ function ClientTechStackDetail({ entity, run, techId }) {
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {/* The detection basis, as the sentence the producer wrote.
-                  It used to render inside a BADGE — the whole basis string as a
-                  pill — with a canned sentence underneath keyed off the source
-                  name ("Confirmed active deployment - high confidence signal"),
-                  which is invented text on a page whose job is provenance. A
-                  96-word basis then overflowed the badge and pushed the whole
-                  document into horizontal scroll at every width. It is prose;
-                  it wraps. */}
-              {t.note ? (
-                <div style={{ padding: "10px 12px", background: "var(--z-ice)",
-                              borderLeft: "3px solid var(--z-teal)", borderRadius: 4,
-                              minWidth: 0 }}>
-                  <div style={{ fontSize: 10, color: "var(--z-muted)", marginBottom: 4,
-                                letterSpacing: ".06em", textTransform: "uppercase" }}>
-                    How this was detected
-                  </div>
-                  <div style={{ fontSize: 12, color: "var(--z-dark)", lineHeight: 1.55,
-                                overflowWrap: "anywhere" }}>{t.note}</div>
-                </div>
-              ) : null}
+              {/* The detection basis is NOT repeated here. It is the row's own
+                  one-line summary and it already sits under the product name in
+                  the header card two blocks up; printing it a second time under
+                  "How this was detected" made a short page look like it was
+                  padding. What this card owes is the citations themselves. */}
               {t.evidence.map(eid => {
                 const e = DMA.getEvidence(eid);
                 if (!e) return null;
@@ -1757,7 +1847,11 @@ function ClientTechStackDetail({ entity, run, techId }) {
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="heatmap" size={15} />
-            <div style={{ fontSize: 13, fontWeight: 600 }}>DMA assessment impact</div>
+            {/* Not "DMA assessment impact" — that is the prose card above, and
+                two cards under one heading is why the impact read as a score
+                restatement. This one is the register's LINKAGE: the cells, at
+                the score the run assessed them. */}
+            <div style={{ fontSize: 13, fontWeight: 600 }}>Cells this product is linked to</div>
             <span className="spacer" />
             <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/heatmap`, { run: run.id })}>Open heatmap <Icon name="arrow-r" size={11} /></button>
           </div>
@@ -1866,27 +1960,79 @@ function ClientTechStackDetail({ entity, run, techId }) {
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="scale" size={15} />
-            <div style={{ fontSize: 13, fontWeight: 600 }}>Peer deployment</div>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>Peer platform comparison</div>
             <span className="spacer" />
             {t.peer_coverage != null
               ? <span className="b b-teal">{fmtPct(t.peer_coverage)} adopted</span>
-              : <span className="b b-muted">not researched</span>}
+              : ((t.peer_deployments || []).length
+                  ? <span className="b b-muted">no share stated</span>
+                  : <span className="b b-muted">not researched</span>)}
           </div>
-          {t.peer_coverage != null ? (
+          {(t.peer_deployments || []).length ? (
             <>
-              <div className="prog" style={{ marginBottom: 14 }}>
-                <div className="prog-fill" style={{ width: `${t.peer_coverage * 100}%`, background: "linear-gradient(90deg, var(--z-teal), var(--z-mid))" }} />
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                {(t.peer_deployments || []).map(d => (
-                  <div key={d.peer} style={{ padding: "6px 10px", background: d.deployed ? "var(--z-ice)" : "var(--z-lav)", borderRadius: 5, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11.5 }}>
-                    <span style={{ color: "var(--z-dark)", fontWeight: 500 }}>{d.peer}</span>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: d.deployed ? "var(--z-mid)" : "var(--z-muted)" }}
-                          title={d.basis || ""}>
-                      {d.deployed ? "✓ deployed" : "not found"}
-                    </span>
-                  </div>
-                ))}
+              {/* Three verdicts, not two. `deployed: null` is a peer the
+                  research could not establish either way, and the contract
+                  requires it to be listed rather than dropped — a coverage
+                  figure of 2 of 5 with three unknowns behind it is not 2 of 5.
+                  The old card had a boolean, so an unknown rendered as "not
+                  found": an absence the producer never established, asserted
+                  about a named institution on a client's dashboard. */}
+              {(() => {
+                const rows = t.peer_deployments || [];
+                const yes = rows.filter(d => d.deployed === true).length;
+                const no = rows.filter(d => d.deployed === false).length;
+                const unknown = rows.length - yes - no;
+                return (
+                  <>
+                    {t.peer_coverage != null ? (
+                      <div className="prog" style={{ marginBottom: 8 }}>
+                        <div className="prog-fill" style={{ width: `${t.peer_coverage * 100}%`, background: "linear-gradient(90deg, var(--z-teal), var(--z-mid))" }} />
+                      </div>
+                    ) : null}
+                    <div style={{ fontSize: 11, color: "var(--z-muted)", marginBottom: 8, lineHeight: 1.5 }}>
+                      {yes} of {rows.length} named peer{rows.length === 1 ? "" : "s"} established
+                      on this platform · {no} searched and not found
+                      {unknown ? ` · ${unknown} not established either way` : ""}.
+                    </div>
+                  </>
+                );
+              })()}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {(t.peer_deployments || []).map(d => {
+                  const yes = d.deployed === true, no = d.deployed === false;
+                  return (
+                    <div key={d.peer}
+                         style={{ padding: "8px 10px",
+                                  background: yes ? "var(--z-ice)" : "var(--z-lav)",
+                                  border: `1px solid ${yes ? "rgba(39,187,175,.35)" : "var(--z-sep)"}`,
+                                  borderRadius: 5, fontSize: 11.5 }}>
+                      <div className="row" style={{ gap: 8 }}>
+                        <span style={{ flex: 1, minWidth: 0, color: "var(--z-dark)", fontWeight: 600 }}>{d.peer}</span>
+                        <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".04em", textTransform: "uppercase",
+                                       color: yes ? "var(--z-mid)" : no ? "var(--z-below)" : "var(--z-muted)" }}>
+                          {yes ? "Deployed" : no ? "Not found" : "Not established"}
+                        </span>
+                      </div>
+                      {d.basis ? (
+                        <div style={{ fontSize: 11, color: "var(--z-body)", lineHeight: 1.5, marginTop: 4, overflowWrap: "anywhere" }}>
+                          {d.basis}
+                        </div>
+                      ) : null}
+                      {(d.source_url || d.as_of) ? (
+                        <div className="row" style={{ gap: 6, marginTop: 5, flexWrap: "wrap" }}>
+                          {d.source_url ? (
+                            <a href={d.source_url} target="_blank" rel="noreferrer"
+                               className="f-mono"
+                               style={{ fontSize: 9.5, color: "var(--z-mid)", overflowWrap: "anywhere" }}>
+                              {String(d.source_url).replace(/^https?:\/\/(www\.)?/, "").slice(0, 44)}
+                            </a>
+                          ) : null}
+                          {d.as_of ? <span style={{ fontSize: 9.5, color: "var(--z-muted)" }}>as of {d.as_of}</span> : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
               </div>
             </>
           ) : (
@@ -1915,20 +2061,52 @@ function ClientTechStackDetail({ entity, run, techId }) {
         </div>
       </div>
 
-      {/* Recommendation callout (if absent) */}
-      {t.status === "ABSENT" ? (
-        <div className="card" style={{ background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)" }}>
-          <div className="row" style={{ marginBottom: 8 }}>
-            <Icon name="sparkle" size={15} style={{ color: "var(--z-dpur)" }} />
-            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--z-dpur)" }}>Zennify recommendation</div>
-            <span className="spacer" />
-            <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/platform`, { run: run.id })}>See platform matrix <Icon name="arrow-r" size={11} /></button>
+      {/* The recommendations that reach this row's cells.
+
+          This card used to print one hardcoded sentence under every ABSENT
+          product on every client — "<product> is the bridge between <client>'s
+          current architecture and a unified customer experience" — a claim
+          about sequencing that no run states and that reads identically for a
+          CDP, an integration bus and a payment rail. The Zennify pathway for
+          THIS product is now written, cited, in `dma_impact` above; what
+          belongs here is the link from this row to the roadmap items that
+          actually name its cells, which is a lookup, not an assertion. */}
+      {(() => {
+        if (t.status !== "ABSENT") return null;
+        const seen = new Set();
+        const linked = [];
+        for (const i of impacts) {
+          for (const r of i.recs) {
+            if (!seen.has(r.id)) { seen.add(r.id); linked.push(r); }
+          }
+        }
+        return (
+          <div className="card" style={{ background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)" }}>
+            <div className="row" style={{ marginBottom: 8 }}>
+              <Icon name="sparkle" size={15} style={{ color: "var(--z-dpur)" }} />
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--z-dpur)" }}>On the platform roadmap</div>
+              <span className="spacer" />
+              <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/platform`, { run: run.id })}>See platform matrix <Icon name="arrow-r" size={11} /></button>
+            </div>
+            {linked.length ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {linked.map(r => (
+                  <div key={r.id} style={{ fontSize: 12.5, color: "#3B0764", lineHeight: 1.55 }}>
+                    <span className="chip purple" style={{ marginRight: 6 }}>{r.id}</span>
+                    {r.title}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontSize: 12.5, color: "#3B0764", lineHeight: 1.65 }}>
+                No promoted recommendation names a cell this row is linked to.
+                The pathway stated above is the argument for the work; the
+                roadmap has not yet sequenced it.
+              </div>
+            )}
           </div>
-          <div style={{ fontSize: 13, color: "#3B0764", lineHeight: 1.65 }}>
-            {t.name} is the bridge between {entity.name}'s current architecture and a unified customer experience. Sequence it after the foundation prerequisites are met (see Readiness Index in D4 Platform).
-          </div>
-        </div>
-      ) : null}
+        );
+      })()}
     </div>
   );
 }
