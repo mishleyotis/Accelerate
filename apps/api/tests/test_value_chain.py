@@ -355,3 +355,60 @@ def test_a_pinned_version_with_no_arrangement_borrows_the_current_one():
         "only cells the RUN serves appear"
     assert "P9C9.9.9" not in ids["VC-CU-02"]["subcaps"], \
         "a v7-only cell the run never scored is not invented into the view"
+
+
+def test_every_workbook_marker_shape_is_stripped_and_counted():
+    """The `21_VC_Mapping_PerSubcap` column carries the author's own
+    annotations as stage labels. Four shapes ship in v7.0, and until the
+    catalogue was curated (0024) this read path only recognised two — so
+    Baxter's 30 CU stages included a stage headed "(SV-Specific:
+    P3C1.3.CU1)" and another headed "Indirect: credit unions also
+    cooperative; some governance patterns transfer".
+
+    A catalogue loaded after 0024 carries none of them; a version loaded
+    before it still does, and is still served. They are excluded and
+    COUNTED — a stage dropped silently is a stage the reader believes
+    does not exist.
+    """
+    markers = [
+        "- (N/A)",
+        "Not applicable — credit unions follow NCUA framework, not FCA",
+        "(applicable via CIB pattern)",
+        "(SV-Specific: P3C1.3.CU1)",
+        "Indirect: credit unions also cooperative; some governance patterns transfer",
+    ]
+    stages = [stage(f"VC-CU-{i:02d}", name, i)
+              for i, name in enumerate(markers, 1)]
+    stages.append(stage("VC-CU-09", "Member onboarding & account opening", 9))
+    cur = _Cur(stages=stages,
+               mapping=[mapped("P2C1.1.1", "Member onboarding & account opening"),
+                        mapped("P1C1.1.1", "- (N/A)")],
+               served=["P2C1.1.1", "P1C1.1.1"])
+    data, empty = read_value_chain(cur, ENTITY, RUN)
+    assert empty is None
+    assert [c["name"] for c in data["chains"]] == \
+        ["Member onboarding & account opening"]
+    assert data["not_applicable_stages"] == len(markers)
+
+
+def test_a_curated_arrangement_is_served_whole():
+    """With the catalogue curated the read path has nothing left to
+    filter, and nothing here caps or reorders: eight stages in, eight out,
+    in the arrangement's stated order."""
+    names = ["Field of membership & market strategy",
+             "Member acquisition & marketing",
+             "Member onboarding & account opening",
+             "Member servicing & digital engagement",
+             "Member growth, cross-sell & lending",
+             "Payments & card operations",
+             "Back office, CUSO & shared services",
+             "Risk, fraud & NCUA compliance"]
+    cur = _Cur(stages=[stage(f"VC-CU-{i:02d}", n, i)
+                       for i, n in enumerate(names, 1)],
+               mapping=[mapped(f"P1C1.1.{i}", n) for i, n in enumerate(names, 1)],
+               served=[f"P1C1.1.{i}" for i in range(1, len(names) + 1)])
+    data, empty = read_value_chain(cur, ENTITY, RUN)
+    assert empty is None
+    assert [c["name"] for c in data["chains"]] == names
+    assert data["not_applicable_stages"] == 0
+    assert all(len(c["subcaps"]) == 1 for c in data["chains"])

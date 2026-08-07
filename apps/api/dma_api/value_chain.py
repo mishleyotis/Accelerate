@@ -11,15 +11,28 @@ promoted `heatmap_value_chain` row contributes only its envelope.
 
 ## The tables, and the loader flaw this module must absorb
 
-`ccg_value_chains (chain_id, version, sub_vertical, name, stage_order)`
-is written by the ccg_loader, which mints `chain_id` PER STAGE
-(`VC-RB-01`, `VC-RB-02`, …) — one chain_id names one STAGE, not an
+`ccg_value_chains (chain_id, version, sub_vertical, name, stage_order,
+source_stages)` is written by the ccg_loader, which mints `chain_id` PER
+STAGE (`VC-RB-01`, `VC-RB-02`, …) — one chain_id names one STAGE, not an
 arrangement. Only (sub_vertical, version) identifies an arrangement, so
 that pair is what this module selects on; each row's chain_id serves as
 the stage id. `ccg_vc_mapping (version, subcap_id, subvertical_code,
 value_chain_stages TEXT[], …)` names, per cell, the stage NAMES the cell
 belongs to; membership joins mapping stage names to stage rows by name
 and is never invented here.
+
+## The arrangement is eight stages, and that is the catalogue's doing
+
+Until 0024 the loader minted one stage per distinct workbook label —
+45 to 54 per sub-vertical, of which Baxter served 30 — and the front end
+truncated to the five with the deepest coverage. Curating that is
+catalogue work, not read-path work: `ccg_loader/value_chains.py` folds
+the labels that name the same process into eight client-legible stages
+per sub-vertical, so every client of a sub-vertical inherits the same
+arrangement and the renderer draws what it is given. Nothing in this
+module caps or reorders anything; `stage_order` is still the only
+statement of sequence, and `source_stages` records which workbook labels
+each stage folds.
 
 ## Vocabulary crosswalk (two sub-vertical vocabularies exist)
 
@@ -64,6 +77,22 @@ from .subverticals import resolve_subvertical, scope_to_entity  # noqa: F401
 # data is the server's work-product, and every served row is attributable.
 PRODUCER_VERSION = "svc-api.value-chain-derive@1"
 PROVENANCE = "server_derived"
+
+# A stage name that is the workbook annotating rather than naming. Kept in
+# step with ccg_loader.value_chains._MARKERS — the loader drops these at
+# load, this drops them on read, and the two exist separately because the
+# API and the loader are separate deployables that share no code.
+#
+#   "- (N/A)" · "Not applicable — credit unions follow NCUA framework"
+#   "(applicable via CIB pattern)"   another sub-vertical's arrangement
+#   "(SV-Specific: P3C1.3.CU1)"      a cell id in the stage column
+#   "Indirect: crop insurance brokers overlap with Farm Credit servicing"
+_MARKERS = (
+    r"^[-–—\s]*(\(?\s*n/?a\s*\)?|not applicable)\b",
+    r"^\(applicable via .+\)$",
+    r"^\(\s*sv-specific\s*:.*\)$",
+    r"^indirect\s*:",
+)
 
 
 def arrange(stage_rows, mapping_rows, served_ids) -> dict:
@@ -158,23 +187,23 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
 
     def _real(stages):
         # The workbook's mapping carries literal not-applicable markers as
-        # stage rows — names like "- (N/A)" or "Not applicable — Farm Credit
-        # associations…" — which are the AUTHOR's way of saying a cell maps
-        # nowhere, not stages of anyone's value chain. Serving them would
-        # render junk columns (measured: 2 of the 48 borrowed CU stages).
-        # They are excluded and COUNTED, never silently dropped.
+        # stage rows — the AUTHOR's way of saying a cell maps nowhere for
+        # this sub-vertical, not stages of anyone's value chain. Serving
+        # them renders junk columns under a client's heading.
+        #
+        # A catalogue loaded at v7.0 or later no longer carries them: the
+        # loader curates the arrangement (ccg_loader/value_chains.py) and
+        # drops markers at load. This filter is for versions loaded BEFORE
+        # that, which are still in the database and still served, and it
+        # is why it lists every shape rather than the ones that happened to
+        # be visible. All four were observed in the shipped v7.0 tabs, and
+        # the last two were being served as stages: Baxter's 30 CU stages
+        # included "(SV-Specific: P3C1.3.CU1)" and "Indirect: credit unions
+        # also cooperative; some governance patterns transfer".
         keep, dropped = [], 0
         for st in stages:
             name = str(st.get("name") or "").strip()
-            # Two marker shapes, both the workbook talking to itself:
-            #   "- (N/A)" / "Not applicable — …"    a cell that maps nowhere
-            #   "(applicable via CIB pattern)"      a cross-reference saying
-            #                                       this sub-vertical reuses
-            #                                       another's arrangement
-            if (not name
-                    or re.match(r"^[-–—\s]*(\(?\s*n/?a\s*\)?|not applicable)\b",
-                                name, re.IGNORECASE)
-                    or re.match(r"^\(applicable via .+\)$", name, re.IGNORECASE)):
+            if not name or any(re.match(p, name, re.IGNORECASE) for p in _MARKERS):
                 dropped += 1
                 continue
             keep.append(st)

@@ -95,6 +95,17 @@ def main() -> int:
         print(f"VERIFY catalogue version={row[0]} cells={row[1]} categories={row[2]} current={row[3]}", flush=True)
     cur.execute("SELECT rolname FROM pg_roles WHERE rolname LIKE 'svc_%' ORDER BY 1")
     print(f"VERIFY roles={[r[0] for r in cur.fetchall()]}", flush=True)
+    # The value-chain arrangement is what a client reads as their own
+    # business, and it is derived — so the stage count per sub-vertical is
+    # the one number that says whether the curation survived this run.
+    cur.execute("""SELECT version, sub_vertical, count(*)
+                     FROM ccg_value_chains GROUP BY 1, 2 ORDER BY 1, 2""")
+    chains = {}
+    for version, sv, n in cur.fetchall():
+        chains.setdefault(version, []).append(f"{sv}={n}")
+    for version, parts in chains.items():
+        print(f"VERIFY value chain version={version} stages "
+              + " ".join(parts), flush=True)
     conn.close()
     return 0
 
