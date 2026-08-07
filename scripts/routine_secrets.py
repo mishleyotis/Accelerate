@@ -67,6 +67,12 @@ def _gcloud() -> str:
 
 
 def secret(name: str, *, project: str = PROJECT) -> str:
+    # The doc is the user's source of record: a key defined there wins over
+    # Secret Manager, so a rotation in the doc takes effect on the next run.
+    _doc = doc_secrets()
+    _k = name.upper().replace("-", "_")
+    if _k in _doc:
+        return _doc[_k]
     """One secret's latest version, as text. Cached; never logged.
 
     CLOUDSDK_AUTH_ACCESS_TOKEN is cleared for the child: a stale token in the
@@ -189,7 +195,82 @@ def drive_get(path: str, **params) -> dict:
                           "message": e.read()[:300].decode(errors="replace")}}
 
 
+
+
+# ── The secrets DOC, the user's stated source of record ─────────────────────
+#
+# The user maintains the routine's credentials in a Google Doc (Zennify-only).
+# The routine reads it AT CALL TIME through the same impersonated dmai-worker
+# identity it already uses for the intake tree, parses KEY: VALUE lines, and
+# hands values to callers in memory only — nothing exported, nothing logged.
+#
+# Two failure modes, named precisely because one of them needs a human once:
+#   404 — the doc is not shared with the service account. FIX (one click):
+#         share it, view-only, with
+#         dmai-worker@digital-maturity-assessor.iam.gserviceaccount.com.
+#   any other error — transient; the Secret Manager values below stand in.
+#
+# Secret Manager remains the fallback so a doc outage never blocks a run; the
+# doc wins wherever both define a key, so a rotation in the doc takes effect
+# on the next firing with no redeploy.
+
+SECRETS_DOC_ID = os.environ.get(
+    "SECRETS_DOC_ID", "1z5cH44uOdAyrP5d8EoqK5airWQx2KjrqIf3jZHzhNuU")
+
+_DOC_CACHE: dict | None = None
+
+
+def doc_secrets() -> dict:
+    """KEY -> value from the secrets doc; {} when unreachable (fallback: SM).
+
+    Parses `KEY: value` / `KEY = value` lines; a KEY is upper-snake with 3+
+    chars. Values live in this process only.
+    """
+    global _DOC_CACHE
+    if _DOC_CACHE is not None:
+        return _DOC_CACHE
+    # Reentrancy guard: drive_token's key fallback calls secret(), which
+    # consults this function. Mark in-progress as {} so the nested call reads
+    # Secret Manager directly instead of recursing.
+    _DOC_CACHE = {}
+    import re
+    try:
+        tok, _how = drive_token("https://www.googleapis.com/auth/drive.readonly")
+        url = (f"https://www.googleapis.com/drive/v3/files/{SECRETS_DOC_ID}"
+               "/export?mimeType=text/plain")
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {tok}"})
+        text = urllib.request.urlopen(req, timeout=30).read().decode()
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            print("secrets doc         FAIL  404: the doc is not shared with the "
+                  "routine's identity. Share it (view-only) with "
+                  "dmai-worker@digital-maturity-assessor.iam.gserviceaccount.com "
+                  "— falling back to Secret Manager values this run.")
+        else:
+            print(f"secrets doc         WARN  HTTP {e.code} — falling back to "
+                  "Secret Manager values this run.")
+        _DOC_CACHE = {}
+        return _DOC_CACHE
+    except Exception as e:
+        print(f"secrets doc         WARN  {type(e).__name__} — falling back to "
+              "Secret Manager values this run.")
+        _DOC_CACHE = {}
+        return _DOC_CACHE
+    out = {}
+    for line in text.splitlines():
+        m = re.match(r"\s*([A-Z][A-Z0-9_]{2,48})\s*[:=]\s*(\S.*?)\s*$", line)
+        if m:
+            out[m.group(1)] = m.group(2)
+    print(f"secrets doc         OK    {len(out)} key(s) loaded at call time, "
+          "values held in memory only")
+    _DOC_CACHE = out
+    return out
+
+
 def main() -> int:
+    # The user's stated source of record first — its verdict line names the
+    # one-click share fix on 404 and never prints a value.
+    doc_secrets()
     """Preflight. Prints verdicts only — no secret and no prefix of one.
 
     Exit codes are graded, because the two failures need different responses:
