@@ -300,7 +300,7 @@ function ClientPlatform({ entity, run }) {
   const { setIpSurface, setIpContext, setIpOpen, openEvidence, openRec, openSubcap, pushToast } = useApp();
 
   const scope = platformScopeOf(entity.id);
-  const { recs, story, opportunity, storyPlatforms, tiles, index, assign, areas } = scope;
+  const { recs, story, opportunity, storyPlatforms, tiles, index, assign } = scope;
   const tileKeys = tiles.map((t, i) => scope.keyOf(t, i));
 
   /* A route parameter selects a tile only where the run promoted that
@@ -412,6 +412,8 @@ function ClientPlatform({ entity, run }) {
   // appears under no platform, so it is named rather than silently dropped.
   const reachable = new Set([...assign.values()].map(a => a.area).filter(Boolean));
   const orphanRecs = recs.filter(r => !r.l3 || !reachable.has(r.l3));
+  const orphanAreas = [];
+  for (const r of orphanRecs) if (r.l3 && !orphanAreas.includes(r.l3)) orphanAreas.push(r.l3);
 
   const scopeLine = area
     ? `${area} · the area this run files ${assignment.votes} of ${assignment.of} of this platform's cells under`
@@ -908,7 +910,8 @@ function ClientPlatform({ entity, run }) {
                 Named, counted, and still openable. */}
             {orphanRecs.length ? (
               <div style={{ padding: "10px 18px", fontSize: 11, color: "var(--z-muted)", borderTop: "1px solid var(--z-sep)", lineHeight: 1.6 }}>
-                {orphanRecs.length} promoted recommendation{orphanRecs.length === 1 ? "" : "s"} sit{orphanRecs.length === 1 ? "s" : ""} in an area no promoted platform addresses:{" "}
+                {orphanRecs.length} promoted recommendation{orphanRecs.length === 1 ? "" : "s"} sit{orphanRecs.length === 1 ? "s" : ""} in an area no promoted platform addresses
+                {orphanAreas.length ? ` — ${orphanAreas.join(" · ")}` : ""}:{" "}
                 {orphanRecs.map(r => (
                   <button key={r.id} className="chip" style={{ cursor: "pointer", border: 0, marginRight: 4 }}
                     title={`${r.id} · ${pfText(r.l3) || "no area stated"}`} onClick={() => openRec(r.id)}>{r.id}</button>
@@ -1154,7 +1157,7 @@ function StairstepCurve({ entity }) {
   // climb to (i+1)/n of the plot height, so the last one reaches the top of
   // the frame as it does in the design — at (i+1)/(n+1) the whole staircase
   // sat in the lower two thirds with a band of empty chart above it.
-  const W = 880, H = 500, padL = 60, padR = 40, padT = 40, padB = 70;
+  const W = 880, H = 560, padL = 60, padR = 40, padT = 40, padB = 70;
   const stepW = (W - padL - padR) / n;
   const stepY = (i) => H - padB - (i + 1) * (H - padT - padB) / n;
   const rungW = stepW - 8;

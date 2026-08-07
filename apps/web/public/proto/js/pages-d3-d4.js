@@ -377,8 +377,7 @@ function ClientPlatform({
     storyPlatforms,
     tiles,
     index,
-    assign,
-    areas
+    assign
   } = scope;
   const tileKeys = tiles.map((t, i) => scope.keyOf(t, i));
 
@@ -503,6 +502,8 @@ function ClientPlatform({
   // appears under no platform, so it is named rather than silently dropped.
   const reachable = new Set([...assign.values()].map(a => a.area).filter(Boolean));
   const orphanRecs = recs.filter(r => !r.l3 || !reachable.has(r.l3));
+  const orphanAreas = [];
+  for (const r of orphanRecs) if (r.l3 && !orphanAreas.includes(r.l3)) orphanAreas.push(r.l3);
   const scopeLine = area ? `${area} · the area this run files ${assignment.votes} of ${assignment.of} of this platform's cells under` : tile ? "This run files none of this platform's cells under an L3 area, so nothing below is scoped to it." : "No platform tile promoted for this run.";
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "page-head"
@@ -1420,7 +1421,7 @@ function ClientPlatform({
       borderTop: "1px solid var(--z-sep)",
       lineHeight: 1.6
     }
-  }, orphanRecs.length, " promoted recommendation", orphanRecs.length === 1 ? "" : "s", " sit", orphanRecs.length === 1 ? "s" : "", " in an area no promoted platform addresses:", " ", orphanRecs.map(r => /*#__PURE__*/React.createElement("button", {
+  }, orphanRecs.length, " promoted recommendation", orphanRecs.length === 1 ? "" : "s", " sit", orphanRecs.length === 1 ? "s" : "", " in an area no promoted platform addresses", orphanAreas.length ? ` — ${orphanAreas.join(" · ")}` : "", ":", " ", orphanRecs.map(r => /*#__PURE__*/React.createElement("button", {
     key: r.id,
     className: "chip",
     style: {
@@ -1792,7 +1793,7 @@ function StairstepCurve({
   // the frame as it does in the design — at (i+1)/(n+1) the whole staircase
   // sat in the lower two thirds with a band of empty chart above it.
   const W = 880,
-    H = 500,
+    H = 560,
     padL = 60,
     padR = 40,
     padT = 40,
