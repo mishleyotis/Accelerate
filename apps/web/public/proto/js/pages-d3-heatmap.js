@@ -60,6 +60,69 @@ function meanOf(values) {
   return vals.reduce((a, v) => a + v, 0) / vals.length;
 }
 
+/* ── Hover identification for heatmap cells ──────────────────────────────
+   A score-only cell said what it was only after a click. Every cell that
+   renders an individual subcap — and the category/pillar aggregates — now
+   identifies itself on hover, twice over: a `title` attribute (works
+   everywhere, but the native tooltip takes a second to appear) and one
+   styled bubble per grid. The bubble is a single fixed-position div rendered
+   once at grid level — never one per cell — fed by enter/leave only (no
+   mousemove handlers, so hovering cannot cause a re-render storm) and
+   positioned from the hovered cell's boundingClientRect. */
+function subcapTipText(s) {
+  const name = s.name && s.name !== s.id ? s.name : "unnamed in catalogue";
+  return `${s.id} — ${name} · ${s.score != null ? fx(s.score, 1) : "no score"}`;
+}
+function useCellTip() {
+  const [tip, setTip] = useState(null);
+  // One state write on enter, one on leave. The label is computed by the
+  // caller at render time, so hovering re-renders nothing but the bubble.
+  const show = label => e => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setTip({
+      label,
+      x: r.left + r.width / 2,
+      top: r.top,
+      bottom: r.bottom,
+      flip: r.top < 64
+    });
+  };
+  const hide = () => setTip(null);
+  return {
+    tip,
+    show,
+    hide
+  };
+}
+function CellTip({
+  tip
+}) {
+  if (!tip) return null;
+  const vw = typeof window !== "undefined" && window.innerWidth || 1024;
+  // Keep the bubble on-screen: clamp its centre so a cell at either edge
+  // still reads in full.
+  const x = Math.min(Math.max(tip.x, 132), Math.max(vw - 132, 132));
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      left: x,
+      top: tip.flip ? tip.bottom + 7 : tip.top - 7,
+      transform: tip.flip ? "translate(-50%, 0)" : "translate(-50%, -100%)",
+      maxWidth: 248,
+      padding: "5px 9px",
+      borderRadius: 6,
+      background: "var(--z-dark)",
+      color: "#fff",
+      fontSize: 11,
+      lineHeight: 1.45,
+      textAlign: "left",
+      pointerEvents: "none",
+      zIndex: 120,
+      boxShadow: "0 2px 10px rgba(0,0,0,.28)"
+    }
+  }, tip.label);
+}
+
 /* ── The run's own workbook table ────────────────────────────────────────
    `heatmap.workbook_scores` is the run's promoted pillar and category grain.
    app-root merges a WHITELIST of live fields onto the directory row and
@@ -277,6 +340,21 @@ function ClientHeatmap({
   useEffect(() => {
     if (audience === "customer" && mode === "standard") setMode("focus");
   }, [audience, mode]);
+
+  // `?subcap=` is how every other page opens a cell here: `openSubcap` in
+  // app-root navigates to this tab with the id as a param. Nothing consumed
+  // it, so a cell chip clicked anywhere else landed on the heatmap's default
+  // view and the cell it named never opened. Consume it — the drawer opens on
+  // the named cell when this run scored it, and an unknown id changes nothing.
+  useEffect(() => {
+    const sid = route.params.subcap;
+    if (!sid) return;
+    const s = (entity.subcaps || []).find(x => x.id === sid);
+    if (s) setSynthSubcap({
+      kind: "subcap",
+      subcap: s
+    });
+  }, [route.params.subcap, entity?.id]);
 
   // The run's own category and pillar rows — promoted score, promoted peer
   // median, the cells it scored — including any category the current catalogue
@@ -529,6 +607,9 @@ function FocusAreaView({
   openEvidence,
   openInsight
 }) {
+  // Hover identification for the score-only cell grid in the detail branch.
+  // Called before the early return — hooks cannot be conditional.
+  const cellTip = useCellTip();
   if (!focusArea) {
     return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
       className: "row",
@@ -918,13 +999,25 @@ function FocusAreaView({
       gridTemplateColumns: `repeat(${Math.min(subs.length, 8)}, 1fr)`,
       gap: 5
     }
-  }, subs.map(s => /*#__PURE__*/React.createElement("button", {
+  }, subs.map(s =>
+  /*#__PURE__*/
+  /* The cell only carries its score and an id fragment — which
+     subcap it IS took a click. Identified on hover: title attr +
+     the grid's shared bubble (hidden on click so it cannot linger
+     over the drawer that opens). */
+  React.createElement("button", {
     key: s.id,
-    onClick: () => openSubcap({
-      kind: "subcap",
-      subcap: s
-    }),
+    onClick: () => {
+      cellTip.hide();
+      openSubcap({
+        kind: "subcap",
+        subcap: s
+      });
+    },
     className: `hm-cell b ${DMA.helpers.maturityClass(s.score)} ${s.thin ? "thin" : ""}`,
+    title: subcapTipText(s),
+    onMouseEnter: cellTip.show(subcapTipText(s)),
+    onMouseLeave: cellTip.hide,
     style: {
       flexDirection: "column",
       height: 56,
@@ -943,7 +1036,9 @@ function FocusAreaView({
       opacity: .85,
       fontFamily: "var(--font-mono)"
     }
-  }, s.id.split(".").slice(1).join("."))))))), /*#__PURE__*/React.createElement("div", {
+  }, s.id.split(".").slice(1).join("."))))), /*#__PURE__*/React.createElement(CellTip, {
+    tip: cellTip.tip
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
@@ -1271,7 +1366,8 @@ function PillarHeatmap({
       onClick: () => setPillarFocus(p.id),
       style: {
         padding: 16
-      }
+      },
+      title: `${p.id} — ${p.name || "unnamed in catalogue"} · ${score != null ? fx(score, 1) : "no score"} · click to drill`
     }, /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
@@ -1353,6 +1449,9 @@ function CategoryHeatmap({
   onSynth
 }) {
   const rows = pillarFocus ? (pillars || []).filter(p => p.id === pillarFocus) : pillars || [];
+  // The aggregate cells are score-only too; same hover identification as the
+  // subcap grids — one bubble for the whole grid.
+  const cellTip = useCellTip();
   /* Category → cells the issue register touches. Two counts, because they are
      two different claims: a LINKED cell is one an issue names, a CAPPED cell is
      one the register puts a maturity ceiling on. The badge counted links and
@@ -1432,14 +1531,21 @@ function CategoryHeatmap({
         capped: 0
       };
       const capCount = iss.capped || iss.linked;
+      const tipLabel = `${c.id} — ${c.name || "unnamed in catalogue"} · ${shown != null ? fx(shown, 1) : "no score"}`;
       return /*#__PURE__*/React.createElement("button", {
         key: c.id,
         className: `hm-cell b ${DMA.helpers.maturityClass(shown)}`,
-        onClick: () => setCatFocus(c.id),
+        onClick: () => {
+          cellTip.hide();
+          setCatFocus(c.id);
+        },
         onContextMenu: e => {
           e.preventDefault();
+          cellTip.hide();
           onSynth(c.id);
         },
+        onMouseEnter: cellTip.show(tipLabel),
+        onMouseLeave: cellTip.hide,
         style: {
           position: "relative",
           border: 0,
@@ -1510,7 +1616,10 @@ function CategoryHeatmap({
         style: {
           minHeight: 30,
           padding: "4px 6px"
-        }
+        },
+        title: `${c.id} — ${c.name || "unnamed in catalogue"} · peer median ${fx(pm, 1)}`,
+        onMouseEnter: cellTip.show(`${c.id} — ${c.name || "unnamed in catalogue"} · peer median ${fx(pm, 1)}`),
+        onMouseLeave: cellTip.hide
       }, fx(pm, 1));
     })) : null, /*#__PURE__*/React.createElement("div", null), cats.map(c => /*#__PURE__*/React.createElement("div", {
       key: `l-${c.id}`,
@@ -1531,6 +1640,8 @@ function CategoryHeatmap({
         fontStyle: "italic"
       }
     }, c.name || "unnamed in catalogue")))));
+  }), /*#__PURE__*/React.createElement(CellTip, {
+    tip: cellTip.tip
   }));
 }
 
@@ -1932,110 +2043,116 @@ function SubcapHeatmap({
         // evidence rows that mention the cell is a coarser
         // number: it made all 43 P4C1 cells read "5 evidence".
         const ev = evidenceCountOf(s);
-        return /*#__PURE__*/React.createElement("button", {
-          key: s.id,
-          className: "subcap-row",
-          onClick: () => onSynth(s)
-        }, /*#__PURE__*/React.createElement("span", {
-          className: `b ${DMA.helpers.maturityClass(s.score)}`,
-          style: {
-            width: 34,
-            justifyContent: "center",
-            flexShrink: 0
-          }
-        }, fx(s.score, 1)), /*#__PURE__*/React.createElement("div", {
-          style: {
-            flex: 1,
-            minWidth: 0
-          }
-        }, /*#__PURE__*/React.createElement("div", {
-          className: "row",
-          style: {
-            gap: 6
-          }
-        }, /*#__PURE__*/React.createElement("span", {
-          style: {
-            fontSize: 12,
-            fontWeight: 500,
-            color: s.name && s.name !== s.id ? "var(--z-dark)" : "var(--z-muted)",
-            fontStyle: s.name && s.name !== s.id ? "normal" : "italic"
-          },
-          className: "txt-fit-1"
-        }, s.name && s.name !== s.id ? s.name : "unnamed in catalogue"), s.thin ? /*#__PURE__*/React.createElement("span", {
-          className: "b b-org"
-        }, "THIN") : null, caps.length ? /*#__PURE__*/React.createElement("span", {
-          className: "b b-org"
-        }, /*#__PURE__*/React.createElement(Icon, {
-          name: "lock",
-          size: 9
-        }), " M", caps[0].cap) : null), /*#__PURE__*/React.createElement("div", {
-          className: "f-mono txt-fit-1",
-          style: {
-            fontSize: 10,
-            color: "var(--z-muted)",
-            marginTop: 1
-          },
-          title: ev.basis === "cited" ? "ids the producer cited for this cell" : ev.basis === "linked" ? "evidence items the run links to this cell" : null
-        }, s.id, s.confidence ? ` · ${s.confidence}` : "", ev.n != null ? ` · ${ev.n} ${ev.basis}` : " · no evidence count")), /*#__PURE__*/React.createElement("div", {
-          style: {
-            width: 90,
-            flexShrink: 0
-          }
-        }, /*#__PURE__*/React.createElement("div", {
-          style: {
-            position: "relative",
-            height: 6,
-            background: "var(--z-sep)",
-            borderRadius: 3
-          },
-          title: `Score ${fx(s.score, 1)}${s.peerMedian != null ? ` · Peer ${fx(s.peerMedian, 1)}` : " · no peer median stated"}`
-        }, s.score != null ? /*#__PURE__*/React.createElement("div", {
-          style: {
-            width: `${s.score / 5 * 100}%`,
-            height: "100%",
-            background: DMA.helpers.maturityHex(s.score),
-            borderRadius: 3
-          }
-        }) : null, s.peerMedian != null ? /*#__PURE__*/React.createElement("div", {
-          style: {
-            position: "absolute",
-            left: `calc(${s.peerMedian / 5 * 100}% - 1px)`,
-            top: -2,
-            bottom: -2,
-            width: 2,
-            background: "var(--z-dpur)"
-          }
-        }) : null), gap != null ? /*#__PURE__*/React.createElement("div", {
-          style: {
-            fontSize: 9,
-            color: gap > 0 ? "var(--z-below)" : gap < 0 ? "var(--z-mid)" : "var(--z-muted)",
-            marginTop: 2,
-            textAlign: "right"
-          }
-        }, gap > 0 ? `−${fx(gap, 1)}` : gap < 0 ? `+${fx(Math.abs(gap), 1)}` : "0.0", " vs peer") : /*#__PURE__*/React.createElement("div", {
-          style: {
-            fontSize: 9,
-            color: "var(--z-muted)",
-            marginTop: 2,
-            textAlign: "right"
-          }
-        }, "no peer")), /*#__PURE__*/React.createElement("div", {
-          style: {
-            display: "flex",
-            gap: 3,
-            flexShrink: 0
-          }
-        }, s.platforms.slice(0, 2).map(p => /*#__PURE__*/React.createElement("span", {
-          key: p,
-          className: "b b-teal"
-        }, DMA.getPlatform(p)?.short || p))), /*#__PURE__*/React.createElement(Icon, {
-          name: "chevron-r",
-          size: 13,
-          style: {
-            color: "var(--z-muted)",
-            flexShrink: 0
-          }
-        }));
+        return (
+          /*#__PURE__*/
+          /* The name column ellipsises to one line; the title
+             carries the full identification. */
+          React.createElement("button", {
+            key: s.id,
+            className: "subcap-row",
+            onClick: () => onSynth(s),
+            title: subcapTipText(s)
+          }, /*#__PURE__*/React.createElement("span", {
+            className: `b ${DMA.helpers.maturityClass(s.score)}`,
+            style: {
+              width: 34,
+              justifyContent: "center",
+              flexShrink: 0
+            }
+          }, fx(s.score, 1)), /*#__PURE__*/React.createElement("div", {
+            style: {
+              flex: 1,
+              minWidth: 0
+            }
+          }, /*#__PURE__*/React.createElement("div", {
+            className: "row",
+            style: {
+              gap: 6
+            }
+          }, /*#__PURE__*/React.createElement("span", {
+            style: {
+              fontSize: 12,
+              fontWeight: 500,
+              color: s.name && s.name !== s.id ? "var(--z-dark)" : "var(--z-muted)",
+              fontStyle: s.name && s.name !== s.id ? "normal" : "italic"
+            },
+            className: "txt-fit-1"
+          }, s.name && s.name !== s.id ? s.name : "unnamed in catalogue"), s.thin ? /*#__PURE__*/React.createElement("span", {
+            className: "b b-org"
+          }, "THIN") : null, caps.length ? /*#__PURE__*/React.createElement("span", {
+            className: "b b-org"
+          }, /*#__PURE__*/React.createElement(Icon, {
+            name: "lock",
+            size: 9
+          }), " M", caps[0].cap) : null), /*#__PURE__*/React.createElement("div", {
+            className: "f-mono txt-fit-1",
+            style: {
+              fontSize: 10,
+              color: "var(--z-muted)",
+              marginTop: 1
+            },
+            title: ev.basis === "cited" ? "ids the producer cited for this cell" : ev.basis === "linked" ? "evidence items the run links to this cell" : null
+          }, s.id, s.confidence ? ` · ${s.confidence}` : "", ev.n != null ? ` · ${ev.n} ${ev.basis}` : " · no evidence count")), /*#__PURE__*/React.createElement("div", {
+            style: {
+              width: 90,
+              flexShrink: 0
+            }
+          }, /*#__PURE__*/React.createElement("div", {
+            style: {
+              position: "relative",
+              height: 6,
+              background: "var(--z-sep)",
+              borderRadius: 3
+            },
+            title: `Score ${fx(s.score, 1)}${s.peerMedian != null ? ` · Peer ${fx(s.peerMedian, 1)}` : " · no peer median stated"}`
+          }, s.score != null ? /*#__PURE__*/React.createElement("div", {
+            style: {
+              width: `${s.score / 5 * 100}%`,
+              height: "100%",
+              background: DMA.helpers.maturityHex(s.score),
+              borderRadius: 3
+            }
+          }) : null, s.peerMedian != null ? /*#__PURE__*/React.createElement("div", {
+            style: {
+              position: "absolute",
+              left: `calc(${s.peerMedian / 5 * 100}% - 1px)`,
+              top: -2,
+              bottom: -2,
+              width: 2,
+              background: "var(--z-dpur)"
+            }
+          }) : null), gap != null ? /*#__PURE__*/React.createElement("div", {
+            style: {
+              fontSize: 9,
+              color: gap > 0 ? "var(--z-below)" : gap < 0 ? "var(--z-mid)" : "var(--z-muted)",
+              marginTop: 2,
+              textAlign: "right"
+            }
+          }, gap > 0 ? `−${fx(gap, 1)}` : gap < 0 ? `+${fx(Math.abs(gap), 1)}` : "0.0", " vs peer") : /*#__PURE__*/React.createElement("div", {
+            style: {
+              fontSize: 9,
+              color: "var(--z-muted)",
+              marginTop: 2,
+              textAlign: "right"
+            }
+          }, "no peer")), /*#__PURE__*/React.createElement("div", {
+            style: {
+              display: "flex",
+              gap: 3,
+              flexShrink: 0
+            }
+          }, s.platforms.slice(0, 2).map(p => /*#__PURE__*/React.createElement("span", {
+            key: p,
+            className: "b b-teal"
+          }, DMA.getPlatform(p)?.short || p))), /*#__PURE__*/React.createElement(Icon, {
+            name: "chevron-r",
+            size: 13,
+            style: {
+              color: "var(--z-muted)",
+              flexShrink: 0
+            }
+          }))
+        );
       })) : null);
     }));
   }));
@@ -2063,6 +2180,9 @@ function ValueChainView({
   openInsight
 }) {
   const [selected, setSelected] = useState(null);
+  // The stage tiles' mini-cells carry a score and nothing else — hover
+  // identification, same shared-bubble pattern as the other grids.
+  const cellTip = useCellTip();
   const chains = DMA.VALUE_CHAINS || [];
   const state = typeof DMA.sectionStateFor === "function" ? DMA.sectionStateFor("heatmap.value_chain") : null;
   const empty = state && state.empty_state;
@@ -2186,7 +2306,10 @@ function ValueChainView({
         fontSize: 9,
         padding: 0,
         border: 0
-      }
+      },
+      title: subcapTipText(s),
+      onMouseEnter: cellTip.show(subcapTipText(s)),
+      onMouseLeave: cellTip.hide
     }, fx(s.score, 1)))));
   })), selected ? (() => {
     const vc = chains.find(x => x.id === selected);
@@ -2233,10 +2356,14 @@ function ValueChainView({
       style: {
         padding: 10
       },
-      onClick: () => openSubcap({
-        kind: "subcap",
-        subcap: s
-      })
+      title: subcapTipText(s),
+      onClick: () => {
+        cellTip.hide();
+        openSubcap({
+          kind: "subcap",
+          subcap: s
+        });
+      }
     }, /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
@@ -2301,7 +2428,9 @@ function ValueChainView({
       },
       className: "txt-fit-1"
     }, ic.title))))));
-  })() : null);
+  })() : null, /*#__PURE__*/React.createElement(CellTip, {
+    tip: cellTip.tip
+  }));
 }
 
 /* A category's citations: the union of its cells' promoted lists, in cell order.

@@ -171,7 +171,7 @@ function prereqVerdict(p) {
 /* ── D4 Platform opportunity ──────────────────────────────────────── */
 function ClientPlatform({ entity, run }) {
   const route = useRoute();
-  const { setIpSurface, setIpContext, setIpOpen, openEvidence, openRec, pushToast } = useApp();
+  const { setIpSurface, setIpContext, setIpOpen, openEvidence, openRec, openSubcap, pushToast } = useApp();
 
   const recs = DMA.recsFor(entity.id) || [];
   const story = DMA.platformStoryFor(entity.id) || null;
@@ -326,13 +326,24 @@ function ClientPlatform({ entity, run }) {
                           <>
                             <div className="eyebrow" style={{ fontSize: 9, margin: "8px 0 5px" }}>Cells it addresses</div>
                             <div style={{ display: "grid", gap: 4 }}>
-                              {t.addressable_cells.map((c, j) => (
-                                <div key={j} className="row" style={{ gap: 5, fontSize: 10, alignItems: "flex-start" }}>
-                                  <span className="chip f-mono" style={{ fontSize: 9, flexShrink: 0 }}>{pfText(c.subcap_id)}</span>
-                                  {pfNum(c.current) !== null ? <MaturityChip score={pfNum(c.current)} /> : null}
-                                  <span style={{ flex: 1, minWidth: 0, color: "var(--z-body)", lineHeight: 1.45 }}>{pfText(c.feature_that_addresses_it) || pfText(c.name) || ""}</span>
-                                </div>
-                              ))}
+                              {t.addressable_cells.map((c, j) => {
+                                const sid = pfText(c.subcap_id);
+                                return (
+                                  <div key={j} className="row" style={{ gap: 5, fontSize: 10, alignItems: "flex-start" }}>
+                                    {/* A cell id is a drill target everywhere else on
+                                        the page; as a bare span these two chips were
+                                        the QA sweep's DEAD targets. stopPropagation:
+                                        the tile's own onClick collapses the breakdown. */}
+                                    {sid ? (
+                                      <button className="chip f-mono" style={{ fontSize: 9, flexShrink: 0 }}
+                                        title={`open ${sid} in the heatmap`}
+                                        onClick={(ev) => { ev.stopPropagation(); openSubcap(sid); }}>{sid}</button>
+                                    ) : null}
+                                    {pfNum(c.current) !== null ? <MaturityChip score={pfNum(c.current)} /> : null}
+                                    <span style={{ flex: 1, minWidth: 0, color: "var(--z-body)", lineHeight: 1.45 }}>{pfText(c.feature_that_addresses_it) || pfText(c.name) || ""}</span>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </>
                         ) : null}
@@ -364,14 +375,18 @@ function ClientPlatform({ entity, run }) {
           </div>
           <div style={{ display: "grid", gap: 7 }}>
             {discarded.map((x, i) => (
-              <div key={i} className="row" style={{ gap: 10, alignItems: "flex-start", fontSize: 11.5 }}>
-                <span style={{ fontWeight: 500, color: "var(--z-dark)", width: 210, flexShrink: 0, lineHeight: 1.45 }}>
+              /* The name column was a fixed 210px in a no-wrap row, so on a
+                 narrow viewport the reason text was squeezed to a sliver
+                 beside it. The row wraps: when the reason no longer fits at a
+                 readable width it drops to its own full-width line. */
+              <div key={i} className="row" style={{ gap: 10, alignItems: "flex-start", fontSize: 11.5, flexWrap: "wrap" }}>
+                <span style={{ fontWeight: 500, color: "var(--z-dark)", flex: "0 0 210px", maxWidth: "100%", lineHeight: 1.45 }}>
                   {pfText(x.platform) || pfText(x.name) || "Platform not named"}
                 </span>
                 {x.relevance != null ? (
                   <span className="b b-muted f-mono" style={{ flexShrink: 0 }} title="relevance to the assessed gaps">{Number(x.relevance).toFixed(2)}</span>
                 ) : null}
-                <span style={{ color: "var(--z-muted)", flex: 1, minWidth: 0, lineHeight: 1.5 }}>{pfText(x.reason) || pfText(x.why_not) || "No reason promoted."}</span>
+                <span style={{ color: "var(--z-muted)", flex: "1 1 240px", minWidth: 0, lineHeight: 1.5 }}>{pfText(x.reason) || pfText(x.why_not) || "No reason promoted."}</span>
               </div>
             ))}
           </div>
@@ -401,9 +416,15 @@ function ClientPlatform({ entity, run }) {
         </div>
       ) : null}
 
-      {/* Selected area — promoted gaps + readiness */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 380px", gap: 16, marginBottom: 16 }}>
-        <div className="card flush">
+      {/* Selected area — promoted gaps + readiness.
+          Was `grid: minmax(0,1fr) 380px` — a fixed sidebar that no media query
+          catches (the app.css override matches the literal "1fr 380px" only),
+          so at 768px the table column was ~110px wide. Flex-wrap sidebar
+          pattern instead: side by side while both fit at a readable width
+          (the 999 grow gives the table nearly all the slack, so the readiness
+          column holds ~300px), stacked below that. No media query needed. */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", gap: 16, marginBottom: 16 }}>
+        <div className="card flush" style={{ flex: "999 1 400px", minWidth: 0, maxWidth: "100%" }}>
           <div className="card-head">
             <h3>Gaps this area closes · {area || "no area promoted"}</h3>
             <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{areaGaps.length} promoted gap row{areaGaps.length === 1 ? "" : "s"}</span>
@@ -415,7 +436,10 @@ function ClientPlatform({ entity, run }) {
                 a six-column table crushed each cell to ~14px wide and wrapped the
                 catalogue path to one character per line. */}
             <div style={{ overflowX: "auto" }}>
-            <table className="tbl" style={{ minWidth: 720 }}>
+            {/* The floor only matters while the table renders as columns; in
+                the ≤760px stacked-card mode a hard 720px would force the
+                stacked rows to scroll sideways, so it yields to the viewport. */}
+            <table className="tbl" style={{ minWidth: "min(720px, calc(100vw - 64px))" }}>
               {/* nowrap on the narrow columns: at this width "PILLAR" and
                   "SCORE" broke mid-word into "PILLA / R" and "SCOR / E". */}
               <thead><tr>
@@ -487,7 +511,7 @@ function ClientPlatform({ entity, run }) {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card" style={{ flex: "1 1 300px", minWidth: 0, maxWidth: "100%" }}>
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="shield" size={16} />
             <div style={{ fontSize: 13, fontWeight: 600, flex: 1, minWidth: 0 }}>Readiness</div>
@@ -597,8 +621,10 @@ function ClientPlatform({ entity, run }) {
         </div>
       </div>
 
-      {/* Recommendation cards + Conversation starters */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
+      {/* Recommendation cards + Conversation starters. Two columns only while
+          each keeps a readable width; below that they stack (the fixed 1fr/1fr
+          pair escaped every media query and halved to ~250px at tablet). */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))", gap: 16, marginBottom: 16 }}>
         <div className="card flush">
           <div className="card-head">
             <h3>Recommendations · {area || "no area promoted"}</h3>
@@ -693,7 +719,12 @@ function ClientPlatform({ entity, run }) {
                       evidence-cited" while citing nothing. What the starter
                       actually states is what it opens on, and its citations. */}
                   {s.opens_on ? <span style={{ fontSize: 10, color: "var(--z-dpur)" }}>opens on {String(s.opens_on).replace(/_/g, " ")}</span> : null}
-                  {s.named_gap_subcap_id ? <span className="chip f-mono" style={{ fontSize: 9 }} title="the gap this starter names">{pfText(s.named_gap_subcap_id)}</span> : null}
+                  {/* The named gap is a cell id — a drill target, not a label. */}
+                  {s.named_gap_subcap_id ? (
+                    <button className="chip f-mono" style={{ fontSize: 9 }}
+                      title={`the gap this starter names — open ${pfText(s.named_gap_subcap_id)} in the heatmap`}
+                      onClick={() => openSubcap(pfText(s.named_gap_subcap_id))}>{pfText(s.named_gap_subcap_id)}</button>
+                  ) : null}
                   <span className="spacer" />
                   <button className="btn btn-tertiary btn-sm" style={{ color: "var(--z-dpur)" }} onClick={() => {
                     const one = [pfText(s.text), s.followup_question ? `Follow-up: ${pfText(s.followup_question)}` : null].filter(Boolean).join("\n");
@@ -808,7 +839,9 @@ function StairstepCurve({ entity }) {
 
   return (
     <div className="card" style={{ marginBottom: 16 }}>
-      <div className="row" style={{ marginBottom: 14 }}>
+      {/* wrap: with several cluster toggles the strip overflowed the card on
+          narrow viewports instead of dropping below the title. */}
+      <div className="row" style={{ marginBottom: 14, flexWrap: "wrap" }}>
         <div style={{ width: 28, height: 28, borderRadius: 7, background: "var(--z-ice)", color: "var(--z-mid)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <Icon name="stairs" size={14} />
         </div>
@@ -827,8 +860,12 @@ function StairstepCurve({ entity }) {
         ) : null}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 18, alignItems: "stretch" }}>
-        <div style={{ background: "linear-gradient(180deg, var(--z-bg), #fff)", borderRadius: 10, padding: "16px 14px 12px", border: "1px solid var(--z-sep)", position: "relative", overflow: "hidden" }}>
+      {/* Was `grid: 1fr 300px` — the step list held 300px whatever the
+          viewport, and the chart (an SVG that scales freely) was crushed
+          beside it. Same flex-wrap sidebar pattern as the readiness column:
+          side by side while both fit, stacked below. */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 18 }}>
+        <div style={{ flex: "999 1 400px", minWidth: 0, maxWidth: "100%", background: "linear-gradient(180deg, var(--z-bg), #fff)", borderRadius: 10, padding: "16px 14px 12px", border: "1px solid var(--z-sep)", position: "relative", overflow: "hidden" }}>
           <img src={assetUrl("illo_curvesTR", "brand/illustrations/curves_topright.png")} alt="" style={{ position: "absolute", top: 0, right: 0, width: 320, height: "auto", opacity: .5, pointerEvents: "none" }} />
 
           <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: "block", position: "relative" }}>
@@ -895,7 +932,7 @@ function StairstepCurve({ entity }) {
           </svg>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ flex: "1 1 280px", minWidth: 0, maxWidth: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
           {steps.map((s, i) => (
             <div key={i} style={{ padding: "10px 12px", background: i === currentIdx ? "var(--z-ice)" : "var(--z-bg)", borderRadius: 8, border: i === currentIdx ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)" }}>
               <div className="row" style={{ marginBottom: 4, gap: 6, flexWrap: "wrap" }}>
@@ -944,7 +981,9 @@ function TransformationRoadmap({ entity }) {
 
   return (
     <div className="card" style={{ marginBottom: 16 }}>
-      <div className="row" style={{ marginBottom: 16 }}>
+      {/* wrap: title + view toggle + export exceed a narrow card; the
+          controls drop below the title instead of clipping. */}
+      <div className="row" style={{ marginBottom: 16, flexWrap: "wrap" }}>
         <div style={{ width: 28, height: 28, borderRadius: 7, background: "var(--z-ice)", color: "var(--z-mid)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <Icon name="route" size={14} />
         </div>
@@ -981,37 +1020,36 @@ function TransformationRoadmap({ entity }) {
 
 function ChevronView({ roadmap, recs, openRec }) {
   return (
-    <>
-      {/* Chevron header strip */}
-      <div style={{ display: "grid", gridTemplateColumns: `repeat(${roadmap.length}, 1fr)`, gap: 12, marginBottom: 12 }}>
-        {roadmap.map((r, i) => (
-          <div key={r.phase} style={{ position: "relative" }}>
-            <div style={{
-              background: r.color,
-              clipPath: i === roadmap.length - 1 ? "polygon(0 0, 100% 0, 100% 100%, 0 100%, 4% 50%)" : "polygon(0 0, 96% 0, 100% 50%, 96% 100%, 0 100%, 4% 50%)",
-              color: "#fff", padding: "10px 22px",
-              fontSize: 12.5, fontWeight: 600,
-              display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8
-            }}>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 10, opacity: .8, letterSpacing: ".08em", textTransform: "uppercase" }}>Phase {r.phase}</div>
-                {/* label and duration are BOTH the phase's horizon in the
-                    adapter, so the chevron printed the horizon twice and the
-                    card below printed it a third time. Once, here. */}
-                <div>{r.label}</div>
-              </div>
-              <div style={{ fontSize: 10, opacity: .85, textAlign: "right", flexShrink: 0 }}>
-                {(r.recs || []).length} rec{(r.recs || []).length === 1 ? "" : "s"}
-              </div>
+    /* One fluid column per phase, each carrying its own chevron header AND its
+       own content card. This used to be two parallel `repeat(N, 1fr)` grids —
+       N hard columns whatever the viewport, so at tablet widths every phase
+       was crushed to a sliver, and the two grids could not wrap without the
+       chevrons drifting away from their phases. Whole phases wrap together
+       instead, and only when a column would drop below a readable width. */
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 230px), 1fr))", gap: 12 }}>
+      {roadmap.map((r, i) => (
+        <div key={r.phase} style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{
+            background: r.color,
+            clipPath: i === roadmap.length - 1 ? "polygon(0 0, 100% 0, 100% 100%, 0 100%, 4% 50%)" : "polygon(0 0, 96% 0, 100% 50%, 96% 100%, 0 100%, 4% 50%)",
+            color: "#fff", padding: "10px 22px",
+            fontSize: 12.5, fontWeight: 600,
+            display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8
+          }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 10, opacity: .8, letterSpacing: ".08em", textTransform: "uppercase" }}>Phase {r.phase}</div>
+              {/* label and duration are BOTH the phase's horizon in the
+                  adapter, so the chevron printed the horizon twice and the
+                  card below printed it a third time. Once, here. */}
+              <div>{r.label}</div>
+            </div>
+            <div style={{ fontSize: 10, opacity: .85, textAlign: "right", flexShrink: 0 }}>
+              {(r.recs || []).length} rec{(r.recs || []).length === 1 ? "" : "s"}
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Phase content cards */}
-      <div style={{ display: "grid", gridTemplateColumns: `repeat(${roadmap.length}, 1fr)`, gap: 12 }}>
-        {roadmap.map(r => (
-          <div key={r.phase} style={{ background: r.color, borderRadius: 8, padding: 14, color: "#fff" }}>
+          {/* flex: 1 keeps the cards in a row the same height. */}
+          <div style={{ background: r.color, borderRadius: 8, padding: 14, color: "#fff", flex: 1 }}>
             {/* Platform, target maturity and success metric are not fields of the
                 roadmap contract — a phase carries its horizon, its rationale and
                 its recommendation ids. They rendered as three empty labels under
@@ -1053,9 +1091,9 @@ function ChevronView({ roadmap, recs, openRec }) {
               })}
             </div>
           </div>
-        ))}
-      </div>
-    </>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -1076,7 +1114,10 @@ function CellImpactView({ roadmap, phaseRecs, openRec, impactRows }) {
     );
   }
   return (
-    <div style={{ display: "grid", gridTemplateColumns: `repeat(${roadmap.length}, 1fr)`, gap: 12 }}>
+    /* Fluid, like the chevron view: N hard columns crushed each phase's
+       impact table at tablet widths; phases wrap when a column would drop
+       below a readable width. */
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap: 12 }}>
       {roadmap.map(r => {
         const rs = phaseRecs(r);
         const bases = [];

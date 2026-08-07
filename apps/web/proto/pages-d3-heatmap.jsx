@@ -60,6 +60,53 @@ function meanOf(values) {
   return vals.reduce((a, v) => a + v, 0) / vals.length;
 }
 
+/* ── Hover identification for heatmap cells ──────────────────────────────
+   A score-only cell said what it was only after a click. Every cell that
+   renders an individual subcap — and the category/pillar aggregates — now
+   identifies itself on hover, twice over: a `title` attribute (works
+   everywhere, but the native tooltip takes a second to appear) and one
+   styled bubble per grid. The bubble is a single fixed-position div rendered
+   once at grid level — never one per cell — fed by enter/leave only (no
+   mousemove handlers, so hovering cannot cause a re-render storm) and
+   positioned from the hovered cell's boundingClientRect. */
+function subcapTipText(s) {
+  const name = (s.name && s.name !== s.id) ? s.name : "unnamed in catalogue";
+  return `${s.id} — ${name} · ${s.score != null ? fx(s.score, 1) : "no score"}`;
+}
+
+function useCellTip() {
+  const [tip, setTip] = useState(null);
+  // One state write on enter, one on leave. The label is computed by the
+  // caller at render time, so hovering re-renders nothing but the bubble.
+  const show = (label) => (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setTip({ label, x: r.left + r.width / 2, top: r.top, bottom: r.bottom,
+             flip: r.top < 64 });
+  };
+  const hide = () => setTip(null);
+  return { tip, show, hide };
+}
+
+function CellTip({ tip }) {
+  if (!tip) return null;
+  const vw = (typeof window !== "undefined" && window.innerWidth) || 1024;
+  // Keep the bubble on-screen: clamp its centre so a cell at either edge
+  // still reads in full.
+  const x = Math.min(Math.max(tip.x, 132), Math.max(vw - 132, 132));
+  return (
+    <div style={{
+      position: "fixed", left: x,
+      top: tip.flip ? tip.bottom + 7 : tip.top - 7,
+      transform: tip.flip ? "translate(-50%, 0)" : "translate(-50%, -100%)",
+      maxWidth: 248, padding: "5px 9px", borderRadius: 6,
+      background: "var(--z-dark)", color: "#fff",
+      fontSize: 11, lineHeight: 1.45, textAlign: "left",
+      pointerEvents: "none", zIndex: 120,
+      boxShadow: "0 2px 10px rgba(0,0,0,.28)",
+    }}>{tip.label}</div>
+  );
+}
+
 /* ── The run's own workbook table ────────────────────────────────────────
    `heatmap.workbook_scores` is the run's promoted pillar and category grain.
    app-root merges a WHITELIST of live fields onto the directory row and
@@ -240,6 +287,18 @@ function ClientHeatmap({ entity, run }) {
     if (audience === "customer" && mode === "standard") setMode("focus");
   }, [audience, mode]);
 
+  // `?subcap=` is how every other page opens a cell here: `openSubcap` in
+  // app-root navigates to this tab with the id as a param. Nothing consumed
+  // it, so a cell chip clicked anywhere else landed on the heatmap's default
+  // view and the cell it named never opened. Consume it — the drawer opens on
+  // the named cell when this run scored it, and an unknown id changes nothing.
+  useEffect(() => {
+    const sid = route.params.subcap;
+    if (!sid) return;
+    const s = (entity.subcaps || []).find(x => x.id === sid);
+    if (s) setSynthSubcap({ kind: "subcap", subcap: s });
+  }, [route.params.subcap, entity?.id]);
+
   // The run's own category and pillar rows — promoted score, promoted peer
   // median, the cells it scored — including any category the current catalogue
   // does not list.
@@ -379,6 +438,9 @@ function ClientHeatmap({ entity, run }) {
 
 /* ─────────────────────── FOCUS AREA VIEW ─────────────────────── */
 function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusArea, openSubcap, openEvidence, openInsight }) {
+  // Hover identification for the score-only cell grid in the detail branch.
+  // Called before the early return — hooks cannot be conditional.
+  const cellTip = useCellTip();
   if (!focusArea) {
     return (
       <div>
@@ -556,14 +618,22 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
           </div>
           <div className="hm" style={{ gridTemplateColumns: `repeat(${Math.min(subs.length, 8)}, 1fr)`, gap: 5 }}>
             {subs.map(s => (
-              <button key={s.id} onClick={() => openSubcap({ kind: "subcap", subcap: s })}
+              /* The cell only carries its score and an id fragment — which
+                 subcap it IS took a click. Identified on hover: title attr +
+                 the grid's shared bubble (hidden on click so it cannot linger
+                 over the drawer that opens). */
+              <button key={s.id} onClick={() => { cellTip.hide(); openSubcap({ kind: "subcap", subcap: s }); }}
                 className={`hm-cell b ${DMA.helpers.maturityClass(s.score)} ${s.thin ? "thin" : ""}`}
+                title={subcapTipText(s)}
+                onMouseEnter={cellTip.show(subcapTipText(s))}
+                onMouseLeave={cellTip.hide}
                 style={{ flexDirection: "column", height: 56, fontSize: 11, padding: 4, border: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 700 }}>{fx(s.score, 1)}</div>
                 <div style={{ fontSize: 8.5, opacity: .85, fontFamily: "var(--font-mono)" }}>{s.id.split(".").slice(1).join(".")}</div>
               </button>
             ))}
           </div>
+          <CellTip tip={cellTip.tip} />
         </div>
       </div>
 
@@ -712,7 +782,8 @@ function PillarHeatmap({ entity, pillars, setPillarFocus }) {
           const score = p.score, peer = p.peer;
           const delta = deltaOf(score, peer);
           return (
-            <div key={p.id} className="card-tile clickable" onClick={() => setPillarFocus(p.id)} style={{ padding: 16 }}>
+            <div key={p.id} className="card-tile clickable" onClick={() => setPillarFocus(p.id)} style={{ padding: 16 }}
+              title={`${p.id} — ${p.name || "unnamed in catalogue"} · ${score != null ? fx(score, 1) : "no score"} · click to drill`}>
               <div className="row" style={{ marginBottom: 12 }}>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 11, color: "var(--z-muted)" }}>{p.id}</div>
@@ -756,6 +827,9 @@ function PillarHeatmap({ entity, pillars, setPillarFocus }) {
 /* ─────────────────────── CATEGORY HEATMAP ─────────────────────── */
 function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, setCatFocus, onSynth }) {
   const rows = pillarFocus ? (pillars || []).filter(p => p.id === pillarFocus) : (pillars || []);
+  // The aggregate cells are score-only too; same hover identification as the
+  // subcap grids — one bubble for the whole grid.
+  const cellTip = useCellTip();
   /* Category → cells the issue register touches. Two counts, because they are
      two different claims: a LINKED cell is one an issue names, a CAPPED cell is
      one the register puts a maturity ceiling on. The badge counted links and
@@ -803,10 +877,13 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
                                         : "no score");
                 const iss = catCaps[c.id] || { linked: 0, capped: 0 };
                 const capCount = iss.capped || iss.linked;
+                const tipLabel = `${c.id} — ${c.name || "unnamed in catalogue"} · ${shown != null ? fx(shown, 1) : "no score"}`;
                 return (
                   <button key={c.id} className={`hm-cell b ${DMA.helpers.maturityClass(shown)}`}
-                    onClick={() => setCatFocus(c.id)}
-                    onContextMenu={(e) => { e.preventDefault(); onSynth(c.id); }}
+                    onClick={() => { cellTip.hide(); setCatFocus(c.id); }}
+                    onContextMenu={(e) => { e.preventDefault(); cellTip.hide(); onSynth(c.id); }}
+                    onMouseEnter={cellTip.show(tipLabel)}
+                    onMouseLeave={cellTip.hide}
                     style={{ position: "relative", border: 0, padding: "8px 6px", minHeight: 44 }}
                     title={`${c.id} · ${c.name || "not named in the current catalogue"} · ${basis}${
                       iss.capped ? ` · ${iss.capped} subcaps capped by issues`
@@ -836,7 +913,10 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
                     <div key={c.id} className="hm-cell peer b b-muted" style={{ minHeight: 30, padding: "4px 6px" }}
                          title="no peer median stated for this category in this run">—</div>
                   ) : (
-                    <div key={c.id} className={`hm-cell peer b ${DMA.helpers.maturityClass(pm)}`} style={{ minHeight: 30, padding: "4px 6px" }}>
+                    <div key={c.id} className={`hm-cell peer b ${DMA.helpers.maturityClass(pm)}`} style={{ minHeight: 30, padding: "4px 6px" }}
+                         title={`${c.id} — ${c.name || "unnamed in catalogue"} · peer median ${fx(pm, 1)}`}
+                         onMouseEnter={cellTip.show(`${c.id} — ${c.name || "unnamed in catalogue"} · peer median ${fx(pm, 1)}`)}
+                         onMouseLeave={cellTip.hide}>
                       {fx(pm, 1)}
                     </div>
                   );
@@ -860,6 +940,7 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
           </div>
         );
       })}
+      <CellTip tip={cellTip.tip} />
     </div>
   );
 }
@@ -1057,7 +1138,9 @@ function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers
                         // number: it made all 43 P4C1 cells read "5 evidence".
                         const ev = evidenceCountOf(s);
                         return (
-                          <button key={s.id} className="subcap-row" onClick={() => onSynth(s)}>
+                          /* The name column ellipsises to one line; the title
+                             carries the full identification. */
+                          <button key={s.id} className="subcap-row" onClick={() => onSynth(s)} title={subcapTipText(s)}>
                             <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(s.score, 1)}</span>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div className="row" style={{ gap: 6 }}>
@@ -1138,6 +1221,9 @@ function subcapsForStage(entity, vc) {
 
 function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }) {
   const [selected, setSelected] = useState(null);
+  // The stage tiles' mini-cells carry a score and nothing else — hover
+  // identification, same shared-bubble pattern as the other grids.
+  const cellTip = useCellTip();
   const chains = DMA.VALUE_CHAINS || [];
   const state = (typeof DMA.sectionStateFor === "function")
     ? DMA.sectionStateFor("heatmap.value_chain") : null;
@@ -1218,7 +1304,10 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
               ) : (
                 <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(subs.length, 12)}, 1fr)`, gap: 2 }}>
                   {subs.slice(0, 12).map(s => (
-                    <div key={s.id} className={`hm-cell b ${DMA.helpers.maturityClass(s.score)}`} style={{ height: 18, fontSize: 9, padding: 0, border: 0 }}>
+                    <div key={s.id} className={`hm-cell b ${DMA.helpers.maturityClass(s.score)}`} style={{ height: 18, fontSize: 9, padding: 0, border: 0 }}
+                      title={subcapTipText(s)}
+                      onMouseEnter={cellTip.show(subcapTipText(s))}
+                      onMouseLeave={cellTip.hide}>
                       {fx(s.score, 1)}
                     </div>
                   ))}
@@ -1245,7 +1334,8 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                 {subs.map(s => (
-                  <button key={s.id} className="card-tile clickable" style={{ padding: 10 }} onClick={() => openSubcap({ kind: "subcap", subcap: s })}>
+                  <button key={s.id} className="card-tile clickable" style={{ padding: 10 }} title={subcapTipText(s)}
+                    onClick={() => { cellTip.hide(); openSubcap({ kind: "subcap", subcap: s }); }}>
                     <div className="row" style={{ marginBottom: 4 }}>
                       <MaturityChip score={s.score} />
                       <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{s.id}</span>
@@ -1277,6 +1367,7 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
           </div>
         );
       })() : null}
+      <CellTip tip={cellTip.tip} />
     </div>
   );
 }

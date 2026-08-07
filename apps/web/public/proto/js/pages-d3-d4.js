@@ -210,6 +210,7 @@ function ClientPlatform({
     setIpOpen,
     openEvidence,
     openRec,
+    openSubcap,
     pushToast
   } = useApp();
   const recs = DMA.recsFor(entity.id) || [];
@@ -453,30 +454,38 @@ function ClientPlatform({
         display: "grid",
         gap: 4
       }
-    }, t.addressable_cells.map((c, j) => /*#__PURE__*/React.createElement("div", {
-      key: j,
-      className: "row",
-      style: {
-        gap: 5,
-        fontSize: 10,
-        alignItems: "flex-start"
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "chip f-mono",
-      style: {
-        fontSize: 9,
-        flexShrink: 0
-      }
-    }, pfText(c.subcap_id)), pfNum(c.current) !== null ? /*#__PURE__*/React.createElement(MaturityChip, {
-      score: pfNum(c.current)
-    }) : null, /*#__PURE__*/React.createElement("span", {
-      style: {
-        flex: 1,
-        minWidth: 0,
-        color: "var(--z-body)",
-        lineHeight: 1.45
-      }
-    }, pfText(c.feature_that_addresses_it) || pfText(c.name) || ""))))) : null, t.rank_rationale ? /*#__PURE__*/React.createElement("div", {
+    }, t.addressable_cells.map((c, j) => {
+      const sid = pfText(c.subcap_id);
+      return /*#__PURE__*/React.createElement("div", {
+        key: j,
+        className: "row",
+        style: {
+          gap: 5,
+          fontSize: 10,
+          alignItems: "flex-start"
+        }
+      }, sid ? /*#__PURE__*/React.createElement("button", {
+        className: "chip f-mono",
+        style: {
+          fontSize: 9,
+          flexShrink: 0
+        },
+        title: `open ${sid} in the heatmap`,
+        onClick: ev => {
+          ev.stopPropagation();
+          openSubcap(sid);
+        }
+      }, sid) : null, pfNum(c.current) !== null ? /*#__PURE__*/React.createElement(MaturityChip, {
+        score: pfNum(c.current)
+      }) : null, /*#__PURE__*/React.createElement("span", {
+        style: {
+          flex: 1,
+          minWidth: 0,
+          color: "var(--z-body)",
+          lineHeight: 1.45
+        }
+      }, pfText(c.feature_that_addresses_it) || pfText(c.name) || ""));
+    }))) : null, t.rank_rationale ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10.5,
         color: "var(--z-body)",
@@ -519,20 +528,27 @@ function ClientPlatform({
       display: "grid",
       gap: 7
     }
-  }, discarded.map((x, i) => /*#__PURE__*/React.createElement("div", {
+  }, discarded.map((x, i) =>
+  /*#__PURE__*/
+  /* The name column was a fixed 210px in a no-wrap row, so on a
+     narrow viewport the reason text was squeezed to a sliver
+     beside it. The row wraps: when the reason no longer fits at a
+     readable width it drops to its own full-width line. */
+  React.createElement("div", {
     key: i,
     className: "row",
     style: {
       gap: 10,
       alignItems: "flex-start",
-      fontSize: 11.5
+      fontSize: 11.5,
+      flexWrap: "wrap"
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
       fontWeight: 500,
       color: "var(--z-dark)",
-      width: 210,
-      flexShrink: 0,
+      flex: "0 0 210px",
+      maxWidth: "100%",
       lineHeight: 1.45
     }
   }, pfText(x.platform) || pfText(x.name) || "Platform not named"), x.relevance != null ? /*#__PURE__*/React.createElement("span", {
@@ -544,7 +560,7 @@ function ClientPlatform({
   }, Number(x.relevance).toFixed(2)) : null, /*#__PURE__*/React.createElement("span", {
     style: {
       color: "var(--z-muted)",
-      flex: 1,
+      flex: "1 1 240px",
       minWidth: 0,
       lineHeight: 1.5
     }
@@ -594,13 +610,19 @@ function ClientPlatform({
     }
   }, "the L3 area is the unit of recommendation"))) : null, /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "grid",
-      gridTemplateColumns: "minmax(0, 1fr) 380px",
+      display: "flex",
+      flexWrap: "wrap",
+      alignItems: "flex-start",
       gap: 16,
       marginBottom: 16
     }
   }, /*#__PURE__*/React.createElement("div", {
-    className: "card flush"
+    className: "card flush",
+    style: {
+      flex: "999 1 400px",
+      minWidth: 0,
+      maxWidth: "100%"
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
   }, /*#__PURE__*/React.createElement("h3", null, "Gaps this area closes \xB7 ", area || "no area promoted"), /*#__PURE__*/React.createElement("span", {
@@ -620,7 +642,7 @@ function ClientPlatform({
   }, /*#__PURE__*/React.createElement("table", {
     className: "tbl",
     style: {
-      minWidth: 720
+      minWidth: "min(720px, calc(100vw - 64px))"
     }
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Cell"), /*#__PURE__*/React.createElement("th", {
     style: {
@@ -736,7 +758,12 @@ function ClientPlatform({
       marginBottom: 5
     }
   }, "What this platform changes"), pfText(s))))), /*#__PURE__*/React.createElement("div", {
-    className: "card"
+    className: "card",
+    style: {
+      flex: "1 1 300px",
+      minWidth: 0,
+      maxWidth: "100%"
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
@@ -989,7 +1016,7 @@ function ClientPlatform({
   }, "A threshold in this area is not met. The unmet prerequisite is the conversation that comes first."))) : null)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+      gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
       gap: 16,
       marginBottom: 16
     }
@@ -1180,12 +1207,13 @@ function ClientPlatform({
       fontSize: 10,
       color: "var(--z-dpur)"
     }
-  }, "opens on ", String(s.opens_on).replace(/_/g, " ")) : null, s.named_gap_subcap_id ? /*#__PURE__*/React.createElement("span", {
+  }, "opens on ", String(s.opens_on).replace(/_/g, " ")) : null, s.named_gap_subcap_id ? /*#__PURE__*/React.createElement("button", {
     className: "chip f-mono",
     style: {
       fontSize: 9
     },
-    title: "the gap this starter names"
+    title: `the gap this starter names — open ${pfText(s.named_gap_subcap_id)} in the heatmap`,
+    onClick: () => openSubcap(pfText(s.named_gap_subcap_id))
   }, pfText(s.named_gap_subcap_id)) : null, /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("button", {
@@ -1360,7 +1388,8 @@ function StairstepCurve({
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
-      marginBottom: 14
+      marginBottom: 14,
+      flexWrap: "wrap"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1400,13 +1429,15 @@ function StairstepCurve({
     onClick: () => setCluster(k)
   }, v.label))) : null), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 300px",
-      gap: 18,
-      alignItems: "stretch"
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 18
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
+      flex: "999 1 400px",
+      minWidth: 0,
+      maxWidth: "100%",
       background: "linear-gradient(180deg, var(--z-bg), #fff)",
       borderRadius: 10,
       padding: "16px 14px 12px",
@@ -1555,6 +1586,9 @@ function StairstepCurve({
     textAnchor: "middle"
   }, `step ${steps[currentIdx].m} of ${n}`)) : null)), /*#__PURE__*/React.createElement("div", {
     style: {
+      flex: "1 1 280px",
+      minWidth: 0,
+      maxWidth: "100%",
       display: "flex",
       flexDirection: "column",
       gap: 8
@@ -1667,7 +1701,8 @@ function TransformationRoadmap({
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
-      marginBottom: 16
+      marginBottom: 16,
+      flexWrap: "wrap"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1735,160 +1770,165 @@ function ChevronView({
   recs,
   openRec
 }) {
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: `repeat(${roadmap.length}, 1fr)`,
-      gap: 12,
-      marginBottom: 12
-    }
-  }, roadmap.map((r, i) => /*#__PURE__*/React.createElement("div", {
-    key: r.phase,
-    style: {
-      position: "relative"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: r.color,
-      clipPath: i === roadmap.length - 1 ? "polygon(0 0, 100% 0, 100% 100%, 0 100%, 4% 50%)" : "polygon(0 0, 96% 0, 100% 50%, 96% 100%, 0 100%, 4% 50%)",
-      color: "#fff",
-      padding: "10px 22px",
-      fontSize: 12.5,
-      fontWeight: 600,
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      minWidth: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      opacity: .8,
-      letterSpacing: ".08em",
-      textTransform: "uppercase"
-    }
-  }, "Phase ", r.phase), /*#__PURE__*/React.createElement("div", null, r.label)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      opacity: .85,
-      textAlign: "right",
-      flexShrink: 0
-    }
-  }, (r.recs || []).length, " rec", (r.recs || []).length === 1 ? "" : "s"))))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: `repeat(${roadmap.length}, 1fr)`,
-      gap: 12
-    }
-  }, roadmap.map(r => /*#__PURE__*/React.createElement("div", {
-    key: r.phase,
-    style: {
-      background: r.color,
-      borderRadius: 8,
-      padding: 14,
-      color: "#fff"
-    }
-  }, r.rationale ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "rgba(255,255,255,.7)",
-      letterSpacing: ".06em",
-      textTransform: "uppercase",
-      marginBottom: 4
-    }
-  }, "Why this phase"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      marginBottom: 10,
-      lineHeight: 1.5
-    }
-  }, pfText(r.rationale))) : null, (r.depends_on || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "rgba(255,255,255,.7)",
-      letterSpacing: ".06em",
-      textTransform: "uppercase",
-      marginBottom: 4
-    }
-  }, "Depends on"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      marginBottom: 10
-    }
-  }, r.depends_on.join(" · "))) : null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "rgba(255,255,255,.7)",
-      letterSpacing: ".06em",
-      textTransform: "uppercase",
-      marginBottom: 6
-    }
-  }, "Recommendations"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 4
-    }
-  }, (r.recs || []).map(rid => {
-    const rec = recs.find(x => x.id === rid);
-    return rec ? /*#__PURE__*/React.createElement("button", {
-      key: rid,
-      onClick: e => {
-        e.stopPropagation();
-        openRec(rid);
-      }
-      /* The title ellipsises to one line by design; without this
-         the rest of the sentence is unreachable by any means. */,
-      title: `${rec.id} · ${pfText(rec.title) || ""}`,
+  return (
+    /*#__PURE__*/
+    /* One fluid column per phase, each carrying its own chevron header AND its
+       own content card. This used to be two parallel `repeat(N, 1fr)` grids —
+       N hard columns whatever the viewport, so at tablet widths every phase
+       was crushed to a sliver, and the two grids could not wrap without the
+       chevrons drifting away from their phases. Whole phases wrap together
+       instead, and only when a column would drop below a readable width. */
+    React.createElement("div", {
       style: {
-        padding: "6px 8px",
-        background: "rgba(255,255,255,.14)",
-        borderRadius: 5,
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 230px), 1fr))",
+        gap: 12
+      }
+    }, roadmap.map((r, i) => /*#__PURE__*/React.createElement("div", {
+      key: r.phase,
+      style: {
+        minWidth: 0,
+        display: "flex",
+        flexDirection: "column",
+        gap: 12
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: r.color,
+        clipPath: i === roadmap.length - 1 ? "polygon(0 0, 100% 0, 100% 100%, 0 100%, 4% 50%)" : "polygon(0 0, 96% 0, 100% 50%, 96% 100%, 0 100%, 4% 50%)",
+        color: "#fff",
+        padding: "10px 22px",
+        fontSize: 12.5,
+        fontWeight: 600,
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        gap: 6,
-        border: 0,
-        color: "#fff",
-        textAlign: "left",
-        cursor: "pointer",
-        transition: "background 120ms"
-      },
-      onMouseEnter: e => e.currentTarget.style.background = "rgba(255,255,255,.22)",
-      onMouseLeave: e => e.currentTarget.style.background = "rgba(255,255,255,.14)"
-    }, /*#__PURE__*/React.createElement("span", {
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 10.5,
-        fontWeight: 600,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        opacity: .8,
+        letterSpacing: ".08em",
+        textTransform: "uppercase"
+      }
+    }, "Phase ", r.phase), /*#__PURE__*/React.createElement("div", null, r.label)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        opacity: .85,
+        textAlign: "right",
         flexShrink: 0
       }
-    }, rec.id), /*#__PURE__*/React.createElement("span", {
+    }, (r.recs || []).length, " rec", (r.recs || []).length === 1 ? "" : "s")), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 10.5,
-        color: "rgba(255,255,255,.85)",
-        flex: 1,
-        minWidth: 0
-      },
-      className: "txt-trunc"
-    }, pfText(rec.title)), /*#__PURE__*/React.createElement(Icon, {
-      name: "arrow-r",
-      size: 11
-    })) :
-    /*#__PURE__*/
-    /* A phase that names a recommendation this run did not serve
-       says so — it used to render nothing at all. */
-    React.createElement("span", {
-      key: rid,
-      style: {
-        fontSize: 10.5,
-        color: "rgba(255,255,255,.7)"
+        background: r.color,
+        borderRadius: 8,
+        padding: 14,
+        color: "#fff",
+        flex: 1
       }
-    }, rid, " \xB7 not served in this run");
-  }))))));
+    }, r.rationale ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "rgba(255,255,255,.7)",
+        letterSpacing: ".06em",
+        textTransform: "uppercase",
+        marginBottom: 4
+      }
+    }, "Why this phase"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        marginBottom: 10,
+        lineHeight: 1.5
+      }
+    }, pfText(r.rationale))) : null, (r.depends_on || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "rgba(255,255,255,.7)",
+        letterSpacing: ".06em",
+        textTransform: "uppercase",
+        marginBottom: 4
+      }
+    }, "Depends on"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        marginBottom: 10
+      }
+    }, r.depends_on.join(" · "))) : null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "rgba(255,255,255,.7)",
+        letterSpacing: ".06em",
+        textTransform: "uppercase",
+        marginBottom: 6
+      }
+    }, "Recommendations"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 4
+      }
+    }, (r.recs || []).map(rid => {
+      const rec = recs.find(x => x.id === rid);
+      return rec ? /*#__PURE__*/React.createElement("button", {
+        key: rid,
+        onClick: e => {
+          e.stopPropagation();
+          openRec(rid);
+        }
+        /* The title ellipsises to one line by design; without this
+           the rest of the sentence is unreachable by any means. */,
+        title: `${rec.id} · ${pfText(rec.title) || ""}`,
+        style: {
+          padding: "6px 8px",
+          background: "rgba(255,255,255,.14)",
+          borderRadius: 5,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 6,
+          border: 0,
+          color: "#fff",
+          textAlign: "left",
+          cursor: "pointer",
+          transition: "background 120ms"
+        },
+        onMouseEnter: e => e.currentTarget.style.background = "rgba(255,255,255,.22)",
+        onMouseLeave: e => e.currentTarget.style.background = "rgba(255,255,255,.14)"
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 10.5,
+          fontWeight: 600,
+          flexShrink: 0
+        }
+      }, rec.id), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 10.5,
+          color: "rgba(255,255,255,.85)",
+          flex: 1,
+          minWidth: 0
+        },
+        className: "txt-trunc"
+      }, pfText(rec.title)), /*#__PURE__*/React.createElement(Icon, {
+        name: "arrow-r",
+        size: 11
+      })) :
+      /*#__PURE__*/
+      /* A phase that names a recommendation this run did not serve
+         says so — it used to render nothing at all. */
+      React.createElement("span", {
+        key: rid,
+        style: {
+          fontSize: 10.5,
+          color: "rgba(255,255,255,.7)"
+        }
+      }, rid, " \xB7 not served in this run");
+    }))))))
+  );
 }
 
 /* Per-phase cell movement, from `recommendations[].dma_impact`.
@@ -1913,179 +1953,185 @@ function CellImpactView({
       }
     }, "No recommendation in this roadmap promoted a cell-impact table, so there is nothing to show per phase.");
   }
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: `repeat(${roadmap.length}, 1fr)`,
-      gap: 12
-    }
-  }, roadmap.map(r => {
-    const rs = phaseRecs(r);
-    const bases = [];
-    for (const rec of rs) {
-      for (const im of rec.dma_impact || []) {
-        if (im.target_basis && !bases.includes(im.target_basis)) bases.push(im.target_basis);
-      }
-    }
-    return /*#__PURE__*/React.createElement("div", {
-      key: r.phase,
-      className: "card-tile",
+  return (
+    /*#__PURE__*/
+    /* Fluid, like the chevron view: N hard columns crushed each phase's
+       impact table at tablet widths; phases wrap when a column would drop
+       below a readable width. */
+    React.createElement("div", {
       style: {
-        padding: 14,
-        borderTop: `3px solid ${r.color}`
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
+        gap: 12
       }
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        marginBottom: 4,
-        gap: 6
+    }, roadmap.map(r => {
+      const rs = phaseRecs(r);
+      const bases = [];
+      for (const rec of rs) {
+        for (const im of rec.dma_impact || []) {
+          if (im.target_basis && !bases.includes(im.target_basis)) bases.push(im.target_basis);
+        }
       }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 10,
-        fontWeight: 700,
-        color: r.color,
-        letterSpacing: ".08em",
-        textTransform: "uppercase",
-        flexShrink: 0
-      }
-    }, "Phase ", pfText(r.phase)), /*#__PURE__*/React.createElement("strong", {
-      style: {
-        fontSize: 12.5,
-        flex: 1,
-        minWidth: 0
-      }
-    }, r.label)), /*#__PURE__*/React.createElement("div", {
-      className: "eyebrow",
-      style: {
-        fontSize: 9.5,
-        margin: "8px 0 6px"
-      }
-    }, "Cells this phase moves"), rs.map(rec => /*#__PURE__*/React.createElement("div", {
-      key: rec.id,
-      style: {
-        marginBottom: 10
-      }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => openRec(rec.id),
-      title: `${rec.id} · ${pfText(rec.title) || ""}`,
-      style: {
-        padding: 0,
-        background: "none",
-        border: 0,
-        cursor: "pointer",
-        textAlign: "left",
-        display: "flex",
-        gap: 6,
-        alignItems: "center",
-        width: "100%"
-      }
-    }, /*#__PURE__*/React.createElement("strong", {
-      style: {
-        fontSize: 10.5,
-        color: "var(--z-dark)",
-        flexShrink: 0
-      }
-    }, rec.id), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 10.5,
-        color: "var(--z-muted)",
-        flex: 1,
-        minWidth: 0
-      },
-      className: "txt-trunc"
-    }, pfText(rec.title)), /*#__PURE__*/React.createElement(Icon, {
-      name: "arrow-r",
-      size: 11,
-      style: {
-        color: "var(--z-muted)",
-        flexShrink: 0
-      }
-    })), (rec.dma_impact || []).length ? (rec.dma_impact || []).map((im, j) => {
-      const cur = pfNum(im.current),
-        tgt = pfNum(im.target),
-        d = pfNum(im.delta);
       return /*#__PURE__*/React.createElement("div", {
-        key: j,
-        className: "row",
+        key: r.phase,
+        className: "card-tile",
         style: {
-          padding: "5px 0",
-          borderTop: "1px solid var(--z-sep)",
-          gap: 6,
-          alignItems: "flex-start"
+          padding: 14,
+          borderTop: `3px solid ${r.color}`
         }
       }, /*#__PURE__*/React.createElement("div", {
+        className: "row",
         style: {
+          marginBottom: 4,
+          gap: 6
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 10,
+          fontWeight: 700,
+          color: r.color,
+          letterSpacing: ".08em",
+          textTransform: "uppercase",
+          flexShrink: 0
+        }
+      }, "Phase ", pfText(r.phase)), /*#__PURE__*/React.createElement("strong", {
+        style: {
+          fontSize: 12.5,
           flex: 1,
           minWidth: 0
         }
-      }, /*#__PURE__*/React.createElement("div", {
+      }, r.label)), /*#__PURE__*/React.createElement("div", {
+        className: "eyebrow",
         style: {
-          fontSize: 11,
-          color: "var(--z-body)",
-          lineHeight: 1.35
+          fontSize: 9.5,
+          margin: "8px 0 6px"
         }
-      }, pfText(im.name) || im.subcap_id), /*#__PURE__*/React.createElement("div", {
-        className: "f-mono",
+      }, "Cells this phase moves"), rs.map(rec => /*#__PURE__*/React.createElement("div", {
+        key: rec.id,
         style: {
-          fontSize: 9,
-          color: "var(--z-muted)"
+          marginBottom: 10
         }
-      }, pfText(im.subcap_id))), /*#__PURE__*/React.createElement("span", {
+      }, /*#__PURE__*/React.createElement("button", {
+        onClick: () => openRec(rec.id),
+        title: `${rec.id} · ${pfText(rec.title) || ""}`,
         style: {
+          padding: 0,
+          background: "none",
+          border: 0,
+          cursor: "pointer",
+          textAlign: "left",
+          display: "flex",
+          gap: 6,
+          alignItems: "center",
+          width: "100%"
+        }
+      }, /*#__PURE__*/React.createElement("strong", {
+        style: {
+          fontSize: 10.5,
+          color: "var(--z-dark)",
           flexShrink: 0
         }
-      }, /*#__PURE__*/React.createElement(MaturityChip, {
-        score: cur
-      })), /*#__PURE__*/React.createElement("span", {
+      }, rec.id), /*#__PURE__*/React.createElement("span", {
         style: {
-          fontSize: 10,
+          fontSize: 10.5,
+          color: "var(--z-muted)",
+          flex: 1,
+          minWidth: 0
+        },
+        className: "txt-trunc"
+      }, pfText(rec.title)), /*#__PURE__*/React.createElement(Icon, {
+        name: "arrow-r",
+        size: 11,
+        style: {
           color: "var(--z-muted)",
           flexShrink: 0
         }
-      }, "\u2192"), /*#__PURE__*/React.createElement("span", {
+      })), (rec.dma_impact || []).length ? (rec.dma_impact || []).map((im, j) => {
+        const cur = pfNum(im.current),
+          tgt = pfNum(im.target),
+          d = pfNum(im.delta);
+        return /*#__PURE__*/React.createElement("div", {
+          key: j,
+          className: "row",
+          style: {
+            padding: "5px 0",
+            borderTop: "1px solid var(--z-sep)",
+            gap: 6,
+            alignItems: "flex-start"
+          }
+        }, /*#__PURE__*/React.createElement("div", {
+          style: {
+            flex: 1,
+            minWidth: 0
+          }
+        }, /*#__PURE__*/React.createElement("div", {
+          style: {
+            fontSize: 11,
+            color: "var(--z-body)",
+            lineHeight: 1.35
+          }
+        }, pfText(im.name) || im.subcap_id), /*#__PURE__*/React.createElement("div", {
+          className: "f-mono",
+          style: {
+            fontSize: 9,
+            color: "var(--z-muted)"
+          }
+        }, pfText(im.subcap_id))), /*#__PURE__*/React.createElement("span", {
+          style: {
+            flexShrink: 0
+          }
+        }, /*#__PURE__*/React.createElement(MaturityChip, {
+          score: cur
+        })), /*#__PURE__*/React.createElement("span", {
+          style: {
+            fontSize: 10,
+            color: "var(--z-muted)",
+            flexShrink: 0
+          }
+        }, "\u2192"), /*#__PURE__*/React.createElement("span", {
+          style: {
+            flexShrink: 0
+          }
+        }, /*#__PURE__*/React.createElement(MaturityChip, {
+          score: tgt
+        })), d !== null ? /*#__PURE__*/React.createElement("span", {
+          className: "f-mono",
+          style: {
+            fontSize: 10,
+            color: "var(--z-mid)",
+            width: 30,
+            textAlign: "right",
+            flexShrink: 0
+          }
+        }, d > 0 ? `+${d.toFixed(1)}` : d.toFixed(1)) : null);
+      }) : /*#__PURE__*/React.createElement("div", {
         style: {
-          flexShrink: 0
+          fontSize: 10.5,
+          color: "var(--z-muted)",
+          padding: "4px 0"
         }
-      }, /*#__PURE__*/React.createElement(MaturityChip, {
-        score: tgt
-      })), d !== null ? /*#__PURE__*/React.createElement("span", {
-        className: "f-mono",
+      }, "No cell impact promoted for this recommendation."))), !rs.length ? /*#__PURE__*/React.createElement("div", {
         style: {
-          fontSize: 10,
-          color: "var(--z-mid)",
-          width: 30,
-          textAlign: "right",
-          flexShrink: 0
+          fontSize: 11,
+          color: "var(--z-muted)"
         }
-      }, d > 0 ? `+${d.toFixed(1)}` : d.toFixed(1)) : null);
-    }) : /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10.5,
-        color: "var(--z-muted)",
-        padding: "4px 0"
-      }
-    }, "No cell impact promoted for this recommendation."))), !rs.length ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: "var(--z-muted)"
-      }
-    }, (r.recs || []).length ? `This phase names ${r.recs.join(" · ")}, none of them served in this run.` : "This phase names no recommendation.") : null, bases.length ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9.5,
-        color: "var(--z-muted)",
-        marginTop: 8,
-        paddingTop: 8,
-        borderTop: "1px solid var(--z-sep)",
-        lineHeight: 1.5
-      }
-    }, bases.map((b, i) => /*#__PURE__*/React.createElement("div", {
-      key: i,
-      style: {
-        marginBottom: 3
-      }
-    }, pfText(b)))) : null);
-  }));
+      }, (r.recs || []).length ? `This phase names ${r.recs.join(" · ")}, none of them served in this run.` : "This phase names no recommendation.") : null, bases.length ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 9.5,
+          color: "var(--z-muted)",
+          marginTop: 8,
+          paddingTop: 8,
+          borderTop: "1px solid var(--z-sep)",
+          lineHeight: 1.5
+        }
+      }, bases.map((b, i) => /*#__PURE__*/React.createElement("div", {
+        key: i,
+        style: {
+          marginBottom: 3
+        }
+      }, pfText(b)))) : null);
+    }))
+  );
 }
 Object.assign(window, {
   ClientPlatform
