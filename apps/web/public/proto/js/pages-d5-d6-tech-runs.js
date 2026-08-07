@@ -1509,43 +1509,88 @@ function SentimentGridInteractive({
   // A tile the producer worked and could not fill is a finding with a ladder
   // behind it, not an empty card: it names what was searched.
   const absent = sent && sent.absent || [];
-  if (!rows.length) {
+
+  /* One tile per AUDIENCE, which is the contract's own unit and the
+     prototype's single row of three. Flattening every measured row into one
+     grid made this card seven tiles and three rows deep, and — worse — the
+     worked-absent ladder was only rendered when the card had NO rows at all,
+     so an audience that was searched and could not be established simply
+     vanished the moment any other audience had a number. That is how the
+     employee ladder stayed invisible while reading "not established": it was
+     never a missing measure, it was an unreachable branch.
+      Each tile leads with its audience's first row and says how many more it
+     holds; an audience with no measure carries the ladder instead. Both open
+     onto the same detail, because the ladder IS the finding at that grain. */
+  const AUDIENCE_ORDER = ["employee", "customer", "market", "unstated"];
+  const byAudience = new Map();
+  for (const r of rows) {
+    const k = String(r.group || "unstated").toLowerCase();
+    if (!byAudience.has(k)) byAudience.set(k, {
+      key: k,
+      label: r.group,
+      rows: []
+    });
+    byAudience.get(k).rows.push(r);
+  }
+  for (const a of absent) {
+    const k = String(a.group || "unstated").toLowerCase();
+    if (!byAudience.has(k)) byAudience.set(k, {
+      key: k,
+      label: a.group,
+      rows: []
+    });
+    byAudience.get(k).absent = a;
+  }
+  const tiles = [...byAudience.values()].sort((x, y) => {
+    const i = AUDIENCE_ORDER.indexOf(x.key),
+      j = AUDIENCE_ORDER.indexOf(y.key);
+    return (i < 0 ? 99 : i) - (j < 0 ? 99 : j);
+  });
+  if (!tiles.length) {
     return /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 12,
         color: "var(--z-muted)",
         lineHeight: 1.6
       }
-    }, absent.length ? absent.map((a, i) => /*#__PURE__*/React.createElement("div", {
-      key: i,
-      style: {
-        marginBottom: 8
-      }
-    }, /*#__PURE__*/React.createElement("strong", {
-      style: {
-        color: "var(--z-body)",
-        textTransform: "uppercase",
-        fontSize: 10,
-        letterSpacing: ".08em"
-      }
-    }, a.group), a.note ? /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 ", a.note) : /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 searched and not established."), (a.sources_searched || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", a.sources_searched.join(" · "), ".") : null)) : /*#__PURE__*/React.createElement(React.Fragment, null, "No sentiment measures promoted for this run.", sent && sent.sources_searched && sent.sources_searched.length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", sent.sources_searched.join(" · "), ".") : null));
+    }, "No sentiment measures promoted for this run.", sent && sent.sources_searched && sent.sources_searched.length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", sent.sources_searched.join(" · "), ".") : null);
   }
+
+  /* The scale as a token, not as a sentence. The producer states it in full
+     ("0-100 % of employees agreeing", "NPS -100..100"), which is right in the
+     payload and far too long beside an 18px number — it wrapped the value off
+     its own tile. The face carries the denominator; the full wording is one
+     click away, where there is room for it. */
+  const scaleToken = scale => {
+    const s = String(scale || "");
+    if (!s) return null;
+    const range = s.match(/(-?\d+(?:\.\d+)?)\s*(?:\.\.|-|–|to)\s*(\d+(?:\.\d+)?)/);
+    if (range) return `/${range[2]}`;
+    if (/%/.test(s)) return "%";
+    if (/star/i.test(s)) return "/5";
+    return null;
+  };
   return /*#__PURE__*/React.createElement("div", {
     className: "g3",
     style: {
-      gap: 10
+      gap: 10,
+      alignItems: "start"
     }
-  }, rows.map(s => {
-    const isOpen = sentOpen === s.id;
+  }, tiles.map(t => {
+    const lead = t.rows[0] || null;
+    const more = Math.max(0, t.rows.length - 1);
+    const id = `aud-${t.key}`;
+    const isOpen = sentOpen === id;
     return /*#__PURE__*/React.createElement("div", {
-      key: s.id
+      key: id
     }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setSentOpen(isOpen ? null : s.id),
+      onClick: () => setSentOpen(isOpen ? null : id),
       className: "card-tile clickable",
       style: {
         padding: 10,
         width: "100%",
         textAlign: "left",
+        minWidth: 0,
         border: isOpen ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)"
       }
     }, /*#__PURE__*/React.createElement("div", {
@@ -1555,29 +1600,38 @@ function SentimentGridInteractive({
         textTransform: "uppercase",
         letterSpacing: ".08em"
       }
-    }, s.group), /*#__PURE__*/React.createElement("div", {
+    }, t.label), /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
-        marginTop: 4
+        marginTop: 4,
+        minWidth: 0
       }
-    }, /*#__PURE__*/React.createElement("span", {
+    }, lead ? /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 18,
-        fontWeight: 600
+        fontWeight: 600,
+        whiteSpace: "nowrap"
       }
-    }, fx(s.value, 1), s.scale ? /*#__PURE__*/React.createElement("span", {
+    }, fx(lead.value, 1), scaleToken(lead.scale) ? /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 11,
         color: "var(--z-muted)",
         fontWeight: 400
       }
-    }, " ", s.scale) : null), /*#__PURE__*/React.createElement("span", {
+    }, scaleToken(lead.scale)) : null) : /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        color: "var(--z-muted)",
+        fontStyle: "italic"
+      }
+    }, "Searched, not established"), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement(Icon, {
       name: isOpen ? "chevron-u" : "chevron-d",
       size: 11,
       style: {
-        color: "var(--z-muted)"
+        color: "var(--z-muted)",
+        flexShrink: 0
       }
     })), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -1585,8 +1639,8 @@ function SentimentGridInteractive({
         color: "var(--z-muted)"
       },
       className: "txt-fit-1",
-      title: `${s.label}${s.n != null ? ` · n=${s.n}` : ""}`
-    }, s.label, s.n != null ? ` · n=${Number(s.n).toLocaleString()}` : "")), isOpen ? /*#__PURE__*/React.createElement("div", {
+      title: lead ? `${lead.label}${lead.n != null ? ` · n=${lead.n}` : ""}` : t.absent && t.absent.note || ""
+    }, lead ? `${lead.label}${lead.n != null ? ` · n=${Number(lead.n).toLocaleString()}` : ""}${more ? ` · +${more} more` : ""}` : `${t.absent && (t.absent.sources_searched || []).length || 0} source${(t.absent && (t.absent.sources_searched || []).length || 0) === 1 ? "" : "s"} searched`)), isOpen ? /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 6,
         padding: "10px 12px",
@@ -1596,12 +1650,32 @@ function SentimentGridInteractive({
         color: "var(--z-body)",
         lineHeight: 1.55
       }
-    }, s.note || s.reading || "The run stated this measure with no reading.", (s.e_ids || []).length ? /*#__PURE__*/React.createElement("div", {
+    }, t.rows.map(s => /*#__PURE__*/React.createElement("div", {
+      key: s.id,
+      style: {
+        marginBottom: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 600,
+        color: "var(--z-dark)"
+      }
+    }, s.label, " \xB7 ", fx(s.value, 1), s.scale ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 400,
+        color: "var(--z-muted)"
+      }
+    }, " ", s.scale) : null, s.n != null ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 400,
+        color: "var(--z-muted)"
+      }
+    }, " \xB7 n=", Number(s.n).toLocaleString()) : null), s.note || s.reading ? /*#__PURE__*/React.createElement("div", null, s.note || s.reading) : null, (s.e_ids || []).length ? /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
         gap: 5,
         flexWrap: "wrap",
-        marginTop: 7
+        marginTop: 5
       }
     }, s.e_ids.map(eid => /*#__PURE__*/React.createElement("button", {
       key: eid,
@@ -1611,7 +1685,7 @@ function SentimentGridInteractive({
         border: 0
       },
       onClick: () => openEvidence(eid)
-    }, eid))) : null) : null);
+    }, eid))) : null)), t.absent ? /*#__PURE__*/React.createElement("div", null, t.absent.note || "Searched and not established.", (t.absent.sources_searched || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", t.absent.sources_searched.join(" · "), ".") : null) : null) : null);
   }));
 }
 function Timeline({

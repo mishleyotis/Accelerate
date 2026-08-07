@@ -853,57 +853,121 @@ function SentimentGridInteractive({ sentOpen, setSentOpen, openEvidence, entity 
   // A tile the producer worked and could not fill is a finding with a ladder
   // behind it, not an empty card: it names what was searched.
   const absent = (sent && sent.absent) || [];
-  if (!rows.length) {
+
+  /* One tile per AUDIENCE, which is the contract's own unit and the
+     prototype's single row of three. Flattening every measured row into one
+     grid made this card seven tiles and three rows deep, and — worse — the
+     worked-absent ladder was only rendered when the card had NO rows at all,
+     so an audience that was searched and could not be established simply
+     vanished the moment any other audience had a number. That is how the
+     employee ladder stayed invisible while reading "not established": it was
+     never a missing measure, it was an unreachable branch.
+
+     Each tile leads with its audience's first row and says how many more it
+     holds; an audience with no measure carries the ladder instead. Both open
+     onto the same detail, because the ladder IS the finding at that grain. */
+  const AUDIENCE_ORDER = ["employee", "customer", "market", "unstated"];
+  const byAudience = new Map();
+  for (const r of rows) {
+    const k = String(r.group || "unstated").toLowerCase();
+    if (!byAudience.has(k)) byAudience.set(k, { key: k, label: r.group, rows: [] });
+    byAudience.get(k).rows.push(r);
+  }
+  for (const a of absent) {
+    const k = String(a.group || "unstated").toLowerCase();
+    if (!byAudience.has(k)) byAudience.set(k, { key: k, label: a.group, rows: [] });
+    byAudience.get(k).absent = a;
+  }
+  const tiles = [...byAudience.values()].sort((x, y) => {
+    const i = AUDIENCE_ORDER.indexOf(x.key), j = AUDIENCE_ORDER.indexOf(y.key);
+    return (i < 0 ? 99 : i) - (j < 0 ? 99 : j);
+  });
+
+  if (!tiles.length) {
     return (
       <div style={{ fontSize: 12, color: "var(--z-muted)", lineHeight: 1.6 }}>
-        {absent.length ? (
-          absent.map((a, i) => (
-            <div key={i} style={{ marginBottom: 8 }}>
-              <strong style={{ color: "var(--z-body)", textTransform: "uppercase", fontSize: 10, letterSpacing: ".08em" }}>{a.group}</strong>
-              {a.note ? <> — {a.note}</> : <> — searched and not established.</>}
-              {(a.sources_searched || []).length ? (
-                <> Searched: {a.sources_searched.join(" · ")}.</>
-              ) : null}
-            </div>
-          ))
-        ) : (
-          <>
-            No sentiment measures promoted for this run.
-            {sent && sent.sources_searched && sent.sources_searched.length ? (
-              <> Searched: {sent.sources_searched.join(" · ")}.</>
-            ) : null}
-          </>
-        )}
+        No sentiment measures promoted for this run.
+        {sent && sent.sources_searched && sent.sources_searched.length ? (
+          <> Searched: {sent.sources_searched.join(" · ")}.</>
+        ) : null}
       </div>
     );
   }
+
+  /* The scale as a token, not as a sentence. The producer states it in full
+     ("0-100 % of employees agreeing", "NPS -100..100"), which is right in the
+     payload and far too long beside an 18px number — it wrapped the value off
+     its own tile. The face carries the denominator; the full wording is one
+     click away, where there is room for it. */
+  const scaleToken = (scale) => {
+    const s = String(scale || "");
+    if (!s) return null;
+    const range = s.match(/(-?\d+(?:\.\d+)?)\s*(?:\.\.|-|–|to)\s*(\d+(?:\.\d+)?)/);
+    if (range) return `/${range[2]}`;
+    if (/%/.test(s)) return "%";
+    if (/star/i.test(s)) return "/5";
+    return null;
+  };
+
   return (
-    <div className="g3" style={{ gap: 10 }}>
-      {rows.map(s => {
-        const isOpen = sentOpen === s.id;
+    <div className="g3" style={{ gap: 10, alignItems: "start" }}>
+      {tiles.map(t => {
+        const lead = t.rows[0] || null;
+        const more = Math.max(0, t.rows.length - 1);
+        const id = `aud-${t.key}`;
+        const isOpen = sentOpen === id;
         return (
-          <div key={s.id}>
-            <button onClick={() => setSentOpen(isOpen ? null : s.id)} className="card-tile clickable" style={{ padding: 10, width: "100%", textAlign: "left", border: isOpen ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)" }}>
-              <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>{s.group}</div>
-              <div className="row" style={{ marginTop: 4 }}>
-                <span style={{ fontSize: 18, fontWeight: 600 }}>{fx(s.value, 1)}{s.scale ? <span style={{ fontSize: 11, color: "var(--z-muted)", fontWeight: 400 }}> {s.scale}</span> : null}</span>
+          <div key={id}>
+            <button onClick={() => setSentOpen(isOpen ? null : id)} className="card-tile clickable"
+                    style={{ padding: 10, width: "100%", textAlign: "left", minWidth: 0,
+                             border: isOpen ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)" }}>
+              <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>{t.label}</div>
+              <div className="row" style={{ marginTop: 4, minWidth: 0 }}>
+                {lead ? (
+                  <span style={{ fontSize: 18, fontWeight: 600, whiteSpace: "nowrap" }}>
+                    {fx(lead.value, 1)}
+                    {scaleToken(lead.scale) ? (
+                      <span style={{ fontSize: 11, color: "var(--z-muted)", fontWeight: 400 }}>{scaleToken(lead.scale)}</span>
+                    ) : null}
+                  </span>
+                ) : (
+                  <span style={{ fontSize: 12, color: "var(--z-muted)", fontStyle: "italic" }}>Searched, not established</span>
+                )}
                 <span className="spacer" />
-                <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={11} style={{ color: "var(--z-muted)" }} />
+                <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={11} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
               </div>
               <div style={{ fontSize: 10, color: "var(--z-muted)" }} className="txt-fit-1"
-                   title={`${s.label}${s.n != null ? ` · n=${s.n}` : ""}`}>
-                {s.label}{s.n != null ? ` · n=${Number(s.n).toLocaleString()}` : ""}
+                   title={lead ? `${lead.label}${lead.n != null ? ` · n=${lead.n}` : ""}` : (t.absent && t.absent.note) || ""}>
+                {lead
+                  ? `${lead.label}${lead.n != null ? ` · n=${Number(lead.n).toLocaleString()}` : ""}${more ? ` · +${more} more` : ""}`
+                  : `${(t.absent && (t.absent.sources_searched || []).length) || 0} source${((t.absent && (t.absent.sources_searched || []).length) || 0) === 1 ? "" : "s"} searched`}
               </div>
             </button>
             {isOpen ? (
               <div style={{ marginTop: 6, padding: "10px 12px", background: "var(--z-lav)", borderRadius: 6, fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55 }}>
-                {s.note || s.reading || "The run stated this measure with no reading."}
-                {(s.e_ids || []).length ? (
-                  <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 7 }}>
-                    {s.e_ids.map(eid => (
-                      <button key={eid} className="chip" style={{ cursor: "pointer", border: 0 }}
-                              onClick={() => openEvidence(eid)}>{eid}</button>
-                    ))}
+                {t.rows.map(s => (
+                  <div key={s.id} style={{ marginBottom: 8 }}>
+                    <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>
+                      {s.label} · {fx(s.value, 1)}{s.scale ? <span style={{ fontWeight: 400, color: "var(--z-muted)" }}> {s.scale}</span> : null}
+                      {s.n != null ? <span style={{ fontWeight: 400, color: "var(--z-muted)" }}> · n={Number(s.n).toLocaleString()}</span> : null}
+                    </div>
+                    {s.note || s.reading ? <div>{s.note || s.reading}</div> : null}
+                    {(s.e_ids || []).length ? (
+                      <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 5 }}>
+                        {s.e_ids.map(eid => (
+                          <button key={eid} className="chip" style={{ cursor: "pointer", border: 0 }}
+                                  onClick={() => openEvidence(eid)}>{eid}</button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+                {t.absent ? (
+                  <div>
+                    {t.absent.note || "Searched and not established."}
+                    {(t.absent.sources_searched || []).length ? (
+                      <> Searched: {t.absent.sources_searched.join(" · ")}.</>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
