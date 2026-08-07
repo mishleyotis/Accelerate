@@ -187,7 +187,24 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
         return [{"stage_id": r[0], "name": r[1], "stage_order": r[2]}
                 for r in cur.fetchall()]
 
-    stage_rows = _stages(version)
+    def _real(stages):
+        # The workbook's mapping carries literal not-applicable markers as
+        # stage rows — names like "- (N/A)" or "Not applicable — Farm Credit
+        # associations…" — which are the AUTHOR's way of saying a cell maps
+        # nowhere, not stages of anyone's value chain. Serving them would
+        # render junk columns (measured: 2 of the 48 borrowed CU stages).
+        # They are excluded and COUNTED, never silently dropped.
+        keep, dropped = [], 0
+        for st in stages:
+            name = str(st.get("name") or "").strip()
+            if not name or re.match(r"^[-–—\s]*(\(?\s*n/?a\s*\)?|not applicable)\b",
+                                    name, re.IGNORECASE):
+                dropped += 1
+                continue
+            keep.append(st)
+        return keep, dropped
+
+    stage_rows, na_stages = _real(_stages(version))
     searched = [f"ccg_value_chains[version={version} sub_vertical={code}]"]
     # USER ADJUDICATION 2026-08-07: "the value chain arrangement is enriched
     # from v7 to v5." A v5.0-pinned run whose sub-vertical has no v5.0
@@ -201,7 +218,8 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
     if not stage_rows:
         current = _current_version(cur)
         if current and current != version:
-            stage_rows = _stages(current)
+            stage_rows, na2 = _real(_stages(current))
+            na_stages += na2
             if stage_rows:
                 arrangement_version = current
             searched.append(
@@ -234,6 +252,7 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
     data["sub_vertical"] = code
     data["version"] = version
     data["arrangement_version"] = arrangement_version
+    data["not_applicable_stages"] = na_stages
     return data, None
 
 
