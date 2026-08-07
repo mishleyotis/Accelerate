@@ -2,31 +2,35 @@
    DMA INSIGHTS · Client page — D4 Platform opportunity
    (heatmap moved to pages-d3-heatmap.jsx)
 
-   The unit of recommendation on this surface is the L3 PLATFORM AREA and its
-   L4 features — not a vendor brand. The page used to open with the static
-   five-vendor catalogue (`DMA.PLATFORMS`: Salesforce / Databricks / Tableau /
-   Twilio / nCino), score it from `entity.oss` through a vendor-alias fold, and
-   filter every panel below by `r.platform === "SF"`. For a real client that
-   produced five tiles reading "—", a readiness list of every recommendation's
-   prerequisites under the heading "Readiness · Salesforce", and "No
-   recommendations for this platform in this run" against eight promoted ones.
-   Nothing on the page came from the run.
+   THE TILE IS THIS PAGE'S ONE SELECTOR, as it is in the design prototype.
+   Every heading below reads "· <the platform you clicked>" and every panel
+   under it — gap mapping, readiness, recommendations, starters — is that
+   platform's own content.
 
-   So there are now two independent controls, each keyed on something the
-   payload actually states:
+   Reaching that takes one join, because the run states the platform and the
+   recommendation at different grains. An opportunity tile names a PLATFORM and
+   the cells it addresses. A recommendation names an L3 PLATFORM AREA and the
+   cells it moves. A platform story gap row names an L3 area per cell. Nothing
+   anywhere names a platform beside an area, and `platform_story.platforms[]`
+   carries no platform name at all.
 
-     · the fit tiles ARE the promoted opportunity tiles — platform name,
-       composite, factors, the cells each addresses — read, never re-ranked;
-     · the area toggle selects an L3 area, taken from the recommendations'
-       own `l3_area`, and scopes the gaps, the readiness rows and the
-       recommendation list to it.
+   So the join runs through the cells, and only through pairings the run itself
+   states: every (cell → area) pair named by a recommendation's `dma_impact` or
+   a story gap row is indexed, and a tile takes the area its own addressable
+   cells are filed under. An exact cell match answers first; where the run
+   states an area only for the cell's family (P4C3.4.5 against a stated
+   P4C3.4.1) the family answers ONLY if the whole family is filed under one
+   area, because a family split across two areas names nothing. A tile whose
+   cells resolve to no area scopes nothing, and the page says so rather than
+   showing another platform's recommendations under its name. The area is
+   printed under every heading it scopes, so a reader can see the join instead
+   of trusting it.
 
-   The two cannot be joined: the opportunity tile carries a vendor name and no
-   L3 area, and `platform_story.platforms[]` carries gaps and a story but — per
-   the connector contract — no platform name at all. Rather than guess a
-   pairing (a wrong vendor beside a recommendation is worse than none), each
-   surface renders what it states, and the platform story is filed under the L3
-   area ITS OWN GAP ROWS name.
+   The build before this one made the two grains two independent controls — a
+   tile row that expanded a breakdown, and below it a separate "PLATFORM AREA"
+   tab strip that scoped everything else. A tile click and the whole page
+   beneath it were on different axes, which reads as a dead control on the
+   page's most prominent row of cards.
    ═══════════════════════════════════════════════════════════════════════ */
 
 function pfNum(v) {
@@ -112,9 +116,122 @@ function PlatformEvChips({
   }));
 }
 
-/* The L3 platform areas this run promoted, in the order the roadmap reaches
-   them (earliest phase first). The area is the recommendation's own `l3_area`;
-   an area is never invented and never renamed. */
+/* The cell family a cell id belongs to — P4C3.4.5 → P4C3. Parsing the id is
+   not an inference: the catalogue's ids are built this way, and a string that
+   is not one yields null rather than a guessed prefix. */
+function cellFamilyOf(id) {
+  const m = /^(P\d+C\d+)/.exec(String(id || ""));
+  return m ? m[1] : null;
+}
+
+/* The catalogue's own name for a cell, from the workbook read.
+   The opportunity tiles state `name: null` for every addressable cell they
+   carry, so a tile that printed only what it states would list five bare ids.
+   The workbook row is the run's own scored cell, not an invented label, and a
+   cell the run did not score yields null so the caller falls back to the id. */
+function cellNameOf(index, id) {
+  const row = index && index.get ? index.get(String(id)) : null;
+  return row && row.name || null;
+}
+
+/* Every (cell → L3 area) pairing THE RUN STATES, indexed at two grains.
+   A recommendation files each cell of its `dma_impact` under its own
+   `l3_area`; a platform story gap row files its own cell under its `l3_area`.
+   Both are statements, so both are indexed; nothing else is.
+
+   The family index exists because the grains do not line up: a tile addresses
+   P4C3.4.5 while the recommendations and the story name P4C3.1.1, P4C3.1.2,
+   P4C3.2.1, P4C3.4.1 and P4C3.4.3. Reading only exact ids, no tile on this run
+   would resolve to any area and the page would scope nothing. A family answer
+   is weaker than an exact one, so it is used only where the family carries ONE
+   area — a family split across two areas answers nothing at all. */
+function cellAreaIndex(recs, storyPlatforms) {
+  const exact = new Map();
+  const family = new Map();
+  const add = (cell, area) => {
+    if (!cell || !area) return;
+    const id = String(cell);
+    if (!exact.has(id)) exact.set(id, new Set());
+    exact.get(id).add(area);
+    const fam = cellFamilyOf(id);
+    if (!fam) return;
+    if (!family.has(fam)) family.set(fam, new Set());
+    family.get(fam).add(area);
+  };
+  for (const r of recs || []) {
+    for (const im of r.dma_impact || []) add(im && im.subcap_id, r.l3);
+  }
+  for (const p of storyPlatforms || []) {
+    for (const g of p.gaps || []) add(g && g.subcap_id, g && g.l3_area);
+  }
+  return {
+    exact,
+    family
+  };
+}
+
+/* The area one cell is filed under, with the grain that answered.
+   `basis` travels with the answer so the surface can say whether the run filed
+   this exact cell or only its family. Ambiguity — two areas at either grain —
+   returns nothing, because a coin toss between two areas is the invented
+   mapping this index exists to avoid. */
+function areaOfCell(index, cellId) {
+  if (!index || !cellId) return null;
+  const exact = index.exact.get(String(cellId));
+  if (exact && exact.size === 1) return {
+    area: [...exact][0],
+    basis: "cell"
+  };
+  const fam = cellFamilyOf(cellId);
+  const byFam = fam ? index.family.get(fam) : null;
+  if (byFam && byFam.size === 1) return {
+    area: [...byFam][0],
+    basis: "family"
+  };
+  return null;
+}
+
+/* The area an opportunity tile scopes: the one its own addressable cells are
+   filed under most often. Ties resolve to nothing rather than to whichever
+   area Object.entries happened to order first. The vote counts come back with
+   the answer so the heading can state how strong the join is. */
+function areaOfTile(index, tile) {
+  const cells = tile && tile.addressable_cells || [];
+  const tally = new Map();
+  let exactVotes = 0;
+  for (const c of cells) {
+    const hit = areaOfCell(index, c && c.subcap_id);
+    if (!hit) continue;
+    tally.set(hit.area, (tally.get(hit.area) || 0) + 1);
+    if (hit.basis === "cell") exactVotes += 1;
+  }
+  if (!tally.size) return {
+    area: null,
+    votes: 0,
+    of: cells.length,
+    exact: 0
+  };
+  const ranked = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+  if (ranked.length > 1 && ranked[0][1] === ranked[1][1]) {
+    return {
+      area: null,
+      votes: 0,
+      of: cells.length,
+      exact: 0,
+      tied: true
+    };
+  }
+  return {
+    area: ranked[0][0],
+    votes: ranked[0][1],
+    of: cells.length,
+    exact: exactVotes
+  };
+}
+
+/* The L3 areas this run promoted, earliest roadmap phase first. Used only to
+   report what the tile row does NOT reach — an area carrying recommendations
+   that no promoted tile addresses would otherwise vanish from the page. */
 function platformAreasOf(recs, storyPlatforms) {
   const order = [];
   const seen = {};
@@ -132,13 +249,45 @@ function platformAreasOf(recs, storyPlatforms) {
     }
   };
   for (const r of recs || []) add(r.l3, r.phase);
-  // A platform story states its area only through its gap rows, so an area
-  // that has a story but no recommendation still gets a tab rather than
-  // leaving the story unreachable.
   for (const p of storyPlatforms || []) {
     for (const g of p.gaps || []) add(g.l3_area, null);
   }
   return order.slice().sort((a, b) => (pfNum(a.phase) === null ? 99 : Number(a.phase)) - (pfNum(b.phase) === null ? 99 : Number(b.phase))).map(x => x.area);
+}
+
+/* One place where the tile axis and the area axis meet, so the three surfaces
+   that need the join (the page, the ladder, the roadmap) compute it the same
+   way instead of three slightly different ways. Pure: it reads the promoted
+   sections through DMA and holds no state. */
+function platformScopeOf(entityId) {
+  const recs = DMA.recsFor(entityId) || [];
+  const story = DMA.platformStoryFor(entityId) || null;
+  const opportunity = DMA.opportunityFor(entityId) || null;
+  const storyPlatforms = story && story.platforms || [];
+  const index = cellAreaIndex(recs, storyPlatforms);
+  const tiles = (opportunity && opportunity.tiles || []).slice().sort((a, b) => (pfNum(a.rank) === null ? 99 : Number(a.rank)) - (pfNum(b.rank) === null ? 99 : Number(b.rank)));
+  const assign = new Map(); // tile key → {area, votes, of, exact}
+  const platformOfArea = new Map();
+  tiles.forEach((t, i) => {
+    const key = pfText(t.platform) || `tile-${i + 1}`;
+    const a = areaOfTile(index, t);
+    assign.set(key, a);
+    // First tile to claim an area owns it: the tiles arrive ranked, so the
+    // higher-ranked platform is the one a rung or a phase names.
+    if (a.area && !platformOfArea.has(a.area)) platformOfArea.set(a.area, key);
+  });
+  return {
+    recs,
+    story,
+    opportunity,
+    storyPlatforms,
+    tiles,
+    index,
+    assign,
+    platformOfArea,
+    areas: platformAreasOf(recs, storyPlatforms),
+    keyOf: (t, i) => pfText(t.platform) || `tile-${i + 1}`
+  };
 }
 
 /* One readiness row per DISTINCT prerequisite across the selected area's
@@ -220,74 +369,141 @@ function ClientPlatform({
     openSubcap,
     pushToast
   } = useApp();
-  const recs = DMA.recsFor(entity.id) || [];
-  const story = DMA.platformStoryFor(entity.id) || null;
-  const opportunity = DMA.opportunityFor(entity.id) || null;
-  const storyPlatforms = story && story.platforms || [];
-  const areas = platformAreasOf(recs, storyPlatforms);
+  const scope = platformScopeOf(entity.id);
+  const {
+    recs,
+    story,
+    opportunity,
+    storyPlatforms,
+    tiles,
+    index,
+    assign,
+    areas
+  } = scope;
+  const tileKeys = tiles.map((t, i) => scope.keyOf(t, i));
 
-  // The route parameter only wins if the run promoted that area; a stale link
-  // must not select a tab that does not exist and blank the page below.
-  const routeArea = route.params.platform && areas.includes(route.params.platform) ? route.params.platform : null;
-  const [areaSel, setAreaSel] = useState(routeArea);
-  const area = areaSel && areas.includes(areaSel) ? areaSel : areas[0] || null;
+  /* A route parameter selects a tile only where the run promoted that
+     platform: a stale link must not select a tile that does not exist and
+     blank every panel below it. Links written against the previous build
+     carry an L3 AREA rather than a platform name, so an area is accepted too
+     and resolves to the tile that scopes it. */
+  const routeParam = route.params.platform || null;
+  const routeKey = routeParam ? tileKeys.find(k => String(k).toLowerCase() === String(routeParam).toLowerCase()) || scope.platformOfArea.get(routeParam) || null : null;
+  const [pickedKey, setPickedKey] = useState(routeKey);
+  const selKey = tileKeys.includes(pickedKey) ? pickedKey : tileKeys[0] || null;
+  const tile = tileKeys.indexOf(selKey) >= 0 ? tiles[tileKeys.indexOf(selKey)] : null;
+  const assignment = assign.get(selKey) || {
+    area: null,
+    votes: 0,
+    of: 0,
+    exact: 0
+  };
+  const area = assignment.area;
   const [openPrereq, setOpenPrereq] = useState(null);
   const [openTile, setOpenTile] = useState(null);
+  const [openStarter, setOpenStarter] = useState(null);
+  const [showDiscarded, setShowDiscarded] = useState(false);
   useEffect(() => {
     setIpSurface("platform_story");
     setIpContext({
       entity,
-      platform: area
+      platform: selKey
     });
-  }, [area, entity?.id]);
-  const oss = entity.oss || {};
-  const tiles = (opportunity && opportunity.tiles || []).slice().sort((a, b) => (pfNum(a.rank) === null ? 99 : Number(a.rank)) - (pfNum(b.rank) === null ? 99 : Number(b.rank)));
-  const areaRecs = recs.filter(r => r.l3 === area).sort((a, b) => String(a.phase || "").localeCompare(String(b.phase || "")) || String(a.id).localeCompare(String(b.id)));
+  }, [selKey, entity?.id]);
 
-  // The promoted gap rows for this area, with the story that argues for them.
-  // Each row states its own cell, score, peer basis, L4 feature, catalogue path
-  // and evidence — none of which the old generic subcap scan carried.
-  const areaGaps = [];
-  const areaStories = [];
-  for (const p of storyPlatforms) {
-    const rows = (p.gaps || []).filter(g => g.l3_area === area);
-    if (!rows.length) continue;
-    areaGaps.push(...rows);
-    if (pfText(p.story_md)) areaStories.push(p.story_md);
-  }
-  // Only render the peer and gap columns when at least one row states a peer
-  // figure. Before, every row printed "−-2.5": a unary minus prepended to an
-  // already-negative difference, computed against a peer median that does not
-  // exist for these cells.
-  const anyPeer = areaGaps.some(g => pfNum(g.peer_score) !== null);
-
-  /* Which area a platform tile drives. The tiles rank PLATFORMS; everything
-     below the tiles is scoped by AREA — so a tile click expanded a breakdown
-     and left the whole page beneath it unchanged, which reads as a dead
-     control on the page's most prominent row of cards. The two axes do meet
-     in the story: each platform's gap rows name their own `l3_area`, so the
-     area a platform bears on most is a fact the run states rather than a
-     mapping invented here. A platform whose story names no area selects
-     nothing — the breakdown still opens, and nothing false is claimed. */
-  const areaForPlatform = name => {
-    const p = storyPlatforms.find(x => pfText(x.platform) === pfText(name));
-    if (!p) return null;
-    const tally = {};
-    for (const g of p.gaps || []) {
-      if (g.l3_area && areas.includes(g.l3_area)) {
-        tally[g.l3_area] = (tally[g.l3_area] || 0) + 1;
-      }
-    }
-    const best = Object.entries(tally).sort((a, b) => b[1] - a[1])[0];
-    return best ? best[0] : null;
+  /* Selecting a platform replaces every row beneath it, so a row left open on
+     the previous platform must not stay open at the same index in the new
+     list — that is how one prerequisite's detail ends up under another's. */
+  const selectTile = key => {
+    setPickedKey(key);
+    setOpenPrereq(null);
+    setOpenStarter(null);
   };
+
+  // The workbook read, indexed once. It answers for the catalogue's own cell
+  // name and pillar where a promoted row states neither — the tile's
+  // addressable cells carry `name: null` on every run seen so far.
+  const cellIndex = new Map((entity.subcaps || []).map(s => [String(s.id), s]));
+  const evidenceByCell = new Map();
+  for (const e of DMA.EVIDENCE || []) {
+    for (const sid of e.subcaps || []) {
+      const k = String(sid);
+      if (!evidenceByCell.has(k)) evidenceByCell.set(k, []);
+      evidenceByCell.get(k).push(e.id);
+    }
+  }
+  const areaRecs = recs.filter(r => area && r.l3 === area).sort((a, b) => String(a.phase || "").localeCompare(String(b.phase || "")) || String(a.id).localeCompare(String(b.id)));
+
+  /* The gap-to-platform mapping for the selected tile, from the two places the
+     run states one. The platform story's rows are richest — they carry the
+     cell's name, its pillar, the L4 feature, the catalogue path, a peer basis
+     and the evidence — so they lead; the tile's own addressable cells follow,
+     minus any the story already listed. Both are this platform's mapping, and
+     the card says how many came from each. */
+  const storyRows = [];
+  for (const p of storyPlatforms) {
+    for (const g of p.gaps || []) if (area && g && g.l3_area === area) storyRows.push(g);
+  }
+  const storySeen = new Set(storyRows.map(g => String(g.subcap_id)));
+  const tileCells = (tile && tile.addressable_cells || []).filter(c => c && !storySeen.has(String(c.subcap_id)));
+  const gapRows = [...storyRows.map(g => ({
+    key: `story:${g.subcap_id}`,
+    from: "story",
+    subcap_id: g.subcap_id,
+    name: g.name,
+    pillar: g.pillar,
+    current: pfNum(g.current_score),
+    peer: pfNum(g.peer_score),
+    peer_note: g.peer_note || null,
+    peer_basis: g.peer_basis || null,
+    feature: g.l4_feature,
+    path: g.catalogue_path,
+    e_ids: g.e_ids || []
+  })), ...tileCells.map(c => ({
+    key: `tile:${c.subcap_id}`,
+    from: "tile",
+    subcap_id: c.subcap_id,
+    name: c.name,
+    pillar: null,
+    current: pfNum(c.current),
+    peer: pfNum(c.peer),
+    peer_note: null,
+    peer_basis: null,
+    feature: c.feature_that_addresses_it,
+    path: null,
+    e_ids: []
+  }))];
+  // Only render the gap column where at least one row can state a difference.
+  // Before, every row printed "−-2.5": a unary minus prepended to an already
+  // negative difference, computed against a peer median that does not exist
+  // for these cells.
+  const anyPeer = gapRows.some(g => g.peer !== null);
   const prereqRows = areaPrereqs(areaRecs);
-  const starters = (DMA.startersFor ? DMA.startersFor(entity.id) || [] : []).slice().sort((a, b) => (pfNum(a.rank) === null ? 99 : Number(a.rank)) - (pfNum(b.rank) === null ? 99 : Number(b.rank)));
-  // "Why not X" — the platform page's own discarded list where it promoted one,
-  // otherwise the overview's. Never both merged: the two sections word the same
-  // decision differently and a merge would show one platform twice with
-  // conflicting reasons.
+
+  /* Conversation starters carry a named gap cell, and that cell is filed under
+     an L3 area by the same index the tiles are — so a starter belongs to a
+     platform on the same evidence everything else on this page does. A starter
+     that names no cell is scoped to nothing and shows under every platform,
+     because it makes no platform-specific claim. */
+  const allStarters = (DMA.startersFor ? DMA.startersFor(entity.id) || [] : []).slice().sort((a, b) => (pfNum(a.rank) === null ? 99 : Number(a.rank)) - (pfNum(b.rank) === null ? 99 : Number(b.rank)));
+  const starterArea = s => {
+    const hit = areaOfCell(index, s && s.named_gap_subcap_id);
+    return hit ? hit.area : null;
+  };
+  const starters = allStarters.filter(s => !s.named_gap_subcap_id || starterArea(s) === area);
+  const elsewhereStarters = allStarters.length - starters.length;
+
+  // "Why not X" — the platform page's own discarded list where it promoted
+  // one, otherwise the overview's. Never both merged: the two sections word
+  // the same decision differently and a merge would show one platform twice
+  // with conflicting reasons.
   const discarded = (story && story.discarded || []).length ? story.discarded : opportunity && opportunity.discarded || [];
+
+  // Areas the tile row cannot reach. A recommendation filed under one of these
+  // appears under no platform, so it is named rather than silently dropped.
+  const reachable = new Set([...assign.values()].map(a => a.area).filter(Boolean));
+  const orphanRecs = recs.filter(r => !r.l3 || !reachable.has(r.l3));
+  const scopeLine = area ? `${area} · the area this run files ${assignment.votes} of ${assignment.of} of this platform's cells under` : tile ? "This run files none of this platform's cells under an L3 area, so nothing below is scoped to it." : "No platform tile promoted for this run.";
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -308,58 +524,49 @@ function ClientPlatform({
       setIpSurface("platform_story");
       setIpContext({
         entity,
-        platform: area
+        platform: selKey
       });
       setIpOpen(true);
     }
-  }, "\u2726 Platform story"))), /*#__PURE__*/React.createElement("div", {
-    className: "card flush",
-    style: {
-      marginBottom: 16
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card-head"
-  }, /*#__PURE__*/React.createElement("h3", null, "Platform fit \xB7 ", tiles.length, " promoted"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-muted)"
-    }
-  }, "Composite read from the run, never re-ranked here")), /*#__PURE__*/React.createElement("div", {
-    className: "card-body"
-  }, tiles.length ? /*#__PURE__*/React.createElement("div", {
+  }, "\u2726 Platform story"))), tiles.length ?
+  /*#__PURE__*/
+  /* alignItems start: an expanded breakdown stretches its grid row, and
+     the collapsed tiles beside it grew to match, leaving a block of
+     empty card. */
+  React.createElement("div", {
     className: tiles.length === 5 ? "g5" : "g4",
     style: {
-      alignItems: "start"
+      alignItems: "start",
+      marginBottom: 16
     }
   }, tiles.map((t, i) => {
-    // Keyed by the PROMOTED platform string. The vendor-alias fold
-    // collapsed "Salesforce Data Cloud" and "Service Cloud
+    // Keyed by the PROMOTED platform string. The vendor-alias fold this
+    // replaced collapsed "Salesforce Data Cloud" and "Service Cloud
     // consolidation" onto one key and destroyed a tile.
-    const composite = oss[t.platform] != null ? pfNum(oss[t.platform]) : pfNum(t.composite);
-    const cells = (t.addressable_cells || []).length;
-    const isOpen = openTile === (t.platform || i);
+    const key = scope.keyOf(t, i);
+    const isSel = key === selKey;
+    const isOpen = openTile === key;
+    const a = assign.get(key) || {
+      area: null,
+      votes: 0,
+      of: 0
+    };
+    const cells = (t.addressable_cells || []).filter(Boolean);
+    const composite = pfNum(t.composite);
+    const tileRecs = a.area ? recs.filter(r => r.l3 === a.area).length : 0;
+    /* "Top:" names the cells this platform addresses, in the
+       catalogue's own words. The tile states `name: null` for every
+       one of them, so the name comes from the workbook read and the id
+       stands in where the run does not carry that cell. */
+    const top = cells.slice(0, 3).map(c => pfText(c.name) || cellNameOf(cellIndex, c.subcap_id) || pfText(c.subcap_id)).filter(Boolean);
     return /*#__PURE__*/React.createElement("div", {
-      key: t.platform || i,
+      key: key,
       className: "card-tile clickable",
-      onClick: () => {
-        const nowOpen = openTile !== (t.platform || i);
-        setOpenTile(nowOpen ? t.platform || i : null);
-        if (!nowOpen) return;
-        const a = areaForPlatform(t.platform);
-        if (a && a !== area) {
-          setAreaSel(a);
-          requestAnimationFrame(() => {
-            const el = document.getElementById("platform-area-detail");
-            if (el) el.scrollIntoView({
-              behavior: "smooth",
-              block: "start"
-            });
-          });
-        }
-      },
+      title: `Scope this page to ${key}`,
+      onClick: () => selectTile(key),
       style: {
-        border: isOpen ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)",
-        background: isOpen ? "var(--z-ice)" : "#fff"
+        border: isSel ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)",
+        background: isSel ? "var(--z-ice)" : "#fff"
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
@@ -373,23 +580,25 @@ function ClientPlatform({
         minWidth: 0
       }
     }, /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        gap: 5,
-        marginBottom: 2
-      }
-    }, t.rank != null ? /*#__PURE__*/React.createElement("span", {
-      className: "b b-purple"
-    }, "#", t.rank) : null, t.relevance != null ? /*#__PURE__*/React.createElement("span", {
-      className: "b b-muted f-mono",
-      title: "relevance to the assessed gaps"
-    }, Number(t.relevance).toFixed(2)) : null), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 12.5,
         fontWeight: 600,
         lineHeight: 1.3
       }
-    }, pfText(t.platform) || "Platform not named")), /*#__PURE__*/React.createElement("div", {
+    }, t.rank != null ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-purple",
+      style: {
+        marginRight: 5
+      }
+    }, "#", pfText(t.rank)) : null, pfText(t.platform) || "Platform not named"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9.5,
+        color: "var(--z-muted)",
+        marginTop: 2,
+        lineHeight: 1.4
+      },
+      className: "txt-fit-2"
+    }, a.area || "No L3 area stated for these cells")), /*#__PURE__*/React.createElement("div", {
       style: {
         textAlign: "right",
         flexShrink: 0
@@ -408,21 +617,26 @@ function ClientPlatform({
         color: "var(--z-muted)"
       }
     }, "/100 fit"))), /*#__PURE__*/React.createElement("div", {
+      className: "row",
       style: {
         marginTop: 10,
-        fontSize: 11
+        gap: 4,
+        fontSize: 11,
+        flexWrap: "wrap"
       }
     }, /*#__PURE__*/React.createElement("span", {
       className: "b b-org"
-    }, cells, " cell", cells === 1 ? "" : "s", " addressed")), t.their_stack_context ? /*#__PURE__*/React.createElement("div", {
+    }, cells.length, " cell", cells.length === 1 ? "" : "s"), a.area ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-muted"
+    }, tileRecs, " rec", tileRecs === 1 ? "" : "s") : null), top.length ? /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 10.5,
+        fontSize: 10,
         color: "var(--z-muted)",
         marginTop: 6,
-        lineHeight: 1.5
+        lineHeight: 1.45
       },
-      className: isOpen ? "" : "txt-fit-3"
-    }, pfText(t.their_stack_context)) : null, /*#__PURE__*/React.createElement("div", {
+      className: "txt-fit-2"
+    }, "Top: ", top.join(" · ")) : null, /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
         marginTop: 8,
@@ -431,16 +645,47 @@ function ClientPlatform({
       }
     }, /*#__PURE__*/React.createElement("span", {
       className: "spacer"
-    }), /*#__PURE__*/React.createElement("span", null, isOpen ? "hide breakdown" : "breakdown"), /*#__PURE__*/React.createElement(Icon, {
+    }), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-tertiary btn-sm",
+      style: {
+        color: "var(--z-mid)"
+      },
+      title: isOpen ? "Hide the composite breakdown" : "Show the composite breakdown",
+      onClick: ev => {
+        ev.stopPropagation();
+        setOpenTile(o => o === key ? null : key);
+      }
+    }, isOpen ? "Hide breakdown" : "Breakdown", /*#__PURE__*/React.createElement(Icon, {
       name: isOpen ? "chevron-u" : "chevron-d",
       size: 12
-    })), isOpen ? /*#__PURE__*/React.createElement("div", {
+    }))), isOpen ? /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 8,
         paddingTop: 8,
         borderTop: "1px solid var(--z-sep)"
       }
-    }, (t.factors || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    }, t.relevance != null ? /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 5,
+        marginBottom: 6
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "b b-muted f-mono",
+      title: "relevance to the assessed gaps"
+    }, Number(t.relevance).toFixed(2)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 9.5,
+        color: "var(--z-muted)"
+      }
+    }, "relevance")) : null, t.their_stack_context ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-body)",
+        marginBottom: 8,
+        lineHeight: 1.5
+      }
+    }, pfText(t.their_stack_context)) : null, (t.factors || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
       className: "eyebrow",
       style: {
         fontSize: 9,
@@ -486,7 +731,7 @@ function ClientPlatform({
         flexShrink: 0
       },
       title: "contribution to the composite"
-    }, "+", Number(f.contribution).toFixed(1)) : null))) : null, (t.addressable_cells || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    }, "+", Number(f.contribution).toFixed(1)) : null))) : null, cells.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
       className: "eyebrow",
       style: {
         fontSize: 9,
@@ -497,7 +742,7 @@ function ClientPlatform({
         display: "grid",
         gap: 4
       }
-    }, t.addressable_cells.map((c, j) => {
+    }, cells.map((c, j) => {
       const sid = pfText(c.subcap_id);
       return /*#__PURE__*/React.createElement("div", {
         key: j,
@@ -513,7 +758,7 @@ function ClientPlatform({
           fontSize: 9,
           flexShrink: 0
         },
-        title: `open ${sid} in the heatmap`,
+        title: `Open ${sid} in the heatmap`,
         onClick: ev => {
           ev.stopPropagation();
           openSubcap(sid);
@@ -537,121 +782,13 @@ function ClientPlatform({
       }
     }, pfText(t.rank_rationale)) : null) : null);
   })) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: "var(--z-muted)"
-    }
-  }, "The opportunity surface did not promote for this run, so no platform fit score is available."))), discarded.length ? /*#__PURE__*/React.createElement("div", {
-    className: "card",
-    style: {
-      marginBottom: 16
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      marginBottom: 10
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "filter",
-    size: 14
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13,
-      fontWeight: 600
-    }
-  }, "Considered and set aside \xB7 ", discarded.length), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10.5,
-      color: "var(--z-muted)"
-    }
-  }, "why the run did not lead with these")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gap: 7
-    }
-  }, discarded.map((x, i) =>
-  /*#__PURE__*/
-  /* The name column was a fixed 210px in a no-wrap row, so on a
-     narrow viewport the reason text was squeezed to a sliver
-     beside it. The row wraps: when the reason no longer fits at a
-     readable width it drops to its own full-width line. */
-  React.createElement("div", {
-    key: i,
-    className: "row",
-    style: {
-      gap: 10,
-      alignItems: "flex-start",
-      fontSize: 11.5,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 500,
-      color: "var(--z-dark)",
-      flex: "0 0 210px",
-      maxWidth: "100%",
-      lineHeight: 1.45
-    }
-  }, pfText(x.platform) || pfText(x.name) || "Platform not named"), x.relevance != null ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-muted f-mono",
-    style: {
-      flexShrink: 0
-    },
-    title: "relevance to the assessed gaps"
-  }, Number(x.relevance).toFixed(2)) : null, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: "var(--z-muted)",
-      flex: "1 1 240px",
-      minWidth: 0,
-      lineHeight: 1.5
-    }
-  }, pfText(x.reason) || pfText(x.why_not) || "No reason promoted."))))) : null, areas.length ? /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       marginBottom: 16,
-      padding: "12px 16px"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      gap: 10,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-muted)",
-      letterSpacing: ".06em",
-      textTransform: "uppercase",
-      fontWeight: 700
-    }
-  }, "Platform area"), /*#__PURE__*/React.createElement("div", {
-    className: "toggle-row",
-    style: {
-      flexWrap: "wrap"
-    }
-  }, areas.map(a =>
-  /*#__PURE__*/
-  /* The open readiness row is identified by its index in THIS
-     area's list, so it is closed on a switch rather than
-     expanding whatever row happens to land at that index. */
-  React.createElement("button", {
-    key: a,
-    className: a === area ? "on" : "",
-    onClick: () => {
-      setAreaSel(a);
-      setOpenPrereq(null);
-    }
-  }, a))), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10.5,
+      fontSize: 12,
       color: "var(--z-muted)"
     }
-  }, "The L3 area is the unit of recommendation"))) : null, /*#__PURE__*/React.createElement("div", {
+  }, "The opportunity surface did not promote for this run, so no platform fit score is available."), /*#__PURE__*/React.createElement("div", {
     id: "platform-area-detail",
     style: {
       display: "flex",
@@ -669,12 +806,29 @@ function ClientPlatform({
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
-  }, /*#__PURE__*/React.createElement("h3", null, "Gaps this area closes \xB7 ", area || "no area promoted"), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("h3", null, "Gap-to-platform mapping \xB7 ", selKey || "no platform promoted"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)",
+      marginTop: 2,
+      lineHeight: 1.45
+    }
+  }, scopeLine)), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
-      color: "var(--z-muted)"
+      color: "var(--z-muted)",
+      flexShrink: 0,
+      textAlign: "right"
     }
-  }, areaGaps.length, " promoted gap row", areaGaps.length === 1 ? "" : "s")), /*#__PURE__*/React.createElement("div", {
+  }, gapRows.length, " mapped cell", gapRows.length === 1 ? "" : "s", storyRows.length && tileCells.length ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5
+    }
+  }, storyRows.length, " from the story \xB7 ", tileCells.length, " from the tile") : null)), /*#__PURE__*/React.createElement("div", {
     className: "card-body",
     style: {
       padding: 0
@@ -700,18 +854,28 @@ function ClientPlatform({
     style: {
       whiteSpace: "nowrap"
     }
-  }, anyPeer ? "Peer" : "Peer basis"), anyPeer ? /*#__PURE__*/React.createElement("th", {
+  }, "Peer"), anyPeer ? /*#__PURE__*/React.createElement("th", {
     style: {
       whiteSpace: "nowrap"
     }
-  }, "Gap") : null, /*#__PURE__*/React.createElement("th", null, "L4 feature"), /*#__PURE__*/React.createElement("th", null, "Evidence"))), /*#__PURE__*/React.createElement("tbody", null, areaGaps.map((g, i) => {
-    const cur = pfNum(g.current_score);
-    const peer = pfNum(g.peer_score);
+  }, "Gap") : null, /*#__PURE__*/React.createElement("th", null, "Feature / L4"), /*#__PURE__*/React.createElement("th", null, "Evidence"))), /*#__PURE__*/React.createElement("tbody", null, gapRows.map(g => {
+    const wb = cellIndex.get(String(g.subcap_id)) || null;
+    const name = pfText(g.name) || wb && wb.name || pfText(g.subcap_id);
+    const pillar = pfText(g.pillar) || wb && wb.pillar || (/^(P\d+)/.exec(String(g.subcap_id || "")) || [])[1] || null;
+    const cur = g.current !== null ? g.current : wb ? pfNum(wb.score) : null;
+    const peer = g.peer !== null ? g.peer : wb ? pfNum(wb.peerMedian) : null;
     // Computed-or-null: a delta exists only where both figures do,
     // and it carries its own sign — no minus is prepended.
     const delta = cur !== null && peer !== null ? Math.round((cur - peer) * 100) / 100 : null;
+    const eids = g.e_ids.length ? g.e_ids : (evidenceByCell.get(String(g.subcap_id)) || []).slice(0, 3);
+    /* Every peer figure on this run is absent with a stated
+       reason, so the column shows an em dash and carries the
+       reason in its tooltip — never the words "cannot estimate"
+       as a chip on all five rows, which reads as a verdict on the
+       platform rather than on the peer set. */
+    const peerWhy = pfText(g.peer_note) || (g.peer_basis ? String(g.peer_basis).replace(/_/g, " ") : wb && wb.peer_basis ? String(wb.peer_basis).replace(/_/g, " ") : "No peer figure is stated for this cell");
     return /*#__PURE__*/React.createElement("tr", {
-      key: g.subcap_id || i
+      key: g.key
     }, /*#__PURE__*/React.createElement("td", {
       "data-label": "Cell"
     }, /*#__PURE__*/React.createElement("div", {
@@ -719,7 +883,7 @@ function ClientPlatform({
         fontSize: 12,
         fontWeight: 500
       }
-    }, pfText(g.name) || g.subcap_id), /*#__PURE__*/React.createElement("div", {
+    }, name), /*#__PURE__*/React.createElement("div", {
       className: "f-mono",
       style: {
         fontSize: 10,
@@ -727,15 +891,15 @@ function ClientPlatform({
       }
     }, pfText(g.subcap_id))), /*#__PURE__*/React.createElement("td", {
       "data-label": "Pillar"
-    }, g.pillar ? /*#__PURE__*/React.createElement("span", {
+    }, pillar ? /*#__PURE__*/React.createElement("span", {
       className: "b b-purple"
-    }, pfText(g.pillar)) : /*#__PURE__*/React.createElement("span", {
+    }, pillar) : /*#__PURE__*/React.createElement("span", {
       className: "chip muted"
     }, "\u2014")), /*#__PURE__*/React.createElement("td", {
       "data-label": "Score"
     }, /*#__PURE__*/React.createElement(MaturityChip, {
       score: cur
-    })), anyPeer ? /*#__PURE__*/React.createElement("td", {
+    })), /*#__PURE__*/React.createElement("td", {
       "data-label": "Peer"
     }, peer !== null ? /*#__PURE__*/React.createElement(MaturityChip, {
       score: peer
@@ -743,54 +907,37 @@ function ClientPlatform({
       style: {
         color: "var(--z-muted)"
       },
-      title: pfText(g.peer_note) || String(g.peer_basis || "").replace(/_/g, " ")
-    }, "\u2014")) :
-    /*#__PURE__*/
-    /* Every row here states cannot_estimate with a note
-       explaining why. That is the answer, so it is what the
-       column shows — the old table printed "-". */
-    React.createElement("td", {
-      "data-label": "Peer basis"
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: "var(--z-muted)"
-      },
-      title: pfText(g.peer_note) || String(g.peer_basis || "").replace(/_/g, " ")
+      title: peerWhy
     }, "\u2014")), anyPeer ? /*#__PURE__*/React.createElement("td", {
       "data-label": "Gap"
     }, delta === null ? /*#__PURE__*/React.createElement("span", {
       style: {
         color: "var(--z-muted)"
-      }
+      },
+      title: peerWhy
     }, "\u2014") : /*#__PURE__*/React.createElement("span", {
       className: "f-mono",
       style: {
         color: delta < 0 ? "var(--z-below)" : "var(--z-above)"
       }
     }, delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1))) : null, /*#__PURE__*/React.createElement("td", {
-      "data-label": "L4 feature"
+      "data-label": "Feature / L4",
+      title: pfText(g.path) || ""
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11.5,
         color: "var(--z-dark)"
       }
-    }, pfText(g.l4_feature) || "—"), g.catalogue_path ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9.5,
-        color: "var(--z-muted)",
-        marginTop: 3,
-        lineHeight: 1.4
-      }
-    }, pfText(g.catalogue_path)) : null), /*#__PURE__*/React.createElement("td", {
+    }, pfText(g.feature) || "—")), /*#__PURE__*/React.createElement("td", {
       "data-label": "Evidence"
     }, /*#__PURE__*/React.createElement(PlatformEvChips, {
-      ids: g.e_ids,
+      ids: eids,
       openEvidence: openEvidence
     })));
-  }), areaGaps.length === 0 ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
+  }), gapRows.length === 0 ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
     colSpan: anyPeer ? 7 : 6,
     className: "tbl-empty"
-  }, storyPlatforms.length ? `The platform story promoted gap rows for ${storyPlatforms.length} platform${storyPlatforms.length === 1 ? "" : "s"}, none of them in ${area || "this area"}.` : "No platform story promoted for this run, so no gap rows are available.")) : null))), areaStories.map((s, i) => /*#__PURE__*/React.createElement("div", {
+  }, tiles.length ? "This tile promoted no addressable cell, and no platform story gap row is filed under its area." : "No platform story promoted for this run, so no gap row is available.")) : null))), storyRows.length ? storyPlatforms.map((p, i) => (p.gaps || []).some(g => g && g.l3_area === area) && pfText(p.story_md) ? /*#__PURE__*/React.createElement("div", {
     key: i,
     style: {
       padding: "12px 18px",
@@ -805,7 +952,7 @@ function ClientPlatform({
       fontSize: 9.5,
       marginBottom: 5
     }
-  }, "What this platform changes"), pfText(s))))), /*#__PURE__*/React.createElement("div", {
+  }, "What this platform changes"), pfText(p.story_md)) : null) : null)), /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       flex: "1 1 300px",
@@ -815,7 +962,8 @@ function ClientPlatform({
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
-      marginBottom: 12
+      marginBottom: 10,
+      gap: 6
     }
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "shield",
@@ -826,32 +974,91 @@ function ClientPlatform({
       fontWeight: 600,
       flex: 1,
       minWidth: 0
-    }
-  }, "Readiness"), /*#__PURE__*/React.createElement("span", {
+    },
+    className: "txt-fit-1"
+  }, "Readiness \xB7 ", selKey || "no platform"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)",
       flexShrink: 0
     }
-  }, prereqRows.length, " prerequisite", prereqRows.length === 1 ? "" : "s")), prereqRows.map((p, idx) => {
+  }, "click a row to drill in")), prereqRows.map((p, idx) => {
     const v = prereqVerdict(p);
+    const isOpen = openPrereq === idx;
     if (p.kind === "condition") {
       /* A text condition has no cell, no minimum and no current value,
-         so it gets its own row shape. It used to render the SAME string
-         twice — once as a 317px badge, once as a name span flexed to
-         0px beside it, which wrapped to one character per line and
-         produced an 8px-wide, 900px-tall column of letters. */
+         so it gets its own row shape — but the SAME height as a
+         threshold row. It used to render the condition as a 317px
+         badge, its note and its recommendation chips all at once, three
+         stacked blocks per row in a 300px column. */
       return /*#__PURE__*/React.createElement("div", {
         key: p.key,
         style: {
-          borderBottom: "1px solid var(--z-sep)",
+          borderBottom: "1px solid var(--z-sep)"
+        }
+      }, /*#__PURE__*/React.createElement("button", {
+        onClick: () => setOpenPrereq(o => o === idx ? null : idx),
+        title: pfText(p.condition) || "",
+        style: {
+          width: "100%",
+          background: "none",
+          border: 0,
+          cursor: "pointer",
+          textAlign: "left",
           padding: "10px 0"
         }
       }, /*#__PURE__*/React.createElement("div", {
         className: "row",
         style: {
-          gap: 6,
+          gap: 6
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "b b-muted",
+        style: {
+          flexShrink: 0
+        }
+      }, "Condition"), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 12,
+          flex: 1,
+          minWidth: 0
+        },
+        className: "txt-fit-1"
+      }, pfText(p.condition)), p.basis ? /*#__PURE__*/React.createElement("span", {
+        className: "b b-above",
+        style: {
+          flexShrink: 0
+        }
+      }, pfText(p.basis)) : null, /*#__PURE__*/React.createElement(Icon, {
+        name: isOpen ? "chevron-u" : "chevron-d",
+        size: 13,
+        style: {
+          color: "var(--z-muted)",
+          flexShrink: 0
+        }
+      }))), isOpen ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          padding: "0 0 12px"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11.5,
+          color: "var(--z-dark)",
+          lineHeight: 1.5,
           marginBottom: 4
+        }
+      }, pfText(p.condition)), p.note ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11,
+          color: "var(--z-muted)",
+          marginBottom: 5,
+          lineHeight: 1.5
+        }
+      }, pfText(p.note)) : null, /*#__PURE__*/React.createElement("div", {
+        className: "row",
+        style: {
+          gap: 4,
+          flexWrap: "wrap"
         }
       }, /*#__PURE__*/React.createElement("span", {
         style: {
@@ -860,31 +1067,7 @@ function ClientPlatform({
           letterSpacing: ".06em",
           textTransform: "uppercase"
         }
-      }, "Condition"), /*#__PURE__*/React.createElement("span", {
-        className: "spacer"
-      }), p.basis ? /*#__PURE__*/React.createElement("span", {
-        className: "b b-muted"
-      }, pfText(p.basis)) : null), /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontSize: 12,
-          color: "var(--z-dark)",
-          lineHeight: 1.5
-        }
-      }, pfText(p.condition)), p.note ? /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontSize: 11,
-          color: "var(--z-muted)",
-          marginTop: 4,
-          lineHeight: 1.5
-        }
-      }, pfText(p.note)) : null, /*#__PURE__*/React.createElement("div", {
-        className: "row",
-        style: {
-          gap: 4,
-          marginTop: 5,
-          flexWrap: "wrap"
-        }
-      }, p.recs.map(rid => /*#__PURE__*/React.createElement("button", {
+      }, "Required by"), p.recs.map(rid => /*#__PURE__*/React.createElement("button", {
         key: rid,
         className: "chip",
         style: {
@@ -893,13 +1076,13 @@ function ClientPlatform({
         },
         title: `Open ${rid}`,
         onClick: () => openRec(rid)
-      }, rid))));
+      }, rid)))) : null);
     }
     // Cell threshold. Keyed by index so two thresholds on the same cell
     // cannot share an open state.
-    const isOpen = openPrereq === idx;
-    const subs = (entity.subcaps || []).filter(s => s.id.startsWith(`${p.cell}.`));
-    const ev = (DMA.EVIDENCE || []).filter(e => e.subcaps && e.subcaps.some(sid => String(sid).startsWith(`${p.cell}.`)));
+    const cat = p.cell ? DMA.getCategory(p.cell) : null;
+    const subs = (entity.subcaps || []).filter(s => String(s.id).startsWith(`${p.cell}.`));
+    const ev = (DMA.EVIDENCE || []).filter(e => (e.subcaps || []).some(sid => String(sid).startsWith(`${p.cell}.`)));
     const pct = p.min !== null && p.current !== null && p.min > 0 ? Math.max(0, Math.min(100, p.current / p.min * 100)) : null;
     return /*#__PURE__*/React.createElement("div", {
       key: p.key,
@@ -923,29 +1106,36 @@ function ClientPlatform({
         gap: 6
       }
     }, /*#__PURE__*/React.createElement("span", {
-      className: "b b-purple"
-    }, pfText(p.cell)), /*#__PURE__*/React.createElement("span", {
-      className: "f-mono",
+      className: "b b-purple",
       style: {
-        fontSize: 11.5,
+        flexShrink: 0
+      }
+    }, pfText(p.cell)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
         flex: 1,
         minWidth: 0
-      }
-    }, p.min === null ? "threshold not stated" : `≥ ${p.min.toFixed(1)}`), v ? /*#__PURE__*/React.createElement("span", {
+      },
+      className: "txt-fit-1"
+    }, cat && cat.name || (p.min === null ? "Threshold not stated" : `Threshold ≥ ${p.min.toFixed(1)}`)), v ? /*#__PURE__*/React.createElement("span", {
       className: `b ${v.met ? "b-above" : "b-org"}`,
+      style: {
+        flexShrink: 0
+      },
       title: v.computed ? "computed from the stated minimum and current value" : "verdict as promoted"
     }, v.text) : null, /*#__PURE__*/React.createElement(Icon, {
       name: isOpen ? "chevron-u" : "chevron-d",
       size: 13,
       style: {
-        color: "var(--z-muted)"
+        color: "var(--z-muted)",
+        flexShrink: 0
       }
     })), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
         color: "var(--z-muted)"
       }
-    }, "Current ", p.current === null ? "not stated" : p.current.toFixed(2), " \xB7 ", subs.length, " cells \xB7 ", ev.length, " evidence"), pct !== null ? /*#__PURE__*/React.createElement("div", {
+    }, p.min === null ? "Min not stated" : `Min ${p.min.toFixed(1)}`, " \xB7 ", p.current === null ? "current not stated" : `Current ${p.current.toFixed(2)}`, " \xB7 ", subs.length, " cells \xB7 ", ev.length, " evidence"), pct !== null ? /*#__PURE__*/React.createElement("div", {
       className: "prog",
       style: {
         marginTop: 4,
@@ -1046,7 +1236,7 @@ function ClientPlatform({
       fontSize: 12,
       color: "var(--z-muted)"
     }
-  }, areaRecs.length ? "No prerequisites promoted for this area's recommendations." : "No recommendation promoted for this area, so no readiness gate applies.") : null, prereqRows.some(p => {
+  }, areaRecs.length ? "No prerequisite promoted for this platform's recommendations." : "No recommendation is scoped to this platform, so no readiness gate applies.") : null, prereqRows.some(p => {
     const v = prereqVerdict(p);
     return v && !v.met;
   }) ? /*#__PURE__*/React.createElement("div", {
@@ -1061,7 +1251,7 @@ function ClientPlatform({
     className: "co-title"
   }, "Advisory"), /*#__PURE__*/React.createElement("div", {
     className: "co-body"
-  }, "A threshold in this area is not met. The unmet prerequisite is the conversation that comes first."))) : null)), /*#__PURE__*/React.createElement("div", {
+  }, "A threshold here is not met. The unmet prerequisite is the conversation that comes first."))) : null)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
@@ -1072,10 +1262,21 @@ function ClientPlatform({
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
-  }, /*#__PURE__*/React.createElement("h3", null, "Recommendations \xB7 ", area || "no area promoted"), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("h3", null, "Recommendations \xB7 ", selKey || "no platform promoted"), area ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)",
+      marginTop: 2
+    }
+  }, area) : null), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
-      color: "var(--z-muted)"
+      color: "var(--z-muted)",
+      flexShrink: 0
     }
   }, areaRecs.length, " of ", recs.length, " promoted")), /*#__PURE__*/React.createElement("div", null, areaRecs.map(r => {
     const gate = r.validation_gate || null;
@@ -1201,18 +1402,39 @@ function ClientPlatform({
     }, "Target \xB7 ", pfText(kpi.target)) : null) : null));
   }), areaRecs.length === 0 ? /*#__PURE__*/React.createElement("div", {
     className: "empty"
-  }, recs.length ? /*#__PURE__*/React.createElement("p", null, "No recommendation promoted for ", area, ". ", recs.length, " promoted across the other areas.") : /*#__PURE__*/React.createElement("p", null, "No recommendation promoted in this run.")) : null, recs.some(r => !r.l3) ? /*#__PURE__*/React.createElement("div", {
+  }, recs.length ? /*#__PURE__*/React.createElement("p", null, "No recommendation is scoped to ", selKey || "this platform", ". ", recs.length, " promoted across the other platform areas.") : /*#__PURE__*/React.createElement("p", null, "No recommendation promoted in this run.")) : null, orphanRecs.length ? /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "10px 18px",
       fontSize: 11,
       color: "var(--z-muted)",
-      borderTop: "1px solid var(--z-sep)"
+      borderTop: "1px solid var(--z-sep)",
+      lineHeight: 1.6
     }
-  }, recs.filter(r => !r.l3).length, " promoted recommendation", recs.filter(r => !r.l3).length === 1 ? "" : "s", " state no platform area and appear under no tab: ", recs.filter(r => !r.l3).map(r => r.id).join(" · ")) : null)), /*#__PURE__*/React.createElement("div", {
+  }, orphanRecs.length, " promoted recommendation", orphanRecs.length === 1 ? "" : "s", " sit", orphanRecs.length === 1 ? "s" : "", " in an area no promoted platform addresses:", " ", orphanRecs.map(r => /*#__PURE__*/React.createElement("button", {
+    key: r.id,
+    className: "chip",
+    style: {
+      cursor: "pointer",
+      border: 0,
+      marginRight: 4
+    },
+    title: `${r.id} · ${pfText(r.l3) || "no area stated"}`,
+    onClick: () => openRec(r.id)
+  }, r.id))) : null)), /*#__PURE__*/React.createElement("div", {
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
-  }, /*#__PURE__*/React.createElement("h3", null, "Conversation starters \xB7 ", starters.length), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("h3", null, "Conversation starters \xB7 ", starters.length), area ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)",
+      marginTop: 2
+    }
+  }, selKey) : null), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => {
       const text = starters.map((s, i) => {
@@ -1233,111 +1455,230 @@ function ClientPlatform({
     style: {
       padding: 14
     }
-  }, starters.map((s, i) => /*#__PURE__*/React.createElement("div", {
-    key: s.rank != null ? `r${s.rank}` : i,
-    style: {
-      padding: 10,
-      marginBottom: 8,
-      background: "var(--ph0-lt)",
-      border: "1px solid var(--ph0-bd)",
-      borderRadius: 8
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      marginBottom: 6,
-      gap: 6
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "b b-purple"
-  }, "#", s.rank != null ? s.rank : i + 1), s.opens_on ? /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-dpur)"
-    }
-  }, "opens on ", String(s.opens_on).replace(/_/g, " ")) : null, s.named_gap_subcap_id ? /*#__PURE__*/React.createElement("button", {
-    className: "chip f-mono",
-    style: {
-      fontSize: 9
-    },
-    title: `the gap this starter names — open ${pfText(s.named_gap_subcap_id)} in the heatmap`,
-    onClick: () => openSubcap(pfText(s.named_gap_subcap_id))
-  }, pfText(s.named_gap_subcap_id)) : null, /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-tertiary btn-sm",
-    style: {
-      color: "var(--z-dpur)"
-    },
-    onClick: () => {
-      const one = [pfText(s.text), s.followup_question ? `Follow-up: ${pfText(s.followup_question)}` : null].filter(Boolean).join("\n");
-      try {
-        navigator.clipboard.writeText(one);
-        pushToast("Conversation starter copied", "success");
-      } catch (e) {
-        pushToast("Couldn't access clipboard", "warn");
+  }, starters.map((s, i) => {
+    const key = s.rank != null ? `r${s.rank}` : `i${i}`;
+    const isOpen = openStarter === key;
+    const extras = [s.their_system_reference, s.peer_reference, s.followup_question].filter(Boolean).length + ((s.e_ids || []).length ? 1 : 0);
+    return /*#__PURE__*/React.createElement("div", {
+      key: key,
+      style: {
+        padding: 10,
+        marginBottom: 8,
+        background: "var(--ph0-lt)",
+        border: "1px solid var(--ph0-bd)",
+        borderRadius: 8
       }
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "copy",
-    size: 11
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: "#3B0764",
-      lineHeight: 1.6
-    }
-  }, pfText(s.text)), s.their_system_reference ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-dpur)",
-      marginTop: 6,
-      lineHeight: 1.5
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      letterSpacing: ".06em",
-      textTransform: "uppercase",
-      opacity: .75
-    }
-  }, "Their system \xB7 "), pfText(s.their_system_reference)) : null, s.peer_reference ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-dpur)",
-      marginTop: 4,
-      lineHeight: 1.5
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      letterSpacing: ".06em",
-      textTransform: "uppercase",
-      opacity: .75
-    }
-  }, "Peer \xB7 "), pfText(s.peer_reference)) : null, s.followup_question ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11.5,
-      color: "#3B0764",
-      marginTop: 6,
-      lineHeight: 1.55,
-      paddingLeft: 8,
-      borderLeft: "2px solid var(--ph0-bd)"
-    }
-  }, pfText(s.followup_question)) : null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 6
-    }
-  }, /*#__PURE__*/React.createElement(PlatformEvChips, {
-    ids: s.e_ids,
-    openEvidence: openEvidence,
-    label: "cites"
-  })))), starters.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        marginBottom: 6,
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "b b-purple",
+      style: {
+        flexShrink: 0
+      }
+    }, "#", s.rank != null ? s.rank : i + 1), s.opens_on ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: "var(--z-dpur)",
+        flexShrink: 0
+      }
+    }, "opens on ", String(s.opens_on).replace(/_/g, " ")) : null, s.named_gap_subcap_id ? /*#__PURE__*/React.createElement("button", {
+      className: "chip f-mono",
+      style: {
+        fontSize: 9,
+        flexShrink: 0
+      },
+      title: `The gap this starter names — open ${pfText(s.named_gap_subcap_id)} in the heatmap`,
+      onClick: () => openSubcap(pfText(s.named_gap_subcap_id))
+    }, pfText(s.named_gap_subcap_id)) : null, /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-tertiary btn-sm",
+      style: {
+        color: "var(--z-dpur)"
+      },
+      title: "Copy this starter",
+      onClick: () => {
+        const one = [pfText(s.text), s.followup_question ? `Follow-up: ${pfText(s.followup_question)}` : null].filter(Boolean).join("\n");
+        try {
+          navigator.clipboard.writeText(one);
+          pushToast("Conversation starter copied", "success");
+        } catch (e) {
+          pushToast("Couldn't access clipboard", "warn");
+        }
+      }
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "copy",
+      size: 11
+    }))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: "#3B0764",
+        lineHeight: 1.6
+      },
+      className: isOpen ? "" : "txt-fit-3",
+      title: isOpen ? "" : pfText(s.text) || ""
+    }, pfText(s.text)), isOpen ? /*#__PURE__*/React.createElement(React.Fragment, null, s.their_system_reference ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-dpur)",
+        marginTop: 6,
+        lineHeight: 1.5
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 9,
+        letterSpacing: ".06em",
+        textTransform: "uppercase",
+        opacity: .75
+      }
+    }, "Their system \xB7 "), pfText(s.their_system_reference)) : null, s.peer_reference ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-dpur)",
+        marginTop: 4,
+        lineHeight: 1.5
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 9,
+        letterSpacing: ".06em",
+        textTransform: "uppercase",
+        opacity: .75
+      }
+    }, "Peer \xB7 "), pfText(s.peer_reference)) : null, s.followup_question ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: "#3B0764",
+        marginTop: 6,
+        lineHeight: 1.55,
+        paddingLeft: 8,
+        borderLeft: "2px solid var(--ph0-bd)"
+      }
+    }, pfText(s.followup_question)) : null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 6
+      }
+    }, /*#__PURE__*/React.createElement(PlatformEvChips, {
+      ids: s.e_ids,
+      openEvidence: openEvidence,
+      label: "cites"
+    }))) : null, extras ? /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        marginTop: 4
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-tertiary btn-sm",
+      style: {
+        color: "var(--z-dpur)",
+        fontSize: 10
+      },
+      onClick: () => setOpenStarter(o => o === key ? null : key)
+    }, isOpen ? "Less" : `More · ${extras}`, /*#__PURE__*/React.createElement(Icon, {
+      name: isOpen ? "chevron-u" : "chevron-d",
+      size: 11
+    }))) : null);
+  }), starters.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: "var(--z-muted)"
     }
-  }, "No conversation starter promoted for this run.") : null))), /*#__PURE__*/React.createElement(StairstepCurve, {
+  }, allStarters.length ? `No conversation starter names a cell in this platform's area. ${allStarters.length} promoted across the other areas.` : "No conversation starter promoted for this run.") : null, starters.length && elsewhereStarters ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)",
+      lineHeight: 1.5
+    }
+  }, elsewhereStarters, " further starter", elsewhereStarters === 1 ? "" : "s", " name a cell in another platform's area.") : null))), discarded.length ? /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowDiscarded(v => !v),
+    style: {
+      width: "100%",
+      background: "none",
+      border: 0,
+      cursor: "pointer",
+      textAlign: "left",
+      padding: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "filter",
+    size: 14
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600
+    }
+  }, "Considered and set aside \xB7 ", discarded.length), /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)"
+    }
+  }, "why the run did not lead with these"), /*#__PURE__*/React.createElement(Icon, {
+    name: showDiscarded ? "chevron-u" : "chevron-d",
+    size: 13,
+    style: {
+      color: "var(--z-muted)"
+    }
+  }))), showDiscarded ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 7,
+      marginTop: 10
+    }
+  }, discarded.map((x, i) =>
+  /*#__PURE__*/
+  /* The name column was a fixed 210px in a no-wrap row, so on a
+     narrow viewport the reason text was squeezed to a sliver
+     beside it. The row wraps: when the reason no longer fits at a
+     readable width it drops to its own full-width line. */
+  React.createElement("div", {
+    key: i,
+    className: "row",
+    style: {
+      gap: 10,
+      alignItems: "flex-start",
+      fontSize: 11.5,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 500,
+      color: "var(--z-dark)",
+      flex: "0 0 210px",
+      maxWidth: "100%",
+      lineHeight: 1.45
+    }
+  }, pfText(x.platform) || pfText(x.name) || "Platform not named"), x.relevance != null ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted f-mono",
+    style: {
+      flexShrink: 0
+    },
+    title: "relevance to the assessed gaps"
+  }, Number(x.relevance).toFixed(2)) : null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)",
+      flex: "1 1 240px",
+      minWidth: 0,
+      lineHeight: 1.5
+    }
+  }, pfText(x.reason) || pfText(x.why_not) || "No reason promoted.")))) : null) : null, /*#__PURE__*/React.createElement(StairstepCurve, {
     entity: entity
   }), /*#__PURE__*/React.createElement(TransformationRoadmap, {
     entity: entity
