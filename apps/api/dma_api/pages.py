@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from .redaction import page_forbidden, redact_section
 from .serving_spec import page_sections, readers, assemble
+from .value_chain import serve_value_chain
 
 AUDIENCES = ("internal", "customer")
 
@@ -124,6 +125,17 @@ def build_page(cur, page: str, display_id: str, audience: str = "internal",
             continue
         rows = _rows(cur, r["table"], run_meta["run_id"])
         built = assemble(page, section, rows)
+        if page == "heatmap" and section == "value_chain":
+            # H9 is SERVER-DERIVED: its contract is `fields: {}` and the
+            # Backend Schema derives it by joining ccg_value_chains to
+            # ccg_vc_mapping against the run's served cells. The promoted
+            # row contributes only its envelope (the normal promote writes
+            # envelope-only for this section); the arrangement is computed
+            # here whether or not that row exists, and the empty state
+            # names what was searched when the catalogue has none.
+            out_sections[section] = serve_value_chain(
+                cur, entity, run_meta, built, audience)
+            continue
         if built is None:
             # A section with no serving row did not promote. Reported as an
             # explicit state rather than an empty object: blank and broken
