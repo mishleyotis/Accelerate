@@ -87,3 +87,16 @@ assessment that already knows where it is weak should not have to be re-diagnose
 **A folder name is the weakest signal.** Client folders are named by humans and the observed
 set already varies — "- DMA", "- Claude DMA", "- Twilio DMA", "- DMA v2". That version
 suffix is a human note about a rerun, not a catalogue version, and must not be read as one.
+
+**The sub-vertical is the highest-consequence of these signals**, because it decides which
+catalogue cells the run may serve as well as which regulator vocabulary and metric set
+apply. The workbook scores the whole catalogue including other sub-verticals' variant cells,
+so a run whose sub-vertical you did not establish is a run that will cite cells the app
+never renders. Take it from the manifest, confirm it against the entity profile's charter
+and regulator, and write it down at the vet step —
+`01-start-here/6-entity-shape.md` for what follows from it.
+
+Establish the entity's **ownership shape** in the same pass. Whether it files with a
+securities regulator, files a call report, or files nothing at all decides which enrichment
+ladders can possibly return anything, and it is the difference between an honest empty state
+and a ladder that was run correctly against routes this entity does not have.

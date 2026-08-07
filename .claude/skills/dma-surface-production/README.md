@@ -18,6 +18,7 @@ SKILL.md          the router — read this first
   3-language            every gap stated as available value
   4-absence-protocol    never say no until a documented ladder has failed
   5-colour-and-bands    what the payload may and may not carry about colour
+  6-entity-shape        sub-vertical · size tier · ownership · brands
 
 02-inputs/        where the material comes from
   1-package             the 15-folder assessment tree, and which artefact wins

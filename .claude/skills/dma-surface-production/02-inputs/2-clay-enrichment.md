@@ -25,7 +25,7 @@ the score.
 | Data point | Tier | Why |
 |---|---|---|
 | `Tech Stack` | **T1** | A machine technographic scan is T1, never T4. Filing it at T4 caps the capability at L2.5 and silently suppresses the score — the commonest misclassification in the corpus. |
-| `Annual Revenue`, `Latest Funding` | T1–T2 | Filings and disclosures |
+| `Annual Revenue`, `Latest Funding` | T1–T2 **when a filing is behind it** | Filings and disclosures. For an entity that files nothing, this value is usually **modelled** and has no traceable source — that is an inference, not a T1 fact, and the tier follows the source as it does everywhere else |
 | `Open Jobs` | T2–T3 | The posting is first-party; the aggregator is not |
 | `Find Thought Leadership` | T2–T3 | T2 for a first-party publication or named conference; T3 for trade press |
 | `Recent News` | T3 | Third-party analysis |
@@ -61,6 +61,18 @@ STEP 1 — RESOLVE THE COMPANY
   The domain comes from 01_evidence/entity_profile/, never from a guess. A wrong domain
   produces a real company's data attached to the wrong entity — the contamination class
   the identity gate exists to catch.
+
+  **Where the entity has more than one domain, which one you resolve on changes the
+  answer.** Many institutions run a corporate domain and one or more brand domains, and a
+  group may run a separate site for its holding entity and its operating one. Resolve on the
+  domain the entity's own registry record or filings use, check the returned legal name
+  against it, and record the others as aliases rather than resolving each in turn.
+
+  This matters most for the technographic scan, which reads the surfaces it can reach. A
+  scan of a brand domain is evidence about **that brand's** estate — its marketing stack,
+  its login subdomain, its app bundle — and on a multi-brand institution that is not the
+  enterprise's stack. Register the finding with the brand named, and never let a
+  brand-domain scan become the enterprise's register row without a second source saying so.
 
 STEP 2 — COMPANY DATA POINTS, ONE CALL
   add-company-data-points(taskId, dataPoints=[

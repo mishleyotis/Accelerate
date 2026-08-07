@@ -75,6 +75,19 @@ opens a panel that says nothing twice.
 metadata. A storyline that names no inflection point is a list of dates in
 sentence form.
 
+### Sixteen clients had two events. A disclosing entity will offer two hundred.
+
+The scarcity failure is the documented one and the enrichment step exists for it. The
+abundance failure produces the same unreadable card from the opposite direction: forty true,
+dated, cited events in chronological order, and no trajectory visible through them.
+
+Select on **bearing and inflection** — an event earns its row because it changed the
+capability position, not because it happened. A vendor renewal, a branch opening and a
+rebrand are dated and belong nowhere near this card; a core conversion, a channel launch,
+a leadership change that moved technology, a regulatory action and a completed integration
+are the arc. State the selection basis alongside `arc_shape`, so a reader can see that the
+ten events are a reading of the history rather than the ten you happened to find.
+
 The Gantt's window is derived from the events' and issues' own dates, so an
 undated item is **listed rather than drawn** — it is not lost, but it is not
 placed either, and a reader cannot see where it sits. Date it or accept that.
@@ -209,6 +222,43 @@ Measured prose length on a real run: **21 words for the whole card.** A regulato
 standing that states a regulator and stops has not been analysed; the analysis is
 what the actions cap and what a verified absence supports.
 
+### The prudential regulator, and the four things that get mistaken for one
+
+The prompt's sub-vertical map gives the family. Three distinctions inside it decide whether
+the card is right:
+
+- **Charter type sets the second regulator.** A federally chartered credit union answers to
+  the NCUA; a state-chartered one answers to the NCUA for insurance and to its state
+  supervisor for the charter, and both belong on the card. The same split runs through
+  state-versus-national banks. Establish the charter from the registry before you name one
+  regulator or two — `license_type` as the registry words it is what makes this checkable.
+- **A disclosure regulator is not a prudential one.** The SEC receives a listed bank's
+  filings and does not supervise its safety and soundness. `primary_regulator` on a bank is
+  the chartering supervisor, and the SEC belongs in `additional_regulators[]` if anywhere.
+  The same applies to a broker's affiliated adviser: SEC registration of the adviser is a
+  fact about the adviser, not the prudential standing of the group.
+- **An intermediary is licensed, not chartered.** For a brokerage or an agency, the analogue
+  of a charter is a set of state department-of-insurance licences and appointments, one per
+  jurisdiction, with a designated licensed producer named. `jurisdictions` for such an entity
+  comes from those licence records, and it is a longer and more precise list than a
+  self-described footprint — which is exactly what makes it the contamination check.
+
+**A counterparty's regulator is not contamination.** A credit union acquiring a bank
+generates an FDIC or state banking-department approval notice; those documents are about
+this entity's transaction and are the best-dated evidence that it exists. Cite them, hand
+them to C5, C1 and O3, and let the identity gate pass them on the ground that the document
+is about this entity even though the regulator is not this entity's. What they may never do
+is set `primary_regulator` — an FDIC chip on a credit union's standing card is still the
+identity error this card quarantines for, and the distinction between "regulates this
+entity" and "regulated the other side of this deal" is the one the reader is trusting you
+to have made.
+
+**On a multi-brand entity, the sweep runs under every name.** Enforcement pages and
+complaint databases key on the legal entity in some places and on the trading name in
+others, so a search run only under the legal name has skipped rungs. Record which names
+were searched in `absence_of_enforcement` — a verified absence that names one of seven
+brands is not a verified absence.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
@@ -341,6 +391,23 @@ This card also rendered an inline fixture until recently — two invented credit
 unions, with an `evidence: []` that was never shown. It reads from the payload now,
 so an empty `rows` is an honest empty state and a thin row is visibly thin. Both are
 better than what it replaced, and neither is a reason to compose a transaction.
+
+### A cross-charter transaction is the best-evidenced row on the card
+
+Where the target sits under a different regulator from the acquirer — a co-operative
+acquiring an insured bank, an intermediary acquiring a licensed agency in a state it does
+not yet operate in — the approval trail is public, dated and authoritative, and it is
+usually the only source that states the closing date precisely. Cite it, and take the
+identity question the right way round: the notice is about this entity's transaction, so it
+belongs here, and it says nothing about who regulates this entity. C3 owns that, and the two
+cards must not end up naming different prudential regulators because one of them read an
+approval notice as a charter fact.
+
+A serial acquirer changes what this card is for. Ten transactions in five years is not ten
+rows of equal weight: rank by integration consequence on a named cell, group the rest, and
+say that is what you did. `scale_metrics` is where the volume goes — the aggregate the
+transactions add up to — and `affected_subcap_ids` is what keeps each row part of the
+assessment rather than a corporate history.
 
 `TEMPORARILY_CONSTRAINED` is the value most often smoothed away and it is usually
 the correct one during a cutover. An integration in flight constrains the

@@ -14,7 +14,8 @@ comparative claim runs the same five steps.
 A  HYPOTHESIS        State the claim and its confidence, before defending it.
 B  COUNTER-EVIDENCE  Argue the strongest case against it. Where the margin is thin,
                      present both and say the call is close.
-C  DOMAIN TEST       Is this plausible for THIS sub-vertical, size tier and regulator?
+C  DOMAIN TEST       Is this plausible for THIS sub-vertical, size tier and regulator —
+                     and is it about this ENTITY rather than about its cohort?
 D  FAILURE PROBES    Run the probe set for this surface. Each probe fires a search.
 E  VERDICT           ACCEPT · REJECT · UNCERTAIN. Reject means re-rank or drop,
                      not soften.
@@ -41,6 +42,31 @@ Three things at once: it proves the objection was considered, it sources the fal
 **the client's own words** rather than your judgement, and it bounds the claim honestly
 instead of overclaiming.
 
+## Step C has two halves, and the second one appears on the second client
+
+The first half is the familiar one: a claim has to be plausible for this sub-vertical, this
+size tier and this regulator. A transformation office is an expectation at one scale and
+not at another; a channel a charter does not permit is not a gap.
+
+The second half only bites once you have produced more than one client in the same
+sub-vertical, and then it bites hard, because the sub-vertical supplies most of the
+vocabulary and the second run writes itself:
+
+> **Would this sentence be true of any institution in this sub-vertical?**
+
+If yes, it is a fact about the sub-vertical — or about a shared vendor — and it is not a
+finding about this client. Two honest moves, and softening it is neither: attach the
+entity-specific evidence that makes it particular (this institution's own figure, its own
+executive's words, its own dated event), or move it to where cohort facts belong. H8 exists
+for exactly this, and its own challenge step says the same thing from the portfolio side —
+where every entity runs the same core, a shared weakness is a finding about the vendor and
+that is the more useful finding.
+
+The test costs one question per claim and it is the difference between a repeatable process
+and a template with a name on it. Run it hardest on the surfaces that carry the argument:
+the exec summary's complication, the top findings, the act-now cards and the platform
+story.
+
 ## Probe sets, by surface
 
 Each probe fires a search. A probe you did not run is not a probe.
@@ -57,6 +83,16 @@ Each probe fires a search. A probe you did not run is not a probe.
 | **P2 recommendations** | Does the client already own this? Does provenance say derived where the card reads as analyst judgement? |
 | **C3 regulatory** | Is regulatory silence being read as evidence of control effectiveness? It is not. |
 | **T1 stack** | Is any entry a service or a category rather than a product? Does any status exceed what the evidence level licenses? |
+
+Four probes fire on **every** surface once the entity's shape is established, because each
+of them produced a confidently wrong card rather than a thin one:
+
+| Probe | Fires when |
+|---|---|
+| **Foreign variant cell** | A cited cell's id ends in a sub-vertical code that is not this entity's — it resolves in the workbook and renders nowhere |
+| **Cohort scale** | The peer median's cohort is not within the entity's own size class, so every delta arrow is confident and unsupported |
+| **Shape-blind ladder** | An absence was recorded from a ladder whose rungs presume a filer this entity is not |
+| **Cohort sentence** | The claim would be true of any institution in this sub-vertical (above) |
 
 ## Contradiction classes
 

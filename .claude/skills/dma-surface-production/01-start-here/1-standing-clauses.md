@@ -23,6 +23,18 @@ per item, every time:
 **On failure:** quarantine the field, emit the reason, escalate. Never substitute a
 plausible value and never render a partial identity.
 
+**The question the five assertions ask is whether the DOCUMENT is about this legal entity**,
+and three shapes make that different from whether every name in it matches.
+
+| Shape | The trap | The resolution |
+|---|---|---|
+| Registered trading names | An institution operating several brands under one charter fails assertion 1 against its own evidence, while a same-named unrelated institution elsewhere passes it | Resolve brands through the registry, then cite with the brand named in the item's context. Brand-level evidence is enterprise evidence only where the source says so, and brand figures never combine by arithmetic |
+| A counterparty's regulator | An approval notice from the regulator of the *other* side of a transaction fails assertions 2 and 4 and is quarantined, losing the best-dated evidence the transaction exists | The document is about this entity's transaction: cite it, and never let it set `primary_regulator` |
+| Ownership and control | A private entity's self-description outlives the transaction that changed it, and both are on the site | The dated announcement outranks undated boilerplate. Record the disagreement — for a private entity, who owns it is an identity fact, and a change of control inside the window is a finding |
+
+`01-start-here/6-entity-shape.md` carries all three at length, with what each does to the
+rest of the run.
+
 Why this is worth doing per figure rather than per run: one contaminated profile put another
 institution's assets, regulator and five-state footprint onto five surfaces simultaneously.
 One root cause, five surfaces, every instance catchable by one rule applied at the figure.

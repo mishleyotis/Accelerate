@@ -27,6 +27,29 @@ Run every rung. Stop at the first hit. Record all attempts either way.
 | **Peer figures** | The peer table → recompute at lower cohort size → adjacency inference → proxy ceiling → stop (see `evidence.md`) |
 | **Sentiment** | App-store reviews → employer review sites → complaint databases → trade press → social listening |
 
+## The ladder has rungs that only exist for some entities
+
+Every rung above that begins "filings", "proxy", "Section 16" or "call report" presumes a
+particular kind of filer, and running a ladder whose rungs cannot exist for this entity
+produces the most dangerous result in the table: a NEGATIVE that is really a NOT ATTEMPTED,
+recorded as a verified absence because the searches were genuinely run.
+
+So before recording a negative, check that the ladder you ran was the one this entity's
+shape has. These rungs replace the missing ones:
+
+| Signal sought | Where the entity files nothing |
+|---|---|
+| **Financial series** | The trade press's annual ranking tables for the sub-vertical — dated third-party figures for private firms, year on year → an ESOP's Form 5500 → the entity's own acquisition announcements, which disclose the target's scale → rating-agency commentary where debt is rated |
+| **Leadership** | The entity's own leadership and governance pages → every acquisition announcement, which names leaders on both sides → state licence registries, which name a designated licensed producer → conference programmes → Form 5500's named plan administrator and trustees |
+| **Regulatory standing** | The licence registries the entity is registered in — state departments of insurance, NAIC's producer database, SEC IAPD or FINRA BrokerCheck for an affiliated adviser or broker-dealer — rather than a prudential enforcement database that has no jurisdiction over it |
+| **Peer figures** | Where every comparable is private too, no rung yields a median. A published *ranking* of those firms is rung 4 — a proxy that discloses itself — and it is not rung 1 |
+
+The mirror problem is a rung that returns three hundred results. That is not a hit either:
+a ladder run against an entity that discloses continuously ends in a **selection** decision,
+and the selection key is part of the finding. Say which key you used —
+`01-start-here/6-entity-shape.md` states one per surface — because a reader who cannot see
+why these six of forty will assume they are the only six that exist.
+
 ## Recording the ladder
 
 Every empty state carries the ladder that produced it:

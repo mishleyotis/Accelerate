@@ -241,3 +241,39 @@ the GENERATED `age_months` is null and `recency_band` is `UNVERIFIED` for EVERY
 item — 120 items, 45 of them dated, all unverified, and a FACT then rendered
 beside an "unverified" label. Check the manifest, and check the request id's own
 `…-YYYYMMDD-NNNN` token before concluding there is no date.
+
+### Four clocks, and putting one in another's field inverts the whole ladder
+
+They are separate fields because they answer separate questions, and the failure is
+symmetrical: put the retrieval date in `published_date` and a fifteen-year-old page bands
+CURRENT; leave `published_date` empty on a dated source and a fresh figure bands
+UNVERIFIED.
+
+| Field | Answers | Never |
+|---|---|---|
+| `published_date` | When the SOURCE said it | The day you fetched it |
+| `as_of` | The date the FIGURE describes — a quarter end, a period end, a headcount date | The publication date, when a filing published in March states a December position |
+| `enriched_at` / retrieval date | When you established it | A substitute for either of the above |
+| `reference_date` | The run's own as-of, against which age is computed | Yours to set — it comes from the run |
+
+`as_of` and `published_date` differ on almost every filing, and the difference is the whole
+of a recency argument: a figure `as_of` a period end, published two months later, read
+against the run's reference date. Send both.
+
+### An undated page is not automatically an undated figure
+
+Undated bands UNVERIFIED and never renders as current — that is settled. What is worth
+doing before accepting it is establishing whether the *figure* is dated even though the
+*page* is not, because a fact sheet with no dateline routinely carries "as of" language, a
+quarter, or a fiscal year inside the text.
+
+In order, stopping at the first that resolves: an explicit as-of stated in the text; the
+period the figure describes where the source names one; the same figure in a dated
+source — a release, a filing, a call report — which dates the claim and corroborates it at
+once; and failing all of those, `published_date` null with the item honestly UNVERIFIED.
+
+Two things this is not. A copyright year is a fact about the site, not about the figure.
+And a date taken from a *different* source is not this source's date: if the dated source
+is what carries the claim, cite that source. Registering the undated page and attaching
+someone else's date to it is the quiet version of fabrication — the row then reads as a
+dated primary source and cannot be checked back.

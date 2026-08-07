@@ -40,6 +40,31 @@ Peer median per pillar and the cohort the median is drawn from.
 
 Every number must equal the served cell to within one 2dp rounding step. The hero ring and the run row must render the SAME number — they are two views of one value.
 
+### Read the cohort before you serve its median
+
+The peer discipline this prompt states — same sub-vertical, ±50% asset size, same regulator
+jurisdiction, no M&A distortion inside 24 months — describes how a cohort *should* have been
+built. It does not certify the one in the workbook. The sub-vertical bands are wide enough
+to hold a hundredfold size range, so a median drawn from the bottom of a band and rendered
+against an entity at the top puts a confident delta arrow on all four pillars that no source
+supports.
+
+Check the cohort's own sizes against the entity's, and let the answer choose the basis:
+inside ±50%, serve it and name the cohort; at an edge, recompute at lower N with the
+ladder's floor-of-three arithmetic and emit `peer_n` so the reader sees the basis shrank;
+a different size class entirely, `peer_basis = cannot_estimate` with the median null and the
+reason stated. A missing tick is honest. `01-start-here/6-entity-shape.md` carries the
+decision table.
+
+**Some sub-verticals have no peer median to find, and that is structural rather than
+missing.** Where the comparable institutions are private and none of them discloses, the
+peer table cannot be repaired by searching harder — no rung of the ladder yields a figure
+because no figure exists. What often does exist is a published *ranking* of those firms,
+which is rung 4: a proxy that must disclose itself with the literal phrase *peer proxy* and
+must never be presented as a median. Say which of the two you have. A hero that admits it
+has no peer basis and states the entity's position on its own evidence is more use than one
+whose arrows were manufactured to fill the strip.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
@@ -87,6 +112,36 @@ Magnitude sanity: an AUM or asset figure implying a market-scale absurdity is re
 `branches` is an integer count. Never a serialised list, never a dict repr — an
 unknown field renders an em dash, and a dict printed into a strip is the one failure
 mode a reader instantly distrusts.
+
+### The registry that has the figure depends on who files, not on the sub-vertical alone
+
+STEP 3's registry list assumes a filer. For an entity that files nothing, every route on it
+misses and the panel comes back empty from a search that was run correctly — which is the
+worst outcome available, because it looks like a verified absence.
+
+Choose the route from the ownership shape as well as the sub-vertical:
+
+| Shape | Where the firmographic actually lives |
+|---|---|
+| SEC registrant | 10-K/10-Q cover page and MD&A; the XBRL facts carry the period explicitly |
+| Insured depository, unlisted | The regulator's call report — NCUA 5300, FFIEC/UBPR — quarterly, dated, T1 |
+| Private, employee-owned | The trade press's annual ranking tables (dated third-party revenue for private firms); an ESOP's **Form 5500**, which is public, dated, and carries participant counts and plan assets; state licence and agency registries; the entity's own acquisition announcements, which usually disclose the *target's* revenue and headcount |
+| Any insurance intermediary | The state departments of insurance the entity is licensed in, plus the NAIC producer database — these give licence type and jurisdictions, which is what C3 needs |
+| Any affiliated adviser or broker-dealer | SEC Form ADV via IAPD, and FINRA BrokerCheck. A private group with a registered affiliate has dated public filings about part of itself |
+
+**When the sub-vertical's must-present metric is genuinely undisclosed, the field is absent
+with its route recorded — never modelled.** A private brokerage does not publish commission
+revenue or producer count; an aggregator's estimate of either has no traceable source, so it
+is an inference at best and it must be labelled one, not rendered as a figure with a
+provenance chip. Absent beats wrong is not a fallback here, it is the answer: the strip
+shows what the entity discloses, and the reader can tell the difference between a firm that
+does not publish and a producer who did not look.
+
+**Ownership is a firmographic and a contradiction site.** Where the entity's own site states
+one ownership structure and a dated transaction states another — a recapitalisation that
+brought minority investors in while employees kept the majority, say — the dated
+announcement outranks the undated boilerplate, both are recorded, and the change of control
+is a why-now signal and a C5 row as well as a field on this strip.
 
 ### Information sources
 
@@ -140,6 +195,14 @@ is low; that is an argument, and "no cost" is not.
 
 `linked_subcap_ids` renders: it is what ties the timing claim to the assessment
 beneath it. A signal linked to no cell is news.
+
+**On a disclosing entity the problem is the opposite of scarcity.** A public company
+produces a dated, citable event most weeks, so the card fills with true, current,
+irrelevant triggers and argues nothing. Select on the two things a why-now needs and
+nothing else: a **dated window with something that closes it**, and a **consequence that
+names a served cell**. An event with neither is news however recent it is. State the
+selection basis on the surface — a reader who can see why these three of forty trusts the
+three. `01-start-here/6-entity-shape.md` carries the selection keys per surface.
 
 ### Information sources
 
@@ -291,13 +354,41 @@ Attaching it would have put an intern's email on a Chief Data Officer's row. The
 check is that the returned TITLE matches the person you searched for — surname and
 employer are not identity. On failure, quarantine the field with its reason.
 
+### Who the panel is about changes with the entity's shape
+
+STEP 2's ladder leans on proxy statements, Section 16 and press releases. Two shapes break
+it in opposite directions.
+
+**A private entity files none of them.** The routes that do exist are the entity's own
+leadership and governance pages, every acquisition announcement (which names the acquired
+firm's leaders and usually the executive who sponsored the deal), state licence registries —
+which name an agency's designated licensed producer, a real accountable individual —
+conference programmes, and an ESOP's Form 5500, whose plan administrator and trustees are
+named officers. None of them is a proxy statement and together they establish the panel. An
+empty roster on a 3,000-person firm is a search that stopped at rung two.
+
+**A multi-brand entity has too many candidates, not too few.** Seven branded segments have
+seven presidents, and none of them is the answer to "who owns this decision" at enterprise
+grain. Scope the roster to the accountability the assessment touches: the enterprise
+technology, operations, data and risk owners, plus the affiliate leader only where the
+assessment itself is scoped to that affiliate — and say which scoping you applied, because
+a reader who sees three of seven brand presidents will assume the other four were missed.
+
+Both shapes make STEP 3's recency rule load-bearing rather than procedural. A technology
+leadership change is announced, dated and public; the roster verifies every name against the
+current leadership page and marks the departure, because a stale executive name is worse
+than a gap — the AE will use it, and the client will know within one sentence that the work
+is old.
+
 Full playbook, call budget and tier map: `02-inputs/2-clay-enrichment.md`.
+Ownership and brand shape: `01-start-here/6-entity-shape.md`.
 
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
 | --- | --- | --- |
 | roster[] | Client Profile DOCX | paragraph form OR a 5-column table — both shapes occur in real packages |
+| roster scope | producer | stated: enterprise accountability, or an affiliate the assessment is scoped to |
 | roster[].relevance_note | producer | 10–25 words: which capability this person owns and what they have said about it |
 | roster[].email / .linkedin_url / .phone | enrichment, at synthesis time | stored; the app makes no call at serve time |
 | roster[].enrichment_basis | the filing or profile the tool surfaced | never the tool itself |
@@ -355,6 +446,42 @@ computed one, send the dated points and the app does the arithmetic.
 Where the identity gate quarantines the series, declare `empty_state` and emit
 `quarantine_reason` instead — a quarantined series never renders, so it has no
 reading.
+
+### A filing states the same metric several ways. `basis` is what stops that becoming a trend.
+
+STEP 1 says the basis is the metric definition and that mixing definitions across periods
+produces a fake trend. On an annual report that is a mild risk; on a 10-K it is the default
+outcome, because one document states **period-end** total assets, **average** assets for the
+period, assets by reportable **segment**, and often a restated prior-year figure — all
+correct, all different, all labelled "total assets" in a table heading somewhere.
+
+So fix the definition once and hold it across every point: period-end, consolidated, as
+reported for that period. Name it in `basis` on each point rather than assuming the reader
+infers it, and never mix a segment or affiliate figure into an enterprise series — a
+branded segment's assets are a fact about that segment. Where a filing restates a prior
+year, the restated figure and the originally reported one are a disagreement resolved by
+recency, recorded, not averaged.
+
+### When nothing is filed, the series comes from somewhere else or it is honestly sparse
+
+The ladder in STEP 4 terminates at rung one for an entity that files nothing, and stopping
+there produces `verified_sparse` on a firm whose figures are actually public. Before you
+declare a snapshot, take the ladder to the shapes that carry private figures: the trade
+press's annual ranking tables, which publish dated revenue for private firms year on year
+and give a genuine multi-point third-party series; an ESOP's Form 5500; the entity's own
+acquisition announcements, which disclose scale in the acquirer's terms; and rating-agency
+commentary where the entity carries rated debt.
+
+Two disciplines follow. A ranking table's figure is a **third-party estimate unless the
+publisher says the firm reported it** — label the claim accordingly, and do not silently
+promote an estimate to a fact because it appears in a table. And a series built from a
+ranking table is a series about *revenue as that publisher defines it*: same definition
+across points, same `basis` string, or it is two metrics in one line.
+
+Where the entity genuinely discloses nothing across time, `verified_sparse` with the routes
+recorded is the right answer and the `reading` still gets written — what a firm's scale and
+trajectory imply for the capability that has to support it does not require three points to
+say, only honesty about what it rests on.
 
 ### Information sources
 
@@ -440,6 +567,20 @@ Two consequences: a row with no `rating` is not a line of sentiment — it belon
 at all. Glassdoor, Indeed and ZipRecruiter all 403, so they are rungs in the ladder
 rather than evidence ids. See `01-start-here/2-evidence.md`.
 
+### A multi-brand entity has several ratings and no average
+
+Where the institution trades under more than one brand, each brand has its own app listing,
+its own review pages and often its own complaint history. Four ratings are four sources.
+Averaging them produces a figure that is in no source — the same fabrication the
+never-average rule forbids between two disagreeing figures, and here it also destroys the
+finding, because the *spread* between brands is usually what the sentiment is telling you.
+
+Render them as separate rated lines with the brand named in `source`, and let the theme
+carry the comparison: a channel rated a point apart across two brands of one institution is
+a statement about how unevenly the channel was built, and it caps different cells for
+different parts of the estate. Complaint records filed under the legal entity are
+enterprise-level and belong in their own line, labelled as such.
+
 **This dataset is also C4.** The Context page re-projects these same ratings as
 three expandable tiles, reconciled by `e_id` and `rating`. Produce this section
 first; C4 projects it and can never disagree with it.
@@ -507,6 +648,21 @@ Produce the evidence tier and claim-class distribution. This is a census; it has
 
 - **Section** `overview.thought_leadership` — **renders on** D1 (Overview)
 - **Contract** Dated executive publications with verbatim quotes. A contradicting entry is the most valuable row on the card and is never filtered out.
+
+### Where the entity holds earnings calls, the card's constraint is selection
+
+Four transcripts a year, each with prepared remarks and an analyst Q&A, is a standing supply
+of dated, attributed, verbatim executive statements — and the fastest way to fill this card
+with quarters of guidance language that bears on no assessed capability. Admit an entry
+because it **corroborates, contradicts or extends a finding**, not because it is the most
+recent thing said. A transcript quote still needs `linked_subcap_ids`, and a call in which
+nothing was said about the assessed capabilities is a call this card does not use.
+
+For a private entity none of this exists, and the routes that do — conference programmes,
+association speaking slots, trade-press bylines, an executive's own posts — are the ladder
+in `01-start-here/4-absence-protocol.md`. Run all of it before `thin=true`: an entity with
+no filings still has executives who speak in public, and this card is the one place their
+words become evidence.
 
 ### Prompt
 

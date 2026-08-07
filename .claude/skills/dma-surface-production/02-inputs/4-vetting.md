@@ -35,6 +35,9 @@ two workbooks yourself for the judgement ones. The script reports; you decide.
 | **Peer grain** | Peer medians exist at category and pillar grain, not per subcap. A per-subcap peer figure in a workbook is a copy of its category's; say so, because the app must label it a proxy. |
 | **Reference date** | The run's own completion date. Absent, every evidence item bands `UNVERIFIED` regardless of its publication date — 120 items, 45 of them dated, all unverified — and a FACT then renders beside an "unverified" label. Check the manifest AND the request id's `…-YYYYMMDD-NNNN` token. |
 | **Excerpt depth** | Excerpts under 50 characters fail registration; excerpts around 80 pass and say nothing. Report the median and the count of empty ones. |
+| **Variant-cell inventory** | The workbook scores the whole catalogue, so it holds other sub-verticals' T2 variant cells. Count them by code against the run's own sub-vertical and state the figure: one credit-union workbook carried 59 foreign variants — 25 carrier, 19 RIA, 15 broker — and all of them reached a rendered heatmap. They stay in the workbook and out of your payload. |
+| **Peer cohort plausibility** | Read the cohort's own sizes, not just its names. A sub-vertical band spanning a hundredfold size range can produce a median drawn from institutions in a different size class, which renders as a confident delta arrow on every pillar. State the cohort's range and where the entity sits in it. |
+| **Ownership shape** | Whether the entity files with a securities regulator, files a call report, or files nothing decides which enrichment ladders can return anything. Record it here so the absence protocol runs the ladder this entity has. |
 
 ## 2 · Refusing
 
@@ -82,6 +85,8 @@ Whatever you conclude, record it so the next run does not re-derive it:
 
 - the tab inventory and the generation you matched
 - the catalogue version and how you inferred it
+- the entity's sub-vertical, ownership shape and brand set, and where each came from
+- the variant-cell counts by code, and the cohort's size range against the entity's
 - every duplicate id, out-of-range score and missing `source_cell`
 - the reference date and where you got it
 - the excerpt median, and the count below 50 characters

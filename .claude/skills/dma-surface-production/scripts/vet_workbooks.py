@@ -5,8 +5,12 @@ Every check here corresponds to a defect that reached a rendered page. The scrip
 REPORTS; you decide whether to refuse. Read `02-inputs/4-vetting.md` for what each
 finding does downstream — the consequence is the reason the check exists.
 
-    python scripts/vet_workbooks.py <package-dir>
+    python scripts/vet_workbooks.py <package-dir> [--subvertical CU]
     python scripts/vet_workbooks.py <scoring.xlsx> [research.xlsx]
+
+Give it the entity's sub-vertical code and it names the variant cells the workbook
+scored for somebody else — they render nowhere, and 59 of them reached a credit
+union's promoted heatmap.
 
 Exit 0 clean · 1 findings that need a decision · 2 could not read the input.
 """
@@ -29,10 +33,17 @@ except ImportError:                                            # pragma: no cove
 STAT_HEADERS = {"median", "p25", "p75", "mean", "average", "avg", "stdev",
                 "std", "min", "max", "count", "n", "quartile"}
 
-CELL_RE = re.compile(r"^P[1-4]C\d+(\.\d+)*(\.[A-Z]{2}\d+)?$", re.I)
+CELL_RE = re.compile(r"^P[1-4]C\d+(\.\d+)*(\.[A-Z]{2,3}\d+)?$", re.I)
 EID_RE = re.compile(r"^E[-_][A-Z0-9]+[-_]?\d*(:F\d+)?$", re.I)
 
+# The suffix codes that name exactly ONE sub-vertical. A family or product code
+# (BK depository, WM wealth, PEN retirement) serves every entity and is not
+# evidence that a cell belongs to somebody else.
+SUBVERTICAL_CODES = {"RB", "CU", "CL", "CIB", "FC", "AM", "RIA", "IC", "IB"}
+VARIANT_RE = re.compile(r"^([A-Z]{2,3})(\d+)$")
+
 findings: list[tuple[str, str]] = []
+entity_sv: str | None = None
 
 
 def note(level: str, msg: str) -> None:
@@ -151,6 +162,30 @@ def vet_scoring(path: Path) -> None:
             note("WARN", f"{len(cats)} categories — matches neither v7.0 (16) nor "
                          f"v5.0 (17). State what you inferred and from what.")
     print(f"cells seen: {len(set(cells))} · evidence ids seen: {len(set(e_ids))}")
+
+    # variant cells the workbook scored for OTHER sub-verticals. They are the
+    # catalogue's, not this entity's, and the serve layer drops them — so a payload
+    # that cites one cites a cell that renders nowhere.
+    variants = Counter()
+    for c in set(cells):
+        m = VARIANT_RE.match(c.rsplit(".", 1)[-1])
+        if m and m.group(1) in SUBVERTICAL_CODES:
+            variants[m.group(1)] += 1
+    if variants:
+        print("variant cells by sub-vertical: "
+              + " · ".join(f"{k}×{n}" for k, n in sorted(variants.items())))
+        if entity_sv:
+            foreign = {k: n for k, n in variants.items() if k != entity_sv}
+            if foreign:
+                note("WARN", f"{sum(foreign.values())} variant cell(s) belong to another "
+                             f"sub-vertical on a {entity_sv} run "
+                             f"({', '.join(f'{k}×{n}' for k, n in sorted(foreign.items()))}). "
+                             f"They stay in the workbook and out of the payload — cite one "
+                             f"and it resolves here and renders nowhere.")
+        elif len(variants) > 1:
+            note("WARN", f"variant cells span {len(variants)} sub-verticals. Pass "
+                         f"--subvertical to name the entity's, or the payload will cite "
+                         f"cells the run cannot serve.")
     if saw_source_cell_col and missing_source_cell:
         note("REFUSE", f"{missing_source_cell} row(s) have no source_cell. It "
                        f"cannot be backfilled after the scan.")
@@ -211,6 +246,20 @@ def vet_research(path: Path) -> None:
 
 
 def main(argv: list[str]) -> int:
+    global entity_sv
+    argv = list(argv)
+    if "--subvertical" in argv:
+        i = argv.index("--subvertical")
+        if i + 1 >= len(argv):
+            print("--subvertical needs a code "
+                  f"({' '.join(sorted(SUBVERTICAL_CODES))})", file=sys.stderr)
+            return 2
+        entity_sv = argv[i + 1].strip().upper()
+        del argv[i:i + 2]
+        if entity_sv not in SUBVERTICAL_CODES:
+            print(f"unknown sub-vertical code {entity_sv!r} — expected one of "
+                  f"{' '.join(sorted(SUBVERTICAL_CODES))}", file=sys.stderr)
+            return 2
     if len(argv) < 2:
         print(__doc__)
         return 2

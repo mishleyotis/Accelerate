@@ -9,6 +9,14 @@ python scripts/preflight.py --progress progress.json
 python scripts/clay_plan.py --domain example.com
 python scripts/check_payload.py payload.json --page overview
 python scripts/check_language.py payload.json
-python scripts/check_consistency.py rundir/
+python scripts/check_consistency.py rundir/ --subvertical CU
 python scripts/score_prompt.py prompt.txt
 ```
+
+Give `check_consistency.py` the entity's sub-vertical code and it blocks on a cited cell
+belonging to another one — the workbook scores the whole catalogue, so those cells resolve
+in it and render nowhere. Without the flag it reports the mixture as a warning. It also
+reads the run as one argument: every served cell must open a drawer that says something,
+coverage must be counted over the cells the grid actually serves, and the constraint in the
+hero framing must be recognisable at the top finding, the act-now set, roadmap phase 1 and
+the timeline storyline.

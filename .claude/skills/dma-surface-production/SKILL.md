@@ -30,7 +30,7 @@ there is no partial promote and no half-built page a client could see.
 
 ## Before you write anything
 
-Read these two, in this order. They apply to every section and are not repeated in the
+Read these, in this order. They apply to every section and are not repeated in the
 page packs.
 
 1. `01-start-here/1-standing-clauses.md` — identity, grain, register, audience, citation. Five rules that
@@ -39,10 +39,13 @@ page packs.
    what to do when you cannot establish an id.
 3. `01-start-here/3-language.md` — every gap is stated as available value. A client reads this.
 4. `01-start-here/4-absence-protocol.md` — never say no until a documented ladder has failed.
-5. `04-craft/4-card-anatomy.md` — the header, sub-header and budget each surface renders into.
-6. `04-craft/1-reasoning.md` — the R-Layer. The only mechanism that catches a claim that is
+5. `01-start-here/6-entity-shape.md` — sub-vertical, size tier, ownership and brand shape.
+   Which cells this run may serve, whether the peer cohort is a cohort, and which enrichment
+   ladders can return anything at all for this entity.
+6. `04-craft/4-card-anatomy.md` — the header, sub-header and budget each surface renders into.
+7. `04-craft/1-reasoning.md` — the R-Layer. The only mechanism that catches a claim that is
    well-formed, correctly cited, grain-locked and wrong.
-7. `04-craft/6-fields-the-app-depends-on.md` — every field whose absence degrades a real
+8. `04-craft/6-fields-the-app-depends-on.md` — every field whose absence degrades a real
    surface, with the observed consequence. Read it once; it is the difference between a
    payload that validates and a page that reads.
 
@@ -67,6 +70,12 @@ matching/escalation/enrichment steps that follow it: `02-inputs/4-vetting.md`.
 
 **Scores come from the scoring workbook. Evidence ids, excerpts, ERS and published dates come
 from the research workbook. A score is never taken from the research workbook.**
+
+Establish the entity's shape in the same pass and write it down: **sub-vertical, size tier,
+ownership and brand set**. The workbook scores the whole catalogue, so it holds other
+sub-verticals' variant cells — 59 of them reached a credit union's rendered heatmap — and the
+peer cohort it names may sit in a different size class from the entity. Both are decided
+here or discovered on a promoted page. `01-start-here/6-entity-shape.md`.
 
 ### 1 · Orient
 
@@ -182,11 +191,21 @@ payload — see `01-start-here/4-absence-protocol.md`. Most ladders hit; the one
 a finding you can defend. Note the third result type: some absences are *correct posture*, not
 gaps, and should be stated as such.
 
-**Write the page's thread before you submit it.** A page is not a container for surfaces — an
-AE reads it top to bottom and takes one argument away. Each page carries a `narrative_thread`
-of 45–75 words tracing the line through its surfaces in render order. Write it last, from what
-you actually produced. If you cannot write it, the surfaces are not yet a page. Per-page
-threads and their tests: `04-craft/3-page-narrative.md`.
+**Every served cell gets a synthesis.** The drawer is the whole reason the grid is
+clickable, and it was empty on 90% of a real run's cells. Coverage is the default, not an
+achievement: a cell with its own evidence gets a cited synthesis, a cell whose parent
+capability carries evidence gets an inherited one labelled as the inference it is, and a
+cell with nothing gets the ladder that established that. Work outward from the cells other
+surfaces cite — those must be cited grade, because a reader was sent there. Method and
+`linking_stats` shape: `03-pages/1-heatmap.md`.
+
+**Write the run thesis after the heatmap, and each page's thread before you submit it.** One
+constraint, stated once, instantiated at five anchors — the hero framing, the top finding,
+the act-now set, roadmap phase 1 and the timeline storyline. Six coherent pages describing
+three different assessments is the failure no per-page gate can see. Each page then carries a
+`narrative_thread` of 45–75 words tracing the line through its surfaces in render order,
+written last, from what you actually produced. If you cannot write it, the surfaces are not
+yet a page. `04-craft/3-page-narrative.md`.
 
 **Verify before citing** when you are unsure:
 
@@ -235,13 +254,15 @@ Probe sets per surface, the nine contradiction classes and the cross-check proce
 so a contradiction *between* pages survives every per-page gate:
 
 ```bash
-python scripts/check_consistency.py <rundir>/     # all six page payloads together
+python scripts/check_consistency.py <rundir>/ --subvertical <CODE>   # all six together
 ```
 
 It reconciles the composite against the pillar means, the hero against the grid, gap rows
 against served scores, roadmap ids against the recommendation set, landscape counts against the
 register, O8 against C6, confidence against evidence count, and the framing sentence against
-the top finding.
+the top finding. It also refuses a cited cell belonging to another sub-vertical, a served cell
+whose drawer says nothing, a coverage denominator that is not the served cell set, and a run
+whose five narrative anchors are about different constraints.
 
 ### 7 · Submit and repair
 
@@ -276,7 +297,7 @@ promote_run(run_id) → all six pages, one transaction, all or nothing
 If it returns `incomplete_run`, it names the missing and unpassed pages. Re-promotion is
 idempotent, so a retry is safe.
 
-## Ten rules that are not negotiable
+## The rules that are not negotiable
 
 These are the ones that produced measured defects when they were left to judgement.
 
@@ -312,6 +333,11 @@ These are the ones that produced measured defects when they were left to judgeme
     strongest counter-argument is one you can defend in the room.
 15. **Never average two disagreeing figures.** The result is in no source. Quarantine and state
     the contradiction — the resolution is the finding.
+16. **Serve the entity's cell set, and count over the same one.** The workbook scores the
+    whole catalogue; another sub-vertical's variant cells resolve in it and render nowhere.
+    Never cite one, and compute every coverage figure over the cells the run actually serves.
+17. **Every served cell opens a drawer that says something.** Cited, inherited or declared —
+    a scored cell with no synthesis asserts a number and answers nothing about it.
 
 ## Colour: you never send one
 
@@ -385,6 +411,7 @@ assets/          payload skeletons per section
 | File | Read it when |
 |---|---|
 | `01-start-here/1-standing-clauses.md` | Always, before writing any section |
+| `01-start-here/6-entity-shape.md` | Before planning the run — sub-vertical scoping, size tier, ownership, brands |
 | `04-craft/6-fields-the-app-depends-on.md` | Once, early — what breaks on the page when a field is missing |
 | `02-inputs/4-vetting.md` | Before parsing anything; when a workbook looks unusual |
 | `01-start-here/2-evidence.md` | Always — tiers, recency, rank score, peer ladder, citation |
@@ -419,9 +446,12 @@ python scripts/check_language.py <payload.json>    # accusatory framing, and gap
                                                     # with no adjacent asset
 python scripts/clay_plan.py --domain <domain>      # the enrichment call sequence and the
                                                     # tier each data point registers at
-python scripts/check_consistency.py <rundir>/      # cross-page reconciliation before
+python scripts/check_consistency.py <rundir>/ --subvertical <CODE>
+                                                    # cross-page reconciliation before
                                                     # promotion — the check no per-page
-                                                    # gate can make
+                                                    # gate can make: foreign variant cells,
+                                                    # silent drawers, coverage denominators
+                                                    # and the run's one constraint
 ```
 
 `check_payload.py` catches the cheap failures locally so your submissions spend their

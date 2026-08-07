@@ -12,8 +12,39 @@ import argparse, glob, json, os, re, sys
 
 PAGES = ["overview","insights","heatmap","platform","context","techstack"]
 BANDS = [(2.0,"Activating"),(3.0,"Building"),(4.0,"Competing"),(99.0,"Differentiating")]
+
+# Codes that name exactly ONE sub-vertical. A T2 variant cell's terminal segment is a
+# code plus an ordinal (P1C1.3.IC1); a base cell's is numeric. Family and product codes
+# (BK, WM, PEN) are outside this set deliberately — they serve every entity.
+SUBVERTICAL_CODES = {"RB","CU","CL","CIB","FC","AM","RIA","IC","IB"}
+VARIANT = re.compile(r"^([A-Z]+)([0-9]+)$")
+
+# Keys anywhere in a payload that hold a cell id, scalar or list.
+CELL_KEYS = ("subcap_id","linked_subcap_id","anchor_subcap_id","named_gap_subcap_id",
+             "linked_subcap_ids","capped_subcap_ids","involved_subcap_ids",
+             "affected_subcap_ids","covered_subcap_ids","target_subcap_ids",
+             "mapped_subcap_ids","addressable_cells","capability_ids","subcaps")
+
 issues=[]
 def bad(sev,label,msg): issues.append((sev,label,msg))
+
+def variant_code(cell_id):
+    """The sub-vertical a variant cell belongs to, or None for a base cell, a
+    family/product code, or an unrecognised one. None never means 'belongs to no one'."""
+    m = VARIANT.match(str(cell_id).rsplit(".",1)[-1])
+    if not m: return None
+    return m.group(1) if m.group(1) in SUBVERTICAL_CODES else None
+
+def cells_cited(node, path=""):
+    """Every cell id the payload cites, with the path that cites it."""
+    out=[]
+    for key in CELL_KEYS:
+        for p,v in dig(node,key,path):
+            for item in (v if isinstance(v,list) else [v]):
+                if isinstance(item,str): out.append((p,item))
+                elif isinstance(item,dict) and isinstance(item.get("subcap_id"),str):
+                    out.append((p,item["subcap_id"]))
+    return out
 
 def band(s):
     if s is None: return None
@@ -37,7 +68,15 @@ def num(x):
 
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument("rundir"); ap.add_argument("--strict",action="store_true")
+    ap.add_argument("--subvertical",metavar="CODE",
+                    help="the entity's sub-vertical code (RB CU CL CIB FC AM RIA IC IB). "
+                         "Given, a cited variant cell belonging to another sub-vertical "
+                         "blocks; omitted, a mixture is reported as a warning.")
     a=ap.parse_args()
+    entity_sv=(a.subvertical or "").strip().upper() or None
+    if entity_sv and entity_sv not in SUBVERTICAL_CODES:
+        print(f"  unknown sub-vertical code {entity_sv!r} — expected one of "
+              f"{' '.join(sorted(SUBVERTICAL_CODES))}"); return 2
     P={}
     for p in PAGES:
         f=os.path.join(a.rundir,f"{p}.json")
@@ -180,6 +219,96 @@ def main():
     for page,pay in P.items():
         if not any(True for _ in dig(pay,"narrative_thread")):
             bad("WARN",page,"no narrative_thread — a page is not a container for surfaces")
+
+    # ── 12 · sub-vertical scoping: the workbook scores cells this run may not serve
+    cited={}                       # code -> [(page, path, cell_id), ...]
+    for page,pay in P.items():
+        for path,cid in cells_cited(pay):
+            code=variant_code(cid)
+            if code: cited.setdefault(code,[]).append((page,path,cid))
+    if cited:
+        shape=", ".join(f"{c}×{len(v)}" for c,v in sorted(cited.items()))
+        if entity_sv:
+            for code,rows in sorted(cited.items()):
+                if code!=entity_sv:
+                    ex="; ".join(f"{p}:{cid}" for p,_,cid in rows[:3])
+                    bad("BLOCK","sub-vertical scope",
+                        f"{len(rows)} cited cell(s) are {code} variants on a {entity_sv} run — "
+                        f"they resolve in the workbook and render nowhere ({ex})")
+        elif len(cited)>1:
+            bad("WARN","sub-vertical scope",
+                f"cited variant cells span more than one sub-vertical ({shape}). One of them "
+                "is the entity's and the rest render nowhere — pass --subvertical to resolve")
+
+    # ── 13 · every served cell opens a drawer that says something
+    ce=hm.get("cell_evidence",{})
+    rows=[c for _,cl in dig(ce,"cells") if isinstance(cl,list) for c in cl if isinstance(c,dict)]
+    drawer={c["subcap_id"]:c for c in rows if isinstance(c.get("subcap_id"),str)}
+    known=set(drawer)
+    for key in ("subcap_scores","cells","subcaps"):
+        for _,v in dig(hm,key):
+            if isinstance(v,list):
+                for c in v:
+                    if isinstance(c,dict) and isinstance(c.get("subcap_id"),str) \
+                       and num(c.get("score")) is not None:
+                        known.add(c["subcap_id"])
+    if known:
+        silent=sorted(k for k in known if not str(drawer.get(k,{}).get("synthesis") or "").strip())
+        if silent:
+            bad("WARN","H2 coverage",
+                f"{len(silent)} of {len(known)} served cell(s) carry no synthesis "
+                f"({', '.join(silent[:5])}{' …' if len(silent)>5 else ''}). Every cell is "
+                "clickable: cited, inherited or declared, but never silent")
+    # a cell another surface sent the reader to must be cited grade
+    elsewhere={}
+    for page,pay in P.items():
+        if page=="heatmap": continue
+        for path,cid in cells_cited(pay): elsewhere.setdefault(cid,set()).add(page)
+    for cid,pages in sorted(elsewhere.items()):
+        if variant_code(cid) and entity_sv and variant_code(cid)!=entity_sv: continue
+        d=drawer.get(cid)
+        if d is None and known:
+            bad("BLOCK","H2 ↔ pages",
+                f"{cid} is cited on {', '.join(sorted(pages))} and has no cell_evidence row — "
+                "the reader was sent to a drawer that says nothing")
+        elif d is not None and not (d.get("e_ids") or d.get("items")):
+            bad("WARN","H2 ↔ pages",
+                f"{cid} is cited on {', '.join(sorted(pages))} but its drawer carries no "
+                "evidence — a cell good enough to carry an argument elsewhere is cited grade here")
+
+    # ── 14 · O10's denominator is the heatmap's cell set
+    cov=ov.get("evidence_coverage",{})
+    tot=sum(int(num(p.get("cells_total")) or 0) for p in (cov.get("per_pillar") or []))
+    if tot and known and tot!=len(known):
+        bad("BLOCK","O10 ↔ H2",
+            f"coverage counts {tot} cells; the heatmap payload serves {len(known)}. Coverage is "
+            "computed over the SAME cell set the grid renders, after sub-vertical scoping")
+
+    # ── 15 · one constraint, five anchors
+    anchors={}
+    if fnd and isinstance(fnd[0],dict):
+        anchors["top finding"]=f"{fnd[0].get('title','')} {fnd[0].get('consequence','')}"
+    cards=P.get("insights",{}).get("insights",{}).get("cards") or []
+    act=[c for c in cards if isinstance(c,dict)
+         and str(c.get("severity","")).lower() in ("critical","high")] or \
+        [c for c in cards if isinstance(c,dict)][:1]
+    if act: anchors["act-now"]=" ".join(f"{c.get('title','')} {c.get('what_text','')}" for c in act[:2])
+    ph=P.get("platform",{}).get("roadmap",{}).get("phases") or []
+    if ph and isinstance(ph[0],dict):
+        anchors["roadmap phase 1"]=f"{ph[0].get('phase','')} {ph[0].get('rationale','')}"
+    story=P.get("context",{}).get("timeline",{}).get("storyline")
+    if story: anchors["timeline storyline"]=story
+    if fr and anchors:
+        miss=[k for k,v in anchors.items() if not (fr & words(v))]
+        for k in miss:
+            bad("WARN","run thesis",
+                f"the hero framing and the {k} share no significant vocabulary — the run's "
+                "constraint should be recognisable at every anchor")
+        if len(miss)>=3:
+            bad("BLOCK","run thesis",
+                f"{len(miss)} of {len(anchors)} anchors share no vocabulary with the framing "
+                "sentence. Six coherent pages describing three assessments is the failure no "
+                "per-page gate can see — write the thesis, then the pages")
 
     order={"BLOCK":0,"WARN":1,"INFO":2}
     issues.sort(key=lambda x:(order[x[0]],x[1]))

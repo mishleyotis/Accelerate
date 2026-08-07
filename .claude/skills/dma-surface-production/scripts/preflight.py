@@ -27,9 +27,16 @@ CHECKLIST = [
  ("Bundle",  "get_report_bundle(run_id) and get_capability_catalogue(run_id). Cell NAMES come "
              "from the catalogue, never from report prose."),
  ("Standing","Read 01-start-here/1-standing-clauses.md and 01-start-here/2-evidence.md before writing."),
- ("Produce", "Page by page, in the order below. Read the page pack first."),
+ ("Shape",   "Write down the entity's sub-vertical, size tier, ownership and brand set. They "
+             "decide which cells this run may serve, whether the workbook's peer cohort is a "
+             "cohort, and which enrichment ladders can return anything. 01-start-here/6-entity-shape.md."),
+ ("Thesis",  "After the heatmap, before the overview: one sentence naming the constraint, what "
+             "it blocks, where the leverage is and what makes it timely. Every page instantiates it."),
+ ("Produce", "Page by page, in the order below. Read the page pack first. Every served cell "
+             "gets a synthesis — cited, inherited or declared, never silent."),
  ("Enrich",  "register_evidence BEFORE citing. The server allocates the id."),
- ("Check",   "scripts/check_payload.py locally before every submit."),
+ ("Check",   "scripts/check_payload.py locally before every submit; check_consistency.py "
+             "--subvertical <CODE> before promotion."),
  ("Submit",  "Read the verdict literally. Repair the cause, not the symptom."),
  ("Promote", "promote_run once every page passes. All six or none."),
 ]

@@ -68,6 +68,24 @@ Check `is_thin_evidence` too: it was false on all 765 cells of a run that also c
 11 thin alerts. H3 and H2 must agree — every alerted cell is one the payload declared
 under-evidenced.
 
+### The workbook scores more cells than this run may serve
+
+The `P*_Subcap_Scoring` tabs carry the whole catalogue, T2 variant cells included, so a
+credit-union workbook holds insurance-carrier, RIA and insurance-broker variants. The
+serve layer scopes them to the entity's own sub-vertical; measured, a credit union
+served 765 cells of which **59 belonged to another sub-vertical** and rendered anyway.
+
+A variant cell names its owner in its terminal segment — `P1C1.3.IC1` is a carrier cell,
+`P2C4.6.RIA1` an adviser cell — and the codes that name exactly one sub-vertical are
+`RB · CU · CL · CIB · FC · AM · RIA · IC · IB`. Base cells and family or product codes
+(`BK`, `WM`, `PEN`) serve for everyone.
+
+So the grid you emit is the entity's cell set, and **every count computed off it — the
+coverage denominator, the linking stats, the pillar cell totals — is computed off the
+same set.** A figure computed over the workbook's rows and rendered beside a grid that
+serves fewer is a contradiction a reader can find by counting.
+`01-start-here/6-entity-shape.md` carries the derivation and its limits.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
@@ -138,9 +156,69 @@ synthesis showed the ids instead.
 
 Measured on a real run: `cell_evidence` rows existed for **69 of 765 served
 cells** — 9%. A cell with no synthesis opens a drawer that says nothing, and that
-drawer is the whole reason the grid is clickable. Coverage is worth raising honestly
-and worth reporting where it stops: `linking_stats` is how a low-reach run declares
-itself rather than looking complete.
+drawer is the whole reason the grid is clickable.
+
+### Every served cell carries a synthesis. The grades differ; the coverage does not.
+
+This is the default, not a stretch goal, and the earlier framing — raise coverage where
+you can and declare where it stops — licensed 9% as an honest outcome. It is not: a grid
+where nine cells in ten open onto silence is the single largest gap between what this
+product costs to produce and what a client experiences.
+
+What makes it achievable is that a synthesis is not one research task per cell. It is a
+statement of **what is established about this capability and how firmly**, and there are
+three honest grades of that statement:
+
+| Grade | When | What the drawer carries |
+|---|---|---|
+| **Cited** | The cell has its own linked items | 40–90 words on what they establish, where the score sits against the peer median, one clause of consequence. `grounded_on` = the citation count |
+| **Inherited** | No cell-specific item, but the parent capability or category carries evidence that bears on it | 25–50 words reasoning explicitly from that evidence to this cell, citing the parent's ids, `claim_label: INFERENCE`, cell marked thin. An inference cites what it was inferred *from* — that is what makes it one |
+| **Declared** | Nothing at capability level either, and the ladder has run | The ladder itself: what was searched, what would close it, and the ceiling the absence sets. This is H3's alert content, rendered where the reader clicks |
+
+An inherited synthesis is not a hedge and it is not padding. "The category's two sources
+speak to the platform this capability runs on but not to this capability's own coverage,
+so the score rests on the platform's presence rather than on observed use" is a true
+statement about the evidence position, it is falsifiable, and it is exactly what a reader needs
+before they argue about the number. A declared one is the absence protocol doing its job at
+the grain the reader clicked on.
+
+What is never acceptable is grade zero — a scored cell with no row at all, which asserts a
+number and answers nothing about it.
+
+### The order the work is done in, because the order cannot be recovered late
+
+Coverage is decided when you plan the run, not when you reach H2. Work outward:
+
+1. **Every cell any other surface cites.** Findings, insight cards, gap rows,
+   recommendations, focus areas, ceilings, roadmap phases, stair-step steps, why-now
+   links, issue caps, sentiment caps, tech-stack linkage. These are the cells a reader
+   *will* click, because something on another page sent them there, and every one of them
+   must be **cited** grade. A cell good enough to carry an argument elsewhere and blank
+   here is the worst single defect on this page.
+2. **Every cell below the assessment's threshold**, and every cell carrying a thin alert.
+   The low scores are what the client came to look at.
+3. **The rest**, worked by document rather than by cell: mine each rich source once, assign
+   fact-level ids `E-xxx:Fy`, and map each fact to every cell it bears on. One annual
+   report or 10-K populates twenty to fifty cells; a call report populates the financial
+   and risk capabilities across a pillar. That is how the long tail gets covered at cost,
+   and it is the same technique H3's ladder already requires — the difference is that here
+   you are spending it on reach rather than on a single alert.
+
+Precision still binds: a fact mapped onto five cells because it was found while reading
+about the category is over-linking, and over-linking is worse than a declared gap because
+it renders as support. If a fact does not speak to the capability, the cell gets an
+inherited or declared synthesis instead — those grades exist so that the reach is honest.
+
+### `linking_stats` reports the grades, not just the reach
+
+A single reach percentage lets a run with 9% cited coverage and 91% silence report a number
+that sounds like progress. Report the shape instead: cells served, cells cited, cells
+inherited, cells declared, rows unlinkable, and the count of **cells cited by another
+surface that are not at cited grade** — which should be zero and is the number worth
+looking at first.
+
+`scripts/check_consistency.py` recomputes all of these against the payloads and fails the
+cross-surface one, because no per-page gate can see it.
 
 The drawer resolves the ids **you cited for this cell**, not a reverse-derived list,
 so a cited id that no longer resolves renders as UNRESOLVED rather than quietly
@@ -153,10 +231,10 @@ asserted (invariant 8, checked by AG-02).
 | --- | --- | --- |
 | cells[].e_ids | research workbook P1C1..P4C4 sheets | one row per E-ID, mapped to the subcap the sheet is about |
 | cells[].excerpt | research workbook | the quoted span, verbatim |
-| cells[].synthesis | producer | the drawer's body: what this cell's evidence establishes |
+| cells[].synthesis | producer | the drawer's body, at cited / inherited / declared grade — one for every served cell |
 | cells[].grounded_on | **computed** | the length of `e_ids`; never asserted |
 | freshness_band | evidence_staleness.py | current / aging / dated / stale / undated, keyed to the run date |
-| linking_stats | producer | reach counters so a zero-reach client is visible |
+| linking_stats | producer | the grade counts, plus cells cited elsewhere and not cited here |
 
 ### Prompt
 
@@ -183,19 +261,31 @@ Per item: {e_id, tier, claim_label, recency, source_title, publisher, excerpt}
   excerpt verbatim, 50–500 chars, never a bare URL.
 Count the items. That count is grounded_on and it is printed beside the synthesis.
 
-STEP 4 — WRITE THE SYNTHESIS (40–90 words)
-What the evidence establishes about THIS capability, where the score sits against the peer
-median, and one clause of consequence: at or above median, what to protect; below, what it
-constrains downstream. Cite inline. Do NOT open by restating the score — it is rendered
-above you. Below three linked items, mark the cell thin and say so in the panel.
+STEP 4 — WRITE A SYNTHESIS FOR EVERY SERVED CELL, AT ONE OF THREE GRADES
+CITED (the cell has its own items), 40–90 words: what the evidence establishes about THIS
+capability, where the score sits against the peer median, and one clause of consequence —
+at or above median, what to protect; below, what it constrains downstream. Cite inline. Do
+NOT open by restating the score, it is rendered above you. Below three linked items, mark
+the cell thin and say so in the panel.
+INHERITED (no cell-specific item, but the parent capability or category carries evidence
+bearing on it), 25–50 words reasoning from that evidence to this cell, citing the parent's
+ids, claim_label INFERENCE, cell marked thin.
+DECLARED (nothing at capability level either): the ladder — searched, closure condition,
+and the ceiling the absence sets.
+A scored cell with NO row is the one unacceptable outcome: it asserts a number and answers
+nothing about it. Order the work by consequence — first every cell another surface cites,
+which must be CITED grade; then every below-threshold and alerted cell; then the rest,
+worked document-by-document with fact-level ids mapped to every cell a fact truly bears on.
 
 STEP 5 — PEER FIGURE
 Where the peer table lacks one, apply the peer fallback ladder (01-start-here/2-evidence.md).
 Label an inferred figure INFERENCE with one clause of reasoning. NEVER impute.
 
 STEP 6 — REACH, HONESTLY
-linking_stats: cells scored, cells linked, rows unlinkable. If every row is unlinkable,
-say so — that is a source-data finding, not a silent zero.
+linking_stats: cells served, cells cited, cells inherited, cells declared, rows unlinkable,
+and cells_cited_elsewhere_not_cited_here — which should be zero and is the number to read
+first. A single reach percentage lets 9% coverage sound like progress; the shape does not.
+If every row is unlinkable, say so — that is a source-data finding, not a silent zero.
 
 GATES: grain lock (blocking) · citation V1–V4 · excerpt verbatim · identity on every
 source domain
@@ -294,6 +384,25 @@ So:
 
 If the surface renders empty for a run, that is a server-side derivation to fix — not
 a payload to write. Say so in the empty state rather than filling the hole by hand.
+
+### An empty chain has two different causes, and they are not both bugs
+
+Before reporting a derivation fault, ask which one you have. The arrangement is keyed on
+`sub_vertical` + `version`, so:
+
+- **The catalogue carries no chain for this sub-vertical at this version.** A brokerage,
+  an adviser or any sub-vertical whose chain was never authored has nothing to arrange, and
+  the honest empty state says exactly that — naming the sub-vertical and the version — so
+  the next reader does not re-diagnose it as a mapping failure. It is a catalogue gap to
+  route, not a run defect.
+- **A chain exists and the run does not render it.** Now it is a derivation fault: the run
+  is pinned to a version whose mapping is absent, or the entity's sub-vertical did not
+  resolve. Say which you established and how.
+
+What you must not do in either case is borrow a neighbouring sub-vertical's chain. The
+stages of a depository's value chain are not a brokerage's, and an arrangement that looks
+plausible is worse than an absent one — it renders the client's own operating model back to
+them incorrectly, which is the fastest way to lose the page.
 
 ### A known flaw, so you can recognise it
 
