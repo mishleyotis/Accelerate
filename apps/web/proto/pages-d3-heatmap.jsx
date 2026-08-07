@@ -1266,22 +1266,19 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
   const mapped = new Set();
   for (const vc of chains) for (const s of subcapsForStage(entity, vc)) mapped.add(s.id);
 
-  /* Five stages, not thirty. A value chain read at thirty stages is a list of
-     process names, not a story about where the estate is strong; the five
-     with the deepest scored coverage are the ones a conversation can actually
-     use. Depth first, then the arrangement's own order so the five still read
-     as a sequence. The remainder is stated below the grid — a stage dropped
-     silently is a stage the reader believes does not exist. */
-  const SHOWN = 5;
-  const depthOf = (vc) => subcapsForStage(entity, vc).filter(s => s.score != null).length;
-  const shown = chains.length <= SHOWN ? chains
-    : chains
-        .map((vc, i) => ({ vc, i, depth: depthOf(vc) }))
-        .sort((a, b) => (b.depth - a.depth) || (a.i - b.i))
-        .slice(0, SHOWN)
-        .sort((a, b) => a.i - b.i)
-        .map(x => x.vc);
-  const hidden = chains.length - shown.length;
+  /* The whole arrangement, in its stated order. This used to draw the five
+     stages with the deepest scored coverage and print a line admitting to
+     twenty-five more, because the catalogue derived one stage per workbook
+     label — 48 for a credit union, of which the API served 30. That was the
+     right patch for the wrong layer: which processes an institution runs is
+     catalogue knowledge, and 0024 moved it there (eight per sub-vertical,
+     each folding the labels that name the same process). With the catalogue
+     holding an arrangement a reader can follow, the renderer's job is to draw
+     it — reordering by "depth" would break the sequence, which is the one
+     thing a value chain has that a grid does not. */
+
+  // How many mini-cells a stage tile's strip can hold and stay legible.
+  const STRIP = 12;
 
   return (
     <div>
@@ -1291,10 +1288,10 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
         <span className="spacer" />
         {/* Counted, not asserted: only the cells the stages actually name are
             arranged by process. */}
-        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{shown.length} of {chains.length} stages · {mapped.size} of {entity.subcaps.length} subcaps mapped</span>
+        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{chains.length} stages · {mapped.size} of {entity.subcaps.length} subcaps mapped</span>
       </div>
       <div className="g3" style={{ marginBottom: 14 }}>
-        {shown.map(vc => {
+        {chains.map(vc => {
           // Pick subcaps representative of value chain - sample from subcaps
           const subs = subcapsForStage(entity, vc);
           const scored = subs.filter(s => s.score != null);
@@ -1332,31 +1329,34 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
                   No cells mapped to this stage for this run.
                 </div>
               ) : (
-                <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(subs.length, 12)}, 1fr)`, gap: 2 }}>
-                  {subs.slice(0, 12).map(s => (
-                    <div key={s.id} className={`hm-cell b ${DMA.helpers.maturityClass(s.score)}`} style={{ height: 18, fontSize: 9, padding: 0, border: 0 }}
-                      title={subcapTipText(s)}
-                      onMouseEnter={cellTip.show(subcapTipText(s))}
-                      onMouseLeave={cellTip.hide}>
-                      {fx(s.score, 1)}
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(subs.length, STRIP)}, 1fr)`, gap: 2 }}>
+                    {subs.slice(0, STRIP).map(s => (
+                      <div key={s.id} className={`hm-cell b ${DMA.helpers.maturityClass(s.score)}`} style={{ height: 18, fontSize: 9, padding: 0, border: 0 }}
+                        title={subcapTipText(s)}
+                        onMouseEnter={cellTip.show(subcapTipText(s))}
+                        onMouseLeave={cellTip.hide}>
+                        {fx(s.score, 1)}
+                      </div>
+                    ))}
+                  </div>
+                  {/* A stage of 373 cells cannot draw 373 swatches in a tile,
+                      and a strip of twelve beside the figure "373 subcaps"
+                      reads as if those twelve WERE the stage. Say which twelve.
+                      The tile's score above is the mean of every scored cell in
+                      the stage, not of the strip — the strip is an opening, and
+                      the panel below holds all of them. */}
+                  {subs.length > STRIP ? (
+                    <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 5 }}>
+                      first {STRIP} cells by id · open the stage for all {subs.length}
                     </div>
-                  ))}
-                </div>
+                  ) : null}
+                </>
               )}
             </div>
           );
         })}
       </div>
-
-      {/* What the five leave out, stated. Arithmetic from the run, not a
-          rounded phrase: the reader can see the arrangement is larger than
-          what is drawn and by how much. */}
-      {hidden > 0 ? (
-        <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginBottom: 14 }}>
-          {hidden} further stage{hidden === 1 ? "" : "s"} tracked in this arrangement ·
-          shown here are the {shown.length} carrying the deepest scored coverage
-        </div>
-      ) : null}
 
       {selected ? (() => {
         const vc = chains.find(x => x.id === selected);

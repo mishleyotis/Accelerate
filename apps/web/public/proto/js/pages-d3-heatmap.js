@@ -2221,20 +2221,19 @@ function ValueChainView({
   const mapped = new Set();
   for (const vc of chains) for (const s of subcapsForStage(entity, vc)) mapped.add(s.id);
 
-  /* Five stages, not thirty. A value chain read at thirty stages is a list of
-     process names, not a story about where the estate is strong; the five
-     with the deepest scored coverage are the ones a conversation can actually
-     use. Depth first, then the arrangement's own order so the five still read
-     as a sequence. The remainder is stated below the grid — a stage dropped
-     silently is a stage the reader believes does not exist. */
-  const SHOWN = 5;
-  const depthOf = vc => subcapsForStage(entity, vc).filter(s => s.score != null).length;
-  const shown = chains.length <= SHOWN ? chains : chains.map((vc, i) => ({
-    vc,
-    i,
-    depth: depthOf(vc)
-  })).sort((a, b) => b.depth - a.depth || a.i - b.i).slice(0, SHOWN).sort((a, b) => a.i - b.i).map(x => x.vc);
-  const hidden = chains.length - shown.length;
+  /* The whole arrangement, in its stated order. This used to draw the five
+     stages with the deepest scored coverage and print a line admitting to
+     twenty-five more, because the catalogue derived one stage per workbook
+     label — 48 for a credit union, of which the API served 30. That was the
+     right patch for the wrong layer: which processes an institution runs is
+     catalogue knowledge, and 0024 moved it there (eight per sub-vertical,
+     each folding the labels that name the same process). With the catalogue
+     holding an arrangement a reader can follow, the renderer's job is to draw
+     it — reordering by "depth" would break the sequence, which is the one
+     thing a value chain has that a grid does not. */
+
+  // How many mini-cells a stage tile's strip can hold and stay legible.
+  const STRIP = 12;
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
@@ -2255,12 +2254,12 @@ function ValueChainView({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, shown.length, " of ", chains.length, " stages \xB7 ", mapped.size, " of ", entity.subcaps.length, " subcaps mapped")), /*#__PURE__*/React.createElement("div", {
+  }, chains.length, " stages \xB7 ", mapped.size, " of ", entity.subcaps.length, " subcaps mapped")), /*#__PURE__*/React.createElement("div", {
     className: "g3",
     style: {
       marginBottom: 14
     }
-  }, shown.map(vc => {
+  }, chains.map(vc => {
     // Pick subcaps representative of value chain - sample from subcaps
     const subs = subcapsForStage(entity, vc);
     const scored = subs.filter(s => s.score != null);
@@ -2315,13 +2314,13 @@ function ValueChainView({
         fontSize: 11,
         color: "var(--z-muted)"
       }
-    }, "No cells mapped to this stage for this run.") : /*#__PURE__*/React.createElement("div", {
+    }, "No cells mapped to this stage for this run.") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
       style: {
         display: "grid",
-        gridTemplateColumns: `repeat(${Math.min(subs.length, 12)}, 1fr)`,
+        gridTemplateColumns: `repeat(${Math.min(subs.length, STRIP)}, 1fr)`,
         gap: 2
       }
-    }, subs.slice(0, 12).map(s => /*#__PURE__*/React.createElement("div", {
+    }, subs.slice(0, STRIP).map(s => /*#__PURE__*/React.createElement("div", {
       key: s.id,
       className: `hm-cell b ${DMA.helpers.maturityClass(s.score)}`,
       style: {
@@ -2333,14 +2332,14 @@ function ValueChainView({
       title: subcapTipText(s),
       onMouseEnter: cellTip.show(subcapTipText(s)),
       onMouseLeave: cellTip.hide
-    }, fx(s.score, 1)))));
-  })), hidden > 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11.5,
-      color: "var(--z-muted)",
-      marginBottom: 14
-    }
-  }, hidden, " further stage", hidden === 1 ? "" : "s", " tracked in this arrangement \xB7 shown here are the ", shown.length, " carrying the deepest scored coverage") : null, selected ? (() => {
+    }, fx(s.score, 1)))), subs.length > STRIP ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)",
+        marginTop: 5
+      }
+    }, "first ", STRIP, " cells by id \xB7 open the stage for all ", subs.length) : null));
+  })), selected ? (() => {
     const vc = chains.find(x => x.id === selected);
     if (!vc) return null;
     const subs = subcapsForStage(entity, vc);
