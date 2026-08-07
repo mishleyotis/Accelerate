@@ -1103,6 +1103,12 @@ function buildLiveEntity(entityId, pages, extras) {
     insightCards: adaptInsights(secOf(insights, "insights"), recs, secOf(overview, "findings")),
     recommendations: adaptRecommendations(recs),
     platformStory: secOf(platform, "platform_story"),
+    // The roadmap's own stated reason for its ORDER, which lives on the
+    // section beside `phases` rather than on any one phase. adaptRoadmap
+    // returns the phase array, so this was dropped on the floor while the
+    // design's "sequencing rationale" strip under the chevrons had nothing to
+    // render and did not appear at all.
+    roadmapBasis: (secOf(platform, "roadmap") || {}).sequencing_basis || null,
     starters: (secOf(platform, "starters") || {}).starters || [],
     roadmap: adaptRoadmap(secOf(platform, "roadmap")),
     // data.js reads `stairstepClusters` and `valueChains`; this used to emit

@@ -478,7 +478,7 @@ function ClientPlatform({ entity, run }) {
                     </div>
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <div style={{ fontSize: 26, fontWeight: 200, color: composite === null ? "var(--z-muted)" : "var(--z-teal)", lineHeight: 1 }}>
+                    <div style={{ fontSize: 26, fontWeight: 200, color: composite === null ? "var(--z-muted)" : "var(--z-teal)", lineHeight: 1.15 }}>
                       {composite === null ? "—" : composite.toFixed(1)}
                     </div>
                     <div className="f-mono" style={{ fontSize: 9, color: "var(--z-muted)" }}>/100 fit</div>
@@ -636,7 +636,11 @@ function ClientPlatform({ entity, run }) {
                   // Computed-or-null: a delta exists only where both figures do,
                   // and it carries its own sign — no minus is prepended.
                   const delta = (cur !== null && peer !== null) ? Math.round((cur - peer) * 100) / 100 : null;
-                  const eids = g.e_ids.length ? g.e_ids : (evidenceByCell.get(String(g.subcap_id)) || []).slice(0, 3);
+                  /* A story row cites its own ids. A tile row cites none, so
+                     the column falls back to the evidence this run links to
+                     that cell — two of them, which is what the story rows
+                     carry, so the rows stay one line tall either way. */
+                  const eids = g.e_ids.length ? g.e_ids : (evidenceByCell.get(String(g.subcap_id)) || []).slice(0, 2);
                   /* Every peer figure on this run is absent with a stated
                      reason, so the column shows an em dash and carries the
                      reason in its tooltip — never the words "cannot estimate"
@@ -699,7 +703,8 @@ function ClientPlatform({ entity, run }) {
         <div className="card" style={{ flex: "1 1 300px", minWidth: 0, maxWidth: "100%" }}>
           <div className="row" style={{ marginBottom: 10, gap: 6 }}>
             <Icon name="shield" size={16} />
-            <div style={{ fontSize: 13, fontWeight: 600, flex: 1, minWidth: 0 }} className="txt-fit-1">Readiness · {selKey || "no platform"}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, flex: 1, minWidth: 0 }} className="txt-fit-1"
+              title={selKey ? `Readiness · ${selKey}` : ""}>Readiness · {selKey || "no platform"}</div>
             <span style={{ fontSize: 10, color: "var(--z-muted)", flexShrink: 0 }}>click a row to drill in</span>
           </div>
           {prereqRows.map((p, idx) => {
@@ -1120,11 +1125,33 @@ function StairstepCurve({ entity }) {
 
   const steps = C.steps;
   const n = steps.length;
+  /* The platform each rung is climbed with, on the same join the tiles use:
+     the rung's covered cells are filed under an L3 area by the run's own
+     recommendations and story rows, and one promoted tile leads on that area.
+     A rung whose cells resolve to no single area carries no platform label —
+     the design's "via SF" is worth having only where the run says which. */
+  const scope = platformScopeOf(entity.id);
+  const viaOf = (s) => {
+    const tally = new Map();
+    for (const id of (s && s.subcaps) || []) {
+      const hit = areaOfCell(scope.index, id);
+      if (!hit) continue;
+      tally.set(hit.area, (tally.get(hit.area) || 0) + 1);
+    }
+    if (!tally.size) return null;
+    const ranked = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+    if (ranked.length > 1 && ranked[0][1] === ranked[1][1]) return null;
+    const key = scope.platformOfArea.get(ranked[0][0]);
+    return key ? { platform: key, area: ranked[0][0] } : null;
+  };
   // Sized from the rung count, not a hardcoded four: a three- or five-rung
-  // ladder used to be squeezed into or spill out of four columns.
-  const W = 880, H = 420, padL = 60, padR = 40, padT = 40, padB = 70;
+  // ladder used to be squeezed into or spill out of four columns. The rungs
+  // climb to (i+1)/n of the plot height, so the last one reaches the top of
+  // the frame as it does in the design — at (i+1)/(n+1) the whole staircase
+  // sat in the lower two thirds with a band of empty chart above it.
+  const W = 880, H = 500, padL = 60, padR = 40, padT = 40, padB = 70;
   const stepW = (W - padL - padR) / n;
-  const stepY = (i) => H - padB - (i + 1) * (H - padT - padB) / (n + 1);
+  const stepY = (i) => H - padB - (i + 1) * (H - padT - padB) / n;
   const rungW = stepW - 8;
   const charsPerLine = Math.max(10, Math.floor(rungW / 5.9));
   const monoChars = Math.max(8, Math.floor(rungW / 5.7));
@@ -1157,8 +1184,11 @@ function StairstepCurve({ entity }) {
       {/* Was `grid: 1fr 300px` — the step list held 300px whatever the
           viewport, and the chart (an SVG that scales freely) was crushed
           beside it. Same flex-wrap sidebar pattern as the readiness column:
-          side by side while both fit, stacked below. */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 18 }}>
+          side by side while both fit, stacked below. alignItems start: the
+          chart box is an SVG with a fixed aspect ratio, so stretching it to
+          the rail's height added a band of empty gradient under the
+          staircase rather than a taller staircase. */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", gap: 18 }}>
         <div style={{ flex: "999 1 400px", minWidth: 0, maxWidth: "100%", background: "linear-gradient(180deg, var(--z-bg), #fff)", borderRadius: 10, padding: "16px 14px 12px", border: "1px solid var(--z-sep)", position: "relative", overflow: "hidden" }}>
           <img src={assetUrl("illo_curvesTR", "brand/illustrations/curves_topright.png")} alt="" style={{ position: "absolute", top: 0, right: 0, width: 320, height: "auto", opacity: .5, pointerEvents: "none" }} />
 
@@ -1176,6 +1206,7 @@ function StairstepCurve({ entity }) {
               const h = H - padB - y;
               const color = RUNG_COLORS[i % RUNG_COLORS.length];
               const lines = wrapSvgLabel(pfText(s.label), charsPerLine, 2);
+              const via = viaOf(s);
               // Cell count and effort only. The blocking findings are chips in
               // the list beside the chart: inside the rung they ran past both
               // edges of the rectangle, because a centred SVG string cannot be
@@ -1184,18 +1215,32 @@ function StairstepCurve({ entity }) {
                 (s.subcaps || []).length ? `${s.subcaps.length} cells` : null,
                 s.effort ? `effort ${s.effort}` : null,
               ].filter(Boolean).join(" · ");
+              /* SVG cannot clip a centred string to its box, so each line is
+                 admitted only if the rung is tall enough to hold it. The
+                 platform outranks the meta line: the cell count is also on the
+                 card beside the chart, and "via <platform>" is the one thing
+                 the rung says that nothing else on the row does. */
+              const top = y + 20 + lines.length * 14;
+              const viaFits = via && (top + 12 <= H - padB - 6);
+              const metaFits = meta && (top + (viaFits ? 12 : 0) + 12 <= H - padB - 6);
+              const clip = (t, max) => (t.length > max ? `${t.slice(0, max - 1)}…` : t);
               return (
                 <g key={i}>
-                  <title>{`Step ${s.m}: ${pfText(s.label) || ""}`}</title>
+                  <title>{`Step ${s.m}: ${pfText(s.label) || ""}${via ? ` · via ${via.platform} (${via.area})` : ""}`}</title>
                   <rect x={x} y={y} width={rungW} height={h} fill={color} rx="6" ry="6" />
                   <circle cx={x + 16} cy={y - 14} r="14" fill="#fff" stroke={color} strokeWidth="2.5" />
                   <text x={x + 16} y={y - 9} fontSize="13" fontWeight="700" fill={color} textAnchor="middle">{s.m}</text>
                   {lines.map((ln, k) => (
                     <text key={k} x={x + rungW / 2} y={y + 20 + k * 14} fontSize="11" fontWeight="600" fill="#fff" textAnchor="middle">{ln}</text>
                   ))}
-                  {meta ? (
-                    <text x={x + rungW / 2} y={y + 22 + lines.length * 14} fontSize="9" fill="rgba(255,255,255,.85)" textAnchor="middle" style={{ fontFamily: "var(--font-mono)" }}>
-                      {meta.length > monoChars ? `${meta.slice(0, monoChars - 1)}…` : meta}
+                  {viaFits ? (
+                    <text x={x + rungW / 2} y={top + 2} fontSize="9.5" fill="rgba(255,255,255,.92)" textAnchor="middle" style={{ fontFamily: "var(--font-mono)" }}>
+                      {clip(`via ${via.platform}`, monoChars)}
+                    </text>
+                  ) : null}
+                  {metaFits ? (
+                    <text x={x + rungW / 2} y={top + (viaFits ? 14 : 2)} fontSize="9" fill="rgba(255,255,255,.8)" textAnchor="middle" style={{ fontFamily: "var(--font-mono)" }}>
+                      {clip(meta, monoChars)}
                     </text>
                   ) : null}
                 </g>
@@ -1226,24 +1271,39 @@ function StairstepCurve({ entity }) {
           </svg>
         </div>
 
+        {/* The right rail is the design's list of the same rungs: a badge row,
+            the rung, and a line or two of what it unlocks. The note is clamped
+            rather than run in full — four unclamped notes made the rail twice
+            the height of the chart it annotates, which is what left the chart
+            floating in a band of empty card. */}
         <div style={{ flex: "1 1 280px", minWidth: 0, maxWidth: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
-          {steps.map((s, i) => (
-            <div key={i} style={{ padding: "10px 12px", background: i === currentIdx ? "var(--z-ice)" : "var(--z-bg)", borderRadius: 8, border: i === currentIdx ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)" }}>
-              <div className="row" style={{ marginBottom: 4, gap: 6, flexWrap: "wrap" }}>
-                <span className="b b-purple" style={{ flexShrink: 0 }}>Step {s.m}</span>
-                {i === currentIdx ? <span className="b b-teal" style={{ flexShrink: 0 }}>current</span> : null}
-                {s.effort ? <span className="b b-muted" style={{ flexShrink: 0 }} title="effort band">{pfText(s.effort)}</span> : null}
-                {(s.blocking || []).map(b => <span key={b} className="b b-org" style={{ flexShrink: 0 }} title="blocking finding">{pfText(b)}</span>)}
+          {steps.map((s, i) => {
+            const via = viaOf(s);
+            return (
+              <div key={i} style={{ padding: "10px 12px", background: i === currentIdx ? "var(--z-ice)" : "var(--z-bg)", borderRadius: 8, border: i === currentIdx ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)" }}>
+                <div className="row" style={{ marginBottom: 4, gap: 6, flexWrap: "wrap" }}>
+                  <span className="b b-purple" style={{ flexShrink: 0 }}>Step {s.m}</span>
+                  {i === currentIdx ? <span className="b b-teal" style={{ flexShrink: 0 }}>current</span> : null}
+                  {s.effort ? <span className="b b-muted" style={{ flexShrink: 0 }} title="effort band">{pfText(s.effort)}</span> : null}
+                  {(s.blocking || []).map(b => <span key={b} className="b b-org" style={{ flexShrink: 0 }} title="blocking finding">{pfText(b)}</span>)}
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.4 }}>{pfText(s.label)}</div>
+                {via ? (
+                  <div style={{ fontSize: 10, color: "var(--z-mid)", marginTop: 3 }}
+                    title={`This rung's cells are filed under ${via.area}, which ${via.platform} leads on`}>
+                    via {via.platform}
+                  </div>
+                ) : null}
+                {s.note ? (
+                  <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55, marginTop: 4 }}
+                    className="txt-fit-2" title={pfText(s.note) || ""}>{pfText(s.note)}</div>
+                ) : null}
+                {(s.subcaps || []).length ? (
+                  <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 4 }}>{s.subcaps.length} cells covered</div>
+                ) : null}
               </div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.4 }}>{pfText(s.label)}</div>
-              {s.note ? (
-                <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55, marginTop: 4 }}>{pfText(s.note)}</div>
-              ) : null}
-              {(s.subcaps || []).length ? (
-                <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 4 }}>{s.subcaps.length} cells covered</div>
-              ) : null}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
@@ -1272,6 +1332,10 @@ function TransformationRoadmap({ entity }) {
   const phaseRecs = (r) => (r.recs || []).map(rid => recs.find(x => x.id === rid)).filter(Boolean);
   const impactRows = roadmap.reduce((a, r) => a + phaseRecs(r)
     .reduce((b, rec) => b + (rec.dma_impact || []).length, 0), 0);
+  // The section states its sequencing basis beside `phases`, so it reaches the
+  // page through the entity rather than through the phase array.
+  const basis = (typeof window !== "undefined" && window.DMA_ENTITY
+    && window.DMA_ENTITY.roadmapBasis) || null;
 
   return (
     <div className="card" style={{ marginBottom: 16 }}>
@@ -1306,13 +1370,60 @@ function TransformationRoadmap({ entity }) {
           so the view is gone rather than re-dressed. What the run does state
           about movement is per-cell, and that is the Cell impact view. */}
       {view === "chevrons"
-        ? <ChevronView roadmap={roadmap} recs={recs} openRec={openRec} />
+        ? <ChevronView roadmap={roadmap} recs={recs} openRec={openRec} phaseRecs={phaseRecs} />
         : <CellImpactView roadmap={roadmap} phaseRecs={phaseRecs} openRec={openRec} impactRows={impactRows} />}
+
+      {/* The design's rationale strip under the chevrons. `sequencing_basis`
+          is the roadmap section's own answer to "why this order", stated once
+          for the whole plan rather than per phase — it sat unread in the
+          payload because the adapter returned only the phase array. */}
+      {basis ? (
+        <div className="co co-teal" style={{ marginTop: 14 }}>
+          <Icon name="info" size={14} />
+          <div>
+            <div className="co-title">Sequencing rationale</div>
+            <div className="co-body">{pfText(basis)}</div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
 
-function ChevronView({ roadmap, recs, openRec }) {
+/* Per phase, the facts the design's card carries — each computed from what the
+   phase's own recommendations state, and each omitted where they state
+   nothing. The roadmap contract itself has no platform, target or metric
+   field: those belong to the recommendations a phase contains, which is why
+   reading them off the phase produced three empty labels under three
+   headings. */
+function phaseFacts(rs) {
+  const areas = [];
+  const metrics = [];
+  const impacts = [];
+  for (const rec of rs || []) {
+    if (rec.l3 && !areas.includes(rec.l3)) areas.push(rec.l3);
+    const m = rec.kpi && rec.kpi.metric ? pfText(rec.kpi.metric) : null;
+    if (m && !metrics.includes(m)) metrics.push(m);
+    for (const im of rec.dma_impact || []) impacts.push(im);
+  }
+  const deltas = impacts.map(im => pfNum(im.delta)).filter(d => d !== null);
+  const bases = [];
+  for (const im of impacts) {
+    if (im.target_basis && !bases.includes(im.target_basis)) bases.push(im.target_basis);
+  }
+  // Computed-or-null: the movement line exists only where cells state one.
+  let move = null;
+  if (impacts.length) {
+    const lo = deltas.length ? Math.min(...deltas) : null;
+    const hi = deltas.length ? Math.max(...deltas) : null;
+    const span = lo === null ? null
+      : (lo === hi ? `+${lo.toFixed(1)}` : `+${lo.toFixed(1)} to +${hi.toFixed(1)}`);
+    move = `${impacts.length} cell${impacts.length === 1 ? "" : "s"}${span ? ` · ${span} projected` : ""}`;
+  }
+  return { areas, metrics, move, bases };
+}
+
+function ChevronView({ roadmap, recs, openRec, phaseRecs }) {
   return (
     /* One fluid column per phase, each carrying its own chevron header AND its
        own content card. This used to be two parallel `repeat(N, 1fr)` grids —
@@ -1321,7 +1432,10 @@ function ChevronView({ roadmap, recs, openRec }) {
        chevrons drifting away from their phases. Whole phases wrap together
        instead, and only when a column would drop below a readable width. */
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 230px), 1fr))", gap: 12 }}>
-      {roadmap.map((r, i) => (
+      {roadmap.map((r, i) => {
+      const rs = phaseRecs ? phaseRecs(r) : (r.recs || []).map(rid => recs.find(x => x.id === rid)).filter(Boolean);
+      const facts = phaseFacts(rs);
+      return (
         <div key={r.phase} style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 12 }}>
           <div style={{
             background: r.color,
@@ -1344,20 +1458,45 @@ function ChevronView({ roadmap, recs, openRec }) {
 
           {/* flex: 1 keeps the cards in a row the same height. */}
           <div style={{ background: r.color, borderRadius: 8, padding: 14, color: "#fff", flex: 1 }}>
-            {/* Platform, target maturity and success metric are not fields of the
-                roadmap contract — a phase carries its horizon, its rationale and
-                its recommendation ids. They rendered as three empty labels under
-                three headings. The phase's own rationale is what belongs here. */}
-            {r.rationale ? (
+            {/* The design's card reads PLATFORM · TARGET MATURITY · SUCCESS
+                METRIC · RECOMMENDATIONS. None of those is a field of the
+                roadmap contract — a phase states its horizon, its rationale,
+                its dependencies and its recommendation ids — so each slot is
+                filled from the phase's own recommendations, and a slot they
+                say nothing about is left out rather than headed and empty.
+                "Platform areas" and not "Platform": the L3 area is what a
+                recommendation names, and naming a vendor here would be this
+                page's one invented mapping. */}
+            {facts.areas.length ? (
               <>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Why this phase</div>
-                <div style={{ fontSize: 12, marginBottom: 10, lineHeight: 1.5 }}>{pfText(r.rationale)}</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Platform areas</div>
+                {/* Two lines: a phase carrying four areas made this slot
+                    taller than the recommendations it heads. */}
+                <div style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 10, lineHeight: 1.4 }}
+                  className="txt-fit-2" title={facts.areas.join(" · ")}>{facts.areas.join(" · ")}</div>
               </>
             ) : null}
-            {(r.depends_on || []).length ? (
+            {facts.move ? (
               <>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Depends on</div>
-                <div style={{ fontSize: 12, marginBottom: 10 }}>{r.depends_on.join(" · ")}</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Target maturity</div>
+                <div style={{ fontSize: 12.5, marginBottom: 10, color: "var(--z-mint-lt)" }}
+                  title={facts.bases.join("\n") || "Projected movement, from the recommendations' own stated targets"}>{facts.move}</div>
+              </>
+            ) : null}
+            {facts.metrics.length ? (
+              <>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Success metric</div>
+                {/* Three, then a count. Every metric is one recommendation's
+                    KPI and they are all openable on the card above; a phase
+                    with four of them turned this slot into a list. */}
+                <div style={{ fontSize: 12, marginBottom: 10, lineHeight: 1.5 }}>
+                  {facts.metrics.slice(0, 3).map((m, k) => <div key={k} style={{ marginBottom: 2 }}>{m}</div>)}
+                  {facts.metrics.length > 3 ? (
+                    <div style={{ color: "rgba(255,255,255,.75)", marginTop: 2 }} title={facts.metrics.slice(3).join("\n")}>
+                      +{facts.metrics.length - 3} more
+                    </div>
+                  ) : null}
+                </div>
               </>
             ) : null}
 
@@ -1384,9 +1523,30 @@ function ChevronView({ roadmap, recs, openRec }) {
                 );
               })}
             </div>
+
+            {/* The phase's own reason and its predecessors, under the four
+                slots the design leads with rather than above them: the
+                rationale is a paragraph, and at the top of the card it pushed
+                every structured fact below the fold of a 230px column. */}
+            {r.rationale || (r.depends_on || []).length ? (
+              <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,.2)" }}>
+                {(r.depends_on || []).length ? (
+                  <div style={{ fontSize: 10.5, color: "rgba(255,255,255,.8)", marginBottom: 6 }}>
+                    Depends on {r.depends_on.join(" · ")}
+                  </div>
+                ) : null}
+                {r.rationale ? (
+                  <>
+                    <div style={{ fontSize: 10, color: "rgba(255,255,255,.7)", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 4 }}>Why this phase</div>
+                    <div style={{ fontSize: 11.5, lineHeight: 1.5 }} className="txt-fit-3" title={pfText(r.rationale) || ""}>{pfText(r.rationale)}</div>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
-      ))}
+      );
+      })}
     </div>
   );
 }

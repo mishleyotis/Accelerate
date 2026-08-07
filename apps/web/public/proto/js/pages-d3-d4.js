@@ -608,7 +608,7 @@ function ClientPlatform({
         fontSize: 26,
         fontWeight: 200,
         color: composite === null ? "var(--z-muted)" : "var(--z-teal)",
-        lineHeight: 1
+        lineHeight: 1.15
       }
     }, composite === null ? "—" : composite.toFixed(1)), /*#__PURE__*/React.createElement("div", {
       className: "f-mono",
@@ -867,7 +867,11 @@ function ClientPlatform({
     // Computed-or-null: a delta exists only where both figures do,
     // and it carries its own sign — no minus is prepended.
     const delta = cur !== null && peer !== null ? Math.round((cur - peer) * 100) / 100 : null;
-    const eids = g.e_ids.length ? g.e_ids : (evidenceByCell.get(String(g.subcap_id)) || []).slice(0, 3);
+    /* A story row cites its own ids. A tile row cites none, so
+       the column falls back to the evidence this run links to
+       that cell — two of them, which is what the story rows
+       carry, so the rows stay one line tall either way. */
+    const eids = g.e_ids.length ? g.e_ids : (evidenceByCell.get(String(g.subcap_id)) || []).slice(0, 2);
     /* Every peer figure on this run is absent with a stated
        reason, so the column shows an em dash and carries the
        reason in its tooltip — never the words "cannot estimate"
@@ -975,7 +979,8 @@ function ClientPlatform({
       flex: 1,
       minWidth: 0
     },
-    className: "txt-fit-1"
+    className: "txt-fit-1",
+    title: selKey ? `Readiness · ${selKey}` : ""
   }, "Readiness \xB7 ", selKey || "no platform"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
@@ -1754,16 +1759,41 @@ function StairstepCurve({
   }
   const steps = C.steps;
   const n = steps.length;
+  /* The platform each rung is climbed with, on the same join the tiles use:
+     the rung's covered cells are filed under an L3 area by the run's own
+     recommendations and story rows, and one promoted tile leads on that area.
+     A rung whose cells resolve to no single area carries no platform label —
+     the design's "via SF" is worth having only where the run says which. */
+  const scope = platformScopeOf(entity.id);
+  const viaOf = s => {
+    const tally = new Map();
+    for (const id of s && s.subcaps || []) {
+      const hit = areaOfCell(scope.index, id);
+      if (!hit) continue;
+      tally.set(hit.area, (tally.get(hit.area) || 0) + 1);
+    }
+    if (!tally.size) return null;
+    const ranked = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+    if (ranked.length > 1 && ranked[0][1] === ranked[1][1]) return null;
+    const key = scope.platformOfArea.get(ranked[0][0]);
+    return key ? {
+      platform: key,
+      area: ranked[0][0]
+    } : null;
+  };
   // Sized from the rung count, not a hardcoded four: a three- or five-rung
-  // ladder used to be squeezed into or spill out of four columns.
+  // ladder used to be squeezed into or spill out of four columns. The rungs
+  // climb to (i+1)/n of the plot height, so the last one reaches the top of
+  // the frame as it does in the design — at (i+1)/(n+1) the whole staircase
+  // sat in the lower two thirds with a band of empty chart above it.
   const W = 880,
-    H = 420,
+    H = 500,
     padL = 60,
     padR = 40,
     padT = 40,
     padB = 70;
   const stepW = (W - padL - padR) / n;
-  const stepY = i => H - padB - (i + 1) * (H - padT - padB) / (n + 1);
+  const stepY = i => H - padB - (i + 1) * (H - padT - padB) / n;
   const rungW = stepW - 8;
   const charsPerLine = Math.max(10, Math.floor(rungW / 5.9));
   const monoChars = Math.max(8, Math.floor(rungW / 5.7));
@@ -1820,6 +1850,7 @@ function StairstepCurve({
     style: {
       display: "flex",
       flexWrap: "wrap",
+      alignItems: "flex-start",
       gap: 18
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -1889,14 +1920,24 @@ function StairstepCurve({
     const h = H - padB - y;
     const color = RUNG_COLORS[i % RUNG_COLORS.length];
     const lines = wrapSvgLabel(pfText(s.label), charsPerLine, 2);
+    const via = viaOf(s);
     // Cell count and effort only. The blocking findings are chips in
     // the list beside the chart: inside the rung they ran past both
     // edges of the rectangle, because a centred SVG string cannot be
     // clipped to its box.
     const meta = [(s.subcaps || []).length ? `${s.subcaps.length} cells` : null, s.effort ? `effort ${s.effort}` : null].filter(Boolean).join(" · ");
+    /* SVG cannot clip a centred string to its box, so each line is
+       admitted only if the rung is tall enough to hold it. The
+       platform outranks the meta line: the cell count is also on the
+       card beside the chart, and "via <platform>" is the one thing
+       the rung says that nothing else on the row does. */
+    const top = y + 20 + lines.length * 14;
+    const viaFits = via && top + 12 <= H - padB - 6;
+    const metaFits = meta && top + (viaFits ? 12 : 0) + 12 <= H - padB - 6;
+    const clip = (t, max) => t.length > max ? `${t.slice(0, max - 1)}…` : t;
     return /*#__PURE__*/React.createElement("g", {
       key: i
-    }, /*#__PURE__*/React.createElement("title", null, `Step ${s.m}: ${pfText(s.label) || ""}`), /*#__PURE__*/React.createElement("rect", {
+    }, /*#__PURE__*/React.createElement("title", null, `Step ${s.m}: ${pfText(s.label) || ""}${via ? ` · via ${via.platform} (${via.area})` : ""}`), /*#__PURE__*/React.createElement("rect", {
       x: x,
       y: y,
       width: rungW,
@@ -1926,16 +1967,25 @@ function StairstepCurve({
       fontWeight: "600",
       fill: "#fff",
       textAnchor: "middle"
-    }, ln)), meta ? /*#__PURE__*/React.createElement("text", {
+    }, ln)), viaFits ? /*#__PURE__*/React.createElement("text", {
       x: x + rungW / 2,
-      y: y + 22 + lines.length * 14,
-      fontSize: "9",
-      fill: "rgba(255,255,255,.85)",
+      y: top + 2,
+      fontSize: "9.5",
+      fill: "rgba(255,255,255,.92)",
       textAnchor: "middle",
       style: {
         fontFamily: "var(--font-mono)"
       }
-    }, meta.length > monoChars ? `${meta.slice(0, monoChars - 1)}…` : meta) : null);
+    }, clip(`via ${via.platform}`, monoChars)) : null, metaFits ? /*#__PURE__*/React.createElement("text", {
+      x: x + rungW / 2,
+      y: top + (viaFits ? 14 : 2),
+      fontSize: "9",
+      fill: "rgba(255,255,255,.8)",
+      textAnchor: "middle",
+      style: {
+        fontFamily: "var(--font-mono)"
+      }
+    }, clip(meta, monoChars)) : null);
   }), steps.slice(0, -1).map((s, i) => {
     const x1 = padL + (i + 1) * stepW - 8;
     const y1 = stepY(i);
@@ -1982,65 +2032,77 @@ function StairstepCurve({
       flexDirection: "column",
       gap: 8
     }
-  }, steps.map((s, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      padding: "10px 12px",
-      background: i === currentIdx ? "var(--z-ice)" : "var(--z-bg)",
-      borderRadius: 8,
-      border: i === currentIdx ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      marginBottom: 4,
-      gap: 6,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "b b-purple",
-    style: {
-      flexShrink: 0
-    }
-  }, "Step ", s.m), i === currentIdx ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-teal",
-    style: {
-      flexShrink: 0
-    }
-  }, "current") : null, s.effort ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-muted",
-    style: {
-      flexShrink: 0
-    },
-    title: "effort band"
-  }, pfText(s.effort)) : null, (s.blocking || []).map(b => /*#__PURE__*/React.createElement("span", {
-    key: b,
-    className: "b b-org",
-    style: {
-      flexShrink: 0
-    },
-    title: "blocking finding"
-  }, pfText(b)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      fontWeight: 600,
-      color: "var(--z-dark)",
-      lineHeight: 1.4
-    }
-  }, pfText(s.label)), s.note ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11.5,
-      color: "var(--z-body)",
-      lineHeight: 1.55,
-      marginTop: 4
-    }
-  }, pfText(s.note)) : null, (s.subcaps || []).length ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)",
-      marginTop: 4
-    }
-  }, s.subcaps.length, " cells covered") : null)))));
+  }, steps.map((s, i) => {
+    const via = viaOf(s);
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        padding: "10px 12px",
+        background: i === currentIdx ? "var(--z-ice)" : "var(--z-bg)",
+        borderRadius: 8,
+        border: i === currentIdx ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        marginBottom: 4,
+        gap: 6,
+        flexWrap: "wrap"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "b b-purple",
+      style: {
+        flexShrink: 0
+      }
+    }, "Step ", s.m), i === currentIdx ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-teal",
+      style: {
+        flexShrink: 0
+      }
+    }, "current") : null, s.effort ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-muted",
+      style: {
+        flexShrink: 0
+      },
+      title: "effort band"
+    }, pfText(s.effort)) : null, (s.blocking || []).map(b => /*#__PURE__*/React.createElement("span", {
+      key: b,
+      className: "b b-org",
+      style: {
+        flexShrink: 0
+      },
+      title: "blocking finding"
+    }, pfText(b)))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        fontWeight: 600,
+        color: "var(--z-dark)",
+        lineHeight: 1.4
+      }
+    }, pfText(s.label)), via ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "var(--z-mid)",
+        marginTop: 3
+      },
+      title: `This rung's cells are filed under ${via.area}, which ${via.platform} leads on`
+    }, "via ", via.platform) : null, s.note ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: "var(--z-body)",
+        lineHeight: 1.55,
+        marginTop: 4
+      },
+      className: "txt-fit-2",
+      title: pfText(s.note) || ""
+    }, pfText(s.note)) : null, (s.subcaps || []).length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)",
+        marginTop: 4
+      }
+    }, s.subcaps.length, " cells covered") : null);
+  }))));
 }
 
 /* ── Transformation Roadmap (Pattern J: phase chevrons) ─────────── */
@@ -2082,6 +2144,9 @@ function TransformationRoadmap({
   }
   const phaseRecs = r => (r.recs || []).map(rid => recs.find(x => x.id === rid)).filter(Boolean);
   const impactRows = roadmap.reduce((a, r) => a + phaseRecs(r).reduce((b, rec) => b + (rec.dma_impact || []).length, 0), 0);
+  // The section states its sequencing basis beside `phases`, so it reaches the
+  // page through the entity rather than through the phase array.
+  const basis = typeof window !== "undefined" && window.DMA_ENTITY && window.DMA_ENTITY.roadmapBasis || null;
   return /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
@@ -2146,18 +2211,69 @@ function TransformationRoadmap({
   }), " Export")), view === "chevrons" ? /*#__PURE__*/React.createElement(ChevronView, {
     roadmap: roadmap,
     recs: recs,
-    openRec: openRec
+    openRec: openRec,
+    phaseRecs: phaseRecs
   }) : /*#__PURE__*/React.createElement(CellImpactView, {
     roadmap: roadmap,
     phaseRecs: phaseRecs,
     openRec: openRec,
     impactRows: impactRows
-  }));
+  }), basis ? /*#__PURE__*/React.createElement("div", {
+    className: "co co-teal",
+    style: {
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "info",
+    size: 14
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "co-title"
+  }, "Sequencing rationale"), /*#__PURE__*/React.createElement("div", {
+    className: "co-body"
+  }, pfText(basis)))) : null);
+}
+
+/* Per phase, the facts the design's card carries — each computed from what the
+   phase's own recommendations state, and each omitted where they state
+   nothing. The roadmap contract itself has no platform, target or metric
+   field: those belong to the recommendations a phase contains, which is why
+   reading them off the phase produced three empty labels under three
+   headings. */
+function phaseFacts(rs) {
+  const areas = [];
+  const metrics = [];
+  const impacts = [];
+  for (const rec of rs || []) {
+    if (rec.l3 && !areas.includes(rec.l3)) areas.push(rec.l3);
+    const m = rec.kpi && rec.kpi.metric ? pfText(rec.kpi.metric) : null;
+    if (m && !metrics.includes(m)) metrics.push(m);
+    for (const im of rec.dma_impact || []) impacts.push(im);
+  }
+  const deltas = impacts.map(im => pfNum(im.delta)).filter(d => d !== null);
+  const bases = [];
+  for (const im of impacts) {
+    if (im.target_basis && !bases.includes(im.target_basis)) bases.push(im.target_basis);
+  }
+  // Computed-or-null: the movement line exists only where cells state one.
+  let move = null;
+  if (impacts.length) {
+    const lo = deltas.length ? Math.min(...deltas) : null;
+    const hi = deltas.length ? Math.max(...deltas) : null;
+    const span = lo === null ? null : lo === hi ? `+${lo.toFixed(1)}` : `+${lo.toFixed(1)} to +${hi.toFixed(1)}`;
+    move = `${impacts.length} cell${impacts.length === 1 ? "" : "s"}${span ? ` · ${span} projected` : ""}`;
+  }
+  return {
+    areas,
+    metrics,
+    move,
+    bases
+  };
 }
 function ChevronView({
   roadmap,
   recs,
-  openRec
+  openRec,
+  phaseRecs
 }) {
   return (
     /*#__PURE__*/
@@ -2173,150 +2289,211 @@ function ChevronView({
         gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 230px), 1fr))",
         gap: 12
       }
-    }, roadmap.map((r, i) => /*#__PURE__*/React.createElement("div", {
-      key: r.phase,
-      style: {
-        minWidth: 0,
-        display: "flex",
-        flexDirection: "column",
-        gap: 12
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: r.color,
-        clipPath: i === roadmap.length - 1 ? "polygon(0 0, 100% 0, 100% 100%, 0 100%, 4% 50%)" : "polygon(0 0, 96% 0, 100% 50%, 96% 100%, 0 100%, 4% 50%)",
-        color: "#fff",
-        padding: "10px 22px",
-        fontSize: 12.5,
-        fontWeight: 600,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 8
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        opacity: .8,
-        letterSpacing: ".08em",
-        textTransform: "uppercase"
-      }
-    }, "Phase ", r.phase), /*#__PURE__*/React.createElement("div", null, r.label)), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        opacity: .85,
-        textAlign: "right",
-        flexShrink: 0
-      }
-    }, (r.recs || []).length, " rec", (r.recs || []).length === 1 ? "" : "s")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: r.color,
-        borderRadius: 8,
-        padding: 14,
-        color: "#fff",
-        flex: 1
-      }
-    }, r.rationale ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: "rgba(255,255,255,.7)",
-        letterSpacing: ".06em",
-        textTransform: "uppercase",
-        marginBottom: 4
-      }
-    }, "Why this phase"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        marginBottom: 10,
-        lineHeight: 1.5
-      }
-    }, pfText(r.rationale))) : null, (r.depends_on || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: "rgba(255,255,255,.7)",
-        letterSpacing: ".06em",
-        textTransform: "uppercase",
-        marginBottom: 4
-      }
-    }, "Depends on"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        marginBottom: 10
-      }
-    }, r.depends_on.join(" · "))) : null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: "rgba(255,255,255,.7)",
-        letterSpacing: ".06em",
-        textTransform: "uppercase",
-        marginBottom: 6
-      }
-    }, "Recommendations"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 4
-      }
-    }, (r.recs || []).map(rid => {
-      const rec = recs.find(x => x.id === rid);
-      return rec ? /*#__PURE__*/React.createElement("button", {
-        key: rid,
-        onClick: e => {
-          e.stopPropagation();
-          openRec(rid);
-        }
-        /* The title ellipsises to one line by design; without this
-           the rest of the sentence is unreachable by any means. */,
-        title: `${rec.id} · ${pfText(rec.title) || ""}`,
+    }, roadmap.map((r, i) => {
+      const rs = phaseRecs ? phaseRecs(r) : (r.recs || []).map(rid => recs.find(x => x.id === rid)).filter(Boolean);
+      const facts = phaseFacts(rs);
+      return /*#__PURE__*/React.createElement("div", {
+        key: r.phase,
         style: {
-          padding: "6px 8px",
-          background: "rgba(255,255,255,.14)",
-          borderRadius: 5,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: 12
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          background: r.color,
+          clipPath: i === roadmap.length - 1 ? "polygon(0 0, 100% 0, 100% 100%, 0 100%, 4% 50%)" : "polygon(0 0, 96% 0, 100% 50%, 96% 100%, 0 100%, 4% 50%)",
+          color: "#fff",
+          padding: "10px 22px",
+          fontSize: 12.5,
+          fontWeight: 600,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          gap: 6,
-          border: 0,
-          color: "#fff",
-          textAlign: "left",
-          cursor: "pointer",
-          transition: "background 120ms"
-        },
-        onMouseEnter: e => e.currentTarget.style.background = "rgba(255,255,255,.22)",
-        onMouseLeave: e => e.currentTarget.style.background = "rgba(255,255,255,.14)"
-      }, /*#__PURE__*/React.createElement("span", {
+          gap: 8
+        }
+      }, /*#__PURE__*/React.createElement("div", {
         style: {
-          fontSize: 10.5,
-          fontWeight: 600,
+          minWidth: 0
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          opacity: .8,
+          letterSpacing: ".08em",
+          textTransform: "uppercase"
+        }
+      }, "Phase ", r.phase), /*#__PURE__*/React.createElement("div", null, r.label)), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          opacity: .85,
+          textAlign: "right",
           flexShrink: 0
         }
-      }, rec.id), /*#__PURE__*/React.createElement("span", {
+      }, (r.recs || []).length, " rec", (r.recs || []).length === 1 ? "" : "s")), /*#__PURE__*/React.createElement("div", {
         style: {
-          fontSize: 10.5,
-          color: "rgba(255,255,255,.85)",
-          flex: 1,
-          minWidth: 0
-        },
-        className: "txt-trunc"
-      }, pfText(rec.title)), /*#__PURE__*/React.createElement(Icon, {
-        name: "arrow-r",
-        size: 11
-      })) :
-      /*#__PURE__*/
-      /* A phase that names a recommendation this run did not serve
-         says so — it used to render nothing at all. */
-      React.createElement("span", {
-        key: rid,
-        style: {
-          fontSize: 10.5,
-          color: "rgba(255,255,255,.7)"
+          background: r.color,
+          borderRadius: 8,
+          padding: 14,
+          color: "#fff",
+          flex: 1
         }
-      }, rid, " \xB7 not served in this run");
-    }))))))
+      }, facts.areas.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: "rgba(255,255,255,.7)",
+          letterSpacing: ".06em",
+          textTransform: "uppercase",
+          marginBottom: 4
+        }
+      }, "Platform areas"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12.5,
+          fontWeight: 600,
+          marginBottom: 10,
+          lineHeight: 1.4
+        },
+        className: "txt-fit-2",
+        title: facts.areas.join(" · ")
+      }, facts.areas.join(" · "))) : null, facts.move ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: "rgba(255,255,255,.7)",
+          letterSpacing: ".06em",
+          textTransform: "uppercase",
+          marginBottom: 4
+        }
+      }, "Target maturity"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12.5,
+          marginBottom: 10,
+          color: "var(--z-mint-lt)"
+        },
+        title: facts.bases.join("\n") || "Projected movement, from the recommendations' own stated targets"
+      }, facts.move)) : null, facts.metrics.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: "rgba(255,255,255,.7)",
+          letterSpacing: ".06em",
+          textTransform: "uppercase",
+          marginBottom: 4
+        }
+      }, "Success metric"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12,
+          marginBottom: 10,
+          lineHeight: 1.5
+        }
+      }, facts.metrics.slice(0, 3).map((m, k) => /*#__PURE__*/React.createElement("div", {
+        key: k,
+        style: {
+          marginBottom: 2
+        }
+      }, m)), facts.metrics.length > 3 ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          color: "rgba(255,255,255,.75)",
+          marginTop: 2
+        },
+        title: facts.metrics.slice(3).join("\n")
+      }, "+", facts.metrics.length - 3, " more") : null)) : null, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: "rgba(255,255,255,.7)",
+          letterSpacing: ".06em",
+          textTransform: "uppercase",
+          marginBottom: 6
+        }
+      }, "Recommendations"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          flexDirection: "column",
+          gap: 4
+        }
+      }, (r.recs || []).map(rid => {
+        const rec = recs.find(x => x.id === rid);
+        return rec ? /*#__PURE__*/React.createElement("button", {
+          key: rid,
+          onClick: e => {
+            e.stopPropagation();
+            openRec(rid);
+          }
+          /* The title ellipsises to one line by design; without this
+             the rest of the sentence is unreachable by any means. */,
+          title: `${rec.id} · ${pfText(rec.title) || ""}`,
+          style: {
+            padding: "6px 8px",
+            background: "rgba(255,255,255,.14)",
+            borderRadius: 5,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 6,
+            border: 0,
+            color: "#fff",
+            textAlign: "left",
+            cursor: "pointer",
+            transition: "background 120ms"
+          },
+          onMouseEnter: e => e.currentTarget.style.background = "rgba(255,255,255,.22)",
+          onMouseLeave: e => e.currentTarget.style.background = "rgba(255,255,255,.14)"
+        }, /*#__PURE__*/React.createElement("span", {
+          style: {
+            fontSize: 10.5,
+            fontWeight: 600,
+            flexShrink: 0
+          }
+        }, rec.id), /*#__PURE__*/React.createElement("span", {
+          style: {
+            fontSize: 10.5,
+            color: "rgba(255,255,255,.85)",
+            flex: 1,
+            minWidth: 0
+          },
+          className: "txt-trunc"
+        }, pfText(rec.title)), /*#__PURE__*/React.createElement(Icon, {
+          name: "arrow-r",
+          size: 11
+        })) :
+        /*#__PURE__*/
+        /* A phase that names a recommendation this run did not serve
+           says so — it used to render nothing at all. */
+        React.createElement("span", {
+          key: rid,
+          style: {
+            fontSize: 10.5,
+            color: "rgba(255,255,255,.7)"
+          }
+        }, rid, " \xB7 not served in this run");
+      })), r.rationale || (r.depends_on || []).length ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          marginTop: 12,
+          paddingTop: 10,
+          borderTop: "1px solid rgba(255,255,255,.2)"
+        }
+      }, (r.depends_on || []).length ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10.5,
+          color: "rgba(255,255,255,.8)",
+          marginBottom: 6
+        }
+      }, "Depends on ", r.depends_on.join(" · ")) : null, r.rationale ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: "rgba(255,255,255,.7)",
+          letterSpacing: ".06em",
+          textTransform: "uppercase",
+          marginBottom: 4
+        }
+      }, "Why this phase"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11.5,
+          lineHeight: 1.5
+        },
+        className: "txt-fit-3",
+        title: pfText(r.rationale) || ""
+      }, pfText(r.rationale))) : null) : null));
+    }))
   );
 }
 
