@@ -12,9 +12,13 @@ Usage:
 
 Grain ids are derived from the Sub_Cap_ID itself (P1C2.3.4 → pillar P1,
 category P1C2, capability P1C2.3): the id system IS the taxonomy (V7
-schema §03). ccg_value_chains is derived from the VC mapping tab: one
-chain per sub-vertical, stages ordered by first appearance over subcaps
-sorted by id — deterministic and re-runnable.
+schema §03). ccg_value_chains is derived from the VC mapping tab, through
+the curated arrangement in `value_chains.py`: eight client-legible stages
+per sub-vertical, each folding the workbook labels that name the same
+process, markers dropped. A sub-vertical the arrangement does not know
+falls back to the original derivation (distinct labels in first-appearance
+order over subcaps sorted by id). Either way, deterministic and
+re-runnable.
 """
 import argparse
 import re
@@ -32,6 +36,7 @@ from .parsers import (
     parse_completeness, parse_theme_mapping, parse_toggle_cascade,
     parse_user_stories, parse_vc_mapping,
 )
+from .value_chains import arrangement, curate_row, has_arrangement
 
 PILLAR_RE = re.compile(r"Pillar[_ ](\d)")
 
@@ -199,21 +204,48 @@ def main() -> int:
             print(f"{table}: {dropped} duplicate rows across workbooks collapsed")
         collected[table] = unique
 
-    # Derive ccg_value_chains from the mapping: one chain per sub-vertical,
-    # stages ordered by first appearance over subcaps sorted by id.
+    # ── The value-chain arrangement ──────────────────────────────────
+    # Curate the workbook's stage labels into the arrangement a client
+    # reads (value_chains.ARRANGEMENTS), then derive the stage rows from
+    # THAT. Both tables move together because the join between them is by
+    # NAME: renaming ccg_value_chains alone would empty every stage.
+    #
+    # A sub-vertical with no curated arrangement keeps the old derivation
+    # — distinct labels in first-appearance order over subcaps sorted by
+    # id — so an unrecognised code still loads something rather than
+    # nothing.
+    curated = folded = 0
+    for row in collected["ccg_vc_mapping"]:
+        sv = row["subvertical_code"]
+        if not has_arrangement(sv):
+            continue
+        before = list(row["value_chain_stages"] or ())
+        row["value_chain_stages"] = curate_row(sv, before)
+        curated += 1
+        folded += len(before) - len(row["value_chain_stages"])
+    if curated:
+        print(f"ccg_vc_mapping: {curated} rows curated, "
+              f"{folded} label references folded or dropped as markers")
+
     chains: list[dict] = []
     by_sv: dict[str, list] = {}
     for row in sorted(collected["ccg_vc_mapping"], key=lambda r: r["subcap_id"]):
         by_sv.setdefault(row["subvertical_code"], []).append(row)
     for sv, rows in sorted(by_sv.items()):
-        order: list[str] = []
-        for r in rows:
-            for stage in r["value_chain_stages"]:
-                if stage not in order:
-                    order.append(stage)
-        for i, stage in enumerate(order, 1):
+        if has_arrangement(sv):
+            stages = [(s["stage_order"], s["name"], s["source_stages"])
+                      for s in arrangement(sv)]
+        else:
+            order: list[str] = []
+            for r in rows:
+                for stage in r["value_chain_stages"]:
+                    if stage not in order:
+                        order.append(stage)
+            stages = [(i, stage, None) for i, stage in enumerate(order, 1)]
+        for i, stage, sources in stages:
             chains.append({"chain_id": f"VC-{sv}-{i:02d}", "version": args.version,
-                           "sub_vertical": sv, "name": stage, "stage_order": i})
+                           "sub_vertical": sv, "name": stage, "stage_order": i,
+                           "source_stages": sources})
 
     conn = connect()
     try:
@@ -233,9 +265,15 @@ def main() -> int:
             print(f"{table}: {len(rows)} rows")
         for c in chains:
             cur.execute(
-                "INSERT INTO ccg_value_chains (chain_id, version, sub_vertical, name, stage_order) VALUES (%s,%s,%s,%s,%s)",
-                (c["chain_id"], c["version"], c["sub_vertical"], c["name"], c["stage_order"]))
-        print(f"ccg_value_chains: {len(chains)} stage rows")
+                "INSERT INTO ccg_value_chains (chain_id, version, sub_vertical,"
+                " name, stage_order, source_stages) VALUES (%s,%s,%s,%s,%s,%s)",
+                (c["chain_id"], c["version"], c["sub_vertical"], c["name"],
+                 c["stage_order"], c["source_stages"]))
+        per_sv = {}
+        for c in chains:
+            per_sv[c["sub_vertical"]] = per_sv.get(c["sub_vertical"], 0) + 1
+        print(f"ccg_value_chains: {len(chains)} stage rows "
+              + ", ".join(f"{sv}={n}" for sv, n in sorted(per_sv.items())))
 
         # Category display names, one per category, from the capability
         # map's Category column (first spelling wins across workbooks).
