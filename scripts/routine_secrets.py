@@ -256,14 +256,55 @@ def doc_secrets() -> dict:
               "Secret Manager values this run.")
         _DOC_CACHE = {}
         return _DOC_CACHE
-    out = {}
-    for line in text.splitlines():
-        m = re.match(r"\s*([A-Z][A-Z0-9_]{2,48})\s*[:=]\s*(\S.*?)\s*$", line)
-        if m:
-            out[m.group(1)] = m.group(2)
+    out = _parse_doc(text)
     print(f"secrets doc         OK    {len(out)} key(s) loaded at call time, "
           "values held in memory only")
     _DOC_CACHE = out
+    return out
+
+
+def _parse_doc(text: str) -> dict:
+    """Parse the doc AS THE USER ACTUALLY WRITES IT, not as a spec imagines it.
+
+    The live doc (inspected 2026-08-07, shapes only, values never printed)
+    carries two things and neither is a `KEY: value` line:
+
+      1. a bare GitHub fine-grained PAT on its own line (`github_pat_…`);
+      2. the Drive service-account key as `field "value"` pairs — the JSON
+         fields with the braces and colons lost to the Docs table export.
+
+    Both are recognised here, alongside the `KEY: value` / `KEY = value` form
+    the earlier parser expected, so any of the three notations works from now
+    on. Recognised material maps onto the names the code already consults via
+    `secret()`: DMA_ROUTINE_GITHUB_PAT and DMA_ROUTINE_DRIVE_SA_KEY.
+    """
+    import re
+    out: dict[str, str] = {}
+    sa: dict[str, str] = {}
+    for raw in text.splitlines():
+        line = raw.lstrip("﻿").strip()
+        if not line:
+            continue
+        m = re.match(r"^([A-Z][A-Z0-9_]{2,48})\s*[:=]\s*(\S.*?)$", line)
+        if m:
+            out[m.group(1)] = m.group(2)
+            continue
+        # A bare GitHub token on its own line IS the PAT.
+        if re.match(r"^(github_pat_[A-Za-z0-9_]{20,}|ghp_[A-Za-z0-9]{20,})$",
+                    line):
+            out.setdefault("DMA_ROUTINE_GITHUB_PAT", line)
+            continue
+        # Service-account key fields: `field "value"` (quoted, no colon).
+        m = re.match(r'^([a-z][a-z0-9_]{1,40})\s+"(.*)"$', line)
+        if m:
+            sa[m.group(1)] = m.group(2)
+    if sa.get("type") == "service_account" and "private_key" in sa:
+        # The doc holds the JSON-source form of the key, so the PEM's line
+        # breaks arrive as literal backslash-n text. json.loads on the
+        # reassembled document must yield REAL newlines — the PEM is written
+        # to disk for one openssl call — so unescape before re-encoding.
+        sa["private_key"] = sa["private_key"].replace("\\n", "\n")
+        out.setdefault("DMA_ROUTINE_DRIVE_SA_KEY", json.dumps(sa))
     return out
 
 
