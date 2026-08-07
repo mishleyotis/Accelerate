@@ -422,6 +422,97 @@ def test_routes_are_wired_with_the_trd_verbs():
     assert "GET" in routes["/v1/alerts"]
     assert "POST" in routes["/v1/alerts/{alert_id}/actions"], \
         "TRD §08: POST /api/v1/alerts/{alert_id}/actions"
-    post_routes = [p for p, methods in routes.items() if "POST" in methods]
-    assert post_routes == ["/v1/alerts/{alert_id}/actions"], \
-        "alert actions are the API's only write route so far (invariant 2)"
+    post_routes = sorted(p for p, methods in routes.items() if "POST" in methods)
+    assert post_routes == [
+        "/v1/alerts/{alert_id}/actions",
+        "/v1/entities/{display_id}/insights/{ic_id}/annotation",
+    ], ("invariant 2 names exactly TWO write exceptions — alert actions and "
+        "annotations — and this census is the tripwire for a third")
+
+
+# ── The annotation half of the two write exceptions ─────────────────────────
+
+def _ann_cur(rows):
+    """A fake cursor for annotate_insight: `rows` maps a SQL fragment to the
+    fetch result, mirroring the style used above."""
+    class Cur:
+        def __init__(self):
+            self.executed = []
+            self._last = None
+        def execute(self, sql, params=None):
+            self.executed.append((sql, params))
+            self._last = sql
+        def fetchone(self):
+            for frag, val in rows.items():
+                if frag in self._last:
+                    return val() if callable(val) else val
+            return None
+    return Cur()
+
+
+def test_annotation_writes_workflow_tables_only_and_replays():
+    from dma_api.annotations import annotate_insight
+    key = "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+    stored = {}
+    def key_lookup():
+        return stored.get("row")
+    cur = _ann_cur({
+        "FROM idempotency_keys": key_lookup,
+        "FROM users": ("11111111-1111-1111-1111-111111111111",),
+        "FROM insight_cards": ("22222222-2222-2222-2222-222222222222",
+                               "33333333-3333-3333-3333-333333333333"),
+        "INSERT INTO annotations": (7, "2026-08-07T15:00:00+00:00"),
+    })
+    status, out = annotate_insight(
+        cur, "baxter-credit-union-bcu", "IC-1",
+        body={"action": "accept"}, idempotency_key=key,
+        actor_email="dma@zennify.com")
+    assert status == 201 and out["action"] == "ACCEPT" and not out["replayed"]
+    # nothing but workflow tables written
+    writes = [sql for sql, _ in cur.executed if "INSERT" in sql or "UPDATE" in sql]
+    assert all(("annotations" in w) or ("idempotency_keys" in w) for w in writes)
+    # replay with the SAME body returns the original, marked replayed
+    import json as _json
+    req_hash = _json.dumps({"display_id": "baxter-credit-union-bcu",
+                            "ic_id": "IC-1", "action": "ACCEPT", "note": None,
+                            "actor": "dma@zennify.com"}, sort_keys=True)
+    stored["row"] = (req_hash, _json.dumps(out))
+    status2, out2 = annotate_insight(
+        cur, "baxter-credit-union-bcu", "IC-1",
+        body={"action": "accept"}, idempotency_key=key,
+        actor_email="dma@zennify.com")
+    assert status2 == 200 and out2["replayed"] is True
+    # same key, DIFFERENT body → 409, a client bug not a retry
+    import pytest as _pytest
+    from dma_api.pages import ApiError
+    with _pytest.raises(ApiError) as e:
+        annotate_insight(cur, "baxter-credit-union-bcu", "IC-1",
+                         body={"action": "reject"}, idempotency_key=key,
+                         actor_email="dma@zennify.com")
+    assert e.value.status == 409
+
+
+def test_annotation_refuses_dangling_anchor_customer_and_anonymous():
+    import pytest as _pytest
+    from dma_api.annotations import annotate_insight
+    from dma_api.pages import ApiError
+    key = "7c9e6679-7425-40de-944b-e07fc1f90ae8"
+    cur = _ann_cur({
+        "FROM idempotency_keys": None,
+        "FROM users": ("11111111-1111-1111-1111-111111111111",),
+        "FROM insight_cards": None,     # the card does not exist
+    })
+    with _pytest.raises(ApiError) as e:
+        annotate_insight(cur, "baxter-credit-union-bcu", "IC-404",
+                         body={"action": "ACCEPT"}, idempotency_key=key,
+                         actor_email="dma@zennify.com")
+    assert e.value.status == 404 and e.value.code == "anchor_not_found"
+    with _pytest.raises(ApiError) as e:
+        annotate_insight(cur, "x", "IC-1", body={"action": "ACCEPT"},
+                         idempotency_key=key, actor_email="dma@zennify.com",
+                         audience="customer")
+    assert e.value.status == 403
+    with _pytest.raises(ApiError) as e:
+        annotate_insight(cur, "x", "IC-1", body={"action": "ACCEPT"},
+                         idempotency_key=None, actor_email="dma@zennify.com")
+    assert e.value.status == 400

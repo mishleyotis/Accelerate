@@ -19,6 +19,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 
 from .alerts import act as alert_act, queue as alert_queue
+from .annotations import annotate_insight
 from .evidence import fetch as ev_fetch, redact_items as ev_redact
 from .pages import ApiError, build_page, etag_for, resolve_run
 
@@ -202,6 +203,39 @@ def global_alerts(audience: str = "internal", role: str | None = None,
         except ApiError as e:
             return JSONResponse({"error": e.code, "detail": e.detail},
                                 status_code=e.status)
+    finally:
+        conn.close()
+
+
+@app.post("/v1/entities/{display_id}/insights/{ic_id}/annotation")
+async def insight_annotation(display_id: str, ic_id: str, request: Request,
+                             actor: str | None = None,
+                             audience: str = "internal",
+                             role: str | None = None):
+    """The annotation half of invariant 2's two write exceptions: an
+    accept/reject verdict on an insight card, anchored fail-closed to a card
+    that exists on a promoted run. Idempotency-Key required; workflow tables
+    only."""
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "malformed_body",
+                             "detail": "the request body must be a JSON object"},
+                            status_code=400)
+    key = request.headers.get("idempotency-key")
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            status_code, payload = annotate_insight(
+                cur, display_id, ic_id, body=body, idempotency_key=key,
+                actor_email=actor, audience=audience, role=role)
+        except ApiError as e:
+            conn.rollback()
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        conn.commit()
+        return JSONResponse(payload, status_code=status_code)
     finally:
         conn.close()
 
