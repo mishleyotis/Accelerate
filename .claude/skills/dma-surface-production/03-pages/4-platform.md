@@ -35,6 +35,183 @@ Out-of-vertical rank-1 is a defect: a carrier platform must not top a bank's lis
 
 story_md must be whole sentences — 501 cards shipped head-clipped mid-sentence.
 
+### One tile per promoted L3 area, or the area renders empty
+
+The page is organised by **L3 area tabs**, and the tab set is the union of the
+`l3_area` on the recommendations and the `l3_area` on the story's own gap rows. A
+story is filed under the area ITS GAP ROWS name. So a run that promotes
+recommendations across five areas and a story covering one leaves **four tabs with
+no story, no gap rows and an empty-state sentence** — which is what "the story is
+not thorough and is not done for all areas" looks like from the client's side.
+
+> Every L3 area this run promotes a recommendation against carries its own tile:
+> fit score with its basis, gap rows, estate reach, peer deployments, readiness,
+> a story and **its own `r_layer`**. A tile is not a heading; it is an argument.
+
+Two consequences worth stating because both were shipped wrong:
+
+- **An area with no engine tile still gets a tile — with `fit_score: null` and the
+  reason.** The engine ranks a fixed set; an area the analyst promoted and the
+  engine did not rank has no figure, and inventing one is worse than the null.
+  Say which is which: *"the engine ranked four platforms for this run and this area
+  was not among them."*
+- **The per-item `r_layer` is where AG-01 is satisfied on this page.** A section
+  `r_layer` covers the ranking; the per-tile one covers THAT tile's claim. Five
+  tiles arguing from one shared reasoning trace is one argument wearing five hats.
+
+### Peer deployment is research, not flavour
+
+This is the field readers reach for first and the one most often absent: *what have
+comparable institutions actually put in on this platform, and what does that mean
+for us*. `peer_deployments[]` on a platform tile takes the same shape and the same
+gate as it does on the tech register — `{peer, deployed, basis, source_url, as_of}`
+with `peer_coverage` in 0..1 — and **AG-04 is not scoped to the register**, so it
+fires here identically.
+
+**Search per platform area, not per vendor.** The area is the question ("does this
+peer run an integration layer"), the vendor is one possible answer. Searching only
+the vendor name finds the one peer that bought that brand and misses the peer that
+solved the same problem with another, which is a finding you needed.
+
+Productive routes, in the order they pay:
+
+| Route | What it establishes |
+|---|---|
+| The delivery partner's case study (Silverline, Slalom, Deloitte Digital, the SI named in the release) | The products, the start date and the go-live — the richest single source class |
+| Vendor customer-story pages (Salesforce, MuleSoft, Q2, Alkami, Lumin, UiPath, Backbase, Snowflake) | Selection and, sometimes, outcomes |
+| The peer's own newsroom | First-party, and the only class that can state present tense with authority |
+| Trade press — CU Times, CUToday, Finopotamus, American Banker, FinTech Futures | Corroboration and dating |
+| The peer's careers postings | Often the only public statement a platform exists at all |
+| **The run's own report** — benchmark and peer sections | Frequently names peer platforms outright, and it is already inside the run |
+
+**Establishing a deployment.** A row is `deployed: true` only with a source URL and
+an `as_of`. Everything else is `deployed: null` **with the searches recorded in the
+basis** — not omitted, because a peer left out of the list implies it was checked.
+
+| What you found | Verdict | Why |
+|---|---|---|
+| Named institution, named product, dated source | `true` | The claim and its basis are the same statement |
+| A competing platform announced later on the same layer | `false` | An established competing answer is an answer |
+| A vendor release naming a DIFFERENT institution | `null` | It is evidence about someone else. Never let a customer list stand in for a customer |
+| A vendor page with no date anywhere | `null`, or `true` only if another source dates it | `as_of` is not optional and a copyright footer is a weak substitute — if you use one, say so in the basis |
+| An announcement more than four years old with no later confirmation | `null`, with the finding written out in full | A 2018 pilot does not establish what runs today. Record the vendor, the date and why it does not carry, so the reader gets the finding without the false present tense |
+| Two institutions publishing under one name | `null` on identity, with the ambiguity stated | Attributing a platform to the wrong institution is the one error the reader can catch and never forgive |
+
+**Scope the share to what the breakdown supports.** One established of five is one
+established of five — never "20% of peers have not adopted", which asserts four
+negatives you did not establish. Where nothing is established, **omit
+`peer_coverage` entirely** and let the breakdown speak.
+
+**Then name the integration pathway.** A peer deployment that stops at "GreenState
+runs MuleSoft" is trivia. The pathway is three sentences and it is the point of the
+research:
+
+1. **What the peer put in, and what it produced** — dated, cited, in their terms.
+2. **Which capability of THIS client's that connects to** — by cell and score, so
+   the reader can see the same problem in their own numbers.
+3. **What sits on that pathway from us** — the offering, named, and tied to the
+   assessment's own gap-to-solution mapping where the report states one.
+
+The third sentence is AE-facing commercial framing, so **mark its path in
+`internal_only`** and keep the client-facing value in the first two. A client
+dashboard that pitches at the client reads as a brochure; the same finding without
+the pitch reads as analysis, and the AE still has the pitch.
+
+Honesty binds harder here than anywhere on the page, because every claim is about
+an institution that is not in the room and can be phoned:
+
+- A peer deployment you cannot cite is `null` with a stated basis, never a guess.
+- Never average disagreeing figures — state both and say they disagree.
+- Never claim a peer deployed something on the strength of a vendor press release
+  that names a different institution.
+- Read the product precisely. "Member 360 on Financial Services Cloud" is not "Data
+  Cloud", and promoting one to the other to make the story tidier is a fabrication
+  that a competitor will correct in the meeting.
+
+### Estate reach is derived from the register, never asserted
+
+*"Where the estate does not yet reach"* is a computation, and it was being written
+from impression. The register already carries `linked_subcap_ids` per row, so reach
+is arithmetic:
+
+> A cell is **reached** when at least one register row lists it among its linked
+> capabilities. Every other cell this run scores in that category is **not yet
+> reached**. Both numbers come out of the register; neither is a judgement.
+
+Emit the derivation with the numbers, not just the conclusion: per category, how
+many cells this run scores, how many a register row is linked to, which ones, and
+which products hold that layer with their status. Then say **why the non-reach is
+established** — and that sentence is where the register's status vocabulary earns
+its keep:
+
+- **ABSENT on a recorded negative search** is the strongest form. The layer is open
+  and the run can prove it looked.
+- **INFERRED** may be described as a signal only. An inferred product is not a
+  governed layer, and reading it as one is how a page recommends what the client
+  already owns — or refuses to, wrongly.
+- **CONFIRMED at this layer** turns the whole tile into extension and adoption
+  depth. Say so explicitly, in the story as well as the reach block.
+- **An unresolved research flag** in the assessment's own "what we could not assess"
+  section is a reason to hold, and citing it is stronger than any inference.
+
+Distribution is usually the finding. When every reached cell sits in one capability
+group and the cells scoring lowest have no register row at all, that pattern is the
+sentence: *the estate reaches the channels, and the record of what happened across
+them is where the next capability sits.* Write it as available value, never as
+fault — `01-start-here/3-language.md` governs, and the reader may be the person who
+chose the incumbent.
+
+### Readiness carries its reasoning, or it is a list of conditions
+
+The readiness panel reads from `recommendations[].prerequisites[]` — **not** from
+the story — so readiness reasoning written anywhere else renders nowhere. Two row
+shapes, and they render differently:
+
+- **A cell threshold** `{cell, minimum, current, verdict}` renders as a badge, a
+  progress bar and a drilldown of backing cells. It carries no prose and needs none.
+- **A condition** `{condition, note, basis}` renders as a sentence with a
+  supporting sentence and a badge. **This is the only place on the page where
+  readiness can reason**, so it is where the reasoning goes.
+
+A condition with no `note` states a requirement and argues nothing. A good `note` is
+40–80 words and answers three questions in this order:
+
+1. **What is already true**, and how it was established — the evidence, the named
+   owner, the gate that is met. Readiness prose that opens on what is missing reads
+   as a blocker list; opening on what is in place reads as a plan.
+2. **What must be true first**, and why it is a real prerequisite rather than a
+   formality. "An ungoverned API layer becomes a second point-to-point estate" is a
+   reason; "governance is important" is not.
+3. **The sequencing basis** — the dependency or the date that fixes this phase.
+   Where a statutory deadline moves a phase ahead of its fit rank, say that a date
+   ordered it and a rank did not. Where the engine's rank and the sequence disagree,
+   state the disagreement on the card and name the gate that decided it.
+
+Keep the reasoning in the `note` and the codes in the structured fields. The panel
+renders `cell` as a badge already; a sentence that says "P4C3 ≥ 2.5" spends the
+reader's attention on grammar they do not have.
+
+### Sentence case, on every prose field
+
+Measured on a real client page: readiness conditions, their notes and their basis
+badges all rendered lower-case mid-card — *"architecture decision owner named for
+the platform"* — because they were written as fragments in a dictionary and never
+read as sentences. They are sentences on the screen.
+
+> Every string that renders as prose begins with a capital letter and ends in
+> terminal punctuation. Check the payload, not your intention — scan every string
+> before submitting.
+
+The exception is exact, and inverting it breaks the page: **contract vocabularies
+keep their declared spelling.** `opens_on`, `horizon` (`next two quarters │ this
+year │ beyond`), `peer_basis`, `provenance`, `signal`, stack `status`,
+`producer_version`, JSON paths in `internal_only`, ids and URLs are matched
+literally by the renderer or the serve layer, and capitalising them silently drops
+the row out of its filter. AG-05 polices the spelling; case is part of it.
+
+A one-line scan is enough: walk every string in the payload, skip the vocabulary
+keys, and flag anything whose first alphabetic character is lower-case.
+
 ### `discarded[]` is the field a reader actually looks for
 
 A platform list with no recorded alternatives reads as the only option anyone
@@ -71,6 +248,9 @@ rule and it is not optional on this page.
 | platforms[].fit_score | platform_fit.py engine v2 | fit = 100 × (0.66·opportunity + 0.34·readiness); read, never recomputed |
 | platforms[].gaps[] | scoring workbook | the subcapabilities this platform addresses |
 | platforms[].story_md | producer | grounded in the client's own gaps and stack |
+| platforms[].estate_reach | the run's own tech register | `linked_subcap_ids` per row against the cells this run scores — computed, never asserted |
+| platforms[].peer_deployments[] | research, per the protocol above | one row per named peer, including the ones you could not establish |
+| readiness prose | recommendations[].prerequisites[] | the panel reads from there; reasoning written elsewhere renders nowhere |
 | vertical guard | platform_fit_data.py | subvertical adjacency; carrier anchors must not surface on banks |
 
 ### Prompt
