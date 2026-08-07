@@ -343,9 +343,14 @@ function ClientBar({ entity, run, tab }) {
         </div>
         <div className="client-bar-r">
           <div style={{ position: "relative" }}>
+            {/* Date only. The composite score used to render beside it
+                ("Mar 30, 2026 · 2.71") — a second copy of the number the hero
+                ring already owns, and the two could disagree at rounding. The
+                run id and status stay: status in the pill beside the client
+                name, id per row in this dropdown. */}
             <button className="run-selector" onClick={() => setRunOpen(o => !o)}>
               <Icon name="calendar" size={12} />
-              <span>{run ? `${fmtDate(run.date)} · ${run.overall ?? "-"}` : "Pick a run"}</span>
+              <span>{run ? fmtDate(run.date) : "Pick a run"}</span>
               <Icon name="chevron-d" size={12} />
             </button>
             {runOpen ? (

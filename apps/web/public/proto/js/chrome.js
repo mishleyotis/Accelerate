@@ -822,7 +822,7 @@ function ClientBar({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "calendar",
     size: 12
-  }), /*#__PURE__*/React.createElement("span", null, run ? `${fmtDate(run.date)} · ${run.overall ?? "-"}` : "Pick a run"), /*#__PURE__*/React.createElement(Icon, {
+  }), /*#__PURE__*/React.createElement("span", null, run ? fmtDate(run.date) : "Pick a run"), /*#__PURE__*/React.createElement(Icon, {
     name: "chevron-d",
     size: 12
   })), runOpen ? /*#__PURE__*/React.createElement("div", {

@@ -2247,13 +2247,20 @@ function ClientTechStack({
   } = useApp();
   const [layer, setLayer] = useState("ALL");
   const [hideAbsent, setHideAbsent] = useState(false);
+  // The status filter the stat strip toggles. It lives in the same predicate
+  // as the layer select and the hide-absent switch, so a tile click and the
+  // filter bar always agree on what the register shows.
+  const [statusFilter, setStatusFilter] = useState(null);
+  // Layer briefly highlighted after a PRIMARY GAP tile click.
+  const [flashLayer, setFlashLayer] = useState(null);
   const allTech = DMA.TECH_STACK;
   const layerRollup = DMA.TECH_LAYERS || [];
   const list = useMemo(() => allTech.filter(t => {
     if (layer !== "ALL" && t.layer !== layer) return false;
+    if (statusFilter && t.status !== statusFilter) return false;
     if (hideAbsent && t.status === "ABSENT") return false;
     return true;
-  }), [layer, hideAbsent]);
+  }), [layer, hideAbsent, statusFilter]);
 
   // Charter correction: the layer keys are OPS · CUST · DATA · INFRA, not
   // L2–L5. L1–L4 already name the EVIDENCE levels, and a register row showing
@@ -2294,6 +2301,37 @@ function ClientTechStack({
   // customer-engagement and data layers are the ones whose absence gates
   // downstream AI/decisioning work.
   const absentCount = allTech.filter(t => t.status === "ABSENT" && (t.layer === "CUST" || t.layer === "DATA")).length;
+
+  // The layers the promoted rollup flags — the PRIMARY GAP tile locates the
+  // flagged card rather than filtering, because the flag belongs to a LAYER,
+  // not to rows a status filter could select.
+  const gapLayers = layerRollup.filter(x => x && x.is_primary_gap).map(x => x.layer);
+  const goToPrimaryGap = () => {
+    const L = gapLayers[0];
+    if (!L) return;
+    // Locate, never filter — but a card the current filters hide entirely
+    // cannot be scrolled to, so relax exactly what hides it and nothing else.
+    if (layer !== "ALL" && layer !== L) setLayer("ALL");
+    const rows = allTech.filter(t => t.layer === L);
+    const anyVisible = rows.some(t => (!statusFilter || t.status === statusFilter) && !(hideAbsent && t.status === "ABSENT"));
+    if (rows.length && !anyVisible) {
+      setStatusFilter(null);
+      setHideAbsent(false);
+    }
+    setFlashLayer(L);
+  };
+  // Scroll after render, so the card exists even when the click above had to
+  // relax a filter first; the highlight clears itself.
+  useEffect(() => {
+    if (!flashLayer) return;
+    const el = document.getElementById(`ts-layer-${flashLayer}`);
+    if (el) el.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+    const tm = window.setTimeout(() => setFlashLayer(null), 2400);
+    return () => window.clearTimeout(tm);
+  }, [flashLayer]);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -2415,7 +2453,13 @@ function ClientTechStack({
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: `switch ${hideAbsent ? "on" : ""}`,
-    onClick: () => setHideAbsent(v => !v)
+    onClick: () => {
+      const next = !hideAbsent;
+      // Mirror of the tile rule: hiding absent while filtered TO
+      // absent would show nothing, so the switch releases the tile.
+      if (next && statusFilter === "ABSENT") setStatusFilter(null);
+      setHideAbsent(next);
+    }
   }), "Hide absent"))), /*#__PURE__*/React.createElement("div", {
     className: "g4",
     style: {
@@ -2423,46 +2467,82 @@ function ClientTechStack({
     }
   }, [{
     l: "Confirmed",
+    key: "CONFIRMED",
     v: allTech.filter(t => t.status === "CONFIRMED").length,
-    c: "var(--z-mid)"
+    c: "var(--z-mid)",
+    bg: "var(--z-ice)"
   }, {
     l: "Inferred",
+    key: "INFERRED",
     v: allTech.filter(t => t.status === "INFERRED").length,
-    c: "var(--z-dpur)"
+    c: "var(--z-dpur)",
+    bg: "var(--ph0-lt)"
   }, {
     l: "Absent",
+    key: "ABSENT",
     v: allTech.filter(t => t.status === "ABSENT").length,
-    c: "var(--z-below)"
+    c: "var(--z-below)",
+    bg: "rgba(194,80,8,.06)"
   },
   // Counted from the promoted rollup, which states it per LAYER. It
   // used to count a per-row `primary_gap` no adapter emits, so the
   // tile read 0 on every client while a layer card wore the badge.
   {
     l: "Primary gap layers",
-    v: layerRollup.filter(x => x && x.is_primary_gap).length,
-    c: "var(--z-blue)"
-  }].map(s => /*#__PURE__*/React.createElement("div", {
-    key: s.l,
-    className: "card-tile",
-    style: {
-      borderLeft: `3px solid ${s.c}`
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)",
-      letterSpacing: ".08em",
-      textTransform: "uppercase"
-    }
-  }, s.l), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 28,
-      fontWeight: 200,
-      color: s.c,
-      lineHeight: 1,
-      marginTop: 6
-    }
-  }, s.v)))), LAYERS.map(L => {
+    key: "GAP",
+    v: gapLayers.length,
+    c: "var(--z-blue)",
+    bg: "var(--ph1-lt)"
+  }].map(s => {
+    const active = s.key !== "GAP" && statusFilter === s.key;
+    const dead = s.v === 0;
+    return /*#__PURE__*/React.createElement("button", {
+      key: s.l,
+      className: "card-tile clickable",
+      "aria-pressed": active,
+      disabled: dead,
+      title: s.key === "GAP" ? dead ? "No layer is flagged as the primary gap in this run" : "Scroll to the flagged layer card" : dead ? `No ${s.key} rows in this register` : active ? "Clear the status filter" : `Show only ${s.key} rows`,
+      onClick: () => {
+        if (dead) return;
+        if (s.key === "GAP") {
+          goToPrimaryGap();
+          return;
+        }
+        const next = statusFilter === s.key ? null : s.key;
+        // Filtering TO absent while hiding absent is a contradiction;
+        // the tile wins and releases the switch (and the switch,
+        // below, releases the tile).
+        if (next === "ABSENT" && hideAbsent) setHideAbsent(false);
+        setStatusFilter(next);
+      },
+      style: {
+        borderLeft: `3px solid ${s.c}`,
+        textAlign: "left",
+        width: "100%",
+        fontFamily: "inherit",
+        background: active ? s.bg : "#fff",
+        boxShadow: active ? `inset 0 0 0 1.5px ${s.c}` : "none",
+        opacity: dead ? 0.45 : 1,
+        cursor: dead ? "not-allowed" : "pointer"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: active ? s.c : "var(--z-muted)",
+        fontWeight: active ? 700 : 400,
+        letterSpacing: ".08em",
+        textTransform: "uppercase"
+      }
+    }, s.l), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 28,
+        fontWeight: 200,
+        color: s.c,
+        lineHeight: 1,
+        marginTop: 6
+      }
+    }, s.v));
+  })), LAYERS.map(L => {
     const LM = LAYER_LABEL[L];
     const techList = byLayer[L];
     if (!techList || techList.length === 0) return null;
@@ -2476,13 +2556,17 @@ function ClientTechStack({
     const expected = roll && roll.expected != null ? roll.expected : techList.length;
     return /*#__PURE__*/React.createElement("div", {
       key: L,
+      id: `ts-layer-${L}`,
       className: "card",
       style: {
         marginBottom: 12,
         padding: 16,
         borderColor: isPrimaryGap ? "var(--z-blue)" : "var(--z-sep)",
         borderWidth: isPrimaryGap ? 1.5 : 1,
-        borderStyle: "solid"
+        borderStyle: "solid",
+        // The PRIMARY GAP tile's landing flash (—z-blue at 25%).
+        boxShadow: flashLayer === L ? "0 0 0 4px rgba(61,129,246,.25)" : "none",
+        transition: "box-shadow 240ms var(--ease)"
       }
     }, /*#__PURE__*/React.createElement("div", {
       className: "row",
@@ -2579,6 +2663,9 @@ function TechRow({
   const {
     openEvidence
   } = useApp();
+  // The four charter statuses (CONFIRMED · INFERRED · CLAIMED · ABSENT). The
+  // fourth key here was PARTIAL — a status no row can carry — so a CLAIMED row
+  // fell through to the CONFIRMED palette and disagreed with the legend.
   const STATUS_STYLE = {
     CONFIRMED: {
       bg: "var(--z-ice)",
@@ -2595,7 +2682,7 @@ function TechRow({
       bd: "rgba(194,80,8,.25)",
       color: "var(--z-below)"
     },
-    PARTIAL: {
+    CLAIMED: {
       bg: "rgba(254,151,50,.08)",
       bd: "rgba(254,151,50,.3)",
       color: "#7C3500"
@@ -2634,7 +2721,6 @@ function TechRow({
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
-      marginBottom: 4,
       flexWrap: "wrap"
     }
   }, /*#__PURE__*/React.createElement("span", {
@@ -2651,7 +2737,12 @@ function TechRow({
       letterSpacing: ".06em",
       color: S.color
     }
-  }, t.status), t.evidence.map(eid => /*#__PURE__*/React.createElement("button", {
+  }, t.status), t.evidence_level ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted",
+    style: {
+      fontSize: 9
+    }
+  }, t.evidence_level) : null, t.evidence.map(eid => /*#__PURE__*/React.createElement("button", {
     key: eid,
     className: "chip purple",
     style: {
@@ -2662,13 +2753,7 @@ function TechRow({
       ev.stopPropagation();
       openEvidence(eid);
     }
-  }, eid))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11.5,
-      color: "var(--z-body)",
-      lineHeight: 1.5
-    }
-  }, t.note), t.subcaps_impact && t.subcaps_impact.length > 0 ? /*#__PURE__*/React.createElement("div", {
+  }, eid))), t.subcaps_impact && t.subcaps_impact.length > 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 4,
