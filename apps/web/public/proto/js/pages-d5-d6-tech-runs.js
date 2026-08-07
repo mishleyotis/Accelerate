@@ -229,12 +229,14 @@ function ClientContext({
     issues: issues,
     issueOpen: issueOpen,
     setIssueOpen: setIssueOpen
-  }), issueOpen ? /*#__PURE__*/React.createElement(IssueDetail, {
+  }), /*#__PURE__*/React.createElement("div", {
+    id: "issue-detail-anchor"
+  }, issueOpen ? /*#__PURE__*/React.createElement(IssueDetail, {
     issue: issues.find(i => i.id === issueOpen),
     entity: entity,
     onClose: () => setIssueOpen(null),
     openEvidence: openEvidence
-  }) : null)), /*#__PURE__*/React.createElement("div", {
+  }) : null))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1.4fr 1fr",
@@ -328,13 +330,13 @@ function ClientContext({
     onClick: () => setAcqOpen(acqOpen === (a.id || i) ? null : a.id || i)
   }, /*#__PURE__*/React.createElement("div", {
     className: "row"
-  }, /*#__PURE__*/React.createElement("span", {
+  }, a.date ? /*#__PURE__*/React.createElement("span", {
     className: "f-mono",
     style: {
       fontSize: 10,
       color: "var(--z-muted)"
     }
-  }, a.date || "undated"), /*#__PURE__*/React.createElement("div", {
+  }, a.date) : null, /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       fontWeight: 500,
@@ -584,7 +586,19 @@ function RegulatoryStanding({
       cursor: "pointer",
       marginBottom: 6
     },
-    onClick: () => setIssueOpen(i.id)
+    onClick: () => {
+      setIssueOpen(i.id);
+      // Take the reader to the panel the click just opened.
+      // Without this the state changed and the page did not,
+      // because the detail renders up inside the register.
+      requestAnimationFrame(() => {
+        const el = document.getElementById("issue-detail-anchor");
+        if (el) el.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      });
+    }
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "warn",
     size: 14
@@ -827,7 +841,7 @@ function InteractiveTimeline({
     onClick: () => setSelectedEvent(i === selectedEvent ? null : i),
     onMouseEnter: () => setHoverEvent(i),
     onMouseLeave: () => setHoverEvent(null),
-    title: `${e.date || "undated"} · ${e.title}`,
+    title: e.date ? `${e.date} · ${e.title}` : e.title,
     style: {
       textAlign: "center",
       lineHeight: 1.4,
@@ -842,7 +856,7 @@ function InteractiveTimeline({
     style: {
       color: hoverEvent === i || selectedEvent === i ? TONE[e.signal] : "var(--z-muted)"
     }
-  }, e.date || "undated"), /*#__PURE__*/React.createElement("div", {
+  }, e.date || ""), /*#__PURE__*/React.createElement("div", {
     className: "txt-fit-2",
     style: {
       fontSize: 9.5,
@@ -892,7 +906,7 @@ function EventDetail({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, event.date || "undated"), /*#__PURE__*/React.createElement("strong", {
+  }, event.date || ""), /*#__PURE__*/React.createElement("strong", {
     style: {
       fontSize: 14,
       flex: 1,
@@ -1173,7 +1187,7 @@ function InteractiveGantt({
       textTransform: "uppercase",
       marginBottom: 6
     }
-  }, "Undated \xB7 ", undated.length, " \xB7 not placeable on a time axis"), undated.map(iss => /*#__PURE__*/React.createElement("button", {
+  }, "Not yet placed on the time axis \xB7 ", undated.length), undated.map(iss => /*#__PURE__*/React.createElement("button", {
     key: iss.id,
     onClick: () => setIssueOpen(issueOpen === iss.id ? null : iss.id),
     style: {
@@ -1474,7 +1488,13 @@ function SentimentGridInteractive({
      whichever real client was open. Clicking one of those chips opened the
      drawer saying the id does not resolve and "a citation that does not resolve
      is a producer defect": the app blaming the producer for its own fixture. */
-  const sent = DMA.sentimentFor(entity && entity.id);
+  /* This card reads the CONTEXT page's own section, not the overview's bars.
+     They are different sections with different grains — `context_sentiment`
+     carries tiles per audience, each with the measured rows behind it — and
+     reading the wrong one is why a promoted section rendered as "nothing
+     promoted". The accessor falls back to the overview bars for a run that
+     promoted only those. */
+  const sent = typeof DMA.contextSentimentFor === "function" ? DMA.contextSentimentFor(entity && entity.id) : DMA.sentimentFor(entity && entity.id);
   const groups = sent && sent.groups || null;
   const rows = [];
   for (const g of Object.keys(groups || {})) {
@@ -1486,6 +1506,9 @@ function SentimentGridInteractive({
       });
     }
   }
+  // A tile the producer worked and could not fill is a finding with a ladder
+  // behind it, not an empty card: it names what was searched.
+  const absent = sent && sent.absent || [];
   if (!rows.length) {
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -1493,7 +1516,19 @@ function SentimentGridInteractive({
         color: "var(--z-muted)",
         lineHeight: 1.6
       }
-    }, "No sentiment measures promoted for this run.", sent && sent.sources_searched && sent.sources_searched.length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", sent.sources_searched.join(" · "), ".") : null);
+    }, absent.length ? absent.map((a, i) => /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        marginBottom: 8
+      }
+    }, /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "var(--z-body)",
+        textTransform: "uppercase",
+        fontSize: 10,
+        letterSpacing: ".08em"
+      }
+    }, a.group), a.note ? /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 ", a.note) : /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 searched and not established."), (a.sources_searched || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", a.sources_searched.join(" · "), ".") : null)) : /*#__PURE__*/React.createElement(React.Fragment, null, "No sentiment measures promoted for this run.", sent && sent.sources_searched && sent.sources_searched.length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", sent.sources_searched.join(" · "), ".") : null));
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "g3",
@@ -2237,6 +2272,39 @@ function VersionDiff({
   }, d.evBase, " \u2192 ", d.evTarget)))))));
 }
 
+/* The four technology layers, at module scope because BOTH the register and
+   the per-product detail name them and the detail used to reach for a field
+   (`layer_full`) that no adapter sets. One map, one source of the names.
+
+   No `primary_gap` here. It used to be hardcoded true on CUST, so every
+   client's customer layer wore PRIMARY GAP LAYER whatever their register
+   said — and on this one CUST is the BEST covered layer (11 confirmed of 23)
+   while DATA has none confirmed at all. It is a judgement the payload makes,
+   per layer, in `layers[].is_primary_gap`. */
+const TS_LAYERS = ["OPS", "CUST", "DATA", "INFRA"];
+const TS_LAYER_LABEL = {
+  OPS: {
+    name: "Operations & core banking",
+    short: "Operations",
+    dma: "P3"
+  },
+  CUST: {
+    name: "Customer engagement",
+    short: "Customer",
+    dma: "P2"
+  },
+  DATA: {
+    name: "Data & analytics",
+    short: "Data",
+    dma: "P4"
+  },
+  INFRA: {
+    name: "Infrastructure & cloud",
+    short: "Infra",
+    dma: "P4"
+  }
+};
+
 /* ── Tech stack overview (s41) ───────────────────────────────────── */
 function ClientTechStack({
   entity,
@@ -2266,34 +2334,8 @@ function ClientTechStack({
   // L2–L5. L1–L4 already name the EVIDENCE levels, and a register row showing
   // "L3" next to an evidence level "L3" means two different things in the same
   // row. Same four labels, same layout, unambiguous keys.
-  const LAYERS = ["OPS", "CUST", "DATA", "INFRA"];
-  const LAYER_LABEL = {
-    OPS: {
-      name: "Operations & core banking",
-      short: "Operations",
-      dma: "P3"
-    },
-    // No `primary_gap` here. It used to be hardcoded true on CUST, so every
-    // client's customer layer wore PRIMARY GAP LAYER whatever their register
-    // said — and on this one CUST is the BEST covered layer (11 confirmed of
-    // 23) while DATA has none confirmed at all. It is a judgement the payload
-    // makes, per layer, in `layers[].is_primary_gap`.
-    CUST: {
-      name: "Customer engagement",
-      short: "Customer",
-      dma: "P2"
-    },
-    DATA: {
-      name: "Data & analytics",
-      short: "Data",
-      dma: "P4"
-    },
-    INFRA: {
-      name: "Infrastructure & cloud",
-      short: "Infra",
-      dma: "P4"
-    }
-  };
+  const LAYERS = TS_LAYERS;
+  const LAYER_LABEL = TS_LAYER_LABEL;
   const byLayer = {};
   LAYERS.forEach(L => byLayer[L] = list.filter(t => t.layer === L));
 
@@ -2900,12 +2942,12 @@ function ClientTechStackDetail({
       marginBottom: 8,
       flexWrap: "wrap"
     }
-  }, /*#__PURE__*/React.createElement("span", {
+  }, TS_LAYER_LABEL[t.layer] ? /*#__PURE__*/React.createElement("span", {
     className: "b b-muted",
     style: {
       textTransform: "uppercase"
     }
-  }, t.layer_full), /*#__PURE__*/React.createElement("span", {
+  }, TS_LAYER_LABEL[t.layer].name) : null, /*#__PURE__*/React.createElement("span", {
     className: "b b-teal",
     style: {
       background: t.status === "ABSENT" ? "rgba(194,80,8,.10)" : t.status === "INFERRED" ? "var(--ph0-lt)" : "var(--z-ice)",
@@ -2982,10 +3024,7 @@ function ClientTechStackDetail({
     style: {
       marginBottom: 8
     }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "target",
-    size: 15
-  }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       fontWeight: 600

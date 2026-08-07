@@ -69,8 +69,24 @@ done < <(
 [ "$killed" -gt 0 ] && sleep 4
 say "stale servers" "$killed removed"
 
-# 3 · start, fully detached so it survives this shell
+# 3 · REBUILD the proto bundle before serving it.
+#
+#     The app does not serve proto/*.jsx — it serves public/proto/js/*.js,
+#     compiled by `npm run build:proto`. This script used to start the server
+#     without that step, so a QA run verified whatever was compiled LAST, not
+#     the code under test. That is a false negative with the same shape as a
+#     real defect: the probe reports the old behaviour, the fix looks like it
+#     did not work, and the next round re-fixes code that was already correct.
+#     It cost several rounds of exactly that before anyone looked here.
 cd "$HERE"
+if ! npm run build:proto > "$LOG.build" 2>&1; then
+  say "proto build" "FAILED — see $LOG.build"
+  tail -5 "$LOG.build"
+  exit 2
+fi
+say "proto build" "$(grep -o 'Successfully compiled [0-9]* files' "$LOG.build" | tail -1)"
+
+# 4 · start, fully detached so it survives this shell
 API_URL="$API" \
 API_ID_TOKEN="$TOKEN" \
 SESSION_SECRET="${SESSION_SECRET:-local-qa-only-not-a-secret}" \
@@ -86,7 +102,7 @@ for _ in $(seq 1 20); do
   curl -s -o /dev/null --max-time 3 "http://localhost:$PORT/" && break
 done
 
-# 4 · prove a real page renders. An empty page here is a FAILURE, because the
+# 5 · prove a real page renders. An empty page here is a FAILURE, because the
 #     failure mode this script exists for is a page that looks fine and is empty.
 len=$(node -e '
 const http = require("http");

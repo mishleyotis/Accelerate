@@ -1023,6 +1023,12 @@ function CapabilityHeatmap({ entity, cats, catFocus, pillarFocus, showIssues, dr
 /* ─────────────────────── SUBCAP HEATMAP ─────────────────────── */
 function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers, showIssues, onSynth, setCatFocus }) {
   const [openClusters, setOpenClusters] = useState({});
+  // Every grid that paints a cell gets the same bubble. This one and the
+  // capability grid carried the `title` attribute alone, which is the
+  // browser's own tooltip: it waits about a second, paints in the OS style,
+  // and reads as nothing happening to anyone who moves on before it fires.
+  // Same text, same instant bubble, in all four views.
+  const cellTip = useCellTip();
   // The run's categories, so a category the current catalogue does not list is
   // still reachable and its cells still readable.
   const cats = catFocus ? (allCats || []).filter(c => c.id === catFocus) :
@@ -1140,7 +1146,8 @@ function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers
                         return (
                           /* The name column ellipsises to one line; the title
                              carries the full identification. */
-                          <button key={s.id} className="subcap-row" onClick={() => onSynth(s)} title={subcapTipText(s)}>
+                          <button key={s.id} className="subcap-row" onClick={() => onSynth(s)} title={subcapTipText(s)}
+                                  onMouseEnter={cellTip.show(subcapTipText(s))} onMouseLeave={cellTip.hide}>
                             <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(s.score, 1)}</span>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div className="row" style={{ gap: 6 }}>
@@ -1197,6 +1204,7 @@ function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers
           </div>
         );
       })}
+      <CellTip tip={cellTip.tip} />
     </div>
   );
 }
@@ -1257,6 +1265,24 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
 
   const mapped = new Set();
   for (const vc of chains) for (const s of subcapsForStage(entity, vc)) mapped.add(s.id);
+
+  /* Five stages, not thirty. A value chain read at thirty stages is a list of
+     process names, not a story about where the estate is strong; the five
+     with the deepest scored coverage are the ones a conversation can actually
+     use. Depth first, then the arrangement's own order so the five still read
+     as a sequence. The remainder is stated below the grid — a stage dropped
+     silently is a stage the reader believes does not exist. */
+  const SHOWN = 5;
+  const depthOf = (vc) => subcapsForStage(entity, vc).filter(s => s.score != null).length;
+  const shown = chains.length <= SHOWN ? chains
+    : chains
+        .map((vc, i) => ({ vc, i, depth: depthOf(vc) }))
+        .sort((a, b) => (b.depth - a.depth) || (a.i - b.i))
+        .slice(0, SHOWN)
+        .sort((a, b) => a.i - b.i)
+        .map(x => x.vc);
+  const hidden = chains.length - shown.length;
+
   return (
     <div>
       <div className="row" style={{ marginBottom: 12 }}>
@@ -1265,10 +1291,10 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
         <span className="spacer" />
         {/* Counted, not asserted: only the cells the stages actually name are
             arranged by process. */}
-        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{chains.length} stages · {mapped.size} of {entity.subcaps.length} subcaps mapped</span>
+        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{shown.length} of {chains.length} stages · {mapped.size} of {entity.subcaps.length} subcaps mapped</span>
       </div>
       <div className="g3" style={{ marginBottom: 14 }}>
-        {chains.map(vc => {
+        {shown.map(vc => {
           // Pick subcaps representative of value chain - sample from subcaps
           const subs = subcapsForStage(entity, vc);
           const scored = subs.filter(s => s.score != null);
@@ -1283,8 +1309,12 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
           return (
             <div key={vc.id} className="card-tile clickable" style={{ padding: 14, border: selected === vc.id ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)", background: selected === vc.id ? "var(--z-ice)" : "#fff" }}
               onClick={() => setSelected(vc.id === selected ? null : vc.id)}>
+              {/* The stage's name, and only its name. The catalogue's stage
+                  code (VC-CU-07 and its siblings) is an internal join key —
+                  it identifies nothing a reader of this page can look up, and
+                  a code beside every heading reads as jargon. It stays the
+                  React key, where it belongs. */}
               <div className="row" style={{ marginBottom: 8 }}>
-                <span className="chip">{vc.id}</span>
                 <span style={{ fontSize: 13, fontWeight: 600 }}>{vc.name}</span>
               </div>
               <div className="row" style={{ marginBottom: 8 }}>
@@ -1318,6 +1348,16 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
         })}
       </div>
 
+      {/* What the five leave out, stated. Arithmetic from the run, not a
+          rounded phrase: the reader can see the arrangement is larger than
+          what is drawn and by how much. */}
+      {hidden > 0 ? (
+        <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginBottom: 14 }}>
+          {hidden} further stage{hidden === 1 ? "" : "s"} tracked in this arrangement ·
+          shown here are the {shown.length} carrying the deepest scored coverage
+        </div>
+      ) : null}
+
       {selected ? (() => {
         const vc = chains.find(x => x.id === selected);
         if (!vc) return null;
@@ -1335,6 +1375,7 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                 {subs.map(s => (
                   <button key={s.id} className="card-tile clickable" style={{ padding: 10 }} title={subcapTipText(s)}
+                    onMouseEnter={cellTip.show(subcapTipText(s))} onMouseLeave={cellTip.hide}
                     onClick={() => { cellTip.hide(); openSubcap({ kind: "subcap", subcap: s }); }}>
                     <div className="row" style={{ marginBottom: 4 }}>
                       <MaturityChip score={s.score} />

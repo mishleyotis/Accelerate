@@ -42,10 +42,17 @@ function pfNum(v) {
    `validation_gate` object raw). Nothing from the payload reaches JSX in this
    file without passing through here: an object is summarised from its own
    naming keys, never printed as JSON, and an unusable value becomes null so the
-   surrounding code renders its absent state. */
+   surrounding code renders its absent state.
+
+   It also raises the opening letter (`sentence`). Several promoted fields on
+   this page are written as fragments — "with plans to increase our member
+   base…" — and land under a heading where they read as sentences, so the
+   page showed lowercase openings throughout. The connector refuses these at
+   submit now, but a run already in the database still has to read properly.
+   `sentence` leaves a deliberate lowercase name (nCino) alone. */
 function pfText(v) {
   if (v === null || v === undefined) return null;
-  if (typeof v === "string") return v || null;
+  if (typeof v === "string") return v ? sentence(v) : null;
   if (typeof v === "number" || typeof v === "boolean") return String(v);
   if (Array.isArray(v)) return v.map(pfText).filter(Boolean).join(" · ") || null;
   if (typeof v === "object") {
@@ -215,6 +222,27 @@ function ClientPlatform({ entity, run }) {
   // exist for these cells.
   const anyPeer = areaGaps.some(g => pfNum(g.peer_score) !== null);
 
+  /* Which area a platform tile drives. The tiles rank PLATFORMS; everything
+     below the tiles is scoped by AREA — so a tile click expanded a breakdown
+     and left the whole page beneath it unchanged, which reads as a dead
+     control on the page's most prominent row of cards. The two axes do meet
+     in the story: each platform's gap rows name their own `l3_area`, so the
+     area a platform bears on most is a fact the run states rather than a
+     mapping invented here. A platform whose story names no area selects
+     nothing — the breakdown still opens, and nothing false is claimed. */
+  const areaForPlatform = (name) => {
+    const p = storyPlatforms.find(x => pfText(x.platform) === pfText(name));
+    if (!p) return null;
+    const tally = {};
+    for (const g of p.gaps || []) {
+      if (g.l3_area && areas.includes(g.l3_area)) {
+        tally[g.l3_area] = (tally[g.l3_area] || 0) + 1;
+      }
+    }
+    const best = Object.entries(tally).sort((a, b) => b[1] - a[1])[0];
+    return best ? best[0] : null;
+  };
+
   const prereqRows = areaPrereqs(areaRecs);
   const starters = (DMA.startersFor ? (DMA.startersFor(entity.id) || []) : [])
     .slice().sort((a, b) => (pfNum(a.rank) === null ? 99 : Number(a.rank))
@@ -246,7 +274,7 @@ function ClientPlatform({ entity, run }) {
         <div className="card-head">
           <h3>Platform fit · {tiles.length} promoted</h3>
           <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
-            composite read from the run, never re-ranked here
+            Composite read from the run, never re-ranked here
           </span>
         </div>
         {/* alignItems start: an expanded breakdown stretches its grid row, and
@@ -264,7 +292,19 @@ function ClientPlatform({ entity, run }) {
                 const isOpen = openTile === (t.platform || i);
                 return (
                   <div key={t.platform || i} className="card-tile clickable"
-                    onClick={() => setOpenTile(o => o === (t.platform || i) ? null : (t.platform || i))}
+                    onClick={() => {
+                      const nowOpen = openTile !== (t.platform || i);
+                      setOpenTile(nowOpen ? (t.platform || i) : null);
+                      if (!nowOpen) return;
+                      const a = areaForPlatform(t.platform);
+                      if (a && a !== area) {
+                        setAreaSel(a);
+                        requestAnimationFrame(() => {
+                          const el = document.getElementById("platform-area-detail");
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                        });
+                      }
+                    }}
                     style={{ border: isOpen ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)", background: isOpen ? "var(--z-ice)" : "#fff" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
                       <div style={{ minWidth: 0 }}>
@@ -410,7 +450,7 @@ function ClientPlatform({ entity, run }) {
             </div>
             <span className="spacer" />
             <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}>
-              the L3 area is the unit of recommendation
+              The L3 area is the unit of recommendation
             </span>
           </div>
         </div>
@@ -423,7 +463,7 @@ function ClientPlatform({ entity, run }) {
           pattern instead: side by side while both fit at a readable width
           (the 999 grow gives the table nearly all the slack, so the readiness
           column holds ~300px), stacked below that. No media query needed. */}
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", gap: 16, marginBottom: 16 }}>
+      <div id="platform-area-detail" style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", gap: 16, marginBottom: 16 }}>
         <div className="card flush" style={{ flex: "999 1 400px", minWidth: 0, maxWidth: "100%" }}>
           <div className="card-head">
             <h3>Gaps this area closes · {area || "no area promoted"}</h3>
@@ -669,11 +709,11 @@ function ClientPlatform({ entity, run }) {
                         <strong style={{ fontWeight: 500 }}>{pfText(kpi.metric)}</strong>
                         {kpi.baseline ? (
                           <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.5 }}>
-                            baseline {pfText(kpi.baseline)}{kpi.baseline_as_of ? ` · ${kpi.baseline_as_of}` : ""}
+                            Baseline · {pfText(kpi.baseline)}{kpi.baseline_as_of ? ` · ${kpi.baseline_as_of}` : ""}
                           </div>
                         ) : null}
                         {kpi.target ? (
-                          <div style={{ fontSize: 10.5, color: "var(--z-mid)", marginTop: 2, lineHeight: 1.5 }}>target {pfText(kpi.target)}</div>
+                          <div style={{ fontSize: 10.5, color: "var(--z-mid)", marginTop: 2, lineHeight: 1.5 }}>Target · {pfText(kpi.target)}</div>
                         ) : null}
                       </div>
                     ) : null}

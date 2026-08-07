@@ -164,7 +164,13 @@ function ClientContext({ entity, run }) {
         </div>
         <div className="card-body">
           <InteractiveGantt issues={issues} issueOpen={issueOpen} setIssueOpen={setIssueOpen} />
-          {issueOpen ? <IssueDetail issue={issues.find(i => i.id === issueOpen)} entity={entity} onClose={() => setIssueOpen(null)} openEvidence={openEvidence} /> : null}
+          {/* The detail panel lives HERE, inside the register — but the
+              regulatory panel further down opens it too, and from there the
+              panel appears a screen and a half above the click. It read as a
+              dead control. Anchored so a caller can bring it into view. */}
+          <div id="issue-detail-anchor">
+            {issueOpen ? <IssueDetail issue={issues.find(i => i.id === issueOpen)} entity={entity} onClose={() => setIssueOpen(null)} openEvidence={openEvidence} /> : null}
+          </div>
         </div>
       </div>
 
@@ -211,7 +217,14 @@ function ClientContext({ entity, run }) {
           ) : (DMA.ACQUISITIONS || []).map((a, i, arr) => (
             <div key={a.id || i} style={{ padding: "10px 0", borderBottom: i < arr.length - 1 ? "1px solid var(--z-sep)" : "none", cursor: "pointer" }} onClick={() => setAcqOpen(acqOpen === (a.id || i) ? null : (a.id || i))}>
               <div className="row">
-                <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{a.date || "undated"}</span>
+                {/* The date slot holds a date or nothing. It used to print the
+                    word "undated" in the date's own place, which reads as a
+                    label on the acquisition rather than as the absence of a
+                    figure — the run's dating discipline is a producer problem
+                    and does not belong in a client's title row. */}
+                {a.date ? (
+                  <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{a.date}</span>
+                ) : null}
                 <div style={{ flex: 1, fontWeight: 500, fontSize: 12.5 }}>{a.target}</div>
                 {a.kind ? <span className="b b-muted">{a.kind}</span> : null}
                 <span className="b b-muted">{a.status}</span>
@@ -367,7 +380,16 @@ function RegulatoryStanding({ entity, issues, setIssueOpen, openEvidence }) {
             </div>
             {regIssues.map(i => (
               <div key={i.id} className="co co-org" style={{ cursor: "pointer", marginBottom: 6 }}
-                   onClick={() => setIssueOpen(i.id)}>
+                   onClick={() => {
+                     setIssueOpen(i.id);
+                     // Take the reader to the panel the click just opened.
+                     // Without this the state changed and the page did not,
+                     // because the detail renders up inside the register.
+                     requestAnimationFrame(() => {
+                       const el = document.getElementById("issue-detail-anchor");
+                       if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                     });
+                   }}>
                 <Icon name="warn" size={14} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="co-title">{i.status || "OPEN"} · {i.id}</div>
@@ -467,10 +489,10 @@ function InteractiveTimeline({ events, setHoverEvent, setSelectedEvent, selected
         {events.map((e, i) => (
           <button key={e.id} onClick={() => setSelectedEvent(i === selectedEvent ? null : i)}
             onMouseEnter={() => setHoverEvent(i)} onMouseLeave={() => setHoverEvent(null)}
-            title={`${e.date || "undated"} · ${e.title}`}
+            title={e.date ? `${e.date} · ${e.title}` : e.title}
             style={{ textAlign: "center", lineHeight: 1.4, background: "none",
                      border: 0, padding: 0, cursor: "pointer", minWidth: 0 }}>
-            <div className="f-mono" style={{ color: hoverEvent === i || selectedEvent === i ? TONE[e.signal] : "var(--z-muted)" }}>{e.date || "undated"}</div>
+            <div className="f-mono" style={{ color: hoverEvent === i || selectedEvent === i ? TONE[e.signal] : "var(--z-muted)" }}>{e.date || ""}</div>
             <div className="txt-fit-2" style={{ fontSize: 9.5, color: hoverEvent === i || selectedEvent === i ? "var(--z-dark)" : "var(--z-muted)", fontWeight: hoverEvent === i ? 600 : 400 }}>{e.title}</div>
           </button>
         ))}
@@ -493,7 +515,7 @@ function EventDetail({ event, onClose, openEvidence, openSubcap }) {
   return (
     <div style={{ marginTop: 16, padding: 14, background: "var(--z-lav)", borderRadius: 8, borderLeft: `4px solid ${TONE[event.signal] || "var(--z-sep)"}` }}>
       <div className="row" style={{ marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
-        <span className="f-mono" style={{ fontSize: 11, color: "var(--z-muted)" }}>{event.date || "undated"}</span>
+        <span className="f-mono" style={{ fontSize: 11, color: "var(--z-muted)" }}>{event.date || ""}</span>
         <strong style={{ fontSize: 14, flex: 1, minWidth: 0 }}>{event.title}</strong>
         {event.kind ? <span className="b b-purple">{event.kind}</span> : null}
         {event.claim ? <span className="b b-muted">{event.claim}</span> : null}
@@ -656,7 +678,7 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen }) {
       {undated.length ? (
         <div style={{ borderTop: "1px solid var(--z-sep)", paddingTop: 10, marginTop: 6 }}>
           <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>
-            Undated · {undated.length} · not placeable on a time axis
+            Not yet placed on the time axis · {undated.length}
           </div>
           {undated.map(iss => (
             <button key={iss.id} onClick={() => setIssueOpen(issueOpen === iss.id ? null : iss.id)}
@@ -812,7 +834,15 @@ function SentimentGridInteractive({ sentOpen, setSentOpen, openEvidence, entity 
      whichever real client was open. Clicking one of those chips opened the
      drawer saying the id does not resolve and "a citation that does not resolve
      is a producer defect": the app blaming the producer for its own fixture. */
-  const sent = DMA.sentimentFor(entity && entity.id);
+  /* This card reads the CONTEXT page's own section, not the overview's bars.
+     They are different sections with different grains — `context_sentiment`
+     carries tiles per audience, each with the measured rows behind it — and
+     reading the wrong one is why a promoted section rendered as "nothing
+     promoted". The accessor falls back to the overview bars for a run that
+     promoted only those. */
+  const sent = typeof DMA.contextSentimentFor === "function"
+    ? DMA.contextSentimentFor(entity && entity.id)
+    : DMA.sentimentFor(entity && entity.id);
   const groups = (sent && sent.groups) || null;
   const rows = [];
   for (const g of Object.keys(groups || {})) {
@@ -820,13 +850,30 @@ function SentimentGridInteractive({ sentOpen, setSentOpen, openEvidence, entity 
       rows.push({ id: `${g}-${b.label}`, group: g, ...b });
     }
   }
+  // A tile the producer worked and could not fill is a finding with a ladder
+  // behind it, not an empty card: it names what was searched.
+  const absent = (sent && sent.absent) || [];
   if (!rows.length) {
     return (
       <div style={{ fontSize: 12, color: "var(--z-muted)", lineHeight: 1.6 }}>
-        No sentiment measures promoted for this run.
-        {sent && sent.sources_searched && sent.sources_searched.length ? (
-          <> Searched: {sent.sources_searched.join(" · ")}.</>
-        ) : null}
+        {absent.length ? (
+          absent.map((a, i) => (
+            <div key={i} style={{ marginBottom: 8 }}>
+              <strong style={{ color: "var(--z-body)", textTransform: "uppercase", fontSize: 10, letterSpacing: ".08em" }}>{a.group}</strong>
+              {a.note ? <> — {a.note}</> : <> — searched and not established.</>}
+              {(a.sources_searched || []).length ? (
+                <> Searched: {a.sources_searched.join(" · ")}.</>
+              ) : null}
+            </div>
+          ))
+        ) : (
+          <>
+            No sentiment measures promoted for this run.
+            {sent && sent.sources_searched && sent.sources_searched.length ? (
+              <> Searched: {sent.sources_searched.join(" · ")}.</>
+            ) : null}
+          </>
+        )}
       </div>
     );
   }
@@ -1194,6 +1241,23 @@ function VersionDiff({ entity, baseId, targetId, setBase, setTarget }) {
   );
 }
 
+/* The four technology layers, at module scope because BOTH the register and
+   the per-product detail name them and the detail used to reach for a field
+   (`layer_full`) that no adapter sets. One map, one source of the names.
+
+   No `primary_gap` here. It used to be hardcoded true on CUST, so every
+   client's customer layer wore PRIMARY GAP LAYER whatever their register
+   said — and on this one CUST is the BEST covered layer (11 confirmed of 23)
+   while DATA has none confirmed at all. It is a judgement the payload makes,
+   per layer, in `layers[].is_primary_gap`. */
+const TS_LAYERS = ["OPS", "CUST", "DATA", "INFRA"];
+const TS_LAYER_LABEL = {
+  OPS:   { name: "Operations & core banking",  short: "Operations", dma: "P3" },
+  CUST:  { name: "Customer engagement",        short: "Customer",   dma: "P2" },
+  DATA:  { name: "Data & analytics",           short: "Data",       dma: "P4" },
+  INFRA: { name: "Infrastructure & cloud",     short: "Infra",      dma: "P4" },
+};
+
 /* ── Tech stack overview (s41) ───────────────────────────────────── */
 function ClientTechStack({ entity, run }) {
   const { pushToast } = useApp();
@@ -1219,18 +1283,8 @@ function ClientTechStack({ entity, run }) {
   // L2–L5. L1–L4 already name the EVIDENCE levels, and a register row showing
   // "L3" next to an evidence level "L3" means two different things in the same
   // row. Same four labels, same layout, unambiguous keys.
-  const LAYERS = ["OPS", "CUST", "DATA", "INFRA"];
-  const LAYER_LABEL = {
-    OPS:   { name: "Operations & core banking",  short: "Operations", dma: "P3" },
-    // No `primary_gap` here. It used to be hardcoded true on CUST, so every
-    // client's customer layer wore PRIMARY GAP LAYER whatever their register
-    // said — and on this one CUST is the BEST covered layer (11 confirmed of
-    // 23) while DATA has none confirmed at all. It is a judgement the payload
-    // makes, per layer, in `layers[].is_primary_gap`.
-    CUST:  { name: "Customer engagement",        short: "Customer",   dma: "P2" },
-    DATA:  { name: "Data & analytics",           short: "Data",       dma: "P4" },
-    INFRA: { name: "Infrastructure & cloud",     short: "Infra",      dma: "P4" },
-  };
+  const LAYERS = TS_LAYERS;
+  const LAYER_LABEL = TS_LAYER_LABEL;
   const byLayer = {};
   LAYERS.forEach(L => byLayer[L] = list.filter(t => t.layer === L));
 
@@ -1570,7 +1624,16 @@ function ClientTechStackDetail({ entity, run, techId }) {
       {/* Header card */}
       <div className="card" style={{ marginBottom: 14 }}>
         <div className="row" style={{ marginBottom: 8, flexWrap: "wrap" }}>
-          <span className="b b-muted" style={{ textTransform: "uppercase" }}>{t.layer_full}</span>
+          {/* The layer, named. `layer_full` is not a field any adapter sets,
+              so this badge rendered EMPTY — a grey bar sitting beside the
+              status chip with nothing in it. The layer itself is promoted;
+              the full name comes from the register's own label map, and an
+              unknown layer renders no badge rather than a blank one. */}
+          {TS_LAYER_LABEL[t.layer] ? (
+            <span className="b b-muted" style={{ textTransform: "uppercase" }}>
+              {TS_LAYER_LABEL[t.layer].name}
+            </span>
+          ) : null}
           <span className="b b-teal" style={{ background: t.status === "ABSENT" ? "rgba(194,80,8,.10)" : t.status === "INFERRED" ? "var(--ph0-lt)" : "var(--z-ice)", color: S.color, border: `1px solid ${S.color}22` }}>{S.label}</span>
           {t.since ? <span style={{ fontSize: 11, color: "var(--z-muted)", background: "var(--z-lav)", padding: "2px 8px", borderRadius: 3 }}>Since {t.since}</span> : null}
         </div>
@@ -1604,8 +1667,10 @@ function ClientTechStackDetail({ entity, run, techId }) {
           two columns, because it is prose and the reader came here for it. */}
       {t.dma_impact ? (
         <div className="card" style={{ marginBottom: 14, borderLeft: "3px solid var(--z-teal)" }}>
+          {/* No icon. `target` is not in the icon set, so it fell through to
+              the fallback glyph and painted a stray dot in front of the
+              heading — a bullet on a heading that is not a list. */}
           <div className="row" style={{ marginBottom: 8 }}>
-            <Icon name="target" size={15} />
             <div style={{ fontSize: 13, fontWeight: 600 }}>What this bears on in the assessment</div>
           </div>
           <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.6, maxWidth: 860 }}>

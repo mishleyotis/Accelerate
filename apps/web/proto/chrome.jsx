@@ -390,7 +390,10 @@ function ClientBar({ entity, run, tab }) {
         {audience !== "customer" ? TAB("context", "Context", null, "timeline") : null}
         {TAB("techstack", "Tech stack", null, "stack")}
         {(role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("health", "Health", entity.open_alerts, "shield") : null}
-        {TAB("runs",      "Runs", null, "refresh")}
+        {/* Runs is production plumbing — which package produced which run,
+            what changed between them. An AE reads the client's story, not the
+            pipeline's, so the tab belongs to the roles who maintain it. */}
+        {(role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("runs", "Runs", null, "refresh") : null}
       </div>
 
       {audience === "customer" ? (

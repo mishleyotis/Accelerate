@@ -59,6 +59,55 @@ function fx(v, digits) {
     ? "—" : n.toFixed(digits === undefined ? 1 : digits);
 }
 
+/* Prose that renders as a sentence, starting like one.
+
+   The producer writes some fields as sentence fragments and some as
+   sentences, and a fragment dropped into a paragraph slot renders as
+   "with plans to increase our member base…" — a lowercase opening under a
+   heading. The real fix is upstream (the connector refuses it now), but a
+   promoted run already in the database still has to read correctly, so the
+   render boundary raises the first letter too.
+
+   What it must NOT do is "correct" a name. A first word that carries an
+   uppercase letter anywhere after its first character is deliberate —
+   nCino, iPhone, eBay — and is left exactly as written, as is anything
+   starting with a URL, an identifier or a digit. */
+function sentence(s) {
+  if (typeof s !== "string") return s;
+  const t = s.trimStart();
+  if (!t) return s;
+  const first = t.split(/\s/)[0];
+  if (/^(https?:|www\.)/i.test(first)) return s;
+  if (/[A-Z]/.test(first.slice(1))) return s;      // nCino, iOS, eBay
+  if (!/^[a-z]/.test(t)) return s;                 // digits, quotes, already capital
+  return t[0].toUpperCase() + t.slice(1);
+}
+
+/* Renderable text from a payload value that may not be a string.
+
+   React throws on an object child and there is no error boundary above these
+   cards, so one wrapped value takes the page down. Several contract fields
+   are objects with the prose inside them — `strategic_alignment` is
+   `{score, statement}` — and a card that reads the field directly renders
+   either the statement or a crash, depending on the run. This unwraps by the
+   naming keys the contract actually uses, joins a list, and returns null for
+   anything it cannot render, so the caller shows its absent state instead.
+   Sentence-cased on the way out for the same reason `sentence` exists. */
+function asText(v) {
+  if (v === null || v === undefined) return null;
+  if (typeof v === "string") return v ? sentence(v) : null;
+  if (typeof v === "number" || typeof v === "boolean") return String(v);
+  if (Array.isArray(v)) return v.map(asText).filter(Boolean).join(" · ") || null;
+  if (typeof v === "object") {
+    for (const k of ["statement", "text", "label", "name", "title", "value"]) {
+      const t = asText(v[k]);
+      if (t) return t;
+    }
+    return null;
+  }
+  return String(v);
+}
+
 /* ── Icons ───────────────────────────────────────────────────────── */
 function Icon({ name, size = 16, ...rest }) {
   const s = size;
@@ -119,7 +168,11 @@ function Icon({ name, size = 16, ...rest }) {
     case "share":     return <svg {...props}><circle cx="6" cy="12" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 11l8-4M8 13l8 4"/></svg>;
     case "switch":    return <svg {...props}><path d="M7 8h14l-3-3M17 16H3l3 3"/></svg>;
     case "lightbulb": return <svg {...props}><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c1 .9 1.5 2.2 1.5 3.5h5c0-1.3.5-2.6 1.5-3.5A6 6 0 0 0 12 3z"/></svg>;
-    default:          return <svg {...props}><circle cx="12" cy="12" r="6"/></svg>;
+    // An unknown name renders NOTHING. The fallback used to be a filled
+    // circle, which is indistinguishable from a deliberate bullet: a single
+    // mistyped name put a stray dot in front of a card heading and nothing in
+    // the code said so. Absent beats a mark nobody asked for.
+    default:          return null;
   }
 }
 

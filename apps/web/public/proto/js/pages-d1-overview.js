@@ -330,7 +330,7 @@ function ClientOverview({
     style: {
       marginBottom: 18
     }
-  }, /*#__PURE__*/React.createElement(FinancialTrajectoryCard, {
+  }, /*#__PURE__*/React.createElement(FinancialTrajectoryD1, {
     entity: entity
   }), /*#__PURE__*/React.createElement(SentimentCard, {
     entity: entity,
@@ -394,12 +394,21 @@ function ScoreRing({
   }, fx(score, 1))));
 }
 
-/* ── Why-now strip · expandable, drillable, per-client ──────────────
+/* ── Why-now strip · card row + full-width drilldown, per-client ────
    Sources DMA.whyNowFor(entity.id): hand-authored for the flagship,
    synthesized from each client's own scoring/evidence otherwise.
-   Collapsed → label + strength + window + one-line "so what".
-   Expanded → detail · metric · timeline event · the play · peer context ·
-   risk-if-ignored · tier-coded evidence · confidence + claim type.
+   The face is one horizontal row of compact cards — kind chip over the
+   trigger sentence — because four stacked full-width rows pushed the rest
+   of the page below the fold and read as four cards instead of one strip.
+   The drilldown carries everything the stacked rows did (detail · metric ·
+   dated event · window · the play · peer context · risk-if-ignored · cost
+   of acting · bears-on cells · tier-coded evidence · claim + confidence),
+   but it opens BELOW the strip at full width: the detail is prose, and
+   expanding it inside a 200px column crushed every sentence. The window
+   moves into the drilldown as a labelled row for the same reason it once
+   broke the stacked header — it is a 20-40-word clause naming the closing
+   event, not a chip-sized phrase. One signal open at a time; none open by
+   default — the strip is the summary, the reader chooses the drilldown.
    Customer view keeps positive framing and strips internal rationale. */
 function WhyNowStrip({
   entity,
@@ -407,31 +416,9 @@ function WhyNowStrip({
   audience,
   openSubcap
 }) {
-  const [open, setOpen] = useState(0); // first signal expanded by default
+  const [open, setOpen] = useState(null); // no drilldown until a card is chosen
   const signals = DMA.whyNowFor(entity.id) || [];
   const isCust = audience === "customer";
-  const CAT = {
-    core_migration: {
-      icon: "refresh",
-      color: "var(--z-teal)"
-    },
-    leadership: {
-      icon: "users",
-      color: "var(--z-dpur)"
-    },
-    hiring: {
-      icon: "users",
-      color: "var(--z-mid)"
-    },
-    regulatory: {
-      icon: "shield",
-      color: "var(--z-org)"
-    },
-    market: {
-      icon: "stack",
-      color: "var(--z-mid)"
-    }
-  };
   const STR = {
     STRONG: "b-teal",
     LEADING: "b-purple",
@@ -442,6 +429,35 @@ function WhyNowStrip({
     INFERENCE: "b-purple",
     HYPOTHESIS: "b-org"
   };
+  // The chip is the signal's `kind`, compressed to one word. The contract's
+  // vocabulary is already chip-sized (LEADERSHIP · REGULATORY · TECHNOLOGY);
+  // the exceptions map to the word a reader would say, and anything else —
+  // fixture categories, future kinds — falls back to the kind text itself,
+  // uppercased. Never invented: no kind, no guess, just SIGNAL.
+  const CHIP_WORD = {
+    "M&A": "MERGER",
+    "CORE_MIGRATION": "MIGRATION"
+  };
+  const chipOf = kind => {
+    if (!kind) return "SIGNAL";
+    const k = String(kind).toUpperCase();
+    return CHIP_WORD[k] || k.replace(/_/g, " ");
+  };
+  const kindChip = kind => /*#__PURE__*/React.createElement("span", {
+    className: "f-mono",
+    style: {
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: ".08em",
+      textTransform: "uppercase",
+      color: "var(--z-dpur)",
+      background: "rgba(115,91,161,.14)",
+      borderRadius: 4,
+      padding: "2px 7px",
+      flexShrink: 0
+    }
+  }, chipOf(kind));
+  const sel = open != null ? signals[open] : null;
   return /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
@@ -489,302 +505,300 @@ function WhyNowStrip({
     size: 11
   }))), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 8
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+      gap: 10
     }
   }, signals.map((s, i) => {
     const openNow = open === i;
-    const cat = CAT[s.category] || CAT.market;
-    return /*#__PURE__*/React.createElement("div", {
+    return /*#__PURE__*/React.createElement("button", {
       key: s.id || i,
+      onClick: () => setOpen(o => o === i ? null : i),
       style: {
+        textAlign: "left",
+        cursor: "pointer",
+        background: "var(--z-lav)",
         border: `1px solid ${openNow ? "var(--ph0-bd)" : "var(--z-sep)"}`,
         borderRadius: 10,
-        overflow: "hidden",
-        background: openNow ? "var(--ph0-lt)" : "#fff",
-        transition: "background 140ms var(--ease), border-color 140ms var(--ease)"
-      }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setOpen(o => o === i ? -1 : i),
-      style: {
-        width: "100%",
+        padding: "11px 13px",
         display: "flex",
-        alignItems: "center",
-        gap: 11,
-        padding: "12px 14px",
-        background: "none",
-        border: 0,
-        cursor: "pointer",
-        textAlign: "left"
+        flexDirection: "column",
+        alignItems: "flex-start",
+        gap: 8,
+        transition: "border-color 140ms var(--ease)"
       }
     }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        width: 30,
-        height: 30,
-        borderRadius: 8,
-        background: cat.color,
-        color: "#fff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0
-      }
-    }, /*#__PURE__*/React.createElement(Icon, {
-      name: cat.icon,
-      size: 15
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: "1 1 55%",
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 7,
-        flexWrap: "wrap"
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 13,
-        fontWeight: 600,
-        color: "var(--z-dark)"
-      }
-    }, s.label), !isCust && s.strength ? /*#__PURE__*/React.createElement("span", {
-      className: `b ${STR[s.strength] || "b-muted"}`
-    }, s.strength) : null), !openNow ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11.5,
-        color: "var(--z-body)",
-        marginTop: 3,
-        lineHeight: 1.4
-      },
-      className: "txt-fit-1",
-      title: s.impact
-    }, s.impact) : null), s.window ? /*#__PURE__*/React.createElement("span", {
-      style: {
-        background: "rgba(115,91,161,.14)",
-        color: "var(--z-dpur)",
-        borderRadius: 6,
-        padding: "5px 9px",
-        fontSize: 11,
-        lineHeight: 1.5,
-        whiteSpace: "normal",
-        flex: "0 1 auto",
-        maxWidth: "36%"
-      }
-    }, s.window) : null, /*#__PURE__*/React.createElement(Icon, {
-      name: openNow ? "chevron-u" : "chevron-d",
-      size: 15,
-      style: {
-        color: "var(--z-muted)",
-        flexShrink: 0
-      }
-    })), openNow ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        padding: "0 14px 14px 55px"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12.5,
-        color: "var(--z-body)",
-        lineHeight: 1.6,
-        marginBottom: 10
-      }
-    }, isCust ? s.impact : s.detail), !isCust && s.metric ? /*#__PURE__*/React.createElement("div", {
-      className: "f-mono",
-      style: {
-        fontSize: 11.5,
-        color: "var(--z-dark)",
-        background: "#fff",
-        border: "1px solid var(--z-sep)",
-        borderRadius: 6,
-        padding: "7px 10px",
-        marginBottom: 10,
-        display: "inline-block"
-      }
-    }, s.metric) : null, s.timeline ? /*#__PURE__*/React.createElement("button", {
-      onClick: () => navigate(`/clients/${entity.id}/context`),
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 7,
-        background: "none",
-        border: 0,
-        padding: 0,
-        cursor: "pointer",
-        marginBottom: 12
-      }
-    }, /*#__PURE__*/React.createElement(Icon, {
-      name: "timeline",
-      size: 12,
-      style: {
-        color: "var(--ph0)"
-      }
-    }), /*#__PURE__*/React.createElement("span", {
-      className: "f-mono",
-      style: {
-        fontSize: 11,
-        color: "var(--z-mid)"
-      }
-    }, s.timeline.date), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 11.5,
-        color: "var(--z-body)"
-      }
-    }, s.timeline.event), /*#__PURE__*/React.createElement(Icon, {
-      name: "arrow-r",
-      size: 10,
-      style: {
-        color: "var(--z-muted)"
-      }
-    })) : null, s.play ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "rgba(39,187,175,.1)",
-        borderLeft: "3px solid var(--z-teal)",
-        borderRadius: "0 6px 6px 0",
-        padding: "8px 12px",
-        marginBottom: 8
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9.5,
-        fontWeight: 700,
-        letterSpacing: ".1em",
-        color: "var(--z-teal)",
-        textTransform: "uppercase",
-        marginBottom: 2
-      }
-    }, "The play"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        color: "var(--z-dark)",
-        lineHeight: 1.55,
-        fontWeight: 500
-      }
-    }, s.play)) : null, !isCust && s.peer_context ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11.5,
-        color: "var(--z-muted)",
-        lineHeight: 1.5,
-        margin: "6px 0"
-      }
-    }, /*#__PURE__*/React.createElement("strong", {
-      style: {
-        color: "var(--z-body)"
-      }
-    }, "Peer context \xB7 "), s.peer_context) : null, !isCust && s.risk ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "rgba(214,109,42,.08)",
-        borderLeft: "3px solid var(--z-org)",
-        borderRadius: "0 6px 6px 0",
-        padding: "8px 12px",
-        marginBottom: 10
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9.5,
-        fontWeight: 700,
-        letterSpacing: ".1em",
-        color: "var(--z-org)",
-        textTransform: "uppercase",
-        marginBottom: 2
-      }
-    }, "If ignored"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        color: "var(--z-body)",
-        lineHeight: 1.55
-      }
-    }, s.risk)) : null, s.cost_now ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "var(--z-lav)",
-        borderLeft: "3px solid var(--z-dpur)",
-        borderRadius: "0 6px 6px 0",
-        padding: "8px 12px",
-        marginBottom: 10
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9.5,
-        fontWeight: 700,
-        letterSpacing: ".1em",
-        color: "var(--z-dpur)",
-        textTransform: "uppercase",
-        marginBottom: 2
-      }
-    }, "Cost of acting now"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        color: "var(--z-body)",
-        lineHeight: 1.55
-      }
-    }, s.cost_now)) : null, (s.subcaps || []).length ? /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        gap: 5,
-        flexWrap: "wrap",
-        marginBottom: 10
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 9.5,
-        color: "var(--z-muted)",
-        textTransform: "uppercase",
-        letterSpacing: ".08em"
-      }
-    }, "Bears on"), s.subcaps.map(cid => /*#__PURE__*/React.createElement("button", {
-      key: cid,
-      className: "chip purple",
-      style: {
-        cursor: "pointer",
-        border: 0
-      },
-      onClick: () => openSubcap && openSubcap(cid)
-    }, cid))) : null, /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         alignItems: "center",
         gap: 6,
-        flexWrap: "wrap",
-        marginTop: 10
+        flexWrap: "wrap"
       }
-    }, s.evidence && s.evidence.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+    }, kindChip(s.category), !isCust && s.strength ? /*#__PURE__*/React.createElement("span", {
+      className: `b ${STR[s.strength] || "b-muted"}`
+    }, s.strength) : null), /*#__PURE__*/React.createElement("span", {
       style: {
-        fontSize: 9.5,
-        color: "var(--z-muted)",
-        textTransform: "uppercase",
-        letterSpacing: ".08em"
-      }
-    }, "Evidence"), s.evidence.map(eid => {
-      const e = DMA.getEvidence(eid);
-      return /*#__PURE__*/React.createElement("button", {
-        key: eid,
-        className: `tier-chip tier-${e ? e.tier : "T3"}`,
-        style: {
-          cursor: "pointer",
-          border: 0
-        },
-        title: e ? e.title : eid,
-        onClick: () => openEvidence(eid)
-      }, eid);
-    })) : /*#__PURE__*/React.createElement("span", {
+        fontSize: 12,
+        fontWeight: 500,
+        color: "var(--z-dark)",
+        lineHeight: 1.45,
+        display: "-webkit-box",
+        WebkitLineClamp: 4,
+        WebkitBoxOrient: "vertical",
+        overflow: "hidden"
+      },
+      title: s.detail || s.label
+    }, s.label));
+  })), sel ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      border: "1px solid var(--ph0-bd)",
+      borderRadius: 10,
+      background: "var(--ph0-lt)",
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setOpen(null),
+    style: {
+      width: "100%",
+      display: "flex",
+      alignItems: "center",
+      gap: 9,
+      padding: "12px 14px",
+      background: "none",
+      border: 0,
+      cursor: "pointer",
+      textAlign: "left"
+    }
+  }, kindChip(sel.category), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      fontSize: 13,
+      fontWeight: 600,
+      color: "var(--z-dark)",
+      minWidth: 0
+    }
+  }, sel.label), /*#__PURE__*/React.createElement(Icon, {
+    name: "chevron-u",
+    size: 15,
+    style: {
+      color: "var(--z-muted)",
+      flexShrink: 0
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "0 14px 14px"
+    }
+  }, (isCust ? sel.impact : sel.detail) ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: "var(--z-body)",
+      lineHeight: 1.6,
+      marginBottom: 10
+    }
+  }, isCust ? sel.impact : sel.detail) : null, !isCust && sel.metric ? /*#__PURE__*/React.createElement("div", {
+    className: "f-mono",
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-dark)",
+      background: "#fff",
+      border: "1px solid var(--z-sep)",
+      borderRadius: 6,
+      padding: "7px 10px",
+      marginBottom: 10,
+      display: "inline-block"
+    }
+  }, sel.metric) : null, sel.timeline ? /*#__PURE__*/React.createElement("button", {
+    onClick: () => navigate(`/clients/${entity.id}/context`),
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 7,
+      background: "none",
+      border: 0,
+      padding: 0,
+      cursor: "pointer",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "timeline",
+    size: 12,
+    style: {
+      color: "var(--ph0)"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "f-mono",
+    style: {
+      fontSize: 11,
+      color: "var(--z-mid)"
+    }
+  }, sel.timeline.date), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-body)"
+    }
+  }, sel.timeline.event), /*#__PURE__*/React.createElement(Icon, {
+    name: "arrow-r",
+    size: 10,
+    style: {
+      color: "var(--z-muted)"
+    }
+  })) : null, sel.window ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      lineHeight: 1.5,
+      margin: "0 0 10px"
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: "var(--z-dpur)"
+    }
+  }, "Window \xB7 "), sel.window) : null, sel.play ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(39,187,175,.1)",
+      borderLeft: "3px solid var(--z-teal)",
+      borderRadius: "0 6px 6px 0",
+      padding: "8px 12px",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: ".1em",
+      color: "var(--z-teal)",
+      textTransform: "uppercase",
+      marginBottom: 2
+    }
+  }, "The play"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-dark)",
+      lineHeight: 1.55,
+      fontWeight: 500
+    }
+  }, sel.play)) : null, !isCust && sel.peer_context ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      lineHeight: 1.5,
+      margin: "6px 0"
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: "var(--z-body)"
+    }
+  }, "Peer context \xB7 "), sel.peer_context) : null, !isCust && sel.risk ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(214,109,42,.08)",
+      borderLeft: "3px solid var(--z-org)",
+      borderRadius: "0 6px 6px 0",
+      padding: "8px 12px",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: ".1em",
+      color: "var(--z-org)",
+      textTransform: "uppercase",
+      marginBottom: 2
+    }
+  }, "If ignored"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-body)",
+      lineHeight: 1.55
+    }
+  }, sel.risk)) : null, sel.cost_now ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "var(--z-lav)",
+      borderLeft: "3px solid var(--z-dpur)",
+      borderRadius: "0 6px 6px 0",
+      padding: "8px 12px",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: ".1em",
+      color: "var(--z-dpur)",
+      textTransform: "uppercase",
+      marginBottom: 2
+    }
+  }, "Cost of acting now"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-body)",
+      lineHeight: 1.55
+    }
+  }, sel.cost_now)) : null, (sel.subcaps || []).length ? /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 5,
+      flexWrap: "wrap",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9.5,
+      color: "var(--z-muted)",
+      textTransform: "uppercase",
+      letterSpacing: ".08em"
+    }
+  }, "Bears on"), sel.subcaps.map(cid => /*#__PURE__*/React.createElement("button", {
+    key: cid,
+    className: "chip purple",
+    style: {
+      cursor: "pointer",
+      border: 0
+    },
+    onClick: () => openSubcap && openSubcap(cid)
+  }, cid))) : null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      flexWrap: "wrap",
+      marginTop: 10
+    }
+  }, sel.evidence && sel.evidence.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9.5,
+      color: "var(--z-muted)",
+      textTransform: "uppercase",
+      letterSpacing: ".08em"
+    }
+  }, "Evidence"), sel.evidence.map(eid => {
+    const e = DMA.getEvidence(eid);
+    return /*#__PURE__*/React.createElement("button", {
+      key: eid,
+      className: `tier-chip tier-${e ? e.tier : "T3"}`,
       style: {
-        fontSize: 11,
-        color: "var(--z-muted)",
-        fontStyle: "italic"
-      }
-    }, "No direct evidence yet \u2014 confirm in first meeting"), /*#__PURE__*/React.createElement("span", {
-      style: {
-        flex: 1
-      }
-    }), !isCust && s.claim ? /*#__PURE__*/React.createElement("span", {
-      className: `b ${CLAIM[s.claim] || "b-muted"}`
-    }, s.claim) : null, !isCust && s.confidence ? /*#__PURE__*/React.createElement("span", {
-      className: "b b-muted"
-    }, s.confidence, " confidence") : null)) : null);
-  })));
+        cursor: "pointer",
+        border: 0
+      },
+      title: e ? e.title : eid,
+      onClick: () => openEvidence(eid)
+    }, eid);
+  })) : /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)",
+      fontStyle: "italic"
+    }
+  }, "No direct evidence yet \u2014 confirm in first meeting"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1
+    }
+  }), !isCust && sel.claim ? /*#__PURE__*/React.createElement("span", {
+    className: `b ${CLAIM[sel.claim] || "b-muted"}`
+  }, sel.claim) : null, !isCust && sel.confidence ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted"
+  }, sel.confidence, " confidence") : null))) : null);
 }
 
 /* ── SCQA card ──────────────────────────────────────────────────── */
@@ -1265,50 +1279,72 @@ function TopFindingsCard({
 function LeadershipPanel({
   audience
 }) {
-  /* Contact detail is PROMOTED, not fetched.
-      The prototype simulated an enrichment call: a per-person button set a
-     "loading" flag, a 900ms setTimeout set "done", and the email and LinkedIn
-     came from the fixture. Under a real client the button appeared only when
-     `ex.clay` was truthy — which it never is — so it never appeared at all, and
-     the row said "Email · LinkedIn hidden until enriched" forever.
+  /* Contact detail is PROMOTED, not fetched — and revealed, not shown.
       Clay runs in the PRODUCER's session at synthesis time; its output is
-     registered as evidence and written into the roster item (migration 0018), so
-     by the time this panel renders the contact route is already a column in
-     Postgres. That is why there is no spinner here: the values arrive in the
-     same read as the name. The app never calls Clay while serving — it performs
-     no third-party call and no inference at request time. */
+     registered as evidence and written into the roster item (migration 0018),
+     so by the time this panel renders the contact route is already a column
+     in Postgres, arriving in the same read as the name. The app never calls
+     Clay while serving (invariant 1) — which is exactly why the "Enrich via
+     Clay" button can exist at all: it is a curtain over data the run already
+     holds, not a request. A click flips component state, waits a beat so the
+     reveal reads as an action, and shows what was stored. A person the
+     producer found no route for gets a transient toast and the curtain comes
+     down entirely — a box left standing would promise a route the run cannot
+     produce. Nothing leaves the browser, nothing persists: navigate away and
+     every curtain is closed again. */
   const {
     pushToast
   } = useApp();
-  const LIVE = typeof window !== "undefined" && !!window.DMA_LIVE;
-  const [enriched, setEnriched] = useState({}); // fixture mode only
+  const [revealed, setRevealed] = useState({}); // id → "loading" | "done" | "none"
   const [enrichingAll, setEnrichingAll] = useState(false);
-  const enrich = id => {
-    if (LIVE) return;
-    setEnriched(e => ({
-      ...e,
-      [id]: "loading"
-    }));
-    setTimeout(() => setEnriched(e => ({
-      ...e,
-      [id]: "done"
-    })), 900);
-  };
-  const enrichAll = () => {
-    if (LIVE) return;
-    setEnrichingAll(true);
-    const roster = DMA.LEADERSHIP || [];
-    // The completion timer used to hang off the LAST index, so a trailing GAP
-    // row (which returns early) meant "Enriching…" never cleared.
-    const enrichable = roster.filter(x => !x.gap_flag);
-    enrichable.forEach((ex, i) => setTimeout(() => {
-      enrich(ex.id);
-      if (i === enrichable.length - 1) setTimeout(() => setEnrichingAll(false), 1000);
-    }, i * 240));
-    if (!enrichable.length) setEnrichingAll(false);
-  };
   const roster = DMA.LEADERSHIP || [];
-  const withContact = roster.filter(x => !x.gap_flag && (x.email || x.linkedin_url || x.phone)).length;
+  // One route shape for both worlds: live rows carry the promoted email /
+  // linkedin_url / phone columns; the fixture's simulated enrichment carries
+  // `clay.{email,linkedin}`. Whichever exists is what the reveal shows.
+  const routeOf = ex => ({
+    email: ex.email || ex.clay && ex.clay.email || null,
+    linkedin: ex.linkedin_url || (ex.clay && ex.clay.linkedin ? `https://${ex.clay.linkedin}` : null),
+    phone: ex.phone || null
+  });
+  const hasRoute = ex => {
+    const r = routeOf(ex);
+    return !!(r.email || r.linkedin || r.phone);
+  };
+  const enrich = (ex, quiet) => {
+    setRevealed(m => ({
+      ...m,
+      [ex.id]: "loading"
+    }));
+    setTimeout(() => {
+      if (hasRoute(ex)) {
+        setRevealed(m => ({
+          ...m,
+          [ex.id]: "done"
+        }));
+      } else {
+        if (!quiet) pushToast(`No stored contact route for ${ex.name}`, "warn");
+        setRevealed(m => ({
+          ...m,
+          [ex.id]: "none"
+        }));
+      }
+    }, 400);
+  };
+  const enrichable = roster.filter(x => !x.gap_flag);
+  const enrichAll = () => {
+    const targets = enrichable.filter(x => revealed[x.id] !== "done");
+    if (!targets.length) return;
+    setEnrichingAll(true);
+    targets.forEach((ex, i) => setTimeout(() => enrich(ex, true), i * 180));
+    // One toast for the whole sweep — a stack of per-person "no route"
+    // toasts is noise; one naming the misses is an answer.
+    setTimeout(() => {
+      const missing = targets.filter(x => !hasRoute(x)).map(x => x.name);
+      if (missing.length) pushToast(`No stored contact route for ${missing.join(" · ")}`, "warn");
+      setEnrichingAll(false);
+    }, targets.length * 180 + 450);
+  };
+  const doneCount = enrichable.filter(x => revealed[x.id] === "done").length;
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1322,13 +1358,7 @@ function LeadershipPanel({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "users",
     size: 15
-  }), " Leadership panel"), LIVE ? /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10.5,
-      color: "var(--z-muted)"
-    },
-    title: "Contact detail is established at synthesis time and stored with the run; nothing is fetched when you open this page."
-  }, withContact, " of ", roster.filter(x => !x.gap_flag).length, " with a contact route") : /*#__PURE__*/React.createElement("button", {
+  }), " Leadership panel"), audience !== "customer" ? /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary btn-sm",
     onClick: enrichAll,
     disabled: enrichingAll
@@ -1342,17 +1372,13 @@ function LeadershipPanel({
   }), " Enriching\u2026") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Icon, {
     name: "sparkle",
     size: 11
-  }), " Enrich all via Clay"))), /*#__PURE__*/React.createElement("div", {
+  }), " Enrich all via Clay")) : null), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "8px 16px 14px"
     }
-  }, DMA.LEADERSHIP.map(ex => {
-    const state = enriched[ex.id]; // fixture mode only
-    // A promoted contact route needs no gate; the fixture's simulated one
-    // still needs its button.
-    const promoted = !ex.gap_flag && (ex.email || ex.linkedin_url || ex.phone);
-    const hasClay = !LIVE && ex.clay && !ex.gap_flag;
-    const isEnriched = state === "done" && hasClay;
+  }, roster.map(ex => {
+    const state = revealed[ex.id]; // undefined | "loading" | "done" | "none"
+    const route = routeOf(ex);
     return /*#__PURE__*/React.createElement("div", {
       key: ex.id,
       style: {
@@ -1392,8 +1418,8 @@ function LeadershipPanel({
         fontWeight: 600,
         fontSize: 13
       }
-    }, "-") : ex.linkedin_url || isEnriched && ex.clay?.linkedin ? /*#__PURE__*/React.createElement("a", {
-      href: ex.linkedin_url || `https://${ex.clay.linkedin}`,
+    }, "-") : state === "done" && route.linkedin ? /*#__PURE__*/React.createElement("a", {
+      href: route.linkedin,
       target: "_blank",
       rel: "noreferrer",
       style: {
@@ -1431,7 +1457,7 @@ function LeadershipPanel({
         marginTop: 4,
         lineHeight: 1.5
       }
-    }, ex.background), promoted && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+    }, ex.background), ex.gap_flag || audience === "customer" || state === "none" ? null : state === "done" ? /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 8,
         padding: "8px 10px",
@@ -1445,8 +1471,8 @@ function LeadershipPanel({
         flexDirection: "column",
         gap: 4
       }
-    }, ex.email ? /*#__PURE__*/React.createElement("a", {
-      href: `mailto:${ex.email}`,
+    }, route.email ? /*#__PURE__*/React.createElement("a", {
+      href: `mailto:${route.email}`,
       style: {
         fontSize: 11,
         color: "var(--z-mid)",
@@ -1459,8 +1485,8 @@ function LeadershipPanel({
     }, /*#__PURE__*/React.createElement(Icon, {
       name: "envelope",
       size: 11
-    }), " ", ex.email) : null, ex.linkedin_url ? /*#__PURE__*/React.createElement("a", {
-      href: ex.linkedin_url,
+    }), " ", route.email) : null, route.linkedin ? /*#__PURE__*/React.createElement("a", {
+      href: route.linkedin,
       target: "_blank",
       rel: "noreferrer",
       style: {
@@ -1475,8 +1501,8 @@ function LeadershipPanel({
     }, /*#__PURE__*/React.createElement(Icon, {
       name: "linkedin",
       size: 11
-    }), " ", String(ex.linkedin_url).replace(/^https?:\/\/(www\.)?/, "")) : null, ex.phone ? /*#__PURE__*/React.createElement("a", {
-      href: `tel:${String(ex.phone).replace(/[^+\d]/g, "")}`,
+    }), " ", String(route.linkedin).replace(/^https?:\/\/(www\.)?/, "")) : null, route.phone ? /*#__PURE__*/React.createElement("a", {
+      href: `tel:${String(route.phone).replace(/[^+\d]/g, "")}`,
       style: {
         fontSize: 11,
         color: "var(--z-mid)",
@@ -1489,21 +1515,34 @@ function LeadershipPanel({
     }, /*#__PURE__*/React.createElement(Icon, {
       name: "phone",
       size: 11
-    }), " ", ex.phone) : null, /*#__PURE__*/React.createElement("div", {
+    }), " ", route.phone) : null, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
         color: "var(--z-muted)",
         marginTop: 2
       }
-    }, ex.enrichment_basis || "no source stated for this contact route", ex.enriched_at ? ` · established ${ex.enriched_at}` : ""))) : !ex.gap_flag && LIVE && audience !== "customer" ?
-    /*#__PURE__*/
-    /* No stored route. The button still RENDERS — hiding it made
-       the panel read as a broken feature — but it cannot fetch
-       anything: Clay runs in the producer's session and its output
-       is promoted with the run (invariant 1: no third-party call
-       at serve time), so the honest answer to a click is a toast
-       saying when enrichment happens, not a spinner. */
-    React.createElement("div", {
+    }, "via Clay", ex.enriched_at ? ` · stored ${ex.enriched_at}` : ""))) : state === "loading" ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 8,
+        padding: "8px 10px",
+        background: "var(--z-lav)",
+        border: "1px solid var(--z-sep)",
+        borderRadius: 6
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        fontSize: 11,
+        color: "var(--z-dpur)"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "skel",
+      style: {
+        width: 12,
+        height: 12,
+        borderRadius: 6
+      }
+    }), /*#__PURE__*/React.createElement("span", null, "Checking stored Clay enrichment\u2026"))) : /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 8,
         padding: "8px 10px",
@@ -1526,7 +1565,7 @@ function LeadershipPanel({
       style: {
         color: "var(--z-muted)"
       }
-    }, "No contact route established for this person in this run."), /*#__PURE__*/React.createElement("span", {
+    }, "Email \xB7 LinkedIn hidden until enriched"), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement("button", {
       className: "btn btn-tertiary btn-sm",
@@ -1534,107 +1573,11 @@ function LeadershipPanel({
         padding: "3px 8px",
         flexShrink: 0
       },
-      onClick: () => pushToast("No contact route was stored for this person at synthesis time; enrichment runs during production, not from the browser", "warn")
+      onClick: () => enrich(ex)
     }, /*#__PURE__*/React.createElement(Icon, {
       name: "sparkle",
       size: 10
-    }), " Enrich via Clay"))) : hasClay && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginTop: 8,
-        padding: "8px 10px",
-        background: isEnriched ? "var(--z-ice)" : state === "loading" ? "var(--z-lav)" : "var(--z-bg)",
-        border: `1px solid ${isEnriched ? "rgba(39,187,175,.35)" : "var(--z-sep)"}`,
-        borderRadius: 6
-      }
-    }, !state ? /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        fontSize: 11
-      }
-    }, /*#__PURE__*/React.createElement(Icon, {
-      name: "lock",
-      size: 11,
-      style: {
-        color: "var(--z-muted)"
-      }
-    }), /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: "var(--z-muted)"
-      }
-    }, "Email \xB7 LinkedIn hidden until enriched"), /*#__PURE__*/React.createElement("span", {
-      className: "spacer"
-    }), /*#__PURE__*/React.createElement("button", {
-      className: "btn btn-tertiary btn-sm",
-      style: {
-        padding: "3px 8px"
-      },
-      onClick: () => enrich(ex.id)
-    }, /*#__PURE__*/React.createElement(Icon, {
-      name: "sparkle",
-      size: 10
-    }), " Enrich via Clay")) : state === "loading" ? /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        fontSize: 11,
-        color: "var(--z-dpur)"
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "skel",
-      style: {
-        width: 12,
-        height: 12,
-        borderRadius: 6
-      }
-    }), /*#__PURE__*/React.createElement("span", null, "Querying Clay enrichment\u2026")) : /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 4
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        fontSize: 11,
-        color: "var(--z-mid)"
-      }
-    }, /*#__PURE__*/React.createElement(Icon, {
-      name: "check",
-      size: 11
-    }), /*#__PURE__*/React.createElement("strong", {
-      style: {
-        color: "var(--z-mid)"
-      }
-    }, "Enriched")), /*#__PURE__*/React.createElement("a", {
-      href: `mailto:${ex.clay.email}`,
-      style: {
-        fontSize: 11,
-        color: "var(--z-mid)",
-        textDecoration: "none",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5
-      },
-      onClick: e => e.stopPropagation()
-    }, /*#__PURE__*/React.createElement(Icon, {
-      name: "envelope",
-      size: 11
-    }), " ", ex.clay.email), /*#__PURE__*/React.createElement("a", {
-      href: `https://${ex.clay.linkedin}`,
-      target: "_blank",
-      rel: "noreferrer",
-      style: {
-        fontSize: 11,
-        color: "var(--z-mid)",
-        textDecoration: "none",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5
-      },
-      onClick: e => e.stopPropagation()
-    }, /*#__PURE__*/React.createElement(Icon, {
-      name: "linkedin",
-      size: 11
-    }), " ", ex.clay.linkedin))) : null));
+    }), " Enrich via Clay")))));
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "10px 16px",
@@ -1661,17 +1604,130 @@ function LeadershipPanel({
     }, named.length ? `${named.join(" · ")} absent` : `${gaps.length} absent`), " ", "from evidence");
   })(), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), LIVE ? withContact ? /*#__PURE__*/React.createElement("span", {
+  }), doneCount ? /*#__PURE__*/React.createElement("span", {
     style: {
       color: "var(--z-mid)",
       fontWeight: 600
     }
-  }, "\u2713 ", withContact, " of ", roster.filter(x => !x.gap_flag).length, " with a contact route") : null : Object.values(enriched).some(v => v === "done") ? /*#__PURE__*/React.createElement("span", {
+  }, "\u2713 ", doneCount, " of ", enrichable.length, " enriched") : null));
+}
+
+/* ── Financial trajectory · D1's own copy ───────────────────────────
+   The shared card (cards-data-driven.jsx) prints the regulator through the
+   `.chip` class — the right weight for the fixture's "FCA", three mono
+   characters, but a credit union's statutory regulator is a full clause
+   ("National Credit Union Administration (share insurance); Illinois
+   Department of …"), and a chip that long renders as a highlighted block
+   that outweighs the chart above it. It also carries the chip's
+   cursor:pointer while clicking it does nothing — the page's one dead
+   control. The strip is context, not a claim and not a drilldown: the
+   prototype's visual weight is small muted text with the regulator in mono,
+   nothing highlighted, nothing clickable — so that is what D1 renders. */
+function FinancialTrajectoryD1({
+  entity
+}) {
+  const f = DMA.financialsFor(entity.id);
+  if (!f || !(f.fy || []).length) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card flush"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row"
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "money",
+      size: 14
+    }), /*#__PURE__*/React.createElement("h3", null, "Financial trajectory")), /*#__PURE__*/React.createElement("span", {
+      className: "b"
+    }, "Not promoted")), /*#__PURE__*/React.createElement("div", {
+      className: "card-body"
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: "var(--z-muted)",
+        lineHeight: 1.55
+      }
+    }, "No financial series promoted for this run.")));
+  }
+  const values = (f.total_assets || []).filter(v => v != null);
+  const maxA = values.length ? Math.max(...values) : 1;
+  const fte = (f.employees || [])[(f.employees || []).length - 1];
+  const counts = [f.branches != null ? `${f.branches} branches` : null, fte != null ? `${fte.toLocaleString()} FTE` : null].filter(Boolean).join(" · ");
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card flush",
+    "data-source": "financial_baseline.json :: total_assets[],net_income_m[],nim_pct[]"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "money",
+    size: 14
+  }), /*#__PURE__*/React.createElement("h3", null, "Financial trajectory")), /*#__PURE__*/React.createElement("span", {
     style: {
-      color: "var(--z-mid)",
-      fontWeight: 600
+      fontSize: 11,
+      color: "var(--z-muted)"
     }
-  }, "\u2713 ", Object.values(enriched).filter(v => v === "done").length, " of ", roster.filter(x => !x.gap_flag).length, " enriched") : null));
+  }, f.headline)), /*#__PURE__*/React.createElement("div", {
+    className: "card-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "flex-end",
+      gap: 10,
+      height: 120
+    }
+  }, f.fy.map((y, i) => /*#__PURE__*/React.createElement("div", {
+    key: y,
+    style: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 5
+    },
+    title: [y, f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : null, f.nim_pct[i] != null ? `NIM ${f.nim_pct[i]}%` : null].filter(Boolean).join(" · ")
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      fontWeight: 600,
+      color: "var(--z-dark)"
+    }
+  }, f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : "—"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "100%",
+      height: `${(f.total_assets[i] || 0) / maxA * 80}px`,
+      background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))",
+      borderRadius: "4px 4px 0 0",
+      transition: "height var(--motion-slow) var(--ease)"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "f-mono",
+    style: {
+      fontSize: 9.5,
+      color: "var(--z-muted)"
+    }
+  }, y.replace("FY", "'"))))), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginTop: 10,
+      gap: 6,
+      flexWrap: "wrap",
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, f.regulator ? /*#__PURE__*/React.createElement("span", {
+    className: "f-mono",
+    style: {
+      fontSize: 10
+    }
+  }, f.regulator) : null, f.geography ? /*#__PURE__*/React.createElement("span", null, f.geography) : null, /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), counts ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      flexShrink: 0
+    }
+  }, counts) : null)));
 }
 
 /* ── Thought leadership ─────────────────────────────────────────── */

@@ -265,6 +265,61 @@ function scaleMaxOf(scale) {
   return m ? Number(m[2]) : null;
 }
 
+/* The context tiles state their bounds as "1-5 stars" where the overview's
+   bars write "0..5". Both are the producer's own statement of the scale, so
+   both are read; anything else stays null and the tile shows the stated
+   string rather than a denominator nobody wrote. */
+function tileScaleMaxOf(scale) {
+  const viaRange = scaleMaxOf(scale);
+  if (viaRange !== null) return viaRange;
+  const m = String(scale || "").match(/(-?\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)/);
+  return m ? Number(m[2]) : null;
+}
+
+/* ── contextSentimentFor (C4) ────────────────────────────────────────
+   The CONTEXT page's own sentiment grid reads `context_sentiment`, a
+   different section from the overview's `sentiment`: tiles per audience,
+   each carrying the measured rows behind it. Only the overview's bars were
+   ever adapted, so the grid's section sat promoted and unread and the card
+   said "no sentiment measures promoted for this run" over three tiles.
+
+   Tiles come in two kinds and both are content. A tile with rows becomes
+   stat cards — one per measured row, on its own stated scale. A tile with
+   state=WORKED_ABSENT is a finding, not a blank: it carries the ladder of
+   sources that refused, and the card states that rather than showing a
+   number nobody measured. */
+function adaptContextSentiment(section) {
+  const tiles = (section && section.context_tiles) || [];
+  if (!tiles.length) return null;
+  const groups = {};
+  const absent = [];
+  for (const t of tiles) {
+    const g = String(t.audience || "unstated");
+    const rows = (t.rows || []).map((r) => ({
+      label: r.source || null,
+      value: num(r.rating),
+      scale: r.scale || null,
+      scale_max: tileScaleMaxOf(r.scale),
+      n: num(r.n),
+      note: r.note || null,
+      as_of: r.as_of || null,
+      url: r.url || null,
+      e_ids: r.e_id ? [r.e_id] : [],
+    })).filter((r) => r.value !== null);
+    if (rows.length) {
+      groups[g] = (groups[g] || []).concat(rows);
+    } else if (t.state === "WORKED_ABSENT") {
+      absent.push({
+        group: g,
+        note: t.note || null,
+        sources_searched: t.sources_searched || [],
+      });
+    }
+  }
+  if (!Object.keys(groups).length && !absent.length) return null;
+  return { groups, absent };
+}
+
 /* ── coverageFor ─────────────────────────────────────────────────────
    pct, cells and the gate threshold all arrive promoted; the orange line the
    card draws is at gate_pct, which is data, not a UI constant. */
@@ -597,7 +652,15 @@ function adaptTechStack(techstack) {
     status: t.status,
     evidence_level: t.evidence_level,
     since: null,
-    source: t.detection_basis ? [t.detection_basis] : [],
+    // `source` is the row's right rail: SHORT source-kind chips ("Press
+    // release", "Job posting"), rendered as badges. The whole detection-basis
+    // SENTENCE was being put here, so every register row grew a grey badge
+    // holding a 150-character paragraph — the grey block that overflowed the
+    // card and made the register unreadable. The basis is prose; it renders
+    // once, on the detail page, under "How this was detected". Nothing goes
+    // in the rail unless the payload states a short kind, and today it
+    // states none.
+    source: [],
     note: t.detection_basis || null,
     evidence: t.e_ids || [],
     subcaps_impact: t.linked_subcap_ids || [],
@@ -1004,6 +1067,7 @@ function buildLiveEntity(entityId, pages, extras) {
                                 secOf(overview, "firmographics"),
                                 secWithEnv(context, "regulatory_standing")),
     sentiment: adaptSentiment(secOf(overview, "sentiment")),
+    contextSentiment: adaptContextSentiment(secOf(context, "context_sentiment")),
     coverage: adaptCoverage(secOf(overview, "evidence_coverage")),
     uncertainty: adaptUncertainty(secOf(overview, "ceilings")),
     evidenceSummary: adaptEvidenceSummary(x.evidence),

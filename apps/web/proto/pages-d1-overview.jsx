@@ -181,7 +181,9 @@ function ClientOverview({ entity, run }) {
         <span style={{ fontSize: 11, color: "var(--z-muted)" }}>extracted from scoring workbook · evidence index · peer set</span>
       </div>
       <div className="cards-grid-2" style={{ marginBottom: 18 }}>
-        <FinancialTrajectoryCard entity={entity} />
+        {/* D1's own trajectory card — the shared one's footer chip is wrong
+            at this grain; see FinancialTrajectoryD1. */}
+        <FinancialTrajectoryD1 entity={entity} />
         <SentimentCard entity={entity} audience={audience} />
       </div>
 
@@ -208,26 +210,48 @@ function ScoreRing({ score, size = 110 }) {
   );
 }
 
-/* ── Why-now strip · expandable, drillable, per-client ──────────────
+/* ── Why-now strip · card row + full-width drilldown, per-client ────
    Sources DMA.whyNowFor(entity.id): hand-authored for the flagship,
    synthesized from each client's own scoring/evidence otherwise.
-   Collapsed → label + strength + window + one-line "so what".
-   Expanded → detail · metric · timeline event · the play · peer context ·
-   risk-if-ignored · tier-coded evidence · confidence + claim type.
+   The face is one horizontal row of compact cards — kind chip over the
+   trigger sentence — because four stacked full-width rows pushed the rest
+   of the page below the fold and read as four cards instead of one strip.
+   The drilldown carries everything the stacked rows did (detail · metric ·
+   dated event · window · the play · peer context · risk-if-ignored · cost
+   of acting · bears-on cells · tier-coded evidence · claim + confidence),
+   but it opens BELOW the strip at full width: the detail is prose, and
+   expanding it inside a 200px column crushed every sentence. The window
+   moves into the drilldown as a labelled row for the same reason it once
+   broke the stacked header — it is a 20-40-word clause naming the closing
+   event, not a chip-sized phrase. One signal open at a time; none open by
+   default — the strip is the summary, the reader chooses the drilldown.
    Customer view keeps positive framing and strips internal rationale. */
 function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
-  const [open, setOpen] = useState(0); // first signal expanded by default
+  const [open, setOpen] = useState(null); // no drilldown until a card is chosen
   const signals = DMA.whyNowFor(entity.id) || [];
   const isCust = audience === "customer";
-  const CAT = {
-    core_migration: { icon: "refresh", color: "var(--z-teal)" },
-    leadership:     { icon: "users",   color: "var(--z-dpur)" },
-    hiring:         { icon: "users",   color: "var(--z-mid)" },
-    regulatory:     { icon: "shield",  color: "var(--z-org)" },
-    market:         { icon: "stack",   color: "var(--z-mid)" },
-  };
   const STR = { STRONG: "b-teal", LEADING: "b-purple", SUPPORTING: "b-muted" };
   const CLAIM = { FACT: "b-teal", INFERENCE: "b-purple", HYPOTHESIS: "b-org" };
+  // The chip is the signal's `kind`, compressed to one word. The contract's
+  // vocabulary is already chip-sized (LEADERSHIP · REGULATORY · TECHNOLOGY);
+  // the exceptions map to the word a reader would say, and anything else —
+  // fixture categories, future kinds — falls back to the kind text itself,
+  // uppercased. Never invented: no kind, no guess, just SIGNAL.
+  const CHIP_WORD = { "M&A": "MERGER", "CORE_MIGRATION": "MIGRATION" };
+  const chipOf = (kind) => {
+    if (!kind) return "SIGNAL";
+    const k = String(kind).toUpperCase();
+    return CHIP_WORD[k] || k.replace(/_/g, " ");
+  };
+  const kindChip = (kind) => (
+    <span className="f-mono" style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em",
+                                      textTransform: "uppercase", color: "var(--z-dpur)",
+                                      background: "rgba(115,91,161,.14)", borderRadius: 4,
+                                      padding: "2px 7px", flexShrink: 0 }}>
+      {chipOf(kind)}
+    </span>
+  );
+  const sel = open != null ? signals[open] : null;
   return (
     <div className="card" style={{ marginBottom: 18 }}>
       <div className="row" style={{ marginBottom: 14 }}>
@@ -240,114 +264,111 @@ function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
         </div>
         <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/context`)}>View timeline <Icon name="arrow-r" size={11} /></button>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
         {signals.map((s, i) => {
           const openNow = open === i;
-          const cat = CAT[s.category] || CAT.market;
           return (
-            <div key={s.id || i} style={{ border: `1px solid ${openNow ? "var(--ph0-bd)" : "var(--z-sep)"}`, borderRadius: 10, overflow: "hidden", background: openNow ? "var(--ph0-lt)" : "#fff", transition: "background 140ms var(--ease), border-color 140ms var(--ease)" }}>
-              {/* clickable header — the prototype's one horizontal row:
-                  icon · label+strength · window · chevron. */}
-              <button onClick={() => setOpen(o => o === i ? -1 : i)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 11, padding: "12px 14px", background: "none", border: 0, cursor: "pointer", textAlign: "left" }}>
-                <span style={{ width: 30, height: 30, borderRadius: 8, background: cat.color, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon name={cat.icon} size={15} /></span>
-                <div style={{ flex: "1 1 55%", minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)" }}>{s.label}</span>
-                    {!isCust && s.strength ? <span className={`b ${STR[s.strength] || "b-muted"}`}>{s.strength}</span> : null}
-                  </div>
-                  {!openNow ? <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 3, lineHeight: 1.4 }} className="txt-fit-1" title={s.impact}>{s.impact}</div> : null}
-                </div>
-                {/* The window sits BESIDE the label, as the prototype has it —
-                    but it wraps. The fixture's window was a phrase ("6-9
-                    months"); the contract's is 20-40 words naming the closing
-                    event, which as an unshrinkable badge first crushed the
-                    label to one character per line and then, once it could
-                    shrink, concealed the sentence behind an ellipsis. Bounded
-                    width + normal white-space keeps the row horizontal and
-                    hides nothing. */}
-                {s.window ? (
-                  <span style={{ background: "rgba(115,91,161,.14)", color: "var(--z-dpur)",
-                                 borderRadius: 6, padding: "5px 9px", fontSize: 11,
-                                 lineHeight: 1.5, whiteSpace: "normal",
-                                 flex: "0 1 auto", maxWidth: "36%" }}>
-                    {s.window}
-                  </span>
-                ) : null}
-                <Icon name={openNow ? "chevron-u" : "chevron-d"} size={15} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
-              </button>
-              {/* expanded drilldown */}
-              {openNow ? (
-                <div style={{ padding: "0 14px 14px 55px" }}>
-                  <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6, marginBottom: 10 }}>{isCust ? s.impact : s.detail}</div>
-                  {!isCust && s.metric ? <div className="f-mono" style={{ fontSize: 11.5, color: "var(--z-dark)", background: "#fff", border: "1px solid var(--z-sep)", borderRadius: 6, padding: "7px 10px", marginBottom: 10, display: "inline-block" }}>{s.metric}</div> : null}
-                  {/* timeline event → context */}
-                  {s.timeline ? (
-                    <button onClick={() => navigate(`/clients/${entity.id}/context`)} style={{ display: "flex", alignItems: "center", gap: 7, background: "none", border: 0, padding: 0, cursor: "pointer", marginBottom: 12 }}>
-                      <Icon name="timeline" size={12} style={{ color: "var(--ph0)" }} />
-                      <span className="f-mono" style={{ fontSize: 11, color: "var(--z-mid)" }}>{s.timeline.date}</span>
-                      <span style={{ fontSize: 11.5, color: "var(--z-body)" }}>{s.timeline.event}</span>
-                      <Icon name="arrow-r" size={10} style={{ color: "var(--z-muted)" }} />
-                    </button>
-                  ) : null}
-                  {/* the play */}
-                  {s.play ? (
-                    <div style={{ background: "rgba(39,187,175,.1)", borderLeft: "3px solid var(--z-teal)", borderRadius: "0 6px 6px 0", padding: "8px 12px", marginBottom: 8 }}>
-                      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-teal)", textTransform: "uppercase", marginBottom: 2 }}>The play</div>
-                      <div style={{ fontSize: 12, color: "var(--z-dark)", lineHeight: 1.55, fontWeight: 500 }}>{s.play}</div>
-                    </div>
-                  ) : null}
-                  {/* peer context + risk — internal only */}
-                  {!isCust && s.peer_context ? <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.5, margin: "6px 0" }}><strong style={{ color: "var(--z-body)" }}>Peer context · </strong>{s.peer_context}</div> : null}
-                  {!isCust && s.risk ? (
-                    <div style={{ background: "rgba(214,109,42,.08)", borderLeft: "3px solid var(--z-org)", borderRadius: "0 6px 6px 0", padding: "8px 12px", marginBottom: 10 }}>
-                      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-org)", textTransform: "uppercase", marginBottom: 2 }}>If ignored</div>
-                      <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55 }}>{s.risk}</div>
-                    </div>
-                  ) : null}
-                  {/* The other side of the argument. `cost_of_acting_now` is a
-                      REQUIRED contract field — the honest cost of moving, about
-                      fifty words per signal — and it was adapted onto
-                      `s.cost_now` and read by nothing, so every card argued one
-                      way only. A why-now that states only the upside is the
-                      shallow reading; this is the half that was missing. */}
-                  {s.cost_now ? (
-                    <div style={{ background: "var(--z-lav)", borderLeft: "3px solid var(--z-dpur)", borderRadius: "0 6px 6px 0", padding: "8px 12px", marginBottom: 10 }}>
-                      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase", marginBottom: 2 }}>Cost of acting now</div>
-                      <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55 }}>{s.cost_now}</div>
-                    </div>
-                  ) : null}
-                  {/* The cells this trigger bears on — the link back to the DMA
-                      that the card was missing. */}
-                  {(s.subcaps || []).length ? (
-                    <div className="row" style={{ gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
-                      <span style={{ fontSize: 9.5, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Bears on</span>
-                      {s.subcaps.map(cid => (
-                        <button key={cid} className="chip purple" style={{ cursor: "pointer", border: 0 }}
-                                onClick={() => openSubcap && openSubcap(cid)}>{cid}</button>
-                      ))}
-                    </div>
-                  ) : null}
-                  {/* footer: evidence + confidence/claim */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
-                    {s.evidence && s.evidence.length ? (
-                      <>
-                        <span style={{ fontSize: 9.5, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Evidence</span>
-                        {s.evidence.map(eid => {
-                          const e = DMA.getEvidence(eid);
-                          return <button key={eid} className={`tier-chip tier-${e ? e.tier : "T3"}`} style={{ cursor: "pointer", border: 0 }} title={e ? e.title : eid} onClick={() => openEvidence(eid)}>{eid}</button>;
-                        })}
-                      </>
-                    ) : <span style={{ fontSize: 11, color: "var(--z-muted)", fontStyle: "italic" }}>No direct evidence yet — confirm in first meeting</span>}
-                    <span style={{ flex: 1 }} />
-                    {!isCust && s.claim ? <span className={`b ${CLAIM[s.claim] || "b-muted"}`}>{s.claim}</span> : null}
-                    {!isCust && s.confidence ? <span className="b b-muted">{s.confidence} confidence</span> : null}
-                  </div>
-                </div>
-              ) : null}
-            </div>
+            <button key={s.id || i} onClick={() => setOpen(o => o === i ? null : i)}
+              style={{ textAlign: "left", cursor: "pointer", background: "var(--z-lav)",
+                       border: `1px solid ${openNow ? "var(--ph0-bd)" : "var(--z-sep)"}`,
+                       borderRadius: 10, padding: "11px 13px", display: "flex",
+                       flexDirection: "column", alignItems: "flex-start", gap: 8,
+                       transition: "border-color 140ms var(--ease)" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                {kindChip(s.category)}
+                {!isCust && s.strength ? <span className={`b ${STR[s.strength] || "b-muted"}`}>{s.strength}</span> : null}
+              </span>
+              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--z-dark)", lineHeight: 1.45,
+                             display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical",
+                             overflow: "hidden" }} title={s.detail || s.label}>
+                {s.label}
+              </span>
+            </button>
           );
         })}
       </div>
+      {/* full-width drilldown for the selected signal. Its header collapses
+          it, same as re-clicking the card — two ways out, no dead end. */}
+      {sel ? (
+        <div style={{ marginTop: 12, border: "1px solid var(--ph0-bd)", borderRadius: 10, background: "var(--ph0-lt)", overflow: "hidden" }}>
+          <button onClick={() => setOpen(null)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 9, padding: "12px 14px", background: "none", border: 0, cursor: "pointer", textAlign: "left" }}>
+            {kindChip(sel.category)}
+            <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "var(--z-dark)", minWidth: 0 }}>{sel.label}</span>
+            <Icon name="chevron-u" size={15} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
+          </button>
+          <div style={{ padding: "0 14px 14px" }}>
+            {(isCust ? sel.impact : sel.detail) ? (
+              <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6, marginBottom: 10 }}>{isCust ? sel.impact : sel.detail}</div>
+            ) : null}
+            {!isCust && sel.metric ? <div className="f-mono" style={{ fontSize: 11.5, color: "var(--z-dark)", background: "#fff", border: "1px solid var(--z-sep)", borderRadius: 6, padding: "7px 10px", marginBottom: 10, display: "inline-block" }}>{sel.metric}</div> : null}
+            {/* timeline event → context */}
+            {sel.timeline ? (
+              <button onClick={() => navigate(`/clients/${entity.id}/context`)} style={{ display: "flex", alignItems: "center", gap: 7, background: "none", border: 0, padding: 0, cursor: "pointer", marginBottom: 12 }}>
+                <Icon name="timeline" size={12} style={{ color: "var(--ph0)" }} />
+                <span className="f-mono" style={{ fontSize: 11, color: "var(--z-mid)" }}>{sel.timeline.date}</span>
+                <span style={{ fontSize: 11.5, color: "var(--z-body)" }}>{sel.timeline.event}</span>
+                <Icon name="arrow-r" size={10} style={{ color: "var(--z-muted)" }} />
+              </button>
+            ) : null}
+            {/* the window — the clause naming what closes it, at full width */}
+            {sel.window ? (
+              <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.5, margin: "0 0 10px" }}>
+                <strong style={{ color: "var(--z-dpur)" }}>Window · </strong>{sel.window}
+              </div>
+            ) : null}
+            {/* the play */}
+            {sel.play ? (
+              <div style={{ background: "rgba(39,187,175,.1)", borderLeft: "3px solid var(--z-teal)", borderRadius: "0 6px 6px 0", padding: "8px 12px", marginBottom: 8 }}>
+                <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-teal)", textTransform: "uppercase", marginBottom: 2 }}>The play</div>
+                <div style={{ fontSize: 12, color: "var(--z-dark)", lineHeight: 1.55, fontWeight: 500 }}>{sel.play}</div>
+              </div>
+            ) : null}
+            {/* peer context + risk — internal only */}
+            {!isCust && sel.peer_context ? <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.5, margin: "6px 0" }}><strong style={{ color: "var(--z-body)" }}>Peer context · </strong>{sel.peer_context}</div> : null}
+            {!isCust && sel.risk ? (
+              <div style={{ background: "rgba(214,109,42,.08)", borderLeft: "3px solid var(--z-org)", borderRadius: "0 6px 6px 0", padding: "8px 12px", marginBottom: 10 }}>
+                <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-org)", textTransform: "uppercase", marginBottom: 2 }}>If ignored</div>
+                <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55 }}>{sel.risk}</div>
+              </div>
+            ) : null}
+            {/* The other side of the argument. `cost_of_acting_now` is a
+                REQUIRED contract field — the honest cost of moving, about
+                fifty words per signal — and a why-now that states only the
+                upside is the shallow reading. */}
+            {sel.cost_now ? (
+              <div style={{ background: "var(--z-lav)", borderLeft: "3px solid var(--z-dpur)", borderRadius: "0 6px 6px 0", padding: "8px 12px", marginBottom: 10 }}>
+                <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase", marginBottom: 2 }}>Cost of acting now</div>
+                <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55 }}>{sel.cost_now}</div>
+              </div>
+            ) : null}
+            {/* The cells this trigger bears on — the link back to the DMA. */}
+            {(sel.subcaps || []).length ? (
+              <div className="row" style={{ gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
+                <span style={{ fontSize: 9.5, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Bears on</span>
+                {sel.subcaps.map(cid => (
+                  <button key={cid} className="chip purple" style={{ cursor: "pointer", border: 0 }}
+                          onClick={() => openSubcap && openSubcap(cid)}>{cid}</button>
+                ))}
+              </div>
+            ) : null}
+            {/* footer: evidence + confidence/claim */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
+              {sel.evidence && sel.evidence.length ? (
+                <>
+                  <span style={{ fontSize: 9.5, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Evidence</span>
+                  {sel.evidence.map(eid => {
+                    const e = DMA.getEvidence(eid);
+                    return <button key={eid} className={`tier-chip tier-${e ? e.tier : "T3"}`} style={{ cursor: "pointer", border: 0 }} title={e ? e.title : eid} onClick={() => openEvidence(eid)}>{eid}</button>;
+                  })}
+                </>
+              ) : <span style={{ fontSize: 11, color: "var(--z-muted)", fontStyle: "italic" }}>No direct evidence yet — confirm in first meeting</span>}
+              <span style={{ flex: 1 }} />
+              {!isCust && sel.claim ? <span className={`b ${CLAIM[sel.claim] || "b-muted"}`}>{sel.claim}</span> : null}
+              {!isCust && sel.confidence ? <span className="b b-muted">{sel.confidence} confidence</span> : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -554,45 +575,63 @@ function TopFindingsCard({ findings, openFinding, setOpenFinding, openEvidence }
 
 /* ── Leadership panel + Clay enrichment ─────────────────────────── */
 function LeadershipPanel({ audience }) {
-  /* Contact detail is PROMOTED, not fetched.
-
-     The prototype simulated an enrichment call: a per-person button set a
-     "loading" flag, a 900ms setTimeout set "done", and the email and LinkedIn
-     came from the fixture. Under a real client the button appeared only when
-     `ex.clay` was truthy — which it never is — so it never appeared at all, and
-     the row said "Email · LinkedIn hidden until enriched" forever.
+  /* Contact detail is PROMOTED, not fetched — and revealed, not shown.
 
      Clay runs in the PRODUCER's session at synthesis time; its output is
-     registered as evidence and written into the roster item (migration 0018), so
-     by the time this panel renders the contact route is already a column in
-     Postgres. That is why there is no spinner here: the values arrive in the
-     same read as the name. The app never calls Clay while serving — it performs
-     no third-party call and no inference at request time. */
+     registered as evidence and written into the roster item (migration 0018),
+     so by the time this panel renders the contact route is already a column
+     in Postgres, arriving in the same read as the name. The app never calls
+     Clay while serving (invariant 1) — which is exactly why the "Enrich via
+     Clay" button can exist at all: it is a curtain over data the run already
+     holds, not a request. A click flips component state, waits a beat so the
+     reveal reads as an action, and shows what was stored. A person the
+     producer found no route for gets a transient toast and the curtain comes
+     down entirely — a box left standing would promise a route the run cannot
+     produce. Nothing leaves the browser, nothing persists: navigate away and
+     every curtain is closed again. */
   const { pushToast } = useApp();
-  const LIVE = typeof window !== "undefined" && !!window.DMA_LIVE;
-  const [enriched, setEnriched] = useState({}); // fixture mode only
+  const [revealed, setRevealed] = useState({}); // id → "loading" | "done" | "none"
   const [enrichingAll, setEnrichingAll] = useState(false);
-  const enrich = (id) => {
-    if (LIVE) return;
-    setEnriched(e => ({ ...e, [id]: "loading" }));
-    setTimeout(() => setEnriched(e => ({ ...e, [id]: "done" })), 900);
-  };
-  const enrichAll = () => {
-    if (LIVE) return;
-    setEnrichingAll(true);
-    const roster = DMA.LEADERSHIP || [];
-    // The completion timer used to hang off the LAST index, so a trailing GAP
-    // row (which returns early) meant "Enriching…" never cleared.
-    const enrichable = roster.filter(x => !x.gap_flag);
-    enrichable.forEach((ex, i) => setTimeout(() => {
-      enrich(ex.id);
-      if (i === enrichable.length - 1) setTimeout(() => setEnrichingAll(false), 1000);
-    }, i * 240));
-    if (!enrichable.length) setEnrichingAll(false);
-  };
   const roster = DMA.LEADERSHIP || [];
-  const withContact = roster.filter(
-    x => !x.gap_flag && (x.email || x.linkedin_url || x.phone)).length;
+  // One route shape for both worlds: live rows carry the promoted email /
+  // linkedin_url / phone columns; the fixture's simulated enrichment carries
+  // `clay.{email,linkedin}`. Whichever exists is what the reveal shows.
+  const routeOf = (ex) => ({
+    email: ex.email || (ex.clay && ex.clay.email) || null,
+    linkedin: ex.linkedin_url
+      || (ex.clay && ex.clay.linkedin ? `https://${ex.clay.linkedin}` : null),
+    phone: ex.phone || null,
+  });
+  const hasRoute = (ex) => {
+    const r = routeOf(ex);
+    return !!(r.email || r.linkedin || r.phone);
+  };
+  const enrich = (ex, quiet) => {
+    setRevealed(m => ({ ...m, [ex.id]: "loading" }));
+    setTimeout(() => {
+      if (hasRoute(ex)) {
+        setRevealed(m => ({ ...m, [ex.id]: "done" }));
+      } else {
+        if (!quiet) pushToast(`No stored contact route for ${ex.name}`, "warn");
+        setRevealed(m => ({ ...m, [ex.id]: "none" }));
+      }
+    }, 400);
+  };
+  const enrichable = roster.filter(x => !x.gap_flag);
+  const enrichAll = () => {
+    const targets = enrichable.filter(x => revealed[x.id] !== "done");
+    if (!targets.length) return;
+    setEnrichingAll(true);
+    targets.forEach((ex, i) => setTimeout(() => enrich(ex, true), i * 180));
+    // One toast for the whole sweep — a stack of per-person "no route"
+    // toasts is noise; one naming the misses is an answer.
+    setTimeout(() => {
+      const missing = targets.filter(x => !hasRoute(x)).map(x => x.name);
+      if (missing.length) pushToast(`No stored contact route for ${missing.join(" · ")}`, "warn");
+      setEnrichingAll(false);
+    }, targets.length * 180 + 450);
+  };
+  const doneCount = enrichable.filter(x => revealed[x.id] === "done").length;
 
   return (
     <div className="card flush">
@@ -600,25 +639,19 @@ function LeadershipPanel({ audience }) {
         <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Icon name="users" size={15} /> Leadership panel
         </h3>
-        {LIVE ? (
-          <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}
-                title="Contact detail is established at synthesis time and stored with the run; nothing is fetched when you open this page.">
-            {withContact} of {roster.filter(x => !x.gap_flag).length} with a contact route
-          </span>
-        ) : (
+        {/* Contact detail for named individuals is internal-only, so the
+            customer audience gets no enrichment affordance at all — a button
+            whose click could reveal nothing would be a dead control. */}
+        {audience !== "customer" ? (
           <button className="btn btn-secondary btn-sm" onClick={enrichAll} disabled={enrichingAll}>
             {enrichingAll ? <><span className="skel" style={{ width: 10, height: 10, borderRadius: 5 }} /> Enriching…</> : <><Icon name="sparkle" size={11} /> Enrich all via Clay</>}
           </button>
-        )}
+        ) : null}
       </div>
       <div style={{ padding: "8px 16px 14px" }}>
-        {DMA.LEADERSHIP.map(ex => {
-          const state = enriched[ex.id]; // fixture mode only
-          // A promoted contact route needs no gate; the fixture's simulated one
-          // still needs its button.
-          const promoted = !ex.gap_flag && (ex.email || ex.linkedin_url || ex.phone);
-          const hasClay = !LIVE && ex.clay && !ex.gap_flag;
-          const isEnriched = state === "done" && hasClay;
+        {roster.map(ex => {
+          const state = revealed[ex.id]; // undefined | "loading" | "done" | "none"
+          const route = routeOf(ex);
           return (
             <div key={ex.id} style={{ display: "flex", gap: 10, padding: "12px 0", borderBottom: "1px solid var(--z-sep)" }}>
               <div style={{ width: 36, height: 36, borderRadius: 18, background: ex.gap_flag ? "var(--z-sep)" : "linear-gradient(135deg, var(--z-teal), var(--z-mid))", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
@@ -626,10 +659,13 @@ function LeadershipPanel({ audience }) {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                  {/* The name links out only AFTER the reveal — a linked name
+                      beside a box saying "LinkedIn hidden until enriched"
+                      would be the route leaking past its own curtain. */}
                   {ex.gap_flag ? (
                     <span style={{ fontWeight: 600, fontSize: 13 }}>-</span>
-                  ) : (ex.linkedin_url || (isEnriched && ex.clay?.linkedin)) ? (
-                    <a href={ex.linkedin_url || `https://${ex.clay.linkedin}`} target="_blank" rel="noreferrer" style={{ fontWeight: 600, fontSize: 13, color: "var(--z-mid)", textDecoration: "none" }} onClick={e => e.stopPropagation()}>{ex.name}</a>
+                  ) : (state === "done" && route.linkedin) ? (
+                    <a href={route.linkedin} target="_blank" rel="noreferrer" style={{ fontWeight: 600, fontSize: 13, color: "var(--z-mid)", textDecoration: "none" }} onClick={e => e.stopPropagation()}>{ex.name}</a>
                   ) : (
                     <span style={{ fontWeight: 600, fontSize: 13, color: "var(--z-dark)" }}>{ex.name}</span>
                   )}
@@ -642,86 +678,54 @@ function LeadershipPanel({ audience }) {
                 </div>
                 <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 4, lineHeight: 1.5 }}>{ex.background}</div>
 
-                {/* Contact route. Promoted values render straight away and
-                    carry their basis; the fixture's simulated enrichment keeps
-                    its button so the prototype still demonstrates the flow.
-                    Contact detail for a named individual is internal-only. */}
-                {promoted && audience !== "customer" ? (
+                {/* The enrichment box, while it has something to say: hidden →
+                    the button; loading → the beat; revealed → the stored route
+                    and a one-line provenance tag, nothing more (the matching
+                    basis is analyst working detail, not panel copy); no route →
+                    nothing at all, because the toast already answered. */}
+                {ex.gap_flag || audience === "customer" || state === "none" ? null
+                 : state === "done" ? (
                   <div style={{ marginTop: 8, padding: "8px 10px", background: "var(--z-ice)", border: "1px solid rgba(39,187,175,.35)", borderRadius: 6 }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      {ex.email ? (
-                        <a href={`mailto:${ex.email}`} style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
-                          <Icon name="envelope" size={11} /> {ex.email}
+                      {route.email ? (
+                        <a href={`mailto:${route.email}`} style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
+                          <Icon name="envelope" size={11} /> {route.email}
                         </a>
                       ) : null}
-                      {ex.linkedin_url ? (
-                        <a href={ex.linkedin_url} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
-                          <Icon name="linkedin" size={11} /> {String(ex.linkedin_url).replace(/^https?:\/\/(www\.)?/, "")}
+                      {route.linkedin ? (
+                        <a href={route.linkedin} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
+                          <Icon name="linkedin" size={11} /> {String(route.linkedin).replace(/^https?:\/\/(www\.)?/, "")}
                         </a>
                       ) : null}
-                      {ex.phone ? (
-                        <a href={`tel:${String(ex.phone).replace(/[^+\d]/g, "")}`} style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
-                          <Icon name="phone" size={11} /> {ex.phone}
+                      {route.phone ? (
+                        <a href={`tel:${String(route.phone).replace(/[^+\d]/g, "")}`} style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
+                          <Icon name="phone" size={11} /> {route.phone}
                         </a>
                       ) : null}
-                      {/* Provenance. A contact route with no stated source is the
-                          one field on this page that would assert without one. */}
                       <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 2 }}>
-                        {ex.enrichment_basis || "no source stated for this contact route"}
-                        {ex.enriched_at ? ` · established ${ex.enriched_at}` : ""}
+                        via Clay{ex.enriched_at ? ` · stored ${ex.enriched_at}` : ""}
                       </div>
                     </div>
                   </div>
-                ) : (!ex.gap_flag && LIVE && audience !== "customer") ? (
-                  /* No stored route. The button still RENDERS — hiding it made
-                     the panel read as a broken feature — but it cannot fetch
-                     anything: Clay runs in the producer's session and its output
-                     is promoted with the run (invariant 1: no third-party call
-                     at serve time), so the honest answer to a click is a toast
-                     saying when enrichment happens, not a spinner. */
+                ) : state === "loading" ? (
+                  <div style={{ marginTop: 8, padding: "8px 10px", background: "var(--z-lav)", border: "1px solid var(--z-sep)", borderRadius: 6 }}>
+                    <div className="row" style={{ fontSize: 11, color: "var(--z-dpur)" }}>
+                      <span className="skel" style={{ width: 12, height: 12, borderRadius: 6 }} />
+                      <span>Checking stored Clay enrichment…</span>
+                    </div>
+                  </div>
+                ) : (
                   <div style={{ marginTop: 8, padding: "8px 10px", background: "var(--z-bg)", border: "1px solid var(--z-sep)", borderRadius: 6 }}>
                     <div className="row" style={{ fontSize: 11 }}>
                       <Icon name="lock" size={11} style={{ color: "var(--z-muted)" }} />
-                      <span style={{ color: "var(--z-muted)" }}>No contact route established for this person in this run.</span>
+                      <span style={{ color: "var(--z-muted)" }}>Email · LinkedIn hidden until enriched</span>
                       <span className="spacer" />
-                      <button className="btn btn-tertiary btn-sm" style={{ padding: "3px 8px", flexShrink: 0 }}
-                        onClick={() => pushToast("No contact route was stored for this person at synthesis time; enrichment runs during production, not from the browser", "warn")}>
+                      <button className="btn btn-tertiary btn-sm" style={{ padding: "3px 8px", flexShrink: 0 }} onClick={() => enrich(ex)}>
                         <Icon name="sparkle" size={10} /> Enrich via Clay
                       </button>
                     </div>
                   </div>
-                ) : hasClay && audience !== "customer" ? (
-                  <div style={{ marginTop: 8, padding: "8px 10px", background: isEnriched ? "var(--z-ice)" : state === "loading" ? "var(--z-lav)" : "var(--z-bg)", border: `1px solid ${isEnriched ? "rgba(39,187,175,.35)" : "var(--z-sep)"}`, borderRadius: 6 }}>
-                    {!state ? (
-                      <div className="row" style={{ fontSize: 11 }}>
-                        <Icon name="lock" size={11} style={{ color: "var(--z-muted)" }} />
-                        <span style={{ color: "var(--z-muted)" }}>Email · LinkedIn hidden until enriched</span>
-                        <span className="spacer" />
-                        <button className="btn btn-tertiary btn-sm" style={{ padding: "3px 8px" }} onClick={() => enrich(ex.id)}>
-                          <Icon name="sparkle" size={10} /> Enrich via Clay
-                        </button>
-                      </div>
-                    ) : state === "loading" ? (
-                      <div className="row" style={{ fontSize: 11, color: "var(--z-dpur)" }}>
-                        <span className="skel" style={{ width: 12, height: 12, borderRadius: 6 }} />
-                        <span>Querying Clay enrichment…</span>
-                      </div>
-                    ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                        <div className="row" style={{ fontSize: 11, color: "var(--z-mid)" }}>
-                          <Icon name="check" size={11} />
-                          <strong style={{ color: "var(--z-mid)" }}>Enriched</strong>
-                        </div>
-                        <a href={`mailto:${ex.clay.email}`} style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
-                          <Icon name="envelope" size={11} /> {ex.clay.email}
-                        </a>
-                        <a href={`https://${ex.clay.linkedin}`} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--z-mid)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 5 }} onClick={e => e.stopPropagation()}>
-                          <Icon name="linkedin" size={11} /> {ex.clay.linkedin}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                ) : null}
+                )}
               </div>
             </div>
           );
@@ -745,18 +749,76 @@ function LeadershipPanel({ audience }) {
           );
         })()}
         <span className="spacer" />
-        {/* In LIVE this states what the run actually established. In fixture
-            mode it reports the simulated enrichment. It used to read a variable
-            that no longer existed after the panel was rewired — an unconditional
-            reference inside the returned JSX, so D1 threw on every load and the
-            whole page rendered blank. */}
-        {LIVE
-          ? (withContact
-              ? <span style={{ color: "var(--z-mid)", fontWeight: 600 }}>✓ {withContact} of {roster.filter(x => !x.gap_flag).length} with a contact route</span>
-              : null)
-          : (Object.values(enriched).some(v => v === "done")
-              ? <span style={{ color: "var(--z-mid)", fontWeight: 600 }}>✓ {Object.values(enriched).filter(v => v === "done").length} of {roster.filter(x => !x.gap_flag).length} enriched</span>
-              : null)}
+        {doneCount
+          ? <span style={{ color: "var(--z-mid)", fontWeight: 600 }}>✓ {doneCount} of {enrichable.length} enriched</span>
+          : null}
+      </div>
+    </div>
+  );
+}
+
+/* ── Financial trajectory · D1's own copy ───────────────────────────
+   The shared card (cards-data-driven.jsx) prints the regulator through the
+   `.chip` class — the right weight for the fixture's "FCA", three mono
+   characters, but a credit union's statutory regulator is a full clause
+   ("National Credit Union Administration (share insurance); Illinois
+   Department of …"), and a chip that long renders as a highlighted block
+   that outweighs the chart above it. It also carries the chip's
+   cursor:pointer while clicking it does nothing — the page's one dead
+   control. The strip is context, not a claim and not a drilldown: the
+   prototype's visual weight is small muted text with the regulator in mono,
+   nothing highlighted, nothing clickable — so that is what D1 renders. */
+function FinancialTrajectoryD1({ entity }) {
+  const f = DMA.financialsFor(entity.id);
+  if (!f || !(f.fy || []).length) {
+    return (
+      <div className="card flush">
+        <div className="card-head">
+          <div className="row"><Icon name="money" size={14} /><h3>Financial trajectory</h3></div>
+          <span className="b">Not promoted</span>
+        </div>
+        <div className="card-body">
+          <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 }}>
+            No financial series promoted for this run.
+          </div>
+        </div>
+      </div>
+    );
+  }
+  const values = (f.total_assets || []).filter(v => v != null);
+  const maxA = values.length ? Math.max(...values) : 1;
+  const fte = (f.employees || [])[(f.employees || []).length - 1];
+  const counts = [
+    f.branches != null ? `${f.branches} branches` : null,
+    fte != null ? `${fte.toLocaleString()} FTE` : null,
+  ].filter(Boolean).join(" · ");
+  return (
+    <div className="card flush" data-source="financial_baseline.json :: total_assets[],net_income_m[],nim_pct[]">
+      <div className="card-head">
+        <div className="row"><Icon name="money" size={14} /><h3>Financial trajectory</h3></div>
+        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{f.headline}</span>
+      </div>
+      <div className="card-body">
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 10, height: 120 }}>
+          {/* Bar tooltips carry only what the series states. The shared card
+              interpolates NIM unconditionally, and this section's contract has
+              no NIM — so every live bar whispered "NIM null%" on hover. */}
+          {f.fy.map((y, i) => (
+            <div key={y} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}
+                 title={[y, f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : null,
+                         f.nim_pct[i] != null ? `NIM ${f.nim_pct[i]}%` : null].filter(Boolean).join(" · ")}>
+              <div style={{ fontSize: 10.5, fontWeight: 600, color: "var(--z-dark)" }}>{f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : "—"}</div>
+              <div style={{ width: "100%", height: `${(f.total_assets[i] || 0) / maxA * 80}px`, background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0", transition: "height var(--motion-slow) var(--ease)" }} />
+              <div className="f-mono" style={{ fontSize: 9.5, color: "var(--z-muted)" }}>{y.replace("FY", "'")}</div>
+            </div>
+          ))}
+        </div>
+        <div className="row" style={{ marginTop: 10, gap: 6, flexWrap: "wrap", fontSize: 11, color: "var(--z-muted)" }}>
+          {f.regulator ? <span className="f-mono" style={{ fontSize: 10 }}>{f.regulator}</span> : null}
+          {f.geography ? <span>{f.geography}</span> : null}
+          <span className="spacer" />
+          {counts ? <span style={{ flexShrink: 0 }}>{counts}</span> : null}
+        </div>
       </div>
     </div>
   );

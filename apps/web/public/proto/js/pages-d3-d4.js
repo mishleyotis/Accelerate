@@ -42,10 +42,17 @@ function pfNum(v) {
    `validation_gate` object raw). Nothing from the payload reaches JSX in this
    file without passing through here: an object is summarised from its own
    naming keys, never printed as JSON, and an unusable value becomes null so the
-   surrounding code renders its absent state. */
+   surrounding code renders its absent state.
+
+   It also raises the opening letter (`sentence`). Several promoted fields on
+   this page are written as fragments — "with plans to increase our member
+   base…" — and land under a heading where they read as sentences, so the
+   page showed lowercase openings throughout. The connector refuses these at
+   submit now, but a run already in the database still has to read properly.
+   `sentence` leaves a deliberate lowercase name (nCino) alone. */
 function pfText(v) {
   if (v === null || v === undefined) return null;
-  if (typeof v === "string") return v || null;
+  if (typeof v === "string") return v ? sentence(v) : null;
   if (typeof v === "number" || typeof v === "boolean") return String(v);
   if (Array.isArray(v)) return v.map(pfText).filter(Boolean).join(" · ") || null;
   if (typeof v === "object") {
@@ -253,6 +260,27 @@ function ClientPlatform({
   // already-negative difference, computed against a peer median that does not
   // exist for these cells.
   const anyPeer = areaGaps.some(g => pfNum(g.peer_score) !== null);
+
+  /* Which area a platform tile drives. The tiles rank PLATFORMS; everything
+     below the tiles is scoped by AREA — so a tile click expanded a breakdown
+     and left the whole page beneath it unchanged, which reads as a dead
+     control on the page's most prominent row of cards. The two axes do meet
+     in the story: each platform's gap rows name their own `l3_area`, so the
+     area a platform bears on most is a fact the run states rather than a
+     mapping invented here. A platform whose story names no area selects
+     nothing — the breakdown still opens, and nothing false is claimed. */
+  const areaForPlatform = name => {
+    const p = storyPlatforms.find(x => pfText(x.platform) === pfText(name));
+    if (!p) return null;
+    const tally = {};
+    for (const g of p.gaps || []) {
+      if (g.l3_area && areas.includes(g.l3_area)) {
+        tally[g.l3_area] = (tally[g.l3_area] || 0) + 1;
+      }
+    }
+    const best = Object.entries(tally).sort((a, b) => b[1] - a[1])[0];
+    return best ? best[0] : null;
+  };
   const prereqRows = areaPrereqs(areaRecs);
   const starters = (DMA.startersFor ? DMA.startersFor(entity.id) || [] : []).slice().sort((a, b) => (pfNum(a.rank) === null ? 99 : Number(a.rank)) - (pfNum(b.rank) === null ? 99 : Number(b.rank)));
   // "Why not X" — the platform page's own discarded list where it promoted one,
@@ -296,7 +324,7 @@ function ClientPlatform({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, "composite read from the run, never re-ranked here")), /*#__PURE__*/React.createElement("div", {
+  }, "Composite read from the run, never re-ranked here")), /*#__PURE__*/React.createElement("div", {
     className: "card-body"
   }, tiles.length ? /*#__PURE__*/React.createElement("div", {
     className: tiles.length === 5 ? "g5" : "g4",
@@ -313,7 +341,22 @@ function ClientPlatform({
     return /*#__PURE__*/React.createElement("div", {
       key: t.platform || i,
       className: "card-tile clickable",
-      onClick: () => setOpenTile(o => o === (t.platform || i) ? null : t.platform || i),
+      onClick: () => {
+        const nowOpen = openTile !== (t.platform || i);
+        setOpenTile(nowOpen ? t.platform || i : null);
+        if (!nowOpen) return;
+        const a = areaForPlatform(t.platform);
+        if (a && a !== area) {
+          setAreaSel(a);
+          requestAnimationFrame(() => {
+            const el = document.getElementById("platform-area-detail");
+            if (el) el.scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+          });
+        }
+      },
       style: {
         border: isOpen ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)",
         background: isOpen ? "var(--z-ice)" : "#fff"
@@ -608,7 +651,8 @@ function ClientPlatform({
       fontSize: 10.5,
       color: "var(--z-muted)"
     }
-  }, "the L3 area is the unit of recommendation"))) : null, /*#__PURE__*/React.createElement("div", {
+  }, "The L3 area is the unit of recommendation"))) : null, /*#__PURE__*/React.createElement("div", {
+    id: "platform-area-detail",
     style: {
       display: "flex",
       flexWrap: "wrap",
@@ -1143,14 +1187,14 @@ function ClientPlatform({
         marginTop: 2,
         lineHeight: 1.5
       }
-    }, "baseline ", pfText(kpi.baseline), kpi.baseline_as_of ? ` · ${kpi.baseline_as_of}` : "") : null, kpi.target ? /*#__PURE__*/React.createElement("div", {
+    }, "Baseline \xB7 ", pfText(kpi.baseline), kpi.baseline_as_of ? ` · ${kpi.baseline_as_of}` : "") : null, kpi.target ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10.5,
         color: "var(--z-mid)",
         marginTop: 2,
         lineHeight: 1.5
       }
-    }, "target ", pfText(kpi.target)) : null) : null));
+    }, "Target \xB7 ", pfText(kpi.target)) : null) : null));
   }), areaRecs.length === 0 ? /*#__PURE__*/React.createElement("div", {
     className: "empty"
   }, recs.length ? /*#__PURE__*/React.createElement("p", null, "No recommendation promoted for ", area, ". ", recs.length, " promoted across the other areas.") : /*#__PURE__*/React.createElement("p", null, "No recommendation promoted in this run.")) : null, recs.some(r => !r.l3) ? /*#__PURE__*/React.createElement("div", {

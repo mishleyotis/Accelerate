@@ -2920,6 +2920,13 @@
        prototype still runs standalone as the design reference. */
     financialsFor: id => LIVE ? liveField(id, "financials") : FINANCIALS[id] || FINANCIALS["fce-001"],
     sentimentFor: id => LIVE ? liveField(id, "sentiment") : SENTIMENT[id] || SENTIMENT["fce-001"],
+    /* D5's own sentiment grid reads a DIFFERENT section from D1's bars:
+       `context.context_sentiment`, tiles by audience with the measured rows
+       behind them. Only the overview's bars were ever adapted, so the context
+       card said "no sentiment measures promoted for this run" while its own
+       section sat promoted and unread. The context tiles answer first; the
+       overview bars stand in when the run promoted only those. */
+    contextSentimentFor: id => LIVE ? liveField(id, "contextSentiment") || liveField(id, "sentiment") : SENTIMENT[id] || SENTIMENT["fce-001"],
     coverageFor: id => LIVE ? liveField(id, "coverage") : COVERAGE_STATS[id] || COVERAGE_STATS["fce-001"],
     uncertaintyFor: id => LIVE ? liveField(id, "uncertainty") : UNCERTAINTY_BANDS[id] || UNCERTAINTY_BANDS["fce-001"],
     evidenceSummaryFor: id => LIVE ? liveField(id, "evidenceSummary") : EVIDENCE_SUMMARY[id] || EVIDENCE_SUMMARY["fce-001"],

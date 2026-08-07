@@ -898,7 +898,7 @@ function ClientBar({
     size: 11
   }), " Customer")))), /*#__PURE__*/React.createElement("div", {
     className: "client-tabs"
-  }, TAB("overview", "Overview", null, "home"), TAB("insights", "Insights", null, "insight"), TAB("heatmap", "Heatmap", null, "heatmap"), TAB("platform", "Platform", null, "platform"), audience !== "customer" ? TAB("context", "Context", null, "timeline") : null, TAB("techstack", "Tech stack", null, "stack"), (role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("health", "Health", entity.open_alerts, "shield") : null, TAB("runs", "Runs", null, "refresh")), audience === "customer" ? /*#__PURE__*/React.createElement("div", {
+  }, TAB("overview", "Overview", null, "home"), TAB("insights", "Insights", null, "insight"), TAB("heatmap", "Heatmap", null, "heatmap"), TAB("platform", "Platform", null, "platform"), audience !== "customer" ? TAB("context", "Context", null, "timeline") : null, TAB("techstack", "Tech stack", null, "stack"), (role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("health", "Health", entity.open_alerts, "shield") : null, (role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("runs", "Runs", null, "refresh") : null), audience === "customer" ? /*#__PURE__*/React.createElement("div", {
     className: "customer-banner"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "users",

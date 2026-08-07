@@ -1793,6 +1793,12 @@ function SubcapHeatmap({
   setCatFocus
 }) {
   const [openClusters, setOpenClusters] = useState({});
+  // Every grid that paints a cell gets the same bubble. This one and the
+  // capability grid carried the `title` attribute alone, which is the
+  // browser's own tooltip: it waits about a second, paints in the OS style,
+  // and reads as nothing happening to anyone who moves on before it fires.
+  // Same text, same instant bubble, in all four views.
+  const cellTip = useCellTip();
   // The run's categories, so a category the current catalogue does not list is
   // still reachable and its cells still readable.
   const cats = catFocus ? (allCats || []).filter(c => c.id === catFocus) : pillarFocus ? (allCats || []).filter(c => c.pillar === pillarFocus) : null;
@@ -2051,7 +2057,9 @@ function SubcapHeatmap({
             key: s.id,
             className: "subcap-row",
             onClick: () => onSynth(s),
-            title: subcapTipText(s)
+            title: subcapTipText(s),
+            onMouseEnter: cellTip.show(subcapTipText(s)),
+            onMouseLeave: cellTip.hide
           }, /*#__PURE__*/React.createElement("span", {
             className: `b ${DMA.helpers.maturityClass(s.score)}`,
             style: {
@@ -2155,6 +2163,8 @@ function SubcapHeatmap({
         );
       })) : null);
     }));
+  }), /*#__PURE__*/React.createElement(CellTip, {
+    tip: cellTip.tip
   }));
 }
 
@@ -2210,6 +2220,21 @@ function ValueChainView({
   }
   const mapped = new Set();
   for (const vc of chains) for (const s of subcapsForStage(entity, vc)) mapped.add(s.id);
+
+  /* Five stages, not thirty. A value chain read at thirty stages is a list of
+     process names, not a story about where the estate is strong; the five
+     with the deepest scored coverage are the ones a conversation can actually
+     use. Depth first, then the arrangement's own order so the five still read
+     as a sequence. The remainder is stated below the grid — a stage dropped
+     silently is a stage the reader believes does not exist. */
+  const SHOWN = 5;
+  const depthOf = vc => subcapsForStage(entity, vc).filter(s => s.score != null).length;
+  const shown = chains.length <= SHOWN ? chains : chains.map((vc, i) => ({
+    vc,
+    i,
+    depth: depthOf(vc)
+  })).sort((a, b) => b.depth - a.depth || a.i - b.i).slice(0, SHOWN).sort((a, b) => a.i - b.i).map(x => x.vc);
+  const hidden = chains.length - shown.length;
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
@@ -2230,12 +2255,12 @@ function ValueChainView({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, chains.length, " stages \xB7 ", mapped.size, " of ", entity.subcaps.length, " subcaps mapped")), /*#__PURE__*/React.createElement("div", {
+  }, shown.length, " of ", chains.length, " stages \xB7 ", mapped.size, " of ", entity.subcaps.length, " subcaps mapped")), /*#__PURE__*/React.createElement("div", {
     className: "g3",
     style: {
       marginBottom: 14
     }
-  }, chains.map(vc => {
+  }, shown.map(vc => {
     // Pick subcaps representative of value chain - sample from subcaps
     const subs = subcapsForStage(entity, vc);
     const scored = subs.filter(s => s.score != null);
@@ -2260,8 +2285,6 @@ function ValueChainView({
         marginBottom: 8
       }
     }, /*#__PURE__*/React.createElement("span", {
-      className: "chip"
-    }, vc.id), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 13,
         fontWeight: 600
@@ -2311,7 +2334,13 @@ function ValueChainView({
       onMouseEnter: cellTip.show(subcapTipText(s)),
       onMouseLeave: cellTip.hide
     }, fx(s.score, 1)))));
-  })), selected ? (() => {
+  })), hidden > 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      marginBottom: 14
+    }
+  }, hidden, " further stage", hidden === 1 ? "" : "s", " tracked in this arrangement \xB7 shown here are the ", shown.length, " carrying the deepest scored coverage") : null, selected ? (() => {
     const vc = chains.find(x => x.id === selected);
     if (!vc) return null;
     const subs = subcapsForStage(entity, vc);
@@ -2357,6 +2386,8 @@ function ValueChainView({
         padding: 10
       },
       title: subcapTipText(s),
+      onMouseEnter: cellTip.show(subcapTipText(s)),
+      onMouseLeave: cellTip.hide,
       onClick: () => {
         cellTip.hide();
         openSubcap({
