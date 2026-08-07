@@ -4,8 +4,11 @@ Serves live build state from the tables svc_api may read (catalogue +
 serving tier). This skeleton exists so the production URL is real from
 stage 2 onward; stage 4 replaces the internals with the full read API
 (SQLAlchemy asyncpg, cursor pagination, ETag/304, Brotli) per TRD §19.
-It performs no inference, writes nothing, and serves only promoted or
-catalogue rows — never staging, never ingested client material.
+It performs no inference and serves only promoted or catalogue rows —
+never staging, never ingested client material. Its only writes are the
+charter's two exceptions (alert actions here; annotations when they
+land), both into workflow tables behind Idempotency-Key — no endpoint
+writes serving content (invariant 2).
 """
 from __future__ import annotations
 
@@ -15,6 +18,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 
+from .alerts import act as alert_act, queue as alert_queue
 from .evidence import fetch as ev_fetch, redact_items as ev_redact
 from .pages import ApiError, build_page, etag_for, resolve_run
 
@@ -176,6 +180,62 @@ def directory():
         return {"entities": list(by_entity.values()),
                 "subvertical_labels": labels,
                 "active_runs": [], "pending_review": []}
+    finally:
+        conn.close()
+
+
+@app.get("/v1/alerts")
+def global_alerts(audience: str = "internal", role: str | None = None,
+                  status: str = "open", severity: str | None = None,
+                  entity: str | None = None, limit: int = 50,
+                  cursor: str | None = None):
+    """G4 — the corpus-wide thin-evidence queue, one row per alert on an
+    active run with its action state joined at read. Cursor-paginated by
+    row comparison, mandatory limit (TRD §19); internal audiences only."""
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            return alert_queue(cur, audience=audience, role=role,
+                               status=status, severity=severity,
+                               entity=entity, limit=limit, cursor=cursor)
+        except ApiError as e:
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+    finally:
+        conn.close()
+
+
+@app.post("/v1/alerts/{alert_id}/actions")
+async def alert_actions(alert_id: int, request: Request,
+                        actor: str | None = None,
+                        audience: str = "internal",
+                        role: str | None = None):
+    """The second of the API's two write exceptions (TRD §08): alert
+    lifecycle — workflow state, not assessment content. Idempotency-Key
+    required; a replay returns the ORIGINAL response, a reused key with a
+    different body is 409. Writes alert_actions + idempotency_keys only;
+    the alert's serving row is never touched (invariant 2)."""
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "malformed_body",
+                             "detail": "the request body must be a JSON object"},
+                            status_code=400)
+    key = request.headers.get("idempotency-key")
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            status_code, payload = alert_act(
+                cur, alert_id, body=body, idempotency_key=key, actor=actor,
+                audience=audience, role=role)
+        except ApiError as e:
+            conn.rollback()
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        conn.commit()
+        return JSONResponse(payload, status_code=status_code)
     finally:
         conn.close()
 
