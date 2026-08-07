@@ -388,6 +388,18 @@ def main() -> int:
         conn.close()
         return 0
 
+    # W2 — evidence→subcap link proposals: an ON-DEMAND pass for the
+    # scheduled session, never part of the scan flow. LINK_PROPOSE_RUN_ID=
+    # <run uuid> (plus LINK_PROPOSE_DRY_RUN=1 to report without writing)
+    # runs the propose-only matcher against that run and exits without
+    # touching the intake tree. CLI equivalent:
+    # python -m dma_worker.link_propose --run-id <uuid>.
+    if os.environ.get("LINK_PROPOSE_RUN_ID"):
+        from dma_worker.link_propose import run_from_env
+        rc = run_from_env(conn)
+        conn.close()
+        return rc
+
     if os.environ.get("RESET_SCAN"):
         # One-time recovery: blank every stored checksum so the whole tree
         # rescans as CHANGED. Rows are kept — FKs may point at them, and
