@@ -22,6 +22,36 @@ Read `01-start-here/1-standing-clauses.md` before writing any section on this pa
 `reading`. You do not produce it twice and you cannot make the two cards
 disagree, because there is only one. Write it on the overview page.
 
+### C6 · five points is the floor, and it is a research floor
+
+The card is a bar chart with a CAGR under it. Three bars is not a trajectory — it is a
+line through two gaps, and it reads as thin research to the one audience that opens this
+page. Ship **at least five dated points on one metric definition**, and take the deceleration
+with them: a series that grows 13% · 13% · 2.5% · 2.1% · 5.3% tells a story a single CAGR
+flattens away, and that story is usually the point.
+
+Three failures produced the three-point cards already shipped, all of them repairable
+before submission:
+
+- **Points sourced from whatever press release mentioned a number.** The figures then carry
+  the release date rather than a reporting period, round to the nearest billion, and lag the
+  filing by two quarters. `01-start-here/2-evidence.md` has the regulator route per
+  institution type — for a credit union, one NCUA quarterly file per December.
+- **`source_e_id` pointing at a row that says something else.** Measured on a promoted run:
+  the FY2023 asset point cited an annual-report row whose excerpt was about NPS, and the
+  2025-Q3 point cited an Indeed employee rating. The id resolved, the chip opened, and it
+  answered a different question. A financial point cites the source **of that figure, for
+  that period**, or it does not ship.
+- **Reading the newest number as the newest year-end.** Quarterly filers publish a cycle
+  above the last December. Keep each figure on its own stated date: an institution can be
+  $6.34B at 2025-12-31, $6.50B at 2026-03-31 and $6.40B at 2026-06-30 without any of them
+  being wrong, and averaging them or picking the flattering one is the defect. Where a
+  quarter falls, say so in `reading` rather than letting a rising chart imply it did not.
+
+`trend` is COMPUTED from the emitted points and stays inside the contract's four words —
+`GROWING │ STABLE │ DECLINING │ VOLATILE`. The prototype's "ACCELERATING" badge is not one
+of them; render the contract's word.
+
 ## Internal only, and what that does not excuse
 
 Withheld from the customer audience does not mean unmarked. Audience redaction
@@ -357,6 +387,40 @@ Two rules follow:
 A source that blocks automated retrieval cannot be cited at all — Glassdoor,
 Indeed and ZipRecruiter all 403 — so it is a rung in the ladder, not an `e_id`.
 See `01-start-here/2-evidence.md`.
+
+### An unmeasured audience still fills its tile
+
+The employee tile is the one that comes back empty, because the three sites everybody
+thinks of first are the three that refuse automated fetches. What renders then is
+*"EMPLOYEE · Not established for this run"*, and a client reads that as nobody having
+looked. The absence is real; the blankness is a production failure on top of it.
+
+So the blocked sites are where the search **starts**, not where it stops. Reachable
+employer-side sources exist and have been registered on a live run:
+
+- **Great Place To Work** certified-company profiles (`greatplacetowork.com/certified-company/<id>`)
+  publish a Trust Index percentage, the comparison against a typical company in the same
+  country, the five highest-scoring survey statements, a tenure distribution and an
+  "Updated <month year>" stamp — all in fetchable prose and JSON-LD.
+- **Comparably, Built In, and regional "best places to work" lists** carry employer scores
+  that republish with attribution.
+- **The institution's own careers and culture pages**, at T4/T5 and needing corroboration,
+  but dated and quotable.
+
+Where such a source publishes a percentage and no response count, emit the row with `n`
+null and say in the `note` that the publisher states the percentage and not the sample.
+That is a rated line with a disclosed limit — which is what the reader needs — and it is
+not the same as no line at all.
+
+Where nothing survives, the tile still ships: `rows: []`, a `state` rung, and a
+`sources_searched` ladder in which **every rung names its own refusal**, with the status
+code where there is one. "Glassdoor — HTTP 403 to automated retrieval; a source that cannot
+be fetched cannot be cited" is a finding. An empty tile is not.
+
+One trap on this surface specifically: a **bureau grade is not a rating**. A BBB letter (C+)
+and a regulator's supervisory status have no scale and no sample, so under the `n`/`scale`
+rules they draw no bar. They belong in the ladder or in a `note`, never in a tile as a
+number, however tempting a letter grade looks beside four stars.
 
 ### Information sources
 

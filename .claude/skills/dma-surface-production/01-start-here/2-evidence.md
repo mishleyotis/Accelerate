@@ -58,6 +58,111 @@ That leaves exactly three honest moves, and inventing an id is not among them:
 A blocked source belongs in the ladder, never in an `e_ids` list, and never behind a number
 presented as cited. `01-start-here/4-absence-protocol.md` owns the ladder's shape.
 
+### Three refusal classes, and they are not the same finding
+
+The verdict word matters, because each class has a different repair and a client reading
+the ladder can tell them apart.
+
+| Class | What happened | What the ladder says |
+|---|---|---|
+| **Blocked** | The host refuses automated retrieval outright — 403 to every fetch. Measured: `glassdoor.com`, `indeed.com`, `ziprecruiter.com`, `trustpilot.com`, `creditunionsonline.com`, `depositaccounts.com`, `cutimes.com`, `bbb.org` profile pages | the source exists and cannot be cited; name the status code |
+| **Gone** | The URL 404s or the host no longer serves that path. Measured: machine-scan consoles (`vibeprospecting.explorium.ai`), and an institution's own press archive after a site rebuild | there is nothing behind this id; retire it rather than re-point it |
+| **Reachable but the span is not in the artefact** | The fetch succeeds and the number you can see in a browser is **not** in the bytes the verifier receives | the source was reached and the figure could not be verified — say which half failed |
+
+The third class is the one that surprises people, so it gets a name. **The excerpt is
+verified against the artefact the SERVER fetches, not against the page you looked at.**
+Those differ whenever a host varies its response by client, region or experiment. Measured
+on Google Play: the same product page yielded the app's identity block
+(`"@type":"SoftwareApplication","name":"BCU Mobile Banking"…`) to both fetchers, and yielded
+`aggregateRating` to a local fetch and **not** to the connector's. So the app is citeable
+and its star rating is not — a distinction worth carrying, because it lets you register the
+identity, keep the rating out of the bar, and record precisely why.
+
+Two habits follow, and they cost one round trip instead of four:
+
+- **Pre-flight the span** against a fetch of your own before you call `register_evidence`,
+  then read a refusal as information about the server's artefact rather than about your
+  span. `excerpt_not_verbatim` after a clean local match means the two artefacts differ.
+- **Prefer the stable half of a page.** Identity blocks, JSON-LD `@type`/`name`/`url`,
+  regulator field names and body prose survive re-fetches. Live counters, star averages
+  carried to fifteen decimal places, "posted 3 hours ago" and anything a CDN personalises
+  do not.
+
+A machine-format span is legitimate evidence when that is how the source states the fact —
+a JSON API response is a document. Registered on live runs: `"averageUserRating":4.865…`
+from the iTunes lookup API, and NCUA's locator payload. Prefer prose where the source
+offers prose; do not manufacture prose where it does not.
+
+## Where a multi-year financial series actually comes from
+
+A financial trajectory is the surface most often shipped thin, and the failure has one
+shape: the producer takes the two or three asset figures that happen to appear in press
+boilerplate and calls the line a trend. Press boilerplate lags, rounds ("over $6 billion")
+and is dated by the release rather than by the reporting period. **Three rounded points from
+three press releases is not a trajectory; it is the same number three times.**
+
+Regulators publish the series. Find the regulator's own periodic filing before you search
+the news:
+
+| Institution | Series | Route |
+|---|---|---|
+| Credit union | Quarterly 5300 Call Report | NCUA — resolve the **charter number** first, then read Account `010` (TOTAL ASSETS) from `FS220.txt` inside each period's quarterly file |
+| Bank / thrift | Quarterly Call Report | FFIEC / FDIC, by RSSD or cert |
+| Insurer | Annual statement | NAIC, by NAIC company code |
+
+**The credit-union route, in full, because it is now proven:**
+
+1. **Resolve the charter.** `https://mapping.ncua.gov/api/CreditUnionDetails/GetCreditUnionDetails/<charter>`
+   returns JSON — legal name, charter type, status, state, address, CEO, website, assets and
+   members for the **latest cycle**, plus `callReportCycleDates` listing every cycle NCUA
+   holds. That response is the identity gate and the current point in one fetch, and it is
+   reachable with a browser-shaped UA. It takes **no cycle parameter** — asking for an older
+   one returns the latest anyway, which is a silent wrong answer if you do not check.
+2. **Take the history from the quarterly files**, listed at
+   `ncua.gov/analysis/credit-union-corporate-call-report-data/quarterly-data`, one ZIP per
+   period (`call-report-data-YYYY-MM.zip`). Inside, `FS220.txt` is keyed by `CU_NUMBER`;
+   `ACCT_010` is total assets. Every December file gives one year-end point, so five years is
+   five files.
+3. **Cite the period, not the dataset in general.** The page carries NCUA's own per-period
+   link and label, so each point can carry its own citation naming its own file — a reader
+   downloads that file and finds the row. One shared "we used NCUA data" citation makes five
+   points look sourced while none of them is checkable.
+
+Two traps this route has already sprung:
+
+- **The Financial Performance Report is not GET-addressable.** `fpr.ncua.gov` is a session
+  and form-POST application; its HTML is unreachable to the excerpt verifier, and its tables
+  put the label and the number in different cells, so a "verbatim" row lifted from it is a
+  reconstruction. The numbers are right and the citation is not.
+- **The latest cycle is not December.** NCUA publishes quarterly; at any moment the newest
+  regulator reading is a March, June or September cycle sitting above the last year-end.
+  That is not a contradiction with the year-end series — it is a later date, and it belongs
+  on the card as its own point with its own period label.
+
+## Dating: what to establish, and what to record when you cannot
+
+Every registered row and every rendered item carries a date or carries the reason it does
+not. A bare null is refused, because the surface cannot tell "nobody looked" from "somebody
+looked and it is not stated", and those are different facts about the research.
+
+Where the date is, in the order worth trying:
+
+1. **The document's own machine metadata** — `datePublished` / `article:published_time` in
+   JSON-LD or meta tags, `<time datetime=…>`. Present far more often than the visible page
+   suggests, and it is the source's own claim rather than yours.
+2. **The reporting period**, for anything filed: a call report cycle, a fiscal year end. Use
+   the period the data describes, not the day the regulator published it — that makes an old
+   figure band as old, which is the honest reading.
+3. **The identifier**, where the platform encodes it. A LinkedIn activity id is a millisecond
+   timestamp in its top bits (`id >> 22`), which dates a post whose page shows only "2mo".
+4. **A stated month with no day** — "Updated March 2026". Register the first of the month and
+   say in the surrounding prose that the source states the month only. Precision you did not
+   get is not precision you may imply.
+5. **Nothing.** Then `published_date` stays null, the band stays `UNVERIFIED`, and the item
+   carries the rung that says the date was searched for — never a band computed from no date.
+
+An undated source is still usable evidence. What it may not do is render as current.
+
 ## The quality ladder
 
 | Tier | Type | Weight | Ceiling |
