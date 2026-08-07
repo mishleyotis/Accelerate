@@ -178,27 +178,49 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
                 f"subvertical_code={code or raw_sv or '?'}]",
             ]}
 
-    cur.execute(
-        """SELECT chain_id, name, stage_order
-             FROM ccg_value_chains
-            WHERE version = %s AND sub_vertical = %s
-            ORDER BY stage_order, chain_id""", (version, code))
-    stage_rows = [{"stage_id": r[0], "name": r[1], "stage_order": r[2]}
-                  for r in cur.fetchall()]
+    def _stages(v):
+        cur.execute(
+            """SELECT chain_id, name, stage_order
+                 FROM ccg_value_chains
+                WHERE version = %s AND sub_vertical = %s
+                ORDER BY stage_order, chain_id""", (v, code))
+        return [{"stage_id": r[0], "name": r[1], "stage_order": r[2]}
+                for r in cur.fetchall()]
+
+    stage_rows = _stages(version)
+    searched = [f"ccg_value_chains[version={version} sub_vertical={code}]"]
+    # USER ADJUDICATION 2026-08-07: "the value chain arrangement is enriched
+    # from v7 to v5." A v5.0-pinned run whose sub-vertical has no v5.0
+    # arrangement borrows the CURRENT catalogue's (v7.0's) — the arrangement
+    # is business-process taxonomy, not scoring, and 795 of v5.0's 836 cell
+    # ids resolve directly in v7.0's mapping. Membership still joins against
+    # the run's own served cells, so a v7-only cell simply never appears and
+    # a v5-only cell (the killed P1C5) counts under not_scored — nothing is
+    # invented on either side. arrangement_version records what was borrowed.
+    arrangement_version = version
+    if not stage_rows:
+        current = _current_version(cur)
+        if current and current != version:
+            stage_rows = _stages(current)
+            if stage_rows:
+                arrangement_version = current
+            searched.append(
+                f"ccg_value_chains[version={current} sub_vertical={code}]")
     if not stage_rows:
         return None, {
             "kind": "no_value_chain_arrangement",
             "reason": (f"the catalogue has no value-chain arrangement for "
-                       f"sub-vertical {code} at version {version}"),
-            "sources_searched": [
-                f"ccg_value_chains[version={version} sub_vertical={code}]",
+                       f"sub-vertical {code} at version {version}, and none "
+                       "at the current version to borrow"),
+            "sources_searched": searched + [
                 f"ccg_vc_mapping[version={version} subvertical_code={code}]",
             ]}
 
     cur.execute(
         """SELECT subcap_id, value_chain_stages
              FROM ccg_vc_mapping
-            WHERE version = %s AND subvertical_code = %s""", (version, code))
+            WHERE version = %s AND subvertical_code = %s""",
+        (arrangement_version, code))
     mapping_rows = [{"subcap_id": r[0], "stages": list(r[1] or ())}
                     for r in cur.fetchall()]
 
@@ -211,6 +233,7 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
     data = arrange(stage_rows, mapping_rows, served_ids)
     data["sub_vertical"] = code
     data["version"] = version
+    data["arrangement_version"] = arrangement_version
     return data, None
 
 

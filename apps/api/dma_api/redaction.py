@@ -42,7 +42,17 @@ CUSTOMER_WITHHELD = frozenset((
 CUSTOMER_WITHHELD_PAGES = frozenset(("context",))
 
 # Pages an AE has no route to (TRD §"403 audience_forbidden").
-ROLE_FORBIDDEN_PAGES = {"AE": frozenset(("context",))}
+#
+# USER ADJUDICATION 2026-08-07: the context dashboard IS available to the AE
+# role — reported as a defect from the client pages ("Context page unavailable
+# for AEs"). The Implementation Plan's QA bullet reads "An AE token is refused
+# on Context and Health by the API", so this is a recorded override, not an
+# oversight: the AUDIENCE boundary stands (context stays customer-withheld
+# above), the ROLE gate on context is lifted, and Health/alerts remains
+# ANALYST+. A side effect this fixes: the firmographics footprint reads
+# regulatory_standing.jurisdictions from the context page, so the AE landing
+# view rendered an empty footprint purely because this fetch 403'd.
+ROLE_FORBIDDEN_PAGES = {"AE": frozenset()}
 
 # Stripped for EVERY audience, marked or not (charter invariant 5).
 ALWAYS_STRIP = {

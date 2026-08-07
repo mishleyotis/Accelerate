@@ -259,7 +259,11 @@ def test_withheld_sections_and_pages():
         keep, _ = redact_section("overview", section, {"rows": [1]}, [], "internal")
         assert keep == {"rows": [1]}
     assert page_forbidden("context", "customer", None), "D5 is locked, not partial"
-    assert page_forbidden("context", "internal", "AE"), "an AE has no Context route"
+    # USER ADJUDICATION 2026-08-07 (overrides the Implementation Plan's "AE
+    # token is refused on Context" QA bullet): context is AE-visible on the
+    # internal audience. The audience lock above is the boundary that stands.
+    assert page_forbidden("context", "internal", "AE") is None, \
+        "an AE reads Context on the internal audience"
     assert page_forbidden("overview", "customer", "AE") is None
     assert page_forbidden("context", "internal", "ANALYST") is None
 

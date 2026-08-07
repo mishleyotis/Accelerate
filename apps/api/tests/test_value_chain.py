@@ -309,3 +309,49 @@ def test_wired_into_the_heatmap_page_read():
         "the promoted envelope must be assembled first, then kept"
     assert dispatch < src.index('"kind": "section_not_promoted"'), \
         "H9 must never fall through to section_not_promoted"
+
+
+def test_a_pinned_version_with_no_arrangement_borrows_the_current_one():
+    """USER ADJUDICATION 2026-08-07: a v5.0-pinned run whose sub-vertical has
+    no v5.0 arrangement borrows the current catalogue's. Membership still
+    joins against the run's own served cells, and arrangement_version records
+    the borrow so the surface can say so."""
+    from dma_api.value_chain import read_value_chain
+
+    class Cur:
+        def __init__(self):
+            self.calls = []
+        def execute(self, sql, params=None):
+            self.calls.append((sql, params))
+            self._last = (sql, params)
+        def fetchall(self):
+            sql, params = self._last
+            if "FROM ccg_value_chains" in sql:
+                # v5.0 has nothing; v7.0 has two stages
+                if params and params[0] == "v7.0":
+                    return [("VC-CU-01", "Member acquisition", 1),
+                            ("VC-CU-02", "Onboarding", 2)]
+                return []
+            if "FROM ccg_vc_mapping" in sql:
+                assert params[0] == "v7.0", "membership reads the BORROWED version"
+                return [("P2C1.1.1", ["Member acquisition"]),
+                        ("P9C9.9.9", ["Onboarding"])]      # v7-only cell
+            if "FROM ccg_versions" in sql:
+                return [("v7.0",)]
+            if "FROM serving_subcaps" in sql:
+                return [("P2C1.1.1",)]
+            raise AssertionError(sql)
+        def fetchone(self):
+            return ("v7.0",)
+
+    data, empty = read_value_chain(
+        Cur(), {"sub_vertical": "SV2"},
+        {"run_id": "r", "ccg_catalog_version": "v5.0"})
+    assert empty is None
+    assert data["version"] == "v5.0"
+    assert data["arrangement_version"] == "v7.0"
+    ids = {c["stage_id"]: c for c in data["chains"]}
+    assert ids["VC-CU-01"]["subcaps"] == ["P2C1.1.1"], \
+        "only cells the RUN serves appear"
+    assert "P9C9.9.9" not in ids["VC-CU-02"]["subcaps"], \
+        "a v7-only cell the run never scored is not invented into the view"
