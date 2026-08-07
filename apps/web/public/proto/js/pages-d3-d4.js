@@ -560,228 +560,239 @@ function ClientPlatform({
        one of them, so the name comes from the workbook read and the id
        stands in where the run does not carry that cell. */
     const top = cells.slice(0, 3).map(c => pfText(c.name) || cellNameOf(cellIndex, c.subcap_id) || pfText(c.subcap_id)).filter(Boolean);
-    return /*#__PURE__*/React.createElement("div", {
-      key: key,
-      className: "card-tile clickable",
-      title: `Scope this page to ${key}`,
-      onClick: () => selectTile(key),
-      style: {
-        border: isSel ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)",
-        background: isSel ? "var(--z-ice)" : "#fff"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        gap: 8
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12.5,
-        fontWeight: 600,
-        lineHeight: 1.3
-      }
-    }, t.rank != null ? /*#__PURE__*/React.createElement("span", {
-      className: "b b-purple",
-      style: {
-        marginRight: 5
-      }
-    }, "#", pfText(t.rank)) : null, pfText(t.platform) || "Platform not named"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9.5,
-        color: "var(--z-muted)",
-        marginTop: 2,
-        lineHeight: 1.4
-      },
-      className: "txt-fit-2"
-    }, a.area || "No L3 area stated for these cells")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        textAlign: "right",
-        flexShrink: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 26,
-        fontWeight: 200,
-        color: composite === null ? "var(--z-muted)" : "var(--z-teal)",
-        lineHeight: 1.15
-      }
-    }, composite === null ? "—" : composite.toFixed(1)), /*#__PURE__*/React.createElement("div", {
-      className: "f-mono",
-      style: {
-        fontSize: 9,
-        color: "var(--z-muted)"
-      }
-    }, "/100 fit"))), /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        marginTop: 10,
-        gap: 4,
-        fontSize: 11,
-        flexWrap: "wrap"
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "b b-org"
-    }, cells.length, " cell", cells.length === 1 ? "" : "s"), a.area ? /*#__PURE__*/React.createElement("span", {
-      className: "b b-muted"
-    }, tileRecs, " rec", tileRecs === 1 ? "" : "s") : null), top.length ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: "var(--z-muted)",
-        marginTop: 6,
-        lineHeight: 1.45
-      },
-      className: "txt-fit-2"
-    }, "Top: ", top.join(" · ")) : null, /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        marginTop: 8,
-        fontSize: 10,
-        color: "var(--z-mid)"
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "spacer"
-    }), /*#__PURE__*/React.createElement("button", {
-      className: "btn btn-tertiary btn-sm",
-      style: {
-        color: "var(--z-mid)"
-      },
-      title: isOpen ? "Hide the composite breakdown" : "Show the composite breakdown",
-      onClick: ev => {
-        ev.stopPropagation();
-        setOpenTile(o => o === key ? null : key);
-      }
-    }, isOpen ? "Hide breakdown" : "Breakdown", /*#__PURE__*/React.createElement(Icon, {
-      name: isOpen ? "chevron-u" : "chevron-d",
-      size: 12
-    }))), isOpen ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginTop: 8,
-        paddingTop: 8,
-        borderTop: "1px solid var(--z-sep)"
-      }
-    }, t.relevance != null ? /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        gap: 5,
-        marginBottom: 6
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "b b-muted f-mono",
-      title: "relevance to the assessed gaps"
-    }, Number(t.relevance).toFixed(2)), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 9.5,
-        color: "var(--z-muted)"
-      }
-    }, "relevance")) : null, t.their_stack_context ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10.5,
-        color: "var(--z-body)",
-        marginBottom: 8,
-        lineHeight: 1.5
-      }
-    }, pfText(t.their_stack_context)) : null, (t.factors || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-      className: "eyebrow",
-      style: {
-        fontSize: 9,
-        marginBottom: 5
-      }
-    }, "Composite factors"), t.factors.map((f, j) => /*#__PURE__*/React.createElement("div", {
-      key: j,
-      className: "row",
-      style: {
-        fontSize: 10,
-        gap: 5,
-        marginBottom: 3
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: "var(--z-muted)",
-        width: 78,
-        flexShrink: 0
-      },
-      title: f.weight != null ? `weight ${f.weight}` : ""
-    }, String(f.name || "").replace(/_/g, " ")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "prog",
-      style: {
-        height: 4
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "prog-fill",
-      style: {
-        width: `${Math.max(0, Math.min(100, (pfNum(f.value) || 0) * 10))}%`
-      }
-    }))), f.contribution != null ? /*#__PURE__*/React.createElement("span", {
-      className: "f-mono",
-      style: {
-        fontSize: 9,
-        color: "var(--z-muted)",
-        width: 34,
-        textAlign: "right",
-        flexShrink: 0
-      },
-      title: "contribution to the composite"
-    }, "+", Number(f.contribution).toFixed(1)) : null))) : null, cells.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-      className: "eyebrow",
-      style: {
-        fontSize: 9,
-        margin: "8px 0 5px"
-      }
-    }, "Cells it addresses"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "grid",
-        gap: 4
-      }
-    }, cells.map((c, j) => {
-      const sid = pfText(c.subcap_id);
-      return /*#__PURE__*/React.createElement("div", {
-        key: j,
+    return (
+      /*#__PURE__*/
+      /* A click on an unselected tile scopes the page to it. A click on
+         the tile ALREADY selected has nothing left to scope, so it
+         opens that tile's own breakdown rather than doing nothing —
+         the QA sweep reads a click that changes no DOM as a dead
+         control, and on the page's most prominent card it reads that
+         way to a person too. */
+      React.createElement("div", {
+        key: key,
+        className: "card-tile clickable",
+        title: isSel ? isOpen ? "Hide the composite breakdown" : "Show the composite breakdown" : `Scope this page to ${key}`,
+        onClick: () => {
+          if (isSel) setOpenTile(o => o === key ? null : key);else selectTile(key);
+        },
+        style: {
+          border: isSel ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)",
+          background: isSel ? "var(--z-ice)" : "#fff"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 8
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          minWidth: 0
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12.5,
+          fontWeight: 600,
+          lineHeight: 1.3
+        }
+      }, t.rank != null ? /*#__PURE__*/React.createElement("span", {
+        className: "b b-purple",
+        style: {
+          marginRight: 5
+        }
+      }, "#", pfText(t.rank)) : null, pfText(t.platform) || "Platform not named"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 9.5,
+          color: "var(--z-muted)",
+          marginTop: 2,
+          lineHeight: 1.4
+        },
+        className: "txt-fit-2"
+      }, a.area || "No L3 area stated for these cells")), /*#__PURE__*/React.createElement("div", {
+        style: {
+          textAlign: "right",
+          flexShrink: 0
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 26,
+          fontWeight: 200,
+          color: composite === null ? "var(--z-muted)" : "var(--z-teal)",
+          lineHeight: 1.15
+        }
+      }, composite === null ? "—" : composite.toFixed(1)), /*#__PURE__*/React.createElement("div", {
+        className: "f-mono",
+        style: {
+          fontSize: 9,
+          color: "var(--z-muted)"
+        }
+      }, "/100 fit"))), /*#__PURE__*/React.createElement("div", {
+        className: "row",
+        style: {
+          marginTop: 10,
+          gap: 4,
+          fontSize: 11,
+          flexWrap: "wrap"
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "b b-org"
+      }, cells.length, " cell", cells.length === 1 ? "" : "s"), a.area ? /*#__PURE__*/React.createElement("span", {
+        className: "b b-muted"
+      }, tileRecs, " rec", tileRecs === 1 ? "" : "s") : null), top.length ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: "var(--z-muted)",
+          marginTop: 6,
+          lineHeight: 1.45
+        },
+        className: "txt-fit-2"
+      }, "Top: ", top.join(" · ")) : null, /*#__PURE__*/React.createElement("div", {
+        className: "row",
+        style: {
+          marginTop: 8,
+          fontSize: 10,
+          color: "var(--z-mid)"
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "spacer"
+      }), /*#__PURE__*/React.createElement("button", {
+        className: "btn btn-tertiary btn-sm",
+        style: {
+          color: "var(--z-mid)"
+        },
+        title: isOpen ? "Hide the composite breakdown" : "Show the composite breakdown",
+        onClick: ev => {
+          ev.stopPropagation();
+          setOpenTile(o => o === key ? null : key);
+        }
+      }, isOpen ? "Hide breakdown" : "Breakdown", /*#__PURE__*/React.createElement(Icon, {
+        name: isOpen ? "chevron-u" : "chevron-d",
+        size: 12
+      }))), isOpen ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          marginTop: 8,
+          paddingTop: 8,
+          borderTop: "1px solid var(--z-sep)"
+        }
+      }, t.relevance != null ? /*#__PURE__*/React.createElement("div", {
         className: "row",
         style: {
           gap: 5,
-          fontSize: 10,
-          alignItems: "flex-start"
+          marginBottom: 6
         }
-      }, sid ? /*#__PURE__*/React.createElement("button", {
-        className: "chip f-mono",
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "b b-muted f-mono",
+        title: "relevance to the assessed gaps"
+      }, Number(t.relevance).toFixed(2)), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 9.5,
+          color: "var(--z-muted)"
+        }
+      }, "relevance")) : null, t.their_stack_context ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10.5,
+          color: "var(--z-body)",
+          marginBottom: 8,
+          lineHeight: 1.5
+        }
+      }, pfText(t.their_stack_context)) : null, (t.factors || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        className: "eyebrow",
         style: {
           fontSize: 9,
+          marginBottom: 5
+        }
+      }, "Composite factors"), t.factors.map((f, j) => /*#__PURE__*/React.createElement("div", {
+        key: j,
+        className: "row",
+        style: {
+          fontSize: 10,
+          gap: 5,
+          marginBottom: 3
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: "var(--z-muted)",
+          width: 78,
           flexShrink: 0
         },
-        title: `Open ${sid} in the heatmap`,
-        onClick: ev => {
-          ev.stopPropagation();
-          openSubcap(sid);
-        }
-      }, sid) : null, pfNum(c.current) !== null ? /*#__PURE__*/React.createElement(MaturityChip, {
-        score: pfNum(c.current)
-      }) : null, /*#__PURE__*/React.createElement("span", {
+        title: f.weight != null ? `weight ${f.weight}` : ""
+      }, String(f.name || "").replace(/_/g, " ")), /*#__PURE__*/React.createElement("div", {
         style: {
           flex: 1,
-          minWidth: 0,
-          color: "var(--z-body)",
-          lineHeight: 1.45
+          minWidth: 0
         }
-      }, pfText(c.feature_that_addresses_it) || pfText(c.name) || ""));
-    }))) : null, t.rank_rationale ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10.5,
-        color: "var(--z-body)",
-        marginTop: 8,
-        lineHeight: 1.55
-      }
-    }, pfText(t.rank_rationale)) : null) : null);
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "prog",
+        style: {
+          height: 4
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "prog-fill",
+        style: {
+          width: `${Math.max(0, Math.min(100, (pfNum(f.value) || 0) * 10))}%`
+        }
+      }))), f.contribution != null ? /*#__PURE__*/React.createElement("span", {
+        className: "f-mono",
+        style: {
+          fontSize: 9,
+          color: "var(--z-muted)",
+          width: 34,
+          textAlign: "right",
+          flexShrink: 0
+        },
+        title: "contribution to the composite"
+      }, "+", Number(f.contribution).toFixed(1)) : null))) : null, cells.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        className: "eyebrow",
+        style: {
+          fontSize: 9,
+          margin: "8px 0 5px"
+        }
+      }, "Cells it addresses"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "grid",
+          gap: 4
+        }
+      }, cells.map((c, j) => {
+        const sid = pfText(c.subcap_id);
+        return /*#__PURE__*/React.createElement("div", {
+          key: j,
+          className: "row",
+          style: {
+            gap: 5,
+            fontSize: 10,
+            alignItems: "flex-start"
+          }
+        }, sid ? /*#__PURE__*/React.createElement("button", {
+          className: "chip f-mono",
+          style: {
+            fontSize: 9,
+            flexShrink: 0
+          },
+          title: `Open ${sid} in the heatmap`,
+          onClick: ev => {
+            ev.stopPropagation();
+            openSubcap(sid);
+          }
+        }, sid) : null, pfNum(c.current) !== null ? /*#__PURE__*/React.createElement(MaturityChip, {
+          score: pfNum(c.current)
+        }) : null, /*#__PURE__*/React.createElement("span", {
+          style: {
+            flex: 1,
+            minWidth: 0,
+            color: "var(--z-body)",
+            lineHeight: 1.45
+          }
+        }, pfText(c.feature_that_addresses_it) || pfText(c.name) || ""));
+      }))) : null, t.rank_rationale ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10.5,
+          color: "var(--z-body)",
+          marginTop: 8,
+          lineHeight: 1.55
+        }
+      }, pfText(t.rank_rationale)) : null) : null)
+    );
   })) : /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {

@@ -460,9 +460,17 @@ function ClientPlatform({ entity, run }) {
               .map(c => pfText(c.name) || cellNameOf(cellIndex, c.subcap_id) || pfText(c.subcap_id))
               .filter(Boolean);
             return (
+              /* A click on an unselected tile scopes the page to it. A click on
+                 the tile ALREADY selected has nothing left to scope, so it
+                 opens that tile's own breakdown rather than doing nothing —
+                 the QA sweep reads a click that changes no DOM as a dead
+                 control, and on the page's most prominent card it reads that
+                 way to a person too. */
               <div key={key} className="card-tile clickable"
-                title={`Scope this page to ${key}`}
-                onClick={() => selectTile(key)}
+                title={isSel
+                  ? (isOpen ? "Hide the composite breakdown" : "Show the composite breakdown")
+                  : `Scope this page to ${key}`}
+                onClick={() => { if (isSel) setOpenTile(o => o === key ? null : key); else selectTile(key); }}
                 style={{ border: isSel ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)",
                          background: isSel ? "var(--z-ice)" : "#fff" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
