@@ -47,8 +47,17 @@ function ClientOverview({
     evidence: f.e_ids || [],
     what: asText(f.body),
     why: asText(f.rejected_alternative),
-    so_what: asText(f.consequence),
-    magnitude: asText(f.strategic_alignment),
+    // The drilldown's SO WHAT is the strategic-alignment argument — which of
+    // the client's OWN stated objectives this finding bears on. It was
+    // `asText(f.consequence)`: the face's 6–14-word consequence line printed
+    // AGAIN under a heading that promises a decision, which is why every
+    // drilldown read as generic. The consequence line stays on the face
+    // (magnitude, below); the contract states alignment as prose or as
+    // {score, statement} — asText unwraps either, never a raw dict — and the
+    // stated score travels separately so the card can print it as data.
+    so_what: asText(f.strategic_alignment),
+    so_what_score: f.strategic_alignment && typeof f.strategic_alignment === "object" && isFinite(Number(f.strategic_alignment.score)) ? Number(f.strategic_alignment.score) : null,
+    magnitude: asText(f.consequence),
     subcaps: f.linked_subcap_ids || []
   }));
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -526,7 +535,7 @@ function WhyNowStrip({
       size: 15
     })), /*#__PURE__*/React.createElement("div", {
       style: {
-        flex: 1,
+        flex: "1 1 55%",
         minWidth: 0
       }
     }, /*#__PURE__*/React.createElement("div", {
@@ -551,13 +560,9 @@ function WhyNowStrip({
         marginTop: 3,
         lineHeight: 1.4
       },
-      className: "txt-fit-1"
-    }, s.impact) : null, s.window ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginTop: 6,
-        display: "flex"
-      }
-    }, /*#__PURE__*/React.createElement("span", {
+      className: "txt-fit-1",
+      title: s.impact
+    }, s.impact) : null), s.window ? /*#__PURE__*/React.createElement("span", {
       style: {
         background: "rgba(115,91,161,.14)",
         color: "var(--z-dpur)",
@@ -565,16 +570,16 @@ function WhyNowStrip({
         padding: "5px 9px",
         fontSize: 11,
         lineHeight: 1.5,
-        whiteSpace: "normal"
+        whiteSpace: "normal",
+        flex: "0 1 auto",
+        maxWidth: "36%"
       }
-    }, s.window)) : null), /*#__PURE__*/React.createElement(Icon, {
+    }, s.window) : null, /*#__PURE__*/React.createElement(Icon, {
       name: openNow ? "chevron-u" : "chevron-d",
       size: 15,
       style: {
         color: "var(--z-muted)",
-        flexShrink: 0,
-        alignSelf: "flex-start",
-        marginTop: 4
+        flexShrink: 0
       }
     })), openNow ? /*#__PURE__*/React.createElement("div", {
       style: {
@@ -1178,7 +1183,14 @@ function TopFindingsCard({
         lineHeight: 1.6,
         fontWeight: 500
       }
-    }, f.so_what)), f.evidence.length > 0 ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    }, f.so_what || "The run states no strategic-alignment argument for this finding."), f.so_what && f.so_what_score != null ? /*#__PURE__*/React.createElement("div", {
+      className: "f-mono",
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)",
+        marginTop: 4
+      }
+    }, "alignment to stated objectives \xB7 ", f.so_what_score) : null), f.evidence.length > 0 ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
         fontWeight: 700,
@@ -1265,6 +1277,9 @@ function LeadershipPanel({
      Postgres. That is why there is no spinner here: the values arrive in the
      same read as the name. The app never calls Clay while serving — it performs
      no third-party call and no inference at request time. */
+  const {
+    pushToast
+  } = useApp();
   const LIVE = typeof window !== "undefined" && !!window.DMA_LIVE;
   const [enriched, setEnriched] = useState({}); // fixture mode only
   const [enrichingAll, setEnrichingAll] = useState(false);
@@ -1480,13 +1495,50 @@ function LeadershipPanel({
         color: "var(--z-muted)",
         marginTop: 2
       }
-    }, ex.enrichment_basis || "no source stated for this contact route", ex.enriched_at ? ` · established ${ex.enriched_at}` : ""))) : !ex.gap_flag && LIVE && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+    }, ex.enrichment_basis || "no source stated for this contact route", ex.enriched_at ? ` · established ${ex.enriched_at}` : ""))) : !ex.gap_flag && LIVE && audience !== "customer" ?
+    /*#__PURE__*/
+    /* No stored route. The button still RENDERS — hiding it made
+       the panel read as a broken feature — but it cannot fetch
+       anything: Clay runs in the producer's session and its output
+       is promoted with the run (invariant 1: no third-party call
+       at serve time), so the honest answer to a click is a toast
+       saying when enrichment happens, not a spinner. */
+    React.createElement("div", {
       style: {
         marginTop: 8,
-        fontSize: 10.5,
+        padding: "8px 10px",
+        background: "var(--z-bg)",
+        border: "1px solid var(--z-sep)",
+        borderRadius: 6
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        fontSize: 11
+      }
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "lock",
+      size: 11,
+      style: {
         color: "var(--z-muted)"
       }
-    }, "No contact route established for this person in this run.") : hasClay && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--z-muted)"
+      }
+    }, "No contact route established for this person in this run."), /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-tertiary btn-sm",
+      style: {
+        padding: "3px 8px",
+        flexShrink: 0
+      },
+      onClick: () => pushToast("No contact route was stored for this person at synthesis time; enrichment runs during production, not from the browser", "warn")
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "sparkle",
+      size: 10
+    }), " Enrich via Clay"))) : hasClay && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 8,
         padding: "8px 10px",
@@ -1735,7 +1787,8 @@ function Row({
       fontWeight: 500,
       textAlign: "right",
       minWidth: 0
-    }
+    },
+    title: typeof v === "string" ? v : undefined
   }, v));
 }
 function InProgressBanner({

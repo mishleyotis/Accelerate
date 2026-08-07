@@ -30,8 +30,19 @@ function ClientOverview({ entity, run }) {
     evidence: f.e_ids || [],
     what: asText(f.body),
     why: asText(f.rejected_alternative),
-    so_what: asText(f.consequence),
-    magnitude: asText(f.strategic_alignment),
+    // The drilldown's SO WHAT is the strategic-alignment argument — which of
+    // the client's OWN stated objectives this finding bears on. It was
+    // `asText(f.consequence)`: the face's 6–14-word consequence line printed
+    // AGAIN under a heading that promises a decision, which is why every
+    // drilldown read as generic. The consequence line stays on the face
+    // (magnitude, below); the contract states alignment as prose or as
+    // {score, statement} — asText unwraps either, never a raw dict — and the
+    // stated score travels separately so the card can print it as data.
+    so_what: asText(f.strategic_alignment),
+    so_what_score: (f.strategic_alignment && typeof f.strategic_alignment === "object"
+                    && isFinite(Number(f.strategic_alignment.score)))
+      ? Number(f.strategic_alignment.score) : null,
+    magnitude: asText(f.consequence),
     subcaps: f.linked_subcap_ids || [],
   }));
 
@@ -235,33 +246,34 @@ function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
           const cat = CAT[s.category] || CAT.market;
           return (
             <div key={s.id || i} style={{ border: `1px solid ${openNow ? "var(--ph0-bd)" : "var(--z-sep)"}`, borderRadius: 10, overflow: "hidden", background: openNow ? "var(--ph0-lt)" : "#fff", transition: "background 140ms var(--ease), border-color 140ms var(--ease)" }}>
-              {/* clickable header */}
+              {/* clickable header — the prototype's one horizontal row:
+                  icon · label+strength · window · chevron. */}
               <button onClick={() => setOpen(o => o === i ? -1 : i)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 11, padding: "12px 14px", background: "none", border: 0, cursor: "pointer", textAlign: "left" }}>
                 <span style={{ width: 30, height: 30, borderRadius: 8, background: cat.color, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon name={cat.icon} size={15} /></span>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ flex: "1 1 55%", minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)" }}>{s.label}</span>
                     {!isCust && s.strength ? <span className={`b ${STR[s.strength] || "b-muted"}`}>{s.strength}</span> : null}
                   </div>
-                  {!openNow ? <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 3, lineHeight: 1.4 }} className="txt-fit-1">{s.impact}</div> : null}
-                  {/* The window comes DOWN, under the header, and reads in
-                      full. The fixture's window was a phrase ("6-9 months") so
-                      it sat beside the label as an unshrinkable badge; the
-                      contract's is 20-40 words naming the closing event, which
-                      first crushed the label to one character per line and then,
-                      once it could shrink, concealed the sentence behind an
-                      ellipsis. Its own row wraps and hides nothing. */}
-                  {s.window ? (
-                    <div style={{ marginTop: 6, display: "flex" }}>
-                      <span style={{ background: "rgba(115,91,161,.14)", color: "var(--z-dpur)",
-                                     borderRadius: 6, padding: "5px 9px", fontSize: 11,
-                                     lineHeight: 1.5, whiteSpace: "normal" }}>
-                        {s.window}
-                      </span>
-                    </div>
-                  ) : null}
+                  {!openNow ? <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 3, lineHeight: 1.4 }} className="txt-fit-1" title={s.impact}>{s.impact}</div> : null}
                 </div>
-                <Icon name={openNow ? "chevron-u" : "chevron-d"} size={15} style={{ color: "var(--z-muted)", flexShrink: 0, alignSelf: "flex-start", marginTop: 4 }} />
+                {/* The window sits BESIDE the label, as the prototype has it —
+                    but it wraps. The fixture's window was a phrase ("6-9
+                    months"); the contract's is 20-40 words naming the closing
+                    event, which as an unshrinkable badge first crushed the
+                    label to one character per line and then, once it could
+                    shrink, concealed the sentence behind an ellipsis. Bounded
+                    width + normal white-space keeps the row horizontal and
+                    hides nothing. */}
+                {s.window ? (
+                  <span style={{ background: "rgba(115,91,161,.14)", color: "var(--z-dpur)",
+                                 borderRadius: 6, padding: "5px 9px", fontSize: 11,
+                                 lineHeight: 1.5, whiteSpace: "normal",
+                                 flex: "0 1 auto", maxWidth: "36%" }}>
+                    {s.window}
+                  </span>
+                ) : null}
+                <Icon name={openNow ? "chevron-u" : "chevron-d"} size={15} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
               </button>
               {/* expanded drilldown */}
               {openNow ? (
@@ -497,7 +509,17 @@ function TopFindingsCard({ findings, openFinding, setOpenFinding, openEvidence }
                   ))}
                   <div style={{ background: "rgba(39,187,175,.1)", borderLeft: "3px solid var(--z-teal)", borderRadius: "0 6px 6px 0", padding: "9px 12px", marginBottom: f.evidence.length ? 12 : 0 }}>
                     <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-teal)", textTransform: "uppercase", marginBottom: 3 }}>So what</div>
-                    <div style={{ fontSize: 12.5, color: "var(--z-dark)", lineHeight: 1.6, fontWeight: 500 }}>{f.so_what}</div>
+                    {/* A finding whose run states no alignment argument says so —
+                        it never falls back to re-printing the face's consequence
+                        line, which is the duplication this block replaces. */}
+                    <div style={{ fontSize: 12.5, color: "var(--z-dark)", lineHeight: 1.6, fontWeight: 500 }}>
+                      {f.so_what || "The run states no strategic-alignment argument for this finding."}
+                    </div>
+                    {f.so_what && f.so_what_score != null ? (
+                      <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 4 }}>
+                        alignment to stated objectives · {f.so_what_score}
+                      </div>
+                    ) : null}
                   </div>
                   {f.evidence.length > 0 ? (
                     <div>
@@ -546,6 +568,7 @@ function LeadershipPanel({ audience }) {
      Postgres. That is why there is no spinner here: the values arrive in the
      same read as the name. The app never calls Clay while serving — it performs
      no third-party call and no inference at request time. */
+  const { pushToast } = useApp();
   const LIVE = typeof window !== "undefined" && !!window.DMA_LIVE;
   const [enriched, setEnriched] = useState({}); // fixture mode only
   const [enrichingAll, setEnrichingAll] = useState(false);
@@ -650,8 +673,22 @@ function LeadershipPanel({ audience }) {
                     </div>
                   </div>
                 ) : (!ex.gap_flag && LIVE && audience !== "customer") ? (
-                  <div style={{ marginTop: 8, fontSize: 10.5, color: "var(--z-muted)" }}>
-                    No contact route established for this person in this run.
+                  /* No stored route. The button still RENDERS — hiding it made
+                     the panel read as a broken feature — but it cannot fetch
+                     anything: Clay runs in the producer's session and its output
+                     is promoted with the run (invariant 1: no third-party call
+                     at serve time), so the honest answer to a click is a toast
+                     saying when enrichment happens, not a spinner. */
+                  <div style={{ marginTop: 8, padding: "8px 10px", background: "var(--z-bg)", border: "1px solid var(--z-sep)", borderRadius: 6 }}>
+                    <div className="row" style={{ fontSize: 11 }}>
+                      <Icon name="lock" size={11} style={{ color: "var(--z-muted)" }} />
+                      <span style={{ color: "var(--z-muted)" }}>No contact route established for this person in this run.</span>
+                      <span className="spacer" />
+                      <button className="btn btn-tertiary btn-sm" style={{ padding: "3px 8px", flexShrink: 0 }}
+                        onClick={() => pushToast("No contact route was stored for this person at synthesis time; enrichment runs during production, not from the browser", "warn")}>
+                        <Icon name="sparkle" size={10} /> Enrich via Clay
+                      </button>
+                    </div>
                   </div>
                 ) : hasClay && audience !== "customer" ? (
                   <div style={{ marginTop: 8, padding: "8px 10px", background: isEnriched ? "var(--z-ice)" : state === "loading" ? "var(--z-lav)" : "var(--z-bg)", border: `1px solid ${isEnriched ? "rgba(39,187,175,.35)" : "var(--z-sep)"}`, borderRadius: 6 }}>
@@ -763,7 +800,11 @@ function Row({ k, v }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", fontSize: 11.5, gap: 8 }}>
       <span style={{ color: "var(--z-muted)", flexShrink: 0, whiteSpace: "nowrap" }}>{k}</span>
-      <span style={{ color: "var(--z-dark)", fontWeight: 500, textAlign: "right", minWidth: 0 }}>{v}</span>
+      {/* At narrow widths the stylesheet keeps key/value on one line with an
+          ellipsis; the title keeps the full value reachable — a regulator name
+          cut mid-word with no way to read the rest is a value withheld. */}
+      <span style={{ color: "var(--z-dark)", fontWeight: 500, textAlign: "right", minWidth: 0 }}
+            title={typeof v === "string" ? v : undefined}>{v}</span>
     </div>
   );
 }

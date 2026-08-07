@@ -336,11 +336,17 @@ function InsightModal() {
     openSubcap,
     openRec,
     audience,
-    pushToast
+    pushToast,
+    route
   } = useApp();
   const [tab, setTab] = useState("detail");
   const [note, setNote] = useState("");
   const [annStatus, setAnnStatus] = useState("ACTIONED");
+  // Accept/Reject verdicts, keyed by card id so a decision survives closing and
+  // reopening the modal within the session. The server's answer is what is
+  // stored — the chip states what was RECORDED, not what was clicked.
+  const [decisions, setDecisions] = useState({});
+  const [deciding, setDeciding] = useState(false);
   useEffect(() => {
     if (insightModal) setTab("detail");
   }, [insightModal]);
@@ -348,6 +354,52 @@ function InsightModal() {
   const ic = DMA.getInsight(insightModal);
   if (!ic) return null;
   const rec = ic.rec ? DMA.getRecommendation(ic.rec) : null;
+  const decided = decisions[ic.id] || null;
+
+  /* Accept / Reject → the annotation write path. Annotations and alert actions
+     are the ONLY writes this app's API accepts, both behind an Idempotency-Key
+     (invariant 2) — this is that write, from the reviewer's seat, through the
+     same `/api/entity/…` BFF the reads use (utils.jsx). The route is another
+     workstream's to build, so until it deploys a 404/501 is an EXPECTED state:
+     it gets said in a toast, never left as an unhandled rejection. */
+  const entityId = ((route && route.path || "").match(/^\/clients\/([^/]+)/) || [])[1] || null;
+  const decide = action => {
+    if (!entityId) {
+      pushToast("No entity in the route — the decision has nowhere to be recorded", "warn");
+      return;
+    }
+    setDeciding(true);
+    fetch(`/api/entity/${encodeURIComponent(entityId)}/insights/${encodeURIComponent(ic.id)}/annotation`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "Idempotency-Key": crypto.randomUUID()
+      },
+      body: JSON.stringify({
+        action
+      })
+    }).then(r => {
+      if (r.status === 404 || r.status === 501) {
+        pushToast("Annotation write path is not deployed yet", "warn");
+        return null;
+      }
+      if (!r.ok) {
+        pushToast(`Annotation write failed (${r.status})`, "warn");
+        return null;
+      }
+      // An empty or non-JSON 2xx body still means the write landed.
+      return r.json().catch(() => ({}));
+    }).then(body => {
+      if (!body) return;
+      const said = String(body.action || body.status || action).toUpperCase();
+      const verdict = said.indexOf("REJECT") === 0 ? "REJECTED" : "ACCEPTED";
+      setDecisions(d => ({
+        ...d,
+        [ic.id]: verdict
+      }));
+      pushToast(`${ic.id} ${verdict.toLowerCase()} — recorded`, "success");
+    }).catch(() => pushToast("Annotation write failed — the API was unreachable", "warn")).finally(() => setDeciding(false));
+  };
   // The card's own platform chip, rendered as the run states it. Resolving it
   // through DMA.getPlatform read the static five-vendor catalogue — which knows
   // nothing about this client — and returned undefined for every promoted
@@ -385,7 +437,9 @@ function InsightModal() {
     className: "b b-teal"
   }, platformChip) : null, ic.claim ? /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
-  }, ic.claim) : null, ic.confidence ? /*#__PURE__*/React.createElement("span", {
+  }, ic.claim) : null, decided ? /*#__PURE__*/React.createElement("span", {
+    className: `b ${decided === "ACCEPTED" ? "b-teal" : "b-below"}`
+  }, decided) : null, ic.confidence ? /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"
@@ -521,28 +575,7 @@ function InsightModal() {
       color: "var(--z-body)",
       lineHeight: 1.55
     }
-  }, v)) : null), (ic.r_layer.probes_run || []).length ? /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      gap: 5,
-      flexWrap: "wrap",
-      marginTop: 4
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9.5,
-      color: "var(--z-muted)",
-      textTransform: "uppercase",
-      letterSpacing: ".08em"
-    }
-  }, "Probes"), ic.r_layer.probes_run.map((x, i) => {
-    const t = dwText(x) || "";
-    return /*#__PURE__*/React.createElement("span", {
-      key: i,
-      className: "chip",
-      title: t
-    }, t.length > 34 ? `${t.slice(0, 33).trimEnd()}…` : t);
-  })) : null) : null, (ic.affects || []).length ? /*#__PURE__*/React.createElement("div", {
+  }, v)) : null)) : null, (ic.affects || []).length ? /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--z-lav)",
       borderRadius: 8,
@@ -922,10 +955,30 @@ function InsightModal() {
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
-  }), " Export")), /*#__PURE__*/React.createElement("button", {
+  }), " Export")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary",
+    disabled: deciding,
+    onClick: () => decide("ACCEPT")
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "check",
+    size: 13
+  }), " Accept"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary",
+    disabled: deciding,
+    onClick: () => decide("REJECT")
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "x",
+    size: 13
+  }), " Reject"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-primary",
     onClick: closeInsight
-  }, "Close"))));
+  }, "Close")))));
 }
 function Block({
   title,

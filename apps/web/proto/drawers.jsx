@@ -275,16 +275,64 @@ function EvidenceDrawer() {
 
 /* ── Insight card modal ──────────────────────────────────────────── */
 function InsightModal() {
-  const { insightModal, closeInsight, openEvidence, openSubcap, openRec, audience, pushToast } = useApp();
+  const { insightModal, closeInsight, openEvidence, openSubcap, openRec, audience, pushToast, route } = useApp();
   const [tab, setTab] = useState("detail");
   const [note, setNote] = useState("");
   const [annStatus, setAnnStatus] = useState("ACTIONED");
+  // Accept/Reject verdicts, keyed by card id so a decision survives closing and
+  // reopening the modal within the session. The server's answer is what is
+  // stored — the chip states what was RECORDED, not what was clicked.
+  const [decisions, setDecisions] = useState({});
+  const [deciding, setDeciding] = useState(false);
 
   useEffect(() => { if (insightModal) setTab("detail"); }, [insightModal]);
   if (!insightModal) return null;
   const ic = DMA.getInsight(insightModal);
   if (!ic) return null;
   const rec = ic.rec ? DMA.getRecommendation(ic.rec) : null;
+  const decided = decisions[ic.id] || null;
+
+  /* Accept / Reject → the annotation write path. Annotations and alert actions
+     are the ONLY writes this app's API accepts, both behind an Idempotency-Key
+     (invariant 2) — this is that write, from the reviewer's seat, through the
+     same `/api/entity/…` BFF the reads use (utils.jsx). The route is another
+     workstream's to build, so until it deploys a 404/501 is an EXPECTED state:
+     it gets said in a toast, never left as an unhandled rejection. */
+  const entityId = ((route && route.path || "").match(/^\/clients\/([^/]+)/) || [])[1] || null;
+  const decide = (action) => {
+    if (!entityId) {
+      pushToast("No entity in the route — the decision has nowhere to be recorded", "warn");
+      return;
+    }
+    setDeciding(true);
+    fetch(`/api/entity/${encodeURIComponent(entityId)}/insights/${encodeURIComponent(ic.id)}/annotation`, {
+      method: "POST",
+      headers: { "content-type": "application/json",
+                 "Idempotency-Key": crypto.randomUUID() },
+      body: JSON.stringify({ action }),
+    })
+      .then(r => {
+        if (r.status === 404 || r.status === 501) {
+          pushToast("Annotation write path is not deployed yet", "warn");
+          return null;
+        }
+        if (!r.ok) {
+          pushToast(`Annotation write failed (${r.status})`, "warn");
+          return null;
+        }
+        // An empty or non-JSON 2xx body still means the write landed.
+        return r.json().catch(() => ({}));
+      })
+      .then(body => {
+        if (!body) return;
+        const said = String(body.action || body.status || action).toUpperCase();
+        const verdict = said.indexOf("REJECT") === 0 ? "REJECTED" : "ACCEPTED";
+        setDecisions(d => ({ ...d, [ic.id]: verdict }));
+        pushToast(`${ic.id} ${verdict.toLowerCase()} — recorded`, "success");
+      })
+      .catch(() => pushToast("Annotation write failed — the API was unreachable", "warn"))
+      .finally(() => setDeciding(false));
+  };
   // The card's own platform chip, rendered as the run states it. Resolving it
   // through DMA.getPlatform read the static five-vendor catalogue — which knows
   // nothing about this client — and returned undefined for every promoted
@@ -302,6 +350,7 @@ function InsightModal() {
               <span className="chip">{ic.id}</span>
               {platformChip ? <span className="b b-teal">{platformChip}</span> : null}
               {ic.claim ? <span className="b b-muted">{ic.claim}</span> : null}
+              {decided ? <span className={`b ${decided === "ACCEPTED" ? "b-teal" : "b-below"}`}>{decided}</span> : null}
               {ic.confidence ? <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Confidence · {ic.confidence}</span> : null}
             </div>
             <div style={{ fontSize: 17, fontWeight: 600, color: "var(--z-dark)", letterSpacing: "-.005em" }}>{ic.title}</div>
@@ -379,18 +428,12 @@ function InsightModal() {
                       <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.55 }}>{v}</div>
                     </div>
                   ) : null)}
-                  {(ic.r_layer.probes_run || []).length ? (
-                    <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 4 }}>
-                      <span style={{ fontSize: 9.5, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Probes</span>
-                      {/* Truncated silently before, so a probe read as a
-                          sentence that stops mid-word; the ellipsis says it was
-                          cut and the full text stays in the tooltip. */}
-                      {ic.r_layer.probes_run.map((x, i) => {
-                        const t = dwText(x) || "";
-                        return <span key={i} className="chip" title={t}>{t.length > 34 ? `${t.slice(0, 33).trimEnd()}…` : t}</span>;
-                      })}
-                    </div>
-                  ) : null}
+                  {/* `probes_run` is deliberately NOT rendered. The probes are
+                      the producer's own audit trail — which checks it ran —
+                      not client content, and as chips they read as sentences
+                      chopped mid-word. The prose that IS for the reader
+                      (alternative explanation, validation question) renders
+                      above. */}
                 </div>
               ) : null}
 
@@ -600,7 +643,11 @@ function InsightModal() {
             }}><Icon name="copy" size={13} /> Copy card</button>
             <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${ic.id} as PDF…`, "success")}><Icon name="download" size={13} /> Export</button>
           </div>
-          <button className="btn btn-primary" onClick={closeInsight}>Close</button>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button className="btn btn-secondary" disabled={deciding} onClick={() => decide("ACCEPT")}><Icon name="check" size={13} /> Accept</button>
+            <button className="btn btn-secondary" disabled={deciding} onClick={() => decide("REJECT")}><Icon name="x" size={13} /> Reject</button>
+            <button className="btn btn-primary" onClick={closeInsight}>Close</button>
+          </div>
         </div>
       </div>
     </div>
