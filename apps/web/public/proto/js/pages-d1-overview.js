@@ -541,11 +541,7 @@ function WhyNowStrip({
         fontSize: 12,
         fontWeight: 500,
         color: "var(--z-dark)",
-        lineHeight: 1.45,
-        display: "-webkit-box",
-        WebkitLineClamp: 4,
-        WebkitBoxOrient: "vertical",
-        overflow: "hidden"
+        lineHeight: 1.45
       },
       title: s.detail || s.label
     }, s.label));

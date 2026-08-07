@@ -130,7 +130,7 @@ function EvidenceDrawer() {
                     consistent FACT-class claims" for every cell in the run. */}
                 <div className="co-body">
                   Score {fx(subcap.score, 1)}
-                  {subcap.peerMedian != null ? ` · peer median ${fx(subcap.peerMedian, 1)}` : " · no peer figure available"}
+                  {subcap.peerMedian != null ? ` · peer median ${fx(subcap.peerMedian, 1)}` : ""}
                   {subcap.peer_basis === "category_proxy" ? " (peer proxy · category median)" : ""}.
                   {" "}
                   {subcap.thin
@@ -1309,7 +1309,7 @@ function liveSurfaceMessages(surface, ctx) {
       dwText(fa.strategic_quote),
       dwText(fa.description),
       band ? `Composite ${fx(band.score, 2)} · ${band.label}` +
-             (peer === null ? " · no peer figure stated" : ` · peer ${fx(peer, 2)}`) +
+             (peer === null ? "" : ` · peer ${fx(peer, 2)}`) +
              (delta === null ? "" : ` · delta ${delta > 0 ? "+" : ""}${fx(delta, 2)} as promoted`) +
              (dwText(fa.currency_status) ? ` · ${dwText(fa.currency_status).replace(/_/g, " ").toLowerCase()}` : "")
            : null,

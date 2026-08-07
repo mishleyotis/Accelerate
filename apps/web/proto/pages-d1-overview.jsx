@@ -278,9 +278,14 @@ function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
                 {kindChip(s.category)}
                 {!isCust && s.strength ? <span className={`b ${STR[s.strength] || "b-muted"}`}>{s.strength}</span> : null}
               </span>
-              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--z-dark)", lineHeight: 1.45,
-                             display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical",
-                             overflow: "hidden" }} title={s.detail || s.label}>
+              {/* The whole trigger sentence, unclamped. A four-line clamp cut
+                  every card mid-clause ("BCU announced a leadership evolution
+                  on 1 July 2026: Jim Block steps…"), which is the one thing a
+                  card face must not do: an argument you have to click to
+                  finish reading is not a summary. The cards are a grid row, so
+                  they size to the tallest and stay level. */}
+              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--z-dark)", lineHeight: 1.45 }}
+                    title={s.detail || s.label}>
                 {s.label}
               </span>
             </button>

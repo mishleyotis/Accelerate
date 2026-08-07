@@ -701,7 +701,7 @@ function FocusAreaView({
           color: "var(--z-muted)"
         },
         title: "no peer median is stated at this grain in this run"
-      }, "no peer figure"), gap == null ? null : gap > 0 ? /*#__PURE__*/React.createElement("span", {
+      }, "\u2014"), gap == null ? null : gap > 0 ? /*#__PURE__*/React.createElement("span", {
         className: "b b-below",
         style: {
           marginLeft: "auto"
@@ -1428,7 +1428,7 @@ function PillarHeatmap({
         color: "var(--z-muted)"
       },
       title: "the run states no peer median for this pillar"
-    }, "no peer figure stated")), /*#__PURE__*/React.createElement("div", {
+    }, "\u2014")), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
         color: "var(--z-muted)",
@@ -2143,7 +2143,7 @@ function SubcapHeatmap({
               marginTop: 2,
               textAlign: "right"
             }
-          }, "no peer")), /*#__PURE__*/React.createElement("div", {
+          }, "\xA0")), /*#__PURE__*/React.createElement("div", {
             style: {
               display: "flex",
               gap: 3,

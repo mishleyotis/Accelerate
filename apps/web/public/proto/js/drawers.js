@@ -155,7 +155,7 @@ function EvidenceDrawer() {
     className: "co-title"
   }, "Rationale"), /*#__PURE__*/React.createElement("div", {
     className: "co-body"
-  }, "Score ", fx(subcap.score, 1), subcap.peerMedian != null ? ` · peer median ${fx(subcap.peerMedian, 1)}` : " · no peer figure available", subcap.peer_basis === "category_proxy" ? " (peer proxy · category median)" : "", ".", " ", subcap.thin ? `Evidence is below the threshold of 3 — flagged as thin${subcap.closure_condition ? `. Closes on: ${subcap.closure_condition}` : "."}` : items.length ? `Grounded on ${items.length} item${items.length === 1 ? "" : "s"}${(() => {
+  }, "Score ", fx(subcap.score, 1), subcap.peerMedian != null ? ` · peer median ${fx(subcap.peerMedian, 1)}` : "", subcap.peer_basis === "category_proxy" ? " (peer proxy · category median)" : "", ".", " ", subcap.thin ? `Evidence is below the threshold of 3 — flagged as thin${subcap.closure_condition ? `. Closes on: ${subcap.closure_condition}` : "."}` : items.length ? `Grounded on ${items.length} item${items.length === 1 ? "" : "s"}${(() => {
     const tiers = [...new Set(items.map(i => i.tier).filter(Boolean))].sort();
     return tiers.length ? ` · ${tiers.join(", ")}` : "";
   })()}.` : "No evidence linked at this grain."))) : null, items.length > 1 ? /*#__PURE__*/React.createElement("div", {
@@ -2023,7 +2023,7 @@ function liveSurfaceMessages(surface, ctx) {
     const band = dwBand(fa.entity_score);
     const peer = dwNum(fa.peer_score);
     const delta = dwNum(fa.delta);
-    const parts = [dwText(fa.strategic_quote), dwText(fa.description), band ? `Composite ${fx(band.score, 2)} · ${band.label}` + (peer === null ? " · no peer figure stated" : ` · peer ${fx(peer, 2)}`) + (delta === null ? "" : ` · delta ${delta > 0 ? "+" : ""}${fx(delta, 2)} as promoted`) + (dwText(fa.currency_status) ? ` · ${dwText(fa.currency_status).replace(/_/g, " ").toLowerCase()}` : "") : null, (fa.subcaps || []).length ? `${fa.subcaps.length} capability cell${fa.subcaps.length === 1 ? "" : "s"} sit under this area.` : null].filter(Boolean);
+    const parts = [dwText(fa.strategic_quote), dwText(fa.description), band ? `Composite ${fx(band.score, 2)} · ${band.label}` + (peer === null ? "" : ` · peer ${fx(peer, 2)}`) + (delta === null ? "" : ` · delta ${delta > 0 ? "+" : ""}${fx(delta, 2)} as promoted`) + (dwText(fa.currency_status) ? ` · ${dwText(fa.currency_status).replace(/_/g, " ").toLowerCase()}` : "") : null, (fa.subcaps || []).length ? `${fa.subcaps.length} capability cell${fa.subcaps.length === 1 ? "" : "s"} sit under this area.` : null].filter(Boolean);
     return {
       title: "Focus area",
       sub: dwText(fa.name) || "Strategic priority",

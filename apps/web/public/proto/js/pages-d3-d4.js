@@ -740,9 +740,11 @@ function ClientPlatform({
     }, peer !== null ? /*#__PURE__*/React.createElement(MaturityChip, {
       score: peer
     }) : /*#__PURE__*/React.createElement("span", {
-      className: "chip muted",
-      title: pfText(g.peer_note) || ""
-    }, String(g.peer_basis || "no peer").replace(/_/g, " "))) :
+      style: {
+        color: "var(--z-muted)"
+      },
+      title: pfText(g.peer_note) || String(g.peer_basis || "").replace(/_/g, " ")
+    }, "\u2014")) :
     /*#__PURE__*/
     /* Every row here states cannot_estimate with a note
        explaining why. That is the answer, so it is what the
@@ -750,9 +752,11 @@ function ClientPlatform({
     React.createElement("td", {
       "data-label": "Peer basis"
     }, /*#__PURE__*/React.createElement("span", {
-      className: "chip muted",
-      title: pfText(g.peer_note) || ""
-    }, String(g.peer_basis || "no peer").replace(/_/g, " "))), anyPeer ? /*#__PURE__*/React.createElement("td", {
+      style: {
+        color: "var(--z-muted)"
+      },
+      title: pfText(g.peer_note) || String(g.peer_basis || "").replace(/_/g, " ")
+    }, "\u2014")), anyPeer ? /*#__PURE__*/React.createElement("td", {
       "data-label": "Gap"
     }, delta === null ? /*#__PURE__*/React.createElement("span", {
       style: {

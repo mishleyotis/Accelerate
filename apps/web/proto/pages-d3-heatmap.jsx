@@ -487,7 +487,7 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
                     {peer != null ? (
                       <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>
                     ) : (
-                      <span style={{ fontSize: 11, color: "var(--z-muted)" }} title="no peer median is stated at this grain in this run">no peer figure</span>
+                      <span style={{ fontSize: 11, color: "var(--z-muted)" }} title="no peer median is stated at this grain in this run">—</span>
                     )}
                     {/* "at peer" is a CLAIM, and it was printed for every card
                         whose gap was null (i.e. all of them) and for every card
@@ -809,7 +809,7 @@ function PillarHeatmap({ entity, pillars, setPillarFocus }) {
                     ) : null}
                   </>
                 ) : (
-                  <span style={{ color: "var(--z-muted)" }} title="the run states no peer median for this pillar">no peer figure stated</span>
+                  <span style={{ color: "var(--z-muted)" }} title="the run states no peer median for this pillar">—</span>
                 )}
               </div>
               {/* Counted from the run's own categories, so a pillar carrying a
@@ -1186,7 +1186,7 @@ function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers
                               {gap != null ? (
                                 <div style={{ fontSize: 9, color: gap > 0 ? "var(--z-below)" : gap < 0 ? "var(--z-mid)" : "var(--z-muted)", marginTop: 2, textAlign: "right" }}>{gap > 0 ? `−${fx(gap, 1)}` : gap < 0 ? `+${fx(Math.abs(gap), 1)}` : "0.0"} vs peer</div>
                               ) : (
-                                <div style={{ fontSize: 9, color: "var(--z-muted)", marginTop: 2, textAlign: "right" }}>no peer</div>
+                                <div style={{ fontSize: 9, color: "var(--z-muted)", marginTop: 2, textAlign: "right" }}>&nbsp;</div>
                               )}
                             </div>
                             <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>

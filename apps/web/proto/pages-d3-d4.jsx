@@ -507,14 +507,14 @@ function ClientPlatform({ entity, run }) {
                       <td data-label="Score"><MaturityChip score={cur} /></td>
                       {anyPeer ? (
                         <td data-label="Peer">{peer !== null ? <MaturityChip score={peer} /> : (
-                          <span className="chip muted" title={pfText(g.peer_note) || ""}>{String(g.peer_basis || "no peer").replace(/_/g, " ")}</span>
+                          <span style={{ color: "var(--z-muted)" }} title={pfText(g.peer_note) || String(g.peer_basis || "").replace(/_/g, " ")}>—</span>
                         )}</td>
                       ) : (
                         /* Every row here states cannot_estimate with a note
                            explaining why. That is the answer, so it is what the
                            column shows — the old table printed "-". */
                         <td data-label="Peer basis">
-                          <span className="chip muted" title={pfText(g.peer_note) || ""}>{String(g.peer_basis || "no peer").replace(/_/g, " ")}</span>
+                          <span style={{ color: "var(--z-muted)" }} title={pfText(g.peer_note) || String(g.peer_basis || "").replace(/_/g, " ")}>—</span>
                         </td>
                       )}
                       {anyPeer ? (
