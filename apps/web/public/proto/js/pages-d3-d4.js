@@ -1015,21 +1015,20 @@ function ClientPlatform({
       }, /*#__PURE__*/React.createElement("div", {
         className: "row",
         style: {
-          gap: 6
+          gap: 6,
+          marginBottom: 3
         }
       }, /*#__PURE__*/React.createElement("span", {
-        className: "b b-muted",
         style: {
+          fontSize: 9,
+          color: "var(--z-muted)",
+          letterSpacing: ".06em",
+          textTransform: "uppercase",
           flexShrink: 0
         }
       }, "Condition"), /*#__PURE__*/React.createElement("span", {
-        style: {
-          fontSize: 12,
-          flex: 1,
-          minWidth: 0
-        },
-        className: "txt-fit-1"
-      }, pfText(p.condition)), p.basis ? /*#__PURE__*/React.createElement("span", {
+        className: "spacer"
+      }), p.basis ? /*#__PURE__*/React.createElement("span", {
         className: "b b-above",
         style: {
           flexShrink: 0
@@ -1041,7 +1040,13 @@ function ClientPlatform({
           color: "var(--z-muted)",
           flexShrink: 0
         }
-      }))), isOpen ? /*#__PURE__*/React.createElement("div", {
+      })), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12,
+          lineHeight: 1.45
+        },
+        className: "txt-fit-2"
+      }, pfText(p.condition))), isOpen ? /*#__PURE__*/React.createElement("div", {
         style: {
           padding: "0 0 12px"
         }

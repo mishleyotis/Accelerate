@@ -718,15 +718,20 @@ function ClientPlatform({ entity, run }) {
                  stacked blocks per row in a 300px column. */
               return (
                 <div key={p.key} style={{ borderBottom: "1px solid var(--z-sep)" }}>
+                  {/* The word "Condition" is an eyebrow, not a badge in the
+                      row. As a badge it took 78px of a 300px column and the
+                      condition itself — the only thing the row is about — was
+                      clamped to "Architecture…". */}
                   <button onClick={() => setOpenPrereq(o => o === idx ? null : idx)}
                     title={pfText(p.condition) || ""}
                     style={{ width: "100%", background: "none", border: 0, cursor: "pointer", textAlign: "left", padding: "10px 0" }}>
-                    <div className="row" style={{ gap: 6 }}>
-                      <span className="b b-muted" style={{ flexShrink: 0 }}>Condition</span>
-                      <span style={{ fontSize: 12, flex: 1, minWidth: 0 }} className="txt-fit-1">{pfText(p.condition)}</span>
+                    <div className="row" style={{ gap: 6, marginBottom: 3 }}>
+                      <span style={{ fontSize: 9, color: "var(--z-muted)", letterSpacing: ".06em", textTransform: "uppercase", flexShrink: 0 }}>Condition</span>
+                      <span className="spacer" />
                       {p.basis ? <span className="b b-above" style={{ flexShrink: 0 }}>{pfText(p.basis)}</span> : null}
                       <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
                     </div>
+                    <div style={{ fontSize: 12, lineHeight: 1.45 }} className="txt-fit-2">{pfText(p.condition)}</div>
                   </button>
                   {isOpen ? (
                     <div style={{ padding: "0 0 12px" }}>
