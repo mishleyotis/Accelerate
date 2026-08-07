@@ -158,6 +158,51 @@ Measured on a real run: `cell_evidence` rows existed for **69 of 765 served
 cells** — 9%. A cell with no synthesis opens a drawer that says nothing, and that
 drawer is the whole reason the grid is clickable.
 
+### Write about the capability, not about the evidence pile
+
+A synthesis answers "what does this institution actually do here, and what does that
+mean for this capability". It is not a census of what was cited and it is not the
+score in words. Both failures were measured on a real run: fourteen drawers in
+sixty-nine argued from the band or the number, and nine opened on an inventory —
+"Two items speak to Business Alignment", "Evidence for a Steering Committee is
+indirect", "Vision Communication rests on a single item". A reader who clicked a
+cell already knows how many chips are under it; the count is printed beside the
+prose as `grounded_on`. What they cannot see is the judgement.
+
+The number never appears as an argument. The score is rendered inches away, and
+prose that restates it — "this sits at Building", "scores 2.5 against a 3.0 peer
+median" — spends the drawer's only paragraph telling the reader what the cell
+already told them. State the *substance* the score was derived from and let the
+number stand on its own.
+
+So: **open on the institution, not on the corpus.** Lead with what is in place, in
+their own terms; then what that establishes about the capability; then the one
+thing that would move it, or the specific limit of what the evidence reaches.
+The evidence position belongs in the sentence as its warrant, not as its subject:
+
+> ✗ Two items imply disciplined allocation: the Adrenaline engagement and SEG
+>   marketing focused on six employer relationships.
+> ✓ Branch investment is directed by network analytics — a three-year expansion
+>   roadmap commissioned from Adrenaline — and campaign spend concentrates on six
+>   employer relationships covering 1.2 million eligible members. Both show
+>   allocation following data; neither reaches the review cadence that would show
+>   the allocation being revisited.
+
+The second is the same evidence and the same honesty about its limit. It is about
+Baxter.
+
+**A shared source must not produce a shared sentence.** One presentation cited by
+six cells is six different capability judgements, because each cell asks a
+different question of it. Where the same clause appears verbatim under several
+cells, the writer has described the source instead of the capability — and a reader
+opening three cells in a row sees the product repeating itself, which reads as
+generation rather than analysis.
+
+An **inherited** or **declared** synthesis follows the same rule. "The category's
+sources speak to the platform this capability runs on, not to this capability's own
+coverage" is about the capability's evidential position, which is a finding. "There
+is one item" is not.
+
 ### Every served cell carries a synthesis. The grades differ; the coverage does not.
 
 This is the default, not a stretch goal, and the earlier framing — raise coverage where
