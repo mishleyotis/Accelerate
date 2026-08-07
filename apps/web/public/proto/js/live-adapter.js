@@ -1032,9 +1032,13 @@ function adaptEvidence(evidenceEnvelope) {
     // next to a FACT reads as a contradiction ("this is a fact, unverified"),
     // when all it means is that no date could be resolved to rank the item on.
     // So: the band when there is one, the date when there is only that, and
-    // "undated" otherwise. `recency_band` carries the raw token for anything
-    // that needs to reason about the rung.
-    recency: e.recency_band && e.recency_band !== "UNVERIFIED" ? e.recency_band : e.published_date || "undated",
+    // NOTHING when there is neither. The third case used to print the word
+    // "undated" beside the citation, which states a producer problem in the
+    // reader's line of sight and states it on every affected chip — an
+    // evidence item that could not be dated should be dated before the run
+    // promotes, not labelled on the page. `recency_band` keeps the raw token
+    // for anything that needs to reason about the rung.
+    recency: e.recency_band && e.recency_band !== "UNVERIFIED" ? e.recency_band : e.published_date || null,
     recency_band: e.recency_band || null,
     published_date: e.published_date,
     age_months: e.age_months,

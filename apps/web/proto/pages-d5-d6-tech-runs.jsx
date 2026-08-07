@@ -1132,15 +1132,28 @@ function ClientHealth({ entity, run }) {
             <thead><tr><th>Evidence</th><th>Source</th><th>Date</th><th>Age</th><th style={{textAlign:"right"}}>Status</th></tr></thead>
             <tbody>
               {DMA.EVIDENCE.map(e => {
-                const age = Math.round((new Date() - new Date(e.recency.replace("Q1","-01-01").replace("Q2","-04-01").replace("Q3","-07-01").replace("Q4","-10-01"))) / (1000*60*60*24*30.4));
-                const stale = age > 18;
+                // Age is computed or null — never NaN, and never computed
+                // from a date that is not there. An item whose recency is
+                // absent gets no age and no freshness verdict, because both
+                // would be assertions about a date nobody established.
+                const raw = typeof e.recency === "string" ? e.recency : null;
+                const parsed = raw
+                  ? new Date(raw.replace("Q1","-01-01").replace("Q2","-04-01")
+                                .replace("Q3","-07-01").replace("Q4","-10-01"))
+                  : null;
+                const age = (parsed && !isNaN(parsed))
+                  ? Math.round((new Date() - parsed) / (1000*60*60*24*30.4)) : null;
+                const stale = age === null ? null : age > 18;
                 return (
                   <tr key={e.id}>
                     <td><span className="chip">{e.id}</span> <span style={{ marginLeft: 6 }}>{e.title}</span></td>
                     <td className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{e.source.split("/")[0]}</td>
-                    <td>{e.recency}</td>
-                    <td>{age} mo</td>
-                    <td style={{ textAlign: "right" }}><span className={`b ${stale ? "b-org" : "b-teal"}`}>{stale ? "STALE" : "FRESH"}</span></td>
+                    <td>{raw || "—"}</td>
+                    <td>{age === null ? "—" : `${age} mo`}</td>
+                    <td style={{ textAlign: "right" }}>
+                      {stale === null ? <span className="b b-muted">NO DATE</span>
+                        : <span className={`b ${stale ? "b-org" : "b-teal"}`}>{stale ? "STALE" : "FRESH"}</span>}
+                    </td>
                   </tr>
                 );
               })}

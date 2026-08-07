@@ -2102,8 +2102,14 @@ function ClientHealth({
       textAlign: "right"
     }
   }, "Status"))), /*#__PURE__*/React.createElement("tbody", null, DMA.EVIDENCE.map(e => {
-    const age = Math.round((new Date() - new Date(e.recency.replace("Q1", "-01-01").replace("Q2", "-04-01").replace("Q3", "-07-01").replace("Q4", "-10-01"))) / (1000 * 60 * 60 * 24 * 30.4));
-    const stale = age > 18;
+    // Age is computed or null — never NaN, and never computed
+    // from a date that is not there. An item whose recency is
+    // absent gets no age and no freshness verdict, because both
+    // would be assertions about a date nobody established.
+    const raw = typeof e.recency === "string" ? e.recency : null;
+    const parsed = raw ? new Date(raw.replace("Q1", "-01-01").replace("Q2", "-04-01").replace("Q3", "-07-01").replace("Q4", "-10-01")) : null;
+    const age = parsed && !isNaN(parsed) ? Math.round((new Date() - parsed) / (1000 * 60 * 60 * 24 * 30.4)) : null;
+    const stale = age === null ? null : age > 18;
     return /*#__PURE__*/React.createElement("tr", {
       key: e.id
     }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
@@ -2118,11 +2124,13 @@ function ClientHealth({
         fontSize: 10,
         color: "var(--z-muted)"
       }
-    }, e.source.split("/")[0]), /*#__PURE__*/React.createElement("td", null, e.recency), /*#__PURE__*/React.createElement("td", null, age, " mo"), /*#__PURE__*/React.createElement("td", {
+    }, e.source.split("/")[0]), /*#__PURE__*/React.createElement("td", null, raw || "—"), /*#__PURE__*/React.createElement("td", null, age === null ? "—" : `${age} mo`), /*#__PURE__*/React.createElement("td", {
       style: {
         textAlign: "right"
       }
-    }, /*#__PURE__*/React.createElement("span", {
+    }, stale === null ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-muted"
+    }, "NO DATE") : /*#__PURE__*/React.createElement("span", {
       className: `b ${stale ? "b-org" : "b-teal"}`
     }, stale ? "STALE" : "FRESH")));
   })))) : /*#__PURE__*/React.createElement("div", {
