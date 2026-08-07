@@ -143,7 +143,7 @@ def _page(**overrides):
               "framing": ("Early digital maturity with strategy work under "
                           "way across the group and clear peer gaps."),
               "claim_label": "FACT", "confidence": "HIGH",
-              "narrative_thread": " ".join(["thread"] * 50)}
+              "narrative_thread": "Thread " + " ".join(["thread"] * 49)}
     scores.update(overrides)
     return scores
 

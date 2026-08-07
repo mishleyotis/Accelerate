@@ -19,6 +19,8 @@ import re
 from .contracts import sections
 from .evidence_tools import get_evidence
 from .identifiers import MINT_RE
+from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical, serves,
+                           variant_subvertical)
 
 GRAIN_TOLERANCE = 0.05
 V4_MIN_MEMBERS = 5
@@ -218,6 +220,181 @@ def _check_peer_research(page: str, payload: dict) -> list:
     return out
 
 
+# ── ET-04 · a cited id resolves to a row that carries its excerpt ─────
+#
+# Invariant 4 is fail-closed in three parts: the id resolves, it belongs
+# to this entity and run, and it CARRIES A VERBATIM EXCERPT of 50-500
+# characters. The first two were enforced and the third was not, so a
+# citation could resolve to a row with an empty excerpt and render as a
+# chip a reader can open onto nothing. register_evidence refuses a short
+# span at the door; an ingested row can still arrive without one, and it
+# is the citation — not the registration — that puts it in front of a
+# client.
+EXCERPT_MIN, EXCERPT_MAX = 50, 500
+
+
+def _check_excerpt_completeness(found, cited_by) -> list:
+    out = []
+    for row in found:
+        e_id = row.get("e_id")
+        section = cited_by.get(e_id) or cited_by.get(row.get("stored_id"))
+        excerpt = (row.get("excerpt") or "").strip()
+        if not excerpt:
+            out.append(_reason(
+                "ET-04", section, f"{section}.e_ids",
+                f"{e_id} resolves to a row with an EMPTY excerpt — the id is "
+                "real and the quotation behind it is not there. A chip a "
+                "reader can open onto nothing is worse than an uncited "
+                "sentence, because it claims a source. Re-register the item "
+                "with its verbatim span, or cite an item that has one"))
+        elif not (EXCERPT_MIN <= len(excerpt) <= EXCERPT_MAX):
+            out.append(_reason(
+                "ET-04", section, f"{section}.e_ids",
+                f"{e_id} carries a {len(excerpt)}-character excerpt — a "
+                f"verbatim span is {EXCERPT_MIN}-{EXCERPT_MAX} characters "
+                f"({EXCERPT_MIN} is the fail-closed floor for a grounded "
+                "excerpt). Re-extract the span from the source; never pad "
+                "or trim it by hand"))
+    return out
+
+
+# ── CG-10 (evidence half) · an undated row says it is undated ─────────
+#
+# Invariant 9's own sentence: undated evidence is UNVERIFIED, never
+# current. A row with no published_date whose band says CURRENT is a
+# freshness claim computed from nothing, and the freshness dot on the
+# cell drawer is drawn from that band.
+_DATED_BANDS = ("CURRENT", "RECENT", "DATED", "STALE", "ARCHIVAL")
+
+
+def _check_evidence_dating(found, cited_by) -> list:
+    out = []
+    for row in found:
+        if row.get("published_date"):
+            continue
+        band = row.get("recency_band")
+        if band in (None, "UNVERIFIED"):
+            continue                       # the absence rung, correctly stated
+        e_id = row.get("e_id")
+        section = cited_by.get(e_id) or cited_by.get(row.get("stored_id"))
+        out.append(_reason(
+            "CG-10", section, f"{section}.e_ids",
+            f"{e_id} has no published_date and a recency band of {band!r} — "
+            "a freshness reading computed from no date. Undated evidence is "
+            "UNVERIFIED, never current: re-register the row with the date "
+            "the source states, or leave the band at UNVERIFIED so the "
+            "surface can say the date was not established"))
+    return out
+
+
+# ── ET-05 · a run cites only its own sub-vertical's variant cells ─────
+#
+# The derivation lives in apps/api/dma_api/subverticals.py and is mirrored
+# into dma_mcp/subverticals.py (the two services are separate images).
+# The serving tier applies it on READ; this applies it at SUBMIT, because
+# a payload that CITES another sub-vertical's cell has reasoned about a
+# capability that does not apply to this institution — no read filter can
+# repair the sentence written beside it. Baxter Credit Union (SV2) reached
+# a client surface citing 59 insurance carrier / RIA / insurance broker
+# cells.
+_CELL_ID_RE = re.compile(r"^P\d+C\d+\.")
+
+
+def _iter_cell_citations(payload):
+    """Yield (path, key, cell_id) for every catalogue cell id a payload
+    cites — any `*subcap_ids` list and any `subcap_id` scalar, wherever
+    they sit in the tree."""
+    for name, body in payload.items():
+        if not isinstance(body, dict):
+            continue
+        for path, obj in _walk(body, name):
+            for key, value in obj.items():
+                if key.endswith("subcap_ids") and isinstance(value, list):
+                    for i, cell in enumerate(value):
+                        if isinstance(cell, str) and _CELL_ID_RE.match(cell):
+                            yield f"{path}.{key}[{i}]", key, cell
+                elif key == "subcap_id" and isinstance(value, str) \
+                        and _CELL_ID_RE.match(value):
+                    yield f"{path}.{key}", key, value
+
+
+def _entity_subvertical(conn, run_id):
+    cur = conn.cursor()
+    cur.execute("""SELECT e.sub_vertical FROM runs r
+                     JOIN entities e ON e.id = r.entity_id
+                    WHERE r.id = %s""", (run_id,))
+    row = cur.fetchone()
+    return resolve_subvertical(row[0]) if row else None
+
+
+def _check_subvertical_scope(page, payload, entity_code) -> list:
+    """ET-05. Silent when the entity's sub-vertical is not in the
+    vocabulary — not knowing who you are is not grounds for refusing a
+    citation (the API's `serves` makes the same one-sided choice)."""
+    if not entity_code or not isinstance(payload, dict):
+        return []
+    out, seen = [], set()
+    mine = SUBVERTICAL_NAMES.get(entity_code, entity_code)
+    for path, _key, cell in _iter_cell_citations(payload):
+        if serves(cell, entity_code):
+            continue
+        owner = variant_subvertical(cell)
+        section = path.split(".")[0]
+        if (section, cell) in seen:
+            continue                        # one verdict per cell per section
+        seen.add((section, cell))
+        out.append(_reason(
+            "ET-05", section, path,
+            f"{cell} is a {SUBVERTICAL_NAMES.get(owner, owner)} variant cell "
+            f"and this run is {mine} — its terminal segment names the "
+            "sub-vertical that owns it. The workbook measuring it is a fact; "
+            "SERVING it to this institution is not. Drop the cell from this "
+            "citation list (a base cell and a family or product variant both "
+            "stay), and take the sentence that rests on it with it"))
+    return out
+
+
+# ── CG-14 · a linked cell exists on this run ──────────────────────────
+#
+# A tech row's `linked_subcap_ids` and a why-now's `linked_subcap_ids` are
+# navigation: the card renders them as chips that open the cell drawer. An
+# id the run does not carry opens onto nothing, and it is invisible until
+# somebody clicks. Same posture as evidence — fail-closed — because a
+# link to a cell that is not there is a claim about a capability this
+# assessment never scored.
+def _run_cells(conn, run_id) -> set:
+    cur = conn.cursor()
+    cur.execute("SELECT subcap_id FROM subcap_scores WHERE run_id = %s",
+                (run_id,))
+    return {r[0] for r in cur.fetchall() if r[0]}
+
+
+def _check_cell_linkage(page, payload, run_cells) -> list:
+    """CG-14. Existence, not score: a cell the run carries with a null
+    score is still a cell. Silent on a run with no cells at all — an
+    unscored run cannot distinguish a bad link from an unloaded workbook,
+    and the empty-run case is caught by the ingest gates instead."""
+    if not run_cells or not isinstance(payload, dict):
+        return []
+    out, seen = [], set()
+    for path, key, cell in _iter_cell_citations(payload):
+        if cell in run_cells:
+            continue
+        section = path.split(".")[0]
+        if (section, key, cell) in seen:
+            continue
+        seen.add((section, key, cell))
+        out.append(_reason(
+            "CG-14", section, path,
+            f"{key} names {cell}, which this run does not carry — the chip "
+            "renders and opens the cell drawer onto nothing. Every linked "
+            "cell resolves against the run's own scored set, the same "
+            "fail-closed posture as an evidence id: link a cell the run "
+            "carries, or drop the link and say what the row bears on in "
+            "prose"))
+    return out
+
+
 def band_for(raw) -> str | None:
     if raw is None:
         return None
@@ -337,6 +514,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                             cited.setdefault(e, name)
     if cited:
         split = get_evidence(conn, run_id, sorted(cited))
+        reasons.extend(_check_excerpt_completeness(split.get("found", []), cited))
+        reasons.extend(_check_evidence_dating(split.get("found", []), cited))
         for e in split.get("not_found", []):
             gate = "ET-02" if MINT_RE.match(e.split(":")[0]) else "ET-01"
             reasons.append(_reason(
@@ -441,6 +620,9 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     # ── AG-03: every claim-bearing item cites evidence ─────────────────
     reasons.extend(_check_item_evidence(page, payload))
     reasons.extend(_check_peer_research(page, payload))
+    reasons.extend(_check_subvertical_scope(page, payload,
+                                            _entity_subvertical(conn, run_id)))
+    reasons.extend(_check_cell_linkage(page, payload, _run_cells(conn, run_id)))
 
     sg = _run_s8(conn, run_id, page, payload)
     sg.extend(_run_v4(conn, run_id, page, payload, encoder))
@@ -484,7 +666,7 @@ def _run_s8(conn, run_id, page, payload) -> list:
         str(r.get("source") or "").lower().find("nps") >= 0 for r in rated) if rated else False
 
     if not rated:
-        result, detail = "NOT_RUN", {"page": page, "reason": "no rated rows"}
+        result, detail = "NOT_RUN", {"page": page, "reason": "No rated rows"}
     elif len(rated) > 1 and not self_published:
         result, detail = "PASS", {"page": page, "rated_rows": len(rated),
                                   "audiences": audiences}
@@ -526,11 +708,11 @@ def _run_v4(conn, run_id, page, payload, encoder) -> list:
 
     if encoder is None:
         record("NOT_RUN", {"page": page},
-               "embedding tier unavailable — V4 is an extra guard, never a "
+               "Embedding tier unavailable — V4 is an extra guard, never a "
                "fail-closed on a missing model")
         conn.commit()
         return [{"gate_id": "SG-V4", "result": "NOT_RUN", "page": page,
-                 "not_run_reason": "embedding tier unavailable"}]
+                 "not_run_reason": "Embedding tier unavailable"}]
 
     cur.execute("""SELECT scope_kind, COALESCE(scope_id,''), centroid::text,
                           member_n, threshold
@@ -539,10 +721,10 @@ def _run_v4(conn, run_id, page, payload, encoder) -> list:
                                 "threshold": r[4]} for r in cur.fetchall()}
     if not centroids:
         record("NOT_RUN", {"page": page},
-               "no centroids for this run — bundle not embedded")
+               "No centroids for this run — bundle not embedded")
         conn.commit()
         return [{"gate_id": "SG-V4", "result": "NOT_RUN", "page": page,
-                 "not_run_reason": "no centroids for this run"}]
+                 "not_run_reason": "No centroids for this run"}]
 
     fields = []          # (path, text, scope_kind, scope_id)
     for name, body in payload.items():
@@ -599,11 +781,11 @@ def _run_v4(conn, run_id, page, payload, encoder) -> list:
     detail = {"page": page, "fields_checked": checked, "failed": failed,
               "abstained_fields": abstained}
     if abstained and not checked:
-        record("NOT_RUN", detail, "every applicable centroid was below "
+        record("NOT_RUN", detail, "Every applicable centroid was below "
                                   f"{V4_MIN_MEMBERS} members")
         disclosures.append({"gate_id": "SG-V4", "result": "NOT_RUN",
                             "page": page,
-                            "not_run_reason": "centroids below the member "
+                            "not_run_reason": "Centroids below the member "
                                               "floor"})
     else:
         record("FAIL" if failed else "PASS", detail)

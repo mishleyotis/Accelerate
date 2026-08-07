@@ -62,6 +62,56 @@ GATES = {
               "string and then aborts the promote transaction.",
               "posture_basis is the EVIDENCE|HYBRID|INFERRED chip, not prose.",
               "block"),
+    "CG-10": ("A date that could not be established says so", None,
+              "An item's own dating field (the timeline's event_date, the "
+              "register's opened_on, a signal's dated_on, a firmographic "
+              "as_of) is either a date or an explicit absence rung — "
+              "UNVERIFIED / WORKED_ABSENT / undated on a recency or basis "
+              "key, a quarantine with its reason, or the sources_searched "
+              "ladder. A cited evidence row with no published_date carries "
+              "recency_band UNVERIFIED, never a computed freshness.",
+              "A bare null renders as an empty slot beside a populated one, "
+              "and the surface cannot tell 'nobody looked' from 'looked and "
+              "found nothing'. Undated is UNVERIFIED, never current.",
+              "block"),
+    "CG-11": ("Prose begins as a sentence", None,
+              "A prose field on a client surface — a prose-keyed field, or "
+              "any string that ends in terminal punctuation — begins with a "
+              "capital. A first word carrying an uppercase letter after its "
+              "first character (nCino, iOS, eBay) is the vendor's own "
+              "spelling and is exempt; identifiers, hostnames, URLs, enums "
+              "and verbatim excerpts are never touched.",
+              "A lowercase sentence opening on a client dashboard reads as "
+              "unfinished text, and it is: the capital was lost between the "
+              "draft and the payload.",
+              "block"),
+    "CG-12": ("A face field is a label, not a paragraph", None,
+              "A field that renders in a chip, badge or single-line slot "
+              "stays inside its contract's stated budget (window 20-40 "
+              "words, trigger 25-45, detection_basis one clause of 160 "
+              "characters, a landscape tile detail 90, a client-visible "
+              "plain_label 6-24 words); the long form lives in the field "
+              "the surface renders as prose.",
+              "A 20-40-word window clause put in a chip destroyed the "
+              "why-now strip, and a 150-character detection_basis rendered "
+              "as a badge overflowed every register row.",
+              "block"),
+    "CG-13": ("Every required field has somewhere to live", None,
+              "Build-time census: each required contract field is bound by "
+              "its section's writer, or is named in the computed-at-read "
+              "register with the source it is recomputed from.",
+              "A required field with no column is validated at submit and "
+              "then discarded at promotion — the card renders empty under a "
+              "real client's name and nothing failed.",
+              "block"),
+    "CG-14": ("A linked cell exists on this run", None,
+              "Every `*subcap_ids` link and every `subcap_id` scalar "
+              "resolves against the run's own scored cell set — existence, "
+              "not score.",
+              "A linked cell the run does not carry renders as a chip that "
+              "opens the cell drawer onto nothing, and stays invisible until "
+              "somebody clicks it.",
+              "block"),
     "ET-01": ("Cited ids resolve to this entity and run", None,
               "Every cited e_id resolves in the run's scope; a foreign id "
               "(another institution's row) halts production.",
@@ -77,6 +127,24 @@ GATES = {
               "everything else is read or requested, never created.",
               "The mint namespace stayed invisible to five regexes once; "
               "one authority prevents the sixth.",
+              "block"),
+    "ET-04": ("Cited evidence carries its excerpt", None,
+              "Every cited id resolves to a row carrying a verbatim excerpt "
+              "of 50-500 characters; an empty excerpt is a refusal, and so "
+              "is a payload-carried excerpt outside the band.",
+              "Invariant 4 was fail-closed on resolution and open on "
+              "content: a chip a reader can open onto nothing claims a "
+              "source it does not have.",
+              "block"),
+    "ET-05": ("A run cites only its own sub-vertical's cells", None,
+              "No section cites a variant cell whose terminal segment names "
+              "a sub-vertical other than the entity's. Base cells and "
+              "family or product-line variants serve every entity; the "
+              "derivation is the catalogue's own id convention.",
+              "A credit union's served register carried 59 insurance "
+              "carrier, RIA and insurance broker cells — the workbook "
+              "measuring them is a fact, serving them to this institution "
+              "is not.",
               "block"),
     "AG-01": ("Ranked or causal claims carry r_layer", None,
               "Any ranked/causal claim records hypothesis, counter, domain "

@@ -31,7 +31,7 @@ HOST = DSN.split("@")[1].split(":")[0] if "@" in DSN else "localhost"
 
 ENV = {"produced_at": "2026-08-04T12:00:00Z", "producer_version": "test@1",
        "e_ids": [], "internal_only": []}
-EMPTY = {"reason": "walking-skeleton empty state",
+EMPTY = {"reason": "Walking-skeleton empty state",
          "sources_searched": ["package", "research", "enrichment"]}
 
 
@@ -58,7 +58,7 @@ def _hero_page() -> dict:
         "framing": ("Early digital maturity, with strategy work under way "
                     "and clear peer gaps across the group."),
         "claim_label": "FACT", "confidence": "HIGH",
-        "narrative_thread": " ".join(["thread"] * 50),
+        "narrative_thread": "Thread " + " ".join(["thread"] * 49),
     }
     return page
 

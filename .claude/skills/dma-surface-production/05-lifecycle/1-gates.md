@@ -22,6 +22,18 @@ analytical:
 **Any evidence reason at all fails the submission.** An excerpt is either a copy of
 something a document says or it is not evidence.
 
+Run the two local checkers before you spend a round trip — they state the same
+rules in the same words, and name the gate that will refuse you:
+
+```
+python scripts/check_payload.py payload.json --page heatmap \
+    --subvertical SV2 --cells bundle.json
+python scripts/check_language.py payload.json
+```
+
+`--subvertical` turns on ET-05 and `--cells` turns on CG-14; without them those
+two print "not run" rather than passing silently.
+
 ## The gates that block most often
 
 These are the ones a submission actually dies on, so they are named here rather than left
@@ -98,6 +110,126 @@ the card read "2 of 5, 3 not established" rather than implying five were checked
 with three unknown is not 40%; it is two of two established, or a share you do not state.
 Rows with `deployed: null` count in the denominator, so scope the share to what the breakdown
 supports.
+
+### ET-04 · a cited id resolves to a row that carries its excerpt
+
+Invariant 4 is fail-closed in three parts, and only two of them used to be
+enforced: the id resolves, it belongs to this entity and run, and **it carries a
+verbatim excerpt of 50–500 characters**. A citation that resolves to a row with
+an empty excerpt renders as a chip a reader opens onto nothing — worse than an
+uncited sentence, because it claims a source.
+
+Both sides of the boundary. `register_evidence` refuses a short span at the
+door; an INGESTED row can still arrive without one, and it is the citation, not
+the registration, that puts it in front of a client. The payload's own copy —
+`heatmap.evidence[*].excerpt`, which the chip renders — is held to the same
+50–500 band, and an empty one is named as empty rather than as short.
+
+### ET-05 · a run cites only its own sub-vertical's variant cells
+
+A T2 variant cell's terminal segment names the sub-vertical that owns it:
+`P1C1.3.CU1` is credit unions, `P1C1.3.IC1` is insurance carriers,
+`P2C4.6.RIA1` is RIAs. A credit union's payload citing 59 insurance-carrier,
+RIA and insurance-broker cells is what produced this gate.
+
+**One-sided, deliberately.** A cell is foreign only when its code names exactly
+ONE sub-vertical AND that sub-vertical is not the entity's. A base cell
+(`P1C1.3.2`), a family code (`P1C2.7.BK1` — the depository family; NCUA is the
+credit-union regulator) and a product line (`P3C4.2.PEN1`) all serve everyone.
+An entity whose sub-vertical is not in the vocabulary keeps everything.
+
+The serving tier already filters these on read. This gate exists because a read
+filter cannot repair the SENTENCE written beside a cell that does not apply:
+drop the cell from the citation list, and take the reasoning that rests on it
+with it. Sweeps every `*subcap_ids` list and every `subcap_id` scalar.
+
+### CG-10 · a date that could not be established says so
+
+An item's own dating field — the timeline's `event_date`, the register's
+`opened_on`, a signal's `dated_on`, a firmographic's `as_of` — is a date or an
+explicit absence rung. A bare null does not render as "no date"; it renders as
+an empty slot beside a populated one, and the surface cannot tell *nobody
+looked* from *looked and found nothing*. Those are different facts, so the
+payload states which.
+
+The rungs it accepts: `UNVERIFIED` / `WORKED_ABSENT` / `NOT_RUN` / `undated` on
+a `recency_band`, `recency_tag`, `band` or `*_basis` key · `quarantined: true`
+with its reason · the item's own `sources_searched` ladder. Three financial
+firmographics in a promoted run already do this correctly (`as_of: null`,
+`recency_band: "UNVERIFIED"`) and pass untouched.
+
+**A second date on the same item is not policed.** `resolved_on` on an ACTIVE
+matter, `closed_on` on an ANNOUNCED merger, `appointed_on` where the source
+gives no start date — the event has not happened, which is a fact about the
+world, not a gap in the research.
+
+Its evidence half: a cited row with no `published_date` carries `recency_band`
+UNVERIFIED. A band of CURRENT with no date is a freshness reading computed from
+nothing, and the drawer's freshness dot is drawn from it.
+
+### CG-11 · prose begins as a sentence
+
+Mechanical. A prose field on a client surface begins with a capital.
+
+Scope: the value's KEY is a prose key, **or** the value ends in terminal
+punctuation (the producer wrote a sentence, so it is one). A noun-phrase
+fragment that renders inline after a label — `unit: "full and part-time
+employees"` — is neither, and capitalising it mid-sentence is the same defect
+pointing the other way.
+
+Never touched: a **verbatim excerpt or quote** (editing a quotation's first
+letter is the one thing evidence may never have done to it), an id, a hostname,
+a URL, an enum, a `producer_version`, a single token.
+
+**The exemption that matters**: a first word carrying an uppercase letter after
+its first character — nCino, iOS, eBay, iPhone — is the vendor's own
+orthography. `nCino originates the commercial book` passes; `the nCino
+deployment covers commercial lending only.` does not, and the verdict names the
+word and its repair.
+
+### CG-12 · a face field is a label, not a paragraph
+
+Two measured failures, one class: a 20–40-word `window` clause put in a chip on
+the why-now card face destroyed the strip's layout, and a 150-character
+`detection_basis` put in the register's right-hand badge overflowed every row.
+
+Budgets, each naming its slot and where the long form lives:
+
+| Field | Budget | The long form belongs in |
+|---|---|---|
+| `why_now.signals[*].window` | 20–40 words | `consequence_of_waiting` |
+| `why_now.signals[*].trigger` | 25–45 words | `why_this_sequence` |
+| `techstack.items[*].detection_basis` | ONE clause, ≤160 chars | `dma_impact` (40–90 words) |
+| `landscape.tiles[*].detail` | ≤90 chars | — |
+| `safeguard_gates.gates[*].plain_label` | 6–24 words | `what_it_checks` |
+| `opportunity…feature_that_addresses_it` | ≤80 chars | — |
+
+**The repair is to MOVE the prose, not to trim it.** A 634-character
+three-sentence detection basis is not a long clause; it is an argument in the
+wrong field.
+
+### CG-14 · a linked cell exists on this run
+
+`linked_subcap_ids` on a tech row and on a why-now, and every other
+`*subcap_ids` list, render as chips that open the cell drawer. A cell the run
+does not carry opens onto nothing and stays invisible until somebody clicks —
+so it takes the same fail-closed posture as an evidence id rather than a
+render-time guard. Eleven alerts in a promoted run cited placeholder ids of the
+shape `P2C2.x.7`.
+
+Existence, not score: a cell the run carries with a null score is still a cell,
+and refusing a link to one would refuse the thin-evidence case the heatmap
+exists to show.
+
+### CG-13 · every required field has somewhere to live
+
+Build time, not submit. A required contract field with no column is validated at
+submit and then discarded at promotion — the card renders empty under a real
+client's name and nothing failed. Every required field is either bound by its
+section's writer or named in the computed-at-read register with the source it is
+recomputed from. The same sweep also resolves every path the gate registries
+name against the contract: a registry pointing at a field the contract does not
+declare is a gate that is switched off and says nothing about it.
 
 ### SG-S8 · sentiment rests on more than one line
 

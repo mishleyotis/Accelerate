@@ -106,7 +106,7 @@ def test_no_rated_rows_records_not_run_rather_than_a_failure():
     # Nothing measured is not the same as one thing measured, and a NOT_RUN
     # carries its reason (a failing SG discloses; a NOT_RUN explains).
     r, _ = _run("overview", {"bars": []})
-    assert r["result"] == "NOT_RUN" and r["not_run_reason"] == "no rated rows"
+    assert r["result"] == "NOT_RUN" and r["not_run_reason"] == "No rated rows"
 
 
 def test_a_page_without_a_sentiment_section_is_untouched():

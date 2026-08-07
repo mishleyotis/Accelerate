@@ -13,6 +13,7 @@ work from format sweeps, and the split keeps both legible.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from .contracts import ENVELOPE, PAGES, sections
@@ -129,6 +130,10 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_enum_fields(page, name, body))
         reasons.extend(_check_contract_vocabularies(page, name, body))
         reasons.extend(_check_date_fields(page, name, body))
+        reasons.extend(_check_date_absence(page, name, body))
+        reasons.extend(_check_sentence_case(name, body))
+        reasons.extend(_check_face_budgets(page, name, body))
+        reasons.extend(_check_payload_excerpts(name, body))
 
     return reasons
 
@@ -155,17 +160,30 @@ def _enum_fields() -> dict:
 
 
 def _at_path(body, path):
-    """Yield (json_path, value) for a spec path, following `[*]` lists."""
-    head, _, rest = path.partition("[*].")
-    if not rest:
-        if isinstance(body, dict) and head in body:
-            yield head, body[head]
+    """Yield (json_path, value) for a spec path, following `[*]` lists.
+
+    Handles repeated `[*].` levels and dotted leaves, so a nested face
+    field (`tiles[*].addressable_cells[*].feature_that_addresses_it`) and
+    a nested object leaf (`validation_gate.grain_note`) are both
+    addressable — a registry that could only reach one level deep would
+    silently police nothing on the surfaces that nest.
+    """
+    head, sep, rest = path.partition("[*].")
+    if not sep:
+        node = body
+        for part in head.split("."):
+            if not isinstance(node, dict) or part not in node:
+                return
+            node = node[part]
+        yield head, node
         return
-    items = body.get(head) if isinstance(body, dict) else None
-    if isinstance(items, list):
-        for i, item in enumerate(items):
-            if isinstance(item, dict) and rest in item:
-                yield f"{head}[{i}].{rest}", item[rest]
+    node = body
+    for part in head.split("."):
+        node = node.get(part) if isinstance(node, dict) else None
+    if isinstance(node, list):
+        for i, item in enumerate(node):
+            for sub, value in _at_path(item, rest):
+                yield f"{head}[{i}].{sub}", value
 
 
 def _check_date_fields(page: str, section: str, body) -> list:
@@ -267,4 +285,313 @@ def _check_agent_ids(section, node, path=None) -> list:
     elif isinstance(node, list):
         for i, item in enumerate(node):
             out.extend(_check_agent_ids(section, item, f"{path}[{i}]"))
+    return out
+
+
+# ── CG-10 · a date that could not be established says so ──────────────
+#
+# The date that DATES an item on a surface: the timeline's x-position, the
+# issue register's Gantt start, the signal's event date, the firmographic
+# row's recency dot. A bare null in one of these does not render as "no
+# date" — it renders as an EMPTY SLOT beside a populated row, which reads
+# as undated when nobody looked and as undated when somebody looked and
+# found nothing. Those are different facts and the surface cannot tell
+# them apart, so the payload has to (invariant 9: undated evidence is
+# UNVERIFIED, never current; a derived value is computed or null, never a
+# default that looks like data).
+#
+# Registered here are the item-dating fields only. A SECOND date on the
+# same item — `resolved_on` on an ACTIVE matter, `closed_on` on an
+# ANNOUNCED merger, `appointed_on` where the source gives no start date —
+# is legitimately null: the event has not happened, which is a fact about
+# the world rather than a gap in the research. Refusing those would be
+# refusing the truth.
+_ITEM_DATING = {
+    "context.timeline": ("events[*].event_date", "the timeline places the "
+                         "event on an axis; an undated event has no position"),
+    "context.issue_register": ("issues[*].opened_on", "the register orders on "
+                               "opened_on and the Gantt draws from it"),
+    "overview.why_now": ("signals[*].dated_on", "a why-now is an EVENT; the "
+                         "contract drops an undated signal rather than "
+                         "rendering one"),
+    "overview.thought_leadership": ("entries[*].published_on", "the card "
+                                    "prints the publication date beside the "
+                                    "quote"),
+    "overview.firmographics": ("fields[*].as_of", "the recency dot is computed "
+                               "from as_of"),
+    "overview.leadership": ("roster[*].as_of", "a name with no verification "
+                            "date does not render — a stale executive is "
+                            "worse than a gap"),
+    "heatmap.evidence_age": ("rows[*].published_or_asof", "age_months and band "
+                             "are computed from this date"),
+}
+
+# Values that RECORD non-establishment rather than assert a date. The
+# ladder's own words, plus the evidence tier's UNVERIFIED and the
+# evidence-age contract's own `undated` band.
+_ABSENCE_RUNGS = frozenset((
+    "UNVERIFIED", "UNWORKED", "WORKED_ABSENT", "NOT_RUN", "undated",
+    "verified_absent", "verified_sparse", "cannot_estimate", "empty_state",
+))
+# Keys whose value may carry one of those rungs (an enum) or, for the
+# `_reason`/`_note`/`_basis` forms, any non-empty sentence.
+_RUNG_KEYS = ("recency_band", "recency_tag", "band", "date_basis",
+              "dating_basis", "undated_reason", "date_absence")
+
+
+def _records_absence(item: dict, field: str) -> bool:
+    """True when the item states that the date was searched for and not
+    established, rather than leaving a hole."""
+    if not isinstance(item, dict):
+        return False
+    if item.get("quarantined") and item.get("quarantine_reason"):
+        return True
+    for key in (f"{field}_basis", f"{field}_absence", f"{field}_note",
+                f"{field}_reason"):
+        if str(item.get(key) or "").strip():
+            return True
+    for key in _RUNG_KEYS:
+        value = item.get(key)
+        if isinstance(value, str) and value.strip() in _ABSENCE_RUNGS:
+            return True
+    # the absence protocol's own record: what was searched, and with what
+    for key in ("sources_searched", "queries_run"):
+        if isinstance(item.get(key), list) and item[key]:
+            return True
+    return False
+
+
+def _check_date_absence(page: str, section: str, body) -> list:
+    out = []
+    entry = _ITEM_DATING.get(f"{page}.{section}")
+    if not entry or not isinstance(body, dict):
+        return out
+    path, why = entry
+    container, _, field = path.partition("[*].")
+    items = body.get(container)
+    for i, item in enumerate(items if isinstance(items, list) else []):
+        if not isinstance(item, dict):
+            continue
+        if item.get(field) is not None:
+            continue
+        if _records_absence(item, field):
+            continue
+        out.append(_reason(
+            "CG-10", section, f"{section}.{container}[{i}].{field}",
+            f"{field} is a bare null — {why}. A date nobody could establish "
+            "is a finding and is recorded as one: carry the rung that says "
+            f"so ({' │ '.join(sorted(_ABSENCE_RUNGS))} on {', '.join(_RUNG_KEYS)}, "
+            "or the sources_searched ladder that established the absence), "
+            "or state the date, or drop the row. What must not happen is an "
+            "empty slot beside a populated one — the surface cannot tell "
+            "'not looked for' from 'looked for and not found', so the "
+            "payload has to"))
+    return out
+
+
+# ── CG-11 · prose begins as a sentence ────────────────────────────────
+#
+# Mechanical, and asked for by name: a field that renders as a line of
+# prose on a client surface starts with a capital. The exception is a
+# first word that carries an uppercase letter after its first character —
+# nCino, iOS, eBay, iPhone — which is the vendor's own orthography and
+# must survive untouched. Everything else that starts lowercase is a
+# sentence that lost its opening capital somewhere between the draft and
+# the payload.
+#
+# Scope is deliberately narrow enough to be right every time: a value is
+# policed when its KEY is a prose key, or when the value ENDS in terminal
+# punctuation (the producer wrote a sentence, so it is one). A noun-phrase
+# fragment that renders inline after a label — a unit, a system reference,
+# an id, a hostname, an enum — is none of those and is left alone, because
+# capitalising a fragment mid-sentence is the same defect pointing the
+# other way.
+_PROSE_KEYS = frozenset((
+    "body", "rationale", "story", "story_md", "text", "framing", "synthesis",
+    "summary", "narrative", "narrative_thread", "consequence",
+    "consequence_of_waiting", "cost_of_acting_now", "why_this_sequence",
+    "trigger", "window", "detection_basis", "dma_impact", "so_what", "what",
+    "why", "reason", "not_run_reason", "note", "grain_note", "currency_note",
+    "reach_note", "detail", "statement", "pattern_statement", "headline",
+    "relevance_note", "effect_note", "mix_implication", "strategic_alignment",
+    "plain_label", "rejected_alternative", "implication", "clause",
+    "limiting_absence", "description", "justification", "closure_condition",
+    "quarantine_reason", "sequencing_basis", "sequencing_reason",
+    "denominator_definition", "target_basis", "enrichment_basis",
+    "proxy_disclosure", "maturity_effect", "empty_reason",
+))
+# Never touched: a verbatim span is a copy of what a document says, and
+# editing its first letter to look tidier is the one thing evidence may
+# never have done to it. Identifiers, hostnames and URLs are not prose.
+_NEVER_SENTENCE = frozenset((
+    "excerpt", "quote", "verbatim", "snippet", "url", "source_url",
+    "linkedin_url", "producer_version", "source_domain", "domain", "email",
+    "phone", "e_id", "source_name", "vendor", "product", "name", "field",
+    "unit", "value", "kind", "layer", "status", "tier", "id",
+))
+_MIN_SENTENCE = 25
+# nCino, iOS, eBay: an uppercase letter anywhere after the first character
+# of the FIRST word. Their lowercase opener is the spelling, not a slip.
+_CAMEL_FIRST_WORD = re.compile(r"^[a-z]+[A-Z]")
+
+
+def _sentence_case_reason(path_key: str, value: str):
+    """→ the offending first word, or None when the value is fine."""
+    if not isinstance(value, str) or len(value) < _MIN_SENTENCE:
+        return None
+    if path_key in _NEVER_SENTENCE:
+        return None
+    if not re.search(r"\s", value):
+        return None                      # a token, not a sentence
+    text = value.strip().lstrip("\"'“‘([{")
+    if not text or not text[0].isalpha() or not text[0].islower():
+        return None
+    ends_as_sentence = value.strip()[-1] in ".?!"
+    if path_key not in _PROSE_KEYS and not ends_as_sentence:
+        return None
+    word = text.split()[0].strip(".,;:")
+    if _CAMEL_FIRST_WORD.match(word):
+        return None                      # nCino, iOS, eBay — the vendor's own
+    return word
+
+
+def _check_sentence_case(section: str, node, path=None, key=None) -> list:
+    out = []
+    path = path or section
+    if isinstance(node, dict):
+        for k, v in node.items():
+            out.extend(_check_sentence_case(section, v, f"{path}.{k}", k))
+    elif isinstance(node, list):
+        for i, item in enumerate(node):
+            out.extend(_check_sentence_case(section, item, f"{path}[{i}]", key))
+    elif isinstance(node, str) and key:
+        word = _sentence_case_reason(key, node)
+        if word:
+            out.append(_reason(
+                "CG-11", section, path,
+                f"begins {word!r} — a prose field on a client surface begins "
+                f"with a capital. Write {word.capitalize()!r}. (A first word "
+                "carrying an uppercase letter after its first character — "
+                "nCino, iOS, eBay — is the vendor's own spelling and is "
+                "exempt; this one is not.)"))
+    return out
+
+
+# ── CG-12 · a face field is a label, not a paragraph ──────────────────
+#
+# Two measured failures, one class. A 20-40-word `window` clause was
+# rendered as a chip on the why-now card FACE and destroyed the strip's
+# layout; a 150-character `detection_basis` was rendered as a badge in the
+# tech register's right rail and overflowed every row. The renderer has
+# since moved both to where prose belongs, and this is the other half of
+# that repair: the payload keeps the face field inside the budget its own
+# contract states, so the next surface that puts it on a face has a
+# bounded string to put there.
+#
+# Each entry names the slot and where the long form lives, because the
+# repair is never "cut words" — it is "move the argument to the field
+# that renders it".
+_FACE_BUDGETS = {
+    "overview.why_now": (
+        ("signals[*].window", {"max_words": 40, "min_words": 20},
+         "the drilldown's Window row",
+         "the closing EVENT and its date; the argument for acting belongs "
+         "in consequence_of_waiting"),
+        ("signals[*].trigger", {"max_words": 45, "min_words": 25},
+         "the card face, cut at its first clause",
+         "what changed, dated and cited; the reasoning belongs in "
+         "why_this_sequence"),
+    ),
+    "techstack.techstack": (
+        ("items[*].detection_basis", {"max_chars": 160, "max_sentences": 1},
+         "the register row and the T3 detail header",
+         "ONE CLAUSE saying how the product was placed in this estate; the "
+         "explanation of what it bears on belongs in dma_impact (40-90 words)"),
+    ),
+    "insights.landscape": (
+        ("tiles[*].detail", {"max_chars": 90},
+         "the landscape tile's one-line detail",
+         "the count's meaning in one line"),
+    ),
+    "heatmap.safeguard_gates": (
+        ("gates[*].plain_label", {"min_words": 6, "max_words": 24},
+         "the client-visible gate card",
+         "a human sentence of 8-18 words; the mechanism belongs in "
+         "what_it_checks"),
+    ),
+    "overview.opportunity": (
+        ("tiles[*].addressable_cells[*].feature_that_addresses_it",
+         {"max_chars": 80}, "the addressable-cell chip",
+         "the feature's name, not its case"),
+    ),
+}
+
+
+def _sentences(text: str) -> int:
+    return len([s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s])
+
+
+def _check_face_budgets(page: str, section: str, body) -> list:
+    out = []
+    for path, budget, slot, belongs in _FACE_BUDGETS.get(f"{page}.{section}", ()):
+        for jpath, value in _at_path(body, path):
+            if not isinstance(value, str) or not value.strip():
+                continue
+            words, chars = len(value.split()), len(value)
+            over = None
+            if "max_chars" in budget and chars > budget["max_chars"]:
+                over = (f"{chars} characters against a budget of "
+                        f"{budget['max_chars']}")
+            elif "max_words" in budget and words > budget["max_words"]:
+                over = f"{words} words against a budget of {budget['max_words']}"
+            elif "max_sentences" in budget and \
+                    _sentences(value) > budget["max_sentences"]:
+                over = (f"{_sentences(value)} sentences where the contract "
+                        f"states {budget['max_sentences']}")
+            elif "min_words" in budget and words < budget["min_words"]:
+                over = f"{words} words, under the stated floor of {budget['min_words']}"
+            if over is None:
+                continue
+            out.append(_reason(
+                "CG-12", section, f"{section}.{jpath}",
+                f"renders in {slot} and carries {over}. This field holds "
+                f"{belongs}. The repair is to MOVE the prose, not to trim it: "
+                "a paragraph in a face slot overflows its container, and a "
+                "20-40-word window clause put in a chip is what broke the "
+                "why-now strip"))
+    return out
+
+
+# ── ET-04 (payload half) · an excerpt is a 50-500 char verbatim span ───
+#
+# The store enforces this at registration, but a payload may carry the
+# excerpt itself (the run's evidence index renders it under every chip),
+# and an empty or clipped one reaches the client as a citation with
+# nothing behind it. Same floor either side of the boundary: 50 characters
+# is the fail-closed minimum for a grounded excerpt, 500 the ceiling.
+def _check_payload_excerpts(section: str, node, path=None, key=None) -> list:
+    out = []
+    path = path or section
+    if isinstance(node, dict):
+        for k, v in node.items():
+            out.extend(_check_payload_excerpts(section, v, f"{path}.{k}", k))
+    elif isinstance(node, list):
+        for i, item in enumerate(node):
+            out.extend(_check_payload_excerpts(section, item, f"{path}[{i}]", key))
+    elif key == "excerpt":
+        text = node if isinstance(node, str) else ""
+        n = len(text.strip())
+        if n == 0:
+            out.append(_reason(
+                "ET-04", section, path,
+                "empty excerpt — a citation with no verbatim span is a "
+                "reference, not evidence. Re-extract the 50-500 character "
+                "span from the source; never compose one"))
+        elif not (50 <= n <= 500):
+            out.append(_reason(
+                "ET-04", section, path,
+                f"excerpt is {n} characters — a verbatim span is 50-500 "
+                "(50 is the fail-closed floor for a grounded excerpt, above "
+                "the 40-character linkable minimum). Widen the span in the "
+                "source or cite a different passage; never pad it"))
     return out

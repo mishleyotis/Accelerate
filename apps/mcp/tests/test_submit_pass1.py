@@ -52,7 +52,7 @@ def test_verdicts_name_gate_path_and_conflict():
 def test_explicit_empty_state_passes_where_missing_field_fails():
     bare = {"techstack": _min_section()}                     # items missing
     with_empty = {"techstack": _min_section(
-        empty_state={"reason": "no register derivable from the package",
+        empty_state={"reason": "No register derivable from the package",
                      "sources_searched": ["profile", "workbook", "research"]})}
     missing = [r for r in validate_pass1("techstack", bare) if r["gate_id"] == "CG-02"]
     assert missing and missing[0]["path"] == "techstack.items"
