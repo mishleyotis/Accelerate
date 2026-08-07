@@ -163,6 +163,19 @@ Where the date is, in the order worth trying:
 
 An undated source is still usable evidence. What it may not do is render as current.
 
+**Where the rung goes matters, and it is not only on the item.** The connector accepts an
+absence rung on the item (`opened_on_basis`, `date_basis`, a `sources_searched` ladder) and
+that satisfies the dating gate. But the promotion writers explode list items into columns,
+so a key the serving DDL does not carry is written nowhere and the client never sees it —
+the row still renders with an empty date and no explanation beside it. Measured on a live
+run: `opened_on_basis` on two register rows and `announced_on` on an announced merger all
+passed validation and none of the three reached the served payload.
+
+So put the rung in **both** places: on the item, where the gate reads it, and in the
+section's `r_layer.probes_run` or `empty_state.sources_searched`, which serve whole. One
+sentence naming what was searched and what it established is enough, and it is the half the
+reader actually gets.
+
 ## The quality ladder
 
 | Tier | Type | Weight | Ceiling |
