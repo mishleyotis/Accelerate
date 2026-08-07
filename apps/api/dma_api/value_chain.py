@@ -197,8 +197,15 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
         keep, dropped = [], 0
         for st in stages:
             name = str(st.get("name") or "").strip()
-            if not name or re.match(r"^[-–—\s]*(\(?\s*n/?a\s*\)?|not applicable)\b",
-                                    name, re.IGNORECASE):
+            # Two marker shapes, both the workbook talking to itself:
+            #   "- (N/A)" / "Not applicable — …"    a cell that maps nowhere
+            #   "(applicable via CIB pattern)"      a cross-reference saying
+            #                                       this sub-vertical reuses
+            #                                       another's arrangement
+            if (not name
+                    or re.match(r"^[-–—\s]*(\(?\s*n/?a\s*\)?|not applicable)\b",
+                                name, re.IGNORECASE)
+                    or re.match(r"^\(applicable via .+\)$", name, re.IGNORECASE)):
                 dropped += 1
                 continue
             keep.append(st)
