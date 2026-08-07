@@ -6,7 +6,8 @@
     "build:proto": "babel proto --presets @babel/preset-react --out-dir public/proto/js && node scripts/copy-vendor.js",
     "build": "npm run build:proto && next build",
     "start": "next start -p ${PORT:-3000}",
-    "test:web": "node --test tests/*.test.js"
+    "test:web": "node --test tests/*.test.js",
+    "qa:gate": "bash scripts/qa-gate.sh"
   },
   "dependencies": {
     "next": "14.2.32",
