@@ -22,6 +22,7 @@ from .alerts import act as alert_act, queue as alert_queue
 from .annotations import annotate_insight
 from .evidence import fetch as ev_fetch, redact_items as ev_redact
 from .pages import ApiError, build_page, etag_for, resolve_run
+from .subverticals import SCOPE_TAG, scope_to_entity
 
 _pool = {}
 
@@ -307,7 +308,16 @@ def entity_subcaps(display_id: str, request: Request, response: Response,
             f"SELECT {', '.join(_SUBCAP_COLS)} FROM serving_subcaps "
             "WHERE run_id = %s ORDER BY subcap_id", (run_meta["run_id"],))
         rows = []
-        for r in cur.fetchall():
+        # A sub-vertical VARIANT cell belonging to somebody else never
+        # serves. The assessment workbook carries the whole variant set,
+        # so a credit union's run measured (and ingested) insurance-carrier
+        # and RIA cells; the ingested tier is read-only once scanned, which
+        # makes this a read-time decision. See subverticals.py for the
+        # derivation and the codes it deliberately does not treat as
+        # foreign. Filtering HERE rather than in the SQL means one
+        # vocabulary, shared with the value-chain derivation.
+        for r in scope_to_entity(cur.fetchall(), entity.get("sub_vertical"),
+                                 key=_SUBCAP_COLS.index("subcap_id")):
             d = dict(zip(_SUBCAP_COLS, r))
             for k in ("score", "peer_median", "delta"):
                 d[k] = float(d[k]) if d[k] is not None else None
@@ -316,7 +326,7 @@ def entity_subcaps(display_id: str, request: Request, response: Response,
                 # decision; the customer sees the basis, not the workings.
                 d.pop("proxy_disclosure", None)
             rows.append(d)
-        tag = etag_for(run_meta, f"{audience}.subcaps")
+        tag = etag_for(run_meta, f"{audience}.subcaps.{SCOPE_TAG}")
         if request.headers.get("if-none-match") == tag:
             return Response(status_code=304, headers={"ETag": tag,
                                                       "Cache-Control": "private, max-age=0"})

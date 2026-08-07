@@ -55,46 +55,15 @@ from __future__ import annotations
 import re
 
 from .redaction import redact_section
+# One sub-vertical vocabulary for the whole read path: the entity->code
+# crosswalk this module needs and the cell->code derivation that keeps a
+# foreign variant off the grid are the same fact, so they live together.
+from .subverticals import resolve_subvertical, scope_to_entity  # noqa: F401
 
 # Stamped on the envelope when no promoted row supplied one — the derived
 # data is the server's work-product, and every served row is attributable.
 PRODUCER_VERSION = "svc-api.value-chain-derive@1"
 PROVENANCE = "server_derived"
-
-# Surface-Spec / manifest spellings -> the catalogue's VC subvertical_code
-# (the loader's SUBVERTICAL_CODES values). Keys are _norm()-alised.
-_SUBVERTICAL_ALIASES = {
-    "RB": ("RB", "SV1", "REGIONAL BANKS", "RETAIL BANKING"),
-    "CU": ("CU", "SV2", "CREDIT UNIONS", "CREDIT UNION"),
-    "CL": ("CL", "SV3", "COMMERCIAL LENDING"),
-    "CIB": ("CIB", "SV4", "CIB CAPITAL MARKETS", "CORP INVESTMENT BANKING",
-            "CORPORATE INVESTMENT BANKING", "CIB BANKING"),
-    "RIA": ("RIA", "SV5", "RIAS BROKER DEALERS", "RIA BROKER DEALER",
-            "RIA BROKER DEALERS", "WEALTH RIAS"),
-    "AM": ("AM", "SV6", "ASSET MANAGEMENT", "ASSET WEALTH MANAGEMENT",
-           "WEALTH ASSET MANAGEMENT"),
-    "IB": ("IB", "SV7", "INSURANCE BROKERS", "INSURANCE BROKERAGES"),
-    "IC": ("IC", "SV8", "INSURANCE CARRIERS"),
-    "FC": ("FC", "SV9", "FARM CREDIT", "FARM CREDIT AG LENDING"),
-}
-_ALIAS_INDEX = {alias: code
-                for code, aliases in _SUBVERTICAL_ALIASES.items()
-                for alias in aliases}
-
-
-def _norm(value: str) -> str:
-    """'RIA / Broker-Dealer', 'ria broker dealer' and 'RIA_Broker Dealer'
-    are one spelling: uppercase, non-alphanumerics collapse to a space."""
-    return re.sub(r"[^A-Z0-9]+", " ", str(value).upper()).strip()
-
-
-def resolve_subvertical(raw) -> str | None:
-    """The catalogue's VC code for an entity's sub_vertical, or None.
-    None means neither vocabulary knows the value — the caller says so
-    rather than guessing (a wrong arrangement is worse than none)."""
-    if not raw or not str(raw).strip():
-        return None
-    return _ALIAS_INDEX.get(_norm(raw))
 
 
 def arrange(stage_rows, mapping_rows, served_ids) -> dict:
@@ -250,10 +219,13 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
                     for r in cur.fetchall()]
 
     # The run's served cell register — the SAME rows the heatmap serves, so
-    # a cell listed here resolves in the renderer and nowhere else.
+    # a cell listed here resolves in the renderer and nowhere else. Scoped
+    # to the entity's sub-vertical by the same rule /subcaps applies, or
+    # the two would disagree: a cell excluded from the grid but listed in a
+    # stage renders as an unresolvable tile, and `not_scored` would undercount.
     cur.execute("SELECT subcap_id FROM serving_subcaps WHERE run_id = %s",
                 (run_meta["run_id"],))
-    served_ids = {r[0] for r in cur.fetchall()}
+    served_ids = set(scope_to_entity([r[0] for r in cur.fetchall()], raw_sv))
 
     data = arrange(stage_rows, mapping_rows, served_ids)
     data["sub_vertical"] = code
