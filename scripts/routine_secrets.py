@@ -151,6 +151,43 @@ def github_pat_status(min_seconds: int = PAT_MIN_SECONDS) -> dict:
         return {**out, "ok": False, "verdict": "FAIL",
                 "detail": "resolved to an empty value"}
 
+    # ── Control probe: is anything between us and GitHub substituting a
+    #    credential?
+    #
+    # An egress proxy that injects its own GitHub identity answers /user
+    # identically whatever token is presented — same login, same expiry
+    # header, 200 every time. A validity check running behind one measures
+    # the PROXY's credential and reports it as the PAT's. That is not a
+    # hypothetical: it happened here, and the expiry it reported sent a
+    # human to regenerate a perfectly good token three times before the
+    # tell was noticed — three different secrets cannot share an expiry to
+    # the second.
+    #
+    # So spend one request on a token that CANNOT be valid. If GitHub
+    # accepts it, this check can no longer distinguish a live PAT from a
+    # dead one, and the honest verdict is UNKNOWN. A check that cannot tell
+    # must say so rather than return the answer it would have given anyway.
+    probe = urllib.request.Request(
+        f"{GITHUB_API}/user",
+        headers={"Authorization": "Bearer github_pat_11INVALID"
+                                  "0000000000000000000000000000000000000000",
+                 "Accept": "application/vnd.github+json",
+                 "X-GitHub-Api-Version": "2022-11-28",
+                 "User-Agent": "dma-routine-preflight"})
+    try:
+        urllib.request.urlopen(probe, timeout=30)
+    except urllib.error.HTTPError:
+        pass                      # refused, as it must be — the check is sound
+    except Exception:             # noqa: BLE001
+        pass                      # unreachable; the real call below decides
+    else:
+        return {**out, "ok": True, "verdict": "UNKNOWN",
+                "detail": "an invalid token is also accepted here, so "
+                          "something between this process and GitHub is "
+                          "substituting a credential — this check cannot "
+                          "read the PAT's real state. Validate it where the "
+                          "routine actually runs."}
+
     req = urllib.request.Request(
         f"{GITHUB_API}/user",
         headers={"Authorization": f"Bearer {pat}",
