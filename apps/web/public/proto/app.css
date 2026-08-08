@@ -808,6 +808,19 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
   color: var(--z-muted);
 }
 
+/* The quiet divider between the rows a derived scope reached and the rows it
+   did not. It is a row of the same table, not a heading above a second one,
+   because the rows below it are the same run's content — filed elsewhere, not
+   lesser. */
+.tbl tbody tr.tbl-split:hover { background: transparent; }
+.tbl tbody td.tbl-split {
+  padding: 10px 12px 6px;
+  font-size: 10px; color: var(--z-muted);
+  border-bottom: 1px solid var(--z-sep);
+  border-top: 1px solid var(--z-sep);
+  background: var(--z-bg);
+}
+
 /* A table that answers to ITS OWN width, not the viewport's.
    The viewport media queries at the bottom of this file are the only thing a
    table normally has, and they are blind to the case that actually breaks:
@@ -855,9 +868,14 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
     text-transform: uppercase; flex-shrink: 0;
   }
   .tbl-reflow .tbl tbody tr:hover { background: transparent; }
-  /* The empty state is one message, not a labelled field. */
-  .tbl-reflow .tbl tbody td.tbl-empty { display: block; text-align: center; }
-  .tbl-reflow .tbl tbody td.tbl-empty::before { content: none; }
+  /* The empty state and the scope divider are each ONE message, not a
+     labelled field, so the stacked-row label pseudo-element stays off them. */
+  .tbl-reflow .tbl tbody td.tbl-empty,
+  .tbl-reflow .tbl tbody td.tbl-split { display: block; text-align: center; }
+  .tbl-reflow .tbl tbody td.tbl-empty::before,
+  .tbl-reflow .tbl tbody td.tbl-split::before { content: none; }
+  .tbl-reflow .tbl tbody td.tbl-empty > *,
+  .tbl-reflow .tbl tbody td.tbl-split > * { max-width: 100%; text-align: center; }
 }
 
 /* The tech register's legend entries ARE the filter, so they need the

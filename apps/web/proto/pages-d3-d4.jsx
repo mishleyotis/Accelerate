@@ -96,6 +96,35 @@ function PlatformEvChips({ ids, openEvidence, label }) {
   );
 }
 
+/* ── The scope rule this page now obeys everywhere ───────────────────
+   A DERIVED relationship may ORDER content. It must never HIDE it.
+
+   The platform → L3 area mapping under every heading on this page is derived:
+   no producer states it, it is read off which cells a tile's own gaps happen
+   to name. That is good enough to decide what a reader sees FIRST. It is not
+   good enough to decide that promoted, cited content does not exist — and
+   that is precisely what four sections were doing. "Conversation starters ·
+   0 — 5 promoted across the other areas" was the visible one, reported twice
+   by the reader; recommendations, the readiness rail and half the gap table
+   failed the same way on any tile whose derived area matched nothing.
+
+   So every scoped section splits its promoted rows in two: the ones the scope
+   reaches, first; then this divider, saying in the run's own counts what the
+   rest are; then the rest. A section whose payload is non-empty never renders
+   a zero. */
+function ScopeDivider({ shown, total, noun, scope }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "10px 0 8px" }}>
+      <span style={{ height: 1, background: "var(--z-sep)", flex: "0 0 14px" }} />
+      <span style={{ fontSize: 10, color: "var(--z-muted)", lineHeight: 1.45 }}>
+        {shown} of {total} {noun}{shown === 1 ? "" : "s"}
+        {scope ? ` in ${scope}` : " could be placed on a platform"} · the rest of this run's below
+      </span>
+      <span style={{ height: 1, background: "var(--z-sep)", flex: 1 }} />
+    </div>
+  );
+}
+
 /* The cell family a cell id belongs to — P4C3.4.5 → P4C3. Parsing the id is
    not an inference: the catalogue's ids are built this way, and a string that
    is not one yields null rather than a guessed prefix. */
@@ -344,46 +373,72 @@ function ClientPlatform({ entity, run }) {
     }
   }
 
-  const areaRecs = recs.filter(r => area && r.l3 === area)
-    .sort((a, b) => String(a.phase || "").localeCompare(String(b.phase || ""))
-                 || String(a.id).localeCompare(String(b.id)));
+  const byPhaseThenId = (a, b) =>
+    String(a.phase || "").localeCompare(String(b.phase || ""))
+      || String(a.id).localeCompare(String(b.id));
+  const areaRecs = recs.filter(r => area && r.l3 === area).sort(byPhaseThenId);
+  // Everything else the run promoted, in the same order. It is NOT dropped:
+  // see the scope note below.
+  const otherRecs = recs.filter(r => !(area && r.l3 === area)).sort(byPhaseThenId);
 
   /* The gap-to-platform mapping for the selected tile, from the two places the
      run states one. The platform story's rows are richest — they carry the
      cell's name, its pillar, the L4 feature, the catalogue path, a peer basis
      and the evidence — so they lead; the tile's own addressable cells follow,
-     minus any the story already listed. Both are this platform's mapping, and
-     the card says how many came from each. */
-  const storyRows = [];
-  for (const p of storyPlatforms) {
-    for (const g of p.gaps || []) if (area && g && g.l3_area === area) storyRows.push(g);
-  }
+     minus any the story already listed.
+
+     The tile's cells are this platform's because the tile SAYS so. The story
+     rows are this platform's because their L3 area matches the area this page
+     DERIVED for the tile — so the second group is scoped on an inference and
+     is ordered by it, never hidden by it (see the scope note below). */
+  const storyAll = [];
+  for (const p of storyPlatforms) for (const g of p.gaps || []) if (g) storyAll.push(g);
+  const inThisArea = (g) => !!area && g.l3_area === area;
+  const storyRows = storyAll.filter(inThisArea);
+  const storyElsewhere = storyAll.filter(g => !inThisArea(g));
   const storySeen = new Set(storyRows.map(g => String(g.subcap_id)));
   const tileCells = ((tile && tile.addressable_cells) || [])
     .filter(c => c && !storySeen.has(String(c.subcap_id)));
-  const gapRows = [
-    ...storyRows.map(g => ({
-      key: `story:${g.subcap_id}`, from: "story",
-      subcap_id: g.subcap_id, name: g.name, pillar: g.pillar,
-      current: pfNum(g.current_score), peer: pfNum(g.peer_score),
-      peer_note: g.peer_note || null, peer_basis: g.peer_basis || null,
-      feature: g.l4_feature, path: g.catalogue_path, e_ids: g.e_ids || [],
-    })),
+  const storyGapRow = (g, scoped) => ({
+    key: `story:${g.subcap_id}`, from: "story", scoped,
+    subcap_id: g.subcap_id, name: g.name, pillar: g.pillar,
+    current: pfNum(g.current_score), peer: pfNum(g.peer_score),
+    peer_note: g.peer_note || null, peer_basis: g.peer_basis || null,
+    feature: g.l4_feature, path: g.catalogue_path, e_ids: g.e_ids || [],
+    l3_area: g.l3_area || null,
+  });
+  const scopedGapRows = [
+    ...storyRows.map(g => storyGapRow(g, true)),
     ...tileCells.map(c => ({
-      key: `tile:${c.subcap_id}`, from: "tile",
+      key: `tile:${c.subcap_id}`, from: "tile", scoped: true,
       subcap_id: c.subcap_id, name: c.name, pillar: null,
       current: pfNum(c.current), peer: pfNum(c.peer),
       peer_note: null, peer_basis: null,
       feature: c.feature_that_addresses_it, path: null, e_ids: [],
+      l3_area: null,
     })),
   ];
+  // A cell already on this platform's own rows is not repeated below the
+  // divider — the same cell twice in one table reads as two findings.
+  const scopedSeen = new Set(scopedGapRows.map(g => String(g.subcap_id)));
+  const otherGapRows = storyElsewhere
+    .filter(g => !scopedSeen.has(String(g.subcap_id)))
+    .map(g => storyGapRow(g, false));
+  const gapRows = [...scopedGapRows, ...otherGapRows];
   // Only render the gap column where at least one row can state a difference.
   // Before, every row printed "−-2.5": a unary minus prepended to an already
   // negative difference, computed against a peer median that does not exist
   // for these cells.
   const anyPeer = gapRows.some(g => g.peer !== null);
+  const gapCols = (anyPeer ? 7 : 6);
 
   const prereqRows = areaPrereqs(areaRecs);
+  /* Readiness gates come from the recommendations, so a platform the scope
+     reaches no recommendation for used to show an empty rail. The gates of
+     every other promoted recommendation are the same run's gates; they are
+     listed after this platform's, under the same divider rule. */
+  const otherPrereqRows = areaPrereqs(otherRecs)
+    .filter(p => !prereqRows.some(q => q.key === p.key));
 
   /* Conversation starters carry a named gap cell, and where that cell is one
      the run files under an L3 area, the starter belongs to a platform on the
@@ -414,16 +469,19 @@ function ClientPlatform({ entity, run }) {
     const hit = areaOfCell(index, s && s.named_gap_subcap_id);
     return hit ? hit.area : null;
   };
-  const starters = allStarters.filter(s => {
+  // In scope: this platform's area, or no area at all. Out of scope: filed
+  // under another platform's area — ordered after, never dropped.
+  const scopedStarters = allStarters.filter(s => {
     const a = starterArea(s);
     return a === null || a === area;
   });
-  const elsewhereStarters = allStarters.length - starters.length;
+  const otherStarters = allStarters.filter(s => scopedStarters.indexOf(s) < 0);
+  const starters = [...scopedStarters, ...otherStarters];
   // Counted, not asserted: how many of what is showing this page could place
-  // on a platform, so the card can say which half of the list a reader is
+  // on THIS platform, so the card can say which part of the list a reader is
   // looking at instead of implying every one of them is this platform's.
-  const placedStarters = starters.filter(s => starterArea(s) !== null).length;
-  const unplacedStarters = starters.length - placedStarters;
+  const placedStarters = scopedStarters.filter(s => starterArea(s) === area && area).length;
+  const unplacedStarters = scopedStarters.length - placedStarters;
 
   // "Why not X" — the platform page's own discarded list where it promoted
   // one, otherwise the overview's. Never both merged: the two sections word
@@ -644,7 +702,7 @@ function ClientPlatform({ entity, run }) {
               <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.45 }}>{scopeLine}</div>
             </div>
             <span style={{ fontSize: 11, color: "var(--z-muted)", flexShrink: 0, textAlign: "right" }}>
-              {gapRows.length} mapped cell{gapRows.length === 1 ? "" : "s"}
+              {scopedGapRows.length} mapped cell{scopedGapRows.length === 1 ? "" : "s"}
               {storyRows.length && tileCells.length ? (
                 <div style={{ fontSize: 9.5 }}>{storyRows.length} from the story · {tileCells.length} from the tile</div>
               ) : null}
@@ -699,11 +757,24 @@ function ClientPlatform({ entity, run }) {
                     || (g.peer_basis ? String(g.peer_basis).replace(/_/g, " ")
                                      : (wb && wb.peer_basis ? String(wb.peer_basis).replace(/_/g, " ")
                                                             : "No peer figure is stated for this cell"));
+                  // The first row the derived scope does not reach carries the
+                  // divider; the rows under it are the same run's promoted gap
+                  // rows, filed under another platform's area.
+                  const first = !g.scoped && otherGapRows.length && otherGapRows[0].key === g.key;
                   return (
-                    <tr key={g.key}>
+                    <React.Fragment key={g.key}>
+                    {first ? (
+                      <tr className="tbl-split"><td className="tbl-split" colSpan={gapCols}>
+                        {scopedGapRows.length} of {gapRows.length} mapped cells sit in {area || "no area this page could derive"} · the rest of this run's gap rows below
+                      </td></tr>
+                    ) : null}
+                    <tr style={{ opacity: g.scoped ? 1 : .78 }}>
                       <td data-label="Cell">
                         <div style={{ fontSize: 12, fontWeight: 500 }}>{name}</div>
                         <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{pfText(g.subcap_id)}</div>
+                        {!g.scoped && g.l3_area ? (
+                          <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 2 }}>{pfText(g.l3_area)}</div>
+                        ) : null}
                       </td>
                       <td data-label="Pillar" className="col-drop">{pillar ? <span className="b b-purple">{pillar}</span> : <span className="chip muted">—</span>}</td>
                       <td data-label="Score"><MaturityChip score={cur} /></td>
@@ -724,13 +795,13 @@ function ClientPlatform({ entity, run }) {
                       </td>
                       <td data-label="Evidence"><PlatformEvChips ids={eids} openEvidence={openEvidence} /></td>
                     </tr>
+                    </React.Fragment>
                   );
                 })}
                 {gapRows.length === 0 ? (
-                  <tr><td colSpan={anyPeer ? 7 : 6} className="tbl-empty">
-                    {tiles.length
-                      ? "This tile promoted no addressable cell, and no platform story gap row is filed under its area."
-                      : "No platform story promoted for this run, so no gap row is available."}
+                  <tr><td colSpan={gapCols} className="tbl-empty">
+                    No platform story gap row and no addressable cell promoted in this run,
+                    so there is no gap mapping to show for any platform.
                   </td></tr>
                 ) : null}
               </tbody>
@@ -756,9 +827,17 @@ function ClientPlatform({ entity, run }) {
               title={selKey ? `Readiness · ${selKey}` : ""}>Readiness · {selKey || "no platform"}</div>
             <span style={{ fontSize: 10, color: "var(--z-muted)", flexShrink: 0 }}>click a row to drill in</span>
           </div>
-          {prereqRows.map((p, idx) => {
+          {[...prereqRows, ...otherPrereqRows].map((p, idx) => {
             const v = prereqVerdict(p);
             const isOpen = openPrereq === idx;
+            // The divider rides on the first gate the derived scope does not
+            // reach, so a platform whose area matches no recommendation still
+            // shows this run's gates rather than an empty rail.
+            const split = idx === prereqRows.length && otherPrereqRows.length ? (
+              <div key="split" style={{ padding: "8px 0 6px", borderTop: "1px solid var(--z-sep)", fontSize: 10, color: "var(--z-muted)", lineHeight: 1.5 }}>
+                {prereqRows.length} of {prereqRows.length + otherPrereqRows.length} gates belong to {selKey || "this platform"} · this run's other gates below
+              </div>
+            ) : null;
             if (p.kind === "condition") {
               /* A text condition has no cell, no minimum and no current value,
                  so it gets its own row shape — but the SAME height as a
@@ -766,7 +845,9 @@ function ClientPlatform({ entity, run }) {
                  badge, its note and its recommendation chips all at once, three
                  stacked blocks per row in a 300px column. */
               return (
-                <div key={p.key} style={{ borderBottom: "1px solid var(--z-sep)" }}>
+                <React.Fragment key={p.key}>
+                {split}
+                <div style={{ borderBottom: "1px solid var(--z-sep)" }}>
                   {/* The word "Condition" is an eyebrow, not a badge in the
                       row. As a badge it took 78px of a 300px column and the
                       condition itself — the only thing the row is about — was
@@ -798,6 +879,7 @@ function ClientPlatform({ entity, run }) {
                     </div>
                   ) : null}
                 </div>
+                </React.Fragment>
               );
             }
             // Cell threshold. Keyed by index so two thresholds on the same cell
@@ -808,7 +890,9 @@ function ClientPlatform({ entity, run }) {
             const pct = (p.min !== null && p.current !== null && p.min > 0)
               ? Math.max(0, Math.min(100, (p.current / p.min) * 100)) : null;
             return (
-              <div key={p.key} style={{ borderBottom: "1px solid var(--z-sep)" }}>
+              <React.Fragment key={p.key}>
+              {split}
+              <div style={{ borderBottom: "1px solid var(--z-sep)" }}>
                 <button onClick={() => setOpenPrereq(o => o === idx ? null : idx)} style={{ width: "100%", background: "none", border: 0, cursor: "pointer", textAlign: "left", padding: "10px 0" }}>
                   {/* The prototype's row is a chip, a NAME and a verdict. The
                       name is the catalogue's own category name for the cell —
@@ -862,13 +946,14 @@ function ClientPlatform({ entity, run }) {
                   </div>
                 ) : null}
               </div>
+              </React.Fragment>
             );
           })}
-          {prereqRows.length === 0 ? (
+          {prereqRows.length + otherPrereqRows.length === 0 ? (
             <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
-              {areaRecs.length
-                ? "No prerequisite promoted for this platform's recommendations."
-                : "No recommendation is scoped to this platform, so no readiness gate applies."}
+              {recs.length
+                ? "No recommendation in this run promoted a prerequisite, so no readiness gate applies."
+                : "No recommendation promoted in this run, so no readiness gate applies."}
             </div>
           ) : null}
           {prereqRows.some(p => { const v = prereqVerdict(p); return v && !v.met; }) ? (
@@ -895,27 +980,45 @@ function ClientPlatform({ entity, run }) {
             <span style={{ fontSize: 11, color: "var(--z-muted)", flexShrink: 0 }}>{areaRecs.length} of {recs.length} promoted</span>
           </div>
           <div>
-            {areaRecs.map(r => {
+            {[...areaRecs, ...otherRecs].map(r => {
               const gate = r.validation_gate || null;
               const kpi = r.kpi || null;
               const impacts = (r.dma_impact || []).length;
+              const scoped = areaRecs.indexOf(r) >= 0;
+              // The divider rides on the first row the scope does not reach.
+              const first = !scoped && otherRecs.length && otherRecs[0].id === r.id;
               return (
-                <div key={r.id} className="rec-row" onClick={() => openRec(r.id)} title="Open full recommendation" style={{ padding: "12px 18px", borderBottom: "1px solid var(--z-sep)", cursor: "pointer" }}>
-                  <div className="row" style={{ marginBottom: 4, gap: 6 }}>
+                <React.Fragment key={r.id}>
+                {first ? (
+                  <div style={{ padding: "8px 18px", background: "var(--z-bg)", borderTop: "1px solid var(--z-sep)", borderBottom: "1px solid var(--z-sep)", fontSize: 10, color: "var(--z-muted)", lineHeight: 1.5 }}>
+                    {areaRecs.length} of {recs.length} promoted recommendations sit in {area || "no area this page could derive for this tile"} · the rest of this run's below, each still openable
+                  </div>
+                ) : null}
+                <div className="rec-row" onClick={() => openRec(r.id)} title="Open full recommendation" style={{ padding: "12px 18px", borderBottom: "1px solid var(--z-sep)", cursor: "pointer", opacity: scoped ? 1 : .82 }}>
+                  {/* wrap: the title, two badges and the chevron do not fit on
+                      one line in a column that halves at tablet width, and the
+                      badges were pushing the title's own box past the card. */}
+                  <div className="row" style={{ marginBottom: 4, gap: 6, flexWrap: "wrap" }}>
                     <span className="chip">{r.id}</span>
-                    <span style={{ fontWeight: 600, fontSize: 13, flex: 1, minWidth: 0 }}>{pfText(r.title)}</span>
+                    <span style={{ fontWeight: 600, fontSize: 13, flex: "1 1 160px", minWidth: 0 }}>{pfText(r.title)}</span>
                     {r.phase != null ? <span className="b b-teal" style={{ flexShrink: 0 }}>Phase {pfText(r.phase)}</span> : null}
                     {r.effort ? <span className="b b-muted" style={{ flexShrink: 0 }} title="effort band">{pfText(r.effort)}</span> : null}
                     <Icon name="chevron-r" size={13} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
                   </div>
-                  {r.l4 ? <div style={{ fontSize: 11, color: "var(--z-mid)", marginBottom: 5 }}>{pfText(r.l4)}</div> : null}
+                  {!scoped && r.l3 ? (
+                    <div style={{ fontSize: 10, color: "var(--z-muted)", marginBottom: 4 }}>{pfText(r.l3)}</div>
+                  ) : null}
+                  {r.l4 ? <div style={{ fontSize: 11, color: "var(--z-mid)", marginBottom: 5, overflowWrap: "anywhere" }}>{pfText(r.l4)}</div> : null}
                   {r.root_cause_text ? (
                     <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55, margin: "6px 0" }} className="txt-fit-3">
                       {pfText(r.root_cause_text)}
                     </div>
                   ) : null}
                   <PlatformEvChips ids={r.root_cause} openEvidence={openEvidence} label="cites" />
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginTop: 8, fontSize: 11 }}>
+                  {/* auto-fit, not a hard pair: at `repeat(2, 1fr)` each slot
+                      was ~110px in a column that halves at tablet width, and
+                      the KPI sentence ran out of its half. */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 150px), 1fr))", gap: 8, marginTop: 8, fontSize: 11 }}>
                     {gate && gate.threshold ? (
                       <div>
                         <div className="muted" style={{ fontSize: 10 }}>Readiness gate</div>
@@ -928,7 +1031,12 @@ function ClientPlatform({ entity, run }) {
                       <strong>{impacts}</strong>
                     </div>
                     {kpi && kpi.metric ? (
-                      <div style={{ gridColumn: "span 2" }}>
+                      /* 1/-1 rather than "span 2": with an auto-fit track count
+                         the grid may only HAVE one column, and a 2-wide item in
+                         a 1-wide grid adds an implicit column the row then
+                         overflows into. 1/-1 is "the whole row", whatever the
+                         count came out as. */
+                      <div style={{ gridColumn: "1 / -1", minWidth: 0 }}>
                         <div className="muted" style={{ fontSize: 10 }}>KPI</div>
                         <strong style={{ fontWeight: 500 }}>{pfText(kpi.metric)}</strong>
                         {kpi.baseline ? (
@@ -943,26 +1051,19 @@ function ClientPlatform({ entity, run }) {
                     ) : null}
                   </div>
                 </div>
+                </React.Fragment>
               );
             })}
-            {areaRecs.length === 0 ? (
-              <div className="empty">
-                {recs.length
-                  ? <p>No recommendation is scoped to {selKey || "this platform"}. {recs.length} promoted across the other platform areas.</p>
-                  : <p>No recommendation promoted in this run.</p>}
-              </div>
+            {recs.length === 0 ? (
+              <div className="empty"><p>No recommendation promoted in this run.</p></div>
             ) : null}
-            {/* A recommendation filed under an area no tile reaches belongs to
-                no platform on this page, so it would be unreachable in silence.
-                Named, counted, and still openable. */}
-            {orphanRecs.length ? (
+            {/* A recommendation filed under an area no tile reaches is now in
+                the list above like every other one; this line still names the
+                areas, because "no promoted platform addresses this" is a fact
+                about the run worth stating once. */}
+            {orphanAreas.length ? (
               <div style={{ padding: "10px 18px", fontSize: 11, color: "var(--z-muted)", borderTop: "1px solid var(--z-sep)", lineHeight: 1.6 }}>
-                {orphanRecs.length} promoted recommendation{orphanRecs.length === 1 ? "" : "s"} sit{orphanRecs.length === 1 ? "s" : ""} in an area no promoted platform addresses
-                {orphanAreas.length ? ` — ${orphanAreas.join(" · ")}` : ""}:{" "}
-                {orphanRecs.map(r => (
-                  <button key={r.id} className="chip" style={{ cursor: "pointer", border: 0, marginRight: 4 }}
-                    title={`${r.id} · ${pfText(r.l3) || "no area stated"}`} onClick={() => openRec(r.id)}>{r.id}</button>
-                ))}
+                {orphanRecs.length} of the {recs.length} promoted recommendation{recs.length === 1 ? "" : "s"} sit{orphanRecs.length === 1 ? "s" : ""} in an area no promoted platform addresses — {orphanAreas.join(" · ")}.
               </div>
             ) : null}
           </div>
@@ -984,7 +1085,10 @@ function ClientPlatform({ entity, run }) {
                   : ""}
               </div>
             </div>
-            <button className="btn btn-tertiary btn-sm" onClick={() => {
+            {/* flexShrink 0: `.btn` is nowrap, and in a space-between head it
+                was being shrunk below its own label — "Copy all" spilled its
+                box at 1100px. */}
+            <button className="btn btn-tertiary btn-sm" style={{ flexShrink: 0 }} onClick={() => {
               const text = starters.map((s, i) => {
                 const head = `#${s.rank != null ? s.rank : i + 1}`;
                 return [`${head} — ${pfText(s.text) || ""}`,
@@ -1021,12 +1125,22 @@ function ClientPlatform({ entity, run }) {
                  fail-closed rule the evidence chips follow. */
               const gapId = pfText(s.named_gap_subcap_id);
               const gapCell = gapId && cellIndex.has(String(gapId)) ? gapId : null;
+              // The divider rides on the first starter the scope does not
+              // reach — one filed under ANOTHER platform's area. It is still
+              // rendered, still copyable, still citing what it cites.
+              const scoped = scopedStarters.indexOf(s) >= 0;
+              const first = !scoped && otherStarters.length && otherStarters[0] === s;
               return (
-                /* One card, one target: the whole face expands it. The "More"
-                   button stays — it is what NAMES the hidden half — but a
-                   reader who clicks the paragraph should not have to find a
-                   10px control to see the rest of the same starter. */
-                <div key={key} style={{ padding: 10, marginBottom: 8, background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", borderRadius: 8, cursor: extras ? "pointer" : "default" }}
+                <React.Fragment key={key}>
+                {first ? (
+                  <ScopeDivider shown={scopedStarters.length} total={allStarters.length}
+                                noun="starter" scope={area || null} />
+                ) : null}
+                {/* One card, one target: the whole face expands it. The "More"
+                    button stays — it is what NAMES the hidden half — but a
+                    reader who clicks the paragraph should not have to find a
+                    10px control to see the rest of the same starter. */}
+                <div style={{ padding: 10, marginBottom: 8, background: "var(--ph0-lt)", border: `1px solid ${scoped ? "var(--ph0-bd)" : "var(--z-sep)"}`, borderRadius: 8, opacity: scoped ? 1 : .84, cursor: extras ? "pointer" : "default" }}
                   title={extras && !isOpen ? "Show the rest of this starter" : ""}
                   onClick={() => { if (extras) setOpenStarter(o => o === key ? null : key); }}>
                   <div className="row" style={{ marginBottom: 6, gap: 6, flexWrap: "wrap" }}>
@@ -1093,18 +1207,12 @@ function ClientPlatform({ entity, run }) {
                     </div>
                   ) : null}
                 </div>
+                </React.Fragment>
               );
             })}
             {starters.length === 0 ? (
               <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
-                {allStarters.length
-                  ? `No conversation starter names a cell in this platform's area. ${allStarters.length} promoted across the other areas.`
-                  : "No conversation starter promoted for this run."}
-              </div>
-            ) : null}
-            {starters.length && elsewhereStarters ? (
-              <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5 }}>
-                {elsewhereStarters} further starter{elsewhereStarters === 1 ? "" : "s"} name a cell in another platform's area.
+                No conversation starter promoted for this run.
               </div>
             ) : null}
           </div>

@@ -169,13 +169,20 @@ function ClientContext({ entity, run }) {
               panel appears a screen and a half above the click. It read as a
               dead control. Anchored so a caller can bring it into view. */}
           <div id="issue-detail-anchor">
-            {issueOpen ? <IssueDetail issue={issues.find(i => i.id === issueOpen)} entity={entity} onClose={() => setIssueOpen(null)} openEvidence={openEvidence} /> : null}
+            {issueOpen ? <IssueDetail issue={issues.find(i => i.id === issueOpen)} entity={entity} onClose={() => setIssueOpen(null)} openEvidence={openEvidence} openSubcap={openSubcap} /> : null}
           </div>
         </div>
       </div>
 
-      {/* Financial trajectory + Regulatory */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 14, marginBottom: 14 }}>
+      {/* Financial trajectory + Regulatory.
+          Was a hard `1.4fr 1fr`, which the ≤760px catch-all in app.css
+          collapses and nothing between 760 and 980 does: at 768 the
+          regulatory column came out at ~199px, its nowrap "No action found"
+          badge needed 100 of them beside a heading, and the whole DOCUMENT
+          scrolled sideways by 2px. auto-fit with a readable floor: two
+          columns while both fit, one when they do not, no breakpoint. The
+          1.4:1 emphasis is kept by giving the chart the larger floor. */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: 14, marginBottom: 14, alignItems: "start" }}>
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="money" size={16} />
@@ -291,14 +298,20 @@ function RegulatoryStanding({ entity, issues, setIssueOpen, openEvidence }) {
   const absence = reg.absence_of_enforcement || null;
   const searched = list(absence && absence.sources_searched);
   // Issues the register carries against a regulatory matter, by id — the link
-  // is the issue's own, never a constant.
+  // is the issue's own, never a constant. The contract gives an issue row no
+  // `kind`, so this reads the row's own words; the vocabulary covers the
+  // statutory and supervisory families a register actually uses (a matter
+  // titled "…Community Reinvestment Act…" carries none of the obvious four).
   const regIssues = (issues || []).filter(
-    i => /regulat|enforce|compliance|breach|consent/i.test(
-      `${i.title || ""} ${i.desc || ""} ${i.kind || ""}`));
+    i => /regulat|enforce|compliance|breach|consent|reinvestment|statut|examination|supervis|order\b|obligation/i.test(
+      `${i.title || ""} ${i.desc || ""} ${i.status || ""} ${i.kind || ""}`));
 
   return (
     <div className="card">
-      <div className="row" style={{ marginBottom: 12 }}>
+      {/* wrap: the verdict badge is nowrap and 100px wide, and in a column
+          that narrows to ~200px it sat beside a heading that would not give
+          way — the pair pushed the card, then the page, sideways. */}
+      <div className="row" style={{ marginBottom: 12, flexWrap: "wrap", gap: 6 }}>
         <Icon name="shield" size={16} />
         <div style={{ fontWeight: 600, fontSize: 13 }}>Regulatory standing</div>
         <span className="spacer" />
@@ -378,26 +391,41 @@ function RegulatoryStanding({ entity, issues, setIssueOpen, openEvidence }) {
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>
               On the issue register
             </div>
-            {regIssues.map(i => (
-              <div key={i.id} className="co co-org" style={{ cursor: "pointer", marginBottom: 6 }}
-                   onClick={() => {
-                     setIssueOpen(i.id);
-                     // Take the reader to the panel the click just opened.
-                     // Without this the state changed and the page did not,
-                     // because the detail renders up inside the register.
-                     requestAnimationFrame(() => {
-                       const el = document.getElementById("issue-detail-anchor");
-                       if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-                     });
-                   }}>
-                <Icon name="warn" size={14} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="co-title">{i.status || "OPEN"} · {i.id}</div>
-                  <div className="co-body">{i.title || i.desc} · click for the cells it caps</div>
+            {regIssues.map(i => {
+              const cap = capStateOf(i);
+              return (
+                <div key={i.id} className="co co-org" style={{ cursor: "pointer", marginBottom: 6 }}
+                     onClick={() => {
+                       setIssueOpen(i.id);
+                       // Take the reader to the panel the click just opened.
+                       // Without this the state changed and the page did not,
+                       // because the detail renders up inside the register.
+                       requestAnimationFrame(() => {
+                         const el = document.getElementById("issue-detail-anchor");
+                         if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                       });
+                     }}>
+                  <Icon name="warn" size={14} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="co-title">
+                      {i.status || "OPEN"} · {i.id}
+                      {cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}` : null}
+                    </div>
+                    {/* The invitation names what the click actually opens. It
+                        read "click for the cells it caps" on every row,
+                        including rows that cap nothing — so a reader who took
+                        it up found a panel that did not answer the promise. */}
+                    <div className="co-body">
+                      {i.title || i.desc}
+                      {cap.kind === "ceiling" ? ` · click for the ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} it caps`
+                        : cap.kind === "linked" ? ` · caps nothing · click for the ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} it bears on`
+                        : " · click for why it is on the register"}
+                    </div>
+                  </div>
+                  <Icon name="arrow-r" size={12} />
                 </div>
-                <Icon name="arrow-r" size={12} />
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : null}
 
@@ -629,15 +657,29 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen }) {
   for (let y = yearOf(lo); y <= yearOf(hi); y++) years.push(y);
 
   return (
+    /* The label column is a RANGE, not a constant. At a flat 200px the header
+       row and the issue rows also disagreed below 760px, because the app.css
+       catch-all that collapses inline grids matches `div[style*=…]` and every
+       issue row here is a <button> — so the header collapsed and the rows did
+       not. A range needs no catch-all: both shrink together. */
     <div>
-      <div style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 12, fontSize: 10.5, color: "var(--z-muted)", marginBottom: 6 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(90px, 200px) minmax(0, 1fr)", gap: 12, fontSize: 10.5, color: "var(--z-muted)", marginBottom: 6 }}>
         <div></div>
         <div style={{ position: "relative", height: 14 }}>
           {years.map(y => {
             const t = Date.parse(`${y}-01-01`);
             const left = Math.max(0, Math.min(100, pct(t)));
+            /* A tick near the right edge puts its label OUTSIDE the track —
+               the last year is the whole reason this strip was 8px wider than
+               its own box at every viewport. The tick stays exactly where the
+               date is; the label flips to the other side of it. */
+            const atEdge = left > 88;
             return (
-              <div key={y} style={{ position: "absolute", left: `${left}%`, top: 0, paddingLeft: 4, borderLeft: "1px dashed var(--z-sep)", height: 14 }}>{y}</div>
+              <div key={y} style={{ position: "absolute", left: `${left}%`, top: 0, height: 14,
+                                    paddingLeft: atEdge ? 0 : 4, paddingRight: atEdge ? 4 : 0,
+                                    borderLeft: atEdge ? 0 : "1px dashed var(--z-sep)",
+                                    borderRight: atEdge ? "1px dashed var(--z-sep)" : 0,
+                                    transform: atEdge ? "translateX(-100%)" : "none" }}>{y}</div>
             );
           })}
         </div>
@@ -648,20 +690,33 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen }) {
         const left = Math.max(0, Math.min(100, pct(a)));
         const right = Math.max(0, Math.min(100, pct(Math.max(b, a))));
         const width = Math.max(2, right - left);
-        const color = iss.severity === "CRITICAL" ? "var(--z-below)" : iss.severity === "MATERIAL" ? "var(--z-org)" : "var(--z-muted)";
+        const tone = severityTone(iss.severity);
+        const color = tone === "b-below" ? "var(--z-below)" : tone === "b-org" ? "var(--z-org)" : "var(--z-muted)";
         const isOpen = issueOpen === iss.id;
-        const capped = Object.keys((DMA.ISSUE_CAPS[iss.id] || {}).caps || {}).length;
+        const cap = capStateOf(iss);
         return (
           <button key={iss.id} onClick={() => setIssueOpen(isOpen ? null : iss.id)}
-            style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 12, padding: "8px 0", borderTop: "1px solid var(--z-sep)", textAlign: "left", width: "100%", background: isOpen ? "var(--z-lav)" : "transparent", border: "0", borderRadius: 6 }}>
+            style={{ display: "grid", gridTemplateColumns: "minmax(90px, 200px) minmax(0, 1fr)", gap: 12, padding: "8px 0", borderTop: "1px solid var(--z-sep)", textAlign: "left", width: "100%", background: isOpen ? "var(--z-lav)" : "transparent", border: "0", borderRadius: 6 }}>
             <div style={{ padding: "0 8px", minWidth: 0 }}>
               <div className="row">
                 <span className="chip">{iss.id}</span>
-                {iss.severity ? <span className={`b ${iss.severity === "CRITICAL" ? "b-below" : iss.severity === "MATERIAL" ? "b-org" : "b-muted"}`}>{iss.severity}</span> : null}
-                {capped ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${capped} cell${capped === 1 ? "" : "s"} capped`} /> : null}
+                {iss.severity ? <span className={`b ${tone}`}>{iss.severity}</span> : null}
+                {cap.kind === "ceiling" ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} held at M${cap.ceiling}`} /> : null}
               </div>
               <div style={{ fontSize: 12, marginTop: 4 }} className="txt-fit-1" title={iss.title || iss.type || ""}>{iss.title || iss.type || "—"}</div>
-              <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 2 }}>{iss.status}{iss.cap_value ? ` · cap ${iss.cap_value}` : ""}</div>
+              {/* The prototype's row footer, made honest. It printed
+                  "OPEN · cap 3" from a `cap_value` the contract does not
+                  carry, so in LIVE it printed the status and stopped. A cap
+                  LEVEL renders when the run states one; where the run names
+                  cells and no level, the row says how many it bears on —
+                  which is the difference between a ceiling and a linkage,
+                  and is what the reader is about to open. */}
+              <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 2 }}>
+                {iss.status}
+                {cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}`
+                  : cap.kind === "linked" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} · no cap`
+                  : " · no cell named"}
+              </div>
             </div>
             <div style={{ position: "relative", height: 28 }}>
               <div title={`${iss.start}${iss.end ? ` → ${iss.end}` : " → open"} · ${iss.desc || ""}`}
@@ -680,90 +735,272 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen }) {
           <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>
             Not yet placed on the time axis · {undated.length}
           </div>
-          {undated.map(iss => (
-            <button key={iss.id} onClick={() => setIssueOpen(issueOpen === iss.id ? null : iss.id)}
-              style={{ display: "flex", gap: 8, alignItems: "center", width: "100%", textAlign: "left", background: issueOpen === iss.id ? "var(--z-lav)" : "transparent", border: 0, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>
-              <span className="chip">{iss.id}</span>
-              {iss.severity ? <span className="b b-muted">{iss.severity}</span> : null}
-              <span style={{ flex: 1, minWidth: 0, fontSize: 12 }} className="txt-fit-1" title={iss.title || ""}>{iss.title || iss.type || "—"}</span>
-              <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{iss.status}</span>
-            </button>
-          ))}
+          {undated.map(iss => {
+            const cap = capStateOf(iss);
+            return (
+              <button key={iss.id} onClick={() => setIssueOpen(issueOpen === iss.id ? null : iss.id)}
+                style={{ display: "flex", gap: 8, alignItems: "center", width: "100%", textAlign: "left", background: issueOpen === iss.id ? "var(--z-lav)" : "transparent", border: 0, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>
+                <span className="chip">{iss.id}</span>
+                {iss.severity ? <span className={`b ${severityTone(iss.severity)}`}>{iss.severity}</span> : null}
+                {cap.kind === "ceiling" ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${cap.entries.length} cells held at M${cap.ceiling}`} /> : null}
+                <span style={{ flex: 1, minWidth: 0, fontSize: 12 }} className="txt-fit-1" title={iss.title || ""}>{iss.title || iss.type || "—"}</span>
+                {/* An undated row opens the same panel as a dated bar, so it
+                    carries the same cap summary — without it the group read
+                    as a list of names with no relationship to the grid. */}
+                <span style={{ fontSize: 10, color: "var(--z-muted)", whiteSpace: "nowrap" }}>
+                  {iss.status}
+                  {cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}`
+                    : cap.kind === "linked" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"}`
+                    : " · no cell"}
+                </span>
+              </button>
+            );
+          })}
         </div>
       ) : null}
     </div>
   );
 }
 
-function IssueDetail({ issue, entity, onClose, openEvidence }) {
+/* ── A cap, and what a register row owes a reader ─────────────────────
+   A cap is the assessment's own arithmetic: a matter holds named cells to a
+   maximum maturity, so a cell sitting at 3.0 has a reason a reader can open
+   rather than a number they must accept. The prototype rendered that as a
+   row label ("OPEN · cap 3") and a grid of tiles reading "Score capped at
+   M3" — the right SHAPE, and as deep as it went: no pre/post arithmetic, no
+   argument, no dates, tiles that were not clickable, and — because its caps
+   lived in a hardcoded map keyed by issue id — a matter absent from that map
+   rendered NO cap section at all, an absence shown as nothing.
+
+   Three states, and each must be said out loud:
+
+     ceiling      the run states a level; show it, and show how many of the
+                  linked cells actually sit at it (pre → post)
+     linked       the run names cells and states no level; the matter bears
+                  on them and caps nothing, which is a finding, not a blank
+     unlinked     no cells at all; then and only then does the panel say the
+                  matter names no cell — and the narrative must say why it is
+                  still on the register
+
+   The middle state is the one this page got wrong: it printed "This matter
+   names no capability cell" whenever no LEVEL was stated, which is what the
+   register looked like when every row shipped with an empty linkage list. */
+function capStateOf(issue) {
+  const entries = Object.entries((DMA.ISSUE_CAPS[issue.id] || {}).caps || {});
+  const levels = entries.map(([, lvl]) => lvl).filter(l => l != null);
+  const ceiling = levels.length ? Math.min(...levels.map(Number)) : null;
+  return { entries, ceiling, kind: !entries.length ? "unlinked" : (ceiling == null ? "linked" : "ceiling") };
+}
+
+/* Severity is the register's OWN word — the source's vocabulary, never
+   normalised (a real run uses S2 EXPIRED, LOW, MEDIUM; the fixture used
+   CRITICAL, MATERIAL, MINOR). The tone ladder therefore reads a family of
+   words rather than three constants, and an unrecognised word renders
+   neutral rather than silently reading as "minor". */
+function severityTone(sev) {
+  const s = String(sev || "").toUpperCase();
+  if (/CRITICAL|SEVERE|S1\b/.test(s)) return "b-below";
+  if (/MATERIAL|HIGH|MEDIUM|S2(?!\s*EXPIRED)/.test(s)) return "b-org";
+  if (/EXPIRED|RETIRED|CLOSED/.test(s)) return "b-muted";
+  return "b-muted";
+}
+
+function monthsSince(d) {
+  const t = Date.parse(/^\d{4}-\d{2}$/.test(String(d)) ? `${d}-01` : String(d));
+  if (Number.isNaN(t)) return null;
+  return Math.max(0, Math.round((Date.now() - t) / (1000 * 60 * 60 * 24 * 30.4375)));
+}
+
+function IssueDetail({ issue, entity, onClose, openEvidence, openSubcap }) {
   if (!issue) return null;
-  const caps = Object.entries(DMA.ISSUE_CAPS[issue.id]?.caps || {});
+  const { entries, ceiling, kind } = capStateOf(issue);
+  const tone = severityTone(issue.severity);
+
+  /* Each linked cell resolved against the run's OWN scores, so the panel
+     shows the position rather than repeating the id. A cell the run does not
+     carry resolves to null and says so — it is a dead chip, and the reader
+     should see that rather than a tile that opens onto nothing. */
+  const cells = entries.map(([id, lvl]) => {
+    const s = (entity.subcaps || []).find(x => x.id === id) || null;
+    return { id, cap: lvl == null ? null : Number(lvl), row: s,
+             name: s ? s.name : null, score: s ? s.score : null,
+             thin: s ? s.thin : false, category: s ? s.category : null };
+  });
+  const scored = cells.filter(c => c.score != null);
+  const lo = scored.length ? Math.min(...scored.map(c => c.score)) : null;
+  const hi = scored.length ? Math.max(...scored.map(c => c.score)) : null;
+  const atCeiling = ceiling == null ? 0 : scored.filter(c => c.score >= ceiling).length;
+
+  /* The categories the linked cells belong to. The contract carries no
+     `kind` on an issue row, so the prototype's category word ("Regulatory",
+     "Data quality") has no promoted source — inventing one would be reading
+     a taxonomy into the register. What IS knowable is where the matter lands
+     on the assessment, computed from the cells it names. */
+  const cats = [];
+  for (const c of cells) {
+    if (c.category && !cats.some(x => x.id === c.category)) {
+      const meta = DMA.getCategory ? DMA.getCategory(c.category) : null;
+      cats.push({ id: c.category, name: meta && meta.name ? meta.name : null });
+    }
+  }
+
+  const opened = issue.start || null;
+  const elapsed = opened ? monthsSince(opened) : null;
+  const ev = (issue.evidence || []).map(eid => DMA.getEvidence(eid) || { id: eid, tier: "T3" });
+
+  const Head = ({ children }) => (
+    <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 7 }}>{children}</div>
+  );
+
   return (
-    <div style={{ marginTop: 14, padding: 14, background: "var(--z-lav)", borderRadius: 8, borderLeft: `4px solid ${issue.severity === "CRITICAL" ? "var(--z-below)" : issue.severity === "MATERIAL" ? "var(--z-org)" : "var(--z-muted)"}` }}>
-      <div className="row" style={{ marginBottom: 8 }}>
+    <div style={{ marginTop: 14, padding: 14, background: "var(--z-lav)", borderRadius: 8, borderLeft: `4px solid ${tone === "b-below" ? "var(--z-below)" : tone === "b-org" ? "var(--z-org)" : "var(--z-muted)"}` }}>
+      {/* Identity row — the prototype's anatomy (id · severity · category ·
+          status), with the category computed from the cells rather than
+          invented, and the cap moved onto its own line so it can carry the
+          arithmetic instead of being a four-character suffix. */}
+      <div className="row" style={{ marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
         <span className="chip">{issue.id}</span>
-        <strong style={{ fontSize: 14 }}>{issue.title || issue.type || "—"}</strong>
-        <span className={`b ${issue.severity === "CRITICAL" ? "b-below" : issue.severity === "MATERIAL" ? "b-org" : "b-muted"}`}>{issue.severity}</span>
-        <span className="b b-muted">{issue.status}</span>
-        <span className="spacer" />
-        <button className="icon-btn" onClick={onClose}><Icon name="x" size={14} /></button>
+        <strong style={{ fontSize: 14, flex: "1 1 320px", minWidth: 0 }}>{sentence(issue.title || issue.type || "—")}</strong>
+        {issue.severity ? <span className={`b ${tone}`}>{issue.severity}</span> : null}
+        {issue.status ? <span className="b b-muted">{issue.status}</span> : null}
+        <button className="icon-btn" onClick={onClose} aria-label="Close"><Icon name="x" size={14} /></button>
       </div>
-      <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.6, marginBottom: 14 }}>{issue.desc}</div>
-      {caps.length === 0 ? (
-        <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginBottom: 12 }}>
-          This matter names no capability cell, so it is not linked to the
-          assessment. An issue that constrains a capability should say which.
+      {cats.length ? (
+        <div className="row" style={{ gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
+          <span style={{ fontSize: 9.5, color: "var(--z-muted)", letterSpacing: ".08em" }}>BEARS ON</span>
+          {cats.map(c => (
+            <span key={c.id} className="b b-purple" title={c.name || c.id}>{c.id}{c.name ? ` · ${c.name}` : ""}</span>
+          ))}
         </div>
       ) : null}
-      {caps.length > 0 ? (
-        <div>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 8 }}>Cells this matter bears on · {caps.length}</div>
+
+      {/* ── The cap, stated ──────────────────────────────────────────── */}
+      <div style={{ display: "flex", gap: 12, alignItems: "stretch", flexWrap: "wrap", padding: "10px 12px", background: "var(--z-white, #fff)", border: "1px solid var(--z-sep)", borderRadius: 7, marginBottom: 12 }}>
+        <div style={{ minWidth: 108 }}>
+          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase" }}>Cap</div>
+          <div style={{ fontSize: 19, fontWeight: 700, lineHeight: 1.25, color: kind === "ceiling" ? "var(--z-org)" : "var(--z-body)" }}>
+            {kind === "ceiling" ? `M${fx(ceiling, 1)}` : "None"}
+          </div>
+          <div style={{ fontSize: 10, color: "var(--z-muted)" }}>
+            {kind === "ceiling" ? `${entries.length} cell${entries.length === 1 ? "" : "s"} held`
+              : kind === "linked" ? `${entries.length} cell${entries.length === 1 ? "" : "s"} named`
+              : "no cell named"}
+          </div>
+        </div>
+        {/* Pre → post. With a ceiling: how many of the named cells actually
+            sit at it. Without: the assessed spread, which is the honest
+            answer to "what did this matter do to the score" — nothing. */}
+        <div style={{ flex: "1 1 260px", minWidth: 0, borderLeft: "1px solid var(--z-sep)", paddingLeft: 12 }}>
+          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase" }}>Arithmetic</div>
+          {kind === "ceiling" ? (
+            <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55, marginTop: 3 }}>
+              Assessed {fx(lo, 1)}–{fx(hi, 1)} <Icon name="arrow-r" size={11} /> ceiling M{fx(ceiling, 1)}
+              {" · "}{atCeiling} of {scored.length} named cell{scored.length === 1 ? "" : "s"} sit{atCeiling === 1 ? "s" : ""} at it.
+            </div>
+          ) : kind === "linked" ? (
+            <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55, marginTop: 3 }}>
+              {scored.length
+                ? (lo === hi
+                    ? <>All {scored.length} named cell{scored.length === 1 ? "" : "s"} assessed {fx(lo, 1)}. This matter sets no maximum — the score is the evidence, not a ceiling.</>
+                    : <>Assessed {fx(lo, 1)}–{fx(hi, 1)} across {scored.length} named cells. This matter sets no maximum; it bears on them without holding them.</>)
+                : <>The run names {entries.length} cell{entries.length === 1 ? "" : "s"} and scores none of them, so no position can be shown.</>}
+            </div>
+          ) : (
+            <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55, marginTop: 3 }}>
+              This matter names no capability cell and states no ceiling. It is
+              on the register for the reason given below, not for a score it moves.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Cells, clickable ─────────────────────────────────────────── */}
+      {cells.length ? (
+        <div style={{ marginBottom: 14 }}>
+          <Head>{kind === "ceiling" ? `Cells this matter caps · ${cells.length}` : `Cells this matter bears on · ${cells.length}`}</Head>
           <div className="g2" style={{ gap: 8 }}>
-            {caps.map(([subcapId, capValue]) => {
-              const s = entity.subcaps.find(x => x.id === subcapId) || { name: subcapId, score: capValue };
-              return (
-                <div key={subcapId} className="card-tile" style={{ padding: 10 }}>
-                  <div className="row" style={{ marginBottom: 4 }}>
-                    <span className="chip purple">{subcapId}</span>
-                    <span className="spacer" />
-                    <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} />
-                  </div>
-                  <div style={{ fontSize: 12, fontWeight: 500 }}>{s.name}</div>
-                  {/* A cap LEVEL is only shown when the run states one; the
-                      linkage alone does not imply a ceiling. */}
-                  <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 4 }}>
-                    {capValue != null
-                      ? `Score capped at M${capValue}`
-                      : (s.score != null ? `Assessed ${fx(s.score, 1)} · no cap level stated` : "no cap level stated")}
-                  </div>
+            {cells.map(c => (
+              <button key={c.id} className="card-tile"
+                      onClick={() => openSubcap && openSubcap(c.id)}
+                      disabled={!openSubcap || !c.row}
+                      title={c.row ? `Open ${c.id} in the cell drawer` : `${c.id} is not carried by this run`}
+                      style={{ padding: 10, textAlign: "left", border: "1px solid var(--z-sep)", background: "var(--z-white, #fff)", borderRadius: 7, cursor: c.row && openSubcap ? "pointer" : "default", width: "100%" }}>
+                <div className="row" style={{ marginBottom: 4 }}>
+                  <span className="chip purple">{c.id}</span>
+                  <span className="spacer" />
+                  {c.thin ? <span className="b b-muted" title="thin evidence">THIN</span> : null}
+                  {c.cap != null ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} /> : null}
+                  {c.score != null ? <MaturityChip score={c.score} /> : null}
                 </div>
-              );
-            })}
+                <div style={{ fontSize: 12, fontWeight: 500 }}>{c.name || c.id}</div>
+                <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 4 }}>
+                  {c.cap != null
+                    ? `Held at M${fx(c.cap, 1)}${c.score != null ? ` · assessed ${fx(c.score, 1)}` : ""}`
+                    : c.score != null
+                      ? `Assessed ${fx(c.score, 1)} · ${DMA.helpers.maturityLabel(c.score)} · no ceiling from this matter`
+                      : "Not carried by this run"}
+                </div>
+              </button>
+            ))}
           </div>
         </div>
       ) : null}
+
+      {/* ── The argument ─────────────────────────────────────────────── */}
+      {issue.desc ? (
+        <div style={{ marginBottom: 14 }}>
+          <Head>Why it constrains</Head>
+          <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.65 }}>{sentence(issue.desc)}</div>
+        </div>
+      ) : (
+        <div style={{ marginBottom: 14, fontSize: 12, color: "var(--z-muted)" }}>
+          The register gives no rationale for this matter. The row renders on its
+          title alone rather than on a composed one.
+        </div>
+      )}
+
+      {/* ── Dates ────────────────────────────────────────────────────── */}
+      <div style={{ marginBottom: 14 }}>
+        <Head>Timeline</Head>
+        <div className="row" style={{ gap: 14, flexWrap: "wrap", fontSize: 11.5, color: "var(--z-body)" }}>
+          <span>
+            <span style={{ color: "var(--z-muted)" }}>Opened </span>
+            {opened
+              ? <><strong>{opened}</strong>{elapsed != null ? <span style={{ color: "var(--z-muted)" }}> · {elapsed} months ago</span> : null}</>
+              : <em style={{ color: "var(--z-muted)" }}>no opening date established</em>}
+          </span>
+          <span>
+            <span style={{ color: "var(--z-muted)" }}>Closed </span>
+            {issue.end
+              ? <strong>{issue.end}</strong>
+              : <em style={{ color: "var(--z-muted)" }}>{/^REMEDIATED|RESOLVED|CLOSED/i.test(String(issue.status || "")) ? "not dated by the register" : "still open"}</em>}
+          </span>
+          {issue.status ? (
+            <span><span style={{ color: "var(--z-muted)" }}>Status </span><strong>{issue.status}</strong></span>
+          ) : null}
+        </div>
+      </div>
+
       {/* The issue's OWN cited ids. This used to prefix-sweep the entire
           evidence store for anything sharing four characters with a capped
           cell — and since the caps map was empty in LIVE, it swept nothing, so
           every issue showed no evidence while carrying an e_id of its own. */}
-      {(() => {
-        const own = issue.evidence || [];
-        const ev = own.map(eid => DMA.getEvidence(eid) || { id: eid, tier: "T3" });
-        if (!ev.length) return null;
-        return (
-          <div style={{ marginTop: 14 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 8 }}>Evidence · click to open</div>
-            <div className="row" style={{ flexWrap: "wrap", gap: 4 }}>
-              {ev.map(e => <button key={e.id} className={`tier-chip tier-${e.tier}`} style={{ cursor: "pointer", border: 0 }} title={`${e.title} · ${e.source_pretty}`} onClick={() => openEvidence && openEvidence(e.id)}>{e.id}</button>)}
-            </div>
+      {ev.length ? (
+        <div>
+          <Head>Evidence · click to open</Head>
+          <div className="row" style={{ flexWrap: "wrap", gap: 4 }}>
+            {ev.map(e => <button key={e.id} className={`tier-chip tier-${e.tier}`} style={{ cursor: "pointer", border: 0 }} title={`${e.title || e.id}${e.source_pretty ? ` · ${e.source_pretty}` : ""}`} onClick={() => openEvidence && openEvidence(e.id)}>{e.id}</button>)}
           </div>
-        );
-      })()}
-      <div className="row" style={{ marginTop: 12 }}>
-        {caps.length ? (
-          <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/heatmap`, { hm: "standard", zoom: "subcap", subcap: caps[0][0] })}>Open {caps[0][0]} in the heatmap <Icon name="arrow-r" size={11} /></button>
-        ) : null}
-      </div>
+        </div>
+      ) : (
+        <div style={{ fontSize: 11.5, color: "var(--z-muted)" }}>This matter cites no evidence id.</div>
+      )}
+
+      {cells.length ? (
+        <div className="row" style={{ marginTop: 12 }}>
+          <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/heatmap`, { hm: "standard", zoom: "subcap", subcap: cells[0].id })}>Open {cells[0].id} in the heatmap <Icon name="arrow-r" size={11} /></button>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -994,7 +1231,7 @@ function Timeline({ events, hover, setHover, openEvidence }) {
           );
         })}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 6, fontSize: 9.5, color: "var(--z-muted)", padding: "0 8px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(8, minmax(0, 1fr))", gap: 6, fontSize: 9.5, color: "var(--z-muted)", padding: "0 8px" }}>
         {events.map((e, i) => (
           <div key={e.id} style={{ textAlign: "center", lineHeight: 1.4 }}>
             <div className="f-mono">{e.date}</div>
@@ -1028,9 +1265,9 @@ function Gantt({ issues }) {
   const today = new Date();
   return (
     <div>
-      <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: 12, fontSize: 10.5, color: "var(--z-muted)", marginBottom: 6 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(90px, 180px) minmax(0, 1fr)", gap: 12, fontSize: 10.5, color: "var(--z-muted)", marginBottom: 6 }}>
         <div></div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: 0 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(12, minmax(0, 1fr))", gap: 0 }}>
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} style={{ borderLeft: i === 0 ? "none" : "1px dashed var(--z-sep)", paddingLeft: 4 }}>{`${i % 3 === 0 ? (2024 + Math.floor(i / 3)) : "Q" + ((i % 3) + 1)}`}</div>
           ))}
@@ -1043,7 +1280,7 @@ function Gantt({ issues }) {
         const widthPct = ((endD - startD) / (1000*60*60*24*30.4) / months) * 100;
         const color = iss.severity === "CRITICAL" ? "var(--z-below)" : iss.severity === "MATERIAL" ? "var(--z-org)" : "var(--z-muted)";
         return (
-          <div key={iss.id} style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: 12, padding: "8px 0", borderTop: "1px solid var(--z-sep)" }}>
+          <div key={iss.id} style={{ display: "grid", gridTemplateColumns: "minmax(90px, 180px) minmax(0, 1fr)", gap: 12, padding: "8px 0", borderTop: "1px solid var(--z-sep)" }}>
             <div>
               <div className="row">
                 <span className="chip">{iss.id}</span>
@@ -1286,11 +1523,11 @@ function VersionDiff({ entity, baseId, targetId, setBase, setTarget }) {
       <div className="card-head" style={{ flexWrap: "wrap", gap: 8 }}>
         <h3>Version diff</h3>
         <div className="row">
-          <select className="inp" style={{ minWidth: 240 }} value={baseId} onChange={e => setBase(e.target.value)}>
+          <select className="inp" style={{ flex: "1 1 200px", minWidth: 0, maxWidth: 320 }} value={baseId} onChange={e => setBase(e.target.value)}>
             {entity.runs.map(r => <option key={r.id} value={r.id}>{fmtDate(r.date)} · {r.status} · {r.data_source}</option>)}
           </select>
           <span style={{ color: "var(--z-muted)" }}>vs</span>
-          <select className="inp" style={{ minWidth: 240 }} value={targetId} onChange={e => setTarget(e.target.value)}>
+          <select className="inp" style={{ flex: "1 1 200px", minWidth: 0, maxWidth: 320 }} value={targetId} onChange={e => setTarget(e.target.value)}>
             {entity.runs.map(r => <option key={r.id} value={r.id}>{fmtDate(r.date)} · {r.status} · {r.data_source}</option>)}
           </select>
         </div>
@@ -1476,7 +1713,7 @@ function ClientTechStack({ entity, run }) {
           <span className="spacer" />
           <div className="row" style={{ gap: 6 }}>
             <span style={{ fontSize: 11, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Layer</span>
-            <select className="inp" style={{ width: 200, padding: "5px 10px", fontSize: 12 }} value={layer} onChange={e => setLayer(e.target.value)}>
+            <select className="inp" style={{ flex: "1 1 150px", minWidth: 0, maxWidth: 200, padding: "5px 10px", fontSize: 12 }} value={layer} onChange={e => setLayer(e.target.value)}>
               <option value="ALL">All layers</option>
               {LAYERS.map(L => <option key={L} value={L}>{LAYER_LABEL[L].name}</option>)}
             </select>
@@ -1897,7 +2134,7 @@ function ClientTechStackDetail({ entity, run, techId }) {
       )}
 
       {/* 2-col: Evidence + DMA assessment impact */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 14, marginBottom: 14 }}>
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="evidence" size={15} />
@@ -1998,7 +2235,7 @@ function ClientTechStackDetail({ entity, run, techId }) {
       </div>
 
       {/* 2-col: Gap zones + Peer comparison */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 14, marginBottom: 14 }}>
         <div className="card">
           <div className="row" style={{ marginBottom: 12 }}>
             <Icon name="warn" size={15} style={{ color: "var(--z-below)" }} />

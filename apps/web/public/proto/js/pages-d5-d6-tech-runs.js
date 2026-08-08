@@ -235,13 +235,15 @@ function ClientContext({
     issue: issues.find(i => i.id === issueOpen),
     entity: entity,
     onClose: () => setIssueOpen(null),
-    openEvidence: openEvidence
+    openEvidence: openEvidence,
+    openSubcap: openSubcap
   }) : null))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "1.4fr 1fr",
+      gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
       gap: 14,
-      marginBottom: 14
+      marginBottom: 14,
+      alignItems: "start"
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "card"
@@ -456,14 +458,19 @@ function RegulatoryStanding({
   const absence = reg.absence_of_enforcement || null;
   const searched = list(absence && absence.sources_searched);
   // Issues the register carries against a regulatory matter, by id — the link
-  // is the issue's own, never a constant.
-  const regIssues = (issues || []).filter(i => /regulat|enforce|compliance|breach|consent/i.test(`${i.title || ""} ${i.desc || ""} ${i.kind || ""}`));
+  // is the issue's own, never a constant. The contract gives an issue row no
+  // `kind`, so this reads the row's own words; the vocabulary covers the
+  // statutory and supervisory families a register actually uses (a matter
+  // titled "…Community Reinvestment Act…" carries none of the obvious four).
+  const regIssues = (issues || []).filter(i => /regulat|enforce|compliance|breach|consent|reinvestment|statut|examination|supervis|order\b|obligation/i.test(`${i.title || ""} ${i.desc || ""} ${i.status || ""} ${i.kind || ""}`));
   return /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
-      marginBottom: 12
+      marginBottom: 12,
+      flexWrap: "wrap",
+      gap: 6
     }
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "shield",
@@ -579,42 +586,45 @@ function RegulatoryStanding({
       textTransform: "uppercase",
       marginBottom: 6
     }
-  }, "On the issue register"), regIssues.map(i => /*#__PURE__*/React.createElement("div", {
-    key: i.id,
-    className: "co co-org",
-    style: {
-      cursor: "pointer",
-      marginBottom: 6
-    },
-    onClick: () => {
-      setIssueOpen(i.id);
-      // Take the reader to the panel the click just opened.
-      // Without this the state changed and the page did not,
-      // because the detail renders up inside the register.
-      requestAnimationFrame(() => {
-        const el = document.getElementById("issue-detail-anchor");
-        if (el) el.scrollIntoView({
-          behavior: "smooth",
-          block: "center"
+  }, "On the issue register"), regIssues.map(i => {
+    const cap = capStateOf(i);
+    return /*#__PURE__*/React.createElement("div", {
+      key: i.id,
+      className: "co co-org",
+      style: {
+        cursor: "pointer",
+        marginBottom: 6
+      },
+      onClick: () => {
+        setIssueOpen(i.id);
+        // Take the reader to the panel the click just opened.
+        // Without this the state changed and the page did not,
+        // because the detail renders up inside the register.
+        requestAnimationFrame(() => {
+          const el = document.getElementById("issue-detail-anchor");
+          if (el) el.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
         });
-      });
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "warn",
-    size: 14
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      minWidth: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "co-title"
-  }, i.status || "OPEN", " \xB7 ", i.id), /*#__PURE__*/React.createElement("div", {
-    className: "co-body"
-  }, i.title || i.desc, " \xB7 click for the cells it caps")), /*#__PURE__*/React.createElement(Icon, {
-    name: "arrow-r",
-    size: 12
-  })))) : null, (reg.e_ids || []).length ? /*#__PURE__*/React.createElement("div", {
+      }
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "warn",
+      size: 14
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "co-title"
+    }, i.status || "OPEN", " \xB7 ", i.id, cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}` : null), /*#__PURE__*/React.createElement("div", {
+      className: "co-body"
+    }, i.title || i.desc, cap.kind === "ceiling" ? ` · click for the ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} it caps` : cap.kind === "linked" ? ` · caps nothing · click for the ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} it bears on` : " · click for why it is on the register")), /*#__PURE__*/React.createElement(Icon, {
+      name: "arrow-r",
+      size: 12
+    }));
+  })) : null, (reg.e_ids || []).length ? /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 5,
@@ -1062,321 +1072,583 @@ function InteractiveGantt({
   // three-year span, with "2027" sitting above 2026-Q4.
   const years = [];
   for (let y = yearOf(lo); y <= yearOf(hi); y++) years.push(y);
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "200px 1fr",
-      gap: 12,
-      fontSize: 10.5,
-      color: "var(--z-muted)",
-      marginBottom: 6
-    }
-  }, /*#__PURE__*/React.createElement("div", null), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "relative",
-      height: 14
-    }
-  }, years.map(y => {
-    const t = Date.parse(`${y}-01-01`);
-    const left = Math.max(0, Math.min(100, pct(t)));
-    return /*#__PURE__*/React.createElement("div", {
-      key: y,
-      style: {
-        position: "absolute",
-        left: `${left}%`,
-        top: 0,
-        paddingLeft: 4,
-        borderLeft: "1px dashed var(--z-sep)",
-        height: 14
-      }
-    }, y);
-  }))), dated.map(iss => {
-    const a = at(iss.start);
-    const b = iss.end ? at(iss.end) ?? now : now;
-    const left = Math.max(0, Math.min(100, pct(a)));
-    const right = Math.max(0, Math.min(100, pct(Math.max(b, a))));
-    const width = Math.max(2, right - left);
-    const color = iss.severity === "CRITICAL" ? "var(--z-below)" : iss.severity === "MATERIAL" ? "var(--z-org)" : "var(--z-muted)";
-    const isOpen = issueOpen === iss.id;
-    const capped = Object.keys((DMA.ISSUE_CAPS[iss.id] || {}).caps || {}).length;
-    return /*#__PURE__*/React.createElement("button", {
-      key: iss.id,
-      onClick: () => setIssueOpen(isOpen ? null : iss.id),
+  return (
+    /*#__PURE__*/
+    /* The label column is a RANGE, not a constant. At a flat 200px the header
+       row and the issue rows also disagreed below 760px, because the app.css
+       catch-all that collapses inline grids matches `div[style*=…]` and every
+       issue row here is a <button> — so the header collapsed and the rows did
+       not. A range needs no catch-all: both shrink together. */
+    React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
       style: {
         display: "grid",
-        gridTemplateColumns: "200px 1fr",
+        gridTemplateColumns: "minmax(90px, 200px) minmax(0, 1fr)",
         gap: 12,
-        padding: "8px 0",
-        borderTop: "1px solid var(--z-sep)",
-        textAlign: "left",
-        width: "100%",
-        background: isOpen ? "var(--z-lav)" : "transparent",
-        border: "0",
-        borderRadius: 6
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        padding: "0 8px",
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "row"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "chip"
-    }, iss.id), iss.severity ? /*#__PURE__*/React.createElement("span", {
-      className: `b ${iss.severity === "CRITICAL" ? "b-below" : iss.severity === "MATERIAL" ? "b-org" : "b-muted"}`
-    }, iss.severity) : null, capped ? /*#__PURE__*/React.createElement(Icon, {
-      name: "lock",
-      size: 11,
-      style: {
-        color: "var(--z-org)"
-      },
-      title: `${capped} cell${capped === 1 ? "" : "s"} capped`
-    }) : null), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        marginTop: 4
-      },
-      className: "txt-fit-1",
-      title: iss.title || iss.type || ""
-    }, iss.title || iss.type || "—"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
+        fontSize: 10.5,
         color: "var(--z-muted)",
-        marginTop: 2
+        marginBottom: 6
       }
-    }, iss.status, iss.cap_value ? ` · cap ${iss.cap_value}` : "")), /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("div", null), /*#__PURE__*/React.createElement("div", {
       style: {
         position: "relative",
-        height: 28
+        height: 14
+      }
+    }, years.map(y => {
+      const t = Date.parse(`${y}-01-01`);
+      const left = Math.max(0, Math.min(100, pct(t)));
+      /* A tick near the right edge puts its label OUTSIDE the track —
+         the last year is the whole reason this strip was 8px wider than
+         its own box at every viewport. The tick stays exactly where the
+         date is; the label flips to the other side of it. */
+      const atEdge = left > 88;
+      return /*#__PURE__*/React.createElement("div", {
+        key: y,
+        style: {
+          position: "absolute",
+          left: `${left}%`,
+          top: 0,
+          height: 14,
+          paddingLeft: atEdge ? 0 : 4,
+          paddingRight: atEdge ? 4 : 0,
+          borderLeft: atEdge ? 0 : "1px dashed var(--z-sep)",
+          borderRight: atEdge ? "1px dashed var(--z-sep)" : 0,
+          transform: atEdge ? "translateX(-100%)" : "none"
+        }
+      }, y);
+    }))), dated.map(iss => {
+      const a = at(iss.start);
+      const b = iss.end ? at(iss.end) ?? now : now;
+      const left = Math.max(0, Math.min(100, pct(a)));
+      const right = Math.max(0, Math.min(100, pct(Math.max(b, a))));
+      const width = Math.max(2, right - left);
+      const tone = severityTone(iss.severity);
+      const color = tone === "b-below" ? "var(--z-below)" : tone === "b-org" ? "var(--z-org)" : "var(--z-muted)";
+      const isOpen = issueOpen === iss.id;
+      const cap = capStateOf(iss);
+      return /*#__PURE__*/React.createElement("button", {
+        key: iss.id,
+        onClick: () => setIssueOpen(isOpen ? null : iss.id),
+        style: {
+          display: "grid",
+          gridTemplateColumns: "minmax(90px, 200px) minmax(0, 1fr)",
+          gap: 12,
+          padding: "8px 0",
+          borderTop: "1px solid var(--z-sep)",
+          textAlign: "left",
+          width: "100%",
+          background: isOpen ? "var(--z-lav)" : "transparent",
+          border: "0",
+          borderRadius: 6
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          padding: "0 8px",
+          minWidth: 0
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "row"
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "chip"
+      }, iss.id), iss.severity ? /*#__PURE__*/React.createElement("span", {
+        className: `b ${tone}`
+      }, iss.severity) : null, cap.kind === "ceiling" ? /*#__PURE__*/React.createElement(Icon, {
+        name: "lock",
+        size: 11,
+        style: {
+          color: "var(--z-org)"
+        },
+        title: `${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} held at M${cap.ceiling}`
+      }) : null), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 12,
+          marginTop: 4
+        },
+        className: "txt-fit-1",
+        title: iss.title || iss.type || ""
+      }, iss.title || iss.type || "—"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: "var(--z-muted)",
+          marginTop: 2
+        }
+      }, iss.status, cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}` : cap.kind === "linked" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} · no cap` : " · no cell named")), /*#__PURE__*/React.createElement("div", {
+        style: {
+          position: "relative",
+          height: 28
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        title: `${iss.start}${iss.end ? ` → ${iss.end}` : " → open"} · ${iss.desc || ""}`,
+        style: {
+          position: "absolute",
+          left: `${left}%`,
+          width: `${width}%`,
+          height: 18,
+          top: 5,
+          background: color,
+          borderRadius: 4,
+          opacity: .85,
+          display: "flex",
+          alignItems: "center",
+          padding: "0 6px",
+          color: "#fff",
+          fontSize: 10,
+          fontWeight: 500,
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          textOverflow: "ellipsis"
+        }
+      }, iss.desc)));
+    }), undated.length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        borderTop: "1px solid var(--z-sep)",
+        paddingTop: 10,
+        marginTop: 6
       }
     }, /*#__PURE__*/React.createElement("div", {
-      title: `${iss.start}${iss.end ? ` → ${iss.end}` : " → open"} · ${iss.desc || ""}`,
       style: {
-        position: "absolute",
-        left: `${left}%`,
-        width: `${width}%`,
-        height: 18,
-        top: 5,
-        background: color,
-        borderRadius: 4,
-        opacity: .85,
-        display: "flex",
-        alignItems: "center",
-        padding: "0 6px",
-        color: "#fff",
-        fontSize: 10,
-        fontWeight: 500,
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-        textOverflow: "ellipsis"
+        fontSize: 9.5,
+        fontWeight: 700,
+        letterSpacing: ".08em",
+        color: "var(--z-muted)",
+        textTransform: "uppercase",
+        marginBottom: 6
       }
-    }, iss.desc)));
-  }), undated.length ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      borderTop: "1px solid var(--z-sep)",
-      paddingTop: 10,
-      marginTop: 6
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9.5,
-      fontWeight: 700,
-      letterSpacing: ".08em",
-      color: "var(--z-muted)",
-      textTransform: "uppercase",
-      marginBottom: 6
-    }
-  }, "Not yet placed on the time axis \xB7 ", undated.length), undated.map(iss => /*#__PURE__*/React.createElement("button", {
-    key: iss.id,
-    onClick: () => setIssueOpen(issueOpen === iss.id ? null : iss.id),
-    style: {
-      display: "flex",
-      gap: 8,
-      alignItems: "center",
-      width: "100%",
-      textAlign: "left",
-      background: issueOpen === iss.id ? "var(--z-lav)" : "transparent",
-      border: 0,
-      borderRadius: 6,
-      padding: "6px 8px",
-      cursor: "pointer"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "chip"
-  }, iss.id), iss.severity ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-muted"
-  }, iss.severity) : null, /*#__PURE__*/React.createElement("span", {
-    style: {
-      flex: 1,
-      minWidth: 0,
-      fontSize: 12
-    },
-    className: "txt-fit-1",
-    title: iss.title || ""
-  }, iss.title || iss.type || "—"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)"
-    }
-  }, iss.status)))) : null);
+    }, "Not yet placed on the time axis \xB7 ", undated.length), undated.map(iss => {
+      const cap = capStateOf(iss);
+      return /*#__PURE__*/React.createElement("button", {
+        key: iss.id,
+        onClick: () => setIssueOpen(issueOpen === iss.id ? null : iss.id),
+        style: {
+          display: "flex",
+          gap: 8,
+          alignItems: "center",
+          width: "100%",
+          textAlign: "left",
+          background: issueOpen === iss.id ? "var(--z-lav)" : "transparent",
+          border: 0,
+          borderRadius: 6,
+          padding: "6px 8px",
+          cursor: "pointer"
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "chip"
+      }, iss.id), iss.severity ? /*#__PURE__*/React.createElement("span", {
+        className: `b ${severityTone(iss.severity)}`
+      }, iss.severity) : null, cap.kind === "ceiling" ? /*#__PURE__*/React.createElement(Icon, {
+        name: "lock",
+        size: 11,
+        style: {
+          color: "var(--z-org)"
+        },
+        title: `${cap.entries.length} cells held at M${cap.ceiling}`
+      }) : null, /*#__PURE__*/React.createElement("span", {
+        style: {
+          flex: 1,
+          minWidth: 0,
+          fontSize: 12
+        },
+        className: "txt-fit-1",
+        title: iss.title || ""
+      }, iss.title || iss.type || "—"), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 10,
+          color: "var(--z-muted)",
+          whiteSpace: "nowrap"
+        }
+      }, iss.status, cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}` : cap.kind === "linked" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"}` : " · no cell"));
+    })) : null)
+  );
+}
+
+/* ── A cap, and what a register row owes a reader ─────────────────────
+   A cap is the assessment's own arithmetic: a matter holds named cells to a
+   maximum maturity, so a cell sitting at 3.0 has a reason a reader can open
+   rather than a number they must accept. The prototype rendered that as a
+   row label ("OPEN · cap 3") and a grid of tiles reading "Score capped at
+   M3" — the right SHAPE, and as deep as it went: no pre/post arithmetic, no
+   argument, no dates, tiles that were not clickable, and — because its caps
+   lived in a hardcoded map keyed by issue id — a matter absent from that map
+   rendered NO cap section at all, an absence shown as nothing.
+
+   Three states, and each must be said out loud:
+
+     ceiling      the run states a level; show it, and show how many of the
+                  linked cells actually sit at it (pre → post)
+     linked       the run names cells and states no level; the matter bears
+                  on them and caps nothing, which is a finding, not a blank
+     unlinked     no cells at all; then and only then does the panel say the
+                  matter names no cell — and the narrative must say why it is
+                  still on the register
+
+   The middle state is the one this page got wrong: it printed "This matter
+   names no capability cell" whenever no LEVEL was stated, which is what the
+   register looked like when every row shipped with an empty linkage list. */
+function capStateOf(issue) {
+  const entries = Object.entries((DMA.ISSUE_CAPS[issue.id] || {}).caps || {});
+  const levels = entries.map(([, lvl]) => lvl).filter(l => l != null);
+  const ceiling = levels.length ? Math.min(...levels.map(Number)) : null;
+  return {
+    entries,
+    ceiling,
+    kind: !entries.length ? "unlinked" : ceiling == null ? "linked" : "ceiling"
+  };
+}
+
+/* Severity is the register's OWN word — the source's vocabulary, never
+   normalised (a real run uses S2 EXPIRED, LOW, MEDIUM; the fixture used
+   CRITICAL, MATERIAL, MINOR). The tone ladder therefore reads a family of
+   words rather than three constants, and an unrecognised word renders
+   neutral rather than silently reading as "minor". */
+function severityTone(sev) {
+  const s = String(sev || "").toUpperCase();
+  if (/CRITICAL|SEVERE|S1\b/.test(s)) return "b-below";
+  if (/MATERIAL|HIGH|MEDIUM|S2(?!\s*EXPIRED)/.test(s)) return "b-org";
+  if (/EXPIRED|RETIRED|CLOSED/.test(s)) return "b-muted";
+  return "b-muted";
+}
+function monthsSince(d) {
+  const t = Date.parse(/^\d{4}-\d{2}$/.test(String(d)) ? `${d}-01` : String(d));
+  if (Number.isNaN(t)) return null;
+  return Math.max(0, Math.round((Date.now() - t) / (1000 * 60 * 60 * 24 * 30.4375)));
 }
 function IssueDetail({
   issue,
   entity,
   onClose,
-  openEvidence
+  openEvidence,
+  openSubcap
 }) {
   if (!issue) return null;
-  const caps = Object.entries(DMA.ISSUE_CAPS[issue.id]?.caps || {});
+  const {
+    entries,
+    ceiling,
+    kind
+  } = capStateOf(issue);
+  const tone = severityTone(issue.severity);
+
+  /* Each linked cell resolved against the run's OWN scores, so the panel
+     shows the position rather than repeating the id. A cell the run does not
+     carry resolves to null and says so — it is a dead chip, and the reader
+     should see that rather than a tile that opens onto nothing. */
+  const cells = entries.map(([id, lvl]) => {
+    const s = (entity.subcaps || []).find(x => x.id === id) || null;
+    return {
+      id,
+      cap: lvl == null ? null : Number(lvl),
+      row: s,
+      name: s ? s.name : null,
+      score: s ? s.score : null,
+      thin: s ? s.thin : false,
+      category: s ? s.category : null
+    };
+  });
+  const scored = cells.filter(c => c.score != null);
+  const lo = scored.length ? Math.min(...scored.map(c => c.score)) : null;
+  const hi = scored.length ? Math.max(...scored.map(c => c.score)) : null;
+  const atCeiling = ceiling == null ? 0 : scored.filter(c => c.score >= ceiling).length;
+
+  /* The categories the linked cells belong to. The contract carries no
+     `kind` on an issue row, so the prototype's category word ("Regulatory",
+     "Data quality") has no promoted source — inventing one would be reading
+     a taxonomy into the register. What IS knowable is where the matter lands
+     on the assessment, computed from the cells it names. */
+  const cats = [];
+  for (const c of cells) {
+    if (c.category && !cats.some(x => x.id === c.category)) {
+      const meta = DMA.getCategory ? DMA.getCategory(c.category) : null;
+      cats.push({
+        id: c.category,
+        name: meta && meta.name ? meta.name : null
+      });
+    }
+  }
+  const opened = issue.start || null;
+  const elapsed = opened ? monthsSince(opened) : null;
+  const ev = (issue.evidence || []).map(eid => DMA.getEvidence(eid) || {
+    id: eid,
+    tier: "T3"
+  });
+  const Head = ({
+    children
+  }) => /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: ".1em",
+      color: "var(--z-muted)",
+      textTransform: "uppercase",
+      marginBottom: 7
+    }
+  }, children);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 14,
       padding: 14,
       background: "var(--z-lav)",
       borderRadius: 8,
-      borderLeft: `4px solid ${issue.severity === "CRITICAL" ? "var(--z-below)" : issue.severity === "MATERIAL" ? "var(--z-org)" : "var(--z-muted)"}`
+      borderLeft: `4px solid ${tone === "b-below" ? "var(--z-below)" : tone === "b-org" ? "var(--z-org)" : "var(--z-muted)"}`
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
-      marginBottom: 8
+      marginBottom: 8,
+      flexWrap: "wrap",
+      gap: 6
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "chip"
   }, issue.id), /*#__PURE__*/React.createElement("strong", {
     style: {
-      fontSize: 14
+      fontSize: 14,
+      flex: "1 1 320px",
+      minWidth: 0
     }
-  }, issue.title || issue.type || "—"), /*#__PURE__*/React.createElement("span", {
-    className: `b ${issue.severity === "CRITICAL" ? "b-below" : issue.severity === "MATERIAL" ? "b-org" : "b-muted"}`
-  }, issue.severity), /*#__PURE__*/React.createElement("span", {
+  }, sentence(issue.title || issue.type || "—")), issue.severity ? /*#__PURE__*/React.createElement("span", {
+    className: `b ${tone}`
+  }, issue.severity) : null, issue.status ? /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
-  }, issue.status), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("button", {
+  }, issue.status) : null, /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
-    onClick: onClose
+    onClick: onClose,
+    "aria-label": "Close"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "x",
     size: 14
-  }))), /*#__PURE__*/React.createElement("div", {
+  }))), cats.length ? /*#__PURE__*/React.createElement("div", {
+    className: "row",
     style: {
-      fontSize: 13,
-      color: "var(--z-body)",
-      lineHeight: 1.6,
-      marginBottom: 14
+      gap: 5,
+      flexWrap: "wrap",
+      marginBottom: 10
     }
-  }, issue.desc), caps.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 11.5,
+      fontSize: 9.5,
       color: "var(--z-muted)",
+      letterSpacing: ".08em"
+    }
+  }, "BEARS ON"), cats.map(c => /*#__PURE__*/React.createElement("span", {
+    key: c.id,
+    className: "b b-purple",
+    title: c.name || c.id
+  }, c.id, c.name ? ` · ${c.name}` : ""))) : null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 12,
+      alignItems: "stretch",
+      flexWrap: "wrap",
+      padding: "10px 12px",
+      background: "var(--z-white, #fff)",
+      border: "1px solid var(--z-sep)",
+      borderRadius: 7,
       marginBottom: 12
     }
-  }, "This matter names no capability cell, so it is not linked to the assessment. An issue that constrains a capability should say which.") : null, caps.length > 0 ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 10,
+      minWidth: 108
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
       fontWeight: 700,
       letterSpacing: ".1em",
       color: "var(--z-muted)",
-      textTransform: "uppercase",
-      marginBottom: 8
+      textTransform: "uppercase"
     }
-  }, "Cells this matter bears on \xB7 ", caps.length), /*#__PURE__*/React.createElement("div", {
+  }, "Cap"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 19,
+      fontWeight: 700,
+      lineHeight: 1.25,
+      color: kind === "ceiling" ? "var(--z-org)" : "var(--z-body)"
+    }
+  }, kind === "ceiling" ? `M${fx(ceiling, 1)}` : "None"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)"
+    }
+  }, kind === "ceiling" ? `${entries.length} cell${entries.length === 1 ? "" : "s"} held` : kind === "linked" ? `${entries.length} cell${entries.length === 1 ? "" : "s"} named` : "no cell named")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: "1 1 260px",
+      minWidth: 0,
+      borderLeft: "1px solid var(--z-sep)",
+      paddingLeft: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: ".1em",
+      color: "var(--z-muted)",
+      textTransform: "uppercase"
+    }
+  }, "Arithmetic"), kind === "ceiling" ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-body)",
+      lineHeight: 1.55,
+      marginTop: 3
+    }
+  }, "Assessed ", fx(lo, 1), "\u2013", fx(hi, 1), " ", /*#__PURE__*/React.createElement(Icon, {
+    name: "arrow-r",
+    size: 11
+  }), " ceiling M", fx(ceiling, 1), " · ", atCeiling, " of ", scored.length, " named cell", scored.length === 1 ? "" : "s", " sit", atCeiling === 1 ? "s" : "", " at it.") : kind === "linked" ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-body)",
+      lineHeight: 1.55,
+      marginTop: 3
+    }
+  }, scored.length ? lo === hi ? /*#__PURE__*/React.createElement(React.Fragment, null, "All ", scored.length, " named cell", scored.length === 1 ? "" : "s", " assessed ", fx(lo, 1), ". This matter sets no maximum \u2014 the score is the evidence, not a ceiling.") : /*#__PURE__*/React.createElement(React.Fragment, null, "Assessed ", fx(lo, 1), "\u2013", fx(hi, 1), " across ", scored.length, " named cells. This matter sets no maximum; it bears on them without holding them.") : /*#__PURE__*/React.createElement(React.Fragment, null, "The run names ", entries.length, " cell", entries.length === 1 ? "" : "s", " and scores none of them, so no position can be shown.")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-body)",
+      lineHeight: 1.55,
+      marginTop: 3
+    }
+  }, "This matter names no capability cell and states no ceiling. It is on the register for the reason given below, not for a score it moves."))), cells.length ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement(Head, null, kind === "ceiling" ? `Cells this matter caps · ${cells.length}` : `Cells this matter bears on · ${cells.length}`), /*#__PURE__*/React.createElement("div", {
     className: "g2",
     style: {
       gap: 8
     }
-  }, caps.map(([subcapId, capValue]) => {
-    const s = entity.subcaps.find(x => x.id === subcapId) || {
-      name: subcapId,
-      score: capValue
-    };
-    return /*#__PURE__*/React.createElement("div", {
-      key: subcapId,
-      className: "card-tile",
-      style: {
-        padding: 10
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        marginBottom: 4
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "chip purple"
-    }, subcapId), /*#__PURE__*/React.createElement("span", {
-      className: "spacer"
-    }), /*#__PURE__*/React.createElement(Icon, {
-      name: "lock",
-      size: 11,
-      style: {
-        color: "var(--z-org)"
-      }
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        fontWeight: 500
-      }
-    }, s.name), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: "var(--z-muted)",
-        marginTop: 4
-      }
-    }, capValue != null ? `Score capped at M${capValue}` : s.score != null ? `Assessed ${fx(s.score, 1)} · no cap level stated` : "no cap level stated"));
-  }))) : null, (() => {
-    const own = issue.evidence || [];
-    const ev = own.map(eid => DMA.getEvidence(eid) || {
-      id: eid,
-      tier: "T3"
-    });
-    if (!ev.length) return null;
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginTop: 14
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        fontWeight: 700,
-        letterSpacing: ".1em",
-        color: "var(--z-muted)",
-        textTransform: "uppercase",
-        marginBottom: 8
-      }
-    }, "Evidence \xB7 click to open"), /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        flexWrap: "wrap",
-        gap: 4
-      }
-    }, ev.map(e => /*#__PURE__*/React.createElement("button", {
-      key: e.id,
-      className: `tier-chip tier-${e.tier}`,
-      style: {
-        cursor: "pointer",
-        border: 0
-      },
-      title: `${e.title} · ${e.source_pretty}`,
-      onClick: () => openEvidence && openEvidence(e.id)
-    }, e.id))));
-  })(), /*#__PURE__*/React.createElement("div", {
+  }, cells.map(c => /*#__PURE__*/React.createElement("button", {
+    key: c.id,
+    className: "card-tile",
+    onClick: () => openSubcap && openSubcap(c.id),
+    disabled: !openSubcap || !c.row,
+    title: c.row ? `Open ${c.id} in the cell drawer` : `${c.id} is not carried by this run`,
+    style: {
+      padding: 10,
+      textAlign: "left",
+      border: "1px solid var(--z-sep)",
+      background: "var(--z-white, #fff)",
+      borderRadius: 7,
+      cursor: c.row && openSubcap ? "pointer" : "default",
+      width: "100%"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      marginBottom: 4
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "chip purple"
+  }, c.id), /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), c.thin ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted",
+    title: "thin evidence"
+  }, "THIN") : null, c.cap != null ? /*#__PURE__*/React.createElement(Icon, {
+    name: "lock",
+    size: 11,
+    style: {
+      color: "var(--z-org)"
+    }
+  }) : null, c.score != null ? /*#__PURE__*/React.createElement(MaturityChip, {
+    score: c.score
+  }) : null), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 500
+    }
+  }, c.name || c.id), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)",
+      marginTop: 4
+    }
+  }, c.cap != null ? `Held at M${fx(c.cap, 1)}${c.score != null ? ` · assessed ${fx(c.score, 1)}` : ""}` : c.score != null ? `Assessed ${fx(c.score, 1)} · ${DMA.helpers.maturityLabel(c.score)} · no ceiling from this matter` : "Not carried by this run"))))) : null, issue.desc ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement(Head, null, "Why it constrains"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "var(--z-body)",
+      lineHeight: 1.65
+    }
+  }, sentence(issue.desc))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14,
+      fontSize: 12,
+      color: "var(--z-muted)"
+    }
+  }, "The register gives no rationale for this matter. The row renders on its title alone rather than on a composed one."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement(Head, null, "Timeline"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 14,
+      flexWrap: "wrap",
+      fontSize: 11.5,
+      color: "var(--z-body)"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)"
+    }
+  }, "Opened "), opened ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("strong", null, opened), elapsed != null ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)"
+    }
+  }, " \xB7 ", elapsed, " months ago") : null) : /*#__PURE__*/React.createElement("em", {
+    style: {
+      color: "var(--z-muted)"
+    }
+  }, "no opening date established")), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)"
+    }
+  }, "Closed "), issue.end ? /*#__PURE__*/React.createElement("strong", null, issue.end) : /*#__PURE__*/React.createElement("em", {
+    style: {
+      color: "var(--z-muted)"
+    }
+  }, /^REMEDIATED|RESOLVED|CLOSED/i.test(String(issue.status || "")) ? "not dated by the register" : "still open")), issue.status ? /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)"
+    }
+  }, "Status "), /*#__PURE__*/React.createElement("strong", null, issue.status)) : null)), ev.length ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Head, null, "Evidence \xB7 click to open"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      flexWrap: "wrap",
+      gap: 4
+    }
+  }, ev.map(e => /*#__PURE__*/React.createElement("button", {
+    key: e.id,
+    className: `tier-chip tier-${e.tier}`,
+    style: {
+      cursor: "pointer",
+      border: 0
+    },
+    title: `${e.title || e.id}${e.source_pretty ? ` · ${e.source_pretty}` : ""}`,
+    onClick: () => openEvidence && openEvidence(e.id)
+  }, e.id)))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-muted)"
+    }
+  }, "This matter cites no evidence id."), cells.length ? /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       marginTop: 12
     }
-  }, caps.length ? /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => navigate(`/clients/${entity.id}/heatmap`, {
       hm: "standard",
       zoom: "subcap",
-      subcap: caps[0][0]
+      subcap: cells[0].id
     })
-  }, "Open ", caps[0][0], " in the heatmap ", /*#__PURE__*/React.createElement(Icon, {
+  }, "Open ", cells[0].id, " in the heatmap ", /*#__PURE__*/React.createElement(Icon, {
     name: "arrow-r",
     size: 11
-  })) : null));
+  }))) : null);
 }
 function FinChartInteractive({
   entity,
@@ -1733,7 +2005,7 @@ function Timeline({
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "repeat(8, 1fr)",
+      gridTemplateColumns: "repeat(8, minmax(0, 1fr))",
       gap: 6,
       fontSize: 9.5,
       color: "var(--z-muted)",
@@ -1802,7 +2074,7 @@ function Gantt({
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "180px 1fr",
+      gridTemplateColumns: "minmax(90px, 180px) minmax(0, 1fr)",
       gap: 12,
       fontSize: 10.5,
       color: "var(--z-muted)",
@@ -1811,7 +2083,7 @@ function Gantt({
   }, /*#__PURE__*/React.createElement("div", null), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "repeat(12, 1fr)",
+      gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
       gap: 0
     }
   }, Array.from({
@@ -1832,7 +2104,7 @@ function Gantt({
       key: iss.id,
       style: {
         display: "grid",
-        gridTemplateColumns: "180px 1fr",
+        gridTemplateColumns: "minmax(90px, 180px) minmax(0, 1fr)",
         gap: 12,
         padding: "8px 0",
         borderTop: "1px solid var(--z-sep)"
@@ -2301,7 +2573,9 @@ function VersionDiff({
   }, /*#__PURE__*/React.createElement("select", {
     className: "inp",
     style: {
-      minWidth: 240
+      flex: "1 1 200px",
+      minWidth: 0,
+      maxWidth: 320
     },
     value: baseId,
     onChange: e => setBase(e.target.value)
@@ -2315,7 +2589,9 @@ function VersionDiff({
   }, "vs"), /*#__PURE__*/React.createElement("select", {
     className: "inp",
     style: {
-      minWidth: 240
+      flex: "1 1 200px",
+      minWidth: 0,
+      maxWidth: 320
     },
     value: targetId,
     onChange: e => setTarget(e.target.value)
@@ -2393,10 +2669,21 @@ function ClientTechStack({
   } = useApp();
   const [layer, setLayer] = useState("ALL");
   const [hideAbsent, setHideAbsent] = useState(false);
-  // The status filter the stat strip toggles. It lives in the same predicate
-  // as the layer select and the hide-absent switch, so a tile click and the
-  // filter bar always agree on what the register shows.
+  // The status filter. ONE piece of state behind three controls — the legend
+  // entries, the stat tiles and the hide-absent switch — and behind the list
+  // predicate, so no two of them can ever describe a different register.
   const [statusFilter, setStatusFilter] = useState(null);
+  /* The single writer. Pressing the status already selected clears it, so a
+     control that filters is also the control that un-filters — otherwise a
+     reader who filters to ABSENT has no way back except reloading the page.
+     Filtering TO absent while absent is hidden shows an empty register, so
+     the request wins and releases the switch (and the switch, below, releases
+     the filter for the mirror case). */
+  const switchStatus = key => {
+    const next = statusFilter === key ? null : key;
+    if (next === "ABSENT" && hideAbsent) setHideAbsent(false);
+    setStatusFilter(next);
+  };
   // Layer briefly highlighted after a PRIMARY GAP tile click.
   const [flashLayer, setFlashLayer] = useState(null);
   const allTech = DMA.TECH_STACK;
@@ -2509,15 +2796,32 @@ function ClientTechStack({
     bg: "rgba(194,80,8,.06)",
     bd: "rgba(194,80,8,.25)"
   }].map(s => {
+    // Counted from the register, never asserted: a status no row
+    // carries has nothing to filter to, so its entry is disabled
+    // rather than pressable into an empty list.
     const n = allTech.filter(t => t.status === s.key).length;
-    return /*#__PURE__*/React.createElement("div", {
+    const active = statusFilter === s.key;
+    const dead = n === 0;
+    return /*#__PURE__*/React.createElement("button", {
       key: s.label,
+      className: "ts-legend",
+      "aria-pressed": active,
+      disabled: dead,
+      onClick: () => switchStatus(s.key),
+      title: dead ? `No ${s.key} rows in this register` : active ? "Show every status again" : `Show only ${s.key} rows`,
       style: {
         display: "flex",
         alignItems: "center",
         gap: 6,
         fontSize: 11.5,
-        color: "var(--z-body)"
+        color: "var(--z-body)",
+        fontFamily: "inherit",
+        padding: "3px 8px",
+        borderRadius: 999,
+        background: active ? s.bg : "transparent",
+        border: active ? `1.5px solid ${s.c}` : "1.5px solid transparent",
+        opacity: dead ? .45 : 1,
+        cursor: dead ? "not-allowed" : "pointer"
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
@@ -2525,7 +2829,8 @@ function ClientTechStack({
         height: 14,
         background: s.bg,
         border: `1.5px solid ${s.bd}`,
-        borderRadius: 3
+        borderRadius: 3,
+        flexShrink: 0
       }
     }), /*#__PURE__*/React.createElement("strong", {
       style: {
@@ -2554,7 +2859,9 @@ function ClientTechStack({
   }, "Layer"), /*#__PURE__*/React.createElement("select", {
     className: "inp",
     style: {
-      width: 200,
+      flex: "1 1 150px",
+      minWidth: 0,
+      maxWidth: 200,
       padding: "5px 10px",
       fontSize: 12
     },
@@ -2628,12 +2935,7 @@ function ClientTechStack({
           goToPrimaryGap();
           return;
         }
-        const next = statusFilter === s.key ? null : s.key;
-        // Filtering TO absent while hiding absent is a contradiction;
-        // the tile wins and releases the switch (and the switch,
-        // below, releases the tile).
-        if (next === "ABSENT" && hideAbsent) setHideAbsent(false);
-        setStatusFilter(next);
+        switchStatus(s.key);
       },
       style: {
         borderLeft: `3px solid ${s.c}`,
@@ -3244,7 +3546,7 @@ function ClientTechStackDetail({
   }, "The run states no assessment impact for this row. The linked cells and their served scores are below; the reasoning that connects them was not written.")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr",
+      gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
       gap: 14,
       marginBottom: 14
     }
@@ -3443,7 +3745,7 @@ function ClientTechStackDetail({
   }, r.id))) : null)))))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr",
+      gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
       gap: 14,
       marginBottom: 14
     }
