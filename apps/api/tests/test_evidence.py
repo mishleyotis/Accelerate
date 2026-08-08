@@ -22,7 +22,7 @@ COLS = ("e_id", "origin", "source_name", "source_url", "source_domain",
 
 
 def _row(e_id, tier="T2", claim="FACT", entity="A", identity_ok=True, ers=4.2,
-         linked=()):
+         linked=(), runs=("run-7",)):
     return {"e_id": e_id, "origin": "PUBLIC_WEB", "source_name": "NCUA",
             "source_url": "https://ncua.gov/x", "source_domain": "ncua.gov",
             "excerpt": "a verbatim excerpt of at least fifty characters, as "
@@ -31,19 +31,26 @@ def _row(e_id, tier="T2", claim="FACT", entity="A", identity_ok=True, ers=4.2,
             "reference_date": None, "age_months": 7, "recency_band": "CURRENT",
             "ers": ers, "specificity": 3, "corroboration": 2,
             "identity_ok": identity_ok, "identity_note": None,
-            # The cells this item was linked to for this run. Selected by the
-            # read path's LEFT JOIN LATERAL over evidence_subcap_links, which is
-            # what makes the drawer's "supports:" chips traceable.
+            # The runs whose evidence_subcap_links carry this row. The read
+            # path's LEFT JOIN LATERAL is run-scoped, so a row linked only
+            # under ANOTHER run reports no cells here — which is exactly the
+            # state the listing used to serve as if it belonged to this run.
+            "_runs": tuple(runs),
+            # The cells this item was linked to for this run. Selected by that
+            # lateral over evidence_subcap_links, and what makes the drawer's
+            # "supports:" chips traceable.
             "linked_subcap_ids": list(linked),
             "_entity": entity}
 
 
 class _Cur:
-    """Enough of a cursor to drive fetch(): the entity-scoped select, and the
-    second select that decides not_found vs foreign."""
+    """Enough of a cursor to drive fetch(): the entity-scoped select, the
+    citation sweep over the run's promoted rows, and the second select that
+    decides not_found vs foreign."""
 
-    def __init__(self, rows):
+    def __init__(self, rows, cited=()):
         self.rows, self._out, self.queries = rows, [], []
+        self.cited = list(cited)
 
     def execute(self, sql, params=None):
         self.queries.append(sql)
@@ -51,12 +58,22 @@ class _Cur:
             # run_id, when passed, is bound BEFORE entity_id (it sits inside the
             # lateral), so the entity is the last of the leading params.
             has_run = "k.run_id = %s" in sql
+            run = params[0] if has_run else None
             entity = params[1] if has_run else params[0]
             picked = [r for r in self.rows if r["_entity"] == entity]
-            if len(params) > (2 if has_run else 1):
+            if "AND e.e_id = ANY(%s)" in sql:
                 picked = [r for r in picked if r["e_id"] in params[-1]]
+            elif "l.ids IS NOT NULL OR" in sql:
+                # the run scope: linked under THIS run, or cited by it
+                picked = [r for r in picked
+                          if (r["linked_subcap_ids"] and run in r["_runs"])
+                          or r["e_id"] in params[-1]]
             self._out = [tuple(r[c] for c in COLS + ("linked_subcap_ids",))
+                         if not (has_run and run not in r["_runs"])
+                         else tuple(list(r[c] for c in COLS) + [[]])
                          for r in picked]
+        elif "unnest(e_ids)" in sql:
+            self._out = [(e,) for e in self.cited]
         elif "WHERE e_id = ANY" in sql:
             wanted = set(params[0])
             self._out = [(r["e_id"],) for r in self.rows if r["e_id"] in wanted]
@@ -158,3 +175,62 @@ def test_the_linkage_survives_customer_redaction():
     items = redact_items(fetch(cur, "A", ["E-3"])["items"], "customer")
     assert items[0]["linked_subcap_ids"] == ["P1C1.1.1"]
     assert all(f not in items[0] for f in INTERNAL_FIELDS)
+
+
+def test_another_runs_rows_are_not_listed_under_this_run():
+    """The measured defect: 178 rows served for one run, 36 of them a second
+    ingest's `-R2` copies, every one of them showing no cells.
+
+    `linked_subcap_ids` was read per RUN while the row set was read per ENTITY,
+    so the listing answered a question nobody asked — "every row this
+    institution has ever had" — and presented it as this run's evidence. A row
+    that cannot be resolved to this run must not be listed as if it belonged to
+    it (invariant 4, fail-closed).
+    """
+    rows = [_row("E-1", entity="A", linked=["P1C1.1.1"], runs=("run-7",)),
+            _row("E-2-R2", entity="A", linked=["P2C1.1.1"], runs=("run-8",))]
+    res = fetch(_Cur(rows), "A", run_id="run-7")
+    assert res["found"] == ["E-1"], "run 8's row is not run 7's evidence"
+
+
+def test_a_row_this_run_cites_is_listed_even_with_no_cell_links():
+    """A producer registers a source, cites it on a card and links it to no
+    cell. It is still this run's evidence — the pages argue from it — so the
+    scope is "linked OR cited", not "linked" alone. Dropping it would empty an
+    evidence tab of the very sources the surfaces name."""
+    rows = [_row("E-CC-001", entity="A", linked=[], runs=()),
+            _row("E-CC-002", entity="A", linked=[], runs=())]
+    cur = _Cur(rows, cited=["E-CC-001"])
+    res = fetch(cur, "A", run_id="run-7")
+    assert res["found"] == ["E-CC-001"]
+    assert "E-CC-002" not in res["found"], "uncited and unlinked is not this run's"
+    assert any("unnest(e_ids)" in q for q in cur.queries), \
+        "the citation set is read from the run's own promoted rows"
+
+
+def test_resolution_by_id_stays_entity_scoped():
+    """Invariant 4 defines found/not_found/foreign over the ENTITY. Narrowing
+    the drawer's own lookup to the run would turn a legitimate citation into
+    not_found and blank a panel the reader opened on purpose — a fail-closed
+    gate reporting a fabrication that isn't one."""
+    rows = [_row("E-2-R2", entity="A", linked=["P2C1.1.1"], runs=("run-8",))]
+    cur = _Cur(rows)
+    res = fetch(cur, "A", ["E-2-R2"], run_id="run-7")
+    assert res["found"] == ["E-2-R2"] and res["not_found"] == []
+    assert res["items"][0]["excerpt"], "the excerpt is what the drawer is for"
+    assert not any("unnest(e_ids)" in q for q in cur.queries), \
+        "an explicit id list needs no citation sweep"
+
+
+def test_the_citation_sweep_reads_the_writer_spec_not_a_hand_list():
+    """A section that gains or loses its citations column changes ONE
+    description of the mapping. A hand-maintained table of tables is the same
+    defect class as a hand-maintained column list."""
+    from dma_api.evidence import _citing_tables
+    from dma_api.serving_spec import readers
+    tables = set(_citing_tables())
+    assert "platform_story" in tables and "heatmap_cell_evidence" in tables
+    assert "insight_cards" in tables, "the column is e_ids even where the item key isn't"
+    for r in readers().values():
+        if r["grain"] == "none":
+            assert r["table"] not in tables, "the evidence store is not per-run"
