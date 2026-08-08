@@ -16,6 +16,10 @@ numpy==1.24.3
 pyarrow==12.0.0
 rank-bm25==0.2.2
 pdfplumber==0.9.0
+# pdfplumber -> pdfminer.six -> cryptography needs the compiled cffi backend.
+# Measured: without it ingest_evidence.py dies on ModuleNotFoundError
+# _cffi_backend, which names no package you can act on.
+cffi>=1.15
 matplotlib==3.7.2
 
 # dma-first-call-deck/scripts — slide editors and visual QA (11 scripts)

@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The five Digital Maturity Assessment skills, four DMA agents, and the remote DMA Insights MCP connector — research, assessment, governance, surface production and the first-call deck, packaged as one installable unit.",
   "author": {
     "name": "Zennify — DMA Insights build"

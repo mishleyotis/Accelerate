@@ -46,6 +46,9 @@ MODULES = {
                             "dma-governance: report audit"),
     "dateutil": ("python-dateutil", "evidence recency ladder"),
     "lxml": ("lxml", "transitive (python-pptx, python-docx)"),
+    "cffi": ("cffi", "dma-assessment: ingest_evidence — pdfplumber's "
+                     "cryptography backend; its absence surfaces as "
+                     "ModuleNotFoundError _cffi_backend"),
 }
 
 

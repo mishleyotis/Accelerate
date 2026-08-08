@@ -2,9 +2,9 @@
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "zennify-dma",
   "description": "Zennify Digital Maturity Assessment tooling: the skills, agents and connector that produce and audit DMA Insights surfaces.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "owner": {
-    "name": "Zennify — DMA Insights build",
+    "name": "Zennify \u2014 DMA Insights build",
     "email": "mishley.otiende@zennify.com"
   },
   "plugins": [
@@ -13,9 +13,14 @@
       "source": "./plugins/dma-insights",
       "displayName": "DMA Insights",
       "description": "The five DMA skills, four DMA agents, and the remote DMA Insights MCP connector.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "domain",
-      "tags": ["dma", "financial-services", "assessment", "zennify"],
+      "tags": [
+        "dma",
+        "financial-services",
+        "assessment",
+        "zennify"
+      ],
       "license": "UNLICENSED",
       "defaultEnabled": false
     }
