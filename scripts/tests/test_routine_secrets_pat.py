@@ -40,10 +40,29 @@ def _pat(monkeypatch):
     monkeypatch.setattr(R, "github_pat", lambda: PAT)
 
 
-def _github(monkeypatch, *, expiry=None, code=None, login="octocat"):
+def _github(monkeypatch, *, expiry=None, code=None, login="octocat",
+            substitutes=False):
+    """A GitHub that behaves like GitHub: it REFUSES an invalid token.
+
+    The check opens with a control probe — a token that cannot be valid —
+    because an egress proxy injecting its own identity answers /user
+    identically whatever is presented, and a check running behind one reads
+    the proxy's credential and reports it as the PAT's. A fake that accepted
+    everything would model the proxy rather than GitHub, so it must refuse
+    the probe for the real assertion to mean anything.
+
+    `substitutes=True` models the proxy, for the test that pins the guard.
+    """
     seen = {}
 
     def fake(req, *a, **kw):
+        bearer = dict(req.headers).get("Authorization", "")
+        is_probe = "INVALID" in bearer
+        if is_probe and not substitutes:
+            raise urllib.error.HTTPError(req.full_url, 401, "bad credentials",
+                                         {}, io.BytesIO(b""))
+        if is_probe:
+            return _Resp(json.dumps({"login": login}).encode(), _hdrs(expiry))
         seen["headers"] = dict(req.headers)
         seen["url"] = req.full_url
         if code:
@@ -53,6 +72,19 @@ def _github(monkeypatch, *, expiry=None, code=None, login="octocat"):
 
     monkeypatch.setattr(R.urllib.request, "urlopen", fake)
     return seen
+
+
+def test_a_proxy_substituting_credentials_is_detected_not_believed(monkeypatch):
+    """The failure that cost three regenerated tokens.
+
+    Behind a credential-substituting proxy every token looks live, including
+    a dead one. The check must report that it cannot tell, rather than the
+    answer it would have given anyway.
+    """
+    _github(monkeypatch, expiry=_in(3600), substitutes=True)
+    s = R.github_pat_status()
+    assert s["verdict"] == "UNKNOWN"
+    assert "substituting" in s["detail"]
 
 
 def _in(seconds):
