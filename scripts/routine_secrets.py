@@ -631,9 +631,28 @@ def main() -> int:
               f"the folder with {e.identity}")
         return 1
 
+    # Paged to exhaustion, not to the first page. `pageSize=50` returned 50 of
+    # 171 client folders and the preflight printed "50 child folder(s)" as a
+    # green line — an undercount of 121 that reads exactly like a healthy small
+    # tree. The same defect class the parser work just closed twelve of: a
+    # reader that stops early reports what it saw as what is there.
     try:
-        kids = drive_get("files", q=f"'{intake}' in parents",
-                         fields="files(id,name)", pageSize=50)
+        files, token, pages = [], None, 0
+        while True:
+            args = dict(q=f"'{intake}' in parents", fields="nextPageToken,files(id,name)",
+                        pageSize=1000)
+            if token:
+                args["pageToken"] = token
+            page = drive_get("files", **args)
+            files.extend(page.get("files", []))
+            token = page.get("nextPageToken")
+            pages += 1
+            # A tree this size needs one or two pages. Anything past ten means
+            # the cursor is not advancing, and looping forever on a preflight
+            # is worse than reporting the number reached.
+            if not token or pages >= 10:
+                break
+        kids = {"files": files, "_pages": pages, "_truncated": bool(token)}
     except DriveError as e:
         print(f"intake children   FAIL {e.code} — the folder resolves but its "
               f"children could not be listed as {e.identity}; this run cannot "
