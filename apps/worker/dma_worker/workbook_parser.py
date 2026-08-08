@@ -32,7 +32,18 @@ import openpyxl
 
 SUBCAP_RE = re.compile(r"^P\d+C\d+(?:\.(?:\d+|[A-Z]+\d+))+$")
 GRAIN_RE = re.compile(r"^(P\d+)(C\d+)\.(\d+|[A-Z]+\d+)")
-EID_RE = re.compile(r"\bE-[A-Z]{0,3}\d{2,4}(?::F\d+)?\b")
+# Two evidence-id families, both published by the upstream dma-assessment
+# skill's column spec (`references/workbook_specification.md` §Column F):
+# `E-\d{3}` for public evidence and `INT-[DOC_ABBREV]-\d{3}` for internal
+# documents the client supplied. The internal form was unmatched here, so
+# every INT- citation was dropped without an observation — 341 of them in
+# one shipped package (ATB), whose cells then read as uncited.
+EID_RE = re.compile(r"\b(?:E-[A-Z]{0,3}\d{2,4}(?::F\d+)?|INT-[A-Z0-9]{2,12}-\d{1,4}(?::F\d+)?)\b")
+
+# The rubric the whole product bands on is M1–M5. A workbook cell outside it
+# is not a score at a different scale, it is a defect: 0 renders as the lowest
+# band and is indistinguishable from a real assessment of "barely started".
+SCORE_MIN, SCORE_MAX = Decimal("1"), Decimal("5")
 
 
 def _norm(name: str) -> str:
@@ -87,9 +98,45 @@ class ParsedScore:
 
 @dataclass
 class Observation:
-    kind: str          # missing_score · unparseable_cell
+    kind: str          # missing_score · unparseable_cell · column_not_found · …
     subcap_id: str
     detail: dict
+
+
+def _column_not_found(tab: str, field: str, tried, headers) -> Observation:
+    """The observation an unrecognised column MUST produce.
+
+    A reader that does not recognise its input carries on as though the input
+    were empty, and a null column is indistinguishable from a column of nulls.
+    So every lookup that fails names the tab, the field it was looking for,
+    the spellings it accepts and the headers actually present — enough for the
+    next spelling to be added without reading the workbook first.
+    """
+    return Observation("column_not_found", None, {
+        "tab": tab, "field": field, "expected_any_of": list(tried),
+        "headers_present": sorted(headers)[:30]})
+
+
+def _pick_col(headers: dict, names) -> int | None:
+    """First alias present wins; None when the column is not there at all."""
+    for n in names:
+        if n in headers:
+            return headers[n]
+    return None
+
+
+# Column spellings the shipped corpus uses, per field. Measured across the 153
+# packages under the production intake tree — `scoring_rationale` alone appears
+# in 35 scoring tabs across 9 clients, and matching "rationale" by PREFIX
+# missed every one of them, losing the only verbatim excerpt text the
+# general_dma generation carries.
+_EVIDENCE_ID_KEYS = ("evidence_ids", "evidence_id", "evidence_refs",
+                     "evidence_references", "e_ids", "evidence_ids_cited",
+                     "citations", "evidence")
+_RATIONALE_KEYS = ("rationale", "scoring_rationale", "assessor_rationale",
+                   "score_rationale", "rationale_150_chars", "justification",
+                   "rationale_evidence", "scoring_notes", "evidence_rationale",
+                   "narrative")
 
 
 @dataclass
@@ -133,7 +180,17 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
             return _parse_scorecard(wb["2_Scorecard"], facets)
         pillar_tabs = [t for t in wb.sheetnames if _is_pillar_tab(t)]
         if pillar_tabs:
-            return _parse_pillar_scoring(wb, pillar_tabs)
+            out = _parse_pillar_scoring(wb, pillar_tabs)
+            if not out.scores and not out.observations and not out.toggled_out:
+                # Structurally impossible to reach silently: a workbook whose
+                # pillar tabs yielded nothing at all still names itself.
+                out.observations.append(Observation(
+                    "workbook_yielded_nothing", None,
+                    {"tabs_read": sorted(pillar_tabs),
+                     "reason": "pillar-grain tabs were found and read, and no "
+                               "cell, observation or toggled-out variant came "
+                               "out of any of them"}))
+            return out
         # Rollup-only variant: recognisably a DMA workbook (stated pillar/
         # category grains present) but carrying no subcap-grain tabs at
         # all. The package lands with zero scored cells and its stated
@@ -146,7 +203,16 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
                  "note": "rollup-only workbook: stated grains land, no cells"}))
             out.scored_cells = 0
             return out
-        raise ValueError(f"unrecognised scoring workbook generation: tabs={wb.sheetnames}")
+        # A generation nobody has taught this parser. Raising is deliberate:
+        # the caller records it and quarantines the package by name after
+        # three attempts, which is louder than a run with no cells. The
+        # message is the quarantine reason, so it names what was looked for.
+        raise ValueError(
+            "unrecognised scoring workbook generation: "
+            f"tabs={wb.sheetnames}; expected one of "
+            "'2_Scorecard' (claude_dma), a P<n>_* subcapability tab "
+            "(general_dma), or 'Pillar_Summary'/'Category_Detail' "
+            "(rollup-only)")
     finally:
         wb.close()
 
@@ -194,17 +260,32 @@ def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
         score_letter = openpyxl.utils.get_column_letter(score_col + 1)
         conf_col = headers.get("confidence")
         name_col = next((headers[k] for k in _NAME_KEYS if k in headers), None)
-        eids_col = headers.get("evidence_ids")
-        rationale_col = headers.get("rationale")
+        eids_col = _pick_col(headers, _EVIDENCE_ID_KEYS)
+        if eids_col is None:
+            result.observations.append(
+                _column_not_found(tab, "evidence_ids", _EVIDENCE_ID_KEYS, headers))
+        rationale_col = _pick_col(headers, _RATIONALE_KEYS)
         if rationale_col is None:  # e.g. "Rationale (≥150 chars)"
-            rationale_col = next((v for k, v in headers.items()
-                                  if k.startswith("rationale")), None)
+            rationale_col = next((v for k, v in sorted(headers.items())
+                                  if "rationale" in k), None)
+        if rationale_col is None:
+            result.observations.append(
+                _column_not_found(tab, "rationale", _RATIONALE_KEYS, headers))
+        id_col_header = next((k for k, v in headers.items() if v == sid_col), "?")
+        seen_ids = unrecognised = 0
+        samples: list = []
         for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
             def cell_at(i, _row=row):
                 return _row[i] if i is not None and i < len(_row) else None
             sid = cell_at(sid_col)
             sid = str(sid).strip() if sid else None
-            if not sid or not SUBCAP_RE.match(sid):
+            if not sid:
+                continue
+            seen_ids += 1
+            if not SUBCAP_RE.match(sid):
+                unrecognised += 1
+                if len(samples) < 5 and sid not in samples:
+                    samples.append(sid)
                 continue
             pillar, category, capability = _grain(sid)
             score = _decimal(cell_at(score_col))
@@ -224,6 +305,17 @@ def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
                 else:
                     result.toggled_out.append(sid)
                 continue
+            if not (SCORE_MIN <= score <= SCORE_MAX):
+                # Out of the M1–M5 rubric: never stored, never rescaled. A 0
+                # banded as Activating and a 7 banded as Differentiating are
+                # both real maturity on the heatmap, and neither was assessed.
+                result.observations.append(Observation(
+                    "score_out_of_range", sid,
+                    {"source_cell": cell, "stated": str(score),
+                     "rubric": f"{SCORE_MIN}–{SCORE_MAX}",
+                     "resolution": "cell not scored; the workbook states a "
+                                   "value outside the maturity rubric"}))
+                continue
             conf = None
             if cell_at(conf_col) is not None:
                 c = str(cell_at(conf_col)).strip().upper()
@@ -237,6 +329,23 @@ def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
                 facets=[], evidence_refs=sorted({m.split(":")[0] for m in EID_RE.findall(refs_raw)}),
                 rationale=rationale,
             ))
+        if seen_ids and unrecognised == seen_ids:
+            # THE silent-zero case. Two shipped packages (American Homes,
+            # Wescom Financial) state CATEGORY ids — `P1C1` — in the
+            # SubCap_ID column of a subcapability tab, so 1,401 populated
+            # rows matched nothing and the whole workbook parsed to zero
+            # scores, zero observations and zero toggled-out cells: a record
+            # indistinguishable from an assessment nobody had done. A shape
+            # the parser cannot read is a named refusal, never an empty tab.
+            result.observations.append(Observation(
+                "unrecognised_cell_id_format", None, {
+                    "tab": tab, "column": id_col_header,
+                    "expected": SUBCAP_RE.pattern,
+                    "found_examples": samples,
+                    "rows_dropped": unrecognised,
+                    "reason": "every populated id on this tab failed the "
+                              "subcapability id pattern; no cell could be "
+                              "attributed, so none was scored"}))
     result.scored_cells = len(result.scores)
     return result
 
