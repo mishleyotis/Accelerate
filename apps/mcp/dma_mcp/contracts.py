@@ -193,9 +193,133 @@ def all_sections() -> list:
     return [(p, s) for p in PAGES for s in sections(p)]
 
 
+#: What a page is MEASURED to weigh, one row per section that has ever been the
+#: reason a submission did not fit. Numbers, not adjectives: a producer that is
+#: told "cell_evidence is large" plans the same way it always did, and a
+#: producer told "862,351 bytes across 697 cells, one row per served cell,
+#: required" plans for parts before it writes the first one.
+MEASURED_SIZES = {
+    ("heatmap", "cell_evidence"): {
+        "measured_bytes": [
+            {"entity": "Frost Bank", "bytes": 862_351, "items": 697,
+             "measured_on": "2026-08-08"},
+            {"entity": "Fisher Investments", "bytes": 1_208_289, "items": 708,
+             "measured_on": "2026-08-08"},
+        ],
+        "grain": "one item per SERVED cell — the drawer row is required for "
+                 "every cell the run scores, so the section's size is the "
+                 "run's cell count and not an authoring choice",
+        "note": "The barest still-compliant reduction of this section "
+                "(subcap_id / e_ids / synthesis / grounded_on / thin / "
+                "provenance only) still measured 347,509 bytes. Cutting the "
+                "served cell set to fit is the wrong repair: over-exclusion "
+                "hides scores the assessment actually made.",
+    },
+    ("heatmap", "alerts"): {
+        "measured_bytes": [
+            {"entity": "Fisher Investments", "bytes": 285_520, "items": 206,
+             "measured_on": "2026-08-08"},
+        ],
+        "grain": "one item per alert",
+    },
+}
+
+#: Whole-page measurements, for the same reason.
+MEASURED_PAGES = {
+    "heatmap": [
+        {"entity": "Frost Bank", "bytes": 1_128_742,
+         "approx_tokens": 282_000, "measured_on": "2026-08-08"},
+        {"entity": "Fisher Investments", "bytes": 1_598_147,
+         "measured_on": "2026-08-08"},
+    ],
+}
+
+
+def _chunkable(sec: dict) -> list:
+    """The fields of a section that can be appended to in parts: the
+    list-valued ones. Everything else arrives in a `fields` merge."""
+    return sorted(f for f, spec in sec["fields"].items()
+                  if spec["type"] == "list")
+
+
+def transport_for(page: str) -> dict:
+    """What the transport allows, stated in bytes, addressed to a producer that
+    is about to build this page.
+
+    This block exists because of MEM-0030 (TRANSPORT_BOUNDS_THE_CONTRACT): the
+    submit path took the payload as one inline object, a contract-complete
+    heatmap did not fit, and the failure mode was not an error — it was a
+    smaller payload that validated perfectly. Nobody discovered the ceiling
+    from the contract. They discovered it by building 1.6 MB and failing. A
+    contract that states its own transport is the second-order fix.
+    """
+    from . import transport as _t
+    lim = _t.limits()
+    return {
+        "inline_max_bytes": lim["inline_max_bytes"],
+        "recommended_part_bytes": lim["recommended_part_bytes"],
+        "max_part_bytes": lim["max_part_bytes"],
+        "upload_ttl_hours": lim["upload_ttl_hours"],
+        "rule": (
+            "A payload whose compact JSON exceeds inline_max_bytes will not "
+            "fit in one tool call. Do NOT reduce the payload to fit — the "
+            "size is the contract's, and cutting served rows hides scores the "
+            "assessment made. Use the chunked path."),
+        "inline": {
+            "tool": "submit_page_payload(run_id, page, payload={...})",
+            "use_when": "the whole page's compact JSON is under "
+                        f"{lim['inline_max_bytes']} bytes",
+        },
+        "chunked": {
+            "use_when": "anything larger, and always for a heatmap with a "
+                        "contract-complete cell_evidence",
+            "steps": [
+                "open_payload(run_id, page, producer_version) -> upload_id "
+                "(the CONNECTOR allocates it; you never choose one)",
+                "append_payload_part(upload_id, part, parts_total, path, "
+                "fields={...}) — shallow-merges an object at `path`; path '' "
+                "is the payload root, so a whole small section is one part",
+                "append_payload_part(upload_id, part, parts_total, path, "
+                "items=[...], item_count=len(items)) — appends to the list at "
+                "`path`; send a big section's items in batches of about "
+                f"{lim['recommended_part_bytes']} bytes",
+                "submit_page_payload(run_id, page, upload_id=upload_id, "
+                "producer_version=..., expect={'<section>.<field>': N}) — the "
+                "assembled whole is validated and staged; the verdict is the "
+                "same verdict, from the same two passes, over the same "
+                "payload",
+            ],
+            "atomicity": (
+                "parts_total is declared on every part and must agree. Submit "
+                "refuses unless the received set is exactly {1..parts_total}: "
+                "CG-16 names the missing indexes and NO submission row is "
+                "written, so an incomplete payload cannot be staged and "
+                "cannot be promoted. `expect` declares the assembled length "
+                "of a path and CG-17 checks it — a list cut short at a valid "
+                "element boundary still parses, and the declared count is the "
+                "only thing that sees it."),
+            "retry": (
+                "Resending a part index REPLACES it; it never duplicates. A "
+                "dropped connection costs one part, not the transmission."),
+            "chunkable_fields": {
+                name: _chunkable(sec)
+                for name, sec in sections(page).items() if _chunkable(sec)},
+        },
+        "measured": {
+            "page": MEASURED_PAGES.get(page, []),
+            "sections": {f"{name}": MEASURED_SIZES[(page, name)]
+                         for name in sections(page)
+                         if (page, name) in MEASURED_SIZES},
+            "finding": "MEM-0030 · TRANSPORT_BOUNDS_THE_CONTRACT",
+        },
+    }
+
+
 def get_page_contract(page: str) -> dict:
     """The get_page_contract tool's response body: shapes plus verbatim
-    doc text (TRD §"Exchange contracts")."""
+    doc text (TRD §"Exchange contracts"), plus what the TRANSPORT allows —
+    a producer should learn the submit path's limits from the contract, not
+    by building 1.6 MB and failing (MEM-0030)."""
     if page not in PAGES:
         return {"error": "unknown_page", "pages": list(PAGES)}
     out = {}
@@ -210,4 +334,4 @@ def get_page_contract(page: str) -> dict:
                 for f, spec in sec["fields"].items()
             },
         }
-    return {"page": page, "sections": out}
+    return {"page": page, "transport": transport_for(page), "sections": out}

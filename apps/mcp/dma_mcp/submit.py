@@ -3,6 +3,15 @@
 Resubmission supersedes cleanly: the prior live row is marked superseded
 by the new one in the same transaction — no merge, no accumulation, no
 cleanup. The verdict is stored with the submission and returned whole.
+
+Two transports, one validation. `payload=` carries the page inline, as it
+always has; `upload_id=` names a chunked upload (dma_mcp/transport.py,
+MEM-0030) that the connector assembles server-side first. Beyond the point
+where `payload` is in hand the two paths are the same code: both passes run
+over the assembled whole, exactly as they did before the chunked path
+existed. Transport refusals (CG-16 parts, CG-17 declared length) happen
+BEFORE any submission row is written, so a partially transmitted payload has
+no state in which it is submittable.
 """
 from __future__ import annotations
 
@@ -10,6 +19,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from . import transport
 from .gates import ensure_gate_registry
 from .validation import validate_pass1
 from .validation2 import validate_pass2
@@ -39,11 +49,21 @@ def _counts(payload: dict) -> dict:
             "e_ids_used": len(e_ids)}
 
 
-def submit_page_payload(conn, run_id, page: str, payload: dict,
+def _fail(reasons) -> dict:
+    """A refusal that writes nothing. Used for every check that runs BEFORE a
+    submission row exists — transport included, which is what makes an
+    incomplete transmission unsubmittable rather than merely invalid."""
+    return {"submission_id": None,
+            "verdict": {"status": "fail", "reasons": reasons,
+                        "warnings": [], "counts": {}}}
+
+
+def submit_page_payload(conn, run_id, page: str, payload: dict = None,
                         provenance: str = "producer",
                         producer_version: str | None = None,
                         submitted_by: str = "svc_mcp",
-                        encoder=None) -> dict:
+                        encoder=None, upload_id: str = "",
+                        expect: dict = None) -> dict:
     ensure_gate_registry(conn)
     cur = conn.cursor()
     cur.execute("SELECT 1 FROM runs WHERE id = %s", (run_id,))
@@ -94,6 +114,43 @@ def submit_page_payload(conn, run_id, page: str, payload: dict,
                                          "severity": "block"}],
                             "warnings": [], "counts": {}}}
 
+    # ── transport: inline, or assembled from a chunked upload ──────────
+    #
+    # Everything below this block is transport-blind. The two paths differ only
+    # in where `payload` came from, and the assembled whole is what both
+    # validation passes then read — MEM-0030 is a transport defect and its fix
+    # changes no gate that judges content.
+    transport_meta = {"transport": "inline"}
+    if upload_id and payload is not None:
+        return _fail([{"gate_id": "CG-05", "section": None, "path": "payload",
+                       "message": "send either `payload` (inline) or "
+                                  "`upload_id` (a chunked upload assembled "
+                                  "server-side), never both — two sources for "
+                                  "one page is two payloads, and only one of "
+                                  "them would be validated",
+                       "severity": "block"}])
+    if upload_id:
+        payload, t_reasons, meta = transport.assemble(
+            conn, upload_id, run_id, page, expect=expect)
+        if t_reasons:
+            # NOTHING is written: an incomplete transmission never reaches
+            # `submissions`, so it can never be promoted
+            return _fail(t_reasons)
+        transport_meta = {"transport": "chunked", "parts": meta["parts"],
+                          "assembled_bytes": meta["bytes"],
+                          "assembled_sha256": meta["sha256"]}
+    elif payload is None:
+        return _fail([{"gate_id": "CG-05", "section": None, "path": "payload",
+                       "message": "no payload — send `payload` inline, or "
+                                  "`upload_id` from open_payload for a page "
+                                  "too large to emit in one call (see "
+                                  "get_page_contract(page)['transport'])",
+                       "severity": "block"}])
+    else:
+        m = transport.measure(payload)
+        transport_meta["assembled_bytes"] = m["bytes"]
+        transport_meta["assembled_sha256"] = m["sha256"]
+
     reasons = validate_pass1(page, payload)
     # Pass 2 always runs too — more named conflicts per verdict means
     # fewer repair round trips. Its SG results DISCLOSE (warnings), never
@@ -104,7 +161,11 @@ def submit_page_payload(conn, run_id, page: str, payload: dict,
         reasons.extend(p2)
         warnings.extend(sg)
     status = "FAIL" if any(r["severity"] == "block" for r in reasons) else "PASS"
-    counts = _counts(payload)
+    # The transport facts ride in `counts`, not in a gate: how the bytes
+    # arrived, how many there were and their digest. A producer that has just
+    # sent 1.6 MB in fourteen parts should be able to read back, from the
+    # stored verdict, exactly which assembly was judged.
+    counts = {**_counts(payload), **transport_meta}
 
     # Supersede-then-insert: the live-row unique index (one live
     # submission per run+page) demands the old row steps aside first.
@@ -131,6 +192,10 @@ def submit_page_payload(conn, run_id, page: str, payload: dict,
         (submission_id, status, json.dumps(reasons), json.dumps(warnings),
          json.dumps(counts)))
     conn.commit()
+    if upload_id:
+        # spent, and naming what it became. The parts stay: they are the
+        # record of what the server actually assembled and validated.
+        transport.close_upload(conn, upload_id, submission_id)
     return {"submission_id": str(submission_id),
             "verdict": {"status": status.lower(), "reasons": reasons,
                         "warnings": warnings, "counts": counts}}

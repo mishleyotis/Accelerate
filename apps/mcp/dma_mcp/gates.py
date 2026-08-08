@@ -130,6 +130,32 @@ GATES = {
               "blocking reasons and was eligible to promote: the pipeline "
               "could not tell a real assessment from an empty shell.",
               "block"),
+    # CG-16/CG-17 are TRANSPORT gates, and the distinction matters: they judge
+    # whether the payload ARRIVED, never what it says. They can only fire on
+    # the chunked path, they fire before any submission row exists, and no gate
+    # that judges content changed when they were added (MEM-0030).
+    "CG-16": ("The assembled payload is the whole payload", None,
+              "A chunked upload assembles only when the received part set is "
+              "exactly {1..parts_total}: parts_total agrees across every "
+              "part, the upload is bound to the run and page it was opened "
+              "for, and every part places at its stated path. A gap names the "
+              "missing indexes and NO submission row is written.",
+              "A contract-complete heatmap does not fit in one tool call "
+              "(measured: 1,128,742 bytes for Frost Bank, 1,598,147 for "
+              "Fisher Investments), so payloads now arrive in parts. A "
+              "partially transmitted payload that could be staged would "
+              "validate perfectly and serve a fraction of the assessment — "
+              "which is exactly how baxter-credit-union-bcu came to serve 69 "
+              "cell_evidence rows out of 765 cells with a clean verdict.",
+              "block"),
+    "CG-17": ("A declared length is the assembled length", None,
+              "Where the producer declares the assembled length of a path "
+              "(`expect={'heatmap.cell_evidence.cells': 706}`), the assembled "
+              "payload carries exactly that many.",
+              "A list truncated at a valid element boundary still parses as "
+              "JSON, so nothing structural sees it. The producer's own "
+              "declared count is the only thing that does.",
+              "block"),
     "ET-01": ("Cited ids resolve to this entity and run", None,
               "Every cited e_id resolves in the run's scope; a foreign id "
               "(another institution's row) halts production.",

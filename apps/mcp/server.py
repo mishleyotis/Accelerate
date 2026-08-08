@@ -1,11 +1,17 @@
 """svc_mcp — the DMA Insights connector (stage 2), streamable HTTP.
 
-Thirteen production tools in four groups (read · claim · write · inspect):
+Fifteen production tools in four groups (read · claim · write · inspect):
 read tools are free and idempotent; write tools are the only path into
 served content (invariant 2). The service connects DIRECT to Cloud SQL in
 session mode — promote holds locks — and bundles the embedding model
 in-image for V4 (local, deterministic, at submit; the serving path never
 touches it).
+
+A page too large to emit in one tool call arrives in parts
+(open_payload / append_payload_part, assembled server-side at submit —
+MEM-0030). That is a transport, not a second door: a part is inert until
+the whole assembles, and the assembled whole goes through the same two
+validation passes an inline payload always has.
 
 Eleven more tools serve the FINDINGS MEMORY (`remember`, below): the store
 of what went wrong, how it was measured, what was changed about it and
@@ -32,6 +38,7 @@ from dma_mcp import memory as memory_mod
 from dma_mcp import promote as promote_mod
 from dma_mcp import register as register_mod
 from dma_mcp import submit as submit_mod
+from dma_mcp import transport as transport_mod
 from dma_mcp.contracts import get_page_contract as page_contract
 
 _ENCODER = None
@@ -220,16 +227,82 @@ def register_evidence(run_id: str, item: dict) -> dict:
 
 @mcp.tool()
 @_traced
-def submit_page_payload(run_id: str, page: str, payload: dict,
+def open_payload(run_id: str, page: str, producer_version: str = "") -> dict:
+    """Open a CHUNKED upload for a page too large to emit in one call, and get
+    back the connector-allocated `upload_id` every part is sent against.
+
+    A contract-complete heatmap does not fit inline: measured 2026-08-08,
+    1,128,742 bytes for Frost Bank and 1,598,147 for Fisher Investments, with
+    `cell_evidence` alone 862,351 / 1,208,289 across ~700 served cells. Rule 17
+    wants a drawer row for EVERY served cell, so that is the contract's size —
+    do not cut the served set to fit. Read
+    `get_page_contract(page)["transport"]` for the byte limits and the exact
+    step list.
+
+    The upload is bound to this run and page at open, so no part can be
+    misrouted into another page's payload later, and the id is server-allocated
+    (invariant 10) so no producer can append into an upload it does not own.
+    """
+    with _conn() as c:
+        return transport_mod.open_payload(c, run_id, page,
+                                          producer_version=producer_version)
+
+
+@mcp.tool()
+@_traced
+def append_payload_part(upload_id: str, part: int, parts_total: int,
+                        path: str = "", items: list = None,
+                        fields: dict = None, item_count: int = 0) -> dict:
+    """Send one part of a chunked payload. Returns a receipt, never a verdict —
+    nothing is validated until the whole assembles.
+
+    Exactly one body per part:
+      fields={...}  shallow-MERGES an object at `path` (path '' is the payload
+                    root, so a whole small section is one part)
+      items=[...]   APPENDS to the list at `path`, e.g.
+                    path="cell_evidence.cells"
+
+    `part` is 1-based; `parts_total` is your declared part count and must be
+    the SAME on every part — that declaration is what makes an incomplete
+    transmission detectable rather than merely smaller than intended. Pass
+    `item_count=len(items)` so a part that arrived short is caught here rather
+    than assembling into a quietly shorter payload.
+
+    Parts are applied in ascending index at assembly, so the same set of parts
+    always assembles to the same bytes. Resending an index REPLACES it: a
+    dropped connection costs one part, not the transmission.
+    """
+    with _conn() as c:
+        return transport_mod.append_payload_part(
+            c, upload_id, part, parts_total, path=path, items=items,
+            fields=fields, item_count=item_count)
+
+
+@mcp.tool()
+@_traced
+def submit_page_payload(run_id: str, page: str, payload: dict = None,
                         provenance: str = "producer",
-                        producer_version: str = "") -> dict:
+                        producer_version: str = "", upload_id: str = "",
+                        expect: dict = None) -> dict:
     """Validate (both passes), supersede the live row, stage, return the
     verdict. Reasons name the gate, the JSON path and the arithmetic;
-    SG results disclose in warnings and never block."""
+    SG results disclose in warnings and never block.
+
+    Two transports, one validation. Send `payload` inline for a page that fits
+    in one call, or `upload_id` from open_payload for one that does not — the
+    connector assembles the parts server-side and both passes then run over the
+    assembled whole, exactly as they do for an inline payload. Never both.
+
+    `expect={"<section>.<field>": N}` declares the assembled length of a path.
+    With it, CG-17 catches a list truncated at a valid element boundary (which
+    parses as JSON and so is otherwise invisible); a missing part is refused by
+    CG-16 naming the indexes, and in neither case is a submission row written.
+    """
     with _conn() as c:
         return submit_mod.submit_page_payload(
             c, run_id, page, payload, provenance=provenance,
-            producer_version=producer_version, encoder=_encoder())
+            producer_version=producer_version, encoder=_encoder(),
+            upload_id=upload_id, expect=expect)
 
 
 @mcp.tool()
