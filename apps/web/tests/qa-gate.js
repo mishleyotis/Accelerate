@@ -311,8 +311,12 @@ async function main() {
       modal: modal ? modal.innerText.trim().length : -1,
       hash: location.hash,
       // innerText reflects CSS text-transform (the heading renders as
-      // "EFFECT ON MATURITY"), so this match must be case-insensitive.
-      eventDetail: /effect on maturity/i.test(main ? main.innerText : ""),
+      // "EFFECT ON ASSESSED MATURITY"), so this match must be
+      // case-insensitive. The heading names the AXIS — the direction the
+      // event moved the assessed position of the cells it lists — which is
+      // what `signal` and `maturity_effect` both mean; "assessed" is optional
+      // here so the probe survives either wording.
+      eventDetail: /effect on (assessed )?maturity/i.test(main ? main.innerText : ""),
     };
   });
 
@@ -451,7 +455,7 @@ async function main() {
       out.push(await probe(page, tab, "event-detail",
         () => clickFirst(page, "#app .main button[title*='·']"),
         async () => (await overlayState(page)).eventDetail
-          ? null : "event detail (Effect on maturity) did not open"));
+          ? null : "event detail (Effect on assessed maturity) did not open"));
       out.push(await probe(page, tab, "event-evidence-drawer",
         () => clickFirst(page, "#app .main button.tier-chip"),
         () => drawerCheck(page)));
