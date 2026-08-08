@@ -1562,13 +1562,9 @@ function SentimentGridInteractive({
      its own tile. The face carries the denominator; the full wording is one
      click away, where there is room for it. */
   const scaleToken = scale => {
-    const s = String(scale || "");
-    if (!s) return null;
-    const range = s.match(/(-?\d+(?:\.\d+)?)\s*(?:\.\.|-|–|to)\s*(\d+(?:\.\d+)?)/);
-    if (range) return `/${range[2]}`;
-    if (/%/.test(s)) return "%";
-    if (/star/i.test(s)) return "/5";
-    return null;
+    const b = scaleBounds(scale);
+    if (!b) return null;
+    return b.min === 0 && b.max === 100 && /%/.test(String(scale)) ? "%" : `/${b.max}`;
   };
   return /*#__PURE__*/React.createElement("div", {
     className: "g3",

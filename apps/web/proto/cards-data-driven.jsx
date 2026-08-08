@@ -77,9 +77,23 @@ function SentimentCard({ entity, audience }) {
     note="No sentiment promoted for this run." />;
   const Row = ({ r }) => {
     // No stated scale means no bounds, and a bar drawn on assumed bounds is
-    // a claim the producer never made.
-    const pct = (r.score != null && r.scale) ? (r.score / r.scale) * 100 : null;
-    const tone = r.score >= 4 ? "var(--z-teal)" : r.score >= 3 ? "var(--z-org)" : "var(--z-below)";
+    // a claim the producer never made. But the reader of the scale has to
+    // understand the producer's own notation: this divided the score by
+    // `scale` when `scale` was a STRING ("0-100 % of employees agreeing",
+    // "1-5 stars"), so every row whose scale was not written with ".."
+    // showed a number beside an empty track — Great Place To Work at 88 and
+    // the App Store at 4.9 both blank, while NPS alone drew a bar.
+    //
+    // It also has to use BOTH bounds. NPS runs from -100, so 79.8 sits nine
+    // tenths up its range; dividing by the maximum alone put it at four
+    // fifths and understated the one row that did render.
+    const frac = scaleFraction(r.score, r.scale);
+    const pct = frac === null ? null : frac * 100;
+    // Tone follows the position within the row's OWN scale, not a 5-point
+    // assumption — 88 on a percentage and 4.9 on five stars are both strong,
+    // and the old thresholds called the first one weak.
+    const tone = frac === null ? "var(--z-muted)"
+      : frac >= 0.75 ? "var(--z-teal)" : frac >= 0.5 ? "var(--z-org)" : "var(--z-below)";
     return (
       <div style={{ display: "grid", gridTemplateColumns: "120px 1fr 40px", gap: 8, alignItems: "center", padding: "5px 0" }}>
         <div style={{ fontSize: 11, color: "var(--z-body)" }}>{r.source}<span style={{ color: "var(--z-muted)" }}> · {r.metric}</span></div>

@@ -252,7 +252,8 @@ function adaptSentiment(sentiment) {
     source: b.source,
     metric: b.metric || b.scale || null,
     score: num(b.rating),
-    scale: scaleMaxOf(b.scale),
+    scale: b.scale || null,
+    scale_max: scaleMaxOf(b.scale),
     n: num(b.n),
     as_of: b.as_of,
     e_id: b.e_id,
@@ -265,7 +266,8 @@ function adaptSentiment(sentiment) {
     source: b.source,
     metric: b.metric || b.scale || null,
     score: num(b.rating),
-    scale: scaleMaxOf(b.scale),
+    scale: b.scale || null,
+    scale_max: scaleMaxOf(b.scale),
     n: num(b.n),
     as_of: b.as_of,
     e_id: b.e_id,
@@ -467,12 +469,34 @@ function adaptWhyNow(whyNow) {
 /* A signal's own first clause, used as the card's title when the producer
    did not author a separate label. Never invented — a slice of what was
    written, cut at the first sentence boundary. */
+/* The why-now card's face: the trigger's FIRST SENTENCE, whole.
+
+   This used to cut at 72 characters and append an ellipsis, which is how
+   every card ended mid-clause — "…merger with HealthCare Associates Credit
+   Unio…", "…on 1 July 2026: Jim Block steps…". A card face that stops
+   mid-word is not a summary of the signal, it is a fragment of one, and the
+   reader has to open the drilldown to find out what the sentence said.
+
+   So: end at a real sentence boundary or not at all. A full stop only counts
+   when it ends a sentence rather than an abbreviation or a decimal — "$6.5
+   billion" and "Jan. 2026" must not split. Nothing is truncated; a long
+   trigger makes a taller card, and the grid levels the row. */
 function headlineOf(text) {
   if (!text) return null;
   const t = String(text).trim();
-  const cut = t.search(/[—.;]/);
-  const head = cut > 12 ? t.slice(0, cut) : t;
-  return head.length > 72 ? `${head.slice(0, 69).trimEnd()}…` : head;
+  // A sentence end: . ! ? or ; followed by whitespace and a capital, or the
+  // end of the string. What disqualifies a full stop is what comes AFTER it,
+  // not before: "$6.5 billion" is followed by a digit and "Jan. 2026" by a
+  // digit, so neither matches, while "…on 12 June 2026. The conversion…"
+  // correctly does. Guarding on the preceding character instead was the
+  // subtler bug — it protected decimals and broke every sentence that ends
+  // in a year, which in this corpus is most of them.
+  const m = t.match(/^(.*?[.;!?])(?=\s+["“(]?[A-Z]|\s*$)/);
+  const head = m ? m[1] : t;
+  // An em dash introduces the elaboration rather than ending the sentence,
+  // so it is a legitimate face boundary when it comes first.
+  const dash = head.indexOf(" — ");
+  return (dash > 24 ? head.slice(0, dash) : head).trim();
 }
 
 /* ── INSIGHT_CARDS ───────────────────────────────────────────────────

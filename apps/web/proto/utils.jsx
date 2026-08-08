@@ -108,6 +108,53 @@ function asText(v) {
   return String(v);
 }
 
+/* The bounds a producer stated for a measure, read from their own words.
+
+   Producers write a scale the way the source writes it, which is at least
+   four notations: "NPS -100..100", "0-100 % of employees agreeing",
+   "1-5 stars", "0 to 10". A reader that understands only one of them does
+   not fail loudly — it returns null, the bar draws nothing, and the card
+   shows a number beside an empty track as though the measure had no scale.
+   That is what happened to every row whose scale was not written with "..":
+   Great Place To Work at 88 and the App Store at 4.9 both rendered blank
+   while NPS, alone in using "..", drew a bar.
+
+   Both bounds matter, not just the top. NPS runs from -100, so 79.8 is
+   nine tenths of the way up its range and dividing by the maximum alone
+   understates it. Returns {min, max} or null — null is still the honest
+   answer for a scale nobody stated, and the caller draws no bar. */
+function scaleBounds(scale) {
+  const s = String(scale || "").trim();
+  if (!s) return null;
+  const num2 = (a, b) => {
+    const lo = Number(a), hi = Number(b);
+    return isFinite(lo) && isFinite(hi) && hi > lo ? { min: lo, max: hi } : null;
+  };
+  // "a..b" first: it is the only notation that can carry a negative low
+  // bound without the hyphen being ambiguous.
+  let m = s.match(/(-?\d+(?:\.\d+)?)\s*\.\.\s*(-?\d+(?:\.\d+)?)/);
+  if (m) return num2(m[1], m[2]);
+  // "a to b", "a-b", "a–b". A leading minus is honoured; an interior one
+  // is the separator.
+  m = s.match(/(-?\d+(?:\.\d+)?)\s*(?:to|[-–—])\s*(-?\d+(?:\.\d+)?)/i);
+  if (m) return num2(m[1], m[2]);
+  // A bare percentage or star rating states its bounds by convention.
+  if (/%/.test(s)) return { min: 0, max: 100 };
+  m = s.match(/(\d+(?:\.\d+)?)\s*stars?/i);
+  if (m) return num2(1, m[1]);
+  return null;
+}
+
+/* Where a value sits within its own stated scale, 0..1, or null when the
+   scale is not stated. Never assumes bounds: an unstated scale draws no
+   bar rather than a bar against invented bounds. */
+function scaleFraction(value, scale) {
+  const b = scaleBounds(scale);
+  const v = Number(value);
+  if (!b || !isFinite(v)) return null;
+  return Math.max(0, Math.min(1, (v - b.min) / (b.max - b.min)));
+}
+
 /* ── Icons ───────────────────────────────────────────────────────── */
 function Icon({ name, size = 16, ...rest }) {
   const s = size;
