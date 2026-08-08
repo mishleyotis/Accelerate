@@ -212,22 +212,70 @@ the row out of its filter. AG-05 polices the spelling; case is part of it.
 A one-line scan is enough: walk every string in the payload, skip the vocabulary
 keys, and flag anything whose first alphabetic character is lower-case.
 
+### The candidate set comes from the catalogue, and the vertical bounds it first
+
+Two questions have to be answered before a single relevance is scored, and
+answering them in the wrong order is what makes this page read as generic.
+
+**Where do candidates come from?** From the catalogue's own per-cell platform
+vocabulary — `l3_platform_areas` and `l4_features` on every cell the run serves,
+which arrive in `get_report_bundle` and on `/subcaps`. Rank the platforms the
+run's own cells NAME, by how many of those cells each one reaches and how far
+below the composite they sit. That sweep is the candidate set. Baxter Credit
+Union's 706 served cells name 220 distinct platforms between them; a page whose
+candidates were the client's existing Salesforce estate plus two invented
+solution categories was not drawing from the catalogue at all, and it showed —
+Databricks, Twilio, Tableau and nCino each address cells this client scores and
+none of the four appeared anywhere on the page, as a tile or as a discard.
+
+If the vocabulary comes back empty on every cell, that is a **catalogue load
+defect, not licence to invent candidates**. Say so and stop; do not fill the
+silence with vendor names you happen to know.
+
+**Which of those candidates are eligible?** The ones inside this entity's
+vertical. The vertical bounds the candidate set BEFORE relevance is scored, so a
+platform outside it never enters, is never weighed, and has no discard to render.
+This is a gate, not a guideline: **ET-06** refuses a discard whose stated reason
+argues from vertical or entity type, and refuses one whose anchor cells belong to
+another sub-vertical. Run `scripts/precheck_gates.py … --bundle` before submitting
+and it will tell you locally.
+
 ### `discarded[]` is the field a reader actually looks for
 
 A platform list with no recorded alternatives reads as the only option anyone
 considered, and the first question in the room is "why not X". `discarded[]`
 answers it before it is asked: `{platform, reason, relevance}`.
 
+**A discard is a platform that was genuinely in contention.** It reached the
+shortlist, the arithmetic weighed it, and something specific about THIS estate
+put it below the line. Three grounds do that honestly: the client already runs it
+at that layer (an adoption conversation, not a fit one), it addresses fewer than
+three of this run's cells, or its relevance sits below 0.5 against the cells it
+does reach. Sequencing is a fourth: a platform that only pays off after another
+platform lands is set aside on order, not on merit — say which one it waits for.
+
+Out-of-vertical is **not** on that list any more, and putting it there was the
+defect. Baxter Credit Union's page carried "Insurance policy administration and
+claims" at relevance 0.15, with the reason "Out of vertical: its anchor cells
+belong to a carrier entity type". The producer knew, wrote it down, and spent one
+of six client-facing cards explaining to a credit union why an insurance carrier
+product does not apply to them. That is not thoroughness — it is a card that
+tells the client their assessment shopped in the wrong industry, and it costs the
+slot a real alternative should have had.
+
 Two rules on the reason. It is about **fit for THIS institution**, never a
 criticism of the product — "addresses two of this client's cells" is a fit
 statement; "weak analytics" is a product review, and it is both unnecessary and
-unsupportable. And it is specific enough to be checkable: the four legitimate
-grounds are sub-vertical relevance below 0.5, anchor cells belonging to a
-different entity type, the client already running it at that layer, and fewer
-than three cells addressed.
+unsupportable. And it is specific enough to be checkable: name the cell count
+from the catalogue sweep, and name the incumbent from the stack register when the
+layer is occupied. "Twilio reaches two served cells, below the three-cell floor,
+and Genesys Cloud, Glia and Tethr are all confirmed at that layer" is checkable.
+"Not a strong fit" is not.
 
 **A ranking that cannot discard is a sort.** Six clients ranked an out-of-vertical
-platform first, one of them with a relevance of 0.35 that was simply ignored.
+platform first, one of them with a relevance of 0.35 that was simply ignored. The
+fix for that is the boundary above, not a lower number: a relevance of 0.05 on a
+carrier product still renders a card.
 
 ### Coverage prose names what is available, never what is missing
 
@@ -256,7 +304,7 @@ rule and it is not optional on this page.
 ### Prompt
 
 ```
-Produce the platform fit and story: which L3 platform areas address this client's assessed gaps, grounded, ranked, and with the irrelevant ones visibly discarded. STEP 1 - WORK FROM THE L3 CATALOGUE, NOT FROM VENDOR BRANDS The unit of recommendation is the L3 PLATFORM AREA and its L4 FEATURES. For every claim, the path L3 -> L4 -> sub-capability must be renderable, because that path is what makes the recommendation auditable rather than a vendor preference. Emit catalogue_path per gap row. A claim that cannot name the L4 feature that addresses the cell is not a fit claim. STEP 2 - GROUNDING (per gap row) {subcap_id, name, current_score, peer_score, gap, pillar, l3_area, l4_feature,  catalogue_path, e_ids[]}   current_score MUST equal what the heatmap serves for that id. Assert it within   +/-0.05 before emitting. Every row cites. A gap row with no evidence behind   the current score is not addressable, it is a guess. STEP 3 - FACTOR IN THE ENTITY'S OWN TECH STACK (this changes the answer) Read the stack register and apply it:   - CONFIRMED at this layer -> greenfield becomes EXTENSION. Reframe the     opportunity as adoption/depth, and say so; recommending what they already     own is the Tech Stack Mismatch failure.   - ABSENT with a demand signal (hiring, RFP, board commitment) -> RAISE     priority and cite the signal.   - Mid-migration -> a TIMING CONSTRAINT on everything downstream of it; carry     it into sequencing.   - CLAIMED but unconfirmed -> treat as absent for fit, and flag the     Marketing-Reality Gap. STEP 4 - DISCARD, WITH REASONS Drop a platform when relevance to the sub-vertical < 0.5; when the anchor cells belong to a different entity type (a carrier sub-capability on a bank - one measured defect class); when the client already runs it at that layer; or when it addresses fewer than 3 cells. Emit discarded[] {platform, reason, relevance}. Six clients ranked an out-of-vertical platform first, one with a relevance of 0.35 ignored. A ranking that cannot discard is a sort. STEP 5 - THE EFFORT PROFILE, AND WHERE EFFORT MATTERS MORE Rank the effort dimensions (integration, data quality, process redesign, change management, licensing) for THIS client, from the evidence. The profile must be consistent with the timeline's storyline: if the storyline attributes integration debt to a 2014 core conversion never revisited, integration ranks first. An effort profile that contradicts the history is one of them being wrong. STEP 6 - THE PLATFORM STORY  (90-150 words) Not a dossier and not a vendor pitch: what this platform would change for THIS client, which constraint it lifts, what it depends on, and what it does not solve. Name the cells. Cite. Must reconcile to the composite - if the story argues for a platform the arithmetic ranks third, say why. STEP 7 - THE REASONING LAYER (R-Layer, and it is the point of this page)  A State the rank-1 fit claim with its confidence.  B Argue the runner-up's case explicitly. Inside a 5-point margin, present both    and say the ranking is close.  C Is this platform plausible for this sub-vertical, size tier and regulator?  D Probes, each firing a required search: out-of-vertical rank-1; anchor-cell    entity-type mismatch; Tech Stack Mismatch; stale fit figure computed against    a superseded run; breakdown-not-equal-to-headline; a gap row whose current    score disagrees with the heatmap.  E ACCEPT / REJECT / UNCERTAIN. REJECT -> discard and re-rank. STEP 8 - RECONCILE THE ARITHMETIC WITH THE ANALYST Read the assessment report's platform sections. If the composite's rank-1 is a platform the report does not discuss, that disagreement is a finding: state it, say which won, lower confidence. Never ship an arithmetic rank that silently contradicts the analyst. GATES: S31_platform_distinctiveness; S13_platform_score_lead; S17_exec_fit_stale; breakdown-equals-headline; catalogue_path present per row.
+Produce the platform fit and story: which L3 platform areas address this client's assessed gaps, grounded, ranked, and with the irrelevant ones visibly discarded. STEP 1 - DRAW THE CANDIDATE SET FROM THE CATALOGUE, AND BOUND IT BY THE VERTICAL FIRST The candidates are the platforms the run's OWN CELLS name: l3_platform_areas and l4_features on every served cell, from get_report_bundle or /subcaps. Rank them by how many of this run's cells each reaches and how far below the composite those cells sit; that sweep IS the candidate set. Then bound it: a platform outside this entity's vertical is not a candidate, and the bound applies BEFORE any relevance is scored, so it never enters and never needs discarding (ET-06 refuses it either way). One client's 706 cells named 220 distinct platforms; a page built from the client's existing estate plus two invented solution categories missed Databricks, Twilio, Tableau and nCino entirely. An empty vocabulary on every cell is a CATALOGUE LOAD DEFECT - report it, do not invent candidates to fill the silence. The unit of recommendation is the L3 PLATFORM AREA and its L4 FEATURES. For every claim, the path L3 -> L4 -> sub-capability must be renderable, because that path is what makes the recommendation auditable rather than a vendor preference. Emit catalogue_path per gap row. A claim that cannot name the L4 feature that addresses the cell is not a fit claim. STEP 2 - GROUNDING (per gap row) {subcap_id, name, current_score, peer_score, gap, pillar, l3_area, l4_feature,  catalogue_path, e_ids[]}   current_score MUST equal what the heatmap serves for that id. Assert it within   +/-0.05 before emitting. Every row cites. A gap row with no evidence behind   the current score is not addressable, it is a guess. STEP 3 - FACTOR IN THE ENTITY'S OWN TECH STACK (this changes the answer) Read the stack register and apply it:   - CONFIRMED at this layer -> greenfield becomes EXTENSION. Reframe the     opportunity as adoption/depth, and say so; recommending what they already     own is the Tech Stack Mismatch failure.   - ABSENT with a demand signal (hiring, RFP, board commitment) -> RAISE     priority and cite the signal.   - Mid-migration -> a TIMING CONSTRAINT on everything downstream of it; carry     it into sequencing.   - CLAIMED but unconfirmed -> treat as absent for fit, and flag the     Marketing-Reality Gap. STEP 4 - DISCARD, WITH REASONS A discard is a platform that was GENUINELY IN CONTENTION: it reached the shortlist, the arithmetic weighed it, and something about THIS estate put it below the line. Drop it when the client already runs it at that layer (adoption, not fit); when it addresses fewer than 3 of this run's cells; when relevance against the cells it does reach is < 0.5; or when it only pays off after another platform lands - say which one it waits for. Out-of-vertical is NOT a discard ground: that platform was excluded at STEP 1 and a card explaining to a client why another industry's product does not apply to them is a defect, not thoroughness (one credit union's page spent a card on insurance policy administration at relevance 0.15; lowering the number would not have helped, the card was the problem). Each reason names the cell count from the STEP 1 sweep and, where the layer is occupied, the incumbent from the stack register. Emit discarded[] {platform, reason, relevance}. A ranking that cannot discard is a sort. STEP 5 - THE EFFORT PROFILE, AND WHERE EFFORT MATTERS MORE Rank the effort dimensions (integration, data quality, process redesign, change management, licensing) for THIS client, from the evidence. The profile must be consistent with the timeline's storyline: if the storyline attributes integration debt to a 2014 core conversion never revisited, integration ranks first. An effort profile that contradicts the history is one of them being wrong. STEP 6 - THE PLATFORM STORY  (90-150 words) Not a dossier and not a vendor pitch: what this platform would change for THIS client, which constraint it lifts, what it depends on, and what it does not solve. Name the cells. Cite. Must reconcile to the composite - if the story argues for a platform the arithmetic ranks third, say why. STEP 7 - THE REASONING LAYER (R-Layer, and it is the point of this page)  A State the rank-1 fit claim with its confidence.  B Argue the runner-up's case explicitly. Inside a 5-point margin, present both    and say the ranking is close.  C Is this platform plausible for this sub-vertical, size tier and regulator?  D Probes, each firing a required search: candidate-set provenance (did the    candidates come from the catalogue's per-cell vocabulary, and was the    set bounded by the vertical before scoring); out-of-vertical rank-1;    anchor-cell entity-type mismatch; Tech Stack Mismatch; stale fit figure computed against    a superseded run; breakdown-not-equal-to-headline; a gap row whose current    score disagrees with the heatmap.  E ACCEPT / REJECT / UNCERTAIN. REJECT -> discard and re-rank. STEP 8 - RECONCILE THE ARITHMETIC WITH THE ANALYST Read the assessment report's platform sections. If the composite's rank-1 is a platform the report does not discuss, that disagreement is a finding: state it, say which won, lower confidence. Never ship an arithmetic rank that silently contradicts the analyst. GATES: ET-06 candidate set bounded by the vertical; S31_platform_distinctiveness; S13_platform_score_lead; S17_exec_fit_stale; breakdown-equals-headline; catalogue_path present per row.
 ```
 
 ---
