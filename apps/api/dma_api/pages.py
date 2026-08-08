@@ -40,7 +40,13 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
                           assessment_date_source, refresh_due_date
                      FROM serving_directory
                     WHERE display_id = %s
-                    ORDER BY is_active DESC, promoted_at DESC""", (display_id,))
+                    -- NULLS LAST is load-bearing: `is_active` is a nullable
+                    -- boolean, and PostgreSQL sorts NULL FIRST under DESC. A
+                    -- promoted run that never had the column set would
+                    -- therefore sort AHEAD of the active one, and this
+                    -- function would 404 an entity that is serving.
+                    ORDER BY is_active DESC NULLS LAST, promoted_at DESC""",
+                (display_id,))
     rows = cur.fetchall()
     if not rows:
         # No promoted run for this entity — including an entity that exists

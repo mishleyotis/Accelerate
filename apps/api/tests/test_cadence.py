@@ -310,6 +310,17 @@ def test_runs_with_no_assessment_date_are_counted_not_silently_absent():
     assert q["counts"]["active_runs_with_no_assessment_date"] == 41
 
 
+def test_run_resolution_orders_nulls_last_on_is_active():
+    """`is_active` is a nullable boolean and PostgreSQL sorts NULL FIRST
+    under DESC, so a promoted run whose flag was never set would sort ahead
+    of the active one and resolve_run would 404 a client that is serving.
+    Caught against a live database; asserted here so it cannot come back."""
+    conn = _Conn()
+    entity_cadence(conn.cursor(), "baxter-credit-union-bcu")
+    sql = next(s for s, _ in conn.statements if "FROM serving_directory" in s)
+    assert "is_active DESC NULLS LAST" in sql
+
+
 def test_the_read_module_contains_no_write_statement():
     src = (ROOT / "apps" / "api" / "dma_api" / "cadence.py").read_text(encoding="utf-8")
     body = "\n".join(line for line in src.splitlines()
