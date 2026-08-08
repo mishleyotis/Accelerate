@@ -123,6 +123,31 @@ if [ -f apps/web/Dockerfile ]; then
     --project="$PROJECT_ID" --region="$REGION" \
     --member="serviceAccount:dmai-web@${SA_DOMAIN}" \
     --role="roles/run.invoker" --quiet >/dev/null 2>&1 || true
+  # …and the "Request refresh" button fires dmai-refresh the same way. The
+  # API writes nothing for it: invariant 2 enumerates the API's writes as
+  # annotations and alert actions, so the request is recorded by a Job under
+  # the ingest identity instead (apps/api/dma_api/refresh_job.py).
+  gcloud run jobs add-iam-policy-binding dmai-refresh \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --member="serviceAccount:dmai-web@${SA_DOMAIN}" \
+    --role="roles/run.invoker" --quiet >/dev/null 2>&1 || true
+fi
+
+# --- 2b · dmai-refresh (the web's refresh-request write path) -------------
+# Same image as svc_api, different entrypoint and a DIFFERENT DB identity:
+# dmai-worker maps to svc_worker, the only role granted INSERT on
+# refresh_requests (0032). svc_api holds SELECT there and nothing else, so an
+# endpoint that tried to write the queue would fail on a grant rather than on
+# a code review.
+if [ -f apps/api/Dockerfile ]; then
+  say "dmai-refresh job (records a refresh request; writes refresh_requests only)"
+  gcloud run jobs deploy dmai-refresh --source=apps/api \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --service-account="dmai-worker@${SA_DOMAIN}" \
+    --network=default --subnet=default --vpc-egress=private-ranges-only \
+    --command="python,-m,dma_api.refresh_job" \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-worker@${PROJECT_ID}.iam;DB_NAME=dma_insights" \
+    --max-retries=0 --task-timeout=120 --memory=512Mi --quiet
 fi
 
 # --- 3 · worker Job + Scheduler sync (stage 1 / 0.5) ----------------------
@@ -148,8 +173,76 @@ if [ -f apps/worker/Dockerfile ]; then
       --oauth-service-account-email="dmai-worker@${SA_DOMAIN}" --quiet
   fi
 fi
-# Remaining Scheduler triggers (corpus-gate-scanner nightly; pack-exporter
-# nightly) sync here with stage 8.
+
+# --- 4 · the corpus Jobs and the charter's other two Scheduler triggers ---
+# The charter names three mandatory triggers; only the package scan existed.
+# A trigger with no Job behind it is a scheduled 404, so the Jobs are deployed
+# here first and the triggers point at them.
+#
+# Both run as dmai-mcp. It is the only account that already holds BOTH halves
+# of what they need — SELECT across the serving tier (svc_mcp) and DML on
+# gate_results — so nothing narrower has to be widened: dmai-api would gain
+# bucket writes it never uses, and dmai-worker would gain the serving-tier
+# read it is deliberately denied.
+if [ -d infra/jobs ]; then
+  say "corpus jobs (pack-exporter, corpus-gate-scanner)"
+  # The ceilings are ONE file — packages/shared/corpus_gates.json, the file CI
+  # Gate B ratchets. It is staged into the build context rather than copied
+  # into infra/, so there is no second copy in the tree to drift.
+  JOBS_CTX="$(mktemp -d)"
+  cp -R infra/jobs/. "$JOBS_CTX/"
+  cp packages/shared/corpus_gates.json "$JOBS_CTX/corpus_gates.json"
+  rm -rf "$JOBS_CTX/tests"
+
+  gcloud run jobs deploy dmai-pack-exporter --source="$JOBS_CTX" \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --service-account="dmai-mcp@${SA_DOMAIN}" \
+    --network=default --subnet=default --vpc-egress=private-ranges-only \
+    --command="python,-m,corpus_jobs.pack_export" \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-mcp@${PROJECT_ID}.iam;DB_NAME=dma_insights;GCP_PROJECT=${PROJECT_ID}" \
+    --max-retries=0 --task-timeout=900 --memory=1Gi --quiet
+
+  gcloud run jobs deploy dmai-corpus-gate-scanner --source="$JOBS_CTX" \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --service-account="dmai-mcp@${SA_DOMAIN}" \
+    --network=default --subnet=default --vpc-egress=private-ranges-only \
+    --command="python,-m,corpus_jobs.gate_scan" \
+    --args="--fail-on-regression" \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-mcp@${PROJECT_ID}.iam;DB_NAME=dma_insights;GCP_PROJECT=${PROJECT_ID}" \
+    --max-retries=0 --task-timeout=900 --memory=1Gi --quiet
+  rm -rf "$JOBS_CTX"
+
+  for job in dmai-pack-exporter dmai-corpus-gate-scanner; do
+    gcloud run jobs add-iam-policy-binding "$job" \
+      --project="$PROJECT_ID" --region="$REGION" \
+      --member="serviceAccount:dmai-mcp@${SA_DOMAIN}" \
+      --role="roles/run.invoker" --quiet >/dev/null
+  done
+
+  # Scheduler: idempotent by describe-then-create, like the package scan.
+  # `update` follows the create so a changed schedule lands on a re-run
+  # rather than being silently kept at whatever was registered first.
+  sched() { # name schedule job-name
+    local uri="https://run.googleapis.com/v2/projects/${PROJECT_ID}/locations/${REGION}/jobs/${3}:run"
+    if gcloud scheduler jobs describe "$1" --project="$PROJECT_ID" --location="$REGION" >/dev/null 2>&1; then
+      gcloud scheduler jobs update http "$1" \
+        --project="$PROJECT_ID" --location="$REGION" \
+        --schedule="$2" --uri="$uri" --http-method=POST \
+        --oauth-service-account-email="dmai-mcp@${SA_DOMAIN}" --quiet
+    else
+      gcloud scheduler jobs create http "$1" \
+        --project="$PROJECT_ID" --location="$REGION" \
+        --schedule="$2" --uri="$uri" --http-method=POST \
+        --oauth-service-account-email="dmai-mcp@${SA_DOMAIN}" --quiet
+    fi
+  }
+  # charter: mandatory trigger #3 — the exporter writes the pack…
+  sched dmai-pack-exporter "0 2 * * *" dmai-pack-exporter
+  # …and #2 reads it an hour later. The order is the dependency: the scanner
+  # measures the exported pack, and a scanner that ran first would grade
+  # yesterday's corpus and report it as today's.
+  sched dmai-corpus-gate-scanner "0 3 * * *" dmai-corpus-gate-scanner
+fi
 
 say "deployed. Service URLs:"
 gcloud run services list --project="$PROJECT_ID" --region="$REGION" \

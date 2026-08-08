@@ -141,6 +141,12 @@ stage_0_5() {
   bind_bucket dmai-artefacts dmai-mcp    roles/storage.objectViewer
   bind_bucket dmai-exports      dmai-worker roles/storage.objectAdmin
   bind_bucket dmai-corpus-packs dmai-worker roles/storage.objectAdmin
+  # The two corpus Jobs (pack-exporter writes the pack, corpus-gate-scanner
+  # reads it) run as dmai-mcp: it is the only identity that already holds the
+  # serving-tier SELECT the pack needs AND the gate_results DML the scan
+  # needs, so nothing narrower is widened to make them work.
+  bind_bucket dmai-corpus-packs dmai-mcp roles/storage.objectAdmin
+  bind_bucket dmai-exports      dmai-mcp roles/storage.objectAdmin
 
   say "0.5 Redis (claim leases, cache — reached over Direct VPC egress)"
   if gcloud redis instances describe dmai-redis --region="$REGION" --project="$PROJECT_ID" >/dev/null 2>&1; then
@@ -151,7 +157,7 @@ stage_0_5() {
       --network="projects/${PROJECT_ID}/global/networks/default" \
       --connect-mode=PRIVATE_SERVICE_ACCESS --quiet
   fi
-  say "0.5 Scheduler — the three triggers register via deploy.sh once their target Jobs exist"
+  say "0.5 Scheduler — all three triggers register via deploy.sh, each after its target Job is deployed"
 }
 
 have || { echo "gcloud not found"; exit 1; }
