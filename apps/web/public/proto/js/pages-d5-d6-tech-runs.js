@@ -2339,9 +2339,13 @@ function ClientHealth({
     }
   }, "Status"))), /*#__PURE__*/React.createElement("tbody", null, alerts.map(a => /*#__PURE__*/React.createElement("tr", {
     key: a.id
-  }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("td", {
+    "data-label": "Severity"
+  }, /*#__PURE__*/React.createElement("span", {
     className: `b ${a.severity === "HIGH" ? "b-below" : "b-org"}`
-  }, a.severity)), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("div", {
+  }, a.severity)), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Subcap"
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       fontWeight: 500
@@ -2352,7 +2356,9 @@ function ClientHealth({
       fontSize: 10,
       color: "var(--z-muted)"
     }
-  }, a.subcap_id)), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("div", {
+  }, a.subcap_id)), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Evidence"
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12
     }
@@ -2369,9 +2375,13 @@ function ClientHealth({
       width: `${a.evidence_count / 3 * 100}%`,
       background: "var(--z-org)"
     }
-  }))), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+  }))), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Action"
+  }, /*#__PURE__*/React.createElement("span", {
     className: "b b-purple"
-  }, a.recommended_action)), /*#__PURE__*/React.createElement("td", null, a.proxy_searched ? /*#__PURE__*/React.createElement("span", {
+  }, a.recommended_action)), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Proxy"
+  }, a.proxy_searched ? /*#__PURE__*/React.createElement("span", {
     style: {
       color: "var(--z-mid)",
       fontSize: 11
@@ -2382,6 +2392,7 @@ function ClientHealth({
       fontSize: 11
     }
   }, "Not yet")), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Status",
     style: {
       textAlign: "right"
     }
@@ -2422,12 +2433,18 @@ function ClientHealth({
   }, /*#__PURE__*/React.createElement("tbody", null, DMA.QA_GATES.map(g => /*#__PURE__*/React.createElement("tr", {
     key: g.id
   }, /*#__PURE__*/React.createElement("td", {
+    "data-label": "Gate",
     style: {
       width: 60
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "chip"
-  }, g.id)), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("strong", null, g.name)), /*#__PURE__*/React.createElement("td", null, g.evidence), /*#__PURE__*/React.createElement("td", {
+  }, g.id)), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Name"
+  }, /*#__PURE__*/React.createElement("strong", null, g.name)), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Evidence"
+  }, g.evidence), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Verdict",
     style: {
       width: 80
     }
@@ -2454,19 +2471,27 @@ function ClientHealth({
     const stale = age === null ? null : age > 18;
     return /*#__PURE__*/React.createElement("tr", {
       key: e.id
-    }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+    }, /*#__PURE__*/React.createElement("td", {
+      "data-label": "Evidence"
+    }, /*#__PURE__*/React.createElement("span", {
       className: "chip"
     }, e.id), " ", /*#__PURE__*/React.createElement("span", {
       style: {
         marginLeft: 6
       }
     }, e.title)), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Source",
       className: "f-mono",
       style: {
         fontSize: 10,
         color: "var(--z-muted)"
       }
-    }, e.source.split("/")[0]), /*#__PURE__*/React.createElement("td", null, raw || "—"), /*#__PURE__*/React.createElement("td", null, age === null ? "—" : `${age} mo`), /*#__PURE__*/React.createElement("td", {
+    }, e.source.split("/")[0]), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Date"
+    }, raw || "—"), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Age"
+    }, age === null ? "—" : `${age} mo`), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Status",
       style: {
         textAlign: "right"
       }
@@ -2489,11 +2514,20 @@ function ClientHealth({
     }
   }, "Action"))), /*#__PURE__*/React.createElement("tbody", null, DMA.PATTERNS.map((p, i) => /*#__PURE__*/React.createElement("tr", {
     key: i
-  }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("td", {
+    "data-label": "Subvertical"
+  }, /*#__PURE__*/React.createElement("span", {
     className: "b b-purple"
-  }, DMA.SUBVERTICAL_LABEL[p.subvertical])), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+  }, DMA.SUBVERTICAL_LABEL[p.subvertical])), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Category"
+  }, /*#__PURE__*/React.createElement("span", {
     className: "chip"
-  }, p.category)), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("strong", null, p.title)), /*#__PURE__*/React.createElement("td", null, p.count, " / ", p.total), /*#__PURE__*/React.createElement("td", {
+  }, p.category)), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Pattern"
+  }, /*#__PURE__*/React.createElement("strong", null, p.title)), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Count"
+  }, p.count, " / ", p.total), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Action",
     style: {
       textAlign: "right"
     }
@@ -2602,24 +2636,36 @@ function VersionDiff({
     className: "tbl"
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Subcap"), /*#__PURE__*/React.createElement("th", null, "Category"), /*#__PURE__*/React.createElement("th", null, fmtDate(base.date)), /*#__PURE__*/React.createElement("th", null, fmtDate(target.date)), /*#__PURE__*/React.createElement("th", null, "\u0394"), /*#__PURE__*/React.createElement("th", null, "Evidence"))), /*#__PURE__*/React.createElement("tbody", null, diffs.map(d => /*#__PURE__*/React.createElement("tr", {
     key: d.id
-  }, /*#__PURE__*/React.createElement("td", null, d.name, " ", /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("td", {
+    "data-label": "Subcap"
+  }, d.name, " ", /*#__PURE__*/React.createElement("span", {
     className: "f-mono",
     style: {
       fontSize: 10,
       color: "var(--z-muted)"
     }
-  }, d.id)), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+  }, d.id)), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Category"
+  }, /*#__PURE__*/React.createElement("span", {
     className: "chip"
-  }, d.category)), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement(MaturityChip, {
+  }, d.category)), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Base"
+  }, /*#__PURE__*/React.createElement(MaturityChip, {
     score: d.base
-  })), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement(MaturityChip, {
+  })), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Target"
+  }, /*#__PURE__*/React.createElement(MaturityChip, {
     score: d.target
-  })), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+  })), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Delta"
+  }, /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: "var(--font-mono)",
       color: d.delta > 0 ? "var(--z-mid)" : d.delta < 0 ? "var(--z-below)" : "var(--z-muted)"
     }
-  }, d.delta > 0 ? "▲" : d.delta < 0 ? "▼" : "-", " ", fx(Math.abs(d.delta), 1))), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+  }, d.delta > 0 ? "▲" : d.delta < 0 ? "▼" : "-", " ", fx(Math.abs(d.delta), 1))), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Evidence"
+  }, /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11
     }
@@ -4067,33 +4113,66 @@ function ClientRuns({
     size: 13
   }), " Trigger rerun"))), /*#__PURE__*/React.createElement("div", {
     className: "card flush"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tbl-reflow"
   }, /*#__PURE__*/React.createElement("table", {
     className: "tbl tbl-clickable"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Run date"), /*#__PURE__*/React.createElement("th", null, "Run ID"), /*#__PURE__*/React.createElement("th", null, "Status"), /*#__PURE__*/React.createElement("th", null, "Source"), /*#__PURE__*/React.createElement("th", null, "Score"), /*#__PURE__*/React.createElement("th", null, "Evidence mode"), /*#__PURE__*/React.createElement("th", null, "Subcaps"), /*#__PURE__*/React.createElement("th", null, "Actions"))), /*#__PURE__*/React.createElement("tbody", null, entity.runs.map(r => /*#__PURE__*/React.createElement("tr", {
-    key: r.id
-  }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("strong", null, fmtDate(r.date))), /*#__PURE__*/React.createElement("td", {
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Run date"), /*#__PURE__*/React.createElement("th", null, "Run ID"), /*#__PURE__*/React.createElement("th", null, "Status"), /*#__PURE__*/React.createElement("th", {
+    className: "col-drop"
+  }, "Source"), /*#__PURE__*/React.createElement("th", null, "Score"), /*#__PURE__*/React.createElement("th", {
+    className: "col-drop"
+  }, "Evidence mode"), /*#__PURE__*/React.createElement("th", null, "Subcaps"), /*#__PURE__*/React.createElement("th", null, "Actions"))), /*#__PURE__*/React.createElement("tbody", null, entity.runs.map(r => /*#__PURE__*/React.createElement("tr", {
+    key: r.id,
+    title: `Open ${r.id}`,
+    onClick: () => navigate(`/clients/${entity.id}/overview`, {
+      run: r.id
+    })
+  }, /*#__PURE__*/React.createElement("td", {
+    "data-label": "Run date"
+  }, /*#__PURE__*/React.createElement("strong", null, fmtDate(r.date))), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Run ID",
     className: "f-mono",
     style: {
       fontSize: 10,
       color: "var(--z-muted)"
     }
-  }, r.id), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+  }, r.id), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Status"
+  }, /*#__PURE__*/React.createElement("span", {
     className: `b ${r.status === "ACTIVE" ? "b-teal" : "b-muted"}`
-  }, r.status)), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+  }, r.status)), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Source",
+    className: "col-drop"
+  }, /*#__PURE__*/React.createElement("span", {
     className: `b ${r.data_source === "DRIVE_PARSE" ? "b-ph0" : "b-ph1"}`
-  }, r.data_source === "DRIVE_PARSE" ? "DRIVE PARSE" : "PROJECT API")), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement(MaturityChip, {
+  }, r.data_source === "DRIVE_PARSE" ? "DRIVE PARSE" : "PROJECT API")), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Score"
+  }, /*#__PURE__*/React.createElement(MaturityChip, {
     score: r.overall
-  })), /*#__PURE__*/React.createElement("td", null, r.evidence_mode), /*#__PURE__*/React.createElement("td", null, r.subcap_count), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("button", {
+  })), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Evidence mode",
+    className: "col-drop"
+  }, r.evidence_mode), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Subcaps"
+  }, r.subcap_count), /*#__PURE__*/React.createElement("td", {
+    "data-label": "Actions"
+  }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
-    onClick: () => navigate(`/clients/${entity.id}/overview`, {
-      run: r.id
-    })
+    onClick: ev => {
+      ev.stopPropagation();
+      navigate(`/clients/${entity.id}/overview`, {
+        run: r.id
+      });
+    }
   }, "View"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
-    onClick: () => navigate(`/clients/${entity.id}/health`, {
-      run: r.id
-    })
-  }, "Compare"))))))));
+    onClick: ev => {
+      ev.stopPropagation();
+      navigate(`/clients/${entity.id}/health`, {
+        run: r.id
+      });
+    }
+  }, "Compare")))))))));
 }
 Object.assign(window, {
   ClientContext,

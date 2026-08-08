@@ -1393,15 +1393,15 @@ function ClientHealth({ entity, run }) {
             <tbody>
               {alerts.map(a => (
                 <tr key={a.id}>
-                  <td><span className={`b ${a.severity === "HIGH" ? "b-below" : "b-org"}`}>{a.severity}</span></td>
-                  <td><div style={{ fontSize: 12, fontWeight: 500 }}>{a.subcap_name}</div><div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{a.subcap_id}</div></td>
-                  <td>
+                  <td data-label="Severity"><span className={`b ${a.severity === "HIGH" ? "b-below" : "b-org"}`}>{a.severity}</span></td>
+                  <td data-label="Subcap"><div style={{ fontSize: 12, fontWeight: 500 }}>{a.subcap_name}</div><div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{a.subcap_id}</div></td>
+                  <td data-label="Evidence">
                     <div style={{ fontSize: 12 }}>{a.evidence_count} / 3</div>
                     <div className="prog" style={{ marginTop: 4, width: 80, height: 4 }}><div className="prog-fill" style={{ width: `${(a.evidence_count / 3) * 100}%`, background: "var(--z-org)" }} /></div>
                   </td>
-                  <td><span className="b b-purple">{a.recommended_action}</span></td>
-                  <td>{a.proxy_searched ? <span style={{ color: "var(--z-mid)", fontSize: 11 }}>✓ Searched</span> : <span style={{ color: "var(--z-org)", fontSize: 11 }}>Not yet</span>}</td>
-                  <td style={{ textAlign: "right" }}>
+                  <td data-label="Action"><span className="b b-purple">{a.recommended_action}</span></td>
+                  <td data-label="Proxy">{a.proxy_searched ? <span style={{ color: "var(--z-mid)", fontSize: 11 }}>✓ Searched</span> : <span style={{ color: "var(--z-org)", fontSize: 11 }}>Not yet</span>}</td>
+                  <td data-label="Status" style={{ textAlign: "right" }}>
                     <button className="btn btn-tertiary btn-sm" onClick={() => pushToast(`${a.subcap_id} moved to IN_REVIEW`, "success")}>In review</button>
                     <button className="btn btn-tertiary btn-sm" onClick={() => pushToast(`${a.subcap_id} waived — add rationale before close`, "warn")}>Waive</button>
                   </td>
@@ -1420,10 +1420,10 @@ function ClientHealth({ entity, run }) {
             <tbody>
               {DMA.QA_GATES.map(g => (
                 <tr key={g.id}>
-                  <td style={{ width: 60 }}><span className="chip">{g.id}</span></td>
-                  <td><strong>{g.name}</strong></td>
-                  <td>{g.evidence}</td>
-                  <td style={{ width: 80 }}><span className={`b ${g.status === "PASS" ? "b-above" : "b-below"}`}>{g.status}</span></td>
+                  <td data-label="Gate" style={{ width: 60 }}><span className="chip">{g.id}</span></td>
+                  <td data-label="Name"><strong>{g.name}</strong></td>
+                  <td data-label="Evidence">{g.evidence}</td>
+                  <td data-label="Verdict" style={{ width: 80 }}><span className={`b ${g.status === "PASS" ? "b-above" : "b-below"}`}>{g.status}</span></td>
                 </tr>
               ))}
             </tbody>
@@ -1450,11 +1450,11 @@ function ClientHealth({ entity, run }) {
                 const stale = age === null ? null : age > 18;
                 return (
                   <tr key={e.id}>
-                    <td><span className="chip">{e.id}</span> <span style={{ marginLeft: 6 }}>{e.title}</span></td>
-                    <td className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{e.source.split("/")[0]}</td>
-                    <td>{raw || "—"}</td>
-                    <td>{age === null ? "—" : `${age} mo`}</td>
-                    <td style={{ textAlign: "right" }}>
+                    <td data-label="Evidence"><span className="chip">{e.id}</span> <span style={{ marginLeft: 6 }}>{e.title}</span></td>
+                    <td data-label="Source" className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{e.source.split("/")[0]}</td>
+                    <td data-label="Date">{raw || "—"}</td>
+                    <td data-label="Age">{age === null ? "—" : `${age} mo`}</td>
+                    <td data-label="Status" style={{ textAlign: "right" }}>
                       {stale === null ? <span className="b b-muted">NO DATE</span>
                         : <span className={`b ${stale ? "b-org" : "b-teal"}`}>{stale ? "STALE" : "FRESH"}</span>}
                     </td>
@@ -1472,11 +1472,11 @@ function ClientHealth({ entity, run }) {
             <tbody>
               {DMA.PATTERNS.map((p, i) => (
                 <tr key={i}>
-                  <td><span className="b b-purple">{DMA.SUBVERTICAL_LABEL[p.subvertical]}</span></td>
-                  <td><span className="chip">{p.category}</span></td>
-                  <td><strong>{p.title}</strong></td>
-                  <td>{p.count} / {p.total}</td>
-                  <td style={{ textAlign: "right" }}><button className="btn btn-tertiary btn-sm" onClick={() => pushToast(`Drafting outreach campaign · ${p.title}`, "success")}>Build campaign →</button></td>
+                  <td data-label="Subvertical"><span className="b b-purple">{DMA.SUBVERTICAL_LABEL[p.subvertical]}</span></td>
+                  <td data-label="Category"><span className="chip">{p.category}</span></td>
+                  <td data-label="Pattern"><strong>{p.title}</strong></td>
+                  <td data-label="Count">{p.count} / {p.total}</td>
+                  <td data-label="Action" style={{ textAlign: "right" }}><button className="btn btn-tertiary btn-sm" onClick={() => pushToast(`Drafting outreach campaign · ${p.title}`, "success")}>Build campaign →</button></td>
                 </tr>
               ))}
             </tbody>
@@ -1544,12 +1544,12 @@ function VersionDiff({ entity, baseId, targetId, setBase, setTarget }) {
         <tbody>
           {diffs.map(d => (
             <tr key={d.id}>
-              <td>{d.name} <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{d.id}</span></td>
-              <td><span className="chip">{d.category}</span></td>
-              <td><MaturityChip score={d.base} /></td>
-              <td><MaturityChip score={d.target} /></td>
-              <td><span style={{ fontFamily: "var(--font-mono)", color: d.delta > 0 ? "var(--z-mid)" : d.delta < 0 ? "var(--z-below)" : "var(--z-muted)" }}>{d.delta > 0 ? "▲" : d.delta < 0 ? "▼" : "-"} {fx(Math.abs(d.delta), 1)}</span></td>
-              <td><span style={{ fontSize: 11 }}>{d.evBase} → {d.evTarget}</span></td>
+              <td data-label="Subcap">{d.name} <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{d.id}</span></td>
+              <td data-label="Category"><span className="chip">{d.category}</span></td>
+              <td data-label="Base"><MaturityChip score={d.base} /></td>
+              <td data-label="Target"><MaturityChip score={d.target} /></td>
+              <td data-label="Delta"><span style={{ fontFamily: "var(--font-mono)", color: d.delta > 0 ? "var(--z-mid)" : d.delta < 0 ? "var(--z-below)" : "var(--z-muted)" }}>{d.delta > 0 ? "▲" : d.delta < 0 ? "▼" : "-"} {fx(Math.abs(d.delta), 1)}</span></td>
+              <td data-label="Evidence"><span style={{ fontSize: 11 }}>{d.evBase} → {d.evTarget}</span></td>
             </tr>
           ))}
         </tbody>
@@ -2461,27 +2461,43 @@ function ClientRuns({ entity }) {
           <button className="btn btn-secondary" onClick={() => pushToast(`Rerun queued for ${entity.name} — first batch in ~3 min`, "success")}><Icon name="refresh" size={13} /> Trigger rerun</button>
         </div>
       </div>
+      {/* `tbl-reflow`: this is an eight-column table, the widest on any client
+          page, and the only thing holding it up at tablet width was the page
+          having no other content to push against. */}
       <div className="card flush">
+        <div className="tbl-reflow">
+        {/* `tbl-clickable` puts a pointer cursor on every row, which promises a
+            row click does something — and the row had no handler at all, so the
+            QA sweep reported it as a dead target and a reader got the same
+            answer by clicking. The row opens the run it names, which is what
+            "View" beside it does; the two buttons stop the event so Compare
+            still goes where it says. */}
         <table className="tbl tbl-clickable">
-          <thead><tr><th>Run date</th><th>Run ID</th><th>Status</th><th>Source</th><th>Score</th><th>Evidence mode</th><th>Subcaps</th><th>Actions</th></tr></thead>
+          <thead><tr>
+            <th>Run date</th><th>Run ID</th><th>Status</th>
+            <th className="col-drop">Source</th><th>Score</th>
+            <th className="col-drop">Evidence mode</th><th>Subcaps</th><th>Actions</th>
+          </tr></thead>
           <tbody>
             {entity.runs.map(r => (
-              <tr key={r.id}>
-                <td><strong>{fmtDate(r.date)}</strong></td>
-                <td className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{r.id}</td>
-                <td><span className={`b ${r.status === "ACTIVE" ? "b-teal" : "b-muted"}`}>{r.status}</span></td>
-                <td><span className={`b ${r.data_source === "DRIVE_PARSE" ? "b-ph0" : "b-ph1"}`}>{r.data_source === "DRIVE_PARSE" ? "DRIVE PARSE" : "PROJECT API"}</span></td>
-                <td><MaturityChip score={r.overall} /></td>
-                <td>{r.evidence_mode}</td>
-                <td>{r.subcap_count}</td>
-                <td>
-                  <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/overview`, { run: r.id })}>View</button>
-                  <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/health`, { run: r.id })}>Compare</button>
+              <tr key={r.id} title={`Open ${r.id}`}
+                  onClick={() => navigate(`/clients/${entity.id}/overview`, { run: r.id })}>
+                <td data-label="Run date"><strong>{fmtDate(r.date)}</strong></td>
+                <td data-label="Run ID" className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{r.id}</td>
+                <td data-label="Status"><span className={`b ${r.status === "ACTIVE" ? "b-teal" : "b-muted"}`}>{r.status}</span></td>
+                <td data-label="Source" className="col-drop"><span className={`b ${r.data_source === "DRIVE_PARSE" ? "b-ph0" : "b-ph1"}`}>{r.data_source === "DRIVE_PARSE" ? "DRIVE PARSE" : "PROJECT API"}</span></td>
+                <td data-label="Score"><MaturityChip score={r.overall} /></td>
+                <td data-label="Evidence mode" className="col-drop">{r.evidence_mode}</td>
+                <td data-label="Subcaps">{r.subcap_count}</td>
+                <td data-label="Actions">
+                  <button className="btn btn-tertiary btn-sm" onClick={(ev) => { ev.stopPropagation(); navigate(`/clients/${entity.id}/overview`, { run: r.id }); }}>View</button>
+                  <button className="btn btn-tertiary btn-sm" onClick={(ev) => { ev.stopPropagation(); navigate(`/clients/${entity.id}/health`, { run: r.id }); }}>Compare</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
