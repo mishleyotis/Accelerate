@@ -288,7 +288,35 @@ Resubmission supersedes cleanly. Submit, read, repair, resubmit as often as need
 is no merge, no accumulation and no cleanup. For the gate families and how to read a
 verdict, see `05-lifecycle/1-gates.md`.
 
-### 8 · Promote
+### 8 · Challenge the storyline — five volleys
+
+The six pages pass and reconcile. That makes the run correct; it does not yet make it
+usable. An AE carries one story into a room and is pushed back on, and a storyline can be
+true, cited, grain-locked and still worthless — because the client already says it, or
+cannot act on it, or the incumbent vendor answers it in one sentence. No gate catches that:
+nothing about it is malformed.
+
+So before promoting, put the whole storyline through five adversarial volleys — the
+client's own executive, the finance officer, the incumbent vendor, the rival on the
+shortlist, and the AE who has to say it out loud. Each volley is a challenge and the
+story's answer, recorded with what changed.
+
+```
+storyline_challenge: { volleys: [{volley, challenger, challenge, answer, outcome, changed}],
+                       survived }
+```
+
+Five `held` outcomes is a finding, not a triumph — it usually means the objections were
+written gently. A volley the story fails may still reach the AE, annotated; a story that
+quietly drops its weakest limb and presents the rest as whole is the thing this step
+exists to prevent.
+
+The full method, the form each objection takes and what passing each volley requires:
+`04-craft/7-storyline-challenge.md`. If a volley changes the storyline, resubmit the
+affected pages and re-run `check_consistency.py` before moving on — staged rows are
+retained, so that is cheap.
+
+### 9 · Promote
 
 ```
 promote_run(run_id) → all six pages, one transaction, all or nothing
@@ -427,6 +455,7 @@ assets/          payload skeletons per section
 | `04-craft/4-card-anatomy.md` | Writing to a budget; knowing which header a field lands in |
 | `04-craft/1-reasoning.md` | Any ranked, causal or comparative claim |
 | `04-craft/2-platform-story.md` | Before producing D4 — the highest-defect surface |
+| `04-craft/7-storyline-challenge.md` | After the six pages pass, before you promote — five volleys against the run's whole story |
 | `01-start-here/5-colour-and-bands.md` | Writing a band word, or describing the heatmap |
 | `03-pages/<n>-<page>.md` | Before producing that page |
 
