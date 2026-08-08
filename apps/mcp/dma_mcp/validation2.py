@@ -375,6 +375,139 @@ def _check_subvertical_scope(page, payload, entity_code) -> list:
     return out
 
 
+# ── ET-06 · the candidate set is bounded by the entity's vertical ─────
+#
+# ET-05 is about a CITATION: a cell from somebody else's sub-vertical
+# reached a sentence. This is about a CANDIDATE: a platform from somebody
+# else's vertical reached the shortlist, was weighed there, and then spent
+# a client-facing card explaining itself.
+#
+# A discard list is evidence of judgement — "why not X" is the question an
+# AE gets asked, and a page that cannot answer it is a sort rather than a
+# ranking. But a platform ruled out by the entity's OWN VERTICAL was never
+# a candidate. It is not a close call the producer resolved; it is a thing
+# that could not have applied, and putting it on the page tells the client
+# their assessment considered a product for a different industry and
+# congratulated itself for noticing.
+#
+# Baxter Credit Union's platform page shipped exactly that: "Insurance
+# policy administration and claims", relevance 0.15, reason "Out of
+# vertical: its anchor cells belong to a carrier entity type…". One of six
+# cards on a credit union's surface, spent on an insurance carrier
+# product. The producer knew — it said so in the reason it wrote — and
+# listed it anyway, because the contract named out-of-vertical as a DROP
+# rule and a drop rule produces a card.
+#
+# So the boundary moves earlier: the vertical bounds the candidate set
+# BEFORE relevance is scored. Discards are for platforms genuinely in
+# contention — already deployed at that layer, too few cells, a relevance
+# the numbers put below the line.
+#
+# The gate reads two things and guesses at neither: what the discard SAYS
+# (a reason arguing from vertical or entity type is a reason that the
+# platform was never in the set) and what it POINTS AT (anchor cells
+# `serves()` says belong to another sub-vertical). A discard that argues
+# from adoption, coverage or cost says none of this and passes.
+_DISCARD_KEYS = ("discarded", "considered_and_set_aside", "set_aside")
+
+# Sections in whose items an anchor-cell key means "the cells this
+# candidate would address".
+_ANCHOR_KEYS = ("anchor_subcap_id", "anchor_cells", "anchor_subcap_ids",
+                "subcap_id", "subcap_ids", "addressable_cells")
+
+# A reason that argues from the vertical or the entity type. Deliberately
+# narrow: it matches the VOCABULARY OF BELONGING, not the mention of
+# another industry. "Their insurance brokerage subsidiary already runs it"
+# is an adoption reason and stays; "out of vertical", "a carrier entity
+# type", "wrong sub-vertical" are declarations that the candidate was
+# never in the set.
+_OUT_OF_VERTICAL_RE = re.compile(
+    r"out[\s-]of[\s-]vertical"
+    r"|(?:wrong|different|another|other|foreign|separate)\s+"
+    r"(?:sub[\s-]?)?vertical"
+    r"|outside\s+(?:the|this|our|their|a)\s+(?:[\w-]+\s+){0,2}"
+    r"(?:sub[\s-]?)?vertical"
+    r"|(?:entity|institution|firm|business|charter)\s+type"
+    r"|(?:not|never)\s+(?:a|an)\s+(?:credit\s+union|bank|carrier|insurer|"
+    r"broker|RIA|broker[\s-]dealer)\b",
+    re.I)
+
+
+def _iter_discards(payload):
+    """Yield (section, path, item) for every entry of every discard list."""
+    for name, body in payload.items():
+        if not isinstance(body, dict):
+            continue
+        for path, obj in _walk(body, name):
+            for key, value in obj.items():
+                if key not in _DISCARD_KEYS or not isinstance(value, list):
+                    continue
+                for i, item in enumerate(value):
+                    if isinstance(item, dict):
+                        yield name, f"{path}.{key}[{i}]", item
+
+
+def _discard_anchor_cells(item):
+    for key in _ANCHOR_KEYS:
+        value = item.get(key)
+        if isinstance(value, str) and _CELL_ID_RE.match(value):
+            yield key, value
+        elif isinstance(value, list):
+            for entry in value:
+                if isinstance(entry, str) and _CELL_ID_RE.match(entry):
+                    yield key, entry
+                elif isinstance(entry, dict):
+                    cell = entry.get("subcap_id")
+                    if isinstance(cell, str) and _CELL_ID_RE.match(cell):
+                        yield key, cell
+
+
+def _check_candidate_vertical(page, payload, entity_code) -> list:
+    """ET-06. Silent when the entity's sub-vertical is not in the
+    vocabulary — the same one-sided choice ET-05 and the API's `serves`
+    make: not knowing who you are is not grounds for refusing anything."""
+    if not entity_code or not isinstance(payload, dict):
+        return []
+    out = []
+    mine = SUBVERTICAL_NAMES.get(entity_code, entity_code)
+    for section, path, item in _iter_discards(payload):
+        name = str(item.get("platform") or item.get("name") or "this candidate")
+        prose = " ".join(str(v) for k, v in item.items()
+                         if isinstance(v, str) and k != "platform")
+        foreign = [(key, cell) for key, cell in _discard_anchor_cells(item)
+                   if not serves(cell, entity_code)]
+        if foreign:
+            key, cell = foreign[0]
+            owner = SUBVERTICAL_NAMES.get(variant_subvertical(cell),
+                                          variant_subvertical(cell))
+            out.append(_reason(
+                "ET-06", section, path,
+                f"{name} is carried as a discard, and its anchor cell {cell} "
+                f"(at {key}) is a {owner} variant cell while this run is "
+                f"{mine}. The candidate set is drawn from the entity's own "
+                "vertical, and it is bounded BEFORE any relevance is scored: "
+                "a platform outside that vertical is not a candidate that was "
+                "weighed and set aside, so it has no discard to render. "
+                "Remove the entry — do not lower its relevance — and let a "
+                "platform that is genuinely in contention have the card"))
+            continue
+        if _OUT_OF_VERTICAL_RE.search(prose):
+            out.append(_reason(
+                "ET-06", section, path,
+                f"{name} is carried as a discard whose own reason rules it out "
+                f"by vertical or entity type, and this run is {mine}. The "
+                "candidate set is drawn from the entity's vertical, and it is "
+                "bounded BEFORE any relevance is scored — a platform outside "
+                "that vertical is not a candidate, so it was never weighed and "
+                "has no discard to render. A card explaining to a client why a "
+                "product for another industry does not apply to them spends a "
+                "client-facing slot on a question they did not ask. Remove the "
+                "entry; keep the discards that were genuinely in contention — "
+                "already deployed at that layer, too few cells addressed, a "
+                "relevance the arithmetic put below the line"))
+    return out
+
+
 # ── CG-14 · a linked cell exists on this run ──────────────────────────
 #
 # A tech row's `linked_subcap_ids` and a why-now's `linked_subcap_ids` are
@@ -641,8 +774,12 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     # ── AG-03: every claim-bearing item cites evidence ─────────────────
     reasons.extend(_check_item_evidence(page, payload))
     reasons.extend(_check_peer_research(page, payload))
-    reasons.extend(_check_subvertical_scope(page, payload,
-                                            _entity_subvertical(conn, run_id)))
+    # One read of the entity's sub-vertical, two gates: ET-05 scopes the
+    # cells a sentence may cite, ET-06 scopes the candidates a shortlist
+    # may contain.
+    entity_code = _entity_subvertical(conn, run_id)
+    reasons.extend(_check_subvertical_scope(page, payload, entity_code))
+    reasons.extend(_check_candidate_vertical(page, payload, entity_code))
     reasons.extend(_check_cell_linkage(page, payload, _run_cells(conn, run_id)))
 
     sg = _run_s8(conn, run_id, page, payload)

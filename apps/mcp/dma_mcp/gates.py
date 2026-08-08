@@ -146,6 +146,18 @@ GATES = {
               "measuring them is a fact, serving them to this institution "
               "is not.",
               "block"),
+    "ET-06": ("The candidate set is bounded by the entity's vertical", None,
+              "No discard list carries a platform ruled out by the entity's "
+              "own vertical — neither one whose stated reason argues from "
+              "vertical or entity type, nor one whose anchor cells are "
+              "another sub-vertical's variant cells.",
+              "A credit union's platform page spent one of its six "
+              "'considered and set aside' cards on an insurance carrier "
+              "product, explaining to the client why policy administration "
+              "does not apply to them. The vertical bounds the candidate set "
+              "BEFORE relevance is scored: a platform outside it was never "
+              "weighed, so it has no discard to show.",
+              "block"),
     "AG-01": ("Ranked or causal claims carry r_layer", None,
               "Any ranked/causal claim records hypothesis, counter, domain "
               "test, probes run and a verdict.",
