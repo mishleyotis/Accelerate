@@ -48,16 +48,22 @@ it. Let the store decide.
 ## The handshake
 
 ```
-tools = list the connector's tools
-assert the memory contracts are all present   ← by contract, not by name
-probe  = list_open_findings(window = wide, limit = small)
+tools   = list the connector's tools
+assert the eleven memory contracts are present   ← by contract, not by name
+classes = list_defect_classes()      the shared vocabulary, and each PROBE
+probe   = get_memory_digest(days)    or list_open_findings(limit = small)
 ```
 
-Record `{tools_seen[], open_count, oldest_open, newest_sighting}` in the run
-report. Those four numbers are the evidence that memory was read, and a later
-reader can tell a genuinely quiet week (`open_count` small, `newest_sighting`
-recent) from a broken pipe (`newest_sighting` weeks old while three QA agents
-have run since).
+`list_defect_classes` belongs in the handshake and not later, for two reasons:
+`defect_class` is a foreign key so nothing can be filed without it, and each
+class carries a **probe** — a command or query that detects that class — which
+is a check you can run against a suspicion before you have a finding at all.
+
+Record `{tools_seen[], classes_seen, open_count, oldest_open, newest_sighting}`
+in the run report. Those numbers are the evidence that memory was read, and a
+later reader can tell a genuinely quiet week (`open_count` small,
+`newest_sighting` recent) from a broken pipe (`newest_sighting` weeks old while
+three QA agents have run since).
 
 ## What it refuses
 
@@ -103,9 +109,12 @@ Sweep for:
 | an auditor's PASS/FAIL/UNVERIFIABLE table | `deployed-app-auditor` |
 | the user's own message | anything |
 
-`python scripts/drain_local.py <dir>` finds the file-shaped ones and emits a
-`record_finding` payload per candidate. The user's own words it cannot see —
-those you record yourself, quoting them, with `source=user`.
+`ingest_reviewer_feedback()` handles the reviewer half — idempotent, so run it
+every time. `python scripts/drain_local.py <dir>` finds the file-shaped ones and
+emits a `record_finding` payload per candidate, building each `measurement` out
+of the artefact and leaving `defect_class` blank for you to pick from the
+vocabulary. The user's own words it cannot see — those you record yourself,
+quoting them, with `raised_by_kind=USER`.
 
 Record first. Triage second. If the sweep finds nothing, write "local channel
 empty" and continue; an empty sweep that was run is a different fact from a
