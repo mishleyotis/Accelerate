@@ -32,9 +32,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from dma_mcp.contracts import PAGES, sections
 from dma_mcp.gates import GATES
 from dma_mcp.validation import validate_pass1
-from dma_mcp.vacuity import (FLOOR_FACTOR, GATE, TEMPLATE_OVERLAP,
-                             check_vacuity, is_placeholder, prose_floors,
-                             residual_content)
+from dma_mcp.vacuity import (CLAIM_MIN_WORDS, CLAIM_OVERLAP, FLOOR_FACTOR,
+                             GATE, TEMPLATE_OVERLAP, _overlap, check_vacuity,
+                             claim_words, is_placeholder, item_keys,
+                             prose_floors, records_absence, residual_content,
+                             shingles)
 
 ENV = {"produced_at": "2026-08-08T00:00:00Z", "producer_version": "test@1",
        "e_ids": ["E-BCU-001"], "internal_only": []}
@@ -246,9 +248,15 @@ def test_the_promoted_ceilings_template_is_refused_on_every_member():
     msg = out[0]["message"]
     assert "share 8-word spans" in msg
     assert f"a line of {TEMPLATE_OVERLAP:g}" in msg
-    # the repair, and the door back out for a genuine shared absence
+    # both terms are stated, so the producer can see that the agreement is
+    # not the contract's own scaffolding
+    assert "content words" in msg and f"line {CLAIM_OVERLAP:g}" in msg
+    # the repair, and the route THIS shape actually has
     assert "say what is true of THIS one" in msg
-    assert "sources_searched" in msg
+    assert "e_ids" in msg and "leave it out of the array" in msg
+    # and never a route it does not have — `overview.ceilings.rows` declares
+    # no state and no ladder, so naming them would be the trap again
+    assert "sources_searched" not in msg
 
 
 def test_two_matching_items_are_a_coincidence_and_three_are_a_template():
@@ -286,6 +294,118 @@ def test_distinct_arguments_that_share_a_fact_are_not_a_template():
         {"subcap_id": f"P1C2.9.{i}", "synthesis": s, "grounded_on": 1}
         for i, s in enumerate(HONEST_SYNTHESES)]}}
     assert _cg15("heatmap", payload) == []
+
+
+# ── 4b · the second term: the CLAIM, not the contract's scaffolding ───
+#
+# H2 requires every synthesis to say "where the score sits against the peer
+# median" and to cite inline. Two honest syntheses obeying that contract are
+# SUPPOSED to share those spans. Pass 1 scored them, which is how a gate
+# meant to catch prose that asserts nothing came to threaten prose that
+# asserts something in the shape the contract asked for.
+#
+# These four are the promoted Baxter run's own zero-evidence cells,
+# near-verbatim: same finding (nothing was found), same mandated frame, and
+# four completely different sets of things looked for. That is what an
+# honest absence at 700-cell scale looks like, and it must pass.
+BAXTER_ABSENCES = [
+    "Academic partnership leaves visible traces — named research "
+    "collaborations, sponsored programmes, university recruiting pipelines — "
+    "and none appears anywhere in BCU's own materials, its news page, or the "
+    "trade coverage of it. The ladder ran across all six mandatory tiers.",
+    "User acceptance testing leaves artefacts — test plans, sign-off records, "
+    "defect logs — and none is visible in BCU's public record, nor in the "
+    "assessment corpus, nor in any vendor case study covering its core "
+    "conversion. The ladder ran across all six mandatory tiers.",
+    "No emissions baseline, reduction target or transition commitment appears "
+    "in BCU's annual report, its about pages, its news releases or the trade "
+    "coverage of it. Nothing in the corpus describes a measurement method "
+    "either. The ladder ran across all six mandatory tiers.",
+    "A roadmap in this domain would sequence commitments against dates, and "
+    "BCU has no published commitments to sequence — the ladder ran across its "
+    "annual report, its about and community pages, its news releases and the "
+    "regulator's own filings index.",
+]
+
+
+def test_four_absences_that_name_different_things_looked_for_are_not_a_template():
+    """The line the gate has to hold. All four report the same OUTCOME in
+    the same mandated frame; none of them reports the same SEARCH. Once the
+    score and evidence registers are stripped, what is left is four
+    different vocabularies, and this is the payload that must ship."""
+    payload = {"cell_evidence": {**ENV, "cells": [
+        {"subcap_id": f"P1C3.6.{i}", "synthesis": s}
+        for i, s in enumerate(BAXTER_ABSENCES)]}}
+    assert _cg15("heatmap", payload) == []
+
+
+def test_the_same_outcome_with_nothing_named_is_a_template():
+    """The other side of the same line, from the two payloads refused
+    today: strip out WHAT was looked for and the four sentences collapse
+    onto one, and the content-word term agrees with the phrasing term
+    instead of overruling it."""
+    one = ("{} was searched across the six mandatory public tiers for this "
+           "entity and no entity-specific artefact naming the capability was "
+           "returned, so the score is carried by the category position "
+           "rather than by direct observation.")
+    payload = {"cell_evidence": {**ENV, "cells": [
+        {"subcap_id": f"P1C3.6.{i}", "synthesis": one.format(cap)}
+        for i, cap in enumerate(("Academic Partnership", "Acceptance Testing",
+                                 "Emissions Baseline", "Roadmap Sequencing"))]}}
+    out = _cg15("heatmap", payload)
+    assert len(out) == 4
+    assert all("share 8-word spans" in r["message"] for r in out)
+
+
+def test_the_two_terms_are_measured_and_separate_on_the_fixtures():
+    """The calibration, with its arithmetic, so a future edit to either
+    line has to argue with a number rather than a feeling.
+
+    The two terms are near-independent. Honest prose about one institution
+    shares VOCABULARY freely — Baxter's own absences run 0.29-0.47 on the
+    content-word measure — and is separated by PHRASING, which is where
+    they collapse to 0.11 or less. The promoted template is high on both.
+    Requiring both is therefore a real narrowing and not a second name for
+    the first test."""
+    def two(a, b):
+        return (_overlap(shingles(a), shingles(b)),
+                _overlap(claim_words(a), claim_words(b)))
+
+    honest = [two(a, b) for i, a in enumerate(BAXTER_ABSENCES)
+              for b in BAXTER_ABSENCES[i + 1:]]
+    assert max(r for r, _c in honest) < TEMPLATE_OVERLAP
+    # …and some of those honest pairs DO clear the claim line, which is
+    # exactly why the claim term cannot be the only one either
+    assert max(c for _r, c in honest) > 0.25
+
+    raw, claim = two(CEILING_TEMPLATE[0], CEILING_TEMPLATE[2])
+    assert raw >= TEMPLATE_OVERLAP and claim >= CLAIM_OVERLAP
+
+
+def test_a_claim_vocabulary_too_small_to_measure_does_not_buy_a_pass():
+    """Below CLAIM_MIN_WORDS distinct content words the second term
+    abstains and the phrasing term decides alone. Sparing them instead
+    would hand a producer a template made of nothing but the register —
+    the residual check's own failure mode, re-entering through this door."""
+    thin = ("The cited evidence for this cell sits below the peer median "
+            "recorded in the workbook for the category above it.")
+    assert len(claim_words(thin)) < CLAIM_MIN_WORDS
+    payload = {"cell_evidence": {**ENV, "cells": [
+        {"subcap_id": f"P4C1.1.{i}", "synthesis": thin} for i in range(3)]}}
+    out = _cg15("heatmap", payload)
+    # the residual check owns it too — but the template check must not have
+    # abstained, or the door is open
+    assert len([r for r in out if "share 8-word spans" in r["message"]]) == 3
+
+
+def test_the_registers_stripped_are_the_scaffolding_the_contract_mandates():
+    """The claim term is only defensible if what it removes is what H2
+    REQUIRES a synthesis to contain. Assert that directly against the
+    contract's own words rather than trusting the register lists."""
+    doc = sections("heatmap")["cell_evidence"]["fields"]["cells"]["doc"]
+    assert "where the score sits against the peer median" in doc
+    mandated = "the score sits against the peer median and the cited evidence"
+    assert claim_words(mandated) == set(), claim_words(mandated)
 
 
 # ── 5 · prose that restates a score, or inventories the evidence ──────
@@ -449,26 +569,92 @@ def test_an_absence_rung_without_a_ladder_does_not_buy_the_exemption():
     assert len(out) == 1 and out[0]["path"] == "acquisitions"
 
 
+SHORT_ABSENCE = ("The ladder ran across every mandatory source and "
+                 "established no evidence for this capability.")
+
+
 @pytest.mark.parametrize("marker", [
     {"state": "WORKED_ABSENT", "sources_searched": ["registry", "filings"]},
     {"state": "UNWORKED", "queries_run": ["INT-020"]},
-    {"state": "NOT_RUN", "not_run_reason": "The cohort has four members."},
-    {"cannot_estimate": True},
-    {"verified_absent": True},
-    {"verified_sparse": True},
-    {"quarantined": True, "quarantine_reason": "Two sources disagree on the "
-                                               "date and neither is primary."},
 ])
-def test_each_rung_of_the_absence_ladder_exempts_a_short_honest_statement(marker):
-    """A 40-word floor on a synthesis is right for an argument. It is not
-    right for "the ladder ran and found nothing", which is the whole of
-    what there is to say."""
-    payload = {"cell_evidence": {**ENV, "cells": [
-        {"subcap_id": "P4C1.1.1",
-         "synthesis": "The ladder ran across every mandatory source and "
-                      "established no evidence for this capability.",
-         **marker}]}}
+def test_each_rung_the_item_shape_declares_exempts_a_short_honest_statement(marker):
+    """A 40-80 word floor on a justification is right for an argument. It
+    is not right for "the ladder ran and found nothing", which is the whole
+    of what there is to say.
+
+    On `heatmap.alerts.alerts`, which is the ONE item shape of the
+    nineteen that declares `state` + a ladder key. That is not an accident
+    of this test's choice of fixture — it is the measured fact that made
+    pass 1's escape hatch a trap."""
+    payload = {"alerts": {**ENV, "alerts": [
+        {"subcap_id": "P4C1.1.1", "justification": SHORT_ABSENCE, **marker}]}}
     assert _cg15("heatmap", payload) == [], marker
+
+
+def test_the_absence_rungs_are_declared_on_exactly_one_item_shape():
+    """The measurement that named the defect, kept as a test so the next
+    person does not have to re-run it.
+
+    Of the nineteen item shapes carrying a per-item prose budget, exactly
+    one declares the `state` + `sources_searched` protocol pass 1's verdict
+    told every producer to use. On the other eighteen the gate named a door
+    that is not in the wall — and a producer who would not invent a field,
+    because the standing clause forbids it, had nowhere to go."""
+    with_ladder = []
+    for page in PAGES:
+        floors = prose_floors(page)
+        for name in sections(page):
+            for fname in (floors.get(name) or {"items": {}})["items"]:
+                keys = item_keys(page, name, fname)
+                if ({"state", "status"} & keys) and (
+                        {"sources_searched", "queries_run"} & keys):
+                    with_ladder.append(f"{page}.{name}.{fname}")
+    assert with_ladder == ["heatmap.alerts.alerts"]
+
+
+def test_an_absence_key_the_item_shape_does_not_declare_buys_nothing():
+    """The Frost hole, measured today: 394 of 697 cell syntheses bought
+    this exemption with `state` + `sources_searched` on
+    `heatmap.cell_evidence.cells`, which declares neither.
+
+    CG-04 sweeps SECTION keys only, so an undeclared item key validates.
+    The writer has no `item:` binding for it, so promote drops it. An
+    exemption bought with such a key trades a real refusal for a field the
+    client never sees — and, on the same payload, it bought the same
+    exemption from AG-03. The exemption is a contract route or it is
+    nothing."""
+    assert "state" not in item_keys("heatmap", "cell_evidence", "cells")
+    # Frost's own sentence, near-verbatim, long enough to clear the 40-word
+    # field's floor so the TEMPLATE verdict is the only one under test.
+    frost = ("{} was searched across the six mandatory public tiers for this "
+             "entity and no entity-specific artefact naming the capability "
+             "was returned, so the score is carried by the category position "
+             "rather than by direct observation. The absence is recorded, "
+             "not inferred.")
+    payload = {"cell_evidence": {**ENV, "cells": [
+        {"subcap_id": f"P4C1.1.{i}", "synthesis": frost.format(cap),
+         "state": "WORKED_ABSENT",
+         "sources_searched": ["registry", "filings"]}
+        for i, cap in enumerate(("Strategy Refresh Cadence",
+                                 "Vision Communication", "Board Engagement"))]}}
+    out = _cg15("heatmap", payload)
+    assert len(out) == 3
+    assert all("share 8-word spans" in r["message"] for r in out)
+    # and the verdict points at the route this shape HAS, not the one it
+    # was just refused for inventing
+    assert "leave it out of the array" in out[0]["message"]
+    assert "invent a key" in out[0]["message"]
+
+
+def test_the_same_keys_on_the_shape_that_declares_them_still_work():
+    """The other direction, so the narrowing cannot be read as a ban: the
+    identical marker on `heatmap.alerts.alerts` is honoured."""
+    assert records_absence({"state": "WORKED_ABSENT",
+                            "sources_searched": ["registry"]},
+                           item_keys("heatmap", "alerts", "alerts"))
+    assert not records_absence({"state": "WORKED_ABSENT",
+                                "sources_searched": ["registry"]},
+                               item_keys("heatmap", "cell_evidence", "cells"))
 
 
 @pytest.mark.parametrize("marker", [
@@ -483,24 +669,24 @@ def test_a_marker_that_is_not_a_recorded_absence_buys_no_exemption(marker):
     beside it to say nothing; and a rung with no search behind it is an
     assertion, not a finding — the same posture AG-03 takes. A producer
     who could buy the exemption with one boolean would have a switch."""
-    payload = {"cell_evidence": {**ENV, "cells": [
-        {"subcap_id": "P4C1.1.1", "synthesis": "Evidence is limited.",
+    payload = {"alerts": {**ENV, "alerts": [
+        {"subcap_id": "P4C1.1.1", "justification": "Evidence is limited.",
          **marker}]}}
     out = _cg15("heatmap", payload)
     assert len(out) == 1, marker
-    assert out[0]["path"] == "cell_evidence.cells[0].synthesis"
+    assert out[0]["path"] == "alerts.alerts[0].justification"
 
 
 def test_a_bare_placeholder_is_refused_even_inside_a_recorded_absence():
     """The one thing no absence excuses. The protocol is a reason and a
     ladder; 'N/A' is neither, and it renders as itself on a client page."""
-    payload = {"cell_evidence": {**ENV, "cells": [
-        {"subcap_id": "P4C1.1.1", "synthesis": "N/A",
+    payload = {"alerts": {**ENV, "alerts": [
+        {"subcap_id": "P4C1.1.1", "justification": "N/A",
          "state": "WORKED_ABSENT",
          "sources_searched": ["registry", "filings"]}]}}
     out = _cg15("heatmap", payload)
     assert len(out) == 1
-    assert out[0]["path"] == "cell_evidence.cells[0].synthesis"
+    assert out[0]["path"] == "alerts.alerts[0].justification"
     assert "placeholder is not an absence" in out[0]["message"]
 
 
