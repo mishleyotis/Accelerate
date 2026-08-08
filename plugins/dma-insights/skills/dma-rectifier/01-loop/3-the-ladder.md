@@ -5,17 +5,23 @@ whether it was chosen or defaulted to. Defaulting produces R1 every time,
 because R1 is where the file you already have open is.
 
 ```
-R5  a schema constraint, enum, generated column or contract shape
+R5  a schema constraint, enum, generated column or contract shape    SCHEMA
     ── the defect cannot be represented ──────────────── a migration
-R4  a connector gate that refuses it at submit or promote
+R4  a connector gate that refuses it at submit or promote            GATE
     ── every session, whether or not it read the skill ── hours–a day
-R3  a script or test that checks it locally or in CI
+R3  a script or test that checks it locally or in CI      TEST · COMPONENT
     ── every run, unattended, if someone runs it ─────── hours
-R2  a worked example or measured exemplar in the skill
+R2  a worked example or measured exemplar in the skill      SKILL · AGENT
     ── when read, and followed ──────────────────────── an hour
-R1  prose guidance in a skill or agent file
+R1  prose guidance in a skill or agent file                   DOC · PROCESS
     ── when read, and remembered ────────────────────── minutes
 ```
+
+The right-hand column is `target_kind` on a `record_refinement` call. **The
+store has no rung field — `target_kind` is the rung**, and it is the copy that
+survives to the next run. Write the rung into `rationale` as well, opening with
+`RUNG: R<n> — `, and keep the two agreeing; where they disagree, `target_kind`
+is what actually landed and the rung claim is aspiration.
 
 The ranking is not about effort. It is about **what the catch depends on**:
 

@@ -9,6 +9,12 @@ rung again. Every artefact named here exists in the repository and can be read.
 > A required contract field is validated at submit and silently discarded at
 > promotion, because the writer spec has no column for it.
 
+It is in the store's taxonomy under that name —
+`CONTRACT_FIELD_DISCARDED_AT_PROMOTION`, seeded by migration 0035. Call
+`list_defect_classes` and read its TELL and its PROBE before filing anything
+that looks like it; the probe is a check you can run against a suspicion before
+you have a finding at all.
+
 Note the two points — *validated at submit*, *discarded at promotion*. That is
 what a class name has to contain, and it is what tells you the rung before you
 have written a line of code.
@@ -85,17 +91,28 @@ exemptions. An exemption list would have let the next real defect be added to it
 ## The refinement
 
 ```
-rung: R3   mode: preventive   direction: added
-artefacts: [apps/mcp/tests/test_field_census.py,
-            apps/api/tests/test_serving_read_path.py,
-            migrations/versions/0023_techstack_dropped.py]
-check: {kind: test,
-        id: "CG-13 :: test_a_required_field_is_either_stored_or_deliberately_computed",
-        result: pass}
-closes: [the five sightings above]
-reason: "Resolves every required contract field against the connector's own
-         writer spec on each CI run; depends only on CI, not on a reader."
+target_kind: TEST                      ← R3, in the store's vocabulary
+target:      apps/mcp/tests/test_field_census.py::
+             test_a_required_field_is_either_stored_or_deliberately_computed
+change:      "Sweep every required contract field against the connector's
+              writer spec; record deliberate absences with the source each is
+              recomputed from."
+applied_by:  rectifier
+finding_ids: [the five sightings above]
+commit_sha:  2aa7047
+relation:    CLOSES
+rationale:   "RUNG: R3 — resolves every required contract field against the
+              connector's own writer spec on each CI run, so the catch depends
+              only on CI running rather than on a reader remembering."
+verification:"pytest apps/mcp/tests/test_field_census.py passes on HEAD; run
+              against `git show <pre-0023>:apps/mcp/dma_mcp/writer_spec.json`
+              it FAILS, naming techstack.dropped, mix_implication and
+              sequencing_basis by path."
 ```
+
+`record_refinement` with that payload closes nothing on its own — five separate
+`resolve_finding(finding_id, "REF-…", verification)` calls do, and the
+refinement argument is under a database CHECK so there is no way to skip it.
 
 Its failure message names the class rather than the instance, which is what
 makes it teach:

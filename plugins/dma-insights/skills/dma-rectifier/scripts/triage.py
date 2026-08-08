@@ -1,244 +1,248 @@
 #!/usr/bin/env python3
-"""Fingerprint, cluster and rank findings, and state the minimum rung each
-cluster requires.
+"""Rank the store's open findings into clusters, and state the minimum rung each
+one requires.
 
-    python scripts/triage.py findings.json
+    list_open_findings(...)  > findings.json && python scripts/triage.py findings.json
+    get_memory_digest(days=7) > digest.json   && python scripts/triage.py digest.json
     python scripts/triage.py findings.json --json > clusters.json
-    list_open_findings(...) > findings.json && python scripts/triage.py findings.json
 
-Input is what `list_open_findings` / `search_findings` return: a JSON array of
-findings, or an object with a "findings" key. Shape: templates/finding.schema.json.
+Input is whatever the connector's memory tools returned: a list of findings, a
+`{findings: […]}` / `{results: […]}` envelope, or a full `get_memory_digest`
+payload (recognised by its `open_by_class` key). Shapes:
+templates/finding.schema.json and 02-inputs/2-memory-tools.md.
 
-It does the counting. You do the naming and the rung choice — see
-01-loop/2-clustering.md and 01-loop/3-the-ladder.md.
+The store already does the class grain — `defect_class` is a foreign key and the
+digest's `open_by_class` says which SHAPE of defect the build is still
+producing. This adds the two things it does not: the ORDER to work in, and the
+FLOOR each cluster's rung has to clear. The naming and the rung choice remain
+judgement; see 01-loop/2-clustering.md and 01-loop/3-the-ladder.md.
 
 Two things it deliberately does NOT do quietly:
 
-  * A finding it cannot fingerprint is a FAILURE, not a skip. A triage that
-    silently drops the findings it could not parse reports a clean cluster set
-    over the ones it never looked at — the same silent-skip mode that let
+  * A finding it cannot place is a FAILURE, not a skip. A triage that silently
+    drops the records it could not read reports a clean cluster set over the
+    findings it never looked at — the same silent-skip mode that let
     `Per issue:` opt out of both CG-13 and AG-03 for as long as it existed.
-  * It never invents a cluster. Ranking is over what was sighted; a run with no
-    findings prints "nothing above threshold" and exits 0.
+  * It never invents a cluster. Ranking is over what was sighted; no findings
+    prints "nothing above threshold" and exits 0.
 
-Exit codes: 0 clean · 1 unfingerprintable findings present.
+Exit codes: 0 clean · 1 unreadable findings present.
 """
 import argparse
 import json
-import re
 import sys
 from collections import defaultdict
 
 RUNGS = ["R1", "R2", "R3", "R4", "R5"]
 
-VERBS = ("discarded", "fabricated", "unchecked", "miscited", "misgrained",
-         "leaked", "stale", "unreachable")
-LOCI = ("package", "synthesis", "submit", "promote", "serve", "render")
+# target_kind IS the rung. The store has no rung column; this is the mapping.
+KIND_RUNG = {"DOC": "R1", "PROCESS": "R1", "SKILL": "R2", "AGENT": "R2",
+             "TEST": "R3", "COMPONENT": "R3", "GATE": "R4", "SCHEMA": "R5"}
 
-# Reach that forces R3 or above by the ladder's second rule: prose did not
-# catch it the first time and the reader who missed it is someone else next time.
-REACHED_CLIENT = ("rendered", "promoted")
+SEVERITIES = ("BLOCKER", "MAJOR", "MINOR", "INFO")
+SEV_ORDER = {s: i for i, s in enumerate(reversed(SEVERITIES))}
 
-_UUID = re.compile(r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b", re.I)
-_IDS = re.compile(r"\b(?:E|IC|F|FA|TS|WN|REC)-[0-9A-Za-z_]+\b")
-_IDX = re.compile(r"\[\s*\d+\s*\]")
-_RUNKEY = re.compile(r"\bDMA-ASM-[A-Z0-9]+-\d{8}-\d+\b")
+# A component that serves the client. A defect here reached, or could reach, a
+# rendered surface — the ladder's second rule then forbids anything below R3.
+CLIENT_FACING = ("web", "api")
 
 
-def normalise(path):
-    """Collapse the parts that make two sightings of one defect look distinct.
-
-    overview.findings[3].score and overview.findings[11].score are one path.
-    """
-    p = (path or "").strip()
-    p = _UUID.sub("<id>", p)
-    p = _RUNKEY.sub("<run>", p)
-    p = _IDS.sub("<id>", p)
-    p = _IDX.sub("[]", p)
-    return re.sub(r"\s+", " ", p)
-
-
-def fingerprint(f):
-    return (f.get("invariant") or "", f.get("verb") or "", normalise(f.get("path")))
-
-
-def unfingerprintable(f):
+def unreadable(f):
     """Why this finding cannot be placed. Empty list means it can."""
     why = []
-    if not (f.get("invariant") or "").strip():
-        why.append("no invariant (UNKNOWN is legal; blank is not)")
-    if (f.get("verb") or "") not in VERBS:
-        why.append("verb not one of " + "/".join(VERBS))
-    if not (f.get("path") or "").strip():
-        why.append("no path")
-    if (f.get("locus") or "") not in LOCI:
-        why.append("locus not one of " + "/".join(LOCI))
+    if not (f.get("defect_class") or "").strip():
+        why.append("no defect_class (it is a foreign key, not a label — read "
+                   "list_defect_classes)")
+    if not (f.get("component") or "").strip():
+        why.append("no component")
+    if not (f.get("title") or "").strip():
+        why.append("no title")
+    if (f.get("severity") or "") not in SEVERITIES:
+        why.append("severity not one of " + "/".join(SEVERITIES))
     return why
 
 
 def prior_rung(f):
-    """The highest rung any refinement against this finding landed on."""
+    """The highest rung any refinement against this finding landed on.
+
+    Present only when the record came from get_finding — list_open_findings
+    does not carry refinements, and 'no refinements listed' is NOT 'no
+    refinements exist'. None means unknown, which the caller must not read as
+    'first attempt'.
+    """
     best = None
     for r in f.get("refinements") or []:
-        rung = (r.get("rung") if isinstance(r, dict) else None) or ""
-        if rung in RUNGS and (best is None or RUNGS.index(rung) > RUNGS.index(best)):
+        if not isinstance(r, dict):
+            continue
+        rung = KIND_RUNG.get((r.get("target_kind") or "").upper())
+        if rung and (best is None or RUNGS.index(rung) > RUNGS.index(best)):
             best = rung
     return best
 
 
-def is_recurrence(f):
-    """A sighting against a finding a refinement already answered."""
-    if f.get("status") == "recurrence" or f.get("recurrence_count"):
-        return True
-    for r in f.get("refinements") or []:
-        if isinstance(r, dict) and r.get("held") is False:
-            return True
-    # A refinement exists and the finding is open again: the fix did not hold.
-    return bool(f.get("refinements")) and f.get("status") in ("open", "reopened", None)
+def recurrences(f):
+    n = int(f.get("recurrences") or 0)
+    if not n and (f.get("status") or "").upper() == "RECURRED":
+        n = 1
+    return n
 
 
-def minimum_rung(cluster):
-    """The floor, with the reason. Never the final answer — that is judgement."""
-    floor, why = "R1", "first sighting, no client reach"
+def locator(f):
+    return (f.get("file_path") or f.get("surface") or f.get("gate_id") or "")
 
-    if len(cluster["findings"]) >= 3 or cluster["sightings"] >= 3:
-        floor, why = "R3", (f"{len(cluster['findings'])} distinct paths / "
-                            f"{cluster['sightings']} sightings — one class, "
-                            "not N patches")
-    elif any((f.get("severity") == "blocking") for f in cluster["findings"]):
-        floor, why = "R2", "a blocking sighting; prose alone was not enough"
 
-    if cluster["client_reach"] in REACHED_CLIENT:
-        if RUNGS.index(floor) < 2:
-            floor, why = "R3", (f"reached the client ({cluster['client_reach']}) "
-                                "— ladder rule 2: never below R3")
+def minimum_rung(c):
+    """The FLOOR, with its reason. Never the final answer — that is judgement."""
+    floor, why = "R1", "first sighting, nothing forcing it higher"
 
-    if cluster["prior_rung"]:
-        nxt = RUNGS[min(RUNGS.index(cluster["prior_rung"]) + 1, len(RUNGS) - 1)]
-        if RUNGS.index(nxt) > RUNGS.index(floor):
-            floor = nxt
-        why = (f"RECURRENCE — previous refinement landed on "
-               f"{cluster['prior_rung']} and did not hold; strictly above it. "
-               "FIRST run that existing check against this instance: if it PASSES "
-               "on a genuine instance the defect is scope, not rung, and the "
-               "upstream move is to widen the same rung — usually one grain down")
-        if cluster["prior_rung"] == "R5":
-            why += " (already R5: this is a scope or ceiling question, not a rung one)"
+    if c["findings"] >= 3 or c["sightings"] >= 3:
+        floor, why = "R3", (f"{c['findings']} findings / {c['sightings']} sightings "
+                            "in one class — one structural change, not N patches")
+    elif c["worst_severity"] == "BLOCKER":
+        floor, why = "R2", "a BLOCKER in the class; prose alone was not enough"
+
+    if c["client_facing"] and RUNGS.index(floor) < 2:
+        floor, why = "R3", (f"reached a client-facing component ({', '.join(c['components'])}) "
+                            "— ladder rule 2: never below R3")
+
+    if c["recurrences"]:
+        if c["prior_rung"]:
+            nxt = RUNGS[min(RUNGS.index(c["prior_rung"]) + 1, len(RUNGS) - 1)]
+            if RUNGS.index(nxt) > RUNGS.index(floor):
+                floor = nxt
+            why = (f"RECURRENCE — the previous refinement landed on "
+                   f"{c['prior_rung']} (target_kind) and did not hold; strictly "
+                   "above it")
+            if c["prior_rung"] == "R5":
+                why += " (already R5: a scope or ceiling question, not a rung one)"
+        else:
+            if RUNGS.index(floor) < 2:
+                floor = "R3"
+            why = ("RECURRENCE — no refinement in this record, so the previous rung "
+                   "is UNKNOWN. Call get_finding before choosing; 'not listed' is "
+                   "not 'none exists'")
+        why += (". FIRST run the existing check against this instance: if it PASSES "
+                "on a genuine instance the defect is scope, not rung, and the "
+                "upstream move is to widen the same rung — usually one grain down")
     return floor, why
 
 
 def build(findings):
-    # One row per fingerprint. Two records with the same fingerprint are two
-    # sightings of one finding, which is exactly what the store's dedup does —
-    # and the sighting count is the signal, so it accumulates rather than
-    # collapsing.
-    by_fp = {}
-    for f in findings:
-        fp = fingerprint(f)
-        if fp not in by_fp:
-            rec = dict(f)
-            rec["sightings"] = int(f.get("sightings") or 1)
-            rec["refinements"] = list(f.get("refinements") or [])
-            by_fp[fp] = rec
-            continue
-        rec = by_fp[fp]
-        rec["sightings"] += int(f.get("sightings") or 1)
-        rec["refinements"] += list(f.get("refinements") or [])
-        for key in ("severity", "client_reach", "surface", "excerpt"):
-            if not rec.get(key) and f.get(key):
-                rec[key] = f[key]
-
     classes = defaultdict(list)
-    for fp, f in by_fp.items():
-        classes[(fp[0], fp[1])].append(f)
+    for f in findings:
+        classes[f["defect_class"]].append(f)
 
     out = []
-    for (inv, verb), fs in classes.items():
-        sightings = sum(int(f.get("sightings") or 1) for f in fs)
-        reaches = [f.get("client_reach") for f in fs if f.get("client_reach")]
-        reach = next((r for r in ("rendered", "promoted", "submitted",
-                                  "caught_before_submit", "none") if r in reaches), "none")
+    for cls, fs in classes.items():
+        comps = sorted({f.get("component") for f in fs if f.get("component")})
         rungs = [prior_rung(f) for f in fs if prior_rung(f)]
-        prior = max(rungs, key=RUNGS.index) if rungs else None
-        depth = sum(1 for f in fs if is_recurrence(f))
+        sev = sorted({(f.get("severity") or "INFO") for f in fs},
+                     key=lambda s: SEV_ORDER.get(s, 0), reverse=True)
         c = {
-            "invariant": inv, "verb": verb,
-            "paths": sorted(normalise(f.get("path")) for f in fs),
-            "findings": fs, "sightings": sightings,
-            "client_reach": reach, "prior_rung": prior, "recurrence_depth": depth,
-            "surfaces": sorted({f.get("surface") for f in fs if f.get("surface")}),
-            "loci": sorted({f.get("locus") for f in fs if f.get("locus")}),
+            "defect_class": cls,
+            "findings": len(fs),
+            "finding_ids": sorted(f.get("finding_id") or "?" for f in fs),
+            "sightings": sum(int(f.get("sightings") or 1) for f in fs),
+            "recurrences": sum(recurrences(f) for f in fs),
+            "components": comps,
+            "client_facing": any(c0 in CLIENT_FACING for c0 in comps),
+            "worst_severity": sev[0] if sev else "INFO",
+            "max_age_days": max((int(f.get("age_days") or 0) for f in fs), default=0),
+            "locators": sorted({locator(f) for f in fs if locator(f)}),
+            "prior_rung": max(rungs, key=RUNGS.index) if rungs else None,
+            "titles": [f.get("title") for f in fs][:8],
         }
         c["minimum_rung"], c["rung_reason"] = minimum_rung(c)
         c["shape"] = ("class — one structural change" if len(fs) > 1
-                      else "single path — recurrence check first")
+                      else "single finding — check for a recurrence first")
         out.append(c)
 
-    # Ordering: recurrence depth, then client reach, then sighting count.
-    order = {"rendered": 4, "promoted": 3, "submitted": 2,
-             "caught_before_submit": 1, "none": 0}
-    out.sort(key=lambda c: (c["recurrence_depth"], order.get(c["client_reach"], 0),
-                            c["sightings"]), reverse=True)
+    out.sort(key=lambda c: (c["recurrences"], SEV_ORDER.get(c["worst_severity"], 0),
+                            c["sightings"], c["max_age_days"]), reverse=True)
     return out
+
+
+def extract(doc):
+    """Findings out of whatever the tools returned."""
+    if isinstance(doc, list):
+        return doc, "list"
+    if not isinstance(doc, dict):
+        return [], "unknown"
+    if "open_by_class" in doc:                       # get_memory_digest
+        rows = list(doc.get("new_findings_in_window") or [])
+        rows += list(doc.get("recurrences_in_window") or [])
+        rows += list(doc.get("ageing_unrefined") or [])
+        seen, uniq = set(), []
+        for r in rows:                               # a row may appear twice
+            k = r.get("finding_id")
+            if k in seen:
+                continue
+            seen.add(k)
+            uniq.append(r)
+        return uniq, "digest"
+    for key in ("findings", "results", "rows", "open"):
+        if isinstance(doc.get(key), list):
+            return doc[key], key
+    return [], "unknown"
 
 
 def main():
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("findings", nargs="?", default="-",
-                    help="JSON array of findings, or '-' for stdin")
+                    help="what a memory tool returned, or '-' for stdin")
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     ap.add_argument("--min-sightings", type=int, default=1,
-                    help="threshold; clusters below it are listed as below-threshold, "
-                         "never dropped silently")
+                    help="threshold; clusters below it are listed as "
+                         "below-threshold, never dropped silently")
     a = ap.parse_args()
 
     raw = sys.stdin.read() if a.findings == "-" else open(a.findings, encoding="utf-8").read()
-    doc = json.loads(raw)
-    findings = doc.get("findings", doc) if isinstance(doc, dict) else doc
-    if not isinstance(findings, list):
-        print("input is neither a list of findings nor {findings: [...]}", file=sys.stderr)
-        return 1
+    findings, shape = extract(json.loads(raw))
 
-    bad = [(i, f, unfingerprintable(f)) for i, f in enumerate(findings)]
-    bad = [(i, f, w) for i, f, w in bad if w]
-    good = [f for f in findings if not unfingerprintable(f)]
+    bad = [(i, unreadable(f)) for i, f in enumerate(findings)]
+    bad = [(i, w) for i, w in bad if w]
+    good = [f for f in findings if not unreadable(f)]
 
     clusters = build(good)
     above = [c for c in clusters if c["sightings"] >= a.min_sightings]
     below = [c for c in clusters if c["sightings"] < a.min_sightings]
 
     if a.json:
-        print(json.dumps({"clusters": above, "below_threshold": below,
-                          "unfingerprintable": [{"index": i, "why": w} for i, _, w in bad]},
+        print(json.dumps({"input_shape": shape, "clusters": above,
+                          "below_threshold": below,
+                          "unreadable": [{"index": i, "why": w} for i, w in bad]},
                          indent=1, default=str))
-    else:
-        print(f"\n  {len(good)} findings · {len(clusters)} clusters · "
-              f"{len(bad)} unfingerprintable\n")
-        if not above:
-            print("  nothing above threshold — say so and stop. Do not lower it.\n")
-        for n, c in enumerate(above, 1):
-            print(f"  {n}. {c['invariant']} / {c['verb']}   "
-                  f"[{c['shape']}]")
-            print(f"     paths        {len(c['paths'])}  sightings {c['sightings']}  "
-                  f"reach {c['client_reach']}  recurrences {c['recurrence_depth']}")
-            for p in c["paths"][:8]:
-                print(f"       · {p}")
-            if len(c["paths"]) > 8:
-                print(f"       · … {len(c['paths']) - 8} more")
-            print(f"     minimum rung {c['minimum_rung']} — {c['rung_reason']}")
-            print(f"     name the class yourself: 12-30 words, and state the two "
-                  f"points it lives between\n")
-        for c in below:
-            print(f"  (below threshold) {c['invariant']}/{c['verb']} "
-                  f"— {c['sightings']} sighting(s)")
-        if bad:
-            print("\n  UNFINGERPRINTABLE — these were NOT clustered and NOT counted:")
-            for i, _, w in bad:
-                print(f"    [{i}] {'; '.join(w)}")
-            print("  A triage that drops what it cannot parse reports clean over the")
-            print("  findings it never looked at. Fix the records, then re-run.")
-        print()
+        return 1 if bad else 0
+
+    print(f"\n  {len(good)} findings ({shape}) · {len(clusters)} classes · "
+          f"{len(bad)} unreadable\n")
+    if not above:
+        print("  nothing above threshold — say so and stop. Do not lower it, and do")
+        print("  not go looking for defects nobody sighted.\n")
+    for n, c in enumerate(above, 1):
+        print(f"  {n}. {c['defect_class']}   [{c['shape']}]")
+        print(f"     findings {c['findings']}  sightings {c['sightings']}  "
+              f"recurrences {c['recurrences']}  worst {c['worst_severity']}  "
+              f"oldest {c['max_age_days']}d")
+        print(f"     components   {', '.join(c['components']) or '—'}")
+        for t in c["titles"]:
+            print(f"       · {t}")
+        if c["findings"] > len(c["titles"]):
+            print(f"       · … {c['findings'] - len(c['titles'])} more")
+        print(f"     minimum rung {c['minimum_rung']} — {c['rung_reason']}")
+        print("     name the class yourself: 12-30 words, stating the two points "
+              "it lives between\n")
+    for c in below:
+        print(f"  (below threshold) {c['defect_class']} — "
+              f"{c['sightings']} sighting(s)")
+    if bad:
+        print("\n  UNREADABLE — these were NOT clustered and NOT counted:")
+        for i, w in bad:
+            print(f"    [{i}] {'; '.join(w)}")
+        print("  A triage that drops what it cannot read reports clean over the")
+        print("  findings it never looked at. Fix the records, then re-run.")
+    print()
     return 1 if bad else 0
 
 

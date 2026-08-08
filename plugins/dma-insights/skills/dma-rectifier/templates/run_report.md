@@ -7,9 +7,13 @@ Window: <from> – <to> (UTC) · Session: <session_ref> · Trigger: weekly | man
 | | |
 |---|---|
 | Memory tools seen | `<n>` — <names, or the contract each mapped to> |
-| Open findings | `<open_count>` |
+| Defect classes | `<n>` from `list_defect_classes` — <any invented this run, with their PROBE> |
+| Open findings | `<open_count>` (OPEN + INVESTIGATING + RECURRED) |
+| Recurrences in window | `<n>` |
+| Ageing unrefined (14d+) | `<n>` |
 | Oldest open | `<date>` |
 | Newest sighting | `<date>` |
+| Search paths skipped | <any `paths_skipped` reason seen this run; a path that never ran is not evidence of absence> |
 
 <If the newest sighting is old while QA agents have run since, say so here. A
 quiet store and a broken pipe look identical in the open count and different in
@@ -31,23 +35,29 @@ Stopped after `<n>` clusters — budget, not exhaustion. Say which.
 
 ## STEP 4–6 — What changed
 
-### Cluster 1 — <class name>
+### Cluster 1 — <defect_class> · <class name in 12–30 words>
 
-- **Rung:** R<n> (<preventive|detective>, <added|widened|narrowed>)
-- **Previous rung for this class:** R<n> or none — <if a recurrence, confirm this
-  rung is strictly above it>
-- **Reason (15–40 words, what the catch depends on):**
-- **Artefacts:**
-- **Check:** `<id>` — `<command>` → pass
-- **Negative control:** `<method>` `<reference>` → failed as expected: `<the
-  failure line>`
-- **Closes:** `<finding ids>`
+- **`target_kind` → rung:** `<TEST|GATE|SCHEMA|SKILL|AGENT|DOC|PROCESS|COMPONENT>`
+  → R<n>
+- **Previous `target_kind` for this class:** R<n>, from `get_finding` — or
+  UNKNOWN, and say so rather than assuming none. If a recurrence, confirm this
+  rung is strictly above it, or that you ran the existing check and it passed on
+  a genuine instance (a scope defect: widen the same rung)
+- **`rationale`:** `RUNG: R<n> — ` + 15–40 words naming what the catch depends on
+- **`target` / artefacts:**
+- **`commit_sha` or `change_ref`:**
+- **`verification` (the negative control, both directions):** passes on the
+  fixed state; fails on `<how the broken state was reconstructed>` with
+  `<the failure line>`
+- **`gate_added`:** <where target_kind is GATE>
+- **Closes:** `<finding ids>` — or ADDRESSES only, and why
 - **Ceiling / rung not reached:** <the rung you could not reach and why, or none>
 
 ## STEP 7 — Written back
 
 | Call | Count |
 |---|---|
+| `ingest_reviewer_feedback` | ingested / skipped / problems |
 | `record_finding` | |
 | `record_refinement` | |
 | `resolve_finding` | |

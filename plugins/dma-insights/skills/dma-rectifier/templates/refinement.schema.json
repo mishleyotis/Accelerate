@@ -1,97 +1,47 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "refinement.schema.json",
-  "title": "Refinement",
-  "description": "One change made in response to findings, recorded against what it closes so the next run can ask whether it held. A refinement with check.kind=none is legal and closes nothing: a class fixed with a paragraph is not closed, it is untested.",
+  "title": "Refinement — the record_refinement payload",
+  "description": "Mirrors the connector's record_refinement contract; the connector is authoritative and this file is the readable copy. What you CHANGED, in response to which findings, so the next run can ask whether it held. Recording a refinement CLOSES NOTHING — resolve_finding is a second, separate call, deliberately, because 'changed' and 'fixed' are two claims and only the second one can be wrong later. The server allocates REF-####.",
   "type": "object",
-  "required": ["rung", "mode", "direction", "artefacts", "check", "closes", "reason"],
-  "additionalProperties": false,
+  "required": ["target_kind", "target", "change", "applied_by", "finding_ids"],
   "properties": {
-    "rung": {
+    "target_kind": {
       "type": "string",
-      "enum": ["R1", "R2", "R3", "R4", "R5"],
-      "description": "R1 prose · R2 worked example · R3 script or test · R4 connector gate · R5 schema constraint. Higher depends on fewer people: R1/R2 depend on a reader, R3 on someone running it, R4/R5 on nothing. A recurrence lands STRICTLY above the rung its previous refinement landed on."
+      "enum": ["SKILL", "AGENT", "COMPONENT", "GATE", "TEST", "SCHEMA", "DOC", "PROCESS"],
+      "description": "THE RUNG, in the store's vocabulary. DOC/PROCESS = R1 prose · SKILL/AGENT = R2 a worked example · TEST/COMPONENT = R3 a check that runs · GATE = R4 refused at submit · SCHEMA = R5 unrepresentable. Higher depends on fewer people: R1/R2 on a reader, R3 on someone running it, R4/R5 on nobody. A recurrence lands STRICTLY above the target_kind its previous refinement used — except where that check existed and did not fire, which is a scope defect and is answered by widening the same rung."
     },
-    "mode": {
+    "target": {
       "type": "string",
-      "enum": ["preventive", "detective"],
-      "description": "detective means it finds the defect after the fact and raises a finding rather than preventing it. Legitimate only where prevention has a stated ceiling — and then the ceiling must be recorded too."
+      "description": "Named the way its owner names it.",
+      "examples": ["skill:dma-surface-production", "agent:rectifier", "CG-13", "apps/mcp/dma_mcp/promote.py", "apps/mcp/tests/test_field_census.py"]
     },
-    "direction": {
-      "type": "string",
-      "enum": ["added", "widened", "narrowed"],
-      "description": "widened is the correct response to a recurrence whose check existed and did not fire — a scope defect, usually one grain down. narrowed must carry a reason citing the authority order or an adjudication; a check narrowed to make a failure go away is a suppression, and this field is how a later run finds the moment the net got smaller."
-    },
-    "artefacts": {
+    "change": {"type": "string", "description": "What was changed, in prose. Name the mechanism, not the culprit."},
+    "applied_by": {"type": "string", "description": "The agent or person who made the change."},
+    "finding_ids": {
       "type": "array",
       "minItems": 1,
       "items": {"type": "string"},
-      "description": "Every path changed. Repo-relative."
+      "description": "The findings this answers. They must exist. One refinement against six findings is the shape a structural change makes; six refinements against one each is the shape a queue makes.",
+      "examples": [["MEM-0007", "MEM-0011"]]
     },
-    "check": {
-      "type": "object",
-      "required": ["kind"],
-      "additionalProperties": false,
-      "properties": {
-        "kind": {
-          "type": "string",
-          "enum": ["test", "gate", "constraint", "script", "none"],
-          "description": "none means R1 or R2. A refinement with kind=none may not appear in a resolve_finding call."
-        },
-        "id": {"type": "string", "description": "Test node id, gate id, constraint name, or script entrypoint.", "examples": ["CG-13 :: test_a_required_field_is_either_stored_or_deliberately_computed"]},
-        "command": {"type": "string", "description": "The exact command a later run can re-run."},
-        "result": {"type": "string", "enum": ["pass", "fail", "not_run"]},
-        "output": {"type": "string", "description": "The outcome line itself, not a description of it."}
-      }
-    },
-    "negative_control": {
-      "type": ["object", "null"],
-      "description": "Proof the check would have caught the defect. Required whenever this refinement is used to resolve anything. A check that passes on both the broken and the fixed state closes nothing and will be believed anyway.",
-      "required": ["method", "ran", "failed_as_expected"],
-      "additionalProperties": false,
-      "properties": {
-        "method": {"type": "string", "enum": ["git_show", "fixture", "recorded_payload", "worktree"], "description": "How the broken state was reconstructed."},
-        "reference": {"type": "string", "description": "The sha:path, fixture path, or payload id used."},
-        "ran": {"type": "boolean"},
-        "failed_as_expected": {"type": "boolean", "description": "false blocks the resolve. So does ran=false. There is no third option where you were confident."},
-        "output": {"type": "string", "description": "The failure line the check produced on the broken state."}
-      }
-    },
-    "closes": {
-      "type": "array",
-      "items": {"type": "string"},
-      "description": "Finding ids this refinement actually closes. Empty is legal and normal for R1/R2. One refinement closing six findings is the shape a structural change makes; six refinements closing one each is the shape a queue makes."
-    },
-    "cluster_name": {
-      "type": ["string", "null"],
-      "description": "The class this answers, 12-30 words, stating the two points the defect lives between — e.g. 'validated at submit and discarded at promotion'. Where the two points are IS the choice of rung."
-    },
-    "ceiling": {
-      "type": ["object", "null"],
-      "description": "Set when this class cannot be prevented above a certain rung — e.g. nothing downstream can distinguish a polled empty roster from an unpolled one. Naming the ceiling stops the next run from reading a recurrence as a rung-choice failure when it is a reachability limit.",
-      "required": ["rung", "reason"],
-      "additionalProperties": false,
-      "properties": {
-        "rung": {"type": "string", "enum": ["R1", "R2", "R3", "R4", "R5"]},
-        "reason": {"type": "string"}
-      }
-    },
-    "reason": {
+    "commit_sha": {"type": "string", "description": "ONE of commit_sha or change_ref is REQUIRED: a refinement nobody can locate is a claim, not a change."},
+    "change_ref": {"type": "string", "description": "A PR, branch or artefact reference, when there is no single commit."},
+    "gate_added": {"type": "string", "description": "The gate added in response, so the memory holds the fix beside the defect. Set it whenever target_kind is GATE.", "examples": ["CG-13"]},
+    "relation": {
       "type": "string",
-      "description": "15-40 words naming what this catch DEPENDS ON. 'Fires on every CI run, so it depends on CI running, which the nightly scanner guarantees.' That sentence is what the next run reads when deciding whether the rung held.",
-      "minLength": 40
+      "enum": ["ADDRESSES", "CLOSES"],
+      "description": "CLOSES only where a check exists. An R1/R2 refinement ADDRESSES — a class fixed with a paragraph is not closed, it is untested."
     },
-    "rung_not_reached": {
-      "type": ["object", "null"],
-      "description": "When the right rung was out of reach this run: the rung you could not reach and why. The class stays OPEN. Never let 'we did something' close it — a class closed at R2 when it needed R5 comes back looking like a new finding.",
-      "required": ["rung", "reason"],
-      "additionalProperties": false,
-      "properties": {
-        "rung": {"type": "string", "enum": ["R1", "R2", "R3", "R4", "R5"]},
-        "reason": {"type": "string"}
-      }
+    "rationale": {
+      "type": "string",
+      "description": "OPEN IT WITH `RUNG: R<n> — ` and keep that agreeing with target_kind; where they disagree the target_kind is what actually landed. Then 15-40 words naming what this catch DEPENDS ON — 'fires on every CI run, so it depends on CI running, which the nightly scanner guarantees'. That sentence is what the next run reads when deciding whether the rung held. Record a ceiling here too where prevention has one, and the rung you could NOT reach where the right one was out of reach this run — in which case the class stays open.",
+      "examples": ["RUNG: R3 — resolves every required contract field against the connector's own writer spec on each CI run, so the catch depends only on CI running rather than on a reader remembering."]
     },
-    "commit": {"type": ["string", "null"], "description": "The commit sha carrying this refinement."},
-    "session_ref": {"type": ["string", "null"], "description": "The session that made the change."}
+    "verification": {
+      "type": "string",
+      "description": "THE NEGATIVE CONTROL, both directions in one sentence: the check, that it passes on the fixed state, and that it FAILS on the state that produced the finding, with how that state was reconstructed (git show sha:path, a fixture, the recorded payload). A check that passes on both the broken and the fixed state closes nothing and will be believed anyway. Required in substance before this refinement may be used in a resolve_finding call.",
+      "examples": ["pytest apps/mcp/tests/test_field_census.py passes on HEAD; run against `git show <pre-0023>:apps/mcp/dma_mcp/writer_spec.json` it names techstack.dropped, mix_implication and sequencing_basis by path."]
+    }
   }
 }

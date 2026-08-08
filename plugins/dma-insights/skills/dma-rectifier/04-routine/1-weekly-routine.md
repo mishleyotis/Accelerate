@@ -50,14 +50,26 @@ editing the cron, not adding logic.
 
 ## What it reads
 
-1. The connector's tool listing, and `list_open_findings` — the handshake.
-2. Open findings sighted in the closed window, plus **every open finding with a
-   recurrence**, regardless of window. A recurrence does not age out; it is the
-   loop's own error signal.
-3. For each cluster it opens, the prior refinements against its findings — which
-   rung was tried, whether it held.
-4. The repository working tree, for the local channel drain and for the artefacts
+1. The connector's tool listing, `list_defect_classes` and
+   `get_memory_digest(days=7)` — the handshake. The digest is built for exactly
+   this pass and returns the whole window in one call; read it in the order its
+   own `reading` field states.
+2. From the digest, in this order: `recurrences_in_window` (each names the
+   refinement that did not hold — its target is where the next change belongs),
+   `new_findings_in_window`, `refinements_in_window` with `held` per row,
+   `open_by_class` (which **shape** of defect the build is still producing), and
+   `ageing_unrefined` (open 14+ days with nothing changed about it).
+3. `get_finding(id)` for each cluster it opens — the sightings in order and the
+   refinements against them, so the previous `target_kind` is known before a
+   rung is chosen.
+4. `ingest_reviewer_feedback()` first, so the week's Accept/Reject verdicts are
+   in the store before the digest is read rather than after.
+5. The repository working tree, for the local channel drain and for the artefacts
    it is about to change.
+
+Recurrences do not age out of scope even when they fall outside the window: a
+fix that did not hold is the loop's own error signal, and `list_open_findings`
+returns RECURRED as open for that reason.
 
 ## What it does
 
@@ -119,10 +131,13 @@ Load the dma-rectifier skill and run one weekly rectification cycle.
 Window: the closed week ending at the most recent Monday 00:00 UTC. Also
 include every open finding carrying a recurrence, whatever its age.
 
-Follow the skill's seven steps in order. STEP 0 is a real handshake: if the
-connector's memory tools are absent or do not answer, stop, report "memory
+Follow the skill's seven steps in order. STEP 0 is a real handshake:
+list_defect_classes and get_memory_digest(days=7) against the connector, and
+if the memory tools are absent or do not answer, stop, report "memory
 unreachable — no rectification performed", and change nothing. Do not work
-from anything else.
+from anything else. Call ingest_reviewer_feedback() before reading the digest
+so the week's Accept/Reject verdicts are already in it. When search_findings
+returns nothing, read paths_skipped before concluding a finding is new.
 
 Budget: open at most three clusters and finish every one you open. Order by
 recurrence depth, then client reach, then sighting count.
@@ -132,10 +147,12 @@ check that passes on the fixed state, and a negative control proving that
 check fails on the state that produced the finding. A recurrence lands
 strictly above the rung its previous refinement landed on.
 
-Write back through the memory tools: record_refinement, resolve_finding,
-report_recurrence. Then open a PR on a branch with named paths only, one
-commit per cluster, each message naming the class and the finding ids it
-closes. Do not merge it.
+Write back through the memory tools: record_refinement (target_kind IS the
+rung; open rationale with "RUNG: Rn — " and put the negative control in
+verification), then resolve_finding naming that refinement, then
+report_recurrence for every fix found not to have held. Then open a PR on a
+branch with named paths only, one commit per cluster, each message naming the
+class and the finding ids it closes. Do not merge it.
 
 If there is nothing above threshold: say so, record the run as
 examined-and-empty, and stop. Do not lower the threshold, do not scan for

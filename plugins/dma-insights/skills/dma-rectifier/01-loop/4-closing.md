@@ -6,7 +6,18 @@ defect cannot recur unnoticed, and that claim needs a check behind it.
 
 ## The three conditions
 
-A `resolve_finding` call is legitimate only when all three hold:
+```
+resolve_finding(finding_id, refinement_id, verification="")
+```
+
+The refinement argument is **required and the column is under a CHECK**, so
+there is no way around it. That constraint is this skill's central rule already
+sitting at rung 5: without it, "did the fix hold?" has no subject. Note also
+that `record_refinement` closes nothing on its own — two calls, deliberately,
+because "changed" and "fixed" are two claims and only the second can be wrong
+later.
+
+A resolve is legitimate only when all three of these hold:
 
 **1 · The check exists and is named.** A file path and a test or function name,
 or a gate id, or a constraint name. Not "the skill now says". If the rung is R1
@@ -36,15 +47,17 @@ looks. This failure mode is common and quiet: a sweep that iterates an empty
 collection passes; an assertion whose subject is `None` passes; a regex that
 never matches reports no violations.
 
-Record it explicitly:
+Record it explicitly, in the refinement's `verification` — both directions in
+one sentence, because that is the field a later run reads:
 
-```
-negative_control: {method: "git show <sha>:<path>" | "fixture" | "recorded payload",
-                   ran: true, failed_as_expected: true, output: "<the failure line>"}
-```
+> `pytest apps/mcp/tests/test_field_census.py` passes on HEAD; run against
+> `git show <pre-0023>:apps/mcp/dma_mcp/writer_spec.json` it **fails**, naming
+> `techstack.dropped`, `mix_implication` and `sequencing_basis` by path.
 
-`failed_as_expected: false` blocks the resolve. So does `ran: false`. There is
-no third option where you were confident.
+A `verification` that says only that the check passes has recorded half the
+control, and it is the half that proves nothing. There is no third option where
+you were confident. `scripts/rung.py` blocks a `relation: CLOSES` whose
+verification does not state both directions.
 
 **A check with no negative control is the same defect class as a gate registry
 naming a field the contract does not declare** — it polices nothing, silently,
@@ -73,13 +86,23 @@ already closed. It is the most valuable single row in this store, because it is
 the only direct measurement of whether this loop works.
 
 ```
-report_recurrence(finding_id, refinement_id, evidence) → {recurrence_count}
+report_recurrence(finding_id, measurement, reported_by,
+                  after_refinement="", …) → {…}
 ```
 
 Report it through the tool. Not in prose, not in the report only — the store's
-job is to know that a fix did not hold, and a refinement whose `held` is false
-is what makes the next run choose a higher rung without having to re-derive the
-history.
+job is to know that a fix did not hold. It records the recurrence against the
+refinement **by name**, returns the finding to `RECURRED`, and flips that
+refinement's `held` to false in the digest, which is what makes the next run
+choose a higher rung without re-deriving the history.
+
+`measurement` is required with the same 30-character floor as a finding: a
+recurrence claim is only as good as the measurement that saw it come back. And
+if the finding was never resolved by a refinement, the tool refuses and sends
+you to `record_finding` — nothing can have failed to hold. Recording a live
+recurrence as a fresh finding instead severs exactly the link this loop is
+built on, which is why `record_finding` warns you when the defect is already
+RESOLVED rather than quietly opening a second row.
 
 Then read it properly, because three different things produce a recurrence and
 they have different fixes:

@@ -79,43 +79,61 @@ protocol is one an agent skims.
 
 ```
 STEP 0 — HANDSHAKE
-  List the connector's tools. Confirm the memory tools are present and answer.
-  Call the read side once for real: list_open_findings with a wide window.
-  Record what you got: {tools_seen[], open_count, oldest_open, newest_sighting}.
+  List the connector's tools. Confirm the eleven memory tools are present and
+  answer. Call the read side twice for real: `list_defect_classes` (the shared
+  vocabulary, and its per-class PROBE) and `get_memory_digest(days)` or
+  `list_open_findings`. Record what you got: {tools_seen[], open_count,
+  classes_seen, oldest_open, newest_sighting}.
   If the tools are absent or error: STOP. Report "memory unreachable — no
   rectification performed", name the failure, and change nothing. NEVER
   proceed from the transcript. A run that cannot read memory cannot know
   whether anything it is about to do has already been done.
 
 STEP 1 — DRAIN THE LOCAL CHANNEL
-  Anything visible only to this session is not yet memory. Sweep the working
-  tree and this conversation for feedback that has never been recorded:
-  qa_verdict.json, issue_register.csv, connector verdicts, pytest failures,
-  auditor reports, the user's own words. `python scripts/drain_local.py <dir>`
-  emits one record_finding payload per candidate. Record them BEFORE triage,
-  so this run's clustering sees them and the dedup counts them as sightings.
-  If none: say "local channel empty" and continue. That sentence is a result.
+  Anything visible only to this session is not yet memory. Two halves:
+    · `ingest_reviewer_feedback()` — every un-ingested Accept/Reject becomes
+      memory. Idempotent, so run it every time. A rejection sitting in
+      `annotations` is feedback this loop cannot see.
+    · Sweep the working tree and this conversation for what never reached the
+      store: qa_verdict.json, issue_register.csv, connector verdicts, pytest
+      failures, auditor reports, the user's own words.
+      `python scripts/drain_local.py <dir>` emits one record_finding payload
+      per candidate; fill `measurement` yourself — the command, query, status
+      or count WITH its denominator, 30 characters minimum, refused below it.
+  Record them BEFORE triage, so this run's clustering sees them and the dedup
+  counts them as sightings. If none: say "local channel empty" and continue.
+  That sentence is a result.
 
 STEP 2 — SEARCH BEFORE YOU BELIEVE
-  For every finding now in scope, ask memory whether it is new. Search BOTH
-  ways: semantic (a verifier and a stack trace describe one defect in different
-  words) and lexical (a JSON path, a gate id, a field name is an exact token
-  and embeddings blur exact tokens). Two searches, union the results.
-  Emit per finding: {finding_id, prior_ids[], prior_refinements[], is_recurrence}.
-  A finding whose prior refinement exists and whose defect is back is a
-  RECURRENCE, and recurrence is reported through the tool, not noted in prose —
-  the store's job is to know that the fix did not hold.
+  For every finding now in scope, ask memory whether it is new:
+  `search_findings(query, mode="auto")` runs lexical and semantic together —
+  semantic because a verifier and a stack trace describe one defect in
+  different words, lexical because a JSON path, a gate id or a field name is
+  an exact token and embeddings blur exact tokens.
+  READ `paths_skipped` EVERY TIME. An empty result from a path that never ran
+  is not evidence of absence: "no encoder in this image" and "nothing matched"
+  are different answers, and only one lets you conclude the finding is new.
+  On a hit, `get_finding(id)` for its sightings and its refinements — the
+  change that failed is named there, with the `target_kind` that says which
+  rung it landed on. A prior refinement plus a live defect is a RECURRENCE, and
+  recurrence goes through `report_recurrence`, not into prose: the store's job
+  is to know the fix did not hold.
 
 STEP 3 — CLUSTER
-  Fingerprint, group, name. `python scripts/triage.py findings.json` does the
-  mechanical part; you do the naming. A class name is 12–30 words and states
-  the two points the defect lives between — "validated at submit and discarded
-  at promotion", "asserted on the payload and never re-derived at read".
-  Where the two points are IS the choice of rung. Order clusters by
-  (recurrence depth, client reach, sighting count), descending; work the top of
-  that ranking first and say where you stopped. NEVER open a cluster you cannot
-  finish this run — a half-landed structural change is worse than an open
-  finding, because it reads as closed.
+  The store clusters at class grain for you — `open_by_class` in the digest is
+  the shape of defect this build is still producing, and a class with several
+  open findings is a process problem, not several bugs. `defect_class` is a
+  foreign key, so read `list_defect_classes` before filing anything; a class
+  may be invented via `new_class`, never invented silently, and if you cannot
+  write its PROBE you do not yet understand the defect well enough to name it.
+  `python scripts/triage.py findings.json` ranks and states a minimum rung; you
+  do the naming. A class name is 12–30 words and states the two points the
+  defect lives between — "validated at submit and discarded at promotion",
+  "asserted on the payload and never re-derived at read". Where the two points
+  are IS the choice of rung. Order clusters by (recurrences, severity,
+  sightings), descending; work the top and say where you stopped. NEVER open a
+  cluster you cannot finish this run — a half-landed structural change is worse
+  than an open finding, because it reads as closed.
 
 STEP 4 — CHOOSE THE RUNG
   Per cluster, one rung, chosen deliberately and with a recorded reason of
@@ -150,11 +168,21 @@ STEP 6 — GATES: PROVE THE CHECK WOULD HAVE CAUGHT IT
   is, not argued about.
 
 STEP 7 — WRITE BACK
-  record_refinement for every change: {rung, artefacts[], check, closes[],
-  reason, negative_control}. resolve_finding for every finding the refinement
-  actually closed, naming that refinement — the store refuses a resolve with no
-  refinement, which is the mechanised form of "no closing without a check".
-  report_recurrence for every fix found not to have held.
+  `record_refinement` for every change: {target_kind, target, change,
+  applied_by, finding_ids[], commit_sha | change_ref, gate_added, rationale,
+  verification, relation}. `target_kind` IS the rung (DOC/PROCESS→R1,
+  SKILL/AGENT→R2, TEST/COMPONENT→R3, GATE→R4, SCHEMA→R5), so open `rationale`
+  with `RUNG: R<n> — ` and make the two agree; where they disagree the
+  target_kind is the truth. Put the negative control in `verification`, both
+  directions in one sentence. Recording a refinement closes NOTHING — that is
+  deliberate, because "changed" and "fixed" are two claims and only the second
+  can be wrong later.
+  `resolve_finding(finding_id, refinement_id, verification)` for every finding
+  the refinement actually closed. The refinement argument is under a database
+  CHECK: this skill's central rule, expressed at rung 5.
+  `report_recurrence` for every fix found not to have held — with a measurement
+  meeting the same 30-character floor, because a recurrence claim is only as
+  good as the measurement that saw it come back.
   Then write the run report from `templates/run_report.md`. Findings you left
   open are part of the report, ordered, with the rung each is waiting on.
 ```
@@ -164,13 +192,17 @@ STEP 7 — WRITE BACK
 Five rungs. Higher is better and more expensive, and the whole point of naming
 them is that "more expensive" stops being a reason to stay low by default.
 
-| Rung | What it is | Catches it | Cost |
-|---|---|---|---|
-| **R1** | Prose guidance in a skill or agent file | When read, and remembered | minutes |
-| **R2** | A worked example or measured exemplar beside the guidance | When read, reliably — an exemplar is followed where an instruction is skimmed | an hour |
-| **R3** | A script or test that checks it locally / in CI | Every run, before submit, unattended | hours |
-| **R4** | A connector gate that refuses it at submit or promote | Every submission, for every session, including ones that never read the skill | hours to a day |
-| **R5** | A schema constraint, enum, generated column or contract shape that makes it unrepresentable | Never happens again, by construction | a migration |
+| Rung | What it is | `target_kind` | Catches it | Cost |
+|---|---|---|---|---|
+| **R1** | Prose guidance in a skill or agent file | `DOC` `PROCESS` | When read, and remembered | minutes |
+| **R2** | A worked example or measured exemplar beside the guidance | `SKILL` `AGENT` | When read, reliably — an exemplar is followed where an instruction is skimmed | an hour |
+| **R3** | A script or test that checks it locally / in CI | `TEST` `COMPONENT` | Every run, before submit, unattended | hours |
+| **R4** | A connector gate that refuses it at submit or promote | `GATE` + `gate_added` | Every submission, for every session, including ones that never read the skill | hours to a day |
+| **R5** | A schema constraint, enum, generated column or contract shape that makes it unrepresentable | `SCHEMA` | Never happens again, by construction | a migration |
+
+The rung is not a field in the store — `target_kind` is, and it is the same
+statement. Record the rung in `rationale`'s opening (`RUNG: R3 — …`) and keep
+the two agreeing; where they disagree, `target_kind` is what actually landed.
 
 R1 and R2 depend on a reader. R3 depends on someone running it. R4 and R5 do
 not depend on anyone. That is the entire ranking, and it is why a recurrence
@@ -207,7 +239,7 @@ Method, the fingerprint fields, and how to name a class:
 | `package-vetter` | REFUSE / ACCEPT WITH FINDINGS | a refusal is a finding; a package that should have been refused and was not is a rectifier finding about the vetter |
 | `deployed-app-auditor` | PASS / FAIL / UNVERIFIABLE per check | UNVERIFIABLE is not a failure of the auditor — it is a finding about observability |
 | `surface-producer` | failed verdicts, repairs, storyline volleys | a verdict repaired more than twice is a class, not a run |
-| the web app | an annotation, `anchor_kind=insight_card`, action ACCEPT or REJECT, with the card's text and its `r_layer` | a REJECT whose `r_layer.verdict` was ACCEPT — the reasoning layer accepted what a human reader rejected |
+| the web app | an annotation, `anchor_kind=insight_card`, ACCEPT or REJECT — turned into memory by `ingest_reviewer_feedback`, filed against the **synthesis skill** under `REVIEWER_REJECTED_INSIGHT` with the card's text and its `r_layer` | a REJECT whose `r_layer.verdict` was ACCEPT — the reasoning layer accepted what a human reader rejected. Accepts are the denominator that makes the reject *rate* readable |
 | CI and the schedulers | pytest failures, `corpus-gate-scanner`, `pack-exporter` | a test that had to be changed to pass is a finding about the test |
 
 Reviewer verdicts are the only feedback in this system from a human looking at
@@ -222,27 +254,36 @@ which finding fields, and how to read an `r_layer` against a rejection:
 
 ## The memory tools
 
-The contracts this skill was written against are in
-`02-inputs/2-memory-tools.md`. Names are **discovered, not assumed**: at STEP 0
-list what the connector exposes and map by contract. If a name differs from the
-one written here, use the connector's and record a finding about the drift —
-a skill naming a tool that no longer exists is exactly the defect class this
-skill exists to close.
+Eleven, on the deployed connector. Full contracts and every refusal in
+`02-inputs/2-memory-tools.md`; names are still **discovered, not assumed** at
+STEP 0, and a name that has drifted from that file is itself a finding.
 
 ```
-record_finding(finding)     → {finding_id, deduped, sightings}
-search_findings(query, mode) → [{finding_id, score, status, refinements[]}]
-list_open_findings(filters)  → [finding]
-record_refinement(refinement)→ {refinement_id}
-resolve_finding(finding_id, refinement_id, check) → {status}
-report_recurrence(finding_id, refinement_id, evidence) → {recurrence_count}
+list_defect_classes()                    → the shared vocabulary, each with a
+                                           TELL and a runnable PROBE
+search_findings(query, mode, filters)    → {paths_run[], paths_skipped{}, results[]}
+record_finding(finding)                  → {finding_id, deduped, sightings, …}
+list_open_findings(filters)              → OPEN + INVESTIGATING + RECURRED
+get_finding(finding_id)                  → every sighting, every refinement
+record_refinement(refinement)            → {refinement_id}   closes nothing
+resolve_finding(finding_id, refinement_id, verification)
+report_recurrence(finding_id, measurement, reported_by, …)
+get_memory_digest(days)                  → the whole weekly pass in one call
+list_reviewer_feedback(…) · ingest_reviewer_feedback(limit)
 ```
 
-Findings and refinements carry **provenance**: which agent or surface produced
-the sighting, in which session, from which run — so a cluster can be read back
-to its origins and a refinement can be attributed. A finding with no provenance
-is an assertion; cite the artefact it came from the way a payload cites
-evidence, with the path and the excerpt, not a summary of it.
+Findings carry **provenance** — `raised_by` and `raised_by_kind`,
+`session_ref`, `run_id`, `component` — so a class can be read back to its
+origins and a refinement can be attributed. And every finding carries a
+**`measurement`**: how it was measured, the command or query or status or count
+with its denominator, 30 characters minimum and refused below that. Cite the
+artefact the way a payload cites evidence, with the path and the excerpt. A
+finding whose measurement is a feeling cannot be re-run, so nobody will ever be
+able to say whether the fix held — which is the one question this store exists
+to answer.
+
+Every count the store returns is computed at read from its two tables. Nothing
+keeps a counter: invariant 8, applied to the memory itself.
 
 ## Register
 

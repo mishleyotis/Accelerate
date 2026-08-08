@@ -69,8 +69,16 @@ annotations(anchor_kind = "insight_card", anchor_id = <ic_id>,
             body = {action: ACCEPT | REJECT, note}, user_id, run_id, entity_id)
 ```
 
-and the finding carries the card's own text and its `r_layer` alongside. Both
-matter, and the pairing is the diagnostic:
+`ingest_reviewer_feedback()` turns every un-ingested verdict into memory and is
+idempotent, so **call it at STEP 1 of every run** — a rejection sitting
+un-ingested in `annotations` is feedback this loop cannot see. A REJECT lands as
+a finding under `REVIEWER_REJECTED_INSIGHT` **against the synthesis skill**, not
+against the application that rendered it: the defect is in what produced the
+claim. It carries the card's own text and its `r_layer`, because a verdict with
+no claim attached teaches nothing about which reasoning failed. An ACCEPT lands
+as a verdict row, which is what makes the reject *rate* measurable.
+
+Both matter, and the pairing is the diagnostic:
 
 | Reviewer said | `r_layer` says | What it means | Where the fix goes |
 |---|---|---|---|
@@ -106,16 +114,31 @@ finding about the test, not a resolved finding about the code. See
 
 ## Recording shape
 
-Whatever the source, a finding carries provenance in the same form:
+Whatever the source, one shape — `templates/finding.schema.json`, mirroring the
+connector's `record_finding`:
 
 ```
-{source, session_ref, run_id?, entity_id?, surface?, invariant, path, locus,
- verb, observed, would_have_caught_it, excerpt, internal_only[]}
+{title, observed, measurement, component, defect_class, severity,
+ raised_by_kind, raised_by, measured_value?, expected?, file_path?, surface?,
+ gate_id?, run_id?, entity_id?, fix_hint?, note?, session_ref?, source_ref?}
 ```
 
-`observed` is what happened, in the source's own words. `would_have_caught_it`
-is your one-sentence guess at the check that was missing — it is a hypothesis,
-it is allowed to be wrong, and it is what makes the cluster's rung obvious three
-sightings later. Cite the artefact with its path and its excerpt, the way a
-payload cites evidence: a finding summarised out of its source cannot be
-re-read, and a class you cannot re-read is one you will re-litigate.
+Three fields decide whether the record is worth anything:
+
+- **`measurement`** — how it was measured: the command, query, status or count
+  **with its denominator**. Refused below 30 characters. Each source hands you
+  one for free and it is the field people drop: pytest gives you the node and
+  the assertion, a verdict gives you the gate and the arithmetic, the auditor
+  gives you the URL and the two values, `ingest_reviewer_feedback` gives you the
+  verdict row. Copy it; do not summarise it.
+- **`defect_class`** — a foreign key from `list_defect_classes`, not a label.
+  Read the vocabulary first; a class may be invented via `new_class`, never
+  invented silently, and its PROBE is what a later run will run.
+- **`component`** — including `skill:<name>` and `agent:<name>`, which is what
+  makes "which skill produces the most defects" a question the store can answer.
+
+`fix_hint` is your one-sentence guess at the check that was missing. It is a
+hypothesis, allowed to be wrong, and three sightings later it is what makes the
+cluster's rung obvious. Cite the artefact the way a payload cites evidence: a
+finding summarised out of its source cannot be re-run, and one that cannot be
+re-run is one you will re-litigate.
