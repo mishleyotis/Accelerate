@@ -10,6 +10,8 @@ months without anyone being able to say which ones were stuck.
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from dma_worker.intake_status import (NO_RUN, PARSED_UNSYNTHESISED,
@@ -175,6 +177,30 @@ def test_intake_status_reads_the_ingested_tier(fakedb):
     assert s["Baxter Credit Union - DMA"].state == PROMOTED_CURRENT
     assert s["ATB - DMA"].blocked
     assert s["Zions Bancorporation - DMA"].state == NO_RUN
+
+
+def test_intake_status_is_reachable_as_a_job_mode(monkeypatch, fakedb, capsys):
+    """INTAKE_STATUS=1 must answer without opening a scan row or ingesting
+    anything — it is a question about the tree, not a firing against it."""
+    import job_main
+    from dma_worker.scan_diff import FileStat
+
+    tree = [FileStat("w", ("Zions Bancorporation - DMA", "Scoring_Workbook.xlsx"),
+                     "Scoring_Workbook.xlsx", "w1", 10, "")]
+    monkeypatch.setenv("INTAKE_FOLDER_ID", "intake-root")
+    monkeypatch.setenv("INTAKE_STATUS", "1")
+    for k in ("DUMP_HEADERS", "LINK_PROPOSE_RUN_ID", "RESET_SCAN",
+              "BACKFILL_SECTIONS", "BACKFILL_EVIDENCE"):
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setattr(job_main, "_connect", lambda: fakedb)
+    monkeypatch.setattr(job_main.drive, "walk_tree", lambda _i: tree)
+    monkeypatch.setattr(job_main, "_ingest_one",
+                        lambda *a: pytest.fail("status mode must not ingest"))
+
+    assert job_main.main() == 0
+    out = capsys.readouterr().out
+    assert "Zions Bancorporation - DMA" in out and "no_run" in out
+    assert fakedb.import_scans == {}, "a question does not write a scan row"
 
 
 def test_failures_from_a_superseded_upload_do_not_count(fakedb):
