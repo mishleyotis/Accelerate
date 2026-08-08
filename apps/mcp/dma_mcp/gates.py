@@ -164,6 +164,26 @@ GATES = {
               "measuring them is a fact, serving them to this institution "
               "is not.",
               "block"),
+    "ET-07": ("A cited source resolves to the cells it supports", None,
+              "Every id a cell-grain section cites resolves to a row "
+              "carrying at least one evidence_subcap_links entry, OR the "
+              "citation is stated as supporting no cell — either because "
+              "the citing section reasons at IDENTITY grain (firmographics, "
+              "the financial series, regulatory standing, the leadership "
+              "roster, thought leadership, evidence coverage and evidence "
+              "age), or because the section's own r_layer.probes_run / "
+              "empty_state.sources_searched carries a rung naming that id. "
+              "Registration without linkage is an incomplete registration; "
+              "an entity-identity document that genuinely supports no "
+              "capability passes by saying so, never by being forced into a "
+              "false link.",
+              "Measured on a promoted run: 178 served evidence rows, 72 of "
+              "them carrying no cell link, 28 of those cited by a section. A "
+              "reader opened the Great Place To Work chip and the drawer "
+              "read 'no cell links served for this item'. An unlinked "
+              "citation is worse than no citation — the reader is invited to "
+              "drill in and lands on an orphan.",
+              "block"),
     "ET-06": ("The candidate set is bounded by the entity's vertical", None,
               "No discard list carries a platform ruled out by the entity's "
               "own vertical — neither one whose stated reason argues from "
@@ -207,6 +227,22 @@ GATES = {
               "is a contradiction, not an empty state.",
               "The envelope's citations are not enough — a reader drills into "
               "the item, and an inference cites the source it came from.",
+              "block"),
+    "AG-05": ("One event, one direction, across both pages", None,
+              "An event the timeline classifies as constraining "
+              "(signal NEGATIVE / maturity_effect CONSTRAINED) must not be "
+              "the same event a why-now signal names as the reason to act — "
+              "matched on a shared evidence id, or on the same date and "
+              "subject. The pair is read across the page under validation "
+              "and the sibling page's live submission, so whichever of the "
+              "two is submitted second sees the other. Within one page, "
+              "signal and maturity_effect are one claim: POSITIVE↔ADVANCED, "
+              "NEGATIVE↔CONSTRAINED, NEUTRAL↔NEUTRAL.",
+              "A merger read NEGATIVE on the context timeline while the "
+              "overview's why-now used the same announcement, citing the "
+              "same id and the same date, as its LEADING opportunity "
+              "trigger. Both surfaces promoted; no per-page gate could see "
+              "the contradiction because neither page held both halves.",
               "block"),
     "AG-04": ("A named peer's technographics carry their source", None,
               "Where peer_coverage is stated, a per-peer breakdown exists "

@@ -258,6 +258,83 @@ def _check_excerpt_completeness(found, cited_by) -> list:
     return out
 
 
+# ── ET-07 · a cited source resolves to the cells it supports ──────────
+#
+# ET-04 asks whether the chip opens onto a quotation. This asks the next
+# question a reader asks after reading it: WHICH capability does this
+# support? Measured on a promoted run — 178 served evidence rows, 72 with
+# no cell link, 28 of those cited by a section — the answer for the row a
+# user actually clicked (a Great Place To Work profile) was "no cell links
+# served for this item". Registration without linkage is an incomplete
+# registration, and an unlinked citation is worse than no citation at all:
+# an uncited sentence asks nothing of the reader, while a citation invites
+# them to drill in and then hands them an orphan.
+#
+# The honest exception is real and must pass STATED rather than be forced
+# into a false link. Some sections do not reason at cell grain at all: a
+# charter registry entry, an NCUA call-report period file, a licence record
+# or a board roster is evidence about the INSTITUTION, not about a
+# capability, and inventing a cell for it would be the misattribution
+# failure this gate is supposed to reduce. Those sections are named here,
+# each with the class of source it legitimately carries — a registry in
+# code, not a boolean a producer can set.
+_IDENTITY_GRAIN = {
+    ("overview", "firmographics"): "firmographic — entity shape, not capability",
+    ("overview", "financial_series"): "regulator period filing — a financial point, not a capability",
+    ("overview", "leadership"): "roster / appointment record — who, not what they can do",
+    ("overview", "thought_leadership"): "authored signal — attributed to a person, not a cell",
+    ("overview", "evidence_coverage"): "inventory of the corpus, not a claim inside it",
+    ("context", "regulatory_standing"): "regulator registry — charter, licence and perimeter",
+    ("heatmap", "evidence_age"): "inventory of the corpus, not a claim inside it",
+}
+
+
+def _stated_unlinked(body: dict) -> str:
+    """The prose a section serves whole, where a producer states why a
+    cited source supports no cell. Both carriers reach the reader —
+    r_layer.probes_run renders as the recorded reasoning, and
+    empty_state.sources_searched as the ladder — so a reason written here
+    is a reason the reader gets, not a flag in a payload."""
+    parts = []
+    r_layer = body.get("r_layer")
+    if isinstance(r_layer, dict):
+        for key in ("probes_run", "domain_test", "counter", "verdict"):
+            val = r_layer.get(key)
+            parts.extend(val if isinstance(val, list) else [val])
+    empty = body.get("empty_state")
+    if isinstance(empty, dict):
+        val = empty.get("sources_searched")
+        parts.extend(val if isinstance(val, list) else [val])
+    return " ".join(p for p in parts if isinstance(p, str))
+
+
+def _check_cited_linkage(page, payload, found, cited_by) -> list:
+    out = []
+    for row in found:
+        if row.get("linked_subcap_ids"):
+            continue
+        e_id = row.get("e_id")
+        section = cited_by.get(e_id) or cited_by.get(row.get("stored_id"))
+        if (page, section) in _IDENTITY_GRAIN:
+            continue                        # stated exception, named in code
+        body = payload.get(section)
+        if isinstance(body, dict) and e_id in _stated_unlinked(body):
+            continue                        # stated exception, named on the surface
+        out.append(_reason(
+            "ET-07", section, f"{section}.e_ids",
+            f"{e_id} resolves to a row linked to NO capability cell, and "
+            f"{section} reasons at cell grain — a reader who opens this chip "
+            "is told 'no cell links served for this item', which is the "
+            "orphan an unlinked citation always produces. Two honest "
+            "repairs: re-register the source with the linked_subcap_ids it "
+            "genuinely supports (the catalogue's own cell names decide "
+            "which), or, if it supports none because it is a firmographic, "
+            "registry or entity-identity document, say so in this section's "
+            f"r_layer.probes_run naming {e_id} — a reason that renders beats "
+            "a link that is not true"))
+    return out
+
+
 # ── CG-10 (evidence half) · an undated row says it is undated ─────────
 #
 # Invariant 9's own sentence: undated evidence is UNVERIFIED, never
@@ -549,6 +626,164 @@ def _check_cell_linkage(page, payload, run_cells) -> list:
     return out
 
 
+# ── AG-05 · one event, one direction, across both pages ───────────────
+#
+# The measured defect: the context timeline classified a merger
+# announcement NEGATIVE / CONSTRAINED, and the overview's why-now used the
+# SAME announcement — same evidence id, same date — as its leading reason
+# to act now. Both pages passed every gate they had, because neither page
+# held both halves of the contradiction. A reader holds both.
+#
+# `signal` on the timeline is not a mood. It is the direction this event
+# moved the ASSESSED POSITION of the cells it names: POSITIVE where the
+# cells score higher because it happened, NEGATIVE where the assessment
+# holds them to a maximum because of it and that constraint is live,
+# NEUTRAL where the event explains the position without setting it — a
+# retired cap, an announcement not yet completed, an obligation that adds
+# demand and takes no capability away. A why-now signal says the opposite
+# thing about an event: this opens a window worth acting in. One event
+# cannot be both, so if the two surfaces name the same one, one of them
+# is wrong and a client sees both.
+_CONSTRAINING = ("NEGATIVE", "CONSTRAINED")
+_EFFECT_FOR_SIGNAL = {"POSITIVE": "ADVANCED", "NEGATIVE": "CONSTRAINED",
+                      "NEUTRAL": "NEUTRAL"}
+_STOPWORDS = frozenset((
+    "about", "after", "against", "announced", "another", "banking", "before",
+    "credit", "during", "first", "their", "there", "these", "those", "union",
+    "which", "while", "with", "would"))
+
+
+def _content_words(*texts) -> set:
+    """Words long enough to name a subject, minus the ones every event on a
+    financial-services timeline shares."""
+    out = set()
+    for text in texts:
+        if isinstance(text, str):
+            out |= {w for w in re.findall(r"[a-z]{5,}", text.lower())
+                    if w not in _STOPWORDS}
+    return out
+
+
+def _timeline_events(payload) -> list:
+    body = (payload or {}).get("timeline")
+    if not isinstance(body, dict):
+        return []
+    return [e for e in (body.get("events") or []) if isinstance(e, dict)]
+
+
+def _why_now_signals(payload) -> list:
+    body = (payload or {}).get("why_now")
+    if not isinstance(body, dict):
+        return []
+    return [s for s in (body.get("signals") or []) if isinstance(s, dict)]
+
+
+def _same_event(event: dict, signal: dict) -> str | None:
+    """Why these two rows are the same event, or None. The event's own id
+    first — a shared evidence row is the strongest possible match — then
+    its date plus its subject, because a producer can cite two different
+    sources for one announcement."""
+    shared = ({e for e in (event.get("e_ids") or []) if isinstance(e, str)}
+              & {e for e in (signal.get("e_ids") or []) if isinstance(e, str)})
+    if shared:
+        return f"both cite {sorted(shared)[0]}"
+    date = str(event.get("event_date") or "")[:10]
+    if not date or date != str(signal.get("dated_on") or "")[:10]:
+        return None
+    kinds = {str(event.get("kind") or "").upper(),
+             str(signal.get("kind") or "").upper()}
+    if len(kinds) == 1 and kinds != {""}:
+        return f"same date {date} and kind {kinds.pop()}"
+    overlap = (_content_words(event.get("title"), event.get("body"))
+               & _content_words(signal.get("trigger")))
+    if len(overlap) >= 2:
+        return f"same date {date} and subject ({', '.join(sorted(overlap)[:3])})"
+    return None
+
+
+def _check_event_direction(page, payload, sibling) -> list:
+    """AG-05. Symmetric: whichever of the two pages is submitted second
+    reads the other's live submission, so the pair is always compared once
+    both exist. Within one page the badge and the sentence are one claim,
+    and that half needs no sibling at all."""
+    out = []
+    if page == "context":
+        events, signals = _timeline_events(payload), _why_now_signals(sibling)
+        e_section, e_path = "timeline", "timeline.events"
+    elif page == "overview":
+        events, signals = _timeline_events(sibling), _why_now_signals(payload)
+        e_section, e_path = "why_now", "why_now.signals"
+    else:
+        return out
+
+    if page == "context":
+        # signal and maturity_effect are one claim about one event
+        for i, event in enumerate(events):
+            sig = str(event.get("signal") or "").upper()
+            effect = str(event.get("maturity_effect") or "").upper()
+            wanted = _EFFECT_FOR_SIGNAL.get(sig)
+            if not wanted or not effect:
+                continue
+            if not effect.startswith(wanted):
+                out.append(_reason(
+                    "AG-05", "timeline", f"timeline.events[{i}].signal",
+                    f"signal {sig} with a maturity_effect of "
+                    f"{effect.split()[0]} — the badge and the sentence are "
+                    "one claim about one event, and they disagree. signal is "
+                    "the direction this event moved the assessed position of "
+                    "the cells it names, so POSITIVE pairs with ADVANCED, "
+                    "NEGATIVE with CONSTRAINED, NEUTRAL with NEUTRAL. Decide "
+                    "which reading is right and write both halves of it"))
+
+    for i, event in enumerate(events):
+        constraining = (str(event.get("signal") or "").upper() in _CONSTRAINING
+                        or str(event.get("maturity_effect") or "").upper()
+                        .startswith("CONSTRAINED"))
+        if not constraining:
+            continue
+        for j, signal in enumerate(signals):
+            why = _same_event(event, signal)
+            if not why:
+                continue
+            here = i if page == "context" else j
+            out.append(_reason(
+                "AG-05", e_section, f"{e_path}[{here}]",
+                f"the timeline classifies {str(event.get('title'))[:60]!r} as "
+                f"CONSTRAINING while why-now signal "
+                f"{signal.get('wn_id') or j} names the same event as a reason "
+                f"to act now ({why}). One event cannot both cap the "
+                "assessment and open the window a client is asked to move "
+                "in, and the same reader sees both pages. Re-read it against "
+                "the cells it names: if the assessment holds them to a "
+                "maximum because of this event and the cap is live today, "
+                "the why-now is wrong; if it adds demand, exposure or scale "
+                "without taking capability away, the timeline is wrong and "
+                "the event is NEUTRAL with its pressure argued in `body`"))
+    return out
+
+
+def _live_submission(conn, run_id, page: str) -> dict:
+    """The sibling page as it currently stands in staging. A page not yet
+    submitted is not a pass — it is nothing to compare, and the symmetric
+    check means the other page will make the comparison when it lands."""
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """SELECT payload FROM submissions
+                WHERE run_id = %s AND page = %s AND superseded_at IS NULL
+                ORDER BY submitted_at DESC LIMIT 1""", (run_id, page))
+        row = cur.fetchone()
+    except Exception:
+        return {}
+    payload = row[0] if row else None
+    if isinstance(payload, str):
+        try:
+            payload = json.loads(payload)
+        except ValueError:
+            return {}
+    return payload if isinstance(payload, dict) else {}
+
+
 def band_for(raw) -> str | None:
     if raw is None:
         return None
@@ -670,6 +905,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
         split = get_evidence(conn, run_id, sorted(cited))
         reasons.extend(_check_excerpt_completeness(split.get("found", []), cited))
         reasons.extend(_check_evidence_dating(split.get("found", []), cited))
+        reasons.extend(_check_cited_linkage(page, payload,
+                                            split.get("found", []), cited))
         for e in split.get("not_found", []):
             gate = "ET-02" if MINT_RE.match(e.split(":")[0]) else "ET-01"
             reasons.append(_reason(
@@ -781,6 +1018,13 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_subvertical_scope(page, payload, entity_code))
     reasons.extend(_check_candidate_vertical(page, payload, entity_code))
     reasons.extend(_check_cell_linkage(page, payload, _run_cells(conn, run_id)))
+    # AG-05 needs the OTHER half of the pair: the timeline lives on context
+    # and the why-now on overview, so each page reads the sibling's live
+    # submission. Whichever lands second makes the comparison.
+    if page in ("context", "overview"):
+        sibling = _live_submission(
+            conn, run_id, "overview" if page == "context" else "context")
+        reasons.extend(_check_event_direction(page, payload, sibling))
 
     sg = _run_s8(conn, run_id, page, payload)
     sg.extend(_run_v4(conn, run_id, page, payload, encoder))
