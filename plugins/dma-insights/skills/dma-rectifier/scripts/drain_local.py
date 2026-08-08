@@ -31,7 +31,11 @@ import sys
 
 GATE = re.compile(r"\b((?:AG|SG|ET|CG)-\d{2})\b")
 JPATH = re.compile(r"\b([a-z_]+(?:\.[a-z_]+){1,4}(?:\[\])?(?:\.[a-z_]+)?)\b")
+# Two pytest dialects: the short summary (`FAILED node - msg`) and the verbose
+# progress line (`node FAILED`). Both appear in one log, so nodes are deduped —
+# the summary carries the message and wins.
 PYTEST_FAIL = re.compile(r"^(?:FAILED|ERROR)\s+(\S+?)(?:\s+-\s+(.*))?$", re.M)
+PYTEST_FAIL_TRAILING = re.compile(r"^(\S+::\S+)\s+(?:FAILED|ERROR)\s*$", re.M)
 AUDIT_ROW = re.compile(r"^.*\b(FAIL|UNVERIFIABLE)\b.*$", re.M)
 
 # filename -> (source, severity hint)
@@ -58,15 +62,20 @@ def _finding(**kw):
 
 
 def from_pytest(text, path, session):
-    out = []
-    for m in PYTEST_FAIL.finditer(text):
-        node, msg = m.group(1), (m.group(2) or "").strip()
+    out, seen = [], set()
+    hits = [(m.group(1), (m.group(2) or "").strip(), m.group(0))
+            for m in PYTEST_FAIL.finditer(text)]
+    hits += [(m.group(1), "", m.group(0)) for m in PYTEST_FAIL_TRAILING.finditer(text)]
+    for node, msg, line in hits:
+        if node in seen:
+            continue
+        seen.add(node)
         g = GATE.search(msg) or GATE.search(node)
         out.append(_finding(
             invariant=g.group(1) if g else "UNKNOWN",
             path=node, source="ci", session_ref=session,
             observed=msg or f"{node} failed",
-            excerpt=m.group(0).strip()[:500], artefact_ref=path,
+            excerpt=line.strip()[:500], artefact_ref=path,
             severity="blocking", client_reach="caught_before_submit",
             would_have_caught_it="the check exists and fired — this is a defect "
                                  "sighting, not a check gap"))
