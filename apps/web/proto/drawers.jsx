@@ -1679,6 +1679,7 @@ const IP_QUESTIONS = [
     paths: ["focusAreas[].strategic_quote", "focusAreas[].description"] },
   { q_id: "Q-FA-02", surface: "focus_area", rank: 2,
     question: "Which capabilities sit under it, and what is holding them down?",
+    scope: "focus_area",
     paths: ["uncertainty.*.limiting_absence", "uncertainty.*.rationale"] },
 
   { q_id: "Q-SC-01", surface: "subcap_narrative", rank: 1,
@@ -1687,6 +1688,7 @@ const IP_QUESTIONS = [
     paths: ["cellEvidence[].synthesis"] },
   { q_id: "Q-SC-02", surface: "subcap_narrative", rank: 2,
     question: "What pulled this score down?",
+    scope: "subcap",
     paths: ["uncertainty.*.limiting_absence", "alerts[].justification"] },
 ];
 
@@ -1715,10 +1717,43 @@ function ipPathMatcher(path) {
   return IP_PATH_RE[path];
 }
 
-function ipScopeId(scope, ctx) {
-  if (scope === "subcap") return dwText(ctx?.subcap?.id);
-  if (scope === "focus_area") return dwText(ctx?.focusArea?.id);
-  return null;
+/* What "about the thing that is open" means, as a set of ids a passage may
+   carry to count.
+
+   The cell id alone is not enough. "What is holding this down?" is answered
+   by the category CEILING, and the ceilings arrive as a map keyed by
+   category (`uncertainty.P4C1.limiting_absence`) with no id inside the row -
+   so without the category prefix the question answered with whichever
+   category's ceiling happened to come first, which reads as a statement
+   about the open cell and is not one. A focus area works the same way
+   through the cells it names.
+
+   Empty set means unscoped, which is the right answer when nothing is open. */
+function ipScopeKeys(scope, ctx) {
+  const keys = new Set();
+  const categoryOf = (id) => {
+    const m = /^(P\d+C\d+)/.exec(String(id || ""));
+    return m ? m[1] : null;
+  };
+  if (scope === "subcap") {
+    const id = dwText(ctx?.subcap?.id);
+    if (id) {
+      keys.add(id);
+      const cat = categoryOf(id);
+      if (cat) keys.add(cat);
+    }
+  } else if (scope === "focus_area") {
+    const fa = ctx?.focusArea || {};
+    const id = dwText(fa.id);
+    if (id) keys.add(id);
+    for (const cell of (Array.isArray(fa.subcaps) ? fa.subcaps : [])) {
+      if (typeof cell !== "string") continue;
+      keys.add(cell);
+      const cat = categoryOf(cell);
+      if (cat) keys.add(cat);
+    }
+  }
+  return keys;
 }
 
 /* One question, resolved to ordered parts of promoted prose. Returns null
@@ -1728,10 +1763,16 @@ const IP_MAX_PARTS = 3;
 function ipResolveQuestion(qDef, ctx) {
   const corpus = ipPassages();
   if (!corpus.length) return null;
-  const scopeId = qDef.scope ? ipScopeId(qDef.scope, ctx) : null;
+  const keys = qDef.scope ? ipScopeKeys(qDef.scope, ctx) : null;
   // A scoped question with nothing open is unscoped; a scoped question WITH
-  // something open answers only about that thing.
-  const inScope = (p) => !qDef.scope || !scopeId || p.anchor_id === scopeId;
+  // something open answers only about that thing - by the anchor the passage
+  // carries, or by a path segment where the payload keys a map by the id
+  // (the ceilings map is keyed by category).
+  const inScope = (p) => {
+    if (!keys || !keys.size) return true;
+    if (p.anchor_id && keys.has(p.anchor_id)) return true;
+    return p.json_path.split(/[.[\]]+/).some(seg => keys.has(seg));
+  };
   const parts = [];
   const seen = new Set();
   for (const path of qDef.paths) {

@@ -42,7 +42,7 @@ from __future__ import annotations
 import re
 
 from .pages import ApiError, build_page
-from .redaction import CUSTOMER_WITHHELD
+from .redaction import CUSTOMER_WITHHELD, CUSTOMER_WITHHELD_PAGES
 
 # ── What counts as a passage ─────────────────────────────────────────────
 #
@@ -600,7 +600,21 @@ def _passages_from_table(cur, run_id, audience: str, question: str,
     where = "run_id = %s"
     params: list = [run_id]
     if audience == "customer":
+        # Two different withholdings, and only one of them is a marked path.
+        # `internal_only` is the producer's per-path marking; CUSTOMER_WITHHELD
+        # and CUSTOMER_WITHHELD_PAGES withhold whole SECTIONS and whole PAGES
+        # whatever the payload said. The passage index stores every section the
+        # run promoted, so filtering on the marking alone would retrieve, for a
+        # customer, exactly the surfaces the page endpoint refuses to serve
+        # them. The selection path gets this for free because it reads pages
+        # that were already redacted; this path has to state it.
         where += " AND internal_only = false"
+        for page_name in sorted(CUSTOMER_WITHHELD_PAGES):
+            where += " AND page <> %s"
+            params.append(page_name)
+        for page_name, section_name in sorted(CUSTOMER_WITHHELD):
+            where += " AND NOT (page = %s AND section = %s)"
+            params += [page_name, section_name]
     cur.execute(
         f"""SELECT text, page, section, json_path, e_ids, anchor_kind,
                    anchor_id,

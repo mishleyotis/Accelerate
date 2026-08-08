@@ -110,6 +110,8 @@ class _Cur:
             self._one = (params[0] if params[0] in self.tables else None,)
         elif "FROM serving_answers" in sql:
             self._out = self.rows
+        elif "FROM serving_passages" in sql:
+            self._out = []
         else:                                            # pragma: no cover
             raise AssertionError(sql)
 
@@ -276,6 +278,33 @@ def test_the_customer_audience_never_reads_an_internal_answer_row():
     cur = _Cur(tables=["serving_answers"])
     A.answers_from_pages(cur, pages_fixture(), "customer")
     assert "internal_only = false" in cur.sql_for("FROM serving_answers")
+
+
+def test_the_customer_never_retrieves_a_withheld_section_or_page():
+    """Two different withholdings, and only one is a marked path.
+    `internal_only` is the producer's per-path marking; CUSTOMER_WITHHELD and
+    CUSTOMER_WITHHELD_PAGES withhold whole sections and whole pages whatever
+    the payload said. The passage index stores every section the run
+    promoted, so the marking alone would hand a customer exactly the surfaces
+    the page endpoint refuses them."""
+    cur = _Cur(tables=["serving_passages"])
+    A._passages_from_table(cur, RUN["run_id"], "customer", "member data", 5)
+    sql = cur.sql_for("FROM serving_passages")
+    assert "internal_only = false" in sql
+    assert "page <> %s" in sql, "a withheld PAGE must not be retrievable"
+    assert "NOT (page = %s AND section = %s)" in sql
+    # and the parameters line up with the placeholders, in order
+    params = next(p for q, p in cur.queries if "FROM serving_passages" in q)
+    assert params[0] == "member data" and params[1] == "member data"
+    assert params[2] == RUN["run_id"]
+    assert "context" in params, "the customer-withheld page is bound"
+
+
+def test_the_internal_audience_reads_the_whole_index():
+    cur = _Cur(tables=["serving_passages"])
+    A._passages_from_table(cur, RUN["run_id"], "internal", "member data", 5)
+    sql = cur.sql_for("FROM serving_passages")
+    assert "internal_only" not in sql and "page <> " not in sql
 
 
 def test_the_answer_set_survives_a_missing_table_before_the_migration():
