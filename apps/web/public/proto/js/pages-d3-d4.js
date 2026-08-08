@@ -1851,7 +1851,7 @@ function ClientPlatform({
       fontSize: 10.5,
       color: "var(--z-muted)"
     }
-  }, "why the run did not lead with these"), /*#__PURE__*/React.createElement(Icon, {
+  }, "why the run did not lead with these \xB7 this list is the run's, not ", selKey || "any one platform", "'s"), /*#__PURE__*/React.createElement(Icon, {
     name: showDiscarded ? "chevron-u" : "chevron-d",
     size: 13,
     style: {
@@ -1900,9 +1900,13 @@ function ClientPlatform({
       lineHeight: 1.5
     }
   }, pfText(x.reason) || pfText(x.why_not) || "No reason promoted.")))) : null) : null, /*#__PURE__*/React.createElement(StairstepCurve, {
-    entity: entity
+    entity: entity,
+    selKey: selKey,
+    area: area
   }), /*#__PURE__*/React.createElement(TransformationRoadmap, {
-    entity: entity
+    entity: entity,
+    selKey: selKey,
+    area: area
   }));
 }
 
@@ -1937,7 +1941,9 @@ function wrapSvgLabel(text, maxChars, maxLines) {
   return kept;
 }
 function StairstepCurve({
-  entity
+  entity,
+  selKey,
+  area
 }) {
   // The default cluster key was hardcoded "P4-data", so any run whose ladder
   // does not carry that theme threw on C.label and blanked the whole lower
@@ -2015,6 +2021,19 @@ function StairstepCurve({
   const monoChars = Math.max(8, Math.floor(rungW / 5.7));
   // The rung the run marks as the current position (1-based level).
   const currentIdx = steps.findIndex(s => Number(s.m) === Number(C.current));
+
+  /* Which rungs the SELECTED platform climbs. Every panel above this one
+     changes when a tile is clicked and this card did not, which is the whole
+     of "not all surfaces are enriched for each platform": the ladder already
+     computed `via` per rung and then ignored the selection.
+      Marked, never filtered. The rung join is DERIVED (see the scope note at
+     the top of this file), and a ladder that dropped the rungs another
+     platform leads would break the one thing a staircase means — that the
+     rungs are in order and there are no gaps in it. So this platform's rungs
+     are marked and counted, and the rest stay where they are. */
+  const viaCache = steps.map(viaOf);
+  const minesIdx = selKey ? viaCache.map((v, i) => v && v.platform === selKey ? i : -1).filter(i => i >= 0) : [];
+  const placed = viaCache.filter(Boolean).length;
   return /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
@@ -2051,12 +2070,24 @@ function StairstepCurve({
       fontSize: 13,
       fontWeight: 600
     }
-  }, "Stair-step ladder \xB7 ", C.label), /*#__PURE__*/React.createElement("div", {
+  }, "Stair-step ladder \xB7 ", C.label, selKey ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)",
+      fontWeight: 400
+    }
+  }, " \xB7 ", selKey) : null), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, n, " rung", n === 1 ? "" : "s", " \xB7 where ", entity.name, " stands today, and what each rung requires")), keys.length > 1 ? /*#__PURE__*/React.createElement("div", {
+  }, n, " rung", n === 1 ? "" : "s", " \xB7 where ", entity.name, " stands today, and what each rung requires"), selKey ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: minesIdx.length ? "var(--z-mid)" : "var(--z-muted)",
+      marginTop: 2,
+      lineHeight: 1.45
+    }
+  }, minesIdx.length ? `${minesIdx.length} of ${n} rungs are climbed with ${selKey}${area ? ` (${area})` : ""} — marked below` : placed ? `No rung on this ladder is climbed with ${selKey}. ${placed} of ${n} resolve to another promoted platform, and all ${n} stay in sequence.` : `This run files none of these rungs' cells under an L3 area, so no rung can be attributed to ${selKey} or to any other platform.`) : null), keys.length > 1 ? /*#__PURE__*/React.createElement("div", {
     className: "toggle-row"
   }, Object.entries(clusters).map(([k, v]) => /*#__PURE__*/React.createElement("button", {
     key: k,
@@ -2136,7 +2167,12 @@ function StairstepCurve({
     const h = H - padB - y;
     const color = RUNG_COLORS[i % RUNG_COLORS.length];
     const lines = wrapSvgLabel(pfText(s.label), charsPerLine, 2);
-    const via = viaOf(s);
+    const via = viaCache[i];
+    // This platform's rungs keep full weight; the others recede.
+    // Nothing is removed — a staircase with a rung missing is a
+    // different claim about the sequence.
+    const mine = !!(selKey && via && via.platform === selKey);
+    const dim = !!(selKey && minesIdx.length && !mine);
     // Cell count and effort only. The blocking findings are chips in
     // the list beside the chart: inside the rung they ran past both
     // edges of the rectangle, because a centred SVG string cannot be
@@ -2152,7 +2188,8 @@ function StairstepCurve({
     const metaFits = meta && top + (viaFits ? 12 : 0) + 12 <= H - padB - 6;
     const clip = (t, max) => t.length > max ? `${t.slice(0, max - 1)}…` : t;
     return /*#__PURE__*/React.createElement("g", {
-      key: i
+      key: i,
+      opacity: dim ? 0.42 : 1
     }, /*#__PURE__*/React.createElement("title", null, `Step ${s.m}: ${pfText(s.label) || ""}${via ? ` · via ${via.platform} (${via.area})` : ""}`), /*#__PURE__*/React.createElement("rect", {
       x: x,
       y: y,
@@ -2161,7 +2198,17 @@ function StairstepCurve({
       fill: color,
       rx: "6",
       ry: "6"
-    }), /*#__PURE__*/React.createElement("circle", {
+    }), mine ? /*#__PURE__*/React.createElement("rect", {
+      x: x - 2,
+      y: y - 2,
+      width: rungW + 4,
+      height: h + 2,
+      rx: "8",
+      ry: "8",
+      fill: "none",
+      stroke: "var(--z-org)",
+      strokeWidth: "2"
+    }) : null, /*#__PURE__*/React.createElement("circle", {
       cx: x + 16,
       cy: y - 14,
       r: "14",
@@ -2249,14 +2296,17 @@ function StairstepCurve({
       gap: 8
     }
   }, steps.map((s, i) => {
-    const via = viaOf(s);
+    const via = viaCache[i];
+    const mine = !!(selKey && via && via.platform === selKey);
+    const dim = !!(selKey && minesIdx.length && !mine);
     return /*#__PURE__*/React.createElement("div", {
       key: i,
       style: {
         padding: "10px 12px",
         background: i === currentIdx ? "var(--z-ice)" : "var(--z-bg)",
         borderRadius: 8,
-        border: i === currentIdx ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)"
+        border: mine ? "1px solid var(--z-org)" : i === currentIdx ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)",
+        opacity: dim ? 0.62 : 1
       }
     }, /*#__PURE__*/React.createElement("div", {
       className: "row",
@@ -2275,7 +2325,13 @@ function StairstepCurve({
       style: {
         flexShrink: 0
       }
-    }, "current") : null, s.effort ? /*#__PURE__*/React.createElement("span", {
+    }, "current") : null, mine ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-org",
+      style: {
+        flexShrink: 0
+      },
+      title: `This rung's cells are filed under ${via.area}, which ${selKey} leads on`
+    }, "this platform") : null, s.effort ? /*#__PURE__*/React.createElement("span", {
       className: "b b-muted",
       style: {
         flexShrink: 0
@@ -2323,7 +2379,9 @@ function StairstepCurve({
 
 /* ── Transformation Roadmap (Pattern J: phase chevrons) ─────────── */
 function TransformationRoadmap({
-  entity
+  entity,
+  selKey,
+  area
 }) {
   const {
     openRec,
@@ -2363,6 +2421,19 @@ function TransformationRoadmap({
   // The section states its sequencing basis beside `phases`, so it reaches the
   // page through the entity rather than through the phase array.
   const basis = typeof window !== "undefined" && window.DMA_ENTITY && window.DMA_ENTITY.roadmapBasis || null;
+
+  /* Which of this roadmap's recommendations belong to the SELECTED platform.
+     Same join as everything else on the page — a recommendation's `l3` against
+     the L3 area the tile derives — so the roadmap answers a tile click instead
+     of being the one panel that ignores it.
+      Marked and counted, never filtered: a roadmap is an ORDER, and a phase
+     removed from it because the reader clicked a platform is a different plan.
+     `mine` per phase is how many of that phase's served recommendations this
+     platform leads. */
+  const isMine = rec => !!(area && rec && rec.l3 === area);
+  const mineCount = recs.filter(isMine).length;
+  const phaseMine = r => phaseRecs(r).filter(isMine).length;
+  const roadmapMine = roadmap.reduce((a, r) => a + phaseMine(r), 0);
   return /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
@@ -2399,12 +2470,24 @@ function TransformationRoadmap({
       fontSize: 13,
       fontWeight: 600
     }
-  }, "Transformation roadmap"), /*#__PURE__*/React.createElement("div", {
+  }, "Transformation roadmap", selKey ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)",
+      fontWeight: 400
+    }
+  }, " \xB7 ", selKey) : null), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, roadmap.length, " promoted phase", roadmap.length === 1 ? "" : "s", " \xB7 ", roadmap.reduce((a, r) => a + (r.recs || []).length, 0), " recommendations")), /*#__PURE__*/React.createElement("div", {
+  }, roadmap.length, " promoted phase", roadmap.length === 1 ? "" : "s", " \xB7 ", roadmap.reduce((a, r) => a + (r.recs || []).length, 0), " recommendations"), selKey ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: roadmapMine ? "var(--z-mid)" : "var(--z-muted)",
+      marginTop: 2,
+      lineHeight: 1.45
+    }
+  }, roadmapMine ? `${roadmapMine} of them sit in ${area} — the area ${selKey} leads — and are marked in their phases. The rest of the plan stays in sequence.` : area ? `None of this plan's recommendations sit in ${area}, so ${selKey} leads no phase of it. Every phase is still this run's.` : `This run files none of ${selKey}'s cells under an L3 area, so no phase can be attributed to it.`) : null), /*#__PURE__*/React.createElement("div", {
     className: "toggle-row"
   }, /*#__PURE__*/React.createElement("button", {
     className: view === "chevrons" ? "on" : "",
@@ -2428,12 +2511,17 @@ function TransformationRoadmap({
     roadmap: roadmap,
     recs: recs,
     openRec: openRec,
-    phaseRecs: phaseRecs
+    phaseRecs: phaseRecs,
+    isMine: isMine,
+    selKey: selKey,
+    phaseMine: phaseMine
   }) : /*#__PURE__*/React.createElement(CellImpactView, {
     roadmap: roadmap,
     phaseRecs: phaseRecs,
     openRec: openRec,
-    impactRows: impactRows
+    impactRows: impactRows,
+    isMine: isMine,
+    selKey: selKey
   }), basis ? /*#__PURE__*/React.createElement("div", {
     className: "co co-teal",
     style: {
@@ -2489,8 +2577,12 @@ function ChevronView({
   roadmap,
   recs,
   openRec,
-  phaseRecs
+  phaseRecs,
+  isMine,
+  selKey,
+  phaseMine
 }) {
+  const mineOf = isMine || (() => false);
   return (
     /*#__PURE__*/
     /* One fluid column per phase, each carrying its own chevron header AND its
@@ -2547,7 +2639,13 @@ function ChevronView({
           textAlign: "right",
           flexShrink: 0
         }
-      }, (r.recs || []).length, " rec", (r.recs || []).length === 1 ? "" : "s")), /*#__PURE__*/React.createElement("div", {
+      }, (r.recs || []).length, " rec", (r.recs || []).length === 1 ? "" : "s", selKey && phaseMine ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 9.5,
+          opacity: .9
+        },
+        title: `${phaseMine(r)} of this phase's recommendations sit in the area ${selKey} leads`
+      }, phaseMine(r), " \xB7 ", selKey.length > 18 ? `${selKey.slice(0, 17)}…` : selKey) : null)), /*#__PURE__*/React.createElement("div", {
         style: {
           background: r.color,
           borderRadius: 8,
@@ -2628,6 +2726,10 @@ function ChevronView({
         }
       }, (r.recs || []).map(rid => {
         const rec = recs.find(x => x.id === rid);
+        // The selected platform's own rows keep a full-strength face;
+        // the rest of the phase recedes. Every row stays clickable.
+        const mine = mineOf(rec);
+        const marked = !!(selKey && mine);
         return rec ? /*#__PURE__*/React.createElement("button", {
           key: rid,
           onClick: e => {
@@ -2636,23 +2738,23 @@ function ChevronView({
           }
           /* The title ellipsises to one line by design; without this
              the rest of the sentence is unreachable by any means. */,
-          title: `${rec.id} · ${pfText(rec.title) || ""}`,
+          title: `${rec.id} · ${pfText(rec.title) || ""}${marked ? ` · ${selKey} leads this` : ""}`,
           style: {
             padding: "6px 8px",
-            background: "rgba(255,255,255,.14)",
+            background: marked ? "rgba(255,255,255,.30)" : "rgba(255,255,255,.14)",
             borderRadius: 5,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             gap: 6,
-            border: 0,
+            border: marked ? "1px solid rgba(255,255,255,.85)" : "1px solid transparent",
             color: "#fff",
             textAlign: "left",
             cursor: "pointer",
             transition: "background 120ms"
           },
           onMouseEnter: e => e.currentTarget.style.background = "rgba(255,255,255,.22)",
-          onMouseLeave: e => e.currentTarget.style.background = "rgba(255,255,255,.14)"
+          onMouseLeave: e => e.currentTarget.style.background = marked ? "rgba(255,255,255,.30)" : "rgba(255,255,255,.14)"
         }, /*#__PURE__*/React.createElement("span", {
           style: {
             fontSize: 10.5,
@@ -2725,8 +2827,11 @@ function CellImpactView({
   roadmap,
   phaseRecs,
   openRec,
-  impactRows
+  impactRows,
+  isMine,
+  selKey
 }) {
+  const mineOf = isMine || (() => false);
   if (!impactRows) {
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -2795,7 +2900,7 @@ function CellImpactView({
         }
       }, /*#__PURE__*/React.createElement("button", {
         onClick: () => openRec(rec.id),
-        title: `${rec.id} · ${pfText(rec.title) || ""}`,
+        title: `${rec.id} · ${pfText(rec.title) || ""}${selKey && mineOf(rec) ? ` · ${selKey} leads this` : ""}`,
         style: {
           padding: 0,
           background: "none",
@@ -2821,7 +2926,12 @@ function CellImpactView({
           minWidth: 0
         },
         className: "txt-trunc"
-      }, pfText(rec.title)), /*#__PURE__*/React.createElement(Icon, {
+      }, pfText(rec.title)), selKey && mineOf(rec) ? /*#__PURE__*/React.createElement("span", {
+        className: "b b-org",
+        style: {
+          flexShrink: 0
+        }
+      }, "this platform") : null, /*#__PURE__*/React.createElement(Icon, {
         name: "arrow-r",
         size: 11,
         style: {

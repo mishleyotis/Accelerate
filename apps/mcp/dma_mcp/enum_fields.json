@@ -29,6 +29,9 @@
   ],
   "overview.why_now": [
    "signals[*].dated_on"
+  ],
+  "techstack.techstack": [
+   "items[*].as_of"
   ]
  },
  "enum_fields": {
@@ -55,6 +58,16 @@
   },
   "heatmap.cohort_patterns": {
    "patterns[*].confidence": {
+    "enum": "confidence_t",
+    "values": [
+     "HIGH",
+     "LOW",
+     "MEDIUM"
+    ]
+   }
+  },
+  "heatmap.focus_areas": {
+   "focus_areas[*].confidence": {
     "enum": "confidence_t",
     "values": [
      "HIGH",

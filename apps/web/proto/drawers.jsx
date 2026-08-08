@@ -284,6 +284,11 @@ function InsightModal() {
   // stored — the chip states what was RECORDED, not what was clicked.
   const [decisions, setDecisions] = useState({});
   const [deciding, setDeciding] = useState(false);
+  /* Why a verdict could not be recorded, in the API's own words. A refusal
+     printed as "(403)" tells a reviewer nothing and makes a working control
+     look broken; the API states its reason and this carries it, the way the
+     answer panel's slow path names what it is waiting for. */
+  const [decideError, setDecideError] = useState(null);
 
   useEffect(() => { if (insightModal) setTab("detail"); }, [insightModal]);
   if (!insightModal) return null;
@@ -295,34 +300,46 @@ function InsightModal() {
   /* Accept / Reject → the annotation write path. Annotations and alert actions
      are the ONLY writes this app's API accepts, both behind an Idempotency-Key
      (invariant 2) — this is that write, from the reviewer's seat, through the
-     same `/api/entity/…` BFF the reads use (utils.jsx). The route is another
-     workstream's to build, so until it deploys a 404/501 is an EXPECTED state:
-     it gets said in a toast, never left as an unhandled rejection. */
+     same `/api/entity/…` BFF the reads use (utils.jsx).
+
+     The anchor is `insight_card` and the anchor id is this card's ic_id. That
+     is the right anchor for a verdict on the REASONING TRACE too: the trace is
+     the card's own `r_layer`, promoted with it and anchored to it, so a
+     verdict on the trace is a verdict on the card. No anchor kind is invented
+     and the API is not widened. (The DDL's enum also lists `recommendation`,
+     but no endpoint implements it, so the recommendation drawer's own trace
+     carries no verdict pair — see the note there.) */
   const entityId = ((route && route.path || "").match(/^\/clients\/([^/]+)/) || [])[1] || null;
   const decide = (action) => {
     if (!entityId) {
+      setDecideError("No entity in this route, so the verdict has nowhere to anchor.");
       pushToast("No entity in the route - the decision has nowhere to be recorded", "warn");
       return;
     }
     setDeciding(true);
+    setDecideError(null);
     fetch(`/api/entity/${encodeURIComponent(entityId)}/insights/${encodeURIComponent(ic.id)}/annotation`, {
       method: "POST",
       headers: { "content-type": "application/json",
                  "Idempotency-Key": crypto.randomUUID() },
       body: JSON.stringify({ action }),
     })
-      .then(r => {
-        if (r.status === 404 || r.status === 501) {
-          pushToast("Annotation write path is not deployed yet", "warn");
-          return null;
-        }
+      .then(r => r.text().then(text => {
+        let body = null;
+        try { body = text ? JSON.parse(text) : {}; } catch (e) { body = {}; }
         if (!r.ok) {
-          pushToast(`Annotation write failed (${r.status})`, "warn");
+          // The API answers `{error, detail}` and both are worth showing: the
+          // code is what a reader repeats to whoever can fix it, the detail is
+          // why. A 404 on this path means the route is not deployed; a 403
+          // `unknown_actor` means the signed-in email has no row in `users`.
+          const why = body && (body.detail || body.error)
+            ? `${body.detail || body.error}` : `the API answered ${r.status}`;
+          setDecideError(why);
+          pushToast(`Verdict not recorded - ${why}`, "warn");
           return null;
         }
-        // An empty or non-JSON 2xx body still means the write landed.
-        return r.json().catch(() => ({}));
-      })
+        return body || {};
+      }))
       .then(body => {
         if (!body) return;
         const said = String(body.action || body.status || action).toUpperCase();
@@ -330,7 +347,10 @@ function InsightModal() {
         setDecisions(d => ({ ...d, [ic.id]: verdict }));
         pushToast(`${ic.id} ${verdict.toLowerCase()} — recorded`, "success");
       })
-      .catch(() => pushToast("Annotation write failed - the API was unreachable", "warn"))
+      .catch(() => {
+        setDecideError("The API was unreachable.");
+        pushToast("Verdict not recorded - the API was unreachable", "warn");
+      })
       .finally(() => setDeciding(false));
   };
   // The card's own platform chip, rendered as the run states it. Resolving it
@@ -412,12 +432,21 @@ function InsightModal() {
                   trace, not client-facing prose. */}
               {ic.r_layer && audience !== "customer" ? (
                 <div style={{ background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", borderRadius: 8, padding: "12px 14px", marginTop: 14 }}>
-                  <div className="row" style={{ marginBottom: 8 }}>
+                  <div className="row" style={{ marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
                     <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase" }}>
                       Reasoning trace
                     </span>
                     <span className="spacer" />
-                    {ic.r_layer.verdict ? <span className="b b-purple">{ic.r_layer.verdict}</span> : null}
+                    {/* This is the PRODUCER's verdict on its own hypothesis,
+                        and as a bare pill reading "ACCEPT" beside nothing else
+                        it was read as a button with a missing Reject. It is
+                        labelled as what it is, in text no control uses, and
+                        the reviewer's real pair is directly below. */}
+                    {ic.r_layer.verdict ? (
+                      <span className="b b-purple" style={{ cursor: "default" }}
+                            title="the producer's own verdict on its hypothesis, promoted with the card — not a control">
+                        Self-check · {ic.r_layer.verdict}</span>
+                    ) : null}
                     {ic.r_layer.confidence ? <span className="b b-muted">{ic.r_layer.confidence}</span> : null}
                   </div>
                   {[["Hypothesis", ic.r_layer.hypothesis],
@@ -434,6 +463,65 @@ function InsightModal() {
                       chopped mid-word. The prose that IS for the reader
                       (alternative explanation, validation question) renders
                       above. */}
+                </div>
+              ) : null}
+
+              {/* The reviewer's verdict — a real pair, where the reader looked
+                  for it. It used to be two buttons in the modal footer, a
+                  screen away from the ACCEPT badge that prompted the question,
+                  and the badge above was the only thing that looked like a
+                  control. Rendered whether or not the card carries a trace, so
+                  a card with no r_layer is still reviewable.
+
+                  What the two buttons do is stated, not implied: the write
+                  lands in `annotations` anchored to this card on this run, and
+                  nothing in this app reads it back. Saying so is the honest
+                  answer to "how are these recorded over time" — an unread log
+                  presented as a feedback loop is the worse defect. */}
+              {audience !== "customer" ? (
+                <div style={{ background: "var(--z-bg)", border: "1px solid var(--z-sep)", borderRadius: 8, padding: "12px 14px", marginTop: 12 }}>
+                  <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                    <div style={{ minWidth: 0, flex: "1 1 200px" }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase" }}>
+                        Your verdict
+                      </div>
+                      <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 3, lineHeight: 1.5 }}>
+                        {ic.r_layer
+                          ? "Does this reasoning hold for this client?"
+                          : "Does this card hold for this client?"}
+                      </div>
+                    </div>
+                    <span className="spacer" />
+                    {decided ? (
+                      <span className={`b ${decided === "ACCEPTED" ? "b-teal" : "b-below"}`}
+                            style={{ flexShrink: 0 }}>{decided}</span>
+                    ) : null}
+                    <button className={`btn ${decided === "ACCEPTED" ? "btn-primary" : "btn-secondary"}`}
+                      disabled={deciding} style={{ flexShrink: 0 }}
+                      title="Record an accept against this card, on this run"
+                      onClick={() => decide("ACCEPT")}>
+                      <Icon name="check" size={13} /> Accept</button>
+                    <button className={`btn ${decided === "REJECTED" ? "btn-primary" : "btn-secondary"}`}
+                      disabled={deciding} style={{ flexShrink: 0 }}
+                      title="Record a reject against this card, on this run"
+                      onClick={() => decide("REJECT")}>
+                      <Icon name="x" size={13} /> Reject</button>
+                  </div>
+                  {decideError ? (
+                    <div className="co co-org" style={{ marginTop: 10 }}>
+                      <Icon name="warn" size={14} />
+                      <div>
+                        <div className="co-title">Not recorded</div>
+                        <div className="co-body">{decideError}</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 8, lineHeight: 1.5 }}>
+                      Stored as an annotation against {ic.id} on this run, attributed to
+                      the signed-in reviewer. Nothing in this app reads verdicts back
+                      yet, so it is a log rather than a loop.
+                    </div>
+                  )}
                 </div>
               ) : null}
 
@@ -643,9 +731,15 @@ function InsightModal() {
             }}><Icon name="copy" size={13} /> Copy card</button>
             <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${ic.id} as PDF…`, "success")}><Icon name="download" size={13} /> Export</button>
           </div>
+          {/* The verdict pair used to live here, a screenful below the trace
+              it judges and beside the ACCEPT badge that reads as a control.
+              One pair, in one place, next to the reasoning — two copies of the
+              same control in one modal is its own defect. The footer is the
+              prototype's: copy, export, close. */}
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <button className="btn btn-secondary" disabled={deciding} onClick={() => decide("ACCEPT")}><Icon name="check" size={13} /> Accept</button>
-            <button className="btn btn-secondary" disabled={deciding} onClick={() => decide("REJECT")}><Icon name="x" size={13} /> Reject</button>
+            {decided ? (
+              <span className={`b ${decided === "ACCEPTED" ? "b-teal" : "b-below"}`}>{decided}</span>
+            ) : null}
             <button className="btn btn-primary" onClick={closeInsight}>Close</button>
           </div>
         </div>
@@ -2435,7 +2529,17 @@ function RecommendationModal() {
                     <div className="row" style={{ marginBottom: 8 }}>
                       <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase" }}>Reasoning trace</span>
                       <span className="spacer" />
-                      {r.r_layer.verdict ? <span className="b b-purple">{r.r_layer.verdict}</span> : null}
+                      {/* Same relabel as the insight card's: the producer's own
+                          verdict, said in words no control uses. There is no
+                          reviewer pair here — the API implements an annotation
+                          endpoint for `insight_card` only, and a `recommendation`
+                          anchor has no route, so a pair on this drawer would be
+                          two buttons that cannot record anything. */}
+                      {r.r_layer.verdict ? (
+                        <span className="b b-purple" style={{ cursor: "default" }}
+                              title="the producer's own verdict on its hypothesis, promoted with the recommendation — not a control">
+                          Self-check · {r.r_layer.verdict}</span>
+                      ) : null}
                     </div>
                     {[["Hypothesis", r.r_layer.hypothesis],
                       ["Counter-evidence", r.r_layer.counter],

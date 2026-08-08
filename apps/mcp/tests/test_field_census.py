@@ -12,6 +12,22 @@ mirrored here over the CONNECTOR's own writer spec, which is the copy
 promote actually walks — the two files are identical today and a divergence
 is itself the defect.
 
+The section-level sweep alone was not enough, twice over:
+
+  · It looked only at the keys a SECTION declares, so the ITEM level — the
+    keys a section's item shape states as `Per issue: {…}` — was never
+    resolved against the writer's `item:` bindings at all.
+    `context.issue_register.issues[].capped_subcap_ids` was validated at
+    submit and dropped at promote for exactly as long as that hole existed,
+    and with it the finding's anchor score, the opportunity tile's headline
+    and the stack row's verification date. The item-level sweep below is
+    the same test one level down.
+  · The item shape is stated in PROSE, and the expression that reads it
+    (`validation2._PER_ITEM_RE`) recognises the lead-in by noun. A section
+    whose noun is missing from that list opts out of both this census and
+    AG-03 silently — which is what `Per issue:` did. So a shape that cannot
+    be parsed is a FAILURE here, not a skip.
+
 **Upstream**: a gate registry that names a field the contract does not
 declare polices nothing, silently, forever. Every path in the new
 registries (`_ITEM_DATING`, `_FACE_BUDGETS`) is therefore resolved against
@@ -19,6 +35,7 @@ the contract here, so a field renamed in `contracts_data.json` breaks this
 test rather than quietly switching a gate off.
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -28,6 +45,7 @@ from dma_mcp.contracts import ENVELOPE, SECTION_META, sections
 from dma_mcp.gates import GATES
 from dma_mcp.validation import (_CONTRACT_VOCABULARIES, _FACE_BUDGETS,
                                 _ITEM_DATING)
+from dma_mcp.validation2 import _PER_ITEM_RE
 
 _SPEC = Path(__file__).resolve().parents[1] / "dma_mcp" / "writer_spec.json"
 
@@ -53,6 +71,44 @@ COMPUTED_AT_READ = {
     ("heatmap", "workbook_scores", "pillars"): "expanded to rows by _expand_h4_maps",
     ("heatmap", "workbook_scores", "categories"): "expanded to rows by _expand_h4_maps",
 }
+
+# The ITEM-level equivalent: keys a section's item shape declares that no
+# `item:` column stores, each with the source it is recomputed from at read.
+# Nothing else may be absent. `-R` a key from a writer without landing it here
+# and the sweep below says so by name.
+ITEM_COMPUTED_AT_READ = {
+    ("heatmap", "cell_evidence", "items"):
+        "the resolved form of the row's own e_ids — one evidence_index row per "
+        "id, which is exactly {e_id, tier, claim_label, recency, source_title, "
+        "publisher, excerpt}. grounded_on is GENERATED as the length of that "
+        "very array, so storing the objects too would be the second code path "
+        "invariant 8 forbids",
+    ("heatmap", "cell_evidence", "thin"):
+        "grounded_on < 3 — the contract's own rule ('below three linked items, "
+        "mark the cell thin'), computed from a GENERATED column",
+}
+
+
+def _item_shape(page: str, section: str, item_field: str):
+    """The item keys a section's contract states in prose, or None.
+
+    The shape lives in the `doc` text and nowhere else, so this reads it with
+    the SAME expression the validator's AG-03 uses. That is deliberate: if the
+    expression cannot see a section's shape then AG-03 cannot either, and both
+    the citation gate and this census switch themselves off for that section
+    without saying so.
+    """
+    fields = sections(page)[section]["fields"]
+    spec = fields.get(item_field.split(".")[0])
+    if spec is None:
+        return None
+    doc = spec.get("doc") or ""
+    m = _PER_ITEM_RE.search(doc) or re.search(
+        re.escape(item_field.split(".")[0]) + r"\[\]\s*\{([^}]*)\}", doc)
+    if not m:
+        return None
+    return [k.strip().rstrip("[]") for k in m.group(1).split(",")
+            if re.match(r"^[a-z_][a-z0-9_]*\[?\]?$", (k or "").strip())]
 
 
 def _bound():
@@ -87,6 +143,84 @@ def test_a_required_field_is_either_stored_or_deliberately_computed():
         "CG-13: required contract fields with no column and no recorded "
         "reason — each is validated at submit and then discarded at "
         "promotion: " + ", ".join(sorted(orphans)))
+
+
+def test_an_item_level_contract_key_is_either_stored_or_deliberately_computed():
+    """CG-13 one level down — the sweep that was missing entirely.
+
+    A section's items are where the client actually reads: the issue with the
+    cells it caps, the finding with the score its chip quotes, the stack row
+    with the date it was verified. Every one of those was validated at submit
+    and dropped at promote because the writer had no `item:` column for it, and
+    the section-level sweep could not see them because they are not section
+    fields. `capped_subcap_ids` is the case that named this test.
+
+    Bound means an `item:` source claims the key, or a GENERATED column
+    computes it. A column that merely SHARES the key's name is not enough —
+    `platform_roadmap.capabilities` holds rec_ids by its own DDL comment, so
+    matching on name would have declared the contract's separate capabilities[]
+    stored when it was being discarded.
+    """
+    spec = json.loads(_SPEC.read_text())
+    orphans, unreadable = [], []
+    for page_spec in spec["specs"]:
+        for w in page_spec["writers"]:
+            page, name, item_field = page_spec["page"], w["section"], w.get("item_field")
+            if not item_field:
+                continue                  # run grain: the section IS the row
+            item_paths, generated = set(), set()
+            for c in w["columns"]:
+                kind, _, rest = c["source"].partition(":")
+                if kind == "item":
+                    item_paths.add(rest.split(".")[0])
+                elif kind == "skip" and "GENERATED ALWAYS" in rest:
+                    generated.add(c["column"].strip('"'))
+            keys = _item_shape(page, name, item_field)
+            if keys is None:
+                unreadable.append(f"{page}.{name}.{item_field}")
+                continue
+            for key in keys:
+                if key in item_paths or key in generated:
+                    continue
+                if (page, name, key) in ITEM_COMPUTED_AT_READ:
+                    continue
+                orphans.append(f"{page}.{name}.{item_field}[].{key}")
+    assert not unreadable, (
+        "an item shape validation2._PER_ITEM_RE cannot parse — the section is "
+        "invisible to BOTH this census and AG-03's citation check, silently. "
+        "Add its lead-in noun to _PER_ITEM_RE: " + ", ".join(sorted(unreadable)))
+    assert not orphans, (
+        "CG-13: item-level contract keys with no column and no recorded "
+        "reason — each is validated at submit and then discarded at "
+        "promotion: " + ", ".join(sorted(orphans)))
+
+
+def test_the_item_provenance_column_does_not_take_the_envelope_s():
+    """Two facts, two columns, and neither may eat the other.
+
+    The envelope's `provenance` says who produced the SECTION and is the
+    submission-level stamp the serving envelope reads; the contract's per-item
+    `provenance` says how THIS row was arrived at. Sourcing one column from
+    both is how the per-item value came to be validated and then dropped — and
+    rebinding the envelope column to the item would have traded that for a
+    section stamp that serves NULL. So: wherever an item declares provenance,
+    the writer carries both, from different sources.
+    """
+    spec = json.loads(_SPEC.read_text())
+    for page_spec in spec["specs"]:
+        for w in page_spec["writers"]:
+            item_field = w.get("item_field")
+            if not item_field:
+                continue
+            keys = _item_shape(page_spec["page"], w["section"], item_field) or []
+            sources = {c["column"].strip('"'): c["source"] for c in w["columns"]}
+            assert sources.get("provenance") == "sys:provenance", (
+                f"{page_spec['page']}.{w['section']}: the envelope's provenance "
+                "column must stay the submission stamp")
+            if "provenance" in keys:
+                assert sources.get("item_provenance") == "item:provenance", (
+                    f"{page_spec['page']}.{w['section']} declares a per-item "
+                    "provenance and has nowhere to put it")
 
 
 def test_the_connector_and_the_serving_tier_walk_the_same_writer_spec():

@@ -3432,10 +3432,10 @@ function LiveTimeline({
     className: "b b-purple"
   }, e.kind) : null, /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), e.maturity_effect ? /*#__PURE__*/React.createElement("span", {
+  }), (window.splitMaturityEffect ? window.splitMaturityEffect(e.maturity_effect).token : null) ? /*#__PURE__*/React.createElement("span", {
     className: "b b-ph1",
     title: "effect on assessed maturity"
-  }, e.maturity_effect) : null, /*#__PURE__*/React.createElement(ClaimChip, {
+  }, window.splitMaturityEffect(e.maturity_effect).token.replace(/_/g, " ")) : null, /*#__PURE__*/React.createElement(ClaimChip, {
     label: e.claim_label
   })), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3451,7 +3451,7 @@ function LiveTimeline({
       marginTop: 4,
       lineHeight: 1.5
     }
-  }, e.body) : null, asText(e.signal) ? /*#__PURE__*/React.createElement("div", {
+  }, e.body) : null, (window.splitMaturityEffect ? window.splitMaturityEffect(e.maturity_effect).reason : null) ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
       color: "var(--z-dark)",
@@ -3460,7 +3460,7 @@ function LiveTimeline({
       borderLeft: "2px solid var(--z-lav)",
       lineHeight: 1.5
     }
-  }, asText(e.signal)) : null, /*#__PURE__*/React.createElement("div", {
+  }, window.splitMaturityEffect(e.maturity_effect).reason) : null, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       marginTop: 5,
@@ -3718,9 +3718,10 @@ function LiveAcquisitions({
     className: "b f-mono"
   }, r.closed_on) : null, r.status ? /*#__PURE__*/React.createElement("span", {
     className: "b"
-  }, r.status) : null, r.maturity_effect ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-ph1"
-  }, r.maturity_effect) : null), r.scale_metrics && typeof r.scale_metrics === "object" ? /*#__PURE__*/React.createElement("div", {
+  }, r.status) : null, (window.splitMaturityEffect ? window.splitMaturityEffect(r.maturity_effect).token : null) ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-ph1",
+    title: "effect on assessed maturity"
+  }, window.splitMaturityEffect(r.maturity_effect).token.replace(/_/g, " ")) : null), r.scale_metrics && typeof r.scale_metrics === "object" ? /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 10,

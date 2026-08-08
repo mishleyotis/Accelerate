@@ -154,6 +154,59 @@ def _qualify(e_id: str, token: str) -> str:
     return f"E-{token}-{e_id[2:]}" if e_id.startswith("E-") else e_id
 
 
+# The basis a carried link is written under. It is not 'package': the package
+# did not state this link for this row, an earlier read of the same source did,
+# and a reader who drills in is owed the difference.
+CARRIED_BASIS = "carried_from_superseded"
+
+
+def carry_links_across_remint(cur, superseded: str, minted: str) -> int:
+    """A re-mint is the SAME SOURCE, read again — carry what the row it
+    supersedes already knows. Returns the number of links carried.
+
+    `_land_evidence` mints a run-qualified id (`E-BCU-006-R2`) when a second
+    scan re-lands a package-local id whose CONTENT changed: a fuller excerpt, a
+    published date, an ERS the first scan had none of. The copy is the better
+    row and it is the one the surfaces cite. It used to arrive with no cell
+    links at all, so a citation of it opened a drawer that could not say which
+    cells the source supports, while the earlier run's linkage sat on an id
+    nobody reads any more. Measured on one client: 36 such rows, 30 of them
+    cited by the promoted run, every one of them linkless under it.
+
+    Links are an assertion about the SOURCE, not about the excerpt, so they
+    survive a re-read of that source — INCLUDING the links of runs other than
+    this one. Carrying those is the whole point: it is what makes an earlier
+    run's citation of the new id resolve to the cells it supports.
+
+    Nothing about the content is touched. Only two things move:
+
+      · the links, preserving their own `run_id`, under a basis that says
+        where they came from, and never over one the copy already has;
+      · the grading the re-scan does not restate (specificity, corroboration,
+        identity), and only into NULLs — a value the new row states is the
+        measured one and always wins.
+    """
+    cur.execute(
+        f"""INSERT INTO evidence_subcap_links (e_id, subcap_id, run_id, link_basis)
+            SELECT %s, k.subcap_id, k.run_id, '{CARRIED_BASIS}'
+              FROM evidence_subcap_links k
+             WHERE k.e_id = %s
+            ON CONFLICT DO NOTHING""",
+        (minted, superseded))
+    carried = cur.rowcount if cur.rowcount and cur.rowcount > 0 else 0
+    cur.execute(
+        """UPDATE evidence_index fresh
+              SET specificity   = COALESCE(fresh.specificity, prior.specificity),
+                  corroboration = COALESCE(fresh.corroboration, prior.corroboration),
+                  identity_ok   = COALESCE(fresh.identity_ok, prior.identity_ok),
+                  identity_note = COALESCE(fresh.identity_note, prior.identity_note)
+             FROM evidence_index prior
+            WHERE fresh.e_id = %s AND prior.e_id = %s
+              AND fresh.entity_id = prior.entity_id""",
+        (minted, superseded))
+    return carried
+
+
 @dataclass
 class PersistResult:
     entity_id: str
@@ -352,6 +405,18 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                VALUES (%s,%s,%s, now())""", (run_id, kind, json.dumps(detail)))
         n_obs += 1
 
+    # minted run-qualified id -> the id it supersedes. Filled while landing,
+    # drained once every package link has been written, so a link this scan
+    # states keeps its own basis and only the gaps are carried.
+    superseded_by: dict[str, str] = {}
+
+    def _carry_forward() -> None:
+        for minted, superseded in sorted(superseded_by.items()):
+            carried = carry_links_across_remint(cur, superseded, minted)
+            _observe("evidence_links_carried_forward",
+                     {"superseded": superseded, "minted": minted,
+                      "links_carried": carried})
+
     def _land_evidence(ev: dict) -> str | None:
         """Insert one package item; return the stored id its local id
         resolves to, or None (recorded) when nothing can hold it."""
@@ -376,6 +441,14 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                  ev.get("ers"), ev.get("published_date"), reference_date))
             if cur.fetchone():
                 landed.add(candidate)
+                if candidate != qualified:
+                    # A run-qualified mint exists only because `qualified`
+                    # already holds this local id under different content:
+                    # the same source, read again. Record the pair; the
+                    # links it already carries are carried over once this
+                    # scan has written its own (below), so a link this
+                    # package states keeps its own basis.
+                    superseded_by[candidate] = qualified
                 return candidate
             # The bare ON CONFLICT covers both uniques; work out which fired.
             cur.execute(
@@ -569,6 +642,10 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                         """INSERT INTO evidence_subcap_links (e_id, subcap_id, run_id, link_basis)
                            VALUES (%s,%s,%s,'score_row') ON CONFLICT DO NOTHING""",
                         (resolved, s.subcap_id, run_id))
+        # Every link THIS scan states is now written, so anything the
+        # superseded row still carries alone is a gap rather than a
+        # competing basis — carry it, and only then count.
+        _carry_forward()
         # The linker count — written only now that both sides of the join
         # exist. The linker ran for this run, so an unlinked cell's count is
         # a computed zero; NULL is reserved for runs the linker never saw.

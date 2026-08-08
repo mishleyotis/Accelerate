@@ -272,6 +272,12 @@
               "nullable": true
             },
             {
+              "column": "confidence",
+              "source": "item:confidence",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
               "column": "run_id",
               "source": "sys:run_id",
               "jsonb": false,
@@ -338,7 +344,7 @@
               "nullable": true
             }
           ],
-          "notes": "Contract item keys map 1:1 to columns EXCEPT: (1) item key `confidence` has NO column in heatmap_focus_areas \u2014 it is currently dropped at write; flag for adjudication (add a confidence_t column or accept payload-only). (2) item key `delta` maps to a GENERATED column \u2014 cross-checked (CG grain tolerance), never written. Name mapping already resolved upstream: the Surface Spec's information-sources table called this field `title`; the emit prompt's `name` was adopted in the contract and matches the column. Items become 3-5 rows (client priorities). r_layer: no item key carries it, so section-level, nullable."
+          "notes": "Contract item keys map 1:1 to columns EXCEPT: (1) item key `confidence` has NO column in heatmap_focus_areas \u2014 it is currently dropped at write; flag for adjudication (add a confidence_t column or accept payload-only). (2) item key `delta` maps to a GENERATED column \u2014 cross-checked (CG grain tolerance), never written. Name mapping already resolved upstream: the Surface Spec's information-sources table called this field `title`; the emit prompt's `name` was adopted in the contract and matches the column. Items become 3-5 rows (client priorities). r_layer: no item key carries it, so section-level, nullable. RESOLVED (0027): confidence has a confidence_t column."
         },
         {
           "section": "cell_evidence",
@@ -379,6 +385,18 @@
             {
               "column": "confidence",
               "source": "skip:no per-cell contract field \u2014 never written, NULL (see notes)",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "reach_note",
+              "source": "item:reach_note",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "item_provenance",
+              "source": "item:provenance",
               "jsonb": false,
               "nullable": true
             },
@@ -449,7 +467,7 @@
               "nullable": true
             }
           ],
-          "notes": "CRITICAL DEVIATION from the default envelope rule: e_ids is item-sourced here (item:e_ids, the CELL's own citation list), NOT env:e_ids \u2014 grounded_on is GENERATED from the row's e_ids array, so writing the section envelope's union onto every row would corrupt every cell's 'on the N items above' count. Contract item keys with NO column: items[] (per-element {e_id, tier, claim_label, recency, source_title, publisher, excerpt} \u2014 re-joinable from evidence_index via the row's e_ids at read; the drawer renders from the index), reach_note, and thin (the dashed-outline thin-cell flag has no storage \u2014 flag for adjudication). Section-level field linking_stats {cells_scored, cells_linked, rows_unlinkable} has NO column \u2014 computed reach counters, recomputable at read but currently unstored; flag whether they must persist. Item key `provenance` collides with the envelope provenance column \u2014 spec'd here as sys:provenance per the promote-transaction rule; if the per-cell payload value should win, adjudicate. Columns claim_label and confidence have no per-cell source in the reissued H2 shape {subcap_id, e_ids[], items[], reach_note, synthesis, grounded_on, provenance, thin} \u2014 NULL is correct under the current contract; flag."
+          "notes": "CRITICAL DEVIATION from the default envelope rule: e_ids is item-sourced here (item:e_ids, the CELL's own citation list), NOT env:e_ids \u2014 grounded_on is GENERATED from the row's e_ids array, so writing the section envelope's union onto every row would corrupt every cell's 'on the N items above' count. Contract item keys with NO column: items[] (per-element {e_id, tier, claim_label, recency, source_title, publisher, excerpt} \u2014 re-joinable from evidence_index via the row's e_ids at read; the drawer renders from the index), reach_note, and thin (the dashed-outline thin-cell flag has no storage \u2014 flag for adjudication). Section-level field linking_stats {cells_scored, cells_linked, rows_unlinkable} has NO column \u2014 computed reach counters, recomputable at read but currently unstored; flag whether they must persist. Item key `provenance` collides with the envelope provenance column \u2014 spec'd here as sys:provenance per the promote-transaction rule; if the per-cell payload value should win, adjudicate. Columns claim_label and confidence have no per-cell source in the reissued H2 shape {subcap_id, e_ids[], items[], reach_note, synthesis, grounded_on, provenance, thin} \u2014 NULL is correct under the current contract; flag. RESOLVED (0027): reach_note has a TEXT column. Of the cell item shape's other unstored keys, items[] is the resolved form of e_ids (grounded_on is GENERATED as the length of that very array) and thin is grounded_on < 3 \u2014 both recorded in the item-level census register with their source named, per invariant 8. RESOLVED (0027): per-item provenance now has its own column (item_provenance TEXT, bound to the payload key `provenance`). The envelope column stays sys:provenance \u2014 the Backend Schema wins on table shape and the Surface Specification wins on payload shape, and they are two different facts: who produced the SECTION, and how THIS row was arrived at. Collapsing them dropped the per-item value at promote and left a page unable to express a mix. TEXT rather than provenance_t because the declared vocabularies differ per surface; CG-09 polices them at submit, where a bad value is refused instead of aborting a promotion."
         },
         {
           "section": "evidence",
@@ -1048,6 +1066,12 @@
               "nullable": true
             },
             {
+              "column": "category_name",
+              "source": "item:category_name",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
               "column": "run_id",
               "source": "sys:run_id",
               "jsonb": false,
@@ -1114,7 +1138,7 @@
               "nullable": true
             }
           ],
-          "notes": "OPTIONAL section (the other of the two optional sections of the 34). Item keys with NO column: category_name (render-time catalogue join on category_id is the natural fill; flag), and the generated pair share_pct/below_threshold (payload carries both; validated only). threshold_pct has DUAL PLACEMENT in the sources \u2014 section-level per section_templates.json, per-pattern per the Surface Spec prompt; the DDL stores it per row, so this spec sources it item:threshold_pct (if the section-level placement wins adjudication, the writer stamps the hoisted section value onto every row \u2014 same column either way; adjudicate before freezing, per the contracts _notes). entity_ids UUID[] is AUDIT ONLY: the DDL comment and invariant 5 require it always listed in the section's internal_only and stripped from EVERY audience, customer and internal alike \u2014 the writer should assert the internal_only marking is present before insert. cohort_size carries CHECK cohort_size >= 5 (constraint cohort_min) but is nullable \u2014 an under-minimum pattern fails at insert, which enforces the do-not-publish rule at the DB. Section fields with no storage: threshold_pct (section placement) rides on rows as above; insufficient_cohorts[] ({sub_vertical, category_id, cohort_size, insufficient_cohort} \u2014 withheld cohorts recorded, never silently dropped) has NO columns anywhere \u2014 flag for adjudication (empty_state is the closest existing carrier but is not contract-shaped for it)."
+          "notes": "OPTIONAL section (the other of the two optional sections of the 34). Item keys with NO column: category_name (render-time catalogue join on category_id is the natural fill; flag), and the generated pair share_pct/below_threshold (payload carries both; validated only). threshold_pct has DUAL PLACEMENT in the sources \u2014 section-level per section_templates.json, per-pattern per the Surface Spec prompt; the DDL stores it per row, so this spec sources it item:threshold_pct (if the section-level placement wins adjudication, the writer stamps the hoisted section value onto every row \u2014 same column either way; adjudicate before freezing, per the contracts _notes). entity_ids UUID[] is AUDIT ONLY: the DDL comment and invariant 5 require it always listed in the section's internal_only and stripped from EVERY audience, customer and internal alike \u2014 the writer should assert the internal_only marking is present before insert. cohort_size carries CHECK cohort_size >= 5 (constraint cohort_min) but is nullable \u2014 an under-minimum pattern fails at insert, which enforces the do-not-publish rule at the DB. Section fields with no storage: threshold_pct (section placement) rides on rows as above; insufficient_cohorts[] ({sub_vertical, category_id, cohort_size, insufficient_cohort} \u2014 withheld cohorts recorded, never silently dropped) has NO columns anywhere \u2014 flag for adjudication (empty_state is the closest existing carrier but is not contract-shaped for it). RESOLVED (0027): category_name has a TEXT column."
         }
       ]
     },
@@ -1728,6 +1752,18 @@
               "nullable": true
             },
             {
+              "column": "headline",
+              "source": "item:headline",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "anchor_subcap_id",
+              "source": "item:anchor_subcap_id",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
               "column": "run_id",
               "source": "sys:run_id",
               "jsonb": false,
@@ -1794,7 +1830,7 @@
               "nullable": true
             }
           ],
-          "notes": "O5. factors JSONB holds [{name, weight, value, contribution}] which must sum to composite; addressable_cells JSONB holds [{subcap_id, name, current, peer, gap, feature_that_addresses_it}]. discarded is the section-level required list stored on every row: the contract's item shape is {platform, reason} while the DDL comment says [{platform, reason, relevance}] \u2014 JSONB absorbs either; the contract shape governs what the producer sends. Contract item keys with NO column: `headline` (the gap framed as available value) and `anchor_subcap_id` (the subcapability the tile is about) \u2014 both from the sources table, neither persisted; flag for registry review since the tile card renders a headline."
+          "notes": "O5. factors JSONB holds [{name, weight, value, contribution}] which must sum to composite; addressable_cells JSONB holds [{subcap_id, name, current, peer, gap, feature_that_addresses_it}]. discarded is the section-level required list stored on every row: the contract's item shape is {platform, reason} while the DDL comment says [{platform, reason, relevance}] \u2014 JSONB absorbs either; the contract shape governs what the producer sends. Contract item keys with NO column: `headline` (the gap framed as available value) and `anchor_subcap_id` (the subcapability the tile is about) \u2014 both from the sources table, neither persisted; flag for registry review since the tile card renders a headline. RESOLVED (0027): headline and anchor_subcap_id now have columns. Both are named '(sources table)' by the tile contract and neither had one."
         },
         {
           "section": "findings",
@@ -1911,6 +1947,30 @@
               "nullable": true
             },
             {
+              "column": "subcap_id",
+              "source": "item:subcap_id",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "score",
+              "source": "item:score",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "peer_median",
+              "source": "item:peer_median",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "name",
+              "source": "item:name",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
               "column": "run_id",
               "source": "sys:run_id",
               "jsonb": false,
@@ -1977,7 +2037,7 @@
               "nullable": true
             }
           ],
-          "notes": "O6. Name mappings: strategic_alignment_score \u2014 the contract bundles '15-30 words PLUS a 0-1 score' under strategic_alignment and names no separate key; the column takes the numeric ranking key (registry-assigned name, must be confirmed with the producer). what_text/why_text/so_what_text are the drilldown's WHAT/WHY/SO WHAT headings whose payload key names 'are not stated in the sources' (page _notes) \u2014 the DDL's names are the registry's assignment. ranking_basis is the section-level required field (alignment | impact_fallback), stored on every row. narrative_thread: this section carries its OWN required narrative_thread (the O6 findings thread, distinct from the page thread on scores) \u2014 it fills the envelope column; NOT NULL in practice here. Contract item keys with NO column: `name` (humanised capability label), `subcap_id`, `score`, `peer_median` (the score chip's anchor cell and its 2dp figures \u2014 W1_workbook_fidelity checks them at validation; joinable from heatmap_workbook_scores at read but unpersisted here), per-item e_ids[], and the fourth drilldown heading EVIDENCE's rows ({e_id, source_title, recency, tier, claim_label}) \u2014 render-time from the evidence store via the cited ids."
+          "notes": "O6. Name mappings: strategic_alignment_score \u2014 the contract bundles '15-30 words PLUS a 0-1 score' under strategic_alignment and names no separate key; the column takes the numeric ranking key (registry-assigned name, must be confirmed with the producer). what_text/why_text/so_what_text are the drilldown's WHAT/WHY/SO WHAT headings whose payload key names 'are not stated in the sources' (page _notes) \u2014 the DDL's names are the registry's assignment. ranking_basis is the section-level required field (alignment | impact_fallback), stored on every row. narrative_thread: this section carries its OWN required narrative_thread (the O6 findings thread, distinct from the page thread on scores) \u2014 it fills the envelope column; NOT NULL in practice here. Contract item keys with NO column: `name` (humanised capability label), `subcap_id`, `score`, `peer_median` (the score chip's anchor cell and its 2dp figures \u2014 W1_workbook_fidelity checks them at validation; joinable from heatmap_workbook_scores at read but unpersisted here), per-item e_ids[], and the fourth drilldown heading EVIDENCE's rows ({e_id, source_title, recency, tier, claim_label}) \u2014 render-time from the evidence store via the cited ids. RESOLVED (0027): the finding's ANCHOR now has columns \u2014 subcap_id, score, peer_median and name. W1_workbook_fidelity asserts at submit that the chip's score and the anchor id name the same cell, and the three figures it compared were then discarded, so the chip had nothing to render from; linked_subcap_ids is a list and cannot say WHICH cell the quoted score belongs to."
         },
         {
           "section": "leadership",
@@ -3023,7 +3083,7 @@
             },
             {
               "column": "gap_rows",
-              "source": "section:platforms.0.gaps",
+              "source": "section:platforms",
               "jsonb": true,
               "nullable": true
             },
@@ -3106,7 +3166,7 @@
               "nullable": true
             }
           ],
-          "notes": "SHAPE MISMATCH TO ADJUDICATE: the contract's primary field is platforms[] = five tiles of {fit_score, gaps[], story_md}, but the table is run-grain with flat columns. gap_rows' DDL comment ([{subcap_id, name, current_score, peer_score, gap, pillar, l3_area, l4_feature, catalogue_path, e_ids}]) is exactly the contract's platforms[].gaps[] item shape, and story's DDL comment (90-150 words: what it changes, lifts, depends on, does not solve) is exactly story_md's contract \u2014 the DDL apparently predates the five-tile shape and models ONE platform story. fit_score and the per-tile grouping have no typed column; the writer should store the full platforms[] list (tiles with fit_score/gaps/story_md) in gap_rows JSONB, or the table needs revisiting \u2014 flag before freezing. story then holds the rank-1 tile's story_md. discarded maps 1:1 ([{platform, reason, relevance}]). effort_profile has NO contract field: page _notes record that P1 Step 5 requires an effort profile but no source names a payload field ('not emitted rather than invented') \u2014 writer writes NULL until adjudicated; NULL is correct. r_layer: no section or item field carries it; NULL."
+          "notes": "SHAPE MISMATCH TO ADJUDICATE: the contract's primary field is platforms[] = five tiles of {fit_score, gaps[], story_md}, but the table is run-grain with flat columns. gap_rows' DDL comment ([{subcap_id, name, current_score, peer_score, gap, pillar, l3_area, l4_feature, catalogue_path, e_ids}]) is exactly the contract's platforms[].gaps[] item shape, and story's DDL comment (90-150 words: what it changes, lifts, depends on, does not solve) is exactly story_md's contract \u2014 the DDL apparently predates the five-tile shape and models ONE platform story. fit_score and the per-tile grouping have no typed column; the writer should store the full platforms[] list (tiles with fit_score/gaps/story_md) in gap_rows JSONB, or the table needs revisiting \u2014 flag before freezing. story then holds the rank-1 tile's story_md. discarded maps 1:1 ([{platform, reason, relevance}]). effort_profile has NO contract field: page _notes record that P1 Step 5 requires an effort profile but no source names a payload field ('not emitted rather than invented') \u2014 writer writes NULL until adjudicated; NULL is correct. r_layer: no section or item field carries it; NULL. ADJUDICATED (0027): gap_rows now takes the WHOLE platforms[] list \u2014 five tiles of {platform, rank, fit_score, gaps[], story_md, readiness, peer_coverage, peer_deployments, peer_synthesis, integration_pathway, zennify_pathway, estate_reach, fit_basis, l3_area, e_ids, r_layer}. Sourcing platforms.0.gaps kept ONE tile's gap rows and discarded four whole tiles: the run submitted five, production served one, and a reader clicking the other four found them empty. The reader inverts this by the same spec (section:platforms lands the list at data.platforms), so the serving projection needed no code change. `story` still takes the rank-1 tile's story_md and is written AFTER gap_rows, so on the read side it lands back on platforms[0].story_md \u2014 the same value, for readers that predate the change."
         },
         {
           "section": "recommendations",
@@ -3211,6 +3271,12 @@
               "nullable": true
             },
             {
+              "column": "item_provenance",
+              "source": "item:provenance",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
               "column": "run_id",
               "source": "sys:run_id",
               "jsonb": false,
@@ -3277,7 +3343,7 @@
               "nullable": true
             }
           ],
-          "notes": "NAME MISMATCH: contract item key evidence_ids[] fills the envelope column e_ids (per-item citations, not the section envelope \u2014 same pattern that makes heatmap_cell_evidence.grounded_on generate from e_ids). PROVENANCE: the item carries provenance ANALYST|DERIVED (required, never blank), which fills the envelope provenance column rather than sys \u2014 provenance_t is lowercase (analyst|derived|producer), so the writer case-folds; deviates deliberately from the default sys:provenance stamping. Nested contract shapes ride as JSONB: dma_impact ([{subcap_id, name, current, target, delta}]), prerequisites (cells and minimums), kpi_triple ({metric, baseline, target}), validation_gate ({cell, threshold, verdict, backing_cells[]}). NO COLUMN: prerequisite_rec_ids and target_subcap_ids from the Surface Spec Information sources table \u2014 the contract _notes leave that mapping unconfirmed ('confirm before freezing the registry'); no column and no adopted item key today, so they ride nowhere. r_layer: items do not carry it; NULL."
+          "notes": "NAME MISMATCH: contract item key evidence_ids[] fills the envelope column e_ids (per-item citations, not the section envelope \u2014 same pattern that makes heatmap_cell_evidence.grounded_on generate from e_ids). PROVENANCE: the item carries provenance ANALYST|DERIVED (required, never blank), which fills the envelope provenance column rather than sys \u2014 provenance_t is lowercase (analyst|derived|producer), so the writer case-folds; deviates deliberately from the default sys:provenance stamping. Nested contract shapes ride as JSONB: dma_impact ([{subcap_id, name, current, target, delta}]), prerequisites (cells and minimums), kpi_triple ({metric, baseline, target}), validation_gate ({cell, threshold, verdict, backing_cells[]}). NO COLUMN: prerequisite_rec_ids and target_subcap_ids from the Surface Spec Information sources table \u2014 the contract _notes leave that mapping unconfirmed ('confirm before freezing the registry'); no column and no adopted item key today, so they ride nowhere. r_layer: items do not carry it; NULL. RESOLVED (0027): per-item provenance now has its own column (item_provenance TEXT, bound to the payload key `provenance`). The envelope column stays sys:provenance \u2014 the Backend Schema wins on table shape and the Surface Specification wins on payload shape, and they are two different facts: who produced the SECTION, and how THIS row was arrived at. Collapsing them dropped the per-item value at promote and left a page unable to express a mix. TEXT rather than provenance_t because the declared vocabularies differ per surface; CG-09 polices them at submit, where a bad value is refused instead of aborting a promotion."
         },
         {
           "section": "starters",
@@ -3330,6 +3396,12 @@
             {
               "column": "followup_question",
               "source": "item:followup_question",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "item_provenance",
+              "source": "item:provenance",
               "jsonb": false,
               "nullable": true
             },
@@ -3400,7 +3472,7 @@
               "nullable": true
             }
           ],
-          "notes": "opens_on: contract adopts opens_on (Surface Spec + skill) over the TRD/MCP-extraction name opening_shape \u2014 the contract _notes flag this as a genuine conflict needing a user call, since repo authority order would pick opening_shape; the column is spelled opens_on, so the payload key maps 1:1 today. TYPE MISMATCH: peer_reference is TEXT in the DDL but the contract describes an object {name, action, dated_on} or null \u2014 the writer must serialise (JSON-in-TEXT) or the column should become JSONB; flag before freezing. VOCABULARY MISMATCH: the item's provenance is TEMPLATE_FILL|ANALYST (and must RENDER), but provenance_t is analyst|derived|producer \u2014 TEMPLATE_FILL has no enum member; nearest is derived (rule-composed), but that mapping loses the rendered label, so adjudicate rather than map silently. e_ids fills from the item's own e_ids[] (per-starter citations). r_layer: items do not carry it; NULL."
+          "notes": "opens_on: contract adopts opens_on (Surface Spec + skill) over the TRD/MCP-extraction name opening_shape \u2014 the contract _notes flag this as a genuine conflict needing a user call, since repo authority order would pick opening_shape; the column is spelled opens_on, so the payload key maps 1:1 today. TYPE MISMATCH: peer_reference is TEXT in the DDL but the contract describes an object {name, action, dated_on} or null \u2014 the writer must serialise (JSON-in-TEXT) or the column should become JSONB; flag before freezing. VOCABULARY MISMATCH: the item's provenance is TEMPLATE_FILL|ANALYST (and must RENDER), but provenance_t is analyst|derived|producer \u2014 TEMPLATE_FILL has no enum member; nearest is derived (rule-composed), but that mapping loses the rendered label, so adjudicate rather than map silently. e_ids fills from the item's own e_ids[] (per-starter citations). r_layer: items do not carry it; NULL. RESOLVED (0027): per-item provenance now has its own column (item_provenance TEXT, bound to the payload key `provenance`). The envelope column stays sys:provenance \u2014 the Backend Schema wins on table shape and the Surface Specification wins on payload shape, and they are two different facts: who produced the SECTION, and how THIS row was arrived at. Collapsing them dropped the per-item value at promote and left a page unable to express a mix. TEXT rather than provenance_t because the declared vocabularies differ per surface; CG-09 polices them at submit, where a bad value is refused instead of aborting a promotion."
         },
         {
           "section": "roadmap",
@@ -3441,6 +3513,24 @@
             {
               "column": "rationale",
               "source": "item:rationale",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "phase_id",
+              "source": "item:phase_id",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "capability_labels",
+              "source": "item:capabilities",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
+              "column": "item_provenance",
+              "source": "item:provenance",
               "jsonb": false,
               "nullable": true
             },
@@ -3517,7 +3607,7 @@
               "nullable": true
             }
           ],
-          "notes": "COLUMN/KEY AMBIGUITY TO ADJUDICATE: the DDL comment on capabilities TEXT[] says 'the rec ids assigned to this phase; ids must resolve', so it is mapped from item:rec_ids (the referential-integrity gate is on rec_ids). But the contract carries BOTH rec_ids[] (skill/section_templates, adopted per _notes) AND capabilities[] (Surface Spec prompt) as separate item keys \u2014 the contract's capabilities[] then has no column of its own; the DDL likely predates the split. NO COLUMN: phase_id (skill-added identifier) rides nowhere \u2014 the BIGSERIAL id plus phase (SMALLINT, order is meaning) serve the table. NO COLUMN, SECTION-LEVEL: sequencing_basis (required string, prerequisites|undetermined) has no home \u2014 the migration's own pattern stores section-level fields of item-grain sections on every row (cf. overview_why_now.synthesis, context_timeline.storyline), so this needs a column or an explicit ride in r_layer; flag, do not drop silently. provenance: item carries analyst|derived, matching provenance_t directly; fills the envelope provenance column per row. e_ids: phases carry no per-item citation list, so the section envelope's e_ids stamps every row. r_layer: NULL. SEQUENCING_BASIS (0023): required by the contract and previously unstored \u2014 validated at submit and then discarded at promotion."
+          "notes": "COLUMN/KEY AMBIGUITY TO ADJUDICATE: the DDL comment on capabilities TEXT[] says 'the rec ids assigned to this phase; ids must resolve', so it is mapped from item:rec_ids (the referential-integrity gate is on rec_ids). But the contract carries BOTH rec_ids[] (skill/section_templates, adopted per _notes) AND capabilities[] (Surface Spec prompt) as separate item keys \u2014 the contract's capabilities[] then has no column of its own; the DDL likely predates the split. NO COLUMN: phase_id (skill-added identifier) rides nowhere \u2014 the BIGSERIAL id plus phase (SMALLINT, order is meaning) serve the table. NO COLUMN, SECTION-LEVEL: sequencing_basis (required string, prerequisites|undetermined) has no home \u2014 the migration's own pattern stores section-level fields of item-grain sections on every row (cf. overview_why_now.synthesis, context_timeline.storyline), so this needs a column or an explicit ride in r_layer; flag, do not drop silently. provenance: item carries analyst|derived, matching provenance_t directly; fills the envelope provenance column per row. e_ids: phases carry no per-item citation list, so the section envelope's e_ids stamps every row. r_layer: NULL. SEQUENCING_BASIS (0023): required by the contract and previously unstored \u2014 validated at submit and then discarded at promotion. RESOLVED (0027): phase_id has a column. The contract lists rec_ids[] AND capabilities[] separately; 0008's `capabilities` column carries the REC IDS by its own DDL comment, so the capability labels get a column under a name that is free (capability_labels) and are bound to the contract's `capabilities` key \u2014 the reader maps column to key through this spec, so the payload shape is unchanged. RESOLVED (0027): per-item provenance now has its own column (item_provenance TEXT, bound to the payload key `provenance`). The envelope column stays sys:provenance \u2014 the Backend Schema wins on table shape and the Surface Specification wins on payload shape, and they are two different facts: who produced the SECTION, and how THIS row was arrived at. Collapsing them dropped the per-item value at promote and left a page unable to express a mix. TEXT rather than provenance_t because the declared vocabularies differ per surface; CG-09 polices them at submit, where a bad value is refused instead of aborting a promotion."
         },
         {
           "section": "stairstep",
@@ -3867,6 +3957,18 @@
               "nullable": true
             },
             {
+              "column": "capped_subcap_ids",
+              "source": "item:capped_subcap_ids",
+              "jsonb": true,
+              "nullable": true
+            },
+            {
+              "column": "item_provenance",
+              "source": "item:provenance",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
               "column": "run_id",
               "source": "sys:run_id",
               "jsonb": false,
@@ -3933,7 +4035,7 @@
               "nullable": true
             }
           ],
-          "notes": "C2. severity and status are the table's only two field NOT NULLs ('never emit a NULL status' \u2014 DDL enforces). CONTRACT FIELDS WITH NO COLUMN, both flagged for adjudication: (1) capped_subcap_ids[] \u2014 the skill-REISSUED addition the contract adopted ('an issue is only interesting here because it CAPS something') has no column on context_issue_register and no JSONB carrier, so it is DROPPED at promote; the same data survives inside context_regulatory_standing.enforcement_actions JSONB for enforcement-sourced matters only. Either 0008 needs a capped_subcap_ids TEXT[] (expand-migrate) or the contract note should say it is validate-only. (2) verified_absent (section-level boolean) has no column; absence renders from the envelope empty_state (whose doc carries sources_searched), which IS written \u2014 acceptable, but the boolean itself is not persisted. DEVIATIONS from the generic envelope-source rule, both because the C2 item shape explicitly carries the field (same pattern the r_layer rule prescribes): e_ids is item:e_ids (per-issue citations; see timeline note for the DDL precedent), and provenance is item:provenance \u2014 the C2 item carries provenance with the same name and enum domain (provenance_t = analyst|derived|producer) and would otherwise be lost; the submission-level provenance stays recoverable from the submissions row. If the verifier prefers uniform sys:provenance, per-issue provenance must be declared validate-only. Ordering of rows follows the list as sent (Gantt renders in send order); BIGSERIAL preserves it."
+          "notes": "C2. severity and status are the table's only two field NOT NULLs ('never emit a NULL status' \u2014 DDL enforces). CONTRACT FIELDS WITH NO COLUMN, both flagged for adjudication: (1) capped_subcap_ids[] \u2014 the skill-REISSUED addition the contract adopted ('an issue is only interesting here because it CAPS something') has no column on context_issue_register and no JSONB carrier, so it is DROPPED at promote; the same data survives inside context_regulatory_standing.enforcement_actions JSONB for enforcement-sourced matters only. Either 0008 needs a capped_subcap_ids TEXT[] (expand-migrate) or the contract note should say it is validate-only. (2) verified_absent (section-level boolean) has no column; absence renders from the envelope empty_state (whose doc carries sources_searched), which IS written \u2014 acceptable, but the boolean itself is not persisted. DEVIATIONS from the generic envelope-source rule, both because the C2 item shape explicitly carries the field (same pattern the r_layer rule prescribes): e_ids is item:e_ids (per-issue citations; see timeline note for the DDL precedent), and provenance is item:provenance \u2014 the C2 item carries provenance with the same name and enum domain (provenance_t = analyst|derived|producer) and would otherwise be lost; the submission-level provenance stays recoverable from the submissions row. If the verifier prefers uniform sys:provenance, per-issue provenance must be declared validate-only. Ordering of rows follows the list as sent (Gantt renders in send order); BIGSERIAL preserves it. RESOLVED (0027): capped_subcap_ids[] now has a JSONB column and is written from item:capped_subcap_ids \u2014 the item shape's element is {subcap_id, cap_level}, an object, so JSONB and not TEXT[]. NOTE the note above was stale about provenance: the column is sys:provenance (the submission stamp the serving envelope reads), NOT item:provenance. Per-issue provenance is therefore validate-only and recorded as such in the item-level census register. RESOLVED (0027): per-item provenance now has its own column (item_provenance TEXT, bound to the payload key `provenance`). The envelope column stays sys:provenance \u2014 the Backend Schema wins on table shape and the Surface Specification wins on payload shape, and they are two different facts: who produced the SECTION, and how THIS row was arrived at. Collapsing them dropped the per-item value at promote and left a page unable to express a mix. TEXT rather than provenance_t because the declared vocabularies differ per surface; CG-09 polices them at submit, where a bad value is refused instead of aborting a promotion."
         },
         {
           "section": "regulatory_standing",
@@ -4382,6 +4484,12 @@
               "nullable": true
             },
             {
+              "column": "as_of",
+              "source": "item:as_of",
+              "jsonb": false,
+              "nullable": true
+            },
+            {
               "column": "run_id",
               "source": "sys:run_id",
               "jsonb": false,
@@ -4454,7 +4562,7 @@
               "nullable": true
             }
           ],
-          "notes": "NAME MISMATCH: contract item key is `product`, column is `name` \u2014 the contract's own _notes record that the TRD representative contract called this field `name` while the Surface Spec/skill REISSUED prompt use `product` (vendor and product are separate fields; product wins in the payload); the DDL kept the TRD spelling `name`, so the writer maps item.product -> name. NO-ITEM-KEY COLUMN: `is_primary_gap` is not in the item shape \u2014 it is carried per layer in the section-level `layers[]` rollup ({layer, pillar_id, detected, expected, is_primary_gap}); the writer fills each row by matching item.layer to its layers[] entry and copying that entry's is_primary_gap flag (matches the \u00a706 DDL comment on techstack_items placing the flag per row). E_IDS: on this item-grain table the row-level `e_ids` takes each item's own e_ids[] (the contract requires every item to cite the evidence placing it in the estate \u2014 an uncitable item goes to dropped[]), not the section-envelope union; same item-over-section rule as r_layer. CONTRACT FIELDS WITH NO COLUMN: (a) item key `as_of` has no column and this table has no JSONB payload carrier \u2014 it is validated in the payload but not persisted, flag if row-level dating is later needed; (b) section field `layers[]` is not stored beyond the per-row is_primary_gap derivation \u2014 the T2 landscape strip and the four layer cards recompute detected-of-expected counts from this register at read (invariant 8, and insights_landscape.summary's comment says counts are NEVER stored); (c) section field `dropped[]` ({candidate, reason}) has no column \u2014 not persisted in the serving tier by this writer; (d) optional `compliance_attestations[]` (plain strings) has no column \u2014 not persisted here. NARRATIVE_THREAD: the techstack section contract declares no narrative_thread field; the skill puts the page-level thread on each page's lead section and techstack has exactly one section, so if the payload carries one it lands here via the envelope path \u2014 NULL is correct when absent. R_LAYER: items do not carry r_layer, so section-level (nullable, NULL when the section has none). STATUS is the table's only payload NOT NULL \u2014 CONFIRMED|INFERRED|CLAIMED|ABSENT required per row because the landscape strip recomputes its four counts from this column. UNIQUENESS: 0008 creates UNIQUE INDEX techstack_items_ts_uq ON (run_id, ts_id) \u2014 ts_id is agent-minted (TS-nnn) and must be unique within the run, so delete-then-insert ordering inside the promote transaction matters. GENERATED columns: none on this table. DROPPED (0023): section-grain on an item-grain table, repeated per row and read once \u2014 the same shape overview_firmographics uses for sub_vertical_undefined. The sibling required field `layers` is deliberately NOT bound: every ingredient of the rollup is on these item rows, so it is recomputed at read (invariant 8) and a column would be a second answer that could disagree with the rows beneath it."
+          "notes": "NAME MISMATCH: contract item key is `product`, column is `name` \u2014 the contract's own _notes record that the TRD representative contract called this field `name` while the Surface Spec/skill REISSUED prompt use `product` (vendor and product are separate fields; product wins in the payload); the DDL kept the TRD spelling `name`, so the writer maps item.product -> name. NO-ITEM-KEY COLUMN: `is_primary_gap` is not in the item shape \u2014 it is carried per layer in the section-level `layers[]` rollup ({layer, pillar_id, detected, expected, is_primary_gap}); the writer fills each row by matching item.layer to its layers[] entry and copying that entry's is_primary_gap flag (matches the \u00a706 DDL comment on techstack_items placing the flag per row). E_IDS: on this item-grain table the row-level `e_ids` takes each item's own e_ids[] (the contract requires every item to cite the evidence placing it in the estate \u2014 an uncitable item goes to dropped[]), not the section-envelope union; same item-over-section rule as r_layer. CONTRACT FIELDS WITH NO COLUMN: (a) item key `as_of` has no column and this table has no JSONB payload carrier \u2014 it is validated in the payload but not persisted, flag if row-level dating is later needed; (b) section field `layers[]` is not stored beyond the per-row is_primary_gap derivation \u2014 the T2 landscape strip and the four layer cards recompute detected-of-expected counts from this register at read (invariant 8, and insights_landscape.summary's comment says counts are NEVER stored); (c) section field `dropped[]` ({candidate, reason}) has no column \u2014 not persisted in the serving tier by this writer; (d) optional `compliance_attestations[]` (plain strings) has no column \u2014 not persisted here. NARRATIVE_THREAD: the techstack section contract declares no narrative_thread field; the skill puts the page-level thread on each page's lead section and techstack has exactly one section, so if the payload carries one it lands here via the envelope path \u2014 NULL is correct when absent. R_LAYER: items do not carry r_layer, so section-level (nullable, NULL when the section has none). STATUS is the table's only payload NOT NULL \u2014 CONFIRMED|INFERRED|CLAIMED|ABSENT required per row because the landscape strip recomputes its four counts from this column. UNIQUENESS: 0008 creates UNIQUE INDEX techstack_items_ts_uq ON (run_id, ts_id) \u2014 ts_id is agent-minted (TS-nnn) and must be unique within the run, so delete-then-insert ordering inside the promote transaction matters. GENERATED columns: none on this table. DROPPED (0023): section-grain on an item-grain table, repeated per row and read once \u2014 the same shape overview_firmographics uses for sub_vertical_undefined. The sibling required field `layers` is deliberately NOT bound: every ingredient of the rollup is on these item rows, so it is recomputed at read (invariant 8) and a column would be a second answer that could disagree with the rows beneath it. RESOLVED (0027): as_of has a DATE column (and an enum_fields date_fields entry, so month and quarter precision resolve at promote rather than aborting the transaction). 'A technographic claim about a named institution is a research finding: without source_url and as_of it is not one.'"
         }
       ]
     }

@@ -232,6 +232,63 @@ _CONTRACT_VOCABULARIES = {
                      "clusters on. The consequence sentence belongs in "
                      "`maturity_effect`, not here"),
         },
+        # Measured on a served run: 4 of 11 events carried a kind outside the
+        # eight — TECHNOLOGY (x3) and CAPABILITY (x1). The column is plain TEXT
+        # and nothing else looked, so those four events matched no D5 filter
+        # and were invisible on a page that rendered them.
+        "events[*].kind": {
+            "name": "kind",
+            "values": ("PLATFORM", "LEADERSHIP", "M&A", "REGULATORY",
+                       "CHANNEL", "DATA", "SECURITY", "STRATEGY"),
+            "note": ("the event's class, which D5 filters on. A near-miss "
+                     "('TECHNOLOGY' for PLATFORM, 'CAPABILITY' for DATA) is "
+                     "not a synonym — it is an event no filter can reach"),
+        },
+        "events[*].maturity_effect": {
+            "name": "maturity_effect",
+            "values": ("ADVANCED", "CONSTRAINED", "NEUTRAL"),
+            "note": ("the effect on today's assessed position; the clause of "
+                     "reasoning goes in `body`, not in this field"),
+        },
+        # Served value: 'strategy-first, substrate-later' — prose against a
+        # five-word vocabulary, on a TEXT column with no enum behind it.
+        "arc_shape": {
+            "name": "arc_shape",
+            "values": ("STEADY_INVESTMENT", "STOP_START", "POST_EVENT_CATCHUP",
+                       "LEGACY_ANCHORED", "RECENT_ACCELERATION"),
+            "note": ("the shape of the sequence, one of five. A coined phrase "
+                     "renders as an unrecognised badge; the sentence of "
+                     "evidence belongs in `storyline`"),
+        },
+    },
+    # Per-item provenance, now that it HAS a column (0027). The vocabularies
+    # differ per surface because the contract states different ones, which is
+    # why the column is TEXT — so CG-09 is the only thing standing between a
+    # coined value and a badge nobody can read.
+    "platform.recommendations": {
+        "recommendations[*].provenance": {
+            "name": "provenance",
+            "values": ("ANALYST", "DERIVED"),
+            "note": ("how THIS recommendation was arrived at — required, never "
+                     "blank. Distinct from the section envelope's provenance, "
+                     "which says who produced the section"),
+        },
+    },
+    "platform.starters": {
+        "starters[*].provenance": {
+            "name": "provenance",
+            "values": ("TEMPLATE_FILL", "ANALYST"),
+            "note": ("and RENDER it — a rule-composed starter labelled as "
+                     "analyst work misrepresents how it was written"),
+        },
+    },
+    "platform.roadmap": {
+        "phases[*].provenance": {
+            "name": "provenance",
+            "values": ("analyst", "derived"),
+            "note": ("if the package states the phasing use it and label it "
+                     "analyst; derive only where it does not"),
+        },
     },
     "techstack.techstack": {
         "items[*].status": {

@@ -1876,8 +1876,21 @@ function FinancialTrajectoryD1({
   }, counts) : null)));
 }
 
-/* ── Thought leadership ─────────────────────────────────────────── */
+/* ── Thought leadership ───────────────────────────────────────────
+   Three to five entries, not three. The grid was `g3` — three hard columns —
+   so a fourth and fifth entry landed in a ragged second row of two, which is
+   what made three look like the cap even though nothing here enforced one.
+   `auto-fit` with a readable floor lays 3, 4 or 5 out the same way, and the
+   heading counts what arrived rather than implying a window.
+
+   WHICH entries are chosen, and how they are weighted towards positions
+   Zennify can act on, is the producer's judgement and stays there. This
+   renders what the run promoted, in the order it promoted it. */
 function ThoughtLeadershipPanel() {
+  const {
+    openEvidence,
+    openSubcap
+  } = useApp();
   const entries = DMA.THOUGHT_LEADERSHIP || [];
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
@@ -1900,7 +1913,7 @@ function ThoughtLeadershipPanel() {
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, entries.length ? "From executives - recent 6 months" : "Nothing to show")), !entries.length ? /*#__PURE__*/React.createElement("div", {
+  }, entries.length ? `${entries.length} named executive${entries.length === 1 ? "" : "s"}, in their own words` : "Nothing to show")), !entries.length ? /*#__PURE__*/React.createElement("div", {
     className: "card-body"
   }, /*#__PURE__*/React.createElement(SectionEmpty, {
     section: "overview.thought_leadership",
@@ -1912,65 +1925,128 @@ function ThoughtLeadershipPanel() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "g3"
-  }, entries.map(tl => /*#__PURE__*/React.createElement("div", {
-    key: tl.id,
-    className: "card-tile",
-    style: {
-      padding: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      marginBottom: 6
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "b b-purple"
-  }, String(tl.kind || tl.type || "SIGNAL").toUpperCase()), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)"
-    }
-  }, fmtDate(tl.date))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13,
-      fontWeight: 600,
-      lineHeight: 1.4,
-      marginBottom: 6
-    }
-  }, tl.title), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-body)",
-      lineHeight: 1.55,
-      fontStyle: "italic"
-    }
-  }, "\"", tl.excerpt, "\""), /*#__PURE__*/React.createElement("div", {
-    className: "sep",
-    style: {
-      margin: "8px 0"
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)"
-    }
-  }, /*#__PURE__*/React.createElement("span", null, tl.author), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), tl.url ? /*#__PURE__*/React.createElement("a", {
-    href: `https://${tl.url}`,
-    target: "_blank",
-    rel: "noreferrer",
-    style: {
-      color: "var(--z-mid)",
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 3
-    }
-  }, "Open ", /*#__PURE__*/React.createElement(Icon, {
-    name: "external",
-    size: 10
-  })) : null))))));
+  }, entries.map(tl => {
+    /* `alignment` is the field the contract calls the most valuable
+       thing on this card — a CONTRADICTS entry is the one that must
+       never be filtered out — and it was adapted and never rendered.
+       An executive quote that argues AGAINST the assessment reads as
+       corroboration when its stance is invisible. */
+    const al = tl.alignment && typeof tl.alignment === "object" ? tl.alignment : null;
+    const stance = al ? String(al.value || "").toUpperCase() : null;
+    const stanceTone = stance === "CONTRADICTS" ? "b-org" : stance === "EXTENDS" ? "b-purple" : "b-teal";
+    return /*#__PURE__*/React.createElement("div", {
+      key: tl.id,
+      className: "card-tile",
+      style: {
+        padding: 14
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        marginBottom: 6,
+        gap: 6,
+        flexWrap: "wrap"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "b b-purple"
+    }, String(tl.kind || tl.type || "SIGNAL").toUpperCase()), stance ? /*#__PURE__*/React.createElement("span", {
+      className: `b ${stanceTone}`,
+      title: al.clause || ""
+    }, stance) : null, /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)"
+      }
+    }, fmtDate(tl.date))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        fontWeight: 600,
+        lineHeight: 1.4,
+        marginBottom: 6
+      }
+    }, tl.title), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-body)",
+        lineHeight: 1.55,
+        fontStyle: "italic"
+      }
+    }, "\"", tl.excerpt, "\""), al && al.clause ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-muted)",
+        lineHeight: 1.5,
+        marginTop: 6
+      }
+    }, al.clause) : null, (tl.subcaps || []).length || (tl.evidence || []).length ? /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 4,
+        flexWrap: "wrap",
+        marginTop: 8
+      }
+    }, (tl.subcaps || []).map(sid => /*#__PURE__*/React.createElement("button", {
+      key: sid,
+      className: "chip f-mono",
+      style: {
+        fontSize: 9,
+        cursor: "pointer",
+        border: 0
+      },
+      title: `Open ${sid} in the heatmap`,
+      onClick: () => openSubcap && openSubcap(sid)
+    }, sid)), (tl.evidence || []).map(eid => {
+      const e = DMA.getEvidence(eid);
+      return e ? /*#__PURE__*/React.createElement("button", {
+        key: eid,
+        className: `tier-chip tier-${e.tier}`,
+        style: {
+          cursor: "pointer",
+          border: 0
+        },
+        title: `${e.title || eid} · ${e.source_pretty || ""}`,
+        onClick: () => openEvidence && openEvidence(eid)
+      }, eid) : /*#__PURE__*/React.createElement("span", {
+        key: eid,
+        className: "chip muted",
+        title: "cited id - not in this run's served evidence"
+      }, eid);
+    })) : null, /*#__PURE__*/React.createElement("div", {
+      className: "sep",
+      style: {
+        margin: "8px 0"
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        minWidth: 0
+      }
+    }, tl.author), /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), tl.url ? /*#__PURE__*/React.createElement("a", {
+      href: `https://${tl.url}`,
+      target: "_blank",
+      rel: "noreferrer",
+      style: {
+        color: "var(--z-mid)",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 3,
+        whiteSpace: "nowrap",
+        flexShrink: 0
+      }
+    }, "Open ", /*#__PURE__*/React.createElement(Icon, {
+      name: "external",
+      size: 10
+    })) : null));
+  }))));
 }
 function Row({
   k,

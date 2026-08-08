@@ -8,6 +8,7 @@
   discipline).
 - Fixing one page re-promotes six pages from five retained staged rows.
 """
+import json
 import os
 import sys
 from pathlib import Path
@@ -31,6 +32,10 @@ HOST = DSN.split("@")[1].split(":")[0] if "@" in DSN else "localhost"
 
 ENV = {"produced_at": "2026-08-04T12:00:00Z", "producer_version": "test@1",
        "e_ids": [], "internal_only": []}
+STAMPS = {"run_id": "11111111-1111-1111-1111-111111111111",
+          "entity_id": "22222222-2222-2222-2222-222222222222",
+          "promoted_at": "2026-08-08T00:00:00+00:00",
+          "producer_version": "test@1", "provenance": "producer"}
 EMPTY = {"reason": "Walking-skeleton empty state",
          "sources_searched": ["package", "research", "enrichment"]}
 
@@ -237,6 +242,60 @@ def test_every_writer_knows_its_own_page():
     from dma_mcp.promote import writer_registry
     for (page, section), w in writer_registry():
         assert w["page"] == page and w["section"] == section
+
+
+def test_five_tiles_survive_promotion():
+    """P1 submits FIVE platform tiles and production served ONE.
+
+    `platform_story.gap_rows` was sourced from `section:platforms.0.gaps` —
+    the first tile's gap rows, out of five tiles each carrying its own
+    fit_score, gaps[] and story_md. Everything from rank 2 down was dropped
+    inside the promote transaction, every gate passed, and a reader clicking
+    the other four platforms found them empty ("when I click on each
+    platform, not all surfaces are enriched for each platform").
+
+    Asserted as the round trip that matters: what promote WRITES, read back
+    by the serving projection, must still be five tiles with their own
+    stories and their own gaps.
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "apps" / "api"))
+    from dma_api.serving_spec import assemble, readers
+    from dma_mcp.promote import _value
+
+    tiles = [{"platform": f"Platform {n}", "rank": n,
+              "fit_score": 80 - n, "story_md": f"story for platform {n}",
+              "gaps": [{"subcap_id": f"P1C1.{n}.{g}", "current_score": 2.0}
+                       for g in range(1, n + 1)]}
+             for n in range(1, 6)]
+    payload = {"platforms": tiles,
+               "discarded": [{"platform": "Discarded", "reason": "r",
+                              "relevance": 0.1}],
+               "e_ids": ["E-X-001"], "internal_only": [],
+               "produced_at": "2026-08-08T00:00:00Z"}
+
+    spec = readers()[("platform", "platform_story")]
+    assert spec["grain"] == "run"
+    row = {}
+    for w in json.loads(_SPEC_PATH.read_text())["specs"]:
+        if w["page"] != "platform":
+            continue
+        writer = next(x for x in w["writers"] if x["section"] == "platform_story")
+        for c in writer["columns"]:
+            v = _value(c["source"], STAMPS, payload, None)
+            if v is ...:
+                continue
+            row[c["column"]] = (json.dumps(v) if c.get("jsonb")
+                                or isinstance(v, (dict, list)) else v)
+
+    served = assemble("platform", "platform_story", [row])["data"]
+    assert len(served["platforms"]) == 5, "promotion must not eat four tiles"
+    for n, tile in enumerate(served["platforms"], start=1):
+        assert tile["story_md"] == f"story for platform {n}"
+        assert len(tile["gaps"]) == n
+        assert tile["fit_score"] == 80 - n
+    # and the rank-1 story is still in its own column, for readers that
+    # predate the change — the same string, not a second version of it
+    assert row["story"] == "story for platform 1"
 
 
 def test_alert_status_is_initialised_at_promote():

@@ -347,6 +347,11 @@ function InsightModal() {
   // stored — the chip states what was RECORDED, not what was clicked.
   const [decisions, setDecisions] = useState({});
   const [deciding, setDeciding] = useState(false);
+  /* Why a verdict could not be recorded, in the API's own words. A refusal
+     printed as "(403)" tells a reviewer nothing and makes a working control
+     look broken; the API states its reason and this carries it, the way the
+     answer panel's slow path names what it is waiting for. */
+  const [decideError, setDecideError] = useState(null);
   useEffect(() => {
     if (insightModal) setTab("detail");
   }, [insightModal]);
@@ -359,16 +364,23 @@ function InsightModal() {
   /* Accept / Reject → the annotation write path. Annotations and alert actions
      are the ONLY writes this app's API accepts, both behind an Idempotency-Key
      (invariant 2) — this is that write, from the reviewer's seat, through the
-     same `/api/entity/…` BFF the reads use (utils.jsx). The route is another
-     workstream's to build, so until it deploys a 404/501 is an EXPECTED state:
-     it gets said in a toast, never left as an unhandled rejection. */
+     same `/api/entity/…` BFF the reads use (utils.jsx).
+      The anchor is `insight_card` and the anchor id is this card's ic_id. That
+     is the right anchor for a verdict on the REASONING TRACE too: the trace is
+     the card's own `r_layer`, promoted with it and anchored to it, so a
+     verdict on the trace is a verdict on the card. No anchor kind is invented
+     and the API is not widened. (The DDL's enum also lists `recommendation`,
+     but no endpoint implements it, so the recommendation drawer's own trace
+     carries no verdict pair — see the note there.) */
   const entityId = ((route && route.path || "").match(/^\/clients\/([^/]+)/) || [])[1] || null;
   const decide = action => {
     if (!entityId) {
+      setDecideError("No entity in this route, so the verdict has nowhere to anchor.");
       pushToast("No entity in the route - the decision has nowhere to be recorded", "warn");
       return;
     }
     setDeciding(true);
+    setDecideError(null);
     fetch(`/api/entity/${encodeURIComponent(entityId)}/insights/${encodeURIComponent(ic.id)}/annotation`, {
       method: "POST",
       headers: {
@@ -378,18 +390,25 @@ function InsightModal() {
       body: JSON.stringify({
         action
       })
-    }).then(r => {
-      if (r.status === 404 || r.status === 501) {
-        pushToast("Annotation write path is not deployed yet", "warn");
-        return null;
+    }).then(r => r.text().then(text => {
+      let body = null;
+      try {
+        body = text ? JSON.parse(text) : {};
+      } catch (e) {
+        body = {};
       }
       if (!r.ok) {
-        pushToast(`Annotation write failed (${r.status})`, "warn");
+        // The API answers `{error, detail}` and both are worth showing: the
+        // code is what a reader repeats to whoever can fix it, the detail is
+        // why. A 404 on this path means the route is not deployed; a 403
+        // `unknown_actor` means the signed-in email has no row in `users`.
+        const why = body && (body.detail || body.error) ? `${body.detail || body.error}` : `the API answered ${r.status}`;
+        setDecideError(why);
+        pushToast(`Verdict not recorded - ${why}`, "warn");
         return null;
       }
-      // An empty or non-JSON 2xx body still means the write landed.
-      return r.json().catch(() => ({}));
-    }).then(body => {
+      return body || {};
+    })).then(body => {
       if (!body) return;
       const said = String(body.action || body.status || action).toUpperCase();
       const verdict = said.indexOf("REJECT") === 0 ? "REJECTED" : "ACCEPTED";
@@ -398,7 +417,10 @@ function InsightModal() {
         [ic.id]: verdict
       }));
       pushToast(`${ic.id} ${verdict.toLowerCase()} — recorded`, "success");
-    }).catch(() => pushToast("Annotation write failed - the API was unreachable", "warn")).finally(() => setDeciding(false));
+    }).catch(() => {
+      setDecideError("The API was unreachable.");
+      pushToast("Verdict not recorded - the API was unreachable", "warn");
+    }).finally(() => setDeciding(false));
   };
   // The card's own platform chip, rendered as the run states it. Resolving it
   // through DMA.getPlatform read the static five-vendor catalogue — which knows
@@ -539,7 +561,9 @@ function InsightModal() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
-      marginBottom: 8
+      marginBottom: 8,
+      flexWrap: "wrap",
+      gap: 6
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -552,8 +576,12 @@ function InsightModal() {
   }, "Reasoning trace"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), ic.r_layer.verdict ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-purple"
-  }, ic.r_layer.verdict) : null, ic.r_layer.confidence ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-purple",
+    style: {
+      cursor: "default"
+    },
+    title: "the producer's own verdict on its hypothesis, promoted with the card \u2014 not a control"
+  }, "Self-check \xB7 ", ic.r_layer.verdict) : null, ic.r_layer.confidence ? /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
   }, ic.r_layer.confidence) : null), [["Hypothesis", ic.r_layer.hypothesis], ["Counter-evidence", ic.r_layer.counter], ["Domain test", ic.r_layer.domain_test]].map(([k, v]) => v ? /*#__PURE__*/React.createElement("div", {
     key: k,
@@ -575,7 +603,89 @@ function InsightModal() {
       color: "var(--z-body)",
       lineHeight: 1.55
     }
-  }, v)) : null)) : null, (ic.affects || []).length ? /*#__PURE__*/React.createElement("div", {
+  }, v)) : null)) : null, audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "var(--z-bg)",
+      border: "1px solid var(--z-sep)",
+      borderRadius: 8,
+      padding: "12px 14px",
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      minWidth: 0,
+      flex: "1 1 200px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: ".1em",
+      color: "var(--z-muted)",
+      textTransform: "uppercase"
+    }
+  }, "Your verdict"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-body)",
+      marginTop: 3,
+      lineHeight: 1.5
+    }
+  }, ic.r_layer ? "Does this reasoning hold for this client?" : "Does this card hold for this client?")), /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), decided ? /*#__PURE__*/React.createElement("span", {
+    className: `b ${decided === "ACCEPTED" ? "b-teal" : "b-below"}`,
+    style: {
+      flexShrink: 0
+    }
+  }, decided) : null, /*#__PURE__*/React.createElement("button", {
+    className: `btn ${decided === "ACCEPTED" ? "btn-primary" : "btn-secondary"}`,
+    disabled: deciding,
+    style: {
+      flexShrink: 0
+    },
+    title: "Record an accept against this card, on this run",
+    onClick: () => decide("ACCEPT")
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "check",
+    size: 13
+  }), " Accept"), /*#__PURE__*/React.createElement("button", {
+    className: `btn ${decided === "REJECTED" ? "btn-primary" : "btn-secondary"}`,
+    disabled: deciding,
+    style: {
+      flexShrink: 0
+    },
+    title: "Record a reject against this card, on this run",
+    onClick: () => decide("REJECT")
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "x",
+    size: 13
+  }), " Reject")), decideError ? /*#__PURE__*/React.createElement("div", {
+    className: "co co-org",
+    style: {
+      marginTop: 10
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "warn",
+    size: 14
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "co-title"
+  }, "Not recorded"), /*#__PURE__*/React.createElement("div", {
+    className: "co-body"
+  }, decideError))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)",
+      marginTop: 8,
+      lineHeight: 1.5
+    }
+  }, "Stored as an annotation against ", ic.id, " on this run, attributed to the signed-in reviewer. Nothing in this app reads verdicts back yet, so it is a log rather than a loop.")) : null, (ic.affects || []).length ? /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--z-lav)",
       borderRadius: 8,
@@ -961,21 +1071,9 @@ function InsightModal() {
       gap: 8,
       alignItems: "center"
     }
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-secondary",
-    disabled: deciding,
-    onClick: () => decide("ACCEPT")
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "check",
-    size: 13
-  }), " Accept"), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-secondary",
-    disabled: deciding,
-    onClick: () => decide("REJECT")
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "x",
-    size: 13
-  }), " Reject"), /*#__PURE__*/React.createElement("button", {
+  }, decided ? /*#__PURE__*/React.createElement("span", {
+    className: `b ${decided === "ACCEPTED" ? "b-teal" : "b-below"}`
+  }, decided) : null, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-primary",
     onClick: closeInsight
   }, "Close")))));
@@ -3654,8 +3752,12 @@ function RecommendationModal() {
   }, "Reasoning trace"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), r.r_layer.verdict ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-purple"
-  }, r.r_layer.verdict) : null), [["Hypothesis", r.r_layer.hypothesis], ["Counter-evidence", r.r_layer.counter], ["Domain test", r.r_layer.domain_test]].map(([k, v]) => v ? /*#__PURE__*/React.createElement("div", {
+    className: "b b-purple",
+    style: {
+      cursor: "default"
+    },
+    title: "the producer's own verdict on its hypothesis, promoted with the recommendation \u2014 not a control"
+  }, "Self-check \xB7 ", r.r_layer.verdict) : null), [["Hypothesis", r.r_layer.hypothesis], ["Counter-evidence", r.r_layer.counter], ["Domain test", r.r_layer.domain_test]].map(([k, v]) => v ? /*#__PURE__*/React.createElement("div", {
     key: k,
     style: {
       marginBottom: 8

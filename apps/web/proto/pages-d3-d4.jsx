@@ -1234,7 +1234,12 @@ function ClientPlatform({ entity, run }) {
               <Icon name="filter" size={14} />
               <div style={{ fontSize: 13, fontWeight: 600 }}>Considered and set aside · {discarded.length}</div>
               <span className="spacer" />
-              <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}>why the run did not lead with these</span>
+              {/* The one panel on this page that CANNOT be scoped to a tile,
+                  and it says so rather than appearing to ignore the click:
+                  a discarded platform belongs to no promoted platform's area,
+                  which is precisely what discarding it means. */}
+              <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}>
+                why the run did not lead with these · this list is the run's, not {selKey || "any one platform"}'s</span>
               <Icon name={showDiscarded ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-muted)" }} />
             </div>
           </button>
@@ -1260,11 +1265,16 @@ function ClientPlatform({ entity, run }) {
         </div>
       ) : null}
 
-      {/* ── Stair-step ladder ─────────────────────────────────────── */}
-      <StairstepCurve entity={entity} />
+      {/* ── Stair-step ladder ───────────────────────────────────────
+          Both of these take the selection now. They were the two panels a
+          tile click left untouched — measured: clicking each of the four
+          tiles changed the gap table, the readiness rail, the recommendation
+          list and the starter order, and left the ladder and the roadmap
+          byte-identical. */}
+      <StairstepCurve entity={entity} selKey={selKey} area={area} />
 
       {/* ── Transformation Roadmap ───────────────────────────────── */}
-      <TransformationRoadmap entity={entity} />
+      <TransformationRoadmap entity={entity} selKey={selKey} area={area} />
     </div>
   );
 }
@@ -1299,7 +1309,7 @@ function wrapSvgLabel(text, maxChars, maxLines) {
   return kept;
 }
 
-function StairstepCurve({ entity }) {
+function StairstepCurve({ entity, selKey, area }) {
   // The default cluster key was hardcoded "P4-data", so any run whose ladder
   // does not carry that theme threw on C.label and blanked the whole lower
   // half of the platform page — the missing maturity curve and roadmap.
@@ -1357,6 +1367,21 @@ function StairstepCurve({ entity }) {
   // The rung the run marks as the current position (1-based level).
   const currentIdx = steps.findIndex(s => Number(s.m) === Number(C.current));
 
+  /* Which rungs the SELECTED platform climbs. Every panel above this one
+     changes when a tile is clicked and this card did not, which is the whole
+     of "not all surfaces are enriched for each platform": the ladder already
+     computed `via` per rung and then ignored the selection.
+
+     Marked, never filtered. The rung join is DERIVED (see the scope note at
+     the top of this file), and a ladder that dropped the rungs another
+     platform leads would break the one thing a staircase means — that the
+     rungs are in order and there are no gaps in it. So this platform's rungs
+     are marked and counted, and the rest stay where they are. */
+  const viaCache = steps.map(viaOf);
+  const minesIdx = selKey ? viaCache.map((v, i) => (v && v.platform === selKey ? i : -1))
+                                     .filter(i => i >= 0) : [];
+  const placed = viaCache.filter(Boolean).length;
+
   return (
     <div className="card" style={{ marginBottom: 16 }}>
       {/* wrap: with several cluster toggles the strip overflowed the card on
@@ -1366,10 +1391,25 @@ function StairstepCurve({ entity }) {
           <Icon name="stairs" size={14} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600 }}>Stair-step ladder · {C.label}</div>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>
+            Stair-step ladder · {C.label}
+            {selKey ? <span style={{ color: "var(--z-muted)", fontWeight: 400 }}> · {selKey}</span> : null}
+          </div>
           <div style={{ fontSize: 11, color: "var(--z-muted)" }}>
             {n} rung{n === 1 ? "" : "s"} · where {entity.name} stands today, and what each rung requires
           </div>
+          {/* What the selection did to THIS card, in the run's own counts. A
+              platform that climbs none of these rungs says so rather than
+              leaving the reader to conclude the card ignored the click. */}
+          {selKey ? (
+            <div style={{ fontSize: 10.5, color: minesIdx.length ? "var(--z-mid)" : "var(--z-muted)", marginTop: 2, lineHeight: 1.45 }}>
+              {minesIdx.length
+                ? `${minesIdx.length} of ${n} rungs are climbed with ${selKey}${area ? ` (${area})` : ""} — marked below`
+                : (placed
+                    ? `No rung on this ladder is climbed with ${selKey}. ${placed} of ${n} resolve to another promoted platform, and all ${n} stay in sequence.`
+                    : `This run files none of these rungs' cells under an L3 area, so no rung can be attributed to ${selKey} or to any other platform.`)}
+            </div>
+          ) : null}
         </div>
         {keys.length > 1 ? (
           <div className="toggle-row">
@@ -1405,7 +1445,12 @@ function StairstepCurve({ entity }) {
               const h = H - padB - y;
               const color = RUNG_COLORS[i % RUNG_COLORS.length];
               const lines = wrapSvgLabel(pfText(s.label), charsPerLine, 2);
-              const via = viaOf(s);
+              const via = viaCache[i];
+              // This platform's rungs keep full weight; the others recede.
+              // Nothing is removed — a staircase with a rung missing is a
+              // different claim about the sequence.
+              const mine = !!(selKey && via && via.platform === selKey);
+              const dim = !!(selKey && minesIdx.length && !mine);
               // Cell count and effort only. The blocking findings are chips in
               // the list beside the chart: inside the rung they ran past both
               // edges of the rectangle, because a centred SVG string cannot be
@@ -1424,9 +1469,13 @@ function StairstepCurve({ entity }) {
               const metaFits = meta && (top + (viaFits ? 12 : 0) + 12 <= H - padB - 6);
               const clip = (t, max) => (t.length > max ? `${t.slice(0, max - 1)}…` : t);
               return (
-                <g key={i}>
+                <g key={i} opacity={dim ? 0.42 : 1}>
                   <title>{`Step ${s.m}: ${pfText(s.label) || ""}${via ? ` · via ${via.platform} (${via.area})` : ""}`}</title>
                   <rect x={x} y={y} width={rungW} height={h} fill={color} rx="6" ry="6" />
+                  {mine ? (
+                    <rect x={x - 2} y={y - 2} width={rungW + 4} height={h + 2} rx="8" ry="8"
+                          fill="none" stroke="var(--z-org)" strokeWidth="2" />
+                  ) : null}
                   <circle cx={x + 16} cy={y - 14} r="14" fill="#fff" stroke={color} strokeWidth="2.5" />
                   <text x={x + 16} y={y - 9} fontSize="13" fontWeight="700" fill={color} textAnchor="middle">{s.m}</text>
                   {lines.map((ln, k) => (
@@ -1477,12 +1526,20 @@ function StairstepCurve({ entity }) {
             floating in a band of empty card. */}
         <div style={{ flex: "1 1 280px", minWidth: 0, maxWidth: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
           {steps.map((s, i) => {
-            const via = viaOf(s);
+            const via = viaCache[i];
+            const mine = !!(selKey && via && via.platform === selKey);
+            const dim = !!(selKey && minesIdx.length && !mine);
             return (
-              <div key={i} style={{ padding: "10px 12px", background: i === currentIdx ? "var(--z-ice)" : "var(--z-bg)", borderRadius: 8, border: i === currentIdx ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)" }}>
+              <div key={i} style={{ padding: "10px 12px", background: i === currentIdx ? "var(--z-ice)" : "var(--z-bg)", borderRadius: 8,
+                    border: mine ? "1px solid var(--z-org)"
+                      : i === currentIdx ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)",
+                    opacity: dim ? 0.62 : 1 }}>
                 <div className="row" style={{ marginBottom: 4, gap: 6, flexWrap: "wrap" }}>
                   <span className="b b-purple" style={{ flexShrink: 0 }}>Step {s.m}</span>
                   {i === currentIdx ? <span className="b b-teal" style={{ flexShrink: 0 }}>current</span> : null}
+                  {mine ? <span className="b b-org" style={{ flexShrink: 0 }}
+                            title={`This rung's cells are filed under ${via.area}, which ${selKey} leads on`}>
+                            this platform</span> : null}
                   {s.effort ? <span className="b b-muted" style={{ flexShrink: 0 }} title="effort band">{pfText(s.effort)}</span> : null}
                   {(s.blocking || []).map(b => <span key={b} className="b b-org" style={{ flexShrink: 0 }} title="blocking finding">{pfText(b)}</span>)}
                 </div>
@@ -1510,7 +1567,7 @@ function StairstepCurve({ entity }) {
 }
 
 /* ── Transformation Roadmap (Pattern J: phase chevrons) ─────────── */
-function TransformationRoadmap({ entity }) {
+function TransformationRoadmap({ entity, selKey, area }) {
   const { openRec, pushToast } = useApp();
   const [view, setView] = useState("chevrons"); // chevrons | impact
   const roadmap = DMA.ROADMAP || [];
@@ -1536,6 +1593,20 @@ function TransformationRoadmap({ entity }) {
   const basis = (typeof window !== "undefined" && window.DMA_ENTITY
     && window.DMA_ENTITY.roadmapBasis) || null;
 
+  /* Which of this roadmap's recommendations belong to the SELECTED platform.
+     Same join as everything else on the page — a recommendation's `l3` against
+     the L3 area the tile derives — so the roadmap answers a tile click instead
+     of being the one panel that ignores it.
+
+     Marked and counted, never filtered: a roadmap is an ORDER, and a phase
+     removed from it because the reader clicked a platform is a different plan.
+     `mine` per phase is how many of that phase's served recommendations this
+     platform leads. */
+  const isMine = (rec) => !!(area && rec && rec.l3 === area);
+  const mineCount = recs.filter(isMine).length;
+  const phaseMine = (r) => phaseRecs(r).filter(isMine).length;
+  const roadmapMine = roadmap.reduce((a, r) => a + phaseMine(r), 0);
+
   return (
     <div className="card" style={{ marginBottom: 16 }}>
       {/* wrap: title + view toggle + export exceed a narrow card; the
@@ -1545,7 +1616,10 @@ function TransformationRoadmap({ entity }) {
           <Icon name="route" size={14} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600 }}>Transformation roadmap</div>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>
+            Transformation roadmap
+            {selKey ? <span style={{ color: "var(--z-muted)", fontWeight: 400 }}> · {selKey}</span> : null}
+          </div>
           {/* Was "From Assessment Report · 3-phase sequencing aligned to the
               maturity curve above" — a sentence from no payload, hardcoded to
               three phases and claiming an alignment to the ladder that nothing
@@ -1553,6 +1627,15 @@ function TransformationRoadmap({ entity }) {
           <div style={{ fontSize: 11, color: "var(--z-muted)" }}>
             {roadmap.length} promoted phase{roadmap.length === 1 ? "" : "s"} · {roadmap.reduce((a, r) => a + (r.recs || []).length, 0)} recommendations
           </div>
+          {selKey ? (
+            <div style={{ fontSize: 10.5, color: roadmapMine ? "var(--z-mid)" : "var(--z-muted)", marginTop: 2, lineHeight: 1.45 }}>
+              {roadmapMine
+                ? `${roadmapMine} of them sit in ${area} — the area ${selKey} leads — and are marked in their phases. The rest of the plan stays in sequence.`
+                : (area
+                    ? `None of this plan's recommendations sit in ${area}, so ${selKey} leads no phase of it. Every phase is still this run's.`
+                    : `This run files none of ${selKey}'s cells under an L3 area, so no phase can be attributed to it.`)}
+            </div>
+          ) : null}
         </div>
         <div className="toggle-row">
           <button className={view === "chevrons" ? "on" : ""} onClick={() => setView("chevrons")}><Icon name="route" size={11} /> Phases</button>
@@ -1569,8 +1652,10 @@ function TransformationRoadmap({ entity }) {
           so the view is gone rather than re-dressed. What the run does state
           about movement is per-cell, and that is the Cell impact view. */}
       {view === "chevrons"
-        ? <ChevronView roadmap={roadmap} recs={recs} openRec={openRec} phaseRecs={phaseRecs} />
-        : <CellImpactView roadmap={roadmap} phaseRecs={phaseRecs} openRec={openRec} impactRows={impactRows} />}
+        ? <ChevronView roadmap={roadmap} recs={recs} openRec={openRec} phaseRecs={phaseRecs}
+                       isMine={isMine} selKey={selKey} phaseMine={phaseMine} />
+        : <CellImpactView roadmap={roadmap} phaseRecs={phaseRecs} openRec={openRec}
+                          impactRows={impactRows} isMine={isMine} selKey={selKey} />}
 
       {/* The design's rationale strip under the chevrons. `sequencing_basis`
           is the roadmap section's own answer to "why this order", stated once
@@ -1622,7 +1707,8 @@ function phaseFacts(rs) {
   return { areas, metrics, move, bases };
 }
 
-function ChevronView({ roadmap, recs, openRec, phaseRecs }) {
+function ChevronView({ roadmap, recs, openRec, phaseRecs, isMine, selKey, phaseMine }) {
+  const mineOf = isMine || (() => false);
   return (
     /* One fluid column per phase, each carrying its own chevron header AND its
        own content card. This used to be two parallel `repeat(N, 1fr)` grids —
@@ -1652,6 +1738,14 @@ function ChevronView({ roadmap, recs, openRec, phaseRecs }) {
             </div>
             <div style={{ fontSize: 10, opacity: .85, textAlign: "right", flexShrink: 0 }}>
               {(r.recs || []).length} rec{(r.recs || []).length === 1 ? "" : "s"}
+              {/* What this phase owes the selected platform, counted from the
+                  phase's own served recommendations. */}
+              {selKey && phaseMine ? (
+                <div style={{ fontSize: 9.5, opacity: .9 }}
+                     title={`${phaseMine(r)} of this phase's recommendations sit in the area ${selKey} leads`}>
+                  {phaseMine(r)} · {selKey.length > 18 ? `${selKey.slice(0, 17)}…` : selKey}
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -1703,14 +1797,18 @@ function ChevronView({ roadmap, recs, openRec, phaseRecs }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {(r.recs || []).map(rid => {
                 const rec = recs.find(x => x.id === rid);
+                // The selected platform's own rows keep a full-strength face;
+                // the rest of the phase recedes. Every row stays clickable.
+                const mine = mineOf(rec);
+                const marked = !!(selKey && mine);
                 return rec ? (
                   <button key={rid} onClick={(e) => { e.stopPropagation(); openRec(rid); }}
                     /* The title ellipsises to one line by design; without this
                        the rest of the sentence is unreachable by any means. */
-                    title={`${rec.id} · ${pfText(rec.title) || ""}`}
-                    style={{ padding: "6px 8px", background: "rgba(255,255,255,.14)", borderRadius: 5, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6, border: 0, color: "#fff", textAlign: "left", cursor: "pointer", transition: "background 120ms" }}
+                    title={`${rec.id} · ${pfText(rec.title) || ""}${marked ? ` · ${selKey} leads this` : ""}`}
+                    style={{ padding: "6px 8px", background: marked ? "rgba(255,255,255,.30)" : "rgba(255,255,255,.14)", borderRadius: 5, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6, border: marked ? "1px solid rgba(255,255,255,.85)" : "1px solid transparent", color: "#fff", textAlign: "left", cursor: "pointer", transition: "background 120ms" }}
                     onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,.22)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,.14)"}>
+                    onMouseLeave={e => e.currentTarget.style.background = marked ? "rgba(255,255,255,.30)" : "rgba(255,255,255,.14)"}>
                     <span style={{ fontSize: 10.5, fontWeight: 600, flexShrink: 0 }}>{rec.id}</span>
                     <span style={{ fontSize: 10.5, color: "rgba(255,255,255,.85)", flex: 1, minWidth: 0 }} className="txt-trunc">{pfText(rec.title)}</span>
                     <Icon name="arrow-r" size={11} />
@@ -1758,7 +1856,8 @@ function ChevronView({ roadmap, recs, openRec, phaseRecs }) {
    movement: per cell, its current score, the projected target and the delta —
    with `target_basis` stating in the producer's own words that the target is a
    projection, which is printed rather than paraphrased. */
-function CellImpactView({ roadmap, phaseRecs, openRec, impactRows }) {
+function CellImpactView({ roadmap, phaseRecs, openRec, impactRows, isMine, selKey }) {
+  const mineOf = isMine || (() => false);
   if (!impactRows) {
     return (
       <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
@@ -1788,10 +1887,15 @@ function CellImpactView({ roadmap, phaseRecs, openRec, impactRows }) {
             <div className="eyebrow" style={{ fontSize: 9.5, margin: "8px 0 6px" }}>Cells this phase moves</div>
             {rs.map(rec => (
               <div key={rec.id} style={{ marginBottom: 10 }}>
-                <button onClick={() => openRec(rec.id)} title={`${rec.id} · ${pfText(rec.title) || ""}`}
+                <button onClick={() => openRec(rec.id)}
+                  title={`${rec.id} · ${pfText(rec.title) || ""}${selKey && mineOf(rec) ? ` · ${selKey} leads this` : ""}`}
                   style={{ padding: 0, background: "none", border: 0, cursor: "pointer", textAlign: "left", display: "flex", gap: 6, alignItems: "center", width: "100%" }}>
                   <strong style={{ fontSize: 10.5, color: "var(--z-dark)", flexShrink: 0 }}>{rec.id}</strong>
                   <span style={{ fontSize: 10.5, color: "var(--z-muted)", flex: 1, minWidth: 0 }} className="txt-trunc">{pfText(rec.title)}</span>
+                  {/* The same mark the chevron view uses, so switching views
+                      does not change which rows belong to the selection. */}
+                  {selKey && mineOf(rec)
+                    ? <span className="b b-org" style={{ flexShrink: 0 }}>this platform</span> : null}
                   <Icon name="arrow-r" size={11} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
                 </button>
                 {(rec.dma_impact || []).length ? (rec.dma_impact || []).map((im, j) => {

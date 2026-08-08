@@ -2005,9 +2005,15 @@ function LiveTimeline({ data, state }) {
               <span className="b f-mono">{e.event_date || "undated"}</span>
               {e.kind ? <span className="b b-purple">{e.kind}</span> : null}
               <span className="spacer" />
-              {e.maturity_effect ? (
+              {/* Split, never printed whole — the token is the badge, the
+                  clause renders under the body. `maturity_effect` arrives as
+                  "TOKEN — one clause of reasoning" and as one string it is a
+                  paragraph inside a pill. */}
+              {(window.splitMaturityEffect
+                ? window.splitMaturityEffect(e.maturity_effect).token : null) ? (
                 <span className="b b-ph1" title="effect on assessed maturity">
-                  {e.maturity_effect}</span>) : null}
+                  {window.splitMaturityEffect(e.maturity_effect).token
+                    .replace(/_/g, " ")}</span>) : null}
               <ClaimChip label={e.claim_label} />
             </div>
             <div style={{ fontSize: 12.5, fontWeight: 600, marginTop: 4,
@@ -2015,10 +2021,14 @@ function LiveTimeline({ data, state }) {
             {e.body ? (
               <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 4,
                             lineHeight: 1.5 }}>{e.body}</div>) : null}
-            {asText(e.signal) ? (
+            {/* The reasoning half of `maturity_effect`, not the enum. The
+                enum's own word is the badge above. */}
+            {(window.splitMaturityEffect
+              ? window.splitMaturityEffect(e.maturity_effect).reason : null) ? (
               <div style={{ fontSize: 11.5, color: "var(--z-dark)", marginTop: 5,
                             paddingLeft: 9, borderLeft: "2px solid var(--z-lav)",
-                            lineHeight: 1.5 }}>{asText(e.signal)}</div>) : null}
+                            lineHeight: 1.5 }}>
+                {window.splitMaturityEffect(e.maturity_effect).reason}</div>) : null}
             <div className="row" style={{ marginTop: 5, gap: 4, flexWrap: "wrap" }}>
               {(e.capability_ids || []).map((id) => (
                 <span key={id} className="chip f-mono" style={{ fontSize: 9 }}>{id}</span>))}
@@ -2142,8 +2152,11 @@ function LiveAcquisitions({ data, state }) {
               <span className="spacer" />
               {r.closed_on ? <span className="b f-mono">{r.closed_on}</span> : null}
               {r.status ? <span className="b">{r.status}</span> : null}
-              {r.maturity_effect ? (
-                <span className="b b-ph1">{r.maturity_effect}</span>) : null}
+              {(window.splitMaturityEffect
+                ? window.splitMaturityEffect(r.maturity_effect).token : null) ? (
+                <span className="b b-ph1" title="effect on assessed maturity">
+                  {window.splitMaturityEffect(r.maturity_effect).token
+                    .replace(/_/g, " ")}</span>) : null}
             </div>
             {r.scale_metrics && typeof r.scale_metrics === "object" ? (
               <div className="row" style={{ gap: 10, marginTop: 5, flexWrap: "wrap" }}>

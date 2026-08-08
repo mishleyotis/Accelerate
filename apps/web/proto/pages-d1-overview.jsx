@@ -960,8 +960,18 @@ function FinancialTrajectoryD1({ entity }) {
   );
 }
 
-/* ── Thought leadership ─────────────────────────────────────────── */
+/* ── Thought leadership ───────────────────────────────────────────
+   Three to five entries, not three. The grid was `g3` — three hard columns —
+   so a fourth and fifth entry landed in a ragged second row of two, which is
+   what made three look like the cap even though nothing here enforced one.
+   `auto-fit` with a readable floor lays 3, 4 or 5 out the same way, and the
+   heading counts what arrived rather than implying a window.
+
+   WHICH entries are chosen, and how they are weighted towards positions
+   Zennify can act on, is the producer's judgement and stays there. This
+   renders what the run promoted, in the order it promoted it. */
 function ThoughtLeadershipPanel() {
+  const { openEvidence, openSubcap } = useApp();
   const entries = DMA.THOUGHT_LEADERSHIP || [];
   return (
     <div className="card flush" style={{ marginBottom: 18 }}>
@@ -970,7 +980,9 @@ function ThoughtLeadershipPanel() {
           <Icon name="lightbulb" size={15} /> Thought leadership signal
         </h3>
         <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
-          {entries.length ? "From executives - recent 6 months" : "Nothing to show"}
+          {entries.length
+            ? `${entries.length} named executive${entries.length === 1 ? "" : "s"}, in their own words`
+            : "Nothing to show"}
         </span>
       </div>
       {/* An empty grid under a heading promising executive signal is a void:
@@ -985,23 +997,74 @@ function ThoughtLeadershipPanel() {
         </div>
       ) : (
       <div style={{ padding: 16 }}>
+        {/* Three tracks, wrapping — so three entries fill one row and five wrap
+            3 + 2 rather than 4 + 1. `.g3` carries the responsive collapse
+            (two columns at tablet, one below), which an inline auto-fit track
+            list cannot: a media query does not reach an inline style. */}
         <div className="g3">
-          {entries.map(tl => (
+          {entries.map(tl => {
+            /* `alignment` is the field the contract calls the most valuable
+               thing on this card — a CONTRADICTS entry is the one that must
+               never be filtered out — and it was adapted and never rendered.
+               An executive quote that argues AGAINST the assessment reads as
+               corroboration when its stance is invisible. */
+            const al = tl.alignment && typeof tl.alignment === "object" ? tl.alignment : null;
+            const stance = al ? String(al.value || "").toUpperCase() : null;
+            const stanceTone = stance === "CONTRADICTS" ? "b-org"
+              : stance === "EXTENDS" ? "b-purple" : "b-teal";
+            return (
             <div key={tl.id} className="card-tile" style={{ padding: 14 }}>
-              <div className="row" style={{ marginBottom: 6 }}>
+              <div className="row" style={{ marginBottom: 6, gap: 6, flexWrap: "wrap" }}>
                 <span className="b b-purple">{String(tl.kind || tl.type || "SIGNAL").toUpperCase()}</span>
+                {stance ? (
+                  <span className={`b ${stanceTone}`} title={al.clause || ""}>{stance}</span>
+                ) : null}
+                <span className="spacer" />
                 <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{fmtDate(tl.date)}</span>
               </div>
               <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.4, marginBottom: 6 }}>{tl.title}</div>
               <div style={{ fontSize: 11, color: "var(--z-body)", lineHeight: 1.55, fontStyle: "italic" }}>"{tl.excerpt}"</div>
+              {al && al.clause ? (
+                <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5, marginTop: 6 }}>
+                  {al.clause}
+                </div>
+              ) : null}
+              {/* The link to the assessment. Without it this card is a press
+                  clipping; the contract says the cell linkage is what makes it
+                  part of the DMA. Fail-closed on evidence, as everywhere: an
+                  id this run did not serve is not a drill target. */}
+              {(tl.subcaps || []).length || (tl.evidence || []).length ? (
+                <div className="row" style={{ gap: 4, flexWrap: "wrap", marginTop: 8 }}>
+                  {(tl.subcaps || []).map(sid => (
+                    <button key={sid} className="chip f-mono" style={{ fontSize: 9, cursor: "pointer", border: 0 }}
+                      title={`Open ${sid} in the heatmap`}
+                      onClick={() => openSubcap && openSubcap(sid)}>{sid}</button>
+                  ))}
+                  {(tl.evidence || []).map(eid => {
+                    const e = DMA.getEvidence(eid);
+                    return e ? (
+                      <button key={eid} className={`tier-chip tier-${e.tier}`} style={{ cursor: "pointer", border: 0 }}
+                        title={`${e.title || eid} · ${e.source_pretty || ""}`}
+                        onClick={() => openEvidence && openEvidence(eid)}>{eid}</button>
+                    ) : (
+                      <span key={eid} className="chip muted" title="cited id - not in this run's served evidence">{eid}</span>
+                    );
+                  })}
+                </div>
+              ) : null}
               <div className="sep" style={{ margin: "8px 0" }} />
               <div className="row" style={{ fontSize: 10, color: "var(--z-muted)" }}>
-                <span>{tl.author}</span>
+                <span style={{ minWidth: 0 }}>{tl.author}</span>
                 <span className="spacer" />
-                {tl.url ? <a href={`https://${tl.url}`} target="_blank" rel="noreferrer" style={{ color: "var(--z-mid)", display: "inline-flex", alignItems: "center", gap: 3 }}>Open <Icon name="external" size={10} /></a> : null}
+                {/* nowrap + no shrink: in a three-column card the four-letter
+                    label was breaking to "Ope / n" beside its own icon. */}
+                {tl.url ? <a href={`https://${tl.url}`} target="_blank" rel="noreferrer"
+                  style={{ color: "var(--z-mid)", display: "inline-flex", alignItems: "center",
+                           gap: 3, whiteSpace: "nowrap", flexShrink: 0 }}>Open <Icon name="external" size={10} /></a> : null}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       )}

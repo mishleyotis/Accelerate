@@ -912,6 +912,89 @@ function signalOf(v) {
   const s = String(v == null ? "" : v).trim().toLowerCase();
   return SIGNALS.includes(s) ? s : "unclassified";
 }
+
+/* `signal` is NOT a reading of the news. Its defined meaning is the direction
+   the event moved the ASSESSED POSITION of the cells in `capability_ids`, and
+   the three stored words invite a mood reading of exactly the kind the reader
+   hit: "why is a merger a negative event?". The stored vocabulary is the
+   contract and does not move; what the reader sees is the axis it actually
+   names. One map, here, so the filter chips, the dot tones and the event
+   drilldown can never label the same value three different ways. */
+const MATURITY_EFFECT_LABEL = {
+  positive: "Advanced",
+  neutral: "Neutral",
+  negative: "Constrained",
+  unclassified: "Unclassified"
+};
+/* The producer's own token for the same axis, as it writes it in
+   `maturity_effect`: ADVANCED │ CONSTRAINED │ NEUTRAL. */
+const MATURITY_EFFECT_TOKENS = ["ADVANCED", "CONSTRAINED", "NEUTRAL"];
+
+/* `timeline.arc_shape` has a closed vocabulary of five (Surface Specification,
+   D5 step 4). This run serves "strategy-first, substrate-later", which is a
+   sentence rather than one of them.
+
+   The app does not correct the producer and does not drop the value: an
+   arc the reader can see is worth more than a blank, and a silent drop hides
+   a producer defect instead of reporting it. So the value is printed as it
+   arrived, and marked off-vocabulary where it is — the badge then reads as
+   what it is (a description this run wrote) rather than as one of the five
+   contract words. */
+const ARC_SHAPES = ["STEADY_INVESTMENT", "STOP_START", "POST_EVENT_CATCHUP", "LEGACY_ANCHORED", "RECENT_ACCELERATION"];
+function arcShapeOf(v) {
+  const raw = v == null ? "" : String(v).trim();
+  if (!raw) return null;
+  const key = raw.toUpperCase().replace(/[\s-]+/g, "_");
+  const known = ARC_SHAPES.includes(key);
+  return {
+    raw,
+    label: known ? key.replace(/_/g, " ").toLowerCase() : raw,
+    in_vocabulary: known
+  };
+}
+
+/* `maturity_effect` arrives as "TOKEN — one clause of reasoning". Rendered
+   whole it is a 200-character paragraph inside a badge; rendered as a badge
+   alone it throws the reasoning away. So it is split ONCE, here.
+
+   Fail-soft in both directions: a value with no leading token is all reason
+   (the badge then falls back to the event's own signal), and a token this
+   app does not know is still returned as the token — printed as the producer
+   wrote it rather than dropped. Nothing is inferred: a string that states no
+   token yields `token: null`, never a guessed one. */
+function splitMaturityEffect(raw) {
+  const s = raw == null ? "" : String(raw).trim();
+  if (!s) return {
+    token: null,
+    reason: null
+  };
+  // A bare token with no clause after it — the acquisitions row writes it that
+  // way and puts its clause in `effect_note`.
+  if (/^[A-Z][A-Z_]*$/.test(s)) return {
+    token: s,
+    reason: null
+  };
+  // The separator the contract uses is an em dash; a hyphen or a colon is the
+  // same statement typed differently and is accepted rather than refused.
+  const m = /^([A-Za-z][A-Za-z_ ]{0,24}?)\s*(?:—|--|–|:|-)\s+([\s\S]+)$/.exec(s);
+  if (!m) return {
+    token: null,
+    reason: s
+  };
+  const token = m[1].trim().toUpperCase().replace(/\s+/g, "_");
+  // A leading word is only a TOKEN where it reads as one — all caps in the
+  // source, or a value the contract declares. "The merger — which…" must not
+  // have its first word promoted into a badge.
+  const looksLikeToken = /^[A-Z_]+$/.test(m[1].trim()) || MATURITY_EFFECT_TOKENS.includes(token);
+  if (!looksLikeToken) return {
+    token: null,
+    reason: s
+  };
+  return {
+    token,
+    reason: m[2].trim() || null
+  };
+}
 function adaptTimeline(timeline) {
   const events = timeline && timeline.events || [];
   return events.map((e, i) => ({
@@ -930,7 +1013,12 @@ function adaptTimeline(timeline) {
     signal_raw: e.signal || null,
     cap_impact: (e.capability_ids || [])[0] || null,
     capabilities: e.capability_ids || [],
+    // Split, never printed whole: the badge takes the token, the body takes
+    // the clause. `maturity_effect` is kept as promoted so a copy path or a
+    // future reader still has the producer's exact string.
     maturity_effect: e.maturity_effect || null,
+    effect_token: splitMaturityEffect(e.maturity_effect).token,
+    effect_reason: splitMaturityEffect(e.maturity_effect).reason,
     evidence: e.e_ids || [],
     claim: e.claim_label || null
   }));
@@ -951,6 +1039,13 @@ function adaptAcquisitions(section) {
     status: a.status || null,
     impl: a.integration_target || null,
     details: [a.effect_note, a.scale_metrics].filter(Boolean).join(" · ") || null,
+    // Same axis as the timeline's, split the same way. This row states the
+    // token bare and puts its clause in `effect_note`, so the split returns
+    // the token and the reason comes from the note — the two D5 surfaces then
+    // say the same word for the same judgement instead of one of them
+    // silently dropping it.
+    effect_token: splitMaturityEffect(a.maturity_effect).token,
+    effect_reason: splitMaturityEffect(a.maturity_effect).reason || a.effect_note || null,
     subcaps: a.affected_subcap_ids || [],
     evidence: a.e_ids || []
   }));
@@ -1298,5 +1393,10 @@ Object.assign(window, {
   techLayersOf,
   adaptOpportunityTiles,
   cagrOf,
-  peerOfSignal: signalOf
+  peerOfSignal: signalOf,
+  splitMaturityEffect,
+  MATURITY_EFFECT_LABEL,
+  MATURITY_EFFECT_TOKENS,
+  ARC_SHAPES,
+  arcShapeOf
 });

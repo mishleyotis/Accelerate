@@ -73,32 +73,53 @@ function ClientContext({ entity, run }) {
           <Icon name="timeline" size={16} />
           <div style={{ fontWeight: 600, fontSize: 13 }}>Digital evolution timeline</div>
           <span className="spacer" />
-          {/* Each bucket carries its count, and a bucket with none is disabled
+          {/* The chips name the AXIS, not a mood. `signal` means the direction
+              the event moved the ASSESSED POSITION of the cells it lists —
+              which is why a merger announcement that has converted nothing is
+              NEUTRAL and a remediated breach is not NEGATIVE. Labelled
+              Positive/Neutral/Negative the row invited exactly the reading the
+              reader had: "why is a merger a negative event?". Advanced ·
+              Neutral · Constrained is the same three buckets under the name of
+              what they measure, and the group says so above them.
+
+              The STORED values do not move: the filter still compares against
+              `e.signal` ∈ positive|neutral|negative, and the payload's enum is
+              a contract change nobody has argued for. Only the words change.
+
+              Each bucket carries its count, and a bucket with none is disabled
               rather than pressable-into-nothing. The Unclassified button only
               exists when the run actually has events the contract's vocabulary
               does not cover — it is a defect indicator, not a category. */}
-          <div className="toggle-row">
-            <button className={signalFilter === "ALL" ? "on" : ""} onClick={() => setSignalFilter("ALL")}>All · {allEvents.length}</button>
-            {[["positive", "Positive", "var(--z-mid)"],
-              ["neutral", "Neutral", null],
-              ["negative", "Negative", "var(--z-below)"]].map(([k, l, c]) => {
-              const n = signalCounts[k] || 0;
-              return (
-                <button key={k} className={signalFilter === k ? "on" : ""}
-                        disabled={!n}
-                        title={n ? `${n} event${n === 1 ? "" : "s"}` : "no events with this signal"}
-                        onClick={() => n && setSignalFilter(k)}
-                        style={{ color: signalFilter === k && c ? c : "var(--z-muted)",
-                                 opacity: n ? 1 : 0.45,
-                                 cursor: n ? "pointer" : "not-allowed" }}>{l} · {n}</button>
-              );
-            })}
-            {unclassified ? (
-              <button className={signalFilter === "unclassified" ? "on" : ""}
-                      title="the run did not state a POSITIVE/NEUTRAL/NEGATIVE signal for these"
-                      onClick={() => setSignalFilter("unclassified")}
-                      style={{ color: "var(--z-org)" }}>Unclassified · {unclassified}</button>
-            ) : null}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 9.5, color: "var(--z-muted)", letterSpacing: ".06em",
+                           textTransform: "uppercase", whiteSpace: "nowrap" }}
+                  title="the direction each event moved the assessed position of the cells it names — not a reading of the news">
+              Effect on assessed maturity</span>
+            <div className="toggle-row">
+              <button className={signalFilter === "ALL" ? "on" : ""} onClick={() => setSignalFilter("ALL")}>All · {allEvents.length}</button>
+              {[["positive", "var(--z-mid)"],
+                ["neutral", null],
+                ["negative", "var(--z-below)"]].map(([k, c]) => {
+                const n = signalCounts[k] || 0;
+                const l = (window.MATURITY_EFFECT_LABEL || {})[k] || k;
+                return (
+                  <button key={k} className={signalFilter === k ? "on" : ""}
+                          disabled={!n}
+                          title={n ? `${n} event${n === 1 ? "" : "s"} the run scores as ${l.toLowerCase()} for the cells they name`
+                                   : `no event in this run ${k === "negative" ? "constrained" : k === "positive" ? "advanced" : "left unchanged"} the cells it names`}
+                          onClick={() => n && setSignalFilter(k)}
+                          style={{ color: signalFilter === k && c ? c : "var(--z-muted)",
+                                   opacity: n ? 1 : 0.45,
+                                   cursor: n ? "pointer" : "not-allowed" }}>{l} · {n}</button>
+                );
+              })}
+              {unclassified ? (
+                <button className={signalFilter === "unclassified" ? "on" : ""}
+                        title="the run did not state a direction for these events"
+                        onClick={() => setSignalFilter("unclassified")}
+                        style={{ color: "var(--z-org)" }}>Unclassified · {unclassified}</button>
+              ) : null}
+            </div>
           </div>
         </div>
         {unclassified ? (
@@ -132,11 +153,29 @@ function ClientContext({ entity, run }) {
         {(() => {
           const meta = DMA.timelineMetaFor(entity.id);
           if (!meta || !meta.storyline) return null;
+          /* `arc_shape` has a closed vocabulary of five. This run serves a
+             sentence instead. The app prints what is there either way — a
+             dropped arc hides the producer's defect and costs the reader the
+             one line that names the shape of the history — but a value the
+             contract does not declare is not dressed as one that does: it
+             keeps the badge and gains a note saying so, which is what makes
+             it fixable rather than invisible. */
+          const arc = window.arcShapeOf ? window.arcShapeOf(meta.arc_shape) : null;
           return (
             <div style={{ background: "var(--z-lav)", borderLeft: "3px solid var(--z-dpur)", borderRadius: "0 8px 8px 0", padding: "10px 14px", marginBottom: 14 }}>
-              <div className="row" style={{ marginBottom: 4 }}>
+              <div className="row" style={{ marginBottom: 4, flexWrap: "wrap", gap: 6 }}>
                 <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase" }}>Storyline</span>
-                {meta.arc_shape ? <span className="b b-purple" style={{ marginLeft: 6 }}>{meta.arc_shape}</span> : null}
+                {arc ? (
+                  <span className={`b ${arc.in_vocabulary ? "b-purple" : "b-org"}`}
+                        title={arc.in_vocabulary
+                          ? "the arc shape this run states, from the five the contract declares"
+                          : `the arc shape this run states. It is not one of the five the contract declares (${(window.ARC_SHAPES || []).join(" · ").toLowerCase().replace(/_/g, " ")}), so it is printed as promoted`}>
+                    {arc.label}</span>
+                ) : null}
+                {arc && !arc.in_vocabulary ? (
+                  <span style={{ fontSize: 9.5, color: "var(--z-org)" }}>
+                    not one of the five arc words</span>
+                ) : null}
               </div>
               <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6 }}>{meta.storyline}</div>
             </div>
@@ -235,6 +274,16 @@ function ClientContext({ entity, run }) {
                 <div style={{ flex: 1, fontWeight: 500, fontSize: 12.5 }}>{a.target}</div>
                 {a.kind ? <span className="b b-muted">{a.kind}</span> : null}
                 <span className="b b-muted">{a.status}</span>
+                {/* The same axis the timeline chips filter by, on the row that
+                    makes the reader ask about it. It was promoted and dropped:
+                    a merger with no stated effect reads as an unexplained
+                    event, which is exactly the question that came back. */}
+                {a.effect_token ? (
+                  <span className={`b ${/CONSTRAIN/.test(a.effect_token) ? "b-below"
+                    : /ADVANC/.test(a.effect_token) ? "b-teal" : "b-muted"}`}
+                    title="effect on assessed maturity — the direction this moved the cells it affects">
+                    {a.effect_token.replace(/_/g, " ")}</span>
+                ) : null}
                 <Icon name={acqOpen === (a.id || i) ? "chevron-u" : "chevron-d"} size={12} style={{ color: "var(--z-muted)" }} />
               </div>
               {a.impl && a.impl !== "-" ? <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 4 }}>{a.impl}</div> : null}
@@ -563,9 +612,14 @@ function EventDetail({ event, onClose, openEvidence, openSubcap }) {
         <strong style={{ fontSize: 14, flex: 1, minWidth: 0 }}>{event.title}</strong>
         {event.kind ? <span className="b b-purple">{event.kind}</span> : null}
         {event.claim ? <span className="b b-muted">{event.claim}</span> : null}
+        {/* The header badge names the axis, not the news. Same three buckets,
+            same stored value, the word the chips above are filtered by. */}
         {event.signal === "unclassified"
-          ? <span className="b b-org" title={event.signal_raw || ""}>NO SIGNAL STATED</span>
-          : <span className="b b-muted">{String(event.signal).toUpperCase()}</span>}
+          ? <span className="b b-org" title={event.signal_raw || ""}>NO DIRECTION STATED</span>
+          : <span className="b b-muted"
+                  title="the direction this event moved the assessed position of the cells it names">
+              {String((window.MATURITY_EFFECT_LABEL || {})[event.signal] || event.signal).toUpperCase()}
+            </span>}
         <button className="icon-btn" onClick={onClose}><Icon name="x" size={14} /></button>
       </div>
 
@@ -580,16 +634,41 @@ function EventDetail({ event, onClose, openEvidence, openSubcap }) {
         </div>
       )}
 
-      {/* What it did to maturity — read, never generated from the signal. */}
+      {/* What it did to maturity — read, never generated from the signal.
+
+          `maturity_effect` arrives as "TOKEN — one clause". Printed whole it
+          was a 200-character paragraph opening with a shouted enum, which is
+          neither a badge nor a sentence. The token is the badge; the clause is
+          the body; and where the field carries no token the badge falls back
+          to the event's own direction rather than inventing one. */}
       <div style={{ background: "rgba(255,255,255,.6)", border: "1px solid var(--z-sep)", borderRadius: 6, padding: "8px 10px", marginBottom: 10 }}>
-        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 4 }}>
-          Effect on maturity
+        <div className="row" style={{ marginBottom: 4, gap: 6, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase" }}>
+            Effect on assessed maturity
+          </span>
+          <span className="spacer" />
+          {(() => {
+            const token = event.effect_token
+              || (event.signal !== "unclassified"
+                  ? String((window.MATURITY_EFFECT_LABEL || {})[event.signal] || "").toUpperCase()
+                  : null);
+            if (!token) return null;
+            const tone = /CONSTRAIN/.test(token) ? "b-below"
+              : /ADVANC/.test(token) ? "b-teal" : "b-muted";
+            return (
+              <span className={`b ${tone}`}
+                    title={event.effect_token
+                      ? "the effect this run states for the cells this event names"
+                      : "the run stated no effect token; this is the event's own direction"}>
+                {token.replace(/_/g, " ")}</span>
+            );
+          })()}
         </div>
         <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55 }}>
-          {event.maturity_effect
+          {event.effect_reason
             || (event.signal === "unclassified"
                 ? "Not stated. The run did not classify this event's direction, so no effect is claimed here."
-                : "The run stated a signal but no effect. Nothing is inferred from the signal alone.")}
+                : "The run stated a direction but no reasoning for it. Nothing is inferred from the direction alone.")}
         </div>
       </div>
 
@@ -1610,18 +1689,48 @@ function ClientTechStack({ entity, run }) {
     const next = statusFilter === key ? null : key;
     if (next === "ABSENT" && hideAbsent) setHideAbsent(false);
     setStatusFilter(next);
+    // A status the reader picks is a narrower question than "the gap layer",
+    // so it replaces it rather than intersecting with it.
+    setGapOnly(false);
   };
   // Layer briefly highlighted after a PRIMARY GAP tile click.
   const [flashLayer, setFlashLayer] = useState(null);
+  /* The PRIMARY GAP LAYERS filter.
+     ─────────────────────────────────────────────────────────────────────
+     This tile used to LOCATE — scroll to the flagged card and flash it —
+     on the reasoning that the flag belongs to a layer rather than to rows a
+     status filter could select. The reader read it as a filter and reported
+     it as broken: "primary gap layers do not filter out the gaps only".
+     They are right, and the rule this build follows says so: a DERIVED
+     relationship may only order content, but a filter THE READER EXPLICITLY
+     SELECTS narrows. This is the second kind.
+
+     What it narrows TO is the flag's own arithmetic. `is_primary_gap` is
+     awarded to the layer with the fewest CONFIRMED rows (`basis` travels with
+     it and reads "0 confirmed of 8 — fewer than any other layer"), so the
+     rows that MAKE it the gap are that layer's rows which are not confirmed:
+     absent, inferred, claimed. Narrowing to the layer alone would leave the
+     confirmed rows in — the ones that are not the gap — and narrowing to
+     ABSENT alone would drop six of this run's eight, because a data layer
+     with nothing confirmed is a gap whether or not a slot was searched and
+     missed. Pressing again clears, like every other filter on this page. */
+  const [gapOnly, setGapOnly] = useState(false);
 
   const allTech = DMA.TECH_STACK;
   const layerRollup = DMA.TECH_LAYERS || [];
+  // The layers the promoted rollup flags. Computed before the predicate, which
+  // reads it.
+  const gapRoll = layerRollup.filter(x => x && x.is_primary_gap);
+  const gapLayers = gapRoll.map(x => x.layer);
+  const isGapRow = (t) => gapLayers.indexOf(t.layer) >= 0 && t.status !== "CONFIRMED";
+  const gapRowCount = allTech.filter(isGapRow).length;
   const list = useMemo(() => allTech.filter(t => {
+    if (gapOnly) return isGapRow(t);
     if (layer !== "ALL" && t.layer !== layer) return false;
     if (statusFilter && t.status !== statusFilter) return false;
     if (hideAbsent && t.status === "ABSENT") return false;
     return true;
-  }), [layer, hideAbsent, statusFilter]);
+  }), [layer, hideAbsent, statusFilter, gapOnly, allTech]);
 
   // Charter correction: the layer keys are OPS · CUST · DATA · INFRA, not
   // L2–L5. L1–L4 already name the EVIDENCE levels, and a register row showing
@@ -1637,21 +1746,18 @@ function ClientTechStack({ entity, run }) {
   // downstream AI/decisioning work.
   const absentCount = allTech.filter(t => t.status === "ABSENT" && (t.layer === "CUST" || t.layer === "DATA")).length;
 
-  // The layers the promoted rollup flags — the PRIMARY GAP tile locates the
-  // flagged card rather than filtering, because the flag belongs to a LAYER,
-  // not to rows a status filter could select.
-  const gapLayers = layerRollup.filter(x => x && x.is_primary_gap).map(x => x.layer);
-  const goToPrimaryGap = () => {
+  /* Narrow to the gap rows, and land on them. Enabling releases every other
+     filter — they would otherwise intersect and the register could come out
+     empty under a control that says "8" — and pressing again restores the
+     whole register. The scroll and the flash stay: filtering and then leaving
+     the reader at the top of a page whose content moved is its own defect. */
+  const togglePrimaryGap = () => {
     const L = gapLayers[0];
     if (!L) return;
-    // Locate, never filter — but a card the current filters hide entirely
-    // cannot be scrolled to, so relax exactly what hides it and nothing else.
-    if (layer !== "ALL" && layer !== L) setLayer("ALL");
-    const rows = allTech.filter(t => t.layer === L);
-    const anyVisible = rows.some(t =>
-      (!statusFilter || t.status === statusFilter) && !(hideAbsent && t.status === "ABSENT"));
-    if (rows.length && !anyVisible) { setStatusFilter(null); setHideAbsent(false); }
-    setFlashLayer(L);
+    const next = !gapOnly;
+    setGapOnly(next);
+    if (next) { setLayer("ALL"); setStatusFilter(null); setHideAbsent(false); }
+    setFlashLayer(next ? L : null);
   };
   // Scroll after render, so the card exists even when the click above had to
   // relax a filter first; the highlight clears itself.
@@ -1736,7 +1842,8 @@ function ClientTechStack({ entity, run }) {
           <span className="spacer" />
           <div className="row" style={{ gap: 6 }}>
             <span style={{ fontSize: 11, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Layer</span>
-            <select className="inp" style={{ flex: "1 1 150px", minWidth: 0, maxWidth: 200, padding: "5px 10px", fontSize: 12 }} value={layer} onChange={e => setLayer(e.target.value)}>
+            <select className="inp" style={{ flex: "1 1 150px", minWidth: 0, maxWidth: 200, padding: "5px 10px", fontSize: 12 }} value={layer}
+              onChange={e => { setLayer(e.target.value); setGapOnly(false); }}>
               <option value="ALL">All layers</option>
               {LAYERS.map(L => <option key={L} value={L}>{LAYER_LABEL[L].name}</option>)}
             </select>
@@ -1748,44 +1855,83 @@ function ClientTechStack({ entity, run }) {
               // absent would show nothing, so the switch releases the tile.
               if (next && statusFilter === "ABSENT") setStatusFilter(null);
               setHideAbsent(next);
+              setGapOnly(false);
             }} />
             Hide absent
           </label>
         </div>
       </div>
 
+      {/* What the gap filter is showing, and how to leave it. A register that
+          silently drops 43 of its 51 rows under a pressed tile is the same
+          defect as one that drops nothing under it: the reader has to be able
+          to read the narrowing off the page. The basis is the rollup's own
+          sentence, not a restatement of it. */}
+      {gapOnly ? (
+        <div className="co co-teal" style={{ marginBottom: 14 }}>
+          <Icon name="filter" size={14} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="co-title">
+              {list.length} of {allTech.length} rows · the unconfirmed rows in{" "}
+              {gapLayers.map(L => (LAYER_LABEL[L] || {}).name || L).join(" · ")}
+            </div>
+            <div className="co-body">
+              {gapRoll.map(r => r.basis).filter(Boolean).join(" · ")
+                || "This layer carries the fewest confirmed rows in the register."}
+            </div>
+            <div className="co-body" style={{ marginTop: 2 }}>
+              Confirmed rows in the same layer are not gaps, so they are held back
+              while this is on.
+            </div>
+          </div>
+          <button className="btn btn-tertiary btn-sm" style={{ flexShrink: 0 }}
+            onClick={() => { setGapOnly(false); setFlashLayer(null); }}>
+            Show all {allTech.length}
+          </button>
+        </div>
+      ) : null}
+
       {/* Stat strip — a legend that filters, not one that sits there. Each
           status tile toggles the register to just its rows (press again to
           clear), through the SAME statusFilter the list predicate reads, so
           it can never disagree with the layer select or hide-absent switch.
-          The PRIMARY GAP tile is different in kind: the flag belongs to a
-          layer, so it scrolls to and highlights the flagged card instead.
+          The PRIMARY GAP tile narrows too — to the flagged layer's own
+          unconfirmed rows, which is what makes it the flagged layer — and
+          says so in the strip: its number is the row count it will show, not
+          a layer count the register has no way to display. The layer count is
+          under it in words, because "1" beside a filter that produces eight
+          rows is the ambiguity the reader hit.
           A zero-count tile is disabled rather than pressable-into-nothing,
-          matching the timeline's signal buttons. */}
+          matching the timeline's effect buttons. */}
       <div className="g4" style={{ marginBottom: 14 }}>
         {[
           { l: "Confirmed",   key: "CONFIRMED", v: allTech.filter(t => t.status === "CONFIRMED").length,  c: "var(--z-mid)",   bg: "var(--z-ice)" },
           { l: "Inferred",    key: "INFERRED",  v: allTech.filter(t => t.status === "INFERRED").length,   c: "var(--z-dpur)",  bg: "var(--ph0-lt)" },
           { l: "Absent",      key: "ABSENT",    v: allTech.filter(t => t.status === "ABSENT").length,     c: "var(--z-below)", bg: "rgba(194,80,8,.06)" },
-          // Counted from the promoted rollup, which states it per LAYER. It
-          // used to count a per-row `primary_gap` no adapter emits, so the
-          // tile read 0 on every client while a layer card wore the badge.
-          { l: "Primary gap layers", key: "GAP", v: gapLayers.length, c: "var(--z-blue)", bg: "var(--ph1-lt)" },
+          // Counted from the promoted rollup, which states the flag per LAYER,
+          // and from the rows that flag selects. It used to count a per-row
+          // `primary_gap` no adapter emits, so the tile read 0 on every client
+          // while a layer card wore the badge.
+          { l: "Primary gap rows", key: "GAP", v: gapRowCount, c: "var(--z-blue)", bg: "var(--ph1-lt)",
+            sub: gapLayers.length
+              ? `unconfirmed in ${gapLayers.map(L => (LAYER_LABEL[L] || {}).short || L).join(" · ")}`
+              : null },
         ].map(s => {
-          const active = s.key !== "GAP" && statusFilter === s.key;
+          const active = s.key === "GAP" ? gapOnly : statusFilter === s.key;
           const dead = s.v === 0;
           return (
             <button key={s.l} className="card-tile clickable" aria-pressed={active}
               disabled={dead}
               title={s.key === "GAP"
                 ? (dead ? "No layer is flagged as the primary gap in this run"
-                        : "Scroll to the flagged layer card")
+                        : (active ? "Show the whole register again"
+                                  : `Show only the ${s.v} unconfirmed rows in the flagged layer`))
                 : (dead ? `No ${s.key} rows in this register`
                         : (active ? "Clear the status filter"
                                   : `Show only ${s.key} rows`))}
               onClick={() => {
                 if (dead) return;
-                if (s.key === "GAP") { goToPrimaryGap(); return; }
+                if (s.key === "GAP") { togglePrimaryGap(); return; }
                 switchStatus(s.key);
               }}
               style={{ borderLeft: `3px solid ${s.c}`, textAlign: "left", width: "100%",
@@ -1796,6 +1942,9 @@ function ClientTechStack({ entity, run }) {
                        cursor: dead ? "not-allowed" : "pointer" }}>
               <div style={{ fontSize: 10, color: active ? s.c : "var(--z-muted)", fontWeight: active ? 700 : 400, letterSpacing: ".08em", textTransform: "uppercase" }}>{s.l}</div>
               <div style={{ fontSize: 28, fontWeight: 200, color: s.c, lineHeight: 1, marginTop: 6 }}>{s.v}</div>
+              {s.sub ? (
+                <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 4, lineHeight: 1.4 }}>{s.sub}</div>
+              ) : null}
             </button>
           );
         })}

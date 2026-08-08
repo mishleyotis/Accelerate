@@ -38,9 +38,18 @@ _EV_KEYS = ("e_ids", "supporting_e_ids", "evidence_ids", "new_evidence_ids",
 # The negative lookbehind keeps a NESTED array's schema — "gaps[] per row:
 # {…}" inside platform_story.platforms — from being read as the outer
 # item's, which would demand a citation the outer item never carries.
+#
+# A NOUN MISSING FROM THIS LIST IS A GATE SWITCHED OFF, SILENTLY. `issue` and
+# `action` were: C2's shape is stated as "Per issue: {…}" and C3's as "Per
+# action: {…}", so the register's item schema was invisible — AG-03 never asked
+# an issue row for its citations, and the item-level field census could not see
+# that `capped_subcap_ids` had nowhere to be stored. The census test now
+# resolves every item_field's shape through this expression, so a section whose
+# lead-in noun is not here fails a test instead of quietly opting out.
 _PER_ITEM_RE = re.compile(
     r"(?<!\[\] )\bPer [a-z ]*?(?:item|card|recommendation|starter|event|row|"
-    r"point|signal|entry|person|gate|cap|tile|alert|pattern|phase|step)"
+    r"point|signal|entry|person|gate|cap|tile|alert|pattern|phase|step|"
+    r"issue|action)"
     r"[^:{]*:\s*\{([^}]*)\}", re.I)
 
 # An item that asserts nothing needs no citation, and there are exactly
