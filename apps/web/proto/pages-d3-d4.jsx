@@ -722,8 +722,9 @@ function ClientPlatform({ entity, run }) {
                   "SCORE" broke mid-word into "PILLA / R" and "SCOR / E".
                   Pillar carries `col-drop` because it is the ONLY column whose
                   fact the row prints twice — the pillar is the first token of
-                  the cell id under the name — so a narrow card loses a column
-                  and no information. */}
+                  the cell id under the name — so at a medium width the table
+                  loses a column and no information. In the stacked mode it
+                  returns as a labelled line, where it costs no width. */}
               <thead><tr>
                 <th>Cell</th>
                 <th className="col-drop" style={{ whiteSpace: "nowrap" }}>Pillar</th>

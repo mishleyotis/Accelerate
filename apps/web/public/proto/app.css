@@ -838,7 +838,10 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
              already prints somewhere else, so nothing becomes unreachable —
              and the floor drops with them;
      narrow  one card per row, the same stacked shape the ≤760px viewport
-             rules give every table, and no floor at all.
+             rules give every table, and no floor at all. The dropped column
+             comes BACK here: stacked, it costs one labelled line rather than
+             a share of the row's width, and the width was the only reason to
+             drop it.
    overflow-x stays as a floor under the floor: a single unbreakable token
    (a URL, a long id) can still exceed the narrowest step, and one row
    scrolling is better than the page doing it. In normal content it never
@@ -862,6 +865,7 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
     word-break: break-word;
   }
   .tbl-reflow .tbl tbody td > * { max-width: 70%; text-align: right; }
+  .tbl-reflow .tbl tbody td.col-drop { display: flex; }
   .tbl-reflow .tbl tbody td::before {
     content: attr(data-label);
     font-weight: 600; font-size: 10px; color: var(--z-muted);
