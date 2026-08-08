@@ -1336,10 +1336,21 @@ function ClientTechStack({ entity, run }) {
   const { pushToast } = useApp();
   const [layer, setLayer] = useState("ALL");
   const [hideAbsent, setHideAbsent] = useState(false);
-  // The status filter the stat strip toggles. It lives in the same predicate
-  // as the layer select and the hide-absent switch, so a tile click and the
-  // filter bar always agree on what the register shows.
+  // The status filter. ONE piece of state behind three controls — the legend
+  // entries, the stat tiles and the hide-absent switch — and behind the list
+  // predicate, so no two of them can ever describe a different register.
   const [statusFilter, setStatusFilter] = useState(null);
+  /* The single writer. Pressing the status already selected clears it, so a
+     control that filters is also the control that un-filters — otherwise a
+     reader who filters to ABSENT has no way back except reloading the page.
+     Filtering TO absent while absent is hidden shows an empty register, so
+     the request wins and releases the switch (and the switch, below, releases
+     the filter for the mirror case). */
+  const switchStatus = (key) => {
+    const next = statusFilter === key ? null : key;
+    if (next === "ABSENT" && hideAbsent) setHideAbsent(false);
+    setStatusFilter(next);
+  };
   // Layer briefly highlighted after a PRIMARY GAP tile click.
   const [flashLayer, setFlashLayer] = useState(null);
 
@@ -1418,7 +1429,17 @@ function ClientTechStack({ entity, run }) {
           and hung a grey caption off each one naming Explorium — a vendor this
           app does not use. Those captions were redundant with the label and
           wrong about the source, so they are gone; the status itself is the
-          claim, and each ROW states its own detection basis. */}
+          claim, and each ROW states its own detection basis.
+
+          Every entry is a CONTROL, on the same `statusFilter` the stat tiles
+          and the register predicate read. A legend that names the four things
+          a row can be, beside a register showing all four, is read as the way
+          to see one of them — and it was inert, so the reader clicked four
+          swatches and nothing moved. One state means the legend, the tiles and
+          the list can never disagree about what is on screen; it also gives
+          CLAIMED a control, which the three-status stat strip never had.
+          `switchStatus` is the single writer, so the contradiction rules
+          (filtering TO absent while hiding absent) hold from either place. */}
       <div className="card" style={{ marginBottom: 14, padding: "12px 16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
           <div className="eyebrow" style={{ margin: 0 }}>Legend</div>
@@ -1428,13 +1449,28 @@ function ClientTechStack({ entity, run }) {
             { label: "Claimed",   key: "CLAIMED",   c: "#7C3500",        bg: "rgba(254,151,50,.08)", bd: "rgba(254,151,50,.3)" },
             { label: "Absent",    key: "ABSENT",    c: "var(--z-below)", bg: "rgba(194,80,8,.06)",   bd: "rgba(194,80,8,.25)" },
           ].map(s => {
+            // Counted from the register, never asserted: a status no row
+            // carries has nothing to filter to, so its entry is disabled
+            // rather than pressable into an empty list.
             const n = allTech.filter(t => t.status === s.key).length;
+            const active = statusFilter === s.key;
+            const dead = n === 0;
             return (
-              <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "var(--z-body)" }}>
-                <span style={{ width: 14, height: 14, background: s.bg, border: `1.5px solid ${s.bd}`, borderRadius: 3 }} />
+              <button key={s.label} className="ts-legend" aria-pressed={active} disabled={dead}
+                onClick={() => switchStatus(s.key)}
+                title={dead ? `No ${s.key} rows in this register`
+                            : (active ? "Show every status again" : `Show only ${s.key} rows`)}
+                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5,
+                         color: "var(--z-body)", fontFamily: "inherit",
+                         padding: "3px 8px", borderRadius: 999,
+                         background: active ? s.bg : "transparent",
+                         border: active ? `1.5px solid ${s.c}` : "1.5px solid transparent",
+                         opacity: dead ? .45 : 1,
+                         cursor: dead ? "not-allowed" : "pointer" }}>
+                <span style={{ width: 14, height: 14, background: s.bg, border: `1.5px solid ${s.bd}`, borderRadius: 3, flexShrink: 0 }} />
                 <strong style={{ color: s.c }}>{s.label}</strong>
                 <span className="muted" style={{ fontSize: 10.5 }}>{n}</span>
-              </div>
+              </button>
             );
           })}
           <span className="spacer" />
@@ -1490,12 +1526,7 @@ function ClientTechStack({ entity, run }) {
               onClick={() => {
                 if (dead) return;
                 if (s.key === "GAP") { goToPrimaryGap(); return; }
-                const next = statusFilter === s.key ? null : s.key;
-                // Filtering TO absent while hiding absent is a contradiction;
-                // the tile wins and releases the switch (and the switch,
-                // below, releases the tile).
-                if (next === "ABSENT" && hideAbsent) setHideAbsent(false);
-                setStatusFilter(next);
+                switchStatus(s.key);
               }}
               style={{ borderLeft: `3px solid ${s.c}`, textAlign: "left", width: "100%",
                        fontFamily: "inherit",

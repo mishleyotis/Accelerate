@@ -385,11 +385,28 @@ function ClientPlatform({ entity, run }) {
 
   const prereqRows = areaPrereqs(areaRecs);
 
-  /* Conversation starters carry a named gap cell, and that cell is filed under
-     an L3 area by the same index the tiles are — so a starter belongs to a
-     platform on the same evidence everything else on this page does. A starter
-     that names no cell is scoped to nothing and shows under every platform,
-     because it makes no platform-specific claim. */
+  /* Conversation starters carry a named gap cell, and where that cell is one
+     the run files under an L3 area, the starter belongs to a platform on the
+     same evidence everything else on this page does.
+
+     Where it is NOT — and on this run it never is — the starter is scoped to
+     nothing and shows under every platform, exactly as one naming no cell
+     does, because it makes no platform-specific claim this page can honour.
+     That distinction is the whole defect the card showed: this run states
+     `named_gap_subcap_id` as "Technology Architecture & Integration.1.2" —
+     a category NAME with a numeric tail, not a catalogue id of the P4C3.4.5
+     shape that `areaOfCell` indexes and that every other cell reference in
+     the run uses. The old predicate asked only whether the value was truthy,
+     so all five starters failed the area comparison on all four tiles and
+     the card read "Conversation starters · 0" everywhere, with the "promoted
+     across the other areas" note pointing at areas that do not exist. A
+     starter this page cannot place must be shown, not hidden: an unplaceable
+     one is still the producer's promoted talking point.
+
+     The name is left as the run wrote it rather than mapped onto a category —
+     "Technology Architecture & Integration" is not any catalogue category's
+     name ("Tech Architecture" is), so a match would be a guess, and this app
+     does not guess about identity. */
   const allStarters = (DMA.startersFor ? (DMA.startersFor(entity.id) || []) : [])
     .slice().sort((a, b) => (pfNum(a.rank) === null ? 99 : Number(a.rank))
                           - (pfNum(b.rank) === null ? 99 : Number(b.rank)));
@@ -397,8 +414,16 @@ function ClientPlatform({ entity, run }) {
     const hit = areaOfCell(index, s && s.named_gap_subcap_id);
     return hit ? hit.area : null;
   };
-  const starters = allStarters.filter(s => !s.named_gap_subcap_id || starterArea(s) === area);
+  const starters = allStarters.filter(s => {
+    const a = starterArea(s);
+    return a === null || a === area;
+  });
   const elsewhereStarters = allStarters.length - starters.length;
+  // Counted, not asserted: how many of what is showing this page could place
+  // on a platform, so the card can say which half of the list a reader is
+  // looking at instead of implying every one of them is this platform's.
+  const placedStarters = starters.filter(s => starterArea(s) !== null).length;
+  const unplacedStarters = starters.length - placedStarters;
 
   // "Why not X" — the platform page's own discarded list where it promoted
   // one, otherwise the overview's. Never both merged: the two sections word
@@ -600,9 +625,19 @@ function ClientPlatform({ entity, run }) {
           so at 768px the table column was ~110px wide. Flex-wrap sidebar
           pattern instead: side by side while both fit at a readable width
           (the 999 grow gives the table nearly all the slack, so the readiness
-          column holds ~300px), stacked below that. No media query needed. */}
+          column holds ~300px), stacked below that. No media query needed.
+
+          The table's basis is what decides WHEN the pair stops sitting side
+          by side, and it is stated as the width the table wants rather than
+          the width the card can survive: a flex line wraps once the bases
+          plus the gap exceed it, so at 560 + 300 + 16 the readiness rail
+          drops below the table at about 1150px of browser and the table takes
+          the whole column back — the width at which a seven-column table is
+          readable again. At the old 400 the pair stayed side by side down to
+          ~940px with the table at 480, which is the state the reader had to
+          scroll sideways out of. */}
       <div id="platform-area-detail" style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", gap: 16, marginBottom: 16 }}>
-        <div className="card flush" style={{ flex: "999 1 400px", minWidth: 0, maxWidth: "100%" }}>
+        <div className="card flush" style={{ flex: "999 1 560px", minWidth: 0, maxWidth: "100%" }}>
           <div className="card-head">
             <div style={{ minWidth: 0 }}>
               <h3>Gap-to-platform mapping · {selKey || "no platform promoted"}</h3>
@@ -616,20 +651,24 @@ function ClientPlatform({ entity, run }) {
             </span>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
-            {/* The table scrolls inside its own box rather than letting the
-                columns collapse. Between the stacked-card breakpoint (760px)
-                and about 1150px the 1fr side of this row is narrow enough that
-                a seven-column table crushed each cell to ~14px wide. */}
-            <div style={{ overflowX: "auto" }}>
-            {/* The floor only matters while the table renders as columns; in
-                the ≤760px stacked-card mode a hard 720px would force the
-                stacked rows to scroll sideways, so it yields to the viewport. */}
-            <table className="tbl" style={{ minWidth: "min(720px, calc(100vw - 64px))" }}>
+            {/* `tbl-reflow` (app.css) makes this table answer to the width of
+                the COLUMN it sits in rather than to the viewport: full columns
+                while the card is wide, the `col-drop` column gone while it is
+                medium, and one card per row while it is narrow. The box no
+                longer scrolls sideways in any of those states, which is what
+                the previous fix — a 720px floor inside an overflow-x box —
+                traded away to stop the columns collapsing. */}
+            <div className="tbl-reflow">
+            <table className="tbl">
               {/* nowrap on the narrow columns: at this width "PILLAR" and
-                  "SCORE" broke mid-word into "PILLA / R" and "SCOR / E". */}
+                  "SCORE" broke mid-word into "PILLA / R" and "SCOR / E".
+                  Pillar carries `col-drop` because it is the ONLY column whose
+                  fact the row prints twice — the pillar is the first token of
+                  the cell id under the name — so a narrow card loses a column
+                  and no information. */}
               <thead><tr>
                 <th>Cell</th>
-                <th style={{ whiteSpace: "nowrap" }}>Pillar</th>
+                <th className="col-drop" style={{ whiteSpace: "nowrap" }}>Pillar</th>
                 <th style={{ whiteSpace: "nowrap" }}>Score</th>
                 <th style={{ whiteSpace: "nowrap" }}>Peer</th>
                 {anyPeer ? <th style={{ whiteSpace: "nowrap" }}>Gap</th> : null}
@@ -666,7 +705,7 @@ function ClientPlatform({ entity, run }) {
                         <div style={{ fontSize: 12, fontWeight: 500 }}>{name}</div>
                         <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{pfText(g.subcap_id)}</div>
                       </td>
-                      <td data-label="Pillar">{pillar ? <span className="b b-purple">{pillar}</span> : <span className="chip muted">—</span>}</td>
+                      <td data-label="Pillar" className="col-drop">{pillar ? <span className="b b-purple">{pillar}</span> : <span className="chip muted">—</span>}</td>
                       <td data-label="Score"><MaturityChip score={cur} /></td>
                       <td data-label="Peer">{peer !== null ? <MaturityChip score={peer} /> : (
                         <span style={{ color: "var(--z-muted)" }} title={peerWhy}>—</span>
@@ -933,7 +972,17 @@ function ClientPlatform({ entity, run }) {
           <div className="card-head">
             <div style={{ minWidth: 0 }}>
               <h3>Conversation starters · {starters.length}</h3>
-              {area ? <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2 }}>{selKey}</div> : null}
+              {/* The sub-line says which platform the list is under AND how
+                  much of it this page could actually place there, because
+                  those are different facts and the heading alone reads as a
+                  claim that all of them are this platform's. Both numbers are
+                  counted from the rows above. */}
+              <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.45 }}>
+                {selKey || "no platform promoted"}
+                {unplacedStarters
+                  ? ` · ${unplacedStarters} of ${starters.length} name${unplacedStarters === 1 ? "s" : ""} no cell this run files under a platform area, so ${unplacedStarters === 1 ? "it shows" : "they show"} under every platform`
+                  : ""}
+              </div>
             </div>
             <button className="btn btn-tertiary btn-sm" onClick={() => {
               const text = starters.map((s, i) => {
@@ -951,37 +1000,62 @@ function ClientPlatform({ entity, run }) {
             {starters.map((s, i) => {
               const key = s.rank != null ? `r${s.rank}` : `i${i}`;
               const isOpen = openStarter === key;
+              const cites = (s.e_ids || []).filter(Boolean);
               const extras = [s.their_system_reference, s.peer_reference, s.followup_question]
-                .filter(Boolean).length + ((s.e_ids || []).length ? 1 : 0);
+                .filter(Boolean).length + (cites.length ? 1 : 0);
+              /* The prototype's card carries a small grey stamp under the rank
+                 — "Template-fill · evidence-cited". That stamp was a literal:
+                 every card wore it whether or not the starter cited anything.
+                 Same position, same weight, but each half is read off this
+                 starter: what it opens on, and how many evidence ids it
+                 actually carries. A starter citing nothing says so, which is
+                 the one thing the prototype's version could never do. */
+              const stamp = [
+                s.opens_on ? `opens on ${String(s.opens_on).replace(/_/g, " ")}` : null,
+                cites.length ? `${cites.length} cited` : "not cited",
+              ].filter(Boolean).join(" · ");
+              /* The named gap is a drill target only where it resolves to a
+                 cell this run scored. This run states it as a category name
+                 with a numeric tail, which opens nothing — and a chip that
+                 opens an empty heatmap reads as a cell that exists, the same
+                 fail-closed rule the evidence chips follow. */
+              const gapId = pfText(s.named_gap_subcap_id);
+              const gapCell = gapId && cellIndex.has(String(gapId)) ? gapId : null;
               return (
-                <div key={key} style={{ padding: 10, marginBottom: 8, background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", borderRadius: 8 }}>
-                  <div className="row" style={{ marginBottom: 6, gap: 6 }}>
+                /* One card, one target: the whole face expands it. The "More"
+                   button stays — it is what NAMES the hidden half — but a
+                   reader who clicks the paragraph should not have to find a
+                   10px control to see the rest of the same starter. */
+                <div key={key} style={{ padding: 10, marginBottom: 8, background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", borderRadius: 8, cursor: extras ? "pointer" : "default" }}
+                  title={extras && !isOpen ? "Show the rest of this starter" : ""}
+                  onClick={() => { if (extras) setOpenStarter(o => o === key ? null : key); }}>
+                  <div className="row" style={{ marginBottom: 6, gap: 6, flexWrap: "wrap" }}>
                     <span className="b b-purple" style={{ flexShrink: 0 }}>#{s.rank != null ? s.rank : i + 1}</span>
-                    {/* The card used to be stamped "Template-fill ·
-                        evidence-cited" while citing nothing. What the starter
-                        states is what it opens on, and its citations. */}
-                    {s.opens_on ? <span style={{ fontSize: 10, color: "var(--z-dpur)", flexShrink: 0 }}>opens on {String(s.opens_on).replace(/_/g, " ")}</span> : null}
-                    {/* The named gap is a cell id — a drill target, not a label. */}
-                    {s.named_gap_subcap_id ? (
+                    {stamp ? <span style={{ fontSize: 10, color: "var(--z-dpur)", opacity: .85 }}>{stamp}</span> : null}
+                    {gapCell ? (
                       <button className="chip f-mono" style={{ fontSize: 9, flexShrink: 0 }}
-                        title={`The gap this starter names — open ${pfText(s.named_gap_subcap_id)} in the heatmap`}
-                        onClick={() => openSubcap(pfText(s.named_gap_subcap_id))}>{pfText(s.named_gap_subcap_id)}</button>
+                        title={`The gap this starter names — open ${gapCell} in the heatmap`}
+                        onClick={(ev) => { ev.stopPropagation(); openSubcap(gapCell); }}>{gapCell}</button>
+                    ) : gapId ? (
+                      <span className="chip muted f-mono" style={{ fontSize: 9, flexShrink: 0, cursor: "default" }}
+                        title="the gap this starter names — not a cell id this run scored, so it opens nothing">{gapId}</span>
                     ) : null}
                     <span className="spacer" />
-                    <button className="btn btn-tertiary btn-sm" style={{ color: "var(--z-dpur)" }} title="Copy this starter" onClick={() => {
+                    <button className="btn btn-tertiary btn-sm" style={{ color: "var(--z-dpur)" }} title="Copy this starter" onClick={(ev) => {
+                      ev.stopPropagation();
                       const one = [pfText(s.text), s.followup_question ? `Follow-up: ${pfText(s.followup_question)}` : null].filter(Boolean).join("\n");
                       try { navigator.clipboard.writeText(one); pushToast("Conversation starter copied", "success"); }
                       catch (e) { pushToast("Couldn't access clipboard", "warn"); }
                     }}><Icon name="copy" size={11} /></button>
                   </div>
-                  {/* Collapsed, the card is the starter's opening lines — the
-                      prototype's card is four lines and five of them fit on one
+                  {/* Collapsed, the card is the starter's opening lines at the
+                      prototype's density — four lines, so several fit on one
                       screen. The system reference, the peer line, the follow-up
                       question and the citations are the rest of the SAME card,
                       one click away, rather than four stacked blocks that made
                       each starter a page of its own. */}
                   <div style={{ fontSize: 12, color: "#3B0764", lineHeight: 1.6 }}
-                    className={isOpen ? "" : "txt-fit-3"} title={isOpen ? "" : (pfText(s.text) || "")}>
+                    className={isOpen ? "" : "txt-fit-4"} title={isOpen ? "" : (pfText(s.text) || "")}>
                     {pfText(s.text)}
                   </div>
                   {isOpen ? (
@@ -1004,7 +1078,7 @@ function ClientPlatform({ entity, run }) {
                         </div>
                       ) : null}
                       <div style={{ marginTop: 6 }}>
-                        <PlatformEvChips ids={s.e_ids} openEvidence={openEvidence} label="cites" />
+                        <PlatformEvChips ids={cites} openEvidence={openEvidence} label="cites" />
                       </div>
                     </>
                   ) : null}
@@ -1012,7 +1086,7 @@ function ClientPlatform({ entity, run }) {
                     <div className="row" style={{ marginTop: 4 }}>
                       <span className="spacer" />
                       <button className="btn btn-tertiary btn-sm" style={{ color: "var(--z-dpur)", fontSize: 10 }}
-                        onClick={() => setOpenStarter(o => o === key ? null : key)}>
+                        onClick={(ev) => { ev.stopPropagation(); setOpenStarter(o => o === key ? null : key); }}>
                         {isOpen ? "Less" : `More · ${extras}`}
                         <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={11} />
                       </button>

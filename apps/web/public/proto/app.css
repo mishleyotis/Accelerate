@@ -808,6 +808,73 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
   color: var(--z-muted);
 }
 
+/* A table that answers to ITS OWN width, not the viewport's.
+   The viewport media queries at the bottom of this file are the only thing a
+   table normally has, and they are blind to the case that actually breaks:
+   a table inside a card inside a two-column row. Its width is the viewport
+   MINUS the sidebar MINUS the rail beside it, so at 1280px of browser the
+   platform page's gap column is ~670px while every media query still reads
+   "desktop" — the columns crushed to a sliver, and the fix before this one
+   gave the table a hard 720px floor and let the box scroll sideways. That
+   sideways scroll is the whole of "why should I slide to see components".
+
+   A container query measures the COLUMN, so the same table behaves correctly
+   wherever it is placed, in three steps:
+     wide    every column, with a floor so nothing collapses;
+     medium  the columns marked `col-drop` leave — each is a fact the row
+             already prints somewhere else, so nothing becomes unreachable —
+             and the floor drops with them;
+     narrow  one card per row, the same stacked shape the ≤760px viewport
+             rules give every table, and no floor at all.
+   overflow-x stays as a floor under the floor: a single unbreakable token
+   (a URL, a long id) can still exceed the narrowest step, and one row
+   scrolling is better than the page doing it. In normal content it never
+   engages, because the reflow has already happened. */
+.tbl-reflow { container-type: inline-size; overflow-x: auto; }
+.tbl-reflow > .tbl { min-width: 620px; }
+
+@container (max-width: 700px) {
+  .tbl-reflow .col-drop { display: none; }
+  .tbl-reflow > .tbl { min-width: 460px; }
+}
+
+@container (max-width: 520px) {
+  .tbl-reflow > .tbl { min-width: 0; }
+  .tbl-reflow .tbl { font-size: 11.5px; }
+  .tbl-reflow .tbl thead { display: none; }
+  .tbl-reflow .tbl tbody tr { display: block; padding: 10px 12px; border-bottom: 1px solid var(--z-sep); }
+  .tbl-reflow .tbl tbody td {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 8px; padding: 4px 0; border-bottom: 0; min-height: 22px;
+    word-break: break-word;
+  }
+  .tbl-reflow .tbl tbody td > * { max-width: 70%; text-align: right; }
+  .tbl-reflow .tbl tbody td::before {
+    content: attr(data-label);
+    font-weight: 600; font-size: 10px; color: var(--z-muted);
+    text-transform: uppercase; flex-shrink: 0;
+  }
+  .tbl-reflow .tbl tbody tr:hover { background: transparent; }
+  /* The empty state is one message, not a labelled field. */
+  .tbl-reflow .tbl tbody td.tbl-empty { display: block; text-align: center; }
+  .tbl-reflow .tbl tbody td.tbl-empty::before { content: none; }
+}
+
+/* The tech register's legend entries ARE the filter, so they need the
+   affordances of a control: a hover, a focus ring, and a pressed state that
+   survives the transparent border the unpressed state uses to keep the row
+   from shifting when one is selected. */
+.ts-legend {
+  transition: background var(--motion-fast) var(--ease),
+              border-color var(--motion-fast) var(--ease);
+}
+/* !important because the pressed colours are inline (each status carries its
+   own), and an inline background outranks any class rule — without it the
+   hover is silently dead on exactly the control this rule exists for. */
+.ts-legend:hover:not(:disabled):not([aria-pressed="true"]) { background: var(--z-lav) !important; }
+.ts-legend[aria-pressed="true"]:hover:not(:disabled) { filter: brightness(.97); }
+.ts-legend:focus-visible { outline: 2px solid var(--z-teal); outline-offset: 2px; }
+
 /* Filter bar */
 .filter-bar {
   display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
@@ -1481,7 +1548,7 @@ img, svg, video { max-width: 100%; }
 .card, .card-tile, .modal, .drawer { overflow-wrap: anywhere; }
 
 /* ─── Text autofit helpers ─── */
-.txt-fit-1, .txt-fit-2, .txt-fit-3 {
+.txt-fit-1, .txt-fit-2, .txt-fit-3, .txt-fit-4 {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -1490,6 +1557,10 @@ img, svg, video { max-width: 100%; }
 .txt-fit-1 { -webkit-line-clamp: 1; }
 .txt-fit-2 { -webkit-line-clamp: 2; }
 .txt-fit-3 { -webkit-line-clamp: 3; }
+/* Four is the design prototype's conversation-starter card: enough of the
+   opening that a reader can tell the starters apart, few enough that several
+   fit on one screen. */
+.txt-fit-4 { -webkit-line-clamp: 4; }
 .txt-trunc {
   overflow: hidden;
   text-overflow: ellipsis;
