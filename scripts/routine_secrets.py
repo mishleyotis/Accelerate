@@ -29,8 +29,10 @@ here — it mints cloud-platform scope only, and Drive returns 403 for it.
 from __future__ import annotations
 
 import base64
+import datetime as _dt
 import json
 import os
+import re
 import subprocess
 import time
 import urllib.error
@@ -41,6 +43,13 @@ PROJECT = os.environ.get("GCP_PROJECT", "digital-maturity-assessor")
 DRIVE_KEY_SECRET = os.environ.get("DRIVE_KEY_SECRET", "dma-routine-drive-sa-key")
 GITHUB_PAT_SECRET = os.environ.get("GITHUB_PAT_SECRET", "dma-routine-github-pat")
 DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly"
+
+GITHUB_API = os.environ.get("GITHUB_API", "https://api.github.com")
+# The routine's cron is `50 */3 * * *`. A PAT that dies inside the next three
+# hours is a PAT this firing cannot rely on: the run outlives it and the push
+# at the end — the routine's only durable output — fails after the work is
+# done. So the horizon is the firing interval, not zero.
+PAT_MIN_SECONDS = int(os.environ.get("PAT_MIN_SECONDS", 3 * 3600))
 
 # The identity the package scan already reads Drive as. The intake tree is
 # shared with it, which is why the worker Job can walk it. Impersonating it
@@ -102,6 +111,97 @@ def github_pat() -> str:
     return secret(GITHUB_PAT_SECRET).strip()
 
 
+def _parse_gh_expiry(raw: str) -> _dt.datetime | None:
+    """GitHub reports fine-grained PAT expiry as e.g. `2026-08-08 10:15:28 UTC`
+    (and, on some routes, an ISO-8601 offset form). Returns an aware datetime,
+    or None when the header is a shape this does not know."""
+    s = (raw or "").strip()
+    if s.upper().endswith(" UTC"):
+        s = s[:-4] + " +0000"
+    for fmt in ("%Y-%m-%d %H:%M:%S %z", "%Y-%m-%dT%H:%M:%S%z",
+                "%Y-%m-%d %H:%M:%S"):
+        try:
+            d = _dt.datetime.strptime(s, fmt)
+        except ValueError:
+            continue
+        return d if d.tzinfo else d.replace(tzinfo=_dt.timezone.utc)
+    return None
+
+
+def github_pat_status(min_seconds: int = PAT_MIN_SECONDS) -> dict:
+    """Prove the PAT WORKS, by spending it on `GET /user`.
+
+    Length is not validity: an expired token is exactly as many characters as
+    a live one, and a revoked one is too. The only check that distinguishes
+    them is a call. GitHub answers it with the token's real expiry in the
+    `github-authentication-token-expiration` response header, so one request
+    settles both "is it accepted" and "will it survive this run".
+
+    Returns {ok, verdict, detail, login, expires_at, seconds_left}. The token
+    never appears in the return value, in `detail`, or in anything printed —
+    not in full and not as a prefix.
+    """
+    out: dict = {"login": None, "expires_at": None, "seconds_left": None}
+    try:
+        pat = github_pat()
+    except Exception as e:                                     # noqa: BLE001
+        return {**out, "ok": False, "verdict": "FAIL",
+                "detail": f"could not be read: {e}"}
+    if not pat:
+        return {**out, "ok": False, "verdict": "FAIL",
+                "detail": "resolved to an empty value"}
+
+    req = urllib.request.Request(
+        f"{GITHUB_API}/user",
+        headers={"Authorization": f"Bearer {pat}",
+                 "Accept": "application/vnd.github+json",
+                 "X-GitHub-Api-Version": "2022-11-28",
+                 "User-Agent": "dma-routine-preflight"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            headers, body = r.headers, r.read()
+    except urllib.error.HTTPError as e:
+        return {**out, "ok": False, "verdict": "FAIL",
+                "detail": f"GitHub rejected it: HTTP {e.code} on GET /user "
+                          f"(expired, revoked or wrongly scoped)"}
+    except Exception as e:                                     # noqa: BLE001
+        # Not proof the token is bad — but the routine's only durable output is
+        # a push, so an unreachable GitHub is not a workable state either.
+        return {**out, "ok": False, "verdict": "FAIL",
+                "detail": f"could not reach GitHub to validate it "
+                          f"({type(e).__name__}); the run's only output is a push"}
+
+    try:
+        out["login"] = json.loads(body).get("login")
+    except Exception:                                          # noqa: BLE001
+        pass
+    who = out["login"] or "the token's account"
+
+    raw = headers.get("github-authentication-token-expiration")
+    if not raw:
+        return {**out, "ok": True, "verdict": "OK",
+                "detail": f"accepted by GitHub for {who}; no expiry set"}
+    out["expires_at"] = raw.strip()
+    exp = _parse_gh_expiry(raw)
+    if exp is None:
+        return {**out, "ok": True, "verdict": "WARN",
+                "detail": f"accepted by GitHub for {who}; expiry header "
+                          f"{raw.strip()!r} is in an unrecognised shape"}
+    left = exp.timestamp() - time.time()
+    out["seconds_left"] = int(left)
+    if left <= 0:
+        return {**out, "ok": False, "verdict": "FAIL",
+                "detail": f"EXPIRED at {out['expires_at']}"}
+    if left < min_seconds:
+        return {**out, "ok": False, "verdict": "FAIL",
+                "detail": f"expires at {out['expires_at']} — {left / 3600:.1f}h "
+                          f"left, inside the {min_seconds / 3600:.0f}h firing "
+                          f"interval; this run would outlive it"}
+    return {**out, "ok": True, "verdict": "OK",
+            "detail": f"accepted by GitHub for {who}; {left / 3600:.1f}h until "
+                      f"{out['expires_at']}"}
+
+
 def _b64(b: bytes) -> bytes:
     return base64.urlsafe_b64encode(b).rstrip(b"=")
 
@@ -128,9 +228,45 @@ def drive_token(scope: str = DRIVE_SCOPE) -> tuple[str, str]:
     if r.returncode == 0 and len(tok) > 100:
         how = f"impersonating {DRIVE_IMPERSONATE}"
         _cache[ck] = (tok, how, time.time() + 3000)
+        _remember_identity(DRIVE_IMPERSONATE)
         return tok, how
 
     return _drive_token_from_key(scope, ck)
+
+
+# Which identity the live Drive token belongs to. Remediation has to name THIS
+# one: a 404 taken while impersonating dmai-worker and a 404 taken with the
+# stored key need different fixes, and telling an operator to share a folder
+# with an account that already has it wastes the one action they were told to
+# take.
+_DRIVE_IDENTITY: str | None = None
+
+
+def _remember_identity(email: str) -> None:
+    global _DRIVE_IDENTITY
+    _DRIVE_IDENTITY = email
+
+
+def drive_identity() -> str:
+    """The account the routine's Drive calls are actually made as."""
+    if _DRIVE_IDENTITY is None:
+        drive_token()
+    return _DRIVE_IDENTITY or "(unknown identity)"
+
+
+class DriveError(RuntimeError):
+    """A Drive read that did not happen.
+
+    Raised rather than returned so it cannot be mistaken for a successful read
+    of an empty folder — the failure mode this replaces was
+    `drive_get(...).get("files", [])` yielding `[]` from an error body and the
+    routine concluding there was nothing to scan.
+    """
+
+    def __init__(self, path: str, code: int, message: str, identity: str):
+        self.path, self.code, self.message, self.identity = (
+            path, code, message, identity)
+        super().__init__(f"Drive {code} on {path} as {identity}: {message}")
 
 
 def _drive_token_from_key(scope: str, ck: str) -> tuple[str, str]:
@@ -178,21 +314,33 @@ def _drive_token_from_key(scope: str, ck: str) -> tuple[str, str]:
             f"{e.read()[:200].decode(errors='replace')}") from None
     how = f"stored key for {info['client_email']}"
     _cache[ck] = (tok, how, now + 3000)
+    _remember_identity(info["client_email"])
     return tok, how
 
 
 def drive_get(path: str, **params) -> dict:
-    """One Drive v3 GET with the routine's token. Shared-drive aware."""
+    """One Drive v3 GET with the routine's token. Shared-drive aware.
+
+    Raises DriveError on any failure — HTTP or transport. It used to return
+    `{"error": {...}}`, which every caller then read with `.get("files", [])`,
+    so a permissions failure and an empty folder produced the same `[]` and the
+    routine treated "I could not look" as "there is nothing there". A read that
+    did not happen must not be answerable.
+    """
     params.setdefault("supportsAllDrives", "true")
     params.setdefault("includeItemsFromAllDrives", "true")
     url = f"https://www.googleapis.com/drive/v3/{path}?" + urllib.parse.urlencode(params)
     req = urllib.request.Request(
         url, headers={"Authorization": f"Bearer {drive_token()[0]}"})
     try:
-        return json.load(urllib.request.urlopen(req))
+        return json.load(urllib.request.urlopen(req, timeout=60))
     except urllib.error.HTTPError as e:
-        return {"error": {"code": e.code,
-                          "message": e.read()[:300].decode(errors="replace")}}
+        raise DriveError(path, e.code,
+                         e.read()[:300].decode(errors="replace"),
+                         drive_identity()) from None
+    except Exception as e:                                     # noqa: BLE001
+        raise DriveError(path, 0, f"{type(e).__name__}: {e}",
+                         drive_identity()) from None
 
 
 
@@ -233,19 +381,23 @@ def doc_secrets() -> dict:
     # consults this function. Mark in-progress as {} so the nested call reads
     # Secret Manager directly instead of recursing.
     _DOC_CACHE = {}
-    import re
+    who = "(identity not established)"
     try:
         tok, _how = drive_token("https://www.googleapis.com/auth/drive.readonly")
+        who = drive_identity()
         url = (f"https://www.googleapis.com/drive/v3/files/{SECRETS_DOC_ID}"
                "/export?mimeType=text/plain")
         req = urllib.request.Request(url, headers={"Authorization": f"Bearer {tok}"})
         text = urllib.request.urlopen(req, timeout=30).read().decode()
     except urllib.error.HTTPError as e:
         if e.code == 404:
-            print("secrets doc         FAIL  404: the doc is not shared with the "
-                  "routine's identity. Share it (view-only) with "
-                  "dmai-worker@digital-maturity-assessor.iam.gserviceaccount.com "
-                  "— falling back to Secret Manager values this run.")
+            # Name the identity that took THIS 404. Impersonation and the
+            # stored-key fallback are different accounts, and the fallback is
+            # exactly the case where the hardcoded worker address is wrong.
+            print(f"secrets doc         FAIL  404: the doc is not shared with "
+                  f"{who}, the identity this read was made as. Share it "
+                  f"(view-only) with that account — falling back to Secret "
+                  f"Manager values this run.")
         else:
             print(f"secrets doc         WARN  HTTP {e.code} — falling back to "
                   "Secret Manager values this run.")
@@ -309,29 +461,37 @@ def _parse_doc(text: str) -> dict:
 
 
 def main() -> int:
-    # The user's stated source of record first — its verdict line names the
-    # one-click share fix on 404 and never prints a value.
-    doc_secrets()
     """Preflight. Prints verdicts only — no secret and no prefix of one.
 
-    Exit codes are graded, because the two failures need different responses:
+    Exit codes, and the line between them:
 
-      0  every credential resolves and the Drive tree is reachable
-      2  credentials resolve, but the stored key cannot see the package tree —
-         the session's own Drive connector has to supply it. Degraded, not
-         blocked.
-      1  a secret could not be read at all. Nothing downstream can work.
+      0  FAIL-free. Every credential resolves, works, and outlives this run.
+      2  WARN — degraded but workable: something is not as intended, and the
+         run can still complete correctly. The secrets doc being unreachable
+         (Secret Manager carries the values) and an intake tree that is
+         genuinely, verifiably empty both qualify.
+      1  FAIL — the run cannot complete correctly. A secret that will not
+         read, a PAT GitHub rejects or that dies inside this firing interval,
+         a Drive tree that cannot be READ. "Could not read" is a FAIL and not
+         a WARN precisely because it is indistinguishable, from the outside,
+         from the state the routine treats as "nothing to do".
     """
+    # The user's stated source of record first — its verdict line names the
+    # identity that took the 404 and never prints a value.
+    doc_secrets()
+
     intake = os.environ.get("INTAKE_FOLDER_ID",
                             "1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo")
     degraded = False
 
-    try:
-        pat = github_pat()
-        print(f"github pat        OK   resolved, {len(pat)} chars, not echoed")
-    except Exception as e:                                     # noqa: BLE001
-        print(f"github pat        FAIL {e}")
+    # Length is not validity. Spend the token on GET /user and read the expiry
+    # GitHub reports back.
+    st = github_pat_status()
+    print(f"github pat        {st['verdict']:<5}{st['detail']}")
+    if not st["ok"]:
         return 1
+    if st["verdict"] == "WARN":
+        degraded = True
 
     try:
         _, how = drive_token()
@@ -344,21 +504,31 @@ def main() -> int:
     # key authenticated and still returned 404 on the intake folder, because the
     # folder is shared with the WORKER's identity and not with that key's. A
     # preflight that stopped at "token minted" would have called that green.
-    meta = drive_get(f"files/{intake}", fields="id,name")
-    if "error" in meta:
-        who = json.loads(secret(DRIVE_KEY_SECRET))["client_email"]
-        print(f"intake folder     WARN {meta['error']['code']} — this identity "
-              f"cannot see the intake tree. Either grant "
-              f"roles/iam.serviceAccountTokenCreator on {DRIVE_IMPERSONATE} "
-              f"(preferred — no key material), or share the folder with {who}")
-        degraded = True
-    else:
+    try:
+        meta = drive_get(f"files/{intake}", fields="id,name")
+    except DriveError as e:
+        print(f"intake folder     FAIL {e.code} — {e.identity} cannot READ the "
+              f"intake tree (this is not the same as the tree being empty). "
+              f"Either grant roles/iam.serviceAccountTokenCreator on "
+              f"{DRIVE_IMPERSONATE} (preferred — no key material), or share "
+              f"the folder with {e.identity}")
+        return 1
+
+    try:
         kids = drive_get("files", q=f"'{intake}' in parents",
                          fields="files(id,name)", pageSize=50)
-        n = len(kids.get("files", []))
-        print(f"intake folder     OK   {meta.get('name')!r}, {n} child folder(s)")
-        if n == 0:
-            print("intake folder     WARN readable but empty — nothing to scan")
+    except DriveError as e:
+        print(f"intake children   FAIL {e.code} — the folder resolves but its "
+              f"children could not be listed as {e.identity}; this run cannot "
+              f"tell an empty tree from an unreadable one")
+        return 1
+
+    n = len(kids.get("files", []))
+    print(f"intake folder     OK   {meta.get('name')!r}, {n} child folder(s)")
+    if n == 0:
+        print("intake folder     WARN listed successfully and is genuinely "
+              "empty — nothing to scan")
+        degraded = True
     return 2 if degraded else 0
 
 
