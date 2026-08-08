@@ -649,6 +649,53 @@ Produce the evidence tier and claim-class distribution. This is a census; it has
 - **Section** `overview.thought_leadership` — **renders on** D1 (Overview)
 - **Contract** Dated executive publications with verbatim quotes. A contradicting entry is the most valuable row on the card and is never filtered out.
 
+### Three to five entries, weighted — not three
+
+**Target 3–5.** Three is the floor, not the goal, and the run measured here shipped exactly
+three because nothing said otherwise. A fourth or fifth entry that clears admission is worth
+more than a tidy row of three: this is the only card where the client's own executives speak,
+and an AE quotes from it in the room.
+
+**Admission is unchanged and comes first.** An entry enters because it *corroborates,
+contradicts or extends a finding* and links to a served cell. Weighting ranks the admitted
+set; it never admits anything.
+
+**Then rank, in this order:**
+
+1. **Anything that CONTRADICTS a finding**, whatever its subject. It is never displaced by a
+   more on-topic corroboration, and it is never dropped to make room. If the set has one, it
+   is entry one.
+2. **Zennify-relevant positions**, which means the Salesforce / nCino / data-platform space
+   for financial institutions: Salesforce and its clouds (Financial Services Cloud, Data
+   Cloud, Marketing Cloud, Service Cloud, Agentforce, MuleSoft, Tableau), nCino, and the data
+   substrate under them (Snowflake, Databricks, the warehouse, the lakehouse, the member or
+   customer 360). An executive naming one of these, by name, on the record, is the highest
+   value row on this card that is not a contradiction.
+3. **The capability domain those platforms serve, named without a product**: member or
+   customer 360, data governance and lineage, integration and APIs, onboarding and
+   origination, service automation, AI inside the member workflow. A CDO saying "we sequenced
+   the data layer before the channel work" ranks here even though no vendor appears.
+4. **Anything else that bears on an assessed capability.** Fills a fourth or fifth slot;
+   never displaces 1–3.
+
+A statement about branch openings, community sponsorship or hiring volume bears on no
+assessed capability and does not enter at any rank.
+
+**One anti-rule.** Weighting is not a search filter. Do not go looking only for Salesforce
+mentions and then report the card as complete — the search is still all seven source families
+across every executive on the roster, and the weighting is applied to what comes back. Five
+entries about one platform, from one executive, is a finding about your search rather than
+about the client.
+
+**Fewer than three after the full ladder is a result, not a failure to pad.** Emit what you
+have, set `thin=true`, and record `sources_searched` — the routes attempted per executive,
+by name, so a reader can see the absence was established rather than assumed. At zero, the
+section carries `empty_state` with its reason, `sources_searched` and a `closure_condition`
+(what would settle it: a conference programme, a byline, a transcript). Never pad with
+corporate press releases, vendor case-study quotes attributed to no person, or a second quote
+from an executive already on the card — this card is about **named people speaking**, and a
+short honest card outranks a full one that is not.
+
 ### Where the entity holds earnings calls, the card's constraint is selection
 
 Four transcripts a year, each with prepared remarks and an analyst Q&A, is a standing supply
@@ -667,5 +714,5 @@ words become evidence.
 ### Prompt
 
 ```
-Produce the thought-leadership signal: the client's executives, in their own words, on the assessed capabilities. ENRICHMENT-FIRST. The package will not contain this. Search:   - LinkedIn posts and articles by named executives from the leadership roster   - conference agendas, panel listings and session abstracts, by year   - podcast and webinar appearances   - by-lined articles and trade-press contributions   - earnings-call transcripts for CIO/CTO/CDO commentary   - the entity's blog where posts are attributed to an executive   - association and user-group speaking slots Query with the executive's NAME plus the entity, with year markers. Mint E-CC ids with url + verbatim excerpt + retrieval date + tier + claim label. Per entry: {kind, published_on, headline, quote, author_name, author_role, url,             linked_subcap_ids[], alignment, e_id, claim_label}   kind            LINKEDIN POST │ CONFERENCE │ ARTICLE │ PODCAST │                   EARNINGS CALL │ BLOG │ PANEL   published_on    REQUIRED, to the day where the source gives one. Undated ->                   excluded: the card's own framing is a recency window, so a date                   is what makes an entry admissible.   headline        as published. Do NOT rewrite it.   quote           VERBATIM, 80-260 chars, the executive's own sentence. Never                   paraphrase an executive - the value is that these are their                   words. Never stitch two sentences into one quote.   author_role     the role AS STATED AT THE TIME. A quote from someone who has                   since left is still evidence but must be dated and the                   departure noted - cross-check against the leadership roster.   linked_subcap_ids                   which assessed capabilities the statement bears on. A post                   about community sponsorship bears on none and does not belong                   here. This link is what makes the card part of the DMA rather                   than a press clipping.   alignment       CORROBORATES │ CONTRADICTS │ EXTENDS our finding, with a 12-25                   word clause. A CONTRADICTS entry is the most valuable thing on                   the card and must NOT be filtered out. CHALLENGE (R-Layer)  B  For every CORROBORATES entry, ask whether it is marketing rather than a     capability claim. "We are committed to digital transformation" is T5 and     evidences nothing.  D  Probes: a same-named executive at a different institution (verify against the     entity's own leadership page); a repost of someone else's content read as the     executive's view; a quote lifted from a vendor case study (T5, needs     corroboration); a departed executive presented as current; a date outside the     rendered window.  E  REJECT -> drop the entry. Fewer than 2 entries after searching all seven     source families -> emit what you have, set thin=true, and name what was     searched. Do NOT pad with corporate press releases: this card is about NAMED     PEOPLE speaking. GATES: every entry dated, cited, attributed to a named person with a role, and linked to a served cell; verbatim quotes only; contradicting entries retained.
+Produce the thought-leadership signal: the client's executives, in their own words, on the assessed capabilities. ENRICHMENT-FIRST. The package will not contain this. Search:   - LinkedIn posts and articles by named executives from the leadership roster   - conference agendas, panel listings and session abstracts, by year   - podcast and webinar appearances   - by-lined articles and trade-press contributions   - earnings-call transcripts for CIO/CTO/CDO commentary   - the entity's blog where posts are attributed to an executive   - association and user-group speaking slots Query with the executive's NAME plus the entity, with year markers. Mint E-CC ids with url + verbatim excerpt + retrieval date + tier + claim label. Per entry: {kind, published_on, headline, quote, author_name, author_role, url,             linked_subcap_ids[], alignment, e_id, claim_label}   kind            LINKEDIN POST │ CONFERENCE │ ARTICLE │ PODCAST │                   EARNINGS CALL │ BLOG │ PANEL   published_on    REQUIRED, to the day where the source gives one. Undated ->                   excluded: the card's own framing is a recency window, so a date                   is what makes an entry admissible.   headline        as published. Do NOT rewrite it.   quote           VERBATIM, 80-260 chars, the executive's own sentence. Never                   paraphrase an executive - the value is that these are their                   words. Never stitch two sentences into one quote.   author_role     the role AS STATED AT THE TIME. A quote from someone who has                   since left is still evidence but must be dated and the                   departure noted - cross-check against the leadership roster.   linked_subcap_ids                   which assessed capabilities the statement bears on. A post                   about community sponsorship bears on none and does not belong                   here. This link is what makes the card part of the DMA rather                   than a press clipping.   alignment       CORROBORATES │ CONTRADICTS │ EXTENDS our finding, with a 12-25                   word clause. A CONTRADICTS entry is the most valuable thing on                   the card and must NOT be filtered out. CHALLENGE (R-Layer)  B  For every CORROBORATES entry, ask whether it is marketing rather than a     capability claim. "We are committed to digital transformation" is T5 and     evidences nothing.  D  Probes: a same-named executive at a different institution (verify against the     entity's own leadership page); a repost of someone else's content read as the     executive's view; a quote lifted from a vendor case study (T5, needs     corroboration); a departed executive presented as current; a date outside the     rendered window.  E  REJECT -> drop the entry. TARGET 3-5 ADMITTED ENTRIES, ranked: any CONTRADICTS     entry first, then Zennify-relevant positions (Salesforce and its clouds, nCino,     the data substrate - Snowflake, Databricks, the member/customer 360), then the     same capability domain named without a product, then anything else bearing on an     assessed capability. Weighting RANKS the admitted set; it never admits. Fewer     than 3 after searching all seven source families -> emit what you have, set     thin=true, and record sources_searched per executive by name. Zero -> empty_state     with reason + sources_searched + closure_condition. Do NOT pad with corporate     press releases, unattributed vendor case-study quotes, or a second quote from an     executive already on the card: this card is about NAMED PEOPLE speaking. GATES: every entry dated, cited, attributed to a named person with a role, and linked to a served cell; verbatim quotes only; contradicting entries retained.
 ```

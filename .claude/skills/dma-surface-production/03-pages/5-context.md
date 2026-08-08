@@ -207,6 +207,24 @@ opens a panel that says nothing twice.
 metadata. A storyline that names no inflection point is a list of dates in
 sentence form.
 
+**`arc_shape` is one of five words, and it is not a place to be descriptive.**
+
+```
+STEADY_INVESTMENT · STOP_START · POST_EVENT_CATCHUP · LEGACY_ANCHORED · RECENT_ACCELERATION
+```
+
+A promoted run served `"strategy-first, substrate-later"` here. It is a better
+sentence than any of the five and it is the wrong answer: the column is TEXT, so
+it stored cleanly, the card printed it verbatim, and the arc it describes —
+strategy landing before the substrate that carries it — is `LEGACY_ANCHORED`
+with the evidence sentence in `storyline`, where prose belongs. An enum field
+that accepts a sentence is a field nothing downstream can group, filter or
+compare across runs, which is the entire point of having five words.
+
+`scripts/check_payload.py` refuses a value outside the five. The connector's own
+CG-09 covers `events[].signal` and `techstack.items[].status`; **it does not
+cover `arc_shape`**, so the local check is the only one that fires.
+
 ### Sixteen clients had two events. A disclosing entity will offer two hundred.
 
 The scarcity failure is the documented one and the enrichment step exists for it. The
@@ -229,11 +247,12 @@ placed either, and a reader cannot see where it sits. Date it or accept that.
 | Field / element | Source of truth | Where it comes from |
 | --- | --- | --- |
 | events[] | Research workbook + enrichment | {event_date, title, body, kind, signal, capability_ids[], maturity_effect, e_ids[], claim_label} |
+| events[].kind | contract vocabulary | `PLATFORM │ LEADERSHIP │ M&A │ REGULATORY │ CHANNEL │ DATA │ SECURITY │ STRATEGY` — exact, and there are only eight. A run served `TECHNOLOGY` and `CAPABILITY`, which are reasonable words and match no filter on D5 |
 | events[].signal | contract vocabulary | `POSITIVE │ NEUTRAL │ NEGATIVE` — CG-09, exact case. The direction the event moved the ASSESSED position of the cells it names; the caps log decides, then the counterfactual |
 | events[].maturity_effect | producer | `ADVANCED │ CONSTRAINED │ NEUTRAL` + one clause; this is where the consequence sentence goes. One claim with `signal`, and AG-05 blocks a disagreement |
 | events[].capability_ids | catalogue | an event bearing on no capability is not a digital-evolution event |
 | storyline | producer | 60–110 words; renders as the page's argument |
-| arc_shape | producer | needs ≥3 dated points; never asserted from two |
+| arc_shape | contract vocabulary | **exactly one of five words** — `STEADY_INVESTMENT │ STOP_START │ POST_EVENT_CATCHUP │ LEGACY_ANCHORED │ RECENT_ACCELERATION`. Needs ≥3 dated points; never asserted from two. The evidence sentence goes in `storyline`, not here |
 | verified_sparse | producer | set when the sources hold fewer than 3 dated events |
 
 ### Prompt
