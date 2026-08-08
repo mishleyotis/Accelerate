@@ -27,88 +27,14 @@
  */
 const { test } = require("node:test");
 const assert = require("node:assert");
-const http = require("node:http");
 const fs = require("node:fs");
-const path = require("node:path");
 
-const WEB = path.join(__dirname, "..");
-const PUBLIC = path.join(WEB, "public");
-const JS_DIR = process.env.PROTO_JS_DIR || path.join(PUBLIC, "proto", "js");
+// The server, the script list, the playwright lookup and the settle rule are
+// shared with tests/surface-contract.test.js — one harness, so the two suites
+// cannot end up driving two different apps.
+const { resolvePlaywright, startServer, settle } = require("./proto-page-harness");
+
 const ENTITY = "test-credit-union";
-
-/* ── the harness ─────────────────────────────────────────────────────── */
-
-function resolvePlaywright() {
-  const candidates = [
-    process.env.PLAYWRIGHT_CORE,
-    "playwright-core",
-    path.join(WEB, "node_modules", "playwright-core"),
-    ...fsGlob("/tmp/claude-0", "scratchpad/node_modules/playwright-core"),
-  ].filter(Boolean);
-  for (const p of candidates) {
-    try { return require(p); } catch { /* keep looking */ }
-  }
-  return null;
-}
-
-// Two levels deep under /tmp/claude-0/<repo>/<session>/, which is where the
-// QA scripts put their own copy. Not a real glob — just enough of one.
-function fsGlob(root, tail) {
-  const out = [];
-  try {
-    for (const a of fs.readdirSync(root)) {
-      for (const b of fs.readdirSync(path.join(root, a))) {
-        out.push(path.join(root, a, b, tail));
-      }
-    }
-  } catch { /* no scratchpad here */ }
-  return out;
-}
-
-// The script list is READ from the route handler rather than copied, so the
-// test cannot drift out of load order with the page it is standing in for.
-function scriptList() {
-  const src = fs.readFileSync(path.join(WEB, "app", "route.js"), "utf8");
-  const block = src.match(/const SCRIPTS = \[([\s\S]*?)\];/);
-  assert.ok(block, "app/route.js no longer declares SCRIPTS — update this test");
-  return [...block[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
-}
-
-const MIME = { ".js": "text/javascript", ".css": "text/css", ".png": "image/png" };
-
-function startServer(live) {
-  const scripts = scriptList();
-  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
-<title>DMA Insights</title><link rel="stylesheet" href="/proto/app.css"></head>
-<body><div id="app"></div>
-<script>window.DMA_LIVE=${JSON.stringify(live).replace(/</g, "\\u003c")};</script>
-${scripts.map((s) => `<script src="/${s}" defer></script>`).join("\n")}
-</body></html>`;
-
-  const server = http.createServer((req, res) => {
-    const url = (req.url || "/").split("?")[0];
-    if (url === "/" || url === "/index.html") {
-      res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      return res.end(html);
-    }
-    // proto/js comes from JS_DIR (overridable); everything else from public/.
-    const file = url.startsWith("/proto/js/")
-      ? path.join(JS_DIR, url.slice("/proto/js/".length))
-      : path.join(PUBLIC, url.replace(/^\//, ""));
-    if (!file.startsWith(JS_DIR) && !file.startsWith(PUBLIC)) {
-      res.writeHead(403); return res.end();
-    }
-    fs.readFile(file, (err, buf) => {
-      if (err) { res.writeHead(404); return res.end(); }
-      res.writeHead(200, { "content-type": MIME[path.extname(file)] || "application/octet-stream" });
-      res.end(buf);
-    });
-  });
-  return new Promise((resolve) => {
-    server.listen(0, "127.0.0.1", () => resolve(
-      { server, base: `http://127.0.0.1:${server.address().port}` }));
-  });
-}
 
 /* ── the payload ─────────────────────────────────────────────────────── */
 
@@ -399,46 +325,3 @@ test("fault injection: one bad field costs one card, never the app",
     await new Promise((r) => server.close(r));
   }
 });
-
-// Wait for the DOM to stop changing. Never a fixed delay: a fixed wait reports
-// the section loader as a blanked page the moment the reads slow down.
-//
-// The boot screen is the trap. App() holds the tree behind a 600ms font/boot
-// timer, and that screen is STATIC — it satisfies "stopped changing" perfectly
-// while showing nothing but "Loading DMA Insights…". So the page shell has to
-// arrive first, and only then is stillness meaningful.
-async function settle(page, quietMs = 400, timeoutMs = 15000) {
-  try {
-    // Both loaders are traps for a "has it stopped changing" wait: the boot
-    // screen and the section loader are STATIC, so a settle that only watched
-    // the DOM would call either of them a finished page. The wait is therefore
-    // for a shell with no loader in it.
-    await page.waitForFunction(
-      () => !!document.querySelector("#app .main, #app .empty, #app .loader-card .btn")
-            && !document.querySelector(".loader-section, .loader-page"),
-      null, { timeout: timeoutMs });
-  } catch {
-    // Report the DEFECT, not the harness. Before this repair every case below
-    // ended here, and "waitForSelector timed out" says nothing; what actually
-    // happened is that React unmounted the tree and #app is empty, or the read
-    // failed in a promise and the page is still on its boot screen for ever.
-    const seen = await page.evaluate(() => ({
-      len: (document.body.innerText || "").length,
-      appChildren: document.getElementById("app")
-        ? document.getElementById("app").childElementCount : -1,
-      head: (document.body.innerText || "").slice(0, 160),
-    }));
-    assert.fail(`no page ever rendered: #app has ${seen.appChildren} children, `
-      + `body is ${seen.len} chars — the tree unmounted or never left the boot `
-      + `screen.\n${seen.head}`);
-  }
-  const started = Date.now();
-  let last = "", lastChange = Date.now();
-  while (Date.now() - started < timeoutMs) {
-    const now = await page.evaluate(() => (document.body.innerText || "").length + ":"
-      + document.querySelectorAll("*").length);
-    if (now !== last) { last = now; lastChange = Date.now(); }
-    else if (Date.now() - lastChange > quietMs) return;
-    await new Promise((r) => setTimeout(r, 100));
-  }
-}

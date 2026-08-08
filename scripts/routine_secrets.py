@@ -524,10 +524,17 @@ def main() -> int:
     # Length is not validity. Spend the token on GET /user and read the expiry
     # GitHub reports back.
     st = github_pat_status()
-    print(f"github pat        {st['verdict']:<5}{st['detail']}")
+    # Padded to the longest verdict word, not to the shortest: at 5 wide
+    # UNKNOWN overflowed its own column and printed "UNKNOWNan invalid token
+    # is also accepted here" — the one verdict whose text most needs reading,
+    # run together with the word before it.
+    print(f"github pat        {st['verdict']:<8}{st['detail']}")
     if not st["ok"]:
         return 1
-    if st["verdict"] == "WARN":
+    # UNKNOWN is degraded, not fine. It means the check could not read the
+    # token's real state — which is exactly the condition under which a
+    # silent OK would send the routine off to discover the truth by failing.
+    if st["verdict"] in ("WARN", "UNKNOWN"):
         degraded = True
 
     try:
