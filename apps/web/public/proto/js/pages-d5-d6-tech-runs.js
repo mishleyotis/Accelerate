@@ -653,7 +653,21 @@ function RegulatoryStanding({
   }, "This section cites no evidence ids.")));
 }
 
-/* ── Range slider ───────────────────────────────────────────────── */
+/* ── Markers on a percentage track ──────────────────────────────────
+   A marker of width w centred on its value — `calc(pct% - w/2)`, or the same
+   thing as `translateX(-50%)` — has half of itself OUTSIDE the track at 0%
+   and at 100%. That is a real w/2 of content past the box, and it is why the
+   context page's slider AND its timeline each measured 8px wider than their
+   own track at every viewport tested.
+
+   Blending the offset with the position instead — no inset at the start, the
+   marker's full width at the end — keeps a whole marker inside the track at
+   both ends and moves its centre across the same span in between. It is the
+   geometry a native range input uses, for the same reason. */
+function markerLeft(pct, w) {
+  const p = Math.max(0, Math.min(100, pct));
+  return `calc(${p}% - ${(p * w / 100).toFixed(2)}px)`;
+}
 function RangeSlider({
   min,
   max,
@@ -661,6 +675,7 @@ function RangeSlider({
   onChange
 }) {
   const [v1, v2] = value;
+  const pct = v => max === min ? 0 : (v - min) / (max - min) * 100;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative",
@@ -715,7 +730,7 @@ function RangeSlider({
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "absolute",
-      left: `calc(${(v1 - min) / (max - min) * 100}% - 8px)`,
+      left: markerLeft(pct(v1), 16),
       width: 16,
       height: 16,
       background: "#fff",
@@ -728,7 +743,7 @@ function RangeSlider({
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "absolute",
-      left: `calc(${(v2 - min) / (max - min) * 100}% - 8px)`,
+      left: markerLeft(pct(v2), 16),
       width: 16,
       height: 16,
       background: "#fff",
@@ -820,13 +835,12 @@ function InteractiveTimeline({
       key: e.id,
       style: {
         position: "absolute",
-        left: `${pct}%`,
+        left: markerLeft(pct, active ? 22 : 16),
         top: active ? -10 : -7,
         width: active ? 22 : 16,
         height: active ? 22 : 16,
         borderRadius: 11,
         background: TONE[e.signal],
-        transform: "translateX(-50%)",
         border: "2px solid #fff",
         cursor: "pointer",
         boxShadow: active ? "0 0 0 4px " + TONE[e.signal] + "40" : "var(--sh-sm)",
@@ -1988,13 +2002,12 @@ function Timeline({
       key: e.id,
       style: {
         position: "absolute",
-        left: `${pct}%`,
+        left: markerLeft(pct, 16),
         top: -7,
         width: 16,
         height: 16,
         borderRadius: 8,
         background: TONE[e.signal],
-        transform: "translateX(-8px)",
         border: "2px solid #fff",
         cursor: "pointer",
         boxShadow: "var(--sh-sm)"

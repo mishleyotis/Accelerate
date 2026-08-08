@@ -447,9 +447,25 @@ function RegulatoryStanding({ entity, issues, setIssueOpen, openEvidence }) {
   );
 }
 
-/* ── Range slider ───────────────────────────────────────────────── */
+/* ── Markers on a percentage track ──────────────────────────────────
+   A marker of width w centred on its value — `calc(pct% - w/2)`, or the same
+   thing as `translateX(-50%)` — has half of itself OUTSIDE the track at 0%
+   and at 100%. That is a real w/2 of content past the box, and it is why the
+   context page's slider AND its timeline each measured 8px wider than their
+   own track at every viewport tested.
+
+   Blending the offset with the position instead — no inset at the start, the
+   marker's full width at the end — keeps a whole marker inside the track at
+   both ends and moves its centre across the same span in between. It is the
+   geometry a native range input uses, for the same reason. */
+function markerLeft(pct, w) {
+  const p = Math.max(0, Math.min(100, pct));
+  return `calc(${p}% - ${(p * w / 100).toFixed(2)}px)`;
+}
+
 function RangeSlider({ min, max, value, onChange }) {
   const [v1, v2] = value;
+  const pct = (v) => (max === min ? 0 : (v - min) / (max - min) * 100);
   return (
     <div style={{ position: "relative", height: 26, display: "flex", alignItems: "center" }}>
       <div style={{ position: "absolute", left: 0, right: 0, height: 4, background: "var(--z-sep)", borderRadius: 2 }} />
@@ -457,8 +473,8 @@ function RangeSlider({ min, max, value, onChange }) {
       <input type="range" min={min} max={max} value={v1} onChange={e => onChange([Math.min(parseInt(e.target.value), v2), v2])} style={{ position: "absolute", inset: 0, opacity: 0.001, cursor: "pointer", margin: 0 }} />
       <input type="range" min={min} max={max} value={v2} onChange={e => onChange([v1, Math.max(parseInt(e.target.value), v1)])} style={{ position: "absolute", inset: 0, opacity: 0.001, cursor: "pointer", margin: 0 }} />
       {/* Knobs */}
-      <div style={{ position: "absolute", left: `calc(${(v1 - min) / (max - min) * 100}% - 8px)`, width: 16, height: 16, background: "#fff", border: "2px solid var(--z-teal)", borderRadius: 8, top: 5, pointerEvents: "none", boxShadow: "0 1px 3px rgba(0,0,0,.15)" }} />
-      <div style={{ position: "absolute", left: `calc(${(v2 - min) / (max - min) * 100}% - 8px)`, width: 16, height: 16, background: "#fff", border: "2px solid var(--z-teal)", borderRadius: 8, top: 5, pointerEvents: "none", boxShadow: "0 1px 3px rgba(0,0,0,.15)" }} />
+      <div style={{ position: "absolute", left: markerLeft(pct(v1), 16), width: 16, height: 16, background: "#fff", border: "2px solid var(--z-teal)", borderRadius: 8, top: 5, pointerEvents: "none", boxShadow: "0 1px 3px rgba(0,0,0,.15)" }} />
+      <div style={{ position: "absolute", left: markerLeft(pct(v2), 16), width: 16, height: 16, background: "#fff", border: "2px solid var(--z-teal)", borderRadius: 8, top: 5, pointerEvents: "none", boxShadow: "0 1px 3px rgba(0,0,0,.15)" }} />
       {/* Tick marks */}
       <div style={{ position: "absolute", bottom: -16, left: 0, right: 0, display: "flex", justifyContent: "space-between", fontSize: 9.5, color: "var(--z-muted)" }}>
         {Array.from({ length: max - min + 1 }).map((_, i) => <span key={i}>{min + i}</span>)}
@@ -502,7 +518,7 @@ function InteractiveTimeline({ events, setHoverEvent, setSelectedEvent, selected
           const active = selectedEvent === i || hoverEvent === i;
           return (
             <button key={e.id}
-              style={{ position: "absolute", left: `${pct}%`, top: active ? -10 : -7, width: active ? 22 : 16, height: active ? 22 : 16, borderRadius: 11, background: TONE[e.signal], transform: "translateX(-50%)", border: "2px solid #fff", cursor: "pointer", boxShadow: active ? "0 0 0 4px " + TONE[e.signal] + "40" : "var(--sh-sm)", transition: "all 160ms var(--ease)", padding: 0 }}
+              style={{ position: "absolute", left: markerLeft(pct, active ? 22 : 16), top: active ? -10 : -7, width: active ? 22 : 16, height: active ? 22 : 16, borderRadius: 11, background: TONE[e.signal], border: "2px solid #fff", cursor: "pointer", boxShadow: active ? "0 0 0 4px " + TONE[e.signal] + "40" : "var(--sh-sm)", transition: "all 160ms var(--ease)", padding: 0 }}
               onClick={() => setSelectedEvent(i === selectedEvent ? null : i)}
               onMouseEnter={() => setHoverEvent(i)}
               onMouseLeave={() => setHoverEvent(null)}
@@ -1232,7 +1248,7 @@ function Timeline({ events, hover, setHover, openEvidence }) {
           const pct = ((new Date(e.date + "-01") - minDate) / span) * 100;
           return (
             <button key={e.id}
-              style={{ position: "absolute", left: `${pct}%`, top: -7, width: 16, height: 16, borderRadius: 8, background: TONE[e.signal], transform: "translateX(-8px)", border: "2px solid #fff", cursor: "pointer", boxShadow: "var(--sh-sm)" }}
+              style={{ position: "absolute", left: markerLeft(pct, 16), top: -7, width: 16, height: 16, borderRadius: 8, background: TONE[e.signal], border: "2px solid #fff", cursor: "pointer", boxShadow: "var(--sh-sm)" }}
               onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
             />
           );
