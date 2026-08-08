@@ -452,8 +452,33 @@ python scripts/check_consistency.py <rundir>/ --subvertical <CODE>
                                                     # gate can make: foreign variant cells,
                                                     # silent drawers, coverage denominators
                                                     # and the run's one constraint
+python scripts/precheck_gates.py <payload.json> --page <page> \
+       --evidence <get_evidence.json> --bundle <get_report_bundle.json>
+                                                    # the connector's own blocking gates,
+                                                    # run locally: ET-01/ET-04 citations,
+                                                    # CG-10 dating, ET-05 sub-vertical
+                                                    # scope, CG-14 cell linkage
 ```
 
 `check_payload.py` catches the cheap failures locally so your submissions spend their
 round trips on the expensive ones — grain, identity and grounding, which only the server
 can check.
+
+`precheck_gates.py` sits between the two, and it exists because a submission is not
+free. Submitting supersedes the staged row, so a FAIL on a page that was passing costs
+you the pass until you repair it — and inside a promotion window, that blocks the
+promote for every other page too. The gates it runs need the run's own facts (which
+evidence rows exist and what they carry, which cells the run serves) but not a database,
+so two tool calls you have already made are enough: `get_evidence` for every id the page
+cites — `--list-cited` prints them so one call covers the page — and `get_report_bundle`.
+
+It imports the connector's gate modules rather than restating them. A second copy of a
+gate is a second answer to the same question, and the answer that matters is the
+server's.
+
+Run it on a page you did not write, too. The heatmap promoted on the run this was
+written for returned **120 blocking reasons** when first checked this way: 79 foreign
+sub-vertical cells sitting inside focus-area cell lists, 11 alerts naming cells the run
+does not carry, 28 evidence rows whose stored excerpt cannot be cited, 2 lowercase
+openings. A page that passed under an older gate set is not a page that passes now, and
+finding that out from this costs nothing.
