@@ -19,6 +19,7 @@ from pathlib import Path
 from .contracts import ENVELOPE, PAGES, sections
 from .dates import ACCEPTED as DATE_SHAPES, resolve as resolve_date
 from .identifiers import EID_TOKEN_RE, agent_id_class
+from .vacuity import check_vacuity
 
 _AGENT_ID_KEYS = ("ic_id", "f_id", "fa_id", "ts_id", "wn_id", "rec_id")
 
@@ -134,6 +135,11 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_sentence_case(name, body))
         reasons.extend(_check_face_budgets(page, name, body))
         reasons.extend(_check_payload_excerpts(name, body))
+
+    # CG-15 runs once over the whole page: template repetition is a
+    # relation BETWEEN a field's items, not a property of one value, so it
+    # cannot be answered inside the per-section loop above.
+    reasons.extend(check_vacuity(page, payload))
 
     return reasons
 

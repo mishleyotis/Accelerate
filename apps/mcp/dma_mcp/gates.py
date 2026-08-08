@@ -112,6 +112,24 @@ GATES = {
               "opens the cell drawer onto nothing, and stays invisible until "
               "somebody clicks it.",
               "block"),
+    "CG-15": ("A payload that says nothing", None,
+              "Prose that a client would read as content actually carries "
+              "some: no placeholder scalar ('N/A', 'TBD', '-', 'none', "
+              "'pending', blank) where the contract requires prose; no prose "
+              "field under half the word floor its own contract doc states; "
+              "no section whose every present content field is vacuous; no "
+              "template repeated across three or more items of one field at "
+              "an 8-gram overlap of 0.40 or more; and no sentence left with "
+              "two or fewer content words once the score register and the "
+              "evidence-inventory register are removed. A recorded absence "
+              "carrying its ladder, and a section with a valid empty_state, "
+              "are exempt from all of it except the placeholder rule.",
+              "Every other gate here checks structure, identity or "
+              "arithmetic. A six-page payload with all 34 sections present "
+              "and every required field set to 'N/A' or [] produced zero "
+              "blocking reasons and was eligible to promote: the pipeline "
+              "could not tell a real assessment from an empty shell.",
+              "block"),
     "ET-01": ("Cited ids resolve to this entity and run", None,
               "Every cited e_id resolves in the run's scope; a foreign id "
               "(another institution's row) halts production.",

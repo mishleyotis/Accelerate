@@ -127,13 +127,16 @@ def test_every_field_a_gate_registry_names_exists_in_the_contract():
 
 def test_every_gate_a_validator_can_emit_is_in_the_registry():
     """"A gate id absent from this registry cannot appear in a verdict" —
-    asserted, rather than trusted, over both validation passes."""
+    asserted, rather than trusted, over every module that emits one."""
     import re
     emitted = set()
-    for module in ("validation.py", "validation2.py"):
+    for module in ("validation.py", "validation2.py", "vacuity.py"):
         src = (_SPEC.parent / module).read_text()
         emitted.update(re.findall(r'"((?:AG|SG|ET|CG)-[A-Z0-9]{2})"', src))
     assert emitted <= set(GATES), sorted(emitted - set(GATES))
     # and the seven added this round are all there
     assert {"CG-10", "CG-11", "CG-12", "CG-13", "CG-14",
             "ET-04", "ET-05"} <= set(GATES)
+    # CG-15 lives in its own module; the sweep has to reach it, or the
+    # invariant is asserted over the two files that happen to be listed.
+    assert "CG-15" in emitted and "CG-15" in GATES
