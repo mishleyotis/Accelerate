@@ -75,10 +75,48 @@ def _i(row, headers, *names):
         return None
 
 
+_STRONG_SEPS = ";|\n"
+
+
 def _split(value):
+    """A catalogue list cell → its items.
+
+    Two generations write these columns two ways, and one splitter had to
+    read both. v7.0 separates with semicolons and keeps commas INSIDE the
+    provenance an item carries —
+
+        Agentforce Builder [L3: L3-SF-AGENTFORCE, Salesforce Agentforce, ..]
+
+    — while v5.0 writes a plain comma list ("CRM Analytics, Tableau,
+    Salesforce Platform"). Splitting on both at once turned each v7.0
+    feature into three fragments, one of them "..]", and a feature named
+    "..]" is a chip nobody can click.
+
+    So: split on the strong separators at bracket depth zero, and fall
+    back to commas only when the cell offers no strong separator. A
+    single-item cell of either generation survives both passes.
+    """
     if not value:
         return []
-    return [p.strip() for p in re.split(r"[;,|\n]", str(value)) if p.strip()]
+    text = str(value)
+
+    def cut(seps):
+        parts, buf, depth = [], [], 0
+        for ch in text:
+            if ch in "[(":
+                depth += 1
+            elif ch in ")]":
+                depth = max(0, depth - 1)
+            if depth == 0 and ch in seps:
+                parts.append("".join(buf))
+                buf = []
+            else:
+                buf.append(ch)
+        parts.append("".join(buf))
+        return [p.strip() for p in parts if p.strip()]
+
+    items = cut(_STRONG_SEPS)
+    return items if len(items) > 1 else cut(",")
 
 
 def _grain(subcap_id):
@@ -114,8 +152,19 @@ def parse_capability_map(ws, version, pillar_id):
             "category_id": category, "pillar_id": pillar,
             "name": _s(row, headers, "Sub_Cap_Name", "Sub_Capability"),
             "weight": weight,   # v5.0 ships Pillar_Weight; v7.0 has none
-            "l3_platform_areas": _split(_get(row, headers, "L3_Platforms_Addressing")),
-            "l4_features": _split(_get(row, headers, "L4_Features_Available")),
+            # The per-cell platform vocabulary. v7.0 names these columns
+            # after the L3/L4 tiers ("L3_Platforms_Addressing_SubCap",
+            # matched by prefix); v5.0 named the same two facts "Primary
+            # Products" and "Key Features". Only the v7.0 spelling was
+            # listed, so every v5.0 cell loaded with an empty list — and a
+            # run pinned to v5.0 handed its producer no platform
+            # vocabulary at all, which is how a platform page came to be
+            # written out of the entity's own estate instead of the
+            # catalogue's.
+            "l3_platform_areas": _split(_get(
+                row, headers, "L3_Platforms_Addressing", "Primary Products")),
+            "l4_features": _split(_get(
+                row, headers, "L4_Features_Available", "Key Features")),
             # the capability map's Category column carries the category's
             # DISPLAY NAME; the loader lifts it to ccg_categories
             "category_name": _s(row, headers, "Category", "Category_Name"),

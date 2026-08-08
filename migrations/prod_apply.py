@@ -90,9 +90,18 @@ def main() -> int:
     cur = conn.cursor()
     cur.execute("SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename <> 'alembic_version'")
     print(f"VERIFY tables={cur.fetchone()[0]}", flush=True)
-    cur.execute("SELECT version, cell_count, category_count, is_current FROM ccg_versions ORDER BY version")
+    # platform_mapped is the cell count that carries a platform vocabulary.
+    # Three columns have now been lost to a header spelling, each time
+    # silently — right row count, green VERIFY lines, emptiness found later
+    # on a rendered page. A version reading cells=836 platform_mapped=0 says
+    # it here, in the deploy log, at the moment it happens.
+    cur.execute("""SELECT version, cell_count, category_count, is_current,
+                          platform_mapped_cells
+                     FROM ccg_versions ORDER BY version""")
     for row in cur.fetchall():
-        print(f"VERIFY catalogue version={row[0]} cells={row[1]} categories={row[2]} current={row[3]}", flush=True)
+        print(f"VERIFY catalogue version={row[0]} cells={row[1]} "
+              f"categories={row[2]} current={row[3]} platform_mapped={row[4]}",
+              flush=True)
     cur.execute("SELECT rolname FROM pg_roles WHERE rolname LIKE 'svc_%' ORDER BY 1")
     print(f"VERIFY roles={[r[0] for r in cur.fetchall()]}", flush=True)
     # The value-chain arrangement is what a client reads as their own

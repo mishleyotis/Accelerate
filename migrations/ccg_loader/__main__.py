@@ -296,6 +296,12 @@ def main() -> int:
         # flag moved atomically (exactly one TRUE, by partial unique).
         cells = [r for r in collected["ccg_subcaps"]]
         categories = {r["category_id"] for r in cells}
+        # How many cells arrived carrying a platform vocabulary. A load
+        # that lost the column to a header spelling used to look exactly
+        # like a load that did not (right row count, green VERIFY lines,
+        # emptiness discovered months later on a rendered page); this
+        # number is what makes the difference readable in the deploy log.
+        platform_mapped = sum(1 for r in cells if r.get("l3_platform_areas"))
         cur.execute("SELECT version FROM ccg_versions WHERE is_current")
         row = cur.fetchone()
         current_before = row[0] if row else None
@@ -305,16 +311,20 @@ def main() -> int:
         # UPSERT, never delete: runs pin this version by FK, and a reload
         # of a pinned version must keep the row identity.
         cur.execute(
-            """INSERT INTO ccg_versions (version, loaded_at, cell_count, category_count, is_current)
-               VALUES (%s, now(), %s, %s, %s)
+            """INSERT INTO ccg_versions (version, loaded_at, cell_count, category_count,
+                                        is_current, platform_mapped_cells)
+               VALUES (%s, now(), %s, %s, %s, %s)
                ON CONFLICT (version) DO UPDATE
                  SET loaded_at = now(), cell_count = EXCLUDED.cell_count,
                      category_count = EXCLUDED.category_count,
-                     is_current = EXCLUDED.is_current""",
-            (args.version, len(cells), len(categories), True if make_current else None))
+                     is_current = EXCLUDED.is_current,
+                     platform_mapped_cells = EXCLUDED.platform_mapped_cells""",
+            (args.version, len(cells), len(categories),
+             True if make_current else None, platform_mapped))
         conn.commit()
         state = "current" if make_current else f"historical (current stays {current_before})"
-        print(f"ccg_versions: {args.version} {state}, {len(cells)} cells, {len(categories)} categories")
+        print(f"ccg_versions: {args.version} {state}, {len(cells)} cells, "
+              f"{len(categories)} categories, {platform_mapped} platform-mapped")
     except Exception:
         conn.rollback()
         raise
