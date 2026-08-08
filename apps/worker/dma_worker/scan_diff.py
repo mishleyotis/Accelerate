@@ -20,6 +20,11 @@ class FileStat:
     checksum: str             # drives the unchanged-tree diff
     size_bytes: int
     mime_type: str = ""
+    # Source ids of the folders on the path, root-first. A folder NAME is not
+    # an identity: the production intake tree carries two distinct folders
+    # both called "Corporate America Credit Union - DMA", each with its own
+    # scoring workbook, and grouping by name silently discarded one of them.
+    parent_ids: tuple = ()
 
 
 @dataclass

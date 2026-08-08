@@ -52,19 +52,20 @@ def walk_tree(intake_folder_id: str, token_fn=metadata_token,
     token = token_fn()
     stats: list = []
 
-    def rec(folder_id, segments, depth):
+    def rec(folder_id, segments, ids, depth):
         if depth > max_depth:
             return
         for f in _list_children(token, folder_id):
             if f["mimeType"] == "application/vnd.google-apps.folder":
-                rec(f["id"], segments + [f["name"]], depth + 1)
+                rec(f["id"], segments + [f["name"]], ids + [f["id"]], depth + 1)
             else:
                 stats.append(FileStat(
                     f["id"], tuple(segments + [f["name"]]), f["name"],
                     f.get("md5Checksum") or f.get("modifiedTime") or "",
-                    int(f.get("size") or 0)))
+                    int(f.get("size") or 0), f.get("mimeType") or "",
+                    tuple(ids)))
 
-    rec(intake_folder_id, [], 0)
+    rec(intake_folder_id, [], [], 0)
     return stats
 
 

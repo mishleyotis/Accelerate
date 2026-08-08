@@ -20,6 +20,7 @@ started_at`, while the job exited 1 and 130 runs existed.
 """
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 
 from .classification import classify, detect_test_case
@@ -151,6 +152,26 @@ def run_scan(conn, tree: list[FileStat], scan_started_at, scan_id: int | None = 
     for f in d.unchanged:
         cur.execute("UPDATE import_files SET last_seen_at = %s WHERE artefact_id = %s",
                     (scan_started_at, f.file_id))
+
+    # Files this scan did NOT see. The bucket was computed, returned and then
+    # never printed, stored or acted on — so a workbook deleted, moved out of
+    # the intake tree or trashed left its run serving and left no trace of the
+    # disappearance anywhere. Recorded against the artefact, so "why is this
+    # client's package gone" has an answer that outlives the log window.
+    for artefact_id in d.missing:
+        cur.execute(
+            """INSERT INTO parser_observations
+                 (artefact_id, kind, detail, occurred_at)
+               VALUES (%s,'artefact_missing_from_tree',%s, now())""",
+            (artefact_id, json.dumps({
+                "scan_id": scan_id,
+                "reason": "recorded by a previous scan and absent from this "
+                          "walk: moved, renamed, trashed or out of scope. The "
+                          "row and anything it serves are left untouched."})))
+    if d.missing:
+        print(f"scan: {len(d.missing)} artefact(s) seen before and absent now: "
+              f"{', '.join(sorted(d.missing)[:10])}"
+              f"{' …' if len(d.missing) > 10 else ''}")
 
     summary = {
         "scan_id": scan_id, "folders_seen": len(folders), "files_seen": len(tree),

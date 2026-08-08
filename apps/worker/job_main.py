@@ -98,15 +98,46 @@ def _classify_artefact(f):
     return None
 
 
-def _package_groups(to_process):
-    """Group changed files by client folder (the first path segment) and
-    keep the best candidate per artefact kind. Returns ALL groups — the
-    caller splits ingestable packages from partial ones (a folder whose
-    manifest arrived before its workbook must retry, not vanish)."""
+def package_key(tree):
+    """A stable display key per client folder, from the tree as a whole.
+
+    The key is the folder's NAME, because that is what `runs.source_folder_id`
+    stores and what every downstream lookup (backfill, intake status,
+    FORCE_FOLDER) matches on — except where a name is not unique. The
+    production intake tree carries two distinct folders both called
+    "Corporate America Credit Union - DMA", each with its own scoring
+    workbook and its own report, and grouping by name merged them into one
+    package: one client's workbook was silently discarded on every firing.
+    A colliding name is qualified by its source folder id, so both packages
+    ingest and both say which folder they came from.
+    """
+    ids_by_name: dict = {}
+    for f in tree:
+        name = f.path_segments[0] if f.path_segments else "?"
+        ids_by_name.setdefault(name, set()).add(
+            f.parent_ids[0] if f.parent_ids else None)
+    collided = {n for n, ids in ids_by_name.items() if len(ids) > 1}
+
+    def key(f):
+        name = f.path_segments[0] if f.path_segments else "?"
+        if name not in collided:
+            return name
+        return f"{name} [{(f.parent_ids[0] if f.parent_ids else '?')}]"
+    key.collisions = {n: sorted(x for x in ids_by_name[n] if x)
+                      for n in sorted(collided)}
+    return key
+
+
+def _package_groups(to_process, key=None):
+    """Group changed files by client folder and keep the best candidate per
+    artefact kind. Returns ALL groups — the caller splits ingestable packages
+    from partial ones (a folder whose manifest arrived before its workbook
+    must retry, not vanish)."""
+    key = key or package_key(to_process)
     groups: dict = {}
     ranks: dict = {}
     for f in to_process:
-        root = f.path_segments[0] if f.path_segments else "?"
+        root = key(f)
         g = groups.setdefault(root, {"folder": root})
         r = ranks.setdefault(root, {})
         c = _classify_artefact(f)
@@ -526,7 +557,12 @@ def main() -> int:
         # report — no run has ever landed its twelve report sections — and a
         # folder with a changed report but an unchanged workbook looked
         # incomplete on every firing.
-        groups = _package_groups(tree)
+        key = package_key(tree)
+        groups = _package_groups(tree, key)
+        for name, ids in key.collisions.items():
+            print(f"folder-name collision: {name!r} is {len(ids)} distinct "
+                  f"folders ({', '.join(ids)}); each ingests under its own "
+                  "id-qualified key rather than one overwriting the other")
 
         # Backfill runs BEFORE the scan and returns: run_scan stores the new
         # checksums, so a backfill executed after it would swallow that
@@ -541,7 +577,8 @@ def main() -> int:
             conn.close()
             return rc
 
-        _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally)
+        _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
+                         key)
     except BaseException as exc:            # noqa: BLE001 — record, then re-raise
         # Anything that escapes — the Drive walk that 403'd mid-recursion, the
         # empty-tree guard, a diff that could not commit — closes the scan row
@@ -576,13 +613,14 @@ def main() -> int:
     return 1 if tally["failed"] else 0
 
 
-def _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally) -> None:
+def _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
+                     key=None) -> None:
     """The diff and the ingest loop. Counters land in `tally` as they happen,
     so a mid-loop exception still reports the runs it had already created."""
     summary = run_scan(conn, tree, started_at, scan_id=scan_id)
     print(f"scan: new={summary['files_new']} changed={summary['files_changed']}")
-    touched = {f.path_segments[0] if f.path_segments else "?"
-               for f in summary["to_process"]}
+    key = key or package_key(tree)
+    touched = {key(f) for f in summary["to_process"]}
     # Re-ingest one named folder even though its tree has not changed. The
     # diff is the right default — an unchanged tree must create nothing — but
     # after a parser fix the tree is unchanged and the extraction is not, and

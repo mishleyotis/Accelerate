@@ -411,3 +411,41 @@ def test_a_ledger_whose_ids_are_all_unrecognised_is_not_an_empty_ledger(tmp_path
     assert parse_evidence_master(str(path), obs) == []
     assert obs[0].kind == "evidence_ledger_ids_unrecognised"
     assert obs[0].detail["rows_seen"] == 2
+
+
+# ── class 14: packages grouped by folder NAME, not folder id ──────────────
+# The production intake tree carries two distinct folders both called
+# "Corporate America Credit Union - DMA" — different ids, different scoring
+# workbooks, different reports. Grouping by name merged them and one client's
+# workbook was silently discarded on every firing.
+
+def test_corporate_america_two_folders_one_name_stay_two_packages():
+    import job_main
+    from dma_worker.scan_diff import FileStat
+
+    def f(fid, folder_id, name):
+        return FileStat(fid, ("Fake Credit Union - DMA", name), name,
+                        "abc", 10, "", (folder_id,))
+
+    tree = [f("a1", "folder-A", "DMA_Scoring_Workbook_A.xlsx"),
+            f("a2", "folder-A", "run_manifest.json"),
+            f("b1", "folder-B", "Scoring_Workbook_B.xlsx")]
+    key = job_main.package_key(tree)
+    assert key.collisions == {"Fake Credit Union - DMA": ["folder-A", "folder-B"]}
+    groups = job_main._package_groups(tree, key)
+    assert len(groups) == 2
+    workbooks = sorted(g["workbook"].file_id for g in groups.values())
+    assert workbooks == ["a1", "b1"], "neither workbook may be discarded"
+    assert all("folder-" in k for k in groups), "the key names the folder id"
+
+
+def test_a_folder_name_that_is_unique_keeps_its_plain_name():
+    """`runs.source_folder_id` stores this string and the backfill matches on
+    it, so the common case must not change shape."""
+    import job_main
+    from dma_worker.scan_diff import FileStat
+
+    tree = [FileStat("a1", ("Fake Bank - DMA", "DMA_Scoring_Workbook.xlsx"),
+                     "DMA_Scoring_Workbook.xlsx", "abc", 10, "", ("folder-A",))]
+    groups = job_main._package_groups(tree, job_main.package_key(tree))
+    assert list(groups) == ["Fake Bank - DMA"]
