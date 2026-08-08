@@ -283,6 +283,57 @@ mapped identically onto five sub-capabilities.
 A cell whose every drawer is empty is a **linking** failure, not an evidence gap. Diagnose
 before enriching — enriching a linker bug adds evidence that also will not render.
 
+### Registration without linkage is an incomplete registration
+
+`register_evidence` takes `linked_subcap_ids` on the item, and the call is idempotent by
+content: re-registering the same url + claim + span returns the same id and **accumulates**
+that call's cell links. So linkage is never a separate errand — it is the second half of
+registering the source, and a row that lands without it has been half-registered.
+
+**An unlinked citation is worse than no citation at all.** An uncited sentence asks nothing
+of the reader. A citation invites them to drill in, and when the row behind it links to
+nothing the drawer answers *"no cell links served for this item"* — an orphan, under a real
+client's name, reached by following exactly the affordance you gave them. Measured on a
+promoted run: **178 served evidence rows, 72 with no cell link, 28 of those cited by a
+section.** The row the client actually clicked was a Great Place To Work profile behind an
+employee sentiment tile.
+
+**ET-07** now refuses this at submit. A cited id resolves to a row carrying at least one
+cell link, or the citation is stated as supporting none.
+
+### The honest exception, and how to state it
+
+Some sources genuinely support no capability cell, and forcing one onto them is the
+**misattribution** failure from the table below — the quietest of the four, because nothing
+breaks. So say so instead. Two ways, and both reach the reader:
+
+1. **By the grain of the section citing it.** A section that does not reason at cell grain
+   carries these sources as a matter of course, and ET-07 exempts it by name:
+   `overview.firmographics`, `overview.financial_series`, `overview.leadership`,
+   `overview.thought_leadership`, `overview.evidence_coverage`,
+   `context.regulatory_standing`, `heatmap.evidence_age`. The exemption belongs to the
+   section, not to the source: the same registry entry cited by the timeline owes a cell,
+   because the timeline is making a claim about the capability history.
+2. **By naming the id in prose the section serves whole** — a rung in
+   `r_layer.probes_run` or in `empty_state.sources_searched` that names the `e_id` and says
+   why it links to none. A general sentence about linkage does not count; the rung has to
+   name the id, or one boilerplate paragraph would excuse every orphan on the page.
+
+The classes that legitimately link to nothing, from the same run:
+
+| Class | Example | Why it links to no cell |
+|---|---|---|
+| Entity identity / firmographic | the NCUSO registry entry: charter number, 46 branches, 369,985 members | the shape of the institution, not a capability |
+| Regulator period filing | one NCUA quarterly call-report file per year-end | a financial point on the trajectory card |
+| Regulator perimeter | the CFPB's own statement of which institutions it supervises | a fact about the regulator's scope |
+| Regulator database search | the complaint database's hit count for this entity | a recorded search, not a measure of capability |
+| Peer comparator | four other credit unions' app-store ratings | the benchmark this entity is read against, not evidence about it |
+| Bureau grade | a BBB letter grade | composite, no scale, no sample — it draws no bar and caps no cell |
+
+Everything outside those classes owes a cell. When you are unsure, ask what a reader who
+clicks the chip is entitled to see: if the answer is "which part of the assessment this
+bears on", link it; if the answer is "who this institution is", state the class.
+
 ## Four failure modes, ordered by damage
 
 | Failure | What the client sees | Caught by |

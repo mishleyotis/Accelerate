@@ -79,19 +79,121 @@ Every event dated; undated events are excluded, not rendered as 'ongoing'.
 
 16 clients had two or fewer events — sparse timelines must declare themselves.
 
-### `signal` is a direction. It is not a sentence.
+### `signal` is a direction. It is not a sentence, and it is not a mood.
 
-**CG-09 blocks this and it is the most-hit vocabulary failure in the corpus.**
-`signal` takes `POSITIVE │ NEUTRAL │ NEGATIVE`, upper case, and nothing else. The
-column is plain TEXT, so a sentence is accepted, promotion succeeds, and the
-defect surfaces on the page: a real run wrote the consequence sentence into
-`signal` on all ten events, and D5's Positive/Neutral/Negative filters then
-matched **zero of ten** on a page showing ten.
+**CG-09 blocks the sentence-in-the-badge failure and it is the most-hit
+vocabulary failure in the corpus.** `signal` takes `POSITIVE │ NEUTRAL │
+NEGATIVE`, upper case, and nothing else. The column is plain TEXT, so a sentence
+is accepted, promotion succeeds, and the defect surfaces on the page: a real run
+wrote the consequence sentence into `signal` on all ten events, and D5's
+Positive/Neutral/Negative filters then matched **zero of ten** on a page showing
+ten.
 
 The consequence sentence has its own home: `maturity_effect`
 (`ADVANCED │ CONSTRAINED │ NEUTRAL`, plus one clause of reasoning) and the
 event `body`. Case matters — `positive` misses the filter exactly as prose does.
 Null passes: absent is not wrong, a sentence is.
+
+**The second failure is worse, because it type-checks.** The three words read as
+MOOD — good news, no news, bad news — and a producer who classifies the news
+instead of the assessment ships a page that argues with itself. Measured on a
+promoted run:
+
+| event | shipped | why it was wrong |
+|---|---|---|
+| Merger with another credit union announced | `NEGATIVE` | the run's own why-now used the same announcement, citing the same id and the same date, as its **leading** reason to act |
+| State community-reinvestment obligation takes effect | `NEGATIVE` | the workbook's caps log reads `None (forward obligation; informs P3C3)` — the assessment applied no cap |
+| Email data breach, since remediated | `NEUTRAL` | correct, and for the right reason: the S2 ceiling lapsed at 24 months |
+
+A remediated breach reading NEUTRAL beside a merger reading NEGATIVE is the
+tell. Nothing about the *news* ranks those two that way. Something about the
+*assessment* does, and the assessment is what the badge is for.
+
+#### What each value means on this page
+
+**`signal` is the direction this event moved the assessed position of the cells
+in `capability_ids`.** Not how the event felt, not how much work it creates, not
+whether a reader would call it good news.
+
+| Value | The claim | The shape it usually has |
+|---|---|---|
+| `POSITIVE` | the named cells score higher, or carry a higher ceiling, **because** this happened | a platform delivered, a function stood up, a role created and still filled, a programme with results in production |
+| `NEUTRAL` | the named cells score exactly what they would score without it — the event **explains** the position without setting it | a constraint whose window has expired; an obligation or transaction that adds demand, exposure or scale and takes no capability away; an announcement that has not yet completed anything |
+| `NEGATIVE` | the assessment holds the named cells to a maximum, or scores them lower, **because** of this event, and that constraint is live at the run's reference date | a cap in the caps log, with its cells and its level, inside its window |
+
+#### The test that decides a borderline case
+
+In order. Stop at the first rung that answers.
+
+1. **Ask the caps log.** `get_report_bundle` hands you the Severity-to-Maturity
+   Cap Matrix result: an **Issue Time Map** row with a `Cap Applied` column, and
+   the **Severity Cap Impact** prose behind it. A live cap on the named cells →
+   `NEGATIVE`. `Cap Applied: None (…)`, or a cap the arithmetic has retired →
+   **not NEGATIVE**, whatever the event is about. The log is the assessment's own
+   arithmetic and it outranks your reading of the news.
+2. **Run the counterfactual.** Delete the event from the history and re-read the
+   cells it names. Higher without it → `NEGATIVE`. Lower without it →
+   `POSITIVE`. The same → `NEUTRAL`.
+3. **Tie-break: capability, not consequence.** If the event changes what the
+   institution must **do** rather than what it **can** do, it is `NEUTRAL`.
+   Demand is not maturity. Urgency belongs to the why-now (O3), pressure belongs
+   in this event's `body`, and neither of them is a signal.
+
+Two consistency rules fall straight out of the definition, and **AG-05 blocks
+both**:
+
+- **The badge and the sentence are one claim.** `POSITIVE ↔ ADVANCED`,
+  `NEGATIVE ↔ CONSTRAINED`, `NEUTRAL ↔ NEUTRAL`. Wanting `NEGATIVE` with an
+  `ADVANCED` clause means you are holding two readings of one event. Pick one
+  and write both halves of it.
+- **An event that anchors a why-now trigger is not NEGATIVE.** O3 says this
+  event opens a window worth acting in; the timeline saying it capped the same
+  cells is one run contradicting itself in front of one reader. AG-05 matches
+  the two on a shared `e_id`, or on the same date and subject, and it reads the
+  sibling page's live submission to do it — so whichever of context and overview
+  you submit **second** is where the verdict lands.
+
+Same rule downstream: C5's `maturity_effect` on the same transaction must carry
+the same direction. An acquisitions row reading `negative` beside a timeline row
+reading `NEUTRAL` is the same contradiction one card further down the page —
+and `negative` is not in C5's vocabulary anyway
+(`ADVANCED │ CONSTRAINED │ NEUTRAL │ TEMPORARILY_CONSTRAINED`).
+
+#### The five events, worked
+
+| Event | Signal | Why, in the definition's terms |
+|---|---|---|
+| Core banking relationship extended to the vendor's cloud | `POSITIVE` | delivered, not announced: the platform the CTO is quoted about is the one the run assesses. Remove it and the architecture cells score lower |
+| Email data breach, since remediated | `NEUTRAL` | rung 1 answers: `Cap Applied: None (>24mo; P4C4 cap retired)`. The ceiling was real and lapsed at 24 months with 54 elapsed; the six linked cells now score on post-incident investment. A retired cap constrains nothing today |
+| State community-reinvestment obligation takes effect | `NEUTRAL` | rung 1 answers again: `None (forward obligation; informs P3C3)`. The statute adds a reporting duty and removes no capability; what holds the compliance cells is a missing lending-analytics layer that predates it and would exist without it |
+| Merger with another credit union announced | `NEUTRAL` | rung 1 is silent, rung 2 answers: nothing has converted, so the integration cells score exactly what they scored before the announcement. Rung 3 confirms it — a second member book is demand, not capability. The pressure is real and it is WN-1's claim |
+| Leadership evolution announced | `NEUTRAL` | the same reading, applied where it is less comfortable. An incoming president whose mandate matches the assessment's sequence is why the window is open; it is not yet a change in what the institution can do. `POSITIVE` here would be the merger error with the sign flipped |
+
+The last row is the check on the rule. If the definition only ever moved
+`NEGATIVE` badges to `NEUTRAL` it would be a way of making the page read better,
+not a definition.
+
+#### Is the enum itself the wrong vocabulary?
+
+The three **values** are right; the **name** and the **rendering** are what
+mislead. `POSITIVE/NEUTRAL/NEGATIVE` under a field called `signal`, rendered as
+Positive/Neutral/Negative filter chips, invites a reader — and a producer — to
+read sentiment. The payload already carries the unambiguous words one field
+along: `maturity_effect` is `ADVANCED │ CONSTRAINED │ NEUTRAL`, which names the
+axis out loud.
+
+Replacing the enum would be a **contract change**, and it is not a small one.
+`signal` promotes into `context_timeline`, so the change would need an
+expand-migrate-contract on that column plus a backfill of every promoted run;
+CG-09 reads its values from the enum registry; D5's three filter chips key on
+them; and the Surface Specification states the vocabulary. That is a schema
+change, an API change and a frontend change to fix a labelling problem — so it
+is not made here.
+
+What is worth doing, and is a **frontend** change rather than a contract one, is
+relabelling the axis where it renders: the chips read *Advanced / Neutral /
+Constrained*, or the group is titled "effect on assessed maturity". The stored
+values do not move; the reader stops being told a merger is bad news.
 
 ### What the event drawer shows, and what it shows when you leave it empty
 
@@ -127,8 +229,8 @@ placed either, and a reader cannot see where it sits. Date it or accept that.
 | Field / element | Source of truth | Where it comes from |
 | --- | --- | --- |
 | events[] | Research workbook + enrichment | {event_date, title, body, kind, signal, capability_ids[], maturity_effect, e_ids[], claim_label} |
-| events[].signal | contract vocabulary | `POSITIVE │ NEUTRAL │ NEGATIVE` — CG-09, exact case |
-| events[].maturity_effect | producer | `ADVANCED │ CONSTRAINED │ NEUTRAL` + one clause; this is where the consequence sentence goes |
+| events[].signal | contract vocabulary | `POSITIVE │ NEUTRAL │ NEGATIVE` — CG-09, exact case. The direction the event moved the ASSESSED position of the cells it names; the caps log decides, then the counterfactual |
+| events[].maturity_effect | producer | `ADVANCED │ CONSTRAINED │ NEUTRAL` + one clause; this is where the consequence sentence goes. One claim with `signal`, and AG-05 blocks a disagreement |
 | events[].capability_ids | catalogue | an event bearing on no capability is not a digital-evolution event |
 | storyline | producer | 60–110 words; renders as the page's argument |
 | arc_shape | producer | needs ≥3 dated points; never asserted from two |
@@ -137,7 +239,7 @@ placed either, and a reader cannot see where it sits. Date it or accept that.
 ### Prompt
 
 ```
-Extract the digital evolution timeline, then make it a STORYLINE that explains how this client reached its current maturity. STEP 1 - COLLECT DATED EVENTS FROM THE PACKAGE The research workbook's dated rows, the assessment report's history sections, regulator enforcement dates, vendor tenure evidence. STEP 2 - ENRICH (mandatory - the package is almost never sufficient here) 16 clients shipped two or fewer events. Search deliberately for the client's own history, with explicit year markers:   - the entity's newsroom and press releases, year by year   - annual reports for the last 5 years - each states that year's initiatives   - core-platform and digital-channel announcements: "[Entity] core conversion";     "[Entity] selects OR implements OR migrates [vendor] 2019..2026"   - leadership changes that moved technology: "[Entity] names CIO OR CTO OR CDO"   - M&A and charter events   - regulator actions WITH DATES (NCUA / OCC / FDIC / CFPB / SEC / FINRA /     state DOI)   - conference talks and case studies with dates   - app-store release history: first release, major redesigns   - vendor tenure: "[Entity] [vendor] since OR relationship history" Mint E-CC ids for everything new with url + verbatim excerpt + retrieval date. STEP 3 - EMIT EVENTS {event_date, title, body, kind, signal, capability_ids[], maturity_effect,  e_ids[], claim_label}   event_date      REQUIRED, precise to at least the month. An undated item is                   EXCLUDED - never rendered as "ongoing".   kind            PLATFORM │ LEADERSHIP │ M&A │ REGULATORY │ CHANNEL │ DATA │                   SECURITY │ STRATEGY   body            25-45 words: what changed, and what it replaced or enabled.   capability_ids  which assessed capabilities this bears on. An event bearing on                   none does not belong here - a rebrand is not a digital                   evolution event.   signal          POSITIVE │ NEUTRAL │ NEGATIVE, and state the SCORE EFFECT in                   the panel: positive raises the ceiling on the affected                   capability, negative caps it, neutral is context with no                   direct effect. A badge without its consequence sentence is                   incomplete.   maturity_effect ADVANCED │ CONSTRAINED │ NEUTRAL with one clause of reasoning.                   A ten-year-old core conversion never revisited CONSTRAINS                   current maturity; say so. STEP 4 - WRITE THE STORYLINE (this is the tie back to the DMA) storyline: 60-110 words tracing how the SEQUENCE produced today's assessed position. Name the inflection points and the consequence. It must be consistent with the executive summary's Complication and with the Platform page's effort profile: if the storyline says integration debt accumulated from a 2014 core conversion, integration had better rank first in the effort profile. Then arc_shape = STEADY_INVESTMENT │ STOP_START │ POST_EVENT_CATCHUP │ LEGACY_ANCHORED │ RECENT_ACCELERATION, with one sentence of evidence. STEP 5 - CHALLENGE (R-Layer)  B  Is there a competing arc? An event you attributed to strategy that actually     follows a regulator action is a different story entirely.  D  Probes: undated; an event about a same-named different entity; a vendor     press release describing an INTENTION rather than a completion (Evidence     Level 2, not 1); an event with no capability bearing; an arc asserted from     too few points.  E  REJECT -> drop the event. FEWER THAN 3 DATED EVENTS -> emit them, set     verified_sparse=true, and do NOT write an arc from two points. GATES: S34_timeline_provenance (every event cited); G6 (arc claims need >=3 dated points); G9 (milestones dated).
+Extract the digital evolution timeline, then make it a STORYLINE that explains how this client reached its current maturity. STEP 1 - COLLECT DATED EVENTS FROM THE PACKAGE The research workbook's dated rows, the assessment report's history sections, regulator enforcement dates, vendor tenure evidence. STEP 2 - ENRICH (mandatory - the package is almost never sufficient here) 16 clients shipped two or fewer events. Search deliberately for the client's own history, with explicit year markers:   - the entity's newsroom and press releases, year by year   - annual reports for the last 5 years - each states that year's initiatives   - core-platform and digital-channel announcements: "[Entity] core conversion";     "[Entity] selects OR implements OR migrates [vendor] 2019..2026"   - leadership changes that moved technology: "[Entity] names CIO OR CTO OR CDO"   - M&A and charter events   - regulator actions WITH DATES (NCUA / OCC / FDIC / CFPB / SEC / FINRA /     state DOI)   - conference talks and case studies with dates   - app-store release history: first release, major redesigns   - vendor tenure: "[Entity] [vendor] since OR relationship history" Mint E-CC ids for everything new with url + verbatim excerpt + retrieval date. STEP 3 - EMIT EVENTS {event_date, title, body, kind, signal, capability_ids[], maturity_effect,  e_ids[], claim_label}   event_date      REQUIRED, precise to at least the month. An undated item is                   EXCLUDED - never rendered as "ongoing".   kind            PLATFORM │ LEADERSHIP │ M&A │ REGULATORY │ CHANNEL │ DATA │                   SECURITY │ STRATEGY   body            25-45 words: what changed, and what it replaced or enabled.   capability_ids  which assessed capabilities this bears on. An event bearing on                   none does not belong here - a rebrand is not a digital                   evolution event.   signal          POSITIVE │ NEUTRAL │ NEGATIVE - the direction this event moved                   the ASSESSED position of the cells in capability_ids, never a                   reading of the news. POSITIVE: those cells score higher because                   it happened. NEGATIVE: the assessment holds them to a maximum                   because of it and the cap is LIVE. NEUTRAL: they score what they                   would score anyway - a retired cap, an announcement that has                   converted nothing, an obligation that adds demand and takes no                   capability away. DECIDE IT IN THIS ORDER: (1) the caps log -                   'Cap Applied: None (...)' or a retired cap is NOT NEGATIVE,                   whatever the event is about; (2) the counterfactual - delete the                   event and re-read the cells; (3) capability, not consequence.                   A badge without its consequence sentence is incomplete, and an                   event that anchors a why-now trigger is never NEGATIVE (AG-05).   maturity_effect ADVANCED │ CONSTRAINED │ NEUTRAL with one clause of reasoning.                   ONE CLAIM WITH signal: POSITIVE-ADVANCED, NEGATIVE-CONSTRAINED,                   NEUTRAL-NEUTRAL. A ten-year-old core conversion never revisited                   CONSTRAINS current maturity; say so. STEP 4 - WRITE THE STORYLINE (this is the tie back to the DMA) storyline: 60-110 words tracing how the SEQUENCE produced today's assessed position. Name the inflection points and the consequence. It must be consistent with the executive summary's Complication and with the Platform page's effort profile: if the storyline says integration debt accumulated from a 2014 core conversion, integration had better rank first in the effort profile. Then arc_shape = STEADY_INVESTMENT │ STOP_START │ POST_EVENT_CATCHUP │ LEGACY_ANCHORED │ RECENT_ACCELERATION, with one sentence of evidence. STEP 5 - CHALLENGE (R-Layer)  B  Is there a competing arc? An event you attributed to strategy that actually     follows a regulator action is a different story entirely.  D  Probes: undated; an event about a same-named different entity; a vendor     press release describing an INTENTION rather than a completion (Evidence     Level 2, not 1); an event with no capability bearing; an arc asserted from     too few points.  E  REJECT -> drop the event. FEWER THAN 3 DATED EVENTS -> emit them, set     verified_sparse=true, and do NOT write an arc from two points. GATES: S34_timeline_provenance (every event cited); G6 (arc claims need >=3 dated points); G9 (milestones dated); AG-05 (signal agrees with maturity_effect, and no NEGATIVE event anchors a why-now trigger); ET-07 (every cited id resolves to the cells it supports, or the section states why it supports none).
 ```
 
 ---
@@ -609,6 +711,16 @@ the correct one during a cutover. An integration in flight constrains the
 capabilities it touches for a stated window; saying so is the finding, and the
 why-now's `cost_of_acting_now` and the roadmap's phase 1 both depend on it.
 
+**In flight is not the same as announced, and the row's own `status` says which.**
+A deal at `ANNOUNCED` with no close date has moved no system, so it has taken no
+capability away from the cells it names: the honest value is `NEUTRAL` with the
+forward cost argued in `effect_note`. Asserting `TEMPORARILY_CONSTRAINED` before a
+cutover is scheduled dates a constraint that has not started. Measured on a
+promoted run, the row went the other way and shipped `maturity_effect: "negative"`
+— a word from the timeline's `signal` vocabulary, not from this field's four, on
+the same transaction the why-now was naming as the reason to act. Both halves are
+AG-05 failures: the vocabulary and the direction.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
@@ -622,5 +734,5 @@ why-now's `cost_of_acting_now` and the roadmap's phase 1 both depend on it.
 ### Prompt
 
 ```
-Produce the acquisition history: dated events with integration state and effect on assessed capabilities. Per row: {closed_on, target_name, kind, status, scale_metrics,           integration_target, affected_subcap_ids[], maturity_effect, effect_note,           e_ids[]}   closed_on         REQUIRED to the month. Announced-but-not-closed is a                     SEPARATE row with status=ANNOUNCED and its own date.   status            ANNOUNCED │ INTEGRATING │ COMPLETE │ ABANDONED   scale_metrics     quantified in the acquirer's own terms: branches, deposits or                     loan volume, members/customers, FTE.   integration_target the date integration is tracking to, where stated.   maturity_effect   ADVANCED │ CONSTRAINED │ NEUTRAL │ TEMPORARILY_CONSTRAINED                     with the named cells. TEMPORARILY_CONSTRAINED is honest and                     often correct during a cutover; do not smooth it to NEUTRAL.   effect_note       20-45 words: what the integration does to the named                     capability and over what window - specific cell, direction,                     window. ENRICHMENT (mandatory - M&A is public and dated, so silence is not evidence)   - the acquirer's press releases and newsroom, by year   - regulator approval notices, which are dated and public: OCC/FDIC/Fed     applications, NCUA merger approvals, FCA territory and merger approvals   - trade press for the sub-vertical   - the target's final filings   - "[Entity] acquires OR merger OR acquisition OR purchases branches 2019..2026" Mint E-CC ids with url + verbatim excerpt + retrieval date. CROSS-SURFACE (emit once, hand to three) Every acquisition is also a TIMELINE event with kind=M&A; an integration in flight is a COST OF ACTING NOW input for the why-now and a timing constraint for the roadmap. All three must carry the same date and the same direction of effect. CHALLENGE  D Probes: an announced deal rendered as closed; a branch purchase described as a    whole-institution acquisition; an acquisition by a same-named entity; an    integration called complete while the timeline still shows cutover activity.  E REJECT -> drop the row rather than assert a status you cannot date. GATES: every row dated and cited; status never NULL; affected cells resolve; consistent with C1 and O3.
+Produce the acquisition history: dated events with integration state and effect on assessed capabilities. Per row: {closed_on, target_name, kind, status, scale_metrics,           integration_target, affected_subcap_ids[], maturity_effect, effect_note,           e_ids[]}   closed_on         REQUIRED to the month. Announced-but-not-closed is a                     SEPARATE row with status=ANNOUNCED and its own date.   status            ANNOUNCED │ INTEGRATING │ COMPLETE │ ABANDONED   scale_metrics     quantified in the acquirer's own terms: branches, deposits or                     loan volume, members/customers, FTE.   integration_target the date integration is tracking to, where stated.   maturity_effect   ADVANCED │ CONSTRAINED │ NEUTRAL │ TEMPORARILY_CONSTRAINED                     with the named cells. TEMPORARILY_CONSTRAINED is honest and                     often correct during a cutover; do not smooth it to NEUTRAL.   effect_note       20-45 words: what the integration does to the named                     capability and over what window - specific cell, direction,                     window. ENRICHMENT (mandatory - M&A is public and dated, so silence is not evidence)   - the acquirer's press releases and newsroom, by year   - regulator approval notices, which are dated and public: OCC/FDIC/Fed     applications, NCUA merger approvals, FCA territory and merger approvals   - trade press for the sub-vertical   - the target's final filings   - "[Entity] acquires OR merger OR acquisition OR purchases branches 2019..2026" Mint E-CC ids with url + verbatim excerpt + retrieval date. CROSS-SURFACE (emit once, hand to three) Every acquisition is also a TIMELINE event with kind=M&A; an integration in flight is a COST OF ACTING NOW input for the why-now and a timing constraint for the roadmap. All three must carry the same date and the same direction of effect. CHALLENGE  D Probes: an announced deal rendered as closed; a branch purchase described as a    whole-institution acquisition; an acquisition by a same-named entity; an    integration called complete while the timeline still shows cutover activity.  E REJECT -> drop the row rather than assert a status you cannot date. GATES: every row dated and cited; status never NULL; affected cells resolve; consistent with C1 and O3 (AG-05 - the same transaction carries the same direction on the timeline and is never a constraint on a card the why-now names as the reason to act).
 ```
