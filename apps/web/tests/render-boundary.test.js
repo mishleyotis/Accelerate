@@ -409,8 +409,14 @@ test("fault injection: one bad field costs one card, never the app",
 // arrive first, and only then is stillness meaningful.
 async function settle(page, quietMs = 400, timeoutMs = 15000) {
   try {
-    await page.waitForSelector("#app .main, #app .empty, #app .loader-card .btn",
-                               { timeout: timeoutMs });
+    // Both loaders are traps for a "has it stopped changing" wait: the boot
+    // screen and the section loader are STATIC, so a settle that only watched
+    // the DOM would call either of them a finished page. The wait is therefore
+    // for a shell with no loader in it.
+    await page.waitForFunction(
+      () => !!document.querySelector("#app .main, #app .empty, #app .loader-card .btn")
+            && !document.querySelector(".loader-section, .loader-page"),
+      null, { timeout: timeoutMs });
   } catch {
     // Report the DEFECT, not the harness. Before this repair every case below
     // ended here, and "waitForSelector timed out" says nothing; what actually
