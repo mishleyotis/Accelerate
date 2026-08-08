@@ -102,16 +102,51 @@ def _declared_ev_keys(spec, field: str = None) -> tuple:
     return tuple(k for k in _EV_KEYS if k in keys)
 
 
-def _asserts_nothing(item: dict) -> bool:
-    """True when the item makes no claim, so no citation is owed."""
-    if item.get("quarantined"):
+def _asserts_nothing(item: dict, declared=None) -> bool:
+    """True when the item makes no claim, so no citation is owed.
+
+    BOUND TO THE ITEM'S OWN SHAPE. `declared` is the key set the field's
+    contract declares; a key outside it buys nothing, however well-formed it
+    looks. That is not pedantry about spelling — it is the hole this gate had.
+    CG-04 sweeps SECTION keys only, so an undeclared ITEM key validates
+    cleanly; no writer binds it, so promotion drops it. An exemption bought
+    with such a key trades a real refusal for a field the client never sees.
+    Measured on one Frost Bank payload: 394 of 697 `cell_evidence.cells`
+    carried `state` and `sources_searched`, neither of them in H2's item
+    shape. Strip the invented keys and AG-03 refuses all 394 — the gate was
+    honouring fields promotion drops. `vacuity.records_absence` has been
+    shape-bound for exactly this reason; AG-03 now reads the same way.
+
+    Pass None only where the caller genuinely has no shape to bind to.
+    """
+    if not isinstance(item, dict):
+        return False
+
+    def named(key):
+        return declared is None or key in declared
+
+    if named("quarantined") and item.get("quarantined"):
+        return True
+    ladder = bool((named("sources_searched") and item.get("sources_searched"))
+                  or (named("queries_run") and item.get("queries_run")))
+    # The CELL-GRAIN protocol, which the TRD states at `Representing absence`
+    # and the Surface Spec's H2 item shape omitted: thin + sources_searched +
+    # closure_condition. All three. `thin` alone marks a cell short of evidence
+    # that still owes its argument, so a producer who could buy the exemption
+    # by setting it would have a switch rather than a gate; the ladder and the
+    # closure condition are what turn it into a finding.
+    if (named("thin") and item.get("thin") is True and ladder
+            and named("closure_condition")
+            and str(item.get("closure_condition") or "").strip()):
         return True
     for key in ("state", "status", "basis", "peer_basis"):
+        if not named(key):
+            continue
         state = item.get(key)
         if isinstance(state, str) and state in _ABSENT_STATES:
             # an absence is a finding only with the search that established it
-            return bool(item.get("sources_searched") or item.get("queries_run"))
-    return "value" in item and item.get("value") in (None, "")
+            return ladder
+    return named("value") and "value" in item and item.get("value") in (None, "")
 
 
 def _check_item_evidence(page: str, payload: dict) -> list:
@@ -121,6 +156,9 @@ def _check_item_evidence(page: str, payload: dict) -> list:
     something about the institution and cites nothing is unfalsifiable:
     it renders to a client with no way back to a source. The section
     envelope's e_ids are not enough — a reader drills into the ITEM."""
+    # local: avoids an import cycle (vacuity reads _PER_ITEM_RE from here)
+    from .vacuity import _absence_route, item_keys
+
     out = []
     for name, sec in sections(page).items():
         body = payload.get(name)
@@ -133,8 +171,9 @@ def _check_item_evidence(page: str, payload: dict) -> list:
             items = body.get(fname)
             if not isinstance(items, list):
                 continue
+            declared = item_keys(page, name, fname) or None
             for i, item in enumerate(items):
-                if not isinstance(item, dict) or _asserts_nothing(item):
+                if not isinstance(item, dict) or _asserts_nothing(item, declared):
                     continue
                 if any(item.get(k) for k in ev_keys):
                     continue
@@ -145,10 +184,18 @@ def _check_item_evidence(page: str, payload: dict) -> list:
                     f"{page}.{name}.{fname} item schema declares {shown}, and "
                     "every claim resolves to at least one registered evidence "
                     "id, inferences included. Register the source with "
-                    "register_evidence and cite the id it returns, or state "
-                    "the absence explicitly with its sources_searched ladder. "
-                    "A state that asserts a find with an empty id list is a "
-                    "contradiction, not an empty state"))
+                    "register_evidence and cite the id it returns. A state "
+                    "that asserts a find with an empty id list is a "
+                    "contradiction, not an empty state."
+                    # …and the absence route named from the shape's OWN keys.
+                    # The old tail said "state the absence explicitly with its
+                    # sources_searched ladder" to all nineteen shapes, one of
+                    # which declared it. Naming a door that is not in the wall
+                    # is what pushes a producer into inventing one — the
+                    # invented key then buys the exemption and is dropped at
+                    # promotion, which is the 394-cell defect this gate was
+                    # party to.
+                    + _absence_route(declared)))
     return out
 
 

@@ -641,9 +641,29 @@ def test_an_absence_key_the_item_shape_does_not_declare_buys_nothing():
     assert len(out) == 3
     assert all("share 8-word spans" in r["message"] for r in out)
     # and the verdict points at the route this shape HAS, not the one it
-    # was just refused for inventing
-    assert "leave it out of the array" in out[0]["message"]
-    assert "invent a key" in out[0]["message"]
+    # was just refused for inventing. Since 0041 that route is the TRD's own
+    # cell-grain protocol, which now has columns: thin + sources_searched +
+    # closure_condition. `state` remains undeclared and still buys nothing.
+    assert "thin + sources_searched + closure_condition" in out[0]["message"]
+
+
+def test_the_declared_cell_absence_protocol_buys_the_exemption_and_thin_alone_does_not():
+    """0041: the TRD states the cell-grain protocol at `Representing absence`
+    and it now has storage, so it is a route rather than an invention. All
+    three keys, because `thin` on its own marks a cell short of evidence that
+    still owes its argument — a switch, not a finding."""
+    declared = item_keys("heatmap", "cell_evidence", "cells")
+    assert {"thin", "sources_searched", "closure_condition"} <= declared
+    full = {"thin": True, "sources_searched": ["registry", "filings"],
+            "closure_condition": "A named owner or a dated artefact for this cell."}
+    assert records_absence(full, declared)
+    assert not records_absence({"thin": True}, declared)
+    assert not records_absence({k: v for k, v in full.items()
+                                if k != "closure_condition"}, declared)
+    assert not records_absence({k: v for k, v in full.items()
+                                if k != "sources_searched"}, declared)
+    # and the trio buys nothing on a shape that does not declare it
+    assert not records_absence(full, item_keys("heatmap", "alerts", "alerts"))
 
 
 def test_the_same_keys_on_the_shape_that_declares_them_still_work():

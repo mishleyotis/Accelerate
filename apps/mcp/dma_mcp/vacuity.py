@@ -428,6 +428,13 @@ _STATE_KEYS = ("state", "status", "basis", "peer_basis", "result")
 # a gate.
 _ABSENCE_FLAGS = ("verified_absent", "verified_sparse", "cannot_estimate",
                   "insufficient_cohort")
+# …and it stays out of that list. `thin` becomes a finding only in the PAIR
+# the TRD states at `Representing absence` for cell grain — thin true, the
+# ladder, AND the closure condition saying what would settle it. Three keys is
+# not a switch: a producer who can write what would close the question has
+# done the work the gate is asking for. (flag, required companion); the ladder
+# is required on top of both, in records_absence.
+_PAIRED_ABSENCE = (("thin", "closure_condition"),)
 _LADDER_KEYS = ("sources_searched", "queries_run")
 # The citation keys AG-03 reads, kept in step with it deliberately: a shape
 # that owes a citation per item is a shape whose per-item prose has per-item
@@ -459,6 +466,17 @@ def records_absence(obj, declared=None) -> bool:
         return True
     ladder = any(named(k) and isinstance(obj.get(k), list) and obj[k]
                  for k in _LADDER_KEYS)
+    # The paired routes: a flag that is a switch on its own becomes a finding
+    # only beside its companion AND the ladder. `thin` is the cell-grain case
+    # the TRD states at `Representing absence` (thin + sources_searched +
+    # closure_condition) and the one this file's comment above deliberately
+    # keeps out of _ABSENCE_FLAGS: thin alone marks a cell short of evidence
+    # that still owes its argument.
+    for flag, companion in _PAIRED_ABSENCE:
+        if (named(flag) and obj.get(flag) is True and ladder
+                and named(companion)
+                and str(obj.get(companion) or "").strip()):
+            return True
     for key in _STATE_KEYS:
         if not named(key):
             continue
@@ -485,6 +503,16 @@ def _absence_route(declared) -> str:
     ladder = [k for k in _LADDER_KEYS if k in declared]
     states = [k for k in _STATE_KEYS if k in declared]
     flags = [k for k in _ABSENCE_FLAGS if k in declared]
+    paired = [(f, c) for f, c in _PAIRED_ABSENCE
+              if f in declared and c in declared]
+    if paired and ladder:
+        flag, companion = paired[0]
+        return (f" And if the finding is that the ladder ran and found "
+                f"nothing, this item shape declares {flag} + {ladder[0]} + "
+                f"{companion} — all three, because {flag} on its own marks a "
+                f"cell short of evidence that still owes its argument. Name "
+                f"what was searched and what would settle it, on the cell "
+                f"itself, and this gate stands down.")
     if states and ladder:
         return (f" And if the finding is that the ladder ran and found "
                 f"nothing, this item shape declares {states[0]} + "
