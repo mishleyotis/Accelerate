@@ -1,0 +1,108 @@
+{
+  "$schema": "dma_evidence_index_v2",
+  "metadata": {
+    "entity_name": "",
+    "subvertical": "",
+    "assessment_date": "",
+    "evidence_mode": "PUBLIC",
+    "total_searches_executed": 0,
+    "total_fetches_executed": 0,
+    "total_evidence_items": 0,
+    "total_facts_extracted": 0,
+    "coverage_percentage": 0.0,
+    "batches_completed": []
+  },
+  "evidence_items": [
+    {
+      "evidence_id": "E-001",
+      "source_name": "",
+      "source_url": "",
+      "source_type": "",
+      "tier": "T1",
+      "recency_tag": "CURRENT",
+      "date_published": "",
+      "kb_source_id": "",
+      "ers_scores": {
+        "tier_score": 0.0,
+        "recency_score": 0.0,
+        "specificity_score": 0.0,
+        "corroboration_score": 0.0,
+        "ers_total": 0.0
+      },
+      "facts": [
+        {
+          "fact_id": "E-001:F1",
+          "fact_text": "",
+          "claim_type": "FACT",
+          "specificity_score": 0.0,
+          "subcap_mappings": [],
+          "supports_or_challenges": "supports",
+          "ceiling_implication": "",
+          "workbook_column_u_text": "",
+          "workbook_column_v_text": ""
+        }
+      ],
+      "corroborating_evidence_ids": [],
+      "contradicting_evidence_ids": [],
+      "search_query_that_found_it": "",
+      "search_tier": 1,
+      "batch_collected": 1,
+      "notes": ""
+    }
+  ],
+  "subcap_coverage": {
+    "_comment": "One entry per subcapability — tracks evidence mapped to each",
+    "P1C1.1.1": {
+      "diagnostic_question": "",
+      "evidence_ids": [],
+      "fact_ids": [],
+      "evidence_count": 0,
+      "highest_tier": "",
+      "highest_ers": 0.0,
+      "coverage_status": "READY",
+      "searches_executed": 0,
+      "max_tier_reached": 6,
+      "ceiling_estimate": 0.0,
+      "uncertainty_band": 0.0,
+      "notes": ""
+    }
+  },
+  "search_log": [
+    {
+      "search_id": "S-0001",
+      "query": "",
+      "search_tier": 1,
+      "subcap_target": "",
+      "capability_target": "",
+      "timestamp": "",
+      "results_count": 0,
+      "evidence_ids_generated": [],
+      "fetched_urls": [],
+      "notes": ""
+    }
+  ],
+  "coverage_summary": {
+    "total_subcaps": 0,
+    "ready_gte_3": 0,
+    "thin_1_2": 0,
+    "no_evidence": 0,
+    "blocked": 0,
+    "coverage_pct": 0.0,
+    "pillar_breakdown": {
+      "P1": {"total": 0, "ready": 0, "thin": 0, "none": 0},
+      "P2": {"total": 0, "ready": 0, "thin": 0, "none": 0},
+      "P3": {"total": 0, "ready": 0, "thin": 0, "none": 0},
+      "P4": {"total": 0, "ready": 0, "thin": 0, "none": 0}
+    }
+  },
+  "analytical_red_flags": [
+    {
+      "flag_type": "",
+      "description": "",
+      "evidence_ids": [],
+      "subcaps_affected": [],
+      "investigation_status": "",
+      "resolution": ""
+    }
+  ]
+}

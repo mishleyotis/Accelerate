@@ -1,0 +1,147 @@
+{
+  "checkpoint_id": "05_priorities",
+  "checkpoint_phase": "Phase 10: Analysis and Prioritization",
+  "description": "Priority scoring for all below-median capabilities using 6-factor formula. Determines which gaps should be addressed first in transformation roadmap.",
+  "checkpoint_metadata": {
+    "assessment_id": "DMA-[ABBREV]-[YYYYMMDD]-[SEQNUM]",
+    "institution_name": "[Institution Name]",
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "prioritization_status": "[COMPLETE]",
+    "priority_framework_version": "[Per references/priority_framework.md]"
+  },
+  "gap_analysis_summary": {
+    "total_capabilities_assessed": "[Count]",
+    "capabilities_below_median": "[Count]",
+    "priority_tiers": {
+      "CRITICAL_8_to_10": "[Count of gaps scoring 8.0+]",
+      "HIGH_6_to_7.9": "[Count of gaps 6.0–7.9]",
+      "MEDIUM_4_to_5.9": "[Count of gaps 4.0–5.9]",
+      "LOW_1_to_3.9": "[Count of gaps <4.0]"
+    }
+  },
+  "prioritized_gaps": [
+    {
+      "gap_rank": 1,
+      "capability_id": "P[1-4]C[1-5]",
+      "capability_name": "[From taxonomy]",
+      "assessed_score": "[Institution's score]",
+      "peer_median_score": "[Selected peer median]",
+      "score_gap": "[assessed_score - peer_median; negative indicates below peer]",
+      "gap_size_description": "[E.g., '0.8 points below peer median']",
+      "priority_score": "[Calculated using 6-factor formula; 1.0–10.0]",
+      "priority_tier": "[CRITICAL / HIGH / MEDIUM / LOW]",
+      "priority_formula_breakdown": {
+        "BI_Business_Impact": {
+          "score": "[1–10]",
+          "weight": "25%",
+          "rationale": "[Why this gap impacts [Institution]: direct revenue impact, member experience, etc.]"
+        },
+        "RE_Risk_Exposure": {
+          "score": "[1–10]",
+          "weight": "20%",
+          "rationale": "[Regulatory risk if not addressed; enforcement history context]"
+        },
+        "CG_Competitive_Gap": {
+          "score": "[1–10]",
+          "weight": "20%",
+          "rationale": "[Gap vs. peer median; distance from laggard threshold]"
+        },
+        "EI_Effort_Inverse": {
+          "score": "[1–10; high = quick, low = long effort]",
+          "weight": "15%",
+          "rationale": "[Estimated effort: quick wins (strategy, culture) vs. long implementation (data, tech)]"
+        },
+        "QW_Quick_Win": {
+          "score": "[1–10; high = addressable in <6mo]",
+          "weight": "10%",
+          "rationale": "[Gap size relative to implementation timeline]"
+        },
+        "TM_Trend_Momentum": {
+          "score": "[1–10]",
+          "weight": "10%",
+          "rationale": "[Is capability declining? Improving? Stagnant for years?]"
+        }
+      },
+      "priority_calculation": "[Show formula: (0.25×BI) + (0.20×RE) + (0.20×CG) + (0.15×EI) + (0.10×QW) + (0.10×TM) = [priority_score]]",
+      "root_cause_analysis": "[Why is [Institution] scoring below peers on this capability? What's the underlying constraint?]",
+      "institutional_context": "[How does [Institution]'s specific situation (size, geography, business model) affect this gap?]",
+      "transformation_opportunity": "[If addressed, what capability could improve to? What would be the strategic impact?]",
+      "action_window": "[0–6 months (CRITICAL), 6–12 months (HIGH), 12–18 months (MEDIUM), Opportunistic (LOW)]",
+      "linked_capabilities": "[Other capabilities that depend on fixing this gap, or that could be fixed together]"
+    }
+  ],
+  "capability_trend_analysis": {
+    "capabilities_improving": "[List of capabilities showing positive trend if reassessment]",
+    "capabilities_stagnant": "[List where scores unchanged for 18+ months]",
+    "capabilities_declining": "[List showing negative trend]"
+  },
+  "quick_wins_identification": {
+    "description": "Gaps that could be addressed in <6 months with high strategic impact",
+    "quick_wins": [
+      {
+        "capability_id": "[P[1-4]C[1-5]]",
+        "gap_size": "[Score delta]",
+        "estimated_effort": "[Quick / Moderate / Significant]",
+        "estimated_timeline": "[Weeks/months]",
+        "required_resources": "[Team, budget, technology needed]",
+        "expected_score_improvement": "[e.g., 2.5 → 3.2 (+0.7 points)]"
+      }
+    ]
+  },
+  "cross_capability_dependencies": {
+    "description": "Capabilities that should be addressed together or in sequence",
+    "dependency_groups": [
+      {
+        "group_name": "[E.g., 'Data Governance Cluster']",
+        "capabilities_included": "[List of P[1-4]C[1-5]]",
+        "dependency_logic": "[Why these should be addressed together; e.g., 'P4C1 Data Mgmt is prerequisite for P4C2 Analytics and P2C4 Personalization']",
+        "recommended_sequence": "[Which capability should be tackled first]",
+        "combined_effort_estimate": "[Months to address all in group]"
+      }
+    ]
+  },
+  "peer_comparison_benchmarking": {
+    "assessment_vs_peer_positioning": {
+      "overall_position": "[vs. median: [X] points above/below]",
+      "pillar_positioning": {
+        "P1": "[Score vs. peer median]",
+        "P2": "[Score vs. peer median]",
+        "P3": "[Score vs. peer median]",
+        "P4": "[Score vs. peer median]"
+      },
+      "quartile_positioning": "[If in P25 (bottom quartile) vs. P75 (top quartile) for each capability]"
+    },
+    "best_performing_capabilities": "[Capabilities in top quartile (P75+) vs. peers]",
+    "weakest_performing_capabilities": "[Capabilities in bottom quartile (P25-) vs. peers]"
+  },
+  "strategic_implications": {
+    "overall_assessment": "[Summary: Is [Institution] strategically aligned with digital maturity? Lagging? Leading?]",
+    "strengths": "[What is [Institution] doing well relative to peers?]",
+    "constraints_on_advancement": "[What are the primary barriers preventing higher maturity scores? Root causes?]",
+    "transformation_thesis": "[If [Institution] addresses top 3 priorities in the recommended sequence, what overall score improvement could be achieved? Timeline?]"
+  },
+  "quality_assurance_checks": {
+    "priority_formula_validation": {
+      "status": "[PASS / FAIL]",
+      "sample_calculation": "[Show calculation for highest-priority gap]"
+    },
+    "gap_count_validation": {
+      "status": "[PASS / FAIL]",
+      "expected": "[Capabilities below peer median]",
+      "actual": "[Count in prioritized_gaps array]"
+    },
+    "priority_tier_distribution": {
+      "status": "[PASS / FAIL]",
+      "check": "Do tier counts sum to total below-median count?"
+    }
+  },
+  "metadata": {
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_version": "1.0",
+    "total_gaps_prioritized": "[Count]",
+    "quick_wins_identified": "[Count]",
+    "checkpoint_status": "COMPLETE"
+  }
+}

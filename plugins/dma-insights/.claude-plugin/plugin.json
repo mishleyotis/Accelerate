@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "dma-insights",
+  "displayName": "DMA Insights",
+  "version": "0.1.0",
+  "description": "The five Digital Maturity Assessment skills, four DMA agents, and the remote DMA Insights MCP connector — research, assessment, governance, surface production and the first-call deck, packaged as one installable unit.",
+  "author": {
+    "name": "Zennify — DMA Insights build"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "dma",
+    "digital-maturity",
+    "financial-services",
+    "surface-production",
+    "governance",
+    "zennify"
+  ],
+  "defaultEnabled": false,
+  "userConfig": {
+    "mcp_base_url": {
+      "type": "string",
+      "title": "Connector base URL",
+      "description": "Cloud Run URL of the deployed dmai-mcp service, no trailing slash. Override only for a staging deployment.",
+      "default": "https://dmai-mcp-306195530103.us-central1.run.app",
+      "required": true
+    },
+    "mcp_path_token": {
+      "type": "string",
+      "title": "Connector path token",
+      "description": "The capability-path segment the connector is mounted under. Read it from Secret Manager: gcloud secrets versions access latest --secret=dmai-mcp-path-token. Never commit it; it is stored in your OS keychain, not in settings.json.",
+      "sensitive": true,
+      "required": true
+    },
+    "repo_root": {
+      "type": "directory",
+      "title": "DMA Insights repo checkout",
+      "description": "Optional. Absolute path to a checkout of the DMA Insights repository. Only scripts/precheck_gates.py uses it, to import the connector's own gate modules from apps/mcp rather than re-implementing them. Leave empty and precheck_gates.py reports which gates it could not run instead of guessing."
+    }
+  },
+  "mcpServers": "./.mcp.json"
+}
