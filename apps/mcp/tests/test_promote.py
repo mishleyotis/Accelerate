@@ -298,6 +298,51 @@ def test_five_tiles_survive_promotion():
     assert row["story"] == "story for platform 1"
 
 
+def test_caps_and_item_provenance_survive_promotion():
+    """"How come there are no caps from issues?" — because there was nowhere
+    to put them.
+
+    `capped_subcap_ids` is the reason an issue is on this register at all ("an
+    issue is only interesting here because it CAPS something"): it validated at
+    submit and had no column, so a client read a regulatory matter beside a
+    score it appeared not to touch. Per-item `provenance` went the same way for
+    a different reason — one envelope column was answering two questions.
+
+    Both asserted through the same round trip as the platform tiles: what
+    promote writes, read back by the serving projection.
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "apps" / "api"))
+    from dma_api.serving_spec import assemble
+    from dma_mcp.promote import _value
+
+    payload = {"issues": [{
+        "issue_id": "ISS-001", "title": "t", "severity": "S2", "status": "OPEN",
+        "capped_subcap_ids": [{"subcap_id": "P4C4.2.1", "cap_level": 3.0}],
+        "provenance": "analyst", "e_ids": ["E-1"],
+        "linked_subcap_ids": ["P4C4.2.1"]}],
+        "e_ids": ["E-1"], "internal_only": [],
+        "produced_at": "2026-08-08T00:00:00Z"}
+    writer = next(w for p in json.loads(_SPEC_PATH.read_text())["specs"]
+                  if p["page"] == "context"
+                  for w in p["writers"] if w["section"] == "issue_register")
+    row = {}
+    for c in writer["columns"]:
+        v = _value(c["source"], STAMPS, payload, payload["issues"][0])
+        if v is ...:
+            continue
+        row[c["column"]] = (json.dumps(v) if c.get("jsonb")
+                            or isinstance(v, (dict, list)) else v)
+
+    built = assemble("context", "issue_register", [row])
+    issue = built["data"]["issues"][0]
+    assert issue["capped_subcap_ids"] == [{"subcap_id": "P4C4.2.1",
+                                           "cap_level": 3.0}]
+    # Two facts, two columns: how THIS issue was arrived at, and who produced
+    # the section. Neither may answer for the other.
+    assert issue["provenance"] == "analyst"
+    assert built["stamps"]["provenance"] == "producer"
+
+
 def test_alert_status_is_initialised_at_promote():
     """heatmap_alerts.status has no DDL default and no contract field, so
     promote must set it — an alert promoted NULL is invisible to the alert
