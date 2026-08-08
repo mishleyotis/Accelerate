@@ -583,7 +583,7 @@ Download template (1 call) → Unpack via `scripts/01_intake/template_preparer.p
 **After editing:** Repack PPTX → convert edited slides to images → present in chat:
 ```bash
 # Pack, convert to images, show
-python3 /mnt/skills/public/pptx/scripts/office/pack.py unpacked/ working/deck.pptx
+python3 scripts/00_util/pack_pptx.py unpacked/ working/deck.pptx
 soffice --headless --convert-to pdf working/deck.pptx --outdir working/
 pdftoppm -png -f 1 -l 3 working/deck.pdf working/slide  # Slides 1-3
 ```

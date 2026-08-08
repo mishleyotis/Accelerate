@@ -485,7 +485,7 @@ For HYBRID/INTERNAL: Load internal evidence FIRST per Internal Evidence Integrat
 
 **Template is MANDATORY — NO deviation.**
 
-1. Read docx skill FIRST (`/mnt/skills/public/docx/SKILL.md`)
+1. Read the `docx` skill FIRST (invoke it by name; do not hardcode a path to it)
 2. **Retrieve `DMA_Client_Profile_Research_Template.docx` from the project knowledge base.**
    This is the ONLY acceptable report structure. Do NOT create ad hoc layouts.
 3. Execute PRE-WRITE PROTOCOL before writing ANY section:

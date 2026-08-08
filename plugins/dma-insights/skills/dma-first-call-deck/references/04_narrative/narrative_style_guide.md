@@ -23,7 +23,7 @@
 | 2 (Static intro) | DO NOT CHANGE — pre-set Zennify intro slide. (Historical note: older narrative guides labeled Slide 2 as "Org Profile" — that was the old template numbering. Current template puts Org Profile on Slide 6.) |
 | 3 (Summary) | [Client] scores [X]/5 overall, [above/below] peer median of [Y] |
 | 4-5 (Static) | DO NOT CHANGE — headlines are pre-set |
-| 6 (Org Profile) | REWRITE Sh2 headline (Quantified Impact, max ~130 chars, 2 lines). Populate 4 quick facts + 3 strategic priorities (with fallback per `05_qa/strategic_priorities_fallback.md` if report is thin) + up to 5 key platforms + 3 metric cards. Headline pattern: "[Client]'s [key metric] and [growth descriptor] create a [strong foundation] for [digital outcome]." NO color operations. |
+| 6 (Org Profile) | REWRITE Sh2 headline (Quantified Impact, max ~130 chars, 2 lines). Populate 4 quick facts + 3 strategic priorities (with fallback per `../05_qa/strategic_priorities_fallback.md` if report is thin) + up to 5 key platforms + 3 metric cards. Headline pattern: "[Client]'s [key metric] and [growth descriptor] create a [strong foundation] for [digital outcome]." NO color operations. |
 | 7 (Assessment) | [Client] shows [strongest pillar] strength at [score] but trails in [weakest] at [score] |
 | 8 (Heatmap) | [N] of [total] capabilities score below benchmark, concentrated in [pillar] |
 | 9 (Discussion) | DO NOT CHANGE |

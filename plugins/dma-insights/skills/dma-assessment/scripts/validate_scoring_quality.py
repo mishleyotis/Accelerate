@@ -330,6 +330,10 @@ def check_evidence_fact_granularity(wb):
 # MAIN
 # ──────────────────────────────────────────────────────────────────────
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print(__doc__ or "scoring-quality checks over a completed workbook")
+        print("Usage: python validate_scoring_quality.py <workbook_path>")
+        return
     if len(sys.argv) < 2:
         print("Usage: python validate_scoring_quality.py <workbook_path>")
         sys.exit(1)

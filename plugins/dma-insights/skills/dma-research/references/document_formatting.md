@@ -1,7 +1,7 @@
 # Document Formatting Specification
 
 Read this file during Batch 3 when generating the .docx report. Use the docx skill
-for implementation — read `/mnt/skills/public/docx/SKILL.md` first.
+for implementation — read the `docx` skill first (invoke it by name; do not hardcode a path to it).
 
 ---
 

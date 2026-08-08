@@ -155,7 +155,7 @@ New version deployed for next assessment
 3. Human operator reviews the ERR entry:
    - Confirms it's a genuine pattern (not a one-off data quirk)
    - Validates the prevention rule is actionable
-4. Approved entries are appended to `references/qa_error_log.md` in the Layer 1 skill
+4. Approved entries are appended to `${CLAUDE_PLUGIN_ROOT}/skills/dma-assessment/references/qa_error_log.md` (the Layer 1 skill)
 5. Future assessments automatically load these prevention rules at phase gates
 
 ### 4.3 Regression Test Pipeline
@@ -166,7 +166,7 @@ New version deployed for next assessment
    - Is the test deterministic? (Same inputs → same pass/fail)
    - Is the tolerance appropriate?
    - Does it conflict with existing tests?
-4. Approved tests are added to `references/regression_tests.md` in Layer 1 and
+4. Approved tests are added to `${CLAUDE_PLUGIN_ROOT}/skills/dma-assessment/references/regression_tests.md` (Layer 1) and
    `references/regression_suite.md` in Layer 2
 
 ### 4.4 Rubric Tweak Pipeline

@@ -68,7 +68,7 @@ SCORING_COLUMNS = ['Score_1_to_5', 'Confidence', 'Caps_Applied', 'Final_Score',
 
 VALID_TIERS = {'T1', 'T2', 'T3', 'T4', 'T5', 'NO_EVIDENCE'}
 
-EVIDENCE_ID_PATTERN = re.compile(r'^E-\d{3}(:\F\d+)?$')
+EVIDENCE_ID_PATTERN = re.compile(r'^E-\d{3}(:F\d+)?$')
 
 
 class ValidationResult:

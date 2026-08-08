@@ -293,7 +293,7 @@ Machine-readable audit trail of every scoring decision made during Phase 4. Prod
 Layer 1 alongside the scoring workbook — NOT reconstructed afterwards. Enables Layer 2 to
 programmatically audit reasoning quality, decision path consistency, and evidence linkage.
 
-**Schema file**: See assessment skill `references/reasoning_chain_schema.md` for the full
+**Schema file**: See the assessment skill's `${CLAUDE_PLUGIN_ROOT}/skills/dma-assessment/references/reasoning_chain_schema.md` for the full
 schema definition.
 
 ```json

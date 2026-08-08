@@ -164,8 +164,8 @@
         "items": {
           "type": "string",
           "examples": [
-            "references/evidence_ranking.md",
-            "schemas/proof_carrying_structure.md",
+            "${CLAUDE_PLUGIN_ROOT}/skills/dma-assessment/references/evidence_ranking.md",
+            "${CLAUDE_PLUGIN_ROOT}/skills/dma-governance/references/audit_checks.md",
             "communication_standards.md#inline_citation_format"
           ]
         }

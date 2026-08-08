@@ -128,7 +128,10 @@ def main():
         shutil.rmtree(unpacked)
     
     # Try using the pptx skill unpack script
-    unpack_script = "/mnt/skills/public/pptx/scripts/office/unpack.py"
+    # The public pptx skill, when installed, unpacks with better OPC handling.
+    # It is not this plugin's to depend on, so absence is normal, not an error.
+    unpack_script = os.environ.get(
+        "PPTX_UNPACK_SCRIPT", "/mnt/skills/public/pptx/scripts/office/unpack.py")
     if os.path.exists(unpack_script):
         subprocess.run(["python3", unpack_script, work_pptx, unpacked], check=True)
     else:

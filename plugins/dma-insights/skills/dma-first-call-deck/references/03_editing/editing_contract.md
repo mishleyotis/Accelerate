@@ -4,7 +4,7 @@
 > - Colors, headline patterns, 9-pt scoring: `references/01_brand/brand_guidelines.md`
 > - Overflow formula + font table: `references/03_editing/overflow_rules.md`
 > - Industry content verification: `references/06_industry_content/{sv_id}.md`
-> - Solution offerings for Slides 17-19: `references/02_registries/solution_offerings_registry.md`
+> - Solution offerings for Slides 17-19: `../02_registries/solution_offerings_registry.md`
 > - Heatmap script: `scripts/03_editing/heatmap_editor.py`
 > - Slide 13 script: `scripts/03_editing/slide13_editor.py`
 > - QA checks: `references/05_qa/qa_rubric.md`
@@ -64,7 +64,7 @@
 
 | Sh | Size px | Font | Content | Edit | Max Chars |
 |---|---|---|---|---|---|
-| 3 | 763×51 | 23pt | "The data and experience consultants for [SV]" | **AUTO-SWAP** SV descriptor from `02_registries/subvertical_registry.md` | ~60 |
+| 3 | 763×51 | 23pt | "The data and experience consultants for [SV]" | **AUTO-SWAP** SV descriptor from `../02_registries/subvertical_registry.md` | ~60 |
 | All others | various | 9-26pt | Zennify stats (CSAT 4.9/5, Certs 580+, Projects 700+, Data 200+) | **DO NOT CHANGE** | — |
 
 **Colors changed:** None. Existing: #B0EED3 on Sh4 "WHY ZENNIFY" header.
@@ -446,7 +446,7 @@ All three slides share identical 3-column structure.
 - "RECOMMENDED SOLUTIONS" header (Sh7): **#B0EED3**
 - All other text: inherited (#1C4A4D or black)
 
-**Solution mapping:** 9 offerings from `02_registries/solution_offerings_registry.md`, selected by `scripts/02_planning/solution_inferrer.py` based on DMA capability gaps. 3 per slide, no duplicates.
+**Solution mapping:** 9 offerings from `../02_registries/solution_offerings_registry.md`, selected by `scripts/02_planning/solution_inferrer.py` based on DMA capability gaps. 3 per slide, no duplicates.
 
 ---
 

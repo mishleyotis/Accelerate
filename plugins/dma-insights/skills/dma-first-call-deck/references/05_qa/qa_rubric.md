@@ -1,6 +1,6 @@
 # QA Rubric — 12-Check System
 
-Run on every batch. Automated checks via `scripts/qa_checker.py`.
+Run on every batch. Automated checks via `scripts/04_qa/qa_checker.py`.
 
 ---
 

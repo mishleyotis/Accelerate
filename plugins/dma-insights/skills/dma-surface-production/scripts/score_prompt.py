@@ -27,6 +27,11 @@ ATTRS = [
 ]
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print(__doc__ or "score a per-surface prompt against the 14 attributes")
+        print("usage: score_prompt.py <prompt.txt>   (or '-' / no argument "
+              "to read stdin)")
+        return 0
     src = sys.argv[1] if len(sys.argv) > 1 else "-"
     text = sys.stdin.read() if src == "-" else open(src, encoding="utf-8").read()
     got = [(n, bool(re.search(p, text, re.I)), why) for n, p, why in ATTRS]

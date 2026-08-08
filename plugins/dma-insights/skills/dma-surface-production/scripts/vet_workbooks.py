@@ -248,6 +248,10 @@ def vet_research(path: Path) -> None:
 def main(argv: list[str]) -> int:
     global entity_sv
     argv = list(argv)
+    if any(a in ("-h", "--help") for a in argv[1:]):
+        print(__doc__ or "mechanical vetting of an assessment package")
+        print("usage: vet_workbooks.py <package-dir> [--subvertical <CODE>]")
+        return 0
     if "--subvertical" in argv:
         i = argv.index("--subvertical")
         if i + 1 >= len(argv):

@@ -100,7 +100,7 @@ After selection, verify:
 7. Post-normalization: `grep "Higginbotham"` returns 0
 8. Post-normalization: `grep "\[Customer name\]"` returns 0 on Slide 10 (new placeholder variant — see editing_contract §11 rule #18)
 9. Slide 10 hardcoded scores (`2.6`, `2.9`) in Sh7 have been replaced by `slide10_editor.py` — verify via `placeholder_manifest.json` that no literal `2.6 (out of 5)` or `peer median of 2.9` remain
-10. Slide 6 strategic priorities — no `[Priority N name]` or `[One-line description...]` remaining in slide6.xml after `slide6_editor.py` runs; if priorities were unavailable, `[DATA NEEDED: strategic priority N]` tags are the acceptable fallback (see `05_qa/strategic_priorities_fallback.md`)
+10. Slide 6 strategic priorities — no `[Priority N name]` or `[One-line description...]` remaining in slide6.xml after `slide6_editor.py` runs; if priorities were unavailable, `[DATA NEEDED: strategic priority N]` tags are the acceptable fallback (see `../05_qa/strategic_priorities_fallback.md`)
 
 ## Google Drive Template IDs
 

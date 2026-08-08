@@ -51,7 +51,7 @@ Evidence linkage is documented in communication_standards.md, but proof structur
 Scorer [Name] omitted rule links in P1C2 rationale due to unclear requirement. This increases variation across assessments.
 
 **Proposed Wording:**
-Add to `references/scoring_methodology.md`, Section "Rationale Structure":
+Add to `${CLAUDE_PLUGIN_ROOT}/skills/dma-assessment/references/scoring_methodology.md`, Section "Rationale Structure":
 
 > **Required Proof Elements for Every Subcapability Score:**
 >
@@ -203,7 +203,7 @@ P2 capability definitions may need refinement to better distinguish M2 (some pla
 **Owner:** Skill Development Team
 **Timeline:** Before next v3.1 release
 **Files to Update:**
-- `references/scoring_methodology.md` — Add explicit proof structure requirements
+- `${CLAUDE_PLUGIN_ROOT}/skills/dma-assessment/references/scoring_methodology.md` — Add explicit proof structure requirements
 - `communication_standards.md` — Add proof template examples
 - `capability_criteria.md` — Add proof-carrying examples for 2-3 sample capabilities
 

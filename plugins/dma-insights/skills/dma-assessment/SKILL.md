@@ -545,7 +545,7 @@ FORBIDDEN: "Category-based scoring", "Based on public evidence analysis", anythi
    11. Run_Metadata       — Assessment ID, evidence mode, parameters
    ```
    **Every sheet must exist. Missing sheets = QA failure.**
-   **Read the xlsx skill (`/mnt/skills/public/xlsx/SKILL.md`) before generating.**
+   **Read the `xlsx` skill before generating** (invoke it by name; do not hardcode a path to it).
 
 5.5. **EVIDENCE COMPLETENESS GATE (blocks Phase 5):**
    For every scored subcap row, verify: F (Evidence_IDs) non-empty, G (Source_URLs)

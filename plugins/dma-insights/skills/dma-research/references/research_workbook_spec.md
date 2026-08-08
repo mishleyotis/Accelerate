@@ -371,7 +371,7 @@ def create_research_workbook(entity_name, date_str, diagnostic_qs, evidence_inde
 | Scoring columns empty | J, N-T have no values | BLOCK |
 | Evidence columns filled | U, V have values for all non-NO_EVIDENCE rows | BLOCK |
 | Weight sums | Each capability weights sum to 100% ±1% | BLOCK |
-| Evidence_IDs format | Match E-\d{3}(:\F\d+)? pattern | WARNING |
+| Evidence_IDs format | Match E-\d{3}(:F\d+)? pattern | WARNING |
 | Tier codes valid | All in {T1,T2,T3,T4,T5,NO_EVIDENCE} | WARNING |
 | Excerpt minimum length | ≥50 chars for evidence rows, ≥100 for NO_EVIDENCE | WARNING |
 | ELM completeness | Every E-xxx in scoring sheets exists in ELM | WARNING |

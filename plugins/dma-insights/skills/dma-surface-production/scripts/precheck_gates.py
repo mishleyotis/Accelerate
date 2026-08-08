@@ -42,24 +42,90 @@ import os
 import sys
 
 
-def _load_connector(repo_root: str):
+def _candidate_roots(repo_root: str | None):
+    """Where a checkout of the connector might be, most explicit first.
+
+    Packaged as a plugin this script no longer sits inside the repository,
+    so a hardcoded sibling path is a coupling that cannot hold. It searches
+    instead, and each rung is something the caller actually controls:
+
+        --repo                      you said so
+        $DMA_INSIGHTS_REPO / $DMA_REPO   the environment said so
+        $CLAUDE_PROJECT_DIR         the session is in the repo
+        cwd and its parents         you are standing in the repo
+        (last) an installed dma_mcp already importable on sys.path
+    """
+    seen, out = set(), []
+    for c in (repo_root,
+              os.environ.get("DMA_INSIGHTS_REPO"),
+              os.environ.get("DMA_REPO"),
+              os.environ.get("CLAUDE_PROJECT_DIR")):
+        if c and c not in seen:
+            seen.add(c)
+            out.append(c)
+    here = os.path.abspath(os.getcwd())
+    while True:
+        if here not in seen:
+            seen.add(here)
+            out.append(here)
+        parent = os.path.dirname(here)
+        if parent == here:
+            break
+        here = parent
+    return out
+
+
+def _load_connector(repo_root: str | None):
     """The gates are imported, never re-implemented.
 
     A second copy of a gate is a second answer to the same question, and
-    the one that matters is the connector's. If the import fails, say so
-    and stop — a precheck that silently skips the gates it could not load
-    would report a clean payload that the server then refuses.
+    the one that matters is the connector's. Vendoring `validation2` into
+    this plugin would give a payload two verdicts — the vendored one, which
+    goes stale the first time a gate changes, and the server's, which is
+    the only one that decides. A precheck that passes a payload the server
+    then refuses is worse than no precheck, because it was believed.
+
+    So: find the connector, or say exactly what could not run and stop.
+    There is no degraded mode where the gates quietly do not fire.
     """
-    mcp = os.path.join(repo_root, "apps", "mcp")
-    if not os.path.isdir(mcp):
-        sys.exit(f"cannot find apps/mcp under {repo_root} — pass --repo")
-    sys.path.insert(0, mcp)
+    tried = []
+    for root in _candidate_roots(repo_root):
+        mcp = os.path.join(root, "apps", "mcp")
+        tried.append(mcp)
+        if not os.path.isdir(mcp):
+            continue
+        if mcp not in sys.path:
+            sys.path.insert(0, mcp)
+        try:
+            from dma_mcp import validation, validation2          # noqa: E402
+            from dma_mcp.subverticals import resolve_subvertical  # noqa: E402
+        except Exception as exc:                                  # noqa: BLE001
+            sys.exit(f"found {mcp} but could not import its gates: {exc!r}")
+        return validation, validation2, resolve_subvertical, mcp
+
+    # Already importable? An editable install of the connector counts.
     try:
         from dma_mcp import validation, validation2          # noqa: E402
         from dma_mcp.subverticals import resolve_subvertical  # noqa: E402
-    except Exception as exc:                                  # noqa: BLE001
-        sys.exit(f"could not import the connector's gates: {exc!r}")
-    return validation, validation2, resolve_subvertical
+    except Exception:                                         # noqa: BLE001
+        pass
+    else:
+        return (validation, validation2, resolve_subvertical,
+                "installed dma_mcp on sys.path")
+
+    sys.exit(
+        "cannot reach the connector's gate modules, so ET-01, ET-04, ET-05,\n"
+        "ET-06, CG-10, CG-14 and the contract pass did NOT run. This does not\n"
+        "mean the payload is clean — it means nothing was checked.\n\n"
+        "Give it a checkout of the DMA Insights repository, any one of:\n"
+        "  precheck_gates.py ... --repo /path/to/Accelerate\n"
+        "  export DMA_INSIGHTS_REPO=/path/to/Accelerate\n"
+        "  run it from inside the checkout\n"
+        "  pip install -e /path/to/Accelerate/apps/mcp\n"
+        "or set repo_root in the plugin's configuration.\n\n"
+        "Without one, run scripts/check_payload.py (no repo needed, catches the\n"
+        "contract failures) and let submit_page_payload return the rest.\n\n"
+        "looked for apps/mcp under:\n  " + "\n  ".join(tried[:8]))
 
 
 def cited_ids(payload: dict, validation2) -> dict:
@@ -124,7 +190,11 @@ def main(argv=None) -> int:
     ap.add_argument("--page", required=True)
     ap.add_argument("--evidence", help="get_evidence(...) output, as JSON")
     ap.add_argument("--bundle", help="get_report_bundle(...) output, as JSON")
-    ap.add_argument("--repo", default=os.environ.get("DMA_REPO", "/home/user/Accelerate"))
+    ap.add_argument("--repo", default=None,
+                    help="checkout of the DMA Insights repository, whose "
+                         "apps/mcp holds the gates this imports. Falls back to "
+                         "$DMA_INSIGHTS_REPO, $DMA_REPO, $CLAUDE_PROJECT_DIR, "
+                         "the cwd and its parents, then an installed dma_mcp.")
     ap.add_argument("--list-cited", action="store_true",
                     help="print every id the payload cites and stop, so one "
                          "get_evidence call can cover the whole page")
@@ -132,7 +202,8 @@ def main(argv=None) -> int:
 
     payload = json.load(open(a.payload))
     payload = payload.get("payload", payload)
-    mods = _load_connector(a.repo)
+    *mods, gates_from = _load_connector(a.repo)
+    print(f"gates imported from: {gates_from}", file=sys.stderr)
 
     if a.list_cited:
         for e in sorted(cited_ids(payload, mods[1])):
