@@ -33,6 +33,59 @@ because they will be. Three questions:
 | Their onboarding is **broken** | Digital onboarding **excludes the segment that defines the franchise** — the exclusion is stated on their own page |
 | **Underinvested** in data | Infrastructure was **built expressly to enable AI**, per the executive who owns it — **the opportunity is breadth, not foundation** |
 
+## The opening rule — a field never starts with an absence
+
+Naming the asset first is not a preference about paragraph order. It is a rule about the
+**first sentence of every prose field**, because that sentence is what the reader meets
+before deciding what kind of document this is — and on several surfaces it is the only
+sentence they meet at all. A recommendation card line-clamps `root_cause` to three lines;
+a cell drawer opens on the first line of `synthesis`; a leadership row shows
+`enrichment_basis` under the name. The rest of the paragraph is below the fold.
+
+**A prose field may not open with an absence construction:**
+
+```
+No X…            There is no…        There are no…
+Nothing…         None…               Neither…        Nowhere…
+Lacks…  Lacking…                     Without a…      Absent…
+```
+
+This shipped to a client, on a recommendation card, as the first thing read:
+
+> **No integration platform** appears in a scan of more than two hundred technologies. One
+> low-code tool carries point-to-point connections between the core, origination, voice and
+> digital-banking platforms, while the packaged connector for this exact core sits on the
+> vendor marketplace undeployed.
+
+Everything in it is true and cited, and the second sentence already contains the asset. The
+repair is order, not content:
+
+> **One low-code tool** carries the point-to-point connections between core, origination,
+> voice and digital banking, and the packaged connector for this exact core is on the vendor
+> marketplace waiting to be deployed. No integration platform sits above them — across a scan
+> of more than two hundred technologies.
+
+Two more from the same run, with their repairs:
+
+| Shipped | Write |
+|---|---|
+| **No contact route stored:** the enrichment search returned no profile whose TITLE matched this person | The name and role come from the assessment package; the enrichment search returned no TITLE-matched profile, so the contact route stays null |
+| **Nothing BCU publishes** packages a dataset as a product with a named consumer, a service level and a version | An executive owns the member data estate and names it in public; what is not yet published is a dataset packaged as a product, with a named consumer, a service level and a version |
+
+**Later sentences are exempt, and deliberately so.** A field whose first sentence names the
+asset and whose second states the absence is this rule working. Measured over one promoted
+run, 116 sentences opened with an absence and 109 of them were exactly that shape:
+
+> A member attribute at BCU can travel from Episys through Salesforce into a marketing
+> audience or a service conversation, and every hop is a place lineage would be recorded.
+> **No catalogue, no lineage tool, no impact-analysis practice appears anywhere in the
+> record.** What can be reconstructed is the platform chain; what cannot is the path of any
+> particular field through it.
+
+One exemption, and it is the contract's: where nothing grounds a cost of inaction, the
+recommendation contract dictates the literal string `no dated trigger established`. Write
+what the contract says.
+
 ## The pattern behind every rewrite
 
 **Name what exists before naming what does not.** Almost every gap sits beside something the
@@ -95,5 +148,11 @@ in prose is not.
 
 ## Check it
 
-`scripts/check_language.py` scans a payload for these constructions and for gap statements
-with no adjacent asset. It is a prompt, not a gate — it finds the sentence, you decide.
+`scripts/check_language.py` scans a payload for these constructions, for fields that open on
+an absence, and for gap statements with no adjacent asset.
+
+The opening rule and the sentence-case rule are checks; the rest is a prompt — it finds the
+sentence, you decide. Note what the checker cannot do: it reads the first sentence, not the
+argument. A field can open on the asset and still read as an indictment, and no regular
+expression will tell you that. Read the framing line, the top finding and every
+`root_cause` aloud.

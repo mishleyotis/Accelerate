@@ -40,6 +40,69 @@ piece.** Reformatting is fine; joining, trimming a clause, or supplying a missin
 not. If the passage you want spans an intervening caption or heading, take the half that
 carries the claim rather than stitching.
 
+## The excerpt and the `source_url` are one claim, not two fields
+
+**An excerpt is a verbatim span of the document at `source_url`.** Not of a document that
+says the same thing, not of the page you originally read before switching to a URL that
+fetched more cleanly, not of the entity's newsroom when the URL points at a directory listing
+that mentions the entity. The pairing IS the claim: it says "open this and you will find
+these words".
+
+Registering a true claim under a URL that does not contain it is **fabrication by
+construction**, and the truth of the claim is not a defence. A reader who clicks the chip
+lands on a page that does not say what the card says it says, and every other citation on the
+run becomes a thing they have to check.
+
+Measured on a promoted run, four rows out of 178:
+
+| Rows | Excerpt | `source_url` | What it is |
+|---|---|---|---|
+| `E-CC-001` | BCU's own newsroom prose about a named executive | `ncuso.org/credit-union/68187/` — a third-party directory listing | The claim is true and the URL does not contain it. **Cited nine times on the heatmap** |
+| `E-CC-002` | BCU's own merger announcement headline | `bbb.org/.../baxter-credit-union-...` — a Better Business Bureau profile | Same |
+| `E-CC-003`, `E-CC-004` | the same two spans | the `bcu.org` newsroom pages that actually carry them | The correct rows, registered separately |
+
+The correct rows existed the whole time. Two documents were read, four rows were minted, and
+the pairing crossed over. That is the shape this defect takes: not a fabricated quote, but a
+correct quote under the wrong address, produced by holding two sources open at once.
+
+Three rules follow:
+
+1. **Register from the artefact you fetched, in the same step you fetched it.** One source,
+   one registration, before moving to the next. Registration is idempotent by content, so
+   there is no cost to registering as you go and every cost to batching.
+2. **The tool that found the source is never the source.** An Explorium, Clay or BuiltWith
+   endpoint in `source_url` means the excerpt was read somewhere else — cite there. Two rows
+   on the run above carried an Indeed rating and an RPA stack under
+   `vibeprospecting.explorium.ai`, and one carried the literal string `multiple`.
+3. **A search-results page is not a document.** `google.com/search?q=…` contains no span you
+   can quote and no claim you can cite. A negative search result is a rung in the absence
+   ladder (`01-start-here/4-absence-protocol.md`), recorded as `sources_searched` — never an
+   evidence row.
+
+`scripts/check_evidence.py` reads a `get_evidence` snapshot and refuses the mechanical shapes
+of this. Know what it can and cannot do:
+
+**It catches** — one excerpt registered under two different hosts (the reported four rows fall
+out of this immediately, and no verbatim span is a verbatim span of two different documents
+without you saying so); a `source_url` that is not a fetchable document URL; a search-results
+page; an excerpt with no URL or no publisher name.
+
+**It cannot catch** a single row whose excerpt simply is not on its page — nothing short of
+fetching the URL can, and the connector does exactly that at `register_evidence`, which is
+why registering as you go is the actual control.
+
+`--review` also prints the publisher named in `source_name` beside the URL's host where they
+share no token. **That list is a reading aid and explicitly not a refusal**, because the
+comparison is wrong far more often than it is right. On the run measured here it questioned
+27 rows and 2 were the crossed pairings: a wire service carrying a vendor's release
+(`prnewswire.com` for "Jack Henry Press Release"), an archive (`web.archive.org`), a
+regulator's own domain (`consumerfinance.gov` for "CFPB") and a rebrand (`scworld.com` for
+"SC Media") accounted for 12 more, and the remaining 13 were rows whose `source_name` was an
+internal label — "P3C4 Carry-Forward Consolidation", "MuleSoft Gap Confirmation" — rather
+than a publisher at all. That last group is a real defect of its own: `source_name` is what
+the evidence drawer prints above the quote, so it is the **publisher and the document**, not
+your filing note.
+
 ## A source that blocks retrieval cannot be cited at all
 
 Glassdoor, Indeed, ZipRecruiter and the Glassdoor mirrors all return 403 to automated

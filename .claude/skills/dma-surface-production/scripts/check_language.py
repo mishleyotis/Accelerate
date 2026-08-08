@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Scan a payload for accusatory framing, unpaired gaps and lost capitals.
+"""Scan a payload for accusatory framing, absence openings, unpaired gaps and
+lost capitals.
 
     python scripts/check_language.py payload.json
     python scripts/check_language.py payload.json --strict
@@ -7,13 +8,30 @@
 Mostly a prompt, not a gate: it finds the sentence, you decide. Everything on a
 client dashboard is read by, or in front of, the client.
 
-ONE section of it is a gate, and says so. Sentence case (CG-11) is mechanical
-and the connector refuses on it: a prose field on a client surface begins with
-a capital. The exception is a first word carrying an uppercase letter after its
-first character — nCino, iOS, eBay — which is the vendor's own orthography and
-must survive untouched, as must an id, a hostname, a URL, an enum and above all
-a verbatim excerpt (editing the first letter of a quotation is the one thing
-evidence may never have done to it).
+TWO sections of it are rules and say so.
+
+Sentence case (CG-11) is mechanical and the connector refuses on it: a prose
+field on a client surface begins with a capital. The exception is a first word
+carrying an uppercase letter after its first character — nCino, iOS, eBay —
+which is the vendor's own orthography and must survive untouched, as must an
+id, a hostname, a URL, an enum and above all a verbatim excerpt (editing the
+first letter of a quotation is the one thing evidence may never have done to
+it).
+
+THE OPENING RULE is the second. A prose field may not OPEN with an absence:
+"No integration platform…", "There is no…", "Lacks…", "Nothing shows…",
+"Without a…". The finding is unchanged and the evidence is unchanged; what
+changes is whether the first thing the reader meets is what the institution
+failed to do or what is now available to it. Name the asset first.
+
+The rule is scoped to the FIRST sentence of a field, deliberately. Measured
+over one promoted run, 116 sentences opened with an absence and 109 of them
+were the second or third sentence of a field whose first sentence had already
+named the asset — "A member attribute can travel from Episys through Salesforce
+into a marketing audience, and every hop is a place lineage would be recorded.
+No catalogue, no lineage tool, no impact-analysis practice appears anywhere in
+the record." That is the rule being followed, not broken, and flagging it would
+be flagging the good writing.
 """
 from __future__ import annotations
 import argparse, json, re, sys
@@ -66,10 +84,46 @@ ASSET_CUES = [
 GAP_CUES = [r"\bnot yet\b", r"\bno \w+ (?:is|are|has|have)\b", r"\bgap\b", r"\babsent\b",
             r"\bmissing\b", r"\bunused\b", r"\bthin\b", r"\bunmonitored\b", r"\buncounted\b"]
 
+# ── the opening rule ─────────────────────────────────────────────────
+# Constructions that put an absence in the reader's first clause. Applied to
+# the FIRST sentence of a prose field only — see the module docstring for why.
+ABSENCE_OPENERS = [
+ (r"^No\s+(?=[A-Za-z])",  "opens on a missing asset",
+  "name the asset that exists, then the absence: 'One low-code tool carries "
+  "the connections between core, origination and digital banking; no "
+  "integration platform sits above them.'"),
+ (r"^There\s+(?:is|are|was|were)\s+(?:no|not|nothing)\b", "opens on an absence",
+  "lead with what the record does carry"),
+ (r"^(?:Neither|None|Nothing|Nowhere)\b", "opens on a bare negative pronoun",
+  "the pronoun has nothing to refer back to in the first sentence — name the "
+  "thing first, then say what it does not reach"),
+ (r"^Lack(?:s|ing|ed)?\b", "opens on a deficit verb",
+  "state what is in place and what the next step adds"),
+ (r"^Without\s+", "opens on a missing precondition",
+  "state the precondition as the next step, not as the frame"),
+ (r"^Absent\b", "opens on an absence",
+  "name what is present first"),
+]
+# Two openings the CONTRACT prescribes verbatim. `cost_of_inaction` is told to
+# write exactly "no dated trigger established" where nothing grounds a cost;
+# refusing the phrase the contract dictates would be this checker overruling
+# the contract, which it does not get to do.
+ABSENCE_EXEMPT = ("no dated trigger established", "not applicable to this run")
+
 PROSE_KEYS = ("body","rationale","story","story_md","text","framing","synthesis","summary",
               "narrative","narrative_thread","consequence","what","why","so_what",
               "rejected_alternative","pattern_statement","detail","plain_label",
-              "mix_implication","strategic_alignment","reason","note")
+              "mix_implication","strategic_alignment","reason","note",
+              # Client-facing prose the first version of this list never
+              # reached. 775 of the 1,721 prose-shaped strings in one promoted
+              # run — 45% — were keyed under names that matched nothing here,
+              # including `root_cause`, which is where the sentence that
+              # prompted the opening rule actually lives.
+              "cause","cost_of_inaction","cost_of_delay","basis","condition",
+              "impact","title","headline","justification","clause","statement",
+              "alternative_explanation","limiting_absence","maturity_effect",
+              "unlocks","implication","description","situation","complication",
+              "answer","theme","cap_statement","effect_note","relevance_note")
 
 # ── CG-11 · sentence case ────────────────────────────────────────────
 # The same rule the connector runs, stated the same way. Policed when the
@@ -105,6 +159,21 @@ def sentence_case_offender(key, value):
     word = text.split()[0].strip(".,;:")
     return None if CAMEL_FIRST_WORD.match(word) else word
 
+def absence_opening(value):
+    """→ (matched opener, why, fix) if the FIELD opens on an absence."""
+    text = (value or "").strip().lstrip("\"'“‘([{")
+    if not text:
+        return None
+    first = sentences(text)[0] if sentences(text) else text
+    if first.lower().rstrip(".").startswith(ABSENCE_EXEMPT):
+        return None
+    for pat, why, fix in ABSENCE_OPENERS:
+        m = re.match(pat, first)
+        if m:
+            return m.group(0).strip(), why, fix
+    return None
+
+
 def walk(n, p=""):
     if isinstance(n, dict):
         for k, v in n.items(): yield from walk(v, f"{p}.{k}" if p else k)
@@ -122,16 +191,20 @@ def main():
     try: payload = json.load(open(a.payload, encoding="utf-8"))
     except Exception as e: print(f"could not read payload: {e}"); return 1
 
-    hits, unpaired, checked, lower = [], [], 0, []
+    hits, unpaired, checked, lower, opens = [], [], 0, [], []
     for path, val in walk(payload):
         if not isinstance(val, str): continue
         # CG-11 runs over EVERY string, not just the prose-keyed ones: the
         # gate's own scope is "prose key OR ends as a sentence".
-        word = sentence_case_offender(path.rsplit(".", 1)[-1].split("[")[0], val)
+        key = path.rsplit(".", 1)[-1].split("[")[0]
+        word = sentence_case_offender(key, val)
         if word: lower.append((path, word, val))
         if len(val) < 12: continue
         if not any(path.lower().endswith(k) or f".{k}" in path.lower() for k in PROSE_KEYS): continue
         checked += 1
+        if key not in NEVER_CASE:
+            op = absence_opening(val)
+            if op: opens.append((path, op[0], op[1], op[2], val))
         for sent in sentences(val):
             for pat, kind, fix in ACCUSATORY:
                 m = re.search(pat, sent, re.I)
@@ -145,10 +218,18 @@ def main():
                 unpaired.append((path, sent))
 
     print(f"\n  prose fields checked: {checked}")
+    print(f"  fields that OPEN on an absence: {len(opens)}")
     print(f"  accusatory constructions: {len(hits)}")
     print(f"  gap statements with no adjacent asset: {len(unpaired)}")
     print(f"  sentences that lost their capital (CG-11, BLOCKING): {len(lower)}\n")
 
+    if opens:
+        print("  OPENS ON AN ABSENCE — name the asset first\n")
+        for path, tok, why, fix, val in opens:
+            print(f"    {path}")
+            print(f"      begins {tok!r}  · {why}")
+            print(f"      {val[:160]}{'…' if len(val) > 160 else ''}")
+            print(f"      → {fix}\n")
     if lower:
         print("  SENTENCE CASE — the connector REFUSES these\n")
         for path, word, val in lower:
@@ -167,11 +248,11 @@ def main():
         for path, sent in unpaired[:12]:
             print(f"    {path}\n      {sent[:150]}{'…' if len(sent) > 150 else ''}\n")
         if len(unpaired) > 12: print(f"    … and {len(unpaired) - 12} more\n")
-    if not hits and not unpaired and not lower:
+    if not hits and not unpaired and not lower and not opens:
         print("  clean — reads as opportunity framing throughout.\n")
         print("  Still read the framing line and the top finding aloud. The checker finds")
         print("  constructions; it cannot tell you whether the argument lands.")
-    return 1 if hits or lower or (a.strict and unpaired) else 0
+    return 1 if hits or lower or opens or (a.strict and unpaired) else 0
 
 if __name__ == "__main__":
     sys.exit(main())
