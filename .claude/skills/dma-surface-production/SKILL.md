@@ -316,6 +316,22 @@ The full method, the form each objection takes and what passing each volley requ
 affected pages and re-run `check_consistency.py` before moving on — staged rows are
 retained, so that is cheap.
 
+### 8b · Answer the questions the panel will be asked
+
+Fifteen questions, listed in `04-craft/8-answered-questions.md`, grouped by the panel
+surface they belong to and repeated per cell, focus area or platform where the question
+is scoped. 40–110 words each, spoken register, cited from registered evidence.
+
+The application answers these without you by quoting the promoted field that bears on
+each one — so a run that skips this step still has a working panel. What it does not
+have is the sentence that says what the run MEANS for the conversation, because writing
+that sentence at request time is what the whole architecture forbids. This is the only
+moment it can be written.
+
+An answer the run cannot ground is written as an absence with its reason, never composed
+around the gap: the question then renders with the reason under it, rather than
+disappearing from the list and leaving the reader unaware it was ever asked.
+
 ### 9 · Promote
 
 ```
@@ -456,6 +472,7 @@ assets/          payload skeletons per section
 | `04-craft/1-reasoning.md` | Any ranked, causal or comparative claim |
 | `04-craft/2-platform-story.md` | Before producing D4 — the highest-defect surface |
 | `04-craft/7-storyline-challenge.md` | After the six pages pass, before you promote — five volleys against the run's whole story |
+| `04-craft/8-answered-questions.md` | Before you promote — the fifteen questions the intelligence panel asks of the run |
 | `01-start-here/5-colour-and-bands.md` | Writing a band word, or describing the heatmap |
 | `03-pages/<n>-<page>.md` | Before producing that page |
 
