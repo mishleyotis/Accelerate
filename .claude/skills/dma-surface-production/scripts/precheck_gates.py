@@ -12,6 +12,7 @@ exist, what they carry, which cells the run serves) but not a database:
     ET-01/ET-04   every cited id resolves, and carries a 50-500 char excerpt
     CG-10         a cited row is dated, or bands UNVERIFIED and says so
     ET-05         no cell belongs to another sub-vertical
+    ET-06         no discard names a platform from another vertical
     CG-14         every cited cell is one the run actually serves
 
 Why it earns its place: a page submission is not free — it supersedes the
@@ -111,6 +112,7 @@ def check(payload, page, evidence, bundle, mods) -> list[dict]:
         code = resolve_subvertical(bundle.get("sub_vertical"))
         if code:
             reasons.extend(validation2._check_subvertical_scope(page, payload, code))
+            reasons.extend(validation2._check_candidate_vertical(page, payload, code))
         if run_cells:
             reasons.extend(validation2._check_cell_linkage(page, payload, run_cells))
     return reasons
@@ -143,7 +145,8 @@ def main(argv=None) -> int:
         print("no --evidence: skipping ET-01/ET-04/CG-10 (citation gates)",
               file=sys.stderr)
     if bundle is None:
-        print("no --bundle: skipping ET-05/CG-14 (cell gates)", file=sys.stderr)
+        print("no --bundle: skipping ET-05/ET-06/CG-14 (cell gates)",
+              file=sys.stderr)
 
     reasons = check(payload, a.page, evidence, bundle, mods)
     if not reasons:
