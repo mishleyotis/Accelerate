@@ -62,7 +62,7 @@ function ClientOverview({ entity, run }) {
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast(`Customer-safe scorecard generated · ${entity.name}`, "success")}><Icon name="download" size={13} /> Scorecard</button>
-          <button className="btn btn-tertiary" onClick={() => pushToast("Rerun queued — first batch in ~3 min", "success")}><Icon name="refresh" size={13} /> Request rerun</button>
+          <button className="btn btn-tertiary" onClick={() => pushToast("Rerun queued - first batch in ~3 min", "success")}><Icon name="refresh" size={13} /> Request rerun</button>
           <button className="btn btn-secondary" onClick={() => { setIpSurface("why_now"); setIpContext({ entity }); setIpOpen(true); }}><Icon name="sparkle" size={13} /> Meeting prep</button>
         </div>
       </div>
@@ -960,9 +960,9 @@ function groupInsights(cards, mode) {
     return groups;
   }
   const defs = [
-    { key: 1, label: "Act now",   color: "below", desc: "Critical gaps + high-confidence, actionable opportunities — lead with these" },
+    { key: 1, label: "Act now",   color: "below", desc: "Critical gaps + high-confidence, actionable opportunities - lead with these" },
     { key: 2, label: "Plan next", color: "org",   desc: "Opportunities to sequence into the roadmap" },
-    { key: 3, label: "Watch",     color: "teal",  desc: "Stable or monitoring items — no immediate action needed" },
+    { key: 3, label: "Watch",     color: "teal",  desc: "Stable or monitoring items - no immediate action needed" },
   ];
   return defs
     .map(d => ({ ...d, items: withP.filter(x => x.p.tier === d.key).sort(byScore) }))
@@ -1034,7 +1034,7 @@ function ClientInsights({ entity, run }) {
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${filtered.length} insight cards as PDF…`, "success")}><Icon name="download" size={13} /> Export PDF</button>
-          <button className="btn btn-secondary" onClick={() => pushToast("Add a note from any insight card — click a card to start", "success")}><Icon name="plus" size={13} /> Add note</button>
+          <button className="btn btn-secondary" onClick={() => pushToast("Add a note from any insight card - click a card to start", "success")}><Icon name="plus" size={13} /> Add note</button>
         </div>
       </div>
 

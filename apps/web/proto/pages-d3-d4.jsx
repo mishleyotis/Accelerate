@@ -89,7 +89,7 @@ function PlatformEvChips({ ids, openEvidence, label }) {
             title={`${e.title || eid} · ${e.source_pretty || ""}`}
             onClick={ev => { ev.stopPropagation(); openEvidence(eid); }}>{eid}</button>
         ) : (
-          <span key={eid} className="chip muted" title="cited id — not in this run's served evidence">{eid}</span>
+          <span key={eid} className="chip muted" title="cited id - not in this run's served evidence">{eid}</span>
         );
       })}
     </div>
@@ -1153,7 +1153,7 @@ function ClientPlatform({ entity, run }) {
                         onClick={(ev) => { ev.stopPropagation(); openSubcap(gapCell); }}>{gapCell}</button>
                     ) : gapId ? (
                       <span className="chip muted f-mono" style={{ fontSize: 9, flexShrink: 0, cursor: "default" }}
-                        title="the gap this starter names — not a cell id this run scored, so it opens nothing">{gapId}</span>
+                        title="the gap this starter names - not a cell id this run scored, so it opens nothing">{gapId}</span>
                     ) : null}
                     <span className="spacer" />
                     <button className="btn btn-tertiary btn-sm" style={{ color: "var(--z-dpur)" }} title="Copy this starter" onClick={(ev) => {

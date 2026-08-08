@@ -32,7 +32,7 @@ function AlertsPage() {
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${filtered.length} alerts as CSV…`, "success")}><Icon name="download" size={13} /> Export CSV</button>
-          <button className="btn btn-secondary" onClick={() => pushToast("Feedback file regenerated — routed to DMA bot", "success")}><Icon name="refresh" size={13} /> Refresh feedback file</button>
+          <button className="btn btn-secondary" onClick={() => pushToast("Feedback file regenerated - routed to DMA bot", "success")}><Icon name="refresh" size={13} /> Refresh feedback file</button>
         </div>
       </div>
 
@@ -504,7 +504,7 @@ function AdminPage() {
         .then(r => r.json().then(b => ({ ok: r.ok, b })))
         .then(({ ok, b }) => {
           setScanning(false);
-          if (ok) pushToast("Package scan started — new client folders land as the Job completes", "success");
+          if (ok) pushToast("Package scan started - new client folders land as the Job completes", "success");
           else pushToast(b.error || "Scan trigger failed", "warn");
         })
         .catch(() => { setScanning(false); pushToast("Scan trigger failed", "warn"); });
@@ -715,7 +715,7 @@ function ImportPage() {
             {scanning ? <><span className="spinner" /> Scanning…</> : <><Icon name="refresh" size={13} /> Run scan now</>}
           </button>
           {LIVE ? null : (
-            <button className="btn btn-secondary" onClick={() => pushToast("Upload payload — drop your app_payload_v1.json file here", "success")}><Icon name="download" size={13} /> Upload payload</button>
+            <button className="btn btn-secondary" onClick={() => pushToast("Upload payload - drop your app_payload_v1.json file here", "success")}><Icon name="download" size={13} /> Upload payload</button>
           )}
         </div>
       </div>
@@ -811,8 +811,8 @@ function ImportPage() {
             <span style={{ fontSize: 12 }}>Endpoint: <code>POST /api/v1/ingest/assessment</code></span>
           </div>
           <div className="row" style={{ marginTop: 8 }}>
-            <button className="btn btn-tertiary" onClick={() => pushToast("API key rotated — new key sent via secure channel", "success")}><Icon name="refresh" size={13} /> Rotate API key</button>
-            <button className="btn btn-secondary" onClick={() => pushToast("Upload payload manually — select app_payload_v1.json", "success")}><Icon name="download" size={13} /> Upload payload manually</button>
+            <button className="btn btn-tertiary" onClick={() => pushToast("API key rotated - new key sent via secure channel", "success")}><Icon name="refresh" size={13} /> Rotate API key</button>
+            <button className="btn btn-secondary" onClick={() => pushToast("Upload payload manually - select app_payload_v1.json", "success")}><Icon name="download" size={13} /> Upload payload manually</button>
           </div>
         </div>
       )) : (
@@ -826,10 +826,10 @@ function ImportPage() {
           <p style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6 }}>Updating the catalogue creates a new version. Existing runs retain their original catalogue reference{LIVE ? " (runs pinned to v5.0 serve against it; cross-version diffs mark the retired ESG category NOT_COMPARABLE)" : ""}.</p>
           <div className="row" style={{ marginTop: 10 }}>
             {LIVE ? (
-              <button className="btn btn-tertiary" onClick={() => pushToast("Catalogue versions load via the migrate Job (LOAD_CATALOGUES) — no upload from the browser", "warn")}><Icon name="lock" size={13} /> Deploy-managed</button>
+              <button className="btn btn-tertiary" onClick={() => pushToast("Catalogue versions load via the migrate Job (LOAD_CATALOGUES) - no upload from the browser", "warn")}><Icon name="lock" size={13} /> Deploy-managed</button>
             ) : (
               <React.Fragment>
-                <button className="btn btn-tertiary" onClick={() => pushToast("V7.3 catalog uploaded — new runs will use the new version", "success")}><Icon name="download" size={13} /> Upload v7.3</button>
+                <button className="btn btn-tertiary" onClick={() => pushToast("V7.3 catalog uploaded - new runs will use the new version", "success")}><Icon name="download" size={13} /> Upload v7.3</button>
                 <button className="btn btn-tertiary" onClick={() => pushToast("Opening V7 catalog change log", "success")}>View change log</button>
               </React.Fragment>
             )}

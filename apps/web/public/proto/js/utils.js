@@ -84,14 +84,35 @@ function fx(v, digits) {
    uppercase letter anywhere after its first character is deliberate —
    nCino, iPhone, eBay — and is left exactly as written, as is anything
    starting with a URL, an identifier or a digit. */
+/* Em and en dashes become hyphens in promoted prose.
+
+   The producer writes them because they read well in a document. On these
+   surfaces they are a liability: the em dash is the one punctuation mark
+   that survives every copy-paste into a CRM note, an email or a deck and
+   marks the text as machine-written, and at small sizes it is hard to tell
+   from a minus sign beside a score. A hyphen carries the same clause break
+   and none of that.
+
+   Spaced dashes collapse to a spaced hyphen; an unspaced dash between two
+   words keeps its spacing rather than gluing them together. A MINUS sign in
+   a figure is not a dash and is not touched — this only ever runs over
+   prose, never over a number. */
+function dashes(s) {
+  return String(s).replace(/\s+[—–]\s+/g, " - ").replace(/([^\s])[—–]([^\s])/g, "$1-$2").replace(/[—–]/g, "-");
+}
 function sentence(s) {
   if (typeof s !== "string") return s;
-  const t = s.trimStart();
+  // Each branch below decides only about CAPITALISATION, so each returns the
+  // dash-normalised text. Returning the original here was the bug that would
+  // have left every already-capitalised sentence — which is most of them —
+  // with its em dashes intact.
+  const t = dashes(s).trimStart();
   if (!t) return s;
   const first = t.split(/\s/)[0];
+  // A URL is left exactly as written: its hyphens are part of the address.
   if (/^(https?:|www\.)/i.test(first)) return s;
-  if (/[A-Z]/.test(first.slice(1))) return s; // nCino, iOS, eBay
-  if (!/^[a-z]/.test(t)) return s; // digits, quotes, already capital
+  if (/[A-Z]/.test(first.slice(1))) return t; // nCino, iOS, eBay
+  if (!/^[a-z]/.test(t)) return t; // digits, quotes, already capital
   return t[0].toUpperCase() + t.slice(1);
 }
 

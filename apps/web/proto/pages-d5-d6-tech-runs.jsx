@@ -1388,7 +1388,7 @@ function ClientHealth({ entity, run }) {
           <div className="sub">{alerts.length} open alerts · {DMA.QA_GATES.filter(g => g.status === "FAIL").length} failing gates · {entity.runs.length} runs in history</div>
         </div>
         <div className="actions">
-          <button className="btn btn-tertiary" onClick={() => pushToast("Feedback file regenerated — routed to DMA bot", "success")}><Icon name="refresh" size={13} /> Re-run feedback file</button>
+          <button className="btn btn-tertiary" onClick={() => pushToast("Feedback file regenerated - routed to DMA bot", "success")}><Icon name="refresh" size={13} /> Re-run feedback file</button>
           <button className="btn btn-secondary" onClick={() => pushToast(`Exporting ${entity.name} health report as CSV…`, "success")}><Icon name="download" size={13} /> CSV export</button>
         </div>
       </div>
@@ -1997,10 +1997,10 @@ function ClientTechStackDetail({ entity, run, techId }) {
   // now says what it means, and the row's own detection_basis says how it was
   // established for THIS product.
   const STATUS_STYLE = {
-    CONFIRMED: { color: "var(--z-mid)",   label: "Confirmed — in production" },
-    INFERRED:  { color: "var(--z-dpur)",  label: "Inferred — from dated public signal" },
-    CLAIMED:   { color: "#7C3500",        label: "Claimed — stated, not corroborated" },
-    ABSENT:    { color: "var(--z-below)", label: "Absent — searched and not found" },
+    CONFIRMED: { color: "var(--z-mid)",   label: "Confirmed - in production" },
+    INFERRED:  { color: "var(--z-dpur)",  label: "Inferred - from dated public signal" },
+    CLAIMED:   { color: "#7C3500",        label: "Claimed - stated, not corroborated" },
+    ABSENT:    { color: "var(--z-below)", label: "Absent - searched and not found" },
   };
   const S = STATUS_STYLE[t.status] || { color: "var(--z-muted)", label: t.status || "—" };
 

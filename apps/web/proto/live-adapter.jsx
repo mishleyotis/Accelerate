@@ -466,7 +466,7 @@ function headlineOf(text) {
   const head = m ? m[1] : t;
   // An em dash introduces the elaboration rather than ending the sentence,
   // so it is a legitimate face boundary when it comes first.
-  const dash = head.indexOf(" — ");
+  const dash = head.indexOf(" - ");
   return (dash > 24 ? head.slice(0, dash) : head).trim();
 }
 
