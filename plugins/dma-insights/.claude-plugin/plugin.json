@@ -22,7 +22,7 @@
       "type": "string",
       "title": "Connector base URL",
       "description": "Cloud Run URL of the deployed dmai-mcp service, no trailing slash. Override only for a staging deployment.",
-      "default": "https://dmai-mcp-306195530103.us-central1.run.app",
+      "default": "https://dmai-mcp-dukrne5v4a-uc.a.run.app",
       "required": true
     },
     "mcp_path_token": {

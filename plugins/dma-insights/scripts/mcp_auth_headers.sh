@@ -16,8 +16,7 @@
 # it is never logged, never written to disk, and never echoed to stderr.
 set -uo pipefail
 
-AUD="${DMA_MCP_HOST:-https://dmai-mcp-306195530103.us-central1.run.app}"
-GCLOUD="${GCLOUD_BIN:-gcloud}"
+AUD="${DMA_MCP_HOST:-https://dmai-mcp-dukrne5v4a-uc.a.run.app}"
 
 fail() {
   # A clean 403 from Cloud Run is more diagnosable than a stalled connection,
@@ -27,7 +26,29 @@ fail() {
   exit 0
 }
 
-command -v "$GCLOUD" >/dev/null 2>&1 || fail "gcloud not on PATH"
+# MCP servers are launched with the session's environment, and a helper that
+# only consults PATH is one shell profile away from failing on a machine where
+# gcloud is installed and working. Measured: on the container this was packaged
+# in, gcloud lives in /root/google-cloud-sdk/bin and is absent from the PATH
+# the Bash tool inherits.
+find_gcloud() {
+  if [ -n "${GCLOUD_BIN:-}" ] && [ -x "$GCLOUD_BIN" ]; then
+    printf '%s' "$GCLOUD_BIN"; return 0
+  fi
+  if command -v gcloud >/dev/null 2>&1; then
+    command -v gcloud; return 0
+  fi
+  for c in "$HOME/google-cloud-sdk/bin/gcloud" \
+           /root/google-cloud-sdk/bin/gcloud \
+           /usr/local/google-cloud-sdk/bin/gcloud \
+           /opt/google-cloud-sdk/bin/gcloud \
+           /snap/bin/gcloud; do
+    [ -x "$c" ] && { printf '%s' "$c"; return 0; }
+  done
+  return 1
+}
+
+GCLOUD="$(find_gcloud)" || fail "gcloud not found on PATH or in the usual install locations"
 
 # A stale CLOUDSDK_AUTH_ACCESS_TOKEN in the environment overrides the activated
 # account and fails with a 401 that reads like a permissions problem.
