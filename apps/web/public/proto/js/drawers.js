@@ -2184,6 +2184,17 @@ function ipCitations(node, inherited) {
       return [found.slice(), "item"];
     }
   }
+  // An evidence item is its own citation. Its excerpt is the most quotable
+  // text in the run - verbatim, 50-500 characters, dated - and without this
+  // every one of the 375 the Baxter run carries would be retrievable and
+  // then shown as "the run cites nothing for this field", which is false:
+  // it cites the item the sentence came out of. The test is exact (the id
+  // must LOOK like an evidence id), so an insight card whose adapted key is
+  // also `id` does not accidentally cite itself.
+  for (const key of ["e_id", "id"]) {
+    const own = node[key];
+    if (typeof own === "string" && IP_E_ID.test(own)) return [[own], "item"];
+  }
   return inherited;
 }
 function ipAnchor(node, inherited) {
@@ -2194,6 +2205,71 @@ function ipAnchor(node, inherited) {
   return inherited;
 }
 
+/* Which promoted SECTION each adapted key came from.
+
+   The adapter takes a section's `data` and drops its envelope, so a
+   paragraph that is grounded at SECTION level (`overview.scores` cites two
+   ids for the whole section and its `framing` paragraph states none of its
+   own) arrives in the browser with no citations at all. The envelope is not
+   lost, though: `sectionState` keeps every section's `e_ids`. This map is
+   the join between the two, and it is the difference between a retrieved
+   passage that carries its grounding and one that says the run cites
+   nothing for it.
+
+   Values are `page.section`, which is how `sectionStates` keys the registry -
+   two pages can carry a section of the same name, and a bare name would join
+   one page's paragraph to another page's citations.
+
+   A key that is not here is not a defect - the grain reads (subcaps, the
+   evidence store) have no section envelope, and their items state their own
+   ids anyway. */
+const IP_SECTION_OF = {
+  exec_summary: "overview.exec_summary",
+  framing: "overview.scores",
+  posture_basis: "overview.scores",
+  narrative_thread: "overview.scores",
+  scores: "overview.scores",
+  findings: "overview.findings",
+  opportunity: "overview.opportunity",
+  opportunityTiles: "overview.opportunity",
+  oss: "overview.opportunity",
+  firmographics: "overview.firmographics",
+  whyNow: "overview.why_now",
+  leadership: "overview.leadership",
+  thoughtLeadership: "overview.thought_leadership",
+  financials: "overview.financial_series",
+  sentiment: "overview.sentiment",
+  uncertainty: "overview.ceilings",
+  coverage: "overview.evidence_coverage",
+  insightCards: "insights.insights",
+  landscape: "insights.landscape",
+  platformStory: "platform.platform_story",
+  recommendations: "platform.recommendations",
+  starters: "platform.starters",
+  roadmap: "platform.roadmap",
+  roadmapBasis: "platform.roadmap",
+  stairstep: "platform.stairstep",
+  stairstepClusters: "platform.stairstep",
+  workbookScores: "heatmap.workbook_scores",
+  focusAreas: "heatmap.focus_areas",
+  cellEvidence: "heatmap.cell_evidence",
+  alerts: "heatmap.alerts",
+  caps: "heatmap.safeguard_gates",
+  gates: "heatmap.safeguard_gates",
+  evidenceAge: "heatmap.evidence_age",
+  cohorts: "heatmap.cohort_patterns",
+  valueChain: "heatmap.value_chain",
+  valueChains: "heatmap.value_chain",
+  timeline: "context.timeline",
+  timelineMeta: "context.timeline",
+  issues: "context.issue_register",
+  regulatory: "context.regulatory_standing",
+  contextSentiment: "context.context_sentiment",
+  acquisitions: "context.acquisitions",
+  techStack: "techstack.techstack",
+  techLayers: "techstack.techstack"
+};
+
 /* Every prose string in the adapted entity, with the path it lives at, the
    citations of the row it came from and what it is about.
 
@@ -2203,6 +2279,7 @@ function ipAnchor(node, inherited) {
 function ipWalkPassages(root) {
   const out = [];
   const seen = new Set();
+  const states = root && root.sectionState || {};
   const walk = (node, path, cites, anchor) => {
     if (node === null || node === undefined) return;
     if (Array.isArray(node)) {
@@ -2237,7 +2314,15 @@ function ipWalkPassages(root) {
       anchor_id: anchorId
     });
   };
-  walk(root, "", [[], "section"], null);
+  // Walked per top-level key rather than from the root in one pass, so each
+  // subtree starts from its own section's citation list instead of from
+  // nothing.
+  for (const key of Object.keys(root || {})) {
+    if (IP_SKIP_SEGMENTS.has(key) || key === "sectionState") continue;
+    const state = states[IP_SECTION_OF[key]];
+    const seedIds = state && Array.isArray(state.e_ids) ? state.e_ids : [];
+    walk(root[key], key, [seedIds, "section"], null);
+  }
   return out;
 }
 
@@ -2260,9 +2345,18 @@ function ipPassages() {
 
 /* ── Ranking ────────────────────────────────────────────────────────────
    Coverage: the share of the question's content terms a passage contains,
-   both sides stemmed so "closes" answers "close". Ties break on the
-   passage's own density, then on payload order. Nothing here changes between
-   two identical queries, and nothing here is learned. */
+   both sides stemmed so "closes" answers "close". Ties break on SUBSTANCE,
+   then on payload order. Nothing here changes between two identical queries,
+   and nothing here is learned.
+
+   Substance rather than density, and the difference is not academic. Density
+   (matched terms over the passage's own terms) rewards the shortest passage
+   that matches, so "what is the merger doing to the data warehouse" came
+   back with the four-word feature label "reusable APIs for merger data
+   conversion" ahead of the paragraph that explains what the merger does to
+   the warehouse. An AE asked a question; a fragment is not an answer to it.
+   Capped, because past roughly eighty terms extra length stops being extra
+   substance and starts being a reason a passage matched by accident. */
 const IP_STOPWORDS = new Set(("a an and are as at be been but by can could did do does doing " + "for from get give had has have how in into is it its me my not of on or our should so " + "tell than that the their them then there these they this to us was we were what when " + "where which who whom why will with would you your show about many much most any all " + "more less need want").split(" "));
 function ipStem(w) {
   const rules = [["ies", "y"], ["ing", ""], ["ed", ""], ["es", ""], ["s", ""]];
@@ -2306,6 +2400,7 @@ function ipPassageTerms(p) {
 // two of the question's terms wherever the question has two to give.
 const IP_MATCH_FLOOR = 0.6;
 const IP_MIN_TERMS_MATCHED = 2;
+const IP_SUBSTANCE_CAP = 80;
 function ipRank(question, passages, limit) {
   const terms = ipTerms(question);
   if (!terms.length) return [];
@@ -2322,12 +2417,12 @@ function ipRank(question, passages, limit) {
     if (score < IP_MATCH_FLOOR) continue;
     scored.push({
       score,
-      density: hit / words.size,
+      substance: Math.min(words.size, IP_SUBSTANCE_CAP),
       i,
       p
     });
   }
-  scored.sort((a, b) => b.score - a.score || b.density - a.density || a.i - b.i);
+  scored.sort((a, b) => b.score - a.score || b.substance - a.substance || a.i - b.i);
   return scored.slice(0, limit || 5).map(s => ({
     ...s.p,
     score: Math.round(s.score * 10000) / 10000

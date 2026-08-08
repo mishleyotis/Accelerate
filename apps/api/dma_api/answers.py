@@ -120,6 +120,14 @@ def _citations(node: dict, inherited: tuple) -> tuple:
         if isinstance(found, list) and found and all(
                 isinstance(x, str) and _E_ID.match(x) for x in found):
             return list(found), "item"
+    # An evidence item is its own citation: its excerpt is the most quotable
+    # text in the run, and "the run cites nothing for this" would be false —
+    # it cites the item the sentence came out of. The test is exact, so an
+    # object whose id merely happens to be called `id` does not self-cite.
+    for key in ("e_id", "id"):
+        own = node.get(key)
+        if isinstance(own, str) and _E_ID.match(own):
+            return [own], "item"
     return inherited
 
 
@@ -482,10 +490,18 @@ def answers_from_pages(cur, pages: dict, audience: str,
 #
 # The rule: a passage scores on COVERAGE — the share of the question's
 # content terms it contains, both sides reduced to stems so "closes" answers
-# "close" and "policies" answers "policy". Ties break on the passage's own
-# density (how much of what it says is what was asked), then on payload
-# order. No term weighting, no learned ranking, nothing that changes between
-# two identical queries.
+# "close" and "policies" answers "policy". Ties break on SUBSTANCE, then on
+# payload order. No term weighting, no learned ranking, nothing that changes
+# between two identical queries.
+#
+# Substance rather than density, and the difference is not academic. Density
+# (matched terms ÷ the passage's own terms) rewards the shortest passage that
+# matches, so "what is the merger doing to the data warehouse" came back with
+# the four-word feature label "reusable APIs for merger data conversion"
+# ahead of the paragraph that explains what the merger does to the
+# warehouse. An AE asked a question; a fragment is not an answer to it.
+# Capped, because past roughly eighty terms extra length stops being extra
+# substance and starts being a reason a passage matched by accident.
 
 _STOPWORDS = frozenset("""
 a an and are as at be been but by can could did do does doing for from get
@@ -505,6 +521,7 @@ _WORD = re.compile(r"[a-z0-9][a-z0-9'’\-]*")
 # about that" is the same fabrication the frame exists to avoid.
 MATCH_FLOOR = 0.6
 MIN_TERMS_MATCHED = 2
+SUBSTANCE_CAP = 80
 
 
 def _stem(word: str) -> str:
@@ -563,8 +580,7 @@ def rank_passages(question: str, passages: list, limit: int = 5) -> list:
         score = hit / len(terms)
         if score < MATCH_FLOOR:
             continue
-        density = hit / len(words)
-        scored.append((score, density, -i, p))
+        scored.append((score, min(len(words), SUBSTANCE_CAP), -i, p))
     scored.sort(key=lambda s: s[:3], reverse=True)
     return [(round(s[0], 4), s[3]) for s in scored[:limit]]
 
