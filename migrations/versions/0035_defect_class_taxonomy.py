@@ -182,6 +182,21 @@ CLASSES = [
         "both unread and empty has never worked at all.",
     ),
     (
+        "REVIEWER_REJECTED_INSIGHT",
+        "A reviewer rejected a produced claim on its reasoning trace",
+        "An analyst pressed Reject on an insight card. The defect is in what "
+        "produced the claim — the synthesis skill and the reasoning it "
+        "recorded — not in the application that rendered it. The finding "
+        "carries the card's own text and its `r_layer`, because a verdict with "
+        "no claim attached teaches nothing about which reasoning failed.",
+        "A REJECT verdict in `memory_reviewer_verdicts`. Several rejects "
+        "sharing a pillar, a claim_label or a shape of r_layer are one skill "
+        "problem, not several bad cards.",
+        "`SELECT action, count(*) FROM memory_reviewer_verdicts GROUP BY 1` "
+        "for the rate, then `list_open_findings(defect_class="
+        "'REVIEWER_REJECTED_INSIGHT')` for what was rejected and why.",
+    ),
+    (
         "UNPROVISIONED_IDENTITY",
         "An authenticated actor has no durable row, so attributable writes refuse",
         "Authentication succeeds and authorisation is held in deploy-time "

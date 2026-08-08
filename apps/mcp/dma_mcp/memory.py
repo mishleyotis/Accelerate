@@ -257,7 +257,7 @@ def record_finding(conn, finding: dict, encoder=None) -> dict:
         cur.execute("UPDATE memory_findings SET last_seen_at = now() "
                     "WHERE finding_id = %s", (finding_id,))
 
-    sighting_id = _add_sighting(
+    sighting_id = add_sighting(
         cur, finding_id,
         reported_by_kind=raised_by_kind, reported_by=raised_by,
         measurement=measurement, measured_value=finding.get("measured_value"),
@@ -283,7 +283,7 @@ def record_finding(conn, finding: dict, encoder=None) -> dict:
     return out
 
 
-def _add_sighting(cur, finding_id, *, reported_by_kind, reported_by,
+def add_sighting(cur, finding_id, *, reported_by_kind, reported_by,
                   measurement=None, measured_value=None, note=None,
                   session_ref=None, source_ref=None, run_id=None,
                   entity_id=None, annotation_id=None, after_refinement=None):
@@ -667,7 +667,7 @@ def report_recurrence(conn, finding_id: str, *, measurement: str,
         return {"finding_id": finding_id, "status": status,
                 "errors": [f"unknown_refinement: {refinement}"]}
 
-    sighting_id = _add_sighting(
+    sighting_id = add_sighting(
         cur, finding_id, reported_by_kind=str(reported_by_kind).upper(),
         reported_by=reported_by, measurement=measurement,
         measured_value=measured_value, note=note, session_ref=session_ref,

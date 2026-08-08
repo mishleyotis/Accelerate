@@ -24,6 +24,65 @@ user, never a client-supplied identity) and resolves against users.email —
 which is CITEXT UNIQUE, the auth table's own join discipline. An email that
 resolves to no active user is refused, not auto-created: user rows are the
 auth flow's to make.
+
+## The 403 was right, and the fix was upstream of here
+
+Measured in production on 2026-08-08 against the live revision:
+
+    POST /v1/entities/baxter-credit-union-bcu/insights/IC-1/annotation
+         ?audience=internal&role=ADMIN&actor=dma%40zennify.com
+    -> 403 {"error":"unknown_actor"}      SELECT count(*) FROM users -> 0
+
+The refusal above is the correct behaviour for an unknown actor and it has NOT
+been weakened. What changed is that the actor became known: migration 0033
+materialises the deploy-time allowlist (`ADMIN_EMAILS` / `ANALYST_EMAILS`,
+which `apps/web/lib/identity.js` already describes as a placeholder for "the
+users table") as durable `users` rows. An email that is not on that allowlist
+still resolves to no user and still takes the 403. Enrolment is not a write
+path: creating the identity inside the write that is checked against it would
+be the check deleted.
+
+## The read half
+
+`annotations` had a reader nowhere in this repository — no endpoint, no MCP
+tool, no worker job — while every insight card rendered an Accept/Reject pair
+and the web adapter hardcoded `annotation: null`. `read_insight_annotations`
+and `latest_verdicts` below are that reader.
+
+Reading does not touch invariant 2. That invariant constrains the API's
+WRITES — "content enters only through the connector" — and a SELECT adds no
+content, creates no serving row and gives no endpoint a write it did not have.
+The API's two write exceptions are unchanged: annotations and alert actions,
+both behind `Idempotency-Key`. `svc_api` has held SELECT on `annotations`
+since 0007 (line 265, in the `workflow` loop); the grant was never the blocker.
+
+WIRING OWED (one line, in a file this module's author does not own):
+
+    @app.get("/v1/entities/{display_id}/insights/annotations")
+    def insight_annotations(display_id: str, ic_id: str | None = None,
+                            audience: str = "internal", role: str | None = None,
+                            limit: int = 100):
+        conn = _connect(); cur = conn.cursor()
+        try:
+            return read_insight_annotations(cur, display_id, ic_id=ic_id,
+                                            audience=audience, role=role,
+                                            limit=limit)
+        finally:
+            conn.close()
+
+Until that lands, the connector's `list_reviewer_feedback` tool is the working
+read path and the consumer (`ingest_reviewer_feedback`) reads the table
+directly. Both are proven against production.
+
+## One thing that is NOT fixed here, and is recorded rather than patched
+
+`main.py` accepts `actor` as a QUERY PARAMETER. The BFF is the only intended
+caller and forwards the verified session email, but nothing in the API itself
+enforces that — a principal holding `roles/run.invoker` on `dmai-api` can name
+any allowlisted actor. That is a defect in the route, not in this module, and
+`main.py` belongs to another author; it is recorded in the findings memory
+(class `UNPROVISIONED_IDENTITY`, component `api`) instead of being quietly
+changed here.
 """
 from __future__ import annotations
 
@@ -136,6 +195,14 @@ def annotate_insight(cur, display_id: str, ic_id: str, *, body,
          json.dumps({"action": action, "note": note})))
     ann_id, created_at = cur.fetchone()
 
+    # The row is being used, so say so. `last_seen_at` is the users table's own
+    # column for it ("updated on token refresh, not per request", 0003) and this
+    # is the only place the API currently learns that a seeded identity is a
+    # real one. It is not authentication and it is not a grant: an UPDATE inside
+    # svc_api's existing privilege on an auth table, nowhere near a serving row.
+    cur.execute("UPDATE users SET last_seen_at = now() WHERE id = %s",
+                (user_id,))
+
     response = {"annotation_id": ann_id, "ic_id": ic_id, "action": action,
                 "created_at": str(created_at), "replayed": False}
     cur.execute(
@@ -144,3 +211,104 @@ def annotate_insight(cur, display_id: str, ic_id: str, *, body,
            VALUES (%s, %s, %s, 201, %s, now())""",
         (idempotency_key, user_id, req_hash, json.dumps(response)))
     return 201, response
+
+
+# ── the read half ───────────────────────────────────────────────────────
+def _refuse_read(audience: str) -> None:
+    """Annotations are internal workflow. A customer audience has no read
+    route for them any more than it has a write route — an analyst's private
+    verdict on a claim is not part of the client's report."""
+    if audience != "internal":
+        raise ApiError(403, "audience_forbidden",
+                       "annotations are internal workflow; the customer "
+                       "audience has no read route")
+
+
+def _parse_body(raw):
+    """The body is TEXT holding the JSON this module wrote. A body that will
+    not parse is surfaced as `unparsed`, never silently rendered as an empty
+    verdict — "I could not read this" and "there was nothing here" are
+    different facts (invariant 9)."""
+    if isinstance(raw, dict):
+        return raw
+    try:
+        out = json.loads(raw or "")
+        return out if isinstance(out, dict) else {"unparsed": str(raw)[:400]}
+    except (TypeError, ValueError):
+        return {"unparsed": str(raw)[:400]}
+
+
+def read_insight_annotations(cur, display_id: str, *, ic_id: str | None = None,
+                             audience: str = "internal",
+                             role: str | None = None,
+                             limit: int = 100) -> dict:
+    """Every insight-card verdict on an entity, newest first, with the actor.
+
+    Runs on the index 0033 added — (entity_id, anchor_kind, anchor_id,
+    created_at DESC) — so this is a lookup, not the sequential scan the table
+    offered before it had any index but its primary key.
+    """
+    _refuse_read(audience)
+    limit = max(1, min(int(limit or 100), 500))
+    params = [display_id]
+    where = "e.display_id = %s AND a.anchor_kind = 'insight_card'"
+    if ic_id:
+        where += " AND a.anchor_id = %s"
+        params.append(ic_id)
+    cur.execute(
+        f"""SELECT a.id, a.anchor_id, a.body, a.created_at, u.email,
+                   u.display_name, u.role::text, a.run_id
+              FROM annotations a
+              JOIN entities e ON e.id = a.entity_id
+              LEFT JOIN users u ON u.id = a.user_id
+             WHERE {where}
+             ORDER BY a.created_at DESC, a.id DESC
+             LIMIT %s""", (*params, limit))
+    rows = []
+    for aid, anchor, body, created, email, name, urole, run_id in cur.fetchall():
+        parsed = _parse_body(body)
+        rows.append({
+            "annotation_id": aid, "ic_id": anchor,
+            "action": parsed.get("action"), "note": parsed.get("note"),
+            "unparsed": parsed.get("unparsed"),
+            "by": {"email": email, "name": name, "role": urole},
+            "run_id": str(run_id) if run_id else None,
+            "created_at": created.isoformat() if created else None,
+        })
+    return {"display_id": display_id, "ic_id": ic_id, "count": len(rows),
+            "annotations": rows}
+
+
+def latest_verdicts(cur, display_id: str, ic_ids=None, *,
+                    audience: str = "internal") -> dict:
+    """The shape the card adapter needs: {ic_id: {action, note, by, at}} — the
+    LATEST verdict per card, so `annotation: null` can stop being a constant.
+
+    The latest verdict per card, not a list: the card renders one state. The
+    full history is `read_insight_annotations`, and it is the history that
+    teaches — which is why the connector consumes every row rather than this
+    projection.
+    """
+    _refuse_read(audience)
+    params = [display_id]
+    filt = ""
+    if ic_ids:
+        filt = " AND a.anchor_id = ANY(%s)"
+        params.append(list(ic_ids))
+    cur.execute(
+        f"""SELECT DISTINCT ON (a.anchor_id)
+                   a.anchor_id, a.body, a.created_at, u.email, u.display_name
+              FROM annotations a
+              JOIN entities e ON e.id = a.entity_id
+              LEFT JOIN users u ON u.id = a.user_id
+             WHERE e.display_id = %s AND a.anchor_kind = 'insight_card'{filt}
+             ORDER BY a.anchor_id, a.created_at DESC, a.id DESC""",
+        tuple(params))
+    out = {}
+    for anchor, body, created, email, name in cur.fetchall():
+        parsed = _parse_body(body)
+        out[anchor] = {"action": parsed.get("action"),
+                       "note": parsed.get("note"),
+                       "by": name or email,
+                       "at": created.isoformat() if created else None}
+    return out

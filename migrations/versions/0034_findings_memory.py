@@ -20,7 +20,7 @@ An index scan is not a model call. If that distinction is ever used to justify
 embedding something on the serving path, it has been misread: the rule is the
 serving path never touches the encoder, and this revision does not change it.
 
-## The five tables
+## The six tables
 
 **memory_defect_classes** — the taxonomy, and the reason it is a foreign key.
 A memory rots when three agents file the same defect under three synonyms. The
@@ -55,6 +55,16 @@ a `change_ref`: a refinement nobody can locate is a claim, not a change.
 
 **memory_refinement_findings** — the many-to-many. One refinement usually answers
 several findings; one finding is sometimes attacked twice.
+
+**memory_reviewer_verdicts** — where the web app's Accept/Reject pair lands.
+One row per annotation, UNIQUE on `annotation_id`, so the consumer can be re-run
+for free. It is not a copy of `annotations`: it carries the CARD'S OWN TEXT and
+its `r_layer` as they were when the verdict was cast, because a re-promotion
+rewrites the card and a verdict against text that no longer exists teaches
+nothing about what was actually rejected. `memory_reviewer_verdicts_reject_lands`
+requires a REJECT to name the finding it raised — a rejection that produced no
+finding is a verdict that went nowhere, which is the exact failure this whole
+revision exists to end.
 
 ## Counts are computed, never stored (invariant 8)
 
@@ -331,6 +341,11 @@ def upgrade() -> None:
     op.execute("CREATE INDEX memory_sightings_annotation_idx "
                "ON memory_finding_sightings (annotation_id) "
                "WHERE annotation_id IS NOT NULL")
+    op.execute("CREATE INDEX memory_verdicts_card_idx "
+               "ON memory_reviewer_verdicts (entity_display_id, ic_id, "
+               "verdict_at DESC)")
+    op.execute("CREATE INDEX memory_verdicts_run_idx "
+               "ON memory_reviewer_verdicts (run_id, action)")
 
     # ── computed views (invariant 8: counts are never stored) ──────────
     op.execute(
@@ -385,7 +400,7 @@ def upgrade() -> None:
     # ── grants, in the same revision as the tables ─────────────────────
     tables = ("memory_defect_classes", "memory_findings",
               "memory_finding_sightings", "memory_refinements",
-              "memory_refinement_findings")
+              "memory_refinement_findings", "memory_reviewer_verdicts")
     for t in tables:
         # The connector is the only writer — the same posture as every other
         # table in this database (invariant 2).
@@ -394,7 +409,8 @@ def upgrade() -> None:
         # no content.
         op.execute(f"GRANT SELECT ON {t} TO svc_api")
     for seq in ("memory_findings_id_seq", "memory_finding_sightings_id_seq",
-                "memory_refinements_id_seq"):
+                "memory_refinements_id_seq",
+                "memory_reviewer_verdicts_id_seq"):
         op.execute(f"GRANT USAGE ON SEQUENCE {seq} TO svc_mcp")
     for v in ("memory_finding_state", "memory_refinement_outcome"):
         op.execute(f"GRANT SELECT ON {v} TO svc_mcp, svc_api")
@@ -421,6 +437,7 @@ def upgrade() -> None:
 def downgrade() -> None:
     for v in ("memory_refinement_outcome", "memory_finding_state"):
         op.execute(f"DROP VIEW IF EXISTS {v}")
-    for t in ("memory_refinement_findings", "memory_finding_sightings",
-              "memory_findings", "memory_refinements", "memory_defect_classes"):
+    for t in ("memory_reviewer_verdicts", "memory_refinement_findings",
+              "memory_finding_sightings", "memory_findings",
+              "memory_refinements", "memory_defect_classes"):
         op.execute(f"DROP TABLE IF EXISTS {t} CASCADE")

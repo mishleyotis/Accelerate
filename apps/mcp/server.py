@@ -1,10 +1,17 @@
 """svc_mcp — the DMA Insights connector (stage 2), streamable HTTP.
 
-Twelve tools in four groups: read tools are free and idempotent; write
-tools are the only path into served content (invariant 2). The service
-connects DIRECT to Cloud SQL in session mode — promote holds locks — and
-bundles the embedding model in-image for V4 (local, deterministic, at
-submit; the serving path never touches it).
+Thirteen production tools in four groups (read · claim · write · inspect):
+read tools are free and idempotent; write tools are the only path into
+served content (invariant 2). The service connects DIRECT to Cloud SQL in
+session mode — promote holds locks — and bundles the embedding model
+in-image for V4 (local, deterministic, at submit; the serving path never
+touches it).
+
+Eleven more tools serve the FINDINGS MEMORY (`remember`, below): the store
+of what went wrong, how it was measured, what was changed about it and
+whether the change held. They write no serving content and are for agents
+— QA agents reporting, a rectifier agent asking "have we seen this
+before", a weekly pass reading what came back.
 
 Access: the endpoint is a capability URL — /mcp/{MCP_PATH_TOKEN}/...
 with the token from Secret Manager. Rotating the secret rotates the URL.
@@ -19,7 +26,9 @@ from mcp.server import MCPServer
 from dma_mcp import bundle as bundle_mod
 from dma_mcp import claims as claims_mod
 from dma_mcp import evidence_tools
+from dma_mcp import feedback as feedback_mod
 from dma_mcp import gates as gates_mod
+from dma_mcp import memory as memory_mod
 from dma_mcp import promote as promote_mod
 from dma_mcp import register as register_mod
 from dma_mcp import submit as submit_mod
@@ -248,6 +257,276 @@ def explain_gate(gate_id: str) -> dict:
     visible."""
     with _conn() as c:
         return gates_mod.explain_gate(c, gate_id)
+
+
+# ── remember ────────────────────────────────────────────────────────────
+# The findings memory (0034/0035). These tools are for AGENTS: a QA agent
+# reporting what it measured, a rectifier agent asking whether this defect is
+# already known, and a weekly refinement pass reading what came back.
+#
+# The one rule that runs through all of them: a finding that cannot say how it
+# was measured is an opinion, and a resolution that cannot name the change that
+# closed it cannot be checked for recurrence. Both are refused.
+#
+# Embedding happens HERE, at write time, inside the connector — the same place
+# and the same model V4 uses at submit. Invariant 1 forbids a model call on the
+# SERVING request path; this is not one. Do not read it as licence.
+@mcp.tool()
+@_traced
+def record_finding(finding: dict) -> dict:
+    """Record a defect in the findings memory. Idempotent by content — the same
+    defect reported by three QA agents is ONE finding with three sightings.
+
+    finding = {
+      title           str  REQUIRED  one line: what is wrong
+      observed        str  REQUIRED  what was actually seen
+      measurement     str  REQUIRED  HOW it was measured — the command, query,
+                                     HTTP status or count WITH its denominator.
+                                     Minimum 30 chars. "it broke" is refused.
+      component       str  REQUIRED  api | mcp | web | worker | migrations |
+                                     infra | skill:<name> | agent:<name>
+      defect_class    str  REQUIRED  a class id from list_defect_classes
+      severity        str  REQUIRED  BLOCKER | MAJOR | MINOR | INFO
+      raised_by_kind  str  REQUIRED  QA_AGENT | REVIEWER | GATE | USER |
+                                     BUILD_AGENT | TEST | MONITOR
+      raised_by       str  REQUIRED  the agent, gate or person BY NAME
+
+      measured_value  str  the number/status itself ("403", "0 of 8")
+      expected        str  what it should have been
+      file_path       str  surface str (Surface Spec id)  gate_id str
+      run_id / entity_id / annotation_id   where applicable
+      fix_hint        str  what to do about it
+      note            str  free text for THIS sighting
+      session_ref     str  the chat, Cowork session or CI job that saw it
+      source_ref      str  an idempotency token for this sighting
+      dedup_key       str  override the dedup identity (see below)
+      new_class  {title, description, tell, probe}
+                      required ONLY when defect_class is not yet known — a
+                      class may be invented, never invented silently
+    }
+
+    Dedup identity, when you do not pass dedup_key:
+        component | defect_class | (file_path or surface or gate_id) | title
+
+    Returns {finding_id: "MEM-0007", deduped, sighting_id, sightings,
+             recurrences, status, content_hash, errors[]}.
+    Reporting a defect that is already RESOLVED returns a warning telling you
+    to use report_recurrence instead — that is how a failed fix gets recorded
+    against the fix that failed.
+    """
+    with _conn() as c:
+        return memory_mod.record_finding(c, finding, encoder=_encoder())
+
+
+@mcp.tool()
+@_traced
+def search_findings(query: str, mode: str = "auto", limit: int = 10,
+                    component: str = "", defect_class: str = "",
+                    severity: str = "", status: str = "") -> dict:
+    """"Have we seen this before?" — asked both ways, because it is asked both
+    ways. Run this BEFORE recording a finding and before designing a fix.
+
+    mode:
+      auto      (default) lexical first; semantic as well; trigram only if
+                neither matched
+      lexical   websearch_to_tsquery + ts_rank_cd over the finding's text
+      semantic  pgvector KNN over the embedding written at record time
+      fuzzy     pg_trgm similarity on the title — for a typo or an
+                abbreviation that shares no lexeme with the corpus
+
+    Filters (all optional): component, defect_class, severity, status.
+
+    Returns {paths_run[], paths_skipped{path: reason}, results[]}. Read
+    paths_skipped: an empty result from a path that never ran is not evidence
+    of absence — "no encoder in this image" and "nothing matched" are
+    different answers. Each result carries matched_by[] and per-path scores,
+    so you can see WHY it matched.
+    """
+    with _conn() as c:
+        return memory_mod.search_findings(
+            c, query, mode=mode, limit=limit, component=component or None,
+            defect_class=defect_class or None, severity=severity or None,
+            status=status or None, encoder=_encoder())
+
+
+@mcp.tool()
+@_traced
+def list_open_findings(component: str = "", severity: str = "",
+                       defect_class: str = "", status: str = "",
+                       min_age_days: int = 0, max_age_days: int = 0,
+                       limit: int = 50) -> dict:
+    """Everything not closed — OPEN, INVESTIGATING and RECURRED — worst first.
+
+    RECURRED counts as open because a fix that did not hold is open again.
+    Ordered by severity, then recurrences, then sightings: the top of this
+    list is what has hurt most often, not what arrived most recently.
+
+    min_age_days / max_age_days filter by age in days since first sighting
+    (0 means no bound). Each row carries sightings, recurrences and age_days,
+    all computed at read time — nothing in this store keeps a count.
+    """
+    with _conn() as c:
+        return memory_mod.list_open_findings(
+            c, component=component or None, severity=severity or None,
+            defect_class=defect_class or None, status=status or None,
+            min_age_days=min_age_days or None,
+            max_age_days=max_age_days or None, limit=limit)
+
+
+@mcp.tool()
+@_traced
+def get_finding(finding_id: str) -> dict:
+    """One finding in full: every sighting in order, and every refinement made
+    against it with its relation (ADDRESSES or CLOSES). This is where you look
+    before changing anything — if a refinement already exists and the finding
+    recurred, the change that failed is named here."""
+    with _conn() as c:
+        return memory_mod.get_finding(c, finding_id)
+
+
+@mcp.tool()
+@_traced
+def list_defect_classes() -> dict:
+    """The shared vocabulary, with each class's TELL (how it presents) and
+    PROBE (the command or query that detects it), and how many findings are
+    open under each.
+
+    Read this before recording a finding. A memory rots when one defect is
+    filed under three synonyms, which is why defect_class is a foreign key.
+    """
+    with _conn() as c:
+        return memory_mod.list_defect_classes(c)
+
+
+@mcp.tool()
+@_traced
+def record_refinement(refinement: dict) -> dict:
+    """What you CHANGED, in response to which findings. The server allocates
+    REF-####.
+
+    refinement = {
+      target_kind  str REQUIRED  SKILL | AGENT | COMPONENT | GATE | TEST |
+                                 SCHEMA | DOC | PROCESS
+      target       str REQUIRED  named the way its owner names it:
+                                 skill:dma-surface-production, agent:rectifier,
+                                 CG-13, apps/mcp/dma_mcp/promote.py
+      change       str REQUIRED  what was changed, in prose
+      applied_by   str REQUIRED
+      finding_ids  [str] REQUIRED  the findings this answers — they must exist
+      commit_sha   str \\ ONE of these two is REQUIRED: a refinement nobody
+      change_ref   str /  can locate is a claim, not a change
+      gate_added   str  the gate added in response, so the memory holds the
+                        fix beside the defect
+      rationale / verification / relation (ADDRESSES | CLOSES)
+    }
+
+    Recording a refinement does NOT close anything. Call resolve_finding for
+    that — deliberately two steps, because "changed" and "fixed" are two
+    claims and only the second one can be wrong later.
+    """
+    with _conn() as c:
+        return memory_mod.record_refinement(c, refinement)
+
+
+@mcp.tool()
+@_traced
+def resolve_finding(finding_id: str, refinement_id: str,
+                    verification: str = "") -> dict:
+    """Close a finding by naming the refinement that closed it. The refinement
+    is REQUIRED and there is no way around it: the column is under a CHECK.
+
+    Without it, "did the fix hold?" has no subject — and that question is the
+    only thing this store exists to answer. Pass `verification` (a test name, a
+    gate id, a probe) when you have one.
+    """
+    with _conn() as c:
+        return memory_mod.resolve_finding(c, finding_id, refinement_id,
+                                          verification=verification or None)
+
+
+@mcp.tool()
+@_traced
+def report_recurrence(finding_id: str, measurement: str, reported_by: str,
+                      reported_by_kind: str = "QA_AGENT",
+                      after_refinement: str = "", measured_value: str = "",
+                      note: str = "", session_ref: str = "",
+                      source_ref: str = "") -> dict:
+    """A finding that was resolved and came back. THIS IS THE SIGNAL THAT
+    MATTERS — a fix that did not hold is more informative than one that did.
+
+    The recurrence is recorded against the refinement BY NAME (defaults to the
+    one that closed the finding), the finding returns to RECURRED, and that
+    refinement's `held` flips to false in the digest. `measurement` is required
+    with the same 30-char floor: a recurrence claim is only as good as the
+    measurement that saw it come back.
+
+    If the finding was never resolved by a refinement, this refuses and tells
+    you to use record_finding instead — nothing can have failed to hold.
+    """
+    with _conn() as c:
+        return memory_mod.report_recurrence(
+            c, finding_id, measurement=measurement, reported_by=reported_by,
+            reported_by_kind=reported_by_kind,
+            after_refinement=after_refinement or None,
+            measured_value=measured_value or None, note=note or None,
+            session_ref=session_ref or None, source_ref=source_ref or None)
+
+
+@mcp.tool()
+@_traced
+def get_memory_digest(days: int = 7) -> dict:
+    """Everything a weekly refinement pass needs, in one call: what came back,
+    what is new, which refinements held, which defect CLASSES are still
+    producing, and what nobody has changed anything about.
+
+    Read it in that order. `recurrences_in_window` names the refinements that
+    did not hold — their targets are where the next change belongs.
+    `open_by_class` says which SHAPE of defect this build is still producing; a
+    class with several open findings is a process problem, not several bugs.
+    """
+    with _conn() as c:
+        return memory_mod.memory_digest(c, days)
+
+
+# ── reviewer feedback (the web app's Accept/Reject pair) ─────────────────
+@mcp.tool()
+@_traced
+def list_reviewer_feedback(display_id: str = "", ic_id: str = "",
+                           run_id: str = "", limit: int = 50) -> dict:
+    """Read reviewer verdicts on insight cards straight from `annotations`,
+    with the actor and whether each has been ingested into the memory yet.
+
+    This is a READ. Invariant 2 constrains the API's writes, not anyone's
+    reads: no content enters a serving table here and no component gains a
+    write it did not have.
+    """
+    with _conn() as c:
+        return feedback_mod.list_reviewer_feedback(
+            c, display_id=display_id or None, ic_id=ic_id or None,
+            run_id=run_id or None, limit=limit)
+
+
+@mcp.tool()
+@_traced
+def ingest_reviewer_feedback(limit: int = 200) -> dict:
+    """Turn every un-ingested Accept/Reject into memory. Idempotent — run it on
+    a schedule and again by hand five minutes later; a verdict becomes a
+    finding exactly once.
+
+    A REJECT becomes a finding against the SYNTHESIS SKILL, carrying the card's
+    own text and its `r_layer`: a verdict with no claim attached teaches
+    nothing, and it is the recorded reasoning the reviewer refused, not the
+    headline. An ACCEPT lands as a verdict row (which is what makes the reject
+    RATE measurable) and, on a card that was previously rejected, as a sighting
+    saying so.
+
+    Returns {ingested, skipped, findings_raised[], problems[], verdict_tally,
+    reject_rate}. `problems` is never empty for the wrong reason: an
+    unreadable verdict is left un-ingested and named, not counted as nothing.
+    """
+    with _conn() as c:
+        return feedback_mod.ingest_reviewer_feedback(c, limit=limit,
+                                                     encoder=_encoder())
 
 
 def build_app():
