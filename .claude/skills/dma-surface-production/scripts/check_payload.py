@@ -9,6 +9,14 @@ expensive ones — grain, identity and grounding — which only the server can c
     python scripts/check_payload.py payload.json --page heatmap \
         --subvertical SV2 --cells bundle.json
 
+What it covers beyond the contract: face budgets (CG-12), item dating (CG-10),
+sentence case (CG-11), closed vocabularies on TEXT columns (CG-09, including
+`arc_shape`, which the connector's own list does not reach), per-ITEM citation
+(AG-03), and the P2 recommendation card's anatomy — the two lists both called
+prerequisites, the KPI that is not a KPI without its baseline, and
+`provenance`, which the contract calls required and which shipped absent on
+every recommendation of the run this was written against.
+
 Two flags unlock the two checks that need to know something about the run:
 `--subvertical` (the entity's, SV1-SV9 or the workbook code) turns on the
 sub-vertical scope check, and `--cells` (a bundle JSON, or a bare list of
@@ -154,6 +162,141 @@ FACE_BUDGETS = {
     "opportunity": [("tiles[*].addressable_cells[*].feature_that_addresses_it",
                      {"max_chars": 80}, "the addressable-cell chip",
                      "the feature's name, not its case")],
+    # P2 · the recommendation card. See 04-craft/4-card-anatomy.md — the face
+    # is a half-width column that halves again at tablet width, so the title
+    # sits on one flex line beside two badges, the L4 feature is a catalogue
+    # feature NAME rather than a solution sentence, and the KPI metric shares
+    # a footer row with the readiness gate and the cell count.
+    "recommendations": [
+        ("recommendations[*].title", {"min_words": 4, "max_words": 9},
+         "the card header, on one line beside the phase and effort badges",
+         "the initiative in a phrase; the argument is root_cause"),
+        ("recommendations[*].l4_feature", {"max_words": 6},
+         "the card's sub-header and a badge in the modal head",
+         "the catalogue L4 FEATURE name ('Data Cloud', 'Workflow Engine'), "
+         "not a description of the solution"),
+        ("recommendations[*].kpi_triple.metric", {"max_words": 8},
+         "the KPI footer cell, above baseline and target",
+         "what gets counted; the numbers are baseline and target"),
+        ("recommendations[*].phase", {"max_words": 1},
+         "the phase badge, which the app prints as 'Phase <value>'",
+         "the ordinal alone — '1', never 'Phase 1 (0-6 mo)'"),
+    ],
+}
+
+# AG-03 · the item lists whose schema declares an evidence key. Derived from
+# the live page contracts with the connector's own `_declared_ev_keys`, so
+# this mirrors what the server will demand rather than guessing at it. Any
+# OTHER list of objects is checked by the self-calibrating rule below.
+ITEM_CITATIONS = {
+    "focus_areas": ("focus_areas", "new_evidence_ids"),
+    "cell_evidence": ("cells", "e_ids"),
+    "evidence": ("evidence", "e_id"),
+    "alerts": ("alerts", "new_evidence_ids"),
+    "safeguard_gates": ("caps", "e_ids"),
+    "evidence_age": ("rows", "e_id"),
+    "firmographics": ("fields", "source_e_id"),
+    "why_now": ("signals", "e_ids"),
+    "findings": ("findings", "e_ids"),
+    "leadership": ("roster", "source_e_id"),
+    "financial_series": ("series", "source_e_id"),
+    "sentiment": ("bars", "e_id"),
+    "ceilings": ("rows", "e_ids"),
+    "thought_leadership": ("entries", "e_id"),
+    "insights": ("cards", "supporting_e_ids"),
+    "recommendations": ("recommendations", "evidence_ids"),
+    "starters": ("starters", "e_ids"),
+    "stairstep": ("ladder", "e_ids"),
+    "timeline": ("events", "e_ids"),
+    "context_sentiment": ("context_tiles", "e_ids"),
+    "acquisitions": ("rows", "e_ids"),
+    "techstack": ("items", "e_ids"),
+}
+EV_KEYS = ("e_ids", "supporting_e_ids", "evidence_ids", "new_evidence_ids",
+           "source_e_id", "e_id")
+# An item that asserts nothing owes no citation, and there are exactly two
+# honest shapes for that: a null-valued row, and a recorded absence carrying
+# the ladder that established it. Same vocabulary the connector reads.
+ABSENT_STATES = {"UNWORKED", "WORKED_ABSENT", "NOT_RUN", "verified_absent",
+                 "verified_sparse", "cannot_estimate", "insufficient_cohort",
+                 "empty_state", "quarantined", "ABSENT"}
+
+# CG-09 · fields whose promoted column is plain TEXT but whose CONTRACT names
+# a closed vocabulary. Add one only where the contract states the values —
+# this is not a place to invent vocabulary.
+#
+# `arc_shape` is here because it is the field that proved the point: the run
+# this was written against served `"strategy-first, substrate-later"`, which
+# is prose in an enum slot. The connector's own CG-09 covers `signal` and
+# `status` and does NOT cover arc_shape, so nothing refused it. Until the
+# connector's list grows, this check is the only one that fires.
+CONTRACT_VOCABULARIES = {
+    "timeline": {
+        "arc_shape": ("STEADY_INVESTMENT", "STOP_START", "POST_EVENT_CATCHUP",
+                      "LEGACY_ANCHORED", "RECENT_ACCELERATION"),
+        "events[*].signal": ("POSITIVE", "NEUTRAL", "NEGATIVE"),
+        "events[*].kind": ("PLATFORM", "LEADERSHIP", "M&A", "REGULATORY",
+                           "CHANNEL", "DATA", "SECURITY", "STRATEGY"),
+    },
+    "techstack": {
+        "items[*].status": ("CONFIRMED", "INFERRED", "CLAIMED", "ABSENT"),
+        "items[*].layer": ("OPS", "CUST", "DATA", "INFRA"),
+    },
+    "recommendations": {
+        "recommendations[*].provenance": ("ANALYST", "DERIVED"),
+        "recommendations[*].effort_band": ("S", "M", "L"),
+    },
+    "starters": {"starters[*].provenance": ("TEMPLATE_FILL", "ANALYST")},
+    "thought_leadership": {
+        "entries[*].kind": ("LINKEDIN POST", "CONFERENCE", "ARTICLE", "PODCAST",
+                            "EARNINGS CALL", "BLOG", "PANEL"),
+    },
+}
+# Fields whose contract says "one of these values WITH a clause of reasoning".
+# The value has to LEAD, because that prefix is what a filter reads and what a
+# badge prints; the clause after it is the contract doing its job, not a
+# vocabulary breach. `maturity_effect` is the one that matters — it renders as
+# "ADVANCED — the engagement stack was assembled component by component".
+LEADING_VOCABULARIES = {
+    "timeline": {"events[*].maturity_effect":
+                 ("ADVANCED", "CONSTRAINED", "NEUTRAL")},
+    "thought_leadership": {"entries[*].alignment":
+                           ("CORROBORATES", "CONTRADICTS", "EXTENDS")},
+}
+# Fields the contract marks required-and-never-blank on an ITEM, which a
+# missing-key check would otherwise pass silently because the key is simply
+# absent rather than empty.
+#
+# `provenance` is a WARN and not a BLOCK on purpose, and the reason is a
+# conflict this checker does not get to resolve. The Surface Specification
+# states it per recommendation ("required, never blank; 32 clients shipped
+# derived rows presented as analyst recommendations"). The Backend Schema
+# stores one `provenance_t` per row from the ENVELOPE, and the writer spec
+# fills that column from `sys:provenance` — the SUBMISSION-level argument to
+# submit_page_payload, whose values are `analyst · derived · producer` and
+# whose default is `producer`. So a per-item provenance validates and is then
+# dropped. Send it (the contract asks for it) AND set the submission argument,
+# and read `04-craft/4-card-anatomy.md` for the open question.
+REQUIRED_ITEM_FIELDS = {
+    "recommendations": [
+        ("recommendations", "provenance", "WARN",
+         "the contract states it per recommendation, ANALYST or DERIVED, "
+         "never blank — 32 clients shipped derived rows presented as analyst "
+         "judgement. Note that what PERSISTS is the submission-level "
+         "provenance argument (analyst|derived|producer, default 'producer'), "
+         "so set that too or every row serves as 'producer'"),
+        ("recommendations", "cost_of_inaction", "BLOCK",
+         "what degrades if this does not happen, over what horizon; where "
+         "nothing grounds it, the contract's literal string is "
+         "'no dated trigger established'"),
+        ("recommendations", "root_cause", "BLOCK",
+         "30-60 words, cited, saying why the gap exists — the card face "
+         "line-clamps it to three lines and the modal opens on it"),
+    ],
+    "starters": [("starters", "provenance", "WARN",
+                  "the contract states TEMPLATE_FILL or ANALYST per starter "
+                  "and the card renders it; the stored column is the "
+                  "submission-level provenance class")],
 }
 
 # ET-05 · the codes that name exactly ONE sub-vertical, and the aliases the
@@ -477,6 +620,194 @@ def check_face_budgets(page, payload):
                         f"field holds {belongs}. Move the prose, do not trim it")
 
 
+def asserts_nothing(item):
+    """True when the item makes no claim, so no citation is owed."""
+    if item.get("quarantined"):
+        return True
+    for key in ("state", "status", "basis", "peer_basis", "coverage", "result"):
+        state = item.get(key)
+        if isinstance(state, str) and state in ABSENT_STATES:
+            # an absence is a finding only with the search that established it
+            return bool(item.get("sources_searched") or item.get("queries_run"))
+    if item.get("empty_state"):
+        return True
+    return "value" in item and item.get("value") in (None, "")
+
+
+def _cites(item, keys=EV_KEYS):
+    for k in keys:
+        v = item.get(k)
+        if isinstance(v, str) and v.strip():
+            return True
+        if isinstance(v, list) and any(isinstance(x, str) and x.strip() for x in v):
+            return True
+    return False
+
+
+def check_item_citations(page, payload):
+    """AG-03 — every claim-bearing ITEM cites, not just the section.
+
+    A card, signal, finding, ceiling or register row that asserts something
+    about the institution and cites nothing is unfalsifiable: it renders to a
+    client with no way back to a source. The envelope's `e_ids` is a union,
+    not a substitute — a reader drills into the item.
+
+    Two rules run. The first is the contract's: the item lists whose schema
+    declares an evidence key must carry one on every asserting item. The
+    second calibrates itself from the payload — where SOME items in a list
+    cite and one does not, that one is the outlier, whatever the contract
+    says, and it is the shape the defect actually takes.
+    """
+    for sec, body in payload.items():
+        if not isinstance(body, dict):
+            continue
+        spec = ITEM_CITATIONS.get(sec)
+        if spec:
+            field, key = spec
+            for i, item in enumerate(body.get(field) or []):
+                if not isinstance(item, dict) or asserts_nothing(item):
+                    continue
+                if _cites(item, (key,)) or _cites(item):
+                    continue
+                bad("BLOCK", f"{page}.{sec}.{field}[{i}].{key}",
+                    f"AG-03 this item asserts a claim and cites nothing — the "
+                    f"{sec}.{field} item schema declares '{key}', and every "
+                    "claim resolves to at least one registered id, inferences "
+                    "included. Register the source and cite the id you were "
+                    "given, or state the absence with its sources_searched "
+                    "ladder. A find asserted with an empty id list is a "
+                    "contradiction, not an empty state")
+        # self-calibrating: a list where most items cite and one does not
+        for field, items in body.items():
+            if not isinstance(items, list) or len(items) < 3:
+                continue
+            objs = [x for x in items if isinstance(x, dict)]
+            if len(objs) != len(items):
+                continue
+            citing = [x for x in objs if _cites(x)]
+            if not (len(citing) >= 2 and len(citing) < len(objs)):
+                continue
+            if spec and spec[0] == field:
+                continue        # already reported above, do not double-count
+            for i, item in enumerate(objs):
+                if _cites(item) or asserts_nothing(item):
+                    continue
+                bad("WARN", f"{page}.{sec}.{field}[{i}]",
+                    f"AG-03 {len(citing)} of {len(objs)} items in this list "
+                    "cite evidence and this one does not — the list's own "
+                    "convention says it should. Cite it, or say why it "
+                    "asserts nothing")
+
+
+def check_contract_vocabularies(page, payload):
+    """CG-09 — a closed vocabulary takes one of its values, including where
+    the promoted column is plain TEXT and nothing downstream would notice."""
+    for sec, body in payload.items():
+        if not isinstance(body, dict):
+            continue
+        for path, values in CONTRACT_VOCABULARIES.get(sec, {}).items():
+            for jpath, val in at_path(body, path):
+                if val is None or val in values:
+                    continue
+                if isinstance(val, dict) and val.get("value") in values:
+                    continue        # {value, clause} shape the contract allows
+                shown = val if isinstance(val, str) and len(val) <= 60 else \
+                    f"{str(val)[:57]}…"
+                bad("BLOCK", f"{page}.{sec}.{jpath}",
+                    f"CG-09 {shown!r} is not a value of this field — the "
+                    f"contract states {' | '.join(values)}. Prose in an enum "
+                    "slot promotes into a TEXT column, renders as itself, and "
+                    "matches no filter: pick the value and put the sentence in "
+                    "the field that carries prose")
+        for path, values in LEADING_VOCABULARIES.get(sec, {}).items():
+            for jpath, val in at_path(body, path):
+                if val is None:
+                    continue
+                lead = val.get("value") if isinstance(val, dict) else val
+                if isinstance(lead, str) and \
+                        any(lead.strip().startswith(v) for v in values):
+                    continue
+                shown = lead if isinstance(lead, str) and len(lead) <= 60 else \
+                    f"{str(lead)[:57]}…"
+                bad("BLOCK", f"{page}.{sec}.{jpath}",
+                    f"CG-09 {shown!r} does not LEAD with one of "
+                    f"{' | '.join(values)}. The clause of reasoning is the "
+                    "contract's, but the value has to come first — the badge "
+                    "prints the prefix and the filter reads it")
+
+
+def check_required_item_fields(page, payload):
+    for sec, rules in REQUIRED_ITEM_FIELDS.items():
+        body = payload.get(sec)
+        if not isinstance(body, dict):
+            continue
+        for field, key, sev, why in rules:
+            for i, item in enumerate(body.get(field) or []):
+                if not isinstance(item, dict):
+                    continue
+                val = item.get(key)
+                if val is None or (isinstance(val, str) and not val.strip()):
+                    bad(sev, f"{page}.{sec}.{field}[{i}].{key}",
+                        f"required and absent — {why}")
+
+
+def check_recommendation_shape(page, payload):
+    """P2 anatomy the budgets cannot see: the two lists called
+    'prerequisites', and the KPI that is not a KPI without its baseline."""
+    body = payload.get("recommendations")
+    if not isinstance(body, dict):
+        return
+    ids = set()
+    for i, r in enumerate(body.get("recommendations") or []):
+        if not isinstance(r, dict):
+            continue
+        p = f"{page}.recommendations.recommendations[{i}]"
+        ids.add(r.get("rec_id"))
+        kpi = r.get("kpi_triple")
+        if isinstance(kpi, dict):
+            for k in ("metric", "baseline", "target"):
+                if not str(kpi.get(k) or "").strip():
+                    bad("BLOCK", f"{p}.kpi_triple.{k}",
+                        "a KPI triple renders metric, Baseline and Target as "
+                        "three lines; one of them empty renders a metric with "
+                        "no way to tell whether it moved")
+            if kpi.get("baseline") and not kpi.get("baseline_as_of"):
+                bad("WARN", f"{p}.kpi_triple.baseline_as_of",
+                    "the baseline must be a figure that EXISTS in the pack "
+                    "with an as_of, not an aspiration — the card prints the "
+                    "date beside it")
+        for j, q in enumerate(r.get("prerequisites") or []):
+            if not isinstance(q, dict):
+                continue
+            qp = f"{p}.prerequisites[{j}]"
+            if q.get("cell"):
+                if q.get("minimum") is None or q.get("current") is None:
+                    bad("BLOCK", qp,
+                        "a cell-shaped prerequisite draws a progress bar "
+                        "against its minimum and a MET/NOT MET verdict from "
+                        "the pair — send {cell, minimum, current, verdict} or "
+                        "send the text shape {condition, basis, note}")
+            elif not q.get("condition"):
+                bad("BLOCK", qp,
+                    "a prerequisite is either a cell threshold "
+                    "{cell, minimum, current, verdict} or a text condition "
+                    "{condition, basis, note}. This row is neither, so the "
+                    "readiness card cannot key it and drops it")
+        gate = r.get("validation_gate")
+        if isinstance(gate, dict) and not gate.get("backing_cells"):
+            bad("WARN", f"{p}.validation_gate.backing_cells",
+                "the readiness drilldown renders the backing cells — a "
+                "verdict with none is a claim the reader cannot trace")
+    for i, r in enumerate(body.get("recommendations") or []):
+        for dep in (r.get("dependencies") or []) if isinstance(r, dict) else []:
+            if dep not in ids:
+                bad("BLOCK",
+                    f"{page}.recommendations.recommendations[{i}].dependencies",
+                    f"'{dep}' is not a rec_id in this page — the modal's "
+                    "Sequencing tab resolves dependencies both ways and "
+                    "renders an empty Prerequisites column instead")
+
+
 def cell_citations(page, payload):
     """(path, key, cell_id) for every catalogue cell a payload cites."""
     for path, val in walk(payload, page):
@@ -570,7 +901,9 @@ def main():
 
     for fn in (check_structure, check_envelope, check_scalars, check_numbers,
                check_gates_section, check_empty_states, check_dating,
-               check_sentence_case, check_face_budgets):
+               check_sentence_case, check_face_budgets, check_item_citations,
+               check_contract_vocabularies, check_required_item_fields,
+               check_recommendation_shape):
         fn(a.page, payload)
     check_subvertical_scope(a.page, payload, a.subvertical)
     check_cell_linkage(a.page, payload, cells)

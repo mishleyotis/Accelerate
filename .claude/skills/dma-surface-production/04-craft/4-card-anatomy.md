@@ -97,6 +97,81 @@ Five headers, all required. Each is a distinct question and none may be folded i
 | Cost of acting now | What it takes — stated honestly |
 | Why this sequence | Why this before the others |
 
+### P2 Recommendation card and its modal
+
+The highest-value card on D4 and, until this was written, the only one this file did not
+describe. Everything below is read off the prototype's `rec-row` and `RecommendationModal`,
+which are authoritative for layout and card anatomy.
+
+**Card face.** A half-width column that halves again at tablet width, so every slot is
+narrow.
+
+| Slot | Field | Budget / note |
+|---|---|---|
+| ID chip | `rec_id` | `REC-nnn`, agent-authored, shared with the roadmap |
+| Card header | `title` | **4–9 words**, sentence case, no terminal stop. It sits on one flex line beside two badges and a chevron; a 12-word title pushes the badges onto a second row |
+| Badge | `phase` | Renders as `Phase <value>`. Send the **ordinal only** (`"1"`), never `"Phase 1 (0–6 mo)"` — the label is the app's |
+| Badge | `effort_band` | `S` / `M` / `L`. One letter, rendered raw |
+| Eyebrow | `l3_area` | The catalogue L3 platform area. 2–6 words, title case as the catalogue spells it |
+| **Sub-header** | `l4_feature` | The L4 feature, **2–6 words**. This is a *catalogue feature name*, not a solution sentence — the prototype's is "Data Cloud", "Workflow Engine". "API-led connectivity layer with the packaged core connector" is a `root_cause` clause wearing a feature's slot |
+| Body | `root_cause` | 30–60 words per contract, **line-clamped to 3 lines on the face** (~28 words at 11.5px in a half-width column). The first sentence is the card; the rest is read in the modal. It may not open on an absence — see `01-start-here/3-language.md` |
+| Chips | `evidence_ids[]` | Labelled `cites`. Each opens the evidence drawer. This — not `root_cause` prose — is what the prototype calls the row's root cause |
+| Footer cell | `validation_gate.threshold` + `.verdict` | `P4C3 >= 2.0` in mono, then a MET / NOT MET badge |
+| Footer cell | `len(dma_impact)` | "Cells it moves". **Computed, never sent** |
+| Footer cell | `kpi_triple.metric` (+ `.baseline`, `.baseline_as_of`, `.target`) | metric **≤ 8 words**; baseline and target render underneath at 10.5px |
+
+**Modal head.** `rec_id` chip · `l3_area` badge · `l4_feature` badge · `Phase <phase>` ·
+`claim_label` · "Effort <effort_band>" · then `title` at 17px. Nothing else fits, and a
+`platform` key does not exist on a promoted recommendation — the head prints the run's own
+L3 area and L4 feature.
+
+**Modal tabs — four, in this order.** Rationale & notes · DMA impact · Root cause evidence ·
+Sequencing.
+
+| Tab | Renders | From |
+|---|---|---|
+| **Rationale** | Five numbered rows: **1 Root cause** (prose + evidence chips) · **2 Cost of inaction** · **3 Sequencing** (`sequencing_reason` + phase badge) · **4 Expected outcome** (metric · effort · Baseline · Target) · **5 Validation gate** (threshold, verdict, current value, backing cells as clickable chips) | `root_cause`, `evidence_ids`, `cost_of_inaction`, `sequencing_reason`, `kpi_triple`, `validation_gate` |
+| **DMA impact** | One row per affected cell: name, `current` → `target`, signed `delta`, and `target_basis` under it | `dma_impact[]` |
+| **Root cause evidence** | Per cited id: tier chip, claim class, recency, ERS, source title, the verbatim excerpt in a quote block | the evidence store, via `evidence_ids[]` |
+| **Sequencing** | Three columns — **Prerequisites** (the recommendations this one depends on) · **This initiative** · **Unlocks** (the recommendations that depend on it) | `dependencies[]` only, resolved both ways |
+
+**The two things called "prerequisites" are different fields.** `dependencies[]` is a list of
+`rec_id`s and drives the modal's Sequencing tab. `prerequisites[]` is a list of readiness
+conditions and drives the **separate Readiness card** on D4, above the recommendation list —
+never the modal. It takes exactly two shapes, and rows are deduplicated across the page on
+`(cell, minimum)`, so `P4C3 >= 2.0` and `P4C3 >= 2.5` are two rows, not one:
+
+```
+{cell, minimum, current, verdict}          → progress bar against the minimum, MET/NOT MET
+{condition, basis, note}                   → a text condition with its evidence basis
+```
+
+A cell-shaped prerequisite with no `minimum` draws no bar and no verdict. Send both numbers
+or send the text shape.
+
+**`provenance` is required and was absent on every recommendation of the run measured here.**
+`ANALYST` or `DERIVED`, never blank; `DERIVED` means composed from the pack by rule, and 32
+clients shipped derived rows presented as analyst judgement.
+
+Two things to know before you send it, because the sources disagree and this file does not
+resolve them:
+
+- The **Surface Specification** states `provenance` per recommendation and per starter.
+- The **Backend Schema** stores one `provenance_t` per row from the section envelope, and
+  the writer fills that column from `sys:provenance` — the **submission-level** argument to
+  `submit_page_payload`, whose values are `analyst · derived · producer` and whose **default
+  is `producer`**.
+
+So a per-item `ANALYST` validates and is then dropped, and a page submitted without the
+argument serves every row as `producer`. Send both: the item field the contract asks for,
+and `provenance="analyst"` or `"derived"` on the submission. If a page genuinely mixes the
+two, say so in the section and raise it — one class per submission cannot express a mixed
+page, and picking silently is the failure mode this note exists to prevent.
+
+**Conversation starters are not in this modal.** P2b is its own card, rendered beside the
+recommendation list with its own copy-all control. A starter that only makes sense after
+opening a recommendation is a starter written in the wrong place.
+
 ### P2b Conversation starter
 
 | Slot | Content | Budget |
