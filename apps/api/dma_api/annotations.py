@@ -74,6 +74,12 @@ Until that lands, the connector's `list_reviewer_feedback` tool is the working
 read path and the consumer (`ingest_reviewer_feedback`) reads the table
 directly. Both are proven against production.
 
+`users.last_seen_at` is deliberately NOT touched on a successful write. It was
+added and removed: `test_alerts.py` pins this path to exactly two written
+tables, and another author's write-boundary test is worth more than a
+convenience column. Binding `google_sub` and `last_seen_at` belongs to the
+sign-in flow, which is where it was always owed.
+
 ## One thing that is NOT fixed here, and is recorded rather than patched
 
 `main.py` accepts `actor` as a QUERY PARAMETER. The BFF is the only intended
@@ -194,14 +200,6 @@ def annotate_insight(cur, display_id: str, ic_id: str, *, body,
         (user_id, entity_id, run_id, ic_id,
          json.dumps({"action": action, "note": note})))
     ann_id, created_at = cur.fetchone()
-
-    # The row is being used, so say so. `last_seen_at` is the users table's own
-    # column for it ("updated on token refresh, not per request", 0003) and this
-    # is the only place the API currently learns that a seeded identity is a
-    # real one. It is not authentication and it is not a grant: an UPDATE inside
-    # svc_api's existing privilege on an auth table, nowhere near a serving row.
-    cur.execute("UPDATE users SET last_seen_at = now() WHERE id = %s",
-                (user_id,))
 
     response = {"annotation_id": ann_id, "ic_id": ic_id, "action": action,
                 "created_at": str(created_at), "replayed": False}
