@@ -284,6 +284,11 @@ the same gap stated as available value invites a conversation. The finding does 
 only whether the sentence is about what the institution failed to do or what is now available
 to it.
 
+**No prose field opens on an absence.** "No integration platform appears in a scan of more
+than two hundred technologies" shipped to a client as the first line of a recommendation
+card, which line-clamps to three lines, so it was most of what was read. Its own second
+sentence already named the asset. Name it first: `01-start-here/3-language.md`.
+
 Resubmission supersedes cleanly. Submit, read, repair, resubmit as often as needed — there
 is no merge, no accumulation and no cleanup. For the gate families and how to read a
 verdict, see `05-lifecycle/1-gates.md`.
@@ -355,6 +360,9 @@ These are the ones that produced measured defects when they were left to judgeme
    inference included. The section envelope's `e_ids` is a union, not a substitute; gate
    **AG-03** blocks an item that asserts something and cites nothing. Naming a source in
    prose is not citing it — register it and use the id you are given. See standing clause 5.
+   **Register from the artefact you fetched, in the same step you fetched it**: the excerpt
+   and the `source_url` are one claim, and a true claim under a URL that does not contain it
+   is fabrication by construction. `scripts/check_evidence.py`.
 4. **A quoted figure and its named cell are the same cell**, within 0.05, read from one row.
 5. **Every figure passes the identity gate** — legal name, regulator, footprint, source
    domain, order of magnitude. On failure quarantine the field with its reason; never
@@ -370,8 +378,9 @@ These are the ones that produced measured defects when they were left to judgeme
 10. **Order is meaning.** Findings are ranked, phases sequenced, events chronological. The
     app renders in the order you send.
 11. **Run the ladder before you say no.** An absence with no recorded search is not a finding.
-12. **Frame every gap as available value.** Name what exists before naming what does not.
-    Never assign fault, never describe a person or a team.
+12. **Frame every gap as available value.** Name what exists before naming what does not —
+    including in sentence order: **no prose field opens on an absence.** Never assign fault,
+    never describe a person or a team.
 13. **A page tells one story.** Write its thread before you submit it.
 14. **Argue against your own conclusion before you ship it.** A claim that survives its
     strongest counter-argument is one you can defend in the room.
@@ -458,7 +467,7 @@ assets/          payload skeletons per section
 | `01-start-here/6-entity-shape.md` | Before planning the run — sub-vertical scoping, size tier, ownership, brands |
 | `04-craft/6-fields-the-app-depends-on.md` | Once, early — what breaks on the page when a field is missing |
 | `02-inputs/4-vetting.md` | Before parsing anything; when a workbook looks unusual |
-| `01-start-here/2-evidence.md` | Always — tiers, recency, rank score, peer ladder, citation |
+| `01-start-here/2-evidence.md` | Always — tiers, recency, rank score, peer ladder, citation, and why the excerpt and the `source_url` are one claim |
 | `02-inputs/1-package.md` | Orienting in the assessment folder; deciding which artefact wins |
 | `02-inputs/3-mcp-tools.md` | Any tool call whose exchange you are unsure of |
 | `05-lifecycle/1-gates.md` | Reading a verdict; understanding what will be asserted |
@@ -488,8 +497,14 @@ python scripts/check_payload.py <payload.json> --page <page>
                                                     # internal_only marking, empty states
 python scripts/score_prompt.py <prompt.txt>        # score a prompt you have written
                                                     # against the 14-attribute standard
-python scripts/check_language.py <payload.json>    # accusatory framing, and gap statements
-                                                    # with no adjacent asset
+python scripts/check_language.py <payload.json>    # accusatory framing, fields that OPEN on
+                                                    # an absence, gap statements with no
+                                                    # adjacent asset, lost capitals
+python scripts/check_evidence.py <get_evidence.json> --review
+                                                    # the evidence register, not a page:
+                                                    # one excerpt under two hosts, a
+                                                    # source_url that is not a document,
+                                                    # a search page, a tool cited as a source
 python scripts/clay_plan.py --domain <domain>      # the enrichment call sequence and the
                                                     # tier each data point registers at
 python scripts/check_consistency.py <rundir>/ --subvertical <CODE>

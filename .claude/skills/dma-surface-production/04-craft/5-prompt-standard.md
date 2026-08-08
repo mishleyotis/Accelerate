@@ -23,8 +23,9 @@ guess that type-checks promotes silently wrong content.
 | 13 | **Audience marking** | Which paths go in internal_only. An unmarked internal rung reaches the client. |
 | 14 | **Ordering** | Where order carries meaning — ranked, sequenced or chronological. |
 
-Four of these — identity, grain, register, audience — are the standing clauses. They apply
-to every section and live in `standing-clauses.md` rather than being restated.
+Five of these — identity (7), grain (8), citation at the item (9), register (10) and
+audience (13) — are the standing clauses. They apply to every section and live in
+`01-start-here/1-standing-clauses.md` rather than being restated.
 
 ## The required form
 

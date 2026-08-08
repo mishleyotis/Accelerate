@@ -29,7 +29,7 @@
       "empty_state": null
     },
     "firmographics": {
-      "<see references/pages/overview.md>": null,
+      "<see 03-pages/2-overview.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -41,7 +41,7 @@
       "empty_state": null
     },
     "why_now": {
-      "<see references/pages/overview.md>": null,
+      "<see 03-pages/2-overview.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -53,7 +53,7 @@
       "empty_state": null
     },
     "exec_summary": {
-      "<see references/pages/overview.md>": null,
+      "<see 03-pages/2-overview.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -65,7 +65,7 @@
       "empty_state": null
     },
     "opportunity": {
-      "<see references/pages/overview.md>": null,
+      "<see 03-pages/2-overview.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -77,7 +77,7 @@
       "empty_state": null
     },
     "findings": {
-      "<see references/pages/overview.md>": null,
+      "<see 03-pages/2-overview.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -89,7 +89,7 @@
       "empty_state": null
     },
     "leadership": {
-      "<see references/pages/overview.md>": null,
+      "<see 03-pages/2-overview.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -101,7 +101,7 @@
       "empty_state": null
     },
     "financial_series": {
-      "<see references/pages/overview.md>": null,
+      "<see 03-pages/2-overview.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -113,7 +113,7 @@
       "empty_state": null
     },
     "sentiment": {
-      "<see references/pages/overview.md>": null,
+      "<see 03-pages/2-overview.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -125,7 +125,7 @@
       "empty_state": null
     },
     "ceilings": {
-      "<see references/pages/overview.md>": null,
+      "<see 03-pages/2-overview.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -137,7 +137,7 @@
       "empty_state": null
     },
     "evidence_coverage": {
-      "<see references/pages/overview.md>": null,
+      "<see 03-pages/2-overview.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -149,7 +149,7 @@
       "empty_state": null
     },
     "thought_leadership": {
-      "<see references/pages/overview.md>": null,
+      "<see 03-pages/2-overview.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -163,7 +163,7 @@
   },
   "insights": {
     "insights": {
-      "<see references/pages/insights.md>": null,
+      "<see 03-pages/3-insights.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -175,7 +175,7 @@
       "empty_state": null
     },
     "landscape": {
-      "<see references/pages/insights.md>": null,
+      "<see 03-pages/3-insights.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -189,7 +189,7 @@
   },
   "heatmap": {
     "workbook_scores": {
-      "<see references/pages/heatmap.md>": null,
+      "<see 03-pages/1-heatmap.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -201,7 +201,7 @@
       "empty_state": null
     },
     "focus_areas": {
-      "<see references/pages/heatmap.md>": null,
+      "<see 03-pages/1-heatmap.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -251,7 +251,7 @@
       "empty_state": null
     },
     "evidence": {
-      "<see references/pages/heatmap.md>": null,
+      "<see 03-pages/1-heatmap.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -263,7 +263,7 @@
       "empty_state": null
     },
     "value_chain": {
-      "<see references/pages/heatmap.md>": null,
+      "<see 03-pages/1-heatmap.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -275,7 +275,7 @@
       "empty_state": null
     },
     "alerts": {
-      "<see references/pages/heatmap.md>": null,
+      "<see 03-pages/1-heatmap.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -317,7 +317,7 @@
       "empty_state": null
     },
     "evidence_age": {
-      "<see references/pages/heatmap.md>": null,
+      "<see 03-pages/1-heatmap.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -361,7 +361,7 @@
   },
   "platform": {
     "platform_story": {
-      "<see references/pages/platform.md>": null,
+      "<see 03-pages/4-platform.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -373,7 +373,7 @@
       "empty_state": null
     },
     "recommendations": {
-      "<see references/pages/platform.md>": null,
+      "<see 03-pages/4-platform.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -385,7 +385,7 @@
       "empty_state": null
     },
     "starters": {
-      "<see references/pages/platform.md>": null,
+      "<see 03-pages/4-platform.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -421,7 +421,7 @@
       "empty_state": null
     },
     "stairstep": {
-      "<see references/pages/platform.md>": null,
+      "<see 03-pages/4-platform.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -435,7 +435,7 @@
   },
   "context": {
     "timeline": {
-      "<see references/pages/context.md>": null,
+      "<see 03-pages/5-context.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -447,7 +447,7 @@
       "empty_state": null
     },
     "issue_register": {
-      "<see references/pages/context.md>": null,
+      "<see 03-pages/5-context.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -459,7 +459,7 @@
       "empty_state": null
     },
     "regulatory_standing": {
-      "<see references/pages/context.md>": null,
+      "<see 03-pages/5-context.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -471,7 +471,7 @@
       "empty_state": null
     },
     "context_sentiment": {
-      "<see references/pages/context.md>": null,
+      "<see 03-pages/5-context.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [
@@ -483,7 +483,7 @@
       "empty_state": null
     },
     "acquisitions": {
-      "<see references/pages/context.md>": null,
+      "<see 03-pages/5-context.md>": null,
       "produced_at": "<iso8601>",
       "producer_version": "<skill@date>",
       "e_ids": [

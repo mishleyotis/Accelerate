@@ -49,10 +49,11 @@ def main():
         print("  Under 800 characters — every prompt this short in the source set")
         print("  failed at least seven attributes.")
     missing = [x for x, ok, _ in got if not ok]
-    if {"identity", "grain", "register", "audience"} & set(missing):
-        print("\n  Note: identity, grain, register and audience are STANDING clauses.")
-        print("  If they are absent because the prompt relies on standing-clauses.md,")
-        print("  that is correct — say so in the prompt so the next reader knows.")
+    if {"identity", "grain", "citation", "register", "audience"} & set(missing):
+        print("\n  Note: identity, grain, citation, register and audience are the FIVE")
+        print("  STANDING clauses. If they are absent because the prompt relies on")
+        print("  01-start-here/1-standing-clauses.md, that is correct — say so in the")
+        print("  prompt so the next reader knows.")
     return 0 if score >= 10 else 1
 
 if __name__ == "__main__":
