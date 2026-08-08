@@ -190,8 +190,11 @@ def upgrade() -> None:
           embedding_model  TEXT,
           promoted_at      TIMESTAMPTZ NOT NULL,
           producer_version TEXT NOT NULL,
+          -- Quoted: `text` is also a type name, and an unquoted reference to
+          -- it inside an expression is a parse ambiguity waiting for a
+          -- Postgres release to resolve differently.
           search_tsv       tsvector GENERATED ALWAYS AS
-                             (to_tsvector('english', text)) STORED,
+                             (to_tsvector('english', "text")) STORED,
           CONSTRAINT serving_passages_dim
             CHECK (embedding IS NULL OR vector_dims(embedding) = 384),
           -- A vector with no model name cannot be trusted against the index
@@ -217,8 +220,8 @@ def upgrade() -> None:
         "CREATE INDEX serving_passages_tsv ON serving_passages "
         "USING gin (search_tsv)")
     op.execute(
-        "CREATE INDEX serving_passages_trgm ON serving_passages "
-        "USING gin (text gin_trgm_ops)")
+        'CREATE INDEX serving_passages_trgm ON serving_passages '
+        'USING gin ("text" gin_trgm_ops)')
 
     # Grants in the same revision as the table. The API reads; the connector
     # is the only writer (invariant 2).
