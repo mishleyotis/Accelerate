@@ -38,11 +38,13 @@ naming the **refinement** that closed it. Recurrence is the signal that
 matters, so it is the one thing recorded against a named change.
 
 Embedding happens at RECORD time, inside this service, with the same model
-V4 uses at submit. Invariant 1 forbids a model call on the SERVING request
-path; this is not one, and `search_findings` reports `paths_skipped` with a
-reason rather than pretending a semantic path ran. Production currently sets
-no `EMBED_MODEL_DIR`, so semantic search abstains and the lexical paths
-answer — the same degradation V4 already documents.
+V4 uses at submit (`EMBED_MODEL_DIR=/model`, baked into the image by the
+Dockerfile — not a deploy-time env var). Invariant 1 forbids a model call on
+the SERVING request path; this is not one. Both paths are live in production:
+`search_findings` returned `paths_run: ['lexical','semantic']` on the first
+query after seeding. Where a path cannot run it is named in `paths_skipped`
+with its reason rather than silently absent — an empty result from a path
+that never ran is not evidence of absence.
 
 Seed the store with `python3 apps/mcp/seed_memory.py` (through the deployed
 connector) or `--direct` against a local database.

@@ -673,6 +673,76 @@ CORPUS = [
     },
     {
         "finding": {
+            "title": "The annotation anchor query reads two tables svc_api has "
+                     "never had a grant on",
+            "observed":
+                "The moment the seeded user rows made the actor resolve, the "
+                "403 stopped firing and the very next statement failed. The "
+                "anchor query joined `entities` and `runs`; svc_api holds no "
+                "grant on either and never has, so that statement could not "
+                "have succeeded on any request in the life of the endpoint. "
+                "The unknown-actor refusal had been standing in front of a "
+                "line that had never run — which is why fixing one defect "
+                "revealed a second rather than finishing the job.",
+            "measurement":
+                "2026-08-08, immediately after migration 0033: POST "
+                "/v1/entities/baxter-credit-union-bcu/insights/IC-1/annotation "
+                "-> HTTP 500; the dmai-api revision log carries "
+                "`pg8000.exceptions.DatabaseError: {'C': '42501', 'M': "
+                "'permission denied for table entities'}` at "
+                "dma_api/annotations.py:177. Grants confirmed absent: 0005 "
+                "grants SELECT on the ingested tier to svc_mcp only.",
+            "measured_value": "HTTP 500 · SQLSTATE 42501 on `entities`",
+            "expected": "201 with an annotation id",
+            "component": "api",
+            "file_path": "apps/api/dma_api/annotations.py",
+            "defect_class": "EARLIER_REFUSAL_MASKS_A_LATER_FAILURE",
+            "new_class": {
+                "title": "A guard refuses before a broken statement is ever "
+                         "reached",
+                "description":
+                    "A request is refused early — an unknown actor, a missing "
+                    "header, an empty result — so the code after the guard has "
+                    "never executed in production. Fixing the guard does not "
+                    "finish the job; it reveals a second defect that was "
+                    "always there and that no test caught, because the test "
+                    "suite exercised the refusal.",
+                "tell": "a 500 appears at the exact moment a long-standing 4xx "
+                        "is fixed, on a path nobody changed.",
+                "probe": "Before fixing a guard, exercise every branch behind "
+                         "it once — with a fixture that satisfies the guard. "
+                         "For permission-shaped failures, cross the SQL in the "
+                         "path against `information_schema.role_table_grants` "
+                         "for the role the service actually connects as.",
+            },
+            "severity": "BLOCKER",
+            "raised_by_kind": "BUILD_AGENT",
+            "raised_by": QA,
+            "session_ref": SESSION,
+        },
+        "refinement": {
+            "target_kind": "COMPONENT",
+            "target": "apps/api/dma_api/annotations.py",
+            "change": "The anchor and both reads resolve display_id through "
+                      "`serving_directory` — the one view svc_api reads for "
+                      "entity display fields — instead of through `entities` "
+                      "and `runs`. The view holds promoted runs only, so "
+                      "`promoted_at IS NOT NULL` is its definition rather than "
+                      "a filter the query has to remember, and promote "
+                      "refreshes it inside the promote transaction.",
+            "rationale": "A new grant would have worked and would have widened "
+                         "svc_api's reach past default-deny for one query. The "
+                         "view was already the codebase's idiom for exactly "
+                         "this.",
+            "commit_sha": "6c39265",
+            "verification": "a real 201 from the annotation endpoint in "
+                            "production, then the verdict read back",
+            "applied_by": QA,
+        },
+        "resolve": True,
+    },
+    {
+        "finding": {
             "title": "The API takes the acting user's identity from a query "
                      "parameter",
             "observed":
