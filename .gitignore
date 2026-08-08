@@ -29,3 +29,9 @@ out/
 
 # OS / editor
 .DS_Store
+
+# Atomic-write scratch from the editor tooling. These appear beside a file
+# while it is being rewritten and vanish when the write lands — but a commit
+# taken mid-edit would capture one, and a half-written module in the tree is
+# worse than no commit at all.
+*.tmp.*
