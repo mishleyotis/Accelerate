@@ -86,10 +86,25 @@ serving five is a broken invariant even if the five look perfect.
 
 ## How to reach production
 
-Service URLs come from `gcloud run services describe`, never from memory or a
-guess. Always clear `CLOUDSDK_AUTH_ACCESS_TOKEN` in the same command — a
-stale token in the environment overrides the activated account and fails with
-a 401 that reads like a permissions problem:
+You need three things and any one of them missing makes the audit
+UNVERIFIABLE rather than failed: the `gcloud` CLI, an activated account with
+`run.services.get`, and permission to make outbound requests from Bash. Say
+which one was missing.
+
+`gcloud` is often installed but off the Bash tool's `PATH`. Before concluding
+it is absent, look in the usual places — `$HOME/google-cloud-sdk/bin/gcloud`,
+`/root/google-cloud-sdk/bin/gcloud`, `/usr/local/google-cloud-sdk/bin/gcloud`,
+`/opt/google-cloud-sdk/bin/gcloud`, `/snap/bin/gcloud` — and prepend the one
+you find to `PATH` for the session. On the container this plugin was packaged
+in, it was the second.
+
+Service URLs come from `gcloud run services describe`, never from memory, a
+guess, or a string grepped out of the repository. A URL recorded in a file is
+a record of a past deploy, not the live registry; auditing against it proves
+nothing about what is deployed now. Always clear
+`CLOUDSDK_AUTH_ACCESS_TOKEN` in the same command — a stale token in the
+environment overrides the activated account and fails with a 401 that reads
+like a permissions problem:
 
 ```bash
 CLOUDSDK_AUTH_ACCESS_TOKEN= gcloud run services describe dmai-api \
