@@ -35,7 +35,9 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
     cur.execute("""SELECT entity_id, display_id, legal_name, sub_vertical, size_tier,
                           run_id, request_id, run_seq, is_active, run_status,
                           composite, scored_cells, catalogue_cells,
-                          ccg_catalog_version, completed_at, promoted_at
+                          ccg_catalog_version, completed_at, promoted_at,
+                          assessment_date, assessment_date_basis,
+                          assessment_date_source, refresh_due_date
                      FROM serving_directory
                     WHERE display_id = %s
                     ORDER BY is_active DESC, promoted_at DESC""", (display_id,))
@@ -69,7 +71,21 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
                 "ccg_catalog_version": picked[13], "scored_cells": picked[11],
                 "catalogue_cells": picked[12], "status": picked[9],
                 "is_active": bool(picked[8]),
-                "composite": float(picked[10]) if picked[10] is not None else None}
+                "composite": float(picked[10]) if picked[10] is not None else None,
+                # The assessment date and the rung it came from travel with
+                # every run this function resolves, so a page header cannot
+                # render a date whose provenance the cadence block contradicts
+                # (0031). `completed_at` above is retained: it is what the
+                # ingest wrote, and the two agreeing is a fact worth being
+                # able to check rather than one to assume.
+                "assessment_date": (picked[16].isoformat()
+                                    if hasattr(picked[16], "isoformat")
+                                    else picked[16]),
+                "assessment_date_basis": picked[17],
+                "assessment_date_source": picked[18],
+                "refresh_due_date": (picked[19].isoformat()
+                                     if hasattr(picked[19], "isoformat")
+                                     else picked[19])}
     return picked[0], entity, run_meta, picked[15]
 
 

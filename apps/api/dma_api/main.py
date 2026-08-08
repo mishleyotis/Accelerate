@@ -12,7 +12,6 @@ writes serving content (invariant 2).
 """
 from __future__ import annotations
 
-import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
@@ -21,33 +20,20 @@ from fastapi.responses import JSONResponse
 from .alerts import act as alert_act, queue as alert_queue
 from .annotations import annotate_insight
 from .answers import build_answers, search_answers
+from .cadence import cadence_for, entity_cadence, refresh_queue
+from .db import close as db_close, connect as db_connect
+from .diff import build_diff
 from .evidence import fetch as ev_fetch, redact_items as ev_redact
 from .pages import ApiError, build_page, etag_for, resolve_run
 from .subverticals import SCOPE_TAG, scope_to_entity
 
-_pool = {}
-
-
-def _connect():
-    if os.environ.get("LOCAL_DATABASE_URL"):
-        import pg8000.dbapi
-        url = os.environ["LOCAL_DATABASE_URL"]
-        host = url.split("@")[1].split(":")[0]
-        return pg8000.dbapi.connect(user="postgres", password="local",
-                                    host=host, port=5432, database="dma_insights")
-    from google.cloud.sql.connector import Connector
-    connector = _pool.setdefault("connector", Connector())
-    return connector.connect(
-        os.environ["DB_INSTANCE_CONNECTION_NAME"], "pg8000",
-        user=os.environ["DB_USER"], db=os.environ["DB_NAME"],
-        enable_iam_auth=True, ip_type="PRIVATE")
+_connect = db_connect
 
 
 @asynccontextmanager
 async def _lifespan(app):
     yield
-    if "connector" in _pool:
-        _pool["connector"].close()
+    db_close()
 
 
 app = FastAPI(title="DMA Insights API", lifespan=_lifespan)
@@ -62,6 +48,11 @@ _PAGE_TABLES = {
     "context": "context_timeline",
     "techstack": "techstack_items",
 }
+
+
+def _date_iso(v):
+    """A DATE column as an ISO day, or None. Never a sentinel, never today."""
+    return v.isoformat() if hasattr(v, "isoformat") else v
 
 
 @app.get("/healthz")
@@ -143,7 +134,9 @@ def directory():
             SELECT entity_id, display_id, legal_name, sub_vertical, size_tier,
                    run_id, request_id, run_seq, is_active, run_status,
                    composite, scored_cells, completed_at, promoted_at,
-                   pillars, open_alerts
+                   pillars, open_alerts, assessment_date,
+                   assessment_date_basis, assessment_date_source,
+                   refresh_due_date
               FROM serving_directory
              ORDER BY entity_id, run_seq DESC""")
         by_entity: dict = {}
@@ -151,7 +144,8 @@ def directory():
         for (eid, display_id, name, sub_vertical, size_tier, run_id,
              request_id, run_seq, is_active, run_status, composite,
              scored_cells, completed_at, promoted_at, pillars,
-             open_alerts) in cur.fetchall():
+             open_alerts, assessment_date, assessment_date_basis,
+             assessment_date_source, refresh_due_date) in cur.fetchall():
             key = (sub_vertical or "UNKNOWN").upper().replace(" ", "_")
             labels[key] = _SUBVERTICAL_NAMES.get(key, sub_vertical or "Unknown")
             ent = by_entity.setdefault(str(eid), {
@@ -165,20 +159,35 @@ def directory():
             if is_active:
                 ent["overall"] = float(composite) if composite is not None else None
                 ent["assessment_id"] = request_id
-                ent["assessment_date"] = (completed_at.date().isoformat()
-                                          if completed_at else None)
+                # The assessment date now comes from the run's own derivation
+                # (0031) rather than from `completed_at`, and it travels with
+                # the basis that produced it — the directory is where a reader
+                # first sees the date, so it is where the qualification has to
+                # start. NULL where nothing resolved, never today's date.
+                ent["assessment_date"] = _date_iso(assessment_date)
+                ent["assessment_date_basis"] = assessment_date_basis
+                ent["assessment_date_source"] = assessment_date_source
+                ent["assessment_date_is_stated"] = (
+                    assessment_date_basis == "STATED")
+                ent["cadence"] = cadence_for(
+                    assessment_date, assessment_date_basis,
+                    assessment_date_source, refresh_due_date)
                 ent["open_alerts"] = open_alerts or 0
                 ent["pillar_scores"] = {
                     p["pillar_id"]: p.get("score")
                     for p in (pillars or []) if p.get("pillar_id")}
             ent["runs"].append({
                 "id": request_id, "run_id": str(run_id),
-                "date": (completed_at.date().isoformat() if completed_at else None),
+                "date": _date_iso(assessment_date),
+                "assessment_date_basis": assessment_date_basis,
+                "completed_at": (completed_at.date().isoformat()
+                                 if completed_at else None),
                 "status": "ACTIVE" if is_active else run_status,
                 "data_source": "DRIVE_PARSE",
                 "overall": float(composite) if composite is not None else None,
                 "subcap_count": scored_cells,
                 "promoted_at": promoted_at.isoformat() if promoted_at else None,
+                "refresh_due_date": _date_iso(refresh_due_date),
             })
         return {"entities": list(by_entity.values()),
                 "subvertical_labels": labels,
@@ -340,6 +349,74 @@ def entity_subcaps(display_id: str, request: Request, response: Response,
 
 
 # Declared BEFORE the generic {page} route, like /evidence and /subcaps.
+@app.get("/v1/entities/{display_id}/refresh")
+def entity_refresh(display_id: str, request: Request, response: Response,
+                   audience: str = "internal", run: str | None = None,
+                   role: str | None = None, history: bool = False):
+    """The client's refresh cadence: the assessment date WITH the basis that
+    produced it, the six-month due date, the distance to it measured now, and
+    what has been requested.
+
+    Read-only. A refresh request is recorded by the `dmai-refresh` Cloud Run
+    Job (the ingest identity), not here — invariant 2 enumerates the API's
+    writes as annotations and alert actions, and a refresh request is neither.
+
+    Deliberately NOT ETagged on the run: the body carries a distance measured
+    against today, so a tag keyed on the promotion would serve yesterday's
+    "due in N weeks" unchanged tomorrow."""
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            body = entity_cadence(cur, display_id, audience=audience, run=run,
+                                  role=role, allow_history=history)
+        except ApiError as e:
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        response.headers["Cache-Control"] = "private, max-age=0"
+        return body
+    finally:
+        conn.close()
+
+
+# Declared BEFORE the generic {page} route, like /evidence and /subcaps.
+@app.get("/v1/entities/{display_id}/diff")
+def entity_diff(display_id: str, request: Request, response: Response,
+                audience: str = "internal", base: str | None = None,
+                target: str | None = None, role: str | None = None,
+                limit: int = 2000):
+    """Run-to-run movement at the cell grain — the read the version-diff
+    surface needs and has never had.
+
+    Both ends are promoted runs; with only one promoted run the response is an
+    explicit `no_base_run` state and no cells, because a base run is never
+    derived from the target (dma_api.diff)."""
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            body = build_diff(cur, display_id, audience=audience, base=base,
+                              target=target, role=role, limit=limit)
+        except ApiError as e:
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        # Both ends are promoted and immutable, so the pair identifies the
+        # body exactly; the run's own promoted_epoch tag would not, because
+        # the base can change without the target being re-promoted.
+        tag = (f'W/"{body["target"]["run_id"]}.'
+               f'{(body.get("base") or {}).get("run_id") or "none"}.{audience}"')
+        if request.headers.get("if-none-match") == tag:
+            return Response(status_code=304,
+                            headers={"ETag": tag,
+                                     "Cache-Control": "private, max-age=0"})
+        response.headers["ETag"] = tag
+        response.headers["Cache-Control"] = "private, max-age=0"
+        return body
+    finally:
+        conn.close()
+
+
+# Declared BEFORE the generic {page} route, like /evidence and /subcaps.
 @app.get("/v1/entities/{display_id}/answers/search")
 def entity_answer_search(display_id: str, q: str, request: Request,
                          response: Response, audience: str = "internal",
@@ -468,6 +545,31 @@ def entity_page(display_id: str, page: str, request: Request,
         response.headers["ETag"] = tag
         response.headers["Cache-Control"] = "private, max-age=0"
         return body
+    finally:
+        conn.close()
+
+
+@app.get("/v1/ops/refresh-queue")
+def ops_refresh_queue(audience: str = "internal", role: str | None = None,
+                      within_days: int = 0, limit: int = 50):
+    """What the scheduled synthesis routine reads to learn there is work.
+
+    Two lists that answer different questions: clients somebody ASKED to
+    refresh (a human and a reason), and clients whose six months have RUN OUT
+    (a date and nothing else). Neither has been claimed by anything.
+
+    This is the routine's external input — before it, the routine had none: it
+    fired every three hours and stopped when the package scan had created
+    nothing."""
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            return refresh_queue(cur, audience=audience, role=role,
+                                 within_days=within_days, limit=limit)
+        except ApiError as e:
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
     finally:
         conn.close()
 
