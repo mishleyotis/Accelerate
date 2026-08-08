@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "dma-rectifier/refinement.schema.json",
+  "$id": "refinement.schema.json",
   "title": "Refinement",
   "description": "One change made in response to findings, recorded against what it closes so the next run can ask whether it held. A refinement with check.kind=none is legal and closes nothing: a class fixed with a paragraph is not closed, it is untested.",
   "type": "object",

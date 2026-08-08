@@ -3,7 +3,7 @@
   "name": "dma-insights",
   "displayName": "DMA Insights",
   "version": "0.1.1",
-  "description": "The five Digital Maturity Assessment skills, four DMA agents, and the remote DMA Insights MCP connector — research, assessment, governance, surface production and the first-call deck, packaged as one installable unit.",
+  "description": "The six Digital Maturity Assessment skills, five DMA agents, and the remote DMA Insights MCP connector — research, assessment, governance, surface production, the first-call deck and rectification, packaged as one installable unit.",
   "author": {
     "name": "Zennify — DMA Insights build"
   },

@@ -73,9 +73,9 @@ loop's name and it will re-fix things that were fixed in March.
 
 ## The run protocol
 
-Written in the form `04-craft/5-prompt-standard.md` requires, because the
-weekly routine executes it unattended and an unstepped protocol is one an agent
-skims.
+Written in the form `../dma-surface-production/04-craft/5-prompt-standard.md`
+requires, because the weekly routine executes it unattended and an unstepped
+protocol is one an agent skims.
 
 ```
 STEP 0 — HANDSHAKE

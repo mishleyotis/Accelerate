@@ -38,6 +38,6 @@ changed against what it closed — so the next run can ask whether the fix held.
 
 ## Related
 
-`agents/rectifier.md` is the agent that runs this skill and is defined by what
+`${CLAUDE_PLUGIN_ROOT}/agents/rectifier.md` is the agent that runs this skill and is defined by what
 it refuses. `04-routine/1-weekly-routine.md` is the scheduled trigger's spec —
 cron, prompt, and the nothing-to-do branch written out in full.

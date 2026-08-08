@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "dma-rectifier/finding.schema.json",
+  "$id": "finding.schema.json",
   "title": "Finding",
   "description": "One observed defect, recorded at the moment of sighting by whoever saw it. Identity is the fingerprint (invariant + verb + normalised path), not the text: the same defect described by a verifier, a reviewer and a stack trace is one finding with three sightings. Never pre-suppress a duplicate — record it and let the store dedupe, because the sighting count is the class signal.",
   "type": "object",

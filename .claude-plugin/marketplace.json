@@ -12,7 +12,7 @@
       "name": "dma-insights",
       "source": "./plugins/dma-insights",
       "displayName": "DMA Insights",
-      "description": "The five DMA skills, four DMA agents, and the remote DMA Insights MCP connector.",
+      "description": "The six DMA skills, five DMA agents, and the remote DMA Insights MCP connector.",
       "version": "0.1.1",
       "category": "domain",
       "tags": [
