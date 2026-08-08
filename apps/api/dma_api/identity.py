@@ -102,7 +102,7 @@ def reset_jwks_cache() -> None:
 
 
 def verify_assertion(token: str | None, *, audience: str | None = None,
-                     fetch=None, now: float | None = None) -> dict:
+                     fetch=None) -> dict:
     """{email, sub} for a valid IAP assertion. Raises ActorError otherwise.
 
     Every refusal names what failed. An assertion that cannot be attributed
@@ -139,22 +139,21 @@ def verify_assertion(token: str | None, *, audience: str | None = None,
                          "the assertion names a signing key that is not in "
                          "Google's published IAP key set")
     try:
+        # `require` is what makes each of these a CHECK rather than a default:
+        # a claim that is absent must fail, not fall through to "not
+        # configured". PyJWT enforces exp and rejects an `iat` in the future
+        # (ImmatureSignatureError) on the way past, so neither is re-checked
+        # below — a second, more lenient copy of a check the library already
+        # makes stricter would read as a tolerance that does not exist.
         claims = jwt.decode(
             token, PyJWK.from_dict(jwk).key, algorithms=["ES256"],
             audience=audience, issuer=ISSUER,
-            options={"require": ["exp", "iss", "aud", "email"]})
+            options={"require": ["exp", "iat", "iss", "aud", "email"]})
     except Exception as e:                                    # noqa: BLE001
-        # The class and the message, never the token.
+        # The class, never the token and never the claim values.
         raise ActorError("actor_unverified",
                          f"the assertion did not verify: {type(e).__name__}")
 
-    # PyJWT checks exp; iat in the future is a clock the issuer does not have.
-    now = now if now is not None else time.time()
-    iat = claims.get("iat")
-    if isinstance(iat, (int, float)) and iat > now + 300:
-        raise ActorError("actor_unverified",
-                         "the assertion is issued more than five minutes in "
-                         "the future")
     email = (claims.get("email") or "").strip().lower()
     if not email:
         raise ActorError("actor_unverified",

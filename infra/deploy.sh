@@ -26,11 +26,17 @@ fi
 # --- 2 · services (api first: web depends on it; mcp independent) ---------
 if [ -f apps/api/Dockerfile ]; then
   say "svc_api"
+  # IAP_AUDIENCE is the assertion audience of the WEB service — the API
+  # verifies the assertion the BFF forwards and pins it to that audience, so
+  # a token minted for anything else cannot be replayed here. Computed the
+  # same way the web's own copy is, below; a mismatch between the two would
+  # refuse every write rather than accept a wrong one.
+  API_PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
   gcloud run deploy dmai-api --source=apps/api \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-api@${SA_DOMAIN}" \
     --network=default --subnet=default --vpc-egress=private-ranges-only \
-    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-api@${PROJECT_ID}.iam;DB_NAME=dma_insights" \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-api@${PROJECT_ID}.iam;DB_NAME=dma_insights;IAP_AUDIENCE=/projects/${API_PROJECT_NUMBER}/locations/${REGION}/services/dmai-web" \
     --concurrency=80 --min-instances=1 --no-allow-unauthenticated --quiet
   # web calls api service-to-service with an ID token
   gcloud run services add-iam-policy-binding dmai-api \

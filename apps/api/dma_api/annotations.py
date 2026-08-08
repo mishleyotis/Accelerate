@@ -95,15 +95,22 @@ tables, and another author's write-boundary test is worth more than a
 convenience column. Binding `google_sub` and `last_seen_at` belongs to the
 sign-in flow, which is where it was always owed.
 
-## One thing that is NOT fixed here, and is recorded rather than patched
+## The actor: recorded here as unfixed, and now closed (MEM-0016)
 
-`main.py` accepts `actor` as a QUERY PARAMETER. The BFF is the only intended
-caller and forwards the verified session email, but nothing in the API itself
-enforces that — a principal holding `roles/run.invoker` on `dmai-api` can name
-any allowlisted actor. That is a defect in the route, not in this module, and
-`main.py` belongs to another author; it is recorded in the findings memory
-(class `UNPROVISIONED_IDENTITY`, component `api`) instead of being quietly
-changed here.
+This module used to end by recording that `main.py` accepted `actor` as a
+QUERY PARAMETER — the BFF was the only intended caller and forwarded the
+verified session email, but nothing in the API enforced it, so a principal
+holding `roles/run.invoker` on `dmai-api` could name any allowlisted actor.
+
+That is closed. `actor_email` now arrives from `dma_api.identity`, which
+verifies the request's IAP assertion independently of the web tier — ES256
+against Google's published key set, issuer and audience pinned — and refuses
+the write outright when there is no assertion. The parameter is compared to
+the verified identity and never believed; naming somebody else is a 403.
+
+Nothing in THIS module changed for it, which is the point: attribution is a
+property of the route that receives the request, and `actor_email` was always
+the right shape for this function to take.
 """
 from __future__ import annotations
 
