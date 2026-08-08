@@ -449,3 +449,93 @@ def test_a_folder_name_that_is_unique_keeps_its_plain_name():
                      "DMA_Scoring_Workbook.xlsx", "abc", 10, "", ("folder-A",))]
     groups = job_main._package_groups(tree, job_main.package_key(tree))
     assert list(groups) == ["Fake Bank - DMA"]
+
+
+# ── class 15: _ingest_one is not idempotent ───────────────────────────────
+# `persist_package` inserted into `runs` unconditionally, and nothing on the
+# run recorded which artefact produced it. `_requeue` blanks a failed
+# package's stored checksum so it rescans, which makes a byte-identical
+# workbook look CHANGED — so every retry minted a second run. Six entities in
+# production carry duplicates that way.
+
+class _ScriptedCursor:
+    """Answers the statements persist_package issues, records them all."""
+
+    def __init__(self, db):
+        self.db = db
+        self._rows = []
+        self.rowcount = 0
+
+    def execute(self, sql, params=None):
+        s = " ".join(str(sql).split())
+        self.db.statements.append((s, params))
+        self._rows = []
+        if s.startswith("SELECT id FROM entities"):
+            self._rows = [("entity-1",)]
+        elif s.startswith("SELECT id, run_seq, scored_cells FROM runs"):
+            self._rows = list(self.db.prior_run)
+        elif s.startswith("SELECT COALESCE(max(run_seq)"):
+            self._rows = [(4,)]
+        elif s.startswith("INSERT INTO runs"):
+            self._rows = [("run-new",)]
+
+    def fetchone(self):
+        return self._rows[0] if self._rows else None
+
+    def fetchall(self):
+        return list(self._rows)
+
+
+class _ScriptedConn:
+    def __init__(self, prior_run=()):
+        self.statements = []
+        self.prior_run = prior_run
+        self.commits = 0
+
+    def cursor(self):
+        return _ScriptedCursor(self)
+
+    def commit(self):
+        self.commits += 1
+
+
+def _persist(conn, **kw):
+    from dma_worker.persist import persist_package
+    from dma_worker.workbook_parser import WorkbookParse
+    return persist_package(
+        conn, manifest={"institution": {"name": "Fake Bank"}},
+        workbook=WorkbookParse(scores=[], observations=[], toggled_out=[]),
+        source_folder_id="Fake Bank - DMA", artefact_id="wb-artefact-1",
+        artefact_checksum="md5-aaaa", **kw)
+
+
+def _issued(conn, prefix):
+    return [s for s, _ in conn.statements if s.startswith(prefix)]
+
+
+def test_a_requeued_package_at_the_same_checksum_mints_no_second_run():
+    conn = _ScriptedConn(prior_run=[("run-existing", 2, 706)])
+    res = _persist(conn)
+    assert res.run_id == "run-existing" and res.run_seq == 2
+    assert res.scored_cells == 706
+    assert _issued(conn, "INSERT INTO runs") == [], \
+        "an unchanged package must resolve to the run it already produced"
+
+
+def test_a_changed_workbook_still_mints_a_run():
+    conn = _ScriptedConn(prior_run=[])         # no run at this checksum
+    res = _persist(conn)
+    assert res.run_id == "run-new"
+    inserts = [p for s, p in conn.statements if s.startswith("INSERT INTO runs")]
+    assert len(inserts) == 1
+    assert "wb-artefact-1" in inserts[0] and "md5-aaaa" in inserts[0], \
+        "the run must record which artefact and which bytes produced it"
+
+
+def test_a_deliberate_re_ingest_after_a_parser_fix_still_mints():
+    """FORCE_FOLDER is a re-read, not a retry: the tree is unchanged and the
+    extraction is not, so it must be able to mint."""
+    conn = _ScriptedConn(prior_run=[("run-existing", 2, 706)])
+    res = _persist(conn, remint=True)
+    assert res.run_id == "run-new"
+    assert len(_issued(conn, "INSERT INTO runs")) == 1

@@ -233,7 +233,9 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                     report_artefact_id: str | None = None,
                     grains: dict | None = None,
                     research: dict | None = None,
-                    companion_observations: list | None = None) -> PersistResult:
+                    companion_observations: list | None = None,
+                    artefact_checksum: str | None = None,
+                    remint: bool = False) -> PersistResult:
     cur = conn.cursor()
     inst = _institution(manifest)
     # Signal 4 of the cascade: the client folder's display name (its
@@ -331,6 +333,26 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                                           "no version recognises enough of the "
                                           "scored cells; run left unpinned"}
 
+    # Idempotence, and the reason it needs its own columns: `_requeue` blanks
+    # the artefact's stored checksum so a failed package rescans, which makes
+    # a byte-identical workbook look CHANGED on the next firing. Without a
+    # record of WHICH artefact produced a run and what its bytes were, every
+    # such retry minted a second run for the same package — six entities in
+    # production carry duplicates that way. A deliberate re-ingest
+    # (FORCE_FOLDER, after a parser fix) passes remint=True and still mints.
+    if artefact_id and artefact_checksum and not remint:
+        cur.execute(
+            """SELECT id, run_seq, scored_cells FROM runs
+                WHERE entity_id = %s AND source_artefact_id = %s
+                  AND source_checksum = %s
+                ORDER BY run_seq DESC LIMIT 1""",
+            (entity_id, artefact_id, artefact_checksum))
+        prior = cur.fetchone()
+        if prior:
+            conn.commit()
+            return PersistResult(str(entity_id), str(prior[0]), prior[1],
+                                 prior[2] or 0, 0)
+
     cur.execute("SELECT COALESCE(max(run_seq), 0) + 1 FROM runs WHERE entity_id = %s", (entity_id,))
     run_seq = cur.fetchone()[0]
     composite = _round_once(workbook.composite)   # rounded ONCE
@@ -344,11 +366,13 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
     cur.execute(
         """INSERT INTO runs (entity_id, request_id, run_seq, ccg_catalog_version,
                              scored_cells, catalogue_cells, composite, status,
-                             completed_at, source_folder_id)
-           VALUES (%s,%s,%s,%s,%s,%s,%s,'INGESTED',%s,%s) RETURNING id""",
+                             completed_at, source_folder_id,
+                             source_artefact_id, source_checksum)
+           VALUES (%s,%s,%s,%s,%s,%s,%s,'INGESTED',%s,%s,%s,%s) RETURNING id""",
         (entity_id, manifest.get("run_id"), run_seq, pinned,
          len({s.subcap_id for s in workbook.scores}), catalogue_cells, composite,
-         _stated_completed_at(manifest), source_folder_id),
+         _stated_completed_at(manifest), source_folder_id,
+         artefact_id, artefact_checksum),
     )
     run_id = cur.fetchone()[0]
 

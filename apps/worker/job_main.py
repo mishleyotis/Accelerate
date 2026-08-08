@@ -225,7 +225,7 @@ def _record_package_failure(conn, parts, folder, exc) -> bool:
     return True
 
 
-def _ingest_one(conn, token, folder, parts):
+def _ingest_one(conn, token, folder, parts, remint=False):
     """Download, parse and persist one package. Atomic: persist_package
     commits once at the end, so an exception anywhere leaves nothing."""
     with tempfile.TemporaryDirectory() as td:
@@ -275,6 +275,12 @@ def _ingest_one(conn, token, folder, parts):
             recommendations=parse_recommendations(wb_path, companion),
             companion_observations=companion,
             artefact_id=parts["workbook"].file_id,
+            # The bytes this run was read from. A requeue blanks the live
+            # checksum in import_files, so the run keeps its own copy and a
+            # retry of an unchanged package resolves to the run it already
+            # produced instead of minting a second one.
+            artefact_checksum=parts["workbook"].checksum,
+            remint=remint,
             sections=sections,
             report_artefact_id=(parts["report"].file_id
                                 if "report" in parts else None),
@@ -628,8 +634,10 @@ def _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
     # whichever three the bound happens to reach. Substring match, so the
     # folder's display name is enough.
     force = (os.environ.get("FORCE_FOLDER") or "").strip()
+    forced: set = set()
     if force:
         matched = {k for k in groups if force.lower() in k.lower()}
+        forced = set(matched)
         if matched:
             touched |= matched
             print(f"FORCE_FOLDER={force!r}: re-ingesting {sorted(matched)}")
@@ -654,7 +662,12 @@ def _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
             continue
         print(f"ingest: {folder}")
         try:
-            res, rationales = _ingest_one(conn, token, folder, parts)
+            # A named re-ingest is a deliberate re-read after a parser fix
+            # and mints a run. Everything else is the scan retrying itself,
+            # and an unchanged package must resolve to the run it already
+            # produced rather than duplicate it.
+            res, rationales = _ingest_one(conn, token, folder, parts,
+                                          remint=folder in forced)
         except Exception as exc:  # noqa: BLE001 — one bad package must not sink the batch
             conn.rollback()
             tally["failed"] += 1

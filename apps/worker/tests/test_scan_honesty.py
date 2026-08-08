@@ -165,7 +165,7 @@ def test_a_clean_pass_records_success_with_the_real_run_count(monkeypatch, faked
         run_id, scored_cells, observations = "run-1", 706, 3
 
     rc = _run_main(monkeypatch, fakedb, TREE,
-                   lambda conn, token, folder, parts: (_Res(), {}))
+                   lambda conn, token, folder, parts, remint=False: (_Res(), {}))
 
     assert rc == 0
     assert fakedb.scan["status"] == SCAN_SUCCEEDED
