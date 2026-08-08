@@ -1929,7 +1929,14 @@ function liveStarters(ctx) {
 function liveSurfaceMessages(surface, ctx) {
   const ent = ctx?.entity?.name || "this entity";
   const id = ctx?.entity?.id;
-  const absent = what => `${what} did not promote for this run. Nothing is shown rather than filled in — ` + `the panel reads promoted synthesis only and this application runs no model at request time.`;
+  /* An absence, said once.
+      This used to add two clauses of architecture to every empty panel —
+     that nothing is filled in, that the panel reads promoted synthesis
+     only, that the application runs no model at request time. All true,
+     none of it the reader's problem, and repeated on every surface it fires
+     on. Why the panel is empty is a property of the run; how this product
+     is built is not an answer to it. */
+  const absent = what => `${what} did not promote for this run.`;
   if (surface === "why_now") {
     // `DMA.whyNowFor` returns the ADAPTED ARRAY of signals, not the section, so
     // `wn.signals` was always undefined and the panel reported that the why-now
@@ -1990,11 +1997,18 @@ function liveSurfaceMessages(surface, ctx) {
     const scoped = area ? plats.filter(p => areasOf(p).includes(area)) : [];
     const use = scoped.length ? scoped : plats;
     const stories = use.map(p => dwText(p.story_md)).filter(Boolean);
-    const gapCount = use.reduce((n, p) => n + (p.gaps || []).length, 0);
-    // An area with no story of its own is said so, and the story that DID
-    // promote is shown under the area it names — never relabelled as this one's.
-    const scopeNote = area && !scoped.length && plats.length ? `No promoted platform story names ${area}.` + (named.length ? ` The run files its story under ${named.join(" · ")}, shown below.` : "") : null;
-    const body = [scopeNote, stories.length ? stories.join("\n\n") : null, !stories.length && (gapCount || discarded.length) ? `No narrative prose promoted for ${area || ent}. The run does state ` + `${gapCount} gap row${gapCount === 1 ? "" : "s"} and ` + `${discarded.length} platform${discarded.length === 1 ? "" : "s"} it set aside — both below.` : null].filter(Boolean).join("\n\n");
+    /* The body is the STORY. Nothing else.
+        It used to open with a paragraph of the app's own plumbing — "No
+       promoted platform story names MuleSoft Anypoint Platform. The run
+       files its story under Integration & API Management, shown below." —
+       followed, when prose was missing, by a sentence counting the gap rows
+       and set-aside platforms and pointing out that they are below. An AE
+       opens this panel to read an argument they can take into a room. How
+       the payload files its sections is not that argument, and the counts
+       narrate structure the reader can already see rendered beneath.
+        Where the story is filed remains visible, because it is genuinely
+       useful — it is the SUBTITLE, one line, where a caption belongs. */
+    const body = stories.join("\n\n");
     return {
       title: "Platform story",
       // The subtitle names an area the STORY names, not whatever the caller put
