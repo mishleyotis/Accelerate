@@ -491,10 +491,15 @@ Run these rather than eyeballing — they are faster and they do not get tired.
 
 ```bash
 python scripts/preflight.py --run-id <uuid>        # where the run stands, what is blocking
-python scripts/check_payload.py <payload.json> --page <page>
+python scripts/check_payload.py <payload.json> --page <page> \
+       --subvertical <CODE> --cells <bundle.json>
                                                     # local checks before you submit:
                                                     # required fields, budgets, id patterns,
-                                                    # internal_only marking, empty states
+                                                    # internal_only marking, empty states.
+                                                    # --subvertical turns ET-05 ON and
+                                                    # --cells turns CG-14 ON; without them
+                                                    # those two print "not run", which is
+                                                    # not a pass
 python scripts/score_prompt.py <prompt.txt>        # score a prompt you have written
                                                     # against the 14-attribute standard
 python scripts/check_language.py <payload.json>    # accusatory framing, fields that OPEN on
