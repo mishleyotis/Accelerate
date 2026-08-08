@@ -306,15 +306,27 @@ class DriveError(RuntimeError):
         super().__init__(f"Drive {code} on {path} as {identity}: {message}")
 
 
-def _drive_token_from_key(scope: str, ck: str) -> tuple[str, str]:
-    """Fallback: mint from the stored key.
+_CLOUD_PLATFORM = "https://www.googleapis.com/auth/cloud-platform"
 
-    Signed with openssl rather than a library, because the images this runs in
-    do not all carry google-auth and a preflight that fails on a missing
-    dependency is a preflight that gets skipped. The key is written to a 0600
-    file only for the length of one openssl call, then removed.
+
+def _key_token(scope: str) -> str | None:
+    """An access token for `scope`, signed with the stored service-account key.
+
+    Split out of the Drive fallback because the fallback needs TWO tokens at
+    two different scopes: one at cloud-platform to ask IAM Credentials for an
+    impersonated token, and the impersonated one at the Drive scope to
+    actually read. Signing is openssl rather than google-auth, because the
+    images this runs in do not all carry it and a preflight that fails on a
+    missing dependency is a preflight that gets skipped. The key is written
+    to a 0600 file for exactly one openssl call, then removed.
+
+    Returns None rather than raising: every caller has a degraded path, and a
+    raise here turns a working-but-degraded run into no run at all.
     """
-    info = json.loads(secret(DRIVE_KEY_SECRET))
+    try:
+        info = json.loads(secret(DRIVE_KEY_SECRET))
+    except Exception:
+        return None
     now = int(time.time())
     hdr = _b64(json.dumps({"alg": "RS256", "typ": "JWT",
                            "kid": info["private_key_id"]}).encode())
@@ -330,29 +342,90 @@ def _drive_token_from_key(scope: str, ck: str) -> tuple[str, str]:
         sig = subprocess.run(["openssl", "dgst", "-sha256", "-sign", pem],
                              input=hdr + b"." + claims,
                              capture_output=True, check=True).stdout
+    except Exception:
+        return None
     finally:
         try:
             os.unlink(pem)
         except OSError:
             pass
-
     jwt = (hdr + b"." + claims + b"." + _b64(sig)).decode()
     body = urllib.parse.urlencode({
         "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
         "assertion": jwt}).encode()
     try:
-        tok = json.load(urllib.request.urlopen(urllib.request.Request(
+        return json.load(urllib.request.urlopen(urllib.request.Request(
             info["token_uri"], data=body,
             headers={"Content-Type": "application/x-www-form-urlencoded"}
         )))["access_token"]
-    except urllib.error.HTTPError as e:
-        raise RuntimeError(
-            f"token exchange rejected the stored key: {e.code} "
-            f"{e.read()[:200].decode(errors='replace')}") from None
+    except Exception:
+        return None
+
+
+def _drive_token_from_key(scope: str, ck: str) -> tuple[str, str]:
+    """Fallback: mint from the stored key, then upgrade to the shared identity.
+
+    The minting itself lives in `_key_token` — this function is about WHICH
+    account the resulting token belongs to, which is the part that was wrong.
+    """
+    info = json.loads(secret(DRIVE_KEY_SECRET))
+    now = int(time.time())
+    tok = _key_token(scope)
+    if not tok:
+        raise RuntimeError("the stored key could not be exchanged for a token")
+    # One more step before settling for the key's own identity: use this token
+    # to impersonate the SAME account the primary path uses. Otherwise the two
+    # paths read Drive as two different accounts, and everything shared with
+    # one of them — the secrets doc, the intake tree — is invisible to the
+    # other. That is the measured failure: gcloud impersonation is unavailable
+    # in the scheduled session, the loader falls back here, and the doc 404s
+    # for an identity nobody ever shared it with, so the run reports "not
+    # retrieving the keys" while the doc is correctly shared all along.
+    #
+    # Requires roles/iam.serviceAccountTokenCreator on DRIVE_IMPERSONATE for
+    # the stored key's account. When that is absent this still returns the
+    # key's own token — degraded, but honestly labelled, and the caller's
+    # remediation names the identity the read was actually made as.
+    # Minted at cloud-platform scope, NOT the Drive scope of `tok`:
+    # iamcredentials.googleapis.com refuses a token scoped only to Drive, so
+    # passing `tok` here fails silently and the upgrade never happens. The
+    # DRIVE scope is what we ask generateAccessToken to issue, not what we
+    # authenticate the call with — two different scopes, one call apart.
+    imp = None
+    admin = _key_token(_CLOUD_PLATFORM)
+    if admin:
+        imp = _impersonate_with(admin, DRIVE_IMPERSONATE, scope)
+    if imp:
+        how = f"impersonating {DRIVE_IMPERSONATE} via the stored key"
+        _cache[ck] = (imp, how, now + 3000)
+        _remember_identity(DRIVE_IMPERSONATE)
+        return imp, how
+
     how = f"stored key for {info['client_email']}"
     _cache[ck] = (tok, how, now + 3000)
     _remember_identity(info["client_email"])
     return tok, how
+
+
+def _impersonate_with(token: str, target: str, scope: str) -> str | None:
+    """Exchange `token` for one belonging to `target`, or None.
+
+    None on any failure, deliberately: this is a best-effort upgrade on the
+    fallback path, and a raise here would turn a degraded-but-working run into
+    no run at all.
+    """
+    url = ("https://iamcredentials.googleapis.com/v1/projects/-/"
+           f"serviceAccounts/{target}:generateAccessToken")
+    body = json.dumps({"scope": scope.split(), "lifetime": "3600s"}).encode()
+    req = urllib.request.Request(url, data=body, headers={
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"})
+    try:
+        out = json.load(urllib.request.urlopen(req, timeout=60))
+    except Exception:
+        return None
+    tok = out.get("accessToken")
+    return tok if tok and len(tok) > 100 else None
 
 
 def drive_get(path: str, **params) -> dict:
