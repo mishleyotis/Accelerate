@@ -125,6 +125,60 @@ def test_the_financial_series_carries_period_files_and_is_exempt():
                                 {"E-CC-041": "financial_series"}) == []
 
 
+class _Conn:
+    """A link table holding only the ids given."""
+
+    def __init__(self, links):
+        self.links = links
+
+    def cursor(self):
+        conn = self
+
+        class _Cur:
+            def execute(self, sql, params=None):
+                self.n = len(conn.links.get(params[0], ()))
+
+            def fetchone(self):
+                return [self.n]
+        return _Cur()
+
+
+def test_a_re_scan_copy_is_named_as_the_wrong_copy_not_as_an_orphan():
+    """A second ingest of one package minted `-R2` ids for the rows whose
+    content changed and left the links on the originals. The re-scan is
+    the better row — fuller excerpt, a published date — so telling the
+    producer to declare that it supports no cell would be asking for a
+    false statement. The repair is to cite the bare package id."""
+    payload = {"cell_evidence": {"e_ids": ["E-BCU-016-R2"]}}
+    conn = _Conn({"E-BCU-016": ["P4C1.1.1", "P4C1.1.2", "P4C1.1.3"]})
+    out = _check_cited_linkage("heatmap", payload, [_row("E-BCU-016-R2")],
+                               {"E-BCU-016-R2": "cell_evidence"}, conn)
+    assert len(out) == 1
+    msg = out[0]["message"]
+    assert out[0]["gate_id"] == "ET-07"
+    assert "the 3 cells this source supports sit on E-BCU-016" in msg
+    assert "BARE form" in msg
+    assert "supports nothing" in msg          # explicitly says it is not that
+
+
+def test_a_suffixed_id_whose_original_is_also_unlinked_is_a_plain_orphan():
+    payload = {"cell_evidence": {"e_ids": ["E-BCU-016-R2"]}}
+    out = _check_cited_linkage("heatmap", payload, [_row("E-BCU-016-R2")],
+                               {"E-BCU-016-R2": "cell_evidence"},
+                               _Conn({"E-BCU-016": []}))
+    assert len(out) == 1
+    assert "no cell links served for this item" in out[0]["message"]
+
+
+def test_without_a_connection_the_check_still_runs():
+    """The sibling lookup is an improvement to the message, never a
+    precondition for the verdict."""
+    out = _check_cited_linkage("heatmap", {"cell_evidence": {}},
+                               [_row("E-BCU-016-R2")],
+                               {"E-BCU-016-R2": "cell_evidence"})
+    assert len(out) == 1 and out[0]["gate_id"] == "ET-07"
+
+
 def test_the_exemption_is_per_page_not_per_section_name():
     """`firmographics` is identity grain on the overview. A section that
     happened to share the name on another page would not inherit the

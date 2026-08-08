@@ -308,7 +308,35 @@ def _stated_unlinked(body: dict) -> str:
     return " ".join(p for p in parts if isinstance(p, str))
 
 
-def _check_cited_linkage(page, payload, found, cited_by) -> list:
+# A package row re-landed under a run-qualified id after a re-scan changed
+# its content keeps its links on the ORIGINAL id (persist.py mints the new
+# id; nothing carries the linkage across). The re-scan is usually the
+# better row — fuller excerpt, a published date — so the orphan a reader
+# hits is the good copy. That is a different defect from "this source
+# supports nothing", and it has a different repair the producer can
+# actually make: cite the package id in its bare form, which resolves
+# inside this run's scope to the row that carries the cells. Telling them
+# instead to declare that the source supports no cell would be asking for
+# a false statement to pass a gate.
+_RUN_SUFFIX = re.compile(r"^(?P<base>.+)-R\d+$")
+
+
+def _sibling_with_links(conn, stored_id: str):
+    m = _RUN_SUFFIX.match(str(stored_id or ""))
+    if not m:
+        return None
+    base = m.group("base")
+    try:
+        cur = conn.cursor()
+        cur.execute("""SELECT count(DISTINCT subcap_id)
+                         FROM evidence_subcap_links WHERE e_id = %s""", (base,))
+        n = (cur.fetchone() or [0])[0]
+    except Exception:
+        return None
+    return (base, n) if n else None
+
+
+def _check_cited_linkage(page, payload, found, cited_by, conn=None) -> list:
     out = []
     for row in found:
         if row.get("linked_subcap_ids"):
@@ -320,6 +348,21 @@ def _check_cited_linkage(page, payload, found, cited_by) -> list:
         body = payload.get(section)
         if isinstance(body, dict) and e_id in _stated_unlinked(body):
             continue                        # stated exception, named on the surface
+        sibling = (_sibling_with_links(conn, row.get("stored_id"))
+                   if conn is not None else None)
+        if sibling:
+            base, n = sibling
+            out.append(_reason(
+                "ET-07", section, f"{section}.e_ids",
+                f"{e_id} resolves to a re-scan copy of a package source, and "
+                f"the copy carries no cell link — the {n} cells this source "
+                f"supports sit on {base}, which a re-scan left behind. The "
+                "reader gets the orphan, and the better excerpt, so this is "
+                "not a source that supports nothing. Cite the package id in "
+                "its BARE form (the connector qualifies it inside this run's "
+                "scope and resolves it to the row holding the cells) rather "
+                "than naming another run's copy"))
+            continue
         out.append(_reason(
             "ET-07", section, f"{section}.e_ids",
             f"{e_id} resolves to a row linked to NO capability cell, and "
@@ -906,7 +949,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
         reasons.extend(_check_excerpt_completeness(split.get("found", []), cited))
         reasons.extend(_check_evidence_dating(split.get("found", []), cited))
         reasons.extend(_check_cited_linkage(page, payload,
-                                            split.get("found", []), cited))
+                                            split.get("found", []), cited,
+                                            conn))
         for e in split.get("not_found", []):
             gate = "ET-02" if MINT_RE.match(e.split(":")[0]) else "ET-01"
             reasons.append(_reason(

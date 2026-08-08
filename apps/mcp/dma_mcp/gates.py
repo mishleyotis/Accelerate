@@ -176,7 +176,11 @@ GATES = {
               "Registration without linkage is an incomplete registration; "
               "an entity-identity document that genuinely supports no "
               "capability passes by saying so, never by being forced into a "
-              "false link.",
+              "false link. A re-scan copy of a package source whose ORIGINAL "
+              "id holds the cells is named as what it is — a citation "
+              "pointing at the wrong copy, repaired by citing the bare "
+              "package id — rather than being asked to declare that it "
+              "supports nothing.",
               "Measured on a promoted run: 178 served evidence rows, 72 of "
               "them carrying no cell link, 28 of those cited by a section. A "
               "reader opened the Great Place To Work chip and the drawer "
