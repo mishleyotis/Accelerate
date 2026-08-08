@@ -653,7 +653,7 @@ def _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
         print("scan: nothing to ingest (unchanged tree creates nothing)")
         return
 
-    token = drive.metadata_token()
+    token = drive.token_provider()
     encoder = None
     for folder, parts in sorted(packages.items()):
         if tally["ingested"] >= limit:
