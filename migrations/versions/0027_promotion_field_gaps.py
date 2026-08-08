@@ -131,8 +131,8 @@ COMMENTS = (
      "the row's verification date; a technographic claim without one is not a "
      "research finding"),
     ("platform_recommendations", "item_provenance",
-     "the contract''s per-item provenance (how THIS row was arrived at). The "
-     "envelope''s `provenance` is a different fact — who produced the section "
+     "the contract's per-item provenance (how THIS row was arrived at). The "
+     "envelope's `provenance` is a different fact — who produced the section "
      "— and keeps its own column"),
     ("platform_story", "gap_rows",
      "the contract's platforms[] — FIVE tiles of {platform, rank, fit_score, "
@@ -147,7 +147,11 @@ def upgrade() -> None:
     for table, column, type_ in COLUMNS:
         op.execute(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {type_}")
     for table, column, comment in COMMENTS:
-        op.execute(f"COMMENT ON COLUMN {table}.{column} IS '{comment}'")
+        # A comment quotes the contract, and the contract is full of
+        # apostrophes; doubling them here rather than in the literals keeps
+        # the prose readable and the statement legal.
+        op.execute("COMMENT ON COLUMN {}.{} IS '{}'".format(
+            table, column, comment.replace("'", "''")))
 
     # Grants in the same revision as the table (build charter). Column
     # privileges follow the table's in Postgres, so these are already implied;
