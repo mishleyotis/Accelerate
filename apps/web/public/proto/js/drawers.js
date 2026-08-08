@@ -1111,7 +1111,14 @@ function IpPart({
   part,
   onEv
 }) {
-  const text = dwText(part && part.text);
+  /* Through `sentence`, like every other promoted paragraph on these
+     surfaces. It normalises em dashes to hyphens, and the reason that rule
+     exists applies here more than anywhere: an answer is the text most likely
+     to be copied out of the page into a CRM note or an email, which is
+     exactly where an em dash marks it as machine-written. The trade is that a
+     quotation is normalised in its punctuation and its first letter's case;
+     the words, the order and the citations are untouched. */
+  const text = sentence(dwText(part && part.text) || "") || null;
   if (!text) return null;
   const ids = Array.isArray(part.e_ids) ? part.e_ids : [];
   const where = ipWhere(part.json_path);
