@@ -539,3 +539,97 @@ def test_a_deliberate_re_ingest_after_a_parser_fix_still_mints():
     res = _persist(conn, remint=True)
     assert res.run_id == "run-new"
     assert len(_issued(conn, "INSERT INTO runs")) == 1
+
+
+# ── class 9: the research-workbook reader pinned to one set of tab names ──
+# 135 packages ship a research workbook — the evidence tier's real authority
+# (ERS, publication dates, per-fact linkage, the absence register). Pinned to
+# `Evidence_Linkage_Matrix` + `P<n>_Scoring_Detail`, 85 of them yielded
+# nothing at all: no ledger, no links, no absences, and no word about it.
+
+def _research_workbook(tmp_path, ledger_tab, detail_tab):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = ledger_tab
+    ws.append(["Evidence_ID", "Source_Name", "Tier", "ERS_Total",
+               "Date_Published"])
+    ws.append(["E-001", "Fake Bank 2026 annual report", "T2", 4.2, "2026-03"])
+    d = wb.create_sheet(detail_tab)
+    d.append(["SubCap_ID", "Evidence_IDs", "Evidence_Excerpt"])
+    d.append(["P1C1.1.1", "E-001:F1",
+              "[E-001:F1] The board approved a three-year digital roadmap "
+              "with quarterly accountability to the technology committee."])
+    path = tmp_path / "research.xlsx"
+    wb.save(path)
+    return str(path)
+
+
+@pytest.mark.parametrize("ledger_tab", ["Evidence_Linkage_Matrix",
+                                        "Evidence_Index", "Evidence_Master"])
+@pytest.mark.parametrize("detail_tab", ["P1_Scoring_Detail",
+                                        "P1_Subcap_Scoring", "P1"])
+def test_research_workbook_under_every_shipped_tab_naming(tmp_path, ledger_tab,
+                                                          detail_tab):
+    from dma_worker.workbook_parser import parse_research_workbook
+    obs = []
+    out = parse_research_workbook(
+        _research_workbook(tmp_path, ledger_tab, detail_tab), obs)
+    assert [e["e_id"] for e in out["ledger"]] == ["E-001"]
+    assert out["ledger"][0]["ers"] is not None
+    assert out["ledger"][0]["published_date"] is not None
+    assert out["links"][0]["subcap_id"] == "P1C1.1.1"
+    assert out["ledger"][0]["excerpt"].startswith("The board approved")
+    assert obs == []
+
+
+def test_a_research_workbook_that_yields_nothing_names_its_tabs(tmp_path):
+    from dma_worker.workbook_parser import parse_research_workbook
+    wb = openpyxl.Workbook()
+    wb.active.title = "Coverage_Summary"
+    path = tmp_path / "research.xlsx"
+    wb.save(path)
+    obs = []
+    out = parse_research_workbook(str(path), obs)
+    assert not any(out.values())
+    assert obs[0].kind == "research_workbook_yielded_nothing"
+    assert obs[0].detail["tabs_present"] == ["Coverage_Summary"]
+    assert "Evidence_Linkage_Matrix" in obs[0].detail["expected_ledger_any_of"]
+
+
+def test_a_caps_log_of_placeholder_rows_is_not_an_absence_of_caps(tmp_path):
+    """Most shipped caps logs hold one row that says the tab is empty. Zero
+    caps read from a tab with rows in it is a named observation, not a fact
+    about the assessment's safeguards."""
+    from dma_worker.workbook_parser import parse_research_workbook
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Caps_Applied_Log"
+    ws.append(["SubCap_ID", "Cap_Type", "Cap_Reason", "Pre_Cap_Score",
+               "Post_Cap_Score"])
+    ws.append(["(empty — Layer 1 dma-assessment populates this)",
+               None, None, None, None])
+    path = tmp_path / "research.xlsx"
+    wb.save(path)
+    obs = []
+    out = parse_research_workbook(str(path), obs)
+    assert out["caps"] == []
+    assert [o.kind for o in obs] == ["caps_log_ids_unrecognised",
+                                     "research_workbook_yielded_nothing"]
+
+
+def test_a_caps_row_naming_several_cells_caps_each_of_them(tmp_path):
+    from dma_worker.workbook_parser import parse_research_workbook
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Caps_Applied_Log"
+    ws.append(["SubCaps_Affected", "Cap_Type", "Cap_Rule", "Original_Score",
+               "Cap_Ceiling"])
+    ws.append(["P1C1.1.1, P1C1.1.2", "TIER_CEILING", "T4 evidence only",
+               4.0, 3.0])
+    path = tmp_path / "research.xlsx"
+    wb.save(path)
+    out = parse_research_workbook(str(path))
+    assert [c["subcap_id"] for c in out["caps"]] == ["P1C1.1.1", "P1C1.1.2"]
+    assert out["caps"][0]["cap_reason"] == "T4 evidence only"
+    assert out["caps"][0]["pre_cap_score"] == 4.0
+    assert out["caps"][0]["post_cap_score"] == 3.0

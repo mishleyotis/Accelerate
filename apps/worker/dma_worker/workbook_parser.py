@@ -637,8 +637,13 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
 _RW_FACT_RE = re.compile(r"\[(E-\d+):(F\d+)\]\s*")
 _RW_HEAD_RE = re.compile(r"^\s*\[ERS:\s*([\d.]+)\]\s*(?:\[([A-Z_]+)\]\s*)?")
 _RW_SRC_PREFIX_RE = re.compile(r"^[^:]{0,120}?\((T[1-5]),\s*[A-Z_]+\):\s*")
-_RW_DETAIL_TABS = ("P1_Scoring_Detail", "P2_Scoring_Detail",
-                   "P3_Scoring_Detail", "P4_Scoring_Detail")
+# The research workbook's per-subcap tabs, under every naming convention the
+# corpus uses — `P1_Scoring_Detail` in 50 workbooks, `P1_Subcap_Scoring` in 10,
+# a bare `P1` in 13. Pinned to the first spelling, 85 of the 135 research
+# workbooks in the intake tree yielded nothing at all: no ledger, no fact-grain
+# links, no verbatim passages, no absence register, and no word about it.
+def _rw_detail_tabs(sheetnames):
+    return [t for t in sheetnames if _is_pillar_tab(t)]
 
 
 def _rw_split_excerpt(blob) -> dict:
@@ -662,7 +667,7 @@ def _rw_split_excerpt(blob) -> dict:
     return out
 
 
-def parse_research_workbook(path: str) -> dict:
+def parse_research_workbook(path: str, obs: list | None = None) -> dict:
     """The research workbook — the evidence tier's real authority.
 
     The scoring workbook's Evidence_Master carries a Fact_Count but no ERS,
@@ -692,7 +697,16 @@ def parse_research_workbook(path: str) -> dict:
             return ws, headers, first
 
         # ── the ledger: ERS, dates, fact counts, claim classes ────────────
-        ws, headers, first = tab("Evidence_Linkage_Matrix", "Evidence_ID")
+        ws = headers = first = None
+        # Linkage matrix first: it is the research generation's own ledger and
+        # the only one carrying ERS and a publication date per item.
+        for name in ("Evidence_Linkage_Matrix",) + _EV_TABS:
+            for anchor in _EV_ID_ANCHORS:
+                ws, headers, first = tab(name, anchor)
+                if headers is not None:
+                    break
+            if headers is not None:
+                break
         if headers is not None:
             for row in ws.iter_rows(min_row=first, values_only=True):
                 def v(*keys, _row=row):
@@ -730,8 +744,12 @@ def parse_research_workbook(path: str) -> dict:
                 })
 
         # ── per-subcap linkage at fact grain, with its verbatim passages ──
-        for name in _RW_DETAIL_TABS:
-            ws, headers, first = tab(name, "SubCap_ID")
+        for name in _rw_detail_tabs(wb.sheetnames):
+            ws = headers = first = None
+            for anchor in ("SubCap_ID", "Sub_Cap_ID", "SubCapability_ID"):
+                ws, headers, first = tab(name, anchor)
+                if headers is not None:
+                    break
             if headers is None:
                 continue
             for row in ws.iter_rows(min_row=first, values_only=True):
@@ -768,8 +786,18 @@ def parse_research_workbook(path: str) -> dict:
                 })
 
         # ── the caps log and the absence register ─────────────────────────
-        ws, headers, first = tab("Caps_Applied_Log", "SubCap_ID")
+        # The caps log states which cells a safeguard held down and why. Its
+        # id column is spelled four ways across the corpus and its score
+        # columns five, so a single-spelling read returned zero caps from
+        # 1,457 populated rows — an assessment whose safeguards left no trace.
+        ws = headers = first = None
+        for anchor in ("SubCap_ID", "Sub_Cap_ID", "SubCaps_Affected",
+                       "Subcap_IDs"):
+            ws, headers, first = tab("Caps_Applied_Log", anchor)
+            if headers is not None:
+                break
         if headers is not None:
+            caps_rows = 0
             for row in ws.iter_rows(min_row=first, values_only=True):
                 def v(*keys, _row=row):
                     for k in keys:
@@ -777,18 +805,40 @@ def parse_research_workbook(path: str) -> dict:
                         if i is not None and i < len(_row) and _row[i] is not None:
                             return _row[i]
                     return None
-                sid = str(v("subcap_id") or "").strip()
-                if not SUBCAP_RE.match(sid):
+                raw = str(v("subcap_id", "sub_cap_id", "subcaps_affected",
+                            "subcap_ids") or "").strip()
+                if not raw:
                     continue
-                out["caps"].append({
-                    "subcap_id": sid,
-                    "cap_type": (str(v("cap_type")).strip() if v("cap_type") else None),
-                    "cap_reason": (str(v("cap_reason")).strip() if v("cap_reason") else None),
-                    "pre_cap_score": _num(v("pre_cap_score")),
-                    "post_cap_score": _num(v("post_cap_score")),
-                    "e_id": (str(v("evidence_id", "e_id")).strip()
-                             if v("evidence_id", "e_id") else None),
-                })
+                caps_rows += 1
+                # One row may name several cells ("P1C1.1, P1C1.2"); a cap is
+                # an assertion about each of them.
+                for sid in (x.strip() for x in re.split(r"[,;]", raw)):
+                    if not SUBCAP_RE.match(sid):
+                        continue
+                    out["caps"].append({
+                        "subcap_id": sid,
+                        "cap_type": (str(v("cap_type")).strip() if v("cap_type") else None),
+                        "cap_reason": (str(v("cap_reason", "cap_rule", "rationale",
+                                             "trigger", "reason")).strip()
+                                       if v("cap_reason", "cap_rule", "rationale",
+                                            "trigger", "reason") else None),
+                        "pre_cap_score": _num(v("pre_cap_score", "prior_score",
+                                                "original_score", "score_before")),
+                        "post_cap_score": _num(v("post_cap_score", "capped_score",
+                                                 "cap_value", "max_score",
+                                                 "ceiling", "cap_ceiling",
+                                                 "score_after")),
+                        "e_id": (str(v("evidence_id", "e_id", "evidence_ids",
+                                       "evidence_refs")).strip()
+                                 if v("evidence_id", "e_id", "evidence_ids",
+                                      "evidence_refs") else None),
+                    })
+            if caps_rows and not out["caps"] and obs is not None:
+                obs.append(Observation("caps_log_ids_unrecognised", None, {
+                    "tab": "Caps_Applied_Log", "rows_seen": caps_rows,
+                    "expected": SUBCAP_RE.pattern,
+                    "reason": "the caps log has rows and none names a cell "
+                              "this parser recognises; no cap was read"}))
 
         # This is the absence protocol's own ladder, already run by the
         # assessment: which cells were searched, how hard, and what the
@@ -834,6 +884,14 @@ def parse_research_workbook(path: str) -> dict:
         for item in out["ledger"]:
             if best.get(item["e_id"]):
                 item["excerpt"] = best[item["e_id"]][:500]
+        if obs is not None and not any(out.values()):
+            obs.append(Observation("research_workbook_yielded_nothing", None, {
+                "tabs_present": list(wb.sheetnames)[:30],
+                "expected_ledger_any_of": ["Evidence_Linkage_Matrix", *_EV_TABS],
+                "expected_detail": "a P<n>_* subcapability tab",
+                "reason": "the research workbook was read and produced no "
+                          "ledger row, no fact-grain link, no cap and no "
+                          "recorded absence"}))
         return out
     finally:
         wb.close()

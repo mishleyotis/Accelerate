@@ -249,11 +249,12 @@ def _ingest_one(conn, token, folder, parts, remint=False):
             sections = parse_report(rp)
 
         research = {}
+        companion: list = []
         if "research" in parts:
             rw_path = os.path.join(td, "research.xlsx")
             with open(rw_path, "wb") as fh:
                 fh.write(drive.download(token, parts["research"].file_id))
-            research = parse_research_workbook(rw_path)
+            research = parse_research_workbook(rw_path, companion)
             print(f"ingest: {folder} research workbook — "
                   f"{len(research.get('ledger') or [])} ledger rows, "
                   f"{len(research.get('links') or [])} linked cells, "
@@ -264,7 +265,6 @@ def _ingest_one(conn, token, folder, parts, remint=False):
         # persist writes them as parser_observations against the run, so a tab
         # the parser did not recognise leaves a record naming the tab, the
         # column and the spelling it expected — not an absent section.
-        companion: list = []
         res = persist_package(
             conn,
             manifest=manifest,
