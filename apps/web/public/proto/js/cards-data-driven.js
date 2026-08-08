@@ -14,11 +14,18 @@
 /* Absent is not empty. In production an accessor returns null when the
    section did not promote, and a card that renders zeros in that case
    asserts a measurement nobody made. Each card says which section is
-   missing instead. */
+   missing instead.
+
+   `note` is this card's own sentence, written here. `section` is the
+   section id, and where the run PROMOTED an empty_state — the producer's
+   own account of what they searched and what would close it — that account
+   is what the reader gets, because it is the answer and the sentence here
+   is only a placeholder for not having one. */
 function CardAbsent({
   icon,
   title,
-  note
+  note,
+  section
 }) {
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush"
@@ -33,7 +40,11 @@ function CardAbsent({
     className: "b"
   }, "Not promoted")), /*#__PURE__*/React.createElement("div", {
     className: "card-body"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, section ? /*#__PURE__*/React.createElement(SectionEmpty, {
+    section: section,
+    absent: note,
+    empty: note
+  }) : /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
       color: "var(--z-muted)",
@@ -137,7 +148,8 @@ function SentimentCard({
   if (!s) return /*#__PURE__*/React.createElement(CardAbsent, {
     icon: "users",
     title: "Sentiment",
-    note: "No sentiment promoted for this run."
+    note: "No sentiment promoted for this run.",
+    section: "overview.sentiment"
   });
   const Row = ({
     r
@@ -252,7 +264,10 @@ function SentimentCard({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, "Not established for this run."), (s.ungrouped || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, "Not established for this run."), /*#__PURE__*/React.createElement(SectionEmptyFoot, {
+    section: "overview.sentiment",
+    title: "What this section could not establish"
+  }), (s.ungrouped || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)",
@@ -275,7 +290,8 @@ function FinancialTrajectoryCard({
   if (!f || !(f.fy || []).length) return /*#__PURE__*/React.createElement(CardAbsent, {
     icon: "money",
     title: "Financial trajectory",
-    note: "No financial series promoted for this run."
+    note: "No financial series promoted for this run.",
+    section: "overview.financial_series"
   });
   const values = (f.total_assets || []).filter(v => v != null);
   const maxA = values.length ? Math.max(...values) : 1;
@@ -358,7 +374,8 @@ function CoverageByPillarCard({
   if (!c) return /*#__PURE__*/React.createElement(CardAbsent, {
     icon: "check",
     title: "Evidence coverage",
-    note: "No coverage figures promoted for this run."
+    note: "No coverage figures promoted for this run.",
+    section: "overview.evidence_coverage"
   });
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
@@ -450,7 +467,8 @@ function CeilingEstimateCard({
   if (!u) return /*#__PURE__*/React.createElement(CardAbsent, {
     icon: "stack",
     title: "Capability ceiling & uncertainty",
-    note: "No ceiling estimates promoted for this run."
+    note: "No ceiling estimates promoted for this run.",
+    section: "overview.ceilings"
   });
   const rows = Object.entries(u);
   return /*#__PURE__*/React.createElement("div", {

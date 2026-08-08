@@ -195,6 +195,261 @@ function scaleFraction(value, scale) {
   return Math.max(0, Math.min(1, (v - b.min) / (b.max - b.min)));
 }
 
+/* ── Render boundaries ────────────────────────────────────────────────
+   React unmounts the WHOLE tree when a render throws and nothing catches
+   it. This app had exactly one error boundary and it lived in
+   pages-live-client.jsx, a module the router never renders — so a single
+   malformed list item (a string where the contract says object, a null
+   where a card reads a field off it) took the entire application down to a
+   literally empty <body>. No message, no chrome, no way back but a reload
+   onto the same payload.
+
+   The unit of failure has to be the CARD. One boundary around the app only
+   moves the blank page up a level: the reader still loses every surface
+   because one field on one card was the wrong shape. So each card and each
+   section gets its own, and a card that cannot render says so in its own
+   frame while its neighbours render normally.
+
+   What the notice may say is limited on purpose. It names the section, it
+   states that THIS PAGE could not render it, and it stops. It never blames
+   the reader, never guesses at the data, and never prints a plausible
+   substitute — a card that fabricates on failure is worse than a blank one.
+   The thrown message is shown verbatim as small mono text because that is
+   the one fact we actually have, and an analyst reading it can tell an
+   engineer which field is wrong.
+
+   Trips are also recorded on window.__DMA_RENDER_FAILURES. A boundary that
+   silently swallowed crashes would hide from the QA sweep exactly the class
+   of defect the sweep exists to find; automation reads the list. */
+class RenderBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      failed: null
+    };
+  }
+  static getDerivedStateFromError(err) {
+    return {
+      failed: err
+    };
+  }
+  componentDidCatch(err, info) {
+    const rec = {
+      name: this.props.name || "unnamed",
+      message: err && err.message || String(err),
+      stack: info && info.componentStack || null,
+      at: new Date().toISOString()
+    };
+    if (typeof window !== "undefined") {
+      window.__DMA_RENDER_FAILURES = window.__DMA_RENDER_FAILURES || [];
+      window.__DMA_RENDER_FAILURES.push(rec);
+    }
+    if (typeof console !== "undefined" && console.error) {
+      console.error(`render failed in ${rec.name}:`, err);
+    }
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return this.props.fallback(this.state.failed);
+  }
+}
+
+/* The error's own words, small and mono. Never the only thing shown. */
+function boundaryDetail(err) {
+  const msg = err && err.message || String(err || "");
+  if (!msg) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "f-mono",
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)",
+      marginTop: 6,
+      wordBreak: "break-word"
+    }
+  }, msg);
+}
+
+/* One card. The page keeps its shape; this frame keeps the card's. */
+function CardBoundary({
+  name,
+  children
+}) {
+  return /*#__PURE__*/React.createElement(RenderBoundary, {
+    name: name,
+    fallback: err => /*#__PURE__*/React.createElement("div", {
+      className: "card flush",
+      "data-render-failed": name || "card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row"
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "warn",
+      size: 14
+    }), /*#__PURE__*/React.createElement("h3", null, name || "This card")), /*#__PURE__*/React.createElement("span", {
+      className: "b b-org"
+    }, "Could not render")), /*#__PURE__*/React.createElement("div", {
+      className: "card-body"
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: "var(--z-muted)",
+        lineHeight: 1.55
+      }
+    }, "This page could not render ", name ? `the ${name} card` : "this card", " from the run's payload. Nothing was changed in the run, and the rest of the page is unaffected."), boundaryDetail(err)))
+  }, children);
+}
+
+/* One row/tile inside a card — an insight card, a list item. Same rules,
+   card-tile sized, so one bad item costs one item and not the list. */
+function ItemBoundary({
+  name,
+  children
+}) {
+  return /*#__PURE__*/React.createElement(RenderBoundary, {
+    name: name,
+    fallback: err => /*#__PURE__*/React.createElement("div", {
+      className: "card-tile",
+      "data-render-failed": name || "item",
+      style: {
+        borderStyle: "dashed"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        marginBottom: 6
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "b b-org"
+    }, "Could not render"), /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "f-mono",
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)"
+      }
+    }, name || "")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: "var(--z-muted)",
+        lineHeight: 1.5
+      }
+    }, "This item could not be rendered from the run's payload. The others in this list are unaffected."), boundaryDetail(err))
+  }, children);
+}
+
+/* One whole page, as the last stop before the blank body. Only reached when
+   the fault is above every card — in the page's own frame or in the merge
+   that feeds it — so it offers the two ways out a reader actually has. */
+function PageBoundary({
+  name,
+  children
+}) {
+  return /*#__PURE__*/React.createElement(RenderBoundary, {
+    name: name,
+    fallback: err => /*#__PURE__*/React.createElement("div", {
+      className: "empty",
+      "data-render-failed": name || "page"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "icon"
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "warn",
+      size: 20
+    })), /*#__PURE__*/React.createElement("h3", null, "This page could not be rendered"), /*#__PURE__*/React.createElement("p", null, "The ", name ? `${name} ` : "", "surface holds a value this page cannot draw. The run is unchanged and the other dashboards still open from the tabs above."), boundaryDetail(err))
+  }, children);
+}
+
+/* ── The empty state the API already sent ─────────────────────────────
+   A section with nothing in it is not a blank card. The envelope carries a
+   `empty_state` — kind, reason, what was searched, what would close it — and
+   a surface that renders a void instead is throwing away the one answer the
+   run gave. Worse is the fabricated zero-assertion: "no critical role gaps"
+   printed off an EMPTY roster asserts a check nobody ran.
+
+   Three cases, all stated plainly:
+     no section state   the section did not promote at all
+     empty_state        the producer's own account of the absence
+     state, no reason   it promoted and carries nothing, which is all we know */
+function SectionEmpty({
+  section,
+  absent,
+  empty
+}) {
+  const state = typeof DMA !== "undefined" && typeof DMA.sectionStateFor === "function" ? DMA.sectionStateFor(section) : null;
+  const es = state && state.empty_state || null;
+  const kind = es && es.kind ? String(es.kind).replace(/_/g, " ") : null;
+  const searched = es && Array.isArray(es.sources_searched) ? es.sources_searched : [];
+  const line = {
+    fontSize: 11.5,
+    color: "var(--z-muted)",
+    lineHeight: 1.55
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    "data-empty-section": section
+  }, /*#__PURE__*/React.createElement("div", {
+    style: line
+  }, !state ? absent || "This section did not promote for this run." : es ? `${kind ? `${kind}. ` : ""}${es.reason || empty || "The section promoted with nothing in it."}` : empty || "The section promoted with nothing in it."), es && es.closure_condition ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...line,
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: "var(--z-body)"
+    }
+  }, "Closes when \xB7 "), es.closure_condition) : null, searched.length ? /*#__PURE__*/React.createElement("details", {
+    style: {
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement("summary", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-mid)",
+      cursor: "pointer"
+    }
+  }, searched.length, " source", searched.length === 1 ? "" : "s", " searched"), /*#__PURE__*/React.createElement("ul", {
+    style: {
+      margin: "6px 0 0 16px",
+      padding: 0
+    }
+  }, searched.map((s, i) => /*#__PURE__*/React.createElement("li", {
+    key: i,
+    style: {
+      ...line,
+      marginBottom: 3
+    }
+  }, asText(s))))) : null);
+}
+
+/* The same account, at the foot of a card that DID render rows. A section can
+   carry data and a declared absence at once; this renders only the absence,
+   and renders nothing at all when the section declared none. */
+function SectionEmptyFoot({
+  section,
+  title
+}) {
+  const state = typeof DMA !== "undefined" && typeof DMA.sectionStateFor === "function" ? DMA.sectionStateFor(section) : null;
+  if (!state || !state.empty_state) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      borderTop: "1px solid var(--z-sep)",
+      paddingTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)",
+      textTransform: "uppercase",
+      letterSpacing: ".06em",
+      marginBottom: 4
+    }
+  }, title || "Not established"), /*#__PURE__*/React.createElement(SectionEmpty, {
+    section: section
+  }));
+}
+
 /* ── Icons ───────────────────────────────────────────────────────── */
 function Icon({
   name,
@@ -899,10 +1154,30 @@ function useLiveEntity(displayId, audience, runId, actingRole) {
         });
         return;
       }
-      const built = window.buildLiveEntity(displayId, byPage, {
-        evidence,
-        subcaps
-      });
+      // The adapter runs INSIDE a promise, so anything it throws — a section
+      // whose list arrived as a number, so `.map` is not a function — became an
+      // unhandled rejection and the state stayed "loading" for ever: the page
+      // sat on its spinner with no error, no timeout and nothing in the UI to
+      // say why. A read that cannot be adapted is a failed read, and it says so.
+      let built;
+      try {
+        built = window.buildLiveEntity(displayId, byPage, {
+          evidence,
+          subcaps
+        });
+      } catch (err) {
+        if (typeof console !== "undefined" && console.error) {
+          console.error("buildLiveEntity failed", err);
+        }
+        window.DMA_ENTITY = null;
+        setState({
+          status: "error",
+          code: "payload_unreadable",
+          withheld,
+          detail: err && err.message || String(err)
+        });
+        return;
+      }
       window.DMA_ENTITY = built;
       setState({
         status: "ready",
@@ -1144,7 +1419,7 @@ function LoadingScreen({
     },
     slow: {
       title: "Slow connection",
-      body: "The network is sluggish — we're still working on it.",
+      body: "The network is sluggish - we're still working on it.",
       detail: "Falling back to cached responses where possible"
     },
     unreachable: {
@@ -1331,6 +1606,12 @@ Object.assign(window, {
   PillarBadge,
   MaturityChip,
   ToastStack,
+  RenderBoundary,
+  CardBoundary,
+  ItemBoundary,
+  PageBoundary,
+  SectionEmpty,
+  SectionEmptyFoot,
   LoadingScreen,
   SectionLoader,
   ConnectionWatcher,

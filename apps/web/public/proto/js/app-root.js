@@ -277,7 +277,18 @@ const LIVE_MODE = typeof window !== "undefined" && !!window.DMA_LIVE;
    panel prints a dash rather than a zero. */
 function firmoFields(firmo) {
   const out = {};
-  for (const f of firmo && firmo.fields || []) {
+  // A `fields` that is not a list is not an absent section: it is a section
+  // that cannot be read. `for…of` on it throws HERE, above every card and
+  // above the shell, which is the one place a boundary cannot save the page —
+  // so the shape is checked and the panel is told, rather than printing an em
+  // dash per row and passing a malformed payload off as an unstated one.
+  const fields = firmo && firmo.fields;
+  if (fields !== null && fields !== undefined && !Array.isArray(fields)) {
+    return {
+      firmographics_unreadable: true
+    };
+  }
+  for (const f of fields || []) {
     if (f.value === null || f.value === undefined || f.value === "") continue;
     const n = Number(f.value);
     const num = isFinite(n) ? n : null;
@@ -388,13 +399,25 @@ function ClientRoute({
     }, /*#__PURE__*/React.createElement(SectionLoader, null));
   }
   if (LIVE_MODE && live.status === "error") {
+    // Two different failures, and telling them apart is the whole point: a run
+    // with nothing promoted is a state of the RUN; a payload the adapter could
+    // not read is a state of this APP, and calling the second one "nothing
+    // promoted" would blame the producer for the reader's page.
+    const unreadable = live.code === "payload_unreadable";
     return /*#__PURE__*/React.createElement(ClientShell, {
       entity: entity,
       run: run,
       tab: tab
     }, /*#__PURE__*/React.createElement("div", {
       className: "empty"
-    }, /*#__PURE__*/React.createElement("h3", null, "Nothing promoted for this run"), /*#__PURE__*/React.createElement("p", null, live.code === "no_promoted_pages" ? "No page of this run has promoted yet, so there is nothing to show." : live.code)));
+    }, /*#__PURE__*/React.createElement("h3", null, unreadable ? "This run's payload could not be read into the page" : "Nothing promoted for this run"), /*#__PURE__*/React.createElement("p", null, unreadable ? "The run promoted, but one of its sections did not arrive in the shape this page reads. Nothing here is missing from the assessment." : live.code === "no_promoted_pages" ? "No page of this run has promoted yet, so there is nothing to show." : live.code), unreadable && live.detail ? /*#__PURE__*/React.createElement("p", {
+      className: "f-mono",
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-muted)",
+        marginTop: 8
+      }
+    }, live.detail) : null));
   }
 
   // A dashboard the server refused: a locked state naming the reason, not a
@@ -478,12 +501,30 @@ function ClientRoute({
         run: run
       });
   }
+  // The boundary sits INSIDE the shell, never around it: a page that cannot
+  // render must leave the reader the tab strip, the client bar and the nav,
+  // because the way out of a broken dashboard is the next dashboard. Cards
+  // carry their own boundaries (CardBoundary, per surface); this one only
+  // catches what is above them — a page's own frame, or a section list the
+  // page walks before it reaches a card.
   return /*#__PURE__*/React.createElement(ClientShell, {
     entity: ent,
     run: run,
     tab: tab
-  }, page);
+  }, /*#__PURE__*/React.createElement(PageBoundary, {
+    name: TAB_LABEL[tab] || tab
+  }, page));
 }
+const TAB_LABEL = {
+  overview: "overview",
+  insights: "insight cards",
+  heatmap: "capability heatmap",
+  platform: "platform fit",
+  context: "context",
+  health: "assessment health",
+  techstack: "technology stack",
+  runs: "runs"
+};
 
 /* ── Router ──────────────────────────────────────────────────────── */
 function Router() {
@@ -542,6 +583,51 @@ function Router() {
 }
 
 /* ── Root ────────────────────────────────────────────────────────── */
+/* The backstop. It renders the app's own frame — brand, a sentence, and the
+   two actions that exist — so a fault above every card is a page the reader
+   can act on rather than a white screen. It claims nothing about the data. */
+function RootBoundary({
+  children
+}) {
+  return /*#__PURE__*/React.createElement(RenderBoundary, {
+    name: "application",
+    fallback: err => /*#__PURE__*/React.createElement("div", {
+      className: "loader-page"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "loader-card"
+    }, /*#__PURE__*/React.createElement(BrandMark, {
+      size: 34
+    }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "loader-title"
+    }, "This page could not be rendered"), /*#__PURE__*/React.createElement("div", {
+      className: "loader-body",
+      style: {
+        marginTop: 6
+      }
+    }, "DMA Insights hit a value it cannot draw. Nothing in the assessment has changed, and no data was written.")), /*#__PURE__*/React.createElement("div", {
+      className: "f-mono",
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-muted)",
+        wordBreak: "break-word"
+      }
+    }, err && err.message || String(err)), /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-primary",
+      onClick: () => window.location.reload()
+    }, "Reload"), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-tertiary",
+      onClick: () => {
+        navigate("/");
+        window.location.reload();
+      }
+    }, "Back to dashboard"))))
+  }, children);
+}
 function App() {
   const [booting, setBooting] = useState(true);
   useEffect(() => {
@@ -552,7 +638,7 @@ function App() {
     variant: "boot",
     dark: true
   });
-  return /*#__PURE__*/React.createElement(AppProvider, null, /*#__PURE__*/React.createElement(ConnectionWatcher, null), /*#__PURE__*/React.createElement(Router, null), /*#__PURE__*/React.createElement(EvidenceDrawer, null), /*#__PURE__*/React.createElement(InsightModal, null), /*#__PURE__*/React.createElement(RecommendationModal, null), /*#__PURE__*/React.createElement(NewRunModal, null), /*#__PURE__*/React.createElement(IntelligencePanel, null), /*#__PURE__*/React.createElement(MyTweaks, null));
+  return /*#__PURE__*/React.createElement(AppProvider, null, /*#__PURE__*/React.createElement(ConnectionWatcher, null), /*#__PURE__*/React.createElement(RootBoundary, null, /*#__PURE__*/React.createElement(Router, null)), /*#__PURE__*/React.createElement(EvidenceDrawer, null), /*#__PURE__*/React.createElement(InsightModal, null), /*#__PURE__*/React.createElement(RecommendationModal, null), /*#__PURE__*/React.createElement(NewRunModal, null), /*#__PURE__*/React.createElement(IntelligencePanel, null), /*#__PURE__*/React.createElement(MyTweaks, null));
 }
 
 // Production divergence: mount OUTSIDE the host framework's hydration

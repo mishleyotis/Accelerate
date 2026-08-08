@@ -14,8 +14,14 @@
 /* Absent is not empty. In production an accessor returns null when the
    section did not promote, and a card that renders zeros in that case
    asserts a measurement nobody made. Each card says which section is
-   missing instead. */
-function CardAbsent({ icon, title, note }) {
+   missing instead.
+
+   `note` is this card's own sentence, written here. `section` is the
+   section id, and where the run PROMOTED an empty_state — the producer's
+   own account of what they searched and what would close it — that account
+   is what the reader gets, because it is the answer and the sentence here
+   is only a placeholder for not having one. */
+function CardAbsent({ icon, title, note, section }) {
   return (
     <div className="card flush">
       <div className="card-head">
@@ -23,9 +29,13 @@ function CardAbsent({ icon, title, note }) {
         <span className="b">Not promoted</span>
       </div>
       <div className="card-body">
-        <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 }}>
-          {note}
-        </div>
+        {section
+          ? <SectionEmpty section={section} absent={note} empty={note} />
+          : (
+            <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 }}>
+              {note}
+            </div>
+          )}
       </div>
     </div>
   );
@@ -74,7 +84,7 @@ function SentimentCard({ entity, audience }) {
   if (audience === "customer") return null;       // internal-only strip
   const s = DMA.sentimentFor(entity.id);
   if (!s) return <CardAbsent icon="users" title="Sentiment"
-    note="No sentiment promoted for this run." />;
+    note="No sentiment promoted for this run." section="overview.sentiment" />;
   const Row = ({ r }) => {
     // No stated scale means no bounds, and a bar drawn on assumed bounds is
     // a claim the producer never made. But the reader of the scale has to
@@ -117,6 +127,14 @@ function SentimentCard({ entity, audience }) {
         <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".06em", margin: "10px 0 2px" }}>Customer</div>
         {(s.customer || []).length ? s.customer.map((r, i) => <Row key={"c" + i} r={r} />)
           : <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Not established for this run.</div>}
+        {/* A section can promote rows AND declare what it could not establish —
+            Baxter's does: ratings and scales on two audiences, and no citable
+            review text behind them. "Not established for this run." beside an
+            empty group is true and says nothing; the producer's own account of
+            what was searched and what would close it is the answer, and it was
+            sitting unread in the envelope. */}
+        <SectionEmptyFoot section="overview.sentiment"
+                          title="What this section could not establish" />
         {(s.ungrouped || []).length ? (
           <React.Fragment>
             <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".06em", margin: "10px 0 2px" }}>Audience not stated</div>
@@ -133,7 +151,7 @@ function FinancialTrajectoryCard({ entity }) {
   const f = DMA.financialsFor(entity.id);
   if (!f || !(f.fy || []).length) return <CardAbsent icon="money"
     title="Financial trajectory"
-    note="No financial series promoted for this run." />;
+    note="No financial series promoted for this run." section="overview.financial_series" />;
   const values = (f.total_assets || []).filter(v => v != null);
   const maxA = values.length ? Math.max(...values) : 1;
   return (
@@ -168,7 +186,7 @@ function FinancialTrajectoryCard({ entity }) {
 function CoverageByPillarCard({ entity }) {
   const c = DMA.coverageFor(entity.id);
   if (!c) return <CardAbsent icon="check" title="Evidence coverage"
-    note="No coverage figures promoted for this run." />;
+    note="No coverage figures promoted for this run." section="overview.evidence_coverage" />;
   return (
     <div className="card flush" data-source="export_coverage_stats.csv :: by_pillar[].pct">
       <div className="card-head">
@@ -204,7 +222,7 @@ function CeilingEstimateCard({ entity, audience }) {
   const [open, setOpen] = useState(null);
   const u = DMA.uncertaintyFor(entity.id);
   if (!u) return <CardAbsent icon="stack" title="Capability ceiling & uncertainty"
-    note="No ceiling estimates promoted for this run." />;
+    note="No ceiling estimates promoted for this run." section="overview.ceilings" />;
   const rows = Object.entries(u);
   return (
     <div className="card flush" data-source="uncertainty_bands.json :: total,modifiers,evidence ; peer_comparison_table.csv :: *_Ceiling">

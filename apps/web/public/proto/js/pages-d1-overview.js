@@ -18,7 +18,6 @@ function ClientOverview({
     tweaks,
     pushToast
   } = useApp();
-  const [findingOpen, setFindingOpen] = useState(null);
   const [scqaExp, setScqaExp] = useState(false);
   const layout = tweaks.overview_layout || "balanced";
   useEffect(() => {
@@ -33,33 +32,6 @@ function ClientOverview({
       entity: entity
     });
   }
-
-  // The promoted findings, mapped onto the card's shape. This was a hardcoded
-  // five-item array of fictional prose — "three production cores", a CTO
-  // "ex-Wells Fargo", a CDO "ex-JPM" — rendered identically for every client,
-  // whose evidence ids resolved against nothing, which is why the card's
-  // "Evidence · click to view" list was always empty.
-  const findings = (DMA.findingsFor(entity.id) || []).map(f => ({
-    id: f.f_id,
-    title: asText(f.title),
-    theme: asText(f.theme),
-    platforms: f.platform_chips || [],
-    evidence: f.e_ids || [],
-    what: asText(f.body),
-    why: asText(f.rejected_alternative),
-    // The drilldown's SO WHAT is the strategic-alignment argument — which of
-    // the client's OWN stated objectives this finding bears on. It was
-    // `asText(f.consequence)`: the face's 6–14-word consequence line printed
-    // AGAIN under a heading that promises a decision, which is why every
-    // drilldown read as generic. The consequence line stays on the face
-    // (magnitude, below); the contract states alignment as prose or as
-    // {score, statement} — asText unwraps either, never a raw dict — and the
-    // stated score travels separately so the card can print it as data.
-    so_what: asText(f.strategic_alignment),
-    so_what_score: f.strategic_alignment && typeof f.strategic_alignment === "object" && isFinite(Number(f.strategic_alignment.score)) ? Number(f.strategic_alignment.score) : null,
-    magnitude: asText(f.consequence),
-    subcaps: f.linked_subcap_ids || []
-  }));
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "page-head",
     style: {
@@ -83,7 +55,7 @@ function ClientOverview({
     size: 13
   }), " Scorecard"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast("Rerun queued — first batch in ~3 min", "success")
+    onClick: () => pushToast("Rerun queued - first batch in ~3 min", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 13
@@ -99,7 +71,94 @@ function ClientOverview({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "sparkle",
     size: 13
-  }), " Meeting prep"))), /*#__PURE__*/React.createElement("div", {
+  }), " Meeting prep"))), /*#__PURE__*/React.createElement(CardBoundary, {
+    name: "snapshot"
+  }, /*#__PURE__*/React.createElement(SnapshotStrip, {
+    entity: entity,
+    run: run,
+    layout: layout
+  })), /*#__PURE__*/React.createElement(CardBoundary, {
+    name: "why-now signals"
+  }, /*#__PURE__*/React.createElement(WhyNowStrip, {
+    entity: entity,
+    openEvidence: openEvidence,
+    audience: audience,
+    openSubcap: openSubcap
+  })), /*#__PURE__*/React.createElement(CardBoundary, {
+    name: "executive narrative"
+  }, /*#__PURE__*/React.createElement(SCQACard, {
+    entity: entity,
+    expanded: scqaExp,
+    onToggle: () => setScqaExp(o => !o),
+    openEvidence: openEvidence
+  })), /*#__PURE__*/React.createElement(CardBoundary, {
+    name: "opportunity surface"
+  }, /*#__PURE__*/React.createElement(OpportunitySurfaceStrip, {
+    entity: entity,
+    run: run
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1.55fr 1fr",
+      gap: 16,
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement(CardBoundary, {
+    name: "top findings"
+  }, /*#__PURE__*/React.createElement(TopFindingsCard, {
+    entity: entity,
+    openEvidence: openEvidence
+  })), /*#__PURE__*/React.createElement(CardBoundary, {
+    name: "leadership panel"
+  }, /*#__PURE__*/React.createElement(LeadershipPanel, {
+    audience: audience
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "section-label",
+    style: {
+      display: "flex",
+      alignItems: "baseline",
+      gap: 8,
+      margin: "4px 0 12px"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: "var(--z-dark)",
+      textTransform: "uppercase",
+      letterSpacing: ".06em"
+    }
+  }, "Evidence & benchmarks"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, "extracted from scoring workbook \xB7 evidence index \xB7 peer set")), /*#__PURE__*/React.createElement("div", {
+    className: "cards-grid-2",
+    style: {
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement(CardBoundary, {
+    name: "financial trajectory"
+  }, /*#__PURE__*/React.createElement(FinancialTrajectoryD1, {
+    entity: entity
+  })), /*#__PURE__*/React.createElement(CardBoundary, {
+    name: "sentiment"
+  }, /*#__PURE__*/React.createElement(SentimentCard, {
+    entity: entity,
+    audience: audience
+  }))), audience !== "customer" ? /*#__PURE__*/React.createElement(CardBoundary, {
+    name: "thought leadership"
+  }, /*#__PURE__*/React.createElement(ThoughtLeadershipPanel, null)) : null);
+}
+
+/* ── O1 · snapshot strip ──────────────────────────────────────────── */
+function SnapshotStrip({
+  entity,
+  run,
+  layout
+}) {
+  return /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       marginBottom: 18,
@@ -233,7 +292,16 @@ function ClientOverview({
       height: 10,
       background: "var(--z-dpur)"
     }
-  }), " Peer median")))), /*#__PURE__*/React.createElement("div", {
+  }), " Peer median")))), /*#__PURE__*/React.createElement(FirmographicsPanel, {
+    entity: entity
+  })));
+}
+
+/* ── Firmographics · the promoted figures, and only those ─────────── */
+function FirmographicsPanel({
+  entity
+}) {
+  return /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--z-lav)",
       borderRadius: 12,
@@ -244,7 +312,14 @@ function ClientOverview({
     style: {
       marginBottom: 8
     }
-  }, "Firmographics"), /*#__PURE__*/React.createElement(Row, {
+  }, "Firmographics"), entity.firmographics_unreadable ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-org)",
+      lineHeight: 1.5,
+      marginBottom: 8
+    }
+  }, "The firmographics section did not arrive as a list of fields, so no figure below is read from it.") : null, /*#__PURE__*/React.createElement(Row, {
     k: "Assets",
     v: fmtAssets(entity.assets, entity.assets_unit)
   }), /*#__PURE__*/React.createElement(Row, {
@@ -277,65 +352,7 @@ function ClientOverview({
   }) : null, entity.founded ? /*#__PURE__*/React.createElement(Row, {
     k: "Founded",
     v: String(entity.founded).slice(0, 4)
-  }) : null))), /*#__PURE__*/React.createElement(WhyNowStrip, {
-    entity: entity,
-    openEvidence: openEvidence,
-    audience: audience,
-    openSubcap: openSubcap
-  }), /*#__PURE__*/React.createElement(SCQACard, {
-    entity: entity,
-    expanded: scqaExp,
-    onToggle: () => setScqaExp(o => !o),
-    openEvidence: openEvidence
-  }), /*#__PURE__*/React.createElement(OpportunitySurfaceStrip, {
-    entity: entity,
-    run: run
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1.55fr 1fr",
-      gap: 16,
-      marginBottom: 18
-    }
-  }, /*#__PURE__*/React.createElement(TopFindingsCard, {
-    findings: findings,
-    openFinding: findingOpen,
-    setOpenFinding: setFindingOpen,
-    openEvidence: openEvidence
-  }), /*#__PURE__*/React.createElement(LeadershipPanel, {
-    audience: audience
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "section-label",
-    style: {
-      display: "flex",
-      alignItems: "baseline",
-      gap: 8,
-      margin: "4px 0 12px"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      fontWeight: 600,
-      color: "var(--z-dark)",
-      textTransform: "uppercase",
-      letterSpacing: ".06em"
-    }
-  }, "Evidence & benchmarks"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-muted)"
-    }
-  }, "extracted from scoring workbook \xB7 evidence index \xB7 peer set")), /*#__PURE__*/React.createElement("div", {
-    className: "cards-grid-2",
-    style: {
-      marginBottom: 18
-    }
-  }, /*#__PURE__*/React.createElement(FinancialTrajectoryD1, {
-    entity: entity
-  }), /*#__PURE__*/React.createElement(SentimentCard, {
-    entity: entity,
-    audience: audience
-  })), audience !== "customer" ? /*#__PURE__*/React.createElement(ThoughtLeadershipPanel, null) : null);
+  }) : null);
 }
 
 /* ── Score ring ─────────────────────────────────────────────────── */
@@ -1047,13 +1064,63 @@ function OpportunitySurfaceStrip({
   })));
 }
 
-/* ── Top findings ───────────────────────────────────────────────── */
+/* ── Top findings ─────────────────────────────────────────────────
+   The card reads and maps its OWN section. It used to be handed a mapped
+   array built in ClientOverview's body, which put the read above every
+   boundary: one finding that arrived as null took `f.f_id` with it and the
+   whole application unmounted, on a page where four other cards had nothing
+   wrong with them. A card owns its read, so a card owns its failure. */
 function TopFindingsCard({
-  findings,
-  openFinding,
-  setOpenFinding,
+  entity,
   openEvidence
 }) {
+  const [openFinding, setOpenFinding] = useState(null);
+  // The promoted findings, mapped onto the card's shape. This was a hardcoded
+  // five-item array of fictional prose — "three production cores", a CTO
+  // "ex-Wells Fargo", a CDO "ex-JPM" — rendered identically for every client,
+  // whose evidence ids resolved against nothing, which is why the card's
+  // "Evidence · click to view" list was always empty.
+  const findings = (DMA.findingsFor(entity.id) || []).map(f => ({
+    id: f.f_id,
+    title: asText(f.title),
+    theme: asText(f.theme),
+    platforms: f.platform_chips || [],
+    evidence: f.e_ids || [],
+    what: asText(f.body),
+    why: asText(f.rejected_alternative),
+    // The drilldown's SO WHAT is the strategic-alignment argument — which of
+    // the client's OWN stated objectives this finding bears on. It was
+    // `asText(f.consequence)`: the face's 6–14-word consequence line printed
+    // AGAIN under a heading that promises a decision, which is why every
+    // drilldown read as generic. The consequence line stays on the face
+    // (magnitude, below); the contract states alignment as prose or as
+    // {score, statement} — asText unwraps either, never a raw dict — and the
+    // stated score travels separately so the card can print it as data.
+    so_what: asText(f.strategic_alignment),
+    so_what_score: f.strategic_alignment && typeof f.strategic_alignment === "object" && isFinite(Number(f.strategic_alignment.score)) ? Number(f.strategic_alignment.score) : null,
+    magnitude: asText(f.consequence),
+    subcaps: f.linked_subcap_ids || []
+  }));
+
+  // Nothing to list is a STATE, not a blank panel. This card used to render
+  // its header, the count 0 and then literally nothing below the rule — a
+  // void that reads as "loading" or as a bug, when the API has already said
+  // what happened and why in the section envelope.
+  if (!findings.length) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card flush"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("h3", null, "Top findings"), /*#__PURE__*/React.createElement("span", {
+      className: "b"
+    }, "Nothing to show")), /*#__PURE__*/React.createElement("div", {
+      className: "card-body"
+    }, /*#__PURE__*/React.createElement(SectionEmpty, {
+      section: "overview.findings",
+      absent: "No findings section promoted for this run.",
+      empty: "The findings section promoted with no findings in it."
+    })));
+  }
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1341,6 +1408,44 @@ function LeadershipPanel({
     }, targets.length * 180 + 450);
   };
   const doneCount = enrichable.filter(x => revealed[x.id] === "done").length;
+
+  // An empty roster used to render the header, an "Enrich all" button over
+  // nobody, and a footer asserting "No critical role gaps in the promoted
+  // roster" — a clean bill of health derived from an absence of evidence,
+  // which is the fabricated zero-assertion this whole app exists to refuse.
+  // Nothing promoted means nothing is claimed, and the API's own account of
+  // the absence is what the card shows instead.
+  if (!roster.length) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card flush"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("h3", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "users",
+      size: 15
+    }), " Leadership panel"), /*#__PURE__*/React.createElement("span", {
+      className: "b"
+    }, "Nothing to show")), /*#__PURE__*/React.createElement("div", {
+      className: "card-body"
+    }, /*#__PURE__*/React.createElement(SectionEmpty, {
+      section: "overview.leadership",
+      absent: "No leadership section promoted for this run.",
+      empty: "The leadership section promoted with no named executives in it."
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: "var(--z-muted)",
+        lineHeight: 1.55,
+        marginTop: 8
+      }
+    }, "With no roster, no role can be called present and none can be called missing.")));
+  }
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1588,7 +1693,10 @@ function LeadershipPanel({
     name: "info",
     size: 11
   }), (() => {
-    const gaps = (DMA.LEADERSHIP || []).filter(x => x.gap_flag);
+    // Read from THIS card's roster, the one rendered above — the line is
+    // a statement about the rows on screen, and it is only reachable
+    // when there are rows (the empty branch returns above).
+    const gaps = roster.filter(x => x.gap_flag);
     if (!gaps.length) {
       return /*#__PURE__*/React.createElement("span", null, "No critical role gaps in the promoted roster.");
     }
@@ -1637,13 +1745,11 @@ function FinancialTrajectoryD1({
       className: "b"
     }, "Not promoted")), /*#__PURE__*/React.createElement("div", {
       className: "card-body"
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11.5,
-        color: "var(--z-muted)",
-        lineHeight: 1.55
-      }
-    }, "No financial series promoted for this run.")));
+    }, /*#__PURE__*/React.createElement(SectionEmpty, {
+      section: "overview.financial_series",
+      absent: "No financial series promoted for this run.",
+      empty: "The financial-series section promoted with no years in it."
+    })));
   }
   const values = (f.total_assets || []).filter(v => v != null);
   const maxA = values.length ? Math.max(...values) : 1;
@@ -1728,6 +1834,7 @@ function FinancialTrajectoryD1({
 
 /* ── Thought leadership ─────────────────────────────────────────── */
 function ThoughtLeadershipPanel() {
+  const entries = DMA.THOUGHT_LEADERSHIP || [];
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
     style: {
@@ -1749,13 +1856,19 @@ function ThoughtLeadershipPanel() {
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, "From executives - recent 6 months")), /*#__PURE__*/React.createElement("div", {
+  }, entries.length ? "From executives - recent 6 months" : "Nothing to show")), !entries.length ? /*#__PURE__*/React.createElement("div", {
+    className: "card-body"
+  }, /*#__PURE__*/React.createElement(SectionEmpty, {
+    section: "overview.thought_leadership",
+    absent: "No thought-leadership section promoted for this run.",
+    empty: "The thought-leadership section promoted with no entries in it."
+  })) : /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 16
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "g3"
-  }, DMA.THOUGHT_LEADERSHIP.map(tl => /*#__PURE__*/React.createElement("div", {
+  }, entries.map(tl => /*#__PURE__*/React.createElement("div", {
     key: tl.id,
     className: "card-tile",
     style: {
@@ -1901,11 +2014,46 @@ function InProgressBanner({
 /* Group insight cards into clusters for D2. Priority is the default lens;
    Pillar and Theme are alternates. Cards sort by priority score within a group. */
 function groupInsights(cards, mode) {
+  // An entry that is not an object is not an insight card, and it must not be
+  // scored, filed under a pillar or counted as a "Watch" item — every one of
+  // those is a judgement about a card nobody can read. They are held back
+  // here and named at the end of the page, each still rendered in place
+  // through its own boundary.
+  const readable = [],
+    unreadable = [];
+  for (const c of cards) (c && typeof c === "object" ? readable : unreadable).push(c);
+  const groups = groupReadableInsights(readable, mode);
+  if (unreadable.length) {
+    groups.push({
+      key: "__unreadable",
+      label: "Could not be read",
+      color: "org",
+      desc: `${unreadable.length} entr${unreadable.length === 1 ? "y" : "ies"} in the ` + "promoted list is not an insight-card object",
+      items: unreadable.map((c, i) => ({
+        c,
+        p: {
+          score: -1,
+          tier: 0,
+          tierLabel: "unreadable",
+          tierColor: "org",
+          key: i
+        }
+      }))
+    });
+  }
+  return groups;
+}
+function groupReadableInsights(cards, mode) {
   const withP = cards.map(c => ({
     c,
     p: DMA.insightPriority(c)
   }));
-  const byScore = (a, b) => b.p.score - a.p.score || a.c.id.localeCompare(b.c.id);
+  // Sorting runs ABOVE every card boundary — it walks the whole list before
+  // one card renders — so a card whose id is missing must not be able to throw
+  // here: `undefined.localeCompare` took the entire page, and the tie-break it
+  // was doing is only a stable order. Ordering by an absent id as the empty
+  // string states nothing about the card; it just puts it somewhere fixed.
+  const byScore = (a, b) => b.p.score - a.p.score || String(a.c && a.c.id || "").localeCompare(String(b.c && b.c.id || ""));
   if (mode === "pillar") {
     const groups = DMA.PILLARS.map(p => ({
       key: p.id,
@@ -1980,7 +2128,7 @@ function groupInsights(cards, mode) {
     key: 1,
     label: "Act now",
     color: "below",
-    desc: "Critical gaps + high-confidence, actionable opportunities — lead with these"
+    desc: "Critical gaps + high-confidence, actionable opportunities - lead with these"
   }, {
     key: 2,
     label: "Plan next",
@@ -1990,49 +2138,25 @@ function groupInsights(cards, mode) {
     key: 3,
     label: "Watch",
     color: "teal",
-    desc: "Stable or monitoring items — no immediate action needed"
+    desc: "Stable or monitoring items - no immediate action needed"
   }];
   return defs.map(d => ({
     ...d,
     items: withP.filter(x => x.p.tier === d.key).sort(byScore)
   })).filter(g => g.items.length);
 }
-function ClientInsights({
-  entity,
-  run
+
+/* One insight card's face. Its own component so React invokes it inside the
+   boundary that wraps it — see renderCard. */
+function InsightTile({
+  c,
+  p,
+  groupBy,
+  onOpen
 }) {
-  const {
-    openInsight,
-    openEvidence,
-    audience,
-    pushToast
-  } = useApp();
-  const [flag, setFlag] = useState("ALL");
-  const [pillar, setPillar] = useState("ALL");
-  const [conf, setConf] = useState("ALL");
-  const [groupBy, setGroupBy] = useState("priority");
-  const [collapsed, setCollapsed] = useState({});
-  const filtered = useMemo(() => DMA.INSIGHT_CARDS.filter(c => {
-    if (flag !== "ALL" && c.flag !== flag) return false;
-    if (pillar !== "ALL" && c.pillar !== pillar) return false;
-    if (conf !== "ALL" && c.confidence !== conf) return false;
-    return true;
-  }), [flag, pillar, conf]);
-  const groups = useMemo(() => groupInsights(filtered, groupBy), [filtered, groupBy]);
-  const tierCounts = {
-    1: 0,
-    2: 0,
-    3: 0
-  };
-  DMA.INSIGHT_CARDS.forEach(c => tierCounts[DMA.insightPriority(c).tier]++);
-  const filtersActive = flag !== "ALL" || pillar !== "ALL" || conf !== "ALL";
-  const renderCard = ({
-    c,
-    p
-  }) => /*#__PURE__*/React.createElement("div", {
-    key: c.id,
+  return /*#__PURE__*/React.createElement("div", {
     className: `ic ${c.flag.toLowerCase()}`,
-    onClick: () => openInsight(c.id)
+    onClick: () => onOpen(c.id)
   }, /*#__PURE__*/React.createElement("div", {
     className: "ic-head"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2089,6 +2213,69 @@ function ClientInsights({
     key: pf,
     className: "b b-teal"
   }, DMA.getPlatform(pf)?.short))));
+}
+function ClientInsights({
+  entity,
+  run
+}) {
+  const {
+    openInsight,
+    openEvidence,
+    audience,
+    pushToast
+  } = useApp();
+  const [flag, setFlag] = useState("ALL");
+  const [pillar, setPillar] = useState("ALL");
+  const [conf, setConf] = useState("ALL");
+  const [groupBy, setGroupBy] = useState("priority");
+  const [collapsed, setCollapsed] = useState({});
+  const filtered = useMemo(() => DMA.INSIGHT_CARDS.filter(c => {
+    // An entry that is not a card cannot answer a filter question. It is kept
+    // rather than dropped: dropping it would hide a malformed payload behind a
+    // count that looks right, and groupInsights names it at the foot instead.
+    if (!c || typeof c !== "object") return true;
+    if (flag !== "ALL" && c.flag !== flag) return false;
+    if (pillar !== "ALL" && c.pillar !== pillar) return false;
+    if (conf !== "ALL" && c.confidence !== conf) return false;
+    return true;
+  }), [flag, pillar, conf]);
+  const groups = useMemo(() => groupInsights(filtered, groupBy), [filtered, groupBy]);
+  const tierCounts = {
+    1: 0,
+    2: 0,
+    3: 0
+  };
+  // Counted over the cards that ARE cards. A tier is a reading of a card's
+  // flag and confidence; an entry with neither cannot be read into one, and
+  // adding it to WATCH would be a count of something nobody assessed.
+  const readableCards = DMA.INSIGHT_CARDS.filter(c => c && typeof c === "object");
+  const unreadableCount = DMA.INSIGHT_CARDS.length - readableCards.length;
+  readableCards.forEach(c => tierCounts[DMA.insightPriority(c).tier]++);
+  const filtersActive = flag !== "ALL" || pillar !== "ALL" || conf !== "ALL";
+
+  // Each card renders inside its OWN boundary. This is the granularity that
+  // matters on this page: the list is long, its items come straight from the
+  // promoted payload, and until now one item with a title that was an object
+  // (or a body that was null) threw during render and React unmounted the
+  // WHOLE app — every card on this page, the chrome, the nav, the <body>.
+  // One bad item now costs one tile.
+  //
+  // The tile is a COMPONENT, not a function called inline. An inline call runs
+  // during THIS component's render — outside the boundary it was handed to —
+  // so the throw would escape and the boundary would never see it. React must
+  // be the one to invoke it.
+  const renderCard = ({
+    c,
+    p
+  }, i) => /*#__PURE__*/React.createElement(ItemBoundary, {
+    key: c && c.id || `insight-${i}`,
+    name: c && c.id || "an insight card"
+  }, /*#__PURE__*/React.createElement(InsightTile, {
+    c: c,
+    p: p,
+    groupBy: groupBy,
+    onOpen: openInsight
+  }));
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -2107,7 +2294,13 @@ function ClientInsights({
     }
   }, tierCounts[2], " PLAN NEXT"), /*#__PURE__*/React.createElement("span", {
     className: "b b-teal"
-  }, tierCounts[3], " WATCH"))), /*#__PURE__*/React.createElement("div", {
+  }, tierCounts[3], " WATCH"), unreadableCount ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-org",
+    style: {
+      marginLeft: 6
+    },
+    title: "entries in the promoted list that are not insight-card objects"
+  }, unreadableCount, " UNREADABLE") : null)), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
@@ -2117,7 +2310,7 @@ function ClientInsights({
     size: 13
   }), " Export PDF"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
-    onClick: () => pushToast("Add a note from any insight card — click a card to start", "success")
+    onClick: () => pushToast("Add a note from any insight card - click a card to start", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "plus",
     size: 13
@@ -2188,7 +2381,21 @@ function ClientInsights({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, filtered.length, " of ", DMA.INSIGHT_CARDS.length, " shown")), groups.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, filtered.length, " of ", DMA.INSIGHT_CARDS.length, " shown")), groups.length === 0 ? DMA.INSIGHT_CARDS.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "empty",
+    style: {
+      padding: 40
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "icon"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "insight",
+    size: 20
+  })), /*#__PURE__*/React.createElement("h3", null, "No insight cards for this run"), /*#__PURE__*/React.createElement(SectionEmpty, {
+    section: "insights.insights",
+    absent: "The insights section did not promote for this run.",
+    empty: "The insights section promoted with no cards in it."
+  })) : /*#__PURE__*/React.createElement("div", {
     className: "empty",
     style: {
       padding: 40
@@ -2245,7 +2452,9 @@ function ClientInsights({
     })), !isCollapsed ? /*#__PURE__*/React.createElement("div", {
       className: "g2"
     }, g.items.map(renderCard)) : null);
-  }), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement(CardBoundary, {
+    name: "technology landscape"
+  }, /*#__PURE__*/React.createElement("div", {
     className: "card flush",
     style: {
       marginBottom: 18
@@ -2262,7 +2471,11 @@ function ClientInsights({
     size: 11
   }))), /*#__PURE__*/React.createElement("div", {
     className: "card-body"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, !DMA.TECH_STACK.length ? /*#__PURE__*/React.createElement(SectionEmpty, {
+    section: "techstack.techstack",
+    absent: "No technology register promoted for this run, so this run states no landscape.",
+    empty: "The technology section promoted with no rows in it."
+  }) : /*#__PURE__*/React.createElement("div", {
     className: "g4"
   }, [{
     label: "Confirmed",
@@ -2325,10 +2538,16 @@ function ClientInsights({
       marginTop: 6,
       lineHeight: 1.5
     }
-  }, q.desc)))))));
+  }, q.desc))))))));
 }
 Object.assign(window, {
   ClientOverview,
   ClientInsights,
-  ScoreRing
+  ScoreRing,
+  SnapshotStrip,
+  FirmographicsPanel,
+  TopFindingsCard,
+  LeadershipPanel,
+  InsightTile,
+  groupInsights
 });

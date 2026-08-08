@@ -4,7 +4,6 @@
 
 function ClientOverview({ entity, run }) {
   const { audience, openEvidence, openInsight, openSubcap, role, setIpSurface, setIpContext, setIpOpen, tweaks, pushToast } = useApp();
-  const [findingOpen, setFindingOpen] = useState(null);
   const [scqaExp, setScqaExp] = useState(false);
   const layout = tweaks.overview_layout || "balanced";
 
@@ -16,35 +15,6 @@ function ClientOverview({ entity, run }) {
   if (entity.in_progress) {
     return <InProgressBanner run={run} entity={entity} />;
   }
-
-  // The promoted findings, mapped onto the card's shape. This was a hardcoded
-  // five-item array of fictional prose — "three production cores", a CTO
-  // "ex-Wells Fargo", a CDO "ex-JPM" — rendered identically for every client,
-  // whose evidence ids resolved against nothing, which is why the card's
-  // "Evidence · click to view" list was always empty.
-  const findings = (DMA.findingsFor(entity.id) || []).map(f => ({
-    id: f.f_id,
-    title: asText(f.title),
-    theme: asText(f.theme),
-    platforms: f.platform_chips || [],
-    evidence: f.e_ids || [],
-    what: asText(f.body),
-    why: asText(f.rejected_alternative),
-    // The drilldown's SO WHAT is the strategic-alignment argument — which of
-    // the client's OWN stated objectives this finding bears on. It was
-    // `asText(f.consequence)`: the face's 6–14-word consequence line printed
-    // AGAIN under a heading that promises a decision, which is why every
-    // drilldown read as generic. The consequence line stays on the face
-    // (magnitude, below); the contract states alignment as prose or as
-    // {score, statement} — asText unwraps either, never a raw dict — and the
-    // stated score travels separately so the card can print it as data.
-    so_what: asText(f.strategic_alignment),
-    so_what_score: (f.strategic_alignment && typeof f.strategic_alignment === "object"
-                    && isFinite(Number(f.strategic_alignment.score)))
-      ? Number(f.strategic_alignment.score) : null,
-    magnitude: asText(f.consequence),
-    subcaps: f.linked_subcap_ids || [],
-  }));
 
   return (
     <div>
@@ -67,7 +37,70 @@ function ClientOverview({ entity, run }) {
         </div>
       </div>
 
-      {/* Snapshot strip - 3 columns: score ring + pillar bars + firmographics */}
+      {/* Snapshot strip - 3 columns: score ring + pillar bars + firmographics.
+          Its own component, and its own boundary, because everything below is
+          a separate read: a malformed pillar list must cost the strip and not
+          the findings, the narrative or the leadership roster. */}
+      <CardBoundary name="snapshot"><SnapshotStrip entity={entity} run={run} layout={layout} /></CardBoundary>
+
+      {/* Why now */}
+      <CardBoundary name="why-now signals">
+        <WhyNowStrip entity={entity} openEvidence={openEvidence} audience={audience} openSubcap={openSubcap} />
+      </CardBoundary>
+
+      {/* SCQA */}
+      <CardBoundary name="executive narrative">
+        <SCQACard entity={entity} expanded={scqaExp} onToggle={() => setScqaExp(o => !o)} openEvidence={openEvidence} />
+      </CardBoundary>
+
+      {/* Opportunity Surface - per platform */}
+      <CardBoundary name="opportunity surface">
+        <OpportunitySurfaceStrip entity={entity} run={run} />
+      </CardBoundary>
+
+      {/* Two-column: Top findings + Leadership panel */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr", gap: 16, marginBottom: 18 }}>
+        <CardBoundary name="top findings">
+          <TopFindingsCard entity={entity} openEvidence={openEvidence} />
+        </CardBoundary>
+        <CardBoundary name="leadership panel">
+          <LeadershipPanel audience={audience} />
+        </CardBoundary>
+      </div>
+
+      {/* Evidence-driven analytics.
+          Evidence coverage by pillar, the tier-mix card and the capability
+          ceiling / uncertainty card are removed from D1 at the user's request
+          (2026-08-05): they report on the ASSESSMENT's own workings rather than
+          on the institution, and D7 Health is where that belongs. The sections
+          still promote and still serve — nothing was deleted from the pipeline,
+          only from this page. */}
+      <div className="section-label" style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "4px 0 12px" }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", textTransform: "uppercase", letterSpacing: ".06em" }}>Evidence &amp; benchmarks</span>
+        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>extracted from scoring workbook · evidence index · peer set</span>
+      </div>
+      <div className="cards-grid-2" style={{ marginBottom: 18 }}>
+        {/* D1's own trajectory card — the shared one's footer chip is wrong
+            at this grain; see FinancialTrajectoryD1. */}
+        <CardBoundary name="financial trajectory">
+          <FinancialTrajectoryD1 entity={entity} />
+        </CardBoundary>
+        <CardBoundary name="sentiment">
+          <SentimentCard entity={entity} audience={audience} />
+        </CardBoundary>
+      </div>
+
+      {/* Thought leadership panel - internal-only */}
+      {audience !== "customer"
+        ? <CardBoundary name="thought leadership"><ThoughtLeadershipPanel /></CardBoundary>
+        : null}
+    </div>
+  );
+}
+
+/* ── O1 · snapshot strip ──────────────────────────────────────────── */
+function SnapshotStrip({ entity, run, layout }) {
+  return (
       <div className="card" style={{ marginBottom: 18, padding: "20px 22px" }}>
         <div style={{ display: "grid", gridTemplateColumns: layout === "ring-left" ? "140px 1fr 280px" : "1fr 280px", gap: 28, alignItems: "stretch" }}>
           {layout === "ring-left" ? <ScoreRing score={entity.overall} /> : null}
@@ -129,66 +162,47 @@ function ClientOverview({ entity, run }) {
               </div>
             </div>
           </div>
-          <div style={{ background: "var(--z-lav)", borderRadius: 12, padding: 16 }}>
-            <div className="eyebrow" style={{ marginBottom: 8 }}>Firmographics</div>
-            {/* Every promoted firmographic gets a row. Four of these —
-                members, net worth ratio, founded, charter — were mapped onto
-                the entity and rendered by nothing, so the card looked sparse
-                while the payload carried them. A field the run did not state
-                prints an em dash rather than being hidden: absent and
-                not-asked-for must not look the same. */}
-            <Row k="Assets"     v={fmtAssets(entity.assets, entity.assets_unit)} />
-            <Row k="Employees"  v={entity.employees != null ? entity.employees.toLocaleString() : "—"} />
-            <Row k="Branches"   v={entity.branches != null ? String(entity.branches) : "—"} />
-            {entity.members != null ? <Row k="Members" v={entity.members.toLocaleString()} /> : null}
-            {entity.customers != null ? <Row k="Customers" v={entity.customers.toLocaleString()} /> : null}
-            <Row k="CAGR"       v={entity.cagr != null
-              ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}`
-              : "—"} />
-            {entity.net_worth_ratio != null ? <Row k="Net worth ratio" v={`${fx(entity.net_worth_ratio, 2)}%`} /> : null}
-            <Row k="Regulator"  v={entity.regulator || "—"} />
-            <Row k="Footprint"  v={entity.footprint?.length ? entity.footprint.join(" · ") : "—"} />
-            {entity.charter ? <Row k="Charter" v={entity.charter} /> : null}
-            {entity.founded ? <Row k="Founded" v={String(entity.founded).slice(0, 4)} /> : null}
-          </div>
+          <FirmographicsPanel entity={entity} />
         </div>
       </div>
+  );
+}
 
-      {/* Why now */}
-      <WhyNowStrip entity={entity} openEvidence={openEvidence} audience={audience} openSubcap={openSubcap} />
-
-      {/* SCQA */}
-      <SCQACard entity={entity} expanded={scqaExp} onToggle={() => setScqaExp(o => !o)} openEvidence={openEvidence} />
-
-      {/* Opportunity Surface - per platform */}
-      <OpportunitySurfaceStrip entity={entity} run={run} />
-
-      {/* Two-column: Top findings + Leadership panel */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr", gap: 16, marginBottom: 18 }}>
-        <TopFindingsCard findings={findings} openFinding={findingOpen} setOpenFinding={setFindingOpen} openEvidence={openEvidence} />
-        <LeadershipPanel audience={audience} />
-      </div>
-
-      {/* Evidence-driven analytics.
-          Evidence coverage by pillar, the tier-mix card and the capability
-          ceiling / uncertainty card are removed from D1 at the user's request
-          (2026-08-05): they report on the ASSESSMENT's own workings rather than
-          on the institution, and D7 Health is where that belongs. The sections
-          still promote and still serve — nothing was deleted from the pipeline,
-          only from this page. */}
-      <div className="section-label" style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "4px 0 12px" }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", textTransform: "uppercase", letterSpacing: ".06em" }}>Evidence &amp; benchmarks</span>
-        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>extracted from scoring workbook · evidence index · peer set</span>
-      </div>
-      <div className="cards-grid-2" style={{ marginBottom: 18 }}>
-        {/* D1's own trajectory card — the shared one's footer chip is wrong
-            at this grain; see FinancialTrajectoryD1. */}
-        <FinancialTrajectoryD1 entity={entity} />
-        <SentimentCard entity={entity} audience={audience} />
-      </div>
-
-      {/* Thought leadership panel - internal-only */}
-      {audience !== "customer" ? <ThoughtLeadershipPanel /> : null}
+/* ── Firmographics · the promoted figures, and only those ─────────── */
+function FirmographicsPanel({ entity }) {
+  return (
+    <div style={{ background: "var(--z-lav)", borderRadius: 12, padding: 16 }}>
+      <div className="eyebrow" style={{ marginBottom: 8 }}>Firmographics</div>
+      {/* A `fields` that did not arrive as a list is not an unstated figure —
+          it is a section this page cannot read, and every row below would
+          print an em dash that says "the run states nothing" about figures the
+          run may well carry. Named here rather than passed off as absence
+          (app-root's firmoFields sets the flag). */}
+      {entity.firmographics_unreadable ? (
+        <div style={{ fontSize: 11, color: "var(--z-org)", lineHeight: 1.5, marginBottom: 8 }}>
+          The firmographics section did not arrive as a list of fields, so no
+          figure below is read from it.
+        </div>
+      ) : null}
+      {/* Every promoted firmographic gets a row. Four of these —
+          members, net worth ratio, founded, charter — were mapped onto
+          the entity and rendered by nothing, so the card looked sparse
+          while the payload carried them. A field the run did not state
+          prints an em dash rather than being hidden: absent and
+          not-asked-for must not look the same. */}
+      <Row k="Assets"     v={fmtAssets(entity.assets, entity.assets_unit)} />
+      <Row k="Employees"  v={entity.employees != null ? entity.employees.toLocaleString() : "—"} />
+      <Row k="Branches"   v={entity.branches != null ? String(entity.branches) : "—"} />
+      {entity.members != null ? <Row k="Members" v={entity.members.toLocaleString()} /> : null}
+      {entity.customers != null ? <Row k="Customers" v={entity.customers.toLocaleString()} /> : null}
+      <Row k="CAGR"       v={entity.cagr != null
+        ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}`
+        : "—"} />
+      {entity.net_worth_ratio != null ? <Row k="Net worth ratio" v={`${fx(entity.net_worth_ratio, 2)}%`} /> : null}
+      <Row k="Regulator"  v={entity.regulator || "—"} />
+      <Row k="Footprint"  v={entity.footprint?.length ? entity.footprint.join(" · ") : "—"} />
+      {entity.charter ? <Row k="Charter" v={entity.charter} /> : null}
+      {entity.founded ? <Row k="Founded" v={String(entity.founded).slice(0, 4)} /> : null}
     </div>
   );
 }
@@ -495,8 +509,63 @@ function OpportunitySurfaceStrip({ entity, run }) {
   );
 }
 
-/* ── Top findings ───────────────────────────────────────────────── */
-function TopFindingsCard({ findings, openFinding, setOpenFinding, openEvidence }) {
+/* ── Top findings ─────────────────────────────────────────────────
+   The card reads and maps its OWN section. It used to be handed a mapped
+   array built in ClientOverview's body, which put the read above every
+   boundary: one finding that arrived as null took `f.f_id` with it and the
+   whole application unmounted, on a page where four other cards had nothing
+   wrong with them. A card owns its read, so a card owns its failure. */
+function TopFindingsCard({ entity, openEvidence }) {
+  const [openFinding, setOpenFinding] = useState(null);
+  // The promoted findings, mapped onto the card's shape. This was a hardcoded
+  // five-item array of fictional prose — "three production cores", a CTO
+  // "ex-Wells Fargo", a CDO "ex-JPM" — rendered identically for every client,
+  // whose evidence ids resolved against nothing, which is why the card's
+  // "Evidence · click to view" list was always empty.
+  const findings = (DMA.findingsFor(entity.id) || []).map(f => ({
+    id: f.f_id,
+    title: asText(f.title),
+    theme: asText(f.theme),
+    platforms: f.platform_chips || [],
+    evidence: f.e_ids || [],
+    what: asText(f.body),
+    why: asText(f.rejected_alternative),
+    // The drilldown's SO WHAT is the strategic-alignment argument — which of
+    // the client's OWN stated objectives this finding bears on. It was
+    // `asText(f.consequence)`: the face's 6–14-word consequence line printed
+    // AGAIN under a heading that promises a decision, which is why every
+    // drilldown read as generic. The consequence line stays on the face
+    // (magnitude, below); the contract states alignment as prose or as
+    // {score, statement} — asText unwraps either, never a raw dict — and the
+    // stated score travels separately so the card can print it as data.
+    so_what: asText(f.strategic_alignment),
+    so_what_score: (f.strategic_alignment && typeof f.strategic_alignment === "object"
+                    && isFinite(Number(f.strategic_alignment.score)))
+      ? Number(f.strategic_alignment.score) : null,
+    magnitude: asText(f.consequence),
+    subcaps: f.linked_subcap_ids || [],
+  }));
+
+  // Nothing to list is a STATE, not a blank panel. This card used to render
+  // its header, the count 0 and then literally nothing below the rule — a
+  // void that reads as "loading" or as a bug, when the API has already said
+  // what happened and why in the section envelope.
+  if (!findings.length) {
+    return (
+      <div className="card flush">
+        <div className="card-head">
+          <h3>Top findings</h3>
+          <span className="b">Nothing to show</span>
+        </div>
+        <div className="card-body">
+          <SectionEmpty
+            section="overview.findings"
+            absent="No findings section promoted for this run."
+            empty="The findings section promoted with no findings in it." />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="card flush">
       <div className="card-head">
@@ -638,6 +707,35 @@ function LeadershipPanel({ audience }) {
   };
   const doneCount = enrichable.filter(x => revealed[x.id] === "done").length;
 
+  // An empty roster used to render the header, an "Enrich all" button over
+  // nobody, and a footer asserting "No critical role gaps in the promoted
+  // roster" — a clean bill of health derived from an absence of evidence,
+  // which is the fabricated zero-assertion this whole app exists to refuse.
+  // Nothing promoted means nothing is claimed, and the API's own account of
+  // the absence is what the card shows instead.
+  if (!roster.length) {
+    return (
+      <div className="card flush">
+        <div className="card-head">
+          <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Icon name="users" size={15} /> Leadership panel
+          </h3>
+          <span className="b">Nothing to show</span>
+        </div>
+        <div className="card-body">
+          <SectionEmpty
+            section="overview.leadership"
+            absent="No leadership section promoted for this run."
+            empty="The leadership section promoted with no named executives in it." />
+          <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55, marginTop: 8 }}>
+            With no roster, no role can be called present and none can be called
+            missing.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card flush">
       <div className="card-head">
@@ -741,7 +839,10 @@ function LeadershipPanel({ audience }) {
         {/* Derived from the roster's own gap rows. This read "CISO absent" as a
             literal, so every client was told their CISO was missing. */}
         {(() => {
-          const gaps = (DMA.LEADERSHIP || []).filter(x => x.gap_flag);
+          // Read from THIS card's roster, the one rendered above — the line is
+          // a statement about the rows on screen, and it is only reachable
+          // when there are rows (the empty branch returns above).
+          const gaps = roster.filter(x => x.gap_flag);
           if (!gaps.length) {
             return <span>No critical role gaps in the promoted roster.</span>;
           }
@@ -783,9 +884,10 @@ function FinancialTrajectoryD1({ entity }) {
           <span className="b">Not promoted</span>
         </div>
         <div className="card-body">
-          <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 }}>
-            No financial series promoted for this run.
-          </div>
+          <SectionEmpty
+            section="overview.financial_series"
+            absent="No financial series promoted for this run."
+            empty="The financial-series section promoted with no years in it." />
         </div>
       </div>
     );
@@ -831,17 +933,31 @@ function FinancialTrajectoryD1({ entity }) {
 
 /* ── Thought leadership ─────────────────────────────────────────── */
 function ThoughtLeadershipPanel() {
+  const entries = DMA.THOUGHT_LEADERSHIP || [];
   return (
     <div className="card flush" style={{ marginBottom: 18 }}>
       <div className="card-head">
         <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Icon name="lightbulb" size={15} /> Thought leadership signal
         </h3>
-        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>From executives - recent 6 months</span>
+        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
+          {entries.length ? "From executives - recent 6 months" : "Nothing to show"}
+        </span>
       </div>
+      {/* An empty grid under a heading promising executive signal is a void:
+          it reads as a card that failed to load. The section's own account of
+          the absence is the answer. */}
+      {!entries.length ? (
+        <div className="card-body">
+          <SectionEmpty
+            section="overview.thought_leadership"
+            absent="No thought-leadership section promoted for this run."
+            empty="The thought-leadership section promoted with no entries in it." />
+        </div>
+      ) : (
       <div style={{ padding: 16 }}>
         <div className="g3">
-          {DMA.THOUGHT_LEADERSHIP.map(tl => (
+          {entries.map(tl => (
             <div key={tl.id} className="card-tile" style={{ padding: 14 }}>
               <div className="row" style={{ marginBottom: 6 }}>
                 <span className="b b-purple">{String(tl.kind || tl.type || "SIGNAL").toUpperCase()}</span>
@@ -859,6 +975,7 @@ function ThoughtLeadershipPanel() {
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 }
@@ -902,8 +1019,34 @@ function InProgressBanner({ run, entity }) {
 /* Group insight cards into clusters for D2. Priority is the default lens;
    Pillar and Theme are alternates. Cards sort by priority score within a group. */
 function groupInsights(cards, mode) {
+  // An entry that is not an object is not an insight card, and it must not be
+  // scored, filed under a pillar or counted as a "Watch" item — every one of
+  // those is a judgement about a card nobody can read. They are held back
+  // here and named at the end of the page, each still rendered in place
+  // through its own boundary.
+  const readable = [], unreadable = [];
+  for (const c of cards) (c && typeof c === "object" ? readable : unreadable).push(c);
+  const groups = groupReadableInsights(readable, mode);
+  if (unreadable.length) {
+    groups.push({ key: "__unreadable", label: "Could not be read", color: "org",
+      desc: `${unreadable.length} entr${unreadable.length === 1 ? "y" : "ies"} in the `
+            + "promoted list is not an insight-card object",
+      items: unreadable.map((c, i) => ({ c, p: { score: -1, tier: 0,
+                                                 tierLabel: "unreadable",
+                                                 tierColor: "org", key: i } })) });
+  }
+  return groups;
+}
+
+function groupReadableInsights(cards, mode) {
   const withP = cards.map(c => ({ c, p: DMA.insightPriority(c) }));
-  const byScore = (a, b) => b.p.score - a.p.score || a.c.id.localeCompare(b.c.id);
+  // Sorting runs ABOVE every card boundary — it walks the whole list before
+  // one card renders — so a card whose id is missing must not be able to throw
+  // here: `undefined.localeCompare` took the entire page, and the tie-break it
+  // was doing is only a stable order. Ordering by an absent id as the empty
+  // string states nothing about the card; it just puts it somewhere fixed.
+  const byScore = (a, b) => b.p.score - a.p.score
+    || String((a.c && a.c.id) || "").localeCompare(String((b.c && b.c.id) || ""));
   if (mode === "pillar") {
     const groups = DMA.PILLARS
       .map(p => ({ key: p.id, label: `${p.id} · ${p.short}`, color: "purple", desc: p.name,
@@ -969,29 +1112,11 @@ function groupInsights(cards, mode) {
     .filter(g => g.items.length);
 }
 
-function ClientInsights({ entity, run }) {
-  const { openInsight, openEvidence, audience, pushToast } = useApp();
-  const [flag, setFlag] = useState("ALL");
-  const [pillar, setPillar] = useState("ALL");
-  const [conf, setConf] = useState("ALL");
-  const [groupBy, setGroupBy] = useState("priority");
-  const [collapsed, setCollapsed] = useState({});
-
-  const filtered = useMemo(() => DMA.INSIGHT_CARDS.filter(c => {
-    if (flag !== "ALL" && c.flag !== flag) return false;
-    if (pillar !== "ALL" && c.pillar !== pillar) return false;
-    if (conf !== "ALL" && c.confidence !== conf) return false;
-    return true;
-  }), [flag, pillar, conf]);
-
-  const groups = useMemo(() => groupInsights(filtered, groupBy), [filtered, groupBy]);
-
-  const tierCounts = { 1: 0, 2: 0, 3: 0 };
-  DMA.INSIGHT_CARDS.forEach(c => tierCounts[DMA.insightPriority(c).tier]++);
-  const filtersActive = flag !== "ALL" || pillar !== "ALL" || conf !== "ALL";
-
-  const renderCard = ({ c, p }) => (
-    <div key={c.id} className={`ic ${c.flag.toLowerCase()}`} onClick={() => openInsight(c.id)}>
+/* One insight card's face. Its own component so React invokes it inside the
+   boundary that wraps it — see renderCard. */
+function InsightTile({ c, p, groupBy, onOpen }) {
+  return (
+    <div className={`ic ${c.flag.toLowerCase()}`} onClick={() => onOpen(c.id)}>
       <div className="ic-head">
         <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
           <span className="ic-id">{c.id}</span>
@@ -1019,6 +1144,55 @@ function ClientInsights({ entity, run }) {
       </div>
     </div>
   );
+}
+
+function ClientInsights({ entity, run }) {
+  const { openInsight, openEvidence, audience, pushToast } = useApp();
+  const [flag, setFlag] = useState("ALL");
+  const [pillar, setPillar] = useState("ALL");
+  const [conf, setConf] = useState("ALL");
+  const [groupBy, setGroupBy] = useState("priority");
+  const [collapsed, setCollapsed] = useState({});
+
+  const filtered = useMemo(() => DMA.INSIGHT_CARDS.filter(c => {
+    // An entry that is not a card cannot answer a filter question. It is kept
+    // rather than dropped: dropping it would hide a malformed payload behind a
+    // count that looks right, and groupInsights names it at the foot instead.
+    if (!c || typeof c !== "object") return true;
+    if (flag !== "ALL" && c.flag !== flag) return false;
+    if (pillar !== "ALL" && c.pillar !== pillar) return false;
+    if (conf !== "ALL" && c.confidence !== conf) return false;
+    return true;
+  }), [flag, pillar, conf]);
+
+  const groups = useMemo(() => groupInsights(filtered, groupBy), [filtered, groupBy]);
+
+  const tierCounts = { 1: 0, 2: 0, 3: 0 };
+  // Counted over the cards that ARE cards. A tier is a reading of a card's
+  // flag and confidence; an entry with neither cannot be read into one, and
+  // adding it to WATCH would be a count of something nobody assessed.
+  const readableCards = DMA.INSIGHT_CARDS.filter(c => c && typeof c === "object");
+  const unreadableCount = DMA.INSIGHT_CARDS.length - readableCards.length;
+  readableCards.forEach(c => tierCounts[DMA.insightPriority(c).tier]++);
+  const filtersActive = flag !== "ALL" || pillar !== "ALL" || conf !== "ALL";
+
+  // Each card renders inside its OWN boundary. This is the granularity that
+  // matters on this page: the list is long, its items come straight from the
+  // promoted payload, and until now one item with a title that was an object
+  // (or a body that was null) threw during render and React unmounted the
+  // WHOLE app — every card on this page, the chrome, the nav, the <body>.
+  // One bad item now costs one tile.
+  //
+  // The tile is a COMPONENT, not a function called inline. An inline call runs
+  // during THIS component's render — outside the boundary it was handed to —
+  // so the throw would escape and the boundary would never see it. React must
+  // be the one to invoke it.
+  const renderCard = ({ c, p }, i) => (
+    <ItemBoundary key={(c && c.id) || `insight-${i}`}
+                  name={(c && c.id) || "an insight card"}>
+      <InsightTile c={c} p={p} groupBy={groupBy} onOpen={openInsight} />
+    </ItemBoundary>
+  );
 
   return (
     <div>
@@ -1030,6 +1204,11 @@ function ClientInsights({ entity, run }) {
             <span className="b b-below" style={{ marginRight: 6 }}>{tierCounts[1]} ACT NOW</span>
             <span className="b b-org" style={{ marginRight: 6 }}>{tierCounts[2]} PLAN NEXT</span>
             <span className="b b-teal">{tierCounts[3]} WATCH</span>
+            {unreadableCount ? (
+              <span className="b b-org" style={{ marginLeft: 6 }}
+                    title="entries in the promoted list that are not insight-card objects">
+                {unreadableCount} UNREADABLE</span>
+            ) : null}
           </div>
         </div>
         <div className="actions">
@@ -1064,9 +1243,23 @@ function ClientInsights({ entity, run }) {
         <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{filtered.length} of {DMA.INSIGHT_CARDS.length} shown</span>
       </div>
 
-      {/* Grouped clusters */}
+      {/* Grouped clusters. Two different nothings, and the page used to call
+          both of them "adjust the filters": a run with no insights section
+          promoted told the reader to change a filter that was not hiding
+          anything. */}
       {groups.length === 0 ? (
-        <div className="empty" style={{ padding: 40 }}><h3>No insight cards match</h3><p>Adjust the filters to see cards.</p></div>
+        DMA.INSIGHT_CARDS.length === 0 ? (
+          <div className="empty" style={{ padding: 40 }}>
+            <div className="icon"><Icon name="insight" size={20} /></div>
+            <h3>No insight cards for this run</h3>
+            <SectionEmpty
+              section="insights.insights"
+              absent="The insights section did not promote for this run."
+              empty="The insights section promoted with no cards in it." />
+          </div>
+        ) : (
+          <div className="empty" style={{ padding: 40 }}><h3>No insight cards match</h3><p>Adjust the filters to see cards.</p></div>
+        )
       ) : groups.map(g => {
         const gid = `${groupBy}:${g.key}`;
         const isCollapsed = !!collapsed[gid];
@@ -1085,12 +1278,25 @@ function ClientInsights({ entity, run }) {
       })}
 
       {/* Technology landscape sub-view */}
+      <CardBoundary name="technology landscape">
       <div className="card flush" style={{ marginBottom: 18 }}>
         <div className="card-head">
           <h3>Technology landscape</h3>
           <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/techstack`, { run: run.id })}>Open full stack <Icon name="arrow-r" size={11} /></button>
         </div>
         <div className="card-body">
+          {/* Four zeros are an assertion: they say a register was compiled and
+              found nothing confirmed, nothing inferred, nothing claimed and no
+              gaps — a technographic scan nobody ran. With no register there is
+              no landscape, and the section says so. The counts below are only
+              ever computed FROM the register (invariant 8), so they are only
+              drawn when there is one. */}
+          {!DMA.TECH_STACK.length ? (
+            <SectionEmpty
+              section="techstack.techstack"
+              absent="No technology register promoted for this run, so this run states no landscape."
+              empty="The technology section promoted with no rows in it." />
+          ) : (
           <div className="g4">
             {[
               { label: "Confirmed",   count: DMA.TECH_STACK.filter(t => t.status === "CONFIRMED").length, tone: "b-teal",   sub: "T1–T3 evidence",   desc: "Active deployments validated via Explorium and primary sources." },
@@ -1115,10 +1321,14 @@ function ClientInsights({ entity, run }) {
               </div>
             ))}
           </div>
+          )}
         </div>
       </div>
+      </CardBoundary>
     </div>
   );
 }
 
-Object.assign(window, { ClientOverview, ClientInsights, ScoreRing });
+Object.assign(window, { ClientOverview, ClientInsights, ScoreRing,
+                        SnapshotStrip, FirmographicsPanel, TopFindingsCard,
+                        LeadershipPanel, InsightTile, groupInsights });

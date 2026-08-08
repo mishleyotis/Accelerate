@@ -191,7 +191,16 @@ const LIVE_MODE = typeof window !== "undefined" && !!window.DMA_LIVE;
    panel prints a dash rather than a zero. */
 function firmoFields(firmo) {
   const out = {};
-  for (const f of (firmo && firmo.fields) || []) {
+  // A `fields` that is not a list is not an absent section: it is a section
+  // that cannot be read. `for…of` on it throws HERE, above every card and
+  // above the shell, which is the one place a boundary cannot save the page —
+  // so the shape is checked and the panel is told, rather than printing an em
+  // dash per row and passing a malformed payload off as an unstated one.
+  const fields = firmo && firmo.fields;
+  if (fields !== null && fields !== undefined && !Array.isArray(fields)) {
+    return { firmographics_unreadable: true };
+  }
+  for (const f of fields || []) {
     if (f.value === null || f.value === undefined || f.value === "") continue;
     const n = Number(f.value);
     const num = isFinite(n) ? n : null;
@@ -272,13 +281,26 @@ function ClientRoute({ id, tab, sub }) {
     return <ClientShell entity={entity} run={run} tab={tab}><SectionLoader /></ClientShell>;
   }
   if (LIVE_MODE && live.status === "error") {
+    // Two different failures, and telling them apart is the whole point: a run
+    // with nothing promoted is a state of the RUN; a payload the adapter could
+    // not read is a state of this APP, and calling the second one "nothing
+    // promoted" would blame the producer for the reader's page.
+    const unreadable = live.code === "payload_unreadable";
     return (
       <ClientShell entity={entity} run={run} tab={tab}>
         <div className="empty">
-          <h3>Nothing promoted for this run</h3>
-          <p>{live.code === "no_promoted_pages"
-            ? "No page of this run has promoted yet, so there is nothing to show."
-            : live.code}</p>
+          <h3>{unreadable
+            ? "This run's payload could not be read into the page"
+            : "Nothing promoted for this run"}</h3>
+          <p>{unreadable
+            ? "The run promoted, but one of its sections did not arrive in the shape this page reads. Nothing here is missing from the assessment."
+            : live.code === "no_promoted_pages"
+              ? "No page of this run has promoted yet, so there is nothing to show."
+              : live.code}</p>
+          {unreadable && live.detail ? (
+            <p className="f-mono" style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 8 }}>
+              {live.detail}</p>
+          ) : null}
         </div>
       </ClientShell>
     );
@@ -317,8 +339,24 @@ function ClientRoute({ id, tab, sub }) {
     case "runs":      page = <ClientRuns entity={ent} />; break;
     default:          page = <ClientOverview entity={ent} run={run} />;
   }
-  return <ClientShell entity={ent} run={run} tab={tab}>{page}</ClientShell>;
+  // The boundary sits INSIDE the shell, never around it: a page that cannot
+  // render must leave the reader the tab strip, the client bar and the nav,
+  // because the way out of a broken dashboard is the next dashboard. Cards
+  // carry their own boundaries (CardBoundary, per surface); this one only
+  // catches what is above them — a page's own frame, or a section list the
+  // page walks before it reaches a card.
+  return (
+    <ClientShell entity={ent} run={run} tab={tab}>
+      <PageBoundary name={TAB_LABEL[tab] || tab}>{page}</PageBoundary>
+    </ClientShell>
+  );
 }
+
+const TAB_LABEL = {
+  overview: "overview", insights: "insight cards", heatmap: "capability heatmap",
+  platform: "platform fit", context: "context", health: "assessment health",
+  techstack: "technology stack", runs: "runs",
+};
 
 /* ── Router ──────────────────────────────────────────────────────── */
 function Router() {
@@ -355,6 +393,36 @@ function Router() {
 }
 
 /* ── Root ────────────────────────────────────────────────────────── */
+/* The backstop. It renders the app's own frame — brand, a sentence, and the
+   two actions that exist — so a fault above every card is a page the reader
+   can act on rather than a white screen. It claims nothing about the data. */
+function RootBoundary({ children }) {
+  return (
+    <RenderBoundary name="application" fallback={(err) => (
+      <div className="loader-page">
+        <div className="loader-card">
+          <BrandMark size={34} />
+          <div>
+            <div className="loader-title">This page could not be rendered</div>
+            <div className="loader-body" style={{ marginTop: 6 }}>
+              DMA Insights hit a value it cannot draw. Nothing in the assessment
+              has changed, and no data was written.
+            </div>
+          </div>
+          <div className="f-mono" style={{ fontSize: 10.5, color: "var(--z-muted)",
+                                           wordBreak: "break-word" }}>
+            {(err && err.message) || String(err)}
+          </div>
+          <div className="row" style={{ gap: 8 }}>
+            <button className="btn btn-primary" onClick={() => window.location.reload()}>Reload</button>
+            <button className="btn btn-tertiary" onClick={() => { navigate("/"); window.location.reload(); }}>Back to dashboard</button>
+          </div>
+        </div>
+      </div>
+    )}>{children}</RenderBoundary>
+  );
+}
+
 function App() {
   const [booting, setBooting] = useState(true);
   useEffect(() => {
@@ -365,7 +433,15 @@ function App() {
   return (
     <AppProvider>
       <ConnectionWatcher />
-      <Router />
+      {/* The last stop, and only the last stop. Cards carry their own
+          boundaries and every client page carries one inside its shell; this
+          catches what is above both — the router itself, the shell's chrome,
+          the entity merge in ClientRoute. Without it those faults still empty
+          the <body>, which is the state this repair exists to make
+          impossible. It is deliberately NOT the app's only boundary: one
+          boundary at the root turns a blank page into a blank page with a
+          sentence on it, and loses every card that was rendering fine. */}
+      <RootBoundary><Router /></RootBoundary>
       <EvidenceDrawer />
       <InsightModal />
       <RecommendationModal />
