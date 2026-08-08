@@ -28,7 +28,7 @@ claude plugin enable dma-insights@zennify-dma
 ```
 
 The plugin ships `defaultEnabled: false`. It connects to a production service
-and the four agents can promote client-facing content, so it is opted into
+and the five agents can promote client-facing content, so it is opted into
 rather than turned on by installing.
 
 Read the token out of Secret Manager into the command, as above. Do not paste

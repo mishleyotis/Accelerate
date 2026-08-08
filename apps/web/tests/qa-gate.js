@@ -100,6 +100,27 @@ const CLICKABLE_SELECTOR = [
 ].map((s) => `#app .main ${s}${NAV_EXCLUDE}`).join(", ");
 
 const findings = [];   // { kind, page, detail }  kinds: CRASH, FIXTURE_LEAK, LAYOUT, DEAD_DRILLDOWN, NETWORK
+
+// The audience/page pairs the API is CONTRACTED to withhold (invariant 5:
+// audience redaction is server-side and default-deny). D5 is the internal
+// dashboard; the customer audience gets a locked state naming the reason,
+// not a partial page. A 403 on one of these is the product working.
+//
+// Deliberately a pair list, not "ignore 403": a 403 on any other page, or
+// on this page for the internal audience, is a real defect and still
+// reports. The gate proved that distinction is worth drawing — it printed
+// seven identical notes per run, which is how a real one gets missed.
+const EXPECTED_DENY = [{ page: "context", audience: "customer" }];
+
+function markExpectedDeny(page, res) {
+  let u;
+  try { u = new URL(res.url()); } catch { return; }
+  const name = u.pathname.split("/").filter(Boolean).pop();
+  const audience = u.searchParams.get("audience") || "internal";
+  if (EXPECTED_DENY.some((d) => d.page === name && d.audience === audience)) {
+    page.__denies.push(res.url());
+  }
+}
 const deadTargets = []; // { page, label, cls }
 const perTab = {};     // per-page table rows
 const add = (kind, page, detail) => findings.push({ kind, page, detail });
@@ -169,15 +190,28 @@ async function main() {
     const page = await ctx.newPage();
     page.__errors = [];
     page.__net = [];
+    page.__denies = [];
     page.on("pageerror", (e) => page.__errors.push(String(e.message).split("\n")[0]));
     page.on("console", (msg) => {
       if (msg.type() !== "error") return;
       const t = msg.text().slice(0, 160);
-      if (/Failed to load resource/i.test(t)) page.__net.push(t);
-      else page.__errors.push(`console: ${t}`);
+      if (/Failed to load resource/i.test(t)) {
+        // Chromium's text for this carries no URL; the location does.
+        const at = (msg.location() && msg.location().url) || "";
+        if (page.__denies.includes(at)) return;   // contracted default-deny
+        page.__net.push(t);
+      } else page.__errors.push(`console: ${t}`);
     });
     page.on("response", (res) => {
       if (res.status() >= 500) page.__net.push(`${res.status()} ${new URL(res.url()).pathname}`);
+      // Default-deny is the product working, and it is loud: the SPA fetches
+      // all six pages on every load, so one audience switch 403s the context
+      // read on all seven tabs and the gate printed the same seven notes
+      // every run. A note that always fires is a note nobody reads, and it
+      // would hide the 403 that matters. Recorded as EXPECTED-DENY, by the
+      // API's own reason code, and only for the audience/page pair that is
+      // contracted to be withheld — an unexpected 403 still reports.
+      if (res.status() === 403) markExpectedDeny(page, res);
     });
     return { ctx, page };
   };

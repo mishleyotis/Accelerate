@@ -23,8 +23,28 @@ import sys
 ROOT = (sys.argv[1] if len(sys.argv) > 1
         else os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "skills"))
 PLUGIN_ROOT = os.path.dirname(ROOT.rstrip("/")) if ROOT.rstrip("/").endswith("skills") else ROOT
-SKILLS = ["dma-research", "dma-assessment", "dma-governance",
-          "dma-surface-production", "dma-first-call-deck"]
+def _discover_skills(root):
+    """Every skill directory under `root` that carries a SKILL.md, sorted.
+
+    This was a hardcoded list of five names. A sixth skill was added and the
+    auditor went on reporting a clean sweep of the five it knew about — the
+    new skill's scripts and internal references were never checked, and the
+    audit's own PASS was the reason nobody looked. That is the defect class
+    this product keeps producing: a reader that does not recognise its input
+    carries on as though the input were not there. Discovery cannot go
+    stale; a list can, and silently.
+    """
+    if not os.path.isdir(root):
+        raise SystemExit(f"audit_skills: no skills directory at {root}")
+    found = sorted(d for d in os.listdir(root)
+                   if os.path.isfile(os.path.join(root, d, "SKILL.md")))
+    if not found:
+        raise SystemExit(f"audit_skills: no SKILL.md under {root} — refusing "
+                         "to report a clean audit of nothing")
+    return found
+
+
+SKILLS = _discover_skills(ROOT)
 
 # Prefixes that name the client package / run working tree, not the skill tree.
 RUNTIME_PREFIX = (
