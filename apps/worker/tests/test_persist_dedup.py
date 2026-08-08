@@ -216,7 +216,15 @@ def test_peer_scores_store_only_named_scores_and_verify_the_median(conns):
 
 
 def test_recommendations_land_raw_with_package_ids(conns):
-    worker, _ = conns
+    worker, admin = conns
+    # runs.source_artefact_id is an FK onto import_files (0029): a run says
+    # which artefact it was read from, so the artefact has to exist. Without
+    # this row the test only ever passed because the database was down.
+    acur = admin.cursor()
+    acur.execute("""INSERT INTO import_files (artefact_id, checksum, first_seen_at)
+                    VALUES ('wb.xlsx','synthetic', now())
+                    ON CONFLICT (artefact_id) DO NOTHING""")
+    admin.commit()
     recs = [{"rec_id": "REC-01", "payload": {"sequencing_phase": "1 — Foundation",
                                              "zennify_solution_s": "Workshop"}}]
     res = persist_package(worker, manifest=MANIFEST, workbook=_workbook(),

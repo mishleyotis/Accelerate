@@ -1,29 +1,48 @@
 """get_evidence (stage 2.3) — the three-way split.
 
-Package Evidence_Master ids are workbook-local; the ingest step stores
-them entity-qualified (E-047 → E-{ENT}-047, run-suffixed -R{n} after a
-content change — see apps/worker/dma_worker/persist.py). The agent cites
-the bare package form; resolution here (and in the validator, which uses
-THIS function) qualifies within the run's entity scope, so two clients'
-E-047 can never collide and a citation can never silently resolve onto
-another institution.
+Package Evidence_Master ids are workbook-LOCAL: every General-DMA template
+starts at E-001, so two clients both ship an `E-007`. The ingest records what
+each of a client's local ids resolves to in `evidence_package_ids`, whose
+primary key is (entity_id, package_local_id) — so the lookup below is
+entity-scoped by construction. A bare id cited for Northern Trust resolves to
+a Northern Trust row or to nothing; there is no query shape here that can
+return another institution's.
 
-foreign is the dangerous bucket: a real row belonging to another entity.
-It must stop synthesis, never be filtered out quietly — its presence
-means the reasoning has drifted onto the wrong entity.
+That property used to rest on a token folded out of the institution's NAME
+(`E-{ENT}-nnn`), and a name is not an identity. Measured in production on
+2026-08-08: 166 entities, 113 tokens, 13 tokens owned by more than one
+entity, `UNK` — the fallback when a package ships no manifest — owned by 14.
+Northern Trust's twelve cited ids all resolved onto one other institution's
+rows and returned `foreign`; Kitsap's 62 resolved onto several. Both
+producers halted, correctly, and could not be produced at all.
+
+`foreign` is the dangerous bucket and it keeps its meaning: a real row
+belonging to another institution, reached by a GLOBALLY scoped id — the
+server's own `E-CC-nnn` mint, or another entity's stored id. That is the
+reasoning having drifted onto the wrong entity, and it must stop synthesis
+rather than be filtered out quietly. A workbook-local number is not that: it
+names an item in THIS client's own ledger and cannot denote another's, so
+when it does not resolve the honest answer is `not_found`.
+
+The legacy `E-{ENT}-nnn` candidates are still tried, ENTITY-SCOPED, for rows
+ingested before the mapping existed and not yet re-landed.
 """
 from __future__ import annotations
 
 import re
 
-# Mirrors persist.py's _entity_token — the qualification must agree on
-# both sides of the boundary or no citation would ever resolve.
+# Mirrors persist.py's _entity_token — kept for the legacy candidate path.
 _DMA_ASM = re.compile(r"^DMA-ASM-(?P<entity>[A-Z0-9]+)-(?P<date>\d{8})-(?P<seq>\d{2,4})$")
-_BARE_PACKAGE = re.compile(r"^E-\d+(?::F\d+)?$")   # workbook-local, optionally fact-level
+# Workbook-local, optionally cited at fact grain (E-047:F1 cites fact 1 OF
+# item E-047; the item is the row). Mirrors dma_worker.evidence_ids.
+_BARE_PACKAGE = re.compile(r"^E-\d+$")
 
-_ROW_FIELDS = """e_id, entity_id, source_name, source_url, excerpt,
-                 enum_label(claim_type), enum_label(tier), published_date,
-                 enum_label(recency_band), ers, enum_label(origin)"""
+_ROW_FIELDS = """{a}e_id, {a}entity_id, {a}source_name, {a}source_url,
+                 {a}excerpt, enum_label({a}claim_type), enum_label({a}tier),
+                 {a}published_date, enum_label({a}recency_band), {a}ers,
+                 enum_label({a}origin)"""
+_FIELDS = _ROW_FIELDS.format(a="")            # single-table selects
+_FIELDS_E = _ROW_FIELDS.format(a="e.")        # joined against the mapping
 
 
 def _run_scope(conn, run_id):
@@ -44,13 +63,45 @@ def _run_scope(conn, run_id):
     return {"entity_id": entity_id, "token": token, "run_seq": run_seq}
 
 
-def _candidates(e_id: str, scope) -> list:
-    """Stored-id candidates for a cited id, most specific first."""
-    cited = e_id.split(":")[0]        # E-047:F1 cites the item, fact-level suffix aside
-    if _BARE_PACKAGE.match(cited):
-        qualified = f"E-{scope['token']}-{cited[2:]}"
-        return [f"{qualified}-R{scope['run_seq']}", qualified]
-    return [cited]
+def _local_id(cited: str) -> str | None:
+    item = str(cited or "").split(":")[0].strip().upper()
+    return item if _BARE_PACKAGE.match(item) else None
+
+
+def _resolve(cur, cited: str, scope):
+    """(row, scoped) for one cited id.
+
+    `scoped` says the lookup was confined to this run's entity — which is
+    true for every workbook-local id, and is what makes `foreign`
+    unreachable for one. A globally scoped id is looked up globally and can
+    therefore be found to belong to someone else.
+    """
+    local = _local_id(cited)
+    if local is not None:
+        cur.execute(
+            f"""SELECT {_FIELDS_E} FROM evidence_index e
+                  JOIN evidence_package_ids m ON m.e_id = e.e_id
+                 WHERE m.entity_id = %s AND m.package_local_id = %s""",
+            (scope["entity_id"], local))
+        row = cur.fetchone()
+        if row:
+            return row, True
+        # Rows ingested before the mapping existed: the historic qualified
+        # shapes, tried against THIS entity only. An id that matches another
+        # institution's row simply does not match here.
+        qualified = f"E-{scope['token']}-{local[2:]}"
+        for candidate in (f"{qualified}-R{scope['run_seq']}", qualified):
+            cur.execute(
+                f"""SELECT {_FIELDS} FROM evidence_index
+                     WHERE e_id = %s AND entity_id = %s""",
+                (candidate, scope["entity_id"]))
+            row = cur.fetchone()
+            if row:
+                return row, True
+        return None, True
+    cur.execute(f"SELECT {_FIELDS} FROM evidence_index WHERE e_id = %s",
+                (str(cited).split(":")[0],))
+    return cur.fetchone(), False
 
 
 def get_evidence(conn, run_id, e_ids) -> dict:
@@ -61,14 +112,7 @@ def get_evidence(conn, run_id, e_ids) -> dict:
     cur = conn.cursor()
     found, not_found, foreign = [], [], []
     for cited in e_ids:
-        row = None
-        for candidate in _candidates(cited, scope):
-            cur.execute(
-                f"SELECT {_ROW_FIELDS} FROM evidence_index WHERE e_id = %s",
-                (candidate,))
-            row = cur.fetchone()
-            if row:
-                break
+        row, _scoped = _resolve(cur, cited, scope)
         if row is None:
             not_found.append(cited)
             continue

@@ -19,7 +19,7 @@ import tempfile
 import traceback
 from datetime import datetime, timezone
 
-from dma_worker import drive, intake_status
+from dma_worker import drive, intake_status, persist
 from dma_worker.persist import persist_package
 from dma_worker.report_parser import parse_report
 from dma_worker.scan_runner import (SCAN_FAILED, SCAN_SUCCEEDED, finish_scan,
@@ -430,6 +430,183 @@ def backfill_evidence(conn, token, groups) -> int:
 
 
 
+def repair_evidence_namespace(conn, token, groups, limit: int = 0) -> int:
+    """Re-land the package evidence the id collision left unpersistable.
+
+    The ingest qualified workbook-local ids with a token folded out of the
+    institution's NAME, and a name is not an identity: 13 tokens were owned
+    by more than one entity in production and one of them, `UNK` — the
+    fallback for a package that ships no manifest — by 14. The second client
+    to land an `E-007` hit the first client's primary key, refused (rightly)
+    to alias across entities, exhausted its one `-R{run_seq}` retry and
+    recorded the item as unpersistable: 5,019 items across 61 runs, leaving
+    50 runs with no citable evidence at all and both Northern Trust and
+    Kitsap unable to be produced.
+
+    Migration 0036 gives the local ids an entity-scoped home, and the mint
+    ladder now has an escape that cannot collide. This pass re-reads the
+    source workbooks and lands what never landed, ADDITIVELY: against the
+    EXISTING run, minting no new run and touching no score. A run whose
+    evidence is already complete resolves every id to the row it already has
+    and writes nothing — the pass is idempotent by construction, because it
+    uses the same lander the ingest does.
+
+    What it cannot do: `completed_at` is still null for a package that
+    states no date anywhere, so those rows still band UNVERIFIED. That is
+    honest (invariant 9) and is fixed by the package shipping a manifest,
+    not here.
+    """
+    from dma_worker.evidence_ids import EvidenceLander
+
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT r.id, r.entity_id, r.source_folder_id, r.run_seq,
+                  r.completed_at, m.payload -> 'manifest'
+             FROM runs r LEFT JOIN run_manifest m ON m.run_id = r.id
+            WHERE r.source_folder_id IS NOT NULL
+              AND (EXISTS (SELECT 1 FROM parser_observations o
+                            WHERE o.run_id = r.id
+                              AND o.kind IN ('evidence_unpersistable',
+                                             'evidence_id_collision',
+                                             'evidence_conflict_unresolved'))
+                   OR NOT EXISTS (SELECT 1 FROM evidence_index e
+                                   WHERE e.entity_id = r.entity_id
+                                     AND e.origin = 'package'))
+            ORDER BY r.source_folder_id, r.run_seq""")
+    todo = cur.fetchall()
+    print(f"repair: {len(todo)} run(s) carry a collision or hold no evidence")
+    repaired = skipped = failed = 0
+    landed_total = links_total = 0
+    for run_id, entity_id, folder, run_seq, completed_at, manifest in todo:
+        if limit and repaired >= limit:
+            print(f"repair: stopping at the {limit}-run bound")
+            break
+        parts = groups.get(folder) or {}
+        if "workbook" not in parts:
+            skipped += 1
+            continue
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                wb_path = os.path.join(td, "wb.xlsx")
+                with open(wb_path, "wb") as fh:
+                    fh.write(drive.download(token, parts["workbook"].file_id))
+                companion: list = []
+                ledger = parse_evidence_master(wb_path, companion)
+                wb = parse_scoring_workbook(wb_path)
+                research = {}
+                if "research" in parts:
+                    rw = os.path.join(td, "research.xlsx")
+                    with open(rw, "wb") as fh:
+                        fh.write(drive.download(token, parts["research"].file_id))
+                    research = parse_research_workbook(rw, companion)
+
+            n_obs = [0]
+
+            def _observe(kind, detail, _rid=run_id, _n=n_obs):
+                cur.execute(
+                    """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
+                       VALUES (%s,%s,%s, now())""",
+                    (_rid, kind, json.dumps({"pass": "evidence_namespace_repair",
+                                             **detail})))
+                _n[0] += 1
+
+            # The same token the ingest used, read back off the run's own
+            # retained manifest — never re-derived from somewhere else, or
+            # the repair would mint under a different name than the ingest.
+            tok = persist._entity_token(manifest or {})
+            lander = EvidenceLander(cur, entity_id=entity_id, run_id=run_id,
+                                    run_seq=run_seq, token=tok,
+                                    reference_date=completed_at,
+                                    observe=_observe)
+            merged = _merge_ledger(ledger, research, wb)
+            alias, before = {}, len(lander.landed)
+            for ev in merged:
+                alias[ev["e_id"]] = lander.land(ev)
+            links = _write_links(cur, run_id, alias, merged, research, wb)
+            cur.execute(
+                """UPDATE subcap_scores sc
+                      SET linked_evidence_count =
+                            (SELECT count(*) FROM evidence_subcap_links l
+                              WHERE l.run_id = sc.run_id AND l.subcap_id = sc.subcap_id)
+                    WHERE sc.run_id = %s""", (run_id,))
+            landed = len(lander.landed) - before
+            _observe("evidence_namespace_repaired",
+                     {"items_read": len(merged), "rows_landed": landed,
+                      "links_written": links, "token": tok})
+            conn.commit()
+            repaired += 1
+            landed_total += landed
+            links_total += links
+            print(f"repair: {folder} run {run_id} -> {landed} row(s), "
+                  f"{links} link(s) from {len(merged)} ledger item(s)")
+        except Exception as exc:  # noqa: BLE001 — one bad package sinks nothing
+            conn.rollback()
+            failed += 1
+            print(f"repair FAILED: {folder}: {exc!r}")
+    print(f"repair: {repaired} run(s) repaired ({landed_total} evidence rows, "
+          f"{links_total} links), {skipped} without a workbook, {failed} failed")
+    return 1 if failed else 0
+
+
+def _merge_ledger(ledger, research, wb):
+    """The Evidence_Master rows, enriched exactly as the ingest enriches
+    them: the research workbook's ERS/date/verbatim passage win where the
+    master is blank, and a mined rationale fragment fills what is still
+    empty. One merge, so the repair reads the same item the ingest would."""
+    rledger = {}
+    for item in ((research or {}).get("ledger") or []):
+        rledger.setdefault(item["e_id"], item)
+    mined = mine_evidence_from_rationales(wb.scores)
+    out = []
+    for ev in (ledger or []):
+        r = rledger.get(ev["e_id"]) or {}
+        for field in ("ers", "published_date", "stated_recency", "tier",
+                      "fact_count", "claim_type"):
+            if r.get(field) is not None and ev.get(field) is None:
+                ev = {**ev, field: r[field]}
+        if r.get("excerpt"):
+            ev = {**ev, "excerpt": r["excerpt"]}
+        m = mined.get(ev["e_id"]) or {}
+        if not ev.get("excerpt") and m.get("excerpt"):
+            ev = {**ev, "excerpt": m["excerpt"]}
+        if not ev.get("subcaps") and m.get("subcaps"):
+            ev = {**ev, "subcaps": m["subcaps"]}
+        out.append(ev)
+    return out
+
+
+def _write_links(cur, run_id, alias, merged, research, wb) -> int:
+    """The three link bases the ingest writes, for the rows this pass landed.
+    ON CONFLICT DO NOTHING throughout: a link the run already carries keeps
+    its own basis."""
+    written = 0
+
+    def link(e_id, subcap_id, basis):
+        nonlocal written
+        cur.execute(
+            """INSERT INTO evidence_subcap_links (e_id, subcap_id, run_id, link_basis)
+               VALUES (%s,%s,%s,%s) ON CONFLICT DO NOTHING""",
+            (e_id, subcap_id, run_id, basis))
+        written += cur.rowcount if cur.rowcount and cur.rowcount > 0 else 0
+
+    for ev in merged:
+        resolved = alias.get(ev["e_id"])
+        if resolved:
+            for sid in ev.get("subcaps", []):
+                link(resolved, sid, "package")
+    for l in ((research or {}).get("links") or []):
+        for e_id in l.get("e_ids", []):
+            resolved = alias.get(e_id)
+            if resolved:
+                link(resolved, l["subcap_id"], "research_workbook")
+    for s in wb.scores:
+        for e_id in s.evidence_refs:
+            resolved = alias.get(e_id)
+            if resolved:
+                link(resolved, s.subcap_id, "score_row")
+    return written
+
+
 def dump_headers(token, groups, needle: str) -> int:
     """Print every tab's first non-empty rows for one package's workbook.
 
@@ -500,6 +677,19 @@ def main() -> int:
 
     conn = _connect()
 
+    # EVIDENCE_NAMESPACE=report — the package-evidence id namespace, measured.
+    # Read-only and lock-free: it is a question about what is already stored,
+    # not a firing, and it must be answerable while a scan is running.
+    # EVIDENCE_NAMESPACE_RUNS=<uuid,uuid> probes named runs end to end.
+    if os.environ.get("EVIDENCE_NAMESPACE") == "report":
+        from dma_worker.evidence_ids import namespace_report
+        probes = [x.strip() for x in
+                  (os.environ.get("EVIDENCE_NAMESPACE_RUNS") or "").split(",")
+                  if x.strip()]
+        print(json.dumps(namespace_report(conn, probes), indent=1, default=str))
+        conn.close()
+        return 0
+
     # One scan at a time: the Scheduler fires every 30 minutes and manual
     # executions overlap it. The session-level lock releases when this
     # connection closes (or the container dies) — a second execution
@@ -548,7 +738,8 @@ def main() -> int:
     # that dies is recorded rather than invisible (the 403 that killed the
     # tree recursion left no import_scans row at all).
     diagnostic = bool(os.environ.get("BACKFILL_SECTIONS")
-                      or os.environ.get("BACKFILL_EVIDENCE"))
+                      or os.environ.get("BACKFILL_EVIDENCE")
+                      or os.environ.get("EVIDENCE_NAMESPACE") == "repair")
     started_at = datetime.now(timezone.utc)
     scan_id = None if diagnostic else open_scan(conn, started_at)
     tally = {"ingested": 0, "failed": 0, "deferred": 0, "quarantined": []}
@@ -580,6 +771,13 @@ def main() -> int:
 
         if os.environ.get("BACKFILL_EVIDENCE"):
             rc = backfill_evidence(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
+        if os.environ.get("EVIDENCE_NAMESPACE") == "repair":
+            rc = repair_evidence_namespace(
+                conn, drive.token_provider(), groups,
+                limit=int(os.environ.get("EVIDENCE_NAMESPACE_LIMIT", "0")))
             conn.close()
             return rc
 

@@ -23,15 +23,12 @@ from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 
 from .entity_resolution import DMA_ASM, resolve
+from .evidence_ids import EvidenceLander
 from .workbook_parser import WorkbookParse, mine_evidence_from_rationales
 
-# Mirrors CONTENT_HASH_EXPR in migrations/versions/0005_ingested_tier.py with
-# claim_type NULL (the package path never asserts a claim type). Used to find
-# the kept row after the (entity_id, content_hash) dedup index rejects an
-# insert — the recompute must stay byte-identical to the generated column.
-_HASH_SQL = r"""encode(digest(coalesce(%s,'') || '|' || '' || '|' ||
-                lower(left(regexp_replace(%s,'\s+',' ','g'),500)),
-         'sha256'),'hex')"""
+# The content-hash recompute that finds the kept row after the (entity_id,
+# content_hash) dedup index rejects an insert now lives with the landing rules
+# it belongs to: EvidenceLander.HASH_SQL in dma_worker/evidence_ids.py.
 
 
 def _institution(manifest: dict) -> dict:
@@ -142,16 +139,6 @@ def _entity_token(manifest: dict) -> str:
         return m.group("entity")
     name = _institution(manifest).get("name") or ""
     return re.sub(r"[^A-Z0-9]", "", name.upper())[:8] or "UNK"
-
-
-def _qualify(e_id: str, token: str) -> str:
-    """Package Evidence_Master ids are workbook-LOCAL (every General-DMA
-    template starts at E-001), but evidence_index.e_id is a global PK. The
-    stored id is entity-qualified — E-047 becomes E-{ENT}-047 — the same
-    scheme the TRD documents for the other package-local id (REC-{ENT}-nn),
-    and a shape the one recogniser already accepts. Bare ids stay the
-    package-facing form; qualification is this one choke point."""
-    return f"E-{token}-{e_id[2:]}" if e_id.startswith("E-") else e_id
 
 
 # The basis a carried link is written under. It is not 'package': the package
@@ -421,7 +408,6 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
     token = _entity_token(manifest)
     seen_links = set()
     alias: dict[str, str] = {}   # package-local e_id -> the row it resolves to
-    landed: set[str] = set()     # stored ids that own a row after this loop
 
     def _observe(kind: str, detail: dict) -> None:
         nonlocal n_obs
@@ -430,108 +416,23 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                VALUES (%s,%s,%s, now())""", (run_id, kind, json.dumps(detail)))
         n_obs += 1
 
-    # minted run-qualified id -> the id it supersedes. Filled while landing,
-    # drained once every package link has been written, so a link this scan
-    # states keeps its own basis and only the gaps are carried.
-    superseded_by: dict[str, str] = {}
+    # The landing rules live in one place (dma_worker.evidence_ids), shared
+    # with the repair pass that re-lands what the id collision left
+    # unpersistable: a repair landing evidence by a second set of rules would
+    # be a second thing to get wrong.
+    lander = EvidenceLander(cur, entity_id=entity_id, run_id=run_id,
+                            run_seq=run_seq, token=token,
+                            reference_date=reference_date, observe=_observe)
 
     def _carry_forward() -> None:
-        for minted, superseded in sorted(superseded_by.items()):
+        # minted id -> the id it supersedes, filled while landing and drained
+        # once every package link has been written, so a link this scan states
+        # keeps its own basis and only the gaps are carried.
+        for minted, superseded in sorted(lander.superseded.items()):
             carried = carry_links_across_remint(cur, superseded, minted)
             _observe("evidence_links_carried_forward",
                      {"superseded": superseded, "minted": minted,
                       "links_carried": carried})
-
-    def _land_evidence(ev: dict) -> str | None:
-        """Insert one package item; return the stored id its local id
-        resolves to, or None (recorded) when nothing can hold it."""
-        ers = ev.get("ers")
-        if ers is not None and not (Decimal("1") <= ers <= Decimal("5")):
-            # A stated ERS outside the 1–5 rubric (some packages score on
-            # 0–10): landed as NULL and recorded — never rescaled, a
-            # made-up conversion would be data that was never stated.
-            _observe("ers_out_of_range",
-                     {"package_local_id": ev["e_id"], "stated": str(ers)})
-            ev = {**ev, "ers": None}
-        qualified = _qualify(ev["e_id"], token)
-        for candidate in (qualified, f"{qualified}-R{run_seq}"):
-            cur.execute(
-                """INSERT INTO evidence_index
-                     (e_id, entity_id, origin, source_name, source_url, excerpt,
-                      tier, claim_type, ers, published_date, reference_date)
-                   VALUES (%s,%s,'package',%s,%s,%s,%s,%s,%s,%s,%s)
-                   ON CONFLICT DO NOTHING RETURNING e_id""",
-                (candidate, entity_id, ev.get("source_name"), ev.get("source_url"),
-                 ev.get("excerpt"), ev.get("tier"), ev.get("claim_type"),
-                 ev.get("ers"), ev.get("published_date"), reference_date))
-            if cur.fetchone():
-                landed.add(candidate)
-                if candidate != qualified:
-                    # A run-qualified mint exists only because `qualified`
-                    # already holds this local id under different content:
-                    # the same source, read again. Record the pair; the
-                    # links it already carries are carried over once this
-                    # scan has written its own (below), so a link this
-                    # package states keeps its own basis.
-                    superseded_by[candidate] = qualified
-                return candidate
-            # The bare ON CONFLICT covers both uniques; work out which fired.
-            cur.execute(
-                f"""SELECT entity_id = %s,
-                           content_hash IS NOT DISTINCT FROM {_HASH_SQL}
-                      FROM evidence_index WHERE e_id = %s""",
-                (entity_id, ev.get("source_url"), ev.get("excerpt"), candidate))
-            row = cur.fetchone()
-            if row is None:
-                # No PK hit -> the (entity_id, content_hash) dedup index
-                # fired: this content already lives under another of this
-                # entity's ids. Map to it and record — never silently.
-                cur.execute(
-                    f"""SELECT e_id FROM evidence_index
-                        WHERE entity_id = %s AND content_hash = {_HASH_SQL}""",
-                    (entity_id, ev.get("source_url"), ev.get("excerpt")))
-                hit = cur.fetchone()
-                if hit is None:
-                    # Neither lookup resolved: the insert conflicted on a
-                    # constraint this branch cannot attribute. Record it and
-                    # drop THIS item — one unattributable row must not sink a
-                    # whole package, and a silent alias to the wrong row would
-                    # be worse than an absent citation.
-                    _observe("evidence_conflict_unresolved", {
-                        "package_local_id": ev["e_id"],
-                        "candidate": candidate,
-                        "has_url": bool(ev.get("source_url")),
-                        "has_excerpt": bool(ev.get("excerpt")),
-                        "reason": "ON CONFLICT fired but neither the e_id nor "
-                                  "the (entity_id, content_hash) lookup matched"})
-                    return None
-                kept = hit[0]
-                branch = ("duplicate_within_run" if kept in landed
-                          else "dedup_same_entity")
-                cur.execute(
-                    f"""INSERT INTO evidence_dedup_audit
-                          (e_id, content_hash, branch, matched_e_id, occurred_at)
-                        VALUES (NULL, {_HASH_SQL}, %s, %s, now())""",
-                    (ev.get("source_url"), ev.get("excerpt"), branch, kept))
-                _observe("evidence_dedup", {"package_local_id": ev["e_id"],
-                                            "incoming_e_id": candidate,
-                                            "kept_e_id": kept, "branch": branch})
-                return kept
-            same_entity, same_content = row
-            if same_entity and same_content:
-                # Idempotent re-scan of a package this entity already holds.
-                landed.add(candidate)
-                return candidate
-            # Same stored id but different content (a re-assessment reusing
-            # the local number), or — under a name-derived token — another
-            # entity's row. NEVER alias to it; retry once run-qualified.
-            _observe("evidence_id_collision",
-                     {"package_local_id": ev["e_id"], "stored_id": candidate,
-                      "same_entity": bool(same_entity),
-                      "retry": f"{qualified}-R{run_seq}"})
-        _observe("evidence_unpersistable", {"package_local_id": ev["e_id"],
-                                            "qualified": qualified})
-        return None
 
     # The general_dma Evidence_Master ships a Fact_Count but no fact TEXT; the
     # verbatim excerpts live in the scoring tabs' Rationale, tagged per
@@ -585,7 +486,7 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
             # ENTITY_PROFILE rather than cell ids; the cells that actually
             # cite this item are the ones the drawer should link to.
             ev = {**ev, "subcaps": m["subcaps"]}
-        resolved = _land_evidence(ev)
+        resolved = lander.land(ev)
         alias[ev["e_id"]] = resolved
         if resolved is None:
             continue
