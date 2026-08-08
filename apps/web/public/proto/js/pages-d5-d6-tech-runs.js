@@ -1177,7 +1177,7 @@ function InteractiveGantt({
           height: 28
         }
       }, /*#__PURE__*/React.createElement("div", {
-        title: `${iss.start}${iss.end ? ` → ${iss.end}` : " → open"} · ${iss.desc || ""}`,
+        title: `${iss.start}${iss.end ? ` → ${iss.end}` : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`,
         style: {
           position: "absolute",
           left: `${left}%`,
@@ -1197,7 +1197,7 @@ function InteractiveGantt({
           whiteSpace: "nowrap",
           textOverflow: "ellipsis"
         }
-      }, iss.desc)));
+      }, iss.title || iss.type || iss.id)));
     }), undated.length ? /*#__PURE__*/React.createElement("div", {
       style: {
         borderTop: "1px solid var(--z-sep)",

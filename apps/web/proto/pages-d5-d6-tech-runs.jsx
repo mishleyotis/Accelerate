@@ -719,9 +719,16 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen }) {
               </div>
             </div>
             <div style={{ position: "relative", height: 28 }}>
-              <div title={`${iss.start}${iss.end ? ` → ${iss.end}` : " → open"} · ${iss.desc || ""}`}
+              {/* The bar carries the matter's TITLE, not its rationale. It
+                  read `desc` — the register's rationale — which is an
+                  argument of two to four sentences: on a bar 200px wide it
+                  rendered as the first six words of a paragraph and told the
+                  reader nothing the row label had not already said. The
+                  argument belongs in the panel the bar opens; the tooltip
+                  keeps the dates. */}
+              <div title={`${iss.start}${iss.end ? ` → ${iss.end}` : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`}
                    style={{ position: "absolute", left: `${left}%`, width: `${width}%`, height: 18, top: 5, background: color, borderRadius: 4, opacity: .85, display: "flex", alignItems: "center", padding: "0 6px", color: "#fff", fontSize: 10, fontWeight: 500, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
-                {iss.desc}
+                {iss.title || iss.type || iss.id}
               </div>
             </div>
           </button>
