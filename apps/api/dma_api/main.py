@@ -24,6 +24,7 @@ from .cadence import cadence_for, entity_cadence, refresh_queue
 from .db import close as db_close, connect as db_connect
 from .diff import build_diff
 from .evidence import fetch as ev_fetch, redact_items as ev_redact
+from .identity import ActorError, verified_actor
 from .pages import ApiError, build_page, etag_for, resolve_run
 from .subverticals import SCOPE_TAG, scope_to_entity
 
@@ -226,13 +227,24 @@ async def insight_annotation(display_id: str, ic_id: str, request: Request,
     """The annotation half of invariant 2's two write exceptions: an
     accept/reject verdict on an insight card, anchored fail-closed to a card
     that exists on a promoted run. Idempotency-Key required; workflow tables
-    only."""
+    only.
+
+    The actor is the person named by the request's VERIFIED IAP assertion —
+    not the `actor` parameter, which is now only compared and never believed
+    (dma_api.identity). These rows feed the findings memory and, through it,
+    skill refinement: a verdict attributed to a name the caller typed does not
+    merely mislabel a row, it teaches."""
     try:
         body = await request.json()
     except Exception:
         return JSONResponse({"error": "malformed_body",
                              "detail": "the request body must be a JSON object"},
                             status_code=400)
+    try:
+        actor_email = verified_actor(request, actor)
+    except ActorError as e:
+        return JSONResponse({"error": e.code, "detail": e.detail},
+                            status_code=e.status)
     key = request.headers.get("idempotency-key")
     conn = _connect()
     try:
@@ -240,7 +252,7 @@ async def insight_annotation(display_id: str, ic_id: str, request: Request,
         try:
             status_code, payload = annotate_insight(
                 cur, display_id, ic_id, body=body, idempotency_key=key,
-                actor_email=actor, audience=audience, role=role)
+                actor_email=actor_email, audience=audience, role=role)
         except ApiError as e:
             conn.rollback()
             return JSONResponse({"error": e.code, "detail": e.detail},
@@ -260,20 +272,43 @@ async def alert_actions(alert_id: int, request: Request,
     lifecycle — workflow state, not assessment content. Idempotency-Key
     required; a replay returns the ORIGINAL response, a reused key with a
     different body is 409. Writes alert_actions + idempotency_keys only;
-    the alert's serving row is never touched (invariant 2)."""
+    the alert's serving row is never touched (invariant 2).
+
+    `alert_actions.user_id` is a user id, and the only identity this service
+    can VERIFY is an email — so the assertion's email is resolved against
+    `users` here and the resolved id is what is recorded. The `actor`
+    parameter is no longer read: it named a row directly, which is the same
+    forgery the annotation route carried."""
     try:
         body = await request.json()
     except Exception:
         return JSONResponse({"error": "malformed_body",
                              "detail": "the request body must be a JSON object"},
                             status_code=400)
+    try:
+        actor_email = verified_actor(request)
+    except ActorError as e:
+        return JSONResponse({"error": e.code, "detail": e.detail},
+                            status_code=e.status)
     key = request.headers.get("idempotency-key")
     conn = _connect()
     try:
         cur = conn.cursor()
+        cur.execute("SELECT id FROM users WHERE email = %s AND is_active",
+                    (actor_email,))
+        row = cur.fetchone()
+        if row is None:
+            # Same refusal annotations.py gives, for the same reason:
+            # enrolment is not a write path, and creating the identity inside
+            # the write that is checked against it is the check deleted.
+            return JSONResponse(
+                {"error": "unknown_actor",
+                 "detail": "the verified signed-in email resolves to no "
+                           "active user; user rows are the auth flow's to "
+                           "create"}, status_code=403)
         try:
             status_code, payload = alert_act(
-                cur, alert_id, body=body, idempotency_key=key, actor=actor,
+                cur, alert_id, body=body, idempotency_key=key, actor=str(row[0]),
                 audience=audience, role=role)
         except ApiError as e:
             conn.rollback()

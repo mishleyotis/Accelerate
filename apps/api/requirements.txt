@@ -2,3 +2,7 @@ fastapi==0.115.*
 uvicorn[standard]==0.30.*
 pg8000==1.31.*
 cloud-sql-python-connector[pg8000]==1.12.*
+# Verifying the IAP assertion that names the person behind a write
+# (dma_api.identity). ES256 over Google's published IAP JWK set — the API
+# must not have to trust that its caller checked.
+PyJWT[crypto]==2.9.*
