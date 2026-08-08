@@ -314,6 +314,11 @@ def _parts_for(sources, pages: dict, limit: int = 3) -> list:
     two concatenated are a new sentence nobody wrote."""
     parts: list = []
     seen = set()
+    # The citation index per section, built once. Rebuilding it for every
+    # matched paragraph walked `heatmap.cell_evidence` — seven hundred cells —
+    # once per part, which is the difference between a lookup and a scan on
+    # the one path that has to feel instant.
+    indexed: dict = {}
     for page, section, path in sources:
         body = pages.get(page)
         if not body:
@@ -323,6 +328,17 @@ def _parts_for(sources, pages: dict, limit: int = 3) -> list:
         if not isinstance(data, dict):
             continue
         section_e_ids = sec.get("e_ids") or []
+        if (page, section) not in indexed:
+            # The citations of the ROW each text came from, not of the page:
+            # walk_passages already resolves inheritance, so re-use it rather
+            # than keep a second rule for the same question. First occurrence
+            # wins, matching the walk order the corpus is served in.
+            index: dict = {}
+            for found in walk_passages(page, section, data, section_e_ids):
+                index.setdefault(found["text"],
+                                 (found["e_ids"], found["cite_scope"]))
+            indexed[(page, section)] = index
+        index = indexed[(page, section)]
         for value in _pluck(data, path):
             if not _is_prose(value):
                 continue
@@ -330,14 +346,7 @@ def _parts_for(sources, pages: dict, limit: int = 3) -> list:
             if text in seen:
                 continue
             seen.add(text)
-            # The citations of the ROW this text came from, not of the page:
-            # walk_passages already resolves inheritance, so re-use it rather
-            # than keep a second rule for the same question.
-            cites, scope = list(section_e_ids), "section"
-            for p in walk_passages(page, section, data, section_e_ids):
-                if p["text"] == text:
-                    cites, scope = p["e_ids"], p["cite_scope"]
-                    break
+            cites, scope = index.get(text, (list(section_e_ids), "section"))
             parts.append({"text": text, "page": page, "section": section,
                           "path": path, "e_ids": list(cites),
                           "cite_scope": scope})
@@ -442,6 +451,13 @@ def answers_from_pages(cur, pages: dict, audience: str,
     """The answer set over pages that are already built — so the search path
     reads the six pages ONCE and asks both questions of them."""
     entity, run_meta = _run_meta_of(pages)
+    if run_meta is None:
+        # Every page resolved and none of them named a run. Not reachable
+        # through build_page, which always stamps one — but this function is
+        # the seam two callers share, and a KeyError here would be a 500 for
+        # what is really "there is nothing promoted to answer from".
+        raise ApiError(404, "entity_not_found",
+                       "no promoted run to answer from")
 
     promoted = _promoted_answers(cur, run_meta["run_id"], audience, surface)
     by_key = {(a["surface"], a["scope_id"] or "", a["q_id"]): a
