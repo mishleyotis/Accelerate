@@ -244,11 +244,16 @@ _CONTRACT_VOCABULARIES = {
                      "('TECHNOLOGY' for PLATFORM, 'CAPABILITY' for DATA) is "
                      "not a synonym — it is an event no filter can reach"),
         },
+        # LEADING: the contract asks for the word "with one clause of
+        # reasoning", so the served value is 'ADVANCED — the core is no longer
+        # the constraint…'. An exact match here would have refused all eleven
+        # events of a run that is doing exactly what it was asked.
         "events[*].maturity_effect": {
             "name": "maturity_effect",
             "values": ("ADVANCED", "CONSTRAINED", "NEUTRAL"),
-            "note": ("the effect on today's assessed position; the clause of "
-                     "reasoning goes in `body`, not in this field"),
+            "leading": True,
+            "note": ("the effect on today's assessed position, leading the "
+                     "field; the clause of reasoning follows it"),
         },
         # Served value: 'strategy-first, substrate-later' — prose against a
         # five-word vocabulary, on a TEXT column with no enum behind it.
@@ -256,9 +261,13 @@ _CONTRACT_VOCABULARIES = {
             "name": "arc_shape",
             "values": ("STEADY_INVESTMENT", "STOP_START", "POST_EVENT_CATCHUP",
                        "LEGACY_ANCHORED", "RECENT_ACCELERATION"),
-            "note": ("the shape of the sequence, one of five. A coined phrase "
-                     "renders as an unrecognised badge; the sentence of "
-                     "evidence belongs in `storyline`"),
+            # leading, because the contract states the five "with one sentence
+            # of evidence" — the badge must be one of them, what follows it is
+            # the producer's own prose
+            "leading": True,
+            "note": ("the shape of the sequence, one of five, leading the "
+                     "field. A coined phrase renders as an unrecognised badge; "
+                     "the sentence of evidence follows the word"),
         },
     },
     # Per-item provenance, now that it HAS a column (0027). The vocabularies
@@ -300,12 +309,22 @@ _CONTRACT_VOCABULARIES = {
 }
 
 
+_LEADING_TOKEN = re.compile(r"^[A-Z][A-Z_]*")
+
+
 def _check_contract_vocabularies(page: str, section: str, body) -> list:
     out = []
     for path, spec in _CONTRACT_VOCABULARIES.get(f"{page}.{section}", {}).items():
         for jpath, value in _at_path(body, path):
             if value is None or value in spec["values"]:
                 continue
+            if spec.get("leading") and isinstance(value, str):
+                # The contract asks for the WORD and then a clause. The badge
+                # is the leading run of capitals; everything after it is the
+                # producer's prose and none of this gate's business.
+                m = _LEADING_TOKEN.match(value)
+                if m and m.group(0) in spec["values"]:
+                    continue
             shown = (value if isinstance(value, str) and len(value) <= 60
                      else f"{str(value)[:57]}…")
             out.append(_reason(

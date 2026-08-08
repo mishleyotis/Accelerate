@@ -66,3 +66,62 @@ def test_techstack_status_vocabulary_is_policed():
 def test_a_section_with_no_declared_vocabulary_is_untouched():
     assert _check_contract_vocabularies("overview", "findings",
                                         {"findings": [{"f_id": "F-1"}]}) == []
+
+
+def test_a_coined_event_kind_is_refused():
+    """Measured on a served run: 4 of 11 events carried TECHNOLOGY (x3) or
+    CAPABILITY (x1). Neither is one of the eight, the column is plain TEXT and
+    nothing else looked — so those four rendered on D5 and matched no filter.
+    A near-miss is not a synonym; it is an event no reader can reach."""
+    body = {"events": [{"event_date": "2024-03-01", "kind": "TECHNOLOGY"},
+                       {"event_date": "2024-04-01", "kind": "CAPABILITY"},
+                       {"event_date": "2024-05-01", "kind": "PLATFORM"}]}
+    reasons = _check_contract_vocabularies("context", "timeline", body)
+    assert [r["path"] for r in reasons] == ["timeline.events[0].kind",
+                                            "timeline.events[1].kind"]
+    assert "PLATFORM │ LEADERSHIP │ M&A" in reasons[0]["message"]
+
+
+def test_a_coined_arc_shape_is_refused():
+    """Served value: 'strategy-first, substrate-later', against five words."""
+    reasons = _check_contract_vocabularies(
+        "context", "timeline", {"arc_shape": "strategy-first, substrate-later"})
+    assert len(reasons) == 1 and reasons[0]["path"] == "timeline.arc_shape"
+    assert "STEADY_INVESTMENT" in reasons[0]["message"]
+
+
+def test_a_vocabulary_that_leads_a_clause_accepts_the_clause():
+    """`maturity_effect` is contracted as the WORD 'with one clause of
+    reasoning', and `arc_shape` as one of five 'with one sentence of
+    evidence'. An exact-match rule here would have refused all eleven events
+    of a run doing precisely what it was asked — a gate that fires on
+    compliance is worse than no gate."""
+    body = {"arc_shape": "STEADY_INVESTMENT — four dated investments, no gaps",
+            "events": [{"maturity_effect": "ADVANCED — the core is no longer "
+                                           "the constraint"},
+                       {"maturity_effect": "NEUTRAL"}]}
+    assert _check_contract_vocabularies("context", "timeline", body) == []
+
+
+def test_the_clause_cannot_smuggle_in_a_coined_word():
+    body = {"events": [{"maturity_effect": "IMPROVED — reads like one of the "
+                                           "three, is not one of the three"}]}
+    reasons = _check_contract_vocabularies("context", "timeline", body)
+    assert len(reasons) == 1
+    assert "ADVANCED │ CONSTRAINED │ NEUTRAL" in reasons[0]["message"]
+
+
+def test_per_item_provenance_vocabularies_are_per_surface():
+    """The contract states a DIFFERENT vocabulary per surface, which is why
+    the column 0027 adds is TEXT and not provenance_t: an enum column would
+    abort the promote transaction on a value the contract itself declares."""
+    ok = _check_contract_vocabularies(
+        "platform", "starters", {"starters": [{"provenance": "TEMPLATE_FILL"}]})
+    assert ok == []
+    bad = _check_contract_vocabularies(
+        "platform", "starters", {"starters": [{"provenance": "DERIVED"}]})
+    assert len(bad) == 1 and "TEMPLATE_FILL │ ANALYST" in bad[0]["message"]
+    # and the recommendation's own two, which are not the starter's two
+    assert _check_contract_vocabularies(
+        "platform", "recommendations",
+        {"recommendations": [{"provenance": "DERIVED"}]}) == []
