@@ -42,6 +42,21 @@ still resolves to no user and still takes the 403. Enrolment is not a write
 path: creating the identity inside the write that is checked against it would
 be the check deleted.
 
+## What the 403 had been hiding
+
+The moment the actor resolved, the next statement raised
+
+    42501: permission denied for table entities
+
+`svc_api` has never held a grant on `entities` or `runs`, so the anchor query
+could not have succeeded on any request in the life of this endpoint — the
+earlier refusal was standing in front of a statement that had never run. Both
+the anchor and the reads below now resolve display_id through
+`serving_directory`, which alerts.py already calls "the ONE view svc_api"
+reads for entity display fields: it holds promoted runs only, promote
+refreshes it inside the promote transaction, and default-deny survives
+because svc_api gains nothing it did not already read.
+
 ## The read half
 
 `annotations` had a reader nowhere in this repository — no endpoint, no MCP
@@ -174,14 +189,28 @@ def annotate_insight(cur, display_id: str, ic_id: str, *, body,
 
     # ── Fail-closed anchor: the card must exist on the entity's active
     #    run. A verdict attached to nothing is refused, not stored. ─────
+    #
+    #    Resolved through `serving_directory`, not through `entities` and
+    #    `runs`. Measured 2026-08-08, the moment the 403 above stopped firing:
+    #    the next statement raised 42501 `permission denied for table entities`
+    #    — svc_api has never held a grant on `entities` or `runs`, so this
+    #    anchor query could not have succeeded on any request, ever. The
+    #    earlier refusal had been hiding it.
+    #
+    #    The fix is the codebase's own idiom rather than a new grant:
+    #    `serving_directory` is "the ONE view svc_api" reads for entity display
+    #    fields (alerts.py), it carries display_id beside run_id, it holds
+    #    PROMOTED runs only — so `promoted_at IS NOT NULL` is the view's own
+    #    definition and not a filter this query has to remember — and promote
+    #    refreshes it inside the promote transaction (promote.py:172), so it
+    #    cannot be stale relative to a card that exists. Default-deny survives:
+    #    svc_api gains nothing it did not already read.
     cur.execute(
-        """SELECT ic.run_id, e.id
+        """SELECT ic.run_id, ic.entity_id
              FROM insight_cards ic
-             JOIN entities e ON e.id = ic.entity_id
-             JOIN runs r ON r.id = ic.run_id
-            WHERE e.display_id = %s AND ic.ic_id = %s
-              AND r.promoted_at IS NOT NULL
-            ORDER BY r.promoted_at DESC
+             JOIN serving_directory d ON d.run_id = ic.run_id
+            WHERE d.display_id = %s AND ic.ic_id = %s
+            ORDER BY d.promoted_at DESC
             LIMIT 1""", (display_id, ic_id))
     anchor = cur.fetchone()
     if anchor is None:
@@ -248,8 +277,13 @@ def read_insight_annotations(cur, display_id: str, *, ic_id: str | None = None,
     """
     _refuse_read(audience)
     limit = max(1, min(int(limit or 100), 500))
+    # display_id -> entity through `serving_directory`, the one view svc_api
+    # reads for entity display fields. `entities` is not readable by this role
+    # and does not need to be (see the anchor query above).
     params = [display_id]
-    where = "e.display_id = %s AND a.anchor_kind = 'insight_card'"
+    where = ("a.entity_id = (SELECT entity_id FROM serving_directory "
+             "WHERE display_id = %s LIMIT 1) "
+             "AND a.anchor_kind = 'insight_card'")
     if ic_id:
         where += " AND a.anchor_id = %s"
         params.append(ic_id)
@@ -257,7 +291,6 @@ def read_insight_annotations(cur, display_id: str, *, ic_id: str | None = None,
         f"""SELECT a.id, a.anchor_id, a.body, a.created_at, u.email,
                    u.display_name, u.role::text, a.run_id
               FROM annotations a
-              JOIN entities e ON e.id = a.entity_id
               LEFT JOIN users u ON u.id = a.user_id
              WHERE {where}
              ORDER BY a.created_at DESC, a.id DESC
@@ -297,9 +330,10 @@ def latest_verdicts(cur, display_id: str, ic_ids=None, *,
         f"""SELECT DISTINCT ON (a.anchor_id)
                    a.anchor_id, a.body, a.created_at, u.email, u.display_name
               FROM annotations a
-              JOIN entities e ON e.id = a.entity_id
               LEFT JOIN users u ON u.id = a.user_id
-             WHERE e.display_id = %s AND a.anchor_kind = 'insight_card'{filt}
+             WHERE a.entity_id = (SELECT entity_id FROM serving_directory
+                                   WHERE display_id = %s LIMIT 1)
+               AND a.anchor_kind = 'insight_card'{filt}
              ORDER BY a.anchor_id, a.created_at DESC, a.id DESC""",
         tuple(params))
     out = {}
