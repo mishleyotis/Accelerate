@@ -680,6 +680,11 @@ function LeadershipPanel({ audience }) {
     const r = routeOf(ex);
     return !!(r.email || r.linkedin || r.phone);
   };
+  // An entry with neither a name nor a role. The adapter files it as a gap
+  // because it has no name; a gap the producer meant carries the TITLE of the
+  // role that is missing, so an entry with neither is not a gap, it is a value
+  // this page cannot read. It is never counted as one and never enriched.
+  const isUnreadable = (ex) => !ex.title && (!ex.name || ex.name === "-");
   const enrich = (ex, quiet) => {
     setRevealed(m => ({ ...m, [ex.id]: "loading" }));
     setTimeout(() => {
@@ -691,7 +696,7 @@ function LeadershipPanel({ audience }) {
       }
     }, 400);
   };
-  const enrichable = roster.filter(x => !x.gap_flag);
+  const enrichable = roster.filter(x => !x.gap_flag && !isUnreadable(x));
   const enrichAll = () => {
     const targets = enrichable.filter(x => revealed[x.id] !== "done");
     if (!targets.length) return;
@@ -755,6 +760,30 @@ function LeadershipPanel({ audience }) {
         {roster.map(ex => {
           const state = revealed[ex.id]; // undefined | "loading" | "done" | "none"
           const route = routeOf(ex);
+          // A row with neither a name nor a title says nothing. The adapter
+          // reads "no name" as a role gap, which is right for a producer's
+          // deliberate gap row — those carry the title of the missing role —
+          // and wrong for an entry that arrived as a string or a number, where
+          // every field is undefined. Rendering that as "critical role absent"
+          // invents a finding out of a malformed field. Named instead.
+          if (isUnreadable(ex)) {
+            return (
+              <div key={ex.id} style={{ display: "flex", gap: 10, padding: "12px 0",
+                                        borderBottom: "1px solid var(--z-sep)" }}
+                   data-unreadable-roster-row={ex.id}>
+                <div style={{ width: 36, height: 36, borderRadius: 18,
+                              background: "var(--z-sep)", color: "var(--z-muted)",
+                              display: "flex", alignItems: "center",
+                              justifyContent: "center", fontSize: 14, flexShrink: 0 }}>?</div>
+                <div style={{ flex: 1, minWidth: 0, fontSize: 11.5,
+                              color: "var(--z-muted)", lineHeight: 1.5 }}>
+                  This roster entry carries neither a name nor a role, so it
+                  states no person and no gap. It is shown rather than dropped:
+                  the roster promoted with it in.
+                </div>
+              </div>
+            );
+          }
           return (
             <div key={ex.id} style={{ display: "flex", gap: 10, padding: "12px 0", borderBottom: "1px solid var(--z-sep)" }}>
               <div style={{ width: 36, height: 36, borderRadius: 18, background: ex.gap_flag ? "var(--z-sep)" : "linear-gradient(135deg, var(--z-teal), var(--z-mid))", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
@@ -842,7 +871,7 @@ function LeadershipPanel({ audience }) {
           // Read from THIS card's roster, the one rendered above — the line is
           // a statement about the rows on screen, and it is only reachable
           // when there are rows (the empty branch returns above).
-          const gaps = roster.filter(x => x.gap_flag);
+          const gaps = roster.filter(x => x.gap_flag && !isUnreadable(x));
           if (!gaps.length) {
             return <span>No critical role gaps in the promoted roster.</span>;
           }
