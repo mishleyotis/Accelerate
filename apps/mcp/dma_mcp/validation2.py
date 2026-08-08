@@ -300,22 +300,43 @@ def _check_evidence_dating(found, cited_by) -> list:
 _CELL_ID_RE = re.compile(r"^P\d+C\d+\.")
 
 
+# The contract does not spell every cell link `subcap_id(s)`. Three
+# surfaces name the same thing differently — the timeline's
+# `capability_ids`, the value chain's `subcaps`, an insight card's
+# singular `linked_subcap_id` — and a predicate written from the two
+# commonest spellings could not see any of them. On the run this comment
+# was written against, two of the eight cards pointing at a MISATTRIBUTED
+# cell sat in fields ET-05 and CG-14 were structurally blind to, so the
+# chips a reader clicks were the ones no gate had read.
+#
+# Membership, not shape: a key is a cell link or it is not, and the value
+# may be one id or a list of them. The id regex still decides what counts,
+# so a key that happens to carry prose contributes nothing.
+_CELL_KEYS = ("capability_ids", "subcaps")
+
+
+def _is_cell_key(key: str) -> bool:
+    return key.endswith(("subcap_id", "subcap_ids")) or key in _CELL_KEYS
+
+
 def _iter_cell_citations(payload):
     """Yield (path, key, cell_id) for every catalogue cell id a payload
-    cites — any `*subcap_ids` list and any `subcap_id` scalar, wherever
-    they sit in the tree."""
+    cites — every cell-link key, scalar or list, wherever it sits in the
+    tree."""
     for name, body in payload.items():
         if not isinstance(body, dict):
             continue
         for path, obj in _walk(body, name):
             for key, value in obj.items():
-                if key.endswith("subcap_ids") and isinstance(value, list):
+                if not _is_cell_key(key):
+                    continue
+                if isinstance(value, str):
+                    if _CELL_ID_RE.match(value):
+                        yield f"{path}.{key}", key, value
+                elif isinstance(value, list):
                     for i, cell in enumerate(value):
                         if isinstance(cell, str) and _CELL_ID_RE.match(cell):
                             yield f"{path}.{key}[{i}]", key, cell
-                elif key == "subcap_id" and isinstance(value, str) \
-                        and _CELL_ID_RE.match(value):
-                    yield f"{path}.{key}", key, value
 
 
 def _entity_subvertical(conn, run_id):

@@ -73,3 +73,37 @@ def test_one_verdict_per_cell_per_section_not_one_per_occurrence():
         {"linked_subcap_ids": ["P2C4.9.9"]},
         {"linked_subcap_ids": ["P2C4.9.9"]}]}}
     assert len(_check_cell_linkage("techstack", payload, RUN_CELLS)) == 1
+
+
+def test_the_keys_that_are_not_spelled_subcap_id_are_still_cell_links():
+    """A timeline event's `capability_ids`, a value chain's `subcaps` and an
+    insight card's singular `linked_subcap_id` are the same navigation as a
+    tech row's `linked_subcap_ids`: a chip a reader clicks. A predicate
+    written from the two commonest spellings read none of them, so a card
+    could point at a cell the run does not carry and no gate would say so.
+    """
+    payload = {
+        "timeline": {"events": [
+            {"title": "Core conversion", "capability_ids": ["P4C3.1.1",
+                                                            "P2C4.9.9"]}]},
+        "value_chain": {"chains": [
+            {"stage": "Serve", "subcaps": ["P2C3.1.6", "P9C9.9.9"]}]},
+        "insights": {"cards": [
+            {"ic_id": "IC-8", "linked_subcap_id": "P2C4.9.8"}]},
+    }
+    out = _check_cell_linkage("context", payload, RUN_CELLS)
+    assert {r["path"] for r in out} == {
+        "timeline.events[0].capability_ids[1]",
+        "value_chain.chains[0].subcaps[1]",
+        "insights.cards[0].linked_subcap_id",
+    }
+    assert all(r["gate_id"] == "CG-14" and r["severity"] == "block"
+               for r in out)
+
+
+def test_a_cell_key_carrying_prose_contributes_nothing():
+    """The id regex decides what counts, so widening the key predicate
+    cannot turn a sentence into a citation."""
+    payload = {"value_chain": {"chains": [
+        {"stage": "Serve", "subcaps": ["not a cell id", "P4C3.1.1"]}]}}
+    assert _check_cell_linkage("heatmap", payload, RUN_CELLS) == []
