@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dma-rectifier/finding.schema.json",
+  "title": "Finding",
+  "description": "One observed defect, recorded at the moment of sighting by whoever saw it. Identity is the fingerprint (invariant + verb + normalised path), not the text: the same defect described by a verifier, a reviewer and a stack trace is one finding with three sightings. Never pre-suppress a duplicate — record it and let the store dedupe, because the sighting count is the class signal.",
+  "type": "object",
+  "required": ["invariant", "path", "locus", "verb", "observed", "source", "session_ref"],
+  "additionalProperties": false,
+  "properties": {
+    "invariant": {
+      "type": "string",
+      "description": "The gate id or charter invariant violated. Gate form: AG-03, SG-02, ET-05, CG-13. Invariant form: INV-06 (four bands), INV-08 (counts computed). UNKNOWN is legal and is itself informative — a defect no gate or invariant names is a gap in the gate set.",
+      "examples": ["CG-13", "ET-05", "AG-03", "INV-08", "UNKNOWN"]
+    },
+    "path": {
+      "type": "string",
+      "description": "The JSON path, DB column, or file:symbol. NORMALISED: array indices collapsed to [], run ids / entity ids / e_ids / uuids stripped. overview.findings[3].score and overview.findings[11].score are one path.",
+      "examples": ["context.issue_register.issues[].capped_subcap_ids", "apps/mcp/dma_mcp/validation2.py:_PER_ITEM_RE"]
+    },
+    "locus": {
+      "type": "string",
+      "enum": ["package", "synthesis", "submit", "promote", "serve", "render"],
+      "description": "Where in the pipeline the defect lives — not where it was noticed. A field discarded at promotion has locus=promote even though it was seen on a rendered card."
+    },
+    "verb": {
+      "type": "string",
+      "enum": ["discarded", "fabricated", "unchecked", "miscited", "misgrained", "leaked", "stale", "unreachable"],
+      "description": "What went wrong. With invariant and path this is the fingerprint. Same invariant + same verb + same path = recurrence; same invariant + same verb + different path = one class."
+    },
+    "observed": {
+      "type": "string",
+      "description": "What actually happened, in the source's own words. Not a paraphrase — the detail dropped in paraphrase is usually the fingerprint."
+    },
+    "source": {
+      "type": "string",
+      "enum": ["adversarial-verifier", "package-vetter", "deployed-app-auditor", "surface-producer", "web-app-reviewer", "ci", "scheduler", "user", "rectifier"],
+      "description": "Which producer sighted it. Provenance, in the same sense a payload cites evidence."
+    },
+    "session_ref": {
+      "type": "string",
+      "description": "The session, run or CI job the sighting came from. What makes a finding re-readable across sessions."
+    },
+    "run_id": {"type": ["string", "null"], "description": "The assessment run, where the sighting had one."},
+    "entity_id": {"type": ["string", "null"], "description": "The entity. Carries client identity: treat as internal."},
+    "surface": {"type": ["string", "null"], "description": "Page and section, e.g. overview.findings, heatmap.cell_evidence.", "examples": ["overview.findings"]},
+    "severity": {
+      "type": "string",
+      "enum": ["blocking", "material", "noted", "probed_clean"],
+      "description": "probed_clean records an attack that came up empty. Recorded deliberately: silence about an attack never run reads identically to one that passed."
+    },
+    "client_reach": {
+      "type": "string",
+      "enum": ["rendered", "promoted", "submitted", "caught_before_submit", "none"],
+      "description": "How far it got. 'rendered' forces rung >= R3 by the ladder's second rule."
+    },
+    "excerpt": {
+      "type": "string",
+      "description": "Verbatim from the artefact — the verdict line, the failing assertion, the card text, the auditor row. A finding summarised out of its source cannot be re-read.",
+      "minLength": 20
+    },
+    "artefact_ref": {"type": ["string", "null"], "description": "Path or URL the excerpt came from."},
+    "would_have_caught_it": {
+      "type": ["string", "null"],
+      "description": "One sentence: the check that was missing. A hypothesis, allowed to be wrong. Three sightings later it is what makes the cluster's rung obvious."
+    },
+    "r_layer": {
+      "type": ["object", "null"],
+      "description": "For a reviewer rejection: the card's recorded reasoning. REJECT against verdict=ACCEPT means the probe set lacks the probe the human just ran; REJECT against an absent r_layer is AG-family gate territory."
+    },
+    "reviewer_action": {"type": ["string", "null"], "enum": ["ACCEPT", "REJECT", null]},
+    "internal_only": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "JSON paths within this finding that must not leave an internal audience — reviewer notes, card bodies, entity identity. Annotations are refused for the customer audience; redaction does not stop at the serving layer because the reader is an agent.",
+      "default": []
+    }
+  }
+}
