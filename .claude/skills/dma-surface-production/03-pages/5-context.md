@@ -177,6 +177,137 @@ A cap with no level is not a cap. The grid distinguishes the two, so a cell
 listed under `capped_subcap_ids` with `cap_level: null` reads as "linked", and if
 you meant a ceiling you have not stated one.
 
+### What a cap is, and where it comes from
+
+**A cap is the assessment's own arithmetic, not a description of an issue.** It
+says: *this matter holds these named cells to a maximum maturity, so a cell
+sitting at 3.0 sits there for a reason a reader can open.* Without it a reader
+meets a number and has to accept it. With it they meet a constraint, its cells,
+its level and its date.
+
+**It is established from the workbook, never composed.** The assessment applies
+the Severity-to-Maturity Cap Matrix and records the result in its caps log —
+which reaches you through `get_report_bundle` as the `issue_register` report
+sections: **Issue Time Map** (a `Cap Applied` column, one row per matter) and
+**Severity Cap Impact** (the prose that states the level, the cells and the
+window). Read both. The column is the authority on *whether*; the prose is the
+authority on *what and why*.
+
+A caps log row states four things, and all four belong on the register row:
+
+| From the log | Onto the row |
+|---|---|
+| the cells named | `capped_subcap_ids` (with a level) or `linked_subcap_ids` (without) |
+| the level | the `cap_level` on those ids |
+| the pre-cap and post-cap position | the first clause of `rationale` |
+| the window or condition that ends it | the rest of `rationale`, with its date arithmetic |
+
+**Cap Applied: None is a finding, and it is the commonest one.** On the Baxter
+run all five workbook rows read `None`. That is not an absence of analysis — it
+is the analysis, and each `None` carries its reason in the same cell:
+`None (>24mo; P4C4 cap retired)`, `None (friction indicator; NPS 79.81 offsets)`,
+`None (forward obligation; informs P3C3)`. Send `capped_subcap_ids: []`, keep the
+cells under `linked_subcap_ids`, and put the reason in the rationale where it
+renders.
+
+**Persistence, so you do not lose the work.** `capped_subcap_ids` is validated at
+submit and has **no column on `context_issue_register`** — it is dropped at
+promote (the writer spec flags this for adjudication). What survives promotion is
+`issue_id, title, severity, status, opened_on, resolved_on, rationale,
+linked_subcap_ids, e_ids`. Two consequences you must design around:
+
+- The cells must be in **`linked_subcap_ids`** or the reader never sees them.
+  Sending them only under `capped_subcap_ids` ships a drilldown that opens onto
+  nothing.
+- Any per-item field the contract does not persist — `opened_on_basis`,
+  `sources_searched` on an issue row — passes the gate and then vanishes. Send
+  it *and* repeat the substance in the `rationale`, which is the only prose
+  carrier that reaches the surface.
+
+### An issue that caps nothing still says so
+
+The drilldown has three states and each must be stated out loud. The one that
+goes wrong is the middle one.
+
+| State | The row | What the panel must say |
+|---|---|---|
+| **ceiling** | cells + a level | the level, and how many of the named cells sit at it |
+| **linked** | cells, no level | the assessed spread, and that this matter sets no maximum |
+| **unlinked** | no cells | that it names none — **and the narrative must say why it is still on the register** |
+
+The reported defect was the middle state rendering as the third: the panel printed
+*"This matter names no capability cell"* whenever no LEVEL was stated, which — with
+every promoted row shipping an empty linkage list — was every row. A reader who
+clicked an issue was told the assessment had not been done.
+
+So: **never leave a field null where the absence is the answer.** A matter that
+genuinely caps nothing gets a rationale opening on the cap state (`Cap: none`,
+`Cap retired`, `Cap: none today`) and then arguing it. A matter that genuinely
+bears on no cell is either mis-scoped for this register or the linkage has not
+been done — say which, in the rationale, in the row itself.
+
+### Issue depth — the standard
+
+A drilldown that only restates its title has not been produced. Every row owes a
+reader all seven:
+
+1. **identity** — id, severity and status in the register's own words
+2. **the cells** — every cell the matter bears on, each one carried by this run
+3. **the cap** — its level, or `none` with the reason it is none
+4. **the arithmetic** — pre-cap and post-cap position, from the caps log
+5. **the argument** — 2–4 sentences that argue the constraint, never restate the
+   title
+6. **the dates** — opened, resolved, and where undated, the search that
+   established the absence
+7. **the citations** — per item, each resolving with a verbatim excerpt
+
+**Worked example — ISS-001, Baxter Credit Union.**
+
+The workbook's Issue Time Map row:
+
+```
+ISS-001  Email Data Breach  Oct 2021  Remediated  S2 EXPIRED  54  E-008
+         Cap Applied: None (>24mo; P4C4 cap retired)
+```
+
+and its Severity Cap Impact prose: *"The P4C4 Cybersecurity cap of 3.0 has been
+retired. Current P4C4 scores reflect BCU's post-breach investments: NIST CSF 2.0,
+13 security platforms, and CISO Southard's leadership."*
+
+Read: the cells are P4C4, the level **was** 3.0, the window is 24 months and 54
+have elapsed. Then check the position — the six linked P4C4 cells all score
+**exactly 3.0** on this run, which is the sharpest thing on the row and is
+invisible until you look:
+
+```json
+{
+  "issue_id": "ISS-001",
+  "title": "Employee email account breach in October 2021, remediated with no evidence of misuse",
+  "severity": "S2 EXPIRED", "status": "REMEDIATED",
+  "opened_on": "2021-10-01", "resolved_on": null,
+  "capped_subcap_ids": [],
+  "linked_subcap_ids": ["P4C4.2.1","P4C4.2.2","P4C4.5.1",
+                        "P4C4.6.2","P4C4.7.2","P4C4.7.3"],
+  "rationale": "Cap retired. The severity matrix held Information Security at a 3.0 ceiling while the incident sat inside its 24-month S2 window; at 54 months elapsed the ceiling lapsed and the six linked cells score on their own evidence. All six still read 3.0, so lifting the cap moved nothing — what holds them there is the NIST CSF 2.0 programme and a standing monitoring function, not a five-year-old email compromise. It stays on the register as the dated origin of a ceiling a reader would otherwise find unexplained.",
+  "e_ids": ["E-BCU-008", "E-BCU-055", "E-CC-066"]
+}
+```
+
+What makes it deep rather than long: the cap state is named in the first two
+words; the arithmetic is checkable (24 vs 54 months, six cells, one level); the
+argument says something the title does not (the cap's removal changed nothing);
+and the last sentence answers the only question a `None` invites — *then why is
+this here?*
+
+**Enrich where the run is silent.** The register hands you a matter and rarely
+hands you the record behind it. Search the regulator's own pages for a statutory
+obligation, the state Attorney General breach registers for an incident, the
+entity's own site for the control that bounds the friction — then `register_evidence`
+each one, which mints the id and verifies the excerpt verbatim against a live
+fetch. On this run four rows carrying one citation each became four rows carrying
+two to five, and the added ids were what let the rationales argue rather than
+assert.
+
 **`status` is never null, and it is the register's own word.** A real run used
 `ACTIVE`, `NEW OBLIGATION` and `REMEDIATED`; the banner had been filtering for
 `OPEN`, a value the register never uses, and showed nothing while the grid beneath
