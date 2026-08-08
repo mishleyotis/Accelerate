@@ -232,7 +232,8 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                     sections: list | None = None,
                     report_artefact_id: str | None = None,
                     grains: dict | None = None,
-                    research: dict | None = None) -> PersistResult:
+                    research: dict | None = None,
+                    companion_observations: list | None = None) -> PersistResult:
     cur = conn.cursor()
     inst = _institution(manifest)
     # Signal 4 of the cascade: the client folder's display name (its
@@ -657,7 +658,12 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                 WHERE sc.run_id = %s""",
             (run_id,))
 
-    for o in workbook.observations:
+    # The scoring workbook's own observations, plus everything the companion
+    # tabs could not read. A tab whose shape the parser does not recognise
+    # lands as a NAMED row here rather than as an absent section — that is
+    # what makes "why is this client's cohort empty" answerable without
+    # opening the workbook.
+    for o in list(workbook.observations) + list(companion_observations or []):
         cur.execute(
             """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
                VALUES (%s,%s,%s, now())""",

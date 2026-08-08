@@ -536,32 +536,62 @@ def _pick(headers: dict, names) -> int | None:
     return None
 
 
-def parse_evidence_master(path: str) -> list:
+# The ledger tab, under every name the corpus gives it. Measured: of the 153
+# packages carrying a workbook, 15 have no `Evidence_Master` at all — eleven
+# of those name the same tab `Evidence_Index`, `Evidence_Linkage_Matrix`,
+# `Evidence_Linkage`, `Evidence_Detail` or `Evidence_Register`, and reading
+# only the one spelling left every one of them with no evidence rows and a
+# NULL linked-evidence counter instead of a computed zero.
+_EV_TABS = ("Evidence_Master", "Evidence_Index", "Evidence_Register",
+            "Evidence_Ledger", "Evidence_Detail", "Evidence_Linkage_Matrix",
+            "Evidence_Linkage", "Evidence_Inventory")
+_EV_ID_ANCHORS = ("Evidence_ID", "E_ID", "Evidence Id", "EvidenceID", "ID")
+
+
+def parse_evidence_master(path: str, obs: list | None = None) -> list:
+    def observe(kind, detail):
+        if obs is not None:
+            obs.append(Observation(kind, None, detail))
+
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
-        if "Evidence_Master" not in wb.sheetnames:
+        tab = next((t for t in _EV_TABS if t in wb.sheetnames), None)
+        if tab is None:
+            observe("evidence_ledger_tab_not_found",
+                    {"expected_any_of": list(_EV_TABS),
+                     "tabs_present": list(wb.sheetnames)[:30],
+                     "reason": "no evidence ledger tab: this package lands "
+                               "with no evidence rows at all"})
             return []
-        ws = wb["Evidence_Master"]
-        try:
-            headers, first = _header_map(ws, "Evidence_ID")
-        except ValueError:
-            # Some corpus variants label the id column differently.
+        ws = wb[tab]
+        headers = first = None
+        for anchor in _EV_ID_ANCHORS:
             try:
-                headers, first = _header_map(ws, "E_ID")
+                headers, first = _header_map(ws, anchor)
+                break
             except ValueError:
-                # No recognisable ledger: the package lands without its
-                # evidence tab (links absent, counts computed zero) rather
-                # than failing wholesale.
-                return []
+                continue
+        if headers is None:
+            # No recognisable ledger: the package lands without its
+            # evidence tab (links absent, counts computed zero) rather
+            # than failing wholesale — but never without saying so.
+            observe("evidence_ledger_header_not_found",
+                    {"tab": tab, "expected_any_of": list(_EV_ID_ANCHORS),
+                     "reason": "the ledger tab exists and its id column could "
+                               "not be located; no evidence row was read"})
+            return []
         cols = {k: _pick(headers, names) for k, names in _EV_ALIASES.items()}
-        cols["e_id"] = _pick(headers, ("evidence_id", "e_id"))
+        cols["e_id"] = _pick(headers, ("evidence_id", "e_id", "id", "evidenceid"))
         out = []
+        rows_seen = 0
         for row in ws.iter_rows(min_row=first, values_only=True):
             def v(key):
                 i = cols.get(key)
                 return row[i] if i is not None and i < len(row) else None
             e_id = str(v("e_id") or "").strip()
-            if not e_id.startswith("E-"):
+            if e_id:
+                rows_seen += 1
+            if not (e_id.startswith("E-") or e_id.startswith("INT-")):
                 continue
             tier = str(v("tier") or "").strip().upper()
             ers = _decimal(v("ers"))
@@ -591,6 +621,12 @@ def parse_evidence_master(path: str) -> list:
                             (x.strip() for x in str(v("subcaps") or "").split(","))
                             if SUBCAP_RE.match(s)],
             })
+        if rows_seen and not out:
+            observe("evidence_ledger_ids_unrecognised", {
+                "tab": tab, "rows_seen": rows_seen,
+                "expected": "E-… or INT-…-…",
+                "reason": "the ledger has rows and not one id was in a form "
+                          "this parser recognises; no evidence was read"})
         return out
     finally:
         wb.close()
@@ -882,6 +918,16 @@ def _is_pillar_tab(tab: str) -> bool:
 _CATEGORY_RE = re.compile(r"^P\d+C\d+$")
 _PILLAR_RE = re.compile(r"^P\d+$")
 
+# The same category id, as the peer tabs actually label their rows:
+# `P1C1`, `P1C1: Digital Strategy & Roadmap`, `P1C1_digital_strategy`. The
+# lookahead keeps a SUBCAP id (`P1C1.1`) out — that is a different grain.
+_CATEGORY_LABEL_RE = re.compile(r"^(P\d+C\d+)(?=$|[^0-9.])")
+
+
+def _category_id(value) -> str | None:
+    m = _CATEGORY_LABEL_RE.match(str(value or "").strip())
+    return m.group(1) if m else None
+
 # Peer_Benchmarks stat columns, under every header spelling the corpus uses.
 # Anything NOT in here is a named peer institution, so a missing alias does
 # not degrade gracefully — it invents a peer. Keyed by _norm() output.
@@ -900,9 +946,36 @@ _STAT_ALIASES = {
 }
 
 
+# Stat headers the corpus writes freely rather than from a fixed list:
+# `Gap_vs_Median`, `Gap_to_Median`, `vs_Peer`, `Position`, `Cat_ID`,
+# `Peer_Name`, `Unknown`, `Percentile_Rank`, … Measured across the corpus,
+# 28 clients had at least one of these read as a named peer institution.
+_STAT_PATTERNS = (
+    # NOT a bare `delta*`: `Delta_Community` is a real credit union, and a
+    # name-only rule that swallowed it would drop a peer instead of inventing
+    # one — the same defect facing the other way.
+    (re.compile(r"^(gap|diff|variance)(_|$)"), "delta"),
+    (re.compile(r"^delta_(vs|to|from|median|peer)"), "delta"),
+    (re.compile(r"^vs_"), "delta"),
+    (re.compile(r"_vs_"), "delta"),
+    (re.compile(r"^(position|rank|ranking|quartile|percentile\w*)$"), "priority"),
+    (re.compile(r"^(cat|cat_id|category\w*)$"), "category"),
+    (re.compile(r"^(peer_name|peer|peers|institution|entity_name|unknown|"
+                r"n_a|na|blank|notes?|comments?|status|source|basis|cohort|"
+                r"method\w*)$"), "note"),
+)
+
+
 def _stat_key(header: str):
     """The canonical stat a header names, or None when it names a peer."""
-    return _STAT_ALIASES.get(_norm(header))
+    n = _norm(header)
+    hit = _STAT_ALIASES.get(n)
+    if hit:
+        return hit
+    for pattern, canonical in _STAT_PATTERNS:
+        if pattern.search(n):
+            return canonical
+    return None
 
 
 def parse_grain_summaries(path: str) -> dict:
@@ -989,55 +1062,131 @@ def _num(value):
     return None if d in (None, "UNPARSEABLE") else float(d)
 
 
-def parse_peer_benchmarks(path: str) -> list:
+def _peer_header_row(rows: list):
+    """Index of the header row, or None. The header is NOT reliably row 1:
+    seven packages put a title, a methodology note or a run id above it
+    (`Peer Benchmarking — METHODOLOGY NOTE`, `DMA-RES-APGFCU-… | Peer
+    Benchmarks | SV2 Credit Union Medium | Maryland`), and reading row 1 as
+    the header made every peer column a fragment of that sentence."""
+    best, best_hits = None, 0
+    for i, row in enumerate(rows[:10]):
+        if not row:
+            continue
+        hits = sum(1 for h in row if h is not None and _stat_key(str(h)))
+        named = sum(1 for h in row if h is not None and str(h).strip())
+        if hits and named >= 2 and hits > best_hits:
+            best, best_hits = i, hits
+    return best
+
+
+def parse_peer_benchmarks(path: str, obs: list | None = None) -> list:
     """Peer_Benchmarks is CATEGORY grain with named-peer columns after the
     stat block. Only the per-peer scores are data — Entity_Score and the
     stat columns (median/quartiles/min/max/delta) are derivable, so they
     are read solely to verify, never to store (counts are computed, never
-    stored, where a source of truth exists). Stops at the footer notes."""
+    stored, where a source of truth exists). Stops at the footer notes.
+
+    A column is a peer only if it BOTH fails to name a known stat and holds
+    values on the maturity scale. The name test alone invents institutions:
+    28 clients in the corpus carried a peer called `Gap_vs_Median`,
+    `Position`, `Peer_Name`, `Cat_ID` or `Unknown`, and every one of those
+    would have rendered in the cohort as a bank that does not exist."""
+    def observe(kind, detail):
+        if obs is not None:
+            obs.append(Observation(kind, None, detail))
+
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
         if "Peer_Benchmarks" not in wb.sheetnames:
             return []
         ws = wb["Peer_Benchmarks"]
-        rows = ws.iter_rows(values_only=True)
-        header = next(rows, None)
-        if not header:
+        rows = [r for r in ws.iter_rows(values_only=True) if r]
+        if not rows:
             return []
-        # A stat column is not a peer. The corpus writes these headers both
-        # ways — `Peer_Median` in some packages, a bare `Median` in others —
-        # and a name that misses this map becomes a PEER NAMED "Median",
-        # which is how 54 of BCU's 144 peer rows arrived as institutions
-        # called Median, P25 and P75.
-        peer_cols = [(i, str(h).strip()) for i, h in enumerate(header)
-                     if h is not None and _stat_key(str(h)) is None]
+        h = _peer_header_row(rows)
+        if h is None:
+            observe("peer_header_not_found", {
+                "tab": "Peer_Benchmarks",
+                "row_1": [str(v)[:60] for v in rows[0] if v is not None][:8],
+                "reason": "no row in the first ten named a recognised peer "
+                          "statistic; no peer row was read"})
+            return []
+        header, body = rows[h], rows[h + 1:]
+        candidates = [(i, str(x).strip()) for i, x in enumerate(header)
+                      if x is not None and _stat_key(str(x)) is None
+                      and str(x).strip()]
 
-        def col(canonical):
+        def col(canonical, row):
             """The row's value for a canonical stat, under any of its aliases."""
-            for i, h in enumerate(header):
-                if h is not None and _stat_key(str(h)) == canonical:
+            for i, x in enumerate(header):
+                if x is not None and _stat_key(str(x)) == canonical:
                     return row[i] if i < len(row) else None
             return None
         # Non-numeric cells ("N/A", footnotes) are None here — a peer grid
         # is data or nothing, and downstream median verification sorts
         # these values.
         num = (lambda v: None if (d := _decimal(v)) in (None, "UNPARSEABLE") else d)
+        graded = [r for r in body if _category_id(r[0])]
+        if body and not graded:
+            observe("peer_rows_unrecognised", {
+                "tab": "Peer_Benchmarks", "rows_seen": len(body),
+                "first_column_examples": sorted(
+                    {str(r[0]).strip()[:40] for r in body if r and r[0]})[:5],
+                "expected": _CATEGORY_LABEL_RE.pattern,
+                "reason": "the tab has rows and none is at category grain "
+                          "(a peer-per-row layout reads this way); no peer "
+                          "score was read"})
+            return []
+
+        # The value test. A peer is scored on the same M1–M5 scale as the
+        # entity; a column of gaps, ranks or words is a statistic or a label
+        # whatever it calls itself, and is refused BY NAME rather than
+        # stored as an institution.
+        peer_cols, refused, unscored = [], [], []
+        for i, name in candidates:
+            values = [row[i] for row in graded if i < len(row)]
+            populated = [v for v in values if v is not None and str(v).strip()]
+            nums = [d for d in (num(v) for v in populated) if d is not None]
+            out_of_band = [d for d in nums if not (SCORE_MIN <= d <= SCORE_MAX)]
+            if not populated:
+                # A peer the tab NAMES but never scores. It is a real
+                # institution and it keeps its column; every score is null,
+                # which is what the cohort should say about it.
+                peer_cols.append((i, name))
+                unscored.append(name)
+            elif nums and not out_of_band:
+                peer_cols.append((i, name))
+            else:
+                refused.append({
+                    "column": name,
+                    "values_seen": len(populated),
+                    "numeric": len(nums),
+                    "outside_rubric": [str(d) for d in out_of_band][:4],
+                    "examples": [str(v)[:30] for v in populated][:4]})
+        if refused:
+            observe("peer_column_unrecognised", {
+                "tab": "Peer_Benchmarks", "columns": refused,
+                "rubric": f"{SCORE_MIN}–{SCORE_MAX}",
+                "reason": "column names no known statistic and does not hold "
+                          "scores on the maturity scale; not stored as a peer"})
+        if unscored:
+            observe("peer_column_unscored", {
+                "tab": "Peer_Benchmarks", "columns": sorted(unscored),
+                "reason": "named in the cohort and scored in no category; "
+                          "kept with null scores, never a computed zero"})
+
         out = []
-        for row in rows:
-            if not row:   # read-only mode yields () for blank rows
-                continue
-            cat = str(row[0] or "").strip()
-            if not _CATEGORY_RE.match(cat):
-                continue
+        for row in graded:
+            cat = _category_id(row[0])
             # The name comes from the column that declares itself a name.
             # Reading row[1] positionally put a peer's SCORE in the name
             # field whenever the tab has no Category_Name column.
-            cat_name = col("category_name")
+            cat_name = col("category_name", row)
             out.append({
                 "category_id": cat,
                 "category_name": (str(cat_name).strip() or None) if cat_name is not None else None,
-                "entity_score": num(col("entity_score")),
-                "stated_median": num(col("median")),
+                "entity_score": num(col("entity_score", row)),
+                "stated_median": num(col("median", row)),
                 "peers": [(name, num(row[i]) if i < len(row) else None)
                           for i, name in peer_cols],
             })
@@ -1046,19 +1195,65 @@ def parse_peer_benchmarks(path: str) -> list:
         wb.close()
 
 
-def parse_recommendations(path: str) -> list:
+# Column names a Recommendations header row uses. A row is the header when it
+# names at least two of them; anything above it is a title, a deferral note or
+# a status line, and reading THAT as the header destroyed the tab.
+_REC_HEADER_WORDS = {
+    "rec_id", "recommendation", "recommendations", "title", "priority", "rank",
+    "category", "category_id", "pillar", "theme", "initiative", "owner",
+    "effort", "impact", "horizon", "timeline", "phase", "status", "rationale",
+    "description", "subcap_id", "capability", "sequence", "value", "outcome",
+    "zennify_solution", "solution", "offering", "dependency", "cost",
+}
+
+
+def _rec_header_row(rows: list):
+    """Index of the header row, or None when the tab starts straight into
+    data (`CI Segal Bryant & Hammill` opens with `1 | FSC/Sales Cloud`)."""
+    for i, row in enumerate(rows[:10]):
+        if not row:
+            continue
+        names = {_norm(str(v)) for v in row if v is not None and str(v).strip()}
+        if len(names & _REC_HEADER_WORDS) >= 2:
+            return i
+    return None
+
+
+def parse_recommendations(path: str, obs: list | None = None) -> list:
     """The Recommendations tab lands raw: rec_id as it arrived (the raw
-    tier preserves package identifiers) plus the full row as payload."""
+    tier preserves package identifiers) plus the full row as payload.
+
+    Neither the header row nor the id column can be assumed. Measured across
+    the corpus, twenty packages put a title or deferral note above the header
+    and 26 lost rows to a de-duplication keyed on the raw first column —
+    Amarillo National Bank's 29 recommendations became 0, Cetera's 24 became
+    4 — because that column repeats a priority rank or a phase label."""
+    def observe(kind, detail):
+        if obs is not None:
+            obs.append(Observation(kind, None, detail))
+
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
         if "Recommendations" not in wb.sheetnames:
             return []
         ws = wb["Recommendations"]
-        rows = ws.iter_rows(values_only=True)
-        first = next(rows, None)
-        if not first:
+        all_rows = [r for r in ws.iter_rows(values_only=True) if r]
+        if not all_rows:
             return []
-        header = [(_norm(str(h)) if h is not None else None) for h in first]
+        h = _rec_header_row(all_rows)
+        if h is None:
+            observe("recommendations_header_not_found", {
+                "tab": "Recommendations",
+                "row_1": [str(v)[:60] for v in all_rows[0] if v is not None][:6],
+                "expected_any_of": sorted(_REC_HEADER_WORDS)[:12],
+                "reason": "no row in the first ten named two recognised "
+                          "recommendation columns; columns land positionally"})
+            first = ()
+            rows = iter(all_rows)
+        else:
+            first = all_rows[h]
+            rows = iter(all_rows[h + 1:])
+        header = [(_norm(str(x)) if x is not None else None) for x in first]
         # The first column is a rec id in some packages and a bare priority
         # rank in others (BCU's header is `Priority` with values 1..8).
         # Requiring a REC- prefix dropped every recommendation in those
@@ -1069,7 +1264,9 @@ def parse_recommendations(path: str) -> list:
         id_is_rank = header and header[0] in ("priority", "rank", "order", "no", "num")
         out = []
         seen = set()
-        for row in rows:
+        collided = 0
+        content_rows = 0
+        for n, row in enumerate(rows, 1):
             if not row:   # read-only mode yields () for blank rows
                 continue
             raw = str(row[0] or "").strip()
@@ -1077,14 +1274,40 @@ def parse_recommendations(path: str) -> list:
                 continue
             payload = {header[i]: (str(row[i]).strip() if i < len(row) and row[i] is not None else None)
                        for i in range(len(header)) if header[i]}
+            if not payload:      # no usable header: keep the row positionally
+                payload = {f"col_{i + 1}": (str(v).strip() if v is not None else None)
+                           for i, v in enumerate(row)}
             # a row whose only populated cell is the id is a footer or spacer
-            if not any(v for k, v in payload.items() if k != header[0]):
+            if not any(v for k, v in payload.items()
+                       if k != (header[0] if header else "col_1")):
                 continue
+            content_rows += 1
             rec_id = f"REC-{raw}" if id_is_rank or not raw.upper().startswith("REC-") else raw
+            if rec_id in seen:
+                # The id repeats; the ROW does not. Dropping it here is how
+                # 26 packages lost recommendations the tab plainly listed —
+                # the raw tier keeps every stated row, and an id that cannot
+                # be unique is qualified by its position instead of deciding
+                # which recommendation the client does not get to read.
+                collided += 1
+                rec_id = f"{rec_id}#{n}"
             if rec_id in seen:
                 continue
             seen.add(rec_id)
             out.append({"rec_id": rec_id, "payload": payload})
+        if collided:
+            observe("recommendation_id_not_unique", {
+                "tab": "Recommendations", "id_column": (header[0] if header else None),
+                "rows_qualified_by_position": collided,
+                "rows_kept": len(out), "content_rows": content_rows,
+                "reason": "the first column repeats, so it is not an id; rows "
+                          "are kept under a position-qualified id rather than "
+                          "de-duplicated away"})
+        if content_rows and not out:
+            observe("recommendations_all_dropped", {
+                "tab": "Recommendations", "content_rows": content_rows,
+                "reason": "the tab has populated rows and none survived "
+                          "parsing"})
         return out
     finally:
         wb.close()

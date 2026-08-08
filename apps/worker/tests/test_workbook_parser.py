@@ -204,6 +204,9 @@ def test_fuzzy_date_impossible_month_is_unverified():
 
 
 def test_peer_grid_nonnumeric_cells_become_none(tmp_path):
+    """A gap in a peer's row is a null, not a zero — and a column that never
+    holds a score at all is not a peer, it is a label (see
+    test_silent_drop_classes for the corpus cases)."""
     from dma_worker.workbook_parser import parse_peer_benchmarks
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -212,11 +215,15 @@ def test_peer_grid_nonnumeric_cells_become_none(tmp_path):
                "Fake Peer A", "Fake Peer B"])
     ws.append([])  # blank row must not crash
     ws.append(["P1C1", "Strategy", 2.5, "N/A", 2.1, "not scored"])
+    ws.append(["P1C2", "Governance", 2.0, "N/A", "N/A", 3.0])
     p = tmp_path / "peers.xlsx"
     wb.save(p)
-    out = parse_peer_benchmarks(str(p))
+    obs = []
+    out = parse_peer_benchmarks(str(p), obs)
     assert out[0]["stated_median"] is None
     assert out[0]["peers"] == [("Fake Peer A", Decimal("2.1")), ("Fake Peer B", None)]
+    assert out[1]["peers"] == [("Fake Peer A", None), ("Fake Peer B", Decimal("3"))]
+    assert obs == []
 
 
 def test_pillar_tab_naming_variants_across_the_corpus():

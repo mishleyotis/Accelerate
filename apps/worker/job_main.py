@@ -229,14 +229,20 @@ def _ingest_one(conn, token, folder, parts):
                   f"{len(research.get('absent') or [])} recorded absences")
 
         wb = parse_scoring_workbook(wb_path)
+        # Every companion tab appends what it could not read to one list; the
+        # persist writes them as parser_observations against the run, so a tab
+        # the parser did not recognise leaves a record naming the tab, the
+        # column and the spelling it expected — not an absent section.
+        companion: list = []
         res = persist_package(
             conn,
             manifest=manifest,
             workbook=wb,
             source_folder_id=folder,
-            evidence=parse_evidence_master(wb_path),
-            peers=parse_peer_benchmarks(wb_path),
-            recommendations=parse_recommendations(wb_path),
+            evidence=parse_evidence_master(wb_path, companion),
+            peers=parse_peer_benchmarks(wb_path, companion),
+            recommendations=parse_recommendations(wb_path, companion),
+            companion_observations=companion,
             artefact_id=parts["workbook"].file_id,
             sections=sections,
             report_artefact_id=(parts["report"].file_id
