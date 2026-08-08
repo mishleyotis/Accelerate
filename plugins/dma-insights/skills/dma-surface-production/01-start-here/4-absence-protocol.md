@@ -68,6 +68,36 @@ Every empty state carries the ladder that produced it:
 }
 ```
 
+## Where the ladder goes is decided by the contract, not by you
+
+`empty_state` is a **section** field and it exists on every section, so the shape
+above always works. The per-**item** version does not: of the nineteen item shapes
+that carry a prose budget, exactly one — `heatmap.alerts.alerts` — declares
+`state` + `sources_searched`. `heatmap.cell_evidence.cells`,
+`overview.ceilings.rows`, `overview.findings.findings` and fifteen others declare
+neither.
+
+**Do not add the keys to an item shape that does not declare them.** They will
+validate — CG-04 sweeps section-level keys only — and they will exempt the item
+from CG-15 and AG-03, and then promotion will drop them, because the serving
+table has no column for a key the contract never named. On one payload measured
+2026-08-08, 394 of 697 cells passed two gates that way on fields no client could
+ever have seen. Both gates now read the item's own shape, so the keys buy
+nothing; the exemption is a contract route or it is not an exemption.
+
+Where an item shape has no per-item absence route, two things always work:
+
+- **Leave the item out of the array**, and let the section's own reach counters
+  and `empty_state` carry the absence — one finding rather than N copies of one.
+- **Say it once**, in the section's prose or its `empty_state` with the ladder,
+  where the array's membership is fixed.
+
+And when you *do* write a per-item absence, **name what you looked for, not that
+you looked.** The protocol above is identical on every cell; the artefact each
+capability would have left is not, and that difference is the whole of what makes
+four hundred honest absences four hundred sentences rather than one. See
+`05-lifecycle/1-gates.md` for the worked examples and the arithmetic.
+
 ## Four results, and they are not the same
 
 | Result | Means | Renders as |

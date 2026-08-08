@@ -500,6 +500,13 @@ python scripts/check_payload.py <payload.json> --page <page> \
                                                     # --cells turns CG-14 ON; without them
                                                     # those two print "not run", which is
                                                     # not a pass
+python scripts/check_repetition.py <drafts.json> --page <page> --at-scale 708
+                                                    # BEFORE you write the 21st item of a
+                                                    # large array, not before submit:
+                                                    # CG-15's template rule compares items
+                                                    # against each other, so no per-item
+                                                    # check can see it, and the shape that
+                                                    # refuses 708 cells is visible in 20
 python scripts/score_prompt.py <prompt.txt>        # score a prompt you have written
                                                     # against the 14-attribute standard
 python scripts/check_language.py <payload.json>    # accusatory framing, fields that OPEN on
@@ -529,6 +536,15 @@ python scripts/precheck_gates.py <payload.json> --page <page> \
 `check_payload.py` catches the cheap failures locally so your submissions spend their
 round trips on the expensive ones — grain, identity and grounding, which only the server
 can check.
+
+`check_repetition.py` runs at a different moment from all the others: **while you are
+still deciding how to write, not after you have written**. CG-15 refuses three or more
+items of one field that share both their phrasing and their content words, so it is a
+property of the ARRAY and invisible inside any single item — on 2026-08-08 two producers
+met it at submit, one of them having already built all 708 heatmap cells. Twenty drafts
+are enough to see it. The promoted Baxter run's 706 cell syntheses score 0.179 against a
+line of 0.40, so a 700-cell page is demonstrably writable; if yours is refused, the shape
+is the problem and not the scale. `03-pages/1-heatmap.md` says what to change.
 
 `precheck_gates.py` sits between the two, and it exists because a submission is not
 free. Submitting supersedes the staged row, so a FAIL on a page that was passing costs

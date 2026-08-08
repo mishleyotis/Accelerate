@@ -227,8 +227,60 @@ statement about the evidence position, it is falsifiable, and it is exactly what
 before they argue about the number. A declared one is the absence protocol doing its job at
 the grain the reader clicked on.
 
-What is never acceptable is grade zero — a scored cell with no row at all, which asserts a
-number and answers nothing about it.
+#### The inherited and declared grades are where CG-15 kills a run — read this before writing them
+
+**This is the section that produced two refused 700-cell payloads on
+2026-08-08**, both of them following the table above literally. Read that
+sentence in the paragraph you have just read — "The category's two sources speak
+to the platform this capability runs on but not to this capability's own
+coverage" — and ask what changes when you write it under the next cell. If the
+answer is "the capability's name", you have written one argument and are about
+to render it four hundred times. CG-15 refuses three or more items that share
+both their phrasing and, once the mandated frame is stripped out, their content
+words. It is measured over `cells[*].synthesis` as a whole array, so it cannot
+be seen while writing one cell, and it is not survivable by rewording.
+
+**Run `scripts/check_repetition.py` on your first twenty.** Not on 708.
+
+```
+python scripts/check_repetition.py drafts.json --page heatmap --at-scale 708
+```
+
+**What makes an inherited or declared synthesis per-cell.** Both grades report
+the same *outcome* on every cell they apply to — that is fine and unavoidable.
+What must differ is the **subject**:
+
+| | The template that is refused | The version that passes |
+|---|---|---|
+| **Inherited** | "X takes its score from the *&lt;category&gt;* position, which rests on the entity-level public sweep recorded beside it." — the parent is named, the cell is not | Reason from the parent's evidence **to this capability specifically**: what the parent source *does* show, and the precise step it does not carry for this cell. Two cells inheriting the same parent inherit it for different reasons |
+| **Declared** | "X was searched across the six mandatory public tiers and no entity-specific artefact naming the capability was returned." — the *search* is described, and the search is identical on all 700 cells | Name **the artefact this capability would have left**: "test plans, sign-off records, defect logs"; "named research collaborations, sponsored programmes, university recruiting pipelines"; "an emissions baseline, a reduction target or a transition commitment". That differs every time, because capabilities differ |
+
+The one-line rule: **name what you looked for, not that you looked.** The
+protocol is the same on every cell; what it was hunting is not. The promoted
+Baxter run's eight zero-evidence cells are the worked examples, and
+`05-lifecycle/1-gates.md` quotes four of them.
+
+**Where a cell defeats even that test, omit it.** A cell with no argument of its
+own is not a cell with a thin argument. Leaving it out of `cells[]` and letting
+`linking_stats` report the reach is one honest finding; four hundred copies of
+one sentence is four hundred drawers that each say the thing the one before said.
+The preference order is:
+
+> cited › inherited › declared-and-specific › **omitted** › declared-and-identical
+
+Grade zero — a scored cell with no row at all — is still the outcome to design
+against, and the coverage plan below exists to avoid it. But it now has a floor
+under it rather than being the worst case: a declared synthesis that is not about
+its own cell ranks *below* no row at all, because it will not promote and, if it
+did, it would render as filler under a real client's name.
+
+**Do not invent an item key to declare the absence with.** `cells[*]` is
+`{subcap_id, e_ids[], items[], reach_note, synthesis, grounded_on, provenance,
+thin}` and it declares no `state` and no `sources_searched`. Supplying them
+anyway is not harmless: CG-04 sweeps section keys only, so they validate, and on
+one payload measured that day 394 cells bought a CG-15 *and* an AG-03 exemption
+with keys `heatmap_cell_evidence` has no column for — dropped at promotion, seen
+by nobody. Both gates now check the item shape, so they buy nothing.
 
 ### The order the work is done in, because the order cannot be recovered late
 

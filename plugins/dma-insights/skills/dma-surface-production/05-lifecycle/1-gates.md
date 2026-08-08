@@ -34,9 +34,18 @@ python scripts/check_language.py payload.json
 `--subvertical` turns on ET-05 and `--cells` turns on CG-14; without them those
 two print "not run" rather than passing silently.
 
-**CG-15 is not in the local checkers.** It runs at submit only, so a clean local
-run says nothing about it. Read its section below before you write prose, not
-after the verdict.
+**CG-15's template rule cannot be seen one item at a time**, so there is a third
+checker for it and you run it on your first twenty drafts, not on 708:
+
+```
+python scripts/check_repetition.py drafts.json --page heatmap --at-scale 708
+```
+
+What refuses a payload is never a single synthesis — it is the SHAPE all of them
+share, and the shape is already visible in twenty. Two producers discovered this
+at submit time on 2026-08-08, one of them after building all 708 cells. Read the
+CG-15 section below **before** you write prose, and run that script before you
+write the twenty-first.
 
 ## The gates that block most often
 
@@ -83,16 +92,44 @@ Five refusals, each naming its arithmetic in the verdict:
 | A **placeholder** where the contract requires prose — `N/A` `TBD` `-` `—` `none` `unknown` `not applicable` `pending` `todo` `nil`, the empty string, whitespace | Case- and punctuation-insensitive: `"N/A."`, `"n.a"`, `"  "` all normalise to the same key |
 | A prose field **under a credible floor for its own contract** | `words < ceil(stated_floor × 0.5)`, minimum 3. The floor is read from the field's own `doc` text, so `consequence` (6-14) and `answer` (90-150) get different lines. A field whose stated floor is under 6 is a label, not prose, and only the placeholder rule applies to it |
 | A **section every one of whose present content fields is vacuous** — the headline case | `vacuous / present == 1`, present ≥ 1, and no valid `empty_state` |
-| **Template prose** across items of one field with a name substituted | 8-word shingles, `overlap = shared / min(count A, count B) >= 0.40`, connected group of **3 or more** |
+| **Template prose** across items of one field with a name substituted | **Two terms, both required.** *Phrasing*: 8-word shingles, `shared / min(A, B) >= 0.40`. *Claim*: the same ratio over CONTENT WORDS — what is left after stopwords, numerals, catalogue ids and the score and evidence-inventory registers come out — `>= 0.40`. Connected group of **3 or more** |
 | Prose that only **restates a score** ("P4C1 scores 2.1, below the peer median of 3.0") or only **inventories the evidence** ("Two items speak to this cell") | Content words left after removing stopwords, numerals, catalogue ids, band words, the score register and the evidence-inventory register: `residual ≤ 2` on a text of 5 tokens or more |
 
-**Where the thresholds come from.** All four numbers are tuned against the
-promoted Baxter run, not chosen: its lowest words-to-floor ratio is 0.64 (a
-16-word timeline body against a 25-word floor — real content that undershoots
-its budget, and it passes); its lowest residual is 4 content words (a seven-word
-`consequence`); and across all 249,374 item-prose pairs the highest 8-gram
-overlap between two genuinely distinct arguments is 0.179, against a refusal
-line of 0.40.
+**Where the thresholds come from.** Every number is measured against real
+payloads, not chosen: the promoted Baxter run's lowest words-to-floor ratio is
+0.64 (a 16-word timeline body against a 25-word floor — real content that
+undershoots its budget, and it passes); its lowest residual is 4 content words
+(a seven-word `consequence`); and across all 249,374 item-prose pairs the
+highest 8-gram overlap between two genuinely distinct arguments is **0.179**,
+against a refusal line of 0.40.
+
+**Why the claim term exists, which is the thing worth understanding.** The
+registers it strips out are the frame this contract *mandates*: H2 requires
+every synthesis to say where the score sits against the peer median and to cite
+inline. Every honest synthesis on the page therefore shares that frame, and
+scoring it would refuse prose for obeying its own contract. Strip the frame, and
+what is left is what the sentence actually asserts. Measured over the four
+heatmaps available on 2026-08-08, on pairs that already clear the phrasing line:
+
+| Corpus | highest phrasing | content overlap |
+|---|---|---|
+| Baxter, 706 honest cell syntheses | 0.179 — **nothing refused** | up to 0.793 |
+| Kitsap, 37 honest cell syntheses | 0.070 — **nothing refused** | up to 0.115 |
+| Fisher, 708 refused | 1.000 | min 0.433 |
+| Frost, 677 refused | 1.000 | min 0.615 |
+| Baxter's 17 ceilings, refused | 1.000 | min 0.630 |
+
+Read the first row twice. **Honest prose about one institution shares vocabulary
+freely** — 0.793 between two Baxter cells that are both perfectly fine — and it
+is the *phrasing* that separates them. A template is high on both. That is why
+neither number alone is the rule, and why "my 708 were all textually distinct"
+is not the defence it sounds like: distinctness of wording is what the first
+term measures, and Fisher's 708 cleared none of it.
+
+**Baxter's 706 are the existence proof.** A 700-cell per-cell synthesis over one
+taxonomy, one institution and one mandated shape is writable and passes with a
+2.2x margin. If a 700-cell page is being refused, the shape is the problem, not
+the scale.
 
 #### What it deliberately allows
 
@@ -112,9 +149,40 @@ a gate. Two exemptions, each narrow:
   `cannot_estimate`, `insufficient_cohort`, `quarantined` — **with the search
   that established it** (`sources_searched`, `queries_run`, or a
   `not_run_reason`) is exempt from the floor, the residual and the template
-  checks.
+  checks — **on the keys that item's own contract shape declares, and no
+  others.**
 
-`thin: true` is **not** one of them. It says the evidence is short of a cell, not
+That last clause is not pedantry, and it is the thing this gate got wrong for a
+day. Of the **nineteen** item shapes that carry a per-item prose budget, exactly
+**one** declares `state` + `sources_searched`:
+
+| Item shape | Per-item absence route |
+|---|---|
+| `heatmap.alerts.alerts` | `state` + `sources_searched` / `queries_run` — **the only one** |
+| the other eighteen, including `heatmap.cell_evidence.cells`, `overview.ceilings.rows`, `overview.findings.findings` | **none** |
+
+**Do not supply the keys anyway.** CG-04 sweeps section-level keys only, so an
+undeclared item key passes validation; the writer has no `item:` binding for it,
+so promotion drops it. On one payload measured 2026-08-08, 394 of 697 cells
+bought this exemption — and the AG-03 exemption too — with `state` and
+`sources_searched` on `cell_evidence.cells`, which declares neither and whose
+table has no column for either. Both gates now check the shape, so the keys buy
+nothing; before they did, they bought a pass on a field the client would never
+have seen. The verdict now names the route *your* shape has, so read it rather
+than assuming the alerts route.
+
+**Where an item shape has no absence route, there are two that always work:**
+
+1. **Leave the item out of the array.** A per-item argument is owed per-item
+   evidence. A cell no evidence reached does not belong in `cells[]` carrying a
+   sentence four hundred siblings also carry — omit it, and `linking_stats`
+   reports the reach honestly, which is one finding instead of four hundred
+   copies of one. Kitsap's promoted heatmap emits 37 of 706 cells this way and
+   passes cleanly.
+2. **Say it once, in the section's own prose or its `empty_state`** with the
+   `sources_searched` ladder — for arrays whose membership is fixed.
+
+`thin: true` is **not** an exemption. It says the evidence is short of a cell, not
 that the argument is, and the contract still asks for the argument. Neither is
 `recency_band: UNVERIFIED` — an undated source is CG-10's business, and no
 licence for the sentence beside it to say nothing.
@@ -154,6 +222,51 @@ evidence DOES establish, cited; (b) the specific thing whose ABSENCE set the
 ceiling". Seventeen categories got one sentence about tier grades. The repair is
 to write (b) per category — the artefact whose absence caps *that* category —
 not to reword the template seventeen ways.
+
+#### Writing seven hundred of these
+
+The question that gets asked at cell 400 is "how can 700 arguments over one
+taxonomy possibly be distinct?" They are distinct because **the facts are
+distinct**, and the honest sentence for a cell with nothing in it is distinct
+too, as long as it names what would have been there.
+
+Four of the promoted Baxter run's eight zero-evidence cells, near-verbatim.
+Same outcome, same mandated frame, and they pass with room to spare:
+
+> **Academic partnership** leaves visible traces — *named research
+> collaborations, sponsored programmes, university recruiting pipelines* — and
+> none appears anywhere in BCU's own materials, its news page, or the trade
+> coverage of it.
+>
+> **User acceptance testing** leaves artefacts — *test plans, sign-off records,
+> defect logs* — and none is visible in BCU's public record, nor in the
+> assessment corpus, nor in any vendor case study covering its core conversion.
+>
+> No *emissions baseline, reduction target or transition commitment* appears in
+> BCU's annual report, its about pages, its news releases or the trade coverage
+> of it.
+>
+> A **roadmap** in this domain would *sequence commitments against dates*, and
+> BCU has no published commitments to sequence.
+
+And the shape that was refused, from a payload built the same day:
+
+> Strategy Refresh Cadence **was searched across the six mandatory public tiers
+> for this entity and no entity-specific artefact naming the capability was
+> returned**, so the score is carried by the category position.
+
+Both report "nothing found". The first four name **the artefact that capability
+would have left**, and it differs every time because capabilities differ. The
+fifth names **only the outcome**, and the outcome is identical for all 400 cells
+it was pasted under, so once the frame is stripped there is nothing left to tell
+them apart. The rule in one line:
+
+> **Name what you looked for, not that you looked.** The search protocol is the
+> same on every cell; what it was hunting is not.
+
+If a cell has nothing of its own to say even under that test, it is not a cell
+with a thin argument — it is a cell with no argument, and route 1 above applies:
+leave it out.
 
 ### CG-09 · a closed vocabulary takes one of its values
 
