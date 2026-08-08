@@ -50,11 +50,25 @@ _COLUMNS = (
 )
 
 
+def _literal(text: str) -> str:
+    """A SQL string literal, apostrophes doubled.
+
+    `COMMENT ON` takes no bind parameters, so its text has to be inlined —
+    and every comment in this schema is written in English prose, where an
+    apostrophe is ordinary. "that artefact's checksum" ended the literal at
+    the apostrophe and left `s checksum ...` as bare SQL: `syntax error at
+    or near "s"`, and the whole revision aborted. This is the second time
+    that has happened in this migration set, which is why the escaping now
+    lives in one function instead of at each call site.
+    """
+    return "'" + text.replace("'", "''") + "'"
+
+
 def upgrade() -> None:
     conn = op.get_bind()
     for column, type_, comment in _COLUMNS:
         op.execute(f"ALTER TABLE runs ADD COLUMN IF NOT EXISTS {column} {type_}")
-        op.execute(f"COMMENT ON COLUMN runs.{column} IS '{comment}'")
+        op.execute(f"COMMENT ON COLUMN runs.{column} IS {_literal(comment)}")
     op.execute(
         """ALTER TABLE runs
              DROP CONSTRAINT IF EXISTS runs_source_artefact_fk""")
