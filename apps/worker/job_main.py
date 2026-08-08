@@ -19,10 +19,11 @@ import tempfile
 import traceback
 from datetime import datetime, timezone
 
-from dma_worker import drive
+from dma_worker import drive, intake_status
 from dma_worker.persist import persist_package
 from dma_worker.report_parser import parse_report
-from dma_worker.scan_runner import run_scan
+from dma_worker.scan_runner import (SCAN_FAILED, SCAN_SUCCEEDED, finish_scan,
+                                    open_scan, run_scan)
 from dma_worker.workbook_parser import (mine_evidence_from_rationales,
                                         parse_evidence_master,
                                         parse_grain_summaries,
@@ -129,6 +130,68 @@ def _requeue(conn, parts, folder, reason):
                     (fid,))
     conn.commit()
     print(f"requeue: {folder} — {reason} ({len(ids)} artefact(s) rescan next firing)")
+
+
+# A package that cannot be parsed cannot be parsed on the next firing either.
+# Blanking its checksums every 30 minutes retried Zions Bancorporation 140
+# times against the same ValueError and reported nothing anywhere. Three
+# attempts, then the package is quarantined: recorded by name, left out of the
+# diff, and surfaced by intake_status. A new upload changes the checksum and
+# starts the budget over; FORCE_FOLDER retries it on demand.
+MAX_INGEST_ATTEMPTS = int(os.environ.get("MAX_INGEST_ATTEMPTS", "3"))
+
+
+def _prior_attempts(conn, artefact_id, checksum) -> int:
+    """Failed ingests already recorded against this artefact AT THIS CHECKSUM.
+
+    The requeue blanks the checksum, so the live value is '' between the
+    failure and the next scan; both the blank and the real checksum count as
+    the same package, and only a genuinely different checksum resets."""
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT detail FROM parser_observations
+            WHERE artefact_id = %s AND kind = %s ORDER BY occurred_at""",
+        (artefact_id, intake_status.PACKAGE_FAILURE_KIND))
+    n = 0
+    for (detail,) in cur.fetchall():
+        d = json.loads(detail) if isinstance(detail, (str, bytes)) else (detail or {})
+        if checksum and d.get("checksum") and d["checksum"] not in ("", checksum):
+            n = 0                       # a different upload: budget starts over
+            continue
+        n += 1
+    return n
+
+
+def _record_package_failure(conn, parts, folder, exc) -> bool:
+    """Record one failed ingest and decide whether to retry it.
+
+    Returns True when the package was requeued, False when it was
+    quarantined. Either way the failure is a row in parser_observations, so
+    "why has this folder never produced a run" has an answer that outlives
+    the log retention window.
+    """
+    wb = parts.get("workbook")
+    error = f"{type(exc).__name__}: {exc}"[:400]
+    attempts = 1
+    if wb is not None:
+        attempts = _prior_attempts(conn, wb.file_id, wb.checksum) + 1
+    quarantined = attempts >= MAX_INGEST_ATTEMPTS
+    if wb is not None:
+        cur = conn.cursor()
+        cur.execute(
+            """INSERT INTO parser_observations (artefact_id, kind, detail, occurred_at)
+               VALUES (%s,%s,%s, now())""",
+            (wb.file_id, intake_status.PACKAGE_FAILURE_KIND,
+             json.dumps({"folder": folder, "error": error, "attempt": attempts,
+                         "checksum": wb.checksum, "quarantined": quarantined})))
+        conn.commit()
+    if quarantined:
+        print(f"quarantine: {folder} — {error} (attempt {attempts} of "
+              f"{MAX_INGEST_ATTEMPTS}; not requeued, named by intake status)")
+        return False
+    _requeue(conn, parts, folder, f"failed: {exc!r} (attempt {attempts} of "
+                                  f"{MAX_INGEST_ATTEMPTS})")
+    return True
 
 
 def _ingest_one(conn, token, folder, parts):
@@ -361,6 +424,23 @@ def dump_headers(token, groups, needle: str) -> int:
     return 0
 
 
+def report_intake_status(conn, tree) -> int:
+    """Name every intake folder that is not yet serving, and why.
+
+    The routine's first question — "is there anything to synthesise, and is
+    anything stuck?" — had no answer anywhere in the system: the folder list
+    lives in Drive and the progress lives in Postgres, and nothing joined
+    them. INTAKE_STATUS=1 (or =json) prints that join.
+    """
+    artefacts = {k: set(v) for k, v in _package_groups(tree).items()}
+    states = intake_status.intake_status(conn, sorted(artefacts), artefacts)
+    if (os.environ.get("INTAKE_STATUS") or "").lower() == "json":
+        print(intake_status.as_json(states))
+    else:
+        print(intake_status.render(states))
+    return 0
+
+
 def main() -> int:
     intake = os.environ["INTAKE_FOLDER_ID"]
     limit = int(os.environ.get("MAX_PACKAGES", "3"))
@@ -411,33 +491,89 @@ def main() -> int:
         print(f"RESET_SCAN: blanked {cur.rowcount} stored checksums; "
               "full tree rescans this execution")
 
-    print(f"scan: walking intake tree {intake}")
-    tree = drive.walk_tree(intake)
-    print(f"scan: {len(tree)} files")
-
-    # Assemble packages from the WHOLE tree, and let the diff decide which
-    # folders to process. Assembling from the changed set only meant a
-    # folder whose workbook changed but whose report did not lost its
-    # report — no run has ever landed its twelve report sections — and a
-    # folder with a changed report but an unchanged workbook looked
-    # incomplete on every firing.
-    groups = _package_groups(tree)
-
-    # Backfill runs BEFORE the scan and returns: run_scan stores the new
-    # checksums, so a backfill executed after it would swallow that
-    # firing's diff and the changed packages would never be ingested.
-    if os.environ.get("BACKFILL_SECTIONS"):
-        rc = backfill_sections(conn, drive.metadata_token(), groups)
+    # Read-only pass over the intake tree and the ingested tier: what has
+    # not been processed, by folder name and with the blocker named. Runs
+    # before the scan row is opened — it is a question, not a firing.
+    if os.environ.get("INTAKE_STATUS"):
+        print(f"scan: walking intake tree {intake}")
+        rc = report_intake_status(conn, drive.walk_tree(intake))
         conn.close()
         return rc
 
-    if os.environ.get("BACKFILL_EVIDENCE"):
-        rc = backfill_evidence(conn, drive.metadata_token(), groups)
+    # A backfill is not a scan and must not write a scan row; everything
+    # else from here on is one, and gets its row BEFORE the walk so a walk
+    # that dies is recorded rather than invisible (the 403 that killed the
+    # tree recursion left no import_scans row at all).
+    diagnostic = bool(os.environ.get("BACKFILL_SECTIONS")
+                      or os.environ.get("BACKFILL_EVIDENCE"))
+    started_at = datetime.now(timezone.utc)
+    scan_id = None if diagnostic else open_scan(conn, started_at)
+    tally = {"ingested": 0, "failed": 0, "deferred": 0, "quarantined": []}
+    try:
+        print(f"scan: walking intake tree {intake}")
+        tree = drive.walk_tree(intake)
+        print(f"scan: {len(tree)} files")
+
+        # Assemble packages from the WHOLE tree, and let the diff decide which
+        # folders to process. Assembling from the changed set only meant a
+        # folder whose workbook changed but whose report did not lost its
+        # report — no run has ever landed its twelve report sections — and a
+        # folder with a changed report but an unchanged workbook looked
+        # incomplete on every firing.
+        groups = _package_groups(tree)
+
+        # Backfill runs BEFORE the scan and returns: run_scan stores the new
+        # checksums, so a backfill executed after it would swallow that
+        # firing's diff and the changed packages would never be ingested.
+        if os.environ.get("BACKFILL_SECTIONS"):
+            rc = backfill_sections(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
+        if os.environ.get("BACKFILL_EVIDENCE"):
+            rc = backfill_evidence(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
+        _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally)
+    except BaseException as exc:            # noqa: BLE001 — record, then re-raise
+        # Anything that escapes — the Drive walk that 403'd mid-recursion, the
+        # empty-tree guard, a diff that could not commit — closes the scan row
+        # as failed with the exception naming itself. This is the whole point:
+        # a scan row must never say `succeeded` about an execution that raised.
+        traceback.print_exc()
+        try:
+            finish_scan(conn, scan_id, status=SCAN_FAILED,
+                        error=f"{type(exc).__name__}: {exc}"[:2000],
+                        runs_created=tally["ingested"])
+        except Exception as inner:          # noqa: BLE001
+            print(f"scan: could not record the failure: {inner!r}")
         conn.close()
-        return rc
+        if isinstance(exc, Exception):
+            return 1
+        raise
+
+    # The traversal completed. It "succeeded" only if nothing inside it
+    # failed: a package that raised is a failed firing, named in the row.
+    reasons = []
+    if tally["failed"]:
+        reasons.append(f"{tally['failed']} package(s) failed to ingest")
+    if tally["quarantined"]:
+        reasons.append("quarantined: " + ", ".join(sorted(tally["quarantined"])))
+    finish_scan(conn, scan_id,
+                status=SCAN_FAILED if tally["failed"] else SCAN_SUCCEEDED,
+                error="; ".join(reasons)[:2000] or None,
+                runs_created=tally["ingested"])
+    conn.close()
+    print(f"done: {tally['ingested']} ingested, {tally['failed']} failed, "
+          f"{tally['deferred']} deferred, {len(tally['quarantined'])} quarantined")
+    return 1 if tally["failed"] else 0
 
 
-    summary = run_scan(conn, tree, datetime.now(timezone.utc))
+def _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally) -> None:
+    """The diff and the ingest loop. Counters land in `tally` as they happen,
+    so a mid-loop exception still reports the runs it had already created."""
+    summary = run_scan(conn, tree, started_at, scan_id=scan_id)
     print(f"scan: new={summary['files_new']} changed={summary['files_changed']}")
     touched = {f.path_segments[0] if f.path_segments else "?"
                for f in summary["to_process"]}
@@ -463,29 +599,28 @@ def main() -> int:
                and any(a in v for a in ("manifest", "report"))}
     if not packages and not partial:
         print("scan: nothing to ingest (unchanged tree creates nothing)")
-        conn.close()
-        return 0
+        return
 
     token = drive.metadata_token()
-    done = failed = deferred = 0
     encoder = None
     for folder, parts in sorted(packages.items()):
-        if done >= limit:
+        if tally["ingested"] >= limit:
             _requeue(conn, parts, folder, "over per-execution bound")
-            deferred += 1
+            tally["deferred"] += 1
             continue
         print(f"ingest: {folder}")
         try:
             res, rationales = _ingest_one(conn, token, folder, parts)
         except Exception as exc:  # noqa: BLE001 — one bad package must not sink the batch
             conn.rollback()
-            failed += 1
+            tally["failed"] += 1
             traceback.print_exc()
-            _requeue(conn, parts, folder, f"failed: {exc!r}")
+            if not _record_package_failure(conn, parts, folder, exc):
+                tally["quarantined"].append(folder)
             continue
         print(f"ingest: {folder} -> run {res.run_id} "
               f"({res.scored_cells} cells, {res.observations} observations)")
-        done += 1
+        tally["ingested"] += 1
 
         # Embedding failures never requeue: the run is persisted, and V4
         # abstains (recorded NOT_RUN) where centroids are thin. Requeueing
@@ -509,11 +644,6 @@ def main() -> int:
         # firing forever. A real change in Drive puts it back in the diff.
         print(f"no workbook: {folder} — {sorted(k for k in parts if k != 'folder')} "
               "present, nothing to score")
-
-    conn.close()
-    print(f"done: {done} ingested, {failed} failed (requeued), "
-          f"{deferred} deferred, {len(partial)} incomplete")
-    return 1 if failed else 0
 
 
 if __name__ == "__main__":
