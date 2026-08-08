@@ -20,6 +20,7 @@ from fastapi.responses import JSONResponse
 
 from .alerts import act as alert_act, queue as alert_queue
 from .annotations import annotate_insight
+from .answers import build_answers, search_answers
 from .evidence import fetch as ev_fetch, redact_items as ev_redact
 from .pages import ApiError, build_page, etag_for, resolve_run
 from .subverticals import SCOPE_TAG, scope_to_entity
@@ -334,6 +335,73 @@ def entity_subcaps(display_id: str, request: Request, response: Response,
         response.headers["Cache-Control"] = "private, max-age=0"
         return {"entity": entity, "run": run_meta, "audience": audience,
                 "subcaps": rows, "count": len(rows)}
+    finally:
+        conn.close()
+
+
+# Declared BEFORE the generic {page} route, like /evidence and /subcaps.
+@app.get("/v1/entities/{display_id}/answers/search")
+def entity_answer_search(display_id: str, q: str, request: Request,
+                         response: Response, audience: str = "internal",
+                         run: str | None = None, role: str | None = None,
+                         history: bool = False, limit: int = 5):
+    """One question against one run, answered from promoted content only.
+
+    Ranks and selects; composes nothing. The result is either an answer the
+    producer wrote, or the run's own passages verbatim under a frame that
+    says what they are, or an explicit no-match. No model runs here — the
+    ranking is `ts_rank_cd`/pg_trgm in the database, or the same
+    deterministic rule in this process when the passage index has not been
+    built yet (invariant 1).
+
+    Deliberately NOT ETagged on the run alone: the response varies with the
+    question, and a tag that ignored `q` would serve one question's answer
+    for another on a 304."""
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            body = search_answers(cur, display_id, q, audience=audience,
+                                  run=run, role=role, allow_history=history,
+                                  limit=limit)
+        except ApiError as e:
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        response.headers["Cache-Control"] = "private, max-age=0"
+        return body
+    finally:
+        conn.close()
+
+
+@app.get("/v1/entities/{display_id}/answers")
+def entity_answers(display_id: str, request: Request, response: Response,
+                   audience: str = "internal", run: str | None = None,
+                   role: str | None = None, history: bool = False,
+                   surface: str | None = None):
+    """The pre-computed answer set: the questions an AE asks on each surface,
+    answered ahead of time from promoted prose with the citations behind it.
+
+    A lookup, not an inference — which is why it can be served on the same
+    ETag as the pages it is built from: the answers change exactly when the
+    run's promotion does."""
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            body = build_answers(cur, display_id, audience=audience, run=run,
+                                 role=role, allow_history=history,
+                                 surface=surface)
+        except ApiError as e:
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        tag = etag_for(body["run"], f"{audience}.answers.{surface or 'all'}")
+        if request.headers.get("if-none-match") == tag:
+            return Response(status_code=304,
+                            headers={"ETag": tag,
+                                     "Cache-Control": "private, max-age=0"})
+        response.headers["ETag"] = tag
+        response.headers["Cache-Control"] = "private, max-age=0"
+        return body
     finally:
         conn.close()
 

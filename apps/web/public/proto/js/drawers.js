@@ -215,7 +215,7 @@ function EvidenceDrawer() {
         fontSize: 10,
         color: "var(--z-muted)"
       },
-      title: it.recency_band === "UNVERIFIED" ? "no publication date could be resolved, so the recency ladder cannot rank this item — its claim class is unaffected" : it.published_date || ""
+      title: it.recency_band === "UNVERIFIED" ? "no publication date could be resolved, so the recency ladder cannot rank this item - its claim class is unaffected" : it.published_date || ""
     }, it.recency), role !== "AE" && audience !== "customer" ? /*#__PURE__*/React.createElement("span", {
       style: {
         marginLeft: "auto",
@@ -365,7 +365,7 @@ function InsightModal() {
   const entityId = ((route && route.path || "").match(/^\/clients\/([^/]+)/) || [])[1] || null;
   const decide = action => {
     if (!entityId) {
-      pushToast("No entity in the route — the decision has nowhere to be recorded", "warn");
+      pushToast("No entity in the route - the decision has nowhere to be recorded", "warn");
       return;
     }
     setDeciding(true);
@@ -398,7 +398,7 @@ function InsightModal() {
         [ic.id]: verdict
       }));
       pushToast(`${ic.id} ${verdict.toLowerCase()} — recorded`, "success");
-    }).catch(() => pushToast("Annotation write failed — the API was unreachable", "warn")).finally(() => setDeciding(false));
+    }).catch(() => pushToast("Annotation write failed - the API was unreachable", "warn")).finally(() => setDeciding(false));
   };
   // The card's own platform chip, rendered as the run states it. Resolving it
   // through DMA.getPlatform read the static five-vendor catalogue — which knows
@@ -920,7 +920,7 @@ function InsightModal() {
     }, eid) : /*#__PURE__*/React.createElement("span", {
       key: eid,
       className: "chip muted",
-      title: "cited id \u2014 not in this run's served evidence"
+      title: "cited id - not in this run's served evidence"
     }, eid);
   })) : /*#__PURE__*/React.createElement("p", {
     style: {
@@ -1021,7 +1021,7 @@ function Block({
       style: {
         marginLeft: 4
       },
-      title: "cited id \u2014 not in this run's served evidence"
+      title: "cited id - not in this run's served evidence"
     }, id);
     return /*#__PURE__*/React.createElement("button", {
       key: id,
@@ -1068,6 +1068,162 @@ function Block({
       marginLeft: 6
     }
   }, evIds.map(eid => renderChip(eid))) : null));
+}
+
+/* One citation chip. Fail closed (invariant 4): an id that does not resolve
+   in this run is shown and NOT clickable — it used to render as a T1 chip
+   that opened an empty drawer, which reads as evidence that exists. */
+function IpCite({
+  id,
+  onEv
+}) {
+  const ev = DMA.getEvidence(id);
+  if (!ev) return /*#__PURE__*/React.createElement("span", {
+    className: "chip muted",
+    style: {
+      fontSize: 9
+    },
+    title: "cited id - not in this run's served evidence"
+  }, id);
+  return /*#__PURE__*/React.createElement("button", {
+    className: `tier-chip tier-${ev.tier}`,
+    style: {
+      cursor: "pointer",
+      border: 0,
+      fontSize: 9
+    },
+    title: `${ev.title || id} · ${ev.source_pretty || ""}`,
+    onClick: () => onEv && onEv(id)
+  }, id);
+}
+
+/* One part of an answer: the promoted sentence, then where it is from and
+   what grounds it. Each part is its own block on purpose — see the answer
+   path's opening note on why parts are never joined.
+
+   Citations render at most six chips and then a count. The section-level
+   case is labelled differently from the item-level one: a paragraph that
+   inherits its section's list is grounded by that section, not by fifty-nine
+   items of its own, and saying so is the difference between a citation and a
+   decoration. */
+const IP_CHIP_LIMIT = 6;
+function IpPart({
+  part,
+  onEv
+}) {
+  const text = dwText(part && part.text);
+  if (!text) return null;
+  const ids = Array.isArray(part.e_ids) ? part.e_ids : [];
+  const where = ipWhere(part.json_path);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 10,
+      borderLeft: "2px solid var(--z-sep)",
+      paddingLeft: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      lineHeight: 1.6,
+      color: "var(--z-dark)",
+      whiteSpace: "pre-wrap"
+    }
+  }, text), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      flexWrap: "wrap",
+      alignItems: "center",
+      marginTop: 5
+    }
+  }, where ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      fontWeight: 700,
+      letterSpacing: ".06em",
+      textTransform: "uppercase",
+      color: "var(--z-muted)"
+    }
+  }, where) : null, ids.length ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      color: "var(--z-muted)"
+    }
+  }, part.cite_scope === "section" ? "· section cites" : "·") : null, ids.slice(0, IP_CHIP_LIMIT).map(id => /*#__PURE__*/React.createElement(IpCite, {
+    key: id,
+    id: id,
+    onEv: onEv
+  })), ids.length > IP_CHIP_LIMIT ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      color: "var(--z-muted)"
+    }
+  }, "+", ids.length - IP_CHIP_LIMIT, " more") : null, !ids.length ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      color: "var(--z-muted)"
+    }
+  }, "\xB7 the run cites nothing for this field") : null));
+}
+
+/* The three shapes an answer can take, rendered so they cannot be mistaken
+   for each other: prose the run promoted, quotations the run states, or an
+   absence with the next step named. */
+function IpAnswer({
+  res,
+  onEv
+}) {
+  if (!res) return null;
+  if (res.kind === "none") {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "ip-message ai",
+      style: {
+        display: "block"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 8
+      }
+    }, "This run states nothing that answers that. It is not a gap in the panel - nothing was promoted for it, and the alternative to saying so is making something up."), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-tertiary btn-sm",
+      disabled: true,
+      title: "Not built: queueing a question writes an annotation with a " + "`question` anchor kind, and widening this app's writes past " + "its two exceptions has not been adjudicated."
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "calendar",
+      size: 12
+    }), " Queue for the next synthesis run"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)",
+        marginTop: 5
+      }
+    }, "Unavailable - the queue needs a question anchor on annotations, which is not adjudicated."));
+  }
+  const parts = Array.isArray(res.parts) ? res.parts : [];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "ip-message ai",
+    style: {
+      display: "block"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: ".1em",
+      textTransform: "uppercase",
+      color: "var(--z-dpur)",
+      marginBottom: 7
+    }
+  }, res.kind === "passages" ? `${res.frame} · ${parts.length} verbatim` : res.provenance === "promoted" ? "Promoted answer" : `Promoted prose · ${parts.length}`), parts.map((p, i) => /*#__PURE__*/React.createElement(IpPart, {
+    key: p.json_path || i,
+    part: p,
+    onEv: onEv
+  })), res.kind === "passages" ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)"
+    }
+  }, "Ranked from this run's own text. Nothing above was written for the question - it is what the run already says, quoted.") : null);
 }
 
 /* ── Intelligence Panel ─────────────────────────────────────────── */
@@ -1120,15 +1276,34 @@ function IntelligencePanel() {
     if (chat.length && bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   }, [chat, chatStreaming]);
   const STARTERS = useMemo(() => starterQuestions(ipSurface, ipContext), [ipSurface, ipContext]);
+  /* The questions this run can answer on this surface, resolved against the
+     payload already in the browser. Recomputed when the surface or the
+     selection changes, and cheap: the corpus walk behind it is memoised on
+     the entity object, so this is a path match over an array. */
+  const ANSWERABLE = useMemo(() => IP_LIVE() ? ipAnswerable(ipSurface, ipContext) : [], [ipSurface, ipContext, chat.length]);
 
   // Never show before sign-in (rule of hooks: gate AFTER all hook calls)
   if (!authed) return null;
   const ask = question => {
-    // In LIVE nothing answers: the serving path runs no model (invariant 1),
-    // and the prototype's canned reply is another institution's story.
-    if (IP_LIVE()) return;
-    const q = (question || chatInput).trim();
+    const q = String(question || chatInput || "").trim();
     if (!q) return;
+    setChatInput("");
+    if (IP_LIVE()) {
+      /* Instant, and no request. The run's own prose is already in this
+         browser from the six page fetches, so a starter question is a path
+         match and a free-text question is a rank over ~1,200 paragraphs —
+         both single-digit milliseconds. Nothing is streamed because there is
+         nothing to wait for: a typewriter on text that is already resolved
+         is a costume for latency that does not exist. */
+      setChat(c => [...c, {
+        role: "user",
+        text: q
+      }, {
+        role: "ai",
+        answer: ipResolve(q, ipSurface, ipContext)
+      }]);
+      return;
+    }
     setChat(c => [...c, {
       role: "user",
       text: q
@@ -1136,7 +1311,6 @@ function IntelligencePanel() {
       role: "ai",
       text: ""
     }]);
-    setChatInput("");
     setChatStreaming(true);
     const answer = answerFor(q, ipSurface, ipContext);
     let i = 0;
@@ -1243,24 +1417,45 @@ function IntelligencePanel() {
     size: 12
   }), " Replay"), IP_LIVE() ? null : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
-    onClick: () => pushToast("Routed to Gemini Pro — deeper analysis takes ~8s", "success")
+    onClick: () => pushToast("Routed to Gemini Pro - deeper analysis takes ~8s", "success")
   }, "Deeper \xB7 Pro")) : null, chat.length > 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 14,
       paddingTop: 12,
       borderTop: "1px dashed var(--ph0-bd)"
     }
-  }, chat.map((m, i) => /*#__PURE__*/React.createElement("div", {
+  }, chat.map((m, i) => m.answer ? /*#__PURE__*/React.createElement(IpAnswer, {
+    key: i,
+    res: m.answer,
+    onEv: openEvidence
+  }) : /*#__PURE__*/React.createElement("div", {
     key: i,
     className: `ip-message ${m.role}`
   }, m.text, m.role === "ai" && chatStreaming && i === chat.length - 1 ? /*#__PURE__*/React.createElement("span", {
     className: "ip-cursor"
-  }) : null))) : null), !chatStreaming && STARTERS.length ? /*#__PURE__*/React.createElement("div", {
+  }) : null))) : null), !chatStreaming && (ANSWERABLE.length || STARTERS.length) ? /*#__PURE__*/React.createElement("div", {
     className: "ip-chat",
     style: IP_LIVE() ? {
       maxHeight: "38vh",
       overflowY: "auto"
     } : null
+  }, IP_LIVE() && ANSWERABLE.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      fontWeight: 700,
+      letterSpacing: ".1em",
+      color: "var(--z-dpur)",
+      textTransform: "uppercase",
+      marginBottom: 6
+    }
+  }, "Answered by this run \xB7 ", ANSWERABLE.length), ANSWERABLE.map(a => /*#__PURE__*/React.createElement("button", {
+    key: a.q_id,
+    className: "ip-starter",
+    onClick: () => ask(a.question)
+  }, a.question))) : null, STARTERS.length ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: IP_LIVE() && ANSWERABLE.length ? 10 : 0
+    }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9.5,
@@ -1280,10 +1475,10 @@ function IntelligencePanel() {
     key: i,
     className: "ip-starter",
     onClick: () => ask(s)
-  }, s))) : null, IP_LIVE() ? null : /*#__PURE__*/React.createElement("div", {
+  }, s))) : null) : null, /*#__PURE__*/React.createElement("div", {
     className: "ip-input"
   }, /*#__PURE__*/React.createElement("input", {
-    placeholder: "Ask anything about this entity\u2026",
+    placeholder: IP_LIVE() ? "Ask about this run - answers are quoted from it, never written" : "Ask anything about this entity…",
     value: chatInput,
     onChange: e => setChatInput(e.target.value),
     onKeyDown: e => e.key === "Enter" && ask()
@@ -1338,7 +1533,7 @@ function PlatformStoryDetail({
       style: {
         fontSize: 9
       },
-      title: "cited id \u2014 not in this run's served evidence"
+      title: "cited id - not in this run's served evidence"
     }, eid);
   };
   return /*#__PURE__*/React.createElement("div", {
@@ -1873,7 +2068,7 @@ function WhyNowSignals({
       }, eid) : /*#__PURE__*/React.createElement("span", {
         key: eid,
         className: "chip muted",
-        title: "cited id \u2014 not in this run's served evidence"
+        title: "cited id - not in this run's served evidence"
       }, eid);
     }) : /*#__PURE__*/React.createElement("span", {
       style: {
@@ -1915,10 +2110,515 @@ function WhyNowSignals({
        It is globally mounted, so it leaked onto all eight pages.
 
    In LIVE the panel therefore shows only what the run promoted — the
-   surface's own synthesis and the producer's conversation starters — and the
-   free-text box, the regenerate button and the canned answers are absent.
-   Anything the run did not promote is stated as absent, never filled in. */
+   surface's own synthesis, the producer's conversation starters, and the
+   grounded answer path below. Anything the run did not promote is stated as
+   absent, never filled in. */
 const IP_LIVE = () => typeof window !== "undefined" && !!window.DMA_LIVE;
+
+/* ═══ The grounded answer path ══════════════════════════════════════════
+   `ask()` used to open with `if (IP_LIVE()) return;`. For a real client the
+   question box therefore accepted input and did nothing — the one control in
+   the application that lied about being a control.
+
+   The reason it did nothing was correct and is unchanged: the serving path
+   runs no model, because no prose may be invented while a client is looking
+   at the page. But that rule forbids WRITING a sentence, not FINDING one. So
+   the panel now does the two things that invent nothing:
+
+     LOOKUP     the questions an AE asks are knowable in advance — this file
+                has enumerated them per surface since the prototype. Each is
+                resolved to prose the run already promoted, with the citations
+                that prose already carries.
+     RETRIEVAL  anything else is answered by ranking the run's own passages
+                and showing the best of them VERBATIM, under a frame that says
+                that is what they are.
+
+   Both run against `window.DMA_ENTITY` — the payload the six page fetches
+   already put in this browser — so an answer costs no request and no wait.
+   That is the whole point: an AE mid-call cannot spend three hours on a
+   synthesis round trip, and cannot spend eight seconds either.
+
+   Nothing here shortens, joins, paraphrases or fills. An answer is a list of
+   PARTS, each keeping the field it came from and its own citations, rendered
+   as separate blocks — because two promoted paragraphs shown one after
+   another are two quotations, and the same two concatenated are a sentence
+   nobody wrote.
+
+   The rules below (what counts as a passage, how a passage is ranked) are
+   the same rules `apps/api/dma_api/answers.py` applies server-side, so the
+   answer does not change with which tier served it. `apps/api/tests/
+   test_answers.py` asserts the two copies of the QUESTION registry agree;
+   the thresholds are stated in both files and named identically. */
+
+const IP_PROSE_MIN_CHARS = 40;
+const IP_PROSE_MIN_WORDS = 6;
+
+// Key names that never hold prose whatever their length.
+const IP_SKIP_KEY = /(^|_)(id|ids|at|on|url|uri|slug|hex|colou?r|version|path|date|kind|type|code|status|band|tier|class|label)$/;
+
+// The producer's own working record — the reasoning behind a ranked claim,
+// the search trail behind an absence. Load-bearing for audit, and not what
+// anybody asked; unfiltered it outnumbers the prose that is.
+const IP_SKIP_SEGMENTS = new Set(["r_layer", "probes_run", "sources_searched", "queries_run", "empty_state", "internal_only", "redacted_paths", "annotation"]);
+const IP_CITE_KEYS = ["e_ids", "supporting_e_ids", "evidence_ids", "evidence"];
+
+// What a passage is ABOUT, when the object says so. `id` is last and matters:
+// the live adapter renames `fa_id`/`ic_id`/`rec_id` to `id`, so without it a
+// focus-area question could not be scoped to the focus area that is open.
+const IP_ANCHOR_KEYS = [["subcap_id", "subcap"], ["cell_id", "subcap"], ["ic_id", "insight"], ["rec_id", "recommendation"], ["fa_id", "focus_area"], ["ts_id", "techstack"], ["e_id", "evidence"], ["wn_id", "why_now"], ["id", "item"]];
+const IP_E_ID = /^E-[A-Za-z0-9][A-Za-z0-9-]*$/;
+function ipIsProse(v) {
+  if (typeof v !== "string") return false;
+  const t = v.trim();
+  return t.length >= IP_PROSE_MIN_CHARS && t.split(/\s+/).length >= IP_PROSE_MIN_WORDS;
+}
+
+/* An object's own citations, or the ones it inherits, and WHICH of the two.
+   The distinction is not pedantry: a section-level `e_ids` can carry every
+   dated item in the run, and a paragraph that inherits fifty-nine chips is
+   claiming a grounding it does not have. The reader is told the difference. */
+function ipCitations(node, inherited) {
+  for (const key of IP_CITE_KEYS) {
+    const found = node[key];
+    if (Array.isArray(found) && found.length && found.every(x => typeof x === "string" && IP_E_ID.test(x))) {
+      return [found.slice(), "item"];
+    }
+  }
+  return inherited;
+}
+function ipAnchor(node, inherited) {
+  for (const [key, kind] of IP_ANCHOR_KEYS) {
+    const v = node[key];
+    if (typeof v === "string" && v) return [kind, v];
+  }
+  return inherited;
+}
+
+/* Every prose string in the adapted entity, with the path it lives at, the
+   citations of the row it came from and what it is about.
+
+   Generic rather than a curated field list: a curated list goes stale the
+   moment a section gains a field, and the sections this reads are adapted by
+   a module this file does not own. A property of the string cannot go stale. */
+function ipWalkPassages(root) {
+  const out = [];
+  const seen = new Set();
+  const walk = (node, path, cites, anchor) => {
+    if (node === null || node === undefined) return;
+    if (Array.isArray(node)) {
+      for (let i = 0; i < node.length; i++) walk(node[i], `${path}[${i}]`, cites, anchor);
+      return;
+    }
+    if (typeof node === "object") {
+      // Cycles are not expected in a JSON payload, but DMA_ENTITY is a live
+      // object graph and this walker is mounted globally: one cycle would
+      // hang the whole application, not just the panel.
+      if (seen.has(node)) return;
+      seen.add(node);
+      const nextCites = ipCitations(node, cites);
+      const nextAnchor = ipAnchor(node, anchor);
+      for (const key of Object.keys(node)) {
+        if (IP_SKIP_SEGMENTS.has(key)) continue;
+        walk(node[key], path ? `${path}.${key}` : key, nextCites, nextAnchor);
+      }
+      return;
+    }
+    if (!ipIsProse(node)) return;
+    const leaf = path.split(".").pop().split("[")[0];
+    if (IP_SKIP_KEY.test(leaf)) return;
+    const [ids, scope] = cites;
+    const [anchorKind, anchorId] = anchor || [null, null];
+    out.push({
+      json_path: path,
+      text: node.trim(),
+      e_ids: (ids || []).slice(),
+      cite_scope: ids && ids.length ? scope : null,
+      anchor_kind: anchorKind,
+      anchor_id: anchorId
+    });
+  };
+  walk(root, "", [[], "section"], null);
+  return out;
+}
+
+/* The corpus, memoised on the ENTITY OBJECT, not on its id: useLiveEntity
+   replaces window.DMA_ENTITY when the client, run or audience changes, and a
+   cache keyed on the id would answer the new run from the old one's prose. */
+let IP_CORPUS = {
+  src: null,
+  list: []
+};
+function ipPassages() {
+  const ent = typeof window !== "undefined" && window.DMA_ENTITY || null;
+  if (!ent) return [];
+  if (IP_CORPUS.src !== ent) IP_CORPUS = {
+    src: ent,
+    list: ipWalkPassages(ent)
+  };
+  return IP_CORPUS.list;
+}
+
+/* ── Ranking ────────────────────────────────────────────────────────────
+   Coverage: the share of the question's content terms a passage contains,
+   both sides stemmed so "closes" answers "close". Ties break on the
+   passage's own density, then on payload order. Nothing here changes between
+   two identical queries, and nothing here is learned. */
+const IP_STOPWORDS = new Set(("a an and are as at be been but by can could did do does doing " + "for from get give had has have how in into is it its me my not of on or our should so " + "tell than that the their them then there these they this to us was we were what when " + "where which who whom why will with would you your show about many much most any all " + "more less need want").split(" "));
+function ipStem(w) {
+  const rules = [["ies", "y"], ["ing", ""], ["ed", ""], ["es", ""], ["s", ""]];
+  for (const [suffix, replacement] of rules) {
+    if (w.endsWith(suffix) && w.length - suffix.length >= 4) {
+      return w.slice(0, w.length - suffix.length) + replacement;
+    }
+  }
+  return w;
+}
+function ipWords(s) {
+  return String(s || "").toLowerCase().match(/[a-z0-9][a-z0-9'’-]*/g) || [];
+}
+function ipTerms(q) {
+  const out = [],
+    seen = new Set();
+  for (const w of ipWords(q)) {
+    if (w.length < 3 || IP_STOPWORDS.has(w)) continue;
+    const s = ipStem(w);
+    if (seen.has(s)) continue;
+    seen.add(s);
+    out.push(s);
+  }
+  return out;
+}
+function ipPassageTerms(p) {
+  if (!p._terms) {
+    const set = new Set();
+    for (const w of ipWords(p.text)) {
+      if (w.length < 3 || IP_STOPWORDS.has(w)) continue;
+      set.add(ipStem(w));
+    }
+    p._terms = set;
+  }
+  return p._terms;
+}
+
+// Coverage alone is not enough on a short question: two content words, one
+// matched, is 0.5 — and "what is their dividend policy" would come back with
+// every passage that says "policy". A passage must clear the share AND carry
+// two of the question's terms wherever the question has two to give.
+const IP_MATCH_FLOOR = 0.6;
+const IP_MIN_TERMS_MATCHED = 2;
+function ipRank(question, passages, limit) {
+  const terms = ipTerms(question);
+  if (!terms.length) return [];
+  const need = Math.min(IP_MIN_TERMS_MATCHED, terms.length);
+  const scored = [];
+  for (let i = 0; i < passages.length; i++) {
+    const p = passages[i];
+    const words = ipPassageTerms(p);
+    if (!words.size) continue;
+    let hit = 0;
+    for (const t of terms) if (words.has(t)) hit++;
+    if (hit < need) continue;
+    const score = hit / terms.length;
+    if (score < IP_MATCH_FLOOR) continue;
+    scored.push({
+      score,
+      density: hit / words.size,
+      i,
+      p
+    });
+  }
+  scored.sort((a, b) => b.score - a.score || b.density - a.density || a.i - b.i);
+  return scored.slice(0, limit || 5).map(s => ({
+    ...s.p,
+    score: Math.round(s.score * 10000) / 10000
+  }));
+}
+
+/* ── The anticipated questions ──────────────────────────────────────────
+   The canonical list is `QUESTIONS` in apps/api/dma_api/answers.py; this is
+   the panel's copy, and a test fails if the two ask different things. The
+   `paths` differ deliberately and cannot be shared: the API resolves against
+   the raw promoted sections, the panel against the adapted entity, and the
+   adapter renames fields on the way through (`verbatim_quote` becomes
+   `strategic_quote`, `why_this_sequence` becomes `play`). Where the adapter
+   DROPS a field the API can read — `why_now.synthesis` is the one that bites
+   — the panel names the next-best promoted field rather than going silent.
+
+   `scope` narrows an answer to what the reader has open. "What does the run
+   state about this cell?" answered with a different cell's synthesis is not a
+   weaker answer, it is a wrong one, so a scoped question that resolves to
+   nothing for the open cell is an absence. */
+const IP_QUESTIONS = [{
+  q_id: "Q-ENT-01",
+  surface: "entity",
+  rank: 1,
+  question: "What is the 30-second version of this assessment?",
+  paths: ["exec_summary.situation", "exec_summary.complication", "exec_summary.answer"]
+}, {
+  q_id: "Q-ENT-02",
+  surface: "entity",
+  rank: 2,
+  question: "What does the run say the overall posture is, and on what basis?",
+  paths: ["framing", "posture_basis", "narrative_thread"]
+}, {
+  q_id: "Q-ENT-03",
+  surface: "entity",
+  rank: 3,
+  question: "What does this cost if nothing changes?",
+  paths: ["exec_summary.cost_of_delay", "recommendations[].cost_of_inaction"]
+}, {
+  q_id: "Q-ENT-04",
+  surface: "entity",
+  rank: 4,
+  question: "What are the top findings this run stands behind?",
+  paths: ["findings.findings[].body", "findings.findings[].strategic_alignment"]
+}, {
+  q_id: "Q-ENT-05",
+  surface: "entity",
+  rank: 5,
+  question: "Where is the largest opportunity, and why there?",
+  paths: ["opportunity.tiles[].rank_rationale", "opportunity.tiles[].their_stack_context", "insightCards[].so_what"]
+}, {
+  q_id: "Q-WN-01",
+  surface: "why_now",
+  rank: 1,
+  question: "What changed recently, and what closes the window?",
+  paths: ["whyNow[].detail"]
+}, {
+  q_id: "Q-WN-02",
+  surface: "why_now",
+  rank: 2,
+  question: "Why does the sequence have to start now?",
+  paths: ["whyNow[].play", "whyNow[].risk"]
+}, {
+  q_id: "Q-WN-03",
+  surface: "why_now",
+  rank: 3,
+  question: "What happens to this account without intervention?",
+  paths: ["exec_summary.cost_of_delay", "roadmapBasis"]
+}, {
+  q_id: "Q-PS-01",
+  surface: "platform_story",
+  rank: 1,
+  question: "What is the case for this platform?",
+  paths: ["platformStory.platforms[].story_md"]
+}, {
+  q_id: "Q-PS-02",
+  surface: "platform_story",
+  rank: 2,
+  question: "What gaps does it close, and against which peers?",
+  paths: ["platformStory.platforms[].gaps[].peer_note", "recommendations[].root_cause_text"]
+}, {
+  q_id: "Q-PS-03",
+  surface: "platform_story",
+  rank: 3,
+  question: "What has to be true before this lands?",
+  paths: ["recommendations[].prerequisites[].condition", "recommendations[].sequencing_reason"]
+}, {
+  q_id: "Q-FA-01",
+  surface: "focus_area",
+  rank: 1,
+  question: "Why is this a focus area?",
+  scope: "focus_area",
+  paths: ["focusAreas[].strategic_quote", "focusAreas[].description"]
+}, {
+  q_id: "Q-FA-02",
+  surface: "focus_area",
+  rank: 2,
+  question: "Which capabilities sit under it, and what is holding them down?",
+  paths: ["uncertainty.*.limiting_absence", "uncertainty.*.rationale"]
+}, {
+  q_id: "Q-SC-01",
+  surface: "subcap_narrative",
+  rank: 1,
+  question: "What does the run state about this cell?",
+  scope: "subcap",
+  paths: ["cellEvidence[].synthesis"]
+}, {
+  q_id: "Q-SC-02",
+  surface: "subcap_narrative",
+  rank: 2,
+  question: "What pulled this score down?",
+  paths: ["uncertainty.*.limiting_absence", "alerts[].justification"]
+}];
+
+/* A declared path to a matcher over real walked paths. `[]` stands for any
+   list index, `*` for any object-map key (the ceilings map is keyed by
+   category id). Anchored at both ends: a prefix match would let
+   `recommendations[].root_cause_text` also collect a nested field of the
+   same name three levels down. */
+const IP_PATH_RE = {};
+function ipPathMatcher(path) {
+  if (!IP_PATH_RE[path]) {
+    // Built character by character rather than by chained replaces. A
+    // two-pass escape needs a sentinel to hold the wildcard's place, and a
+    // sentinel in a source file is a promise that the sentinel can never
+    // occur in the input - which is a promise about future inputs nobody
+    // can keep.
+    let body = "";
+    for (let i = 0; i < path.length; i++) {
+      const ch = path[i];
+      if (ch === "*") {
+        body += "[^.\\[\\]]+";
+        continue;
+      }
+      if (ch === "[" && path[i + 1] === "]") {
+        body += "\\[\\d+\\]";
+        i += 1;
+        continue;
+      }
+      body += /[A-Za-z0-9_]/.test(ch) ? ch : `\\${ch}`;
+    }
+    IP_PATH_RE[path] = new RegExp(`^${body}$`);
+  }
+  return IP_PATH_RE[path];
+}
+function ipScopeId(scope, ctx) {
+  if (scope === "subcap") return dwText(ctx?.subcap?.id);
+  if (scope === "focus_area") return dwText(ctx?.focusArea?.id);
+  return null;
+}
+
+/* One question, resolved to ordered parts of promoted prose. Returns null
+   when the run promoted nothing that answers it — the caller says so rather
+   than filling the space. */
+const IP_MAX_PARTS = 3;
+function ipResolveQuestion(qDef, ctx) {
+  const corpus = ipPassages();
+  if (!corpus.length) return null;
+  const scopeId = qDef.scope ? ipScopeId(qDef.scope, ctx) : null;
+  // A scoped question with nothing open is unscoped; a scoped question WITH
+  // something open answers only about that thing.
+  const inScope = p => !qDef.scope || !scopeId || p.anchor_id === scopeId;
+  const parts = [];
+  const seen = new Set();
+  for (const path of qDef.paths) {
+    const re = ipPathMatcher(path);
+    for (const p of corpus) {
+      if (!re.test(p.json_path) || !inScope(p) || seen.has(p.text)) continue;
+      seen.add(p.text);
+      parts.push(p);
+      if (parts.length >= IP_MAX_PARTS) return parts;
+    }
+  }
+  return parts.length ? parts : null;
+}
+
+/* The producer's own answers, once the connector writes them and the live
+   adapter carries them through (see the report — `answers:` is one line in
+   buildLiveEntity). Absent today, and absent reads as "fall back to
+   selection" rather than as an error. */
+function ipPromotedAnswers(surface) {
+  const ent = typeof window !== "undefined" && window.DMA_ENTITY || null;
+  const rows = ent && Array.isArray(ent.answers) ? ent.answers : [];
+  return rows.filter(a => a && (!surface || a.surface === surface));
+}
+
+/* Which questions this run can actually answer on this surface. A starter
+   the panel cannot answer is not shown — a question offered and then met
+   with "nothing promoted" is the same broken control in a politer voice. */
+function ipAnswerable(surface, ctx) {
+  const key = IP_QUESTIONS.some(q => q.surface === surface) ? surface : "entity";
+  const promoted = ipPromotedAnswers(key);
+  const out = [];
+  for (const a of promoted) {
+    if (dwText(a.answer_md)) {
+      out.push({
+        q_id: a.q_id || a.question,
+        question: dwText(a.question),
+        provenance: "promoted",
+        parts: [{
+          text: dwText(a.answer_md),
+          json_path: a.source_path || null,
+          e_ids: Array.isArray(a.e_ids) ? a.e_ids : [],
+          cite_scope: "item"
+        }]
+      });
+    }
+  }
+  const answered = new Set(out.map(a => a.q_id));
+  for (const q of IP_QUESTIONS) {
+    if (q.surface !== key || answered.has(q.q_id)) continue;
+    const parts = ipResolveQuestion(q, ctx);
+    if (parts) out.push({
+      q_id: q.q_id,
+      question: q.question,
+      provenance: "selected",
+      parts
+    });
+  }
+  return out;
+}
+
+/* One asked question → one of three shapes, deliberately different so the
+   panel cannot render one as another. */
+function ipResolve(question, surface, ctx) {
+  const asked = String(question || "").trim().toLowerCase();
+  for (const a of ipAnswerable(surface, ctx)) {
+    if (dwText(a.question) && a.question.trim().toLowerCase() === asked) {
+      return {
+        kind: "answer",
+        question,
+        ...a
+      };
+    }
+  }
+  const hits = ipRank(question, ipPassages(), 4);
+  if (hits.length) {
+    return {
+      kind: "passages",
+      question,
+      frame: "Here is what this run states about that",
+      parts: hits
+    };
+  }
+  return {
+    kind: "none",
+    question
+  };
+}
+
+/* Where a passage lives, said the way a reader would say it. The path is the
+   adapter's key, which is an implementation detail; the caption is not. */
+const IP_WHERE = {
+  exec_summary: "Executive summary",
+  framing: "Overall scores",
+  posture_basis: "Overall scores",
+  narrative_thread: "Page narrative",
+  findings: "Top findings",
+  opportunity: "Opportunity",
+  insightCards: "Insight cards",
+  whyNow: "Why-now signals",
+  platformStory: "Platform story",
+  recommendations: "Recommendations",
+  focusAreas: "Focus areas",
+  uncertainty: "Category ceilings",
+  cellEvidence: "Cell evidence",
+  alerts: "Thin-evidence alerts",
+  roadmapBasis: "Roadmap sequencing",
+  techStack: "Technology register",
+  timeline: "Timeline",
+  issues: "Issue register",
+  evidence: "Evidence store",
+  stairstep: "Maturity ladder",
+  landscape: "Landscape",
+  regulatory: "Regulatory standing",
+  acquisitions: "Acquisitions",
+  starters: "Conversation starters",
+  scores: "Scores",
+  leadership: "Leadership",
+  thoughtLeadership: "Thought leadership",
+  valueChain: "Value chain",
+  contextSentiment: "Context sentiment"
+};
+function ipWhere(path) {
+  if (!path) return null;
+  const segs = String(path).split(".");
+  const head = segs[0].split("[")[0];
+  const label = IP_WHERE[head] || head.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ").toLowerCase().replace(/^./, c => c.toUpperCase());
+  const leaf = segs.length > 1 ? segs[segs.length - 1].split("[")[0].replace(/_/g, " ") : null;
+  return leaf && leaf !== head ? `${label} · ${leaf}` : label;
+}
 function liveStarters(ctx) {
   const id = ctx?.entity?.id;
   if (!id) return [];

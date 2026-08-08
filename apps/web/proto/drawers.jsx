@@ -766,7 +766,7 @@ function IpAnswer({ res, onEv }) {
       <div className="ip-message ai" style={{ display: "block" }}>
         <div style={{ marginBottom: 8 }}>
           This run states nothing that answers that. It is not a gap in the
-          panel — nothing was promoted for it, and the alternative to saying
+          panel - nothing was promoted for it, and the alternative to saying
           so is making something up.
         </div>
         <button className="btn btn-tertiary btn-sm" disabled
@@ -776,7 +776,7 @@ function IpAnswer({ res, onEv }) {
           <Icon name="calendar" size={12} /> Queue for the next synthesis run
         </button>
         <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 5 }}>
-          Unavailable — the queue needs a question anchor on annotations,
+          Unavailable - the queue needs a question anchor on annotations,
           which is not adjudicated.
         </div>
       </div>
@@ -795,7 +795,7 @@ function IpAnswer({ res, onEv }) {
       {res.kind === "passages" ? (
         <div style={{ fontSize: 10, color: "var(--z-muted)" }}>
           Ranked from this run's own text. Nothing above was written for the
-          question — it is what the run already says, quoted.
+          question - it is what the run already says, quoted.
         </div>
       ) : null}
     </div>
@@ -1001,7 +1001,7 @@ function IntelligencePanel() {
           are getting before they type. */}
       <div className="ip-input">
         <input placeholder={IP_LIVE()
-                 ? "Ask about this run — answers are quoted from it, never written"
+                 ? "Ask about this run - answers are quoted from it, never written"
                  : "Ask anything about this entity…"}
                value={chatInput}
                onChange={e => setChatInput(e.target.value)}
@@ -1622,10 +1622,18 @@ const IP_QUESTIONS = [
 const IP_PATH_RE = {};
 function ipPathMatcher(path) {
   if (!IP_PATH_RE[path]) {
-    const body = path
-      .replace(/[.*+?^${}()|\\]/g, m => (m === "*" ? " STAR " : `\\${m}`))
-      .replace(/\[\]/g, "\\[\\d+\\]")
-      .split(" STAR ").join("[^.\\[\\]]+");
+    // Built character by character rather than by chained replaces. A
+    // two-pass escape needs a sentinel to hold the wildcard's place, and a
+    // sentinel in a source file is a promise that the sentinel can never
+    // occur in the input - which is a promise about future inputs nobody
+    // can keep.
+    let body = "";
+    for (let i = 0; i < path.length; i++) {
+      const ch = path[i];
+      if (ch === "*") { body += "[^.\\[\\]]+"; continue; }
+      if (ch === "[" && path[i + 1] === "]") { body += "\\[\\d+\\]"; i += 1; continue; }
+      body += /[A-Za-z0-9_]/.test(ch) ? ch : `\\${ch}`;
+    }
     IP_PATH_RE[path] = new RegExp(`^${body}$`);
   }
   return IP_PATH_RE[path];
