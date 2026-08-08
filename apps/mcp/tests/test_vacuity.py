@@ -97,6 +97,16 @@ def test_every_placeholder_spelling_is_refused(stub):
     assert "sources_searched" in out[0]["message"]
 
 
+@pytest.mark.parametrize("stub", ["N / A", "n.a", "N.A", "not-applicable",
+                                  "To Be Determined.", "( TBD )", "n/a."])
+def test_a_placeholder_cannot_slip_past_one_punctuation_mark_at_a_time(stub):
+    payload = {"exec_summary": {**ENV, "situation": REAL_SITUATION,
+                                "question": stub}}
+    out = _cg15("overview", payload)
+    assert len(out) == 1, stub
+    assert "placeholder" in out[0]["message"]
+
+
 def test_a_placeholder_predicate_that_would_swallow_real_prose_is_wrong():
     """The set is the vocabulary of not-having-written-it, and nothing
     wider: a sentence that merely CONTAINS 'unknown' is prose."""
@@ -444,6 +454,26 @@ def test_each_rung_of_the_absence_ladder_exempts_a_short_honest_statement(marker
                       "established no evidence for this capability.",
          **marker}]}}
     assert _cg15("heatmap", payload) == [], marker
+
+
+@pytest.mark.parametrize("marker", [
+    {"thin": True},
+    {"recency_band": "UNVERIFIED"},
+    {"state": "WORKED_ABSENT"},               # the rung with no ladder
+    {"quarantined": True},                    # quarantined with no reason
+])
+def test_a_marker_that_is_not_a_recorded_absence_buys_no_exemption(marker):
+    """`thin` says the evidence is short, not that the argument is; an
+    undated SOURCE is CG-10's business and no licence for the sentence
+    beside it to say nothing; and a rung with no search behind it is an
+    assertion, not a finding — the same posture AG-03 takes. A producer
+    who could buy the exemption with one boolean would have a switch."""
+    payload = {"cell_evidence": {**ENV, "cells": [
+        {"subcap_id": "P4C1.1.1", "synthesis": "Evidence is limited.",
+         **marker}]}}
+    out = _cg15("heatmap", payload)
+    assert len(out) == 1, marker
+    assert out[0]["path"] == "cell_evidence.cells[0].synthesis"
 
 
 def test_a_bare_placeholder_is_refused_even_inside_a_recorded_absence():

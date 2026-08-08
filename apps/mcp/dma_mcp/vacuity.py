@@ -115,15 +115,18 @@ def normalise_scalar(text: str) -> str:
     return _WS.sub(" ", _PUNCT.sub(" ", text.lower())).strip()
 
 
+# The same set with separators squashed out, so "N / A", "n.a." and
+# "not-applicable" land on the spellings above instead of slipping past
+# them one punctuation mark at a time.
+_SQUASHED = frozenset(p.replace(" ", "").replace("/", "")
+                      for p in PLACEHOLDERS) - {""}
+
+
 def is_placeholder(text: str) -> bool:
     key = normalise_scalar(text)
     if key in PLACEHOLDERS:
         return True
-    # "n/a" survives punctuation stripping; "n / a" and "n a" fall out of
-    # the collapse, and a bare "n" never means anything else in a prose
-    # field.
-    return key.replace(" ", "") in {p.replace(" ", "").replace("/", "")
-                                    for p in PLACEHOLDERS} - {""}
+    return key.replace(" ", "").replace("/", "") in _SQUASHED
 
 
 # ── the score and evidence-inventory registers ────────────────────────
@@ -272,10 +275,18 @@ _ABSENCE_STATES = frozenset((
     "verified_sparse", "cannot_estimate", "insufficient_cohort",
     "empty_state", "quarantined", "UNVERIFIED", "NO_EVIDENCE",
 ))
-_STATE_KEYS = ("state", "status", "basis", "peer_basis", "result",
-               "recency_band", "ceiling")
+# The four keys AG-03 reads for the same purpose, plus `result` for a
+# gate row's NOT_RUN. Deliberately NOT here: `recency_band` (an undated
+# SOURCE is CG-10's business, and it is no licence for the sentence
+# beside it to say nothing) and `ceiling` (a band word, not a state).
+_STATE_KEYS = ("state", "status", "basis", "peer_basis", "result")
+# Unambiguous "we established there is nothing / not enough" markers.
+# Deliberately NOT here: `thin`, which marks evidence a cell is short of
+# while still owing the argument the contract asked for — a producer who
+# could buy the exemption by setting thin=true would have a switch, not
+# a gate.
 _ABSENCE_FLAGS = ("verified_absent", "verified_sparse", "cannot_estimate",
-                  "insufficient_cohort", "thin", "sub_vertical_undefined")
+                  "insufficient_cohort")
 
 
 def records_absence(obj) -> bool:
