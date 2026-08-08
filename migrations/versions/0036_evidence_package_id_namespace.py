@@ -73,7 +73,10 @@ relation, so there is nothing for a CONCURRENTLY build to protect.
 from alembic import op
 
 revision = "0036"
-down_revision = "0032"
+# 0040 (chunked payload transport) reached the branch first and chained off
+# 0035, so it is the head this revision extends whatever the file numbers
+# say — `alembic upgrade head` refuses to run with more than one.
+down_revision = "0040"
 branch_labels = None
 depends_on = None
 
