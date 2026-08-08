@@ -111,7 +111,7 @@ function PlatformEvChips({
     }, eid) : /*#__PURE__*/React.createElement("span", {
       key: eid,
       className: "chip muted",
-      title: "cited id \u2014 not in this run's served evidence"
+      title: "cited id - not in this run's served evidence"
     }, eid);
   }));
 }
@@ -1715,7 +1715,7 @@ function ClientPlatform({
         flexShrink: 0,
         cursor: "default"
       },
-      title: "the gap this starter names \u2014 not a cell id this run scored, so it opens nothing"
+      title: "the gap this starter names - not a cell id this run scored, so it opens nothing"
     }, gapId) : null, /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement("button", {

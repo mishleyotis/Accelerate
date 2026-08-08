@@ -2320,7 +2320,7 @@ function ClientHealth({
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast("Feedback file regenerated — routed to DMA bot", "success")
+    onClick: () => pushToast("Feedback file regenerated - routed to DMA bot", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 13
@@ -3376,19 +3376,19 @@ function ClientTechStackDetail({
   const STATUS_STYLE = {
     CONFIRMED: {
       color: "var(--z-mid)",
-      label: "Confirmed — in production"
+      label: "Confirmed - in production"
     },
     INFERRED: {
       color: "var(--z-dpur)",
-      label: "Inferred — from dated public signal"
+      label: "Inferred - from dated public signal"
     },
     CLAIMED: {
       color: "#7C3500",
-      label: "Claimed — stated, not corroborated"
+      label: "Claimed - stated, not corroborated"
     },
     ABSENT: {
       color: "var(--z-below)",
-      label: "Absent — searched and not found"
+      label: "Absent - searched and not found"
     }
   };
   const S = STATUS_STYLE[t.status] || {

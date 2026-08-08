@@ -11,8 +11,11 @@ import { effectiveRole } from "../../../../../lib/identity";
 // The six promoted pages, plus the two GRAIN reads the surfaces need: the
 // evidence store (read per id, not per page — it is not a promoted section)
 // and the run's cell grain. Both are entity-scoped and fail-closed at the API.
+// plus the answer index, which is the same class again: run-scoped, derived
+// from the six promoted pages at promote time, never a seventh surface.
 const PAGES = new Set(["overview", "insights", "heatmap", "platform",
-                       "context", "techstack", "evidence", "subcaps"]);
+                       "context", "techstack", "evidence", "subcaps",
+                       "answers"]);
 
 export async function GET(req, { params }) {
   const session = verify(cookies().get(COOKIE)?.value);

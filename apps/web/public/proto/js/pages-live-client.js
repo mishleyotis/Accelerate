@@ -39,7 +39,7 @@ const LIVE_PAGE_SECTIONS = {
    production failure, and it must not read as a broken card. */
 const ENVELOPE_ONLY = {
   landscape: "the D4 landscape recomputes from the technology register (T1); its own payload contract is unauthored, so this run promoted an envelope only",
-  context_sentiment: "the D5 sentiment contract names no payload field yet — the promoted sentiment for this run is on the overview page",
+  context_sentiment: "the D5 sentiment contract names no payload field yet - the promoted sentiment for this run is on the overview page",
   value_chain: "the H9 value-chain arrangement is server-derived and pinned at stage 6.3; no contract field exists to promote yet"
 };
 
@@ -2175,7 +2175,7 @@ function LiveCellEvidence({
         }
       }, c.subcap_id), /*#__PURE__*/React.createElement("span", {
         className: `b ${n === 0 ? "b-org" : ""}`,
-        title: "grounded_on \u2014 the length of the citation list, computed by the database"
+        title: "grounded_on - the length of the citation list, computed by the database"
       }, n, " cited"), /*#__PURE__*/React.createElement("span", {
         className: "spacer"
       }), (c.e_ids || []).slice(0, 8).map(e => /*#__PURE__*/React.createElement("span", {

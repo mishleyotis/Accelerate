@@ -494,8 +494,12 @@ function headlineOf(text) {
   const m = t.match(/^(.*?[.;!?])(?=\s+["“(]?[A-Z]|\s*$)/);
   const head = m ? m[1] : t;
   // An em dash introduces the elaboration rather than ending the sentence,
-  // so it is a legitimate face boundary when it comes first.
-  const dash = head.indexOf(" — ");
+  // so it is a legitimate face boundary when it comes first. This reads the
+  // PAYLOAD, which still holds whatever the producer wrote — the hyphen
+  // normalisation happens at render, downstream of here. A matcher rewritten
+  // to look for the normalised form finds nothing and silently stops
+  // truncating, which is how the face went back to carrying the elaboration.
+  const dash = head.search(/\s[-—–]\s/);
   return (dash > 24 ? head.slice(0, dash) : head).trim();
 }
 
@@ -781,6 +785,39 @@ function adaptLeadership(leadership, enrichment) {
 
 /* ── the rest ────────────────────────────────────────────────────────
    Straight field mappings; each returns [] or null when absent. */
+/* ── adaptAnswers ────────────────────────────────────────────────────
+   `/v1/entities/{id}/answers` returns TWO kinds of row: the producer's own
+   answers out of `serving_answers`, and the server's own selection over the
+   promoted prose. Only the first kind is carried here. The panel already
+   performs the selection itself, in the browser, scoped to whatever the
+   reader has open — a cell, a focus area — which a request that knows
+   nothing about the open drawer cannot do. Taking the server's selection
+   would replace a scoped answer with an unscoped one and call it an upgrade.
+
+   Shape: the server returns `parts[]`, the panel reads one authored answer,
+   and a producer row carries exactly one part or none. A row with no part is
+   a stated absence and is dropped here — the panel's own absence path says
+   the same thing with the question still named. */
+function adaptAnswers(body) {
+  const rows = body && body.answers || [];
+  const out = [];
+  for (const a of rows) {
+    if (!a || a.provenance !== "promoted") continue;
+    const part = Array.isArray(a.parts) && a.parts[0] || null;
+    if (!part || !part.text) continue;
+    out.push({
+      q_id: a.q_id || null,
+      surface: a.surface || null,
+      scope_id: a.scope_id || null,
+      question: a.question || null,
+      rank: typeof a.rank === "number" ? a.rank : null,
+      answer_md: part.text,
+      source_path: part.path || null,
+      e_ids: Array.isArray(part.e_ids) ? part.e_ids : []
+    });
+  }
+  return out;
+}
 function adaptThoughtLeadership(tl) {
   return (tl && tl.entries || []).map((e, i) => ({
     id: `TL-${String(i + 1).padStart(2, "0")}`,
@@ -1109,6 +1146,11 @@ function buildLiveEntity(entityId, pages, extras) {
     confidence: scores && scores.confidence || null,
     narrative_thread: scores && scores.narrative_thread || null,
     subcaps: adaptSubcaps(x.subcaps),
+    // The producer's own answers, when the connector has written them. A
+    // grain read like `subcaps` and `evidence`, not a section — so an empty
+    // array here means "nothing authored", and the panel falls through to
+    // selection over the promoted prose rather than reporting a fault.
+    answers: Array.isArray(x.answers) ? x.answers : [],
     oss: adaptOss(secOf(overview, "opportunity")),
     opportunity: secOf(overview, "opportunity"),
     opportunityTiles: adaptOpportunityTiles(secOf(overview, "opportunity")),
@@ -1122,6 +1164,13 @@ function buildLiveEntity(entityId, pages, extras) {
     uncertainty: adaptUncertainty(secOf(overview, "ceilings")),
     evidenceSummary: adaptEvidenceSummary(x.evidence),
     whyNow: adaptWhyNow(secOf(overview, "why_now")),
+    // adaptWhyNow returns the SIGNAL rows and drops the section's own
+    // `synthesis` and `narrative_thread` — the paragraph that says what
+    // changed and why it matters now. It was reachable from the API and
+    // from nowhere in the browser, so the panel could not answer the one
+    // question the surface exists to answer. The rows keep their shape;
+    // the section travels beside them.
+    whyNowMeta: secOf(overview, "why_now"),
     leadership: adaptLeadership(secOf(overview, "leadership"), x.enrichment),
     thoughtLeadership: adaptThoughtLeadership(secOf(overview, "thought_leadership")),
     insightCards: adaptInsights(secOf(insights, "insights"), recs, secOf(overview, "findings")),
@@ -1233,6 +1282,7 @@ Object.assign(window, {
   adaptRoadmap,
   adaptStairstep,
   adaptEvidence,
+  adaptAnswers,
   platformChips,
   scaleMaxOf,
   headlineOf,

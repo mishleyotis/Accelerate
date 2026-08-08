@@ -279,8 +279,16 @@ test("sentiment groups by the payload's own audience and keeps each scale", () =
   ] });
   assert.strictEqual(s.employee.length, 1);
   assert.strictEqual(s.customer.length, 1);
-  assert.strictEqual(s.employee[0].scale, 5);
-  assert.strictEqual(s.customer[0].scale, 100, "an NPS keeps its own bounds");
+  // `scale` is the producer's own words, because the card PRINTS it beside
+  // the figure ("0..5", "NPS -100..100") — a bar labelled 5 tells a reader
+  // nothing. `scale_max` is the parsed bound the fill is computed against.
+  // They were one field, holding the number, until the card started printing
+  // it: every bar then read its own label as its width and rendered empty.
+  assert.strictEqual(s.employee[0].scale, "0..5");
+  assert.strictEqual(s.employee[0].scale_max, 5);
+  assert.strictEqual(s.customer[0].scale, "NPS -100..100",
+                     "an NPS keeps its own bounds");
+  assert.strictEqual(s.customer[0].scale_max, 100);
   assert.strictEqual(s.customer[0].score, 79.81, "never rescaled");
 });
 

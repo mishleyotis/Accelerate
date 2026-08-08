@@ -53,7 +53,7 @@ function AlertsPage() {
     size: 13
   }), " Export CSV"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
-    onClick: () => pushToast("Feedback file regenerated — routed to DMA bot", "success")
+    onClick: () => pushToast("Feedback file regenerated - routed to DMA bot", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 13
@@ -1141,7 +1141,7 @@ function AdminPage() {
         b
       }) => {
         setScanning(false);
-        if (ok) pushToast("Package scan started — new client folders land as the Job completes", "success");else pushToast(b.error || "Scan trigger failed", "warn");
+        if (ok) pushToast("Package scan started - new client folders land as the Job completes", "success");else pushToast(b.error || "Scan trigger failed", "warn");
       }).catch(() => {
         setScanning(false);
         pushToast("Scan trigger failed", "warn");
@@ -1627,7 +1627,7 @@ function ImportPage() {
     size: 13
   }), " Run scan now")), LIVE ? null : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
-    onClick: () => pushToast("Upload payload — drop your app_payload_v1.json file here", "success")
+    onClick: () => pushToast("Upload payload - drop your app_payload_v1.json file here", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -1859,13 +1859,13 @@ function ImportPage() {
     }
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast("API key rotated — new key sent via secure channel", "success")
+    onClick: () => pushToast("API key rotated - new key sent via secure channel", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 13
   }), " Rotate API key"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
-    onClick: () => pushToast("Upload payload manually — select app_payload_v1.json", "success")
+    onClick: () => pushToast("Upload payload manually - select app_payload_v1.json", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -1903,13 +1903,13 @@ function ImportPage() {
     }
   }, LIVE ? /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast("Catalogue versions load via the migrate Job (LOAD_CATALOGUES) — no upload from the browser", "warn")
+    onClick: () => pushToast("Catalogue versions load via the migrate Job (LOAD_CATALOGUES) - no upload from the browser", "warn")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "lock",
     size: 13
   }), " Deploy-managed") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast("V7.3 catalog uploaded — new runs will use the new version", "success")
+    onClick: () => pushToast("V7.3 catalog uploaded - new runs will use the new version", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13

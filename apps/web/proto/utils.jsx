@@ -612,6 +612,17 @@ function useLiveEntity(displayId, audience, runId, actingRole) {
       window.DMA_ENTITY = built;
       setState({ status: "ready", entity: built, withheld,
                  run: built.run, audience: audience || "internal" });
+      // Producer-authored answers are a run-scoped grain read, and nothing on
+      // first paint needs them: the panel answers from the promoted prose it
+      // already holds, with no request at all. So this is fetched BESIDE the
+      // render rather than before it — it cannot add a millisecond to the
+      // page, and when the connector starts writing them they simply become
+      // the preferred answer on the next open.
+      get(`/api/entity/${id}/answers?${qs()}`).then((r) => {
+        if (cancelled || !r.ok || window.DMA_ENTITY !== built) return;
+        const rows = window.adaptAnswers(r.body);
+        if (rows.length) built.answers = rows;
+      });
     });
     return () => { cancelled = true; };
   }, [LIVE, displayId, audience, runId, actingRole]);

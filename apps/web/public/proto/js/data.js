@@ -2932,6 +2932,13 @@
     evidenceSummaryFor: id => LIVE ? liveField(id, "evidenceSummary") : EVIDENCE_SUMMARY[id] || EVIDENCE_SUMMARY["fce-001"],
     sourceFor: cardId => SOURCE_MAP[cardId] || null,
     whyNowFor: id => LIVE ? liveField(id, "whyNow") : WHY_NOW[id] || synthWhyNow(id),
+    /* The why-now SECTION beside its signal rows. `whyNowFor` returns the
+       adapted rows and drops the section's own `synthesis` and
+       `narrative_thread` — the paragraph that states what changed and why it
+       matters now. That is the best answer this run holds to "what changed
+       recently", and until this accessor existed it was reachable from the
+       API and from nowhere in the browser. */
+    whyNowMetaFor: id => LIVE ? liveField(id, "whyNowMeta") : null,
     /* The promoted SCQA and top findings. Both were adapted onto DMA_ENTITY and
        read by nothing, so the cards rendered the prototype's fixture prose —
        a fictional bank's narrative under a real client's name. No fixture
