@@ -34,6 +34,10 @@ python scripts/check_language.py payload.json
 `--subvertical` turns on ET-05 and `--cells` turns on CG-14; without them those
 two print "not run" rather than passing silently.
 
+**CG-15 is not in the local checkers.** It runs at submit only, so a clean local
+run says nothing about it. Read its section below before you write prose, not
+after the verdict.
+
 ## The gates that block most often
 
 These are the ones a submission actually dies on, so they are named here rather than left
@@ -63,6 +67,80 @@ absence instead.
 
 The contradiction it also catches: an item whose state says `WORKED_FOUND` while its
 evidence list is empty. One of the two is wrong.
+
+### CG-15 · a payload that says nothing
+
+**The only gate that reads the prose for content.** Every other gate here checks
+structure, identity or arithmetic, and a payload can satisfy all of them while
+asserting nothing: all 34 sections present, every required field set to `"N/A"`
+or `[]`, every id resolving, every figure agreeing with the workbook — zero
+blocking reasons, eligible to promote. That is what this closes.
+
+Five refusals, each naming its arithmetic in the verdict:
+
+| Refused | The arithmetic |
+|---|---|
+| A **placeholder** where the contract requires prose — `N/A` `TBD` `-` `—` `none` `unknown` `not applicable` `pending` `todo` `nil`, the empty string, whitespace | Case- and punctuation-insensitive: `"N/A."`, `"n.a"`, `"  "` all normalise to the same key |
+| A prose field **under a credible floor for its own contract** | `words < ceil(stated_floor × 0.5)`, minimum 3. The floor is read from the field's own `doc` text, so `consequence` (6-14) and `answer` (90-150) get different lines. A field whose stated floor is under 6 is a label, not prose, and only the placeholder rule applies to it |
+| A **section every one of whose present content fields is vacuous** — the headline case | `vacuous / present == 1`, present ≥ 1, and no valid `empty_state` |
+| **Template prose** across items of one field with a name substituted | 8-word shingles, `overlap = shared / min(count A, count B) >= 0.40`, connected group of **3 or more** |
+| Prose that only **restates a score** ("P4C1 scores 2.1, below the peer median of 3.0") or only **inventories the evidence** ("Two items speak to this cell") | Content words left after removing stopwords, numerals, catalogue ids, band words, the score register and the evidence-inventory register: `residual ≤ 2` on a text of 5 tokens or more |
+
+**Where the thresholds come from.** All four numbers are tuned against the
+promoted Baxter run, not chosen: its lowest words-to-floor ratio is 0.64 (a
+16-word timeline body against a 25-word floor — real content that undershoots
+its budget, and it passes); its lowest residual is 4 content words (a seven-word
+`consequence`); and across all 249,374 item-prose pairs the highest 8-gram
+overlap between two genuinely distinct arguments is 0.179, against a refusal
+line of 0.40.
+
+#### What it deliberately allows
+
+**An honest absence is a finding, and it passes.** Refusing it would be worse
+than the hole this closes — it would push you toward inventing content to clear
+a gate. Exempt from the floor, the residual and the template checks:
+
+- a section carrying a valid `empty_state` (reason **and** `sources_searched`);
+- an item recording an absence on the protocol's own ladder — `WORKED_ABSENT`,
+  `UNWORKED`, `NOT_RUN`, `verified_absent`, `verified_sparse`, `cannot_estimate`,
+  `insufficient_cohort`, `quarantined` — **with the search that established it**
+  (`sources_searched`, `queries_run`, or a `not_run_reason`).
+
+The eleven alert justifications in the promoted run sit at an 8-gram overlap of
+0.90–0.97 and pass, because every one of them records `WORKED_ABSENT` or
+`UNWORKED` with the four sources it searched. They say the same sentence eleven
+times because it is the same finding eleven times, and demanding variation there
+would be demanding invention. **Strip the ladder and the same three sentences are
+a template** — the exemption is the record, not the wording.
+
+Two more things it does not fire on:
+
+- **`narrative_thread` repeated across a page's sections.** It is one thread per
+  page carried onto every section by contract; 10 of overview's 12 sections carry
+  the identical string in the promoted run, correctly. Repetition is only a defect
+  where the contract asked for one argument **per item**.
+- **A number.** A score came off a workbook row, so a section carrying a real
+  figure is not a shell — it gets field verdicts, not the section verdict.
+
+The one thing no absence excuses is a **bare placeholder**. `"N/A"` is not the
+absence protocol; the protocol is a stated reason plus the ladder, and it is
+available on every section that needs it. `"N/A"` renders as itself.
+
+#### What it caught on a run that had already promoted
+
+All 17 `overview.ceilings.rows[*].rationale` values — one template with the cited
+document swapped, two pairs of them byte-identical:
+
+> Best evidence is T2-grade (**BCU 2024 Annual Report (PDF)**), which licenses
+> observation up to the Differentiating band under the tier ceiling. The limiting
+> absence is internal utilisation evidence — public sources establish deployment,
+> not depth of use.
+
+The contract asks that field for "TWO halves, both required: (a) what the
+evidence DOES establish, cited; (b) the specific thing whose ABSENCE set the
+ceiling". Seventeen categories got one sentence about tier grades. The repair is
+to write (b) per category — the artefact whose absence caps *that* category —
+not to reword the template seventeen ways.
 
 ### CG-09 · a closed vocabulary takes one of its values
 
