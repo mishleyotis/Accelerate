@@ -15,13 +15,24 @@ pointer that is. Both are written, in that order — a scanner that read
 `latest.json` while the dated write was still in flight would measure a
 corpus that was never exported.
 
-Identity: `dmai-mcp`. It is the only service account that already holds both
-halves of this job's needs — SELECT across the serving tier (svc_mcp) and,
-with the binding provision.sh adds, object access on the pack bucket. Running
-it as `dmai-api` would mean granting the serving API's identity write access
-to a bucket the service never uses; running it as `dmai-worker` would mean
-granting the ingest identity read access to the serving tier it is
-deliberately denied.
+Identity: `dmai-api`, and the reason is a grant rather than a preference.
+The pack reads `serving_directory`, the ONE view the read path resolves runs
+through — and 0013 grants it to `svc_api` alone. Measured, not assumed: the
+first production run of this Job as `dmai-mcp` failed with
+
+    42501: permission denied for materialized view serving_directory
+
+The alternative was to rebuild the directory's query here out of `runs`,
+`entities` and `run_manifest`, which svc_mcp does read. That would have put a
+second `+ INTERVAL '6 months'` in the tree, free to drift from the one in
+0031 — a corpus measurement disagreeing with the surface it measures is worse
+than a bucket binding. So the exporter reads exactly what the API reads, as
+the identity that is allowed to, and the only thing widened is object access
+on the pack bucket.
+
+`corpus-gate-scanner` runs as `dmai-mcp` instead, and reads no serving table
+at all: it reads the pack this Job wrote, and writes `gate_results`, which is
+svc_mcp's. Each Job holds the grants it uses and nothing else.
 
 Not built here: the scorecard PDF. It needs headless Chromium in the image
 and a rendered page to shoot, and belongs with the surface whose layout it

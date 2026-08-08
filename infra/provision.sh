@@ -141,12 +141,14 @@ stage_0_5() {
   bind_bucket dmai-artefacts dmai-mcp    roles/storage.objectViewer
   bind_bucket dmai-exports      dmai-worker roles/storage.objectAdmin
   bind_bucket dmai-corpus-packs dmai-worker roles/storage.objectAdmin
-  # The two corpus Jobs (pack-exporter writes the pack, corpus-gate-scanner
-  # reads it) run as dmai-mcp: it is the only identity that already holds the
-  # serving-tier SELECT the pack needs AND the gate_results DML the scan
-  # needs, so nothing narrower is widened to make them work.
-  bind_bucket dmai-corpus-packs dmai-mcp roles/storage.objectAdmin
-  bind_bucket dmai-exports      dmai-mcp roles/storage.objectAdmin
+  # The corpus pack: written by pack-exporter as dmai-api (the only identity
+  # granted `serving_directory`, which the pack reads) and read by
+  # corpus-gate-scanner as dmai-mcp (the identity that writes gate_results).
+  # Each Job holds the grants it uses; the split is a consequence of 0013's
+  # grant, not a preference.
+  bind_bucket dmai-corpus-packs dmai-api roles/storage.objectAdmin
+  bind_bucket dmai-exports      dmai-api roles/storage.objectAdmin
+  bind_bucket dmai-corpus-packs dmai-mcp roles/storage.objectViewer
 
   say "0.5 Redis (claim leases, cache — reached over Direct VPC egress)"
   if gcloud redis instances describe dmai-redis --region="$REGION" --project="$PROJECT_ID" >/dev/null 2>&1; then

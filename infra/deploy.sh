@@ -185,11 +185,13 @@ fi
 # A trigger with no Job behind it is a scheduled 404, so the Jobs are deployed
 # here first and the triggers point at them.
 #
-# Both run as dmai-mcp. It is the only account that already holds BOTH halves
-# of what they need — SELECT across the serving tier (svc_mcp) and DML on
-# gate_results — so nothing narrower has to be widened: dmai-api would gain
-# bucket writes it never uses, and dmai-worker would gain the serving-tier
-# read it is deliberately denied.
+# They run as DIFFERENT identities, each the one whose grants it actually
+# uses. The exporter reads `serving_directory`, which 0013 grants to svc_api
+# alone (measured: as dmai-mcp it failed with 42501 permission denied), so it
+# runs as dmai-api. The scanner reads no serving table — it reads the pack and
+# writes `gate_results`, which is svc_mcp's — so it runs as dmai-mcp. Neither
+# gains a database grant it does not use; the only widening is object access
+# on the pack bucket, added in provision.sh.
 if [ -d infra/jobs ]; then
   say "corpus jobs (pack-exporter, corpus-gate-scanner)"
   # The ceilings are ONE file — packages/shared/corpus_gates.json, the file CI
@@ -202,10 +204,10 @@ if [ -d infra/jobs ]; then
 
   gcloud run jobs deploy dmai-pack-exporter --source="$JOBS_CTX" \
     --project="$PROJECT_ID" --region="$REGION" \
-    --service-account="dmai-mcp@${SA_DOMAIN}" \
+    --service-account="dmai-api@${SA_DOMAIN}" \
     --network=default --subnet=default --vpc-egress=private-ranges-only \
     --command="python,-m,corpus_jobs.pack_export" \
-    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-mcp@${PROJECT_ID}.iam;DB_NAME=dma_insights;GCP_PROJECT=${PROJECT_ID}" \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-api@${PROJECT_ID}.iam;DB_NAME=dma_insights;GCP_PROJECT=${PROJECT_ID}" \
     --max-retries=0 --task-timeout=900 --memory=1Gi --quiet
 
   gcloud run jobs deploy dmai-corpus-gate-scanner --source="$JOBS_CTX" \
@@ -218,6 +220,9 @@ if [ -d infra/jobs ]; then
     --max-retries=0 --task-timeout=900 --memory=1Gi --quiet
   rm -rf "$JOBS_CTX"
 
+  # Cloud Scheduler invokes both as dmai-mcp (one OAuth identity for the two
+  # triggers); the JOB's own service account is what the container then runs
+  # as, and they differ on purpose — see above.
   for job in dmai-pack-exporter dmai-corpus-gate-scanner; do
     gcloud run jobs add-iam-policy-binding "$job" \
       --project="$PROJECT_ID" --region="$REGION" \
