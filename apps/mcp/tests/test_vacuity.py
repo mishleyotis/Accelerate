@@ -424,6 +424,21 @@ def test_a_section_with_a_valid_empty_state_is_not_a_vacuous_section():
     assert _cg15("context", payload) == []
 
 
+def test_an_empty_state_does_not_exempt_the_prose_a_populated_section_carries():
+    """`empty_state` answers the section question and nothing more. The
+    promoted run's overview.sentiment carries bars, themes AND an
+    empty_state naming the review text it could not cite — a producer who
+    could switch the gate off for a whole section with one declared
+    absence would have a switch, not a gate."""
+    payload = _ceilings(CEILING_TEMPLATE)
+    payload["ceilings"]["empty_state"] = {
+        "reason": "Two categories could not be given a ceiling.",
+        "sources_searched": ["the evidence index", "the client profile"]}
+    out = _cg15("overview", payload)
+    assert len(out) == len(CEILING_TEMPLATE)
+    assert all("share 8-word spans" in r["message"] for r in out)
+
+
 def test_an_absence_rung_without_a_ladder_does_not_buy_the_exemption():
     """A state that claims the ladder ran and records no search is not an
     absence; it is an assertion with nothing behind it — the same posture

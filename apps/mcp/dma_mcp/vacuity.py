@@ -27,15 +27,21 @@ Five shapes are refused, each with its arithmetic stated in the verdict:
 
 WHAT IT DELIBERATELY ALLOWS. An honest ABSENCE is a finding, and
 refusing it would be worse than the hole this closes: it would push
-producers toward fabricating content to get past a gate. So a section
-carrying a valid `empty_state` (reason + sources_searched), and an item
-recording an absence on the protocol's own ladder (`WORKED_ABSENT`,
-`UNWORKED`, `NOT_RUN`, `verified_absent`, `verified_sparse`,
-`cannot_estimate`, `insufficient_cohort`, `quarantined`) WITH the search
-that established it, are exempt from the floor, the residual and the
-template checks. Eleven alerts whose ladder ran and found nothing say the
-same sentence eleven times because it is the same finding eleven times;
-demanding variation there would be demanding invention.
+producers toward fabricating content to get past a gate.
+
+  · A section carrying a valid `empty_state` (reason + sources_searched)
+    is not a shell — check 3 stands down for it. That, and only that:
+    an empty_state on a POPULATED section does not exempt the prose it
+    carries, or one declared absence would switch the gate off for
+    everything beside it.
+  · An ITEM recording an absence on the protocol's own ladder
+    (`WORKED_ABSENT`, `UNWORKED`, `NOT_RUN`, `verified_absent`,
+    `verified_sparse`, `cannot_estimate`, `insufficient_cohort`,
+    `quarantined`) WITH the search that established it is exempt from
+    the floor, the residual and the template checks. Eleven alerts whose
+    ladder ran and found nothing say the same sentence eleven times
+    because it is the same finding eleven times; demanding variation
+    there would be demanding invention.
 
 The one thing no absence excuses is a bare placeholder. "N/A" is not the
 absence protocol — the protocol is a reason and a sources_searched
@@ -529,7 +535,14 @@ def check_vacuity(page: str, payload: dict) -> list:
             out.extend(vacuous_section)
             continue
 
-        section_exempt = valid_empty_state(body.get("empty_state"))
+        # `empty_state` answers the SECTION question — "is this a shell?"
+        # — and it is answered above. It is not a blanket exemption for
+        # the prose a POPULATED section also carries: overview.sentiment
+        # in the promoted run has bars, themes and a gap analysis AND an
+        # empty_state saying which review text could not be cited, and a
+        # producer who could switch the gate off for a whole section with
+        # one declared absence would have a switch. Below this line an
+        # exemption is the ITEM's own record of what it searched.
         reg = floors.get(name) or {"scalars": {}, "items": {}}
 
         for fname, floor in reg["scalars"].items():
@@ -540,8 +553,7 @@ def check_vacuity(page: str, payload: dict) -> list:
             if not isinstance(value, str):
                 continue
             out.extend(_check_value(page, name, f"{name}.{fname}", fname,
-                                    value, floor,
-                                    section_exempt or records_absence(body)))
+                                    value, floor, records_absence(body)))
 
         for fname, per_key in reg["items"].items():
             value = body.get(fname)
@@ -552,7 +564,7 @@ def check_vacuity(page: str, payload: dict) -> list:
                 if not isinstance(item, dict):
                     continue
                 index = "" if isinstance(value, dict) else f"[{i}]"
-                exempt = section_exempt or records_absence(item)
+                exempt = records_absence(item)
                 for key, floor in per_key.items():
                     text = item.get(key)
                     if not isinstance(text, str):

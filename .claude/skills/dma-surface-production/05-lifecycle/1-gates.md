@@ -98,13 +98,26 @@ line of 0.40.
 
 **An honest absence is a finding, and it passes.** Refusing it would be worse
 than the hole this closes — it would push you toward inventing content to clear
-a gate. Exempt from the floor, the residual and the template checks:
+a gate. Two exemptions, each narrow:
 
-- a section carrying a valid `empty_state` (reason **and** `sources_searched`);
-- an item recording an absence on the protocol's own ladder — `WORKED_ABSENT`,
-  `UNWORKED`, `NOT_RUN`, `verified_absent`, `verified_sparse`, `cannot_estimate`,
-  `insufficient_cohort`, `quarantined` — **with the search that established it**
-  (`sources_searched`, `queries_run`, or a `not_run_reason`).
+- a section carrying a valid `empty_state` (reason **and** `sources_searched`)
+  is not a shell, so the **section** check stands down for it. That, and only
+  that: an `empty_state` on a section that is otherwise populated does **not**
+  exempt the prose beside it — overview.sentiment in the promoted run has bars,
+  themes and a gap analysis as well as an `empty_state` naming the review text
+  it could not cite, and one declared absence must not switch the gate off for
+  everything else in the section;
+- an **item** recording an absence on the protocol's own ladder —
+  `WORKED_ABSENT`, `UNWORKED`, `NOT_RUN`, `verified_absent`, `verified_sparse`,
+  `cannot_estimate`, `insufficient_cohort`, `quarantined` — **with the search
+  that established it** (`sources_searched`, `queries_run`, or a
+  `not_run_reason`) is exempt from the floor, the residual and the template
+  checks.
+
+`thin: true` is **not** one of them. It says the evidence is short of a cell, not
+that the argument is, and the contract still asks for the argument. Neither is
+`recency_band: UNVERIFIED` — an undated source is CG-10's business, and no
+licence for the sentence beside it to say nothing.
 
 The eleven alert justifications in the promoted run sit at an 8-gram overlap of
 0.90–0.97 and pass, because every one of them records `WORKED_ABSENT` or
