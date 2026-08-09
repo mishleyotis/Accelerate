@@ -125,3 +125,52 @@ def test_per_item_provenance_vocabularies_are_per_surface():
     assert _check_contract_vocabularies(
         "platform", "recommendations",
         {"recommendations": [{"provenance": "DERIVED"}]}) == []
+
+
+# ── derived vocabularies (2026-08-09) ─────────────────────────────────
+def test_arc_shape_is_policed_without_being_hand_added():
+    """MEM-0010's class, one field along from where CG-09 was built. The
+    contract's doc for `context.timeline.arc_shape` opens with a five-value
+    pipe list; `_CONTRACT_VOCABULARIES` is hand-written and never carried
+    it; a promoted run served 'strategy-first, substrate-later' there — a
+    coined phrase in a fixed-vocabulary field, which renders, matches no
+    filter, and is invisible to every surface that groups on it."""
+    from dma_mcp.validation import _vocabularies
+    vocab = _vocabularies("context", "timeline")
+    assert "arc_shape" in vocab, "the contract declares it; the gate must see it"
+    assert vocab["arc_shape"]["values"] == (
+        "STEADY_INVESTMENT", "STOP_START", "POST_EVENT_CATCHUP",
+        "LEGACY_ANCHORED", "RECENT_ACCELERATION")
+
+
+def test_the_served_arc_shape_is_refused_and_a_declared_one_passes():
+    from dma_mcp.validation import _check_contract_vocabularies
+    served = {"events": [], "arc_shape": "strategy-first, substrate-later"}
+    out = _check_contract_vocabularies("context", "timeline", served)
+    assert len(out) == 1 and out[0]["gate_id"] == "CG-09"
+    assert "STEADY_INVESTMENT" in out[0]["message"]
+    ok = {"events": [], "arc_shape": "LEGACY_ANCHORED"}
+    assert _check_contract_vocabularies("context", "timeline", ok) == []
+
+
+def test_the_hand_written_entries_still_win():
+    """They carry near-miss guidance and the `leading` rule — the contract
+    asks `maturity_effect` for the WORD and then a clause, and a derivation
+    cannot infer that. Deriving over them would refuse eleven events of a
+    run doing exactly what it was asked."""
+    from dma_mcp.validation import _vocabularies, _CONTRACT_VOCABULARIES
+    vocab = _vocabularies("context", "timeline")
+    for field, spec in _CONTRACT_VOCABULARIES["context.timeline"].items():
+        assert vocab[field] is spec, f"{field} was overwritten by a derivation"
+
+
+def test_a_derivation_failure_never_takes_validation_down():
+    """The derived table is additive: if the contract cannot be read, the
+    hand-written rules must still run rather than the gate erroring."""
+    import dma_mcp.validation as V
+    saved = V._DERIVED_VOCABULARIES
+    try:
+        V._DERIVED_VOCABULARIES = {}
+        assert "events[*].kind" in V._vocabularies("context", "timeline")
+    finally:
+        V._DERIVED_VOCABULARIES = saved

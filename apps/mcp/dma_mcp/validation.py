@@ -312,9 +312,69 @@ _CONTRACT_VOCABULARIES = {
 _LEADING_TOKEN = re.compile(r"^[A-Z][A-Z_]*")
 
 
+# Vocabularies the CONTRACT declares in its own `doc` text, derived rather
+# than copied. `_CONTRACT_VOCABULARIES` above is hand-written, and hand-
+# written is how `context.timeline.arc_shape` — whose doc opens
+# "STEADY_INVESTMENT|STOP_START|POST_EVENT_CATCHUP|LEGACY_ANCHORED|
+# RECENT_ACCELERATION" — was never added to it. A promoted run served
+# `'strategy-first, substrate-later'` there: a coined phrase in a
+# five-value field, which is MEM-0010's exact class on the exact page
+# CG-09 was built for, one field along.
+#
+# So the hand-written entries stay (they carry near-miss guidance and the
+# `leading` rule, which no derivation can infer) and anything the contract
+# declares and they do not is derived and policed automatically. A
+# vocabulary added to the contract tomorrow is enforced tomorrow.
+_DOC_VOCAB = re.compile(
+    r"^([A-Z][A-Z0-9_&/-]{1,30}(?:\|[A-Z][A-Z0-9_&/-]{1,30}){1,12})")
+_DERIVED_VOCABULARIES = None
+
+
+def _derived_vocabularies() -> dict:
+    """{"page.section": {field: spec}} from the contract's own doc text."""
+    global _DERIVED_VOCABULARIES
+    if _DERIVED_VOCABULARIES is not None:
+        return _DERIVED_VOCABULARIES
+    out: dict = {}
+    try:
+        for page in PAGES:
+            for sname, sec in sections(page).items():
+                key = f"{page}.{sname}"
+                hand = _CONTRACT_VOCABULARIES.get(key, {})
+                for fname, spec in (sec.get("fields") or {}).items():
+                    if fname in hand:
+                        continue          # the hand-written entry wins
+                    m = _DOC_VOCAB.match((spec.get("doc") or "").strip())
+                    if not m:
+                        continue
+                    out.setdefault(key, {})[fname] = {
+                        "name": fname,
+                        "values": tuple(m.group(1).split("|")),
+                        "note": ("the vocabulary is stated in this field's "
+                                 "own contract doc, first line. A coined "
+                                 "phrase in a fixed-vocabulary field renders, "
+                                 "matches no filter, and is invisible to "
+                                 "every surface that groups on it"),
+                        # A vocabulary the contract states as a bare pipe list
+                        # is exact: where a field legitimately takes the WORD
+                        # then a clause, its hand-written entry says so.
+                        "leading": False,
+                    }
+    except Exception:                     # noqa: BLE001 — derived, never fatal
+        out = {}
+    _DERIVED_VOCABULARIES = out
+    return out
+
+
+def _vocabularies(page: str, section: str) -> dict:
+    key = f"{page}.{section}"
+    return {**_derived_vocabularies().get(key, {}),
+            **_CONTRACT_VOCABULARIES.get(key, {})}
+
+
 def _check_contract_vocabularies(page: str, section: str, body) -> list:
     out = []
-    for path, spec in _CONTRACT_VOCABULARIES.get(f"{page}.{section}", {}).items():
+    for path, spec in _vocabularies(page, section).items():
         for jpath, value in _at_path(body, path):
             if value is None or value in spec["values"]:
                 continue
