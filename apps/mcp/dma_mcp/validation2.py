@@ -405,27 +405,26 @@ _RUN_SUFFIX = re.compile(r"^(?P<base>.+)-R\d+$")
 
 
 def _sibling_with_links(conn, stored_id: str):
-    """(twin_id, cells) for the re-scan twin of `stored_id` that carries the
-    links, or None. Bare -> re-mint AND re-mint -> bare, because either can
-    be the one holding them."""
+    """(successor_id, cells) when this row was superseded by one that carries
+    the links, or None.
+
+    0046 records the supersession the re-scan performs, and
+    `resolve_evidence_id()` is the ONE implementation of the rule — in the
+    database, because `apps/api`'s evidence drawer resolves the same
+    citations and this file having its own copy is what produced the
+    inverted advice above. The id-shape lookup this replaced could only
+    ever guess the direction from a string suffix.
+    """
     stored_id = str(stored_id or "")
     if not stored_id:
         return None
-    m = _RUN_SUFFIX.match(stored_id)
-    if m:
-        # a re-mint: its twin is the bare package id
-        pattern, params = "e_id = %s", (m.group("base"),)
-    else:
-        # a bare id: its twins are its re-mints. LIKE with the id as a
-        # prefix would also match a LONGER id that merely starts the same
-        # way, so the suffix shape is asserted rather than assumed.
-        pattern = "e_id LIKE %s AND e_id ~ '-R[0-9]+$'"
-        params = (f"{stored_id}-R%",)
     try:
         cur = conn.cursor()
-        cur.execute(f"""SELECT e_id, count(DISTINCT subcap_id) n
-                          FROM evidence_subcap_links WHERE {pattern}
-                         GROUP BY e_id ORDER BY n DESC LIMIT 1""", params)
+        cur.execute("""SELECT r.e_id, count(DISTINCT l.subcap_id)
+                         FROM resolve_evidence_id(%s) AS r(e_id)
+                         JOIN evidence_subcap_links l ON l.e_id = r.e_id
+                        WHERE r.e_id <> %s
+                        GROUP BY r.e_id""", (stored_id, stored_id))
         row = cur.fetchone()
     except Exception:
         return None
@@ -448,14 +447,22 @@ def _check_cited_linkage(page, payload, found, cited_by, conn=None) -> list:
                    if conn is not None else None)
         if sibling:
             twin, n = sibling
-            out.append(_reason(
+            # DISCLOSES, does not refuse. The reader is not stranded: the
+            # serving path resolves through the same 0046 pointer, so this
+            # chip opens on `twin` with its links and its fuller excerpt.
+            # Blocking here would refuse a citation that renders correctly,
+            # and would refuse it on 4,366 ids at once — every bare row whose
+            # links 0043 moved. The producer is told to cite the current id
+            # because it is better practice, not because the page is broken.
+            r = _reason(
                 "ET-07", section, f"{section}.e_ids",
-                f"{e_id} and {twin} are two registrations of the same package "
-                f"source — one re-scan apart — and the {n} cells this source "
-                f"supports are linked to {twin}, not to the id cited here. So "
-                "this is not a source that supports nothing; it is the twin "
-                f"that does not hold the linkage. Cite {twin}, which is the "
-                "row a reader opening this chip needs to reach"))
+                f"{e_id} was superseded by {twin} — the same source, re-scanned "
+                f"— and the {n} cells it supports are linked to {twin}. The "
+                "chip still opens: the serve path resolves the citation through "
+                "the same pointer this check used. Cite the current id so the "
+                "payload says what the reader is shown")
+            r["severity"] = "warn"
+            out.append(r)
             continue
         out.append(_reason(
             "ET-07", section, f"{section}.e_ids",

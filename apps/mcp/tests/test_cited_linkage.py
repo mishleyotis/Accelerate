@@ -19,7 +19,6 @@ passes STATED — by the grain of the section citing it, or by a rung the
 producer wrote naming the id — and never by being forced into a false
 link.
 """
-import re
 import sys
 from pathlib import Path
 
@@ -127,84 +126,77 @@ def test_the_financial_series_carries_period_files_and_is_exempt():
 
 
 class _Conn:
-    """A link table holding only the ids given, answering the real query:
-    one row per e_id, richest first, or nothing."""
+    """Stands in for `resolve_evidence_id()` (0046) plus the link table.
 
-    def __init__(self, links):
+    The resolution rule itself is a SQL function and is tested against the
+    real database in apps/api/tests/test_evidence_supersession.py — including
+    the case where a successor carries no links and must NOT capture the
+    citation. What this double exercises is what ET-07 does with the answer.
+    """
+
+    def __init__(self, links, superseded=None):
         self.links = links
+        self.superseded = superseded or {}      # e_id -> successor
 
     def cursor(self):
         conn = self
 
         class _Cur:
             def execute(self, sql, params=None):
-                if "LIKE" in sql:             # bare id -> its re-mints
-                    prefix = params[0][:-1]   # strip the trailing %
-                    hits = [(k, len(v)) for k, v in conn.links.items()
-                            if k.startswith(prefix) and re.search(r"-R\d+$", k)]
-                else:                          # re-mint -> its bare original
-                    hits = [(params[0], len(conn.links.get(params[0], ())))]
-                hits = [h for h in hits if h[1]]
-                self.row = max(hits, key=lambda h: h[1]) if hits else None
+                cited = params[0]
+                # the function's own rule: forward only onto a successor that
+                # carries links, otherwise stay put
+                succ = conn.superseded.get(cited)
+                resolved = succ if succ and conn.links.get(succ) else cited
+                n = len(conn.links.get(resolved, ()))
+                self.row = (resolved, n) if resolved != cited and n else None
 
             def fetchone(self):
                 return self.row
         return _Cur()
 
 
-def test_a_re_scan_twin_is_named_as_the_wrong_copy_not_as_an_orphan():
-    """Two registrations of one package source, one re-scan apart, and only
-    one of them carries the cell links. Telling the producer to declare
-    that the cited one supports no cell would be asking for a false
-    statement to pass a gate — the repair is to cite the twin."""
-    payload = {"cell_evidence": {"e_ids": ["E-BCU-016-R2"]}}
-    conn = _Conn({"E-BCU-016": ["P4C1.1.1", "P4C1.1.2", "P4C1.1.3"]})
-    out = _check_cited_linkage("heatmap", payload, [_row("E-BCU-016-R2")],
-                               {"E-BCU-016-R2": "cell_evidence"}, conn)
-    assert len(out) == 1
-    msg = out[0]["message"]
-    assert out[0]["gate_id"] == "ET-07"
-    assert "the 3 cells this source supports are linked to E-BCU-016" in msg
-    assert "Cite E-BCU-016," in msg
-    assert "supports nothing" in msg          # explicitly says it is not that
-
-
-def test_the_lookup_goes_the_other_way_too_because_0043_moved_the_links():
-    """The direction is not a property of the id shape, and this code used
-    to assume it was.
-
-    When it was written, `persist.py` minted the re-mint and carried no
-    linkage, so the links stayed on the bare original and the advice was
-    "cite the bare package id". Migration 0043 and
-    `persist.carry_links_across_remint` MOVE them onto the re-mint.
-    Measured on production 2026-08-09 over every cited id on the promoted
-    heatmap: three orphans have a linked twin and ALL THREE are bare ids
-    whose links now sit on the `-R2` copy — E-BCU-012 (192 cells),
-    E-BCU-071 (43), E-BCU-026 (39).
-
-    Negative control: the one-directional lookup returns None here, so the
-    run falls through to the generic orphan reason and the producer is told
-    to declare that a source supporting 192 cells supports none."""
+def test_a_superseded_citation_discloses_and_does_not_refuse():
+    """The reader is not stranded: the serve path resolves through the same
+    0046 pointer, so the chip opens on the successor with its links and its
+    fuller excerpt. Blocking would refuse a citation that renders correctly —
+    and would refuse it on 4,366 ids at once, every bare row whose links 0043
+    moved."""
     payload = {"cell_evidence": {"e_ids": ["E-BCU-012"]}}
-    conn = _Conn({"E-BCU-012-R2": ["P4C1.1.%d" % i for i in range(5)]})
+    conn = _Conn({"E-BCU-012-R2": ["P4C1.1.%d" % i for i in range(5)]},
+                 superseded={"E-BCU-012": "E-BCU-012-R2"})
     out = _check_cited_linkage("heatmap", payload, [_row("E-BCU-012")],
                                {"E-BCU-012": "cell_evidence"}, conn)
     assert len(out) == 1
+    assert out[0]["gate_id"] == "ET-07"
+    assert out[0]["severity"] == "warn", "a resolvable citation must not block"
     msg = out[0]["message"]
-    assert "linked to E-BCU-012-R2" in msg and "Cite E-BCU-012-R2," in msg
+    assert "superseded by E-BCU-012-R2" in msg and "5 cells" in msg
     assert "no cell links served for this item" not in msg
 
 
-def test_a_longer_id_that_merely_starts_the_same_way_is_not_a_twin():
-    """`LIKE 'E-BCU-01%'` would match E-BCU-012 from E-BCU-01, and a prefix
-    match across an id space where E-BCU-1 and E-BCU-12 both exist would
-    name an unrelated document as the repair."""
-    payload = {"cell_evidence": {"e_ids": ["E-BCU-01"]}}
-    conn = _Conn({"E-BCU-012": ["P4C1.1.1"], "E-BCU-012-R2": ["P4C1.1.2"]})
-    out = _check_cited_linkage("heatmap", payload, [_row("E-BCU-01")],
-                               {"E-BCU-01": "cell_evidence"}, conn)
+def test_a_genuine_orphan_still_blocks():
+    """The negative control on the disclosure. If every unlinked citation
+    became a warning, ET-07 would stop doing the job it was built for — a
+    reader invited to drill in and handed nothing."""
+    payload = {"cell_evidence": {"e_ids": ["E-BCU-016"]}}
+    out = _check_cited_linkage("heatmap", payload, [_row("E-BCU-016")],
+                               {"E-BCU-016": "cell_evidence"}, _Conn({}))
     assert len(out) == 1
+    assert out[0]["severity"] == "block"
     assert "no cell links served for this item" in out[0]["message"]
+
+
+def test_a_successor_that_carries_no_links_does_not_rescue_the_citation():
+    """Supersession alone is not resolution. Moving a citation onto a
+    successor that links nothing would trade one orphan for another while
+    making the gate report it repaired."""
+    payload = {"cell_evidence": {"e_ids": ["E-BCU-009"]}}
+    conn = _Conn({}, superseded={"E-BCU-009": "E-BCU-009-R2"})
+    out = _check_cited_linkage("heatmap", payload, [_row("E-BCU-009")],
+                               {"E-BCU-009": "cell_evidence"}, conn)
+    assert len(out) == 1
+    assert out[0]["severity"] == "block"
 
 
 def test_a_suffixed_id_whose_original_is_also_unlinked_is_a_plain_orphan():
@@ -213,6 +205,7 @@ def test_a_suffixed_id_whose_original_is_also_unlinked_is_a_plain_orphan():
                                {"E-BCU-016-R2": "cell_evidence"},
                                _Conn({"E-BCU-016": []}))
     assert len(out) == 1
+    assert out[0]["severity"] == "block"
     assert "no cell links served for this item" in out[0]["message"]
 
 

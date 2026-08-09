@@ -210,6 +210,17 @@ def carry_links_across_remint(cur, superseded: str, minted: str) -> int:
             WHERE fresh.e_id = %s AND prior.e_id = %s
               AND fresh.entity_id = prior.entity_id""",
         (minted, superseded))
+    # The move's third half, and the one this function shipped without (0046).
+    # Retaining the superseded row so "an old payload's citation of it still
+    # resolves" is only true if something says WHERE it resolves to. Without
+    # this pointer the retained row is reachable and empty, and ET-07 refuses
+    # every citation of it — measured corpus-wide after 0043: 4,366 bare ids
+    # carrying no links, 7 of 7 blocking the first page that was resubmitted,
+    # 7 of 7 with a twin holding between 6 and 141 of them.
+    cur.execute(
+        """UPDATE evidence_index SET superseded_by = %s
+            WHERE e_id = %s AND coalesce(superseded_by, '') <> %s""",
+        (minted, superseded, minted))
     return carried
 
 

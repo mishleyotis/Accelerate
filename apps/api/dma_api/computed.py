@@ -368,14 +368,31 @@ def cell_items(cur, data: dict, entity_id) -> None:
     # rendering. Scoping the lookup means a foreign id resolves to nothing
     # here and the cell shows the id it could not open, rather than opening
     # somebody else's document.
+    #
+    # Resolved through `resolve_evidence_id` (0046), because a citation may
+    # name a row a later scan replaced: 0043 moved the cell links onto the
+    # re-mint and left 4,366 bare ids in the corpus carrying none. Opening
+    # the drawer on the superseded row shows the OLDER, shorter excerpt and
+    # no linkage, which is the version of the source we deliberately stopped
+    # using. The rule lives in the database because the connector's ET-07
+    # resolves the same citations, and two copies of it is what produced the
+    # inverted remediation this pointer was added to end.
+    #
+    # `cited` is kept beside `e_id` so the payload's id and the row actually
+    # shown are both on the surface, rather than the resolution being silent.
     cur.execute(
-        """SELECT e_id, tier::text, claim_type::text, recency_band::text,
-                  source_name, source_domain, excerpt
-             FROM evidence_index
-            WHERE entity_id = %s AND e_id = ANY(%s)""", (entity_id, wanted))
-    by_id = {r[0]: {"e_id": r[0], "tier": r[1], "claim_label": r[2],
-                    "recency": r[3], "source_title": r[4], "publisher": r[5],
-                    "excerpt": r[6]} for r in cur.fetchall()}
+        """SELECT w.cited, ei.e_id, ei.tier::text, ei.claim_type::text,
+                  ei.recency_band::text, ei.source_name, ei.source_domain,
+                  ei.excerpt
+             FROM unnest(%s::text[]) AS w(cited)
+             JOIN evidence_index ei
+               ON ei.e_id = resolve_evidence_id(w.cited)
+            WHERE ei.entity_id = %s""", (wanted, entity_id))
+    by_id = {r[0]: {"e_id": r[1], "tier": r[2], "claim_label": r[3],
+                    "recency": r[4], "source_title": r[5], "publisher": r[6],
+                    "excerpt": r[7],
+                    **({"cited_as": r[0]} if r[0] != r[1] else {})}
+             for r in cur.fetchall()}
 
     unresolved = 0
     for c in cells:
