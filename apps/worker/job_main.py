@@ -471,7 +471,18 @@ def repair_evidence_namespace(conn, token, groups, limit: int = 0) -> int:
                                              'evidence_conflict_unresolved'))
                    OR NOT EXISTS (SELECT 1 FROM evidence_index e
                                    WHERE e.entity_id = r.entity_id
-                                     AND e.origin = 'package'))
+                                     AND e.origin = 'package')
+                   -- The third arm: the evidence LANDED and cannot be cited.
+                   -- One package's 127 rows all carried null excerpts because
+                   -- the parser knew one generation's excerpt format and read
+                   -- the other as empty; with the parser fixed, a re-read
+                   -- re-mints fuller rows. Keyed on the MAPPING TARGETS so a
+                   -- repaired run stops being selected: after the repair the
+                   -- local ids point at the -R rows that carry the excerpts.
+                   OR EXISTS (SELECT 1 FROM evidence_package_ids m
+                               JOIN evidence_index e ON e.e_id = m.e_id
+                              WHERE m.entity_id = r.entity_id
+                                AND e.excerpt IS NULL))
             ORDER BY r.source_folder_id, r.run_seq""")
     todo = cur.fetchall()
     print(f"repair: {len(todo)} run(s) carry a collision or hold no evidence")

@@ -111,7 +111,12 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #   @1  the shape as it shipped
 #   @2  2026-08-09 — redaction walker performs its strips; r_layer stripped
 #       by key; vendor-name safety net; audience default-deny
-SERVE_RULES = "serve-rules@2"
+#   @3  2026-08-09 — migration 0043 moved 30,269 duplicated re-mint links
+#       and recomputed linked_evidence_count on 29,622 cells corpus-wide.
+#       serving_subcaps is a live view over those counts, so the served
+#       thin flags changed under an unmoved promoted_at — without this
+#       bump every cached client 304s onto the inflated counts.
+SERVE_RULES = "serve-rules@3"
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
