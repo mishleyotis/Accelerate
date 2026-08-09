@@ -325,8 +325,23 @@ _LEADING_TOKEN = re.compile(r"^[A-Z][A-Z_]*")
 # `leading` rule, which no derivation can infer) and anything the contract
 # declares and they do not is derived and policed automatically. A
 # vocabulary added to the contract tomorrow is enforced tomorrow.
+# Case-INSENSITIVE, because a vocabulary is not always shouted: the
+# contract states `platform.roadmap.sequencing_basis` as
+# "prerequisites|undetermined", and an uppercase-only expression let a
+# 90-word paragraph sit in it on a promoted run. Found by the producer
+# repairing that run, not by this gate.
 _DOC_VOCAB = re.compile(
-    r"^([A-Z][A-Z0-9_&/-]{1,30}(?:\|[A-Z][A-Z0-9_&/-]{1,30}){1,12})")
+    r"^([A-Za-z][A-Za-z0-9_&/-]{1,30}(?:\|[A-Za-z][A-Za-z0-9_&/-]{1,30}){1,12})")
+# …and a TYPE description is not a vocabulary. `context.regulatory_standing
+# .charter_date` opens "date|null", which reads as a two-value enum to the
+# expression above and would refuse every real date. Measured before
+# landing the widening: it was the only false positive in the corpus, and
+# it is the reason this list exists rather than a case fold alone.
+_TYPE_WORDS = frozenset((
+    "date", "datetime", "time", "null", "none", "string", "str", "text",
+    "number", "numeric", "int", "integer", "float", "decimal", "bool",
+    "boolean", "true", "false", "object", "dict", "list", "array", "any",
+))
 _DERIVED_VOCABULARIES = None
 
 
@@ -347,9 +362,12 @@ def _derived_vocabularies() -> dict:
                     m = _DOC_VOCAB.match((spec.get("doc") or "").strip())
                     if not m:
                         continue
+                    values = tuple(m.group(1).split("|"))
+                    if any(v.lower() in _TYPE_WORDS for v in values):
+                        continue          # a type description, not a vocabulary
                     out.setdefault(key, {})[fname] = {
                         "name": fname,
-                        "values": tuple(m.group(1).split("|")),
+                        "values": values,
                         "note": ("the vocabulary is stated in this field's "
                                  "own contract doc, first line. A coined "
                                  "phrase in a fixed-vocabulary field renders, "

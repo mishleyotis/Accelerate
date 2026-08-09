@@ -19,6 +19,7 @@ import json
 from pathlib import Path
 
 from .contracts import PAGES, SERVING_TABLES
+from .validation import validate_pass1
 
 _SPEC_PATH = Path(__file__).with_name("writer_spec.json")
 _SPEC = None
@@ -139,6 +140,38 @@ def promote_run(conn, run_id) -> dict:
                     "unpassed_pages": sorted(unpassed),
                     "hint": "promote requires a PASS row for every page"}
 
+        # A retained PASS is a DATED OBSERVATION, not a current state.
+        #
+        # Validation runs at submit. Retention is correct and load-bearing —
+        # invariant 3 exists so that fixing one page does not cost five
+        # re-syntheses — but it means a page keeps a verdict issued by the
+        # gate set of the day it was submitted, and every later promote
+        # carries it forward unexamined. So a gate added today protects only
+        # pages submitted after today.
+        #
+        # Measured on the reference client: its context page holds a PASS
+        # from before CG-09 learned `arc_shape` and CG-10 learned the
+        # issue register's dates, and against today's gates the same stored
+        # payload returns seven blocking reasons. It is live, and its row
+        # says PASS.
+        #
+        # Re-validated here, over the payload promote is about to write —
+        # no extra I/O, it is already in hand. DISCLOSED, not refused: a
+        # gate that tightened after a page was authored is a reason to look,
+        # not a reason to strand five other pages that are fine. Refusing
+        # would also make every gate change retroactively un-promotable,
+        # which is how a build stops adding gates.
+        stale_verdicts = {}
+        for page, sub in sorted(live.items()):
+            try:
+                now = validate_pass1(page, sub["payload"] or {})
+            except Exception as exc:      # noqa: BLE001 — never block a promote
+                stale_verdicts[page] = [{"gate_id": "revalidation",
+                                         "message": f"{type(exc).__name__}"}]
+                continue
+            if now:
+                stale_verdicts[page] = now[:8]
+
         stats = {p: {"sections": 0, "rows_written": 0} for p in PAGES}
         for (page, section), writer in registry:
             sub = live[page]
@@ -188,6 +221,15 @@ def promote_run(conn, run_id) -> dict:
                "stats": stats}
         if refresh_error:
             out["directory_refresh_error"] = refresh_error
+        if stale_verdicts:
+            out["stale_verdicts"] = stale_verdicts
+            out["stale_verdicts_note"] = (
+                "These pages promoted from a RETAINED submission whose PASS "
+                "predates gates that now refuse it. Their content is live and "
+                "nothing here blocked it — validation runs at submit and a "
+                "retained verdict is a dated observation, not a current "
+                "state. Resubmit each page named to clear them; a page not "
+                "listed is clean against today's gates.")
         return out
     except Exception:
         conn.rollback()

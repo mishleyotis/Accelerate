@@ -388,3 +388,48 @@ def test_alert_status_is_initialised_at_promote():
     from dma_mcp.promote import LIFECYCLE_INITIAL, _value
     assert LIFECYCLE_INITIAL["heatmap_alerts"]["status"] == "open"
     assert _value("const:open", {}, {}, {}) == "open"
+
+
+def test_a_retained_pass_is_revalidated_and_disclosed(seeded):
+    """A retained PASS is a DATED OBSERVATION, not a current state.
+
+    Validation runs at submit. Retention is correct and load-bearing —
+    invariant 3 exists so fixing one page does not cost five re-syntheses
+    — but a page keeps the verdict of the gate set it was submitted under,
+    and every later promote carried it forward unexamined. Measured on the
+    reference client: its context page holds a PASS from before CG-09
+    learned `arc_shape`, and against today's gates the same stored payload
+    returns seven blocking reasons. It is live, and its row says PASS.
+
+    Disclosed, never refused: a gate that tightened after a page was
+    authored is a reason to look, not a reason to strand five pages that
+    are fine — and refusing would make every gate change retroactively
+    un-promotable, which is how a build stops adding gates."""
+    mcp, admin, rid = seeded
+    _submit_all(mcp, rid)
+    clean = promote_run(mcp, rid)
+    assert clean["promoted"] is True
+    assert "stale_verdicts" not in clean, \
+        "pages that pass today's gates must not be named"
+
+    # Reach past submit and corrupt a RETAINED payload the way a later gate
+    # would see it — an off-vocabulary value CG-09 now refuses.
+    cur = admin.cursor()
+    cur.execute("""SELECT id, payload FROM submissions
+                    WHERE run_id = %s AND page = 'context'
+                      AND superseded_at IS NULL""", (rid,))
+    sid, payload = cur.fetchone()
+    if isinstance(payload, str):
+        payload = json.loads(payload)
+    payload.setdefault("timeline", {})["arc_shape"] = "strategy-first, substrate-later"
+    cur.execute("UPDATE submissions SET payload = %s WHERE id = %s",
+                (json.dumps(payload), sid))
+    admin.commit()
+
+    out = promote_run(mcp, rid)
+    assert out["promoted"] is True, "disclosure must not block the promote"
+    assert "context" in out.get("stale_verdicts", {}), \
+        "a retained PASS that today's gates refuse must be named"
+    assert any(r["gate_id"] == "CG-09"
+               for r in out["stale_verdicts"]["context"])
+    assert "resubmit" in out["stale_verdicts_note"].lower()
