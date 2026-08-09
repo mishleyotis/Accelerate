@@ -430,6 +430,64 @@ def backfill_evidence(conn, token, groups) -> int:
 
 
 
+def dedup_remint_links(conn) -> int:
+    """Every superseded evidence row that still links where its re-mint does.
+
+    Migration 0043 did this once, as a migration must; this is the same
+    move as a re-runnable pass, because the condition is not a one-time
+    state. It is produced by any code path that mints a `-R` row without
+    carrying — 0043 cleaned 30,269 and the very next corpus repair created
+    65,425, because the repair pass was one such path. The pass that
+    creates them is fixed; a cleanup that can only run inside a migration
+    would mean the next occurrence waits for a schema change.
+
+    A link ONLY the base row holds is kept. This removes duplicates and
+    never removes information.
+    """
+    cur = conn.cursor()
+    pairs = """
+      SELECT copy.e_id AS copy_id, base.e_id AS base_id
+        FROM evidence_index copy
+        JOIN evidence_index base
+          ON base.e_id = regexp_replace(copy.e_id, '-R[0-9]+$', '')
+         AND base.entity_id IS NOT DISTINCT FROM copy.entity_id
+       WHERE copy.e_id ~ '-R[0-9]+$'
+    """
+    cur.execute(f"""
+        SELECT count(*) FROM ({pairs}) p
+          JOIN evidence_subcap_links k ON k.e_id = p.base_id
+         WHERE EXISTS (SELECT 1 FROM evidence_subcap_links m
+                        WHERE m.e_id = p.copy_id AND m.subcap_id = k.subcap_id
+                          AND m.run_id = k.run_id)""")
+    before = cur.fetchone()[0]
+    print(f"dedup: {before} duplicated link(s) — a base row and its re-mint "
+          f"both linking one cell in one run")
+    if not before:
+        return 0
+    cur.execute(f"""
+        DELETE FROM evidence_subcap_links k
+         USING ({pairs}) p
+         WHERE k.e_id = p.base_id
+           AND EXISTS (SELECT 1 FROM evidence_subcap_links m
+                        WHERE m.e_id = p.copy_id AND m.subcap_id = k.subcap_id
+                          AND m.run_id = k.run_id)""")
+    removed = cur.rowcount
+    cur.execute(f"""
+        UPDATE subcap_scores sc
+           SET linked_evidence_count =
+                 (SELECT count(*) FROM evidence_subcap_links l
+                   WHERE l.run_id = sc.run_id AND l.subcap_id = sc.subcap_id)
+         WHERE sc.run_id IN (SELECT DISTINCT l.run_id
+                               FROM ({pairs}) p
+                               JOIN evidence_subcap_links l ON l.e_id = p.copy_id)""")
+    recounted = cur.rowcount
+    conn.commit()
+    print(f"dedup: removed {removed} duplicate base-row link(s); "
+          f"linked_evidence_count recomputed on {recounted} subcap_scores row(s). "
+          "Base rows are retained — an older payload's citation still resolves.")
+    return 0
+
+
 def repair_evidence_namespace(conn, token, groups, limit: int = 0) -> int:
     """Re-land the package evidence the id collision left unpersistable.
 
@@ -534,6 +592,21 @@ def repair_evidence_namespace(conn, token, groups, limit: int = 0) -> int:
             for ev in merged:
                 alias[ev["e_id"]] = lander.land(ev)
             links = _write_links(cur, run_id, alias, merged, research, wb)
+            # The re-mint carry, which `persist_package` does and this pass
+            # did not. A repair that re-reads a source with a fuller excerpt
+            # mints `-R<seq>`; without this, the base row keeps its links
+            # AND the mint gets its own, so one document votes twice in
+            # every count that reads them. Measured after the first
+            # corpus-wide run of this pass: 65,425 duplicated links, having
+            # cleaned 30,269 an hour earlier. `carry_links_across_remint`
+            # carries what the write missed and removes the base copies.
+            carried = 0
+            for minted, superseded in sorted(lander.superseded.items()):
+                carried += persist.carry_links_across_remint(
+                    cur, superseded, minted)
+            if lander.superseded:
+                _observe("evidence_remint_links_carried",
+                         {"pairs": len(lander.superseded), "carried": carried})
             cur.execute(
                 """UPDATE subcap_scores sc
                       SET linked_evidence_count =
@@ -702,6 +775,15 @@ def main() -> int:
     # Read-only and lock-free: it is a question about what is already stored,
     # not a firing, and it must be answerable while a scan is running.
     # EVIDENCE_NAMESPACE_RUNS=<uuid,uuid> probes named runs end to end.
+    # LINK_DEDUP=1 — remove the duplicate links a re-mint without a carry
+    # leaves behind. Lock-free and idempotent: it is a repair of stored
+    # state, not a firing, and it must be runnable while a scan holds the
+    # scan lock (the pass that creates the duplicates is the scan's own).
+    if os.environ.get("LINK_DEDUP"):
+        rc = dedup_remint_links(conn)
+        conn.close()
+        return rc
+
     if os.environ.get("EVIDENCE_NAMESPACE") == "report":
         from dma_worker.evidence_ids import namespace_report
         probes = [x.strip() for x in

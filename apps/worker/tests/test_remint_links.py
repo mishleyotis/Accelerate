@@ -124,3 +124,44 @@ def test_a_row_that_supersedes_nothing_carries_nothing():
     """rowcount 0 is the honest answer, not None and not a guess."""
     cur = _Cur(rowcount=-1)          # DB-API's "not applicable"
     assert carry_links_across_remint(cur, "E-X-009", "E-X-009-R2") == 0
+
+
+# ── the repair path must carry, not only the ingest path ────────────────
+def test_every_path_that_mints_a_remint_also_carries():
+    """The measured regression this pins. `persist_package` consumed
+    `lander.superseded` and called the carry; `repair_evidence_namespace`
+    used the same lander, populated the same dict, and never read it — so
+    the base row kept its links and the mint got its own. Migration 0043
+    cleaned 30,269 duplicated links and the very next corpus-wide repair
+    created 65,425.
+
+    Asserted on the source rather than through a live pass, because the
+    defect is a MISSING call: a behavioural test can only catch it by
+    running the whole repair against a database, and the thing worth
+    pinning is that no future path mints without carrying."""
+    import re
+    from pathlib import Path
+    src = (Path(__file__).resolve().parents[1] / "job_main.py").read_text()
+    minting = [m.start() for m in re.finditer(r"lander\.land\(", src)]
+    assert minting, "no minting call found — this test is measuring nothing"
+    for at in minting:
+        # the carry must appear in the same function body, after the mint
+        tail = src[at:at + 4000]
+        assert "carry_links_across_remint" in tail, (
+            "a path mints re-mint rows and never carries their links: one "
+            "document then votes twice in every count that reads them")
+
+
+def test_the_dedup_pass_is_runnable_outside_a_migration():
+    """0043 did the cleanup once, as a migration must. The condition is not
+    a one-time state — any path that mints without carrying reproduces it —
+    so a cleanup that only exists inside a migration makes the next
+    occurrence wait for a schema change."""
+    from pathlib import Path
+    src = (Path(__file__).resolve().parents[1] / "job_main.py").read_text()
+    assert "def dedup_remint_links(" in src
+    assert 'os.environ.get("LINK_DEDUP")' in src
+    # and it must recompute the counter those links fed
+    body = src.split("def dedup_remint_links(")[1].split("\ndef ")[0]
+    assert "linked_evidence_count" in body
+    assert "DELETE FROM evidence_subcap_links" in body
