@@ -49,6 +49,15 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# gcloud is not on the default PATH in every image this runs in, and without
+# it `dma_connector` dies with a bare FileNotFoundError that reads like the
+# connector is unreachable — a producer lost a round trip to it. Put the known
+# locations on PATH before importing, so the failure that remains is a real one.
+for _p in ("/root/google-cloud-sdk/bin", "/usr/lib/google-cloud-sdk/bin"):
+    if os.path.isdir(_p) and _p not in os.environ.get("PATH", ""):
+        os.environ["PATH"] = os.environ.get("PATH", "") + os.pathsep + _p
+
 import dma_connector as C                                    # noqa: E402
 
 # The connector states its own inline ceiling in get_page_contract(page)
