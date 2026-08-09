@@ -134,8 +134,30 @@ CUSTOMER_ALWAYS = {
     # is…". Withheld from the customer audience until a submit-time gate can
     # tell the reasoning from the pitch; that gate, not this line, is the
     # real fix, and this is default-deny in the meantime.
-    ("techstack", "items"): ("items[*].dma_impact",),
+    # The SECTION is named `techstack`, not `items` — `items` is the field
+    # inside it. Keyed on the wrong name this rule was unreachable for the
+    # whole of its life: `pages.py` passes the real section name, the lookup
+    # missed, and `del missed` made the miss silent by design. Nothing showed
+    # it because the only test exercising it called redact_section with the
+    # wrong name too, so a green test and a dead rule agreed with each other.
+    # All 51 rows were removed anyway — by the vendor safety net, which this
+    # module says in as many words is "not a substitute" for the rule.
+    ("techstack", "techstack"): ("items[*].dma_impact",),
 }
+
+# Seller-role vocabulary: sentences written to the assessing firm's own
+# account executive. A SECOND safety net beside VENDOR_NAME, because the
+# measured leak named no vendor at all — "The searched absence is itself
+# informative for the AE", served byte-identical to the customer on the
+# client's own platform page, reachable by none of the four declared
+# mechanisms and invisible to the vendor net because it does not contain the
+# vendor's name. One string of 1,345 on that body, which is why a rule is
+# needed rather than a reading.
+SELLER_VOCABULARY = re.compile(
+    r"\bAEs?\b|\baccount executives?\b|\bdiscovery call\b|\bfirst call\b"
+    r"|\btalk track\b|\bthe seller\b|\bour offering\b|\bour pathway\b"
+    r"|\bsay it aloud\b|\bin the room\b|\bpitch\b",
+    re.I)
 
 # The assessing firm's own name. A customer-audience string that names it is
 # sell copy on the client's dashboard, whatever field it arrived in. This is a
@@ -272,8 +294,12 @@ def _strip_keys(node, keys, path="", found=None) -> list:
     return found
 
 
-def _strip_vendor(node, path="", found=None) -> list:
-    """Remove every string that names the assessing vendor, in one walk.
+def _strip_vendor(node, path="", found=None, pattern=None) -> list:
+    """Remove every string matching `pattern` (default: the vendor name).
+
+    Two nets share this walk rather than each having their own: a second
+    traversal is a second parser to disagree with the first, which is the
+    class this file was rewritten for.
 
     Deleting in the same pass that finds it is deliberate: the alternative
     is a list of paths and a second walk to re-resolve them, which is a
@@ -281,28 +307,29 @@ def _strip_vendor(node, path="", found=None) -> list:
     the class this file is being rewritten for.
     """
     found = [] if found is None else found
-    if _VENDOR_RE is None:
+    rx = pattern if pattern is not None else _VENDOR_RE
+    if rx is None:
         return found
     if isinstance(node, dict):
         for k in list(node):
             v = node[k]
             here = f"{path}.{k}" if path else k
-            if isinstance(v, str) and _VENDOR_RE.search(v):
+            if isinstance(v, str) and rx.search(v):
                 node.pop(k, None)
                 found.append(here)
             else:
-                _strip_vendor(v, here, found)
+                _strip_vendor(v, here, found, rx)
     elif isinstance(node, list):
         for i, v in enumerate(node):
             here = f"{path}[{i}]"
-            if isinstance(v, str) and _VENDOR_RE.search(v):
+            if isinstance(v, str) and rx.search(v):
                 # An element, not a key: blanked rather than removed, because
                 # dropping it would renumber a ranked list and order is
                 # meaning (rule 10).
                 node[i] = None
                 found.append(here)
             else:
-                _strip_vendor(v, here, found)
+                _strip_vendor(v, here, found, rx)
     return found
 
 
@@ -312,7 +339,8 @@ def redact_section(page: str, section: str, data: dict, internal_only,
     the caller's object: the promoted payload is shared across readers."""
     out = copy.deepcopy(data) if isinstance(data, dict) else data
     report = {"withheld": False, "paths_stripped": [], "paths_unmatched": [],
-              "keys_stripped": [], "vendor_named": []}
+              "keys_stripped": [], "vendor_named": [],
+              "seller_voice": []}
 
     always = ALWAYS_STRIP.get((page, section), ())
     if isinstance(out, dict) and always:
@@ -324,7 +352,7 @@ def redact_section(page: str, section: str, data: dict, internal_only,
         if (page, section) in CUSTOMER_WITHHELD:
             return None, {"withheld": True, "paths_stripped": [],
                           "paths_unmatched": [], "keys_stripped": [],
-                          "vendor_named": []}
+                          "vendor_named": [], "seller_voice": []}
         if isinstance(out, dict):
             did, missed = strip_paths(out, internal_only, section)
             report["paths_stripped"] += did
@@ -341,8 +369,12 @@ def redact_section(page: str, section: str, data: dict, internal_only,
             report["keys_stripped"] = _strip_keys(
                 out, CUSTOMER_STRIP_KEYS + CUSTOMER_STRIP_CONTACT_KEYS)
 
-            # The safety net runs LAST, over what survived every rule above.
+            # The safety nets run LAST, over what survived every rule
+            # above. Two of them: the vendor's name, and sentences addressed
+            # to the seller's own account executive — the measured leak was
+            # the second kind and named no vendor at all.
             report["vendor_named"] = _strip_vendor(out)
+            report["seller_voice"] = _strip_vendor(out, pattern=SELLER_VOCABULARY)
 
     return out, report
 

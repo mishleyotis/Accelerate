@@ -219,8 +219,12 @@ def landscape(cur, data: dict, run_id) -> None:
     register. Two code paths producing two numbers is exactly what the
     `reconciles_to_register` boolean exists to make visible."""
     cur.execute(
+        # ORDER BY id: rule 10, order is meaning. Without it the GAPS tile's
+        # named_items came back in heap order and two of three platforms
+        # swapped between reads of one promoted run.
         """SELECT status::text, name, vendor, evidence_level::text
-             FROM techstack_items WHERE run_id = %s""", (run_id,))
+             FROM techstack_items WHERE run_id = %s ORDER BY id""",
+        (run_id,))
     rows = cur.fetchall()
     if not rows:
         return

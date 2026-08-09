@@ -312,6 +312,37 @@ def test_r_layer_never_reaches_the_customer_however_it_is_marked():
     assert keep["r_layer"]["verdict"] == "ACCEPT"
 
 
+def test_a_sentence_written_to_our_own_account_executive_is_not_client_content():
+    """Measured on the live customer body of the reference client's platform
+    page: one string of 1,345 read "The searched absence is itself informative
+    for the AE", byte-identical to the internal body and to the submission.
+
+    It is reachable by none of the four declared mechanisms — not r_layer,
+    not in the section's `internal_only`, not matched by CUSTOMER_ALWAYS —
+    and the vendor safety net does not fire because the sentence names no
+    vendor. The leak is a ROLE, not a name.
+
+    Negative control is the second half: an ordinary sentence containing the
+    word "call" or a client's own executive must survive, or the net is a
+    censor rather than a rule."""
+    data = {"platforms": [
+        {"name": "Salesforce",
+         "peer_synthesis": "The searched absence is itself informative for "
+                           "the AE, who should open on it."},
+        {"name": "MuleSoft",
+         "peer_synthesis": "Two of five peers run a comparable integration "
+                           "layer; the institution does not."}]}
+    out, rep = redact_section("platform", "platform_story",
+                              json.loads(json.dumps(data)), [], "customer")
+    assert "peer_synthesis" not in out["platforms"][0]
+    assert out["platforms"][1]["peer_synthesis"].startswith("Two of five")
+    assert any("peer_synthesis" in p for p in rep["seller_voice"])
+
+    keep, _ = redact_section("platform", "platform_story",
+                             json.loads(json.dumps(data)), [], "internal")
+    assert "for the AE" in keep["platforms"][0]["peer_synthesis"]
+
+
 def test_unmarked_vendor_copy_does_not_reach_the_client():
     """51 of 51 techstack rows on the reference client named the assessing
     firm in `dma_impact`, 26 of them opening "Zennify's pathway is…", served
@@ -323,10 +354,24 @@ def test_unmarked_vendor_copy_does_not_reach_the_client():
                        "dma_impact": "Zennify's pathway is to consolidate…"},
                       {"vendor": "MuleSoft", "product": "Anypoint",
                        "dma_impact": "Bears on P4C3.1.2 at 1.95."}]}
-    out, rep = redact_section("techstack", "items",
+    # The SECTION is `techstack`; `items` is the field inside it. This test
+    # called it "items" — the same wrong key CUSTOMER_ALWAYS was written
+    # under — so for the whole of its life a green test and an unreachable
+    # rule agreed with each other, and production stripped these 51 rows by
+    # the vendor safety net that this module says is not a substitute for the
+    # rule. `pages.py` passes the real section name; so does this now.
+    out, rep = redact_section("techstack", "techstack",
                               json.loads(json.dumps(data)), [], "customer")
     assert all("dma_impact" not in i for i in out["items"])
     assert out["items"][0]["product"] == "Service Cloud", "the register survives"
+    assert "items[*].dma_impact" in rep["paths_stripped"], \
+        "stripped by the RULE, not by the safety net underneath it"
+
+    # The negative control on the key itself: the second row names no vendor,
+    # so if the rule were dead again only the first row would go and this
+    # assertion would be the one that noticed.
+    assert "1.95" not in json.dumps(out), \
+        "the vendor-free dma_impact is withheld too — by the rule, not the net"
 
     # And the net itself, on a field no rule names.
     loose = {"narrative": "Zennify would sequence this after the data layer.",

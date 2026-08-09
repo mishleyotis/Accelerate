@@ -16,6 +16,12 @@ from .value_chain import serve_value_chain
 AUDIENCES = ("internal", "customer")
 
 
+def _iso(v):
+    """A timestamp as ISO-8601, or whatever it already was. One helper, so
+    the envelope cannot format one instant two ways."""
+    return v.isoformat() if hasattr(v, "isoformat") else v
+
+
 class ApiError(Exception):
     def __init__(self, status: int, code: str, detail: str):
         super().__init__(detail)
@@ -23,7 +29,25 @@ class ApiError(Exception):
 
 
 def _rows(cur, table: str, run_id) -> list[dict]:
-    cur.execute(f"SELECT * FROM {table} WHERE run_id = %s", (run_id,))
+    """Every item-grain section's rows, IN THE ORDER THE PRODUCER SENT THEM.
+
+    `ORDER BY id` is load-bearing, not tidiness. Rule 10 is "order is
+    meaning" — findings are ranked, phases sequenced, events chronological —
+    and promote inserts each section's items in payload order, so the
+    BIGSERIAL id IS that order. Without the clause PostgreSQL returns heap
+    order, which is not insertion order, is not stable across reads, and
+    changes after any UPDATE or VACUUM on the serving table.
+
+    Measured on the reference client: `overview.firmographics.fields` served
+    its first seven rows left-rotated by two — 13 in, 13 out, identical
+    multiset, 7 of 13 positions carrying a different row — putting
+    return-on-assets where branch count was on a ranked identity card. The
+    other arrays happened to come back in insertion order on that read and
+    nothing in the query made that hold on the next one. 23 of the 34
+    writers are item-grain.
+    """
+    cur.execute(f"SELECT * FROM {table} WHERE run_id = %s ORDER BY id",
+                (run_id,))
     cols = [d[0] for d in cur.description]
     return [dict(zip(cols, r)) for r in cur.fetchall()]
 
@@ -134,7 +158,14 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       changes under an unmoved promoted_at: without this bump the reader
 #       who was served the LinkedIn URL is precisely the reader who 304s
 #       back onto it.
-SERVE_RULES = "serve-rules@5"
+#   @6  2026-08-09 — found by a submitted-vs-served diff of all six pages.
+#       Item-grain sections serve in the producer's order (ORDER BY id) and
+#       not PostgreSQL heap order; `produced_at` serves the section's own
+#       instant instead of the run's promotion instant, on 34 of 34 sections;
+#       techstack's dma_impact withholding fires by RULE rather than by the
+#       vendor safety net underneath it; and a sentence written to the
+#       seller's own account executive stops reaching the customer body.
+SERVE_RULES = "serve-rules@6"
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
@@ -240,9 +271,21 @@ def build_page(cur, page: str, display_id: str, audience: str = "internal",
             "data": data,
             "data_source": "empty" if empty else "producer",
             "provenance": stamps.get("provenance"),
-            "produced_at": (stamps.get("promoted_at").isoformat()
-                            if hasattr(stamps.get("promoted_at"), "isoformat")
-                            else stamps.get("promoted_at")),
+            # The instant this SECTION was produced, which is what the
+            # contract's envelope says this field is, and not the instant the
+            # run was promoted.
+            #
+            # This served `promoted_at` on 34 of 34 sections across all six
+            # pages of the reference client — 0 of 34 preserved — while the
+            # producer's own value sat in `env`, loaded by `assemble` from a
+            # column `writer_spec` fills from `env:produced_at`, and was
+            # discarded here. A page whose sections were synthesised 25 hours
+            # apart by two different producers reported all of them at one
+            # instant, so a reader could not tell which section was stale.
+            # `promoted_at` is not lost: it is the run's, it is on the run
+            # envelope, and it is in the ETag.
+            "produced_at": _iso(env.get("produced_at")
+                                or stamps.get("promoted_at")),
             "producer_version": stamps.get("producer_version"),
             "e_ids": env.get("e_ids") or [],
             "empty_state": empty,
