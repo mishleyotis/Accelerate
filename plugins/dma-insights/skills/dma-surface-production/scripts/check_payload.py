@@ -58,7 +58,15 @@ NEEDS_INTERNAL_ONLY = {
 
 # ── vocabularies ─────────────────────────────────────────────────────
 EID = re.compile(r"\b(?:E|EV|INT)-[A-Z0-9]+(?:-[A-Z0-9]+){0,3}(?![A-Za-z0-9-])")
-SUBCAP = re.compile(r"^P[1-4]C\d{1,2}(?:\.\d{1,2}){0,2}[a-z]?$")
+# Base cells (P4C3.1.2) AND sub-vertical variant cells (P1C1.3.CU1,
+# P3C3.4.RIA1, P2C3.2.IC1) — a 2-4 letter vertical tag plus an index as the
+# terminal segment. The old expression could not match a variant cell at
+# all, so this checker refused 32 of one run's legitimately served RIA/WM
+# cells as malformed while the connector's own _SUBCAP_RE accepted every
+# one (MEM-0032, MEM-0026). The connector's gate is the authority; a local
+# checker stricter than the gate is a false alarm, not a higher standard.
+SUBCAP = re.compile(
+    r"^P[1-4]C\d{1,2}(?:\.\d{1,2}){0,2}(?:\.[A-Z]{2,4}\d{1,2})?[a-z]?$")
 AGENT_IDS = {"ic_id": r"^IC-\d{1,3}$", "f_id": r"^F-\d{1,2}$", "fa_id": r"^FA-\d{1,2}$",
              "ts_id": r"^TS-\d{1,3}$", "wn_id": r"^WN-\d{1,2}$"}
 TIERS = {"T1", "T2", "T3", "T4", "T5"}
@@ -437,12 +445,19 @@ def check_scalars(page, payload):
         if not isinstance(val, str):
             continue
         low = path.lower()
-        # sentinels anywhere
-        for pat in SENTINELS:
-            if re.search(pat, val):
-                bad("BLOCK", path,
-                    f"sentinel value {val!r} — a derived value is computed or null")
-                break
+        # Sentinels are VALUES, not words: a scalar whose whole content is
+        # "N/A" or "null" is an unwritten field, but a 40-word sentence
+        # describing a null ("completed_at and request_id are both null")
+        # is prose doing its job. The old rule fired on the prose — four of
+        # one run's six local blocks were this (MEM-0022) — so the sweep
+        # now applies only to values short enough to BE a value.
+        if len(val.split()) <= 6:
+            for pat in SENTINELS:
+                if re.search(pat, val):
+                    bad("BLOCK", path,
+                        f"sentinel value {val!r} — a derived value is "
+                        "computed or null")
+                    break
         # register rules on prose fields only
         if any(k in low for k in ("body", "rationale", "story", "text", "framing",
                                   "synthesis", "summary", "title", "headline",
@@ -540,7 +555,16 @@ def check_empty_states(page, payload):
         if not isinstance(body, dict):
             continue
         arrays = {k: v for k, v in body.items() if isinstance(v, list)}
-        if arrays and all(len(v) == 0 for v in arrays.values()):
+        # An H4-shaped section keeps its content in OBJECT MAPS (pillars,
+        # categories keyed by id), so "every array is empty" can be true of
+        # a fully populated section. The old rule flagged a workbook_scores
+        # carrying 4 pillars and 17 categories as empty (MEM-0022); a
+        # populated dict beside the empty arrays is content.
+        populated_maps = any(isinstance(v, dict) and v
+                             for k, v in body.items()
+                             if k not in ("empty_state", "r_layer"))
+        if arrays and all(len(v) == 0 for v in arrays.values()) \
+                and not populated_maps:
             es = body.get("empty_state")
             if not es:
                 bad("BLOCK", f"{page}.{sec}",

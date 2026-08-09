@@ -72,7 +72,7 @@ def test_null_valued_row_asserts_nothing():
 
 def test_recorded_absence_is_exempt_but_a_bare_absence_is_not():
     worked_absent = {"subcap_id": "P2C2.x.7", "state": "WORKED_ABSENT",
-                     "new_evidence_ids": [], "sources_searched": ["a", "b"],
+                     "new_evidence_ids": [], "sources_searched": ["ncua.gov", 'query: "x"'],
                      "queries_run": ["q"]}
     bare = {"subcap_id": "P2C2.x.9", "state": "WORKED_ABSENT",
             "new_evidence_ids": []}
@@ -92,7 +92,7 @@ def test_ag03_is_bound_to_the_item_shape_so_an_invented_key_buys_nothing():
     cells = item_keys("heatmap", "cell_evidence", "cells")
     alerts = item_keys("heatmap", "alerts", "alerts")
     invented = {"subcap_id": "P2C2.x.7", "state": "WORKED_ABSENT",
-                "sources_searched": ["a", "b"]}
+                "sources_searched": ["ncua.gov", 'query: "x"']}
     assert _asserts_nothing(invented, alerts) is True     # alerts declares it
     assert _asserts_nothing(invented, cells) is False     # cell_evidence does not
     # unbound (declared=None) stays permissive — callers with no shape in hand
@@ -107,7 +107,7 @@ def test_the_declared_cell_absence_trio_is_exempt_and_thin_alone_is_not():
     from dma_mcp.vacuity import item_keys
     cells = item_keys("heatmap", "cell_evidence", "cells")
     full = {"subcap_id": "P2C2.x.7", "e_ids": [], "thin": True,
-            "sources_searched": ["the register", "the filings"],
+            "sources_searched": ["sec.gov filings", 'query: "case routing"'],
             "closure_condition": "A dated artefact naming this capability."}
     assert _asserts_nothing(full, cells) is True
     assert _asserts_nothing({**full, "closure_condition": ""}, cells) is False
@@ -125,7 +125,7 @@ def test_a_state_asserting_a_find_with_no_id_is_a_contradiction():
     """WORKED_FOUND with an empty id list is not an empty state."""
     payload = {"alerts": {"alerts": [
         {"subcap_id": "P2C1.x.4", "state": "WORKED_FOUND",
-         "new_evidence_ids": [], "sources_searched": ["a"], "queries_run": ["q"]}]}}
+         "new_evidence_ids": [], "sources_searched": ["ncua.gov"], "queries_run": ['"q"']}]}}
     reasons = _ag03("heatmap", payload)
     assert len(reasons) == 1
     assert "contradiction" in reasons[0]["message"]

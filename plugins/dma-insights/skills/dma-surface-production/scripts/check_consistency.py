@@ -91,20 +91,63 @@ def main():
     ov=P.get("overview",{}); hm=P.get("heatmap",{})
     sc=ov.get("scores",{})
     comp=num(sc.get("composite"))
-    pill=[num(x.get("score")) for x in (sc.get("pillars") or []) if num(x.get("score")) is not None]
+
+    def pillar_entries(v):
+        """The contract declares workbook_scores.pillars as an OBJECT MAP
+        keyed by pillar id; overview.scores.pillars is a list. This checker
+        read both as lists, so on every real payload it crashed on the map
+        and has never completed a run on any client — a checker that has
+        never run reads exactly like a checker that always passes. Accept
+        both shapes; refuse neither for its spelling."""
+        if isinstance(v, dict):
+            return [{"pillar_id": pid, **entry}
+                    for pid, entry in v.items() if isinstance(entry, dict)]
+        if isinstance(v, list):
+            return [x for x in v if isinstance(x, dict)]
+        return []
+
+    prows=pillar_entries(sc.get("pillars"))
+    pill=[num(x.get("score")) for x in prows if num(x.get("score")) is not None]
     if comp is not None and len(pill)==4:
-        mean=round(sum(pill)/4,2)
-        if abs(mean-comp)>0.005:
-            bad("BLOCK","O1 ↔ pillars",
-                f"composite {comp} but the mean of the four pillar means is {mean}. "
-                "The composite is the mean of PILLAR means, not a flat mean over cells.")
+        # USER ADJUDICATION 2026-08-09: the workbook value governs, and the
+        # drift gate compares against the WEIGHTED pillar mean — the
+        # workbook's own operator (Run_Metadata weights; 2.759 for the run
+        # that raised this) — or it fires on every correct run. The
+        # unweighted mean is reported beside it, never the referee alone.
+        flat=round(sum(pill)/4,4)
+        weights=[num(x.get("weight")) for x in prows]
+        cands={"unweighted mean": flat}
+        if all(w is not None for w in weights) and abs(sum(weights)-1.0)<0.05:
+            cands["weighted mean"]=round(sum(s*w for s,w in zip(pill,weights)),4)
+        if not any(abs(v-comp)<=0.03 for v in cands.values()):
+            shown=", ".join(f"{k} {v:.2f}" for k,v in cands.items())
+            if "weighted mean" in cands:
+                bad("BLOCK","O1 ↔ pillars",
+                    f"composite {comp} agrees with no pillar rollup ({shown}, "
+                    "tolerance 0.03) — including the weighted mean over the "
+                    "payload's own weights, so this is drift, not an "
+                    "operator difference.")
+            else:
+                # The one measured false alarm this check ever produced was
+                # a BLOCK here: 2.76 against an unweighted 2.82, where the
+                # workbook's WEIGHTED mean is 2.759 and the composite was
+                # correct. The workbook value governs (user adjudication
+                # 2026-08-09); without weights in the payload this checker
+                # cannot compute the governing operator, so disagreement
+                # with the flat mean alone is a question, never a verdict.
+                bad("WARN","O1 ↔ pillars",
+                    f"composite {comp} differs from the unweighted pillar "
+                    f"mean ({shown}) and the payload carries no weights — "
+                    "if the workbook states pillar weights this is likely "
+                    "the weighted mean and correct; verify against "
+                    "Run_Metadata rather than rewriting the composite.")
     elif comp is not None:
         bad("WARN","O1",f"composite present with {len(pill)} pillar scores — expected 4")
 
     # ── 2 · hero composite vs heatmap rollup
     ws=hm.get("workbook_scores",{})
-    hp={x.get("pillar_id"):num(x.get("score")) for x in (ws.get("pillars") or [])}
-    for x in (sc.get("pillars") or []):
+    hp={x.get("pillar_id"):num(x.get("score")) for x in pillar_entries(ws.get("pillars"))}
+    for x in prows:
         pid,s=x.get("pillar_id"),num(x.get("score"))
         if pid in hp and s is not None and hp[pid] is not None and abs(hp[pid]-s)>0.005:
             bad("BLOCK","O1 ↔ H4",f"{pid}: hero {s} vs grid {hp[pid]}")

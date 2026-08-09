@@ -634,7 +634,25 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
 
 # A fact-grain citation and the header the research workbook puts in front of
 # an excerpt block: "[ERS: 4.20] [FACT] [E-012:F1] Source (T2, CURRENT): text".
-_RW_FACT_RE = re.compile(r"\[(E-\d+):(F\d+)\]\s*")
+#
+# The fact suffix is OPTIONAL. One research generation writes "[E-012:F1]"
+# per fact; another writes a bare "[E-008]" per item. The mandatory-suffix
+# version of this expression read the second generation's 709 populated
+# Evidence_Excerpt cells and produced zero fragments and zero observations
+# — so 127 evidence rows landed excerpt-less, 517 cells had nothing citable
+# behind them, and the run's producer was blamed for a package the parser
+# had silently half-read. Measured on the Odlum Brown research workbook,
+# 2026-08-09: 0 of 709 cells parsed before, 709 of 709 after.
+_RW_FACT_RE = re.compile(r"\[(E-\d+)(?::(F\d+))?\]\s*")
+# Ledger markup EMBEDDED in a passage — "[E-051 (T2, CURRENT): corroborates.]",
+# "[CEILING: L2 …]", "[ERS: 4.0]" — is the researcher annotating, not the
+# document speaking. A fragment is cut at the first such annotation: 75 of 78
+# excerpts on one package carried this markup INSIDE what rendered as a
+# quotation (MEM-0034), and an annotation a reader mistakes for source text
+# is worse than a shorter excerpt.
+_RW_ANNOTATION_RE = re.compile(
+    r"\s*\[(?:E-\d+[^\]]*|CEILING\b[^\]]*|ERS\b[^\]]*|FACT\b|INFERENCE\b|"
+    r"HYPOTHESIS\b|CEILING_ESTIMATE\b|T[1-5]\b[^\]]*)\]")
 _RW_HEAD_RE = re.compile(r"^\s*\[ERS:\s*([\d.]+)\]\s*(?:\[([A-Z_]+)\]\s*)?")
 _RW_SRC_PREFIX_RE = re.compile(r"^[^:]{0,120}?\((T[1-5]),\s*[A-Z_]+\):\s*")
 # The research workbook's per-subcap tabs, under every naming convention the
@@ -661,9 +679,18 @@ def _rw_split_excerpt(blob) -> dict:
     out = {}
     for n, m in enumerate(hits):
         end = hits[n + 1].start() if n + 1 < len(hits) else len(text)
-        frag = _RW_SRC_PREFIX_RE.sub("", text[m.end():end].strip()).strip(" ;·")
+        # A bare "[E-008]" cell may repeat its own "[ERS: …] [FACT]" header
+        # before each subsequent block; strip it wherever a block starts.
+        frag = _RW_HEAD_RE.sub("", text[m.end():end].strip())
+        frag = _RW_SRC_PREFIX_RE.sub("", frag).strip(" ;·")
+        # …and the passage ends where the researcher starts annotating.
+        cut = _RW_ANNOTATION_RE.search(frag)
+        if cut:
+            frag = frag[:cut.start()].strip(" ;·")
         if frag:
-            out[f"{m.group(1)}:{m.group(2)}"] = frag
+            # A bare item id gets F1: the consumer keys the drawer by the
+            # e_id half, and an unnumbered fact is still that item's fact.
+            out[f"{m.group(1)}:{m.group(2) or 'F1'}"] = frag
     return out
 
 
@@ -772,6 +799,7 @@ def parse_research_workbook(path: str, obs: list | None = None) -> dict:
                     "e_ids": sorted({f.split(":")[0] for f in facts
                                      if f.upper().startswith("E-")}),
                     "excerpts": _rw_split_excerpt(v("evidence_excerpt")),
+                    "_had_excerpt_cell": bool(str(v("evidence_excerpt") or "").strip()),
                     "source_document": (str(v("source_document")).strip()
                                         if v("source_document") else None),
                     "urls": [u.strip() for u in
@@ -876,7 +904,9 @@ def parse_research_workbook(path: str, obs: list | None = None) -> dict:
         # longest passage is the one that carries the claim rather than a
         # fragment of it. Floor of 50 chars is the contract's.
         best: dict = {}
+        cells_with_text = sum(1 for l in out["links"] if l.get("_had_excerpt_cell"))
         for link in out["links"]:
+            link.pop("_had_excerpt_cell", None)
             for fact_id, text in link["excerpts"].items():
                 e_id = fact_id.split(":")[0]
                 if len(text) >= 50 and len(text) > len(best.get(e_id, "")):
@@ -884,6 +914,22 @@ def parse_research_workbook(path: str, obs: list | None = None) -> dict:
         for item in out["ledger"]:
             if best.get(item["e_id"]):
                 item["excerpt"] = best[item["e_id"]][:500]
+        if obs is not None and cells_with_text and not best:
+            # REF-0004's rule, applied to the one reader it missed: a reader
+            # that does not recognise its input must produce a NAMED
+            # observation, never an empty result. This exact silence cost a
+            # promoted run its entire citable evidence base — the cells were
+            # populated, the expression could not see them, and nothing said
+            # so anywhere.
+            obs.append(Observation("research_excerpt_format_unrecognised", None, {
+                "excerpt_cells_with_text": cells_with_text,
+                "fragments_parsed": 0,
+                "expected": "[E-nnn:Fn] or [E-nnn] fact tags inside "
+                            "Evidence_Excerpt",
+                "reason": "the detail tabs carry populated Evidence_Excerpt "
+                          "cells and not one parsed into a fragment; every "
+                          "ledger row will land excerpt-less and nothing "
+                          "downstream will be citable"}))
         if obs is not None and not any(out.values()):
             obs.append(Observation("research_workbook_yielded_nothing", None, {
                 "tabs_present": list(wb.sheetnames)[:30],

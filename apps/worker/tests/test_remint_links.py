@@ -80,12 +80,30 @@ def test_the_basis_says_the_link_was_carried_not_stated():
     assert "'package'" not in cur.calls[0][0]
 
 
+def test_the_carry_is_a_move_not_a_copy():
+    """The first version copied the links and left the superseded row's in
+    place, so one document read twice reached every one of its subcaps
+    twice: E-BCU-012 and its -R2 twin each reached 191 subcaps, and each
+    of those cells counted the same source as TWO items toward the <3
+    thin-evidence line. The second statement is the move's second half —
+    and it deletes only links the mint verifiably holds, so a link that
+    failed to carry is never lost."""
+    cur = _Cur()
+    carry_links_across_remint(cur, "E-X-001", "E-X-001-R2")
+    delete = cur.calls[1][0]
+    assert delete.startswith("DELETE FROM evidence_subcap_links")
+    assert "EXISTS" in delete and "m.subcap_id = k.subcap_id" in delete \
+        and "m.run_id = k.run_id" in delete
+    assert cur.calls[1][1] == ("E-X-001", "E-X-001-R2"), \
+        "delete from the SUPERSEDED row, guarded by the MINT's links"
+
+
 def test_no_content_follows_the_links():
     """The copy exists BECAUSE the content changed. Only metadata this ingest
     cannot re-derive moves, and only into NULLs."""
     cur = _Cur()
     carry_links_across_remint(cur, "E-X-001", "E-X-001-R2")
-    update = cur.calls[1][0]
+    update = cur.calls[2][0]
     assert update.startswith("UPDATE evidence_index")
     for column in CONTENT_COLUMNS:
         assert column not in update, f"{column} is a fresh reading, not metadata"
@@ -99,7 +117,7 @@ def test_no_content_follows_the_links():
 def test_the_pair_is_matched_by_id_only():
     cur = _Cur()
     carry_links_across_remint(cur, "E-X-001", "E-X-001-R2")
-    assert cur.calls[1][1] == ("E-X-001-R2", "E-X-001")
+    assert cur.calls[2][1] == ("E-X-001-R2", "E-X-001")
 
 
 def test_a_row_that_supersedes_nothing_carries_nothing():

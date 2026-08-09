@@ -564,6 +564,16 @@ def _merge_ledger(ledger, research, wb):
                       "fact_count", "claim_type"):
             if r.get(field) is not None and ev.get(field) is None:
                 ev = {**ev, field: r[field]}
+        # The LONGER copy of a name or URL wins wherever the two ledgers
+        # disagree. Both are display-truncated at source — Evidence_Master
+        # hard-caps Source_Name at 40 and URL at 50 (measured: 119 of 127
+        # names and 89 of 127 URLs at exactly the cap on one package), the
+        # research matrix at 60/80 — so "longer" is never a different value,
+        # it is more of the same one, and a URL cut mid-path resolves for
+        # nobody while its 80-char copy is complete for 89 of 127.
+        for field in ("source_name", "source_url"):
+            if r.get(field) and len(r[field]) > len(ev.get(field) or ""):
+                ev = {**ev, field: r[field]}
         if r.get("excerpt"):
             ev = {**ev, "excerpt": r["excerpt"]}
         m = mined.get(ev["e_id"]) or {}

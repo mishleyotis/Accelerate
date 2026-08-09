@@ -168,7 +168,16 @@ def carry_links_across_remint(cur, superseded: str, minted: str) -> int:
     Nothing about the content is touched. Only two things move:
 
       · the links, preserving their own `run_id`, under a basis that says
-        where they came from, and never over one the copy already has;
+        where they came from, and never over one the copy already has —
+        and they MOVE, they are not copied. The first version of this
+        function left the superseded row's links in place, so one document
+        read twice reached every one of its subcaps twice: measured on the
+        reference client, E-BCU-012 and its -R2 twin each reached 191
+        subcaps, and every one of those cells counted the same source as
+        two items toward the `<3` thin-evidence line. The superseded row
+        itself is retained — an old payload's citation of it still
+        resolves — but a superseded row that still LINKS is two rows
+        voting with one document's voice;
       · the grading the re-scan does not restate (specificity, corroboration,
         identity), and only into NULLs — a value the new row states is the
         measured one and always wins.
@@ -181,6 +190,16 @@ def carry_links_across_remint(cur, superseded: str, minted: str) -> int:
             ON CONFLICT DO NOTHING""",
         (minted, superseded))
     carried = cur.rowcount if cur.rowcount and cur.rowcount > 0 else 0
+    # The move's second half: a carried link exists on the minted row now,
+    # so the superseded row's copy comes off. Only links the mint actually
+    # holds are removed — a link that failed to carry is not deleted.
+    cur.execute(
+        """DELETE FROM evidence_subcap_links k
+            WHERE k.e_id = %s
+              AND EXISTS (SELECT 1 FROM evidence_subcap_links m
+                           WHERE m.e_id = %s AND m.subcap_id = k.subcap_id
+                             AND m.run_id = k.run_id)""",
+        (superseded, minted))
     cur.execute(
         """UPDATE evidence_index fresh
               SET specificity   = COALESCE(fresh.specificity, prior.specificity),

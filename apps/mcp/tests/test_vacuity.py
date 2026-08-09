@@ -33,7 +33,7 @@ from dma_mcp.contracts import PAGES, sections
 from dma_mcp.gates import GATES
 from dma_mcp.validation import validate_pass1
 from dma_mcp.vacuity import (CLAIM_MIN_WORDS, CLAIM_OVERLAP, FLOOR_FACTOR,
-                             GATE, TEMPLATE_OVERLAP, _overlap, check_vacuity,
+                             CLAIM_ALONE, GATE, TEMPLATE_OVERLAP, _overlap, check_vacuity,
                              claim_words, is_placeholder, item_keys,
                              prose_floors, records_absence, residual_content,
                              shingles)
@@ -247,10 +247,11 @@ def test_the_promoted_ceilings_template_is_refused_on_every_member():
         f"ceilings.rows[{i}].rationale" for i in range(len(CEILING_TEMPLATE))}
     msg = out[0]["message"]
     assert "share 8-word spans" in msg
-    assert f"a line of {TEMPLATE_OVERLAP:g}" in msg
+    assert f"line {TEMPLATE_OVERLAP:g}" in msg
     # both terms are stated, so the producer can see that the agreement is
-    # not the contract's own scaffolding
-    assert "content words" in msg and f"line {CLAIM_OVERLAP:g}" in msg
+    # not the contract's own scaffolding — and the claim term leads, because
+    # since pass 3 it can refuse ALONE at CLAIM_ALONE, phrasing or no
+    assert "content words" in msg and f"{CLAIM_ALONE:g} alone" in msg
     # the repair, and the route THIS shape actually has
     assert "say what is true of THIS one" in msg
     assert "e_ids" in msg and "leave it out of the array" in msg
@@ -509,10 +510,118 @@ ALERT_TEMPLATE = [
 
 
 def _alerts(with_ladder=True):
+    # The corpus rungs are legitimately SHARED (one package, one profile);
+    # what must differ per item is the query that asked about IT. A ladder
+    # identical across items in full — shared rungs AND one pasted query —
+    # is the group rule's business, tested separately below.
     return {"alerts": {**ENV, "alerts": [
         {"subcap_id": c, "state": s, "justification": j,
-         **(ALERT_LADDER if with_ladder else {})}
+         **({**ALERT_LADDER,
+             "queries_run": [f"INT-{20 + i}: What does the corpus hold on "
+                             f"{c}? Nothing was located."]}
+            if with_ladder else {})}
+        for i, (c, s, j) in enumerate(ALERT_TEMPLATE)]}}
+
+
+def test_one_ladder_pasted_across_three_items_is_refused_as_a_group():
+    """The negative control for the group rule, and the shape both promoted
+    runs actually carried: 98 alerts on one run and 11 on the other shared
+    ONE byte-identical ladder. One search establishes one absence, not N
+    distinct ones — each item's ladder must record the rung that asked
+    about THAT item. Before pass 3 this payload produced zero reasons."""
+    payload = {"alerts": {**ENV, "alerts": [
+        {"subcap_id": c, "state": s, "justification": j, **ALERT_LADDER}
         for c, s, j in ALERT_TEMPLATE]}}
+    out = _cg15("heatmap", payload)
+    grouped = [r for r in out if "byte-identical ladder" in r["message"]]
+    assert len(grouped) == len(ALERT_TEMPLATE), \
+        "the pasted ladder must be refused on every member"
+    assert all("the rung that asked about THIS item" in r["message"]
+               for r in grouped)
+
+
+def test_a_pointer_rung_is_refused_by_name():
+    """The promoted 517: rung 1 was 'Run ladder in section r_layer' on
+    every cell — an instruction to a reader, not a search. Before pass 3
+    it bought the exemption from this gate AND from AG-03."""
+    cell = {"subcap_id": "P2C2.1.1", "e_ids": [], "thin": True,
+            "sources_searched": ["Run ladder in section r_layer",
+                                 "Corpus search: consent capture - nil"],
+            "closure_condition": "A dated document naming consent capture."}
+    payload = {"cell_evidence": {**ENV, "linking_stats": {
+        "cells_scored": 1, "cells_linked": 0, "rows_unlinkable": 1},
+        "cells": [cell]}}
+    out = _cg15("heatmap", payload)
+    assert any("pointer to another section" in r["message"] for r in out)
+
+
+def test_a_hostless_unquoted_ladder_cannot_buy_the_exemption():
+    """MEM-0038's substantive requirement: a rung must name a host, a URL,
+    a quoted query or a re-runnable query string. 'Corpus search: <the
+    cell's own topic> - nil' names nothing a reader could re-run, and 515
+    'distinct' ladders of that form exempted 517 uncited cells."""
+    from dma_mcp.vacuity import ladder_flaw, records_absence
+    from dma_mcp.vacuity import item_keys
+    declared = item_keys("heatmap", "cell_evidence", "cells")
+    cell = {"subcap_id": "P2C2.1.1", "e_ids": [], "thin": True,
+            "sources_searched": ["Assessment package reviewed",
+                                 "Corpus search: consent capture - nil"],
+            "closure_condition": "A dated document naming consent capture."}
+    assert ladder_flaw(cell, declared) is not None
+    assert records_absence(cell, declared) is False
+    # …and the honest version of the same ladder still buys it.
+    cell["sources_searched"] = ["Assessment package reviewed",
+                                'corpus search: "consent capture" - nil']
+    assert ladder_flaw(cell, declared) is None
+    assert records_absence(cell, declared) is True
+
+
+def test_thin_asserted_beside_three_citations_is_not_an_absence():
+    """MEM-0038's agreement clause: thin must agree with the evidence
+    beside it. At or above the contract's own three-item line the cell is
+    not thin, and the absence route is not available to it."""
+    from dma_mcp.vacuity import ladder_flaw, item_keys
+    declared = item_keys("heatmap", "cell_evidence", "cells")
+    cell = {"subcap_id": "P2C2.1.1", "e_ids": ["E-1", "E-2", "E-3"],
+            "thin": True,
+            "sources_searched": ["sec.gov EDGAR full-text"],
+            "closure_condition": "A dated artefact naming this capability."}
+    flaw = ladder_flaw(cell, declared)
+    assert flaw is not None and "3 citations" in flaw
+
+
+def test_the_claim_term_refuses_a_round_robin_the_phrasing_term_misses():
+    """The hostile payload's shape: opening frames and connectives rotated
+    so no pair shares an 8-gram at 0.40, while the content words — what
+    the sentences SAY — agree at 0.60+. Before pass 3 this produced zero
+    reasons; the conjunction closed the instance, not the class."""
+    frames = ["The register shows no deployment evidence for",
+              "Across the corpus, nothing addresses",
+              "Assessment materials do not surface",
+              "The evidence base is silent on",
+              "No artefact in the package speaks to",
+              "Available documentation omits"]
+    connect = ["which constrains", "and this limits", "leaving open",
+               "which defers", "and this narrows", "postponing"]
+    cells = []
+    for i in range(6):
+        # six DISTINCT frames and connectives: no two syntheses share an
+        # 8-gram, so the phrasing term generates no candidate pair at all —
+        # exactly the hostile payload's trick, at test scale
+        cells.append({
+            "subcap_id": f"P1C1.1.{i + 1}", "e_ids": ["E-BCU-001"],
+            "synthesis": (f"{frames[i]} member onboarding workflow "
+                          f"automation at this institution, {connect[i]} "
+                          "the roadmap for consent capture telemetry in the "
+                          "current planning horizon.")})
+    payload = {"cell_evidence": {**ENV, "linking_stats": {
+        "cells_scored": 6, "cells_linked": 6, "rows_unlinkable": 0},
+        "cells": cells}}
+    out = _cg15("heatmap", payload)
+    claim = [r for r in out if "make the same claim" in r["message"]]
+    assert len(claim) == 6, "the claim term must refuse all six alone"
+    assert all("share almost no phrasing" in r["message"] for r in claim), \
+        "the verdict must say the wording was varied and the argument was not"
 
 
 def test_a_recorded_absence_with_its_ladder_passes_the_template_check():
@@ -537,7 +646,7 @@ def test_a_section_with_a_valid_empty_state_is_not_a_vacuous_section():
         **ENV, "rows": [],
         "empty_state": {"reason": "No closed or announced transactions were "
                                   "established for this institution.",
-                        "sources_searched": ["NCUA merger notices",
+                        "sources_searched": ["ncua.gov merger notices",
                                              "state regulator filings",
                                              "press releases 2021-2026"],
                         "closure_condition": "A published merger notice."}}}
@@ -553,7 +662,7 @@ def test_an_empty_state_does_not_exempt_the_prose_a_populated_section_carries():
     payload = _ceilings(CEILING_TEMPLATE)
     payload["ceilings"]["empty_state"] = {
         "reason": "Two categories could not be given a ceiling.",
-        "sources_searched": ["the evidence index", "the client profile"]}
+        "sources_searched": ["package evidence index", "search: \"peer deposit mix\" - nil"]}
     out = _cg15("overview", payload)
     assert len(out) == len(CEILING_TEMPLATE)
     assert all("share 8-word spans" in r["message"] for r in out)
@@ -574,8 +683,12 @@ SHORT_ABSENCE = ("The ladder ran across every mandatory source and "
 
 
 @pytest.mark.parametrize("marker", [
-    {"state": "WORKED_ABSENT", "sources_searched": ["registry", "filings"]},
-    {"state": "UNWORKED", "queries_run": ["INT-020"]},
+    {"state": "WORKED_ABSENT", "sources_searched": ["sec.gov filings", "query: \"vendor contract\""]},
+    # A string under queries_run is a query by the field's own semantics —
+    # re-runnable as written. A bare "INT-020" is a label, names nothing a
+    # reader could run, and no longer buys the exemption (see below).
+    {"state": "UNWORKED",
+     "queries_run": ["INT-020: Does BCU hold proprietary technology patents?"]},
 ])
 def test_each_rung_the_item_shape_declares_exempts_a_short_honest_statement(marker):
     """A 40-80 word floor on a justification is right for an argument. It
@@ -634,7 +747,7 @@ def test_an_absence_key_the_item_shape_does_not_declare_buys_nothing():
     payload = {"cell_evidence": {**ENV, "cells": [
         {"subcap_id": f"P4C1.1.{i}", "synthesis": frost.format(cap),
          "state": "WORKED_ABSENT",
-         "sources_searched": ["registry", "filings"]}
+         "sources_searched": ["sec.gov filings", "query: \"board oversight\""]}
         for i, cap in enumerate(("Strategy Refresh Cadence",
                                  "Vision Communication", "Board Engagement"))]}}
     out = _cg15("heatmap", payload)
@@ -654,7 +767,7 @@ def test_the_declared_cell_absence_protocol_buys_the_exemption_and_thin_alone_do
     still owes its argument — a switch, not a finding."""
     declared = item_keys("heatmap", "cell_evidence", "cells")
     assert {"thin", "sources_searched", "closure_condition"} <= declared
-    full = {"thin": True, "sources_searched": ["registry", "filings"],
+    full = {"thin": True, "sources_searched": ["sec.gov EDGAR full-text", 'query: "consent capture"'],
             "closure_condition": "A named owner or a dated artefact for this cell."}
     assert records_absence(full, declared)
     assert not records_absence({"thin": True}, declared)
@@ -670,10 +783,10 @@ def test_the_same_keys_on_the_shape_that_declares_them_still_work():
     """The other direction, so the narrowing cannot be read as a ban: the
     identical marker on `heatmap.alerts.alerts` is honoured."""
     assert records_absence({"state": "WORKED_ABSENT",
-                            "sources_searched": ["registry"]},
+                            "sources_searched": ["ciro.ca registry"]},
                            item_keys("heatmap", "alerts", "alerts"))
     assert not records_absence({"state": "WORKED_ABSENT",
-                                "sources_searched": ["registry"]},
+                                "sources_searched": ["ncua.gov registry"]},
                                item_keys("heatmap", "cell_evidence", "cells"))
 
 
@@ -703,7 +816,7 @@ def test_a_bare_placeholder_is_refused_even_inside_a_recorded_absence():
     payload = {"alerts": {**ENV, "alerts": [
         {"subcap_id": "P4C1.1.1", "justification": "N/A",
          "state": "WORKED_ABSENT",
-         "sources_searched": ["registry", "filings"]}]}}
+         "sources_searched": ["sec.gov filings", "query: \"data lineage\""]}]}}
     out = _cg15("heatmap", payload)
     assert len(out) == 1
     assert out[0]["path"] == "alerts.alerts[0].justification"

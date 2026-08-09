@@ -188,6 +188,32 @@ CLAIM_OVERLAP = 0.40
 # them instead would hand a producer 700 near-contentless sentences.
 CLAIM_MIN_WORDS = 6
 
+# CLAIM ALONE (pass 3, 2026-08-09). The conjunction above closed the
+# INSTANCE and not the class: a hostile 706-cell round robin built against
+# this connector's own modules passed all six pages with zero blocking
+# reasons, because its phrasing overlap (0.306) sits under the 0.40 8-gram
+# line and the claim term only ever ran on pairs that share an 8-gram.
+# Phrasing is the cheapest thing a generator can vary — eight opening
+# frames and four connectives put every pair under the line while the
+# CLAIM overlap of the same field ran 0.769. So the claim term now also
+# decides ALONE, over all measurable pairs, at a higher line:
+#
+#   Odlum's 517 round robin    claim 0.938   refused (475 named)
+#   the hostile round robin    claim 0.769   refused — was PASSING
+#   Baxter, hand-written       max 0.793 on a pair; components of 3+ are
+#                              what refuse, measured ≤3% of cells
+#
+# 0.50 splits the populations: a generator cannot push claim overlap down
+# without changing what the sentences SAY, which is the work the gate
+# exists to demand. The conjunction route above is kept as well — it can
+# only add refusals a phrasing-heavy template earns — and an edge from
+# either route joins the same components.
+CLAIM_ALONE = 0.50
+# Candidate pruning for the all-pairs pass: two sets of ≥ CLAIM_MIN_WORDS
+# words need ⌈0.5·min⌉ ≥ 3 shared words to clear 0.50, so only pairs
+# sharing at least this many content words are measured at all.
+CLAIM_MIN_SHARED = 3
+
 
 # ── placeholder scalars ───────────────────────────────────────────────
 #
@@ -443,6 +469,120 @@ _EV_KEYS = frozenset(("e_ids", "supporting_e_ids", "evidence_ids",
                       "new_evidence_ids", "source_e_id", "e_id"))
 
 
+# ── what a ladder rung has to BE (pass 3, 2026-08-09) ─────────────────
+#
+# REF-0012 bound the exemption to declared keys, so an INVENTED key buys
+# nothing. Twelve hours later a promoted run bought it with DECLARED keys
+# filled with a constant: 517 of 517 uncited cells carried the two-rung
+# ladder ["Run ladder in section r_layer", "Corpus search: <the cell's own
+# catalogue topic> - nil"] — rung 1 a pointer to another section, naming
+# no host, no query and no result, on every cell identically; rung 2 the
+# cell's own name substituted into one sentence. 98 alerts shared ONE
+# ladder string. The predicate was "is the field present and well-shaped",
+# and a template satisfies that for free (MEM-0038).
+#
+# So the ladder itself now has to look like a search somebody ran:
+#
+#   1. No rung may be a POINTER — an instruction to a reader ("run the
+#      ladder", "see section X", "refer to r_layer") is not a search.
+#   2. At least one rung must NAME what was attempted: a host, a URL, a
+#      quoted query, or an explicit query/site form. "Corpus search:
+#      roadmap visualization - nil" names nothing a reader could re-run;
+#      'corpus search: "roadmap visualization" — nil' names the query.
+#   3. `thin` must agree with the evidence beside it: a cell asserting
+#      thin while citing three or more items is not thin by the
+#      contract's own line, so the trio cannot exempt it.
+#
+# And at the GROUP grain, in check_vacuity: a byte-identical full ladder
+# across three or more exempted items of one field is one search pasted N
+# times — one search can establish one absence, not N distinct ones. Each
+# item's ladder must record the rung that asked about THAT item.
+_POINTER_RUNG = re.compile(
+    r"\b(?:run|rerun|see|refer(?:\s+to)?|per|consult)\b[^.]{0,40}"
+    r"\b(?:ladder|section|r_layer|above|elsewhere)\b", re.I)
+_HOST_RUNG = re.compile(
+    r"\b[a-z0-9][a-z0-9-]{1,63}\.(?:[a-z]{2,12})(?:\.[a-z]{2,12})?(?:/|\b)",
+    re.I)
+_QUOTED_RUNG = re.compile(r"[\"“‘'][^\"”’']{3,120}[\"”’']")
+_QUERY_RUNG = re.compile(r"\b(?:site|query|queried|searched\s+for)\s*[:=]", re.I)
+
+
+def _rungs(obj, declared) -> list:
+    """(key, text) pairs — the key travels because it carries meaning: a
+    string under `queries_run` IS a query by the field's own semantics."""
+    def named(key):
+        return declared is None or key in declared
+    out = []
+    for k in _LADDER_KEYS:
+        if named(k) and isinstance(obj.get(k), list):
+            out.extend((k, r) for r in obj[k]
+                       if isinstance(r, str) and r.strip())
+    return out
+
+
+def _citation_count(obj, declared) -> int:
+    def named(key):
+        return declared is None or key in declared
+    n = 0
+    for k in _EV_KEYS:
+        if not named(k):
+            continue
+        v = obj.get(k)
+        if isinstance(v, list):
+            n += len(v)
+        elif isinstance(v, str) and v.strip():
+            n += 1
+    return n
+
+
+def ladder_flaw(obj, declared=None) -> str | None:
+    """Why this item's ladder cannot buy an absence exemption — or None.
+
+    Shared with AG-03 (validation2._asserts_nothing) deliberately: the two
+    gates honour the same trio, and a predicate held in two places drifts.
+    Returns prose that names the flaw and the repair, because the last
+    time this gate refused without naming a route, five producers stalled
+    on the same day.
+    """
+    rungs = _rungs(obj, declared)
+    if not rungs:
+        return None                      # no ladder → no ladder-based route
+    pointers = [(k, r) for k, r in rungs if _POINTER_RUNG.search(r)]
+    if pointers:
+        k, r = pointers[0]
+        return (f"rung {rungs.index(pointers[0]) + 1} "
+                f"({r[:60]!r}) is a pointer to another section, "
+                "not a search — a reader following the ladder must find the "
+                "searches themselves, on the item, not an instruction to "
+                "look elsewhere")
+
+    def substantive(key, text):
+        if (_HOST_RUNG.search(text) or _QUOTED_RUNG.search(text)
+                or _QUERY_RUNG.search(text)):
+            return True
+        # A string under `queries_run` is a query by the field's own
+        # semantics — "INT-020: Does BCU hold proprietary technology
+        # patents?" is re-runnable as written, and demanding quotation
+        # marks around it would refuse the corpus's most honest ladders
+        # for punctuation. Four words is the line between a query and a
+        # label ("INT-020" alone names nothing a reader could run).
+        return key == "queries_run" and len(text.split()) >= 4
+
+    if not any(substantive(k, r) for k, r in rungs):
+        return (f"none of the {len(rungs)} rungs names a host, a URL, a "
+                "quoted query or a re-runnable query string — a ladder "
+                "establishes an absence only if it records searches "
+                "somebody could re-run. Name the source attempted (its "
+                "domain or document) or record the query itself, per rung")
+    if (obj.get("thin") is True
+            and _citation_count(obj, declared) >= 3):
+        return (f"thin is asserted beside {_citation_count(obj, declared)} "
+                "citations — at or above the contract's own three-item "
+                "line, the cell is not thin, and the absence route is not "
+                "available to it")
+    return None
+
+
 def records_absence(obj, declared=None) -> bool:
     """True when the object states that somebody looked and found
     nothing, with the search that establishes it.
@@ -464,8 +604,12 @@ def records_absence(obj, declared=None) -> bool:
     if (named("quarantined") and obj.get("quarantined")
             and named("quarantine_reason") and obj.get("quarantine_reason")):
         return True
-    ladder = any(named(k) and isinstance(obj.get(k), list) and obj[k]
-                 for k in _LADDER_KEYS)
+    # A ladder is a ladder only if it survives the rung predicate: present
+    # and well-shaped stopped being enough the morning 517 cells bought
+    # this exemption with a pointer and a template (MEM-0038).
+    ladder = (any(named(k) and isinstance(obj.get(k), list) and obj[k]
+                  for k in _LADDER_KEYS)
+              and ladder_flaw(obj, declared) is None)
     # The paired routes: a flag that is a switch on its own becomes a finding
     # only beside its companion AND the ladder. `thin` is the cell-grain case
     # the TRD states at `Representing absence` (thin + sources_searched +
@@ -510,9 +654,14 @@ def _absence_route(declared) -> str:
         return (f" And if the finding is that the ladder ran and found "
                 f"nothing, this item shape declares {flag} + {ladder[0]} + "
                 f"{companion} — all three, because {flag} on its own marks a "
-                f"cell short of evidence that still owes its argument. Name "
-                f"what was searched and what would settle it, on the cell "
-                f"itself, and this gate stands down.")
+                f"cell short of evidence that still owes its argument. The "
+                f"ladder must record searches a reader could re-run: at "
+                f"least one rung naming a host, a URL or a quoted query, no "
+                f"rung pointing at another section, and each item carrying "
+                f"the rung that asked about IT — a template rung repeated "
+                f"across items records one search, not many. Name what was "
+                f"searched and what would settle it, on the cell itself, "
+                f"and this gate stands down.")
     if states and ladder:
         return (f" And if the finding is that the ladder ran and found "
                 f"nothing, this item shape declares {states[0]} + "
@@ -546,6 +695,57 @@ def _absence_route(declared) -> str:
             "per-item key to declare it with: a key the contract does not "
             "name is dropped at promote, so it would buy this exemption and "
             "render as nothing.")
+
+
+def _absence_pass(name, fname, items, value_is_dict, declared):
+    """Per-item exemptions, with the verdicts that void a claimed ladder.
+
+    Two things the per-item predicate cannot see happen here. First, an
+    item whose ladder is FLAWED gets a verdict naming the flaw — falling
+    silently through to the template check would refuse the prose without
+    ever telling the producer the ladder was the problem. Second, the
+    GROUP rule: a byte-identical full ladder across three or more exempted
+    items is one search pasted N times, and one search establishes one
+    absence, not N distinct ones — each item's ladder must record the rung
+    that asked about THAT item. Measured before this existed: 98 alerts on
+    one promoted run shared one ladder string, and 517 cells shared their
+    first rung verbatim.
+    """
+    reasons, exempt, by_sig = [], [], {}
+    for i, item in enumerate(items):
+        if not isinstance(item, dict):
+            exempt.append(False)
+            continue
+        path = f"{name}.{fname}" + ("" if value_is_dict else f"[{i}]")
+        rungs = _rungs(item, declared)
+        flaw = ladder_flaw(item, declared) if rungs else None
+        if flaw and (_citation_count(item, declared) == 0
+                     or item.get("thin") is True):
+            reasons.append(_reason(
+                name, path,
+                f"the recorded absence ladder cannot exempt this item: "
+                f"{flaw}. The exemption is the RECORD of a search, and a "
+                "record a reader could not re-run records nothing"))
+        e = records_absence(item, declared)
+        exempt.append(e)
+        if e and rungs and not flaw:
+            by_sig.setdefault(tuple(rungs), []).append((i, path))
+    for sig, members in by_sig.items():
+        if len(members) < TEMPLATE_MIN_GROUP:
+            continue
+        for i, path in members:
+            exempt[i] = False
+            reasons.append(_reason(
+                name, path,
+                f"{len(members)} items of {fname!r} claim a recorded "
+                f"absence on one byte-identical ladder "
+                f"({'; '.join(t for _k, t in sig)[:120]!r}…) — one search "
+                "establishes one absence, not "
+                f"{len(members)} distinct ones. Record, per item, the rung "
+                "that asked about THIS item — the query or the source "
+                "checked for this capability — or state the shared finding "
+                "once, in the section's own prose"))
+    return exempt, reasons
 
 
 def valid_empty_state(es) -> bool:
@@ -709,15 +909,14 @@ def _check_templates(name, groups, declared=None) -> list:
     out = []
     route = _absence_route(declared)
     for (field_key, floor), values in sorted(groups.items()):
-        rows = [(p, shingles(t), claim_words(t)) for p, t in values
-                if len(tokens(t)) >= TEMPLATE_MIN_TOKENS]
-        rows = [(p, s, c) for p, s, c in rows if s]
+        rows = [(p, shingles(t), claim_words(t))
+                for p, t in values if len(tokens(t)) >= TEMPLATE_MIN_TOKENS]
         if len(rows) < TEMPLATE_MIN_GROUP:
             continue
-        # Only pairs that share at least one 8-gram can clear the line, so
-        # an inverted index enumerates the candidates instead of all
-        # n(n-1)/2 of them — the heatmap's 706 cell syntheses are 249,374
-        # pairs, of which a handful share a span at all.
+
+        # Route 1 — the phrasing conjunction. Only pairs that share at
+        # least one 8-gram can clear its line, so an inverted index
+        # enumerates the candidates instead of all n(n-1)/2 of them.
         index = {}
         for i, (_p, sh, _c) in enumerate(rows):
             for s in sh:
@@ -729,27 +928,53 @@ def _check_templates(name, groups, declared=None) -> list:
             for a in range(len(members)):
                 for b in range(a + 1, len(members)):
                     candidates.add((members[a], members[b]))
+
+        # Route 2 — the claim term alone, over ALL measurable pairs. The
+        # candidate set is pruned by content-word postings: clearing 0.50
+        # on two sets of ≥6 words requires ≥3 shared words, so a pair
+        # sharing fewer is never measured. This route exists because the
+        # conjunction's candidate filter IS the 8-gram index above, and a
+        # generator that varies its phrasing never enters it — the hostile
+        # round robin passed at phrasing 0.306 / claim 0.769.
+        postings = {}
+        for i, (_p, _sh, cw) in enumerate(rows):
+            if len(cw) < CLAIM_MIN_WORDS:
+                continue
+            for w in cw:
+                postings.setdefault(w, []).append(i)
+        shared = {}
+        for members in postings.values():
+            if len(members) < 2:
+                continue
+            for a in range(len(members)):
+                for b in range(a + 1, len(members)):
+                    pair = (members[a], members[b])
+                    shared[pair] = shared.get(pair, 0) + 1
+        claim_candidates = {p for p, n in shared.items()
+                            if n >= CLAIM_MIN_SHARED}
+
         adj = {i: set() for i in range(len(rows))}
-        best = {}
-        claim_best = {}
-        for i, j in candidates:
-            ov = _overlap(rows[i][1], rows[j][1])
-            if ov < TEMPLATE_OVERLAP:
-                continue
-            ci, cj = rows[i][2], rows[j][2]
-            claim = _overlap(ci, cj)
-            # Too few content words to measure: the claim term abstains
-            # and the phrasing term decides alone. Sparing them would hand
-            # a producer a template made of nothing but the register.
-            measurable = min(len(ci), len(cj)) >= CLAIM_MIN_WORDS
-            if measurable and claim < CLAIM_OVERLAP:
-                continue
+        best, claim_best = {}, {}
+
+        def _edge(i, j, ov, claim):
             adj[i].add(j)
             adj[j].add(i)
             best[i] = max(best.get(i, 0.0), ov)
             best[j] = max(best.get(j, 0.0), ov)
             claim_best[i] = max(claim_best.get(i, 0.0), claim)
             claim_best[j] = max(claim_best.get(j, 0.0), claim)
+
+        for i, j in candidates | claim_candidates:
+            ov = _overlap(rows[i][1], rows[j][1])
+            ci, cj = rows[i][2], rows[j][2]
+            claim = _overlap(ci, cj)
+            measurable = min(len(ci), len(cj)) >= CLAIM_MIN_WORDS
+            if measurable and claim >= CLAIM_ALONE:
+                _edge(i, j, ov, claim)          # the claim decides alone
+            elif ov >= TEMPLATE_OVERLAP and (
+                    not measurable or claim >= CLAIM_OVERLAP):
+                _edge(i, j, ov, claim)          # the phrasing conjunction
+
         seen = set()
         for i in range(len(rows)):
             if i in seen or not adj[i]:
@@ -767,21 +992,24 @@ def _check_templates(name, groups, declared=None) -> list:
             comp.sort()
             paths = [rows[k][0] for k in comp]
             for k in comp:
+                phr = best.get(k, 0.0)
+                phrase_note = (
+                    f"share {SHINGLE_N}-word spans at up to {phr:.2f} "
+                    f"(line {TEMPLATE_OVERLAP:g})" if phr >= TEMPLATE_OVERLAP
+                    else f"share almost no phrasing (max {phr:.2f}) — the "
+                         "wording was varied; the argument was not")
                 out.append(_reason(
                     name, rows[k][0],
-                    f"{len(comp)} items of {field_key!r} share "
-                    f"{SHINGLE_N}-word spans at an overlap of up to "
-                    f"{max(best[k] for k in comp):.2f} (this one "
-                    f"{best[k]:.2f}, against a line of {TEMPLATE_OVERLAP:g}) "
-                    f"AND share {claim_best[k]:.2f} of their content words "
-                    f"once the score and evidence registers are stripped "
-                    f"(line {CLAIM_OVERLAP:g}) — so it is not the contract's "
-                    "own scaffolding that agrees here, it is the argument. "
-                    f"One template with a name substituted, rendered as "
+                    f"{len(comp)} items of {field_key!r} make the same "
+                    f"claim: {claim_best.get(k, 0.0):.2f} of their content "
+                    f"words agree once the score and evidence registers are "
+                    f"stripped (refusal at {CLAIM_ALONE:g} alone, or "
+                    f"{CLAIM_OVERLAP:g} with matching phrasing), and they "
+                    f"{phrase_note}. One argument rendered as "
                     f"{len(comp)} separate arguments. The group is "
                     f"{', '.join(paths[:4])}"
-                    f"{', …' if len(paths) > 4 else ''}. A per-item field the "
-                    "contract gives its own word budget is a per-item "
+                    f"{', …' if len(paths) > 4 else ''}. A per-item field "
+                    "the contract gives its own word budget is a per-item "
                     "argument: say what is true of THIS one. If the finding "
                     "genuinely is the same for all of them, it belongs once, "
                     "in the section's own prose." + route))
@@ -843,12 +1071,15 @@ def check_vacuity(page: str, payload: dict) -> list:
             items = (value if isinstance(value, list)
                      else [value] if isinstance(value, dict) else [])
             declared = item_keys(page, name, fname)
+            exempts, ladder_reasons = _absence_pass(
+                name, fname, items, isinstance(value, dict), declared)
+            out.extend(ladder_reasons)
             groups = {}
             for i, item in enumerate(items):
                 if not isinstance(item, dict):
                     continue
                 index = "" if isinstance(value, dict) else f"[{i}]"
-                exempt = records_absence(item, declared)
+                exempt = exempts[i]
                 for key, floor in per_key.items():
                     text = item.get(key)
                     if not isinstance(text, str):
