@@ -497,6 +497,11 @@
      "type": "number",
      "doc": "O11. Share of items from the entity's OWN publications (annual report, site, press releases). Above ~50%, corroboration is structurally weak regardless of the tier histogram — flag it. Computed."
     },
+    "self_sourced_basis": {
+     "required": false,
+     "type": "string",
+     "doc": "O11. COMPUTED AT READ — do not send. Names the domains the share above was measured against, or, when the run records no publication domain for the entity itself, says that and what would close it. A percentage with no stated basis and an absent percentage are both unreadable: the first invites certainty, the second reads as 'the producer left it empty'."
+    },
     "mix_implication": {
      "required": true,
      "type": "string",

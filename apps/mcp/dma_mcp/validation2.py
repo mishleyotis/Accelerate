@@ -380,31 +380,56 @@ def _stated_unlinked(body: dict) -> str:
 
 
 # A package row re-landed under a run-qualified id after a re-scan changed
-# its content keeps its links on the ORIGINAL id (persist.py mints the new
-# id; nothing carries the linkage across). The re-scan is usually the
-# better row — fuller excerpt, a published date — so the orphan a reader
-# hits is the good copy. That is a different defect from "this source
-# supports nothing", and it has a different repair the producer can
-# actually make: cite the package id in its bare form, which resolves
-# inside this run's scope to the row that carries the cells. Telling them
-# instead to declare that the source supports no cell would be asking for
-# a false statement to pass a gate.
+# its content has a TWIN, and one of the two carries the cell links. Which
+# one is not a property of the id shape, and this code used to assume it
+# was.
+#
+# When it was written, `persist.py` minted the new id and nothing carried
+# the linkage across, so the links stayed on the ORIGINAL and the re-scan
+# copy was the orphan. The remediation said "cite the package id in its
+# BARE form", which was right then.
+#
+# Migration 0043 and `persist.carry_links_across_remint` MOVE the links
+# onto the re-mint. Measured on production 2026-08-09, over every cited id
+# on the promoted heatmap: 3 orphans have a linked twin, and **all three
+# are bare ids whose links now sit on the `-R2` copy** — E-BCU-012 (192
+# cells), E-BCU-071 (43), E-BCU-026 (39). The direction inverted, and the
+# advice inverted with it: telling a producer to cite the bare form now
+# names the orphan.
+#
+# So the lookup goes BOTH ways and the reason names the id that actually
+# holds the links rather than the id shape it happens to have. The class
+# is `RULE_HELD_IN_TWO_PLACES_DRIFTS` again — remediation text is a second
+# copy of a rule the data moved out from under.
 _RUN_SUFFIX = re.compile(r"^(?P<base>.+)-R\d+$")
 
 
 def _sibling_with_links(conn, stored_id: str):
-    m = _RUN_SUFFIX.match(str(stored_id or ""))
-    if not m:
+    """(twin_id, cells) for the re-scan twin of `stored_id` that carries the
+    links, or None. Bare -> re-mint AND re-mint -> bare, because either can
+    be the one holding them."""
+    stored_id = str(stored_id or "")
+    if not stored_id:
         return None
-    base = m.group("base")
+    m = _RUN_SUFFIX.match(stored_id)
+    if m:
+        # a re-mint: its twin is the bare package id
+        pattern, params = "e_id = %s", (m.group("base"),)
+    else:
+        # a bare id: its twins are its re-mints. LIKE with the id as a
+        # prefix would also match a LONGER id that merely starts the same
+        # way, so the suffix shape is asserted rather than assumed.
+        pattern = "e_id LIKE %s AND e_id ~ '-R[0-9]+$'"
+        params = (f"{stored_id}-R%",)
     try:
         cur = conn.cursor()
-        cur.execute("""SELECT count(DISTINCT subcap_id)
-                         FROM evidence_subcap_links WHERE e_id = %s""", (base,))
-        n = (cur.fetchone() or [0])[0]
+        cur.execute(f"""SELECT e_id, count(DISTINCT subcap_id) n
+                          FROM evidence_subcap_links WHERE {pattern}
+                         GROUP BY e_id ORDER BY n DESC LIMIT 1""", params)
+        row = cur.fetchone()
     except Exception:
         return None
-    return (base, n) if n else None
+    return (row[0], row[1]) if row and row[1] else None
 
 
 def _check_cited_linkage(page, payload, found, cited_by, conn=None) -> list:
@@ -422,17 +447,15 @@ def _check_cited_linkage(page, payload, found, cited_by, conn=None) -> list:
         sibling = (_sibling_with_links(conn, row.get("stored_id"))
                    if conn is not None else None)
         if sibling:
-            base, n = sibling
+            twin, n = sibling
             out.append(_reason(
                 "ET-07", section, f"{section}.e_ids",
-                f"{e_id} resolves to a re-scan copy of a package source, and "
-                f"the copy carries no cell link — the {n} cells this source "
-                f"supports sit on {base}, which a re-scan left behind. The "
-                "reader gets the orphan, and the better excerpt, so this is "
-                "not a source that supports nothing. Cite the package id in "
-                "its BARE form (the connector qualifies it inside this run's "
-                "scope and resolves it to the row holding the cells) rather "
-                "than naming another run's copy"))
+                f"{e_id} and {twin} are two registrations of the same package "
+                f"source — one re-scan apart — and the {n} cells this source "
+                f"supports are linked to {twin}, not to the id cited here. So "
+                "this is not a source that supports nothing; it is the twin "
+                f"that does not hold the linkage. Cite {twin}, which is the "
+                "row a reader opening this chip needs to reach"))
             continue
         out.append(_reason(
             "ET-07", section, f"{section}.e_ids",

@@ -88,7 +88,8 @@ def firmographics(data: dict) -> None:
     _set(data, "undated_pct", _pct(len(rows) - dated, len(rows)))
 
 
-def evidence_coverage(cur, data: dict, run_id, entity_id) -> None:
+def evidence_coverage(cur, data: dict, run_id, entity_id,
+                      entity_domain: str | None = None) -> None:
     """O11's census, over the run's own evidence store.
 
     An item is a DOCUMENT; a fact is a claim carried by one. One annual
@@ -124,7 +125,7 @@ def evidence_coverage(cur, data: dict, run_id, entity_id) -> None:
         return
 
     tiers, claims, self_sourced, facts = {}, {}, 0, 0
-    own = _entity_domains(cur, entity_id)
+    own = _entity_domains(cur, entity_id, entity_domain)
     for tier, claim, domain, n_links in rows:
         tiers[tier or "unknown"] = tiers.get(tier or "unknown", 0) + 1
         claims[claim or "unlabelled"] = claims.get(claim or "unlabelled", 0) + 1
@@ -145,18 +146,71 @@ def evidence_coverage(cur, data: dict, run_id, entity_id) -> None:
     # Only meaningful when the entity's own domains are known. Guessing them
     # from the evidence would make the numerator define its own denominator.
     _set(data, "self_sourced_pct", _pct(self_sourced, total) if own else None)
+    if own:
+        _set(data, "self_sourced_basis",
+             "share of items published on " + ", ".join(sorted(own)))
+    else:
+        # A field that is simply ABSENT reads as "the producer left it
+        # empty" — the exact misreading this module exists to end, and the
+        # one its own docstring names. Measured 2026-08-09: `entities.domain`
+        # is NULL on all 166 rows, no row in the corpus carries
+        # `origin = 'internal'`, and nothing in the ingest path writes
+        # either — so this figure cannot be computed for ANY client today
+        # and says so, naming what would close it.
+        data.setdefault("self_sourced_basis",
+                        "not computed: this run records no publication "
+                        "domain for the entity itself, and inferring one "
+                        "from the evidence would let the numerator define "
+                        "its own denominator. Closed by recording the "
+                        "entity's own domain at ingest")
 
 
-def _entity_domains(cur, entity_id) -> set:
-    """The entity's own publication domains, from the run's firmographics
-    source rows. Empty when nothing states them — which makes
-    self_sourced_pct null rather than 0."""
+def _bare_domain(value) -> str:
+    """`https://WWW.BCU.org/about` -> `bcu.org`. "" when there is nothing.
+
+    `entities.domain` is TEXT and nothing enforces its shape, so a value
+    written as a URL would match no `source_domain` and score a confident
+    0% — a wrong number, which is worse than the null it replaced. This is
+    the same defensive normalisation `source_domain` gets at ingest.
+    """
+    if not isinstance(value, str):
+        return ""
+    v = value.strip().lower()
+    v = v.split("://", 1)[-1]              # scheme
+    v = v.split("/", 1)[0]                 # path
+    v = v.split("?", 1)[0].split("#", 1)[0]
+    v = v.rsplit("@", 1)[-1]               # userinfo
+    v = v.split(":", 1)[0]                 # port
+    return v.removeprefix("www.").strip(".")
+
+
+def _entity_domains(cur, entity_id, entity_domain: str | None = None) -> set:
+    """The entity's own publication domains.
+
+    Two sources, in authority order, and neither is the evidence mix this
+    figure is a share OF:
+
+    1. `entities.domain` — the column the schema declares for exactly this,
+       carried on `serving_directory` (0045) because `svc_api` holds no
+       grant on `entities`.
+    2. evidence rows this run marked `origin = 'internal'` — the entity's
+       own publications, as classified at registration.
+
+    Empty when neither states one, which makes self_sourced_pct null rather
+    than 0. Reading the declared column FIRST is the half that was missing:
+    the previous version named only source 2, and `evidence_origin_t` has
+    an `internal` label that no row in the corpus has ever carried — so the
+    condition was unsatisfiable and the field could never render for any
+    client. A mechanism that cannot fire is worse than none, because the
+    code reads as though the path exists.
+    """
+    own = {_bare_domain(entity_domain)} if _bare_domain(entity_domain) else set()
     cur.execute(
         """SELECT DISTINCT ei.source_domain
              FROM evidence_index ei
             WHERE ei.entity_id = %s AND ei.origin = 'internal'
               AND ei.source_domain IS NOT NULL""", (entity_id,))
-    return {r[0] for r in cur.fetchall() if r[0]}
+    return own | {r[0] for r in cur.fetchall() if r[0]}
 
 
 # ── insights ───────────────────────────────────────────────────────────────
@@ -463,7 +517,8 @@ def apply(cur, page: str, section: str, data, run_meta: dict, entity_id) -> None
         if page == "overview" and section == "firmographics":
             firmographics(data)
         elif page == "overview" and section == "evidence_coverage":
-            evidence_coverage(cur, data, run_id, entity_id)
+            evidence_coverage(cur, data, run_id, entity_id,
+                              run_meta.get("entity_domain"))
         elif page == "insights" and section == "landscape":
             landscape(cur, data, run_id)
         elif page == "techstack" and section == "techstack":

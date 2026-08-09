@@ -19,6 +19,7 @@ passes STATED — by the grain of the section citing it, or by a rung the
 producer wrote naming the id — and never by being forced into a false
 link.
 """
+import re
 import sys
 from pathlib import Path
 
@@ -126,7 +127,8 @@ def test_the_financial_series_carries_period_files_and_is_exempt():
 
 
 class _Conn:
-    """A link table holding only the ids given."""
+    """A link table holding only the ids given, answering the real query:
+    one row per e_id, richest first, or nothing."""
 
     def __init__(self, links):
         self.links = links
@@ -136,19 +138,25 @@ class _Conn:
 
         class _Cur:
             def execute(self, sql, params=None):
-                self.n = len(conn.links.get(params[0], ()))
+                if "LIKE" in sql:             # bare id -> its re-mints
+                    prefix = params[0][:-1]   # strip the trailing %
+                    hits = [(k, len(v)) for k, v in conn.links.items()
+                            if k.startswith(prefix) and re.search(r"-R\d+$", k)]
+                else:                          # re-mint -> its bare original
+                    hits = [(params[0], len(conn.links.get(params[0], ())))]
+                hits = [h for h in hits if h[1]]
+                self.row = max(hits, key=lambda h: h[1]) if hits else None
 
             def fetchone(self):
-                return [self.n]
+                return self.row
         return _Cur()
 
 
-def test_a_re_scan_copy_is_named_as_the_wrong_copy_not_as_an_orphan():
-    """A second ingest of one package minted `-R2` ids for the rows whose
-    content changed and left the links on the originals. The re-scan is
-    the better row — fuller excerpt, a published date — so telling the
-    producer to declare that it supports no cell would be asking for a
-    false statement. The repair is to cite the bare package id."""
+def test_a_re_scan_twin_is_named_as_the_wrong_copy_not_as_an_orphan():
+    """Two registrations of one package source, one re-scan apart, and only
+    one of them carries the cell links. Telling the producer to declare
+    that the cited one supports no cell would be asking for a false
+    statement to pass a gate — the repair is to cite the twin."""
     payload = {"cell_evidence": {"e_ids": ["E-BCU-016-R2"]}}
     conn = _Conn({"E-BCU-016": ["P4C1.1.1", "P4C1.1.2", "P4C1.1.3"]})
     out = _check_cited_linkage("heatmap", payload, [_row("E-BCU-016-R2")],
@@ -156,9 +164,47 @@ def test_a_re_scan_copy_is_named_as_the_wrong_copy_not_as_an_orphan():
     assert len(out) == 1
     msg = out[0]["message"]
     assert out[0]["gate_id"] == "ET-07"
-    assert "the 3 cells this source supports sit on E-BCU-016" in msg
-    assert "BARE form" in msg
+    assert "the 3 cells this source supports are linked to E-BCU-016" in msg
+    assert "Cite E-BCU-016," in msg
     assert "supports nothing" in msg          # explicitly says it is not that
+
+
+def test_the_lookup_goes_the_other_way_too_because_0043_moved_the_links():
+    """The direction is not a property of the id shape, and this code used
+    to assume it was.
+
+    When it was written, `persist.py` minted the re-mint and carried no
+    linkage, so the links stayed on the bare original and the advice was
+    "cite the bare package id". Migration 0043 and
+    `persist.carry_links_across_remint` MOVE them onto the re-mint.
+    Measured on production 2026-08-09 over every cited id on the promoted
+    heatmap: three orphans have a linked twin and ALL THREE are bare ids
+    whose links now sit on the `-R2` copy — E-BCU-012 (192 cells),
+    E-BCU-071 (43), E-BCU-026 (39).
+
+    Negative control: the one-directional lookup returns None here, so the
+    run falls through to the generic orphan reason and the producer is told
+    to declare that a source supporting 192 cells supports none."""
+    payload = {"cell_evidence": {"e_ids": ["E-BCU-012"]}}
+    conn = _Conn({"E-BCU-012-R2": ["P4C1.1.%d" % i for i in range(5)]})
+    out = _check_cited_linkage("heatmap", payload, [_row("E-BCU-012")],
+                               {"E-BCU-012": "cell_evidence"}, conn)
+    assert len(out) == 1
+    msg = out[0]["message"]
+    assert "linked to E-BCU-012-R2" in msg and "Cite E-BCU-012-R2," in msg
+    assert "no cell links served for this item" not in msg
+
+
+def test_a_longer_id_that_merely_starts_the_same_way_is_not_a_twin():
+    """`LIKE 'E-BCU-01%'` would match E-BCU-012 from E-BCU-01, and a prefix
+    match across an id space where E-BCU-1 and E-BCU-12 both exist would
+    name an unrelated document as the repair."""
+    payload = {"cell_evidence": {"e_ids": ["E-BCU-01"]}}
+    conn = _Conn({"E-BCU-012": ["P4C1.1.1"], "E-BCU-012-R2": ["P4C1.1.2"]})
+    out = _check_cited_linkage("heatmap", payload, [_row("E-BCU-01")],
+                               {"E-BCU-01": "cell_evidence"}, conn)
+    assert len(out) == 1
+    assert "no cell links served for this item" in out[0]["message"]
 
 
 def test_a_suffixed_id_whose_original_is_also_unlinked_is_a_plain_orphan():

@@ -38,7 +38,8 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
                           composite, scored_cells, catalogue_cells,
                           ccg_catalog_version, completed_at, promoted_at,
                           assessment_date, assessment_date_basis,
-                          assessment_date_source, refresh_due_date
+                          assessment_date_source, refresh_due_date,
+                          entity_domain
                      FROM serving_directory
                     WHERE display_id = %s
                     -- NULLS LAST is load-bearing: `is_active` is a nullable
@@ -92,7 +93,12 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
                 "assessment_date_source": picked[18],
                 "refresh_due_date": (picked[19].isoformat()
                                      if hasattr(picked[19], "isoformat")
-                                     else picked[19])}
+                                     else picked[19]),
+                # The entity's OWN publication domain (0045). Carried on the
+                # view because svc_api holds no grant on `entities`, and read
+                # here rather than queried in `computed` so the read path
+                # keeps resolving the run in exactly one place.
+                "entity_domain": picked[20]}
     return picked[0], entity, run_meta, picked[15]
 
 

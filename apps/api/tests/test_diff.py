@@ -36,7 +36,7 @@ ENTITY = "22222222-2222-2222-2222-222222222222"
 
 def _dir_row(run_id, run_seq, version, composite, active):
     """A serving_directory row in the two column orders this module reads:
-    resolve_run's twenty, and _pick_runs' twelve."""
+    resolve_run's twenty-one, and _pick_runs' twelve."""
     return {"run_id": run_id, "run_seq": run_seq, "version": version,
             "composite": composite, "active": active}
 
@@ -63,14 +63,15 @@ class _Conn:
         self.statements.append((sql, list(params or [])))
         p = list(params or [])
         if "FROM serving_directory" in sql and "assessment_date_source" in sql:
-            # resolve_run's twenty columns
+            # resolve_run's twenty-one columns
             self._out = [
                 (ENTITY, "baxter-credit-union-bcu", "Baxter Credit Union (BCU)",
                  "SV2", None, r["run_id"], f"REQ-{r['run_seq']}", r["run_seq"],
                  r["active"], "PROMOTED", r["composite"], 765, 836, r["version"],
                  datetime(2026, 3, 30, tzinfo=timezone.utc),
                  datetime(2026, 8, 8, tzinfo=timezone.utc),
-                 None, "DERIVED_REQUEST_ID_TOKEN", "manifest.run_id", None)
+                 None, "DERIVED_REQUEST_ID_TOKEN", "manifest.run_id", None,
+                 None)                              # entity_domain (0045)
                 for r in self.runs]
             self._out.sort(key=lambda r: (not r[8],))
         elif "FROM serving_directory" in sql:

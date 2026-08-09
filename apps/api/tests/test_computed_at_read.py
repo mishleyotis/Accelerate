@@ -243,6 +243,63 @@ def test_no_evidence_linked_to_the_run_is_a_finding_not_a_zero():
         "0 items with no reason reads as a producer who found nothing"
 
 
+class _CoverageCur:
+    """The two statements evidence_coverage runs, in order: the census, then
+    the entity's own `origin = 'internal'` domains."""
+
+    def __init__(self, census, internal=()):
+        self.census, self.internal, self._out = census, internal, []
+
+    def execute(self, sql, params=None):
+        self._out = ([(d,) for d in self.internal] if "origin = 'internal'" in sql
+                     else self.census)
+
+    def fetchall(self):
+        return self._out
+
+
+def test_the_self_sourced_share_measures_against_the_entitys_declared_domain():
+    """The share of evidence the entity published about ITSELF, which needs
+    the entity's own domain — and the previous version could only get it
+    from rows carrying `origin = 'internal'`.
+
+    Negative control, measured on production 2026-08-09:
+    `evidence_origin_t` HAS an `internal` label and no row in the corpus has
+    ever carried one (25,385 package, 152 producer, 0 internal). So without
+    the declared column this returns an empty set for every client, the
+    numerator is always 0, and `self_sourced_pct` has never rendered for
+    anyone. Drop `entity_domain` here and the first assertion fails."""
+    census = [("T1", "FACT", "bcu.org", 4),
+              ("T3", "FACT", "creditunions.com", 2),
+              ("T3", "FACT", "ncua.gov", 1),
+              ("T1", "FACT", "www.bcu.org", 3)]
+
+    data = {}
+    computed.evidence_coverage(_CoverageCur(census), data, "run", "entity",
+                               "https://WWW.BCU.org/")
+    assert data["self_sourced_pct"] == 50.0, "2 of 4 items are the entity's own"
+    assert "bcu.org" in data["self_sourced_basis"]
+
+    # The old route still works where a run actually marks its own rows.
+    other = {}
+    computed.evidence_coverage(_CoverageCur(census, internal=("bcu.org",)),
+                               other, "run", "entity", None)
+    assert other["self_sourced_pct"] == 50.0
+
+
+def test_an_uncomputable_share_says_so_instead_of_vanishing():
+    """An absent field reads as "the producer left it empty" — the exact
+    misreading this module exists to end. `entities.domain` is NULL on all
+    166 rows and nothing writes it, so this is what every client gets
+    today, and it now names what would close it."""
+    census = [("T3", "FACT", "ncua.gov", 1)]
+    data = {}
+    computed.evidence_coverage(_CoverageCur(census), data, "run", "entity", None)
+    assert "self_sourced_pct" not in data, "a share of an unknown is not 0%"
+    assert "publication domain" in data["self_sourced_basis"]
+    assert "ingest" in data["self_sourced_basis"], "names what closes it"
+
+
 def test_a_failed_computation_names_itself_rather_than_taking_the_page_down():
     """The fields are additive. A page that renders without its census is
     worse than one that renders with it and better than one that 500s — but
