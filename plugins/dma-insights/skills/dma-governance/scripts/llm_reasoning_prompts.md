@@ -13,6 +13,27 @@ These checks CANNOT be automated — they require semantic understanding.
 ### Purpose
 Verify every subcap rationale contains all 5 proof elements.
 
+### Step 0 — do the inputs exist at all?
+
+Count the rows carrying a non-empty Column S or T, and check whether
+`reasoning_chain_log.json` exists. **If the answer is zero rows and no
+file, stop: do not report PV-01 as 0%.**
+
+Zero is not a measurement of proof quality — it is a measurement of a
+FORMAT CONTRADICTION between two skills in this plugin. `dma-assessment`
+declares the 11-column layout canonical and states "Do NOT use the legacy
+22-column (A-V) layout"; this check audits columns R, S and T, which
+exist only in that layout. Emit `GOV-FORMAT-01` at CRITICAL, name both
+skills and the columns, and set the verdict to FAIL.
+
+This happened, and the cost is the reason for this step: one promoted
+assessment scored 0 of 709 rows, the verdict recorded it under
+`schema_drift_accepted`, returned PASS_WITH_NOTES, and the run reached a
+regulated dealer's dashboard telling it that its trade surveillance was
+Differentiating on the strength of a subsidiary's officer list.
+
+Where the columns ARE present, continue below.
+
 ### Evaluation Procedure
 
 For each subcap rationale, check across THREE data sources:

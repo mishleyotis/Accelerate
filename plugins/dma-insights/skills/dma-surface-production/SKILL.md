@@ -207,6 +207,20 @@ three different assessments is the failure no per-page gate can see. Each page t
 written last, from what you actually produced. If you cannot write it, the surfaces are not
 yet a page. `04-craft/3-page-narrative.md`.
 
+**Four things the connector now refuses at registration, so know them before
+you search rather than after** (W6, from one promoted run):
+
+| What | Rule |
+|---|---|
+| Vendor collateral | A customer story, case study, press release, product page or vendor blog is **T5, ceiling L2, corroboration required** — whatever tier you type. One run registered a `fortinet.com/customers/<client>` page as T1 at ERS 4.20 and let it carry five cells of its only Differentiating category. |
+| An absence | "The search returned no disciplinary actions" is the absence of a finding, not the presence of a control. It registers as an absence (INFERENCE, with the ladder), never as a FACT about a capability. Rephrasing it positively — "records a clean supervisory history" — is the same span and is refused the same way. |
+| A related entity | A filing about a parent, subsidiary or affiliate may evidence **ownership, structure, group policy, regulatory registration, corporate history** — never the assessed entity's operational capability. Thirty top-band cells in one run rested on a subsidiary's officer list, telling a CIRO-regulated dealer its surveillance was Differentiating. The connector notes the relation on the row; reading the note is your job. |
+| One document | A document may be the **only** citable source for at most 20% of a run's scored cells. Breadth is fine — the reference client's call report bears on 53.7% of its cells legitimately. What is refused is one source being the whole basis for a fifth of an assessment. The cap is per DOCUMENT: splitting a filing into eight ids does not divide its voice. |
+
+Each of these refuses the LINKS, never the registration — a verified span is
+never lost to them. What you lose is the cells the source cannot carry, which
+is the finding.
+
 **Verify before citing** when you are unsure:
 
 ```

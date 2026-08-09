@@ -162,6 +162,35 @@ Verify across Columns R, S, T and reasoning_chain_log.json: Claims (C1-C3), Evid
 Cross-validate: R score matches T JSON final_score. S claim count matches T claims[] length. Reasoning chain final_score matches workbook.
 PASS: ≥95% complete | WARNINGS: 80-94% | FAIL: <80%
 
+**BEFORE scoring PV-01, establish whether its INPUTS EXIST — and never
+accept their absence as drift.** Measured on a promoted assessment: 0 of
+709 rows carried columns R/S/T, `reasoning_chain_log.json` did not exist,
+PV-01 computed 0% against an 80% floor, and the verdict recorded the
+finding under `schema_drift_accepted` and returned PASS_WITH_NOTES. That
+run reached a regulated client's dashboard asserting Differentiating
+trade surveillance on a subsidiary's officer list. A check that is always
+skipped is not a check, and `schema_drift_accepted` is the mechanism that
+skipped it.
+
+So:
+
+* If columns R/S/T are absent on **every** row, this is NOT a PV-01
+  score of 0%. It is a **FORMAT CONTRADICTION**, and it is the audit's
+  headline finding: `dma-assessment` declares an 11-column layout
+  canonical and the 22-column R/S/T layout legacy and forbidden, while
+  this check audits R/S/T. Emit issue `GOV-FORMAT-01` at **CRITICAL**,
+  naming both skills, and set the verdict to **FAIL** — not
+  PASS_WITH_NOTES. The two skills must be reconciled by their owner; an
+  auditor that scores 0% and passes is an auditor reporting that it did
+  not run.
+* If the columns are PRESENT and incomplete, score PV-01 normally.
+* `schema_drift_accepted` may never be used to dispose of a proof check.
+  Recording that a check's inputs are out of scope is recording that the
+  check did not run, and a verdict that says PASS about a check that did
+  not run is the single most expensive sentence this layer can emit.
+  Where a check genuinely cannot run, its result is **NOT_RUN with the
+  reason**, and a NOT_RUN proof check caps the verdict at FAIL.
+
 **PV-02: Rule Link Validity**
 For each RuleID: exists in framework? Correctly applied? Score consistent?
 PASS: All valid + correct | FAIL: Any invalid or misapplied
@@ -244,7 +273,16 @@ LLM interpretation: analyze failures (expected vs. regression) → assess compar
 
 Every subcap must contain across R, S, T: Claims, Evidence Links, Rule Links, Counterclaim, Constraint Satisfaction. Plus reasoning_chain_log.json (Contract 8) for programmatic verification.
 
-PV-01/02/03 checks validate completeness, rule validity, and counterclaim quality. Failures = MEDIUM severity (fix before delivery).
+PV-01/02/03 checks validate completeness, rule validity, and counterclaim quality.
+
+**Severity, corrected 2026-08-09.** These were MEDIUM ("fix before
+delivery"), and MEDIUM is what let a run with a 0% proof structure ship
+under PASS_WITH_NOTES. A score without a proof structure is not a score
+with a documentation gap — it is an assertion whose basis nobody can
+check, which is exactly what the 52 top-band cells of one promoted run
+turned out to be. **A PV-01 FAIL is CRITICAL and the verdict is FAIL.**
+PV-02 and PV-03 failures stay MEDIUM: an invalid rule link and a
+non-substantive counterclaim are defects in proof that EXISTS.
 
 ---
 

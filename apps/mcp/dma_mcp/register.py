@@ -21,6 +21,8 @@ from __future__ import annotations
 import re
 from datetime import date
 
+from . import source_rules
+
 _MINT_LOCK = 815001          # advisory lock key for the E-CC mint counter
 
 _HASH_SQL = r"""encode(digest(coalesce(%s,'') || '|' || coalesce(%s,'') || '|' ||
@@ -114,6 +116,16 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
         errors.append(f"claim_type: {claim!r} not in {_CLAIMS}")
     if tier not in _TIERS:
         errors.append(f"tier: {tier!r} not in {_TIERS}")
+    # W6 — what a source may be used to ESTABLISH, checked where the source
+    # is named rather than left to the producer's typing. Both refusals are
+    # about the source's own nature, so they belong beside the tier and
+    # claim vocabulary checks and before anything is fetched or minted.
+    tier_bad = source_rules.tier_violation(source_url, tier)
+    if tier_bad:
+        errors.append(tier_bad)
+    absence_bad = source_rules.absence_as_capability(excerpt, claim)
+    if absence_bad:
+        errors.append(absence_bad)
     if errors:
         return {"e_id": None, "deduped": False, "ers": None, "errors": errors}
 
@@ -150,6 +162,14 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
     if domain and known_entity_domains and domain in {d.lower() for d in known_entity_domains}:
         identity_ok = True
         identity_note = "entity's own domain"
+    # A document about a RELATED entity is noted, never refused: a filing
+    # saying A is wholly owned by B is the right evidence for ownership and
+    # the wrong evidence for B's operational capability. The note is what
+    # lets a reader see which one this is (W6).
+    relation = source_rules.relation_note(excerpt)
+    if relation:
+        identity_note = f"{identity_note}; {relation}" if identity_note else relation
+        adjustments.append(relation)
     subcaps = [s for s in (item.get("linked_subcap_ids") or []) if s]
 
     published = item.get("published_date")
@@ -201,6 +221,21 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
                 VALUES (NULL, {_HASH_SQL}, 'dedup_same_entity', %s, now())""",
             (source_url, claim, excerpt, kept_id))
 
+    # The per-DOCUMENT sole-evidence cap (W6). Checked here, after the mint,
+    # because the refusal is about the LINKS and not the registration: the
+    # id is minted and its excerpt stored either way, so a producer never
+    # loses a verified span to this rule — it loses the further cells the
+    # document would have become the only voice for. A per-evidence-id cap
+    # was refuted in the adversarial pass by splitting one filing into eight
+    # ids sharing one URL, so the key is the canonicalised document.
+    reach_bad = source_rules.sole_evidence_reach(cur, run_id, kept_id,
+                                                source_url, subcaps)
+    if reach_bad:
+        conn.commit()                     # keep the mint; refuse the links
+        return {"e_id": kept_id, "deduped": deduped, "ers": ers_out,
+                "errors": [reach_bad],
+                "links_written": 0,
+                "adjustments": adjustments or []}
     for sid in subcaps:
         cur.execute(
             """INSERT INTO evidence_subcap_links (e_id, subcap_id, run_id, link_basis)
