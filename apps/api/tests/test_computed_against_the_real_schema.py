@@ -182,6 +182,51 @@ def test_safeguard_gates_serve_one_row_per_gate_the_latest(seeded):
     assert cur.fetchone()[0] == 1
 
 
+def test_cell_items_resolve_from_the_evidence_store_and_are_entity_scoped(seeded):
+    """`items` and `thin` are the two H2 keys the field census exempts from
+    needing a column, on the grounds that they are the RESOLVED form of the
+    row's own e_ids. The exemption was right and nothing performed it, so the
+    evidence drawer resolved to nothing for every client since the beginning
+    — 698 of 706 cells linked on the reference client, 0 with an item.
+
+    Entity scoping is invariant 4: an id belonging to another institution
+    resolves to nothing here rather than opening somebody else's document."""
+    conn, cur, rid, eid = seeded
+    cur.execute("""INSERT INTO entities (display_id, legal_name, status,
+                                         created_at)
+                   VALUES ('synthetic-other-cu','Other CU','ACTIVE', now())
+                RETURNING id""")
+    other = cur.fetchone()[0]
+    cur.execute("""INSERT INTO evidence_index
+                     (e_id, entity_id, origin, source_name, source_url,
+                      excerpt, claim_type, tier)
+                   VALUES ('E-OTHER-001', %s, 'producer', 'Other filing',
+                           'https://other.example/1', %s, 'FACT', 'T1')""",
+                (other, "y" * 60))
+    conn.commit()
+
+    data = {"cells": [
+        {"subcap_id": "P1C1.1.1", "e_ids": ["E-SCU-001", "E-SCU-002"],
+         "grounded_on": 2},
+        {"subcap_id": "P1C1.1.9", "e_ids": ["E-OTHER-001"], "grounded_on": 1},
+        {"subcap_id": "P1C1.1.3", "e_ids": [], "grounded_on": 0},
+    ]}
+    computed.apply(cur, "heatmap", "cell_evidence", data,
+                   {"run_id": rid}, eid)
+    assert data.get("computed_error") is None
+    cells = data["cells"]
+    assert [i["e_id"] for i in cells[0]["items"]] == ["E-SCU-001", "E-SCU-002"]
+    assert cells[0]["items"][0]["excerpt"] and cells[0]["items"][0]["tier"] == "T1"
+    assert cells[0]["thin"] is True, "two linked items is below the three line"
+    assert cells[1]["items"] == [], "another entity's id must not open here"
+    assert data["unresolved_citations"] == 1
+    assert data["linking_stats"]["cells_citable"] == 1
+
+    cur.execute("DELETE FROM evidence_index WHERE entity_id = %s", (other,))
+    cur.execute("DELETE FROM entities WHERE id = %s", (other,))
+    conn.commit()
+
+
 def test_a_failed_computation_does_not_poison_the_rest_of_the_request(seeded):
     """PostgreSQL aborts the whole transaction on a failed statement, so
     without a savepoint the first bad query 25P02s every later one — and the

@@ -153,7 +153,12 @@ def test_techstack_layers_expected_comes_from_outside_the_register():
     # CLAIMED is not detection: the four statuses are CONFIRMED · INFERRED ·
     # CLAIMED · ABSENT and only the first two are evidence of a deployment.
     assert by["DATA"]["detected"] == 0
-    assert by["INFRA"]["detected"] == 0 and by["INFRA"]["expected"] == 60
+    # DATA and INFRA both absorb P4, so neither may claim the pillar's count
+    # as its own denominator — "6 of 187" and "11 of 187" printed over one
+    # 187 is a bigger lie than no denominator. Null, with the reason stated.
+    assert by["DATA"]["expected"] is None and by["INFRA"]["expected"] is None
+    assert "shared by more than one layer" in by["INFRA"]["expected_basis"]
+    assert "v7.0" in by["OPS"]["expected_basis"]
 
 
 def test_techstack_layers_expected_is_null_when_the_catalogue_says_nothing():

@@ -198,14 +198,30 @@ def techstack_layers(cur, data: dict, run_id, catalog_version) -> None:
     if not rows:
         return
     expected = _expected_per_layer(cur, catalog_version)
+    # DATA and INFRA both absorb P4. Handing each of them the whole pillar
+    # would let two layers claim the same denominator, so "6 of 187" and
+    # "11 of 187" would both be printed over one 187 — a bigger lie than no
+    # denominator at all. Where a pillar carries more than one layer the
+    # count is not separable and `expected` is null, with the reason stated
+    # rather than left for a reader to infer from a blank.
+    shared = {p for p in {pl for _, pl in LAYERS}
+              if sum(1 for _, q in LAYERS if q == p) > 1}
     out = []
     for layer, pillar in LAYERS:
         members = [r for r in rows if (r[0] or "").upper() == layer]
         detected = sum(1 for r in members
                        if (r[1] or "").upper() in ("CONFIRMED", "INFERRED"))
+        n = None if pillar in shared else expected.get(pillar)
         out.append({
             "layer": layer, "pillar_id": pillar, "detected": detected,
-            "expected": expected.get(pillar),
+            "expected": n,
+            "expected_basis": (
+                f"cells in {pillar} carrying a platform vocabulary "
+                f"({catalog_version})" if n is not None else
+                f"{pillar} is shared by more than one layer, so a per-layer "
+                f"expected count is not separable from the catalogue"
+                if pillar in shared else
+                f"{catalog_version} maps no platform vocabulary onto {pillar}"),
             "is_primary_gap": any(bool(r[2]) for r in members),
         })
     _set(data, "layers", out)
@@ -239,6 +255,79 @@ def _expected_per_layer(cur, catalog_version) -> dict:
 
 
 # ── heatmap ────────────────────────────────────────────────────────────────
+def cell_items(cur, data: dict, entity_id) -> None:
+    """Resolve every cell's `items[]` from its own `e_ids`.
+
+    `items` and `thin` are the two H2 item keys the field census exempts from
+    needing a column, and the exemption states exactly what they are:
+
+        items — "the resolved form of the row's own e_ids: one evidence_index
+                 row per id, which is exactly {e_id, tier, claim_label,
+                 recency, source_title, publisher, excerpt}. grounded_on is
+                 GENERATED as the length of that very array, so storing the
+                 objects too would be the second code path invariant 8
+                 forbids"
+        thin  — "grounded_on < 3, computed from a GENERATED column"
+
+    The exemption was right and nothing performed it. So the evidence
+    DRAWER — what a reader opens to see the quotation a cell rests on, the
+    only place on the heatmap where a claim meets its source text — resolved
+    to nothing for every client since the beginning, and read as a producer
+    who had cited nothing.
+
+    Measured before this landed, on the reference client: 698 of 706 cells
+    linked, 0 with a resolvable item. It also accounts for a byte gap nobody
+    could explain: one heatmap verdict records assembled_bytes 497,793
+    against 372,236 served.
+
+    One query for the whole page, not one per cell: 706 cells against a few
+    hundred evidence rows is a join, not 706 round trips.
+    """
+    cells = data.get("cells")
+    if not isinstance(cells, list) or not cells:
+        return
+    wanted = sorted({e for c in cells if isinstance(c, dict)
+                     for e in (c.get("e_ids") or []) if isinstance(e, str)})
+    if not wanted:
+        return
+    # Entity-scoped, always: an id that resolves to ANOTHER institution is
+    # contamination, and invariant 4 says that halts production rather than
+    # rendering. Scoping the lookup means a foreign id resolves to nothing
+    # here and the cell shows the id it could not open, rather than opening
+    # somebody else's document.
+    cur.execute(
+        """SELECT e_id, tier::text, claim_type::text, recency_band::text,
+                  source_name, source_domain, excerpt
+             FROM evidence_index
+            WHERE entity_id = %s AND e_id = ANY(%s)""", (entity_id, wanted))
+    by_id = {r[0]: {"e_id": r[0], "tier": r[1], "claim_label": r[2],
+                    "recency": r[3], "source_title": r[4], "publisher": r[5],
+                    "excerpt": r[6]} for r in cur.fetchall()}
+
+    unresolved = 0
+    for c in cells:
+        if not isinstance(c, dict):
+            continue
+        ids = [e for e in (c.get("e_ids") or []) if isinstance(e, str)]
+        items = [by_id[e] for e in ids if e in by_id]
+        unresolved += len(ids) - len(items)
+        # Order follows e_ids, which the producer ranked. Order is meaning.
+        _set(c, "items", items)
+        # grounded_on is GENERATED as the length of e_ids, so thin follows
+        # the contract's own rule from the stored count rather than from the
+        # resolved list — an id that fails to resolve makes a cell LESS
+        # citable, and saying it is therefore not thin would be backwards.
+        n = c.get("grounded_on")
+        if n is None:
+            n = len(ids)
+        _set(c, "thin", n < 3)
+    if unresolved:
+        # Named rather than absorbed: ids that do not resolve inside this
+        # entity are either deleted evidence or another institution's, and
+        # both are findings.
+        data["unresolved_citations"] = unresolved
+
+
 def cell_linking_stats(data: dict) -> None:
     """Reach counters, so a zero-reach client is visible.
 
@@ -355,6 +444,8 @@ def apply(cur, page: str, section: str, data, run_meta: dict, entity_id) -> None
             techstack_layers(cur, data, run_id,
                              run_meta.get("ccg_catalog_version"))
         elif page == "heatmap" and section == "cell_evidence":
+            # items[] first: the counters below read what it resolved.
+            cell_items(cur, data, entity_id)
             cell_linking_stats(data)
         elif page == "heatmap" and section == "evidence_age":
             evidence_age_rollups(data)
