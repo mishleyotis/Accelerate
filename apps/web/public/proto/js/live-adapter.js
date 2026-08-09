@@ -1350,7 +1350,13 @@ function sectionStates(pages) {
         producer_version: s.producer_version,
         e_ids: s.e_ids || [],
         empty_state: s.empty_state || null,
-        redacted_paths: s.redacted_paths || null
+        // The customer body now carries a COUNT rather than the path list:
+        // the paths carry field names, and one of them named the assessing
+        // vendor five times inside a client's own response. `redacted_paths`
+        // is still read so an older cached body renders the same way.
+        redacted_paths: s.redacted_paths || null,
+        redacted_count: s.redacted_count ?? (s.redacted_paths ? s.redacted_paths.length : null),
+        redaction_note: s.redaction_note || null
       };
     }
   }

@@ -1467,7 +1467,7 @@ const IP_SKIP_KEY = /(^|_)(id|ids|at|on|url|uri|slug|hex|colou?r|version|path|da
 // anybody asked; unfiltered it outnumbers the prose that is.
 const IP_SKIP_SEGMENTS = new Set(["r_layer", "probes_run", "sources_searched",
                                   "queries_run", "empty_state", "internal_only",
-                                  "redacted_paths", "annotation"]);
+                                  "redacted_paths", "redacted_count", "redaction_note", "annotation"]);
 
 const IP_CITE_KEYS = ["e_ids", "supporting_e_ids", "evidence_ids", "evidence"];
 

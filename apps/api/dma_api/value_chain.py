@@ -325,6 +325,12 @@ def serve_value_chain(cur, entity: dict, run_meta: dict, built,
         # one described the producer's absence, which the server just filled
         "empty_state": None,
     }
-    if audience == "customer" and report["paths_stripped"]:
-        entry["redacted_paths"] = report["paths_stripped"]
+    # A count, not the paths — the path strings carry field names, and one of
+    # them named the assessing vendor in a client's own body. See pages.py.
+    removed = (len(report["paths_stripped"]) + len(report.get("keys_stripped") or ())
+               + len(report.get("vendor_named") or ()))
+    if audience == "customer" and removed:
+        entry["redacted_count"] = removed
+        entry["redaction_note"] = (
+            "fields on this surface are held for the internal audience")
     return entry

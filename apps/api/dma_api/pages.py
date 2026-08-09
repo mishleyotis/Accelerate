@@ -224,8 +224,20 @@ def build_page(cur, page: str, display_id: str, audience: str = "internal",
             "e_ids": env.get("e_ids") or [],
             "empty_state": empty,
         }
-        if audience == "customer" and report["paths_stripped"]:
-            out_sections[section]["redacted_paths"] = report["paths_stripped"]
+        removed = (len(report["paths_stripped"]) + len(report["keys_stripped"])
+                   + len(report["vendor_named"]))
+        if audience == "customer" and removed:
+            # A COUNT, not the paths. The receipt exists so a reader can tell
+            # blank-because-withheld from blank-because-empty, and for that
+            # the number is enough. The path strings are not: they carry the
+            # field names, and `platform_story.platforms[0].zennify_pathway`
+            # names the assessing vendor five times in a client's own body —
+            # the leak this redaction pass exists to close, re-opened by its
+            # own receipt. Measured in production after the first fix: the
+            # only five occurrences left were in this list.
+            out_sections[section]["redacted_count"] = removed
+            out_sections[section]["redaction_note"] = (
+                "fields on this surface are held for the internal audience")
 
     return {"entity": entity, "run": run_meta, "audience": audience,
             "page": page, "sections": out_sections}

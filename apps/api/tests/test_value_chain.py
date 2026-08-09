@@ -276,7 +276,13 @@ def test_redaction_runs_through_the_same_path_as_the_grid():
     assert internal["data"]["r_layer"] == {"verdict": "analyst reasoning"}
     customer = serve_value_chain(fresh(), ENTITY, RUN, built, "customer")
     assert "r_layer" not in customer["data"]
-    assert customer["redacted_paths"] == ["r_layer"]
+    # A COUNT, not the paths: a path string carries the field's name, and one
+    # of them named the assessing vendor five times inside a client's own
+    # body. Here r_layer is both marked AND stripped by key, so the count is
+    # the two removals rather than the one marking.
+    assert customer["redacted_count"] >= 1
+    assert "redacted_paths" not in customer
+    assert customer["redaction_note"]
     assert customer["data"]["chains"], "the arrangement itself still serves"
 
 

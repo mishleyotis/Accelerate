@@ -71,7 +71,8 @@ _SKIP_KEY = re.compile(
 # answer with the producer talking about its own method.
 _SKIP_SEGMENTS = frozenset((
     "r_layer", "probes_run", "sources_searched", "queries_run",
-    "empty_state", "internal_only", "redacted_paths",
+    "empty_state", "internal_only", "redacted_paths", "redacted_count",
+    "redaction_note",
 ))
 
 # Where an object states its own citations. First one present wins; a list
