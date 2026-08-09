@@ -91,3 +91,43 @@ rows. "The peer tab looks wrong" is not a refusal. "Peers tab, column D
 Never soften a REFUSE into a note because the run is urgent. The cost of
 refusing is a delay; the cost of accepting is a client reading invented peer
 institutions on a dashboard.
+
+## Run the Phase-4 validator before you read a single score
+
+```bash
+python ../skills/dma-assessment/scripts/validate_scoring_quality.py <workbook.xlsx>
+```
+
+It exits 1 on any CRITICAL, and a CRITICAL is a REFUSE — the package does not
+enter the system until the workbook is re-emitted. This is not advisory: the
+script is declared MANDATORY after Phase 4 by the assessment skill, and a
+package arriving here without it having passed is a package where nobody ran
+it.
+
+**Read its denominators, not just its verdict.** The version of this script
+that shipped for most of the build checked the LEGACY 22-column sheets, found
+none of them in a canonical 11-column workbook, and then five of its seven
+checks iterated those absent sheets, examined **zero rows** and printed `PASS`
+— including "Required Columns ✅" on a workbook with none of them. One real
+workbook went through it reporting 5 CRITICAL and 5 green ticks without a
+single score being looked at, and its assessment reached a regulated client.
+
+So: every check now prints the row count it examined. **A check that examined
+0 rows reports CRITICAL, never PASS.** If you see a green tick with no
+denominator beside it, you are reading an old copy — say so and stop.
+
+**The ceiling check (8) is the one to read hardest.** `Evidence_Ceiling` is
+defined as the maximum score the cited tiers support (T5 vendor collateral →
+2.0, T4 → 2.5, T3 → 4.0). Nothing recomputes it, so a row can cite a vendor's
+own marketing page and still carry a ceiling of 5. A category where every row
+is ≥4.0 under a ceiling of 5.0 is a ceiling that never bound anything —
+measured on one run, two whole categories, 62 cells, telling a CIRO-regulated
+dealer its trade surveillance and best-execution monitoring were
+Differentiating on the strength of a Form ADV officer list for a 29-person
+subsidiary, a conference speaker biography, and the absence of enforcement
+actions.
+
+**And check `Proxy_Searched` yourself.** A cell scored at the top band, or
+scored `NO_EVIDENCE`, with `Proxy_Searched = No` has had no ladder run either
+way. An absence with no search behind it is not a finding, and a top-band
+score with no search behind it is an archetype.

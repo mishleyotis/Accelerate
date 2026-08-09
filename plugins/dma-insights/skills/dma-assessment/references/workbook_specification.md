@@ -1,3 +1,23 @@
+> **AUTHORITY NOTE (added by rectification, MEM-0054 + MEM-0055).**
+> `SKILL.md` is the authority on workbook shape and it declares the
+> **11-column `P#_Subcap_Scoring`** layout CANONICAL, in these words: *"This is
+> the ONLY acceptable column layout. Do NOT use the legacy 22-column (A-V)
+> layout."* Where this file still describes columns R/S/T/U/V or sheets named
+> `P#_Scoring_Detail`, it is describing the LEGACY form and SKILL.md wins.
+>
+> That disagreement was not academic. `scripts/validate_scoring_quality.py` —
+> declared MANDATORY after Phase 4 — checked the layout described here, found
+> none of its sheets in a canonical workbook, and then five of its seven checks
+> iterated the absent sheets, examined zero rows and printed PASS. A real
+> assessment went through it with five green ticks and not one score examined,
+> and reached a regulated client. The validator now checks the canonical form
+> and refuses to print PASS for a check that examined nothing.
+>
+> Proof in the canonical form is carried by **J (Rationale, >=150 chars,
+> citing E-ids), F (Evidence_IDs), H (Evidence_Ceiling) and I (Caps_Applied)**
+> — see SKILL.md "Proof-Carrying Scoring". Do not add R/S/T columns to satisfy
+> a check; fix the check.
+
 # DMA Scoring Workbook Specification
 
 ## Overview

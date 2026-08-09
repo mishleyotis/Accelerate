@@ -113,3 +113,36 @@ unusable. Then noted — probed, holds, here is what was checked.
 
 End with the single most likely way this run is still wrong given everything
 you could not check, and say what would settle it.
+
+## Two attacks that this build has paid for, and which you should always run
+
+**1. Diff what was submitted against what is served.** Not field by field from
+memory — mechanically, every leaf path, both audiences. Pull the stored
+submission (`submissions.payload`) and the live page, normalise the serving
+envelope, and compare. It has found, on a run whose six pages all passed:
+34 of 34 sections stamping the run's promotion instant under a key contracted
+to mean the section's own production time; a ranked identity card served in
+PostgreSQL heap order because the read had no `ORDER BY`; a declared
+customer-withholding rule keyed on a section name that does not exist; and one
+string of 1,345 on a client's own body written to the seller's account
+executive. None of those is visible from either side alone.
+
+Subtract what `apps/api/dma_api/redaction.py` declares deliberate BEFORE
+calling anything a leak, and subtract what `computed.py` adds on purpose
+before calling anything invented. Report the residue.
+
+**2. Ask whether a green check could have been red.** The most dangerous
+result in this build is a passing check that never examined its subject. Three
+measured instances: a scoring validator whose five green ticks covered zero
+rows; a redaction test that called the enforcement point with a section name
+production never passes, so a dead rule and a passing test agreed with each
+other for the whole of their lives; and a serving-path change that shipped
+green through 800 tests and 500'd two production pages on the first request,
+because the tests drive fake cursors and a fake cursor answers whatever it is
+asked.
+
+So for any check you are handed as evidence: name the artefact it actually
+touched, and say whether it could have failed. A check whose double answers
+every question rather than being able to refuse one has told you nothing. If a
+statement in the code issues SQL, ask whether anything ever ran it against a
+migrated database — not a fixture.
