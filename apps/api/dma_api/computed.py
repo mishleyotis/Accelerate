@@ -43,6 +43,26 @@ TILE_FOR_STATUS = {"CONFIRMED": "CONFIRMED", "INFERRED": "INFERRED",
                    "CLAIMED": "CLAIMED", "ABSENT": "GAPS"}
 
 
+def _product_label(vendor: str | None, name: str | None) -> str:
+    """`vendor + " " + product`, unless the product already carries it.
+
+    The register stores them separately and a producer may put the vendor
+    in either field or both. Blind concatenation produced "Salesforce
+    Salesforce Data Cloud" and "MuleSoft MuleSoft Anypoint Platform" on a
+    customer-facing D2 tile — mine, found by an adversarial read of the
+    live page.
+    """
+    name = (name or "").strip()
+    vendor = (vendor or "").strip()
+    if not vendor:
+        return name
+    if not name:
+        return vendor
+    if name.lower().startswith(vendor.lower()):
+        return name
+    return f"{vendor} {name}"
+
+
 def _pct(part: int, whole: int) -> float | None:
     """A share, or None. Never 0.0 for an empty denominator: 0% of nothing
     is a claim about nothing, and it renders as a fact."""
@@ -154,8 +174,7 @@ def landscape(cur, data: dict, run_id) -> None:
     for status, name, vendor, level in rows:
         tile = TILE_FOR_STATUS.get((status or "").upper())
         if tile:
-            buckets[tile].append((f"{vendor} {name}".strip() if vendor else name,
-                                  level))
+            buckets[tile].append((_product_label(vendor, name), level))
 
     tiles = []
     for kind in ("CONFIRMED", "INFERRED", "CLAIMED", "GAPS"):

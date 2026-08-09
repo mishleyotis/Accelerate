@@ -124,6 +124,33 @@ def test_landscape_recomputes_from_the_register_and_says_whether_it_reconciles()
         "the register lists what is present; the tile names what is absent"
 
 
+def test_the_gaps_tile_does_not_say_the_vendor_name_twice():
+    """`Salesforce Salesforce Data Cloud`, `Salesforce Salesforce CRM
+    Analytics`, `MuleSoft MuleSoft Anypoint Platform` — three strings on the
+    live customer-facing D2 GAPS tile, from this module's own blind
+    `f"{vendor} {name}"`. The register stores vendor and product separately
+    and a producer may put the vendor in either field or both.
+
+    Negative control: the pre-fix expression is `"Salesforce Salesforce Data
+    Cloud"` for row one, so this fails against it, and the second assertion
+    fails against the naive fix of always dropping the vendor."""
+    class Cur:
+        def execute(self, *_a, **_k):
+            pass
+
+        def fetchall(self):
+            return [("ABSENT", "Salesforce Data Cloud", "Salesforce", None),
+                    ("ABSENT", "Anypoint Platform", "MuleSoft", None),
+                    ("ABSENT", "Customer data platform", None, None),
+                    ("ABSENT", None, "Snowflake", None)]
+
+    data = {}
+    computed.landscape(Cur(), data, "run")
+    named = {t["kind"]: t for t in data["tiles"]}["GAPS"]["named_items"]
+    assert named == ["Salesforce Data Cloud", "MuleSoft Anypoint Platform",
+                     "Customer data platform", "Snowflake"]
+
+
 def test_techstack_layers_expected_comes_from_outside_the_register():
     """The frontend computed this rollup from `items` with `expected` set to
     the rows the producer wrote, which is circular: on one client it rendered

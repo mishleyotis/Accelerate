@@ -98,7 +98,29 @@ ALWAYS_STRIP = {
 #             reading our sales notes about their own assessment. Marked
 #             here rather than left to a producer, from the moment the
 #             field exists (0044), so it can never arrive unmarked.
-CUSTOMER_STRIP_KEYS = ("r_layer", "storyline_challenge")
+#   enrichment_basis · enriched_at
+#             the enrichment tool's own account of itself. Measured on the
+#             customer body of the reference client: three named
+#             executives each carried, under their own name, "the
+#             enrichment search returned no profile whose TITLE matched
+#             this person (a name-similar match is an identity failure,
+#             not a near-miss)". That is our process vocabulary attached
+#             to a real person on their employer's dashboard, and
+#             standing clause 12 says never describe a person.
+CUSTOMER_STRIP_KEYS = ("r_layer", "storyline_challenge",
+                       "enrichment_basis", "enriched_at")
+
+# Contact routes for NAMED INDIVIDUALS. Personal work email, direct line
+# and personal LinkedIn profile are how an AE reaches somebody; they are
+# not part of a client's assessment of itself, and three of six roster
+# rows were serving personal LinkedIn URLs to the customer audience.
+#
+# Stripped by KEY rather than by path, because the roster is not the only
+# place a person can appear and a per-path rule is one a producer has to
+# remember. The person's NAME, TITLE, TENURE and relevance stay — those
+# are the finding; the route to their inbox is not.
+CUSTOMER_STRIP_CONTACT_KEYS = ("email", "linkedin_url", "phone",
+                               "contact_email", "direct_line", "mobile")
 
 # Paths stripped for the CUSTOMER audience whatever the payload said, per
 # (page, section). Producer marking is the primary mechanism and it is not
@@ -316,7 +338,8 @@ def redact_section(page: str, section: str, data: dict, internal_only,
             # not reported as a producer defect.
             del missed
 
-            report["keys_stripped"] = _strip_keys(out, CUSTOMER_STRIP_KEYS)
+            report["keys_stripped"] = _strip_keys(
+                out, CUSTOMER_STRIP_KEYS + CUSTOMER_STRIP_CONTACT_KEYS)
 
             # The safety net runs LAST, over what survived every rule above.
             report["vendor_named"] = _strip_vendor(out)

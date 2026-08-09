@@ -121,7 +121,14 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       since removed with linked_evidence_count recomputed on 63,244
 #       cells. @3 was already deployed while those counts were wrong, so a
 #       body cached under it is a body cached mid-repair.
-SERVE_RULES = "serve-rules@4"
+#   @5  2026-08-09 — the customer audience stops serving a named person's
+#       contact route (email, linkedin_url, phone) and the enrichment tool's
+#       account of itself (enrichment_basis, enriched_at), and the D2 GAPS
+#       tile stops printing the vendor name twice. Both are customer-body
+#       changes under an unmoved promoted_at: without this bump the reader
+#       who was served the LinkedIn URL is precisely the reader who 304s
+#       back onto it.
+SERVE_RULES = "serve-rules@5"
 
 
 def etag_for(run_meta: dict, audience: str) -> str:

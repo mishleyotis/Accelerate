@@ -337,6 +337,51 @@ def test_unmarked_vendor_copy_does_not_reach_the_client():
     assert rep["vendor_named"] == ["narrative"]
 
 
+def test_a_named_persons_contact_route_and_our_notes_about_them_stay_internal():
+    """Measured on the reference client's LIVE customer body, 2026-08-09.
+
+    Three of six roster executives served a personal LinkedIn URL. The other
+    three served, under their own name on their employer's dashboard,
+    `enrichment_basis`: "No contact route stored: the enrichment search
+    returned no profile whose TITLE matched this person (a name-similar
+    match is an identity failure, not a near-miss)" — our process vocabulary
+    attached to a real person, against standing clause 12.
+
+    Root cause is not the walker: `internal_only` is an EMPTY ARRAY on all 34
+    sections of all six pages, on both clients. Nothing was marked, so no
+    marking-driven rule could fire. Hence by key.
+
+    The negative control is the second half: the roster is the finding, so
+    the name, title, tenure and relevance must survive. A test that only
+    asserted the strip would pass on `return {}`."""
+    roster = {"executives": [
+        {"name": "A. Person", "title": "Chief Information Officer",
+         "tenure_months": 41, "relevance": "owns the core platform decision",
+         "email": "a.person@example.org", "linkedin_url": "https://…/in/a",
+         "phone": "+1 555 0100"},
+        {"name": "B. Person", "title": "Chief Risk Officer",
+         "enrichment_basis": "No contact route stored: the enrichment search "
+                             "returned no profile whose TITLE matched this "
+                             "person (a name-similar match is an identity "
+                             "failure, not a near-miss)",
+         "enriched_at": "2026-08-04T11:00:00Z"}]}
+    out, rep = redact_section("overview", "leadership",
+                              json.loads(json.dumps(roster)), [], "customer")
+    a, b = out["executives"]
+    assert not ({"email", "linkedin_url", "phone"} & set(a))
+    assert not ({"enrichment_basis", "enriched_at"} & set(b))
+    assert a["name"] == "A. Person" and a["title"] == "Chief Information Officer"
+    assert a["tenure_months"] == 41 and a["relevance"].startswith("owns the")
+    assert b["title"] == "Chief Risk Officer", "the finding survives the strip"
+    assert len(rep["keys_stripped"]) == 5
+
+    # An AE needs the route; that is what the internal audience is for.
+    keep, _ = redact_section("overview", "leadership",
+                             json.loads(json.dumps(roster)), [], "internal")
+    assert keep["executives"][0]["linkedin_url"].endswith("/in/a")
+    assert keep["executives"][1]["enrichment_basis"].startswith("No contact")
+
+
 def test_audience_defaults_to_the_least_privileged_one():
     """Every route declared `audience: str = "internal"`, so a caller that
     omitted the parameter — or misspelled it — was served the analyst body
