@@ -90,7 +90,15 @@ ALWAYS_STRIP = {
 #             record of arguing against our own conclusion. It reached the
 #             customer body on 36 paths across both clients, because it is
 #             declared per SECTION and the marking was per PATH.
-CUSTOMER_STRIP_KEYS = ("r_layer",)
+#   storyline_challenge
+#             the five adversarial volleys the storyline survived before
+#             promotion — the incumbent vendor's strongest objection and
+#             why it does not hold. Same family and the same reason: it is
+#             our preparation for the room, and a client reading it is
+#             reading our sales notes about their own assessment. Marked
+#             here rather than left to a producer, from the moment the
+#             field exists (0044), so it can never arrive unmarked.
+CUSTOMER_STRIP_KEYS = ("r_layer", "storyline_challenge")
 
 # Paths stripped for the CUSTOMER audience whatever the payload said, per
 # (page, section). Producer marking is the primary mechanism and it is not

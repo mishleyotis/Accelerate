@@ -274,3 +274,60 @@ def test_every_gate_a_validator_can_emit_is_in_the_registry():
     # CG-15 lives in its own module; the sweep has to reach it, or the
     # invariant is asserted over the two files that happen to be listed.
     assert "CG-15" in emitted and "CG-15" in GATES
+
+
+def test_the_storyline_challenge_record_has_somewhere_to_land():
+    """0044. The skill tells a producer to put the storyline through five
+    adversarial volleys before promoting and to record each challenge, the
+    answer and what changed. Nothing declared it: not the contract, so
+    CG-04 never swept it; not the writer spec, so promote had nowhere to
+    put it; not the schema, so there was no column. A producer following
+    the skill wrote the record and it was dropped in the same transaction
+    that promoted the storyline it defends.
+
+    Contract, column and writer binding land together, because each one
+    alone is a defect this build has already shipped twice."""
+    import json
+    from pathlib import Path
+    from dma_mcp.contracts import sections
+
+    field = sections("overview")["exec_summary"]["fields"].get("storyline_challenge")
+    assert field, "the contract must declare what the skill asks for"
+    doc = field["doc"]
+    for expected in ("volleys", "challenger", "outcome", "survived",
+                     "held", "changed", "REQUIRED"):
+        assert expected in doc, expected
+    assert "finding" in doc, "five held outcomes is a finding, not a triumph"
+
+    for path in ("apps/mcp/dma_mcp/writer_spec.json",
+                 "apps/api/dma_api/writer_spec.json"):
+        spec = json.loads((Path(__file__).resolve().parents[3] / path).read_text())
+        cols = [c for p in spec["specs"] for w in p["writers"]
+                if w["table"] == "overview_exec_summary" for c in w["columns"]]
+        binding = [c for c in cols if c["column"] == "storyline_challenge"]
+        assert binding, f"{path}: no writer binding"
+        assert binding[0]["source"] == "section:storyline_challenge"
+        assert binding[0]["jsonb"] is True
+
+
+def test_the_challenge_record_is_internal_by_construction():
+    """It is the r_layer's family — our preparation for the room, not the
+    client's assessment — so it is stripped by KEY rather than left to a
+    producer's marking, from the moment the field exists."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "apps" / "api"))
+    from dma_api.redaction import CUSTOMER_STRIP_KEYS, redact_section
+    assert "storyline_challenge" in CUSTOMER_STRIP_KEYS
+
+    data = {"situation": "A credit union with 370,000 members.",
+            "storyline_challenge": {"survived": True, "volleys": [
+                {"volley": 1, "challenger": "incumbent_vendor",
+                 "challenge": "You are describing our roadmap as a gap.",
+                 "outcome": "held"}]}}
+    out, rep = redact_section("overview", "exec_summary", dict(data), [], "customer")
+    assert "storyline_challenge" not in out
+    assert out["situation"] == data["situation"]
+    assert "storyline_challenge" in rep["keys_stripped"]
+    keep, _ = redact_section("overview", "exec_summary", dict(data), [], "internal")
+    assert keep["storyline_challenge"]["survived"] is True
