@@ -125,17 +125,25 @@ def _asserts_nothing(item: dict, declared=None) -> bool:
     def named(key):
         return declared is None or key in declared
 
-    if named("quarantined") and item.get("quarantined"):
+    # A quarantine is a finding only WITH its reason — `quarantined: true`
+    # alone was a one-boolean exemption here while vacuity.records_absence
+    # required the reason, and the daylight between the two copies is a
+    # route (found by the pass-4 adversarial review, reproduced live).
+    if (named("quarantined") and item.get("quarantined")
+            and named("quarantine_reason")
+            and str(item.get("quarantine_reason") or "").strip()):
         return True
     # The rung predicate is vacuity's, imported rather than restated: the
     # exemption lives in two gates, and a rule held in two places drifts —
     # REF-0012 hardened both copies against invented keys and then 517
     # cells bought both with DECLARED keys holding a pointer and a
     # template. A ladder that cannot exempt there cannot exempt here.
-    from .vacuity import ladder_flaw      # local: vacuity imports this module
-    ladder = bool((named("sources_searched") and item.get("sources_searched"))
-                  or (named("queries_run") and item.get("queries_run")))
-    ladder = ladder and ladder_flaw(item, declared) is None
+    # Presence is judged on the FILTERED rungs (vacuity._rungs), never on
+    # raw truthiness: `[""]` and `true` were both "present" here and
+    # rungless in the flaw check, and that gap was itself an exemption.
+    from .vacuity import _rungs, ladder_flaw  # local: vacuity imports this module
+    ladder = (bool(_rungs(item, declared))
+              and ladder_flaw(item, declared) is None)
     # The CELL-GRAIN protocol, which the TRD states at `Representing absence`
     # and the Surface Spec's H2 item shape omitted: thin + sources_searched +
     # closure_condition. All three. `thin` alone marks a cell short of evidence

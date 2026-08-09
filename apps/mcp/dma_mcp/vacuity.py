@@ -500,11 +500,32 @@ _EV_KEYS = frozenset(("e_ids", "supporting_e_ids", "evidence_ids",
 _POINTER_RUNG = re.compile(
     r"\b(?:run|rerun|see|refer(?:\s+to)?|per|consult)\b[^.]{0,40}"
     r"\b(?:ladder|section|r_layer|above|elsewhere)\b", re.I)
+# Case-sensitive TLD with a hard boundary: the case-insensitive version read
+# glued prose as hosts — 'tooling.Nil' in "…tooling.Nil results returned",
+# 'roadmap.The' in "…the roadmap.The board" — so any sentence missing a space
+# after its full stop was a "search somebody could re-run" (found by the
+# pass-4 adversarial run, measured 600/600 exempted).
 _HOST_RUNG = re.compile(
-    r"\b[a-z0-9][a-z0-9-]{1,63}\.(?:[a-z]{2,12})(?:\.[a-z]{2,12})?(?:/|\b)",
-    re.I)
-_QUOTED_RUNG = re.compile(r"[\"“‘'][^\"”’']{3,120}[\"”’']")
+    r"\b[a-z0-9][a-z0-9-]{1,63}\.(?:[a-z]{2,12})(?:\.[a-z]{2,12})?"
+    r"(?=[\s/,;:)\"'”]|$)")
+_QUOTED_RUNG = re.compile(r"[\"“‘']([^\"”’']{3,120})[\"”’']")
 _QUERY_RUNG = re.compile(r"\b(?:site|query|queried|searched\s+for)\s*[:=]", re.I)
+
+
+def _rung_content(text: str) -> tuple:
+    """A rung's content words, with everything an item varies for free
+    masked out: catalogue ids, numerals, stopwords and the two registers.
+
+    Both halves of the pass-4 hardening stand on this. SUBSTANCE: a rung is
+    a search only if something a reader could re-run SURVIVES the masking —
+    a quoted subcap id ('\"P2C2.5\"') and a counter ('reviewed #7') survive
+    as nothing, and both bought the exemption for 600 of 600 hostile cells
+    when the test was a regex hit or a word count. DISTINCTNESS: the group
+    rule compares rungs by this tuple, so 'Searched ncua.gov for capability
+    7 - nil' with the number rotated collapses to ONE masked form across
+    517 cells — the byte-identity rule it replaces was defeated by exactly
+    that substitution."""
+    return tuple(claim_words(text))
 
 
 def _rungs(obj, declared) -> list:
@@ -518,6 +539,22 @@ def _rungs(obj, declared) -> list:
             out.extend((k, r) for r in obj[k]
                        if isinstance(r, str) and r.strip())
     return out
+
+
+def _ladder_claimed(obj, declared) -> bool:
+    """A ladder key is PRESENT with any truthy value at all.
+
+    Distinct from _rungs on purpose, and the distance between the two was a
+    bypass: records_absence used raw list truthiness, so `[\"\"]`, `[0]` and
+    `[None]` read as \"a ladder is present\", while ladder_flaw's _rungs
+    filtered them to nothing and answered \"no ladder → nothing to flaw\".
+    517 byte-identical cells rode through the gap with zero reasons. One
+    question, one answer: anything truthy under a ladder key is a CLAIMED
+    ladder, and a claimed ladder that yields no valid rung is a flawed one,
+    never an absent one."""
+    def named(key):
+        return declared is None or key in declared
+    return any(named(k) and obj.get(k) for k in _LADDER_KEYS)
 
 
 def _citation_count(obj, declared) -> int:
@@ -535,6 +572,30 @@ def _citation_count(obj, declared) -> int:
     return n
 
 
+def _rung_is_substantive(key: str, text: str) -> bool:
+    """Something a reader could re-run survives in this rung.
+
+    Every branch requires CONTENT to survive the masking, because every
+    regex-only version of this predicate was bought with content-free
+    tokens: a quoted subcap id satisfied the quote pattern, a constant
+    host satisfied the host pattern on all 600 cells of a hostile payload,
+    and 'did entity adopt capability number 13' satisfied a bare word
+    count. The masking is `claim_words` — the same residual the rest of
+    this gate scores syntheses with."""
+    if _HOST_RUNG.search(text):
+        return True                       # a host IS re-runnable as written
+    m = _QUOTED_RUNG.search(text)
+    if m and len(claim_words(m.group(1))) >= 2:
+        return True                       # a quoted QUERY, not a quoted id
+    if _QUERY_RUNG.search(text) and len(claim_words(text)) >= 2:
+        return True
+    # A string under `queries_run` is a query by the field's own semantics —
+    # "INT-020: Does BCU hold proprietary technology patents?" is re-runnable
+    # as written. Four CONTENT words is the line: ids, numerals, stopwords
+    # and the registers are masked first, so a counter buys nothing.
+    return key == "queries_run" and len(claim_words(text)) >= 4
+
+
 def ladder_flaw(obj, declared=None) -> str | None:
     """Why this item's ladder cannot buy an absence exemption — or None.
 
@@ -546,6 +607,11 @@ def ladder_flaw(obj, declared=None) -> str | None:
     """
     rungs = _rungs(obj, declared)
     if not rungs:
+        if _ladder_claimed(obj, declared):
+            return ("a ladder key is present and holds no usable rung — "
+                    "empty strings, whitespace or non-text entries. A "
+                    "ladder full of blanks is a flawed ladder, not an "
+                    "absent one: record the searches, or drop the key")
         return None                      # no ladder → no ladder-based route
     pointers = [(k, r) for k, r in rungs if _POINTER_RUNG.search(r)]
     if pointers:
@@ -556,24 +622,14 @@ def ladder_flaw(obj, declared=None) -> str | None:
                 "searches themselves, on the item, not an instruction to "
                 "look elsewhere")
 
-    def substantive(key, text):
-        if (_HOST_RUNG.search(text) or _QUOTED_RUNG.search(text)
-                or _QUERY_RUNG.search(text)):
-            return True
-        # A string under `queries_run` is a query by the field's own
-        # semantics — "INT-020: Does BCU hold proprietary technology
-        # patents?" is re-runnable as written, and demanding quotation
-        # marks around it would refuse the corpus's most honest ladders
-        # for punctuation. Four words is the line between a query and a
-        # label ("INT-020" alone names nothing a reader could run).
-        return key == "queries_run" and len(text.split()) >= 4
-
-    if not any(substantive(k, r) for k, r in rungs):
+    if not any(_rung_is_substantive(k, r) for k, r in rungs):
         return (f"none of the {len(rungs)} rungs names a host, a URL, a "
                 "quoted query or a re-runnable query string — a ladder "
                 "establishes an absence only if it records searches "
-                "somebody could re-run. Name the source attempted (its "
-                "domain or document) or record the query itself, per rung")
+                "somebody could re-run, and catalogue ids, counters and "
+                "bare numbers do not survive that test. Name the source "
+                "attempted (its domain or document) or record the query "
+                "itself, in real words, per rung")
     if (obj.get("thin") is True
             and _citation_count(obj, declared) >= 3):
         return (f"thin is asserted beside {_citation_count(obj, declared)} "
@@ -606,9 +662,11 @@ def records_absence(obj, declared=None) -> bool:
         return True
     # A ladder is a ladder only if it survives the rung predicate: present
     # and well-shaped stopped being enough the morning 517 cells bought
-    # this exemption with a pointer and a template (MEM-0038).
-    ladder = (any(named(k) and isinstance(obj.get(k), list) and obj[k]
-                  for k in _LADDER_KEYS)
+    # this exemption with a pointer and a template (MEM-0038). Presence is
+    # judged on the FILTERED rungs, never on raw list truthiness — `[""]`
+    # was truthy here and rungless in ladder_flaw, and the distance between
+    # the two answers exempted 517 hostile cells with zero reasons.
+    ladder = (bool(_rungs(obj, declared))
               and ladder_flaw(obj, declared) is None)
     # The paired routes: a flag that is a switch on its own becomes a finding
     # only beside its companion AND the ladder. `thin` is the cell-grain case
@@ -711,14 +769,15 @@ def _absence_pass(name, fname, items, value_is_dict, declared):
     one promoted run shared one ladder string, and 517 cells shared their
     first rung verbatim.
     """
-    reasons, exempt, by_sig = [], [], {}
+    reasons, exempt, laddered = [], [], []
     for i, item in enumerate(items):
         if not isinstance(item, dict):
             exempt.append(False)
             continue
         path = f"{name}.{fname}" + ("" if value_is_dict else f"[{i}]")
-        rungs = _rungs(item, declared)
-        flaw = ladder_flaw(item, declared) if rungs else None
+        flaw = (ladder_flaw(item, declared)
+                if (_rungs(item, declared)
+                    or _ladder_claimed(item, declared)) else None)
         if flaw and (_citation_count(item, declared) == 0
                      or item.get("thin") is True):
             reasons.append(_reason(
@@ -728,23 +787,49 @@ def _absence_pass(name, fname, items, value_is_dict, declared):
                 "record a reader could not re-run records nothing"))
         e = records_absence(item, declared)
         exempt.append(e)
-        if e and rungs and not flaw:
-            by_sig.setdefault(tuple(rungs), []).append((i, path))
-    for sig, members in by_sig.items():
-        if len(members) < TEMPLATE_MIN_GROUP:
-            continue
-        for i, path in members:
+        if e and not flaw:
+            rungs = _rungs(item, declared)
+            if rungs:
+                laddered.append((i, path, rungs))
+
+    # The GROUP rule, over masked rung content rather than bytes. Its
+    # byte-identity predecessor was defeated by exactly the substitution it
+    # was built to catch: 'Searched ncua.gov for capability 7 - nil' with
+    # the number rotated made 517 "distinct" ladders that are one search.
+    # Under masking (_rung_content) they collapse to one form. The rule:
+    # among three or more ladder-exempted items of one field, each item
+    # must carry at least one SUBSTANTIVE rung whose masked content is its
+    # own — shared corpus rungs ("package evidence index") stay legitimate,
+    # they just do not count as the rung that asked about THIS item.
+    if len(laddered) >= TEMPLATE_MIN_GROUP:
+        form_counts: dict = {}
+        for _i, _p, rungs in laddered:
+            for k, t in rungs:
+                if _rung_is_substantive(k, t):
+                    form_counts[_rung_content(t)] = \
+                        form_counts.get(_rung_content(t), 0) + 1
+        for i, path, rungs in laddered:
+            distinctive = any(
+                _rung_is_substantive(k, t)
+                and form_counts.get(_rung_content(t), 0) < TEMPLATE_MIN_GROUP
+                for k, t in rungs)
+            if distinctive:
+                continue
             exempt[i] = False
+            shared = max((form_counts.get(_rung_content(t), 0)
+                          for k, t in rungs if _rung_is_substantive(k, t)),
+                         default=0)
             reasons.append(_reason(
                 name, path,
-                f"{len(members)} items of {fname!r} claim a recorded "
-                f"absence on one byte-identical ladder "
-                f"({'; '.join(t for _k, t in sig)[:120]!r}…) — one search "
-                "establishes one absence, not "
-                f"{len(members)} distinct ones. Record, per item, the rung "
-                "that asked about THIS item — the query or the source "
-                "checked for this capability — or state the shared finding "
-                "once, in the section's own prose"))
+                f"{len(laddered)} items of {fname!r} claim a recorded "
+                f"absence and this one carries no rung of its own: every "
+                f"substantive rung it names is the same search, shared "
+                f"with up to {shared} sibling items once numbers, ids and "
+                "counters are masked out. One search establishes one "
+                "absence, not many. Record, per item, the rung that asked "
+                "about THIS item — the query or the source checked for "
+                "this capability — or state the shared finding once, in "
+                "the section's own prose"))
     return exempt, reasons
 
 

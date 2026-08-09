@@ -533,11 +533,83 @@ def test_one_ladder_pasted_across_three_items_is_refused_as_a_group():
         {"subcap_id": c, "state": s, "justification": j, **ALERT_LADDER}
         for c, s, j in ALERT_TEMPLATE]}}
     out = _cg15("heatmap", payload)
-    grouped = [r for r in out if "byte-identical ladder" in r["message"]]
+    grouped = [r for r in out if "no rung of its own" in r["message"]]
     assert len(grouped) == len(ALERT_TEMPLATE), \
         "the pasted ladder must be refused on every member"
     assert all("the rung that asked about THIS item" in r["message"]
                for r in grouped)
+
+
+def test_a_substituted_counter_does_not_make_a_shared_rung_distinctive():
+    """The pass-4 adversarial run's winning attack: 'ncua.gov reviewed #7'
+    with the counter rotated made 600 byte-distinct ladders that are one
+    search — the byte-identity rule saw 600 singleton groups and exempted
+    all 600 with zero reasons. Under masked-content comparison the counter
+    and the subcap id vanish and the 600 collapse to one form."""
+    payload = {"alerts": {**ENV, "alerts": [
+        {"subcap_id": c, "state": s, "justification": j,
+         "sources_searched": [f"ncua.gov reviewed #{i}"]}
+        for i, (c, s, j) in enumerate(ALERT_TEMPLATE)]}}
+    out = _cg15("heatmap", payload)
+    grouped = [r for r in out if "no rung of its own" in r["message"]]
+    assert len(grouped) == len(ALERT_TEMPLATE), \
+        "a counter suffix must not buy per-item distinctiveness"
+
+
+def test_a_quoted_catalogue_id_is_not_a_quoted_query():
+    """Attack 1's cheapest bypass at ~198 bytes a cell: the whole ladder is
+    the cell's own id in quotation marks. A quoted string is a query only
+    if content words survive the masking."""
+    from dma_mcp.vacuity import _rung_is_substantive
+    assert _rung_is_substantive("sources_searched", '"P2C2.5"') is False
+    assert _rung_is_substantive("sources_searched", '"12 40"') is False
+    assert _rung_is_substantive(
+        "sources_searched", '"consent capture telemetry"') is True
+
+
+def test_counter_words_do_not_make_a_query_re_runnable():
+    from dma_mcp.vacuity import _rung_is_substantive
+    assert _rung_is_substantive(
+        "queries_run", "did entity adopt capability number 13") is False
+    assert _rung_is_substantive(
+        "queries_run",
+        "INT-020: Does BCU hold proprietary technology patents?") is True
+
+
+def test_glued_prose_is_not_a_host():
+    from dma_mcp.vacuity import _HOST_RUNG
+    assert not _HOST_RUNG.search("no vendor tooling.Nil results returned")
+    assert not _HOST_RUNG.search("on the roadmap.The board approved it")
+    assert _HOST_RUNG.search("checked ncua.gov for the filing")
+    assert _HOST_RUNG.search("odlumbrown.com/annual-report reviewed")
+
+
+def test_a_ladder_of_blanks_is_a_flawed_ladder_not_an_absent_one():
+    """The judge's reproduction: records_absence read [""] as a ladder
+    present (raw truthiness) while ladder_flaw's rung filter read it as no
+    ladder at all — and the daylight between the two answers exempted 517
+    byte-identical hostile cells with zero reasons."""
+    from dma_mcp.vacuity import item_keys, ladder_flaw, records_absence
+    declared = item_keys("heatmap", "cell_evidence", "cells")
+    for junk in ([""], ["   "], [0], [None], [{}]):
+        cell = {"subcap_id": "P1C1.1.1", "e_ids": [], "thin": True,
+                "sources_searched": junk,
+                "closure_condition": "A dated artefact naming this."}
+        assert ladder_flaw(cell, declared) is not None, junk
+        assert records_absence(cell, declared) is False, junk
+    # …and through the whole gate: 4+ such cells produce reasons, not a pass.
+    cells = [{"subcap_id": f"P1C1.1.{i}", "e_ids": [], "thin": True,
+              "sources_searched": [""],
+              "closure_condition": "A dated artefact naming this.",
+              "synthesis": "The capability is read from the category record, "
+                           "so the reading is inferred rather than measured "
+                           "for this institution."}
+             for i in range(1, 5)]
+    out = _cg15("heatmap", {"cell_evidence": {
+        **ENV, "linking_stats": {"cells_scored": 4, "cells_linked": 0,
+                                 "rows_unlinkable": 4},
+        "cells": cells}})
+    assert any("no usable rung" in r["message"] for r in out)
 
 
 def test_a_pointer_rung_is_refused_by_name():
