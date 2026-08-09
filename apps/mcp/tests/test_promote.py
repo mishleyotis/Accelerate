@@ -176,6 +176,43 @@ def test_promote_all_or_nothing_then_idempotent(seeded):
     assert cur.fetchone()[0] == 1
 
 
+def test_a_promote_clears_a_withdrawal_and_nothing_else_does(seeded):
+    """0042: withdrawal is reversed by passing the gates again, not by a
+    lever. There is deliberately no restore tool — a restore would be a way
+    to put a run back on a client's screen without fixing what it served —
+    so this promote is the ONLY path back, and the test that proves it is
+    the one that would notice if somebody added the lever."""
+    from dma_mcp.withdraw import withdraw_run
+    mcp, admin, rid = seeded
+    _submit_all(mcp, rid)
+    assert promote_run(mcp, rid)["promoted"] is True
+
+    out = withdraw_run(mcp, rid,
+                       "Top-band cells rest on a filing for a far smaller "
+                       "subsidiary; withheld pending a rescore.",
+                       "agent:test")
+    assert out["withdrawn"] is True
+    cur = admin.cursor()
+    cur.execute("SELECT count(*) FROM serving_directory WHERE run_id = %s", (rid,))
+    gone = cur.fetchone()[0]
+    # Commit before the next promote: a read leaves this connection idle IN
+    # TRANSACTION holding AccessShare on the matview, and the promote's
+    # REFRESH wants Exclusive. Not a product defect — a test that would hang
+    # rather than fail, which is worse than either.
+    admin.commit()
+    assert gone == 0
+
+    assert promote_run(mcp, rid)["promoted"] is True
+    cur.execute("""SELECT withdrawn_at, withdrawn_reason, withdrawn_by,
+                          enum_label(status), is_active
+                     FROM runs WHERE id = %s""", (rid,))
+    at, reason, by, status, active = cur.fetchone()
+    assert (at, reason, by) == (None, None, None)
+    assert (status, active) == ("PROMOTED", True)
+    cur.execute("SELECT count(*) FROM serving_directory WHERE run_id = %s", (rid,))
+    assert cur.fetchone()[0] == 1
+
+
 def test_fix_one_page_repromotes_from_retained_staging(seeded):
     mcp, admin, rid = seeded
     _submit_all(mcp, rid)

@@ -155,8 +155,16 @@ def promote_run(conn, run_id) -> dict:
         cur.execute("""UPDATE runs SET is_active = FALSE, status = 'SUPERSEDED'
                         WHERE entity_id = %s AND is_active AND id <> %s""",
                     (entity_id, run_id))
+        # A successful promote is the ONLY way back from withdrawal (0042).
+        # Clearing the three columns here rather than in a restore tool is
+        # deliberate: a run was withdrawn because what it served was wrong,
+        # so the way onto a client's screen is passing the gates again, not
+        # a lever that un-withdraws without fixing anything.
         cur.execute("""UPDATE runs SET status = 'PROMOTED', is_active = TRUE,
-                                       promoted_at = now()
+                                       promoted_at = now(),
+                                       withdrawn_at = NULL,
+                                       withdrawn_reason = NULL,
+                                       withdrawn_by = NULL
                         WHERE id = %s""", (run_id,))
         # stamp by the EXACT ids read at the top of the transaction — a
         # resubmission racing this promote must never get stamped for

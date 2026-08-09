@@ -39,6 +39,7 @@ from dma_mcp import promote as promote_mod
 from dma_mcp import register as register_mod
 from dma_mcp import submit as submit_mod
 from dma_mcp import transport as transport_mod
+from dma_mcp import withdraw as withdraw_mod
 from dma_mcp.contracts import get_page_contract as page_contract
 
 _ENCODER = None
@@ -312,6 +313,36 @@ def promote_run(run_id: str) -> dict:
     names the missing and unpassed pages; re-promotion is idempotent."""
     with _conn() as c:
         return promote_mod.promote_run(c, run_id)
+
+
+@mcp.tool()
+@_traced
+def withdraw_run(run_id: str, reason: str, actor: str) -> dict:
+    """Take a promoted run off the client surface, with a recorded reason.
+
+    Removes the run from `serving_directory`, which is the only window the
+    API reads — so the entity stops being LISTED, not merely stops being
+    openable. Setting is_active=false does not do this: the run stays in
+    the view and the directory keeps publishing the client's name beside a
+    set of pages that 404.
+
+    Nothing is deleted. Promoted rows, annotations and alerts are retained;
+    the alerts leave the queue with the run and return with it, still open.
+    `reason` is required at 30 characters and is stored on the run.
+
+    There is no restore tool. A withdrawn run returns by being re-promoted,
+    which clears the withdrawal — the way back is passing the gates again.
+    """
+    with _conn() as c:
+        return withdraw_mod.withdraw_run(c, run_id, reason, actor)
+
+
+@mcp.tool()
+@_traced
+def list_withdrawn_runs() -> dict:
+    """Every currently withdrawn run with its reason and who withdrew it."""
+    with _conn() as c:
+        return withdraw_mod.list_withdrawn(c)
 
 
 # ── inspect ─────────────────────────────────────────────────────────────

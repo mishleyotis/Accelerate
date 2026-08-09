@@ -20,8 +20,8 @@ sys.path.insert(0, str(ROOT / "apps" / "api"))
 sys.path.insert(0, str(ROOT / "apps" / "mcp"))
 
 from dma_api.pages import etag_for                              # noqa: E402
-from dma_api.redaction import (CUSTOMER_WITHHELD, page_forbidden,  # noqa: E402
-                               redact_section)
+from dma_api.redaction import (CUSTOMER_WITHHELD, normalise_audience,  # noqa: E402
+                               page_forbidden, redact_section)
 from dma_api.serving_spec import assemble, page_sections, readers  # noqa: E402
 from dma_mcp.promote import _expand_h4_maps, _value               # noqa: E402
 
@@ -229,7 +229,124 @@ def test_customer_audience_strips_marked_paths_only():
     assert all("ers" not in r and "scoring_rationale" not in r for r in out["rows"])
     assert out["rows"][0]["e_id"] == "E-1", "unmarked fields survive"
     assert out["undated_pct"] == 0.0
+    # `paths_stripped` used to be asserted equal to `internal` — the INPUT.
+    # It passed while the walker deleted nothing, because the old strip_paths
+    # appended every path it was handed whether or not it matched. That
+    # assertion is what let six announced-and-unperformed redactions ship.
+    # The receipt is now the set of paths a deletion actually happened for.
     assert set(rep["paths_stripped"]) == set(internal)
+    assert rep["paths_unmatched"] == []
+
+
+def test_a_path_that_matches_nothing_is_never_reported_as_stripped():
+    """The negative control for the whole module. Every one of these shapes
+    was in a promoted payload on 2026-08-09 and every one was announced as
+    removed while the value was served byte-identical to the customer.
+
+    Run against the pre-fix walker, all four assertions below fail: the
+    receipt listed the path and the value was still there.
+    """
+    data = {"platforms": [{"name": "A", "zennify_pathway": "pitch A"},
+                          {"name": "B", "zennify_pathway": "pitch B"}]}
+
+    # 1. Section-qualified with a NUMERIC index — Baxter's five, verbatim.
+    marked = [f"platform_story.platforms[{i}].zennify_pathway" for i in (0, 1)]
+    out, rep = redact_section("platform", "platform_story",
+                              json.loads(json.dumps(data)), marked, "customer")
+    assert all("zennify_pathway" not in p for p in out["platforms"])
+    assert set(rep["paths_stripped"]) == set(marked)
+
+    # 2. Section-qualified with no index at all — Odlum's `starters.starters`.
+    st = {"starters": [{"rank": 1, "text": "AE call opener"}]}
+    out, rep = redact_section("platform", "starters", st, ["starters.starters"],
+                              "customer")
+    assert "starters" not in out
+    assert rep["paths_stripped"] == ["starters.starters"]
+
+    # 3. A marking that names nothing is reported as unmatched, NOT stripped.
+    out, rep = redact_section("platform", "platform_story",
+                              json.loads(json.dumps(data)),
+                              ["platforms[*].no_such_field",
+                               "typo_section.platforms[0].name"],
+                              "customer")
+    assert set(rep["paths_unmatched"]) == {"platforms[*].no_such_field",
+                                           "typo_section.platforms[0].name"}
+    assert not set(rep["paths_unmatched"]) & set(rep["paths_stripped"])
+    assert out["platforms"][0]["name"] == "A", "an unmatched path deleted data"
+
+    # 4. The internal audience keeps everything a marking names.
+    out, rep = redact_section("platform", "platform_story",
+                              json.loads(json.dumps(data)), marked, "internal")
+    assert out["platforms"][0]["zennify_pathway"] == "pitch A"
+
+
+def test_the_customer_body_is_never_larger_than_the_internal_one():
+    """The measurement that found this: 132,711 customer against 132,462
+    internal on Baxter's platform page, and 33,165 against 33,126 on Odlum's.
+    A receipt is the only thing redaction may ADD, and it may not add more
+    than the redaction removed."""
+    data = {"platforms": [{"name": "A", "zennify_pathway": "x" * 400,
+                           "r_layer": {"verdict": "ACCEPT"}}]}
+    marked = ["platform_story.platforms[0].zennify_pathway"]
+    internal, _ = redact_section("platform", "platform_story",
+                                 json.loads(json.dumps(data)), marked, "internal")
+    customer, rep = redact_section("platform", "platform_story",
+                                   json.loads(json.dumps(data)), marked, "customer")
+    assert (len(json.dumps(customer)) + len(json.dumps(rep["paths_stripped"]))
+            < len(json.dumps(internal)))
+
+
+def test_r_layer_never_reaches_the_customer_however_it_is_marked():
+    """36 paths across two clients carried hypothesis, counter-argument and
+    verdict to the customer audience, because r_layer is declared per SECTION
+    and the marking was per PATH. It is internal by its own definition, so it
+    no longer depends on anyone remembering."""
+    data = {"r_layer": {"verdict": "ACCEPT"},
+            "platforms": [{"name": "A", "r_layer": {"counter": "the case against"}}]}
+    out, rep = redact_section("platform", "platform_story",
+                              json.loads(json.dumps(data)), [], "customer")
+    assert "r_layer" not in out and "r_layer" not in out["platforms"][0]
+    assert set(rep["keys_stripped"]) == {"r_layer", "platforms[0].r_layer"}
+    keep, _ = redact_section("platform", "platform_story",
+                             json.loads(json.dumps(data)), [], "internal")
+    assert keep["r_layer"]["verdict"] == "ACCEPT"
+
+
+def test_unmarked_vendor_copy_does_not_reach_the_client():
+    """51 of 51 techstack rows on the reference client named the assessing
+    firm in `dma_impact`, 26 of them opening "Zennify's pathway is…", served
+    byte-identical at audience=customer. It was in no `internal_only`, no
+    ALWAYS_STRIP, and techstack is not a withheld section — so no marking
+    rule could have caught it. The safety net is a net, not a substitute for
+    the gate that should refuse it at submit."""
+    data = {"items": [{"vendor": "Salesforce", "product": "Service Cloud",
+                       "dma_impact": "Zennify's pathway is to consolidate…"},
+                      {"vendor": "MuleSoft", "product": "Anypoint",
+                       "dma_impact": "Bears on P4C3.1.2 at 1.95."}]}
+    out, rep = redact_section("techstack", "items",
+                              json.loads(json.dumps(data)), [], "customer")
+    assert all("dma_impact" not in i for i in out["items"])
+    assert out["items"][0]["product"] == "Service Cloud", "the register survives"
+
+    # And the net itself, on a field no rule names.
+    loose = {"narrative": "Zennify would sequence this after the data layer.",
+             "clean": "The data layer is the primary gap."}
+    out, rep = redact_section("overview", "exec_summary",
+                              json.loads(json.dumps(loose)), [], "customer")
+    assert "narrative" not in out and out["clean"].startswith("The data")
+    assert rep["vendor_named"] == ["narrative"]
+
+
+def test_audience_defaults_to_the_least_privileged_one():
+    """Every route declared `audience: str = "internal"`, so a caller that
+    omitted the parameter — or misspelled it — was served the analyst body
+    including every internal rung."""
+    assert normalise_audience(None) == "customer"
+    assert normalise_audience("") == "customer"
+    assert normalise_audience("Internal ") == "internal"
+    assert normalise_audience("INTERNAL") == "internal"
+    assert normalise_audience("analyst") == "customer", "unknown is not internal"
+    assert normalise_audience("customer") == "customer"
 
 
 def test_cohort_entity_ids_are_stripped_for_every_audience():

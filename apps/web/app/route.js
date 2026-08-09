@@ -81,7 +81,12 @@ export async function GET(req) {
 
   const [catalogue, directory, scans] = await Promise.all([
     apiFetch("/v1/catalogue"),
-    apiFetch("/v1/directory"),
+    // The directory lists OTHER institutions, so the API now refuses it to
+    // anything but the internal audience (403 audience_forbidden). Asking
+    // for it without a session is asking to be refused, so we do not ask —
+    // an unauthenticated landing page renders its signed-out state rather
+    // than a swallowed error.
+    session ? apiFetch("/v1/directory?audience=internal") : Promise.resolve(null),
     session?.role === "ADMIN" ? apiFetch("/v1/ops/import-scans") : Promise.resolve(null),
   ]);
   const live = {

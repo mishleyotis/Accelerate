@@ -26,6 +26,7 @@ from .diff import build_diff
 from .evidence import fetch as ev_fetch, redact_items as ev_redact
 from .identity import ActorError, verified_actor
 from .pages import ApiError, build_page, etag_for, resolve_run
+from .redaction import normalise_audience
 from .subverticals import SCOPE_TAG, scope_to_entity
 
 _connect = db_connect
@@ -123,11 +124,27 @@ def catalogue():
 
 
 @app.get("/v1/directory")
-def directory():
+def directory(audience: str | None = None, role: str | None = None):
     """Promoted entities from the one materialised view the directory is
     allowed to read (invariant 8; 0013). Shaped for the front-end's
     entity rows; anything the serving tier does not carry is null, never
-    invented. Empty until the first promote is the correct state."""
+    invented. Empty until the first promote is the correct state.
+
+    The directory is a list of OTHER institutions. It took no audience at
+    all and answered every caller with every client's legal name, sub-
+    vertical, composite and pillar breakdown — the one response in this API
+    where a customer-audience reader would learn about somebody else's
+    assessment. There is no redacted form of that; a customer has an entity,
+    not a directory, so the audience is refused rather than narrowed."""
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
+    if audience != "internal":
+        return JSONResponse(
+            {"error": "audience_forbidden",
+             "detail": "the directory lists other institutions and is not "
+                       "served to the customer audience"},
+            status_code=403)
     conn = _connect()
     try:
         cur = conn.cursor()
@@ -198,13 +215,16 @@ def directory():
 
 
 @app.get("/v1/alerts")
-def global_alerts(audience: str = "internal", role: str | None = None,
+def global_alerts(audience: str | None = None, role: str | None = None,
                   status: str = "open", severity: str | None = None,
                   entity: str | None = None, limit: int = 50,
                   cursor: str | None = None):
     """G4 — the corpus-wide thin-evidence queue, one row per alert on an
     active run with its action state joined at read. Cursor-paginated by
     row comparison, mandatory limit (TRD §19); internal audiences only."""
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
     conn = _connect()
     try:
         cur = conn.cursor()
@@ -222,7 +242,7 @@ def global_alerts(audience: str = "internal", role: str | None = None,
 @app.post("/v1/entities/{display_id}/insights/{ic_id}/annotation")
 async def insight_annotation(display_id: str, ic_id: str, request: Request,
                              actor: str | None = None,
-                             audience: str = "internal",
+                             audience: str | None = None,
                              role: str | None = None):
     """The annotation half of invariant 2's two write exceptions: an
     accept/reject verdict on an insight card, anchored fail-closed to a card
@@ -234,6 +254,9 @@ async def insight_annotation(display_id: str, ic_id: str, request: Request,
     (dma_api.identity). These rows feed the findings memory and, through it,
     skill refinement: a verdict attributed to a name the caller typed does not
     merely mislabel a row, it teaches."""
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
     try:
         body = await request.json()
     except Exception:
@@ -266,7 +289,7 @@ async def insight_annotation(display_id: str, ic_id: str, request: Request,
 @app.post("/v1/alerts/{alert_id}/actions")
 async def alert_actions(alert_id: int, request: Request,
                         actor: str | None = None,
-                        audience: str = "internal",
+                        audience: str | None = None,
                         role: str | None = None):
     """The second of the API's two write exceptions (TRD §08): alert
     lifecycle — workflow state, not assessment content. Idempotency-Key
@@ -279,6 +302,9 @@ async def alert_actions(alert_id: int, request: Request,
     `users` here and the resolved id is what is recorded. The `actor`
     parameter is no longer read: it named a row directly, which is the same
     forgery the annotation route carried."""
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
     try:
         body = await request.json()
     except Exception:
@@ -330,7 +356,7 @@ _SUBCAP_COLS = ("subcap_id", "capability_id", "category_id", "pillar_id",
 # Declared BEFORE the generic {page} route, like /evidence.
 @app.get("/v1/entities/{display_id}/subcaps")
 def entity_subcaps(display_id: str, request: Request, response: Response,
-                   audience: str = "internal", run: str | None = None,
+                   audience: str | None = None, run: str | None = None,
                    role: str | None = None, history: bool = False):
     """The run's cell grain: every scored subcap, as the workbook stated it.
 
@@ -340,6 +366,9 @@ def entity_subcaps(display_id: str, request: Request, response: Response,
     and categories only. `delta` and `is_thin_evidence` are the base table's
     GENERATED columns: selected here, never recomputed (invariants 8 and 9).
     """
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
     conn = _connect()
     try:
         cur = conn.cursor()
@@ -386,7 +415,7 @@ def entity_subcaps(display_id: str, request: Request, response: Response,
 # Declared BEFORE the generic {page} route, like /evidence and /subcaps.
 @app.get("/v1/entities/{display_id}/refresh")
 def entity_refresh(display_id: str, request: Request, response: Response,
-                   audience: str = "internal", run: str | None = None,
+                   audience: str | None = None, run: str | None = None,
                    role: str | None = None, history: bool = False):
     """The client's refresh cadence: the assessment date WITH the basis that
     produced it, the six-month due date, the distance to it measured now, and
@@ -399,6 +428,9 @@ def entity_refresh(display_id: str, request: Request, response: Response,
     Deliberately NOT ETagged on the run: the body carries a distance measured
     against today, so a tag keyed on the promotion would serve yesterday's
     "due in N weeks" unchanged tomorrow."""
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
     conn = _connect()
     try:
         cur = conn.cursor()
@@ -417,7 +449,7 @@ def entity_refresh(display_id: str, request: Request, response: Response,
 # Declared BEFORE the generic {page} route, like /evidence and /subcaps.
 @app.get("/v1/entities/{display_id}/diff")
 def entity_diff(display_id: str, request: Request, response: Response,
-                audience: str = "internal", base: str | None = None,
+                audience: str | None = None, base: str | None = None,
                 target: str | None = None, role: str | None = None,
                 limit: int = 2000):
     """Run-to-run movement at the cell grain — the read the version-diff
@@ -426,6 +458,9 @@ def entity_diff(display_id: str, request: Request, response: Response,
     Both ends are promoted runs; with only one promoted run the response is an
     explicit `no_base_run` state and no cells, because a base run is never
     derived from the target (dma_api.diff)."""
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
     conn = _connect()
     try:
         cur = conn.cursor()
@@ -454,7 +489,7 @@ def entity_diff(display_id: str, request: Request, response: Response,
 # Declared BEFORE the generic {page} route, like /evidence and /subcaps.
 @app.get("/v1/entities/{display_id}/answers/search")
 def entity_answer_search(display_id: str, q: str, request: Request,
-                         response: Response, audience: str = "internal",
+                         response: Response, audience: str | None = None,
                          run: str | None = None, role: str | None = None,
                          history: bool = False, limit: int = 5):
     """One question against one run, answered from promoted content only.
@@ -469,6 +504,9 @@ def entity_answer_search(display_id: str, q: str, request: Request,
     Deliberately NOT ETagged on the run alone: the response varies with the
     question, and a tag that ignored `q` would serve one question's answer
     for another on a 304."""
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
     conn = _connect()
     try:
         cur = conn.cursor()
@@ -487,7 +525,7 @@ def entity_answer_search(display_id: str, q: str, request: Request,
 
 @app.get("/v1/entities/{display_id}/answers")
 def entity_answers(display_id: str, request: Request, response: Response,
-                   audience: str = "internal", run: str | None = None,
+                   audience: str | None = None, run: str | None = None,
                    role: str | None = None, history: bool = False,
                    surface: str | None = None):
     """The pre-computed answer set: the questions an AE asks on each surface,
@@ -496,6 +534,9 @@ def entity_answers(display_id: str, request: Request, response: Response,
     A lookup, not an inference — which is why it can be served on the same
     ETag as the pages it is built from: the answers change exactly when the
     run's promotion does."""
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
     conn = _connect()
     try:
         cur = conn.cursor()
@@ -522,7 +563,7 @@ def entity_answers(display_id: str, request: Request, response: Response,
 # order, and "evidence" would otherwise be read as a page name.
 @app.get("/v1/entities/{display_id}/evidence")
 def entity_evidence(display_id: str, request: Request, response: Response,
-                    audience: str = "internal", run: str | None = None,
+                    audience: str | None = None, run: str | None = None,
                     e_ids: str | None = None, role: str | None = None,
                     history: bool = False):
     """The evidence drawer's read path.
@@ -532,6 +573,9 @@ def entity_evidence(display_id: str, request: Request, response: Response,
     comma-separated filter — the drawer asks for exactly the ids a card cites,
     so the response is the resolution verdict for those ids and nothing else.
     """
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
     conn = _connect()
     try:
         cur = conn.cursor()
@@ -558,12 +602,15 @@ def entity_evidence(display_id: str, request: Request, response: Response,
 
 @app.get("/v1/entities/{display_id}/{page}")
 def entity_page(display_id: str, page: str, request: Request,
-                response: Response, audience: str = "internal",
+                response: Response, audience: str | None = None,
                 run: str | None = None, role: str | None = None,
                 history: bool = False):
     """One promoted page for one entity, redacted for the audience.
     ETag is run_id.promoted_epoch.audience; a matching If-None-Match gets
     304 with no body (TRD §19)."""
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
     conn = _connect()
     try:
         cur = conn.cursor()
@@ -585,7 +632,7 @@ def entity_page(display_id: str, page: str, request: Request,
 
 
 @app.get("/v1/ops/refresh-queue")
-def ops_refresh_queue(audience: str = "internal", role: str | None = None,
+def ops_refresh_queue(audience: str | None = None, role: str | None = None,
                       within_days: int = 0, limit: int = 50):
     """What the scheduled synthesis routine reads to learn there is work.
 
@@ -596,6 +643,9 @@ def ops_refresh_queue(audience: str = "internal", role: str | None = None,
     This is the routine's external input — before it, the routine had none: it
     fired every three hours and stopped when the package scan had created
     nothing."""
+    # Default-deny (dma_api.redaction): omitted or unknown resolves to
+    # `customer`, the least privileged audience — never to `internal`.
+    audience = normalise_audience(audience)
     conn = _connect()
     try:
         cur = conn.cursor()
