@@ -313,14 +313,21 @@ def cell_items(cur, data: dict, entity_id) -> None:
         unresolved += len(ids) - len(items)
         # Order follows e_ids, which the producer ranked. Order is meaning.
         _set(c, "items", items)
-        # grounded_on is GENERATED as the length of e_ids, so thin follows
-        # the contract's own rule from the stored count rather than from the
-        # resolved list — an id that fails to resolve makes a cell LESS
-        # citable, and saying it is therefore not thin would be backwards.
-        n = c.get("grounded_on")
-        if n is None:
-            n = len(ids)
-        _set(c, "thin", n < 3)
+        # `thin` is the ABSENCE-ROUTE marker — it travels with
+        # sources_searched and closure_condition ("A cell's evidence is
+        # genuinely thin: emit thin, sources_searched, closure_condition").
+        # It is NOT a citation-count flag: computing it as grounded_on < 3
+        # marked 565 CITED cells thin on the reference client, because 544
+        # of them cite exactly two items — the exact definition the plan's
+        # stress test withdrew as "ruinous on the reference", shipped here
+        # for one deploy before this measurement caught it. The maturity
+        # surface's flag is `is_thin_evidence` on the workbook scores, and
+        # one screen must not carry two meanings of one word. So: the
+        # producer's value serves untouched, and the only computed default
+        # is thin=true on a cell with NO citations and no producer value —
+        # the state the absence protocol exists to mark.
+        if "thin" not in c and not ids:
+            c["thin"] = True
     if unresolved:
         # Named rather than absorbed: ids that do not resolve inside this
         # entity are either deleted evidence or another institution's, and

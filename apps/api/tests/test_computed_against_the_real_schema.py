@@ -217,7 +217,13 @@ def test_cell_items_resolve_from_the_evidence_store_and_are_entity_scoped(seeded
     cells = data["cells"]
     assert [i["e_id"] for i in cells[0]["items"]] == ["E-SCU-001", "E-SCU-002"]
     assert cells[0]["items"][0]["excerpt"] and cells[0]["items"][0]["tier"] == "T1"
-    assert cells[0]["thin"] is True, "two linked items is below the three line"
+    # `thin` is the absence-route marker, not a citation-count flag. The
+    # first version of this module computed it as grounded_on < 3 and marked
+    # 565 CITED reference cells thin — the definition the plan's stress test
+    # had already withdrawn as "ruinous on the reference". A cited cell gets
+    # no injected thin; an uncited cell with no producer value defaults true.
+    assert "thin" not in cells[0], "a cited cell must not be marked thin at read"
+    assert cells[2]["thin"] is True, "no citations and no producer value"
     assert cells[1]["items"] == [], "another entity's id must not open here"
     assert data["unresolved_citations"] == 1
     assert data["linking_stats"]["cells_citable"] == 1
