@@ -530,6 +530,68 @@ def _iter_cell_citations(payload):
                             yield f"{path}.{key}[{i}]", key, cell
 
 
+def _iter_malformed_cell_ids(payload):
+    """Yield (path, key, value) for a cell-link key holding something that
+    is NOT a cell id.
+
+    The citation walker above skips them — "the id regex still decides what
+    counts, so a key that happens to carry prose contributes nothing" — and
+    skipping is right for the gates that ask about a CITED cell. But it
+    means a cell-link field carrying a capability NAME is invisible to
+    every gate in this connector: ET-05, CG-14 and the rest never see the
+    value, so nothing refuses it and nothing renders it either.
+
+    Measured on the reference client: all five
+    `platform.starters.starters[].named_gap_subcap_id` values carry a name
+    ("Technology Architecture & Integration.1.2") where the contract wants
+    a cell id. Three independent local checks reported it and no gate did;
+    downstream, the same five are what `check_consistency` sees as cells
+    cited on the platform page with no cell_evidence row — a reader sent to
+    a drawer that cannot exist, because the id it was sent with is not one.
+    """
+    for name, body in payload.items():
+        if not isinstance(body, dict):
+            continue
+        for path, obj in _walk(body, name):
+            for key, value in obj.items():
+                if not _is_cell_key(key):
+                    continue
+                items = ([(f"{path}.{key}", value)] if isinstance(value, str)
+                         else [(f"{path}.{key}[{i}]", v)
+                               for i, v in enumerate(value)]
+                         if isinstance(value, list) else [])
+                for where, v in items:
+                    if isinstance(v, str) and v.strip() \
+                            and not _CELL_ID_RE.match(v):
+                        yield where, key, v
+
+
+def check_cell_id_shape(page: str, payload: dict) -> list:
+    """ET-08 — a cell-link field carries a cell id, or names nothing.
+
+    Deliberately narrow: it fires only on a key this connector already
+    treats as a cell link, and only on a non-empty string that is not an
+    id. An empty value is CG-02's business and a missing key is the
+    contract's; this gate exists for the one shape both of those miss and
+    every other gate skips.
+    """
+    out = []
+    for where, key, value in _iter_malformed_cell_ids(payload):
+        out.append({
+            "gate_id": "ET-08", "section": where.split(".")[0],
+            "path": where, "severity": "block",
+            "message": (
+                f"{value[:60]!r} is not a catalogue cell id, and {key!r} is a "
+                "cell-link field. Every gate that reads cell links — the "
+                "sub-vertical scope check, the serves check, the drawer "
+                "reconciliation — skips a value it cannot parse as an id, so "
+                "a name here is refused by nothing and resolves to nothing: "
+                "the chip renders and opens a drawer that cannot exist. Use "
+                "the id from get_capability_catalogue; the NAME belongs in "
+                "the field beside it that renders the label.")})
+    return out
+
+
 def _entity_subvertical(conn, run_id):
     cur = conn.cursor()
     cur.execute("""SELECT e.sub_vertical FROM runs r
@@ -1126,6 +1188,10 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     # ── AG-03: every claim-bearing item cites evidence ─────────────────
     reasons.extend(_check_item_evidence(page, payload))
     reasons.extend(_check_peer_research(page, payload))
+    # ET-08 runs BEFORE the cell gates below, because those all skip a
+    # value they cannot parse as an id: a cell-link field holding a name
+    # is invisible to every one of them, and this is where it is seen.
+    reasons.extend(check_cell_id_shape(page, payload))
     # One read of the entity's sub-vertical, two gates: ET-05 scopes the
     # cells a sentence may cite, ET-06 scopes the candidates a shortlist
     # may contain.

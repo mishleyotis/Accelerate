@@ -221,6 +221,25 @@ GATES = {
               "citation is worse than no citation — the reader is invited to "
               "drill in and lands on an orphan.",
               "block"),
+    "ET-08": ("A cell-link field carries a cell id",
+              "Cells named on this page resolve to real capabilities",
+              "Every field this connector treats as a cell link — anything "
+              "ending subcap_id / subcap_ids, plus capability_ids and "
+              "subcaps — holds a catalogue cell id or nothing. A non-empty "
+              "value that is not an id is refused.",
+              "Every other cell gate SKIPS a value it cannot parse as an "
+              "id: that is right for gates asking about a cited cell, and "
+              "it means a cell-link field holding a capability NAME is "
+              "invisible to all of them at once. Measured on the reference "
+              "client, all five platform starters named their gap with "
+              "'Technology Architecture & Integration.1.2' where the id "
+              "belongs. Nothing refused it, and downstream the same five "
+              "are cells cited on a page with no drawer behind them — a "
+              "chip that renders and opens onto something that cannot "
+              "exist. Refusing a name is also the only way a grain error "
+              "gets caught: a category id in a cell field (P1C4 in "
+              "mapped_subcap_ids) is the same defect one level up.",
+              "block"),
     "ET-06": ("The candidate set is bounded by the entity's vertical", None,
               "No discard list carries a platform ruled out by the entity's "
               "own vertical — neither one whose stated reason argues from "

@@ -205,3 +205,47 @@ def test_one_peer_of_tolerance_so_a_scoped_share_passes():
 
 def test_a_row_with_neither_field_is_untouched():
     assert _check_peer_research("techstack", _ts({})) == []
+
+
+# ── ET-08 · a cell-link field carries a cell id ──────────────────────────
+def test_a_capability_name_in_a_cell_link_field_is_refused():
+    """The gap every other cell gate shares: they skip a value they cannot
+    parse as an id, so a NAME in a cell-link field is invisible to all of
+    them at once. Measured on the reference client — five platform
+    starters naming their gap 'Technology Architecture & Integration.1.2'
+    — refused by nothing, rendering a chip that opens onto no drawer."""
+    from dma_mcp.validation2 import check_cell_id_shape
+    payload = {"starters": {"starters": [
+        {"rank": 1, "text": "An opener.",
+         "named_gap_subcap_id": "Technology Architecture & Integration.1.2"},
+        {"rank": 2, "text": "Another.", "named_gap_subcap_id": "P4C3.1.2"},
+    ]}}
+    out = check_cell_id_shape("platform", payload)
+    assert len(out) == 1
+    assert out[0]["gate_id"] == "ET-08"
+    assert out[0]["path"] == "starters.starters[0].named_gap_subcap_id"
+    assert "not a catalogue cell id" in out[0]["message"]
+
+
+def test_et08_catches_the_grain_error_one_level_up():
+    """A CATEGORY id where a cell id belongs is the same defect: P1C4 is a
+    real catalogue id and not a cell, so the drawer it points at is a
+    grain that has none."""
+    from dma_mcp.validation2 import check_cell_id_shape
+    payload = {"sentiment": {"themes": [
+        {"theme": "service", "mapped_subcap_ids": ["P1C4", "P2C3.1.2"]}]}}
+    out = check_cell_id_shape("overview", payload)
+    assert [r["path"] for r in out] == ["sentiment.themes[0].mapped_subcap_ids[0]"]
+
+
+def test_et08_is_silent_on_empty_and_on_well_formed_ids():
+    """Deliberately narrow. An empty value is CG-02's business and a
+    missing key is the contract's; a gate that fired on those would be
+    three gates disagreeing about one field."""
+    from dma_mcp.validation2 import check_cell_id_shape
+    payload = {"starters": {"starters": [
+        {"named_gap_subcap_id": ""}, {"named_gap_subcap_id": None},
+        {"named_gap_subcap_id": "P3C3.4.RIA1"}, {"rank": 4},
+        {"linked_subcap_ids": ["P1C1.1.1", "P2C2.3.2"]},
+    ]}}
+    assert check_cell_id_shape("platform", payload) == []
