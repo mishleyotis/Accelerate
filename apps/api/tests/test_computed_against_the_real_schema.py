@@ -258,3 +258,43 @@ def test_a_failed_computation_does_not_poison_the_rest_of_the_request(seeded):
     assert broken.get("computed_error") is None
     assert broken["item_count"] == 3, \
         "the transaction survived an earlier failure and still computed"
+
+
+def test_every_serving_table_can_actually_be_read_by_the_page_builder(seeded):
+    """`_rows` runs against all 33 serving tables, on the real schema.
+
+    A blanket `ORDER BY id` shipped and 500'd overview and platform in
+    production, because 10 of the 33 serving tables are RUN-grain and carry
+    no `id` — one row per run needs no ordering. Every unit test stayed green
+    through it: they drive fake cursors, and a fake cursor answers whatever
+    it is asked, which is the same class as the `l3_platform` column that
+    this file was created for.
+
+    This is the check that would have caught it, so it runs the real
+    statement against every table the registry names rather than the two a
+    fixture happens to cover.
+    """
+    import json as _json
+    from pathlib import Path as _Path
+    from dma_api import pages
+
+    conn, cur, _entity, run = seeded
+    spec = _json.loads(
+        (ROOT / "apps" / "mcp" / "dma_mcp" / "writer_spec.json").read_text())
+    tables = sorted({w["table"] for p in spec["specs"] for w in p["writers"]
+                     if w["grain"] != "none"})
+    assert len(tables) >= 30, f"only {len(tables)} serving tables found"
+
+    ordered, unordered, failed = [], [], []
+    for t in tables:
+        try:
+            pages._rows(cur, t, run)
+            (ordered if pages._has_id(cur, t) else unordered).append(t)
+        except Exception as exc:              # noqa: BLE001
+            conn.rollback()
+            failed.append((t, f"{type(exc).__name__}"))
+    assert not failed, f"_rows raised on {failed}"
+    # Both branches must be exercised, or the test proves only that one of
+    # them works and the next blanket clause ships again.
+    assert ordered and unordered, \
+        f"expected both grains; ordered={len(ordered)} unordered={len(unordered)}"

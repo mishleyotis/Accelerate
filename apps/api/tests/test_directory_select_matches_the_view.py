@@ -37,9 +37,19 @@ MIGRATIONS = ROOT / "migrations" / "versions"
 
 
 def _select_columns() -> list:
-    """The columns resolve_run asks serving_directory for, in order."""
+    """The columns resolve_run asks serving_directory for, in order.
+
+    Anchored on `FROM serving_directory` and read BACKWARDS to its SELECT,
+    not forwards from the module's first SELECT. The first version anchored
+    on the first execute-SELECT in the file and silently started matching a
+    different statement the moment one was added above it, which happened
+    within the hour when `_has_id` landed. A parser that finds the wrong
+    thing and reports confidently is the class this whole file exists to
+    catch, so it had better not be the parser.
+    """
     src = Path(pages.__file__).read_text()
-    body = src.split("cur.execute(\"\"\"SELECT ", 1)[1].split("FROM serving_directory", 1)[0]
+    head = src.split("FROM serving_directory", 1)[0]
+    body = head[head.rindex("SELECT ") + len("SELECT "):]
     body = re.sub(r"--.*", "", body)
     return [c.strip() for c in body.replace("\n", " ").split(",") if c.strip()]
 

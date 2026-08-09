@@ -46,10 +46,36 @@ def _rows(cur, table: str, run_id) -> list[dict]:
     nothing in the query made that hold on the next one. 23 of the 34
     writers are item-grain.
     """
-    cur.execute(f"SELECT * FROM {table} WHERE run_id = %s ORDER BY id",
-                (run_id,))
+    order = " ORDER BY id" if _has_id(cur, table) else ""
+    cur.execute(f"SELECT * FROM {table} WHERE run_id = %s{order}", (run_id,))
     cols = [d[0] for d in cur.description]
     return [dict(zip(cols, r)) for r in cur.fetchall()]
+
+
+_HAS_ID: dict = {}
+
+
+def _has_id(cur, table: str) -> bool:
+    """Whether this serving table carries the BIGSERIAL, asked once per table.
+
+    Measured: the 23 ITEM-grain tables all have `id`; the 10 RUN-grain ones
+    (overview_scores, platform_story, insights_landscape, …) do not, because
+    one row per run needs no ordering. A blanket `ORDER BY id` therefore 500s
+    exactly the pages carrying a run-grain section — which is what it did in
+    production for the four minutes between that deploy and this fix, on
+    overview and platform, while every fake-cursor test stayed green because
+    a fake cursor answers whatever it is asked.
+
+    Asked BEFORE the select, never after: a failed statement aborts the whole
+    transaction in PostgreSQL and every later query on the request then fails
+    with 25P02, so "try it and fall back" would take the page down anyway.
+    """
+    if table not in _HAS_ID:
+        cur.execute("""SELECT 1 FROM information_schema.columns
+                        WHERE table_schema = 'public' AND table_name = %s
+                          AND column_name = 'id'""", (table,))
+        _HAS_ID[table] = cur.fetchone() is not None
+    return _HAS_ID[table]
 
 
 def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
