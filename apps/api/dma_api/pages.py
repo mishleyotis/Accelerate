@@ -116,7 +116,12 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       serving_subcaps is a live view over those counts, so the served
 #       thin flags changed under an unmoved promoted_at — without this
 #       bump every cached client 304s onto the inflated counts.
-SERVE_RULES = "serve-rules@3"
+#   @4  2026-08-09 — the corpus excerpt repair re-minted 22,187 evidence
+#       rows and its missing link carry re-created 65,425 duplicates, all
+#       since removed with linked_evidence_count recomputed on 63,244
+#       cells. @3 was already deployed while those counts were wrong, so a
+#       body cached under it is a body cached mid-repair.
+SERVE_RULES = "serve-rules@4"
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
