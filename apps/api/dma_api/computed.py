@@ -77,13 +77,21 @@ def evidence_coverage(cur, data: dict, run_id, entity_id) -> None:
     cell links: a document evidencing eleven cells is eleven facts about
     this run, which is the only fact count this schema can honestly derive.
     """
+    # "This run's evidence" is defined ONCE, in `evidence.py`, and this reads
+    # the same definition: rows belonging to the entity that this run links to
+    # a cell. `evidence_run_links` looks like the right table and is EMPTY —
+    # 0 rows for a run whose evidence_subcap_links carries 6,323 — so a census
+    # over it reported a store of zero for a client with 182 rows, which is
+    # how a second definition of the same thing fails.
     cur.execute(
         """SELECT ei.tier::text, ei.claim_type::text, ei.source_domain,
-                  (SELECT count(*) FROM evidence_subcap_links l
-                    WHERE l.e_id = ei.e_id AND l.run_id = rl.run_id)
-             FROM evidence_run_links rl
-             JOIN evidence_index ei ON ei.e_id = rl.e_id
-            WHERE rl.run_id = %s""", (run_id,))
+                  count(l.subcap_id)
+             FROM evidence_index ei
+             JOIN evidence_subcap_links l
+               ON l.e_id = ei.e_id AND l.run_id = %s
+            WHERE ei.entity_id = %s
+            GROUP BY ei.e_id, ei.tier, ei.claim_type, ei.source_domain""",
+        (run_id, entity_id))
     rows = cur.fetchall()
     if not rows:
         # No evidence linked to this run is a FINDING, not a zero. Say so in
@@ -217,9 +225,15 @@ def _expected_per_layer(cur, catalog_version) -> dict:
     """
     if not catalog_version:
         return {}
+    # `l3_platform_areas`, not `l3_platform`. The first version of this query
+    # named a column that does not exist and the section served
+    # `computed_error: DatabaseError` — caught, named, and still wrong,
+    # because the unit test drove a fake cursor that answered whatever it was
+    # asked. A fake cannot refuse a column name. That is why
+    # test_computed_against_the_real_schema.py exists.
     cur.execute(
         """SELECT pillar_id, count(*) FROM ccg_subcaps
-            WHERE version = %s AND l3_platform IS NOT NULL
+            WHERE version = %s AND coalesce(cardinality(l3_platform_areas), 0) > 0
             GROUP BY pillar_id""", (catalog_version,))
     return {p: n for p, n in cur.fetchall()}
 
@@ -279,13 +293,20 @@ def safeguard_gates(cur, data: dict, run_id) -> None:
     The plain_label comes from `gate_registry`, not from the result row — one
     definition of what a gate means, in the place the gate is defined.
     """
+    # ONE row per gate: the LATEST. `gate_results` accumulates a row per
+    # evaluation, and a resubmitted page evaluates its gates again — Baxter
+    # carries 61 rows for SG-V4 and 23 for SG-S8 across its submission
+    # history. Serving them all would render the same gate eighty-four times
+    # and put a superseded FAIL beside its own later PASS, with nothing on
+    # the card to say which is current.
     cur.execute(
-        """SELECT g.gate_id, r.plain_label, g.result::text, g.detail,
+        """SELECT DISTINCT ON (g.gate_id)
+                  g.gate_id, r.plain_label, g.result::text, g.detail,
                   g.not_run_reason
              FROM gate_results g
              LEFT JOIN gate_registry r ON r.gate_id = g.gate_id
             WHERE g.run_id = %s AND g.gate_id LIKE 'SG-%%'
-            ORDER BY g.gate_id""", (run_id,))
+            ORDER BY g.gate_id, g.evaluated_at DESC, g.id DESC""", (run_id,))
     rows = cur.fetchall()
     if not rows:
         return
@@ -313,6 +334,16 @@ def apply(cur, page: str, section: str, data, run_meta: dict, entity_id) -> None
     if not isinstance(data, dict):
         return
     run_id = run_meta["run_id"]
+    # A SAVEPOINT, because a failed statement aborts the whole transaction in
+    # PostgreSQL and every later query on this request then fails with 25P02.
+    # The first version of this module shipped a query naming a column that
+    # does not exist; the section reported `computed_error` correctly and
+    # would have taken the rest of the page down with it on any page carrying
+    # more than one computed section.
+    try:
+        cur.execute("SAVEPOINT computed_at_read")
+    except Exception:                       # noqa: BLE001 — no savepoint, no net
+        pass
     try:
         if page == "overview" and section == "firmographics":
             firmographics(data)
@@ -334,3 +365,12 @@ def apply(cur, page: str, section: str, data, run_meta: dict, entity_id) -> None
         # why, so an absent census reads as a broken computation rather than
         # as an empty producer.
         data["computed_error"] = f"{page}.{section}: {type(exc).__name__}"
+        try:
+            cur.execute("ROLLBACK TO SAVEPOINT computed_at_read")
+        except Exception:                   # noqa: BLE001
+            pass
+    else:
+        try:
+            cur.execute("RELEASE SAVEPOINT computed_at_read")
+        except Exception:                   # noqa: BLE001
+            pass
