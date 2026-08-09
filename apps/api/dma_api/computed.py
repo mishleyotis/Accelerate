@@ -166,7 +166,7 @@ def evidence_coverage(cur, data: dict, run_id, entity_id,
 
 
 def _bare_domain(value) -> str:
-    """`https://WWW.BCU.org/about` -> `bcu.org`. "" when there is nothing.
+    """`https://WWW.BCU.org/about` -> `client.example`. "" when there is nothing.
 
     `entities.domain` is TEXT and nothing enforces its shape, so a value
     written as a URL would match no `source_domain` and score a confident
@@ -484,7 +484,7 @@ def safeguard_gates(cur, data: dict, run_id) -> None:
     definition of what a gate means, in the place the gate is defined.
     """
     # ONE row per gate: the LATEST. `gate_results` accumulates a row per
-    # evaluation, and a resubmitted page evaluates its gates again — Baxter
+    # evaluation, and a resubmitted page evaluates its gates again — the reference client
     # carries 61 rows for SG-V4 and 23 for SG-S8 across its submission
     # history. Serving them all would render the same gate eighty-four times
     # and put a superseded FAIL beside its own later PASS, with nothing on

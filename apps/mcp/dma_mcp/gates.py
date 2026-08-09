@@ -152,7 +152,7 @@ GATES = {
               "Fisher Investments), so payloads now arrive in parts. A "
               "partially transmitted payload that could be staged would "
               "validate perfectly and serve a fraction of the assessment — "
-              "which is exactly how baxter-credit-union-bcu came to serve 69 "
+              "which is exactly how the reference client came to serve 69 "
               "cell_evidence rows out of 765 cells with a clean verdict.",
               "block"),
     "CG-17": ("A declared length is the assembled length", None,

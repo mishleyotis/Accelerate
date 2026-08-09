@@ -23,8 +23,8 @@ internal fields (TRD §11). Four mechanisms, in order of authority:
 
 Measured on both promoted clients, 2026-08-09: **6 of 6 declared redactions
 were announced and not performed.** The customer body was LARGER than the
-internal one on both platform pages (132,711 against 132,462 for Baxter;
-33,165 against 33,126 for Odlum) — the receipt naming the removals was the
+internal one on both platform pages (132,711 against 132,462 for the reference client;
+33,165 against 33,126 for the second client) — the receipt naming the removals was the
 only thing the redaction added. Three defects, compounding:
 
 * `strip_paths` appended to `applied` unconditionally, so the receipt

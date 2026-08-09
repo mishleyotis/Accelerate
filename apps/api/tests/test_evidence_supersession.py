@@ -4,7 +4,7 @@
 links onto its re-mint when a later scan re-lands the same source with better
 content. The move is right; what shipped without it was any record that the
 move happened. `evidence_index` had no column saying "this row was replaced by
-that one", so the relationship between `E-BCU-008` and `E-BCU-008-R2` existed
+that one", so the relationship between `E-XXX-008` and `E-XXX-008-R2` existed
 only as a shared id prefix.
 
 Measured on production 2026-08-09, corpus-wide:

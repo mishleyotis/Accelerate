@@ -382,7 +382,7 @@ def check_ceiling_is_derived(wb):
     Measured on the workbook behind MEM-0054: Evidence_Ceiling is 5 on 634 of
     709 rows overall — which is legitimate where the evidence is T1/T2 — but 5
     on 62 of 62 rows of P3C3 and P4C4, whose strongest cited document is
-    fortinet.com's own customer case study. A ceiling that is never below the
+    a security vendor's own site's own customer case study. A ceiling that is never below the
     score it is supposed to bound is not a ceiling.
     """
     issues, ceil_at_5_top_band = [], 0

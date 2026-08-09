@@ -392,8 +392,8 @@ def _stated_unlinked(body: dict) -> str:
 # Migration 0043 and `persist.carry_links_across_remint` MOVE the links
 # onto the re-mint. Measured on production 2026-08-09, over every cited id
 # on the promoted heatmap: 3 orphans have a linked twin, and **all three
-# are bare ids whose links now sit on the `-R2` copy** — E-BCU-012 (192
-# cells), E-BCU-071 (43), E-BCU-026 (39). The direction inverted, and the
+# are bare ids whose links now sit on the `-R2` copy** — E-XXX-012 (192
+# cells), E-XXX-071 (43), E-XXX-026 (39). The direction inverted, and the
 # advice inverted with it: telling a producer to cite the bare form now
 # names the orphan.
 #
@@ -515,7 +515,7 @@ def _check_evidence_dating(found, cited_by) -> list:
 # The serving tier applies it on READ; this applies it at SUBMIT, because
 # a payload that CITES another sub-vertical's cell has reasoned about a
 # capability that does not apply to this institution — no read filter can
-# repair the sentence written beside it. Baxter Credit Union (SV2) reached
+# repair the sentence written beside it. the reference client (SV2) reached
 # a client surface citing 59 insurance carrier / RIA / insurance broker
 # cells.
 _CELL_ID_RE = re.compile(r"^P\d+C\d+\.")
@@ -673,7 +673,7 @@ def _check_subvertical_scope(page, payload, entity_code) -> list:
 # their assessment considered a product for a different industry and
 # congratulated itself for noticing.
 #
-# Baxter Credit Union's platform page shipped exactly that: "Insurance
+# the reference client's platform page shipped exactly that: "Insurance
 # policy administration and claims", relevance 0.15, reason "Out of
 # vertical: its anchor cells belong to a carrier entity type…". One of six
 # cards on a credit union's surface, spent on an insurance carrier

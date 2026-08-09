@@ -123,7 +123,7 @@ def upgrade() -> None:
     op.execute(
         "COMMENT ON COLUMN entities.domain IS "
         "'The entity''s own primary web domain, bare and lowercased "
-        "(bcu.org, not https://www.bcu.org/). The denominator side of "
+        "(client.example, not https://www.client.example/). The denominator side of "
         "O11''s self_sourced_pct: an evidence row published here is the "
         "entity speaking about itself rather than a third party doing so. "
         "NULL on every row as of 0045 because no ingest path writes it; "

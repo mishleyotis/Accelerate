@@ -159,7 +159,7 @@ def test_landscape_query_runs_against_the_real_enum(seeded):
 
 
 def test_safeguard_gates_serve_one_row_per_gate_the_latest(seeded):
-    """gate_results accumulates a row per evaluation — Baxter carries 61 rows
+    """gate_results accumulates a row per evaluation — the reference client carries 61 rows
     for SG-V4 and 23 for SG-S8 — so serving them all renders the same gate
     eighty-four times and puts a superseded FAIL beside its own later PASS,
     with nothing on the card to say which is current."""

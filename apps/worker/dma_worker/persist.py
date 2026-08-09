@@ -98,7 +98,7 @@ def _stated_completed_at(manifest: dict):
     Reading it matters far beyond a header line: `completed_at` becomes each
     evidence row's `reference_date`, and with that null the GENERATED
     `age_months` is null and `recency_band` falls to UNVERIFIED for EVERY item.
-    Baxter served 120 items, 45 of them dated, and all 120 banded UNVERIFIED —
+    the reference client served 120 items, 45 of them dated, and all 120 banded UNVERIFIED —
     which is why a FACT rendered beside an "unverified" label. The ladder, the
     freshness dot and the age contribution to ERS all depend on this one field.
     """
@@ -151,7 +151,7 @@ def carry_links_across_remint(cur, superseded: str, minted: str) -> int:
     """A re-mint is the SAME SOURCE, read again — carry what the row it
     supersedes already knows. Returns the number of links carried.
 
-    `_land_evidence` mints a run-qualified id (`E-BCU-006-R2`) when a second
+    `_land_evidence` mints a run-qualified id (`E-XXX-006-R2`) when a second
     scan re-lands a package-local id whose CONTENT changed: a fuller excerpt, a
     published date, an ERS the first scan had none of. The copy is the better
     row and it is the one the surfaces cite. It used to arrive with no cell
@@ -172,7 +172,7 @@ def carry_links_across_remint(cur, superseded: str, minted: str) -> int:
         and they MOVE, they are not copied. The first version of this
         function left the superseded row's links in place, so one document
         read twice reached every one of its subcaps twice: measured on the
-        reference client, E-BCU-012 and its -R2 twin each reached 191
+        reference client, E-XXX-012 and its -R2 twin each reached 191
         subcaps, and every one of those cells counted the same source as
         two items toward the `<3` thin-evidence line. The superseded row
         itself is retained — an old payload's citation of it still

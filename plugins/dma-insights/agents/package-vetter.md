@@ -121,7 +121,7 @@ defined as the maximum score the cited tiers support (T5 vendor collateral →
 2.0, T4 → 2.5, T3 → 4.0). Nothing recomputes it, so a row can cite a vendor's
 own marketing page and still carry a ceiling of 5. A category where every row
 is ≥4.0 under a ceiling of 5.0 is a ceiling that never bound anything —
-measured on one run, two whole categories, 62 cells, telling a CIRO-regulated
+measured on one run, two whole categories, 62 cells, telling a the client's regulator-regulated
 dealer its trade surveillance and best-execution monitoring were
 Differentiating on the strength of a Form ADV officer list for a 29-person
 subsidiary, a conference speaker biography, and the absence of enforcement

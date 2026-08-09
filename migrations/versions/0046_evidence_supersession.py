@@ -8,7 +8,7 @@ source as two items toward the `<3` thin-evidence line.
 
 What it did not do is record that the move happened. `evidence_index` has no
 column saying "this row was replaced by that one", so the relationship between
-`E-BCU-008` and `E-BCU-008-R2` exists only as a shared id prefix — a rule held
+`E-XXX-008` and `E-XXX-008-R2` exists only as a shared id prefix — a rule held
 in the shape of a string, which is the same class as the remediation text that
 inverted with it.
 
