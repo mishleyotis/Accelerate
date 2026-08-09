@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "apps" / "api"))
 sys.path.insert(0, str(ROOT / "apps" / "mcp"))
 
-from dma_api.pages import etag_for                              # noqa: E402
+from dma_api.pages import SERVE_RULES, etag_for                 # noqa: E402
 from dma_api.redaction import (CUSTOMER_WITHHELD, normalise_audience,  # noqa: E402
                                page_forbidden, redact_section)
 from dma_api.serving_spec import assemble, page_sections, readers  # noqa: E402
@@ -397,9 +397,24 @@ def test_etag_carries_run_promotion_and_audience():
     run = {"run_id": "abc", "promoted_at": "2026-08-05T04:00:00+00:00"}
     internal = etag_for(run, "internal")
     customer = etag_for(run, "customer")
-    assert internal.startswith('W/"abc.') and internal.endswith('.internal"')
+    assert internal.startswith('W/"abc.') and f'.internal.{SERVE_RULES}"' in internal
     assert internal != customer, "one run serves two documents"
-    assert etag_for({"run_id": "abc", "promoted_at": None}, "internal") == 'W/"abc.0.internal"'
+    assert (etag_for({"run_id": "abc", "promoted_at": None}, "internal")
+            == f'W/"abc.0.internal.{SERVE_RULES}"')
+
+
+def test_a_serving_rule_change_invalidates_a_cached_body():
+    """`run_id.promoted_epoch.audience` — not one of the three moves when a
+    SERVING RULE is fixed. So every cached client would have gone on holding
+    the defective body, including the customer body carrying vendor sell copy
+    that the redaction fix removes, and the fix would have been invisible to
+    exactly the readers it was for. Same lesson `subverticals.SCOPE_TAG`
+    already carries, at the page grain."""
+    run = {"run_id": "abc", "promoted_at": "2026-08-05T04:00:00+00:00"}
+    before = etag_for(run, "customer").replace(SERVE_RULES, "serve-rules@1")
+    assert before != etag_for(run, "customer"), (
+        "a serving-rule bump must change the tag, or a 304 keeps serving the "
+        "body the rule change was made to stop serving")
 
 
 def test_active_run_predicate_matches_the_real_enum():

@@ -87,12 +87,43 @@ _SUBVERTICAL_NAMES = {
 
 
 @app.get("/v1/catalogue")
-def catalogue():
+def catalogue(entity: str | None = None, run: str | None = None):
+    """The capability axis. Pinned to a RUN when one is named.
+
+    It served the CURRENT version to every caller. Two promoted runs are
+    pinned to v5.0, which has seventeen categories against v7.0's sixteen, so
+    any surface drawing its axis from here dropped P1C5 for those runs
+    silently — the killed ESG category, the same one every cross-version diff
+    renders NOT_COMPARABLE. A grid whose axis comes from a different version
+    than its cells is not a rendering difference; it is a column of scores
+    with no header and a header with no column.
+
+    `entity` (or `run`) pins it. Without either, the current version is
+    served and `is_pinned` says so, because an unpinned axis is a legitimate
+    answer to "what does the catalogue look like now" and an illegitimate one
+    to "what does this client's grid mean".
+    """
     conn = _connect()
     try:
         cur = conn.cursor()
-        cur.execute("SELECT version FROM ccg_versions WHERE is_current")
-        version = cur.fetchone()[0]
+        version, pinned_to = None, None
+        if entity or run:
+            cur.execute(
+                """SELECT ccg_catalog_version, run_id FROM serving_directory
+                    WHERE (%s IS NULL OR display_id = %s)
+                      AND (%s IS NULL OR run_id::text = %s)
+                    ORDER BY is_active DESC NULLS LAST, promoted_at DESC
+                    LIMIT 1""", (entity, entity, run, run))
+            row = cur.fetchone()
+            if row is None:
+                return JSONResponse(
+                    {"error": "entity_not_found",
+                     "detail": "no promoted run matches that entity or run"},
+                    status_code=404)
+            version, pinned_to = row[0], str(row[1])
+        if not version:
+            cur.execute("SELECT version FROM ccg_versions WHERE is_current")
+            version = cur.fetchone()[0]
         cur.execute(
             """SELECT category_id, pillar_id, name FROM ccg_categories
                 WHERE version = %s ORDER BY category_id""", (version,))
@@ -118,7 +149,11 @@ def catalogue():
                       for c, p, n in rows]
         pillars = [{"id": pid, "name": n, "short": s}
                    for pid, (n, s) in _PILLAR_NAMES.items()]
-        return {"version": version, "pillars": pillars, "categories": categories}
+        return {"version": version, "pillars": pillars,
+                "categories": categories,
+                # Stated rather than implied: a caller that did not pin has to
+                # be able to tell that it did not.
+                "is_pinned": pinned_to is not None, "pinned_to_run": pinned_to}
     finally:
         conn.close()
 
