@@ -1,0 +1,77 @@
+{
+  "_doc": [
+    "THE ENRICHMENT REGISTER — which served surfaces depend on an enrichment",
+    "source, and what THIN means for each.",
+    "",
+    "Why this file exists. Until 2026-08-14 nothing in this product recorded",
+    "that a surface needed enrichment, so a section built without a scan and a",
+    "section built with one rendered identically. The measured consequence: one",
+    "client's technology register served 12 rows against another's 51, its own",
+    "empty_state said 'the technographic scan that would normally widen this",
+    "register did not run', and no surface, gate, checker or routine read that",
+    "sentence. The section was honest and the reader could not tell.",
+    "",
+    "Two sources, per the build owner's adjudication of 2026-08-14 ('Both'):",
+    "  explorium  a machine technographic scan at INGEST, so a scheduled run",
+    "             gets a full register with no connector. Not yet live — it",
+    "             needs an API key — and records NOT_RUN with that reason",
+    "             until it is, which this register then renders.",
+    "  clay       the producer session's enrichment, for contact routes,",
+    "             thought leadership and firmographic members. Only available",
+    "             where the session holds the connector: this organisation's",
+    "             trigger API refuses connector grants, so scheduled runs",
+    "             cannot use it and must say so rather than appear complete.",
+    "",
+    "`thin_below` is a COUNT, deliberately, not a percentage: a rate needs a",
+    "denominator this product does not have (nobody knows how many products a",
+    "firm runs). The counts are floors set by measurement of the corpus, not by",
+    "aspiration — the reference client clears every one of them and the",
+    "under-enriched client clears none.",
+    "",
+    "Nothing here judges a run. The API computes `enrichment_status` per section",
+    "from these floors and the rows actually served (invariant 8 — counted, never",
+    "stored); the surface then states which of its sources ran. A section below",
+    "its floor is not a failure, it is a section whose reader is told why it is",
+    "short."
+  ],
+  "surfaces": {
+    "techstack.techstack": {
+      "sources": ["explorium", "clay"],
+      "counts": "items",
+      "thin_below": 20,
+      "basis_key": "detection_basis",
+      "thin_reason": "the technographic scan that widens this register did not run, so the rows here are only those a human search could place",
+      "closes_with": "an Explorium scan at ingest, or a Clay Tech Stack scan in a producer session that holds the connector"
+    },
+    "overview.leadership": {
+      "sources": ["clay"],
+      "counts": "roster",
+      "thin_below": 4,
+      "basis_key": "enrichment_basis",
+      "contact_keys": ["email", "linkedin_url", "phone"],
+      "thin_reason": "the contact-enrichment ladder established a route for fewer than half the named leaders",
+      "closes_with": "a Clay contact search against the entity's own domain, cited to the document it surfaces"
+    },
+    "overview.thought_leadership": {
+      "sources": ["clay"],
+      "counts": "entries",
+      "thin_below": 3,
+      "thin_reason": "fewer than three named executives were established in their own words",
+      "closes_with": "a Clay Find Thought Leadership pass, plus the newsroom and trade-press rungs of the ladder"
+    },
+    "overview.sentiment": {
+      "sources": ["clay"],
+      "counts": "employee",
+      "thin_below": 1,
+      "thin_reason": "no retrievable rating carrying its sample size, scale and date was established",
+      "closes_with": "an employer-review export or a client-satisfaction survey the firm publishes itself"
+    },
+    "overview.firmographics": {
+      "sources": ["clay"],
+      "counts": "fields",
+      "thin_below": 9,
+      "thin_reason": "fewer than nine of the must-present members carry a stated value",
+      "closes_with": "a Clay company enrichment, cited to the filings and pages it surfaces rather than to Clay itself"
+    }
+  }
+}

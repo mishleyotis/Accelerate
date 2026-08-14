@@ -1330,6 +1330,19 @@ function buildLiveEntity(entityId, pages, extras) {
     acquisitions: adaptAcquisitions(secOf(context, "acquisitions")),
     techStack: adaptTechStack(secOf(techstack, "techstack")),
     techLayers: techLayersOf(secOf(techstack, "techstack")),
+    /* `enrichment_status` is computed at read (dma_api/computed.py) from the
+       enrichment register: which sources this surface depends on, whether any
+       served row shows one reached it, and whether the register is under its
+       floor. Carried here so the page can SAY a register is short rather than
+       presenting twelve rows as if they were the estate — the defect the
+       build owner named on 2026-08-14. */
+    enrichment: {
+      techstack: (secOf(techstack, "techstack") || {}).enrichment_status || null,
+      leadership: (secOf(overview, "leadership") || {}).enrichment_status || null,
+      thought_leadership: (secOf(overview, "thought_leadership") || {}).enrichment_status || null,
+      sentiment: (secOf(overview, "sentiment") || {}).enrichment_status || null,
+      firmographics: (secOf(overview, "firmographics") || {}).enrichment_status || null
+    },
     evidence: adaptEvidence(x.evidence),
     landscape: secOf(insights, "landscape"),
     // The run's own promotion facts, so a surface can say what it is showing

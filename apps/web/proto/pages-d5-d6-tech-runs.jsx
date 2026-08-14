@@ -1793,6 +1793,12 @@ function ClientTechStack({ entity, run }) {
             {allTech.length} product{allTech.length === 1 ? "" : "s"} across four
             layers · detection level per row, from the run's own evidence
           </div>
+          {/* Whether the technographic scan that widens this register actually
+              ran. Without it, twelve human-placed rows and a fifty-one-row
+              machine-scanned estate render identically, and the short one
+              reads as the client's whole stack. The run's own empty_state said
+              the scan had not run and no surface repeated it. */}
+          <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).techstack} what="register" />
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entity.name} tech stack as CSV…`, "success")}><Icon name="download" size={13} /> Export</button>

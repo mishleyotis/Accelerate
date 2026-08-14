@@ -27,6 +27,9 @@ Two rules hold everywhere in this module:
 """
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 # Tier -> the highest evidence level that tier can carry, RENDERED beside the
 # count because it is what the mix means (O11 contract). T5 is vendor
 # collateral: corroboration required, ceiling L2.
@@ -536,6 +539,82 @@ def safeguard_gates(cur, data: dict, run_id) -> None:
         for gid, label, result, detail, reason in rows])
 
 
+# ── enrichment status ──────────────────────────────────────────────────────
+#
+# THE SIGNAL THAT DID NOT EXIST. Nothing in this product recorded that a
+# surface depended on an enrichment source, so a section built without a scan
+# and a section built with one rendered identically. Measured 2026-08-14: one
+# client's technology register served 12 rows against another's 51, its own
+# empty_state said the technographic scan "did not run", and no surface, gate,
+# checker or routine read that sentence.
+#
+# This computes, per section, from what was actually served:
+#
+#   required     this surface depends on an enrichment source
+#   sources      which ones (explorium at ingest, clay in a producer session)
+#   ran          whether ANY item carries a basis showing enrichment reached it
+#   count        rows served / thin_below floor
+#   thin         count is under the floor
+#   thin_reason  why that matters, in the register's own words
+#   closes_with  what would close it
+#
+# Counted, never stored (invariant 8), and additive — a page that renders
+# without this is worse than one that renders with it, so a register that
+# cannot be read leaves every section unflagged rather than failing the page.
+_ENRICHMENT_REGISTER: dict | None = None
+
+
+def _enrichment_register() -> dict:
+    global _ENRICHMENT_REGISTER
+    if _ENRICHMENT_REGISTER is None:
+        try:
+            path = (Path(__file__).resolve().parents[3] / "packages" /
+                    "shared" / "enrichment_register.json")
+            _ENRICHMENT_REGISTER = json.loads(path.read_text()).get("surfaces") or {}
+        except Exception:                   # noqa: BLE001
+            _ENRICHMENT_REGISTER = {}
+    return _ENRICHMENT_REGISTER
+
+
+def enrichment_status(data: dict, page: str, section: str) -> None:
+    spec = _enrichment_register().get(f"{page}.{section}")
+    if not spec or not isinstance(data, dict):
+        return
+    rows = data.get(spec.get("counts") or "")
+    rows = rows if isinstance(rows, list) else []
+    count = len(rows)
+    floor = spec.get("thin_below") or 0
+
+    # "Ran" is evidenced by the rows themselves, not asserted: an item that
+    # carries the register's basis key, or a contact route on a roster, is a
+    # row enrichment actually reached. A producer claiming a scan ran while no
+    # row shows it would be believed by any check that read a boolean.
+    basis_key = spec.get("basis_key")
+    contact_keys = spec.get("contact_keys") or ()
+    enriched = 0
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        if basis_key and str(r.get(basis_key) or "").strip():
+            enriched += 1
+        elif any(str(r.get(k) or "").strip() for k in contact_keys):
+            enriched += 1
+
+    status = {
+        "required": True,
+        "sources": list(spec.get("sources") or []),
+        "ran": enriched > 0,
+        "enriched_rows": enriched,
+        "count": count,
+        "thin_below": floor,
+        "thin": count < floor,
+    }
+    if status["thin"]:
+        status["thin_reason"] = spec.get("thin_reason")
+        status["closes_with"] = spec.get("closes_with")
+    _set(data, "enrichment_status", status)
+
+
 # ── the one entry point ────────────────────────────────────────────────────
 def apply(cur, page: str, section: str, data, run_meta: dict, entity_id) -> None:
     """Fill this section's computed-at-read fields, in place.
@@ -578,6 +657,10 @@ def apply(cur, page: str, section: str, data, run_meta: dict, entity_id) -> None
             evidence_age_rollups(data)
         elif page == "heatmap" and section == "safeguard_gates":
             safeguard_gates(cur, data, run_id)
+        # Runs for EVERY section, after whatever else this section computes,
+        # because a surface that depends on an enrichment source has to say so
+        # whether or not it has other computed fields.
+        enrichment_status(data, page, section)
     except Exception as exc:                # noqa: BLE001
         # Named, not swallowed. The section says which computation failed and
         # why, so an absent census reads as a broken computation rather than

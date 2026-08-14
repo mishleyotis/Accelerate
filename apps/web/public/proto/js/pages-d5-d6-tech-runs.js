@@ -2885,7 +2885,10 @@ function ClientTechStack({
     className: "eyebrow"
   }, "Technology intelligence"), /*#__PURE__*/React.createElement("h1", null, "Technology stack - ", entity.name), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, allTech.length, " product", allTech.length === 1 ? "" : "s", " across four layers \xB7 detection level per row, from the run's own evidence")), /*#__PURE__*/React.createElement("div", {
+  }, allTech.length, " product", allTech.length === 1 ? "" : "s", " across four layers \xB7 detection level per row, from the run's own evidence"), /*#__PURE__*/React.createElement(EnrichmentFlag, {
+    s: (DMA.LIVE_ENRICHMENT || {}).techstack,
+    what: "register"
+  })), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",

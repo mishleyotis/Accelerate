@@ -2858,6 +2858,14 @@
     get THOUGHT_LEADERSHIP() {
       return LIVE ? liveField(null, "thoughtLeadership") || [] : THOUGHT_LEADERSHIP;
     },
+    /* Computed at read from the enrichment register: per surface, which
+       sources it depends on, whether any served row shows one reached it, and
+       whether it is under its floor. `{}` on the prototype path — the fixture
+       has no enrichment provenance, and inventing one would make a surface
+       claim a scan ran. */
+    get LIVE_ENRICHMENT() {
+      return LIVE ? liveField(null, "enrichment") || {} : {};
+    },
     get FOCUS_AREAS() {
       return LIVE ? liveField(null, "focusAreas") || [] : FOCUS_AREAS;
     },

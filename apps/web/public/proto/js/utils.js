@@ -371,6 +371,47 @@ function PageBoundary({
      no section state   the section did not promote at all
      empty_state        the producer's own account of the absence
      state, no reason   it promoted and carries nothing, which is all we know */
+/* Whether the enrichment a surface DEPENDS on actually reached it.
+
+   Renders nothing when the surface is not enrichment-dependent, and nothing
+   when it is and is healthy — a badge on every card is noise, and the reader
+   only needs telling when what they are looking at is short of what it should
+   be. `enrichment_status` is computed at read from
+   packages/shared/enrichment_register.json; see dma_api/computed.py.
+
+   The line the build owner asked for on 2026-08-14: a twelve-row technology
+   register and a fifty-one-row one rendered identically, and the short one
+   read as the client's whole estate. */
+function EnrichmentFlag({
+  s,
+  what
+}) {
+  if (!s || !s.required) return null;
+  const thin = !!s.thin;
+  const notRun = !s.ran;
+  if (!thin && !notRun) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    "data-enrichment": what || "surface",
+    style: {
+      gap: 6,
+      marginTop: 6,
+      flexWrap: "wrap",
+      alignItems: "baseline"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "b b-org",
+    style: {
+      whiteSpace: "nowrap"
+    }
+  }, notRun ? "Scan did not run" : `Thin ${what || "surface"}`), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)",
+      lineHeight: 1.5
+    }
+  }, s.thin_reason || `no served row records that ${(s.sources || []).join(" or ")} reached this surface`, s.count != null && s.thin_below ? ` (${s.count} of ${s.thin_below} expected)` : "", s.closes_with ? ` · closes with ${s.closes_with}` : ""));
+}
 function SectionEmpty({
   section,
   absent,
@@ -1623,6 +1664,7 @@ Object.assign(window, {
   PageBoundary,
   SectionEmpty,
   SectionEmptyFoot,
+  EnrichmentFlag,
   LoadingScreen,
   SectionLoader,
   ConnectionWatcher,
