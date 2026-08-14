@@ -369,7 +369,20 @@ function EnrichmentFlag({ s, what }) {
    and the leadership panel's own comment settles the shape — an affordance that
    promises an action the reader cannot take is worse than the absence. */
 function EnrichmentGap({ what, reason, held, audience, compact }) {
-  const isCust = audience === "customer";
+  /* DEFAULT-DENY on the audience, deliberately inverted from the usual
+     `=== "customer"` test used elsewhere in this file.
+
+     `audience` is "internal" or "customer" and this component is rendered from
+     ~50 sites across ten modules, several of which had to have the prop
+     THREADED to them. A site that misses it would, under the usual test, show a
+     CUSTOMER the internal wording — "queued for enrichment" is our workflow
+     language and it names a backlog the client is not party to. Under this
+     test, the same mistake shows an internal reader the plainer sentence: less
+     informative, and harmless.
+
+     Invariant 5's shape, applied one layer out: the unmarked case is the
+     protected one. */
+  const isCust = audience !== "internal";
   // A held field is the one honest absence: the producer ran the ladder, the
   // figure failed, and the reason is the finding. It is not a gap to queue.
   if (held) {

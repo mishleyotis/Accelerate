@@ -410,7 +410,11 @@ function ClientPlatform({
   run
 }) {
   const route = useRoute();
+  // `audience` decides what an empty field is allowed to say: a customer is
+  // told the assessment did not establish it, an internal reader is told it is
+  // queued for enrichment. Nothing on this page may print a bare em dash.
   const {
+    audience,
     setIpSurface,
     setIpContext,
     setIpOpen,
@@ -716,12 +720,16 @@ function ClientPlatform({
         }
       }, /*#__PURE__*/React.createElement("div", {
         style: {
-          fontSize: 26,
-          fontWeight: 200,
+          fontSize: composite === null ? 11.5 : 26,
+          fontWeight: composite === null ? 400 : 200,
           color: composite === null ? "var(--z-muted)" : "var(--z-teal)",
           lineHeight: 1.15
         }
-      }, composite === null ? "—" : composite.toFixed(1)), /*#__PURE__*/React.createElement("div", {
+      }, composite === null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+        what: "Platform fit score",
+        audience: audience,
+        compact: true
+      }) : composite.toFixed(1)), /*#__PURE__*/React.createElement("div", {
         className: "f-mono",
         style: {
           fontSize: 9,
@@ -981,11 +989,19 @@ function ClientPlatform({
        carry, so the rows stay one line tall either way. */
     const eids = g.e_ids.length ? g.e_ids : (evidenceByCell.get(String(g.subcap_id)) || []).slice(0, 2);
     /* Every peer figure on this run is absent with a stated
-       reason, so the column shows an em dash and carries the
-       reason in its tooltip — never the words "cannot estimate"
-       as a chip on all five rows, which reads as a verdict on the
-       platform rather than on the peer set. */
+       reason, so the column carries that reason rather than a
+       chip reading "cannot estimate" on all five rows, which
+       reads as a verdict on the platform rather than on the peer
+       set. */
     const peerWhy = pfText(g.peer_note) || (g.peer_basis ? String(g.peer_basis).replace(/_/g, " ") : wb && wb.peer_basis ? String(wb.peer_basis).replace(/_/g, " ") : "No peer figure is stated for this cell");
+    /* A missing peer with a stated basis is HELD, not silent: the
+       producer ran the comparison and the figure failed. Tile
+       rows carry `peer_basis: null` by construction, so those are
+       a real gap and read as one. Guarded on `peer === null`
+       because a basis beside a PRESENT peer describes how that
+       figure was derived (category_proxy), not why one is
+       missing. */
+    const peerHeld = peer === null && !!(pfText(g.peer_note) || g.peer_basis || wb && wb.peer_basis);
     // The first row the derived scope does not reach carries the
     // divider; the rows under it are the same run's promoted gap
     // rows, filed under another platform's area.
@@ -1025,9 +1041,11 @@ function ClientPlatform({
       className: "col-drop"
     }, pillar ? /*#__PURE__*/React.createElement("span", {
       className: "b b-purple"
-    }, pillar) : /*#__PURE__*/React.createElement("span", {
-      className: "chip muted"
-    }, "\u2014")), /*#__PURE__*/React.createElement("td", {
+    }, pillar) : /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Pillar",
+      audience: audience,
+      compact: true
+    })), /*#__PURE__*/React.createElement("td", {
       "data-label": "Score"
     }, /*#__PURE__*/React.createElement(MaturityChip, {
       score: cur
@@ -1035,19 +1053,28 @@ function ClientPlatform({
       "data-label": "Peer"
     }, peer !== null ? /*#__PURE__*/React.createElement(MaturityChip, {
       score: peer
-    }) : /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: "var(--z-muted)"
-      },
-      title: peerWhy
-    }, "\u2014")), anyPeer ? /*#__PURE__*/React.createElement("td", {
+    }) : /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Peer score",
+      held: peerHeld,
+      reason: peerHeld ? peerWhy : undefined,
+      audience: audience,
+      compact: true
+    })), anyPeer ?
+    /*#__PURE__*/
+    /* The delta is arithmetic, so it carries the state of
+       its inputs: held where the peer is held, an ordinary
+       gap where a score is simply not stated. The reason
+       itself is not repeated here — it is one cell to the
+       left and belongs to the figure it explains, not to a
+       subtraction. */
+    React.createElement("td", {
       "data-label": "Gap"
-    }, delta === null ? /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: "var(--z-muted)"
-      },
-      title: peerWhy
-    }, "\u2014") : /*#__PURE__*/React.createElement("span", {
+    }, delta === null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Gap to peer",
+      held: peerHeld,
+      audience: audience,
+      compact: true
+    }) : /*#__PURE__*/React.createElement("span", {
       className: "f-mono",
       style: {
         color: delta < 0 ? "var(--z-below)" : "var(--z-above)"
@@ -1060,7 +1087,11 @@ function ClientPlatform({
         fontSize: 11.5,
         color: "var(--z-dark)"
       }
-    }, pfText(g.feature) || "—")), /*#__PURE__*/React.createElement("td", {
+    }, pfText(g.feature) || /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Feature / L4",
+      audience: audience,
+      compact: true
+    }))), /*#__PURE__*/React.createElement("td", {
       "data-label": "Evidence"
     }, /*#__PURE__*/React.createElement(PlatformEvChips, {
       ids: eids,

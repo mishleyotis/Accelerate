@@ -21,8 +21,10 @@
      in the ONE resolver (DMA.helpers.maturityHex/maturityClass);
    · nothing is recomputed that the producer already computed (deltas,
      shares, ages, counts all render as promoted);
-   · a null derived value renders as an em dash, never as 0 and never as
-     a sentinel that looks like data.
+   · a null derived value renders as an EnrichmentGap naming the field,
+     never as 0 and never as a sentinel that looks like data. Not an em
+     dash either: an em dash cannot say whether the field was searched,
+     held or never asked for, and gives the reader no route to filling it.
    ═══════════════════════════════════════════════════════════════════════ */
 
 const LIVE_PAGE_SECTIONS = {
@@ -189,18 +191,28 @@ function bandClass(v) {
   return BAND_CLASS[String(v).trim().toLowerCase()] || "";
 }
 
+/* fmtScore and fmtPctVal return TEXT, because both are also read into title
+   attributes, where a React element cannot go. The absent case is therefore a
+   plain word here; every JSX site that can receive a null renders
+   <EnrichmentGap> instead, which names the field and carries the route to
+   enrichment. */
 function fmtScore(v) {
-  return (v === null || v === undefined) ? "—" : Number(v).toFixed(1);
+  return (v === null || v === undefined) ? "not stated" : Number(v).toFixed(1);
 }
 
 function fmtPctVal(v, decimals) {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "not stated";
   return `${fmtNum(v, { decimals: decimals === undefined ? 0 : decimals })}%`;
 }
 
-/* Delta is PROMOTED, never recomputed here (invariant 8). */
-function DeltaBadge({ delta, direction }) {
-  if (delta === null || delta === undefined) return <span className="muted">—</span>;
+/* Delta is PROMOTED, never recomputed here (invariant 8). An absent delta is
+   an absent peer comparison, not a zero — it renders as the enrichment gap in
+   its compact form, because every delta on this page sits in a narrow
+   fixed-width numeric column. */
+function DeltaBadge({ delta, direction, audience }) {
+  if (delta === null || delta === undefined) {
+    return <EnrichmentGap what="Peer delta" audience={audience} compact />;
+  }
   const below = direction ? direction === "below" : delta < 0;
   return (
     <span className="f-mono" style={{ fontSize: 11,
@@ -315,7 +327,7 @@ function SectionHead({ title, note, right }) {
 
 /* ══ O1 · snapshot strip: ring · pillar bars · firmographics ═════════
    The prototype's D1 opening card, three columns, unchanged in shape. */
-function LiveSnapshot({ scores, firmo, entity, run, state }) {
+function LiveSnapshot({ scores, firmo, entity, run, state, audience }) {
   const d = scores || {};
   const pillars = d.pillars || [];
   const byId = {};
@@ -370,9 +382,17 @@ function LiveSnapshot({ scores, firmo, entity, run, state }) {
                              title={`Peer median ${fmtScore(peer)}${row.peer_n ? ` · n=${row.peer_n}` : ""}`} />
                       ) : null}
                     </div>
-                    <div className="pbar-score">{fmtScore(s)}</div>
+                    {/* .pbar-score is 32px and .pbar-delta 50px, so both take
+                        the compact gap — a queue badge here would burst the
+                        row. */}
+                    <div className="pbar-score">
+                      {s == null
+                        ? <EnrichmentGap what={`${p.id} pillar score`}
+                                         audience={audience} compact />
+                        : fmtScore(s)}</div>
                     <div className="pbar-delta">
-                      <DeltaBadge delta={row.delta} direction={row.direction} /></div>
+                      <DeltaBadge delta={row.delta} direction={row.direction}
+                                  audience={audience} /></div>
                   </div>
                 );
               })}
@@ -735,7 +755,7 @@ function LiveLeadership({ data, state }) {
 }
 
 /* ══ O7 · financial trajectory ═════════════════════════════════════ */
-function LiveFinancials({ data, state }) {
+function LiveFinancials({ data, state, audience }) {
   const series = (data && data.series) || [];
   if (!series.length) return null;
   const points = series.filter((s) => s.value != null);
@@ -771,9 +791,16 @@ function LiveFinancials({ data, state }) {
         {series.map((p, i) => (
           <div key={i} style={{ flex: 1, textAlign: "center", fontSize: 9.5,
                                 color: "var(--z-muted)" }}>
-            <div className="f-mono">{p.period || "—"}</div>
+            {/* One column per bar, so both gaps are compact — the bar above
+                already carries the dashed outline for an absent figure. */}
+            <div className="f-mono">
+              {p.period || <EnrichmentGap what="Reporting period"
+                                          audience={audience} compact />}</div>
             <div style={{ color: "var(--z-dark)", fontWeight: 500 }}>
-              {p.value == null ? "—"
+              {p.value == null
+                ? <EnrichmentGap what={p.period ? `${p.period} figure`
+                                                : "Financial figure"}
+                                 audience={audience} compact />
                 : (p.unit ? fmtMoney(p.value, p.unit) : fmtNum(p.value))}</div>
           </div>
         ))}
@@ -789,7 +816,7 @@ function LiveFinancials({ data, state }) {
 }
 
 /* ══ O8 · evidence coverage & tier mix ═════════════════════════════ */
-function LiveCoverage({ data, state }) {
+function LiveCoverage({ data, state, audience }) {
   if (!data) return null;
   const per = data.per_pillar || [];
   return (
@@ -807,7 +834,11 @@ function LiveCoverage({ data, state }) {
             {p.cells_covered != null && p.cells_total != null ? (
               <span className="muted" style={{ fontSize: 10 }}>
                 {fmtNum(p.cells_covered)}/{fmtNum(p.cells_total)}</span>) : null}
-            <span className="f-mono">{fmtPctVal(p.pct, 1)}</span>
+            <span className="f-mono">
+              {p.pct == null
+                ? <EnrichmentGap what={`${p.pillar_id || "Pillar"} evidence coverage`}
+                                 audience={audience} compact />
+                : fmtPctVal(p.pct, 1)}</span>
             {p.below_gate ? (
               <span className="b b-org" title="below the corpus gate threshold">
                 BELOW GATE</span>) : null}
@@ -1007,7 +1038,7 @@ function LiveThoughtLeadership({ data, state }) {
    The prototype's category heatmap, rendered from promoted pillar and
    category scores. Colour is resolved here from the raw score — the
    payload carries no hex, by invariant 7. */
-function LiveWorkbookGrid({ data, state, entity, run, onDrill }) {
+function LiveWorkbookGrid({ data, state, entity, run, onDrill, audience }) {
   const [showPeers, setShowPeers] = useState(true);
   const [pillarFocus, setPillarFocus] = useState(null);
   if (!data) return null;
@@ -1062,8 +1093,12 @@ function LiveWorkbookGrid({ data, state, entity, run, onDrill }) {
                 background: DMA.helpers.maturityHex(row.score) }} /></div>
               <div className="row" style={{ marginTop: 8, fontSize: 10.5 }}>
                 <span style={{ color: "var(--z-muted)" }}>
-                  Peer {fmtScore(row.peer_median)}</span>
-                {row.delta != null ? <DeltaBadge delta={Number(row.delta)} /> : null}
+                  {row.peer_median == null
+                    ? <EnrichmentGap what={`${p.id} peer median`}
+                                     audience={audience} compact />
+                    : `Peer ${fmtScore(row.peer_median)}`}</span>
+                {row.delta != null
+                  ? <DeltaBadge delta={Number(row.delta)} audience={audience} /> : null}
                 <span className="spacer" />
                 <span style={{ fontSize: 9.5, color: "var(--z-muted)" }}>
                   {catsOf(p.id).length} categories</span>
@@ -1110,7 +1145,11 @@ function LiveWorkbookGrid({ data, state, entity, run, onDrill }) {
                            .filter(Boolean).join(" · ")}>
                     <div style={{ display: "flex", flexDirection: "column",
                                   lineHeight: 1.15, gap: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700 }}>{fmtScore(c.score)}</div>
+                      <div style={{ fontSize: 13, fontWeight: 700 }}>
+                        {c.score == null
+                          ? <EnrichmentGap what={`${cid} score`}
+                                           audience={audience} compact />
+                          : fmtScore(c.score)}</div>
                       {c.delta != null ? (
                         <div style={{ fontSize: 8, fontWeight: 600 }}>
                           {Number(c.delta) >= 0 ? "▲" : "▼"}{Math.abs(Number(c.delta)).toFixed(1)}
@@ -1126,9 +1165,14 @@ function LiveWorkbookGrid({ data, state, entity, run, onDrill }) {
                                 paddingRight: 8 }}>Peer</div>
                   {ids.map((cid) => {
                     const pm = cats[cid].peer_median;
+                    /* A null median is NOT a zero: banded and printed as 0.0
+                       it would read as a peer set that scores nothing. It is
+                       a gap in the cohort benchmark, and it is enrichable. */
                     return pm == null ? (
                       <div key={cid} className="hm-cell peer"
-                           style={{ minHeight: 30, padding: "4px 6px" }}>—</div>
+                           style={{ minHeight: 30, padding: "4px 6px" }}>
+                        <EnrichmentGap what={`${cid} peer median`}
+                                       audience={audience} compact /></div>
                     ) : (
                       <div key={cid}
                            className={`hm-cell peer b ${DMA.helpers.maturityClass(pm)}`}
@@ -1174,7 +1218,7 @@ function LiveWorkbookGrid({ data, state, entity, run, onDrill }) {
 }
 
 /* ══ H1 · focus areas ══════════════════════════════════════════════ */
-function LiveFocusAreas({ data, state }) {
+function LiveFocusAreas({ data, state, audience }) {
   const areas = (data && data.focus_areas) || [];
   const [open, setOpen] = useState(null);
   if (!areas.length) return null;
@@ -1198,7 +1242,7 @@ function LiveFocusAreas({ data, state }) {
                 {fa.peer_score != null ? (
                   <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}>
                     peer {fmtScore(fa.peer_score)}</span>) : null}
-                {delta != null ? <DeltaBadge delta={delta} /> : null}
+                {delta != null ? <DeltaBadge delta={delta} audience={audience} /> : null}
               </div>
               {fa.verbatim_quote ? (
                 <div style={{ fontSize: 12, fontStyle: "italic", marginTop: 8,
@@ -1467,7 +1511,7 @@ const AGE_BANDS = ["FRESH", "CURRENT", "AGING", "DATED", "STALE", "UNDATED"];
 const AGE_TONE = { FRESH: "b-ph1", CURRENT: "b-ph1", AGING: "", DATED: "b-org",
                    STALE: "b-org", UNDATED: "b-org" };
 
-function LiveEvidenceAge({ data, state }) {
+function LiveEvidenceAge({ data, state, audience }) {
   const rows = (data && data.rows) || [];
   const [all, setAll] = useState(false);
   if (!rows.length) return null;
@@ -1494,7 +1538,9 @@ function LiveEvidenceAge({ data, state }) {
             <span className="f-mono" style={{ minWidth: 88 }}>{r.e_id}</span>
             <span style={{ flex: 1, minWidth: 0, overflow: "hidden",
                            textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                  title={r.title || ""}>{r.title || "—"}</span>
+                  title={r.title || ""}>
+              {r.title || <EnrichmentGap what={`Title of ${r.e_id || "this evidence item"}`}
+                                         audience={audience} compact />}</span>
             {r.source_domain ? (
               <span className="muted" style={{ minWidth: 110, fontSize: 10,
                     overflow: "hidden", textOverflow: "ellipsis",
@@ -1523,7 +1569,7 @@ function LiveEvidenceAge({ data, state }) {
 }
 
 /* ══ H8 · cohort patterns (entity ids always stripped server-side) ══ */
-function LiveCohorts({ data, state }) {
+function LiveCohorts({ data, state, audience }) {
   const patterns = (data && data.patterns) || [];
   const insufficient = (data && data.insufficient_cohorts) || [];
   if (!patterns.length && !insufficient.length) return null;
@@ -1543,7 +1589,9 @@ function LiveCohorts({ data, state }) {
                 background: "var(--z-dpur)" }} /></div>
             </div>
             <span className="f-mono" style={{ minWidth: 52, textAlign: "right" }}>
-              {fmtPctVal(p.share_pct, 0)}</span>
+              {p.share_pct == null
+                ? <EnrichmentGap what="Cohort share" audience={audience} compact />
+                : fmtPctVal(p.share_pct, 0)}</span>
           </div>
         ))}
       </div>
@@ -1703,7 +1751,7 @@ function LivePlatformStory({ data, state }) {
 }
 
 /* ══ D2 · recommendations ══════════════════════════════════════════ */
-function LiveRecommendations({ data, state }) {
+function LiveRecommendations({ data, state, audience }) {
   const recs = (data && data.recommendations) || [];
   const [open, setOpen] = useState(null);
   if (!recs.length) return null;
@@ -1755,10 +1803,17 @@ function LiveRecommendations({ data, state }) {
                             <span className="chip f-mono" style={{ fontSize: 9 }}>
                               {c.subcap_id}</span>
                             <span style={{ flex: 1, minWidth: 0 }}>{asText(c.name)}</span>
-                            <span className="f-mono">{fmtScore(c.current)}</span>
+                            <span className="f-mono">
+                              {c.current == null
+                                ? <EnrichmentGap what={`${c.subcap_id || "Cell"} current score`}
+                                                 audience={audience} compact />
+                                : fmtScore(c.current)}</span>
                             <Icon name="chevron-r" size={9} />
                             <span className="f-mono" style={{ fontWeight: 600 }}>
-                              {fmtScore(c.target)}</span>
+                              {c.target == null
+                                ? <EnrichmentGap what={`${c.subcap_id || "Cell"} target score`}
+                                                 audience={audience} compact />
+                                : fmtScore(c.target)}</span>
                             {c.delta != null ? (
                               <span className="f-mono" style={{ minWidth: 34,
                                     textAlign: "right", color: "var(--z-mid)" }}>
@@ -1810,7 +1865,11 @@ function LiveRecommendations({ data, state }) {
                           {r.validation_gate.backing_cells.map((b, j) => (
                             <span key={j} className="chip f-mono" style={{ fontSize: 9 }}
                                   title={asText(b.name) || ""}>
-                              {b.subcap_id} {fmtScore(b.score)}</span>))}
+                              {b.subcap_id}{" "}
+                              {b.score == null
+                                ? <EnrichmentGap what={`${b.subcap_id || "Backing cell"} score`}
+                                                 audience={audience} compact />
+                                : fmtScore(b.score)}</span>))}
                         </div>) : null}
                       {asText(r.validation_gate.grain_note) ? (
                         <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 4,
@@ -1833,7 +1892,8 @@ function LiveRecommendations({ data, state }) {
                                           textTransform: "uppercase",
                                           letterSpacing: ".06em" }}>{k}</div>
                             <div style={{ fontSize: 11, lineHeight: 1.45 }}>
-                              {asText(v) || "—"}</div>
+                              {asText(v) || <EnrichmentGap what={`KPI ${k.toLowerCase()}`}
+                                                           audience={audience} compact />}</div>
                           </div>))}
                       </div>
                     </div>) : null}
@@ -2090,7 +2150,7 @@ function LiveIssueRegister({ data, state }) {
 }
 
 /* ══ D5 · regulatory standing ══════════════════════════════════════ */
-function LiveRegulatory({ data, state }) {
+function LiveRegulatory({ data, state, audience }) {
   if (!data) return null;
   const enf = data.enforcement_actions || [];
   const abs = data.absence_of_enforcement || null;
@@ -2099,11 +2159,17 @@ function LiveRegulatory({ data, state }) {
       <SectionHead title="Regulatory standing" />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
         <div>
-          <Row k="Primary regulator" v={data.primary_regulator || "—"} />
-          <Row k="Licence type" v={data.license_type || "—"} />
-          <Row k="Charter date" v={data.charter_date || "—"} />
-          <Row k="Additional" v={(data.additional_regulators || []).join(" · ") || "—"} />
-          <Row k="Jurisdictions" v={(data.jurisdictions || []).join(" · ") || "—"} />
+          {/* Full-width label/value rows, so these carry the queue badge. */}
+          <Row k="Primary regulator" v={data.primary_regulator
+            || <EnrichmentGap what="Primary regulator" audience={audience} />} />
+          <Row k="Licence type" v={data.license_type
+            || <EnrichmentGap what="Licence type" audience={audience} />} />
+          <Row k="Charter date" v={data.charter_date
+            || <EnrichmentGap what="Charter date" audience={audience} />} />
+          <Row k="Additional" v={(data.additional_regulators || []).join(" · ")
+            || <EnrichmentGap what="Additional regulators" audience={audience} />} />
+          <Row k="Jurisdictions" v={(data.jurisdictions || []).join(" · ")
+            || <EnrichmentGap what="Jurisdictions" audience={audience} />} />
         </div>
         <div>
           <div className="eyebrow" style={{ fontSize: 9.5, marginBottom: 6 }}>
@@ -2141,7 +2207,7 @@ function LiveRegulatory({ data, state }) {
 }
 
 /* ══ D5 · acquisitions ═════════════════════════════════════════════ */
-function LiveAcquisitions({ data, state }) {
+function LiveAcquisitions({ data, state, audience }) {
   const rows = (data && data.rows) || [];
   if (!rows.length) return null;
   return (
@@ -2168,7 +2234,10 @@ function LiveAcquisitions({ data, state }) {
                   <span key={k} style={{ fontSize: 10.5, color: "var(--z-muted)" }}>
                     {k.replace(/_/g, " ")}{" "}
                     <b style={{ color: "var(--z-dark)" }}>
-                      {fmtNum(r.scale_metrics[k]) || asText(r.scale_metrics[k]) || "—"}</b></span>))}
+                      {fmtNum(r.scale_metrics[k]) || asText(r.scale_metrics[k])
+                        || <EnrichmentGap what={`${r.target_name || "Target"} ${
+                              k.replace(/_/g, " ")}`}
+                              audience={audience} compact />}</b></span>))}
               </div>) : null}
             {r.integration_target ? (
               <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 5 }}>
@@ -2347,7 +2416,8 @@ function LiveClientPage({ entity, run, tab, live }) {
         <PageHead eyebrow="Assessment overview" title={entity.name} sub={subline} />
         {has("scores") || has("firmographics") ? (
           <Sec name="scores"><LiveSnapshot scores={S("scores")} firmo={S("firmographics")}
-                        entity={entity} run={run} state={St("scores")} /></Sec>
+                        entity={entity} run={run} state={St("scores")}
+                        audience={audience} /></Sec>
         ) : missing("scores")}
         {has("why_now") ? <Sec name="why_now"><LiveWhyNow data={S("why_now")} state={St("why_now")} /></Sec>
           : missing("why_now")}
@@ -2376,10 +2446,10 @@ function LiveClientPage({ entity, run, tab, live }) {
         </div>
         <div className="cards-grid-3" style={{ marginBottom: 16 }}>
           {has("financial_series") ? <Sec name="financial_series"><LiveFinancials data={S("financial_series")}
-            state={St("financial_series")} /></Sec>
+            state={St("financial_series")} audience={audience} /></Sec>
           : missing("financial_series")}
           {has("evidence_coverage") ? <Sec name="evidence_coverage"><LiveCoverage data={S("evidence_coverage")}
-            state={St("evidence_coverage")} /></Sec>
+            state={St("evidence_coverage")} audience={audience} /></Sec>
           : missing("evidence_coverage")}
           {has("sentiment") ? <Sec name="sentiment"><LiveSentiment data={S("sentiment")}
             state={St("sentiment")} /></Sec>
@@ -2408,10 +2478,11 @@ function LiveClientPage({ entity, run, tab, live }) {
         {has("workbook_scores") ? (
           <Sec name="workbook_scores">
             <LiveWorkbookGrid data={S("workbook_scores")} state={St("workbook_scores")}
-                              entity={entity} run={run} onDrill={setCellFilter} /></Sec>
+                              entity={entity} run={run} onDrill={setCellFilter}
+                              audience={audience} /></Sec>
         ) : missing("workbook_scores")}
         {has("focus_areas") ? <Sec name="focus_areas"><LiveFocusAreas data={S("focus_areas")}
-          state={St("focus_areas")} /></Sec>
+          state={St("focus_areas")} audience={audience} /></Sec>
           : missing("focus_areas")}
         {has("cell_evidence") ? (
           <Sec name="cell_evidence">
@@ -2428,10 +2499,10 @@ function LiveClientPage({ entity, run, tab, live }) {
           state={St("safeguard_gates")} /></Sec>
           : missing("safeguard_gates")}
         {has("evidence_age") ? <Sec name="evidence_age"><LiveEvidenceAge data={S("evidence_age")}
-          state={St("evidence_age")} /></Sec>
+          state={St("evidence_age")} audience={audience} /></Sec>
           : missing("evidence_age")}
         {has("cohort_patterns") ? <Sec name="cohort_patterns"><LiveCohorts data={S("cohort_patterns")}
-          state={St("cohort_patterns")} /></Sec>
+          state={St("cohort_patterns")} audience={audience} /></Sec>
           : missing("cohort_patterns")}
         {missing("evidence")}
       </div>
@@ -2461,7 +2532,7 @@ function LiveClientPage({ entity, run, tab, live }) {
           state={St("platform_story")} /></Sec>
           : missing("platform_story")}
         {has("recommendations") ? <Sec name="recommendations"><LiveRecommendations data={S("recommendations")}
-          state={St("recommendations")} /></Sec>
+          state={St("recommendations")} audience={audience} /></Sec>
           : missing("recommendations")}
         {has("roadmap") ? <Sec name="roadmap"><LiveRoadmap data={S("roadmap")} state={St("roadmap")} /></Sec>
           : missing("roadmap")}
@@ -2480,10 +2551,10 @@ function LiveClientPage({ entity, run, tab, live }) {
         {has("timeline") ? <Sec name="timeline"><LiveTimeline data={S("timeline")} state={St("timeline")} /></Sec>
           : missing("timeline")}
         {has("acquisitions") ? <Sec name="acquisitions"><LiveAcquisitions data={S("acquisitions")}
-          state={St("acquisitions")} /></Sec>
+          state={St("acquisitions")} audience={audience} /></Sec>
           : missing("acquisitions")}
         {has("regulatory_standing") ? <Sec name="regulatory_standing"><LiveRegulatory data={S("regulatory_standing")}
-          state={St("regulatory_standing")} /></Sec>
+          state={St("regulatory_standing")} audience={audience} /></Sec>
           : missing("regulatory_standing")}
         {has("issue_register") ? <Sec name="issue_register"><LiveIssueRegister data={S("issue_register")}
           state={St("issue_register")} /></Sec>

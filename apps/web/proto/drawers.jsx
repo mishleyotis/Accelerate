@@ -401,8 +401,14 @@ function InsightModal() {
               <Block title="WHY" body={ic.why} />
               <Block title="SO WHAT" body={ic.so_what} accent />
 
+              {/* The severity LEVEL can be absent while the rationale promoted.
+                  `title` is a template string on a prop, so EnrichmentGap (an
+                  element) cannot go here — the plain string carries the same
+                  two readings it does, and no queue badge, because a heading is
+                  a label slot and not a field slot (cf. "PHASE NOT STATED"). */}
               {ic.severity_rationale ? (
-                <Block title={`SEVERITY · ${ic.severity || "—"}`} body={ic.severity_rationale} />
+                <Block title={`SEVERITY · ${ic.severity || (audience === "customer" ? "Not established" : "Not stated")}`}
+                       body={ic.severity_rationale} />
               ) : null}
 
               {/* The counter-case, stated by the producer. A ranked claim that
@@ -2598,8 +2604,28 @@ function RecommendationModal() {
                             <button className="chip purple" onClick={() => { closeRec(); openSubcap(x.subcap_id); }}>{x.subcap_id}</button>
                           ) : null}
                           <span style={{ fontSize: 12.5, fontWeight: 600, flex: 1, minWidth: 0 }}>{dwText(x.name) || "cell not named"}</span>
+                          {/* A gap at BOTH ends of the arrow reads as a broken
+                              pair rather than as two absences, so when neither
+                              side promoted the row states the absence once and
+                              drops the arrow. One side missing keeps the arrow:
+                              the side that IS stated is the finding, and the
+                              arrow is what says which end it belongs to.
+                              Compact — this is a dense mono cell in a row of
+                              chips, and a queue badge would burst it. */}
                           <span className="f-mono" style={{ fontSize: 11.5, color: "var(--z-body)" }}>
-                            {cur === null ? "—" : fx(cur, 1)} → {tgt === null ? "—" : fx(tgt, 1)}
+                            {cur === null && tgt === null ? (
+                              <EnrichmentGap what="Current and target score" audience={audience} compact />
+                            ) : (
+                              <>
+                                {cur === null
+                                  ? <EnrichmentGap what="Current score" audience={audience} compact />
+                                  : fx(cur, 1)}
+                                {" → "}
+                                {tgt === null
+                                  ? <EnrichmentGap what="Target score" audience={audience} compact />
+                                  : fx(tgt, 1)}
+                              </>
+                            )}
                           </span>
                           {d === null ? null : (
                             <span className="b b-teal">{d > 0 ? "+" : ""}{fx(d, 1)}</span>
@@ -2662,10 +2688,27 @@ function RecommendationModal() {
                           {before === null ? null : <div className="pbar-fill" style={{ width: `${before / 5 * 100}%`, background: DMA.helpers.maturityHex(before), opacity: .45 }} />}
                           {a === null ? null : <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${a / 5 * 100}%`, background: DMA.helpers.maturityHex(a), borderRadius: 4, transition: "width 1.2s var(--ease)" }} />}
                         </div>
-                        <div className="pbar-score">{a === null ? "—" : fx(a, 1)}</div>
-                        {/* A delta needs both endpoints; one missing is null, not zero. */}
+                        {/* .pbar-score is 32px and .pbar-delta 50px, so both
+                            take the compact gap — a queue badge here would
+                            burst the row. */}
+                        <div className="pbar-score">
+                          {a === null
+                            ? <EnrichmentGap what={`${p} projected score`} audience={audience} compact />
+                            : fx(a, 1)}
+                        </div>
+                        {/* A delta needs both endpoints; one missing is null, not
+                            zero. The absent ENDPOINT is the enrichable field, so
+                            the gap names it: the baseline has no column of its
+                            own (its bar simply does not draw), and this is the
+                            only place its absence can surface. When it is the
+                            projection that is absent, the score column one over
+                            has already said so and this column stays quiet
+                            rather than saying it twice. */}
                         <div className="pbar-delta" style={{ color: "var(--z-mid)" }}>
-                          {a === null || before === null ? "—" : `${a - before > 0 ? "+" : ""}${fx(a - before, 1)}`}
+                          {before === null
+                            ? <EnrichmentGap what={`${p} baseline score`} audience={audience} compact />
+                            : a === null ? null
+                            : `${a - before > 0 ? "+" : ""}${fx(a - before, 1)}`}
                         </div>
                       </div>
                     );
@@ -2734,7 +2777,7 @@ function RecommendationModal() {
               })}
             </div>
           ) : (
-            <DependencyMap rec={r} />
+            <DependencyMap rec={r} audience={audience} />
           )}
         </div>
         <div className="modal-foot">
@@ -2808,7 +2851,10 @@ function ValidationGate({ gate, openSubcap, closeRec }) {
    Predecessors are the row's own `dependencies` (rec ids). "Unlocks" is COMPUTED
    by asking which other promoted recommendations name this one in theirs —
    invariant 8, one source of truth, so the two columns cannot disagree. */
-function DependencyMap({ rec }) {
+// `audience` is threaded from RecommendationModal (which destructures it from
+// useApp) so the readiness rows can state an absent threshold in the right
+// words rather than defaulting to either reading.
+function DependencyMap({ rec, audience }) {
   const impact = DMA.ROADMAP_IMPACTS[rec.id];
   const all = DMA.RECOMMENDATIONS || [];
   const depIds = (rec.dependencies || []).length ? rec.dependencies
@@ -2882,8 +2928,14 @@ function DependencyMap({ rec }) {
               <div key={i} className="row" style={{ gap: 8, padding: "6px 0", borderTop: i ? "1px solid var(--z-sep)" : 0, flexWrap: "wrap" }}>
                 {q.cell ? <span className="chip purple">{q.cell}</span> : null}
                 <span style={{ fontSize: 12, flex: 1, minWidth: 0 }}>
+                  {/* The threshold the condition turns on. Absent, it is an
+                      unstated field on the promoted prerequisite, not a
+                      condition that is met — so it names itself and stays
+                      compact: this is a table row of chips and badges. */}
                   {q.cell
-                    ? <span className="f-mono">{q.cell} ≥ {min === null ? "—" : fx(min, 1)}{cur === null ? "" : ` · currently ${fx(cur, 2)}`}</span>
+                    ? <span className="f-mono">{q.cell} ≥ {min === null
+                        ? <EnrichmentGap what={`${q.cell} minimum score`} audience={audience} compact />
+                        : fx(min, 1)}{cur === null ? "" : ` · currently ${fx(cur, 2)}`}</span>
                     : dwText(q.condition)}
                 </span>
                 {dwText(q.basis) ? <span className="b b-muted">{dwText(q.basis)}</span> : null}

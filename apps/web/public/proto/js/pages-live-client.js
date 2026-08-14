@@ -21,8 +21,10 @@
      in the ONE resolver (DMA.helpers.maturityHex/maturityClass);
    · nothing is recomputed that the producer already computed (deltas,
      shares, ages, counts all render as promoted);
-   · a null derived value renders as an em dash, never as 0 and never as
-     a sentinel that looks like data.
+   · a null derived value renders as an EnrichmentGap naming the field,
+     never as 0 and never as a sentinel that looks like data. Not an em
+     dash either: an em dash cannot say whether the field was searched,
+     held or never asked for, and gives the reader no route to filling it.
    ═══════════════════════════════════════════════════════════════════════ */
 
 const LIVE_PAGE_SECTIONS = {
@@ -204,24 +206,38 @@ function bandClass(v) {
   if (isFinite(n)) return DMA.helpers.maturityClass(n);
   return BAND_CLASS[String(v).trim().toLowerCase()] || "";
 }
+
+/* fmtScore and fmtPctVal return TEXT, because both are also read into title
+   attributes, where a React element cannot go. The absent case is therefore a
+   plain word here; every JSX site that can receive a null renders
+   <EnrichmentGap> instead, which names the field and carries the route to
+   enrichment. */
 function fmtScore(v) {
-  return v === null || v === undefined ? "—" : Number(v).toFixed(1);
+  return v === null || v === undefined ? "not stated" : Number(v).toFixed(1);
 }
 function fmtPctVal(v, decimals) {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "not stated";
   return `${fmtNum(v, {
     decimals: decimals === undefined ? 0 : decimals
   })}%`;
 }
 
-/* Delta is PROMOTED, never recomputed here (invariant 8). */
+/* Delta is PROMOTED, never recomputed here (invariant 8). An absent delta is
+   an absent peer comparison, not a zero — it renders as the enrichment gap in
+   its compact form, because every delta on this page sits in a narrow
+   fixed-width numeric column. */
 function DeltaBadge({
   delta,
-  direction
+  direction,
+  audience
 }) {
-  if (delta === null || delta === undefined) return /*#__PURE__*/React.createElement("span", {
-    className: "muted"
-  }, "\u2014");
+  if (delta === null || delta === undefined) {
+    return /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Peer delta",
+      audience: audience,
+      compact: true
+    });
+  }
   const below = direction ? direction === "below" : delta < 0;
   return /*#__PURE__*/React.createElement("span", {
     className: "f-mono",
@@ -404,7 +420,8 @@ function LiveSnapshot({
   firmo,
   entity,
   run,
-  state
+  state,
+  audience
 }) {
   const d = scores || {};
   const pillars = d.pillars || [];
@@ -499,11 +516,16 @@ function LiveSnapshot({
       title: `Peer median ${fmtScore(peer)}${row.peer_n ? ` · n=${row.peer_n}` : ""}`
     }) : null), /*#__PURE__*/React.createElement("div", {
       className: "pbar-score"
-    }, fmtScore(s)), /*#__PURE__*/React.createElement("div", {
+    }, s == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${p.id} pillar score`,
+      audience: audience,
+      compact: true
+    }) : fmtScore(s)), /*#__PURE__*/React.createElement("div", {
       className: "pbar-delta"
     }, /*#__PURE__*/React.createElement(DeltaBadge, {
       delta: row.delta,
-      direction: row.direction
+      direction: row.direction,
+      audience: audience
     })));
   }), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1184,7 +1206,8 @@ function LiveLeadership({
 /* ══ O7 · financial trajectory ═════════════════════════════════════ */
 function LiveFinancials({
   data,
-  state
+  state,
+  audience
 }) {
   const series = data && data.series || [];
   if (!series.length) return null;
@@ -1247,12 +1270,20 @@ function LiveFinancials({
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "f-mono"
-  }, p.period || "—"), /*#__PURE__*/React.createElement("div", {
+  }, p.period || /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: "Reporting period",
+    audience: audience,
+    compact: true
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       color: "var(--z-dark)",
       fontWeight: 500
     }
-  }, p.value == null ? "—" : p.unit ? fmtMoney(p.value, p.unit) : fmtNum(p.value))))), series.some(p => p.basis) ? /*#__PURE__*/React.createElement("div", {
+  }, p.value == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: p.period ? `${p.period} figure` : "Financial figure",
+    audience: audience,
+    compact: true
+  }) : p.unit ? fmtMoney(p.value, p.unit) : fmtNum(p.value))))), series.some(p => p.basis) ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)",
@@ -1266,7 +1297,8 @@ function LiveFinancials({
 /* ══ O8 · evidence coverage & tier mix ═════════════════════════════ */
 function LiveCoverage({
   data,
-  state
+  state,
+  audience
 }) {
   if (!data) return null;
   const per = data.per_pillar || [];
@@ -1305,7 +1337,11 @@ function LiveCoverage({
     }
   }, fmtNum(p.cells_covered), "/", fmtNum(p.cells_total)) : null, /*#__PURE__*/React.createElement("span", {
     className: "f-mono"
-  }, fmtPctVal(p.pct, 1)), p.below_gate ? /*#__PURE__*/React.createElement("span", {
+  }, p.pct == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: `${p.pillar_id || "Pillar"} evidence coverage`,
+    audience: audience,
+    compact: true
+  }) : fmtPctVal(p.pct, 1)), p.below_gate ? /*#__PURE__*/React.createElement("span", {
     className: "b b-org",
     title: "below the corpus gate threshold"
   }, "BELOW GATE") : null), /*#__PURE__*/React.createElement("div", {
@@ -1661,7 +1697,8 @@ function LiveWorkbookGrid({
   state,
   entity,
   run,
-  onDrill
+  onDrill,
+  audience
 }) {
   const [showPeers, setShowPeers] = useState(true);
   const [pillarFocus, setPillarFocus] = useState(null);
@@ -1759,8 +1796,13 @@ function LiveWorkbookGrid({
       style: {
         color: "var(--z-muted)"
       }
-    }, "Peer ", fmtScore(row.peer_median)), row.delta != null ? /*#__PURE__*/React.createElement(DeltaBadge, {
-      delta: Number(row.delta)
+    }, row.peer_median == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${p.id} peer median`,
+      audience: audience,
+      compact: true
+    }) : `Peer ${fmtScore(row.peer_median)}`), row.delta != null ? /*#__PURE__*/React.createElement(DeltaBadge, {
+      delta: Number(row.delta),
+      audience: audience
     }) : null, /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement("span", {
@@ -1844,7 +1886,11 @@ function LiveWorkbookGrid({
           fontSize: 13,
           fontWeight: 700
         }
-      }, fmtScore(c.score)), c.delta != null ? /*#__PURE__*/React.createElement("div", {
+      }, c.score == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+        what: `${cid} score`,
+        audience: audience,
+        compact: true
+      }) : fmtScore(c.score)), c.delta != null ? /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 8,
           fontWeight: 600
@@ -1861,6 +1907,9 @@ function LiveWorkbookGrid({
       }
     }, "Peer"), ids.map(cid => {
       const pm = cats[cid].peer_median;
+      /* A null median is NOT a zero: banded and printed as 0.0
+         it would read as a peer set that scores nothing. It is
+         a gap in the cohort benchmark, and it is enrichable. */
       return pm == null ? /*#__PURE__*/React.createElement("div", {
         key: cid,
         className: "hm-cell peer",
@@ -1868,7 +1917,11 @@ function LiveWorkbookGrid({
           minHeight: 30,
           padding: "4px 6px"
         }
-      }, "\u2014") : /*#__PURE__*/React.createElement("div", {
+      }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+        what: `${cid} peer median`,
+        audience: audience,
+        compact: true
+      })) : /*#__PURE__*/React.createElement("div", {
         key: cid,
         className: `hm-cell peer b ${DMA.helpers.maturityClass(pm)}`,
         style: {
@@ -1929,7 +1982,8 @@ function LiveWorkbookGrid({
 /* ══ H1 · focus areas ══════════════════════════════════════════════ */
 function LiveFocusAreas({
   data,
-  state
+  state,
+  audience
 }) {
   const areas = data && data.focus_areas || [];
   const [open, setOpen] = useState(null);
@@ -1982,7 +2036,8 @@ function LiveFocusAreas({
         color: "var(--z-muted)"
       }
     }, "peer ", fmtScore(fa.peer_score)) : null, delta != null ? /*#__PURE__*/React.createElement(DeltaBadge, {
-      delta: delta
+      delta: delta,
+      audience: audience
     }) : null), fa.verbatim_quote ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 12,
@@ -2418,7 +2473,8 @@ const AGE_TONE = {
 };
 function LiveEvidenceAge({
   data,
-  state
+  state,
+  audience
 }) {
   const rows = data && data.rows || [];
   const [all, setAll] = useState(false);
@@ -2479,7 +2535,11 @@ function LiveEvidenceAge({
       whiteSpace: "nowrap"
     },
     title: r.title || ""
-  }, r.title || "—"), r.source_domain ? /*#__PURE__*/React.createElement("span", {
+  }, r.title || /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: `Title of ${r.e_id || "this evidence item"}`,
+    audience: audience,
+    compact: true
+  })), r.source_domain ? /*#__PURE__*/React.createElement("span", {
     className: "muted",
     style: {
       minWidth: 110,
@@ -2521,7 +2581,8 @@ function LiveEvidenceAge({
 /* ══ H8 · cohort patterns (entity ids always stripped server-side) ══ */
 function LiveCohorts({
   data,
-  state
+  state,
+  audience
 }) {
   const patterns = data && data.patterns || [];
   const insufficient = data && data.insufficient_cohorts || [];
@@ -2570,7 +2631,11 @@ function LiveCohorts({
       minWidth: 52,
       textAlign: "right"
     }
-  }, fmtPctVal(p.share_pct, 0))))), insufficient.length ? /*#__PURE__*/React.createElement("div", {
+  }, p.share_pct == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: "Cohort share",
+    audience: audience,
+    compact: true
+  }) : fmtPctVal(p.share_pct, 0))))), insufficient.length ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10.5,
       color: "var(--z-muted)",
@@ -2860,7 +2925,8 @@ function LivePlatformStory({
 /* ══ D2 · recommendations ══════════════════════════════════════════ */
 function LiveRecommendations({
   data,
-  state
+  state,
+  audience
 }) {
   const recs = data && data.recommendations || [];
   const [open, setOpen] = useState(null);
@@ -2969,7 +3035,11 @@ function LiveRecommendations({
       }
     }, asText(c.name)), /*#__PURE__*/React.createElement("span", {
       className: "f-mono"
-    }, fmtScore(c.current)), /*#__PURE__*/React.createElement(Icon, {
+    }, c.current == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${c.subcap_id || "Cell"} current score`,
+      audience: audience,
+      compact: true
+    }) : fmtScore(c.current)), /*#__PURE__*/React.createElement(Icon, {
       name: "chevron-r",
       size: 9
     }), /*#__PURE__*/React.createElement("span", {
@@ -2977,7 +3047,11 @@ function LiveRecommendations({
       style: {
         fontWeight: 600
       }
-    }, fmtScore(c.target)), c.delta != null ? /*#__PURE__*/React.createElement("span", {
+    }, c.target == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${c.subcap_id || "Cell"} target score`,
+      audience: audience,
+      compact: true
+    }) : fmtScore(c.target)), c.delta != null ? /*#__PURE__*/React.createElement("span", {
       className: "f-mono",
       style: {
         minWidth: 34,
@@ -3062,7 +3136,11 @@ function LiveRecommendations({
         fontSize: 9
       },
       title: asText(b.name) || ""
-    }, b.subcap_id, " ", fmtScore(b.score)))) : null, asText(r.validation_gate.grain_note) ? /*#__PURE__*/React.createElement("div", {
+    }, b.subcap_id, " ", b.score == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${b.subcap_id || "Backing cell"} score`,
+      audience: audience,
+      compact: true
+    }) : fmtScore(b.score)))) : null, asText(r.validation_gate.grain_note) ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 9.5,
         color: "var(--z-muted)",
@@ -3094,7 +3172,11 @@ function LiveRecommendations({
         fontSize: 11,
         lineHeight: 1.45
       }
-    }, asText(v) || "—"))))) : null, /*#__PURE__*/React.createElement("div", {
+    }, asText(v) || /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `KPI ${k.toLowerCase()}`,
+      audience: audience,
+      compact: true
+    })))))) : null, /*#__PURE__*/React.createElement("div", {
       className: "row",
       style: {
         gap: 4,
@@ -3587,7 +3669,8 @@ function LiveIssueRegister({
 /* ══ D5 · regulatory standing ══════════════════════════════════════ */
 function LiveRegulatory({
   data,
-  state
+  state,
+  audience
 }) {
   if (!data) return null;
   const enf = data.enforcement_actions || [];
@@ -3608,19 +3691,34 @@ function LiveRegulatory({
     }
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Row, {
     k: "Primary regulator",
-    v: data.primary_regulator || "—"
+    v: data.primary_regulator || /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Primary regulator",
+      audience: audience
+    })
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Licence type",
-    v: data.license_type || "—"
+    v: data.license_type || /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Licence type",
+      audience: audience
+    })
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Charter date",
-    v: data.charter_date || "—"
+    v: data.charter_date || /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Charter date",
+      audience: audience
+    })
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Additional",
-    v: (data.additional_regulators || []).join(" · ") || "—"
+    v: (data.additional_regulators || []).join(" · ") || /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Additional regulators",
+      audience: audience
+    })
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Jurisdictions",
-    v: (data.jurisdictions || []).join(" · ") || "—"
+    v: (data.jurisdictions || []).join(" · ") || /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Jurisdictions",
+      audience: audience
+    })
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow",
     style: {
@@ -3679,7 +3777,8 @@ function LiveRegulatory({
 /* ══ D5 · acquisitions ═════════════════════════════════════════════ */
 function LiveAcquisitions({
   data,
-  state
+  state,
+  audience
 }) {
   const rows = data && data.rows || [];
   if (!rows.length) return null;
@@ -3741,7 +3840,11 @@ function LiveAcquisitions({
     style: {
       color: "var(--z-dark)"
     }
-  }, fmtNum(r.scale_metrics[k]) || asText(r.scale_metrics[k]) || "—")))) : null, r.integration_target ? /*#__PURE__*/React.createElement("div", {
+  }, fmtNum(r.scale_metrics[k]) || asText(r.scale_metrics[k]) || /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: `${r.target_name || "Target"} ${k.replace(/_/g, " ")}`,
+    audience: audience,
+    compact: true
+  }))))) : null, r.integration_target ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)",
@@ -4013,7 +4116,8 @@ function LiveClientPage({
       firmo: S("firmographics"),
       entity: entity,
       run: run,
-      state: St("scores")
+      state: St("scores"),
+      audience: audience
     })) : missing("scores"), has("why_now") ? /*#__PURE__*/React.createElement(Sec, {
       name: "why_now"
     }, /*#__PURE__*/React.createElement(LiveWhyNow, {
@@ -4077,12 +4181,14 @@ function LiveClientPage({
       name: "financial_series"
     }, /*#__PURE__*/React.createElement(LiveFinancials, {
       data: S("financial_series"),
-      state: St("financial_series")
+      state: St("financial_series"),
+      audience: audience
     })) : missing("financial_series"), has("evidence_coverage") ? /*#__PURE__*/React.createElement(Sec, {
       name: "evidence_coverage"
     }, /*#__PURE__*/React.createElement(LiveCoverage, {
       data: S("evidence_coverage"),
-      state: St("evidence_coverage")
+      state: St("evidence_coverage"),
+      audience: audience
     })) : missing("evidence_coverage"), has("sentiment") ? /*#__PURE__*/React.createElement(Sec, {
       name: "sentiment"
     }, /*#__PURE__*/React.createElement(LiveSentiment, {
@@ -4116,12 +4222,14 @@ function LiveClientPage({
       state: St("workbook_scores"),
       entity: entity,
       run: run,
-      onDrill: setCellFilter
+      onDrill: setCellFilter,
+      audience: audience
     })) : missing("workbook_scores"), has("focus_areas") ? /*#__PURE__*/React.createElement(Sec, {
       name: "focus_areas"
     }, /*#__PURE__*/React.createElement(LiveFocusAreas, {
       data: S("focus_areas"),
-      state: St("focus_areas")
+      state: St("focus_areas"),
+      audience: audience
     })) : missing("focus_areas"), has("cell_evidence") ? /*#__PURE__*/React.createElement(Sec, {
       name: "cell_evidence"
     }, /*#__PURE__*/React.createElement(LiveCellEvidence, {
@@ -4148,12 +4256,14 @@ function LiveClientPage({
       name: "evidence_age"
     }, /*#__PURE__*/React.createElement(LiveEvidenceAge, {
       data: S("evidence_age"),
-      state: St("evidence_age")
+      state: St("evidence_age"),
+      audience: audience
     })) : missing("evidence_age"), has("cohort_patterns") ? /*#__PURE__*/React.createElement(Sec, {
       name: "cohort_patterns"
     }, /*#__PURE__*/React.createElement(LiveCohorts, {
       data: S("cohort_patterns"),
-      state: St("cohort_patterns")
+      state: St("cohort_patterns"),
+      audience: audience
     })) : missing("cohort_patterns"), missing("evidence"));
   }
   if (page === "insights") {
@@ -4187,7 +4297,8 @@ function LiveClientPage({
       name: "recommendations"
     }, /*#__PURE__*/React.createElement(LiveRecommendations, {
       data: S("recommendations"),
-      state: St("recommendations")
+      state: St("recommendations"),
+      audience: audience
     })) : missing("recommendations"), has("roadmap") ? /*#__PURE__*/React.createElement(Sec, {
       name: "roadmap"
     }, /*#__PURE__*/React.createElement(LiveRoadmap, {
@@ -4219,12 +4330,14 @@ function LiveClientPage({
       name: "acquisitions"
     }, /*#__PURE__*/React.createElement(LiveAcquisitions, {
       data: S("acquisitions"),
-      state: St("acquisitions")
+      state: St("acquisitions"),
+      audience: audience
     })) : missing("acquisitions"), has("regulatory_standing") ? /*#__PURE__*/React.createElement(Sec, {
       name: "regulatory_standing"
     }, /*#__PURE__*/React.createElement(LiveRegulatory, {
       data: S("regulatory_standing"),
-      state: St("regulatory_standing")
+      state: St("regulatory_standing"),
+      audience: audience
     })) : missing("regulatory_standing"), has("issue_register") ? /*#__PURE__*/React.createElement(Sec, {
       name: "issue_register"
     }, /*#__PURE__*/React.createElement(LiveIssueRegister, {

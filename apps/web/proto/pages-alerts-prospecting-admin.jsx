@@ -395,9 +395,12 @@ function AdminUsersCard() {
     };
     const me = sessionUser().email;
     const rows = [];
-    g.admins.forEach((e, i) => rows.push({ id: `adm-${i}`, name: nameOf(e), email: e, role: "ADMIN", active: true, last: e === me ? "now (this session)" : "—" }));
+    // Last-active is not an enrichable field: a deploy-time grant carries no
+    // sign-in history until the users table lands, so the honest word is that
+    // nothing recorded it, not a gap anyone can queue against the connector.
+    g.admins.forEach((e, i) => rows.push({ id: `adm-${i}`, name: nameOf(e), email: e, role: "ADMIN", active: true, last: e === me ? "now (this session)" : "Not recorded" }));
     g.analysts.filter(e => !g.admins.includes(e)).forEach((e, i) =>
-      rows.push({ id: `ana-${i}`, name: nameOf(e), email: e, role: "ANALYST", active: true, last: e === me ? "now (this session)" : "—" }));
+      rows.push({ id: `ana-${i}`, name: nameOf(e), email: e, role: "ANALYST", active: true, last: e === me ? "now (this session)" : "Not recorded" }));
     return rows;
   })();
   const [users, setUsers] = useState(LIVE ? (liveGrantRows || []) : [
@@ -681,10 +684,13 @@ function ImportPage() {
       id: `SCAN-${s.id}`,
       kind: `Package scan · ${s.files_new ?? 0} new / ${s.files_changed ?? 0} changed`,
       status: (s.status || "").toUpperCase() === "SUCCEEDED" ? "COMPLETED" : (s.status || "?").toUpperCase(),
-      started: s.started_at ? new Date(s.started_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "—",
-      files: s.files_seen ?? "—",
+      // Scan-ledger columns are execution facts, not client content: a Job that
+      // wrote no start, no file count or no finish has nothing to enrich, so
+      // these say what is true of the ledger row rather than queueing a field.
+      started: s.started_at ? new Date(s.started_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "Not recorded",
+      files: s.files_seen ?? "Not recorded",
       entities: s.runs_created ?? 0,
-      took: ms == null ? "—" : (ms < 1000 ? "<1 s" : `${Math.round(ms / 1000)} s`),
+      took: ms == null ? "Not recorded" : (ms < 1000 ? "<1 s" : `${Math.round(ms / 1000)} s`),
     };
   }) : [
     { id: "IJ-09", kind: "Drive crawl",   status: "COMPLETED",  started: "Jun 4 09:12", files: 187, entities: 6, took: "2 m 14 s" },
@@ -767,10 +773,13 @@ function ImportPage() {
               ? (lastScan?.started_at ? `Last scan ${new Date(lastScan.started_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}` : "No scans recorded yet")
               : "Last crawl 2 h ago"}</span>
           </div>
+          {/* Counter tiles read the last scan-run row. A count the Job never
+              wrote is an ops fact, not an enrichable field, so the tile says so
+              plainly; "0" would be a figure the ledger never recorded. */}
           <div className="g3" style={{ gap: 10 }}>
-            <div className="card-tile"><div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>Files seen</div><div style={{ fontSize: 22, fontWeight: 200, color: "var(--z-teal)", marginTop: 4 }}>{LIVE ? (lastScan?.files_seen ?? "—") : 187}</div></div>
+            <div className="card-tile"><div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>Files seen</div><div style={{ fontSize: 22, fontWeight: 200, color: "var(--z-teal)", marginTop: 4 }}>{LIVE ? (lastScan?.files_seen ?? "Not recorded") : 187}</div></div>
             <div className="card-tile"><div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>{LIVE ? "New / changed" : "Imported"}</div><div style={{ fontSize: 22, fontWeight: 200, color: "var(--z-mid)", marginTop: 4 }}>{LIVE ? `${lastScan?.files_new ?? 0} / ${lastScan?.files_changed ?? 0}` : 6}</div></div>
-            <div className="card-tile"><div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>{LIVE ? "Folders" : "Audit queue"}</div><div style={{ fontSize: 22, fontWeight: 200, color: "var(--z-org)", marginTop: 4 }}>{LIVE ? (lastScan?.folders_seen ?? "—") : DMA.IMPORT_AUDIT.length}</div></div>
+            <div className="card-tile"><div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>{LIVE ? "Folders" : "Audit queue"}</div><div style={{ fontSize: 22, fontWeight: 200, color: "var(--z-org)", marginTop: 4 }}>{LIVE ? (lastScan?.folders_seen ?? "Not recorded") : DMA.IMPORT_AUDIT.length}</div></div>
           </div>
           <div className="sep" />
           <button className="btn btn-tertiary" onClick={() => navigate("/admin/import/audit")}>Open audit queue <Icon name="arrow-r" size={12} /></button>
@@ -821,7 +830,10 @@ function ImportPage() {
             <Icon name="stack" size={16} />
             <div style={{ fontWeight: 600 }}>Capability catalogue</div>
             <span className="spacer" />
-            <span className="muted" style={{ fontSize: 11 }}>{LIVE ? `Current: ${window.DMA_LIVE.catalogue_version || "—"}` : "Current: v7.2 · loaded May 1"}</span>
+            {/* The catalogue version is deploy-managed (migrate Job,
+                LOAD_CATALOGUES). Nothing enriches it, so an empty one states
+                that none is loaded rather than queueing a field. */}
+            <span className="muted" style={{ fontSize: 11 }}>{LIVE ? `Current: ${window.DMA_LIVE.catalogue_version || "none loaded"}` : "Current: v7.2 · loaded May 1"}</span>
           </div>
           <p style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6 }}>Updating the catalogue creates a new version. Existing runs retain their original catalogue reference{LIVE ? " (runs pinned to v5.0 serve against it; cross-version diffs mark the retired ESG category NOT_COMPARABLE)" : ""}.</p>
           <div className="row" style={{ marginTop: 10 }}>

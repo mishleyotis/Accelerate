@@ -326,7 +326,10 @@ function prereqVerdict(p) {
 /* ── D4 Platform opportunity ──────────────────────────────────────── */
 function ClientPlatform({ entity, run }) {
   const route = useRoute();
-  const { setIpSurface, setIpContext, setIpOpen, openEvidence, openRec, openSubcap, pushToast } = useApp();
+  // `audience` decides what an empty field is allowed to say: a customer is
+  // told the assessment did not establish it, an internal reader is told it is
+  // queued for enrichment. Nothing on this page may print a bare em dash.
+  const { audience, setIpSurface, setIpContext, setIpOpen, openEvidence, openRec, openSubcap, pushToast } = useApp();
 
   const scope = platformScopeOf(entity.id);
   const { recs, story, opportunity, storyPlatforms, tiles, index, assign } = scope;
@@ -571,8 +574,15 @@ function ClientPlatform({ entity, run }) {
                     </div>
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <div style={{ fontSize: 26, fontWeight: 200, color: composite === null ? "var(--z-muted)" : "var(--z-teal)", lineHeight: 1.15 }}>
-                      {composite === null ? "—" : composite.toFixed(1)}
+                    {/* The numeral's display size is for a numeral. Where the
+                        run states no composite the slot carries a label, not a
+                        figure, so it drops to label size in the same
+                        conditional that already sets its colour — at 26px the
+                        words would push the platform name out of the tile. */}
+                    <div style={{ fontSize: composite === null ? 11.5 : 26, fontWeight: composite === null ? 400 : 200, color: composite === null ? "var(--z-muted)" : "var(--z-teal)", lineHeight: 1.15 }}>
+                      {composite === null
+                        ? <EnrichmentGap what="Platform fit score" audience={audience} compact />
+                        : composite.toFixed(1)}
                     </div>
                     <div className="f-mono" style={{ fontSize: 9, color: "var(--z-muted)" }}>/100 fit</div>
                   </div>
@@ -750,14 +760,23 @@ function ClientPlatform({ entity, run }) {
                      carry, so the rows stay one line tall either way. */
                   const eids = g.e_ids.length ? g.e_ids : (evidenceByCell.get(String(g.subcap_id)) || []).slice(0, 2);
                   /* Every peer figure on this run is absent with a stated
-                     reason, so the column shows an em dash and carries the
-                     reason in its tooltip — never the words "cannot estimate"
-                     as a chip on all five rows, which reads as a verdict on the
-                     platform rather than on the peer set. */
+                     reason, so the column carries that reason rather than a
+                     chip reading "cannot estimate" on all five rows, which
+                     reads as a verdict on the platform rather than on the peer
+                     set. */
                   const peerWhy = pfText(g.peer_note)
                     || (g.peer_basis ? String(g.peer_basis).replace(/_/g, " ")
                                      : (wb && wb.peer_basis ? String(wb.peer_basis).replace(/_/g, " ")
                                                             : "No peer figure is stated for this cell"));
+                  /* A missing peer with a stated basis is HELD, not silent: the
+                     producer ran the comparison and the figure failed. Tile
+                     rows carry `peer_basis: null` by construction, so those are
+                     a real gap and read as one. Guarded on `peer === null`
+                     because a basis beside a PRESENT peer describes how that
+                     figure was derived (category_proxy), not why one is
+                     missing. */
+                  const peerHeld = peer === null
+                    && !!(pfText(g.peer_note) || g.peer_basis || (wb && wb.peer_basis));
                   // The first row the derived scope does not reach carries the
                   // divider; the rows under it are the same run's promoted gap
                   // rows, filed under another platform's area.
@@ -777,13 +796,20 @@ function ClientPlatform({ entity, run }) {
                           <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 2 }}>{pfText(g.l3_area)}</div>
                         ) : null}
                       </td>
-                      <td data-label="Pillar" className="col-drop">{pillar ? <span className="b b-purple">{pillar}</span> : <span className="chip muted">—</span>}</td>
+                      <td data-label="Pillar" className="col-drop">{pillar ? <span className="b b-purple">{pillar}</span> : <EnrichmentGap what="Pillar" audience={audience} compact />}</td>
                       <td data-label="Score"><MaturityChip score={cur} /></td>
                       <td data-label="Peer">{peer !== null ? <MaturityChip score={peer} /> : (
-                        <span style={{ color: "var(--z-muted)" }} title={peerWhy}>—</span>
+                        <EnrichmentGap what="Peer score" held={peerHeld}
+                          reason={peerHeld ? peerWhy : undefined} audience={audience} compact />
                       )}</td>
                       {anyPeer ? (
-                        <td data-label="Gap">{delta === null ? <span style={{ color: "var(--z-muted)" }} title={peerWhy}>—</span> : (
+                        /* The delta is arithmetic, so it carries the state of
+                           its inputs: held where the peer is held, an ordinary
+                           gap where a score is simply not stated. The reason
+                           itself is not repeated here — it is one cell to the
+                           left and belongs to the figure it explains, not to a
+                           subtraction. */
+                        <td data-label="Gap">{delta === null ? <EnrichmentGap what="Gap to peer" held={peerHeld} audience={audience} compact /> : (
                           <span className="f-mono" style={{ color: delta < 0 ? "var(--z-below)" : "var(--z-above)" }}>{delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}</span>
                         )}</td>
                       ) : null}
@@ -792,7 +818,9 @@ function ClientPlatform({ entity, run }) {
                           height of every row and pushed the table past the
                           readiness column beside it. */}
                       <td data-label="Feature / L4" title={pfText(g.path) || ""}>
-                        <div style={{ fontSize: 11.5, color: "var(--z-dark)" }}>{pfText(g.feature) || "—"}</div>
+                        <div style={{ fontSize: 11.5, color: "var(--z-dark)" }}>
+                          {pfText(g.feature) || <EnrichmentGap what="Feature / L4" audience={audience} compact />}
+                        </div>
                       </td>
                       <td data-label="Evidence"><PlatformEvChips ids={eids} openEvidence={openEvidence} /></td>
                     </tr>

@@ -116,3 +116,49 @@ test("a finding chip never prints a serialised object", () => {
   assert.strictEqual(f({ note: "no id here" }), "no id here");
   assert.strictEqual(f({}), "Finding");
 });
+
+test("an enrichment gap with no audience shows the customer wording", () => {
+  /* DEFAULT-DENY. EnrichmentGap is rendered from ~50 sites across ten modules
+     and several needed `audience` threaded down to them. A site that misses the
+     prop must degrade to the CUSTOMER sentence, never to "queued for
+     enrichment" — that is our workflow language, naming a backlog the client is
+     not party to. Under the usual `=== "customer"` test the mistake leaks; the
+     component inverts it so the same mistake is merely less informative.
+
+     Asserted on the rendered TREE rather than the source, because the whole
+     point is what a reader ends up seeing. */
+  for (const k of Object.keys(require.cache)) delete require.cache[k];
+  const seen = [];
+  const noop = () => undefined;
+  global.window = {};
+  global.React = {
+    Fragment: "Fragment",
+    createElement: (type, props, ...kids) => {
+      kids.flat(Infinity).forEach((k) => {
+        if (typeof k === "string") seen.push(k);
+      });
+      return { type, props, kids };
+    },
+    useState: (v) => [v, noop], useEffect: noop, useRef: () => ({ current: null }),
+    useMemo: (f) => f(), useCallback: (f) => f,
+    createContext: () => ({ Provider: null, Consumer: null }), useContext: noop,
+    Component: class {}, PureComponent: class {},
+  };
+  require(path.join(JS, "utils.js"));
+  const Gap = global.window.EnrichmentGap;
+  assert.ok(typeof Gap === "function", "EnrichmentGap is not exported");
+
+  const textOf = (props) => { seen.length = 0; Gap(props); return seen.join(" "); };
+
+  assert.match(textOf({ what: "Website" }), /Not established/,
+               "a missing audience must not reveal the internal wording");
+  assert.doesNotMatch(textOf({ what: "Website" }), /queued/);
+  assert.doesNotMatch(textOf({ what: "Website", audience: "customer" }), /queued/);
+  // The internal reader still gets the useful version when it IS stated.
+  assert.match(textOf({ what: "Website", audience: "internal" }), /queued/);
+  // A held field names its reason internally and stays plain for the client.
+  assert.match(textOf({ what: "AUM", held: true, reason: "two domains resolve",
+                        audience: "internal" }), /Held/);
+  assert.match(textOf({ what: "AUM", held: true, reason: "two domains resolve",
+                        audience: "customer" }), /Not established/);
+});

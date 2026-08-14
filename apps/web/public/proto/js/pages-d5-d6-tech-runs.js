@@ -257,7 +257,8 @@ function ClientContext({
   }, /*#__PURE__*/React.createElement(InteractiveGantt, {
     issues: issues,
     issueOpen: issueOpen,
-    setIssueOpen: setIssueOpen
+    setIssueOpen: setIssueOpen,
+    audience: audience
   }), /*#__PURE__*/React.createElement("div", {
     id: "issue-detail-anchor"
   }, issueOpen ? /*#__PURE__*/React.createElement(IssueDetail, {
@@ -265,7 +266,8 @@ function ClientContext({
     entity: entity,
     onClose: () => setIssueOpen(null),
     openEvidence: openEvidence,
-    openSubcap: openSubcap
+    openSubcap: openSubcap,
+    audience: audience
   }) : null))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
@@ -301,7 +303,8 @@ function ClientContext({
     entity: entity,
     issues: issues,
     setIssueOpen: setIssueOpen,
-    openEvidence: openEvidence
+    openEvidence: openEvidence,
+    audience: audience
   })), /*#__PURE__*/React.createElement("div", {
     className: "g2"
   }, /*#__PURE__*/React.createElement("div", {
@@ -458,7 +461,8 @@ function RegulatoryStanding({
   entity,
   issues,
   setIssueOpen,
-  openEvidence
+  openEvidence,
+  audience
 }) {
   const reg = DMA.regulatoryFor(entity.id);
   const [openLadder, setOpenLadder] = useState(false);
@@ -535,7 +539,10 @@ function RegulatoryStanding({
     v: reg.license_type || entity.license
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Jurisdictions",
-    v: list(reg.jurisdictions).join(" · ") || (entity.footprint || []).join(" · ") || "—"
+    v: list(reg.jurisdictions).join(" · ") || (entity.footprint || []).join(" · ") || /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Jurisdictions",
+      audience: audience
+    })
   }), reg.charter_date ? /*#__PURE__*/React.createElement(Row, {
     k: "Chartered",
     v: String(reg.charter_date).slice(0, 4)
@@ -559,7 +566,10 @@ function RegulatoryStanding({
     className: "co-title"
   }, a.kind || "Enforcement action", a.dated_on ? ` · ${a.dated_on}` : "", a.status ? ` · ${a.status}` : ""), /*#__PURE__*/React.createElement("div", {
     className: "co-body"
-  }, a.summary || a.title || "—"), (a.e_ids || []).length ? /*#__PURE__*/React.createElement("div", {
+  }, a.summary || a.title || /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: "Enforcement action summary",
+    audience: audience
+  })), (a.e_ids || []).length ? /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 5,
@@ -1096,7 +1106,8 @@ function EventDetail({
 function InteractiveGantt({
   issues,
   issueOpen,
-  setIssueOpen
+  setIssueOpen,
+  audience
 }) {
   const all = issues || [];
   const undated = all.filter(i => !i.start);
@@ -1232,7 +1243,11 @@ function InteractiveGantt({
         },
         className: "txt-fit-1",
         title: iss.title || iss.type || ""
-      }, iss.title || iss.type || "—"), /*#__PURE__*/React.createElement("div", {
+      }, iss.title || iss.type || /*#__PURE__*/React.createElement(EnrichmentGap, {
+        what: "Issue title",
+        audience: audience,
+        compact: true
+      })), /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 10,
           color: "var(--z-muted)",
@@ -1316,7 +1331,11 @@ function InteractiveGantt({
         },
         className: "txt-fit-1",
         title: iss.title || ""
-      }, iss.title || iss.type || "—"), /*#__PURE__*/React.createElement("span", {
+      }, iss.title || iss.type || /*#__PURE__*/React.createElement(EnrichmentGap, {
+        what: "Issue title",
+        audience: audience,
+        compact: true
+      })), /*#__PURE__*/React.createElement("span", {
         style: {
           fontSize: 10,
           color: "var(--z-muted)",
@@ -1383,7 +1402,8 @@ function IssueDetail({
   entity,
   onClose,
   openEvidence,
-  openSubcap
+  openSubcap,
+  audience
 }) {
   if (!issue) return null;
   const {
@@ -1470,7 +1490,10 @@ function IssueDetail({
       flex: "1 1 320px",
       minWidth: 0
     }
-  }, sentence(issue.title || issue.type || "—")), issue.severity ? /*#__PURE__*/React.createElement("span", {
+  }, issue.title || issue.type ? sentence(issue.title || issue.type) : /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: "Issue title",
+    audience: audience
+  })), issue.severity ? /*#__PURE__*/React.createElement("span", {
     className: `b ${tone}`
   }, issue.severity) : null, issue.status ? /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
@@ -2554,9 +2577,18 @@ function ClientHealth({
       }
     }, e.source.split("/")[0]), /*#__PURE__*/React.createElement("td", {
       "data-label": "Date"
-    }, raw || "—"), /*#__PURE__*/React.createElement("td", {
+    }, raw || /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Evidence date",
+      audience: audience,
+      compact: true
+    })), /*#__PURE__*/React.createElement("td", {
       "data-label": "Age"
-    }, age === null ? "—" : `${age} mo`), /*#__PURE__*/React.createElement("td", {
+    }, age === null ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--z-muted)",
+        fontStyle: "italic"
+      }
+    }, "Not computed") : `${age} mo`), /*#__PURE__*/React.createElement("td", {
       "data-label": "Status",
       style: {
         textAlign: "right"
@@ -3490,7 +3522,8 @@ function ClientTechStackDetail({
   techId
 }) {
   const {
-    openEvidence
+    openEvidence,
+    audience
   } = useApp();
   const t = DMA.TECH_STACK.find(x => x.id === techId);
   if (!t) return /*#__PURE__*/React.createElement("div", {
@@ -3519,9 +3552,16 @@ function ClientTechStackDetail({
       label: "Absent - searched and not found"
     }
   };
+  // A status is REQUIRED on every register row, so a row without one is a
+  // hole in the payload, not a style of row. It renders inside a badge, so
+  // the gap is compact — a badge nested in a badge is not a fix.
   const S = STATUS_STYLE[t.status] || {
     color: "var(--z-muted)",
-    label: t.status || "—"
+    label: t.status || /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Detection status",
+      audience: audience,
+      compact: true
+    })
   };
 
   // What the DMA impact IS, and how it was arrived at.

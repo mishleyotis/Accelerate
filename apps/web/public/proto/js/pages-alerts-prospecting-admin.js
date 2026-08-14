@@ -868,13 +868,16 @@ function AdminUsersCard() {
     };
     const me = sessionUser().email;
     const rows = [];
+    // Last-active is not an enrichable field: a deploy-time grant carries no
+    // sign-in history until the users table lands, so the honest word is that
+    // nothing recorded it, not a gap anyone can queue against the connector.
     g.admins.forEach((e, i) => rows.push({
       id: `adm-${i}`,
       name: nameOf(e),
       email: e,
       role: "ADMIN",
       active: true,
-      last: e === me ? "now (this session)" : "—"
+      last: e === me ? "now (this session)" : "Not recorded"
     }));
     g.analysts.filter(e => !g.admins.includes(e)).forEach((e, i) => rows.push({
       id: `ana-${i}`,
@@ -882,7 +885,7 @@ function AdminUsersCard() {
       email: e,
       role: "ANALYST",
       active: true,
-      last: e === me ? "now (this session)" : "—"
+      last: e === me ? "now (this session)" : "Not recorded"
     }));
     return rows;
   })();
@@ -1522,15 +1525,18 @@ function ImportPage() {
       id: `SCAN-${s.id}`,
       kind: `Package scan · ${s.files_new ?? 0} new / ${s.files_changed ?? 0} changed`,
       status: (s.status || "").toUpperCase() === "SUCCEEDED" ? "COMPLETED" : (s.status || "?").toUpperCase(),
+      // Scan-ledger columns are execution facts, not client content: a Job that
+      // wrote no start, no file count or no finish has nothing to enrich, so
+      // these say what is true of the ledger row rather than queueing a field.
       started: s.started_at ? new Date(s.started_at).toLocaleString(undefined, {
         month: "short",
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit"
-      }) : "—",
-      files: s.files_seen ?? "—",
+      }) : "Not recorded",
+      files: s.files_seen ?? "Not recorded",
       entities: s.runs_created ?? 0,
-      took: ms == null ? "—" : ms < 1000 ? "<1 s" : `${Math.round(ms / 1000)} s`
+      took: ms == null ? "Not recorded" : ms < 1000 ? "<1 s" : `${Math.round(ms / 1000)} s`
     };
   }) : [{
     id: "IJ-09",
@@ -1742,7 +1748,7 @@ function ImportPage() {
       color: "var(--z-teal)",
       marginTop: 4
     }
-  }, LIVE ? lastScan?.files_seen ?? "—" : 187)), /*#__PURE__*/React.createElement("div", {
+  }, LIVE ? lastScan?.files_seen ?? "Not recorded" : 187)), /*#__PURE__*/React.createElement("div", {
     className: "card-tile"
   }, /*#__PURE__*/React.createElement("div", {
     className: "muted",
@@ -1774,7 +1780,7 @@ function ImportPage() {
       color: "var(--z-org)",
       marginTop: 4
     }
-  }, LIVE ? lastScan?.folders_seen ?? "—" : DMA.IMPORT_AUDIT.length))), /*#__PURE__*/React.createElement("div", {
+  }, LIVE ? lastScan?.folders_seen ?? "Not recorded" : DMA.IMPORT_AUDIT.length))), /*#__PURE__*/React.createElement("div", {
     className: "sep"
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
@@ -1890,7 +1896,7 @@ function ImportPage() {
     style: {
       fontSize: 11
     }
-  }, LIVE ? `Current: ${window.DMA_LIVE.catalogue_version || "—"}` : "Current: v7.2 · loaded May 1")), /*#__PURE__*/React.createElement("p", {
+  }, LIVE ? `Current: ${window.DMA_LIVE.catalogue_version || "none loaded"}` : "Current: v7.2 · loaded May 1")), /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 12.5,
       color: "var(--z-body)",

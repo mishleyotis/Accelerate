@@ -509,7 +509,7 @@ function InsightModal() {
     body: ic.so_what,
     accent: true
   }), ic.severity_rationale ? /*#__PURE__*/React.createElement(Block, {
-    title: `SEVERITY · ${ic.severity || "—"}`,
+    title: `SEVERITY · ${ic.severity || (audience === "customer" ? "Not established" : "Not stated")}`,
     body: ic.severity_rationale
   }) : null, ic.alternative && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3902,7 +3902,19 @@ function RecommendationModal() {
         fontSize: 11.5,
         color: "var(--z-body)"
       }
-    }, cur === null ? "—" : fx(cur, 1), " \u2192 ", tgt === null ? "—" : fx(tgt, 1)), d === null ? null : /*#__PURE__*/React.createElement("span", {
+    }, cur === null && tgt === null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Current and target score",
+      audience: audience,
+      compact: true
+    }) : /*#__PURE__*/React.createElement(React.Fragment, null, cur === null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Current score",
+      audience: audience,
+      compact: true
+    }) : fx(cur, 1), " → ", tgt === null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Target score",
+      audience: audience,
+      compact: true
+    }) : fx(tgt, 1))), d === null ? null : /*#__PURE__*/React.createElement("span", {
       className: "b b-teal"
     }, d > 0 ? "+" : "", fx(d, 1))), /*#__PURE__*/React.createElement("div", {
       className: "pbar-track",
@@ -4026,12 +4038,20 @@ function RecommendationModal() {
       }
     })), /*#__PURE__*/React.createElement("div", {
       className: "pbar-score"
-    }, a === null ? "—" : fx(a, 1)), /*#__PURE__*/React.createElement("div", {
+    }, a === null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${p} projected score`,
+      audience: audience,
+      compact: true
+    }) : fx(a, 1)), /*#__PURE__*/React.createElement("div", {
       className: "pbar-delta",
       style: {
         color: "var(--z-mid)"
       }
-    }, a === null || before === null ? "—" : `${a - before > 0 ? "+" : ""}${fx(a - before, 1)}`));
+    }, before === null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${p} baseline score`,
+      audience: audience,
+      compact: true
+    }) : a === null ? null : `${a - before > 0 ? "+" : ""}${fx(a - before, 1)}`));
   })) : null, linkedSubcaps.length > 0 ? /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
@@ -4145,7 +4165,8 @@ function RecommendationModal() {
       }
     }, "no verbatim excerpt served for this item"));
   })) : /*#__PURE__*/React.createElement(DependencyMap, {
-    rec: r
+    rec: r,
+    audience: audience
   })), /*#__PURE__*/React.createElement("div", {
     className: "modal-foot"
   }, /*#__PURE__*/React.createElement("div", {
@@ -4252,8 +4273,12 @@ function ValidationGate({
    Predecessors are the row's own `dependencies` (rec ids). "Unlocks" is COMPUTED
    by asking which other promoted recommendations name this one in theirs —
    invariant 8, one source of truth, so the two columns cannot disagree. */
+// `audience` is threaded from RecommendationModal (which destructures it from
+// useApp) so the readiness rows can state an absent threshold in the right
+// words rather than defaulting to either reading.
 function DependencyMap({
-  rec
+  rec,
+  audience
 }) {
   const impact = DMA.ROADMAP_IMPACTS[rec.id];
   const all = DMA.RECOMMENDATIONS || [];
@@ -4429,7 +4454,11 @@ function DependencyMap({
       }
     }, q.cell ? /*#__PURE__*/React.createElement("span", {
       className: "f-mono"
-    }, q.cell, " \u2265 ", min === null ? "—" : fx(min, 1), cur === null ? "" : ` · currently ${fx(cur, 2)}`) : dwText(q.condition)), dwText(q.basis) ? /*#__PURE__*/React.createElement("span", {
+    }, q.cell, " \u2265 ", min === null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${q.cell} minimum score`,
+      audience: audience,
+      compact: true
+    }) : fx(min, 1), cur === null ? "" : ` · currently ${fx(cur, 2)}`) : dwText(q.condition)), dwText(q.basis) ? /*#__PURE__*/React.createElement("span", {
       className: "b b-muted"
     }, dwText(q.basis)) : null, verdict ? /*#__PURE__*/React.createElement("span", {
       className: `b ${verdict.toUpperCase() === "MET" ? "b-above" : "b-below"}`

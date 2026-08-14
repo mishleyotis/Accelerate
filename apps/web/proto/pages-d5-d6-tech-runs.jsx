@@ -202,13 +202,14 @@ function ClientContext({ entity, run }) {
           </span>
         </div>
         <div className="card-body">
-          <InteractiveGantt issues={issues} issueOpen={issueOpen} setIssueOpen={setIssueOpen} />
+          <InteractiveGantt issues={issues} issueOpen={issueOpen} setIssueOpen={setIssueOpen}
+                            audience={audience} />
           {/* The detail panel lives HERE, inside the register — but the
               regulatory panel further down opens it too, and from there the
               panel appears a screen and a half above the click. It read as a
               dead control. Anchored so a caller can bring it into view. */}
           <div id="issue-detail-anchor">
-            {issueOpen ? <IssueDetail issue={issues.find(i => i.id === issueOpen)} entity={entity} onClose={() => setIssueOpen(null)} openEvidence={openEvidence} openSubcap={openSubcap} /> : null}
+            {issueOpen ? <IssueDetail issue={issues.find(i => i.id === issueOpen)} entity={entity} onClose={() => setIssueOpen(null)} openEvidence={openEvidence} openSubcap={openSubcap} audience={audience} /> : null}
           </div>
         </div>
       </div>
@@ -232,7 +233,8 @@ function ClientContext({ entity, run }) {
           <FinChartInteractive entity={entity} hoveredYear={hoveredYear} setHoveredYear={setHoveredYear} />
         </div>
         <RegulatoryStanding entity={entity} issues={issues}
-                            setIssueOpen={setIssueOpen} openEvidence={openEvidence} />
+                            setIssueOpen={setIssueOpen} openEvidence={openEvidence}
+                            audience={audience} />
       </div>
 
       {/* Sentiment + acquisitions */}
@@ -332,7 +334,7 @@ function ClientContext({ entity, run }) {
    A run with no enforcement action is the common case, and it is a FINDING,
    not a blank: `absence_of_enforcement` carries the ladder that establishes
    it, and the card states what was searched. */
-function RegulatoryStanding({ entity, issues, setIssueOpen, openEvidence }) {
+function RegulatoryStanding({ entity, issues, setIssueOpen, openEvidence, audience }) {
   const reg = DMA.regulatoryFor(entity.id);
   const [openLadder, setOpenLadder] = useState(false);
   if (!reg) {
@@ -380,8 +382,13 @@ function RegulatoryStanding({ entity, issues, setIssueOpen, openEvidence }) {
           <Row k="Also regulated by" v={list(reg.additional_regulators).join(" · ")} />
         ) : null}
         <Row k="License type" v={reg.license_type || entity.license} />
+        {/* Jurisdictions falls back to the entity's footprint, and when
+            neither is stated the row says so in the one way that can be
+            acted on: an em dash here read the same whether the producer
+            searched and found nothing or was never asked. */}
         <Row k="Jurisdictions" v={list(reg.jurisdictions).join(" · ")
-                                  || (entity.footprint || []).join(" · ") || "—"} />
+                                  || (entity.footprint || []).join(" · ")
+                                  || <EnrichmentGap what="Jurisdictions" audience={audience} />} />
         {reg.charter_date ? <Row k="Chartered" v={String(reg.charter_date).slice(0, 4)} /> : null}
         <div className="sep" />
 
@@ -394,7 +401,8 @@ function RegulatoryStanding({ entity, issues, setIssueOpen, openEvidence }) {
                 {a.dated_on ? ` · ${a.dated_on}` : ""}
                 {a.status ? ` · ${a.status}` : ""}
               </div>
-              <div className="co-body">{a.summary || a.title || "—"}</div>
+              <div className="co-body">{a.summary || a.title
+                || <EnrichmentGap what="Enforcement action summary" audience={audience} />}</div>
               {(a.e_ids || []).length ? (
                 <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 6 }}>
                   {a.e_ids.map(eid => (
@@ -717,7 +725,7 @@ function EventDetail({ event, onClose, openEvidence, openSubcap }) {
   );
 }
 
-function InteractiveGantt({ issues, issueOpen, setIssueOpen }) {
+function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
   const all = issues || [];
   const undated = all.filter(i => !i.start);
   const dated = all.filter(i => i.start);
@@ -809,7 +817,11 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen }) {
                 {iss.severity ? <span className={`b ${tone}`}>{iss.severity}</span> : null}
                 {cap.kind === "ceiling" ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} held at M${cap.ceiling}`} /> : null}
               </div>
-              <div style={{ fontSize: 12, marginTop: 4 }} className="txt-fit-1" title={iss.title || iss.type || ""}>{iss.title || iss.type || "—"}</div>
+              {/* compact: this label column clamps to one line inside a
+                  90-200px track, and the queue badge would push the bar
+                  lane off the row. */}
+              <div style={{ fontSize: 12, marginTop: 4 }} className="txt-fit-1" title={iss.title || iss.type || ""}>{iss.title || iss.type
+                || <EnrichmentGap what="Issue title" audience={audience} compact />}</div>
               {/* The prototype's row footer, made honest. It printed
                   "OPEN · cap 3" from a `cap_value` the contract does not
                   carry, so in LIVE it printed the status and stopped. A cap
@@ -856,7 +868,8 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen }) {
                 <span className="chip">{iss.id}</span>
                 {iss.severity ? <span className={`b ${severityTone(iss.severity)}`}>{iss.severity}</span> : null}
                 {cap.kind === "ceiling" ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${cap.entries.length} cells held at M${cap.ceiling}`} /> : null}
-                <span style={{ flex: 1, minWidth: 0, fontSize: 12 }} className="txt-fit-1" title={iss.title || ""}>{iss.title || iss.type || "—"}</span>
+                <span style={{ flex: 1, minWidth: 0, fontSize: 12 }} className="txt-fit-1" title={iss.title || ""}>{iss.title || iss.type
+                  || <EnrichmentGap what="Issue title" audience={audience} compact />}</span>
                 {/* An undated row opens the same panel as a dated bar, so it
                     carries the same cap summary — without it the group read
                     as a list of names with no relationship to the grid. */}
@@ -924,7 +937,7 @@ function monthsSince(d) {
   return Math.max(0, Math.round((Date.now() - t) / (1000 * 60 * 60 * 24 * 30.4375)));
 }
 
-function IssueDetail({ issue, entity, onClose, openEvidence, openSubcap }) {
+function IssueDetail({ issue, entity, onClose, openEvidence, openSubcap, audience }) {
   if (!issue) return null;
   const { entries, ceiling, kind } = capStateOf(issue);
   const tone = severityTone(issue.severity);
@@ -973,7 +986,11 @@ function IssueDetail({ issue, entity, onClose, openEvidence, openSubcap }) {
           arithmetic instead of being a four-character suffix. */}
       <div className="row" style={{ marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
         <span className="chip">{issue.id}</span>
-        <strong style={{ fontSize: 14, flex: "1 1 320px", minWidth: 0 }}>{sentence(issue.title || issue.type || "—")}</strong>
+        {/* `sentence()` takes a string, so the absence is decided before the
+            call rather than being sentence-cased into an em dash. */}
+        <strong style={{ fontSize: 14, flex: "1 1 320px", minWidth: 0 }}>{(issue.title || issue.type)
+          ? sentence(issue.title || issue.type)
+          : <EnrichmentGap what="Issue title" audience={audience} />}</strong>
         {issue.severity ? <span className={`b ${tone}`}>{issue.severity}</span> : null}
         {issue.status ? <span className="b b-muted">{issue.status}</span> : null}
         <button className="icon-btn" onClick={onClose} aria-label="Close"><Icon name="x" size={14} /></button>
@@ -1558,8 +1575,18 @@ function ClientHealth({ entity, run }) {
                   <tr key={e.id}>
                     <td data-label="Evidence"><span className="chip">{e.id}</span> <span style={{ marginLeft: 6 }}>{e.title}</span></td>
                     <td data-label="Source" className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{e.source.split("/")[0]}</td>
-                    <td data-label="Date">{raw || "—"}</td>
-                    <td data-label="Age">{age === null ? "—" : `${age} mo`}</td>
+                    {/* The DATE is a field of the evidence record: absent, it
+                        is a producer gap the connector can be asked to fill,
+                        so it says so (compact — this is a table cell). The AGE
+                        is DERIVED from that date, and nothing enriches a
+                        computed age: it states that it was not computed rather
+                        than borrowing the queue language of the column beside
+                        it. */}
+                    <td data-label="Date">{raw
+                      || <EnrichmentGap what="Evidence date" audience={audience} compact />}</td>
+                    <td data-label="Age">{age === null
+                      ? <span style={{ color: "var(--z-muted)", fontStyle: "italic" }}>Not computed</span>
+                      : `${age} mo`}</td>
                     <td data-label="Status" style={{ textAlign: "right" }}>
                       {stale === null ? <span className="b b-muted">NO DATE</span>
                         : <span className={`b ${stale ? "b-org" : "b-teal"}`}>{stale ? "STALE" : "FRESH"}</span>}
@@ -2154,7 +2181,7 @@ function TechRow({ t, entity, run }) {
 
 /* ── Tech stack drilldown (s42) ──────────────────────────────────── */
 function ClientTechStackDetail({ entity, run, techId }) {
-  const { openEvidence } = useApp();
+  const { openEvidence, audience } = useApp();
   const t = DMA.TECH_STACK.find(x => x.id === techId);
   if (!t) return <div className="empty"><h3>Technology not found</h3></div>;
 
@@ -2168,7 +2195,14 @@ function ClientTechStackDetail({ entity, run, techId }) {
     CLAIMED:   { color: "#7C3500",        label: "Claimed - stated, not corroborated" },
     ABSENT:    { color: "var(--z-below)", label: "Absent - searched and not found" },
   };
-  const S = STATUS_STYLE[t.status] || { color: "var(--z-muted)", label: t.status || "—" };
+  // A status is REQUIRED on every register row, so a row without one is a
+  // hole in the payload, not a style of row. It renders inside a badge, so
+  // the gap is compact — a badge nested in a badge is not a fix.
+  const S = STATUS_STYLE[t.status] || {
+    color: "var(--z-muted)",
+    label: t.status
+      || <EnrichmentGap what="Detection status" audience={audience} compact />,
+  };
 
   // What the DMA impact IS, and how it was arrived at.
   //
