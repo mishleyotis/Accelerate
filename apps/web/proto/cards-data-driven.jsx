@@ -110,7 +110,14 @@ function SentimentCard({ entity, audience }) {
         <div style={{ height: 7, background: "var(--z-sep)", borderRadius: 4, overflow: "hidden" }}>
           {pct == null ? null : <div style={{ width: `${Math.max(0, Math.min(100, pct))}%`, height: "100%", background: tone, borderRadius: 4, transition: "width var(--motion-slow) var(--ease)" }} />}
         </div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: tone, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{r.score == null ? "—" : fx(r.score, 1)}</div>
+        {/* A row can arrive with a source, a metric and no rating — the bar
+            was found but the figure was not stated. The dash read the same as
+            a zero-width bar and gave the reader no route to filling it. The
+            payload carries no quarantine marker on these rows (adaptSentiment
+            maps rating straight through), so this is a silent gap, never
+            `held`. `compact` because the cell is 40px of a three-column grid
+            and the badge would break the row. */}
+        <div style={{ fontSize: 12, fontWeight: 600, color: tone, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{r.score == null ? <EnrichmentGap what={r.metric ? `${r.source} · ${r.metric}` : r.source || "Rating"} audience={audience} compact /> : fx(r.score, 1)}</div>
       </div>
     );
   };

@@ -1579,10 +1579,10 @@ function IssueDetail({
       lineHeight: 1.55,
       marginTop: 3
     }
-  }, "Assessed ", fx(lo, 1), "\u2013", fx(hi, 1), " ", /*#__PURE__*/React.createElement(Icon, {
+  }, scored.length ? /*#__PURE__*/React.createElement(React.Fragment, null, "Assessed ", fx(lo, 1), "\u2013", fx(hi, 1), " ", /*#__PURE__*/React.createElement(Icon, {
     name: "arrow-r",
     size: 11
-  }), " ceiling M", fx(ceiling, 1), " · ", atCeiling, " of ", scored.length, " named cell", scored.length === 1 ? "" : "s", " sit", atCeiling === 1 ? "s" : "", " at it.") : kind === "linked" ? /*#__PURE__*/React.createElement("div", {
+  }), " ceiling M", fx(ceiling, 1), " · ", atCeiling, " of ", scored.length, " named cell", scored.length === 1 ? "" : "s", " sit", atCeiling === 1 ? "s" : "", " at it.") : /*#__PURE__*/React.createElement(React.Fragment, null, "Ceiling M", fx(ceiling, 1), ". The run names ", entries.length, " cell", entries.length === 1 ? "" : "s", " and scores none of them, so no assessed position can be shown.")) : kind === "linked" ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: "var(--z-body)",

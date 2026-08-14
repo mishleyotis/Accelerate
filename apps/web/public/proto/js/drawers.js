@@ -509,7 +509,7 @@ function InsightModal() {
     body: ic.so_what,
     accent: true
   }), ic.severity_rationale ? /*#__PURE__*/React.createElement(Block, {
-    title: `SEVERITY · ${ic.severity || (audience === "customer" ? "Not established" : "Not stated")}`,
+    title: `SEVERITY · ${ic.severity || (audience === "internal" ? "Not stated" : "Not established")}`,
     body: ic.severity_rationale
   }) : null, ic.alternative && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
     style: {

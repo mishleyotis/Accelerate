@@ -403,6 +403,7 @@ function ClientHeatmap({ entity, run }) {
           subcapsForFocusArea={subcapsForFocusArea}
           openSubcap={setSynthSubcap}
           openEvidence={openEvidence} openInsight={openInsight}
+          audience={audience}
           showIssues={showIssues} />
       ) : mode === "value_chain" ? (
         <ValueChainView entity={entity} subcapsForFocusArea={subcapsForFocusArea} openSubcap={setSynthSubcap} openInsight={openInsight} />
@@ -410,9 +411,10 @@ function ClientHeatmap({ entity, run }) {
         <>
           {showIssues ? <IssueRegisterBanner entity={entity} onSubcap={(s) => setSynthSubcap({ kind: "subcap", subcap: s })} openEvidence={openEvidence} /> : null}
           {zoom === "pillar" ? (
-            <PillarHeatmap entity={entity} pillars={pillars} setPillarFocus={(p) => { setPillarFocus(p); setZoom("category"); }} />
+            <PillarHeatmap entity={entity} pillars={pillars} audience={audience} setPillarFocus={(p) => { setPillarFocus(p); setZoom("category"); }} />
           ) : zoom === "category" ? (
             <CategoryHeatmap entity={entity} pillars={pillars} pillarFocus={pillarFocus} showPeers={showPeers} showIssues={showIssues}
+              audience={audience}
               setCatFocus={(c) => { setCatFocus(c); setZoom("capability"); }}
               onSynth={(catId) => { setSynthSubcap({ kind: "category", catId }); }} />
           ) : zoom === "capability" ? (
@@ -423,6 +425,7 @@ function ClientHeatmap({ entity, run }) {
               drillCategory={(c) => { setCatFocus(c); setZoom("subcap"); }} />
           ) : (
             <SubcapHeatmap entity={entity} cats={cats} catFocus={catFocus} pillarFocus={pillarFocus} showPeers={showPeers} showIssues={showIssues}
+              audience={audience}
               setCatFocus={setCatFocus}
               onSynth={(s) => setSynthSubcap({ kind: "subcap", subcap: s })} />
           )}
@@ -443,7 +446,7 @@ function ClientHeatmap({ entity, run }) {
 }
 
 /* ─────────────────────── FOCUS AREA VIEW ─────────────────────── */
-function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusArea, openSubcap, openEvidence, openInsight }) {
+function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusArea, openSubcap, openEvidence, openInsight, audience }) {
   // Hover identification for the score-only cell grid in the detail branch.
   // Called before the early return — hooks cannot be conditional.
   const cellTip = useCellTip();
@@ -493,7 +496,13 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
                     {peer != null ? (
                       <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>
                     ) : (
-                      <span style={{ fontSize: 11, color: "var(--z-muted)" }} title="no peer median is stated at this grain in this run">—</span>
+                      /* No stated median at focus-area grain is a routable
+                         gap, not a dash. Compact: this row already carries a
+                         maturity chip and a delta badge inside a three-up
+                         card, and the queue badge would push the delta out. */
+                      <span style={{ fontSize: 11, color: "var(--z-muted)" }} title="no peer median is stated at this grain in this run">
+                        <EnrichmentGap what={`${fa.id} peer median`} audience={audience} compact />
+                      </span>
                     )}
                     {/* "at peer" is a CLAIM, and it was printed for every card
                         whose gap was null (i.e. all of them) and for every card
@@ -776,7 +785,7 @@ function CustomizableKpiStrip({ fa, entity }) {
 }
 
 /* ─────────────────────── PILLAR HEATMAP ─────────────────────── */
-function PillarHeatmap({ entity, pillars, setPillarFocus }) {
+function PillarHeatmap({ entity, pillars, setPillarFocus, audience }) {
   return (
     <div className="card">
       <div className="g4">
@@ -815,7 +824,11 @@ function PillarHeatmap({ entity, pillars, setPillarFocus }) {
                     ) : null}
                   </>
                 ) : (
-                  <span style={{ color: "var(--z-muted)" }} title="the run states no peer median for this pillar">—</span>
+                  /* Compact: four tiles across, and the 11px meta row under
+                     the progress bar has no room for the queue badge. */
+                  <span style={{ color: "var(--z-muted)" }} title="the run states no peer median for this pillar">
+                    <EnrichmentGap what={`${p.id} peer median`} audience={audience} compact />
+                  </span>
                 )}
               </div>
               {/* Counted from the run's own categories, so a pillar carrying a
@@ -831,7 +844,7 @@ function PillarHeatmap({ entity, pillars, setPillarFocus }) {
 }
 
 /* ─────────────────────── CATEGORY HEATMAP ─────────────────────── */
-function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, setCatFocus, onSynth }) {
+function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, setCatFocus, onSynth, audience }) {
   const rows = pillarFocus ? (pillars || []).filter(p => p.id === pillarFocus) : (pillars || []);
   // The aggregate cells are score-only too; same hover identification as the
   // subcap grids — one bubble for the whole grid.
@@ -916,8 +929,13 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
                   // so all sixteen categories read "Peer 0.0" in the lowest band
                   // — a peer set that scores nothing.
                   return pm == null ? (
+                    /* Compact, and only compact: this is a fixed-height grid
+                       cell in a row of peer figures — the queue badge would
+                       burst the column. */
                     <div key={c.id} className="hm-cell peer b b-muted" style={{ minHeight: 30, padding: "4px 6px" }}
-                         title="no peer median stated for this category in this run">—</div>
+                         title="no peer median stated for this category in this run">
+                      <EnrichmentGap what={`${c.id} peer median`} audience={audience} compact />
+                    </div>
                   ) : (
                     <div key={c.id} className={`hm-cell peer b ${DMA.helpers.maturityClass(pm)}`} style={{ minHeight: 30, padding: "4px 6px" }}
                          title={`${c.id} — ${c.name || "unnamed in catalogue"} · peer median ${fx(pm, 1)}`}
@@ -1027,7 +1045,7 @@ function CapabilityHeatmap({ entity, cats, catFocus, pillarFocus, showIssues, dr
 }
 
 /* ─────────────────────── SUBCAP HEATMAP ─────────────────────── */
-function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers, showIssues, onSynth, setCatFocus }) {
+function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers, showIssues, onSynth, setCatFocus, audience }) {
   const [openClusters, setOpenClusters] = useState({});
   // Every grid that paints a cell gets the same bubble. This one and the
   // capability grid carried the `title` attribute alone, which is the
@@ -1071,7 +1089,12 @@ function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers
                       <div className="row" style={{ marginBottom: 6, gap: 5 }}>
                         <span className="chip">{c.id}</span>
                         <span className="spacer" />
-                        {shown != null ? <span className={`b ${DMA.helpers.maturityClass(shown)}`}>{fx(shown, 1)}</span> : <span className="b b-muted">—</span>}
+                        {/* Neither a promoted category score nor a mean of
+                            scored cells: the score is absent, not zero. The
+                            badge shell stays so the picker tiles keep their
+                            row rhythm; compact inside it. */}
+                        {shown != null ? <span className={`b ${DMA.helpers.maturityClass(shown)}`}>{fx(shown, 1)}</span>
+                          : <span className="b b-muted"><EnrichmentGap what={`${c.id} score`} audience={audience} compact /></span>}
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }} className="txt-fit-2">{c.name || "unnamed in catalogue"}</div>
                       <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 3 }}>{c.cells.length} subcaps{c.thin ? ` · ${c.thin} thin` : ""}</div>

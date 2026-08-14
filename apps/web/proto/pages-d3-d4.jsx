@@ -573,12 +573,19 @@ function ClientPlatform({ entity, run }) {
                       {a.area || "No L3 area stated for these cells"}
                     </div>
                   </div>
-                  <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <div style={{ textAlign: "right", flexShrink: composite === null ? 1 : 0, minWidth: 0 }}>
                     {/* The numeral's display size is for a numeral. Where the
                         run states no composite the slot carries a label, not a
                         figure, so it drops to label size in the same
                         conditional that already sets its colour — at 26px the
-                        words would push the platform name out of the tile. */}
+                        words would push the platform name out of the tile.
+
+                        `flexShrink` moves with it. A three-character numeral
+                        must never shrink; a sentence must, because the customer
+                        wording is the long one ("Not established in this
+                        assessment", which `compact` does not shorten) and an
+                        unshrinkable slot that wide collapses the platform name
+                        beside it in a five-up grid. */}
                     <div style={{ fontSize: composite === null ? 11.5 : 26, fontWeight: composite === null ? 400 : 200, color: composite === null ? "var(--z-muted)" : "var(--z-teal)", lineHeight: 1.15 }}>
                       {composite === null
                         ? <EnrichmentGap what="Platform fit score" audience={audience} compact />
@@ -958,7 +965,24 @@ function ClientPlatform({ entity, run }) {
                     {subs.length ? <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", margin: "6px 0 4px" }}>Backing cells</div> : null}
                     {subs.slice(0, 6).map(s => (
                       <div key={s.id} className="row" style={{ gap: 6, padding: "3px 0" }}>
-                        <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 30, justifyContent: "center", flexShrink: 0 }}>{fx(s.score, 1)}</span>
+                        {/* `fx` returns the em dash for an unscored cell and
+                            stays that way on purpose (it feeds 40-odd template
+                            literals a component would print as [object Object]),
+                            so the guard belongs at the call site — utils.jsx
+                            says so where fx is defined.
+
+                            The badge shell goes with the numeral rather than
+                            being kept around a label. `.b` is `white-space:
+                            nowrap` and this rail is ~300px: the customer
+                            sentence is not shortened by `compact`, so nowrap
+                            would run it out of the card. Bare, it shrinks and
+                            wraps, and it matches the four other gaps on this
+                            page. */}
+                        {s.score == null
+                          ? <span style={{ flex: "0 1 auto", minWidth: 0 }}>
+                              <EnrichmentGap what={`${s.id} score`} audience={audience} compact />
+                            </span>
+                          : <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 30, justifyContent: "center", flexShrink: 0 }}>{fx(s.score, 1)}</span>}
                         <span style={{ fontSize: 11.5, color: "var(--z-dark)", flex: 1, minWidth: 0 }} className="txt-fit-1">{s.name}</span>
                         <span className="f-mono" style={{ fontSize: 9.5, color: "var(--z-muted)", flexShrink: 0 }}>{s.id}</span>
                       </div>

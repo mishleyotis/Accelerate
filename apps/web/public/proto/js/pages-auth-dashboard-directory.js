@@ -409,7 +409,7 @@ function DashboardHome() {
     const avg = scored.length ? scored.reduce((a, e) => a + e.overall, 0) / scored.length : null;
     return /*#__PURE__*/React.createElement(KpiCard, {
       label: "Avg maturity",
-      value: avg == null ? "—" : fx(avg, 1),
+      value: avg == null ? "Not computed" : fx(avg, 1),
       sub: avg == null ? "no promoted runs yet" : DMA.helpers.maturityLabel(avg),
       icon: "heatmap",
       accent: "var(--z-dpur)"

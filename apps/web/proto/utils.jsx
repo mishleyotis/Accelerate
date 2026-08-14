@@ -52,7 +52,17 @@ function useRoute() {
    nobody stated, a delta with nothing to compare against, a score on an
    unscored cell. Rendering 0.0 there asserts a measurement, and crashing on
    null loses the whole page (React unmounts the tree, so ONE null blanked
-   every route). Absent prints an em dash. */
+   every route). Absent prints an em dash.
+
+   2026-08-14, the no-em-dash pass: this one SURVIVES, deliberately. fx returns
+   a STRING and 86 call sites depend on that — 42 of them interpolate it into a
+   template literal (Peer ${fx(peer,1)} · M${fx(ceiling,1)} · the lo-hi range
+   pair · money()'s ${fx(v)}${unit}) and 4 more lean on string
+   truthiness (`fx(e.overall,1) || "-"`). Returning <EnrichmentGap> here prints
+   "[object Object]" across those, and returning any longer word ("Not stated")
+   glues into "Mnot stated". The fix is per-caller, not here: each site that
+   renders a bare score guards on null and renders <EnrichmentGap> itself, and
+   fx is left to format numbers it was actually given. Tracked as follow-up. */
 function fx(v, digits) {
   const n = Number(v);
   return (v === null || v === undefined || v === "" || !isFinite(n))
@@ -593,7 +603,10 @@ function sessionUser() {
   const email = live.email;
   if (!email) {
     // Live but unauthenticated: nothing to show but the sign-in gate.
-    return { name: "Not signed in", short: "—", first: "there",
+    // `short` is the sidebar footer's compact name (chrome.jsx, .sb-foot-name).
+    // Nothing enriches a logged-out session, so this is a plain statement of
+    // fact, not an EnrichmentGap: there is no field for the producer to fill.
+    return { name: "Not signed in", short: "Not signed in", first: "there",
              initials: "?", email: "" };
   }
   // Server-verified display name (lib/identity.js); the client never

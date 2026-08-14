@@ -203,10 +203,19 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
   };
   const first = series.find(s => s.unit) || series[0];
   const last = [...series].reverse().find(s => s.value != null);
+  // `last` is the newest point carrying a value, but a value that will not
+  // parse (a stated "confidential", a "~$6.5B") still yields null money.
+  const lastMoney = last ? moneyOf(last) : null;
   return {
     currency: "USD",
     unit: unitOf(first),
-    fy: series.map(s => s.period || "—"),
+    // Axis labels, and a plain STRING array by contract: three charts key
+    // React children off these and call `.replace("FY", "'")` on them, so
+    // neither an <EnrichmentGap> element nor a null can go here — either
+    // would crash the callers. An undated point therefore carries the same
+    // word the compact gap renders, so it reads as a stated absence rather
+    // than as a dash the reader cannot act on.
+    fy: series.map(s => s.period || "Not stated"),
     total_assets: series.map(s => num(s.value)),
     // Net income and NIM are not in this section's contract. Null, not zero:
     // a zero-height bar reads as a measured zero.
@@ -216,7 +225,11 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
     branches: num(fields.branches && fields.branches.value),
     regulator: regulatory && regulatory.primary_regulator || fields.primary_regulator && fields.primary_regulator.value || null,
     geography: regulatory && (regulatory.jurisdictions || []).join(" · ") || null,
-    headline: last ? `${moneyOf(last)} · ${last.period || ""}`.trim() : null,
+    // A headline with no figure in it is not a headline. When the money will
+    // not parse the whole string stays absent rather than leading with a
+    // dash; the card's span renders nothing for null, and the gap belongs to
+    // the card, not to the adapter.
+    headline: lastMoney !== null ? `${lastMoney} · ${last.period || ""}`.trim() : null,
     basis: (series.find(s => s.basis) || {}).basis || null,
     // CAGR is COMPUTED from the dated points, never taken on faith. The card
     // showed "—" because no contract field carries it and nothing derived it,
@@ -232,7 +245,12 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
 }
 function moneyOf(s) {
   const v = num(s.value);
-  if (v === null) return "—";
+  // Null, not a dash. This is a formatter: it has no audience in scope and
+  // no idea what container it lands in, so the CALLER decides what an absent
+  // figure renders as. Returning a dash from here printed it into the card
+  // headline with no route to enrichment and no way for a reader to tell an
+  // unparseable figure from one nobody stated.
+  if (v === null) return null;
   const u = String(s.unit || "").toLowerCase();
   const suffix = u.includes("trillion") ? "T" : u.includes("billion") ? "B" : u.includes("million") ? "M" : "";
   return `$${v}${suffix}`;

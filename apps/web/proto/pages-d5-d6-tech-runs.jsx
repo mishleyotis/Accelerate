@@ -1024,8 +1024,24 @@ function IssueDetail({ issue, entity, onClose, openEvidence, openSubcap, audienc
           <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase" }}>Arithmetic</div>
           {kind === "ceiling" ? (
             <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55, marginTop: 3 }}>
-              Assessed {fx(lo, 1)}–{fx(hi, 1)} <Icon name="arrow-r" size={11} /> ceiling M{fx(ceiling, 1)}
-              {" · "}{atCeiling} of {scored.length} named cell{scored.length === 1 ? "" : "s"} sit{atCeiling === 1 ? "s" : ""} at it.
+              {/* `lo`/`hi` are null when the matter caps cells the run does
+                  not score — the dead-chip case above — and fx() renders a
+                  null score as an em dash, so this read "Assessed —–— →
+                  ceiling M3.0 · 0 of 0 named cells sit at it". The ceiling is
+                  stated either way; the assessed spread only when the run
+                  states one. Same sentence the `linked` branch already uses
+                  for the same condition. */}
+              {scored.length ? (
+                <>
+                  Assessed {fx(lo, 1)}–{fx(hi, 1)} <Icon name="arrow-r" size={11} /> ceiling M{fx(ceiling, 1)}
+                  {" · "}{atCeiling} of {scored.length} named cell{scored.length === 1 ? "" : "s"} sit{atCeiling === 1 ? "s" : ""} at it.
+                </>
+              ) : (
+                <>
+                  Ceiling M{fx(ceiling, 1)}. The run names {entries.length} cell{entries.length === 1 ? "" : "s"} and
+                  scores none of them, so no assessed position can be shown.
+                </>
+              )}
             </div>
           ) : kind === "linked" ? (
             <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55, marginTop: 3 }}>

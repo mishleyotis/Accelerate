@@ -211,7 +211,11 @@ function SentimentCard({
         textAlign: "right",
         fontVariantNumeric: "tabular-nums"
       }
-    }, r.score == null ? "—" : fx(r.score, 1)));
+    }, r.score == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: r.metric ? `${r.source} · ${r.metric}` : r.source || "Rating",
+      audience: audience,
+      compact: true
+    }) : fx(r.score, 1)));
   };
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",

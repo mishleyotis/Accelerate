@@ -1536,7 +1536,12 @@ function ImportPage() {
       }) : "Not recorded",
       files: s.files_seen ?? "Not recorded",
       entities: s.runs_created ?? 0,
-      took: ms == null ? "Not recorded" : ms < 1000 ? "<1 s" : `${Math.round(ms / 1000)} s`
+      // `took` needs both ends. The row is inserted with started_at and
+      // status='running', and only gets finished_at when the Job ends, so a
+      // missing duration almost always means the scan has not ended (running
+      // now, or the Job died before writing one), not that a duration went
+      // unrecorded. Those are different facts and must not read the same.
+      took: ms != null ? ms < 1000 ? "<1 s" : `${Math.round(ms / 1000)} s` : s.started_at ? "Not finished" : "Not recorded"
     };
   }) : [{
     id: "IJ-09",

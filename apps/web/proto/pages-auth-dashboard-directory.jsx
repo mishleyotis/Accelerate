@@ -198,12 +198,18 @@ function DashboardHome() {
           value={ent.reduce((a, e) => a + (e.runs || []).length, 0)}
           sub="across all entities" icon="insight" accent="var(--z-mid)" />
         {/* Production divergence: computed or null, never NaN (invariant 9).
-            An average over zero scored entities renders its empty state. */}
+            An average over zero scored entities renders its empty state.
+
+            Not an EnrichmentGap: this is a cross-directory aggregate on the
+            internal command centre, not a payload field. Nothing in the
+            connector's worklist fills it — a promoted run does — and the
+            customer wording ("not established in this assessment") names an
+            assessment this number is not scoped to. So: a plain honest word. */}
         {(() => {
           const scored = ent.filter(e => e.overall);
           const avg = scored.length ? scored.reduce((a, e) => a + e.overall, 0) / scored.length : null;
           return <KpiCard label="Avg maturity"
-            value={avg == null ? "—" : fx(avg, 1)}
+            value={avg == null ? "Not computed" : fx(avg, 1)}
             sub={avg == null ? "no promoted runs yet" : DMA.helpers.maturityLabel(avg)}
             icon="heatmap" accent="var(--z-dpur)" />;
         })()}

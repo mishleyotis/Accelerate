@@ -405,9 +405,16 @@ function InsightModal() {
                   `title` is a template string on a prop, so EnrichmentGap (an
                   element) cannot go here — the plain string carries the same
                   two readings it does, and no queue badge, because a heading is
-                  a label slot and not a field slot (cf. "PHASE NOT STATED"). */}
+                  a label slot and not a field slot (cf. "PHASE NOT STATED").
+
+                  The test is `=== "internal"`, not `=== "customer"`: this is the
+                  one hand-rolled copy of EnrichmentGap's wording in the sweep,
+                  so it carries the component's DEFAULT-DENY polarity too.
+                  Anything that is not explicitly internal gets the customer
+                  sentence, and an audience that ever arrives unset degrades to
+                  the plainer reading rather than showing a client ours. */}
               {ic.severity_rationale ? (
-                <Block title={`SEVERITY · ${ic.severity || (audience === "customer" ? "Not established" : "Not stated")}`}
+                <Block title={`SEVERITY · ${ic.severity || (audience === "internal" ? "Not stated" : "Not established")}`}
                        body={ic.severity_rationale} />
               ) : null}
 

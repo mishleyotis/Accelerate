@@ -528,6 +528,7 @@ function ClientHeatmap({
     openSubcap: setSynthSubcap,
     openEvidence: openEvidence,
     openInsight: openInsight,
+    audience: audience,
     showIssues: showIssues
   }) : mode === "value_chain" ? /*#__PURE__*/React.createElement(ValueChainView, {
     entity: entity,
@@ -544,6 +545,7 @@ function ClientHeatmap({
   }) : null, zoom === "pillar" ? /*#__PURE__*/React.createElement(PillarHeatmap, {
     entity: entity,
     pillars: pillars,
+    audience: audience,
     setPillarFocus: p => {
       setPillarFocus(p);
       setZoom("category");
@@ -554,6 +556,7 @@ function ClientHeatmap({
     pillarFocus: pillarFocus,
     showPeers: showPeers,
     showIssues: showIssues,
+    audience: audience,
     setCatFocus: c => {
       setCatFocus(c);
       setZoom("capability");
@@ -586,6 +589,7 @@ function ClientHeatmap({
     pillarFocus: pillarFocus,
     showPeers: showPeers,
     showIssues: showIssues,
+    audience: audience,
     setCatFocus: setCatFocus,
     onSynth: s => setSynthSubcap({
       kind: "subcap",
@@ -610,7 +614,8 @@ function FocusAreaView({
   subcapsForFocusArea,
   openSubcap,
   openEvidence,
-  openInsight
+  openInsight,
+  audience
 }) {
   // Hover identification for the score-only cell grid in the detail branch.
   // Called before the early return — hooks cannot be conditional.
@@ -700,13 +705,23 @@ function FocusAreaView({
           fontSize: 11,
           color: "var(--z-muted)"
         }
-      }, "Peer ", fx(peer, 1)) : /*#__PURE__*/React.createElement("span", {
+      }, "Peer ", fx(peer, 1)) :
+      /*#__PURE__*/
+      /* No stated median at focus-area grain is a routable
+         gap, not a dash. Compact: this row already carries a
+         maturity chip and a delta badge inside a three-up
+         card, and the queue badge would push the delta out. */
+      React.createElement("span", {
         style: {
           fontSize: 11,
           color: "var(--z-muted)"
         },
         title: "no peer median is stated at this grain in this run"
-      }, "\u2014"), gap == null ? null : gap > 0 ? /*#__PURE__*/React.createElement("span", {
+      }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+        what: `${fa.id} peer median`,
+        audience: audience,
+        compact: true
+      })), gap == null ? null : gap > 0 ? /*#__PURE__*/React.createElement("span", {
         className: "b b-below",
         style: {
           marginLeft: "auto"
@@ -1351,7 +1366,8 @@ function CustomizableKpiStrip({
 function PillarHeatmap({
   entity,
   pillars,
-  setPillarFocus
+  setPillarFocus,
+  audience
 }) {
   return /*#__PURE__*/React.createElement("div", {
     className: "card"
@@ -1428,12 +1444,20 @@ function PillarHeatmap({
         color: delta < 0 ? "var(--z-below)" : "var(--z-mid)",
         fontFamily: "var(--font-mono)"
       }
-    }, delta >= 0 ? "▲" : "▼", " ", fx(Math.abs(delta), 1)) : null) : /*#__PURE__*/React.createElement("span", {
+    }, delta >= 0 ? "▲" : "▼", " ", fx(Math.abs(delta), 1)) : null) :
+    /*#__PURE__*/
+    /* Compact: four tiles across, and the 11px meta row under
+       the progress bar has no room for the queue badge. */
+    React.createElement("span", {
       style: {
         color: "var(--z-muted)"
       },
       title: "the run states no peer median for this pillar"
-    }, "\u2014")), /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${p.id} peer median`,
+      audience: audience,
+      compact: true
+    }))), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
         color: "var(--z-muted)",
@@ -1451,7 +1475,8 @@ function CategoryHeatmap({
   showPeers,
   showIssues,
   setCatFocus,
-  onSynth
+  onSynth,
+  audience
 }) {
   const rows = pillarFocus ? (pillars || []).filter(p => p.id === pillarFocus) : pillars || [];
   // The aggregate cells are score-only too; same hover identification as the
@@ -1607,7 +1632,12 @@ function CategoryHeatmap({
       // A null median banded as maturityClass(null) and printed 0.0,
       // so all sixteen categories read "Peer 0.0" in the lowest band
       // — a peer set that scores nothing.
-      return pm == null ? /*#__PURE__*/React.createElement("div", {
+      return pm == null ?
+      /*#__PURE__*/
+      /* Compact, and only compact: this is a fixed-height grid
+         cell in a row of peer figures — the queue badge would
+         burst the column. */
+      React.createElement("div", {
         key: c.id,
         className: "hm-cell peer b b-muted",
         style: {
@@ -1615,7 +1645,11 @@ function CategoryHeatmap({
           padding: "4px 6px"
         },
         title: "no peer median stated for this category in this run"
-      }, "\u2014") : /*#__PURE__*/React.createElement("div", {
+      }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+        what: `${c.id} peer median`,
+        audience: audience,
+        compact: true
+      })) : /*#__PURE__*/React.createElement("div", {
         key: c.id,
         className: `hm-cell peer b ${DMA.helpers.maturityClass(pm)}`,
         style: {
@@ -1795,7 +1829,8 @@ function SubcapHeatmap({
   showPeers,
   showIssues,
   onSynth,
-  setCatFocus
+  setCatFocus,
+  audience
 }) {
   const [openClusters, setOpenClusters] = useState({});
   // Every grid that paints a cell gets the same bubble. This one and the
@@ -1890,7 +1925,11 @@ function SubcapHeatmap({
           className: `b ${DMA.helpers.maturityClass(shown)}`
         }, fx(shown, 1)) : /*#__PURE__*/React.createElement("span", {
           className: "b b-muted"
-        }, "\u2014")), /*#__PURE__*/React.createElement("div", {
+        }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+          what: `${c.id} score`,
+          audience: audience,
+          compact: true
+        }))), /*#__PURE__*/React.createElement("div", {
           style: {
             fontSize: 12,
             fontWeight: 600,

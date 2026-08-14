@@ -716,7 +716,8 @@ function ClientPlatform({
       }, a.area || "No L3 area stated for these cells")), /*#__PURE__*/React.createElement("div", {
         style: {
           textAlign: "right",
-          flexShrink: 0
+          flexShrink: composite === null ? 1 : 0,
+          minWidth: 0
         }
       }, /*#__PURE__*/React.createElement("div", {
         style: {
@@ -1374,7 +1375,16 @@ function ClientPlatform({
         gap: 6,
         padding: "3px 0"
       }
-    }, /*#__PURE__*/React.createElement("span", {
+    }, s.score == null ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: "0 1 auto",
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${s.id} score`,
+      audience: audience,
+      compact: true
+    })) : /*#__PURE__*/React.createElement("span", {
       className: `b ${DMA.helpers.maturityClass(s.score)}`,
       style: {
         width: 30,
