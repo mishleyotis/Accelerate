@@ -738,9 +738,15 @@ function KpiCard({
 function DashboardEntityCard({
   e
 }) {
+  const {
+    audience
+  } = useApp();
   const top = e.oss ? Object.entries(e.oss).sort((a, b) => b[1] - a[1])[0] : null;
   const matHex = DMA.helpers.maturityHex(e.overall || 2.5);
-  const matLabel = DMA.helpers.maturityLabel(e.overall || 2.5);
+  // Band word only where there is a score to band. maturityLabel(null) is
+  // already null; the `|| 2.5` fallback printed "BUILDING" beneath an absent
+  // score, which reads as a finding and would now contradict the gap above it.
+  const matLabel = DMA.helpers.maturityLabel(e.overall);
   return /*#__PURE__*/React.createElement("div", {
     className: "card-tile clickable",
     onClick: () => navigate(`/clients/${e.id}/overview`),
@@ -801,14 +807,23 @@ function DashboardEntityCard({
       flexDirection: "column",
       alignItems: "flex-end"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, e.overall == null ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: "Overall maturity",
+    audience: audience,
+    compact: true
+  })) : /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 22,
       fontWeight: 200,
       color: matHex,
       lineHeight: 1
     }
-  }, fx(e.overall, 1) || "-"), /*#__PURE__*/React.createElement("div", {
+  }, fx(e.overall, 1)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 8.5,
       color: matHex,
@@ -827,9 +842,13 @@ function DashboardEntityCard({
     }
   }, DMA.PILLARS.map(p => {
     const s = e.pillar_scores?.[p.id];
+    // A title attribute takes a STRING, so no EnrichmentGap in it — an
+    // element would stringify to "[object Object]". Same defect as the
+    // score above though: fx returned the em dash and `|| "-"` never
+    // fired, so a pillar with no score tipped "P1 · —".
     return /*#__PURE__*/React.createElement("div", {
       key: p.id,
-      title: `${p.id} · ${fx(s, 1) || "-"}`,
+      title: `${p.id} · ${s == null ? "not stated" : fx(s, 1)}`,
       style: {
         display: "flex",
         flexDirection: "column",
@@ -853,7 +872,11 @@ function DashboardEntityCard({
         color: "var(--z-body)",
         fontWeight: 600
       }
-    }, s ? fx(s, 1) : "–")), /*#__PURE__*/React.createElement("div", {
+    }, s == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${p.id} score`,
+      audience: audience,
+      compact: true
+    }) : fx(s, 1))), /*#__PURE__*/React.createElement("div", {
       style: {
         height: 5,
         background: "var(--z-sep)",
@@ -1100,6 +1123,9 @@ function EntityDirectoryPage() {
 function EntityCard({
   e
 }) {
+  const {
+    audience
+  } = useApp();
   const top = e.oss ? Object.entries(e.oss).sort((a, b) => b[1] - a[1])[0] : null;
   return /*#__PURE__*/React.createElement("div", {
     className: "card-tile clickable",
@@ -1137,7 +1163,16 @@ function EntityCard({
     style: {
       textAlign: "right"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, e.overall == null ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: "Overall maturity",
+    audience: audience,
+    compact: true
+  })) : /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 26,
       fontWeight: 200,
@@ -1145,7 +1180,7 @@ function EntityCard({
       lineHeight: 1,
       letterSpacing: "-.02em"
     }
-  }, fx(e.overall, 1) || "-"), /*#__PURE__*/React.createElement("div", {
+  }, fx(e.overall, 1)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
       color: "var(--z-muted)",
@@ -1161,6 +1196,12 @@ function EntityCard({
   }, DMA.PILLARS.map(p => {
     const s = e.pillar_scores[p.id];
     const w = s / 5 * 100;
+    // pillarScoresOf KEEPS null entries (unlike pillarPeerMediansOf,
+    // which drops them), so `pillar_scores` can be present with a null
+    // score inside it. This `fx(s, 1)` was unguarded and printed the em
+    // dash outright, and `width: "NaN%"` is rejected by CSS, leaving
+    // the fill at its auto width — a FULL bar beside the dash. Guard
+    // both, the way the dashboard card already does.
     return /*#__PURE__*/React.createElement("div", {
       key: p.id
     }, /*#__PURE__*/React.createElement("div", {
@@ -1176,7 +1217,7 @@ function EntityCard({
         borderRadius: 3,
         overflow: "hidden"
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, s == null ? null : /*#__PURE__*/React.createElement("div", {
       style: {
         width: `${w}%`,
         height: "100%",
@@ -1188,7 +1229,11 @@ function EntityCard({
         color: "var(--z-dark)",
         marginTop: 2
       }
-    }, fx(s, 1)));
+    }, s == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${p.id} score`,
+      audience: audience,
+      compact: true
+    }) : fx(s, 1)));
   })) : /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 10

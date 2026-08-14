@@ -701,6 +701,19 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
 .pbar-score { font-size: 13px; font-weight: 600; color: var(--z-dark); width: 32px; text-align: right; }
 .pbar-delta { font-size: 10px; color: var(--z-muted); width: 50px; text-align: right; font-family: var(--font-mono); }
 
+/* A cell holding an enrichment gap sizes to its words instead of to a score.
+   32px fits "3.2" and nothing else, so "Not stated" wrapped and grew the row —
+   which is how the no-em-dash pass would have arrived as a layout regression.
+   Scoped with :has() so ONLY the rows that need words widen: every scored row
+   stays on the same 32px right edge, and .pbar-track is flex:1 so the bar
+   absorbs the difference on a row that has no fill to draw anyway.
+   Without :has() support the nowrap below overflows rather than wraps, which
+   degrades to ugly rather than to broken. */
+.pbar-score:has(.enrich-gap),
+.pbar-delta:has(.enrich-gap) { width: auto; min-width: 32px; flex-shrink: 0; }
+.enrich-gap { white-space: nowrap; }
+.enrich-gap[data-gap="held"] { white-space: normal; }   /* carries its reason */
+
 /* Heatmap cell */
 .hm {
   display: grid;
@@ -1529,6 +1542,12 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
   .pbar-name { width: auto; font-size: 11px; min-width: 70px; }
   .pbar-score { width: 26px; font-size: 12px; }
   .pbar-delta { width: 40px; font-size: 9.5px; }
+  /* The narrow-viewport overrides above reset width, which would undo the
+     gap widening from the base rules — the specificity is equal and these
+     come later, so they win. Restated here rather than hoisted, because at
+     26px the words need the exemption more, not less. */
+  .pbar-score:has(.enrich-gap),
+  .pbar-delta:has(.enrich-gap) { width: auto; min-width: 26px; }
 
   /* Login becomes single column */
   body > #app > div[style*="grid-template-columns: minmax(420px"] { grid-template-columns: 1fr !important; min-height: auto !important; }

@@ -344,9 +344,13 @@ function KpiCard({ label, value, sub, icon, accent, rounding }) {
 }
 
 function DashboardEntityCard({ e }) {
+  const { audience } = useApp();
   const top = e.oss ? Object.entries(e.oss).sort((a, b) => b[1] - a[1])[0] : null;
   const matHex = DMA.helpers.maturityHex(e.overall || 2.5);
-  const matLabel = DMA.helpers.maturityLabel(e.overall || 2.5);
+  // Band word only where there is a score to band. maturityLabel(null) is
+  // already null; the `|| 2.5` fallback printed "BUILDING" beneath an absent
+  // score, which reads as a finding and would now contradict the gap above it.
+  const matLabel = DMA.helpers.maturityLabel(e.overall);
   return (
     <div className="card-tile clickable" onClick={() => navigate(`/clients/${e.id}/overview`)} style={{ padding: 14, display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10 }}>
@@ -358,7 +362,16 @@ function DashboardEntityCard({ e }) {
           <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.35 }} className="txt-fit-2" title={[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}>{[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-          <div style={{ fontSize: 22, fontWeight: 200, color: matHex, lineHeight: 1 }}>{fx(e.overall, 1) || "-"}</div>
+          {/* fx() RETURNS the em dash for a null score, and it returns it as a
+              non-empty string — so the old `|| "-"` never fired and an entity
+              whose promoted run states no composite rendered a bare dash here.
+              `overall` is `num(scores.composite)` in the live adapter, so null
+              is a real production value, not a fixture artefact. `compact` and
+              a 10px slot: this is the corner of a directory card and the badge
+              at 22px would break the row. */}
+          {e.overall == null
+            ? <div style={{ fontSize: 10, fontWeight: 600 }}><EnrichmentGap what="Overall maturity" audience={audience} compact /></div>
+            : <div style={{ fontSize: 22, fontWeight: 200, color: matHex, lineHeight: 1 }}>{fx(e.overall, 1)}</div>}
           <div style={{ fontSize: 8.5, color: matHex, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em", marginTop: 3, whiteSpace: "nowrap" }}>{matLabel}</div>
         </div>
       </div>
@@ -366,11 +379,20 @@ function DashboardEntityCard({ e }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, marginBottom: 10 }}>
         {DMA.PILLARS.map(p => {
           const s = e.pillar_scores?.[p.id];
+          // A title attribute takes a STRING, so no EnrichmentGap in it — an
+          // element would stringify to "[object Object]". Same defect as the
+          // score above though: fx returned the em dash and `|| "-"` never
+          // fired, so a pillar with no score tipped "P1 · —".
           return (
-            <div key={p.id} title={`${p.id} · ${fx(s, 1) || "-"}`} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <div key={p.id} title={`${p.id} · ${s == null ? "not stated" : fx(s, 1)}`} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                 <span style={{ fontSize: 9, color: "var(--z-muted)", fontWeight: 600 }}>{p.id}</span>
-                <span style={{ fontSize: 9, color: "var(--z-body)", fontWeight: 600 }}>{s ? fx(s, 1) : "–"}</span>
+                {/* Was an EN dash, so the em-dash grep never saw it — but it is
+                    the same absent pillar score that EntityCard's strip renders
+                    as a gap, and two cards disagreeing on one value is its own
+                    defect. `== null` not truthiness: a stated 0 is a score. */}
+                <span style={{ fontSize: 9, color: "var(--z-body)", fontWeight: 600 }}>
+                  {s == null ? <EnrichmentGap what={`${p.id} score`} audience={audience} compact /> : fx(s, 1)}</span>
               </div>
               <div style={{ height: 5, background: "var(--z-sep)", borderRadius: 2.5, overflow: "hidden" }}>
                 {s ? <div style={{ width: `${s / 5 * 100}%`, height: "100%", background: DMA.helpers.maturityHex(s) }} /> : null}
@@ -499,6 +521,7 @@ function EntityDirectoryPage() {
 }
 
 function EntityCard({ e }) {
+  const { audience } = useApp();
   const top = e.oss ? Object.entries(e.oss).sort((a, b) => b[1] - a[1])[0] : null;
   return (
     <div className="card-tile clickable" onClick={() => navigate(`/clients/${e.id}/overview`)}>
@@ -511,7 +534,13 @@ function EntityCard({ e }) {
           <span className="b b-org" style={{ display: "inline-flex", gap: 4 }}>● IN PROGRESS</span>
         ) : (
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 26, fontWeight: 200, color: "var(--z-teal)", lineHeight: 1, letterSpacing: "-.02em" }}>{fx(e.overall, 1) || "-"}</div>
+            {/* Same dead `|| "-"` as the dashboard card: fx returns the em dash
+                as a non-empty string, so a completed entity with no composite
+                rendered a bare dash. Small slot, `compact` — the badge at 26px
+                would break the card head. */}
+            {e.overall == null
+              ? <div style={{ fontSize: 10, fontWeight: 600 }}><EnrichmentGap what="Overall maturity" audience={audience} compact /></div>
+              : <div style={{ fontSize: 26, fontWeight: 200, color: "var(--z-teal)", lineHeight: 1, letterSpacing: "-.02em" }}>{fx(e.overall, 1)}</div>}
             <div style={{ fontSize: 9, color: "var(--z-muted)", marginTop: 2 }}>maturity</div>
           </div>
         )}
@@ -522,13 +551,20 @@ function EntityCard({ e }) {
           {DMA.PILLARS.map(p => {
             const s = e.pillar_scores[p.id];
             const w = (s / 5) * 100;
+            // pillarScoresOf KEEPS null entries (unlike pillarPeerMediansOf,
+            // which drops them), so `pillar_scores` can be present with a null
+            // score inside it. This `fx(s, 1)` was unguarded and printed the em
+            // dash outright, and `width: "NaN%"` is rejected by CSS, leaving
+            // the fill at its auto width — a FULL bar beside the dash. Guard
+            // both, the way the dashboard card already does.
             return (
               <div key={p.id}>
                 <div style={{ fontSize: 9, color: "var(--z-muted)", marginBottom: 3 }}>{p.id}</div>
                 <div style={{ height: 6, background: "var(--z-sep)", borderRadius: 3, overflow: "hidden" }}>
-                  <div style={{ width: `${w}%`, height: "100%", background: DMA.helpers.maturityHex(s) }} />
+                  {s == null ? null : <div style={{ width: `${w}%`, height: "100%", background: DMA.helpers.maturityHex(s) }} />}
                 </div>
-                <div style={{ fontSize: 10, color: "var(--z-dark)", marginTop: 2 }}>{fx(s, 1)}</div>
+                <div style={{ fontSize: 10, color: "var(--z-dark)", marginTop: 2 }}>
+                  {s == null ? <EnrichmentGap what={`${p.id} score`} audience={audience} compact /> : fx(s, 1)}</div>
               </div>
             );
           })}

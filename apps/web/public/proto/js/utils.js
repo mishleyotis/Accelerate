@@ -68,14 +68,26 @@ function useRoute() {
    every route). Absent prints an em dash.
 
    2026-08-14, the no-em-dash pass: this one SURVIVES, deliberately. fx returns
-   a STRING and 86 call sites depend on that — 42 of them interpolate it into a
-   template literal (Peer ${fx(peer,1)} · M${fx(ceiling,1)} · the lo-hi range
-   pair · money()'s ${fx(v)}${unit}) and 4 more lean on string
-   truthiness (`fx(e.overall,1) || "-"`). Returning <EnrichmentGap> here prints
-   "[object Object]" across those, and returning any longer word ("Not stated")
-   glues into "Mnot stated". The fix is per-caller, not here: each site that
-   renders a bare score guards on null and renders <EnrichmentGap> itself, and
-   fx is left to format numbers it was actually given. Tracked as follow-up. */
+   a STRING and ~90 call lines across 7 modules depend on that (grep `fx(` under
+   apps/web/proto; the count moves as the sweep lands, so re-derive it rather
+   than trust this number). Roughly half interpolate it into a template literal
+   — Peer ${fx(peer,1)} · M${fx(ceiling,1)} · the lo-hi range pair · money()'s
+   ${fx(v)}${unit} — where a returned React element prints "[object Object]",
+   and returning any longer word ("Not stated") glues into "Mnot stated" and
+   "$Not stated". Neither the type nor the string can change from in here.
+
+   The truthiness trap, for whoever takes the follow-up: grep `fx(…) || "-"`.
+   Those sites look like they fall back to a hyphen; they do not. "—" is TRUTHY,
+   so the `||` never fires and they render the em dash. A "fix" that returns ""
+   would flip them all on and swap one dead end for another.
+
+   The real fix is per-caller, not here: each site that renders a bare score
+   guards on null and renders <EnrichmentGap> itself, and fx is left to format
+   numbers it was actually given. Until that lands, the return below is the one
+   dead end still reaching the screen from this file, and Gate C
+   (scripts/gate_c_no_render_dead_ends.py) flags it. It is deliberately NOT in
+   that gate's ALLOWED list: this is real debt, not a legitimate literal, and
+   allowlisting it would hide the very thing the gate exists to surface. */
 function fx(v, digits) {
   const n = Number(v);
   return v === null || v === undefined || v === "" || !isFinite(n) ? "—" : n.toFixed(digits === undefined ? 1 : digits);
