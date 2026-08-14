@@ -191,7 +191,15 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       techstack's dma_impact withholding fires by RULE rather than by the
 #       vendor safety net underneath it; and a sentence written to the
 #       seller's own account executive stops reaching the customer body.
-SERVE_RULES = "serve-rules@6"
+#   @7  2026-08-14 — `firmographics.website` becomes a third source for the
+#       entity's own publication domains, so O11's `self_sourced_pct` changes
+#       from null to a computed share on any run that states one, and its
+#       `self_sourced_basis` names what closes it differently. Both are body
+#       changes under an unmoved `promoted_at`, which is the whole reason this
+#       tag exists: caught here only because the deployed ETag was READ after
+#       the change went live and still said @6 — the reader holding a cached
+#       null is exactly the reader who would 304 back onto it.
+SERVE_RULES = "serve-rules@7"
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
