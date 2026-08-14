@@ -574,10 +574,17 @@ def _register_paths() -> list:
     there is no second copy in the tree to drift.
     """
     here = Path(__file__).resolve()
-    return [
-        here.parent.parent / "shared" / "enrichment_register.json",   # image
-        here.parents[3] / "packages" / "shared" / "enrichment_register.json",
-    ]
+    paths = [here.parent.parent / "shared" / "enrichment_register.json"]  # image
+    # In the image this module is /app/dma_api/computed.py — THREE parents, so
+    # parents[3] raises IndexError. The first deploy of this loader built both
+    # paths eagerly and died on the repo path before ever checking the image
+    # path that existed beside it: every section carried
+    # `computed_error: IndexError` and no enrichment_status served. The repo
+    # layout is optional; the image layout is not.
+    if len(here.parents) > 3:
+        paths.append(here.parents[3] / "packages" / "shared"
+                     / "enrichment_register.json")
+    return paths
 
 
 def _enrichment_register() -> dict:

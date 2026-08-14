@@ -128,3 +128,22 @@ def test_every_surface_in_the_register_is_a_real_page_and_section():
     for key in (reg.get("surfaces") or reg):
         page, _, section = key.partition(".")
         assert section in sections(page), f"{key} is not a real section"
+
+
+def test_register_paths_survive_a_shallow_image_layout():
+    """In the image the module is /app/dma_api/computed.py — three parents.
+    The first deploy built `here.parents[3]` EAGERLY and raised IndexError
+    while constructing the list, before checking the image path that existed
+    beside the package. Measured in production: every computed section carried
+    `computed_error: ...IndexError` and enrichment_status served nowhere,
+    while this suite passed — because in the repo the module is deep enough.
+    The path list must be buildable from ANY depth."""
+    import types
+    real_file = computed.__file__
+    try:
+        computed.__file__ = "/app/dma_api/computed.py"
+        paths = computed._register_paths()
+        assert paths, "no candidate paths at image depth"
+        assert str(paths[0]) == "/app/shared/enrichment_register.json", paths[0]
+    finally:
+        computed.__file__ = real_file
