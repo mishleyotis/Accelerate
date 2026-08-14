@@ -189,6 +189,27 @@ const LIVE_MODE = typeof window !== "undefined" && !!window.DMA_LIVE;
    entity shape reads them as named properties. Mapped by field name, and only
    where the producer stated a value — a field it left null stays absent so the
    panel prints a dash rather than a zero. */
+/* Field names this mapper pins onto the prototype's entity shape. Everything
+   NOT in here still renders — see `extra_fields` below — because the contract
+   says the SUB-VERTICAL decides which fields exist ("SV5: AUM, client count,
+   revenue, ADVISOR COUNT"), and a reader with a fixed vocabulary silently
+   drops whatever its author had not met.
+
+   Measured 2026-08-14 on a wealth-manager run: 13 fields served, 5 rendered
+   nowhere (AUM, HQ, advisor_count, ownership, business_model) and Assets
+   printed an em dash while `AUM 18.0 CAD billions` sat in the payload. The
+   panel read as "this client disclosed almost nothing"; the producer had
+   disclosed it and the reader threw it away. */
+const FIRMO_PINNED = new Set([
+  "total_assets", "assets", "aum", "employees", "branches",
+  "primary_regulator", "member_count", "customer_count", "net_worth_ratio",
+  "founded", "founded_year", "charter", "hq", "website", "web site",
+  "domain", "primary domain", "web domain", "entity website", "url",
+]);
+
+/* `AUM` and `total_assets` are the same row on this panel: the contract's
+   must-present set names them as a disjunction ("AUM or assets"), so a
+   sub-vertical states one or the other and the panel has one Assets row. */
 function firmoFields(firmo) {
   const out = {};
   // A `fields` that is not a list is not an absent section: it is a section
@@ -200,20 +221,45 @@ function firmoFields(firmo) {
   if (fields !== null && fields !== undefined && !Array.isArray(fields)) {
     return { firmographics_unreadable: true };
   }
+  out.extra_fields = [];
   for (const f of fields || []) {
-    if (f.value === null || f.value === undefined || f.value === "") continue;
+    const key = String(f.field == null ? "" : f.field).trim().toLowerCase();
+    if (f.value === null || f.value === undefined || f.value === "") {
+      // A field the producer HELD (quarantined, with its reason) is a finding
+      // and renders as a documented em dash. Silently skipping it is how a
+      // held field became indistinguishable from one nobody asked for.
+      if (f.quarantined && !FIRMO_PINNED.has(key)) {
+        out.extra_fields.push({ field: f.field, value: null, unit: null,
+                                as_of: f.as_of || null, held: true,
+                                reason: f.quarantine_reason || null });
+      }
+      continue;
+    }
     const n = Number(f.value);
     const num = isFinite(n) ? n : null;
-    switch (f.field) {
-      case "total_assets": out.assets = num; out.assets_unit = f.unit; break;
+    if (!FIRMO_PINNED.has(key)) {
+      out.extra_fields.push({ field: f.field, value: f.value,
+                              unit: f.unit || null, as_of: f.as_of || null,
+                              held: false, reason: null });
+      continue;
+    }
+    switch (key) {
+      // One Assets row, whichever of the disjunction the sub-vertical states.
+      case "total_assets":
+      case "assets":
+      case "aum":          out.assets = num; out.assets_unit = f.unit;
+                           out.assets_label = key === "aum" ? "AUM" : "Assets";
+                           break;
       case "employees":    out.employees = num; break;
       case "branches":     out.branches = num; break;
       case "primary_regulator": out.regulator = f.value; break;
       case "member_count": out.members = num; break;
       case "customer_count": out.customers = num; break;
       case "net_worth_ratio": out.net_worth_ratio = num; break;
-      case "founded":      out.founded = f.value; break;
+      case "founded":
+      case "founded_year": out.founded = f.value; break;
       case "charter":      out.charter = f.value; break;
+      case "hq":           out.hq = f.value; break;
       // Required on every sub-vertical since 2026-08-14. The spellings match
       // the read path in dma_api/computed.py::_entity_domains, because the
       // same stated field both renders here and supplies O11's denominator —
@@ -230,6 +276,18 @@ function firmoFields(firmo) {
     }
   }
   return out;
+}
+
+/* `advisor_count` -> "Advisor count". The producer's own key, humanised — not
+   translated, because a label this app invented would disagree with the field
+   name every other surface and every verdict uses. */
+function humaniseFieldName(k) {
+  const s = String(k == null ? "" : k).replace(/[_-]+/g, " ").trim();
+  if (!s) return "";
+  // Acronyms the producer wrote in caps stay in caps (AUM, CAGR, HQ, ROA).
+  return s.split(" ").map(w =>
+    w.length <= 4 && w === w.toUpperCase() ? w
+      : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
 }
 
 function ClientRoute({ id, tab, sub }) {

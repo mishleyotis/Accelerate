@@ -278,11 +278,17 @@ function ClientContext({ entity, run }) {
                     makes the reader ask about it. It was promoted and dropped:
                     a merger with no stated effect reads as an unexplained
                     event, which is exactly the question that came back. */}
+                {/* Displayed through the one label map, so this badge cannot
+                    read CONSTRAINED beside a filter chip reading Negative —
+                    the same axis under two names on one screen. The stored
+                    token is unchanged; only the word shown moves. */}
                 {a.effect_token ? (
                   <span className={`b ${/CONSTRAIN/.test(a.effect_token) ? "b-below"
                     : /ADVANC/.test(a.effect_token) ? "b-teal" : "b-muted"}`}
                     title="effect on assessed maturity — the direction this moved the cells it affects">
-                    {a.effect_token.replace(/_/g, " ")}</span>
+                    {(window.effectTokenLabel
+                      ? window.effectTokenLabel(a.effect_token)
+                      : a.effect_token).replace(/_/g, " ")}</span>
                 ) : null}
                 <Icon name={acqOpen === (a.id || i) ? "chevron-u" : "chevron-d"} size={12} style={{ color: "var(--z-muted)" }} />
               </div>
@@ -653,14 +659,19 @@ function EventDetail({ event, onClose, openEvidence, openSubcap }) {
                   ? String((window.MATURITY_EFFECT_LABEL || {})[event.signal] || "").toUpperCase()
                   : null);
             if (!token) return null;
-            const tone = /CONSTRAIN/.test(token) ? "b-below"
-              : /ADVANC/.test(token) ? "b-teal" : "b-muted";
+            // Tone reads the STORED token; the word shown reads the one label
+            // map, so a producer token and a fallback direction print the same
+            // vocabulary the filter chips above use.
+            const tone = /CONSTRAIN|NEGATIVE/.test(token) ? "b-below"
+              : /ADVANC|POSITIVE/.test(token) ? "b-teal" : "b-muted";
+            const shown = window.effectTokenLabel
+              ? window.effectTokenLabel(token) : token;
             return (
               <span className={`b ${tone}`}
                     title={event.effect_token
                       ? "the effect this run states for the cells this event names"
                       : "the run stated no effect token; this is the event's own direction"}>
-                {token.replace(/_/g, " ")}</span>
+                {shown.replace(/_/g, " ")}</span>
             );
           })()}
         </div>

@@ -320,7 +320,7 @@ function FirmographicsPanel({
       marginBottom: 8
     }
   }, "The firmographics section did not arrive as a list of fields, so no figure below is read from it.") : null, /*#__PURE__*/React.createElement(Row, {
-    k: "Assets",
+    k: entity.assets_label || "Assets",
     v: fmtAssets(entity.assets, entity.assets_unit)
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Employees",
@@ -350,7 +350,10 @@ function FirmographicsPanel({
       target: "_blank",
       rel: "noopener noreferrer"
     }, entity.website) : "—"
-  }), /*#__PURE__*/React.createElement(Row, {
+  }), entity.hq ? /*#__PURE__*/React.createElement(Row, {
+    k: "HQ",
+    v: entity.hq
+  }) : null, /*#__PURE__*/React.createElement(Row, {
     k: "Footprint",
     v: entity.footprint?.length ? entity.footprint.join(" · ") : "—"
   }), entity.charter ? /*#__PURE__*/React.createElement(Row, {
@@ -359,7 +362,16 @@ function FirmographicsPanel({
   }) : null, entity.founded ? /*#__PURE__*/React.createElement(Row, {
     k: "Founded",
     v: String(entity.founded).slice(0, 4)
-  }) : null);
+  }) : null, (entity.extra_fields || []).map((f, i) => /*#__PURE__*/React.createElement(Row, {
+    key: `x${i}`,
+    k: humaniseFieldName(f.field),
+    v: f.held ? /*#__PURE__*/React.createElement("span", {
+      title: f.reason || "held by the producer",
+      style: {
+        color: "var(--z-muted)"
+      }
+    }, "\u2014") : `${f.value}${f.unit ? ` ${f.unit}` : ""}`
+  })));
 }
 
 /* ── Score ring ─────────────────────────────────────────────────── */
@@ -1973,7 +1985,14 @@ function ThoughtLeadershipPanel() {
         lineHeight: 1.4,
         marginBottom: 6
       }
-    }, tl.title), /*#__PURE__*/React.createElement("div", {
+    }, tl.title), tl.author ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        fontWeight: 600,
+        color: "var(--z-mid)",
+        marginBottom: 5
+      }
+    }, tl.author) : null, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
         color: "var(--z-body)",

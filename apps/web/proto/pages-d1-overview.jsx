@@ -190,7 +190,9 @@ function FirmographicsPanel({ entity }) {
           while the payload carried them. A field the run did not state
           prints an em dash rather than being hidden: absent and
           not-asked-for must not look the same. */}
-      <Row k="Assets"     v={fmtAssets(entity.assets, entity.assets_unit)} />
+      {/* The disjunction the contract states: a sub-vertical reports AUM OR
+          assets, and the row is labelled with the one it actually stated. */}
+      <Row k={entity.assets_label || "Assets"} v={fmtAssets(entity.assets, entity.assets_unit)} />
       <Row k="Employees"  v={entity.employees != null ? entity.employees.toLocaleString() : "—"} />
       <Row k="Branches"   v={entity.branches != null ? String(entity.branches) : "—"} />
       {entity.members != null ? <Row k="Members" v={entity.members.toLocaleString()} /> : null}
@@ -208,9 +210,24 @@ function FirmographicsPanel({ entity }) {
         ? <a href={/^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`}
              target="_blank" rel="noopener noreferrer">{entity.website}</a>
         : "—"} />
+      {entity.hq ? <Row k="HQ" v={entity.hq} /> : null}
       <Row k="Footprint"  v={entity.footprint?.length ? entity.footprint.join(" · ") : "—"} />
       {entity.charter ? <Row k="Charter" v={entity.charter} /> : null}
       {entity.founded ? <Row k="Founded" v={String(entity.founded).slice(0, 4)} /> : null}
+      {/* EVERY remaining field the run stated, in the order it stated them.
+          The rows above are pinned because the contract's must-present set
+          names them on every sub-vertical; these are the ones the SUB-VERTICAL
+          decides, and a fixed row list is exactly how five of a wealth
+          manager's thirteen fields rendered nowhere. A held field prints its
+          documented em dash with the reason on hover — absent and
+          held-with-a-reason must not look the same. */}
+      {(entity.extra_fields || []).map((f, i) => (
+        <Row key={`x${i}`} k={humaniseFieldName(f.field)}
+             v={f.held
+                 ? <span title={f.reason || "held by the producer"}
+                         style={{ color: "var(--z-muted)" }}>—</span>
+                 : `${f.value}${f.unit ? ` ${f.unit}` : ""}`} />
+      ))}
     </div>
   );
 }
@@ -1031,6 +1048,17 @@ function ThoughtLeadershipPanel() {
                 <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{fmtDate(tl.date)}</span>
               </div>
               <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.4, marginBottom: 6 }}>{tl.title}</div>
+              {/* WHO said it. The header promises "named executives, in their
+                  own words" and the byline was adapted and never rendered, so
+                  two executives quoted in the SAME article — different people,
+                  different quotes, different cells — rendered as two identical
+                  cards and read as a duplication bug. The name is the whole
+                  difference between them. */}
+              {tl.author ? (
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--z-mid)", marginBottom: 5 }}>
+                  {tl.author}
+                </div>
+              ) : null}
               <div style={{ fontSize: 11, color: "var(--z-body)", lineHeight: 1.55, fontStyle: "italic" }}>"{tl.excerpt}"</div>
               {al && al.clause ? (
                 <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5, marginTop: 6 }}>

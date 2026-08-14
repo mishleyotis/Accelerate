@@ -295,6 +295,62 @@ function FinancialTrajectoryCard({
   });
   const values = (f.total_assets || []).filter(v => v != null);
   const maxA = values.length ? Math.max(...values) : 1;
+  /* A TRAJECTORY needs at least two points. With one, `value / max * 80px`
+     is 80px by construction — a single full-height, full-width bar that reads
+     as a trend and is a claim the run never made. The producer's own section
+     says so ("a multi-year series needs three dated points and one could be
+     established"); this renders the figure and that sentence instead of
+     drawing a chart out of a single measurement. */
+  if (f.fy.length < 2) {
+    const only = f.fy[0];
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card flush",
+      "data-source": "financial_baseline.json :: total_assets[]"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row"
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "money",
+      size: 14
+    }), /*#__PURE__*/React.createElement("h3", null, "Financial trajectory")), /*#__PURE__*/React.createElement("span", {
+      className: "b b-org"
+    }, "Single point")), /*#__PURE__*/React.createElement("div", {
+      className: "card-body"
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 26,
+        fontWeight: 700,
+        color: "var(--z-dark)"
+      }
+    }, fmtAssets(f.total_assets[0], f.unit)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: "var(--z-muted)",
+        marginTop: 2
+      }
+    }, String(only).replace("FY", ""), f.basis ? ` · ${f.basis}` : ""), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-body)",
+        lineHeight: 1.55,
+        marginTop: 10
+      }
+    }, "One dated point was established, so no trajectory is drawn. A trend line through a single measurement would assert a direction this run did not evidence."), /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        marginTop: 10,
+        gap: 6,
+        flexWrap: "wrap",
+        fontSize: 11,
+        color: "var(--z-muted)"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "chip"
+    }, f.regulator), /*#__PURE__*/React.createElement("span", null, f.geography), /*#__PURE__*/React.createElement("span", {
+      className: "spacer"
+    }), /*#__PURE__*/React.createElement("span", null, f.branches, " branches \xB7 ", f.employees[f.employees.length - 1].toLocaleString(), " FTE"))));
+  }
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
     "data-source": "financial_baseline.json :: total_assets[],net_income_m[],nim_pct[]"

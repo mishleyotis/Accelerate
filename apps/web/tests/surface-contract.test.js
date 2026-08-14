@@ -77,11 +77,28 @@ test("maturity_effect splits into a token and a reason, and never renders whole"
   assert.deepStrictEqual(splitMaturityEffect(""), { token: null, reason: null });
 });
 
+/* BUILD OWNER'S ADJUDICATION, 2026-08-14. This test previously pinned
+   Advanced / Constrained — a relabel an earlier session made to stop a reader
+   asking "why is a merger a negative event?". The owner reviewed the live page
+   and reversed it: the timeline segments Positive · Negative · Neutral.
+
+   The assertions BELOW the labels are the ones that matter and they do not
+   move: the stored vocabulary is the contract, and only the displayed word
+   ever changed. That separation is why this reversal cost one map and three
+   test lines rather than a migration. */
 test("the three stored signals are labelled on the axis they name", () => {
   const { MATURITY_EFFECT_LABEL } = loadAdapter();
-  assert.strictEqual(MATURITY_EFFECT_LABEL.positive, "Advanced");
+  assert.strictEqual(MATURITY_EFFECT_LABEL.positive, "Positive");
   assert.strictEqual(MATURITY_EFFECT_LABEL.neutral, "Neutral");
-  assert.strictEqual(MATURITY_EFFECT_LABEL.negative, "Constrained");
+  assert.strictEqual(MATURITY_EFFECT_LABEL.negative, "Negative");
+  // The producer's own token translates to the SAME vocabulary, so a badge
+  // and a chip on one screen cannot name one axis two ways.
+  const { effectTokenLabel } = global.window;
+  assert.strictEqual(effectTokenLabel("ADVANCED"), "POSITIVE");
+  assert.strictEqual(effectTokenLabel("CONSTRAINED"), "NEGATIVE");
+  assert.strictEqual(effectTokenLabel("NEUTRAL"), "NEUTRAL");
+  // An unknown token is printed as the producer wrote it, never dropped.
+  assert.strictEqual(effectTokenLabel("SOMETHING_ELSE"), "SOMETHING_ELSE");
   // The stored vocabulary is a contract and does not move with the labels.
   const { peerOfSignal } = global.window;
   assert.strictEqual(peerOfSignal("POSITIVE"), "positive");
@@ -386,15 +403,17 @@ test("surfaces read the axis they name, and answer the control the reader presse
       const txt = await textOf(page);
       assert.match(txt, /Effect on assessed maturity/i,
                    "the chip group states the axis it filters on");
-      assert.match(txt, /Advanced · 1/);
+      assert.match(txt, /Positive · 1/);
       assert.match(txt, /Neutral · 1/);
-      assert.match(txt, /Constrained · 0/);
-      // The mood words are gone from the control row. "Positive" may still
-      // appear elsewhere in prose, so this is scoped to the chips.
+      assert.match(txt, /Negative · 0/);
+      // The REVERSED assertion, per the owner's adjudication: the relabelled
+      // words must not survive anywhere in the control row, so a half-applied
+      // rename cannot leave one chip reading Constrained beside two that read
+      // Positive and Neutral.
       const chips = await page.evaluate(() => [...document.querySelectorAll(".toggle-row button")]
         .map((b) => b.textContent.trim()));
-      assert.ok(!chips.some((c) => /^Positive|^Negative/.test(c)),
-                `a mood word survived in the filter row: ${JSON.stringify(chips)}`);
+      assert.ok(!chips.some((c) => /Advanced|Constrained/.test(c)),
+                `a relabelled word survived in the filter row: ${JSON.stringify(chips)}`);
       assert.deepStrictEqual(errors, []);
       await ctx.close();
     });

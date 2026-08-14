@@ -920,15 +920,37 @@ function signalOf(v) {
    contract and does not move; what the reader sees is the axis it actually
    names. One map, here, so the filter chips, the dot tones and the event
    drilldown can never label the same value three different ways. */
+/* BUILD OWNER'S ADJUDICATION, 2026-08-14: the timeline segments POSITIVE ·
+   NEGATIVE · NEUTRAL. An earlier session relabelled these to Advanced /
+   Constrained to stop a reader asking "why is a merger a negative event?";
+   the owner reviewed the live page and reversed it — "I do not know where all
+   those other classifications came in". The stored vocabulary was always
+   positive|neutral|negative, so this map is the only thing that moved, and it
+   moves back. Do not re-relabel without a new adjudication. */
 const MATURITY_EFFECT_LABEL = {
-  positive: "Advanced",
+  positive: "Positive",
   neutral: "Neutral",
-  negative: "Constrained",
+  negative: "Negative",
   unclassified: "Unclassified"
 };
 /* The producer's own token for the same axis, as it writes it in
-   `maturity_effect`: ADVANCED │ CONSTRAINED │ NEUTRAL. */
+   `maturity_effect`: ADVANCED │ CONSTRAINED │ NEUTRAL. The PAYLOAD keeps that
+   vocabulary — it is the contract and no one has argued to change it — so the
+   token is translated for display here, in the same one place as the stored
+   values above. A badge printing ADVANCED beside a chip reading Positive is
+   the same axis under two names on one screen. */
 const MATURITY_EFFECT_TOKENS = ["ADVANCED", "CONSTRAINED", "NEUTRAL"];
+const EFFECT_TOKEN_LABEL = {
+  ADVANCED: "POSITIVE",
+  CONSTRAINED: "NEGATIVE",
+  NEUTRAL: "NEUTRAL"
+};
+/* Unknown tokens pass through as the producer wrote them — printed, never
+   dropped and never guessed at. */
+function effectTokenLabel(tok) {
+  const k = String(tok == null ? "" : tok).trim().toUpperCase();
+  return EFFECT_TOKEN_LABEL[k] || k;
+}
 
 /* `timeline.arc_shape` has a closed vocabulary of five (Surface Specification,
    D5 step 4). This run serves "strategy-first, substrate-later", which is a
@@ -1404,5 +1426,6 @@ Object.assign(window, {
   MATURITY_EFFECT_LABEL,
   MATURITY_EFFECT_TOKENS,
   ARC_SHAPES,
+  effectTokenLabel,
   arcShapeOf
 });

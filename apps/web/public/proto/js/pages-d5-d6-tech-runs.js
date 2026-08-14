@@ -380,7 +380,7 @@ function ClientContext({
   }, a.status), a.effect_token ? /*#__PURE__*/React.createElement("span", {
     className: `b ${/CONSTRAIN/.test(a.effect_token) ? "b-below" : /ADVANC/.test(a.effect_token) ? "b-teal" : "b-muted"}`,
     title: "effect on assessed maturity \u2014 the direction this moved the cells it affects"
-  }, a.effect_token.replace(/_/g, " ")) : null, /*#__PURE__*/React.createElement(Icon, {
+  }, (window.effectTokenLabel ? window.effectTokenLabel(a.effect_token) : a.effect_token).replace(/_/g, " ")) : null, /*#__PURE__*/React.createElement(Icon, {
     name: acqOpen === (a.id || i) ? "chevron-u" : "chevron-d",
     size: 12,
     style: {
@@ -1025,11 +1025,15 @@ function EventDetail({
   }), (() => {
     const token = event.effect_token || (event.signal !== "unclassified" ? String((window.MATURITY_EFFECT_LABEL || {})[event.signal] || "").toUpperCase() : null);
     if (!token) return null;
-    const tone = /CONSTRAIN/.test(token) ? "b-below" : /ADVANC/.test(token) ? "b-teal" : "b-muted";
+    // Tone reads the STORED token; the word shown reads the one label
+    // map, so a producer token and a fallback direction print the same
+    // vocabulary the filter chips above use.
+    const tone = /CONSTRAIN|NEGATIVE/.test(token) ? "b-below" : /ADVANC|POSITIVE/.test(token) ? "b-teal" : "b-muted";
+    const shown = window.effectTokenLabel ? window.effectTokenLabel(token) : token;
     return /*#__PURE__*/React.createElement("span", {
       className: `b ${tone}`,
       title: event.effect_token ? "the effect this run states for the cells this event names" : "the run stated no effect token; this is the event's own direction"
-    }, token.replace(/_/g, " "));
+    }, shown.replace(/_/g, " "));
   })()), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
