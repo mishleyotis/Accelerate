@@ -58,3 +58,41 @@ def test_no_colour_reaches_any_contract():
         for fname, spec in sections(page)[name]["fields"].items():
             assert not re.search(r"hex|#[0-9A-Fa-f]{6}|colou?r_code", fname), fname
             assert "#185F60" not in spec["doc"]   # the M5 hex must not exist
+
+
+def test_no_gate_id_is_defined_twice():
+    """A duplicate key in the GATES literal is silent: Python keeps the last
+    one, so an earlier definition vanishes and a verdict citing that id gets
+    somebody else's description.
+
+    Measured 2026-08-14: CG-16 and CG-17 were added for must-present members
+    and empty required lists while the SAME ids were already in use as the two
+    transport gates. The registry kept the transport pair, the new entries
+    disappeared from `explain_gate`, and the validator went on emitting ids
+    that resolved to the wrong explanation. Renumbered to CG-18/CG-19; this
+    test is what makes the next collision a failure instead of a silence.
+    """
+    import re
+    from collections import Counter
+    from pathlib import Path
+
+    src = Path(__file__).resolve().parents[1] / "dma_mcp" / "gates.py"
+    ids = re.findall(r'^\s*"([A-Z]{2}-\d+)":', src.read_text(), re.M)
+    dupes = sorted(k for k, n in Counter(ids).items() if n > 1)
+    assert not dupes, f"gate ids defined more than once: {dupes}"
+
+
+def test_every_gate_the_validator_emits_is_in_the_registry():
+    """A verdict may only name a gate the registry can explain."""
+    import re
+    from pathlib import Path
+
+    from dma_mcp.gates import GATES
+
+    root = Path(__file__).resolve().parents[1] / "dma_mcp"
+    emitted = set()
+    for mod in ("validation.py", "validation2.py", "transport.py"):
+        emitted |= set(re.findall(r'_reason\(\s*"([A-Z]{2}-\d+)"',
+                                  (root / mod).read_text()))
+    missing = sorted(emitted - set(GATES))
+    assert not missing, f"emitted but unregistered: {missing}"

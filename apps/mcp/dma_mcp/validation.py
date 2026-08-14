@@ -40,7 +40,7 @@ def _norm_member(s) -> str:
 
 
 def _check_must_present(section, fname, spec, val, empty_declared) -> list:
-    """CG-16 — the members a list field must contain, not just that it exists.
+    """CG-18 — the members a list field must contain, not just that it exists.
 
     THE ROOT CAUSE THIS CLOSES, measured 2026-08-14.
 
@@ -106,7 +106,7 @@ def _check_must_present(section, fname, spec, val, empty_declared) -> list:
             continue
         if norm in empty:
             out.append(_reason(
-                "CG-16", section, f"{section}.{fname}[{want}]",
+                "CG-18", section, f"{section}.{fname}[{want}]",
                 f"must-present member {want!r} is present with no value and "
                 "no quarantine reason — an unexplained blank is the one state "
                 "this set exists to refuse. Either state the value with its "
@@ -115,7 +115,7 @@ def _check_must_present(section, fname, spec, val, empty_declared) -> list:
                 "is a finding, a silent one is an omission"))
         else:
             out.append(_reason(
-                "CG-16", section, f"{section}.{fname}",
+                "CG-18", section, f"{section}.{fname}",
                 f"must-present member {want!r} is absent from "
                 f"{section}.{fname} entirely. The contract's must-present set "
                 "is not a suggestion: every member is stated with its "
@@ -126,7 +126,7 @@ def _check_must_present(section, fname, spec, val, empty_declared) -> list:
         if any(_norm_member(g) in accounted for g in group):
             continue
         out.append(_reason(
-            "CG-16", section, f"{section}.{fname}",
+            "CG-18", section, f"{section}.{fname}",
             f"none of {', '.join(map(repr, group))} is stated or held — the "
             "set requires one of them, and a sub-vertical that genuinely "
             "reports none of them still has to say which ladder established "
@@ -204,7 +204,7 @@ def validate_pass1(page: str, payload: dict) -> list:
                         f"required field {fname!r} missing and no explicit "
                         "empty state declared"))
                 continue
-            # CG-17 — `required: true` was satisfied by an EMPTY list.
+            # CG-19 — `required: true` was satisfied by an EMPTY list.
             #
             # `val = []` is not None, so the branch above never ran, and a
             # list type-checks fine. The empty list then wrote zero rows at
@@ -226,7 +226,7 @@ def validate_pass1(page: str, payload: dict) -> list:
                     and fname not in ENVELOPE and not empty_declared
                     and not spec.get("may_be_empty")):
                 reasons.append(_reason(
-                    "CG-17", name, f"{name}.{fname}",
+                    "CG-19", name, f"{name}.{fname}",
                     f"required list {fname!r} is EMPTY and the section "
                     "declares no empty state. An empty list is not a quiet "
                     "pass: promotion writes no rows for it and the surface "

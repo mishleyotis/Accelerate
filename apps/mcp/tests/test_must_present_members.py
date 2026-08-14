@@ -1,4 +1,4 @@
-"""CG-16 — the members a list field must contain, not just that it exists.
+"""CG-18 — the members a list field must contain, not just that it exists.
 
 THE ROOT CAUSE. Every "must-present set" in this product lived only as prose
 inside a contract's `doc` string. `required: true` applies to the CONTAINER —
@@ -52,7 +52,7 @@ def test_a_missing_member_blocks_and_names_it():
     out = _run([i for i in COMPLETE if i["field"] != "website"])
     assert len(out) == 1
     r = out[0]
-    assert r["gate_id"] == "CG-16" and r["severity"] == "block"
+    assert r["gate_id"] == "CG-18" and r["severity"] == "block"
     assert "'website'" in r["message"] and "absent" in r["message"]
 
 

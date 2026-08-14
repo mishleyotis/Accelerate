@@ -1,4 +1,4 @@
-"""CG-17 — `required: true` was satisfied by an empty list.
+"""CG-19 — `required: true` was satisfied by an empty list.
 
 The second root cause behind "changes do not get promoted", and the larger of
 the two. `val = []` is not None, so CG-02's branch never ran; a list
@@ -30,7 +30,7 @@ from dma_mcp.validation import validate_pass1
 
 def _reasons(page, payload):
     out = validate_pass1(page, payload)
-    return [r for r in out if r["gate_id"] == "CG-17"]
+    return [r for r in out if r["gate_id"] == "CG-19"]
 
 
 def _platform(starters):
