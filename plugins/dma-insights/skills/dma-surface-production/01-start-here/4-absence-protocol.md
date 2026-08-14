@@ -132,6 +132,33 @@ the page); and no score, band, count or coverage figure changes because a cell
 was skipped — counts are computed from what exists (invariant 8), so a skipped
 cell simply is not counted, and must never be counted as covered.
 
+## An empty list is a claim, and it is refused unless you make it deliberately
+
+Sending `[]` for a required list used to pass every gate: it is not null, it
+type-checks as a list, and nothing looked further. Promotion then wrote zero rows,
+and the read path omits a key with no rows — so the **surface disappeared from the
+page** with no empty state to explain it, and the verdict was clean. Measured on a
+promoted run, that is exactly how `platform.starters` came to serve a narrative
+thread and no starters at all.
+
+Two gates close it, and between them they decide what you owe:
+
+| Gate | Asks | Passes when |
+|---|---|---|
+| **CG-17** | may this list be empty? | it has items, **or** the section declares `empty_state` with the ladder |
+| **CG-16** | does it contain the members it must? | each must-present member is stated with provenance, **or** carries `quarantined: true` with a `quarantine_reason` |
+
+Both keep the honest route open on purpose. A field the ladder could not close is a
+finding and renders as a documented em dash — a gate that refused it would push you
+into guessing, which is the opposite of everything on this page. What neither gate
+will accept is silence: a member missing from the array, a `quarantined` flag with
+an empty reason, or an empty list with no `empty_state`. Those are indistinguishable
+from work that was never done, and on the surface they read as the producer having
+nothing to say.
+
+So when a list comes out empty, do not ship it empty. Either the ladder hit and you
+have items, or it did not and you say so, with the rungs.
+
 ## Four results, and they are not the same
 
 | Result | Means | Renders as |
