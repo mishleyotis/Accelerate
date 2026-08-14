@@ -215,7 +215,10 @@ function SnapshotStrip({
       color: "var(--z-body)",
       lineHeight: 1.5
     }
-  }, asText(entity.framing) || asText(entity.posture_basis) || `Composite ${fx(entity.overall, 1)} / 5 across ${DMA.PILLARS.length} pillars.`))) : null, /*#__PURE__*/React.createElement("div", null, DMA.PILLARS.map(p => {
+  }, asText(entity.framing) || asText(entity.posture_basis) || (entity.overall != null ? `Composite ${fx(entity.overall, 1)} / 5 across ${DMA.PILLARS.length} pillars.` : /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: "Run framing",
+    audience: audience
+  }))))) : null, /*#__PURE__*/React.createElement("div", null, DMA.PILLARS.map(p => {
     const s = entity.pillar_scores[p.id];
     // The workbook's own stated peer median for this pillar. This
     // was `s + 0.3` — a constant offset presented as a benchmark,
@@ -225,7 +228,9 @@ function SnapshotStrip({
     const peer = (entity.pillar_peer_medians || {})[p.id];
     const w = s / 5 * 100;
     const peerL = peer == null ? null : peer / 5 * 100;
-    const delta = peer == null ? null : s - peer;
+    // Both ends or no delta: `null - peer` is -peer, which rendered
+    // an unscored pillar as ▼peer — a movement nobody measured.
+    const delta = peer == null || s == null ? null : s - peer;
     return /*#__PURE__*/React.createElement("div", {
       className: "pbar",
       key: p.id,
@@ -254,7 +259,11 @@ function SnapshotStrip({
       title: `Peer ${fx(peer, 1)}`
     })), /*#__PURE__*/React.createElement("div", {
       className: "pbar-score"
-    }, fx(s, 1)), /*#__PURE__*/React.createElement("div", {
+    }, s == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${p.id} score`,
+      audience: audience,
+      compact: true
+    }) : fx(s, 1)), /*#__PURE__*/React.createElement("div", {
       className: "pbar-delta",
       style: {
         color: delta == null ? "var(--z-muted)" : delta < 0 ? "var(--z-below)" : "var(--z-mid)"
@@ -305,6 +314,28 @@ function FirmographicsPanel({
   entity,
   audience
 }) {
+  /* One absent-state builder for every pinned row, so the three states a
+     firmographic can be in stay distinguishable wherever they occur:
+        stated   the value renders
+       HELD     quarantined with the ladder that failed — a finding, and the
+                reason is the content
+       silent   nobody established it; it is in the connector's worklist
+      Held is read from `entity.held[slot]`, which app-root's firmoFields sets
+     for a pinned field. Before that existed, a held pinned field rendered no
+     row at all and was indistinguishable from one never asked for — which is
+     the exact confusion this whole component was rebuilt to end. */
+  const gap = (slot, label) => {
+    const reason = entity.held && entity.held[slot];
+    return reason ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: label,
+      held: true,
+      reason: reason,
+      audience: audience
+    }) : /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: label,
+      audience: audience
+    });
+  };
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--z-lav)",
@@ -325,22 +356,13 @@ function FirmographicsPanel({
     }
   }, "The firmographics section did not arrive as a list of fields, so no figure below is read from it.") : null, /*#__PURE__*/React.createElement(Row, {
     k: entity.assets_label || "Assets",
-    v: entity.assets != null ? fmtAssets(entity.assets, entity.assets_unit) : /*#__PURE__*/React.createElement(EnrichmentGap, {
-      what: "Assets",
-      audience: audience
-    })
+    v: entity.assets != null ? fmtAssets(entity.assets, entity.assets_unit) : gap("assets", entity.assets_label || "Assets")
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Employees",
-    v: entity.employees != null ? entity.employees.toLocaleString() : /*#__PURE__*/React.createElement(EnrichmentGap, {
-      what: "Employees",
-      audience: audience
-    })
+    v: entity.employees != null ? entity.employees.toLocaleString() : gap("employees", "Employees")
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Branches",
-    v: entity.branches != null ? String(entity.branches) : /*#__PURE__*/React.createElement(EnrichmentGap, {
-      what: "Branches",
-      audience: audience
-    })
+    v: entity.branches != null ? String(entity.branches) : gap("branches", "Branches")
   }), entity.members != null ? /*#__PURE__*/React.createElement(Row, {
     k: "Members",
     v: entity.members.toLocaleString()
@@ -349,45 +371,33 @@ function FirmographicsPanel({
     v: entity.customers.toLocaleString()
   }) : null, /*#__PURE__*/React.createElement(Row, {
     k: "CAGR",
-    v: entity.cagr != null ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}` : entity.stated_cagr != null ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}` : /*#__PURE__*/React.createElement(EnrichmentGap, {
-      what: "CAGR",
-      audience: audience
-    })
+    v: entity.cagr != null ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}` : entity.stated_cagr != null ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}` : gap("cagr", "CAGR")
   }), entity.net_worth_ratio != null ? /*#__PURE__*/React.createElement(Row, {
     k: "Net worth ratio",
     v: `${fx(entity.net_worth_ratio, 2)}%`
   }) : null, /*#__PURE__*/React.createElement(Row, {
     k: "Regulator",
-    v: entity.regulator || /*#__PURE__*/React.createElement(EnrichmentGap, {
-      what: "Primary regulator",
-      audience: audience
-    })
+    v: entity.regulator || gap("regulator", "Primary regulator")
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Website",
     v: entity.website ? /*#__PURE__*/React.createElement("a", {
       href: /^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`,
       target: "_blank",
       rel: "noopener noreferrer"
-    }, entity.website) : /*#__PURE__*/React.createElement(EnrichmentGap, {
-      what: "Website",
-      audience: audience
-    })
-  }), entity.hq ? /*#__PURE__*/React.createElement(Row, {
+    }, entity.website) : gap("website", "Website")
+  }), /*#__PURE__*/React.createElement(Row, {
     k: "HQ",
-    v: entity.hq
-  }) : null, /*#__PURE__*/React.createElement(Row, {
+    v: entity.hq || gap("hq", "HQ")
+  }), /*#__PURE__*/React.createElement(Row, {
     k: "Footprint",
-    v: entity.footprint?.length ? entity.footprint.join(" · ") : entity.stated_footprint ? String(entity.stated_footprint) : /*#__PURE__*/React.createElement(EnrichmentGap, {
-      what: "Footprint",
-      audience: audience
-    })
-  }), entity.charter ? /*#__PURE__*/React.createElement(Row, {
+    v: entity.footprint?.length ? entity.footprint.join(" · ") : entity.stated_footprint ? String(entity.stated_footprint) : gap("footprint", "Footprint")
+  }), /*#__PURE__*/React.createElement(Row, {
     k: "Charter",
-    v: entity.charter
-  }) : null, entity.founded ? /*#__PURE__*/React.createElement(Row, {
+    v: entity.charter || gap("charter", "Charter")
+  }), /*#__PURE__*/React.createElement(Row, {
     k: "Founded",
-    v: String(entity.founded).slice(0, 4)
-  }) : null, (entity.extra_fields || []).map((f, i) => /*#__PURE__*/React.createElement(Row, {
+    v: entity.founded ? String(entity.founded).slice(0, 4) : gap("founded", "Founded")
+  }), (entity.extra_fields || []).map((f, i) => /*#__PURE__*/React.createElement(Row, {
     key: `x${i}`,
     k: humaniseFieldName(f.field),
     v: f.held ? /*#__PURE__*/React.createElement(EnrichmentGap, {

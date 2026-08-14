@@ -408,7 +408,7 @@ function ScorecardPreview({
       fontSize: 12,
       color: "var(--z-muted)"
     }
-  }, DMA.SUBVERTICAL_LABEL[e.subvertical], " \xB7 ", e.hq, " \xB7 ", fmtAssets(e.assets), " \xB7 Assessment ", fmtDate(e.assessment_date))), /*#__PURE__*/React.createElement(ScoreRing, {
+  }, [DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq, fmtAssets(e.assets), e.assessment_date ? `Assessment ${fmtDate(e.assessment_date)}` : null].filter(Boolean).join(" · "))), /*#__PURE__*/React.createElement(ScoreRing, {
     score: e.overall
   })), /*#__PURE__*/React.createElement("div", {
     className: "g4"

@@ -472,7 +472,8 @@ function RegulatoryStanding({ entity, issues, setIssueOpen, openEvidence, audien
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="co-title">
                       {i.status || "OPEN"} · {i.id}
-                      {cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}` : null}
+                      {cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}`
+                        : cap.kind === "held_unleveled" ? " · capped" : null}
                     </div>
                     {/* The invitation names what the click actually opens. It
                         read "click for the cells it caps" on every row,
@@ -480,7 +481,7 @@ function RegulatoryStanding({ entity, issues, setIssueOpen, openEvidence, audien
                         it up found a panel that did not answer the promise. */}
                     <div className="co-body">
                       {i.title || i.desc}
-                      {cap.kind === "ceiling" ? ` · click for the ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} it caps`
+                      {(cap.kind === "ceiling" || cap.kind === "held_unleveled") ? ` · click for the ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} it caps`
                         : cap.kind === "linked" ? ` · caps nothing · click for the ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} it bears on`
                         : " · click for why it is on the register"}
                     </div>
@@ -800,7 +801,20 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
       </div>
       {dated.map(iss => {
         const a = at(iss.start);
-        const b = iss.end ? (at(iss.end) ?? now) : now;
+        // A matter in a TERMINAL status is over, whatever its dates say. The
+        // bar used to run to TODAY whenever `end` was null — so ISS-001,
+        // status REMEDIATED with no stated resolution date, drew a bar from
+        // 2021 to now and tooltipped "→ open" while the drilldown one click
+        // deeper said the opposite. The chart asserting a live regulatory
+        // matter that the run says is closed is a false statement in the
+        // safeguard family. With no end date the honest bar is BOUNDED —
+        // a fixed stub past its start — and the tooltip says the date is
+        // not stated rather than inventing either endpoint.
+        const TERMINAL = /^(REMEDIATED|RESOLVED|CLOSED|RETIRED|EXPIRED|S\d\s+EXPIRED)/i
+          .test(String(iss.status || "").trim());
+        const b = iss.end ? (at(iss.end) ?? now)
+          : TERMINAL ? Math.min((a ?? now) + (now - (a ?? now)) * 0.12 + 1, now)
+          : now;
         const left = Math.max(0, Math.min(100, pct(a)));
         const right = Math.max(0, Math.min(100, pct(Math.max(b, a))));
         const width = Math.max(2, right - left);
@@ -815,7 +829,8 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
               <div className="row">
                 <span className="chip">{iss.id}</span>
                 {iss.severity ? <span className={`b ${tone}`}>{iss.severity}</span> : null}
-                {cap.kind === "ceiling" ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} held at M${cap.ceiling}`} /> : null}
+                {cap.kind === "ceiling" ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} held at M${cap.ceiling}`} />
+                  : cap.kind === "held_unleveled" ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} held — level on the assessment caps`} /> : null}
               </div>
               {/* compact: this label column clamps to one line inside a
                   90-200px track, and the queue badge would push the bar
@@ -832,6 +847,7 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
               <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 2 }}>
                 {iss.status}
                 {cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}`
+                  : cap.kind === "held_unleveled" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} capped`
                   : cap.kind === "linked" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} · no cap`
                   : " · no cell named"}
               </div>
@@ -844,7 +860,9 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
                   reader nothing the row label had not already said. The
                   argument belongs in the panel the bar opens; the tooltip
                   keeps the dates. */}
-              <div title={`${iss.start}${iss.end ? ` → ${iss.end}` : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`}
+              <div title={`${iss.start}${iss.end ? ` → ${iss.end}`
+                     : TERMINAL ? ` → ${String(iss.status).toLowerCase()} · resolution date not stated`
+                     : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`}
                    style={{ position: "absolute", left: `${left}%`, width: `${width}%`, height: 18, top: 5, background: color, borderRadius: 4, opacity: .85, display: "flex", alignItems: "center", padding: "0 6px", color: "#fff", fontSize: 10, fontWeight: 500, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
                 {iss.title || iss.type || iss.id}
               </div>
@@ -867,7 +885,7 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
                 style={{ display: "flex", gap: 8, alignItems: "center", width: "100%", textAlign: "left", background: issueOpen === iss.id ? "var(--z-lav)" : "transparent", border: 0, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>
                 <span className="chip">{iss.id}</span>
                 {iss.severity ? <span className={`b ${severityTone(iss.severity)}`}>{iss.severity}</span> : null}
-                {cap.kind === "ceiling" ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${cap.entries.length} cells held at M${cap.ceiling}`} /> : null}
+                {(cap.kind === "ceiling" || cap.kind === "held_unleveled") ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={cap.ceiling != null ? `${cap.entries.length} cells held at M${cap.ceiling}` : `${cap.entries.length} cells held — level on the assessment caps`} /> : null}
                 <span style={{ flex: 1, minWidth: 0, fontSize: 12 }} className="txt-fit-1" title={iss.title || ""}>{iss.title || iss.type
                   || <EnrichmentGap what="Issue title" audience={audience} compact />}</span>
                 {/* An undated row opens the same panel as a dated bar, so it
@@ -876,6 +894,7 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
                 <span style={{ fontSize: 10, color: "var(--z-muted)", whiteSpace: "nowrap" }}>
                   {iss.status}
                   {cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}`
+                    : cap.kind === "held_unleveled" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} capped`
                     : cap.kind === "linked" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"}`
                     : " · no cell"}
                 </span>
@@ -912,10 +931,26 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
    names no capability cell" whenever no LEVEL was stated, which is what the
    register looked like when every row shipped with an empty linkage list. */
 function capStateOf(issue) {
-  const entries = Object.entries((DMA.ISSUE_CAPS[issue.id] || {}).caps || {});
-  const levels = entries.map(([, lvl]) => lvl).filter(l => l != null);
+  // The adapter now separates the two facts this function used to blur:
+  // `caps` holds only cells the matter actually HOLDS (from the contract's
+  // capped_subcap_ids — previously read from a key that does not exist, so
+  // every matter on every client printed "Cap None"), and `linked` holds the
+  // cells it merely bears on. A matter with caps is a ceiling; with only
+  // linkage it names cells without holding them; with neither it is unlinked.
+  const rec = DMA.ISSUE_CAPS[issue.id] || {};
+  const capEntries = Object.entries(rec.caps || {});
+  const linked = rec.linked || [];
+  const levels = capEntries.map(([, lvl]) => lvl).filter(l => l != null);
   const ceiling = levels.length ? Math.min(...levels.map(Number)) : null;
-  return { entries, ceiling, kind: !entries.length ? "unlinked" : (ceiling == null ? "linked" : "ceiling") };
+  if (capEntries.length) {
+    // Held cells with no stated level still render as a ceiling — the level
+    // lives on the run's caps[] array; "held, level on the assessment caps"
+    // is honest where inventing M-numbers is not.
+    return { entries: capEntries, ceiling,
+             kind: ceiling == null ? "held_unleveled" : "ceiling" };
+  }
+  const entries = linked.map(c => [c, null]);
+  return { entries, ceiling: null, kind: entries.length ? "linked" : "unlinked" };
 }
 
 /* Severity is the register's OWN word — the source's vocabulary, never
@@ -1008,11 +1043,13 @@ function IssueDetail({ issue, entity, onClose, openEvidence, openSubcap, audienc
       <div style={{ display: "flex", gap: 12, alignItems: "stretch", flexWrap: "wrap", padding: "10px 12px", background: "var(--z-white, #fff)", border: "1px solid var(--z-sep)", borderRadius: 7, marginBottom: 12 }}>
         <div style={{ minWidth: 108 }}>
           <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase" }}>Cap</div>
-          <div style={{ fontSize: 19, fontWeight: 700, lineHeight: 1.25, color: kind === "ceiling" ? "var(--z-org)" : "var(--z-body)" }}>
-            {kind === "ceiling" ? `M${fx(ceiling, 1)}` : "None"}
+          <div style={{ fontSize: 19, fontWeight: 700, lineHeight: 1.25, color: (kind === "ceiling" || kind === "held_unleveled") ? "var(--z-org)" : "var(--z-body)" }}>
+            {kind === "ceiling" ? `M${fx(ceiling, 1)}`
+              : kind === "held_unleveled" ? "Held"
+              : "None"}
           </div>
           <div style={{ fontSize: 10, color: "var(--z-muted)" }}>
-            {kind === "ceiling" ? `${entries.length} cell${entries.length === 1 ? "" : "s"} held`
+            {(kind === "ceiling" || kind === "held_unleveled") ? `${entries.length} cell${entries.length === 1 ? "" : "s"} held`
               : kind === "linked" ? `${entries.length} cell${entries.length === 1 ? "" : "s"} named`
               : "no cell named"}
           </div>

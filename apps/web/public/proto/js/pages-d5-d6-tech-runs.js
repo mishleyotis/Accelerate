@@ -660,9 +660,9 @@ function RegulatoryStanding({
       }
     }, /*#__PURE__*/React.createElement("div", {
       className: "co-title"
-    }, i.status || "OPEN", " \xB7 ", i.id, cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}` : null), /*#__PURE__*/React.createElement("div", {
+    }, i.status || "OPEN", " \xB7 ", i.id, cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}` : cap.kind === "held_unleveled" ? " · capped" : null), /*#__PURE__*/React.createElement("div", {
       className: "co-body"
-    }, i.title || i.desc, cap.kind === "ceiling" ? ` · click for the ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} it caps` : cap.kind === "linked" ? ` · caps nothing · click for the ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} it bears on` : " · click for why it is on the register")), /*#__PURE__*/React.createElement(Icon, {
+    }, i.title || i.desc, cap.kind === "ceiling" || cap.kind === "held_unleveled" ? ` · click for the ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} it caps` : cap.kind === "linked" ? ` · caps nothing · click for the ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} it bears on` : " · click for why it is on the register")), /*#__PURE__*/React.createElement(Icon, {
       name: "arrow-r",
       size: 12
     }));
@@ -1195,7 +1195,17 @@ function InteractiveGantt({
       }, y);
     }))), dated.map(iss => {
       const a = at(iss.start);
-      const b = iss.end ? at(iss.end) ?? now : now;
+      // A matter in a TERMINAL status is over, whatever its dates say. The
+      // bar used to run to TODAY whenever `end` was null — so ISS-001,
+      // status REMEDIATED with no stated resolution date, drew a bar from
+      // 2021 to now and tooltipped "→ open" while the drilldown one click
+      // deeper said the opposite. The chart asserting a live regulatory
+      // matter that the run says is closed is a false statement in the
+      // safeguard family. With no end date the honest bar is BOUNDED —
+      // a fixed stub past its start — and the tooltip says the date is
+      // not stated rather than inventing either endpoint.
+      const TERMINAL = /^(REMEDIATED|RESOLVED|CLOSED|RETIRED|EXPIRED|S\d\s+EXPIRED)/i.test(String(iss.status || "").trim());
+      const b = iss.end ? at(iss.end) ?? now : TERMINAL ? Math.min((a ?? now) + (now - (a ?? now)) * 0.12 + 1, now) : now;
       const left = Math.max(0, Math.min(100, pct(a)));
       const right = Math.max(0, Math.min(100, pct(Math.max(b, a))));
       const width = Math.max(2, right - left);
@@ -1236,6 +1246,13 @@ function InteractiveGantt({
           color: "var(--z-org)"
         },
         title: `${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} held at M${cap.ceiling}`
+      }) : cap.kind === "held_unleveled" ? /*#__PURE__*/React.createElement(Icon, {
+        name: "lock",
+        size: 11,
+        style: {
+          color: "var(--z-org)"
+        },
+        title: `${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} held — level on the assessment caps`
       }) : null), /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 12,
@@ -1253,13 +1270,13 @@ function InteractiveGantt({
           color: "var(--z-muted)",
           marginTop: 2
         }
-      }, iss.status, cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}` : cap.kind === "linked" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} · no cap` : " · no cell named")), /*#__PURE__*/React.createElement("div", {
+      }, iss.status, cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}` : cap.kind === "held_unleveled" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} capped` : cap.kind === "linked" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} · no cap` : " · no cell named")), /*#__PURE__*/React.createElement("div", {
         style: {
           position: "relative",
           height: 28
         }
       }, /*#__PURE__*/React.createElement("div", {
-        title: `${iss.start}${iss.end ? ` → ${iss.end}` : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`,
+        title: `${iss.start}${iss.end ? ` → ${iss.end}` : TERMINAL ? ` → ${String(iss.status).toLowerCase()} · resolution date not stated` : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`,
         style: {
           position: "absolute",
           left: `${left}%`,
@@ -1316,13 +1333,13 @@ function InteractiveGantt({
         className: "chip"
       }, iss.id), iss.severity ? /*#__PURE__*/React.createElement("span", {
         className: `b ${severityTone(iss.severity)}`
-      }, iss.severity) : null, cap.kind === "ceiling" ? /*#__PURE__*/React.createElement(Icon, {
+      }, iss.severity) : null, cap.kind === "ceiling" || cap.kind === "held_unleveled" ? /*#__PURE__*/React.createElement(Icon, {
         name: "lock",
         size: 11,
         style: {
           color: "var(--z-org)"
         },
-        title: `${cap.entries.length} cells held at M${cap.ceiling}`
+        title: cap.ceiling != null ? `${cap.entries.length} cells held at M${cap.ceiling}` : `${cap.entries.length} cells held — level on the assessment caps`
       }) : null, /*#__PURE__*/React.createElement("span", {
         style: {
           flex: 1,
@@ -1341,7 +1358,7 @@ function InteractiveGantt({
           color: "var(--z-muted)",
           whiteSpace: "nowrap"
         }
-      }, iss.status, cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}` : cap.kind === "linked" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"}` : " · no cell"));
+      }, iss.status, cap.kind === "ceiling" ? ` · cap ${fx(cap.ceiling, 1)}` : cap.kind === "held_unleveled" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} capped` : cap.kind === "linked" ? ` · ${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"}` : " · no cell"));
     })) : null)
   );
 }
@@ -1370,13 +1387,32 @@ function InteractiveGantt({
    names no capability cell" whenever no LEVEL was stated, which is what the
    register looked like when every row shipped with an empty linkage list. */
 function capStateOf(issue) {
-  const entries = Object.entries((DMA.ISSUE_CAPS[issue.id] || {}).caps || {});
-  const levels = entries.map(([, lvl]) => lvl).filter(l => l != null);
+  // The adapter now separates the two facts this function used to blur:
+  // `caps` holds only cells the matter actually HOLDS (from the contract's
+  // capped_subcap_ids — previously read from a key that does not exist, so
+  // every matter on every client printed "Cap None"), and `linked` holds the
+  // cells it merely bears on. A matter with caps is a ceiling; with only
+  // linkage it names cells without holding them; with neither it is unlinked.
+  const rec = DMA.ISSUE_CAPS[issue.id] || {};
+  const capEntries = Object.entries(rec.caps || {});
+  const linked = rec.linked || [];
+  const levels = capEntries.map(([, lvl]) => lvl).filter(l => l != null);
   const ceiling = levels.length ? Math.min(...levels.map(Number)) : null;
+  if (capEntries.length) {
+    // Held cells with no stated level still render as a ceiling — the level
+    // lives on the run's caps[] array; "held, level on the assessment caps"
+    // is honest where inventing M-numbers is not.
+    return {
+      entries: capEntries,
+      ceiling,
+      kind: ceiling == null ? "held_unleveled" : "ceiling"
+    };
+  }
+  const entries = linked.map(c => [c, null]);
   return {
     entries,
-    ceiling,
-    kind: !entries.length ? "unlinked" : ceiling == null ? "linked" : "ceiling"
+    ceiling: null,
+    kind: entries.length ? "linked" : "unlinked"
   };
 }
 
@@ -1550,14 +1586,14 @@ function IssueDetail({
       fontSize: 19,
       fontWeight: 700,
       lineHeight: 1.25,
-      color: kind === "ceiling" ? "var(--z-org)" : "var(--z-body)"
+      color: kind === "ceiling" || kind === "held_unleveled" ? "var(--z-org)" : "var(--z-body)"
     }
-  }, kind === "ceiling" ? `M${fx(ceiling, 1)}` : "None"), /*#__PURE__*/React.createElement("div", {
+  }, kind === "ceiling" ? `M${fx(ceiling, 1)}` : kind === "held_unleveled" ? "Held" : "None"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)"
     }
-  }, kind === "ceiling" ? `${entries.length} cell${entries.length === 1 ? "" : "s"} held` : kind === "linked" ? `${entries.length} cell${entries.length === 1 ? "" : "s"} named` : "no cell named")), /*#__PURE__*/React.createElement("div", {
+  }, kind === "ceiling" || kind === "held_unleveled" ? `${entries.length} cell${entries.length === 1 ? "" : "s"} held` : kind === "linked" ? `${entries.length} cell${entries.length === 1 ? "" : "s"} named` : "no cell named")), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: "1 1 260px",
       minWidth: 0,

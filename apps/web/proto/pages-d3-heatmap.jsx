@@ -1236,7 +1236,7 @@ function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers
                             </div>
                             <div style={{ width: 90, flexShrink: 0 }}>
                               <div style={{ position: "relative", height: 6, background: "var(--z-sep)", borderRadius: 3 }}
-                                   title={`Score ${fx(s.score, 1)}${s.peerMedian != null ? ` · Peer ${fx(s.peerMedian, 1)}` : " · no peer median stated"}`}>
+                                   title={`${s.score != null ? `Score ${fx(s.score, 1)}` : "no score stated"}${s.peerMedian != null ? ` · Peer ${fx(s.peerMedian, 1)}` : " · no peer median stated"}`}>
                                 {/* An unscored cell gets no fill rather than a
                                     zero-width bar that reads as a floor. */}
                                 {s.score != null ? (
@@ -1607,7 +1607,7 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
               ? (subcap.name && subcap.name !== subcap.id ? subcap.name : `${subcap.id} · unnamed in catalogue`)
               : (category.name || `${category.id} · unnamed in catalogue`)}</div>
             <div className="sub">{subcap
-              ? `Score ${fx(subcap.score, 1)}${subcap.confidence ? ` · ${subcap.confidence}` : ""}`
+              ? `${subcap.score != null ? `Score ${fx(subcap.score, 1)}` : "no score stated"}${subcap.confidence ? ` · ${subcap.confidence}` : ""}`
               : `${catCells.length} subcaps${category.weight != null ? ` · weight ${fx(category.weight * 100, 0)}%` : ""}`}</div>
           </div>
           <button className="icon-btn" onClick={onClose}><Icon name="x" size={16} /></button>

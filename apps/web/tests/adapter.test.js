@@ -212,19 +212,36 @@ test("acquisitions map the contract's keys onto the card's", () => {
   assert.strictEqual(out[0].date, null, "undated stays null, never a placeholder");
 });
 
-test("issue caps are built from each issue's own linked cells", () => {
-  // DMA.ISSUE_CAPS was {} in LIVE, so no issue could ever show the cells it
-  // caps — the "issues not linked to the DMA" symptom.
+test("issue caps come from capped_subcap_ids; linkage stays linkage", () => {
+  // Two defects, in order. First DMA.ISSUE_CAPS was {} in LIVE (nothing
+  // emitted it). The first fix then read `x.cap_level` — a key no contract
+  // declares — and stuffed LINKED cells into `caps` with null levels, so a
+  // matter that merely bears on cells and a matter that HOLDS them were one
+  // shape, and the drilldown printed "Cap None" on every matter of every
+  // client, including one whose payload caps two cells at M3. The contract's
+  // cap field is `capped_subcap_ids`; `linked_subcap_ids` is bears-on.
   const w = load(LIVE);
   const caps = w.issueCapsOf({ issues: [
+    // linkage only — no cap. The old test asserted these landed in `caps`;
+    // that assertion was the defect wearing a green tick.
     { issue_id: "ISS-003", linked_subcap_ids: ["P2C2.1.1", "P2C3.1.1"] },
+    // capped, as a {cell: level} map — the leveled shape.
+    { issue_id: "ISS-007", linked_subcap_ids: ["P4C4.1.1"],
+      capped_subcap_ids: { "P4C4.1.1": 3, "P4C4.2.1": "3" } },
+    // capped, as a bare id list — held, level lives on the run's caps[].
+    { issue_id: "ISS-008", capped_subcap_ids: ["P1C1.1.1"] },
     { issue_id: "ISS-001", linked_subcap_ids: [] },
   ] });
-  assert.deepStrictEqual(Object.keys(caps), ["ISS-003"]);
-  assert.deepStrictEqual(Object.keys(caps["ISS-003"].caps),
-                        ["P2C2.1.1", "P2C3.1.1"]);
-  assert.strictEqual(caps["ISS-003"].caps["P2C2.1.1"], null,
-    "linkage without a stated cap level does not imply a ceiling");
+  assert.deepStrictEqual(Object.keys(caps).sort(),
+                         ["ISS-003", "ISS-007", "ISS-008"]);
+  // Linkage-only: caps EMPTY, linked carried.
+  assert.deepStrictEqual(caps["ISS-003"].caps, {});
+  assert.deepStrictEqual(caps["ISS-003"].linked, ["P2C2.1.1", "P2C3.1.1"]);
+  // Map shape: numeric levels, string numerals coerced.
+  assert.strictEqual(caps["ISS-007"].caps["P4C4.1.1"], 3);
+  assert.strictEqual(caps["ISS-007"].caps["P4C4.2.1"], 3);
+  // List shape: held with no invented level.
+  assert.strictEqual(caps["ISS-008"].caps["P1C1.1.1"], null);
 });
 
 test("a section's envelope citations reach the card", () => {

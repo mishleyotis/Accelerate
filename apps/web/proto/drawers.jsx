@@ -129,7 +129,11 @@ function EvidenceDrawer() {
                     read, never asserted: the old copy claimed "T2 with
                     consistent FACT-class claims" for every cell in the run. */}
                 <div className="co-body">
-                  Score {fx(subcap.score, 1)}
+                  {/* Same null the header above words as "not scored": an
+                      unscored cell must not open its rationale "Score —". */}
+                  {dwNum(subcap.score) === null
+                    ? <EnrichmentGap what={`${subcap.id} score`} audience={audience} compact />
+                    : `Score ${fx(subcap.score, 1)}`}
                   {subcap.peerMedian != null ? ` · peer median ${fx(subcap.peerMedian, 1)}` : ""}
                   {subcap.peer_basis === "category_proxy" ? " (peer proxy · category median)" : ""}.
                   {" "}
@@ -2228,7 +2232,10 @@ function surfaceMessages(surface, ctx) {
         title: "Subcap narrative",
         sub: ctx?.subcap?.id || "Heatmap selection",
         cache_age: "200ms",
-        body: `${ctx?.subcap?.name || "This subcap"} scores ${fx(ctx?.subcap?.score, 1) || "-"}. Peer median is ${fx(ctx?.subcap?.peerMedian, 1) || "-"}.\n\nEvidence is ${ctx?.subcap?.thin ? "thin - only " + (ctx?.subcap?.evidence_count || 0) + " items below the threshold of 3" : "consistent across multiple T1–T3 sources"}.\n\nClosing the gap to peer requires investment in the named platform candidates. The exact path differs by subvertical pillar weight.`,
+        // fx returns the em dash as a NON-EMPTY string, so `|| "-"` never
+        // fired here — the truthiness trap utils.jsx documents. Words,
+        // decided before the call.
+        body: `${ctx?.subcap?.name || "This subcap"} ${ctx?.subcap?.score != null ? `scores ${fx(ctx.subcap.score, 1)}` : "has no stated score"}. Peer median is ${ctx?.subcap?.peerMedian != null ? fx(ctx.subcap.peerMedian, 1) : "not stated"}.\n\nEvidence is ${ctx?.subcap?.thin ? "thin - only " + (ctx?.subcap?.evidence_count || 0) + " items below the threshold of 3" : "consistent across multiple T1–T3 sources"}.\n\nClosing the gap to peer requires investment in the named platform candidates. The exact path differs by subvertical pillar weight.`,
       };
     case "platform_story":
       return {

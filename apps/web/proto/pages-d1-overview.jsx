@@ -122,8 +122,13 @@ function SnapshotStrip({ entity, run, layout, audience }) {
                       P4 Data foundation" — true of the fixture, asserted of
                       everyone. */}
                   <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.5 }}>
+                    {/* The composite sentence is itself a fallback, so with no
+                        framing AND no composite there is nothing honest left
+                        to say here but the gap. */}
                     {asText(entity.framing) || asText(entity.posture_basis) ||
-                     `Composite ${fx(entity.overall, 1)} / 5 across ${DMA.PILLARS.length} pillars.`}
+                     (entity.overall != null
+                       ? `Composite ${fx(entity.overall, 1)} / 5 across ${DMA.PILLARS.length} pillars.`
+                       : <EnrichmentGap what="Run framing" audience={audience} />)}
                   </div>
                 </div>
               </div>
@@ -139,7 +144,9 @@ function SnapshotStrip({ entity, run, layout, audience }) {
                 const peer = (entity.pillar_peer_medians || {})[p.id];
                 const w = (s / 5) * 100;
                 const peerL = peer == null ? null : (peer / 5) * 100;
-                const delta = peer == null ? null : s - peer;
+                // Both ends or no delta: `null - peer` is -peer, which rendered
+                // an unscored pillar as ▼peer — a movement nobody measured.
+                const delta = peer == null || s == null ? null : s - peer;
                 return (
                   <div className="pbar" key={p.id} onClick={() => navigate(`/clients/${entity.id}/heatmap`, { pillar: p.id, run: run.id })} style={{ cursor: "pointer" }}>
                     <div className="pbar-name">{p.id} · {p.short}</div>
@@ -149,7 +156,9 @@ function SnapshotStrip({ entity, run, layout, audience }) {
                         <div className="pbar-peer" style={{ left: `calc(${peerL}% - 1px)` }} title={`Peer ${fx(peer, 1)}`} />
                       )}
                     </div>
-                    <div className="pbar-score">{fx(s, 1)}</div>
+                    <div className="pbar-score">{s == null
+                      ? <EnrichmentGap what={`${p.id} score`} audience={audience} compact />
+                      : fx(s, 1)}</div>
                     <div className="pbar-delta" style={{ color: delta == null ? "var(--z-muted)" : (delta < 0 ? "var(--z-below)" : "var(--z-mid)") }}>
                       {delta == null ? "—" : <>{delta >= 0 ? "▲" : "▼"} {fx(Math.abs(delta), 1)}</>}
                     </div>
@@ -170,6 +179,24 @@ function SnapshotStrip({ entity, run, layout, audience }) {
 
 /* ── Firmographics · the promoted figures, and only those ─────────── */
 function FirmographicsPanel({ entity, audience }) {
+  /* One absent-state builder for every pinned row, so the three states a
+     firmographic can be in stay distinguishable wherever they occur:
+
+       stated   the value renders
+       HELD     quarantined with the ladder that failed — a finding, and the
+                reason is the content
+       silent   nobody established it; it is in the connector's worklist
+
+     Held is read from `entity.held[slot]`, which app-root's firmoFields sets
+     for a pinned field. Before that existed, a held pinned field rendered no
+     row at all and was indistinguishable from one never asked for — which is
+     the exact confusion this whole component was rebuilt to end. */
+  const gap = (slot, label) => {
+    const reason = entity.held && entity.held[slot];
+    return reason
+      ? <EnrichmentGap what={label} held reason={reason} audience={audience} />
+      : <EnrichmentGap what={label} audience={audience} />;
+  };
   return (
     <div style={{ background: "var(--z-lav)", borderRadius: 12, padding: 16 }}>
       <div className="eyebrow" style={{ marginBottom: 8 }}>Firmographics</div>
@@ -195,12 +222,12 @@ function FirmographicsPanel({ entity, audience }) {
       <Row k={entity.assets_label || "Assets"}
            v={entity.assets != null
                ? fmtAssets(entity.assets, entity.assets_unit)
-               : <EnrichmentGap what="Assets" audience={audience} />} />
+               : gap("assets", entity.assets_label || "Assets")} />
       <Row k="Employees"  v={entity.employees != null
         ? entity.employees.toLocaleString()
-        : <EnrichmentGap what="Employees" audience={audience} />} />
+        : gap("employees", "Employees")} />
       <Row k="Branches"   v={entity.branches != null ? String(entity.branches)
-        : <EnrichmentGap what="Branches" audience={audience} />} />
+        : gap("branches", "Branches")} />
       {entity.members != null ? <Row k="Members" v={entity.members.toLocaleString()} /> : null}
       {entity.customers != null ? <Row k="Customers" v={entity.customers.toLocaleString()} /> : null}
       {/* ONE CAGR row. It rendered twice until 2026-08-14: pinned here from the
@@ -214,10 +241,10 @@ function FirmographicsPanel({ entity, audience }) {
         ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}`
         : entity.stated_cagr != null
           ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}`
-          : <EnrichmentGap what="CAGR" audience={audience} />} />
+          : gap("cagr", "CAGR")} />
       {entity.net_worth_ratio != null ? <Row k="Net worth ratio" v={`${fx(entity.net_worth_ratio, 2)}%`} /> : null}
       <Row k="Regulator"  v={entity.regulator
-        || <EnrichmentGap what="Primary regulator" audience={audience} />} />
+        || gap("regulator", "Primary regulator")} />
       {/* Required on every sub-vertical since 2026-08-14, so it gets a row
           whether or not the run stated it — hiding the row would hide the
           omission. Linked because a domain a reader cannot open is half a
@@ -225,8 +252,8 @@ function FirmographicsPanel({ entity, audience }) {
       <Row k="Website"    v={entity.website
         ? <a href={/^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`}
              target="_blank" rel="noopener noreferrer">{entity.website}</a>
-        : <EnrichmentGap what="Website" audience={audience} />} />
-      {entity.hq ? <Row k="HQ" v={entity.hq} /> : null}
+        : gap("website", "Website")} />
+      <Row k="HQ" v={entity.hq || gap("hq", "HQ")} />
       {/* Footprint reads the regulatory section's jurisdictions first, then a
           footprint the firmographics stated. Both are consumed by this one row
           — the pinned-row/pinned-key drift that duplicated CAGR was latent here
@@ -235,9 +262,18 @@ function FirmographicsPanel({ entity, audience }) {
         ? entity.footprint.join(" · ")
         : entity.stated_footprint
           ? String(entity.stated_footprint)
-          : <EnrichmentGap what="Footprint" audience={audience} />} />
-      {entity.charter ? <Row k="Charter" v={entity.charter} /> : null}
-      {entity.founded ? <Row k="Founded" v={String(entity.founded).slice(0, 4)} /> : null}
+          : gap("footprint", "Footprint")} />
+      <Row k="Charter" v={entity.charter || gap("charter", "Charter")} />
+      {/* Unconditional, and this is the fix rather than a tidy-up: `founded`
+          is HELD on the reference client — quarantined with a 297-character
+          reason naming the searches that failed — and this row was
+          `{entity.founded ? … : null}`, so the single most defensible field
+          on the panel rendered nothing at all. A held field and an unasked
+          one must never look alike, and "no row" is the one rendering that
+          makes them identical. */}
+      <Row k="Founded" v={entity.founded
+        ? String(entity.founded).slice(0, 4)
+        : gap("founded", "Founded")} />
       {/* EVERY remaining field the run stated, in the order it stated them.
           The rows above are pinned because the contract's must-present set
           names them on every sub-vertical; these are the ones the SUB-VERTICAL

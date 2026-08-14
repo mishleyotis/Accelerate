@@ -2204,7 +2204,7 @@ function SubcapHeatmap({
               background: "var(--z-sep)",
               borderRadius: 3
             },
-            title: `Score ${fx(s.score, 1)}${s.peerMedian != null ? ` · Peer ${fx(s.peerMedian, 1)}` : " · no peer median stated"}`
+            title: `${s.score != null ? `Score ${fx(s.score, 1)}` : "no score stated"}${s.peerMedian != null ? ` · Peer ${fx(s.peerMedian, 1)}` : " · no peer median stated"}`
           }, s.score != null ? /*#__PURE__*/React.createElement("div", {
             style: {
               width: `${s.score / 5 * 100}%`,
@@ -2717,7 +2717,7 @@ function SynthesisDrawer({
     }
   }, subcap ? subcap.name && subcap.name !== subcap.id ? subcap.name : `${subcap.id} · unnamed in catalogue` : category.name || `${category.id} · unnamed in catalogue`), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, subcap ? `Score ${fx(subcap.score, 1)}${subcap.confidence ? ` · ${subcap.confidence}` : ""}` : `${catCells.length} subcaps${category.weight != null ? ` · weight ${fx(category.weight * 100, 0)}%` : ""}`)), /*#__PURE__*/React.createElement("button", {
+  }, subcap ? `${subcap.score != null ? `Score ${fx(subcap.score, 1)}` : "no score stated"}${subcap.confidence ? ` · ${subcap.confidence}` : ""}` : `${catCells.length} subcaps${category.weight != null ? ` · weight ${fx(category.weight * 100, 0)}%` : ""}`)), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
     onClick: onClose
   }, /*#__PURE__*/React.createElement(Icon, {

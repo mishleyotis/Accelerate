@@ -287,7 +287,10 @@ function CeilingEstimateCard({ entity, audience }) {
               <button onClick={() => setOpen(o => o === cat ? null : cat)}
                 style={{ width: "100%", display: "grid", gridTemplateColumns: "128px 1fr 62px 16px", gap: 8, alignItems: "center", padding: "8px 0", background: "none", border: 0, cursor: "pointer", textAlign: "left" }}>
                 <div style={{ fontSize: 10.5, color: "var(--z-body)" }}><span className="f-mono">{cat}</span> {cdef ? cdef.name.slice(0, 14) : ""}</div>
-                <div style={{ position: "relative", height: 8, background: "var(--z-sep)", borderRadius: 4 }} title={`Band ${fx(lo, 1)}–${fx(hi, 1)}`}>
+                {/* `lo`/`hi` are arithmetic ON the ceiling, so a null ceiling
+                    makes them a fabricated pair (1.0–0.0), not an em dash —
+                    the title must not assert bounds nobody stated. */}
+                <div style={{ position: "relative", height: 8, background: "var(--z-sep)", borderRadius: 4 }} title={d.ceiling == null ? `${cat} ceiling not stated` : `Band ${fx(lo, 1)}–${fx(hi, 1)}`}>
                   <div style={{ position: "absolute", left: `${pct(lo)}%`, width: `${pct(hi) - pct(lo)}%`, top: 0, bottom: 0, background: "rgba(124,93,201,.25)", borderRadius: 4 }} />
                   <div style={{ position: "absolute", left: `calc(${pct(d.ceiling)}% - 4px)`, top: -1, width: 8, height: 10, borderRadius: 2, background: tone }} />
                 </div>

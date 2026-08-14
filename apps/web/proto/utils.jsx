@@ -890,17 +890,31 @@ function fmtDate(s) {
    6_500_000_000. Formatting it by size alone printed "$6.5", which reads as six
    dollars fifty for a $6.5bn balance sheet. The unit is now applied first. */
 function fmtAssets(n, unit) {
-  if (n == null || n === 0) return "-";
+  // null and 0 used to share one branch, so a STATED zero printed exactly
+  // like an unstated figure. A zero on a balance-sheet field is almost
+  // certainly a producer error — but that is the identity gate's call, not a
+  // formatter's; the formatter's only job is to never make two different
+  // facts look the same. Callers guard null and render the gap themselves.
+  if (n == null || n === "" || !isFinite(Number(n))) return null;
+  if (Number(n) === 0) return "$0";
   const u = String(unit || "").toLowerCase();
   const mult = /billion|\bbn\b/.test(u) ? 1e9
              : /million|\bmm?\b/.test(u) ? 1e6
              : /thousand|\bk\b/.test(u) ? 1e3 : 1;
-  const v = n * mult;
+  const v = Number(n) * mult;
   if (v >= 1e9) return `$${(v/1e9).toFixed(1)}B`;
   if (v >= 1e6) return `$${(v/1e6).toFixed(0)}M`;
   return `$${v.toLocaleString()}`;
 }
-function fmtPct(n) { return `${(n*100).toFixed(0)}%`; }
+/* A null percentage used to print "0%" — the one formatter in this file that
+   answered "nobody measured this" with a MEASUREMENT. Invariant 9: derived
+   values are computed or null, never a default that looks like data. Returns
+   null so the caller renders its gap; every current call site already guards,
+   and the next one that does not will now show nothing rather than a lie. */
+function fmtPct(n) {
+  return (n == null || n === "" || !isFinite(Number(n)))
+    ? null : `${(Number(n)*100).toFixed(0)}%`;
+}
 function relTime(s) {
   if (!s) return "-";
   const months = Math.round((new Date() - new Date(s)) / (1000*60*60*24*30.4));

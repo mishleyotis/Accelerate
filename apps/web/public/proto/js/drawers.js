@@ -155,7 +155,11 @@ function EvidenceDrawer() {
     className: "co-title"
   }, "Rationale"), /*#__PURE__*/React.createElement("div", {
     className: "co-body"
-  }, "Score ", fx(subcap.score, 1), subcap.peerMedian != null ? ` · peer median ${fx(subcap.peerMedian, 1)}` : "", subcap.peer_basis === "category_proxy" ? " (peer proxy · category median)" : "", ".", " ", subcap.thin ? `Evidence is below the threshold of 3 — flagged as thin${subcap.closure_condition ? `. Closes on: ${subcap.closure_condition}` : "."}` : items.length ? `Grounded on ${items.length} item${items.length === 1 ? "" : "s"}${(() => {
+  }, dwNum(subcap.score) === null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: `${subcap.id} score`,
+    audience: audience,
+    compact: true
+  }) : `Score ${fx(subcap.score, 1)}`, subcap.peerMedian != null ? ` · peer median ${fx(subcap.peerMedian, 1)}` : "", subcap.peer_basis === "category_proxy" ? " (peer proxy · category median)" : "", ".", " ", subcap.thin ? `Evidence is below the threshold of 3 — flagged as thin${subcap.closure_condition ? `. Closes on: ${subcap.closure_condition}` : "."}` : items.length ? `Grounded on ${items.length} item${items.length === 1 ? "" : "s"}${(() => {
     const tiers = [...new Set(items.map(i => i.tier).filter(Boolean))].sort();
     return tiers.length ? ` · ${tiers.join(", ")}` : "";
   })()}.` : "No evidence linked at this grain."))) : null, items.length > 1 ? /*#__PURE__*/React.createElement("div", {
@@ -3046,7 +3050,10 @@ function surfaceMessages(surface, ctx) {
         title: "Subcap narrative",
         sub: ctx?.subcap?.id || "Heatmap selection",
         cache_age: "200ms",
-        body: `${ctx?.subcap?.name || "This subcap"} scores ${fx(ctx?.subcap?.score, 1) || "-"}. Peer median is ${fx(ctx?.subcap?.peerMedian, 1) || "-"}.\n\nEvidence is ${ctx?.subcap?.thin ? "thin - only " + (ctx?.subcap?.evidence_count || 0) + " items below the threshold of 3" : "consistent across multiple T1–T3 sources"}.\n\nClosing the gap to peer requires investment in the named platform candidates. The exact path differs by subvertical pillar weight.`
+        // fx returns the em dash as a NON-EMPTY string, so `|| "-"` never
+        // fired here — the truthiness trap utils.jsx documents. Words,
+        // decided before the call.
+        body: `${ctx?.subcap?.name || "This subcap"} ${ctx?.subcap?.score != null ? `scores ${fx(ctx.subcap.score, 1)}` : "has no stated score"}. Peer median is ${ctx?.subcap?.peerMedian != null ? fx(ctx.subcap.peerMedian, 1) : "not stated"}.\n\nEvidence is ${ctx?.subcap?.thin ? "thin - only " + (ctx?.subcap?.evidence_count || 0) + " items below the threshold of 3" : "consistent across multiple T1–T3 sources"}.\n\nClosing the gap to peer requires investment in the named platform candidates. The exact path differs by subvertical pillar weight.`
       };
     case "platform_story":
       return {

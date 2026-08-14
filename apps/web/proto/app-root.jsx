@@ -255,13 +255,31 @@ function firmoFields(firmo) {
   for (const f of fields || []) {
     const key = String(f.field == null ? "" : f.field).trim().toLowerCase();
     if (f.value === null || f.value === undefined || f.value === "") {
-      // A field the producer HELD (quarantined, with its reason) is a finding
-      // and renders as a documented em dash. Silently skipping it is how a
-      // held field became indistinguishable from one nobody asked for.
-      if (f.quarantined && !FIRMO_PINNED.has(key)) {
-        out.extra_fields.push({ field: f.field, value: null, unit: null,
-                                as_of: f.as_of || null, held: true,
-                                reason: f.quarantine_reason || null });
+      // A field the producer HELD — quarantined, with the ladder that failed
+      // written out — is the most defensible thing on this panel, and it has
+      // to reach the reader as a held field rather than as silence.
+      //
+      // It did not, for the NINE fields the contract makes mandatory. The
+      // condition here was `f.quarantined && !FIRMO_PINNED.has(key)`, so a
+      // held field that IS pinned fell through to `continue` and rendered
+      // nothing at all — no row, no reason, no trace. Measured on the
+      // reference client: `founded` is quarantined with a 297-character
+      // reason naming the searches that failed, and the panel showed no
+      // Founded row whatsoever. The em-dash pass did not catch it because it
+      // only ever touched the unpinned branch.
+      //
+      // Pinned held fields now mark their SLOT, so the panel's own row prints
+      // the hold and its reason; unpinned ones keep going to extra_fields.
+      if (f.quarantined) {
+        const slot = FIRMO_SLOT.get(key);
+        if (slot) {
+          out.held = out.held || {};
+          out.held[slot] = f.quarantine_reason || "held by the producer";
+        } else {
+          out.extra_fields.push({ field: f.field, value: null, unit: null,
+                                  as_of: f.as_of || null, held: true,
+                                  reason: f.quarantine_reason || null });
+        }
       }
       continue;
     }

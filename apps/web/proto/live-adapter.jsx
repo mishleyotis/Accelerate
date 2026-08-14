@@ -142,6 +142,33 @@ function adaptOpportunityTiles(opportunity) {
   }));
 }
 
+/* The run's peer set, recovered from the register that actually names it.
+
+   data.js's `PEER_SETS` accessor reads the key `peerSets` and NO adapter ever
+   emitted it, so in LIVE it resolved to {} on every client — and the tech
+   detail page told the reader "This run states no peer set, so there is no
+   cohort to search against either" on 43 of 51 cards while the run named five
+   peers on the other 8. The overview's own pillars carry peer_n: 5,
+   peer_basis: "table" — the run HAS a peer set; the page denying it was a
+   false statement about the assessment.
+
+   The names live on `techstack.items[].peer_deployments[].peer` — the peer
+   technographic research the producer registered. Keyed by the entity's own
+   sub_vertical because that is exactly how the consumer reads it
+   (`DMA.PEER_SETS[entity.subvertical]?.peers`). Empty when the run genuinely
+   states none — the honest empty text is then TRUE. */
+function peerSetsOf(techstack, subVertical) {
+  const names = [];
+  for (const it of (techstack && techstack.items) || []) {
+    for (const pd of (it && it.peer_deployments) || []) {
+      const p = pd && pd.peer;
+      if (p && !names.includes(p)) names.push(p);
+    }
+  }
+  if (!names.length || !subVertical) return {};
+  return { [subVertical]: { peers: names } };
+}
+
 /* ── financialsFor ───────────────────────────────────────────────────
    The prototype's card draws one bar per fiscal period with the value above
    it and a footer of regulator · footprint · branches · FTE. Periods come
@@ -1052,11 +1079,32 @@ function adaptAcquisitions(section) {
 function issueCapsOf(register) {
   const out = {};
   for (const x of (register && register.issues) || []) {
-    const cells = x.linked_subcap_ids || x.capability_ids || [];
-    if (!cells.length) continue;
+    // The contract's cap field is `capped_subcap_ids` — the cells a matter
+    // HOLDS, distinct from `linked_subcap_ids`, the cells it merely bears on.
+    // This function read `x.cap_level`, a key no contract declares, so every
+    // cap was null by construction: the issue drilldown printed "Cap None" on
+    // every matter of every client, including one whose payload caps two
+    // cells at M3. A page asserting a cap that was never read is a false
+    // statement about the assessment, in the safeguard family where honesty
+    // is the whole point.
+    //
+    // Shapes the producer actually writes: a list of ids (cap level lives on
+    // the run's caps[] array), or a {subcap_id: level} map. Both are read;
+    // a bare list yields null levels and the drilldown says "held, level on
+    // the assessment caps" rather than inventing a number.
+    const capped = x.capped_subcap_ids;
+    const linked = x.linked_subcap_ids || x.capability_ids || [];
     const caps = {};
-    for (const c of cells) caps[c] = x.cap_level != null ? x.cap_level : null;
-    out[x.issue_id] = { caps };
+    if (Array.isArray(capped)) {
+      for (const c of capped) caps[c] = null;
+    } else if (capped && typeof capped === "object") {
+      for (const [c, lvl] of Object.entries(capped)) {
+        const n = Number(lvl);
+        caps[c] = isFinite(n) ? n : null;
+      }
+    }
+    if (!Object.keys(caps).length && !linked.length) continue;
+    out[x.issue_id] = { caps, linked };
   }
   return out;
 }
@@ -1289,6 +1337,13 @@ function buildLiveEntity(entityId, pages, extras) {
     // plural for the accessor.
     stairstep: adaptStairstep(secOf(platform, "stairstep")),
     stairstepClusters: stairstepClustersOf(secOf(platform, "stairstep")),
+    // data.js reads `peerSets`; nothing emitted it, so DMA.PEER_SETS was {}
+    // in LIVE and the tech detail page told the reader the run states no
+    // peer set while the register named five. Keyed by the entity's own
+    // sub_vertical because that is the key the consumer looks up.
+    peerSets: peerSetsOf(
+      secOf(techstack, "techstack"),
+      ((overview && overview.entity) || (heatmap && heatmap.entity) || {}).sub_vertical),
 
     focusAreas: adaptFocusAreas(secOf(heatmap, "focus_areas")),
     workbookScores: secOf(heatmap, "workbook_scores"),
@@ -1400,7 +1455,7 @@ Object.assign(window, {
   // Exported so tests can assert them directly. Each of these was a silent
   // key or shape mismatch between the payload and a renderer, which is the
   // defect class no per-field test caught.
-  secWithEnv, stairstepClustersOf, adaptAcquisitions, issueCapsOf, techLayersOf,
+  secWithEnv, stairstepClustersOf, peerSetsOf, adaptAcquisitions, issueCapsOf, techLayersOf,
   adaptOpportunityTiles, cagrOf, peerOfSignal: signalOf,
   splitMaturityEffect, MATURITY_EFFECT_LABEL, MATURITY_EFFECT_TOKENS, ARC_SHAPES,
   effectTokenLabel,

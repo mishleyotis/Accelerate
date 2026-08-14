@@ -593,7 +593,7 @@ function CeilingEstimateCard({
         background: "var(--z-sep)",
         borderRadius: 4
       },
-      title: `Band ${fx(lo, 1)}–${fx(hi, 1)}`
+      title: d.ceiling == null ? `${cat} ceiling not stated` : `Band ${fx(lo, 1)}–${fx(hi, 1)}`
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         position: "absolute",

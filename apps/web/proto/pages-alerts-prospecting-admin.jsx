@@ -194,7 +194,16 @@ function ScorecardPreview({ e }) {
         <div>
           <div style={{ fontSize: 11, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".1em" }}>Zennify · DMA Scorecard</div>
           <div style={{ fontSize: 24, fontWeight: 600, marginTop: 4 }}>{e.name}</div>
-          <div style={{ fontSize: 12, color: "var(--z-muted)" }}>{DMA.SUBVERTICAL_LABEL[e.subvertical]} · {e.hq} · {fmtAssets(e.assets)} · Assessment {fmtDate(e.assessment_date)}</div>
+          {/* Joined from the parts the entity actually states — fmtAssets now
+              returns null for an absent figure (it used to return "-"), and a
+              null inside this row previously would have printed the WORD
+              "null" into a client-facing scorecard header. */}
+          <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+            {[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq,
+              fmtAssets(e.assets),
+              e.assessment_date ? `Assessment ${fmtDate(e.assessment_date)}` : null]
+              .filter(Boolean).join(" · ")}
+          </div>
         </div>
         <ScoreRing score={e.overall} />
       </div>
