@@ -471,11 +471,33 @@ def drive_get(path: str, **params) -> dict:
 # Secret Manager remains the fallback so a doc outage never blocks a run; the
 # doc wins wherever both define a key, so a rotation in the doc takes effect
 # on the next firing with no redeploy.
+#
+# READING THE DOC IS NOT OPTIONAL, AND UNTIL 2026-08-14 IT SILENTLY WAS.
+# `main()` called `doc_secrets()` for its printed line and threw the return
+# value away. Nothing downstream consulted it. So a doc that 404'd printed a
+# FAIL line, `main()` returned 0 anyway, and `routine_preflight.sh` mapped
+# exit 0 to `secrets OK` and then to `PREFLIGHT PASS — proceed`: a composite
+# verdict computed without its own most important input, with the contrary
+# evidence printed two lines above it. A doc that parsed to zero keys was
+# worse — it printed OK on an empty result.
+#
+# Both are closed below. The doc's outcome now reaches the exit code, every
+# required credential prints WHERE IT CAME FROM, and a run whose credentials
+# did not come from the doc cannot report a clean preflight. The escape hatch
+# is deliberate and must be chosen: SECRETS_DOC_OPTIONAL=1 downgrades an
+# unreachable doc from FAIL to WARN, for a Docs outage a human has decided to
+# ride out on the Secret Manager values.
 
 SECRETS_DOC_ID = os.environ.get(
     "SECRETS_DOC_ID", "1z5cH44uOdAyrP5d8EoqK5airWQx2KjrqIf3jZHzhNuU")
 
+# The credentials the routine cannot work without, by the name `secret()`
+# resolves. These are what provenance is reported for.
+REQUIRED_DOC_KEYS = ("DMA_ROUTINE_GITHUB_PAT", "DMA_ROUTINE_DRIVE_SA_KEY")
+
 _DOC_CACHE: dict | None = None
+# Why the doc read ended, for `main()` to grade. None until the first read.
+_DOC_STATUS: dict | None = None
 
 
 def doc_secrets() -> dict:
@@ -484,7 +506,7 @@ def doc_secrets() -> dict:
     Parses `KEY: value` / `KEY = value` lines; a KEY is upper-snake with 3+
     chars. Values live in this process only.
     """
-    global _DOC_CACHE
+    global _DOC_CACHE, _DOC_STATUS
     if _DOC_CACHE is not None:
         return _DOC_CACHE
     # Reentrancy guard: drive_token's key fallback calls secret(), which
@@ -508,20 +530,64 @@ def doc_secrets() -> dict:
                   f"{who}, the identity this read was made as. Share it "
                   f"(view-only) with that account — falling back to Secret "
                   f"Manager values this run.")
+            _DOC_STATUS = {"ok": False, "keys": 0,
+                           "reason": f"404 — not shared with {who}"}
         else:
             print(f"secrets doc         WARN  HTTP {e.code} — falling back to "
                   "Secret Manager values this run.")
+            _DOC_STATUS = {"ok": False, "keys": 0, "reason": f"HTTP {e.code}"}
         _DOC_CACHE = {}
         return _DOC_CACHE
     except Exception as e:
         print(f"secrets doc         WARN  {type(e).__name__} — falling back to "
               "Secret Manager values this run.")
+        _DOC_STATUS = {"ok": False, "keys": 0, "reason": type(e).__name__}
         _DOC_CACHE = {}
         return _DOC_CACHE
     out = _parse_doc(text)
-    print(f"secrets doc         OK    {len(out)} key(s) loaded at call time, "
-          "values held in memory only")
+    if out:
+        print(f"secrets doc         OK    {len(out)} key(s) loaded at call time, "
+              "values held in memory only")
+        _DOC_STATUS = {"ok": True, "keys": len(out), "reason": ""}
+    else:
+        # A parse that yields nothing is not a successful read. The doc was
+        # fetched, so every transport check passed and the old code printed OK
+        # — on zero credentials. That is the shape of a green check measuring
+        # the wrong thing, and it is the reason this branch exists separately.
+        print("secrets doc         FAIL  fetched but parsed to 0 keys — the "
+              "notation in the doc is one this parser does not recognise "
+              "(see _parse_doc for the three it does). Falling back to Secret "
+              "Manager values this run.")
+        _DOC_STATUS = {"ok": False, "keys": 0, "reason": "parsed to 0 keys"}
     _DOC_CACHE = out
+    return out
+
+
+def doc_status() -> dict:
+    """How the doc read ended: {ok, keys, reason}. Reads the doc if needed."""
+    doc_secrets()
+    return dict(_DOC_STATUS or {"ok": False, "keys": 0, "reason": "not read"})
+
+
+def credential_provenance() -> dict:
+    """For each required credential, the source that actually supplied it.
+
+    'secrets doc' or 'Secret Manager' or the failure. This is the line that
+    makes forgetting the doc impossible to miss: a run reading its PAT from
+    Secret Manager while believing it read the doc now says so on its own
+    preflight, per credential, every time.
+    """
+    doc = doc_secrets()
+    out: dict[str, str] = {}
+    for k in REQUIRED_DOC_KEYS:
+        if k in doc:
+            out[k] = "secrets doc"
+            continue
+        try:
+            secret(k.lower().replace("_", "-"))
+            out[k] = "Secret Manager"
+        except Exception as e:                                 # noqa: BLE001
+            out[k] = f"UNRESOLVED ({type(e).__name__})"
     return out
 
 
@@ -588,11 +654,54 @@ def main() -> int:
     """
     # The user's stated source of record first — its verdict line names the
     # identity that took the 404 and never prints a value.
-    doc_secrets()
+    doc = doc_status()
 
     intake = os.environ.get("INTAKE_FOLDER_ID",
                             "1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo")
     degraded = False
+
+    # The doc's outcome DECIDES something now. Reading it and then grading the
+    # run without it is how a 404 rendered as PREFLIGHT PASS for nine days.
+    #
+    # It does NOT decide it HERE, though. `doc_secrets()` reads the doc through
+    # the impersonated Drive identity, so a broken Drive grant surfaces first as
+    # a doc failure — and returning on it would report "the doc was not read"
+    # while the checks that name the identity that actually failed never ran.
+    # The flag is raised here and spent at the end, so the operator gets the
+    # root cause and the doc verdict in the same output.
+    fatal = False
+    if not doc["ok"]:
+        if os.environ.get("SECRETS_DOC_OPTIONAL") == "1":
+            print(f"secrets doc       WARN    {doc['reason']} — continuing on "
+                  "Secret Manager because SECRETS_DOC_OPTIONAL=1 was set "
+                  "deliberately. The doc is still the source of record.")
+            degraded = True
+        else:
+            print(f"secrets doc       FAIL    {doc['reason']}. The doc is the "
+                  "source of record and this run did not read it. Fix the "
+                  "share or the notation; set SECRETS_DOC_OPTIONAL=1 only to "
+                  "ride out a Docs outage on the Secret Manager values. "
+                  "If a Drive line below also fails, fix that first — this "
+                  "read goes through the same identity.")
+            fatal = True
+
+    # Provenance, per credential, every run. A value that came from Secret
+    # Manager while the doc was reachable means the doc does not define it —
+    # which is a rotation that never landed, and it is invisible without this.
+    # Skipped when the doc is already known unreadable: every answer would be
+    # "Secret Manager", which is noise rather than information.
+    if doc["ok"]:
+        for name, src in credential_provenance().items():
+            if src == "secrets doc":
+                print(f"  {name:<28} from the secrets doc")
+            elif src == "Secret Manager":
+                print(f"  {name:<28} WARN from Secret Manager — the doc does "
+                      "not define it, so a rotation there will not reach this "
+                      "run")
+                degraded = True
+            else:
+                print(f"  {name:<28} FAIL {src}")
+                fatal = True
 
     # Length is not validity. Spend the token on GET /user and read the expiry
     # GitHub reports back.
@@ -665,6 +774,9 @@ def main() -> int:
         print("intake folder     WARN listed successfully and is genuinely "
               "empty — nothing to scan")
         degraded = True
+    # Spent last, so the lines above got to name the root cause first.
+    if fatal:
+        return 1
     return 2 if degraded else 0
 
 

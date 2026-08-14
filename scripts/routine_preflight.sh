@@ -70,11 +70,18 @@ fi
 
 # 2 · the stored credentials, and whether they actually WORK.
 #     exit 0 = all good · 2 = degraded but workable · 1 = fatal.
+#
+#     The verdict text names the SECRETS DOC deliberately. Until 2026-08-14
+#     `routine_secrets.main()` printed the doc's verdict and then graded the
+#     run without it, so a doc that 404'd printed a FAIL line, exited 0, and
+#     was relabelled here as `secrets OK … PREFLIGHT PASS — proceed`. The
+#     exit code carries the doc's outcome now; this line has to say so, or
+#     the same laundering happens one layer up.
 "$PY" "$HERE/routine_secrets.py"
 case "$?" in
-  0) say  "secrets" OK   "loaded at call time, not persisted" ;;
-  2) warn "secrets" "degraded but workable — see the WARN line(s) above" ;;
-  *) bad  "secrets" "a credential could not be read, is rejected, or expires inside this firing interval" ;;
+  0) say  "secrets" OK   "read from the secrets doc at call time, not persisted" ;;
+  2) warn "secrets" "degraded but workable — read the WARN line(s) above for which: secrets-doc provenance, the PAT's state, or the intake tree" ;;
+  *) bad  "secrets" "the secrets doc was not read, or a credential could not be read, is rejected, or expires inside this firing interval" ;;
 esac
 
 # 3 · the deployed services this routine drives

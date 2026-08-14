@@ -29,6 +29,20 @@ def _no_network(monkeypatch):
     monkeypatch.setattr(R, "drive_token", lambda *a, **k: ("tok", "test"))
     monkeypatch.setattr(R, "_DRIVE_IDENTITY", STORED_KEY_SA, raising=False)
     monkeypatch.setattr(R, "doc_secrets", dict)
+    # The secrets doc became an input to main()'s verdict on 2026-08-14. These
+    # tests are about the intake TREE, so the doc is held green here for the
+    # same reason the Drive layer is: an assertion about the tree only means
+    # something when the tree is the sole thing that can have moved. The two
+    # tests that failed when the doc check landed were reading its FAIL as a
+    # tree result. raising=False so this file still runs against a module
+    # predating either function.
+    monkeypatch.setattr(R, "doc_status",
+                        lambda: {"ok": True, "keys": 2, "reason": ""},
+                        raising=False)
+    monkeypatch.setattr(R, "credential_provenance",
+                        lambda: {"DMA_ROUTINE_GITHUB_PAT": "secrets doc",
+                                 "DMA_ROUTINE_DRIVE_SA_KEY": "secrets doc"},
+                        raising=False)
     monkeypatch.setattr(R, "github_pat", lambda: "irrelevant-here")
     # raising=False so the semantic tests below fail on BEHAVIOUR against a
     # module that has no PAT check at all, rather than on the patch.
