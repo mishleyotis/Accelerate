@@ -24,8 +24,27 @@ if [ -f migrations/Dockerfile ]; then
 fi
 
 # --- 2 · services (api first: web depends on it; mcp independent) ---------
+#
+# The api image READS cross-service contracts at runtime, and the Dockerfile
+# copies only `dma_api` — so those files have to be staged in beside it. Same
+# pattern as corpus_gates.json for the jobs below: staged, never committed to
+# apps/api, so packages/shared holds the single copy CI checks.
+#
+# This is not hypothetical tidiness. enrichment_register.json was NOT staged,
+# the loader swallowed the FileNotFoundError into an empty dict, and all five
+# enrichment surfaces served without their status while every test passed —
+# because in the repo the file is there. Gate D now fails CI if a shared file
+# the code reads is not staged for the deployable that reads it.
+stage_shared_into_api() {
+  cp packages/shared/enrichment_register.json apps/api/shared/ 2>/dev/null || {
+    echo "FATAL: packages/shared/enrichment_register.json is missing" >&2
+    exit 1
+  }
+}
+
 if [ -f apps/api/Dockerfile ]; then
   say "svc_api"
+  stage_shared_into_api
   # IAP_AUDIENCE is the assertion audience of the WEB service — the API
   # verifies the assertion the BFF forwards and pins it to that audience, so
   # a token minted for anything else cannot be replayed here. Computed the
@@ -147,6 +166,7 @@ fi
 # a code review.
 if [ -f apps/api/Dockerfile ]; then
   say "dmai-refresh job (records a refresh request; writes refresh_requests only)"
+  stage_shared_into_api   # same image, same runtime reads
   gcloud run jobs deploy dmai-refresh --source=apps/api \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-worker@${SA_DOMAIN}" \

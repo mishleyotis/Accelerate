@@ -564,15 +564,51 @@ def safeguard_gates(cur, data: dict, run_id) -> None:
 _ENRICHMENT_REGISTER: dict | None = None
 
 
+def _register_paths() -> list:
+    """Where the register can live, in the order it is looked for.
+
+    Two layouts, because this module runs in two: the repo tree in tests and
+    local dev, and a container image where only `dma_api` is copied in. The
+    IMAGE path comes first — deploy.sh stages the file into `shared/` beside
+    the package, the same way it stages corpus_gates.json for the jobs, so
+    there is no second copy in the tree to drift.
+    """
+    here = Path(__file__).resolve()
+    return [
+        here.parent.parent / "shared" / "enrichment_register.json",   # image
+        here.parents[3] / "packages" / "shared" / "enrichment_register.json",
+    ]
+
+
 def _enrichment_register() -> dict:
+    """Read the register, or RAISE.
+
+    It used to swallow every failure into an empty dict, and that is exactly
+    how it shipped broken: the API image copies only `dma_api`, the register
+    was not in it, `path.read_text()` raised FileNotFoundError, the except
+    turned that into "no surfaces are declared", and all five enrichment
+    surfaces served without their status for as long as the feature existed.
+    Every test passed, because in the repo the file is there.
+
+    A bare `except` on a FILE THIS MODULE REQUIRES converts a deployment fault
+    into a content answer, which is the one translation a serving path must
+    never make. Raising instead means `apply` records `computed_error` on the
+    section and the audit script sees it on the very first run.
+    """
     global _ENRICHMENT_REGISTER
     if _ENRICHMENT_REGISTER is None:
-        try:
-            path = (Path(__file__).resolve().parents[3] / "packages" /
-                    "shared" / "enrichment_register.json")
-            _ENRICHMENT_REGISTER = json.loads(path.read_text()).get("surfaces") or {}
-        except Exception:                   # noqa: BLE001
-            _ENRICHMENT_REGISTER = {}
+        tried = _register_paths()
+        for path in tried:
+            if path.exists():
+                _ENRICHMENT_REGISTER = (
+                    json.loads(path.read_text()).get("surfaces") or {})
+                return _ENRICHMENT_REGISTER
+        raise FileNotFoundError(
+            "enrichment_register.json is not in this image — looked in "
+            + ", ".join(str(p) for p in tried)
+            + ". deploy.sh stages it into shared/ beside the package; a build "
+              "that skipped that step serves every enrichment surface without "
+              "its status.")
     return _ENRICHMENT_REGISTER
 
 

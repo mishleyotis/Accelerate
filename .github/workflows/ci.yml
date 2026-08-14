@@ -31,6 +31,18 @@ jobs:
         run: |
           python3 scripts/extract_docs.py docs /tmp/docs-text-check
           diff -r /tmp/docs-text-check docs/text --exclude='*docx upload*' && echo "docs/text matches sources"
+      # An em dash is a render dead end: it cannot say WHICH absence it is, and
+      # gives the reader no route to getting the field filled. Removed once by
+      # hand across 11 files; this is what stops the next component reaching
+      # for `: "—"` because it is the shortest thing that renders.
+      - name: Gate C — no render dead ends
+        run: python3 scripts/gate_c_no_render_dead_ends.py
+      # A shared contract the serving code READS must be in the image that
+      # reads it. enrichment_register.json was not, the loader swallowed the
+      # FileNotFoundError, and five surfaces served without their status while
+      # the whole suite passed — because in the repo the file is there.
+      - name: Gate D — shared contracts ship in the image
+        run: python3 scripts/gate_d_shared_files_ship.py
 
   schema-qa:
     name: Schema QA checklist (stage 0.3 DoD)
@@ -58,13 +70,51 @@ jobs:
       - name: QA checklist as tests
         run: LOCAL_DATABASE_URL='postgresql+pg8000://postgres:local@localhost:5432/dma_insights' python -m pytest tests/schema/ -q
 
-  worker-tests:
-    name: Worker unit tests (stage 1 QA bullets)
+  # Every python suite, not a subset. Until 2026-08-14 this job ran worker and
+  # mcp only: the API's 251 tests and the routine-preflight tests had never run
+  # in CI at all, so a change could break the serving layer and merge green.
+  python-tests:
+    name: Python unit tests (worker · mcp · api · scripts)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install -q pytest openpyxl pg8000 && python -m pytest apps/worker/tests/ apps/mcp/tests/ -q
+      - run: pip install -q pytest openpyxl pg8000
+      - run: python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ scripts/tests/ -q
 
-  # Per-service lint/type/test/build jobs are added when each service's
+  # The frontend has its own suite (node's built-in runner, no framework) and
+  # it too had never run here. It is the only place the COMPILED bundle is
+  # asserted against the register and the adapter — the check that caught four
+  # of five enrichment surfaces rendering nothing.
+  web-tests:
+    name: Web unit tests (compiled bundle)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: apps/web
+        run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - working-directory: apps/web
+        run: npm run build:proto
+      - working-directory: apps/web
+        run: npm run test:web
+
+  # The deep audit, run against the golden fixture rather than production, so a
+  # payload shape that would fail in front of a client fails here first. The
+  # same script runs nightly against the live API from the corpus-gate-scanner.
+  promoted-client-audit:
+    name: Promoted-client audit (fixture)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          if [ -d fixtures/served ]; then
+            python3 scripts/audit_promoted_client.py --from-dir fixtures/served
+          else
+            echo "no served fixture yet; audit runs against production nightly"
+          fi
+
+  # Per-service lint/type/build jobs are added when each service's
   # first code lands (Implementation Plan S.3); the gates above run from
   # the first commit so no code was ever merged without them.
