@@ -269,7 +269,12 @@ function evidenceCountOf(subcap) {
 function ClientHeatmap({ entity, run }) {
   const route = useRoute();
   const { audience, openEvidence, openInsight, setIpSurface, setIpContext, tweaks, pushToast } = useApp();
-  const [mode, setMode]               = useState(route.params.hm || (audience === "customer" ? "focus" : "focus"));  // focus | standard | value_chain
+  // Order and default, per the build owner 2026-08-14: the STANDARD heatmap
+  // opens the page, then focus areas, then the value chain. The customer
+  // audience still cannot reach the standard grid (it carries every capped and
+  // thin cell), so it opens on focus areas — the ternary that used to return
+  // "focus" on both branches now actually branches.
+  const [mode, setMode]               = useState(route.params.hm || (audience === "customer" ? "focus" : "standard"));  // standard | focus | value_chain
   const [zoom, setZoom]               = useState(route.params.zoom || "category");
   const [pillarFocus, setPillarFocus] = useState(route.params.pillar || null);
   const [catFocus, setCatFocus]       = useState(route.params.cat || null);
@@ -344,15 +349,16 @@ function ClientHeatmap({ entity, run }) {
           <div className="row" style={{ gap: 6 }}>
             <span style={{ fontSize: 11, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>View</span>
             <div className="toggle-row">
-              <button className={mode === "focus" ? "on" : ""} onClick={() => { setMode("focus"); setFocusArea(null); }}><Icon name="sparkle" size={11} /> Focus areas</button>
-              {/* The internal grid carries every cell, capped or thin, and is
-                  not part of the customer view. Disabled rather than switched
+              {/* Standard · Focus areas · Value chain, in that order. The
+                  internal grid carries every cell, capped or thin, and is not
+                  part of the customer view — disabled rather than switched
                   back a moment later. */}
               <button className={mode === "standard" ? "on" : ""}
                 disabled={audience === "customer"}
                 title={audience === "customer" ? "the full internal grid is not part of the customer view" : null}
                 style={audience === "customer" ? { opacity: .45, cursor: "not-allowed" } : null}
                 onClick={() => { if (audience !== "customer") setMode("standard"); }}><Icon name="heatmap" size={11} /> Standard</button>
+              <button className={mode === "focus" ? "on" : ""} onClick={() => { setMode("focus"); setFocusArea(null); }}><Icon name="sparkle" size={11} /> Focus areas</button>
               <button className={mode === "value_chain" ? "on" : ""} onClick={() => setMode("value_chain")}><Icon name="route" size={11} /> Value chain</button>
             </div>
           </div>

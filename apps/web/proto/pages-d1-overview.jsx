@@ -200,6 +200,14 @@ function FirmographicsPanel({ entity }) {
         : "—"} />
       {entity.net_worth_ratio != null ? <Row k="Net worth ratio" v={`${fx(entity.net_worth_ratio, 2)}%`} /> : null}
       <Row k="Regulator"  v={entity.regulator || "—"} />
+      {/* Required on every sub-vertical since 2026-08-14, so it gets a row
+          whether or not the run stated it — an em dash here is a finding the
+          producer owes, and hiding the row would hide the omission. Linked
+          because a domain a reader cannot open is half a fact. */}
+      <Row k="Website"    v={entity.website
+        ? <a href={/^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`}
+             target="_blank" rel="noopener noreferrer">{entity.website}</a>
+        : "—"} />
       <Row k="Footprint"  v={entity.footprint?.length ? entity.footprint.join(" · ") : "—"} />
       {entity.charter ? <Row k="Charter" v={entity.charter} /> : null}
       {entity.founded ? <Row k="Founded" v={String(entity.founded).slice(0, 4)} /> : null}

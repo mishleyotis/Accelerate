@@ -344,6 +344,13 @@ function FirmographicsPanel({
     k: "Regulator",
     v: entity.regulator || "—"
   }), /*#__PURE__*/React.createElement(Row, {
+    k: "Website",
+    v: entity.website ? /*#__PURE__*/React.createElement("a", {
+      href: /^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`,
+      target: "_blank",
+      rel: "noopener noreferrer"
+    }, entity.website) : "—"
+  }), /*#__PURE__*/React.createElement(Row, {
     k: "Footprint",
     v: entity.footprint?.length ? entity.footprint.join(" · ") : "—"
   }), entity.charter ? /*#__PURE__*/React.createElement(Row, {

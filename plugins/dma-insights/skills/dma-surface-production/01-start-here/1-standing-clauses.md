@@ -39,6 +39,35 @@ Why this is worth doing per figure rather than per run: one contaminated profile
 institution's assets, regulator and five-state footprint onto five surfaces simultaneously.
 One root cause, five surfaces, every instance catchable by one rule applied at the figure.
 
+### Assert the identity of your own working copy, before any of the five
+
+The five assertions above check the DOCUMENT. They cannot check the thing every one of
+them is applied to — **the bundle you are reading**. That is the gap contamination has
+actually come through here: two sessions shared one scratchpad path, a bundle was
+overwritten in place, and a producer analysed a different client's assessment for
+twenty-two minutes with every identity assertion passing, because each figure genuinely
+was about the entity in the file it was reading.
+
+So, first, before any surface work:
+
+- **Namespace your scratchpad by RUN ID**, not by session — `…/scratchpad/<run_id>/`.
+  Two sessions on two runs then cannot collide, and a session that resumes finds its
+  own material.
+- **Assert `run_id` and `display_id` at the top of every script that opens the bundle**,
+  against the run you claimed. Not once at the start of the session — at every read,
+  because the file can change under you between reads and that is precisely what
+  happened.
+- **Re-assert after any long pause**, a resumed lease, or a tool result you did not
+  produce in this turn.
+
+The connector now refuses the output as well: **ET-09 blocks a payload whose prose names
+another client in the corpus** where that name is not a peer recorded server-side for this
+run. ET-01 already halted a foreign *citation*; ET-09 is the same halt for contamination
+that cites nothing, which is what a wrong-bundle read produces. Neither gate is a substitute
+for asserting the working copy — by the time a gate fires, the reasoning is already wrong
+and everything else the session produced is suspect, so the repair is to re-read the right
+bundle, never to delete the offending sentence and carry on.
+
 ---
 
 ## 2 · Grain

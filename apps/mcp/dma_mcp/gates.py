@@ -168,6 +168,14 @@ GATES = {
               "(another institution's row) halts production.",
               "A foreign id means the reasoning drifted onto another entity.",
               "block"),
+    "ET-09": ("No other client named in this client's prose", None,
+              "No payload string names another client in the corpus, unless "
+              "that name is a peer recorded server-side for this run.",
+              "ET-01 halts a foreign CITATION. Contamination that never "
+              "cites — a sentence written while reading the wrong client's "
+              "bundle — is invisible to it, and that is the route that "
+              "actually occurred (MEM-0023).",
+              "block"),
     "ET-02": ("No minted-namespace fabrication", None,
               "Ids in the mint namespace must exist server-side; the agent "
               "never chooses the number.",

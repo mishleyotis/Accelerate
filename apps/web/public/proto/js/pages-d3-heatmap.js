@@ -323,7 +323,12 @@ function ClientHeatmap({
     tweaks,
     pushToast
   } = useApp();
-  const [mode, setMode] = useState(route.params.hm || (audience === "customer" ? "focus" : "focus")); // focus | standard | value_chain
+  // Order and default, per the build owner 2026-08-14: the STANDARD heatmap
+  // opens the page, then focus areas, then the value chain. The customer
+  // audience still cannot reach the standard grid (it carries every capped and
+  // thin cell), so it opens on focus areas — the ternary that used to return
+  // "focus" on both branches now actually branches.
+  const [mode, setMode] = useState(route.params.hm || (audience === "customer" ? "focus" : "standard")); // standard | focus | value_chain
   const [zoom, setZoom] = useState(route.params.zoom || "category");
   const [pillarFocus, setPillarFocus] = useState(route.params.pillar || null);
   const [catFocus, setCatFocus] = useState(route.params.cat || null);
@@ -419,15 +424,6 @@ function ClientHeatmap({
   }, "View"), /*#__PURE__*/React.createElement("div", {
     className: "toggle-row"
   }, /*#__PURE__*/React.createElement("button", {
-    className: mode === "focus" ? "on" : "",
-    onClick: () => {
-      setMode("focus");
-      setFocusArea(null);
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "sparkle",
-    size: 11
-  }), " Focus areas"), /*#__PURE__*/React.createElement("button", {
     className: mode === "standard" ? "on" : "",
     disabled: audience === "customer",
     title: audience === "customer" ? "the full internal grid is not part of the customer view" : null,
@@ -442,6 +438,15 @@ function ClientHeatmap({
     name: "heatmap",
     size: 11
   }), " Standard"), /*#__PURE__*/React.createElement("button", {
+    className: mode === "focus" ? "on" : "",
+    onClick: () => {
+      setMode("focus");
+      setFocusArea(null);
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "sparkle",
+    size: 11
+  }), " Focus areas"), /*#__PURE__*/React.createElement("button", {
     className: mode === "value_chain" ? "on" : "",
     onClick: () => setMode("value_chain")
   }, /*#__PURE__*/React.createElement(Icon, {

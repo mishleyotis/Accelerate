@@ -214,6 +214,18 @@ function firmoFields(firmo) {
       case "net_worth_ratio": out.net_worth_ratio = num; break;
       case "founded":      out.founded = f.value; break;
       case "charter":      out.charter = f.value; break;
+      // Required on every sub-vertical since 2026-08-14. The spellings match
+      // the read path in dma_api/computed.py::_entity_domains, because the
+      // same stated field both renders here and supplies O11's denominator —
+      // one field recognised in two places by two different lists is the
+      // drift class this build has paid for repeatedly.
+      case "website":
+      case "web site":
+      case "domain":
+      case "primary domain":
+      case "web domain":
+      case "entity website":
+      case "url":          out.website = f.value; break;
       default: break;
     }
   }

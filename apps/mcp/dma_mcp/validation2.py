@@ -329,6 +329,128 @@ def _check_excerpt_completeness(found, cited_by) -> list:
     return out
 
 
+# ── ET-09 · another client's name in this client's prose ─────────────
+#
+# ET-01 halts a CITATION that resolves to another institution's row. It sees
+# nothing when the contamination never cites: a sentence, a leadership name,
+# a tech row or a why-now card that simply names a different client. That is
+# the route that actually bit this build — MEM-0023, where two concurrent
+# sessions shared a scratchpad path and a producer analysed another client's
+# bundle for twenty-two minutes. Every id it cited would have been that other
+# client's, so ET-01 would have caught THAT; but the prose written from the
+# same read is invisible to every gate in this connector.
+#
+# The corpus knows who its clients are, so the check is a lookup rather than
+# a heuristic. Measured over the 113 distinct entity names in the intake tree
+# on 2026-08-14: 111 carry two or more words, ZERO are composed entirely of
+# generic banking tokens (bank, first, national, credit, union, trust …), and
+# exactly one is shorter than eight characters. So a floor of "two words and
+# eight characters, or one word of ten" matches 112 of 113 by their own
+# distinctiveness and cannot fire on a phrase like "the first national bank".
+#
+# Peers are excluded from server-side truth — `peer_scores.peer_name` for
+# THIS run — never from the payload's own claims, because a payload that
+# names its own exculpation is not evidence.
+_ET09_MIN_MULTI, _ET09_MIN_SINGLE = 8, 10
+
+# A name must carry at least one word that is not sector furniture. The
+# length floor alone is not enough: "First National Bank" is three words and
+# nineteen characters and matches the sentence "the first national bank in
+# the state", which appears in ordinary prose on any run. Zero of the
+# corpus's 113 names are composed ENTIRELY of these, so requiring one
+# distinctive word costs no real coverage — it was measured before it was
+# written, and the test that pins it fired on the first implementation,
+# which had the measurement in its comment and not in its code.
+# Kept deliberately SMALL. A first draft included capital, farm, global and
+# partners, which reads sensible and dropped three real clients out of
+# coverage — their names are built entirely from sector words and are still
+# perfectly distinctive as phrases. The test is not "is this word generic"
+# but "does this PHRASE occur in ordinary prose": "the first national bank
+# in the state" does, "global federal credit union" does not. Re-measured
+# after tightening: 112 of the corpus's 113 names covered, the one gap being
+# a five-character acronym that the length floor excludes anyway.
+_ET09_GENERIC = frozenset((
+    "the", "of", "and", "a", "an", "for", "at", "in", "co", "inc", "llc",
+    "ltd", "limited", "corp", "corporation", "company", "group", "holdings",
+    "holding", "services", "service", "systems", "association",
+    "bank", "banking", "banks", "credit", "union", "federal", "national",
+    "state", "community", "savings", "mutual", "financial", "finance",
+    "trust", "insurance", "first", "american", "america", "us", "usa"))
+
+
+def _norm_name(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
+
+
+def _foreign_entity_names(conn, run_id) -> dict:
+    """{compiled pattern: legal name} for every OTHER client in the corpus."""
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT e.legal_name, e.trading_name
+             FROM entities e
+            WHERE e.id <> (SELECT entity_id FROM runs WHERE id = %s)""",
+        (run_id,))
+    candidates = {n for row in cur.fetchall() for n in row if n}
+    cur.execute("SELECT DISTINCT peer_name FROM peer_scores WHERE run_id = %s",
+                (run_id,))
+    peers = {_norm_name(r[0]) for r in cur.fetchall() if r[0]}
+    out = {}
+    for name in candidates:
+        norm = _norm_name(name)
+        if not norm or norm in peers:
+            continue
+        words = norm.split()
+        long_enough = (len(words) >= 2 and len(norm) >= _ET09_MIN_MULTI) or \
+                      (len(words) == 1 and len(norm) >= _ET09_MIN_SINGLE)
+        if not long_enough:
+            continue
+        # At least one word that is not sector furniture, or the pattern
+        # matches ordinary prose rather than an institution.
+        if all(w in _ET09_GENERIC for w in words):
+            continue
+        out[re.compile(r"\b" + r"\W+".join(map(re.escape, words)) + r"\b",
+                       re.I)] = name
+    return out
+
+
+def _check_foreign_entity_prose(conn, run_id, payload) -> list:
+    try:
+        patterns = _foreign_entity_names(conn, run_id)
+    except Exception:                                          # noqa: BLE001
+        # A gate that cannot read its corpus must not silently pass the
+        # payload it was meant to check. It also must not block a run on a
+        # transient read, so it says nothing here and the reason is that
+        # ET-01 still covers the cited route.
+        return []
+    if not patterns:
+        return []
+    out, seen = [], set()
+    for section, body in payload.items():
+        if not isinstance(body, dict):
+            continue
+        for path, obj in _walk(body, section):
+            for key, value in obj.items():
+                if not isinstance(value, str) or len(value) < 4:
+                    continue
+                for pat, name in patterns.items():
+                    if (section, name) in seen or not pat.search(value):
+                        continue
+                    seen.add((section, name))
+                    out.append(_reason(
+                        "ET-09", section, f"{path}.{key}",
+                        f"names {name!r} — another client in this corpus, and "
+                        "not a peer recorded for this run. STOP: this is "
+                        "contamination, the same class as a foreign citation "
+                        "and invisible to ET-01 because the sentence cites "
+                        "nothing. Confirm which client's material you are "
+                        "reading (assert the bundle's run_id and display_id), "
+                        "quarantine and escalate — do not delete the sentence "
+                        "and carry on, because the reasoning that produced it "
+                        "drifted onto the wrong entity and everything else it "
+                        "produced is suspect"))
+    return out
+
+
 # ── ET-07 · a cited source resolves to the cells it supports ──────────
 #
 # ET-04 asks whether the chip opens onto a quotation. This asks the next
@@ -1131,6 +1253,10 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                 f"institution ({f['belongs_to']}) — STOP: this is "
                 "contamination; quarantine and escalate, do not filter it "
                 "out quietly"))
+
+    # Runs whether or not anything was cited: the whole point of ET-09 is the
+    # contamination that never cites, so it must not sit inside `if cited:`.
+    reasons.extend(_check_foreign_entity_prose(conn, run_id, payload))
 
     served = _served_figures(conn, run_id)
 

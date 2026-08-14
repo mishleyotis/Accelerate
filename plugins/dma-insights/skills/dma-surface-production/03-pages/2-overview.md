@@ -89,7 +89,7 @@ Produce the hero: composite, four pillar scores with peer deltas, posture, the f
 
 ### Must present
 
-Employees, revenue, AUM or assets, CAGR, HQ, branches, founded year, primary regulator, charter — each as value + provenance.
+Employees, revenue, AUM or assets, CAGR, HQ, branches, founded year, primary regulator, charter, **website** — each as value + provenance.
 
 Every populated field shows where it came from; an unknown field renders an em dash, never a guess and never a dict repr.
 
@@ -97,8 +97,18 @@ Figures must be about THIS legal entity. A parent, subsidiary or same-name insti
 
 Magnitude sanity: an AUM or asset figure implying a market-scale absurdity is rejected (a $2.70T AUM on a mid-market manager was a real defect).
 
-**The must-present set is a set, not a suggestion, and two of its members are the ones that go missing.**
+**The must-present set is a set, not a suggestion, and three of its members are the ones that go missing.**
 
+- **`website` is required on every sub-vertical**, added 2026-08-14 by the build
+  owner. It is the one firmographic that is never sub-vertical specific, and it is
+  the only field that is also load-bearing elsewhere: O11's `self_sourced_pct` is a
+  share OF this domain — an evidence row published here is the entity speaking about
+  itself rather than a third party doing so — and until a run states it, that figure
+  is null on every surface for every client. Write it **bare and lowercased**
+  (`client.example`), never a scheme, `www.`, path or query: the serve layer matches
+  it against `evidence_index.source_domain`, and a URL-shaped value matches nothing
+  and renders a confident 0%, which is worse than the null it replaced. Cite it like
+  any other field — the page you read it from.
 - **CAGR belongs here.** The financial-series section's `cagr` column is unbound and
   computed at read; a producer-stated, cited CAGR is a firmographics field with its
   own `as_of` and `source_e_id`. If you want a sourced growth rate on the page, this

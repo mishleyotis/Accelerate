@@ -125,7 +125,7 @@ def evidence_coverage(cur, data: dict, run_id, entity_id,
         return
 
     tiers, claims, self_sourced, facts = {}, {}, 0, 0
-    own = _entity_domains(cur, entity_id, entity_domain)
+    own = _entity_domains(cur, entity_id, entity_domain, run_id)
     for tier, claim, domain, n_links in rows:
         tiers[tier or "unknown"] = tiers.get(tier or "unknown", 0) + 1
         claims[claim or "unlabelled"] = claims.get(claim or "unlabelled", 0) + 1
@@ -161,8 +161,9 @@ def evidence_coverage(cur, data: dict, run_id, entity_id,
                         "not computed: this run records no publication "
                         "domain for the entity itself, and inferring one "
                         "from the evidence would let the numerator define "
-                        "its own denominator. Closed by recording the "
-                        "entity's own domain at ingest")
+                        "its own denominator. Closed by the run stating "
+                        "firmographics.website, which the contract has "
+                        "required on every sub-vertical since 2026-08-14")
 
 
 def _bare_domain(value) -> str:
@@ -184,27 +185,51 @@ def _bare_domain(value) -> str:
     return v.removeprefix("www.").strip(".")
 
 
-def _entity_domains(cur, entity_id, entity_domain: str | None = None) -> set:
+def _entity_domains(cur, entity_id, entity_domain: str | None = None,
+                    run_id=None) -> set:
     """The entity's own publication domains.
 
-    Two sources, in authority order, and neither is the evidence mix this
-    figure is a share OF:
+    Three sources, in authority order, and none of them is the evidence mix
+    this figure is a share OF:
 
     1. `entities.domain` — the column the schema declares for exactly this,
        carried on `serving_directory` (0045) because `svc_api` holds no
        grant on `entities`.
-    2. evidence rows this run marked `origin = 'internal'` — the entity's
+    2. The run's own `firmographics.website` — required on every sub-vertical
+       as of 2026-08-14 (build owner). This is the source that actually
+       fires: `entities.domain` is populated by nothing (0 of 166 rows, and
+       the write half of that is still upstream), whereas the website is
+       stated by the producer with provenance like any other firmographic,
+       and it arrives with the run rather than ahead of it.
+    3. evidence rows this run marked `origin = 'internal'` — the entity's
        own publications, as classified at registration.
 
-    Empty when neither states one, which makes self_sourced_pct null rather
-    than 0. Reading the declared column FIRST is the half that was missing:
-    the previous version named only source 2, and `evidence_origin_t` has
-    an `internal` label that no row in the corpus has ever carried — so the
+    Empty when none states one, which makes self_sourced_pct null rather
+    than 0. Reading beyond source 3 is the half that was missing: the
+    original version named only that one, and `evidence_origin_t` has an
+    `internal` label that no row in the corpus has ever carried — so the
     condition was unsatisfiable and the field could never render for any
     client. A mechanism that cannot fire is worse than none, because the
     code reads as though the path exists.
+
+    Every source goes through `_bare_domain`, because a producer writing
+    `https://www.client.example/` would otherwise match no `source_domain`
+    and render a confident 0% — worse than the null it replaced.
     """
     own = {_bare_domain(entity_domain)} if _bare_domain(entity_domain) else set()
+    if run_id is not None:
+        # `field` is free text by contract, so match the shapes a producer
+        # actually writes rather than one spelling. Quarantined rows are
+        # excluded: a field the identity gate refused is not a fact.
+        cur.execute(
+            """SELECT value FROM overview_firmographics
+                WHERE run_id = %s AND value IS NOT NULL
+                  AND coalesce(quarantined, false) = false
+                  AND lower(field) IN ('website', 'web site', 'domain',
+                                       'primary domain', 'web domain',
+                                       'entity website', 'url')""",
+            (run_id,))
+        own |= {d for d in (_bare_domain(r[0]) for r in cur.fetchall()) if d}
     cur.execute(
         """SELECT DISTINCT ei.source_domain
              FROM evidence_index ei

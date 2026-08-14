@@ -244,15 +244,35 @@ def test_no_evidence_linked_to_the_run_is_a_finding_not_a_zero():
 
 
 class _CoverageCur:
-    """The two statements evidence_coverage runs, in order: the census, then
-    the entity's own `origin = 'internal'` domains."""
+    """The three statements evidence_coverage runs: the census, the run's own
+    `firmographics.website`, and the entity's `origin = 'internal'` domains.
 
-    def __init__(self, census, internal=()):
-        self.census, self.internal, self._out = census, internal, []
+    It DISPATCHES on the statement rather than answering every question with
+    the census. That is not tidiness: when `overview_firmographics` was added
+    as a domain source, the previous else-branch handed the census back to it,
+    every census row became a publication domain, and a test asserting an
+    UNCOMPUTABLE share saw a computed one. A double that answers whatever it
+    is asked cannot fail, and a check that cannot fail is not a check.
+
+    An unrecognised statement raises, so the next source added here is a test
+    error rather than a silent wrong answer.
+    """
+
+    def __init__(self, census, internal=(), website=()):
+        self.census, self.internal, self.website = census, internal, website
+        self._out = []
 
     def execute(self, sql, params=None):
-        self._out = ([(d,) for d in self.internal] if "origin = 'internal'" in sql
-                     else self.census)
+        if "origin = 'internal'" in sql:
+            self._out = [(d,) for d in self.internal]
+        elif "overview_firmographics" in sql:
+            self._out = [(w,) for w in self.website]
+        elif "evidence_subcap_links" in sql:
+            self._out = self.census
+        else:
+            raise AssertionError(
+                "_CoverageCur was asked a statement it does not model, so it "
+                "would have answered with the census:\n" + sql)
 
     def fetchall(self):
         return self._out
@@ -287,17 +307,64 @@ def test_the_self_sourced_share_measures_against_the_entitys_declared_domain():
     assert other["self_sourced_pct"] == 50.0
 
 
+def test_the_runs_own_firmographics_website_closes_the_share():
+    """The source that actually fires. `entities.domain` is populated by
+    nothing (0 of 166 rows) and no row has ever carried `origin='internal'`,
+    so before the website was required this figure could not render for ANY
+    client. Negative control: drop the `website=` argument and the share goes
+    back to null."""
+    census = [("T1", "FACT", "client.example", 2),
+              ("T3", "FACT", "regulator.gov", 2)]
+    data = {}
+    computed.evidence_coverage(
+        _CoverageCur(census, website=["client.example"]),
+        data, "run", "entity", None)
+    assert data["self_sourced_pct"] == 50.0
+    assert "client.example" in data["self_sourced_basis"]
+
+    without = {}
+    computed.evidence_coverage(_CoverageCur(census), without,
+                               "run", "entity", None)
+    assert "self_sourced_pct" not in without
+
+
+def test_a_website_written_as_a_url_still_matches_the_evidence_domain():
+    """A producer writing `https://www.client.example/about` would otherwise
+    match no `source_domain` and render a confident 0% — worse than the null
+    it replaced. Every source goes through `_bare_domain`."""
+    census = [("T1", "FACT", "client.example", 3),
+              ("T3", "FACT", "regulator.gov", 1)]
+    data = {}
+    computed.evidence_coverage(
+        _CoverageCur(census, website=["https://www.client.example/about?x=1"]),
+        data, "run", "entity", None)
+    assert data["self_sourced_pct"] == 50.0
+
+
+def test_the_website_source_is_skipped_when_there_is_no_run():
+    """`run_id=None` must not issue the firmographics statement at all —
+    the double raises if it is asked something it does not model, so this
+    also pins that the query is guarded rather than merely empty."""
+    data = {}
+    computed.evidence_coverage(_CoverageCur([("T3", "FACT", "x.gov", 1)]),
+                               data, None, "entity", None)
+    assert "self_sourced_pct" not in data
+
+
 def test_an_uncomputable_share_says_so_instead_of_vanishing():
     """An absent field reads as "the producer left it empty" — the exact
     misreading this module exists to end. `entities.domain` is NULL on all
-    166 rows and nothing writes it, so this is what every client gets
-    today, and it now names what would close it."""
+    166 rows and nothing writes it, so this is what a run that states no
+    website still gets, and it names what would close it: since 2026-08-14
+    that is `firmographics.website`, required on every sub-vertical, rather
+    than the ingest path that never landed."""
     census = [("T3", "FACT", "ncua.gov", 1)]
     data = {}
     computed.evidence_coverage(_CoverageCur(census), data, "run", "entity", None)
     assert "self_sourced_pct" not in data, "a share of an unknown is not 0%"
     assert "publication domain" in data["self_sourced_basis"]
-    assert "ingest" in data["self_sourced_basis"], "names what closes it"
+    assert "firmographics.website" in data["self_sourced_basis"], \
+        "names what closes it, and names the thing that actually closes it"
 
 
 def test_a_failed_computation_names_itself_rather_than_taking_the_page_down():

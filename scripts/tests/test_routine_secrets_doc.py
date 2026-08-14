@@ -24,8 +24,12 @@ import pytest
 
 import routine_secrets as R
 
+# Opaque placeholders. The Drive one deliberately does NOT carry the shape of
+# a service-account key: scan_secrets.py refuses that shape anywhere in the
+# tree, correctly, and a test fixture is not an exemption from a rule whose
+# whole value is having none.
 DOC_KEYS = {"DMA_ROUTINE_GITHUB_PAT": "github_pat_" + "x" * 71,
-            "DMA_ROUTINE_DRIVE_SA_KEY": '{"type": "service_account"}'}
+            "DMA_ROUTINE_DRIVE_SA_KEY": "drive-key-placeholder-" + "y" * 40}
 
 
 @pytest.fixture(autouse=True)
