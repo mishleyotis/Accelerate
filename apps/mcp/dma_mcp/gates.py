@@ -31,6 +31,16 @@ GATES = {
               "list items included.",
               "A shape that type-checks wrongly promotes silently wrong content.",
               "block"),
+    "CG-20": ("A vendor is a company, not a category", None,
+              "Every technology-register row names the COMPANY that supplies "
+              "it: not a category ('Integration platform'), not a "
+              "placeholder ('unnamed'), and not the same string as its own "
+              "product.",
+              "The contract always said vendor and product are separate and a "
+              "category is neither, and nothing checked it — so placeholder "
+              "rows promoted onto a client's register with the same weight as "
+              "a confirmed deployment.",
+              "block"),
     "CG-19": ("A required list is not silently empty", None,
               "A required list field carries items, or the section declares "
               "an empty state, or the contract marks the field "

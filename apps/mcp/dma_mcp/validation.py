@@ -134,6 +134,72 @@ def _check_must_present(section, fname, spec, val, empty_declared) -> list:
     return out
 
 
+# ── CG-20 · a vendor is a company, not a category ─────────────────────
+#
+# The contract has always said it: "A PRODUCT, not a service and not a
+# category — 'Salesforce Financial Services Cloud' is a product; 'CRM',
+# 'Analytics/BI', 'Django' are not; vendor and product are separate fields."
+# Nothing checked it, so rows reading `vendor: "Integration platform"` and
+# `vendor: "e-signature vendor (unnamed)"` promoted onto a client's technology
+# register beside Salesforce and Fortinet. The build owner called them noise
+# entries, which is exactly what they are: a placeholder for research that did
+# not finish, rendered with the same weight as a confirmed deployment.
+#
+# Measured over both promoted registers, 2026-08-14: 39 distinct vendors, of
+# which exactly 3 are categories and 36 are real companies. Both rules below
+# separate them with no false positives — "Early Warning Services" keeps its
+# generic third word and passes, because it also carries two words that are
+# not generic.
+_CG20_PLACEHOLDER = ("unnamed", "unknown", "tbd", "n/a", "not named",
+                     "to be confirmed", "unspecified")
+_CG20_GENERIC = frozenset((
+    "platform", "platforms", "vendor", "vendors", "tool", "tools", "tooling",
+    "solution", "solutions", "software", "provider", "providers", "system",
+    "systems", "suite", "service", "services", "integration", "portal",
+    "application", "applications", "app", "apps", "product", "products",
+    "the", "a", "an", "and", "or", "of", "unnamed", "unknown", "tbd",
+))
+
+
+def _check_vendor_is_a_company(section, fname, spec, val) -> list:
+    if fname != "items" or section != "techstack":
+        return []
+    out = []
+    for i, item in enumerate(val or []):
+        if not isinstance(item, dict):
+            continue
+        vendor = str(item.get("vendor") or "").strip()
+        product = str(item.get("product") or "").strip()
+        if not vendor:
+            continue
+        low = vendor.lower()
+        words = [w for w in re.split(r"[^a-z0-9]+", low) if w]
+        if any(p in low for p in _CG20_PLACEHOLDER):
+            out.append(_reason(
+                "CG-20", section, f"{section}.{fname}[{i}].vendor",
+                f"vendor {vendor!r} says it is a placeholder. A row whose "
+                "vendor is not named is research that did not finish, and it "
+                "renders on the client's register with the same weight as a "
+                "confirmed deployment. Name the company, or drop the row and "
+                "let the section's reach counters carry the gap"))
+        elif words and all(w in _CG20_GENERIC for w in words):
+            out.append(_reason(
+                "CG-20", section, f"{section}.{fname}[{i}].vendor",
+                f"vendor {vendor!r} is a CATEGORY, not a company. The "
+                "contract is explicit — vendor and product are separate "
+                "fields, and 'CRM' or 'Analytics/BI' is neither. Name the "
+                "company that supplies it; if the run could not establish "
+                "one, the row is not a register entry"))
+        elif product and product.lower() == low:
+            out.append(_reason(
+                "CG-20", section, f"{section}.{fname}[{i}].product",
+                f"product and vendor are both {vendor!r}. One of the two is "
+                "unstated: a register row names a company AND the thing it "
+                "supplies, and repeating the company in both fields renders "
+                "as a product nobody sells"))
+    return out
+
+
 def _reason(gate, section, path, message):
     return {"gate_id": gate, "section": section, "path": path,
             "message": message, "severity": "block"}
@@ -253,6 +319,7 @@ def validate_pass1(page: str, payload: dict) -> list:
                         break
             reasons.extend(_check_must_present(name, fname, spec, val,
                                                empty_declared))
+            reasons.extend(_check_vendor_is_a_company(name, fname, spec, val))
 
         # id-pattern discipline
         for i, e in enumerate(body.get("e_ids") or []):
