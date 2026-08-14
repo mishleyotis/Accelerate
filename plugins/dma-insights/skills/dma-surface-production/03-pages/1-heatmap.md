@@ -294,7 +294,11 @@ Coverage is decided when you plan the run, not when you reach H2. Work outward:
    here is the worst single defect on this page.
 2. **Every cell below the assessment's threshold**, and every cell carrying a thin alert.
    The low scores are what the client came to look at.
-3. **The rest**, worked by document rather than by cell: mine each rich source once, assign
+3. **The rest**, worked by document rather than by cell — **and only the ones that have
+   evidence.** A cell whose evidence set is empty is out of scope as of 2026-08-14: it is
+   not synthesised, not laddered and not chased. See the scoping decision in
+   `01-start-here/4-absence-protocol.md` for exactly what that permits and what it does
+   not. Tiers 1 and 2 above are **not** covered by it. For the rest: mine each rich source once, assign
    fact-level ids `E-xxx:Fy`, and map each fact to every cell it bears on. One annual
    report or 10-K populates twenty to fifty cells; a call report populates the financial
    and risk capabilities across a pillar. That is how the long tail gets covered at cost,

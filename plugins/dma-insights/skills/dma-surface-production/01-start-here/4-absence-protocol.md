@@ -98,6 +98,40 @@ capability would have left is not, and that difference is the whole of what make
 four hundred honest absences four hundred sentences rather than one. See
 `05-lifecycle/1-gates.md` for the worked examples and the arithmetic.
 
+## SCOPING DECISION — a subcapability with no evidence is out of scope
+
+**Standing since 2026-08-14, by the build owner. Operational scope, not doctrine —
+it narrows what you are obliged to produce, and it changes nothing about what is
+true. Reversible: when it lifts, the sections above govern again unchanged.**
+
+> **A subcapability whose evidence set is empty is not yours to write. Skip it.**
+
+Concretely, for a cell with no linked evidence carrying a citable excerpt:
+
+- Do **not** synthesise it. No inherited grade, no declared grade, no prose.
+- Do **not** write a recorded-absence ladder for it. The ladder is how you earn a
+  *stated* absence; here you are not stating one, so there is nothing to earn.
+- Do **not** chase evidence to fill it. Enrichment effort goes to the cells in
+  `03-pages/1-heatmap.md`'s tiers 1 and 2 — the cells another surface cites, and
+  the cells below threshold — and stops there.
+- **Leave the item out of the array.** The section's reach counters already carry
+  the shortfall honestly: `linking_stats` reports cells served against cells
+  cited, so the gap is disclosed as a count rather than as N sentences.
+
+**A run is promotable with those cells unwritten.** That is the accepted state
+for now, not a defect to repair and not something to apologise for on the page.
+`cell_evidence` has never been a row-per-cell contract — measured on a real run,
+rows existed for 69 of 765 — so a partial array is valid, and promotion does not
+require otherwise.
+
+What this does **not** license: a cell that *does* have citable evidence still
+gets written; a cell another surface cites still must reach **cited** grade
+however thin its evidence looks (tier 1 is exempt from this scoping rule, and a
+cell carrying an argument elsewhere and blank here remains the worst defect on
+the page); and no score, band, count or coverage figure changes because a cell
+was skipped — counts are computed from what exists (invariant 8), so a skipped
+cell simply is not counted, and must never be counted as covered.
+
 ## Four results, and they are not the same
 
 | Result | Means | Renders as |
