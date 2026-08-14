@@ -622,12 +622,16 @@ function CeilingEstimateCard({
         textAlign: "right",
         fontVariantNumeric: "tabular-nums"
       }
-    }, fx(d.ceiling, 1), /*#__PURE__*/React.createElement("span", {
+    }, d.ceiling == null ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: `${cat} ceiling`,
+      audience: audience,
+      compact: true
+    }) : /*#__PURE__*/React.createElement(React.Fragment, null, fx(d.ceiling, 1), /*#__PURE__*/React.createElement("span", {
       style: {
         color: "var(--z-muted)",
         fontWeight: 400
       }
-    }, " \xB1", d.band)), /*#__PURE__*/React.createElement(Icon, {
+    }, " \xB1", d.band))), /*#__PURE__*/React.createElement(Icon, {
       name: isOpen ? "chevron-u" : "chevron-d",
       size: 12,
       style: {

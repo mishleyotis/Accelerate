@@ -578,6 +578,7 @@ function ClientHeatmap({
     catFocus: catFocus,
     pillarFocus: pillarFocus,
     showIssues: showIssues,
+    audience: audience,
     drillCategory: c => {
       setCatFocus(c);
       setZoom("subcap");
@@ -601,7 +602,8 @@ function ClientHeatmap({
     onClose: () => setSynthSubcap(null),
     openEvidence: openEvidence,
     openInsight: openInsight,
-    showIssues: showIssues
+    showIssues: showIssues,
+    audience: audience
   }) : null);
 }
 
@@ -1045,7 +1047,16 @@ function FocusAreaView({
       padding: 4,
       border: 0
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, s.score == null ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: `${s.id} score`,
+    audience: audience,
+    compact: true
+  })) : /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 14,
       fontWeight: 700
@@ -1590,7 +1601,16 @@ function CategoryHeatmap({
           lineHeight: 1.2,
           gap: 2
         }
-      }, /*#__PURE__*/React.createElement("div", {
+      }, shown == null ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10.5,
+          fontWeight: 600
+        }
+      }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+        what: `${c.id} score`,
+        audience: audience,
+        compact: true
+      })) : /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 13,
           fontWeight: 700
@@ -1696,7 +1716,8 @@ function CapabilityHeatmap({
   catFocus,
   pillarFocus,
   showIssues,
-  drillCategory
+  drillCategory,
+  audience
 }) {
   const scope = catFocus ? (cats || []).filter(c => c.id === catFocus) : pillarFocus ? (cats || []).filter(c => c.pillar === pillarFocus) : cats || [];
   if (!scope.length) {
@@ -1782,7 +1803,16 @@ function CapabilityHeatmap({
         style: {
           gap: 8
         }
-      }, /*#__PURE__*/React.createElement("span", {
+      }, mean == null ? /*#__PURE__*/React.createElement("span", {
+        style: {
+          flex: "0 1 auto",
+          minWidth: 0
+        }
+      }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+        what: `${g.id} cell scores`,
+        audience: audience,
+        compact: true
+      })) : /*#__PURE__*/React.createElement("span", {
         className: `b ${DMA.helpers.maturityClass(mean)}`,
         style: {
           width: 34,
@@ -2042,7 +2072,16 @@ function SubcapHeatmap({
           cursor: "pointer",
           textAlign: "left"
         }
-      }, /*#__PURE__*/React.createElement("span", {
+      }, avg == null ? /*#__PURE__*/React.createElement("span", {
+        style: {
+          flex: "0 1 auto",
+          minWidth: 0
+        }
+      }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+        what: `${cl.id} cell scores`,
+        audience: audience,
+        compact: true
+      })) : /*#__PURE__*/React.createElement("span", {
         className: `b ${DMA.helpers.maturityClass(avg)}`,
         style: {
           width: 34,
@@ -2104,7 +2143,16 @@ function SubcapHeatmap({
             title: subcapTipText(s),
             onMouseEnter: cellTip.show(subcapTipText(s)),
             onMouseLeave: cellTip.hide
-          }, /*#__PURE__*/React.createElement("span", {
+          }, s.score == null ? /*#__PURE__*/React.createElement("span", {
+            style: {
+              flex: "0 1 auto",
+              minWidth: 0
+            }
+          }, /*#__PURE__*/React.createElement(EnrichmentGap, {
+            what: `${s.id} score`,
+            audience: audience,
+            compact: true
+          })) : /*#__PURE__*/React.createElement("span", {
             className: `b ${DMA.helpers.maturityClass(s.score)}`,
             style: {
               width: 34,
@@ -2376,7 +2424,7 @@ function ValueChainView({
       title: subcapTipText(s),
       onMouseEnter: cellTip.show(subcapTipText(s)),
       onMouseLeave: cellTip.hide
-    }, fx(s.score, 1)))), subs.length > STRIP ? /*#__PURE__*/React.createElement("div", {
+    }, s.score == null ? null : fx(s.score, 1)))), subs.length > STRIP ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
         color: "var(--z-muted)",
@@ -2591,7 +2639,8 @@ function SynthesisDrawer({
   onClose,
   openEvidence,
   openInsight,
-  showIssues
+  showIssues,
+  audience
 }) {
   const subcap = item.subcap;
   const catId = item.catId || subcap && subcap.category || null;
@@ -2757,7 +2806,16 @@ function SynthesisDrawer({
       borderRadius: 3,
       background: DMA.helpers.maturityHex(score)
     }
-  }), " Entity ", /*#__PURE__*/React.createElement("strong", null, fx(score, 1))), /*#__PURE__*/React.createElement("span", {
+  }), " Entity ", score == null
+  /* The marker above already guards on a null score; this
+     readout did not, so `fx` printed "Entity —" beside a
+     peer branch that says "no peer median stated" in words.
+     Compact: the row carries entity, peer and delta on one
+     line. */ ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+    what: subcap ? `${subcap.id} score` : `${catId || "category"} score`,
+    audience: audience,
+    compact: true
+  }) : /*#__PURE__*/React.createElement("strong", null, fx(score, 1))), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), peer != null ? /*#__PURE__*/React.createElement("span", {
     className: "row",

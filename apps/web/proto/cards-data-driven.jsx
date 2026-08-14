@@ -292,7 +292,17 @@ function CeilingEstimateCard({ entity, audience }) {
                   <div style={{ position: "absolute", left: `calc(${pct(d.ceiling)}% - 4px)`, top: -1, width: 8, height: 10, borderRadius: 2, background: tone }} />
                 </div>
                 <div style={{ fontSize: 11, fontWeight: 600, color: tone, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
-                  {fx(d.ceiling, 1)}<span style={{ color: "var(--z-muted)", fontWeight: 400 }}> ±{d.band}</span>
+                  {/* adaptUncertainty yields `ceiling: null` when the row's
+                      ceiling is neither a number nor a band word, and fx prints
+                      an em dash for null — utils.jsx keeps fx returning a
+                      string on purpose and says the guard belongs to each site
+                      that renders a bare score. This is one of them.
+                      The band goes with it: "±0.4" beside a point nobody stated
+                      asserts an uncertainty about a value that does not exist.
+                      `compact` because the column is 62px. */}
+                  {d.ceiling == null
+                    ? <EnrichmentGap what={`${cat} ceiling`} audience={audience} compact />
+                    : <React.Fragment>{fx(d.ceiling, 1)}<span style={{ color: "var(--z-muted)", fontWeight: 400 }}> ±{d.band}</span></React.Fragment>}
                 </div>
                 <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={12} style={{ color: "var(--z-muted)" }} />
               </button>

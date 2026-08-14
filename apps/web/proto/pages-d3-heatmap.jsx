@@ -422,6 +422,7 @@ function ClientHeatmap({ entity, run }) {
                fall through to the subcap branch, so it produced DOM identical
                to "Subcap" — a control that did nothing. */
             <CapabilityHeatmap entity={entity} cats={cats} catFocus={catFocus} pillarFocus={pillarFocus} showIssues={showIssues}
+              audience={audience}
               drillCategory={(c) => { setCatFocus(c); setZoom("subcap"); }} />
           ) : (
             <SubcapHeatmap entity={entity} cats={cats} catFocus={catFocus} pillarFocus={pillarFocus} showPeers={showPeers} showIssues={showIssues}
@@ -439,6 +440,7 @@ function ClientHeatmap({ entity, run }) {
           openEvidence={openEvidence}
           openInsight={openInsight}
           showIssues={showIssues}
+          audience={audience}
         />
       ) : null}
     </div>
@@ -643,7 +645,14 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
                 onMouseEnter={cellTip.show(subcapTipText(s))}
                 onMouseLeave={cellTip.hide}
                 style={{ flexDirection: "column", height: 56, fontSize: 11, padding: 4, border: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 700 }}>{fx(s.score, 1)}</div>
+                {/* `fx` returns the em dash for a null and keeps doing so on
+                    purpose (utils.jsx: 40-odd template literals need it to be
+                    a string), so an unscored cell has to be guarded HERE. The
+                    phrase takes the numeral's line at 10px rather than 14: the
+                    grid is up to eight columns and `.b` is nowrap. */}
+                {s.score == null
+                  ? <div style={{ fontSize: 10, fontWeight: 600 }}><EnrichmentGap what={`${s.id} score`} audience={audience} compact /></div>
+                  : <div style={{ fontSize: 14, fontWeight: 700 }}>{fx(s.score, 1)}</div>}
                 <div style={{ fontSize: 8.5, opacity: .85, fontFamily: "var(--font-mono)" }}>{s.id.split(".").slice(1).join(".")}</div>
               </button>
             ))}
@@ -908,7 +917,14 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
                       iss.capped ? ` · ${iss.capped} subcaps capped by issues`
                         : iss.linked ? ` · ${iss.linked} subcaps linked to issues (no cap level stated)` : ""} · click to drill`}>
                     <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2, gap: 2 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700 }}>{fx(shown, 1)}</div>
+                      {/* Same value as the subcap-view picker's badge
+                          (`score`, else the cells' mean), so it says the same
+                          thing when there is neither: `fx` would print an em
+                          dash. 10.5px so the phrase sits on the numeral's
+                          line in a column of this grid. */}
+                      {shown == null
+                        ? <div style={{ fontSize: 10.5, fontWeight: 600 }}><EnrichmentGap what={`${c.id} score`} audience={audience} compact /></div>
+                        : <div style={{ fontSize: 13, fontWeight: 700 }}>{fx(shown, 1)}</div>}
                       {c.thin > 0 ? <div style={{ fontSize: 8, fontWeight: 600 }}>{c.thin} thin</div> : null}
                     </div>
                     {showIssues && capCount > 0 ? (
@@ -975,7 +991,7 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
    is labelled with its id — the alternative would be inventing one. The mean is
    computed from the cells because nothing is promoted at this grain, and every
    row says how many cells it is a mean of. */
-function CapabilityHeatmap({ entity, cats, catFocus, pillarFocus, showIssues, drillCategory }) {
+function CapabilityHeatmap({ entity, cats, catFocus, pillarFocus, showIssues, drillCategory, audience }) {
   const scope = catFocus ? (cats || []).filter(c => c.id === catFocus)
     : pillarFocus ? (cats || []).filter(c => c.pillar === pillarFocus)
     : (cats || []);
@@ -1025,7 +1041,15 @@ function CapabilityHeatmap({ entity, cats, catFocus, pillarFocus, showIssues, dr
                     onClick={() => drillCategory && drillCategory(c.id)}
                     title={`${g.id} · mean of ${g.items.length} scored cells (no capability score is promoted) · click to read the cells`}>
                     <div className="row" style={{ gap: 8 }}>
-                      <span className={`b ${DMA.helpers.maturityClass(mean)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(mean, 1)}</span>
+                      {/* No capability score is promoted at this grain, so a
+                          null mean means not one cell in the group is scored —
+                          and `fx` printed an em dash for it. The badge shell
+                          goes with the numeral: `.b` is nowrap on a 34px fixed
+                          box, so a phrase left inside it would overrun the id
+                          beside it. Bare and shrinkable instead. */}
+                      {mean == null
+                        ? <span style={{ flex: "0 1 auto", minWidth: 0 }}><EnrichmentGap what={`${g.id} cell scores`} audience={audience} compact /></span>
+                        : <span className={`b ${DMA.helpers.maturityClass(mean)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(mean, 1)}</span>}
                       <span className="f-mono txt-fit-1" style={{ fontSize: 11.5, fontWeight: 600, color: "var(--z-dark)", minWidth: 0 }}>{g.id}</span>
                       <span className="spacer" />
                       <span className="b b-muted" title="cells in this capability">{g.items.length}</span>
@@ -1154,7 +1178,13 @@ function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers
                   <button onClick={() => setOpenClusters(o => ({ ...o, [key]: !open }))}
                     title={`${cl.id} · mean of ${cl.items.length} scored cells (no capability score or name is promoted at this grain)`}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "9px 12px", background: "var(--z-bg)", border: 0, cursor: "pointer", textAlign: "left" }}>
-                    <span className={`b ${DMA.helpers.maturityClass(avg)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(avg, 1)}</span>
+                    {/* Same as the capability grid: nothing is promoted at
+                        this grain, so a null mean is a cluster with no scored
+                        cell in it, and `fx` printed an em dash. Out of the
+                        34px nowrap badge for the same reason. */}
+                    {avg == null
+                      ? <span style={{ flex: "0 1 auto", minWidth: 0 }}><EnrichmentGap what={`${cl.id} cell scores`} audience={audience} compact /></span>
+                      : <span className={`b ${DMA.helpers.maturityClass(avg)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(avg, 1)}</span>}
                     <span className="f-mono txt-fit-1" style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }}>{cl.id}</span>
                     <span style={{ fontSize: 10, color: "var(--z-muted)", flexShrink: 0 }}>{cl.items.length} cells</span>
                     {capped ? <span className="b b-org"><Icon name="lock" size={9} /> {capped}</span> : null}
@@ -1177,7 +1207,14 @@ function SubcapHeatmap({ entity, cats: allCats, catFocus, pillarFocus, showPeers
                              carries the full identification. */
                           <button key={s.id} className="subcap-row" onClick={() => onSynth(s)} title={subcapTipText(s)}
                                   onMouseEnter={cellTip.show(subcapTipText(s))} onMouseLeave={cellTip.hide}>
-                            <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(s.score, 1)}</span>
+                            {/* An unscored cell printed an em dash in the
+                                score badge while the row beneath it said
+                                "no evidence count" in words. Same treatment as
+                                the platform page's backing-cell rail: the
+                                nowrap 34px badge goes with the numeral. */}
+                            {s.score == null
+                              ? <span style={{ flex: "0 1 auto", minWidth: 0 }}><EnrichmentGap what={`${s.id} score`} audience={audience} compact /></span>
+                              : <span className={`b ${DMA.helpers.maturityClass(s.score)}`} style={{ width: 34, justifyContent: "center", flexShrink: 0 }}>{fx(s.score, 1)}</span>}
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div className="row" style={{ gap: 6 }}>
                                 {/* The adapter falls back to the id when the
@@ -1365,7 +1402,17 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
                         title={subcapTipText(s)}
                         onMouseEnter={cellTip.show(subcapTipText(s))}
                         onMouseLeave={cellTip.hide}>
-                        {fx(s.score, 1)}
+                        {/* 18px tall and up to twelve to a row: no wording
+                            fits in this swatch, and `fx` painted an em dash
+                            into it. The swatch already carries the "nothing
+                            measured" band colour and names itself on hover
+                            ("… · no score"), which is the idiom this file
+                            uses for every other unscored mark (no bar, no
+                            tick). Deliberately NOT an EnrichmentGap: the
+                            enrichment route for these cells is the grid they
+                            come from, and a phrase here would burst the
+                            strip. */}
+                        {s.score == null ? null : fx(s.score, 1)}
                       </div>
                     ))}
                   </div>
@@ -1496,7 +1543,7 @@ function BandAxis() {
 }
 
 /* ─────────────────────── SYNTHESIS DRAWER ─────────────────────── */
-function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, showIssues }) {
+function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, showIssues, audience }) {
   const subcap = item.subcap;
   const catId = item.catId || (subcap && subcap.category) || null;
   const cats = useMemo(() => runCategoriesOf(entity), [entity?.id, entity?.subcaps]);
@@ -1591,7 +1638,14 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
             <BandAxis />
             <div className="row" style={{ marginTop: 10, fontSize: 12, flexWrap: "wrap", gap: 8 }}>
               <span className="row" style={{ gap: 5 }}>
-                <span style={{ width: 10, height: 10, borderRadius: 3, background: DMA.helpers.maturityHex(score) }} /> Entity <strong>{fx(score, 1)}</strong>
+                <span style={{ width: 10, height: 10, borderRadius: 3, background: DMA.helpers.maturityHex(score) }} /> Entity {score == null
+                  /* The marker above already guards on a null score; this
+                     readout did not, so `fx` printed "Entity —" beside a
+                     peer branch that says "no peer median stated" in words.
+                     Compact: the row carries entity, peer and delta on one
+                     line. */
+                  ? <EnrichmentGap what={subcap ? `${subcap.id} score` : `${catId || "category"} score`} audience={audience} compact />
+                  : <strong>{fx(score, 1)}</strong>}
               </span>
               <span className="spacer" />
               {peer != null ? (
