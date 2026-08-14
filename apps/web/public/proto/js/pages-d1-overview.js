@@ -76,7 +76,8 @@ function ClientOverview({
   }, /*#__PURE__*/React.createElement(SnapshotStrip, {
     entity: entity,
     run: run,
-    layout: layout
+    layout: layout,
+    audience: audience
   })), /*#__PURE__*/React.createElement(CardBoundary, {
     name: "why-now signals"
   }, /*#__PURE__*/React.createElement(WhyNowStrip, {
@@ -156,7 +157,8 @@ function ClientOverview({
 function SnapshotStrip({
   entity,
   run,
-  layout
+  layout,
+  audience
 }) {
   return /*#__PURE__*/React.createElement("div", {
     className: "card",
@@ -293,13 +295,15 @@ function SnapshotStrip({
       background: "var(--z-dpur)"
     }
   }), " Peer median")))), /*#__PURE__*/React.createElement(FirmographicsPanel, {
-    entity: entity
+    entity: entity,
+    audience: audience
   })));
 }
 
 /* ── Firmographics · the promoted figures, and only those ─────────── */
 function FirmographicsPanel({
-  entity
+  entity,
+  audience
 }) {
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -321,13 +325,22 @@ function FirmographicsPanel({
     }
   }, "The firmographics section did not arrive as a list of fields, so no figure below is read from it.") : null, /*#__PURE__*/React.createElement(Row, {
     k: entity.assets_label || "Assets",
-    v: fmtAssets(entity.assets, entity.assets_unit)
+    v: entity.assets != null ? fmtAssets(entity.assets, entity.assets_unit) : /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Assets",
+      audience: audience
+    })
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Employees",
-    v: entity.employees != null ? entity.employees.toLocaleString() : "—"
+    v: entity.employees != null ? entity.employees.toLocaleString() : /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Employees",
+      audience: audience
+    })
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Branches",
-    v: entity.branches != null ? String(entity.branches) : "—"
+    v: entity.branches != null ? String(entity.branches) : /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Branches",
+      audience: audience
+    })
   }), entity.members != null ? /*#__PURE__*/React.createElement(Row, {
     k: "Members",
     v: entity.members.toLocaleString()
@@ -336,26 +349,38 @@ function FirmographicsPanel({
     v: entity.customers.toLocaleString()
   }) : null, /*#__PURE__*/React.createElement(Row, {
     k: "CAGR",
-    v: entity.cagr != null ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}` : "—"
+    v: entity.cagr != null ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}` : entity.stated_cagr != null ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}` : /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "CAGR",
+      audience: audience
+    })
   }), entity.net_worth_ratio != null ? /*#__PURE__*/React.createElement(Row, {
     k: "Net worth ratio",
     v: `${fx(entity.net_worth_ratio, 2)}%`
   }) : null, /*#__PURE__*/React.createElement(Row, {
     k: "Regulator",
-    v: entity.regulator || "—"
+    v: entity.regulator || /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Primary regulator",
+      audience: audience
+    })
   }), /*#__PURE__*/React.createElement(Row, {
     k: "Website",
     v: entity.website ? /*#__PURE__*/React.createElement("a", {
       href: /^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`,
       target: "_blank",
       rel: "noopener noreferrer"
-    }, entity.website) : "—"
+    }, entity.website) : /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Website",
+      audience: audience
+    })
   }), entity.hq ? /*#__PURE__*/React.createElement(Row, {
     k: "HQ",
     v: entity.hq
   }) : null, /*#__PURE__*/React.createElement(Row, {
     k: "Footprint",
-    v: entity.footprint?.length ? entity.footprint.join(" · ") : "—"
+    v: entity.footprint?.length ? entity.footprint.join(" · ") : entity.stated_footprint ? String(entity.stated_footprint) : /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Footprint",
+      audience: audience
+    })
   }), entity.charter ? /*#__PURE__*/React.createElement(Row, {
     k: "Charter",
     v: entity.charter
@@ -365,12 +390,12 @@ function FirmographicsPanel({
   }) : null, (entity.extra_fields || []).map((f, i) => /*#__PURE__*/React.createElement(Row, {
     key: `x${i}`,
     k: humaniseFieldName(f.field),
-    v: f.held ? /*#__PURE__*/React.createElement("span", {
-      title: f.reason || "held by the producer",
-      style: {
-        color: "var(--z-muted)"
-      }
-    }, "\u2014") : `${f.value}${f.unit ? ` ${f.unit}` : ""}`
+    v: f.held ? /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: humaniseFieldName(f.field),
+      held: true,
+      reason: f.reason,
+      audience: audience
+    }) : `${f.value}${f.unit ? ` ${f.unit}` : ""}`
   })), /*#__PURE__*/React.createElement(EnrichmentFlag, {
     s: (DMA.LIVE_ENRICHMENT || {}).firmographics,
     what: "firmographics"

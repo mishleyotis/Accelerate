@@ -33,6 +33,7 @@ from dma_mcp import bundle as bundle_mod
 from dma_mcp import claims as claims_mod
 from dma_mcp import evidence_tools
 from dma_mcp import feedback as feedback_mod
+from dma_mcp import gaps as gaps_mod
 from dma_mcp import gates as gates_mod
 from dma_mcp import memory as memory_mod
 from dma_mcp import promote as promote_mod
@@ -475,6 +476,53 @@ def list_open_findings(component: str = "", severity: str = "",
             defect_class=defect_class or None, status=status or None,
             min_age_days=min_age_days or None,
             max_age_days=max_age_days or None, limit=limit)
+
+
+@mcp.tool()
+@_traced
+def list_enrichment_gaps(run_id: str, page: str = "") -> dict:
+    """Every empty field on this run's live submissions — your worklist.
+
+    Build owner, 2026-08-14: "Never place an em dash. There should always be a
+    way to send a signal to the MCP to give us an enrichment of the empty
+    field." This is that signal, and it is COMPUTED rather than queued: the set
+    of empty fields is derivable from the staged payloads against the contract
+    at any moment, so a stored request could only go stale — it would keep
+    asking for a field a later re-promote had already filled. Nothing is
+    clicked, nothing is written, and the list cannot drift from what the
+    surfaces actually show.
+
+    Every gap here is a spot where a reader currently sees "Not stated". Close
+    one and the surface fills; there is no separate step to mark it done.
+
+    THE THREE KINDS, worst first:
+
+      must_present_member  a member the contract names on EVERY sub-vertical is
+                           neither stated nor held. Its absence is never a
+                           property of this client, so this is the class to
+                           work first.
+      empty_required       a required field is empty and the section declares
+                           no empty state.
+      empty_optional       an optional field is empty.
+
+    WHAT IS NOT HERE, deliberately. A field QUARANTINED with a reason is not a
+    gap — the producer ran the ladder, the figure failed the identity gate, and
+    the reason is the finding. Neither is a section that declared its
+    `empty_state` with a ladder: the search happened and is recorded. Nor a
+    boolean, whose absence IS its value. If you want a field to leave this list
+    without finding the value, that is the route — state the ladder, do not
+    invent the figure.
+
+    Reads the STAGED submissions, never the served projection: the serve layer
+    strips `internal_only` paths and redacts cohort `entity_ids` for every
+    audience, and a list built from what the API returns would report redaction
+    working correctly as content you failed to write.
+
+    Pass `page` to narrow to one page. Returns {gaps[], count, by_kind,
+    pages_read}, each gap carrying its contract `doc` text and `closes_with`.
+    """
+    with _conn() as c:
+        return gaps_mod.list_enrichment_gaps(c, run_id, page or None)
 
 
 @mcp.tool()

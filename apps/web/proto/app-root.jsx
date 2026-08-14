@@ -200,12 +200,42 @@ const LIVE_MODE = typeof window !== "undefined" && !!window.DMA_LIVE;
    printed an em dash while `AUM 18.0 CAD billions` sat in the payload. The
    panel read as "this client disclosed almost nothing"; the producer had
    disclosed it and the reader threw it away. */
-const FIRMO_PINNED = new Set([
-  "total_assets", "assets", "aum", "employees", "branches",
-  "primary_regulator", "member_count", "customer_count", "net_worth_ratio",
-  "founded", "founded_year", "charter", "hq", "website", "web site",
-  "domain", "primary domain", "web domain", "entity website", "url",
-]);
+/* ONE declaration, read by both halves of this panel: the slot a served key
+   maps onto, and — derived from it below — the set of keys a pinned row has
+   already consumed.
+
+   It is one table because it was two, and the two drifted. `cagr` was rendered
+   as a pinned row and was NOT in the pinned key set, so the passthrough that
+   exists to stop fields being dropped printed it a SECOND time underneath, as
+   "Cagr". The build owner saw both rows. `footprint` had the same shape and had
+   simply not been stated by a run yet. A key added to the row list now cannot
+   be forgotten here, because there is no second place to forget it in. */
+const FIRMO_ROWS = [
+  // The contract states this one as a disjunction ("AUM or assets"), so a
+  // sub-vertical reports one of the three and the panel keeps one row.
+  { slot: "assets", keys: ["total_assets", "assets", "aum"] },
+  { slot: "employees", keys: ["employees"] },
+  { slot: "branches", keys: ["branches"] },
+  { slot: "members", keys: ["member_count"] },
+  { slot: "customers", keys: ["customer_count"] },
+  { slot: "cagr", keys: ["cagr", "growth_rate"] },
+  { slot: "net_worth_ratio", keys: ["net_worth_ratio"] },
+  { slot: "regulator", keys: ["primary_regulator"] },
+  // The spellings match the read path in dma_api/computed.py::_entity_domains,
+  // because the same stated field both renders here and supplies O11's
+  // denominator — one field recognised in two places by two different lists is
+  // the drift class this build has paid for repeatedly.
+  { slot: "website", keys: ["website", "web site", "domain", "primary domain",
+                            "web domain", "entity website", "url"] },
+  { slot: "hq", keys: ["hq", "headquarters"] },
+  { slot: "footprint", keys: ["footprint"] },
+  { slot: "charter", keys: ["charter"] },
+  { slot: "founded", keys: ["founded", "founded_year", "year_founded"] },
+];
+
+const FIRMO_PINNED = new Set(FIRMO_ROWS.flatMap((r) => r.keys));
+const FIRMO_SLOT = new Map(
+  FIRMO_ROWS.flatMap((r) => r.keys.map((k) => [k, r.slot])));
 
 /* `AUM` and `total_assets` are the same row on this panel: the contract's
    must-present set names them as a disjunction ("AUM or assets"), so a
@@ -243,35 +273,30 @@ function firmoFields(firmo) {
                               held: false, reason: null });
       continue;
     }
-    switch (key) {
+    switch (FIRMO_SLOT.get(key)) {
       // One Assets row, whichever of the disjunction the sub-vertical states.
-      case "total_assets":
-      case "assets":
-      case "aum":          out.assets = num; out.assets_unit = f.unit;
+      case "assets":       out.assets = num; out.assets_unit = f.unit;
                            out.assets_label = key === "aum" ? "AUM" : "Assets";
                            break;
       case "employees":    out.employees = num; break;
       case "branches":     out.branches = num; break;
-      case "primary_regulator": out.regulator = f.value; break;
-      case "member_count": out.members = num; break;
-      case "customer_count": out.customers = num; break;
+      case "regulator":    out.regulator = f.value; break;
+      case "members":      out.members = num; break;
+      case "customers":    out.customers = num; break;
       case "net_worth_ratio": out.net_worth_ratio = num; break;
-      case "founded":
-      case "founded_year": out.founded = f.value; break;
+      case "founded":      out.founded = f.value; break;
       case "charter":      out.charter = f.value; break;
       case "hq":           out.hq = f.value; break;
-      // Required on every sub-vertical since 2026-08-14. The spellings match
-      // the read path in dma_api/computed.py::_entity_domains, because the
-      // same stated field both renders here and supplies O11's denominator —
-      // one field recognised in two places by two different lists is the
-      // drift class this build has paid for repeatedly.
-      case "website":
-      case "web site":
-      case "domain":
-      case "primary domain":
-      case "web domain":
-      case "entity website":
-      case "url":          out.website = f.value; break;
+      case "website":      out.website = f.value; break;
+      case "footprint":    out.stated_footprint = f.value; break;
+      // The panel's CAGR row prefers the value COMPUTED from the promoted
+      // financial series (adapter `cagrOf`), because a growth rate is a derived
+      // value and the series is its source of truth. A run that also STATES one
+      // is kept here as the fallback, carrying its own basis — so a client whose
+      // series is too sparse to compute a rate still shows the rate it stated,
+      // and neither renders twice.
+      case "cagr":         out.stated_cagr = num;
+                           out.stated_cagr_basis = f.unit || null; break;
       default: break;
     }
   }

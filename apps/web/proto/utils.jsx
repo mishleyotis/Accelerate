@@ -348,6 +348,64 @@ function EnrichmentFlag({ s, what }) {
   );
 }
 
+/* ── The em dash, replaced ────────────────────────────────────────────
+   Build owner, 2026-08-14: "Never place an em dash. There should always be a
+   way to send a signal to the MCP to give us an enrichment of the empty field."
+
+   An em dash is a dead end. It looks identical whether the producer searched
+   and found nothing, held a figure that failed the identity gate, or was never
+   asked for the field at all — and those are three different facts, only one of
+   which is a finding. Worse, it is terminal: a reader who sees one has no route
+   to getting it filled.
+
+   So every empty spot renders this instead, and it says which of the three it
+   is. The connector computes the same set from the promoted payload against the
+   contract (`list_enrichment_gaps`), so a gap a reader sees here is already on
+   the producer's worklist — the signal is derived, not clicked, and therefore
+   cannot be forgotten.
+
+   AUDIENCE. Internal names the gap and says it is queued. Customer gets the
+   plain statement and no queue language: the queue is our workflow, not theirs,
+   and the leadership panel's own comment settles the shape — an affordance that
+   promises an action the reader cannot take is worse than the absence. */
+function EnrichmentGap({ what, reason, held, audience, compact }) {
+  const isCust = audience === "customer";
+  // A held field is the one honest absence: the producer ran the ladder, the
+  // figure failed, and the reason is the finding. It is not a gap to queue.
+  if (held) {
+    return (
+      <span className="enrich-gap" data-gap="held" title={reason || undefined}
+            style={{ color: "var(--z-muted)", fontStyle: "italic" }}>
+        {isCust ? "Not established" : "Held"}
+        {!isCust && reason ? ` · ${reason}` : ""}
+      </span>
+    );
+  }
+  if (isCust) {
+    return (
+      <span className="enrich-gap" data-gap="absent"
+            style={{ color: "var(--z-muted)", fontStyle: "italic" }}>
+        Not established in this assessment
+      </span>
+    );
+  }
+  return (
+    <span className="enrich-gap" data-gap="queued"
+          title={what ? `${what} is empty on the promoted run and is in the connector's enrichment worklist` : undefined}
+          style={{ display: "inline-flex", alignItems: "baseline", gap: 6,
+                   flexWrap: "wrap" }}>
+      <span style={{ color: "var(--z-muted)", fontStyle: "italic" }}>
+        Not stated
+      </span>
+      {compact ? null : (
+        <span className="b b-org" style={{ whiteSpace: "nowrap" }}>
+          queued for enrichment
+        </span>
+      )}
+    </span>
+  );
+}
+
 /* A finding reference, however the payload happens to carry it.
    CG-21 now refuses a serialised object at submit, so new runs cannot
    reintroduce this — but a run promoted BEFORE that gate existed carried
@@ -957,7 +1015,7 @@ Object.assign(window, {
   AppCtx, useApp,
   Icon, BrandMark, ZennifyWordmark, PillarBadge, MaturityChip, ToastStack,
   RenderBoundary, CardBoundary, ItemBoundary, PageBoundary,
-  SectionEmpty, SectionEmptyFoot, EnrichmentFlag, findingChipId,
+  SectionEmpty, SectionEmptyFoot, EnrichmentFlag, EnrichmentGap, findingChipId,
   LoadingScreen, SectionLoader, ConnectionWatcher,
   parseHash, buildHash, navigate, useRoute,
   fmtDate, fmtAssets, fmtPct, relTime, FreshnessDot, fx,

@@ -41,7 +41,7 @@ function ClientOverview({ entity, run }) {
           Its own component, and its own boundary, because everything below is
           a separate read: a malformed pillar list must cost the strip and not
           the findings, the narrative or the leadership roster. */}
-      <CardBoundary name="snapshot"><SnapshotStrip entity={entity} run={run} layout={layout} /></CardBoundary>
+      <CardBoundary name="snapshot"><SnapshotStrip entity={entity} run={run} layout={layout} audience={audience} /></CardBoundary>
 
       {/* Why now */}
       <CardBoundary name="why-now signals">
@@ -99,7 +99,7 @@ function ClientOverview({ entity, run }) {
 }
 
 /* ── O1 · snapshot strip ──────────────────────────────────────────── */
-function SnapshotStrip({ entity, run, layout }) {
+function SnapshotStrip({ entity, run, layout, audience }) {
   return (
       <div className="card" style={{ marginBottom: 18, padding: "20px 22px" }}>
         <div style={{ display: "grid", gridTemplateColumns: layout === "ring-left" ? "140px 1fr 280px" : "1fr 280px", gap: 28, alignItems: "stretch" }}>
@@ -162,14 +162,14 @@ function SnapshotStrip({ entity, run, layout }) {
               </div>
             </div>
           </div>
-          <FirmographicsPanel entity={entity} />
+          <FirmographicsPanel entity={entity} audience={audience} />
         </div>
       </div>
   );
 }
 
 /* ── Firmographics · the promoted figures, and only those ─────────── */
-function FirmographicsPanel({ entity }) {
+function FirmographicsPanel({ entity, audience }) {
   return (
     <div style={{ background: "var(--z-lav)", borderRadius: 12, padding: 16 }}>
       <div className="eyebrow" style={{ marginBottom: 8 }}>Firmographics</div>
@@ -192,26 +192,50 @@ function FirmographicsPanel({ entity }) {
           not-asked-for must not look the same. */}
       {/* The disjunction the contract states: a sub-vertical reports AUM OR
           assets, and the row is labelled with the one it actually stated. */}
-      <Row k={entity.assets_label || "Assets"} v={fmtAssets(entity.assets, entity.assets_unit)} />
-      <Row k="Employees"  v={entity.employees != null ? entity.employees.toLocaleString() : "—"} />
-      <Row k="Branches"   v={entity.branches != null ? String(entity.branches) : "—"} />
+      <Row k={entity.assets_label || "Assets"}
+           v={entity.assets != null
+               ? fmtAssets(entity.assets, entity.assets_unit)
+               : <EnrichmentGap what="Assets" audience={audience} />} />
+      <Row k="Employees"  v={entity.employees != null
+        ? entity.employees.toLocaleString()
+        : <EnrichmentGap what="Employees" audience={audience} />} />
+      <Row k="Branches"   v={entity.branches != null ? String(entity.branches)
+        : <EnrichmentGap what="Branches" audience={audience} />} />
       {entity.members != null ? <Row k="Members" v={entity.members.toLocaleString()} /> : null}
       {entity.customers != null ? <Row k="Customers" v={entity.customers.toLocaleString()} /> : null}
+      {/* ONE CAGR row. It rendered twice until 2026-08-14: pinned here from the
+          series the adapter computes, and printed again by the passthrough
+          below because `cagr` was missing from the pinned KEY set. Computed
+          wins — a growth rate is derived and the promoted series is its source
+          of truth — and a run that stated its own falls back in with its own
+          basis, so a client too sparse to compute one still shows what it
+          stated. */}
       <Row k="CAGR"       v={entity.cagr != null
         ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}`
-        : "—"} />
+        : entity.stated_cagr != null
+          ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}`
+          : <EnrichmentGap what="CAGR" audience={audience} />} />
       {entity.net_worth_ratio != null ? <Row k="Net worth ratio" v={`${fx(entity.net_worth_ratio, 2)}%`} /> : null}
-      <Row k="Regulator"  v={entity.regulator || "—"} />
+      <Row k="Regulator"  v={entity.regulator
+        || <EnrichmentGap what="Primary regulator" audience={audience} />} />
       {/* Required on every sub-vertical since 2026-08-14, so it gets a row
-          whether or not the run stated it — an em dash here is a finding the
-          producer owes, and hiding the row would hide the omission. Linked
-          because a domain a reader cannot open is half a fact. */}
+          whether or not the run stated it — hiding the row would hide the
+          omission. Linked because a domain a reader cannot open is half a
+          fact. */}
       <Row k="Website"    v={entity.website
         ? <a href={/^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`}
              target="_blank" rel="noopener noreferrer">{entity.website}</a>
-        : "—"} />
+        : <EnrichmentGap what="Website" audience={audience} />} />
       {entity.hq ? <Row k="HQ" v={entity.hq} /> : null}
-      <Row k="Footprint"  v={entity.footprint?.length ? entity.footprint.join(" · ") : "—"} />
+      {/* Footprint reads the regulatory section's jurisdictions first, then a
+          footprint the firmographics stated. Both are consumed by this one row
+          — the pinned-row/pinned-key drift that duplicated CAGR was latent here
+          too, waiting on the first run to state one. */}
+      <Row k="Footprint"  v={entity.footprint?.length
+        ? entity.footprint.join(" · ")
+        : entity.stated_footprint
+          ? String(entity.stated_footprint)
+          : <EnrichmentGap what="Footprint" audience={audience} />} />
       {entity.charter ? <Row k="Charter" v={entity.charter} /> : null}
       {entity.founded ? <Row k="Founded" v={String(entity.founded).slice(0, 4)} /> : null}
       {/* EVERY remaining field the run stated, in the order it stated them.
@@ -224,8 +248,8 @@ function FirmographicsPanel({ entity }) {
       {(entity.extra_fields || []).map((f, i) => (
         <Row key={`x${i}`} k={humaniseFieldName(f.field)}
              v={f.held
-                 ? <span title={f.reason || "held by the producer"}
-                         style={{ color: "var(--z-muted)" }}>—</span>
+                 ? <EnrichmentGap what={humaniseFieldName(f.field)} held
+                                  reason={f.reason} audience={audience} />
                  : `${f.value}${f.unit ? ` ${f.unit}` : ""}`} />
       ))}
       <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).firmographics}
