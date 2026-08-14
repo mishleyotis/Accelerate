@@ -33,6 +33,107 @@ _TYPE_CHECK = {
 }
 
 
+def _norm_member(s) -> str:
+    """One normaliser for both sides of the membership test, so `founded_year`,
+    `Founded Year` and `founded-year` are one member and not three."""
+    return re.sub(r"[^a-z0-9]+", "_", str(s or "").lower()).strip("_")
+
+
+def _check_must_present(section, fname, spec, val, empty_declared) -> list:
+    """CG-16 — the members a list field must contain, not just that it exists.
+
+    THE ROOT CAUSE THIS CLOSES, measured 2026-08-14.
+
+    Every "must-present set" in this product lived only as prose inside a
+    contract's `doc` string. `required: true` applies to the CONTAINER — that
+    `firmographics.fields` is a list — and CG-02 fires on
+    `body.get(fname) is None`. So a payload carrying a list with ONE member
+    satisfied every gate the connector has, and which members it carried was
+    documentation.
+
+    The consequence was reported by the build owner as "changes do not get
+    promoted": `website` was added to the firmographics contract, no gate
+    asked for it, and the next run would have omitted it exactly as the last
+    one did. Measured on the live reference: 12 firmographics fields served,
+    no website among them, while the producer's own absence ladder on that
+    same section named the firm's domain twice. Nothing was broken. Nothing
+    had been asked.
+
+    WHAT COUNTS AS PRESENT — and this is the whole design:
+
+      * a member carrying a value                                 -> passes
+      * a member explicitly quarantined WITH a reason             -> passes
+      * a member absent from the list entirely                    -> BLOCKS
+      * a member present but null with no quarantine reason       -> BLOCKS
+
+    The second line is what keeps the absence protocol legal: a field the
+    ladder could not close is a finding, and it renders as a documented em
+    dash. The third and fourth are the ones that were invisible — silence,
+    and silence dressed as a value.
+
+    The set is read from the contract, so a section that gains a member gains
+    its enforcement in the same edit and this function never changes.
+    """
+    members = spec.get("must_present") or []
+    any_of = spec.get("must_present_any") or []
+    if not members and not any_of:
+        return []
+    # A section that declares an empty state and sends nothing has said so
+    # honestly; CG-02 already governs whether that is allowed.
+    if not val and empty_declared:
+        return []
+    key = spec.get("must_present_key", "field")
+
+    stated, held, empty = set(), set(), set()
+    for item in val or []:
+        if not isinstance(item, dict):
+            continue
+        member = _norm_member(item.get(key))
+        if not member:
+            continue
+        value = item.get("value")
+        if value not in (None, "", []):
+            stated.add(member)
+        elif item.get("quarantined") and str(item.get("quarantine_reason") or "").strip():
+            held.add(member)
+        else:
+            empty.add(member)
+
+    out, accounted = [], stated | held
+    for want in members:
+        norm = _norm_member(want)
+        if norm in accounted:
+            continue
+        if norm in empty:
+            out.append(_reason(
+                "CG-16", section, f"{section}.{fname}[{want}]",
+                f"must-present member {want!r} is present with no value and "
+                "no quarantine reason — an unexplained blank is the one state "
+                "this set exists to refuse. Either state the value with its "
+                "provenance, or run the ladder and mark the field "
+                "`quarantined` with `quarantine_reason`; a documented em dash "
+                "is a finding, a silent one is an omission"))
+        else:
+            out.append(_reason(
+                "CG-16", section, f"{section}.{fname}",
+                f"must-present member {want!r} is absent from "
+                f"{section}.{fname} entirely. The contract's must-present set "
+                "is not a suggestion: every member is stated with its "
+                "provenance, or held with `quarantined` and a "
+                "`quarantine_reason` naming the ladder that failed. Absent "
+                "beats wrong, but absent-and-unmentioned is neither"))
+    for group in any_of:
+        if any(_norm_member(g) in accounted for g in group):
+            continue
+        out.append(_reason(
+            "CG-16", section, f"{section}.{fname}",
+            f"none of {', '.join(map(repr, group))} is stated or held — the "
+            "set requires one of them, and a sub-vertical that genuinely "
+            "reports none of them still has to say which ladder established "
+            "that"))
+    return out
+
+
 def _reason(gate, section, path, message):
     return {"gate_id": gate, "section": section, "path": path,
             "message": message, "severity": "block"}
@@ -120,6 +221,8 @@ def validate_pass1(page: str, payload: dict) -> list:
                             f"{spec['item_type']}s (the item schema is in "
                             "the field's doc text)"))
                         break
+            reasons.extend(_check_must_present(name, fname, spec, val,
+                                               empty_declared))
 
         # id-pattern discipline
         for i, e in enumerate(body.get("e_ids") or []):

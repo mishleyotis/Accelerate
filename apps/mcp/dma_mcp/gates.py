@@ -31,6 +31,16 @@ GATES = {
               "list items included.",
               "A shape that type-checks wrongly promotes silently wrong content.",
               "block"),
+    "CG-16": ("Must-present members are stated or held", None,
+              "A list field declaring `must_present` carries every named "
+              "member — each either stated with provenance, or explicitly "
+              "quarantined with a reason. Absent, or blank with no reason, "
+              "is refused.",
+              "`required: true` covers the CONTAINER; until 2026-08-14 every "
+              "must-present set lived only as prose in a contract doc string, "
+              "so a list with one member passed every gate and which members "
+              "it carried was documentation rather than contract.",
+              "block"),
     "CG-04": ("No invented fields", None,
               "No field outside the section contract, envelope included.",
               "Payload shapes are law; an invented field is a contract fork.",
