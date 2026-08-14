@@ -31,6 +31,16 @@ GATES = {
               "list items included.",
               "A shape that type-checks wrongly promotes silently wrong content.",
               "block"),
+    "CG-17": ("A required list is not silently empty", None,
+              "A required list field carries items, or the section declares "
+              "an empty state, or the contract marks the field "
+              "`may_be_empty`. An empty list is a claim and is made "
+              "deliberately.",
+              "`required: true` was satisfied by []: not None, type-checks as "
+              "a list, writes zero rows at promotion, and the surface then "
+              "vanishes from the served page with nothing saying why. Every "
+              "gate green.",
+              "block"),
     "CG-16": ("Must-present members are stated or held", None,
               "A list field declaring `must_present` carries every named "
               "member — each either stated with provenance, or explicitly "

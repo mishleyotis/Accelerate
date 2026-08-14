@@ -204,6 +204,36 @@ def validate_pass1(page: str, payload: dict) -> list:
                         f"required field {fname!r} missing and no explicit "
                         "empty state declared"))
                 continue
+            # CG-17 — `required: true` was satisfied by an EMPTY list.
+            #
+            # `val = []` is not None, so the branch above never ran, and a
+            # list type-checks fine. The empty list then wrote zero rows at
+            # promotion, and the read path omits a key with no rows — so the
+            # surface DISAPPEARED from the served page with no empty_state to
+            # explain it, and every gate was green. Measured 2026-08-14 across
+            # both promoted clients: exactly one content field each is empty
+            # or absent without an empty state, and on the second client it is
+            # `platform.starters.starters` — the conversation starters the
+            # build owner reported as "disappeared".
+            #
+            # An empty list is a claim ("there are none") and it has to be
+            # made deliberately: declare the section's empty_state with the
+            # ladder, or mark the field `may_be_empty` in the contract where
+            # emptiness is the ordinary case rather than a finding
+            # (`techstack.dropped` — nothing was dropped — is the one such
+            # field in the registry today).
+            if (spec["type"] == "list" and spec["required"] and not val
+                    and fname not in ENVELOPE and not empty_declared
+                    and not spec.get("may_be_empty")):
+                reasons.append(_reason(
+                    "CG-17", name, f"{name}.{fname}",
+                    f"required list {fname!r} is EMPTY and the section "
+                    "declares no empty state. An empty list is not a quiet "
+                    "pass: promotion writes no rows for it and the surface "
+                    "vanishes from the page with nothing saying why. Either "
+                    "send the items, or declare the section's empty_state "
+                    "with the ladder that established the absence"))
+                continue
             check = _TYPE_CHECK.get(spec["type"])
             if check and not check(val):
                 reasons.append(_reason(

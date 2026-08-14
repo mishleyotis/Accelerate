@@ -824,7 +824,8 @@
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "Per dropped candidate: {candidate, reason} — candidates rejected by the taxonomy, with the reason. dropped[] is reported, not hidden: it is how a taxonomy gap becomes visible."
+     "doc": "Per dropped candidate: {candidate, reason} — candidates rejected by the taxonomy, with the reason. dropped[] is reported, not hidden: it is how a taxonomy gap becomes visible. MAY BE EMPTY: a run that dropped no candidate has an empty list, and that is the ordinary case rather than a finding — so CG-17 does not require an empty_state for it. Every other required list on this page does.",
+     "may_be_empty": true
     },
     "compliance_attestations": {
      "required": false,
