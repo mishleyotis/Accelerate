@@ -3357,13 +3357,16 @@ function LiveStairstep({
       fontSize: 10,
       color: "var(--z-org)"
     }
-  }, "Blocked by:"), st.blocking_findings.map(f => /*#__PURE__*/React.createElement("span", {
-    key: f,
-    className: "chip f-mono",
-    style: {
-      fontSize: 9
-    }
-  }, f))) : null, (st.covered_subcap_ids || []).length ? /*#__PURE__*/React.createElement("div", {
+  }, "Blocked by:"), st.blocking_findings.map((f, i) => {
+    const id = findingChipId(f);
+    return /*#__PURE__*/React.createElement("span", {
+      key: `${id}-${i}`,
+      className: "chip f-mono",
+      style: {
+        fontSize: 9
+      }
+    }, id);
+  })) : null, (st.covered_subcap_ids || []).length ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9.5,
       color: "var(--z-muted)",

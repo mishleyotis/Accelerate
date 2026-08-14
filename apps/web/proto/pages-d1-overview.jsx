@@ -228,6 +228,8 @@ function FirmographicsPanel({ entity }) {
                          style={{ color: "var(--z-muted)" }}>—</span>
                  : `${f.value}${f.unit ? ` ${f.unit}` : ""}`} />
       ))}
+      <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).firmographics}
+                      what="firmographics" />
     </div>
   );
 }
@@ -913,6 +915,7 @@ function LeadershipPanel({ audience }) {
           ? <span style={{ color: "var(--z-mid)", fontWeight: 600 }}>✓ {doneCount} of {enrichable.length} enriched</span>
           : null}
       </div>
+      <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).leadership} what="roster" />
     </div>
   );
 }
@@ -1104,6 +1107,8 @@ function ThoughtLeadershipPanel() {
         </div>
       </div>
       )}
+      <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).thought_leadership}
+                      what="entries" />
     </div>
   );
 }

@@ -371,7 +371,10 @@ function FirmographicsPanel({
         color: "var(--z-muted)"
       }
     }, "\u2014") : `${f.value}${f.unit ? ` ${f.unit}` : ""}`
-  })));
+  })), /*#__PURE__*/React.createElement(EnrichmentFlag, {
+    s: (DMA.LIVE_ENRICHMENT || {}).firmographics,
+    what: "firmographics"
+  }));
 }
 
 /* ── Score ring ─────────────────────────────────────────────────── */
@@ -1776,7 +1779,10 @@ function LeadershipPanel({
       color: "var(--z-mid)",
       fontWeight: 600
     }
-  }, "\u2713 ", doneCount, " of ", enrichable.length, " enriched") : null));
+  }, "\u2713 ", doneCount, " of ", enrichable.length, " enriched") : null), /*#__PURE__*/React.createElement(EnrichmentFlag, {
+    s: (DMA.LIVE_ENRICHMENT || {}).leadership,
+    what: "roster"
+  }));
 }
 
 /* ── Financial trajectory · D1's own copy ───────────────────────────
@@ -2072,7 +2078,10 @@ function ThoughtLeadershipPanel() {
       name: "external",
       size: 10
     })) : null));
-  }))));
+  }))), /*#__PURE__*/React.createElement(EnrichmentFlag, {
+    s: (DMA.LIVE_ENRICHMENT || {}).thought_leadership,
+    what: "entries"
+  }));
 }
 function Row({
   k,

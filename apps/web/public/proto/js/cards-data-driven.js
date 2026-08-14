@@ -278,7 +278,10 @@ function SentimentCard({
   }, "Audience not stated"), s.ungrouped.map((r, i) => /*#__PURE__*/React.createElement(Row, {
     key: "u" + i,
     r: r
-  }))) : null));
+  }))) : null, /*#__PURE__*/React.createElement(EnrichmentFlag, {
+    s: (DMA.LIVE_ENRICHMENT || {}).sentiment,
+    what: "rows"
+  })));
 }
 
 /* ── Financial trajectory ──────────────────────────────────────────────

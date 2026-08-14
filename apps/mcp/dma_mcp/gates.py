@@ -31,6 +31,16 @@ GATES = {
               "list items included.",
               "A shape that type-checks wrongly promotes silently wrong content.",
               "block"),
+    "CG-21": ("A leaf is a value, not a serialisation of one", None,
+              "No payload leaf is a string that parses as a JSON object or "
+              "array. Send the value; the encoding is never the value.",
+              "A run promoted with `blocking_findings` holding "
+              "'{\"f_id\": \"F-1\", ...}' as STRINGS where the contract asks "
+              "for ids, and the ladder rendered literal JSON to the AE. CG-03 "
+              "is structurally unable to catch it — it asks whether the items "
+              "are strings, and a serialised object is a perfectly valid "
+              "string.",
+              "block"),
     "CG-20": ("A vendor is a company, not a category", None,
               "Every technology-register row names the COMPANY that supplies "
               "it: not a category ('Integration platform'), not a "

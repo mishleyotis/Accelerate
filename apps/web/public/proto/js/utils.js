@@ -412,6 +412,42 @@ function EnrichmentFlag({
     }
   }, s.thin_reason || `no served row records that ${(s.sources || []).join(" or ")} reached this surface`, s.count != null && s.thin_below ? ` (${s.count} of ${s.thin_below} expected)` : "", s.closes_with ? ` · closes with ${s.closes_with}` : ""));
 }
+
+/* A finding reference, however the payload happens to carry it.
+   CG-21 now refuses a serialised object at submit, so new runs cannot
+   reintroduce this — but a run promoted BEFORE that gate existed carried
+   `blocking_findings` as JSON-encoded strings, and the ladder printed
+   '{"f_id": "F-1", "e_ids": [...]}' into a chip. The serving path stores
+   what it was given, so the repair has to hold on this side too for any
+   payload already in the database.
+
+   Order matters: the id if there is one, then any single string field, and
+   only then the raw value — a chip that says something wrong is worse than
+   one that says the id it could establish. */
+function findingChipId(f) {
+  if (f == null) return "";
+  let v = f;
+  if (typeof v === "string") {
+    const s = v.trim();
+    if (s.startsWith("{") || s.startsWith("[")) {
+      try {
+        v = JSON.parse(s);
+      } catch (e) {
+        return s;
+      }
+    } else {
+      return s;
+    }
+  }
+  if (Array.isArray(v)) return v.map(findingChipId).filter(Boolean).join(", ");
+  if (typeof v === "object") {
+    const id = v.f_id || v.finding_id || v.id || v.rec_id;
+    if (id) return String(id);
+    const first = Object.values(v).find(x => typeof x === "string" && x.trim());
+    return first ? String(first) : "Finding";
+  }
+  return String(v);
+}
 function SectionEmpty({
   section,
   absent,
@@ -1665,6 +1701,7 @@ Object.assign(window, {
   SectionEmpty,
   SectionEmptyFoot,
   EnrichmentFlag,
+  findingChipId,
   LoadingScreen,
   SectionLoader,
   ConnectionWatcher,

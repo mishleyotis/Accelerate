@@ -205,6 +205,57 @@ def _reason(gate, section, path, message):
             "message": message, "severity": "block"}
 
 
+# CG-21 — a serialisation that escaped into a payload leaf.
+#
+# Measured 2026-08-14: a promoted run carried
+# `stairstep.ladder.steps[*].blocking_findings` as JSON-ENCODED STRINGS —
+# `'{"f_id": "F-1", "e_ids": ["E-CC-139"]}'` where the contract says finding
+# ids. The frontend printed each item straight into a chip, so the ladder
+# showed literal JSON to the AE.
+#
+# CG-03 cannot see this and never will: it asks whether a list's items are
+# the declared type, and a JSON-encoded object IS a valid string. The
+# encoding is invisible to every type check in this module, which is exactly
+# why it needs its own gate rather than a widening of an existing one.
+#
+# The predicate is deliberately narrow — a leaf that PARSES as a JSON object
+# or array. Prose that merely mentions a brace does not parse; a stringified
+# object always does. Anything that parses to a scalar (a bare number, a
+# quoted word) is not a serialisation of a structure and is left alone.
+def _looks_like_serialised_json(text: str) -> bool:
+    s = text.strip()
+    if len(s) < 2 or s[0] not in "{[":
+        return False
+    try:
+        return isinstance(json.loads(s), (dict, list))
+    except Exception:
+        return False
+
+
+def _check_serialised_leaves(section: str, node, path=None) -> list:
+    """Walk every leaf of a section and refuse the ones that are JSON."""
+    out = []
+    path = path or section
+    if isinstance(node, dict):
+        for k, v in node.items():
+            out.extend(_check_serialised_leaves(section, v, f"{path}.{k}"))
+    elif isinstance(node, list):
+        for i, item in enumerate(node):
+            out.extend(_check_serialised_leaves(section, item, f"{path}[{i}]"))
+    elif isinstance(node, str) and _looks_like_serialised_json(node):
+        shape = "object" if node.strip()[0] == "{" else "array"
+        out.append(_reason(
+            "CG-21", section, path,
+            f"this leaf is a JSON {shape} that has been SERIALISED into a "
+            f"string: {node.strip()[:80]!r}. Send the value, not a "
+            "serialisation of it — the serving path stores what it is given "
+            "and the page renders it verbatim, so an encoded object reaches "
+            "the client as literal JSON. If the contract asks for ids, send "
+            "the ids; if it asks for objects, send objects and let CG-03 "
+            "check their type"))
+    return out
+
+
 def _valid_empty_state(es) -> bool:
     return (isinstance(es, dict) and bool(es.get("reason"))
             and isinstance(es.get("sources_searched"), list)
@@ -335,6 +386,7 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_sentence_case(name, body))
         reasons.extend(_check_face_budgets(page, name, body))
         reasons.extend(_check_payload_excerpts(name, body))
+        reasons.extend(_check_serialised_leaves(name, body))
 
     # CG-15 runs once over the whole page: template repetition is a
     # relation BETWEEN a field's items, not a property of one value, so it

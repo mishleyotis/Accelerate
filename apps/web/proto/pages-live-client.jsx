@@ -1969,8 +1969,12 @@ function LiveStairstep({ data, state }) {
             {(st.blocking_findings || []).length ? (
               <div className="row" style={{ marginTop: 5, gap: 4, flexWrap: "wrap" }}>
                 <span style={{ fontSize: 10, color: "var(--z-org)" }}>Blocked by:</span>
-                {st.blocking_findings.map((f) => (
-                  <span key={f} className="chip f-mono" style={{ fontSize: 9 }}>{f}</span>))}
+                {st.blocking_findings.map((f, i) => {
+                  const id = findingChipId(f);
+                  return (
+                    <span key={`${id}-${i}`} className="chip f-mono"
+                          style={{ fontSize: 9 }}>{id}</span>);
+                })}
               </div>) : null}
             {(st.covered_subcap_ids || []).length ? (
               <div style={{ fontSize: 9.5, color: "var(--z-muted)", marginTop: 5 }}>

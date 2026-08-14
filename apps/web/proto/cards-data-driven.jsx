@@ -140,6 +140,7 @@ function SentimentCard({ entity, audience }) {
             <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".06em", margin: "10px 0 2px" }}>Audience not stated</div>
             {s.ungrouped.map((r, i) => <Row key={"u" + i} r={r} />)}
           </React.Fragment>) : null}
+        <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).sentiment} what="rows" />
       </div>
     </div>
   );
