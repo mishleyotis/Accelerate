@@ -24,6 +24,27 @@ from .validation import validate_pass1
 _SPEC_PATH = Path(__file__).with_name("writer_spec.json")
 _SPEC = None
 
+#: The most open alerts a run may carry onto a client dashboard. Set by the
+#: build owner, 2026-08-14, after a run promoted with 98. The number is a
+#: judgement about what a person can work in a sitting, not a measurement, and
+#: it is stated here so it is one number rather than a habit.
+ALERT_CEILING = 15
+
+
+def _open_alert_count(live: dict) -> int:
+    """How many alerts this promote is about to put in the queue.
+
+    Counted from the payload that is about to be written rather than from a
+    stored total (invariant 8): every alert row promotion writes starts open,
+    so the length of the array IS the queue the AE will meet. A payload with
+    no alerts section counts zero, which is the honest reading — a run that
+    raised none is not a run that hid them.
+    """
+    hm = (live.get("heatmap") or {}).get("payload") or {}
+    alerts = ((hm.get("alerts") or {}).get("alerts")
+              if isinstance(hm.get("alerts"), dict) else None)
+    return len(alerts) if isinstance(alerts, list) else 0
+
 
 def writer_registry() -> list:
     """The ordered writer list. Order = contracts.SERVING_TABLES order,
@@ -139,6 +160,35 @@ def promote_run(conn, run_id) -> dict:
                     "missing_pages": sorted(missing),
                     "unpassed_pages": sorted(unpassed),
                     "hint": "promote requires a PASS row for every page"}
+
+        # ── the alert ceiling ──────────────────────────────────────────
+        #
+        # A run reaches a client dashboard only if its open alert queue is
+        # something a person can actually work. Measured 2026-08-14: one run
+        # promoted carrying 98 open alerts — 59 high, 39 medium — because
+        # NOTHING anywhere read the count. Not at submit, not here. The
+        # queue was the first thing an AE saw and it was unusable, and the
+        # run had passed every gate this connector has.
+        #
+        # It belongs at PROMOTE rather than at submit, because the rule is
+        # about what reaches the DASHBOARD and the alerts arrive on the
+        # heatmap page while the decision is a property of the whole run.
+        # Counted from the payload about to be written, not from a stored
+        # total (invariant 8).
+        alerts = _open_alert_count(live)
+        if alerts > ALERT_CEILING:
+            conn.rollback()
+            return {"promoted": False, "error": "alert_ceiling_exceeded",
+                    "open_alerts": alerts, "ceiling": ALERT_CEILING,
+                    "hint": (
+                        f"this run carries {alerts} open alerts against a "
+                        f"ceiling of {ALERT_CEILING}. The alert queue is the "
+                        "first thing an AE works, and a queue this size is "
+                        "not a queue — it is the run telling you its evidence "
+                        "is too thin to carry a conversation. Close the "
+                        "underlying thinness (enrich the cells the alerts "
+                        "name) or resolve the alerts that are not findings; "
+                        "do not delete them to clear the gate")}
 
         # A retained PASS is a DATED OBSERVATION, not a current state.
         #
