@@ -47,7 +47,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PROJECT = os.environ.get("GCP_PROJECT", "digital-maturity-assessor")
 REGION = os.environ.get("GCP_REGION", "us-central1")
-SERVICES = ("dmai-web", "dmai-api", "dmai-mcp")
+# The source a service is actually built from. A service built before HEAD is
+# only STALE if HEAD touched something it ships — otherwise the flag is noise,
+# and a checker that cries wolf is one nobody reads, which is how the thing it
+# checks for gets missed.
+SERVICES = {
+    "dmai-web": ["apps/web", "packages"],
+    "dmai-api": ["apps/api", "packages"],
+    "dmai-mcp": ["apps/mcp", "packages"],
+}
 BUNDLE_IN_IMAGE = "app/public/proto/js/"
 BUNDLE_LOCAL = ROOT / "apps" / "web" / "public" / "proto" / "js"
 
@@ -68,6 +76,18 @@ def sh(args: list) -> str:
 def head_commit() -> tuple:
     return (sh(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"]),
             sh(["git", "-C", str(ROOT), "log", "-1", "--format=%cI"]))
+
+
+def changed_since(built_at: str, paths: list) -> list:
+    """Commits after `built_at` that touched any of this service's paths."""
+    if not built_at:
+        return []
+    try:
+        out = sh(["git", "-C", str(ROOT), "log",
+                  f"--since={built_at}", "--format=%h %s", "--", *paths])
+    except Exception:
+        return []
+    return [l for l in out.splitlines() if l.strip()]
 
 
 def deployed(service: str) -> dict:
@@ -157,19 +177,22 @@ def main() -> int:
             rows.append({"service": svc, "revision": "?", "built_at": "",
                          "image": ""})
     for r in rows:
-        stale = r["built_at"] and r["built_at"] < when
-        flag = "  <-- BUILT BEFORE HEAD" if stale else ""
+        r["pending"] = changed_since(r["built_at"], SERVICES.get(r["service"], []))
+        flag = (f"  <-- STALE: {len(r['pending'])} commit(s) since"
+                if r["pending"] else "")
         print(f"  {r['service']:10} {r['revision']:24} built {r['built_at']}{flag}")
+        for line in r["pending"][:4]:
+            print(f"       {line[:90]}")
 
-    behind = [r for r in rows if r["built_at"] and r["built_at"] < when]
+    behind = [r for r in rows if r["pending"]]
     if a.quick:
         if behind:
-            print(f"\n{len(behind)} service(s) were built before HEAD was "
-                  "committed. Whatever HEAD changed is NOT what production "
-                  "serves. Run infra/deploy.sh.")
+            print(f"\n{len(behind)} service(s) have commits touching their own "
+                  "source since they were built. That code is NOT what "
+                  "production serves. Run infra/deploy.sh.")
             return 1
-        print("\nEvery service was built after HEAD. Run without --quick to "
-              "compare the bundle bytes.")
+        print("\nNo service has unshipped commits touching its source. Run "
+              "without --quick to compare the bundle bytes.")
         return 0
 
     web = next((r for r in rows if r["service"] == "dmai-web"), None)
