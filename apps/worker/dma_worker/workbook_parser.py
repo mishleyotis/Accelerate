@@ -227,6 +227,104 @@ _SCORE_KEYS = ("score", "post_critic_score", "score_1_to_5",
 _NAME_KEYS = ("subcap_name", "subcapability", "sub_cap_name")
 
 
+# Which pillar tab wins when a workbook carries more than one for the same
+# pillar, most authoritative first. Matched as a substring of the lowercased
+# tab name; anything unlisted ranks last, in tab order.
+#
+# MEASURED, not assumed. 23 of the 154 corpus workbooks are MERGED files
+# carrying both the assessment's `P{n}_Subcap_Scoring` and the research
+# layer's `P{n}_Scoring_Detail`, so the parser read every cell twice: 1,420
+# rows for a 710-cell assessment. Which tab is authoritative was settled by
+# asking the workbook: aggregating `P*_Subcap_Scoring` reproduces its own
+# `Pillar_Summary` (2.13 / 2.45 / 2.08 / 2.26 against a stated 2.13 / 2.44 /
+# 2.08 / 2.25), and `_Scoring_Detail` is the calculation chain behind it —
+# pre-critic, intermediate, and not what the summary sheets cite.
+# Most specific FIRST — every token must be reachable. `scoring_detail`
+# contains `scoring`, so listing the generic one earlier would make the
+# specific one dead and rank the research tab as though it were the
+# assessment's.
+_TAB_PRECEDENCE = ("subcap_scoring", "subcapability_scoring",
+                   "scoring_detail", "detail", "scoring")
+
+
+def _tab_rank(tab: str) -> int:
+    low = tab.lower()
+    for i, token in enumerate(_TAB_PRECEDENCE):
+        if token in low:
+            return i
+    return len(_TAB_PRECEDENCE)
+
+
+def _dedupe_scores(result: "WorkbookParse") -> None:
+    """One score per cell, chosen by tab authority rather than by row order.
+
+    23 of the 154 corpus workbooks are MERGED files carrying both the
+    assessment's `P{n}_Subcap_Scoring` and the research layer's
+    `P{n}_Scoring_Detail`, so this parser emitted two `ParsedScore` rows per
+    cell — 1,420 for a 710-cell assessment, 12,461 redundant rows across the
+    corpus.
+
+    WHAT WAS ALREADY SAFE, stated so this is not read as a bigger fix than it
+    is. `persist` deduplicates on its own (`seen_subcaps`, first row wins,
+    the repeat recorded as `duplicate_subcap_row` carrying its skipped
+    score), and it counts `len({s.subcap_id ...})`, so the run's stored cell
+    count was never inflated and no duplicate row was ever inserted twice.
+
+    WHAT THIS CHANGES, and it is three narrower things:
+
+      * `WorkbookParse.scored_cells` was the raw row count, so the parse
+        result reported 1,420 cells for an assessment that scored 710. Only
+        logging and intake status read it, but a field that disagrees with
+        the database by a factor of two is a trap for the next reader.
+      * persist's first-wins is ALPHABETICAL — `sorted()` puts
+        `P2_Scoring_Detail` ahead of `P2_Subcap_Scoring`, so the research
+        calculation chain outranked the tab the workbook's own
+        `Pillar_Summary` agrees with. Measured, the two tabs never disagree
+        today (13 disagreements, all of them two rows on ONE sheet), so
+        nothing served was wrong — but the precedence was accidental, and
+        the next merged generation would have inherited it.
+      * a benign repeat and a genuine contradiction were the same
+        observation kind. They are now `superseded_duplicate` and
+        `duplicate_score_disagreement`, because a workbook stating one cell
+        twice with two different scores is a finding about the workbook.
+    """
+    best: dict = {}
+    for score in result.scores:
+        tab = (score.source_cell or "").split("!")[0]
+        rank = _tab_rank(tab)
+        prior = best.get(score.subcap_id)
+        if prior is None:
+            best[score.subcap_id] = (rank, score)
+            continue
+        prior_rank, prior_score = prior
+        keep, drop = ((prior_score, score) if prior_rank <= rank
+                      else (score, prior_score))
+        if str(prior_score.score) != str(score.score):
+            result.observations.append(Observation(
+                "duplicate_score_disagreement", score.subcap_id, {
+                    "kept": {"source_cell": keep.source_cell,
+                             "score": str(keep.score)},
+                    "dropped": {"source_cell": drop.source_cell,
+                                "score": str(drop.score)},
+                    "resolution": "the tab the workbook's own Pillar_Summary "
+                                  "agrees with is authoritative; the other "
+                                  "reading is recorded, not averaged"}))
+        else:
+            result.observations.append(Observation(
+                "superseded_duplicate", score.subcap_id,
+                {"kept": keep.source_cell, "dropped": drop.source_cell}))
+        best[score.subcap_id] = (min(prior_rank, rank), keep)
+    if len(best) != len(result.scores):
+        # Order is meaning (rule 10): keep first-seen order, not dict order.
+        seen, ordered = set(), []
+        for score in result.scores:
+            if score.subcap_id in seen:
+                continue
+            seen.add(score.subcap_id)
+            ordered.append(best[score.subcap_id][1])
+        result.scores = ordered
+
+
 def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
     result = WorkbookParse(scores=[], observations=[], toggled_out=[])
     for tab in sorted(pillar_tabs):
@@ -346,6 +444,10 @@ def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
                     "reason": "every populated id on this tab failed the "
                               "subcapability id pattern; no cell could be "
                               "attributed, so none was scored"}))
+    # One score per cell, BEFORE the count is taken — `scored_cells` is what
+    # the directory reports as a run's coverage, so counting duplicates
+    # overstates every merged workbook by the size of its second tab set.
+    _dedupe_scores(result)
     result.scored_cells = len(result.scores)
     return result
 

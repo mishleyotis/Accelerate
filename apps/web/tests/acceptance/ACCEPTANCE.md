@@ -1322,6 +1322,63 @@ exists to prevent. The finding stands (those cells generate a third of that
 client's alert queue), but closing it belongs in the assessment or the
 catalogue, not in a serving filter. **Open, and stated as such.**
 
+### 7.17 Ingest readiness, measured across 154 packages
+
+Two promoted clients prove the pipeline works twice. They do not prove it works
+on the next package, so the whole corpus was parsed and counted. Repeatable as
+`scripts/ingest_readiness.py --corpus <dir>`, baseline committed at
+`ingest_baseline.json`, with the regressible metrics **one-sided** — parse
+failures, unresolved sub-verticals and duplicate ids may only fall.
+
+| | |
+|---|---|
+| packages | **154** |
+| parsed without raising | **154** |
+| parse failures | **0** |
+| zero-cell packages | 7 |
+| duplicate ids remaining | **0** (was 12,461) |
+| sub-vertical resolved / unresolved | 85 / 7 |
+| scored cells, max | 836 (was 1,420 — over a catalogue of 851) |
+
+**The zero-cell 7 are not silent.** Each names its reason — 707
+`missing_score`, or `unrecognised_cell_id_format`, the named refusal the parser
+was built to give. A shape it cannot read is a refusal, never an empty tab.
+
+**The duplicate finding.** 23 of the 154 are MERGED workbooks carrying both the
+assessment's `P{n}_Subcap_Scoring` and the research layer's
+`P{n}_Scoring_Detail`, so the parser emitted two rows per cell — 1,420 for a
+710-cell assessment.
+
+Stated precisely, because it is a smaller fix than it first looked: `persist`
+already deduplicated (first row wins, repeat recorded) and already counted a
+SET, so **nothing was inserted twice and no stored count was inflated**. Three
+narrower things were wrong:
+
+1. `WorkbookParse.scored_cells` was the raw row count, disagreeing with the
+   database by a factor of two.
+2. persist's first-wins is **alphabetical**, and `sorted()` puts
+   `P2_Scoring_Detail` ahead of `P2_Subcap_Scoring` — so the research
+   calculation chain outranked the tab the workbook's own `Pillar_Summary`
+   agrees with. Measured, the two tabs never disagree today, so nothing served
+   was wrong; the precedence was accidental and the next merged generation
+   would have inherited it.
+3. A benign repeat and a genuine contradiction were one observation kind.
+
+Authority was settled by asking the workbook, not by assuming: aggregating
+`P*_Subcap_Scoring` reproduces its stated `Pillar_Summary` to two decimals.
+The 13 real disagreements are now `duplicate_score_disagreement` — and all 13
+turn out to be **two rows on one sheet**, a workbook defect rather than a tab
+conflict.
+
+**Known limits an operator should expect on a new package**, none of them
+silent: 7 corpus sub-vertical spellings stay unresolved (two name *two*
+sub-verticals, the rest are a placeholder, a family code, or a confidence grade
+in the wrong field) and those runs serve every T2 variant, which
+`scope_status()` reports; 989 `missing_score` and 853 `unparseable_cell`
+observations across the corpus are recorded per cell; and `composite` is absent
+from the general-DMA generation, falling back to the manifest's stated overall
+with a `composite_from_manifest` observation.
+
 ---
 
 ## 8 · Files
