@@ -1379,6 +1379,53 @@ observations across the corpus are recorded per cell; and `composite` is absent
 from the general-DMA generation, falling back to the manifest's stated overall
 with a `composite_from_manifest` observation.
 
+### 7.18 The audit's 32 blockers: 30 real observations, 2 false, and a wrong cause
+
+`audit_promoted_client.py --api` reported **32 blockers** against the live
+reference client — whole columns null on every row, the
+`CONTRACT_FIELD_DISCARDED_AT_PROMOTION` signature. That would mean every future
+client inherits the same holes, so it was worth settling rather than filing.
+
+`get_staged_payload` settles it, which is the first thing that tool has earned.
+Comparing the staged submission against the served row, for all 32:
+
+| attribution | n |
+|---|---|
+| producer wrote NULL | 22 |
+| key absent in staging | 4 |
+| unreadable (`cell_evidence`, over the inline budget) | 4 |
+| **dropped between producer and serve** | **1** |
+
+**The app is not dropping contract fields.** 26 of the 28 attributable are
+content the producer never wrote. The one genuine drop is
+`insights.landscape.tiles[].detail` — `computed.landscape()` recomputes the
+tiles from the T1 register, correctly owning `count` and `basis` per invariant
+8, and rebuilds the tile without carrying the producer's `detail` prose. It
+owns the arithmetic; it does not own the sentence.
+
+**Two of the 32 were false, and the check's own arithmetic was the reason.**
+The denominator counted null LEAF YIELDS, and `walk` descends into a populated
+list instead of yielding it — so a row whose value is present never reached the
+counter, and `n == t` was true by construction for any partially populated
+column. `.techstack.data.items[].peer_deployments` is populated on **8 of 51**
+rows and this reported *"null on 43/43 rows — every one"*. "Every one" was true
+only of a set selected by being null. Counting the last `[i]` instead fails the
+other way on nested shapes, where the inner index restarts per outer row
+(`platforms[].gaps[].gap` read 18 nulls against 5 rows). A **set of concrete
+container paths** is the only count that survives both, and every finding now
+satisfies `n == t` — anything else is a bug in the check, not a finding about
+the client.
+
+**The message asserted a cause it could not observe**: *"the value is being
+lost between the producer and the reader"*. It was wrong 26 times out of 28. It
+now states the signature, says explicitly that the signature is not the cause,
+and names `get_staged_payload` as the way to attribute it. An audit that names
+the wrong layer sends the next person hunting in it, and is worse than one that
+names none.
+
+After the fix: **30 blockers, all genuine observations of a perfect null
+column, 1 of them an app defect and 29 content the producer owes.**
+
 ---
 
 ## 8 · Files

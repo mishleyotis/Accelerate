@@ -152,28 +152,68 @@ def check_drop_signature(page, body) -> list:
     check whose absence let 32 field paths serve empty on the client that was
     being used as the standard.
     """
-    total: dict = {}
-    empty: dict = {}
-    for p, v in walk(body):
-        if "[" not in p:            # only list rows can show the signature
+    # THE DENOMINATOR IS THE CONTAINER, NOT THE LEAF YIELDS.
+    #
+    # `walk` DESCENDS into a non-empty list or dict instead of yielding it, so
+    # a row whose value is populated never reaches this loop at all. Counting
+    # yields therefore counts only the rows where the key is null — and n == t
+    # is then true by construction for every partially populated column.
+    #
+    # Measured 2026-08-15 on the reference client:
+    # `.techstack.data.items[].peer_deployments` is populated on 8 of 51 rows
+    # and this reported "null on 43/43 rows — every one". A check whose
+    # arithmetic IS the finding got the arithmetic backwards, and the phrasing
+    # "every one" was true only of a set selected BY being null.
+    # The denominator is the number of ROWS in the containing list, counted
+    # as DISTINCT CONCRETE row paths — not as leaf yields, and not from an
+    # index, both of which get nesting wrong.
+    #
+    # `walk` DESCENDS into a populated list or dict instead of yielding it, so
+    # a row whose value is present never reaches this loop. Counting yields
+    # therefore counts only the rows where the key is null, and `n == t` is
+    # true by construction for every partially populated column. Measured on
+    # the reference client: `.techstack.data.items[].peer_deployments` is
+    # populated on 8 of 51 rows and this reported "null on 43/43 — every one".
+    # A check whose arithmetic IS the finding had the arithmetic backwards,
+    # and "every one" was true only of a set selected BY being null.
+    #
+    # Taking the last `[i]` instead over-counts the other way on a nested
+    # shape — `platforms[].peer_deployments[].as_of` read 18 nulls against 5
+    # rows — because the inner index restarts inside each outer row. A set of
+    # concrete container paths is the only count that survives both.
+    rows: dict = {}          # container shape -> {concrete container paths}
+    empty: dict = {}         # leaf shape -> rows where it is null/blank
+    for path, value in walk(body):
+        if "[" not in path:          # only list rows can show the signature
             continue
-        shape = _shape(p)
-        total[shape] = total.get(shape, 0) + 1
-        if v is None or (isinstance(v, str) and not v.strip()):
-            empty[shape] = empty.get(shape, 0) + 1
+        concrete_container, _, _leaf = path.rpartition(".")
+        if concrete_container.endswith("]"):
+            # Any leaf under a row proves that row exists, including leaves
+            # nested deeper — so every row is counted once, whatever it holds.
+            rows.setdefault(_shape(concrete_container), set()).add(concrete_container)
+        if value is None or (isinstance(value, str) and not value.strip()):
+            empty[_shape(path)] = empty.get(_shape(path), 0) + 1
     out = []
     for shape, n in sorted(empty.items(), key=lambda kv: -kv[1]):
-        t = total[shape]
+        container, _, _leaf = shape.rpartition(".")
+        t = len(rows.get(container, ()))
+        # Only a PERFECT column is the signature. `n != t` covers both
+        # directions: a partially populated column (n < t) is a producer with
+        # partial data, and n > t would mean the denominator is wrong, which
+        # is a bug in this check rather than a finding about the client.
         if n != t or t < DROP_MIN_ROWS:
             continue
         if any(r in shape for r in REDACTED_BY_DESIGN):
             continue
         out.append(_v("BLOCKER", "C-DROP", page, shape,
-                      f"null on {n}/{t} rows — every one. A producer short of "
-                      "data leaves a scatter of nulls; a perfect column means "
-                      "the value is being lost between the producer and the "
-                      "reader. Trace it: contract, then the promotion writer, "
-                      "then the serve projection.",
+                      f"null on all {t} rows of {container}. That is the drop "
+                      "SIGNATURE, not the cause: a producer short of data "
+                      "leaves a scatter, and a perfect column means the value "
+                      "was either never written or lost on the way here. "
+                      "Attribute it before fixing it — "
+                      f"get_staged_payload(run_id, page, section) returns what "
+                      "the producer actually submitted, and comparing that "
+                      "against this row says which half to look in.",
                       rows_null=n, rows_total=t))
     return out
 
