@@ -210,6 +210,84 @@ def gaps_for_payload(page: str, payload: dict) -> list:
     return out
 
 
+def attempts_for_run(conn, run_id) -> dict:
+    """What the enrichment routine already tried, keyed by the gap's path.
+
+    Migration 0047 granted svc_mcp SELECT on these tables for exactly this —
+    "the producer session reads what the routine already resolved so it does
+    not re-run a search that has an answer" — and then nothing read them. The
+    hourly job resolved BCU's website to a value, recorded it, and
+    `list_enrichment_gaps` went on reporting the field as untouched: the
+    producer would have run the same search again and had no way to know.
+
+    That is the write-path-with-no-read-path shape inside the machinery built
+    to close it, which is why this is here rather than in a later stage.
+
+    Both halves matter and for different reasons. A RESOLVED attempt saves the
+    search and, more importantly, carries the value's PROVENANCE — the producer
+    still has to register it as evidence and submit it through the connector,
+    because a resolved attempt is a lead and not a promotion (invariant 2). An
+    UNRESOLVED attempt is the more valuable of the two on a second pass: it says
+    which route was tried and why it failed, so the producer neither repeats a
+    dead search nor mistakes an unattempted field for an exhausted one.
+
+    Returns {} when the tables are absent or unreadable. The worklist is the
+    product here; degrading it to a bare list is correct, and failing to
+    produce one because a history table is missing is not.
+    """
+    out: dict = {}
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """SELECT a.field_path, a.status, a.value, a.unit, a.as_of,
+                      a.reason, a.resolver, a.source_url, a.excerpt,
+                      a.confidence, a.attempted_at
+                 FROM enrichment_attempts a
+                WHERE a.run_id = %s
+                ORDER BY a.attempted_at DESC, a.id DESC""",
+            (run_id,))
+        rows = cur.fetchall()
+    except Exception:
+        # A missing grant or a table that does not exist yet must not take the
+        # worklist down with it.
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        return {}
+
+    for (path, status, value, unit, as_of, reason, resolver, source_url,
+         excerpt, confidence, attempted_at) in rows:
+        # Newest first, so the first row per path is the current answer and
+        # every earlier attempt on that path is superseded history.
+        if path in out:
+            continue
+        rec = {
+            "status": status,
+            "resolver": resolver,
+            "attempted_at": attempted_at.isoformat() if attempted_at else None,
+        }
+        if status == "RESOLVED":
+            rec.update({
+                "value": value, "unit": unit,
+                "as_of": as_of.isoformat() if as_of else None,
+                "source_url": source_url, "excerpt": excerpt,
+                "confidence": confidence,
+                # Said plainly, because a resolved attempt looks like a done
+                # job and is not one. The value is a LEAD: it still has to be
+                # registered as evidence and submitted through the connector,
+                # which is the only path content may take (invariant 2).
+                "still_to_do": ("register_evidence with this source, then "
+                                "submit the field citing the id you are "
+                                "given — a resolved attempt is a lead, not a "
+                                "promotion"),
+            })
+        else:
+            rec["reason"] = reason
+        out[path] = rec
+    return out
+
+
 def list_enrichment_gaps(conn, run_id, page: str | None = None) -> dict:
     """Every empty field on a run's live submissions — the producer's worklist.
 
@@ -243,9 +321,29 @@ def list_enrichment_gaps(conn, run_id, page: str | None = None) -> dict:
             continue
         pages_read.append(pg)
         out.extend(gaps_for_payload(pg, payload or {}))
-    out.sort(key=lambda g: (order.get(g["kind"], 3), g["page"], g["path"]))
+    # What the routine already tried, joined onto the gap it was trying to
+    # close. Ordering puts a gap with an answer waiting at the top of its own
+    # kind: it is the cheapest one to close and leaving it buried is how the
+    # answer goes unused for another hour.
+    tried = attempts_for_run(conn, run_id)
+    for g in out:
+        a = tried.get(g["path"])
+        if a:
+            g["enrichment_attempt"] = a
+    out.sort(key=lambda g: (
+        order.get(g["kind"], 3),
+        0 if (g.get("enrichment_attempt") or {}).get("status") == "RESOLVED" else 1,
+        g["page"], g["path"]))
     counts: dict = {}
     for g in out:
         counts[g["kind"]] = counts.get(g["kind"], 0) + 1
+    resolved = sum(1 for g in out
+                   if (g.get("enrichment_attempt") or {}).get("status") == "RESOLVED")
+    attempted = sum(1 for g in out if g.get("enrichment_attempt"))
     return {"run_id": str(run_id), "pages_read": sorted(pages_read),
-            "gaps": out, "count": len(out), "by_kind": counts}
+            "gaps": out, "count": len(out), "by_kind": counts,
+            # Stated at the top level because a producer scanning the list
+            # needs to know an answer is waiting before it starts searching.
+            "with_resolved_value": resolved,
+            "attempted_by_routine": attempted,
+            "never_attempted": len(out) - attempted}

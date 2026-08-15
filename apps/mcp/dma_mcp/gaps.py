@@ -74,6 +74,6 @@ for _cand in _shared_roots():
 
 from enrichment_gaps import (  # noqa: E402,F401  enrichment_gaps.py
     ENVELOPE_KEYS, NON_GAP_TYPES, gaps_for_payload, gaps_for_section,
-    list_enrichment_gaps, _is_empty, _held, _empty_declared, _member_gaps,
-    _norm,
+    list_enrichment_gaps, attempts_for_run, _is_empty, _held, _empty_declared,
+    _member_gaps, _norm,
 )
