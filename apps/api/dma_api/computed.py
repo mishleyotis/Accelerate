@@ -262,6 +262,25 @@ def landscape(cur, data: dict, run_id) -> None:
         if tile:
             buckets[tile].append((_product_label(vendor, name), level))
 
+    # THE RECOMPUTE OWNS THE ARITHMETIC, NOT THE SENTENCE.
+    #
+    # `detail` used to be rebuilt as a hardcoded None, so the producer's prose
+    # — "Vendor or client statements place the product in the estate." — was
+    # discarded on every read. Measured 2026-08-15 on the reference client:
+    # the staged payload carried it on all four tiles and the served payload
+    # carried none, the only genuine producer-to-serve drop among the 32 the
+    # audit reported.
+    #
+    # Invariant 8 puts `count` and `basis` here because a stored count can
+    # disagree with the register. It says nothing about a sentence the
+    # register cannot produce, and rebuilding a whole object is how a field
+    # nobody meant to own gets destroyed anyway. Keyed by `kind` because that
+    # is what identifies a tile; order and membership are still this
+    # function's to decide.
+    was = data.get("tiles") if isinstance(data, dict) else None
+    detail_for = {t.get("kind"): t.get("detail")
+                  for t in (was or []) if isinstance(t, dict)}
+
     tiles = []
     for kind in ("CONFIRMED", "INFERRED", "CLAIMED", "GAPS"):
         members = buckets[kind]
@@ -274,7 +293,7 @@ def landscape(cur, data: dict, run_id) -> None:
                       if len(levels) > 1 else
                       f"{len(members)} · {levels[0]} evidence" if levels else
                       f"{len(members)} · evidence level not recorded"),
-            "detail": None,
+            "detail": detail_for.get(kind),
             # Only the GAPS tile names its members: a list of what is absent
             # is the finding; a list of what is present is the register.
             "named_items": ([n for n, _ in members] if kind == "GAPS" else []),
