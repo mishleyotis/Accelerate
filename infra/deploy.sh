@@ -179,6 +179,13 @@ fi
 # --- 3 · worker Job + Scheduler sync (stage 1 / 0.5) ----------------------
 if [ -f apps/worker/Dockerfile ]; then
   say "worker job (package scan; requires the intake folder shared with dmai-worker@)"
+  # The enrichment routine reads the gap computation and the contract at
+  # runtime; the Dockerfile copies only dma_worker, so both are staged in here
+  # the same way the api's register is. Gate D fails CI if either is missing.
+  cp packages/shared/enrichment_gaps.py apps/worker/shared/ || {
+    echo "FATAL: packages/shared/enrichment_gaps.py is missing" >&2; exit 1; }
+  cp packages/shared/contracts_data.json apps/worker/shared/ || {
+    echo "FATAL: packages/shared/contracts_data.json is missing" >&2; exit 1; }
   gcloud run jobs deploy dmai-worker --source=apps/worker \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-worker@${SA_DOMAIN}" \
@@ -189,6 +196,31 @@ if [ -f apps/worker/Dockerfile ]; then
     --project="$PROJECT_ID" --region="$REGION" \
     --member="serviceAccount:dmai-worker@${SA_DOMAIN}" \
     --role="roles/run.invoker" --quiet >/dev/null
+  # ── the enrichment loop ────────────────────────────────────────────
+  #
+  # Same image, different entrypoint — the routine needs the same database
+  # identity and the same staged contracts as the scan. Owner, 2026-08-15:
+  # "There should be a working enrichment routine; not you doing it as Claude
+  # Code." This is that routine; the schedule below is what makes it a loop
+  # rather than a script someone remembers to run.
+  say "dmai-enrich job (computes each run's gaps and records what it resolved)"
+  gcloud run jobs deploy dmai-enrich --source=apps/worker \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --service-account="dmai-worker@${SA_DOMAIN}" \
+    --network=default --subnet=default --vpc-egress=private-ranges-only \
+    --command="python,-m,dma_worker.enrichment" \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-worker@${PROJECT_ID}.iam;DB_NAME=dma_insights;ENRICH_TRIGGER=schedule" \
+    --max-retries=1 --task-timeout=900 --memory=1Gi --quiet
+  # Hourly. The gap set only changes when a run is submitted or re-promoted,
+  # so a tighter cadence would spend the same answer repeatedly; an hour keeps
+  # the loop visibly alive without becoming noise.
+  if ! gcloud scheduler jobs describe dmai-enrich-loop --project="$PROJECT_ID" --location="$REGION" >/dev/null 2>&1; then
+    gcloud scheduler jobs create http dmai-enrich-loop \
+      --project="$PROJECT_ID" --location="$REGION" --schedule="7 * * * *" \
+      --uri="https://${REGION}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/${PROJECT_ID}/jobs/dmai-enrich:run" \
+      --http-method=POST --oauth-service-account-email="dmai-worker@${SA_DOMAIN}" --quiet || true
+  fi
+
   # package scan every 30 minutes (charter: mandatory trigger #1)
   if ! gcloud scheduler jobs describe dmai-package-scan --project="$PROJECT_ID" --location="$REGION" >/dev/null 2>&1; then
     gcloud scheduler jobs create http dmai-package-scan \

@@ -694,6 +694,56 @@ def ops_refresh_queue(audience: str | None = None, role: str | None = None,
         conn.close()
 
 
+@app.get("/v1/ops/enrichment-loop")
+def ops_enrichment_loop(limit: int = 10):
+    """Is the enrichment loop alive, and what did it last do?
+
+    Owner, 2026-08-15: "confirm that this enrichment loop happens robustly as
+    the web app runs." A routine nobody can see is a routine nobody can trust,
+    and until this endpoint the only way to answer the question was to read a
+    Cloud Run log. This is the answer as data.
+
+    `healthy` is computed here rather than stored, and it is deliberately
+    strict: a job that never closed, a job that errored, and a job that scanned
+    zero runs are all UNHEALTHY. The last one matters most — a loop that finds
+    nothing to look at reports the same numbers as a loop with nothing to do,
+    and only one of those is fine.
+    """
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        cur.execute("""SELECT id, started_at, finished_at, trigger, runs_scanned,
+                              gaps_found, resolved, not_run, failed, error
+                         FROM enrichment_jobs
+                        ORDER BY started_at DESC LIMIT %s""", (max(1, min(limit, 50)),))
+        jobs = [{"id": r[0], "started_at": r[1], "finished_at": r[2],
+                 "trigger": r[3], "runs_scanned": r[4], "gaps_found": r[5],
+                 "resolved": r[6], "not_run": r[7], "failed": r[8],
+                 "error": r[9]} for r in cur.fetchall()]
+        last = jobs[0] if jobs else None
+        healthy = bool(last and last["finished_at"] and not last["error"]
+                       and last["runs_scanned"] > 0)
+        why = ("no enrichment job has ever run" if not last
+               else "the last job never finished" if not last["finished_at"]
+               else f"the last job errored: {last['error']}" if last["error"]
+               else "the last job scanned zero runs, which is a failure to "
+                    "look rather than a clean result" if not last["runs_scanned"]
+               else None)
+        # The open worklist, computed from the latest attempt per field so a
+        # gap closed last hour stops being reported this hour.
+        cur.execute("""SELECT DISTINCT ON (run_id, field)
+                              field, status, value, reason
+                         FROM enrichment_attempts
+                        ORDER BY run_id, field, attempted_at DESC""")
+        rows = cur.fetchall()
+        return {"healthy": healthy, "unhealthy_because": why,
+                "last_job": last, "jobs": jobs,
+                "open_gaps": sum(1 for r in rows if r[1] != "RESOLVED"),
+                "resolved_awaiting_producer": sum(1 for r in rows if r[1] == "RESOLVED")}
+    finally:
+        conn.close()
+
+
 @app.get("/v1/ops/import-scans")
 def import_scans(limit: int = 20):
     """Recent package-scan executions — the REAL job history the admin
