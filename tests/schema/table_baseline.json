@@ -35,6 +35,8 @@
   "context_sentiment",
   "context_timeline",
   "document_sections",
+  "enrichment_attempts",
+  "enrichment_jobs",
   "entities",
   "evidence_dedup_audit",
   "evidence_index",
