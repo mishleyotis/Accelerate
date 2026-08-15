@@ -138,3 +138,23 @@ def test_the_gate_is_registered_with_its_arithmetic():
     assert severity == "block", "an unexplained contradiction does not disclose"
     assert plain is None, "AG is an analysis gate; SG is the family that renders"
     assert "fit_basis" in rule and "story_md" in rule
+
+
+def test_two_platforms_at_the_same_rank_are_not_an_inversion():
+    """`o_rank < rank` — mutating that to `<=` survived the suite.
+
+    A survivor is a statement about the test. Under `<=` a row compares against
+    every row at its OWN rank, so a tie in rank with a difference in fit reads
+    as "ranked below something that scores less" and AG-09 fires. It should
+    not: AG-09 is about a rank ORDER that contradicts the score, and two rows
+    at the same rank state no order at all. Duplicate ranks are a producer
+    error of a different kind, and reporting them here would send a producer to
+    write an ordering basis for a contradiction that does not exist — the same
+    fabrication pressure the enrichment worklist audit was about.
+    """
+    assert gates([P("A", 2, 70.0), P("B", 2, 73.0)]) == [], (
+        "equal ranks state no order, so there is no order to contradict")
+    # And the row is still compared against genuinely higher ranks.
+    assert gates([P("A", 1, 60.0), P("B", 2, 70.0), P("C", 2, 73.0)]) == \
+        ["AG-09", "AG-09"], (
+        "both rank-2 rows score above rank 1 and neither states a basis")

@@ -118,6 +118,12 @@
      "severity": "P0",
      "catches_known_defect": 14
     }
+   ],
+   "covers_lines": [
+    [
+     1,
+     127
+    ]
    ]
   },
   {
@@ -710,6 +716,12 @@
      "severity": "P0",
      "catches_known_defect": null
     }
+   ],
+   "covers_lines": [
+    [
+     13329,
+     13631
+    ]
    ]
   },
   {
@@ -788,6 +800,12 @@
      "severity": "P1",
      "catches_known_defect": null
     }
+   ],
+   "covers_lines": [
+    [
+     13632,
+     13779
+    ]
    ]
   },
   {
@@ -859,6 +877,12 @@
      "severity": "P0",
      "catches_known_defect": 4
     }
+   ],
+   "covers_lines": [
+    [
+     13780,
+     13992
+    ]
    ]
   },
   {

@@ -45,6 +45,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from dma_mcp import gaps
+import enrichment_gaps  # noqa: F401  the shared module gaps re-exports
 
 REPO = Path(__file__).resolve().parents[3]
 CONTRACT = json.loads(
@@ -256,3 +257,62 @@ def test_the_two_flags_are_not_both_set_on_one_field():
                         spec.get("absence_is_correct_when"):
                     both.append(f"{page}.{section}.{fname}")
     assert both == [], f"both flags set on: {both}"
+
+
+# ── Holes the mutation check found ───────────────────────────────────
+#
+# `mutation_check.py` mutates the code a test names and requires the test to
+# notice. Two mutations of `gaps_for_section` survived the suite above, and a
+# survivor is a statement about the test, not about the code: these behaviours
+# were relied on and asserted nowhere.
+
+def test_a_declared_empty_state_suppresses_the_whole_section():
+    """`if declared or fspec.get("may_be_empty")` — flipping that `or` to
+    `and` survived, because nothing exercised the declared-empty path.
+
+    It is the escape hatch the worklist offers on every optional field ("or
+    declare the section's empty_state with the ladder that established the
+    absence"), so a producer that runs the ladder and records it must see the
+    section leave the list. Under the mutant it would not, and the honest run
+    would be told to do the work again."""
+    body = {"trend": None, "reading": None, "series": None}
+    assert paths("overview", "financial_series", body), (
+        "fixture must produce gaps before the empty state is declared")
+
+    declared = dict(body, empty_state={
+        "reason": "fewer than three dated points survive the identity gate",
+        "sources_searched": ["call reports 2024-2026", "annual report"],
+        "closure_condition": "a third dated figure that passes the gate"})
+    assert paths("overview", "financial_series", declared) == set(), (
+        "a section that declared its empty state with a ladder has answered "
+        "for the whole section; re-reporting each field drowns the real gaps "
+        "in a run that did its work honestly")
+
+
+def test_an_empty_state_without_a_ladder_does_not_suppress():
+    """The paired negative. `_empty_declared` requires a reason AND a
+    non-empty `sources_searched` — an absence with no recorded search is not a
+    finding, and must not buy silence."""
+    for weak in ({"reason": "not found"},
+                 {"reason": "not found", "sources_searched": []},
+                 {"sources_searched": ["a", "b"]},
+                 {}):
+        body = {"trend": None, "reading": None, "empty_state": weak}
+        assert paths("overview", "financial_series", body), (
+            f"empty_state={weak!r} suppressed the section without a ladder")
+
+
+def test_the_doc_excerpt_is_truncated():
+    """`[:400]` — mutating the bound survived. The worklist carries contract
+    text so a producer can act without opening the contract, and an untruncated
+    doc would put four thousand characters of prose into every gap row."""
+    long_doc = [s for s in (enrichment_gaps.contracts.sections("overview") or {}).values()
+                if isinstance(s, dict)
+                for f in (s.get("fields") or {}).values()
+                if isinstance(f, dict) and len(f.get("doc") or "") > 400]
+    assert long_doc, "no overview field has a doc over 400 chars to test with"
+    for page, section, field in (("overview", "exec_summary", "storyline_challenge"),):
+        g = gap_at(page, section, {field: None}, f"{section}.{field}")
+        if g is None:
+            continue
+        assert len(g["doc"]) <= 400, "the doc excerpt is not truncated"

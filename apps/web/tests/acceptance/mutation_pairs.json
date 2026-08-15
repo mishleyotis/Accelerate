@@ -1,0 +1,35 @@
+{
+ "_why": "Each pair is (test, the file it is supposed to assert about). mutation_check.py mutates the target and requires the test to notice. A pair whose mutants all survive is a test that asserts nothing about the code it names. Add a pair when a test carries real weight; the list is the set we are willing to have proven, not every test in the repo.",
+ "pairs": [
+  {
+   "test": "apps/mcp/tests/test_rank_against_score.py",
+   "target": "apps/mcp/dma_mcp/validation2.py",
+   "why": "AG-09 blocks a rank that inverts its own fit_score with no stated basis",
+   "symbol": "_check_rank_against_score"
+  },
+  {
+   "test": "apps/mcp/tests/test_gap_false_positives.py",
+   "target": "packages/shared/enrichment_gaps.py",
+   "why": "nine worklist items whose only closure was fabrication",
+   "symbol": "gaps_for_section"
+  },
+  {
+   "test": "apps/mcp/tests/test_enrichment_attempt_readback.py",
+   "target": "packages/shared/enrichment_gaps.py",
+   "why": "the loop's last hop: a resolved value must reach the producer as a lead, not as done",
+   "symbol": "attempts_for_run"
+  },
+  {
+   "test": "apps/mcp/tests/test_contract_text_is_evidence.py",
+   "target": "packages/shared/contracts_data.json",
+   "why": "no corpus-scale claim or client name in contract prose, and the two committed copies agree"
+  }
+ ],
+ "_not_mutation_testable": [
+  {
+   "test": "apps/worker/tests/test_enrichment_grants.py",
+   "target": "apps/worker/dma_worker/enrichment.py",
+   "why": "The test derives the grant set by scanning the routine's SQL TEXT for FROM/JOIN targets. Token mutation of the surrounding Python does not perturb that text, so every mutant survives for a reason that has nothing to do with the test's strength. It is a repository-invariant test, not a behavioural one, and its evidence is that it failed on all three missing grants the moment it was written. Listing it here rather than deleting it, so the exclusion is a recorded judgement and not a silent gap."
+  }
+ ]
+}
