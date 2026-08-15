@@ -1279,6 +1279,49 @@ scoped and both producers had already excluded the variants. That is the
 expected result and it is worth stating plainly — this fix is preventive for
 them and corrective for the 44 packages behind them.
 
+### 7.16 The catalogue states the applicability the app was inferring
+
+Before building base-cell scoping I went looking for an authoritative source
+for "which cells apply to which sub-vertical", because inventing one would be
+exactly the unsourced judgement this build forbids. The v7.0 catalogue has it,
+in `2_Capability_Map!Tier` across the four Pillar workbooks:
+
+| Tier | cells | meaning |
+|---|---|---|
+| `T1` | 686 | a base cell — applies to every sub-vertical |
+| `T2-<CODE>` | 127 | the catalogue **names** the owning sub-vertical |
+| `T2` | 38 | a variant the catalogue leaves unqualified |
+
+851 total, matching the charter's own count.
+
+`variant_subvertical()` had been deriving the owner from the cell **id suffix**
+— the catalogue's minting convention rather than a stated fact. Checked against
+the column: **on all 127 the catalogue names, the suffix agrees. Zero
+contradictions.** And on the 38 it leaves bare, the suffix does name an owner —
+including `P1C1.3.IC1` "Insurance Line Strategy" and `P1C1.4.IB1", two of the
+exact cells a credit union was served in the defect the module exists to close.
+
+So the derivation is not merely consistent with its source; it is strictly
+**more complete**, and replacing it with the column would have lost 38
+exclusions. That is the opposite of what I expected to find, and it is the
+reason to check rather than assume.
+
+`packages/shared/catalogue_v70_tier.json` now carries the column, and
+`test_variant_owner_matches_the_catalogue` fails if a later catalogue version
+contradicts the suffix anywhere, adds a sub-vertical code this module cannot
+see, or closes the 38-cell gap — any of which means re-deriving the rule rather
+than letting it drift from its own source of truth.
+
+**Base-cell scoping is NOT built, and deliberately.** The catalogue marks every
+one of the 686 base cells `T1` — applies to everyone — so there is no stated
+basis for excluding a base cell from any sub-vertical. The 33
+"correct-absence" cells on the second client are all `T1`. Excluding them would
+mean encoding a per-entity business-model judgement that no source in this
+system makes, which is precisely the kind of invention the authority order
+exists to prevent. The finding stands (those cells generate a third of that
+client's alert queue), but closing it belongs in the assessment or the
+catalogue, not in a serving filter. **Open, and stated as such.**
+
 ---
 
 ## 8 · Files
