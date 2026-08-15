@@ -961,6 +961,31 @@ was a read path missing under a correct write path.** The document tests what
 a surface shows; nothing in it can ask what a surface was *given* and did not
 show.
 
+### 7.8 The worklist audit — nine items whose only closure was fabrication
+
+With the enrichment loop finally running in production (287 runs · 7 gaps · 1
+resolved · 6 recorded with reasons · 0 failed), the worklist it produces became
+worth auditing rather than trusting. Every field the gap predicate can flag was
+classified against its own contract doc, per page, and every false-positive
+claim was then put to an independent skeptic that defaulted to refuting.
+
+**Fourteen of twenty-three claims were refuted** — a real kill rate, and mostly
+one mistake: treating "recomputed at read" as "do not send". Validated at
+submit and not persisted are different statements, and only the second is what
+invariant 8 governs. `insights.landscape.tiles`, `techstack.layers`,
+`cell_evidence.linking_stats` and `evidence_coverage.item_count` are all
+required at submit and all correctly gaps.
+
+**Nine survived**, in three shapes: one predicate bug (`value_chain.fields` —
+a phantom field manufactured by a falsy `{}`), two fields the producer *cannot*
+author, and six whose absence is *mandated* in a stated state.
+
+The pattern worth carrying: a check that tells someone to fix something they
+must not fix is worse than no check. Every one of these would have pushed a
+producer toward fabrication — the single worst outcome this system has — and
+each was contradicted by the field's own contract text, which nothing was
+reading.
+
 ---
 
 ## 8 · Files
