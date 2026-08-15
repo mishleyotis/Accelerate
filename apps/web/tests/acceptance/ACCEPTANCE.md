@@ -1426,6 +1426,41 @@ names none.
 After the fix: **30 blockers, all genuine observations of a perfect null
 column, 1 of them an app defect and 29 content the producer owes.**
 
+### 7.19 The fix that was a no-op, and the reason it did not stay believed
+
+**Correction, kept because the mistake is more instructive than the fix.**
+§7.18 reported `insights.landscape.tiles[].detail` as repaired. It was not.
+Production served 0 of 4 after that change deployed.
+
+The first attempt carried the producer's prose forward from `data["tiles"]`.
+That cannot work: **`insights_landscape` has no tiles column.** The writer
+stores none deliberately — T2's contract is four counts recomputed from the T1
+register, so the tile is server-derived end to end and there was never anything
+of the producer's to preserve. Carrying forward a field that is never persisted
+is dead code wearing a fix's clothes, and it type-checks, tests green against a
+fixture, and changes nothing.
+
+The only reason it did not stay believed is that production was **read again**
+rather than reasoned about. That is the whole of the lesson, and it is the
+owner's standing directive restated: a fix is what the deployed system serves,
+not what the diff says.
+
+The real fix came from asking what the field *is*. One client's producer wrote
+nothing; the other wrote definitions of the status **vocabulary** —
+`CONFIRMED` "Vendor or client statements place the product in the estate", and
+so on. Those are identical for every client, not facts about either
+institution. A definition asked of a producer is one two producers can word
+differently, which is exactly how one register's CONFIRMED comes to mean
+something other than another's. They now sit beside `TILE_FOR_STATUS`, GAPS
+included — a tile no producer had ever worded. No migration, and it fills for
+every client including the one whose producer left it blank.
+
+The guard is on the writer spec: if a `tiles` column is ever added,
+`test_a_producer_sent_tile_cannot_reach_here_anyway` fails and the
+prefer-the-producer rule needs applying instead.
+
+**Verified in production, by reading it: 4/4.** Audit blockers 32 → 29.
+
 ---
 
 ## 8 · Files
