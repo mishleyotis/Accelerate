@@ -172,7 +172,21 @@ def gaps_for_section(page: str, section: str, body: dict) -> list:
         return out
     spec_all = contracts.sections(page) or {}
     spec = (spec_all.get(section) or {})
-    fields = spec.get("fields") or spec
+    # A page's section map also carries `_notes`, which is a LIST. Nothing in
+    # a payload is ever named `_notes`, so this never fired in production — but
+    # the worklist is the product, and it must not be one malformed section
+    # away from raising instead of returning.
+    if not isinstance(spec, dict):
+        return out
+    # Key presence, not truthiness. `heatmap.value_chain` declares `fields: {}`
+    # — the producer authors the envelope and nothing else — and `{}` is falsy,
+    # so `spec.get("fields") or spec` fell through to the SECTION spec, iterated
+    # its own keys, and found the literal key "fields" mapping to a dict. The
+    # worklist then reported `value_chain.fields` as a gap: a field that exists
+    # in no payload, whose only compliant closure is inventing a key the
+    # contract does not have. The fallthrough itself is still needed for
+    # sections whose spec IS the field map.
+    fields = spec["fields"] if "fields" in spec else spec
     declared = _empty_declared(body)
 
     for fname, fspec in (fields or {}).items():
@@ -188,17 +202,49 @@ def gaps_for_section(page: str, section: str, body: dict) -> list:
         # the real gaps in a run that did its work honestly.
         if declared or fspec.get("may_be_empty"):
             continue
+        # ── A worklist item whose only closure is fabrication is worse than
+        #    no worklist item at all ─────────────────────────────────────────
+        #
+        # Audited 2026-08-15 across all six pages, every claim adversarially
+        # verified (14 of 23 refuted). Two classes survived, and the contract
+        # already states both — they were simply not read.
+        #
+        # `not_producer_authored`: the producer CANNOT write it. The serve
+        # layer computes it, or the connector writes it at submit. Telling a
+        # producer to "send the value" for
+        # `evidence_coverage.self_sourced_basis` — whose doc reads "COMPUTED AT
+        # READ — do not send" — asks it to contradict the contract to satisfy
+        # the worklist. These are dropped outright: no run, no client and no
+        # amount of searching can ever close one.
+        if fspec.get("not_producer_authored"):
+            continue
+        # `absence_is_correct_when`: the producer MAY write it, on a run in a
+        # different state. `financial_series.trend` is null BY MANDATE below
+        # three dated points; `quarantine_reason` exists only when the identity
+        # gate quarantined the series. These are NOT dropped — on a run where
+        # the condition does not hold they are true gaps, and dropping them
+        # would hide real holes — but they are demoted below every ordinary
+        # gap and they carry the condition, so a producer reads the state
+        # before it reads an instruction.
+        when = fspec.get("absence_is_correct_when")
+        required = fspec.get("required")
         out.append({
             "page": page, "section": section, "path": f"{section}.{fname}",
             "field": fname,
-            "kind": "empty_required" if fspec.get("required") else "empty_optional",
-            "reason": (f"{fname!r} is empty on the promoted run and the section "
-                       f"declares no empty state"),
+            "kind": "conditional" if when else
+                    ("empty_required" if required else "empty_optional"),
+            "reason": (
+                f"{fname!r} is empty. The contract says absence is CORRECT "
+                f"when {when} — check that first; this is a gap only if it "
+                f"does not hold" if when else
+                f"{fname!r} is empty on the promoted run and the section "
+                f"declares no empty state"),
             "doc": (fspec.get("doc") or "")[:400],
-            "closes_with": ("send the value" if fspec.get("required") else
-                            "send the value, or declare the section's "
-                            "empty_state with the ladder that established the "
-                            "absence"),
+            "closes_with": (
+                f"nothing, if {when}. Otherwise send the value" if when else
+                ("send the value" if required else
+                 "send the value, or declare the section's empty_state with "
+                 "the ladder that established the absence")),
         })
     return out
 
@@ -314,7 +360,11 @@ def list_enrichment_gaps(conn, run_id, page: str | None = None) -> dict:
                         "read. Gaps are computed from what was submitted; a "
                         "run with no submissions has no fields to be empty"}
 
-    order = {"must_present_member": 0, "empty_required": 1, "empty_optional": 2}
+    # `conditional` sits last on purpose: it is the only kind whose correct
+    # resolution is often "do nothing", so it must never sit above a gap that
+    # genuinely needs work.
+    order = {"must_present_member": 0, "empty_required": 1, "empty_optional": 2,
+             "conditional": 3}
     out, pages_read = [], []
     for pg, payload in rows:
         if page and pg != page:

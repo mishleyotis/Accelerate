@@ -95,13 +95,17 @@
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "What the ASSESSMENT applied. Per item: {cap_id, kind, ceiling, affected_categories[], rationale, e_ids[]}. kind: cap | uncertainty_band | qa_hold | analyst_override. Read the workbook's own cap log (IR-00N rows) and the QA verdict (qa_verdict.json); rationale is the stated reason, quoted or closely paraphrased. Do not invent a cap to explain a low score — only controls the assessment actually applied belong here. A served score above its cap is a hard defect."
+     "doc": "What the ASSESSMENT applied. Per item: {cap_id, kind, ceiling, affected_categories[], rationale, e_ids[]}. kind: cap | uncertainty_band | qa_hold | analyst_override. Read the workbook's own cap log (IR-00N rows) and the QA verdict (qa_verdict.json); rationale is the stated reason, quoted or closely paraphrased. Do not invent a cap to explain a low score — only controls the assessment actually applied belong here. A served score above its cap is a hard defect.",
+     "absence_is_correct_when": "the run's cap log records no cap, uncertainty band, QA hold or analyst override"
     },
     "gates": {
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "The SG family results (submission gates). Per item: {gate_id, plain_label, result, detail, not_run_reason}. gate_id is SG-nn. result: PASS | FAIL | NOT_RUN. plain_label REQUIRED — a human sentence, 8-18 words; this card renders to the client and a bare code teaches them to distrust the page. not_run_reason REQUIRED when result is NOT_RUN — a gate reporting PASS because it did not run is worse than one reporting FAIL. DISCLOSE, DO NOT SUPPRESS: a failing gate is shown with its measurement; it does not block promotion."
+     "doc": "The SG family results (submission gates). Per item: {gate_id, plain_label, result, detail, not_run_reason}. gate_id is SG-nn. result: PASS | FAIL | NOT_RUN. plain_label REQUIRED — a human sentence, 8-18 words; this card renders to the client and a bare code teaches them to distrust the page. not_run_reason REQUIRED when result is NOT_RUN — a gate reporting PASS because it did not run is worse than one reporting FAIL. DISCLOSE, DO NOT SUPPRESS: a failing gate is shown with its measurement; it does not block promotion.",
+     "not_producer_authored": true,
+     "absence_is_correct_when": null,
+     "not_producer_authored_why": "The connector runs SG-V4 and SG-S8 ON the payload at submit and writes gate_results; the serve layer joins that against gate_registry. A producer authoring a result asserts an outcome that does not exist yet."
     }
    }
   },
@@ -146,7 +150,8 @@
      "required": false,
      "type": "list",
      "item_type": "object",
-     "doc": "Cohorts withheld under the minimum (spec H8: cohort_size < 5 -> do NOT publish; emit insufficient_cohort=true). Per item: {sub_vertical, category_id, cohort_size, insufficient_cohort} — the withheld cohort is recorded, never silently dropped, and nothing else about it is published."
+     "doc": "Cohorts withheld under the minimum (spec H8: cohort_size < 5 -> do NOT publish; emit insufficient_cohort=true). Per item: {sub_vertical, category_id, cohort_size, insufficient_cohort} — the withheld cohort is recorded, never silently dropped, and nothing else about it is published.",
+     "absence_is_correct_when": "every cohort met the minimum size, so nothing was withheld"
     }
    }
   }
@@ -417,7 +422,8 @@
     "trend": {
      "required": true,
      "type": "string",
-     "doc": "GROWING | STABLE | DECLINING | VOLATILE, COMPUTED from the series, with the CAGR where 3+ dated points exist. FEWER THAN 3 DATED POINTS -> no trend label at all: emit trend=null, verified_sparse=true, and label it a snapshot. A trend drawn from two points is a line, not a trajectory — never asserted without >=3 dated points. Computed or null, never a sentinel."
+     "doc": "GROWING | STABLE | DECLINING | VOLATILE, COMPUTED from the series, with the CAGR where 3+ dated points exist. FEWER THAN 3 DATED POINTS -> no trend label at all: emit trend=null, verified_sparse=true, and label it a snapshot. A trend drawn from two points is a line, not a trajectory — never asserted without >=3 dated points. Computed or null, never a sentinel.",
+     "absence_is_correct_when": "the series holds fewer than 3 dated points (the contract mandates trend=null and verified_sparse=true; there is no non-fabricated string)"
     },
     "verified_sparse": {
      "required": false,
@@ -427,7 +433,8 @@
     "quarantine_reason": {
      "required": false,
      "type": "string",
-     "doc": "Emitted when the identity gate quarantines the series (the honest empty state renders instead of the series). (The required 35-60 word READING of STEP 7 — what the trajectory means for the assessment, cited — has no named payload key; see page _notes.)"
+     "doc": "Emitted when the identity gate quarantines the series (the honest empty state renders instead of the series). (The required 35-60 word READING of STEP 7 — what the trajectory means for the assessment, cited — has no named payload key; see page _notes.)",
+     "absence_is_correct_when": "the identity gate did NOT quarantine the series"
     },
     "reading": {
      "required": true,
@@ -456,7 +463,8 @@
     "gap_analysis": {
      "required": false,
      "type": "object",
-     "doc": "The B2B/B2C and internal/external gaps — 'Where both sides exist, state the GAP and what it implies' (O9 prompt STEP 4). Conditional by construction: omit when only one audience was established. Object: {b2b_b2c, internal_external, e_ids}. b2b_b2c — 25-55 words: the gap between the customer-side and employee-side readings and what it implies. An employee rating well above the customer rating says the constraint is not capability but process; the reverse says delivery is outrunning the operating model. internal_external — 25-55 words, the gap INSIDE the organisation, localised to a named function. Measured exemplar: 'Engineering scores 4.2 - front-line ops scores 3.1'. e_ids — the citations behind both. The Overview card's 'B2B/B2C gap' chip is a presence flag computed at render from b2b_b2c being non-empty; it is never a stored boolean. PROPOSED, NOT RECOVERED — ADJUDICATION 2026-08-05: no source names this payload key or any key inside it; the serving DDL comment reads only 'the B2B/B2C and internal/external gaps'. The two prose slots are the minimum faithful reading of STEP 4; the key names are registry-assigned and open to revision."
+     "doc": "The B2B/B2C and internal/external gaps — 'Where both sides exist, state the GAP and what it implies' (O9 prompt STEP 4). Conditional by construction: omit when only one audience was established. Object: {b2b_b2c, internal_external, e_ids}. b2b_b2c — 25-55 words: the gap between the customer-side and employee-side readings and what it implies. An employee rating well above the customer rating says the constraint is not capability but process; the reverse says delivery is outrunning the operating model. internal_external — 25-55 words, the gap INSIDE the organisation, localised to a named function. Measured exemplar: 'Engineering scores 4.2 - front-line ops scores 3.1'. e_ids — the citations behind both. The Overview card's 'B2B/B2C gap' chip is a presence flag computed at render from b2b_b2c being non-empty; it is never a stored boolean. PROPOSED, NOT RECOVERED — ADJUDICATION 2026-08-05: no source names this payload key or any key inside it; the serving DDL comment reads only 'the B2B/B2C and internal/external gaps'. The two prose slots are the minimum faithful reading of STEP 4; the key names are registry-assigned and open to revision.",
+     "absence_is_correct_when": "only one audience was established (the contract says omit)"
     },
     "displayed_lines": {
      "required": false,
@@ -505,7 +513,8 @@
     "note": {
      "required": false,
      "type": "string",
-     "doc": "O10. 15-30 words where any pillar is below gate: which cells drive it and what would close them. Otherwise omit."
+     "doc": "O10. 15-30 words where any pillar is below gate: which cells drive it and what would close them. Otherwise omit.",
+     "absence_is_correct_when": "no pillar sits below the 80 gate (the contract says otherwise omit)"
     },
     "item_count": {
      "required": true,
@@ -537,7 +546,10 @@
     "self_sourced_basis": {
      "required": false,
      "type": "string",
-     "doc": "O11. COMPUTED AT READ — do not send. Names the domains the share above was measured against, or, when the run records no publication domain for the entity itself, says that and what would close it. A percentage with no stated basis and an absent percentage are both unreadable: the first invites certainty, the second reads as 'the producer left it empty'."
+     "doc": "O11. COMPUTED AT READ — do not send. Names the domains the share above was measured against, or, when the run records no publication domain for the entity itself, says that and what would close it. A percentage with no stated basis and an absent percentage are both unreadable: the first invites certainty, the second reads as 'the producer left it empty'.",
+     "not_producer_authored": true,
+     "absence_is_correct_when": null,
+     "not_producer_authored_why": "COMPUTED AT READ - do not send. computed.py fills it unconditionally and the writer spec binds no column, so a producer-sent value lands nowhere."
     },
     "mix_implication": {
      "required": true,
