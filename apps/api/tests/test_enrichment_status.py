@@ -272,3 +272,24 @@ def test_ran_is_measured_before_redaction_strips_what_it_measures():
     assert apply_at < redact_at, (
         "computed_apply must run BEFORE redact_section — the customer audience "
         "would otherwise be told no scan reached a roster that a scan reached.")
+
+
+def test_a_spec_with_no_floor_reads_as_no_floor_not_as_a_floor_of_one(
+        monkeypatch):
+    """The third mutation survivor: `spec.get("thin_below") or 0`.
+
+    Every register entry carries `thin_below` — the completeness test above
+    requires it — so the fallback never fires against the real file and the
+    mutant `or 1` lived. It is still reachable if an entry is ever added
+    without one, and the two answers differ: a floor of 0 can never be
+    undercut, a floor of 1 declares any empty surface thin. Absent means no
+    floor, and a surface with no floor is never thin.
+    """
+    monkeypatch.setattr(
+        computed, "_ENRICHMENT_REGISTER",
+        {"techstack.techstack": {"sources": ["clay"], "counts": "items",
+                                 "basis_key": "detection_basis"}},
+        raising=False)
+    s = _status("techstack", "techstack", {"items": []})
+    assert s["thin_below"] == 0
+    assert s["thin"] is False, "no declared floor cannot make a surface thin"

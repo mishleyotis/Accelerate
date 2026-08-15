@@ -23,6 +23,24 @@
    "test": "apps/mcp/tests/test_contract_text_is_evidence.py",
    "target": "packages/shared/contracts_data.json",
    "why": "no corpus-scale claim or client name in contract prose, and the two committed copies agree"
+  },
+  {
+   "test": "apps/api/tests/test_enrichment_status.py",
+   "target": "apps/api/dma_api/computed.py",
+   "why": "the badge no payload could clear: `ran` must be null where the surface cannot observe enrichment, and false only where it measured one",
+   "symbol": "enrichment_status"
+  },
+  {
+   "test": "apps/mcp/tests/test_fetch_pdf.py",
+   "target": "apps/mcp/dma_mcp/fetching.py",
+   "why": "MEM-0070: a PDF decoded as UTF-8 refused every true citation from a PDF-only source",
+   "symbol": "_pdf_text"
+  },
+  {
+   "test": "apps/mcp/tests/test_staged_readback.py",
+   "target": "apps/mcp/dma_mcp/staged.py",
+   "why": "the read half of submit — verbatim, live row only, oversized sections described not truncated",
+   "symbol": "get_staged_payload"
   }
  ],
  "_not_mutation_testable": [

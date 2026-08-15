@@ -121,3 +121,37 @@ def test_a_dict_payload_from_the_driver_is_handled_as_well_as_a_string():
     row = (1, "PASS", PAYLOAD, WHEN, "p", "c", None)   # already a dict
     out = staged.get_staged_payload(_Conn(row), "r", "heatmap", "grid")
     assert out["data"] == PAYLOAD["grid"]
+
+
+def _exact(n: int) -> dict:
+    """A section whose compact JSON is EXACTLY n bytes."""
+    shell = len(json.dumps({"t": ""}, separators=(",", ":")))
+    return {"t": "x" * (n - shell)}
+
+
+def test_the_index_and_the_body_agree_at_the_exact_boundary():
+    """Two survivors of the mutation check, and they are the same bug.
+
+    `inline: n <= LIMIT` in the index and `if n > LIMIT` on the body are two
+    statements of one boundary, written in opposite directions in different
+    functions. Flip either and a section exactly at the budget is advertised as
+    inline and then refused when asked for — a producer told it can fetch
+    something it cannot. Nothing else in this suite exercises the equality
+    case, so both mutants lived.
+    """
+    body = _exact(staged.SECTION_INLINE_BYTES)
+    payload = {"edge": body}
+    idx = staged.get_staged_payload(_Conn(_row(payload)), "r", "heatmap")
+    assert idx["sections"]["edge"]["bytes"] == staged.SECTION_INLINE_BYTES
+    assert idx["sections"]["edge"]["inline"] is True
+
+    got = staged.get_staged_payload(_Conn(_row(payload)), "r", "heatmap", "edge")
+    assert "error" not in got, "the index promised inline; the body must deliver"
+    assert got["data"] == body
+
+    # And one byte over is refused, from both sides.
+    over = {"edge": _exact(staged.SECTION_INLINE_BYTES + 1)}
+    idx2 = staged.get_staged_payload(_Conn(_row(over)), "r", "heatmap")
+    assert idx2["sections"]["edge"]["inline"] is False
+    got2 = staged.get_staged_payload(_Conn(_row(over)), "r", "heatmap", "edge")
+    assert got2["error"] == "section_too_large"
