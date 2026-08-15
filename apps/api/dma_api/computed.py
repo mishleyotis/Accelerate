@@ -45,6 +45,21 @@ LAYERS = (("OPS", "P3"), ("CUST", "P2"), ("DATA", "P4"), ("INFRA", "P4"))
 TILE_FOR_STATUS = {"CONFIRMED": "CONFIRMED", "INFERRED": "INFERRED",
                    "CLAIMED": "CLAIMED", "ABSENT": "GAPS"}
 
+# What each tile MEANS. The vocabulary's own definitions, not a fact about any
+# client, which is why they live here rather than being asked of a producer —
+# a definition two producers word differently is how one register's CONFIRMED
+# comes to mean something other than another's. Wording taken from the
+# reference client's own submission, which is the only place it has ever been
+# written down.
+TILE_DETAIL = {
+    "CONFIRMED": "Vendor or client statements place the product in the estate.",
+    "INFERRED": "Technographic or indirect signal; a vendor statement would "
+                "confirm.",
+    "CLAIMED": "Stated but not corroborated; treated as absent for fit.",
+    "GAPS": "Searched and not established in this estate; named, because a "
+            "list of what is absent is the finding.",
+}
+
 
 def _product_label(vendor: str | None, name: str | None) -> str:
     """`vendor + " " + product`, unless the product already carries it.
@@ -262,25 +277,31 @@ def landscape(cur, data: dict, run_id) -> None:
         if tile:
             buckets[tile].append((_product_label(vendor, name), level))
 
-    # THE RECOMPUTE OWNS THE ARITHMETIC, NOT THE SENTENCE.
+    # THE RECOMPUTE OWNS THE TILE, SO IT OWNS THE TILE'S SENTENCE TOO.
     #
-    # `detail` used to be rebuilt as a hardcoded None, so the producer's prose
-    # — "Vendor or client statements place the product in the estate." — was
-    # discarded on every read. Measured 2026-08-15 on the reference client:
-    # the staged payload carried it on all four tiles and the served payload
-    # carried none, the only genuine producer-to-serve drop among the 32 the
-    # audit reported.
+    # `detail` served null on every tile for every client. My first attempt
+    # carried the producer's prose forward from `data["tiles"]` — and it was a
+    # no-op, because `insights_landscape` HAS NO TILES COLUMN. The writer
+    # deliberately stores none: T2's contract is four counts recomputed from
+    # the T1 register, so the tile is server-derived and there is nothing of
+    # the producer's to preserve. Carrying forward a field that is never
+    # persisted is dead code that looks like a fix.
     #
-    # Invariant 8 puts `count` and `basis` here because a stored count can
-    # disagree with the register. It says nothing about a sentence the
-    # register cannot produce, and rebuilding a whole object is how a field
-    # nobody meant to own gets destroyed anyway. Keyed by `kind` because that
-    # is what identifies a tile; order and membership are still this
-    # function's to decide.
-    was = data.get("tiles") if isinstance(data, dict) else None
-    detail_for = {t.get("kind"): t.get("detail")
-                  for t in (was or []) if isinstance(t, dict)}
-
+    # What the two clients actually submitted settles what the field IS. One
+    # producer wrote nothing; the other wrote
+    #
+    #     CONFIRMED  "Vendor or client statements place the product in the
+    #                 estate."
+    #     INFERRED   "Technographic or indirect signal; a vendor statement
+    #                 would confirm."
+    #     CLAIMED    "Stated but not corroborated; treated as absent for fit."
+    #
+    # Those are DEFINITIONS OF THE STATUS VOCABULARY, identical for every
+    # client — not facts about either institution. A definition asked of the
+    # producer is a definition two producers can word differently, which is
+    # how one register's CONFIRMED comes to mean something else from another's.
+    # It belongs here, beside `TILE_FOR_STATUS`, with the rest of the
+    # vocabulary.
     tiles = []
     for kind in ("CONFIRMED", "INFERRED", "CLAIMED", "GAPS"):
         members = buckets[kind]
@@ -293,7 +314,7 @@ def landscape(cur, data: dict, run_id) -> None:
                       if len(levels) > 1 else
                       f"{len(members)} · {levels[0]} evidence" if levels else
                       f"{len(members)} · evidence level not recorded"),
-            "detail": detail_for.get(kind),
+            "detail": TILE_DETAIL.get(kind),
             # Only the GAPS tile names its members: a list of what is absent
             # is the finding; a list of what is present is the register.
             "named_items": ([n for n, _ in members] if kind == "GAPS" else []),

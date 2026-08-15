@@ -405,19 +405,22 @@ def test_every_computed_at_read_field_has_a_function_that_writes_it():
             assert f'"{f}"' in src, f"{page}.{section}.{f} is computed by nothing"
 
 
-# ── the recompute owns the arithmetic, not the sentence ───────────────
-def test_landscape_keeps_the_producers_detail_prose():
-    """The only genuine producer-to-serve drop among the audit's 32.
+# ── the recompute owns the tile, so it owns the tile's sentence ───────
+def test_landscape_states_what_each_tile_means():
+    """`detail` served null on every tile for every client.
 
-    `landscape()` recomputes the tiles from the T1 register — invariant 8,
-    because a stored count can disagree with the register — and rebuilt each
-    tile with `detail` hardcoded to None. The producer's prose ("Vendor or
-    client statements place the product in the estate.") was on all four
-    staged tiles and none of the served ones.
+    The first attempt at this carried the producer's prose forward from
+    `data["tiles"]` and was a NO-OP, because `insights_landscape` has no tiles
+    column — the writer deliberately stores none, since T2's contract is four
+    counts recomputed from the T1 register. Carrying forward a field that is
+    never persisted is dead code that looks like a fix; production still
+    served 0 of 4 after it deployed.
 
-    Invariant 8 is about COUNTS. It says nothing about a sentence the register
-    cannot produce, and rebuilding a whole object is how a field nobody meant
-    to own gets destroyed anyway.
+    What the two clients submitted settles what the field is: one producer
+    wrote nothing, the other wrote definitions of the status VOCABULARY —
+    identical for any client, not facts about either institution. A definition
+    asked of a producer is one two producers can word differently, which is how
+    one register's CONFIRMED comes to mean something else from another's.
     """
     from dma_api import computed
 
@@ -426,39 +429,44 @@ def test_landscape_keeps_the_producers_detail_prose():
         def fetchall(self):
             return [("CONFIRMED", "Symitar", "Jack Henry", "L1"),
                     ("CONFIRMED", "Episys", "Jack Henry", "L2"),
-                    ("INFERRED", "Snowflake", "Snowflake", "L3")]
-
-    data = {"tiles": [
-        {"kind": "CONFIRMED", "count": 99, "basis": "stale",
-         "detail": "Vendor or client statements place the product in the estate."},
-        {"kind": "INFERRED", "count": 99, "basis": "stale",
-         "detail": "Technographic or indirect signal."},
-        {"kind": "CLAIMED", "count": 99, "basis": "stale", "detail": "Stated only."},
-    ]}
-    computed.landscape(_Cur(), data, "run")
-    by = {t["kind"]: t for t in data["tiles"]}
-
-    # The arithmetic is the recompute's, and it overrides the producer.
-    assert by["CONFIRMED"]["count"] == 2, "the register decides the count"
-    assert by["INFERRED"]["count"] == 1
-    assert "stale" not in by["CONFIRMED"]["basis"], "basis is recomputed too"
-
-    # The sentence is the producer's, and it survives.
-    assert by["CONFIRMED"]["detail"].startswith("Vendor or client statements")
-    assert by["INFERRED"]["detail"] == "Technographic or indirect signal."
-    assert by["CLAIMED"]["detail"] == "Stated only."
-    # A tile the producer never sent still renders, with nothing invented.
-    assert by["GAPS"]["detail"] is None
-
-
-def test_landscape_survives_a_section_with_no_prior_tiles():
-    """A run whose producer sent no tiles at all must not raise here."""
-    from dma_api import computed
-
-    class _Cur:
-        def execute(self, *a, **k): pass
-        def fetchall(self): return [("CONFIRMED", "X", "V", "L1")]
+                    ("INFERRED", "Snowflake", "Snowflake", "L3"),
+                    ("ABSENT", "MuleSoft", "Salesforce", "L2")]
 
     data = {}
     computed.landscape(_Cur(), data, "run")
-    assert [t["detail"] for t in data["tiles"]] == [None] * 4
+    by = {t["kind"]: t for t in data["tiles"]}
+    assert set(by) == {"CONFIRMED", "INFERRED", "CLAIMED", "GAPS"}
+    for kind, tile in by.items():
+        assert tile["detail"], f"{kind} has no definition"
+    assert "estate" in by["CONFIRMED"]["detail"]
+    assert by["CLAIMED"]["detail"] != by["INFERRED"]["detail"], (
+        "two statuses sharing one definition is the confusion this ends")
+    # The arithmetic is still the register's.
+    assert by["CONFIRMED"]["count"] == 2 and by["GAPS"]["count"] == 1
+    assert by["GAPS"]["named_items"] == ["Salesforce MuleSoft"]
+
+
+def test_every_tile_kind_has_a_definition():
+    """A tile added to TILE_FOR_STATUS without one would serve null again."""
+    from dma_api import computed
+    for kind in set(computed.TILE_FOR_STATUS.values()):
+        assert computed.TILE_DETAIL.get(kind), f"{kind} has no TILE_DETAIL"
+
+
+def test_a_producer_sent_tile_cannot_reach_here_anyway():
+    """Asserted on the writer spec, because the reason this is server-side is
+    that nothing of the producer's tiles is stored. If a tiles column is ever
+    added, this fails and the preserve-the-producer rule needs applying."""
+    import json
+    root = Path(__file__).resolve().parents[3]
+    spec = json.loads((root / "apps" / "mcp" / "dma_mcp"
+                       / "writer_spec.json").read_text())["specs"]
+    cols = [c["column"] for p in spec for w in p.get("writers", [])
+            if w.get("section") == "landscape" for c in w["columns"]]
+    assert cols, "the landscape writer disappeared"
+    assert "tiles" not in cols, (
+        "insights_landscape now stores tiles — a producer value can reach the "
+        "read path, so it must be preferred over the vocabulary default")
+
+
+# ── the recompute owns the arithmetic, not the sentence ───────────────
