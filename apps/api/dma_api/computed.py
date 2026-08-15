@@ -574,16 +574,33 @@ def _register_paths() -> list:
     there is no second copy in the tree to drift.
     """
     here = Path(__file__).resolve()
-    paths = [here.parent.parent / "shared" / "enrichment_register.json"]  # image
+    paths = []
+    # THE REPO PATH FIRST, and the order is the point.
+    #
+    # It used to be image-first, unconditionally. In the image that is the only
+    # path so the order was invisible; in a checkout it meant the tests read
+    # `apps/api/shared/` — a GITIGNORED artefact that deploy.sh copies there —
+    # in preference to `packages/shared/`, the file a human edits and git
+    # tracks. Measured 2026-08-15: the register was corrected at source, the
+    # whole suite was run, and every assertion was answered by a stale copy
+    # left behind by an earlier deploy. Two tests written to fail did, for the
+    # wrong reason; a test written to pass would have passed for one.
+    #
+    # A build artefact shadowing its own source is how verification runs
+    # against the wrong copy, and it does not announce itself — the file is
+    # there, it parses, and it is merely old.
+    #
     # In the image this module is /app/dma_api/computed.py — THREE parents, so
     # parents[3] raises IndexError. The first deploy of this loader built both
     # paths eagerly and died on the repo path before ever checking the image
     # path that existed beside it: every section carried
-    # `computed_error: IndexError` and no enrichment_status served. The repo
-    # layout is optional; the image layout is not.
+    # `computed_error: IndexError` and no enrichment_status served. So the repo
+    # path is CONDITIONAL — absent in the image, authoritative in a checkout —
+    # and the image path is the fallback that is always built.
     if len(here.parents) > 3:
         paths.append(here.parents[3] / "packages" / "shared"
                      / "enrichment_register.json")
+    paths.append(here.parent.parent / "shared" / "enrichment_register.json")
     return paths
 
 
@@ -632,26 +649,44 @@ def enrichment_status(data: dict, page: str, section: str) -> None:
     # carries the register's basis key, or a contact route on a roster, is a
     # row enrichment actually reached. A producer claiming a scan ran while no
     # row shows it would be believed by any check that read a boolean.
+    #
+    # But that only answers the question where a row CAN carry the mark. On
+    # firmographics, sentiment and thought leadership nothing distinguishes a
+    # Clay-surfaced filing from a searched one — the skill requires citing the
+    # source and not the tool, so both produce an identical row. Those surfaces
+    # declare `ran_observable: false` and `ran` serves null, because `false`
+    # there is not a measurement, it is the absence of one wearing a
+    # measurement's clothes (invariant 9). It served on every run this product
+    # has ever had, and the badge reading off it told every reader a scan had
+    # not run on surfaces where no payload could have said otherwise.
     basis_key = spec.get("basis_key")
     contact_keys = spec.get("contact_keys") or ()
-    enriched = 0
-    for r in rows:
-        if not isinstance(r, dict):
-            continue
-        if basis_key and str(r.get(basis_key) or "").strip():
-            enriched += 1
-        elif any(str(r.get(k) or "").strip() for k in contact_keys):
-            enriched += 1
+    observable = bool(basis_key or contact_keys)
 
     status = {
         "required": True,
         "sources": list(spec.get("sources") or []),
-        "ran": enriched > 0,
-        "enriched_rows": enriched,
         "count": count,
         "thin_below": floor,
         "thin": count < floor,
     }
+    if observable:
+        enriched = 0
+        for r in rows:
+            if not isinstance(r, dict):
+                continue
+            if basis_key and str(r.get(basis_key) or "").strip():
+                enriched += 1
+            elif any(str(r.get(k) or "").strip() for k in contact_keys):
+                enriched += 1
+        status["ran"] = enriched > 0
+        status["enriched_rows"] = enriched
+    else:
+        # Null, and the reason with it — a reader of this payload must be able
+        # to tell "we looked and enrichment reached nothing" from "this surface
+        # cannot tell", which is the whole distinction that was lost.
+        status["ran"] = None
+        status["ran_unobservable_reason"] = spec.get("ran_unobservable_reason")
     if status["thin"]:
         status["thin_reason"] = spec.get("thin_reason")
         status["closes_with"] = spec.get("closes_with")

@@ -372,7 +372,14 @@ function EnrichmentFlag({ s, what, audience }) {
      adjudication B exists to keep off the page. */
   if (!s || !s.required) return null;
   const thin = !!s.thin;
-  const unscanned = !s.ran;
+  /* `ran` is TRUE, FALSE or NULL, and the third is not the second.
+     Null means the surface cannot observe whether enrichment reached it: a
+     firmographic row cites the filing, not the tool that found the filing, so
+     a Clay-surfaced call report and a searched one are the same row. Reading
+     that as "did not run" is what put this badge on three surfaces where no
+     payload could ever have cleared it. `!s.ran` was the bug; `=== false` is
+     the fix, and it is a claim only where the API measured one. */
+  const unscanned = s.ran === false;
   if (!thin && !unscanned) return null;
   const customer = String(audience || "").toLowerCase() === "customer";
   const label = unscanned

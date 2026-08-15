@@ -187,3 +187,81 @@ test("an unestablished value renders NOTHING, in any audience or shape", () => {
      return — deliberately, as the record — so this asserts on behaviour above,
      not on a grep that a comment would fail. */
 });
+
+/* ── `ran` has three values, and the third is not the second ───────────────
+ *
+ * OWNER, four times across 2026-08-14/15: "I still see the scan did not run
+ * text on most surfaces... these are issues that should be resolved and not
+ * feature anywhere on the web app."
+ *
+ * The first fix reworded the badge. It was the wrong layer. The badge was
+ * firing because `EnrichmentFlag` read `!s.ran`, and `ran` was NULL — not
+ * false — on firmographics, sentiment and thought leadership, because those
+ * surfaces cannot observe whether enrichment reached them at all. A row cites
+ * the filing, never the tool that found the filing, so a Clay-surfaced call
+ * report and a searched one are the same row.
+ *
+ * `!null` is true, so the component said "no machine scan contributed rows
+ * here" on three surfaces where no payload could ever have said otherwise.
+ * That is the badge the owner kept seeing, and rewording it left it on screen.
+ */
+test("a null `ran` is silence, not a finding", () => {
+  for (const k of Object.keys(require.cache)) delete require.cache[k];
+  const seen = [];
+  const noop = () => undefined;
+  global.window = {};
+  global.React = {
+    Fragment: "Fragment",
+    createElement: (type, props, ...kids) => {
+      kids.flat(Infinity).forEach((k) => { if (typeof k === "string") seen.push(k); });
+      return { type, props, kids };
+    },
+    useState: (v) => [v, noop], useEffect: noop, useRef: () => ({ current: null }),
+    useMemo: (f) => f(), useCallback: (f) => f,
+    createContext: () => ({ Provider: null, Consumer: null }), useContext: noop,
+    Component: class {}, PureComponent: class {},
+  };
+  require(path.join(JS, "utils.js"));
+  const Flag = global.window.EnrichmentFlag;
+  assert.ok(typeof Flag === "function", "EnrichmentFlag is not exported");
+  const render = (s, what, audience) => {
+    seen.length = 0;
+    const out = Flag({ s, what, audience });
+    return { out, text: seen.join(" ") };
+  };
+
+  // The three surfaces as production now serves them: healthy count, ran null.
+  for (const what of ["firmographics", "sentiment", "thought leadership"]) {
+    for (const audience of ["internal", "customer"]) {
+      const { out, text } = render(
+        { required: true, sources: ["clay"], ran: null,
+          ran_unobservable_reason: "the row cites the filing, not the tool",
+          count: 13, thin_below: 9, thin: false },
+        what, audience);
+      assert.strictEqual(out, null,
+        `${what}/${audience}: a surface that cannot observe enrichment must `
+        + `render no badge at all; got ${JSON.stringify(text)}`);
+    }
+  }
+
+  // FALSE is still a finding — the measurement exists and came back empty.
+  // If this stops rendering, the fix went too far and the technology register
+  // is back to reading as a whole estate.
+  const measured = render(
+    { required: true, sources: ["explorium", "clay"], ran: false,
+      enriched_rows: 0, count: 12, thin_below: 20, thin: true,
+      thin_reason: "the technographic scan that widens this register did not run" },
+    "technology register", "internal");
+  assert.notStrictEqual(measured.out, null,
+    "ran:false is a measured absence and must still reach the reader");
+
+  // TRUE is silent when the surface is otherwise healthy.
+  const healthy = render(
+    { required: true, sources: ["clay"], ran: true, enriched_rows: 6,
+      count: 6, thin_below: 4, thin: false }, "leadership", "internal");
+  assert.strictEqual(healthy.out, null, "a healthy surface needs no badge");
+
+  // And the retired sentence is gone from every reachable branch.
+  assert.ok(!measured.text.includes("Scan did not run"),
+    `the retired badge text is still reachable: ${measured.text}`);
+});

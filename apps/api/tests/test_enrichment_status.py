@@ -133,6 +133,104 @@ def test_every_registered_surface_exists_in_the_contract():
         assert section in sections(page), f"{name} is not a real section"
 
 
+# ── the container name, written twice and compared nowhere ────────────
+def test_counts_names_a_list_the_section_contract_actually_declares():
+    """RULE_HELD_IN_TWO_PLACES_DRIFTS, measured.
+
+    This register said `"counts": "employee"` for overview.sentiment against a
+    section whose only rating list is `bars`. `data.get("employee")` returned
+    None on every run that has ever promoted, so the card served `count: 0,
+    thin: true` — "no retrievable rating was established" — while it rendered
+    seven rated bars above the sentence, and while the connector's SG-S8 passed
+    those same seven. Renderer and gate disagreed for the whole life of the
+    feature, because the container name lived in two files and no test put them
+    side by side.
+
+    The section existence check above passed throughout. Naming a real section
+    and then reading a key it does not have is the more common half of the
+    mistake, and it was the unchecked half."""
+    sys.path.insert(0, str(ROOT / "apps" / "mcp"))
+    from dma_mcp.contracts import sections
+
+    reg = json.loads((ROOT / "packages" / "shared" /
+                      "enrichment_register.json").read_text())["surfaces"]
+    for name, spec in reg.items():
+        page, _, section = name.partition(".")
+        fields = (sections(page).get(section) or {}).get("fields") or {}
+        key = spec["counts"]
+        assert key in fields, (
+            f"{name}: counts names {key!r}, which the contract does not "
+            f"declare — it has {sorted(fields)}. The status will count 0 rows "
+            f"forever and the surface will read as thin whatever it serves.")
+        assert fields[key].get("type") == "list", (
+            f"{name}: counts names {key!r}, a "
+            f"{fields[key].get('type')} — len() of a non-list is not a row "
+            f"count.")
+
+
+# ── ran: measured, or null, never a default wearing a measurement's clothes ──
+def test_every_surface_declares_whether_ran_is_observable():
+    """A surface that declares an enrichment source and no way to observe it
+    served `ran: false` for every run in this product's history.
+
+    firmographics, sentiment and thought_leadership each declared `clay` and
+    neither `basis_key` nor `contact_keys`, so `enriched` was structurally 0
+    and no payload could ever have cleared the badge that reads off it. The
+    owner reported that badge four times; the cause was here, one field short,
+    in a file whose completeness test checked five other fields.
+
+    So the declaration is now mandatory and exclusive: measure it, or say why
+    it cannot be measured."""
+    reg = json.loads((ROOT / "packages" / "shared" /
+                      "enrichment_register.json").read_text())["surfaces"]
+    for name, spec in reg.items():
+        observable = bool(spec.get("basis_key") or spec.get("contact_keys"))
+        declared_un = spec.get("ran_observable") is False
+        assert observable != declared_un, (
+            f"{name}: declare exactly one — a basis_key/contact_keys that "
+            f"evidences enrichment in the rows, or ran_observable: false. "
+            f"Declaring neither is what served `ran: false` on three surfaces "
+            f"that could never have said otherwise.")
+        if declared_un:
+            assert spec.get("ran_unobservable_reason"), (
+                f"{name}: ran_observable false needs its reason — a reader of "
+                f"the payload has to be able to tell 'enrichment reached "
+                f"nothing' from 'this surface cannot tell'.")
+
+
+def test_an_unobservable_surface_serves_null_not_false():
+    """Invariant 9: derived values are computed or null, never a default that
+    looks like data. `false` here is a claim the rows do not support."""
+    s = _status("overview", "firmographics",
+                {"fields": [{"field": "employees", "value": "1200"}] * 13})
+    assert s["ran"] is None, "false is a measurement this surface cannot make"
+    assert s["ran_unobservable_reason"], "null without its reason is a shrug"
+    assert "enriched_rows" not in s, "a count of nothing observable is noise"
+    assert s["count"] == 13 and s["thin"] is False, (
+        "thin is still measurable — it counts rows, which are observable")
+
+
+def test_an_observable_surface_still_measures_ran_both_ways():
+    """The other half: where the mark exists, `ran` is a real reading and must
+    stay one — the null branch must not swallow it."""
+    off = _status("techstack", "techstack", {"items": [{"name": "x"}] * 30})
+    on = _status("techstack", "techstack",
+                 {"items": [{"detection_basis": "scan"}] * 30})
+    assert off["ran"] is False and off["enriched_rows"] == 0
+    assert on["ran"] is True and on["enriched_rows"] == 30
+
+
+def test_sentiment_with_seven_rated_bars_is_not_thin():
+    """The card the owner was looking at. Seven bars, count 0, "no retrievable
+    rating carrying its sample size, scale and date was established"."""
+    s = _status("overview", "sentiment",
+                {"bars": [{"source": "App Store", "rating": 4.87,
+                           "scale": "1-5 stars", "n": 95033}] * 7})
+    assert s["count"] == 7, "the bars are the rows"
+    assert s["thin"] is False, "seven established ratings is not 'no rating'"
+    assert "thin_reason" not in s
+
+
 def test_an_unreadable_register_leaves_sections_unflagged_rather_than_failing(
         monkeypatch):
     """Additive: a page rendering without this is worse than one rendering
@@ -141,3 +239,36 @@ def test_an_unreadable_register_leaves_sections_unflagged_rather_than_failing(
     data = {"items": []}
     computed.enrichment_status(data, "techstack", "techstack")
     assert "enrichment_status" not in data
+
+
+def test_ran_is_measured_before_redaction_strips_what_it_measures():
+    """The ordering in pages.py is load-bearing for this field specifically.
+
+    `ran` on the leadership roster is evidenced by contact routes — email,
+    linkedin_url, phone — and those are exactly what redaction strips for the
+    customer audience. Compute after redaction and an enriched roster measures
+    `ran: false`, which renders "no machine scan of the estate contributed rows
+    here" to the client, about a roster that was enriched. A live false
+    statement, produced by two correct components in the wrong order.
+
+    Caught 2026-08-15 while replaying the promoted payload through the new
+    logic: the CUSTOMER copy flipped true -> false and the internal copy did
+    not. That was an artefact of replaying an already-redacted body, but it is
+    precisely the defect the real order avoids, so it is pinned here."""
+    enriched = [{"name": "A", "email": "a@x.com"},
+                {"name": "B", "linkedin_url": "https://x"},
+                {"name": "C", "phone": "+1"}, {"name": "D", "email": "d@x.com"}]
+    assert _status("overview", "leadership", {"roster": enriched})["ran"] is True
+
+    # The same roster as the customer audience receives it.
+    redacted = [{k: v for k, v in r.items() if k == "name"} for r in enriched]
+    assert _status("overview", "leadership", {"roster": redacted})["ran"] is False, (
+        "if this ever stops being false, the test no longer guards anything")
+
+    src = (ROOT / "apps" / "api" / "dma_api" / "pages.py").read_text()
+    apply_at = src.find("computed_apply(cur, page, section")
+    redact_at = src.find("redact_section(page, section")
+    assert apply_at > 0 and redact_at > 0, "the serve path moved; re-anchor this"
+    assert apply_at < redact_at, (
+        "computed_apply must run BEFORE redact_section — the customer audience "
+        "would otherwise be told no scan reached a roster that a scan reached.")

@@ -85,15 +85,44 @@ def test_the_failure_surfaces_as_computed_error_not_as_silence():
         computed._register_paths = real
 
 
-def test_the_image_path_is_looked_for_first():
-    """deploy.sh stages the file beside the package as `shared/`. That path has
-    to be tried BEFORE the repo layout, because in the image the repo layout
-    resolves to `/` and would silently miss."""
+def test_the_repo_path_wins_wherever_it_exists():
+    """The source of truth beats the build artefact — CORRECTED 2026-08-15.
+
+    This test used to assert the opposite, on the reasoning that the image path
+    "has to be tried BEFORE the repo layout, because in the image the repo
+    layout resolves to `/` and would silently miss". That reasoning was already
+    wrong when it was written: the repo path is built behind
+    `len(here.parents) > 3`, which is false in the image, so it is never in the
+    list there at all — the guard does the work, not the order.
+
+    What the order actually decided was which file a CHECKOUT reads, and it
+    chose `apps/api/shared/` — gitignored, written by deploy.sh, updated only
+    when someone deploys. Measured 2026-08-15: the register was corrected at
+    source, the suite was run against a copy left by an earlier deploy, and the
+    corrections were invisible. Nothing errored. The stale file parsed fine.
+
+    So: repo path first where it exists, image path always last and alone in
+    the image. A test suite must not be able to read a build artefact in
+    preference to the file a human edits."""
     paths = [str(p) for p in computed._register_paths()]
     assert len(paths) >= 2
-    assert paths[0].endswith("dma_api/../shared/enrichment_register.json") or \
-        "/shared/enrichment_register.json" in paths[0], paths[0]
-    assert "packages/shared" in paths[1], paths[1]
+    assert "packages/shared" in paths[0], (
+        f"the tracked file must be read first in a checkout: {paths}")
+    assert paths[-1].endswith("/shared/enrichment_register.json"), paths[-1]
+    assert "packages" not in paths[-1], (
+        f"the image fallback must be the staged copy: {paths[-1]}")
+
+
+def test_the_staged_copy_is_never_committed():
+    """It is a build artefact. Committing it would let the two drift with no
+    signal at all — the same shadowing as above, but permanent and shared."""
+    import subprocess
+    tracked = subprocess.run(
+        ["git", "ls-files", "apps/api/shared/"], cwd=ROOT,
+        capture_output=True, text=True).stdout.split()
+    assert not [f for f in tracked if f.endswith(".json")], (
+        f"apps/api/shared carries tracked JSON: {tracked}. deploy.sh writes "
+        "that directory; a committed copy is a second source of truth.")
 
 
 def test_the_dockerfile_copies_the_staging_directory():

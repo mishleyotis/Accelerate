@@ -986,6 +986,62 @@ producer toward fabrication — the single worst outcome this system has — and
 each was contradicted by the field's own contract text, which nothing was
 reading.
 
+### 7.9 The badge the owner reported four times, and why rewording it failed
+
+The owner reported "scan did not run" on 14 August and three more times on 15
+August, the last one after a fix had shipped. Both of the first two fixes were
+real and neither reached the cause.
+
+- **Fix 1** was the wording. `EnrichmentFlag` said "Scan did not run", which is
+  a status of *our* pipeline — adjudication B's class, missed because it is
+  phrased as a finding. Reworded to a statement about the reading.
+- **Fix 2** was the cause, one layer down, and it was in the register. Three
+  surfaces — firmographics, sentiment, thought leadership — declared `clay` as
+  a source and declared **no way to observe it**: no `basis_key`, no
+  `contact_keys`. `enriched` was therefore 0 for every run this product has
+  ever promoted, `ran` was `false` by construction, and the component read
+  `!s.ran`. **No payload could ever have cleared the badge.** Rewording it left
+  a false statement on screen in better prose.
+
+The reason no basis key exists is not an oversight — it is the shape of the
+evidence. The synthesis skill requires citing the *source*, not the tool, so a
+Clay-surfaced call report and a searched one produce an identical row. The
+question is not false on those surfaces, it is **unanswerable**, and `false`
+was invariant 9 exactly: a default that looks like data. `ran` is now
+three-valued and serves `null` with its reason; the component tests
+`=== false`.
+
+Two further defects fell out of looking at the same file:
+
+- `overview.sentiment` declared `"counts": "employee"` against a section whose
+  list is `bars`. Every promoted run served `count: 0, thin: true` — "no
+  retrievable rating carrying its sample size, scale and date was established"
+  — beneath **seven rated bars**, while the connector's SG-S8 passed those same
+  seven. Renderer and gate disagreed for the whole life of the feature because
+  the container name was written in two files and compared in none.
+- `_register_paths()` read the gitignored `apps/api/shared/` build artefact
+  **before** the tracked `packages/shared/` source. In the image that ordering
+  is invisible (the repo path is guarded out); in a checkout it meant the suite
+  answered from a copy left behind by an earlier deploy. Caught by writing a
+  test that failed for the wrong reason. Repo path now wins wherever it exists.
+
+**REM-070 · REM-071 · REM-072 — closed.** Tests:
+`test_counts_names_a_list_the_section_contract_actually_declares`,
+`test_every_surface_declares_whether_ran_is_observable`,
+`test_an_unobservable_surface_serves_null_not_false`,
+`test_ran_is_measured_before_redaction_strips_what_it_measures`,
+`test_the_repo_path_wins_wherever_it_exists`, and
+`a null \`ran\` is silence, not a finding` (web). Confirmed in the opened app
+against the payload the new API computes, both audiences, with a **negative
+control**: the same checks run against the pre-fix payload fail on the two
+badge assertions, so they are not vacuous.
+
+The class to carry forward is `DECLARED_DEPENDENCY_WITH_NO_OBSERVABLE`: a
+register may not name a source for a surface that has no way to show the source
+reached it. Declaring the dependency and leaving the observation
+unimplemented does not produce silence — it produces a permanent negative,
+stated to the reader as a finding.
+
 ---
 
 ## 8 · Files
