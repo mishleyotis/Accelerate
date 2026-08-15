@@ -1100,6 +1100,41 @@ The measurement is being redone first, because MEM-0070 above made that
 client's own disclosures citable for the first time and may move the number
 without any gate change.
 
+### 7.12 When the owner removes a surface a check was guarding
+
+The build owner looked at the platform dossier's peer roster and said: *"This
+part on peers should not even be there; unnecessary detail."* Removing it broke
+two assertions — `PEER SET · 5` and a named peer — both carrying MEM-0068,
+whose finding was that **25 cited peer_deployment rows were served and rendered
+zero times**.
+
+The tempting move is to delete the assertions along with the block. The
+opposite move — restore the block because a check demands it — is worse. Both
+skip the actual question: *did the removal orphan the evidence, or was the block
+redundant with something that survived?*
+
+Measured in the opened app against the live production payload. It was
+redundant. `PEER POSITION` renders per platform and states the peer position in
+prose that **names** the established peer ("GreenState is the…", "Lake Michigan
+Credit Union runs UiPath and…"), and `Considered and set aside · 8` gives the
+discarded set its route. The cited rows still reach a reader. The owner's
+instinct was right and the roster was a second telling of the same thing.
+
+So the assertions were **re-pointed, not deleted**: `PEER POSITION` present, and
+a peer NAMED rather than counted. One incidental correction fell out — the old
+check asserted `Alliant Credit Union`, a name this run mentions *only* inside a
+discarded platform's rationale, so it was testing a string that never had to
+render. `GreenState` is the peer the run actually establishes.
+
+The rule: an owner removing a surface retires the **assertion**, never the
+**finding**. Re-point the check at whatever now carries the guarantee, and if
+nothing does, that is a regression to report rather than a check to delete.
+
+**Verification standard used throughout this section**: every claim above was
+confirmed by opening the app against payloads pulled from the **deployed API**,
+not from fixtures — 65 assertions across five suites, both audiences, all
+green.
+
 ---
 
 ## 8 · Files

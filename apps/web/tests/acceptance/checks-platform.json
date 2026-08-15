@@ -1,102 +1,102 @@
 [
-  {
-    "route": "#/clients/baxter-credit-union-bcu/platform",
-    "name": "PF-A1-collapsed",
-    "assert": [
-      {
-        "kind": "count_at_most",
-        "arg": "EVIDENCE BEHIND THIS PLATFORM",
-        "n": 5,
-        "why": "one disclosure per promoted platform and no duplicates; the run promotes five"
-      },
-      {
-        "kind": "text_present",
-        "arg": "THE RUN'S OTHER PROMOTED PLATFORMS",
-        "why": "PF-A2: the derived tile-to-area join may ORDER the stories and must never hide them. It hid all five."
-      },
-      {
-        "kind": "text_present",
-        "arg": "fit 76.5",
-        "why": "PF-A3: fit_score is the number the page ranks by; it was served on every platform and shown on none. fit_basis rides on the tooltip."
-      }
-    ]
-  },
-  {
-    "route": "#/clients/baxter-credit-union-bcu/platform",
-    "name": "PF-A4-expanded",
-    "steps": [
-      {
-        "do": "click_text",
-        "arg": "Evidence behind this platform",
-        "all": true
-      }
-    ],
-    "assert": [
-      {
-        "kind": "text_present",
-        "arg": "PEER SET · 5",
-        "why": "MEM-0068: 25 cited peer_deployment rows were served and rendered zero times"
-      },
-      {
-        "kind": "text_present",
-        "arg": "Alliant Credit Union",
-        "why": "the peer is named, not counted — peer_coverage alone is a number with no route to its basis"
-      },
-      {
-        "kind": "text_present",
-        "arg": "unestablished",
-        "why": "deployed:null is a search that settled nothing; true/false/null are three different findings and must not flatten to a blank"
-      },
-      {
-        "kind": "text_present",
-        "arg": "ESTATE REACH",
-        "why": "estate_reach — what the register already reaches, and why — appeared in no frontend file"
-      },
-      {
-        "kind": "text_present",
-        "arg": "READINESS · READY WITH CONDITIONS",
-        "why": "the readiness verdict and its already_true / must_be_true_first prose were served and unread"
-      },
-      {
-        "kind": "text_present",
-        "arg": "HOW IT LANDS IN THIS ESTATE",
-        "why": "integration_pathway was unread"
-      },
-      {
-        "kind": "text_present",
-        "arg": "ASSESSMENT PATHWAY",
-        "why": "zennify_pathway renders for the INTERNAL audience; redaction removes the key for the customer, so checks-customer.json asserts its absence"
-      },
-      {
-        "kind": "text_absent",
-        "arg": "undefined",
-        "why": "a leaked JS value reads as content"
-      },
-      {
-        "kind": "text_absent",
-        "arg": "NaN",
-        "why": "invariant 9: derived values are computed or null, never NaN"
-      },
-      {
-        "kind": "text_absent",
-        "arg": "[object Object]",
-        "why": "an unrendered object is a contract field the component never learned to read"
-      },
-      {
-        "kind": "text_present",
-        "arg": "WHY THIS RANK",
-        "why": "BAX-24: rank_rationale lives on the opportunity tile and rendered nowhere; rank and fit shown together with no reason between them reads as a broken sort"
-      },
-      {
-        "kind": "text_present",
-        "arg": "RANKED AGAINST THE ARITHMETIC",
-        "why": "BAX-24/BAX-10 measured live: rank 3 scores 73.0 above rank 2's 70.0. The run ranks on dependency and says so; the inversion is named outright rather than left for a reader to notice and distrust"
-      },
-      {
-        "kind": "text_present",
-        "arg": "The order is the run’s dependency sequence, not its score.",
-        "why": "the explanation is the content, not the badge"
-      }
-    ]
-  }
+ {
+  "route": "#/clients/baxter-credit-union-bcu/platform",
+  "name": "PF-A1-collapsed",
+  "assert": [
+   {
+    "kind": "count_at_most",
+    "arg": "EVIDENCE BEHIND THIS PLATFORM",
+    "n": 5,
+    "why": "one disclosure per promoted platform and no duplicates; the run promotes five"
+   },
+   {
+    "kind": "text_present",
+    "arg": "THE RUN'S OTHER PROMOTED PLATFORMS",
+    "why": "PF-A2: the derived tile-to-area join may ORDER the stories and must never hide them. It hid all five."
+   },
+   {
+    "kind": "text_present",
+    "arg": "fit 76.5",
+    "why": "PF-A3: fit_score is the number the page ranks by; it was served on every platform and shown on none. fit_basis rides on the tooltip."
+   }
+  ]
+ },
+ {
+  "route": "#/clients/baxter-credit-union-bcu/platform",
+  "name": "PF-A4-expanded",
+  "steps": [
+   {
+    "do": "click_text",
+    "arg": "Evidence behind this platform",
+    "all": true
+   }
+  ],
+  "assert": [
+   {
+    "kind": "text_present",
+    "arg": "unestablished",
+    "why": "deployed:null is a search that settled nothing; true/false/null are three different findings and must not flatten to a blank"
+   },
+   {
+    "kind": "text_present",
+    "arg": "ESTATE REACH",
+    "why": "estate_reach — what the register already reaches, and why — appeared in no frontend file"
+   },
+   {
+    "kind": "text_present",
+    "arg": "READINESS · READY WITH CONDITIONS",
+    "why": "the readiness verdict and its already_true / must_be_true_first prose were served and unread"
+   },
+   {
+    "kind": "text_present",
+    "arg": "HOW IT LANDS IN THIS ESTATE",
+    "why": "integration_pathway was unread"
+   },
+   {
+    "kind": "text_present",
+    "arg": "ASSESSMENT PATHWAY",
+    "why": "zennify_pathway renders for the INTERNAL audience; redaction removes the key for the customer, so checks-customer.json asserts its absence"
+   },
+   {
+    "kind": "text_absent",
+    "arg": "undefined",
+    "why": "a leaked JS value reads as content"
+   },
+   {
+    "kind": "text_absent",
+    "arg": "NaN",
+    "why": "invariant 9: derived values are computed or null, never NaN"
+   },
+   {
+    "kind": "text_absent",
+    "arg": "[object Object]",
+    "why": "an unrendered object is a contract field the component never learned to read"
+   },
+   {
+    "kind": "text_present",
+    "arg": "WHY THIS RANK",
+    "why": "BAX-24: rank_rationale lives on the opportunity tile and rendered nowhere; rank and fit shown together with no reason between them reads as a broken sort"
+   },
+   {
+    "kind": "text_present",
+    "arg": "RANKED AGAINST THE ARITHMETIC",
+    "why": "BAX-24/BAX-10 measured live: rank 3 scores 73.0 above rank 2's 70.0. The run ranks on dependency and says so; the inversion is named outright rather than left for a reader to notice and distrust"
+   },
+   {
+    "kind": "text_present",
+    "arg": "The order is the run’s dependency sequence, not its score.",
+    "why": "the explanation is the content, not the badge"
+   },
+   {
+    "kind": "text_present",
+    "arg": "PEER POSITION",
+    "why": "MEM-0068 restated. SUPERSEDED 2026-08-15: the original assertion was `PEER SET · 5`, a roster block the build owner removed on sight — \"This part on peers should not even be there; unnecessary detail.\" The finding MEM-0068 records is that cited peer rows were served and rendered zero times, and that is still the thing to guard; the roster was one way to satisfy it and not the only one. PEER POSITION carries the same guarantee in prose the owner kept."
+   },
+   {
+    "kind": "text_present",
+    "arg": "GreenState",
+    "why": "the peer is NAMED, not counted — peer_coverage alone is a number with no route to its basis. Was `Alliant Credit Union`, which this run mentions only in a DISCARDED platform's rationale; GreenState is the peer the run actually establishes, so the old assertion was testing a name that never had to render."
+   }
+  ]
+ }
 ]

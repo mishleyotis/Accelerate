@@ -90,13 +90,18 @@
    },
    {
     "kind": "text_present",
-    "arg": "PEER SET · 5",
-    "why": "the peer evidence is client-safe and MUST survive redaction — a redaction that removes defensible content is as wrong as one that leaks"
+    "arg": "ESTATE REACH",
+    "why": "estate_reach is served to both audiences and renders for both"
    },
    {
     "kind": "text_present",
-    "arg": "ESTATE REACH",
-    "why": "estate_reach is served to both audiences and renders for both"
+    "arg": "PEER POSITION",
+    "why": "MEM-0068 restated. SUPERSEDED 2026-08-15: the original assertion was `PEER SET · 5`, a roster block the build owner removed on sight — \"This part on peers should not even be there; unnecessary detail.\" The finding MEM-0068 records is that cited peer rows were served and rendered zero times, and that is still the thing to guard; the roster was one way to satisfy it and not the only one. PEER POSITION carries the same guarantee in prose the owner kept."
+   },
+   {
+    "kind": "text_present",
+    "arg": "GreenState",
+    "why": "the peer is NAMED, not counted — peer_coverage alone is a number with no route to its basis. Was `Alliant Credit Union`, which this run mentions only in a DISCARDED platform's rationale; GreenState is the peer the run actually establishes, so the old assertion was testing a name that never had to render."
    }
   ],
   "steps": [
