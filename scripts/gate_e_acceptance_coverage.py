@@ -177,8 +177,14 @@ def main(argv) -> int:
             if not qid:
                 continue
             inv_ids.add(qid)
+            # A check is textless when it ADOPTS the document's wording and
+            # states nothing of its own. The curated shape carries the improved
+            # statement in `rule`, so a bare "ADOPT" verdict beside real rule
+            # text is fully specified — counting it as textless would report
+            # the completed half of the work as the outstanding half.
             verdict = str(chk.get("verdict") or "")
-            if verdict.strip() == "ADOPT":
+            rule = str(chk.get("rule") or "").strip()
+            if verdict.strip() == "ADOPT" and len(rule) < 20:
                 textless.append(f'{sec["surface_id"]}:{qid}')
 
     md_ids = set(QA_ID.findall(md))

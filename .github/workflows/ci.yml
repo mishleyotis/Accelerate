@@ -54,6 +54,38 @@ jobs:
       # have no reader.
       - name: Gate F — a declared key has a reader
         run: python3 scripts/gate_f_declared_keys_have_readers.py
+      # The curation covered 115 of the specification's 127 surfaces and walked
+      # past twelve — three whole Insights surfaces carrying eighteen P0 checks
+      # among them, in neither artefact, not included and not excluded. Nothing
+      # noticed until a completeness critic counted. This is that count, and it
+      # also refuses an exclusion whose reason names no file or contract:
+      # three of the first pass's rested on a comment inside a module that is
+      # mounted nowhere.
+      - name: Gate E — every document surface has a disposition
+        run: python3 scripts/gate_e_acceptance_coverage.py
+      # The gate has to be able to fail. Removing a surface's disposition must
+      # be caught, or "0 unaccounted" is a sentence rather than a measurement.
+      - name: Gate E negative control
+        run: |
+          python3 - <<'PY'
+          import json, subprocess, sys, shutil
+          INV = "apps/web/tests/acceptance/inventory.json"
+          shutil.copyfile(INV, "/tmp/inv.bak")
+          d = json.loads(open(INV).read())
+          before = len(d["sections"])
+          d["sections"] = [s for s in d["sections"]
+                           if s.get("surface_id") != "insights.recmodal"]
+          assert len(d["sections"]) == before - 1, "control target not found"
+          open(INV, "w").write(json.dumps(d, indent=1, ensure_ascii=False))
+          rc = subprocess.run([sys.executable,
+                               "scripts/gate_e_acceptance_coverage.py"],
+                              capture_output=True).returncode
+          shutil.copyfile("/tmp/inv.bak", INV)
+          if rc == 0:
+              print("Gate E passed with a surface removed — it measures nothing")
+              sys.exit(1)
+          print("Gate E negative control ok: dropping one surface fails it")
+          PY
       # verify_deployed.py needs gcloud and production credentials, which CI
       # does not have — so CI cannot run the byte comparison. What it CAN
       # enforce is that the script stays wired into the release path, which is
