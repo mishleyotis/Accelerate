@@ -59,10 +59,21 @@ from pathlib import Path
 # pinned-row/pinned-key pair that duplicated CAGR, `founded` versus
 # `founded_year`. deploy.sh stages the module into both images; Gate D fails CI
 # if either one is missing it.
-for _cand in (
-    Path(__file__).resolve().parent.parent / "shared",          # image
-    Path(__file__).resolve().parents[3] / "packages" / "shared",  # repo
-):
+# Candidate roots, built LAZILY. In the image this module is
+# /app/<pkg>/<name>.py — THREE parents — so `parents[3]` raises IndexError, and
+# a tuple literal evaluates BOTH entries before the loop body runs, so it raises
+# before the image path it would have found is ever tried. Exactly this killed
+# the api once (computed.py) and the mcp container twice (deploy 8 and 9). The
+# repo layout is optional; the image layout is not.
+def _shared_roots():
+    here = Path(__file__).resolve()
+    roots = [here.parent / "shared", here.parent.parent / "shared"]
+    if len(here.parents) > 3:
+        roots.append(here.parents[3] / "packages" / "shared")
+    return roots
+
+
+for _cand in _shared_roots():
     if _cand.exists() and str(_cand) not in sys.path:
         sys.path.insert(0, str(_cand))
 

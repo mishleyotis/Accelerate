@@ -54,8 +54,21 @@ the other is a hole, and the reader could not tell them apart.
 import sys as _sys
 from pathlib import Path as _Path
 
-for _cand in (_Path(__file__).resolve().parent / "shared",              # image
-              _Path(__file__).resolve().parents[3] / "packages" / "shared"):
+# Candidate roots, built LAZILY. In the image this module is
+# /app/<pkg>/<name>.py — THREE parents — so `parents[3]` raises IndexError, and
+# a tuple literal evaluates BOTH entries before the loop body runs, so it raises
+# before the image path it would have found is ever tried. Exactly this killed
+# the api once (computed.py) and the mcp container twice (deploy 8 and 9). The
+# repo layout is optional; the image layout is not.
+def _shared_roots():
+    here = _Path(__file__).resolve()
+    roots = [here.parent / "shared", here.parent.parent / "shared"]
+    if len(here.parents) > 3:
+        roots.append(here.parents[3] / "packages" / "shared")
+    return roots
+
+
+for _cand in _shared_roots():
     if _cand.exists() and str(_cand) not in _sys.path:
         _sys.path.insert(0, str(_cand))
 
