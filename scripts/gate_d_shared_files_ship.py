@@ -121,10 +121,33 @@ def read_references(dirs, names) -> dict:
             text = path.read_text(encoding="utf-8", errors="replace")
             for lineno, line in _code_lines(text, path.suffix):
                 for name in names:
-                    if name in line:
+                    if name in line or _imports_module(line, name):
                         found.setdefault(name, []).append(
                             f"{path.relative_to(ROOT)}:{lineno}")
     return found
+
+
+def _imports_module(line: str, name: str) -> bool:
+    """Does this line IMPORT the shared file as a module?
+
+    THE MISS THIS CLOSES. `apps/mcp/dma_mcp/gaps.py` was rewritten to
+    `from enrichment_gaps import (...)`. The only place the string
+    "enrichment_gaps.py" appeared was a trailing comment, and this gate strips
+    comments — correctly, since its own prose names the files it polices. So
+    the reference was invisible, the gate passed, the mcp image shipped without
+    the module, and the container died on its startup probe. Cloud Run kept
+    traffic on the previous revision, so it was a failed deploy rather than an
+    outage — by Cloud Run's grace, not by design.
+
+    A python module is imported by its STEM, never its filename, so a gate that
+    only looks for filenames cannot see the most common way a shared file is
+    used. Matching `import <stem>` and `from <stem> import` closes that.
+    """
+    if not name.endswith(".py"):
+        return False
+    stem = re.escape(name[:-3])
+    return bool(re.search(rf"^\s*(?:from\s+{stem}\s+import|import\s+{stem})\b",
+                          line))
 
 
 def dockerfile_copies(deployable: str) -> list:

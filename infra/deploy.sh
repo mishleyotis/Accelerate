@@ -65,6 +65,14 @@ if [ -f apps/api/Dockerfile ]; then
 fi
 if [ -f apps/mcp/Dockerfile ]; then
   say "svc_mcp"
+  # dma_mcp/gaps.py imports the shared gap module at load time. Deploy 8
+  # shipped without this and the container failed its startup probe; Cloud Run
+  # kept traffic on the previous revision, so it was a failed deploy rather
+  # than an outage — but only by Cloud Run's grace, not by design.
+  cp packages/shared/enrichment_gaps.py apps/mcp/shared/ || {
+    echo "FATAL: packages/shared/enrichment_gaps.py is missing" >&2; exit 1; }
+  cp packages/shared/contracts_data.json apps/mcp/shared/ || {
+    echo "FATAL: packages/shared/contracts_data.json is missing" >&2; exit 1; }
   # Capability-URL token: the streamable-HTTP path embeds it, so the
   # Cowork connector needs only the URL. Rotating the secret rotates the
   # URL. Created once, never echoed.
