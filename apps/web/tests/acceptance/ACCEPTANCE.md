@@ -1135,6 +1135,80 @@ confirmed by opening the app against payloads pulled from the **deployed API**,
 not from fixtures — 65 assertions across five suites, both audiences, all
 green.
 
+### 7.13 The out-of-scope cells do NOT depress the score — measured, hypothesis wrong
+
+The second client's alert queue measured 98: **13** closeable now · **33**
+correct-absence · **45** thin-unresearched · **7** unreachable (host blocked).
+The 33 are base cells the entity has no business having — consumer-credit
+decisioning at a firm that originates no credit, BaaS at a firm with no partner
+distribution, TCFD at a private dealer bound by neither OSFI B-15 nor IFRS S2.
+
+I put it to the owner that those 33 were probably also **depressing the
+composite**, since they score at mean 1.91 against a run mean of 2.76. The
+owner said measure it first. That was the right call: **the hypothesis is
+wrong.**
+
+Method validated before use — the aggregation here (category = mean of its
+cells, pillar = mean of its categories, composite = pillar-weighted 25/30/20/25)
+reproduces the workbook's own stated numbers exactly: composite 2.76, P1 2.96,
+P2 2.11, P3 3.33, P4 2.88.
+
+| | with the 33 | without | delta |
+|---|---|---|---|
+| P1 | 2.96 | 2.96 | +0.00 |
+| P2 | 2.11 | 2.12 | +0.00 |
+| P3 | 3.33 | 3.34 | +0.00 |
+| P4 | 2.89 | 2.89 | +0.00 |
+| **composite** | **2.76** | **2.76** | **+0.00** |
+
+No pillar moves, no category moves by more than 0.10, no band changes. The
+reason is the aggregation shape: the 33 sit *inside* categories whose means
+they do not shift — the nine P1C5 cells all score 3.0 against a P1C5 mean of
+exactly 3.000, and the P2C2 cells score 1.5 against a P2C2 mean of 1.492. They
+are representative of their categories, not outliers dragging them.
+
+**So the scoping fix is justified by the alert queue and by what a reader sees
+— 33 cells rendering as gaps that are not gaps — and NOT by score fairness.**
+Recording that distinction because the wrong rationale would have survived into
+the change and been repeated as fact.
+
+### 7.14 What the measurement found instead: clone blocks
+
+Looking for the score effect surfaced something larger, in the **upstream
+assessment** rather than in this app — the app is faithfully serving what the
+workbook says.
+
+Odlum's `P2C3` carries **59 cells with the identical score (2.5), the identical
+confidence (HIGH) and the identical four evidence ids**, with one rationale
+reading "Evidence from research corpus mapped to subcap".
+
+Generalising it — cells sharing an identical evidence set *and* an identical
+score, in blocks of ten or more:
+
+| | scored cells | in a clone block of 10+ | single id reaching most cells | ids reaching ≥40 cells |
+|---|---|---|---|---|
+| second client | 709 | **224 (32%)** | 186 (26%) | 19 |
+| reference client | 766 | **604 (79%)** | 191 (25%) | 36 |
+
+The reference client — the one promoted and serving in production — is the
+worse of the two. Its largest block is 43 cells at score 3 from five evidence
+ids, spanning one category.
+
+A shared source is not itself a defect: one annual report legitimately bears on
+many capabilities. What the clone block measures is a shared source producing
+**one score across many distinct capabilities** — a single judgement wearing
+many hats, rendered as 766 independent readings. This is BAX-09 ("one T5 item
+supporting 47 cells") measured across the corpus rather than spotted once.
+
+The connector already caps this for evidence a producer registers
+(`source_rules.sole_evidence_reach`, W6, keyed on the canonicalised document).
+It does **not** apply to ingested workbook evidence, which is where all of the
+above lives. That asymmetry is the gap.
+
+**OPEN, for the owner** — this is a finding about assessment production, not a
+bug in the serving app, and closing it means either a corpus gate at ingest or
+a change to the assessment skill. Recorded, not acted on.
+
 ---
 
 ## 8 · Files
