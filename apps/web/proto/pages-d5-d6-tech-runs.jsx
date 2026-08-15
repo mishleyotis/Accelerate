@@ -1529,7 +1529,7 @@ function SentimentGrid() {
 
 /* ── D6 Assessment health ────────────────────────────────────────── */
 function ClientHealth({ entity, run }) {
-  const { role, audience, pushToast } = useApp();
+  const { role, audience, pushToast, openEvidence } = useApp();
   const [tab, setTab] = useState("alerts");
   const alerts = DMA.alertsForEntity(entity.id);
   const [compareBase, setCompareBase] = useState(entity.runs[1]?.id);
@@ -1590,21 +1590,103 @@ function ClientHealth({ entity, run }) {
       ) : tab === "diff" ? (
         <VersionDiff entity={entity} baseId={compareBase} targetId={compareTarget} setBase={setCompareBase} setTarget={setCompareTarget} />
       ) : tab === "gates" ? (
+        /* Two arrays, kept apart, per the charter: `caps[]` is what the
+           ASSESSMENT applied to the scores and `gates[]` is what VALIDATION
+           found. The prototype held one blob and the distinction was lost.
+
+           The heading said "G01-G10" and the badge said "N / 10 PASS" against
+           a hardcoded ten-gate fixture set. In LIVE the array was empty, so
+           production served "0 / 10 PASS" over an empty table while the run
+           carried a FAILING grounding gate. A run states its own gate ids; the
+           denominator is the length of what it states (invariant 8). */
+        (() => {
+          const gates = DMA.QA_GATES || [];
+          const caps = DMA.SAFEGUARD_CAPS || [];
+          const pass = gates.filter(g => g.status === "PASS").length;
+          const failed = gates.some(g => g.status === "FAIL");
+          return (
         <div className="card flush">
-          <div className="card-head"><h3>Safeguard gates · G01–G10</h3><span className={`b ${DMA.QA_GATES.some(g => g.status === "FAIL") ? "b-org" : "b-teal"}`}>{DMA.QA_GATES.filter(g => g.status === "PASS").length} / 10 PASS</span></div>
+          <div className="card-head">
+            <h3>Safeguard gates</h3>
+            {gates.length ? (
+              <span className={`b ${failed ? "b-org" : "b-teal"}`}>{pass} / {gates.length} PASS</span>
+            ) : null}
+          </div>
+          {gates.length ? (
           <table className="tbl">
             <tbody>
-              {DMA.QA_GATES.map(g => (
+              {gates.map(g => (
                 <tr key={g.id}>
-                  <td data-label="Gate" style={{ width: 60 }}><span className="chip">{g.id}</span></td>
+                  <td data-label="Gate" style={{ width: 70 }}><span className="chip">{g.id}</span></td>
+                  {/* `plain_label` is the sentence an SG renders to a client;
+                      the gate id alone is a code nobody outside this build
+                      can read. */}
                   <td data-label="Name"><strong>{g.name}</strong></td>
-                  <td data-label="Evidence">{g.evidence}</td>
-                  <td data-label="Verdict" style={{ width: 80 }}><span className={`b ${g.status === "PASS" ? "b-above" : "b-below"}`}>{g.status}</span></td>
+                  <td data-label="Evidence">
+                    {g.evidence
+                      ? <span style={{ fontSize: 11 }}>{g.evidence}</span>
+                      : <EnrichmentGap what="Gate detail" audience={audience} compact />}
+                    {g.e_ids && g.e_ids.length ? (
+                      <div style={{ marginTop: 3 }}>
+                        <PlatformEvChips ids={g.e_ids} openEvidence={openEvidence} />
+                      </div>
+                    ) : null}
+                  </td>
+                  {/* NOT_RUN is a third verdict, not a soft fail: the gate
+                      abstained and recorded why (V4 abstains when a scoped
+                      centroid holds fewer than five members). Rendering it as
+                      a failure would report a finding the run did not make. */}
+                  <td data-label="Verdict" style={{ width: 90 }}>
+                    <span className={`b ${g.status === "PASS" ? "b-above"
+                                        : g.status === "NOT_RUN" ? "b-muted" : "b-below"}`}>
+                      {g.status}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          ) : (
+            <SectionEmpty section="safeguard_gates" />
+          )}
+
+          {caps.length ? (
+            <div style={{ borderTop: "1px solid var(--z-sep)" }}>
+              <div className="card-head" style={{ borderBottom: 0 }}>
+                <h3>Caps the assessment applied · {caps.length}</h3>
+              </div>
+              <table className="tbl">
+                <tbody>
+                  {caps.map((c, i) => (
+                    <tr key={c.cap_id || i}>
+                      <td data-label="Cap" style={{ width: 80 }}><span className="chip">{c.cap_id}</span></td>
+                      <td data-label="Ceiling" style={{ width: 70 }}>
+                        {c.ceiling != null && c.ceiling !== ""
+                          ? <span className="f-mono">{c.ceiling}</span>
+                          : <EnrichmentGap what="Ceiling" audience={audience} compact />}
+                      </td>
+                      <td data-label="Categories" style={{ width: 110 }}>
+                        {(c.affected_categories || []).map(k => (
+                          <span key={k} className="chip" style={{ marginRight: 3 }}>{k}</span>
+                        ))}
+                      </td>
+                      <td data-label="Why">
+                        <span style={{ fontSize: 11 }}>{c.rationale}</span>
+                        {c.e_ids && c.e_ids.length ? (
+                          <div style={{ marginTop: 3 }}>
+                            <PlatformEvChips ids={c.e_ids} openEvidence={openEvidence} />
+                          </div>
+                        ) : null}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
         </div>
+          );
+        })()
       ) : tab === "age" ? (
         <div className="card flush">
           <div className="card-head"><h3>Evidence age tracker</h3></div>

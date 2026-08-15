@@ -2009,7 +2009,33 @@
     return alerts;
   }
 
-  /* ── QA gates ───────────────────────────────────────────────────── */
+  /* ── QA gates ─────────────────────────────────────────────────────
+     LIVE returned `[]` while the run served its safeguard results on
+     `heatmap.safeguard_gates` — one cap row and two SG gates, every one of
+     them cited. The card above it renders "Safeguard gates · G01-G10" and
+     "0 / 10 PASS" from that empty array, so production showed a ten-gate
+     denominator that no run defines, a zero numerator, and an empty table,
+     while the section carried a FAILING V4 grounding gate nobody could see.
+      The static ten are the prototype's fixture set and are kept only for the
+     unLIVE demo. A live run states its OWN gate ids (SG-S8, SG-V4), so the
+     denominator is the length of what it states — invariant 8, counts are
+     computed where a source of truth exists.
+      `plain_label` is what an SG renders to a client (invariant 12: 8-18
+     words), and `not_run_reason` is required whenever the result is NOT_RUN —
+     V4 abstains to a recorded NOT_RUN when a scoped centroid holds fewer than
+     five members, so the reason is the content on exactly the runs where the
+     verdict says least. */
+  const liveGates = () => (liveField(null, "gates") || []).map(g => ({
+    id: g.gate_id || g.id || null,
+    name: g.plain_label || g.gate_id || g.id || null,
+    status: g.result || null,
+    // The detail object is the arithmetic the gate ran; NOT_RUN carries its
+    // reason instead, and a gate with neither renders no evidence line rather
+    // than an empty one.
+    evidence: g.not_run_reason || (g.detail == null ? null : typeof g.detail === "string" ? g.detail : JSON.stringify(g.detail)),
+    not_run_reason: g.not_run_reason || null,
+    e_ids: g.e_ids || []
+  })).filter(g => g.id);
   const QA_GATES = LIVE ? [] : [{
     id: "G01",
     name: "Source diversity",
@@ -2872,7 +2898,18 @@
     get ROADMAP() {
       return LIVE ? liveField(null, "roadmap") || [] : ROADMAP;
     },
-    QA_GATES,
+    // A getter, not the const: the const is evaluated once at module load,
+    // before any entity is fetched, so a LIVE array built there would be the
+    // empty one forever.
+    get QA_GATES() {
+      return LIVE ? liveGates() : QA_GATES;
+    },
+    /* The charter's two arrays, kept apart: `caps[]` is what the ASSESSMENT
+       applied to the scores, `gates[]` is what VALIDATION found. The prototype
+       held one blob called "safeguard gates" and the distinction was lost. */
+    get SAFEGUARD_CAPS() {
+      return LIVE ? liveField(null, "caps") || [] : [];
+    },
     IMPORT_AUDIT,
     PENDING_REVIEW,
     ACTIVE_RUNS,

@@ -156,13 +156,18 @@ async function main() {
         failures += 1;
         continue;
       }
-      const clicked = await page.evaluate(({ needle, all }) => {
+      const clicked = await page.evaluate(({ needle, all, exact }) => {
         const want = String(needle).toLowerCase();
+        // Icon-only controls carry their name in aria-label and no text at
+        // all — the settings popover that gates the analyst view is one — so
+        // the label is matched as well as the content.
+        const label = (n) => ((n.textContent || "") + " " +
+                              (n.getAttribute("aria-label") || "")).toLowerCase();
         const hits = [...document.querySelectorAll("button, [role=button], summary")]
-          .filter((n) => (n.textContent || "").toLowerCase().includes(want));
+          .filter((n) => (exact ? label(n).trim() === want : label(n).includes(want)));
         (all ? hits : hits.slice(0, 1)).forEach((n) => n.click());
         return hits.length;
-      }, { needle: s.arg, all: !!s.all });
+      }, { needle: s.arg, all: !!s.all, exact: !!s.exact });
       if (!clicked) {
         console.log(`FAIL  ${chk.name} · click_text(${s.arg}) matched no control`);
         failures += 1;

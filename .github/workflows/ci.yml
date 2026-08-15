@@ -43,6 +43,17 @@ jobs:
       # the whole suite passed — because in the repo the file is there.
       - name: Gate D — shared contracts ship in the image
         run: python3 scripts/gate_d_shared_files_ship.py
+      # `platform_story` served sixteen keys per platform and the page read
+      # two: the ranked fit score, the readiness verdict, the estate reach and
+      # twenty-five cited peer rows were promoted and shown nowhere. Nothing
+      # was broken in a way any test could see — the payload was right, the
+      # promote was right, the suite was green and the content was invisible.
+      # Finding it took a hand census against a live payload; this is that
+      # census, run against the contract so it needs no promoted run, and
+      # ratcheted like Gate B because plenty of declared keys legitimately
+      # have no reader.
+      - name: Gate F — a declared key has a reader
+        run: python3 scripts/gate_f_declared_keys_have_readers.py
       # verify_deployed.py needs gcloud and production credentials, which CI
       # does not have — so CI cannot run the byte comparison. What it CAN
       # enforce is that the script stays wired into the release path, which is

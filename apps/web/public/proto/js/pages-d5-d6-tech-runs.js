@@ -2406,7 +2406,8 @@ function ClientHealth({
   const {
     role,
     audience,
-    pushToast
+    pushToast,
+    openEvidence
   } = useApp();
   const [tab, setTab] = useState("alerts");
   const alerts = DMA.alertsForEntity(entity.id);
@@ -2547,35 +2548,122 @@ function ClientHealth({
     targetId: compareTarget,
     setBase: setCompareBase,
     setTarget: setCompareTarget
-  }) : tab === "gates" ? /*#__PURE__*/React.createElement("div", {
-    className: "card flush"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card-head"
-  }, /*#__PURE__*/React.createElement("h3", null, "Safeguard gates \xB7 G01\u2013G10"), /*#__PURE__*/React.createElement("span", {
-    className: `b ${DMA.QA_GATES.some(g => g.status === "FAIL") ? "b-org" : "b-teal"}`
-  }, DMA.QA_GATES.filter(g => g.status === "PASS").length, " / 10 PASS")), /*#__PURE__*/React.createElement("table", {
-    className: "tbl"
-  }, /*#__PURE__*/React.createElement("tbody", null, DMA.QA_GATES.map(g => /*#__PURE__*/React.createElement("tr", {
-    key: g.id
-  }, /*#__PURE__*/React.createElement("td", {
-    "data-label": "Gate",
-    style: {
-      width: 60
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "chip"
-  }, g.id)), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Name"
-  }, /*#__PURE__*/React.createElement("strong", null, g.name)), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Evidence"
-  }, g.evidence), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Verdict",
-    style: {
-      width: 80
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    className: `b ${g.status === "PASS" ? "b-above" : "b-below"}`
-  }, g.status))))))) : tab === "age" ? /*#__PURE__*/React.createElement("div", {
+  }) : tab === "gates" ? (
+  /* Two arrays, kept apart, per the charter: `caps[]` is what the
+     ASSESSMENT applied to the scores and `gates[]` is what VALIDATION
+     found. The prototype held one blob and the distinction was lost.
+      The heading said "G01-G10" and the badge said "N / 10 PASS" against
+     a hardcoded ten-gate fixture set. In LIVE the array was empty, so
+     production served "0 / 10 PASS" over an empty table while the run
+     carried a FAILING grounding gate. A run states its own gate ids; the
+     denominator is the length of what it states (invariant 8). */
+  (() => {
+    const gates = DMA.QA_GATES || [];
+    const caps = DMA.SAFEGUARD_CAPS || [];
+    const pass = gates.filter(g => g.status === "PASS").length;
+    const failed = gates.some(g => g.status === "FAIL");
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card flush"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("h3", null, "Safeguard gates"), gates.length ? /*#__PURE__*/React.createElement("span", {
+      className: `b ${failed ? "b-org" : "b-teal"}`
+    }, pass, " / ", gates.length, " PASS") : null), gates.length ? /*#__PURE__*/React.createElement("table", {
+      className: "tbl"
+    }, /*#__PURE__*/React.createElement("tbody", null, gates.map(g => /*#__PURE__*/React.createElement("tr", {
+      key: g.id
+    }, /*#__PURE__*/React.createElement("td", {
+      "data-label": "Gate",
+      style: {
+        width: 70
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "chip"
+    }, g.id)), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Name"
+    }, /*#__PURE__*/React.createElement("strong", null, g.name)), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Evidence"
+    }, g.evidence ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11
+      }
+    }, g.evidence) : /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Gate detail",
+      audience: audience,
+      compact: true
+    }), g.e_ids && g.e_ids.length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 3
+      }
+    }, /*#__PURE__*/React.createElement(PlatformEvChips, {
+      ids: g.e_ids,
+      openEvidence: openEvidence
+    })) : null), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Verdict",
+      style: {
+        width: 90
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `b ${g.status === "PASS" ? "b-above" : g.status === "NOT_RUN" ? "b-muted" : "b-below"}`
+    }, g.status)))))) : /*#__PURE__*/React.createElement(SectionEmpty, {
+      section: "safeguard_gates"
+    }), caps.length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        borderTop: "1px solid var(--z-sep)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head",
+      style: {
+        borderBottom: 0
+      }
+    }, /*#__PURE__*/React.createElement("h3", null, "Caps the assessment applied \xB7 ", caps.length)), /*#__PURE__*/React.createElement("table", {
+      className: "tbl"
+    }, /*#__PURE__*/React.createElement("tbody", null, caps.map((c, i) => /*#__PURE__*/React.createElement("tr", {
+      key: c.cap_id || i
+    }, /*#__PURE__*/React.createElement("td", {
+      "data-label": "Cap",
+      style: {
+        width: 80
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "chip"
+    }, c.cap_id)), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Ceiling",
+      style: {
+        width: 70
+      }
+    }, c.ceiling != null && c.ceiling !== "" ? /*#__PURE__*/React.createElement("span", {
+      className: "f-mono"
+    }, c.ceiling) : /*#__PURE__*/React.createElement(EnrichmentGap, {
+      what: "Ceiling",
+      audience: audience,
+      compact: true
+    })), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Categories",
+      style: {
+        width: 110
+      }
+    }, (c.affected_categories || []).map(k => /*#__PURE__*/React.createElement("span", {
+      key: k,
+      className: "chip",
+      style: {
+        marginRight: 3
+      }
+    }, k))), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Why"
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11
+      }
+    }, c.rationale), c.e_ids && c.e_ids.length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 3
+      }
+    }, /*#__PURE__*/React.createElement(PlatformEvChips, {
+      ids: c.e_ids,
+      openEvidence: openEvidence
+    })) : null)))))) : null);
+  })()) : tab === "age" ? /*#__PURE__*/React.createElement("div", {
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
