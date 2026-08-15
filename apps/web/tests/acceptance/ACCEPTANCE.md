@@ -1042,6 +1042,64 @@ reached it. Declaring the dependency and leaving the observation
 unimplemented does not produce silence — it produces a permanent negative,
 stated to the reader as a finding.
 
+### 7.10 A fail-closed rule that refuses a whole format
+
+**MEM-0070 — closed.** `register_evidence` verifies an excerpt verbatim against
+the fetched artefact, which is right. The fetcher decoded every response as
+UTF-8, which meant a PDF was compared as mojibake and *could not* verify. The
+second client made this measurable: its WAF answers 403 to every HTML path
+while `/docs/*.pdf` returns 200, so its client agreement, statement guides and
+every career posting are reachable **only** as PDFs. A producer working it
+registered **0 of 3 PDF sources against 13 of 13 HTML** ones, having confirmed
+by hand that its span was present in the bytes.
+
+This is the worst shape a fail-closed rule can take, and it is worth naming as
+a class. A refusal that is *indistinguishable from catching a fabrication*, but
+fires on a true citation, leaves an honest producer exactly two moves: drop a
+true finding, or go find a source it can pass. Both degrade the corpus, and
+neither is visible in any count — the run just looks thin. Regulatory filings,
+annual reports and client agreements are overwhelmingly PDFs, so this refused
+the T1 and T2 tiers the product rests on.
+
+Fixed as extraction only: no fuzzy matching, no repair, the verbatim comparison
+unchanged. Magic bytes decide the dispatch rather than the URL or the header
+alone, and a scanned PDF returns `None` (unreachable) rather than `""`, so an
+absent text layer does not read as a mismatched excerpt.
+
+The second finding is procedural and larger. The fetcher lived in `server.py`,
+which imports the MCP SDK at module scope, so **no test in the suite could
+import it**. That is why a one-line defect survived in production through every
+gate this repo has. It now lives in `dma_mcp/fetching.py` with 8 tests,
+including a negative control that fails if UTF-8 decoding was not the cause,
+and the two real-filing shapes a synthetic one-liner would miss — a span
+wrapped across lines, and a citation past page 1.
+
+Class: `LOGIC_NO_TEST_CAN_IMPORT`. Untestable placement is not a style
+question; it is the reason a defect gets to be permanent.
+
+### 7.11 Open, and the owner's call — the alert ceiling on the second client
+
+Not a defect. Recorded here because it is the one thing blocking two-client
+execution, and because resolving it silently would be the wrong move.
+
+`ALERT_CEILING = 15` was set by the build owner on 2026-08-14 after a run
+promoted carrying 98 open alerts, with the explicit instruction *"do not delete
+them to clear the gate"*. The second client still stands at 98 and a producer
+working it in good faith could not honestly get below the ceiling. Its argument,
+which is worth weighing and is **not yet independently measured**: a large share
+of those alerts are cells where no public source could observe the capability
+for a firm of that type — consumer-credit decisioning at a firm that does no
+consumer lending, TCFD disclosure at a private provincial dealer — for which
+`WORKED_ABSENT` is the *correct* output, not a gap. The ceiling cannot tell
+that from "thin because nobody looked", so both count the same.
+
+Any fix is a governance change with an obvious hazard: a producer-declared
+"correct absence" exemption turns the ceiling advisory and reopens exactly the
+fabrication route the owner closed. **Left open deliberately, for the owner.**
+The measurement is being redone first, because MEM-0070 above made that
+client's own disclosures citable for the first time and may move the number
+without any gate change.
+
 ---
 
 ## 8 · Files
