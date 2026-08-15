@@ -54,13 +54,23 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[3]
 
-# Every committed copy. The staged copies under apps/*/shared are written by
-# deploy.sh from the packages/shared source; they are listed too because they
-# are in the tree and a stale one in the tree is what gets read if a deploy is
-# skipped.
-COPIES = [
+# The two COMMITTED copies. Both are in git and both are read.
+COMMITTED = [
     REPO / "packages" / "shared" / "contracts_data.json",
     REPO / "apps" / "mcp" / "dma_mcp" / "contracts_data.json",
+]
+
+# The deploy-staging copies. `apps/*/shared/.gitignore` excludes `*.json` on
+# purpose: infra/deploy.sh writes these from packages/shared into each build
+# context, so they are build artefacts and are ABSENT in a fresh clone. The
+# first version of this test required them and passed locally — where a deploy
+# had run — while failing in CI, which is the repo-versus-runtime gap in the
+# other direction and precisely what Gate D exists to catch one layer up.
+#
+# Checked when present, never required: a stale staged copy left behind by an
+# interrupted deploy is a real hazard on a developer's machine, and an absent
+# one is the normal state everywhere else.
+STAGED = [
     REPO / "apps" / "mcp" / "shared" / "contracts_data.json",
     REPO / "apps" / "worker" / "shared" / "contracts_data.json",
 ]
@@ -144,10 +154,25 @@ def test_the_runtime_contract_and_the_deploy_source_are_the_same_bytes():
             "one validates against one shape and promotes against another.")
 
 
-@pytest.mark.parametrize("copy", COPIES, ids=lambda p: str(p).split("Accelerate/")[-1])
+@pytest.mark.parametrize("copy", COMMITTED,
+                         ids=lambda p: str(p).split("Accelerate/")[-1])
 def test_every_committed_copy_agrees(copy):
     assert copy.exists(), f"{copy} is committed and missing"
     assert copy.read_bytes() == SOURCE.read_bytes(), (
         f"{copy.relative_to(REPO)} has drifted from the source at "
-        f"{SOURCE.relative_to(REPO)}. Re-run infra/deploy.sh's staging step, "
-        "or apply the edit to packages/shared and re-stage.")
+        f"{SOURCE.relative_to(REPO)}. Apply the edit to packages/shared and "
+        "copy it across, or the connector validates and promotes against "
+        "different shapes.")
+
+
+@pytest.mark.parametrize("copy", STAGED,
+                         ids=lambda p: str(p).split("Accelerate/")[-1])
+def test_a_staged_copy_left_in_the_tree_is_not_stale(copy):
+    if not copy.exists():
+        pytest.skip(f"{copy.relative_to(REPO)} is a deploy artefact and is "
+                    "absent, which is the normal state outside a deploy")
+    assert copy.read_bytes() == SOURCE.read_bytes(), (
+        f"{copy.relative_to(REPO)} is a staged copy left over from an earlier "
+        f"deploy and no longer matches {SOURCE.relative_to(REPO)}. Re-run "
+        "infra/deploy.sh, or delete it — a stale one is what the next local "
+        "build would package.")
