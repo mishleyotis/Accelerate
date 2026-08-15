@@ -462,6 +462,27 @@ function EnrichmentGap({
   audience,
   compact
 }) {
+  /* OWNER ADJUDICATION 2026-08-14, superseding the three-state vocabulary
+     below: "It should not state queued for enrichment or held. It should
+     enrich and clarify real time and give the real data."
+      So this renders NOTHING. A value that cannot be established is not
+     announced to the reader in our workflow's language; the field is enriched
+     and shown, or it does not appear.
+      WHY THIS IS NOT A RETURN TO THE ORIGINAL DEFECT. Hiding an absent field is
+     what kept the missing website invisible for five days — but only because
+     nothing else was counting. Now three things are, none of them on the page:
+     `list_enrichment_gaps(run_id)` computes the empty set from the staged
+     payload and hands it to the producer as a worklist,
+     `audit_promoted_client.py` fails on a field null across 100% of its rows,
+     and CG-18 refuses a submission missing a must-present member outright. The
+     reader stops seeing our bookkeeping; the system does not stop keeping it.
+      Kept rather than deleted so the call sites stay self-documenting about
+     WHICH field is absent, and so the policy lives in one place if it is ever
+     revisited. A caller that can drop its whole row should do that instead —
+     see FirmographicsPanel, which builds a filtered row list. */
+  return null;
+
+  /* eslint-disable no-unreachable */
   /* DEFAULT-DENY on the audience, deliberately inverted from the usual
      `=== "customer"` test used elsewhere in this file.
       `audience` is "internal" or "customer" and this component is rendered from

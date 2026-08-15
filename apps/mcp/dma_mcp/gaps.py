@@ -104,8 +104,14 @@ def _member_gaps(page, section, fname, spec, val, out) -> None:
         elif is_held:
             held[name] = reason
     for want in members:
-        n = _norm(want)
-        if n in stated or n in held:
+        # Mirrors CG-18: a member may be a list of aliases for one fact, any
+        # of which satisfies it. Held here in step with validation.py because a
+        # worklist that asks for a field the gate already accepts sends the
+        # producer looking for something it has.
+        aliases = want if isinstance(want, (list, tuple)) else [want]
+        norms = [_norm(a) for a in aliases]
+        want = aliases[0]
+        if any(n in stated or n in held for n in norms):
             continue
         out.append({
             "page": page, "section": section,

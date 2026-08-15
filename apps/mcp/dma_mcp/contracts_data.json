@@ -226,11 +226,14 @@
      "must_present_key": "field",
      "must_present": [
       "employees",
-      "revenue",
       "CAGR",
       "HQ",
       "branches",
-      "founded_year",
+      [
+       "founded_year",
+       "founded",
+       "year_founded"
+      ],
       "primary_regulator",
       "charter",
       "website"
@@ -240,6 +243,21 @@
        "AUM",
        "total_assets",
        "assets"
+      ],
+      [
+       "revenue",
+       "total_income",
+       "interest_income",
+       "commission_revenue",
+       "trading_revenue",
+       "premium_placed",
+       "DWP",
+       "direct_written_premium",
+       "shares",
+       "deposits",
+       "loan_portfolio",
+       "net_flows",
+       "investment_income"
       ]
      ]
     },

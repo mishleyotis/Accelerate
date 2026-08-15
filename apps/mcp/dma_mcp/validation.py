@@ -101,10 +101,19 @@ def _check_must_present(section, fname, spec, val, empty_declared) -> list:
 
     out, accounted = [], stated | held
     for want in members:
-        norm = _norm_member(want)
-        if norm in accounted:
+        # A member may be a STRING or a LIST OF ALIASES for one fact. The
+        # spec writes "founded year"; the corpus writes `founded`; the
+        # normaliser folds case and punctuation but not synonyms, so the gate
+        # refused the gold-standard payload for a field it plainly stated.
+        # A gate that refuses correct content teaches producers to route
+        # around it, which is worse than the gap it was guarding.
+        aliases = want if isinstance(want, (list, tuple)) else [want]
+        norms = [_norm_member(a) for a in aliases]
+        want = aliases[0]                      # the canonical name, for prose
+        norm = norms[0]
+        if any(n in accounted for n in norms):
             continue
-        if norm in empty:
+        if any(n in empty for n in norms):
             out.append(_reason(
                 "CG-18", section, f"{section}.{fname}[{want}]",
                 f"must-present member {want!r} is present with no value and "

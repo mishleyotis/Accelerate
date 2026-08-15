@@ -324,18 +324,47 @@ function FirmographicsPanel({
      for a pinned field. Before that existed, a held pinned field rendered no
      row at all and was indistinguishable from one never asked for — which is
      the exact confusion this whole component was rebuilt to end. */
-  const gap = (slot, label) => {
-    const reason = entity.held && entity.held[slot];
-    return reason ? /*#__PURE__*/React.createElement(EnrichmentGap, {
-      what: label,
-      held: true,
-      reason: reason,
-      audience: audience
-    }) : /*#__PURE__*/React.createElement(EnrichmentGap, {
-      what: label,
-      audience: audience
-    });
+  /* One row builder. A row whose value cannot be established is NOT
+     rendered — owner adjudication 2026-08-14, replacing the three-state gap
+     vocabulary ("Not stated · queued for enrichment", "Held · reason") with
+     silence on the page.
+      The reason that is safe now and was not before: the omission is no longer
+     invisible to the SYSTEM. `list_enrichment_gaps(run_id)` computes the same
+     empty set from the staged payload, and audit_promoted_client.py fails on
+     it — so a field the reader never sees is still on the producer's worklist
+     and still blocks a clean audit. Hiding it from the page hid it from
+     everyone only while nothing else counted.
+      `held` is likewise not surfaced: a quarantine reason is internal
+     provenance, and the row it belonged to now simply does not appear. */
+  const rows = [];
+  const row = (k, v) => {
+    if (v !== null && v !== undefined && v !== "") rows.push([k, v]);
   };
+  row(entity.assets_label || "Assets", fmtAssets(entity.assets, entity.assets_unit));
+  row("Employees", entity.employees != null ? entity.employees.toLocaleString() : null);
+  row("Branches", entity.branches != null ? String(entity.branches) : null);
+  row("Members", entity.members != null ? entity.members.toLocaleString() : null);
+  row("Customers", entity.customers != null ? entity.customers.toLocaleString() : null);
+  /* ONE CAGR row. It rendered twice until 2026-08-14: pinned here from the
+     series the adapter computes, and printed again by the passthrough below
+     because `cagr` was missing from the pinned KEY set. Computed wins — a
+     growth rate is derived and the promoted series is its source of truth —
+     and a run that stated its own falls back in with its own basis. */
+  row("CAGR", entity.cagr != null ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}` : entity.stated_cagr != null ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}` : null);
+  row("Net worth ratio", entity.net_worth_ratio != null ? `${fx(entity.net_worth_ratio, 2)}%` : null);
+  row("Regulator", entity.regulator || null);
+  // Linked because a domain a reader cannot open is half a fact.
+  row("Website", entity.website ? /*#__PURE__*/React.createElement("a", {
+    href: /^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`,
+    target: "_blank",
+    rel: "noopener noreferrer"
+  }, entity.website) : null);
+  row("HQ", entity.hq || null);
+  // Footprint reads the regulatory section's jurisdictions first, then a
+  // footprint the firmographics stated — both consumed by this one row.
+  row("Footprint", entity.footprint?.length ? entity.footprint.join(" · ") : entity.stated_footprint ? String(entity.stated_footprint) : null);
+  row("Charter", entity.charter || null);
+  row("Founded", entity.founded ? String(entity.founded).slice(0, 4) : null);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--z-lav)",
@@ -354,50 +383,11 @@ function FirmographicsPanel({
       lineHeight: 1.5,
       marginBottom: 8
     }
-  }, "The firmographics section did not arrive as a list of fields, so no figure below is read from it.") : null, /*#__PURE__*/React.createElement(Row, {
-    k: entity.assets_label || "Assets",
-    v: entity.assets != null ? fmtAssets(entity.assets, entity.assets_unit) : gap("assets", entity.assets_label || "Assets")
-  }), /*#__PURE__*/React.createElement(Row, {
-    k: "Employees",
-    v: entity.employees != null ? entity.employees.toLocaleString() : gap("employees", "Employees")
-  }), /*#__PURE__*/React.createElement(Row, {
-    k: "Branches",
-    v: entity.branches != null ? String(entity.branches) : gap("branches", "Branches")
-  }), entity.members != null ? /*#__PURE__*/React.createElement(Row, {
-    k: "Members",
-    v: entity.members.toLocaleString()
-  }) : null, entity.customers != null ? /*#__PURE__*/React.createElement(Row, {
-    k: "Customers",
-    v: entity.customers.toLocaleString()
-  }) : null, /*#__PURE__*/React.createElement(Row, {
-    k: "CAGR",
-    v: entity.cagr != null ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}` : entity.stated_cagr != null ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}` : gap("cagr", "CAGR")
-  }), entity.net_worth_ratio != null ? /*#__PURE__*/React.createElement(Row, {
-    k: "Net worth ratio",
-    v: `${fx(entity.net_worth_ratio, 2)}%`
-  }) : null, /*#__PURE__*/React.createElement(Row, {
-    k: "Regulator",
-    v: entity.regulator || gap("regulator", "Primary regulator")
-  }), /*#__PURE__*/React.createElement(Row, {
-    k: "Website",
-    v: entity.website ? /*#__PURE__*/React.createElement("a", {
-      href: /^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`,
-      target: "_blank",
-      rel: "noopener noreferrer"
-    }, entity.website) : gap("website", "Website")
-  }), /*#__PURE__*/React.createElement(Row, {
-    k: "HQ",
-    v: entity.hq || gap("hq", "HQ")
-  }), /*#__PURE__*/React.createElement(Row, {
-    k: "Footprint",
-    v: entity.footprint?.length ? entity.footprint.join(" · ") : entity.stated_footprint ? String(entity.stated_footprint) : gap("footprint", "Footprint")
-  }), /*#__PURE__*/React.createElement(Row, {
-    k: "Charter",
-    v: entity.charter || gap("charter", "Charter")
-  }), /*#__PURE__*/React.createElement(Row, {
-    k: "Founded",
-    v: entity.founded ? String(entity.founded).slice(0, 4) : gap("founded", "Founded")
-  }), (entity.extra_fields || []).map((f, i) => /*#__PURE__*/React.createElement(Row, {
+  }, "The firmographics section did not arrive as a list of fields, so no figure below is read from it.") : null, rows.map(([k, v], i) => /*#__PURE__*/React.createElement(Row, {
+    key: `f${i}`,
+    k: k,
+    v: v
+  })), (entity.extra_fields || []).map((f, i) => /*#__PURE__*/React.createElement(Row, {
     key: `x${i}`,
     k: humaniseFieldName(f.field),
     v: f.held ? /*#__PURE__*/React.createElement(EnrichmentGap, {

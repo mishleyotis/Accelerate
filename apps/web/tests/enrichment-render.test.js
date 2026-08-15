@@ -117,13 +117,26 @@ test("a finding chip never prints a serialised object", () => {
   assert.strictEqual(f({}), "Finding");
 });
 
-test("an enrichment gap with no audience shows the customer wording", () => {
-  /* DEFAULT-DENY. EnrichmentGap is rendered from ~50 sites across ten modules
-     and several needed `audience` threaded down to them. A site that misses the
-     prop must degrade to the CUSTOMER sentence, never to "queued for
-     enrichment" — that is our workflow language, naming a backlog the client is
-     not party to. Under the usual `=== "customer"` test the mistake leaks; the
-     component inverts it so the same mistake is merely less informative.
+test("an unestablished value renders NOTHING, in any audience or shape", () => {
+  /* SUPERSEDED PREMISE, kept as the record of what changed and why.
+
+     This test used to assert a three-state vocabulary — "Not stated · queued
+     for enrichment" internally, "Held · <reason>" for a quarantined field,
+     "Not established in this assessment" for the client — and that a site
+     missing its `audience` prop degraded to the client wording rather than
+     leaking ours.
+
+     Owner adjudication 2026-08-14 retired all three: "It should not state
+     queued for enrichment or held. It should enrich and clarify real time and
+     give the real data." The reader is not shown our workflow state in any
+     form. The field is enriched and rendered, or nothing is.
+
+     What replaces the old default-deny guarantee is stronger, because it no
+     longer depends on a prop being threaded correctly to ~50 call sites: the
+     component cannot leak internal wording under ANY props, since it emits no
+     text at all. The absence is still tracked — by list_enrichment_gaps, by
+     audit_promoted_client.py's 100%-null check, and by CG-18 — none of which
+     render.
 
      Asserted on the rendered TREE rather than the source, because the whole
      point is what a reader ends up seeing. */
@@ -148,17 +161,29 @@ test("an enrichment gap with no audience shows the customer wording", () => {
   const Gap = global.window.EnrichmentGap;
   assert.ok(typeof Gap === "function", "EnrichmentGap is not exported");
 
-  const textOf = (props) => { seen.length = 0; Gap(props); return seen.join(" "); };
+  const render = (props) => { seen.length = 0; const out = Gap(props); return { out, text: seen.join(" ") }; };
 
-  assert.match(textOf({ what: "Website" }), /Not established/,
-               "a missing audience must not reveal the internal wording");
-  assert.doesNotMatch(textOf({ what: "Website" }), /queued/);
-  assert.doesNotMatch(textOf({ what: "Website", audience: "customer" }), /queued/);
-  // The internal reader still gets the useful version when it IS stated.
-  assert.match(textOf({ what: "Website", audience: "internal" }), /queued/);
-  // A held field names its reason internally and stays plain for the client.
-  assert.match(textOf({ what: "AUM", held: true, reason: "two domains resolve",
-                        audience: "internal" }), /Held/);
-  assert.match(textOf({ what: "AUM", held: true, reason: "two domains resolve",
-                        audience: "customer" }), /Not established/);
+  /* Every shape the component is called in across the app, including the ones
+     that used to produce each of the three retired sentences. All must be
+     silent — a policy asserted over the input space, not over one call. */
+  for (const props of [
+    { what: "Website" },                                             // no audience
+    { what: "Website", audience: "internal" },                       // was "queued"
+    { what: "Website", audience: "customer" },                       // was "Not established"
+    { what: "AUM", held: true, reason: "two domains resolve", audience: "internal" },
+    { what: "AUM", held: true, reason: "two domains resolve", audience: "customer" },
+    { what: "Peer", audience: "internal", compact: true },            // dense grids
+    {},                                                              // no props at all
+  ]) {
+    const { out, text } = render(props);
+    assert.strictEqual(out, null,
+      `EnrichmentGap must render null; got a tree for ${JSON.stringify(props)}`);
+    assert.strictEqual(text, "",
+      `EnrichmentGap emitted text for ${JSON.stringify(props)}: ${text}`);
+  }
+
+  /* The retired vocabulary must not survive anywhere in the compiled bundle as
+     REACHABLE output. The strings remain inside the component below its early
+     return — deliberately, as the record — so this asserts on behaviour above,
+     not on a grep that a comment would fail. */
 });

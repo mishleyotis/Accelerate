@@ -191,96 +191,67 @@ function FirmographicsPanel({ entity, audience }) {
      for a pinned field. Before that existed, a held pinned field rendered no
      row at all and was indistinguishable from one never asked for — which is
      the exact confusion this whole component was rebuilt to end. */
-  const gap = (slot, label) => {
-    const reason = entity.held && entity.held[slot];
-    return reason
-      ? <EnrichmentGap what={label} held reason={reason} audience={audience} />
-      : <EnrichmentGap what={label} audience={audience} />;
-  };
+  /* One row builder. A row whose value cannot be established is NOT
+     rendered — owner adjudication 2026-08-14, replacing the three-state gap
+     vocabulary ("Not stated · queued for enrichment", "Held · reason") with
+     silence on the page.
+
+     The reason that is safe now and was not before: the omission is no longer
+     invisible to the SYSTEM. `list_enrichment_gaps(run_id)` computes the same
+     empty set from the staged payload, and audit_promoted_client.py fails on
+     it — so a field the reader never sees is still on the producer's worklist
+     and still blocks a clean audit. Hiding it from the page hid it from
+     everyone only while nothing else counted.
+
+     `held` is likewise not surfaced: a quarantine reason is internal
+     provenance, and the row it belonged to now simply does not appear. */
+  const rows = [];
+  const row = (k, v) => { if (v !== null && v !== undefined && v !== "") rows.push([k, v]); };
+
+  row(entity.assets_label || "Assets", fmtAssets(entity.assets, entity.assets_unit));
+  row("Employees", entity.employees != null ? entity.employees.toLocaleString() : null);
+  row("Branches", entity.branches != null ? String(entity.branches) : null);
+  row("Members", entity.members != null ? entity.members.toLocaleString() : null);
+  row("Customers", entity.customers != null ? entity.customers.toLocaleString() : null);
+  /* ONE CAGR row. It rendered twice until 2026-08-14: pinned here from the
+     series the adapter computes, and printed again by the passthrough below
+     because `cagr` was missing from the pinned KEY set. Computed wins — a
+     growth rate is derived and the promoted series is its source of truth —
+     and a run that stated its own falls back in with its own basis. */
+  row("CAGR", entity.cagr != null
+    ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}`
+    : entity.stated_cagr != null
+      ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}`
+      : null);
+  row("Net worth ratio", entity.net_worth_ratio != null
+    ? `${fx(entity.net_worth_ratio, 2)}%` : null);
+  row("Regulator", entity.regulator || null);
+  // Linked because a domain a reader cannot open is half a fact.
+  row("Website", entity.website
+    ? <a href={/^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`}
+         target="_blank" rel="noopener noreferrer">{entity.website}</a>
+    : null);
+  row("HQ", entity.hq || null);
+  // Footprint reads the regulatory section's jurisdictions first, then a
+  // footprint the firmographics stated — both consumed by this one row.
+  row("Footprint", entity.footprint?.length ? entity.footprint.join(" · ")
+    : entity.stated_footprint ? String(entity.stated_footprint) : null);
+  row("Charter", entity.charter || null);
+  row("Founded", entity.founded ? String(entity.founded).slice(0, 4) : null);
+
   return (
     <div style={{ background: "var(--z-lav)", borderRadius: 12, padding: 16 }}>
       <div className="eyebrow" style={{ marginBottom: 8 }}>Firmographics</div>
       {/* A `fields` that did not arrive as a list is not an unstated figure —
-          it is a section this page cannot read, and every row below would
-          print an em dash that says "the run states nothing" about figures the
-          run may well carry. Named here rather than passed off as absence
-          (app-root's firmoFields sets the flag). */}
+          it is a section this page cannot read. Named here rather than passed
+          off as absence (app-root's firmoFields sets the flag). */}
       {entity.firmographics_unreadable ? (
         <div style={{ fontSize: 11, color: "var(--z-org)", lineHeight: 1.5, marginBottom: 8 }}>
           The firmographics section did not arrive as a list of fields, so no
           figure below is read from it.
         </div>
       ) : null}
-      {/* Every promoted firmographic gets a row. Four of these —
-          members, net worth ratio, founded, charter — were mapped onto
-          the entity and rendered by nothing, so the card looked sparse
-          while the payload carried them. A field the run did not state
-          prints an em dash rather than being hidden: absent and
-          not-asked-for must not look the same. */}
-      {/* The disjunction the contract states: a sub-vertical reports AUM OR
-          assets, and the row is labelled with the one it actually stated. */}
-      <Row k={entity.assets_label || "Assets"}
-           v={entity.assets != null
-               ? fmtAssets(entity.assets, entity.assets_unit)
-               : gap("assets", entity.assets_label || "Assets")} />
-      <Row k="Employees"  v={entity.employees != null
-        ? entity.employees.toLocaleString()
-        : gap("employees", "Employees")} />
-      <Row k="Branches"   v={entity.branches != null ? String(entity.branches)
-        : gap("branches", "Branches")} />
-      {entity.members != null ? <Row k="Members" v={entity.members.toLocaleString()} /> : null}
-      {entity.customers != null ? <Row k="Customers" v={entity.customers.toLocaleString()} /> : null}
-      {/* ONE CAGR row. It rendered twice until 2026-08-14: pinned here from the
-          series the adapter computes, and printed again by the passthrough
-          below because `cagr` was missing from the pinned KEY set. Computed
-          wins — a growth rate is derived and the promoted series is its source
-          of truth — and a run that stated its own falls back in with its own
-          basis, so a client too sparse to compute one still shows what it
-          stated. */}
-      <Row k="CAGR"       v={entity.cagr != null
-        ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}`
-        : entity.stated_cagr != null
-          ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}`
-          : gap("cagr", "CAGR")} />
-      {entity.net_worth_ratio != null ? <Row k="Net worth ratio" v={`${fx(entity.net_worth_ratio, 2)}%`} /> : null}
-      <Row k="Regulator"  v={entity.regulator
-        || gap("regulator", "Primary regulator")} />
-      {/* Required on every sub-vertical since 2026-08-14, so it gets a row
-          whether or not the run stated it — hiding the row would hide the
-          omission. Linked because a domain a reader cannot open is half a
-          fact. */}
-      <Row k="Website"    v={entity.website
-        ? <a href={/^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`}
-             target="_blank" rel="noopener noreferrer">{entity.website}</a>
-        : gap("website", "Website")} />
-      <Row k="HQ" v={entity.hq || gap("hq", "HQ")} />
-      {/* Footprint reads the regulatory section's jurisdictions first, then a
-          footprint the firmographics stated. Both are consumed by this one row
-          — the pinned-row/pinned-key drift that duplicated CAGR was latent here
-          too, waiting on the first run to state one. */}
-      <Row k="Footprint"  v={entity.footprint?.length
-        ? entity.footprint.join(" · ")
-        : entity.stated_footprint
-          ? String(entity.stated_footprint)
-          : gap("footprint", "Footprint")} />
-      <Row k="Charter" v={entity.charter || gap("charter", "Charter")} />
-      {/* Unconditional, and this is the fix rather than a tidy-up: `founded`
-          is HELD on the reference client — quarantined with a 297-character
-          reason naming the searches that failed — and this row was
-          `{entity.founded ? … : null}`, so the single most defensible field
-          on the panel rendered nothing at all. A held field and an unasked
-          one must never look alike, and "no row" is the one rendering that
-          makes them identical. */}
-      <Row k="Founded" v={entity.founded
-        ? String(entity.founded).slice(0, 4)
-        : gap("founded", "Founded")} />
-      {/* EVERY remaining field the run stated, in the order it stated them.
-          The rows above are pinned because the contract's must-present set
-          names them on every sub-vertical; these are the ones the SUB-VERTICAL
-          decides, and a fixed row list is exactly how five of a wealth
-          manager's thirteen fields rendered nowhere. A held field prints its
-          documented em dash with the reason on hover — absent and
-          held-with-a-reason must not look the same. */}
+      {rows.map(([k, v], i) => <Row key={`f${i}`} k={k} v={v} />)}
       {(entity.extra_fields || []).map((f, i) => (
         <Row key={`x${i}`} k={humaniseFieldName(f.field)}
              v={f.held
