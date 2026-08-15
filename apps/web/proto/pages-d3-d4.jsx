@@ -139,7 +139,7 @@ function PlatformFact({ label, children, ids, openEvidence, title }) {
   );
 }
 
-function PlatformDossier({ p, openEvidence }) {
+function PlatformDossier({ p, tile, inverted, openEvidence }) {
   const [open, setOpen] = useState(false);
   const reach = (p && p.estate_reach) || null;
   const ready = (p && p.readiness) || null;
@@ -151,6 +151,7 @@ function PlatformDossier({ p, openEvidence }) {
   // nothing behind the story and the control is not rendered at all — a
   // disclosure toggle that opens onto nothing is its own dead end.
   const facts = [
+    pfText(tile && tile.rank_rationale),
     pfText(p && p.peer_synthesis), peers.length ? "peers" : null,
     reach && (cats.length || pfText(reach.why_this_is_established)) ? "reach" : null,
     ready && (pfText(ready.verdict) || pfText(ready.already_true)) ? "ready" : null,
@@ -180,6 +181,28 @@ function PlatformDossier({ p, openEvidence }) {
       </button>
       {open ? (
         <div style={{ paddingTop: 2 }}>
+          {/* BAX-24 / BAX-10: "fit 70 ranked above fit 73". Measured live and
+              real — rank 2 carries composite 70.0 and rank 3 carries 73.0. It
+              is not an arithmetic error: the producer ranks on DEPENDENCY, not
+              on the composite, and says so ("Ranked third because its value
+              multiplies after the data layer lands"). The defect was showing
+              both numbers with no reason between them, which reads as a broken
+              sort. The rationale leads the dossier, and an inversion is named
+              outright rather than left for a reader to notice and distrust. */}
+          {inverted ? (
+            <div style={{ marginTop: 8, padding: "6px 8px", borderLeft: "2px solid var(--z-org)", background: "var(--z-wash)" }}>
+              <div className="eyebrow" style={{ fontSize: 9, marginBottom: 2 }}>Ranked against the arithmetic</div>
+              <div style={{ fontSize: 11, lineHeight: 1.55 }}>
+                This platform scores higher than one ranked above it. The order
+                is the run&rsquo;s dependency sequence, not its score.
+              </div>
+            </div>
+          ) : null}
+
+          <PlatformFact label="Why this rank" openEvidence={openEvidence}>
+            {pfText(tile && tile.rank_rationale)}
+          </PlatformFact>
+
           <PlatformFact label="Peer position" openEvidence={openEvidence}>
             {pfText(p.peer_synthesis) || (cover !== null
               ? `${cover} of the locked peer set is established on this platform area.`
@@ -1065,6 +1088,19 @@ function ClientPlatform({ entity, run }) {
               const isSel = (p) => !!selKey && named(p) === selKey;
               const ordered = [...storyPlatforms.filter(isSel),
                                ...storyPlatforms.filter(p => !isSel(p))];
+              // The tile carries `rank_rationale`; the story carries the rank
+              // and the fit. Joined by the platform NAME, which both state.
+              const tileOf = (p) => tiles.find(t => pfText(t.platform) === named(p)) || null;
+              /* A platform is INVERTED when something ranked above it scores
+                 lower. Computed here, never stored: the run states rank and
+                 fit and the relationship between them is derivable, so a
+                 stored flag could only go stale (invariant 8). */
+              const ranked = storyPlatforms
+                .map(p => ({ p, r: pfNum(p.rank), f: pfNum(p.fit_score) }))
+                .filter(x => x.r !== null && x.f !== null);
+              const invertedSet = new Set(
+                ranked.filter(x => ranked.some(y => y.r < x.r && y.f < x.f))
+                      .map(x => named(x.p)));
               const block = (p, i, lead) => {
                 const md = pfText(p.story_md);
                 const fit = pfNum(p.fit_score);
@@ -1073,7 +1109,8 @@ function ClientPlatform({ entity, run }) {
                 // The dossier used to be gated behind `story_md`, so a platform
                 // with a full evidence base and no narrative rendered nothing.
                 // Either half earns the block.
-                const dossier = <PlatformDossier p={p} openEvidence={openEvidence} />;
+                const dossier = <PlatformDossier p={p} tile={tileOf(p)}
+                  inverted={invertedSet.has(name)} openEvidence={openEvidence} />;
                 if (!md && !p.estate_reach && !p.readiness
                     && !(p.peer_deployments || []).length) return null;
                 return (

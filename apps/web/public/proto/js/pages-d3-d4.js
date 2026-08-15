@@ -181,6 +181,8 @@ function PlatformFact({
 }
 function PlatformDossier({
   p,
+  tile,
+  inverted,
   openEvidence
 }) {
   const [open, setOpen] = useState(false);
@@ -193,7 +195,7 @@ function PlatformDossier({
   // Every fact this platform actually carries. If the count is zero there is
   // nothing behind the story and the control is not rendered at all — a
   // disclosure toggle that opens onto nothing is its own dead end.
-  const facts = [pfText(p && p.peer_synthesis), peers.length ? "peers" : null, reach && (cats.length || pfText(reach.why_this_is_established)) ? "reach" : null, ready && (pfText(ready.verdict) || pfText(ready.already_true)) ? "ready" : null, pfText(p && p.integration_pathway), pfText(p && p.zennify_pathway), rl && pfText(rl.confidence_basis)].filter(Boolean);
+  const facts = [pfText(tile && tile.rank_rationale), pfText(p && p.peer_synthesis), peers.length ? "peers" : null, reach && (cats.length || pfText(reach.why_this_is_established)) ? "reach" : null, ready && (pfText(ready.verdict) || pfText(ready.already_true)) ? "ready" : null, pfText(p && p.integration_pathway), pfText(p && p.zennify_pathway), rl && pfText(rl.confidence_basis)].filter(Boolean);
   if (!facts.length) return null;
   const cover = fmtPct(pfNum(p && p.peer_coverage));
   const notReached = pfNum(reach && reach.cells_not_yet_reached);
@@ -242,7 +244,28 @@ function PlatformDossier({
     style: {
       paddingTop: 2
     }
-  }, /*#__PURE__*/React.createElement(PlatformFact, {
+  }, inverted ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8,
+      padding: "6px 8px",
+      borderLeft: "2px solid var(--z-org)",
+      background: "var(--z-wash)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow",
+    style: {
+      fontSize: 9,
+      marginBottom: 2
+    }
+  }, "Ranked against the arithmetic"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      lineHeight: 1.55
+    }
+  }, "This platform scores higher than one ranked above it. The order is the run\u2019s dependency sequence, not its score.")) : null, /*#__PURE__*/React.createElement(PlatformFact, {
+    label: "Why this rank",
+    openEvidence: openEvidence
+  }, pfText(tile && tile.rank_rationale)), /*#__PURE__*/React.createElement(PlatformFact, {
     label: "Peer position",
     openEvidence: openEvidence
   }, pfText(p.peer_synthesis) || (cover !== null ? `${cover} of the locked peer set is established on this platform area.` : null)), peers.length ? /*#__PURE__*/React.createElement("div", {
@@ -1363,6 +1386,19 @@ function ClientPlatform({
     const named = p => pfText(p && p.platform) || "";
     const isSel = p => !!selKey && named(p) === selKey;
     const ordered = [...storyPlatforms.filter(isSel), ...storyPlatforms.filter(p => !isSel(p))];
+    // The tile carries `rank_rationale`; the story carries the rank
+    // and the fit. Joined by the platform NAME, which both state.
+    const tileOf = p => tiles.find(t => pfText(t.platform) === named(p)) || null;
+    /* A platform is INVERTED when something ranked above it scores
+       lower. Computed here, never stored: the run states rank and
+       fit and the relationship between them is derivable, so a
+       stored flag could only go stale (invariant 8). */
+    const ranked = storyPlatforms.map(p => ({
+      p,
+      r: pfNum(p.rank),
+      f: pfNum(p.fit_score)
+    })).filter(x => x.r !== null && x.f !== null);
+    const invertedSet = new Set(ranked.filter(x => ranked.some(y => y.r < x.r && y.f < x.f)).map(x => named(x.p)));
     const block = (p, i, lead) => {
       const md = pfText(p.story_md);
       const fit = pfNum(p.fit_score);
@@ -1373,6 +1409,8 @@ function ClientPlatform({
       // Either half earns the block.
       const dossier = /*#__PURE__*/React.createElement(PlatformDossier, {
         p: p,
+        tile: tileOf(p),
+        inverted: invertedSet.has(name),
         openEvidence: openEvidence
       });
       if (!md && !p.estate_reach && !p.readiness && !(p.peer_deployments || []).length) return null;

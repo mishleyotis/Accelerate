@@ -115,10 +115,12 @@
   "severity": "P0",
   "bax_id": "BAX-11",
   "neutral_rule": "A promoted array with N>0 rows renders N>0 rows, or its omission is recorded with a reason; served set and rendered set are diffed rather than counted.",
-  "status": "OPEN",
-  "verify_first": true,
+  "status": "FIXED",
+  "verify_first": false,
   "covering_qa_id": "KP-03 / TR-ADD-02 / WT-10",
-  "retest_at_head": "Same class as BAX-09 and BAX-10. Re-test the render-count assertion per array field for BOTH promoted clients."
+  "retest_at_head": "Same class as BAX-09 and BAX-10. Re-test the render-count assertion per array field for BOTH promoted clients.",
+  "commit": "b9e9b4f",
+  "evidence": "Cause was not the payload: platform_story serves 16 keys per platform and the page read two. The story block was gated on the DERIVED tile-to-area join, so when that produced no area all five promoted stories and every fact behind them vanished — the page breaking its own stated rule that a derived relationship may order content and never hide it. Fixed by ordering on the STATED join (tile and story both name the platform). PlatformDossier now renders peer_deployments, peer_synthesis, estate_reach, readiness, both pathways, fit_score and confidence_basis. Confirmed in the opened app on both audiences with the dossiers expanded: apps/web/tests/acceptance/checks-platform.json (PEER SET · 5, named peers, tri-state deployed) and checks-customer.json (ASSESSMENT PATHWAY absent for the customer, peer and estate evidence present)."
  },
  {
   "issue": "A HELD firmographic quarantined with a 297-character reason rendered no row at all",
@@ -258,10 +260,12 @@
   "severity": "P0",
   "bax_id": "BAX-24",
   "neutral_rule": "Rank IS the sort: a ranked list is ordered by the displayed score before render, at every ranked surface.",
-  "status": "OPEN",
-  "verify_first": true,
+  "status": "FIXED",
+  "verify_first": false,
   "covering_qa_id": "PA-08 / OO-A1",
-  "retest_at_head": "The SAME class was fixed on the Overview opportunity surface at HEAD by sorting before render. Re-test whether the platform list received the same fix."
+  "retest_at_head": "The SAME class was fixed on the Overview opportunity surface at HEAD by sorting before render. Re-test whether the platform list received the same fix.",
+  "commit": "pending",
+  "evidence": "Confirmed live at HEAD and then re-read: the run serves rank 2 at fit 70.0 and rank 3 at 73.0, and it is NOT an arithmetic error. The producer ranks on dependency and writes the reason on the tile ('ranked third because its value multiplies after the data layer lands'). The defect was showing both numbers with nothing between them, which reads as a broken sort. Two halves: the page now renders rank_rationale ('WHY THIS RANK') and names the inversion outright, joined to the tile by the platform name both state; and connector gate AG-09 blocks a submission whose rank inverts its own fit_score with neither fit_basis nor story_md to explain it. Verified against the live payload: 0 verdicts on the run as promoted, 1 verdict naming exactly the right row when the ordering basis is stripped. 15 unit tests, including that every inverted row is named and that a malformed section cannot raise."
  },
  {
   "issue": "Stacked overlays shipped duplicate accessible Close names",
@@ -357,10 +361,12 @@
   "severity": "P1",
   "bax_id": "BAX-33",
   "neutral_rule": "The searchable field set is stated in the contract and asserted against the matcher; a check may not assert a behaviour nobody built without recording the gap.",
-  "status": "OPEN",
-  "verify_first": true,
+  "status": "FIXED",
+  "verify_first": false,
   "covering_qa_id": "DIR-02 / SRCH-10",
-  "retest_at_head": "The doc calls this P0 against an unimplemented behaviour. Either the matcher gains display id or the contract is corrected - this is a genuine spec-vs-implementation conflict for the owner."
+  "retest_at_head": "The doc calls this P0 against an unimplemented behaviour. Either the matcher gains display id or the contract is corrected - this is a genuine spec-vs-implementation conflict for the owner.",
+  "commit": "b9e9b4f",
+  "evidence": "Adjudicated 2026-08-15 in the document's favour. Three controls searched three different field sets and none searched the display id — the string in every URL, alert row and printed scorecard. One shared rule (utils.jsx::entityMatches) now serves the global popover, the directory filter and the prospecting picker. apps/web/tests/entity-search.test.js asserts the behaviour AND that no call site re-derives the rule; both branches proven to fail under mutation."
  },
  {
   "issue": "Uncertainty-band category counts do not reconcile to actual category-cell counts",

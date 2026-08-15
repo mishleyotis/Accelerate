@@ -362,6 +362,16 @@ GATES = {
               "of the row id. The claim cannot be manufactured, and a share "
               "with unknowns behind it is not that share.",
               "block"),
+    "AG-09": ("A rank that contradicts its own score says why", None,
+              "For every platform P: if some platform Q ranks above P and "
+              "scores below it, P carries a non-empty fit_basis or story_md. "
+              "Rows missing either number are skipped, not failed.",
+              "A run served rank 2 at fit 70.0 and rank 3 at fit 73.0. "
+              "Ranking on dependency rather than on the composite is often "
+              "the honest answer, but an inversion with nothing beside it "
+              "reads as a broken sort and takes the surrounding argument "
+              "down with it.",
+              "block"),
     "SG-S8": ("Sentiment rests on more than one line",
               "Sentiment rests on a single source, so treat it as "
               "indicative only",

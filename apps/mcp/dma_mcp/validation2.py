@@ -214,6 +214,76 @@ def _check_item_evidence(page: str, payload: dict) -> list:
     return out
 
 
+def _check_rank_against_score(page: str, payload: dict) -> list:
+    """AG-09 — a rank that contradicts its own score says why, on the row.
+
+    Measured on a promoted run, 2026-08-15: the platform set served rank 2 at
+    fit 70.0 and rank 3 at fit 73.0. The doc's BAX-24 and BAX-10 both name this
+    ("fit-70 ranked above fit-73") and both call it a defect.
+
+    It is not an arithmetic error, and refusing every inversion would be wrong.
+    This producer ranks on DEPENDENCY — "ranked third because its value
+    multiplies after the data layer lands" — and a dependency order that
+    disagrees with a weighted composite is the honest answer, not a broken sort.
+    The R-Layer says as much: a ranking that cannot discard is a sort.
+
+    What cannot ship is the inversion with nothing beside it. A reader who sees
+    73.0 sitting under 70.0 and no reason concludes the arithmetic is broken,
+    and the surrounding argument loses with it. So the gate is narrow:
+
+        for every platform P, if some platform Q ranks ABOVE P (Q.rank <
+        P.rank) and scores BELOW it (Q.fit_score < P.fit_score), then P must
+        carry a non-empty ordering basis.
+
+    `fit_basis` is that basis — the contract already requires it to say where
+    the figure came from — and `story_md` is accepted as the longer form of the
+    same statement. Both empty is the refusal.
+
+    Rows missing either number are skipped rather than failed: a null rank or a
+    null fit is a different finding, and inventing an inversion out of two
+    nulls would be a derived value that is neither computed nor null.
+    """
+    if page != "platform":
+        return []
+    body = ((payload.get("sections") or {}).get("platform_story") or {})
+    body = body.get("data") if isinstance(body.get("data"), dict) else body
+    rows = (body or {}).get("platforms")
+    if not isinstance(rows, list):
+        return []
+
+    def num(v):
+        try:
+            return float(v) if v is not None and v != "" else None
+        except (TypeError, ValueError):
+            return None
+
+    scored = [(i, r, num(r.get("rank")), num(r.get("fit_score")))
+              for i, r in enumerate(rows) if isinstance(r, dict)]
+    scored = [t for t in scored if t[2] is not None and t[3] is not None]
+
+    out = []
+    for i, row, rank, fit in scored:
+        above = [(o_rank, o_fit, o_row.get("platform"))
+                 for _, o_row, o_rank, o_fit in scored
+                 if o_rank < rank and o_fit < fit]
+        if not above:
+            continue
+        basis = (row.get("fit_basis") or "") or (row.get("story_md") or "")
+        if str(basis).strip():
+            continue
+        o_rank, o_fit, o_name = sorted(above)[0]
+        out.append(_reason(
+            "AG-09", "platform_story",
+            f"platform_story.platforms[{i}].fit_basis",
+            f"{row.get('platform')!r} is ranked {rank:g} with fit_score "
+            f"{fit:g}, below {o_name!r} at rank {o_rank:g} with fit_score "
+            f"{o_fit:g} — a lower rank on a higher score. That can be right "
+            "when the order is a dependency sequence rather than a sort, but "
+            "the row has to say so: fit_basis and story_md are both empty, so "
+            "the page can only show two numbers that contradict each other."))
+    return out
+
+
 def _check_peer_research(page: str, payload: dict) -> list:
     """AG-04 — a technographic claim about a NAMED peer carries its source.
 
@@ -1344,6 +1414,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     # ── AG-03: every claim-bearing item cites evidence ─────────────────
     reasons.extend(_check_item_evidence(page, payload))
     reasons.extend(_check_peer_research(page, payload))
+    reasons.extend(_check_rank_against_score(page, payload))
     # ET-08 runs BEFORE the cell gates below, because those all skip a
     # value they cannot parse as an id: a cell-link field holding a name
     # is invisible to every one of them, and this is where it is seen.
