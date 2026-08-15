@@ -924,12 +924,57 @@ another.
 
 ---
 
+### 7.7 What the document could not have found
+
+Three defects surfaced on 15 August that no check in the source document
+names, because all three are invisible from the outside: the payload is
+correct, the promotion is correct, the suite is green, and the content is not
+on the page.
+
+**`platform_story` served 16 keys per platform and the page read two**
+(`BAX-11`, and the reported "blanks instead of sourced or inferred"). The
+ranked fit score, the readiness verdict, the estate reach, both pathways and
+25 cited peer rows were promoted and shown nowhere. The cause was the page
+breaking its own written rule — the story block was gated on the *derived*
+tile-to-area join, so when that produced no area, all five stories vanished.
+
+**`QA_GATES` returned `[]` under LIVE** while the run served one cap row and
+two SG gates, every one cited. The card renders its heading and badge from
+that array, so production showed `Safeguard gates · G01–G10` and `0 / 10 PASS`
+over an empty table — a ten-gate denominator no run defines — while a
+**failing** V4 grounding gate sat unrendered. The only `NOT_RUN` renderer in
+the tree is in `pages-live-client.jsx`, which is mounted nowhere (H3).
+
+**The enrichment job could not read `submissions`.** It scanned 287 runs,
+printed `0 gap(s)` and exited 1. The summary line is the dangerous part: a
+routine that cannot see the payloads reports the same number as one that saw
+them and found nothing.
+
+Finding the first took a hand census against a live payload. **Gate F** is
+that census automated — it runs against the contract, so it needs no promoted
+run, and it is ratcheted at 37 rather than zero because many declared keys
+legitimately have no reader. Its baseline is now a worklist, and it caught its
+own first improvement (38 → 37) on the commit that added it.
+
+The general lesson the document's method cannot reach: **every one of these
+was a read path missing under a correct write path.** The document tests what
+a surface shows; nothing in it can ask what a surface was *given* and did not
+show.
+
+---
+
 ## 8 · Files
 
 - `ACCEPTANCE.md` — this file, the reference root.
 - `inventory.json` — 122 sections, 463 canonical checks, per-check verdict,
   layer, severity and defect linkage. What Gate E WILL reconcile against once it exists (H7); today it is an index, not an enforced contract.
-- `remediation_ledger.json` — 41 open issues, each with its neutral rule, its
-  `bax_id`, its covering `qa_id` and a re-test note. 33 carry
-  `verify_first: true` because the document reported them broken on 14 August
-  and several were fixed after that pass.
+- `remediation_ledger.json` — 41 issues (3 FIXED, 38 open), each with its
+  neutral rule, its `bax_id`, its covering `qa_id` and a re-test note. The
+  open rows carry `verify_first: true` because the document reported them
+  broken on 14 August and several were fixed after that pass.
+- `checks-platform.json`, `checks-safeguard-gates.json`,
+  `checks-customer.json` — opened-app check sets for `tests/open-app.js`.
+  Each drives the real controls (`click_text` steps, including the
+  icon-only settings popover and the AE→Analyst switch every session lands
+  behind) and asserts against the settled DOM, so a disclosure that renders
+  nothing cannot pass as one that is merely collapsed.
