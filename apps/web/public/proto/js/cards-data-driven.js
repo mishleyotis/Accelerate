@@ -284,7 +284,8 @@ function SentimentCard({
     r: r
   }))) : null, /*#__PURE__*/React.createElement(EnrichmentFlag, {
     s: (DMA.LIVE_ENRICHMENT || {}).sentiment,
-    what: "rows"
+    what: "rows",
+    audience: audience
   })));
 }
 

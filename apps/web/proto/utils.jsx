@@ -348,23 +348,60 @@ function PageBoundary({ name, children }) {
    The line the build owner asked for on 2026-08-14: a twelve-row technology
    register and a fifty-one-row one rendered identically, and the short one
    read as the client's whole estate. */
-function EnrichmentFlag({ s, what }) {
+function EnrichmentFlag({ s, what, audience }) {
+  /* OWNER, 2026-08-15, after asking three times: "I still see the scan did not
+     run text on most surfaces... these are issues that should be resolved and
+     not feature anywhere on the web app."
+
+     The badge read "Scan did not run", and that is a status of OUR pipeline.
+     Adjudication B has forbidden workflow vocabulary reaching a reader since
+     14 August — "queued", "validating", "held" — and this was the same class,
+     missed because it is phrased as a finding. It tells a reader nothing they
+     can use: they do not run our scans, cannot start one, and are left holding
+     a defect report about our machinery instead of a statement about their
+     institution.
+
+     The underlying fact is worth keeping, and it is a fact about the READING,
+     not about the job: what is on screen came from the assessment's own
+     sources, so it should be read as what was evidenced rather than as the
+     whole estate. That is the same information, useful, and it names no
+     workflow.
+
+     A CUSTOMER gets the limit and nothing else. Which sources we do or do not
+     reach is our business, and naming them to a client is the sell-side detail
+     adjudication B exists to keep off the page. */
   if (!s || !s.required) return null;
   const thin = !!s.thin;
-  const notRun = !s.ran;
-  if (!thin && !notRun) return null;
+  const unscanned = !s.ran;
+  if (!thin && !unscanned) return null;
+  const customer = String(audience || "").toLowerCase() === "customer";
+  const label = unscanned
+    ? "Established from the assessment's own sources"
+    : `Thin ${what || "surface"}`;
+  // The detail says what would widen the reading. For the unscanned case that
+  // is a statement about coverage; the producer's own thin_reason wins where
+  // it exists, because it was written about this run.
+  const detail = unscanned
+    ? (customer
+        ? `Read this as what the assessment established, not as a complete ${what || "picture"}.`
+        : `No machine scan of the estate contributed rows here, so read it as `
+          + `what was evidenced rather than as the whole ${what || "picture"}.`)
+    : (s.thin_reason
+        || `fewer rows than this surface expects reached it`);
   return (
     <div className="row" data-enrichment={what || "surface"}
          style={{ gap: 6, marginTop: 6, flexWrap: "wrap", alignItems: "baseline" }}>
-      <span className="b b-org" style={{ whiteSpace: "nowrap" }}>
-        {notRun ? "Scan did not run" : `Thin ${what || "surface"}`}
+      <span className={`b ${unscanned ? "b-muted" : "b-org"}`} style={{ whiteSpace: "nowrap" }}>
+        {label}
       </span>
       <span style={{ fontSize: 11, color: "var(--z-muted)", lineHeight: 1.5 }}>
-        {s.thin_reason
-          || `no served row records that ${(s.sources || []).join(" or ")} reached this surface`}
+        {detail}
         {s.count != null && s.thin_below
           ? ` (${s.count} of ${s.thin_below} expected)` : ""}
-        {s.closes_with ? ` · closes with ${s.closes_with}` : ""}
+        {/* `closes_with` names OUR next action. Internal only, and never on
+            the unscanned branch, where it would reintroduce the queue the
+            adjudication removed. */}
+        {!customer && !unscanned && s.closes_with ? ` · closes with ${s.closes_with}` : ""}
       </span>
     </div>
   );

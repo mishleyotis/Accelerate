@@ -113,6 +113,21 @@ async function main() {
     active_runs: directory.active_runs || [],
     pending_review: directory.pending_review || [],
     catalogue_version: "v7.0", dev_login: false,
+    /* The CATALOGUE, which production's own boot carries
+       (apps/web/app/route.js:103) and this harness did not.
+
+       Without it `data.js` falls back to its fixture category list, so a
+       readiness row for the real client's P4C3 rendered the FIXTURE's name —
+       "AI & Decisioning" where the catalogue says "Technology Architecture &
+       Integration". Nothing was wrong with the app; the harness was feeding it
+       less than production does, and a harness that under-feeds hands back a
+       false reading of a change. That is worse than no harness, because it is
+       believed.
+
+       Optional: a payload directory captured before this existed still runs,
+       and the fallback is what it always was. */
+    categories: (payloadFor("../catalogue") || {}).categories || null,
+    pillars: (payloadFor("../catalogue") || {}).pillars || null,
   };
 
   const browser = await pw.chromium.launch({ executablePath: chromiumPath, args: ["--no-sandbox"] });

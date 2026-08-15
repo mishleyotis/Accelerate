@@ -278,13 +278,12 @@ function PlatformDossier({
   const reach = p && p.estate_reach || null;
   const ready = p && p.readiness || null;
   const rl = p && p.r_layer || null;
-  const peers = (p && p.peer_deployments || []).filter(Boolean);
   const cats = (reach && reach.by_category || []).filter(Boolean);
 
   // Every fact this platform actually carries. If the count is zero there is
   // nothing behind the story and the control is not rendered at all — a
   // disclosure toggle that opens onto nothing is its own dead end.
-  const facts = [pfText(tile && tile.rank_rationale), pfText(p && p.peer_synthesis), peers.length ? "peers" : null, reach && (cats.length || pfText(reach.why_this_is_established)) ? "reach" : null, ready && (pfText(ready.verdict) || pfText(ready.already_true)) ? "ready" : null, pfText(p && p.integration_pathway), pfText(p && p.zennify_pathway), rl && pfText(rl.confidence_basis)].filter(Boolean);
+  const facts = [pfText(tile && tile.rank_rationale), pfText(p && p.peer_synthesis), reach && (cats.length || pfText(reach.why_this_is_established)) ? "reach" : null, ready && (pfText(ready.verdict) || pfText(ready.already_true)) ? "ready" : null, pfText(p && p.integration_pathway), pfText(p && p.zennify_pathway), rl && pfText(rl.confidence_basis)].filter(Boolean);
   if (!facts.length) return null;
   const cover = fmtPct(pfNum(p && p.peer_coverage));
   const notReached = pfNum(reach && reach.cells_not_yet_reached);
@@ -357,74 +356,7 @@ function PlatformDossier({
   }, pfText(tile && tile.rank_rationale)), /*#__PURE__*/React.createElement(PlatformFact, {
     label: "Peer position",
     openEvidence: openEvidence
-  }, pfText(p.peer_synthesis) || (cover !== null ? `${cover} of the locked peer set is established on this platform area.` : null)), peers.length ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 8
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "eyebrow",
-    style: {
-      fontSize: 9,
-      marginBottom: 4
-    }
-  }, "Peer set \xB7 ", peers.length), peers.map((pd, i) => {
-    const name = pfText(pd.peer);
-    if (!name) return null;
-    // `deployed` is a tri-state and every branch is a different
-    // finding: true is a citable deployment, false is a search-led
-    // absence, null is "the search ran and settled nothing". The
-    // basis prose says which, so the badge must never flatten the
-    // three into a blank.
-    const dep = pd.deployed;
-    const tone = dep === true ? "b-above" : dep === false ? "b-below" : "b-muted";
-    const word = dep === true ? "established" : dep === false ? "not established" : "unestablished";
-    const asOf = pfText(pd.as_of);
-    const url = pfText(pd.source_url);
-    return /*#__PURE__*/React.createElement("div", {
-      key: `${name}-${i}`,
-      style: {
-        padding: "6px 0",
-        borderTop: i ? "1px solid var(--z-sep)" : 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        gap: 6,
-        alignItems: "baseline",
-        flexWrap: "wrap"
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 11.5,
-        fontWeight: 600
-      }
-    }, name), /*#__PURE__*/React.createElement("span", {
-      className: `b ${tone}`,
-      style: {
-        flexShrink: 0
-      }
-    }, word), asOf ? /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 10,
-        color: "var(--z-muted)"
-      }
-    }, fmtDate(asOf)) : null, url ? /*#__PURE__*/React.createElement("a", {
-      href: url,
-      target: "_blank",
-      rel: "noreferrer",
-      style: {
-        fontSize: 10,
-        color: "var(--z-mid)"
-      }
-    }, "source") : null), pfText(pd.basis) ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        lineHeight: 1.55,
-        color: "var(--z-body)",
-        marginTop: 2
-      }
-    }, pfText(pd.basis)) : null);
-  })) : null, reach ? /*#__PURE__*/React.createElement(PlatformFact, {
+  }, pfText(p.peer_synthesis) || (cover !== null ? `${cover} of the locked peer set is established on this platform area.` : null)), reach ? /*#__PURE__*/React.createElement(PlatformFact, {
     label: "Estate reach",
     openEvidence: openEvidence,
     ids: reach.e_ids,
@@ -725,6 +657,25 @@ function platformScopeOf(entityId) {
    verdicts, so the key carries the minimum — deduping on the cell alone would
    silently drop the stricter of the two. */
 function areaPrereqs(recs) {
+  /* ONE ROW PER CELL, with its thresholds as a ladder beneath it.
+      Owner, 2026-08-15, with a screenshot: "Readiness card with duplicates and
+     a lot of issues." The card rendered P4C3 twice — "Technology Architecture
+     &..." MET at min 2.0, and "Technology..." NOT MET at min 2.5 — with the
+     same current score, the same 47 cells and the same 14 evidence items on
+     both. The two names are one name truncated at two widths, so the rows did
+     not even read as the same cell.
+      The keying was deliberate and is defended in the history: P4C3 >= 2.0 and
+     P4C3 >= 2.5 are DIFFERENT prerequisites with different verdicts, and
+     deduping on the cell alone would silently drop the stricter of the two.
+     That reasoning is right about the data and wrong about the page. Both
+     facts are kept — nothing is dropped — but they belong to ONE cell and are
+     shown as one row carrying two thresholds, because a reader who sees the
+     same identifier twice with opposite verdicts concludes the card is broken
+     and stops trusting the rest of it.
+      The row's verdict is the STRICTEST unmet threshold. A cell that clears 2.0
+     and misses 2.5 is not ready for the recommendation that needs 2.5, and
+     reporting it as MET because some other recommendation's lower bar passed
+     would be the more dangerous of the two errors. */
   const byKey = new Map();
   for (const r of recs || []) {
     for (const q of r.prerequisites || []) {
@@ -733,22 +684,49 @@ function areaPrereqs(recs) {
       const cond = q.condition || null;
       if (!cell && !cond) continue;
       const min = pfNum(q.minimum);
-      const key = cell ? `cell:${cell}:${min === null ? "" : min}` : `cond:${cond}`;
+      const key = cell ? `cell:${cell}` : `cond:${cond}`;
       const row = byKey.get(key) || {
         key,
         kind: cell ? "cell" : "condition",
         cell,
         condition: cond,
-        min,
         current: pfNum(q.current),
-        verdict: q.verdict || null,
         basis: q.basis || null,
         note: q.note || null,
+        thresholds: [],
         recs: []
       };
       if (!row.recs.includes(r.id)) row.recs.push(r.id);
+      // A threshold is (minimum, verdict). The same minimum required by two
+      // recommendations is one threshold, not two.
+      const seen = row.thresholds.find(t => t.min === min);
+      if (seen) {
+        if (!seen.recs.includes(r.id)) seen.recs.push(r.id);
+      } else {
+        row.thresholds.push({
+          min,
+          verdict: q.verdict || null,
+          current: pfNum(q.current),
+          recs: [r.id]
+        });
+      }
+      // The current score is a property of the CELL, not of a threshold; keep
+      // the first non-null and never let a later row overwrite it with null.
+      if (row.current === null) row.current = pfNum(q.current);
       byKey.set(key, row);
     }
+  }
+  for (const row of byKey.values()) {
+    row.thresholds.sort((a, b) => a.min === null ? 1 : b.min === null ? -1 : a.min - b.min);
+    // The strictest threshold governs the row. `min` and `verdict` stay on the
+    // row so every existing reader of this shape keeps working.
+    const failing = row.thresholds.filter(t => {
+      if (t.verdict) return String(t.verdict).toUpperCase() !== "MET";
+      return t.min !== null && row.current !== null && row.current < t.min;
+    });
+    const governing = failing.length ? failing[failing.length - 1] : row.thresholds[row.thresholds.length - 1] || {};
+    row.min = governing.min === undefined ? null : governing.min;
+    row.verdict = governing.verdict || null;
   }
   return [...byKey.values()].sort((a, b) => a.kind === b.kind ? 0 : a.kind === "cell" ? -1 : 1);
 }
@@ -1788,7 +1766,26 @@ function ClientPlatform({
         fontSize: 11,
         color: "var(--z-muted)"
       }
-    }, p.min === null ? "Min not stated" : `Min ${p.min.toFixed(1)}`, " \xB7 ", p.current === null ? "current not stated" : `Current ${p.current.toFixed(2)}`, " \xB7 ", subs.length, " cells \xB7 ", ev.length, " evidence"), pct !== null ? /*#__PURE__*/React.createElement("div", {
+    }, p.current === null ? "Current not stated" : `Current ${p.current.toFixed(2)}`, " \xB7 ", subs.length, " cells \xB7 ", ev.length, " evidence"), (p.thresholds || []).length ? /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 6,
+        marginTop: 4,
+        flexWrap: "wrap"
+      }
+    }, p.thresholds.map((t, ti) => {
+      const met = t.verdict ? String(t.verdict).toUpperCase() === "MET" : t.min !== null && p.current !== null && p.current >= t.min;
+      const stated = t.min === null ? "not stated" : `≥ ${t.min.toFixed(1)}`;
+      return /*#__PURE__*/React.createElement("span", {
+        key: ti,
+        className: `b ${met ? "b-above" : "b-org"}`,
+        style: {
+          flexShrink: 0,
+          fontSize: 9.5
+        },
+        title: `${t.recs.length} recommendation${t.recs.length === 1 ? "" : "s"} require${t.recs.length === 1 ? "s" : ""} this threshold: ${t.recs.join(" · ")}`
+      }, stated, " ", met ? "met" : "not met");
+    })) : null, pct !== null ? /*#__PURE__*/React.createElement("div", {
       className: "prog",
       style: {
         marginTop: 4,

@@ -398,7 +398,8 @@ function FirmographicsPanel({
     }) : `${f.value}${f.unit ? ` ${f.unit}` : ""}`
   })), /*#__PURE__*/React.createElement(EnrichmentFlag, {
     s: (DMA.LIVE_ENRICHMENT || {}).firmographics,
-    what: "firmographics"
+    what: "firmographics",
+    audience: audience
   }));
 }
 
@@ -1845,7 +1846,8 @@ function LeadershipPanel({
     }
   }, "\u2713 ", doneCount, " of ", enrichable.length, " enriched") : null), /*#__PURE__*/React.createElement(EnrichmentFlag, {
     s: (DMA.LIVE_ENRICHMENT || {}).leadership,
-    what: "roster"
+    what: "roster",
+    audience: audience
   }));
 }
 
@@ -1976,9 +1978,15 @@ function FinancialTrajectoryD1({
    Zennify can act on, is the producer's judgement and stays there. This
    renders what the run promoted, in the order it promoted it. */
 function ThoughtLeadershipPanel() {
+  // `audience` decides how much of the enrichment limit a reader is told: the
+  // customer gets the limit on the reading, an internal reader also gets which
+  // sources reached it. Read from context rather than threaded through props —
+  // passing it in was a ReferenceError the card boundary caught, which is the
+  // boundary working and the change still being wrong.
   const {
     openEvidence,
-    openSubcap
+    openSubcap,
+    audience
   } = useApp();
   const entries = DMA.THOUGHT_LEADERSHIP || [];
   return /*#__PURE__*/React.createElement("div", {
@@ -2144,7 +2152,8 @@ function ThoughtLeadershipPanel() {
     })) : null));
   }))), /*#__PURE__*/React.createElement(EnrichmentFlag, {
     s: (DMA.LIVE_ENRICHMENT || {}).thought_leadership,
-    what: "entries"
+    what: "entries",
+    audience: audience
   }));
 }
 function Row({

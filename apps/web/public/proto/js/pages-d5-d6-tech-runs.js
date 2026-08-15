@@ -2933,7 +2933,8 @@ function ClientTechStack({
   run
 }) {
   const {
-    pushToast
+    pushToast,
+    audience
   } = useApp();
   const [layer, setLayer] = useState("ALL");
   const [hideAbsent, setHideAbsent] = useState(false);
@@ -3043,7 +3044,8 @@ function ClientTechStack({
     className: "sub"
   }, allTech.length, " product", allTech.length === 1 ? "" : "s", " across four layers \xB7 detection level per row, from the run's own evidence"), /*#__PURE__*/React.createElement(EnrichmentFlag, {
     s: (DMA.LIVE_ENRICHMENT || {}).techstack,
-    what: "register"
+    what: "register",
+    audience: audience
   })), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {

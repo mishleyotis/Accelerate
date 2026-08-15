@@ -1845,7 +1845,7 @@ const TS_LAYER_LABEL = {
 
 /* ── Tech stack overview (s41) ───────────────────────────────────── */
 function ClientTechStack({ entity, run }) {
-  const { pushToast } = useApp();
+  const { pushToast, audience } = useApp();
   const [layer, setLayer] = useState("ALL");
   const [hideAbsent, setHideAbsent] = useState(false);
   // The status filter. ONE piece of state behind three controls — the legend
@@ -1960,7 +1960,7 @@ function ClientTechStack({ entity, run }) {
               machine-scanned estate render identically, and the short one
               reads as the client's whole stack. The run's own empty_state said
               the scan had not run and no surface repeated it. */}
-          <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).techstack} what="register" />
+          <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).techstack} what="register" audience={audience} />
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entity.name} tech stack as CSV…`, "success")}><Icon name="download" size={13} /> Export</button>
