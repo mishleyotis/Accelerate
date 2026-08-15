@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from .computed import apply as computed_apply
 from .redaction import page_forbidden, redact_section
+from .subverticals import scope_sections
 from .serving_spec import page_sections, readers, assemble
 from .value_chain import serve_value_chain
 
@@ -287,6 +288,22 @@ def build_page(cur, page: str, display_id: str, audience: str = "internal",
         # contract calls computed is never served as the producer's copy of
         # a number the app was supposed to derive (invariant 8).
         computed_apply(cur, page, section, built["data"], run_meta, entity_id)
+        # T2 SUB-VERTICAL SCOPE, on the way out.
+        #
+        # ET-05 already refuses a foreign variant cell at SUBMIT, so a payload
+        # promoted under a resolvable sub-vertical cannot carry one. This is
+        # for the payloads promoted when it was NOT resolvable: until
+        # 2026-08-15 `resolve_subvertical` matched only the whole normalised
+        # string, so 44 of the 93 corpus manifests carrying a sub-vertical
+        # would have ingested with no scope at all — and an unresolved entity
+        # keeps every cell, deliberately and silently. Widening the resolver
+        # turns those entities from unscoped into scoped, which retroactively
+        # makes their PROMOTED payloads wrong; the gate cannot reach back, and
+        # this can.
+        #
+        # Same one-sided rule as everywhere else: base cells, family and
+        # product variants, and an unresolved entity all keep everything.
+        scope_sections(entity.get("sub_vertical"), built["data"])
         data, report = redact_section(page, section, built["data"],
                                       env.get("internal_only"), audience)
         if data is None:

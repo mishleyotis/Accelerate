@@ -41,6 +41,18 @@
    "target": "apps/mcp/dma_mcp/staged.py",
    "why": "the read half of submit — verbatim, live row only, oversized sections described not truncated",
    "symbol": "get_staged_payload"
+  },
+  {
+   "test": "apps/api/tests/test_subvertical_resolution.py",
+   "target": "apps/api/dma_api/subverticals.py",
+   "why": "the check that never ran: 44 of 93 corpus manifests would ingest unscoped, silently, because unresolved means serve-everything",
+   "symbol": "resolve_subvertical"
+  },
+  {
+   "test": "apps/api/tests/test_scope_sections.py",
+   "target": "apps/api/dma_api/subverticals.py",
+   "why": "foreign T2 variants dropped at serve for payloads promoted while the entity was unresolvable",
+   "symbol": "scope_sections"
   }
  ],
  "_not_mutation_testable": [

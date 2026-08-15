@@ -1209,6 +1209,76 @@ above lives. That asymmetry is the gap.
 bug in the serving app, and closing it means either a corpus gate at ingest or
 a change to the assessment skill. Recorded, not acted on.
 
+### 7.15 The T2 sub-vertical filter that mostly did not run
+
+The owner asked for base-cell scoping and, specifically, that *"tier 2 subcaps
+that relate to a different subvertical get excluded if the client is not in
+that subvertical"*. Checking whether that already held turned up the reason it
+often did not.
+
+Everything downstream was correct. `serves()` hides a foreign variant; ET-05
+refuses one at submit; `scope_to_entity` drops one from `/subcaps`. All three
+ask `resolve_subvertical()` which sub-vertical the entity is, and that was:
+
+```python
+_ALIAS_INDEX.get(_norm(raw))          # an EXACT lookup of the whole string
+```
+
+which answers `"SV2"` and `"Credit Unions"` and almost nothing else. The form a
+manifest actually writes is compound — `"SV1 — Regional Banks"`,
+`"Regional / Community Banks (RB)"`, `"SV2_CreditUnion"` — and every one of
+those returned `None`. `None` is not a failure here: it means *keep
+everything*, deliberately, because not knowing who you are is not grounds for
+hiding scores. So the exclusion did not break loudly. **It silently did
+nothing, and an unscoped run is indistinguishable from a correctly scoped one
+at every layer above it.** `CHECK_NEVER_RAN_READS_AS_UNKNOWN`, in the module
+whose entire job is the check.
+
+Measured through the real ingest path (`persist._institution`, which writes the
+manifest's value **verbatim**) across the corpus's 119 manifests:
+
+| | resolved | would ingest **unscoped** |
+|---|---|---|
+| before | 49 of 93 | **44** |
+| after | 86 of 93 | 7 |
+
+The remaining 7 are correctly refused: two name *two* sub-verticals
+(`"Insurance & Wealth — mutual/fraternal (IC/AM)"`), and the rest are a family
+code (`WM`), a placeholder (`"TBD - Step 1.4"`), or a confidence grade that
+landed in a sub-vertical field (`"HIGH"`). Ambiguity keeps every cell, which is
+the safe direction — and `scope_status()` now *states* that it is unscoped and
+why, so the silence is visible to an audit.
+
+**A correction.** I reported earlier that ET-05 "never fired" for the second
+client. That was wrong, and I inferred it rather than checked it: I read the
+compound string from the client's **workbook**, not from `entities.sub_vertical`,
+which holds the bare `"SV5"` and resolved correctly all along. Both promoted
+clients were scoped. The defect is real and its blast radius is the 44 above —
+latent, not active on either client serving today.
+
+Three further things landed with it:
+
+- **The rule lived in two files and had already drifted.** `dma_api/subverticals.py`
+  and `dma_mcp/subverticals.py` had different `resolve_subvertical` bodies, so a
+  cell the connector admitted at submit could be one the API hid at serve, or
+  the reverse — a gate and a filter disagreeing about who the client is. The
+  shared core is now delimited by an explicit sentinel in both files and
+  `test_subvertical_core_is_one_rule` asserts byte-identity plus identical
+  answers through real imports.
+- **`scope_sections()`** drops foreign variants at serve, not only at submit.
+  ET-05 cannot reach back into payloads promoted while the entity was
+  unresolvable — and widening the resolver is exactly what turns those
+  entities from unscoped to scoped, making their promoted payloads
+  retroactively wrong.
+- **`SCOPE_TAG` bumped to `sv-scope@2`**, because the document a run serves now
+  depends on this rule and `promoted_at` does not move when a serving rule
+  does.
+
+Effect on the two live clients: **zero cells dropped**. Both were already
+scoped and both producers had already excluded the variants. That is the
+expected result and it is worth stating plainly — this fix is preventive for
+them and corrective for the 44 packages behind them.
+
 ---
 
 ## 8 · Files
