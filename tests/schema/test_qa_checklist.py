@@ -4,12 +4,15 @@ Runs against a migrated database (alembic upgrade head) reachable via
 LOCAL_DATABASE_URL, with the docker-compose / pg-init parity users present
 so role-boundary assertions behave exactly as they will on Cloud SQL.
 """
+import json
 import os
 import threading
 import uuid
 
 import pg8000.dbapi
 import pytest
+
+from pathlib import Path
 
 DSN = os.environ.get("LOCAL_DATABASE_URL", "postgresql+pg8000://postgres:local@localhost:5432/dma_insights")
 
@@ -57,9 +60,38 @@ ENVELOPE = ["run_id", "entity_id", "promoted_at", "producer_version", "provenanc
             "produced_at"]
 
 
-def test_table_count_is_89(db):
-    (n,) = q(db, "SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename <> 'alembic_version'")[0]
-    assert n == 89
+def test_no_table_disappears_and_growth_is_deliberate(db):
+    """Replaces `assert count == 89`.
+
+    89 was the stage-0.3 DoD and the schema has since grown to 102 as later
+    stages added the memory store, the workflow tier, the enrichment store and
+    the rest — all legitimate. The equality had been failing CI for every
+    commit since, which is worse than useless: a red check nobody can act on
+    trains people to ignore red checks.
+
+    A bare count could not tell "we added 13 tables" from "someone dropped a
+    charter table and added 14". A name list can, and it reads as documentation
+    of what the schema IS. A DROP fails here; an ADD must be written into
+    table_baseline.json in the same commit, which makes schema growth a
+    reviewed edit rather than a silent one.
+    """
+    baseline = json.loads(
+        (Path(__file__).parent / "table_baseline.json").read_text())
+    expected = set(baseline["tables"])
+    present = {r[0] for r in q(db, """SELECT tablename FROM pg_tables
+                                       WHERE schemaname='public'
+                                         AND tablename <> 'alembic_version'""")}
+    dropped = sorted(expected - present)
+    added = sorted(present - expected)
+    assert not dropped, (
+        f"{len(dropped)} table(s) in the baseline are GONE from the schema: "
+        f"{dropped}. A migration removed a table the build depends on, or the "
+        "migration chain did not run to head.")
+    assert not added, (
+        f"{len(added)} table(s) exist that the baseline does not list: "
+        f"{added}. If a migration added them deliberately, add them to "
+        "tests/schema/table_baseline.json in the same commit.")
+    assert len(present) >= baseline["charter_baseline_at_stage_0_3"]
 
 
 def test_serving_map_reconciles(db):

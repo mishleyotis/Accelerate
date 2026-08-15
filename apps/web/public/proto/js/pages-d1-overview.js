@@ -268,7 +268,7 @@ function SnapshotStrip({
       style: {
         color: delta == null ? "var(--z-muted)" : delta < 0 ? "var(--z-below)" : "var(--z-mid)"
       }
-    }, delta == null ? "—" : /*#__PURE__*/React.createElement(React.Fragment, null, delta >= 0 ? "▲" : "▼", " ", fx(Math.abs(delta), 1))));
+    }, delta == null ? null : /*#__PURE__*/React.createElement(React.Fragment, null, delta >= 0 ? "▲" : "▼", " ", fx(Math.abs(delta), 1))));
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 8,
@@ -1889,7 +1889,7 @@ function FinancialTrajectoryD1({
       fontWeight: 600,
       color: "var(--z-dark)"
     }
-  }, f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : "—"), /*#__PURE__*/React.createElement("div", {
+  }, f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : null), /*#__PURE__*/React.createElement("div", {
     style: {
       width: "100%",
       height: `${(f.total_assets[i] || 0) / maxA * 80}px`,

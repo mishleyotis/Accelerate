@@ -160,7 +160,7 @@ function SnapshotStrip({ entity, run, layout, audience }) {
                       ? <EnrichmentGap what={`${p.id} score`} audience={audience} compact />
                       : fx(s, 1)}</div>
                     <div className="pbar-delta" style={{ color: delta == null ? "var(--z-muted)" : (delta < 0 ? "var(--z-below)" : "var(--z-mid)") }}>
-                      {delta == null ? "—" : <>{delta >= 0 ? "▲" : "▼"} {fx(Math.abs(delta), 1)}</>}
+                      {delta == null ? null : <>{delta >= 0 ? "▲" : "▼"} {fx(Math.abs(delta), 1)}</>}
                     </div>
                   </div>
                 );
@@ -1002,7 +1002,7 @@ function FinancialTrajectoryD1({ entity }) {
             <div key={y} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}
                  title={[y, f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : null,
                          f.nim_pct[i] != null ? `NIM ${f.nim_pct[i]}%` : null].filter(Boolean).join(" · ")}>
-              <div style={{ fontSize: 10.5, fontWeight: 600, color: "var(--z-dark)" }}>{f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : "—"}</div>
+              <div style={{ fontSize: 10.5, fontWeight: 600, color: "var(--z-dark)" }}>{f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : null}</div>
               <div style={{ width: "100%", height: `${(f.total_assets[i] || 0) / maxA * 80}px`, background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0", transition: "height var(--motion-slow) var(--ease)" }} />
               <div className="f-mono" style={{ fontSize: 9.5, color: "var(--z-muted)" }}>{y.replace("FY", "'")}</div>
             </div>

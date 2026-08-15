@@ -78,7 +78,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install -q pytest openpyxl pg8000
+      # apps/api's tests import dma_api.main, which imports fastapi. The first
+      # version of this job widened the pytest targets to include them WITHOUT
+      # widening the install, so two route-wiring tests failed on
+      # ModuleNotFoundError — a green suite locally and a red one here, which
+      # is the same repo-versus-runtime gap Gate D exists for one layer up.
+      - run: pip install -q pytest openpyxl pg8000 -r apps/api/requirements.txt
       - run: python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ scripts/tests/ -q
 
   # The frontend has its own suite (node's built-in runner, no framework) and

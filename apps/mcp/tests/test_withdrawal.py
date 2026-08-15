@@ -45,7 +45,16 @@ def _connect(user):
 
 @pytest.fixture()
 def seeded():
-    admin = _connect("postgres")
+    # Every other DB-backed suite in this tree SKIPS when there is no local
+    # database; this one connected unconditionally, so on a runner without
+    # postgres it produced 7 ERRORS while 74 sibling tests skipped cleanly —
+    # and a job that errors is a job that fails. The distinction that matters:
+    # "the database is not here" is an ENVIRONMENT fact, while a test failure
+    # is a claim about the code, and a suite that conflates them cannot be read.
+    try:
+        admin = _connect("postgres")
+    except Exception:
+        pytest.skip("no migrated local database")
     cur = admin.cursor()
 
     def clean():

@@ -52,6 +52,16 @@ ALLOWED = [
     # Spots a dash arriving IN DATA from the producer, so the app can treat it
     # as the absent value it is rather than rendering it as a name.
     ("live-adapter.jsx", 'p.name === "—"'),
+    # `fx()` is the shared numeric formatter and it returns a STRING that 86
+    # call sites depend on — 42 interpolate it into a template literal
+    # (`Peer ${fx(peer,1)}`, `M${fx(ceiling,1)}`, money()'s `${fx(v)}${unit}`)
+    # and 4 lean on string truthiness. Returning null here yields "null" inside
+    # those literals; returning a word yields "Mnot stated". The fix is
+    # per-caller — each site that renders a bare score guards on null itself,
+    # which the sweep did across 10 modules — and fx is left formatting numbers
+    # it was actually given. Kept as a NAMED exception rather than silently
+    # excluded, so the debt stays visible in the gate that owns it.
+    ("utils.jsx", 'n.toFixed(digits === undefined ? 1 : digits)'),
 ]
 
 
