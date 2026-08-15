@@ -38,6 +38,7 @@ from dma_mcp import gates as gates_mod
 from dma_mcp import memory as memory_mod
 from dma_mcp import promote as promote_mod
 from dma_mcp import register as register_mod
+from dma_mcp import staged as staged_mod
 from dma_mcp import submit as submit_mod
 from dma_mcp import transport as transport_mod
 from dma_mcp import withdraw as withdraw_mod
@@ -153,6 +154,27 @@ def get_run_progress(run_id: str) -> dict:
     not be re-synthesised."""
     with _conn() as c:
         return claims_mod.get_run_progress(c, run_id)
+
+
+@mcp.tool()
+@_traced
+def get_staged_payload(run_id: str, page: str, section: str = "") -> dict:
+    """What you last submitted for a page — STAGED, verbatim, unredacted.
+
+    The read half of submit, and what makes the one-card repair the skill
+    documents actually possible across sessions: retention keeps the staged
+    row, this hands it back, you edit the one section and resubmit.
+
+    Without a `section` you get the index — every section's name, byte size
+    and top-level keys. Ask for the one you are repairing. A section over the
+    inline budget is DESCRIBED rather than returned, because a truncated copy
+    resubmitted would silently empty a complete section.
+
+    This is not the served projection: the serve layer strips `internal_only`
+    and redacts for audience, and a payload with those removed cannot be
+    resubmitted — it would promote the redaction."""
+    with _conn() as c:
+        return staged_mod.get_staged_payload(c, run_id, page, section)
 
 
 @mcp.tool()
