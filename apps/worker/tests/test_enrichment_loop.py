@@ -317,3 +317,45 @@ def test_the_worker_and_the_connector_compute_gaps_from_ONE_module():
     from dma_mcp import gaps as connector_gaps
     assert connector_gaps.gaps_for_section.__module__ == "enrichment_gaps"
     assert E.gapmod.gaps_for_section is connector_gaps.gaps_for_section
+
+
+# ── the entrypoint actually imports ───────────────────────────────────
+def test_main_s_imports_resolve():
+    """The job died in production on `ImportError: cannot import name
+    'connect' from dma_worker.persist` — a function name I guessed instead of
+    reading. Every test above calls run_once() directly, so main()'s own
+    imports were never executed by anything until Cloud Run ran them.
+
+    This compiles main's body and resolves each name it imports, which is the
+    cheapest possible proxy for "the entrypoint starts"."""
+    import ast
+    import importlib
+    import inspect
+
+    src = inspect.getsource(E.main)
+    tree = ast.parse(src.strip())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            mod = importlib.import_module(
+                node.module if node.level == 0
+                else f"dma_worker.{node.module}" if node.module
+                else "dma_worker")
+            for alias in node.names:
+                assert hasattr(mod, alias.name), (
+                    f"main() imports {alias.name!r} from {mod.__name__}, which "
+                    "does not export it")
+
+
+def test_the_connect_helper_matches_job_main():
+    """Both must reach the same database the same way. job_main.py is the
+    canonical one; a second connect that drifts would work locally and fail on
+    IAM in production, where no DB password exists at all."""
+    import inspect
+    from pathlib import Path as _P
+
+    mine = inspect.getsource(E._connect)
+    canonical = (_P(E.__file__).resolve().parent.parent / "job_main.py").read_text()
+    for token in ("LOCAL_DATABASE_URL", "DB_INSTANCE_CONNECTION_NAME",
+                  "enable_iam_auth=True", 'ip_type="PRIVATE"', "pg8000"):
+        assert token in mine, f"_connect is missing {token}"
+        assert token in canonical, f"job_main.py no longer uses {token}"

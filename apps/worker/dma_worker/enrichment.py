@@ -293,10 +293,37 @@ def _attempt(cur, job_id, run_id, entity_id, gap, resolver, status, value,
          reason))
 
 
+def _connect():
+    """The worker's canonical connect, matching job_main.py exactly.
+
+    The first version imported a `connect` from .persist that does not exist —
+    guessed, not read — and the job died on ImportError before touching the
+    database. The endpoint reported "no enrichment job has ever run", which was
+    true and is why it says that rather than assuming health.
+
+    Local dev goes through pg8000 with a password; production goes through the
+    Cloud SQL connector with IAM auth on the private IP. No DB password exists
+    in production (charter: IAM DB auth), so these cannot be one path.
+    """
+    if os.environ.get("LOCAL_DATABASE_URL"):
+        import pg8000.dbapi
+        host = os.environ["LOCAL_DATABASE_URL"].split("@")[1].split(":")[0]
+        return pg8000.dbapi.connect(
+            user="dmai-worker@digital-maturity-assessor.iam",
+            password="local", host=host, port=5432, database="dma_insights")
+    from google.cloud.sql.connector import Connector
+    return Connector().connect(
+        os.environ["DB_INSTANCE_CONNECTION_NAME"], "pg8000",
+        user=os.environ["DB_USER"], db=os.environ["DB_NAME"],
+        enable_iam_auth=True, ip_type="PRIVATE")
+
+
 def main() -> int:
-    from .persist import connect                                # lazy: CLI only
-    with connect() as conn:
+    conn = _connect()
+    try:
         out = run_once(conn, os.environ.get("ENRICH_TRIGGER", "schedule"))
+    finally:
+        conn.close()
     print(f"enrichment job {out['job_id']}: {out['runs_scanned']} run(s), "
           f"{out['gaps_found']} gap(s) — {out['resolved']} resolved, "
           f"{out['not_run']} unresolved, {out['failed']} failed")
