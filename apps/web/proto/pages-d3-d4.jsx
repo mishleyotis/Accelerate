@@ -96,6 +96,81 @@ function PlatformEvChips({ ids, openEvidence, label }) {
   );
 }
 
+/* ── A benchmark the run states, at the grain it states it ───────────
+   Owner, 2026-08-15: "issues with the readiness tab; how peer scores inherited
+   category benchmarks or pillar benchmarks."
+
+   Every one of the 28 gap rows on the promoted run serves `peer_score: null`
+   with `peer_basis: cannot_estimate`, and the note says why in the producer's
+   own words: "The locked peer set is benchmarked at CATEGORY grain, so no peer
+   figure exists for this cell; the category comparison is stated on the
+   workbook surface instead."
+
+   So the comparison exists. `heatmap.workbook_scores` carries twenty-one
+   `peer_median` values across categories and pillars, and the platform page
+   read none of them — it rendered an absence beside a number that is sitting
+   one section away, on a surface the same reader has open.
+
+   The rule this obeys, and the reason it is a resolver rather than a fallback:
+   a category median IS NOT a cell peer score, and presenting one as the other
+   would be the grain violation invariant 12's CG family exists to catch. So the
+   grain travels with the figure, always, and the row says which it is. An
+   inherited benchmark is a comparison the reader can make; an unlabelled one is
+   a number they will read as a peer score for this cell.
+
+   Cell -> category -> pillar, by id: `P4C3.1.2` is in `P4C3`, which is in `P4`.
+   Derived, never stored (invariant 8), and null where the run states neither. */
+function benchmarkFor(subcapId, workbookScores) {
+  const id = pfText(subcapId);
+  if (!id || !workbookScores) return null;
+  const rows = (table) => {
+    const t = workbookScores[table];
+    if (!t) return {};
+    if (Array.isArray(t)) {
+      const out = {};
+      for (const r of t) {
+        const key = r && (r.category_id || r.pillar_id || r.id);
+        if (key) out[key] = r;
+      }
+      return out;
+    }
+    return t;
+  };
+  const m = id.match(/^(P\d+)(C\d+)/);
+  if (!m) return null;
+  const [, pillarId, catPart] = m;
+  const categoryId = pillarId + catPart;
+
+  const cats = rows("categories");
+  const cat = cats[categoryId];
+  const catMedian = pfNum(cat && cat.peer_median);
+  if (catMedian !== null) {
+    return { value: catMedian, grain: "category", of: categoryId,
+             score: pfNum(cat && cat.score) };
+  }
+  const pils = rows("pillars");
+  const pil = pils[pillarId];
+  const pilMedian = pfNum(pil && pil.peer_median);
+  if (pilMedian !== null) {
+    return { value: pilMedian, grain: "pillar", of: pillarId,
+             score: pfNum(pil && pil.score) };
+  }
+  return null;
+}
+
+/* The benchmark chip. Deliberately NOT a MaturityChip: a maturity chip is the
+   vocabulary this app uses for a cell's own score, and wearing it would make an
+   inherited category figure read as one. */
+function BenchmarkChip({ mark }) {
+  if (!mark) return null;
+  return (
+    <span className="b b-muted f-mono" style={{ whiteSpace: "nowrap" }}
+      title={`This run states no peer figure at cell grain. ${mark.value.toFixed(1)} is the peer median its ${mark.grain} (${mark.of}) is benchmarked at, and is shown at that grain rather than as a peer score for this cell.`}>
+      {mark.value.toFixed(1)} <span style={{ opacity: .7 }}>{mark.grain}</span>
+    </span>
+  );
+}
+
 /* ── The evidence behind a platform, which was promoted and never shown ──
    Measured 2026-08-15 against the live BCU payload. `platform_story` serves 16
    keys per platform. The page rendered exactly two of them — `platform` and
@@ -657,7 +732,19 @@ function ClientPlatform({ entity, run }) {
   // Before, every row printed "−-2.5": a unary minus prepended to an already
   // negative difference, computed against a peer median that does not exist
   // for these cells.
-  const anyPeer = gapRows.some(g => g.peer !== null);
+  /* The run's own benchmark table. `workbookScoresOf` lives on the heatmap
+     page and reads the merged entity field first, then the registry the loader
+     installs — the same object either way. Read once here rather than per row:
+     twenty-eight rows resolving the same table is twenty-eight lookups for one
+     answer. */
+  const wbScores = (typeof workbookScoresOf === "function"
+    ? workbookScoresOf(entity) : null)
+    || (entity && entity.workbookScores) || null;
+  // A row can state a difference when it has a cell peer OR an inherited
+  // benchmark. Before, a run whose peers are all benchmarked at category grain
+  // dropped the column entirely and the comparison vanished with it.
+  const anyPeer = gapRows.some(g => g.peer !== null
+    || benchmarkFor(g.subcap_id, wbScores) !== null);
   const gapCols = (anyPeer ? 7 : 6);
 
   const prereqRows = areaPrereqs(areaRecs);
@@ -1009,6 +1096,12 @@ function ClientPlatform({ entity, run }) {
                      missing. */
                   const peerHeld = peer === null
                     && !!(pfText(g.peer_note) || g.peer_basis || (wb && wb.peer_basis));
+                  // The benchmark this run states for the cell's category, or
+                  // failing that its pillar. Resolved only when the cell itself
+                  // has no peer figure — a category median never overrides a
+                  // real one.
+                  const mark = peer === null
+                    ? benchmarkFor(g.subcap_id, wbScores) : null;
                   // The first row the derived scope does not reach carries the
                   // divider; the rows under it are the same run's promoted gap
                   // rows, filed under another platform's area.
@@ -1030,9 +1123,14 @@ function ClientPlatform({ entity, run }) {
                       </td>
                       <td data-label="Pillar" className="col-drop">{pillar ? <span className="b b-purple">{pillar}</span> : <EnrichmentGap what="Pillar" audience={audience} compact />}</td>
                       <td data-label="Score"><MaturityChip score={cur} /></td>
+                      {/* Cell peer first; then the benchmark the run DOES
+                          state, at the grain it states it; then, only if
+                          neither exists, the absence. */}
                       <td data-label="Peer">{peer !== null ? <MaturityChip score={peer} /> : (
-                        <EnrichmentGap what="Peer score" held={peerHeld}
-                          reason={peerHeld ? peerWhy : undefined} audience={audience} compact />
+                        mark ? <BenchmarkChip mark={mark} /> : (
+                          <EnrichmentGap what="Peer score" held={peerHeld}
+                            reason={peerHeld ? peerWhy : undefined} audience={audience} compact />
+                        )
                       )}</td>
                       {anyPeer ? (
                         /* The delta is arithmetic, so it carries the state of
@@ -1041,9 +1139,32 @@ function ClientPlatform({ entity, run }) {
                            itself is not repeated here — it is one cell to the
                            left and belongs to the figure it explains, not to a
                            subtraction. */
-                        <td data-label="Gap">{delta === null ? <EnrichmentGap what="Gap to peer" held={peerHeld} audience={audience} compact /> : (
-                          <span className="f-mono" style={{ color: delta < 0 ? "var(--z-below)" : "var(--z-above)" }}>{delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}</span>
-                        )}</td>
+                        <td data-label="Gap">{(() => {
+                          // A difference against an INHERITED benchmark is a
+                          // real comparison and is shown — but it is a
+                          // difference at that benchmark's grain, and the
+                          // column says so. Presenting it bare would be the
+                          // grain violation the CG family exists to catch:
+                          // the label and the figure would come from different
+                          // rows.
+                          const d = delta !== null ? delta
+                            : (mark !== null && cur !== null ? cur - mark.value : null);
+                          if (d === null) {
+                            return <EnrichmentGap what="Gap to peer" held={peerHeld} audience={audience} compact />;
+                          }
+                          const inherited = delta === null;
+                          return (
+                            <span className="f-mono"
+                              style={{ color: d < 0 ? "var(--z-below)" : "var(--z-above)",
+                                       opacity: inherited ? .8 : 1 }}
+                              title={inherited
+                                ? `Against the ${mark.grain} benchmark for ${mark.of}, not against a peer figure for this cell — the run states none.`
+                                : ""}>
+                              {d > 0 ? `+${d.toFixed(1)}` : d.toFixed(1)}
+                              {inherited ? <span style={{ opacity: .7 }}> {mark.grain}</span> : null}
+                            </span>
+                          );
+                        })()}</td>
                       ) : null}
                       {/* The catalogue path is a tooltip rather than a second
                           line: at 9.5px under every feature it doubled the

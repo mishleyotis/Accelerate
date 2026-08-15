@@ -1400,12 +1400,50 @@ function LeadershipPanel({
      reveal reads as an action, and shows what was stored. A person the
      producer found no route for gets a transient toast and the curtain comes
      down entirely — a box left standing would promise a route the run cannot
-     produce. Nothing leaves the browser, nothing persists: navigate away and
-     every curtain is closed again. */
+     produce.
+      WHAT PERSISTS, and what does not. Owner, 2026-08-15: "When I click enrich
+     via Clay, this is not persisted across sessions to me as a user such that
+     I never click it again." Correct, and the original "nothing persists" was
+     the wrong call for a reader: the curtain reads as a request the first time
+     and as busywork every time after, over data the run already holds.
+      A REVEAL now persists, per browser and per entity. It is a view
+     preference, not content — invariant 2 is untouched, nothing is written
+     anywhere the serving tier can see, and a customer-audience payload carries
+     no contact columns at all, so a restored reveal on that audience uncovers
+     an empty box rather than a leak.
+      A "no route" result does NOT persist, deliberately. It is a statement about
+     what THIS run found, and freezing it would keep a curtain down over a
+     contact a later run fills. Absence is recomputed; only the reader's
+     decision is remembered. */
   const {
     pushToast
   } = useApp();
-  const [revealed, setRevealed] = useState({}); // id → "loading" | "done" | "none"
+  /* Per-entity so a reveal on one client never uncovers another's roster —
+     the same identity discipline the registry reads follow. */
+  const revealKey = (() => {
+    const m = String(typeof window !== "undefined" && window.location.hash || "").match(/#\/clients\/([^/?]+)/);
+    return m ? `dma.reveal.${decodeURIComponent(m[1])}` : null;
+  })();
+  const [revealed, setRevealed] = useState(() => {
+    // Restored on first render rather than in an effect: an effect would paint
+    // the closed curtain first and reopen it, which reads as a flicker on
+    // exactly the surface this is meant to stop nagging the reader about.
+    if (!revealKey || typeof localStorage === "undefined") return {};
+    try {
+      const ids = JSON.parse(localStorage.getItem(revealKey) || "[]");
+      return Array.isArray(ids) ? Object.fromEntries(ids.map(id => [id, "done"])) : {};
+    } catch (e) {
+      return {}; // corrupt storage is not worth a broken panel
+    }
+  }); // id → "loading" | "done" | "none"
+  const remember = id => {
+    if (!revealKey || typeof localStorage === "undefined") return;
+    try {
+      const ids = new Set(JSON.parse(localStorage.getItem(revealKey) || "[]"));
+      ids.add(id);
+      localStorage.setItem(revealKey, JSON.stringify([...ids]));
+    } catch (e) {/* private mode, quota — the reveal still works this session */}
+  };
   const [enrichingAll, setEnrichingAll] = useState(false);
   const roster = DMA.LEADERSHIP || [];
   // One route shape for both worlds: live rows carry the promoted email /
@@ -1436,6 +1474,7 @@ function LeadershipPanel({
           ...m,
           [ex.id]: "done"
         }));
+        remember(ex.id);
       } else {
         if (!quiet) pushToast(`No stored contact route for ${ex.name}`, "warn");
         setRevealed(m => ({
