@@ -179,6 +179,15 @@ def promote_run(conn, run_id) -> dict:
         if alerts > ALERT_CEILING:
             conn.rollback()
             return {"promoted": False, "error": "alert_ceiling_exceeded",
+                    # NAME THE GATE. Invariant 12 says a verdict names the
+                    # gate, the path and the arithmetic, and this refusal
+                    # named none of them — it was the only rule in the system
+                    # a producer could meet and then not look up, because it
+                    # had no registry entry. `explain_gate("SG-AC1")` now
+                    # answers, including the threshold history, so "why 15"
+                    # is a question with a recorded answer.
+                    "gate_id": "SG-AC1",
+                    "explain": "explain_gate('SG-AC1')",
                     "open_alerts": alerts, "ceiling": ALERT_CEILING,
                     "hint": (
                         f"this run carries {alerts} open alerts against a "

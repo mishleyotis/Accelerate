@@ -88,6 +88,31 @@ def _normalise(text: str) -> str:
     return re.sub(r"\s+", " ", text or "").strip().lower()
 
 
+def date_merge(stored: date | None, incoming: date | None) -> str:
+    """What a later registration may do to an already-stored date.
+
+    Three cases and they are not the same, which is the whole point:
+
+      fill          stored is unknown, incoming states one. Strictly
+                    additive — unknown becoming known — so take it.
+      keep          they agree, or the incoming one says nothing.
+      contradiction they disagree. The stored date STANDS and the conflict
+                    is reported. Two sources disagreeing about when a
+                    document was published is a finding; letting the later
+                    write win resolves it silently in favour of whichever
+                    call happened to be second, which is not a resolution.
+
+    A separate function because every test of this behaviour otherwise needs
+    a live database, and `apps/mcp/tests` skips 53 tests for want of one —
+    a test that always skips is a test that never runs.
+    """
+    if incoming is None:
+        return "keep"
+    if stored is None:
+        return "fill"
+    return "keep" if stored == incoming else "contradiction"
+
+
 def register_evidence(conn, run_id, item: dict, fetch=None,
                       known_entity_domains=None) -> dict:
     """fetch(url) -> str|None is injectable (tests; and the worker image
@@ -220,6 +245,57 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
                   (e_id, content_hash, branch, matched_e_id, occurred_at)
                 VALUES (NULL, {_HASH_SQL}, 'dedup_same_entity', %s, now())""",
             (source_url, claim, excerpt, kept_id))
+
+        # A DATE THE FIRST REGISTRATION LACKED, arriving on a later one.
+        #
+        # Measured 2026-08-15 on the second client. A producer registered
+        # three spans from a Client Agreement before it had established the
+        # document's date, then re-registered them with published_date set.
+        # Dedup fired, `linked_subcap_ids` MERGED — a new cell was genuinely
+        # added to E-CC-178 — and `published_date` stayed null. The merge was
+        # partial, on one field and not the other, which is the defect: an
+        # item first registered undated could never afterwards be dated, so
+        # it sat at UNVERIFIED forever and its ERS stayed suppressed (3.40
+        # undated against 4.15 dated, on comparable spans from one document).
+        #
+        # Filling it is strictly additive — unknown becoming known. What is
+        # NOT done here is overwriting a date the row already carries with a
+        # different one: two sources disagreeing about when a document was
+        # published is a contradiction, and the rule for a contradiction is
+        # to state it, never to resolve it silently by taking the newer
+        # write. So the three cases are separated and the third is reported.
+        if published:
+            cur.execute("SELECT published_date FROM evidence_index "
+                        "WHERE e_id = %s", (kept_id,))
+            stored = cur.fetchone()[0]
+            verdict = date_merge(stored, published)
+            if verdict == "fill":
+                # Recompute ERS: recency is 25% of it, and a row left at
+                # UNVERIFIED scores as though nobody had ever dated it.
+                new_band = _recency_band(published, reference_date)
+                cur.execute(
+                    """UPDATE evidence_index
+                          SET published_date = %s,
+                              ers = round((0.35 * %s + 0.25 * %s
+                                         + 0.20 * specificity
+                                         + 0.20 * corroboration)::numeric, 2)
+                        WHERE e_id = %s
+                    RETURNING ers""",
+                    (published, _TIER_FACTOR[tier], _RECENCY_FACTOR[new_band],
+                     kept_id))
+                ers_out = float(cur.fetchone()[0])
+                adjustments.append(
+                    f"{kept_id} was registered undated and is now dated "
+                    f"{published.isoformat()}: recency {new_band}, ERS "
+                    f"recomputed to {ers_out}")
+            elif verdict == "contradiction":
+                adjustments.append(
+                    f"CONTRADICTION not resolved: {kept_id} is stored as "
+                    f"published {stored.isoformat()} and this registration "
+                    f"says {published.isoformat()}. The stored date stands. "
+                    "One of the two readings is wrong and which one is a "
+                    "finding — establish it from the document rather than "
+                    "letting the later write win.")
 
     # The per-DOCUMENT sole-evidence cap (W6). Checked here, after the mint,
     # because the refusal is about the LINKS and not the registration: the
