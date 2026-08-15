@@ -43,6 +43,19 @@ jobs:
       # the whole suite passed — because in the repo the file is there.
       - name: Gate D — shared contracts ship in the image
         run: python3 scripts/gate_d_shared_files_ship.py
+      # verify_deployed.py needs gcloud and production credentials, which CI
+      # does not have — so CI cannot run the byte comparison. What it CAN
+      # enforce is that the script stays wired into the release path, which is
+      # the failure that actually happened: the script existed and nothing
+      # called it.
+      - name: The deploy verifies its own result
+        run: |
+          grep -q "verify_deployed.py" infra/deploy.sh || {
+            echo "infra/deploy.sh no longer runs verify_deployed.py."
+            echo "A deploy that does not check what it shipped is how four"
+            echo "render fixes were reported live against a revision built"
+            echo "58 minutes before they were committed."
+            exit 1; }
 
   schema-qa:
     name: Schema QA checklist (stage 0.3 DoD)

@@ -1,0 +1,7545 @@
+{
+ "sections": [
+  {
+   "qa_section": "Register: Release gate (RG)",
+   "doc_line": 3,
+   "status": "REGISTER",
+   "surface_id": "register.rg",
+   "checks": [
+    {
+     "qa_id": "RG-01",
+     "verdict": "AMEND(sweep targets derived from the router, so global chrome and overlays are covered rather than page routes only)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-02",
+     "verdict": "AMEND(evidence record is a retained DOM + payload dump keyed by qa_id; a screenshot is illustration, never provenance - the doc's own 8.2 concedes this while 93 sections claim ATTACHED as proof)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-03",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-04",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-05",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-06",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-07",
+     "verdict": "AMEND(add lifecycle status and terminal-state to the reconciled attribute set; the doc reconciles score, count and label only)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 4
+    },
+    {
+     "qa_id": "RG-08",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-09",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-10",
+     "verdict": "AMEND(a dead or unreachable target is BLOCKING, not a note)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-11",
+     "verdict": "ADD(defect 1: enrichment_register.json was absent from the api image, the loader swallowed FileNotFoundError into {}, five declared surfaces served without status and every test passed)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 1
+    },
+    {
+     "qa_id": "RG-12",
+     "verdict": "ADD(defect 2: _register_paths built parents[3] EAGERLY, raising IndexError in the 3-deep image layout and never in the repo)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 2
+    },
+    {
+     "qa_id": "RG-13",
+     "verdict": "ADD(defects 5/10: every key a proto or adapter module READS must be written by some adapter and declared by a contract)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 5
+    },
+    {
+     "qa_id": "RG-14",
+     "verdict": "ADD(defect 11: a run promoted carrying 98 open alerts because nothing counted them; owner adjudication F sets the ceiling at 15)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 11
+    },
+    {
+     "qa_id": "RG-15",
+     "verdict": "ADD(defect 13: four render fixes reported live against a revision built 58 minutes before they were committed)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 13
+    },
+    {
+     "qa_id": "RG-16",
+     "verdict": "ADD(defect 14: CI ran apps/worker and apps/mcp only; the API's 251 tests and the entire web suite had never run in CI)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 14
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Overlay behaviour (OV)",
+   "doc_line": 1536,
+   "status": "REGISTER",
+   "surface_id": "register.ov",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "ADD(stacked overlays shipped duplicate accessible Close names, making the stack ambiguous to assistive tech - observed on the Heatmap subcap drawer, asserted nowhere)",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Evidence integrity (EV)",
+   "doc_line": 1536,
+   "status": "REGISTER",
+   "surface_id": "register.ev",
+   "checks": [
+    {
+     "qa_id": "EV-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "ADOPT",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-06",
+     "verdict": "AMEND(state as a rule, not as the doc's single-client 749-cell/699-thin measurement: coverage and evidentiary sufficiency are separate metrics and must be measured from the promoted payload at test time)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "ADD(the doc records source URLs rendering as plain text on Heatmap and focus detail but issues no check that a locator is an actual link)",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Grain and rollup (GR)",
+   "doc_line": 7088,
+   "status": "REGISTER",
+   "surface_id": "register.gr",
+   "checks": [
+    {
+     "qa_id": "GR-01",
+     "verdict": "AMEND(keep the rule that the score chip and the anchor chip must name the SAME cell; discard the doc's '2.77 on 59 clients' - 59 clients cannot exist)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-03",
+     "verdict": "AMEND(carry the 169-versus-36 P1C1 case as a ZERO-tolerance rule at every grain, not as one client's number)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-04",
+     "verdict": "ADOPT",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-05",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-06",
+     "verdict": "AMEND(HCD-15 asks that P1C5 fragmented variants reconcile to an aggregate. P1C5 is the KILLED 17th category: v7.0 has 16 categories and all 31 P1C5 cells resolve NOT_COMPARABLE. In a v7.0 run P1C5 must not aggregate at all; it renders NOT_COMPARABLE. Aggregation applies only to v5.0-pinned runs)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-07",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Maturity bands (BD)",
+   "doc_line": 3409,
+   "status": "REGISTER",
+   "surface_id": "register.bd",
+   "checks": [
+    {
+     "qa_id": "BD-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BD-02",
+     "verdict": "SUPERSEDED(owner adjudication E and invariant 6 - the doc specifies the ceiling surface on an M1-M5 scale and OCU-08's exemplar reads 'cap M3 applied'; M5/Transformational must not exist in code, enum, payload or prose)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BD-03",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BD-04",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BD-05",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BD-06",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BD-07",
+     "verdict": "AMEND(the doc writes the band word as 'Competitive' in the Hero section; the enum is Activating, Building, Competing, Differentiating)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Absence and enrichment (AB)",
+   "doc_line": 3542,
+   "status": "REGISTER",
+   "surface_id": "register.ab",
+   "checks": [
+    {
+     "qa_id": "AB-01",
+     "verdict": "SUPERSEDED(owner adjudication A - the doc's Firmographics 8.3 says an unknown field renders an em dash; never place an em dash)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-02",
+     "verdict": "SUPERSEDED(owner adjudication B - the doc requires UNWORKED/WORKED_FOUND/WORKED_ABSENT and 'queued, validating, ingesting, synthesizing, promoting' as user-visible content; no workflow vocabulary reaches the reader)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-03",
+     "verdict": "SUPERSEDED(owner adjudication C - when a value genuinely cannot be sourced the ROW IS OMITTED, not dashed, guessed or narrated)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-04",
+     "verdict": "ADD(defect 7: a HELD firmographic quarantined with a 297-char reason rendered NO ROW AT ALL - the most defensible field on the panel, invisible)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 7
+    },
+    {
+     "qa_id": "AB-05",
+     "verdict": "ADD(defect 8b: a stated zero must be visibly distinct from an unstated value)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 8
+    },
+    {
+     "qa_id": "AB-06",
+     "verdict": "ADD(owner adjudication G - enrichment is a scheduled job, observable at GET /v1/ops/enrichment-loop, not a person driving Clay)",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Formatter honesty (FM)",
+   "doc_line": 3542,
+   "status": "REGISTER",
+   "surface_id": "register.fm",
+   "checks": [
+    {
+     "qa_id": "FM-01",
+     "verdict": "ADD(defect 8: fmtPct(null) returned '0%' - a null answering with a measurement)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 8
+    },
+    {
+     "qa_id": "FM-02",
+     "verdict": "ADD(defect 8b: fmtAssets(0) printed a stated zero identically to an unstated one)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 8
+    },
+    {
+     "qa_id": "FM-03",
+     "verdict": "ADD(invariant 9 generalised: no formatter may return a sentinel that reads as data)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 8
+    },
+    {
+     "qa_id": "FM-04",
+     "verdict": "ADD(defect 9: a duplicate CAGR row - pinned from the computed series AND printed again by the passthrough, because the pinned-ROW list and the pinned-KEY list were two lists that drifted)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 9
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Key provenance (KP)",
+   "doc_line": 11642,
+   "status": "REGISTER",
+   "surface_id": "register.kp",
+   "checks": [
+    {
+     "qa_id": "KP-01",
+     "verdict": "ADD(defect 6: the adapter read cap_level, a key no contract declares, while the contract's capped_subcap_ids had ZERO hits in the web tree)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 6
+    },
+    {
+     "qa_id": "KP-02",
+     "verdict": "ADD(defect 6b: a contract-declared field with zero readers in apps/web fails the build)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 6
+    },
+    {
+     "qa_id": "KP-03",
+     "verdict": "ADD(defect 10: 25 platform peer_deployment rows, every one carrying a fully cited basis, rendered ZERO times)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 10
+    },
+    {
+     "qa_id": "KP-04",
+     "verdict": "ADD(defect 5: 43 of 51 tech cards said 'this run states no peer set' while the run named five; data.js read a key no adapter ever wrote)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 5
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Mount parity (MT)",
+   "doc_line": 5131,
+   "status": "REGISTER",
+   "surface_id": "register.mt",
+   "checks": [
+    {
+     "qa_id": "MT-01",
+     "verdict": "ADD(five components are defined, exported and mounted NOWHERE - CoverageByPillarCard, EvidenceTierCard, CeilingEstimateCard, FinancialTrajectoryCard and the 2,694-line LiveClientPage page pack, which app/route.js ships to every browser anyway)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "MT-02",
+     "verdict": "ADD(a declared surface that resolves to no mounted component is EXCLUDE with grep evidence, never a silent pass; the doc issues P0 DOM checks against seven surfaces it concedes are absent)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "MT-03",
+     "verdict": "ADD(no page pack ships to the browser unmounted)",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: State vocabulary (ST)",
+   "doc_line": 8584,
+   "status": "REGISTER",
+   "surface_id": "register.st",
+   "checks": [
+    {
+     "qa_id": "ST-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-03",
+     "verdict": "ADOPT",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-04",
+     "verdict": "ADOPT",
+     "layer": "connector",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-05",
+     "verdict": "AMEND(the prototype's single 'safeguard gates' blob is superseded: caps[] - assessment applied - and gates[] - SG results - are two arrays)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-06",
+     "verdict": "ADD(defect 4: a REMEDIATED regulatory matter drew as still open while the drilldown said the opposite; a record's lifecycle status must be identical at card face, detail tab, status arrow and drilldown, and no arrow may be derived from anything but the stored status field)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 4
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Connector verdicts (CG/AG/SG/ET)",
+   "doc_line": 8584,
+   "status": "REGISTER",
+   "surface_id": "register.verdict",
+   "checks": [
+    {
+     "qa_id": "CG-03",
+     "verdict": "ADOPT",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CG-18",
+     "verdict": "AMEND(defect 3: no gate anywhere read ITEM keys and CG-18 was wired to exactly one field path in the whole registry; every contract-asked ITEM key must sit in a must_present set or a recorded waiver)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 3
+    },
+    {
+     "qa_id": "CG-21",
+     "verdict": "ADOPT",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 12
+    },
+    {
+     "qa_id": "EN-01",
+     "verdict": "ADD(defect 3: submit-time ITEM-key field census - any contract-asked path null on 100% of rows blocks, naming the path and the row count; an unparseable item shape is a FAILURE, not a skip)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 3
+    },
+    {
+     "qa_id": "EN-02",
+     "verdict": "ADD(defect 3b: registry coverage asserted in CI - the count of field specs carrying must_present may not fall, and a newly declared ITEM key without a must_present entry or a recorded waiver fails)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 3
+    },
+    {
+     "qa_id": "AG-01",
+     "verdict": "ADOPT",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SG-01",
+     "verdict": "ADOPT",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ET-01",
+     "verdict": "ADOPT",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CG-GRAIN",
+     "verdict": "ADOPT",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Narrative and data integrity (NQ)",
+   "doc_line": 13329,
+   "status": "REGISTER",
+   "surface_id": "register.nq",
+   "checks": [
+    {
+     "qa_id": "NQ-01",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-02",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-03",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-04",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-05",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-06",
+     "verdict": "AMEND(a signal may not be the assessment itself - the rule is right; the doc's 'shipped on 11 clients' is not, this system has two)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-07",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-08",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-09",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-10",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-11",
+     "verdict": "AMEND(add lifecycle status to the reconciled attribute set; also the doc's own '765 subcapabilities' is an unsourced served-cell subset that names no catalogue - v7.0 is 851 cells across 16 categories, v5.0 is 836 across 17)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 4
+    },
+    {
+     "qa_id": "NQ-12",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Test-system audit (TA/CI)",
+   "doc_line": 13632,
+   "status": "REGISTER",
+   "surface_id": "register.ci",
+   "checks": [
+    {
+     "qa_id": "CI-01",
+     "verdict": "AMEND(re-tested at HEAD: ci.yml now runs worker, mcp, api and scripts in python-tests and a separate web-tests job over the compiled bundle. The API and web halves are FIXED; lint, type checks, accessibility and authenticated deployment smoke remain absent. Adopting the doc's finding verbatim would report a solved problem and hide the unsolved remainder)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 14
+    },
+    {
+     "qa_id": "CI-14",
+     "verdict": "AMEND(byte-level comparison of the deployed bundle against a local build of HEAD via scripts/verify_deployed.py, with 'could not compare' treated as FAIL)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 13
+    },
+    {
+     "qa_id": "CI-15",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 1
+    },
+    {
+     "qa_id": "CI-16",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 2
+    },
+    {
+     "qa_id": "CI-17",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 3
+    },
+    {
+     "qa_id": "CI-18",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 11
+    },
+    {
+     "qa_id": "CI-19",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 12
+    },
+    {
+     "qa_id": "TA-01",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TA-07",
+     "verdict": "AMEND(a required production-path test that SKIPS fails the job)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TA-11",
+     "verdict": "AMEND(name the code path, image digest and suite; a count of test FILES is not a measure of coverage in either direction, and the legacy apps/dma-insights figures may not be reported as coverage of this build)",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Repository test architecture (WT/BG/CL)",
+   "doc_line": 13780,
+   "status": "REGISTER",
+   "surface_id": "register.wt",
+   "checks": [
+    {
+     "qa_id": "WT-02",
+     "verdict": "SUPERSEDED(owner adjudication D - WT-02 asserts financial fields as a uniform expectation; revenue is SUB-VERTICAL CONDITIONAL, a credit union has no revenue line, and the doc's own Prospecting 8.5 contradicts WT-02 in the same document)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "WT-08",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 5
+    },
+    {
+     "qa_id": "WT-09",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 6
+    },
+    {
+     "qa_id": "WT-10",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 10
+    },
+    {
+     "qa_id": "WT-11",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 7
+    },
+    {
+     "qa_id": "WT-12",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 8
+    },
+    {
+     "qa_id": "WT-13",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 9
+    },
+    {
+     "qa_id": "BG-04",
+     "verdict": "AMEND(remove the target cap so later rows are reached; a capped sweep proved nothing about row 26 onward)",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CL-07",
+     "verdict": "AMEND(add lifecycle status to the reconciled attribute set)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 4
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: BAX neutral loophole rules",
+   "doc_line": 13329,
+   "status": "REGISTER",
+   "surface_id": "register.bax",
+   "checks": [
+    {
+     "qa_id": "BAX-01",
+     "verdict": "AMEND(re-expressed client-neutrally - the doc builds the whole register on a NAMED promoted client, cites ten of its URLs and quotes its assets, engagement percentages, NPS and app-store rating, which its own scope note forbids)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-02",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-03",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-04",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-05",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-06",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-07",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-08",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-09",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-10",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-11",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-12",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-13",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-14",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BAX-15",
+     "verdict": "AMEND(client-neutral restatement)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Register: Composition oracle and sub-vertical matrix",
+   "doc_line": 128,
+   "status": "REGISTER",
+   "surface_id": "register.comp",
+   "checks": [
+    {
+     "qa_id": "CO-01",
+     "verdict": "AMEND(section 8.3 and the 9.x weight profiles hardcode pillar weights 25/30/20/25 as acceptance facts; weights belong to the run manifest and must be READ, not asserted)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CO-02",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CO-03",
+     "verdict": "SUPERSEDED(owner adjudication D - the must-present set makes revenue universal while 9.2's own credit-union row gives shares, loans, net-worth ratio and members and no revenue line)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CO-04",
+     "verdict": "AMEND(9.12 demands one reference-rich and one sparse-valid fixture for every one of nine sub-verticals. With two real clients these can only be SYNTHETIC fixtures, and the doc does not say so - unqualified it is a licence to copy client facts into fixtures, which RG-08 forbids)",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CO-05",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CO-06",
+     "verdict": "AMEND(classification before composition is right; the classifier's output must be read from the run, never inferred by the test)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Global Shell and Auth",
+   "doc_line": 354,
+   "status": "INCLUDED",
+   "surface_id": "shell",
+   "checks": [
+    {
+     "qa_id": "RG-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GS-01",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GS-02",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GS-03",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GS-04",
+     "verdict": "AMEND(the destination form must be asserted cross-entity, not only on the default entity)",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": 5
+    },
+    {
+     "qa_id": "GS-05",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GS-06",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GS-10",
+     "verdict": "ADD(a swallowed contract read must render an error state, not an empty one)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 1
+    }
+   ]
+  },
+  {
+   "qa_section": "Global navigation and responsive",
+   "doc_line": 495,
+   "status": "INCLUDED",
+   "surface_id": "nav",
+   "checks": [
+    {
+     "qa_id": "RG-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-09",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NAV-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NAV-02",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NAV-03",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NAV-04",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NAV-05",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Global nav - Search popover",
+   "doc_line": 621,
+   "status": "INCLUDED",
+   "surface_id": "nav.search",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SRCH-01",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SRCH-02",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SRCH-03",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P2",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SRCH-04",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SRCH-05",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SRCH-06",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P2",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SRCH-10",
+     "verdict": "AMEND(the doc asserts search matches 'name and display ID'; the shipped matcher searches name and domain and never the display id - a behaviour nobody built, called P0 without flagging the gap)",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Global nav - Notifications popover",
+   "doc_line": 757,
+   "status": "INCLUDED",
+   "surface_id": "nav.notif",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NOTF-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NOTF-02",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NOTF-03",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NOTF-04",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NOTF-05",
+     "verdict": "AMEND(the unread count must reconcile with the Alerts page and the Dashboard; the doc records 'zero open alerts across zero entities' beside 'Dashboard reports 109' as BOTH a P1 blocker and 'reconciled')",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 11
+    }
+   ]
+  },
+  {
+   "qa_section": "Global nav - Settings popover",
+   "doc_line": 887,
+   "status": "INCLUDED",
+   "surface_id": "nav.settings",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SET-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SET-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SET-03",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P2",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SET-04",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P2",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SET-05",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Global client context bar",
+   "doc_line": 1021,
+   "status": "INCLUDED",
+   "surface_id": "contextbar",
+   "checks": [
+    {
+     "qa_id": "RG-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CB-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CB-02",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CB-03",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CB-04",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CB-05",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Client bar - Run selector",
+   "doc_line": 1148,
+   "status": "INCLUDED",
+   "surface_id": "contextbar.runsel",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RSEL-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RSEL-02",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RSEL-03",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RSEL-04",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RSEL-05",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RSEL-11",
+     "verdict": "AMEND(the doc demands a 100-run execution; with two clients this is a SYNTHETIC fixture and must be declared one - it may not be presented as a corpus measurement)",
+     "layer": "ci",
+     "severity": "P2",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Global universal actions",
+   "doc_line": 1278,
+   "status": "INCLUDED",
+   "surface_id": "universal",
+   "checks": [
+    {
+     "qa_id": "RG-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UA-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UA-02",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UA-03",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UA-04",
+     "verdict": "AMEND(a control that reports completion must prove the write; the intake control pushes a toast and performs no submit)",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": 13
+    },
+    {
+     "qa_id": "UA-05",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UA-06",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UA-09",
+     "verdict": "ADD(no surface may report an action complete on the strength of a client-side toast)",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": 13
+    }
+   ]
+  },
+  {
+   "qa_section": "Universal - Intake modal (NewRunModal)",
+   "doc_line": 1409,
+   "status": "INCLUDED",
+   "surface_id": "universal.intake",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "INTK-01",
+     "verdict": "AMEND(the doc records 'No Request DMA control or modal entry point was rendered'. Stale: NewRunModal IS mounted at app-root and opened from Dashboard and Clients. The real defect is different - the submit is fake)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "INTK-02",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "INTK-03",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "INTK-04",
+     "verdict": "ADD(the three-step confirm must produce a server-side run record; a toast is not a submit)",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": 13
+    },
+    {
+     "qa_id": "INTK-05",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Universal - Evidence drawer",
+   "doc_line": 1536,
+   "status": "INCLUDED",
+   "surface_id": "universal.evidence",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UED-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UED-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UED-03",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UED-04",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UED-05",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UED-06",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P2",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Universal - Recommendation modal",
+   "doc_line": 1682,
+   "status": "INCLUDED",
+   "surface_id": "universal.rec",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "URM-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "URM-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "URM-03",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "URM-04",
+     "verdict": "ADD(provenance must read 'analyst' or 'synthesised' and never blank; the rule is real, the doc's '32 clients shipped synthetic recs laundered as analyst output' is not - and the same fabricated 32 appears in the Surface Specification, so the contract carries it too)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Universal - Intelligence panel",
+   "doc_line": 1814,
+   "status": "INCLUDED",
+   "surface_id": "universal.intel",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UIP-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UIP-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UIP-03",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "UIP-04",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Dashboard",
+   "doc_line": 1941,
+   "status": "INCLUDED",
+   "surface_id": "dashboard",
+   "checks": [
+    {
+     "qa_id": "RG-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "DASH-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "DASH-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "DASH-3.3",
+     "verdict": "AMEND(the alert count must reconcile three ways - Dashboard, Alerts page and notification bell - and the doc's own 109 is not a baseline to reconcile against: under adjudication F it is a state that should never have promoted)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 11
+    },
+    {
+     "qa_id": "DASH-05",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 8
+    },
+    {
+     "qa_id": "DASH-06",
+     "verdict": "ADD(the Dashboard alert tile must be computed from the same payload the promote gate counted)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 11
+    },
+    {
+     "qa_id": "DASH-07",
+     "verdict": "ADD(an empty tile arising from a failed contract read renders an error state, never a zero)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 1
+    }
+   ]
+  },
+  {
+   "qa_section": "Dashboard - New assessment",
+   "doc_line": 2067,
+   "status": "INCLUDED",
+   "surface_id": "dashboard.newrun",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "DNA-01",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "DNA-02",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Clients",
+   "doc_line": 2311,
+   "status": "INCLUDED",
+   "surface_id": "clients",
+   "checks": [
+    {
+     "qa_id": "RG-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "DIR-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "DIR-02",
+     "verdict": "AMEND(the doc requires search to match 'name and display ID'; the shipped matcher searches name and domain. Either the matcher gains display id or the check is restated - the doc asserts a behaviour nobody built and calls it P0)",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "DIR-03",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "DIR-04",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "DIR-05",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "DIR-A1",
+     "verdict": "ADD(the directory header and rows must read ONE materialised view; a header count and a row count computed by different paths drift)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 1
+    },
+    {
+     "qa_id": "DIR-A3",
+     "verdict": "ADD(the directory suite must run in CI)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 14
+    }
+   ]
+  },
+  {
+   "qa_section": "Clients - New run",
+   "doc_line": 2437,
+   "status": "INCLUDED",
+   "surface_id": "clients.newrun",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CNR-01",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CNR-02",
+     "verdict": "AMEND(this and 'Clients - Request DMA modal' describe ONE control; the doc concedes at its own line 2565 that the live Clients page has no Request DMA action)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview",
+   "doc_line": 2679,
+   "status": "INCLUDED",
+   "surface_id": "overview",
+   "checks": [
+    {
+     "qa_id": "RG-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-A1",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-A2",
+     "verdict": "AMEND(the hero ring and the run row must agree to the displayed precision; the doc's 'disagreed at 1dp on 26 clients' cannot be true with two clients)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-A3",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Header and actions",
+   "doc_line": 2788,
+   "status": "INCLUDED",
+   "surface_id": "overview.header",
+   "checks": [
+    {
+     "qa_id": "RG-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OH-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OH-02",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OH-03",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview header - Scorecard export",
+   "doc_line": 2911,
+   "status": "INCLUDED",
+   "surface_id": "overview.export",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OEX-01",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OEX-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OEX-03",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OEX-04",
+     "verdict": "ADD(an export that cannot be proven complete is BLOCKED, not PASS - the doc records 'export completion was not proven' on three surfaces and passes them anyway)",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview header - Meeting prep panel",
+   "doc_line": 3160,
+   "status": "INCLUDED",
+   "surface_id": "overview.meetingprep",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OMP-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OMP-02",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OMP-03",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Hero maturity card",
+   "doc_line": 3409,
+   "status": "INCLUDED",
+   "surface_id": "overview.hero",
+   "checks": [
+    {
+     "qa_id": "BD-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BD-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BD-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BD-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BD-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OHERO-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OHERO-A1",
+     "verdict": "AMEND(the doc writes the band word as 'Competitive'; the enum is Activating, Building, Competing, Differentiating, strict less-than on the RAW score before display rounding)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OHERO-02",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Firmographics",
+   "doc_line": 3542,
+   "status": "INCLUDED",
+   "surface_id": "overview.firmographics",
+   "checks": [
+    {
+     "qa_id": "AB-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FM-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FM-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FM-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FM-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OF-01",
+     "verdict": "SUPERSEDED(owner adjudication A and C - 8.3's 'an unknown field renders an em dash, never a guess and never a dict repr'. HEAD already implements omission)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OF-A2",
+     "verdict": "SUPERSEDED(owner adjudication D - 8.3 makes revenue universally required while 8.5's own sub-vertical table gives credit unions shares, loans, net-worth ratio and members and no revenue line. Revenue is SUB-VERTICAL CONDITIONAL)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OF-A3",
+     "verdict": "ADD(a HELD field with a recorded reason renders its row with the reason's substance and no workflow vocabulary)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 7
+    },
+    {
+     "qa_id": "OF-A4",
+     "verdict": "ADD(formatter honesty on this panel: null never becomes a measurement, a stated zero is distinct from an unstated one)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 8
+    },
+    {
+     "qa_id": "OF-A5",
+     "verdict": "ADD(one canonical pinned list drives both pinned rows and pinned keys; assert no duplicate metric slot on the rendered panel)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 9
+    },
+    {
+     "qa_id": "OF-A1",
+     "verdict": "ADD(every ITEM key the firmographics contract asks for is gated; 23 contract-asked paths were null on 100% of rows and gated by nothing)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 3
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Why Now",
+   "doc_line": 3673,
+   "status": "INCLUDED",
+   "surface_id": "overview.whynow",
+   "checks": [
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OWN-01",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OWN-A1",
+     "verdict": "AMEND(a signal may not be the assessment itself - circular. The rule is adopted; the doc's 'shipped on 11 clients' is discarded)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OWN-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Why Now - Signal drilldown",
+   "doc_line": 3808,
+   "status": "INCLUDED",
+   "surface_id": "overview.whynow.drill",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OWD-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OWD-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Why Now - Evidence drawer",
+   "doc_line": 3931,
+   "status": "INCLUDED",
+   "surface_id": "overview.whynow.evidence",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OWE-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Executive Summary",
+   "doc_line": 4074,
+   "status": "INCLUDED",
+   "surface_id": "overview.execsummary",
+   "checks": [
+    {
+     "qa_id": "NQ-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OES-01",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OES-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OES-03",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Executive Summary - Evidence drawer",
+   "doc_line": 4206,
+   "status": "INCLUDED",
+   "surface_id": "overview.execsummary.evidence",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OESE-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Opportunity surface",
+   "doc_line": 4349,
+   "status": "INCLUDED",
+   "surface_id": "overview.opportunity",
+   "checks": [
+    {
+     "qa_id": "RG-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OO-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OO-A1",
+     "verdict": "AMEND(re-tested at HEAD 2026-08-15: displayed rank now follows displayed score - the list is sorted by score descending before render and rank IS the sort. FIXED; carried as a regression guard, not a live defect)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OO-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Top findings",
+   "doc_line": 4479,
+   "status": "INCLUDED",
+   "surface_id": "overview.topfindings",
+   "checks": [
+    {
+     "qa_id": "GR-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OTF-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OTF-02",
+     "verdict": "AMEND(the score chip and the anchor id must name the same cell; the doc's '2.77 on 59 clients' is discarded)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Top findings - Finding drilldown",
+   "doc_line": 4611,
+   "status": "INCLUDED",
+   "surface_id": "overview.topfindings.drill",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TFD-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TFD-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TFD-8C-06",
+     "verdict": "AMEND(the release-linkage boilerplate is unfalsifiable as written; bind it to the 15-alert promote ceiling and a named commit)",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": 11
+    }
+   ]
+  },
+  {
+   "qa_section": "Top findings - Evidence drawer",
+   "doc_line": 4737,
+   "status": "INCLUDED",
+   "surface_id": "overview.topfindings.evidence",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TFE-AM-01",
+     "verdict": "AMEND(a subcap-grain score under a category id read 3.5/5 against a cell serving 2.77; keep the grain rule, discard '59 clients')",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TFE-ADD-01",
+     "verdict": "ADD(every key this drawer reads must be written by an adapter)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 5
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Leadership",
+   "doc_line": 4880,
+   "status": "INCLUDED",
+   "surface_id": "overview.leadership",
+   "checks": [
+    {
+     "qa_id": "AB-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OL-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OL-ADD-03",
+     "verdict": "ADD(the leadership roster's ITEM keys must sit in a must_present set)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 3
+    },
+    {
+     "qa_id": "OL-ADD-01",
+     "verdict": "ADD(shared contracts must be present in the image that reads them, proven by opening the built image)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 1
+    },
+    {
+     "qa_id": "OL-ADD-02",
+     "verdict": "ADD(contract path resolution is lazy and depth-independent, exercised under the 3-deep image layout)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 2
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Financial trajectory",
+   "doc_line": 5002,
+   "status": "INCLUDED",
+   "surface_id": "overview.financial",
+   "checks": [
+    {
+     "qa_id": "FM-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FM-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FM-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OFT-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OFT-ADD-01",
+     "verdict": "ADD(formatter honesty unit tests. Re-tested at HEAD: fmtPct(null) returns null and fmtAssets(0) is distinct from unstated. FIXED; regression guard)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 8
+    },
+    {
+     "qa_id": "OFT-ADD-02",
+     "verdict": "ADD(no metric renders twice; the pinned-ROW list and the pinned-KEY list must be one list. Re-tested at HEAD: the duplicate CAGR row is gone. FIXED; regression guard)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 9
+    },
+    {
+     "qa_id": "OFT-ADD-03",
+     "verdict": "ADD(financial series points must have ITEM-key coverage)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 3
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Sentiment",
+   "doc_line": 5775,
+   "status": "INCLUDED",
+   "surface_id": "overview.sentiment",
+   "checks": [
+    {
+     "qa_id": "AB-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OS-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OS-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SENT-ADD-01",
+     "verdict": "ADD(8.3 requires each bar to name its source, rating AND SAMPLE SIZE, but not one of OS-01..OS-07 asserts that n is rendered; the adapter already carries n, scale and as_of - a contract field adapted and never drawn)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 3
+    },
+    {
+     "qa_id": "SENT-ADD-02",
+     "verdict": "ADD(render n, scale and as_of on each bar)",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "SENT-ADD-03",
+     "verdict": "ADD(a served sentiment row either renders or is omitted with its reason recorded)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 7
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Thought leadership",
+   "doc_line": 6026,
+   "status": "INCLUDED",
+   "surface_id": "overview.thoughtleadership",
+   "checks": [
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TL-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TL-ADD-01",
+     "verdict": "ADD(thought-leadership entries need ITEM-key coverage)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 3
+    }
+   ]
+  },
+  {
+   "qa_section": "Insights",
+   "doc_line": 6146,
+   "status": "INCLUDED",
+   "surface_id": "insights",
+   "checks": [
+    {
+     "qa_id": "RG-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "INS-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "INS-ADD-02",
+     "verdict": "ADD(a run promotes only with fewer than 15 open alerts, counted at promote time and recorded in the verdict)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 11
+    },
+    {
+     "qa_id": "INS-ADD-03",
+     "verdict": "ADD(typed-shape gate rejecting any contract-declared array or object that arrives as a string)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 12
+    },
+    {
+     "qa_id": "INS-ADD-04",
+     "verdict": "ADD(deploy-versus-commit assertion before any fix is reported live)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 13
+    },
+    {
+     "qa_id": "INS-ADD-05",
+     "verdict": "ADD(the set of CI test targets must equal the set of test directories discovered in the tree)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 14
+    }
+   ]
+  },
+  {
+   "qa_section": "Insights - Insight cards",
+   "doc_line": 6293,
+   "status": "INCLUDED",
+   "surface_id": "insights.cards",
+   "checks": [
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "KP-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "KP-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "IC-AM-01",
+     "verdict": "AMEND(every linked_subcap_id must resolve to a served cell. The doc's '15 of 119 dead links' is ONE 14-Aug measurement on ONE client; carried as a ZERO-tolerance rule, never as a 15/119 budget)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "IC-ADD-02",
+     "verdict": "ADD(the cap field is capped_subcap_ids; cap_level is a phantom key no contract declares)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 6
+    },
+    {
+     "qa_id": "INS-ADD-01",
+     "verdict": "ADD(insight cards need ITEM-key coverage)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 3
+    }
+   ]
+  },
+  {
+   "qa_section": "Insights - Detail modal",
+   "doc_line": 6422,
+   "status": "INCLUDED",
+   "surface_id": "insights.detail",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "IDM-ADD-01",
+     "verdict": "ADD(cross-grain status reconciliation: a record's lifecycle status must be identical at card face, detail tab, status arrow and drilldown)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 4
+    },
+    {
+     "qa_id": "IDM-ADD-02",
+     "verdict": "ADD(apply the serialised-leaf gate to the insight payload)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 12
+    }
+   ]
+  },
+  {
+   "qa_section": "Insights - Evidence actions",
+   "doc_line": 6562,
+   "status": "INCLUDED",
+   "surface_id": "insights.evidenceactions",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "IEA-01",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Insights - Evidence drawer",
+   "doc_line": 6687,
+   "status": "INCLUDED",
+   "surface_id": "insights.evidence",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "IED-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap",
+   "doc_line": 7088,
+   "status": "INCLUDED",
+   "surface_id": "heatmap",
+   "checks": [
+    {
+     "qa_id": "GR-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "BD-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HM-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HM-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HM-03",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HM-04",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HM-05",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HM-06",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HM-07",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HM-08",
+     "verdict": "AMEND(export must match mode, filters, client, run, audience and uncertainty disclosure AND must be proven complete; the doc records export completion as unproven and passes it)",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HM-09",
+     "verdict": "AMEND(uncertainty-band counts must reconcile to actual cells at the same grain - zero tolerance. The doc's 749-cell/699-thin and 169-versus-36 figures are one client's measurements and must be MEASURED at test time, never hard-coded)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HM-10",
+     "verdict": "AMEND(focus-area quotes must be the CLIENT speaking, verbatim, with a page number - not the scoring ledger's annotation, a cut-off diagnostic question or machine scoring text. The doc's '57 of 138 clients had none' is fabricated; this system has two)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Grid and drilldowns",
+   "doc_line": 7285,
+   "status": "INCLUDED",
+   "surface_id": "heatmap.grid",
+   "checks": [
+    {
+     "qa_id": "GR-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-09",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HG-01",
+     "verdict": "AMEND(fragmented P1C5 variants: in a v7.0 run P1C5 is the killed ESG category and all 31 cells resolve NOT_COMPARABLE - there is nothing to aggregate. The aggregation rule applies only to v5.0-pinned runs)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HG-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HG-03",
+     "verdict": "AMEND(re-test at HEAD: selecting one capability displayed all 40 subcaps of its parent category. A capability drill that returns a parent-wide set is a grain defect, not a UI nit)",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HG-04",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HG-05",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HG-06",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HG-07",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HG-08",
+     "verdict": "ADD(a missing category label is a payload defect, not a render nit - assert every rendered cell carries a non-empty label sourced from the catalogue)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Subcap synthesis drawer",
+   "doc_line": 7413,
+   "status": "INCLUDED",
+   "surface_id": "heatmap.subcapdrawer",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HSD-07",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HSD-08",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HSD-09",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HSD-10",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HSD-11",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HSD-12",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HSD-13",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Category synthesis drawer",
+   "doc_line": 7551,
+   "status": "INCLUDED",
+   "surface_id": "heatmap.categorydrawer",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCD-07",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCD-08",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCD-09",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCD-10",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCD-11",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCD-12",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCD-13",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCD-14",
+     "verdict": "AMEND(generalise: the stated uncertainty rationale's leaf count and the actual leaf count must agree at EVERY category, zero tolerance. '169 versus 36' is one instance, not the rule)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCD-15",
+     "verdict": "SUPERSEDED(CLAUDE.md adjudication - P1C5 is v5.0's killed ESG category; v7.0 has 16 categories and all 31 P1C5 cells are NOT_COMPARABLE. A v7.0 run must render NOT_COMPARABLE, not reconcile an aggregate)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Evidence drawer",
+   "doc_line": 7691,
+   "status": "INCLUDED",
+   "surface_id": "heatmap.evidence",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HME-07",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HME-08",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HME-09",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HME-10",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HME-11",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HME-12",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Cell evidence drawer",
+   "doc_line": 7834,
+   "status": "INCLUDED",
+   "surface_id": "heatmap.cellevidence",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCE-01",
+     "verdict": "AMEND(SURF-01 as written - 'execute every component and subsection above' - is the generic execution instruction restated and asserts nothing; bound to the cell-evidence membership and grounded_on arithmetic)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCE-02",
+     "verdict": "ADD(the source locator must render as a link; the doc records it as plain text in focus detail and asserts nothing)",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Focus areas",
+   "doc_line": 7957,
+   "status": "INCLUDED",
+   "surface_id": "heatmap.focusareas",
+   "checks": [
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-09",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HF-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HF-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HF-03",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HF-04",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HF-05",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HF-06",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HF-07",
+     "verdict": "ADD(focus cards shipped as clickable divs with no role, accessible name or keyboard tab stop; assert role, name and tab stop on every card)",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Focus detail",
+   "doc_line": 8085,
+   "status": "INCLUDED",
+   "surface_id": "heatmap.focusdetail",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HFD-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HFD-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HFD-03",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HFD-04",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HFD-05",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HFD-06",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HFD-07",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HFD-08",
+     "verdict": "AMEND(empty linked-insight states must be explained consistently; adjudication C - a genuinely unsourceable link omits its row rather than rendering an unexplained blank)",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Thin-evidence alerts",
+   "doc_line": 8462,
+   "status": "INCLUDED",
+   "surface_id": "heatmap.thinalerts",
+   "checks": [
+    {
+     "qa_id": "ST-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HTA-01",
+     "verdict": "AMEND(the run reported ZERO thin cells, so the denominator, eligibility rule and zero-state must be proven before a zero is accepted - a zero that nothing computed is defect 11's class)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 11
+    },
+    {
+     "qa_id": "HTA-02",
+     "verdict": "AMEND(this surface renders under Analyst Health, not Heatmap; re-point the checks at the mounted location)",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HTA-03",
+     "verdict": "SUPERSEDED(owner adjudication B - the doc's UNWORKED / WORKED_FOUND / WORKED_ABSENT states are producer workflow vocabulary and must not reach the reader)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Safeguard gates",
+   "doc_line": 8584,
+   "status": "INCLUDED",
+   "surface_id": "heatmap.gates",
+   "checks": [
+    {
+     "qa_id": "ST-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HSG-01",
+     "verdict": "AMEND(this surface renders under Analyst Health, not Heatmap; re-point)",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HSG-02",
+     "verdict": "ADOPT",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HSG-03",
+     "verdict": "ADD(the run under test promoted with an EMPTY gate array; build positive, failed, waived and unavailable gate fixtures. The doc's '93 committed client packages have empty safeguard_gates' denominator cannot exist)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform",
+   "doc_line": 8705,
+   "status": "INCLUDED",
+   "surface_id": "platform",
+   "checks": [
+    {
+     "qa_id": "RG-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PLAT-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PLAT-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PLAT-03",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PLAT-04",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PLAT-05",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PLAT-06",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PLAT-07",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PLAT-08",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PLAT-09",
+     "verdict": "AMEND(export completion was not proven and ranking did not reconcile to displayed scores; both are P0 and neither may pass unproven)",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform - Stair-step curve",
+   "doc_line": 8802,
+   "status": "INCLUDED",
+   "surface_id": "platform.stairstep",
+   "checks": [
+    {
+     "qa_id": "ST-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PSS-01",
+     "verdict": "AMEND(the doc records NOT YET RE-EXECUTED - no live result at all. Mount VERIFIED at HEAD: StairstepCurve is rendered from the D3/D4 page pack. An unexecuted surface is UNVERIFIED and blocks release; the doc does not say so)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PSS-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PSS-03",
+     "verdict": "ADD(the empty state 'No stair-step ladder promoted for this run' must be reached only when the payload array is genuinely absent, not when a key is misread)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 10
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform - Affinity cards",
+   "doc_line": 8851,
+   "status": "INCLUDED",
+   "surface_id": "platform.affinity",
+   "checks": [
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "KP-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PA-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PA-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PA-03",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PA-04",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PA-05",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PA-06",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PA-07",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PA-08",
+     "verdict": "AMEND(displayed rank did not follow displayed composite score - the same class as the Opportunity surface defect, which was fixed by sorting before render. Assert rank IS the sort at every ranked list)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform - Fit breakdown modal",
+   "doc_line": 8981,
+   "status": "INCLUDED",
+   "surface_id": "platform.fitmodal",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "GR-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FIT-07",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FIT-08",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FIT-09",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FIT-10",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FIT-11",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FIT-12",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FIT-13",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform affinity - Evidence drawer",
+   "doc_line": 9118,
+   "status": "INCLUDED",
+   "surface_id": "platform.affinity.evidence",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PAE-07",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform - Recommendations",
+   "doc_line": 9261,
+   "status": "INCLUDED",
+   "surface_id": "platform.recommendations",
+   "checks": [
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PR-01",
+     "verdict": "AMEND(the doc holds INSIGHTS for having no Recommendations section. The Surface Specification places Recommendations on PLATFORM - payload section platform.recommendations, component ClientPlatform + RecommendationModal. The doc sits below the Surface Specification in the authority order; the contract wins)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PR-02",
+     "verdict": "ADD(provenance must read 'analyst' or 'synthesised', never blank; the doc's '32 clients' is fabricated and the Surface Specification repeats it)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform - Recommendation modal",
+   "doc_line": 9390,
+   "status": "INCLUDED",
+   "surface_id": "platform.recmodal",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PRM-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PRM-02",
+     "verdict": "ADOPT",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform recommendations - Evidence drawer",
+   "doc_line": 9522,
+   "status": "INCLUDED",
+   "surface_id": "platform.rec.evidence",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PRE-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform - Readiness gate",
+   "doc_line": 9665,
+   "status": "INCLUDED",
+   "surface_id": "platform.readiness",
+   "checks": [
+    {
+     "qa_id": "ST-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PRG-01",
+     "verdict": "AMEND(the doc's 'All 17 gates were clickable' promotes one client's INSTANCE COUNT to a release threshold; the rail renders one row per distinct prerequisite in the selected area, so the gate is the rule, not 17)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PRG-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PRP-S6",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": 13
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform - Conversation starters",
+   "doc_line": 9785,
+   "status": "INCLUDED",
+   "surface_id": "platform.starters",
+   "checks": [
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PC-01",
+     "verdict": "AMEND(the doc allows a starter 'explicitly framed as a question' while the producer's D4 starters are talking points; and 8.3 requires 45-90-word openers while the promoted starters are 60-90-word paragraphs. Read the length bound from the contract, not from the doc)",
+     "layer": "narrative",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PC-02",
+     "verdict": "AMEND(the gate is non-duplication and evidence binding at whatever N the run produced; 'PASS - Five non-duplicative starters' is one run's count)",
+     "layer": "narrative",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform - Copy confirmation toast",
+   "doc_line": 9910,
+   "status": "INCLUDED",
+   "surface_id": "platform.copytoast",
+   "checks": [
+    {
+     "qa_id": "ST-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PCT-01",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PCT-ADD-01",
+     "verdict": "ADD(what is copied must equal what is displayed, byte for byte)",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Platform - Roadmap phases",
+   "doc_line": 10028,
+   "status": "INCLUDED",
+   "surface_id": "platform.roadmap",
+   "checks": [
+    {
+     "qa_id": "RG-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PRP-01",
+     "verdict": "AMEND(phase order must not contradict recommendation prerequisites - the rule is right, the doc's '17 clients did' is fabricated)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PRP-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Context",
+   "doc_line": 10149,
+   "status": "INCLUDED",
+   "surface_id": "context",
+   "checks": [
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CTX-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CTX-04",
+     "verdict": "AMEND(the doc's 'committed data exceeded the allowed defaulted-date rate' states no rate and no allowance anywhere; the surviving rule is that dates are validated at ingestion AND again at render)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CTX-05",
+     "verdict": "AMEND(a sparse timeline must declare itself - the rule survives; '16 clients had two or fewer events' does not)",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Context - Timeline and issue register",
+   "doc_line": 10438,
+   "status": "INCLUDED",
+   "surface_id": "context.timeline",
+   "checks": [
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CTIR-01",
+     "verdict": "AMEND(one matter must not ship as many rows. The rule is kept; the named third-party anecdote is not evidence about this build)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CTIR-S5",
+     "verdict": "AMEND(a terminal status is over whatever its dates say; the bar is bounded and the tooltip states when a date is not stated)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 4
+    },
+    {
+     "qa_id": "CTIR-S6",
+     "verdict": "AMEND(3.1 'Dated event sequence' carries dependency-graph accept clauses - acyclic ordering, gates, prerequisites - copy-pasted from the roadmap surface. A timeline has no gates and no cycles; replaced with monotonic ordering and date validity)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Context - Evidence drawer",
+   "doc_line": 10571,
+   "status": "INCLUDED",
+   "surface_id": "context.evidence",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CED-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Context - Event detail",
+   "doc_line": 10714,
+   "status": "INCLUDED",
+   "surface_id": "context.eventdetail",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CEV-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Context - Issue detail",
+   "doc_line": 10835,
+   "status": "INCLUDED",
+   "surface_id": "context.issuedetail",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CID-S2",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 4
+    },
+    {
+     "qa_id": "CID-ADD-01",
+     "verdict": "ADD(item-level field census over the writer spec's item bindings; an unparseable item shape is a FAILURE, not a skip)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 3
+    },
+    {
+     "qa_id": "CID-ADD-02",
+     "verdict": "ADD(every key the adapter reads must be declared by a contract, and every required contract key must have a reader)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 6
+    }
+   ]
+  },
+  {
+   "qa_section": "Context - Regulatory standing",
+   "doc_line": 10250,
+   "status": "INCLUDED",
+   "surface_id": "context.regulatory",
+   "checks": [
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "C3-AP",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 4
+    },
+    {
+     "qa_id": "C3-ADD-01",
+     "verdict": "ADD(defect 4 and 7: a searched-and-held field renders a ROW naming the field and the substance of the reason; a REMEDIATED matter may not draw as open; no code path returns null for a declared field, and no em dash or workflow word appears)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 7
+    },
+    {
+     "qa_id": "C3-01",
+     "verdict": "AMEND(the doc records NOT YET RE-EXECUTED; an unexecuted surface is UNVERIFIED and blocks release)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Context - Acquisitions",
+   "doc_line": 10346,
+   "status": "INCLUDED",
+   "surface_id": "context.acquisitions",
+   "checks": [
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "C5-01",
+     "verdict": "AMEND(NOT YET RE-EXECUTED - UNVERIFIED, blocks release)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Health",
+   "doc_line": 10956,
+   "status": "INCLUDED",
+   "surface_id": "health",
+   "checks": [
+    {
+     "qa_id": "ST-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RG-14",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HLT-02",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 11
+    },
+    {
+     "qa_id": "HLT-ADD-01",
+     "verdict": "ADD(Gate D - shared contracts ship in the image; the loader must fail loudly, not swallow FileNotFoundError)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 1
+    },
+    {
+     "qa_id": "HLT-ADD-02",
+     "verdict": "ADD(no eager parents[N] path construction at import; repo-wide scan plus a shallow-layout test)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 2
+    },
+    {
+     "qa_id": "HLT-ADD-03",
+     "verdict": "ADD(the deployed revision must be built AFTER the commit under test and the served bytes compared)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 13
+    },
+    {
+     "qa_id": "HLT-ADD-04",
+     "verdict": "ADD(CI runs every suite; a test directory no job names fails the build)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 14
+    },
+    {
+     "qa_id": "HLT-ADD-05",
+     "verdict": "ADD(the open-alert count on Health, the Dashboard tile and the promote verdict are one number)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 11
+    },
+    {
+     "qa_id": "HLT-03",
+     "verdict": "AMEND(the doc asserts as FACT that 'the register is payload-produced; the legacy deriver is switched off'. At HEAD the page still calls the legacy alert deriver, which walks subcap thin flags rather than the promoted alerts section. The doc records a fix that did not happen)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HLT-04",
+     "verdict": "AMEND(the review basis names the wrong files for every Health surface; ClientHealth and VersionDiff live in the D5/D6 page pack, not the D3 heatmap pack. A reviewer following the doc opens the wrong files)",
+     "layer": "ci",
+     "severity": "P2",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Health - CSV export",
+   "doc_line": 11301,
+   "status": "INCLUDED",
+   "surface_id": "health.csv",
+   "checks": [
+    {
+     "qa_id": "RG-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCSV-01",
+     "verdict": "AMEND(3.5 is titled 'Formula-injection and delimiter safety' but its accept clause is numeric-recompute boilerplate; nothing in it tests CSV injection. Replaced with a real injection and delimiter suite - leading =, +, -, @, tab and CR, embedded quotes and commas, and a UTF-8 BOM assertion)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HCSV-RG",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": 13
+    }
+   ]
+  },
+  {
+   "qa_section": "Health - Rerun feedback",
+   "doc_line": 11426,
+   "status": "INCLUDED",
+   "surface_id": "health.rerun",
+   "checks": [
+    {
+     "qa_id": "ST-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HRR-01",
+     "verdict": "SUPERSEDED(owner adjudication B - 8.3 lists 'queued, validating, ingesting, synthesizing, challenging, promoting' as required USER-VISIBLE content. Admissible only on the ANALYST-gated Health view, never on a client-facing surface)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HRR-02",
+     "verdict": "AMEND(the doc's CQ-01 countercase is the generic execution instruction restated and asserts nothing; replaced with the out-of-order-attempt countercase from the surface's own 8.6)",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "HRR-RG",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": 13
+    }
+   ]
+  },
+  {
+   "qa_section": "Tech Stack",
+   "doc_line": 11550,
+   "status": "INCLUDED",
+   "surface_id": "techstack",
+   "checks": [
+    {
+     "qa_id": "KP-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "KP-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "KP-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TECH-01",
+     "verdict": "SUPERSEDED(CLAUDE.md correction - the doc's source contract lists layer keys 'core / crm / data / integration / channel / security'. The build's layer keys are OPS, CUST, DATA, INFRA, chosen precisely because L2-L5-style keys collide with the L1-L4 evidence levels rendered on the same card)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TECH-02",
+     "verdict": "AMEND(status is REQUIRED per row and has FOUR values - CONFIRMED, INFERRED, CLAIMED, ABSENT. The prototype's three-status set is superseded)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TECH-07",
+     "verdict": "ADOPT",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": 13
+    }
+   ]
+  },
+  {
+   "qa_section": "Tech Stack - Technology rows",
+   "doc_line": 11642,
+   "status": "INCLUDED",
+   "surface_id": "techstack.rows",
+   "checks": [
+    {
+     "qa_id": "KP-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "KP-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TR-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TR-04",
+     "verdict": "AMEND(the negative-evidence and search-scope contract must be proven PER SOURCE TYPE; the doc's '86 of 93 committed clients contain absent-technology rows' is fabricated - this system has two)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TR-ADD-01",
+     "verdict": "ADD(defect 5: negative-state strings such as 'states no peer set' asserted ABSENT against the compiled bundle whenever the payload names a peer set; peer names derived from the key the adapter actually writes)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 5
+    },
+    {
+     "qa_id": "TR-ADD-02",
+     "verdict": "ADD(defect 10: every non-empty promoted array must have a reader in the compiled bundle, enumerated per array field for BOTH promoted clients)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 10
+    },
+    {
+     "qa_id": "TTR-ADD-01",
+     "verdict": "ADD(bind the no-peer-set sentence to peer_deployments[].peer)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 5
+    }
+   ]
+  },
+  {
+   "qa_section": "Tech Stack - Evidence actions",
+   "doc_line": 11770,
+   "status": "INCLUDED",
+   "surface_id": "techstack.evidenceactions",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TEA-01",
+     "verdict": "AMEND(the 'Required content' list is the Heatmap cell-evidence contract copied verbatim - anchor chip, 'N evidence items / score X / CONFIDENCE', 'supports:' chips. A technology-detection record has no cell score and no cross-cell supports relation; adopting it would INVENT fields, which the authority order forbids)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Tech Stack - Evidence drawer",
+   "doc_line": 11894,
+   "status": "INCLUDED",
+   "surface_id": "techstack.evidence",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "EV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TED-01",
+     "verdict": "AMEND(same copied cell-evidence contract as TEA-01; re-expressed against the detection record's own fields)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Tech Detail",
+   "doc_line": 12037,
+   "status": "INCLUDED",
+   "surface_id": "techdetail",
+   "checks": [
+    {
+     "qa_id": "OV-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-07",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "KP-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TD-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TD-02",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 5
+    }
+   ]
+  },
+  {
+   "qa_section": "Runs",
+   "doc_line": 12164,
+   "status": "INCLUDED",
+   "surface_id": "runs",
+   "checks": [
+    {
+     "qa_id": "RG-04",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RUN-01",
+     "verdict": "ADOPT",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RUN-09",
+     "verdict": "EXCLUDE(the doc's 'All 93 committed clients have exactly one ACTIVE run' passes vacuously over a population that does not exist; this system has TWO promoted clients)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RUN-10",
+     "verdict": "AMEND(the observation reports '765 subcapabilities' as an identity fact with no denominator and names no catalogue. v7.0 is 851 cells across 16 categories, v5.0 is 836 across 17; a served count is a per-run SUBSET and must say so)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Runs - Rerun assessment",
+   "doc_line": 12300,
+   "status": "INCLUDED",
+   "surface_id": "runs.rerun",
+   "checks": [
+    {
+     "qa_id": "ST-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "RRA-01",
+     "verdict": "AMEND(re-tested at HEAD - the trigger-rerun control is STILL a stub; a control that reports completion must prove the write)",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": 13
+    }
+   ]
+  },
+  {
+   "qa_section": "Alerts",
+   "doc_line": 12546,
+   "status": "INCLUDED",
+   "surface_id": "alerts",
+   "checks": [
+    {
+     "qa_id": "RG-14",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ALT-01",
+     "verdict": "AMEND(the Alerts page, the Dashboard tile and the bell must be one number. The doc records 'zero open alerts across zero entities' against 'Dashboard reports 109' as BOTH a P1 blocker and 'reconciled' - the same figure cannot be both)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 11
+    },
+    {
+     "qa_id": "ALT-02",
+     "verdict": "SUPERSEDED(owner adjudication B - UNWORKED / WORKED_FOUND are producer workflow states and must not reach the reader)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ALT-ADD-01",
+     "verdict": "ADD(promotion counts open alerts from the payload and blocks at 15 or more, per owner adjudication F; 109 is not a baseline to reconcile against, it is a state that should never have promoted)",
+     "layer": "connector",
+     "severity": "P0",
+     "catches_known_defect": 11
+    }
+   ]
+  },
+  {
+   "qa_section": "Prospecting",
+   "doc_line": 12675,
+   "status": "INCLUDED",
+   "surface_id": "prospecting",
+   "checks": [
+    {
+     "qa_id": "FM-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "FM-02",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-03",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PROS-01",
+     "verdict": "AMEND(re-tested at HEAD - the crash is STILL LIVE)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PROS-02",
+     "verdict": "SUPERSEDED(owner adjudication D - 8.5 correctly lists oss, members, deposits, AUM and premiums as fields NOT to expect universally, which contradicts WT-02 in the same document. Revenue is sub-vertical conditional)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "PROS-ADD-02",
+     "verdict": "ADD(formatter honesty on the prospecting table)",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": 8
+    }
+   ]
+  },
+  {
+   "qa_section": "Admin",
+   "doc_line": 12803,
+   "status": "INCLUDED",
+   "surface_id": "admin",
+   "checks": [
+    {
+     "qa_id": "ST-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "ADM-01",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Import and Jobs",
+   "doc_line": 12933,
+   "status": "INCLUDED",
+   "surface_id": "importjobs",
+   "checks": [
+    {
+     "qa_id": "ST-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "AB-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "IMP-01",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "IMP-02",
+     "verdict": "ADD(the enrichment loop must be observable at GET /v1/ops/enrichment-loop and driven by a schedule, not by a person - owner adjudication G)",
+     "layer": "ci",
+     "severity": "P1",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Import Audit",
+   "doc_line": 13064,
+   "status": "INCLUDED",
+   "surface_id": "importaudit",
+   "checks": [
+    {
+     "qa_id": "ST-06",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "IMA-01",
+     "verdict": "AMEND(re-tested at HEAD - the staleness defect is STILL LIVE)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Login and Errors",
+   "doc_line": 13193,
+   "status": "INCLUDED",
+   "surface_id": "login",
+   "checks": [
+    {
+     "qa_id": "ST-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "OV-05",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "LOG-01",
+     "verdict": "ADOPT",
+     "layer": "interaction",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "LOG-02",
+     "verdict": "ADOPT",
+     "layer": "dom",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Narrative and Data Integrity",
+   "doc_line": 13329,
+   "status": "INCLUDED",
+   "surface_id": "narrative",
+   "checks": [
+    {
+     "qa_id": "NQ-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-11",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "NQ-12",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "REG-014",
+     "verdict": "ADD(defect 4: a lifecycle status must be identical wherever it is drawn, and a status arrow may be derived from nothing but the stored status field)",
+     "layer": "payload",
+     "severity": "P0",
+     "catches_known_defect": 4
+    }
+   ]
+  },
+  {
+   "qa_section": "Test-System Audit",
+   "doc_line": 13632,
+   "status": "INCLUDED",
+   "surface_id": "testaudit",
+   "checks": [
+    {
+     "qa_id": "CI-01",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CI-14",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CI-15",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CI-16",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CI-17",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CI-18",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "CI-19",
+     "verdict": "INHERIT",
+     "layer": "register",
+     "severity": "P0",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "REG-007",
+     "verdict": "AMEND(re-tested at HEAD - the non-native switch is STILL LIVE)",
+     "layer": "dom",
+     "severity": "P1",
+     "catches_known_defect": null
+    },
+    {
+     "qa_id": "TA-13",
+     "verdict": "AMEND(the doc's CI finding is half solved: api and web suites now run. Lint, type checks, accessibility, the browser QA gate and authenticated deployment smoke remain absent and must be named jobs)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 14
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Source quality banner",
+   "doc_line": 3286,
+   "status": "EXCLUDED",
+   "surface_id": "overview.sourcequality",
+   "checks": [
+    {
+     "qa_id": "OVERVIEW-SOURCEQUALITY-X",
+     "verdict": "EXCLUDE(grep -rniE 'sourcequality|source_quality' apps/web -> ZERO hits. ClientOverview renders header, SnapshotStrip, WhyNowStrip, SCQACard, OpportunitySurfaceStrip, TopFindingsCard, LeadershipPanel, FinancialTrajectoryD1, SentimentCard, ThoughtLeadershipPanel - no banner. The doc concedes the absence and still issues seven P0 DOM checks against it)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 7
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview header - Rerun modal",
+   "doc_line": 3034,
+   "status": "EXCLUDED",
+   "surface_id": "overview.rerunmodal",
+   "checks": [
+    {
+     "qa_id": "OVERVIEW-RERUNMODAL-X",
+     "verdict": "EXCLUDE(there is no rerun modal. The Overview header renders one button whose onClick pushes a toast. drawers.jsx exports only EvidenceDrawer, InsightModal, IntelligencePanel, RecommendationModal, NewRunModal. ORR-01..11 assert a dialog that does not exist - the underlying fake-completion defect is carried instead at UA-09 and INTK-04)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 11
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Coverage by pillar",
+   "doc_line": 5131,
+   "status": "EXCLUDED",
+   "surface_id": "overview.coveragebypillar",
+   "checks": [
+    {
+     "qa_id": "OVERVIEW-COVERAGEBYPILLAR-X",
+     "verdict": "EXCLUDE(CoverageByPillarCard is defined and exported in cards-data-driven.jsx and referenced by NOTHING else - 6 grep hits, all definition, comment, export and their compiled twins. The Overview page pack records the removal from D1 on 2026-08-05: these cards report on the assessment's own workings, which is D7 Health's job. Also self-contradicting evidence - the doc marks the surface FAIL 'no module was rendered' AND 'Screenshot record - ATTACHED')",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 7
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Evidence tiers",
+   "doc_line": 5259,
+   "status": "EXCLUDED",
+   "surface_id": "overview.evidencetiers",
+   "checks": [
+    {
+     "qa_id": "OVERVIEW-EVIDENCETIERS-X",
+     "verdict": "EXCLUDE(EvidenceTierCard - same 6-hit dead-definition pattern; same self-contradicting ATTACHED screenshot of an absent surface)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 7
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Ceiling and uncertainty",
+   "doc_line": 5379,
+   "status": "EXCLUDED",
+   "surface_id": "overview.ceiling",
+   "checks": [
+    {
+     "qa_id": "OVERVIEW-CEILING-X",
+     "verdict": "EXCLUDE(CeilingEstimateCard - same dead-definition pattern. The surface is additionally specified on an M1-M5 scale with an exemplar reading 'cap M3 applied', which owner adjudication E forbids outright)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 7
+    }
+   ]
+  },
+  {
+   "qa_section": "Ceiling - Detail accordion",
+   "doc_line": 5507,
+   "status": "EXCLUDED",
+   "surface_id": "overview.ceiling.accordion",
+   "checks": [
+    {
+     "qa_id": "OVERVIEW-CEILING-ACCORDION-X",
+     "verdict": "EXCLUDE(child of an unmounted card; same ATTACHED-screenshot-of-an-absent-surface contradiction)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 7
+    }
+   ]
+  },
+  {
+   "qa_section": "Ceiling - Evidence drawer",
+   "doc_line": 5633,
+   "status": "EXCLUDED",
+   "surface_id": "overview.ceiling.evidence",
+   "checks": [
+    {
+     "qa_id": "OVERVIEW-CEILING-EVIDENCE-X",
+     "verdict": "EXCLUDE(child of an unmounted card)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": 7
+    }
+   ]
+  },
+  {
+   "qa_section": "Overview - Sentiment detail",
+   "doc_line": 5905,
+   "status": "EXCLUDED",
+   "surface_id": "overview.sentimentdetail",
+   "checks": [
+    {
+     "qa_id": "OVERVIEW-SENTIMENTDETAIL-X",
+     "verdict": "EXCLUDE-AS-ROUTED(DD-12 is specified as an inline open from a sentiment context tile, component SentimentGridInteractive, which is mounted on the CONTEXT page and not on Overview. The doc's observed FAIL - 'clicking the 79.8 Overview sentiment value produced no state change' - measures the Overview bars against a Context contract. The checks survive, re-pointed at the Context opener)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Universal - Request DMA modal",
+   "doc_line": 1409,
+   "status": "EXCLUDED",
+   "surface_id": "universal.requestdma",
+   "checks": [
+    {
+     "qa_id": "UNIVERSAL-REQUESTDMA-X",
+     "verdict": "EXCLUDE-AS-NAMED(grep 'Request DMA' apps/web -> ZERO hits. There is exactly ONE intake modal, NewRunModal, mounted at app-root and opened from two page-header buttons. Merged into 'Universal - Intake modal (NewRunModal)'; the overlay rules are salvaged there)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Dashboard - Request DMA modal",
+   "doc_line": 2185,
+   "status": "EXCLUDED",
+   "surface_id": "dashboard.requestdma",
+   "checks": [
+    {
+     "qa_id": "DASHBOARD-REQUESTDMA-X",
+     "verdict": "EXCLUDE-DUPLICATE(the same single mounted NewRunModal as the Universal entry; running both as separate tabs doubles evidence cost without doubling coverage)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Clients - Request DMA modal",
+   "doc_line": 2553,
+   "status": "EXCLUDED",
+   "surface_id": "clients.requestdma",
+   "checks": [
+    {
+     "qa_id": "CLIENTS-REQUESTDMA-X",
+     "verdict": "EXCLUDE-DUPLICATE(the doc concedes at its own line 2565 that the live Clients page has no Request DMA action; merged into 'Clients - New run')",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Runs - Request DMA modal",
+   "doc_line": 12419,
+   "status": "EXCLUDED",
+   "surface_id": "runs.requestdma",
+   "checks": [
+    {
+     "qa_id": "RUNS-REQUESTDMA-X",
+     "verdict": "EXCLUDE(specified across 22 headings with 12 P0 checks while its own Observed result states 'No Request DMA control or modal is rendered on Analyst Runs.' Verified absent from the web tree. The twelve overlay rules are salvaged onto the overlays that do exist, via the OV register)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Archetype control",
+   "doc_line": 8212,
+   "status": "EXCLUDED",
+   "surface_id": "heatmap.archetype",
+   "checks": [
+    {
+     "qa_id": "HEATMAP-ARCHETYPE-X",
+     "verdict": "EXCLUDE(grep -rni 'archetype' apps/web --include=*.jsx --include=*.js -> ZERO hits. No archetype control, popover, state, URL param or export field exists anywhere in the web tree. The doc's own observed result agrees - 'No Archetype control was rendered' - and it still issues six P0 checks)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Archetype popover",
+   "doc_line": 8333,
+   "status": "EXCLUDED",
+   "surface_id": "heatmap.archetypepopover",
+   "checks": [
+    {
+     "qa_id": "HEATMAP-ARCHETYPEPOPOVER-X",
+     "verdict": "EXCLUDE(child of a control with zero hits in the entire web tree; HAP-01..07 assert a listbox that does not exist. The doc's CQ-01 for this surface is HAP-01 restated as its own countercase, which asserts nothing)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Value-chain view",
+   "doc_line": 7237,
+   "status": "EXCLUDED",
+   "surface_id": "heatmap.valuechain",
+   "checks": [
+    {
+     "qa_id": "HEATMAP-VALUECHAIN-X",
+     "verdict": "EXCLUDE-UNTIL-CONTRACTED(the only mount is inside the unmounted LiveClientPage pack, which declares value_chain ENVELOPE_ONLY: 'the H9 value-chain arrangement is server-derived and pinned at stage 6.3; no contract field exists to promote yet'. There is no payload field to assert against. Doc status: NOT YET RE-EXECUTED)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Heatmap - Evidence store",
+   "doc_line": 7187,
+   "status": "EXCLUDED",
+   "surface_id": "heatmap.evidencestore",
+   "checks": [
+    {
+     "qa_id": "HEATMAP-EVIDENCESTORE-X",
+     "verdict": "EXCLUDE-AS-SEPARATE(no separate evidence-store surface is mounted; the census it describes is the EV register, which is asserted at the connector and on each drawer. Doc status: NOT YET RE-EXECUTED)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Context - Sentiment overview",
+   "doc_line": 10298,
+   "status": "EXCLUDED",
+   "surface_id": "context.sentimentoverview",
+   "checks": [
+    {
+     "qa_id": "CONTEXT-SENTIMENTOVERVIEW-X",
+     "verdict": "EXCLUDE-UNTIL-CONTRACTED(C4 requires 'the sentiment grid at Context depth, each tile expanding inline to the items behind it', but context_sentiment is declared ENVELOPE_ONLY - the D5 sentiment contract names no payload field yet. There is nothing to expand)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Context - Financial series",
+   "doc_line": 10394,
+   "status": "EXCLUDED",
+   "surface_id": "context.financialseries",
+   "checks": [
+    {
+     "qa_id": "CONTEXT-FINANCIALSERIES-X",
+     "verdict": "EXCLUDE-AS-ROUTED(the Context section list is timeline, issue_register, regulatory_standing, context_sentiment, acquisitions. financial_series is registered under OVERVIEW and the financials component is wired only in the overview branch. C6's checks are carried on 'Overview - Financial trajectory')",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  },
+  {
+   "qa_section": "Health - H3 / V1 / H5 / H7 / H8 sub-surfaces",
+   "doc_line": 11063,
+   "status": "EXCLUDED",
+   "surface_id": "health.subsurfaces",
+   "checks": [
+    {
+     "qa_id": "HEALTH-SUBSURFACES-X",
+     "verdict": "EXCLUDE-AS-SEPARATE(five sub-surfaces carrying NOT YET RE-EXECUTED and stale file references - the review basis names the D3 heatmap pack while ClientHealth and VersionDiff live in the D5/D6 pack. Their substantive checks are carried on 'Health'; the surfaces are not separately mountable)",
+     "layer": "ci",
+     "severity": "P0",
+     "catches_known_defect": null
+    }
+   ]
+  }
+ ],
+ "totals": {
+  "sections": 122,
+  "registers": 16,
+  "surfaces_included": 87,
+  "surfaces_excluded": 19,
+  "checks_total": 930,
+  "checks_canonical": 463,
+  "inherited_references": 467,
+  "by_verdict": {
+   "AMEND": 95,
+   "ADOPT": 255,
+   "ADD": 79,
+   "SUPERSEDED": 14,
+   "INHERIT": 467,
+   "EXCLUDE": 11,
+   "EXCLUDE-AS-ROUTED": 2,
+   "EXCLUDE-AS-NAMED": 1,
+   "EXCLUDE-DUPLICATE": 2,
+   "EXCLUDE-UNTIL-CONTRACTED": 2,
+   "EXCLUDE-AS-SEPARATE": 2
+  },
+  "by_layer": {
+   "ci": 76,
+   "narrative": 49,
+   "payload": 148,
+   "dom": 108,
+   "interaction": 56,
+   "connector": 26,
+   "register": 467
+  },
+  "by_severity": {
+   "P0": 853,
+   "P1": 70,
+   "P2": 7
+  },
+  "defects_covered": 14,
+  "defect_coverage_counts": {
+   "1": 7,
+   "2": 4,
+   "3": 11,
+   "4": 9,
+   "5": 8,
+   "6": 5,
+   "7": 11,
+   "8": 9,
+   "9": 4,
+   "10": 4,
+   "11": 13,
+   "12": 4,
+   "13": 12,
+   "14": 6
+  },
+  "raw_checks_in_doc_slices": 2139,
+  "dedupe_ratio": 4.62
+ }
+}

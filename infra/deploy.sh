@@ -315,6 +315,24 @@ if [ -d infra/jobs ]; then
   sched dmai-corpus-gate-scanner "0 3 * * *" dmai-corpus-gate-scanner
 fi
 
+# ── the deploy has not happened until the BYTES match ────────────────
+#
+# H1 from the acceptance curation: verify_deployed.py existed and was
+# referenced by neither CI nor this script, so shipped defect 13 — four render
+# fixes reported live against a revision built 58 minutes BEFORE they were
+# committed — had zero enforcement. A deploy script that exits 0 without
+# checking what it shipped is how that happens twice.
+#
+# Non-fatal by design: the services are already rolled by this point and
+# aborting would leave a half-reported release. It PRINTS the verdict, which is
+# the thing that was missing.
+if [ -f scripts/verify_deployed.py ]; then
+  say "verify: is production serving HEAD?"
+  python3 scripts/verify_deployed.py || {
+    echo "!! production is NOT serving HEAD — see the diff above" >&2
+  }
+fi
+
 say "deployed. Service URLs:"
 gcloud run services list --project="$PROJECT_ID" --region="$REGION" \
   --filter="metadata.name:dmai-" --format='value(metadata.name,status.url)' || true
