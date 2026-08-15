@@ -165,7 +165,7 @@ function TopBar({
   const ql = q.toLowerCase().trim();
   const searchResults = useMemo(() => {
     if (!ql) return null;
-    const entities = DMA.ENTITIES.filter(e => e.name.toLowerCase().includes(ql) || (e.domain || "").includes(ql)).slice(0, 4).map(e => ({
+    const entities = DMA.ENTITIES.filter(e => entityMatches(e, ql)).slice(0, 4).map(e => ({
       kind: "entity",
       title: e.name,
       sub: DMA.SUBVERTICAL_LABEL[e.subvertical],

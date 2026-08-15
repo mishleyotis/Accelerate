@@ -1258,10 +1258,12 @@
     },
     {
      "qa_id": "SRCH-10",
-     "verdict": "AMEND(the doc asserts search matches 'name and display ID'; the shipped matcher searches name and domain and never the display id - a behaviour nobody built, called P0 without flagging the gap)",
+     "verdict": "ADOPT(adjudicated 2026-08-15 in the document's favour: the matcher now searches name, display id, slug and domain through ONE shared rule (utils.jsx::entityMatches), called by the global popover, the directory filter and the prospecting picker - which previously answered this one question three different ways and none of them with the display id. Asserted by apps/web/tests/entity-search.test.js, both branches proven non-vacuous under mutation)",
      "layer": "dom",
      "severity": "P1",
-     "catches_known_defect": null
+     "catches_known_defect": null,
+     "status": "IMPLEMENTED",
+     "test": "apps/web/tests/entity-search.test.js"
     }
    ]
   },
@@ -2229,10 +2231,12 @@
     },
     {
      "qa_id": "DIR-02",
-     "verdict": "AMEND(the doc requires search to match 'name and display ID'; the shipped matcher searches name and domain. Either the matcher gains display id or the check is restated - the doc asserts a behaviour nobody built and calls it P0)",
+     "verdict": "ADOPT(adjudicated 2026-08-15 in the document's favour: the matcher now searches name, display id, slug and domain through ONE shared rule (utils.jsx::entityMatches), called by the global popover, the directory filter and the prospecting picker - which previously answered this one question three different ways and none of them with the display id. Asserted by apps/web/tests/entity-search.test.js, both branches proven non-vacuous under mutation)",
      "layer": "dom",
      "severity": "P1",
-     "catches_known_defect": null
+     "catches_known_defect": null,
+     "status": "IMPLEMENTED",
+     "test": "apps/web/tests/entity-search.test.js"
     },
     {
      "qa_id": "DIR-03",

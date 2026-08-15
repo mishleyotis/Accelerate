@@ -203,7 +203,7 @@ function ProspectingPage() {
   const [picked, setPicked] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [downloadReady, setDownloadReady] = useState(false);
-  const matches = q ? DMA.ENTITIES.filter(e => e.name.toLowerCase().includes(q.toLowerCase()) && !e.in_progress).slice(0, 5) : [];
+  const matches = q ? DMA.ENTITIES.filter(e => entityMatches(e, q) && !e.in_progress).slice(0, 5) : [];
   return /*#__PURE__*/React.createElement(PageShell, {
     title: "Prospecting",
     crumbs: [{

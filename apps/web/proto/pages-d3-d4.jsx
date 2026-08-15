@@ -96,6 +96,208 @@ function PlatformEvChips({ ids, openEvidence, label }) {
   );
 }
 
+/* ── The evidence behind a platform, which was promoted and never shown ──
+   Measured 2026-08-15 against the live BCU payload. `platform_story` serves 16
+   keys per platform. The page rendered exactly two of them — `platform` and
+   `story_md` — and dropped the rest on the floor:
+
+     fit_score · fit_basis          the ranked number the whole page sorts by
+     peer_synthesis · peer_coverage
+     peer_deployments               25 rows, every one carrying a cited basis
+     estate_reach                   what the register already reaches, and why
+     readiness                      verdict, what is already true, what is not
+     integration_pathway            how it lands in THIS estate
+     zennify_pathway                internal only; stripped for the customer
+     r_layer.confidence_basis       internal only
+
+   That is the write-path-with-no-read-path shape at its most expensive: the
+   producer ran the search, argued against itself, cited the result — and a
+   reader saw a name and a paragraph. It is also the direct cause of the
+   reported "blanks stated instead of sourced or inferred": the sourcing was
+   there and unrendered, so an absent peer figure read as a blank rather than
+   as the recorded finding it is.
+
+   Two rules this block obeys, both owner adjudications:
+     · Never an em dash for an absence (2026-08-14). A row whose value is not
+       sourceable is OMITTED, not rendered as punctuation (2026-08-15).
+     · What is absent from the payload is absent because redaction removed it
+       (`r_layer` and `zennify_pathway` for the customer audience) or because
+       the producer had nothing. Neither is announced; the block simply carries
+       what exists, so a customer never learns what a customer cannot see. */
+function PlatformFact({ label, children, ids, openEvidence, title }) {
+  if (children === null || children === undefined || children === "") return null;
+  return (
+    <div style={{ marginTop: 9 }}>
+      <div className="eyebrow" style={{ fontSize: 9, marginBottom: 3 }} title={title || ""}>{label}</div>
+      <div style={{ fontSize: 11.5, lineHeight: 1.6, color: "var(--z-body)" }}>{children}</div>
+      {ids && ids.length ? (
+        <div style={{ marginTop: 4 }}>
+          <PlatformEvChips ids={ids} openEvidence={openEvidence} label="cited" />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function PlatformDossier({ p, openEvidence }) {
+  const [open, setOpen] = useState(false);
+  const reach = (p && p.estate_reach) || null;
+  const ready = (p && p.readiness) || null;
+  const rl = (p && p.r_layer) || null;
+  const peers = ((p && p.peer_deployments) || []).filter(Boolean);
+  const cats = ((reach && reach.by_category) || []).filter(Boolean);
+
+  // Every fact this platform actually carries. If the count is zero there is
+  // nothing behind the story and the control is not rendered at all — a
+  // disclosure toggle that opens onto nothing is its own dead end.
+  const facts = [
+    pfText(p && p.peer_synthesis), peers.length ? "peers" : null,
+    reach && (cats.length || pfText(reach.why_this_is_established)) ? "reach" : null,
+    ready && (pfText(ready.verdict) || pfText(ready.already_true)) ? "ready" : null,
+    pfText(p && p.integration_pathway), pfText(p && p.zennify_pathway),
+    rl && pfText(rl.confidence_basis),
+  ].filter(Boolean);
+  if (!facts.length) return null;
+
+  const cover = fmtPct(pfNum(p && p.peer_coverage));
+  const notReached = pfNum(reach && reach.cells_not_yet_reached);
+
+  return (
+    <div style={{ marginTop: 10, borderTop: "1px dashed var(--z-sep)", paddingTop: 8 }}>
+      <button onClick={() => setOpen(o => !o)}
+        style={{ background: "none", border: 0, padding: 0, cursor: "pointer", width: "100%", textAlign: "left" }}
+        title={pfText(p && p.fit_basis) || ""}>
+        <div className="row" style={{ gap: 6, alignItems: "center" }}>
+          <span className="eyebrow" style={{ fontSize: 9.5 }}>
+            Evidence behind this platform
+          </span>
+          <span style={{ fontSize: 10, color: "var(--z-muted)" }}>
+            {facts.length} {facts.length === 1 ? "finding" : "findings"}
+          </span>
+          <span className="spacer" />
+          <Icon name={open ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-muted)" }} />
+        </div>
+      </button>
+      {open ? (
+        <div style={{ paddingTop: 2 }}>
+          <PlatformFact label="Peer position" openEvidence={openEvidence}>
+            {pfText(p.peer_synthesis) || (cover !== null
+              ? `${cover} of the locked peer set is established on this platform area.`
+              : null)}
+          </PlatformFact>
+
+          {peers.length ? (
+            <div style={{ marginTop: 8 }}>
+              <div className="eyebrow" style={{ fontSize: 9, marginBottom: 4 }}>
+                Peer set · {peers.length}
+              </div>
+              {peers.map((pd, i) => {
+                const name = pfText(pd.peer);
+                if (!name) return null;
+                // `deployed` is a tri-state and every branch is a different
+                // finding: true is a citable deployment, false is a search-led
+                // absence, null is "the search ran and settled nothing". The
+                // basis prose says which, so the badge must never flatten the
+                // three into a blank.
+                const dep = pd.deployed;
+                const tone = dep === true ? "b-above" : dep === false ? "b-below" : "b-muted";
+                const word = dep === true ? "established"
+                           : dep === false ? "not established" : "unestablished";
+                const asOf = pfText(pd.as_of);
+                const url = pfText(pd.source_url);
+                return (
+                  <div key={`${name}-${i}`} style={{ padding: "6px 0", borderTop: i ? "1px solid var(--z-sep)" : 0 }}>
+                    <div className="row" style={{ gap: 6, alignItems: "baseline", flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 11.5, fontWeight: 600 }}>{name}</span>
+                      <span className={`b ${tone}`} style={{ flexShrink: 0 }}>{word}</span>
+                      {asOf ? <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{fmtDate(asOf)}</span> : null}
+                      {url ? (
+                        <a href={url} target="_blank" rel="noreferrer"
+                          style={{ fontSize: 10, color: "var(--z-mid)" }}>source</a>
+                      ) : null}
+                    </div>
+                    {pfText(pd.basis) ? (
+                      <div style={{ fontSize: 11, lineHeight: 1.55, color: "var(--z-body)", marginTop: 2 }}>
+                        {pfText(pd.basis)}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+
+          {reach ? (
+            <PlatformFact label="Estate reach" openEvidence={openEvidence}
+              ids={reach.e_ids} title={pfText(reach.derivation) || ""}>
+              <>
+                {cats.length ? (
+                  <div style={{ marginBottom: 4 }}>
+                    {cats.map((c, i) => {
+                      const linked = pfNum(c.cells_a_register_product_is_linked_to);
+                      const scored = pfNum(c.cells_this_run_scores);
+                      if (linked === null || scored === null) return null;
+                      return (
+                        <div key={c.category_id || i} style={{ fontSize: 11 }}>
+                          <span className="f-mono" style={{ color: "var(--z-muted)" }}>{pfText(c.category_id)}</span>{" "}
+                          {pfText(c.category_name)} · {linked} of {scored} cells reached
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : null}
+                {notReached !== null ? (
+                  <div style={{ marginBottom: 4, fontSize: 11, color: "var(--z-muted)" }}>
+                    {notReached} cells this run scores have no register row against them.
+                  </div>
+                ) : null}
+                {pfText(reach.why_this_is_established)}
+              </>
+            </PlatformFact>
+          ) : null}
+
+          {ready ? (
+            <PlatformFact label={`Readiness${pfText(ready.verdict) ? ` · ${pfText(ready.verdict)}` : ""}`}
+              openEvidence={openEvidence} ids={ready.e_ids}>
+              <>
+                {pfText(ready.already_true) ? <div>{pfText(ready.already_true)}</div> : null}
+                {pfText(ready.must_be_true_first) ? (
+                  <div style={{ marginTop: 4 }}>
+                    <span style={{ color: "var(--z-muted)" }}>Must be true first: </span>
+                    {pfText(ready.must_be_true_first)}
+                  </div>
+                ) : null}
+                {pfText(ready.sequencing_basis) ? (
+                  <div style={{ marginTop: 4 }}>
+                    <span style={{ color: "var(--z-muted)" }}>Why this order: </span>
+                    {pfText(ready.sequencing_basis)}
+                  </div>
+                ) : null}
+              </>
+            </PlatformFact>
+          ) : null}
+
+          <PlatformFact label="How it lands in this estate" openEvidence={openEvidence}>
+            {pfText(p.integration_pathway)}
+          </PlatformFact>
+
+          {/* internal only: redaction removes this key for the customer
+              audience, so its absence needs no branch here. */}
+          <PlatformFact label="Assessment pathway" openEvidence={openEvidence}>
+            {pfText(p.zennify_pathway)}
+          </PlatformFact>
+
+          <PlatformFact
+            label={`Confidence${rl && pfText(rl.confidence) ? ` · ${pfText(rl.confidence)}` : ""}`}
+            openEvidence={openEvidence}>
+            {rl ? pfText(rl.confidence_basis) : null}
+          </PlatformFact>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 /* ── The scope rule this page now obeys everywhere ───────────────────
    A DERIVED relationship may ORDER content. It must never HIDE it.
 
@@ -844,15 +1046,76 @@ function ClientPlatform({ entity, run }) {
             </table>
             </div>
             {/* The story argues for the rows above it, so it sits under them
-                rather than in a card of its own. */}
-            {storyRows.length ? storyPlatforms.map((p, i) => (
-              (p.gaps || []).some(g => g && g.l3_area === area) && pfText(p.story_md) ? (
-                <div key={i} style={{ padding: "12px 18px", borderTop: "1px solid var(--z-sep)", fontSize: 12, color: "var(--z-body)", lineHeight: 1.65 }}>
-                  <div className="eyebrow" style={{ fontSize: 9.5, marginBottom: 5 }}>What this platform changes</div>
-                  {pfText(p.story_md)}
-                </div>
-              ) : null
-            )) : null}
+                rather than in a card of its own.
+
+                It was gated on `storyRows.length` and each platform was matched
+                by `g.l3_area === area` — the DERIVED area join. The page's own
+                rule two hundred lines up says a derived relationship may order
+                content and must never hide it, and this block broke that rule
+                against itself: when the derivation produced no area, all five
+                promoted platform stories and every fact behind them vanished
+                from the page. Measured against the live run: five stories, five
+                readiness verdicts, twenty-five cited peer rows, zero rendered.
+
+                The reader's selection is a STATED join — the tile and the story
+                both name the platform — so it leads, and the run's other
+                platforms follow. Nothing is scoped away. */}
+            {storyPlatforms.length ? (() => {
+              const named = (p) => pfText(p && p.platform) || "";
+              const isSel = (p) => !!selKey && named(p) === selKey;
+              const ordered = [...storyPlatforms.filter(isSel),
+                               ...storyPlatforms.filter(p => !isSel(p))];
+              const block = (p, i, lead) => {
+                const md = pfText(p.story_md);
+                const fit = pfNum(p.fit_score);
+                const rank = pfNum(p.rank);
+                const name = named(p);
+                // The dossier used to be gated behind `story_md`, so a platform
+                // with a full evidence base and no narrative rendered nothing.
+                // Either half earns the block.
+                const dossier = <PlatformDossier p={p} openEvidence={openEvidence} />;
+                if (!md && !p.estate_reach && !p.readiness
+                    && !(p.peer_deployments || []).length) return null;
+                return (
+                  <div key={`${name}-${i}`} style={{ padding: "12px 18px", borderTop: "1px solid var(--z-sep)", fontSize: 12, color: "var(--z-body)", lineHeight: 1.65 }}>
+                    <div className="row" style={{ gap: 6, alignItems: "baseline", marginBottom: 5, flexWrap: "wrap" }}>
+                      <div className="eyebrow" style={{ fontSize: 9.5 }}>
+                        {lead ? "What this platform changes" : name}
+                      </div>
+                      <span className="spacer" />
+                      {/* The number the page ranks by was served on every
+                          platform and shown on none of them, so the order was
+                          asserted and never justified. `fit_basis` says where
+                          it came from and rides on the tooltip. */}
+                      {fit !== null ? (
+                        <span className="b b-muted f-mono" style={{ flexShrink: 0 }}
+                          title={pfText(p.fit_basis) || ""}>
+                          {rank !== null ? `rank ${rank} · ` : ""}fit {fit.toFixed(1)}
+                        </span>
+                      ) : null}
+                    </div>
+                    {md}
+                    {dossier}
+                  </div>
+                );
+              };
+              const lead = ordered[0] && isSel(ordered[0]) ? ordered[0] : null;
+              const rest = lead ? ordered.slice(1) : ordered;
+              return (
+                <>
+                  {lead ? block(lead, 0, true) : null}
+                  {rest.length ? (
+                    <div style={{ padding: "8px 18px 0", borderTop: "1px solid var(--z-sep)" }}>
+                      <div className="eyebrow" style={{ fontSize: 9 }}>
+                        {lead ? `The run's other promoted platforms · ${rest.length}`
+                              : `Promoted platform stories · ${rest.length}`}
+                      </div>
+                    </div>
+                  ) : null}
+                  {rest.map((p, i) => block(p, i + 1, false))}
+                </>
+              );
+            })() : null}
           </div>
         </div>
 

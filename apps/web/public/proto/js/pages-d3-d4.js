@@ -116,6 +116,264 @@ function PlatformEvChips({
   }));
 }
 
+/* ── The evidence behind a platform, which was promoted and never shown ──
+   Measured 2026-08-15 against the live BCU payload. `platform_story` serves 16
+   keys per platform. The page rendered exactly two of them — `platform` and
+   `story_md` — and dropped the rest on the floor:
+
+     fit_score · fit_basis          the ranked number the whole page sorts by
+     peer_synthesis · peer_coverage
+     peer_deployments               25 rows, every one carrying a cited basis
+     estate_reach                   what the register already reaches, and why
+     readiness                      verdict, what is already true, what is not
+     integration_pathway            how it lands in THIS estate
+     zennify_pathway                internal only; stripped for the customer
+     r_layer.confidence_basis       internal only
+
+   That is the write-path-with-no-read-path shape at its most expensive: the
+   producer ran the search, argued against itself, cited the result — and a
+   reader saw a name and a paragraph. It is also the direct cause of the
+   reported "blanks stated instead of sourced or inferred": the sourcing was
+   there and unrendered, so an absent peer figure read as a blank rather than
+   as the recorded finding it is.
+
+   Two rules this block obeys, both owner adjudications:
+     · Never an em dash for an absence (2026-08-14). A row whose value is not
+       sourceable is OMITTED, not rendered as punctuation (2026-08-15).
+     · What is absent from the payload is absent because redaction removed it
+       (`r_layer` and `zennify_pathway` for the customer audience) or because
+       the producer had nothing. Neither is announced; the block simply carries
+       what exists, so a customer never learns what a customer cannot see. */
+function PlatformFact({
+  label,
+  children,
+  ids,
+  openEvidence,
+  title
+}) {
+  if (children === null || children === undefined || children === "") return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 9
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow",
+    style: {
+      fontSize: 9,
+      marginBottom: 3
+    },
+    title: title || ""
+  }, label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      lineHeight: 1.6,
+      color: "var(--z-body)"
+    }
+  }, children), ids && ids.length ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement(PlatformEvChips, {
+    ids: ids,
+    openEvidence: openEvidence,
+    label: "cited"
+  })) : null);
+}
+function PlatformDossier({
+  p,
+  openEvidence
+}) {
+  const [open, setOpen] = useState(false);
+  const reach = p && p.estate_reach || null;
+  const ready = p && p.readiness || null;
+  const rl = p && p.r_layer || null;
+  const peers = (p && p.peer_deployments || []).filter(Boolean);
+  const cats = (reach && reach.by_category || []).filter(Boolean);
+
+  // Every fact this platform actually carries. If the count is zero there is
+  // nothing behind the story and the control is not rendered at all — a
+  // disclosure toggle that opens onto nothing is its own dead end.
+  const facts = [pfText(p && p.peer_synthesis), peers.length ? "peers" : null, reach && (cats.length || pfText(reach.why_this_is_established)) ? "reach" : null, ready && (pfText(ready.verdict) || pfText(ready.already_true)) ? "ready" : null, pfText(p && p.integration_pathway), pfText(p && p.zennify_pathway), rl && pfText(rl.confidence_basis)].filter(Boolean);
+  if (!facts.length) return null;
+  const cover = fmtPct(pfNum(p && p.peer_coverage));
+  const notReached = pfNum(reach && reach.cells_not_yet_reached);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      borderTop: "1px dashed var(--z-sep)",
+      paddingTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setOpen(o => !o),
+    style: {
+      background: "none",
+      border: 0,
+      padding: 0,
+      cursor: "pointer",
+      width: "100%",
+      textAlign: "left"
+    },
+    title: pfText(p && p.fit_basis) || ""
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 6,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "eyebrow",
+    style: {
+      fontSize: 9.5
+    }
+  }, "Evidence behind this platform"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)"
+    }
+  }, facts.length, " ", facts.length === 1 ? "finding" : "findings"), /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), /*#__PURE__*/React.createElement(Icon, {
+    name: open ? "chevron-u" : "chevron-d",
+    size: 13,
+    style: {
+      color: "var(--z-muted)"
+    }
+  }))), open ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      paddingTop: 2
+    }
+  }, /*#__PURE__*/React.createElement(PlatformFact, {
+    label: "Peer position",
+    openEvidence: openEvidence
+  }, pfText(p.peer_synthesis) || (cover !== null ? `${cover} of the locked peer set is established on this platform area.` : null)), peers.length ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow",
+    style: {
+      fontSize: 9,
+      marginBottom: 4
+    }
+  }, "Peer set \xB7 ", peers.length), peers.map((pd, i) => {
+    const name = pfText(pd.peer);
+    if (!name) return null;
+    // `deployed` is a tri-state and every branch is a different
+    // finding: true is a citable deployment, false is a search-led
+    // absence, null is "the search ran and settled nothing". The
+    // basis prose says which, so the badge must never flatten the
+    // three into a blank.
+    const dep = pd.deployed;
+    const tone = dep === true ? "b-above" : dep === false ? "b-below" : "b-muted";
+    const word = dep === true ? "established" : dep === false ? "not established" : "unestablished";
+    const asOf = pfText(pd.as_of);
+    const url = pfText(pd.source_url);
+    return /*#__PURE__*/React.createElement("div", {
+      key: `${name}-${i}`,
+      style: {
+        padding: "6px 0",
+        borderTop: i ? "1px solid var(--z-sep)" : 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 6,
+        alignItems: "baseline",
+        flexWrap: "wrap"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11.5,
+        fontWeight: 600
+      }
+    }, name), /*#__PURE__*/React.createElement("span", {
+      className: `b ${tone}`,
+      style: {
+        flexShrink: 0
+      }
+    }, word), asOf ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)"
+      }
+    }, fmtDate(asOf)) : null, url ? /*#__PURE__*/React.createElement("a", {
+      href: url,
+      target: "_blank",
+      rel: "noreferrer",
+      style: {
+        fontSize: 10,
+        color: "var(--z-mid)"
+      }
+    }, "source") : null), pfText(pd.basis) ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        lineHeight: 1.55,
+        color: "var(--z-body)",
+        marginTop: 2
+      }
+    }, pfText(pd.basis)) : null);
+  })) : null, reach ? /*#__PURE__*/React.createElement(PlatformFact, {
+    label: "Estate reach",
+    openEvidence: openEvidence,
+    ids: reach.e_ids,
+    title: pfText(reach.derivation) || ""
+  }, /*#__PURE__*/React.createElement(React.Fragment, null, cats.length ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 4
+    }
+  }, cats.map((c, i) => {
+    const linked = pfNum(c.cells_a_register_product_is_linked_to);
+    const scored = pfNum(c.cells_this_run_scores);
+    if (linked === null || scored === null) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      key: c.category_id || i,
+      style: {
+        fontSize: 11
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "f-mono",
+      style: {
+        color: "var(--z-muted)"
+      }
+    }, pfText(c.category_id)), " ", pfText(c.category_name), " \xB7 ", linked, " of ", scored, " cells reached");
+  })) : null, notReached !== null ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 4,
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, notReached, " cells this run scores have no register row against them.") : null, pfText(reach.why_this_is_established))) : null, ready ? /*#__PURE__*/React.createElement(PlatformFact, {
+    label: `Readiness${pfText(ready.verdict) ? ` · ${pfText(ready.verdict)}` : ""}`,
+    openEvidence: openEvidence,
+    ids: ready.e_ids
+  }, /*#__PURE__*/React.createElement(React.Fragment, null, pfText(ready.already_true) ? /*#__PURE__*/React.createElement("div", null, pfText(ready.already_true)) : null, pfText(ready.must_be_true_first) ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)"
+    }
+  }, "Must be true first: "), pfText(ready.must_be_true_first)) : null, pfText(ready.sequencing_basis) ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)"
+    }
+  }, "Why this order: "), pfText(ready.sequencing_basis)) : null)) : null, /*#__PURE__*/React.createElement(PlatformFact, {
+    label: "How it lands in this estate",
+    openEvidence: openEvidence
+  }, pfText(p.integration_pathway)), /*#__PURE__*/React.createElement(PlatformFact, {
+    label: "Assessment pathway",
+    openEvidence: openEvidence
+  }, pfText(p.zennify_pathway)), /*#__PURE__*/React.createElement(PlatformFact, {
+    label: `Confidence${rl && pfText(rl.confidence) ? ` · ${pfText(rl.confidence)}` : ""}`,
+    openEvidence: openEvidence
+  }, rl ? pfText(rl.confidence_basis) : null)) : null);
+}
+
 /* ── The scope rule this page now obeys everywhere ───────────────────
    A DERIVED relationship may ORDER content. It must never HIDE it.
 
@@ -1101,22 +1359,69 @@ function ClientPlatform({
   }), gapRows.length === 0 ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
     colSpan: gapCols,
     className: "tbl-empty"
-  }, "No platform story gap row and no addressable cell promoted in this run, so there is no gap mapping to show for any platform.")) : null))), storyRows.length ? storyPlatforms.map((p, i) => (p.gaps || []).some(g => g && g.l3_area === area) && pfText(p.story_md) ? /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      padding: "12px 18px",
-      borderTop: "1px solid var(--z-sep)",
-      fontSize: 12,
-      color: "var(--z-body)",
-      lineHeight: 1.65
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "eyebrow",
-    style: {
-      fontSize: 9.5,
-      marginBottom: 5
-    }
-  }, "What this platform changes"), pfText(p.story_md)) : null) : null)), /*#__PURE__*/React.createElement("div", {
+  }, "No platform story gap row and no addressable cell promoted in this run, so there is no gap mapping to show for any platform.")) : null))), storyPlatforms.length ? (() => {
+    const named = p => pfText(p && p.platform) || "";
+    const isSel = p => !!selKey && named(p) === selKey;
+    const ordered = [...storyPlatforms.filter(isSel), ...storyPlatforms.filter(p => !isSel(p))];
+    const block = (p, i, lead) => {
+      const md = pfText(p.story_md);
+      const fit = pfNum(p.fit_score);
+      const rank = pfNum(p.rank);
+      const name = named(p);
+      // The dossier used to be gated behind `story_md`, so a platform
+      // with a full evidence base and no narrative rendered nothing.
+      // Either half earns the block.
+      const dossier = /*#__PURE__*/React.createElement(PlatformDossier, {
+        p: p,
+        openEvidence: openEvidence
+      });
+      if (!md && !p.estate_reach && !p.readiness && !(p.peer_deployments || []).length) return null;
+      return /*#__PURE__*/React.createElement("div", {
+        key: `${name}-${i}`,
+        style: {
+          padding: "12px 18px",
+          borderTop: "1px solid var(--z-sep)",
+          fontSize: 12,
+          color: "var(--z-body)",
+          lineHeight: 1.65
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "row",
+        style: {
+          gap: 6,
+          alignItems: "baseline",
+          marginBottom: 5,
+          flexWrap: "wrap"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "eyebrow",
+        style: {
+          fontSize: 9.5
+        }
+      }, lead ? "What this platform changes" : name), /*#__PURE__*/React.createElement("span", {
+        className: "spacer"
+      }), fit !== null ? /*#__PURE__*/React.createElement("span", {
+        className: "b b-muted f-mono",
+        style: {
+          flexShrink: 0
+        },
+        title: pfText(p.fit_basis) || ""
+      }, rank !== null ? `rank ${rank} · ` : "", "fit ", fit.toFixed(1)) : null), md, dossier);
+    };
+    const lead = ordered[0] && isSel(ordered[0]) ? ordered[0] : null;
+    const rest = lead ? ordered.slice(1) : ordered;
+    return /*#__PURE__*/React.createElement(React.Fragment, null, lead ? block(lead, 0, true) : null, rest.length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "8px 18px 0",
+        borderTop: "1px solid var(--z-sep)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "eyebrow",
+      style: {
+        fontSize: 9
+      }
+    }, lead ? `The run's other promoted platforms · ${rest.length}` : `Promoted platform stories · ${rest.length}`)) : null, rest.map((p, i) => block(p, i + 1, false)));
+  })() : null)), /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       flex: "1 1 300px",

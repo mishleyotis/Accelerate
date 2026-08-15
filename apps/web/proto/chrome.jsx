@@ -87,7 +87,7 @@ function TopBar({ title, crumbs, right }) {
   const ql = q.toLowerCase().trim();
   const searchResults = useMemo(() => {
     if (!ql) return null;
-    const entities = DMA.ENTITIES.filter(e => e.name.toLowerCase().includes(ql) || (e.domain || "").includes(ql)).slice(0, 4)
+    const entities = DMA.ENTITIES.filter(e => entityMatches(e, ql)).slice(0, 4)
       .map(e => ({ kind: "entity", title: e.name, sub: DMA.SUBVERTICAL_LABEL[e.subvertical], route: `/clients/${e.id}/overview`, icon: "users" }));
     const insights = DMA.INSIGHT_CARDS.filter(c => c.title.toLowerCase().includes(ql) || c.id.toLowerCase().includes(ql)).slice(0, 3)
       .map(c => ({ kind: "insight", title: c.title, sub: `${c.id} · ${c.flag}`, route: `/clients/fce-001/insights?card=${c.id}`, icon: "insight" }));

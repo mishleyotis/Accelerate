@@ -135,6 +135,41 @@ async function main() {
     await page.goto(`${base}/${chk.route}`, { waitUntil: "domcontentloaded" });
     await settle(page);
 
+    /* Optional interaction, run before the assertions.
+     *
+     * Content behind a disclosure control is reachable, not hidden — but a
+     * test that only reads the settled page cannot tell "collapsed" from
+     * "renders nothing", which is the exact confusion the platform dossier
+     * was built to end. So a check may drive the control first.
+     *
+     *   steps: [{do: "click_text", arg: "Evidence behind this platform",
+     *            all: true}]
+     *
+     * Matching is case-insensitive against the element's own text because
+     * `.eyebrow` is uppercased in CSS: the DOM says "Evidence behind this
+     * platform" and innerText says "EVIDENCE BEHIND THIS PLATFORM". A
+     * case-sensitive probe against innerText reported this very block as
+     * absent while it was on screen. */
+    for (const s of chk.steps || []) {
+      if (s.do !== "click_text") {
+        console.log(`FAIL  ${chk.name} · unknown step ${s.do}`);
+        failures += 1;
+        continue;
+      }
+      const clicked = await page.evaluate(({ needle, all }) => {
+        const want = String(needle).toLowerCase();
+        const hits = [...document.querySelectorAll("button, [role=button], summary")]
+          .filter((n) => (n.textContent || "").toLowerCase().includes(want));
+        (all ? hits : hits.slice(0, 1)).forEach((n) => n.click());
+        return hits.length;
+      }, { needle: s.arg, all: !!s.all });
+      if (!clicked) {
+        console.log(`FAIL  ${chk.name} · click_text(${s.arg}) matched no control`);
+        failures += 1;
+      }
+      await settle(page);
+    }
+
     const shot = path.join(SHOTS,
       `${chk.name}-${ENTITY}-ADMIN-${AUDIENCE}-1512-${stamp}.png`);
     await page.screenshot({ path: shot, fullPage: true });

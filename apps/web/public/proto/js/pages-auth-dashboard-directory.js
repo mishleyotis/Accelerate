@@ -942,7 +942,7 @@ function EntityDirectoryPage() {
     let xs = DMA.ENTITIES.filter(e => {
       if (subvFilter !== "ALL" && e.subvertical !== subvFilter) return false;
       if (sourceFilter !== "ALL" && e.data_source !== sourceFilter) return false;
-      if (ql && !(e.name.toLowerCase().includes(ql) || (e.domain || "").includes(ql))) return false;
+      if (!entityMatches(e, ql)) return false;
       return true;
     });
     if (sortBy === "date") xs.sort((a, b) => new Date(b.assessment_date || 0) - new Date(a.assessment_date || 0));
@@ -1010,7 +1010,7 @@ function EntityDirectoryPage() {
     style: {
       paddingLeft: 32
     },
-    placeholder: "Search by name or domain\u2026",
+    placeholder: "Search by name, ID or domain\u2026",
     value: q,
     onChange: e => setQ(e.target.value)
   })), /*#__PURE__*/React.createElement("select", {

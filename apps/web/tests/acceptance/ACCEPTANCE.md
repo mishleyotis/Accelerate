@@ -878,7 +878,49 @@ authenticated smoke).
 | Tech layer keys `core/crm/data/integration/channel/security` | CLAUDE.md: `OPS · CUST · DATA · INFRA` | CLAUDE.md |
 | 3 tech-stack statuses | `CONFIRMED · INFERRED · CLAIMED · ABSENT`, required | CLAUDE.md |
 | P1C5 variants reconcile to an aggregate | v7.0 has 16 categories; all 31 P1C5 cells are `NOT_COMPARABLE` | CLAUDE.md adjudication |
-| Search matches "name and display ID" | The matcher searches name and domain | **Unresolved — owner decision needed** (BAX-33) |
+| Search matches "name and display ID" | The matcher searched name and domain | **The document** — adjudicated 2026-08-15, see 7.6 (BAX-33) |
+
+### 7.6 Two decisions taken 2026-08-15
+
+**BAX-33 — the document was right; the app was fixed.** `DIR-02` and `SRCH-10`
+both require entity search to match "name and display ID" and both mark it P0.
+Measured at HEAD, three controls answered that one question three different
+ways — the global popover and the directory filter matched name and domain, the
+prospecting picker matched name alone, and **none of the three matched the
+display id**. The display id is in the URL of every client page, on every alert
+row and on the printed scorecard: it is the string a reader is most likely to
+paste, and it was the one string that matched nothing.
+
+The alternative — mark the check wrong and delete it — would have recorded a
+directory that cannot find an entity by its own identifier as intended
+behaviour. The rule now lives in one place (`entityMatches` in `utils.jsx`) and
+all three controls call it, because three controls disagreeing about one
+question is the drift class, not an accident. `DIR-02` and `SRCH-10` move
+AMEND → **ADOPT**, and `entity-search.test.js` asserts both the behaviour and
+the single-rule property, each proven to fail under mutation.
+
+**The fabricated corpus reached the contract, and was removed there.** The
+design documents assert corpus measurements throughout — "86 of 93 committed
+clients", "32 clients shipped synthetic recs", "26 clients disagreed at 1dp".
+This system has two promoted clients. In `docs/` those numbers are inert and
+the files are read-only, so they are recorded here and flagged upward, not
+edited.
+
+But six of them had been copied into **`contracts_data.json`**, which is not a
+document: `get_page_contract` returns each field's `doc` text and the synthesis
+skill treats it as part of the contract, so the producer reads those clauses as
+fact and calibrates on them. They were removed and each rule kept — "provenance
+required, never blank" never needed a denominator. One of the six named a
+client (`SunStrong`) inside prose that ships to every producer; that is either
+client information in a shared file or a false measurement wearing a client's
+name, and both are removals.
+
+`test_contract_text_is_evidence.py` now fails CI on any corpus-scale claim or
+client name in contract prose. It also closes a hole found while looking: the
+runtime contract (`apps/mcp/dma_mcp/`) and the deploy source
+(`packages/shared/`) are **two committed copies with nothing asserting they
+agree** — a contract fix could validate against one shape and promote against
+another.
 
 ---
 

@@ -939,6 +939,27 @@ function fmtPct(n) {
   return (n == null || n === "" || !isFinite(Number(n)))
     ? null : `${(Number(n)*100).toFixed(0)}%`;
 }
+/* ── Entity search: ONE rule, three call sites ───────────────────────
+   The acceptance doc's DIR-02 and SRCH-10 both require the directory and the
+   global search to match on "name and display ID". Neither did. The global
+   popover matched name+domain, the directory matched name+domain, and the
+   prospecting picker matched name alone — three controls, three answers to the
+   same question, and the identifier a reader actually holds (it is in the URL,
+   in every alert row and on the printed scorecard) matched in none of them.
+
+   Adjudicated 2026-08-15 in favour of the doc: a directory that cannot find an
+   entity by its own identifier is a real gap, and the fix is additive. The rule
+   lives here rather than at the call sites because "held in two places, drifts"
+   is exactly what produced the three-way disagreement above.
+
+   `display_id` arrives as both `id` and `slug` from /v1/directory; both are
+   read so a shape change on either side cannot silently narrow the match. */
+function entityMatches(e, q) {
+  const ql = String(q == null ? "" : q).toLowerCase().trim();
+  if (!ql) return true;
+  return [e && e.name, e && e.domain, e && e.id, e && e.slug]
+    .some(v => v != null && String(v).toLowerCase().includes(ql));
+}
 function relTime(s) {
   if (!s) return "-";
   const months = Math.round((new Date() - new Date(s)) / (1000*60*60*24*30.4));
@@ -1094,7 +1115,7 @@ Object.assign(window, {
   SectionEmpty, SectionEmptyFoot, EnrichmentFlag, EnrichmentGap, findingChipId,
   LoadingScreen, SectionLoader, ConnectionWatcher,
   parseHash, buildHash, navigate, useRoute,
-  fmtDate, fmtAssets, fmtPct, relTime, FreshnessDot, fx,
+  fmtDate, fmtAssets, fmtPct, relTime, FreshnessDot, fx, entityMatches,
   assetUrl, sessionUser, grantedRole, signOutSession,
   useLivePage, useLiveEntity, liveSection, liveSectionState,
 });

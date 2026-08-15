@@ -272,7 +272,8 @@ Extract the digital evolution timeline, then make it a STORYLINE that explains h
 
 The client's own open matters, one row per MATTER, with severity, status and a drilldown that has something in it.
 
-One matter must not ship as many rows (SunStrong shipped 13 rows for one matter).
+One matter must not ship as many rows. Collapse duplicates that differ only by
+formatting or a trailing clause — `issue_dedup.collapse_issue_rows` is the rule.
 
 A row with neither rationale nor linked capabilities renders title-only; the frontend guards this, so do not fabricate a rationale to fill it.
 

@@ -432,7 +432,7 @@ function EntityDirectoryPage() {
     let xs = DMA.ENTITIES.filter(e => {
       if (subvFilter !== "ALL" && e.subvertical !== subvFilter) return false;
       if (sourceFilter !== "ALL" && e.data_source !== sourceFilter) return false;
-      if (ql && !(e.name.toLowerCase().includes(ql) || (e.domain || "").includes(ql))) return false;
+      if (!entityMatches(e, ql)) return false;
       return true;
     });
     if (sortBy === "date") xs.sort((a, b) => (new Date(b.assessment_date || 0) - new Date(a.assessment_date || 0)));
@@ -462,7 +462,7 @@ function EntityDirectoryPage() {
       <div className="filter-bar">
         <div className="grow" style={{ position: "relative" }}>
           <Icon name="search" size={14} style={{ position: "absolute", top: 10, left: 10, color: "var(--z-muted)" }} />
-          <input className="inp" style={{ paddingLeft: 32 }} placeholder="Search by name or domain…" value={q} onChange={e => setQ(e.target.value)} />
+          <input className="inp" style={{ paddingLeft: 32 }} placeholder="Search by name, ID or domain…" value={q} onChange={e => setQ(e.target.value)} />
         </div>
         <select className="inp" style={{ maxWidth: 200 }} value={subvFilter} onChange={e => setSubvFilter(e.target.value)}>
           <option value="ALL">All subverticals</option>
