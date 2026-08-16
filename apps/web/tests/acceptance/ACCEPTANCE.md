@@ -1624,6 +1624,93 @@ definition for a rule nothing enforces is worse than `unknown_gate`: it reads
 as a live constraint, and a producer would repair against something that cannot
 fire.
 
+> **That last paragraph was written about the Python dict, and it was false of
+> production the moment it was written.** `gate_registry` is a table; the row
+> outlived the entry and kept answering `on_failure: "block"` for a further
+> day. §7.23 is what that cost and what closes it. The claim stands only
+> as amended there.
+
+### 7.23 The gate was removed from the code and kept answering "block"
+
+Measured 2026-08-16, hours after §7.22 was written and while proving that
+removal had landed.
+
+`SG-AC1` was deleted from `gates.GATES`. Its refusal was deleted from
+`promote_run`. Two test files asserted its absence. The connector deployed.
+`verify_deployed.py` reported every compiled module byte-identical to a local
+build of HEAD. `explain_gate("SG-AC1")`, asked of production, returned the full
+definition and **`on_failure: "block"`**.
+
+`gate_registry` is a **table**. `ensure_gate_registry` seeded it with
+`INSERT … ON CONFLICT DO UPDATE`, which can create a gate and amend a gate and
+can never retire one. Every check that passed was reading the Python dict.
+Nothing read the row.
+
+    RULE_HELD_IN_TWO_PLACES_DRIFTS — with the second place in the database,
+    and only the first place under test.
+
+The cost is specific: a producer asking why it had been refused would have
+found a live blocking gate that no code path can fire, and repaired against it.
+And the class is not this gate's — **any** gate ever removed or renamed left a
+row that keeps answering.
+
+**Retirement, not deletion, and the schema forces the better answer.**
+`gate_results` carries a foreign key onto `gate_registry(gate_id)`: every gate
+outcome ever recorded against a run points there. A `DELETE` would fail on the
+constraint or, cascaded, destroy the record of which gates ran against a
+promoted run — and a gate's history is evidence about that run, not
+scaffolding. The row stays readable and stops claiming to be enforced.
+
+- **0049** adds a nullable `retired_at` (expand only; existing rows read as
+  live, which they are) and dates SG-AC1.
+- `ensure_gate_registry` now **reconciles**: it retires any `gate_id` absent
+  from the code registry, and **clears** `retired_at` for any that returns, so
+  restoring a gate needs no second migration. The predicate is driven by
+  `GATES` itself rather than a hand-list, and is scoped — a statement that
+  retired unconditionally would take out every live gate on the next deploy,
+  which is a worse failure than the one being fixed.
+- `explain_gate` reports `retired_at`, rewrites `on_failure` to `retired`, and
+  **falls through** rather than returning early, so the threshold history is
+  still attached. Retention buys nothing over deletion if a retired gate loses
+  the history that made it worth keeping.
+
+**What the tests assert is the point of the finding.** `"SG-AC1" not in
+gates.GATES` proves the source changed and says nothing about what a producer
+is told — and what a producer was told was wrong for the entire window in which
+every check was green. So `test_gate_registry_reconciles.py` asserts the
+**seeder's effect** and the **shape `explain_gate` returns**, not the contents
+of the dict.
+
+**The class was swept, and this was its only instance.** A rule set held in
+code and mirrored into a table is the shape at risk; the sweep found no other.
+The writer registry — the one other ordered rule list in this system
+(invariant 11) — is code-only and never written to a table, so it cannot drift
+this way. The remaining `ON CONFLICT … DO UPDATE` sites (`transport.py` upload
+parts, `claims.py` per-run claims, `scan_runner.py` artefacts, the catalogue
+loader's version row) upsert **data**, not rules, and have nothing to retire.
+
+**Two further places the removal never reached**, both prose, both found in
+this pass and fixed with it: `audit_promoted_client.py`'s header still
+described check D as *"Promotion refuses above 15 now"* — a file header telling
+its reader a removed gate is enforced — and `inventory.json`'s mount
+justification still cited `ALERT_CEILING = 15` as the server-side gate. The
+`GATES` comment that reasoned *"leaving a disabled entry would let
+`explain_gate` keep answering"* now says what that reasoning missed: removing a
+gate means removing it from both places, and only one of them is that file.
+
+**OPEN — the fix is not yet proven in production, and this defect is precisely
+why that distinction matters.** The code reconciles and 529 connector tests
+pass; migration 0049 has not been applied to the production database from this
+session, and no deploy has been made from it (no `gcloud` in this container).
+Until then the production row is unchanged and still answers `block`. The proof
+is one call, and it is the observable the defect lived in rather than any
+restatement of the source:
+
+    explain_gate("SG-AC1")  →  on_failure: "retired", retired_at: 2026-08-16
+
+Anything short of that answer — including a green test run, a byte-identical
+image, and both together — is the state this finding already occurred in.
+
 ---
 
 ## 8 · Files

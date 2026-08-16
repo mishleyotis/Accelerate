@@ -29,9 +29,14 @@ WHAT IT CHECKS, and why each one is here rather than in a gate at submit:
                            nulls, while a value lost between producer and serve
                            produces a perfect column of them. 32 such paths were
                            live and unnoticed.
-  D  ALERT CEILING         Promotion refuses above 15 now, but a run promoted
-                           before that gate, or one whose alerts grew, is still
-                           serving. Verified where the reader meets it.
+  D  OPEN ALERT COUNT      Reported, never judged. The ceiling of 15 was
+                           removed on 2026-08-16 — a second client owed 621
+                           alerts under H3's literal reading, so the number
+                           measures the assessment's evidence mode rather than
+                           the run. The count stays because the original defect
+                           was that nobody read it, and it is emitted at WARN
+                           with no threshold: a line that appears only above
+                           some number is a ceiling wearing a different word.
   E  ENRICHMENT VISIBLE    Every surface the enrichment register declares must
                            serve `enrichment_status`, or a thin surface reads as
                            a complete one.

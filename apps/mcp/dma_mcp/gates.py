@@ -32,6 +32,14 @@ GATES = {
     # enforces, which is worse than `unknown_gate`: it reads as a live
     # constraint to anyone who looks it up. The count survives as
     # `promote_run`'s `open_alerts`, which is a measurement, not a gate.
+    #
+    # DELETING IT FROM THIS DICT WAS NOT ENOUGH, and the paragraph above is
+    # exactly the reasoning that made it look like enough. `gate_registry` is
+    # a table: the row outlived the entry and `explain_gate("SG-AC1")` went on
+    # answering `on_failure: "block"` from production. What closes it is the
+    # reconciliation in `ensure_gate_registry` below, which retires whatever
+    # this dict no longer defines. Removing a gate means removing it from
+    # BOTH places, and only one of them is this file.
     "CG-01": ("Required section present", None,
               "Every required section of the page carries a payload object.",
               "A page missing a section renders a hole a client can see.",
@@ -440,7 +448,6 @@ def ensure_gate_registry(conn) -> int:
               SET retired_at = COALESCE(retired_at, now())
             WHERE NOT (gate_id = ANY(%s)) AND retired_at IS NULL""",
         (list(GATES),))
-    retired = cur.rowcount or 0
     cur.execute(
         """UPDATE gate_registry SET retired_at = NULL
             WHERE gate_id = ANY(%s) AND retired_at IS NOT NULL""",
