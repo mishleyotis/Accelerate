@@ -200,21 +200,73 @@ def promote_run(conn, run_id) -> dict:
         # says PASS.
         #
         # Re-validated here, over the payload promote is about to write —
-        # no extra I/O, it is already in hand. DISCLOSED, not refused: a
-        # gate that tightened after a page was authored is a reason to look,
-        # not a reason to strand five other pages that are fine. Refusing
-        # would also make every gate change retroactively un-promotable,
-        # which is how a build stops adding gates.
+        # no extra I/O, it is already in hand.
+        #
+        # THIS USED TO DISCLOSE AND PROMOTE ANYWAY, and the argument for that
+        # was written here: a gate that tightened after a page was authored is
+        # a reason to look, not a reason to strand five other pages that are
+        # fine, and refusing makes every gate change retroactively
+        # un-promotable, which is how a build stops adding gates.
+        #
+        # Measured 2026-08-16, which is what retired it. A run was re-promoted
+        # from retained rows after an unrelated gate was removed. Promotion
+        # carried forward payloads dated a week earlier, none of the owner's
+        # reported issues having been re-synthesised, and disclosed EIGHT
+        # CG-15 reasons at severity "block" — then promoted. The content
+        # reached the client surface. The disclosure went into a promote
+        # result that is read once, by whoever typed the call, and it was
+        # under-weighted exactly as a passing-looking result invites.
+        #
+        # "Disclosed" is only a control if something downstream refuses on it.
+        # Nothing did. So a blocking reason now blocks, and the "strand five
+        # pages" objection is answered by retention itself — the repair is to
+        # resubmit the ONE page named and promote again, which is the workflow
+        # invariant 3 exists for. It costs one re-synthesis, not six.
+        #
+        # SG is the documented exception and keeps its old behaviour: the
+        # charter says a failing safeguard discloses and still promotes. A
+        # failing CG, AG or ET is a correctness reason and does not.
         stale_verdicts = {}
+        refusing = {}
         for page, sub in sorted(live.items()):
             try:
                 now = validate_pass1(page, sub["payload"] or {})
-            except Exception as exc:      # noqa: BLE001 — never block a promote
-                stale_verdicts[page] = [{"gate_id": "revalidation",
-                                         "message": f"{type(exc).__name__}"}]
+            except Exception as exc:      # noqa: BLE001
+                # A re-validation that CRASHED established nothing. It must
+                # not read as a clean page — that is the
+                # CHECK_NEVER_RAN_READS_AS_UNKNOWN shape — so it refuses.
+                reasons = [{"gate_id": "revalidation", "severity": "block",
+                            "message": f"re-validation raised "
+                                       f"{type(exc).__name__}; this page's "
+                                       "current state is unknown, which is "
+                                       "not the same as clean"}]
+                stale_verdicts[page] = reasons
+                refusing[page] = reasons
                 continue
             if now:
                 stale_verdicts[page] = now[:8]
+                blocking = [r for r in now
+                            if r.get("severity") == "block"
+                            and not str(r.get("gate_id", "")).startswith("SG")]
+                if blocking:
+                    refusing[page] = blocking[:8]
+        if refusing:
+            conn.rollback()
+            return {
+                "promoted": False, "error": "retained_pages_fail_current_gates",
+                "pages": sorted(refusing),
+                "reasons": refusing,
+                "hint": (
+                    "These pages hold a PASS issued by an earlier gate set and "
+                    "do not pass today's. A retained verdict is a DATED "
+                    "observation, not a current state, and promoting on one "
+                    "puts content on a client surface that this connector "
+                    "would refuse if it were submitted now. Resubmit each page "
+                    "named — only those; the others' retained rows are still "
+                    "good and cost nothing — then promote again. Safeguard "
+                    "(SG) reasons are excluded from this refusal and still "
+                    "disclose-and-promote, per the charter."),
+            }
 
         stats = {p: {"sections": 0, "rows_written": 0} for p in PAGES}
         for (page, section), writer in registry:
