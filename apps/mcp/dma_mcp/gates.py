@@ -419,6 +419,32 @@ def ensure_gate_registry(conn) -> int:
             (gate_id, family, name, plain_label, what, why,
              "boolean" if gate_id != "SG-V4" else "absolute",
              on_failure, gate_id.startswith("SG")))
+    # ── RECONCILE, DO NOT ONLY INSERT ──────────────────────────────────
+    #
+    # This loop was `INSERT … ON CONFLICT DO UPDATE` and nothing else, so it
+    # could create a gate and amend a gate and could never retire one. When
+    # SG-AC1 was removed from GATES on 2026-08-16 the row survived, and
+    # `explain_gate("SG-AC1")` kept returning `on_failure: "block"` from a
+    # connector whose every module was byte-identical to HEAD. Every check
+    # that passed was reading this dict; nothing read the row.
+    #
+    # RETIRED, NOT DELETED: `gate_results` has a foreign key onto
+    # gate_registry(gate_id), and a gate outcome recorded against a run is
+    # evidence about that run. The row stays explicable; it just stops
+    # claiming to be enforced.
+    #
+    # `retired_at` is cleared for anything in GATES, so a gate that comes back
+    # is live again without a second migration.
+    cur.execute(
+        """UPDATE gate_registry
+              SET retired_at = COALESCE(retired_at, now())
+            WHERE NOT (gate_id = ANY(%s)) AND retired_at IS NULL""",
+        (list(GATES),))
+    retired = cur.rowcount or 0
+    cur.execute(
+        """UPDATE gate_registry SET retired_at = NULL
+            WHERE gate_id = ANY(%s) AND retired_at IS NOT NULL""",
+        (list(GATES),))
     conn.commit()
     return len(GATES)
 
@@ -427,14 +453,30 @@ def explain_gate(conn, gate_id: str) -> dict:
     cur = conn.cursor()
     cur.execute("""SELECT gate_id, enum_label(family), name, plain_label,
                           what_it_checks, why_it_exists, on_failure,
-                          is_client_visible
+                          is_client_visible, retired_at
                      FROM gate_registry WHERE gate_id = %s""", (gate_id,))
     row = cur.fetchone()
     if row is None:
         return {"error": "unknown_gate", "gate_id": gate_id}
     out = dict(zip(("gate_id", "family", "name", "plain_label",
                     "what_it_checks", "why_it_exists", "on_failure",
-                    "is_client_visible"), row))
+                    "is_client_visible", "retired_at"), row))
+    # A RETIRED GATE MUST NOT ANSWER "block". The definition and the history
+    # stay readable — that is why the row is kept rather than deleted, so an
+    # old verdict naming this gate remains explicable — but the one field a
+    # producer acts on has to say the gate does nothing now. Reporting
+    # `on_failure: "block"` for a rule no code path can fire is how a producer
+    # ends up repairing against a constraint that does not exist.
+    if out["retired_at"] is not None:
+        out["retired_at"] = out["retired_at"].isoformat()
+        out["on_failure"] = "retired"
+        out["retired"] = True
+        out["note"] = ("This gate is no longer enforced. Its definition and "
+                       "threshold history are retained so a verdict that "
+                       "names it stays explicable; nothing you submit or "
+                       "promote is checked against it.")
+    else:
+        out.pop("retired_at")
     cur.execute("""SELECT changed_from, changed_to, reason, changed_at
                      FROM gate_threshold_history WHERE gate_id = %s
                     ORDER BY changed_at""", (gate_id,))
