@@ -1461,6 +1461,67 @@ prefer-the-producer rule needs applying instead.
 
 **Verified in production, by reading it: 4/4.** Audit blockers 32 → 29.
 
+### 7.20 What the intake queue actually holds, and the duplicate that made it
+
+Asked to trigger the scan for recently-assessed clients, the first thing worth
+establishing was whether they were already in. They were.
+
+| | |
+|---|---|
+| intake tree | 8,208 files |
+| runs awaiting synthesis | **286**, across **171** entities |
+| carrying an assessment date | 198 |
+| assessed within the last six weeks | 46 runs / 23 entities |
+| **synthesised** | **0** |
+| promoted | 1 current, 1 withdrawn |
+
+A scan fired against the live tree confirmed the ingest half is healthy and
+idempotent, exactly as the charter requires:
+
+```
+scan: 8208 files
+scan: new=0 changed=0
+scan: nothing to ingest (unchanged tree creates nothing)
+done: 0 ingested, 0 failed, 0 deferred, 0 quarantined
+```
+
+**So ingest is not the constraint — synthesis is.** 286 runs sit at `INGESTED`
+with nothing consuming them, and the scheduler refills the queue every thirty
+minutes. The Cowork session scheduling the charter places in stages 2–3 does
+not exist, and it is the whole distance between a package landing and a client
+seeing a dashboard. Recorded here because a queue that only grows is a state
+the app reports correctly and nobody reads.
+
+**The duplicate.** 105 of the 171 entities carry more than one pending run —
+286 runs for 171 clients, roughly 115 surplus. One holds three at `run_seq` 1,
+2 and 3 with the same request id, the same composite, the same scored-cell
+count and the same `completed_at`: the same assessment, three times.
+
+The idempotence guard required `source_artefact_id` — **the Drive file id** —
+to match as well as the checksum. Re-uploading a workbook (delete, upload
+again, which is what people do) mints a new file id for identical bytes, so the
+guard could not match and the package ingested again. The same scan reported
+**"130 artefact(s) seen before and absent now"**, which is that signature: a
+replaced file is not `changed`, it is a new id plus a missing one, so the diff
+correctly routes it to ingest and only a content-keyed guard can tell it is the
+same assessment.
+
+Now keyed on `(entity_id, source_checksum)`. A byte-identical workbook for one
+entity IS the same assessment whatever Drive calls the file today, and two
+genuinely different assessments cannot collide — they differ in dates and ids,
+so they differ in bytes. `remint=True` still bypasses it deliberately.
+
+Worth stating precisely: the unchanged-tree path was never broken, today's scan
+proves it, and the surplus runs are historical. **The re-upload path is covered
+by unit tests, not by a production trial** — reproducing it live would mean
+writing to the client intake tree, which is not something a verification run
+should do.
+
+**OPEN for the owner**: the ~115 historical duplicate runs. Each is a synthesis
+candidate, so a producer could work the wrong copy and the active-run
+resolution has identical candidates to choose between. Cleaning them is a data
+decision, not a code one.
+
 ---
 
 ## 8 · Files
