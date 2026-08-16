@@ -1398,10 +1398,25 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
 
         # ── AG-01: ranked claims carry r_layer with a verdict — EVERY
         # list-of-object field of a ranked section, not just the first ──
+        #
+        # An item that ASSERTS NOTHING is not a ranked claim, and the same
+        # predicate AG-03 uses decides it. `cohort_patterns.insufficient_
+        # cohorts` is the case that forced this: it is the contract's own
+        # field for RECORDING A WITHHELD COHORT, every item carries
+        # `insufficient_cohort`, and demanding an R-Layer verdict on each
+        # asks a producer to argue for a conclusion it explicitly declined
+        # to draw. Measured 2026-08-16: a producer met that refusal, could
+        # not satisfy it honestly, and deleted the field — so a gate meant
+        # to raise the standard of ranked claims removed an honest
+        # disclosure from a client surface instead.
         if (page, name) in _RANKED_SECTIONS:
+            from .vacuity import item_keys
             for fname, val in body.items():
                 if isinstance(val, list) and val and all(isinstance(x, dict) for x in val):
+                    declared = item_keys(page, name, fname)
                     for i, item in enumerate(val):
+                        if _asserts_nothing(item, declared):
+                            continue
                         rl = item.get("r_layer")
                         if not isinstance(rl, dict) or not rl.get("verdict"):
                             reasons.append(_reason(

@@ -78,14 +78,82 @@ VENDOR_CEILING = "L2"
 _TIER_ORDER = {"T1": 1, "T2": 2, "T3": 3, "T4": 4, "T5": 5}
 
 
+# ── Who is publishing, which the path cannot tell you ──────────────────
+#
+# THE RULE ABOVE READS THE PATH AND THROWS THE HOST AWAY, and for vendors
+# that is right: the corpus's vendors are not enumerable. But `/newsroom/`
+# and `/press-release/` are exactly how a REGULATOR publishes too, and a
+# regulator is not a vendor — it is the T1 source the evidence tier table
+# names first.
+#
+# Measured 2026-08-16: `ncua.gov/newsroom/press-release/2025/…` — the
+# prudential regulator of the credit union being assessed — was refused at
+# T1 and again at T2 with "a vendor's own page is evidence of what the
+# VENDOR says". The only way past it was to register a T1 regulator at T5,
+# which understates the tier and depresses the rank score: the same
+# silently-suppresses-the-score failure the tier rules exist to prevent,
+# running in the opposite direction.
+#
+# An ALLOWLIST is wrong for vendors and right here, and the asymmetry is
+# the point: vendors are an open set, prudential regulators are a closed
+# and small one. Matching is on the registrable suffix, so a lookalike
+# host (`ncua.gov.example.com`) does not qualify.
+_REGULATORY_SUFFIX = (
+    ".gov",            # US federal and state: NCUA, FDIC, OCC, FRB, SEC, CFPB
+    ".mil",
+    ".gc.ca",          # Canada: OSFI, FCAC
+    ".gov.uk",
+    ".europa.eu",
+    ".gov.au",
+    ".govt.nz",
+)
+#: Prudential regulators, SROs and central banks that do not sit under one
+#: of the suffixes above. Short by construction — add only a body that
+#: supervises the institutions being assessed.
+_REGULATORY_HOST = frozenset({
+    "fca.org.uk", "bankofengland.co.uk", "prarulebook.co.uk",
+    "osfi-bsif.gc.ca", "bank-banque-canada.ca", "cdic.ca",
+    "finra.org", "sipc.org", "ffiec.gov", "bis.org", "iosco.org",
+    "ecb.europa.eu", "eba.europa.eu", "esma.europa.eu",
+})
+
+
+def _host(source_url: str | None) -> str:
+    m = re.match(r"^[a-z]+://([^/:?#]+)", source_url or "", flags=re.I)
+    return (m.group(1) if m else "").lower().rstrip(".")
+
+
+def regulatory_publisher(source_url: str | None) -> bool:
+    """Is this URL published by a regulator or a government body?
+
+    Such a page is a third-party regulatory source, never the assessed
+    institution's own marketing, so the vendor-collateral shapes must not
+    reach it whatever its path says.
+    """
+    host = _host(source_url)
+    if not host:
+        return False
+    # Subdomains qualify (`www.fca.org.uk`, `data.fdic.gov`) but a lookalike
+    # must not: match the registrable suffix, never a substring.
+    if any(host == known or host.endswith("." + known)
+           for known in _REGULATORY_HOST):
+        return True
+    return any(host == suffix.lstrip(".") or host.endswith(suffix)
+               for suffix in _REGULATORY_SUFFIX)
+
+
 def vendor_collateral(source_url: str | None) -> str | None:
     """What KIND of vendor collateral this URL is, or None.
 
     Deliberately shape-based rather than a vendor allowlist: the corpus's
     vendors are not enumerable, and a rule that needs a list is a rule
-    that is wrong about every vendor not on it.
+    that is wrong about every vendor not on it. The one exception is the
+    publisher class the path genuinely cannot express — see
+    `regulatory_publisher`.
     """
     if not source_url:
+        return None
+    if regulatory_publisher(source_url):
         return None
     try:
         path = re.sub(r"^[a-z]+://[^/]+", "", source_url, flags=re.I) or "/"

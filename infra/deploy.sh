@@ -91,7 +91,40 @@ if [ -f apps/mcp/Dockerfile ]; then
     --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-mcp@${PROJECT_ID}.iam;DB_NAME=dma_insights" \
     --set-secrets="MCP_PATH_TOKEN=dmai-mcp-path-token:latest" \
     --memory=2Gi --cpu=2 \
-    --concurrency=4 --timeout=900 --min-instances=1 --allow-unauthenticated --quiet
+    --concurrency=4 --timeout=900 --min-instances=1 --no-allow-unauthenticated --quiet
+  # THE CONNECTOR IS NOT PUBLIC, and this line is why it stays that way.
+  #
+  # This deploy passed `--allow-unauthenticated` until 2026-08-16, which
+  # grants roles/run.invoker to allUsers. The plugin minted a Google identity
+  # token on every connection and sent it; nothing on the other side read it.
+  # Authentication rested entirely on the path token in the URL — on the one
+  # component permitted to write serving content — while dmai-api and dmai-web
+  # were correctly closed. Fixing the IAM policy by hand would have been undone
+  # by the next release, silently, which is the only reason this comment is
+  # here rather than in a runbook.
+  #
+  # The path token is a capability, not an identity. It says WHICH connector;
+  # it cannot say WHO, it travels in a URL, and it cannot be revoked per user.
+  for member in "domain:${MCP_INVOKER_DOMAIN:-zennify.com}" \
+                "serviceAccount:${MCP_INVOKER_SA:-claude-deployer@${PROJECT_ID}.iam.gserviceaccount.com}"; do
+    gcloud run services add-iam-policy-binding dmai-mcp \
+      --project="$PROJECT_ID" --region="$REGION" \
+      --member="$member" --role="roles/run.invoker" --quiet >/dev/null
+  done
+  # Prove it rather than assuming it: an ANONYMOUS request to a bogus path
+  # token must die at IAM (403), not reach the application (404).
+  mcp_url=$(gcloud run services describe dmai-mcp --project="$PROJECT_ID" \
+      --region="$REGION" --format='value(status.url)')
+  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
+      "${mcp_url}/mcp/deploy-probe-no-such-path-token" \
+      -H 'Content-Type: application/json' -d '{}' || echo 000)
+  case "$code" in
+    401|403) say "svc_mcp: anonymous call rejected at IAM (HTTP $code)" ;;
+    *) echo "FATAL: dmai-mcp answered an ANONYMOUS request with HTTP $code." \
+            "403 means IAM rejected it; anything else means the connector is" \
+            "reachable without a Google identity. Refusing to call this deploy" \
+            "done." >&2; exit 1 ;;
+  esac
 fi
 if [ -f apps/web/Dockerfile ]; then
   say "web"

@@ -183,3 +183,70 @@ def test_a_run_with_no_scored_cells_has_no_line():
 def test_a_registration_with_no_new_links_is_not_measured():
     assert SR.sole_evidence_reach(_Cur(709, 700), "run", "E-1",
                                   "https://x.com/a", []) is None
+
+
+# ── the publisher class the path cannot express ────────────────────────
+#
+# The vendor rule reads the path and throws the host away. `/newsroom/`
+# and `/press-release/` are also how a REGULATOR publishes, and measured
+# 2026-08-16 a producer was refused at T1 and again at T2 on
+# `ncua.gov/newsroom/press-release/…` — the prudential regulator of the
+# credit union being assessed — with "a vendor's own page is evidence of
+# what the VENDOR says". The only way past was to register a T1 regulator
+# at T5, understating the tier and depressing the rank score: the
+# score-suppression the tier rules exist to prevent, running backwards.
+
+REGULATOR_PRESS = ("https://ncua.gov/newsroom/press-release/2025/"
+                   "credit-union-system-performance-data")
+
+
+def test_A_REGULATORS_PRESS_RELEASE_IS_NOT_VENDOR_COLLATERAL():
+    assert SR.vendor_collateral(REGULATOR_PRESS) is None
+    assert SR.tier_violation(REGULATOR_PRESS, "T1") is None
+    assert SR.tier_violation(REGULATOR_PRESS, "T2") is None
+
+
+def test_the_regulator_exemption_covers_the_shapes_that_caught_it():
+    for url in ("https://ncua.gov/newsroom/press-release/2025/x",
+                "https://www.fdic.gov/news/press-releases/2025/x.html",
+                "https://occ.gov/newsroom/news-releases/2025/x.html",
+                "https://www.federalreserve.gov/newsevents/pressreleases/x.htm",
+                "https://osfi-bsif.gc.ca/en/news/x",
+                "https://www.fca.org.uk/news/press-releases/x"):
+        assert SR.vendor_collateral(url) is None, url
+
+
+def test_A_VENDOR_IS_STILL_A_VENDOR():
+    """The exemption must not become a hole. Everything the rule was
+    written for keeps failing exactly as before."""
+    for url in ("https://fortinet.com/customers/some-credit-union",
+                "https://engageware.com/case-studies/some-cu",
+                "https://vendor.com/newsroom/2025/partnership",
+                "https://vendor.com/press-releases/2025/launch",
+                "https://vendor.com/success-stories/x",
+                "https://vendor.com/products/scheduling"):
+        assert SR.vendor_collateral(url) is not None, url
+        assert SR.tier_violation(url, "T1") is not None, url
+
+
+def test_a_lookalike_host_does_not_buy_the_exemption():
+    """Matching is on the registrable suffix, not a substring: a rule that
+    accepted `ncua.gov.example.com` would hand any vendor the exemption
+    for the price of a subdomain."""
+    for url in ("https://ncua.gov.example.com/newsroom/x",
+                "https://notgov/newsroom/x",
+                "https://mygov.com/press-releases/x",
+                "https://fake-fca.org.uk.evil.com/news/press-releases/x"):
+        assert not SR.regulatory_publisher(url), url
+    assert SR.vendor_collateral("https://ncua.gov.example.com/newsroom/x")
+
+
+def test_a_regulator_subdomain_qualifies():
+    assert SR.regulatory_publisher("https://www.ncua.gov/newsroom/x")
+    assert SR.regulatory_publisher("https://data.fdic.gov/press-releases/x")
+
+
+def test_no_url_is_not_a_regulator():
+    assert not SR.regulatory_publisher(None)
+    assert not SR.regulatory_publisher("")
+    assert not SR.regulatory_publisher("not-a-url")
