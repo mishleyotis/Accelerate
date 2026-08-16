@@ -1,0 +1,58 @@
+{
+  "_doc": [
+    "THE ROUTINES THIS PRODUCT REQUIRES, declared once so they can be",
+    "reconciled rather than remembered.",
+    "",
+    "The charter makes three of these mandatory and says why: the package scan",
+    "is how runs come to exist, so a project without it has an app that serves",
+    "whatever was last ingested by hand. They were provisioned by",
+    "infra/provision.sh and there was no way to ASK whether they were still",
+    "right — a paused job, a drifted schedule or a second job pointed at the",
+    "same target all look like nothing at all from inside the app.",
+    "",
+    "`scripts/setup_routines.py` reconciles a project against this file: it",
+    "creates what is missing, corrects a drifted schedule, re-enables a paused",
+    "routine, and reports any OTHER scheduler job aimed at the same Cloud Run",
+    "target as a duplicate.",
+    "",
+    "A duplicate is defined narrowly and deliberately: same target URI, name",
+    "not the canonical one. That is the only shape this can safely delete,",
+    "because the project hosts ~24 scheduler jobs belonging to other systems",
+    "and a broader rule would reach them.",
+    "",
+    "`oauth_service_account` is the identity Cloud Scheduler presents to",
+    "Cloud Run. It must hold roles/run.invoker on the target."
+  ],
+  "project": "digital-maturity-assessor",
+  "location": "us-central1",
+  "routines": [
+    {
+      "name": "dmai-package-scan",
+      "schedule": "*/30 * * * *",
+      "target_job": "dmai-worker",
+      "mandatory": true,
+      "why": "The package scan is how runs come to exist (TRD §07). Idempotent: an unchanged tree creates nothing. Without it nothing new is ever ingested and the app serves a frozen corpus."
+    },
+    {
+      "name": "dmai-corpus-gate-scanner",
+      "schedule": "0 3 * * *",
+      "target_job": "dmai-corpus-gate-scanner",
+      "mandatory": true,
+      "why": "Nightly corpus gate sweep; also runs on every CI run. Catches a corpus-wide regression no single package's ingest would show."
+    },
+    {
+      "name": "dmai-pack-exporter",
+      "schedule": "0 2 * * *",
+      "target_job": "dmai-pack-exporter",
+      "mandatory": true,
+      "why": "Nightly pack export, and on demand."
+    },
+    {
+      "name": "dmai-enrich-loop",
+      "schedule": "7 * * * *",
+      "target_job": "dmai-enrich",
+      "mandatory": false,
+      "why": "Computes each run's enrichment gaps and records what it resolved. Not in the charter's mandatory three; added 2026-08-15 and kept here so it is reconciled rather than remembered. Minute 7 so it does not contend with the half-hour scan."
+    }
+  ]
+}

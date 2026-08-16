@@ -1,22 +1,72 @@
 # dma-insights
 
-The five Digital Maturity Assessment skills, four DMA agents, and the remote
-DMA Insights MCP connector, as one installable plugin.
+The six Digital Maturity Assessment skills, five DMA agents, two operator
+commands and the remote DMA Insights MCP connector, as one installable plugin.
 
 ```
-skills/   dma-research · dma-assessment · dma-governance
-          dma-surface-production · dma-first-call-deck
-agents/   surface-producer · deployed-app-auditor
-          package-vetter · adversarial-verifier
-bin/      dma-deps            on PATH while the plugin is enabled
-scripts/  mcp_auth_headers.sh · audit_skills.py
-.mcp.json the deployed connector, declared remote
+skills/    dma-research · dma-assessment · dma-governance
+           dma-surface-production · dma-first-call-deck · dma-rectifier
+agents/    surface-producer · deployed-app-auditor · package-vetter
+           adversarial-verifier · rectifier
+commands/  /dma-insights:doctor          is this install able to do the work?
+           /dma-insights:setup-routines  reconcile the scheduled routines
+bin/       dma-deps                      on PATH while the plugin is enabled
+scripts/   mcp_auth_headers.sh · doctor.py · setup_routines.py
+           audit_skills.py
+routines.json  the scheduled routines this product requires, declared
+.mcp.json      the deployed connector, declared remote
 ```
+
+## The two credentials, which are not the same thing
+
+Most install failures are one of these missing, and they fail identically —
+the connector's tools are simply absent, and absent carries no reason.
+
+| | what it proves | where it lives | if it is wrong |
+|---|---|---|---|
+| **path token** | *which* connector you meant | OS keychain, as `user_config.mcp_path_token` | 404 — the capability URL resolves to nothing |
+| **Google ID token** | *who you are* | minted per connection by `scripts/mcp_auth_headers.sh` from your active `gcloud` account | 403 — Cloud Run rejects the call before the connector sees it |
+
+The ID token is minted for an **audience**, and Cloud Run checks it. The
+audience defaults to the production service; override it with `DMA_MCP_HOST`
+if you point `mcp_base_url` at a different deployment. Cloud Run gives one
+service two URL forms (`<svc>-<hash>-<region>.a.run.app` and
+`<svc>-<projnum>.<region>.run.app`) and **either audience is accepted at
+either URL** — measured, all four combinations return 200 — so only a
+genuinely different service is a problem.
+
+Run `/dma-insights:doctor` and it will tell you which of the two is missing
+rather than leaving you to infer it from an empty tool list.
+
+### The third question, which is not about your credentials
+
+A token that is minted and sent is not the same as a token that is *checked*.
+Until **2026-08-16** `dmai-mcp` granted `roles/run.invoker` to `allUsers` with
+ingress `all`: the plugin minted an identity token on every connection, sent
+it, and nothing on the other side ever read it. Authentication rested entirely
+on the 32-character path token in the URL — on the one component in this system
+permitted to write serving content. `dmai-api` and `dmai-web` were locked down
+correctly; the connector was the outlier.
+
+Every check the doctor made passed throughout, because each measured that a
+credential **existed** and none measured that anything **enforced** it. The
+doctor now probes enforcement directly, and needs no secret to do it: an
+unauthenticated POST to a deliberately bogus path token.
+
+| answer | means |
+|---|---|
+| **403** / 401 | IAM rejected it before routing — enforced |
+| **404** | it reached the application: the service is **public** |
+
+The grant is now `domain:zennify.com` plus the deployer service account. If you
+stand up another deployment, run the doctor against it before trusting it.
 
 ## Install
 
+**From GitHub**, which is what to use on a machine that does not have the repo:
+
 ```bash
-claude plugin marketplace add ./            # from the repository root
+claude plugin marketplace add mishleyotis/Accelerate
 claude plugin install dma-insights@zennify-dma \
   --config mcp_base_url="$(gcloud run services describe dmai-mcp \
       --project=digital-maturity-assessor --region=us-central1 \
@@ -27,13 +77,48 @@ claude plugin install dma-insights@zennify-dma \
 claude plugin enable dma-insights@zennify-dma
 ```
 
-The plugin ships `defaultEnabled: false`. It connects to a production service
-and the five agents can promote client-facing content, so it is opted into
-rather than turned on by installing.
+**From a local checkout**, replace the first line with
+`claude plugin marketplace add ./` run at the repository root.
 
-Read the token out of Secret Manager into the command, as above. Do not paste
-it, do not put it in a file, and do not echo it — `claude mcp list` prints
-the resolved server URL in full, and the token is a path segment of that URL.
+Then, in a session, prove it rather than assuming it:
+
+```
+/dma-insights:doctor            # plugin, gcloud identity, audience, path token
+/dma-insights:setup-routines    # the four scheduled routines, reconciled
+```
+
+The plugin ships `defaultEnabled: false`, so nothing loads until you enable it.
+
+## Requirements on the machine
+
+* **`gcloud`**, authenticated, with an account that may mint an identity token
+  for the connector's audience and holds `roles/run.invoker` on `dmai-mcp`.
+  The auth helper looks on `PATH` and in the usual install locations, and
+  honours `GCLOUD_BIN`.
+* **Read access to the path-token secret** (`dmai-mcp-path-token`), once, at
+  install. It is stored in your OS keychain afterwards, never in
+  `settings.json` and never in the repository.
+
+## The scheduled routines
+
+`routines.json` declares them; `/dma-insights:setup-routines` reconciles a
+project against it and reports `ok` / `MISSING` / `PAUSED` / `DRIFTED` /
+`DUPLICATE` per routine.
+
+| routine | schedule | why it matters |
+|---|---|---|
+| `dmai-package-scan` | every 30 min | **how runs come to exist.** Without it nothing new is ingested and the app serves a frozen corpus |
+| `dmai-corpus-gate-scanner` | nightly 03:00 | catches a corpus-wide regression no single ingest would show |
+| `dmai-pack-exporter` | nightly 02:00 | pack export |
+| `dmai-enrich-loop` | hourly at :07 | computes each run's enrichment gaps |
+
+Reconciliation is **dry-run by default**. It creates, resumes and corrects only
+with `--apply`, and deletes a duplicate only with `--delete-duplicates` on top
+of that. A duplicate is defined narrowly — another scheduler job aimed at the
+*same Cloud Run target* under a different name — because this project hosts
+around two dozen jobs belonging to other systems and a looser rule would reach
+them.
+
 
 ## The three configuration values
 

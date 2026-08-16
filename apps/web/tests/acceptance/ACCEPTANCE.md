@@ -1522,6 +1522,54 @@ candidate, so a producer could work the wrong copy and the active-run
 resolution has identical candidates to choose between. Cleaning them is a data
 decision, not a code one.
 
+### 7.21 The connector was public, and every check said it was healthy
+
+Measured 2026-08-16, while proving the plugin's authentication end to end.
+`dmai-mcp` granted `roles/run.invoker` to **`allUsers`** with ingress `all`.
+
+The plugin's `headersHelper` minted a Google identity token on every
+connection and sent it. Nothing on the other side read it. Authentication
+rested entirely on a 32-character path token in the URL — on the one
+component in this system permitted to write serving content. `dmai-api`
+(invokable only by the web service account) and `dmai-web` (only by IAP) were
+locked down correctly; the connector was the outlier.
+
+**What makes it a defect class rather than a misconfiguration** is that
+nothing was silent about it. The install doctor ran nine checks and passed
+all nine. It verified that a token could be *minted* and that its *audience*
+matched the service. Both were true. Neither has any bearing on whether the
+service checks the token, and there was no check that did — so a green report
+was fully consistent with an open connector.
+
+    DECLARED_DEPENDENCY_WITH_NO_OBSERVABLE, in its costliest form: the
+    credential existed, was configured correctly, was transmitted on every
+    call, and was load-bearing in every document describing the system —
+    while being, in fact, ignored.
+
+The probe that closes it needs **no secret**, which is what makes it shippable
+and what makes it runnable before the path token is configured — exactly when
+an operator most needs to know whether a deployment is open. Send an
+unauthenticated POST to a deliberately bogus path token and read where the
+request died:
+
+| answer | means |
+|---|---|
+| 403 / 401 | IAM rejected it before routing — enforced |
+| 404 | it reached the application — the service is **public** |
+
+Before: 404. After: 403. The authenticated call returns 200 across both Cloud
+Run URL forms, and a wrong path token still returns 404, so neither credential
+was weakened to fix the other.
+
+Remediation, in the order that avoids locking anyone out: grant
+`domain:zennify.com` and the deployer service account, verify the grant, then
+remove `allUsers`, then re-verify all four combinations. The rollback snapshot
+of the prior policy was taken before the first change.
+
+Six other Cloud Run services in this project also grant `allUsers`. They
+belong to other systems — the same restraint that governs the 24 foreign
+scheduler jobs applies: **named and left alone**, not swept.
+
 ---
 
 ## 8 · Files
