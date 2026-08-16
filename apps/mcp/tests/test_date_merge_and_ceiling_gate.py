@@ -17,6 +17,15 @@
    `explain_gate` answered `unknown_gate` for the one rule in this system a
    producer could meet and then not look up. Invariant 12 says a verdict
    names the gate; that refusal named none.
+
+   RETIRED 2026-08-16: the ceiling itself was removed, so there is no longer
+   a rule here to look up. A second client owed 621 alerts against it — the
+   count measures the assessment's evidence mode, not the run's quality. The
+   registry assertions below became assertions about ABSENCE, because a
+   registry that keeps answering for a removed gate is worse than one that
+   says `unknown_gate`: it reads as a live constraint. What the ceiling was,
+   why it went, and where the count survives are in
+   `apps/mcp/tests/test_alert_ceiling.py`.
 """
 import datetime as dt
 import sys
@@ -82,30 +91,27 @@ def test_the_fill_branch_recomputes_the_rank_score():
     assert "ers = round(" in block and "_RECENCY_FACTOR[new_band]" in block
 
 
-# ── the gate that could not be looked up ──────────────────────────────
-def test_the_run_level_ceiling_is_in_the_gate_registry():
-    assert "SG-AC1" in gates.GATES, (
-        "the alert ceiling is the only rule a producer can meet and then not "
-        "look up; explain_gate answered unknown_gate")
-    name, plain, what, why, on_failure = gates.GATES["SG-AC1"]
-    assert on_failure == "block"
-    assert plain, "SG gates render to a client and need a plain_label"
-    assert 8 <= len(plain.split()) <= 18, (
-        f"plain_label is {len(plain.split())} words; the safeguard contract "
-        "says 8-18")
-    assert "98" in why, "the measurement that motivated it belongs in the why"
+# ── the gate that was removed ─────────────────────────────────────────
+def test_the_removed_ceiling_is_not_in_the_gate_registry():
+    """Removed means removed. A `"disabled"` entry left behind would let
+    `explain_gate("SG-AC1")` keep returning a definition for a rule nothing
+    enforces, and a producer would repair against a constraint that cannot
+    fire."""
+    assert "SG-AC1" not in gates.GATES
 
 
-def test_the_family_prefix_resolves():
+def test_the_family_prefix_still_resolves_for_the_gates_that_remain():
     """`ensure_gate_registry` derives family from the id prefix and would
-    KeyError on an unknown one — seeding every gate, not just this one."""
-    assert gates._FAMILY[("SG-AC1").split("-")[0]] == "safeguard"
+    KeyError on an unknown one — seeding every gate, so the prefix table has
+    to cover every id still in the registry, not just the ones anyone
+    remembers."""
+    for gate_id in gates.GATES:
+        prefix = gate_id.split("-")[0]
+        assert prefix in gates._FAMILY, (
+            f"{gate_id} has prefix {prefix!r}, which _FAMILY does not map; "
+            "seeding the registry would KeyError on it")
 
 
-def test_the_refusal_names_its_gate():
-    """Invariant 12: a verdict names the gate. It did not."""
+def test_promote_no_longer_refuses_on_the_alert_count():
     src = (ROOT / "apps" / "mcp" / "dma_mcp" / "promote.py").read_text()
-    i = src.index('"error": "alert_ceiling_exceeded"')
-    tail = src[i:i + 900]
-    assert '"gate_id": "SG-AC1"' in tail
-    assert "explain_gate" in tail, "name the tool that answers 'why 15'"
+    assert '"error": "alert_ceiling_exceeded"' not in src

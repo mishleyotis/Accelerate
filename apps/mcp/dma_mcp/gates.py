@@ -17,31 +17,21 @@ _FAMILY = {"AG": "analytical", "SG": "safeguard", "ET": "enrichment", "CG": "cor
 
 # gate_id -> (name, plain_label|None, what_it_checks, why_it_exists, on_failure)
 GATES = {
-    # ── the one RUN-level gate ────────────────────────────────────────
-    # Every other entry here is checked at submit, against one page. This
-    # one is checked at PROMOTE, against the whole run, and it had no
-    # registry entry at all — so a producer that met it got a refusal it
-    # could not look up. `explain_gate("SG-AC1")` answered `unknown_gate`,
-    # which is the connector saying "the rule that just stopped you does not
-    # exist". Measured 2026-08-15, when a producer meeting it at 98 asked.
+    # SG-AC1, THE OPEN ALERT CEILING, WAS REMOVED on 2026-08-16 and is
+    # deliberately not replaced by a disabled entry.
     #
-    # It is a SAFEGUARD: it does not question whether the content is right,
-    # it asks whether the queue the content generates is one a person can
-    # work. `alert_ceiling_exceeded` is the error string promote_run returns;
-    # the id is what the registry and the threshold history are keyed by.
-    "SG-AC1": ("Open alert ceiling", 
-               "The list of things to look into is short enough to actually work",
-               "The run's open alert count, taken from the heatmap payload "
-               "about to be written, is at or under the ceiling. Counted from "
-               "the payload rather than a stored total (invariant 8): every "
-               "alert promotion writes starts open, so the length of the "
-               "array is the queue an AE meets.",
-               "A run promoted carrying 98 open alerts because nothing "
-               "anywhere read the count — not at submit, not at promote. The "
-               "queue was the first thing an AE saw and it was unusable, and "
-               "the run had passed every other gate. A queue that size is the "
-               "run saying its evidence is too thin to carry a conversation.",
-               "block"),
+    # It was this registry's only run-level gate: checked at promote against
+    # the whole run rather than at submit against one page, refusing above 15
+    # open alerts. Two clients' evidence retired it — measured 2026-08-16, a
+    # second run owed 621 alerts under H3's literal reading, because that
+    # assessment ran in PUBLIC evidence mode and an alert per unknown cell
+    # counts the evidence mode rather than the work. See `promote.py`.
+    #
+    # A gate that cannot fail does not belong here. Leaving a `"disabled"`
+    # entry would let `explain_gate` keep answering for a rule nothing
+    # enforces, which is worse than `unknown_gate`: it reads as a live
+    # constraint to anyone who looks it up. The count survives as
+    # `promote_run`'s `open_alerts`, which is a measurement, not a gate.
     "CG-01": ("Required section present", None,
               "Every required section of the page carries a payload object.",
               "A page missing a section renders a hole a client can see.",

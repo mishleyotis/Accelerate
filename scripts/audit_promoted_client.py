@@ -55,7 +55,6 @@ import sys
 from pathlib import Path
 
 PAGES = ("overview", "heatmap", "insights", "platform", "context", "techstack")
-ALERT_CEILING = 15
 DROP_MIN_ROWS = 3
 
 # Keys that legitimately hold prose written for a person, where an em dash is
@@ -220,6 +219,20 @@ def check_drop_signature(page, body) -> list:
 
 # ── D · the alert queue a reader would meet ───────────────────────────
 def check_alert_ceiling(page, body) -> list:
+    """Report the queue's size. Never refuse on it.
+
+    This was a BLOCKER above 15 until 2026-08-16. The ceiling was removed
+    because the count turned out to measure the assessment's EVIDENCE MODE
+    rather than the run's quality: a second client owed 621 alerts under H3's
+    literal reading, having been assessed in PUBLIC mode, whose methodology
+    says that is why two thirds of subcapabilities come back Unknown.
+
+    The measurement stays and is emitted UNCONDITIONALLY, with no threshold.
+    A threshold is what was wrong; and a line that appears only above some
+    number is a ceiling wearing a different word. Reported at WARN so it
+    lands in the findings list an operator reads without failing the audit —
+    `--api` exits on BLOCKERs, and this is not one.
+    """
     if page != "heatmap":
         return []
     node = body.get("alerts") if isinstance(body, dict) else None
@@ -227,13 +240,12 @@ def check_alert_ceiling(page, body) -> list:
     alerts = (node or {}).get("alerts") if isinstance(node, dict) else None
     if not isinstance(alerts, list):
         return []
-    if len(alerts) > ALERT_CEILING:
-        return [_v("BLOCKER", "D-ALERTS", page, "heatmap.alerts.alerts",
-                   f"{len(alerts)} open alerts against a ceiling of "
-                   f"{ALERT_CEILING}. The queue is the first surface an AE "
-                   "works and this one is not workable.",
-                   open_alerts=len(alerts), ceiling=ALERT_CEILING)]
-    return []
+    return [_v("WARN", "D-ALERTS", page, "heatmap.alerts.alerts",
+               f"{len(alerts)} open alert(s) in the queue an AE meets first. "
+               "Reported, not judged: there is no ceiling. A large queue is "
+               "usually the assessment's evidence mode showing through rather "
+               "than a defect in the run.",
+               open_alerts=len(alerts))]
 
 
 # ── E · a thin surface must say it is thin ────────────────────────────

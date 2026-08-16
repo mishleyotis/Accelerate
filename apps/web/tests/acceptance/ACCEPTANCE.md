@@ -140,7 +140,7 @@ catches it and where that check stands at HEAD.
 | 8 | `fmtPct(null)` → "0%"; `fmtAssets(0)` printed a stated zero identically to an unstated one | formatter honesty | **FM-01**, FM-02, FM-03, AB-05, OFT-ADD-01, WT-12, DASH-05, PROS-ADD-02 | dom | **Fixed** — regression guard |
 | 9 | Duplicate CAGR row: pinned from the computed series *and* printed by the passthrough — two lists that drifted | list identity | **FM-04**, OF-A5, OFT-ADD-02, WT-13 | dom | **Fixed** — regression guard |
 | 10 | 25 platform `peer_deployment` rows, each fully cited, rendered zero times | render reach | **KP-03**, TR-ADD-02, WT-10, PSS-03 | payload | Instance fixed; **HOLE 2** |
-| 11 | A run promoted carrying 98 open alerts because nothing counted them | promote gate | **RG-14**, ALT-ADD-01, CI-18, H3-ADD-01, HLT-ADD-05, DASH-3.3, ALT-01 | connector | **Enforced** — `ALERT_CEILING = 15` at promote, with a test |
+| 11 | A run promoted carrying 98 open alerts because nothing counted them | promote gate | **RG-14**, ALT-ADD-01, CI-18, H3-ADD-01, HLT-ADD-05, DASH-3.3, ALT-01 | connector | **Counted, not gated** — the ceiling was removed 2026-08-16 (§7.22); `promote_run` returns `open_alerts` so the count is never again unread |
 | 12 | `blocking_findings` promoted as JSON-encoded strings; CG-03 cannot see them because a serialised object *is* a valid string | type blindness | **CG-21**, INS-ADD-03, IDM-ADD-02, CI-19 | connector | **Enforced** — CG-21 refuses leaves that parse as JSON |
 | 13 | Four render fixes reported live; deployed revision built 58 minutes *before* they were committed | deploy-vs-commit | **RG-15**, CI-14, HLT-ADD-03, INS-ADD-04, UA-09 | ci | **HOLE 1** — `verify_deployed.py` exists, wired nowhere |
 | 14 | CI ran `apps/worker` and `apps/mcp` only; the API's 251 tests and the whole web suite had never run | suite coverage | **RG-16**, CI-01, TA-13, HLT-ADD-04, INS-ADD-05, DIR-A3 | ci | **HOLE 5** — api + web now run; lint, types, a11y, browser gate, smoke absent |
@@ -530,7 +530,8 @@ not a live defect.
 **Overview — Top findings** (4479) · inherits GR-01 · `OTF-01` ADOPT, `OTF-02` AMEND.
 **Top findings — Finding drilldown** (4611) · inherits OV, ST-06 · `TFD-01`,
 `TFD-02` ADOPT; `TFD-8C-06` AMEND — the release-linkage boilerplate is
-unfalsifiable as written; bound to the 15-alert ceiling and a named commit.
+unfalsifiable as written; bound to the promoted alert COUNT (the 15-alert
+ceiling it originally named was removed 2026-08-16, §7.22) and a named commit.
 **Top findings — Evidence drawer** (4737) · inherits OV + EV · `TFE-AM-01` AMEND
 (grain rule kept, "59 clients" discarded), `TFE-ADD-01` ADD *(defect 5)*.
 
@@ -847,7 +848,7 @@ Every FAIL/PARTIAL in the document is dated 14 August, against commit `08a8f48`.
 **Fixed since — carried as regression guards, not live defects:**
 `fmtPct(null)` now returns null · `fmtAssets(0)` prints `$0` distinctly from
 unstated · the duplicate CAGR row is gone · opportunity rank now follows the
-sort · `ALERT_CEILING = 15` is enforced at promote with a test · CG-21 refuses
+sort · `promote_run` reports `open_alerts`; the ceiling was removed (§7.22) · CG-21 refuses
 serialised-JSON leaves · CI Gate D ships shared contracts into the image · the
 eager-`parents[N]` scanner exists · CI now runs api + scripts + web ·
 `capped_subcap_ids` and `peer_deployments` are read.
@@ -1078,6 +1079,12 @@ Class: `LOGIC_NO_TEST_CAN_IMPORT`. Untestable placement is not a style
 question; it is the reason a defect gets to be permanent.
 
 ### 7.11 Open, and the owner's call — the alert ceiling on the second client
+
+**RESOLVED 2026-08-16: the owner removed the ceiling. See §7.22.** The
+reasoning below is kept because it is what the decision was made against, and
+because its central observation — that the ceiling cannot tell a correct
+absence from an unlooked-at one — is exactly what the second measurement
+confirmed at a larger scale.
 
 Not a defect. Recorded here because it is the one thing blocking two-client
 execution, and because resolving it silently would be the wrong move.
@@ -1569,6 +1576,53 @@ of the prior policy was taken before the first change.
 Six other Cloud Run services in this project also grant `allUsers`. They
 belong to other systems — the same restraint that governs the 24 foreign
 scheduler jobs applies: **named and left alone**, not swept.
+
+### 7.22 The alert ceiling, removed — and why the count was kept
+
+**Owner decision, 2026-08-16: remove the alert ceiling.** §7.11 recorded it as
+open; this is what closed it and what was done.
+
+`ALERT_CEILING = 15` was set on 2026-08-14 after a run promoted carrying 98
+open alerts that nothing had read. It refused at promote, named `SG-AC1`, and
+its own refusal text forbade the obvious escape: *"do not delete them to clear
+the gate."*
+
+**Two clients retired it.** The second, measured 2026-08-16, owed **621**
+alerts under H3's literal contract — one per cell scored on insufficient
+evidence — against the same ceiling of 15. 621 of 705 scored cells carry
+`is_thin_evidence`; 472 have no linked evidence at all. The cause is not
+particular to that client: the assessment ran in **PUBLIC evidence mode**,
+whose own methodology states that is why two thirds of subcapabilities come
+back Unknown. An alert per unknown cell counts the evidence mode, not the work.
+
+That reframes the rule. A ceiling of 15 against a floor of 621 is not a
+queue-length constraint — it refuses the corpus, and the only route past it a
+producer can actually take is the one the refusal forbade. §7.11 had already
+identified the mechanism (the ceiling cannot tell a *correct* absence from an
+unlooked-at one, so both count the same); the second measurement showed the
+gap is 41×, not a margin.
+
+**What was removed:** the constant, the refusal in `promote_run`, the `SG-AC1`
+registry entry, and the audit's `D-ALERTS` blocker.
+
+**What was deliberately NOT removed: the count.** The original defect was never
+the size of the queue — it was that *nobody anywhere read the number*, which is
+how 98 reached a dashboard unremarked. Deleting the counter alongside the
+ceiling would have restored precisely that state while looking like a
+simplification, so:
+
+- `promote_run` returns `open_alerts` on **success**. With the gate gone, the
+  success path is the only one left that can report it.
+- `audit_promoted_client.py` emits the count **unconditionally**, at WARN, with
+  no threshold — a line that appears only above some number is a ceiling
+  wearing a different word.
+- `test_alert_ceiling.py` keeps every counting test and adds one that fails if
+  `promote_run` stops reporting the number.
+
+**No disabled registry entry was left behind.** `explain_gate` answering with a
+definition for a rule nothing enforces is worse than `unknown_gate`: it reads
+as a live constraint, and a producer would repair against something that cannot
+fire.
 
 ---
 

@@ -24,11 +24,26 @@ from .validation import validate_pass1
 _SPEC_PATH = Path(__file__).with_name("writer_spec.json")
 _SPEC = None
 
-#: The most open alerts a run may carry onto a client dashboard. Set by the
-#: build owner, 2026-08-14, after a run promoted with 98. The number is a
-#: judgement about what a person can work in a sitting, not a measurement, and
-#: it is stated here so it is one number rather than a habit.
-ALERT_CEILING = 15
+# THE ALERT CEILING WAS REMOVED by the build owner on 2026-08-16, and the
+# COUNT deliberately was not.
+#
+# It was set at 15 on 2026-08-14 after a run promoted carrying 98 open alerts
+# that nothing had read. Two clients later the number looks like a property of
+# the CORPUS rather than of any run: measured 2026-08-16, a second client owed
+# 621 alerts against the same ceiling — 621 of 705 scored cells flagged thin,
+# 472 with no linked evidence — because that assessment ran in PUBLIC evidence
+# mode, whose own methodology says that is why two thirds of subcapabilities
+# come back Unknown. An alert per unknown cell counts the evidence mode, not
+# the work. A ceiling of 15 against a floor of 621 is not a queue-length rule;
+# it is a rule that refuses the corpus, and its only reachable escape is a
+# producer deleting alerts to clear it — the one repair the refusal text
+# explicitly forbade.
+#
+# What stays is the measurement. The original defect was never the size of the
+# queue; it was that NOBODY ANYWHERE READ THE COUNT — not at submit, not at
+# promote — so 98 reached a dashboard unremarked. Deleting the counter along
+# with the ceiling would restore exactly that. `promote_run` now reports
+# `open_alerts` on success: nothing is blocked, and nothing is unremarked.
 
 
 def _open_alert_count(live: dict) -> int:
@@ -161,43 +176,13 @@ def promote_run(conn, run_id) -> dict:
                     "unpassed_pages": sorted(unpassed),
                     "hint": "promote requires a PASS row for every page"}
 
-        # ── the alert ceiling ──────────────────────────────────────────
+        # ── the alert queue: counted, never a refusal ──────────────────
         #
-        # A run reaches a client dashboard only if its open alert queue is
-        # something a person can actually work. Measured 2026-08-14: one run
-        # promoted carrying 98 open alerts — 59 high, 39 medium — because
-        # NOTHING anywhere read the count. Not at submit, not here. The
-        # queue was the first thing an AE saw and it was unusable, and the
-        # run had passed every gate this connector has.
-        #
-        # It belongs at PROMOTE rather than at submit, because the rule is
-        # about what reaches the DASHBOARD and the alerts arrive on the
-        # heatmap page while the decision is a property of the whole run.
-        # Counted from the payload about to be written, not from a stored
-        # total (invariant 8).
+        # Measured, not gated. The ceiling this replaced is explained at the
+        # top of the module; the short version is that the count turned out to
+        # measure the assessment's EVIDENCE MODE rather than the run's quality,
+        # so refusing on it refused the corpus. Nothing below rolls back.
         alerts = _open_alert_count(live)
-        if alerts > ALERT_CEILING:
-            conn.rollback()
-            return {"promoted": False, "error": "alert_ceiling_exceeded",
-                    # NAME THE GATE. Invariant 12 says a verdict names the
-                    # gate, the path and the arithmetic, and this refusal
-                    # named none of them — it was the only rule in the system
-                    # a producer could meet and then not look up, because it
-                    # had no registry entry. `explain_gate("SG-AC1")` now
-                    # answers, including the threshold history, so "why 15"
-                    # is a question with a recorded answer.
-                    "gate_id": "SG-AC1",
-                    "explain": "explain_gate('SG-AC1')",
-                    "open_alerts": alerts, "ceiling": ALERT_CEILING,
-                    "hint": (
-                        f"this run carries {alerts} open alerts against a "
-                        f"ceiling of {ALERT_CEILING}. The alert queue is the "
-                        "first thing an AE works, and a queue this size is "
-                        "not a queue — it is the run telling you its evidence "
-                        "is too thin to carry a conversation. Close the "
-                        "underlying thinness (enrich the cells the alerts "
-                        "name) or resolve the alerts that are not findings; "
-                        "do not delete them to clear the gate")}
 
         # A retained PASS is a DATED OBSERVATION, not a current state.
         #
@@ -277,6 +262,12 @@ def promote_run(conn, run_id) -> dict:
         cur.execute("SELECT promoted_at FROM runs WHERE id = %s", (run_id,))
         out = {"promoted": True,
                "promoted_at": cur.fetchone()[0].isoformat(),
+               # The queue this promote just put in front of an AE. Reported
+               # on SUCCESS because that is the only path left: with the
+               # ceiling gone, a number nobody returns is a number nobody
+               # reads, which is the exact state that let 98 alerts reach a
+               # dashboard unremarked in the first place.
+               "open_alerts": alerts,
                "stats": stats}
         if refresh_error:
             out["directory_refresh_error"] = refresh_error

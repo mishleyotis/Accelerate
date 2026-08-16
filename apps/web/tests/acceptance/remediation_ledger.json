@@ -41,7 +41,7 @@
   "status": "OPEN",
   "verify_first": true,
   "covering_qa_id": "ALT-01 / ALT-ADD-01 / HLT-ADD-05",
-  "retest_at_head": "The doc calls this a P1 blocker at line 24 and 'reconciled' at line 1947 - the same number cannot be both. ALERT_CEILING=15 is enforced at promote at HEAD; the three-way render reconciliation is not."
+  "retest_at_head": "The doc calls this a P1 blocker at line 24 and 'reconciled' at line 1947 - the same number cannot be both. ALERT_CEILING=15 is enforced at promote at HEAD; the three-way render reconciliation is not. SUPERSEDED 2026-08-16: the owner removed the ceiling (ACCEPTANCE.md §7.22). A second client owed 621 alerts against it, so the count measures the assessment's evidence mode rather than the run. promote_run now reports open_alerts instead of refusing on it."
  },
  {
   "issue": "A run promoted carrying 98 open alerts because nothing counted them",
@@ -52,7 +52,7 @@
   "status": "OPEN",
   "verify_first": false,
   "covering_qa_id": "RG-14 / ALT-ADD-01 / CI-18",
-  "retest_at_head": "FIXED at HEAD: ALERT_CEILING = 15 enforced in promote with a test asserting the ceiling. Carried as a regression guard."
+  "retest_at_head": "FIXED at HEAD: ALERT_CEILING = 15 enforced in promote with a test asserting the ceiling. Carried as a regression guard. SUPERSEDED 2026-08-16: the owner removed the ceiling (ACCEPTANCE.md §7.22). A second client owed 621 alerts against it, so the count measures the assessment's evidence mode rather than the run. promote_run now reports open_alerts instead of refusing on it."
  },
  {
   "issue": "A shared contract was absent from the api image and the loader swallowed FileNotFoundError into an empty dict",
