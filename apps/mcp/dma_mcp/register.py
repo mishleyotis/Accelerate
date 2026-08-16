@@ -167,8 +167,18 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
                                "an unverified excerpt is not evidence"]}
         fetched = fetch(source_url)
         if fetched is None:
+            # SAY WHY. `url_unreachable` alone covered a DNS failure, a TLS
+            # error, a 403 from a bot filter, a 404 and a timeout, and each of
+            # those calls for a DIFFERENT next move — find another source,
+            # correct the URL, retry. MEM-0072 stayed an open BLOCKER through
+            # two clients because the one word could not distinguish "this
+            # firm's site refuses robots" from "this firm has no site", and
+            # the second reads as evidence about the firm while the first is
+            # evidence about nothing.
+            why = getattr(fetch, "last_error", None)
             return {"e_id": None, "deduped": False, "ers": None,
-                    "errors": [f"url_unreachable: {source_url}"]}
+                    "errors": [f"url_unreachable: {source_url}"
+                               + (f" — {why}" if why else "")]}
         if _normalise(excerpt) not in _normalise(fetched):
             return {"e_id": None, "deduped": False, "ers": None,
                     "errors": ["excerpt_not_verbatim: the span is not in the "

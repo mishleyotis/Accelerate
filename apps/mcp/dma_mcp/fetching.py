@@ -8,6 +8,8 @@ that. Logic a test cannot import is logic nothing checks.
 """
 from __future__ import annotations
 
+import re
+
 
 def _pdf_text(raw: bytes) -> str | None:
     """The text of a PDF, or None if it has none to give.
@@ -58,6 +60,53 @@ def _pdf_text(raw: bytes) -> str | None:
     return text
 
 
+def _describe(exc: BaseException, url: str) -> str:
+    """The failure, in words a producer can act on.
+
+    Each branch names a DIFFERENT next move, which is the whole reason the
+    distinction is worth carrying: a 403 means find another source for the
+    same fact, NXDOMAIN means the URL is wrong, and a timeout means try again.
+    "unreachable" means all three and therefore none of them.
+    """
+    import socket
+    import ssl
+    import urllib.error
+
+    host = ""
+    m = re.match(r"^[a-z]+://([^/:?#]+)", url or "", flags=re.I)
+    if m:
+        host = m.group(1)
+    if isinstance(exc, urllib.error.HTTPError):
+        server = (exc.headers.get("Server") or "").strip() if exc.headers else ""
+        via = f" (served by {server})" if server else ""
+        if exc.code in (401, 403):
+            return (f"HTTP {exc.code} from {host}{via} — the host answered and "
+                    "refused. Usually a bot filter rather than the page being "
+                    "absent: the fact is likely still there, so cite it from "
+                    "another source rather than recording an absence")
+        if exc.code == 404:
+            return (f"HTTP 404 from {host} — the host answered and does not "
+                    "have this path. The URL is wrong or the page is gone; "
+                    "an absence here is about the URL, not the capability")
+        if exc.code == 429:
+            return f"HTTP 429 from {host} — rate limited; retry later"
+        return f"HTTP {exc.code} from {host}{via}"
+    if isinstance(exc, urllib.error.URLError):
+        reason = getattr(exc, "reason", exc)
+        if isinstance(reason, socket.gaierror):
+            return (f"DNS lookup failed for {host} — no such host. The URL is "
+                    "wrong or the domain is gone; nothing about the entity's "
+                    "capability follows from this")
+        if isinstance(reason, ssl.SSLError):
+            return f"TLS failure talking to {host}: {type(reason).__name__}"
+        if isinstance(reason, (TimeoutError, socket.timeout)):
+            return f"timed out connecting to {host} after 30s"
+        return f"could not connect to {host}: {reason}"
+    if isinstance(exc, (TimeoutError, socket.timeout)):
+        return f"timed out reading from {host} after 30s"
+    return f"{type(exc).__name__} fetching {host}: {str(exc)[:120]}"
+
+
 def _fetch(url: str):
     """Excerpt-verification fetcher: GET with a browser-shaped UA (bare
     python-urllib is WAF-blocked by most entity sites — bcu.org rejected
@@ -79,7 +128,24 @@ def _fetch(url: str):
         with urllib.request.urlopen(req, timeout=30) as r:
             raw = r.read(20_000_000)
             ctype = (r.headers.get("Content-Type") or "").lower()
-    except Exception:
+    except Exception as exc:                      # noqa: BLE001
+        # WHY IT FAILED, not merely THAT it failed.
+        #
+        # This was `except Exception: return None`, so `register_evidence`
+        # answered `url_unreachable` for a DNS failure, a TLS error, a 403
+        # from a WAF, a 404, a redirect loop and a timeout alike. MEM-0072
+        # has been an open BLOCKER on exactly that: the connector cannot
+        # reach an entity's own site or its regulators, and no one could tell
+        # whether the cause was egress, the User-Agent, or the site being
+        # gone — so nobody could fix it. Measured again 2026-08-16 on a second
+        # client, whose own domain and three regulator hosts all returned the
+        # same undifferentiated word.
+        #
+        # A producer cannot act on "unreachable". It can act on "403 from
+        # Cloudflare", which means find another source, and on "DNS NXDOMAIN",
+        # which means the URL is wrong. Recorded on the function so the caller
+        # can surface it without changing its own signature.
+        _fetch.last_error = _describe(exc, url)
         return None
     # MAGIC BYTES DECIDE, not the URL and not the header alone. A filing
     # served as application/octet-stream is still a PDF, and a `.pdf` path
@@ -88,3 +154,8 @@ def _fetch(url: str):
     if raw[:5] == b"%PDF-" or "application/pdf" in ctype:
         return _pdf_text(raw)
     return raw.decode("utf-8", "replace")
+
+
+#: Last failure reason, set by `_fetch` and read by callers that report it.
+#: Initialised so a read before any fetch is None rather than AttributeError.
+_fetch.last_error = None
