@@ -196,7 +196,7 @@ def list_pending_runs() -> dict:
         cur.execute("""
             SELECT r.id, e.display_id, e.legal_name, r.request_id,
                    enum_label(r.status), r.completed_at,
-                   cl.held_by, cl.expires_at > now()
+                   cl.held_by, cl.expires_at > now(), r.run_seq
               FROM runs r
               JOIN entities e ON e.id = r.entity_id
               LEFT JOIN run_claims cl ON cl.run_id = r.id
@@ -206,6 +206,15 @@ def list_pending_runs() -> dict:
             {"run_id": str(r[0]), "display_id": r[1], "entity_name": r[2],
              "request_id": r[3], "status": r[4],
              "completed_at": r[5].isoformat() if r[5] else None,
+             # run_seq, because a caller choosing BETWEEN pending runs of one
+             # entity has nothing else to choose on. Measured 2026-08-16: 105
+             # of 171 entities carry more than one pending run, and for the
+             # duplicates every other field is identical — same request id,
+             # same composite, same cell count, same completed_at. Without
+             # this a scheduler picks by run id, which is stable and
+             # arbitrary; with it, it picks the latest ingest, which is the
+             # one a producer should work.
+             "run_seq": r[8],
              "claim": None if r[6] is None else
                       {"held_by": r[6], "live": bool(r[7])}}
             for r in cur.fetchall()]}
