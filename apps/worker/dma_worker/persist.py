@@ -357,13 +357,32 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
     # such retry minted a second run for the same package — six entities in
     # production carry duplicates that way. A deliberate re-ingest
     # (FORCE_FOLDER, after a parser fix) passes remint=True and still mints.
+    # KEYED ON CONTENT, NOT ON THE FILE'S NAME IN DRIVE.
+    #
+    # This used to require `source_artefact_id` to match as well, and
+    # `artefact_id` is the DRIVE FILE ID. Re-uploading a workbook — delete and
+    # upload again, which is what people do — mints a new file id for the same
+    # bytes, so the guard could not match, and a byte-identical assessment
+    # ingested as a second run.
+    #
+    # Measured 2026-08-16 in production: 286 pending runs across 171 entities,
+    # 105 of them carrying more than one. One entity holds three runs at
+    # run_seq 1, 2 and 3 with the same request id, the same composite (1.63),
+    # the same 120 scored cells and the same completed_at — the same
+    # assessment, three times. The same scan reported "130 artefact(s) seen
+    # before and absent now", which is the replaced-file signature.
+    #
+    # A byte-identical workbook for the same entity IS the same assessment,
+    # whatever Drive calls the file today. Two genuinely different assessments
+    # cannot collide here: they differ in dates and ids, so they differ in
+    # bytes. `remint=True` (FORCE_FOLDER, after a parser fix) still bypasses
+    # this entirely and mints deliberately.
     if artefact_id and artefact_checksum and not remint:
         cur.execute(
             """SELECT id, run_seq, scored_cells FROM runs
-                WHERE entity_id = %s AND source_artefact_id = %s
-                  AND source_checksum = %s
+                WHERE entity_id = %s AND source_checksum = %s
                 ORDER BY run_seq DESC LIMIT 1""",
-            (entity_id, artefact_id, artefact_checksum))
+            (entity_id, artefact_checksum))
         prior = cur.fetchone()
         if prior:
             conn.commit()
