@@ -337,11 +337,25 @@ def techstack_layers(cur, data: dict, run_id, catalog_version) -> None:
     pillar — an outside number the register cannot move — and it is null,
     not a substitute, when the catalogue does not state one.
     """
-    cur.execute("""SELECT layer::text, status::text, is_primary_gap
+    cur.execute("""SELECT layer::text, status::text
                      FROM techstack_items WHERE run_id = %s""", (run_id,))
     rows = cur.fetchall()
     if not rows:
         return
+    # is_primary_gap is NOT read from techstack_items. writer_spec.json marks
+    # the column "skip: derived from layers[] per layer at serve time, not
+    # per item" — the writer never populates it, so every row reads NULL and
+    # `any(bool(r[2]) for r in members)` was always False regardless of what
+    # the producer actually submitted. Measured 2026-08-17: a producer wrote
+    # is_primary_gap: true on techstack.layers[3] and the served value
+    # silently discarded it every time — no layer has ever been flagged the
+    # primary gap for any client. The submitted section's own layers[] is the
+    # one place this flag exists; read it from there, matched by layer name,
+    # before `_set` below overwrites data["layers"] with the recomputed rollup.
+    _submitted_primary_gap = {
+        (row.get("layer") or "").upper(): bool(row.get("is_primary_gap"))
+        for row in (data.get("layers") or []) if isinstance(row, dict)
+    }
     expected = _expected_per_layer(cur, catalog_version)
     # DATA and INFRA both absorb P4. Handing each of them the whole pillar
     # would let two layers claim the same denominator, so "6 of 187" and
@@ -367,7 +381,7 @@ def techstack_layers(cur, data: dict, run_id, catalog_version) -> None:
                 f"expected count is not separable from the catalogue"
                 if pillar in shared else
                 f"{catalog_version} maps no platform vocabulary onto {pillar}"),
-            "is_primary_gap": any(bool(r[2]) for r in members),
+            "is_primary_gap": _submitted_primary_gap.get(layer, False),
         })
     _set(data, "layers", out)
 

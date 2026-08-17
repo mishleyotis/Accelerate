@@ -167,16 +167,23 @@ def test_techstack_layers_expected_comes_from_outside_the_register():
 
         def fetchall(self):
             if self.n == 1:
-                return [("OPS", "CONFIRMED", False), ("OPS", "ABSENT", False),
-                        ("CUST", "INFERRED", True), ("DATA", "CLAIMED", False)]
+                return [("OPS", "CONFIRMED"), ("OPS", "ABSENT"),
+                        ("CUST", "INFERRED"), ("DATA", "CLAIMED")]
             return [("P2", 40), ("P3", 55), ("P4", 60)]
 
-    data = {}
+    # is_primary_gap comes from the SUBMITTED section's own layers[], not
+    # from techstack_items — writer_spec.json marks that column
+    # "skip: derived from layers[] per layer at serve time, not per item",
+    # so it is never written and a query reading it would always see NULL.
+    data = {"layers": [{"layer": "CUST", "is_primary_gap": True}]}
     computed.techstack_layers(Cur(), data, "run", "v7.0")
     by = {l["layer"]: l for l in data["layers"]}
     assert [l["layer"] for l in data["layers"]] == ["OPS", "CUST", "DATA", "INFRA"]
     assert by["OPS"]["detected"] == 1 and by["OPS"]["expected"] == 55
     assert by["CUST"]["is_primary_gap"] is True
+    # A layer the producer did NOT flag must not inherit the flag by default.
+    assert by["OPS"]["is_primary_gap"] is False
+    assert by["DATA"]["is_primary_gap"] is False
     # CLAIMED is not detection: the four statuses are CONFIRMED · INFERRED ·
     # CLAIMED · ABSENT and only the first two are evidence of a deployment.
     assert by["DATA"]["detected"] == 0
@@ -470,3 +477,28 @@ def test_a_producer_sent_tile_cannot_reach_here_anyway():
 
 
 # ── the recompute owns the arithmetic, not the sentence ───────────────
+
+
+def test_techstack_layers_NEVER_READS_is_primary_gap_FROM_THE_DB_COLUMN():
+    """Measured 2026-08-17: computed.techstack_layers() queried
+    `is_primary_gap` per row from techstack_items and served
+    `any(bool(r[2]) for r in members)`. writer_spec.json marks that column
+    "skip: derived from layers[] per layer at serve time, not per item" — the
+    writer never populates it, so every row read NULL and the served flag was
+    False no matter what the producer submitted; a producer who wrote
+    is_primary_gap: true on a layer had it silently discarded every time, and
+    no layer has ever been flagged the primary gap for any client.
+
+    This pins the READ SHAPE itself: the query must not select a third
+    column at all, so a future edit cannot quietly start trusting it again.
+    """
+    import inspect
+
+    src = inspect.getsource(computed.techstack_layers)
+    assert "is_primary_gap\n" not in src.split("FROM techstack_items")[0], (
+        "the techstack_items query must not select is_primary_gap; the "
+        "column is never written and reading it silently discards what the "
+        "producer actually submitted")
+    assert 'data.get("layers")' in src, (
+        "the submitted section's own layers[] must be the source of "
+        "is_primary_gap")

@@ -1441,6 +1441,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_subvertical_scope(page, payload, entity_code))
     reasons.extend(_check_candidate_vertical(page, payload, entity_code))
     reasons.extend(_check_cell_linkage(page, payload, _run_cells(conn, run_id)))
+    reasons.extend(_check_safeguard_gate_ids(conn, page, payload))
     # AG-05 needs the OTHER half of the pair: the timeline lives on context
     # and the why-now on overview, so each page reads the sibling's live
     # submission. Whichever lands second makes the comparison.
@@ -1452,6 +1453,63 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     sg = _run_s8(conn, run_id, page, payload)
     sg.extend(_run_v4(conn, run_id, page, payload, encoder))
     return reasons, sg
+
+
+def _check_safeguard_gate_ids(conn, page, payload) -> list:
+    """CG-22 — a gate_id a producer writes into heatmap.safeguard_gates.gates
+    must name a real gate.
+
+    Measured 2026-08-17: a payload carried gates[] entries SG-E1, SG-E2,
+    SG-Q1 and SG-D1, none of them ever registered anywhere in gates.py or
+    gate_registry, three rendering FAIL with an official-looking plain_label.
+    `computed.safeguard_gates` only ever serves rows it reads back from
+    `gate_results` — a table only real, machine-evaluated gates write to — so
+    the fabricated entries never reached a client. But that was accidental:
+    they simply landed in a key nothing reads, not a rule the producer could
+    see, and the effort spent authoring them was wasted. Caught here instead,
+    at submit, with the reason a producer needs: this belongs in caps[].
+
+    Retired counts as present — a gate that once ran and has since been
+    retired still has a real history worth citing; only a gate_id with NO
+    row at all, ever, is fabricated.
+    """
+    if page != "heatmap":
+        return []
+    sg = payload.get("safeguard_gates")
+    if not isinstance(sg, dict):
+        return []
+    gates = sg.get("gates")
+    if not isinstance(gates, list) or not gates:
+        return []
+    named = {g.get("gate_id") for g in gates
+             if isinstance(g, dict) and g.get("gate_id")}
+    if not named:
+        return []
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT gate_id FROM gate_registry WHERE gate_id = ANY(%s)",
+                    (list(named),))
+        known = {row[0] for row in cur.fetchall()}
+    except Exception:                                          # noqa: BLE001
+        # A gate that cannot read the registry must not block on a transient
+        # read; it also must not silently wave through a fabricated id, so it
+        # says nothing rather than either.
+        return []
+    out = []
+    for i, g in enumerate(gates):
+        if not isinstance(g, dict):
+            continue
+        gid = g.get("gate_id")
+        if gid and gid not in known:
+            out.append(_reason(
+                "CG-22", "safeguard_gates", f"safeguard_gates.gates[{i}].gate_id",
+                f"gate_id {gid!r} is not a real gate — it has no row in "
+                "gate_registry, ever. A gate result must come from a "
+                "connector-evaluated gate; a disclosure about what the "
+                "assessment applied (a public-evidence ceiling, a withheld "
+                "peer comparison, a rebuilt citation base) belongs in "
+                "caps[], not in a fabricated gates[] entry"))
+    return out
 
 
 def _run_s8(conn, run_id, page, payload) -> list:

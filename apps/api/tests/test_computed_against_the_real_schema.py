@@ -92,16 +92,22 @@ def seeded():
                        VALUES (%s, %s, %s, 'test')""",
                     (f"E-SCU-{i:03d}", f"P1C1.1.{i}", rid))
 
-    for i, (layer, status, primary) in enumerate((
-            ("OPS", "CONFIRMED", False), ("CUST", "ABSENT", True),
-            ("DATA", "INFERRED", False)), start=1):
+    # is_primary_gap is NOT inserted here. writer_spec.json marks the column
+    # "skip: derived from layers[] per layer at serve time, not per item" —
+    # the real writer never populates it, and a fixture that did would have
+    # hidden the exact bug this measured: computed.techstack_layers() used to
+    # read this column and get NULL on every row in production, silently
+    # discarding whatever the producer's submitted layers[] actually said.
+    for i, (layer, status) in enumerate((
+            ("OPS", "CONFIRMED"), ("CUST", "ABSENT"),
+            ("DATA", "INFERRED")), start=1):
         cur.execute("""INSERT INTO techstack_items
                          (ts_id, name, vendor, layer, pillar_id, status,
-                          evidence_level, is_primary_gap, run_id, entity_id,
+                          evidence_level, run_id, entity_id,
                           promoted_at, producer_version)
-                       VALUES (%s, %s, 'Acme', %s, 'P2', %s, 'L2', %s, %s, %s,
+                       VALUES (%s, %s, 'Acme', %s, 'P2', %s, 'L2', %s, %s,
                                now(), 'test@1')""",
-                    (f"TS-{i}", f"Product {i}", layer, status, primary,
+                    (f"TS-{i}", f"Product {i}", layer, status,
                      rid, eid))
 
     cur.execute("""INSERT INTO gate_results (run_id, gate_id, result,
@@ -138,13 +144,16 @@ def test_techstack_layers_query_names_columns_that_exist(seeded):
     """The regression this file was written for: `l3_platform` against a
     catalogue whose column is `l3_platform_areas`."""
     conn, cur, rid, _ = seeded
-    data = {}
+    # is_primary_gap comes from the SUBMITTED section's layers[], never from
+    # techstack_items — see the fixture comment above `seeded`'s INSERT.
+    data = {"layers": [{"layer": "CUST", "is_primary_gap": True}]}
     computed.techstack_layers(cur, data, rid, "v7.0")
     assert data.get("computed_error") is None
     by = {l["layer"]: l for l in data["layers"]}
     assert set(by) == {"OPS", "CUST", "DATA", "INFRA"}
     assert by["OPS"]["detected"] == 1 and by["CUST"]["detected"] == 0
     assert by["CUST"]["is_primary_gap"] is True
+    assert by["OPS"]["is_primary_gap"] is False
     # `expected` counts catalogue rows, so it is null on a database that is
     # migrated but not SEEDED. Asserting it against an empty catalogue fails
     # for a reason that has nothing to do with the query — the same red as a

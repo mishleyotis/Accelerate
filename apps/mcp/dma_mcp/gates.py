@@ -46,6 +46,22 @@ GATES = {
               "list items included.",
               "A shape that type-checks wrongly promotes silently wrong content.",
               "block"),
+    "CG-22": ("A safeguard gate_id in the payload is a real gate", None,
+              "Every item in heatmap.safeguard_gates.gates[] names a gate_id "
+              "present in this registry (retired counts as present — its "
+              "history stays explicable). An item shaped like a disclosure "
+              "but naming no real gate belongs in caps[], not gates[].",
+              "Measured 2026-08-17: a producer's payload carried gates[] "
+              "entries SG-E1, SG-E2, SG-Q1 and SG-D1, none of them ever "
+              "registered anywhere, three rendering FAIL with an "
+              "official-looking plain_label. computed.safeguard_gates only "
+              "ever serves rows from gate_results — a real, machine-evaluated "
+              "gate — so the fabricated entries reached nobody; but that "
+              "safety was accidental (they simply landed in a key nothing "
+              "reads) rather than a rule the producer could see. Invariant 10 "
+              "already forbids inventing an identifier outside five named "
+              "classes; a gate_id is not one of them.",
+              "block"),
     "CG-21": ("A leaf is a value, not a serialisation of one", None,
               "No payload leaf is a string that parses as a JSON object or "
               "array. Send the value; the encoding is never the value.",
