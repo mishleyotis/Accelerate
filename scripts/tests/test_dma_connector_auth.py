@@ -148,3 +148,87 @@ def test_mint_failure_is_an_error_not_an_empty_token(monkeypatch):
     monkeypatch.setattr(C, "_gcloud", lambda args: _Sub())
     with pytest.raises(RuntimeError, match="could not mint an identity token"):
         C._mint_identity_token()
+
+
+# ── finding gcloud when PATH has already reset ─────────────────────────
+#
+# Measured 2026-08-16: `_GCLOUD = os.environ.get("GCLOUD_BIN", "gcloud")` was
+# evaluated once at import time against whatever PATH the CURRENT shell
+# happened to have. In this harness shell state does not survive between
+# Bash invocations — an `export PATH=...` in one call is gone in the next —
+# so a call that worked minutes earlier died with FileNotFoundError as soon
+# as a fresh shell picked the module up. `doctor.py` and `setup_routines.py`
+# both already search fixed install locations for exactly this reason; this
+# script had the same problem and none of the fix.
+def test_GCLOUD_BIN_ENV_VAR_STILL_WINS(monkeypatch):
+    monkeypatch.setenv("GCLOUD_BIN", "/custom/gcloud")
+    assert C._find_gcloud() == "/custom/gcloud"
+
+
+def test_falls_back_to_a_fixed_install_location_when_PATH_has_nothing(monkeypatch, tmp_path):
+    monkeypatch.delenv("GCLOUD_BIN", raising=False)
+    monkeypatch.setattr("shutil.which", lambda name: None)
+    fake_home = tmp_path / "home"
+    fake_sdk = fake_home / "google-cloud-sdk" / "bin" / "gcloud"
+    fake_sdk.parent.mkdir(parents=True)
+    fake_sdk.write_text("#!/bin/sh\n")
+    fake_sdk.chmod(0o755)
+    monkeypatch.setenv("HOME", str(fake_home))
+    assert C._find_gcloud() == str(fake_sdk)
+
+
+def test_a_bare_name_that_resolves_on_PATH_is_still_honoured(monkeypatch):
+    monkeypatch.delenv("GCLOUD_BIN", raising=False)
+    monkeypatch.setattr("shutil.which", lambda name: "/usr/bin/gcloud")
+    assert C._find_gcloud() == "/usr/bin/gcloud"
+
+
+def test_NEVER_RAISES_WHEN_NOTHING_IS_FOUND(monkeypatch):
+    """gcloud missing everywhere must fail with gcloud's own error at the call
+    site, not with an import-time crash that blocks every other tool call
+    including ones that need no credential."""
+    monkeypatch.delenv("GCLOUD_BIN", raising=False)
+    monkeypatch.setattr("shutil.which", lambda name: None)
+    # Not just an empty HOME: this container genuinely has gcloud installed at
+    # one of the fixed fallback paths, so the search has to be denied there
+    # too or the test proves nothing on this machine.
+    monkeypatch.setattr("os.path.isfile", lambda path: False)
+    monkeypatch.setenv("HOME", "/nonexistent-for-this-test")
+    assert C._find_gcloud() == "gcloud"
+
+
+# ── large payloads should not have to be re-typed into a shell argument ─
+#
+# A contract-complete page payload runs 1-1.6MB. Measured on the Logix
+# producer run: ~12 of 50 minutes went to re-typing a payload into a tool-call
+# argument, and a one-field repair after a verdict cost a full retransmission
+# because there was no cheaper way to resubmit. `--file` is the fix: write the
+# payload once, reference it by path, edit and resubmit without retyping.
+def test_a_json_string_argument_still_works():
+    assert C._cli_args(['{"run_id": "abc"}']) == {"run_id": "abc"}
+
+
+def test_no_arguments_is_an_empty_call():
+    assert C._cli_args([]) == {}
+
+
+def test_FILE_FORM_READS_THE_SAME_SHAPE_A_STRING_WOULD(tmp_path):
+    p = tmp_path / "payload.json"
+    p.write_text('{"run_id": "abc", "payload": {"a": [1, 2, 3]}}')
+    assert C._cli_args(["--file", str(p)]) == {
+        "run_id": "abc", "payload": {"a": [1, 2, 3]}}
+
+
+def test_file_form_with_no_path_is_a_clean_error_not_an_IndexError():
+    with pytest.raises(SystemExit):
+        C._cli_args(["--file"])
+
+
+def test_a_LARGE_payload_survives_the_file_path_intact(tmp_path):
+    """The whole reason for the flag: something too big to comfortably retype
+    as a shell argument must round-trip byte-for-byte through a file."""
+    big = {"run_id": "abc", "payload": {"cells": [
+        {"id": f"C{i}", "text": "x" * 200} for i in range(2000)]}}
+    p = tmp_path / "big.json"
+    p.write_text(json.dumps(big))
+    assert C._cli_args(["--file", str(p)]) == big

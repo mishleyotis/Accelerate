@@ -35,7 +35,34 @@ import time
 import urllib.error
 import urllib.request
 
-_GCLOUD = os.environ.get("GCLOUD_BIN", "gcloud")
+def _find_gcloud() -> str:
+    """gcloud, wherever it is.
+
+    A bare "gcloud" assumes PATH, which does not survive between shell
+    invocations in this harness — `export PATH=...` in one Bash call is gone
+    in the next, so every fresh call silently fell back to a bare name and
+    died with `FileNotFoundError`. Measured 2026-08-16: a call that had
+    worked minutes earlier failed this way as soon as a new shell picked it
+    up. The same search `doctor.py` and `setup_routines.py` already make, for
+    the same reason: on this container gcloud lives outside PATH by default.
+    """
+    import shutil
+    env_bin = os.environ.get("GCLOUD_BIN")
+    if env_bin:
+        return env_bin
+    found = shutil.which("gcloud")
+    if found:
+        return found
+    for candidate in (f"{os.environ.get('HOME', '')}/google-cloud-sdk/bin/gcloud",
+                      "/root/google-cloud-sdk/bin/gcloud",
+                      "/usr/local/google-cloud-sdk/bin/gcloud",
+                      "/opt/google-cloud-sdk/bin/gcloud"):
+        if candidate and os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return candidate
+    return "gcloud"  # let it fail with gcloud's own error, not ours
+
+
+_GCLOUD = _find_gcloud()
 _MCP_HOST = os.environ.get(
     "DMA_MCP_HOST", "https://dmai-mcp-306195530103.us-central1.run.app")
 _PROJECT = os.environ.get("GCP_PROJECT", "digital-maturity-assessor")
@@ -184,7 +211,32 @@ def call(tool, **arguments):
     return res.get("structuredContent")
 
 
+def _cli_args(rest: list) -> dict:
+    """Tool arguments from the CLI tail (everything after the tool name):
+    `--file path.json`, a JSON string, or nothing (`{}`).
+
+    THE FILE FORM EXISTS BECAUSE OF A MEASURED COST, not for symmetry. A
+    contract-complete page payload runs 1-1.6MB, and a positional JSON string
+    means the model authoring a submission has to RE-TYPE the entire payload
+    into a shell argument on every attempt — on one heatmap page, ~12 of the
+    50 minutes a producer spent went to exactly this, and a one-field repair
+    after a verdict cost a full re-transmission because there was no cheaper
+    way to resubmit. `--file` lets the payload be written once with a normal
+    file-editing tool and referenced by path from then on: the repair is an
+    edit plus one CLI call, not a retype.
+    """
+    if not rest:
+        return {}
+    if rest[0] == "--file":
+        if len(rest) < 2:
+            raise SystemExit("--file requires a path")
+        with open(rest[1]) as f:
+            return json.load(f)
+    return json.loads(rest[0])
+
+
 if __name__ == "__main__":
-    tool = sys.argv[1]
-    args = json.loads(sys.argv[2]) if len(sys.argv) > 2 else {}
+    if len(sys.argv) < 2:
+        sys.exit("usage: dma_connector.py <tool> ['<json-args>' | --file path.json]")
+    tool, args = sys.argv[1], _cli_args(sys.argv[2:])
     print(json.dumps(call(tool, **args), indent=2, default=str))
