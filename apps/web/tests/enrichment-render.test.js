@@ -117,7 +117,7 @@ test("a finding chip never prints a serialised object", () => {
   assert.strictEqual(f({}), "Finding");
 });
 
-test("an unestablished value renders NOTHING, in any audience or shape", () => {
+test("an unestablished value renders its REASON, or nothing at all", () => {
   /* SUPERSEDED PREMISE, kept as the record of what changed and why.
 
      This test used to assert a three-state vocabulary — "Not stated · queued
@@ -137,6 +137,21 @@ test("an unestablished value renders NOTHING, in any audience or shape", () => {
      text at all. The absence is still tracked — by list_enrichment_gaps, by
      audit_promoted_client.py's 100%-null check, and by CG-18 — none of which
      render.
+
+     NARROWED 2026-08-18, after a client read a run as broken rather than
+     thin. The adjudication is about our WORKFLOW vocabulary, and that stands:
+     "queued for enrichment" and "Held" name a backlog the reader is not party
+     to, and no props produce either any more. It is not a reason to discard a
+     REASON the producer wrote.
+
+     The distinction is visible in the call sites and that is what settles it.
+     Of 63, sixty-one pass only a field label — they have nothing to say and
+     they still say nothing. TWO pass a producer-authored `reason`: the ladder
+     ran, it returned nothing, and this is why. That sentence is a finding,
+     and dropping it was losing the only real information the component is
+     ever handed while keeping every case where there was none.
+
+     So the input space below splits in two, and both halves are asserted.
 
      Asserted on the rendered TREE rather than the source, because the whole
      point is what a reader ends up seeing. */
@@ -163,16 +178,16 @@ test("an unestablished value renders NOTHING, in any audience or shape", () => {
 
   const render = (props) => { seen.length = 0; const out = Gap(props); return { out, text: seen.join(" ") }; };
 
-  /* Every shape the component is called in across the app, including the ones
-     that used to produce each of the three retired sentences. All must be
-     silent — a policy asserted over the input space, not over one call. */
+  /* HALF ONE — no reason to give. Every shape that used to produce one of the
+     three retired sentences, plus the shapes that never had anything to say.
+     All silent: a policy asserted over the input space, not over one call. */
   for (const props of [
     { what: "Website" },                                             // no audience
     { what: "Website", audience: "internal" },                       // was "queued"
     { what: "Website", audience: "customer" },                       // was "Not established"
-    { what: "AUM", held: true, reason: "two domains resolve", audience: "internal" },
-    { what: "AUM", held: true, reason: "two domains resolve", audience: "customer" },
+    { what: "AUM", held: true, audience: "internal" },               // held, no reason
     { what: "Peer", audience: "internal", compact: true },            // dense grids
+    { what: "Peer", reason: "   ", audience: "customer" },            // whitespace is not a reason
     {},                                                              // no props at all
   ]) {
     const { out, text } = render(props);
@@ -181,6 +196,30 @@ test("an unestablished value renders NOTHING, in any audience or shape", () => {
     assert.strictEqual(text, "",
       `EnrichmentGap emitted text for ${JSON.stringify(props)}: ${text}`);
   }
+
+  /* HALF TWO — a producer wrote a reason, so the reader gets it. No status
+     word in front of it: the sentence stands on its own, which is the whole
+     difference between reporting a finding and reporting our bookkeeping. */
+  for (const audience of ["internal", "customer"]) {
+    const { out, text } = render(
+      { what: "AUM", held: true, reason: "Two domains resolve to this name.", audience });
+    assert.ok(out, `a producer's reason was dropped for the ${audience} audience`);
+    assert.strictEqual(text, "Two domains resolve to this name.");
+    assert.strictEqual(out.props["data-gap"], "reason");
+    assert.ok(!/queued|Held|Not established/.test(text),
+      `retired vocabulary came back: ${text}`);
+  }
+
+  /* A paragraph in a table cell is its own defect, so a long reason is cut to
+     its first sentence and carries the rest on hover. The quarantine reason
+     for a credit union's revenue row runs to 500 characters. */
+  const long = "A credit union returns its surplus to members, so no revenue "
+    + "figure exists to state. The regulator's own account dictionary defines "
+    + "3,376 accounts and none of them names or describes revenue.";
+  const { out: cut, text: cutText } = render({ what: "Revenue", reason: long });
+  assert.strictEqual(
+    cutText, "A credit union returns its surplus to members, so no revenue figure exists to state.");
+  assert.strictEqual(cut.props.title, long, "the full reason must survive on hover");
 
   /* The retired vocabulary must not survive anywhere in the compiled bundle as
      REACHABLE output. The strings remain inside the component below its early

@@ -590,8 +590,32 @@ function EnrichmentGap({
       Kept rather than deleted so the call sites stay self-documenting about
      WHICH field is absent, and so the policy lives in one place if it is ever
      revisited. A caller that can drop its whole row should do that instead —
-     see FirmographicsPanel, which builds a filtered row list. */
-  return null;
+     see FirmographicsPanel, which builds a filtered row list.
+      ONE EXCEPTION, 2026-08-18. The adjudication above is about our WORKFLOW
+     vocabulary — "queued for enrichment", "held" — which names a backlog the
+     reader is not party to and tells them nothing. It is not a reason to
+     discard a REASON the producer wrote. Of the 63 call sites, 61 pass only a
+     field label and genuinely have nothing to say; those still render nothing
+     and that is right. Two pass a producer-authored `reason`, and dropping it
+     was losing the only real information on offer — the ladder ran, it
+     returned nothing, and this is why. That sentence is a finding. It renders,
+     with no status word in front of it.
+      Long reasons are trimmed to their first sentence with the whole text on
+     hover, because several of these are a paragraph and a paragraph in a table
+     cell is its own defect. */
+  const why = typeof reason === "string" ? reason.trim() : "";
+  if (!why) return null;
+  const firstSentence = (why.match(/^[^.!?]{1,160}[.!?]/) || [null])[0];
+  const shown = firstSentence ? firstSentence.trim() : why.length > 160 ? `${why.slice(0, 157)}…` : why;
+  return /*#__PURE__*/React.createElement("span", {
+    className: "enrich-gap",
+    "data-gap": "reason",
+    title: why !== shown ? why : undefined,
+    style: {
+      color: "var(--z-muted)",
+      fontStyle: "italic"
+    }
+  }, shown);
 
   /* eslint-disable no-unreachable */
   /* DEFAULT-DENY on the audience, deliberately inverted from the usual
