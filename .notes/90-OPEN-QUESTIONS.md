@@ -154,3 +154,37 @@ the container.
   composite 2.71, 765 scored cells, pinned to **v5.0**, run_seq 1 PROMOTED,
   all six pages served at `2026-08-15T11:51:20Z`. A newer run_seq 3 sits at
   INGESTED, unsynthesised.
+
+## Findings from the Logix remediation (2026-08-18)
+
+### MEM-0087 · a machine technographic scan can be filed below T1
+Recorded and gated (`source_rules.scan_tier_violation`). Same scan output:
+**ERS 3.75 at T4, 4.4-4.8 at T1**. T4's ceiling sits below the L1-L2 a
+CONFIRMED tech row needs, so the surface read "0 of 6 detected" over six real
+products. `E-CC-308` stands mis-tiered because dedup merges dates and links but
+never tier; the corrected registrations are `E-CC-324`..`E-CC-331`.
+
+### MEM-0088 · the stated pillar and category grains were lost in silence
+`parse_grain_summaries` was the only companion parser that did not take the
+observations list. Logix: `rollups.pillars 0, categories 0`; Baxter: 4 and 17.
+Fixed forward (aliases + three named observations). **The Logix run cannot be
+backfilled** — the ingested tier is read-only once scanned and the package's
+artefact bytes are not in `gs://digital-maturity-assessor-dmai-artefacts/`.
+Recovering its stated grains needs a re-scan of the package.
+
+### B4 · Logix has no peer benchmark, and it is a package property
+`peer_table` is **0 rows** on Logix against **144** on Baxter (named peers:
+Alliant CU, CEFCU, Consumers CU, GreenState CU, Lake Michigan CU, plus
+Median/P25/P75, at CATEGORY grain). `peer_median` is null on all 705 cells,
+and the payload says so in `peer_basis: cannot_estimate` with a ~900-character
+`proxy_disclosure` that the overview now renders.
+
+**Decision left open, deliberately.** The Surface Spec sanctions an
+INFERENCE-labelled "peer proxy" at floor N=3. The only cohort available is
+another client's peer panel, and borrowing it would put a benchmark on a client
+dashboard that was never selected for that client. That is a judgement for the
+owner, not a default. Ask before proxying.
+
+### F4 · Tavily was unavailable this session
+It requires authorisation through claude.ai connector settings. Clay, Explorium,
+Exa and Indeed were all reachable and used.
