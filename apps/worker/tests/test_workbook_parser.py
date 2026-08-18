@@ -325,3 +325,118 @@ def test_excerpts_are_mined_verbatim_and_stop_at_the_next_label():
     # cited but untagged: linked to the cell, with no excerpt invented for it
     assert out["E-016"]["excerpt"] is None
     assert out["E-016"]["subcaps"] == ["P1C1.1.1"]
+
+
+# ── The stated grains, and the silence when they do not land ───────────
+#
+# Measured 2026-08-18 on the third client: `pillars: 0, categories: 0`
+# against the reference client's 4 and 17, and not one row anywhere saying
+# why. This parser was the only companion parser that did not take the
+# observations list, and it had three separate ways to return nothing.
+
+def test_an_unrecognised_grain_tab_says_so_by_name(tmp_path):
+    from dma_worker.workbook_parser import parse_grain_summaries
+
+    wb = openpyxl.Workbook()
+    wb.active.title = "P1_Subcap_Scoring"
+    path = tmp_path / "no_grain_tabs.xlsx"
+    wb.save(path)
+
+    obs = []
+    out = parse_grain_summaries(str(path), obs)
+    assert out == {"pillars": [], "categories": []}
+    kinds = [o.kind for o in obs]
+    assert kinds.count("grain_tab_not_found") == 2, kinds
+    for o in obs:
+        # An observation a reader cannot act on is decoration. It has to
+        # name the grain, what was looked for, what was there, and the
+        # downstream consequence of the miss.
+        assert o.detail["grain"] in ("pillars", "categories")
+        assert o.detail["tried"] and o.detail["tabs"] == ["P1_Subcap_Scoring"]
+        assert "peer median" in o.detail["consequence"]
+
+
+def test_a_tab_present_but_headerless_is_a_different_observation(tmp_path):
+    from dma_worker.workbook_parser import parse_grain_summaries
+
+    wb = openpyxl.Workbook()
+    ps = wb.active
+    ps.title = "Pillar_Summary"
+    ps["A1"] = "A narrative block, not a header"
+    path = tmp_path / "headerless.xlsx"
+    wb.save(path)
+
+    obs = []
+    parse_grain_summaries(str(path), obs)
+    kinds = {o.kind for o in obs}
+    # The tab WAS found, so "not found" would send the reader after the
+    # wrong fix. Each branch names a different next move.
+    assert "grain_header_not_found" in kinds
+    assert not any(o.kind == "grain_tab_not_found"
+                   and o.detail["grain"] == "pillars" for o in obs)
+
+
+def test_a_header_row_with_no_score_column_names_the_column(tmp_path):
+    from dma_worker.workbook_parser import parse_grain_summaries
+
+    wb = openpyxl.Workbook()
+    ps = wb.active
+    ps.title = "Pillar_Summary"
+    for i, h in enumerate(["Pillar", "Pillar_Name", "Weight_IB"], 1):
+        ps.cell(row=1, column=i, value=h)
+    ps.append(["P1", "Strategy", 0.25])
+    path = tmp_path / "no_score.xlsx"
+    wb.save(path)
+
+    obs = []
+    assert parse_grain_summaries(str(path), obs)["pillars"] == []
+    assert any(o.kind == "column_not_found" for o in obs), [o.kind for o in obs]
+
+
+@pytest.mark.parametrize("pillar_tab,category_tab", [
+    ("Pillar Summary", "Category Detail"),
+    ("pillar_summary", "category_scorecard"),
+    ("PillarScores", "CategorySummary"),
+    ("1_Pillar_Summary", "2_Category_Detail"),
+])
+def test_the_spellings_the_corpus_actually_uses(tmp_path, pillar_tab, category_tab):
+    """One literal tab name was read, so any other spelling lost both grains.
+
+    The aliases matter less than the observation above — a spelling nobody
+    has met yet still misses — but every spelling added here is one client
+    that does not lose its stated grains in silence.
+    """
+    from dma_worker.workbook_parser import parse_grain_summaries
+
+    wb = openpyxl.Workbook()
+    ps = wb.active
+    ps.title = pillar_tab
+    for i, h in enumerate(["Pillar", "Pillar_Name", "Score", "Peer_Median"], 1):
+        ps.cell(row=1, column=i, value=h)
+    ps.append(["P1", "Strategy, Governance & Culture", 2.1, 2.4])
+    cd = wb.create_sheet(category_tab)
+    for i, h in enumerate(["Category_ID", "Category_Name", "Pillar", "Score"], 1):
+        cd.cell(row=1, column=i, value=h)
+    cd.append(["P1C1", "Fake Category", "P1", 1.9])
+    path = tmp_path / "aliased.xlsx"
+    wb.save(path)
+
+    obs = []
+    out = parse_grain_summaries(str(path), obs)
+    assert [p["pillar_id"] for p in out["pillars"]] == ["P1"]
+    assert out["pillars"][0]["peer_median"] == 2.4
+    assert [c["category_id"] for c in out["categories"]] == ["P1C1"]
+    # The source cell names the tab that was actually read, not the one the
+    # parser used to hard-code — a reader opens the workbook at this address.
+    assert out["pillars"][0]["source_cell"].startswith(f"{pillar_tab}!")
+    assert not obs, [o.kind for o in obs]
+
+
+def test_the_observations_list_is_optional_and_nothing_throws_without_it(tmp_path):
+    from dma_worker.workbook_parser import parse_grain_summaries
+
+    wb = openpyxl.Workbook()
+    wb.active.title = "P1_Subcap_Scoring"
+    path = tmp_path / "bare.xlsx"
+    wb.save(path)
+    assert parse_grain_summaries(str(path)) == {"pillars": [], "categories": []}

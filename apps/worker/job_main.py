@@ -284,7 +284,7 @@ def _ingest_one(conn, token, folder, parts, remint=False):
             sections=sections,
             report_artefact_id=(parts["report"].file_id
                                 if "report" in parts else None),
-            grains=parse_grain_summaries(wb_path),
+            grains=parse_grain_summaries(wb_path, companion),
             research=research,
         )
         rationales = {s.subcap_id: s.rationale for s in wb.scores if s.rationale}

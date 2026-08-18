@@ -1191,33 +1191,101 @@ def _stat_key(header: str):
     return None
 
 
-def parse_grain_summaries(path: str) -> dict:
+#: Tab spellings for the two stated grains. One literal name was read until
+#: 2026-08-18 and a workbook that spells it any other way lost both grains in
+#: silence. Matched case- and separator-insensitively, so `Pillar Summary`,
+#: `pillar_summary` and `PillarSummary` are one name.
+_GRAIN_TABS = {
+    "pillars": ("Pillar_Summary", "Pillar Summary", "Pillar_Scores",
+                "Pillar Scores", "Pillar_Rollup", "Pillar Rollup",
+                "Pillar_Detail", "1_Pillar_Summary", "Summary_Pillar"),
+    "categories": ("Category_Detail", "Category Detail", "Category_Scores",
+                   "Category Scores", "Category_Scorecard",
+                   "Category Scorecard", "Category_Summary",
+                   "Category Summary", "Category_Rollup", "2_Category_Detail"),
+}
+#: The header cell each grain's table is anchored on, in preference order.
+_GRAIN_ANCHORS = {
+    "pillars": ("Pillar", "Pillar_ID", "Pillar ID"),
+    "categories": ("Category_ID", "Category ID", "Category"),
+}
+
+
+def _tab_key(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", str(name or "").lower())
+
+
+def parse_grain_summaries(path: str, observations: list | None = None) -> dict:
     """The workbook's own STATED pillar and category grains
     (Pillar_Summary / Category_Detail tabs, cached formula values). H4's
     grain lock forbids recomputing these by averaging subcaps — cap
     logic, weighting and analyst override are applied when they are
     struck. The rubric Level column (M1-M5) is deliberately not read:
-    display banding is the app's four-band rule over raw scores."""
+    display banding is the app's four-band rule over raw scores.
+
+    THE SILENCE THIS CLOSES, measured 2026-08-18 on the third client.
+    Every other companion parser here takes the `observations` list and
+    appends what it could not read; this one was the exception, and it had
+    three distinct ways to return nothing — tab absent, header row not
+    locatable, no Score column — all spelled `(None, None, None)` and none
+    of them recorded. The client's run landed with `pillars: 0,
+    categories: 0` against the reference client's 4 and 17, its bundle note
+    still saying both grains are stated with source cells, and no row
+    anywhere naming what had happened. Downstream: the workbook zoom served
+    an empty state at both grains, the overview pillar bars had to derive
+    means the workbook already stated, and no peer median existed at any
+    grain to compare against. One unrecognised tab name, four surfaces.
+
+    The observation is the fix that matters more than the aliases: a
+    spelling nobody has met yet still loses the grains, and now it says so
+    by name instead of looking like a workbook that states none.
+    """
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     out = {"pillars": [], "categories": []}
+    obs = observations if observations is not None else []
+    present = {_tab_key(n): n for n in wb.sheetnames}
 
-    def _tab_headers(name: str, anchor: str):
-        """A tab whose header row can't be located (or that lacks a Score
-        column) yields no stated grains — H4 then rejects quotes at that
-        grain rather than the whole package failing to ingest."""
-        if name not in wb.sheetnames:
+    def _tab_headers(grain: str):
+        """The tab for this grain, or nothing plus the reason why nothing.
+
+        Each branch names a DIFFERENT next move for whoever reads the
+        observation: add a spelling, fix the header row, or find the score
+        column. "no stated grains" means all three and therefore none.
+        """
+        name = next((present[_tab_key(c)] for c in _GRAIN_TABS[grain]
+                     if _tab_key(c) in present), None)
+        if name is None:
+            obs.append(Observation(
+                "grain_tab_not_found", None,
+                {"grain": grain, "tried": list(_GRAIN_TABS[grain]),
+                 "tabs": list(wb.sheetnames)[:30],
+                 "consequence": (
+                     f"no stated {grain} grain lands for this run. The "
+                     "workbook zoom serves an empty state at this grain and "
+                     "no peer median exists to compare against; add the "
+                     "tab's spelling to _GRAIN_TABS rather than letting the "
+                     "run look like a workbook that states none")}))
             return None, None, None
         ws = wb[name]
-        try:
-            headers, first = _header_map(ws, anchor)
-        except ValueError:
+        for anchor in _GRAIN_ANCHORS[grain]:
+            try:
+                headers, first = _header_map(ws, anchor)
+                break
+            except ValueError:
+                continue
+        else:
+            obs.append(Observation(
+                "grain_header_not_found", None,
+                {"grain": grain, "tab": name,
+                 "anchors_tried": list(_GRAIN_ANCHORS[grain])}))
             return None, None, None
         if "score" not in headers:
+            obs.append(_column_not_found(name, "score", ("score",), headers))
             return None, None, None
         return ws, headers, first
 
     try:
-        ws, headers, first = _tab_headers("Pillar_Summary", "Pillar")
+        ws, headers, first = _tab_headers("pillars")
         if headers is not None:
             for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
                 def v(*keys, _row=row):
@@ -1240,9 +1308,9 @@ def parse_grain_summaries(path: str) -> dict:
                     "score": _num(v("score")),
                     "weight": _num(v("weight_ib", "weight", "weight_pct")),
                     "peer_median": _num(v("peer_median", "median")),
-                    "source_cell": f"Pillar_Summary!{score_col}{r}",
+                    "source_cell": f"{ws.title}!{score_col}{r}",
                 })
-        ws, headers, first = _tab_headers("Category_Detail", "Category_ID")
+        ws, headers, first = _tab_headers("categories")
         if headers is not None:
             for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
                 def v(*keys, _row=row):
@@ -1263,7 +1331,7 @@ def parse_grain_summaries(path: str) -> dict:
                     "peer_median": _num(v("peer_median", "median")),
                     "priority_score": _num(v("priority_score", "priority")),
                     "priority_tier": (str(v("priority_tier")).strip() if v("priority_tier") else None),
-                    "source_cell": f"Category_Detail!{score_col}{r}",
+                    "source_cell": f"{ws.title}!{score_col}{r}",
                 })
         return out
     finally:
