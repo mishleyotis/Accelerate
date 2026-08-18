@@ -362,6 +362,34 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
     else:
         rows = [None]
 
+    # A section that PROMOTED WITH AN EMPTY COLLECTION must still leave a row.
+    #
+    # `assemble` returns None when a section has no serving rows, and pages.py
+    # then serves {"kind": "section_not_promoted", "reason": "no serving row
+    # for this run"}. So a producer who worked a section, found nothing it
+    # could publish, and wrote the reason WHY — the cohort floor of five runs
+    # for heatmap.cohort_patterns, the pillar grain the workbook does not
+    # resolve for heatmap.workbook_scores, each with its sources searched and
+    # its closure condition — had that reason discarded right here, and the
+    # reader was handed the plumbing sentence in its place. Promoted with
+    # nothing in it and never promoted are DIFFERENT FACTS and must not serve
+    # the same document (TRD §08).
+    #
+    # The envelope-only row carries the envelope columns and nulls every item
+    # column, which is what H9's value-chain section has always done by
+    # design. `assemble` skips a row with no item content, so the collection
+    # still serves empty; the envelope, and with it `empty_state`, survives.
+    #
+    # It carries NO LIFECYCLE STATE either. `serving_directory.open_alerts`
+    # counts `heatmap_alerts` rows whose status is 'open', and heatmap.alerts
+    # is item-grain: an envelope-only alert row stamped with the lifecycle
+    # initial would put one open alert on the directory of every run whose
+    # queue promoted empty — an alert naming no cell, on a run that raised
+    # none. Exactly the kind of asserted count this change exists to remove.
+    envelope_only = not rows and isinstance(section_payload, dict)
+    if envelope_only:
+        rows = [None]
+
     cols, exprs, per_row_sources = [], [], []
     # A queue-lifecycle column the contract does not name, but the queue is
     # useless without: heatmap_alerts.status has no DDL default, so an alert
@@ -371,7 +399,8 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
     for col, initial in LIFECYCLE_INITIAL.get(table, {}).items():
         cols.append(col)
         exprs.append("%s")
-        per_row_sources.append({"column": col, "source": f"const:{initial}"})
+        per_row_sources.append({"column": col, "source": f"const:{initial}",
+                                "lifecycle": True})
     for c in writer["columns"]:
         if c["source"].startswith("skip:"):
             continue
@@ -388,6 +417,11 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
         for c in per_row_sources:
             v = _value(c["source"], ctx, section_payload, item)
             if v is ...:
+                v = None
+            # An envelope-only row is a carrier for the section's declared
+            # absence, not a queue entry: it takes no lifecycle state, so it
+            # cannot be counted as an open alert on a run that raised none.
+            if envelope_only and c.get("lifecycle"):
                 v = None
             if v is not None and c["source"].split(":")[-1].split(".")[-1] in date_leaves:
                 # Month and quarter precision are legitimate in the payload

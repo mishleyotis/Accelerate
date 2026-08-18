@@ -153,6 +153,22 @@ function SentimentCard({ entity, audience }) {
   );
 }
 
+/* The footer's two counts, each rendered only where the run states one.
+
+   `${f.branches} branches · ${employees.toLocaleString()} FTE` asserted both
+   unconditionally: a run with no branch count printed "null branches", and a
+   headcount stated in words ("more than 800") threw on `.toLocaleString()`
+   of a NaN-coerced null and took the card down to its boundary. `fmtCount`
+   renders a number with separators and a stated-in-words figure as the words
+   the producer wrote; a count nobody stated contributes nothing. */
+function footerCounts(f) {
+  const emp = (f.employees || [])[(f.employees || []).length - 1];
+  return [
+    fmtCount(f.branches) != null ? `${fmtCount(f.branches)} branches` : null,
+    fmtCount(emp) != null ? `${fmtCount(emp)} FTE` : null,
+  ].filter(Boolean).join(" · ") || null;
+}
+
 /* ── Financial trajectory ──────────────────────────────────────────────
    SOURCE: 00_entity_profile/financial_baseline.json + entity_profile.json */
 function FinancialTrajectoryCard({ entity }) {
@@ -192,7 +208,7 @@ function FinancialTrajectoryCard({ entity }) {
             <span className="chip">{f.regulator}</span>
             <span>{f.geography}</span>
             <span className="spacer" />
-            <span>{f.branches} branches · {f.employees[f.employees.length - 1].toLocaleString()} FTE</span>
+            <span>{footerCounts(f)}</span>
           </div>
         </div>
       </div>
@@ -206,19 +222,29 @@ function FinancialTrajectoryCard({ entity }) {
       </div>
       <div className="card-body">
         <div style={{ display: "flex", alignItems: "flex-end", gap: 10, height: 120 }}>
-          {f.fy.map((y, i) => (
-            <div key={y} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }} title={`${y} · $${f.total_assets[i]}${f.unit} · NIM ${f.nim_pct[i]}%`}>
-              <div style={{ fontSize: 10.5, fontWeight: 600, color: "var(--z-dark)" }}>${f.total_assets[i]}{f.unit}</div>
-              <div style={{ width: "100%", height: `${f.total_assets[i] / maxA * 80}px`, background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0", transition: "height var(--motion-slow) var(--ease)" }} />
+          {/* Every money label on this card comes out of `fmtMoney` — the
+              same call the firmographics Assets row makes. Built by
+              interpolation, `$${value}${unit}`, the bar label printed
+              `$9687804914` for a run that stated its magnitude in full while
+              the row thirty pixels away rendered the identical figure as
+              $9.7B. NIM is not in this section's contract, so the tooltip
+              names it only when the run carries it. */}
+          {f.fy.map((y, i) => {
+            const money = fmtMoney(f.total_assets[i], f.unit);
+            return (
+            <div key={y} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}
+                 title={[y, money, f.nim_pct[i] != null ? `NIM ${f.nim_pct[i]}%` : null].filter(Boolean).join(" · ")}>
+              <div style={{ fontSize: 10.5, fontWeight: 600, color: "var(--z-dark)" }}>{money}</div>
+              <div style={{ width: "100%", height: `${(f.total_assets[i] || 0) / maxA * 80}px`, background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0", transition: "height var(--motion-slow) var(--ease)" }} />
               <div className="f-mono" style={{ fontSize: 9.5, color: "var(--z-muted)" }}>{y.replace("FY", "'")}</div>
             </div>
-          ))}
+          );})}
         </div>
         <div className="row" style={{ marginTop: 10, gap: 6, flexWrap: "wrap", fontSize: 11, color: "var(--z-muted)" }}>
           <span className="chip">{f.regulator}</span>
           <span>{f.geography}</span>
           <span className="spacer" />
-          <span>{f.branches} branches · {f.employees[f.employees.length - 1].toLocaleString()} FTE</span>
+          <span>{footerCounts(f)}</span>
         </div>
       </div>
     </div>

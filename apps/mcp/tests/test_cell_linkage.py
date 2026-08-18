@@ -107,3 +107,31 @@ def test_a_cell_key_carrying_prose_contributes_nothing():
     payload = {"value_chain": {"chains": [
         {"stage": "Serve", "subcaps": ["not a cell id", "P4C3.1.1"]}]}}
     assert _check_cell_linkage("heatmap", payload, RUN_CELLS) == []
+
+
+def test_an_insight_cards_affects_list_is_held_to_the_same_rule():
+    """`affects` was the fourth spelling and the predicate could not see it.
+
+    Measured 2026-08-18 against a PROMOTED run whose insights page carries 32
+    cell ids under `cards[*].affects`: injecting P1C1.3.BK1 — a retail-bank
+    variant cell, so ET-05 territory as well — and P1C9.9.9, which exists in
+    no catalogue, drew ZERO blocking reasons from this gate and zero from the
+    local checker. The same two ids in `focus_areas[*].involved_subcap_ids`
+    drew two refusals from each. Every one of the 32 real ids was correct,
+    which is exactly what made it worth fixing: the field's green check could
+    not have been red, so it was evidence about nothing.
+    """
+    payload = {"insights": {"cards": [
+        {"ic_id": "IC-1", "affects": ["P2C3.1.6", "P1C9.9.9"]}]}}
+    out = _check_cell_linkage("insights", payload, RUN_CELLS)
+    assert len(out) == 1
+    r = out[0]
+    assert r["gate_id"] == "CG-14" and r["severity"] == "block"
+    assert r["path"] == "insights.cards[0].affects[1]"
+    assert "affects" in r["message"] and "P1C9.9.9" in r["message"]
+
+
+def test_an_affects_list_the_run_carries_passes():
+    payload = {"insights": {"cards": [
+        {"ic_id": "IC-1", "affects": ["P2C3.1.6", "P4C3.1.1"]}]}}
+    assert _check_cell_linkage("insights", payload, RUN_CELLS) == []

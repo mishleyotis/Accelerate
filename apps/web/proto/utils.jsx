@@ -155,6 +155,82 @@ function asText(v) {
   return String(v);
 }
 
+/* ── The serialised-object guard ──────────────────────────────────────
+   A renderer must never print a JSON-looking blob to a reader, even when it
+   is handed one.
+
+   `stairstep.ladder.steps[].blocking_findings[]` promoted as an array of
+   JSON-ENCODED STRINGS, so the ladder printed
+   `{"f_id": "F-02", "e_ids": [...], "title": "Model governance is …"}`
+   onto the platform page — to the customer audience as well as ours. CG-21
+   refuses that shape at submit now and the payload is being repaired, but
+   the serving path stores what it was given and a run already in the
+   database still has to read correctly. More to the point: the renderer is
+   where the reader is. Whatever arrives, the reader gets the human field or
+   nothing — never the machine's punctuation.
+
+   Three functions, because the three questions are different:
+     looksSerialised  — would printing this raw show a reader a JSON blob?
+     parseMaybeJSON   — give me the OBJECT, however it was carried
+     humanText        — give me the one sentence a person should read */
+function looksSerialised(v) {
+  if (typeof v !== "string") return false;
+  const s = v.trim();
+  if (!s) return false;
+  // A JSON object or array, whether or not it parses, plus the tell-tale
+  // `"key":` pair that survives a truncated or concatenated blob.
+  if (/^[[{]/.test(s) && /[\]}]$/.test(s)) return true;
+  // A brace anywhere plus a quoted key is a blob however it was truncated or
+  // concatenated. Both halves are required: prose legitimately carries a
+  // quoted word before a colon, and refusing that would drop real sentences.
+  if (/[[{]/.test(s) && /"[A-Za-z_][A-Za-z0-9_]*"\s*:/.test(s)) return true;
+  return /\[object Object\]/.test(s);
+}
+
+function parseMaybeJSON(v) {
+  if (v === null || v === undefined) return null;
+  if (typeof v === "object") return v;
+  if (typeof v !== "string") return null;
+  const s = v.trim();
+  if (!/^[[{]/.test(s) || !/[\]}]$/.test(s)) return null;
+  try {
+    const p = JSON.parse(s);
+    return (p !== null && typeof p === "object") ? p : null;
+  } catch (e) { return null; }
+}
+
+/* The human sentence inside a value of unknown shape, or null.
+
+   Order: parse it if it is (or encodes) an object, take the field a person
+   would read, and refuse to return anything that still looks like machine
+   output. `null` is a legitimate answer — the caller renders its own gap,
+   which is strictly better than a reader meeting `{"f_id": …}`. */
+function humanText(v, keys) {
+  if (v === null || v === undefined) return null;
+  const obj = parseMaybeJSON(v);
+  let out;
+  if (obj !== null) {
+    if (Array.isArray(obj)) {
+      out = obj.map(x => humanText(x, keys)).filter(Boolean).join(" · ") || null;
+    } else {
+      out = null;
+      for (const k of (keys || ["title", "statement", "text", "label", "name",
+                                "summary", "headline", "value"])) {
+        const t = asText(obj[k]);
+        if (t) { out = t; break; }
+      }
+    }
+  } else if (typeof v === "string") {
+    // A string that did not parse but still reads as machine output — a
+    // truncated blob, a concatenation — is refused rather than printed.
+    out = looksSerialised(v) ? null : asText(v);
+  } else {
+    out = asText(v);
+  }
+  if (out && looksSerialised(out)) return null;
+  return out || null;
+}
+
 /* The bounds a producer stated for a measure, read from their own words.
 
    Producers write a scale the way the source writes it, which is at least
@@ -946,34 +1022,213 @@ function ToastStack({ toasts, remove }) {
   );
 }
 
-/* ── Format helpers ──────────────────────────────────────────────── */
-function fmtDate(s) {
-  if (!s) return "-";
+/* ── Format helpers ──────────────────────────────────────────────────
+   ONE formatter per kind of value, exported from here and called by name
+   everywhere else. The defect these replace is not "a slot formatted badly"
+   — it is TWO formatters for the same fact disagreeing on one screen: the
+   firmographics Assets row printed `$9.7B` while the trajectory card thirty
+   pixels above printed `$9687804914`, both reading the identical figure out
+   of the identical run. A second formatter written at a call site is the
+   bug, not the fix, so every money slot, every date slot and every count
+   slot routes through the functions below. */
+
+/* A Date from whatever the payload happened to carry, or null.
+
+   A date-only string is pinned to UTC NOON, not midnight: `new Date("2024-01-01")`
+   is midnight UTC, and any renderer west of Greenwich then formats it as
+   31 December 2023. A stated calendar day must survive formatting in every
+   timezone this app is opened in. */
+function toDate(v) {
+  if (v instanceof Date) return isFinite(v.getTime()) ? v : null;
+  if (typeof v === "number") return isFinite(v) ? new Date(v) : null;
+  const s = String(v == null ? "" : v).trim();
+  if (!s) return null;
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    const y = +m[1], mo = +m[2], d = +m[3];
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+    return new Date(Date.UTC(y, mo - 1, d, 12));
+  }
   const d = new Date(s);
+  return isFinite(d.getTime()) ? d : null;
+}
+
+/* "Aug 13, 2026" — the short human date, for chips, rows and tooltips.
+   Unchanged contract: returns a STRING always, "-" when nothing was stated,
+   because ~40 call sites interpolate it into a template literal. What is new
+   is that an unparseable value comes back as the text the producer wrote
+   rather than as the literal "Invalid Date". */
+function fmtDate(v) {
+  if (v === null || v === undefined || v === "") return "-";
+  const d = toDate(v);
+  if (!d) return String(v);
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
-/* Assets, honouring the unit the payload states.
-   The firmographics contract states magnitude in a `unit` field — Baxter's is
-   `{value: "6.5", unit: "USD billions"}` — so the bare number is 6.5, not
-   6_500_000_000. Formatting it by size alone printed "$6.5", which reads as six
-   dollars fifty for a $6.5bn balance sheet. The unit is now applied first. */
-function fmtAssets(n, unit) {
+
+/* "17 August 2026" — the long human date, for prose. Returns null when the
+   value is absent or unreadable so the caller renders its own gap rather
+   than a sentence with a hole in it. */
+function fmtDateLong(v) {
+  const d = toDate(v);
+  if (!d) return null;
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
+/* Raw ISO stamps inside PROSE the producer wrote.
+
+   `kpi_triple.baseline` reads "Not established as at 2026-08-17; the public
+   record names no model registry…" — the date is a substring of a sentence,
+   not a field, so no field-level formatter can reach it. This rewrites the
+   stamps in place and touches nothing else: the sentence, its clause order
+   and its punctuation are the producer's.
+
+   A stamp preceded by a hyphen or a digit is part of an identifier, not a
+   date, and is left alone. */
+function fmtDatesInText(s) {
+  if (typeof s !== "string" || !s) return s;
+  const ISO = /(\d{4})-(\d{2})-(\d{2})(?:[T ]\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)?/g;
+  return s.replace(ISO, (match, y, mo, d, offset) => {
+    const before = offset > 0 ? s[offset - 1] : "";
+    if (/[-\d/]/.test(before)) return match;
+    const human = fmtDateLong(`${y}-${mo}-${d}`);
+    return human || match;
+  });
+}
+
+/* ── Money · ONE formatter ────────────────────────────────────────────
+   Every money slot in the app calls this. It reads the unit the payload
+   states — "USD", "USD billions", "billion", "bn", "B", "$M" — applies it,
+   and then abbreviates by magnitude. The two things it must never do are
+   print a bare eleven-digit integer, and disagree with itself between two
+   rows reading the same figure.
+
+   `fmtAssets` is the name the firmographics Assets row has always called;
+   it is kept as an alias so no call site has to move for the rename. */
+function moneyMultiplier(unit) {
+  const u = String(unit == null ? "" : unit).toLowerCase();
+  if (/trillion/.test(u) || /(^|[^a-z])t([^a-z]|$)/.test(u)) return 1e12;
+  if (/billion/.test(u) || /(^|[^a-z])(b|bn)([^a-z]|$)/.test(u)) return 1e9;
+  if (/million/.test(u) || /(^|[^a-z])(m|mm)([^a-z]|$)/.test(u)) return 1e6;
+  if (/thousand/.test(u) || /(^|[^a-z])k([^a-z]|$)/.test(u)) return 1e3;
+  return 1;
+}
+
+/* Does this unit say the figure is money at all? `fmtMoney` will format
+   anything it is handed; this is how a generic row DECIDES to call it. */
+function isMoneyUnit(unit) {
+  const u = String(unit == null ? "" : unit).toLowerCase();
+  if (!u) return false;
+  return /usd|dollar|\$|eur|gbp|cad|aud/.test(u);
+}
+
+function fmtMoney(n, unit) {
+  // Already formatted — "$9.7B" arriving from a caller that formatted once
+  // already comes back unchanged rather than through Number() and out as
+  // null. Two passes over one value must not lose it.
+  if (typeof n === "string" && /^\s*-?\$/.test(n)) return n.trim();
   // null and 0 used to share one branch, so a STATED zero printed exactly
   // like an unstated figure. A zero on a balance-sheet field is almost
   // certainly a producer error — but that is the identity gate's call, not a
   // formatter's; the formatter's only job is to never make two different
   // facts look the same. Callers guard null and render the gap themselves.
-  if (n == null || n === "" || !isFinite(Number(n))) return null;
-  if (Number(n) === 0) return "$0";
-  const u = String(unit || "").toLowerCase();
-  const mult = /billion|\bbn\b/.test(u) ? 1e9
-             : /million|\bmm?\b/.test(u) ? 1e6
-             : /thousand|\bk\b/.test(u) ? 1e3 : 1;
-  const v = Number(n) * mult;
-  if (v >= 1e9) return `$${(v/1e9).toFixed(1)}B`;
-  if (v >= 1e6) return `$${(v/1e6).toFixed(0)}M`;
-  return `$${v.toLocaleString()}`;
+  if (n === null || n === undefined || n === "") return null;
+  const raw = typeof n === "number" ? n : Number(String(n).replace(/[,\s]/g, ""));
+  if (!isFinite(raw)) return null;
+  if (raw === 0) return "$0";
+  const v = raw * moneyMultiplier(unit);
+  const sign = v < 0 ? "-" : "";
+  const a = Math.abs(v);
+  if (a >= 1e12) return `${sign}$${(a/1e12).toFixed(1)}T`;
+  if (a >= 1e9) return `${sign}$${(a/1e9).toFixed(1)}B`;
+  if (a >= 1e6) return `${sign}$${(a/1e6).toFixed(0)}M`;
+  return `${sign}$${a.toLocaleString()}`;
 }
+function fmtAssets(n, unit) { return fmtMoney(n, unit); }
+
+/* A money SERIES expressed in one magnitude.
+
+   A chart draws one axis, so its points have to share a suffix — six bars
+   labelled $8.8B, $9.6B, $9.7B are comparable and six labelled
+   $8825600137 … $9687804914 are not readable at all. The producer states
+   the magnitude either way it likes ("6.5 USD billions" or "9687804914
+   USD"); this turns both into the same shape — values expressed in the
+   returned suffix — so the renderer never has to know which was sent.
+
+   Rounding matches `fmtMoney` exactly (one decimal at B and T, none at M),
+   so a bar label built by interpolation and one built by calling fmtMoney
+   read identically. Returns {values, unit}; values keep their nulls, so an
+   undated point stays absent rather than becoming a zero-height bar. */
+function scaleMoneySeries(values, unit) {
+  const base = moneyMultiplier(unit);
+  const list = (values || []).map(v => {
+    if (v === null || v === undefined || v === "") return null;
+    const n = typeof v === "number" ? v : Number(String(v).replace(/[,\s]/g, ""));
+    return isFinite(n) ? n : null;
+  });
+  const mags = list.filter(v => v !== null).map(v => Math.abs(v) * base).filter(v => v > 0);
+  if (!mags.length) return { values: list, unit: "" };
+  const top = Math.max(...mags);
+  const step = top >= 1e12 ? { d: 1e12, s: "T", p: 1 }
+             : top >= 1e9 ? { d: 1e9, s: "B", p: 1 }
+             : top >= 1e6 ? { d: 1e6, s: "M", p: 0 }
+             : { d: 1, s: "", p: 0 };
+  return {
+    values: list.map(v => v === null ? null : Number((v * base / step.d).toFixed(step.p))),
+    unit: step.s,
+  };
+}
+
+/* A number the payload may not have written as one.
+
+   `Number("more than 800")` is NaN, and the firmographics panel dropped the
+   whole Employees row on that — a headcount the run states, cited and
+   badged UNVERIFIED, rendered as though nobody had asked. A value that will
+   not coerce is not absent: it is a STATED figure written in words, and the
+   reader is owed it.
+
+   Returns a Number when the text is a number (thousands separators and a
+   stray currency symbol included), the trimmed TEXT when it is not, and
+   null only when there is genuinely nothing there. Callers that need a
+   number test `typeof x === "number"`. */
+function numOrText(v) {
+  if (v === null || v === undefined) return null;
+  if (typeof v === "number") return isFinite(v) ? v : null;
+  if (typeof v === "boolean") return String(v);
+  const s = String(v).trim();
+  if (!s) return null;
+  const n = Number(s.replace(/[,\s$]/g, ""));
+  return isFinite(n) ? n : s;
+}
+
+/* A count, with separators when it is one and in the producer's own words
+   when it is not. "246291" -> "246,291"; "more than 800" -> "more than 800";
+   nothing stated -> null, and the caller renders its gap. */
+function fmtCount(v) {
+  const x = numOrText(v);
+  if (x === null) return null;
+  return typeof x === "number" ? x.toLocaleString() : x;
+}
+
+/* A {value, unit} pair as one readable string.
+
+   The firmographics passthrough printed `${value} ${unit}` for every field
+   it had no pinned row for, which is right for "246291 members" and wrong
+   for "8051646636 USD" — the same figure the pinned Assets row above it was
+   already rendering as $9.7B. The unit decides: money abbreviates, a
+   percentage takes its sign, and anything else keeps the producer's words. */
+function fmtFieldValue(value, unit) {
+  if (value === null || value === undefined || value === "") return null;
+  const u = String(unit == null ? "" : unit);
+  const x = numOrText(value);
+  if (x === null) return null;
+  // Prose — "more than 800", "Valencia, California" — is stated, not
+  // measured. It renders as written; a unit glued onto it reads as a label.
+  if (typeof x !== "number") return String(x);
+  if (isMoneyUnit(u)) return fmtMoney(x, u);
+  if (u === "%" || /^percent(age)?$/i.test(u.trim())) return `${x}%`;
+  return u ? `${x.toLocaleString()} ${u}` : x.toLocaleString();
+}
+
 /* A null percentage used to print "0%" — the one formatter in this file that
    answered "nobody measured this" with a MEASUREMENT. Invariant 9: derived
    values are computed or null, never a default that looks like data. Returns
@@ -1159,7 +1414,11 @@ Object.assign(window, {
   SectionEmpty, SectionEmptyFoot, EnrichmentFlag, EnrichmentGap, findingChipId,
   LoadingScreen, SectionLoader, ConnectionWatcher,
   parseHash, buildHash, navigate, useRoute,
-  fmtDate, fmtAssets, fmtPct, relTime, FreshnessDot, fx, entityMatches,
+  fmtDate, fmtDateLong, fmtDatesInText, toDate,
+  fmtMoney, fmtAssets, moneyMultiplier, isMoneyUnit, scaleMoneySeries,
+  numOrText, fmtCount, fmtFieldValue,
+  humanText, parseMaybeJSON, looksSerialised, asText,
+  fmtPct, relTime, FreshnessDot, fx, entityMatches,
   assetUrl, sessionUser, grantedRole, signOutSession,
   useLivePage, useLiveEntity, liveSection, liveSectionState,
 });

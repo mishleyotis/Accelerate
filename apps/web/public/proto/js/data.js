@@ -3002,10 +3002,21 @@
       return sec && Array.isArray(sec.findings) ? sec.findings : [];
     },
     opportunityFor: id => LIVE ? liveField(id, "opportunity") : null,
+    /* The O1 scores SECTION, not the pillar-score map.
+        `entity.pillar_scores` is {P1: 1.6, …} and nothing else, so the four
+       fields that say WHY a bar carries no figure — `proxy_disclosure`,
+       `peer_basis`, `peer_n`, `direction` — reached no renderer at all. On a
+       run whose pillar grain does not resolve, that left four empty grey
+       tracks and a ~900-character promoted explanation nobody could read. */
+    scoresFor: id => LIVE ? liveField(id, "scores") : null,
     /* Per-section provenance for the live run: what promoted, when, by which
        producer version. The prototype states provenance per card, so a card
        asks for its own section rather than the page's. */
     sectionStateFor: key => LIVE ? ((liveEntity() || {}).sectionState || {})[key] || null : null,
+    /* A section's own reasoning trace, keyed `page.section` exactly as
+       `sectionStateFor`. Internal content: the customer payload arrives with
+       it stripped, and the renderer gates on audience regardless. */
+    rLayerFor: key => LIVE ? ((liveEntity() || {}).rLayers || {})[key] || null : null,
     runFor: id => LIVE ? liveField(id, "run") : null,
     startersFor: id => LIVE ? liveField(id, "starters") || [] : [],
     /* The Intelligence panel's LIVE bodies. It used to carry canned prose per
@@ -3045,6 +3056,50 @@
       });
       return out;
     },
-    alertsForEntity: id => buildAlerts().filter(a => a.entity_id === id)
+    /* The run's own thin-evidence alerts.
+        `buildAlerts()` walks `ENTITIES[].subcaps` — the BOOT DIRECTORY, which
+       carries no cell grain at all — so in LIVE it returned `[]` on every run
+       and the health queue printed "0 open alerts" and a green all-clear over
+       the fourteen alerts this run promoted. The run states its own queue on
+       `heatmap.alerts`; that is the source of truth and its length is the
+       count (invariant 8).
+        Only what the producer wrote is carried across. The prototype's alert
+       shape has three fields the contract does not define —
+       `recommended_action`, `proxy_searched`, `subcap_name` — and they stay
+       ABSENT rather than being defaulted: a "PROXY_ESCALATION" badge nobody
+       decided, or a "✓ Searched" tick nobody ran, is a fabricated finding on
+       a client's quality queue. `status` is the one derivation, and it is a
+       reading of the list rather than an addition to it: this section IS the
+       run's open queue, and `runs_open` says how long each row has been on
+       it. The renderer reads `state` (WORKED_ABSENT here) for what the
+       producer actually concluded. */
+    alertsForEntity: id => {
+      if (!LIVE) return buildAlerts().filter(a => a.entity_id === id);
+      return (liveField(id, "alerts") || []).map(a => ({
+        id: `AL-${id}-${a.subcap_id}`,
+        entity_id: id,
+        subcap_id: a.subcap_id || null,
+        severity: a.severity || null,
+        status: "OPEN",
+        state: a.state || null,
+        score: a.score == null ? null : Number(a.score),
+        confidence: a.confidence || null,
+        evidence_count: a.evidence_count == null ? null : Number(a.evidence_count),
+        runs_open: a.runs_open == null ? null : Number(a.runs_open),
+        justification: a.justification || null,
+        closure_condition: a.closure_condition || null,
+        sources_searched: a.sources_searched || [],
+        queries_run: a.queries_run || [],
+        new_evidence_ids: a.new_evidence_ids || []
+      }));
+    },
+    /* The promoted evidence-age panel: one row per cited item, each carrying
+       the date it was published or stated as-of, its age in months and the
+       band that age falls in. The health tracker used to age
+       `DMA.EVIDENCE[].recency`, which the adapter sets to the recency BAND
+       ("CURRENT", "ARCHIVAL"); `new Date("CURRENT")` is an Invalid Date, so
+       all 63 rows read "Not computed" / "NO DATE" including the 22 that
+       carry a published date. */
+    evidenceAgeFor: id => LIVE ? liveField(id, "evidenceAge") || [] : []
   };
 })();

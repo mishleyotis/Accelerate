@@ -2398,6 +2398,87 @@ function SentimentGrid() {
   }, s.label, " \xB7 n=", s.n.toLocaleString()))));
 }
 
+/* ── The evidence-age panel's rows ────────────────────────────────────
+   The tracker aged `DMA.EVIDENCE[].recency`, and the adapter sets `recency`
+   to the recency BAND — "CURRENT", "AGING", "ARCHIVAL" — whenever the record
+   carries one, falling back to the date only when it does not. `new
+   Date("CURRENT")` is an Invalid Date, so every one of the 63 rows printed
+   "Not computed" in the AGE column and "NO DATE" in the STATUS column, the 22
+   that carry both a published date and an age in months included, while the
+   DATE column showed the band word where a date belonged.
+
+   Two reads, in order. A run that promotes the panel outright
+   (`heatmap.evidence_age.rows`) is read first: 26 rows already dated, aged
+   and banded by the producer against the run's own reference date. A run that
+   promoted no panel falls back to the evidence records' own date fields,
+   `published_date` and `age_months` — never to a band word.
+
+   The age is the producer's arithmetic either way, not a fresh subtraction
+   against today's clock: a run's ages are stated against its reference date,
+   and re-deriving them here would drift a month for every month the run sits
+   promoted, so two readers of one promoted run would see two different
+   numbers. A row with no date gets no age and no freshness verdict, because
+   both would be assertions about a date nobody established. */
+function evidenceAgeRows(entity) {
+  const promoted = typeof DMA.evidenceAgeFor === "function" ? DMA.evidenceAgeFor(entity && entity.id) || [] : [];
+  if (promoted.length) {
+    return promoted.map(r => ({
+      id: r.e_id || r.id || null,
+      title: r.title || r.e_id || null,
+      source: r.source_domain || null,
+      date: r.published_or_asof || null,
+      age: r.age_months == null ? null : Number(r.age_months),
+      status: r.status || r.band || null,
+      identity_ok: r.identity_ok === undefined ? null : r.identity_ok
+    })).filter(r => r.id);
+  }
+  return (DMA.EVIDENCE || []).map(e => {
+    // `recency` is the band word when the record has one and the date when it
+    // does not, so it is read only through `calendarValue`, which returns a
+    // date for a calendar value and null for a word. That is the whole defect
+    // in one line: "CURRENT" used to go into `new Date()`.
+    const date = e.published_date || calendarValue(e.recency);
+    const age = e.age_months != null ? Number(e.age_months) : date ? monthsSince(date) : null;
+    return {
+      id: e.id,
+      title: e.title,
+      source: e.source ? String(e.source).split("/")[0] : null,
+      date,
+      age,
+      // The band is the producer's verdict on the date. "UNVERIFIED" is the
+      // ladder's word for "no date to rank this on", not a freshness state,
+      // and a verdict nobody reached is left null rather than derived here
+      // against a threshold no run declares.
+      status: e.recency_band && e.recency_band !== "UNVERIFIED" ? e.recency_band : null,
+      identity_ok: e.identity_ok === undefined ? null : e.identity_ok
+    };
+  }).filter(r => r.id);
+}
+
+/* A calendar value the producer wrote, or null.
+   `2026-06-30`, `2026-06`, `2026-Q2` and `2026` are dates at their own
+   precision and normalise to the first day of the period they name. A recency
+   BAND — CURRENT, AGING, STALE, ARCHIVAL, UNVERIFIED — is a word about a date,
+   not a date, and comes back null however confidently it is handed over. */
+function calendarValue(v) {
+  const s = String(v == null ? "" : v).trim();
+  if (!s) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const q = s.match(/^(\d{4})[-\s]?Q([1-4])$/i);
+  if (q) return `${q[1]}-${String((+q[2] - 1) * 3 + 1).padStart(2, "0")}-01`;
+  if (/^\d{4}-\d{2}$/.test(s)) return `${s}-01`;
+  if (/^\d{4}$/.test(s)) return `${s}-01-01`;
+  return null;
+}
+
+/* Whole months since a stated date is `monthsSince`, already in this file at
+   the issue register — one function per fact, so the age a row shows here and
+   the age a matter shows there cannot round differently. It is only ever
+   reached where the producer stated no `age_months` of its own: a promoted
+   age is the producer's arithmetic against the run's reference date and is
+   never recomputed, so two readers of one promoted run cannot see two
+   numbers. */
+
 /* ── D6 Assessment health ────────────────────────────────────────── */
 function ClientHealth({
   entity,
@@ -2411,6 +2492,14 @@ function ClientHealth({
   } = useApp();
   const [tab, setTab] = useState("alerts");
   const alerts = DMA.alertsForEntity(entity.id);
+  /* A cell id is not a capability name. The alert contract carries
+     `subcap_id` and no name, and the run's own cell grain names all 705, so
+     the queue resolves the name from the grid rather than printing a
+     taxonomy code at a reader or inventing a label. */
+  const subcapName = sid => {
+    const s = (entity.subcaps || []).find(x => x.id === sid);
+    return s && s.name && s.name !== s.id ? s.name : null;
+  };
   const [compareBase, setCompareBase] = useState(entity.runs[1]?.id);
   const [compareTarget, setCompareTarget] = useState(entity.runs[0]?.id);
   if (audience === "customer" || role !== "ANALYST" && role !== "ADMIN") {
@@ -2429,7 +2518,11 @@ function ClientHealth({
     className: "eyebrow"
   }, "Assessment health"), /*#__PURE__*/React.createElement("h1", null, "Quality & controls"), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, alerts.length, " open alerts \xB7 ", DMA.QA_GATES.filter(g => g.status === "FAIL").length, " failing gates \xB7 ", entity.runs.length, " runs in history")), /*#__PURE__*/React.createElement("div", {
+  }, (() => {
+    const failing = DMA.QA_GATES.filter(g => g.status === "FAIL").length;
+    const runs = entity.runs.length;
+    return `${alerts.length} open alert${alerts.length === 1 ? "" : "s"}` + ` · ${failing} failing gate${failing === 1 ? "" : "s"}` + ` · ${runs} run${runs === 1 ? "" : "s"} in history`;
+  })())), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
@@ -2455,94 +2548,163 @@ function ClientHealth({
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
-  }, /*#__PURE__*/React.createElement("h3", null, "Thin-evidence alerts"), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Thin-evidence alerts"), alerts.length ? /*#__PURE__*/React.createElement("span", {
     className: "b b-org"
-  }, alerts.length, " open")), /*#__PURE__*/React.createElement("table", {
+  }, alerts.length, " open") : null), alerts.length ? /*#__PURE__*/React.createElement("table", {
     className: "tbl"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Severity"), /*#__PURE__*/React.createElement("th", null, "Subcap"), /*#__PURE__*/React.createElement("th", null, "Evidence"), /*#__PURE__*/React.createElement("th", null, "Action"), /*#__PURE__*/React.createElement("th", null, "Proxy"), /*#__PURE__*/React.createElement("th", {
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
     style: {
-      textAlign: "right"
+      width: 80
     }
-  }, "Status"))), /*#__PURE__*/React.createElement("tbody", null, alerts.map(a => /*#__PURE__*/React.createElement("tr", {
-    key: a.id
-  }, /*#__PURE__*/React.createElement("td", {
-    "data-label": "Severity"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: `b ${a.severity === "HIGH" ? "b-below" : "b-org"}`
-  }, a.severity)), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Subcap"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, "Severity"), /*#__PURE__*/React.createElement("th", {
     style: {
-      fontSize: 12,
-      fontWeight: 500
+      width: 190
     }
-  }, a.subcap_name), /*#__PURE__*/React.createElement("div", {
-    className: "f-mono",
+  }, "Sub-capability"), /*#__PURE__*/React.createElement("th", {
     style: {
-      fontSize: 10,
-      color: "var(--z-muted)"
+      width: 76
     }
-  }, a.subcap_id)), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Evidence"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, "Cited"), /*#__PURE__*/React.createElement("th", {
     style: {
-      fontSize: 12
+      width: 118
     }
-  }, a.evidence_count, " / 3"), /*#__PURE__*/React.createElement("div", {
-    className: "prog",
+  }, "State"), /*#__PURE__*/React.createElement("th", null, "Why it is flagged, and what would close it"), /*#__PURE__*/React.createElement("th", {
     style: {
-      marginTop: 4,
-      width: 80,
-      height: 4
+      textAlign: "right",
+      width: 140
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "prog-fill",
+  }, "Queue"))), /*#__PURE__*/React.createElement("tbody", null, alerts.map(a => {
+    const name = subcapName(a.subcap_id);
+    const searched = a.sources_searched || [];
+    const queries = a.queries_run || [];
+    return /*#__PURE__*/React.createElement("tr", {
+      key: a.id
+    }, /*#__PURE__*/React.createElement("td", {
+      "data-label": "Severity"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `b ${a.severity === "HIGH" ? "b-below" : a.severity === "LOW" ? "b-muted" : "b-org"}`
+    }, a.severity || "not stated")), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Sub-capability"
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        fontWeight: 500
+      }
+    }, name || /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--z-muted)",
+        fontStyle: "italic"
+      }
+    }, "unnamed in catalogue")), /*#__PURE__*/React.createElement("div", {
+      className: "f-mono",
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)"
+      }
+    }, a.subcap_id, a.score != null ? ` · ${fx(a.score, 1)}` : "", a.confidence ? ` · ${a.confidence}` : "")), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Cited"
+    }, a.evidence_count == null ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--z-muted)",
+        fontSize: 11
+      }
+    }, "not stated") : /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12
+      }
+    }, a.evidence_count, " item", a.evidence_count === 1 ? "" : "s")), /*#__PURE__*/React.createElement("td", {
+      "data-label": "State"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "b b-purple"
+    }, String(a.state || "OPEN").replace(/_/g, " ")), a.runs_open != null ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)",
+        marginTop: 3
+      }
+    }, "open ", a.runs_open, " run", a.runs_open === 1 ? "" : "s") : null), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Why"
+    }, a.justification ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: "var(--z-body)",
+        lineHeight: 1.5
+      }
+    }, a.justification) : null, a.closure_condition ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-muted)",
+        lineHeight: 1.5,
+        marginTop: 4
+      }
+    }, /*#__PURE__*/React.createElement("strong", {
+      style: {
+        color: "var(--z-body)"
+      }
+    }, "Closes when \xB7 "), a.closure_condition) : null, searched.length || queries.length ? /*#__PURE__*/React.createElement("details", {
+      style: {
+        marginTop: 5
+      }
+    }, /*#__PURE__*/React.createElement("summary", {
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-mid)",
+        cursor: "pointer"
+      }
+    }, searched.length, " source", searched.length === 1 ? "" : "s", " searched", queries.length ? ` · ${queries.length} quer${queries.length === 1 ? "y" : "ies"} run` : ""), /*#__PURE__*/React.createElement("ul", {
+      style: {
+        margin: "5px 0 0 15px",
+        padding: 0
+      }
+    }, searched.map((s, i) => /*#__PURE__*/React.createElement("li", {
+      key: `s${i}`,
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-muted)",
+        lineHeight: 1.5,
+        marginBottom: 3
+      }
+    }, asText(s))), queries.map((q, i) => /*#__PURE__*/React.createElement("li", {
+      key: `q${i}`,
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-muted)",
+        lineHeight: 1.5,
+        marginBottom: 3
+      }
+    }, "Query \xB7 ", asText(q))))) : null), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Queue",
+      style: {
+        textAlign: "right"
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-tertiary btn-sm",
+      onClick: () => pushToast(`${a.subcap_id} moved to IN_REVIEW`, "success")
+    }, "In review"), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-tertiary btn-sm",
+      onClick: () => pushToast(`${a.subcap_id} waived — add rationale before close`, "warn")
+    }, "Waive")));
+  }))) :
+  /*#__PURE__*/
+  /* No tick, no coverage claim. An empty queue is a statement about
+     the queue, and the section's own empty_state says why it is
+     empty when the producer wrote one. */
+  React.createElement("div", {
     style: {
-      width: `${a.evidence_count / 3 * 100}%`,
-      background: "var(--z-org)"
+      padding: "14px 16px"
     }
-  }))), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Action"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "b b-purple"
-  }, a.recommended_action)), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Proxy"
-  }, a.proxy_searched ? /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement(SectionEmpty, {
+    section: "heatmap.alerts",
+    absent: "This run promoted no thin-evidence alert queue, so there is nothing to work here. It is not a statement about evidence coverage \u2014 the coverage panel states that separately.",
+    empty: "The run promoted an alert queue with no rows in it."
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
-      color: "var(--z-mid)",
-      fontSize: 11
+      padding: "0 16px 12px"
     }
-  }, "\u2713 Searched") : /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: "var(--z-org)",
-      fontSize: 11
-    }
-  }, "Not yet")), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Status",
-    style: {
-      textAlign: "right"
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-tertiary btn-sm",
-    onClick: () => pushToast(`${a.subcap_id} moved to IN_REVIEW`, "success")
-  }, "In review"), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-tertiary btn-sm",
-    onClick: () => pushToast(`${a.subcap_id} waived — add rationale before close`, "warn")
-  }, "Waive")))), alerts.length === 0 ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
-    colSpan: 6,
-    className: "tbl-empty"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "var(--z-mid)",
-      fontSize: 13,
-      fontWeight: 500
-    }
-  }, "\u2713 No open alerts"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      marginTop: 4
-    }
-  }, "Evidence coverage meets the minimum threshold."))) : null))) : tab === "diff" ? /*#__PURE__*/React.createElement(VersionDiff, {
+  }, /*#__PURE__*/React.createElement(SectionEmptyFoot, {
+    section: "heatmap.alerts",
+    title: "What this queue does not cover"
+  }))) : tab === "diff" ? /*#__PURE__*/React.createElement(VersionDiff, {
     entity: entity,
     baseId: compareBase,
     targetId: compareTarget,
@@ -2663,72 +2825,116 @@ function ClientHealth({
       ids: c.e_ids,
       openEvidence: openEvidence
     })) : null)))))) : null);
-  })()) : tab === "age" ? /*#__PURE__*/React.createElement("div", {
-    className: "card flush"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card-head"
-  }, /*#__PURE__*/React.createElement("h3", null, "Evidence age tracker")), /*#__PURE__*/React.createElement("table", {
-    className: "tbl"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Evidence"), /*#__PURE__*/React.createElement("th", null, "Source"), /*#__PURE__*/React.createElement("th", null, "Date"), /*#__PURE__*/React.createElement("th", null, "Age"), /*#__PURE__*/React.createElement("th", {
-    style: {
-      textAlign: "right"
-    }
-  }, "Status"))), /*#__PURE__*/React.createElement("tbody", null, DMA.EVIDENCE.map(e => {
-    // Age is computed or null — never NaN, and never computed
-    // from a date that is not there. An item whose recency is
-    // absent gets no age and no freshness verdict, because both
-    // would be assertions about a date nobody established.
-    const raw = typeof e.recency === "string" ? e.recency : null;
-    const parsed = raw ? new Date(raw.replace("Q1", "-01-01").replace("Q2", "-04-01").replace("Q3", "-07-01").replace("Q4", "-10-01")) : null;
-    const age = parsed && !isNaN(parsed) ? Math.round((new Date() - parsed) / (1000 * 60 * 60 * 24 * 30.4)) : null;
-    const stale = age === null ? null : age > 18;
-    return /*#__PURE__*/React.createElement("tr", {
-      key: e.id
+  })()) : tab === "age" ? (() => {
+    const rows = evidenceAgeRows(entity);
+    // Both header figures are COUNTED from the rows on screen, not read
+    // from the promoted `stale_pct` / `undated_pct` (invariant 8: a
+    // count is computed where a source of truth exists). They reproduce
+    // the promoted pair exactly on this run — 4/26 = 15.4, 5/26 = 19.2.
+    const dated = rows.filter(r => r.date);
+    const stale = rows.filter(r => String(r.status || "").toUpperCase() === "STALE");
+    const pct = n => rows.length ? `${(n / rows.length * 100).toFixed(1)}%` : null;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card flush"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("h3", null, "Evidence age tracker"), rows.length ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-muted)"
+      }
+    }, rows.length, " row", rows.length === 1 ? "" : "s", " \xB7 ", dated.length, " dated \xB7", " ", pct(stale.length), " stale \xB7 ", pct(rows.length - dated.length), " undated") : null), rows.length ? /*#__PURE__*/React.createElement("table", {
+      className: "tbl"
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Evidence"), /*#__PURE__*/React.createElement("th", null, "Source"), /*#__PURE__*/React.createElement("th", null, "Date"), /*#__PURE__*/React.createElement("th", null, "Age"), /*#__PURE__*/React.createElement("th", {
+      style: {
+        textAlign: "right"
+      }
+    }, "Status"))), /*#__PURE__*/React.createElement("tbody", null, rows.map(r => /*#__PURE__*/React.createElement("tr", {
+      key: r.id
     }, /*#__PURE__*/React.createElement("td", {
       "data-label": "Evidence"
     }, /*#__PURE__*/React.createElement("span", {
       className: "chip"
-    }, e.id), " ", /*#__PURE__*/React.createElement("span", {
+    }, r.id), /*#__PURE__*/React.createElement("span", {
       style: {
         marginLeft: 6
       }
-    }, e.title)), /*#__PURE__*/React.createElement("td", {
+    }, r.title), r.identity_ok === false ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-below",
+      style: {
+        marginLeft: 6
+      },
+      title: "this row was checked against the entity and did not match"
+    }, "FOREIGN") : null), /*#__PURE__*/React.createElement("td", {
       "data-label": "Source",
       className: "f-mono",
       style: {
         fontSize: 10,
         color: "var(--z-muted)"
       }
-    }, e.source.split("/")[0]), /*#__PURE__*/React.createElement("td", {
+    }, r.source), /*#__PURE__*/React.createElement("td", {
       "data-label": "Date"
-    }, raw || /*#__PURE__*/React.createElement(EnrichmentGap, {
+    }, r.date ? fmtDate(r.date) : /*#__PURE__*/React.createElement(EnrichmentGap, {
       what: "Evidence date",
       audience: audience,
       compact: true
     })), /*#__PURE__*/React.createElement("td", {
       "data-label": "Age"
-    }, age === null ? /*#__PURE__*/React.createElement("span", {
+    }, r.age == null ? /*#__PURE__*/React.createElement("span", {
       style: {
         color: "var(--z-muted)",
         fontStyle: "italic"
       }
-    }, "Not computed") : `${age} mo`), /*#__PURE__*/React.createElement("td", {
+    }, "no date to age") : `${r.age} mo`), /*#__PURE__*/React.createElement("td", {
       "data-label": "Status",
       style: {
         textAlign: "right"
       }
-    }, stale === null ? /*#__PURE__*/React.createElement("span", {
-      className: "b b-muted"
-    }, "NO DATE") : /*#__PURE__*/React.createElement("span", {
-      className: `b ${stale ? "b-org" : "b-teal"}`
-    }, stale ? "STALE" : "FRESH")));
-  })))) : /*#__PURE__*/React.createElement("div", {
+    }, (() => {
+      const s = String(r.status || "").toUpperCase();
+      if (!s) return r.date ? null : /*#__PURE__*/React.createElement("span", {
+        className: "b b-muted"
+      }, "undated");
+      const cls = s === "FRESH" || s === "CURRENT" ? "b-teal" : s === "STALE" || s === "ARCHIVAL" ? "b-org" : s === "UNDATED" ? "b-muted" : "b-purple";
+      return /*#__PURE__*/React.createElement("span", {
+        className: `b ${cls}`
+      }, s);
+    })()))))) : /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "14px 16px"
+      }
+    }, sectionReason("heatmap.evidence_age").stub ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: "var(--z-muted)",
+        lineHeight: 1.55
+      }
+    }, "This run promoted no evidence-age panel, and its evidence records carry no dates to age.") : /*#__PURE__*/React.createElement(SectionEmpty, {
+      section: "heatmap.evidence_age"
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "0 16px 12px"
+      }
+    }, /*#__PURE__*/React.createElement(SectionEmptyFoot, {
+      section: "heatmap.evidence_age",
+      title: "Rows this panel does not carry"
+    })));
+  })() :
+  /*#__PURE__*/
+  /* ── Cross-entity patterns ──────────────────────────────────────
+     `DMA.PATTERNS` is the prototype's fixture list and is `[]` in LIVE,
+     and this table had no empty branch at all: the card rendered a
+     header, a "≥60% threshold" badge and then nothing, with no word
+     about why. The reason is a real one and the section states it — a
+     cohort needs five promoted runs in the same sub-vertical and the
+     corpus holds two — so the reason renders where the rows would be. */
+  React.createElement("div", {
     className: "card flush"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
-  }, /*#__PURE__*/React.createElement("h3", null, "Cross-entity patterns"), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Cross-entity patterns"), DMA.PATTERNS.length ? /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
-  }, "\u226560% threshold")), /*#__PURE__*/React.createElement("table", {
+  }, "\u226560% threshold") : null), DMA.PATTERNS.length ? /*#__PURE__*/React.createElement("table", {
     className: "tbl"
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Subvertical"), /*#__PURE__*/React.createElement("th", null, "Category"), /*#__PURE__*/React.createElement("th", null, "Pattern"), /*#__PURE__*/React.createElement("th", null, "Count"), /*#__PURE__*/React.createElement("th", {
     style: {
@@ -2756,7 +2962,27 @@ function ClientHealth({
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => pushToast(`Drafting outreach campaign · ${p.title}`, "success")
-  }, "Build campaign \u2192"))))))));
+  }, "Build campaign \u2192")))))) :
+  /*#__PURE__*/
+  /* The producer's own reason for this section — its cohort floor,
+     its two sources searched, its closure condition — is written and
+     destroyed at promote (see `sectionReason`). Until the writer
+     persists an envelope-only row, the floor renders from the rule
+     rather than from the plumbing sentence the serving tier
+     substitutes. */
+  React.createElement("div", {
+    style: {
+      padding: "14px 16px"
+    }
+  }, sectionReason("heatmap.cohort_patterns").stub ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      lineHeight: 1.55
+    }
+  }, "No cross-entity pattern is published for this run. A cohort is published only where five promoted runs in the same sub-vertical carry a served score for the same category; cohorts are never pooled across sub-verticals, and one below the floor is withheld rather than shown thin.") : /*#__PURE__*/React.createElement(SectionEmpty, {
+    section: "heatmap.cohort_patterns"
+  }))));
 }
 function VersionDiff({
   entity,
@@ -3488,6 +3714,18 @@ function techRowSources(t) {
     citedTo
   };
 }
+
+/* The catalogue's own name for a cell, from the run's served grain.
+   A cell id is a taxonomy code, not a capability name: the register printed
+   `P4C3.2.1 P4C3.2.2 P4C3.3.1 P3C1.2.2` under every product and asked a
+   reader to know what those are (T-05). The run names all 705 of them on the
+   grain read — the same lookup the detail sub-page has always made — so the
+   name is READ, never guessed, and a cell this run did not score falls back
+   to its bare id rather than to an invented label. */
+function techCellName(entity, sid) {
+  const s = (entity && entity.subcaps || []).find(x => x.id === sid);
+  return s && s.name && s.name !== s.id ? s.name : null;
+}
 function TechRow({
   t,
   entity,
@@ -3603,10 +3841,19 @@ function TechRow({
       marginTop: 6,
       flexWrap: "wrap"
     }
-  }, t.subcaps_impact.map(s => /*#__PURE__*/React.createElement("span", {
-    key: s,
-    className: "chip"
-  }, s))) : null), /*#__PURE__*/React.createElement("div", {
+  }, t.subcaps_impact.map(s => {
+    const nm = techCellName(entity, s);
+    return /*#__PURE__*/React.createElement("span", {
+      key: s,
+      className: "chip",
+      title: nm ? `${nm} · ${s}` : `${s} — this run serves no name for this cell`
+    }, nm ? /*#__PURE__*/React.createElement(React.Fragment, null, nm, " · ", /*#__PURE__*/React.createElement("span", {
+      className: "f-mono",
+      style: {
+        opacity: .62
+      }
+    }, s)) : s);
+  })) : null), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -3922,7 +4169,7 @@ function ClientTechStackDetail({
     className: "spacer"
   }), /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
-  }, t.evidence.length || 0, " items")), t.evidence.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, t.evidence.length || 0, " item", t.evidence.length === 1 ? "" : "s")), t.evidence.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: "var(--z-muted)",
@@ -4486,5 +4733,7 @@ Object.assign(window, {
   ClientHealth,
   ClientTechStack,
   ClientTechStackDetail,
-  ClientRuns
+  ClientRuns,
+  evidenceAgeRows,
+  calendarValue
 });

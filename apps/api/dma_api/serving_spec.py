@@ -164,6 +164,18 @@ def assemble(page: str, section: str, rows: list[dict]) -> dict | None:
                 if col in row:
                     _set_path(item, key, _json_maybe(row[col]))
             take_derived(row, item)
+            # An ENVELOPE-ONLY row is not an item.
+            #
+            # A section that promoted with an empty collection now leaves one
+            # row carrying its envelope and nothing else, so that its
+            # `empty_state` — the producer's account of why there is nothing
+            # to publish — survives promote instead of being indistinguishable
+            # from a section that never promoted at all. Read as an item it
+            # would become a row of pure nulls in the collection: a cohort
+            # pattern with no statement, a workbook score with no cell. The
+            # envelope was already taken above; the row contributes no item.
+            if all(row.get(col) is None for col in r["item_cols"]):
+                continue
             items.append(item)
         # item_field can be a dotted path (`ladder.steps`) — the payload nests
         # it, so the reader must too. Assigning the dotted string as a literal

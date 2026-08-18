@@ -373,6 +373,20 @@ def techstack_layers(cur, data: dict, run_id, catalog_version) -> None:
         n = None if pillar in shared else expected.get(pillar)
         out.append({
             "layer": layer, "pillar_id": pillar, "detected": detected,
+            # The word carries a definition, and this surface has two
+            # candidates for it: rows corroborated to CONFIRMED or INFERRED
+            # (this one, and the one that renders), and rows that place a
+            # product at any confidence — every status except ABSENT — which
+            # is what the page's own rollup and the landscape tiles count.
+            # On the reference run they differ 1 against 10. Stating which
+            # one this number is does not resolve which one SHOULD render;
+            # that is an open adjudication (guide T-03 / DNR-6 against this
+            # module's own test), and until it is settled the number says
+            # what it counted rather than leaving a reader to infer it.
+            "detected_basis": "register rows in this layer corroborated to "
+                              "CONFIRMED or INFERRED; a CLAIMED row names a "
+                              "product without corroborating it and is not "
+                              "counted here",
             "expected": n,
             "expected_basis": (
                 f"cells in {pillar} carrying a platform vocabulary "

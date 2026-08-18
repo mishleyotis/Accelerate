@@ -725,7 +725,16 @@ _CELL_ID_RE = re.compile(r"^P\d+C\d+\.")
 # Membership, not shape: a key is a cell link or it is not, and the value
 # may be one id or a list of them. The id regex still decides what counts,
 # so a key that happens to carry prose contributes nothing.
-_CELL_KEYS = ("capability_ids", "subcaps")
+# `affects` is the fourth spelling and it was invisible here. Measured
+# 2026-08-18 on a promoted run: an adversarial pass injected P1C1.3.BK1 (a
+# retail-bank variant cell) and P1C9.9.9 (no such cell in any catalogue) into
+# insights.cards[0].affects, and BOTH the connector's pass 2 and the local
+# checker returned zero blocking; the same two ids in
+# heatmap.focus_areas[*].involved_subcap_ids produced two CG-14 refusals in
+# each. The field carries 32 cell ids on that run and every one of them was
+# correct, which is the point: its green check could not have been red, so it
+# was never evidence about anything. ET-05 was blind to it on the same route.
+_CELL_KEYS = ("capability_ids", "subcaps", "affects")
 
 
 def _is_cell_key(key: str) -> bool:
@@ -1197,17 +1206,45 @@ def band_for(raw) -> str | None:
 
 def _served_figures(conn, run_id) -> dict:
     """Every figure the run serves, by grain id: subcaps from
-    subcap_scores, pillar/category from the workbook's STATED grains."""
+    subcap_scores, pillar/category from the workbook's STATED grains, and —
+    only where the workbook states none — the mean of the run's own scored
+    cells at that grain.
+
+    The computed fallback exists because CG-07's rejection branch refuses a
+    quoted figure whose grain "cannot be checked". On a run whose ingestion
+    carried no pillar or category rollup row, that was true of every pillar
+    figure, so the four bars on the first card of the first page could carry
+    no number at all — while the same run served all 705 cells the mean is
+    taken over, and `bundle.rollups.capabilities` already publishes exactly
+    this arithmetic one grain lower ("capabilities are computed and say so").
+    Deriving the mean here removes the premise rather than the gate: the
+    figure becomes checkable, and a producer quoting a DIFFERENT weighting
+    (an assessment report's own pillar table, say) is now caught at 0.05
+    instead of passing unexamined because nothing could be compared.
+
+    A STATED grain always wins. A struck workbook figure is the source of
+    truth wherever one exists, and is never overridden by a derived one.
+    """
     cur = conn.cursor()
     served = {}
+    cells: dict[str, list] = {}
     cur.execute("SELECT subcap_id, score FROM subcap_scores WHERE run_id = %s",
                 (run_id,))
     for sid, score in cur.fetchall():
-        if score is not None:
-            served[sid] = float(score)
+        if score is None:
+            continue
+        served[sid] = float(score)
+        # P1C2.7.3 -> category P1C2 -> pillar P1. Grains are read off the id
+        # rather than a join: the id IS the taxonomy path.
+        head = sid.split(".", 1)[0]
+        if _CATEGORY_RE.match(head):
+            cells.setdefault(head, []).append(float(score))
+            cells.setdefault(head[:head.index("C")], []).append(float(score))
     cur.execute("SELECT payload FROM run_manifest WHERE run_id = %s", (run_id,))
     payload = (cur.fetchone() or [None])[0] or {}
     grains = payload.get("workbook_grains") or {}
+    for gid, scores in cells.items():
+        served[gid] = sum(scores) / len(scores)
     for p in grains.get("pillars") or []:
         if p.get("score") is not None:
             served[p["pillar_id"]] = float(p["score"])

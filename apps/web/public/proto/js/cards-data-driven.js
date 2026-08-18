@@ -289,6 +289,19 @@ function SentimentCard({
   })));
 }
 
+/* The footer's two counts, each rendered only where the run states one.
+
+   `${f.branches} branches · ${employees.toLocaleString()} FTE` asserted both
+   unconditionally: a run with no branch count printed "null branches", and a
+   headcount stated in words ("more than 800") threw on `.toLocaleString()`
+   of a NaN-coerced null and took the card down to its boundary. `fmtCount`
+   renders a number with separators and a stated-in-words figure as the words
+   the producer wrote; a count nobody stated contributes nothing. */
+function footerCounts(f) {
+  const emp = (f.employees || [])[(f.employees || []).length - 1];
+  return [fmtCount(f.branches) != null ? `${fmtCount(f.branches)} branches` : null, fmtCount(emp) != null ? `${fmtCount(emp)} FTE` : null].filter(Boolean).join(" · ") || null;
+}
+
 /* ── Financial trajectory ──────────────────────────────────────────────
    SOURCE: 00_entity_profile/financial_baseline.json + entity_profile.json */
 function FinancialTrajectoryCard({
@@ -357,7 +370,7 @@ function FinancialTrajectoryCard({
       className: "chip"
     }, f.regulator), /*#__PURE__*/React.createElement("span", null, f.geography), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
-    }), /*#__PURE__*/React.createElement("span", null, f.branches, " branches \xB7 ", f.employees[f.employees.length - 1].toLocaleString(), " FTE"))));
+    }), /*#__PURE__*/React.createElement("span", null, footerCounts(f)))));
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
@@ -383,37 +396,40 @@ function FinancialTrajectoryCard({
       gap: 10,
       height: 120
     }
-  }, f.fy.map((y, i) => /*#__PURE__*/React.createElement("div", {
-    key: y,
-    style: {
-      flex: 1,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 5
-    },
-    title: `${y} · $${f.total_assets[i]}${f.unit} · NIM ${f.nim_pct[i]}%`
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10.5,
-      fontWeight: 600,
-      color: "var(--z-dark)"
-    }
-  }, "$", f.total_assets[i], f.unit), /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: "100%",
-      height: `${f.total_assets[i] / maxA * 80}px`,
-      background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))",
-      borderRadius: "4px 4px 0 0",
-      transition: "height var(--motion-slow) var(--ease)"
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "f-mono",
-    style: {
-      fontSize: 9.5,
-      color: "var(--z-muted)"
-    }
-  }, y.replace("FY", "'"))))), /*#__PURE__*/React.createElement("div", {
+  }, f.fy.map((y, i) => {
+    const money = fmtMoney(f.total_assets[i], f.unit);
+    return /*#__PURE__*/React.createElement("div", {
+      key: y,
+      style: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 5
+      },
+      title: [y, money, f.nim_pct[i] != null ? `NIM ${f.nim_pct[i]}%` : null].filter(Boolean).join(" · ")
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10.5,
+        fontWeight: 600,
+        color: "var(--z-dark)"
+      }
+    }, money), /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: "100%",
+        height: `${(f.total_assets[i] || 0) / maxA * 80}px`,
+        background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))",
+        borderRadius: "4px 4px 0 0",
+        transition: "height var(--motion-slow) var(--ease)"
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "f-mono",
+      style: {
+        fontSize: 9.5,
+        color: "var(--z-muted)"
+      }
+    }, y.replace("FY", "'")));
+  })), /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       marginTop: 10,
@@ -426,7 +442,7 @@ function FinancialTrajectoryCard({
     className: "chip"
   }, f.regulator), /*#__PURE__*/React.createElement("span", null, f.geography), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, f.branches, " branches \xB7 ", f.employees[f.employees.length - 1].toLocaleString(), " FTE"))));
+  }), /*#__PURE__*/React.createElement("span", null, footerCounts(f)))));
 }
 
 /* ── Coverage by pillar ─────────────────────────────────────────────────

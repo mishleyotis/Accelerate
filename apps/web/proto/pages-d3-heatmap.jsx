@@ -121,6 +121,39 @@ function workbookScoresOf(entity) {
   return (reg && reg.workbookScores) || null;
 }
 
+/* ── Is a section's empty state a REASON, or the serving tier's stub? ────
+   `SectionEmpty` renders whatever `empty_state` the section carries, and two
+   sections on this run carry the SERVING TIER's stub rather than the
+   producer's account:
+
+     {kind: "section_not_promoted", reason: "no serving row for this run",
+      sources_searched: []}
+
+   That is what `pages.py` writes when `assemble` returns None, and `assemble`
+   returns None whenever the writer persisted zero rows — which is exactly
+   what a section with an EMPTY COLLECTION does. So *promoted with nothing in
+   it* and *never promoted* are indistinguishable downstream, and the reason
+   the producer wrote for `workbook_scores` (and for `cohort_patterns`) is
+   discarded at promote. The durable fix is an envelope-only serving row; on
+   this side of the wire, a reader must not be handed the plumbing sentence
+   "no serving row for this run" where a reason belongs.
+
+   Returns `stub: true` when the state carries nothing a reader could act on,
+   and the caller then renders its own honest sentence. When the serving tier
+   starts carrying the producer's state through, `stub` goes false on its own
+   and the producer's words render with no further change at the call site. */
+function sectionReason(key) {
+  const state = (typeof DMA !== "undefined" && typeof DMA.sectionStateFor === "function")
+    ? DMA.sectionStateFor(key) : null;
+  const es = (state && state.empty_state) || null;
+  const reason = (es && typeof es.reason === "string") ? es.reason.trim() : "";
+  const stub = !es
+    || (!es.closure_condition
+        && !((es.sources_searched || []).length)
+        && (!reason || /^no serving row for this run\.?$/i.test(reason)));
+  return { state, es, stub };
+}
+
 /* The contract allows either shape for the workbook tables: an id-keyed object
    ({"P1C1": {score…}}, which is what the API sends) or a list of rows carrying
    their own id. Both become a list of rows with `id`. */
@@ -297,12 +330,21 @@ function ClientHeatmap({ entity, run }) {
   // it, so a cell chip clicked anywhere else landed on the heatmap's default
   // view and the cell it named never opened. Consume it — the drawer opens on
   // the named cell when this run scored it, and an unknown id changes nothing.
+  /* The CELL GRAIN is a second fetch, and it lands after the entity does.
+     With `[route.params.subcap, entity?.id]` alone this effect ran once, at
+     mount, against an `entity.subcaps` that was still empty — found nothing,
+     and never ran again, because the id it depends on had not changed. So
+     `?subcap=` was consumed by a page that could not yet answer it and every
+     cross-page cell chip still landed on the default view. The arrival of the
+     705 cells is the event this effect is waiting for, so it is in the deps.
+     The count is stable once loaded, and the lookup is a no-op when the id
+     names no cell this run scored, so there is no loop to fall into. */
   useEffect(() => {
     const sid = route.params.subcap;
     if (!sid) return;
     const s = (entity.subcaps || []).find(x => x.id === sid);
     if (s) setSynthSubcap({ kind: "subcap", subcap: s });
-  }, [route.params.subcap, entity?.id]);
+  }, [route.params.subcap, entity?.id, (entity && entity.subcaps || []).length]);
 
   // The run's own category and pillar rows — promoted score, promoted peer
   // median, the cells it scored — including any category the current catalogue
@@ -795,6 +837,10 @@ function CustomizableKpiStrip({ fa, entity }) {
 
 /* ─────────────────────── PILLAR HEATMAP ─────────────────────── */
 function PillarHeatmap({ entity, pillars, setPillarFocus, audience }) {
+  // Does any tile carry a figure? Four that do not is not four separate
+  // absences; it is one section that promoted nothing at this grain, and the
+  // reader is owed that once rather than four times or not at all.
+  const anyScore = (pillars || []).some(p => p.score != null);
   return (
     <div className="card">
       <div className="g4">
@@ -821,7 +867,11 @@ function PillarHeatmap({ entity, pillars, setPillarFocus, audience }) {
               {score != null ? (
                 <div className="prog"><div className="prog-fill" style={{ width: `${score / 5 * 100}%`, background: DMA.helpers.maturityHex(score) }} /></div>
               ) : (
-                <div style={{ fontSize: 11, color: "var(--z-muted)" }}>no pillar score promoted</div>
+                /* The tile says the figure is absent; the card foot says WHY,
+                   once, in the producer's own words. Four tiles each repeating
+                   "no pillar score promoted" and no reason anywhere was a
+                   dead end four times over. */
+                <div style={{ fontSize: 11, color: "var(--z-muted)" }}>no figure at pillar grain</div>
               )}
               <div className="row" style={{ marginTop: 8, fontSize: 11 }}>
                 {peer != null ? (
@@ -848,6 +898,37 @@ function PillarHeatmap({ entity, pillars, setPillarFocus, audience }) {
           );
         })}
       </div>
+      {/* ── Why the four tiles carry no figure ────────────────────────────
+          The pillar grain is `heatmap.workbook_scores`, and on a run where
+          that section serves nothing the zoom rendered four bare chips and
+          four repetitions of "no pillar score promoted" — no reason, no
+          closure condition, no ladder, nothing a reader could act on. The
+          section states its own empty state and it renders here.
+
+          Deliberately NOT a derived mean. The category zoom one click away
+          derives one and this zoom does not, which is a real inconsistency
+          (H-06) and an adjudication about what the grid is allowed to
+          publish — not something to settle by quietly starting to publish a
+          pillar figure the run does not state. */}
+      {!anyScore ? (() => {
+        const { stub } = sectionReason("heatmap.workbook_scores");
+        return (
+        <div style={{ marginTop: 12, borderTop: "1px solid var(--z-sep)", paddingTop: 10 }}>
+          <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase",
+                        letterSpacing: ".06em", marginBottom: 4 }}>
+            Pillar grain
+          </div>
+          {stub ? (
+            <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 }}>
+              This run serves no workbook table at pillar grain, so the four
+              tiles above carry their cell counts and no pillar figure. The
+              scores the run does state are at cell grain — one zoom in, and
+              in every cell drawer.
+            </div>
+          ) : <SectionEmpty section="heatmap.workbook_scores" />}
+        </div>
+        );
+      })() : null}
     </div>
   );
 }
@@ -1707,12 +1788,70 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
                     : `The ids cited by the ${cit.withLists} cell${cit.withLists === 1 ? "" : "s"} in this category that promoted a citation list.`)
                 : `The run promoted no citation list for this ${subcap ? "cell" : "category"}; these are the evidence items the run links to ${subcap ? "it" : "its cells"}.`}
             </div>
-            {linkedEv.length === 0 ? (
-              <div className="co co-org" style={{ marginBottom: 0 }}>
-                <Icon name="warn" size={13} />
-                <div className="co-body">No evidence item directly cites this {subcap ? "subcap" : "category"} in this run — the score is inferred. Treat as provisional until corroborated.</div>
-              </div>
-            ) : linkedEv.map(e => {
+            {linkedEv.length === 0 ? (() => {
+              /* ── The copy has to match the record ─────────────────────────
+                 This box read "No evidence item directly cites this subcap in
+                 this run — the score is inferred. Treat as provisional until
+                 corroborated." on 456 of the 705 cell drawers. On 456 of those
+                 456 the cell's own `provenance` is `declared`: a RECORDED
+                 ABSENCE that names the artefact which would settle the cell,
+                 lists the rungs the run searched for it and states the
+                 condition that would close it. A worked absence is the
+                 opposite of an inference. Telling a client the score was
+                 inferred where the run did the search and found nothing
+                 citable both understates the work and misdescribes the record
+                 — and it is the one sentence a reader would quote back.
+
+                 Only 24 cells on this run are genuinely `inherited`, and that
+                 is where "inferred · provisional" belongs. Where the producer
+                 wrote a provenance SENTENCE rather than one of the two tokens,
+                 that sentence renders as written: it is their own account of
+                 how the cell came by its reading, and no paraphrase of it here
+                 could be more accurate.
+
+                 The ladder renders with it. The section's own empty_state
+                 promises the reader "the cell, the artefact that would settle
+                 it, and the ladder that was run"; the first two arrived and
+                 the third did not. */
+              const cell = cit.cell || null;
+              const prov = (cell && typeof cell.provenance === "string") ? cell.provenance.trim() : "";
+              const token = prov.toLowerCase();
+              const declared = token === "declared";
+              const inherited = token === "inherited";
+              const what = subcap ? "cell" : "category";
+              const searched = (cell && Array.isArray(cell.sources_searched)) ? cell.sources_searched : [];
+              return (
+                <div className={`co ${inherited ? "co-org" : "co-purple"}`} style={{ marginBottom: 0 }}>
+                  <Icon name={inherited ? "warn" : "search"} size={13} className="co-icon" />
+                  <div className="co-body">
+                    <div>
+                      {declared
+                        ? `No evidence item in this run carries a quotable span at this ${what}'s own grain. The absence is recorded rather than assumed — the run names the artefact that would settle it, and the searches it ran for that artefact are below.`
+                        : inherited
+                          ? `No evidence item directly cites this ${what} in this run. The reading is carried across from a neighbouring ${what} and is labelled an inference — treat it as provisional until corroborated.`
+                          : prov
+                            ? prov
+                            : `No evidence item directly cites this ${what} in this run, and the run states no provenance for the reading.`}
+                    </div>
+                    {cell && cell.reach_note ? (
+                      <div style={{ marginTop: 6, opacity: .88 }}>{cell.reach_note}</div>
+                    ) : null}
+                    {searched.length ? (
+                      <details style={{ marginTop: 6 }}>
+                        <summary style={{ cursor: "pointer", color: "var(--z-dpur)", fontWeight: 600 }}>
+                          {searched.length} source{searched.length === 1 ? "" : "s"} searched for it
+                        </summary>
+                        <ul style={{ margin: "6px 0 0 16px", padding: 0 }}>
+                          {searched.map((s, i) => (
+                            <li key={i} style={{ marginBottom: 4, lineHeight: 1.5 }}>{asText(s)}</li>
+                          ))}
+                        </ul>
+                      </details>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })() : linkedEv.map(e => {
               // A cited id that resolves to nothing in the evidence store is
               // shown as unresolved, not dropped: a dangling citation is a
               // finding, and silently omitting it hides it.
@@ -1934,4 +2073,4 @@ function Legend() {
 function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i); return h; }
 window.hashCode = hashCode;
 
-Object.assign(window, { ClientHeatmap });
+Object.assign(window, { ClientHeatmap, sectionReason });

@@ -204,13 +204,21 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
   for (const f of (firmographics && firmographics.fields) || []) {
     fields[f.field] = f;
   }
-  const unitOf = (s) => {
-    const u = String(s.unit || "").toLowerCase();
-    if (u.includes("trillion")) return "T";
-    if (u.includes("billion")) return "B";
-    if (u.includes("million")) return "M";
-    return "";
-  };
+  /* ONE magnitude for the whole series, chosen by `scaleMoneySeries`.
+     The unit-word reader this replaced recognised "billion" and "million"
+     and nothing else, so a run stating `{value: 9687804914, unit: "USD"}`
+     — a magnitude written out in full rather than named — came back with
+     unit "" and its value untouched. Every consumer builds its label as
+     `$${value}${unit}`, so the card headlined `$9687804914 · Q2 2026`
+     while the firmographics row thirty pixels below rendered the identical
+     figure as $9.7B, through the formatter this now shares.
+
+     The values and the unit come out of one call so they cannot disagree:
+     "6.5 USD billions" and "9687804914 USD" both arrive at {6.5, "B"} and
+     {9.7, "B"}. Bar heights are ratios, so the shared magnitude leaves the
+     chart's geometry exactly as it was. */
+  const scaled = scaleMoneySeries(series.map((s) => s.value),
+                                  (series.find((s) => s.unit) || {}).unit);
   const first = series.find((s) => s.unit) || series[0];
   const last = [...series].reverse().find((s) => s.value != null);
   // `last` is the newest point carrying a value, but a value that will not
@@ -218,7 +226,7 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
   const lastMoney = last ? moneyOf(last) : null;
   return {
     currency: "USD",
-    unit: unitOf(first),
+    unit: scaled.unit,
     // Axis labels, and a plain STRING array by contract: three charts key
     // React children off these and call `.replace("FY", "'")` on them, so
     // neither an <EnrichmentGap> element nor a null can go here — either
@@ -226,12 +234,22 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
     // word the compact gap renders, so it reads as a stated absence rather
     // than as a dash the reader cannot act on.
     fy: series.map((s) => s.period || "Not stated"),
-    total_assets: series.map((s) => num(s.value)),
+    // Expressed in `unit` above, which is what every bar label already
+    // assumes when it writes `$${total_assets[i]}${unit}`.
+    total_assets: scaled.values,
+    // The figure as the run states it, in dollars, untouched — for anything
+    // that needs the exact number rather than the chart's magnitude.
+    total_assets_usd: series.map((s) => num(s.value)),
+    // Preformatted, for a caller that would rather not interpolate at all.
+    // Identical strings to fmtMoney(total_assets[i], unit) by construction.
+    total_assets_display: series.map((s) => fmtMoney(s.value, s.unit || (first || {}).unit)),
     // Net income and NIM are not in this section's contract. Null, not zero:
     // a zero-height bar reads as a measured zero.
     net_income_m: series.map(() => null),
     nim_pct: series.map(() => null),
-    employees: [num(fields.employees && fields.employees.value)],
+    // A headcount stated in words ("more than 800") is a stated figure, not
+    // an absent one: `Number()` on it is NaN and the row it fed disappeared.
+    employees: [numOrText(fields.employees && fields.employees.value)],
     branches: num(fields.branches && fields.branches.value),
     regulator: (regulatory && regulatory.primary_regulator)
       || (fields.primary_regulator && fields.primary_regulator.value) || null,
@@ -257,18 +275,19 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
   };
 }
 
+/* The card headline's figure — through the SAME formatter as every other
+   money slot. This function used to build its own string, `$${v}${suffix}`,
+   with a suffix table that knew "billion" and "million" and not "USD"; a run
+   stating its magnitude in full therefore headlined `$9687804914 · Q2 2026`.
+   Two formatters that disagree is the defect, so there is now one.
+
+   Null, not a dash. This is a formatter: it has no audience in scope and no
+   idea what container it lands in, so the CALLER decides what an absent
+   figure renders as. Returning a dash from here printed it into the card
+   headline with no route to enrichment and no way for a reader to tell an
+   unparseable figure from one nobody stated. */
 function moneyOf(s) {
-  const v = num(s.value);
-  // Null, not a dash. This is a formatter: it has no audience in scope and
-  // no idea what container it lands in, so the CALLER decides what an absent
-  // figure renders as. Returning a dash from here printed it into the card
-  // headline with no route to enrichment and no way for a reader to tell an
-  // unparseable figure from one nobody stated.
-  if (v === null) return null;
-  const u = String(s.unit || "").toLowerCase();
-  const suffix = u.includes("trillion") ? "T" : u.includes("billion") ? "B"
-    : u.includes("million") ? "M" : "";
-  return `$${v}${suffix}`;
+  return fmtMoney(s.value, s.unit);
 }
 
 /* ── sentimentFor ────────────────────────────────────────────────────
@@ -1174,7 +1193,24 @@ function adaptStairstep(stairstep) {
       level: s.step_level, label: s.label,
       subcaps: s.covered_subcap_ids || [],
       current: !!s.current_position,
-      blocking: s.blocking_findings || [],
+      /* The finding's own words, never its JSON.
+
+         This run promoted `blocking_findings` as an array of JSON-ENCODED
+         STRINGS, so the ladder printed
+         `{"f_id": "F-02", "e_ids": [...], "title": "…"}` onto the platform
+         page — in the customer audience as well as ours. The payload is
+         being repaired upstream and CG-21 refuses the shape at submit now,
+         but the reader is on this side of the wire, so the renderer takes
+         the human field or nothing whatever it is handed. A finding that
+         yields no readable field is dropped rather than shown as a blob.
+
+         Two keys: `blocking` is what a chip or a line renders; the parsed
+         objects stay on `blocking_refs` so a caller that wants the f_id as
+         its own chip, or the e_ids as evidence, has them. */
+      blocking: (s.blocking_findings || []).map(b => humanText(b)).filter(Boolean),
+      blocking_refs: (s.blocking_findings || [])
+        .map(b => parseMaybeJSON(b) || (typeof b === "string" ? { title: b } : null))
+        .filter(Boolean),
       unlocks: s.unlocks || null,
       effort: s.effort_band || null,
       entry_condition: s.entry_condition || null,
@@ -1213,6 +1249,7 @@ function stairstepClustersOf(stairstep) {
         effort: x.effort,
         subcaps: x.subcaps,
         blocking: x.blocking,
+        blocking_refs: x.blocking_refs,
       })),
     },
   };
@@ -1391,6 +1428,7 @@ function buildLiveEntity(entityId, pages, extras) {
     // and when it was promoted rather than leaving the reader to guess.
     run: (overview && overview.run) || (heatmap && heatmap.run) || null,
     sectionState: sectionStates(p),
+    rLayers: rLayersOf(p),
   };
 }
 
@@ -1410,6 +1448,34 @@ function pillarPeerMediansOf(scores) {
   for (const p of (scores && scores.pillars) || []) {
     const v = num(p.peer_median);
     if (p.pillar_id && v != null) out[p.pillar_id] = v;
+  }
+  return out;
+}
+
+/* Per-section REASONING TRACE, keyed `page.section`.
+
+   Every section a producer writes carries an `r_layer` — the hypothesis it
+   worked from, the strongest counter-case it could put against itself, the
+   probes it ran, its domain test and its own verdict. Twelve of the twelve
+   sections on this run's overview carry one and not a word of any of them
+   reached a reader, because the shaped views drop it: `adaptCoverage` returns
+   five fields, `adaptLeadership` returns the roster rows, and the trace is on
+   neither. A finding without its counter-case is half the finding.
+
+   Carried as ONE map rather than a key per section, so a card asks for its
+   own section by name and a section added later needs no adapter change.
+   Internal-only content: the customer payload has already had it stripped
+   server-side (`redacted_count`), so this map is simply empty there — the
+   renderer still gates on audience, because default-deny is not a thing to
+   infer from an absence. */
+function rLayersOf(pages) {
+  const out = {};
+  for (const page of Object.keys(pages || {})) {
+    const secs = (pages[page] && pages[page].sections) || {};
+    for (const name of Object.keys(secs)) {
+      const r = secs[name] && secs[name].data && secs[name].data.r_layer;
+      if (r && typeof r === "object" && !Array.isArray(r)) out[`${page}.${name}`] = r;
+    }
   }
   return out;
 }

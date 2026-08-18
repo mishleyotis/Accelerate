@@ -54,19 +54,58 @@ function pfNum(v) {
    page showed lowercase openings throughout. The connector refuses these at
    submit now, but a run already in the database still has to read properly.
    `sentence` leaves a deliberate lowercase name (nCino) alone. */
+const PF_TEXT_KEYS = ["statement", "text", "label", "name", "title", "value"];
 function pfText(v) {
   if (v === null || v === undefined) return null;
-  if (typeof v === "string") return v ? sentence(v) : null;
+  /* A string is not automatically prose. `stairstep.ladder.steps[].
+     blocking_findings[]` promoted as JSON-ENCODED STRINGS, so this branch
+     printed `{"f_id": "F-02", "e_ids": [...], "title": "…"}` onto the page —
+     to the customer audience as well as ours (P-01). `humanText` is the one
+     shared guard for that shape (utils.jsx): it parses the object out of the
+     string, takes the field a person should read, and returns null rather
+     than hand back anything that still looks like machine output. Whatever
+     arrives, the reader gets the human field or the caller's own gap. */
+  if (typeof v === "string") {
+    if (!v) return null;
+    const h = humanText(v, PF_TEXT_KEYS);
+    return h ? sentence(h) : null;
+  }
   if (typeof v === "number" || typeof v === "boolean") return String(v);
   if (Array.isArray(v)) return v.map(pfText).filter(Boolean).join(" · ") || null;
   if (typeof v === "object") {
-    for (const k of ["statement", "text", "label", "name", "title", "value"]) {
+    for (const k of PF_TEXT_KEYS) {
       const t = pfText(v[k]);
       if (t) return t;
     }
     return null;
   }
   return String(v);
+}
+
+/* ── The L3 area label, without the producer's tally ──────────────────
+   `l3_area` promoted as `[L3-SF-DC-CORE] Data Cloud (count: 3)` — a vote
+   count from the producer's own catalogue pass, baked into the string that
+   is a human platform label everywhere this page reads it: the tile
+   sub-line, the platform column of 21 gap rows, every heading that names
+   the scope, and the catalogue path in the row tooltips. It reached the
+   customer audience too (P-05).
+
+   The same suffix is why four of the five tiles read `0 recs` (P-06): a
+   recommendation states the clean `[L3-SF-DC-CORE] Data Cloud`, a gap row
+   states the same area with the tally on the end, and `r.l3 === g.l3_area`
+   is false on every pair but MLflow's — whose rows the producer happened to
+   write clean. The count is stripped wherever it appears, not just at the
+   end, because the catalogue path carries it mid-string.
+
+   This normalises ONE known producer artefact and nothing else. Two areas
+   that differ in their words — `Service Cloud` against `Salesforce Service
+   Cloud` under one L3 code — stay two areas: folding those would be this
+   app deciding two labels mean one thing, which is a producer's call. */
+const PF_COUNT_SUFFIX = /\s*\(count:\s*\d+\)/g;
+function areaLabel(v) {
+  if (v === null || v === undefined) return null;
+  const s = String(v).replace(PF_COUNT_SUFFIX, "").trim();
+  return s || null;
 }
 
 /* Evidence chips for a promoted id list.
@@ -511,10 +550,10 @@ function cellAreaIndex(recs, storyPlatforms) {
     family.get(fam).add(area);
   };
   for (const r of recs || []) {
-    for (const im of r.dma_impact || []) add(im && im.subcap_id, r.l3);
+    for (const im of r.dma_impact || []) add(im && im.subcap_id, areaLabel(r.l3));
   }
   for (const p of storyPlatforms || []) {
-    for (const g of p.gaps || []) add(g && g.subcap_id, g && g.l3_area);
+    for (const g of p.gaps || []) add(g && g.subcap_id, g && areaLabel(g.l3_area));
   }
   return {
     exact,
@@ -600,9 +639,9 @@ function platformAreasOf(recs, storyPlatforms) {
       if (cur.phase == null || Number(phase) < Number(cur.phase)) cur.phase = phase;
     }
   };
-  for (const r of recs || []) add(r.l3, r.phase);
+  for (const r of recs || []) add(areaLabel(r.l3), r.phase);
   for (const p of storyPlatforms || []) {
-    for (const g of p.gaps || []) add(g.l3_area, null);
+    for (const g of p.gaps || []) add(areaLabel(g.l3_area), null);
   }
   return order.slice().sort((a, b) => (pfNum(a.phase) === null ? 99 : Number(a.phase)) - (pfNum(b.phase) === null ? 99 : Number(b.phase))).map(x => x.area);
 }
@@ -834,10 +873,10 @@ function ClientPlatform({
     }
   }
   const byPhaseThenId = (a, b) => String(a.phase || "").localeCompare(String(b.phase || "")) || String(a.id).localeCompare(String(b.id));
-  const areaRecs = recs.filter(r => area && r.l3 === area).sort(byPhaseThenId);
+  const areaRecs = recs.filter(r => area && areaLabel(r.l3) === area).sort(byPhaseThenId);
   // Everything else the run promoted, in the same order. It is NOT dropped:
   // see the scope note below.
-  const otherRecs = recs.filter(r => !(area && r.l3 === area)).sort(byPhaseThenId);
+  const otherRecs = recs.filter(r => !(area && areaLabel(r.l3) === area)).sort(byPhaseThenId);
 
   /* The gap-to-platform mapping for the selected tile, from the two places the
      run states one. The platform story's rows are richest — they carry the
@@ -850,7 +889,7 @@ function ClientPlatform({
      is ordered by it, never hidden by it (see the scope note below). */
   const storyAll = [];
   for (const p of storyPlatforms) for (const g of p.gaps || []) if (g) storyAll.push(g);
-  const inThisArea = g => !!area && g.l3_area === area;
+  const inThisArea = g => !!area && areaLabel(g.l3_area) === area;
   const storyRows = storyAll.filter(inThisArea);
   const storyElsewhere = storyAll.filter(g => !inThisArea(g));
   const storySeen = new Set(storyRows.map(g => String(g.subcap_id)));
@@ -867,9 +906,9 @@ function ClientPlatform({
     peer_note: g.peer_note || null,
     peer_basis: g.peer_basis || null,
     feature: g.l4_feature,
-    path: g.catalogue_path,
+    path: areaLabel(g.catalogue_path),
     e_ids: g.e_ids || [],
-    l3_area: g.l3_area || null
+    l3_area: areaLabel(g.l3_area)
   });
   const scopedGapRows = [...storyRows.map(g => storyGapRow(g, true)), ...tileCells.map(c => ({
     key: `tile:${c.subcap_id}`,
@@ -962,9 +1001,12 @@ function ClientPlatform({
   // Areas the tile row cannot reach. A recommendation filed under one of these
   // appears under no platform, so it is named rather than silently dropped.
   const reachable = new Set([...assign.values()].map(a => a.area).filter(Boolean));
-  const orphanRecs = recs.filter(r => !r.l3 || !reachable.has(r.l3));
+  const orphanRecs = recs.filter(r => !areaLabel(r.l3) || !reachable.has(areaLabel(r.l3)));
   const orphanAreas = [];
-  for (const r of orphanRecs) if (r.l3 && !orphanAreas.includes(r.l3)) orphanAreas.push(r.l3);
+  for (const r of orphanRecs) {
+    const a = areaLabel(r.l3);
+    if (a && !orphanAreas.includes(a)) orphanAreas.push(a);
+  }
   const scopeLine = area ? `${area} · the area this run files ${assignment.votes} of ${assignment.of} of this platform's cells under` : tile ? "This run files none of this platform's cells under an L3 area, so nothing below is scoped to it." : "No platform tile promoted for this run.";
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "page-head"
@@ -1015,7 +1057,7 @@ function ClientPlatform({
     };
     const cells = (t.addressable_cells || []).filter(Boolean);
     const composite = pfNum(t.composite);
-    const tileRecs = a.area ? recs.filter(r => r.l3 === a.area).length : 0;
+    const tileRecs = a.area ? recs.filter(r => areaLabel(r.l3) === a.area).length : 0;
     /* "Top:" names the cells this platform addresses, in the
        catalogue's own words. The tile states `name: null` for every
        one of them, so the name comes from the workbook read and the id
@@ -2006,7 +2048,7 @@ function ClientPlatform({
         color: "var(--z-muted)",
         marginBottom: 4
       }
-    }, pfText(r.l3)) : null, r.l4 ? /*#__PURE__*/React.createElement("div", {
+    }, pfText(areaLabel(r.l3))) : null, r.l4 ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
         color: "var(--z-mid)",
@@ -2805,6 +2847,21 @@ function StairstepCurve({
     const via = viaCache[i];
     const mine = !!(selKey && via && via.platform === selKey);
     const dim = !!(selKey && minesIdx.length && !mine);
+    /* A blocking finding is an ID and a SENTENCE, and the rail used
+       to print whichever one it was handed into a badge. On this run
+       it was handed the whole JSON object as a string, so the badge
+       read `{"f_id": "F-02", "e_ids": [...], "title": "…"}` — in the
+       customer audience as well as ours (P-01).
+        Split at the render, which is where the reader is: the `f_id`
+       is a chip in the badge row beside the step, and the `title` is
+       the prose it was written as. `blocking_refs` carries the
+       parsed objects; a payload that states only a string still
+       reads, as its sentence with no chip. */
+    const blockers = ((s.blocking_refs || []).length ? s.blocking_refs : s.blocking || []).map(b => ({
+      id: b && typeof b === "object" ? pfText(b.f_id) || null : null,
+      text: pfText(b)
+    })).filter(b => b.id || b.text);
+    const blockerProse = blockers.map(b => b.text).filter(Boolean);
     return /*#__PURE__*/React.createElement("div", {
       key: i,
       style: {
@@ -2843,21 +2900,36 @@ function StairstepCurve({
         flexShrink: 0
       },
       title: "effort band"
-    }, pfText(s.effort)) : null, (s.blocking || []).map(b => /*#__PURE__*/React.createElement("span", {
-      key: b,
+    }, pfText(s.effort)) : null, blockers.filter(b => b.id).map(b => /*#__PURE__*/React.createElement("span", {
+      key: b.id,
       className: "b b-org",
       style: {
         flexShrink: 0
       },
-      title: "blocking finding"
-    }, pfText(b)))), /*#__PURE__*/React.createElement("div", {
+      title: b.text ? `Blocking finding ${b.id} · ${b.text}` : `Blocking finding ${b.id}`
+    }, b.id))), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 12,
         fontWeight: 600,
         color: "var(--z-dark)",
         lineHeight: 1.4
       }
-    }, pfText(s.label)), via ? /*#__PURE__*/React.createElement("div", {
+    }, pfText(s.label)), blockerProse.length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-body)",
+        lineHeight: 1.5,
+        marginTop: 4
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 9,
+        color: "var(--z-muted)",
+        letterSpacing: ".06em",
+        textTransform: "uppercase",
+        marginRight: 5
+      }
+    }, blockerProse.length === 1 ? "Blocking finding" : "Blocking findings"), " ", blockerProse.join(" · ")) : null, via ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
         color: "var(--z-mid)",
@@ -2936,7 +3008,7 @@ function TransformationRoadmap({
      removed from it because the reader clicked a platform is a different plan.
      `mine` per phase is how many of that phase's served recommendations this
      platform leads. */
-  const isMine = rec => !!(area && rec && rec.l3 === area);
+  const isMine = rec => !!(area && rec && areaLabel(rec.l3) === area);
   const mineCount = recs.filter(isMine).length;
   const phaseMine = r => phaseRecs(r).filter(isMine).length;
   const roadmapMine = roadmap.reduce((a, r) => a + phaseMine(r), 0);
@@ -3054,7 +3126,8 @@ function phaseFacts(rs) {
   const metrics = [];
   const impacts = [];
   for (const rec of rs || []) {
-    if (rec.l3 && !areas.includes(rec.l3)) areas.push(rec.l3);
+    const ra = areaLabel(rec.l3);
+    if (ra && !areas.includes(ra)) areas.push(ra);
     const m = rec.kpi && rec.kpi.metric ? pfText(rec.kpi.metric) : null;
     if (m && !metrics.includes(m)) metrics.push(m);
     for (const im of rec.dma_impact || []) impacts.push(im);

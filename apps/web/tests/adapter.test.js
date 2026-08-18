@@ -18,14 +18,34 @@ const assert = require("node:assert");
 const path = require("node:path");
 
 const JS = path.join(__dirname, "..", "public", "proto", "js");
+const VENDOR = path.join(__dirname, "..", "public", "vendor");
 
 function load(live) {
   // Fresh module registry per case: data.js captures LIVE at load time, which
   // is the behaviour being relied on.
   for (const k of Object.keys(require.cache)) delete require.cache[k];
   global.window = live ? { DMA_LIVE: live } : {};
+  global.self = global.window;
+  // The real script list, in the real order — `app/route.js` SCRIPTS:
+  // React, data.js, live-adapter.js, utils.js. utils.js was left out while
+  // the adapter had no dependency on it, and the omission was invisible
+  // until it did: `adaptFinancials` reaches the ONE money formatter, which
+  // lives on window from utils.js, so a test loading two of the three
+  // scripts threw `scaleMoneySeries is not defined` on a path the browser
+  // runs correctly. Loading what the page loads is what this harness
+  // claims to do, and utils.js only needs React in scope to do it.
+  global.React = require(path.join(VENDOR, "react.production.min.js"));
   require(path.join(JS, "data.js"));
   require(path.join(JS, "live-adapter.js"));
+  require(path.join(JS, "utils.js"));
+  // In a browser `window` IS the global object, so a script assigning to
+  // window publishes a bare global every later script can name. Node's
+  // module scope does not work that way: `Object.assign(window, …)` at the
+  // foot of utils.js reaches `global.window` and nothing else, so
+  // live-adapter's bare `scaleMoneySeries` still resolved to nothing. This
+  // is the one line that makes the loaded scripts see each other the way
+  // the page makes them see each other.
+  Object.assign(global, global.window);
   return global.window;
 }
 

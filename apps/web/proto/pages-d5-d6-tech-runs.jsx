@@ -1527,11 +1527,103 @@ function SentimentGrid() {
   );
 }
 
+/* ── The evidence-age panel's rows ────────────────────────────────────
+   The tracker aged `DMA.EVIDENCE[].recency`, and the adapter sets `recency`
+   to the recency BAND — "CURRENT", "AGING", "ARCHIVAL" — whenever the record
+   carries one, falling back to the date only when it does not. `new
+   Date("CURRENT")` is an Invalid Date, so every one of the 63 rows printed
+   "Not computed" in the AGE column and "NO DATE" in the STATUS column, the 22
+   that carry both a published date and an age in months included, while the
+   DATE column showed the band word where a date belonged.
+
+   Two reads, in order. A run that promotes the panel outright
+   (`heatmap.evidence_age.rows`) is read first: 26 rows already dated, aged
+   and banded by the producer against the run's own reference date. A run that
+   promoted no panel falls back to the evidence records' own date fields,
+   `published_date` and `age_months` — never to a band word.
+
+   The age is the producer's arithmetic either way, not a fresh subtraction
+   against today's clock: a run's ages are stated against its reference date,
+   and re-deriving them here would drift a month for every month the run sits
+   promoted, so two readers of one promoted run would see two different
+   numbers. A row with no date gets no age and no freshness verdict, because
+   both would be assertions about a date nobody established. */
+function evidenceAgeRows(entity) {
+  const promoted = (typeof DMA.evidenceAgeFor === "function")
+    ? (DMA.evidenceAgeFor(entity && entity.id) || []) : [];
+  if (promoted.length) {
+    return promoted.map(r => ({
+      id: r.e_id || r.id || null,
+      title: r.title || r.e_id || null,
+      source: r.source_domain || null,
+      date: r.published_or_asof || null,
+      age: r.age_months == null ? null : Number(r.age_months),
+      status: r.status || r.band || null,
+      identity_ok: r.identity_ok === undefined ? null : r.identity_ok,
+    })).filter(r => r.id);
+  }
+  return (DMA.EVIDENCE || []).map(e => {
+    // `recency` is the band word when the record has one and the date when it
+    // does not, so it is read only through `calendarValue`, which returns a
+    // date for a calendar value and null for a word. That is the whole defect
+    // in one line: "CURRENT" used to go into `new Date()`.
+    const date = e.published_date || calendarValue(e.recency);
+    const age = e.age_months != null ? Number(e.age_months)
+      : (date ? monthsSince(date) : null);
+    return {
+      id: e.id,
+      title: e.title,
+      source: e.source ? String(e.source).split("/")[0] : null,
+      date,
+      age,
+      // The band is the producer's verdict on the date. "UNVERIFIED" is the
+      // ladder's word for "no date to rank this on", not a freshness state,
+      // and a verdict nobody reached is left null rather than derived here
+      // against a threshold no run declares.
+      status: (e.recency_band && e.recency_band !== "UNVERIFIED")
+        ? e.recency_band : null,
+      identity_ok: e.identity_ok === undefined ? null : e.identity_ok,
+    };
+  }).filter(r => r.id);
+}
+
+/* A calendar value the producer wrote, or null.
+   `2026-06-30`, `2026-06`, `2026-Q2` and `2026` are dates at their own
+   precision and normalise to the first day of the period they name. A recency
+   BAND — CURRENT, AGING, STALE, ARCHIVAL, UNVERIFIED — is a word about a date,
+   not a date, and comes back null however confidently it is handed over. */
+function calendarValue(v) {
+  const s = String(v == null ? "" : v).trim();
+  if (!s) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const q = s.match(/^(\d{4})[-\s]?Q([1-4])$/i);
+  if (q) return `${q[1]}-${String((+q[2] - 1) * 3 + 1).padStart(2, "0")}-01`;
+  if (/^\d{4}-\d{2}$/.test(s)) return `${s}-01`;
+  if (/^\d{4}$/.test(s)) return `${s}-01-01`;
+  return null;
+}
+
+/* Whole months since a stated date is `monthsSince`, already in this file at
+   the issue register — one function per fact, so the age a row shows here and
+   the age a matter shows there cannot round differently. It is only ever
+   reached where the producer stated no `age_months` of its own: a promoted
+   age is the producer's arithmetic against the run's reference date and is
+   never recomputed, so two readers of one promoted run cannot see two
+   numbers. */
+
 /* ── D6 Assessment health ────────────────────────────────────────── */
 function ClientHealth({ entity, run }) {
   const { role, audience, pushToast, openEvidence } = useApp();
   const [tab, setTab] = useState("alerts");
   const alerts = DMA.alertsForEntity(entity.id);
+  /* A cell id is not a capability name. The alert contract carries
+     `subcap_id` and no name, and the run's own cell grain names all 705, so
+     the queue resolves the name from the grid rather than printing a
+     taxonomy code at a reader or inventing a label. */
+  const subcapName = (sid) => {
+    const s = (entity.subcaps || []).find(x => x.id === sid);
+    return (s && s.name && s.name !== s.id) ? s.name : null;
+  };
   const [compareBase, setCompareBase] = useState(entity.runs[1]?.id);
   const [compareTarget, setCompareTarget] = useState(entity.runs[0]?.id);
 
@@ -1545,7 +1637,16 @@ function ClientHealth({ entity, run }) {
         <div>
           <div className="eyebrow">Assessment health</div>
           <h1>Quality &amp; controls</h1>
-          <div className="sub">{alerts.length} open alerts · {DMA.QA_GATES.filter(g => g.status === "FAIL").length} failing gates · {entity.runs.length} runs in history</div>
+          {/* Singular counts took plural nouns on all three of these — "1
+              failing gates · 1 runs in history" — while the first of them
+              read zero over a queue of fourteen. */}
+          <div className="sub">{(() => {
+            const failing = DMA.QA_GATES.filter(g => g.status === "FAIL").length;
+            const runs = entity.runs.length;
+            return `${alerts.length} open alert${alerts.length === 1 ? "" : "s"}`
+                 + ` · ${failing} failing gate${failing === 1 ? "" : "s"}`
+                 + ` · ${runs} run${runs === 1 ? "" : "s"} in history`;
+          })()}</div>
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast("Feedback file regenerated - routed to DMA bot", "success")}><Icon name="refresh" size={13} /> Re-run feedback file</button>
@@ -1561,31 +1662,120 @@ function ClientHealth({ entity, run }) {
         </div>
       </div>
 
+      {/* ── The run's own alert queue ──────────────────────────────────
+          This table read `DMA.ALERTS`, which `buildAlerts()` derives by
+          walking the BOOT DIRECTORY's cell grain — a key the live directory
+          does not carry. So it was empty on every live run, and the empty
+          branch below printed a green tick, "✓ No open alerts", and the
+          sentence "Evidence coverage meets the minimum threshold." over a run
+          carrying fourteen promoted alerts and 33.0% evidence coverage
+          against its own 80% gate. A quality surface that reassures where the
+          run raised an alarm is worse than no quality surface.
+
+          Two rules follow from that and are why the columns changed. An
+          all-clear is now a statement about the QUEUE and nothing else — an
+          empty alert list says the run promoted no alert, never that coverage
+          is adequate, which is a different section's arithmetic. And every
+          column renders a field the producer wrote: `recommended_action` and
+          `proxy_searched` are the prototype's own vocabulary, absent from the
+          contract, and a "PROXY_ESCALATION" badge or a "✓ Searched" tick that
+          nobody decided is a fabricated finding on a client's quality queue.
+          What the run does state — the state it reached, how long the row has
+          been open, why it was flagged, what would close it, and the ladder
+          that was run — is what the reader gets. */}
       {tab === "alerts" ? (
         <div className="card flush">
-          <div className="card-head"><h3>Thin-evidence alerts</h3><span className="b b-org">{alerts.length} open</span></div>
+          <div className="card-head">
+            <h3>Thin-evidence alerts</h3>
+            {alerts.length ? <span className="b b-org">{alerts.length} open</span> : null}
+          </div>
+          {alerts.length ? (
           <table className="tbl">
-            <thead><tr><th>Severity</th><th>Subcap</th><th>Evidence</th><th>Action</th><th>Proxy</th><th style={{ textAlign: "right" }}>Status</th></tr></thead>
+            <thead><tr><th style={{ width: 80 }}>Severity</th><th style={{ width: 190 }}>Sub-capability</th><th style={{ width: 76 }}>Cited</th><th style={{ width: 118 }}>State</th><th>Why it is flagged, and what would close it</th><th style={{ textAlign: "right", width: 140 }}>Queue</th></tr></thead>
             <tbody>
-              {alerts.map(a => (
+              {alerts.map(a => {
+                const name = subcapName(a.subcap_id);
+                const searched = a.sources_searched || [];
+                const queries = a.queries_run || [];
+                return (
                 <tr key={a.id}>
-                  <td data-label="Severity"><span className={`b ${a.severity === "HIGH" ? "b-below" : "b-org"}`}>{a.severity}</span></td>
-                  <td data-label="Subcap"><div style={{ fontSize: 12, fontWeight: 500 }}>{a.subcap_name}</div><div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{a.subcap_id}</div></td>
-                  <td data-label="Evidence">
-                    <div style={{ fontSize: 12 }}>{a.evidence_count} / 3</div>
-                    <div className="prog" style={{ marginTop: 4, width: 80, height: 4 }}><div className="prog-fill" style={{ width: `${(a.evidence_count / 3) * 100}%`, background: "var(--z-org)" }} /></div>
+                  <td data-label="Severity">
+                    <span className={`b ${a.severity === "HIGH" ? "b-below" : a.severity === "LOW" ? "b-muted" : "b-org"}`}>
+                      {a.severity || "not stated"}
+                    </span>
                   </td>
-                  <td data-label="Action"><span className="b b-purple">{a.recommended_action}</span></td>
-                  <td data-label="Proxy">{a.proxy_searched ? <span style={{ color: "var(--z-mid)", fontSize: 11 }}>✓ Searched</span> : <span style={{ color: "var(--z-org)", fontSize: 11 }}>Not yet</span>}</td>
-                  <td data-label="Status" style={{ textAlign: "right" }}>
+                  <td data-label="Sub-capability">
+                    <div style={{ fontSize: 12, fontWeight: 500 }}>
+                      {name || <span style={{ color: "var(--z-muted)", fontStyle: "italic" }}>unnamed in catalogue</span>}
+                    </div>
+                    <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>
+                      {a.subcap_id}{a.score != null ? ` · ${fx(a.score, 1)}` : ""}{a.confidence ? ` · ${a.confidence}` : ""}
+                    </div>
+                  </td>
+                  {/* The count the run states, with no denominator invented for
+                      it: "N / 3" was the prototype's house rule and no promoted
+                      alert carries a target. */}
+                  <td data-label="Cited">
+                    {a.evidence_count == null
+                      ? <span style={{ color: "var(--z-muted)", fontSize: 11 }}>not stated</span>
+                      : <span style={{ fontSize: 12 }}>{a.evidence_count} item{a.evidence_count === 1 ? "" : "s"}</span>}
+                  </td>
+                  <td data-label="State">
+                    <span className="b b-purple">{String(a.state || "OPEN").replace(/_/g, " ")}</span>
+                    {a.runs_open != null ? (
+                      <div style={{ fontSize: 10, color: "var(--z-muted)", marginTop: 3 }}>
+                        open {a.runs_open} run{a.runs_open === 1 ? "" : "s"}
+                      </div>
+                    ) : null}
+                  </td>
+                  <td data-label="Why">
+                    {a.justification ? (
+                      <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.5 }}>{a.justification}</div>
+                    ) : null}
+                    {a.closure_condition ? (
+                      <div style={{ fontSize: 11, color: "var(--z-muted)", lineHeight: 1.5, marginTop: 4 }}>
+                        <strong style={{ color: "var(--z-body)" }}>Closes when · </strong>{a.closure_condition}
+                      </div>
+                    ) : null}
+                    {searched.length || queries.length ? (
+                      <details style={{ marginTop: 5 }}>
+                        <summary style={{ fontSize: 10.5, color: "var(--z-mid)", cursor: "pointer" }}>
+                          {searched.length} source{searched.length === 1 ? "" : "s"} searched
+                          {queries.length ? ` · ${queries.length} quer${queries.length === 1 ? "y" : "ies"} run` : ""}
+                        </summary>
+                        <ul style={{ margin: "5px 0 0 15px", padding: 0 }}>
+                          {searched.map((s, i) => (
+                            <li key={`s${i}`} style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5, marginBottom: 3 }}>{asText(s)}</li>
+                          ))}
+                          {queries.map((q, i) => (
+                            <li key={`q${i}`} style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5, marginBottom: 3 }}>Query · {asText(q)}</li>
+                          ))}
+                        </ul>
+                      </details>
+                    ) : null}
+                  </td>
+                  <td data-label="Queue" style={{ textAlign: "right" }}>
                     <button className="btn btn-tertiary btn-sm" onClick={() => pushToast(`${a.subcap_id} moved to IN_REVIEW`, "success")}>In review</button>
                     <button className="btn btn-tertiary btn-sm" onClick={() => pushToast(`${a.subcap_id} waived — add rationale before close`, "warn")}>Waive</button>
                   </td>
-                </tr>
-              ))}
-              {alerts.length === 0 ? <tr><td colSpan={6} className="tbl-empty"><div style={{ color: "var(--z-mid)", fontSize: 13, fontWeight: 500 }}>✓ No open alerts</div><div style={{ fontSize: 11, marginTop: 4 }}>Evidence coverage meets the minimum threshold.</div></td></tr> : null}
+                </tr>);
+              })}
             </tbody>
           </table>
+          ) : (
+            /* No tick, no coverage claim. An empty queue is a statement about
+               the queue, and the section's own empty_state says why it is
+               empty when the producer wrote one. */
+            <div style={{ padding: "14px 16px" }}>
+              <SectionEmpty
+                section="heatmap.alerts"
+                absent="This run promoted no thin-evidence alert queue, so there is nothing to work here. It is not a statement about evidence coverage — the coverage panel states that separately."
+                empty="The run promoted an alert queue with no rows in it." />
+            </div>
+          )}
+          <div style={{ padding: "0 16px 12px" }}>
+            <SectionEmptyFoot section="heatmap.alerts" title="What this queue does not cover" />
+          </div>
         </div>
       ) : tab === "diff" ? (
         <VersionDiff entity={entity} baseId={compareBase} targetId={compareTarget} setBase={setCompareBase} setTarget={setCompareTarget} />
@@ -1688,53 +1878,109 @@ function ClientHealth({ entity, run }) {
           );
         })()
       ) : tab === "age" ? (
+        (() => {
+          const rows = evidenceAgeRows(entity);
+          // Both header figures are COUNTED from the rows on screen, not read
+          // from the promoted `stale_pct` / `undated_pct` (invariant 8: a
+          // count is computed where a source of truth exists). They reproduce
+          // the promoted pair exactly on this run — 4/26 = 15.4, 5/26 = 19.2.
+          const dated = rows.filter(r => r.date);
+          const stale = rows.filter(r => String(r.status || "").toUpperCase() === "STALE");
+          const pct = (n) => rows.length ? `${(n / rows.length * 100).toFixed(1)}%` : null;
+          return (
         <div className="card flush">
-          <div className="card-head"><h3>Evidence age tracker</h3></div>
+          <div className="card-head">
+            <h3>Evidence age tracker</h3>
+            {rows.length ? (
+              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
+                {rows.length} row{rows.length === 1 ? "" : "s"} · {dated.length} dated ·
+                {" "}{pct(stale.length)} stale · {pct(rows.length - dated.length)} undated
+              </span>
+            ) : null}
+          </div>
+          {rows.length ? (
           <table className="tbl">
             <thead><tr><th>Evidence</th><th>Source</th><th>Date</th><th>Age</th><th style={{textAlign:"right"}}>Status</th></tr></thead>
             <tbody>
-              {DMA.EVIDENCE.map(e => {
-                // Age is computed or null — never NaN, and never computed
-                // from a date that is not there. An item whose recency is
-                // absent gets no age and no freshness verdict, because both
-                // would be assertions about a date nobody established.
-                const raw = typeof e.recency === "string" ? e.recency : null;
-                const parsed = raw
-                  ? new Date(raw.replace("Q1","-01-01").replace("Q2","-04-01")
-                                .replace("Q3","-07-01").replace("Q4","-10-01"))
-                  : null;
-                const age = (parsed && !isNaN(parsed))
-                  ? Math.round((new Date() - parsed) / (1000*60*60*24*30.4)) : null;
-                const stale = age === null ? null : age > 18;
-                return (
-                  <tr key={e.id}>
-                    <td data-label="Evidence"><span className="chip">{e.id}</span> <span style={{ marginLeft: 6 }}>{e.title}</span></td>
-                    <td data-label="Source" className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{e.source.split("/")[0]}</td>
+              {rows.map(r => (
+                  <tr key={r.id}>
+                    <td data-label="Evidence">
+                      <span className="chip">{r.id}</span>
+                      <span style={{ marginLeft: 6 }}>{r.title}</span>
+                      {/* An identity verdict the producer made is a fact about
+                          the row and belongs beside it; a null one asserts
+                          nothing and renders nothing. */}
+                      {r.identity_ok === false
+                        ? <span className="b b-below" style={{ marginLeft: 6 }}
+                                title="this row was checked against the entity and did not match">FOREIGN</span>
+                        : null}
+                    </td>
+                    <td data-label="Source" className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{r.source}</td>
                     {/* The DATE is a field of the evidence record: absent, it
                         is a producer gap the connector can be asked to fill,
                         so it says so (compact — this is a table cell). The AGE
-                        is DERIVED from that date, and nothing enriches a
-                        computed age: it states that it was not computed rather
-                        than borrowing the queue language of the column beside
-                        it. */}
-                    <td data-label="Date">{raw
-                      || <EnrichmentGap what="Evidence date" audience={audience} compact />}</td>
-                    <td data-label="Age">{age === null
-                      ? <span style={{ color: "var(--z-muted)", fontStyle: "italic" }}>Not computed</span>
-                      : `${age} mo`}</td>
+                        is the producer's own arithmetic against the run's
+                        reference date, not a fresh subtraction against today's
+                        clock, which would drift a month every month the run
+                        sits promoted. */}
+                    <td data-label="Date">{r.date
+                      ? fmtDate(r.date)
+                      : <EnrichmentGap what="Evidence date" audience={audience} compact />}</td>
+                    <td data-label="Age">{r.age == null
+                      ? <span style={{ color: "var(--z-muted)", fontStyle: "italic" }}>no date to age</span>
+                      : `${r.age} mo`}</td>
                     <td data-label="Status" style={{ textAlign: "right" }}>
-                      {stale === null ? <span className="b b-muted">NO DATE</span>
-                        : <span className={`b ${stale ? "b-org" : "b-teal"}`}>{stale ? "STALE" : "FRESH"}</span>}
+                      {/* The band the producer stated, or nothing. A row that
+                          carries a date but no band already says how old it is
+                          in the column beside this one; stamping "undated" on
+                          it would contradict that, and deriving a freshness
+                          word here would apply a threshold no run declares. */}
+                      {(() => {
+                        const s = String(r.status || "").toUpperCase();
+                        if (!s) return r.date ? null : <span className="b b-muted">undated</span>;
+                        const cls = s === "FRESH" || s === "CURRENT" ? "b-teal"
+                                  : s === "STALE" || s === "ARCHIVAL" ? "b-org"
+                                  : s === "UNDATED" ? "b-muted" : "b-purple";
+                        return <span className={`b ${cls}`}>{s}</span>;
+                      })()}
                     </td>
                   </tr>
-                );
-              })}
+              ))}
             </tbody>
           </table>
+          ) : (
+            <div style={{ padding: "14px 16px" }}>
+              {sectionReason("heatmap.evidence_age").stub ? (
+                <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 }}>
+                  This run promoted no evidence-age panel, and its evidence
+                  records carry no dates to age.
+                </div>
+              ) : <SectionEmpty section="heatmap.evidence_age" />}
+            </div>
+          )}
+          {/* The panel's own account of what it leaves out — on this run, the
+              36 ingested rows that carry no excerpt and so cannot be listed
+              here. It was promoted and rendered nowhere. */}
+          <div style={{ padding: "0 16px 12px" }}>
+            <SectionEmptyFoot section="heatmap.evidence_age" title="Rows this panel does not carry" />
+          </div>
         </div>
+          );
+        })()
       ) : (
+        /* ── Cross-entity patterns ──────────────────────────────────────
+           `DMA.PATTERNS` is the prototype's fixture list and is `[]` in LIVE,
+           and this table had no empty branch at all: the card rendered a
+           header, a "≥60% threshold" badge and then nothing, with no word
+           about why. The reason is a real one and the section states it — a
+           cohort needs five promoted runs in the same sub-vertical and the
+           corpus holds two — so the reason renders where the rows would be. */
         <div className="card flush">
-          <div className="card-head"><h3>Cross-entity patterns</h3><span className="b b-muted">≥60% threshold</span></div>
+          <div className="card-head">
+            <h3>Cross-entity patterns</h3>
+            {DMA.PATTERNS.length ? <span className="b b-muted">≥60% threshold</span> : null}
+          </div>
+          {DMA.PATTERNS.length ? (
           <table className="tbl">
             <thead><tr><th>Subvertical</th><th>Category</th><th>Pattern</th><th>Count</th><th style={{ textAlign: "right" }}>Action</th></tr></thead>
             <tbody>
@@ -1749,6 +1995,25 @@ function ClientHealth({ entity, run }) {
               ))}
             </tbody>
           </table>
+          ) : (
+            /* The producer's own reason for this section — its cohort floor,
+               its two sources searched, its closure condition — is written and
+               destroyed at promote (see `sectionReason`). Until the writer
+               persists an envelope-only row, the floor renders from the rule
+               rather than from the plumbing sentence the serving tier
+               substitutes. */
+            <div style={{ padding: "14px 16px" }}>
+              {sectionReason("heatmap.cohort_patterns").stub ? (
+                <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 }}>
+                  No cross-entity pattern is published for this run. A cohort is
+                  published only where five promoted runs in the same
+                  sub-vertical carry a served score for the same category;
+                  cohorts are never pooled across sub-verticals, and one below
+                  the floor is withheld rather than shown thin.
+                </div>
+              ) : <SectionEmpty section="heatmap.cohort_patterns" />}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -2231,6 +2496,18 @@ function techRowSources(t) {
   return { chips, citedTo };
 }
 
+/* The catalogue's own name for a cell, from the run's served grain.
+   A cell id is a taxonomy code, not a capability name: the register printed
+   `P4C3.2.1 P4C3.2.2 P4C3.3.1 P3C1.2.2` under every product and asked a
+   reader to know what those are (T-05). The run names all 705 of them on the
+   grain read — the same lookup the detail sub-page has always made — so the
+   name is READ, never guessed, and a cell this run did not score falls back
+   to its bare id rather than to an invented label. */
+function techCellName(entity, sid) {
+  const s = ((entity && entity.subcaps) || []).find(x => x.id === sid);
+  return (s && s.name && s.name !== s.id) ? s.name : null;
+}
+
 function TechRow({ t, entity, run }) {
   const { openEvidence } = useApp();
   // The four charter statuses (CONFIRMED · INFERRED · CLAIMED · ABSENT). The
@@ -2280,9 +2557,27 @@ function TechRow({ t, entity, run }) {
             {t.note}
           </div>
         ) : null}
+        {/* The cells this row is linked to, named. The chip carried the bare
+            catalogue code, so thirteen register rows printed forty-odd codes
+            and nothing a reader could act on (T-05). The name leads and the
+            code stays beside it in mono, because the code is what every other
+            surface — the drawer, the heatmap, the detail sub-page — is keyed
+            on and a reader following the row needs both. */}
         {t.subcaps_impact && t.subcaps_impact.length > 0 ? (
           <div style={{ display: "flex", gap: 4, marginTop: 6, flexWrap: "wrap" }}>
-            {t.subcaps_impact.map(s => <span key={s} className="chip">{s}</span>)}
+            {t.subcaps_impact.map(s => {
+              const nm = techCellName(entity, s);
+              return (
+                <span key={s} className="chip"
+                      title={nm ? `${nm} · ${s}` : `${s} — this run serves no name for this cell`}>
+                  {/* The separator is a character, not a margin: a 4px gap is
+                      invisible to innerText, to a screen reader and to
+                      copy-paste, all three of which read
+                      "Application Portfolio ManagementP4C3.2.1". */}
+                  {nm ? <>{nm}{" · "}<span className="f-mono" style={{ opacity: .62 }}>{s}</span></> : s}
+                </span>
+              );
+            })}
           </div>
         ) : null}
       </div>
@@ -2498,7 +2793,9 @@ function ClientTechStackDetail({ entity, run, techId }) {
             <Icon name="evidence" size={15} />
             <div style={{ fontSize: 13, fontWeight: 600 }}>Detection evidence</div>
             <span className="spacer" />
-            <span className="b b-muted">{t.evidence.length || 0} items</span>
+            {/* "1 items" on every single-citation product. The idiom is used
+                twice more on this same page. */}
+            <span className="b b-muted">{t.evidence.length || 0} item{t.evidence.length === 1 ? "" : "s"}</span>
           </div>
           {t.evidence.length === 0 ? (
             <div style={{ fontSize: 12, color: "var(--z-muted)", padding: "8px 12px", background: "var(--z-lav)", borderRadius: 6 }}>
@@ -2854,4 +3151,4 @@ function ClientRuns({ entity }) {
   );
 }
 
-Object.assign(window, { ClientContext, ClientHealth, ClientTechStack, ClientTechStackDetail, ClientRuns });
+Object.assign(window, { ClientContext, ClientHealth, ClientTechStack, ClientTechStackDetail, ClientRuns, evidenceAgeRows, calendarValue });

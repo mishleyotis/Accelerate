@@ -994,12 +994,26 @@ def check_recommendation_shape(page, payload):
                     "renders an empty Prerequisites column instead")
 
 
+# The connector's own predicate is membership, not shape: `_is_cell_key` in
+# validation2.py accepts any key ending subcap_id/subcap_ids plus three named
+# spellings the contract uses for the same thing. This mirrored it with two of
+# the five, so `capability_ids`, `subcaps` and `affects` passed unread — and
+# `affects` carries 32 cell ids on the reference run. Measured 2026-08-18: two
+# bad ids injected into insights.cards[0].affects drew zero blocking from this
+# checker and from the connector, while the same two in
+# focus_areas[*].involved_subcap_ids drew two CG-14 refusals from each.
+CELL_KEYS = ("capability_ids", "subcaps", "affects")
+
+
+def is_cell_key(key):
+    return key.endswith(("subcap_id", "subcap_ids")) or key in CELL_KEYS
+
+
 def cell_citations(page, payload):
     """(path, key, cell_id) for every catalogue cell a payload cites."""
     for path, val in walk(payload, page):
         key = leaf_key(path)
-        if isinstance(val, str) and CELL_ID.match(val) and \
-                (key.endswith("subcap_ids") or key == "subcap_id"):
+        if isinstance(val, str) and CELL_ID.match(val) and is_cell_key(key):
             yield path, key, val
 
 

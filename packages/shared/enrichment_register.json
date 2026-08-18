@@ -73,7 +73,7 @@
       "counts": "items",
       "thin_below": 20,
       "basis_key": "detection_basis",
-      "thin_reason": "the technographic scan that widens this register did not run, so the rows here are only those a human search could place",
+      "thin_reason": "no machine technographic scan has widened this register, so the rows here are only those a human search could place",
       "closes_with": "an Explorium scan at ingest, or a Clay Tech Stack scan in a producer session that holds the connector"
     },
     "overview.leadership": {

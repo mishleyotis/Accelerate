@@ -1782,7 +1782,7 @@ function PlatformStoryDetail({
         lineHeight: 1.4,
         wordBreak: "break-word"
       }
-    }, dwText(g.catalogue_path)) : null, dwText(g.gap) ? /*#__PURE__*/React.createElement("div", {
+    }, dwText(g.catalogue_path).replace(/\s*\(count:\s*\d+\)/g, "")) : null, dwText(g.gap) ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
         color: "var(--z-body)",
@@ -2938,7 +2938,17 @@ function liveSurfaceMessages(surface, ctx) {
     const plats = (ps && ps.platforms || []).filter(p => p && typeof p === "object");
     const discarded = (ps && ps.discarded || []).filter(p => p && typeof p === "object");
     const area = dwText(ctx?.platform);
-    const areasOf = p => [...new Set((p.gaps || []).map(g => dwText(g.l3_area)).filter(Boolean))];
+    /* `l3_area` promoted with the producer's own vote count welded onto the
+       label — `[L3-SF-DC-CORE] Data Cloud (count: 3)` — so this subtitle read
+       the tally out to the reader in both audiences, and listed Data Cloud
+       and Agentforce twice each because two counts made one area look like
+       two (P-05). The platform page strips the same suffix at the same
+       boundary (`areaLabel`, pages-d3-d4.jsx). Deduped after the strip, not
+       before. */
+    const areasOf = p => [...new Set((p.gaps || []).map(g => {
+      const s = dwText(g.l3_area);
+      return s ? s.replace(/\s*\(count:\s*\d+\)/g, "").trim() : null;
+    }).filter(Boolean))];
     const named = [...new Set(plats.flatMap(areasOf))];
     const scoped = area ? plats.filter(p => areasOf(p).includes(area)) : [];
     const use = scoped.length ? scoped : plats;

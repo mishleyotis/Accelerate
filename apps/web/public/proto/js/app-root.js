@@ -400,13 +400,32 @@ function firmoFields(firmo) {
       }
       continue;
     }
-    const n = Number(f.value);
-    const num = isFinite(n) ? n : null;
+    /* A number when the producer wrote one, the producer's own words when
+       they did not, null only when there is nothing there. `Number()` alone
+       returned NaN for `employees: "more than 800"` — a stated, cited,
+       UNVERIFIED-badged headcount — and the row that read it disappeared
+       from the panel entirely. A figure written in words is a stated figure. */
+    const coerced = numOrText(f.value);
+    const num = typeof coerced === "number" ? coerced : null;
     if (!FIRMO_PINNED.has(key)) {
+      /* The passthrough rendered `${value} ${unit}`, which printed
+         `8051646636 USD` two rows under an Assets row rendering the same
+         magnitude, through the shared formatter, as `$9.7B`.
+          `value` is now the string a READER should see — the unit is applied
+         and folded in, so a row that appends it adds nothing and a row that
+         calls `fmtFieldValue` again gets the same string back unchanged.
+         The producer's own figure and unit are kept verbatim on `raw_value`
+         and `raw_unit` for anything that needs to compute on them; `display`
+         is the same string as `value`, named for callers that would rather
+         say so. */
+      const shown = fmtFieldValue(f.value, f.unit);
       out.extra_fields.push({
         field: f.field,
-        value: f.value,
-        unit: f.unit || null,
+        value: shown != null ? shown : f.value,
+        unit: shown != null ? null : f.unit || null,
+        display: shown,
+        raw_value: f.value,
+        raw_unit: f.unit || null,
         as_of: f.as_of || null,
         held: false,
         reason: null
@@ -420,20 +439,23 @@ function firmoFields(firmo) {
         out.assets_unit = f.unit;
         out.assets_label = key === "aum" ? "AUM" : "Assets";
         break;
+      // The four COUNT slots keep the producer's words when the figure is
+      // not written as a number. `fmtCount` renders either; a slot that
+      // silently coerced to NaN rendered neither.
       case "employees":
-        out.employees = num;
+        out.employees = coerced;
         break;
       case "branches":
-        out.branches = num;
+        out.branches = coerced;
         break;
       case "regulator":
         out.regulator = f.value;
         break;
       case "members":
-        out.members = num;
+        out.members = coerced;
         break;
       case "customers":
-        out.customers = num;
+        out.customers = coerced;
         break;
       case "net_worth_ratio":
         out.net_worth_ratio = num;
