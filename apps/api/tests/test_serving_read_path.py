@@ -224,7 +224,12 @@ def test_customer_audience_strips_marked_paths_only():
     out, rep = redact_section("heatmap", "evidence_age", dict(data), internal, "internal")
     assert out["rows"][0]["ers"] == 4.5, "internal audience keeps marked fields"
 
-    out, rep = redact_section("overview", "evidence_coverage", json.loads(json.dumps(data)),
+    # Deliberately a section that is NOT in CUSTOMER_WITHHELD: this test is
+    # about path stripping, and a withheld section returns None before any
+    # path is looked at. It used to name overview.evidence_coverage, which
+    # joined CUSTOMER_WITHHELD on 2026-08-18 — at which point this assertion
+    # started reading a withheld section's None as a dict.
+    out, rep = redact_section("overview", "firmographics", json.loads(json.dumps(data)),
                               internal, "customer")
     assert all("ers" not in r and "scoring_rationale" not in r for r in out["rows"])
     assert out["rows"][0]["e_id"] == "E-1", "unmarked fields survive"

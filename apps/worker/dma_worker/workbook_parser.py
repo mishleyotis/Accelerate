@@ -1086,7 +1086,14 @@ def mine_evidence_from_rationales(scores: list) -> dict:
             if cut:
                 frag = frag[:cut.start()]
             frag = frag.strip().strip(" .;·")
-            if len(frag) < 20:
+            # 50, not 20. A citation needs a 50-500 character span: that is
+            # what the column comment states, what `register_evidence`
+            # refuses outside, and what ET-04 blocks a citation for. A mined
+            # 20-49 character fragment used to land, link to cells, and then
+            # refuse the first producer who tried to cite it — so the miner
+            # was manufacturing a defect that surfaced two stages later,
+            # wearing the appearance of evidence the whole way.
+            if len(frag) < 50:
                 continue
             rec = out.setdefault(e_id, {"fragments": [], "subcaps": []})
             if frag not in rec["fragments"]:

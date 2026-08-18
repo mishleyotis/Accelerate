@@ -524,6 +524,18 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                       "fact_count", "claim_type"):
             if r.get(field) is not None and ev.get(field) is None:
                 ev = {**ev, field: r[field]}
+        # The ingest path and the repair job disagreed about these two, and
+        # only the repair job was right. `Evidence_Master` hard-caps
+        # Source_Name at 40 characters and URL at 50 — measured, 119 of 127
+        # names and 89 of 127 URLs sat at exactly the cap on one package —
+        # while the research matrix caps at 60/80. So "longer" is never a
+        # different value, it is more of the same one, and a URL cut
+        # mid-path resolves for nobody while its 80-character copy is
+        # complete. A run that was never hand-repaired kept the truncated
+        # URL even though the research workbook was carrying the whole one.
+        for field in ("source_name", "source_url"):
+            if r.get(field) and len(r[field]) > len(ev.get(field) or ""):
+                ev = {**ev, field: r[field]}
         if r.get("excerpt"):
             # a verbatim 50–500 char passage beats a mined fragment
             ev = {**ev, "excerpt": r["excerpt"]}

@@ -54,6 +54,16 @@ CUSTOMER_WITHHELD = frozenset((
     ("overview", "ceilings"),            # O1b — TRD §11 rung table
     ("overview", "sentiment"),            # O9  — TRD §11 rung table
     ("overview", "thought_leadership"),   # O12 — TRD §11 rung table
+    # O10. The evidence CENSUS, not the evidence: tier histogram, item and
+    # fact counts, the self-sourced share and the gate line. It is how well
+    # WE evidenced the assessment, which is our method showing through, and
+    # it belongs beside the ceilings it explains rather than in front of the
+    # client. It sat outside this set until 2026-08-18 and was reaching the
+    # customer body in full; nothing rendered it only because the web
+    # adapter happens to drop those keys (live-adapter.jsx adaptCoverage),
+    # so a wire leak was standing behind a UI accident. Both promoted
+    # clients were affected, not one.
+    ("overview", "evidence_coverage"),    # O10 — the census, not the scores
     ("heatmap", "alerts"),                # D7 Health, operational
     ("heatmap", "evidence_age"),          # D7 Health, operational
     ("heatmap", "cohort_patterns"),       # D7 Health + cross-entity

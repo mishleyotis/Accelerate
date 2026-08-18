@@ -2819,7 +2819,22 @@ function ClientTechStackDetail({ entity, run, techId }) {
                       <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{e.recency}</span>
                     </div>
                     <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>{e.title}</div>
-                    <div style={{ fontSize: 11.5, fontStyle: "italic", color: "var(--z-body)" }}>"{e.excerpt.slice(0, 140)}…"</div>
+                    {/* Guarded, because an ingested evidence row can carry no
+                        excerpt at all and `null.slice` takes the whole card
+                        down with a TypeError. Measured on Logix run d7ed1d90:
+                        36 of 62 rows had no excerpt, so this threw on the
+                        tech-stack evidence card and the surface rendered
+                        empty — which is a large part of what "no confirmed
+                        tech stack" looked like on screen. Every other
+                        excerpt render site in proto/ already states the
+                        absence instead; this one was the outlier. */}
+                    {dwText(e.excerpt) ? (
+                      <div style={{ fontSize: 11.5, fontStyle: "italic", color: "var(--z-body)" }}>"{dwText(e.excerpt).slice(0, 140)}…"</div>
+                    ) : (
+                      <div style={{ fontSize: 11.5, color: "var(--z-muted)" }}>
+                        No verbatim excerpt is stored for this source, so nothing here quotes it. The citation and its link are above.
+                      </div>
+                    )}
                   </div>
                 );
               })}

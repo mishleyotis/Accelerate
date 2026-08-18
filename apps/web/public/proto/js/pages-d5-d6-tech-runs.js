@@ -4215,13 +4215,18 @@ function ClientTechStackDetail({
         fontWeight: 600,
         marginBottom: 4
       }
-    }, e.title), /*#__PURE__*/React.createElement("div", {
+    }, e.title), dwText(e.excerpt) ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11.5,
         fontStyle: "italic",
         color: "var(--z-body)"
       }
-    }, "\"", e.excerpt.slice(0, 140), "\u2026\""));
+    }, "\"", dwText(e.excerpt).slice(0, 140), "\u2026\"") : /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: "var(--z-muted)"
+      }
+    }, "No verbatim excerpt is stored for this source, so nothing here quotes it. The citation and its link are above."));
   }))), /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {

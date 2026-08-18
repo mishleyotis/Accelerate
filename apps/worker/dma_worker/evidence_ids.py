@@ -102,6 +102,65 @@ def qualify(e_id: str, token: str) -> str:
     return f"E-{token}-{e_id[2:]}" if BARE_PACKAGE.match(str(e_id).upper()) else e_id
 
 
+# The contract floor for a citable span. The schema states it on the column
+# (`excerpt TEXT, -- verbatim, 50-500 chars, verified at registration`),
+# `register_evidence` refuses outside it, and ET-04 blocks a citation that
+# resolves to a row outside it. The worker used to be the one writer of this
+# column that did not know the number.
+EXCERPT_MIN, EXCERPT_MAX = 50, 500
+
+
+def citable_span(value):
+    """`(excerpt, reason_it_is_not_citable)` — exactly one of the two is set.
+
+    Three different values were being stored in this column and only one of
+    them was a span:
+
+      · a real 50-500 character quotation;
+      · a fragment under the floor — the rationale miner accepts 20 chars —
+        which lands, links to cells, and is then refused by ET-04 the moment
+        a producer tries to cite it;
+      · the empty string, produced by a whitespace-only workbook cell,
+        because `"   "` is truthy and `"   ".strip()` is `""`.
+
+    The empty string is the expensive one, and it is why this function
+    returns None rather than tidying in place. `repair_evidence_namespace`
+    keys its third arm on `excerpt IS NULL`; `embed` filters on
+    `IS NOT NULL`; and `CONTENT_HASH_EXPR` concatenates the excerpt without
+    a COALESCE, so a NULL excerpt yields a NULL `content_hash` and the
+    dedup index never fires. A row holding `''` is therefore invisible to
+    the repair, absent from the embedding corpus and outside the dedup
+    index, while reading as populated to every check written against None.
+    Measured on Logix run d7ed1d90: 36 of 62 rows uncitable, and the whole
+    evidence index had to be re-registered by hand from the fetched sources.
+
+    A short fragment is dropped rather than stored for the same reason a
+    guessed field is refused everywhere else in this build: it is not the
+    thing it claims to be, and storing it converts a visible absence into an
+    invisible defect that surfaces as a blocked submission much later.
+    """
+    if value is None:
+        return None, "the package states no excerpt for this row"
+    span = str(value).strip()
+    if not span:
+        return None, "the package's excerpt cell is empty or whitespace"
+    if len(span) < EXCERPT_MIN:
+        return None, (f"the package states a {len(span)}-character fragment, "
+                      f"under the {EXCERPT_MIN}-character floor a citation "
+                      "needs; stored as absent rather than as a span that "
+                      "would be refused at ET-04")
+    return span[:EXCERPT_MAX], None
+
+
+def stored_url(value):
+    """A source URL, or None. Same reason as above: `''` and NULL were two
+    spellings of 'no url' and only one of them was ever queried for."""
+    if value is None:
+        return None
+    url = str(value).strip()
+    return url or None
+
+
 class EvidenceLander:
     """Lands package evidence rows for one entity, and records what each
     workbook-local id resolves to.
@@ -174,7 +233,15 @@ class EvidenceLander:
             ev = {**ev, "ers": None}
 
         local = local_id(ev["e_id"])
-        url, excerpt = ev.get("source_url"), ev.get("excerpt")
+        url = stored_url(ev.get("source_url"))
+        excerpt, uncitable = citable_span(ev.get("excerpt"))
+        if uncitable:
+            # Recorded per row, so "this package landed evidence nobody can
+            # cite" is a number on the scan rather than something a producer
+            # discovers by writing prose about it three days later.
+            self._observe("evidence_excerpt_uncitable",
+                          {"package_local_id": ev["e_id"],
+                           "source_url": url, "reason": uncitable})
 
         prior, prior_same = (None, False)
         if local:

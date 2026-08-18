@@ -200,7 +200,15 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       tag exists: caught here only because the deployed ETag was READ after
 #       the change went live and still said @6 — the reader holding a cached
 #       null is exactly the reader who would 304 back onto it.
-SERVE_RULES = "serve-rules@7"
+#   @8  2026-08-18 — `overview.evidence_coverage` joins CUSTOMER_WITHHELD.
+#       The evidence CENSUS — tier histogram, item and fact counts, the
+#       self-sourced share — was reaching the customer body in full on every
+#       promoted client. It rendered nowhere only because the web adapter
+#       drops those keys, so the leak was real on the wire and invisible on
+#       the page, which is the worst pair: a hand check of the screen agrees
+#       with a green test and neither is looking at the body. A customer who
+#       fetched before this bump holds a body carrying the census.
+SERVE_RULES = "serve-rules@8"
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
@@ -220,7 +228,14 @@ def etag_for(run_meta: dict, audience: str) -> str:
     return f'W/"{run_meta["run_id"]}.{epoch}.{audience}.{SERVE_RULES}"'
 
 
-def build_page(cur, page: str, display_id: str, audience: str = "internal",
+# `audience` has NO default. It used to default to "internal", which is
+# fail-OPEN: unreachable over HTTP because all twelve routes pass a value
+# normalised by `normalise_audience`, but a new in-process caller that
+# omitted the kwarg would have been handed the full internal body in
+# silence. The module that decides redaction defaults to `customer` for
+# exactly this reason (redaction.normalise_audience); the function it
+# decides for should not disagree with it.
+def build_page(cur, page: str, display_id: str, audience: str,
                run: str | None = None, role: str | None = None,
                allow_history: bool = False) -> dict:
     if audience not in AUDIENCES:
