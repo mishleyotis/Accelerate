@@ -279,8 +279,12 @@ did, it would render as filler under a real client's name.
 thin}` and it declares no `state` and no `sources_searched`. Supplying them
 anyway is not harmless: CG-04 sweeps section keys only, so they validate, and on
 one payload measured that day 394 cells bought a CG-15 *and* an AG-03 exemption
-with keys `heatmap_cell_evidence` has no column for — dropped at promotion, seen
-by nobody. Both gates now check the item shape, so they buy nothing.
+with keys the CONTRACT does not declare — seen by nobody. Both gates now check
+the item shape, so they buy nothing. (`heatmap_cell_evidence` has since been
+given a `sources_searched` column, so that one is no longer dropped; it is still
+not a contract key on `cells[*]`, and the exemption it used to buy is gone
+either way. The column is the absence route the SECTION has, through
+`empty_state`.)
 
 ### The order the work is done in, because the order cannot be recovered late
 

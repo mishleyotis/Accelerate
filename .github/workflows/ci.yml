@@ -54,6 +54,16 @@ jobs:
       # have no reader.
       - name: Gate F — a declared key has a reader
         run: python3 scripts/gate_f_declared_keys_have_readers.py
+      # The producer prompts are the synthesis agent's whole picture of what
+      # survives promotion, so a stale claim there does not merely misinform:
+      # a producer told a field is dropped stops sending it, and the surface
+      # goes empty for a reason no payload, gate or page can show. One such
+      # paragraph said `capped_subcap_ids` has no column on
+      # `context_issue_register` and was true when written; migration 0027
+      # gave it one. Stdlib only, like the gates above it — this job installs
+      # nothing (Gate G rode here once and failed on `No module named pytest`).
+      - name: Gate H — the prompts do not claim a stored field is dropped
+        run: python3 scripts/gate_h_prompt_persistence_claims.py
       # The curation covered 115 of the specification's 127 surfaces and walked
       # past twelve — three whole Insights surfaces carrying eighteen P0 checks
       # among them, in neither artefact, not included and not excluded. Nothing

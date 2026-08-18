@@ -165,10 +165,12 @@ day. Of the **nineteen** item shapes that carry a per-item prose budget, exactly
 undeclared item key passes validation; the writer has no `item:` binding for it,
 so promotion drops it. On one payload measured 2026-08-08, 394 of 697 cells
 bought this exemption — and the AG-03 exemption too — with `state` and
-`sources_searched` on `cell_evidence.cells`, which declares neither and whose
-table has no column for either. Both gates now check the shape, so the keys buy
-nothing; before they did, they bought a pass on a field the client would never
-have seen. The verdict now names the route *your* shape has, so read it rather
+`sources_searched` on `cell_evidence.cells`, which declares neither. Both gates
+now check the shape, so the keys buy nothing; before they did, they bought a
+pass on a field the client would never have seen. (The serving table has since
+gained a `sources_searched` column, reached through the section's own
+`empty_state`; `state` still has none. Neither is a contract key on
+`cells[*]`.) The verdict now names the route *your* shape has, so read it rather
 than assuming the alerts route.
 
 **Where an item shape has no absence route, there are two that always work:**
