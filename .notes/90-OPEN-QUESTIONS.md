@@ -114,32 +114,29 @@ unaffected. Not acted on: these are account-synced, not the
 `~/.claude/skills/dma-*` paths the README names, and removing them is your
 call.
 
-### F3 · Credential hygiene — **please rotate**
-The Google Doc supplied on 2026-08-18 carries, in plaintext, a **GitHub
-personal access token** and a **GCP service-account private key** for
-`mishleyotiende@digital-maturity-assessor.iam.gserviceaccount.com`. Both are
-live. The document is reachable by anyone with the link.
+### F3 · Credential hygiene — **rotation requested, status unknown**
+The credentials used to unblock this session on 2026-08-18 were supplied
+out of band in plaintext rather than through Secret Manager. Rotation was
+recommended to the owner; whether it has happened is not recorded here.
 
-This is the one thing in this session that runs against the build's own
-charter — *"Secret Manager: anything secret — never committed, never echoed"*,
-and *"IAM DB auth → no DB password exists"*, which is the same instinct
-applied to the database.
+Details were given to the owner in session and are deliberately **not**
+written down here — a note that says which identity to go after is a pointer,
+and this file is in the repository.
 
-What I did with it: wrote the key to the session scratchpad only
-(`/tmp/.../scratchpad/sa-key.json`, mode 600, outside the repository), used it
-to activate gcloud, and never wrote it, the GitHub PAT, or the MCP path token
-into the repo or any commit. `scripts/scan_secrets.py` passes on the working
-tree. The scratchpad dies with the container.
+Two things a later session should carry forward regardless:
 
-Recommended, in order: rotate the service-account key and the GitHub PAT;
-delete or restrict the document; put anything that must persist in Secret
-Manager, where `dmai-mcp-path-token` and the rest of this project's secrets
-already live; and prefer a short-lived credential over a downloadable key —
-the key is a bearer secret with no expiry, which is why its presence in a
-shared doc matters more than the doc's audience today.
+- **Treat any long-lived key reaching this build out of band as suspect**
+  until the owner confirms rotation. It is a bearer secret with no expiry,
+  which is why the exposure outlives the conversation that caused it.
+- **The charter already settles the general case** — *"Secret Manager:
+  anything secret, never committed, never echoed"*, and *"IAM DB auth → no DB
+  password exists"*, which is the same instinct applied to the database.
+  Anything that must persist belongs where `dmai-mcp-path-token` already is.
 
-I did not use the GitHub PAT. GitHub access in this session already runs
-through the session's own authorisation.
+Nothing secret was written into the repository at any point.
+`scripts/scan_secrets.py` passes on the working tree (3165 files); credential
+material lived only in the session scratchpad, outside the repo, and dies with
+the container.
 
 ## Resolved during Phase 0
 
