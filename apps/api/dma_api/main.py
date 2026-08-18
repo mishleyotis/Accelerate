@@ -149,8 +149,22 @@ def catalogue(entity: str | None = None, run: str | None = None):
                       for c, p, n in rows]
         pillars = [{"id": pid, "name": n, "short": s}
                    for pid, (n, s) in _PILLAR_NAMES.items()]
+        # The L3 platform map, so a code never has to render as itself.
+        # `ccg_l3_platforms` has held `l3_id -> vendor, platform_name` since
+        # migration 0004 and NOTHING read it: not this endpoint, not
+        # get_capability_catalogue, not the front end. So the payload's
+        # `[L3-SF-DC-CORE] Data Cloud` reached the platform page verbatim —
+        # 59 occurrences of 7 distinct codes on one promoted run — and the UI
+        # compensated with a hard-coded five-vendor alias table that knows
+        # nothing about any client. A label the catalogue already stores is
+        # not a thing to guess at downstream.
+        cur.execute("""SELECT l3_id, vendor, platform_name, category
+                         FROM ccg_l3_platforms WHERE version = %s
+                        ORDER BY l3_id""", (version,))
+        l3_platforms = [{"id": lid, "vendor": v, "name": n, "category": c}
+                        for lid, v, n, c in cur.fetchall()]
         return {"version": version, "pillars": pillars,
-                "categories": categories,
+                "categories": categories, "l3_platforms": l3_platforms,
                 # Stated rather than implied: a caller that did not pin has to
                 # be able to tell that it did not.
                 "is_pinned": pinned_to is not None, "pinned_to_run": pinned_to}

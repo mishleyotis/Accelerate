@@ -99,6 +99,11 @@ export async function GET(req) {
     import_scans: session?.role === "ADMIN" ? (scans?.scans || []) : null,
     catalogue_version: catalogue?.version || null,
     dev_login: process.env.ALLOW_DEV_LOGIN === "1",
+    // `l3_id -> vendor, platform_name`, so the platform surfaces can
+    // resolve a catalogue code instead of printing it. Boot-time and
+    // cached, because the resolution has to be synchronous inside a
+    // label function.
+    l3_platforms: catalogue?.l3_platforms || null,
     pillars: catalogue?.pillars || null,
     categories: catalogue?.categories || null,
     entities: directory?.entities || [],

@@ -2098,7 +2098,11 @@ function liveSurfaceMessages(surface, ctx) {
        boundary (`areaLabel`, pages-d3-d4.jsx). Deduped after the strip, not
        before. */
     const areasOf = (p) => [...new Set((p.gaps || [])
-      .map(g => { const s = dwText(g.l3_area); return s ? s.replace(/\s*\(count:\s*\d+\)/g, "").trim() : null; })
+      // Same rule as pages-d3-d4's areaLabel, which this used to half-copy:
+      // strip the vote-count suffix AND resolve or drop the catalogue code.
+      // Two copies that disagreed meant the drawer subtitle printed a code
+      // the card above it had already resolved.
+      .map(g => { const s = dwText(g.l3_area); return s ? areaLabel(s) : null; })
       .filter(Boolean))];
     const named = [...new Set(plats.flatMap(areasOf))];
     const scoped = area ? plats.filter(p => areasOf(p).includes(area)) : [];

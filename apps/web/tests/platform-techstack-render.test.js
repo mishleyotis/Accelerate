@@ -41,6 +41,14 @@ const RUN_ID = "DMA-ASM-TCU-20260801-0001";
 const AREA_CLEAN = "[L3-SF-DC-CORE] Data Cloud";
 const AREA_TALLIED = "[L3-SF-DC-CORE] Data Cloud (count: 3)";
 const AREA2_CLEAN = "[L3-DB-MLFLOW] MLflow (Databricks-managed)";
+// What a reader should end up with. The bracketed id is catalogue grammar:
+// `ccg_l3_platforms` maps it to a vendor and a platform name, and until
+// 2026-08-18 nothing read that table, so the code rendered as itself — 59
+// occurrences of 7 distinct codes on one promoted run. Resolved where the
+// catalogue knows it, dropped where it does not; either way the human half
+// survives and the code does not reach the page.
+const AREA_HUMAN = "Data Cloud";
+const AREA2_HUMAN = "MLflow (Databricks-managed)";
 
 const BLOCKING_TITLE =
   "Model governance is the one control the compliance build did not buy";
@@ -273,8 +281,17 @@ for (const AUDIENCE of ["internal", "customer"]) {
         assert.deepStrictEqual(leaky, [],
           `the tally reached a tooltip: ${JSON.stringify(leaky.slice(0, 3))}`);
         // and the label itself still renders — stripping must not blank it
-        assert.ok(text.includes(AREA_CLEAN),
+        assert.ok(text.includes(AREA_HUMAN),
           "the area label vanished with its tally; the strip took the label too");
+        // P-05b · and the catalogue code does not reach the reader. This is
+        // the half that was missing: the assertion above passed for a year
+        // while `[L3-SF-DC-CORE]` sat in front of every one of these labels.
+        const codes = text.match(/\[L3-[A-Za-z0-9._-]+\]/g) || [];
+        assert.deepStrictEqual(codes, [],
+          `a raw catalogue code reached the page: ${JSON.stringify(codes.slice(0, 4))}`);
+        const codedTitles = titles.filter((x) => /\[L3-/.test(x));
+        assert.deepStrictEqual(codedTitles, [],
+          `a raw catalogue code reached a tooltip: ${JSON.stringify(codedTitles.slice(0, 3))}`);
       });
 
       await t.test("P-06 · a tile counts the recommendations that name it", () => {

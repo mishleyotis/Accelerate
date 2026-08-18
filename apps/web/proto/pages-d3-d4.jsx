@@ -103,10 +103,55 @@ function pfText(v) {
    Cloud` under one L3 code — stay two areas: folding those would be this
    app deciding two labels mean one thing, which is a producer's call. */
 const PF_COUNT_SUFFIX = /\s*\(count:\s*\d+\)/g;
+const PF_L3_CODE = /\[(L3-[A-Za-z0-9._-]+)\]\s*/g;
+
+/* `l3_id -> "Vendor Platform"`, built once from the boot catalogue.
+   `ccg_l3_platforms` has stored this since migration 0004 and nothing read
+   it, so `[L3-SF-DC-CORE] Data Cloud` rendered verbatim on a client's
+   platform page — 59 occurrences of 7 distinct codes on one promoted run.
+   The code is internal grammar; the reader gets the name. */
+let _l3Map = null;
+function l3Label(code) {
+  if (_l3Map === null) {
+    _l3Map = new Map();
+    const rows = (typeof window !== "undefined" && window.DMA_LIVE
+                  && window.DMA_LIVE.l3_platforms) || [];
+    for (const r of rows) {
+      if (!r || !r.id) continue;
+      const name = [r.vendor, r.name].filter(Boolean).join(" ").trim();
+      if (name) _l3Map.set(String(r.id).toUpperCase(), name);
+    }
+  }
+  return _l3Map.get(String(code).toUpperCase()) || null;
+}
+
 function areaLabel(v) {
   if (v === null || v === undefined) return null;
-  const s = String(v).replace(PF_COUNT_SUFFIX, "").trim();
-  return s || null;
+  const raw = String(v).replace(PF_COUNT_SUFFIX, "").trim();
+
+  /* Resolved ANYWHERE in the string, not just at the front. The first cut of
+     this anchored on ^, which fixed the tile labels and left the catalogue
+     PATH untouched — "P2 > P2C4 > P2C4.5 > P2C4.5.1 > [L3-SF-DC-CORE] Data
+     Cloud > Data Stream" renders in a tooltip, so the code was off the card
+     and still on the page. Found by the assertion added with this change,
+     which is the argument for adding it.
+
+     The producer writes the code AND the human name, so resolving one and
+     keeping the other prints "Salesforce Data Cloud Data Cloud". The
+     catalogue label carries the vendor and is the fuller of the two, so it
+     wins wherever it already says what the tail says. The tail runs to the
+     next path separator and no further. */
+  const norm = (x) => x.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const out = raw.replace(
+    /\[(L3-[A-Za-z0-9._-]+)\]([^>|·]*)/g,
+    (_m, code, rest) => {
+      const label = l3Label(code);
+      const tail = (rest || "").trim();
+      if (!label) return tail ? ` ${tail}` : "";   // unknown code: drop it
+      if (!tail) return label;
+      return norm(label).includes(norm(tail)) ? label : `${label} · ${tail}`;
+    });
+  return out.replace(/\s{2,}/g, " ").trim() || null;
 }
 
 /* Evidence chips for a promoted id list.

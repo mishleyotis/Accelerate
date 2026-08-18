@@ -171,6 +171,17 @@ def get_capability_catalogue(conn, run_id) -> dict:
                    "name": name or stated_names.get(cid)}
                   for cid, pid, name in cur.fetchall()]
 
+    # The L3 platform catalogue. `ccg_subcaps.l3_platform_areas` gives a
+    # producer the CODES a cell maps to and this is the only place their
+    # names live, so without it the producer writes the code into prose and
+    # the page renders it. That is exactly what happened: `[L3-SF-DC-CORE]`
+    # and six siblings reached a client's platform surface because no tool
+    # in this system could turn one into "Salesforce Data Cloud".
+    l3_platforms = _rows(cur, """
+        SELECT l3_id, vendor, platform_name, category
+          FROM ccg_l3_platforms WHERE version = %s ORDER BY l3_id""",
+        (version,))
+
     return _jsonable({
         "ccg_catalog_version": version,
         "pillars": [{"pillar_id": p["pillar_id"], "name": p.get("name"),
@@ -179,6 +190,7 @@ def get_capability_catalogue(conn, run_id) -> dict:
         "categories": categories,
         "subcaps": subcaps,
         "aliases": aliases,
+        "l3_platforms": l3_platforms,
     })
 
 
