@@ -202,10 +202,19 @@ def _check_page_thread(page, section, fields, body) -> list:
         "written, the surfaces are not yet a page.")]
 
 
-#: Statuses that count toward a layer's `detected` figure. CONFIRMED and
-#: INFERRED are the two the contract calls detected; CLAIMED is a supplier's
-#: word for it and ABSENT is a searched absence, and neither is a detection.
-_DETECTED_STATUSES = frozenset({"CONFIRMED", "INFERRED"})
+#: What `detected` counts, and it is defined by SUBTRACTION for a reason.
+#:
+#: ABSENT is the one status that means "a slot was searched here and nothing
+#: was found". Every other status — CONFIRMED, INFERRED, CLAIMED — is a slot
+#: with something in it at a stated confidence, and the confidence is what the
+#: row's own badge says. So detected = rows - absent.
+#:
+#: The first cut of this gate counted CONFIRMED and INFERRED only, which reads
+#: defensibly and was still wrong: the frontend computes the same figure by
+#: subtraction (live-adapter.jsx techLayersOf) and the frontend is what a
+#: reader sees. Two definitions of one word on one page is the defect this
+#: gate exists to refuse, so the gate takes the renderer's.
+_UNDETECTED_STATUSES = frozenset({"ABSENT"})
 
 
 def _check_rollup_agrees(section, body) -> list:
@@ -231,7 +240,7 @@ def _check_rollup_agrees(section, body) -> list:
         if not isinstance(it, dict):
             continue
         lay = str(it.get("layer") or "").strip().upper()
-        if str(it.get("status") or "").strip().upper() in _DETECTED_STATUSES:
+        if str(it.get("status") or "").strip().upper() not in _UNDETECTED_STATUSES:
             counted[lay] = counted.get(lay, 0) + 1
     out = []
     for i, lay in enumerate(layers):
@@ -249,10 +258,13 @@ def _check_rollup_agrees(section, body) -> list:
             out.append(_reason(
                 "CG-24", section, f"{section}.layers[{i}].detected",
                 f"layer {name} sends detected={sent} and its own items[] "
-                f"hold {got}: of the {rows} rows on this layer, {got} carry "
-                f"status CONFIRMED or INFERRED. Compute this figure from "
-                f"items[] at build time rather than asserting it, or the two "
-                f"numbers on the card drift apart the moment a row is added."))
+                f"hold {got}: of the {rows} rows on this layer, {rows - got} "
+                f"are ABSENT and the other {got} place something at a stated "
+                f"confidence. Compute this figure from items[] at build time "
+                f"rather than asserting it, or the two numbers on the card "
+                f"drift apart the moment a row is added. `expected` is not "
+                f"checked here: it is a judgement about the reference class, "
+                f"not a count of these rows."))
     return out
 
 

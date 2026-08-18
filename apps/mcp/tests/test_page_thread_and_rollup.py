@@ -112,24 +112,45 @@ def test_a_computed_rollup_passes():
              + [_row("TS-010", "OPS", "CLAIMED"),
                 _row("TS-011", "OPS", "ABSENT"),
                 _row("TS-020", "DATA", "INFERRED")])
-    layers = [{"layer": "OPS", "pillar_id": "P3", "detected": 3, "expected": 7},
+    # OPS: five rows, one ABSENT -> four detected. DATA: one row, none absent.
+    layers = [{"layer": "OPS", "pillar_id": "P3", "detected": 4, "expected": 7},
               {"layer": "DATA", "pillar_id": "P4", "detected": 1, "expected": 5}]
     assert not _ids(_reasons("techstack", _ts(items, layers)), "CG-24")
 
 
-def test_claimed_and_absent_are_not_detections():
-    """The distinction the whole register turns on, pinned.
+def test_absent_is_the_only_status_that_is_not_a_detection():
+    """The definition, pinned, because there are two plausible ones.
 
-    CLAIMED is a supplier's word for it and ABSENT is a searched absence.
-    Counting either as detected is how a page reports an estate it has not
-    established.
+    ABSENT means a slot was searched and nothing was found. CLAIMED means
+    something was found on a supplier's word alone — weak, and the row's own
+    badge says so. The frontend computes this figure by subtracting ABSENT
+    (live-adapter.jsx techLayersOf), and two definitions of one word on one
+    page is the defect this gate exists to refuse.
     """
     items = [_row("TS-001", "OPS", "CLAIMED"), _row("TS-002", "OPS", "ABSENT")]
+    assert not _ids(_reasons("techstack",
+                             _ts(items, [{"layer": "OPS", "pillar_id": "P3",
+                                          "detected": 1, "expected": 7}])),
+                    "CG-24")
     reasons = _ids(_reasons("techstack",
                             _ts(items, [{"layer": "OPS", "pillar_id": "P3",
                                          "detected": 2, "expected": 7}])),
                    "CG-24")
     assert reasons and "detected=2" in reasons[0]["message"]
+
+
+def test_expected_is_a_judgement_and_is_not_checked():
+    """A reference-class denominator is not a count of these rows.
+
+    Deriving it from them makes it unfalsifiable: a register with no ABSENT
+    rows then reads "15 of 15 detected", which is what a promoted client
+    showed over a payload stating 12 of 17.
+    """
+    items = [_row("TS-001", "OPS", "CONFIRMED")]
+    assert not _ids(_reasons("techstack",
+                             _ts(items, [{"layer": "OPS", "pillar_id": "P3",
+                                          "detected": 1, "expected": 40}])),
+                    "CG-24")
 
 
 def test_a_layer_with_no_rows_must_send_zero():

@@ -741,6 +741,10 @@ function adaptRecommendations(recommendations) {
 function techLayersOf(techstack) {
   const items = techstack && techstack.items || [];
   if (!items.length) return [];
+  const promoted = new Map();
+  for (const r of techstack && techstack.layers || []) {
+    if (r && r.layer) promoted.set(String(r.layer).trim().toUpperCase(), r);
+  }
   const order = ["OPS", "CUST", "DATA", "INFRA"];
   const rows = [];
   for (const layer of order) {
@@ -748,17 +752,44 @@ function techLayersOf(techstack) {
     if (!at.length) continue;
     const absent = at.filter(t => t.status === "ABSENT").length;
     const confirmed = at.filter(t => t.status === "CONFIRMED").length;
+    const roll = promoted.get(layer) || {};
     rows.push({
       layer,
-      pillar_id: (at.find(t => t.pillar_id) || {}).pillar_id || null,
+      pillar_id: roll.pillar_id || (at.find(t => t.pillar_id) || {}).pillar_id || null,
+      // COUNTED, never taken. Invariant 8: the register is the source of
+      // truth for how many slots have something in them, and an ABSENT row
+      // is the one status meaning "searched here and found nothing".
       detected: at.length - absent,
-      expected: at.length,
+      // JUDGED, so taken from the producer where it stated one. `expected`
+      // is not a count of anything on this page — it is how many product
+      // slots this assessment expects an institution of this shape to fill,
+      // and deriving it from the rows makes it unfalsifiable: a register
+      // with no ABSENT rows then reads "15 of 15 detected", which is what a
+      // promoted client showed on 2026-08-18 over a payload stating 12 of
+      // 17. Two figures on one page counting different things, which is the
+      // defect CG-24 exists for, arriving between the payload and the
+      // renderer rather than inside either.
+      //
+      // The row count remains the fallback, because a run that promoted no
+      // rollup still owes the reader a real ratio rather than a constant.
+      expected: roll.expected != null && isFinite(Number(roll.expected)) ? Number(roll.expected) : at.length,
+      expected_basis: roll.expected_basis || null,
       confirmed,
       is_primary_gap: false,
       basis: null
     });
   }
   if (!rows.length) return rows;
+  // The producer's own flag wins where it set one: the contract calls
+  // is_primary_gap "a judgement the surface makes explicitly", and a
+  // judgement belongs to whoever made it. The derived rule below stands in
+  // only when no layer was flagged.
+  const flagged = rows.filter(r => promoted.get(r.layer) && promoted.get(r.layer).is_primary_gap);
+  if (flagged.length === 1) {
+    flagged[0].is_primary_gap = true;
+    flagged[0].basis = "named by this assessment as the primary gap layer";
+    return rows;
+  }
   const fewest = Math.min(...rows.map(r => r.confirmed));
   let cands = rows.filter(r => r.confirmed === fewest);
   if (cands.length > 1) {
