@@ -100,3 +100,30 @@ test("a section's declared absence renders its reason, closure and ladder", () =
       + "turns a finding back into a blank space.");
   }
 });
+
+test("the client view defaults to the body a client may read", () => {
+  /* Audience is a UI toggle, not a role-derived value, so whatever this says
+     is what every reader gets on first paint. It said "internal", which put
+     the reasoning traces, the capability ceilings, the evidence census and
+     the whole Context dashboard in front of anyone who opened a client — no
+     action taken to ask for them, and a client potentially sitting beside
+     the screen.
+
+     Every other tier in this system fails closed: `normalise_audience`
+     resolves an unknown audience to `customer`, and `build_page` has no
+     default at all. The browser was the last one failing open. */
+  const src = fs.readFileSync(path.join(PROTO, "app-root.jsx"), "utf8");
+  const m = src.match(/"audience_default":\s*"([a-z]+)"/);
+  assert.ok(m, "TWEAK_DEFAULTS no longer declares audience_default");
+  assert.strictEqual(m[1], "customer",
+    "the client view must default to the customer body. The internal body is "
+    + "one toggle away for an analyst who asks for it; it must not be what a "
+    + "reader is handed before asking.");
+
+  // and the compiled bundle agrees, because that is what ships
+  const built = fs.readFileSync(
+    path.join(PROTO, "..", "public", "proto", "js", "app-root.js"), "utf8");
+  const b = built.match(/audience_default":\s*"([a-z]+)"/);
+  assert.ok(b && b[1] === "customer",
+    "the source says customer and the compiled bundle does not — run build:proto");
+});

@@ -128,5 +128,24 @@ async function settle(page, quietMs = 400, timeoutMs = 15000) {
   }
 }
 
+/* Drive the app's OWN audience toggle.
+ *
+ * The client view now DEFAULTS to the customer body — see app-root.jsx, where
+ * `audience_default` moved from "internal" to "customer" because audience is
+ * a UI toggle rather than anything derived from the signed-in role, so the old
+ * default put reasoning traces, ceilings and the evidence census in front of
+ * every reader before they asked. A suite asserting internal-only content
+ * therefore has to ASK for the internal body, exactly as an analyst now does.
+ */
+async function selectAudience(page, which) {
+  const want = String(which || "").toLowerCase();
+  await page.evaluate((w) => {
+    const b = [...document.querySelectorAll("button")]
+      .find((n) => (n.textContent || "").trim().toLowerCase() === w);
+    if (b) b.click();
+  }, want);
+  await settle(page);
+}
+
 module.exports = { WEB, PUBLIC, JS_DIR, fsGlob, resolvePlaywright, scriptList,
-                   startServer, settle };
+                   startServer, settle, selectAudience };

@@ -40,7 +40,8 @@ const assert = require("node:assert");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const { resolvePlaywright, startServer, settle } = require("./proto-page-harness");
+const { resolvePlaywright, startServer, settle, selectAudience } =
+  require("./proto-page-harness");
 
 const ENTITY = "test-credit-union";
 const RUN_ID = "DMA-ASM-TCU-20260801-0001";
@@ -216,6 +217,10 @@ test("D1 overview renders what the run promoted", { skip, concurrency: false }, 
     });
     await page.goto(`${base}/#/clients/${ENTITY}/overview`, { waitUntil: "domcontentloaded" });
     await settle(page);
+    // The view defaults to the CUSTOMER body now, so a subtest asserting
+    // internal-only content has to ask for the internal one — which is what
+    // an analyst does, and therefore what the test should model.
+    await selectAudience(page, audience === "customer" ? "customer" : "internal");
     return { page, errors };
   };
 

@@ -26,7 +26,7 @@ const { test } = require("node:test");
 const assert = require("node:assert");
 const path = require("node:path");
 
-const { JS_DIR, resolvePlaywright, startServer, settle } =
+const { JS_DIR, resolvePlaywright, startServer, settle, selectAudience } =
   require("./proto-page-harness");
 
 const ENTITY = "test-credit-union";
@@ -361,6 +361,12 @@ test("surfaces read the axis they name, and answer the control the reader presse
     // surfaces these cases are about are withheld on load. Role state is
     // per-document, so this is redone for every case rather than once.
     await actAsAdmin(page);
+    // And the view now lands on the CUSTOMER body by default (app-root's
+    // `audience_default`, moved off "internal" so a reader is not handed the
+    // internal one before asking). These cases are ABOUT internal surfaces —
+    // reasoning traces, the self-check, thought leadership — so they ask for
+    // the internal body the same way an analyst does.
+    await selectAudience(page, "internal");
     return { ctx, page, errors };
   };
   // Same switch tests/qa-gate.js makes, for the same reason: the acting-as

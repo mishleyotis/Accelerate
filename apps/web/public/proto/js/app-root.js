@@ -2,9 +2,28 @@
    DMA INSIGHTS · App root - router + provider + tweaks
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* `audience_default` is "customer", and that is a deliberate reversal.
+
+   It was "internal", and because audience is a UI toggle rather than
+   anything derived from the signed-in role, EVERY reader landed on the
+   internal body: the reasoning traces, the capability ceilings, the evidence
+   census and the whole Context dashboard, on the first page load, with no
+   action taken to ask for them. Reported three times as "information I
+   instructed to be removed still shows up", and each time it was this line
+   rather than a redaction defect — the API withholds all of it from the
+   customer audience already, and had been all along.
+
+   Defaulting to the client-safe body matches what every other layer here
+   does: `normalise_audience` resolves an unknown audience to `customer`,
+   and `build_page` no longer defaults at all. The browser was the one tier
+   still failing open.
+
+   The toggle is unchanged and one click away, so an analyst who wants the
+   internal body still has it — they now ask for it, which is the right way
+   round for a surface a client can be sitting in front of. */
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "role": "ANALYST",
-  "audience_default": "internal",
+  "audience_default": "customer",
   "ip_open_default": false,
   "overview_layout": "balanced",
   "heatmap_density": "comfortable",
