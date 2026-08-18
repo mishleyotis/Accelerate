@@ -907,7 +907,7 @@ function InteractiveTimeline({
     onClick: () => setSelectedEvent(i === selectedEvent ? null : i),
     onMouseEnter: () => setHoverEvent(i),
     onMouseLeave: () => setHoverEvent(null),
-    title: e.date ? `${e.date} · ${e.title}` : e.title,
+    title: e.date ? `${fmtDate(e.date)} · ${e.title}` : e.title,
     style: {
       textAlign: "center",
       lineHeight: 1.4,
@@ -922,7 +922,7 @@ function InteractiveTimeline({
     style: {
       color: hoverEvent === i || selectedEvent === i ? TONE[e.signal] : "var(--z-muted)"
     }
-  }, e.date || ""), /*#__PURE__*/React.createElement("div", {
+  }, e.date ? fmtDate(e.date) : ""), /*#__PURE__*/React.createElement("div", {
     className: "txt-fit-2",
     style: {
       fontSize: 9.5,
@@ -2144,7 +2144,7 @@ function Timeline({
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "f-mono"
-  }, e.date), /*#__PURE__*/React.createElement("div", {
+  }, e.date ? fmtDate(e.date) : ""), /*#__PURE__*/React.createElement("div", {
     style: {
       color: TONE[e.signal],
       fontWeight: hover === i ? 600 : 400
@@ -2168,7 +2168,7 @@ function Timeline({
       fontSize: 10,
       color: "var(--z-muted)"
     }
-  }, events[hover].date), /*#__PURE__*/React.createElement("strong", {
+  }, events[hover].date ? fmtDate(events[hover].date) : ""), /*#__PURE__*/React.createElement("strong", {
     style: {
       fontSize: 13
     }

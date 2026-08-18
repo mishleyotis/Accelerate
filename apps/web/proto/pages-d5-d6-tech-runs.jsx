@@ -597,10 +597,10 @@ function InteractiveTimeline({ events, setHoverEvent, setSelectedEvent, selected
         {events.map((e, i) => (
           <button key={e.id} onClick={() => setSelectedEvent(i === selectedEvent ? null : i)}
             onMouseEnter={() => setHoverEvent(i)} onMouseLeave={() => setHoverEvent(null)}
-            title={e.date ? `${e.date} · ${e.title}` : e.title}
+            title={e.date ? `${fmtDate(e.date)} · ${e.title}` : e.title}
             style={{ textAlign: "center", lineHeight: 1.4, background: "none",
                      border: 0, padding: 0, cursor: "pointer", minWidth: 0 }}>
-            <div className="f-mono" style={{ color: hoverEvent === i || selectedEvent === i ? TONE[e.signal] : "var(--z-muted)" }}>{e.date || ""}</div>
+            <div className="f-mono" style={{ color: hoverEvent === i || selectedEvent === i ? TONE[e.signal] : "var(--z-muted)" }}>{e.date ? fmtDate(e.date) : ""}</div>
             <div className="txt-fit-2" style={{ fontSize: 9.5, color: hoverEvent === i || selectedEvent === i ? "var(--z-dark)" : "var(--z-muted)", fontWeight: hoverEvent === i ? 600 : 400 }}>{e.title}</div>
           </button>
         ))}
@@ -1417,7 +1417,7 @@ function Timeline({ events, hover, setHover, openEvidence }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(8, minmax(0, 1fr))", gap: 6, fontSize: 9.5, color: "var(--z-muted)", padding: "0 8px" }}>
         {events.map((e, i) => (
           <div key={e.id} style={{ textAlign: "center", lineHeight: 1.4 }}>
-            <div className="f-mono">{e.date}</div>
+            <div className="f-mono">{e.date ? fmtDate(e.date) : ""}</div>
             <div style={{ color: TONE[e.signal], fontWeight: hover === i ? 600 : 400 }}>{e.title.split(" ").slice(0, 4).join(" ")}{e.title.split(" ").length > 4 ? "…" : ""}</div>
           </div>
         ))}
@@ -1425,7 +1425,7 @@ function Timeline({ events, hover, setHover, openEvidence }) {
       {hover != null ? (
         <div className="card-tile" style={{ marginTop: 16, padding: 12, background: "var(--z-lav)", border: "none" }}>
           <div className="row" style={{ marginBottom: 6 }}>
-            <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{events[hover].date}</span>
+            <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{events[hover].date ? fmtDate(events[hover].date) : ""}</span>
             <strong style={{ fontSize: 13 }}>{events[hover].title}</strong>
             <span className="spacer" />
             <span className="b b-purple">{events[hover].cap_impact}</span>
