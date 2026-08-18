@@ -26,6 +26,22 @@ calibrated against Baxter Credit Union.
 
 ## Readiness
 
-Ready to ingest **against a local stack**. Not ready to ingest **into
-production**: the connector is the only door content may enter through, and
-reaching it needs a Google identity this container does not have (blocker B1).
+**Ready to ingest into production.** A GCP service-account credential arrived
+after the first pass and resolved the two blockers that mattered: the
+connector is reachable and answering (`doctor.py` all checks passed, live
+pending-run queue read), and the v7.0 catalogue is seeded locally
+(851 cells, 16 categories), which took the local suite to 1247 passed /
+1 failed.
+
+The gold standard is confirmed serving: `baxter-credit-union-bcu`, SV2,
+composite 2.71, 765 cells, pinned to v5.0, all six pages promoted
+2026-08-15.
+
+One capability is still missing and one thing needs your attention:
+
+- **B2** — `dmai-web` cannot be signed into from here. IAP admits
+  `domain:zennify.com` only and a service account is not in that domain. The
+  only check this actually costs is
+  `audit_promoted_client.py --api`, the post-promotion render audit.
+- **F3** — the credential arrived in a plaintext Google Doc alongside a live
+  GitHub PAT. Rotation recommended. Nothing secret was written into the repo.
