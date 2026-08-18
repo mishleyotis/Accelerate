@@ -63,6 +63,16 @@ jobs:
       # mounted nowhere.
       - name: Gate E — every document surface has a disposition
         run: python3 scripts/gate_e_acceptance_coverage.py
+      # `evidence_index.excerpt` has two writers and only one enforced the
+      # 50-500 contract. The worker's workbook-parse path wrote whatever the
+      # cell held — including the empty string, which is invisible to the
+      # repair job (IS NULL), the embedder (IS NOT NULL) and the dedup index
+      # (NULL content_hash) all at once, while reading as populated to every
+      # check written against None. 36 of 62 rows on one promoted run. This
+      # is the unit half; the corpus half runs from the nightly scanner with
+      # a real register in hand.
+      - name: Gate G — an ingested excerpt is citable or it is None
+        run: python3 -m pytest scripts/tests/test_gate_g_citable_evidence.py apps/worker/tests/test_ingested_excerpt_contract.py -q
       # The gate has to be able to fail. Removing a surface's disposition must
       # be caught, or "0 unaccounted" is a sentence rather than a measurement.
       - name: Gate E negative control
