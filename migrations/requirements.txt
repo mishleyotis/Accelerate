@@ -1,0 +1,6 @@
+alembic>=1.13
+SQLAlchemy>=2.0
+pg8000>=1.31
+cloud-sql-python-connector[pg8000]>=1.12
+google-cloud-storage>=2.14
+openpyxl>=3.1

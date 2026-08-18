@@ -1,0 +1,162 @@
+{
+  "checkpoint_id": "03_issue_register",
+  "checkpoint_phase": "Phase 4: Map Issues and Caps",
+  "description": "Regulatory issues, enforcement actions, and material findings. Used to determine severity-based caps applied during scoring.",
+  "checkpoint_metadata": {
+    "assessment_id": "DMA-[ABBREV]-[YYYYMMDD]-[SEQNUM]",
+    "institution_name": "[Institution Name]",
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "issue_identification_status": "[COMPLETE / IN_PROGRESS]",
+    "sources_checked": [
+      "NCUA/OCC Exam Reports",
+      "CFPB Enforcement Database",
+      "Court Records",
+      "Internal Risk Register",
+      "Breach Disclosure Databases",
+      "News Archives"
+    ]
+  },
+  "regulatory_issues": [
+    {
+      "issue_id": "ISS-001",
+      "issue_type": "[Consent Order / Enforcement Action / Material Weakness / Cyber Incident / Compliance Finding / etc.]",
+      "issue_title": "[Brief description of issue]",
+      "issue_source": "[Database or document where issue found; e.g., NCUA Enforcement DB, Internal Audit]",
+      "issued_date": "YYYY-MM-DD",
+      "effective_date": "YYYY-MM-DD",
+      "terminated_date": "[If applicable; 'Ongoing' if still active]",
+      "status": "[ACTIVE / TERMINATED / REMEDIATED]",
+      "months_since_issuance": "[Calculated from issued_date]",
+      "severity_classification": "[S3_CRITICAL / S2_MATERIAL / S1_MINOR]",
+      "severity_rationale": "[E.g., 'S3: Active enforcement action <12 months old']",
+      "description": "[Full description of issue and context]",
+      "regulatory_body": "[NCUA / OCC / CFPB / Department of Justice / etc.]",
+      "affected_capabilities": "[Array of P[1-4]C[1-5] impacted by this issue]",
+      "primary_capability_cap": "[If S3, primary cap = 1.5; if S2, = 3.0; if S1, = none]",
+      "secondary_capability_cap": "[If S3, secondary = 2.0; if S2, = 3.0; if S1, = none]",
+      "pillar_cap": "[If S3, pillar cap = 2.0; if S2, = 3.5; if S1, = none]",
+      "evidence_tier": "[T1 / T2; enforcement always high-tier evidence]",
+      "reference_url": "[URL to enforcement database entry or public filing]",
+      "internal_remediation_status": "[Brief note on any remediation evidence; e.g., 'Internal audit shows corrective actions completed as of [date]']"
+    }
+  ],
+  "data_breaches_and_security_incidents": [
+    {
+      "incident_id": "BREACH-001",
+      "incident_date": "YYYY-MM-DD",
+      "incident_type": "[Data Breach / Ransomware / System Compromise / etc.]",
+      "disclosure_status": "[PUBLICLY_DISCLOSED / REGULATORY_DISCLOSURE / INTERNAL_ONLY]",
+      "customers_affected": "[Count if known; or 'Unknown']",
+      "data_types_exposed": "[Types of data: PII, Financial, Medical, etc.]",
+      "disclosure_date": "YYYY-MM-DD",
+      "months_since_incident": "[Calculated from incident_date]",
+      "cap_trigger": "[Disclosed breach <12 mo → P4C4 cap 2.0; <24 mo → cap 3.0]",
+      "affected_capabilities": ["P4C4"],
+      "breach_evidence_source": "[Breach notification database, press release, regulatory filing]",
+      "reference_url": "[URL to disclosure or database entry]"
+    }
+  ],
+  "material_compliance_findings": [
+    {
+      "finding_id": "COMPLIANCE-001",
+      "finding_date": "YYYY-MM-DD",
+      "finding_source": "[Internal Audit / Regulatory Exam / External Audit]",
+      "finding_category": "[AML/BSA / Consumer Compliance / Fair Lending / Data Protection / etc.]",
+      "finding_severity": "[Critical / High / Medium / Low]",
+      "finding_description": "[What was found and why it matters]",
+      "remediation_status": "[OPEN / IN_PROGRESS / REMEDIATED]",
+      "remediation_date": "[If remediated]",
+      "affected_capabilities": "[Array of P[1-4]C[1-5]]",
+      "month_since_finding": "[If open or recent]"
+    }
+  ],
+  "issue_time_map": {
+    "description": "Timeline of all issues to determine current exposure and cap applicability",
+    "issue_timeline": [
+      {
+        "event": "[Issue name or event]",
+        "date": "YYYY-MM-DD",
+        "months_ago": "[Calculated from today]",
+        "cap_status": "[Active cap / Expired cap / No cap]",
+        "severity": "[S1 / S2 / S3 / N/A]"
+      }
+    ]
+  },
+  "caps_mapping": {
+    "severity_caps_to_apply": [
+      {
+        "issue_id": "[Issue ID]",
+        "severity_level": "[S3 / S2 / S1]",
+        "primary_capability_cap": "[1.5 / 3.0 / none]",
+        "secondary_capability_cap": "[2.0 / 3.0 / none]",
+        "pillar_cap": "[2.0 / 3.5 / none]",
+        "affected_capabilities": "[List of caps to apply]"
+      }
+    ],
+    "cybersecurity_breach_caps": [
+      {
+        "incident_id": "[Incident ID]",
+        "months_since_disclosure": "[Count]",
+        "p4c4_cap_ceiling": "[2.0 if <12 mo / 3.0 if <24 mo / None if >24 mo]"
+      }
+    ],
+    "cross_pillar_dependency_caps": [
+      {
+        "trigger_capability": "[P1C2 / P3C3 / etc.]",
+        "trigger_score_threshold": "[e.g., 2.5]",
+        "actual_score": "[Assessed institution's score for trigger capability]",
+        "affected_capability": "[Downstream capability affected]",
+        "cap_ceiling": "[e.g., 3.0]",
+        "cap_applies": "[true / false]"
+      }
+    ]
+  },
+  "summary_statistics": {
+    "total_issues_identified": "[Count]",
+    "active_issues": "[Count of ACTIVE issues]",
+    "terminated_issues": "[Count]",
+    "issues_by_severity": {
+      "S3_CRITICAL": "[Count]",
+      "S2_MATERIAL": "[Count]",
+      "S1_MINOR": "[Count]"
+    },
+    "caps_triggered": {
+      "severity_caps_count": "[Total number of severity caps to apply]",
+      "cybersecurity_breach_caps_count": "[Count]",
+      "cross_pillar_caps_count": "[Count]"
+    },
+    "most_recent_issue_date": "YYYY-MM-DD",
+    "oldest_unresolved_issue_date": "[If applicable]"
+  },
+  "quality_assurance_checks": {
+    "issue_identification_completeness": {
+      "status": "[PASS / FAIL]",
+      "checks_performed": [
+        "NCUA/OCC exam database searched",
+        "CFPB enforcement database searched",
+        "Breach notification database searched",
+        "Internal risk register reviewed",
+        "Recent news archives searched"
+      ]
+    },
+    "severity_classification_validation": {
+      "status": "[PASS / FAIL]",
+      "description": "All issues classified per skill definitions: S3 = active enforcement <12 mo, S2 = material weakness/terminated <24 mo, S1 = minor/resolved"
+    },
+    "cap_calculation_validation": {
+      "status": "[PASS / FAIL]",
+      "sample_calculation": "[E.g., 'Issue ISS-001: S3 active <12 mo → Apply P3C3 cap 1.5, P3C2 cap 2.0, P3 pillar cap 2.0 ✓']"
+    },
+    "timeline_accuracy": {
+      "status": "[PASS / FAIL]",
+      "notes": "All issue dates verified against source documents; months_since calculation verified"
+    }
+  },
+  "metadata": {
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_version": "1.0",
+    "checkpoint_status": "COMPLETE"
+  }
+}

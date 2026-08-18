@@ -1,0 +1,1363 @@
+DMA Insights
+MCP Specification
+The contract between the producing agent, the database, the backend and the frontend.Every identifier, every exchange, every lifecycle state — written so a new sessioncan pick this up cold and lose nothing.
+2026-07-29  ·  companion to the Surface Design Specification
+
+0. Read this first
+The previous web application and its repository are RETIRED. This document is therefore not a description of something that exists — it is the contract the next application is built against. Where it says “must”, that is a requirement on the new build, not a report on the old one.
+Two documents, one system:
+Document
+Answers
+Surface Design Specification
+WHAT each of the 32 surfaces presents, where its information comes from, and the prompt that produces it — with a screenshot of every page, card and drilldown
+MCP Specification (this one)
+HOW that content travels: the identifiers, the tool exchanges, the database, the serving schema, the frontend contract, and the lifecycle from claim to promotion
+
+The app never calls a model. The producing agent calls the MCP. Nothing renders that has not passed validation and been promoted.
+
+0.1 Why this document exists in this shape
+Everything below was learned by measuring the retired system against its own prototype, surface by surface. Six classes of defect recurred, and each one traced to a contract that was implicit rather than written down:
+What went wrong
+Because
+Fixed here by
+A quoted score named a different cell than the one it came from — 125 gate violations from one line
+grain was a convention, not a contract
+§4 grain lock, asserted at submit
+An entity's Overview showed another institution's assets, regulator and footprint
+nothing checked identity per figure
+§8.4 identity gate, blocking
+Enrichment-minted citations were served having passed no citation check at all
+five modules each had their own id regex and none matched the mint namespace
+§3 one id authority
+“ERS 0.78” rendered on a 1.0–5.0 scale
+no bound was asserted on ingest
+§3.6 range assertion
+An age column read “NaN mo” while the status beside it read FRESH
+a derived value was allowed to be non-numeric
+§9.3 derived-value rule
+Nine rendered surfaces had no payload route at all
+the section set was never reconciled against the rendered app
+§5 complete section set
+
+0.2 Session continuity — how to resume cold
+A new session should read, in this order: §1 for the shape, §3 for the identifiers, §5 for what it owes, §6 for the lifecycle. That is enough to start producing. §13 is the checklist to run before claiming anything is finished.
+Three things a resuming session must never assume:
+That an identifier can be invented. Every id in §3 has exactly one authority, and for most of them the authority is not the producing agent.
+That a partially-promoted run is a valid state. It is not — see §6.5.
+That a surface renders because the payload was accepted. Accepted means staged; rendered means promoted. They are different states and §6 keeps them apart.
+1. What the MCP is, and where it sits
+The MCP is the only writable boundary into the application's content. It exists so that a producing agent — which reasons, searches, enriches and writes prose — can hand finished, validated content to an application that does none of those things at request time.
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │  PRODUCING AGENT  (Claude Code + the dma-surface-production skill)   │
+  │  reasons · searches · enriches · challenges · writes prose           │
+  └───────────────────────────┬──────────────────────────────────────────┘
+                              │  MCP tools (§4)
+                              │  read: bundle, contract, client state
+                              │  write: register_evidence, submit, promote
+                              ▼
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │  MCP SERVER              validates → stages → promotes               │
+  │  the ONLY writable boundary into served content                      │
+  └───────────┬──────────────────────────────────────┬───────────────────┘
+              │                                      │
+              ▼  staging                             ▼  serving
+  ┌───────────────────────────┐        ┌─────────────────────────────────┐
+  │ submissions + verdicts    │        │ POSTGRES serving tables (§9)    │
+  │ nothing here renders      │──────▶ │ the only thing the API reads    │
+  └───────────────────────────┘promote └──────────────┬──────────────────┘
+                                                      │  read-only
+                                                      ▼
+                                       ┌─────────────────────────────────┐
+                                       │ BACKEND API  →  FRONTEND (§10)  │
+                                       │ no model calls on the hot path  │
+                                       └─────────────────────────────────┘
+
+1.1 The four hard boundaries
+Boundary
+Rule
+The agent never writes a serving table
+All writes go through the MCP. There is no side door, no direct SQL, no admin bypass. A surface that appears without a promotion is a bug in the MCP, not a shortcut that worked.
+The app never calls a model
+Request-time rendering is pure reads. Every sentence an AE sees was produced ahead of time, validated, and persisted. This is what makes the app fast, cheap and reproducible — and what makes a hallucination a build-time failure rather than a runtime surprise.
+Staged is not served
+A submission that passes validation is STAGED. It renders only after promotion. The two states exist so a run can be assembled surface by surface without a client ever seeing a half-built page.
+The contract is served, not remembered
+get_page_contract returns the field shapes AND their spec text. A producing agent should read the contract at the start of every run rather than rely on a remembered shape, because a remembered shape that still type-checks promotes silently wrong content.
+
+2. Vocabulary — terms used precisely throughout
+Term
+Means exactly
+entity
+a client institution. Has one identity, many runs.
+run
+one completed assessment of one entity at one point in time. The unit everything else hangs off.
+page
+one of the payload submission units (§5). Six of them. A page is a SUBMISSION boundary, not necessarily a screen.
+surface
+one card, panel or drilldown a human sees. 32 of them. Several surfaces can live on one page.
+section
+one named block inside a page payload — the thing a surface is produced into.
+cell
+one sub-capability, e.g. P1C1.1.1. The finest grain that carries a score.
+produce
+the agent's work: read, reason, enrich, write, cite.
+submit
+hand one page's payload to the MCP and receive a verdict.
+stage
+the accepted-but-not-rendering state.
+promote
+move every page of a run into the serving tables, atomically.
+serve
+the API reading a serving table for a request.
+mint
+the server allocating a new identifier. The agent never mints.
+
+3. The identifier system
+This section is the one a resuming session most needs. Every identifier in the system, its format, who is allowed to create it, and what it joins to.
+An identifier is a JOIN KEY and, on most surfaces, a CLICK-THROUGH CONTROL. An id that does not resolve is a broken control, which is worse than an absent one because it looks like diligence.
+
+3.1 The complete register
+Id
+Format
+Minted by
+Joins / means
+entity_id
+UUID
+the app, at first ingest
+the institution. Internal only — never rendered.
+display_id
+slug, e.g. zions-bancorporation
+the app, from the name
+the URL segment and the human-facing handle
+run_id
+UUID
+the app, at ingest
+the assessment instance. Every payload is scoped to one.
+request_id
+REQ-{8 uppercase hex}
+the upstream bot
+cross-system continuity with the pipeline that produced the package
+
+or DMA-ASM-{ENTITY}-{YYYYMMDD}-{NNNN}
+the assessment project
+the same role for project-originated runs. BOTH forms are valid; accept both.
+pillar_id
+P1..P4
+the capability catalogue
+the four pillars. Fixed vocabulary.
+category_id
+PxCy, e.g. P1C1
+the catalogue
+a capability category. 17 of them.
+subcap_id
+PxCy.z.w, e.g. P1C1.1.1
+the catalogue
+THE CELL. The only grain that carries a score. May carry a variant suffix, e.g. P2C4.3.4-T2-XX.
+ccg_catalog_version
+vN.N, e.g. v7.0
+the catalogue loader
+which catalogue a run was scored against. Pins every id resolution.
+e_id
+E-nnn
+the package (evidence_index)
+an evidence item from the assessment package
+
+E-CC-nnn
+THE SERVER, via register_evidence
+an enrichment source the agent found. Agent never chooses the number.
+
+EV-{scope}-nnn
+the connector layer
+connector-sourced evidence
+
+INT-{label}
+structured discovery notes
+internal evidence
+ic_id
+IC-nnn
+the producing agent
+an insight card. Agent-assigned, unique within the run.
+f_id
+F-nn
+the producing agent
+a top finding, ranked
+fa_id
+FA-nn
+the producing agent
+a focus area
+rec_id
+REC-nn or REC-{ENT}-nn
+the package or the agent
+a recommendation. Referenced by roadmap phases and stair-step steps.
+issue_id
+IS-nnn
+the package (issue_register)
+a client issue-register matter
+ts_id
+TS-nn
+the producing agent
+a tech-stack row
+wn_id
+WN-n
+the producing agent
+a why-now signal
+submission_id
+UUID
+the MCP, at submit
+one page submission and its verdict
+gate_id
+see §3.5
+the gate registry
+a validation gate
+
+3.2 Who may create what — the rule that prevents most errors
+Class
+Ids
+Agent may create?
+Structural
+entity_id · display_id · run_id · submission_id
+NO — the app owns identity and instance
+Catalogue
+pillar_id · category_id · subcap_id · ccg_catalog_version
+NO — resolve against the catalogue; a cell that is not in it does not exist
+Upstream
+request_id · e_id (E-nnn) · issue_id · rec_id from the package
+NO — these arrive with the package
+Server-minted
+e_id (E-CC-nnn)
+NO — call register_evidence and USE THE RETURNED ID
+Agent-assigned
+ic_id · f_id · fa_id · ts_id · wn_id · agent-authored rec_id
+YES — but they must be unique within the run and stable across resubmissions of the same content
+
+The agent creates FIVE id classes and only five. Everything else is read or requested. An invented e_id is fabrication by construction, even if a matching source genuinely exists.
+
+3.3 Evidence ids in detail
+Evidence is where identifier discipline actually gets tested, because it is the only class where the agent brings something new to the system.
+Two legal origins
+PACKAGE. E-nnn, already in the evidence store with an entity, a run, a tier and a URL. Cite it; never create it.
+MINT. Anything found outside the package is REGISTERED first and cited second. register_evidence returns the id. The server allocates E-CC-nnn sequentially within the run.
+One recogniser, four namespaces
+The retired system had five different regexes for this, with three different digit bounds, and not one matched the mint namespace it was supposed to be checking. Since every one of them used its pattern to diff claimed ids against an allowed set and flag the remainder, a pattern that could not SEE an id could not flag it — so genuine mints passed unchecked and fabricated mints were equally invisible.
+EID_TOKEN_RE = \b(?:E|EV|INT)-[A-Z0-9]+(?:-[A-Z0-9]+){0,3}(?![A-Za-z0-9-])
+
+  matches      E-047   E-7   E-1234   E-CC-001   EV-P2C4-013   INT-DISCOVERY-04
+  rejects      e-047 (case)   E-047abc (partial)   PRE-047   P1C1.1.1   REC-04
+
+Properties that are load-bearing, not stylistic:
+  case-SENSITIVE   lowercasing makes every "e-" in prose a candidate
+  no partial match the trailing (?![A-Za-z0-9-]) stops a match ending
+                   mid-token, where \b would allow it
+  order preserved  the truncated-cell recovery path takes the FIRST token,
+                   because in a comma-joined cell only the last one is cut
+
+ONE recogniser, in one module, imported everywhere. A private copy in a second module is how the hole re-opens, so a test asserts identity of the compiled object at every call site.
+
+The canonical rendering
+inline, in prose      [E-047]           or  [E-047, E-089]
+in arrays             "e_ids": ["E-047", "E-089"]        ← bare, no brackets
+
+The brackets belong to the CHIP, not to the id. The frontend renders a bracketed
+group as a click-through control; a bare id inside prose renders as literal text
+and is a defect.
+
+3.4 Grain — the single most expensive mistake
+A quoted figure and the cell id it names must be the SAME cell. In the retired system one line paired a sub-capability's score with a category's id and produced 125 gate violations; it fell to 40, then 8, then 1 as each layer was fixed and re-measured. Nothing was accommodated by loosening the gate.
+WRONG   "Data Warehouse & Data Lake ... at 1.6/5"     ← the name of a subcap
+                                                        with the CATEGORY's mean
+
+RIGHT   subcap_id = P4C1.2.1
+        name      = "Data Warehouse & Data Lake"
+        score     = 1.6          ← both read from the SAME row
+
+ASSERTION at submit: for every "<label> at N/5" in produced prose, resolve the
+label to a served cell and require |rendered - served| <= 0.05.
+
+Grain is asserted at submit, not reviewed later. A grain mismatch fails the submission while the agent can still repair it.
+
+3.5 Gate identifiers — one numbering, because three collided
+The retired system had THREE independent G-numbered families, and one of them was rendered to clients. A bare “G4” could mean Traceability, evidence-per-subcap, or CONTRADICTION depending on who was speaking.
+Retired family
+Where it lived
+G4 meant
+Analytical gates G1–G16
+the research methodology
+Traceability
+Safeguard gates G01–G10
+a CLIENT-VISIBLE health card
+Evidence per subcap
+Enrichment triggers G1–G10
+the enrichment trigger matrix
+G4_CONTRADICTION
+
+The new numbering is prefixed by family, so an id is unambiguous in isolation and no renaming is needed later:
+AG-nn    ANALYTICAL gate       AG-01 Identity & Boundary · AG-04 Traceability
+SG-nn    SAFEGUARD gate        SG-01 Source diversity · SG-04 Evidence per cell
+                               (the client-visible family — plain-language
+                                labels required, see §10.5)
+ET-nn    ENRICHMENT trigger    ET-01 Empty field · ET-04 Contradiction
+CG-nn    CORPUS gate           CG-01 grain resolution · CG-02 citation set …
+                               (the build-time scanners over the exported pack)
+
+Never emit a bare G-number in any payload, log, prose or conversation. The prefix is part of the id.
+
+3.6 Evidence quality: tier, ERS, recency — one scale each
+Three scales that the retired system carried in two versions each. One version of each, here.
+Tier — the QUALITY ladder, T1 to T5
+Tier
+Type
+Weight
+Ceiling
+T1
+Regulatory / audited, AND machine technographic scans
+1.0
+L5
+T2
+Official disclosures; structured internal notes
+0.85
+L5
+T3
+Third-party analysis (analyst, app ratings, trade press)
+0.7
+L4
+T4
+Internal unvalidated narrative
+0.55
+L2.5
+T5
+Marketing / claims — REQUIRES corroboration
+0.3
+L2
+
+Two rules that were repeatedly broken and cost real score accuracy:
+A machine technographic scan is T1, never T4. Filing it as T4 caps the capability at L2.5 and silently suppresses the score. It was the most common misclassification in the retired corpus.
+There is NO T6, T7 or T8 in the quality ladder. The retired frontend carried a separate 8-row SOURCE-TYPE display table that collided with this one on rows 4 and 5 — so an item filed T4 (internal unvalidated) rendered to an AE as “Marketing claim”, and one filed T5 (marketing, weakest, needs corroboration) rendered as “Analyst inference”, which reads STRONGER than it is. The new app renders the quality tier and its label from ONE table.
+ERS — Evidence Rank Score, 1.0 to 5.0
+ERS = (0.35 × Tier) + (0.25 × Recency) + (0.20 × Specificity)
+                    + (0.20 × Corroboration)
+
+EVERY factor is itself scored 1.0–5.0, so ERS is bounded 1.0–5.0.
+      High >= 3.5      Medium 2.5–3.5      Low < 2.5
+
+Factor 5.0 / 4.0 / 3.0 / 2.0 / 1.0
+  Tier           T1 / T2 / T3 / T4 / T5
+  Recency        CURRENT / RECENT / DATED / STALE / ARCHIVAL   (bands below)
+  Specificity    quantified+method / quantified / specific-qualitative /
+                 general / vague
+  Corroboration  3+ independent / 2 independent / single T1-T2 / single T3 /
+                 single T4-T5
+
+"Independent" = different ORIGINS. An annual report and an investor deck from
+the same institution are ONE source: corroboration 3.0, not 4.0.
+
+ERS is computed by the SERVER at register_evidence, never sent by the agent. It can never be below 1.0 — assert 1.0 <= ers <= 5.0 on ingest and quarantine anything outside the range. The retired app rendered “ERS 0.78”, which is below its own floor.
+
+Recency — one vocabulary, boundaries at 12/24/36/48 months
+Age
+Band
+Recency score
+≤ 12mo
+CURRENT
+5.0
+12–24mo
+RECENT
+4.0
+24–36mo
+DATED
+3.0
+36–48mo
+STALE  (carries the >3y marker)
+2.0
+48mo+
+ARCHIVAL
+1.0
+no date
+UNVERIFIED
+1.0 — and never rendered as current
+
+The retired system had two band vocabularies over the same boundaries plus a third invented one in documentation. ONE set of names, used in the payload, the database column and the UI label.
+Evidence Level — what the evidence lets you SAY
+Level
+Basis
+Permitted language
+L1
+vendor named in T1/T2 with deployment confirmed
+implemented · deployed · uses · powers
+L2
+official partnership announcement or case study
+partnered with · selected · announced
+L3
+2+ independent signals (postings AND a talk)
+likely uses · signals suggest · inferred from hiring
+L4
+single weak source
+may use · potential · unconfirmed
+
+Writing “uses” on Level 3 evidence is a fabrication, not a style choice. The level governs the verb.
+
+4. The tool surface
+Twelve tools in four groups. Read tools are free and idempotent; write tools are the only path into content.
+Group
+Tool
+Purpose
+Discover
+list_pending_runs
+runs awaiting production, with staging counts per page
+
+get_client_state
+what is currently SERVED for a client — the diff target for a rerun
+Read
+get_report_bundle
+THE INPUT. The parsed package for one run: scores, evidence, report sections, issues, techstack, firmographics, fits, peer table
+
+get_page_contract
+the payload contract for one page: field tuples plus per-field spec text
+
+get_capability_catalogue
+the pinned catalogue for the run — the only valid source of cell ids and names
+
+get_evidence
+resolve one or more ids to their full rows
+Write
+register_evidence
+mint an E-CC id for a new enrichment source. CALL BEFORE CITING.
+
+submit_page_payload
+stage one page and return the verdict
+
+promote_run
+atomically promote every page of a run into the serving tables
+Inspect
+get_validation_verdict
+re-read a submission's verdict
+
+get_run_progress
+per-page status for a run: which pages are staged, passed, failed, missing
+
+explain_gate
+the definition, rationale and current threshold of one gate id
+
+Three of those twelve are new relative to the retired system, and each closes a gap that cost real time: get_capability_catalogue (so cell ids are resolved rather than copied from prose), get_evidence (so an agent can verify an id resolves before citing it rather than after failing), and get_run_progress (so a resuming session can see where it left off without inferring it from verdicts).
+4.1 Exchange contracts
+Every tool takes a JSON object and returns a JSON object. Errors are structured, never prose — see §12.
+get_report_bundle
+→  { "run_id": "<uuid>" }
+
+←  { "run_id", "entity_id", "display_id", "entity_name",
+     "request_id", "ccg_catalog_version", "sub_vertical", "size_tier",
+     "completed_at",
+     "scores":        [ { "subcap_id", "name", "score", "confidence",
+                          "peer_median", "delta", "is_thin_evidence",
+                          "source_cell" } ],
+     "rollups":       { "pillars": {...}, "categories": {...} },
+     "evidence":      [ { "e_id", "source_name", "source_url", "excerpt",
+                          "tier", "claim_type", "published_date",
+                          "recency_band", "ers", "linked_subcap_ids" } ],
+     "report_sections":[ { "section_kind", "pillar_id", "heading", "body",
+                           "page" } ],
+     "issues":        [ { "issue_id", "title", "severity", "status",
+                          "opened_on", "resolved_on", "rationale" } ],
+     "techstack":     [ { "name", "status", "e_ids", "category" } ],
+     "firmographics": { ... },
+     "peer_table":    [ { "peer_name", "subcap_id", "score" } ],
+     "fits":          [ { "platform", "composite", "factors" } ] }
+
+Note source_cell on every score row. It names the workbook cell the figure was read from, which is what makes the grain assertion in §3.4 checkable rather than aspirational.
+get_page_contract
+→  { "page": "overview" }
+
+←  { "page": "overview",
+     "sections": {
+       "why_now": {
+         "signals": {
+           "required": true, "type": "list", "item_type": "object",
+           "doc": "Per signal: {wn_id, trigger, window,
+                   consequence_of_waiting, cost_of_acting_now,
+                   why_this_sequence, linked_subcap_ids[], e_ids[],
+                   dated_on, claim_label, confidence}.
+                   ALL FIVE narrative headers are required ..."
+         } } , ... } }
+
+The doc field is not documentation — it is part of the contract and it travels with it. A list-of-object field whose item shape lives only in the writer forces the agent to guess, and a guess that type-checks promotes silently wrong content.
+
+register_evidence
+→  { "run_id": "<uuid>",
+     "item": { "source_name": "FY2025 Annual Report",
+               "source_url":  "https://…/annual-report-2025.pdf",
+               "excerpt":     "<verbatim span, 50–500 chars>",
+               "claim_type":  "FACT",
+               "tier":        "T2",
+               "recency_tag": "CURRENT",
+               "published_date": "2025-11-14",
+               "linked_subcap_ids": ["P4C1.2.1"],
+               "facts": [ { "label": "…", "value": "…" } ] } }
+
+←  { "e_id": "E-CC-014", "deduped": false, "ers": 4.05, "errors": [] }
+←  { "e_id": "E-CC-009", "deduped": true,  "ers": null,  "errors": [] }
+
+The SERVER allocates the id and computes the ERS. Sending either is ignored.
+Idempotent by CONTENT: dedup key is SHA256(url + claim_type + normalize(excerpt[:500])), scoped to the entity. Registering the same source from six surfaces returns the same id six times — which is how one annual report is cited by six cards without producing six rows.
+origin='producer' is stamped, so enrichment stays separable from package evidence in audit and in gates.
+The excerpt is verified against the fetched artifact where the app holds it. An excerpt that is not present in the source is rejected at registration, not at promote.
+submit_page_payload
+→  { "run_id": "<uuid>", "page": "overview",
+     "payload": { "<section>": { "<field>": … }, … },
+     "provenance": "producer",
+     "producer_version": "surface-production@2026-07-29" }
+
+←  { "submission_id": "<uuid>",
+     "verdict": { "status": "pass" | "fail",
+                  "reasons": [ { "gate_id": "CG-01",
+                                 "section": "findings",
+                                 "path": "findings[2].body",
+                                 "message": "quoted 2.34/5 resolves to
+                                             P3C2.1.1 = 2.10 (Δ 0.24 > 0.05)",
+                                 "severity": "block" } ],
+                  "warnings": [ … ],
+                  "counts": { "sections": 8, "cited_claims": 41,
+                              "e_ids_used": 27, "new_mints": 6 } } }
+
+Every reason carries a gate_id, a JSON path and a message that names the conflict concretely. A verdict an agent cannot act on is a verdict that produces another failed submission.
+promote_run
+→  { "run_id": "<uuid>" }
+
+←  { "promoted": true,
+     "stats": { "overview": {"sections": 8, "rows_written": 63}, … },
+     "promoted_at": "…" }
+
+←  409 { "error": "incomplete_run",
+         "missing_pages":  ["context"],
+         "unpassed_pages": ["platform"],
+         "hint": "promote requires a PASS row for every page" }
+
+get_run_progress
+→  { "run_id": "<uuid>" }
+
+←  { "run_id", "entity_name", "ccg_catalog_version",
+     "pages": { "overview":  {"status":"pass",   "submission_id":"…",
+                              "submitted_at":"…", "reasons":0},
+                "insights":  {"status":"fail",   "reasons":3},
+                "heatmap":   {"status":"staged"},
+                "platform":  {"status":"missing"}, … },
+     "promotable": false,
+     "blocking": ["insights: 3 blocking reasons", "platform: not submitted"] }
+
+This is the tool a resuming session calls FIRST. It answers “where was I” without reading verdicts or guessing.
+4.2 The remaining exchange contracts
+list_pending_runs
+→  { "limit": 50, "unclaimed_only": true }
+
+←  { "runs": [ { "run_id", "entity_id", "display_id", "entity_name",
+                 "request_id", "completed_at", "ccg_catalog_version",
+                 "sub_vertical",
+                 "pages": { "overview": "pass", "insights": "missing", … },
+                 "claim": { "held_by": null | "<session>",
+                            "expires_at": null | "<iso>" } } ] }
+
+get_client_state — the diff target for a rerun
+→  { "display_id": "zions-bancorporation" }
+
+←  { "entity_id", "display_id", "entity_name",
+     "active_run": { "run_id", "request_id", "completed_at",
+                     "ccg_catalog_version", "promoted_at" },
+     "served": { "overview": { "sections": [...], "promoted_at": "…" }, … },
+     "prior_runs": [ { "run_id", "completed_at", "composite" } ] }
+
+prior_runs is what makes the longitudinal surfaces possible — velocity, recurring themes and the seen-in-N-runs chip all read across runs, so a rerun must not be produced as though it were a first run.
+get_capability_catalogue — resolve, never copy
+→  { "run_id": "<uuid>" }        (version is taken from the run, not passed)
+
+←  { "ccg_catalog_version": "v7.0",
+     "pillars":    [ { "pillar_id", "name", "weight" } ],
+     "categories": [ { "category_id", "pillar_id", "name", "weight" } ],
+     "subcaps":    [ { "subcap_id", "category_id", "name",
+                       "l3_platform_areas": [...], "l4_features": [...] } ],
+     "aliases":    [ { "from_subcap_id", "to_subcap_id", "from_version" } ] }
+
+Resolve every cell id and NAME through this call. Copying a cell name out of report prose is how 16 clients ended up rendering raw PxCy.z codes as labels, and how a renamed cell silently stops resolving after a catalogue bump. The aliases array is the bridge — use it rather than assuming an id is stable across versions.
+
+get_evidence — verify before you cite
+→  { "run_id": "<uuid>", "e_ids": ["E-047", "E-CC-003"] }
+
+←  { "found": [ { "e_id", "entity_id", "source_name", "source_url", "excerpt",
+                  "tier", "claim_type", "published_date", "recency_band",
+                  "ers", "linked_subcap_ids", "origin", "seen_in_runs" } ],
+     "not_found":  ["E-CC-003"],
+     "foreign":    [ { "e_id": "E-511", "belongs_to": "<other entity_id>" } ] }
+
+The three-way split is the point. not_found means fabricated or not yet registered. FOREIGN is the dangerous one — a real row belonging to another institution — and it must stop production rather than be filtered out quietly, because its presence means the reasoning has drifted onto the wrong entity.
+get_validation_verdict
+→  { "submission_id": "<uuid>" }
+
+←  { "submission_id", "run_id", "page", "status", "submitted_at",
+     "superseded": false,
+     "verdict": { … as returned by submit_page_payload … } }
+
+explain_gate
+→  { "gate_id": "CG-07" }
+
+←  { "gate_id": "CG-07", "family": "corpus", "name": "…",
+     "what_it_checks": "…", "why_it_exists": "…",
+     "threshold": { "kind": "per_client_rate", "value": 0.92,
+                    "effective_at_n": { "n_clients": 138, "ceiling": 127 } },
+     "on_failure": "fails the build",
+     "history": [ { "changed_at", "from", "to", "reason" } ] }
+
+history matters more than it looks. A ceiling that has only ever moved down, with a reason recorded each time, is a gate someone can still trust. One that moved up to make a build pass is a gate that has stopped measuring anything, and the history is what makes that visible.
+4.3 A complete worked exchange
+One page, start to finish, with the calls in order. This is the shape a resuming session should be able to reproduce from memory.
+# 1 — where am I?
+get_run_progress { run_id: R }
+  → { pages: { overview: {status:"missing"}, … }, promotable: false }
+
+# 2 — what do I owe?
+get_page_contract { page: "overview" }
+  → 12 sections, each with field tuples + doc text
+
+# 3 — what do I have?
+get_report_bundle { run_id: R }
+  → scores[761] with source_cell, evidence[110], report_sections[12], …
+get_capability_catalogue { run_id: R }
+  → subcaps[761] with canonical names
+
+# 4 — produce. Along the way, one source is found outside the package:
+register_evidence {
+  run_id: R,
+  item: { source_name: "FY2025 Annual Report",
+          source_url:  "https://…/ar2025.pdf",
+          excerpt:     "We completed the consolidation of three core
+                        platforms onto a single ledger in Q3 2025.",
+          claim_type: "FACT", tier: "T2", recency_tag: "CURRENT",
+          published_date: "2025-11-14",
+          linked_subcap_ids: ["P4C1.2.1"] } }
+  → { e_id: "E-CC-014", deduped: false, ers: 4.05, errors: [] }
+     ^^^ USE THIS ID. Do not invent, do not renumber.
+
+# 5 — verify before citing
+get_evidence { run_id: R, e_ids: ["E-047","E-CC-014"] }
+  → { found: [ … , … ], not_found: [], foreign: [] }        ✓ safe to cite
+
+# 6 — submit
+submit_page_payload {
+  run_id: R, page: "overview", provenance: "producer",
+  payload: {
+    scores: { composite: 3.4, pillars: [...], posture: "COMPETING",
+              framing: "Trails regional bank peer median by −0.3 points.
+                        Gap concentrated in P4 Data foundation.",
+              e_ids: ["E-047"] },
+    findings: { findings: [
+      { f_id: "F-01",
+        title: "Data fragmentation is the root constraint, not
+                under-investment",
+        theme: "DATA FOUNDATION",
+        consequence: "Blocks 34 downstream subcaps",
+        what:    "Three production cores run in parallel with no canonical
+                  customer profile — a customer with a mortgage, a deposit
+                  account and a card appears as three unrelated records.",
+        why:     "Each core was retained through prior acquisitions rather
+                  than consolidated. The organisation has invested heavily
+                  in analytics on top, but every downstream initiative
+                  inherits the fragmentation underneath.",
+        so_what: "Every channel or CX investment made before the substrate
+                  is fixed compounds the problem. The data foundation is
+                  the highest-leverage conversation on the board now.",
+        rejected_alternative: "Under-investment would predict thin
+                  analytics spend; spend is high and outcomes are flat,
+                  which points at the substrate rather than the budget.",
+        strategic_alignment: { objective: "…", score: 0.86 },
+        linked_subcap_ids: ["P4C1.2.1","P4C1.1.1"],
+        e_ids: ["E-047","E-CC-014"],
+        claim_label: "FACT", confidence: "HIGH" },
+      … F-02 … F-05 ],
+      narrative_thread: "…" },
+    … ten more sections … } }
+
+  → { submission_id: S,
+      verdict: { status: "fail",
+                 reasons: [ { gate_id: "CG-01", section: "scores",
+                              path: "scores.framing",
+                              message: "quoted −0.3 resolves to pillar P4
+                                        delta −0.31 (Δ 0.01 ok); composite
+                                        3.4 vs computed 3.36 (Δ 0.04 ok);
+                                        posture COMPETING unsupported —
+                                        peer set has n=4, floor is 3, but
+                                        two peers lack P4 figures",
+                              severity: "block" } ] } }
+
+# 7 — repair (recompute the peer median at lower N, disclose the proxy),
+#     resubmit. The new row SUPERSEDES S.
+submit_page_payload { … }  → { verdict: { status: "pass" } }
+
+# 8 — repeat for the other five pages, then:
+promote_run { run_id: R }
+  → { promoted: true, stats: { overview: {sections:12, rows_written:71}, … } }
+
+Note what the failing verdict does: it names the gate, the JSON path, and the arithmetic — including the two checks that PASSED — so the agent can see exactly which assertion failed and why. A verdict that said only “scores invalid” would produce another failed submission.
+4.4 Authentication and provenance
+Concern
+Rule
+Who may call write tools
+the producing agent, with its own credential. Never a user session, never the frontend.
+What is recorded per submission
+submitted_by, producer_version, provenance, and the full verdict — including superseded ones, so the path to a passing submission is auditable
+What is recorded per serving row
+run_id, entity_id, promoted_at, producer_version, provenance, e_ids[]
+Read tools
+may be called freely and are side-effect free. get_report_bundle and get_capability_catalogue are the two worth caching within a session.
+
+5. Pages and sections — the complete set
+A payload is submitted one page at a time. The retired system had six pages and twenty-two sections, and nine rendered surfaces had no section at all — so the agent could not author them even though they were specified. The new set closes that: every surface a human sees has exactly one section that produces it.
+5.1 The section map — all 32 surfaces
+Page
+Section
+Surfaces it produces
+overview
+scores
+O1 hero: composite, pillar scores, peer deltas, posture, framing sentence
+
+firmographics
+O2 firmographics strip
+
+why_now
+O3 why-now signals
+
+exec_summary
+O4 SCQA
+
+opportunity
+O5 opportunity tiles
+
+findings
+O6 top findings + their expansions
+
+leadership
+O7 leadership roster
+
+financial_series
+O8 financial trajectory
+
+sentiment
+O9 sentiment (bars + tiles)
+
+ceilings
+O1b capability ceiling & uncertainty  ← NEW
+
+evidence_coverage
+O10 coverage + O11 tier distribution  ← NEW
+
+thought_leadership
+O12 executive signal  ← NEW
+insights
+insights
+I1 insight cards + the 4-tab modal
+heatmap
+focus_areas
+H1 focus areas + expansion + KPIs
+
+cell_evidence
+H2 cell evidence + the synthesis drawer
+
+alerts
+H3 thin-evidence queue
+
+workbook_scores
+H4 pillar/category grain
+
+safeguard_gates
+H5 safeguard gates
+
+evidence
+H6 evidence store + the evidence drawer
+
+evidence_age
+H7 evidence age tracker  ← NEW
+
+cohort_patterns
+H8 cross-entity patterns  ← NEW
+platform
+platform_story
+P1 fit + story + gap mapping + readiness
+
+recommendations
+P2 recs + the recommendation modal
+
+starters
+P2b conversation starters  ← NEW
+
+roadmap
+P3 roadmap phases
+
+stairstep
+P4 stair-step curve
+context
+timeline
+C1 timeline + event detail
+
+issue_register
+C2 register + gantt + issue detail
+
+regulatory_standing
+C3 regulatory standing  ← NEW
+
+acquisitions
+C5 acquisition history  ← NEW
+techstack
+techstack
+T1 layered register + T3 platform detail
+
+landscape
+T2 technology landscape strip  ← NEW
+
+Ten new sections, six pages unchanged. The page count matters because promotion requires every page to pass (§6.5) — adding a page raises the bar for every client in the corpus, while adding a section to an existing page does not.
+5.2 Two placement rules
+A section goes on the page whose PRODUCING CONTEXT already determines it. An agent filling cell_evidence is reading the workbook cell by cell, so workbook_scores, the alerts that are its complement, and the evidence-age tracker all belong on the same page and come out of one reading.
+Sections that must agree go on the SAME page, so a contradiction is catchable in one pass rather than across two submissions. roadmap and stairstep sit with recommendations because all three reference the same rec_ids; ceilings sits with scores because a ceiling is meaningless without the score it caps.
+5.3 One fix carried forward: O1 was cross-page
+In the retired system the D1 hero had no scores section — its pillar figures came from heatmap.workbook_scores. One section, two renderers, and the predictable result: the hero ring and the run row disagreed at one decimal place on 26 clients.
+overview.scores now exists and is authoritative for the hero. heatmap.workbook_scores remains authoritative for the grid. They are produced in one run from one reading and a cross-section gate asserts they agree to 2dp before either can promote.
+
+5.4 The field tuple
+{ "field": (required?, type, item_type|None, doc?) }
+
+  required?   true → the section is invalid without it
+  type        the JSON type the value must be
+  item_type   applies when type is list — usually object
+  doc         the field's spec text, returned VERBATIM by get_page_contract
+
+Nested section specs live under "_sections".
+
+5.5 Representing absence
+An empty surface is a VALUE, not an omission. A missing required field fails the contract; an explicit empty state passes and renders correctly.
+Situation
+Emit
+The app renders
+No leadership found after the full search
+roster: [], verified_absent: true, sources_searched: [...]
+the honest empty state, with what was searched
+Fewer than 3 dated financial points
+series: [...], verified_sparse: true, trend: null
+the points, labelled a snapshot — no trend line
+No stair-step derivable
+ladder: null, empty_state: "<reason>"
+the reason, not a blank card
+A figure failed the identity gate
+value: null, quarantined: true, quarantine_reason: "…"
+a dash with a provenance note
+A cell's evidence is genuinely thin
+thin: true, sources_searched: [...], closure_condition: "…"
+the provisional-score state
+
+Absent beats wrong. A dash with a provenance note costs nothing; a plausible-looking wrong figure costs the document its credibility with the client.
+
+5.6 Field contracts for the ten new sections
+The twenty-two carried-forward sections are described by get_page_contract and specified surface-by-surface in the Surface Design Specification. The ten NEW ones have no prior contract to read, so their shapes are written here.
+overview.scores  (O1 hero — new because O1 was cross-page)
+{ "composite":  float,          mean of the four PILLAR means, rounded ONCE
+                                at 2dp. Not a flat mean over all cells — the
+                                two differ, and shipping both produced a hero
+                                and a run row disagreeing at 1dp on 26 clients.
+  "pillars":    [ { "pillar_id", "score", "peer_median", "delta",
+                    "peer_n", "peer_basis": "table|recomputed|inferred|
+                                             cannot_estimate",
+                    "proxy_disclosure": str|null } ],
+  "posture":    "LEADING|COMPETING|LAGGING|MIXED",
+  "posture_basis": "EVIDENCE|HYBRID|INFERRED",
+  "framing":    str,            18-32 words. States the gap, QUANTIFIES it,
+                                and LOCALISES it. Must not open with the
+                                composite — it renders beside this text.
+  "e_ids":      [str], "claim_label": str, "confidence": str }
+
+peer_basis is the field that prevents fabrication. When the peer table lacks a figure the ladder is: recompute at lower N (floor 3) → adjacency inference → proxy ceiling → cannot_estimate. Never impute a value into the cell, and when proxying, proxy_disclosure must contain the literal phrase “peer proxy”.
+overview.ceilings  (O1b)
+{ "rows": [ { "category_id", "ceiling": "M1..M5"|null,
+              "uncertainty_band": float,   over 0.8 → ceiling null and
+                                           "cannot_reliably_estimate": true
+              "rationale":  str,   35-70 words, TWO halves: what the evidence
+                                   establishes, AND the specific thing whose
+                                   ABSENCE set the ceiling
+              "limiting_absence": str,     the artefact that would raise it —
+                                           searchable, because it is next
+                                           run's backlog
+              "urf_modifiers": [ "URF-01", … ],   named, not just summed
+              "e_ids": [str] } ] }
+
+overview.evidence_coverage  (O10 + O11)
+{ "coverage": { "overall_pct": float, "gate_pct": 80,
+                "denominator_definition": str,   REQUIRED and RENDERED
+                "per_pillar": [ { "pillar_id", "pct", "cells_total",
+                                  "cells_covered", "below_gate": bool } ] },
+  "tiers":    { "item_count": int, "fact_count": int,
+                "self_sourced_pct": float,
+                "rows": [ { "tier", "count", "pct", "max_evidence_level" } ] },
+  "claim_classes": [ { "claim_label", "count", "pct" } ],
+  "mix_implication": str }   25-50 words: what vocabulary this mix LICENSES
+                             across the whole document
+
+Never round up across the gate. 79.6% renders as 79.6% with below_gate=true. An overall figure must never carry a failing pillar.
+
+overview.thought_leadership  (O12)
+{ "entries": [ { "kind": "LINKEDIN POST|CONFERENCE|ARTICLE|PODCAST|
+                          EARNINGS CALL|BLOG|PANEL",
+                 "published_on": date,   REQUIRED — undated is excluded
+                 "headline": str,        as published; do NOT rewrite
+                 "quote": str,           VERBATIM, 80-260 chars, one sentence,
+                                         never stitched from two
+                 "author_name", "author_role",   role AS AT the time
+                 "url", "linked_subcap_ids": [str],
+                 "alignment": "CORROBORATES|CONTRADICTS|EXTENDS",
+                 "alignment_note": str,  12-25 words
+                 "e_id" } ],
+  "window_months": 6, "thin": bool, "sources_searched": [str] }
+
+A CONTRADICTS entry is the most valuable row on this card and must never be filtered out: an executive publicly claiming a maturity the evidence does not support is a Marketing-Reality Gap the AE needs before the meeting.
+heatmap.evidence_age  (H7)
+{ "reference_date": date,    PINNED and rendered — age is meaningless without
+                             the date it was computed against
+  "rows": [ { "e_id", "title", "source_domain",
+              "published_or_asof": date|null,
+              "age_months": int|null,      null when the date is absent or
+                                           unparseable. NEVER NaN.
+              "band": "current|aging|dated|stale|undated",
+              "status": "FRESH|AGING|DATED|STALE|UNDATED",
+                        derived from band ONLY
+              "identity_ok": bool, "identity_note": str|null } ],
+  "undated_pct": float, "stale_pct": float }
+
+status follows from band, band follows from age, age follows from a real date. The retired app rendered “NaN mo” beside “FRESH” on every row — a status asserted over an uncomputable age.
+
+heatmap.cohort_patterns  (H8)
+{ "threshold_pct": 60, "score_threshold": 2.5,
+  "run_window_months": int,        how far apart the cohort's runs are
+  "patterns": [ { "sub_vertical", "category_id", "pattern_statement",
+                  "affected_count", "cohort_size",   MINIMUM 5 to publish
+                  "share_pct", "below_threshold": bool,
+                  "confidence": "LOW|MEDIUM|HIGH",   from cohort size
+                  "structural_explanation": str|null,
+                  "action", "entity_ids": [uuid] } ],   INTERNAL ONLY
+  "insufficient_cohorts": [ { "sub_vertical", "category_id", "cohort_size" } ] }
+
+entity_ids is for audit and must be STRIPPED from every rendered response. This is the one surface where one client's data can leak into another's view, so it emits counts and shares only.
+
+platform.starters  (P2b)
+{ "starters": [ { "rank", "provenance": "TEMPLATE_FILL|ANALYST",
+                  "opening_shape": "gap|peer|timing|their_words|
+                                    contradiction|system",
+                  "text": str,          45-90 words, SAY-IT-ALOUD: no codes,
+                                        no bracketed ids mid-sentence, no
+                                        score-first opening
+                  "named_gap_subcap_id",
+                  "peer_reference": { "name", "action", "dated_on" }|null,
+                  "their_system_reference": str|null,
+                  "followup_question": str,   a Discovery Question, never a
+                                              toolkit diagnostic question
+                  "e_ids": [str] } ] }
+
+opening_shape is enforced as distinct across the set. All 685 starters in the retired corpus used one template, and an obviously templated opener is worse than none because an AE reads it aloud.
+context.regulatory_standing  (C3)
+{ "primary_regulator": str,      from the REGULATOR's registry, never from the
+                                 entity's self-description
+  "additional_regulators": [str],
+  "license_type": str,           as the registry states it
+  "jurisdictions": [str],        the fastest contamination check in the system
+  "charter_date": date|null,
+  "enforcement_actions": [ { "issue_id", "regulator", "kind", "opened_on",
+                             "status", "summary",
+                             "capped_subcap_ids": [ { "subcap_id",
+                                                      "cap_level" } ],
+                             "remediation_status", "e_id" } ],
+  "absence_of_enforcement": { "verified": bool, "sources_searched": [str] },
+  "e_ids": [str] }
+
+An FDIC or OCC regulator on a Farm Credit entity, or an FCA regulator on a national bank, is an IDENTITY ERROR. Quarantine the whole card and escalate — it means the profile is contaminated, and §8.4 explains how one such error reached five surfaces at once.
+
+context.acquisitions  (C5)
+{ "rows": [ { "closed_on": date,      to the month. ANNOUNCED-not-closed is a
+                                      separate row with its own date.
+              "target_name", "kind",
+              "status": "ANNOUNCED|INTEGRATING|COMPLETE|ABANDONED",
+              "scale_metrics": { … in the ACQUIRER's own terms … },
+              "integration_target": date|null,
+              "affected_subcap_ids": [str],
+              "maturity_effect": "ADVANCED|CONSTRAINED|NEUTRAL|
+                                  TEMPORARILY_CONSTRAINED",
+              "effect_note": str,     20-45 words: named cell, direction,
+                                      window
+              "e_ids": [str] } ] }
+
+TEMPORARILY_CONSTRAINED is permitted and frequently correct during a cutover. It must not be smoothed to NEUTRAL to keep the page positive — an integration that will depress a score is exactly the fact that belongs in the why-now's cost-of-acting-now.
+techstack.landscape  (T2)
+{ "tiles": [ { "kind": "CONFIRMED|INFERRED|CLAIMED|GAPS",
+               "count": int,
+               "basis": str,        the evidence basis, PRINTED on the tile —
+                                    "5" invites certainty, "5 · T1–T3
+                                    evidence" tells the reader what kind of 5
+               "detail": str,
+               "named_items": [str] } ],   the GAPS tile names the platforms
+  "reconciles_to_register": bool }         counts recomputed FROM the register,
+                                           never stored separately
+
+The four counts must sum to the register and be recomputed from it. Two code paths produce two numbers and the client sees the disagreement.
+
+The universal envelope every section carries
+Every section, without exception:
+  "produced_at":     iso timestamp
+  "producer_version": str
+  "e_ids":           [str]     every id the section cites, deduplicated
+  "internal_only":   [str]     JSON paths that must be stripped for the
+                               Customer audience (ERS, rationale, synthetic
+                               provenance, internal codes)
+  "empty_state":     null | { "kind", "reason", "sources_searched": [str] }
+
+internal_only is a PAYLOAD field, not a frontend decision. An unmarked internal rung is invisible to the serve layer and reaches the client.
+
+6. The lifecycle
+  claim ──▶ produce ──▶ [register_evidence]* ──▶ submit ──▶ verdict
+                                                    │          │
+                                            fail ◀──┘          │ pass
+                                              │                ▼
+                                              └── repair ──▶ STAGED
+                                                                │
+                              all six pages STAGED+pass ────────┤
+                                                                ▼
+                                                          promote_run
+                                                                │
+                                                                ▼
+                                                    SERVING (renders)
+
+6.1 Claim
+A run is claimed before production so two sessions cannot produce the same run concurrently. list_pending_runs shows what is unclaimed; the claim carries a lease with an expiry so a dead session does not block a run forever.
+6.2 Produce
+The agent's work, governed by the Surface Design Specification. Read the bundle, read the contract, read the catalogue, reason, enrich, challenge, cite, write.
+6.3 Submit and the verdict
+Validation runs in two passes, deliberately separated:
+STRUCTURAL AND EDITORIAL: required fields, types, grain resolution, word budgets, forbidden registers (no internal codes in client prose, no score-predicate openers, no toolkit diagnostic questions), terminal punctuation, id resolution.
+EVIDENCE: every cited id resolves, belongs to this entity and this run; every excerpt is verbatim in the artifact where the app holds it; every source domain passes the identity check. This is database work of a different shape from the format sweeps, which is why it is its own pass.
+ANY evidence reason fails the submission. An excerpt is either a copy of something a document says or it is not evidence. The check lives at submit rather than promote so the agent can still repair the span.
+
+6.4 Supersession
+A resubmission for the same (run, page) SUPERSEDES the previous row. Submissions do not accumulate, there is no merge, and the last passing submission is the one that promotes. This makes iteration safe: an agent can submit, read the verdict, repair and resubmit without cleaning up after itself.
+6.5 Promotion is all-or-nothing
+promote_run requires a PASS row for EVERY page. There is no partial promote, so a client is never looking at a page from the new run beside a page from the old one.
+
+On success, each page's writer runs into the serving tables inside one transaction and the staging rows are marked promoted. On failure, 409 with missing_pages and unpassed_pages — nothing is written.
+6.6 Reruns and invalidation
+A new run for an entity does not delete the old one. Promotion swaps which run is ACTIVE, and the previous run stays queryable for the longitudinal surfaces (velocity, recurring themes, seen-in-N-runs). Anything derived from the superseded run is invalidated lazily, and a catalogue version bump invalidates by version tag so renamed cells resolve through the alias bridge rather than silently vanishing.
+7. The gate stack
+Four families, each with a different job and a different failure behaviour. §3.5 gives the id prefixes.
+Family
+Runs
+On failure
+AG · analytical
+inside production, per claim, before anything is emitted
+the claim changes or is dropped — the agent's own discipline
+Contract
+at submit, structurally
+the submission fails; repair and resubmit
+Evidence
+at submit, against the store and the artifacts
+the submission fails. Any reason at all.
+SG · safeguard
+at submit, and the results are RENDERED to the client
+recorded and shown. A failing safeguard gate does not block promotion — it is disclosed.
+CG · corpus
+at build time, over the exported pack, corpus-wide
+fails the build
+
+7.1 The safeguard gates are client-visible — write them accordingly
+This family is unusual and was mishandled in the retired system: its results render on a client-facing surface. Three consequences.
+PLAIN LANGUAGE. “SG-04 Evidence per cell” with a human sentence beside it, never a bare code. A client reading “G04 FAIL” learns nothing and distrusts everything.
+HONEST BY CONSTRUCTION. A gate that reports PASS because it did not run is worse than one that reports FAIL. Emit a third state — NOT_RUN, with the reason — rather than defaulting to PASS.
+A FAILING GATE IS NOT A BLOCKED RUN. Disclosure is the point. The retired card showed 9/10 PASS with evidence-per-subcap failing, and that is the correct behaviour: the assessment ships with its weakness stated.
+7.2 Corpus gate ceilings — the rule that keeps them alive
+NEVER raise a ceiling to make a build pass. Every ceiling is a MEASUREMENT of the corpus as it is, so any regression past today's state fails the build. The only sanctioned movement is downward, after a defect class is actually fixed and re-measured.
+
+Two corollaries learned the hard way. Ceilings must be per-client RATES, not fixed counts — a fixed count passes at 137 clients and fails at 138 on arithmetic alone, with no defect introduced. And a ceiling set from an acceptance target rather than a measurement fails every build on day one for defects the build did not introduce, which is how a gate ends up disabled wholesale.
+8. Validation in detail
+8.1 The citation stack
+
+Check
+Catches
+V1
+cited ids ⊆ the bundle you were given
+reasoning that reached outside its grounding
+V2
+no fabricated ids — by pattern AND by database existence
+invented ids, including in the mint namespace
+V3
+no fabricated entity-specific tokens (platform, agent, vendor ids) unless present in the run's own rows
+invented systems
+V4
+re-embed the output; require cosine ≥ 0.55 against the bundle centroid
+a FLUENT PARAPHRASE that invents a claim while citing only real ids — which V1–V3 cannot catch
+
+V4 is the one that matters most and is easiest to skip. V1–V3 are id checks: text can satisfy all three and still say something the sources do not support. V4 asks whether the output is ABOUT the bundle. It abstains when no embedding tier is available — an extra guard, never a fail-closed on a missing model.
+8.2 Fail-closed
+On any citation flag the surface fails closed: the deterministic fallback is served and an alert row is written. An AE never sees unvalidated content.
+
+8.3 Grain resolution
+For every “<label> at N/5” in produced prose: resolve the label to a served cell and require |rendered − served| ≤ 0.05. Round ONCE — rounding to 2dp and then to 1dp is not the same function as rounding once, and .x5 ties diverge between the two paths.
+8.4 The identity gate — blocking, per figure
+The retired system had no identity gate, and the consequence was visible on one client across FIVE surfaces at once: an Overview trajectory carrying another institution's assets, regulator and footprint; a thought-leadership panel quoting that institution's conference talk; a ceiling drilldown citing its annual report; a focus area whose source document was its client profile; and an evidence-age row whose source domain was its website. One root cause, five surfaces, and every instance catchable by one rule.
+For EVERY figure, quote, document and source domain, assert:
+
+  1  LEGAL NAME matches this entity (resolve suffixes; trading vs legal name)
+  2  REGULATOR matches this entity's own
+  3  FOOTPRINT / jurisdictions are consistent with this entity
+  4  SOURCE DOMAIN belongs to this entity or to a known neutral registry
+  5  ORDER OF MAGNITUDE agrees with any other figure for the same metric
+     already in the pack — two figures for one metric differing by more than
+     25% are a CONTRADICTION to resolve, not two data points to render
+
+Any failure → quarantine the field, emit quarantine_reason, escalate.
+Never render a partial identity.
+
+The source domain is the cheapest identity check in the system and it catches the most. Run it on every item, at registration.
+
+8.5 Cross-surface reconciliation
+The same metric appearing on two surfaces must agree or one must be quarantined. This is a gate, not a review step, because the client reads both surfaces on the same screen.
+8.6 Derived values must be computed
+A derived value is either computed from real inputs or it is null. It is never a sentinel, never NaN, and a STATUS derived from it must follow from the computation.
+
+The retired evidence-age tracker rendered “NaN mo” in every age cell while the status beside it read FRESH — a status asserted over an uncomputable age. The rule: if the input date is absent or unparseable, age is null, the band is UNVERIFIED, and the status is UNDATED. Every one of those three follows from the one before.
+8.7 Thresholds are enforced or they are not thresholds
+The retired cohort-patterns surface displayed a 50% row under a header declaring a ≥60% threshold. Either enforce it, or label the exception explicitly as BELOW_THRESHOLD. A stated threshold that does not hold teaches the reader to distrust every other number on the page.
+9. The database
+9.1 Three tiers, one direction of flow
+Tier
+Tables
+Written by
+Read by
+Ingested
+entities · runs · subcap_scores · evidence_index · document_sections · issue_register · peer_scores
+the package parser at ingest
+the agent via get_report_bundle
+Staging
+submissions · submission_verdicts
+the MCP at submit
+the MCP at promote; never the API
+Serving
+one table per section (§9.2)
+the MCP at promote, ONLY
+the backend API for every request
+
+The API reads serving tables only. If a surface can render from a staging table, the boundary has been broken and unvalidated content can reach a client.
+
+9.2 Serving tables — one per section
+A section promotes into its own table. One-to-one keeps the writer simple, makes a partial write impossible to hide, and lets the API select exactly what a surface needs.
+overview_scores          overview_firmographics    overview_why_now
+overview_exec_summary    overview_opportunity      overview_findings
+overview_leadership      overview_financial_series overview_sentiment
+overview_ceilings        overview_evidence_coverage
+overview_thought_leadership
+insight_cards
+heatmap_focus_areas      heatmap_cell_evidence     heatmap_alerts
+heatmap_workbook_scores  heatmap_safeguard_gates   evidence_index (linked)
+heatmap_evidence_age     heatmap_cohort_patterns
+platform_story           platform_recommendations  platform_starters
+platform_roadmap         platform_stairstep
+context_timeline         context_issue_register    context_regulatory
+context_acquisitions
+techstack_items          techstack_landscape
+
+Every serving row carries, without exception:
+    run_id            which assessment produced it
+    entity_id         which client it belongs to
+    promoted_at       when it began rendering
+    producer_version  what produced it
+    provenance        analyst | derived | producer
+    e_ids[]           the citations behind it
+
+provenance is not cosmetic. A deterministically composed recommendation must not present as an analyst recommendation — 32 clients shipped exactly that in the retired corpus, and an AE who quotes a synthetic recommendation as analyst judgement is exposed in the room.
+9.3 Generated columns for anything derivable
+Freshness band, staleness flag and content hash are STORED GENERATED columns maintained by the database, not application fields. A value the database can derive should not be writable, because two writers of one truth eventually disagree.
+9.4 Audit trails that make a defect traceable
+Table
+Records
+Answers
+evidence_dedup_audit
+per registration: which branch fired — kept, dedup_same_entity, cross_entity_kept, duplicate_within_run, tier_upgrade
+why does this id look like that one
+evidence_run_links
+which runs an id appeared in, and on which surfaces
+the seen-in-N-runs chip, and longitudinal continuity
+submission_verdicts
+every verdict, including superseded ones
+what failed, when, and what the agent did about it
+identity_quarantine
+every figure that failed §8.4, with its reason
+which surfaces are incomplete BECAUSE we refused to guess
+
+10. Backend and frontend
+10.1 One endpoint per page, shaped like the payload
+GET /api/v1/entities/{display_id}/overview     → the overview sections
+GET /api/v1/entities/{display_id}/insights
+GET /api/v1/entities/{display_id}/heatmap
+GET /api/v1/entities/{display_id}/platform
+GET /api/v1/entities/{display_id}/context
+GET /api/v1/entities/{display_id}/techstack
+
+GET /api/v1/entities/{display_id}/techstack/{ts_id}     platform detail route
+GET /api/v1/evidence/{e_id}                             the evidence drawer
+GET /api/v1/evidence/{e_id}/run-history                 the seen-in-N chip
+
+The response mirrors the payload section names. An agent that knows the payload knows the response, and a frontend developer reading this specification does not need a second mapping document.
+10.2 Every surface declares its data source
+Each rendered surface carries data-source="producer" | "parsed" | "empty". A surface that cannot say where its content came from cannot be audited from the outside, and a blank one is indistinguishable from a broken one.
+
+10.3 The drilldown contract
+Drilldowns are not a separate fetch layer. A drilldown renders from data the page response already carried, because the panel must open instantly and must never 404 after the card has rendered.
+Shell
+Used by
+Opens from
+Drawer — right slide-in
+synthesis, evidence
+a cell row; any evidence chip
+Modal — centred
+insight, recommendation, new run
+an insight card; a recommendation row
+Inline expansion — in the document flow, no overlay
+finding, event, issue, focus area, platform tile, sentiment tile, readiness gate, acquisition
+the card itself
+
+The inline class is worth stating explicitly because it defeated two automated audits of the retired app: an inline expansion matches no overlay selector, so a probe for role=dialog or [class*=modal] reports zero drilldowns on a page full of them.
+An evidence drawer stacks ABOVE an open modal. Whatever manages panel z-order must handle a drawer over a modal, and closing the drawer must return to the modal rather than orphaning it.
+
+10.4 The audience toggle
+Two audiences, one payload. Internal rungs are MARKED in the payload so the serve layer can strip them; the frontend does not decide what is internal.
+Rendered to
+Internal (AE / analyst)
+Customer
+ERS, tier weights
+shown
+stripped
+scoring rationale
+shown
+stripped
+synthetic provenance (derived vs analyst)
+shown
+stripped
+internal codes (cell ids, gate ids, E-ids)
+shown as chips
+capability NAMES only
+thin-evidence and quarantine markers
+shown
+shown — honesty is not internal
+
+Verify the Customer view on the RENDERED output, not by reading the code. An unmarked internal field is invisible to the serve layer and reaches the client.
+
+10.5 Presentation guarantees the payload must satisfy
+ORDER IS MEANING. A list renders in the order sent. Findings are ranked, phases sequenced, events chronological. Never rely on the client to sort.
+IDS ARE THE JOINS. subcap_id, e_id, rec_id and ic_id are what wire a card to its drilldown. An unresolvable id is a dead control.
+NO MARKDOWN IN A FIELD THAT RENDERS AS TEXT. Only fields explicitly typed as markdown go through a stripper; everything else renders literally, so a stray “### ” reaches the AE verbatim. 127 clients shipped exactly that.
+TERMINAL PUNCTUATION on every prose field. 452 bodies across 136 clients shipped without it.
+COUNTS ARE COMPUTED, NOT ASSERTED. Where a surface declares its grounding (“on the 3 items above”), that number is len(e_ids).
+DENOMINATORS ARE RENDERED. A percentage without its base is not information — “96%” needs “of 761 cells carrying ≥1 linked item”.
+11. Idempotency, concurrency, versioning
+Concern
+Rule
+Re-registering a source
+idempotent by content hash; returns the existing id with deduped=true
+Resubmitting a page
+supersedes the previous row for (run, page). No merge, no accumulation.
+Re-promoting a run
+idempotent — a promoted run promotes to the same state. Not an error.
+Two sessions, one run
+the claim lease prevents it. A lease expires so a dead session cannot block a run permanently.
+Two runs, one entity
+both persist. Promotion swaps which is ACTIVE; the prior run stays queryable for longitudinal surfaces.
+Catalogue version bump
+every id resolution is pinned to the run's ccg_catalog_version. Renamed cells resolve through the alias bridge; nothing silently vanishes.
+Producer version
+stamped on every serving row, so output can be attributed to the producer that made it and a regression can be bisected.
+
+12. Errors
+Structured, actionable, and never prose. An error an agent cannot act on produces another failed attempt.
+Code
+Means
+The agent should
+unknown_page
+not one of the six
+read §5.1
+contract_violation
+missing section, wrong type
+call get_page_contract and re-shape
+grain_violation
+a quoted figure does not resolve to its named cell
+re-read the score row; fix the pairing, not the prose
+unresolved_id
+a cited id does not exist
+call get_evidence to confirm, or register the source first
+foreign_id
+the id resolves to a DIFFERENT entity
+STOP. This is contamination — quarantine and escalate.
+excerpt_not_verbatim
+the span is not in the fetched artifact
+re-extract from the source; never repair by hand
+identity_quarantine
+a figure failed §8.4
+emit the empty state with the reason; do not substitute
+incomplete_run
+promote called before every page passed
+call get_run_progress and finish the blocking pages
+lease_expired
+the claim lapsed mid-production
+re-claim, then resubmit — staged work survives
+catalogue_mismatch
+a cell id is not in the run's pinned version
+resolve through get_capability_catalogue
+
+13. Session continuity
+This section exists so a session that starts cold — with no memory of any prior conversation — can establish exactly where things stand and lose nothing.
+13.1 Resuming: the first four calls, in order
+get_run_progress(run_id) — per-page status, and what is blocking. This replaces guessing from verdicts.
+get_page_contract(page) for each page still to do — read the shape rather than recalling it.
+get_report_bundle(run_id) — the input, including source_cell on every score so grain can be asserted.
+get_client_state(display_id) — what is currently SERVED, which is the diff target if this is a rerun.
+13.2 What is safe to assume, and what is not
+Safe
+NOT safe
+Staged work survives a session ending
+That accepted means rendering. Accepted is staged; only promotion renders.
+Re-registering a source is free and returns the same id
+That an id can be reused across entities — check ownership every time
+Resubmitting a page is clean — it supersedes
+That a partially promoted run exists. It cannot.
+The contract is served, so it cannot drift from the validator
+That a remembered field shape is still current
+A failing safeguard gate still promotes
+That a failing CONTRACT or EVIDENCE gate promotes. It does not.
+
+13.3 The invariants, in one place
+If a future change makes any of these false, it is a breaking change to this specification and not a refactor.
+The app never calls a model at request time.
+All content writes go through the MCP.
+The API reads serving tables only.
+Promotion is atomic across all six pages.
+The agent creates only five id classes; everything else is read or requested.
+Evidence ids are recognised by ONE pattern, in one module.
+ERS is server-computed and bounded 1.0–5.0.
+A quoted figure and its named cell are the same cell, within 0.05.
+Every figure passes the identity gate before it renders.
+A derived value is computed or null — never a sentinel.
+Internal rungs are marked in the payload, not filtered in the frontend.
+A corpus ceiling only ever moves down.
+13.4 Definition of done for one run
+[ ] get_run_progress shows pass for all six pages
+[ ] every section in §5.1 is present, including the ten new ones
+[ ] no unresolved, foreign or fabricated id in any payload
+[ ] every excerpt verified verbatim against its artifact
+[ ] every figure identity-checked; quarantines emitted, not substituted
+[ ] grain asserted on every quoted figure
+[ ] cross-surface metrics reconciled (hero vs grid, Overview vs Context)
+[ ] safeguard gate results emitted with plain-language labels, incl. NOT_RUN
+[ ] empty states explicit — verified_absent / verified_sparse / empty_state
+[ ] internal rungs marked internal_only
+[ ] promote_run returned promoted: true
+[ ] the Customer view verified on the RENDERED output
+
+13.5 What this specification deliberately does not decide
+The transport. JSON-RPC or REST are both acceptable; the exchange contracts in §4.1 are the same either way.
+The hosting shape. Nothing here depends on where the MCP server runs.
+The prompt text. That is the Surface Design Specification's job — this document governs the envelope, not the content.
+Retention. How long superseded runs and verdicts are kept is an operational policy, not a contract.
+Everything else in this document is a contract. Where the two specifications touch — a section name, an id format, a validation rule — this one is authoritative for the envelope and the Surface Design Specification is authoritative for what goes inside it.

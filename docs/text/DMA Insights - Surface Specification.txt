@@ -1,0 +1,2030 @@
+DMA Insights — Surface Specification
+
+Zennify
+DMA Insights · Surface Spec
+August 2026
+
+Reference
+P The package
+O Page operation
+
+Surface contracts
+D1 Overview
+D2 Insights
+D3 Heatmap
+D4 Platform
+D5 Context
+D6 Tech stack
+D7 Health
+
+Drilldowns
+D Drilldown contracts
+
+Rendering
+R Card anatomy & colour
+
+Continuity
+V Versioning
+S Persistence & sessions
+© 2026 Zennify · Confidential
+
+P — The package
+DMA Insights · Surface Specification · contracts, sources and prompts
+Surface Spec38 surfaces38 prompts
+
+D1 · Overview
+
+# Overview — surface contracts
+
+The page an AE is guaranteed to read. It answers one question — what is true about this client, and what do I lead with — and it is the only client page with a customer variant that renders rather than locks. Thirteen surfaces, twelve sections, and five of them are confidence instrumentation.
+
+## O1 · Scores & peer benchmarks
+
+Payload section overview.scores · component ScoreRing
+
+Contract. Composite to 1dp with its band word, four pillar scores with peer deltas, posture chip, evidence basis, and an 18–32 word framing sentence that states the gap, quantifies it and localises it.
+
+### What must be presented
+
+- Overall maturity to 1dp in the hero ring, with its band word (Building, Competitive…).
+- Four pillar scores P1–P4 as a bar strip, each to 1dp with peer delta arrow.
+- Peer median per pillar and the cohort the median is drawn from.
+- Every number must equal the served cell to within one 2dp rounding step. The hero ring and the run row must render the SAME number — they are two views of one value.
+
+### Why it is shaped this way
+
+The hero is the only card an AE is guaranteed to read, so it carries the whole argument in one screen: the composite, the four pillar scores with their peer deltas, the posture label, and — measured on this render — a FIRMOGRAPHICS strip. For the client it must be recognisably them; for the AE it must supply the one number that frames the meeting and the named capability behind it.
+
+What the render establishes: the composite is 3.4, the posture chip reads COMPETING, provenance reads EVIDENCE · HYBRID, and the framing line is "Trails regional bank peer median by -0.3 points. Gap concentrated in P4 Data foundation." That last sentence is the model for this card. It is not a score read-out — it states the gap, quantifies it, and localises it. A hero that says "overall maturity 3.4" has told the AE nothing they cannot see.
+
+Peer scores are frequently absent, and this is where fabrication happens. The sanctioned answers, in order, are: recompute the median at a lower N by dropping the peer that lacks the figure (floor N=3; N=5 -> sorted[2], N=4 -> mean of sorted[1..2], N=3 -> sorted[1]); then adjacency inference from a neighbouring sub-capability, labelled INFERENCE with its reasoning; then a proxy ceiling (a LinkedIn specialist ratio under 5% caps P1C4 at L2.5, negative-dominant Glassdoor caps at L3.0, lowest cap wins); then stop and print "Cannot reliably estimate". Never impute a value into the cell. The report must disclose proxying with the literal phrase "peer proxy", because a governance check greps for it, and must never claim "identical methodology".
+
+The grain rule owns this card. A quoted number and the cell id it names must be the same cell. One line that paired a sub-capability's score with a category's id produced 125 gate violations across the corpus; it fell to 40, then 8, then 1 as each layer was fixed and re-measured, and none of it was accommodated by raising a ceiling.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+overall_score | Scoring workbook | mean of the four pillar means, 2dp; never a flat mean of subcaps (those weight pillars by catalogue size)
+
+pillar_scores[] | Scoring workbook | runs.workbook_scores.pillars, else the rollup of subcap_scores by LEFT(subcap_id,2)
+
+peer_median | peer_comparison_table.csv | per-pillar cohort median
+
+band | lib/maturity.ts | single source of truth for score→band→hex (ADR 0008)
+
+### Drilldown
+
+*PROTOTYPE · drilldown from O1 — capability ceiling row (inline).*
+
+### Synthesis prompt
+
+```
+Produce the hero: composite, four pillar scores with peer deltas, posture, the framing sentence, and the firmographics strip. STEP 1 - READ, DO NOT DERIVE Scores come from the workbook. You never assign M1-M5. Read the composite as the mean of the four pillar means (NOT a flat mean of all sub-capabilities - those differ, and shipping both produced a hero ring and a run row that disagreed at 1dp on 26 clients). Round once, at 2dp, then present at 1dp: rounding to 2dp and then to 1dp is not the same function as rounding once, and .x5 ties diverge. STEP 2 - PEER FIGURES, WHERE THE TABLE HAS THEM Per pillar: {pillar_id, score, peer_median, delta, direction}. delta is signed and is computed, never restated from the source. STEP 3 - PEER FIGURES, WHERE IT DOES NOT  (in this order, stop at the first that yields a defensible number)   a RECOMPUTE AT LOWER N. Drop the peer lacking the figure; take the median of     the rest. Floor N=3. N=5 -> sorted[2]; N=4 -> mean(sorted[1..2]);     N=3 -> sorted[1]. Emit peer_n so the reader knows the basis shrank.   b ADJACENCY INFERENCE. A neighbouring sub-capability's evidence implies     something about this one. Label INFERENCE, state the reasoning in one     clause, widen the band.   c PROXY CEILING. LinkedIn specialist ratio <5% caps P1C4 at L2.5;     negative-dominant Glassdoor caps at L3.0. Lowest cap wins.   d STOP. Accumulated uncertainty over +/-0.8 -> "Cannot reliably estimate".     A point estimate past the cap is false precision, which is worse than a     declared unknown.   Disclose proxying with the literal phrase "peer proxy". NEVER write   "identical methodology". NEVER impute a value into the peer cell. The peer set   is immutable once selected: same sub-vertical, +/-50% asset size, same   regulator jurisdiction, no M&A distortion inside 24 months. STEP 4 - THE FRAMING SENTENCE  (18-32 words) State the gap, quantify it, and localise it to a pillar or a named capability. Model: "Trails regional bank peer median by -0.3 points. Gap concentrated in P4 Data foundation." Do NOT open with the composite - it is rendered beside you. STEP 5 - POSTURE LEADING │ COMPETING │ LAGGING │ MIXED, justified against the peer set, with the evidence basis chip (EVIDENCE / HYBRID / INFERRED) set from what actually backs the scores. STEP 6 - GRAIN ASSERTION (blocking) For every "<label> at N/5" you emit, resolve the label to a served cell and assert the score matches within +/-0.05. A mismatch is a grain_violation and the card does not ship. This is the most common defect in this product. STEP 7 - ENRICHMENT AND CHALLENGE (R-Layer)  A State the posture claim and its confidence.  B Search for what would refute it. At least one contradictory query:    "[Entity] digital transformation criticism OR delay OR failure".  C Is the posture reasonable for this sub-vertical, size tier and regulator?  D Probes: grain mismatch; identity contamination (every figure must be THIS    entity - check the domain on every source); Peer Outlier (a capability wildly    unlike peers needs its evidence re-verified); staleness.  E ACCEPT / REJECT / UNCERTAIN. UNCERTAIN ships with the band stated.
+```
+
+## O2 · Firmographics strip
+
+Payload section overview.firmographics · component ScoreRing inline strip
+
+Contract. Assets, employees and branches rendered inside the hero rather than as a separate panel. Every figure identity-checked against the entity.
+
+### What must be presented
+
+- Employees, revenue, AUM or assets, CAGR, HQ, branches, founded year, primary regulator, charter — each as value + provenance.
+- Every populated field shows where it came from; an unknown field renders an em dash, never a guess and never a dict repr.
+- Figures must be about THIS legal entity. A parent, subsidiary or same-name institution is a contamination, and the panel is quarantined rather than shown.
+- Magnitude sanity: an AUM or asset figure implying a market-scale absurdity is rejected (a $2.70T AUM on a mid-market manager was a real defect).
+
+### Why it is shaped this way
+
+Two things about this card must be stated plainly. First, the prototype has NO dedicated firmographics panel: the data renders as a FIRMOGRAPHICS strip inside the hero (measured labels: Assets, Employees, Branches) plus the Financial trajectory card. The specification is written to that reality.
+
+Second, this render contains a live identity-contamination defect, and it is the best available worked example of why this card needs a gate. Measured on one client, Zions Bancorporation, on one run:
+
+the hero firmographics strip reads Assets $87.9B
+
+the Overview Financial trajectory card reads "$12.2B assets · FY2025", with a
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+legal_name, founded, charter | Client Profile DOCX + run_manifest | firmographics narrative_md and the manifest's institution_name
+
+employees, revenue, AUM, CAGR | Client Profile DOCX financial highlights; Clay | Clay inbound is HMAC-signed and fail-closed when the secret is unset (ADR 0010)
+
+hq_address, branches | Client Profile DOCX; Clay | branches must be an integer count, never a serialised list or dict
+
+primary_regulator | Assessment report / profile | stated, not inferred from charter
+
+identity_mismatch | producer validator | set when a field's source names a different entity; quarantines the panel
+
+### Synthesis prompt
+
+```
+Produce the firmographics strip. Sub-vertical decides WHICH fields, not just what values. STEP 0 - CLASSIFY, THEN CHOOSE THE FIELDS Classification is regulator first, operating model second, revenue mix as tiebreak. Never by size, never by product names. First match wins; unmatched escalates rather than force-fitting.   SV1 Regional Banks $1B-$100B  total assets, deposits, loans, NIM, efficiency                                 ratio, NPL ratio   SV2 Credit Unions             total assets, SHARES, loans, net worth ratio,                                 ROA, MEMBER COUNT   SV3 Commercial Lending        loan portfolio, CRE concentration, C&I volume,                                 NPA ratio   SV4 CIB / Capital Markets     revenue by segment, trading revenue, IB fees,                                 AUM   SV5 RIAs & Broker-Dealers     AUM, client count, revenue, ADVISOR COUNT   SV6 Asset Management          AUM BY STRATEGY, fund performance, NET FLOWS,                                 expense ratios   SV7 Insurance Brokers         premium placed, commission revenue, PRODUCER                                 COUNT, acquisitions   SV8 Insurance Carriers        DWP, COMBINED RATIO, LOSS RATIO, investment                                 income, surplus   Farm Credit                   UNDEFINED in research. Do NOT borrow SV1's                                 metrics. Emit sub_vertical_undefined=true and                                 say so on the surface. Rendering "shares" for a bank or "deposits" for an RIA is a category error even when the number is right. STEP 1 - IDENTITY GATE (blocking, runs before any figure is accepted) For EVERY field: assert the source document is about THIS legal entity.   - match the legal name, not the trading name; resolve suffixes   - check the REGULATOR against the entity's own: an FCA figure on an     OCC-regulated bank is a different institution   - check the FOOTPRINT: a five-state Northeast footprint on a Utah bank is a     different institution   - check the ORDER OF MAGNITUDE against any other figure for the same metric     already on the pack. Two figures for one metric that differ by more than     25% are a contradiction to resolve, not two data points to render.   Any failure -> QUARANTINE the field. Emit it as absent with   quarantine_reason, never as a value. A measured case: one client shipped   $12.2B assets / FCA / NY-NJ-CT-MA-NH on the Overview while the hero and the   Context page both said $87.9B / OCC. Both cards rendered. That must fail. STEP 2 - RECENCY GATE (blocking) Every figure carries {value, as_of, source_e_id, recency_band}. No as_of, no render. Bands: CURRENT <18mo · RECENT 18-36mo · LEGACY >36mo · UNVERIFIED undated. A LEGACY figure may render ONLY with its date visible. An UNVERIFIED figure never renders as current. Report undated_pct for the panel. STEP 3 - ENRICHMENT (mandatory, not a fallback) Always search for a NEWER figure than the package holds, because the package is as old as the assessment:   - the authoritative registry for the sub-vertical: FDIC BankFind (banks),     NCUA Research (credit unions), OCC Bank Search, FFIEC NPW, SEC EDGAR     (10-K/10-Q), SEC IAPD + FINRA BrokerCheck (advisers/BDs), NAIC and AM Best     (insurers)   - the entity's own site: MANDATORY fetch - about page, newsroom, investor     relations, latest quarterly release   - LinkedIn for headcount; the careers page for footprint   - the newest quarterly filing, not the annual, when the metric is quarterly Mint E-CC ids with url + verbatim excerpt + retrieval date + tier + claim label. If enrichment finds a newer figure that disagrees with the package, the NEWER specific source wins (recent>older, specific>general) and you emit the contradiction row rather than silently replacing. STEP 4 - MAGNITUDE SANITY Compare against the sub-vertical's plausible range and against the entity's own prior-year figure. A regional bank at $2.70T is not a large regional bank, it is a parse error - one client shipped exactly that. Implausible -> quarantine, do not clamp. STEP 5 - EMIT Per field: {field, value, unit, as_of, recency_band, source_e_id, confidence, quarantined, quarantine_reason}. Absent beats wrong: a dash with a provenance note is honest; a plausible-looking wrong number is not.
+```
+
+## O3 · Why-now signals
+
+Payload section overview.why_now · component WhyNowStrip
+
+Contract. Dated, cited events. Each carries trigger, window, consequence of waiting, cost of acting now and why this sequence.
+
+### What must be presented
+
+- Three to six trigger cards, each a DATED external event with a kind pill, a one-line body and its E-ID.
+- Each signal answers 'why call them now' — a leadership change, an earnings move, a regulatory action, a technology announcement, an M&A event.
+- A signal is an EVENT, not a score read-out. 'P2 scores 2.4' is not a why-now.
+- No signal may be the assessment itself ('Zennify completed a Digital Maturity Assessment' shipped on 11 clients and is circular).
+
+### Why it is shaped this way
+
+A why-now is not a list of changes. It is the synthesis of the whole report, answering one question: why should this entity act NOW rather than next year. Changes are the raw material; the synthesis is the product.
+
+Measured on this render the card is "Why now signals · 3 triggers · click any signal to drill into the evidence", and the drilldown returns reasoning of the form "Closing P1C1.6.4 lifts the parent category and unblocks downstream work." That is the right shape — a trigger tied to a cell, tied to a consequence.
+
+Two things the review identified as missing, both of which are now required.
+
+First, the card must be SEGMENTED, and each header has an ideal: - TRIGGER — what changed, dated, cited. Ideal: a dated external event with a regulator, a filing, a vendor milestone or a named hire behind it. Not "digital transformation is accelerating". - WINDOW — how long the opening lasts, and what closes it. Ideal: a specific closing event with a date ("window closes at nCino go-live, Q2 2026"), because a window with no closing condition is not a window. - CONSEQUENCE OF WAITING — which assessed capability degrades, and by when. Ideal: named cell, direction, horizon. - COST OF ACTING NOW — the honest other side. Ideal: the concurrent commitment this would collide with, drawn from the timeline and the issue register — a live core migration, an open consent order, an integration already tracking to Q3. If acting now is genuinely cheap, say why, but say it. - WHY THIS SEQUENCE — why this is first rather than second, tied to the roadmap.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+signals[].body | Research workbook + enrichment | dated timeline events within a 24-month lookback, most recent first
+
+signals[].kind | producer classification | LEADERSHIP │ EARNINGS │ REGULATORY │ TECHNOLOGY │ M&A │ MARKET
+
+signals[].event_date | the source | required; an undated signal is dropped
+
+signals[].e_ids | evidence store | at least one; uncited signals are dropped
+
+### Drilldown
+
+*PROTOTYPE · drilldown from O3 — why-now signal row (inline).*
+
+### Synthesis prompt
+
+```
+Synthesise why this entity should act now. This is the report's conclusion rendered as a card, not a changelog. Emit 2-4 signals. Per signal, ALL FIVE headers are required: {wn_id, trigger, window, consequence_of_waiting, cost_of_acting_now,  why_this_sequence, linked_subcap_ids[], e_ids[], dated_on, claim_label,  confidence}   trigger                25-45 words. WHAT CHANGED, dated to at least the                          month, cited. Ideal: a regulator action, a filing, a                          vendor milestone, a named executive hire, an M&A event.                          An undated trigger is not a trigger - drop it.   window                 20-40 words. How long the opening lasts AND THE EVENT                          THAT CLOSES IT, with its date. "Window closes at                          [named event], [quarter]". No closing condition means                          no window; say "no dated close established" rather                          than implying urgency you cannot support.   consequence_of_waiting 30-55 words. Which assessed capability degrades, in                          which direction, over what horizon. Name the cell.                          Ground it: a peer trajectory, a dated regulatory                          deadline, a contract expiry, a migration date.   cost_of_acting_now     30-55 words. REQUIRED. The concurrent commitment this                          collides with, drawn from the timeline, the issue                          register and the tech stack: a live core migration, an                          open consent order, an integration in cutover, a                          leadership vacancy. If the cost is genuinely low, state                          WHY it is low. A signal with only upside is a pitch and                          is rejected.   why_this_sequence      20-35 words. Why this is first rather than second, tied                          to the roadmap phase and any readiness gate. Then ONE synthesis paragraph across the signals, 60-110 words: what the signals TOGETHER say about timing that no single one says. This is the card's reason to exist. It must be consistent with the executive summary's Complication and with the roadmap's phase 1. SOURCES AND ENRICHMENT Start from the package: the assessment report's timing sections, the issue register, the timeline, leadership changes. Then ENRICH - the package is almost never current enough for a timing claim:   - every applicable regulator's enforcement and order pages (NCUA / OCC / FDIC     / CFPB / SEC / FINRA / state DOI), by date   - the entity's newsroom and investor relations, last 12 months   - "[Entity] core conversion OR migration OR go-live 2025 2026"   - "[Entity] names OR appoints CIO OR CTO OR CDO OR chief digital"   - M&A and charter events with dates   - the latest quarterly filing for forward-looking commitments Mint E-CC ids with url + verbatim excerpt + retrieval date. CHALLENGE (R-Layer)  B  Argue the opposite: why should they WAIT? If the wait case is strong, the     signal changes or goes. Run "[Entity] delay OR postpone OR paused     [initiative]".  D  Probes: Temporal Inconsistency (urgency asserted, metrics flat);     Marketing-Reality Gap (a vendor announcement read as a commitment);     Regulatory Divergence (the entity's framing vs the regulator's);     an event about a same-named different entity.  E  ACCEPT / REJECT / UNCERTAIN. Fewer than 2 defensible signals -> emit what     you have and set thin=true. Do NOT manufacture urgency to fill the card. GATES: S25_whynow_provenance (every trigger dated and cited); no undated trigger; cost_of_acting_now non-empty.
+```
+
+Gates asserted: S25_whynow_provenance
+
+## O4 · Executive summary
+
+Payload section overview.exec_summary · component SCQACard
+
+Contract. Situation, complication, question, answer. At most one raw score, and client facts must outnumber score references.
+
+### What must be presented
+
+- A Situation–Complication–Question–Answer narrative, 4 short paragraphs, that an AE can read aloud.
+- At most ONE raw score in the whole summary; the story carries the argument, not the arithmetic. 131/138 bodies once quoted two or more.
+- Every factual claim carries an E-ID. Client facts must outnumber score references.
+- Any score quoted must resolve to a served cell under the label used — quoting a category average under a subcapability's name is the O1/S23 grain defect.
+
+### Why it is shaped this way
+
+Measured, this card is "Executive narrative · SCQA · Assessment Report · stored verbatim · Read full ↓". The review's objection stands: a summary that recaps scores is not a summary. The scores are already on the same screen, twice.
+
+An executive summary earns its place by doing four things the rest of the page cannot. It synthesises the CORPUS rather than the scorecard — the report, the evidence, the issue register, the sentiment, the stack. It is DATA-LED, opening on the fact that most changes the reader's mind. It names the RECOMMENDATIONS and, critically, JUSTIFIES THEIR SEQUENCING, because sequencing is the one judgement the client cannot make from the heatmap. And it is one story that survives contact with the other five pages.
+
+SCQA is the structure, and each element has a job: - SITUATION — the client's own position in their own terms, recognisable to them, with a figure that is theirs. - COMPLICATION — the constraint. This is where the analysis lives. It is a mechanism, not a low score: "applications abandon at identity verification, so the branch channel is absorbing volume the digital channel was built to take" is a complication; "onboarding scores 2.1" is a measurement. - QUESTION — the decision the client faces, phrased as they would phrase it. - ANSWER — the sequenced recommendation, with the reason the sequence is that way, and what it costs to wait.
+
+The safeguard against score-recapping has to be mechanical, because prose drifts: no sentence may consist of a score predicate, at most one numeric score may appear in the whole summary, and the Complication must contain a causal connective. A corpus sweep found 219 findings across 83 clients opening with "stands at 2.34/5", which is what happens without a mechanical rule.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+scqa_md | Assessment report DOCX | executive_summary section, then the per-pillar deep dives for the Complication
+
+cited_e_ids | research workbook | every claim's E-ID, validated against this run's evidence store
+
+scores quoted | scoring workbook | must match the served cell ±0.05 at the grain named
+
+### Synthesis prompt
+
+```
+Write the executive summary as SCQA. It synthesises the corpus, not the scorecard. BEFORE WRITING, READ ALL OF: the four pillar deep-dives, the issue register, the peer table, the sentiment sources, the tech stack, the timeline, the recommendations and their phases. A summary written from the scores alone is the failure mode this card exists to avoid. {situation, complication, question, answer, sequencing_rationale,  cost_of_delay, e_ids[], claim_label}   situation     50-90 words. Where this client is, in terms they would use,                 anchored on ONE figure that is theirs (a firmographic, a                 trajectory, a footprint) - not a maturity score.   complication  70-120 words. THE CONSTRAINT, AS A MECHANISM. What is blocking                 what, and through what causal path. Must contain a causal                 connective (because / so that / which means / with the result                 that). If you cannot state a mechanism you have a measurement;                 go back to the deep-dives and find the mechanism.   question      25-45 words. The decision the client actually faces, in their                 voice. Not "how can we improve digital maturity".   answer        90-150 words. The sequenced recommendation. Name the                 recommendations by what they do, not by REC id. State what                 happens first and what it unblocks.   sequencing_rationale                 50-90 words. WHY THIS ORDER. The dependency, the readiness gate,                 or the window that fixes it. This is the judgement the client                 cannot make from the heatmap, and it is the highest-value                 sentence in the document.   cost_of_delay 40-70 words. What degrades if the sequence slips a year, tied to                 a named capability and a dated trigger where one exists. SAFEGUARDS (mechanical, checked before submit)   - NO sentence may consist of a score predicate ("X stands at N/5", "X scores     N", "X is rated N").   - AT MOST ONE numeric maturity score in the entire summary, and only where it     carries an argument.   - The complication MUST contain a causal connective.   - Every quantitative claim carries an E-ID.   - No internal codes (PxCy.z, E-nnn, REC-nn) in the client-visible prose - use     capability NAMES.   - Terminal punctuation on every field. 452 bodies across 136 clients shipped     without it. COHESION (blocking) The Complication must be the same constraint the Top findings rank first, the same one the Platform page's effort profile leads with, and consistent with the timeline's arc. If they disagree, one of them is wrong - resolve it before shipping, because the client reads all four. CHALLENGE (R-Layer)  B  What would make this summary wrong? If the complication rests on one     source, say so and lower confidence.  D  Probes: Input-Output Disconnect (investment claimed, outcomes flat);     CX Disconnect (internal metrics good, customer sentiment bad - that     contradiction is often the real complication); Peer Outlier.  E  ACCEPT / REJECT / UNCERTAIN. GATES: S26_exec_synthesis; S16_headline_score_quoting; S20_score_recap_register; S1_jargon.
+```
+
+Gates asserted: S16_headline_score_quoting · S1_jargon · S20_score_recap_register · S26_exec_synthesis
+
+## O5 · Opportunity surface tiles
+
+Payload section overview.opportunity · component OpportunitySurfaceStrip
+
+Contract. Where engagement value concentrates per platform, tied to the cells below M3 that the platform addresses.
+
+### What must be presented
+
+- Five tiles naming where value is available, each with a headline, a one-line rationale and its anchor capability.
+- Prose must be whole sentences — tiles once shipped head-clipped mid-word.
+- Each tile names a capability in words and ties to a platform the client could use.
+
+### Why it is shaped this way
+
+Measured: "Opportunity Surface · per platform · Composite fit score 0-100 · Σ(priority × gap) for ABS", and clicking a tile NAVIGATES to #/clients/<id>/platform?platform=DB — it is a cross-page link into the Platform page scoped to that platform, not a panel.
+
+The review's objection is that these tiles are shallow: a composite number with no visible reasoning and no validation. A fit score is a claim about what the client should buy. It is the most commercially loaded number in the product and it must be the most defensible.
+
+Three requirements follow. The composite must be DECOMPOSABLE — the tile shows Σ(priority × gap) and the drilldown must reproduce exactly that arithmetic from the cells it names. A tile showing 47/100 whose expansion recomputes to something else is the defect class that hit 570 of 685 cards; the fix is to rebake the factors after any override rather than render two numbers from two code paths.
+
+It must be VALIDATED against the assessment report, not just the score matrix. The report says what the analyst concluded; if the arithmetic ranks a platform the report never discusses, that disagreement is a finding about one of them.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+tiles[].headline | Assessment report + recommendations_detail.json | the gap framed as available value
+
+tiles[].anchor_subcap_id | scoring workbook | the subcapability the tile is about
+
+tiles[].platform | platform fit engine v2 | deterministic; the agent explains, never recomputes
+
+### Synthesis prompt
+
+```
+Produce the opportunity tiles: composite fit per platform, decomposable and validated. STEP 1 - COMPUTE, SHOWING THE PARTS composite = Σ(priority × gap) over the addressable cells, normalised 0-100. Emit {platform, composite, factors[], addressable_cells[], relevance, their_stack_context, rank, rank_rationale}   factors[]          {name, weight, value, contribution} and they MUST sum to                      the composite. The drilldown reproduces this arithmetic.   addressable_cells[] {subcap_id, name, current, peer, gap, feature_that                       _addresses_it}. Every cell must be one THIS run serves.   relevance          0-1, how relevant this platform is to THIS sub-vertical. STEP 2 - DISCARD (a ranking that cannot reject is a sort) Drop a platform when: relevance < 0.5 for the sub-vertical; the anchor cells belong to a different entity type (a carrier sub-capability on a bank); the client already runs it at the layer in question (that is an adoption conversation, not a fit conversation); or it addresses fewer than 3 cells. Emit discarded[] with {platform, reason} - a visible discard is evidence of judgement, and it is what an AE needs when the client asks "why not X". STEP 3 - FACTOR IN THEIR OWN STACK  (this changes the answer, not the framing) Read the tech stack register. A CONFIRMED platform at a layer removes that layer's greenfield opportunity and creates an extension one. An ABSENT platform with a demand signal (hiring, an RFP, a board commitment) RAISES priority. A platform mid-migration is a timing constraint on everything downstream. STEP 4 - VALIDATE AGAINST THE ASSESSMENT REPORT (blocking) Read the report's platform and recommendation sections. If the arithmetic's rank-1 is a platform the report does not discuss, you have a disagreement: resolve it, state which won and why, and lower confidence. Do NOT ship an arithmetic rank that contradicts the analyst without saying so. STEP 5 - CHALLENGE (R-Layer)  A State the rank-1 claim and its confidence.  B Argue for the runner-up. What would make IT first? If the margin is inside    5 points, present both and say the ranking is close.  C Is this platform plausible for this sub-vertical, size tier and regulator?  D Probes: out-of-vertical rank-1; anchor-cell entity-type mismatch; stale    fit figure (an exec_fit computed against a superseded run);    Tech Stack Mismatch (recommending what they already own).  E REJECT -> discard the tile and re-rank. Never keep a rank you cannot defend. STEP 6 - RANK RATIONALE  (25-45 words per tile) Why this platform sits at this rank, naming the cells it addresses and the constraint it lifts. Not a restatement of the composite. GATES: S13_platform_score_lead; S17_exec_fit_stale; S31_platform _distinctiveness; breakdown-equals-headline.
+```
+
+Gates asserted: S13_platform_score_lead · S17_exec_fit_stale · S31_platform
+
+## O6 · Top findings
+
+Payload section overview.findings · component TopFindingsCard
+
+Contract. Ranked findings, each with what, why and so what, a named consequence, a rejected alternative, and an inline expansion.
+
+### What must be presented
+
+- Four to six findings, each a capability-named headline with a What/Why/So-what body and evidence chips.
+- The score chip and the anchor id must name the SAME cell. A subcap-grain score under a category id read '3.5/5' against a cell serving 2.77 on 59 clients.
+- The title must be a capability, not an evidence sentence, not a person's name, not a raw code, and not the body restated.
+- Bodies end in terminal punctuation and never repeat a sentence.
+
+### Why it is shaped this way
+
+The render is more structured than the earlier specification allowed for, and the structure is the answer to "what makes a compelling finding". Measured, each row is: an id chip (F-01), a title that is a CLAIM, a THEME label, and a QUANTIFIED CONSEQUENCE — plus platform chips and a chevron:
+
+F-01 "Data fragmentation is the root constraint, not under-investment"
+
+F-02 "Loan origination is where automation lands first"
+
+F-03 "The team generates insight faster than it acts on it"
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+findings[].name | Client Profile focus areas; assessment report | a capability label, humanised — never 'P4C1' and never '[P2C3.2.IC1] Evidence'
+
+findings[].subcap_id | scoring workbook | MUST be the cell whose score is quoted
+
+findings[].score / peer_median | scoring workbook | that cell's own score, 2dp
+
+findings[].e_ids | research workbook | at least one; uncited findings are dropped
+
+### Drilldown
+
+*PROTOTYPE · drilldown from O6 — top-finding row "F-01Data fragmentation is the root const" expanded (inline).*
+
+### Synthesis prompt
+
+```
+Produce the top findings. RETRIEVE them; derive only if retrieval fails. STEP 1 - RETRIEVE FROM THE RESEARCH AND ASSESSMENT REPORTS (first choice) Read 04_reports/Assessment_Report*.docx and the Client Profile research report in full. The analyst's key-findings, executive-summary and per-pillar conclusion sections already contain the findings; extract them with their reasoning intact. Record source_kind=retrieved with the section and page. STEP 2 - ONLY IF RETRIEVAL YIELDS FEWER THAN 5 Derive from the corpus - the joins, not the scores: a complaint theme against a process score, a job posting against a platform tenure, a regulator finding against a self-description, a timeline event against a capability. Record source_kind=derived. NEVER derive by taking the five widest score gaps; that produces a sorted list, not findings. STEP 3 - EMIT  (5 findings, each with EVERY field) {f_id, title, theme, consequence, body, rejected_alternative,  strategic_alignment, linked_subcap_ids[], platform_chips[], e_ids[],  source_kind, claim_label, confidence}   title         <=12 words. A CLAIM, and where possible one that rejects the                 obvious alternative in the same breath - the measured exemplar                 is "Data fragmentation is the root constraint, not                 under-investment". NEVER a capability name alone, never a                 score, never a person's name, never an evidence sentence, never                 a raw code.   theme         ONE of the client's own domains, upper-case, 1-3 words:                 DATA FOUNDATION │ WORKFLOW │ DECISIONING │ CHANNELS │ TIMING │                 RISK & COMPLIANCE │ OPERATING MODEL. This is the reader's                 orientation cue.   consequence   6-14 words, QUANTIFIED where the evidence allows. Measured                 exemplars: "Blocks 34 downstream subcaps"; "5-7 month cycle                 compression"; "Trails peer sentiment by ~0.8 stars"; "Window                 closes at nCino go-live". A consequence with no magnitude and no                 named event is not finished.   body          55-95 words. The argument: what is true, the mechanism by which                 it produces the consequence, and what it implies. Cited. Must                 NOT open with a score predicate.   rejected_alternative                 20-35 words. The competing explanation you considered and why                 the evidence favours yours.   strategic_alignment                 15-30 words PLUS a 0-1 score. Which of the ENTITY'S OWN stated                 strategic objectives this bears on, quoting the objective from                 their annual report, investor deck, strategic plan or CEO                 letter. This is the RANKING KEY. STEP 4 - RANK BY STRATEGIC ALIGNMENT, NOT BY GAP WIDTH Order by strategic_alignment score, tie-broken by breadth of downstream impact (how many cells it blocks), then by severity. The widest gap is frequently not the most important finding. State the ranking basis on the surface. If you cannot establish the entity's strategic objectives, SAY SO, rank by downstream impact, and set ranking_basis=impact_fallback - do not pretend to an alignment you did not establish. STEP 5 - NARRATIVE COHESION The five findings must read as ONE story in order: the root constraint, then what it blocks, then where the leverage is, then the timing. Emit narrative_thread, 45-75 words, tracing that line. If the five do not form a thread, you have five observations. STEP 6 - THE DRILLDOWN: FOUR HEADINGS, EACH WITH ITS OWN JOB The card face shows id, title, theme and consequence. The expansion carries the argument under exactly four headings. Every one is required; a heading present but empty is worse than the row not expanding.   WHAT     25-45 words. The STRUCTURAL FACT, then one concrete illustration the            client will recognise about themselves. Do not restate the title and            do not open with a score. The measured exemplar states three parallel            cores, then makes it real: "a customer with a mortgage, a deposit            account, and a card appears as three unrelated records." Cite.            Sub-parts, in order: (a) the fact; (b) the illustration; (c) the scope            where the evidence supports one (how many systems, how many records,            which lines of business).   WHY      25-45 words. THE MECHANISM, in three moves: (a) the CAUSE - usually            historical, and usually the most interesting sentence on the card            ("each core was retained through prior acquisitions rather than            consolidated"); (b) what has been done ANYWAY, which is where the            waste lives ("invested heavily in analytics on top"); (c) HOW it            propagates ("every downstream initiative inherits the fragmentation            underneath"). If you cannot name the cause, say so - an unexplained            fact is still a finding, but do not invent a history.            Where the mechanism is entitlement-without-adoption, say it in client            language ("the capability is bought but unused") and fire URF-04            internally; never print the URF code on a client surface.   SO WHAT  25-45 words. THE DECISION, in two moves: (a) the consequence of            sequence - what compounds if this is not done FIRST ("every CX            investment made before the substrate is fixed compounds the            problem"); (b) this finding's ROLE in the narrative - is it the            constraint, the fastest win, the proof point, or the timing gate? The            measured F-02 does this explicitly: "the fastest credible win ... it            builds the proof point for the larger data conversation." Name a            quantified benefit only where the evidence carries one ("a 5-7 month            cycle compression"), and name the procurement reality where it helps            ("a tool they already own, with no new procurement").            Never "consider investing in". Never a benefit with no source.   EVIDENCE one row per supporting item: {e_id, source_title, recency, tier,            claim_label}, each id resolving to the evidence store so the chip            opens the evidence drawer. The heading is a control ("EVIDENCE ·            CLICK TO VIEW"), so an unresolvable id is a dead control, not a            cosmetic issue. A finding with zero evidence rows does not ship. CROSS-HEADING CHECKS (run before emitting)   - WHAT states a fact; WHY explains it; SO WHAT decides. If two headings say     the same thing in different words, the card has one idea, not three.   - The consequence on the card FACE must be the same consequence SO WHAT argues.   - Every number in any heading resolves to a served cell or a cited source.   - No internal codes (PxCy.z, URF-nn, REC-nn) in any of the four headings. STEP 7 - CHALLENGE (R-Layer, per finding)  B  One contradictory query per finding: "[Entity] [area] failure complaint     outage criticism".  D  Probes: title-is-not-a-claim; grain mismatch between the quoted figure and     the named cell; Input-Output Disconnect; Marketing-Reality Gap; a finding     that restates another; a WHY that asserts a history with no source.  E  REJECT -> drop it and retrieve or derive a replacement. Fewer than 3     defensible findings on a completed run is a failure state, not an empty one. GATES: W1_workbook_fidelity (quoted score resolves to the named cell); S14_capability_gap_title; S14_jargon_title; S1_jargon; S20_score_recap_register; terminal punctuation.
+```
+
+Gates asserted: S14_capability_gap_title · S14_jargon_title · S1_jargon · S20_score_recap_register · W1_workbook_fidelity
+
+## O7 · Leadership panel
+
+Payload section overview.leadership · component LeadershipPanel
+
+Contract. Roster with role and tenure, or an explicit verified-absent state naming every source searched.
+
+### What must be presented
+
+- The executives who matter to this conversation: name, title, tenure signal, and what they own that the assessment touches.
+- An empty roster must be an explicit verified_absent, not a silent blank.
+
+### Why it is shaped this way
+
+Measured: "Leadership panel · Enrich all via Clay · MH ..." — the panel ships with an enrichment action built into it, which is the design telling you that gaps here are expected to be filled, not rendered.
+
+The review's rule is absolute and correct: NO EMPTY LEADERSHIP SURFACE. A blank leadership panel on an assessed entity is not an empty state, it is an unfinished one — and it is uniquely damaging because leadership is the first thing an AE checks before a meeting.
+
+Absence is only a finding once the search has actually happened. "No CDO found" without the five mandatory proxy searches — board bios, C-suite digital hires, LinkedIn digital titles, conference talks, strategic-plan filings — is a research failure wearing a finding's clothes. And a leadership record decays faster than any other firmographic: an executive who left eighteen months ago is worse than no record, because the AE will use the name.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+roster[] | Client Profile DOCX | paragraph form OR a 5-column table — both shapes occur in real packages
+
+roster[].relevance | producer | which pillar/capability this person owns
+
+verified_absent | producer | true only after the profile was read and held none
+
+### Synthesis prompt
+
+```
+Produce the leadership roster. An empty panel on an assessed entity is a failure state. STEP 1 - PACKAGE FIRST The Client Profile research report renders leaders in paragraphs OR in a table (one real fixture uses a 5-column table). Parse both shapes. STEP 2 - ENRICH UNTIL THE PANEL IS NOT EMPTY (mandatory)   - the entity's own leadership / about / governance page: MANDATORY fetch   - the latest proxy statement or annual report governance section   - "[Entity] names OR appoints OR promotes CIO OR CTO OR CDO OR chief digital     OR chief information", with year markers 2024 2025 2026   - LinkedIn: current holders of the relevant titles   - press releases for the last 24 months   - conference speaker listings and panel bios   - regulator filings that name officers Mint E-CC ids with url + verbatim excerpt + retrieval date. STEP 3 - RECENCY VALIDATION (blocking per person) Every entry carries as_of and a verification source. A name with no verification date does not render. Cross-check against the CURRENT leadership page: if the person is absent there, mark departed and remove them from the roster - a stale executive name is worse than a gap, because the AE will use it. Emit tenure where the source gives a start date. STEP 4 - THE DIGITAL-OWNERSHIP QUESTION The panel exists to answer "who owns this decision". For each relevant domain (data, digital channels, technology, risk) name the accountable executive, or state that no owner was established. If there is no CDO/CIO equivalent, run ALL FIVE proxy searches (board bios, C-suite digital hires, LinkedIn digital titles, conference talks, strategic-plan filings) BEFORE recording the absence - and then record the absence WITH the sources searched, because a genuine vacancy at that level is itself a finding that bears on P1C4 and belongs in the why-now. STEP 5 - EMIT {name, title, domain, appointed_on, tenure_months, as_of, source_e_id,  relevance_note, confidence}   relevance_note  10-25 words: why this person matters to THIS assessment -                   which capability they own, what they have said publicly about                   it. A roster without relevance is an org chart. STEP 6 - CHALLENGE  D Probes: a same-named person at a different institution (check the domain on    every source); a title that exists on the site but is vacant; an    announcement of an intention to hire read as a hire; a bio cached from a    prior employer.  E Never ship a name you could not verify against a current source. GATES: no empty roster on a completed run; every entry dated; identity checks.
+```
+
+## O8 · Financial trajectory
+
+Payload section overview.financial_series · component FinancialTrajectoryCard
+
+Contract. A dated series. Below three points it renders as a labelled snapshot with no trend line.
+
+### What must be presented
+
+- A multi-year dated series (assets, revenue or AUM) rendered as a trend, with the metric named and each point dated.
+- A trend word (improving, stable, declining) only when the series supports it.
+- Two points is not a trajectory — thin series must declare themselves.
+
+### Why it is shaped this way
+
+Measured, this card carries a five-point series ($9.8B '21 -> $12.2B '25), a headline "$12.2B assets · FY2025", a regulator chip (FCA) and a footprint line ("NY · NJ · CT · MA · NH (5 states)", "64 branches · 1,788 FTE").
+
+It is also the card that proves the review's point about missing validation gates, because on this render it is WRONG. The Context page's Financial trajectory for the same client shows $76.6B -> $87.9B with regulator OCC, and the hero's firmographics strip agrees at $87.9B. Zions Bancorporation is a Utah-headquartered, OCC-regulated bank of roughly $87B; FCA is the Farm Credit Administration and that Northeast five-state footprint is Farm Credit East's. Two cards on one client, both labelled Financial trajectory, disagreeing by 7x, with the wrong one also carrying the wrong regulator.
+
+No gate caught it because there was no gate. Three are now required: an identity gate on every figure, a cross-surface reconciliation gate (the same metric on two surfaces must agree or one must be quarantined), and a recency gate that forces enrichment toward the newest published figure rather than trusting the package's vintage.
+
+The trend label carries its own trap. A trajectory needs at least three dated points before it may be called a trend at all; with fewer, it is a snapshot and must be labelled one.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+series[] | Client Profile financial highlights; assessment report | {year, metric, value, unit, e_id} per point
+
+trajectory | computed from the series | never asserted without >=3 dated points
+
+verified_sparse | producer | set when the sources hold fewer than 3 points
+
+### Synthesis prompt
+
+```
+Produce the financial trajectory: a dated series, a trend label, and the validation that makes both trustworthy. STEP 1 - BUILD THE SERIES {period, value, unit, as_of, source_e_id, basis} per point, oldest first. basis is the metric definition (total assets / DWP / AUM / premium placed) taken from the sub-vertical - see O2. Mixing definitions across periods is a silent error that produces a fake trend. STEP 2 - IDENTITY GATE (blocking, per point) Assert every point is THIS legal entity: legal name, REGULATOR, and FOOTPRINT must all match the entity's own. A measured failure on this very card: an Overview series of $9.8B->$12.2B carrying regulator FCA and a NY-NJ-CT-MA-NH footprint, on an OCC-regulated Utah bank whose other two surfaces both said $87.9B. Any mismatch -> QUARANTINE the series, render the honest empty state, and emit quarantine_reason. Never render a quarantined series. STEP 3 - CROSS-SURFACE RECONCILIATION GATE (blocking) Before submitting, compare this metric against EVERY other surface in the pack that carries it: the hero firmographics strip, the Context trajectory, the peer table, the report narrative. Any two figures for the same metric and period differing by more than 25% is a contradiction. Resolve it by recent>older, specific>general, T1>T2>T3, and emit the resolution row. If you cannot resolve it, quarantine BOTH rather than shipping two numbers that disagree on one client. STEP 4 - RECENCY GATE AND MANDATORY ENRICHMENT The package is as old as the assessment, so ALWAYS search for a newer figure:   - the latest 10-Q/10-K on SEC EDGAR, or the sub-vertical's registry: FDIC     BankFind, NCUA Research, FFIEC NPW, NAIC, AM Best   - the entity's investor-relations page and most recent quarterly release   - "[Entity] total assets OR AUM OR direct written premium Q1 OR Q2 2026" If a newer figure exists, it becomes the headline and the older ones become the series. Mint E-CC ids with url + verbatim excerpt + retrieval date. Every point renders with its as_of; an undated point does not render. STEP 5 - MAGNITUDE SANITY Check each point against the sub-vertical's plausible range and against the adjacent periods. A single point 7x its neighbours is a parse or identity error, not growth. One client shipped $2.70T AUM from a parse error. Implausible -> quarantine, never clamp. STEP 6 - TREND LABEL GROWING │ STABLE │ DECLINING │ VOLATILE, computed from the series, with the CAGR where 3+ dated points exist. FEWER THAN 3 DATED POINTS -> no trend label at all; emit trend=null, verified_sparse=true, and label it a snapshot. A trend drawn from two points is a line, not a trajectory. STEP 7 - EMIT THE READING  (35-60 words) What the trajectory means for the assessment: does the growth outpace the digital capability that has to support it? That question is the card's reason to exist. Cite. GATES: S6_financials; S27_financial_series (>=3 dated points or verified_sparse); S24_firmo_integrity; cross-surface reconciliation.
+```
+
+Gates asserted: S24_firmo_integrity · S27_financial_series · S6_financials
+
+## O9 · Sentiment
+
+Payload section overview.sentiment · component SentimentCard
+
+Contract. Bars plus context tiles, each tile expanding inline to the items behind it.
+
+### What must be presented
+
+- The prototype's design, which is the contract: source-level rating BARS grouped by audience on the Overview, and an interactive three-tile grid with drilldowns and evidence chips on Context.
+- Each bar names its source, its rating and its sample size.
+- A single displayed line is not a sentiment picture — thin sources declare themselves.
+- The invented card style that shipped on D1 is not in the design package and must not return.
+
+### Why it is shaped this way
+
+Measured on Overview: "Sentiment · B2B/B2C gap · Industry avg 3.5". On Context the same data renders as a three-tile grid ("Sentiment overview · Click any card for source · EMPLOYEE ..."), and each tile's expansion ends by naming the cell it caps — measured: "Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3 ...".
+
+That last clause is what makes sentiment analysis rather than trivia. Sentiment that does not connect to an assessed capability is decoration; sentiment that caps a cell is evidence.
+
+The review's objection was that there were no enrichment options and the prompt did not condition the agent. Sentiment is the most enrichable surface in the product — there are at least seven public sources, and the package usually carries one or two. It is also the surface where thinness is most often mistaken for a finding: an app rating with n=12 is not a signal, and a rating with no n, no scale and no as-of cannot be interpreted at all.
+
+The CX Disconnect probe belongs here more than anywhere: when internal metrics look good and customer sentiment does not, that contradiction is frequently the report's real complication.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+overview.bars[] | Research workbook sentiment rows; enrichment | {source, rating, n, audience, e_id} — customer, employee, industry
+
+context_tiles[] | same | three tiles: customer, employee, market, each with drilldown rows and evidence chips
+
+displayed_lines | producer | gate S8 flags a single-line render as thin
+
+### Drilldown
+
+*PROTOTYPE · drilldown from O9 — sentiment source card (inline).*
+
+### Synthesis prompt
+
+```
+Produce the sentiment surface: per-audience ratings that each terminate in an assessed capability. STEP 1 - COLLECT ACROSS ALL SEVEN SOURCE FAMILIES (do not stop at one)   1 Apple App Store   rating, n, scale, latest release date   2 Google Play       rating, n, scale, latest release date   3 Glassdoor         overall + the sub-ratings that bear on execution   4 Indeed            where Glassdoor is thin   5 CFPB complaint narratives  by product, with counts - the complaint TEXT is                       the analysable part, not just the count   6 BBB               complaint themes and resolution behaviour   7 Trustpilot / Google reviews  where the entity has presence Plus: J.D. Power and Forrester rankings where the entity appears (T3), and any NPS the entity publishes itself (T4/T5, needs corroboration). STEP 2 - EVERY RATING CARRIES ITS INTERPRETABILITY FIELDS {audience, source, rating, scale, n, as_of, url, e_id, trend_vs_prior} No n -> not a signal, do not render a number. No scale -> the rating is meaningless (4.1 out of what?). No as_of -> UNVERIFIED recency, never rendered as current. n below 30 -> render with a low-sample warning, not as a finding. STEP 3 - THEMES, MAPPED TO CAPABILITIES (this is the analysis) Extract 2-4 recurring themes per audience from the review and complaint TEXT, not from the star rating. Map each theme to the pillar and cell it bears on:   onboarding / account opening friction        -> P2C3, P2C1   transfer, payment and processing delays      -> P3C2, P2C2   manual and spreadsheet-heavy internal work   -> P3C1, P3C3   data and personalisation complaints          -> P4C1, P4C2   app stability and release cadence            -> P2C1   advice and service quality                   -> P2C2 Then state the CAP: which cell this sentiment caps and at what level. Measured exemplar: "Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3." Note that the exemplar also DISTINGUISHES the cause - process, not service - which is what makes it useful. Negative-dominant employee themes cap P1C4 and P4C3 at L3.0. Mixed themes add +0.2 uncertainty. Record which. STEP 4 - THE B2B/B2C AND INTERNAL/EXTERNAL GAPS Where both sides exist, state the GAP and what it implies. An employee rating well above the customer rating says the constraint is not capability but process; the reverse says delivery is outrunning the operating model. One measured exemplar reads "Engineering scores 4.2 - front-line ops scores 3.1", which localises the constraint inside the organisation. STEP 5 - RECENCY An app not updated in over 6 months is a flag in itself. Sentiment older than 18 months is RECENT not CURRENT; older than 36 is LEGACY and must not be presented as the current picture. STEP 6 - HONESTY If only one source exists after searching all seven, emit it and let the thin-source state show. Do NOT synthesise a second audience to fill the grid. One source should be rare. CHALLENGE (R-Layer)  D Probes: CX Disconnect (internal metrics good, customer sentiment bad - that    contradiction is a finding, surface it as one); a rating from the wrong app    (check the publisher); reviews for a same-named different entity; a sample    too small to mean anything; a rating average that hides a bimodal split.  E UNCERTAIN -> ship with n and scale visible and confidence LOW. GATES: S8_sentiment_thin; every rating carries n + scale + as_of; every theme maps to a served cell.
+```
+
+Gates asserted: S8_sentiment_thin
+
+## O10 · Evidence coverage
+
+Payload section overview.evidence_coverage · component CoverageByPillarCard
+
+Contract. Overall and per-pillar against the 80% hard gate, with the denominator definition rendered. Never rounded up across the gate.
+
+### Synthesis prompt
+
+```
+Produce the evidence coverage instrumentation. {overall_pct, per_pillar[{pillar_id, pillar_name, pct, cells_total,  cells_covered, below_gate}], gate_pct, denominator_definition, note}   denominator_definition                 REQUIRED and RENDERED. State exactly what is counted: "share of                 scored sub-capabilities carrying at least one linked evidence                 item" is a different metric from "share meeting the three-item                 sufficiency threshold", and the two differ by tens of points.   gate_pct      80. A HARD GATE, not a target.   below_gate    true per pillar under the gate, rendered distinctly. An overall                 96% with one pillar at 62% is a failing assessment presented as a                 passing one.   note          15-30 words where any pillar is below gate: which cells drive it                 and what would close them. Otherwise omit. COMPUTE, DO NOT ESTIMATE Count from the served cells and their linked evidence, per pillar, over the SAME cell set the heatmap serves. A coverage figure computed over a different denominator than the heatmap renders is a contradiction the reader can find by counting. HONESTY Never round up across the gate: 79.6% renders as 79.6% with below_gate=true. Coverage counts LINKED evidence only - an item that resolves to no cell counts nowhere. A cell whose only evidence is undated DOES count toward coverage but is reported in the evidence age tracker; coverage and freshness are different questions and must not be merged. GATES: denominator stated; per-pillar breakdown present; no rounding across the gate; reconciles to the heatmap's cell set.
+```
+
+## O11 · Evidence tier distribution
+
+Payload section overview.evidence_coverage · component EvidenceTierCard
+
+Contract. Tier and claim-class histograms, plus what vocabulary this mix licenses across the whole document.
+
+### Synthesis prompt
+
+```
+Produce the evidence tier and claim-class distribution. This is a census; it has no editorial layer. {item_count, fact_count, tiers[{tier, count, pct, max_evidence_level}],  claim_classes[{claim_label, count, pct}], self_sourced_pct, mix_implication}   item_count vs fact_count                 distinct and both reported. One annual report is ONE item                 carrying many facts with ids E-xxx:Fy.   max_evidence_level per tier                 T1/T2 -> L5 · T3 -> L4 · T4 -> L2.5 · T5 -> L2 (corroboration                 required). RENDER it, because it is what the mix means.   self_sourced_pct                 share of items from the entity's OWN publications (annual report,                 site, press releases). Above ~50%, corroboration is structurally                 weak regardless of the tier histogram, because same-institution                 documents are one source. Flag it.   mix_implication                 25-50 words. THE POINT OF THE CARD: what vocabulary this mix                 licenses across the whole document. A T3-dominant mix licenses                 "likely uses / signals suggest" and NOT "uses". A T5-heavy mix                 licenses almost nothing without corroboration. Say it plainly so                 the reader can hold the other surfaces to it. CHALLENGE  D Probes: machine scans (Hubbl / BuiltWith / Wappalyzer / Explorium) filed as T4    rather than T1 - this understates T1 AND suppresses ceilings, and it is the    most common misclassification in this corpus; a ceiling_estimate count of    zero, which usually means ceilings were asserted as facts rather than    labelled.  E Recount rather than adjust. GATES: item and fact counts both present; tier ceilings rendered; mix_implication non-empty; counts reconcile to the evidence store.
+```
+
+## O1b · Capability ceiling & uncertainty
+
+Payload section overview.ceilings · component CeilingEstimateCard
+
+Contract. Per category, the highest level the evidence would support under perfect execution, its uncertainty band, and the named absence that set it.
+
+### Synthesis prompt
+
+```
+Produce the capability ceiling and uncertainty table: one row per category. A CEILING IS NOT A SCORE. It is the highest maturity level the available evidence would support even under perfect execution. You never assign scores; you state what the evidence can and cannot reach. Per row: {category_id, category_name, ceiling, uncertainty_band, rationale,           limiting_absence, urf_modifiers[], e_ids[], claim_label, confidence}   ceiling           M1-M5, set by the BEST evidence available and capped by its                     tier: T1/T2 -> up to L5 · T3 -> L4 · T4 -> L2.5 · T5 -> L2                     and only with corroboration. A ceiling can never exceed the                     cap of its best tier.   uncertainty_band  the +/- figure: base band plus URF modifiers. URF-01                     Capability Plateau +0.2 · URF-02 Adoption Gap +0.2 · URF-03                     Stagnation +0.1 · URF-04 Entitlement Underutilisation +0.2 ·                     URF-05 Shadow Systems +0.2 · URF-06 Peripheral Tool +0.1.                     Name every modifier applied. OVER +/-0.8 -> emit                     ceiling=null and "Cannot reliably estimate". A point estimate                     past the cap is false precision, which is worse than a                     declared unknown. A band under +/-0.3 on a single-source                     category is overconfident.   rationale         35-70 words with TWO halves, both required:                     (a) what the evidence DOES establish, cited;                     (b) the specific thing whose ABSENCE set the ceiling.   limiting_absence  the artefact that would raise the ceiling if found - a named                     document, metric or organisational unit. This is the research                     backlog for the next run, so make it searchable. ENRICH BEFORE SETTLING ON A LOW CEILING A ceiling set by absence obliges you to have looked. Before emitting a ceiling below M3 on an absence, run ladder tiers 1-6 for the limiting_absence specifically, plus the five mandatory organisational proxies where the absence is organisational (board bios, C-suite digital hires, LinkedIn digital titles, conference talks, strategic-plan filings). Mint E-CC ids for anything found and RAISE the ceiling if the evidence supports it. CHALLENGE (R-Layer)  B  What would raise this ceiling? Search for it explicitly. A ceiling you have     not tried to break is an assumption.  C  Is the ceiling plausible for this sub-vertical, size tier and regulator? A     Nano-tier entity is not expected to evidence a transformation office - the     context adjustment applies to the EXPECTATION, not to the evidence.  D  Probes: tier misclassification capping artificially (a machine scan filed as     T4 caps at L2.5 - the most common suppression in this corpus); the absence is     of something this sub-vertical does not have (never cap a Farm Credit     association for lacking a deposit channel it cannot legally operate);     an overconfident band.  E  ACCEPT / REJECT / UNCERTAIN. GATES: G14 Ceiling Estimate Framing; +/-0.8 cap enforced; every ceiling cited.
+```
+
+Gates asserted: G14
+
+## O12 · Thought leadership signal
+
+Payload section overview.thought_leadership · component ThoughtLeadershipPanel
+
+Contract. Dated executive publications with verbatim quotes. A contradicting entry is the most valuable row on the card and is never filtered out.
+
+### Synthesis prompt
+
+```
+Produce the thought-leadership signal: the client's executives, in their own words, on the assessed capabilities. ENRICHMENT-FIRST. The package will not contain this. Search:   - LinkedIn posts and articles by named executives from the leadership roster   - conference agendas, panel listings and session abstracts, by year   - podcast and webinar appearances   - by-lined articles and trade-press contributions   - earnings-call transcripts for CIO/CTO/CDO commentary   - the entity's blog where posts are attributed to an executive   - association and user-group speaking slots Query with the executive's NAME plus the entity, with year markers. Mint E-CC ids with url + verbatim excerpt + retrieval date + tier + claim label. Per entry: {kind, published_on, headline, quote, author_name, author_role, url,             linked_subcap_ids[], alignment, e_id, claim_label}   kind            LINKEDIN POST │ CONFERENCE │ ARTICLE │ PODCAST │                   EARNINGS CALL │ BLOG │ PANEL   published_on    REQUIRED, to the day where the source gives one. Undated ->                   excluded: the card's own framing is a recency window, so a date                   is what makes an entry admissible.   headline        as published. Do NOT rewrite it.   quote           VERBATIM, 80-260 chars, the executive's own sentence. Never                   paraphrase an executive - the value is that these are their                   words. Never stitch two sentences into one quote.   author_role     the role AS STATED AT THE TIME. A quote from someone who has                   since left is still evidence but must be dated and the                   departure noted - cross-check against the leadership roster.   linked_subcap_ids                   which assessed capabilities the statement bears on. A post                   about community sponsorship bears on none and does not belong                   here. This link is what makes the card part of the DMA rather                   than a press clipping.   alignment       CORROBORATES │ CONTRADICTS │ EXTENDS our finding, with a 12-25                   word clause. A CONTRADICTS entry is the most valuable thing on                   the card and must NOT be filtered out. CHALLENGE (R-Layer)  B  For every CORROBORATES entry, ask whether it is marketing rather than a     capability claim. "We are committed to digital transformation" is T5 and     evidences nothing.  D  Probes: a same-named executive at a different institution (verify against the     entity's own leadership page); a repost of someone else's content read as the     executive's view; a quote lifted from a vendor case study (T5, needs     corroboration); a departed executive presented as current; a date outside the     rendered window.  E  REJECT -> drop the entry. Fewer than 2 entries after searching all seven     source families -> emit what you have, set thin=true, and name what was     searched. Do NOT pad with corporate press releases: this card is about NAMED     PEOPLE speaking. GATES: every entry dated, cited, attributed to a named person with a role, and linked to a served cell; verbatim quotes only; contradicting entries retained.
+```
+
+D2 · Insights
+
+# Insights — surface contracts
+
+A triage surface, not a grid. Cards group by priority, pillar or theme; the priority is a commercial judgement the card carries rather than a filter the reader applies. The technology landscape strip sits here because the gap it names is what makes an insight actionable.
+
+## I1 · Insight cards
+
+Payload section insights.insights · component ClientInsights
+
+Contract. Triage layout grouped by priority, pillar or theme. Each card carries a claim as its title and opens a four-tab modal.
+
+### What must be presented
+
+- Six to ten cards, each a defensible argument: what, why it matters, what to do, with severity and the capability it anchors on.
+- Zero cards on a completed run is a failure state, not an empty state.
+- No card may open with a score read-out; the what_text is a claim, not a metric.
+- Every linked_subcap_id must resolve to a served cell — dead links were 15 of 119.
+
+### Why it is shaped this way
+
+The review asked directly: what really IS an insight card, what makes it useful, and what are the non-negotiables. The answer the rest of this section is built on:
+
+An insight card is a DEFENSIBLE ARGUMENT THAT CHANGES WHAT SOMEONE DOES. It has five parts — a claim, the evidence for it, the mechanism connecting them, a competing explanation considered and rejected, and the decision it implies. Remove any one and it stops being an insight.
+
+Observation: "Onboarding scores 2.1." Insight: "Onboarding is the constraint on deposit growth, because applications abandon at identity verification, which is why the branch channel is absorbing volume the digital channel was built to take."
+
+The observation gives a number the reader could have read off the heatmap. The insight gives a causal chain they could not. The reader's response to the first is "noted"; to the second, "then we fix IDV before we market the app".
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+cards[].what/why/so_what | Assessment report deep dives; research workbook | the analyst's argument, restated for an AE
+
+cards[].linked_subcap_id | scoring workbook | must resolve to a cell this run serves
+
+cards[].severity | producer | critical │ high │ opportunity │ info
+
+cards[].e_ids | research workbook | mandatory; the serve layer excludes uncited cards
+
+### Drilldown
+
+*PROTOTYPE · drilldown from I1.*
+
+### Synthesis prompt
+
+```
+Write 6-10 insight cards. An insight card is a DEFENSIBLE ARGUMENT THAT CHANGES WHAT SOMEONE DOES - not an observation, and not a score with prose around it. BEFORE WRITING, READ: all four pillar deep-dives in the assessment report, the issue register, the peer table, the sentiment sources, the tech stack and the timeline. The best insights come from JOINING two sources that sit apart - a complaint theme against a process score, a job posting against a platform tenure, a regulator finding against a self-description, a timeline event against a capability. Look for those joins FIRST; a card that could have been written from the score matrix alone is usually an observation. Per card: {ic_id, title, what_text, why_text, so_what_text, alternative_explanation,  severity, severity_rationale, linked_subcap_id, supporting_e_ids[],  validation_question, confidence, claim_label}   title        <=10 words. The argument in a phrase. Not a capability name                alone, not a score.   what_text    35-60 words. The CLAIM about this client, cited. States a state                of the world, not a measurement. Must NOT open with or consist of                a score read-out.   why_text     35-60 words. THE MECHANISM. How does the claimed state produce                the consequence? Name the causal path. If you cannot state a                mechanism you have an observation - either find the mechanism or                drop the card.   so_what_text 30-50 words. The DECISION this implies, for a named owner where                the leadership roster supports naming one. Specific enough to act                on this quarter. Never "consider investing in".   alternative_explanation                20-35 words. The strongest competing explanation you considered                and why the evidence favours yours. If it is equally supported,                say so and set confidence MEDIUM - a card that admits ambiguity                is more useful than one that hides it.   severity     critical │ high │ opportunity │ info, justified by CONSEQUENCE,                not by how far the score sits from the median.   severity_rationale  15-30 words arguing the consequence.   linked_subcap_id                a capability THIS run scored. A card pointing at a cell the pack                does not serve is a dead link and is rejected - 15 of 119                findings had them.   validation_question                the one question that would confirm or kill this card, phrased                for a client conversation and naming an internal document type.                This is a DISCOVERY QUESTION - never a toolkit diagnostic                question. CHALLENGE (R-Layer, per card - this page is where it matters most)  A State the claim and your confidence.  B Search for counter-evidence deliberately. At least ONE contradictory query    per card: "[Entity] [area] failure complaint outage criticism". If the    counter-evidence is strong, the card changes or it goes.  C Is the claim reasonable for this sub-vertical, size tier and regulator?  D Probes, each firing a required extra search before the card may ship:    Input-Output Disconnect; Marketing-Reality Gap; Temporal Inconsistency;    Regulatory Divergence; CX Disconnect; Peer Outlier; Tech Stack Mismatch.  E ACCEPT / REJECT / UNCERTAIN. REJECT -> drop it. UNCERTAIN -> ship with the    alternative stated and confidence MEDIUM or LOW. ENRICHMENT Where the package supports a claim thinly, enrich before dropping: ladder tiers 1-6, then 7-10. Mint E-CC ids for anything new with url + verbatim excerpt + retrieval date. A card upgraded from thin to cited is the highest-value work on this page. DO NOT write one card per pillar for symmetry. Write the cards the evidence supports. Eight cards about two pillars is itself a finding about the client. Zero cards on a completed run is a FAILURE STATE, not an empty state. GATES: S28_insight_integrity (no score-predicate openers, no dead anchors, no zero-card completed runs); S2_accusatory; S1_jargon.
+```
+
+Gates asserted: S1_jargon · S28_insight_integrity · S2_accusatory
+
+## T2 · Technology landscape strip
+
+Payload section insights.landscape · component ClientInsights landscape card
+
+Contract. Confirmed, inferred, claimed and gaps. Four counts recomputed from the register, each tile printing its evidence basis.
+
+Vocabulary resolved. The design specification carries two conflicting layer lists (five in its contract block, six in its sources table) and the prototype a third. The four prototype layers win, because they carry pillar tags and a primary-gap marker the others do not. Their keys are re-cut to OPS · CUST · DATA · INFRA because the prototype's L2–L5 collide with the L1–L4 evidence levels rendered on the same card. Every register row carries a status from CONFIRMED · INFERRED · CLAIMED · ABSENT, without which the landscape strip cannot be recomputed.
+
+No prompt block exists for this surface in the design specification. It renders from server-derived data and its contract is the one stated above.
+
+D3 · Heatmap
+
+# Heatmap — surface contracts
+
+The scoring grid and everything that qualifies it. Three view modes and, inside the standard grid, four grain levels. Nine sections are synthesised into this page because an agent filling cell evidence is already reading the workbook cell by cell — four of them render on Health.
+
+## H4 · Workbook grain scores
+
+Payload section heatmap.workbook_scores · component PillarHeatmap / CategoryHeatmap / SubcapHeatmap
+
+Contract. The maturity grid at four grain levels — pillar, category, capability, sub-capability. A cell drills in; it does not open a panel.
+
+### What must be presented
+
+- The pillar and category zooms serve the workbook's OWN stated figure, with the subcap rollup shown alongside it, never instead of it.
+- Every aggregate cell ships both candidates and its source_cell, so a disagreement is measurable rather than invisible.
+
+### Why it is shaped this way
+
+Measured, the heatmap ships three grid views (Focus areas, Standard, Value chain) with Peers and Issues overlays, and the Standard grid is a two-level interaction: a category cell drills IN to its sub-capability rows rather than opening a panel (Drilldown atlas, DD-1).
+
+The grain rule governs this surface more than any other, because the same maturity figure exists at three grains and they are not interchangeable. A pillar figure, a category figure and a sub-capability figure must each be served from the workbook at that grain, with source_cell recorded, and the rollup shown alongside rather than silently substituted. Sixteen clients rendered raw PxCy.z codes as cell labels; the label must be the catalogue NAME.
+
+The default view matters for a reason that is easy to miss: defaulting to Focus areas gives an empty first paint for any client with no focus areas - 53 of them - so the view must fall back to Standard rather than render blank.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+pillars / categories | Scoring workbook + assessment report | the stated figure, with source_cell
+
+rollup_score | subcap_scores | the arithmetic mean, carried alongside
+
+score_source | workbook_scores.resolve_cell | 'payload' or 'rollup' — the flag that makes 'both took the same source' checkable
+
+### Synthesis prompt
+
+```
+Emit the workbook's own pillar and category scores.   pillars    : {P1..P4: {score, peer_median, source_cell}}   categories : {PxCy:   {score, peer_median, source_cell}}   - These grains are STATED in the workbook and the assessment report.     They are not projections and must not be recomputed by averaging     subcapabilities -- cap logic, category weighting and analyst override     are applied when they are struck.   - source_cell is mandatory. A figure that names no workbook location     cannot be checked against one and is rejected.   - Where the workbook states nothing at a grain, omit it. The app falls     back to the rollup and labels the fallback.
+```
+
+## H1 · Focus areas
+
+Payload section heatmap.focus_areas · component FocusAreaView + CustomizableKpiStrip
+
+Contract. Three to five client priorities, each with a verbatim quote from the client's own report and its page number, plus a configurable KPI strip.
+
+### What must be presented
+
+- Three to five client priorities, each with a VERBATIM quote from the client's own report and its page number.
+- The quote must be the client speaking — not the scoring ledger's annotation, not a cut-off diagnostic question, not machine scoring text.
+- 57 of 138 clients had none; a client with a full assessment and no focus areas is a synthesiser failure to diagnose, not an empty state to render.
+
+### Why it is shaped this way
+
+Measured, a focus-area card carries the area name, its sub-capability count, the entity score, the peer figure and the delta ("Digital Account Opening · 178 subcaps · 3.2 · Peer 3.9 · -0.6"). Clicking it expands the largest inline panel in the product (+2,594 characters), and that panel names its provenance precisely: "FOCUS AREA · FA-01 ... SOURCE ... Client Profile · p.7 · FCE_DMA_Client_Profile_FINAL.docx".
+
+The provenance triple — document, page, filename — is the non-negotiable, because a focus area is the client's OWN stated priority. Without the page reference an AE cannot show them where it came from, and the surface loses the authority that makes it worth having. (That same measured filename is also the corroborating evidence for the identity contamination documented under O2 — the source document belongs to a different entity than the client on screen.)
+
+The review's substantive objection: relying on the client research report alone is not enough, and the prompt neither conditioned the agent nor invoked any real extraction discipline. A focus area is a claim about what the client cares about NOW. A research report written eight months ago is evidence of what they cared about then. So the area must be validated against the most recent financials, newsletters, articles and interviews, and any new evidence found must be RECORDED as evidence, not just used silently.
+
+The verbatim quote is where this surface most often fails: a sweep found 53 clients rendering machine scoring text ("Score M1 for Pilot Framework... category P1C3") as the client's own quote. The quote must be the client's language, from the client's document, with its page.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+focus_areas[].verbatim_quote | Client Profile DOCX | exact text + page number
+
+focus_areas[].involved_subcap_ids | producer | extracted from the quote's subject
+
+focus_areas[].title | producer | the priority in the client's own words
+
+### Drilldown
+
+*PROTOTYPE · drilldown from H1.*
+
+### Synthesis prompt
+
+```
+Produce the focus areas: the client's own stated priorities, validated against what they have said most recently. STEP 1 - EXTRACT FROM THE CLIENT PROFILE RESEARCH REPORT Per area: {fa_id, name, verbatim_quote, source_document, source_page, source_filename, involved_subcap_ids[], entity_score, peer_score, delta}   verbatim_quote   THE CLIENT'S OWN WORDS, copied exactly from their document.                    50-400 chars. It must read like a person wrote it about their                    own institution.                    REJECT as a quote candidate anything that: contains a                    capability code (PxCy.z), contains "Score M1..M5", contains                    the word "category" followed by a code, is a scoring                    rationale, or is a [Section] tag. 53 clients shipped machine                    scoring text as the client's quote.   source_page      REQUIRED. The provenance triple is document + page +                    filename; without the page an AE cannot show the client                    where it came from.   involved_subcap_ids                    cells THIS run serves. Compute entity_score as the mean over                    them and peer_score the same way, at the same grain - a                    focus-area score built from a different cell set than the                    peer figure is a grain violation. STEP 2 - VALIDATE AGAINST THE CLIENT'S MOST RECENT VOICE (mandatory) The report tells you what they said THEN. Establish what they are saying NOW:   - the two most recent quarterly filings and the latest annual report:     strategy, outlook and MD&A sections   - the entity's newsletter and blog, last 12 months   - press releases and the newsroom, last 12 months   - executive INTERVIEWS and podcasts: "[Entity] CEO OR CIO interview 2025 2026"   - conference talks and panels by their executives   - earnings-call commentary where public   - trade-press articles naming the entity For each area emit:   currency_status  CONFIRMED_CURRENT (restated in the last 12 months) │                    AGING (last stated 12-24 months ago) │                    SUPERSEDED (they now say something different - state what) │                    UNCONFIRMED (no recent statement found; say what you searched)   currency_note    20-45 words with the newest supporting statement and its date. A SUPERSEDED focus area is one of the most valuable findings the product can produce, because the AE would otherwise walk in with last year's priority. STEP 3 - RECORD NEW EVIDENCE AS EVIDENCE (not just as reading) Every source used in step 2 is minted as E-CC-nnn with url + verbatim excerpt + retrieval date + tier + claim label, registered in the evidence store, and linked to the focus area AND to the cells it bears on. Enrichment that is not recorded cannot be shown in a drilldown, and evidence that cannot be shown might as well not exist. Emit new_evidence_ids[] per area. STEP 4 - EXTRACTION DISCIPLINE FOR EXCERPTS Read the document, do not skim it. An excerpt must be the span that ACTUALLY supports the claim, 50-500 characters, verbatim, never a URL, never a summary of the page. Where a rich document (an annual report, a strategic plan) supports many areas, mine it once for all facts, assign fact-level ids E-xxx:Fy, and map each fact to its targets - then still run the per-area searches. The single most common enrichment failure is one document-level search mapped identically onto five areas. STEP 5 - CHALLENGE (R-Layer, per area)  A State: "this is a current priority for this client", with confidence.  B Search for counter-evidence: has this initiative been paused, completed or    replaced? "[Entity] [initiative] paused OR completed OR replaced OR delayed".  C Is this priority plausible for this sub-vertical, size and regulator?  D Probes: the quote is machine text; the source document belongs to a    DIFFERENT ENTITY (check the filename and the header - one measured case cites    FCE_DMA_Client_Profile_FINAL.docx on a page for a different bank); the area    maps to no served cell; the priority is a vendor's framing rather than the    client's; the quote is from a document older than 24 months with nothing    recent to support it.  E REJECT -> drop the area. UNCERTAIN -> ship with currency_status and    confidence LOW. GATES: S29_focus_grounding; S9_focus_invalid; S18_focus_title_duplication; provenance triple present; quote is client prose.
+```
+
+Gates asserted: S18_focus_title_duplication · S29_focus_grounding · S9_focus_invalid
+
+## H2 · Cell evidence
+
+Payload section heatmap.cell_evidence · component SynthesisDrawer source
+
+Contract. Per-cell evidence linkage and synthesis prose, with the count of items reasoned over computed from the citation array.
+
+### What must be presented
+
+- Each scored cell's drilldown: the evidence rows behind its score, with excerpt, source, tier and freshness band.
+- Evidence must reach the cells — 67 clients rendered 100% thin-evidence while holding hundreds of linked rows.
+- Attribution must be right: a Forbes ranking under an Open-Banking subcapability is a misattribution, not a citation.
+
+### Why it is shaped this way
+
+The purpose of this surface is not to flag that evidence is thin. It is to make it not thin, and where it cannot be made thicker, to justify the score honestly. An alert is a by-product; the enrichment is the work.
+
+The drilldown (see the Drilldown atlas, DD-1) shows what "justified" looks like in the render: the cell id and name, the score with its confidence band, the M1-M5 peer ladder with entity/peer/delta, then SOURCE REPORTS & EVIDENCE with each item's tier, claim class, recency, publisher and verbatim excerpt, then AI SYNTHESIS labelled "on the 1 item above".
+
+That label is the grounding mechanism. The panel declares how many items the synthesis reasoned over, next to the synthesis. A reader can see immediately whether the prose outran its evidence, and a synthesis that claims more than its citation count is caught by inspection rather than by trust.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+cells[].e_ids | research workbook P1C1..P4C4 sheets | one row per E-ID, mapped to the subcap the sheet is about
+
+cells[].excerpt | research workbook | the quoted span, verbatim
+
+freshness_band | evidence_staleness.py | current / aging / dated / stale / undated, keyed to the run date
+
+linking_stats | producer | reach counters so a zero-reach client is visible
+
+### Drilldown
+
+*PROTOTYPE · drilldown from H2.*
+
+### Synthesis prompt
+
+```
+Link evidence to heatmap cells. Emit cells[] of {subcap_id, e_ids[], excerpts[], tiers[], reach_note} plus linking_stats.   - Map each research-workbook row to the subcapability its SHEET is     about, then verify the excerpt is actually about that capability. A     plausible-but-unrelated citation (a ranking under an integration     subcap) is worse than no citation.   - Copy excerpts verbatim; never paraphrase into a citation.   - Report reach honestly in linking_stats: cells scored, cells linked,     rows unlinkable. If every row for a client is unlinkable, say so --     that is a source-data finding, not a silent zero.
+```
+
+## H6 · Evidence store
+
+Payload section heatmap.evidence · component EvidenceDrawer source
+
+Contract. The run's full evidence index: tier, claim class, recency, publisher, verbatim excerpt, and the cells each item supports.
+
+### What must be presented
+
+- The full evidence index for the run: E-ID, source, URL, excerpt, tier, date, freshness band, and which surfaces cite it.
+- Excerpts are verbatim and grounded — the fail-closed floor is 50 characters for a grounded excerpt, above the 40-character linkable minimum.
+- New enrichment mints E-CC ids with provenance recorded.
+
+### Why it is shaped this way
+
+The evidence store is what makes every other surface auditable: it is the set every citation on every page resolves into. Measured on the Overview, the supporting cards report "Evidence coverage · 96% overall" and "Evidence tier distribution · 110 items · 387 facts", so the store is presented as coverage plus composition rather than as a list.
+
+Two contracts follow. Every E-ID cited anywhere in the pack must exist here with a resolvable URL and a verbatim excerpt - a citation that resolves to nothing is worse than no citation, because it looks like diligence. And the composition must be visible, because 110 items at T5 and 110 items at T1 support entirely different claims: the tier mix is what licenses the language used elsewhere.
+
+Note one measured divergence to resolve rather than paper over: the evidence drawer renders "ERS 0.78", while the ERS definition carried by the research skill is a 1.0-5.0 scale (0.35*Tier + 0.25*Recency + 0.20*Specificity + 0.20*Corroboration). Either the prototype renders a 0-1 normalisation or the scale differs between systems. Pick one, state it on the surface, and make both the store and the drawer use it - a score with an ambiguous scale cannot be interpreted by the reader.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+evidence[] | research workbook + 01_evidence index | the evidence of record
+
+content_hash | evidence_dedup.py | SHA256(url + claim_type + excerpt[:500])
+
+discovered_by | producer | 'claude-code' for minted rows
+
+freshness_band | generated column | maintained by Postgres, not the producer
+
+### Drilldown
+
+*PROTOTYPE · drilldown from H6.*
+
+### Synthesis prompt
+
+```
+Register the evidence store for this run. Each: {e_id, source_name, url, excerpt, claim_type, tier, published_date,        discovered_by, surfaces[]}   - Excerpts VERBATIM from the source, >=50 characters. A paraphrase is     not evidence.   - Package evidence keeps its original E-ID. Anything you add from     outside mints E-CC-nnn and records url + excerpt + retrieval date.   - claim_type: FACT │ INFERENCE │ RANKING │ ANNOUNCEMENT. An inference     is labelled as one.   - Do not register a row you did not read. Do not register a URL you     could not retrieve.
+```
+
+## H9 · Value-chain view
+
+Payload section heatmap.value_chain · component ValueChainView
+
+Contract. The same scores arranged along the institution's value chain rather than the catalogue's taxonomy. Prototype-only; no prompt in the design specification.
+
+No prompt block exists for this surface in the design specification. It renders from server-derived data and its contract is the one stated above.
+
+D4 · Platform
+
+# Platform — surface contracts
+
+Fit, story, gap mapping, readiness, recommendations, roadmap, stair-step and starters. Every section here references the same recommendation ids, which is why they are submitted together: a phase citing a recommendation the payload does not describe fails in one pass.
+
+## P1 · Platform fit & story
+
+Payload section platform.platform_story · component ClientPlatform
+
+Contract. Fit score per platform, the client-specific story, gap-to-platform mapping with backing sub-capabilities, and the readiness prerequisite gates.
+
+### What must be presented
+
+- Five platform tiles, each with its fit score, the gaps it addresses, and a story that is about THIS client.
+- The fit score is computed by engine v2 and is deterministic — the agent EXPLAINS it, never recomputes or re-ranks it.
+- The breakdown modal must agree with the headline fit (570 of 685 cards disagreed).
+- Out-of-vertical rank-1 is a defect: a carrier platform must not top a bank's list.
+- story_md must be whole sentences — 501 cards shipped head-clipped mid-sentence.
+
+### Why it is shaped this way
+
+Measured, this surface is three cards working together: "Gap-to-platform mapping · Salesforce · 89 high-priority subcap gaps" with a SUBCAP / PILLAR / SCORE table; "Readiness · Salesforce · click a row to drill in" whose rows expand to show BACKING SUBCAPS with their scores; and the platform tiles carrying composite fit.
+
+The review asked five things of this page, and they are the right five.
+
+How grounding is achieved: every gap row names a cell THIS run serves, with the served score, and every platform capability claim resolves to an L4 feature in the capability catalogue that maps to that cell. The readiness drilldown makes this checkable — measured, it shows "BACKING SUBCAPS · 3.6 · Data Platform · Framework & Standards · P4C1.1.1", so the gate's verdict is traceable to the cells that produced it.
+
+L3 platforms from the catalogue: the unit of recommendation is the L3 platform area and its L4 features, not a vendor brand. The path L3 -> L4 -> sub-capability must be renderable for every claim, because that path is what makes the recommendation auditable rather than a vendor preference.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+platforms[].fit_score | platform_fit.py engine v2 | fit = 100 × (0.66·opportunity + 0.34·readiness); read, never recomputed
+
+platforms[].gaps[] | scoring workbook | the subcapabilities this platform addresses
+
+platforms[].story_md | producer | grounded in the client's own gaps and stack
+
+vertical guard | platform_fit_data.py | subvertical adjacency; carrier anchors must not surface on banks
+
+### Drilldown
+
+*PROTOTYPE · drilldown from P1 — readiness gate row (inline).*
+
+### Synthesis prompt
+
+```
+Produce the platform fit and story: which L3 platform areas address this client's assessed gaps, grounded, ranked, and with the irrelevant ones visibly discarded. STEP 1 - WORK FROM THE L3 CATALOGUE, NOT FROM VENDOR BRANDS The unit of recommendation is the L3 PLATFORM AREA and its L4 FEATURES. For every claim, the path L3 -> L4 -> sub-capability must be renderable, because that path is what makes the recommendation auditable rather than a vendor preference. Emit catalogue_path per gap row. A claim that cannot name the L4 feature that addresses the cell is not a fit claim. STEP 2 - GROUNDING (per gap row) {subcap_id, name, current_score, peer_score, gap, pillar, l3_area, l4_feature,  catalogue_path, e_ids[]}   current_score MUST equal what the heatmap serves for that id. Assert it within   +/-0.05 before emitting. Every row cites. A gap row with no evidence behind   the current score is not addressable, it is a guess. STEP 3 - FACTOR IN THE ENTITY'S OWN TECH STACK (this changes the answer) Read the stack register and apply it:   - CONFIRMED at this layer -> greenfield becomes EXTENSION. Reframe the     opportunity as adoption/depth, and say so; recommending what they already     own is the Tech Stack Mismatch failure.   - ABSENT with a demand signal (hiring, RFP, board commitment) -> RAISE     priority and cite the signal.   - Mid-migration -> a TIMING CONSTRAINT on everything downstream of it; carry     it into sequencing.   - CLAIMED but unconfirmed -> treat as absent for fit, and flag the     Marketing-Reality Gap. STEP 4 - DISCARD, WITH REASONS Drop a platform when relevance to the sub-vertical < 0.5; when the anchor cells belong to a different entity type (a carrier sub-capability on a bank - one measured defect class); when the client already runs it at that layer; or when it addresses fewer than 3 cells. Emit discarded[] {platform, reason, relevance}. Six clients ranked an out-of-vertical platform first, one with a relevance of 0.35 ignored. A ranking that cannot discard is a sort. STEP 5 - THE EFFORT PROFILE, AND WHERE EFFORT MATTERS MORE Rank the effort dimensions (integration, data quality, process redesign, change management, licensing) for THIS client, from the evidence. The profile must be consistent with the timeline's storyline: if the storyline attributes integration debt to a 2014 core conversion never revisited, integration ranks first. An effort profile that contradicts the history is one of them being wrong. STEP 6 - THE PLATFORM STORY  (90-150 words) Not a dossier and not a vendor pitch: what this platform would change for THIS client, which constraint it lifts, what it depends on, and what it does not solve. Name the cells. Cite. Must reconcile to the composite - if the story argues for a platform the arithmetic ranks third, say why. STEP 7 - THE REASONING LAYER (R-Layer, and it is the point of this page)  A State the rank-1 fit claim with its confidence.  B Argue the runner-up's case explicitly. Inside a 5-point margin, present both    and say the ranking is close.  C Is this platform plausible for this sub-vertical, size tier and regulator?  D Probes, each firing a required search: out-of-vertical rank-1; anchor-cell    entity-type mismatch; Tech Stack Mismatch; stale fit figure computed against    a superseded run; breakdown-not-equal-to-headline; a gap row whose current    score disagrees with the heatmap.  E ACCEPT / REJECT / UNCERTAIN. REJECT -> discard and re-rank. STEP 8 - RECONCILE THE ARITHMETIC WITH THE ANALYST Read the assessment report's platform sections. If the composite's rank-1 is a platform the report does not discuss, that disagreement is a finding: state it, say which won, lower confidence. Never ship an arithmetic rank that silently contradicts the analyst. GATES: S31_platform_distinctiveness; S13_platform_score_lead; S17_exec_fit_stale; breakdown-equals-headline; catalogue_path present per row.
+```
+
+Gates asserted: S13_platform_score_lead · S17_exec_fit_stale · S31_platform_distinctiveness
+
+## P2 · Recommendations
+
+Payload section platform.recommendations · component ClientPlatform + RecommendationModal
+
+Contract. Detail, impact, effort, sequencing and provenance. A derived recommendation must never present as analyst judgement.
+
+### What must be presented
+
+- The analyst's recommendations with their detail: what, why, prerequisites, effort, and the capabilities each targets.
+- Analyst recommendations and synthesised ones must be distinguishable — 32 clients shipped synthetic recs laundered as analyst output.
+- The drilldown must carry the detail the panel promises.
+
+### Why it is shaped this way
+
+Measured: "Recommendations · Salesforce · REC-ZB-01 · Close Digital Strategy gap with Salesforce...". The drilldown is a modal with DMA impact, Root cause & evidence and Sequencing tabs plus a dependency map (Drilldown atlas, DD-4).
+
+The review asked whether the prompt considers validation gates, whether it is evidence-led, and whether it carries the cost of inaction. It did not do enough of any of the three, and all three are now required.
+
+Validation gates: a recommendation asserts a readiness condition whether or not it states one. Making it explicit ("P4C1 >= 2.0 before this starts") is what turns a wish list into a sequence, and the gate's verdict must be traceable to the backing cells — which the Readiness drilldown already renders.
+
+Evidence-led: the root cause must be cited, and the impact table's "current" figures must equal what the heatmap serves for those cells. Provenance must be declared, because 32 clients shipped deterministically composed recommendations presented as analyst recommendations.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+recommendations[] | recommendations_detail.json | the analyst's own recs
+
+prerequisite_rec_ids | recommendation_validation.json | the dependency edges
+
+provenance | producer | 'analyst' or 'synthesised' — required, never blank
+
+target_subcap_ids | scoring workbook | must resolve to served cells
+
+### Drilldown
+
+*PROTOTYPE · drilldown from P2.*
+
+### Synthesis prompt
+
+```
+Produce the recommendations: evidence-led, gated, sequenced, and honest about the cost of doing nothing. Per recommendation: {rec_id, title, l3_area, l4_feature, phase, provenance, dma_impact[],  root_cause, evidence_ids[], cost_of_inaction, prerequisites[], dependencies[],  sequencing_reason, effort_band, kpi_triple, validation_gate, claim_label}   provenance    ANALYST │ DERIVED. DERIVED means composed from the pack by rule.                 32 clients shipped derived rows presented as analyst                 recommendations. Never mislabel; the AE's credibility depends on                 knowing which is which.   dma_impact[]  one row per affected cell {subcap_id, name, current, target,                 delta}. current MUST equal what the heatmap serves. Assert it.   root_cause    30-60 words, CITED. Why the gap exists - not a restatement of                 the gap. This is the evidence-led requirement: a recommendation                 whose root cause is "score is low" has no root cause.   cost_of_inaction                 30-60 words. REQUIRED. What degrades if this does not happen,                 over what horizon, and which capability absorbs the damage.                 GROUND IT in one of: a dated regulator milestone, a peer                 trajectory, a contract or licence expiry, a migration date                 already in evidence, a stated board commitment. If nothing                 grounds a cost, write "no dated trigger established" - that is a                 better answer than invented urgency, and an AE can use it.   prerequisites[]                 what must be true before this can start, as cells and minimums.   validation_gate                 the readiness condition, expressed as a cell and a threshold                 ("P4C1 >= 2.0"), plus its current verdict MET │ NOT MET and the                 BACKING CELLS that produce that verdict. The readiness drilldown                 renders those backing cells, so the verdict must be traceable to                 them.   kpi_triple    {metric, baseline, target} - the baseline must be a figure that                 exists in the pack with an as_of, not an aspiration.   sequencing_reason                 20-40 words: why THIS phase. The dependency or gate that fixes                 its position. Must agree with the roadmap phases AND the                 stair-step curve - 17 clients shipped a sequence contradicting                 their own roadmap. CHALLENGE  B  Is there a cheaper intervention that closes the same gap? State it and why     it was not chosen. Is there a reason to do this LATER? If so, say it.  D  Probes: platform out-of-vertical; anchor cell of the wrong entity type;     dependency inversion; a stale metric in the impact table; a KPI baseline     with no source; a validation gate asserted with no backing cells.  E  REJECT -> drop the row rather than ship a recommendation you cannot     sequence or gate. GATES: S32_rec_detail (panel and roadmap agree; provenance present); cost_of_inaction non-empty; every current figure reconciles to the heatmap.
+```
+
+Gates asserted: S32_rec_detail
+
+## P2b · Conversation starters
+
+Payload section platform.starters · component ClientPlatform starters card
+
+Contract. 45–90 word say-it-aloud openers with distinct opening shapes. No codes, no bracketed ids mid-sentence, no score-first opening.
+
+### Synthesis prompt
+
+```
+Produce the conversation starters: openers an AE can say out loud, each grounded in this client's evidence. Per starter: {rank, provenance, text, opens_on, named_gap_subcap_id,               peer_reference, e_ids[], their_system_reference, followup_question}   provenance      TEMPLATE_FILL │ ANALYST, and RENDER it. A rule-composed starter                   labelled as analyst work is a credibility risk for the AE.   text            45-90 words, and it must pass the SAY-IT-ALOUD TEST: no                   internal codes, no bracketed ids mid-sentence, no "PxCy.z", no                   score-first opening. Put the E-ID at the end.   VARY THE SHAPE - at most one starter per opening move:      - the gap opener          name the capability and what it blocks      - the peer opener         what a comparable institution did, dated      - the timing opener       the window and what closes it      - the their-words opener  quote their own executive (from O12)      - the contradiction opener two of their facts that do not fit together      - the system opener       something in THEIR stack the gap depends on     A set that all opens the same way is a template, not a set. This is the     measured failure: 685 of 685 used one shape.   peer_reference  a NAMED comparable institution and a DATED action, or omit the                   field. "Peers are investing in data platforms" is filler; if                   you cannot name and date it, do not imply it.   their_system_reference                   something from the tech stack register - a platform they run, a                   migration in flight - so the opener shows we looked at their                   environment rather than their score.   followup_question                   what to ask after they respond. A Discovery Question, never a                   toolkit diagnostic question. QUOTE HYGIENE (measured: 76 starters across 39 clients shipped garbled quotes) Quoted material must be a clean, complete, verbatim sentence from a resolvable source. If the mined excerpt is truncated, mid-word or missing its subject, DO NOT REPAIR IT and do not use it - drop to a non-quoting shape. Never invent the missing half of a sentence. CLAIM HYGIENE Never inflate scope. A measured defect had starters claiming a platform "addresses 629 linked capabilities". Cite the count you can name, or state none. CHALLENGE  B  Would the client push back? A claim resting on one source or a stale figure     will not survive the room - change it.  D  Probes: score-first opening; codes in spoken text; a peer reference with no     name or date; an inflated capability count; a quote that does not resolve; a     claim contradicting another surface.  E  REJECT -> replace with a different opening shape rather than softening a     claim you cannot support. GATES: S31_platform_distinctiveness (client-specific, not templated); provenance rendered; no codes in spoken text; every claim cited; opening shapes varied.
+```
+
+Gates asserted: S31_platform_distinctiveness
+
+## P3 · Transformation roadmap
+
+Payload section platform.roadmap · component TransformationRoadmap
+
+Contract. Sequenced phases referencing the same recommendation ids the page already carries. Order is meaning.
+
+### What must be presented
+
+- Phased sequencing with each phase's capabilities, dependencies and horizon.
+- Phase order must not contradict the recommendation prerequisites (17 clients did).
+
+### Why it is shaped this way
+
+Measured: "Transformation roadmap · From Assessment Report · 3-phase sequencing aligned to the maturi...". The provenance line is doing important work - the phases come from the analyst's report, not from a template, and saying so is what lets an AE defend the sequence in the room.
+
+The roadmap is the one surface whose only job is ORDER. Its correctness condition is therefore consistency: each phase's contents must be the recommendations assigned to that phase, the entry conditions must be the validation gates of those recommendations, and the order must match both the stair-step curve and each recommendation's own sequencing_reason. Where any of the three disagree, the client sees it, because all three render.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+phases[] | recommendations_detail.json + assessment report | {phase, horizon, capabilities[], depends_on[]}
+
+metrics | workbook | any metric quoted must be current, not carried from a prior run
+
+### Synthesis prompt
+
+```
+Emit the roadmap phases. Each: {phase, horizon, capabilities[], depends_on[], rationale}   - Sequencing must be consistent with recommendation prerequisites. A     phase cannot precede a phase it depends on.   - horizon in plain terms (next 2 quarters / this year / beyond).   - Any metric quoted must come from THIS run.   - If the package states no phasing, derive it from prerequisites and     label it derived.
+```
+
+## P4 · Stair-step curve
+
+Payload section platform.stairstep · component StairstepCurve
+
+Contract. The maturity ladder and its clusters, or an explicit reason it is not derivable — never a blank card.
+
+### What must be presented
+
+- The ladder from current maturity to target, step by step, with what each step unlocks.
+- An absent ladder renders a stated empty state, not "Couldn't load stairstep."
+
+### Why it is shaped this way
+
+Measured: "Stairstepped maturity curve · Data foundation · Where Zions Bancorporation is today -> M3 -> ...". The review's question — how does it respond to the findings — is the right test, because a stair-step that does not respond to findings is a generic maturity ladder with a client's name on it.
+
+Each step must be derived from the assessed cells and the findings, not from a template. A step exists because specific cells sit below it; it is blocked by specific findings; it unlocks specific capability. The measured curve is scoped to a focus area ("Data foundation") and the page offers a second scope ("Loan origination"), so the ladder is per-theme rather than global — which means the findings that block each step must be the findings for THAT theme.
+
+The consistency requirements are what make it credible: the step the client currently occupies must equal the served score for the cells the step covers; the blocking findings must be findings that exist elsewhere in the pack, with their citations; and the sequence must agree with the roadmap phases and the recommendation sequencing. Seventeen clients shipped a sequence that contradicted their own roadmap.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+ladder | workbook current scores + roadmap | {from_level, to_level, steps[]}
+
+empty_state | producer | the sentence to render when no ladder is derivable
+
+### Synthesis prompt
+
+```
+Produce the stair-step maturity curve. It must RESPOND to the findings - a ladder that would look the same for any client is a template with a name on it. The curve is scoped to a theme (measured scopes: "Data foundation", "Loan origination"), so everything below is per-theme. Per step: {step_level, label, covered_subcap_ids[], current_position, blocking_findings[],  unlocks, effort_band, entry_condition, e_ids[]}   current_position   which step the client occupies TODAY, computed from the                      served scores of covered_subcap_ids. Assert it equals those                      scores - the step the client stands on is a measurement,                      not a judgement.   blocking_findings[] THE POINT OF THE CARD. The specific findings that prevent                      the client reaching this step, BY ID, with their citations.                      They must be findings that exist elsewhere in the pack -                      a blocking finding invented for the ladder is a                      fabrication. A step with no blocking findings above the                      client's current position is unexplained: either find the                      blockers or drop the step.   unlocks            20-40 words: what becomes possible AT this step that was                      not possible below it, in client outcomes rather than                      capability names.   entry_condition    the readiness threshold, as cells and minimums, matching                      the corresponding recommendation's validation_gate.   effort_band        S │ M │ L, consistent with the platform page's effort                      profile. CONSISTENCY (blocking)   - current_position == the served scores for the covered cells.   - blocking_findings ⊂ the findings the pack actually serves.   - step order == roadmap phase order == recommendation sequencing_reason.   - covered_subcap_ids are all cells THIS run serves, and all belong to the     theme this curve is scoped to. CHALLENGE  D Probes: a step whose blockers are not in the pack; a current_position that    disagrees with the heatmap; an order that contradicts the roadmap; a generic    ladder (if no step names a client-specific blocker, the curve is a template).  E REJECT -> rebuild from the findings rather than shipping a generic ladder. GATES: S33_pack_surface_completeness (the surface is exported at all - it was absent for 138 clients until the exporter was fixed); step-order consistency.
+```
+
+Gates asserted: S33_pack_surface_completeness
+
+D5 · Context
+
+# Context — surface contracts
+
+Internal team-preparation material. The customer audience receives a locked state, not a redacted page. Six surfaces from five sections — the financial trajectory renders the Overview's section so the two cards cannot disagree.
+
+Audience
+INTERNAL ONLY. The route is refused at the API, not only hidden in the navigation.
+
+## C1 · Digital evolution timeline
+
+Payload section context.timeline · component InteractiveTimeline + EventDetail
+
+Contract. Chronological, year-range and signal filtered. Every event dated and cited; each expands inline to its detail.
+
+### What must be presented
+
+- The client's technology history as dated events, each cited.
+- Every event dated; undated events are excluded, not rendered as 'ongoing'.
+- 16 clients had two or fewer events — sparse timelines must declare themselves.
+
+### Why it is shaped this way
+
+Measured, the timeline is a HORIZONTAL RAIL: eight event dots on a track, a dual-handle year-range slider, and signal filters (All / Positive / Neutral / Negative). The page header reads "Internal-only · 8 of 8 events · 4 issues · 5-year financials". Clicking a dot expands an event panel carrying a capability chip, a signal badge, and the signal's score effect spelled out — measured: "Positive signal - increases the maturity ceiling on the affected capability."
+
+History is the credibility page. When an AE can show a client their own technology arc, accurately, with dates, the room changes; it is the strongest available signal that the work was actually done.
+
+But a timeline of dated events is a chronology, not a story. The review's two objections are exactly the gap: the prompt was not conditioned, and there was no enrichment path for new stories. Both matter because the package rarely holds more than a handful of dated events — 16 clients shipped two or fewer, and an arc drawn from two points is a line.
+
+So two requirements. Every event must earn its place by bearing on an assessed capability, and the events TOGETHER must explain how the client arrived at the maturity they have — that through-line is what ties this page back to the DMA. A rebrand is not a digital-evolution event. And enrichment is mandatory rather than a fallback, because the client's own newsroom, annual reports and regulator history are public and the package's silence is not evidence of absence.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+events[] | Research workbook + enrichment | {event_date, title, body, kind, e_id}
+
+verified_sparse | producer | set when the sources hold fewer than 3 dated events
+
+### Drilldown
+
+*PROTOTYPE · drilldown from C1.*
+
+### Synthesis prompt
+
+```
+Extract the digital evolution timeline, then make it a STORYLINE that explains how this client reached its current maturity. STEP 1 - COLLECT DATED EVENTS FROM THE PACKAGE The research workbook's dated rows, the assessment report's history sections, regulator enforcement dates, vendor tenure evidence. STEP 2 - ENRICH (mandatory - the package is almost never sufficient here) 16 clients shipped two or fewer events. Search deliberately for the client's own history, with explicit year markers:   - the entity's newsroom and press releases, year by year   - annual reports for the last 5 years - each states that year's initiatives   - core-platform and digital-channel announcements: "[Entity] core conversion";     "[Entity] selects OR implements OR migrates [vendor] 2019..2026"   - leadership changes that moved technology: "[Entity] names CIO OR CTO OR CDO"   - M&A and charter events   - regulator actions WITH DATES (NCUA / OCC / FDIC / CFPB / SEC / FINRA /     state DOI)   - conference talks and case studies with dates   - app-store release history: first release, major redesigns   - vendor tenure: "[Entity] [vendor] since OR relationship history" Mint E-CC ids for everything new with url + verbatim excerpt + retrieval date. STEP 3 - EMIT EVENTS {event_date, title, body, kind, signal, capability_ids[], maturity_effect,  e_ids[], claim_label}   event_date      REQUIRED, precise to at least the month. An undated item is                   EXCLUDED - never rendered as "ongoing".   kind            PLATFORM │ LEADERSHIP │ M&A │ REGULATORY │ CHANNEL │ DATA │                   SECURITY │ STRATEGY   body            25-45 words: what changed, and what it replaced or enabled.   capability_ids  which assessed capabilities this bears on. An event bearing on                   none does not belong here - a rebrand is not a digital                   evolution event.   signal          POSITIVE │ NEUTRAL │ NEGATIVE, and state the SCORE EFFECT in                   the panel: positive raises the ceiling on the affected                   capability, negative caps it, neutral is context with no                   direct effect. A badge without its consequence sentence is                   incomplete.   maturity_effect ADVANCED │ CONSTRAINED │ NEUTRAL with one clause of reasoning.                   A ten-year-old core conversion never revisited CONSTRAINS                   current maturity; say so. STEP 4 - WRITE THE STORYLINE (this is the tie back to the DMA) storyline: 60-110 words tracing how the SEQUENCE produced today's assessed position. Name the inflection points and the consequence. It must be consistent with the executive summary's Complication and with the Platform page's effort profile: if the storyline says integration debt accumulated from a 2014 core conversion, integration had better rank first in the effort profile. Then arc_shape = STEADY_INVESTMENT │ STOP_START │ POST_EVENT_CATCHUP │ LEGACY_ANCHORED │ RECENT_ACCELERATION, with one sentence of evidence. STEP 5 - CHALLENGE (R-Layer)  B  Is there a competing arc? An event you attributed to strategy that actually     follows a regulator action is a different story entirely.  D  Probes: undated; an event about a same-named different entity; a vendor     press release describing an INTENTION rather than a completion (Evidence     Level 2, not 1); an event with no capability bearing; an arc asserted from     too few points.  E  REJECT -> drop the event. FEWER THAN 3 DATED EVENTS -> emit them, set     verified_sparse=true, and do NOT write an arc from two points. GATES: S34_timeline_provenance (every event cited); G6 (arc claims need >=3 dated points); G9 (milestones dated).
+```
+
+Gates asserted: G6 · G9 · S34_timeline_provenance
+
+## C2 · Issue register & Gantt
+
+Payload section context.issue_register · component InteractiveGantt + IssueDetail
+
+Contract. One row per matter with identity fields, rendered as a Gantt. Each issue expands inline and names the cells it caps.
+
+### What must be presented
+
+- The client's own open matters, one row per MATTER, with severity, status and a drilldown that has something in it.
+- One matter must not ship as many rows (SunStrong shipped 13 rows for one matter).
+- A row with neither rationale nor linked capabilities renders title-only; the frontend guards this, so do not fabricate a rationale to fill it.
+
+### Why it is shaped this way
+
+Measured: "Issue register · Gantt · 3 OPEN · 1 RESOLVED · click any bar for detail", and the bar drilldown reports "CAPS PLACED BY THIS ISSUE · 3" with the capped cell, its name, and "Score capped at M3".
+
+That is the register's whole value: an issue is only interesting here because it CAPS something. The quantified cap - which cell, at what level - is what connects the client's open matters to their assessed maturity, and it is what makes the page more than a compliance list.
+
+One measured behaviour must not be "fixed": IS-018 expands to 104 characters and renders only "View capped cells in heatmap", with no caps table. A thin row rendering thin is CORRECT. Across the corpus, 228 of 236 bare register rows had genuinely nothing behind them because the client's own register gave nothing else; composing a rationale to fill the panel would put fabricated analysis on a client's screen. The frontend guards each field independently for exactly this reason.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+issues[] | issue_register.csv | {issue_id, title, severity, status, opened_on, rationale, linked_subcap_ids[]}
+
+dedup | issue_dedup.collapse_issue_rows | collapses by register key, exact title and prefix containment
+
+### Drilldown
+
+*PROTOTYPE · drilldown from C2 — issue register gantt bar (inline).*
+
+### Synthesis prompt
+
+```
+Build the issue register. Each: {issue_id, title, severity, status, opened_on, resolved_on,        rationale, linked_subcap_ids[], e_ids[]}   - ONE ROW PER MATTER. Collapse duplicates that differ only by     formatting or a trailing clause.   - severity and status are always populated; never emit a NULL status.   - rationale: the stated reason, where the source gives one. If it does     not, LEAVE IT EMPTY -- the drilldown renders the title alone and that     is honest. Do not compose a rationale to make the card look full.   - linked_subcap_ids where the matter maps to assessed capabilities.
+```
+
+## C3 · Regulatory standing
+
+Payload section context.regulatory_standing · component ClientContext
+
+Contract. Primary regulator from the regulator's own registry, licence type, jurisdictions, and enforcement actions with the cells they cap.
+
+### Synthesis prompt
+
+```
+Produce the regulatory standing card. Treat it as the document's identity anchor. {primary_regulator, additional_regulators[], license_type, jurisdictions[],  charter_date, enforcement_actions[], absence_of_enforcement, e_ids[]}   primary_regulator                 the prudential regulator, from the regulator's OWN registry, not                 from the entity's self-description. By sub-vertical: SV1                 OCC/FDIC/Fed/State DOB · SV2 NCUA/State CU · SV4 SEC/FINRA/Fed/                 CFTC · SV5 SEC/FINRA/State securities · SV6 SEC/CFTC · SV7-SV8                 State DOIs/NAIC · SV9 FCA/FCSIC.                 An FDIC or OCC chip on a Farm Credit entity, or an FCA chip on a                 national bank, is an IDENTITY ERROR: quarantine the whole card                 and escalate, because it means the profile is contaminated.   license_type  as the registry states it ("National bank holding co.",                 "federally chartered credit union", "Agricultural Credit                 Association"). This constrains which products the entity may                 offer and therefore which capabilities can legitimately be                 assessed.   jurisdictions from the registry or the entity's filings. THE FASTEST                 CONTAMINATION CHECK IN THE PRODUCT: cross-check against every                 footprint claim on every other surface and flag disagreement as a                 contradiction, not as variation. ENFORCEMENT - search always; absence is a finding Per action: {issue_id, regulator, kind, opened_on, status, summary, capped_subcap_ids[], remediation_status, e_id}   Search EVERY applicable regulator's enforcement or order pages by entity name:   NCUA, OCC, FDIC, Fed, CFPB, SEC, FINRA, state DOI/DOB, FCA. Dated actions only.   capped_subcap_ids  which cells this action CAPS and at what level. An action                      that caps nothing has not been analysed.   Emit once, hand to the issue register (C2) and the why-now (O3); all three must   carry the same date.   absence_of_enforcement                      searched all applicable regulators and found nothing ->                      RECORD THE SOURCES SEARCHED. Verified absence supports the                      compliance-posture cell; unverified silence supports                      nothing. CHALLENGE  D Probes: regulator taken from marketing rather than the registry; a same-named    institution's action attributed here (verify the charter number / CIK / RSSD,    never the name); a closed action rendered as open; jurisdictions inconsistent    with any other surface.  E Any identity mismatch -> quarantine and escalate. Never render a partial    identity. GATES: G1 Identity & Boundary; G2 Regulatory Anchor; every action dated and cited; jurisdictions reconcile across surfaces.
+```
+
+Gates asserted: G1 · G2
+
+## C4 · Sentiment overview
+
+Payload section context.context_sentiment · component SentimentGridInteractive
+
+Contract. The sentiment grid at Context depth, each tile expanding inline to the items behind it. Prototype-only; produced under the O9 sentiment prompt at Context depth.
+
+No prompt block exists for this surface in the design specification. It renders from server-derived data and its contract is the one stated above.
+
+## C5 · Acquisition history
+
+Payload section context.acquisitions · component ClientContext
+
+Contract. Closed and announced transactions with integration status and maturity effect. A temporarily-constraining integration is not smoothed to neutral.
+
+### Synthesis prompt
+
+```
+Produce the acquisition history: dated events with integration state and effect on assessed capabilities. Per row: {closed_on, target_name, kind, status, scale_metrics,           integration_target, affected_subcap_ids[], maturity_effect, effect_note,           e_ids[]}   closed_on         REQUIRED to the month. Announced-but-not-closed is a                     SEPARATE row with status=ANNOUNCED and its own date.   status            ANNOUNCED │ INTEGRATING │ COMPLETE │ ABANDONED   scale_metrics     quantified in the acquirer's own terms: branches, deposits or                     loan volume, members/customers, FTE.   integration_target the date integration is tracking to, where stated.   maturity_effect   ADVANCED │ CONSTRAINED │ NEUTRAL │ TEMPORARILY_CONSTRAINED                     with the named cells. TEMPORARILY_CONSTRAINED is honest and                     often correct during a cutover; do not smooth it to NEUTRAL.   effect_note       20-45 words: what the integration does to the named                     capability and over what window - specific cell, direction,                     window. ENRICHMENT (mandatory - M&A is public and dated, so silence is not evidence)   - the acquirer's press releases and newsroom, by year   - regulator approval notices, which are dated and public: OCC/FDIC/Fed     applications, NCUA merger approvals, FCA territory and merger approvals   - trade press for the sub-vertical   - the target's final filings   - "[Entity] acquires OR merger OR acquisition OR purchases branches 2019..2026" Mint E-CC ids with url + verbatim excerpt + retrieval date. CROSS-SURFACE (emit once, hand to three) Every acquisition is also a TIMELINE event with kind=M&A; an integration in flight is a COST OF ACTING NOW input for the why-now and a timing constraint for the roadmap. All three must carry the same date and the same direction of effect. CHALLENGE  D Probes: an announced deal rendered as closed; a branch purchase described as a    whole-institution acquisition; an acquisition by a same-named entity; an    integration called complete while the timeline still shows cutover activity.  E REJECT -> drop the row rather than assert a status you cannot date. GATES: every row dated and cited; status never NULL; affected cells resolve; consistent with C1 and O3.
+```
+
+## C6 · Financial trajectory
+
+Payload section overview.financial_series · component FinChartInteractive
+
+Contract. Renders the Overview's financial series section. One section, so the two cards cannot disagree.
+
+No prompt block exists for this surface in the design specification. It renders from server-derived data and its contract is the one stated above.
+
+D6 · Tech stack
+
+# Tech stack — surface contracts
+
+A layered register rather than a flat list. Four layer cards, each with a pillar tag and a detection count, plus a per-item detail sub-page. The layering carries analysis a list cannot.
+
+## T1 · Technology stack register
+
+Payload section techstack.techstack · component ClientTechStack + TechRow
+
+Contract. Four layer cards — operations, customer engagement, data, infrastructure — each with a pillar tag and a detection count.
+
+### What must be presented
+
+- The client's actual stack by layer — core, CRM, data, integration, channel — each entry a PRODUCT with its vendor and evidence.
+- A service or a category is not a product ('Django' as a product, 'CRM; Analytics/BI' as an entry).
+- Dropped candidates are reported, not silently discarded.
+
+### Why it is shaped this way
+
+Measured, the register is LAYERED, not a flat list — four layer cards each with a pillar tag and a detection count: "Operations & core banking · P3 · 2 of 3 detected"; "Customer engagement · PRIMARY GAP LAYER · P2"; "Data & analytics · P4 · 2 of 4 detected"; "Infrastructure & cloud · P4 · 2 of 2 detected". A legend row names the evidence source (Explorium technographic), and a summary line reads "6 technologies absent across customer + data layers - the primary Zennify engagement opportunity". Rows navigate to a per-platform sub-page (#/clients/<id>/techstack/TS-nn).
+
+The layering is the analysis: "2 of 4 detected" at the data layer with a P4 tag says where the gap is and which pillar absorbs it, which a flat list cannot. PRIMARY GAP LAYER is a judgement the surface makes explicitly.
+
+Two measured rows are contracts in themselves. "Okta (Identity) · CONFIRMED" carries NO evidence id - and a CONFIRMED row without a citation is a defect, not a style, because CONFIRMED is Evidence Level 1-2 and Level 1-2 requires a T1/T2 source. Either the citation was dropped or the status should be INFERRED; confidence never stands in for evidence. Conversely "Salesforce Marketing Cloud · ABSENT · E-089 · 5 Marketing Cloud roles posted Q1" is the most actionable row on the page, because the evidence is a DEMAND SIGNAL rather than a deployment - and five job postings license "signals suggest", never "uses".
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+items[] | Research workbook tech rows; client profile | {vendor, product, layer, confidence, e_id}
+
+layer | producer | core │ crm │ data │ integration │ channel │ security
+
+dropped[] | producer | candidates rejected by the taxonomy, with the reason
+
+compliance_attestations | profile / research | where the client states one
+
+### Drilldown
+
+*PROTOTYPE · drilldown from T1.*
+
+### Synthesis prompt
+
+```
+Validate and emit the technology stack. Each item: {vendor, product, layer, confidence, as_of, e_ids[]}   - A PRODUCT, not a service and not a category. "Salesforce Financial     Services Cloud" is a product; "CRM", "Analytics/BI", "Django" are not.   - vendor and product are separate fields.   - layer: core │ crm │ data │ integration │ channel │ security.   - Every item cites the evidence that places it in this client's estate.     An item you cannot cite is a rumour -- put it in dropped[] with the     reason.   - dropped[] is reported, not hidden: it is how a taxonomy gap becomes     visible.
+```
+
+Vocabulary resolved. The design specification carries two conflicting layer lists (five in its contract block, six in its sources table) and the prototype a third. The four prototype layers win, because they carry pillar tags and a primary-gap marker the others do not. Their keys are re-cut to OPS · CUST · DATA · INFRA because the prototype's L2–L5 collide with the L1–L4 evidence levels rendered on the same card. Every register row carries a status from CONFIRMED · INFERRED · CLAIMED · ABSENT, without which the landscape strip cannot be recomputed.
+
+## T3 · Platform detail
+
+Payload section techstack.techstack · component ClientTechStackDetail
+
+Contract. A sub-page per stack item: detection basis, evidence, the cells it touches and the gap it leaves.
+
+Vocabulary resolved. The design specification carries two conflicting layer lists (five in its contract block, six in its sources table) and the prototype a third. The four prototype layers win, because they carry pillar tags and a primary-gap marker the others do not. Their keys are re-cut to OPS · CUST · DATA · INFRA because the prototype's L2–L5 collide with the L1–L4 evidence levels rendered on the same card. Every register row carries a status from CONFIRMED · INFERRED · CLAIMED · ABSENT, without which the landscape strip cannot be recomputed.
+
+No prompt block exists for this surface in the design specification. It renders from server-derived data and its contract is the one stated above.
+
+D7 · Health
+
+# Health — surface contracts
+
+Where the assessment states its own weaknesses. Five tabs, analyst-only, no customer route. Four of its surfaces are synthesised into the heatmap page; version diff is derived from the runs table.
+
+Audience
+ANALYST ONLY. The route is refused at the API, not only hidden in the navigation.
+
+## H3 · Thin-evidence alerts
+
+Payload section heatmap.alerts · component ClientHealth alerts tab
+
+Contract. The run's under-evidenced cells with severity, current count, proxy attempted and closure condition.
+
+### What must be presented
+
+- One alert per cell scored on insufficient evidence, with severity and the cell it concerns, feeding the Alerts queue.
+- The register is payload-produced; the legacy deriver is switched off.
+
+### Why it is shaped this way
+
+Measured, the Health page carries five toggle views — Thin-evidence alerts, Version diff, Safeguard gates, Evidence age and Cross-entity patterns — and the alerts table runs to 13,713px for 252 open items on this client.
+
+The review's point is the whole design principle for this surface: the goal is not to raise alerts but to enrich and justify. 252 open alerts is not 252 pieces of information; it is a queue that has not been worked. An alert that has been open across three runs with no enrichment attempt is evidence about our process, not about the client.
+
+So the alert is a work item with a lifecycle, not a label. Every alert names the cell, what was searched, what was found, and what it would take to close. And the surface must distinguish two genuinely different states that look identical in a count: cells that are thin because nobody looked, and cells that are thin because the evidence does not exist. The first is a backlog; the second is a finding, and it belongs in the narrative.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+alerts[] | scoring workbook is_thin_evidence + link reconcile | cleared only by real linked support, never set by the producer
+
+severity | producer | mapped from the evidence deficit
+
+### Synthesis prompt
+
+```
+Produce the thin-evidence queue: work items that enrich and justify, not labels. STEP 1 - CLASSIFY EVERY THIN CELL INTO ONE OF THREE STATES   UNWORKED       the enrichment ladder has not been run on this cell   WORKED_FOUND   the ladder ran and found evidence -> the cell is no longer thin;                  emit the new E-CC ids and close the alert   WORKED_ABSENT  the ladder ran across all mandatory sources and found nothing A count that merges these is useless. UNWORKED is a backlog item; WORKED_ABSENT is a FINDING about the client and belongs in the narrative and, where it bears on posture, in the report. STEP 2 - FOR EVERY UNWORKED CELL, RUN THE LADDER BEFORE ALERTING Tiers 1-6 are mandatory; 7-10 fire when 1-6 yield fewer than 3 items:   1 direct capability   2 official document   3 keyword variant   4 regulatory (per applicable regulator)     5 technology / platform   6 sentiment           7 proxy signal        8 peer association   9 vendor reverse     10 CONTRADICTORY - mandatory, at least one per cell Rules: the entity name in every query; 4-8 words; no duplicate framings; never repeat a diagnostic question verbatim; add "2024 2025 2026" to at least two queries; web-fetch every rich document; LOG EVERY QUERY. Rich-document first: one annual-report fetch can populate 20-50 cells. Mine it once, assign fact-level ids E-xxx:Fy, map each fact to its targets - then still run the per-cell searches. The single most common failure is one category-level search mapped identically onto five cells. STEP 3 - GROUNDING (so nothing is hallucinated) Every item minted carries: e_id, url THAT RESOLVES, verbatim excerpt 50-500 chars taken from the fetched document, retrieval date, tier, claim label. An excerpt that is not present in the fetched text is a fabrication - assert it byte-for-byte against what you fetched, and drop the item if it does not match. Never paste a URL as an excerpt. Never summarise a page and call it an excerpt. STEP 4 - JUSTIFY THE SCORE, WHICH IS THE POINT Per cell emit: {subcap_id, score, confidence, evidence_count, state, sources_searched[], queries_run[], new_evidence_ids[], justification, closure_condition}   justification      40-80 words: on the evidence that DOES exist, why is this                      score defensible, and what is the ceiling that evidence                      licenses (Evidence Level 1-4 -> the language allowed)? A                      thin cell with a stated ceiling is honest; a thin cell with                      a confident score is not.   closure_condition  what specific artefact would close this alert - "the FY2025                      annual report's technology section", "a CFPB complaint                      narrative for this product". An alert with no closure                      condition cannot be worked by the next person. STEP 5 - AGEING Emit runs_open for each alert. An alert open across 3+ runs with no queries_run is escalated as a PROCESS defect, separately from the client's evidence position. Do not let it hide in a total. GATES: S3_thin; S3_no_cite; S30_evidence_reach; every excerpt verified against the fetched source; every alert carries sources_searched.
+```
+
+Gates asserted: S30_evidence_reach · S3_no_cite · S3_thin
+
+## V1 · Version diff
+
+Payload section — derived, no section · component VersionDiff
+
+Contract. Run-to-run comparison, derived from the runs table. Comparison is direct within a catalogue lineage and resolves through the alias bridge across a bump.
+
+No prompt block exists for this surface in the design specification. It renders from server-derived data and its contract is the one stated above.
+
+## H5 · Safeguard gates
+
+Payload section heatmap.safeguard_gates · component ClientHealth gates tab
+
+Contract. Client-visible gate results in plain language, including an explicit not-run state with its reason.
+
+### What must be presented
+
+- The controls the assessment applied — caps enforced, uncertainty bands, QA verdicts — shown so a reader can see what constrained the scores.
+- This section had zero rows and no producer before it was contracted.
+
+### Why it is shaped this way
+
+Safeguard gates are the client-visible expression of our own discipline, which makes honesty here structural rather than optional. A gate that reports PASS because it did not run is worse than a gate that reports FAIL.
+
+Each gate states what it checked, what it found, and what a failure would mean for the reader's confidence in the surrounding numbers. The three classes behave differently and must be labelled as such: BLOCK gates (identity, regulatory anchor, traceability, classification anchors, no toolkit blending) stop publication; CONFIDENCE gates reduce the confidence band without stopping it; LABELLING gates force a relabel - a trend with fewer than three dated points becomes a snapshot rather than disappearing.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+gates[] | Scoring workbook cap log; qa_verdict.json | {gate_id, kind, ceiling, affected_categories[], rationale}
+
+cap_ceiling | workbook cap log | a served score above its cap is a hard defect
+
+### Synthesis prompt
+
+```
+Emit the safeguard gates that constrained this assessment. Each: {gate_id, kind, ceiling, affected_categories[], rationale, e_ids[]}   - Read the workbook's own cap log (IR-00N rows) and the QA verdict.   - kind: cap │ uncertainty_band │ qa_hold │ analyst_override.   - rationale is the stated reason, quoted or closely paraphrased.   - Do not invent a gate to explain a low score. Only gates the     assessment actually applied belong here.
+```
+
+## H7 · Evidence age tracker
+
+Payload section heatmap.evidence_age · component ClientHealth age tab
+
+Contract. Age against a pinned reference date. Status follows band, band follows age, age follows a real date — or all three are null.
+
+### Synthesis prompt
+
+```
+Produce the evidence age tracker: one row per evidence item, with a computed age and a status that FOLLOWS from it. Per row: {e_id, title, source_domain, published_or_asof, age_months, band,           status, identity_ok, reference_date}   reference_date  the run's as-of date, PINNED and RENDERED. Age is meaningless                   without the date it was computed against, and pinning makes the                   table reproducible.   age_months      (reference_date - published_or_asof) in months. If                   published_or_asof is absent or unparseable, age_months=null and                   band=undated. NEVER emit NaN, and never let a null age produce                   a positive status - the measured render shows "NaN mo ... FRESH"                   on every row, a status asserted over an uncomputable age.   band            current <=12 · aging 12-24 · dated 24-36 · stale >36 ·                   undated. These are the app's freshness_band values over the                   same 12/24/36 boundaries as the ERS Recency factor                   (CURRENT / RECENT / DATED / STALE / ARCHIVAL). Do not invent a                   third vocabulary.   status          derived from band ONLY: current->FRESH · aging->AGING ·                   dated->DATED · stale->STALE (with the >3y marker) ·                   undated->UNDATED. A status that does not follow from a computed                   band is a defect.   identity_ok     resolve source_domain against the entity's own domains and the                   known registries. A domain belonging to a DIFFERENT institution                   is an identity failure: identity_ok=false, quarantine the item,                   escalate, and do not let it count toward coverage (O10) or the                   tier distribution (O11). QUARTER-PRECISION DATES "2025-Q4" IS a date. Resolve to the quarter end for age and render the quarter as given. A quarter is not an absent date. ROLL-UP Emit undated_pct and stale_pct for the run. Where undated_pct is material, every surface quoting a time-sensitive figure must carry an age marker - 24 clients shipped 100% undated evidence while quoting current figures, and 46 were over 50% undated. GATES: no NaN in any age cell; status derived from band; every source domain identity-checked; undated_pct reported.
+```
+
+## H8 · Cross-entity patterns
+
+Payload section heatmap.cohort_patterns · component ClientHealth patterns tab
+
+Contract. Sub-vertical concentration at or above the declared threshold. Counts and shares only; entity ids never leave the audit trail.
+
+### Synthesis prompt
+
+```
+Produce cross-entity patterns: capability weaknesses recurring across a sub-vertical cohort. Per pattern: {sub_vertical, category_id, category_name, pattern_statement,               affected_count, cohort_size, share_pct, threshold_pct, confidence,               entity_ids[], action}   cohort_size     entities of the SAME sub-vertical with a completed run and a                   served score for this category. NEVER pool across                   sub-verticals: a Farm Credit association and a regional bank do                   not share a loan-origination cohort, because their funding                   models and product sets differ structurally.   share_pct       affected_count / cohort_size, rendered with BOTH numerator and                   denominator visible. "67%" alone hides that it is 4 of 6.   threshold_pct   the publication threshold (measured: 60). ENFORCE IT. A pattern                   below threshold is not published; if one is shown deliberately,                   label it BELOW_THRESHOLD. The measured render shows a 50% row                   under a ">=60%" header - an unenforced threshold or a                   mislabelled header, and both are defects.   MINIMUM COHORT  cohort_size < 5 -> do NOT publish; emit                   insufficient_cohort=true. Confidence from cohort size: >=20                   HIGH, >=12 MEDIUM, below 12 LOW - and RENDER it.   pattern_statement                   15-30 words naming the category, the threshold crossed and the                   share.   action          the campaign this justifies, actionable at portfolio level. CONFIDENTIALITY (blocking) Emit COUNTS and SHARES only. Never render another entity's name, score or evidence on a client-scoped page. entity_ids[] is for internal audit and must be stripped from any client-visible or AE-visible rendering. Verify on the rendered output, not in the payload. METHOD HONESTY State the score threshold used (<2.5) and the run recency window. A pattern mixing runs from three years apart is a statement about our backlog, not about the market; where the cohort's runs span more than 18 months, say so. CHALLENGE  B  Is there a structural explanation that makes the pattern trivial? If every     entity in the cohort runs the same shared core, a shared weakness is a fact     about the VENDOR, not the cohort - and that is a more useful finding. Say     which it is. For SV9 specifically, check the shared-technology providers     (FPI, AgVantis, the district bank) before calling anything a cohort pattern.  D  Probes: cohort pooled across sub-verticals; cohort below 5; threshold not     enforced; runs spanning a long window; a pattern driven by one outlier;     another client's identifying detail visible.  E  REJECT -> withhold. A withheld pattern costs nothing; a wrong one gets     repeated to clients. GATES: cohort >= 5 and same sub-vertical; threshold enforced or the exception labelled; numerator and denominator both rendered; no cross-client identifiers in any rendered output.
+```
+
+Drilldowns
+
+# Drilldown contracts
+
+15 panels across three shells. Five carry a synthesis prompt in the design specification; the rest render from data their parent surface already holds. Every panel renders from the page response — none fetches.
+
+Shell | Geometry | Panels
+
+Drawer | Right slide-in, z-index 95, 420–480px | DD-1 Synthesis, DD-2 Evidence
+
+Modal | Centred, z-index 80, 640–820px | DD-3 Insight, DD-4 Recommendation, DD-5 New run, DD-6 Intelligence panel
+
+Inline expansion | Expands in the document flow, no overlay | DD-7 Event detail, DD-8 Issue detail, DD-9 Finding expansion, DD-10 Focus area expansion, DD-11 Platform tile expansion, DD-12 Sentiment tile expansion, DD-13 Readiness gate expansion, DD-14 Acquisition expansion, DD-15 Ceiling rationale
+
+Two things any audit of this app must get right
+An inline expansion matches no overlay selector, so probing the DOM for dialogs reports zero drilldowns on a page full of them — read the component to find the trigger, then click it. And a harness reading “the open panel” must prefer the drawer, or it captures the modal sitting behind an open drawer and records the wrong contract.
+
+## DD-1 · Synthesis
+
+drawer opens from a sub-capability row on the heatmap · component SynthesisDrawer
+
+### What must be presented
+
+- The cell id, its name, its score and its confidence band — one cell, one set of numbers. Grain lock is the whole point of this panel.
+- The M1–M5 peer ladder with entity, peer median and signed delta.
+- SOURCE REPORTS & EVIDENCE: every linked item with tier, claim class, recency, publisher and a verbatim excerpt — plus “click an ID to open”, because each id opens DD-2.
+- AI SYNTHESIS, with the count of items it is grounded on printed beside it.
+- Thin evidence stated where it applies — below three items the panel says so rather than reading as complete.
+- Copy synthesis · Close.
+
+### Information sources
+
+Field / element | Source of truth | Where it comes from
+
+subcap_id, name | V7 capability catalogue | ccg_subcaps via CatalogueResolver
+
+score, confidence | the assessment workbook | subcap_scores — never re-derived
+
+peer median, delta | peer_comparison_table.csv | recomputed at lower N if a peer lacks a figure
+
+evidence rows | evidence_index + E-CC mints | package evidence, plus enrichment
+
+excerpt | the source document | verbatim span, 50–500 chars
+
+synthesis prose | this skill | produced, validated, then persisted
+
+### Synthesis prompt
+
+```
+Produce the synthesis panel for ONE sub-capability cell. INPUT: subcap_id, its score, its confidence band, its peer median (or the inference standing in for one), and every evidence item linked to it. STEP 1 - GRAIN CHECK, BEFORE ANYTHING ELSE Assert that the score, the peer median and the cell id all come from the same row of subcap_scores. If the score belongs to the category and the id to the sub-capability, STOP and emit grain_violation - do not write prose over a mismatch. This is the most common defect in this product: one line pairing a sub-capability's score with a category's id produced 125 violations. STEP 2 - EMIT THE EVIDENCE LIST FIRST, THE SYNTHESIS SECOND Per item: {e_id, tier, claim_label, recency, source_title, publisher, excerpt}. excerpt is verbatim, 50-500 chars, never a bare URL. Count them. That count is what the synthesis may reason over, and it is printed beside the synthesis. STEP 3 - WRITE THE SYNTHESIS  (40-90 words) What the evidence establishes about THIS capability, where the score sits against the peer median, and what follows for the client. One clause of consequence: at or above median -> what to protect; below -> what it constrains downstream. Cite inline. Do NOT open by restating the score - it is already rendered above you. STEP 4 - PEER FIGURE If the peer table lacks a figure: recompute the median at lower N (floor 3), then adjacency inference, then proxy ceiling, then stop. Label an inferred figure INFERENCE with one clause of reasoning. Use the literal phrase "peer proxy" when proxying. Never impute a value into the cell. Never write "identical methodology". Uncertainty over +/-0.8 -> "Cannot reliably estimate". STEP 5 - CHALLENGE (R-Layer)  B  What would refute the synthesis? Run at least one contradictory query:     "[Entity] [capability area] failure complaint outage criticism".  D  Probes: grain mismatch; identity contamination (is every item about THIS     entity, not a same-named one? check the domain on every source);     staleness (a time-sensitive figure with no as-of date); tier     misclassification (a machine scan filed as T4 caps the cell at L2.5);     Marketing-Reality Gap (T5 claims exceeding T1-T3 evidence).  E  ACCEPT / REJECT / UNCERTAIN. REJECT -> emit the evidence list with     synthesis=null and thin=true rather than prose you cannot defend. STEP 6 - ENRICH WHEN THIN Fewer than 3 items: run the ladder tiers 1-6 before settling for thin. Mint E-CC ids with url + verbatim excerpt + retrieval date + tier + claim label. A cell upgraded from thin to cited is the highest-value work on this surface. If the ladder still yields nothing, emit thin=true and record what was searched - searched-and-not-found is a finding; silence is not. GATES: grain resolution (every rendered score resolves to the named cell +/-0.05); synthesis-citation-count equality; S1 (no internal codes in client-visible prose); H13 (evidence linked to the right cell).
+```
+
+Gates asserted: H13 · S1
+
+## DD-2 · Evidence
+
+drawer opens from any evidence chip, anywhere in the app · component EvidenceDrawer
+
+### What must be presented
+
+- EVIDENCE badge, the anchor chip (cell or card id), the tier chip.
+- “N evidence items · score X · CONFIDENCE” — the anchor's own figures.
+- A Rationale callout that is INTERNAL ONLY — suppressed when role=AE or audience=customer.
+- Tier filter chips: “All · N” then one per tier present, with an honest empty state when a filter yields nothing.
+- Per item: id chip · tier · tier label · claim-label badge · recency · seen-in-N-runs chip · ERS (internal only) · title · verbatim excerpt on a tier-coloured rule · a RESOLVABLE source link · “supports:” chips that jump to the other cells the item supports.
+- Copy citation · Close.
+
+### Synthesis prompt
+
+```
+Assemble the evidence drawer for one anchor (a cell, an insight card, or a single E-ID). Per item: {e_id, tier, tier_label, claim_label, recency_band, ers, published_or_asof, source_title, publisher, url, excerpt, supports_subcap_ids[], seen_in_runs}   tier          T1 regulatory/audited AND machine tech scans (Hubbl, BuiltWith,                 Wappalyzer, Explorium) weight 1.0 ceiling L5 · T2 official                 disclosure 0.85/L5 · T3 third-party analysis 0.7/L4 · T4                 internal unvalidated 0.55/L2.5 · T5 marketing 0.3/L2 and                 REQUIRES corroboration.                 Never file a machine scan as T4 - it silently suppresses the                 score through a T4 ceiling. It is the most common                 misclassification in this corpus.   claim_label   FACT │ INFERENCE │ HYPOTHESIS │ CEILING_ESTIMATE. Mandatory.   ers           0.35*Tier + 0.25*Recency + 0.20*Specificity +                 0.20*Corroboration, 1.0-5.0. Best item below 2.5 -> the anchor                 is LOW confidence.   recency_band  CURRENT <18mo · RECENT 18-36mo · LEGACY >36mo · UNVERIFIED                 undated. AI evidence over 18mo is STALE. Undated is a BAND, not                 a blank - never render an undated figure as current.   excerpt       verbatim, 50-500 chars, the span that actually supports the                 claim. Never a URL. Never a summary of the page.   url           must resolve. A drawer whose link 404s is worse than an empty                 state, because it looks like diligence and is not. CONTRADICTIONS Where two items disagree, suppress neither. Resolve by T1>T2>T3>T4>T5; recent>older; specific>general; outcome>input - and emit the resolution row {source_a, source_b, resolution, impact}. Two documents from the same institution are ONE source, not corroboration. AUDIENCE Mark ers and the rationale block internal_only=true. The serve layer strips them for AE and Customer; your payload must mark them so it can. Verify on the toggled render, not by reading the code. GATES: S1 (no codes in client prose); resolvable-URL check; zero-unlinked (a drawer that renders empty for every cell of an entity is a linking failure, not an evidence gap); G16 recency verification.
+```
+
+Gates asserted: G16 · S1
+
+## DD-3 · Insight
+
+modal opens from an insight card · component InsightModal
+
+### Synthesis prompt
+
+```
+Expand one insight card into its drilldown. The card face already showed title, flag, pillar and a truncated WHAT - do not repeat it, complete it. {ic_id, flag, pillar, confidence, title, what_text, why_text, so_what_text,  alternative_explanation, severity_rationale, affects[], supporting_e_ids[],  linked_rec_id, validation_question, claim_label}   what_text     35-60 words. The claim, cited. States a state of the world, not                 a measurement. Must NOT open with or consist of a score                 read-out.   why_text      35-60 words. THE MECHANISM - how the claimed state produces the                 consequence. Name the causal path. No mechanism means you have                 an observation: find the mechanism or drop the card.   so_what_text  30-50 words. The decision, for a named owner where the                 leadership roster supports naming one. Specific enough to act                 on this quarter. Never "consider investing in".   alternative_explanation                 20-35 words. The strongest competing explanation you considered                 and why the evidence favours yours. If equally supported, say so                 and set confidence MEDIUM - a card that admits ambiguity is                 more useful than one that hides it. REQUIRED: this is the tab's                 reason to exist.   severity_rationale                 15-30 words. Why this severity, argued from CONSEQUENCE, not                 from how far the score sits from the median.   affects[]     every id must resolve to a cell THIS run serves. A chip that                 opens nothing is a dead link - 15 of 119 findings had them.   validation_question                 the one question that would confirm or kill the card, phrased                 for a client conversation and naming an internal document type.                 A Discovery Question - NEVER a toolkit diagnostic question. CHALLENGE (R-Layer, mandatory per card - this is where it matters most)  B  At least one contradictory query: "[Entity] [area] failure complaint outage     criticism". Strong counter-evidence changes the card or kills it.  D  Probes: Input-Output Disconnect · Marketing-Reality Gap · Temporal     Inconsistency · Regulatory Divergence · CX Disconnect · Peer Outlier ·     Tech Stack Mismatch. Each fires a required extra search before shipping.  E  ACCEPT / REJECT / UNCERTAIN. UNCERTAIN ships with the alternative stated     and confidence MEDIUM or LOW. GATES: S28 (no score-predicate openers, no dead affects links, no zero-card completed runs); S2 (no accusatory framing); S1.
+```
+
+Gates asserted: S1 · S2 · S28
+
+## DD-4 · Recommendation
+
+modal opens from a recommendation row · component RecommendationModal
+
+### Synthesis prompt
+
+```
+Expand one recommendation into its drilldown. {rec_id, title, platform, feature, phase, provenance, dma_impact[],  root_cause, evidence_ids[], cost_of_inaction, dependencies[],  sequencing_reason, effort_band, validation_gate}   provenance    ANALYST │ DERIVED. DERIVED means composed from the pack by                 rule. Never label a derived row as analyst work - 32 clients                 shipped synthetic recommendations laundered as analyst                 recommendations.   dma_impact[]  one row per affected cell: {subcap_id, name, current, target,                 delta}. current MUST equal what the heatmap serves for that id.   root_cause    30-60 words. WHY the gap exists, cited. Not a restatement of                 the gap.   cost_of_inaction                 30-60 words. What degrades if this does not happen, over what                 horizon, and which capability absorbs the damage. GROUND IT: a                 dated regulator milestone, a peer trajectory, a contract or                 migration date already in evidence. If nothing grounds a cost,                 write "no dated trigger established" rather than inventing                 urgency. A recommendation with only upside is a pitch.   sequencing_reason                 20-40 words. Why THIS phase - the dependency or gate that fixes                 its position. Must agree with the roadmap AND the stair-step                 curve; a rec that says Phase 2 while the roadmap renders it                 Phase 1 is a contradiction the client can see.   dependencies[] real predecessors only - no inversion.   validation_gate                 the readiness condition that must hold before this starts,                 expressed as a cell and a minimum (e.g. "P4C1 >= 2.0"). CHALLENGE  B  Is there a cheaper intervention that closes the same gap? State it and why     it was not chosen.  D  Probes: platform out-of-vertical for this sub-vertical (6 clients ranked an     out-of-vertical platform first); anchor cell belongs to a different entity     type (a carrier subcap on a bank); dependency inversion; a stale metric in     the impact table.  E  REJECT -> drop the row rather than ship a recommendation you cannot     sequence. GATES: S32_rec_detail (panel and roadmap agree; provenance present).
+```
+
+Gates asserted: S32_rec_detail
+
+## DD-5 · New run
+
+modal opens from the request-rerun control · component NewRunModal
+
+No separate prompt. This panel renders from the payload its parent surface already carries, so its content is governed by that surface’s contract and gates.
+
+## DD-6 · Intelligence panel
+
+modal opens from the Open Intelligence control · component IntelligencePanel
+
+No separate prompt. This panel renders from the payload its parent surface already carries, so its content is governed by that surface’s contract and gates.
+
+## DD-7 · Event detail
+
+inline opens from a timeline event · component EventDetail
+
+### Synthesis prompt
+
+```
+Expand one timeline event. {event_date, title, body, kind, capability_ids[], maturity_effect, signal,  e_ids[], claim_label}   event_date      REQUIRED, precise to at least the month. An undated item is                   EXCLUDED - never rendered as "ongoing".   kind            PLATFORM │ LEADERSHIP │ M&A │ REGULATORY │ CHANNEL │ DATA │                   SECURITY │ STRATEGY   body            25-45 words: what changed, and what it replaced or enabled.   capability_ids  which assessed capabilities this event bears on. An event                   that bears on none does not belong on the timeline - a                   rebrand is not a digital-evolution event. THIS IS THE TIE                   BACK TO THE DMA and it is the panel's whole purpose.   maturity_effect ADVANCED │ CONSTRAINED │ NEUTRAL, with one clause of                   reasoning. A ten-year-old core conversion never revisited                   CONSTRAINS current maturity; say so.   signal          POSITIVE │ NEUTRAL │ NEGATIVE, and the panel spells out what                   that means for the score: positive raises the ceiling on the                   affected capability, negative caps it, neutral is context                   with no direct score effect. Do not ship a signal badge                   without its consequence sentence.   e_ids           every event cited, and the ids must resolve. CHALLENGE  B  Is there a competing arc? An event you attributed to strategy that actually     follows a regulator action is a different story entirely.  D  Probes: undated; an event about a different entity of the same name; a     vendor press release describing an INTENTION rather than a completion     (Evidence Level 2, not 1); an event with no capability bearing; an arc     asserted from too few points.  E  REJECT -> drop the event. Fewer than 3 dated events -> emit them, set     verified_sparse=true, and do not write an arc from two points. GATES: S34_timeline_provenance (every event cited); G6 (arc claims need >=3 points).
+```
+
+Gates asserted: G6 · S34_timeline_provenance
+
+## DD-8 · Issue detail
+
+inline opens from an issue register row · component IssueDetail
+
+No separate prompt. This panel renders from the payload its parent surface already carries, so its content is governed by that surface’s contract and gates.
+
+## DD-9 · Finding expansion
+
+inline opens from a top-findings row · component TopFindingsCard
+
+No separate prompt. This panel renders from the payload its parent surface already carries, so its content is governed by that surface’s contract and gates.
+
+## DD-10 · Focus area expansion
+
+inline opens from a focus area card · component FocusAreaView
+
+No separate prompt. This panel renders from the payload its parent surface already carries, so its content is governed by that surface’s contract and gates.
+
+## DD-11 · Platform tile expansion
+
+inline opens from a platform fit tile · component ClientPlatform
+
+No separate prompt. This panel renders from the payload its parent surface already carries, so its content is governed by that surface’s contract and gates.
+
+## DD-12 · Sentiment tile expansion
+
+inline opens from a sentiment context tile · component SentimentGridInteractive
+
+No separate prompt. This panel renders from the payload its parent surface already carries, so its content is governed by that surface’s contract and gates.
+
+## DD-13 · Readiness gate expansion
+
+inline opens from a prerequisite gate row · component ClientPlatform
+
+No separate prompt. This panel renders from the payload its parent surface already carries, so its content is governed by that surface’s contract and gates.
+
+## DD-14 · Acquisition expansion
+
+inline opens from an acquisition row · component ClientContext
+
+No separate prompt. This panel renders from the payload its parent surface already carries, so its content is governed by that surface’s contract and gates.
+
+## DD-15 · Ceiling rationale
+
+inline opens from a capability ceiling row · component CeilingEstimateCard
+
+No separate prompt. This panel renders from the payload its parent surface already carries, so its content is governed by that surface’s contract and gates.
+
+Page operation
+
+# How each page operates
+
+Every page follows the same skeleton — resolve, fetch, redact, render, interact — and each diverges from it in ways that matter. Below is the operational sequence for all seven dashboards.
+
+The shared invariants
+Every page is server-rendered from serving tables in a single round trip. Every drilldown payload ships inline on that response, so no panel fetches. Redaction happens at serialisation, so the browser never receives an internal field. Ordering is payload ordering. And no page computes a colour, a score, a delta or an age — all four are either promoted or generated by the database.
+
+## D1 · Overview · 12 sections · 13 surfaces
+
+1
+
+Resolve
+Slug → entity → active run (or the run pinned in the URL). Audience resolved from the role and the URL parameter.
+
+2
+
+Fetch
+Twelve concurrent selects, one per section. A section with no promoted row returns its empty state rather than a null-filled object.
+
+3
+
+Redact
+Every JSON path in each section's internal-only array is deleted before serialisation. For the customer audience, O1b, O9 and O12 are withheld whole.
+
+4
+
+Render
+Server-rendered in one pass. The hero first — it is the only card guaranteed to be read — then the strip, then the instrumentation.
+
+5
+
+Reconcile
+The hero composite is asserted equal to the heatmap rollup and to the run-history score at read time; a mismatch renders a quarantine note rather than a number.
+
+6
+
+Interact
+O6 findings, O9 sentiment tiles and O1b ceiling rows expand inline. Every evidence chip opens the drawer. Nothing fetches.
+
+## D2 · Insights · 2 sections · 2 surfaces
+
+1
+
+Resolve
+As D1.
+
+2
+
+Fetch
+Two selects: the card set and the landscape strip.
+
+3
+
+Group
+Client-side regrouping by priority, pillar or theme. The grouping key is in the URL; the card's own priority is payload data and is never recomputed.
+
+4
+
+Render
+Cards in payload order within each group — order is meaning.
+
+5
+
+Interact
+A card opens the four-tab modal; an evidence chip inside it opens the drawer above the modal. Landscape tiles are static: their counts are recomputed from the tech-stack register at read time.
+
+## D3 · Heatmap · 9 sections · 5 surfaces
+
+1
+
+Resolve
+As D1, plus view mode and grain from the URL.
+
+2
+
+Fetch
+Nine selects. The cell set ships whole — every scored cell with its evidence rows and synthesis — because a drill during a client call cannot wait for a request.
+
+3
+
+Route
+Four sections (alerts, gates, age, patterns) are handed to Health rather than rendered here.
+
+4
+
+Render
+The active view mode only. Grain level determines which rollup is drawn; the others stay in memory.
+
+5
+
+Drill
+Pillar → category → capability → sub-capability, each replacing the grid with a breadcrumb and reset. A sub-capability row opens the synthesis drawer.
+
+6
+
+Interact
+Focus-area cards expand inline. The KPI strip is user-configurable and its configuration is view state, not content.
+
+## D4 · Platform · 5 sections · 5 surfaces
+
+1
+
+Resolve
+As D1.
+
+2
+
+Fetch
+Five selects, all keyed on the same run.
+
+3
+
+Verify
+Every roadmap phase and stair-step step is checked against the recommendation set the same payload carries; an unresolvable reference renders as a gap, not a dead link.
+
+4
+
+Render
+Fit tiles in engine order — the agent explains the ranking and never re-sorts it. Readiness gates render beneath the tile they qualify.
+
+5
+
+Interact
+Platform tiles and readiness gates expand inline; a recommendation row opens the modal with its dependency map.
+
+## D5 · Context · 5 sections · 6 surfaces
+
+1
+
+Gate
+Customer audience or a non-analyst role returns the locked state immediately. No content is fetched.
+
+2
+
+Fetch
+Five selects plus the Overview financial series, which C6 renders.
+
+3
+
+Render
+Timeline first, filtered by the year range and signal filter held in the URL. Then the issue Gantt, regulatory standing, sentiment and acquisitions.
+
+4
+
+Reconcile
+C6 is asserted identical to O8. They read one section, so a disagreement is a bug rather than a data question.
+
+5
+
+Interact
+Timeline events, issue rows, sentiment tiles and acquisition rows all expand inline. Every event carries its citation chip.
+
+## D6 · Tech stack · 1 sections · 2 surfaces
+
+1
+
+Resolve
+As D1. A stack-item id in the path routes to the detail sub-page.
+
+2
+
+Fetch
+One select. Layers are derived from the item rows rather than stored separately.
+
+3
+
+Render
+Four layer cards in fixed order, each with its pillar tag, detection count and primary-gap marker. A summary line names what is absent across the gap layers.
+
+4
+
+Interact
+A row opens the detail sub-page, which carries detection basis, evidence and the cells the item touches.
+
+## D7 · Health · 4 sections · 5 surfaces
+
+1
+
+Gate
+Analyst or admin role required, in both layers. Customer audience has no route at all.
+
+2
+
+Fetch
+Four heatmap-page sections plus the runs table for version diff.
+
+3
+
+Render
+Five tabs, all content in the page payload — a tab change is state, not a request.
+
+4
+
+Disclose
+Safeguard gates render in plain language including not-run with its reason. A failing gate is shown, not hidden, and did not block promotion.
+
+5
+
+Protect
+Cross-entity patterns render counts and shares only. Entity ids are stripped for every audience including this one.
+
+## Failure behaviour, per page
+
+Condition | Behaviour
+
+No promoted run for the entity | The client shell renders with an awaiting-synthesis state. No tab shows a partial page.
+
+A section has no promoted row | That surface renders its empty state with a data-source of empty. The rest of the page renders normally.
+
+A section promoted with an explicit empty state | The stated reason renders, with what was searched. This is a value, not a failure.
+
+A figure was quarantined at synthesis | A dash with the provenance note. Never a substituted value.
+
+A cited evidence id does not resolve | Cannot occur — submission would have failed. If it somehow does, the chip is not rendered at all rather than rendered dead.
+
+A run is promoted while a page is open | The page stays pinned to the run it loaded. A banner offers the newer run. Numbers never change under an open page.
+
+A role loses access mid-session | The next API call refuses; the route redirects to the directory with a stated reason.
+
+Versioning
+
+# Versioning across assessments
+
+Four independent version axes. Conflating any two of them produces a comparison that looks valid and is not.
+
+Axis | Carried by | Owned by | What it means
+
+Run | run_id · run_seq | The app, at ingest | One complete assessment of one entity at one point in time.
+
+Catalogue | ccg_catalog_version | The catalogue loader | Which capability catalogue the run was scored against.
+
+Producer | producer_version | The synthesis agent, per submission | Which synthesis produced each section.
+
+Contract | contract_version | The connector, per section | The payload shape the submission validated against.
+
+## Run version
+
+One complete assessment of one entity at one point in time.
+
+Promotion swaps which run is ACTIVE. Prior runs stay queryable forever — the longitudinal surfaces read across them.
+
+## Catalogue version
+
+Which capability catalogue the run was scored against.
+
+Pinned at ingest and never changed for that run. Cross-run comparison is only valid within a lineage; across a bump every cell resolves through the alias bridge or is marked not-comparable.
+
+## Producer version
+
+Which synthesis produced each section.
+
+Stamped on every serving row. Lets one page be re-synthesised and re-promoted without re-running the assessment, and lets a regression be bisected to a producer.
+
+## Contract version
+
+The payload shape the submission validated against.
+
+Recorded on the staged row. A contract bump invalidates staged-but-unpromoted work for the changed sections only; promoted content is unaffected until re-synthesised.
+
+## Run lineage
+
+```
+entity: shore-united-bank
+  │
+  ├─ run 1   req DMA-ASM-SUB-20251104-0001   catalogue v7.0   SUPERSEDED
+  │            composite 2.9 · scored_cells 742
+  │
+  ├─ run 2   req DMA-ASM-SUB-20260317-0002   catalogue v7.0   SUPERSEDED
+  │            composite 3.1 · scored_cells 748
+  │            comparable to run 1 cell-by-cell — same catalogue
+  │
+  └─ run 3   req DMA-ASM-SUB-20260731-0003   catalogue v7.1   ACTIVE
+               composite 3.4 · scored_cells 761
+               comparison to runs 1–2 must resolve through the alias bridge;
+               cells with no bridge are marked NOT_COMPARABLE, not omitted
+```
+
+## What a version diff may and may not assert
+
+Comparison | Permitted
+
+Two runs, same catalogue version | Cell-by-cell. Score deltas, coverage deltas, evidence-count deltas, recommendation carry-over.
+
+Two runs, catalogue bump, cell bridged by an alias | Cell-by-cell, with the rename disclosed. The diff names both ids.
+
+Two runs, catalogue bump, cell split or merged | Category level only. The cell row renders NOT_COMPARABLE with the reason.
+
+Two runs, catalogue bump, cell retired | Not comparable. Rendered as retired, never as a drop to zero.
+
+Composite across a catalogue bump | Disclosed as approximate. The denominator changed, so the composite is not strictly the same measurement.
+
+Any comparison across entities | Never on a client surface. Cross-entity work is counts and shares only, on Health.
+
+The failure this prevents
+A renamed cell compared naively across a catalogue bump reads as a capability that vanished — which looks like a regression, gets investigated as one, and is actually a rename. A split cell compared naively reads as a score that halved. Both are the diff asserting more than the data supports, and both are prevented by refusing the comparison rather than by annotating it afterwards.
+
+## Re-synthesising one page without a new run
+
+A section can be wrong without the assessment being wrong. The producer version axis exists so that case does not require a rerun.
+
+```
+1  The run is already PROMOTED. Its staging rows are retained, marked promoted.
+2  A Cowork session re-claims the run.
+3  It resubmits ONE page. That supersedes the live staging row for that page
+   and carries a new producer_version.
+4  promote_run runs again. It asserts a PASS on every page — five come from the
+   retained staging rows, one from the new submission — and rewrites all
+   34 serving tables in one transaction.
+5  Rows from the five unchanged pages are rewritten byte-identically but with a
+   new promoted_at. Rows from the changed page carry the new producer_version.
+
+The atomic guarantee is unaffected: promotion is still all-or-nothing
+across all 6 pages. What changes is that four of them did not need
+re-synthesising, only re-promoting.
+```
+
+This is why promoted staging rows are retained rather than deleted. If promotion cleared its inputs, fixing one card would mean re-synthesising all 6 pages — which in practice means nobody fixes one card.
+
+## Catalogue bumps
+
+Event | Effect
+
+A new catalogue version is loaded | Rows are added, keyed on the new version. Nothing existing is mutated.
+
+An existing run is opened | Resolves against the version it was pinned to. Unaffected.
+
+A new run is ingested | Pins to the current version.
+
+A cell was renamed | The alias bridge resolves it. Drilldowns keep working; the diff discloses the rename.
+
+A cell was split, merged or retired | Recorded in the bridge with its reason. Comparison degrades to the nearest comparable grain and says so.
+
+The toggle cascade changed for a sub-vertical | Affects new runs only. An existing run's scored-cell count is stored, not recomputed.
+
+Persistence
+
+# Runs, payloads, users and sessions
+
+Five classes of state with five different owners and five different lifetimes. The most common design error here is treating content as user state, or view state as server state.
+
+Class | Owner | Holds | Lives in
+
+Content | Global — identical for every user | Promoted section rows, evidence, scores, gates | Serving tables, keyed by run
+
+Synthesis session | Owned by one Cowork session at a time | The claim lease, staged submissions, verdicts | Staging tables + a lease in the cache
+
+User workspace | Per user, per entity | Annotations, alert dispositions, last-viewed run, saved searches | Workflow tables, keyed by user and entity
+
+View state | Per user, per tab — ephemeral but shareable | Audience, heatmap view mode and grain, open panel, filters, Health tab | The URL
+
+Pinned run | Per user, per entity | Which run the user is currently reading | URL parameter, defaulted from the workspace row
+
+## Content
+
+Global — identical for every user · Promoted section rows, evidence, scores, gates
+
+Never per-user. Two AEs opening the same client see the same numbers. Only the audience filter differs, and audience is a request parameter, not a user attribute.
+
+## Synthesis session
+
+Owned by one Cowork session at a time · The claim lease, staged submissions, verdicts
+
+Staged work outlives the session. The lease expires so a dead session cannot block a run; a new session resumes from run progress.
+
+## User workspace
+
+Per user, per entity · Annotations, alert dispositions, last-viewed run, saved searches
+
+Survives sign-out. Never presents as synthesis output — an annotation is attributed and dated.
+
+## View state
+
+Per user, per tab — ephemeral but shareable · Audience, heatmap view mode and grain, open panel, filters, Health tab
+
+Nothing server-side. A URL is the unit of sharing: paste it to a colleague and they see exactly your view, subject to their own role.
+
+## Pinned run
+
+Per user, per entity · Which run the user is currently reading
+
+Set on first load so a promotion mid-session cannot silently swap the numbers under an open page.
+
+## Two AEs, one client
+
+```
+AE-1 opens /clients/shore-united-bank/overview
+AE-2 opens /clients/shore-united-bank/overview        same moment
+
+Both resolve to run 3 (ACTIVE) and read the same 12 serving rows.
+Both see IDENTICAL numbers, prose and citations.
+
+What can differ:
+  · audience          a URL parameter, not a user attribute
+  · pinned run        AE-1 may still be reading run 2 from a shared link
+  · view state        grain, filters, open panel — all in the URL
+  · annotations       each sees their own AND their colleagues', attributed
+  · role              an AE and an analyst see different tab sets
+
+Content is never per-user. There is no per-user copy of a payload,
+no per-user cache, and nothing to reconcile between two readers.
+```
+
+## A promotion lands while a page is open
+
+```
+t0   AE opens /clients/x/overview          → resolves run 2, pins ?run=<run2>
+t1   Cowork promotes run 3                  → run 2 becomes SUPERSEDED
+t2   AE clicks the Heatmap tab              → still ?run=<run2>, still run 2
+t3   A banner appears: "A newer assessment is available."
+t4   AE clicks through                      → ?run=<run3>, whole shell reloads
+
+The numbers never change under an open page. An AE who quoted a figure
+at t0 can still see that figure at t2. Silent mid-session substitution is
+the one behaviour this design refuses outright.
+```
+
+Why pinning is not optional
+An AE reads the hero, walks into a meeting, and refers back to the tab twenty minutes later. If the run swapped in between, the figure they quoted is no longer on screen and they cannot tell whether they misread it or the data moved. Pinning costs one URL parameter and removes the entire class.
+
+## A Cowork session dies mid-synthesis
+
+```
+t0   session A claims run 3, lease expires at t0+2h
+t1   session A submits overview → PASS, STAGED
+t2   session A submits insights → FAIL, 3 reasons
+t3   session A dies
+
+     Staged work persists. The overview submission is untouched.
+     The verdict persists. Including the failing one.
+
+t4   lease expires. The run returns to unclaimed.
+t5   session B claims run 3 and calls get_run_progress:
+       overview  pass       insights  fail (3 reasons)
+       heatmap   missing    platform  missing
+       context   missing    techstack missing
+       promotable: false
+t6   session B reads the three reasons, repairs, resubmits insights.
+     It never re-synthesises the overview.
+```
+
+## Concurrency rules
+
+Situation | Behaviour
+
+Two Cowork sessions, same run | The second is refused. The lease is exclusive.
+
+Two Cowork sessions, different runs of one entity | Allowed. Claims are per-run. Whichever promotes last becomes active.
+
+Two Cowork sessions, different entities | Allowed and expected. This is the normal throughput case.
+
+A session resubmits a page it already passed | Allowed. The new row supersedes; the old verdict is retained.
+
+A session calls promote twice | Idempotent. The second reaches the same state.
+
+Promotion races an ingest of a newer run | Both persist. Active is decided by promotion order, not ingest order.
+
+An AE annotates a run that is then superseded | The annotation stays attached to the run it was made against, and is visible in that run's history rather than migrating.
+
+An alert is resolved, then a rerun reopens the same cell | A new alert row. The prior disposition is history, and the reopening is itself a signal — the closure condition did not hold.
+
+## What survives what
+
+Event | Survives | Does not survive
+
+A user signs out | Annotations, alert dispositions, last-viewed run, saved searches | View state — unless the URL was saved
+
+A Cowork session ends | Staged submissions, verdicts, registered evidence | The claim lease, once expired
+
+A run is superseded | Everything. Scores, evidence, sections, verdicts, annotations, alerts | Its ACTIVE status only
+
+A catalogue bump | Every existing run, resolving against its pinned version | Naive cross-version cell comparison
+
+A contract change | Promoted content, until re-synthesised | Staged-but-unpromoted work for the changed sections
+
+A re-promotion | The run, its history and its annotations | The previous promoted_at on rewritten rows
+
+## Retention
+
+Deliberately an operational policy rather than a contract. The one constraint the contract does impose: a superseded run must remain queryable long enough for the longitudinal surfaces — velocity, recurring themes, the seen-in-N-runs chip and version diff — to read across it. In practice that means every run for an entity that is still an active account.
+
+The package
+
+# What an assessment folder contains
+
+Every client folder carries the same 15-folder structure — 8 at the top level and 7 nested. The parser reads eight of them; the rest are retained for lineage.
+
+```
+<Client Name> - DMA/
+├── 01_evidence/                     the evidence corpus
+│   └── entity_profile/              firmographics and identity
+├── 02_research_workbook/            raw research, per cell
+├── 03_scoring_workbook/             THE scoring authority
+│   └── exports/                     flattened score projections
+├── 04_reports/                      Assessment Report + Client Profile
+├── 05_narrative_deck/               client-facing PPTX — not parsed
+├── 06_peers/                        the peer cohort table
+├── 07_governance/
+│   ├── layer1_qa/                   first-line QA on the assessment
+│   └── layer2_audit/                independent audit and calibration
+└── 08_appendices/
+    ├── recommendations/             recommendation detail
+    ├── gap_priority/                ranked gap register
+    └── research_appendix_csv/       issue register and flat exports
+```
+
+## What each folder holds, and where it lands
+
+Folder | Holds | Parses into
+
+01_evidence
+The evidence corpus for the run | evidence_index.csv, per-item source captures, retrieval dates  | evidence_index · evidence_subcap_links
+
+ └ entity_profile
+Firmographic and identity material | legal name, charter, regulator, jurisdictions, assets, employees, branches  | entities · firmographics_raw
+
+02_research_workbook
+Raw research, per sub-capability | search transcripts, technographic scans, dated events, sentiment captures  | document_sections · techstack_raw · timeline source
+
+03_scoring_workbook
+THE scoring authority | one row per scored cell: score, confidence, evidence refs — and the cell address  | subcap_scores (with source_cell)
+
+ └ exports
+Machine-readable projections of the workbook | flattened score CSVs, rollups, toggle-cascade results  | subcap_scores rollups · run.scored_cells
+
+04_reports
+The narrative deliverables | Assessment Report DOCX (12 structured sections) and Client Profile Research Report DOCX  | document_sections · issue_register_raw
+
+05_narrative_deck
+The client-facing deck | PPTX built from the report; not an ingest source  | — (not parsed; retained for lineage)
+
+06_peers
+The peer cohort | peer_comparison_table.csv — cohort membership and per-cell peer figures  | peer_scores
+
+07_governance
+Assessment quality control | gate results, calibration notes, sign-off  | gate_results · parser_observations
+
+ └ layer1_qa
+First-line QA on the assessment itself | per-cell QA findings, thin-evidence register  | gate_results (SG family) · heatmap_alerts source
+
+ └ layer2_audit
+Independent audit of the assessment | calibration analysis, drift checks, issue register  | gate_results · calibration flags
+
+08_appendices
+Structured supporting data | run_manifest.json and the machine-readable appendices  | run_manifest · recommendations_raw
+
+ └ recommendations
+Recommendation detail | recommendations_detail.json — impact, effort, sequencing, platform mapping  | recommendations_raw · platform_fits_raw
+
+ └ gap_priority
+Prioritised gap register | ranked gaps with their anchor cells  | opportunity + findings synthesis input
+
+ └ research_appendix_csv
+Flat research exports | issue_register.csv and the remaining structured appendices  | issue_register_raw
+
+Two folders the parser must treat differently from the rest
+03_scoring_workbook is the only authority for a score. Nothing else may set one, and the parser records the workbook cell address alongside every figure — that address is what makes the grain assertion checkable rather than aspirational. 05_narrative_deck is deliberately not parsed: it is a rendering of the report, so treating it as a source would create a second path to the same claim.
+
+## Governance folders are an ingest source, not just an archive
+
+07_governance/layer1_qa and layer2_audit carry the assessment's own quality findings — the thin-evidence register, calibration analysis and drift checks. Those become the seed for the thin-evidence alerts and the safeguard gate results rather than being re-derived. An assessment that already knows where it is weak should not have to be re-diagnosed by the product.
+
+## Discovery and identity
+
+Signal | Read from
+
+Entity identity, highest confidence | 08_appendices/run_manifest.json
+
+Request identifier | The manifest, or the folder name pattern
+
+Legal name, charter, regulator, jurisdictions | 01_evidence/entity_profile/
+
+Sub-vertical and size tier | The manifest, confirmed against the profile
+
+Assessment completion date | The manifest; the folder timestamp is a fallback only
+
+Catalogue version the run was scored against | The scoring workbook header
+
+A folder name is the weakest signal and produces a pending-review entity, never an active one. Client folders are named by humans, and the observed set already contains suffix variation — “- DMA”, “- Claude DMA”, “- Twilio DMA”, “- DMA v2”. The version suffix in particular is a trap: it is a human note about a rerun, not a catalogue version, and it must not be parsed as one.
+
+Rendering
+
+# Card anatomy and colour
+
+Every surface renders into a fixed shell. Prose written without knowing where it lands is prose that clips mid-word — a measured defect on 501 cards.
+
+## The universal card shell
+
+```
+┌─ card ───────────────────────────────────────────────────────────┐
+│  card-head                                                        │
+│    <h3>            CARD HEADER   2–4 words, sentence case         │
+│    badge           COUNT or STATE   right-aligned                 │
+├───────────────────────────────────────────────────────────────────┤
+│  rows / body                                                      │
+│    chip            ID CHIP       the item's own id, monospace     │
+│    row title       13px / 600 / line-height 1.35   ≤ 12 words     │
+│    eyebrow line    10px / uppercase / letter-spacing .05em        │
+│                    THEME · magnitude · platform chips             │
+│    chevron         expand affordance, where the row expands       │
+├───────────────────────────────────────────────────────────────────┤
+│  expansion         inset panel, appears in flow, no overlay       │
+└───────────────────────────────────────────────────────────────────┘
+```
+
+The header names the card, never the finding. The row title carries the claim. The eyebrow carries orientation — theme, then magnitude, then platform. The expansion carries the argument. A row title that needs the eyebrow to make sense is too short; an eyebrow that repeats the title is wasted.
+
+## Slot budgets, per surface
+
+Surface | Slot | Content | Budget
+
+O1 | Framing line | The gap, quantified and localised. Must not open with the composite — it renders beside the number | 18–32 words
+
+O1 | Ring label | The band word | 1 word
+
+O3 | Five headers | Trigger · Window · Consequence of waiting · Cost of acting now · Why this sequence | all required
+
+O6 | Row title | A claim, ideally one that rejects the obvious alternative | ≤ 12 words
+
+O6 | Eyebrow | THEME, then quantified magnitude | 1–3 · 6–14 words
+
+O6 | Expansion | what · why · so what · rejected alternative | 55–95 words
+
+I1 | WHAT | What is observably true, cited | 30–60 words
+
+I1 | WHY | The mechanism — not a restatement of the what | 30–60 words
+
+I1 | SO WHAT | The commercial consequence, one clause | 15–30 words
+
+I1 | Rejected alternative | The competing explanation, and why the evidence favours yours | 20–35 words
+
+H2 | Synthesis | With the grounded-on count printed beside it | 40–90 words
+
+P1 | Platform story | What it changes · which constraint it lifts · what it depends on · what it does not solve | 90–150 words
+
+P2b | Starter text | Say-it-aloud. No codes, no bracketed ids, no score-first opening | 45–90 words
+
+P3 | Phase rationale | Why this phase sits here and not earlier | 30–60 words
+
+H5 | Plain label | A human sentence beside every client-visible gate | 8–18 words
+
+C2 | Issue title | The matter in the source's own terms | 8–16 words
+
+The insight modal's sub-headings are literal and uppercase in the prototype — WHAT, WHY, SO WHAT — alongside the ACTIONED, CRITICAL and OPPORTUNITY badges. The opportunity framing is native to the interface, not an editorial overlay.
+
+## Colour: the payload carries none
+
+Score resolves to band resolves to hex in one module. No payload field carries a hex value, a class name or an outline instruction. The payload carries the raw score, the band word where a surface renders one, and semantic flags — thin evidence, below threshold, primary gap.
+
+Band | Word | Boundary | Fill
+
+M1 | Activating | score < 2.0 | #FFCB99
+
+M2 | Building | 2.0 ≤ score < 3.0 | #62D7B8
+
+M3 | Competing | 3.0 ≤ score < 4.0 | #27BBAF
+
+M4 | Differentiating | score ≥ 4.0 | #139F94
+
+— | No score | score is null | #E5E7EB
+
+Boundaries are strict less-than on the raw score, before display rounding. A score of 2.97 displays as 3.0 and bands as Building — the band comes from the raw value and the label from the rounded one, and they diverge at the boundary.
+
+Three conflicts worth knowing before writing a band word
+Transformational does not render — the resolver has four branches and anything at or above 4.0 returns Differentiating. The M2 hex disagrees between sources — #62D7B8 in the resolver, #B0EDD3 in the published palette; the resolver wins because it is what renders. And the word "stale" carries two meanings — over 12 months on the freshness dot, 36 to 48 months on the evidence ladder. The evidence ladder governs anything the payload emits.
+
+Describe the number, not the colour. "Data foundation sits at 1.9" is checkable. "Data foundation is red" depends on a palette the writer does not control and cannot see. Thin evidence adds a dashed outline and does not change the fill, because the fill means maturity and nothing else.

@@ -1,0 +1,4 @@
+Staging directory. deploy.sh copies packages/shared/*.json here before
+building the api image; the files are NOT committed, so there is exactly one
+copy of each contract in the tree (packages/shared) and no second one to
+drift. Tracked only so the Dockerfile COPY has a source on a bare build.

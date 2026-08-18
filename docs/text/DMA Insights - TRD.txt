@@ -1,0 +1,2498 @@
+DMA Insights — Technical Requirements Document
+
+Zennify
+DMA Insights · TRD
+August 2026
+
+Foundations
+01 How to read this
+02 System architecture
+
+The write path
+03 The MCP connector
+04 Identifier system
+05 Payload contracts
+06 Validation
+07 Ingest service
+
+The read path
+08 Application API
+09 Frontend architecture
+10 Heatmap design
+11 Redaction layer
+
+Data platform
+16 Data platform
+17 Storage patterns
+18 The vector tier
+19 API contracts
+
+Operations
+14 Versioning & lineage
+15 State & sessions
+12 Security & observability
+13 Testing strategy
+© 2026 Zennify · Confidential
+
+01 — How to read this
+DMA Insights · Technical Requirements Document
+TRD12 tools34 sections
+
+Technical Requirements Document
+
+# How to read this document
+
+Every technical detail of DMA Insights — a Google Cloud platform that serves 47 pre-synthesised, validated surfaces from a completed Digital Maturity Assessment. Every section is standalone.
+
+If you are new to this system, start here. DMA Insights does three things. (1) A worker ingests a completed assessment package from Drive and parses it into a read-only tier. (2) A synthesis agent running in Claude Cowork connects through the DMA Insights MCP connector, reads that tier, reasons over it, enriches it, writes every sentence the product will display, and submits it one page at a time — receiving a structured verdict each time. (3) When all 6 pages pass, one atomic promotion writes the content into serving tables and the web app renders it. The application itself does no reasoning: every request is a database read.
+
+The architectural constraint everything else follows from
+The app never calls a model. There is no inference on the request path, no streaming synthesis and no response cache to invalidate. This is what makes the product fast, cheap and reproducible — and what turns a hallucination from a runtime surprise into a build-time failure that a verdict can name.
+
+## Glossary
+
+Term | Means exactly
+
+entity | A client institution. One identity, many runs.
+
+run | One completed assessment of one entity at one point in time. The unit everything hangs off.
+
+synthesis agent | The Claude Cowork agent that reasons and writes content. Not part of the deployed application.
+
+connector | The DMA Insights MCP connector. The only writable boundary into served content.
+
+page | One of the 6 payload submission units. A submission boundary, not necessarily a screen.
+
+section | One named block inside a page payload. 34 of them, one per serving table.
+
+surface | One card or panel a human sees. 38 on client dashboards, 9 global.
+
+cell | One sub-capability. The finest grain that carries a score.
+
+catalogue cells | The 851 cells in the current catalogue version. Fixed per version.
+
+scored cells | The cells a given run actually scored — fewer, and varying, because sub-vertical toggles exclude cells an institution cannot legally operate. Stored on the run.
+
+stage | Accepted by validation, persisted, rendering nowhere.
+
+promote | Move every page of a run into the serving tables, atomically.
+
+mint | The server allocating a new identifier. The agent never mints.
+
+## Two counts that must never be conflated
+
+catalogue_cells
+851 in the current version, fixed, denormalised onto the run so a denominator never needs a join.
+
+scored_cells
+Per run, smaller, varying. A coverage percentage renders its denominator, so the denominator is stored rather than recomputed differently by two callers.
+
+## Capability catalogue
+
+The catalogue is authoritative for what every cell means, which platforms address it and which agents are relevant. Cell ids and names are resolved through it, never copied from report prose — copying is how raw taxonomy codes end up rendering as labels, and how a renamed cell silently stops resolving after a version bump.
+
+Pillar | Name | Cells | Share
+
+P1 | Strategy & Governance | 205 | 24.1%
+
+P2 | Customer Experience | 292 | 34.3%
+
+P3 | Operations | 164 | 19.3%
+
+P4 | Data & Technology | 190 | 22.3%
+
+Total  | 17 categories  | 851 | 100.0%
+
+Every id resolution is pinned to the run's catalogue version. Renamed cells resolve through the alias bridge so nothing silently vanishes across a bump.
+
+## Technology stack
+
+Layer | Chosen | Rationale
+
+Backend | Python 3.12 · FastAPI · Uvicorn  | The parser tier is spreadsheet and document libraries. More importantly the connector and the parser share validation code — one grain resolver, one identity gate, one evidence recogniser — and a shared runtime is what makes “one module, imported everywhere” enforceable by a test rather than by convention.
+
+Frontend | Next.js 15 App Router · TypeScript  | Server Components render six read-only page payloads on the server with no client-side data fetching on first paint. TypeScript catches section-shape mismatches at compile time across 34 payload shapes.
+
+Database | PostgreSQL 16 · Cloud SQL  | The serving tier leans on stored generated columns for every derivable value, JSONB for section payloads whose shape is contract-governed rather than column-governed, and one transaction spanning 34 writers for the atomic promotion.
+
+Embeddings | pgvector · local sentence-embedding tier  | Off the request path entirely. Its only job is the semantic grounding check at submit: re-embed the synthesised text and require agreement against the bundle centroid.
+
+Inference | none in the deployed app  | Reasoning happens in Claude Cowork, outside the deployment boundary. The application carries no model credential, no token cost and no latency budget for reasoning.
+
+Hosting | Cloud Run — 4 services, 2 jobs  | Scale-to-zero suits a tool used in bursts before meetings. The connector is a separate service because it has a different authentication model, a different scaling profile, and the only write credential in the system.
+
+Cache | Redis (Upstash)  | Two jobs only: the ingest job queue, and the synthesis claim lease with its expiry. The lease needs a time-to-live primitive the database would emulate badly.
+
+Object storage | Google Cloud Storage  | Source artefacts are retained after parse because excerpt verification reads the fetched bytes. An excerpt that cannot be checked against its artefact is not verifiable evidence.
+
+Export | Playwright · headless Chromium  | The scorecard is the product's own customer-view HTML, so the export is a render of the real thing rather than a parallel implementation that can drift.
+
+Auth | Google OIDC · NextAuth · RS256 JWT  | Workspace domain restriction, httpOnly cookie, role in the claim, re-verified at the API.
+
+ORM | SQLAlchemy 2.0 async · Alembic  | Migrations matter at 89 tables, and the promote transaction needs a session abstraction that will not surprise you about transaction boundaries.
+
+Section 02
+
+# System architecture
+
+4 Cloud Run services and 2 jobs. One database with three tiers, one cache, one bucket. The synthesis agent sits outside the deployment boundary and reaches in through exactly one door.
+
+```
+┌─ OUTSIDE THE DEPLOYMENT BOUNDARY ─────────────────────────────────────┐
+│  CLAUDE COWORK · a synthesis agent running the surface-production skill │
+│  reasons · searches · enriches · challenges · writes prose · cites     │
+└───────────────────────────────┬───────────────────────────────────────┘
+                                │ DMA Insights MCP connector · 12 tools
+                                │ service credential · never a user session
+                                ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│  mcp          validates → stages → promotes                          │
+│               THE ONLY WRITABLE BOUNDARY INTO SERVED CONTENT          │
+└──────────┬──────────────────────────────────────┬─────────────────────┘
+           │ stage                                │ promote (atomic, 6 pages)
+           ▼                                      ▼
+┌──────────────────────┐              ┌──────────────────────────────────┐
+│ STAGING              │              │ SERVING · 34 tables          │
+│ submissions          │─── promote ─▶│ the ONLY thing the API reads     │
+│ submission_verdicts  │              └─────────────┬────────────────────┘
+│ run_claims           │                            │ read-only
+│ nothing here renders │                            ▼
+└──────────────────────┘              ┌──────────────────────────────────┐
+                                        │ api   FastAPI · reads only      │
+┌──────────────────────┐              └─────────────┬────────────────────┘
+│ INGESTED             │◀── worker                 │
+│ read-only after parse│    Drive → parse          ▼
+└──────────────────────┘              ┌──────────────────────────────────┐
+                                        │ web   Next.js · server-render │
+                                        └──────────────────────────────────┘
+```
+
+## Enrichment sits outside the boundary too
+
+The synthesis agent reaches two external services, not one: the connector, which is the only door into this application, and Clay, which is a source. Clay never touches the database — its output is registered as evidence through the connector like any other source, which is why it needs no place in the service topology below.
+
+Surface | Provides | Call | Data point | Tier
+
+O7 | Leadership | find-and-enrich-contacts-at-company | filtered contact rows | —
+
+O12 | Thought leadership | add-contact-data-points | Find Thought Leadership | T2–T3
+
+O2 | Firmographics | add-company-data-points | Annual Revenue · Headcount Growth | T1–T2
+
+T1 | Technology stack | add-company-data-points | Tech Stack | T1
+
+O3 | Why-now signals | add-company-data-points | Recent News · Latest Funding · Open Jobs | T2–T3
+
+C5 | Acquisitions | add-company-data-points | Recent News + Custom | T3
+
+P1 | Platform readiness | add-company-data-points | Open Jobs — the demand signal | T2–T3
+
+O7 | Tenure and trajectory | add-contact-data-points | Summarize Work History | T3
+
+Clay output is evidence, and inherits every evidence rule
+Registered before it is cited, so the server allocates the id and computes the rank score. Identity-checked on the source domain, because Clay resolves by domain and a holding company, a subsidiary and a same-named institution in another market all have one. Tiered by the underlying source rather than by the tool — a technographic scan is a T1 machine scan, and filing it at T4 caps the capability at L2.5. And cited as the source, never as Clay: a value with no traceable source is an inference and is labelled one.
+
+Enrichment is asynchronous, which changes the sequence. The search response carries base fields only; enriched values arrive later and are read by polling. An absence recorded before the poll resolved is an unfinished call rendered as a finding — so enrichment starts immediately after the bundle read and the pages that consume it are produced last.
+
+## Service topology
+
+Service | Responsibility | Scaling | Writes
+
+web  |
+Frontend
+Server-rendered dashboards, drilldown shells, redaction applied server-side before markup reaches the browser.  | 0→8, request-driven | nothing
+
+api  |
+Read API
+One endpoint per page, shaped like the payload. Plus evidence resolution, run history, version diff, corpus rollups, search and the import audit.  | 0→8, request-driven | annotations and alert actions only
+
+mcp  |
+The MCP connector
+12 tools. Contract validation, evidence validation, gate execution, staging, atomic promotion, evidence minting, claim leases.  | 0→2, long-request tolerant | everything
+
+worker  |
+Ingest
+Scheduled Drive traversal, artefact classification, entity resolution, deduplication, parsing into the ingested tier.  | 0→4, queue-driven | ingested tier only
+
+Job | Responsibility | Trigger | Writes
+
+corpus-gate-scanner  |
+Build-time corpus gates
+Scans the exported pack corpus-wide. Ceilings are per-client rates. A regression fails the build.  | CI, and nightly | gate_results
+
+pack-exporter  |
+Export
+Scorecard PDF via headless Chromium, and the corpus pack the scanner reads.  | On demand, and nightly | object storage only
+
+Four boundaries, enforced by deployment rather than discipline
+The synthesis agent never writes a serving table — every write goes through the connector, and there is no side door, no direct SQL, no admin bypass. The app never calls a model. Staged is not served. And the contract is served rather than remembered: the connector returns field shapes and their spec text, so an agent reads the contract at the start of every run instead of relying on a remembered shape that still type-checks but promotes silently wrong content.
+
+## How components authenticate
+
+From → to | Mechanism | Scope
+
+Browser → web | Google OIDC, httpOnly session cookie, Workspace domain restricted | Role in the JWT claim
+
+web → api | Cloud Run service identity, audience-scoped ID token | Forwards the user's role claim; the API re-checks it
+
+Cowork agent → mcp | A dedicated service credential, never a user session, never the frontend | Write tools. The only credential that can promote.
+
+worker → Drive | Service account with domain-wide read delegation | Read-only on the assessment tree
+
+Any service → database | IAM database authentication, per-service role | The API role holds SELECT on serving tables and INSERT on two workflow tables. Nothing else.
+
+The database grant is the real enforcement. The rule that the API reads serving tables only is not a code convention — the API role has no SELECT grant on the staging tables at all. A developer who writes that query gets a permission error in local integration tests, not a code review comment six weeks later.
+
+## Request flow — an AE opens a client
+
+```
+GET /clients/<slug>/overview
+  │
+  ├─ web (Server Component)
+  │    └─ session cookie → role claim → audience (internal | customer)
+  │
+  ├─ api  GET /api/v1/entities/<slug>/overview?audience=internal
+  │    ├─ resolve slug → entity_id → ACTIVE run_id
+  │    ├─ SELECT from 12 overview serving tables, issued concurrently
+  │    ├─ apply redaction: delete every JSON path listed in internal_only
+  │    └─ attach data-source per section: producer | parsed | empty
+  │
+  └─ web renders 13 surfaces server-side. First paint carries every
+     drilldown payload inline — a drilldown never fetches.
+
+Model calls: 0.   Round trips after first paint: 0.
+```
+
+Section 03
+
+# The MCP connector
+
+12 tools in four groups. Read tools are free, idempotent and side-effect free; write tools are the only path into content. Transport is deliberately unspecified — the exchange contracts are identical over JSON-RPC or REST.
+
+list_pending_runs
+Discover
+Runs awaiting synthesis, with per-page staging counts and the current claim.
+
+get_client_state
+Discover
+What is currently served for a client, plus prior runs — the diff target for a rerun.
+
+get_report_bundle
+Read
+The parsed assessment package for one run. This is the agent's input.
+
+get_page_contract
+Read
+The payload contract for one page: field tuples plus per-field spec text.
+
+get_capability_catalogue
+Read
+The catalogue pinned to the run, with the alias bridge for renamed cells.
+
+get_evidence
+Read
+Resolve ids to full rows. Returns found, not-found and foreign separately.
+
+register_evidence
+Write
+Mint an id for an enrichment source. Call before citing it.
+
+submit_page_payload
+Write
+Stage one page and return a structured verdict.
+
+promote_run
+Write
+Atomically promote every page of a run into the serving tables.
+
+get_validation_verdict
+Inspect
+Re-read a submission's verdict, including superseded ones.
+
+get_run_progress
+Inspect
+Per-page status, and what is blocking promotion.
+
+explain_gate
+Inspect
+A gate's definition, rationale, threshold and change history.
+
+## Exchange contracts
+
+### get_report_bundle — the agent's input
+
+```
+→ { "run_id": "<uuid>" }
+← { "run_id", "entity_id", "display_id", "entity_name", "request_id",
+     "ccg_catalog_version", "sub_vertical", "size_tier", "completed_at",
+     "scored_cells", "catalogue_cells",
+     "scores":  [ { "subcap_id", "name", "score", "confidence",
+                    "peer_median", "peer_n", "peer_basis", "delta",
+                    "is_thin_evidence", "source_cell" } ],
+     "rollups": { "pillars": {…}, "categories": {…}, "capabilities": {…} },
+     "evidence": [ { "e_id", "source_name", "source_url", "source_domain",
+                     "excerpt", "tier", "claim_type", "published_date",
+                     "recency_band", "ers", "identity_ok",
+                     "linked_subcap_ids" } ],
+     "report_sections": [ { "section_kind", "pillar_id", "heading", "body", "page" } ],
+     "issues": […], "recommendations": […], "techstack": […],
+     "firmographics": {…}, "peer_table": […], "fits": […],
+     "value_chains": […] }
+```
+
+source_cell names the workbook cell each figure was read from. It is the single field that turns the grain assertion from an aspiration into something checkable.
+
+### get_page_contract — the shape, and its spec text
+
+```
+→ { "page": "overview" }
+← { "page": "overview",
+     "sections": {
+       "why_now": {
+         "signals": {
+           "required": true, "type": "list", "item_type": "object",
+           "doc": "Per signal: {wn_id, trigger, window,
+                   consequence_of_waiting, cost_of_acting_now,
+                   why_this_sequence, linked_subcap_ids[], e_ids[],
+                   dated_on, claim_label, confidence}. ALL FIVE narrative
+                   headers are required …"
+         } }, … } }
+```
+
+doc is part of the contract, not documentation
+For a list-of-object field, required-type-items tells the agent nothing about the item keys. When the item shape lives only in the writer, the agent guesses — and a guess that type-checks promotes silently wrong content. Every object-item section carries its item schema in doc, returned verbatim.
+
+### register_evidence — mint before you cite
+
+```
+→ { "run_id": "<uuid>",
+     "item": { "source_name", "source_url",
+               "excerpt":     "<verbatim span, 50–500 chars>",
+               "claim_type":  "FACT", "tier": "T2", "recency_tag": "CURRENT",
+               "published_date": "2025-11-14",
+               "linked_subcap_ids": ["P4C1.2.1"],
+               "facts": [ { "label", "value" } ] } }
+← { "e_id": "E-CC-014", "deduped": false, "ers": 4.05, "errors": [] }
+← { "e_id": "E-CC-009", "deduped": true,  "ers": null,  "errors": [] }
+```
+
+- The server allocates the id and computes the rank score. Sending either is ignored.
+- Idempotent by content: the dedup key is a hash of URL, claim type and the normalised leading excerpt, scoped to the entity. Registering the same source from six surfaces returns the same id six times.
+- Producer origin is stamped, so enrichment stays separable from package evidence in audit and gates.
+- The excerpt is verified against the fetched artefact — rejected at registration, not at promotion.
+- The source domain is identity-checked at registration. This is the cheapest identity check in the system and it catches the most.
+
+### submit_page_payload — stage one page, receive a verdict
+
+```
+→ { "run_id", "page": "overview",
+     "payload": { "<section>": { "<field>": … }, … },
+     "provenance": "producer",
+     "producer_version": "surface-synthesis@2026-08-01" }
+← { "submission_id": "<uuid>",
+     "verdict": {
+       "status": "fail",
+       "reasons": [ { "gate_id": "CG-01", "section": "findings",
+                      "path": "findings[2].body",
+                      "message": "quoted 2.34/5 resolves to P3C2.1.1 = 2.10
+                                  (Δ 0.24 > 0.05)",
+                      "severity": "block" } ],
+       "warnings": [ … ],
+       "counts": { "sections": 12, "cited_claims": 41,
+                   "e_ids_used": 27, "new_mints": 6 } } }
+```
+
+Every reason carries a gate id, a JSON path and a message that names the conflict concretely — including, where useful, the checks that passed. A verdict an agent cannot act on produces another failed submission.
+
+### promote_run — all or nothing
+
+```
+→ { "run_id": "<uuid>" }
+← { "promoted": true, "promoted_at": "…",
+     "stats": { "overview": {"sections": 12, "rows_written": 71}, … } }
+← 409 { "error": "incomplete_run",
+         "missing_pages":  ["context"],
+         "unpassed_pages": ["platform"],
+         "hint": "promote requires a PASS row for every page" }
+```
+
+### get_evidence — the three-way split
+
+```
+→ { "run_id", "e_ids": ["E-047", "E-CC-003"] }
+← { "found":     [ { …full rows… } ],
+     "not_found": ["E-CC-003"],
+     "foreign":   [ { "e_id": "E-511", "belongs_to": "<other entity_id>" } ] }
+```
+
+Foreign is the dangerous bucket
+Not-found means fabricated or not yet registered. Foreign is a real row belonging to another institution, and it must stop synthesis rather than be filtered out quietly — its presence means the reasoning has drifted onto the wrong entity.
+
+### get_run_progress — what a resuming session calls first
+
+```
+→ { "run_id": "<uuid>" }
+← { "run_id", "entity_name", "ccg_catalog_version",
+     "pages": { "overview": {"status":"pass", "submission_id":"…", "reasons":0},
+                "insights": {"status":"fail", "reasons":3},
+                "heatmap":  {"status":"staged"},
+                "platform": {"status":"missing"}, … },
+     "promotable": false,
+     "blocking": ["insights: 3 blocking reasons", "platform: not submitted"] }
+```
+
+## Resuming a session cold
+
+A Cowork session that starts with no memory of a prior conversation establishes where things stand with four calls, in this order.
+
+# | Call | Answers
+
+1 | get_run_progress | Where was I. Which pages are done, which are blocking.
+
+2 | get_page_contract per remaining page | What do I owe. Read the shape rather than recalling it.
+
+3 | get_report_bundle | What do I have, including the source cell on every score.
+
+4 | get_client_state | What is currently served — the diff target if this is a rerun.
+
+## What is safe to assume, and what is not
+
+Safe
+
+- Staged work survives a session ending
+- Re-registering a source is free and returns the same id
+- Resubmitting a page supersedes cleanly
+- The contract cannot drift from the validator, because it is served
+- A failing safeguard gate still promotes
+
+Not safe
+
+- That accepted means rendering — accepted is staged
+- That an id can be reused across entities
+- That a partially promoted run exists — it cannot
+- That a remembered field shape is still current
+- That a failing contract or evidence gate promotes
+
+## Idempotency, concurrency, versioning
+
+Concern | Rule
+
+Re-registering a source | Idempotent by content hash; returns the existing id with a dedup flag.
+
+Resubmitting a page | Supersedes the previous row for that run and page. No merge, no accumulation.
+
+Re-promoting a run | Idempotent — a promoted run promotes to the same state. Not an error.
+
+Two sessions, one run | The claim lease prevents it. The lease expires so a dead session cannot block a run permanently.
+
+Two runs, one entity | Both persist. Promotion swaps which is active; the prior stays queryable for longitudinal surfaces.
+
+Catalogue version bump | Every id resolution is pinned to the run's version. Renamed cells resolve through the alias bridge.
+
+Producer version | Stamped on every serving row, so output is attributable and a regression can be bisected.
+
+## Error taxonomy
+
+Structured and actionable, never prose. An error an agent cannot act on produces another failed attempt.
+
+Code | Means | The agent should
+
+unknown_page | Not one of the six | Read the page list
+
+contract_violation | Missing section, or a wrong type | Re-read the contract and re-shape
+
+grain_violation | A quoted figure does not resolve to its named cell | Re-read the score row; fix the pairing, not the prose
+
+unresolved_id | A cited id does not exist | Verify it, or register the source first
+
+foreign_id | The id resolves to a different entity | Stop. This is contamination — quarantine and escalate
+
+excerpt_not_verbatim | The span is not in the fetched artefact | Re-extract from the source; never repair by hand
+
+identity_quarantine | A figure failed the identity gate | Emit the empty state with its reason; do not substitute
+
+incomplete_run | Promote called before every page passed | Read run progress and finish the blocking pages
+
+lease_expired | The claim lapsed mid-synthesis | Re-claim and resubmit — staged work survives
+
+catalogue_mismatch | A cell id is not in the run's pinned version | Resolve it through the catalogue
+
+Section 04
+
+# The identifier system
+
+Every identifier, its format, who may create it, and what it joins to. This is the section a resuming session most needs, and where most avoidable errors originate.
+
+Why this is not bookkeeping
+An identifier is a join key and, on most surfaces, a click-through control. An id that does not resolve is a broken control — which is worse than an absent one, because it looks like diligence.
+
+## The complete register
+
+Id | Format | Minted by | Joins / means
+
+entity_id | UUID | the app, at first ingest | The institution. Internal only — never rendered.
+
+display_id | slug | the app, from the name | The URL segment and the human-facing handle.
+
+run_id | UUID | the app, at ingest | The assessment instance. Every payload is scoped to one.
+
+request_id | REQ-{8 hex} · DMA-ASM-{ENT}-{YYYYMMDD}-{NNNN} | the upstream bot / assessment project | Cross-system continuity. Both forms are valid; accept both.
+
+pillar_id | P1–P4 | the catalogue | Fixed vocabulary.
+
+category_id | PxCy | the catalogue | A capability category. 17 of them.
+
+subcap_id | PxCy.z.w, may carry a variant suffix | the catalogue | The cell. The only grain that carries a score.
+
+ccg_catalog_version | vN.N | the catalogue loader | Pins every id resolution for the run.
+
+e_id | E-nnn | the package | An evidence item that arrived with the assessment.
+
+ | E-CC-nnn | the server | An enrichment source. The agent never chooses the number.
+
+ | EV-{scope}-nnn · INT-{label} | connectors / discovery notes | Connector-sourced and internal evidence.
+
+ic_id · f_id · fa_id · ts_id · wn_id | IC-nnn · F-nn · FA-nn · TS-nn · WN-n | the synthesis agent | Insight card, finding, focus area, tech-stack row, why-now signal.
+
+rec_id | REC-nn · REC-{ENT}-nn | the package or the agent | A recommendation. Referenced by roadmap phases and stair-step steps.
+
+issue_id | IS-nnn | the package | A client issue-register matter.
+
+submission_id | UUID | the connector, at submit | One page submission and its verdict.
+
+gate_id | AG-nn · SG-nn · ET-nn · CG-nn | the gate registry | A validation gate. The prefix is part of the id.
+
+## Who may create what
+
+Class | Ids | Agent may create?
+
+Structural | entity_id · display_id · run_id · submission_id | NO The app owns identity and instance
+
+Catalogue | pillar_id · category_id · subcap_id · version | NO A cell not in the catalogue does not exist
+
+Upstream | request_id · package e_id · issue_id · package rec_id | NO These arrive with the package
+
+Server-minted | enrichment evidence ids | NO Register, and use the returned id
+
+Agent-assigned | ic_id · f_id · fa_id · ts_id · wn_id · agent-authored rec_id | YES Unique within the run, stable across resubmissions
+
+Five, and only five
+The agent creates 5 id classes. Everything else is read or requested. An invented evidence id is fabrication by construction, even if a matching source genuinely exists.
+
+## One recogniser, four namespaces
+
+Recognition lives in one module, is imported everywhere, and is pinned by test at every call site. The failure mode this prevents is silent under-detection: a pattern that cannot see an id cannot flag it, so genuine mints pass unchecked and fabricated mints are equally invisible.
+
+```
+EID_TOKEN_RE = re.compile(
+    r"\b(?:E|EV|INT)-[A-Z0-9]+(?:-[A-Z0-9]+){0,3}(?![A-Za-z0-9-])")
+
+matches   E-047   E-7   E-1234   E-CC-001   EV-P2C4-013   INT-DISCOVERY-04
+rejects   e-047 (case)   E-047abc (partial)   PRE-047   P1C1.1.1   REC-04
+
+Load-bearing properties, not stylistic ones:
+  case-sensitive    lowercasing makes every "e-" in prose a candidate
+  no partial match  the trailing lookahead stops a match ending mid-token,
+                    where a word boundary would allow it
+  order preserved   the truncated-cell recovery path takes the FIRST token,
+                    because in a comma-joined cell only the last one is cut
+```
+
+## Canonical rendering
+
+```
+inline, in prose   [E-047]            or  [E-047, E-089]
+in arrays          "e_ids": ["E-047", "E-089"]     ← bare, no brackets
+
+The brackets belong to the CHIP, not to the id. The frontend renders a
+bracketed group as a click-through control; a bare id inside prose
+renders as literal text and is a defect.
+```
+
+## Gate identifiers
+
+Prefixed by family, so an id is unambiguous in isolation and no renaming is ever needed.
+
+Prefix | Family | Examples
+
+AG-nn | Analytical | AG-01 Identity & boundary · AG-04 Traceability
+
+SG-nn | Safeguard | SG-01 Source diversity · SG-04 Evidence per cell
+
+ET-nn | Enrichment trigger | ET-01 Empty field · ET-04 Contradiction
+
+CG-nn | Corpus | CG-01 Grain resolution · CG-02 Citation set
+
+Never emit a bare G-number in any payload, log, prose or conversation. The prefix is part of the id.
+
+Section 05
+
+# Payload contracts
+
+34 sections across 6 pages. Each is synthesised as JSON, validated at submit, and promoted into exactly one serving table. A section with no surface is not authorable; a surface with no section is not buildable. The registry, the writers, the serving tables and the surface register are reconciled by test.
+
+## The field tuple
+
+```
+{ "field": (required?, type, item_type│None, doc?) }
+
+  required?   true → the section is invalid without it
+  type        the JSON type the value must be
+  item_type   applies when type is list — usually object
+  doc         the field's spec text, returned VERBATIM by get_page_contract
+
+Nested section specs live under "_sections".
+```
+
+## The universal envelope every section carries
+
+```
+"produced_at":     iso timestamp
+"producer_version": str
+"e_ids":           [str]   every id the section cites, deduplicated
+"internal_only":   [str]   JSON paths the serve layer must strip for the
+                           Customer audience — ERS, rationale, synthetic
+                           provenance, internal codes
+"empty_state":     null │ { "kind", "reason", "sources_searched": [str] }
+```
+
+internal_only is a payload field, not a frontend decision
+An unmarked internal rung is invisible to the serve layer and reaches the client. The frontend cannot hide a field nobody told it about, and neither can a reviewer reading the hiding logic.
+
+## Every section, its surfaces and its serving table
+
+Page | Section | Contract  | Surfaces | Serving table
+
+overview | scores | required | O1 | overview_scores
+
+overview | firmographics | required | O2 | overview_firmographics
+
+overview | why_now | required | O3 | overview_why_now
+
+overview | exec_summary | required | O4 | overview_exec_summary
+
+overview | opportunity | required | O5 | overview_opportunity
+
+overview | findings | required | O6 | overview_findings
+
+overview | leadership | required | O7 | overview_leadership
+
+overview | financial_series | required | O8, C6 | overview_financial_series
+
+overview | sentiment | required | O9 | overview_sentiment
+
+overview | ceilings | required | O1b | overview_ceilings
+
+overview | evidence_coverage | required | O10, O11 | overview_evidence_coverage
+
+overview | thought_leadership | required | O12 | overview_thought_leadership
+
+insights | insights | required | I1 | insight_cards
+
+insights | landscape | required | T2 | insights_landscape
+
+heatmap | workbook_scores | required | H4 | heatmap_workbook_scores
+
+heatmap | focus_areas | required | H1 | heatmap_focus_areas
+
+heatmap | cell_evidence | required | H2 | heatmap_cell_evidence
+
+heatmap | evidence | required | H6 | evidence_index
+
+heatmap | value_chain | optional | H9 | heatmap_value_chain
+
+heatmap | alerts | required | H3 | heatmap_alerts
+
+heatmap | safeguard_gates | required | H5 | heatmap_safeguard_gates
+
+heatmap | evidence_age | required | H7 | heatmap_evidence_age
+
+heatmap | cohort_patterns | optional | H8 | heatmap_cohort_patterns
+
+platform | platform_story | required | P1 | platform_story
+
+platform | recommendations | required | P2 | platform_recommendations
+
+platform | starters | required | P2b | platform_starters
+
+platform | roadmap | required | P3 | platform_roadmap
+
+platform | stairstep | required | P4 | platform_stairstep
+
+context | timeline | required | C1 | context_timeline
+
+context | issue_register | required | C2 | context_issue_register
+
+context | regulatory_standing | required | C3 | context_regulatory_standing
+
+context | context_sentiment | required | C4 | context_sentiment
+
+context | acquisitions | required | C5 | context_acquisitions
+
+techstack | techstack | required | T1, T3 | techstack_items
+
+## Representative field contracts
+
+### overview.scores — the hero
+
+```
+{ "composite":  float,   mean of the four PILLAR means, rounded ONCE at 2dp.
+                          NOT a flat mean over all cells — the two differ, and
+                          shipping both makes the hero and the run row disagree.
+   "pillars":    [ { "pillar_id", "score", "peer_median", "delta",
+                     "peer_n", "peer_basis": "table│recomputed│inferred│
+                                              cannot_estimate",
+                     "proxy_disclosure": str│null } ],
+   "posture":       "LEADING│COMPETING│LAGGING│MIXED",
+   "posture_basis": "EVIDENCE│HYBRID│INFERRED",
+   "framing":    str,   18–32 words. States the gap, QUANTIFIES it and
+                        LOCALISES it. Must not open with the composite —
+                        it renders beside this text.
+   "e_ids": [str], "claim_label": str, "confidence": str }
+```
+
+peer_basis is the field that prevents fabrication. Where the peer table lacks a figure the ladder is: recompute at lower cohort size (floor three) → adjacency inference → proxy ceiling → cannot estimate. Never impute a value into the cell, and when proxying, the disclosure must say so in words a governance check can find.
+
+### overview.ceilings — capability ceiling and uncertainty
+
+```
+{ "rows": [ { "category_id",
+               "ceiling": "M1..M5"│null,
+               "uncertainty_band": float,   above the cap → ceiling null and
+                                            cannot_reliably_estimate true
+               "rationale": str,   35–70 words, TWO halves: what the evidence
+                                   establishes, AND the specific thing whose
+                                   ABSENCE set the ceiling
+               "limiting_absence": str,   the artefact that would raise it —
+                                          searchable, because it is next
+                                          run's backlog
+               "urf_modifiers": [str],   named, not just summed
+               "e_ids": [str] } ] }
+```
+
+### overview.evidence_coverage — two surfaces from one section
+
+```
+{ "coverage": { "overall_pct": float, "gate_pct": 80,
+                "denominator_definition": str,   REQUIRED and RENDERED
+                "per_pillar": [ { "pillar_id", "pct", "cells_total",
+                                  "cells_covered", "below_gate": bool } ] },
+   "tiers":    { "item_count": int, "fact_count": int,
+                "self_sourced_pct": float,
+                "rows": [ { "tier", "count", "pct", "max_evidence_level" } ] },
+   "claim_classes": [ { "claim_label", "count", "pct" } ],
+   "mix_implication": str }   25–50 words: what vocabulary this mix LICENSES
+                              across the whole document
+```
+
+Never round up across the gate
+A figure below the gate renders as itself, with a below-gate marker. An overall figure must never carry a failing pillar.
+
+### heatmap.evidence_age — where derived values are enforced
+
+```
+{ "reference_date": date,   PINNED and rendered — age is meaningless
+                            without the date it was computed against
+   "rows": [ { "e_id", "title", "source_domain",
+               "published_or_asof": date│null,
+               "age_months": int│null,   null when the date is absent or
+                                         unparseable. NEVER a sentinel.
+               "band": "current│aging│dated│stale│undated",
+               "status": "FRESH│AGING│DATED│STALE│UNDATED",
+                         derived from band ONLY
+               "identity_ok": bool, "identity_note": str│null } ],
+   "undated_pct": float, "stale_pct": float }
+```
+
+### heatmap.cohort_patterns — the one section that can leak
+
+```
+{ "threshold_pct": 60, "score_threshold": 2.5, "run_window_months": int,
+   "patterns": [ { "sub_vertical", "category_id", "pattern_statement",
+                   "affected_count", "cohort_size",   MINIMUM 5 to publish
+                   "share_pct", "below_threshold": bool,
+                   "confidence": "LOW│MEDIUM│HIGH",   from cohort size
+                   "structural_explanation": str│null,
+                   "action",
+                   "entity_ids": [uuid] } ],   AUDIT ONLY — always in internal_only
+   "insufficient_cohorts": [ { "sub_vertical", "category_id", "cohort_size" } ] }
+```
+
+### platform.starters — say-it-aloud openers
+
+```
+{ "starters": [ { "rank",
+                  "provenance": "TEMPLATE_FILL│ANALYST",
+                  "opening_shape": "gap│peer│timing│their_words│
+                                    contradiction│system",
+                  "text": str,   45–90 words. No codes, no bracketed ids
+                                 mid-sentence, no score-first opening.
+                  "named_gap_subcap_id",
+                  "peer_reference": { "name", "action", "dated_on" }│null,
+                  "their_system_reference": str│null,
+                  "followup_question": str,   a Discovery Question, never a
+                                              toolkit diagnostic question
+                  "e_ids": [str] } ] }
+```
+
+opening_shape is enforced distinct across the set. An obviously templated opener is worse than none, because an AE reads it aloud.
+
+### context.regulatory_standing — the fastest contamination check
+
+```
+{ "primary_regulator": str,   from the REGULATOR's registry, never from
+                              the entity's self-description
+   "additional_regulators": [str],
+   "license_type": str, "jurisdictions": [str], "charter_date": date│null,
+   "enforcement_actions": [ { "issue_id", "regulator", "kind", "opened_on",
+                              "status", "summary",
+                              "capped_subcap_ids": [ { "subcap_id",
+                                                       "cap_level" } ],
+                              "remediation_status", "e_id" } ],
+   "absence_of_enforcement": { "verified": bool, "sources_searched": [str] },
+   "e_ids": [str] }
+```
+
+A regulator from the wrong charter type is an identity error, not a data error
+Quarantine the whole card and escalate — it means the profile is contaminated, and one such error can reach five surfaces at once.
+
+### techstack.techstack — layered, with recomputed counts
+
+```
+{ "items": [ { "ts_id", "name", "vendor", "layer", "pillar_id",
+               "status": "CONFIRMED│INFERRED│CLAIMED│ABSENT",
+               "evidence_level": "L1..L4", "detection_basis": str,
+               "linked_subcap_ids": [str], "e_ids": [str] } ],
+   "layers": [ { "layer", "pillar_id", "detected", "expected",
+                 "is_primary_gap": bool } ],
+   "landscape": { "tiles": [ { "kind": "CONFIRMED│INFERRED│CLAIMED│GAPS",
+                              "count": int,
+                              "basis": str,   PRINTED on the tile — a bare
+                                              count invites certainty
+                              "detail": str, "named_items": [str] } ],
+                 "reconciles_to_register": bool },
+   "compliance_attestations": […], "dropped": […] }
+```
+
+The four landscape counts must sum to the register and be recomputed from it. Two code paths produce two numbers and the client sees the disagreement.
+
+## Representing absence
+
+Situation | Emit | The app renders
+
+No leadership found after the full search | roster: [], verified_absent: true, sources_searched | The honest empty state, with what was searched
+
+Fewer than three dated financial points | series, verified_sparse: true, trend: null | The points, labelled a snapshot
+
+No stair-step derivable | ladder: null, empty_state | The reason, not a blank card
+
+A figure failed the identity gate | value: null, quarantined: true, quarantine_reason | A dash with a provenance note
+
+A cell's evidence is genuinely thin | thin: true, sources_searched, closure_condition | The provisional-score state
+
+Section 06
+
+# Validation
+
+Two passes at submit, deliberately separated, then four families of gate. Any evidence reason at all fails a submission.
+
+## Two passes at submit
+
+Pass 1 · structural and editorial
+Required fields, types, grain resolution, word budgets, forbidden registers — no internal codes in client prose, no score-predicate openers, no toolkit diagnostic questions — terminal punctuation, and id resolution by pattern.
+
+Pass 2 · evidence
+Every cited id resolves and belongs to this entity and this run. Every excerpt is verbatim in the artefact the app holds. Every source domain passes the identity check. Database work of a different shape, which is why it is its own pass.
+
+## The citation stack
+
+ | Check | Catches
+
+V1 | Cited ids are a subset of the bundle the agent was given | Reasoning that reached outside its grounding
+
+V2 | No fabricated ids — by pattern and by database existence | Invented ids, including in the mint namespace
+
+V3 | No fabricated entity-specific tokens unless present in the run's own rows | Invented platforms, agents and vendors
+
+V4 | Re-embed the output; require semantic agreement with the bundle centroid | A fluent paraphrase that invents a claim while citing only real ids
+
+V4 is the one that matters most and is easiest to skip. V1 to V3 are id checks — text can satisfy all three and still say something the sources do not support. V4 asks whether the output is about the bundle at all. It abstains when no embedding tier is available: an extra guard, never a fail-closed on a missing model.
+
+## Grain resolution
+
+```
+For every "<label> at N/5" in synthesised prose:
+    resolve the label to a served cell
+    require |rendered − served| ≤ 0.05
+
+WRONG  "Data Warehouse & Data Lake … at 1.6/5"
+       ← the name of a sub-capability with the CATEGORY's mean
+
+RIGHT  subcap_id = P4C1.2.1
+       name      = "Data Warehouse & Data Lake"
+       score     = 1.6            ← both read from the SAME row
+```
+
+Round once. Rounding to two decimals and then to one is not the same function as rounding once, and ties diverge between the two paths.
+
+## The identity gate — blocking, per figure
+
+# | Assert
+
+1 | Legal name matches this entity, with suffixes and trading names resolved
+
+2 | Regulator matches this entity's own
+
+3 | Footprint and jurisdictions are consistent with this entity
+
+4 | Source domain belongs to this entity or to a known neutral registry
+
+5 | Order of magnitude agrees with any other figure for the same metric already in the pack — two figures differing materially are a contradiction to resolve, not two data points to render
+
+Any failure quarantines the field, emits a reason and escalates. Never render a partial identity.
+
+## Cross-surface reconciliation
+
+The same metric appearing on two surfaces must agree, or one must be quarantined. This is a gate rather than a review step, because the client reads both surfaces on the same screen.
+
+Pair | Assertion
+
+O1 hero composite ↔ H1 workbook rollup | Agree to two decimals before either can promote
+
+O8 financial trajectory ↔ C6 Context trajectory | Identical — C6 renders O8's section rather than producing its own
+
+T2 landscape counts ↔ T1 register | The four counts are recomputed from the register, never stored separately
+
+O10 coverage denominator ↔ H1 cell set | Computed over the same cell set the heatmap serves
+
+Q1 alert cells ↔ H4 cell evidence | Every alerted cell is one the same payload declared under-evidenced
+
+P3 roadmap rec ids ↔ P2 recommendations | Every phase cites a recommendation the same payload describes
+
+G6 run history score ↔ O1 hero | Both average the four pillar means at the same precision
+
+## The peer fallback ladder
+
+Where the peer table lacks a figure, this ladder is applied in strict order and stops at the first rung that yields one. It determines peer_basis, peer_n and proxy_disclosure on every score row, and it is the mechanism that prevents peer fabrication.
+
+# | Rung | Procedure | Records
+
+1 | Peer table figure | peer_comparison_table.csv carries the cell | basis = table
+
+2 | Recompute at lower cohort size | Drop the peer lacking the figure and re-take the median. Floor of three: N=5 → sorted[2]; N=4 → mean of sorted[1..2]; N=3 → sorted[1]. | basis = recomputed, peer_n records the size actually used
+
+3 | Adjacency inference | Infer from a neighbouring sub-capability in the same category. | basis = inferred, labelled INFERENCE with one clause of reasoning
+
+4 | Proxy ceiling | A signal that caps rather than estimates — e.g. a specialist-headcount ratio below 5% caps its category, negative-dominant review sentiment caps at mid-scale. Lowest cap wins. | basis = inferred, proxy_disclosure carries the literal phrase 'peer proxy'
+
+5 | Stop | Print 'Cannot reliably estimate'. | basis = cannot_estimate, peer_median stays NULL
+
+Never impute a value into the cell
+A proxied figure must disclose itself with the literal phrase peer proxy, because a governance check greps for it, and must never claim identical methodology. A proxy that reads as a measurement is the fabrication this ladder exists to prevent.
+
+## Derived values
+
+Computed or null
+A derived value is either computed from real inputs or it is null. Never a sentinel, and a status derived from it must follow from the computation. If the input date is absent or unparseable: age is null, the band is unverified, and the status is undated. Each follows from the one before.
+
+## The reasoning layer
+
+Every check in this section runs against a claim that has already been written. The reasoning layer runs before, and it is the only mechanism that catches a claim which is well-formed, correctly cited, grain-locked and wrong.
+
+ | Step | Requires
+
+A | Hypothesis | State the claim and its confidence, before defending it.
+
+B | Counter-evidence | Argue the strongest case against it. Inside a thin margin, present both and say the call is close.
+
+C | Domain test | Is this plausible for THIS sub-vertical, size tier and regulator?
+
+D | Failure probes | Run the probe set for the surface. Each probe fires a search.
+
+E | Verdict | ACCEPT · REJECT · UNCERTAIN. Reject means re-rank or drop, not soften.
+
+A surface making a ranked or causal claim carries r_layer {hypothesis, counter, domain_test, probes_run[], verdict, confidence} in its payload, and the verdict promotes with the row. This is what makes a ranking auditable after the fact: the runner-up that was argued and rejected is recorded beside the winner.
+
+Cross-checking a repeated fact. Agreement from independent origins is corroboration and raises the rank score — but an annual report and an investor deck from the same institution are one origin, not two. Disagreement where one source outranks resolves by priority and is recorded as a parser observation. Disagreement between peers is quarantined and stated. Averaging two disagreeing figures produces a number that is in no source.
+
+## The gate stack
+
+AG-nn Analytical
+Inside synthesis, per claim, before anything is emitted On failureThe claim changes or is dropped — the agent's own disciplineExamplesAG-01 Identity & boundary · AG-04 Traceability
+
+SG-nn Safeguard
+At submit — and the results render to the client On failureRecorded and disclosed. Does not block promotion.ExamplesSG-01 Source diversity · SG-04 Evidence per cell
+
+ET-nn Enrichment trigger
+During synthesis, to send the agent looking On failureNot a failure — a prompt to enrichExamplesET-01 Empty field · ET-04 Contradiction
+
+CG-nn Corpus
+At build time, over the exported pack, corpus-wide On failureFails the buildExamplesCG-01 Grain resolution · CG-02 Citation set
+
+## Fail-closed
+
+On any citation flag
+The surface fails closed: the deterministic fallback is served and an alert row is written. An AE never sees unvalidated content.
+
+## Corpus gates and the ratchet
+
+Corpus gates run at build time over the exported pack. Ceilings are per-client rates rather than fixed counts, because a fixed count fails on arithmetic alone as the corpus grows. Every threshold change is recorded with a reason, and the continuous-integration check fails any upward movement.
+
+Gate | Asserts
+
+Workbook fidelity | Every served score and peer equals the cell it names; the hero and the run row agree
+
+Metric grain | No category average quoted under a sub-capability's name
+
+Firmographic integrity | No contradictory or contaminated firmographic
+
+Why-now provenance | Every signal is a dated, cited event
+
+Executive synthesis | Client facts outnumber score references
+
+Financial series | Three dated points, or an explicit sparse marker
+
+Insight integrity | No score-predicate openers; no dead cell links
+
+Focus grounding | Quotes are client prose, not machine text
+
+Evidence reach | Evidence reaches the scored cells
+
+Platform distinctiveness | Story, opportunity and narrative are client-specific
+
+Recommendation detail | Panel and roadmap agree; provenance present
+
+Timeline provenance | Every event cited
+
+Issue register | One row per matter; identity fields present
+
+Tech stack register | No service or category shipped as a product
+
+Surface completeness | Every contracted surface exported and rendering — target zero failures
+
+Section 07
+
+# Ingest service
+
+The worker. It runs before any Cowork session can claim a run, because the connector's primary read tool returns the parsed package.
+
+```
+Cloud Scheduler → worker
+  │
+  ├─ 1  traverse the assessment tree; diff against previous scans
+  ├─ 2  classify each artefact against the registry; rank by source priority
+  ├─ 3  exclude test cases (recorded, with the rule that fired)
+  ├─ 4  resolve the entity — 4-signal cascade; low confidence → PENDING_REVIEW
+  ├─ 5  deduplicate — 4 ordered rules; the loser is marked, never deleted
+  ├─ 6  parse workbook → subcap_scores, WITH source_cell
+  │           report   → document_sections, with page numbers
+  │           package  → evidence, issues, peers, recommendations, techstack
+  ├─ 7  retain artefact bytes in object storage for excerpt verification
+  ├─ 8  verify every package excerpt against those bytes
+  ├─ 9  compute scored_cells and stamp it on the run
+  └─ 10 the run appears in list_pending_runs, unclaimed
+
+The ingested tier is read-only from step 10 onward.
+```
+
+Two fields that cannot be backfilled
+The workbook cell each score was read from, without which grain resolution has nothing to resolve against. And the artefact bytes, without which an excerpt cannot be verified. Both are only available at parse time.
+
+## Artefact priority
+
+# | Artefact | Authoritative for
+
+1 | Scoring workbook | Every score, every peer figure, and the cell each was read from
+
+2 | Assessment report | The twelve structured report sections, gap prioritisation, roadmap
+
+3 | Client profile research report | Focus areas with verbatim quotes and page numbers, leadership, firmographics narrative
+
+4 | Package structured files | Evidence index, issue register, peer cohort, recommendation detail, run identity
+
+5 | Ops sheet and enrichment connectors | AE ownership, firmographic enrichment
+
+## Parse error handling
+
+Condition | Behaviour | Recorded as
+
+A required artefact is missing | The run is not queued. Import fails loudly. | Import audit row naming the missing type
+
+A score cell is unparseable | The row is skipped, never defaulted to zero | Parser observation, surfaced on D7
+
+An excerpt is absent from its artefact | The item is not linked; the row persists as unverified | Parser observation
+
+A cell id is not in the pinned catalogue | Resolved through the alias bridge; failing that, quarantined | Parser observation with both ids
+
+Two artefacts disagree on a figure | Higher priority wins; the disagreement is recorded | Parser observation — never silently reconciled
+
+Never default a missing score to zero. A zero renders as the lowest maturity band and is indistinguishable from a real assessment of it. A skipped row renders as “no score”, which is what it is. The same principle governs derived values everywhere: computed or null, never a sentinel.
+
+## Deduplication
+
+Four rules in strict order: artefact priority, completion date, parsed section count, then a stable tiebreak so the outcome is reproducible. The loser is retained and marked.
+
+Evidence dedup is a different and deliberately more permissive question. The same public document can legitimately be evidence for two institutions — a regulator's industry report, a vendor's customer list — so a cross-entity keep is allowed and the serving-side entity filter carries the load instead. Every registration records which branch fired, so a leak is traceable after the fact rather than mysterious.
+
+Section 08
+
+# Application API
+
+Read-only, with two narrow exceptions. One endpoint per page, shaped like the payload — so an agent that knows the payload knows the response, and a frontend developer does not need a second mapping document.
+
+## Client page endpoints
+
+GET
+
+/api/v1/entities/{display_id}/overview
+Overview · 12 sections · 13 surfaces
+GET
+
+/api/v1/entities/{display_id}/insights
+Insights · 2 sections · 2 surfaces
+GET
+
+/api/v1/entities/{display_id}/heatmap
+Heatmap · 9 sections · 5 surfaces
+GET
+
+/api/v1/entities/{display_id}/platform
+Platform · 5 sections · 5 surfaces
+GET
+
+/api/v1/entities/{display_id}/context
+Context · 5 sections · 6 surfaces · INTERNAL ONLY
+GET
+
+/api/v1/entities/{display_id}/techstack
+Tech stack · 1 sections · 2 surfaces
+GET
+
+/api/v1/entities/{display_id}/techstack/{ts_id}
+T3 platform detail sub-page
+GET
+
+/api/v1/entities/{display_id}/health
+D7 · 5 surfaces · derived from the heatmap page's gate, alert, age and pattern sections plus the runs table · ANALYST ONLY
+Every page endpoint accepts ?audience=internal|customer and ?run=<run_id> for historical runs.
+
+## Evidence, provenance and history
+
+GET
+
+/api/v1/evidence/{e_id}
+The evidence drawer payload, with the cells it supports
+GET
+
+/api/v1/evidence/{e_id}/run-history
+The seen-in-N-runs chip
+GET
+
+/api/v1/entities/{display_id}/runs
+Run history · the score column must equal the Overview hero
+GET
+
+/api/v1/entities/{display_id}/runs/diff
+Version diff between two runs
+
+## Corpus and admin
+
+GET
+
+/api/v1/entities
+Directory · one query for both header counts and rows
+GET
+
+/api/v1/dashboard
+Command centre · KPI counts from the SAME query as the header
+GET
+
+/api/v1/alerts
+Corpus-wide thin-evidence queue · cursor-paginated, mandatory limit
+GET
+
+/api/v1/patterns
+Cross-entity pattern finder · counts and shares only
+GET
+
+/api/v1/search
+Prospecting · empty until a query is supplied
+GET
+
+/api/v1/admin/imports
+Ingest job status and the pending-review queue · ADMIN
+GET
+
+/api/v1/admin/imports/audit
+Every file seen, classified, excluded or deduplicated · ADMIN
+GET
+
+/api/v1/admin/users
+Users and roles · ADMIN
+
+## The two write exceptions
+
+POST
+
+/api/v1/annotations
+A user's own note. Never content, never rendered as synthesis output.
+POST
+
+/api/v1/alerts/{alert_id}/actions
+Alert lifecycle. Workflow state, not assessment content.
+
+Neither exception writes a serving table
+Annotations and alert actions live in their own workflow tables and are joined at read time. The invariant holds: content reaches a serving table only through a promotion.
+
+## Response envelope
+
+```
+{
+  "entity":  { "display_id", "entity_name", "sub_vertical", "size_tier" },
+  "run":     { "run_id", "request_id", "completed_at", "promoted_at",
+               "ccg_catalog_version", "scored_cells", "catalogue_cells",
+               "is_active" },
+  "audience": "internal" | "customer",
+  "sections": {
+    "<section_name>": {
+      "data":         { … the promoted payload, redacted for the audience … },
+      "data_source":  "producer" | "parsed" | "empty",
+      "provenance":   "analyst" | "derived" | "producer",
+      "produced_at":  "…", "producer_version": "…",
+      "e_ids":        [ … ],
+      "empty_state":  null | { "kind", "reason", "sources_searched": [ … ] }
+    }, …
+  }
+}
+```
+
+Every surface declares its data source
+A surface that cannot say where its content came from cannot be audited from the outside — and a blank one is indistinguishable from a broken one.
+
+## Query patterns, and three that must not be used
+
+A page endpoint issues one resolution then one select per section, concurrently. That outperforms a wide join and, more importantly, a section that failed to promote returns no row rather than nulling columns the serialiser then has to distinguish from a legitimately empty section.
+
+Anti-pattern | Why
+
+Reading a staging table to render anything | The boundary. Prevented by grant, but worth stating: unvalidated content reaching a client is the failure this architecture exists to prevent.
+
+Recomputing a score, delta, share or age in the API | Two writers of one truth. Every one of these is either promoted or generated by the database.
+
+Two queries for a count and its rows | A header and its KPI counts that come from different queries will eventually disagree.
+
+## Error envelope
+
+Status | Code | When
+
+404 | entity_not_found | No entity, or no promoted run for it
+
+404 | section_not_promoted | The run is active but the section has no serving row
+
+403 | audience_forbidden | An AE requesting Context or Health, or a customer-audience request for an internal-only page
+
+409 | run_superseded | A pinned run is no longer active and the caller did not opt into history
+
+Section 09
+
+# Frontend architecture
+
+Next.js App Router, server-rendered. The frontend holds no business logic about what is internal, what a colour means, or how a number rounds — all three are resolved before the markup exists.
+
+## Complete route structure
+
+```
+// AUTH
+/login                               G1 Login — always the entry point until signed in
+
+// GLOBAL
+/                                    G2 Dashboard — command centre
+/clients                             G3 Client directory
+/alerts                              G4 Global alert dashboard (virtualised)
+/prospecting                         G5 Prospecting + scorecard export
+
+// CLIENT — seven dashboards
+/clients/:id                         → redirects to /overview
+/clients/:id/overview             D1 Overview      13 surfaces
+/clients/:id/insights             D2 Insights      2 surfaces
+/clients/:id/heatmap              D3 Heatmap       5 surfaces
+/clients/:id/platform             D4 Platform      5 surfaces
+/clients/:id/context              D5 Context       6 surfaces   INTERNAL ONLY
+/clients/:id/techstack            D6 Tech stack    2 surfaces
+/clients/:id/health               D7 Health        5 surfaces   ANALYST ONLY
+/clients/:id/techstack/:tsId         T3 platform detail
+/clients/:id/runs                    G6 Run history + version diff
+
+// ADMIN
+/admin                               G7 Admin — users, roles, settings
+/admin/import                        G8 Import & jobs + pending review
+/admin/import/audit                  G9 Import audit
+```
+
+## Rendering model
+
+Concern | Where it happens | Why not the client
+
+Redaction | API, before serialisation | A field stripped in the browser was still sent to the browser.
+
+Score → band → colour | One shared resolver module | No page computes a colour. Two code paths produce two palettes.
+
+Rounding | API, once, then presented | Rounding twice makes two nearly-equal values render a step apart.
+
+Ordering | Payload order, preserved | Order is meaning. The client never sorts a ranked list.
+
+Drilldown data | Inline in the page response | A panel must open instantly and must never fail after the card rendered.
+
+## The 15 drilldowns, by shell
+
+Shell | Geometry | Panels
+
+Drawer | Right slide-in, z-index 95, 420–480px  | DD-1 Synthesis, DD-2 Evidence
+
+Modal | Centred, z-index 80, 640–820px  | DD-3 Insight, DD-4 Recommendation, DD-5 New run, DD-6 Intelligence panel
+
+Inline expansion | Expands in the document flow, no overlay  | DD-7 Event detail, DD-8 Issue detail, DD-9 Finding expansion, DD-10 Focus area expansion, DD-11 Platform tile expansion, DD-12 Sentiment tile expansion, DD-13 Readiness gate expansion, DD-14 Acquisition expansion, DD-15 Ceiling rationale
+
+The inline class defeats naive audits. An inline expansion matches no overlay selector, so a probe for a dialog role or a modal class reports zero drilldowns on a page full of them. Any harness auditing this app must read the component to find the trigger, then click it. And a harness reading “the open panel” must prefer the drawer, or it captures the modal behind an open drawer.
+
+Panel stacking
+The evidence drawer opens above an already-open modal or synthesis drawer. Whatever manages order must handle a drawer over a modal, and closing the drawer must return to the panel beneath rather than orphaning it.
+
+## State management
+
+State | Held in | Consequence
+
+Page payload | Server Component props | Not client state at all
+
+Audience toggle | URL search parameter | Shareable, and the server re-resolves it
+
+Heatmap view mode and grain level | URL search parameters | A drilled-in state is linkable
+
+Open panel and its anchor id | URL search parameters | A drilldown is linkable and survives refresh
+
+Health tab, insight grouping, filters, sort | URL search parameters | Reproducible for a colleague
+
+Transient interaction — hover, focus | Local component state | Nowhere
+
+There is no client-side data store. With no streaming and no request-time fetching, a store would hold a copy of the server's props and eventually disagree with them.
+
+## Performance budgets
+
+Surface | Budget | Approach
+
+Any client page, first paint | < 800 ms p75 | Server-rendered from serving tables; one round trip
+
+Any drilldown open | < 50 ms | Data already in the page payload; no fetch
+
+Heatmap grain change | < 100 ms | In-page state change; rows already delivered
+
+Global alert queue | < 1 s to interactive | Cursor pagination plus row virtualisation — it is the one surface that cannot render whole
+
+Directory at corpus scale | < 1 s | Single rollup query; no per-row lookups
+
+Health, five tabs | < 1 s | Tab content in the page payload; tabs are state, not requests
+
+## Global surface contracts
+
+ID | Surface | Contract and characteristic failure
+
+G1 | Login | Google OIDC, Workspace domain restricted. Always the entry point until signed in.
+
+G2 | Dashboard | Command centre: active assessments, open alerts, insight cards, average maturity, in-progress runs. Header and KPI counts come from one query.
+
+G3 | Client directory | Card and table views with maturity, pillar strip, sub-vertical, source badge, open alerts and top platform fit.
+
+G4 | Global alert dashboard | The corpus-wide thin-evidence queue plus the cross-entity pattern finder and the waived-alert register. Virtualised.
+
+G5 | Prospecting | Search-first surface producing the customer-safe scorecard export. Empty until a query is entered.
+
+G6 | Run history | Per-entity run list. The score column must equal the Overview hero ring.
+
+G7 | Admin | Users and roles, settings and operations. Admin role required.
+
+G8 | Import & jobs | Ingest job status with a live stream, and the pending-review queue for low-confidence entity inferences.
+
+G9 | Import audit | Every file seen, classified, excluded or deduplicated, with the rule that fired.
+
+Section 10
+
+# Heatmap technical design
+
+Three view modes, four grain levels, one data delivery, no fetching between them.
+
+## Data delivery
+
+```
+heatmap page response
+  ├─ workbook_scores.pillars[4]              grain level 1
+  ├─ workbook_scores.categories[17]            grain level 2
+  ├─ workbook_scores.capabilities[…]         grain level 3
+  ├─ cell_evidence.cells[scored_cells]       grain level 4 + the drawer
+  │    └─ per cell: score, confidence, peer_median, peer_n, peer_basis,
+  │                 delta, thin flag, linked evidence rows with verbatim
+  │                 excerpts, synthesis prose + the count it is grounded on
+  ├─ focus_areas.focus_areas[]               focus view + KPI strip
+  ├─ value_chain.chains[]                    value-chain view
+  ├─ evidence.items[]                        the evidence store
+  ├─ alerts.alerts[]              ─┐
+  ├─ safeguard_gates.gates[]       │  synthesised here,
+  ├─ evidence_age.rows[]           │  RENDERED on D7 Health
+  └─ cohort_patterns.patterns[]   ─┘
+```
+
+Why the whole cell set ships at once. An AE drilling into a category during a client call cannot wait for a request, and a synthesis drawer that fails after its card rendered is worse than no drawer. The payload is large but bounded, compresses well, and is rendered server-side — so the cost is bytes on one response rather than latency on every interaction.
+
+## Level transitions
+
+From → to | Trigger | Mechanism | URL
+
+1 → 2 | Click a pillar cell | The grid is replaced, not overlaid | ?grain=category&p=P1
+
+2 → 3 | Click a category cell | Replaced with its capability rows, with a breadcrumb stating the category, its sub-capability count, its capability count and its weight, plus a reset | ?grain=capability&cat=P1C1
+
+3 → 4 | Click a capability row | Replaced with its sub-capability rows, each showing score, peer median, delta and the thin marker | ?grain=subcap&cap=P1C1.1
+
+4 → drawer | Click a sub-capability row | Synthesis drawer opens from data already present | &cell=P1C1.1.1
+
+drawer → drawer | Click an evidence chip | Evidence drawer stacks above | &ev=E-302
+
+any → 1 | Breadcrumb or reset | Clear the parameters | /heatmap
+
+A grid cell is a drill target, not a panel trigger
+This is why a single cell click looks like a dead control if the levels are not understood. Levels one through four replace the grid; only the sub-capability row opens a panel.
+
+## Synthesis drawer contract
+
+Element | Rule
+
+Cell id, name, score, confidence | One cell, one set of numbers. All four read from the same row — grain lock is the whole point of this panel.
+
+Peer ladder | Entity figure, peer median and signed delta, all belonging to the cell named at the top. Where the peer table lacks a figure, an inferred figure is labelled with one clause of reasoning.
+
+Evidence list | Every linked item with tier, claim class, recency, publisher and a verbatim excerpt. Each id opens the evidence drawer.
+
+Synthesis | 40–90 words, with the count of items it is grounded on printed beside it, computed from the citation array. Does not open by restating the score.
+
+Thin marker | Below three items the panel says so rather than reading as complete.
+
+## Colour resolution
+
+One module. Score resolves to band resolves to hex, and no page computes a colour. The payload carries the raw score, the band word where a surface renders one, and semantic flags — never a hex, a class name or an outline instruction.
+
+Band | Word | Boundary | Fill
+
+M1 | Activating | score < 2.0 | #FFCB99
+
+M2 | Building | 2.0 ≤ score < 3.0 | #62D7B8
+
+M3 | Competing | 3.0 ≤ score < 4.0 | #27BBAF
+
+M4 | Differentiating | score ≥ 4.0 | #139F94
+
+— | No score | score is null | #E5E7EB
+
+Boundaries are strict less-than on the raw score, before display rounding. A score of 2.97 displays as 3.0 and bands as Building; the band comes from the raw value and the label from the rounded one, and they diverge at the boundary. The database's generated band column and the frontend resolver must implement this identically — a test asserts they agree for every score in a fixture run.
+
+### Three conflicts in the current definitions
+
+C-01M5 Transformational is unreachableReconcile
+
+The resolver has four branches; anything at or above 4.0 returns Differentiating. The design set published a fifth band and a hex (#185F60) that no code path can reach.
+
+Resolution. Use the four reachable band words. A genuine M5 in the workbook renders as Differentiating and is recorded as a parser observation.
+
+C-02The M2 hex disagrees between sourcesReconcile
+
+The prototype resolver returns #62D7B8; the design set published #B0EDD3.
+
+Resolution. The resolver is the source of truth because it is what renders. The payload carries no hex, so nothing is served wrongly — but the palette documentation must be reconciled.
+
+C-03Two freshness vocabularies collide on the word STALEReconcile
+
+The evidence ladder bands at 12/24/36/48 months (CURRENT·RECENT·DATED·STALE·ARCHIVAL). The prototype freshness dot bands at 6/12 months (Current·Aging·Stale). An item at 14 months is RECENT on one and Stale on the other, on the same screen.
+
+Resolution. The evidence ladder governs everything the payload emits. The dot is a UI affordance with a tighter threshold and must be relabelled.
+
+### The old palette
+
+```
+The published palette, for reference. The resolver above governs.
+score → band → hex
+
+  M1 Activating        #FFCB99   text #7C3C00
+  M2 Building          #B0EDD3   text #0D4F3C
+  M3 Competing         #27BBAF   text #FFFFFF
+  M4 Differentiating   #139F94   text #FFFFFF
+  M5 Transformational  #185F60   text #FFFFFF
+  no score             #E5E7EB   text #6B7280
+
+Thin evidence adds a dashed outline; it does not change the fill,
+because the fill means maturity and nothing else.
+```
+
+## Rendering technique
+
+Level | Elements | Technique
+
+1 · pillars | 4 | CSS Grid
+
+2 · categories | 17 | CSS Grid. No virtualisation needed.
+
+3 · capabilities | up to ~12 per category | Plain list
+
+4 · sub-capabilities | up to ~50 per category | Plain list
+
+Value-chain view | chains × stages | CSS Grid, same resolver
+
+Drawer | 1 cell | Portal, focus-trapped, escape-closable, returns focus to the trigger row
+
+Section 11
+
+# Redaction layer
+
+Two audiences, one payload, one enforcement point. The frontend does not decide what is internal — it cannot, because it never receives the internal fields.
+
+## How it works
+
+```
+Every section carries, in its universal envelope:
+
+  "internal_only": [ "rows[*].ers",
+                     "rows[*].scoring_rationale",
+                     "provenance",
+                     "patterns[*].entity_ids" ]
+
+These are JSON paths. At serialisation the API walks each path and
+deletes it when audience = customer. The frontend receives an object
+that never contained the field.
+```
+
+## What is stripped, and what is withheld entirely
+
+Rung | Internal | Customer
+
+Evidence rank scores, tier weights | shown | stripped
+
+Scoring rationale | shown | stripped
+
+Synthetic provenance | shown | stripped
+
+Internal codes — cell, gate and evidence ids | shown as chips | capability names only
+
+O1b ceilings · O9 sentiment · O12 thought leadership | shown | withheld
+
+D5 Context — all six surfaces | shown | locked state
+
+D7 Health — all five surfaces | analyst only | no route
+
+Cross-entity pattern entity ids | audit only | never
+
+Thin-evidence and quarantine markers | shown | shown
+
+Two dashboards are withheld, not redacted
+Context and Health render an explicit locked state in the customer audience rather than a partial page. A page that renders half its cards invites the question of what the other half said.
+
+## Verification
+
+The customer view is verified on rendered output, not by reading the code. The entire defect class here is a field nobody marked, and reading the marking logic cannot find a field absent from it. The scorecard export renders the same customer-view markup through a headless browser rather than a parallel template, because a second implementation is a second place for a redaction rule to be missing.
+
+Section 12
+
+# Security, observability and operations
+
+## Authentication and authorisation
+
+Control | Implementation
+
+Identity | Google OIDC, Workspace domain restricted at the OAuth client
+
+Session | RS256 JWT in an httpOnly, secure, same-site cookie. Never browser storage.
+
+Role | A claim in the token, re-verified at the API on every request rather than trusted from the frontend
+
+Two-layer gate | Route-level, so the frontend does not render a dashboard the user cannot reach; and API-level, which refuses it. The first is user experience; the second is the control.
+
+Synthesis agent | A dedicated service credential, never a user session, never the frontend. The only credential that can promote.
+
+Database | IAM authentication with per-service roles. The API role holds no grant on staging tables.
+
+## What is recorded
+
+Per | Recorded | Answers
+
+Submission | Who submitted, producer version, provenance, and the full verdict — including superseded ones | What failed, when, and what the agent did about it
+
+Serving row | Run, entity, promotion time, producer version, provenance, citations | Where did this sentence come from
+
+Evidence registration | Which dedup branch fired — kept, same-entity dedup, cross-entity keep, within-run duplicate, tier upgrade | Why does this id look like that one
+
+Identity quarantine | Every figure that failed, which surface it would have appeared on, and its reason | Which surfaces are incomplete because we refused to guess
+
+Parse | Every observation, disagreement, exclusion and skipped row | Whether an empty surface is a gap or a bug
+
+Threshold change | From, to, reason, and the corpus size it was measured at | Whether a gate still measures anything
+
+## Monitoring
+
+Signal | Alert when
+
+Serving rows with a null producer version | Any. It means something wrote outside a promotion.
+
+Foreign-id rejections | Any. Synthesis should stop, not filter.
+
+Corpus gate ceiling movement | Any upward movement, at all. It is never sanctioned.
+
+Identity quarantines per run | Above the corpus rate — a spike usually means one contaminated profile rather than many bad figures
+
+Promotion failure rate | Any run failing twice with the same blocking page
+
+Ingest lag | A folder discovered but unparsed for more than 24 hours
+
+Claim leases expiring mid-synthesis | Repeatedly on the same run — a session is dying rather than finishing
+
+The alert that should page someone
+A serving row with no producer version means content reached a serving table without going through a promotion. That is the invariant this entire architecture rests on.
+
+## Environments
+
+Environment | Data | Gates
+
+Local | A seeded fixture run, one entity, full catalogue | Contract and evidence passes run; corpus gates do not
+
+Staging | Anonymised corpus subset | All four families, with production ceilings
+
+Production | Live corpus | All four. Corpus gates run nightly and in continuous integration.
+
+## Retention
+
+How long superseded runs and verdicts are kept is an operational policy rather than a contract. The one constraint the contract imposes: a superseded run must stay queryable long enough for the longitudinal surfaces to read across it.
+
+Section 13
+
+# Testing strategy
+
+Weighted toward contract and invariant assertions rather than unit coverage, because the failures this system is designed against are cases where the code does exactly what it says and what it says is wrong.
+
+## Invariant tests
+
+One test per invariant, named after the invariant so a failure is self-describing.
+
+- No module in the deployed application imports an inference client.
+- The API database role has no SELECT grant on any staging table.
+- Promotion writes all 6 pages or none — asserted by injecting a writer failure.
+- A payload attempting to mint an evidence id is rejected.
+- A customer-audience response contains no path listed in any section's internal-only array.
+- Every serving row written by a promotion carries a non-null producer version.
+- Committed corpus ceilings are no higher than in the previous commit.
+- The section registry, the writer registry, the serving-table list and the surface register reconcile.
+- The evidence recogniser is the same compiled object at every call site.
+
+The ceiling test belongs in continuous integration, not at runtime. It compares the committed gate configuration against the previous commit and fails on any upward movement. This is the only mechanism that reliably resists raising a ceiling, because the pressure to do it arrives exactly when everyone is busy shipping.
+
+## Contract tests
+
+Assertion | Why
+
+Every section has a contract, a writer, a serving table and a renderer | Four registries that can drift. This is the test that prevents a specified surface being unauthorable.
+
+Every list-of-object contract field carries doc text | An item shape that lives only in the writer forces the agent to guess.
+
+Response section names equal payload section names | The API mirrors the payload so no second mapping document is needed.
+
+Every error code the connector can emit appears in the documented table | An undocumented error is one an agent cannot act on.
+
+Every surface in the register has a test id present in rendered markup | Closes the loop between specification and render.
+
+## Validation tests
+
+Defect class | Test
+
+Grain | For a fixture payload with a known mismatch, assert the verdict names the gate, the JSON path and both figures, and that the submission fails.
+
+Identity | Inject a figure whose source domain belongs to another institution. Assert quarantine, a reason, and that no value is substituted. Repeat for regulator and footprint.
+
+Citation | Assert object identity of the compiled recogniser at every call site, and that the mint namespace is matched.
+
+Bounds | Property test: for all valid factor inputs the computed rank score is in range, and out-of-range input is quarantined rather than rendered.
+
+Derived values | For a row with an absent or unparseable date, assert age is null, band is unverified, status is undated, and no sentinel appears in the serialised response.
+
+Reconciliation | All seven enforced pairs, each asserted independently.
+
+## Rendering tests
+
+Assertion | Approach
+
+All 38 client surfaces and 9 global surfaces render for a fixture run | Server-render each route; assert each surface's test id is present with a data-source attribute
+
+All 15 drilldowns open | Read the component to find the trigger, then click it. Never probe the DOM for overlays.
+
+A drawer stacks above a modal and closing it returns to the modal | Explicit stacking test
+
+Customer view withholds Context and Health entirely, and the three internal Overview cards | Assert on rendered markup, not on the code that hides them
+
+The global alert queue is interactive at corpus scale | Fixture at measured corpus size; assert virtualisation is active
+
+Every empty state renders as a sentence naming what was searched | Assert no error string reaches a surface
+
+Every heatmap grain transition and view mode is reachable and linkable | Drive each transition; assert URL round-trips
+
+## What is deliberately not tested heavily
+
+Unit coverage of the read API is thin by design. It is a set of parameterised selects against tables whose shape a contract test already pins, and heavy mocking there produces tests that assert the implementation rather than the behaviour. The investment goes into the connector boundary, registry reconciliation, and rendered output — the three places where the failures this system is designed against actually live.
+
+Section 14
+
+# Versioning and lineage
+
+Four version axes, each with its own owner, key and invalidation rule.
+
+Axis | Key | Set by | Invalidation
+
+Run | runs.id · runs.run_seq | Ingest | Never. Promotion swaps is_active; nothing is deleted.
+
+Catalogue | runs.ccg_catalog_version | Ingest, from the workbook header | Never for an existing run. New runs pin to the current version.
+
+Producer | <serving>.producer_version | Each submission | Overwritten on re-promotion of that section only.
+
+Contract | submissions.contract_version | The connector, at submit | A bump invalidates staged-but-unpromoted rows for the changed sections. Promoted content is untouched.
+
+## Run lineage
+
+```
+entity
+  ├─ run 1  catalogue v7.0  SUPERSEDED  scored_cells 742
+  ├─ run 2  catalogue v7.0  SUPERSEDED  scored_cells 748
+  │           comparable to run 1 cell-by-cell
+  └─ run 3  catalogue v7.1  ACTIVE       scored_cells 761
+              comparison to 1–2 resolves through ccg_aliases; unbridgeable
+              cells are marked NOT_COMPARABLE, never omitted
+```
+
+## The diff resolver
+
+```
+def compare_cell(cell, run_a, run_b):
+    if run_a.catalogue == run_b.catalogue:
+        return DIRECT                    # same id, same meaning
+
+    alias = resolve(cell, run_a.catalogue, run_b.catalogue)
+    if alias is None:            return NOT_IN_TARGET
+    if alias.reason == "renamed": return BRIDGED(alias, disclose_rename=True)
+    if alias.reason in ("split","merged"):
+                                 return DEGRADE_TO_CATEGORY(alias.reason)
+    if alias.reason == "retired": return RETIRED
+
+# A composite across a bump is ALWAYS approximate: the denominator moved.
+# Render it with that stated, or do not render it.
+```
+
+Refuse rather than annotate
+A renamed cell compared naively reads as a capability that vanished; a split cell reads as a score that halved. Both are the diff asserting more than the data supports. The resolver refuses the comparison and states why, rather than producing a number with a footnote nobody reads.
+
+## Section-level re-promotion
+
+Promoted staging rows are retained, marked promoted. That is what makes a single-page fix possible without a rerun.
+
+```
+1  run is PROMOTED; its staging rows are retained
+2  a Cowork session re-claims the run
+3  it resubmits ONE page → supersedes that page's live staging row,
+   carrying a new producer_version and contract_version
+4  promote_run asserts a PASS on every page — five from retained rows,
+   one from the new submission — and rewrites all serving tables in ONE
+   transaction
+5  unchanged sections rewrite byte-identically with a new promoted_at;
+   the changed section carries the new producer_version
+
+Atomicity is unaffected. Promotion is still all-or-nothing.
+```
+
+## Catalogue bump procedure
+
+Step | Action
+
+1 | Load the new version. Rows are added, keyed on version. Nothing existing mutates.
+
+2 | Populate ccg_aliases for every rename, split, merge and retirement, with its reason.
+
+3 | Run the bridge-coverage check: every cell in the previous version resolves, or is explicitly retired. An unaccounted cell fails the load.
+
+4 | Flip is_current. Existing runs are unaffected; new ingests pin to it.
+
+5 | Invalidate cached diffs by version tag. Nothing is recomputed eagerly.
+
+Section 15
+
+# State, sessions and concurrency
+
+Five state classes. Which tier holds each, and what happens when two actors touch the same thing.
+
+Class | Storage | Lifetime | Scope
+
+Content | Serving tables | Until superseded | Global. One copy, read by everyone.
+
+Synthesis | Staging tables + lease | Staged: indefinite. Lease: hours. | One Cowork session per run.
+
+Workspace | user_workspace, annotations, alert_actions, saved_searches | Until deleted | Per user, per entity.
+
+View | URL search parameters | The tab | Per tab. Shareable by paste.
+
+Pinned run | URL, defaulted from user_workspace | The session, then remembered | Per user, per entity.
+
+Content is never per-user
+There is no per-user copy of a payload, no per-user cache and no per-user derivation. Two readers of the same run see byte-identical section data. The only per-request variation is the audience filter, and audience is a request parameter rather than a user attribute — which is what makes a customer-view URL shareable with a colleague.
+
+## Run resolution, per request
+
+```
+GET /api/v1/entities/{display_id}/overview[?run=<uuid>][&audience=…]
+
+  1  slug → entity_id
+  2  if ?run given:  use it, and set is_active=false in the response envelope
+     else:           SELECT id FROM runs WHERE entity_id=? AND is_active
+  3  if none:        404 entity_not_found with runs_found and promoted counts
+  4  read sections for that run_id
+  5  envelope carries run_id, run_seq, is_active, promoted_at,
+     ccg_catalog_version, scored_cells, catalogue_cells
+
+The frontend writes ?run on first load, so subsequent navigation within
+the shell cannot silently move to a newer run.
+```
+
+## Session continuity for synthesis
+
+```
+t0  session A: claim(run) → lease until t0+2h
+t1  session A: submit(overview)  → PASS  → STAGED
+t2  session A: submit(insights)  → FAIL  → 3 reasons persisted
+t3  session A dies
+
+    staged rows persist · verdicts persist · registered evidence persists
+
+t4  lease expires → run returns to unclaimed
+t5  session B: claim(run) → get_run_progress
+      overview pass · insights fail(3) · heatmap missing · …
+      promotable: false
+t6  session B repairs insights only. It never re-synthesises overview.
+```
+
+## Concurrency matrix
+
+Two actors | Outcome
+
+Two Cowork sessions, same run | Second claim refused while the lease holds.
+
+Two Cowork sessions, different runs, one entity | Both proceed. Promotion order decides which is active.
+
+Promotion races an ingest of a newer run | Both persist. Active is decided by promotion, not ingest.
+
+Two promotions of one run | Serialised by the transaction. The second is idempotent.
+
+An API read during a promotion | Reads the pre-promotion state. The transaction is not visible until commit.
+
+Two users annotating the same anchor | Both rows persist, each attributed and dated.
+
+Two users acting on one alert | Last write wins on status; both actions are retained in history.
+
+The read-during-promotion case matters more than it looks. Because the promotion is one transaction across every serving table, a request that arrives mid-promotion sees the entire previous run rather than a mixture. There is no window in which a client can read a half-updated page — which is the whole reason promotion is atomic rather than per-section.
+
+## Cache invalidation
+
+There is almost nothing to invalidate, and that is deliberate. The cache holds an ingest job queue and synthesis claim leases. It holds no rendered content, no section payloads and no query results, so a promotion requires no invalidation step and cannot leave a stale page behind. The one derived artefact with a lifetime is the run-diff, invalidated by version tag.
+
+Section 16
+
+# Data platform
+
+PostgreSQL 16 on Cloud SQL, and the configuration decisions that are not defaults. Each one below exists because getting it wrong produces a specific failure this architecture is sensitive to.
+
+## Instance and extensions
+
+Setting | Value | Why
+
+Engine | PostgreSQL 16 | Stored generated columns, jsonb_path_ops improvements, and MERGE for the promote writers
+
+Extensions | vector · citext · pg_trgm · pgcrypto | Embeddings; case-insensitive email; trigram search on entity names during resolution; UUID generation
+
+Networking | Private IP, no public endpoint | Every consumer is a Cloud Run service in the same VPC connector
+
+Auth | IAM database authentication, per-service role | No password in a secret to rotate, and the grant boundary is the write-boundary invariant
+
+default_transaction_isolation | read committed | Sufficient because promotion is atomic — a reader sees the whole previous run or the whole new one
+
+statement_timeout | 15s on svc_api, 300s on svc_mcp | A page read that takes 15 seconds is a bug; a promote across 34 writers legitimately takes longer
+
+idle_in_transaction_session_timeout | 60s | A synthesis session holding a transaction open blocks the promote path
+
+work_mem | 32MB | The heaviest read sorts a few thousand cell rows; the corpus rollups aggregate across entities
+
+## Connection pooling — and the gotcha that bites
+
+Cloud SQL Managed Connection Pooling — Google's built-in, PgBouncer-based pooler — sits between the services and Postgres. Cloud Run scales to many short-lived instances and Postgres connections are expensive; without pooling, a burst of page reads before a morning of client meetings exhausts the connection limit. Managed pooling was chosen over a self-hosted PgBouncer sidecar because it removes a container to patch and a config to drift, at the cost of one edition constraint below.
+
+Requirement | Detail
+
+Edition | Cloud SQL Enterprise Plus. Managed pooling is not available on the standard edition — if the instance is ever downgraded, fall back to a PgBouncer sidecar on each Cloud Run service with the same settings
+
+Ports | 6432 for direct pooled connections; 3307 when connecting through the Cloud SQL Auth Proxy or the language connectors
+
+Modes | pool_mode per pool: transaction (the default) or session — the same semantics as stock PgBouncer, including what transaction mode breaks
+
+Network | Requires the new Cloud SQL network architecture; private service access or Private Service Connect
+
+Transaction-mode pooling breaks server-side prepared statements
+asyncpg — which SQLAlchemy uses underneath — prepares statements by default and caches them per connection. In transaction mode a connection is handed to a different client between statements, so the prepared statement is not there. The failure is intermittent and looks like data corruption rather than a pooling problem.
+
+```
+# The two settings that make asyncpg safe behind a transaction pooler
+create_async_engine(
+    url,
+    connect_args={
+        "statement_cache_size": 0,          # no server-side prepared statements
+        "prepared_statement_cache_size": 0,
+    },
+    poolclass=NullPool,                  # PgBouncer owns pooling, not SQLAlchemy
+)
+
+# Advisory locks and SET LOCAL still work — they are transaction-scoped.
+# Session-scoped SET, LISTEN/NOTIFY and cursors held across statements do NOT.
+```
+
+Service | Pool mode | Max client conns | Rationale
+
+svc_api | transaction | 200 → 20 server | Short read transactions, high concurrency
+
+svc_mcp | session | 10 → 10 server | The promote holds advisory locks and a long transaction. Session mode keeps the connection stable.
+
+svc_worker | transaction | 20 → 8 server | Batch parse writes
+
+IAM authentication and pooled connections — a known failure, mitigated
+IAM database authentication uses OAuth tokens valid for roughly one hour. A pooled server connection that outlives its token fails intermittently with SQLSTATE 08P01 — a documented issue with managed pooling under IAM auth. Three settings close it: connect through the Cloud SQL Python Connector with automatic IAM authentication, which refreshes tokens rather than passing a static one; set pool_recycle=1800 so no connection outlives half a token lifetime; and set pool_pre_ping=True so a connection that expired anyway is replaced instead of handed to a request.
+
+## Migrations
+
+Rule | Because
+
+Alembic, one revision per change, no squashing after merge | The revision history is how a schema regression is bisected alongside a producer version
+
+Run as svc_migrate in a pre-deploy step, never by a running service | A service that can run DDL can drop a serving table
+
+Grants applied in the same revision that creates the table | Default-deny means a table without an explicit grant is invisible; adding it later is a second chance to forget
+
+Expand, migrate, contract — never a bare rename | Cloud Run rolls instances; old and new code run together for a minute or two
+
+A generated column change is add-new, backfill, swap, drop-old | ALTER … GENERATED rewrites the table and takes an ACCESS EXCLUSIVE lock
+
+Index creation is CONCURRENTLY, outside a transaction | A plain CREATE INDEX on the evidence table blocks the promote path
+
+## Backup and recovery
+
+Automated daily backups with point-in-time recovery through the write-ahead log, retained thirty-five days. Recovery is verified by an actual restore into a scratch instance on a schedule — a backup nobody has restored is a hypothesis. The recovery-point objective is five minutes and the recovery-time objective one hour, and both are dominated by the restore rather than the detection.
+
+Content is reproducible; ingested data is not. Serving rows can be regenerated by re-promoting from retained staging rows, and staging can be regenerated by re-synthesising. What cannot be regenerated is the ingested tier — the parsed workbook with its source-cell addresses, and the artefact bytes that excerpt verification reads. Those are the rows worth the restore drill.
+
+## Google Cloud deployment mapping
+
+Every component named in this document, its Google Cloud service, and the setting that is not a default. Verified against current availability — nothing below requires a service Google does not offer.
+
+Component | Google Cloud service | Non-default settings
+
+svc_api | Cloud Run service | concurrency 80 · min-instances 1 (cold starts on the first meeting of the day) · Direct VPC egress
+
+svc_mcp | Cloud Run service | concurrency 4 — the embedding model is CPU-bound at submit · timeout 900s (the 300s promote statement fits; Cloud Run's ceiling is 3600s) · min-instances 1
+
+svc_worker | Cloud Run Job | Parse and embed are batch work with no request to answer; a Job gets CPU for its whole duration without request-based throttling
+
+svc_migrate | Cloud Run Job, pre-deploy | Runs Alembic and exits; deploy proceeds only on success
+
+PostgreSQL 16 | Cloud SQL Enterprise Plus | Managed Connection Pooling · private IP · IAM auth · PITR 35 days
+
+pgvector + HNSW | Cloud SQL extension | pgvector 0.6+ ships with Cloud SQL and includes HNSW; SET LOCAL hnsw.ef_search is an ordinary session GUC and works unchanged
+
+Redis (leases, cache) | Memorystore for Redis | Reached over Direct VPC egress — Memorystore has no public endpoint, so the VPC path is required, not optional
+
+Artefact bytes | Cloud Storage | Uniform bucket-level access; the worker holds the only writer role
+
+Secrets | Secret Manager | Mounted as env at deploy; IAM auth removes the database password entirely
+
+Scheduled jobs | Cloud Scheduler → Cloud Run Jobs | The 2 jobs in the register, each a Job execution
+
+Embedding model | Bundled in the connector and worker images | ~90MB of weights in-image; CPU inference; no Vertex AI dependency and no per-call cost
+
+What Google Cloud does not do for this design: Cloud Run does not compress dynamic responses, so the Brotli-or-gzip behaviour in the API section is FastAPI middleware, not platform configuration. And the load balancer will not negotiate it either — compression happens in the service or not at all.
+
+## Autovacuum
+
+Two tables need non-default settings because promotion is delete-then-insert across every serving table, which produces dead tuples in proportion to run size rather than to user activity.
+
+```
+ALTER TABLE heatmap_cell_evidence SET (
+  autovacuum_vacuum_scale_factor = 0.02,   -- default 0.2 is too lazy here
+  autovacuum_analyze_scale_factor = 0.01,  -- plans depend on run cardinality
+  autovacuum_vacuum_cost_limit = 2000);
+
+-- Same for evidence_index. A re-promotion of one page rewrites every
+-- serving table, so a client re-promoted five times in a morning has
+-- five generations of dead tuples on 34 tables.
+```
+
+Section 17
+
+# Storage patterns
+
+Four patterns carry most of the schema: array columns, JSONB, stored generated columns and link tables. Choosing wrongly between them is the difference between a query that uses an index and one that scans.
+
+## Array columns
+
+Used where a list is read whole, written whole and never joined on. Every one of these travels with its parent row and is rendered as a set.
+
+Column | Type | Access pattern
+
+<serving>.e_ids | TEXT[] | Rendered as chips; containment-searched for impact analysis
+
+<serving>.internal_only | TEXT[] | Walked at serialisation. Never queried
+
+techstack_items.linked_subcap_ids | TEXT[] | Rendered; containment-searched from the cell side
+
+entities.jurisdictions | TEXT[] | Identity gate assertion 3; overlap-searched
+
+evidence_run_links.surface_ids | TEXT[] | The seen-in-N-runs chip
+
+heatmap_cohort_patterns.entity_ids | UUID[] | Audit only. Stripped from every response
+
+```
+-- GIN with the default array operator class supports @>, <@, && and =
+CREATE INDEX evidence_eids_gin
+  ON heatmap_cell_evidence USING GIN (e_ids);
+
+-- "Which surfaces cite this evidence item?" — index-backed containment
+SELECT subcap_id FROM heatmap_cell_evidence
+ WHERE run_id = :run AND e_ids @> ARRAY['E-CC-014'];
+
+-- "Do these jurisdictions overlap?" — the identity gate, index-backed
+SELECT 1 FROM entities
+ WHERE id = :entity AND jurisdictions && ARRAY['Utah','Idaho'];
+```
+
+Where an array is the wrong answer
+Evidence-to-cell linkage is not an array. It is many-to-many, carries its own attribute (link_basis), is queried from both directions, and is scoped per run — so it is a link table with a composite primary key. An array would make "which cells does this item support" a scan and would have nowhere to record why the link exists.
+
+## JSONB
+
+Used where the shape is governed by the payload contract rather than by the schema, and where the whole object is read at once.
+
+Column | Holds | Indexed
+
+submissions.payload | The full page payload as submitted | no — read by primary key
+
+submission_verdicts.reasons | Gate id, section, path, message, severity | GIN jsonb_path_ops
+
+<serving>.r_layer | Hypothesis, counter, probes, verdict | expression index on verdict
+
+<serving>.empty_state | Kind, reason, sources searched | expression index on kind
+
+overview_scores.pillars | Four objects with score, peer, basis | no — always read whole
+
+gate_results.detail | The measurement behind a gate | no
+
+```
+-- jsonb_path_ops is ~3x smaller than the default opclass and supports @>,
+-- which is the only operator the verdict queries use.
+CREATE INDEX verdict_reasons_gin
+  ON submission_verdicts USING GIN (reasons jsonb_path_ops);
+
+-- "Every submission that failed on grain" — corpus gate input
+SELECT submission_id FROM submission_verdicts
+ WHERE reasons @> '[{"gate_id":"CG-01"}]';
+
+-- Expression indexes for the two fields that ARE filtered on
+CREATE INDEX serving_rlayer_verdict
+  ON heatmap_cell_evidence ((r_layer->>'verdict'))
+  WHERE r_layer IS NOT NULL;
+
+CREATE INDEX serving_empty_kind
+  ON overview_leadership ((empty_state->>'kind'))
+  WHERE empty_state IS NOT NULL;
+```
+
+Why staging is JSONB and serving is typed columns. Staging holds the payload exactly as submitted, because it is the audit record and the input to a re-promotion — typing it would mean a contract change breaks the ability to re-promote old work. Serving is queried per surface and benefits from typed columns, check constraints and generated columns. The same data, two representations, for two different jobs.
+
+## Stored generated columns
+
+Ten of them. Every one was an application field in an earlier design and every one caused a defect by being writable.
+
+```
+-- STORED, never VIRTUAL. The read path must not recompute; a page
+-- request selects from 12 tables concurrently and a virtual column
+-- would evaluate on every row of every one.
+
+age_months     GENERATED ALWAYS AS (
+                 CASE WHEN published_date IS NULL THEN NULL
+                      ELSE (EXTRACT(YEAR  FROM age(reference_date, published_date))*12
+                          + EXTRACT(MONTH FROM age(reference_date, published_date)))::int
+                 END) STORED
+
+recency_band   GENERATED ALWAYS AS (
+                 CASE WHEN age_months IS NULL THEN 'UNVERIFIED'
+                      WHEN age_months <= 12   THEN 'CURRENT'
+                      WHEN age_months <= 24   THEN 'RECENT'
+                      WHEN age_months <= 36   THEN 'DATED'
+                      WHEN age_months <= 48   THEN 'STALE'
+                      ELSE 'ARCHIVAL' END::recency_t) STORED
+
+content_hash   GENERATED ALWAYS AS (
+                 encode(digest(coalesce(source_url,'') || '|' ||
+                               coalesce(claim_type::text,'') || '|' ||
+                               lower(left(regexp_replace(excerpt,'\s+',' ','g'),500)),
+                        'sha256'),'hex')) STORED
+```
+
+The hash normalises whitespace and case and truncates at 500 characters before digesting, so the same source registered from six surfaces with different surrounding whitespace produces one row. That normalisation is the dedup policy, and putting it in the column definition means there is exactly one implementation of it.
+
+## Partitioning — not yet, and the trigger for when
+
+At corpus scale the largest table is cell evidence: roughly 800 cells × 6 to 8 promoted generations × a few hundred entities, which is low millions of rows. That is comfortably inside what a well-indexed unpartitioned table serves, and premature partitioning would cost more in planning time and operational complexity than it returns.
+
+Table | Partition when | Strategy
+
+heatmap_cell_evidence | > 50M rows | RANGE (promoted_at) monthly. Reads are almost always for the active run, so recent partitions stay hot
+
+evidence_index | > 20M rows | HASH (entity_id), 16 ways. Every query is entity-scoped, so hash gives even distribution with full partition pruning
+
+submission_verdicts | Retention exceeds 24 months | RANGE (evaluated_at) quarterly, with old partitions detached to cold storage rather than dropped
+
+audit_log | > 100M rows | RANGE (occurred_at) monthly, detach-and-archive
+
+The constraint partitioning must not break
+The partial unique index enforcing one active run per entity, and the one enforcing one live submission per page, must both survive. A partitioned table can only enforce uniqueness when the partition key is part of the key — so neither runs nor submissions is a partitioning candidate, whatever their size.
+
+## Index inventory, by access path
+
+Index | Type | Serves
+
+entities (display_id) | btree, unique | Every page request resolves the slug first
+
+entities USING GIN (legal_name gin_trgm_ops) | GIN trigram | Entity resolution — fuzzy name match against suffix variants
+
+runs (entity_id) WHERE is_active | btree, partial unique | The active-run lookup, and the invariant
+
+runs (entity_id, run_seq DESC) | btree | Run history, newest first
+
+<serving> (run_id) × 33 | btree | The hot path — every page query selects by run
+
+subcap_scores (run_id, subcap_id) | btree, unique | Grain resolution and the cell lookup
+
+subcap_scores (run_id, category_id) | btree | Heatmap grain transitions
+
+evidence_subcap_links (subcap_id, run_id) | btree | The synthesis drawer's evidence list
+
+evidence_index (entity_id, content_hash) | btree, unique | Registration dedup, entity-scoped
+
+evidence_index (source_domain) | btree | Identity check, and the age tracker
+
+heatmap_alerts (entity_id, status, created_at DESC) | btree | Cursor pagination on the corpus queue
+
+<serving> (e_ids) | GIN array | Impact analysis — which surfaces cite an item
+
+submission_verdicts (reasons jsonb_path_ops) | GIN | Corpus gate scanning
+
+bundle_embeddings USING hnsw (embedding vector_cosine_ops) | HNSW | The V4 grounding check
+
+## Rollups: a materialised view, refreshed on promote
+
+The directory and the command centre aggregate across every entity. Computing that per request means a full scan of the score tables on a page an AE opens first thing in the morning.
+
+```
+CREATE MATERIALIZED VIEW corpus_rollup AS
+SELECT e.id AS entity_id, e.display_id, e.sub_vertical, e.size_tier,
+       r.id AS run_id, r.composite, r.scored_cells, r.promoted_at,
+       (SELECT count(*) FROM heatmap_alerts a
+         WHERE a.run_id = r.id AND a.status = 'OPEN')       AS open_alerts,
+       (SELECT count(*) FROM insight_cards i
+         WHERE i.run_id = r.id)                              AS insight_count
+  FROM entities e JOIN runs r ON r.entity_id = e.id AND r.is_active
+ WHERE e.status = 'ACTIVE';
+
+CREATE UNIQUE INDEX corpus_rollup_pk ON corpus_rollup (entity_id);
+
+-- REFRESH CONCURRENTLY needs that unique index, and does not block readers.
+-- Called at the END of the promote transaction, after COMMIT — never inside
+-- it, because CONCURRENTLY cannot run in a transaction block.
+REFRESH MATERIALIZED VIEW CONCURRENTLY corpus_rollup;
+```
+
+This is the one place a count and its rows can drift. The directory header and the directory rows must come from this one view, not from the view for one and a live query for the other. Two queries disagreeing by thousands is exactly the defect this consolidates away.
+
+Section 18
+
+# The vector tier
+
+One job: the V4 grounding check at submit. Text can satisfy every identifier check — cited ids that exist, belong to this entity and appear in the bundle — and still say something the sources do not support. V4 asks whether the output is about the bundle at all.
+
+This is the one place the no-model rule bends, and it bends narrowly
+The invariant is that the app never calls a model at request time. The embedding tier runs inside the connector at submit, which is build time, on a local deterministic sentence-embedding model with no generative capability and no network call. The serving path never touches it. A reader who sees pgvector in the schema and concludes the invariant is broken has read it correctly and drawn the wrong conclusion — which is why this section exists rather than a footnote.
+
+## Model and dimensions
+
+Decision | Value | Why
+
+Model class | Local sentence-embedding, 384 dimensions | A small bi-encoder of the MiniLM or BGE-small class. Runs on CPU in the MCP container; no external dependency, no per-call cost, deterministic output
+
+Normalisation | L2, at write | Cosine similarity becomes a dot product, and the index does not have to normalise on every probe
+
+Distance operator | vector_cosine_ops | Magnitude carries no meaning in a normalised embedding; only direction does
+
+Model pinning | embedding_model on every row, width enforced by a vector_dims check | Re-embedding with a different model invalidates every stored comparison. A mixed-model index returns nonsense silently
+
+Chunking | Sentence-window, 60–120 tokens, 20% overlap | An evidence excerpt is already the right size. Report sections are chunked so a paragraph-level claim matches a paragraph-level chunk
+
+## Schema
+
+```
+CREATE TABLE bundle_embeddings (
+  id              BIGSERIAL PRIMARY KEY,
+  run_id          UUID        NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+  scope_kind      scope_t     NOT NULL,   -- cell | category | pillar | run
+  scope_id        TEXT,                   -- P4C1.2.1 | P4C1 | P4 | NULL
+  source_kind     TEXT        NOT NULL,   -- evidence | report_section | score_rationale
+  source_ref      TEXT        NOT NULL,   -- e_id, section id — traceability
+  chunk_index     SMALLINT    NOT NULL,
+  content         TEXT        NOT NULL,   -- kept, so a flag can quote what it matched
+  embedding       vector(384) NOT NULL,
+  embedding_model TEXT        NOT NULL,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE bundle_centroids (
+  run_id      UUID    NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+  scope_kind  scope_t NOT NULL,
+  scope_id    TEXT,
+  centroid    vector(384) NOT NULL,   -- mean of normalised members, renormalised
+  member_n    INTEGER NOT NULL,
+  threshold   REAL    NOT NULL,       -- per scope; see below
+  PRIMARY KEY (run_id, scope_kind, scope_id)
+);
+
+-- HNSW, not IVFFlat. IVFFlat needs a training pass over a representative
+-- sample and degrades as rows are inserted after training — and this table
+-- grows one run at a time, for ever. HNSW is incremental and needs no
+-- training, at the cost of a larger index and slower build.
+CREATE INDEX bundle_emb_hnsw ON bundle_embeddings
+  USING hnsw (embedding vector_cosine_ops)
+  WITH (m = 16, ef_construction = 64);
+
+-- Every probe is run-scoped, so this filter runs first and the ANN search
+-- happens over a few thousand rows rather than the whole corpus.
+CREATE INDEX bundle_emb_run ON bundle_embeddings (run_id, scope_kind, scope_id);
+```
+
+Parameter | Value | Trade-off
+
+m | 16 | Graph connectivity. Higher recall, larger index. 16 is the sensible default for a few hundred thousand vectors
+
+ef_construction | 64 | Build-time search breadth. Higher is a better graph and a slower insert; the index is created once at migration and the graph grows incrementally as each run's vectors are inserted at ingest
+
+hnsw.ef_search | 40, at query time | Query breadth. Raised to 100 for the flagged-field attribution query, where recall matters more than latency
+
+## Centroids are scoped, not global
+
+A single whole-run centroid is too diffuse to be useful: an assessment corpus spans regulatory filings, technology detail and executive commentary, and their mean points at nothing in particular. Every claim is therefore checked against the narrowest centroid that applies.
+
+Scope | Built from | Threshold | Checks
+
+cell | Evidence linked to that sub-capability | 0.62 | A cell synthesis, which should be tightly about its own evidence
+
+category | All cells in the category, plus report text tagged to it | 0.58 | Focus areas, cell-group claims
+
+pillar | All categories in the pillar, plus the pillar deep-dive | 0.55 | Platform claims, pillar-level findings
+
+run | Everything in the bundle | 0.50 | The executive summary, the framing sentence — legitimately synthetic
+
+The thresholds tighten as the scope narrows, because a claim about one cell has less licence to roam than a document-level summary. They are calibrated against the corpus and move like any other gate ceiling: only upward for tightening, and never loosened to make a submission pass.
+
+## The check
+
+```
+for each prose field in the submitted payload:
+    text   = strip_markup(field.value)
+    if len(text) < 40:  continue          # too short to be meaningful
+
+    e      = normalise(embed(text))
+    scope  = narrowest_scope_for(field)    # cell < category < pillar < run
+    c      = centroid[run_id, scope]
+
+    sim    = 1 - (e <=> c.centroid)        # pgvector cosine distance operator
+
+    if sim < c.threshold:
+        # Attribution: what IS this text closest to? A bare number is not
+        # actionable; the three nearest chunks tell the agent what it drifted
+        # toward and whether the drift is real.
+        neighbours = top_k(3, run_id, scope, e)
+        flag(gate="V4", path=field.path, similarity=sim,
+             threshold=c.threshold, nearest=neighbours)
+```
+
+```
+-- The attribution query. <=> is cosine distance; ORDER BY on it uses HNSW.
+SET LOCAL hnsw.ef_search = 100;
+SELECT source_kind, source_ref, left(content, 240) AS snippet,
+       1 - (embedding <=> :q) AS similarity
+  FROM bundle_embeddings
+ WHERE run_id = :run AND scope_kind = :scope
+   AND (scope_id = :scope_id OR :scope_id IS NULL)
+ ORDER BY embedding <=> :q
+ LIMIT 3;
+```
+
+The attribution is what makes the verdict repairable. "V4 similarity 0.41 against a threshold of 0.62" tells an agent it failed. "…and the nearest three chunks are a vendor case study, a job posting and an unrelated pillar section" tells it why — the claim drifted onto material that does not support it, and the fix is to find grounding or drop the claim.
+
+## Abstention
+
+V4 is an extra guard, never a fail-closed on a missing model. If the embedding tier is unavailable, if the run has no centroid for the applicable scope, or if the centroid has fewer than five members, the check abstains and records that it abstained.
+
+An abstention is recorded, not silent
+A gate that reports pass because it did not run is worse than one that reports fail. V4 abstention writes a NOT_RUN result with its reason, exactly like any other gate, and that surfaces on the Health dashboard.
+
+## Lifecycle
+
+When | What happens
+
+At ingest | The bundle is chunked and embedded; centroids are computed per scope. Roughly 3,000–6,000 vectors per run, a few minutes on CPU, entirely inside the worker
+
+At submit | Each prose field is embedded and compared. Tens of embeddings per page, sub-second
+
+At promote | Nothing. Embeddings are not promoted and the serving tier holds no vectors
+
+On supersede | Retained. A rerun's V4 can compare against the prior run's centroid to detect a claim that survived only because the corpus moved
+
+On model change | Every affected run is re-embedded, or is pinned to the old model. Never mixed — a mixed-model index returns plausible nonsense
+
+## Cost and scale
+
+Quantity | Estimate | Note
+
+Vectors per run | 3,000–6,000 | Evidence chunks dominate
+
+Storage per run | ~9–18 MB | 384 dims × 4 bytes = 1.5 KB per vector, plus content and index
+
+Corpus at 300 entities × 4 runs | ~4–7 M vectors, 10–20 GB | Comfortable for pgvector with HNSW; no separate vector database earns its operational cost at this scale
+
+Index build | Minutes per run, at ingest | Off the critical path
+
+Query latency | Single-digit ms | Run-scoped filter before the ANN probe
+
+Why pgvector rather than a dedicated vector database. Every query is run-scoped and joins back to relational rows — the evidence id, the source reference, the run. A separate store would mean a second system to keep consistent with the ingested tier, a second place a run can be half-deleted, and a network hop on the submit path. The scale does not demand it, and the consistency cost is real. Revisit if the corpus passes roughly 50M vectors or if user-facing semantic search returns — and the second is a product decision, not an infrastructure one.
+
+Section 19
+
+# API contracts
+
+Pagination, caching, idempotency and limits. These are thin in most internal tools and matter here because one surface renders at corpus scale and one write path must tolerate retries.
+
+## Pagination — cursor, never offset
+
+The alerts queue was measured at 1,512 rows and 83,130 pixels. Offset pagination on a table that receives inserts while a user is paging skips and repeats rows, and it degrades linearly because the database must count past the offset.
+
+```
+GET /api/v1/alerts?limit=50&cursor=eyJjIjoiMjAyNi0wOC0wMVQwOTozMDowMFoiLCJpIjo4ODEyfQ
+
+# The cursor is base64 of the sort key — it is opaque to the client but
+# deterministic, and it round-trips the tiebreak so ties cannot repeat.
+{ "c": "2026-08-01T09:30:00Z", "i": 8812 }   # keys abbreviated: c = created_at, i = id
+
+SELECT * FROM heatmap_alerts
+ WHERE entity_id = :e AND status = 'OPEN'
+   AND (created_at, id) < (:cursor_ts, :cursor_id)   -- row comparison
+ ORDER BY created_at DESC, id DESC
+ LIMIT :limit + 1;                                    -- +1 detects has_more
+
+```
+
+Rule | Because
+
+limit is mandatory, default 50, hard maximum 200 | An unbounded list endpoint is a denial of service someone writes by accident
+
+The sort key always includes a unique tiebreak | Two alerts created in the same millisecond otherwise page unstably
+
+Row comparison (a, b) < (x, y), not a < x OR (a = x AND b < y) | The row form uses the composite index; the disjunction does not
+
+A cursor from a different filter set is rejected | Silently reinterpreting it produces a page that belongs to neither query
+
+## Caching
+
+Promoted content is immutable until the next promotion, which makes it unusually cacheable — the entity tag can be derived rather than guessed.
+
+```
+ETag: W/"<run_id>.<promoted_at epoch>.<audience>"
+Cache-Control: private, max-age=0, must-revalidate
+
+# A conditional request costs one index lookup on runs and returns 304
+# without touching a single serving table.
+GET /api/v1/entities/acme/overview
+If-None-Match: W/"7f3a…​.1754212800.internal"
+→ 304 Not Modified
+```
+
+The audience is part of the tag, because the same run serves two different documents and a shared cache keyed only on the run would serve internal content to a customer view. private keeps it out of shared caches entirely; the tag exists for the browser and for the export renderer, which fetches the same page it is about to print.
+
+## Idempotency on the two write paths
+
+Annotations and alert actions are the only writes the API accepts, and both are reachable from a mobile client on a flaky connection where a retry is likely.
+
+```
+POST /api/v1/annotations
+Idempotency-Key: 9f2c1b7e-…
+
+# Stored with the response for 24h. A replay returns the ORIGINAL response,
+# not a second annotation. A replay with the same key and a DIFFERENT body
+# is a 409 — that is a client bug, not a retry.
+CREATE TABLE idempotency_keys (
+  key          UUID PRIMARY KEY,
+  user_id      UUID NOT NULL,
+  request_hash TEXT NOT NULL,
+  status_code  SMALLINT NOT NULL,
+  response     JSONB NOT NULL,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+The connector's write tools need no idempotency key because they are idempotent by construction: registration dedups by content hash, submission supersedes by (run_id, page), and promotion converges on the same state. That is a design property, not an accident, and it is why the agent can retry freely.
+
+## Limits
+
+Limit | Value | Rationale
+
+Page response, uncompressed | soft 8 MB | The heatmap ships every cell with its evidence. Beyond this, the drilldown-never-fetches rule needs revisiting rather than the limit raising
+
+Requests per user | 600/min | Generous — a human cannot exceed it. It exists to catch a client in a render loop
+
+Connector submissions per run | 40 | Roughly six per page. More than that is a session failing to converge, and the verdicts will say why
+
+Evidence registrations per run | 500 | Above the corpus maximum by a wide margin. A run hitting it is registering speculatively
+
+Excerpt length | 50–500 chars | Below 50 is not a quotation; above 500 is reproduction
+
+Payload depth | 8 levels | The redaction walker recurses over it; unbounded nesting is a stack exhaustion vector
+
+## Compression and transfer
+
+Brotli where the client accepts it, gzip otherwise — as FastAPI middleware, because Cloud Run does not compress dynamic responses and neither does the load balancer. The heatmap payload is highly repetitive JSON — identifiers, band words, tier codes — and compresses roughly eight to one, which is what makes shipping the whole cell set on one response affordable. Responses are streamed rather than buffered, so the browser begins parsing the hero before the cell array has finished serialising.
+
+## Errors, and what a client may retry
+
+Status | Meaning | Retry?
+
+304 | Content unchanged | n/a — use the cache
+
+400 | Malformed cursor, unknown audience | No. Fix the request
+
+403 | Role or audience forbidden | No
+
+404 | No entity, or no promoted run | No
+
+409 | Pinned run superseded; idempotency key reused with a different body | No — re-resolve first
+
+429 | Rate limited | Yes, honouring Retry-After
+
+503 | Database unavailable | Yes, with jittered exponential backoff

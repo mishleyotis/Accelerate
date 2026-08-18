@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DMA Insights — QA Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap">
+<style>
+
+/* ─── ZENNIFY TOKEN MAP ──────────────────────────────────────── */
+:root {
+  --z-teal:      #27BBAF;   /* brand teal — headlines, accents     */
+  --z-teal-dark: #185F60;   /* dark teal  — sidebar, dark cards    */
+  --z-teal-mid:  #139F94;   /* accent green — icons, sub-labels    */
+  --z-mint:      #79E2BF;   /* mint — curve, highlight             */
+  --z-ice:       #E8F7F6;   /* ice — card tint, soft bg            */
+  --z-green:     #1C4A4D;   /* dark green — primary body text      */
+  --z-green2:    #1A4D4D;   /* dark teal variant 2                 */
+  --z-lavender:  #F2F4F9;   /* card fill — most common card color  */
+  --z-purple:    #8094C0;   /* eyebrow / caption                   */
+  --z-orange:    #FE9732;   /* accent orange — warnings            */
+  --z-orange-lt: #FFCB99;   /* light orange — Activating level     */
+  --z-gray-bg:   #F5F5F5;   /* light slide background              */
+  --z-gray-sep:  #E5E7EB;   /* separator                           */
+  --z-gray-body: #4A5568;   /* alt body text                       */
+  --z-gray-muted:#6B7280;   /* footnotes, muted                    */
+  --z-white:     #FFFFFF;
+  --z-navy:      #001E48;   /* featured offerings dark             */
+  /* Maturity */
+  --m1: #FFCB99; --m1t: #7C3C00;   /* Activating */
+  --m2: #62D7B8; --m2t: #0D4F3C;   /* Building   */
+  --m3: #27BBAF; --m3t: #FFFFFF;   /* Competing  */
+  --m4: #139F94; --m4t: #FFFFFF;   /* Differentiating */
+  /* Phase colours */
+  --ph0: #735BA1; --ph0-lt: #EDE9FE; --ph0-bd: #C4B5FD;
+  --ph1: #3D81F6; --ph1-lt: #EFF6FF; --ph1-bd: #BFDBFE;
+  --radius: 8px; --radius-lg: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;font-weight:400;font-size:14px;line-height:1.65;background:var(--z-gray-bg);color:var(--z-green);}
+
+/* ─── LAYOUT ─────────────────────────────────────────────────── */
+.shell{display:flex;min-height:100vh;}
+
+/* Sidebar */
+.sb{width:240px;flex-shrink:0;background:var(--z-teal-dark);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.sb-head{padding:20px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo{font-size:13px;font-weight:600;color:var(--z-teal);letter-spacing:.1em;text-transform:uppercase;}
+.sb-doc{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;}
+.sb-ver{font-size:10px;color:rgba(255,255,255,.2);margin-top:2px;font-family:'DM Mono',monospace;}
+.sb-grp{padding:14px 10px 2px;}
+.sb-grp-label{font-size:9px;font-weight:600;color:rgba(255,255,255,.22);letter-spacing:.14em;text-transform:uppercase;padding:0 6px;margin-bottom:4px;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;color:rgba(255,255,255,.48);font-size:12px;font-weight:400;transition:all .13s;}
+.sb-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.82);}
+.sb-item.on{background:rgba(39,187,175,.16);color:var(--z-teal);}
+.sb-item.ph0{color:rgba(196,181,253,.65);}
+.sb-item.ph0:hover{background:rgba(115,91,161,.12);color:#c4b5fd;}
+.sb-item.ph0.on{background:rgba(115,91,161,.2);color:#c4b5fd;}
+.sb-item.ph1{color:rgba(147,197,253,.65);}
+.sb-item.ph1:hover{background:rgba(61,129,246,.12);color:#93c5fd;}
+.sb-item.ph1.on{background:rgba(61,129,246,.2);color:#93c5fd;}
+.sb-tag{font-size:9px;font-family:'DM Mono',monospace;background:rgba(255,255,255,.07);border-radius:3px;padding:1px 5px;min-width:22px;text-align:center;}
+.sb-item.on .sb-tag{background:rgba(39,187,175,.25);color:var(--z-teal);}
+.sb-item.ph0.on .sb-tag{background:rgba(115,91,161,.25);color:#c4b5fd;}
+.sb-item.ph1.on .sb-tag{background:rgba(61,129,246,.25);color:#93c5fd;}
+.sb-foot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.2);}
+
+/* Main */
+.main{flex:1;min-width:0;}
+.topbar{background:var(--z-white);border-bottom:1px solid var(--z-gray-sep);padding:14px 36px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
+.tb-title{font-size:15px;font-weight:600;color:var(--z-green);}
+.tb-meta{font-size:11px;color:var(--z-gray-muted);}
+.content{padding:36px;max-width:980px;}
+.section{display:none;}
+.section.on{display:block;}
+
+/* ─── TYPOGRAPHY ─────────────────────────────────────────────── */
+h1{font-size:26px;font-weight:600;color:var(--z-green);letter-spacing:-.018em;line-height:1.2;margin-bottom:6px;}
+.eyebrow{font-size:11px;font-weight:400;color:var(--z-purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+h2{font-size:17px;font-weight:600;color:var(--z-green);margin:30px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--z-ice);}
+h3{font-size:14px;font-weight:600;color:var(--z-green);margin:20px 0 8px;}
+h4{font-size:13px;font-weight:500;color:var(--z-green2);margin:14px 0 6px;}
+p{color:var(--z-gray-body);line-height:1.75;margin-bottom:10px;}
+.lead{font-size:15px;font-weight:300;color:var(--z-gray-body);line-height:1.85;margin-bottom:22px;max-width:820px;}
+code{font-family:'DM Mono',monospace;font-size:11.5px;background:var(--z-lavender);padding:2px 5px;border-radius:4px;color:var(--z-teal-dark);}
+strong{font-weight:600;color:var(--z-green);}
+hr{border:none;border-top:1px solid var(--z-gray-sep);margin:24px 0;}
+
+/* ─── BADGES ─────────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.03em;white-space:nowrap;}
+.b-teal{background:var(--z-ice);color:var(--z-teal-dark);}
+.b-green{background:#D1FAE5;color:#065F46;}
+.b-amber{background:#FEF3C7;color:#92400E;}
+.b-red{background:#FEE2E2;color:#991B1B;}
+.b-gray{background:var(--z-lavender);color:var(--z-gray-body);}
+.b-navy{background:#E0E7FF;color:var(--z-navy);}
+.b-ph0{background:var(--ph0-lt);color:#5B21B6;}
+.b-ph1{background:var(--ph1-lt);color:#1D4ED8;}
+.b-p0{background:#FEE2E2;color:#991B1B;}
+.b-p1{background:#FFEDD5;color:#C2410C;}
+.b-p2{background:var(--z-lavender);color:var(--z-gray-body);}
+.b-new{background:var(--z-teal);color:var(--z-white);font-size:9px;}
+
+/* ─── CALL-OUT BOXES ─────────────────────────────────────────── */
+.callout{border-radius:var(--radius);padding:13px 16px;margin:12px 0;}
+.callout p{margin:0;font-size:13px;line-height:1.7;}
+.co-teal{background:var(--z-ice);border-left:3px solid var(--z-teal);}
+.co-teal p{color:var(--z-teal-dark);}
+.co-orange{background:#FFF7ED;border-left:3px solid var(--z-orange);}
+.co-orange p{color:#7C2D12;}
+.co-dark{background:var(--z-teal-dark);border-left:3px solid var(--z-mint);}
+.co-dark .co-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--z-mint);margin-bottom:5px;}
+.co-dark p{color:rgba(255,255,255,.78);}
+.co-ph0{background:var(--ph0-lt);border-left:3px solid var(--ph0);}
+.co-ph0 p{color:#4C1D95;}
+.co-ph1{background:var(--ph1-lt);border-left:3px solid var(--ph1);}
+.co-ph1 p{color:#1E3A8A;}
+
+/* ─── CARDS ─────────────────────────────────────────────────── */
+.card{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:12px;}
+.card-lav{background:var(--z-lavender);border:none;}
+.card-ice{background:var(--z-ice);border:none;}
+.card-dark{background:var(--z-teal-dark);border:none;color:var(--z-white);}
+.card-title{font-size:14px;font-weight:600;color:var(--z-green);}
+.card-dark .card-title{color:var(--z-white);}
+.card-sub{font-size:12px;color:var(--z-gray-muted);margin-top:2px;}
+.card-dark .card-sub{color:rgba(255,255,255,.45);}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+
+/* ─── GRIDS ─────────────────────────────────────────────────── */
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.g-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;}
+
+/* ─── PHASE BANNER ───────────────────────────────────────────── */
+.phase-banner{display:flex;gap:0;border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:18px 0;}
+.pb-col{flex:1;padding:18px 16px;}
+.pb-0{background:linear-gradient(135deg,rgba(115,91,161,.07),rgba(115,91,161,.03));}
+.pb-1{background:linear-gradient(135deg,rgba(61,129,246,.07),rgba(61,129,246,.03));}
+.pb-div{width:1px;background:var(--z-gray-sep);}
+.pb-eye{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.pb-0 .pb-eye{color:var(--ph0);}
+.pb-1 .pb-eye{color:var(--ph1);}
+.pb-h{font-size:14px;font-weight:600;color:var(--z-green);margin-bottom:5px;}
+.pb-desc{font-size:12px;color:var(--z-gray-body);line-height:1.7;margin-bottom:10px;}
+.pb-li{font-size:12px;color:var(--z-gray-body);line-height:1.8;list-style:none;}
+.pb-li li{display:flex;gap:6px;align-items:flex-start;}
+.pb-0 .pb-li li::before{content:'→';color:var(--ph0);font-weight:600;flex-shrink:0;}
+.pb-1 .pb-li li::before{content:'→';color:var(--ph1);font-weight:600;flex-shrink:0;}
+
+/* ─── FEATURE TABLE ──────────────────────────────────────────── */
+.ft{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+.ft th{background:var(--z-teal-dark);color:rgba(255,255,255,.82);padding:8px 11px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.ft th:first-child{border-radius:6px 0 0 6px;}
+.ft th:last-child{border-radius:0 6px 6px 0;}
+.ft td{padding:9px 11px;border-bottom:1px solid var(--z-lavender);vertical-align:top;}
+.ft tr:last-child td{border-bottom:none;}
+.ft tr:hover td{background:#FAFBFD;}
+.ft .fn{font-weight:600;color:var(--z-green);margin-bottom:2px;}
+.ft .fd{font-size:11px;color:var(--z-gray-muted);}
+
+/* ─── FLOW ───────────────────────────────────────────────────── */
+.flow{display:flex;flex-direction:column;}
+.f-row{display:flex;gap:13px;}
+.f-spine{display:flex;flex-direction:column;align-items:center;}
+.f-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.f-dot-teal{background:var(--z-teal);color:var(--z-white);}
+.f-dot-0{background:var(--ph0);color:var(--z-white);}
+.f-dot-1{background:var(--ph1);color:var(--z-white);}
+.f-line{flex:1;width:2px;min-height:12px;}
+.f-line-teal{background:var(--z-ice);}
+.f-line-0{background:var(--ph0-lt);}
+.f-line-1{background:var(--ph1-lt);}
+.f-body{flex:1;padding-bottom:16px;}
+.f-title{font-size:13px;font-weight:600;color:var(--z-green);margin-bottom:3px;}
+.f-desc{font-size:12px;color:var(--z-gray-muted);line-height:1.7;}
+.f-sub{background:var(--z-lavender);border-radius:var(--radius);padding:9px 12px;margin-top:7px;}
+.f-sub p{font-size:11px;color:var(--z-gray-body);margin:0;line-height:1.65;}
+
+/* ─── PERSONA CARDS ──────────────────────────────────────────── */
+.personas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0;}
+.persona{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);padding:16px;}
+.p-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;margin-bottom:10px;}
+.p-name{font-size:13px;font-weight:600;color:var(--z-green);}
+.p-role{font-size:11px;color:var(--z-gray-muted);margin-bottom:8px;}
+.p-desc{font-size:12px;color:var(--z-gray-body);line-height:1.7;}
+.p-missions{margin-top:10px;padding-top:10px;border-top:1px solid var(--z-lavender);}
+.p-m{font-size:11px;color:var(--z-gray-muted);padding:2px 0;display:flex;gap:6px;align-items:flex-start;}
+.p-m::before{content:'→';color:var(--z-teal);font-weight:700;flex-shrink:0;}
+
+/* ─── DASHBOARD BLOCKS ───────────────────────────────────────── */
+.db{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:16px 0;}
+.db-head{background:var(--z-teal-dark);padding:14px 18px;display:flex;align-items:center;gap:12px;}
+.db-num{width:28px;height:28px;border-radius:8px;background:rgba(39,187,175,.25);color:var(--z-teal);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.db-info{flex:1;}
+.db-title{font-size:14px;font-weight:600;color:var(--z-white);}
+.db-sub{font-size:11px;color:rgba(255,255,255,.38);margin-top:1px;}
+.db-body{padding:18px;}
+.db-desc{font-size:13px;color:var(--z-gray-body);margin-bottom:14px;line-height:1.75;}
+.db-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.db-feat{background:var(--z-lavender);border-radius:var(--radius);padding:10px 12px;}
+.db-ft{font-size:12px;font-weight:600;color:var(--z-green);margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+.db-fd{font-size:11px;color:var(--z-gray-muted);line-height:1.6;}
+
+/* ─── TABLES ─────────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+.tbl th{background:var(--z-teal-dark);color:rgba(255,255,255,.8);padding:8px 11px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.tbl th:first-child{border-radius:6px 0 0 6px;}
+.tbl th:last-child{border-radius:0 6px 6px 0;}
+.tbl td{padding:8px 11px;border-bottom:1px solid var(--z-lavender);vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#fafbfd;}
+.tk{color:var(--z-teal-mid);font-weight:600;font-family:'DM Mono',monospace;}
+.tv{color:var(--z-gray-body);}
+
+/* ─── CODE BLOCK ─────────────────────────────────────────────── */
+.code{background:var(--z-teal-dark);border-radius:var(--radius);padding:14px 16px;font-family:'DM Mono',monospace;font-size:11.5px;color:#e2e8f0;overflow-x:auto;margin:10px 0;line-height:1.75;}
+.code .kw{color:#60a5fa;}
+.code .str{color:#6ee7b7;}
+.code .cmt{color:#475569;}
+.code .key{color:#f0abfc;}
+.code .num{color:#fbbf24;}
+
+/* ─── HEATMAP DEMO ───────────────────────────────────────────── */
+.hm-wrap{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:10px 0;}
+.hm-bar{background:var(--z-lavender);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--z-gray-muted);border-bottom:1px solid var(--z-gray-sep);}
+.hm-grid{padding:12px;display:grid;grid-template-columns:88px repeat(8,1fr);gap:3px;}
+.hm-c{height:22px;border-radius:3px;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;}
+.hm-c:hover{transform:scale(1.1);z-index:1;}
+.hm-label{font-size:10px;color:var(--z-gray-muted);text-align:right;padding-right:8px;display:flex;align-items:center;justify-content:flex-end;}
+.hm-ch{font-size:9px;color:var(--z-gray-muted);text-align:center;display:flex;align-items:flex-end;justify-content:center;height:22px;}
+.m1s{background:#FFCB99;color:#7C3C00;}
+.m2s{background:#B0EDD3;color:#0D4F3C;}
+.m3s{background:#27BBAF;color:#fff;}
+.m4s{background:#139F94;color:#fff;}
+.m5s{background:#185F60;color:#fff;}
+.thin{outline:2px dashed #C25008;outline-offset:1px;}
+
+/* ─── MATURITY PILLS ─────────────────────────────────────────── */
+.m-legend{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;}
+.m-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+
+/* ─── ARTIFACT CARDS ─────────────────────────────────────────── */
+.art-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+.art{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;}
+.art-head{padding:9px 13px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+.art-body{padding:10px 13px;}
+.art-row{display:grid;grid-template-columns:88px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid var(--z-lavender);font-size:11px;}
+.art-row:last-child{border-bottom:none;}
+.art-k{color:var(--z-gray-muted);}
+.art-v{color:var(--z-gray-body);}
+.ah-doc{background:var(--z-ice);color:var(--z-teal-dark);}
+.ah-xlsx{background:#D1FAE5;color:#065F46;}
+.ah-json{background:#FEF3C7;color:#92400E;}
+.ah-zip{background:var(--ph0-lt);color:#5B21B6;}
+
+/* ─── DEDUP ──────────────────────────────────────────────────── */
+.dd-group{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);margin:10px 0;overflow:hidden;}
+.dd-head{background:var(--z-lavender);padding:8px 13px;font-size:12px;font-weight:600;color:var(--z-green);display:flex;align-items:center;gap:8px;}
+.dd-file{display:flex;align-items:center;gap:10px;padding:8px 13px;border-top:1px solid var(--z-lavender);font-size:12px;}
+.dd-name{flex:1;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--z-gray-body);}
+.dd-date{font-size:10px;color:var(--z-gray-muted);}
+.win{background:#F0FDF4;}
+.win .dd-name{color:var(--z-green);font-weight:500;}
+.lose .dd-name{text-decoration:line-through;color:var(--z-gray-muted);}
+
+/* ─── API ENDPOINTS ──────────────────────────────────────────── */
+.ep{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius);margin-bottom:6px;}
+.method{font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 6px;border-radius:3px;font-family:'DM Mono',monospace;flex-shrink:0;}
+.mget{background:#DBEAFE;color:#1E40AF;}
+.mpost{background:#D1FAE5;color:#065F46;}
+.mput{background:#FFEDD5;color:#C2410C;}
+.ep-path{font-family:'DM Mono',monospace;font-size:12px;color:var(--z-green);font-weight:500;}
+.ep-desc{font-size:11px;color:var(--z-gray-muted);margin-top:1px;}
+
+/* ─── CHECKLIST ──────────────────────────────────────────────── */
+.chk{list-style:none;font-size:13px;}
+.chk li{padding:4px 0;display:flex;gap:8px;align-items:flex-start;}
+.chk li::before{content:'✓';color:var(--z-teal);font-weight:700;flex-shrink:0;margin-top:1px;}
+.chk-x li::before{content:'✗';color:#DC2626;}
+
+/* ─── PLATFORM CHIPS ─────────────────────────────────────────── */
+.plat{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;border:1px solid;}
+.pl-sf{background:#E0F4FC;color:#005C82;border-color:#B8E4F5;}
+.pl-db{background:#FFF0EE;color:#9B1A08;border-color:#FFD0C9;}
+.pl-tbl{background:#FFF3E8;color:#7A3C00;border-color:#FFD9B0;}
+.pl-tw{background:#FFEEF0;color:#8B0012;border-color:#FFCCD1;}
+.pl-nc{background:#E8EEF8;color:#1B5298;border-color:#C5D4EE;}
+
+/* ─── STAT CARDS ─────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+.stat{background:var(--z-lavender);border-radius:var(--radius-lg);padding:16px 14px;}
+.stat-num{font-size:28px;font-weight:600;color:var(--z-teal);line-height:1;}
+.stat-label{font-size:12px;font-weight:500;color:var(--z-green);margin-top:4px;}
+.stat-desc{font-size:11px;color:var(--z-gray-muted);margin-top:4px;line-height:1.5;}
+
+/* ─── INSIGHT CARD DEMO ──────────────────────────────────────── */
+.ic{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:10px 0;}
+.ic-head{background:var(--z-teal-dark);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.ic-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--z-teal);}
+.ic-body{padding:0;}
+.ic-row{display:grid;grid-template-columns:72px 1fr;gap:10px;padding:9px 14px;border-bottom:1px solid var(--z-lavender);}
+.ic-row:last-child{border-bottom:none;}
+.ic-label{font-size:9px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--z-gray-muted);padding-top:2px;}
+.ic-text{font-size:12px;color:var(--z-gray-body);line-height:1.65;}
+
+/* SCOPE TABLE */
+.scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0;}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────── */
+@media(max-width:768px){.sb{display:none;}.personas,.stats,.g3{grid-template-columns:1fr;}.g2,.db-grid,.art-grid,.scope-grid{grid-template-columns:1fr;}.phase-banner{flex-direction:column;}}
+
+
+/* ─── v4.0 ADDITIONS ─────────────────────────────────────────── */
+.b-mcp{background:#EDE9FE;color:#5B21B6;}
+.b-gate{background:#E0F2FE;color:#075985;}
+.b-serv{background:#D1FAE5;color:#065F46;}
+.b-stage{background:#FEF3C7;color:#92400E;}
+.b-ing{background:#E0E7FF;color:#3730A3;}
+.b-none{background:var(--z-lavender);color:var(--z-gray-muted);font-style:italic;}
+.b-mono{font-family:'DM Mono',monospace;font-weight:500;letter-spacing:0;}
+
+
+/* Decision register */
+.dec{border:1px solid var(--z-gray-sep);border-left:3px solid var(--z-purple);
+  border-radius:var(--radius);padding:13px 16px;margin:10px 0;background:var(--z-white);}
+.dec-h{display:flex;align-items:center;gap:9px;margin-bottom:6px;flex-wrap:wrap;}
+.dec-id{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--z-purple);}
+.dec-t{font-size:13px;font-weight:600;color:var(--z-green);}
+.dec-b{font-size:12px;color:var(--z-gray-body);line-height:1.7;}
+.dec-b p{font-size:12px;margin:0 0 6px;}
+.dec-b p:last-child{margin-bottom:0;}
+.dec-why{background:var(--z-lavender);border-radius:6px;padding:8px 11px;margin-top:8px;
+  font-size:11px;color:var(--z-gray-body);line-height:1.65;}
+.dec-why b{color:var(--z-green);}
+
+/* Boundary / invariant rules — the hard statements */
+.rule{background:var(--z-teal-dark);border-radius:var(--radius);padding:12px 16px;margin:12px 0;}
+.rule p{color:#fff;font-size:12.5px;font-weight:500;margin:0;line-height:1.7;}
+.rule .rule-lbl{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--z-mint);margin-bottom:5px;}
+
+/* Tier ladder */
+.tier-row{display:grid;grid-template-columns:44px 1fr 62px 60px;gap:10px;align-items:center;
+  padding:7px 11px;border-bottom:1px solid var(--z-lavender);font-size:11.5px;}
+.tier-row:last-child{border-bottom:none;}
+.tier-n{font-family:'DM Mono',monospace;font-weight:600;font-size:11px;padding:3px 0;
+  text-align:center;border-radius:4px;}
+.t1{background:#065F46;color:#fff;} .t2{background:#059669;color:#fff;}
+.t3{background:#27BBAF;color:#fff;} .t4{background:#FE9732;color:#7C3C00;}
+.t5{background:#FEE2E2;color:#991B1B;}
+.tier-w{font-family:'DM Mono',monospace;color:var(--z-gray-muted);text-align:right;}
+.tier-c{font-family:'DM Mono',monospace;color:var(--z-teal-mid);font-weight:600;text-align:right;}
+
+/* Gate family cards */
+.gfam{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0;}
+.gf{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;}
+.gf-h{padding:9px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.gf-p{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;}
+.gf-b{padding:11px 13px;font-size:11.5px;color:var(--z-gray-body);line-height:1.65;}
+.gf-b .gf-k{color:var(--z-gray-muted);font-size:10px;letter-spacing:.06em;
+  text-transform:uppercase;display:block;margin-top:7px;margin-bottom:2px;}
+.gf-ag .gf-h{background:var(--z-ice);color:var(--z-teal-dark);}
+.gf-sg .gf-h{background:#FFF7ED;color:#7C2D12;}
+.gf-et .gf-h{background:var(--ph0-lt);color:#5B21B6;}
+.gf-cg .gf-h{background:var(--ph1-lt);color:#1D4ED8;}
+
+/* MCP tool cards */
+.tool{display:grid;grid-template-columns:190px 1fr;gap:12px;padding:9px 12px;
+  border:1px solid var(--z-gray-sep);border-radius:var(--radius);margin-bottom:6px;
+  background:var(--z-white);}
+.tool-n{font-family:'DM Mono',monospace;font-size:11.5px;font-weight:600;color:var(--z-teal-dark);}
+.tool-g{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--z-gray-muted);
+  margin-top:2px;}
+.tool-d{font-size:11.5px;color:var(--z-gray-body);line-height:1.65;}
+
+/* Pipeline / lifecycle strip */
+.pipe{display:flex;align-items:stretch;gap:0;margin:14px 0;border:1px solid var(--z-gray-sep);
+  border-radius:var(--radius-lg);overflow:hidden;}
+.pipe-s{flex:1;padding:12px 13px;border-right:1px solid var(--z-gray-sep);}
+.pipe-s:last-child{border-right:none;}
+.pipe-n{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--z-purple);margin-bottom:4px;}
+.pipe-t{font-size:12px;font-weight:600;color:var(--z-green);margin-bottom:3px;}
+.pipe-d{font-size:10.5px;color:var(--z-gray-muted);line-height:1.6;}
+.pipe-s.hot{background:var(--z-ice);}
+.pipe-s.cold{background:var(--z-lavender);}
+
+/* Schema column rows (backend schema doc) */
+.schema{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);
+  overflow:hidden;margin:12px 0;}
+.sch-h{background:var(--z-teal-dark);padding:9px 14px;display:flex;align-items:center;
+  justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.sch-n{font-family:'DM Mono',monospace;font-size:12.5px;font-weight:600;color:var(--z-teal);}
+.sch-s{font-size:10.5px;color:rgba(255,255,255,.45);}
+.sch-b{padding:2px 0;}
+.col{display:grid;grid-template-columns:210px 128px 58px 1fr;gap:9px;padding:6px 14px;
+  border-bottom:1px solid var(--z-lavender);font-size:11px;align-items:baseline;}
+.col:last-child{border-bottom:none;}
+.col-name{font-family:'DM Mono',monospace;font-weight:500;color:var(--z-green);}
+.col-type{font-family:'DM Mono',monospace;font-size:10px;color:var(--z-teal-mid);}
+.col-pk{font-size:8.5px;font-weight:700;letter-spacing:.05em;color:var(--z-purple);}
+.col-desc{color:var(--z-gray-muted);line-height:1.6;font-size:10.5px;}
+
+/* Count reconciliation */
+.count{display:grid;grid-template-columns:1fr 66px;gap:8px;padding:6px 12px;
+  border-bottom:1px solid var(--z-lavender);font-size:11.5px;}
+.count:last-of-type{border-bottom:2px solid var(--z-teal);}
+.count-v{font-family:'DM Mono',monospace;font-weight:600;color:var(--z-green);text-align:right;}
+.count-tot{display:grid;grid-template-columns:1fr 66px;gap:8px;padding:8px 12px;
+  font-size:12px;font-weight:600;color:var(--z-green);}
+.count-tot .count-v{color:var(--z-teal-mid);}
+
+/* Step cards (implementation plan) */
+.step{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);margin:12px 0;
+  overflow:hidden;}
+.step-h{background:var(--z-lavender);padding:10px 14px;display:flex;align-items:center;
+  gap:10px;flex-wrap:wrap;}
+.step-id{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--z-teal-dark);
+  background:var(--z-white);border-radius:4px;padding:2px 7px;}
+.step-t{font-size:13px;font-weight:600;color:var(--z-green);flex:1;}
+.step-b{padding:13px 15px;}
+.step-b p{font-size:12px;}
+.deliv{list-style:none;font-size:11.5px;margin:8px 0;}
+.deliv li{padding:3px 0;display:flex;gap:7px;align-items:flex-start;color:var(--z-gray-body);
+  line-height:1.6;}
+.deliv li::before{content:'▸';color:var(--z-teal);font-weight:700;flex-shrink:0;}
+
+/* Dependency / ordering note */
+.dep{font-size:10.5px;color:var(--z-gray-muted);background:var(--z-lavender);
+  border-radius:5px;padding:6px 10px;margin-top:8px;display:inline-block;}
+.dep b{color:var(--z-teal-dark);}
+
+/* Two-column compare */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--z-gray-sep);
+  border-radius:var(--radius-lg);overflow:hidden;margin:12px 0;}
+.cmp-c{padding:14px 16px;}
+.cmp-c:first-child{background:#FFF7ED;border-right:1px solid var(--z-gray-sep);}
+.cmp-c:last-child{background:#F0FDF4;}
+.cmp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:7px;}
+.cmp-c:first-child .cmp-l{color:#C2410C;}
+.cmp-c:last-child .cmp-l{color:#065F46;}
+.cmp-c ul{list-style:none;font-size:11.5px;line-height:1.75;color:var(--z-gray-body);}
+.cmp-c li{padding:2px 0;display:flex;gap:6px;align-items:flex-start;}
+.cmp-c:first-child li::before{content:'✗';color:#DC2626;font-weight:700;flex-shrink:0;}
+.cmp-c:last-child li::before{content:'✓';color:#059669;font-weight:700;flex-shrink:0;}
+
+.tbl td code, .ft td code{font-size:10.5px;padding:1px 4px;}
+.tbl .num, .ft .num{font-family:'DM Mono',monospace;text-align:right;color:var(--z-green);}
+.nowrap{white-space:nowrap;}
+.muted{color:var(--z-gray-muted);}
+.small{font-size:11px;}
+h2 .delta, h3 .delta{vertical-align:middle;margin-left:8px;}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="sb">
+  <div class="sb-head">
+    <div class="sb-logo">Zennify</div>
+    <div class="sb-doc">DMA Insights · QA Report</div>
+    <div class="sb-ver">August 2026</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Report</div>
+    <div class="sb-item on" onclick="go('s01')"><span class="sb-tag">01</span> Method &amp; result</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(196,181,253,.3)">Findings</div>
+    <div class="sb-item ph0" onclick="go('s02')"><span class="sb-tag">02</span> Blocking</div>
+    <div class="sb-item ph0" onclick="go('s03')"><span class="sb-tag">03</span> Material &amp; minor</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(147,197,253,.3)">Prompts</div>
+    <div class="sb-item ph1" onclick="go('s04')"><span class="sb-tag">04</span> Completeness matrix</div>
+    <div class="sb-item ph1" onclick="go('s05')"><span class="sb-tag">05</span> The prompt standard</div>
+    <div class="sb-item ph1" onclick="go('s06')"><span class="sb-tag">06</span> Six prompts reissued</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Close</div>
+    <div class="sb-item" onclick="go('s07')"><span class="sb-tag">07</span> Actions</div>
+  </div>
+  <div class="sb-foot">© 2026 Zennify · Confidential</div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title" id="tb-title">01 — Method &amp; result</div>
+      <div class="tb-meta">DMA Insights · QA Report · documents and prompts</div>
+    </div>
+    <div style="display:flex;gap:7px;align-items:center"><span class="badge b-red">6 blocking</span><span class="badge b-amber">7 material</span><span class="badge b-mcp">37 prompts scored</span></div>
+  </div>
+  <div class="content">
+
+<div id="s01" class="section on">
+
+<div class="eyebrow">Quality assurance</div>
+<h1>QA report</h1>
+<p class="lead">An adversarial pass over the five documents and the 37 synthesis prompts they
+depend on. This is not a review for typos — it looks for the failure modes this product is specifically
+designed against: contradictions between sources, one concept wearing two names, numbers asserted rather
+than computed, and prompts that cannot produce what the surface requires.</p>
+
+<h2>Method</h2>
+<table class="tbl">
+<tr><th style="width:230px">Check</th><th>What it looks for</th></tr>
+<tr><td><strong>Computed-count audit</strong></td><td>Every countable claim in prose traced back to the counts module. A number typed by hand is a number that will drift.</td></tr>
+<tr><td><strong>Terminology drift</strong></td><td>One concept with two names, measured on prose with code identifiers excluded so <code>ccg_catalog_version</code> does not masquerade as a spelling error.</td></tr>
+<tr><td><strong>Concept grounding</strong></td><td>Every named mechanism defined somewhere, and not used exactly once and abandoned.</td></tr>
+<tr><td><strong>Source-spec coverage</strong></td><td>Twenty load-bearing requirements from the two specifications, each traced to at least one document.</td></tr>
+<tr><td><strong>Cross-document contradiction</strong></td><td>The same quantity asserted differently in two places.</td></tr>
+<tr><td><strong>Register integrity</strong></td><td>Every surface in the register present in the source specification, and every spec surface in the register.</td></tr>
+<tr><td><strong>Prompt completeness</strong></td><td>All 37 prompts scored against 14 attributes a synthesis agent needs to produce correctly first time and repair second time.</td></tr>
+<tr><td><strong>Producer-to-render handoff</strong></td><td>Whether the prompt that owns a section actually specifies what the surface renders.</td></tr>
+</table>
+
+<h2>Result</h2>
+<div class="stats">
+  <div class="stat"><div class="stat-num">10</div><div class="stat-label">blocking findings</div>
+    <div class="stat-desc">Contradictions, collisions and one missing protocol.</div></div>
+  <div class="stat"><div class="stat-num">7</div><div class="stat-label">material findings</div>
+    <div class="stat-desc">Gaps that force an agent to guess.</div></div>
+  <div class="stat"><div class="stat-num">6</div><div class="stat-label">stub prompts</div>
+    <div class="stat-desc">Under 700 characters for surfaces that are not simple.</div></div>
+</div>
+
+<div class="rule">
+  <div class="rule-lbl">The headline</div>
+  <p>The documents hold up structurally — counts reconcile, coverage is complete, navigation works. What
+  does not hold up is the <strong>prompt layer</strong>. Prompt quality ranges from 3 of 14 attributes to 14
+  of 14, audience marking appears in 5 prompts of 37, and three surfaces carry vocabularies that
+  contradict either the prototype or each other. A synthesis agent working from the weaker prompts cannot
+  produce what the surface requires.</p>
+</div>
+
+</div>
+<div id="s02" class="section">
+
+<div class="eyebrow">Findings · blocking</div>
+<h1>Ten findings that would produce wrong output</h1>
+
+<div class="dec">
+  <div class="dec-h"><span class="dec-id">B-01</span>
+    <span class="dec-t">The stack layer vocabulary contradicts itself four ways</span>
+    <span class="badge b-red">Blocking</span></div>
+  <div class="dec-b">
+    <p>Four sources, four different layer sets.</p>
+    <table class="tbl">
+    <tr><th style="width:230px">Source</th><th>Layers</th></tr>
+    <tr><td>Prototype <code>LAYER_LABEL</code></td><td>Operations &amp; core banking, Customer engagement, Data &amp; analytics, Infrastructure &amp; cloud <span class="badge b-gray">4</span></td></tr>
+    <tr><td>Spec, what-must-be-presented</td><td>core, CRM, data, integration, channel <span class="badge b-gray">5</span></td></tr>
+    <tr><td>Spec, sources table and prompt</td><td>core, crm, data, integration, channel, security <span class="badge b-gray">6</span></td></tr>
+    <tr><td>The documents as first written</td><td>the prototype's four <span class="badge b-gray">4</span></td></tr>
+    </table>
+    <div class="dec-why"><b>Resolution.</b> Adopt the prototype's four, because they carry pillar tags and a
+    primary-gap marker the other vocabularies do not, and because they are what actually renders. The spec's
+    five- and six-layer lists are superseded. The T1 prompt must be reissued against the four.</div>
+  </div>
+</div>
+
+<div class="dec">
+  <div class="dec-h"><span class="dec-id">B-02</span>
+    <span class="dec-t">Stack layer keys collide with the evidence-level vocabulary</span>
+    <span class="badge b-red">Blocking</span></div>
+  <div class="dec-b">
+    <p>The prototype keys its four layers <code>L2 L3 L4 L5</code>. The evidence-level ladder governing what
+    verb the prose may use is <code>L1 L2 L3 L4</code>. Both render on the same card. <code>layer: "L4"</code>
+    means Data &amp; analytics; <code>evidence_level: "L4"</code> means a single weak source.</p>
+    <p>The prototype's own source carries the comment <em>“Natural layer labels (no L1-L5)”</em> — the
+    collision was noticed and worked around in the labels rather than in the keys.</p>
+    <div class="dec-why"><b>Resolution.</b> Re-cut the layer keys to
+    <code>OPS · CUST · DATA · INFRA</code>. This is the same class of defect as three
+    colliding G-numbered gate families, and it is fixed the same way: make the identifier unambiguous in
+    isolation.</div>
+  </div>
+</div>
+
+<div class="dec">
+  <div class="dec-h"><span class="dec-id">B-03</span>
+    <span class="dec-t">Two different things are both called safeguard gates</span>
+    <span class="badge b-red">Blocking</span></div>
+  <div class="dec-b">
+    <p>The MCP specification's <strong>SG family</strong> runs at submit and produces pass, fail or not-run
+    with a plain-language label, rendered to the client. The Surface specification's <strong>H5</strong> is
+    the caps the <em>assessment</em> applied — cap-log rows, uncertainty bands, QA holds, analyst overrides —
+    and its prompt emits <code>{gate_id, kind, ceiling, affected_categories[], rationale, e_ids[]}</code>
+    with no result field and no plain label.</p>
+    <p>They share a section name, a surface and a tab. As prompted, H5 cannot render what the documents
+    require of a safeguard gate, because the prompt never asks for a result.</p>
+    <div class="dec-why"><b>Resolution.</b> One section, two arrays. <code>heatmap.safeguard_gates</code>
+    carries <code>caps[]</code> — what the assessment applied — and <code>gates[]</code> — the SG results with
+    plain labels and an explicit not-run state. Both render on the Health tab under their own headings. The
+    prompt must be reissued to emit both.</div>
+  </div>
+</div>
+
+<div class="dec">
+  <div class="dec-h"><span class="dec-id">B-04</span>
+    <span class="dec-t">The producing prompt for the synthesis drawer does not specify the synthesis</span>
+    <span class="badge b-red">Blocking</span></div>
+  <div class="dec-b">
+    <p>H2 owns <code>heatmap.cell_evidence</code>, which is the section the synthesis drawer renders from.
+    Its prompt is 642 characters and covers linking only. The actual content contract — grain check before
+    anything else, evidence list first, a 40–90 word synthesis, the count printed beside it, the peer
+    fallback ladder — lives in the DD-1 drilldown prompt.</p>
+    <p>An agent reading the H2 prompt produces a section with linkage and no synthesis. An agent reading DD-1
+    has no section to submit into, because drilldowns are not submission units.</p>
+    <div class="dec-why"><b>Resolution.</b> Fold DD-1's content contract into H2. A drilldown that renders
+    from a section must not hold requirements the section's own prompt lacks.</div>
+  </div>
+</div>
+
+<div class="dec">
+  <div class="dec-h"><span class="dec-id">B-05</span>
+    <span class="dec-t">The landscape strip cannot be computed from what the register emits</span>
+    <span class="badge b-red">Blocking</span></div>
+  <div class="dec-b">
+    <p>T2 renders four counts — confirmed, inferred, claimed and gaps — and the documents require them to be
+    recomputed from the T1 register rather than stored. T1's prompt emits
+    <code>{vendor, product, layer, confidence, as_of, e_ids[]}</code>: no status field. The prototype
+    renders three statuses (confirmed, inferred, absent) and no claimed at all.</p>
+    <div class="dec-why"><b>Resolution.</b> T1 emits <code>status</code> from
+    <code>CONFIRMED · INFERRED · CLAIMED · ABSENT</code>, with gaps on the landscape strip being the absent count. Without
+    a status on every register row the strip is uncomputable, and a stored count would be a second source of
+    truth for a number that already exists.</div>
+  </div>
+</div>
+
+<div class="dec">
+  <div class="dec-h"><span class="dec-id">B-06</span>
+    <span class="dec-t">The peer fallback ladder is load-bearing and lives only inside two prompts</span>
+    <span class="badge b-red">Blocking</span></div>
+  <div class="dec-b">
+    <p>Where the peer table lacks a figure, the sanctioned procedure is a five-rung ladder ending in an
+    explicit refusal. It determines <code>peer_basis</code>, <code>peer_n</code> and
+    <code>proxy_disclosure</code> on every score row, and it is the mechanism that prevents peer fabrication —
+    the failure the O1 prompt calls out by name.</p>
+    <p>It appeared in full in the O1 and DD-1 prompts and nowhere in the technical documents. A reader of the
+    TRD would not know the ladder exists, and a second implementation would invent a different one.</p>
+    <div class="dec-why"><b>Resolution.</b> Specified formally in the TRD and reproduced in the Surface
+    Specification. Every prompt that touches a peer figure references it rather than restating it.</div>
+  </div>
+</div>
+<div class="dec">
+  <div class="dec-h"><span class="dec-id">B-07</span>
+    <span class="dec-t">M5 Transformational is unreachable</span>
+    <span class="badge b-red">Blocking</span></div>
+  <div class="dec-b">
+    <p>The prototype's <code>maturityLabel</code> and <code>maturityHex</code> have four
+    branches. Anything at or above 4.0 returns <em>Differentiating</em>. The design set
+    publishes a fifth band and a hex for it (#185F60) that no code path can reach.</p>
+    <p>A score of 4.6 renders as Differentiating. Prose that calls it Transformational
+    contradicts the card beside it, and a payload that emits the word writes a band no
+    renderer produces.</p>
+    <div class="dec-why"><b>Resolution.</b> The band domain is four values and is enforced as
+    an enumerated type, so a fifth cannot be written. Prose uses the four reachable words. A
+    genuine M5 in the workbook renders as Differentiating and is recorded as a parser
+    observation rather than silently relabelled.</div>
+  </div>
+</div>
+
+<div class="dec">
+  <div class="dec-h"><span class="dec-id">B-08</span>
+    <span class="dec-t">Two hex values for one band</span>
+    <span class="badge b-red">Blocking</span></div>
+  <div class="dec-b">
+    <p>M2 Building is <code>#62D7B8</code> in the prototype resolver and <code>#B0EDD3</code>
+    in the published palette. Same band, two colours, and the palette is what a designer would
+    build from.</p>
+    <div class="dec-why"><b>Resolution.</b> The resolver is authoritative because it is what
+    renders. Nothing is served wrongly today — the payload carries no hex — but the two must be
+    reconciled before anyone builds from the documentation. This is the same
+    two-implementations-of-one-rule shape that rendered every directory score in brand teal.</div>
+  </div>
+</div>
+
+<div class="dec">
+  <div class="dec-h"><span class="dec-id">B-09</span>
+    <span class="dec-t">Two freshness vocabularies collide on the word STALE</span>
+    <span class="badge b-red">Blocking</span></div>
+  <div class="dec-b">
+    <p>The evidence ladder bands at 12/24/36/48 months — CURRENT, RECENT, DATED, STALE,
+    ARCHIVAL. The prototype's <code>freshnessOf</code> bands at 6/12 months — Current, Aging,
+    Stale. An item at fourteen months is <strong>RECENT</strong> on the evidence ladder and
+    <strong>Stale</strong> on the freshness dot, and both render on the same screen.</p>
+    <div class="dec-why"><b>Resolution.</b> The evidence ladder governs everything the payload
+    emits — recency tags, tier weighting, the rank score, the age tracker. The dot is a UI
+    affordance with a tighter threshold and must be relabelled so one word does not carry two
+    meanings. Prose never uses the word: it states the age and lets the band speak.</div>
+  </div>
+</div>
+
+<div class="dec">
+  <div class="dec-h"><span class="dec-id">B-10</span>
+    <span class="dec-t">The reasoning layer exists in exactly one prompt</span>
+    <span class="badge b-red">Blocking</span></div>
+  <div class="dec-b">
+    <p>The P1 platform prompt carries a full five-step reasoning protocol and calls it
+    <em>"STEP 7 — THE REASONING LAYER (R-Layer, and it is the point of this page)."</em> State
+    the rank-1 claim, argue the runner-up explicitly, test domain plausibility, run failure
+    probes, then accept, reject or mark uncertain.</p>
+    <p>It appears in <strong>one prompt of thirty-seven</strong>. Every other surface making a
+    ranked, causal or comparative claim — findings, insights, ceilings, recommendations,
+    cohort patterns — has no equivalent. Those surfaces get gates, and every gate in this
+    system checks a claim <em>after</em> it has been written.</p>
+    <div class="dec-why"><b>Resolution.</b> The R-Layer becomes a standing protocol with probe
+    sets for ten surfaces, nine contradiction classes and a recorded verdict in the payload.
+    It is the only mechanism that catches a claim which is well-formed, correctly cited,
+    grain-locked and wrong.</div>
+  </div>
+</div>
+
+</div>
+<div id="s03" class="section">
+
+<div class="eyebrow">Findings · material</div>
+<h1>Seven findings that force a guess</h1>
+
+<table class="ft">
+<tr><th style="width:56px">ID</th><th>Finding</th><th style="width:230px">Resolution</th></tr>
+<tr><td class="tk">M-01</td>
+    <td><div class="fn">Audience marking appears in five prompts of thirty-seven</div>
+    <div class="fd">The redaction contract depends entirely on the payload marking its own internal rungs, and
+    thirty-two prompts never mention <code>internal_only</code>. This is the highest-consequence gap in the
+    prompt layer: the failure direction is a field reaching a client.</div></td>
+    <td>A standing clause in every prompt naming the paths that surface must mark.</td></tr>
+<tr><td class="tk">M-02</td>
+    <td><div class="fn">Grain lock is named in fifteen prompts of thirty-seven</div>
+    <div class="fd">It is a blocking gate. Twenty-two prompts, including several that quote scores, never
+    mention it — so the agent meets it first as a rejection.</div></td>
+    <td>A standing clause wherever a prompt may quote a figure.</td></tr>
+<tr><td class="tk">M-03</td>
+    <td><div class="fn">Provenance is named in fifteen prompts of thirty-seven</div>
+    <div class="fd">Deterministically composed content presenting as analyst judgement was a measured defect,
+    and the fix is a field the prompt must set.</div></td>
+    <td>Every prompt that can compose deterministically states its provenance value.</td></tr>
+<tr><td class="tk">M-04</td>
+    <td><div class="fn">Register rules appear in sixteen prompts of thirty-seven</div>
+    <div class="fd">Twenty-one prompts producing client-visible prose carry no vocabulary constraint at all —
+    including the tech stack, the evidence store and the gate card.</div></td>
+    <td>The banned-register clause becomes standing text, not per-prompt discretion.</td></tr>
+<tr><td class="tk">M-05</td>
+    <td><div class="fn">Only twelve prompts use numbered steps</div>
+    <div class="fd">The twelve highest-scoring prompts are almost all stepped and the six weakest are all
+    flat. Form and completeness correlate because steps force the author to enumerate.</div></td>
+    <td>Steps become the required form: retrieve, derive only on failure, emit, rank, check.</td></tr>
+<tr><td class="tk">M-06</td>
+    <td><div class="fn">Nine surfaces have a prompt but no what-must-be-presented or sources table</div>
+    <div class="fd">The nine sections added late — ceilings, coverage, tier distribution, thought leadership,
+    evidence age, cohort patterns, starters, regulatory standing, acquisitions — carry a prompt and nothing
+    else, so the render contract has to be inferred from the prompt.</div></td>
+    <td>Contract and sources synthesised from the prompt and stated explicitly.</td></tr>
+<tr><td class="tk">M-07</td>
+    <td><div class="fn">Twelve prompts carry no word budget</div>
+    <div class="fd">Unbudgeted prose overflows its card. The measured defects include cards clipped mid-word
+    and mid-sentence — a rendering symptom of an authoring gap.</div></td>
+    <td>Every prose field gets a budget, and the contract carries it in its doc text.</td></tr>
+</table>
+
+<h2>Minor — corrected in place</h2>
+<table class="tbl">
+<tr><th style="width:240px">Issue</th><th>Correction</th></tr>
+<tr><td>One instance of <code>catalog</code> against 94 of <code>catalogue</code></td><td>Spelling unified. The identifier <code>ccg_catalog_version</code> is left alone: it is a column name, not prose.</td></tr>
+<tr><td>One instance of <code>MCP server</code> against 15 of <code>MCP connector</code></td><td>Unified on connector.</td></tr>
+<tr><td>Numerals and words mixed for the same quantity — “6 pages” and “six pages”</td><td>Words in prose, numerals in tables and code.</td></tr>
+<tr><td><code>proxy_disclosure</code> exists as a column and appeared in no prose</td><td>Defined as part of the peer ladder.</td></tr>
+<tr><td>“Claude Code” and “Claude Cowork” both present, undifferentiated</td><td>Disambiguated explicitly — see below.</td></tr>
+</table>
+
+
+<h2>Deployment verification — Google Cloud</h2>
+<p>The target is Cloud Run. Every named tool was checked against current Google Cloud
+availability; four findings required changes and the rest verified clean.</p>
+
+<table class="ft">
+<tr><th style="width:56px">ID</th><th>Finding</th><th style="width:210px">Disposition</th></tr>
+<tr><td class="tk">D-01</td>
+    <td><div class="fn">Self-hosted PgBouncer named as the pooler</div>
+    <div class="fd">Cloud SQL ships <strong>Managed Connection Pooling</strong> — PgBouncer-based,
+    transaction and session modes, ports 6432 and 3307 — which removes a container to patch. It
+    requires the <strong>Enterprise Plus</strong> edition, a constraint the documents now state,
+    with a sidecar fallback if the edition ever changes.</div></td>
+    <td><span class="badge b-green">Fixed</span> TRD §16</td></tr>
+<tr><td class="tk">D-02</td>
+    <td><div class="fn">IAM tokens expire under pooled connections</div>
+    <div class="fd">IAM database auth tokens live one hour; a pooled server connection that
+    outlives its token fails intermittently with SQLSTATE 08P01 — a documented issue. Mitigated
+    with automatic IAM auth through the Cloud SQL Python Connector, <code>pool_recycle=1800</code>
+    and <code>pool_pre_ping</code>.</div></td>
+    <td><span class="badge b-green">Fixed</span> TRD §16, Plan</td></tr>
+<tr><td class="tk">D-03</td>
+    <td><div class="fn">Compression was implied to be platform behaviour</div>
+    <div class="fd">Cloud Run does not compress dynamic responses and neither does the load
+    balancer. The Brotli-or-gzip behaviour is FastAPI middleware, and the eight-to-one heatmap
+    ratio depends on it actually being installed.</div></td>
+    <td><span class="badge b-green">Fixed</span> TRD §16, §19</td></tr>
+<tr><td class="tk">D-04</td>
+    <td><div class="fn">The HNSW build mechanism misstated</div>
+    <div class="fd">The index is created once at migration; the graph grows incrementally as each
+    run's vectors insert. The cost claim was right — build effort lands at ingest, off the
+    critical path — but the mechanism as stated would have someone dropping and recreating an
+    index per run.</div></td>
+    <td><span class="badge b-green">Fixed</span> TRD, Schema, Plan</td></tr>
+<tr><td class="tk">D-05</td>
+    <td><div class="fn">Verified clean, no change</div>
+    <div class="fd">pgvector 0.6+ with HNSW ships on Cloud SQL, and <code>SET LOCAL
+    hnsw.ef_search</code> is an ordinary GUC. PostgreSQL 16 is available. The 300-second promote
+    fits Cloud Run's timeout with an order of magnitude to spare. The worker and migrator map to
+    Cloud Run Jobs. Memorystore for Redis reaches Cloud Run over Direct VPC egress. The embedding
+    model bundles in-image at ~90MB with no Vertex AI dependency.</div></td>
+    <td><span class="badge b-teal">Checked</span></td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">Claude Code and Claude Cowork are different things in this system</div>
+  <p><strong>Claude Cowork</strong> is where synthesis runs: an agent reads the assessment through the MCP
+  connector and writes the content the product serves. <strong>Claude Code</strong> is where the application
+  is built: the implementation plan is written for it, and it never touches client content. A document that
+  uses them interchangeably is describing two different trust boundaries as one.</p>
+</div>
+
+</div>
+<div id="s04" class="section">
+
+<div class="eyebrow">Prompt analysis</div>
+<h1>Prompt completeness matrix</h1>
+<p class="lead">All 37 prompts scored against the 14 attributes a synthesis
+agent needs. Sorted weakest first.</p>
+
+<table class="ft"><tr><th style="width:52px">ID</th><th style="width:56px">chars</th><th style="width:38px;font-size:8px">steps</th><th style="width:38px;font-size:8px">shape</th><th style="width:38px;font-size:8px">words</th><th style="width:38px;font-size:8px">gates</th><th style="width:38px;font-size:8px">empty</th><th style="width:38px;font-size:8px">forbid</th><th style="width:38px;font-size:8px">ident</th><th style="width:38px;font-size:8px">grain</th><th style="width:38px;font-size:8px">cite</th><th style="width:38px;font-size:8px">regist</th><th style="width:38px;font-size:8px">measur</th><th style="width:38px;font-size:8px">prov</th><th style="width:38px;font-size:8px">audien</th><th style="width:38px;font-size:8px">order</th><th style="width:52px">score</th></tr><tr><td class="tk">P3</td><td class="num">426</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-red">3/14</span></td></tr><tr><td class="tk">C2</td><td class="num">611</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-red">4/14</span></td></tr><tr><td class="tk">T1</td><td class="num">613</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-red">4/14</span></td></tr><tr><td class="tk">H2</td><td class="num">642</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-red">4/14</span></td></tr><tr><td class="tk">O11</td><td class="num">1805</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-red">4/14</span></td></tr><tr><td class="tk">H5</td><td class="num">453</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-red">5/14</span></td></tr><tr><td class="tk">H6</td><td class="num">580</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-red">5/14</span></td></tr><tr><td class="tk">H4</td><td class="num">676</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-red">5/14</span></td></tr><tr><td class="tk">O10</td><td class="num">1660</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-red">5/14</span></td></tr><tr><td class="tk">DD-2</td><td class="num">2244</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-red">5/14</span></td></tr><tr><td class="tk">H8</td><td class="num">3025</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-red">5/14</span></td></tr><tr><td class="tk">O12</td><td class="num">3182</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-red">5/14</span></td></tr><tr><td class="tk">P4</td><td class="num">2483</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-amber">6/14</span></td></tr><tr><td class="tk">O1b</td><td class="num">3116</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-amber">6/14</span></td></tr><tr><td class="tk">C5</td><td class="num">2321</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-amber">7/14</span></td></tr><tr><td class="tk">O7</td><td class="num">2581</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-amber">7/14</span></td></tr><tr><td class="tk">DD-3</td><td class="num">2605</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-amber">7/14</span></td></tr><tr><td class="tk">C3</td><td class="num">2814</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-amber">7/14</span></td></tr><tr><td class="tk">DD-7</td><td class="num">2023</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-amber">8/14</span></td></tr><tr><td class="tk">H7</td><td class="num">2329</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-amber">8/14</span></td></tr><tr><td class="tk">H3</td><td class="num">3180</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-amber">8/14</span></td></tr><tr><td class="tk">O9</td><td class="num">3488</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-amber">8/14</span></td></tr><tr><td class="tk">O5</td><td class="num">2798</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-amber">9/14</span></td></tr><tr><td class="tk">O8</td><td class="num">2989</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-amber">9/14</span></td></tr><tr><td class="tk">O1</td><td class="num">3163</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-amber">9/14</span></td></tr><tr><td class="tk">O2</td><td class="num">4299</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-amber">9/14</span></td></tr><tr><td class="tk">DD-4</td><td class="num">2295</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-green">10/14</span></td></tr><tr><td class="tk">P2</td><td class="num">3085</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-green">10/14</span></td></tr><tr><td class="tk">O4</td><td class="num">3172</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-green">10/14</span></td></tr><tr><td class="tk">O3</td><td class="num">3660</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-green">10/14</span></td></tr><tr><td class="tk">I1</td><td class="num">4044</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-green">10/14</span></td></tr><tr><td class="tk">DD-1</td><td class="num">2951</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-green">11/14</span></td></tr><tr><td class="tk">P2b</td><td class="num">2976</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-green">11/14</span></td></tr><tr><td class="tk">C1</td><td class="num">3684</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-green">12/14</span></td></tr><tr><td class="tk">H1</td><td class="num">4432</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#DC2626">○</td><td><span class="badge b-green">12/14</span></td></tr><tr><td class="tk">P1</td><td class="num">3920</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-green">13/14</span></td></tr><tr><td class="tk">O6</td><td class="num">7522</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#DC2626">○</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td style="text-align:center;color:#059669">●</td><td><span class="badge b-green">13/14</span></td></tr></table>
+
+<p class="small muted">Columns, in order: steps · shape · words · gates · empty · forbid · ident · grain · cite · regist · measur · prov · audien · order</p>
+
+<h2>Per-attribute coverage</h2>
+<table class="ft">
+<tr><th style="width:190px">Attribute</th><th style="width:90px">Coverage</th><th>Why it matters</th></tr>
+<tr><td><strong>Numbered steps</strong></td>
+<td><span class="badge b-red">12/37 · 32%</span></td>
+<td class="small">A long prompt without steps is a wall the agent skims. Retrieval first, derivation only on failure.</td></tr><tr><td><strong>Output shape</strong></td>
+<td><span class="badge b-green">37/37 · 100%</span></td>
+<td class="small">Every field named, in one brace block. Intent without shape forces a guess that type-checks.</td></tr><tr><td><strong>Word budgets</strong></td>
+<td><span class="badge b-amber">25/37 · 68%</span></td>
+<td class="small">Per field. Unbudgeted prose overflows its card or reads as filler.</td></tr><tr><td><strong>Named gates</strong></td>
+<td><span class="badge b-amber">30/37 · 81%</span></td>
+<td class="small">What will be asserted at submit, before the agent writes.</td></tr><tr><td><strong>Empty state</strong></td>
+<td><span class="badge b-amber">21/37 · 57%</span></td>
+<td class="small">What to emit when the evidence is not there, and what to record about the search.</td></tr><tr><td><strong>Explicit prohibitions</strong></td>
+<td><span class="badge b-green">32/37 · 86%</span></td>
+<td class="small">The commonest defects are things the agent should not have done.</td></tr><tr><td><strong>Identity gate</strong></td>
+<td><span class="badge b-red">15/37 · 41%</span></td>
+<td class="small">Every figure is about THIS entity. One contaminated figure reaches five surfaces.</td></tr><tr><td><strong>Grain lock</strong></td>
+<td><span class="badge b-red">7/37 · 19%</span></td>
+<td class="small">A quoted figure and its named cell are the same cell, within 0.05.</td></tr><tr><td><strong>Citation discipline</strong></td>
+<td><span class="badge b-amber">30/37 · 81%</span></td>
+<td class="small">Register before citing; verbatim excerpts; ids the server allocated.</td></tr><tr><td><strong>Register rules</strong></td>
+<td><span class="badge b-red">16/37 · 43%</span></td>
+<td class="small">A client reads this prose. No consultant register, no codes, no score-predicate openers.</td></tr><tr><td><strong>Measured exemplar</strong></td>
+<td><span class="badge b-red">19/37 · 51%</span></td>
+<td class="small">A prompt anchored to a real defect is followed; an abstract one is not.</td></tr><tr><td><strong>Provenance</strong></td>
+<td><span class="badge b-red">15/37 · 41%</span></td>
+<td class="small">So deterministically composed content cannot present as analyst judgement.</td></tr><tr><td><strong>Audience marking</strong></td>
+<td><span class="badge b-red">5/37 · 14%</span></td>
+<td class="small">Which paths go in internal_only. An unmarked internal rung reaches the client.</td></tr><tr><td><strong>Ordering</strong></td>
+<td><span class="badge b-red">20/37 · 54%</span></td>
+<td class="small">Where order carries meaning — ranked, sequenced or chronological.</td></tr>
+</table>
+
+<h2>The distribution is the finding</h2>
+<div class="cmp">
+  <div class="cmp-c"><div class="cmp-l">Weakest six — all flat prose, all under 700 characters</div><ul>
+    <li>P3 Roadmap phases — 426 chars, 3/14</li><li>C2 Issue register — 611 chars, 4/14</li><li>T1 Technology stack — 613 chars, 4/14</li><li>H2 Cell evidence — 642 chars, 4/14</li><li>O11 Evidence tier distribution — 1805 chars, 4/14</li><li>H5 Safeguard gates — 453 chars, 5/14</li>
+  </ul></div>
+  <div class="cmp-c"><div class="cmp-l">Strongest six — all stepped, all over 2,900 characters</div><ul>
+    <li>O6 Top findings — 7522 chars, 13/14</li><li>P1 Platform fit and story — 3920 chars, 13/14</li><li>H1 Focus areas — 4432 chars, 12/14</li><li>C1 Digital evolution timeline — 3684 chars, 12/14</li><li>P2b Conversation starters — 2976 chars, 11/14</li><li>DD-1 Synthesis drawer — Heatmap cell → capability synthesis — 2951 chars, 11/14</li>
+  </ul></div>
+</div>
+
+<div class="callout co-orange">
+  <p><strong>Length is a proxy, not the cause.</strong> The correlation runs through <em>form</em>: every
+  prompt in the strong column uses numbered steps, and every prompt in the weak column is a flat bullet list.
+  Steps force the author to enumerate — to say what happens if retrieval fails, what the ranking key is, what
+  to do when the evidence is absent. A bullet list lets all three go unwritten.</p>
+</div>
+
+<h2>The model prompt</h2>
+<p>O6 Top findings scores 14 of 14 and is the template the rest should follow. Its structure:</p>
+<div class="code"><span class="key">STEP 1 — RETRIEVE</span>   Read the reports in full. The analyst's findings already
+                exist; extract them with their reasoning intact.
+                Record source_kind=retrieved with section and page.
+
+<span class="key">STEP 2 — DERIVE, ONLY IF RETRIEVAL YIELDS FEWER THAN 5</span>
+                Derive from the joins, not the scores.
+                <span class="num">NEVER</span> derive by taking the widest score gaps — that produces
+                a sorted list, not findings.
+
+<span class="key">STEP 3 — EMIT</span>       Every field named in one block, each with its own budget
+                and a measured exemplar.
+
+<span class="key">STEP 4 — RANK</span>       By strategic alignment, not gap width. And a stated
+                fallback: if the objectives cannot be established, say so,
+                rank by downstream impact, set ranking_basis=impact_fallback.
+
+<span class="key">STEP 5 — COHESION</span>   The five must read as one story. If they do not, you have
+                five observations.
+
+<span class="key">STEP 6 — DRILLDOWN</span>  What the expanded panel carries, per heading.</div>
+
+<p>Four things it does that the weak prompts do not: it <strong>prefers retrieval to derivation</strong> and
+says so; it gives every field a <strong>measured exemplar</strong> rather than an abstract instruction; it
+names a <strong>ranking key and a fallback</strong>; and it requires the set to <strong>cohere</strong>
+rather than merely to be complete.</p>
+
+</div>
+<div id="s05" class="section">
+
+<div class="eyebrow">Prompt engineering</div>
+<h1>The prompt standard</h1>
+<p class="lead">Fourteen attributes. A prompt missing any of them is asking the agent to guess, and a guess
+that type-checks promotes silently wrong content.</p>
+
+<table class="ft">
+<tr><th style="width:44px">#</th><th style="width:190px">Attribute</th><th>Requirement</th></tr>
+<tr><td class="tk">1</td><td><strong>Numbered steps</strong></td><td class="small">A long prompt without steps is a wall the agent skims. Retrieval first, derivation only on failure.</td></tr><tr><td class="tk">2</td><td><strong>Output shape</strong></td><td class="small">Every field named, in one brace block. Intent without shape forces a guess that type-checks.</td></tr><tr><td class="tk">3</td><td><strong>Word budgets</strong></td><td class="small">Per field. Unbudgeted prose overflows its card or reads as filler.</td></tr><tr><td class="tk">4</td><td><strong>Named gates</strong></td><td class="small">What will be asserted at submit, before the agent writes.</td></tr><tr><td class="tk">5</td><td><strong>Empty state</strong></td><td class="small">What to emit when the evidence is not there, and what to record about the search.</td></tr><tr><td class="tk">6</td><td><strong>Explicit prohibitions</strong></td><td class="small">The commonest defects are things the agent should not have done.</td></tr><tr><td class="tk">7</td><td><strong>Identity gate</strong></td><td class="small">Every figure is about THIS entity. One contaminated figure reaches five surfaces.</td></tr><tr><td class="tk">8</td><td><strong>Grain lock</strong></td><td class="small">A quoted figure and its named cell are the same cell, within 0.05.</td></tr><tr><td class="tk">9</td><td><strong>Citation discipline</strong></td><td class="small">Register before citing; verbatim excerpts; ids the server allocated.</td></tr><tr><td class="tk">10</td><td><strong>Register rules</strong></td><td class="small">A client reads this prose. No consultant register, no codes, no score-predicate openers.</td></tr><tr><td class="tk">11</td><td><strong>Measured exemplar</strong></td><td class="small">A prompt anchored to a real defect is followed; an abstract one is not.</td></tr><tr><td class="tk">12</td><td><strong>Provenance</strong></td><td class="small">So deterministically composed content cannot present as analyst judgement.</td></tr><tr><td class="tk">13</td><td><strong>Audience marking</strong></td><td class="small">Which paths go in internal_only. An unmarked internal rung reaches the client.</td></tr><tr><td class="tk">14</td><td><strong>Ordering</strong></td><td class="small">Where order carries meaning — ranked, sequenced or chronological.</td></tr>
+</table>
+
+<h2>Four standing clauses</h2>
+<p>Four attributes are identical on every surface and should be standing text the contract appends rather
+than something each prompt author remembers. That is what takes audience marking from five prompts of
+37 to all of them.</p>
+
+<div class="code"><span class="key">STANDING · IDENTITY</span>
+Every figure, quote, document and source domain is about THIS entity.
+Assert legal name, regulator, footprint, source domain and order of
+magnitude. On failure: quarantine the field, emit the reason, escalate.
+<span class="num">NEVER</span> substitute a plausible value and <span class="num">NEVER</span> render a partial identity.
+
+<span class="key">STANDING · GRAIN</span>
+Any "&lt;label&gt; at N/5" you write must resolve to a served cell within 0.05.
+Read the label and the score from the SAME row. Round once.
+
+<span class="key">STANDING · REGISTER</span>
+A client reads this. No consultant register (leverage, journey,
+best-in-class). No deficit framing (lacks, fails to). No raw taxonomy
+codes in prose. No score-predicate openers. No markdown in a text field.
+The verb is governed by the evidence level: L1 implemented · L2 selected ·
+L3 likely uses · L4 may use.
+
+<span class="key">STANDING · AUDIENCE</span>
+List in internal_only every JSON path the customer must not receive:
+rank scores, tier weights, scoring rationale, synthetic provenance,
+internal codes. Thin-evidence and quarantine markers are <span class="num">NOT</span> internal —
+honesty renders to the client.</div>
+
+<h2>The required form</h2>
+<div class="code"><span class="key">STEP 1 — RETRIEVE</span>    Where the answer already exists, and how to record
+                 that it was retrieved rather than derived.
+<span class="key">STEP 2 — DERIVE</span>      Only on retrieval failure. State what derivation is
+                 legitimate and what looks like derivation but is not.
+<span class="key">STEP 3 — EMIT</span>        Every field in one brace block. Per-field budget.
+                 A measured exemplar per prose field.
+<span class="key">STEP 4 — ORDER</span>       The ranking or sequencing key, and its fallback.
+<span class="key">STEP 5 — ABSENCE</span>     What to emit when the evidence is not there, and what
+                 to record about the search that established it.
+<span class="key">STEP 6 — GATES</span>       What will be asserted at submit.
+<span class="key">STEP 7 — DRILLDOWN</span>   What the expanded panel carries, if the surface has one.</div>
+
+<div class="rule">
+  <div class="rule-lbl">Why the measured exemplar matters more than the instruction</div>
+  <p>“Quantify the consequence” produces hedged prose. <em>“Blocks 34 downstream subcaps”</em>,
+  <em>“5–7 month cycle compression”</em>, <em>“Window closes at nCino go-live”</em> produce the thing itself.
+  The strongest prompt in the set gives an exemplar for every prose field, and it is the only one that
+  scores full marks.</p>
+</div>
+
+<h2>The peer fallback ladder</h2>
+<p>Referenced by every prompt that touches a peer figure, restated by none of them.</p>
+<table class="ft">
+<tr><th style="width:44px">#</th><th style="width:210px">Rung</th><th>Procedure</th><th style="width:240px">Records</th></tr>
+<tr><td class="tk">1</td><td><strong>Peer table figure</strong></td><td class="small">peer_comparison_table.csv carries the cell</td><td class="small"><code>basis = table</code></td></tr><tr><td class="tk">2</td><td><strong>Recompute at lower cohort size</strong></td><td class="small">Drop the peer lacking the figure and re-take the median. Floor of three: N=5 → sorted[2]; N=4 → mean of sorted[1..2]; N=3 → sorted[1].</td><td class="small"><code>basis = recomputed, peer_n records the size actually used</code></td></tr><tr><td class="tk">3</td><td><strong>Adjacency inference</strong></td><td class="small">Infer from a neighbouring sub-capability in the same category.</td><td class="small"><code>basis = inferred, labelled INFERENCE with one clause of reasoning</code></td></tr><tr><td class="tk">4</td><td><strong>Proxy ceiling</strong></td><td class="small">A signal that caps rather than estimates — e.g. a specialist-headcount ratio below 5% caps its category, negative-dominant review sentiment caps at mid-scale. Lowest cap wins.</td><td class="small"><code>basis = inferred, proxy_disclosure carries the literal phrase 'peer proxy'</code></td></tr><tr><td class="tk">5</td><td><strong>Stop</strong></td><td class="small">Print 'Cannot reliably estimate'.</td><td class="small"><code>basis = cannot_estimate, peer_median stays NULL</code></td></tr>
+</table>
+<div class="callout co-orange">
+  <p><strong>Never impute a value into the cell.</strong> The disclosure must carry the literal phrase
+  <em>peer proxy</em>, because a governance check greps for it — and must never claim identical methodology.
+  A proxied figure that reads as a measured one is the peer-fabrication failure this ladder exists to
+  prevent.</p>
+</div>
+
+</div>
+<div id="s06" class="section">
+
+<div class="eyebrow">Prompt engineering</div>
+<h1>The six stub prompts, reissued</h1>
+<p class="lead">Each was under 700 characters of flat prose for a surface that is not simple. Reissued against
+the standard, with the four standing clauses assumed rather than repeated.</p>
+
+
+<h2>H2 · Cell evidence</h2>
+<p class="small muted">Was 642 characters, flat prose. Now stepped, with the standing clauses applied.</p>
+<div class="code"><span class="key">STEP 1 — GRAIN CHECK, BEFORE ANYTHING ELSE</span>
+Assert the score, the peer median and the cell id all come from the SAME
+row of subcap_scores. If the score belongs to the category and the id to
+the sub-capability, <span class="num">STOP</span> and emit grain_violation. Do not write prose
+over a mismatch. One line pairing a sub-capability score with a category
+id produced 125 violations across the corpus.
+
+<span class="key">STEP 2 — LINK ON SUBSTANCE, NOT PROXIMITY</span>
+Map each research-workbook row to the sub-capability its SHEET is about,
+then verify the excerpt speaks to that capability. A plausible-but-
+unrelated citation is worse than none. The commonest cause of over-
+linking is one category-level search mapped onto five sub-capabilities.
+
+<span class="key">STEP 3 — EMIT THE EVIDENCE LIST FIRST</span>
+Per cell: {subcap_id, e_ids[], items[], reach_note, synthesis,
+           grounded_on, provenance}
+Per item: {e_id, tier, claim_label, recency, source_title, publisher,
+           excerpt}   excerpt verbatim, 50-500 chars, never a bare URL.
+Count the items. That count is grounded_on, and it is printed beside the
+synthesis.
+
+<span class="key">STEP 4 — WRITE THE SYNTHESIS (40-90 words)</span>
+What the evidence establishes about THIS capability, where the score sits
+against the peer median, and one clause of consequence: at or above
+median, what to protect; below, what it constrains downstream. Cite
+inline. Do <span class="num">NOT</span> open by restating the score — it is rendered above you.
+Below three linked items, mark the cell thin and say so in the panel.
+
+<span class="key">STEP 5 — PEER FIGURE</span>
+Where the peer table lacks one, apply the peer fallback ladder. Label an
+inferred figure INFERENCE with one clause of reasoning. <span class="num">NEVER</span> impute.
+
+<span class="key">STEP 6 — REACH, HONESTLY</span>
+linking_stats: cells scored, cells linked, rows unlinkable. If every row
+is unlinkable, say so — that is a source-data finding, not a silent zero.
+
+<span class="key">GATES</span>: grain lock (blocking) · citation V1-V4 · excerpt verbatim ·
+       identity on every source domain</div>
+<p class="small"><strong>What changed:</strong> Absorbs the DD-1 content contract (B-04): grain check, synthesis budget, the printed count and the peer ladder. Adds thin-evidence marking, provenance and the standing clauses.</p>
+
+
+
+<h2>H5 · Assessment caps &amp; safeguard gates</h2>
+<p class="small muted">Was 453 characters, flat prose. Now stepped, with the standing clauses applied.</p>
+<div class="code"><span class="key">STEP 1 — TWO ARRAYS, NOT ONE</span>
+This section carries both what the ASSESSMENT capped and what the
+SUBMISSION gates found. They are different things and were previously
+conflated.
+
+<span class="key">STEP 2 — EMIT caps[] — what the assessment applied</span>
+{cap_id, kind, ceiling, affected_categories[], rationale, e_ids[]}
+kind: cap │ uncertainty_band │ qa_hold │ analyst_override
+Read the workbook's own cap log and the QA verdict. rationale is the
+stated reason, quoted or closely paraphrased.
+<span class="num">Do not invent a cap to explain a low score.</span> Only caps the assessment
+actually applied belong here.
+
+<span class="key">STEP 3 — EMIT gates[] — the SG family results</span>
+{gate_id, plain_label, result, detail, not_run_reason}
+gate_id is SG-nn. result: PASS │ FAIL │ <span class="num">NOT_RUN</span>.
+plain_label is a human sentence, 8-18 words, and is <span class="num">REQUIRED</span> — this card
+renders to the client and a bare code teaches them to distrust the page.
+not_run_reason is <span class="num">REQUIRED</span> when result is NOT_RUN. A gate reporting PASS
+because it did not run is worse than one reporting FAIL.
+
+<span class="key">STEP 4 — DISCLOSE, DO NOT SUPPRESS</span>
+A failing gate is shown with its measurement. It does not block
+promotion. An assessment that states its own weakness is more credible
+than one that appears complete.
+
+<span class="key">GATES</span>: plain_label present on every client-visible gate ·
+       not_run_reason present wherever result is NOT_RUN</div>
+<p class="small"><strong>What changed:</strong> Resolves B-03 by splitting caps from gate results. Adds the required plain label, the three-state result and the not-run reason, none of which the original emitted.</p>
+
+
+
+<h2>T1 · Technology stack register</h2>
+<p class="small muted">Was 613 characters, flat prose. Now stepped, with the standing clauses applied.</p>
+<div class="code"><span class="key">STEP 1 — A PRODUCT, NOT A SERVICE OR A CATEGORY</span>
+"Salesforce Financial Services Cloud" is a product. "CRM",
+"Analytics/BI", "Django" are not. vendor and product are separate fields.
+
+<span class="key">STEP 2 — EMIT items[]</span>
+{ts_id, vendor, product, layer, pillar_id, status, evidence_level,
+ detection_basis, as_of, linked_subcap_ids[], e_ids[]}
+
+layer  <span class="num">OPS │ CUST │ DATA │ INFRA</span>
+       OPS=Operations & core banking (P3) · CUST=Customer engagement (P2) · DATA=Data & analytics (P4) · INFRA=Infrastructure & cloud (P4)
+       <span class="num">NOT</span> L2-L5 — those keys collide with the evidence-level ladder
+       rendered on the same card.
+
+status <span class="num">CONFIRMED │ INFERRED │ CLAIMED │ ABSENT</span>
+       Required on every row. The landscape strip recomputes its four
+       counts from this field; without it the strip is uncomputable.
+
+evidence_level  L1-L4, and it governs the verb the prose may use.
+detection_basis  one clause, printed on the detail page. A bare status
+                 invites certainty the evidence does not support.
+
+<span class="key">STEP 3 — LAYER ROLLUP</span>
+Per layer: {layer, pillar_id, detected, expected, is_primary_gap}
+The layering carries analysis a flat list cannot: two of four detected at
+the data layer with a P4 tag says where the gap is and which pillar
+absorbs it.
+
+<span class="key">STEP 4 — dropped[] IS REPORTED, NOT HIDDEN</span>
+A candidate you cannot cite is a rumour. Put it in dropped[] with the
+reason. That is how a taxonomy gap becomes visible.
+
+<span class="key">GATES</span>: no service or category shipped as a product · every item cited ·
+       landscape counts reconcile to the register</div>
+<p class="small"><strong>What changed:</strong> Resolves B-01, B-02 and B-05: four layers with collision-free keys, a required status field, evidence level, detection basis and the layer rollup.</p>
+
+
+
+<h2>C2 · Issue register</h2>
+<p class="small muted">Was 611 characters, flat prose. Now stepped, with the standing clauses applied.</p>
+<div class="code"><span class="key">STEP 1 — ONE ROW PER MATTER</span>
+Collapse duplicates differing only by formatting or a trailing clause.
+A register with the same matter three times reads as three problems.
+
+<span class="key">STEP 2 — EMIT</span>
+{issue_id, title, severity, status, opened_on, resolved_on, rationale,
+ capped_subcap_ids[], linked_subcap_ids[], e_ids[], provenance}
+title  8-16 words, the matter in the source's own terms.
+severity and status are ALWAYS populated. <span class="num">Never emit a NULL status.</span>
+rationale  25-60 words where the source gives one. If it does not,
+           <span class="num">LEAVE IT EMPTY</span> — the drilldown renders the title alone and that
+           is honest. Do not compose a rationale to make the card look full.
+
+<span class="key">STEP 3 — NAME WHAT IT CAPS</span>
+Where a matter constrains an assessed capability, put the cell in
+capped_subcap_ids with its cap level. A regulatory matter that caps a
+cell and does not say so leaves the score looking unexplained.
+
+<span class="key">STEP 4 — CHRONOLOGY</span>
+Ordered by opened_on. The Gantt renders in the order sent.
+
+<span class="key">STEP 5 — ABSENCE</span>
+No matters found is a finding, not an empty array: emit verified_absent
+with the registries searched.
+
+<span class="key">GATES</span>: one row per matter · status non-null · identity on every
+       regulator named</div>
+<p class="small"><strong>What changed:</strong> Adds the cap linkage, word budgets, ordering, an explicit empty state and provenance.</p>
+
+
+
+<h2>H6 · Evidence store</h2>
+<p class="small muted">Was 580 characters, flat prose. Now stepped, with the standing clauses applied.</p>
+<div class="code"><span class="key">STEP 1 — REGISTER BEFORE YOU CITE</span>
+Package evidence keeps its original id. Anything found outside the
+package is registered through the connector, which allocates the id and
+computes the rank score. <span class="num">NEVER</span> choose an id yourself — an invented id is
+fabrication by construction even when the source is real.
+
+<span class="key">STEP 2 — EMIT</span>
+{e_id, source_name, url, excerpt, claim_type, tier, published_date,
+ discovered_by, supports_subcap_ids[], surfaces[]}
+excerpt  VERBATIM, 50-500 chars. A paraphrase is not evidence.
+claim_type  FACT │ INFERENCE │ HYPOTHESIS │ CEILING_ESTIMATE.
+            An inference is labelled as one.
+tier  T1-T5. A machine technographic scan is <span class="num">T1</span>, never T4 — filing it
+      at T4 caps the capability and silently suppresses the score.
+
+<span class="key">STEP 3 — TWO THINGS YOU MUST NOT DO</span>
+<span class="num">Do not</span> register a row you did not read.
+<span class="num">Do not</span> register a URL you could not retrieve.
+
+<span class="key">STEP 4 — BIDIRECTIONAL LINKAGE</span>
+supports_subcap_ids lets the drawer render chips that jump to the other
+cells an item backs, so a wrong link is visible from two directions.
+
+<span class="key">STEP 5 — RECENCY</span>
+Undated is UNVERIFIED, never CURRENT. Age is computed against the run's
+pinned reference date or it is null — never a sentinel.
+
+<span class="key">GATES</span>: excerpt verbatim · id resolves and belongs to this entity ·
+       source domain identity-checked · rank score bounded</div>
+<p class="small"><strong>What changed:</strong> Adds the register-before-cite rule, the T1 scan correction, bidirectional linkage, recency handling and the tier ceiling consequence.</p>
+
+
+
+<h2>P3 · Transformation roadmap</h2>
+<p class="small muted">Was 426 characters, flat prose. Now stepped, with the standing clauses applied.</p>
+<div class="code"><span class="key">STEP 1 — RETRIEVE THE PHASING</span>
+If the package states phasing, use it and record source_kind=retrieved.
+Derive only if it does not, and label it derived.
+
+<span class="key">STEP 2 — EMIT</span>
+{phase_id, phase, horizon, rec_ids[], capabilities[], depends_on[],
+ rationale, provenance}
+horizon  plain terms: next two quarters │ this year │ beyond.
+rationale  30-60 words: why this phase sits here and not earlier.
+
+<span class="key">STEP 3 — REFERENTIAL INTEGRITY</span>
+Every rec_id must resolve to a recommendation THIS payload describes.
+A phase citing a recommendation the page does not carry is a dead link
+in a document an AE reads aloud.
+
+<span class="key">STEP 4 — SEQUENCING IS THE CONTENT</span>
+A phase cannot precede a phase it depends on. Assert the dependency graph
+is acyclic before emitting. Order is meaning — the roadmap renders in the
+order sent and the client reads it as commitment.
+
+<span class="key">STEP 5 — METRICS</span>
+Any figure quoted comes from THIS run and resolves to its named cell.
+
+<span class="key">STEP 6 — ABSENCE</span>
+If prerequisites do not determine a sequence, say so and emit the phases
+unordered with sequencing_basis=undetermined. Do not invent an order to
+look decisive.
+
+<span class="key">GATES</span>: rec_ids resolve within the payload · dependency graph acyclic ·
+       grain lock on any quoted figure</div>
+<p class="small"><strong>What changed:</strong> Adds referential integrity against the recommendation set, an acyclicity assertion, budgets, retrieval preference and an explicit undetermined state.</p>
+
+
+</div>
+<div id="s07" class="section">
+
+<div class="eyebrow">Actions</div>
+<h1>What was changed, and what is left</h1>
+
+<h2>Applied to the document set</h2>
+<table class="ft">
+<tr><th style="width:64px">Finding</th><th>Change</th><th style="width:170px">Where</th></tr>
+<tr><td class="tk">B-01</td><td>Four stack layers adopted; the five- and six-layer vocabularies superseded</td><td>Surface Spec, Schema, TRD</td></tr>
+<tr><td class="tk">B-02</td><td>Layer keys re-cut to <code>OPS · CUST · DATA · INFRA</code> to break the collision with evidence levels</td><td>Schema, Surface Spec</td></tr>
+<tr><td class="tk">B-03</td><td>Section split into <code>caps[]</code> and <code>gates[]</code>; plain label and not-run reason required</td><td>TRD, Schema, Surface Spec</td></tr>
+<tr><td class="tk">B-04</td><td>DD-1's content contract folded into the H2 prompt</td><td>Surface Spec</td></tr>
+<tr><td class="tk">B-05</td><td><code>status</code> required on every register row; landscape recomputes from it</td><td>Schema, Surface Spec</td></tr>
+<tr><td class="tk">B-06</td><td>Peer fallback ladder specified formally</td><td>TRD, Surface Spec</td></tr>
+<tr><td class="tk">M-01–07</td><td>Prompt standard defined; four standing clauses; six stubs reissued</td><td>This report, Surface Spec</td></tr>
+<tr><td class="tk">B-07</td><td>Band domain enforced as four values; M5 removed from prose</td><td>TRD, Schema, Surface Spec</td></tr>
+<tr><td class="tk">B-08</td><td>Resolver made authoritative for the palette; divergence recorded</td><td>TRD, Schema</td></tr>
+<tr><td class="tk">B-09</td><td>Evidence ladder governs the payload; the dot relabelled</td><td>TRD, Surface Spec</td></tr>
+<tr><td class="tk">B-10</td><td>R-Layer generalised, with probe sets and a recorded verdict</td><td>PRD, TRD, Schema</td></tr>
+<tr><td class="tk">minor</td><td>Spelling unified; Claude Code and Cowork disambiguated</td><td>All</td></tr>
+<tr><td class="tk">D-01–05</td><td>Google Cloud deployment verification: managed pooling with the Enterprise Plus constraint, IAM token-expiry mitigation, app-level compression, HNSW build wording</td><td>TRD, Schema, Plan</td></tr>
+</table>
+
+<h2>Left open, deliberately</h2>
+<table class="tbl">
+<tr><th style="width:250px">Item</th><th>Why it is not resolved here</th></tr>
+<tr><td>Reissuing the other 31 prompts against the standard</td><td>Mechanical but substantial. The six stubs were reissued because they were unusable as written; the rest are usable and should be upgraded as each surface is built.</td></tr>
+<tr><td>Nine surfaces with a prompt but no contract block</td><td>Contracts have been synthesised from the prompts in the register. Confirming them against the rendered prototype is a build-time task.</td></tr>
+<tr><td>Retention policy for superseded runs</td><td>An operational decision, not a contract one.</td></tr>
+<tr><td>Whether <code>CLAIMED</code> should render distinctly from <code>INFERRED</code> on the register</td><td>The prototype renders three statuses; the landscape strip needs four. Resolved in favour of four, but the visual treatment is a design decision.</td></tr>
+</table>
+
+<h2>Standing recommendations</h2>
+<ul class="chk">
+  <li><strong>Make the four standing clauses contract text, not prompt text.</strong> If the connector appends
+  them to every section's doc, audience marking goes from five prompts of 37 to all of them
+  without anyone remembering.</li>
+  <li><strong>Score every new prompt against the fourteen attributes before it ships.</strong> The check is
+  mechanical and catches the gap class that produced six unusable prompts.</li>
+  <li><strong>Require a measured exemplar for every prose field.</strong> It is the single strongest
+  differentiator between the prompts that work and the ones that do not.</li>
+  <li><strong>Treat a prompt under 1,500 characters for a non-trivial surface as a defect</strong>, not a
+  style. Every prompt below that threshold failed at least seven attributes.</li>
+  <li><strong>Re-run this analysis in continuous integration.</strong> The matrix is computed from the prompt
+  text, so it can regress silently.</li>
+</ul>
+
+<div class="rule">
+  <div class="rule-lbl">The finding behind the findings</div>
+  <p>Eight of the ten blocking issues are the same shape: <strong>one name, two meanings</strong> — two layer
+  vocabularies, layer keys colliding with evidence levels, safeguard gates meaning two different things, a
+  section contract split across two prompts. This is precisely the defect class the specifications were
+  written to eliminate, reappearing one level down in the prompt layer. The prompts need the same discipline
+  the payload contracts already have: an identifier that is unambiguous in isolation, and a single place
+  where each rule lives.</p>
+</div>
+
+</div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+const titles = {
+  s01:"01 — Method & result",
+  s02:"02 — Blocking",
+  s03:"03 — Material & minor",
+  s04:"04 — Completeness matrix",
+  s05:"05 — The prompt standard",
+  s06:"06 — Six prompts reissued",
+  s07:"07 — Actions"
+};
+function go(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(l => l.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.sb-item').forEach(l => {
+    if ((l.getAttribute('onclick')||'').includes("'"+id+"'")) l.classList.add('on');
+  });
+  document.getElementById('tb-title').textContent = titles[id]||id;
+  window.scrollTo(0,0);
+}
+</script>
+</body></html>

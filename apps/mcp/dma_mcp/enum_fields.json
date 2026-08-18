@@ -1,0 +1,458 @@
+{
+ "date_fields": {
+  "context.acquisitions": [
+   "rows[*].closed_on"
+  ],
+  "context.issue_register": [
+   "issues[*].opened_on",
+   "issues[*].resolved_on"
+  ],
+  "context.regulatory_standing": [
+   "charter_date"
+  ],
+  "context.timeline": [
+   "events[*].event_date"
+  ],
+  "heatmap.evidence_age": [
+   "rows[*].reference_date",
+   "rows[*].published_or_asof"
+  ],
+  "overview.firmographics": [
+   "fields[*].as_of"
+  ],
+  "overview.leadership": [
+   "roster[*].appointed_on",
+   "roster[*].as_of"
+  ],
+  "overview.thought_leadership": [
+   "entries[*].published_on"
+  ],
+  "overview.why_now": [
+   "signals[*].dated_on"
+  ],
+  "techstack.techstack": [
+   "items[*].as_of"
+  ]
+ },
+ "enum_fields": {
+  "context.timeline": {
+   "events[*].claim_label": {
+    "enum": "claim_t",
+    "values": [
+     "CEILING_ESTIMATE",
+     "FACT",
+     "HYPOTHESIS",
+     "INFERENCE"
+    ]
+   }
+  },
+  "heatmap.alerts": {
+   "alerts[*].confidence": {
+    "enum": "confidence_t",
+    "values": [
+     "HIGH",
+     "LOW",
+     "MEDIUM"
+    ]
+   }
+  },
+  "heatmap.cohort_patterns": {
+   "patterns[*].confidence": {
+    "enum": "confidence_t",
+    "values": [
+     "HIGH",
+     "LOW",
+     "MEDIUM"
+    ]
+   }
+  },
+  "heatmap.focus_areas": {
+   "focus_areas[*].confidence": {
+    "enum": "confidence_t",
+    "values": [
+     "HIGH",
+     "LOW",
+     "MEDIUM"
+    ]
+   }
+  },
+  "heatmap.safeguard_gates": {
+   "caps[*].kind": {
+    "enum": "cap_kind_t",
+    "values": [
+     "analyst_override",
+     "cap",
+     "qa_hold",
+     "uncertainty_band"
+    ]
+   }
+  },
+  "insights.insights": {
+   "cards[*].claim_label": {
+    "enum": "claim_t",
+    "values": [
+     "CEILING_ESTIMATE",
+     "FACT",
+     "HYPOTHESIS",
+     "INFERENCE"
+    ]
+   },
+   "cards[*].confidence": {
+    "enum": "confidence_t",
+    "values": [
+     "HIGH",
+     "LOW",
+     "MEDIUM"
+    ]
+   }
+  },
+  "overview.ceilings": {
+   "rows[*].claim_label": {
+    "enum": "claim_t",
+    "values": [
+     "CEILING_ESTIMATE",
+     "FACT",
+     "HYPOTHESIS",
+     "INFERENCE"
+    ]
+   },
+   "rows[*].confidence": {
+    "enum": "confidence_t",
+    "values": [
+     "HIGH",
+     "LOW",
+     "MEDIUM"
+    ]
+   }
+  },
+  "overview.exec_summary": {
+   "claim_label": {
+    "enum": "claim_t",
+    "values": [
+     "CEILING_ESTIMATE",
+     "FACT",
+     "HYPOTHESIS",
+     "INFERENCE"
+    ]
+   }
+  },
+  "overview.findings": {
+   "findings[*].claim_label": {
+    "enum": "claim_t",
+    "values": [
+     "CEILING_ESTIMATE",
+     "FACT",
+     "HYPOTHESIS",
+     "INFERENCE"
+    ]
+   },
+   "findings[*].confidence": {
+    "enum": "confidence_t",
+    "values": [
+     "HIGH",
+     "LOW",
+     "MEDIUM"
+    ]
+   }
+  },
+  "overview.firmographics": {
+   "fields[*].confidence": {
+    "enum": "confidence_t",
+    "values": [
+     "HIGH",
+     "LOW",
+     "MEDIUM"
+    ]
+   },
+   "fields[*].recency_band": {
+    "enum": "recency_t",
+    "values": [
+     "ARCHIVAL",
+     "CURRENT",
+     "DATED",
+     "RECENT",
+     "STALE",
+     "UNVERIFIED"
+    ]
+   }
+  },
+  "overview.leadership": {
+   "roster[*].confidence": {
+    "enum": "confidence_t",
+    "values": [
+     "HIGH",
+     "LOW",
+     "MEDIUM"
+    ]
+   }
+  },
+  "overview.scores": {
+   "claim_label": {
+    "enum": "claim_t",
+    "values": [
+     "CEILING_ESTIMATE",
+     "FACT",
+     "HYPOTHESIS",
+     "INFERENCE"
+    ]
+   },
+   "confidence": {
+    "enum": "confidence_t",
+    "values": [
+     "HIGH",
+     "LOW",
+     "MEDIUM"
+    ]
+   },
+   "posture": {
+    "enum": "posture_t",
+    "values": [
+     "COMPETING",
+     "LAGGING",
+     "LEADING",
+     "MIXED"
+    ]
+   },
+   "posture_basis": {
+    "enum": "basis_t",
+    "values": [
+     "EVIDENCE",
+     "HYBRID",
+     "INFERRED"
+    ]
+   }
+  },
+  "overview.thought_leadership": {
+   "entries[*].claim_label": {
+    "enum": "claim_t",
+    "values": [
+     "CEILING_ESTIMATE",
+     "FACT",
+     "HYPOTHESIS",
+     "INFERENCE"
+    ]
+   }
+  },
+  "overview.why_now": {
+   "signals[*].claim_label": {
+    "enum": "claim_t",
+    "values": [
+     "CEILING_ESTIMATE",
+     "FACT",
+     "HYPOTHESIS",
+     "INFERENCE"
+    ]
+   },
+   "signals[*].confidence": {
+    "enum": "confidence_t",
+    "values": [
+     "HIGH",
+     "LOW",
+     "MEDIUM"
+    ]
+   }
+  },
+  "platform.recommendations": {
+   "recommendations[*].claim_label": {
+    "enum": "claim_t",
+    "values": [
+     "CEILING_ESTIMATE",
+     "FACT",
+     "HYPOTHESIS",
+     "INFERENCE"
+    ]
+   }
+  },
+  "techstack.techstack": {
+   "items[*].evidence_level": {
+    "enum": "evidence_level_t",
+    "values": [
+     "L1",
+     "L2",
+     "L3",
+     "L4"
+    ]
+   },
+   "items[*].layer": {
+    "enum": "stack_layer_t",
+    "values": [
+     "CUST",
+     "DATA",
+     "INFRA",
+     "OPS"
+    ]
+   },
+   "items[*].status": {
+    "enum": "stack_status_t",
+    "values": [
+     "ABSENT",
+     "CLAIMED",
+     "CONFIRMED",
+     "INFERRED"
+    ]
+   }
+  }
+ },
+ "enums": {
+  "age_band_t": [
+   "aging",
+   "current",
+   "dated",
+   "stale",
+   "undated"
+  ],
+  "age_status_t": [
+   "AGING",
+   "DATED",
+   "FRESH",
+   "STALE",
+   "UNDATED"
+  ],
+  "alert_action_t": [
+   "acknowledged",
+   "assigned",
+   "reopened",
+   "resolved",
+   "waived"
+  ],
+  "band_t": [
+   "Activating",
+   "Building",
+   "Competing",
+   "Differentiating"
+  ],
+  "basis_t": [
+   "EVIDENCE",
+   "HYBRID",
+   "INFERRED"
+  ],
+  "cap_kind_t": [
+   "analyst_override",
+   "cap",
+   "qa_hold",
+   "uncertainty_band"
+  ],
+  "claim_t": [
+   "CEILING_ESTIMATE",
+   "FACT",
+   "HYPOTHESIS",
+   "INFERENCE"
+  ],
+  "confidence_t": [
+   "HIGH",
+   "LOW",
+   "MEDIUM"
+  ],
+  "dedup_branch_t": [
+   "cross_entity_kept",
+   "dedup_same_entity",
+   "duplicate_within_run",
+   "kept",
+   "tier_upgrade"
+  ],
+  "entity_status_t": [
+   "ACTIVE",
+   "ARCHIVED",
+   "EXCLUDED",
+   "PENDING_REVIEW"
+  ],
+  "evidence_level_t": [
+   "L1",
+   "L2",
+   "L3",
+   "L4"
+  ],
+  "evidence_origin_t": [
+   "connector",
+   "internal",
+   "package",
+   "producer"
+  ],
+  "gate_family_t": [
+   "analytical",
+   "corpus",
+   "enrichment",
+   "safeguard"
+  ],
+  "gate_result_t": [
+   "FAIL",
+   "NOT_RUN",
+   "PASS"
+  ],
+  "page_t": [
+   "context",
+   "heatmap",
+   "insights",
+   "overview",
+   "platform",
+   "techstack"
+  ],
+  "peer_basis_t": [
+   "cannot_estimate",
+   "inferred",
+   "recomputed",
+   "table"
+  ],
+  "posture_t": [
+   "COMPETING",
+   "LAGGING",
+   "LEADING",
+   "MIXED"
+  ],
+  "provenance_t": [
+   "analyst",
+   "derived",
+   "producer"
+  ],
+  "recency_t": [
+   "ARCHIVAL",
+   "CURRENT",
+   "DATED",
+   "RECENT",
+   "STALE",
+   "UNVERIFIED"
+  ],
+  "run_status_t": [
+   "CLAIMED",
+   "INGESTED",
+   "PROMOTED",
+   "STAGED",
+   "SUPERSEDED",
+   "SYNTHESISING"
+  ],
+  "scope_t": [
+   "category",
+   "cell",
+   "pillar",
+   "run"
+  ],
+  "stack_layer_t": [
+   "CUST",
+   "DATA",
+   "INFRA",
+   "OPS"
+  ],
+  "stack_status_t": [
+   "ABSENT",
+   "CLAIMED",
+   "CONFIRMED",
+   "INFERRED"
+  ],
+  "submission_status_t": [
+   "FAIL",
+   "PASS"
+  ],
+  "tier_t": [
+   "T1",
+   "T2",
+   "T3",
+   "T4",
+   "T5"
+  ],
+  "user_role_t": [
+   "ADMIN",
+   "AE",
+   "ANALYST"
+  ]
+ }
+}

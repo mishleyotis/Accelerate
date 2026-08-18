@@ -1,0 +1,240 @@
+{
+  "checkpoint_id": "06_recommendations",
+  "checkpoint_phase": "Phase 11: Develop Recommendations",
+  "description": "Strategic recommendations for addressing priority gaps. Includes solution mapping, implementation approach, expected outcomes, and KPI tracking.",
+  "checkpoint_metadata": {
+    "assessment_id": "DMA-[ABBREV]-[YYYYMMDD]-[SEQNUM]",
+    "institution_name": "[Institution Name]",
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "recommendations_status": "[COMPLETE]",
+    "recommendation_count": "[Count of CRITICAL/HIGH priority recommendations]"
+  },
+  "recommendation_context": {
+    "prospecting_disclaimer": "All recommendations demonstrate alignment between identified gaps and solutions. Expected improvements and timeline are indicative only; subject to scoping and implementation complexity. No contractual or pricing commitments are implied.",
+    "assessment_basis": "[Overall score, top 3 gaps, peer positioning]",
+    "target_audience": "[C-suite, Board, CIO, COO, etc.]"
+  },
+  "strategic_recommendations": [
+    {
+      "recommendation_id": "REC-001",
+      "priority_tier": "[CRITICAL / HIGH / MEDIUM]",
+      "addressed_gap": "[P[1-4]C[1-5] — gap name]",
+      "current_score": "[Current institutional score]",
+      "peer_median_score": "[Peer benchmark]",
+      "gap_analysis": "[Root cause of why institution is behind peers; institutional context]",
+      "recommendation_title": "[Concise title; e.g., 'Establish Data Governance Council']",
+      "recommendation_summary": "[1–2 sentences describing the strategic action]",
+      "argument_chain": {
+        "claim": "[What should [Institution] do?]",
+        "evidence": "[Specific evidence supporting the claim: gap size, peer practice, regulatory context]",
+        "reasoning": "[Why this specific action addresses the root cause]",
+        "counterargument": "[Potential objection or risk]",
+        "rebuttal": "[Why the objection is addressed or acceptable]",
+        "qualification": "[Assumptions, timeline dependencies, prerequisite conditions]"
+      },
+      "implementation_approach": {
+        "phase_1": {
+          "phase_name": "[E.g., 'Foundation: Board-Level Governance']",
+          "timeline": "[X–Y months from start]",
+          "actions": [
+            "[Specific action 1]",
+            "[Specific action 2]"
+          ],
+          "resources_required": "[Team, budget, vendor, technology]",
+          "success_metrics": "[How to know Phase 1 succeeded]"
+        },
+        "phase_2": {
+          "phase_name": "[E.g., 'Implementation: Data Element Classification']",
+          "timeline": "[X–Y months]",
+          "actions": ["[Actions]"],
+          "resources_required": "[Resources]",
+          "success_metrics": "[Metrics]"
+        },
+        "phase_3": {
+          "phase_name": "[E.g., 'Optimization & Measurement']",
+          "timeline": "[X–Y months]",
+          "actions": ["[Actions]"],
+          "resources_required": "[Resources]",
+          "success_metrics": "[Metrics]"
+        }
+      },
+      "solution_alignment": {
+        "recommended_solutions": [
+          {
+            "solution_name": "[Salesforce Data Cloud / MuleSoft / etc.]",
+            "why_this_solution": "[Why this solution is optimal for [Institution]'s specific situation and gap; not generic]",
+            "expected_capability_improvement": "[P[1-4]C[1-5]: X.X → Y.Y (+Z.Z points)]",
+            "time_to_value": "[Months from implementation start to capability improvement]",
+            "key_outcomes": "[Specific outcomes that solution enables]"
+          }
+        ]
+      },
+      "kpis_and_tracking": [
+        {
+          "kpi": "[E.g., 'Data element coverage: % of critical elements classified']",
+          "baseline": "[Current state]",
+          "target": "[Target state after implementation]",
+          "measurement_method": "[How to measure]",
+          "tracking_frequency": "[Monthly / Quarterly]"
+        }
+      ],
+      "business_impact": {
+        "strategic_impact": "[How does this address institution's strategic objectives?]",
+        "member_impact": "[How does this benefit members/customers?]",
+        "operational_impact": "[Efficiency gains, risk reduction, cost implications]",
+        "competitive_impact": "[How does this position [Institution] vs. peers?]"
+      },
+      "dependencies_and_sequencing": {
+        "prerequisite_capabilities": "[Capabilities that must be in place first]",
+        "sequence_rationale": "[Why this recommendation is positioned at this stage relative to others]",
+        "concurrent_initiatives": "[Other gaps that could be addressed in parallel]"
+      },
+      "risks_and_mitigations": [
+        {
+          "risk": "[E.g., 'Change management complexity']",
+          "severity": "[High / Medium / Low]",
+          "mitigation": "[How to address the risk]"
+        }
+      ],
+      "success_criteria": {
+        "short_term": "[6–9 month milestones]",
+        "medium_term": "[12–18 month milestones]",
+        "long_term": "[24+ month vision]"
+      }
+    }
+  ],
+  "transformation_roadmap": {
+    "description": "Phased implementation plan across multiple priorities; no fixed date ranges (use milestone-based phases per skill standards)",
+    "roadmap_phases": [
+      {
+        "phase_number": 1,
+        "phase_name": "[E.g., 'Foundation & Governance']",
+        "duration": "[X–Y months]",
+        "trigger_milestone": "[What completion triggers phase start?]",
+        "included_recommendations": "[List of REC IDs addressed in this phase]",
+        "expected_overall_score_progression": "[Baseline → interim → post-phase]",
+        "resource_requirements": "[Team, budget, technology]",
+        "key_deliverables": "[Tangible outputs from this phase]",
+        "success_gates": "[Criteria that must be met before moving to next phase]"
+      },
+      {
+        "phase_number": 2,
+        "phase_name": "[E.g., 'Core Capability Build']",
+        "duration": "[X–Y months]",
+        "trigger_milestone": "[What starts this phase?]",
+        "included_recommendations": "[List of REC IDs]",
+        "expected_score_progression": "[Score trajectory]",
+        "resource_requirements": "[Resources]",
+        "key_deliverables": "[Deliverables]",
+        "success_gates": "[Gates]"
+      },
+      {
+        "phase_number": 3,
+        "phase_name": "[E.g., 'Optimization & Competitive Positioning']",
+        "duration": "[X–Y months]",
+        "trigger_milestone": "[Trigger]",
+        "included_recommendations": "[REC IDs]",
+        "expected_score_progression": "[Score trajectory; should approach or exceed peer median]",
+        "resource_requirements": "[Resources]",
+        "key_deliverables": "[Deliverables]",
+        "success_gates": "[Gates; final gate = maturity target achieved]"
+      }
+    ],
+    "overall_roadmap_timeline": {
+      "phase_1_start": "[Trigger]",
+      "phase_2_start": "[Trigger; estimated [X] months after Phase 1 start]",
+      "phase_3_start": "[Trigger; estimated [X] months after Phase 2 start]",
+      "full_roadmap_duration": "[Total estimated months from Phase 1 start to completion]",
+      "maturity_target": "[Overall score target at end of roadmap, e.g., 3.2 → 3.8]"
+    }
+  },
+  "solution_portfolio_summary": {
+    "description": "Overview of recommended solutions and how they work together",
+    "solution_categories": {
+      "governance_and_strategy": [
+        "[Solutions for P1 gaps]"
+      ],
+      "customer_experience": [
+        "[Solutions for P2 gaps]"
+      ],
+      "operations_and_compliance": [
+        "[Solutions for P3 gaps]"
+      ],
+      "technology_and_data": [
+        "[Solutions for P4 gaps]"
+      ]
+    },
+    "integrated_approach": "[How solutions work together; synergies; avoid overlapping or redundant tooling]"
+  },
+  "alternative_approaches": {
+    "description": "Alternative strategies for addressing priority gaps; shows [Institution] has options based on risk tolerance and resources",
+    "alternative_1": {
+      "approach_name": "[E.g., 'Build Internal vs. Buy']",
+      "advantages": "[Why this approach might be preferred]",
+      "disadvantages": "[Trade-offs]",
+      "timeline_impact": "[Would this speed up or slow down implementation?]",
+      "cost_implications": "[Relative cost vs. recommended approach]"
+    }
+  },
+  "investment_and_resource_planning": {
+    "resource_estimate": {
+      "internal_resources": "[Team skills, headcount needed]",
+      "external_resources": "[Vendors, consultants, agencies]",
+      "technology_investment": "[Estimated software, infrastructure, training]",
+      "total_effort_estimate": "[Person-months or FTE-years]"
+    },
+    "implementation_timeline": "[Total months to complete all phases]",
+    "roi_considerations": "[NOTE: Prospecting context; no specific ROI commitments. Typical benefits include: improved member satisfaction, operational efficiency gains, reduced compliance risk, increased digital revenue.]"
+  },
+  "expected_outcomes": {
+    "capability_improvements": [
+      {
+        "capability": "[P[1-4]C[1-5]]",
+        "current_score": "[X.X]",
+        "post_implementation_score": "[Y.Y]",
+        "score_improvement": "[+Z.Z points]"
+      }
+    ],
+    "overall_maturity_trajectory": {
+      "baseline": "[Current overall score]",
+      "post_phase_1": "[Expected score after Phase 1]",
+      "post_phase_2": "[Expected score after Phase 2]",
+      "post_phase_3": "[Expected score after Phase 3 (roadmap completion)]",
+      "peer_median_comparison": "[How does final score compare to current peer median?]"
+    },
+    "qualitative_outcomes": [
+      "[Governance strengthened]",
+      "[Member digital engagement increased]",
+      "[Operational risk reduced]",
+      "[Technology modernization achieved]"
+    ]
+  },
+  "governance_and_oversight": {
+    "steering_committee": "[Who should oversee implementation? CEO, Board committee, CIO, etc.]",
+    "success_metrics_dashboard": "[Monthly/quarterly tracking of KPIs across all recommendations]",
+    "gating_process": "[How to determine when phases are complete and gates satisfied]",
+    "course_correction": "[Process for adjusting roadmap if conditions change]"
+  },
+  "quality_assurance_checks": {
+    "recommendation_argument_validation": {
+      "status": "[PASS / FAIL]",
+      "description": "All recommendations include full argument chain per skill Principle 2"
+    },
+    "solution_specificity_validation": {
+      "status": "[PASS / FAIL]",
+      "check": "No generic recommendations; all solutions explained for [Institution]'s specific context"
+    },
+    "no_roi_commitment_validation": {
+      "status": "[PASS / FAIL]",
+      "check": "Prospecting context maintained; no pricing or contractual language included"
+    }
+  },
+  "metadata": {
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_version": "1.0",
+    "total_recommendations": "[Count]",
+    "checkpoint_status": "COMPLETE"
+  }
+}

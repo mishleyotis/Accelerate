@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DMA Insights — Backend Schema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap">
+<style>
+
+/* ─── ZENNIFY TOKEN MAP ──────────────────────────────────────── */
+:root {
+  --z-teal:      #27BBAF;   /* brand teal — headlines, accents     */
+  --z-teal-dark: #185F60;   /* dark teal  — sidebar, dark cards    */
+  --z-teal-mid:  #139F94;   /* accent green — icons, sub-labels    */
+  --z-mint:      #79E2BF;   /* mint — curve, highlight             */
+  --z-ice:       #E8F7F6;   /* ice — card tint, soft bg            */
+  --z-green:     #1C4A4D;   /* dark green — primary body text      */
+  --z-green2:    #1A4D4D;   /* dark teal variant 2                 */
+  --z-lavender:  #F2F4F9;   /* card fill — most common card color  */
+  --z-purple:    #8094C0;   /* eyebrow / caption                   */
+  --z-orange:    #FE9732;   /* accent orange — warnings            */
+  --z-orange-lt: #FFCB99;   /* light orange — Activating level     */
+  --z-gray-bg:   #F5F5F5;   /* light slide background              */
+  --z-gray-sep:  #E5E7EB;   /* separator                           */
+  --z-gray-body: #4A5568;   /* alt body text                       */
+  --z-gray-muted:#6B7280;   /* footnotes, muted                    */
+  --z-white:     #FFFFFF;
+  --z-navy:      #001E48;   /* featured offerings dark             */
+  /* Maturity */
+  --m1: #FFCB99; --m1t: #7C3C00;   /* Activating */
+  --m2: #62D7B8; --m2t: #0D4F3C;   /* Building   */
+  --m3: #27BBAF; --m3t: #FFFFFF;   /* Competing  */
+  --m4: #139F94; --m4t: #FFFFFF;   /* Differentiating */
+  /* Phase colours */
+  --ph0: #735BA1; --ph0-lt: #EDE9FE; --ph0-bd: #C4B5FD;
+  --ph1: #3D81F6; --ph1-lt: #EFF6FF; --ph1-bd: #BFDBFE;
+  --radius: 8px; --radius-lg: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;font-weight:400;font-size:14px;line-height:1.65;background:var(--z-gray-bg);color:var(--z-green);}
+
+/* ─── LAYOUT ─────────────────────────────────────────────────── */
+.shell{display:flex;min-height:100vh;}
+
+/* Sidebar */
+.sb{width:240px;flex-shrink:0;background:var(--z-teal-dark);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.sb-head{padding:20px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo{font-size:13px;font-weight:600;color:var(--z-teal);letter-spacing:.1em;text-transform:uppercase;}
+.sb-doc{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;}
+.sb-ver{font-size:10px;color:rgba(255,255,255,.2);margin-top:2px;font-family:'DM Mono',monospace;}
+.sb-grp{padding:14px 10px 2px;}
+.sb-grp-label{font-size:9px;font-weight:600;color:rgba(255,255,255,.22);letter-spacing:.14em;text-transform:uppercase;padding:0 6px;margin-bottom:4px;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;color:rgba(255,255,255,.48);font-size:12px;font-weight:400;transition:all .13s;}
+.sb-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.82);}
+.sb-item.on{background:rgba(39,187,175,.16);color:var(--z-teal);}
+.sb-item.ph0{color:rgba(196,181,253,.65);}
+.sb-item.ph0:hover{background:rgba(115,91,161,.12);color:#c4b5fd;}
+.sb-item.ph0.on{background:rgba(115,91,161,.2);color:#c4b5fd;}
+.sb-item.ph1{color:rgba(147,197,253,.65);}
+.sb-item.ph1:hover{background:rgba(61,129,246,.12);color:#93c5fd;}
+.sb-item.ph1.on{background:rgba(61,129,246,.2);color:#93c5fd;}
+.sb-tag{font-size:9px;font-family:'DM Mono',monospace;background:rgba(255,255,255,.07);border-radius:3px;padding:1px 5px;min-width:22px;text-align:center;}
+.sb-item.on .sb-tag{background:rgba(39,187,175,.25);color:var(--z-teal);}
+.sb-item.ph0.on .sb-tag{background:rgba(115,91,161,.25);color:#c4b5fd;}
+.sb-item.ph1.on .sb-tag{background:rgba(61,129,246,.25);color:#93c5fd;}
+.sb-foot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.2);}
+
+/* Main */
+.main{flex:1;min-width:0;}
+.topbar{background:var(--z-white);border-bottom:1px solid var(--z-gray-sep);padding:14px 36px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
+.tb-title{font-size:15px;font-weight:600;color:var(--z-green);}
+.tb-meta{font-size:11px;color:var(--z-gray-muted);}
+.content{padding:36px;max-width:980px;}
+.section{display:none;}
+.section.on{display:block;}
+
+/* ─── TYPOGRAPHY ─────────────────────────────────────────────── */
+h1{font-size:26px;font-weight:600;color:var(--z-green);letter-spacing:-.018em;line-height:1.2;margin-bottom:6px;}
+.eyebrow{font-size:11px;font-weight:400;color:var(--z-purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+h2{font-size:17px;font-weight:600;color:var(--z-green);margin:30px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--z-ice);}
+h3{font-size:14px;font-weight:600;color:var(--z-green);margin:20px 0 8px;}
+h4{font-size:13px;font-weight:500;color:var(--z-green2);margin:14px 0 6px;}
+p{color:var(--z-gray-body);line-height:1.75;margin-bottom:10px;}
+.lead{font-size:15px;font-weight:300;color:var(--z-gray-body);line-height:1.85;margin-bottom:22px;max-width:820px;}
+code{font-family:'DM Mono',monospace;font-size:11.5px;background:var(--z-lavender);padding:2px 5px;border-radius:4px;color:var(--z-teal-dark);}
+strong{font-weight:600;color:var(--z-green);}
+hr{border:none;border-top:1px solid var(--z-gray-sep);margin:24px 0;}
+
+/* ─── BADGES ─────────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.03em;white-space:nowrap;}
+.b-teal{background:var(--z-ice);color:var(--z-teal-dark);}
+.b-green{background:#D1FAE5;color:#065F46;}
+.b-amber{background:#FEF3C7;color:#92400E;}
+.b-red{background:#FEE2E2;color:#991B1B;}
+.b-gray{background:var(--z-lavender);color:var(--z-gray-body);}
+.b-navy{background:#E0E7FF;color:var(--z-navy);}
+.b-ph0{background:var(--ph0-lt);color:#5B21B6;}
+.b-ph1{background:var(--ph1-lt);color:#1D4ED8;}
+.b-p0{background:#FEE2E2;color:#991B1B;}
+.b-p1{background:#FFEDD5;color:#C2410C;}
+.b-p2{background:var(--z-lavender);color:var(--z-gray-body);}
+.b-new{background:var(--z-teal);color:var(--z-white);font-size:9px;}
+
+/* ─── CALL-OUT BOXES ─────────────────────────────────────────── */
+.callout{border-radius:var(--radius);padding:13px 16px;margin:12px 0;}
+.callout p{margin:0;font-size:13px;line-height:1.7;}
+.co-teal{background:var(--z-ice);border-left:3px solid var(--z-teal);}
+.co-teal p{color:var(--z-teal-dark);}
+.co-orange{background:#FFF7ED;border-left:3px solid var(--z-orange);}
+.co-orange p{color:#7C2D12;}
+.co-dark{background:var(--z-teal-dark);border-left:3px solid var(--z-mint);}
+.co-dark .co-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--z-mint);margin-bottom:5px;}
+.co-dark p{color:rgba(255,255,255,.78);}
+.co-ph0{background:var(--ph0-lt);border-left:3px solid var(--ph0);}
+.co-ph0 p{color:#4C1D95;}
+.co-ph1{background:var(--ph1-lt);border-left:3px solid var(--ph1);}
+.co-ph1 p{color:#1E3A8A;}
+
+/* ─── CARDS ─────────────────────────────────────────────────── */
+.card{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:12px;}
+.card-lav{background:var(--z-lavender);border:none;}
+.card-ice{background:var(--z-ice);border:none;}
+.card-dark{background:var(--z-teal-dark);border:none;color:var(--z-white);}
+.card-title{font-size:14px;font-weight:600;color:var(--z-green);}
+.card-dark .card-title{color:var(--z-white);}
+.card-sub{font-size:12px;color:var(--z-gray-muted);margin-top:2px;}
+.card-dark .card-sub{color:rgba(255,255,255,.45);}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+
+/* ─── GRIDS ─────────────────────────────────────────────────── */
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.g-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;}
+
+/* ─── PHASE BANNER ───────────────────────────────────────────── */
+.phase-banner{display:flex;gap:0;border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:18px 0;}
+.pb-col{flex:1;padding:18px 16px;}
+.pb-0{background:linear-gradient(135deg,rgba(115,91,161,.07),rgba(115,91,161,.03));}
+.pb-1{background:linear-gradient(135deg,rgba(61,129,246,.07),rgba(61,129,246,.03));}
+.pb-div{width:1px;background:var(--z-gray-sep);}
+.pb-eye{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.pb-0 .pb-eye{color:var(--ph0);}
+.pb-1 .pb-eye{color:var(--ph1);}
+.pb-h{font-size:14px;font-weight:600;color:var(--z-green);margin-bottom:5px;}
+.pb-desc{font-size:12px;color:var(--z-gray-body);line-height:1.7;margin-bottom:10px;}
+.pb-li{font-size:12px;color:var(--z-gray-body);line-height:1.8;list-style:none;}
+.pb-li li{display:flex;gap:6px;align-items:flex-start;}
+.pb-0 .pb-li li::before{content:'→';color:var(--ph0);font-weight:600;flex-shrink:0;}
+.pb-1 .pb-li li::before{content:'→';color:var(--ph1);font-weight:600;flex-shrink:0;}
+
+/* ─── FEATURE TABLE ──────────────────────────────────────────── */
+.ft{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+.ft th{background:var(--z-teal-dark);color:rgba(255,255,255,.82);padding:8px 11px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.ft th:first-child{border-radius:6px 0 0 6px;}
+.ft th:last-child{border-radius:0 6px 6px 0;}
+.ft td{padding:9px 11px;border-bottom:1px solid var(--z-lavender);vertical-align:top;}
+.ft tr:last-child td{border-bottom:none;}
+.ft tr:hover td{background:#FAFBFD;}
+.ft .fn{font-weight:600;color:var(--z-green);margin-bottom:2px;}
+.ft .fd{font-size:11px;color:var(--z-gray-muted);}
+
+/* ─── FLOW ───────────────────────────────────────────────────── */
+.flow{display:flex;flex-direction:column;}
+.f-row{display:flex;gap:13px;}
+.f-spine{display:flex;flex-direction:column;align-items:center;}
+.f-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.f-dot-teal{background:var(--z-teal);color:var(--z-white);}
+.f-dot-0{background:var(--ph0);color:var(--z-white);}
+.f-dot-1{background:var(--ph1);color:var(--z-white);}
+.f-line{flex:1;width:2px;min-height:12px;}
+.f-line-teal{background:var(--z-ice);}
+.f-line-0{background:var(--ph0-lt);}
+.f-line-1{background:var(--ph1-lt);}
+.f-body{flex:1;padding-bottom:16px;}
+.f-title{font-size:13px;font-weight:600;color:var(--z-green);margin-bottom:3px;}
+.f-desc{font-size:12px;color:var(--z-gray-muted);line-height:1.7;}
+.f-sub{background:var(--z-lavender);border-radius:var(--radius);padding:9px 12px;margin-top:7px;}
+.f-sub p{font-size:11px;color:var(--z-gray-body);margin:0;line-height:1.65;}
+
+/* ─── PERSONA CARDS ──────────────────────────────────────────── */
+.personas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0;}
+.persona{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);padding:16px;}
+.p-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;margin-bottom:10px;}
+.p-name{font-size:13px;font-weight:600;color:var(--z-green);}
+.p-role{font-size:11px;color:var(--z-gray-muted);margin-bottom:8px;}
+.p-desc{font-size:12px;color:var(--z-gray-body);line-height:1.7;}
+.p-missions{margin-top:10px;padding-top:10px;border-top:1px solid var(--z-lavender);}
+.p-m{font-size:11px;color:var(--z-gray-muted);padding:2px 0;display:flex;gap:6px;align-items:flex-start;}
+.p-m::before{content:'→';color:var(--z-teal);font-weight:700;flex-shrink:0;}
+
+/* ─── DASHBOARD BLOCKS ───────────────────────────────────────── */
+.db{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:16px 0;}
+.db-head{background:var(--z-teal-dark);padding:14px 18px;display:flex;align-items:center;gap:12px;}
+.db-num{width:28px;height:28px;border-radius:8px;background:rgba(39,187,175,.25);color:var(--z-teal);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.db-info{flex:1;}
+.db-title{font-size:14px;font-weight:600;color:var(--z-white);}
+.db-sub{font-size:11px;color:rgba(255,255,255,.38);margin-top:1px;}
+.db-body{padding:18px;}
+.db-desc{font-size:13px;color:var(--z-gray-body);margin-bottom:14px;line-height:1.75;}
+.db-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.db-feat{background:var(--z-lavender);border-radius:var(--radius);padding:10px 12px;}
+.db-ft{font-size:12px;font-weight:600;color:var(--z-green);margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+.db-fd{font-size:11px;color:var(--z-gray-muted);line-height:1.6;}
+
+/* ─── TABLES ─────────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+.tbl th{background:var(--z-teal-dark);color:rgba(255,255,255,.8);padding:8px 11px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.tbl th:first-child{border-radius:6px 0 0 6px;}
+.tbl th:last-child{border-radius:0 6px 6px 0;}
+.tbl td{padding:8px 11px;border-bottom:1px solid var(--z-lavender);vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#fafbfd;}
+.tk{color:var(--z-teal-mid);font-weight:600;font-family:'DM Mono',monospace;}
+.tv{color:var(--z-gray-body);}
+
+/* ─── CODE BLOCK ─────────────────────────────────────────────── */
+.code{background:var(--z-teal-dark);border-radius:var(--radius);padding:14px 16px;font-family:'DM Mono',monospace;font-size:11.5px;color:#e2e8f0;overflow-x:auto;margin:10px 0;line-height:1.75;}
+.code .kw{color:#60a5fa;}
+.code .str{color:#6ee7b7;}
+.code .cmt{color:#475569;}
+.code .key{color:#f0abfc;}
+.code .num{color:#fbbf24;}
+
+/* ─── HEATMAP DEMO ───────────────────────────────────────────── */
+.hm-wrap{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:10px 0;}
+.hm-bar{background:var(--z-lavender);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--z-gray-muted);border-bottom:1px solid var(--z-gray-sep);}
+.hm-grid{padding:12px;display:grid;grid-template-columns:88px repeat(8,1fr);gap:3px;}
+.hm-c{height:22px;border-radius:3px;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;}
+.hm-c:hover{transform:scale(1.1);z-index:1;}
+.hm-label{font-size:10px;color:var(--z-gray-muted);text-align:right;padding-right:8px;display:flex;align-items:center;justify-content:flex-end;}
+.hm-ch{font-size:9px;color:var(--z-gray-muted);text-align:center;display:flex;align-items:flex-end;justify-content:center;height:22px;}
+.m1s{background:#FFCB99;color:#7C3C00;}
+.m2s{background:#B0EDD3;color:#0D4F3C;}
+.m3s{background:#27BBAF;color:#fff;}
+.m4s{background:#139F94;color:#fff;}
+.m5s{background:#185F60;color:#fff;}
+.thin{outline:2px dashed #C25008;outline-offset:1px;}
+
+/* ─── MATURITY PILLS ─────────────────────────────────────────── */
+.m-legend{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;}
+.m-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+
+/* ─── ARTIFACT CARDS ─────────────────────────────────────────── */
+.art-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+.art{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;}
+.art-head{padding:9px 13px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+.art-body{padding:10px 13px;}
+.art-row{display:grid;grid-template-columns:88px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid var(--z-lavender);font-size:11px;}
+.art-row:last-child{border-bottom:none;}
+.art-k{color:var(--z-gray-muted);}
+.art-v{color:var(--z-gray-body);}
+.ah-doc{background:var(--z-ice);color:var(--z-teal-dark);}
+.ah-xlsx{background:#D1FAE5;color:#065F46;}
+.ah-json{background:#FEF3C7;color:#92400E;}
+.ah-zip{background:var(--ph0-lt);color:#5B21B6;}
+
+/* ─── DEDUP ──────────────────────────────────────────────────── */
+.dd-group{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);margin:10px 0;overflow:hidden;}
+.dd-head{background:var(--z-lavender);padding:8px 13px;font-size:12px;font-weight:600;color:var(--z-green);display:flex;align-items:center;gap:8px;}
+.dd-file{display:flex;align-items:center;gap:10px;padding:8px 13px;border-top:1px solid var(--z-lavender);font-size:12px;}
+.dd-name{flex:1;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--z-gray-body);}
+.dd-date{font-size:10px;color:var(--z-gray-muted);}
+.win{background:#F0FDF4;}
+.win .dd-name{color:var(--z-green);font-weight:500;}
+.lose .dd-name{text-decoration:line-through;color:var(--z-gray-muted);}
+
+/* ─── API ENDPOINTS ──────────────────────────────────────────── */
+.ep{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius);margin-bottom:6px;}
+.method{font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 6px;border-radius:3px;font-family:'DM Mono',monospace;flex-shrink:0;}
+.mget{background:#DBEAFE;color:#1E40AF;}
+.mpost{background:#D1FAE5;color:#065F46;}
+.mput{background:#FFEDD5;color:#C2410C;}
+.ep-path{font-family:'DM Mono',monospace;font-size:12px;color:var(--z-green);font-weight:500;}
+.ep-desc{font-size:11px;color:var(--z-gray-muted);margin-top:1px;}
+
+/* ─── CHECKLIST ──────────────────────────────────────────────── */
+.chk{list-style:none;font-size:13px;}
+.chk li{padding:4px 0;display:flex;gap:8px;align-items:flex-start;}
+.chk li::before{content:'✓';color:var(--z-teal);font-weight:700;flex-shrink:0;margin-top:1px;}
+.chk-x li::before{content:'✗';color:#DC2626;}
+
+/* ─── PLATFORM CHIPS ─────────────────────────────────────────── */
+.plat{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;border:1px solid;}
+.pl-sf{background:#E0F4FC;color:#005C82;border-color:#B8E4F5;}
+.pl-db{background:#FFF0EE;color:#9B1A08;border-color:#FFD0C9;}
+.pl-tbl{background:#FFF3E8;color:#7A3C00;border-color:#FFD9B0;}
+.pl-tw{background:#FFEEF0;color:#8B0012;border-color:#FFCCD1;}
+.pl-nc{background:#E8EEF8;color:#1B5298;border-color:#C5D4EE;}
+
+/* ─── STAT CARDS ─────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+.stat{background:var(--z-lavender);border-radius:var(--radius-lg);padding:16px 14px;}
+.stat-num{font-size:28px;font-weight:600;color:var(--z-teal);line-height:1;}
+.stat-label{font-size:12px;font-weight:500;color:var(--z-green);margin-top:4px;}
+.stat-desc{font-size:11px;color:var(--z-gray-muted);margin-top:4px;line-height:1.5;}
+
+/* ─── INSIGHT CARD DEMO ──────────────────────────────────────── */
+.ic{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:10px 0;}
+.ic-head{background:var(--z-teal-dark);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.ic-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--z-teal);}
+.ic-body{padding:0;}
+.ic-row{display:grid;grid-template-columns:72px 1fr;gap:10px;padding:9px 14px;border-bottom:1px solid var(--z-lavender);}
+.ic-row:last-child{border-bottom:none;}
+.ic-label{font-size:9px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--z-gray-muted);padding-top:2px;}
+.ic-text{font-size:12px;color:var(--z-gray-body);line-height:1.65;}
+
+/* SCOPE TABLE */
+.scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0;}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────── */
+@media(max-width:768px){.sb{display:none;}.personas,.stats,.g3{grid-template-columns:1fr;}.g2,.db-grid,.art-grid,.scope-grid{grid-template-columns:1fr;}.phase-banner{flex-direction:column;}}
+
+
+/* ─── v4.0 ADDITIONS ─────────────────────────────────────────── */
+.b-mcp{background:#EDE9FE;color:#5B21B6;}
+.b-gate{background:#E0F2FE;color:#075985;}
+.b-serv{background:#D1FAE5;color:#065F46;}
+.b-stage{background:#FEF3C7;color:#92400E;}
+.b-ing{background:#E0E7FF;color:#3730A3;}
+.b-none{background:var(--z-lavender);color:var(--z-gray-muted);font-style:italic;}
+.b-mono{font-family:'DM Mono',monospace;font-weight:500;letter-spacing:0;}
+
+
+/* Decision register */
+.dec{border:1px solid var(--z-gray-sep);border-left:3px solid var(--z-purple);
+  border-radius:var(--radius);padding:13px 16px;margin:10px 0;background:var(--z-white);}
+.dec-h{display:flex;align-items:center;gap:9px;margin-bottom:6px;flex-wrap:wrap;}
+.dec-id{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--z-purple);}
+.dec-t{font-size:13px;font-weight:600;color:var(--z-green);}
+.dec-b{font-size:12px;color:var(--z-gray-body);line-height:1.7;}
+.dec-b p{font-size:12px;margin:0 0 6px;}
+.dec-b p:last-child{margin-bottom:0;}
+.dec-why{background:var(--z-lavender);border-radius:6px;padding:8px 11px;margin-top:8px;
+  font-size:11px;color:var(--z-gray-body);line-height:1.65;}
+.dec-why b{color:var(--z-green);}
+
+/* Boundary / invariant rules — the hard statements */
+.rule{background:var(--z-teal-dark);border-radius:var(--radius);padding:12px 16px;margin:12px 0;}
+.rule p{color:#fff;font-size:12.5px;font-weight:500;margin:0;line-height:1.7;}
+.rule .rule-lbl{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--z-mint);margin-bottom:5px;}
+
+/* Tier ladder */
+.tier-row{display:grid;grid-template-columns:44px 1fr 62px 60px;gap:10px;align-items:center;
+  padding:7px 11px;border-bottom:1px solid var(--z-lavender);font-size:11.5px;}
+.tier-row:last-child{border-bottom:none;}
+.tier-n{font-family:'DM Mono',monospace;font-weight:600;font-size:11px;padding:3px 0;
+  text-align:center;border-radius:4px;}
+.t1{background:#065F46;color:#fff;} .t2{background:#059669;color:#fff;}
+.t3{background:#27BBAF;color:#fff;} .t4{background:#FE9732;color:#7C3C00;}
+.t5{background:#FEE2E2;color:#991B1B;}
+.tier-w{font-family:'DM Mono',monospace;color:var(--z-gray-muted);text-align:right;}
+.tier-c{font-family:'DM Mono',monospace;color:var(--z-teal-mid);font-weight:600;text-align:right;}
+
+/* Gate family cards */
+.gfam{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0;}
+.gf{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;}
+.gf-h{padding:9px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.gf-p{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;}
+.gf-b{padding:11px 13px;font-size:11.5px;color:var(--z-gray-body);line-height:1.65;}
+.gf-b .gf-k{color:var(--z-gray-muted);font-size:10px;letter-spacing:.06em;
+  text-transform:uppercase;display:block;margin-top:7px;margin-bottom:2px;}
+.gf-ag .gf-h{background:var(--z-ice);color:var(--z-teal-dark);}
+.gf-sg .gf-h{background:#FFF7ED;color:#7C2D12;}
+.gf-et .gf-h{background:var(--ph0-lt);color:#5B21B6;}
+.gf-cg .gf-h{background:var(--ph1-lt);color:#1D4ED8;}
+
+/* MCP tool cards */
+.tool{display:grid;grid-template-columns:190px 1fr;gap:12px;padding:9px 12px;
+  border:1px solid var(--z-gray-sep);border-radius:var(--radius);margin-bottom:6px;
+  background:var(--z-white);}
+.tool-n{font-family:'DM Mono',monospace;font-size:11.5px;font-weight:600;color:var(--z-teal-dark);}
+.tool-g{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--z-gray-muted);
+  margin-top:2px;}
+.tool-d{font-size:11.5px;color:var(--z-gray-body);line-height:1.65;}
+
+/* Pipeline / lifecycle strip */
+.pipe{display:flex;align-items:stretch;gap:0;margin:14px 0;border:1px solid var(--z-gray-sep);
+  border-radius:var(--radius-lg);overflow:hidden;}
+.pipe-s{flex:1;padding:12px 13px;border-right:1px solid var(--z-gray-sep);}
+.pipe-s:last-child{border-right:none;}
+.pipe-n{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--z-purple);margin-bottom:4px;}
+.pipe-t{font-size:12px;font-weight:600;color:var(--z-green);margin-bottom:3px;}
+.pipe-d{font-size:10.5px;color:var(--z-gray-muted);line-height:1.6;}
+.pipe-s.hot{background:var(--z-ice);}
+.pipe-s.cold{background:var(--z-lavender);}
+
+/* Schema column rows (backend schema doc) */
+.schema{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);
+  overflow:hidden;margin:12px 0;}
+.sch-h{background:var(--z-teal-dark);padding:9px 14px;display:flex;align-items:center;
+  justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.sch-n{font-family:'DM Mono',monospace;font-size:12.5px;font-weight:600;color:var(--z-teal);}
+.sch-s{font-size:10.5px;color:rgba(255,255,255,.45);}
+.sch-b{padding:2px 0;}
+.col{display:grid;grid-template-columns:210px 128px 58px 1fr;gap:9px;padding:6px 14px;
+  border-bottom:1px solid var(--z-lavender);font-size:11px;align-items:baseline;}
+.col:last-child{border-bottom:none;}
+.col-name{font-family:'DM Mono',monospace;font-weight:500;color:var(--z-green);}
+.col-type{font-family:'DM Mono',monospace;font-size:10px;color:var(--z-teal-mid);}
+.col-pk{font-size:8.5px;font-weight:700;letter-spacing:.05em;color:var(--z-purple);}
+.col-desc{color:var(--z-gray-muted);line-height:1.6;font-size:10.5px;}
+
+/* Count reconciliation */
+.count{display:grid;grid-template-columns:1fr 66px;gap:8px;padding:6px 12px;
+  border-bottom:1px solid var(--z-lavender);font-size:11.5px;}
+.count:last-of-type{border-bottom:2px solid var(--z-teal);}
+.count-v{font-family:'DM Mono',monospace;font-weight:600;color:var(--z-green);text-align:right;}
+.count-tot{display:grid;grid-template-columns:1fr 66px;gap:8px;padding:8px 12px;
+  font-size:12px;font-weight:600;color:var(--z-green);}
+.count-tot .count-v{color:var(--z-teal-mid);}
+
+/* Step cards (implementation plan) */
+.step{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);margin:12px 0;
+  overflow:hidden;}
+.step-h{background:var(--z-lavender);padding:10px 14px;display:flex;align-items:center;
+  gap:10px;flex-wrap:wrap;}
+.step-id{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--z-teal-dark);
+  background:var(--z-white);border-radius:4px;padding:2px 7px;}
+.step-t{font-size:13px;font-weight:600;color:var(--z-green);flex:1;}
+.step-b{padding:13px 15px;}
+.step-b p{font-size:12px;}
+.deliv{list-style:none;font-size:11.5px;margin:8px 0;}
+.deliv li{padding:3px 0;display:flex;gap:7px;align-items:flex-start;color:var(--z-gray-body);
+  line-height:1.6;}
+.deliv li::before{content:'▸';color:var(--z-teal);font-weight:700;flex-shrink:0;}
+
+/* Dependency / ordering note */
+.dep{font-size:10.5px;color:var(--z-gray-muted);background:var(--z-lavender);
+  border-radius:5px;padding:6px 10px;margin-top:8px;display:inline-block;}
+.dep b{color:var(--z-teal-dark);}
+
+/* Two-column compare */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--z-gray-sep);
+  border-radius:var(--radius-lg);overflow:hidden;margin:12px 0;}
+.cmp-c{padding:14px 16px;}
+.cmp-c:first-child{background:#FFF7ED;border-right:1px solid var(--z-gray-sep);}
+.cmp-c:last-child{background:#F0FDF4;}
+.cmp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:7px;}
+.cmp-c:first-child .cmp-l{color:#C2410C;}
+.cmp-c:last-child .cmp-l{color:#065F46;}
+.cmp-c ul{list-style:none;font-size:11.5px;line-height:1.75;color:var(--z-gray-body);}
+.cmp-c li{padding:2px 0;display:flex;gap:6px;align-items:flex-start;}
+.cmp-c:first-child li::before{content:'✗';color:#DC2626;font-weight:700;flex-shrink:0;}
+.cmp-c:last-child li::before{content:'✓';color:#059669;font-weight:700;flex-shrink:0;}
+
+.tbl td code, .ft td code{font-size:10.5px;padding:1px 4px;}
+.tbl .num, .ft .num{font-family:'DM Mono',monospace;text-align:right;color:var(--z-green);}
+.nowrap{white-space:nowrap;}
+.muted{color:var(--z-gray-muted);}
+.small{font-size:11px;}
+h2 .delta, h3 .delta{vertical-align:middle;margin-left:8px;}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="sb">
+  <div class="sb-head">
+    <div class="sb-logo">Zennify</div>
+    <div class="sb-doc">DMA Insights · Backend Schema</div>
+    <div class="sb-ver">August 2026</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Overview</div>
+    <div class="sb-item on" onclick="go('s01')"><span class="sb-tag">01</span> Architecture &amp; tiers</div>
+    <div class="sb-item" onclick="go('s02')"><span class="sb-tag">02</span> Table inventory</div>
+    <div class="sb-item" onclick="go('s03')"><span class="sb-tag">03</span> Auth</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(196,181,253,.3)">Tier 1 · Ingested</div>
+    <div class="sb-item ph0" onclick="go('s04')"><span class="sb-tag">04</span> Ingested tier</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(196,181,253,.3)">Tier 2 · Staging</div>
+    <div class="sb-item ph0" onclick="go('s05')"><span class="sb-tag">05</span> Staging tier</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(147,197,253,.3)">Tier 3 · Serving</div>
+    <div class="sb-item ph1" onclick="go('s06')"><span class="sb-tag">06</span> Serving tier</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(167,243,208,.35)">Vector &amp; concurrency</div>
+    <div class="sb-item" onclick="go('s12')"><span class="sb-tag">12</span> Vector tier</div>
+    <div class="sb-item" onclick="go('s13')"><span class="sb-tag">13</span> Transactions &amp; concurrency</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Supporting</div>
+    <div class="sb-item" onclick="go('s07')"><span class="sb-tag">07</span> Control &amp; audit</div>
+    <div class="sb-item" onclick="go('s08')"><span class="sb-tag">08</span> Catalogue</div>
+    <div class="sb-item" onclick="go('s09')"><span class="sb-tag">09</span> Constraints &amp; indexes</div>
+    <div class="sb-item" onclick="go('s11')"><span class="sb-tag">11</span> User state &amp; lineage</div>
+    <div class="sb-item" onclick="go('s10')"><span class="sb-tag">10</span> Query patterns &amp; QA</div>
+  </div>
+  <div class="sb-foot">© 2026 Zennify · Confidential</div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title" id="tb-title">01 — Architecture &amp; tiers</div>
+      <div class="tb-meta">DMA Insights · Backend Schema · PostgreSQL 16</div>
+    </div>
+    <div style="display:flex;gap:7px;align-items:center"><span class="badge b-teal">Schema</span><span class="badge b-serv">89 tables</span><span class="badge b-mcp">3 tiers</span></div>
+  </div>
+  <div class="content">
+
+<div id="s01" class="section on">
+
+<div class="eyebrow">Backend schema</div>
+<h1 class="page-title">DMA Insights — database design</h1>
+<p class="lead">PostgreSQL 16 on Cloud SQL. 89 tables across eight groups, arranged in three tiers
+with one direction of flow.</p>
+
+<div style="background:var(--z-lavender);border-radius:var(--radius);padding:12px 15px;margin:12px 0;
+  font-size:12.5px;color:var(--z-gray-body)">
+<strong>Engine:</strong> PostgreSQL 16 · pgvector (build-time grounding only) · Redis 7 (ingest queue and
+claim leases only) · Python 3.12 + FastAPI · SQLAlchemy 2.0 async · Alembic · Cloud Run
+</div>
+
+<h2>Three tiers, one direction</h2>
+<div class="pipe">
+  <div class="pipe-s"><div class="pipe-n">Tier 1</div><div class="pipe-t">Ingested</div>
+    <div class="pipe-d"><strong>Written by</strong> the package parser, at ingest.
+    <strong>Read by</strong> the Cowork synthesis agent, through the report bundle.
+    <strong>Mutability</strong> read-only after parse.</div></div>
+  <div class="pipe-s cold"><div class="pipe-n">Tier 2</div><div class="pipe-t">Staging</div>
+    <div class="pipe-d"><strong>Written by</strong> the connector, at submit.
+    <strong>Read by</strong> the connector, at promote. <strong>Never by the API.</strong>
+    <strong>Mutability</strong> superseded, never merged.</div></div>
+  <div class="pipe-s hot"><div class="pipe-n">Tier 3</div><div class="pipe-t">Serving</div>
+    <div class="pipe-d"><strong>Written by</strong> the connector, at promote, only.
+    <strong>Read by</strong> the API, for every request.
+    <strong>Mutability</strong> replaced atomically per run.</div></div>
+</div>
+
+<div class="rule">
+  <div class="rule-lbl">The boundary the whole design rests on</div>
+  <p>The API reads serving tables only. If a surface can render from a staging table, the boundary has been
+  broken and unvalidated content can reach a client. This is enforced by database grant, not by code
+  convention — the API role has no SELECT on any staging table, so the query fails in local integration tests
+  rather than in code review.</p>
+</div>
+
+<h2>Entity relationships</h2>
+<div class="code">users ─────────────────────────────────────────────────────────────────┐
+  id · email · role (AE/ANALYST/ADMIN) · google_sub                    │
+                                                                       │
+<span class="num">INGESTED</span> ───────────────────────────────────────────────────────────┐    │
+entities                                                          │    │
+  id · display_id · legal_name · trading_name · domain            │    │
+  sub_vertical · size_tier · primary_regulator · jurisdictions[]   │    │
+  │                                                               │    │
+  └── runs (1:N)                                                  │    │
+       id · request_id · ccg_catalog_version                       │    │
+       <span class="str">scored_cells</span> · <span class="str">catalogue_cells</span> · composite                  │    │
+       status · is_active · completed_at · promoted_at             │    │
+       │                                                          │    │
+       ├── subcap_scores       score · peer_median · peer_basis     │    │
+       │                       delta (gen) · <span class="str">source_cell</span>            │    │
+       ├── peer_scores · evidence_index · evidence_subcap_links     │    │
+       ├── document_sections · issue_register_raw                   │    │
+       ├── recommendations_raw · techstack_raw                      │    │
+       └── platform_fits_raw · firmographics_raw · run_manifest     │    │
+                                                                   │    │
+<span class="num">STAGING</span> ─────────────────────────────────────────────────────────┤    │
+run_claims             lease per run, with expiry                  │    │
+submissions            one live row per (run_id, page) — supersedes │    │
+submission_verdicts    every verdict, including superseded ones     │    │
+                                                                   │    │
+<span class="num">SERVING</span> ─────────────────────────────────────────────────────────┤    │
+34 tables, one per section                                        │    │
+every row carries: run_id · entity_id · promoted_at                │    │
+                   producer_version · provenance · e_ids[]         │    │
+                   internal_only[] · empty_state · produced_at     │    │
+                                                                   │    │
+<span class="num">CONTROL &amp; AUDIT</span> ─────────────────────────────────────────────────┘    │
+gate_registry · gate_results · gate_threshold_history                   │
+identity_quarantine · evidence_dedup_audit · evidence_run_links         │
+audit_log                                                               │
+                                                                        │
+<span class="num">WORKFLOW</span> ── annotations · alert_actions ───────────────────────────────┘
+<span class="num">CATALOGUE</span> ─ 21 tables, versioned, with an alias bridge</div>
+
+</div>
+<div id="s02" class="section">
+
+<div class="eyebrow">Section 02</div>
+<h1>Table inventory</h1>
+<p class="lead">Computed from the enumeration below, not asserted. The serving tier is the largest group
+because it holds one table per payload section.</p>
+
+<div class="g2">
+<div class="card" style="padding:0;overflow:hidden">
+  <div style="background:var(--z-teal-dark);padding:9px 14px;color:var(--z-teal);font-size:11px;
+    font-weight:600;letter-spacing:.08em;text-transform:uppercase">Count by group</div>
+  <div class="count"><span>Ingested</span><span class="count-v">13</span></div><div class="count"><span>Staging</span><span class="count-v">3</span></div><div class="count"><span>Serving</span><span class="count-v">33</span></div><div class="count"><span>Control & audit</span><span class="count-v">7</span></div><div class="count"><span>Workflow</span><span class="count-v">5</span></div><div class="count"><span>Auth</span><span class="count-v">2</span></div><div class="count"><span>Ingest ops</span><span class="count-v">3</span></div><div class="count"><span>Vector</span><span class="count-v">2</span></div><div class="count"><span>Catalogue</span><span class="count-v">21</span></div>
+  <div class="count-tot"><span>Total</span><span class="count-v">89</span></div>
+</div>
+<div>
+  <div class="card card-ice"><div class="card-title">The reconciliation that must hold</div>
+    <div class="card-sub" style="margin-top:6px;color:var(--z-gray-body)">
+      34 payload sections → 34 serving tables, of which
+      33 are dedicated and one is <code>evidence_index</code>, reused because
+      <code>heatmap.evidence</code> promotes into the ingested evidence table rather than duplicating it. A
+      test asserts this reconciles against the writer registry and the surface register.</div></div>
+  <div class="card card-lav"><div class="card-title">One table per section, deliberately</div>
+    <div class="card-sub" style="margin-top:6px;color:var(--z-gray-body)">
+      One-to-one keeps the writer simple, makes a partial write impossible to hide, and lets the API select
+      exactly what a surface needs rather than filtering a wide polymorphic table at read time.</div></div>
+</div>
+</div>
+
+<h2>Full enumeration</h2>
+<table class="tbl">
+<tr><th style="width:150px">Group</th><th>Tables</th></tr>
+<tr><td><strong>Ingested</strong><br><span class="small muted">13 tables</span></td><td class="small"><code>entities</code> · <code>runs</code> · <code>run_manifest</code> · <code>subcap_scores</code> · <code>peer_scores</code> · <code>evidence_index</code> · <code>evidence_subcap_links</code> · <code>document_sections</code> · <code>issue_register_raw</code> · <code>recommendations_raw</code> · <code>techstack_raw</code> · <code>platform_fits_raw</code> · <code>firmographics_raw</code></td></tr><tr><td><strong>Staging</strong><br><span class="small muted">3 tables</span></td><td class="small"><code>run_claims</code> · <code>submissions</code> · <code>submission_verdicts</code></td></tr><tr><td><strong>Serving</strong><br><span class="small muted">33 tables</span></td><td class="small"><code>overview_scores</code> · <code>overview_firmographics</code> · <code>overview_why_now</code> · <code>overview_exec_summary</code> · <code>overview_opportunity</code> · <code>overview_findings</code> · <code>overview_leadership</code> · <code>overview_financial_series</code> · <code>overview_sentiment</code> · <code>overview_ceilings</code> · <code>overview_evidence_coverage</code> · <code>overview_thought_leadership</code> · <code>insight_cards</code> · <code>insights_landscape</code> · <code>heatmap_workbook_scores</code> · <code>heatmap_focus_areas</code> · <code>heatmap_cell_evidence</code> · <code>heatmap_value_chain</code> · <code>heatmap_alerts</code> · <code>heatmap_safeguard_gates</code> · <code>heatmap_evidence_age</code> · <code>heatmap_cohort_patterns</code> · <code>platform_story</code> · <code>platform_recommendations</code> · <code>platform_starters</code> · <code>platform_roadmap</code> · <code>platform_stairstep</code> · <code>context_timeline</code> · <code>context_issue_register</code> · <code>context_regulatory_standing</code> · <code>context_sentiment</code> · <code>context_acquisitions</code> · <code>techstack_items</code></td></tr><tr><td><strong>Control & audit</strong><br><span class="small muted">7 tables</span></td><td class="small"><code>gate_registry</code> · <code>gate_results</code> · <code>gate_threshold_history</code> · <code>evidence_dedup_audit</code> · <code>evidence_run_links</code> · <code>identity_quarantine</code> · <code>audit_log</code></td></tr><tr><td><strong>Workflow</strong><br><span class="small muted">5 tables</span></td><td class="small"><code>annotations</code> · <code>alert_actions</code> · <code>user_workspace</code> · <code>saved_searches</code> · <code>idempotency_keys</code></td></tr><tr><td><strong>Auth</strong><br><span class="small muted">2 tables</span></td><td class="small"><code>users</code> · <code>session_log</code></td></tr><tr><td><strong>Ingest ops</strong><br><span class="small muted">3 tables</span></td><td class="small"><code>import_scans</code> · <code>import_files</code> · <code>parser_observations</code></td></tr><tr><td><strong>Vector</strong><br><span class="small muted">2 tables</span></td><td class="small"><code>bundle_embeddings</code> · <code>bundle_centroids</code></td></tr><tr><td><strong>Catalogue</strong><br><span class="small muted">21 tables</span></td><td class="small"><code>ccg_versions</code> · <code>ccg_subcaps</code> · <code>ccg_aliases</code> · <code>ccg_l3_platforms</code> · <code>ccg_l4_features</code> · <code>ccg_maturity_descriptors</code> · <code>ccg_agents</code> · <code>ccg_constructs</code> · <code>ccg_products</code> · <code>ccg_offerings</code> · <code>ccg_data_products</code> · <code>ccg_offering_subcap_matrix</code> · <code>ccg_dataproduct_subcap_matrix</code> · <code>ccg_user_stories</code> · <code>ccg_cross_pillar_stories</code> · <code>ccg_theme_subcap_mapping</code> · <code>ccg_subcap_completeness</code> · <code>ccg_toggle_cascade</code> · <code>ccg_value_chains</code> · <code>ccg_vc_mapping</code> · <code>ccg_qa_gates</code></td></tr>
+</table>
+
+</div>
+<div id="s03" class="section">
+
+<div class="eyebrow">Section 03</div>
+<h1>Auth</h1>
+<p class="lead">Google OIDC to a server-side token exchange. The token lives in an httpOnly cookie; the role
+lives in a claim and is re-verified at the API on every request.</p>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">users</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Authentication and authorisation</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">UUID</span><span class="col-pk">PK</span><span class="col-desc">gen_random_uuid()</span></div><div class="col"><span class="col-name">email</span><span class="col-type">CITEXT</span><span class="col-pk">UQ</span><span class="col-desc">Workspace address; domain restricted at the OAuth client</span></div><div class="col"><span class="col-name">google_sub</span><span class="col-type">TEXT</span><span class="col-pk">UQ</span><span class="col-desc">Stable OIDC subject — the join key, not the email</span></div><div class="col"><span class="col-name">display_name</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">From the OIDC profile claim</span></div><div class="col"><span class="col-name">role</span><span class="col-type">user_role_t</span><span class="col-pk"></span><span class="col-desc">AE · ANALYST · ADMIN</span></div><div class="col"><span class="col-name">is_active</span><span class="col-type">BOOLEAN</span><span class="col-pk"></span><span class="col-desc">Soft disable without deleting audit history</span></div><div class="col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc">DEFAULT now()</span></div><div class="col"><span class="col-name">last_seen_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc">Updated on token refresh, not per request</span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">session_log</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Auth events</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">user_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">→ users.id</span></div><div class="col"><span class="col-name">event</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">login · logout · refresh · denied</span></div><div class="col"><span class="col-name">role_at_event</span><span class="col-type">user_role_t</span><span class="col-pk"></span><span class="col-desc">Role as it was, so a later change does not rewrite history</span></div><div class="col"><span class="col-name">ip</span><span class="col-type">INET</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">user_agent</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">occurred_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc">DEFAULT now()</span></div></div></div>
+
+<h2>Database roles</h2>
+<table class="tbl">
+<tr><th style="width:140px">Role</th><th>Grants</th></tr>
+<tr><td><code>svc_api</code></td><td>SELECT on serving, catalogue and workflow tables. INSERT on <code>annotations</code> and <code>alert_actions</code>. <strong>No grant of any kind on staging.</strong></td></tr>
+<tr><td><code>svc_mcp</code></td><td>SELECT on ingested and catalogue. Full DML on staging, serving, control and audit. The only role that can write a serving table.</td></tr>
+<tr><td><code>svc_worker</code></td><td>Full DML on ingested and ingest-ops. SELECT on catalogue. No access to serving or staging.</td></tr>
+<tr><td><code>svc_migrate</code></td><td>DDL. Used by migrations at deploy, never by a running service.</td></tr>
+</table>
+
+<h2>The two-layer role gate</h2>
+<table class="tbl">
+<tr><th style="width:110px">Layer</th><th style="width:380px">Enforces</th><th>Is</th></tr>
+<tr><td>Route</td><td>The frontend does not render Context or Health for an AE</td><td>User experience</td></tr>
+<tr><td>API</td><td>The API refuses the request regardless of what the frontend did</td><td><strong>The control</strong></td></tr>
+</table>
+
+</div>
+<div id="s04" class="section">
+
+<div class="eyebrow">Section 04</div>
+<h1>Ingested tier</h1>
+<p class="lead">13 tables. Written once by the parser, read by the Cowork agent
+through the report bundle, and read-only from the moment the run is queued.</p>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">entities</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">One institution, many runs</span><span class="badge b-ing">INGESTED</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">UUID</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">display_id</span><span class="col-type">TEXT</span><span class="col-pk">UQ</span><span class="col-desc">URL slug and human-facing handle, derived from the name</span></div><div class="col"><span class="col-name">legal_name</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">As the regulator's registry states it, not as the entity describes itself</span></div><div class="col"><span class="col-name">trading_name</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Where it differs — the identity gate resolves between them</span></div><div class="col"><span class="col-name">domain</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Primary domain; the cheapest identity check in the system</span></div><div class="col"><span class="col-name">sub_vertical</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Drives the peer cohort and the toggle cascade</span></div><div class="col"><span class="col-name">size_tier</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Drives expectation adjustment, never evidence adjustment</span></div><div class="col"><span class="col-name">primary_regulator</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">From the regulator's registry. A mismatch is an identity error.</span></div><div class="col"><span class="col-name">jurisdictions</span><span class="col-type">TEXT[]</span><span class="col-pk"></span><span class="col-desc">The fastest contamination check available</span></div><div class="col"><span class="col-name">status</span><span class="col-type">entity_status_t</span><span class="col-pk"></span><span class="col-desc">ACTIVE · PENDING_REVIEW · ARCHIVED · EXCLUDED</span></div><div class="col"><span class="col-name">inference_confidence</span><span class="col-type">NUMERIC(3,2)</span><span class="col-pk"></span><span class="col-desc">From the four-signal cascade. Low confidence → PENDING_REVIEW</span></div><div class="col"><span class="col-name">owner_user_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">AE ownership, from the ops sheet</span></div><div class="col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">runs</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">One assessment of one entity at one point in time</span><span class="badge b-ing">INGESTED</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">UUID</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">entity_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">→ entities.id</span></div><div class="col"><span class="col-name">request_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Both upstream formats are valid; accept both</span></div><div class="col"><span class="col-name">run_seq</span><span class="col-type">SMALLINT</span><span class="col-pk"></span><span class="col-desc">1, 2, 3 … per entity. The human-facing run number.</span></div><div class="col"><span class="col-name">ccg_catalog_version</span><span class="col-type">TEXT</span><span class="col-pk">FK</span><span class="col-desc">→ ccg_versions. Pins every id resolution for this run.</span></div><div class="col"><span class="col-name">scored_cells</span><span class="col-type">INTEGER</span><span class="col-pk"></span><span class="col-desc">How many cells THIS run scored. Distinct from catalogue size.</span></div><div class="col"><span class="col-name">catalogue_cells</span><span class="col-type">INTEGER</span><span class="col-pk"></span><span class="col-desc">Denormalised from the pinned version, so a denominator never needs a join</span></div><div class="col"><span class="col-name">composite</span><span class="col-type">NUMERIC(4,2)</span><span class="col-pk"></span><span class="col-desc">Mean of the four pillar means, rounded ONCE</span></div><div class="col"><span class="col-name">status</span><span class="col-type">run_status_t</span><span class="col-pk"></span><span class="col-desc">INGESTED · CLAIMED · SYNTHESISING · STAGED · PROMOTED · SUPERSEDED</span></div><div class="col"><span class="col-name">is_active</span><span class="col-type">BOOLEAN</span><span class="col-pk"></span><span class="col-desc">Exactly one TRUE per entity, by partial unique index</span></div><div class="col"><span class="col-name">completed_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc">When the assessment finished, not when it was ingested</span></div><div class="col"><span class="col-name">promoted_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc">NULL until promotion</span></div><div class="col"><span class="col-name">source_folder_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">For traceability back to the artefacts</span></div></div></div>
+
+<div class="rule">
+  <div class="rule-lbl">Two counts, two columns</div>
+  <p><code>catalogue_cells</code> is fixed per catalogue version. <code>scored_cells</code> varies by run,
+  because sub-vertical toggles exclude cells an institution cannot legally operate. Coverage percentages
+  render their denominator, so the denominator is stored rather than recomputed differently by two callers.</p>
+</div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">subcap_scores</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">The cell — the only grain that carries a score</span><span class="badge b-ing">INGESTED</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">→ runs.id</span></div><div class="col"><span class="col-name">subcap_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Resolved through the catalogue, never copied from prose</span></div><div class="col"><span class="col-name">capability_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Grain level 3 — the heatmap drills through it</span></div><div class="col"><span class="col-name">category_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Grain level 2</span></div><div class="col"><span class="col-name">pillar_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Grain level 1</span></div><div class="col"><span class="col-name">score</span><span class="col-type">NUMERIC(4,2)</span><span class="col-pk"></span><span class="col-desc">Read from the workbook. Never re-derived anywhere in this system.</span></div><div class="col"><span class="col-name">confidence</span><span class="col-type">confidence_t</span><span class="col-pk"></span><span class="col-desc">HIGH · MEDIUM · LOW</span></div><div class="col"><span class="col-name">peer_median</span><span class="col-type">NUMERIC(4,2)</span><span class="col-pk"></span><span class="col-desc">NULL where the peer table lacks it — never imputed</span></div><div class="col"><span class="col-name">peer_n</span><span class="col-type">SMALLINT</span><span class="col-pk"></span><span class="col-desc">The cohort size actually used. Floor of three.</span></div><div class="col"><span class="col-name">peer_basis</span><span class="col-type">peer_basis_t</span><span class="col-pk"></span><span class="col-desc">table · recomputed · inferred · cannot_estimate</span></div><div class="col"><span class="col-name">proxy_disclosure</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Required when peer_basis is a proxy</span></div><div class="col"><span class="col-name">delta</span><span class="col-type">NUMERIC(4,2)</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED: score − peer_median. Computed, never restated.</span></div><div class="col"><span class="col-name">linked_evidence_count</span><span class="col-type">INTEGER</span><span class="col-pk"></span><span class="col-desc">Maintained by the linker</span></div><div class="col"><span class="col-name">is_thin_evidence</span><span class="col-type">BOOLEAN</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED: fewer than three linked items</span></div><div class="col"><span class="col-name">source_cell</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">The workbook cell this figure was read from. Grain lock depends on it.</span></div><div class="col"><span class="col-name">UNIQUE</span><span class="col-type">(run_id, subcap_id)</span><span class="col-pk">UQ</span><span class="col-desc">One score per cell per run</span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">evidence_index</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Evidence — also the serving table for heatmap.evidence</span><span class="badge b-ing">INGESTED</span></div></div><div class="sch-b"><div class="col"><span class="col-name">e_id</span><span class="col-type">TEXT</span><span class="col-pk">PK</span><span class="col-desc">Four namespaces, one recogniser</span></div><div class="col"><span class="col-name">entity_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">Evidence is entity-scoped. A foreign id must stop synthesis.</span></div><div class="col"><span class="col-name">origin</span><span class="col-type">evidence_origin_t</span><span class="col-pk"></span><span class="col-desc">package · producer · connector · internal</span></div><div class="col"><span class="col-name">source_name</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">source_url</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">source_domain</span><span class="col-type">TEXT</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED from source_url. The identity check runs on it.</span></div><div class="col"><span class="col-name">excerpt</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Verbatim, 50–500 chars. Verified against the fetched artefact at registration.</span></div><div class="col"><span class="col-name">claim_type</span><span class="col-type">claim_t</span><span class="col-pk"></span><span class="col-desc">FACT · INFERENCE · HYPOTHESIS · CEILING_ESTIMATE</span></div><div class="col"><span class="col-name">tier</span><span class="col-type">tier_t</span><span class="col-pk"></span><span class="col-desc">T1–T5. Five rungs, not eight.</span></div><div class="col"><span class="col-name">published_date</span><span class="col-type">DATE</span><span class="col-pk"></span><span class="col-desc">NULL is legal and produces UNVERIFIED, never CURRENT</span></div><div class="col"><span class="col-name">reference_date</span><span class="col-type">DATE</span><span class="col-pk"></span><span class="col-desc">The date age is computed against, pinned per run</span></div><div class="col"><span class="col-name">age_months</span><span class="col-type">INTEGER</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED. NULL when the date is absent.</span></div><div class="col"><span class="col-name">recency_band</span><span class="col-type">recency_t</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED from age_months at the four boundaries</span></div><div class="col"><span class="col-name">ers</span><span class="col-type">NUMERIC(3,2)</span><span class="col-pk"></span><span class="col-desc">Server-computed. CHECK bounded 1.0–5.0.</span></div><div class="col"><span class="col-name">specificity</span><span class="col-type">SMALLINT</span><span class="col-pk"></span><span class="col-desc">One of the four rank-score factors</span></div><div class="col"><span class="col-name">corroboration</span><span class="col-type">SMALLINT</span><span class="col-pk"></span><span class="col-desc">Counted by distinct ORIGIN, not by document</span></div><div class="col"><span class="col-name">identity_ok</span><span class="col-type">BOOLEAN</span><span class="col-pk"></span><span class="col-desc">FALSE excludes the item from coverage and tier distribution</span></div><div class="col"><span class="col-name">identity_note</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Why, when identity_ok is FALSE</span></div><div class="col"><span class="col-name">content_hash</span><span class="col-type">TEXT</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED — the dedup key, scoped to the entity</span></div></div></div>
+
+<div class="callout co-orange">
+  <p><strong>Four columns the database derives rather than the application.</strong> Source domain, age,
+  recency band and content hash. A value the database can derive should not be writable, because two writers
+  of one truth eventually disagree — and an age computed in application code is the one that ends up
+  rendering as uncomputable beside a status of fresh.</p>
+</div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">evidence_subcap_links</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Which item supports which cell — bidirectional in the interface</span><span class="badge b-ing">INGESTED</span></div></div><div class="sch-b"><div class="col"><span class="col-name">e_id</span><span class="col-type">TEXT</span><span class="col-pk">FK</span><span class="col-desc">→ evidence_index.e_id</span></div><div class="col"><span class="col-name">subcap_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">The cell it supports</span></div><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">Scoped, because linkage can differ between runs</span></div><div class="col"><span class="col-name">link_basis</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Why. Substance, not proximity.</span></div><div class="col"><span class="col-name">PRIMARY KEY</span><span class="col-type">(e_id, subcap_id, run_id)</span><span class="col-pk">PK</span><span class="col-desc"></span></div></div></div>
+
+<p class="small muted">A cell whose every drawer is empty is a <em>linking</em> failure, not an evidence gap.
+Diagnose before enriching — enriching a linker bug adds evidence that also will not render.</p>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">peer_scores</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">The peer cohort table</span><span class="badge b-ing">INGESTED</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">peer_name</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">subcap_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">pillar_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Pillar-level peer medians feed the hero</span></div><div class="col"><span class="col-name">score</span><span class="col-type">NUMERIC(4,2)</span><span class="col-pk"></span><span class="col-desc">NULL is legal and triggers the recompute-at-lower-cohort ladder</span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">document_sections</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Parsed report structure</span><span class="badge b-ing">INGESTED</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">section_kind</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">One of the twelve structured report sections</span></div><div class="col"><span class="col-name">pillar_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">NULL for non-pillar sections</span></div><div class="col"><span class="col-name">heading</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">body</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">page</span><span class="col-type">INTEGER</span><span class="col-pk"></span><span class="col-desc">Source page, so a focus-area quote can cite it</span></div><div class="col"><span class="col-name">artefact_id</span><span class="col-type">TEXT</span><span class="col-pk">FK</span><span class="col-desc">→ import_files. Which document this came from.</span></div></div></div>
+
+<p class="small">Five further ingested tables follow the same shape and are elided for length:
+<code>issue_register_raw</code>, <code>recommendations_raw</code>, <code>techstack_raw</code>,
+<code>platform_fits_raw</code> and <code>firmographics_raw</code>. Each carries <code>run_id</code>, its
+package identifier, its payload columns and an <code>artefact_id</code> back to the file it was parsed from.
+<code>run_manifest</code> is one-to-one with the run.</p>
+
+</div>
+<div id="s05" class="section">
+
+<div class="eyebrow">Section 05</div>
+<h1>Staging tier</h1>
+<p class="lead">3 tables. Written by the connector at submit, read by the connector
+at promote, and invisible to the API by database grant.</p>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">run_claims</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">One Cowork session at a time, with a lease that expires</span><span class="badge b-stage">STAGING</span></div></div><div class="sch-b"><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">PK</span><span class="col-desc">→ runs.id. One claim per run.</span></div><div class="col"><span class="col-name">held_by</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Session identifier</span></div><div class="col"><span class="col-name">claimed_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">expires_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc">So a dead session cannot block a run permanently</span></div><div class="col"><span class="col-name">producer_version</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">submissions</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">One live row per (run, page) — a resubmission supersedes</span><span class="badge b-stage">STAGING</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">UUID</span><span class="col-pk">PK</span><span class="col-desc">The submission_id returned to the agent</span></div><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">page</span><span class="col-type">page_t</span><span class="col-pk"></span><span class="col-desc">overview · insights · heatmap · platform · context · techstack</span></div><div class="col"><span class="col-name">payload</span><span class="col-type">JSONB</span><span class="col-pk"></span><span class="col-desc">The full page payload as submitted</span></div><div class="col"><span class="col-name">status</span><span class="col-type">submission_status_t</span><span class="col-pk"></span><span class="col-desc">PASS · FAIL</span></div><div class="col"><span class="col-name">provenance</span><span class="col-type">provenance_t</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">producer_version</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">contract_version</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">The payload shape this submission validated against</span></div><div class="col"><span class="col-name">submitted_by</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">The service credential, never a user</span></div><div class="col"><span class="col-name">submitted_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">superseded_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc">NULL while live</span></div><div class="col"><span class="col-name">superseded_by</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">→ submissions.id</span></div><div class="col"><span class="col-name">promoted_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc">Set by promote_run</span></div></div></div>
+
+<div class="code"><span class="cmt">-- Exactly one live submission per (run, page)</span>
+CREATE UNIQUE INDEX submissions_live_uq
+  ON submissions (run_id, page)
+  WHERE superseded_at IS NULL;</div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">submission_verdicts</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Every verdict, including superseded ones</span><span class="badge b-stage">STAGING</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">submission_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">→ submissions.id</span></div><div class="col"><span class="col-name">status</span><span class="col-type">submission_status_t</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">reasons</span><span class="col-type">JSONB</span><span class="col-pk"></span><span class="col-desc">[{gate_id, section, path, message, severity}]</span></div><div class="col"><span class="col-name">warnings</span><span class="col-type">JSONB</span><span class="col-pk"></span><span class="col-desc">Non-blocking</span></div><div class="col"><span class="col-name">counts</span><span class="col-type">JSONB</span><span class="col-pk"></span><span class="col-desc">{sections, cited_claims, e_ids_used, new_mints}</span></div><div class="col"><span class="col-name">evaluated_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<div class="rule">
+  <div class="rule-lbl">Verdicts are never deleted</div>
+  <p>Including failing ones, and including verdicts for superseded submissions. The path an agent took to a
+  passing submission is the audit trail for how a surface came to say what it says — and it is the only way
+  to tell a first-time pass from a fifth attempt.</p>
+</div>
+
+<h2>The promote transaction</h2>
+<div class="code">BEGIN;
+  <span class="cmt">-- 1. Assert a PASS row for every page. Otherwise 409, write nothing.</span>
+  SELECT page FROM submissions
+   WHERE run_id = :run AND superseded_at IS NULL AND status = 'PASS';
+  <span class="cmt">-- must return all 6 pages</span>
+
+  <span class="cmt">-- 2. Deactivate the previous active run for this entity.</span>
+  UPDATE runs SET is_active = FALSE, status = 'SUPERSEDED'
+   WHERE entity_id = :entity AND is_active;
+
+  <span class="cmt">-- 3. Run WRITERS[section] for each of the 34 sections:</span>
+  <span class="cmt">--    delete-then-insert per serving table, scoped to (run_id).</span>
+  <span class="cmt">-- 4. Stamp promoted_at, producer_version and provenance on every row.</span>
+  <span class="cmt">-- 5. Mark the staging rows promoted.</span>
+
+  UPDATE runs SET is_active = TRUE, status = 'PROMOTED', promoted_at = now()
+   WHERE id = :run;
+COMMIT;</div>
+
+<p>On any writer failure the transaction rolls back and nothing is written — there is no partial promote, so a
+client is never looking at a page from the new run beside a page from the old one. Re-promoting an already
+promoted run reaches the same state and is not an error.</p>
+
+<div class="code"><span class="cmt">-- Exactly one active run per entity</span>
+CREATE UNIQUE INDEX runs_active_uq ON runs (entity_id) WHERE is_active;</div>
+
+</div>
+<div id="s06" class="section">
+
+<div class="eyebrow">Section 06</div>
+<h1>Serving tier</h1>
+<p class="lead">34 tables, one per section. The only tier the API reads. Every row carries the same
+nine provenance columns without exception.</p>
+
+<h2>The universal envelope</h2>
+<div class="schema"><div class="sch-h"><div><span class="sch-n">&lt;every serving table&gt;</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">The nine columns every promoted row carries</span><span class="badge b-serv">SERVING</span></div></div><div class="sch-b"><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">Which assessment produced this row</span></div><div class="col"><span class="col-name">entity_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">Which client it belongs to — denormalised for the serving-side filter</span></div><div class="col"><span class="col-name">promoted_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk">NN</span><span class="col-desc">When it began rendering</span></div><div class="col"><span class="col-name">producer_version</span><span class="col-type">TEXT</span><span class="col-pk">NN</span><span class="col-desc">Which synthesis produced it — a regression can be bisected</span></div><div class="col"><span class="col-name">provenance</span><span class="col-type">provenance_t</span><span class="col-pk"></span><span class="col-desc">analyst · derived · producer</span></div><div class="col"><span class="col-name">e_ids</span><span class="col-type">TEXT[]</span><span class="col-pk"></span><span class="col-desc">Every citation behind the row, deduplicated</span></div><div class="col"><span class="col-name">internal_only</span><span class="col-type">TEXT[]</span><span class="col-pk"></span><span class="col-desc">JSON paths the serve layer strips for the Customer audience</span></div><div class="col"><span class="col-name">empty_state</span><span class="col-type">JSONB</span><span class="col-pk"></span><span class="col-desc">NULL, or {kind, reason, sources_searched[], searched_on} — an absence with no recorded ladder is a research failure, not a finding</span></div><div class="col"><span class="col-name">r_layer</span><span class="col-type">JSONB</span><span class="col-pk"></span><span class="col-desc">On any ranked or causal claim: {hypothesis, counter, domain_test, probes_run[], verdict, confidence}. The rejected runner-up is recorded beside the winner.</span></div><div class="col"><span class="col-name">narrative_thread</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">45–75 words, on the page lead section only. Written last, from what was produced.</span></div><div class="col"><span class="col-name">produced_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc">When the agent produced it, distinct from promotion</span></div></div></div>
+
+<div class="callout co-orange">
+  <p><strong>Provenance is not cosmetic.</strong> A deterministically composed recommendation must not present
+  as an analyst recommendation, because an AE who quotes a synthetic recommendation as analyst judgement is
+  exposed in the room.</p>
+</div>
+
+<h2>The complete map</h2>
+<table class="ft">
+<tr><th style="width:220px">Section</th><th style="width:230px">Serving table</th>
+    <th style="width:120px">Surfaces</th><th>Renders on</th></tr>
+<tr><td class="small"><code>overview.scores</code></td><td><code>overview_scores</code></td><td class="small">O1</td><td class="small"></td></tr><tr><td class="small"><code>overview.firmographics</code></td><td><code>overview_firmographics</code></td><td class="small">O2</td><td class="small"></td></tr><tr><td class="small"><code>overview.why_now</code></td><td><code>overview_why_now</code></td><td class="small">O3</td><td class="small"></td></tr><tr><td class="small"><code>overview.exec_summary</code></td><td><code>overview_exec_summary</code></td><td class="small">O4</td><td class="small"></td></tr><tr><td class="small"><code>overview.opportunity</code></td><td><code>overview_opportunity</code></td><td class="small">O5</td><td class="small"></td></tr><tr><td class="small"><code>overview.findings</code></td><td><code>overview_findings</code></td><td class="small">O6</td><td class="small"></td></tr><tr><td class="small"><code>overview.leadership</code></td><td><code>overview_leadership</code></td><td class="small">O7</td><td class="small"></td></tr><tr><td class="small"><code>overview.financial_series</code></td><td><code>overview_financial_series</code></td><td class="small">O8, C6</td><td class="small">D5</td></tr><tr><td class="small"><code>overview.sentiment</code></td><td><code>overview_sentiment</code></td><td class="small">O9</td><td class="small"></td></tr><tr><td class="small"><code>overview.ceilings</code></td><td><code>overview_ceilings</code></td><td class="small">O1b</td><td class="small"></td></tr><tr><td class="small"><code>overview.evidence_coverage</code></td><td><code>overview_evidence_coverage</code></td><td class="small">O10, O11</td><td class="small"></td></tr><tr><td class="small"><code>overview.thought_leadership</code></td><td><code>overview_thought_leadership</code></td><td class="small">O12</td><td class="small"></td></tr><tr><td class="small"><code>insights.insights</code></td><td><code>insight_cards</code></td><td class="small">I1</td><td class="small"></td></tr><tr><td class="small"><code>insights.landscape</code></td><td><code>insights_landscape</code></td><td class="small">T2</td><td class="small"></td></tr><tr><td class="small"><code>heatmap.workbook_scores</code></td><td><code>heatmap_workbook_scores</code></td><td class="small">H4</td><td class="small"></td></tr><tr><td class="small"><code>heatmap.focus_areas</code></td><td><code>heatmap_focus_areas</code></td><td class="small">H1</td><td class="small"></td></tr><tr><td class="small"><code>heatmap.cell_evidence</code></td><td><code>heatmap_cell_evidence</code></td><td class="small">H2</td><td class="small"></td></tr><tr><td class="small"><code>heatmap.evidence</code></td><td><code>evidence_index</code> <span class="small muted">(ingested, reused)</span></td><td class="small">H6</td><td class="small"></td></tr><tr><td class="small"><code>heatmap.value_chain</code></td><td><code>heatmap_value_chain</code></td><td class="small">H9</td><td class="small"></td></tr><tr><td class="small"><code>heatmap.alerts</code></td><td><code>heatmap_alerts</code></td><td class="small">H3</td><td class="small">D7</td></tr><tr><td class="small"><code>heatmap.safeguard_gates</code></td><td><code>heatmap_safeguard_gates</code></td><td class="small">H5</td><td class="small">D7</td></tr><tr><td class="small"><code>heatmap.evidence_age</code></td><td><code>heatmap_evidence_age</code></td><td class="small">H7</td><td class="small">D7</td></tr><tr><td class="small"><code>heatmap.cohort_patterns</code></td><td><code>heatmap_cohort_patterns</code></td><td class="small">H8</td><td class="small">D7</td></tr><tr><td class="small"><code>platform.platform_story</code></td><td><code>platform_story</code></td><td class="small">P1</td><td class="small"></td></tr><tr><td class="small"><code>platform.recommendations</code></td><td><code>platform_recommendations</code></td><td class="small">P2</td><td class="small"></td></tr><tr><td class="small"><code>platform.starters</code></td><td><code>platform_starters</code></td><td class="small">P2b</td><td class="small"></td></tr><tr><td class="small"><code>platform.roadmap</code></td><td><code>platform_roadmap</code></td><td class="small">P3</td><td class="small"></td></tr><tr><td class="small"><code>platform.stairstep</code></td><td><code>platform_stairstep</code></td><td class="small">P4</td><td class="small"></td></tr><tr><td class="small"><code>context.timeline</code></td><td><code>context_timeline</code></td><td class="small">C1</td><td class="small"></td></tr><tr><td class="small"><code>context.issue_register</code></td><td><code>context_issue_register</code></td><td class="small">C2</td><td class="small"></td></tr><tr><td class="small"><code>context.regulatory_standing</code></td><td><code>context_regulatory_standing</code></td><td class="small">C3</td><td class="small"></td></tr><tr><td class="small"><code>context.context_sentiment</code></td><td><code>context_sentiment</code></td><td class="small">C4</td><td class="small"></td></tr><tr><td class="small"><code>context.acquisitions</code></td><td><code>context_acquisitions</code></td><td class="small">C5</td><td class="small"></td></tr><tr><td class="small"><code>techstack.techstack</code></td><td><code>techstack_items</code></td><td class="small">T1, T3</td><td class="small"></td></tr>
+</table>
+<p class="small muted">Where the “renders on” column is blank, the surface renders on the dashboard matching
+its own page. The exceptions are the four heatmap sections that render on Health, and the Overview financial
+series which also renders on Context.</p>
+
+<h2>Four representative tables</h2>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">overview_scores</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">O1 — the hero. One row per run.</span><span class="badge b-serv">SERVING</span></div></div><div class="sch-b"><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">PK</span><span class="col-desc">The hero is singular</span></div><div class="col"><span class="col-name">composite</span><span class="col-type">NUMERIC(4,2)</span><span class="col-pk"></span><span class="col-desc">Mean of the four PILLAR means, rounded ONCE</span></div><div class="col"><span class="col-name">pillars</span><span class="col-type">JSONB</span><span class="col-pk"></span><span class="col-desc">[{pillar_id, score, peer_median, delta, peer_n, peer_basis, proxy_disclosure}]</span></div><div class="col"><span class="col-name">posture</span><span class="col-type">posture_t</span><span class="col-pk"></span><span class="col-desc">LEADING · COMPETING · LAGGING · MIXED</span></div><div class="col"><span class="col-name">posture_basis</span><span class="col-type">basis_t</span><span class="col-pk"></span><span class="col-desc">EVIDENCE · HYBRID · INFERRED</span></div><div class="col"><span class="col-name">framing</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">18–32 words. States the gap, quantifies it, localises it.</span></div><div class="col"><span class="col-name">band</span><span class="col-type">band_t</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED from composite. FOUR bands — the resolver has no branch above Differentiating, so M5 is unreachable. Boundaries are strict less-than on the RAW score.</span></div><div class="col"><span class="col-name">claim_label</span><span class="col-type">claim_t</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">confidence</span><span class="col-type">confidence_t</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">…</span><span class="col-type"></span><span class="col-pk"></span><span class="col-desc">plus the nine universal columns</span></div></div></div>
+
+<div class="rule">
+  <div class="rule-lbl">Authoritative for the hero</div>
+  <p>This table is authoritative for the Overview hero; <code>heatmap_workbook_scores</code> is authoritative
+  for the grid. A cross-section gate asserts they agree before either can promote, and the band is generated
+  from the composite by the same function the frontend resolver uses.</p>
+</div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">heatmap_evidence_age</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Q4 — where the derived-value rule is enforced in the schema</span><span class="badge b-serv">SERVING</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">reference_date</span><span class="col-type">DATE</span><span class="col-pk">NN</span><span class="col-desc">PINNED and RENDERED. Age is meaningless without it.</span></div><div class="col"><span class="col-name">e_id</span><span class="col-type">TEXT</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">title</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">source_domain</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Where the identity check is cheapest to run</span></div><div class="col"><span class="col-name">published_or_asof</span><span class="col-type">DATE</span><span class="col-pk"></span><span class="col-desc">NULL is legal</span></div><div class="col"><span class="col-name">age_months</span><span class="col-type">INTEGER</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED. NULL when the date is absent.</span></div><div class="col"><span class="col-name">band</span><span class="col-type">age_band_t</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED from age_months</span></div><div class="col"><span class="col-name">status</span><span class="col-type">age_status_t</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED from band ONLY</span></div><div class="col"><span class="col-name">identity_ok</span><span class="col-type">BOOLEAN</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">identity_note</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">…</span><span class="col-type"></span><span class="col-pk"></span><span class="col-desc">plus the nine universal columns</span></div></div></div>
+
+<p class="small muted">Status follows band, band follows age, age follows a real date. All three are
+generated, so the chain cannot be broken by an application write.</p>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">heatmap_cohort_patterns</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Q5 — the one surface that can leak between clients</span><span class="badge b-serv">SERVING</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">sub_vertical</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">category_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">pattern_statement</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">affected_count</span><span class="col-type">INTEGER</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">cohort_size</span><span class="col-type">INTEGER</span><span class="col-pk"></span><span class="col-desc">CHECK at least five. Below that it is not published.</span></div><div class="col"><span class="col-name">share_pct</span><span class="col-type">NUMERIC(5,2)</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED: affected_count / cohort_size</span></div><div class="col"><span class="col-name">threshold_pct</span><span class="col-type">NUMERIC(5,2)</span><span class="col-pk"></span><span class="col-desc">Declared, and enforced</span></div><div class="col"><span class="col-name">below_threshold</span><span class="col-type">BOOLEAN</span><span class="col-pk">GEN</span><span class="col-desc">STORED GENERATED. A row below the threshold is labelled, not hidden.</span></div><div class="col"><span class="col-name">confidence</span><span class="col-type">confidence_t</span><span class="col-pk"></span><span class="col-desc">Derived from cohort size</span></div><div class="col"><span class="col-name">structural_explanation</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">action</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">entity_ids</span><span class="col-type">UUID[]</span><span class="col-pk"></span><span class="col-desc">AUDIT ONLY. Always in internal_only. Stripped from every response.</span></div><div class="col"><span class="col-name">…</span><span class="col-type"></span><span class="col-pk"></span><span class="col-desc">plus the nine universal columns</span></div></div></div>
+
+<div class="rule">
+  <div class="rule-lbl">The one column that must never render</div>
+  <p><code>entity_ids</code> exists for audit and is stripped from every rendered response — internal and
+  customer alike. This is the single surface where one client's data can reach another's view, so it emits
+  counts and shares only. A test asserts the column never appears in a serialised response.</p>
+</div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">techstack_items</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">T1 and T3 — the layered register</span><span class="badge b-serv">SERVING</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">ts_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Agent-assigned, unique within the run</span></div><div class="col"><span class="col-name">name</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">vendor</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">layer</span><span class="col-type">stack_layer_t</span><span class="col-pk"></span><span class="col-desc">OPS · CUST · DATA · INFRA. Keys deliberately NOT L2–L5 — those collide with evidence levels L1–L4 on the same card.</span></div><div class="col"><span class="col-name">pillar_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Which pillar absorbs a gap at this layer</span></div><div class="col"><span class="col-name">status</span><span class="col-type">stack_status_t</span><span class="col-pk">NN</span><span class="col-desc">CONFIRMED · INFERRED · CLAIMED · ABSENT. Required — the landscape strip recomputes its four counts from this column.</span></div><div class="col"><span class="col-name">evidence_level</span><span class="col-type">evidence_level_t</span><span class="col-pk"></span><span class="col-desc">L1–L4. Governs the verb the prose may use.</span></div><div class="col"><span class="col-name">detection_basis</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">PRINTED on the detail page — a bare status invites certainty</span></div><div class="col"><span class="col-name">linked_subcap_ids</span><span class="col-type">TEXT[]</span><span class="col-pk"></span><span class="col-desc">The cells this item touches</span></div><div class="col"><span class="col-name">is_primary_gap</span><span class="col-type">BOOLEAN</span><span class="col-pk"></span><span class="col-desc">Marks the primary gap layer</span></div><div class="col"><span class="col-name">…</span><span class="col-type"></span><span class="col-pk"></span><span class="col-desc">plus the nine universal columns</span></div></div></div>
+
+<p class="small muted">The landscape strip's four counts are recomputed from this register at read time
+rather than stored, so two code paths cannot produce two numbers.</p>
+
+</div>
+<div id="s07" class="section">
+
+<div class="eyebrow">Section 07</div>
+<h1>Control and audit</h1>
+<p class="lead">7 tables that make a defect traceable after the fact rather
+than mysterious.</p>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">gate_registry</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Every gate, its family, its threshold and its behaviour</span></div></div><div class="sch-b"><div class="col"><span class="col-name">gate_id</span><span class="col-type">TEXT</span><span class="col-pk">PK</span><span class="col-desc">Prefixed by family. The prefix is part of the id.</span></div><div class="col"><span class="col-name">family</span><span class="col-type">gate_family_t</span><span class="col-pk"></span><span class="col-desc">analytical · safeguard · enrichment · corpus</span></div><div class="col"><span class="col-name">name</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">plain_label</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">REQUIRED for safeguard gates: a human sentence, 8–18 words. A client reading a bare code learns nothing.</span></div><div class="col"><span class="col-name">what_it_checks</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">why_it_exists</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">threshold_kind</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">per_client_rate · absolute · boolean</span></div><div class="col"><span class="col-name">threshold_value</span><span class="col-type">NUMERIC</span><span class="col-pk"></span><span class="col-desc">Rates, not counts — a fixed count fails on arithmetic as the corpus grows</span></div><div class="col"><span class="col-name">on_failure</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">block · disclose · trigger · fail_build</span></div><div class="col"><span class="col-name">is_client_visible</span><span class="col-type">BOOLEAN</span><span class="col-pk"></span><span class="col-desc">TRUE only for the safeguard family</span></div></div></div>
+
+<div class="rule">
+  <div class="rule-lbl">Two different things share the safeguard-gates section</div>
+  <p>The assessment applies <strong>caps</strong> — cap-log rows, uncertainty bands, QA holds, analyst
+  overrides. The submission runs <strong>SG gates</strong> and produces pass, fail or not-run. Both render on
+  the Health tab and both promote through <code>heatmap.safeguard_gates</code>, but they are stored
+  separately because only one of them has a result.</p>
+</div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">assessment_caps</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">What the ASSESSMENT capped — promoted content</span><span class="badge b-serv">SERVING</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">cap_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">From the workbook's own cap log</span></div><div class="col"><span class="col-name">kind</span><span class="col-type">cap_kind_t</span><span class="col-pk"></span><span class="col-desc">cap · uncertainty_band · qa_hold · analyst_override</span></div><div class="col"><span class="col-name">ceiling</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">The level the cap imposes</span></div><div class="col"><span class="col-name">affected_categories</span><span class="col-type">TEXT[]</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">rationale</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">The stated reason. Never composed to explain a low score.</span></div><div class="col"><span class="col-name">…</span><span class="col-type"></span><span class="col-pk"></span><span class="col-desc">plus the nine universal columns</span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">gate_results</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">The SG family results — per run, per gate, including not-run</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">gate_id</span><span class="col-type">TEXT</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">result</span><span class="col-type">gate_result_t</span><span class="col-pk"></span><span class="col-desc">PASS · FAIL · NOT_RUN. Never default to PASS.</span></div><div class="col"><span class="col-name">not_run_reason</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">REQUIRED when result is NOT_RUN</span></div><div class="col"><span class="col-name">detail</span><span class="col-type">JSONB</span><span class="col-pk"></span><span class="col-desc">The measurement, so a client-visible gate can state a number</span></div><div class="col"><span class="col-name">evaluated_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<div class="rule">
+  <div class="rule-lbl">A gate that reports pass because it did not run is worse than one that reports fail</div>
+  <p>Hence the third state, and hence the reason being required rather than optional. A failing safeguard gate
+  is recorded and disclosed; it does not block promotion. The assessment ships with its weakness stated.</p>
+</div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">gate_threshold_history</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Every threshold change, with its reason</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">gate_id</span><span class="col-type">TEXT</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">changed_from</span><span class="col-type">NUMERIC</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">changed_to</span><span class="col-type">NUMERIC</span><span class="col-pk"></span><span class="col-desc">For corpus gates, never greater than changed_from. Enforced in CI.</span></div><div class="col"><span class="col-name">reason</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">REQUIRED. A ceiling moved without a recorded reason is one nobody trusts.</span></div><div class="col"><span class="col-name">measured_at_n_clients</span><span class="col-type">INTEGER</span><span class="col-pk"></span><span class="col-desc">The corpus size the measurement was taken at</span></div><div class="col"><span class="col-name">changed_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">changed_by</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">identity_quarantine</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Every figure that failed the identity gate</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">entity_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">surface_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Which of the 38 surfaces it would have appeared on</span></div><div class="col"><span class="col-name">field_path</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">The JSON path within the section</span></div><div class="col"><span class="col-name">attempted_value</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Kept for diagnosis. NEVER rendered.</span></div><div class="col"><span class="col-name">failed_assertion</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">legal_name · regulator · footprint · source_domain · magnitude</span></div><div class="col"><span class="col-name">quarantine_reason</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Rendered as the provenance note beside the dash</span></div><div class="col"><span class="col-name">occurred_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<p class="small muted">This table answers a question no other table can: <em>which surfaces are incomplete
+because we refused to guess.</em> An empty field with a quarantine row is a different thing from an empty
+field with none.</p>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">evidence_dedup_audit</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Which branch fired, per registration</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">e_id</span><span class="col-type">TEXT</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">content_hash</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">branch</span><span class="col-type">dedup_branch_t</span><span class="col-pk"></span><span class="col-desc">kept · dedup_same_entity · cross_entity_kept · duplicate_within_run · tier_upgrade</span></div><div class="col"><span class="col-name">matched_e_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">The existing row, where one was matched</span></div><div class="col"><span class="col-name">occurred_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">evidence_run_links</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Which runs an id appeared in, and on which surfaces</span></div></div><div class="sch-b"><div class="col"><span class="col-name">e_id</span><span class="col-type">TEXT</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">surface_ids</span><span class="col-type">TEXT[]</span><span class="col-pk"></span><span class="col-desc">Powers the seen-in-N-runs chip and longitudinal continuity</span></div><div class="col"><span class="col-name">PRIMARY KEY</span><span class="col-type">(e_id, run_id)</span><span class="col-pk">PK</span><span class="col-desc"></span></div></div></div>
+
+<p class="small">Plus <code>audit_log</code>, recording every state-changing operation with actor, action,
+target and before-and-after — including promotions, claim acquisitions and threshold changes.</p>
+
+<h2>Workflow tables — the two API write exceptions</h2>
+<div class="schema"><div class="sch-h"><div><span class="sch-n">annotations</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">A user's own note. Never content.</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">user_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">entity_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">anchor_kind</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">insight_card · finding · cell · recommendation · issue</span></div><div class="col"><span class="col-name">anchor_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">body</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+<p class="small muted">Joined at read time and rendered as an annotation marker. It never presents as
+synthesis output, and it never reaches a serving table.</p>
+
+</div>
+<div id="s08" class="section">
+
+<div class="eyebrow">Section 08</div>
+<h1>Catalogue</h1>
+<p class="lead">21 tables. Every row keyed on its version, so a bump adds rows
+rather than mutating them.</p>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">ccg_versions</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Which catalogue a run was scored against</span></div></div><div class="sch-b"><div class="col"><span class="col-name">version</span><span class="col-type">TEXT</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">loaded_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">cell_count</span><span class="col-type">INTEGER</span><span class="col-pk"></span><span class="col-desc">851 in the current version</span></div><div class="col"><span class="col-name">category_count</span><span class="col-type">INTEGER</span><span class="col-pk"></span><span class="col-desc">17</span></div><div class="col"><span class="col-name">is_current</span><span class="col-type">BOOLEAN</span><span class="col-pk"></span><span class="col-desc">Exactly one TRUE. New runs pin to it; existing runs keep theirs.</span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">ccg_subcaps</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">The cells</span></div></div><div class="sch-b"><div class="col"><span class="col-name">subcap_id</span><span class="col-type">TEXT</span><span class="col-pk">PK</span><span class="col-desc">Composite with version</span></div><div class="col"><span class="col-name">version</span><span class="col-type">TEXT</span><span class="col-pk">PK</span><span class="col-desc">Part of the key — a cell is only meaningful within a version</span></div><div class="col"><span class="col-name">capability_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Grain level 3</span></div><div class="col"><span class="col-name">category_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Grain level 2</span></div><div class="col"><span class="col-name">pillar_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Grain level 1</span></div><div class="col"><span class="col-name">name</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">The CANONICAL name. Resolve through here; never copy a name from report prose.</span></div><div class="col"><span class="col-name">weight</span><span class="col-type">NUMERIC(5,4)</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">l3_platform_areas</span><span class="col-type">TEXT[]</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">l4_features</span><span class="col-type">TEXT[]</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">ccg_aliases</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">The bridge across version bumps</span></div></div><div class="sch-b"><div class="col"><span class="col-name">from_subcap_id</span><span class="col-type">TEXT</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">from_version</span><span class="col-type">TEXT</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">to_subcap_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">to_version</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">reason</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">renamed · split · merged · retired</span></div></div></div>
+
+<div class="rule">
+  <div class="rule-lbl">Why the alias bridge is necessary</div>
+  <p>Every id resolution is pinned to the run's catalogue version. Without a bridge, a renamed cell silently
+  stops resolving after a bump and its drilldown becomes a dead control — which looks like an evidence gap and
+  is diagnosed as one. With a bridge, a renamed cell resolves and the rename is visible.</p>
+</div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">ccg_value_chains</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">The value-chain view's arrangement</span></div></div><div class="sch-b"><div class="col"><span class="col-name">chain_id</span><span class="col-type">TEXT</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">version</span><span class="col-type">TEXT</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">sub_vertical</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Chains differ by sub-vertical</span></div><div class="col"><span class="col-name">name</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">stage_order</span><span class="col-type">SMALLINT</span><span class="col-pk"></span><span class="col-desc">Order is meaning</span></div></div></div>
+<p class="small muted">With <code>ccg_vc_mapping</code> joining chain stages to cells, this is what lets the
+heatmap arrange the same scores along the institution's value chain rather than the catalogue's taxonomy.</p>
+
+<h2>The remaining catalogue tables</h2>
+<p class="small">All keyed on identifier and version:
+<code>ccg_l3_platforms</code> · <code>ccg_l4_features</code> · <code>ccg_maturity_descriptors</code> · <code>ccg_agents</code> · <code>ccg_constructs</code> · <code>ccg_products</code> · <code>ccg_offerings</code> · <code>ccg_data_products</code> · <code>ccg_offering_subcap_matrix</code> · <code>ccg_dataproduct_subcap_matrix</code> · <code>ccg_user_stories</code> · <code>ccg_cross_pillar_stories</code> · <code>ccg_theme_subcap_mapping</code> · <code>ccg_subcap_completeness</code> · <code>ccg_toggle_cascade</code> · <code>ccg_vc_mapping</code> · <code>ccg_qa_gates</code>.</p>
+
+<div class="callout co-teal">
+  <p><strong>The toggle cascade is what makes scored cells differ from catalogue cells.</strong> An
+  institution that cannot legally operate a given channel has the cells covering it toggled out of its runs.
+  Capping such an entity for “lacking” that channel is a category error — and the cascade is where the system
+  encodes that, rather than leaving it to the analyst to remember.</p>
+</div>
+
+<h2>Catalogue volume</h2>
+<table class="tbl">
+<tr><th style="width:70px">Pillar</th><th>Name</th><th class="nowrap">Cells</th><th>Share</th></tr>
+<tr><td><strong>P1</strong></td><td>Strategy &amp; Governance</td><td class="num">205</td><td class="num">24.1%</td></tr><tr><td><strong>P2</strong></td><td>Customer Experience</td><td class="num">292</td><td class="num">34.3%</td></tr><tr><td><strong>P3</strong></td><td>Operations</td><td class="num">164</td><td class="num">19.3%</td></tr><tr><td><strong>P4</strong></td><td>Data &amp; Technology</td><td class="num">190</td><td class="num">22.3%</td></tr>
+<tr style="border-top:2px solid var(--z-teal)"><td><strong>Total</strong></td>
+    <td class="small muted">17 categories</td>
+    <td class="num"><strong>851</strong></td><td class="num">100.0%</td></tr>
+</table>
+
+</div>
+<div id="s09" class="section">
+
+<div class="eyebrow">Section 09</div>
+<h1>Constraints, generated columns and indexes</h1>
+
+<h2>Everything derivable is generated</h2>
+<p>A value the database can derive should not be writable, because two writers of one truth eventually
+disagree.</p>
+<table class="tbl">
+<tr><th style="width:330px">Column</th><th style="width:230px">Derived from</th><th>The defect it prevents</th></tr>
+<tr><td><code>evidence_index.age_months</code></td><td>published_date, reference_date</td><td>An age rendering as uncomputable</td></tr>
+<tr><td><code>evidence_index.recency_band</code></td><td>age_months at the four boundaries</td><td>Two band vocabularies over the same boundaries</td></tr>
+<tr><td><code>heatmap_evidence_age.status</code></td><td>band only</td><td>A status of fresh asserted over an uncomputable age</td></tr>
+<tr><td><code>evidence_index.source_domain</code></td><td>source_url</td><td>The cheapest identity check being skipped because nobody extracted the domain</td></tr>
+<tr><td><code>evidence_index.content_hash</code></td><td>url, claim_type, normalised excerpt</td><td>One annual report registered six times as six rows</td></tr>
+<tr><td><code>subcap_scores.delta</code></td><td>score, peer_median</td><td>A delta restated from the source rather than computed</td></tr>
+<tr><td><code>subcap_scores.is_thin_evidence</code></td><td>linked evidence count</td><td>A thin cell reading as complete</td></tr>
+<tr><td><code>overview_scores.band</code></td><td>composite</td><td>Two colour paths producing two palettes for one score</td></tr>
+<tr><td><code>heatmap_cohort_patterns.share_pct</code></td><td>affected_count, cohort_size</td><td>An asserted share drifting from its own numerator</td></tr>
+<tr><td><code>heatmap_cohort_patterns.below_threshold</code></td><td>share_pct, threshold_pct</td><td>A sub-threshold row displayed under a header declaring the threshold</td></tr>
+</table>
+
+<h2>The band domain is four values, not five</h2>
+<div class="code"><span class="cmt">-- The resolver has four branches. Anything at or above 4.0 returns</span>
+<span class="cmt">-- Differentiating, so a fifth enum value would be unreachable and would</span>
+<span class="cmt">-- let a writer emit a band no renderer produces.</span>
+CREATE TYPE band_t AS ENUM
+  ('Activating','Building','Competing','Differentiating');
+
+<span class="cmt">-- Generated from the RAW score, before display rounding. 2.97 displays</span>
+<span class="cmt">-- as 3.0 and bands as Building; the two diverge at the boundary and the</span>
+<span class="cmt">-- band must follow the raw value.</span>
+ALTER TABLE overview_scores ADD COLUMN band band_t
+  GENERATED ALWAYS AS (
+    CASE WHEN composite IS NULL THEN NULL
+         WHEN composite &lt; 2.0   THEN 'Activating'
+         WHEN composite &lt; 3.0   THEN 'Building'
+         WHEN composite &lt; 4.0   THEN 'Competing'
+         ELSE 'Differentiating' END) STORED;</div>
+
+<div class="rule">
+  <div class="rule-lbl">One rule, two implementations, asserted equal</div>
+  <p>The database generates the band and the frontend resolver renders the colour. Two
+  implementations of one rule is exactly the shape that produced a directory rendering every
+  score in brand teal, so a test asserts they agree for every score in a fixture run rather
+  than trusting that both were written from the same table.</p>
+</div>
+
+<h2>Check constraints that encode contract rules</h2>
+<div class="code"><span class="cmt">-- The rank score cannot fall below the floor of its own scale.</span>
+ALTER TABLE evidence_index
+  ADD CONSTRAINT ers_bounded CHECK (ers IS NULL OR ers BETWEEN 1.0 AND 5.0);
+
+<span class="cmt">-- Five tiers, not eight. A typed domain prevents the collision.</span>
+CREATE TYPE tier_t AS ENUM ('T1','T2','T3','T4','T5');
+
+<span class="cmt">-- A cohort pattern below five entities is not published.</span>
+ALTER TABLE heatmap_cohort_patterns
+  ADD CONSTRAINT cohort_min CHECK (cohort_size &gt;= 5);
+
+<span class="cmt">-- NOT_RUN must state why. A silent NOT_RUN is a PASS in disguise.</span>
+ALTER TABLE gate_results
+  ADD CONSTRAINT not_run_needs_reason
+  CHECK (result &lt;&gt; 'NOT_RUN' OR not_run_reason IS NOT NULL);
+
+<span class="cmt">-- Exactly one active run per entity, one live submission per page.</span>
+CREATE UNIQUE INDEX runs_active_uq ON runs (entity_id) WHERE is_active;
+CREATE UNIQUE INDEX submissions_live_uq ON submissions (run_id, page)
+  WHERE superseded_at IS NULL;
+
+<span class="cmt">-- Every promoted row is attributable. This is the invariant that</span>
+<span class="cmt">-- detects a write which bypassed a promotion. Applied to all</span>
+<span class="cmt">-- serving tables.</span>
+ALTER TABLE &lt;serving_table&gt;
+  ALTER COLUMN producer_version SET NOT NULL,
+  ALTER COLUMN promoted_at      SET NOT NULL;</div>
+
+<h2>Indexes</h2>
+<table class="tbl">
+<tr><th style="width:390px">Index</th><th>Serves</th></tr>
+<tr><td><code>entities (display_id)</code> unique</td><td>Every page request resolves the slug first</td></tr>
+<tr><td><code>runs (entity_id) WHERE is_active</code> unique</td><td>The active-run lookup, and the invariant</td></tr>
+<tr><td><code>&lt;serving&gt; (run_id)</code> on every serving table</td><td>The page query selects by run. This is the hot path.</td></tr>
+<tr><td><code>subcap_scores (run_id, subcap_id)</code> unique</td><td>Grain resolution and the cell lookup</td></tr>
+<tr><td><code>subcap_scores (run_id, category_id)</code></td><td>Heatmap grain transitions</td></tr>
+<tr><td><code>evidence_subcap_links (subcap_id, run_id)</code></td><td>The synthesis drawer's evidence list</td></tr>
+<tr><td><code>evidence_index (entity_id, content_hash)</code> unique</td><td>Registration dedup, scoped to the entity</td></tr>
+<tr><td><code>evidence_index (source_domain)</code></td><td>The identity check and the age tracker</td></tr>
+<tr><td><code>heatmap_alerts (entity_id, status, created_at DESC)</code></td><td>Cursor pagination on the corpus-wide queue</td></tr>
+<tr><td><code>ccg_subcaps (version, category_id)</code></td><td>Catalogue resolution and grain drilling</td></tr>
+<tr><td><code>submission_verdicts (submission_id)</code></td><td>Verdict re-read</td></tr>
+</table>
+
+<div class="callout co-orange">
+  <p><strong>One index deliberately absent.</strong> There is no user-facing full-text or vector index on
+  evidence excerpts. The embedding tier exists solely for the build-time grounding check, and adding a query
+  surface over it would reintroduce a request-time model dependency the architecture removes on purpose. If
+  semantic search arrives, it arrives as a decision, not as a side effect of an index someone added.</p>
+</div>
+
+<h2>Enumerated types</h2>
+<p class="small"><code>user_role_t</code> · <code>entity_status_t</code> · <code>run_status_t</code> ·
+<code>page_t</code> · <code>submission_status_t</code> · <code>provenance_t</code> ·
+<code>evidence_origin_t</code> · <code>tier_t</code> · <code>claim_t</code> · <code>recency_t</code> ·
+<code>age_band_t</code> · <code>age_status_t</code> · <code>evidence_level_t</code> ·
+<code>confidence_t</code> · <code>peer_basis_t</code> · <code>posture_t</code> · <code>basis_t</code> ·
+<code>stack_layer_t</code> · <code>stack_status_t</code> · <code>alert_action_t</code> · <code>band_t</code> · <code>cap_kind_t</code> · <code>scope_t</code> · <code>gate_family_t</code> ·
+<code>gate_result_t</code> · <code>dedup_branch_t</code>.</p>
+<p class="small muted">Enumerated types rather than text with a check, because the vocabulary collisions this
+system is designed against are exactly the kind a typed domain prevents. Adding a value is a migration, which
+is the right amount of friction for a vocabulary that must not fragment.</p>
+
+</div>
+<div id="s10" class="section">
+
+<div class="eyebrow">Section 10</div>
+<h1>Query patterns and QA</h1>
+
+<h2>The page query</h2>
+<div class="code"><span class="cmt">-- One resolution, then one select per section, issued concurrently.</span>
+<span class="cmt">-- No joins across sections: each is independently promoted and</span>
+<span class="cmt">-- independently absent.</span>
+
+WITH active AS (
+  SELECT r.id AS run_id, r.entity_id, r.scored_cells, r.catalogue_cells,
+         r.ccg_catalog_version, r.promoted_at, r.composite
+    FROM runs r
+    JOIN entities e ON e.id = r.entity_id
+   WHERE e.display_id = :display_id AND r.is_active
+)
+SELECT * FROM overview_scores        WHERE run_id = (SELECT run_id FROM active);
+SELECT * FROM overview_firmographics WHERE run_id = (SELECT run_id FROM active);
+<span class="cmt">-- … ten more for the Overview page</span></div>
+
+<p>Concurrent single-table selects on an indexed key outperform one wide join and — more importantly — a
+section that failed to promote returns no row rather than nulling columns the serialiser then has to
+distinguish from a legitimately empty section.</p>
+
+<h2>The evidence drawer</h2>
+<div class="code">SELECT ei.*,
+       <span class="cmt">-- bidirectional: the drawer renders chips that jump to the</span>
+       <span class="cmt">-- other cells this item backs, so a wrong link is visible</span>
+       <span class="cmt">-- from two directions</span>
+       array_agg(esl.subcap_id) AS supports_subcap_ids,
+       (SELECT count(*) FROM evidence_run_links erl
+         WHERE erl.e_id = ei.e_id) AS seen_in_runs
+  FROM evidence_index ei
+  LEFT JOIN evidence_subcap_links esl
+         ON esl.e_id = ei.e_id AND esl.run_id = :run_id
+ WHERE ei.e_id = :e_id
+   AND ei.entity_id = :entity_id      <span class="cmt">← the serving-side filter</span>
+ GROUP BY ei.e_id;</div>
+
+<div class="rule">
+  <div class="rule-lbl">The entity predicate is load-bearing</div>
+  <p>Evidence dedup deliberately allows a cross-entity keep, because the same public document can legitimately
+  be evidence for two institutions. That makes the serving-side filter the thing that stops one client's
+  drawer opening another's row. It is not defensive coding; it is the mechanism.</p>
+</div>
+
+<h2>Coverage — over the run's own denominator</h2>
+<div class="code">SELECT s.pillar_id,
+       count(*)                                    AS cells_total,
+       count(*) FILTER (WHERE s.linked &gt; 0)        AS cells_covered,
+       round(100.0 * count(*) FILTER (WHERE s.linked &gt; 0)
+                   / nullif(count(*), 0), 1)       AS pct
+  FROM (
+    SELECT sc.subcap_id, sc.pillar_id,
+           (SELECT count(*) FROM evidence_subcap_links l
+             JOIN evidence_index ei ON ei.e_id = l.e_id
+            WHERE l.subcap_id = sc.subcap_id
+              AND l.run_id    = sc.run_id
+              AND ei.identity_ok) AS linked
+      FROM subcap_scores sc WHERE sc.run_id = :run_id
+  ) s
+ GROUP BY s.pillar_id;</div>
+
+<p class="small muted">Three things this encodes. Coverage counts <em>linked</em> evidence only — an item
+resolving to no cell counts nowhere. An item failing the identity check counts nowhere either. And the
+denominator is the run's own scored cells, over the same cell set the heatmap serves, because a coverage
+figure computed over a different denominator is a contradiction a reader can find by counting.</p>
+
+<h2>Three patterns that must not be used</h2>
+<table class="tbl">
+<tr><th style="width:340px">Anti-pattern</th><th>Why</th></tr>
+<tr><td>Reading a staging table to render anything</td><td>The boundary. Prevented by grant, but worth stating.</td></tr>
+<tr><td>Recomputing a score, delta, share, band or age in the API</td><td>Two writers of one truth. Every one is either promoted or generated.</td></tr>
+<tr><td>Two queries for a count and its rows</td><td>A header and its KPI counts from different queries will eventually disagree.</td></tr>
+</table>
+
+<h2>Requirement alignment</h2>
+<table class="ft">
+<tr><th style="width:300px">Requirement</th><th>Satisfied by</th></tr>
+<tr><td><div class="fn">The API reads serving tables only</div></td><td>The API role holds no grant on staging — §03</td></tr>
+<tr><td><div class="fn">One serving table per section</div></td><td>34 sections → 34 tables, reconciled by test — §02, §06</td></tr>
+<tr><td><div class="fn">Every serving row carries its provenance</div></td><td>The nine universal columns, two of them not-null — §06</td></tr>
+<tr><td><div class="fn">Promotion is atomic across all 6 pages</div></td><td>One transaction; a pass asserted per page before any write — §05</td></tr>
+<tr><td><div class="fn">Resubmission supersedes, never merges</div></td><td>Partial unique index on live submissions — §05</td></tr>
+<tr><td><div class="fn">The rank score is bounded</div></td><td>Check constraint — §09</td></tr>
+<tr><td><div class="fn">A derived value is computed or null</div></td><td>Ten stored generated columns — §09</td></tr>
+<tr><td><div class="fn">Status follows band follows age follows a real date</div></td><td>Three chained generated columns — §06</td></tr>
+<tr><td><div class="fn">One tier ladder, one recency vocabulary</div></td><td>Typed enumerations, generated from age — §04, §09</td></tr>
+<tr><td><div class="fn">Grain is checkable</div></td><td><code>subcap_scores.source_cell</code>, persisted at parse — §04</td></tr>
+<tr><td><div class="fn">Every figure passes the identity gate</div></td><td><code>identity_quarantine</code>, plus <code>identity_ok</code> excluding items from coverage — §04, §07</td></tr>
+<tr><td><div class="fn">Internal rungs marked in the payload</div></td><td><code>internal_only</code> on every serving row — §06</td></tr>
+<tr><td><div class="fn">Cohort patterns emit counts and shares only</div></td><td><code>entity_ids</code> always in internal-only; asserted by test — §06</td></tr>
+<tr><td><div class="fn">A corpus ceiling only ever moves down</div></td><td><code>gate_threshold_history</code>, enforced in CI — §07</td></tr>
+<tr><td><div class="fn">Safeguard gates disclose, including not-run</div></td><td>Typed result with a required reason — §07</td></tr>
+<tr><td><div class="fn">Catalogue version pins every resolution</div></td><td>Composite keys on identifier and version; the alias bridge — §08</td></tr>
+<tr><td><div class="fn">Evidence dedup is idempotent by content</div></td><td>Generated content hash plus a unique index scoped to the entity — §04, §09</td></tr>
+<tr><td><div class="fn">Two cell counts, kept apart</div></td><td><code>scored_cells</code> and <code>catalogue_cells</code>, both on the run — §04</td></tr>
+<tr><td><div class="fn">Four heatmap grain levels</div></td><td>Pillar, category, capability and sub-capability ids on every score row — §04</td></tr>
+<tr><td><div class="fn">The value-chain view</div></td><td><code>ccg_value_chains</code> and <code>ccg_vc_mapping</code> — §08</td></tr>
+<tr><td><div class="fn">A reasoning verdict is recorded, not assumed</div></td><td><code>r_layer</code> JSONB on every serving row — §06</td></tr>
+<tr><td><div class="fn">An absence carries the ladder that produced it</div></td><td><code>empty_state.sources_searched[]</code> — §06</td></tr>
+<tr><td><div class="fn">A page carries its own thread</div></td><td><code>narrative_thread</code> on the page lead section — §06</td></tr>
+<tr><td><div class="fn">Four bands, generated from the raw score</div></td><td><code>band_t</code> and the generated column — §09</td></tr>
+<tr><td><div class="fn">Enrichment is evidence, tiered by its source</div></td><td><code>evidence_index.origin = 'connector'</code> — §04</td></tr>
+</table>
+
+<h2>Schema QA checklist</h2>
+<ul class="chk">
+  <li>All 89 tables created; the count matches the enumeration in §02.</li>
+  <li>All 33 dedicated serving tables carry the nine universal columns.</li>
+  <li>Producer version and promotion time are not-null on every serving table.</li>
+  <li>The API role returns a permission error on any staging select.</li>
+  <li>Every generated column is stored, not virtual — the read path must not recompute.</li>
+  <li>Both partial unique indexes hold under concurrent load.</li>
+  <li>A promote with one page missing writes nothing and returns the missing page.</li>
+  <li>An out-of-range rank score is rejected at insert.</li>
+  <li>A null published date yields a null age, an unverified band and an undated status.</li>
+  <li>The section registry, writer registry, serving-table list and surface register reconcile.</li>
+</ul>
+
+</div>
+<div id="s11" class="section">
+
+<div class="eyebrow">Section 11</div>
+<h1>User state and lineage</h1>
+<p class="lead">Four workflow tables hold everything that belongs to a person rather than to a run. Nothing
+here is content, and nothing here reaches a serving table.</p>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">user_workspace</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Per user, per entity — what they were last doing</span></div></div><div class="sch-b"><div class="col"><span class="col-name">user_id</span><span class="col-type">UUID</span><span class="col-pk">PK</span><span class="col-desc">→ users.id</span></div><div class="col"><span class="col-name">entity_id</span><span class="col-type">UUID</span><span class="col-pk">PK</span><span class="col-desc">→ entities.id</span></div><div class="col"><span class="col-name">last_run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">The run this user was last reading. Defaults the URL pin.</span></div><div class="col"><span class="col-name">last_tab</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Which dashboard they were on</span></div><div class="col"><span class="col-name">audience_pref</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">internal or customer, remembered per entity</span></div><div class="col"><span class="col-name">kpi_strip_config</span><span class="col-type">JSONB</span><span class="col-pk"></span><span class="col-desc">The heatmap KPI strip is user-configurable; this is view preference, not content</span></div><div class="col"><span class="col-name">insight_grouping</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">priority · pillar · theme</span></div><div class="col"><span class="col-name">updated_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">saved_searches</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Prospecting queries a user wants back</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">user_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">name</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc"></span></div><div class="col"><span class="col-name">query</span><span class="col-type">JSONB</span><span class="col-pk"></span><span class="col-desc">The full filter set, so the result is reproducible</span></div><div class="col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">alert_actions</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">Alert lifecycle — workflow state, not assessment content</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">alert_id</span><span class="col-type">BIGINT</span><span class="col-pk">FK</span><span class="col-desc">→ heatmap_alerts.id</span></div><div class="col"><span class="col-name">user_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">action</span><span class="col-type">alert_action_t</span><span class="col-pk"></span><span class="col-desc">acknowledged · assigned · waived · resolved · reopened</span></div><div class="col"><span class="col-name">rationale</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">REQUIRED on waive. A waiver without a reason is indistinguishable from neglect.</span></div><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">Which run the action was taken against</span></div><div class="col"><span class="col-name">occurred_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<div class="rule">
+  <div class="rule-lbl">Actions are attached to the run they were taken against</div>
+  <p>An annotation or an alert disposition records its <code>run_id</code>. When a rerun supersedes that run
+  the action does not migrate — it stays visible in that run's history. A cell that reopens in a later run
+  produces a new alert row, and the reopening is itself a signal: the closure condition did not hold.</p>
+</div>
+
+<h2>Run lineage queries</h2>
+<div class="code"><span class="cmt">-- The active run for an entity. One row, by partial unique index.</span>
+SELECT * FROM runs WHERE entity_id = :e AND is_active;
+
+<span class="cmt">-- Full lineage, newest first, for the run-history surface.</span>
+SELECT id, run_seq, request_id, ccg_catalog_version, composite,
+       scored_cells, completed_at, promoted_at, status
+  FROM runs WHERE entity_id = :e ORDER BY run_seq DESC;
+
+<span class="cmt">-- Can these two runs be compared cell-by-cell?</span>
+SELECT a.ccg_catalog_version = b.ccg_catalog_version AS direct
+  FROM runs a, runs b WHERE a.id = :run_a AND b.id = :run_b;
+
+<span class="cmt">-- If not, resolve each cell through the bridge. An unbridgeable cell</span>
+<span class="cmt">-- is NOT_COMPARABLE, never a null that renders as a drop to zero.</span>
+SELECT s.subcap_id, al.to_subcap_id, al.reason
+  FROM subcap_scores s
+  LEFT JOIN ccg_aliases al
+         ON al.from_subcap_id = s.subcap_id
+        AND al.from_version   = :ver_a
+        AND al.to_version     = :ver_b
+ WHERE s.run_id = :run_a;</div>
+
+<h2>Retention of promoted staging rows</h2>
+<div class="rule">
+  <div class="rule-lbl">Promotion retains its inputs</div>
+  <p>Staging rows are marked promoted rather than deleted. That is what makes a single-page fix possible: a
+  session re-claims a promoted run, resubmits one page, and promotion asserts a pass on every page — five from
+  the retained rows, one from the new submission — then rewrites every serving table in one transaction. If
+  promotion cleared its inputs, fixing one card would require re-synthesising every page.</p>
+</div>
+
+<h2>What each event does to state</h2>
+<table class="tbl">
+<tr><th style="width:240px">Event</th><th>Serving</th><th>Staging</th><th>Workflow</th></tr>
+<tr><td>Ingest a new run</td><td>untouched</td><td>none yet</td><td>untouched</td></tr>
+<tr><td>Submit a page</td><td>untouched</td><td>one row supersedes</td><td>untouched</td></tr>
+<tr><td>Promote</td><td>all sections rewritten</td><td>marked promoted, retained</td><td>untouched</td></tr>
+<tr><td>Re-promote after a one-page fix</td><td>all sections rewritten</td><td>one row superseded, rest reused</td><td>untouched</td></tr>
+<tr><td>Supersede by a newer run</td><td>the old run's rows remain, queryable</td><td>retained</td><td>stays attached to its own run</td></tr>
+<tr><td>Catalogue bump</td><td>untouched</td><td>untouched</td><td>untouched</td></tr>
+<tr><td>Contract bump</td><td>untouched</td><td>changed sections invalidated if unpromoted</td><td>untouched</td></tr>
+</table>
+
+</div>
+<div id="s12" class="section">
+
+<div class="eyebrow">Section 12</div>
+<h1>Vector tier</h1>
+<p class="lead">Two tables, one index, one job: the V4 grounding check at submit. Nothing here
+is read by the serving path, and no vector is ever promoted.</p>
+
+<div class="rule">
+  <div class="rule-lbl">Why a vector column lives in this schema at all</div>
+  <p>Text can satisfy every identifier check — cited ids that exist, belong to this entity and
+  appear in the bundle — and still assert something the sources do not support. V4 asks whether
+  the output is <em>about</em> the bundle. It runs inside the connector at submit, on a local
+  deterministic embedding model, and the request path never touches it.</p>
+</div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">bundle_embeddings</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">The ingested corpus, chunked and embedded at ingest</span><span class="badge b-ing">INGESTED</span></div></div><div class="sch-b"><div class="col"><span class="col-name">id</span><span class="col-type">BIGSERIAL</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">FK</span><span class="col-desc">→ runs.id ON DELETE CASCADE. Embeddings die with their run.</span></div><div class="col"><span class="col-name">scope_kind</span><span class="col-type">scope_t</span><span class="col-pk"></span><span class="col-desc">cell · category · pillar · run</span></div><div class="col"><span class="col-name">scope_id</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">P4C1.2.1 · P4C1 · P4 · NULL for run scope</span></div><div class="col"><span class="col-name">source_kind</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">evidence · report_section · score_rationale</span></div><div class="col"><span class="col-name">source_ref</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">The e_id or section id — traceability back to a real row</span></div><div class="col"><span class="col-name">chunk_index</span><span class="col-type">SMALLINT</span><span class="col-pk"></span><span class="col-desc">Sentence-window chunking, 60–120 tokens, 20% overlap</span></div><div class="col"><span class="col-name">content</span><span class="col-type">TEXT</span><span class="col-pk"></span><span class="col-desc">Retained, so a flagged field can be told what it matched</span></div><div class="col"><span class="col-name">embedding</span><span class="col-type">vector(384)</span><span class="col-pk">NN</span><span class="col-desc">L2-normalised at write, so cosine becomes a dot product</span></div><div class="col"><span class="col-name">embedding_model</span><span class="col-type">TEXT</span><span class="col-pk">NN</span><span class="col-desc">Pinned. A mixed-model index returns plausible nonsense.</span></div><div class="col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span><span class="col-pk"></span><span class="col-desc"></span></div></div></div>
+
+<div class="schema"><div class="sch-h"><div><span class="sch-n">bundle_centroids</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sch-s">One centroid per scope, per run</span><span class="badge b-ing">INGESTED</span></div></div><div class="sch-b"><div class="col"><span class="col-name">run_id</span><span class="col-type">UUID</span><span class="col-pk">PK</span><span class="col-desc">→ runs.id</span></div><div class="col"><span class="col-name">scope_kind</span><span class="col-type">scope_t</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">scope_id</span><span class="col-type">TEXT</span><span class="col-pk">PK</span><span class="col-desc"></span></div><div class="col"><span class="col-name">centroid</span><span class="col-type">vector(384)</span><span class="col-pk">NN</span><span class="col-desc">Mean of the normalised members, renormalised</span></div><div class="col"><span class="col-name">member_n</span><span class="col-type">INTEGER</span><span class="col-pk">NN</span><span class="col-desc">Below five the check abstains — a centroid of two is noise</span></div><div class="col"><span class="col-name">threshold</span><span class="col-type">REAL</span><span class="col-pk">NN</span><span class="col-desc">Per scope. Tightens as the scope narrows.</span></div></div></div>
+
+<h2>The index</h2>
+<div class="code"><span class="cmt">-- HNSW, not IVFFlat. IVFFlat needs a training pass over a representative</span>
+<span class="cmt">-- sample and degrades as rows are inserted after training — and this table</span>
+<span class="cmt">-- grows one run at a time, indefinitely. HNSW is incremental and needs no</span>
+<span class="cmt">-- training, at the cost of a larger index and a slower build. The build</span>
+<span class="cmt">-- is created once at migration; the graph then grows incrementally as</span>
+<span class="cmt">-- each run's vectors are inserted at ingest, off the critical path.</span>
+CREATE INDEX bundle_emb_hnsw ON bundle_embeddings
+  USING hnsw (embedding vector_cosine_ops)
+  WITH (m = 16, ef_construction = 64);
+
+<span class="cmt">-- Every probe is run-scoped. This filter runs first, so the ANN search</span>
+<span class="cmt">-- happens over a few thousand rows rather than the whole corpus.</span>
+CREATE INDEX bundle_emb_run
+  ON bundle_embeddings (run_id, scope_kind, scope_id);
+
+<span class="cmt">-- Dimension guard. pgvector will not compare vectors of differing width,</span>
+<span class="cmt">-- but this fails at INSERT with a readable message rather than at query.</span>
+ALTER TABLE bundle_embeddings
+  ADD CONSTRAINT emb_dim_384 CHECK (vector_dims(embedding) = 384);</div>
+
+<h2>The check, in SQL</h2>
+<div class="code"><span class="cmt">-- Similarity of a submitted field against its scope centroid.</span>
+<span class="cmt">-- &lt;=&gt; is cosine DISTANCE, so similarity is 1 minus it.</span>
+SELECT 1 - (c.centroid &lt;=&gt; :q) AS similarity, c.threshold, c.member_n
+  FROM bundle_centroids c
+ WHERE c.run_id = :run AND c.scope_kind = :scope
+   AND c.scope_id IS NOT DISTINCT FROM :scope_id;
+
+<span class="cmt">-- On a flag: what IS this text closest to? A bare number is not</span>
+<span class="cmt">-- actionable; three nearest chunks tell the agent what it drifted toward.</span>
+SET LOCAL hnsw.ef_search = 100;
+SELECT source_kind, source_ref, left(content, 240) AS snippet,
+       1 - (embedding &lt;=&gt; :q) AS similarity
+  FROM bundle_embeddings
+ WHERE run_id = :run AND scope_kind = :scope
+   AND scope_id IS NOT DISTINCT FROM :scope_id
+ ORDER BY embedding &lt;=&gt; :q
+ LIMIT 3;</div>
+
+<table class="tbl">
+<tr><th style="width:130px">Scope</th><th style="width:100px">Threshold</th><th>Applies to</th></tr>
+<tr><td><code>cell</code></td><td class="num">0.62</td><td>A cell synthesis, which should be tightly about its own evidence</td></tr>
+<tr><td><code>category</code></td><td class="num">0.58</td><td>Focus areas and cell-group claims</td></tr>
+<tr><td><code>pillar</code></td><td class="num">0.55</td><td>Platform claims and pillar-level findings</td></tr>
+<tr><td><code>run</code></td><td class="num">0.50</td><td>The executive summary and framing sentence — legitimately synthetic</td></tr>
+</table>
+
+<p class="small muted">Thresholds tighten as the scope narrows, because a claim about one cell
+has less licence to roam than a document-level summary. They move like any other gate ceiling:
+only upward, and never loosened to make a submission pass.</p>
+
+<div class="callout co-orange">
+  <p><strong>Abstention is recorded, not silent.</strong> If the embedding tier is unavailable,
+  if no centroid exists for the applicable scope, or if <code>member_n</code> is below five, V4
+  writes a <code>NOT_RUN</code> gate result with its reason. A gate that reports pass because it
+  did not run is worse than one that reports fail.</p>
+</div>
+
+<h2>Why pgvector and not a separate store</h2>
+<p>Every query is run-scoped and joins back to relational rows — the evidence id, the source
+reference, the run. A dedicated vector database would mean a second system to keep consistent
+with the ingested tier, a second place a run can be half-deleted, and a network hop on the submit
+path. At roughly 4 to 7 million vectors and 10 to 20 GB across a 300-entity corpus, the scale
+does not demand it and the consistency cost is real.</p>
+<p class="small muted">Revisit past roughly 50M vectors, or if user-facing semantic search
+returns — and the second is a product decision, not an infrastructure one.</p>
+
+</div>
+<div id="s13" class="section">
+
+<div class="eyebrow">Section 13</div>
+<h1>Transactions and concurrency</h1>
+<p class="lead">One long transaction, two partial unique indexes and an advisory lock carry the
+whole concurrency model. Isolation stays at read committed because atomicity, not serialisability,
+is what this design needs.</p>
+
+<h2>Why read committed is sufficient</h2>
+<p>The failure serialisable isolation protects against is a read that interleaves with a write
+and sees an inconsistent mixture. Here the only write that touches serving data is the promote,
+and it is one transaction across every table — so a concurrent reader sees the entire previous
+run or the entire new one, never a mixture. Raising the isolation level would add serialisation
+failures and retry logic to buy a guarantee already held.</p>
+
+<h2>The promote transaction</h2>
+<div class="code">BEGIN;  <span class="cmt">-- read committed</span>
+
+  <span class="cmt">-- 1. Serialise promotes of THIS run at the database, not only at the</span>
+  <span class="cmt">--    Redis lease. The lease is advisory and can expire mid-transaction;</span>
+  <span class="cmt">--    this cannot.</span>
+  SELECT id FROM runs WHERE id = :run FOR UPDATE;
+
+  <span class="cmt">-- 2. Assert a PASS on every page. Otherwise 409, having written nothing.</span>
+  SELECT page FROM submissions
+   WHERE run_id = :run AND superseded_at IS NULL AND status = 'PASS';
+
+  <span class="cmt">-- 3. Deactivate the previous active run for this entity. A concurrent</span>
+  <span class="cmt">--    promote of a DIFFERENT run of the same entity violates the partial</span>
+  <span class="cmt">--    unique index and rolls back — which is the correct outcome.</span>
+  UPDATE runs SET is_active = FALSE, status = 'SUPERSEDED'
+   WHERE entity_id = :entity AND is_active;
+
+  <span class="cmt">-- 4. Run WRITERS[section] for each of the 34 sections: delete-then-insert</span>
+  <span class="cmt">--    per serving table, scoped to run_id.</span>
+  <span class="cmt">-- 5. Stamp promoted_at, producer_version and provenance on every row.</span>
+  <span class="cmt">-- 6. Mark the staging rows promoted — RETAINED, so a one-page fix can</span>
+  <span class="cmt">--    re-promote without re-synthesising the other five.</span>
+
+  UPDATE runs SET is_active = TRUE, status = 'PROMOTED', promoted_at = now()
+   WHERE id = :run;
+
+COMMIT;
+
+<span class="cmt">-- AFTER commit, never inside: REFRESH ... CONCURRENTLY cannot run in a</span>
+<span class="cmt">-- transaction block, and it must not hold the promote open.</span>
+REFRESH MATERIALIZED VIEW CONCURRENTLY corpus_rollup;</div>
+
+<h2>Lock inventory</h2>
+<table class="ft">
+<tr><th style="width:230px">Lock</th><th style="width:150px">Held by</th><th>Prevents</th></tr>
+<tr><td><code>SELECT … FOR UPDATE</code> on the run row</td><td>promote, for its duration</td><td>Two promotes of one run interleaving their writers</td></tr>
+<tr><td>Partial unique on <code>runs (entity_id) WHERE is_active</code></td><td>the index</td><td>Two active runs for one entity, however they arrive</td></tr>
+<tr><td>Partial unique on <code>submissions (run_id, page) WHERE superseded_at IS NULL</code></td><td>the index</td><td>Two live submissions for one page</td></tr>
+<tr><td>Redis claim lease, with expiry</td><td>the synthesis session</td><td>Two Cowork sessions on one run. Advisory — expires so a dead session cannot block a run for ever</td></tr>
+<tr><td>Row locks from delete-then-insert</td><td>promote, per serving table</td><td>Nothing a reader notices — readers take no locks under MVCC</td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">Two layers, deliberately</div>
+  <p>The Redis lease is the ergonomic guard: it gives a second session a clean refusal rather
+  than a database error. The row lock is the correctness guard: it holds even when the lease has
+  expired mid-transaction. Neither alone is enough — the lease can lapse, and the row lock gives
+  an unhelpful message.</p>
+</div>
+
+<h2>Lock ordering, and the deadlock that would otherwise happen</h2>
+<p>The promote touches 34 tables. Two promotes for <em>different</em> entities acquiring those
+tables in different orders would deadlock. The writer registry is therefore an <strong>ordered
+list</strong>, not a mapping, and every promote walks it in the same order.</p>
+<div class="code"><span class="cmt"># WRITERS is a list, and the order is load-bearing rather than cosmetic.</span>
+<span class="cmt"># A test asserts it is stable across imports, because a dict comprehension</span>
+<span class="cmt"># somewhere upstream reordering it would produce an intermittent deadlock</span>
+<span class="cmt"># that only appears under concurrent promotion.</span>
+WRITERS: list[tuple[str, Writer]] = [
+    ("overview.scores",        write_overview_scores),
+    ("overview.firmographics", write_overview_firmographics),
+    ...                                  <span class="cmt"># 34 entries, fixed order</span>
+]</div>
+
+<h2>What a reader sees during a promote</h2>
+<table class="tbl">
+<tr><th style="width:250px">Moment</th><th>The reader sees</th></tr>
+<tr><td>Before <code>COMMIT</code></td><td>The entire previous run. The transaction is invisible.</td></tr>
+<tr><td>At <code>COMMIT</code></td><td>The entire new run, atomically.</td></tr>
+<tr><td>Mid-writer failure</td><td>The entire previous run. Rollback leaves nothing behind.</td></tr>
+<tr><td>Holding a pinned run id</td><td>The run they pinned, active or not, until they choose to move.</td></tr>
+<tr><td>Between commit and the rollup refresh</td><td>Fresh page content beside a directory count up to a few seconds old — the one acceptable staleness window, and why the rollup carries no per-section figures.</td></tr>
+</table>
+
+<h2>Retry policy</h2>
+<table class="tbl">
+<tr><th style="width:230px">Failure</th><th style="width:130px">Retry</th><th>Because</th></tr>
+<tr><td>Deadlock detected</td><td>Yes, up to 3</td><td>Should not occur given ordered writers, but a retry is cheap and the alternative is a failed promote</td></tr>
+<tr><td>Unique violation on the active-run index</td><td><strong>No</strong></td><td>Another run of this entity promoted first. Re-resolve rather than retry — retrying would deactivate their work</td></tr>
+<tr><td>Lock timeout on the run row</td><td>Yes, with backoff</td><td>Another promote of the same run is in flight and will finish</td></tr>
+<tr><td>Statement timeout mid-writer</td><td><strong>No</strong></td><td>A writer exceeding 300 seconds is a bug, not contention. Fail loudly.</td></tr>
+</table>
+
+</div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+const titles = {
+  s01:"01 — Architecture & tiers",
+  s02:"02 — Table inventory",
+  s03:"03 — Auth",
+  s04:"04 — Ingested tier",
+  s05:"05 — Staging tier",
+  s06:"06 — Serving tier",
+  s12:"12 — Vector tier",
+  s13:"13 — Transactions & concurrency",
+  s07:"07 — Control & audit",
+  s08:"08 — Catalogue",
+  s09:"09 — Constraints & indexes",
+  s11:"11 — User state & lineage",
+  s10:"10 — Query patterns & QA"
+};
+function go(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(l => l.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.sb-item').forEach(l => {
+    if ((l.getAttribute('onclick')||'').includes("'"+id+"'")) l.classList.add('on');
+  });
+  document.getElementById('tb-title').textContent = titles[id]||id;
+  window.scrollTo(0,0);
+}
+</script>
+</body></html>

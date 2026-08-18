@@ -1,0 +1,1631 @@
+DMA Insights — Product Requirements Document
+
+Zennify
+DMA Insights · PRD
+August 2026
+
+Product
+01 Product overview
+02 Problem statement
+03 Personas & roles
+
+Synthesis
+04 The synthesis model
+13 Ingest & entity resolution
+14 Lifecycle & persistence
+
+Surfaces
+05 Dashboard architecture
+06 Surface register
+07 Drilldown atlas
+08 Insight cards
+09 Heatmap & platform
+
+Integrity
+10 Evidence & citation
+11 Gates & disclosure
+12 Audience model
+
+Operations
+15 Rerun intelligence
+16 Success metrics
+18 Versioning
+19 Persistence & sessions
+20 Scope
+© 2026 Zennify · Confidential
+
+01 — Product overview
+DMA Insights · Product Requirements Document
+PRDMCP connector47 surfaces
+
+Product Requirements Document
+
+# DMA Insights
+
+An intelligence workspace that turns a completed Digital Maturity Assessment into 47 interrogable surfaces an account executive can walk into a client meeting with. Every sentence it displays was written, cited, validated and persisted before the page was opened. The application performs no reasoning at request time.
+
+Core thesis
+A DMA produces hundreds of scored cells, hundreds of evidence items, insight cards, issue registers, peer benchmarks, financial trajectories and platform opportunity maps. Under a fifth of it reaches an AE. The rest sits in a forty-to-eighty page report and a scoring workbook. This product surfaces the remainder — selectively, with every number traceable to the cell it came from, and with an honest empty state wherever the evidence genuinely is not there.
+
+38
+client surfaces
+Across seven dashboards, plus 9 global surfaces.
+
+34
+payload sections
+Each synthesised, validated and promoted into one serving table.
+
+15
+drilldowns
+Three shells. Every one renders from data the page already carries.
+
+## How the product works
+
+Upstream
+The assessment
+A DMA run produces a report, a scoring workbook, an evidence index and a package of structured files. Unchanged by this product.
+
+Ingest
+Package parser
+Discovers the folder, classifies artefacts, resolves the entity, parses into a read-only tier the synthesis agent can read.
+
+Synthesis
+Claude Cowork
+An agent reads the bundle through the MCP connector, reasons, enriches, cites, writes every surface, submits page by page, repairs against verdicts.
+
+Promotion
+MCP connector
+One atomic write across all 6 pages. Nothing renders before it; nothing is half-new after it.
+
+Serving
+The web app
+Pure reads. No reasoning, no model, no synthesis at request time.
+The separation is the central product decision. Everything expensive, slow and fallible happens once, ahead of time, in an environment where a failure is catchable and repairable against a structured verdict. Everything an AE does at twenty to nine before a nine o'clock meeting is a database read.
+
+The sentence the whole architecture follows from
+The app never calls a model. Content arrives as a validated payload over the MCP connector and is written to the serving tables by promotion. This is what makes the product fast, cheap and reproducible — and what turns a hallucination into a build-time failure a verdict can name, rather than a runtime surprise a client discovers.
+
+## Who it serves
+
+Internal, and it stays internal. Zennify account executives preparing for and sitting in client conversations; delivery analysts who ran the assessment and own its quality; and practice leads who read across the corpus. A client sees output from it — a redacted view, an exported scorecard — but never the tool itself.
+
+## What it is not
+
+- Not a replacement for the assessment engine. It consumes assessments; it does not perform them.
+- Not a scoring tool. Nothing here assigns a maturity level. Scores are read from the workbook and never re-derived.
+- Not a research tool. No live scraping, no request-time search. Enrichment happens during synthesis.
+- Not a chat interface. There is no prompt box, because the reasoning already happened.
+
+Section 02
+
+# Problem statement
+
+Two problems sit on top of each other. The first is that rich assessment output does not reach its audience. The second is that when it does, it has to survive being challenged — and six specific defect classes determine whether it does.
+
+## The assessment does not reach its audience
+
+### The static artefact problem
+
+Every completed DMA writes documents and workbooks to Drive. Reaching one finding means opening a forty-to-eighty page report and interpreting tables without context. The report alone carries twelve structured sections: an SCQA executive summary, trend analysis, an issue register with a timeline, four pillar deep-dives, benchmark comparison, gap prioritisation, recommendations with root-cause analysis, a transformation roadmap, data gaps and a full evidence registry. None of it is searchable, filterable or cross-referenceable.
+
+### The evidence depth problem
+
+Each score is backed by evidence carrying a quality tier, a rank score, a claim class, a source URL and a verbatim excerpt. The insight cards — each structured as what, why and so what — are the most commercially useful analysis in the engagement, and they are rows in a table on page twenty.
+
+### The platform recommendation problem
+
+Recommendations name platforms: Agentforce, Data Cloud, Mosaic AI, Tableau Next, Twilio Engage, nCino. Each gap maps to platform areas and features in the capability catalogue. Today that is prose, with no way to filter by platform or see every gap a platform addresses.
+
+### The rerun quality problem
+
+A rerun has no memory of where the prior run was thin. Cells with fewer than three evidence items get no special attention, and proxy searches that were never attempted are not recorded. Reruns reproduce the same gaps.
+
+### The version coherence problem
+
+Runs accumulate with no comparison mechanism. Asking whether a pillar improved means opening two workbooks and comparing rows by hand.
+
+## Six defect classes that determine whether it survives a client
+
+Each is closed by a specific mechanism rather than by review discipline. The pattern worth naming: every one is a contract that existed in someone's head rather than in a file. None would have been caught by more careful reading, because the fifth reader reads the same undocumented assumption as the first.
+
+Defect class | What it looks like | Closed by
+
+Grain  | A quoted score names a different cell than the one it came from — a sub-capability's name beside a category's mean.  | Grain lock at submit: resolve the label to a served cell, require agreement within 0.05. blocking
+
+Identity  | One entity's overview carrying another institution's assets, regulator and footprint — one root cause visible on five surfaces at once.  | An identity gate on every figure, quote, document and source domain. blocking
+
+Citation  | Enrichment-minted ids served having passed no citation check, because no module's pattern could see the mint namespace.  | One recogniser in one module, with a test asserting identity of the compiled object at every call site.
+
+Bounds  | An evidence rank score rendering below the floor of its own scale.  | Server-computed, bounded, and quarantined outside the range.
+
+Derived values  | An age column reading as uncomputable while the status beside it reads fresh.  | Computed or null, never a sentinel. Status follows band, band follows age, age follows a real date.
+
+Coverage  | Rendered surfaces with no payload route, so nothing can author them even though they are specified.  | A complete section set, reconciled by test against the rendered surface register.
+
+Why these matter more than they look. An AE is challenged on exactly one thing in a client meeting: where a number came from. A product that answers that instantly and correctly is worth more than one that presents more analysis. Every mechanism above exists to protect that single moment.
+
+Section 03
+
+# Personas and roles
+
+AE
+The account executive
+Primary user · reads before a meeting
+Has twenty minutes and a nine o'clock call. Needs the one number that frames the conversation, the named capability behind it, and something true and specific to open with. Will be challenged on where a figure came from and must survive that.
+
+What is true about this client, and what do I lead with?
+Where does that number come from — shown, not asserted.
+What do I say out loud, in words I would actually use.
+
+AN
+The delivery analyst
+Owns assessment quality
+Ran the assessment and is accountable for it. Needs to see where evidence is thin, which gates failed and why, which cells are capped by tier misclassification, and what the next run should go and find.
+
+Which cells are under-evidenced, and what would close them?
+Did anything fail a gate, and is it disclosed rather than hidden?
+What changed since the last run, and did a recommendation land?
+
+PL
+The practice lead
+Reads across the corpus
+Not interested in one client. Wants the pattern: which categories are structurally weak across a sub-vertical, where platform opportunity concentrates, and whether assessment quality is improving run over run.
+
+What is systematically true across this sub-vertical?
+Where does opportunity concentrate, and how confident are we?
+Is the corpus improving, or has the gate simply loosened?
+
+## Roles and what they gate
+
+Role | Reaches | Cannot
+
+AE  | Overview, Insights, Heatmap, Platform and Tech stack in either audience. All drilldowns, evidence drawers and exports.  | Reach Context or Health. Resolve alerts. Trigger a synthesis run.
+
+ANALYST  | Everything the AE reaches, plus Context and Health — the thin-evidence queue, gate results with reasons, the evidence age tracker, cross-entity patterns and version diff.  | Manage users, reload the catalogue or administer imports.
+
+ADMIN  | Everything, plus user management, import administration, the import audit and catalogue version control.  | Write content. Nothing writes a serving table except a promotion.
+
+There is a fourth reader who never signs in: the client. The customer view is a redaction contract driven by payload marking, not a layout preference. Two whole dashboards — Context and Health — are withheld from it entirely.
+
+Section 04
+
+# The synthesis model
+
+Content is produced by an agent running in Claude Cowork, connected to the application through the DMA Insights MCP connector. The connector is the only writable boundary into anything the product serves.
+
+```
+┌─ CLAUDE COWORK ───────────────────────────────────────────────────────┐
+│  A synthesis agent running the DMA surface-production skill.          │
+│  Reads the assessment. Reasons over it. Searches for what would       │
+│  refute it. Enriches where evidence is thin. Writes every sentence    │
+│  the product will display, and cites all of it.                       │
+└───────────────────────────────┬───────────────────────────────────────┘
+                                │  DMA Insights MCP connector · 12 tools
+                                │  read:  bundle · contract · catalogue · evidence · state
+                                │  write: register_evidence · submit_page_payload · promote_run
+                                ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│  THE APPLICATION       validates → stages → promotes → serves         │
+└───────────────────────────────────────────────────────────────────────┘
+```
+
+Claude Cowork and Claude Code are different things in this system
+Claude Cowork is where synthesis runs: an agent reads the assessment through the MCP connector and writes the content the product serves. Claude Code is where the application itself is built, and it never touches client content. They are separate trust boundaries and the documents keep them apart.
+
+## Why synthesis happens in Cowork
+
+Property | What it buys
+
+It is agentic and multi-step  | Producing one client means reading a bundle, resolving a catalogue, reasoning across 34 sections, running enrichment searches, registering sources, submitting, reading verdicts and repairing. That is a long-running task with many tool calls, not a single completion.
+
+It can search  | Enrichment is the highest-value work on any surface. A cell with two evidence items and a successful search becomes a cited cell; the same cell without one becomes a thin-evidence alert.
+
+It is separable from the app  | The deployed application carries no inference dependency, no model credential, no token cost and no latency budget for reasoning. Its compliance surface shrinks to reads.
+
+It fails where failure is cheap  | A grain violation caught at submit is repaired in the same session. The same violation discovered in a client meeting is not repairable at all.
+
+## Enrichment: Clay
+
+Clay closes the evidence gaps public search cannot. It runs during synthesis, immediately after the package is read and before the pages that consume it, because enrichment is asynchronous and the surfaces that need it come last.
+
+Surface | Provides | Data point | Tier
+
+O7 | Leadership | find-and-enrich-contacts-at-company — filtered contact rows | —
+
+O12 | Thought leadership | add-contact-data-points — Find Thought Leadership | T2–T3
+
+O2 | Firmographics | add-company-data-points — Annual Revenue · Headcount Growth | T1–T2
+
+T1 | Technology stack | add-company-data-points — Tech Stack | T1
+
+O3 | Why-now signals | add-company-data-points — Recent News · Latest Funding · Open Jobs | T2–T3
+
+C5 | Acquisitions | add-company-data-points — Recent News + Custom | T3
+
+P1 | Platform readiness | add-company-data-points — Open Jobs — the demand signal | T2–T3
+
+O7 | Tenure and trajectory | add-contact-data-points — Summarize Work History | T3
+
+Three rules that matter more than the call sequence
+Cite the source, not the tool. A value Clay surfaced is evidence because of the filing behind it, not because it arrived through an API — a value with no traceable source is an inference and is labelled one. Never record an absence from a Clay call without polling first; the search response carries base fields only, so an empty leadership panel written before the poll resolved is an unfinished call rendered as a finding. And enrichment is a budget, not a blank cheque — a technographic scan is worth its credits, enriching the whole org chart is not.
+
+Per run | Call | Scope
+
+1 | company enrichment call | Tech Stack · Annual Revenue · Headcount Growth · Recent News · Open Jobs · Latest Funding
+
+1 | leadership contact search | C-suite and technology leadership, title-filtered
+
+1 | contact enrichment call | Find Thought Leadership · Summarize Work History
+
+0–2 | targeted custom data points | Only against a named gap already attempted by search
+
+A technographic scan is a T1 machine scan, never T4. Filing it at T4 caps the capability at L2.5 and silently suppresses the score — the commonest tier misclassification in the corpus, and Clay is now the largest single producer of these scans.
+
+## The agent's responsibilities
+
+- Reading the parsed package, the page contract and the catalogue pinned to the run.
+- Reasoning over evidence and writing the prose every surface renders.
+- Enriching beyond the package when a cell is thin — and registering every source found before citing it.
+- Challenging its own conclusions: state the claim, search for what would refute it, probe for grain mismatch and identity contamination, then accept, reject or mark uncertain.
+- Emitting honest empty states, with what was searched, rather than filling space.
+- Marking every internal rung in the payload so the serve layer can strip it.
+
+## What the agent is forbidden from doing
+
+- Assigning a score. Scores are read from the workbook and never re-derived.
+- Inventing an identifier. It creates 5 classes — insight card, finding, focus area, tech-stack row and why-now signal — and everything else is read or requested.
+- Choosing an evidence id. Enrichment sources are registered and the server allocates the id.
+- Computing an evidence rank score. The server computes it, bounded.
+- Writing a serving table. Every write goes through the connector; there is no side door.
+
+The rule that prevents most errors
+An invented evidence id is fabrication by construction, even when a matching source genuinely exists. Register first, cite second, and use the id you were given.
+
+## The analyst stance
+
+The agent extracts and explains. It is not a copywriter and not a scorer. Every claim about the client carries an evidence id; if it cannot be cited, it is not written. Where a source is absent, the surface renders an honest empty state — absent beats wrong, because a guessed field survives into a meeting and costs credibility, while a dash with a provenance note costs nothing.
+
+## The reasoning layer
+
+Every gate in this product checks a claim after it has been written. The reasoning layer is what happens before, and it is the only mechanism that catches a claim that is well-formed, correctly cited, grain-locked and wrong.
+
+ | Step | What it requires
+
+A | Hypothesis | State the claim and its confidence, before defending it.
+
+B | Counter-evidence | Argue the strongest case against it. Inside a thin margin, present both and say the call is close.
+
+C | Domain test | Is this plausible for THIS sub-vertical, size tier and regulator?
+
+D | Failure probes | Run the probe set for the surface. Each probe fires a search.
+
+E | Verdict | ACCEPT · REJECT · UNCERTAIN. Reject means re-rank or drop, not soften.
+
+Any surface making a ranked, causal or comparative claim carries its verdict in the payload. A verdict that is not recorded is a step the agent can convince itself it took.
+
+Step B is the one that gets skipped. Arguing against your own conclusion feels like undermining the work; it is the opposite. A claim that survives its strongest counter-argument is one an AE can defend in the room, and a claim that does not survive was going to fail there instead. The strongest form sources the falsifier from the client's own words rather than from the assessment's judgement.
+
+### Nine contradiction classes
+
+Each has been observed, and each renders plausibly.
+
+Class | Looks like | Caught by
+
+Grain | A figure quoted under a name from a different row | Grain lock, per quoted figure
+
+Magnitude | Two figures for one metric differing by more than a quarter | Identity gate, assertion 5
+
+Cross-surface | The hero names one constraint and the findings another | The seven reconciliation pairs
+
+Source rank | The workbook and the report disagree and the report won | Source priority — the workbook wins on scores
+
+Self-description | The entity's claim contradicts a registry | Registry wins; the contradiction is itself a finding
+
+Arithmetic vs analyst | The engine ranks a platform the report never discusses | State it, say which won, lower confidence
+
+Temporal | The timeline shows a platform live; the register shows it stalled | One is wrong, or the relationship is the finding
+
+Confidence | A cell scored HIGH on two evidence items | Confidence is earned by the evidence count
+
+Vocabulary | One word carrying two meanings on one screen | Resolve the band word from the served score
+
+Never average two disagreeing figures
+The result is in no source, which is fabrication with extra steps. Agreement from independent origins is corroboration. Disagreement where one source outranks resolves by priority and is recorded. Disagreement between peers is quarantined and stated — the resolution is the finding.
+
+## Register discipline
+
+Banned in anything a client reads | Why
+
+Consultant register — leverage, journey, best-in-class | Says nothing, and signals a template.
+
+Deficit framing — lacks, fails to | The client is in the room. State what is true, not what is missing about them.
+
+Raw taxonomy codes in prose | Internal grammar. Capability names are humanised; codes appear only in drilldown provenance.
+
+Score-predicate openers | A card opening with a score has told the AE nothing they cannot read off the grid.
+
+Markdown in a field that renders as text | Only explicitly typed markdown fields go through a stripper; everything else renders literally.
+
+## Every gap is stated as available value
+
+Everything on a client dashboard is read by, or in front of, the client. A gap stated as a deficiency invites defensiveness; the same gap stated as available value invites a conversation. The finding is identical and the evidence is unchanged — what differs is whether the sentence is about what the institution failed to do or about what is now available to it.
+
+Instead of | Write
+
+The bank lacks covenant monitoring | Covenant monitoring is purchased and not yet activated
+
+Failure to govern agent creation | Governance is in place at the sanctioned tool; the unsanctioned path is still open
+
+Data quality is poor | Data quality rules are embedded in the delivery lifecycle; coverage extends to 7 of 12 sources
+
+They are behind their peers | The peer set has moved on this; the pattern is available and the substrate is already built
+
+Nobody owns the agent estate | An owner per agent is the output of one governance session
+
+The pattern behind every rewrite: name what exists before naming what does not. Almost every gap sits beside something the institution has already built, bought or decided. Lead with that, and the gap becomes the next step rather than an indictment.
+
+This is register, not softening. Thin-evidence markers, quarantine notes and failing safeguard gates all still render, unhedged. Never soften a risk into vagueness — state it plainly, attach it to evidence, and frame the response as available rather than overdue. Capability sits with institutions, not individuals: "the team lacks" is both accusatory and unfalsifiable.
+
+## The verb is governed by the evidence level
+
+Level | Basis | Permitted language
+
+L1 | Vendor named in a T1 or T2 source with deployment confirmed | implemented · deployed · uses · powers
+
+L2 | Official partnership announcement or case study | partnered with · selected · announced
+
+L3 | Two or more independent signals | likely uses · signals suggest · inferred from hiring
+
+L4 | A single weak source | may use · potential · unconfirmed
+
+Writing “uses” on level-three evidence is a fabrication, not a style choice.
+
+Section 05
+
+# Dashboard architecture
+
+Seven client dashboards, 38 client surfaces, 9 global surfaces and 34 payload sections across 6 submission pages. These are four different quantities and this document keeps them apart.
+
+## The four quantities
+
+Quantity | Count | What it is
+
+Dashboard | 7 | A client screen with a route and a tab.
+
+Surface | 38  | One card or panel a human sees on a client dashboard. Several live on one page, and one section can produce more than one.
+
+Section | 34  | One named block inside a page payload — the unit the agent synthesises into and the unit that promotes into a serving table.
+
+Page | 6  | A submission boundary, not necessarily a screen. Promotion requires a pass on every one.
+
+Why the page count is load-bearing, and why sections do not follow screens
+Adding a seventh page raises the bar for every client in the corpus, because promotion requires a passing submission on every page before serving tables can be touched again. Adding a section to an existing page does not. That is why four sections synthesised into the heatmap page render on the Health dashboard, and why the Context financial trajectory renders the Overview's section rather than owning one of its own.
+
+## The seven dashboards
+
+ | Dashboard | Route  | Surfaces | Audience
+
+D1 | Overview | /clients/:id/overview  | 13  | internal + customer
+
+D2 | Insights | /clients/:id/insights  | 2  | internal + customer
+
+D3 | Heatmap | /clients/:id/heatmap  | 5  | internal + customer
+
+D4 | Platform | /clients/:id/platform  | 5  | internal + customer
+
+D5 | Context | /clients/:id/context  | 6  | INTERNAL ONLY
+
+D6 | Tech stack | /clients/:id/techstack  | 2  | internal + customer
+
+D7 | Health | /clients/:id/health  | 5  | ANALYST ONLY
+
+ | Total |   | 38 |
+
+D1
+
+Overview
+13 surfaces · 12 sections · the page an AE is guaranteed to read
+
+Answers one question: what is true about this client, and what do I lead with. The hero carries the whole argument in one screen — composite, four pillar scores with peer deltas, posture, and a framing sentence that states the gap, quantifies it and localises it. Five of its cards are confidence instrumentation: they tell the reader how much to trust everything else on the screen.
+
+D2
+
+Insights
+2 surfaces · 2 sections · triage, not a grid
+
+Insight cards grouped by priority, pillar or theme, each opening a four-tab modal carrying the full argument. The technology landscape strip sits here rather than on the Tech stack page, because the gap it names is what makes an insight actionable.
+
+D3
+
+Heatmap
+5 surfaces · 9 sections · three view modes, four grain levels
+
+The scoring grid and everything that qualifies it. Three view modes — focus areas, the standard grid and the value chain — and within the standard grid four grain levels: pillar, category, capability and sub-capability. This page carries nine sections because an agent filling cell evidence is already reading the workbook cell by cell; four of those sections render on the Health dashboard.
+
+D4
+
+Platform
+5 surfaces · 5 sections · fit is not readiness
+
+Fit score, client-specific story, gap-to-platform mapping with backing sub-capabilities, readiness prerequisites, recommendations, roadmap phases, the stair-step curve and the conversation starters. All five sections sit together because all five reference the same recommendation ids.
+
+D5
+
+Context INTERNAL ONLY
+6 surfaces · 5 sections · withheld from the customer view entirely
+
+Timeline, issue register, regulatory standing, sentiment, acquisition history and the financial trajectory. This is internal team-preparation material: the customer view renders a locked state, not a redacted page.
+
+D6
+
+Tech stack
+2 surfaces · 1 section · layered, not flat
+
+Four layer cards — operations and core, customer engagement, data and analytics, infrastructure and cloud — each with a pillar tag and a detection count. The layering carries analysis a flat list cannot: two of four detected at the data layer with a data-pillar tag says where the gap is and which pillar absorbs it.
+
+D7
+
+Health ANALYST ONLY
+5 surfaces · 4 sections from the heatmap page, plus one derived
+
+Five tabs: thin-evidence alerts, version diff, safeguard gates, the evidence age tracker and cross-entity patterns. This is where the assessment states its own weaknesses. Four surfaces are synthesised into the heatmap page; version diff is derived from the runs table.
+
+Section 06
+
+# Surface register
+
+Every client surface, what it must present, and the payload section that produces it. A surface with no stated section is not buildable; a section with no surface is not authorable. This register is reconciled by test against the section registry, the writer registry and the serving tables.
+
+The payload-section column names where a surface is synthesised, which is not always the dashboard it renders on. Four heatmap sections render on Health; the Context financial trajectory renders the Overview's section so the two cards cannot disagree; and evidence coverage produces two surfaces from one section.
+
+## D1 · Overview · 13 surfaces internal + customer
+
+/clients/:id/overview
+
+ID | Surface and its contract | Payload section
+
+O1 |
+Scores & peer benchmarks
+Composite to 1dp with its band word, four pillar scores with peer deltas, posture chip, evidence basis, and an 18–32 word framing sentence that states the gap, quantifies it and localises it. | overview.scores
+
+O2 |
+Firmographics strip
+Assets, employees and branches rendered inside the hero rather than as a separate panel. Every figure identity-checked against the entity. | overview.firmographics
+
+O3 |
+Why-now signals
+Dated, cited events. Each carries trigger, window, consequence of waiting, cost of acting now and why this sequence. | overview.why_now
+
+O4 |
+Executive summary
+Situation, complication, question, answer. At most one raw score, and client facts must outnumber score references. | overview.exec_summary
+
+O5 |
+Opportunity surface tiles
+Where engagement value concentrates per platform, tied to the cells below M3 that the platform addresses. | overview.opportunity
+
+O6 |
+Top findings
+Ranked findings, each with what, why and so what, a named consequence, a rejected alternative, and an inline expansion. | overview.findings
+
+O7 |
+Leadership panel
+Roster with role and tenure, or an explicit verified-absent state naming every source searched. | overview.leadership
+
+O8 |
+Financial trajectory
+A dated series. Below three points it renders as a labelled snapshot with no trend line. | overview.financial_series
+
+O9 |
+Sentiment
+Bars plus context tiles, each tile expanding inline to the items behind it. | overview.sentiment
+
+O10 |
+Evidence coverage
+Overall and per-pillar against the 80% hard gate, with the denominator definition rendered. Never rounded up across the gate. | overview.evidence_coverage
+
+O11 |
+Evidence tier distribution
+Tier and claim-class histograms, plus what vocabulary this mix licenses across the whole document. | overview.evidence_coverage
+
+O1b |
+Capability ceiling & uncertainty
+Per category, the highest level the evidence would support under perfect execution, its uncertainty band, and the named absence that set it. | overview.ceilings
+
+O12 |
+Thought leadership signal
+Dated executive publications with verbatim quotes. A contradicting entry is the most valuable row on the card and is never filtered out. | overview.thought_leadership
+
+## D2 · Insights · 2 surfaces internal + customer
+
+/clients/:id/insights
+
+ID | Surface and its contract | Payload section
+
+I1 |
+Insight cards
+Triage layout grouped by priority, pillar or theme. Each card carries a claim as its title and opens a four-tab modal. | insights.insights
+
+T2 |
+Technology landscape strip
+Confirmed, inferred, claimed and gaps. Four counts recomputed from the register, each tile printing its evidence basis. | insights.landscape
+
+## D3 · Heatmap · 5 surfaces internal + customer
+
+/clients/:id/heatmap
+
+ID | Surface and its contract | Payload section
+
+H4 |
+Workbook grain scores
+The maturity grid at four grain levels — pillar, category, capability, sub-capability. A cell drills in; it does not open a panel. | heatmap.workbook_scores
+
+H1 |
+Focus areas
+Three to five client priorities, each with a verbatim quote from the client's own report and its page number, plus a configurable KPI strip. | heatmap.focus_areas
+
+H2 |
+Cell evidence
+Per-cell evidence linkage and synthesis prose, with the count of items reasoned over computed from the citation array. | heatmap.cell_evidence
+
+H6 |
+Evidence store
+The run's full evidence index: tier, claim class, recency, publisher, verbatim excerpt, and the cells each item supports. | heatmap.evidence
+
+H9 |
+Value-chain view
+The same scores arranged along the institution's value chain rather than the catalogue's taxonomy. Prototype-only; no prompt in the design specification. | heatmap.value_chain
+
+## D4 · Platform · 5 surfaces internal + customer
+
+/clients/:id/platform
+
+ID | Surface and its contract | Payload section
+
+P1 |
+Platform fit & story
+Fit score per platform, the client-specific story, gap-to-platform mapping with backing sub-capabilities, and the readiness prerequisite gates. | platform.platform_story
+
+P2 |
+Recommendations
+Detail, impact, effort, sequencing and provenance. A derived recommendation must never present as analyst judgement. | platform.recommendations
+
+P2b |
+Conversation starters
+45–90 word say-it-aloud openers with distinct opening shapes. No codes, no bracketed ids mid-sentence, no score-first opening. | platform.starters
+
+P3 |
+Transformation roadmap
+Sequenced phases referencing the same recommendation ids the page already carries. Order is meaning. | platform.roadmap
+
+P4 |
+Stair-step curve
+The maturity ladder and its clusters, or an explicit reason it is not derivable — never a blank card. | platform.stairstep
+
+## D5 · Context · 6 surfaces INTERNAL ONLY
+
+/clients/:id/context
+
+ID | Surface and its contract | Payload section
+
+C1 |
+Digital evolution timeline
+Chronological, year-range and signal filtered. Every event dated and cited; each expands inline to its detail. | context.timeline
+
+C2 |
+Issue register & Gantt
+One row per matter with identity fields, rendered as a Gantt. Each issue expands inline and names the cells it caps. | context.issue_register
+
+C3 |
+Regulatory standing
+Primary regulator from the regulator's own registry, licence type, jurisdictions, and enforcement actions with the cells they cap. | context.regulatory_standing
+
+C4 |
+Sentiment overview
+The sentiment grid at Context depth, each tile expanding inline to the items behind it. Prototype-only; produced under the O9 sentiment prompt at Context depth. | context.context_sentiment
+
+C5 |
+Acquisition history
+Closed and announced transactions with integration status and maturity effect. A temporarily-constraining integration is not smoothed to neutral. | context.acquisitions
+
+C6 |
+Financial trajectory
+Renders the Overview's financial series section. One section, so the two cards cannot disagree. | overview.financial_series
+
+## D6 · Tech stack · 2 surfaces internal + customer
+
+/clients/:id/techstack
+
+ID | Surface and its contract | Payload section
+
+T1 |
+Technology stack register
+Four layer cards — operations, customer engagement, data, infrastructure — each with a pillar tag and a detection count. | techstack.techstack
+
+T3 |
+Platform detail
+A sub-page per stack item: detection basis, evidence, the cells it touches and the gap it leaves. | techstack.techstack
+
+## D7 · Health · 5 surfaces ANALYST ONLY
+
+/clients/:id/health
+
+ID | Surface and its contract | Payload section
+
+H3 |
+Thin-evidence alerts
+The run's under-evidenced cells with severity, current count, proxy attempted and closure condition. | heatmap.alerts
+
+V1 |
+Version diff
+Run-to-run comparison, derived from the runs table. Comparison is direct within a catalogue lineage and resolves through the alias bridge across a bump. | —
+
+H5 |
+Safeguard gates
+Client-visible gate results in plain language, including an explicit not-run state with its reason. | heatmap.safeguard_gates
+
+H7 |
+Evidence age tracker
+Age against a pinned reference date. Status follows band, band follows age, age follows a real date — or all three are null. | heatmap.evidence_age
+
+H8 |
+Cross-entity patterns
+Sub-vertical concentration at or above the declared threshold. Counts and shares only; entity ids never leave the audit trail. | heatmap.cohort_patterns
+
+## Global surfaces
+
+These render from serving rollups, the runs table and the ingest audit rather than from a payload section. They carry no synthesis prompt, and each breaks in its own characteristic way.
+
+ID | Surface | Route | Contract
+
+G1 | Login | /login | Google OIDC, Workspace domain restricted. Always the entry point until signed in.
+
+G2 | Dashboard | / | Command centre: active assessments, open alerts, insight cards, average maturity, in-progress runs. Header and KPI counts come from one query.
+
+G3 | Client directory | /clients | Card and table views with maturity, pillar strip, sub-vertical, source badge, open alerts and top platform fit.
+
+G4 | Global alert dashboard | /alerts | The corpus-wide thin-evidence queue plus the cross-entity pattern finder and the waived-alert register. Virtualised.
+
+G5 | Prospecting | /prospecting | Search-first surface producing the customer-safe scorecard export. Empty until a query is entered.
+
+G6 | Run history | /clients/:id/runs | Per-entity run list. The score column must equal the Overview hero ring.
+
+G7 | Admin | /admin | Users and roles, settings and operations. Admin role required.
+
+G8 | Import & jobs | /admin/import | Ingest job status with a live stream, and the pending-review queue for low-confidence entity inferences.
+
+G9 | Import audit | /admin/import/audit | Every file seen, classified, excluded or deduplicated, with the rule that fired.
+
+## Reconciliation
+
+Surfaces
+D1 Overview13
+D2 Insights2
+D3 Heatmap5
+D4 Platform5
+D5 Context6
+D6 Tech stack2
+D7 Health5
+Global9
+Total47
+
+Sections per page
+overview12
+insights2
+heatmap9
+platform5
+context5
+techstack1
+Total34
+
+Section 07
+
+# Drilldown atlas
+
+15 panels across three shells. One shell is not an overlay at all, which is why an audit that probes the DOM for dialogs reports zero drilldowns on a page full of them.
+
+Shell | Geometry | Panels
+
+Drawer | Right slide-in, z-index 95, 420–480px  | DD-1 Synthesis, DD-2 Evidence
+
+Modal | Centred, z-index 80, 640–820px  | DD-3 Insight, DD-4 Recommendation, DD-5 New run, DD-6 Intelligence panel
+
+Inline expansion | Expands in the document flow, no overlay  | DD-7 Event detail, DD-8 Issue detail, DD-9 Finding expansion, DD-10 Focus area expansion, DD-11 Platform tile expansion, DD-12 Sentiment tile expansion, DD-13 Readiness gate expansion, DD-14 Acquisition expansion, DD-15 Ceiling rationale
+
+A drilldown never fetches
+Every panel renders from data the page response already carried. The panel must open instantly and must never fail after the card has rendered — a spinner on the panel an AE opens when a client challenges a number is the worst possible moment for a network round trip.
+
+## The complete atlas
+
+ID | Shell | Panel | Opens from
+
+DD-1 | drawer | Synthesis | a sub-capability row on the heatmap
+
+DD-2 | drawer | Evidence | any evidence chip, anywhere in the app
+
+DD-3 | modal | Insight | an insight card
+
+DD-4 | modal | Recommendation | a recommendation row
+
+DD-5 | modal | New run | the request-rerun control
+
+DD-6 | modal | Intelligence panel | the Open Intelligence control
+
+DD-7 | inline | Event detail | a timeline event
+
+DD-8 | inline | Issue detail | an issue register row
+
+DD-9 | inline | Finding expansion | a top-findings row
+
+DD-10 | inline | Focus area expansion | a focus area card
+
+DD-11 | inline | Platform tile expansion | a platform fit tile
+
+DD-12 | inline | Sentiment tile expansion | a sentiment context tile
+
+DD-13 | inline | Readiness gate expansion | a prerequisite gate row
+
+DD-14 | inline | Acquisition expansion | an acquisition row
+
+DD-15 | inline | Ceiling rationale | a capability ceiling row
+
+Stacking. The evidence drawer opens above an already-open insight modal or synthesis drawer. Whatever manages panel order must handle a drawer over a modal, and closing the drawer must return to the panel beneath rather than orphaning it. An audit harness that reads “the open panel” must prefer the drawer, or it captures the modal behind it and records the wrong contract.
+
+## The synthesis path — four levels deep
+
+This is the most important drilldown in the product, and the reason a single cell click looks like a dead control if the levels are not understood.
+
+1
+
+Pillar and category grid
+Each cell is a drill target, not a panel trigger.
+
+2
+
+Capability, then sub-capability rows
+The grid is replaced, not overlaid. A breadcrumb states the category, its sub-capability count, its capability count and its weight, with a reset control.
+
+3
+
+Synthesis drawer
+One cell: its id, name, score and confidence; the peer ladder with entity, median and signed delta; every linked evidence item with a verbatim excerpt; and the synthesis with the count of items it reasoned over printed beside it.
+
+4
+
+Evidence drawer, stacked above
+Any evidence chip opens the source itself. This is the panel that decides whether an AE survives being challenged.
+
+Why the count beside the synthesis is not decoration. “On the three items above” is computed from the length of the citation array, so prose that reasons past its evidence is visible to the reader without them opening anything. It is the anti-hallucination affordance and it is not optional.
+
+Section 08
+
+# Insight cards
+
+IC-nnnACT NOW
+
+Title
+A claim, not a topic. “Data fragmentation is the root constraint, not under-investment” — never “Data management”.
+
+Theme
+The area it belongs to, for grouping.
+
+What
+What is observably true, cited.
+
+Why
+The mechanism, not a restatement of the what.
+
+So what
+What follows commercially. One clause of consequence.
+
+Rejected
+The alternative explanation considered, and why the evidence points elsewhere. This field separates analysis from assertion.
+
+Magnitude
+The named consequence — cells blocked, cycle time, peer gap.
+
+Links
+Cell ids, evidence ids, platforms, claim label, confidence.
+
+## Grouping
+
+The page groups by priority, pillar or theme. Priority is a commercial judgement the card carries, not a filter the reader applies.
+
+Priority | Means | Test
+
+Act now | Raise it in the next conversation | There is a dated trigger and a cost to waiting.
+
+Plan next | Sequence it behind something else | Real, but blocked by a prerequisite that is itself a card.
+
+Watch | True but not yet actionable | Evidence is thin, or the trigger has not fired.
+
+## The four-tab modal
+
+Tab | Carries
+
+Argument | The full what, why and so what, unabbreviated, with the rejected alternative.
+
+Evidence | Every linked item with tier, claim class, recency, publisher and a verbatim excerpt. Each id opens the evidence drawer above the modal.
+
+Capabilities | The cells the card touches, with scores and peer deltas. Each opens the synthesis drawer.
+
+Action | The recommendation it maps to, and the conversation starter derived from it.
+
+## Lifecycle states
+
+State | Renders as
+
+Cited | A normal card with evidence chips.
+
+Thin | A provisional marker, the count of items it rests on, and the closure condition.
+
+Quarantined | A dash and a provenance note. Never a substituted value.
+
+Annotated | Carries a team member's note, attributed and dated. Notes are workflow, never content.
+
+Superseded | Visible in run history, not on the active page.
+
+No score-predicate openers. A card that opens by restating a score has told the AE nothing they cannot read off the grid, and it puts a raw taxonomy code in front of a client. The gate rejects it.
+
+Section 09
+
+# Heatmap and platform layers
+
+## Maturity palette
+
+M1 · Activating
+M2 · Building
+M3 · Competing
+M4 · Differentiating
+M5 · Transformational
+No score
+
+One resolver
+Score to band to colour resolves through a single module. No page computes a colour. Thin evidence adds a dashed outline; it does not change the fill, because the fill means maturity and nothing else.
+
+## Three view modes, four grain levels
+
+View mode | Presents
+
+Focus areas | Focus-area cards with a configurable KPI strip and the insight cards sitting in each area.
+
+Standard grid | The catalogue taxonomy at four grain levels: pillar, category, capability, sub-capability.
+
+Value chain | The same scores arranged along the institution's value chain rather than the catalogue's taxonomy.
+
+## Drill behaviour
+
+Action | Effect | Shell
+
+Click a pillar or category cell | Replaces the grid with the next grain down, with a breadcrumb and reset | None — in-page state
+
+Click a capability row | Replaces with its sub-capability rows | None
+
+Click a sub-capability row | Opens the synthesis panel | Drawer
+
+Click an evidence chip in the drawer | Opens the source | Drawer, stacked above
+
+## Thin evidence
+
+Below three linked items a cell is thin. The drawer says so rather than reading as complete, and the alert that results carries what was searched and what would close it. Searched-and-not-found is a finding; silence is not.
+
+## Platform taxonomy
+
+Salesforce
+Agentforce, Data Cloud, Service Cloud, Financial Services Cloud
+Databricks
+Mosaic AI, Delta, Unity Catalog
+Tableau
+Tableau Next, Pulse
+Twilio
+Engage, Segment
+nCino
+Workflow engine, origination
+
+## Fit and readiness are different questions
+
+Platform fit
+How much of this client's gap surface a platform addresses — derived from which cells sit below M3 and which of those the platform's areas cover. A high fit says the opportunity is real.
+
+Readiness index
+Whether the prerequisites exist. A platform can fit perfectly and be unsellable this year because the substrate underneath is not there. Rendered as prerequisite gates, each expandable.
+
+Selling into a high-fit, low-readiness platform is the failure this surface exists to prevent. Every channel or experience investment made before the data substrate is fixed compounds the problem — which is a finding, and belongs in the why-now's cost of acting now.
+
+## Roadmap, stair-step and starters
+
+Surface | Rule
+
+Recommendations | Provenance is not cosmetic. A deterministically composed recommendation must not present as analyst judgement.
+
+Transformation roadmap | Order is meaning. Phases render in the order sent and cite recommendations the same payload describes.
+
+Stair-step curve | The ladder and its clusters, or an explicit reason it is not derivable — never a blank card.
+
+Conversation starters | Opening shapes enforced distinct across the set. An obviously templated opener is worse than none, because an AE reads it out loud.
+
+Section 10
+
+# Evidence and citation
+
+A citation is the only thing standing between analysis and assertion. This section defines what a citation has to survive.
+
+## Two legal origins, and only two
+
+Package evidence
+Already in the store with an entity, a run, a tier and a URL. Cite it; never create it.
+
+Enrichment mints
+Anything found outside the package is registered first and cited second. The server allocates the id and computes the rank score. Registration is idempotent by content, so one annual report cited by six cards produces one row.
+
+## The quality ladder
+
+Tier
+Type
+Weight
+Ceiling
+
+T1
+Regulatory and audited sources — and machine technographic scans
+1.0
+L5
+
+T2
+Official disclosures; structured internal notes
+0.85
+L5
+
+T3
+Third-party analysis — analyst, app ratings, trade press
+0.7
+L4
+
+T4
+Internal unvalidated narrative
+0.55
+L2.5
+
+T5
+Marketing and claims — requires corroboration
+0.3
+L2
+
+Two rules that cost real score accuracy. A machine technographic scan is T1, never T4 — filing it as T4 caps the capability and silently suppresses the score. And the ladder has five rungs, not eight: a separate source-type display table renders the weakest tier as something that reads stronger than it is, inverting the reader's trust exactly where the evidence is weakest.
+
+## Recency — one vocabulary
+
+Age | Band | Recency score
+
+≤ 12 months | CURRENT | 5.0
+
+12–24 months | RECENT | 4.0
+
+24–36 months | DATED | 3.0
+
+36–48 months | STALE | 2.0
+
+48 months+ | ARCHIVAL | 1.0
+
+no date | UNVERIFIED | 1.0
+
+An undated item is never rendered as current. One set of names, used in the payload, the database column and the interface label.
+
+## The evidence rank score
+
+```
+ERS = (0.35 × Tier) + (0.25 × Recency) + (0.20 × Specificity) + (0.20 × Corroboration)
+
+Every factor is itself scored 1.0–5.0, so the result is bounded 1.0–5.0.
+High ≥ 3.5      Medium 2.5–3.5      Low < 2.5
+
+Specificity    quantified with method / quantified / specific-qualitative /
+               general / vague
+Corroboration  3+ independent / 2 independent / single T1–T2 / single T3 /
+               single T4–T5
+               "Independent" means different ORIGINS. An annual report and an
+               investor deck from the same institution are ONE source.
+```
+
+Server-computed, and bounded
+Computed at registration, never sent by the agent, and asserted within range on ingest. Anything outside is quarantined rather than rendered.
+
+## Four failure modes, ordered by damage
+
+Failure | What the client sees | Caught by
+
+Fabricated — no such row | A chip that opens nothing | Pattern and database existence checks, fail-closed
+
+Foreign — a real row, another entity | A competitor's data on their page | Cohort filter plus the identity gate. Stops synthesis; it is not filtered out quietly.
+
+Misattributed — real row, wrong cell | Evidence that does not support the claim | Linker thresholds. The quietest failure: everything renders and nothing breaks.
+
+Unverifiable excerpt | A quote that is not in the source | Verified against the fetched artefact at registration
+
+Link on substance, not proximity. An item supports a cell when it speaks to that capability, not when it was found while researching the category. The commonest cause of over-linking is one category-level search mapped identically onto five sub-capabilities. And a cell whose every drawer is empty is a linking failure, not an evidence gap — enriching a linker bug adds evidence that also will not render.
+
+## When an id cannot be established
+
+In order, stopping at the first that applies:
+
+- Enrich. Find a real source, register it, cite the returned id. This is the answer most of the time and the highest-value work on any surface.
+- Drop the claim, keep the surface. A shorter honest card beats a complete unfounded one.
+- Emit the empty state with what was searched. Absence with a recorded search is a finding. Absence with no record is a research failure wearing a finding's clothes.
+
+- Never keep the claim and remove the citation. An uncited claim is excluded by the serve layer anyway, so it is wasted work as well as wrong.
+
+Section 11
+
+# Quality gates and disclosure
+
+Four families with four different jobs and four different failure behaviours. The prefix is part of the id, so a gate reference is unambiguous in isolation.
+
+AG-nn Analytical
+Inside synthesis, per claim, before anything is emitted On failureThe claim changes or is dropped — the agent's own disciplineExamplesAG-01 Identity & boundary · AG-04 Traceability
+
+SG-nn Safeguard
+At submit — and the results render to the client On failureRecorded and disclosed. Does not block promotion.ExamplesSG-01 Source diversity · SG-04 Evidence per cell
+
+ET-nn Enrichment trigger
+During synthesis, to send the agent looking On failureNot a failure — a prompt to enrichExamplesET-01 Empty field · ET-04 Contradiction
+
+CG-nn Corpus
+At build time, over the exported pack, corpus-wide On failureFails the buildExamplesCG-01 Grain resolution · CG-02 Citation set
+Two more run at submit and are not G-numbered because they are structural rather than analytical: the contract pass — required fields, types, word budgets, forbidden registers, terminal punctuation, id resolution — and the evidence pass, in which every id resolves and belongs to this entity and this run, every excerpt is verbatim, and every source domain is identity-checked.
+
+Any evidence reason fails the submission
+An excerpt is either a copy of something a document says or it is not evidence. The check lives at submit rather than at promotion, so the agent can still repair the span.
+
+## Safeguard gates render to the client — three consequences
+
+Requirement | Because
+
+Plain language. A human sentence beside every gate, never a bare code.  | A client reading a code and a fail learns nothing and distrusts everything.
+
+A third state. Not-run, with a reason.  | A gate that reports pass because it did not run is worse than one that reports fail.
+
+A failing gate is not a blocked run.  | Disclosure is the point. The assessment ships with its weakness stated.
+
+## Corpus ceilings only ever move down
+
+Every ceiling is a measurement of the corpus as it is, so any regression past today's state fails the build. The only sanctioned movement is downward, after a defect class is fixed and re-measured. A ceiling raised to make a build pass is a gate that has stopped measuring anything — and the change history is what makes that visible.
+
+Two corollaries. Ceilings must be per-client rates, not fixed counts: a fixed count passes at one corpus size and fails at the next on arithmetic alone, with no defect introduced. And a ceiling set from an acceptance target rather than a measurement fails every build on day one, for defects the build did not introduce — which is how a gate ends up disabled wholesale.
+
+## Four presentation guarantees the payload must satisfy
+
+Guarantee | Because
+
+Order is meaning. A list renders in the order sent.  | Findings are ranked, phases sequenced, events chronological. Never rely on the client to sort.
+
+Counts are computed. Where a surface declares its grounding, the number is the length of the citation array.  | An asserted count drifts from the thing it counts. A computed one cannot.
+
+Denominators are rendered.  | A percentage without its base is not information. Share of cells with at least one item and share meeting the three-item threshold differ by tens of points.
+
+Thresholds are enforced or they are not thresholds.  | A row below a declared threshold displayed under a header stating it teaches the reader to distrust every other number on the page.
+
+## Before stating no: the proxy ladder
+
+An absence is a finding only if the search that established it can be shown. An absence with no record is a research failure wearing a finding's clothes — and it is the difference between "no enforcement actions were found" and "no enforcement actions exist".
+
+The rule
+No empty state is emitted until a documented proxy ladder has failed. Every rung attempted is recorded, whether it hit or missed, and the record ships with the payload and renders in the empty state.
+
+Result | Means | Renders as
+
+HIT | A rung returned something | The finding, cited
+
+NEGATIVE | Every rung ran and returned nothing | A verified absence, with the routes shown
+
+NEGATIVE AND APPROPRIATE | The absence is the correct posture, not a gap | The absence, stated as correct — with why
+
+NOT ATTEMPTED | The ladder did not run | Not an absence. Emit nothing and record the omission
+
+The third is the one most often missed. Some absences are the correct posture rather than a gap — an institution with no browser-automation estate has declined a capability its model does not need, and saying so is more useful than rendering it as a shortfall. The fourth is the one that causes damage: an unrun ladder rendered as "none found" is a claim nobody earned.
+
+## Representing absence
+
+An empty surface is a value, not an omission. A missing required field fails the contract; an explicit empty state passes and renders correctly.
+
+Situation | The payload emits | The app renders
+
+No leadership found after a full search | An empty roster, verified-absent, and the sources searched | The honest empty state, with what was searched
+
+Fewer than three dated financial points | The points, verified-sparse, no trend | The points, labelled a snapshot
+
+No stair-step derivable | A null ladder and a stated reason | The reason, not a blank card
+
+A figure failed the identity gate | A null value, quarantined, with its reason | A dash with a provenance note
+
+A cell's evidence is genuinely thin | Thin, the sources searched, the closure condition | The provisional-score state
+
+## A page tells one story
+
+A page is not a container for surfaces. An AE reads it top to bottom in about ninety seconds and takes one argument away. Surfaces that are individually correct and collectively incoherent are a page that has failed, even though every gate passed.
+
+Each page payload carries a narrative thread of 45–75 words tracing the line through its surfaces in render order. It is written last, from what was actually produced — a thread written in advance describes the page the agent meant to make. Three arguments run across pages and must not fracture: the primary constraint (hero framing → top finding → act-now insight → platform readiness → roadmap phase one), the clock (why-now → triage → horizon → cost of waiting), and the confidence (coverage → tier distribution → ceilings → thin alerts → gate results).
+
+A page that does not cohere is more expensive than a page with a thin card on it. The thin card costs one surface; the incoherent page costs the AE the argument.
+
+## Colour conventions
+
+Score resolves to band resolves to colour in one module. No payload field carries a hex value, a class name or an outline instruction — the payload carries the raw score, the band word where a surface renders one, and semantic flags. Thin evidence adds a dashed outline and does not change the fill, because the fill means maturity and nothing else.
+
+Band | Word | Boundary | Fill
+
+M1 | Activating | score < 2.0 | #FFCB99
+
+M2 | Building | 2.0 ≤ score < 3.0 | #62D7B8
+
+M3 | Competing | 3.0 ≤ score < 4.0 | #27BBAF
+
+M4 | Differentiating | score ≥ 4.0 | #139F94
+
+— | No score | score is null | #E5E7EB
+
+Boundaries are strict less-than on the raw score, before display rounding. A score of 2.97 displays as 3.0 and bands as Building — prose must resolve the band from the raw value.
+
+Absent beats wrong
+A dash with a provenance note costs nothing. A plausible-looking wrong figure costs the document its credibility with the client, and the AE has no way to recover it in the room.
+
+Section 12
+
+# Audience model
+
+Two audiences, one payload, one enforcement point. Internal rungs are marked in the payload so the serve layer can strip them; the frontend does not decide what is internal, because it never receives the internal fields.
+
+## What each audience reaches
+
+Rendered | Internal | Customer
+
+D1 Overview · D2 Insights · D3 Heatmap · D4 Platform · D6 Tech stack  | full | redacted
+
+D5 Context | full | locked state
+
+D7 Health | analyst only | no route
+
+Evidence rank scores and tier weights | shown | stripped
+
+Scoring rationale | shown | stripped
+
+Synthetic provenance — derived versus analyst | shown | stripped
+
+Internal codes — cell ids, gate ids, evidence ids | shown as chips | capability names only
+
+Capability ceilings, sentiment, thought leadership | shown | withheld
+
+Cross-entity pattern entity ids | audit only | never
+
+Thin-evidence and quarantine markers | shown | shown
+
+Honesty is not internal. Thin evidence and quarantine markers render to the client. An assessment that states its own weaknesses is more credible than one that appears complete, and hiding them is how a document gets caught out in the room.
+
+Any new surface declares its side before it ships
+There is no default. A surface added without an audience declaration has undefined redaction behaviour, and the failure direction is the expensive one.
+
+## Verification
+
+The customer view is verified on rendered output, not by reading the code. The entire defect class here is a field nobody marked — and reading the marking logic cannot find a field absent from it. The scorecard export renders the same customer-view markup through a headless browser rather than a parallel template, because a second implementation is a second place for a redaction rule to be missing.
+
+Section 13
+
+# Package ingest and entity resolution
+
+How an assessment becomes something a synthesis agent can read. This runs before any agent claims the run.
+
+1
+Discover
+Scheduled traversal of the assessment tree, diffed against previous scans.
+
+2
+Classify
+Each artefact typed against the registry and ranked by source priority.
+
+3
+Resolve
+Entity inferred, test cases excluded, duplicates collapsed to a winner.
+
+4
+Parse
+Report, workbook and package files parsed. Read-only thereafter.
+
+5
+Queue
+The run appears as unclaimed and awaiting synthesis.
+
+## What an assessment folder contains
+
+Every client folder carries the same structure — eight top-level folders and seven nested, fifteen in all. The parser reads eight of them; the rest are retained for lineage.
+
+```
+<Client Name> - DMA/
+├── 01_evidence/                     the evidence corpus
+│   └── entity_profile/              firmographics and identity
+├── 02_research_workbook/            raw research, per cell
+├── 03_scoring_workbook/             THE scoring authority
+│   └── exports/                     flattened score projections
+├── 04_reports/                      Assessment Report + Client Profile
+├── 05_narrative_deck/               client-facing deck — not parsed
+├── 06_peers/                        the peer cohort table
+├── 07_governance/
+│   ├── layer1_qa/                   first-line QA on the assessment
+│   └── layer2_audit/                independent audit and calibration
+└── 08_appendices/
+    ├── recommendations/             recommendation detail
+    ├── gap_priority/                ranked gap register
+    └── research_appendix_csv/       issue register and flat exports
+```
+
+Two folders the parser treats differently from the rest
+03_scoring_workbook is the only authority for a score, and the parser records the workbook cell address alongside every figure. 05_narrative_deck is deliberately not parsed: it is a rendering of the report, so treating it as a source would create a second path to the same claim.
+
+Governance is an ingest source, not an archive. The two governance folders carry the assessment's own quality findings — the thin-evidence register, calibration analysis and drift checks. Those seed the thin-evidence alerts and the safeguard gate results rather than being re-derived. An assessment that already knows where it is weak should not have to be re-diagnosed by the product.
+
+## Source priority
+
+Where two artefacts disagree, the higher row wins and the disagreement is recorded as a parser observation rather than silently resolved.
+
+# | Artefact | Authoritative for
+
+1 | Scoring workbook | Every score, every peer figure, and the cell each was read from
+
+2 | Assessment report | The twelve structured report sections, gap prioritisation, roadmap
+
+3 | Client profile research report | Focus areas with verbatim quotes and page numbers, leadership, firmographics narrative
+
+4 | Package structured files | Evidence index, issue register, peer cohort, recommendation detail, run identity
+
+5 | Ops sheet and enrichment connectors | AE ownership, firmographic enrichment
+
+Two things the parser must capture, and cannot capture later
+The workbook cell each score was read from — without it the grain assertion has nothing to resolve against. And the artefact bytes themselves — without them an excerpt cannot be verified. Neither can be reconstructed after the parse.
+
+## Test case exclusion and deduplication
+
+Detection runs before entity resolution, so a rehearsal folder never becomes an entity. Exclusion is recorded with the rule that fired, because a silently skipped folder is indistinguishable from a traversal bug. Deduplication applies four rules in strict order — artefact priority, completion date, parsed section count, then a stable tiebreak so the outcome is reproducible — and the loser is retained and marked rather than deleted.
+
+## The four-signal entity cascade
+
+1
+
+Run manifest
+An explicit identity in the package. Highest confidence; stop here.
+
+2
+
+Request identifier
+Carries the entity token in its own structure.
+
+3
+
+Document header extraction
+Legal name from the report cover, resolved against known suffixes and trading names.
+
+4
+
+Folder name inference
+Lowest confidence. Produces a pending-review entity, never an active one.
+
+## The identity gate
+
+Resolution establishes which entity a run belongs to. The identity gate is stricter and runs per figure, per quote, per document and per source domain, every time.
+
+# | Assert | Catches
+
+1 | Legal name matches, with suffixes and trading names resolved | A same-named institution in another market
+
+2 | Regulator matches this entity's own | A regulator from another charter type — an instant contradiction
+
+3 | Footprint and jurisdictions are consistent | The fastest contamination check available
+
+4 | Source domain belongs to this entity or a known neutral registry | The cheapest check, and the one that catches the most
+
+5 | Order of magnitude agrees with any other figure for the same metric | Two figures for one metric differing materially — a contradiction to resolve, not two data points to render
+
+On failure
+Quarantine the field, emit the reason, escalate. Never render a partial identity and never substitute a plausible value.
+
+Section 14
+
+# Lifecycle and persistence
+
+```
+claim ──▶ synthesise ──▶ [register_evidence]* ──▶ submit ──▶ verdict
+                                                       │           │
+                                               fail ◀──┘           │ pass
+                                                 │                 ▼
+                                                 └── repair ──▶ STAGED
+                                                                   │
+                            all 6 pages STAGED + pass ───┤
+                                                                   ▼
+                                                             promote_run
+                                                                   │
+                                                                   ▼
+                                                             SERVING (renders)
+```
+
+The distinction that causes the most confusion
+Accepted means staged. Rendered means promoted. A submission that passes validation appears nowhere a human can see it. The two states exist so a run can be assembled surface by surface without a client ever seeing a half-built page.
+
+## The six states
+
+State | What is true
+
+Claimed | One Cowork session holds a lease so two cannot synthesise the same run concurrently. The lease expires, so a dead session cannot block a run permanently.
+
+Synthesising | Reading the bundle, the contract and the catalogue; reasoning; enriching; citing; writing.
+
+Submitted | One page's payload handed over and a structured verdict returned naming the gate, the path and the arithmetic.
+
+Staged | Passed validation. Persisted. Survives the session ending. Renders nowhere.
+
+Promoted | Every page passed and all 34 sections wrote into serving tables inside one transaction.
+
+Superseded | A newer run is active. This one stays queryable for the longitudinal surfaces.
+
+## Three rules that make iteration safe
+
+Rule | Consequence
+
+Resubmission supersedes. A new submission for the same run and page replaces the previous row.  | No merge, no accumulation, no cleanup. Submit, read the verdict, repair, resubmit.
+
+Promotion is all-or-nothing. A pass is required for every page.  | A client is never looking at a page from the new run beside a page from the old one.
+
+Re-promotion is idempotent. | Not an error. Retries are safe.
+
+## Three tiers, one direction
+
+Tier | Written by | Read by | Mutability
+
+Ingested | The package parser, at ingest | The synthesis agent, through the bundle | Read-only after parse
+
+Staging | The connector, at submit | The connector, at promote | Superseded, never merged
+
+Serving | The connector, at promote, only | The API, for every request | Replaced atomically per run
+
+The boundary that matters most
+The API reads serving tables only. If a surface can render from a staging table, the boundary has been broken and unvalidated content can reach a client.
+
+## Every serving row carries its provenance
+
+Which run produced it, which client it belongs to, when it began rendering, which synthesis version produced it, whether it is analyst, derived or producer content, and every citation behind it.
+
+Provenance is not cosmetic. A deterministically composed recommendation must not present as an analyst recommendation, because an AE who quotes a synthetic recommendation as analyst judgement is exposed in the room.
+
+## Reruns
+
+A new run does not delete the old one. Promotion swaps which run is active; the previous stays queryable because the longitudinal surfaces — velocity, recurring themes, the seen-in-N-runs chip, version diff — read across runs. A rerun must not be synthesised as though it were a first run. A catalogue version bump invalidates by version tag, and renamed cells resolve through the alias bridge rather than silently vanishing.
+
+Section 15
+
+# Rerun intelligence
+
+The product's obligation back to the assessment engine. Without it, every rerun rediscovers the same gaps.
+
+Signal | Carries | Consumed by
+
+Thin evidence
+Every cell below three linked items.  | Cell id, current count, sources searched, closure condition | Next run's pre-flight
+
+Evidence freshness
+Cells whose support has aged past the dated boundary.  | Cell id, oldest item age, reference date | Next run's enrichment queue
+
+Calibration flags
+Scores materially out of line with the cohort.  | Cell id, delta, peer basis and cohort size | Analyst review — re-verification, not adjustment
+
+Limiting absences
+The artefact whose absence set each ceiling.  | Category, named artefact, searchable description | Next run's research backlog
+
+Tier misclassification
+Machine scans filed at a tier that caps the cell artificially.  | Evidence id, filed tier, correct tier | Immediate correction
+
+The limiting absence is the highest-value signal. A ceiling set by absence obliges the analyst to have looked, and naming the artefact that would raise it turns a dead end into next run's backlog. “No dedicated transformation office is evidenced” is searchable. “Insufficient evidence” is not.
+
+## The corpus as a calibration baseline
+
+Across the corpus the product holds every score, every peer figure and every evidence count that produced them. That makes it the natural baseline for two questions the assessment engine cannot answer alone: whether a given score is an outlier for its sub-vertical and size tier, and whether coverage is improving run over run or the gate has simply loosened.
+
+## Longitudinal surfaces depend on prior runs
+
+Velocity, recurring themes, the seen-in-N-runs chip and version diff all read across runs. This is why prior-run state is part of the synthesis input rather than an optional lookup.
+
+Section 16
+
+# Success metrics
+
+Two sets. Integrity tells us whether the product deserves to be used; adoption tells us whether it is.
+
+## Integrity — primary
+
+Grain violations per client
+Quoted figures that do not resolve to the cell they name. Enforced at submit, measured corpus-wide, and the ratchet only moves down.
+
+Identity quarantines per client
+Counted, not minimised — a quarantine is the gate working. The failure signal is one that should have fired and did not, caught by cross-surface reconciliation.
+
+Unresolvable citation rate
+Chips that open nothing. Target zero, enforced at submit rather than measured after.
+
+Evidence coverage per pillar
+Against the hard gate, per pillar rather than overall. An overall figure can hide a failing pillar.
+
+Surface completeness
+All 38 client surfaces exported and rendering, each declaring its data source. Target 100%.
+
+Honest empty states
+Share of absences carrying what was searched. An absence with no record is a research failure wearing a finding's clothes.
+
+## Adoption — secondary
+
+Metric | Target | What it tells us
+
+Runs opened before a client meeting | 80% of active opportunities | Whether it reaches the moment it was built for
+
+Evidence drawer opens per session | five or more | Whether AEs trust it enough to check it — the drawer is where a challenge is survived
+
+Thin-evidence alerts resolved within 14 days of a rerun | 80% | Whether the feedback loop is closing
+
+Conversation starters used verbatim | tracked, not targeted | Whether the prose is say-it-aloud or merely correct
+
+Customer view exports per engagement | at least one | Whether the redaction contract is trusted in front of a client
+
+Synthesis runs reaching promotion on first pass | rising | Whether the contract and verdicts are legible enough to work against
+
+One class of metric deliberately absent. There is no target for time-to-first-token, synthesis latency or model cost per session. The app performs no reasoning at request time, so the interesting question is not how fast it thinks.
+
+Section 18
+
+# Versioning across assessments
+
+Four independent version axes. Conflating any two produces a comparison that looks valid and is not.
+
+Axis | Carried by | What it means
+
+Run | run_id · run_seq | One complete assessment of one entity at one point in time. Promotion swaps which run is active; prior runs stay queryable forever.
+
+Catalogue | ccg_catalog_version | Which capability catalogue the run was scored against. Pinned at ingest and never changed for that run.
+
+Producer | producer_version | Which synthesis produced each section. Stamped per serving row, so one page can be re-synthesised without a rerun.
+
+Contract | contract_version | The payload shape a submission validated against. A contract bump invalidates staged-but-unpromoted work for the changed sections only.
+
+## What a comparison may assert
+
+Comparison | Permitted
+
+Two runs, same catalogue version | Cell by cell. Score, coverage and evidence deltas; recommendation carry-over.
+
+Catalogue bump, cell bridged by an alias | Cell by cell, with the rename disclosed.
+
+Catalogue bump, cell split or merged | Category level only. The row says not comparable, and why.
+
+Catalogue bump, cell retired | Not comparable. Rendered as retired, never as a drop to zero.
+
+Composite across a catalogue bump | Disclosed as approximate. The denominator changed.
+
+Anything across entities | Never on a client surface.
+
+The failure this prevents
+A renamed cell compared naively across a catalogue bump reads as a capability that vanished — which looks like a regression, gets investigated as one, and is a rename. A split cell reads as a score that halved. Both are the diff asserting more than the data supports, and both are prevented by refusing the comparison rather than annotating it afterwards.
+
+## Fixing one card without rerunning the assessment
+
+A section can be wrong without the assessment being wrong. Because promoted staging rows are retained, a Cowork session can re-claim a promoted run, resubmit one page, and re-promote — five pages come from the retained rows, one from the new submission, and all sections rewrite in a single transaction. The atomic guarantee is unaffected; what changes is that five pages needed no re-synthesis.
+
+This is why promotion retains its inputs. If promotion cleared them, fixing one card would mean re-synthesising every page — which in practice means nobody fixes one card.
+
+Section 19
+
+# Persistence across users and sessions
+
+Five classes of state with five owners and five lifetimes. The common design error is treating content as user state, or view state as server state.
+
+Class | Owner | Lives in
+
+Content | Global — identical for every user | Serving tables, keyed by run
+
+Synthesis session | One Cowork session at a time | Staging tables, plus a lease
+
+User workspace | Per user, per entity | Workflow tables
+
+View state | Per user, per tab | The URL — nothing server-side
+
+Pinned run | Per user, per entity | URL parameter, defaulted from the workspace row
+
+## Two AEs, one client
+
+Both resolve to the active run and read the same serving rows. Both see identical numbers, prose and citations. What can differ: the audience (a URL parameter, not a user attribute), the pinned run, view state, and which tabs their role reaches. Content is never per-user. There is no per-user copy of a payload, no per-user cache, and nothing to reconcile between two readers.
+
+## A promotion lands while a page is open
+
+```
+t0   AE opens the Overview            → resolves run 2, pins it in the URL
+t1   Cowork promotes run 3           → run 2 becomes superseded
+t2   AE clicks the Heatmap tab       → still run 2
+t3   A banner offers the newer assessment
+t4   AE clicks through               → the whole shell reloads on run 3
+
+The numbers never change under an open page.
+```
+
+Why pinning is not optional
+An AE reads the hero, walks into a meeting, and refers back to the tab twenty minutes later. If the run swapped in between, the figure they quoted is no longer on screen and they cannot tell whether they misread it or the data moved. Pinning costs one URL parameter and removes the entire class of failure.
+
+## A Cowork session dies mid-synthesis
+
+Staged work persists, including the failing verdicts. The lease expires and the run returns to unclaimed. A new session claims it, reads run progress, and continues from where the first left off — repairing the pages that failed and never re-synthesising the ones that passed.
+
+## Concurrency
+
+Situation | Behaviour
+
+Two Cowork sessions, same run | The second is refused. The lease is exclusive.
+
+Two Cowork sessions, different runs of one entity | Allowed. Whichever promotes last becomes active.
+
+An AE annotates a run that is then superseded | The annotation stays attached to the run it was made against.
+
+An alert is resolved, then a rerun reopens the cell | A new alert row. The reopening is itself a signal — the closure condition did not hold.
+
+## What survives what
+
+Event | Survives | Does not
+
+A user signs out | Annotations, alert dispositions, last-viewed run, saved searches | View state, unless the URL was saved
+
+A Cowork session ends | Staged submissions, verdicts, registered evidence | The claim lease, once expired
+
+A run is superseded | Everything — scores, evidence, sections, verdicts, annotations | Its active status only
+
+A catalogue bump | Every existing run, against its pinned version | Naive cross-version cell comparison
+
+A contract change | Promoted content, until re-synthesised | Staged-but-unpromoted work for changed sections
+
+Section 20
+
+# Scope
+
+#### In scope — v1
+
+- Internal tool for Zennify AEs, analysts and practice leads
+- Package ingest from Drive with classification, entity resolution and deduplication
+- The DMA Insights MCP connector — all 12 tools — as the sole writable boundary
+- Synthesis by a Claude Cowork agent, page by page, against structured verdicts
+- Seven client dashboards and all 38 client surfaces
+- 9 global surfaces including admin, import and the import audit
+- The full drilldown atlas — three shells, 15 panels, with stacking
+- Identity, grain and cross-surface reconciliation gates, blocking
+- Client-visible safeguard gate disclosure including a not-run state
+- Internal and customer audiences driven by payload marking
+- Thin-evidence queue and the feedback signals back to the assessment engine
+- Run history, superseded-run querying, version diff and longitudinal surfaces
+- Scorecard export with redaction applied at render
+- Corpus gate scanning at build time, with a downward-only ratchet
+
+#### Out of scope — v1
+
+- Any model call on the request path
+- A customer-facing portal — clients receive exports, not logins
+- Live research or scraping at request time
+- Assigning or adjusting maturity scores
+- Replacing the assessment execution engine
+- CRM write-back
+- A natural-language query interface
+- Cost, ROI or investment projections
+- Multi-tenant or white-label deployment
+- Cross-entity patterns on any client-visible surface
+- Unattended synthesis scheduling
+
+## Deferred, with a reason
+
+Deferred | Why not now | Revisit when
+
+Semantic evidence search | The embedding tier serves build-time grounding validation. Exposing it as a query surface reintroduces a request-time model dependency. | Grounding validation is stable and the cost is understood.
+
+A seventh payload page | Promotion requires a pass on every page, so a seventh raises the bar for every client in the corpus. | Only if a surface genuinely cannot be synthesised from an existing page's context.
+
+Cross-entity patterns for AEs | It is the one surface where one client's data can leak into another's view. | Counts-and-shares-only rendering is verified on rendered output.
+
+Unattended synthesis | Verdicts need a human in the loop while gate thresholds settle. | Corpus ceilings have moved down twice without a manual override.
+
+The invariants — breaking any of these is a breaking change, not a refactor
+The app never calls a model at request time. All content writes go through the MCP connector. The API reads serving tables only. Promotion is atomic across all 6 pages. The agent creates 5 id classes and no others. Evidence ids are recognised by one pattern in one module. Rank scores are server-computed and bounded. A quoted figure and its named cell are the same cell. Every figure passes the identity gate. A derived value is computed or null. Internal rungs are marked in the payload. A corpus ceiling only ever moves down.

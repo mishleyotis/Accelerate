@@ -1,0 +1,802 @@
+DMA Insights — QA Report
+
+Zennify
+DMA Insights · QA Report
+August 2026
+
+Report
+01 Method & result
+
+Findings
+02 Blocking
+03 Material & minor
+
+Prompts
+04 Completeness matrix
+05 The prompt standard
+06 Six prompts reissued
+
+Close
+07 Actions
+© 2026 Zennify · Confidential
+
+01 — Method & result
+DMA Insights · QA Report · documents and prompts
+6 blocking7 material37 prompts scored
+
+Quality assurance
+
+# QA report
+
+An adversarial pass over the five documents and the 37 synthesis prompts they depend on. This is not a review for typos — it looks for the failure modes this product is specifically designed against: contradictions between sources, one concept wearing two names, numbers asserted rather than computed, and prompts that cannot produce what the surface requires.
+
+## Method
+
+Check | What it looks for
+
+Computed-count audit | Every countable claim in prose traced back to the counts module. A number typed by hand is a number that will drift.
+
+Terminology drift | One concept with two names, measured on prose with code identifiers excluded so ccg_catalog_version does not masquerade as a spelling error.
+
+Concept grounding | Every named mechanism defined somewhere, and not used exactly once and abandoned.
+
+Source-spec coverage | Twenty load-bearing requirements from the two specifications, each traced to at least one document.
+
+Cross-document contradiction | The same quantity asserted differently in two places.
+
+Register integrity | Every surface in the register present in the source specification, and every spec surface in the register.
+
+Prompt completeness | All 37 prompts scored against 14 attributes a synthesis agent needs to produce correctly first time and repair second time.
+
+Producer-to-render handoff | Whether the prompt that owns a section actually specifies what the surface renders.
+
+## Result
+
+10
+blocking findings
+Contradictions, collisions and one missing protocol.
+
+7
+material findings
+Gaps that force an agent to guess.
+
+6
+stub prompts
+Under 700 characters for surfaces that are not simple.
+
+The headline
+The documents hold up structurally — counts reconcile, coverage is complete, navigation works. What does not hold up is the prompt layer. Prompt quality ranges from 3 of 14 attributes to 14 of 14, audience marking appears in 5 prompts of 37, and three surfaces carry vocabularies that contradict either the prototype or each other. A synthesis agent working from the weaker prompts cannot produce what the surface requires.
+
+Findings · blocking
+
+# Ten findings that would produce wrong output
+
+B-01 The stack layer vocabulary contradicts itself four ways Blocking
+
+Four sources, four different layer sets.
+
+Source | Layers
+
+Prototype LAYER_LABEL | Operations & core banking, Customer engagement, Data & analytics, Infrastructure & cloud 4
+
+Spec, what-must-be-presented | core, CRM, data, integration, channel 5
+
+Spec, sources table and prompt | core, crm, data, integration, channel, security 6
+
+The documents as first written | the prototype's four 4
+
+Resolution. Adopt the prototype's four, because they carry pillar tags and a primary-gap marker the other vocabularies do not, and because they are what actually renders. The spec's five- and six-layer lists are superseded. The T1 prompt must be reissued against the four.
+
+B-02 Stack layer keys collide with the evidence-level vocabulary Blocking
+
+The prototype keys its four layers L2 L3 L4 L5. The evidence-level ladder governing what verb the prose may use is L1 L2 L3 L4. Both render on the same card. layer: "L4" means Data & analytics; evidence_level: "L4" means a single weak source.
+
+The prototype's own source carries the comment “Natural layer labels (no L1-L5)” — the collision was noticed and worked around in the labels rather than in the keys.
+
+Resolution. Re-cut the layer keys to OPS · CUST · DATA · INFRA. This is the same class of defect as three colliding G-numbered gate families, and it is fixed the same way: make the identifier unambiguous in isolation.
+
+B-03 Two different things are both called safeguard gates Blocking
+
+The MCP specification's SG family runs at submit and produces pass, fail or not-run with a plain-language label, rendered to the client. The Surface specification's H5 is the caps the assessment applied — cap-log rows, uncertainty bands, QA holds, analyst overrides — and its prompt emits {gate_id, kind, ceiling, affected_categories[], rationale, e_ids[]} with no result field and no plain label.
+
+They share a section name, a surface and a tab. As prompted, H5 cannot render what the documents require of a safeguard gate, because the prompt never asks for a result.
+
+Resolution. One section, two arrays. heatmap.safeguard_gates carries caps[] — what the assessment applied — and gates[] — the SG results with plain labels and an explicit not-run state. Both render on the Health tab under their own headings. The prompt must be reissued to emit both.
+
+B-04 The producing prompt for the synthesis drawer does not specify the synthesis Blocking
+
+H2 owns heatmap.cell_evidence, which is the section the synthesis drawer renders from. Its prompt is 642 characters and covers linking only. The actual content contract — grain check before anything else, evidence list first, a 40–90 word synthesis, the count printed beside it, the peer fallback ladder — lives in the DD-1 drilldown prompt.
+
+An agent reading the H2 prompt produces a section with linkage and no synthesis. An agent reading DD-1 has no section to submit into, because drilldowns are not submission units.
+
+Resolution. Fold DD-1's content contract into H2. A drilldown that renders from a section must not hold requirements the section's own prompt lacks.
+
+B-05 The landscape strip cannot be computed from what the register emits Blocking
+
+T2 renders four counts — confirmed, inferred, claimed and gaps — and the documents require them to be recomputed from the T1 register rather than stored. T1's prompt emits {vendor, product, layer, confidence, as_of, e_ids[]}: no status field. The prototype renders three statuses (confirmed, inferred, absent) and no claimed at all.
+
+Resolution. T1 emits status from CONFIRMED · INFERRED · CLAIMED · ABSENT, with gaps on the landscape strip being the absent count. Without a status on every register row the strip is uncomputable, and a stored count would be a second source of truth for a number that already exists.
+
+B-06 The peer fallback ladder is load-bearing and lives only inside two prompts Blocking
+
+Where the peer table lacks a figure, the sanctioned procedure is a five-rung ladder ending in an explicit refusal. It determines peer_basis, peer_n and proxy_disclosure on every score row, and it is the mechanism that prevents peer fabrication — the failure the O1 prompt calls out by name.
+
+It appeared in full in the O1 and DD-1 prompts and nowhere in the technical documents. A reader of the TRD would not know the ladder exists, and a second implementation would invent a different one.
+
+Resolution. Specified formally in the TRD and reproduced in the Surface Specification. Every prompt that touches a peer figure references it rather than restating it.
+
+B-07 M5 Transformational is unreachable Blocking
+
+The prototype's maturityLabel and maturityHex have four branches. Anything at or above 4.0 returns Differentiating. The design set publishes a fifth band and a hex for it (#185F60) that no code path can reach.
+
+A score of 4.6 renders as Differentiating. Prose that calls it Transformational contradicts the card beside it, and a payload that emits the word writes a band no renderer produces.
+
+Resolution. The band domain is four values and is enforced as an enumerated type, so a fifth cannot be written. Prose uses the four reachable words. A genuine M5 in the workbook renders as Differentiating and is recorded as a parser observation rather than silently relabelled.
+
+B-08 Two hex values for one band Blocking
+
+M2 Building is #62D7B8 in the prototype resolver and #B0EDD3 in the published palette. Same band, two colours, and the palette is what a designer would build from.
+
+Resolution. The resolver is authoritative because it is what renders. Nothing is served wrongly today — the payload carries no hex — but the two must be reconciled before anyone builds from the documentation. This is the same two-implementations-of-one-rule shape that rendered every directory score in brand teal.
+
+B-09 Two freshness vocabularies collide on the word STALE Blocking
+
+The evidence ladder bands at 12/24/36/48 months — CURRENT, RECENT, DATED, STALE, ARCHIVAL. The prototype's freshnessOf bands at 6/12 months — Current, Aging, Stale. An item at fourteen months is RECENT on the evidence ladder and Stale on the freshness dot, and both render on the same screen.
+
+Resolution. The evidence ladder governs everything the payload emits — recency tags, tier weighting, the rank score, the age tracker. The dot is a UI affordance with a tighter threshold and must be relabelled so one word does not carry two meanings. Prose never uses the word: it states the age and lets the band speak.
+
+B-10 The reasoning layer exists in exactly one prompt Blocking
+
+The P1 platform prompt carries a full five-step reasoning protocol and calls it "STEP 7 — THE REASONING LAYER (R-Layer, and it is the point of this page)." State the rank-1 claim, argue the runner-up explicitly, test domain plausibility, run failure probes, then accept, reject or mark uncertain.
+
+It appears in one prompt of thirty-seven. Every other surface making a ranked, causal or comparative claim — findings, insights, ceilings, recommendations, cohort patterns — has no equivalent. Those surfaces get gates, and every gate in this system checks a claim after it has been written.
+
+Resolution. The R-Layer becomes a standing protocol with probe sets for ten surfaces, nine contradiction classes and a recorded verdict in the payload. It is the only mechanism that catches a claim which is well-formed, correctly cited, grain-locked and wrong.
+
+Findings · material
+
+# Seven findings that force a guess
+
+ID | Finding | Resolution
+
+M-01  |
+Audience marking appears in five prompts of thirty-seven
+The redaction contract depends entirely on the payload marking its own internal rungs, and thirty-two prompts never mention internal_only. This is the highest-consequence gap in the prompt layer: the failure direction is a field reaching a client.  | A standing clause in every prompt naming the paths that surface must mark.
+
+M-02  |
+Grain lock is named in fifteen prompts of thirty-seven
+It is a blocking gate. Twenty-two prompts, including several that quote scores, never mention it — so the agent meets it first as a rejection.  | A standing clause wherever a prompt may quote a figure.
+
+M-03  |
+Provenance is named in fifteen prompts of thirty-seven
+Deterministically composed content presenting as analyst judgement was a measured defect, and the fix is a field the prompt must set.  | Every prompt that can compose deterministically states its provenance value.
+
+M-04  |
+Register rules appear in sixteen prompts of thirty-seven
+Twenty-one prompts producing client-visible prose carry no vocabulary constraint at all — including the tech stack, the evidence store and the gate card.  | The banned-register clause becomes standing text, not per-prompt discretion.
+
+M-05  |
+Only twelve prompts use numbered steps
+The twelve highest-scoring prompts are almost all stepped and the six weakest are all flat. Form and completeness correlate because steps force the author to enumerate.  | Steps become the required form: retrieve, derive only on failure, emit, rank, check.
+
+M-06  |
+Nine surfaces have a prompt but no what-must-be-presented or sources table
+The nine sections added late — ceilings, coverage, tier distribution, thought leadership, evidence age, cohort patterns, starters, regulatory standing, acquisitions — carry a prompt and nothing else, so the render contract has to be inferred from the prompt.  | Contract and sources synthesised from the prompt and stated explicitly.
+
+M-07  |
+Twelve prompts carry no word budget
+Unbudgeted prose overflows its card. The measured defects include cards clipped mid-word and mid-sentence — a rendering symptom of an authoring gap.  | Every prose field gets a budget, and the contract carries it in its doc text.
+
+## Minor — corrected in place
+
+Issue | Correction
+
+One instance of catalog against 94 of catalogue | Spelling unified. The identifier ccg_catalog_version is left alone: it is a column name, not prose.
+
+One instance of MCP server against 15 of MCP connector | Unified on connector.
+
+Numerals and words mixed for the same quantity — “6 pages” and “six pages” | Words in prose, numerals in tables and code.
+
+proxy_disclosure exists as a column and appeared in no prose | Defined as part of the peer ladder.
+
+“Claude Code” and “Claude Cowork” both present, undifferentiated | Disambiguated explicitly — see below.
+
+## Deployment verification — Google Cloud
+
+The target is Cloud Run. Every named tool was checked against current Google Cloud availability; four findings required changes and the rest verified clean.
+
+ID | Finding | Disposition
+
+D-01  |
+Self-hosted PgBouncer named as the pooler
+Cloud SQL ships Managed Connection Pooling — PgBouncer-based, transaction and session modes, ports 6432 and 3307 — which removes a container to patch. It requires the Enterprise Plus edition, a constraint the documents now state, with a sidecar fallback if the edition ever changes.  | Fixed TRD §16
+
+D-02  |
+IAM tokens expire under pooled connections
+IAM database auth tokens live one hour; a pooled server connection that outlives its token fails intermittently with SQLSTATE 08P01 — a documented issue. Mitigated with automatic IAM auth through the Cloud SQL Python Connector, pool_recycle=1800 and pool_pre_ping.  | Fixed TRD §16, Plan
+
+D-03  |
+Compression was implied to be platform behaviour
+Cloud Run does not compress dynamic responses and neither does the load balancer. The Brotli-or-gzip behaviour is FastAPI middleware, and the eight-to-one heatmap ratio depends on it actually being installed.  | Fixed TRD §16, §19
+
+D-04  |
+The HNSW build mechanism misstated
+The index is created once at migration; the graph grows incrementally as each run's vectors insert. The cost claim was right — build effort lands at ingest, off the critical path — but the mechanism as stated would have someone dropping and recreating an index per run.  | Fixed TRD, Schema, Plan
+
+D-05  |
+Verified clean, no change
+pgvector 0.6+ with HNSW ships on Cloud SQL, and SET LOCAL hnsw.ef_search is an ordinary GUC. PostgreSQL 16 is available. The 300-second promote fits Cloud Run's timeout with an order of magnitude to spare. The worker and migrator map to Cloud Run Jobs. Memorystore for Redis reaches Cloud Run over Direct VPC egress. The embedding model bundles in-image at ~90MB with no Vertex AI dependency.  | Checked
+
+Claude Code and Claude Cowork are different things in this system
+Claude Cowork is where synthesis runs: an agent reads the assessment through the MCP connector and writes the content the product serves. Claude Code is where the application is built: the implementation plan is written for it, and it never touches client content. A document that uses them interchangeably is describing two different trust boundaries as one.
+
+Prompt analysis
+
+# Prompt completeness matrix
+
+All 37 prompts scored against the 14 attributes a synthesis agent needs. Sorted weakest first.
+
+ID | chars | steps | shape | words | gates | empty | forbid | ident | grain | cite | regist | measur | prov | audien | order | score
+
+P3 | 426 | ○ | ● | ○ | ○ | ● | ○ | ○ | ○ | ○ | ○ | ○ | ● | ○ | ○ | 3/14
+
+C2 | 611 | ○ | ● | ○ | ○ | ○ | ● | ○ | ○ | ● | ● | ○ | ○ | ○ | ○ | 4/14
+
+T1 | 613 | ○ | ● | ○ | ○ | ● | ○ | ● | ○ | ● | ○ | ○ | ○ | ○ | ○ | 4/14
+
+H2 | 642 | ○ | ● | ○ | ○ | ○ | ● | ○ | ○ | ● | ○ | ○ | ○ | ○ | ● | 4/14
+
+O11 | 1805 | ○ | ● | ● | ● | ○ | ○ | ○ | ○ | ○ | ● | ○ | ○ | ○ | ○ | 4/14
+
+H5 | 453 | ○ | ● | ○ | ● | ○ | ● | ○ | ○ | ● | ○ | ○ | ● | ○ | ○ | 5/14
+
+H6 | 580 | ○ | ● | ○ | ○ | ○ | ● | ○ | ○ | ● | ● | ○ | ○ | ○ | ● | 5/14
+
+H4 | 676 | ○ | ● | ○ | ○ | ● | ● | ○ | ● | ○ | ○ | ○ | ● | ○ | ○ | 5/14
+
+O10 | 1660 | ○ | ● | ● | ● | ○ | ● | ○ | ● | ○ | ○ | ○ | ○ | ○ | ○ | 5/14
+
+DD-2 | 2244 | ○ | ● | ○ | ● | ○ | ● | ○ | ○ | ● | ○ | ○ | ○ | ● | ○ | 5/14
+
+H8 | 3025 | ○ | ● | ● | ● | ○ | ● | ○ | ○ | ○ | ○ | ● | ○ | ○ | ○ | 5/14
+
+O12 | 3182 | ○ | ● | ● | ● | ○ | ● | ○ | ○ | ● | ○ | ○ | ○ | ○ | ○ | 5/14
+
+P4 | 2483 | ○ | ● | ● | ● | ○ | ○ | ○ | ○ | ● | ○ | ● | ○ | ○ | ● | 6/14
+
+O1b | 3116 | ○ | ● | ● | ● | ● | ● | ○ | ○ | ● | ○ | ○ | ○ | ○ | ○ | 6/14
+
+C5 | 2321 | ○ | ● | ● | ● | ● | ● | ○ | ○ | ● | ○ | ○ | ○ | ● | ○ | 7/14
+
+O7 | 2581 | ● | ● | ● | ● | ○ | ● | ● | ○ | ● | ○ | ○ | ○ | ○ | ○ | 7/14
+
+DD-3 | 2605 | ○ | ● | ● | ● | ○ | ● | ○ | ○ | ● | ○ | ● | ○ | ○ | ● | 7/14
+
+C3 | 2814 | ○ | ● | ○ | ● | ○ | ● | ● | ○ | ● | ● | ○ | ○ | ○ | ● | 7/14
+
+DD-7 | 2023 | ○ | ● | ● | ● | ● | ● | ○ | ○ | ● | ○ | ○ | ● | ○ | ● | 8/14
+
+H7 | 2329 | ○ | ● | ○ | ● | ○ | ● | ● | ○ | ● | ● | ● | ● | ○ | ○ | 8/14
+
+H3 | 3180 | ● | ● | ● | ● | ● | ● | ○ | ○ | ● | ○ | ● | ○ | ○ | ○ | 8/14
+
+O9 | 3488 | ● | ● | ○ | ● | ○ | ● | ○ | ○ | ● | ○ | ● | ○ | ● | ● | 8/14
+
+O5 | 2798 | ● | ● | ● | ● | ● | ● | ○ | ○ | ○ | ● | ○ | ● | ○ | ● | 9/14
+
+O8 | 2989 | ● | ● | ● | ● | ● | ● | ● | ○ | ● | ○ | ● | ○ | ○ | ○ | 9/14
+
+O1 | 3163 | ● | ● | ● | ○ | ● | ● | ● | ● | ○ | ○ | ● | ○ | ○ | ● | 9/14
+
+O2 | 4299 | ● | ● | ○ | ● | ○ | ● | ● | ○ | ● | ○ | ● | ● | ○ | ● | 9/14
+
+DD-4 | 2295 | ○ | ● | ● | ● | ● | ● | ○ | ○ | ● | ● | ● | ● | ○ | ● | 10/14
+
+P2 | 3085 | ○ | ● | ● | ● | ● | ● | ○ | ○ | ● | ● | ● | ● | ○ | ● | 10/14
+
+O4 | 3172 | ○ | ● | ● | ● | ● | ○ | ● | ○ | ● | ● | ● | ○ | ● | ● | 10/14
+
+O3 | 3660 | ○ | ● | ● | ● | ● | ● | ● | ○ | ● | ● | ○ | ● | ○ | ● | 10/14
+
+I1 | 4044 | ○ | ● | ● | ● | ● | ● | ● | ○ | ● | ● | ● | ○ | ○ | ● | 10/14
+
+DD-1 | 2951 | ● | ● | ● | ● | ● | ● | ● | ● | ● | ○ | ● | ○ | ○ | ● | 11/14
+
+P2b | 2976 | ○ | ● | ● | ● | ● | ● | ● | ○ | ● | ● | ● | ● | ○ | ● | 11/14
+
+C1 | 3684 | ● | ● | ● | ● | ● | ● | ● | ○ | ● | ● | ● | ● | ○ | ● | 12/14
+
+H1 | 4432 | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ○ | ○ | 12/14
+
+P1 | 3920 | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ○ | ● | 13/14
+
+O6 | 7522 | ● | ● | ● | ● | ● | ● | ○ | ● | ● | ● | ● | ● | ● | ● | 13/14
+
+Columns, in order: steps · shape · words · gates · empty · forbid · ident · grain · cite · regist · measur · prov · audien · order
+
+## Per-attribute coverage
+
+Attribute | Coverage | Why it matters
+
+Numbered steps  | 12/37 · 32%  | A long prompt without steps is a wall the agent skims. Retrieval first, derivation only on failure.
+
+Output shape  | 37/37 · 100%  | Every field named, in one brace block. Intent without shape forces a guess that type-checks.
+
+Word budgets  | 25/37 · 68%  | Per field. Unbudgeted prose overflows its card or reads as filler.
+
+Named gates  | 30/37 · 81%  | What will be asserted at submit, before the agent writes.
+
+Empty state  | 21/37 · 57%  | What to emit when the evidence is not there, and what to record about the search.
+
+Explicit prohibitions  | 32/37 · 86%  | The commonest defects are things the agent should not have done.
+
+Identity gate  | 15/37 · 41%  | Every figure is about THIS entity. One contaminated figure reaches five surfaces.
+
+Grain lock  | 7/37 · 19%  | A quoted figure and its named cell are the same cell, within 0.05.
+
+Citation discipline  | 30/37 · 81%  | Register before citing; verbatim excerpts; ids the server allocated.
+
+Register rules  | 16/37 · 43%  | A client reads this prose. No consultant register, no codes, no score-predicate openers.
+
+Measured exemplar  | 19/37 · 51%  | A prompt anchored to a real defect is followed; an abstract one is not.
+
+Provenance  | 15/37 · 41%  | So deterministically composed content cannot present as analyst judgement.
+
+Audience marking  | 5/37 · 14%  | Which paths go in internal_only. An unmarked internal rung reaches the client.
+
+Ordering  | 20/37 · 54%  | Where order carries meaning — ranked, sequenced or chronological.
+
+## The distribution is the finding
+
+Weakest six — all flat prose, all under 700 characters
+
+- P3 Roadmap phases — 426 chars, 3/14
+- C2 Issue register — 611 chars, 4/14
+- T1 Technology stack — 613 chars, 4/14
+- H2 Cell evidence — 642 chars, 4/14
+- O11 Evidence tier distribution — 1805 chars, 4/14
+- H5 Safeguard gates — 453 chars, 5/14
+
+Strongest six — all stepped, all over 2,900 characters
+
+- O6 Top findings — 7522 chars, 13/14
+- P1 Platform fit and story — 3920 chars, 13/14
+- H1 Focus areas — 4432 chars, 12/14
+- C1 Digital evolution timeline — 3684 chars, 12/14
+- P2b Conversation starters — 2976 chars, 11/14
+- DD-1 Synthesis drawer — Heatmap cell → capability synthesis — 2951 chars, 11/14
+
+Length is a proxy, not the cause. The correlation runs through form: every prompt in the strong column uses numbered steps, and every prompt in the weak column is a flat bullet list. Steps force the author to enumerate — to say what happens if retrieval fails, what the ranking key is, what to do when the evidence is absent. A bullet list lets all three go unwritten.
+
+## The model prompt
+
+O6 Top findings scores 14 of 14 and is the template the rest should follow. Its structure:
+
+```
+STEP 1 — RETRIEVE   Read the reports in full. The analyst's findings already
+                exist; extract them with their reasoning intact.
+                Record source_kind=retrieved with section and page.
+
+STEP 2 — DERIVE, ONLY IF RETRIEVAL YIELDS FEWER THAN 5
+                Derive from the joins, not the scores.
+                NEVER derive by taking the widest score gaps — that produces
+                a sorted list, not findings.
+
+STEP 3 — EMIT       Every field named in one block, each with its own budget
+                and a measured exemplar.
+
+STEP 4 — RANK       By strategic alignment, not gap width. And a stated
+                fallback: if the objectives cannot be established, say so,
+                rank by downstream impact, set ranking_basis=impact_fallback.
+
+STEP 5 — COHESION   The five must read as one story. If they do not, you have
+                five observations.
+
+STEP 6 — DRILLDOWN  What the expanded panel carries, per heading.
+```
+
+Four things it does that the weak prompts do not: it prefers retrieval to derivation and says so; it gives every field a measured exemplar rather than an abstract instruction; it names a ranking key and a fallback; and it requires the set to cohere rather than merely to be complete.
+
+Prompt engineering
+
+# The prompt standard
+
+Fourteen attributes. A prompt missing any of them is asking the agent to guess, and a guess that type-checks promotes silently wrong content.
+
+# | Attribute | Requirement
+
+1 | Numbered steps | A long prompt without steps is a wall the agent skims. Retrieval first, derivation only on failure.
+
+2 | Output shape | Every field named, in one brace block. Intent without shape forces a guess that type-checks.
+
+3 | Word budgets | Per field. Unbudgeted prose overflows its card or reads as filler.
+
+4 | Named gates | What will be asserted at submit, before the agent writes.
+
+5 | Empty state | What to emit when the evidence is not there, and what to record about the search.
+
+6 | Explicit prohibitions | The commonest defects are things the agent should not have done.
+
+7 | Identity gate | Every figure is about THIS entity. One contaminated figure reaches five surfaces.
+
+8 | Grain lock | A quoted figure and its named cell are the same cell, within 0.05.
+
+9 | Citation discipline | Register before citing; verbatim excerpts; ids the server allocated.
+
+10 | Register rules | A client reads this prose. No consultant register, no codes, no score-predicate openers.
+
+11 | Measured exemplar | A prompt anchored to a real defect is followed; an abstract one is not.
+
+12 | Provenance | So deterministically composed content cannot present as analyst judgement.
+
+13 | Audience marking | Which paths go in internal_only. An unmarked internal rung reaches the client.
+
+14 | Ordering | Where order carries meaning — ranked, sequenced or chronological.
+
+## Four standing clauses
+
+Four attributes are identical on every surface and should be standing text the contract appends rather than something each prompt author remembers. That is what takes audience marking from five prompts of 37 to all of them.
+
+```
+STANDING · IDENTITY
+Every figure, quote, document and source domain is about THIS entity.
+Assert legal name, regulator, footprint, source domain and order of
+magnitude. On failure: quarantine the field, emit the reason, escalate.
+NEVER substitute a plausible value and NEVER render a partial identity.
+
+STANDING · GRAIN
+Any "<label> at N/5" you write must resolve to a served cell within 0.05.
+Read the label and the score from the SAME row. Round once.
+
+STANDING · REGISTER
+A client reads this. No consultant register (leverage, journey,
+best-in-class). No deficit framing (lacks, fails to). No raw taxonomy
+codes in prose. No score-predicate openers. No markdown in a text field.
+The verb is governed by the evidence level: L1 implemented · L2 selected ·
+L3 likely uses · L4 may use.
+
+STANDING · AUDIENCE
+List in internal_only every JSON path the customer must not receive:
+rank scores, tier weights, scoring rationale, synthetic provenance,
+internal codes. Thin-evidence and quarantine markers are NOT internal —
+honesty renders to the client.
+```
+
+## The required form
+
+```
+STEP 1 — RETRIEVE    Where the answer already exists, and how to record
+                 that it was retrieved rather than derived.
+STEP 2 — DERIVE      Only on retrieval failure. State what derivation is
+                 legitimate and what looks like derivation but is not.
+STEP 3 — EMIT        Every field in one brace block. Per-field budget.
+                 A measured exemplar per prose field.
+STEP 4 — ORDER       The ranking or sequencing key, and its fallback.
+STEP 5 — ABSENCE     What to emit when the evidence is not there, and what
+                 to record about the search that established it.
+STEP 6 — GATES       What will be asserted at submit.
+STEP 7 — DRILLDOWN   What the expanded panel carries, if the surface has one.
+```
+
+Why the measured exemplar matters more than the instruction
+“Quantify the consequence” produces hedged prose. “Blocks 34 downstream subcaps”, “5–7 month cycle compression”, “Window closes at nCino go-live” produce the thing itself. The strongest prompt in the set gives an exemplar for every prose field, and it is the only one that scores full marks.
+
+## The peer fallback ladder
+
+Referenced by every prompt that touches a peer figure, restated by none of them.
+
+# | Rung | Procedure | Records
+
+1 | Peer table figure | peer_comparison_table.csv carries the cell | basis = table
+
+2 | Recompute at lower cohort size | Drop the peer lacking the figure and re-take the median. Floor of three: N=5 → sorted[2]; N=4 → mean of sorted[1..2]; N=3 → sorted[1]. | basis = recomputed, peer_n records the size actually used
+
+3 | Adjacency inference | Infer from a neighbouring sub-capability in the same category. | basis = inferred, labelled INFERENCE with one clause of reasoning
+
+4 | Proxy ceiling | A signal that caps rather than estimates — e.g. a specialist-headcount ratio below 5% caps its category, negative-dominant review sentiment caps at mid-scale. Lowest cap wins. | basis = inferred, proxy_disclosure carries the literal phrase 'peer proxy'
+
+5 | Stop | Print 'Cannot reliably estimate'. | basis = cannot_estimate, peer_median stays NULL
+
+Never impute a value into the cell. The disclosure must carry the literal phrase peer proxy, because a governance check greps for it — and must never claim identical methodology. A proxied figure that reads as a measured one is the peer-fabrication failure this ladder exists to prevent.
+
+Prompt engineering
+
+# The six stub prompts, reissued
+
+Each was under 700 characters of flat prose for a surface that is not simple. Reissued against the standard, with the four standing clauses assumed rather than repeated.
+
+## H2 · Cell evidence
+
+Was 642 characters, flat prose. Now stepped, with the standing clauses applied.
+
+```
+STEP 1 — GRAIN CHECK, BEFORE ANYTHING ELSE
+Assert the score, the peer median and the cell id all come from the SAME
+row of subcap_scores. If the score belongs to the category and the id to
+the sub-capability, STOP and emit grain_violation. Do not write prose
+over a mismatch. One line pairing a sub-capability score with a category
+id produced 125 violations across the corpus.
+
+STEP 2 — LINK ON SUBSTANCE, NOT PROXIMITY
+Map each research-workbook row to the sub-capability its SHEET is about,
+then verify the excerpt speaks to that capability. A plausible-but-
+unrelated citation is worse than none. The commonest cause of over-
+linking is one category-level search mapped onto five sub-capabilities.
+
+STEP 3 — EMIT THE EVIDENCE LIST FIRST
+Per cell: {subcap_id, e_ids[], items[], reach_note, synthesis,
+           grounded_on, provenance}
+Per item: {e_id, tier, claim_label, recency, source_title, publisher,
+           excerpt}   excerpt verbatim, 50-500 chars, never a bare URL.
+Count the items. That count is grounded_on, and it is printed beside the
+synthesis.
+
+STEP 4 — WRITE THE SYNTHESIS (40-90 words)
+What the evidence establishes about THIS capability, where the score sits
+against the peer median, and one clause of consequence: at or above
+median, what to protect; below, what it constrains downstream. Cite
+inline. Do NOT open by restating the score — it is rendered above you.
+Below three linked items, mark the cell thin and say so in the panel.
+
+STEP 5 — PEER FIGURE
+Where the peer table lacks one, apply the peer fallback ladder. Label an
+inferred figure INFERENCE with one clause of reasoning. NEVER impute.
+
+STEP 6 — REACH, HONESTLY
+linking_stats: cells scored, cells linked, rows unlinkable. If every row
+is unlinkable, say so — that is a source-data finding, not a silent zero.
+
+GATES: grain lock (blocking) · citation V1-V4 · excerpt verbatim ·
+       identity on every source domain
+```
+
+What changed: Absorbs the DD-1 content contract (B-04): grain check, synthesis budget, the printed count and the peer ladder. Adds thin-evidence marking, provenance and the standing clauses.
+
+## H5 · Assessment caps & safeguard gates
+
+Was 453 characters, flat prose. Now stepped, with the standing clauses applied.
+
+```
+STEP 1 — TWO ARRAYS, NOT ONE
+This section carries both what the ASSESSMENT capped and what the
+SUBMISSION gates found. They are different things and were previously
+conflated.
+
+STEP 2 — EMIT caps[] — what the assessment applied
+{cap_id, kind, ceiling, affected_categories[], rationale, e_ids[]}
+kind: cap │ uncertainty_band │ qa_hold │ analyst_override
+Read the workbook's own cap log and the QA verdict. rationale is the
+stated reason, quoted or closely paraphrased.
+Do not invent a cap to explain a low score. Only caps the assessment
+actually applied belong here.
+
+STEP 3 — EMIT gates[] — the SG family results
+{gate_id, plain_label, result, detail, not_run_reason}
+gate_id is SG-nn. result: PASS │ FAIL │ NOT_RUN.
+plain_label is a human sentence, 8-18 words, and is REQUIRED — this card
+renders to the client and a bare code teaches them to distrust the page.
+not_run_reason is REQUIRED when result is NOT_RUN. A gate reporting PASS
+because it did not run is worse than one reporting FAIL.
+
+STEP 4 — DISCLOSE, DO NOT SUPPRESS
+A failing gate is shown with its measurement. It does not block
+promotion. An assessment that states its own weakness is more credible
+than one that appears complete.
+
+GATES: plain_label present on every client-visible gate ·
+       not_run_reason present wherever result is NOT_RUN
+```
+
+What changed: Resolves B-03 by splitting caps from gate results. Adds the required plain label, the three-state result and the not-run reason, none of which the original emitted.
+
+## T1 · Technology stack register
+
+Was 613 characters, flat prose. Now stepped, with the standing clauses applied.
+
+```
+STEP 1 — A PRODUCT, NOT A SERVICE OR A CATEGORY
+"Salesforce Financial Services Cloud" is a product. "CRM",
+"Analytics/BI", "Django" are not. vendor and product are separate fields.
+
+STEP 2 — EMIT items[]
+{ts_id, vendor, product, layer, pillar_id, status, evidence_level,
+ detection_basis, as_of, linked_subcap_ids[], e_ids[]}
+
+layer  OPS │ CUST │ DATA │ INFRA
+       OPS=Operations & core banking (P3) · CUST=Customer engagement (P2) · DATA=Data & analytics (P4) · INFRA=Infrastructure & cloud (P4)
+       NOT L2-L5 — those keys collide with the evidence-level ladder
+       rendered on the same card.
+
+status CONFIRMED │ INFERRED │ CLAIMED │ ABSENT
+       Required on every row. The landscape strip recomputes its four
+       counts from this field; without it the strip is uncomputable.
+
+evidence_level  L1-L4, and it governs the verb the prose may use.
+detection_basis  one clause, printed on the detail page. A bare status
+                 invites certainty the evidence does not support.
+
+STEP 3 — LAYER ROLLUP
+Per layer: {layer, pillar_id, detected, expected, is_primary_gap}
+The layering carries analysis a flat list cannot: two of four detected at
+the data layer with a P4 tag says where the gap is and which pillar
+absorbs it.
+
+STEP 4 — dropped[] IS REPORTED, NOT HIDDEN
+A candidate you cannot cite is a rumour. Put it in dropped[] with the
+reason. That is how a taxonomy gap becomes visible.
+
+GATES: no service or category shipped as a product · every item cited ·
+       landscape counts reconcile to the register
+```
+
+What changed: Resolves B-01, B-02 and B-05: four layers with collision-free keys, a required status field, evidence level, detection basis and the layer rollup.
+
+## C2 · Issue register
+
+Was 611 characters, flat prose. Now stepped, with the standing clauses applied.
+
+```
+STEP 1 — ONE ROW PER MATTER
+Collapse duplicates differing only by formatting or a trailing clause.
+A register with the same matter three times reads as three problems.
+
+STEP 2 — EMIT
+{issue_id, title, severity, status, opened_on, resolved_on, rationale,
+ capped_subcap_ids[], linked_subcap_ids[], e_ids[], provenance}
+title  8-16 words, the matter in the source's own terms.
+severity and status are ALWAYS populated. Never emit a NULL status.
+rationale  25-60 words where the source gives one. If it does not,
+           LEAVE IT EMPTY — the drilldown renders the title alone and that
+           is honest. Do not compose a rationale to make the card look full.
+
+STEP 3 — NAME WHAT IT CAPS
+Where a matter constrains an assessed capability, put the cell in
+capped_subcap_ids with its cap level. A regulatory matter that caps a
+cell and does not say so leaves the score looking unexplained.
+
+STEP 4 — CHRONOLOGY
+Ordered by opened_on. The Gantt renders in the order sent.
+
+STEP 5 — ABSENCE
+No matters found is a finding, not an empty array: emit verified_absent
+with the registries searched.
+
+GATES: one row per matter · status non-null · identity on every
+       regulator named
+```
+
+What changed: Adds the cap linkage, word budgets, ordering, an explicit empty state and provenance.
+
+## H6 · Evidence store
+
+Was 580 characters, flat prose. Now stepped, with the standing clauses applied.
+
+```
+STEP 1 — REGISTER BEFORE YOU CITE
+Package evidence keeps its original id. Anything found outside the
+package is registered through the connector, which allocates the id and
+computes the rank score. NEVER choose an id yourself — an invented id is
+fabrication by construction even when the source is real.
+
+STEP 2 — EMIT
+{e_id, source_name, url, excerpt, claim_type, tier, published_date,
+ discovered_by, supports_subcap_ids[], surfaces[]}
+excerpt  VERBATIM, 50-500 chars. A paraphrase is not evidence.
+claim_type  FACT │ INFERENCE │ HYPOTHESIS │ CEILING_ESTIMATE.
+            An inference is labelled as one.
+tier  T1-T5. A machine technographic scan is T1, never T4 — filing it
+      at T4 caps the capability and silently suppresses the score.
+
+STEP 3 — TWO THINGS YOU MUST NOT DO
+Do not register a row you did not read.
+Do not register a URL you could not retrieve.
+
+STEP 4 — BIDIRECTIONAL LINKAGE
+supports_subcap_ids lets the drawer render chips that jump to the other
+cells an item backs, so a wrong link is visible from two directions.
+
+STEP 5 — RECENCY
+Undated is UNVERIFIED, never CURRENT. Age is computed against the run's
+pinned reference date or it is null — never a sentinel.
+
+GATES: excerpt verbatim · id resolves and belongs to this entity ·
+       source domain identity-checked · rank score bounded
+```
+
+What changed: Adds the register-before-cite rule, the T1 scan correction, bidirectional linkage, recency handling and the tier ceiling consequence.
+
+## P3 · Transformation roadmap
+
+Was 426 characters, flat prose. Now stepped, with the standing clauses applied.
+
+```
+STEP 1 — RETRIEVE THE PHASING
+If the package states phasing, use it and record source_kind=retrieved.
+Derive only if it does not, and label it derived.
+
+STEP 2 — EMIT
+{phase_id, phase, horizon, rec_ids[], capabilities[], depends_on[],
+ rationale, provenance}
+horizon  plain terms: next two quarters │ this year │ beyond.
+rationale  30-60 words: why this phase sits here and not earlier.
+
+STEP 3 — REFERENTIAL INTEGRITY
+Every rec_id must resolve to a recommendation THIS payload describes.
+A phase citing a recommendation the page does not carry is a dead link
+in a document an AE reads aloud.
+
+STEP 4 — SEQUENCING IS THE CONTENT
+A phase cannot precede a phase it depends on. Assert the dependency graph
+is acyclic before emitting. Order is meaning — the roadmap renders in the
+order sent and the client reads it as commitment.
+
+STEP 5 — METRICS
+Any figure quoted comes from THIS run and resolves to its named cell.
+
+STEP 6 — ABSENCE
+If prerequisites do not determine a sequence, say so and emit the phases
+unordered with sequencing_basis=undetermined. Do not invent an order to
+look decisive.
+
+GATES: rec_ids resolve within the payload · dependency graph acyclic ·
+       grain lock on any quoted figure
+```
+
+What changed: Adds referential integrity against the recommendation set, an acyclicity assertion, budgets, retrieval preference and an explicit undetermined state.
+
+Actions
+
+# What was changed, and what is left
+
+## Applied to the document set
+
+Finding | Change | Where
+
+B-01 | Four stack layers adopted; the five- and six-layer vocabularies superseded | Surface Spec, Schema, TRD
+
+B-02 | Layer keys re-cut to OPS · CUST · DATA · INFRA to break the collision with evidence levels | Schema, Surface Spec
+
+B-03 | Section split into caps[] and gates[]; plain label and not-run reason required | TRD, Schema, Surface Spec
+
+B-04 | DD-1's content contract folded into the H2 prompt | Surface Spec
+
+B-05 | status required on every register row; landscape recomputes from it | Schema, Surface Spec
+
+B-06 | Peer fallback ladder specified formally | TRD, Surface Spec
+
+M-01–07 | Prompt standard defined; four standing clauses; six stubs reissued | This report, Surface Spec
+
+B-07 | Band domain enforced as four values; M5 removed from prose | TRD, Schema, Surface Spec
+
+B-08 | Resolver made authoritative for the palette; divergence recorded | TRD, Schema
+
+B-09 | Evidence ladder governs the payload; the dot relabelled | TRD, Surface Spec
+
+B-10 | R-Layer generalised, with probe sets and a recorded verdict | PRD, TRD, Schema
+
+minor | Spelling unified; Claude Code and Cowork disambiguated | All
+
+D-01–05 | Google Cloud deployment verification: managed pooling with the Enterprise Plus constraint, IAM token-expiry mitigation, app-level compression, HNSW build wording | TRD, Schema, Plan
+
+## Left open, deliberately
+
+Item | Why it is not resolved here
+
+Reissuing the other 31 prompts against the standard | Mechanical but substantial. The six stubs were reissued because they were unusable as written; the rest are usable and should be upgraded as each surface is built.
+
+Nine surfaces with a prompt but no contract block | Contracts have been synthesised from the prompts in the register. Confirming them against the rendered prototype is a build-time task.
+
+Retention policy for superseded runs | An operational decision, not a contract one.
+
+Whether CLAIMED should render distinctly from INFERRED on the register | The prototype renders three statuses; the landscape strip needs four. Resolved in favour of four, but the visual treatment is a design decision.
+
+## Standing recommendations
+
+- Make the four standing clauses contract text, not prompt text. If the connector appends them to every section's doc, audience marking goes from five prompts of 37 to all of them without anyone remembering.
+- Score every new prompt against the fourteen attributes before it ships. The check is mechanical and catches the gap class that produced six unusable prompts.
+- Require a measured exemplar for every prose field. It is the single strongest differentiator between the prompts that work and the ones that do not.
+- Treat a prompt under 1,500 characters for a non-trivial surface as a defect, not a style. Every prompt below that threshold failed at least seven attributes.
+- Re-run this analysis in continuous integration. The matrix is computed from the prompt text, so it can regress silently.
+
+The finding behind the findings
+Eight of the ten blocking issues are the same shape: one name, two meanings — two layer vocabularies, layer keys colliding with evidence levels, safeguard gates meaning two different things, a section contract split across two prompts. This is precisely the defect class the specifications were written to eliminate, reappearing one level down in the prompt layer. The prompts need the same discipline the payload contracts already have: an identifier that is unambiguous in isolation, and a single place where each rule lives.

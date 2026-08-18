@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "refinement.schema.json",
+  "title": "Refinement — the record_refinement payload",
+  "description": "Mirrors the connector's record_refinement contract; the connector is authoritative and this file is the readable copy. What you CHANGED, in response to which findings, so the next run can ask whether it held. Recording a refinement CLOSES NOTHING — resolve_finding is a second, separate call, deliberately, because 'changed' and 'fixed' are two claims and only the second one can be wrong later. The server allocates REF-####.",
+  "type": "object",
+  "required": ["target_kind", "target", "change", "applied_by", "finding_ids"],
+  "properties": {
+    "target_kind": {
+      "type": "string",
+      "enum": ["SKILL", "AGENT", "COMPONENT", "GATE", "TEST", "SCHEMA", "DOC", "PROCESS"],
+      "description": "THE RUNG, in the store's vocabulary. DOC/PROCESS = R1 prose · SKILL/AGENT = R2 a worked example · TEST/COMPONENT = R3 a check that runs · GATE = R4 refused at submit · SCHEMA = R5 unrepresentable. Higher depends on fewer people: R1/R2 on a reader, R3 on someone running it, R4/R5 on nobody. A recurrence lands STRICTLY above the target_kind its previous refinement used — except where that check existed and did not fire, which is a scope defect and is answered by widening the same rung."
+    },
+    "target": {
+      "type": "string",
+      "description": "Named the way its owner names it.",
+      "examples": ["skill:dma-surface-production", "agent:rectifier", "CG-13", "apps/mcp/dma_mcp/promote.py", "apps/mcp/tests/test_field_census.py"]
+    },
+    "change": {"type": "string", "description": "What was changed, in prose. Name the mechanism, not the culprit."},
+    "applied_by": {"type": "string", "description": "The agent or person who made the change."},
+    "finding_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"},
+      "description": "The findings this answers. They must exist. One refinement against six findings is the shape a structural change makes; six refinements against one each is the shape a queue makes.",
+      "examples": [["MEM-0007", "MEM-0011"]]
+    },
+    "commit_sha": {"type": "string", "description": "ONE of commit_sha or change_ref is REQUIRED: a refinement nobody can locate is a claim, not a change."},
+    "change_ref": {"type": "string", "description": "A PR, branch or artefact reference, when there is no single commit."},
+    "gate_added": {"type": "string", "description": "The gate added in response, so the memory holds the fix beside the defect. Set it whenever target_kind is GATE.", "examples": ["CG-13"]},
+    "relation": {
+      "type": "string",
+      "enum": ["ADDRESSES", "CLOSES"],
+      "description": "CLOSES only where a check exists. An R1/R2 refinement ADDRESSES — a class fixed with a paragraph is not closed, it is untested."
+    },
+    "rationale": {
+      "type": "string",
+      "description": "OPEN IT WITH `RUNG: R<n> — ` and keep that agreeing with target_kind; where they disagree the target_kind is what actually landed. Then 15-40 words naming what this catch DEPENDS ON — 'fires on every CI run, so it depends on CI running, which the nightly scanner guarantees'. That sentence is what the next run reads when deciding whether the rung held. Record a ceiling here too where prevention has one, and the rung you could NOT reach where the right one was out of reach this run — in which case the class stays open.",
+      "examples": ["RUNG: R3 — resolves every required contract field against the connector's own writer spec on each CI run, so the catch depends only on CI running rather than on a reader remembering."]
+    },
+    "verification": {
+      "type": "string",
+      "description": "THE NEGATIVE CONTROL, both directions in one sentence: the check, that it passes on the fixed state, and that it FAILS on the state that produced the finding, with how that state was reconstructed (git show sha:path, a fixture, the recorded payload). A check that passes on both the broken and the fixed state closes nothing and will be believed anyway. Required in substance before this refinement may be used in a resolve_finding call.",
+      "examples": ["pytest apps/mcp/tests/test_field_census.py passes on HEAD; run against `git show <pre-0023>:apps/mcp/dma_mcp/writer_spec.json` it names techstack.dropped, mix_implication and sequencing_basis by path."]
+    }
+  }
+}

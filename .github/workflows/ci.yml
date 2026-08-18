@@ -1,0 +1,181 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  gates:
+    name: Architecture gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Secret scan
+        run: python3 scripts/scan_secrets.py
+      - name: Gate A — no inference import
+        run: python3 scripts/gate_a_no_inference_imports.py
+      - name: Gate B — corpus ceiling ratchet
+        run: |
+          if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          elif git rev-parse HEAD~1 >/dev/null 2>&1; then
+            BASE="HEAD~1"
+          else
+            BASE=""
+          fi
+          if [ -n "$BASE" ]; then python3 scripts/gate_b_ceiling_ratchet.py "$BASE"; else echo "No base commit; skipping ratchet"; fi
+      - name: Docs extraction is reproducible
+        run: |
+          python3 scripts/extract_docs.py docs /tmp/docs-text-check
+          diff -r /tmp/docs-text-check docs/text --exclude='*docx upload*' && echo "docs/text matches sources"
+      # An em dash is a render dead end: it cannot say WHICH absence it is, and
+      # gives the reader no route to getting the field filled. Removed once by
+      # hand across 11 files; this is what stops the next component reaching
+      # for `: "—"` because it is the shortest thing that renders.
+      - name: Gate C — no render dead ends
+        run: python3 scripts/gate_c_no_render_dead_ends.py
+      # A shared contract the serving code READS must be in the image that
+      # reads it. enrichment_register.json was not, the loader swallowed the
+      # FileNotFoundError, and five surfaces served without their status while
+      # the whole suite passed — because in the repo the file is there.
+      - name: Gate D — shared contracts ship in the image
+        run: python3 scripts/gate_d_shared_files_ship.py
+      # `platform_story` served sixteen keys per platform and the page read
+      # two: the ranked fit score, the readiness verdict, the estate reach and
+      # twenty-five cited peer rows were promoted and shown nowhere. Nothing
+      # was broken in a way any test could see — the payload was right, the
+      # promote was right, the suite was green and the content was invisible.
+      # Finding it took a hand census against a live payload; this is that
+      # census, run against the contract so it needs no promoted run, and
+      # ratcheted like Gate B because plenty of declared keys legitimately
+      # have no reader.
+      - name: Gate F — a declared key has a reader
+        run: python3 scripts/gate_f_declared_keys_have_readers.py
+      # The curation covered 115 of the specification's 127 surfaces and walked
+      # past twelve — three whole Insights surfaces carrying eighteen P0 checks
+      # among them, in neither artefact, not included and not excluded. Nothing
+      # noticed until a completeness critic counted. This is that count, and it
+      # also refuses an exclusion whose reason names no file or contract:
+      # three of the first pass's rested on a comment inside a module that is
+      # mounted nowhere.
+      - name: Gate E — every document surface has a disposition
+        run: python3 scripts/gate_e_acceptance_coverage.py
+      # The gate has to be able to fail. Removing a surface's disposition must
+      # be caught, or "0 unaccounted" is a sentence rather than a measurement.
+      - name: Gate E negative control
+        run: |
+          python3 - <<'PY'
+          import json, subprocess, sys, shutil
+          INV = "apps/web/tests/acceptance/inventory.json"
+          shutil.copyfile(INV, "/tmp/inv.bak")
+          d = json.loads(open(INV).read())
+          before = len(d["sections"])
+          d["sections"] = [s for s in d["sections"]
+                           if s.get("surface_id") != "insights.recmodal"]
+          assert len(d["sections"]) == before - 1, "control target not found"
+          open(INV, "w").write(json.dumps(d, indent=1, ensure_ascii=False))
+          rc = subprocess.run([sys.executable,
+                               "scripts/gate_e_acceptance_coverage.py"],
+                              capture_output=True).returncode
+          shutil.copyfile("/tmp/inv.bak", INV)
+          if rc == 0:
+              print("Gate E passed with a surface removed — it measures nothing")
+              sys.exit(1)
+          print("Gate E negative control ok: dropping one surface fails it")
+          PY
+      # verify_deployed.py needs gcloud and production credentials, which CI
+      # does not have — so CI cannot run the byte comparison. What it CAN
+      # enforce is that the script stays wired into the release path, which is
+      # the failure that actually happened: the script existed and nothing
+      # called it.
+      - name: The deploy verifies its own result
+        run: |
+          grep -q "verify_deployed.py" infra/deploy.sh || {
+            echo "infra/deploy.sh no longer runs verify_deployed.py."
+            echo "A deploy that does not check what it shipped is how four"
+            echo "render fixes were reported live against a revision built"
+            echo "58 minutes before they were committed."
+            exit 1; }
+
+  schema-qa:
+    name: Schema QA checklist (stage 0.3 DoD)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: dma_insights
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: local
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parity users (mirror Cloud SQL IAM users)
+        run: PGPASSWORD=local psql -h localhost -U postgres -d dma_insights -f infra/local/pg-init/01-iam-parity-users.sql
+      - name: Install
+        run: pip install -q -r migrations/requirements.txt pytest
+      - name: Migrate
+        working-directory: migrations
+        run: LOCAL_DATABASE_URL='postgresql+pg8000://postgres:local@localhost:5432/dma_insights' alembic upgrade head
+      - name: QA checklist as tests
+        run: LOCAL_DATABASE_URL='postgresql+pg8000://postgres:local@localhost:5432/dma_insights' python -m pytest tests/schema/ -q
+
+  # Every python suite, not a subset. Until 2026-08-14 this job ran worker and
+  # mcp only: the API's 251 tests and the routine-preflight tests had never run
+  # in CI at all, so a change could break the serving layer and merge green.
+  python-tests:
+    name: Python unit tests (worker · mcp · api · scripts)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # apps/api's tests import dma_api.main, which imports fastapi. The first
+      # version of this job widened the pytest targets to include them WITHOUT
+      # widening the install, so two route-wiring tests failed on
+      # ModuleNotFoundError — a green suite locally and a red one here, which
+      # is the same repo-versus-runtime gap Gate D exists for one layer up.
+      - run: pip install -q pytest openpyxl pg8000 -r apps/api/requirements.txt
+      - run: python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ scripts/tests/ -q
+
+  # The frontend has its own suite (node's built-in runner, no framework) and
+  # it too had never run here. It is the only place the COMPILED bundle is
+  # asserted against the register and the adapter — the check that caught four
+  # of five enrichment surfaces rendering nothing.
+  web-tests:
+    name: Web unit tests (compiled bundle)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: apps/web
+        run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - working-directory: apps/web
+        run: npm run build:proto
+      - working-directory: apps/web
+        run: npm run test:web
+
+  # The deep audit, run against the golden fixture rather than production, so a
+  # payload shape that would fail in front of a client fails here first. The
+  # same script runs nightly against the live API from the corpus-gate-scanner.
+  promoted-client-audit:
+    name: Promoted-client audit (fixture)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          if [ -d fixtures/served ]; then
+            python3 scripts/audit_promoted_client.py --from-dir fixtures/served
+          else
+            echo "no served fixture yet; audit runs against production nightly"
+          fi
+
+  # Per-service lint/type/build jobs are added when each service's
+  # first code lands (Implementation Plan S.3); the gates above run from
+  # the first commit so no code was ever merged without them.

@@ -1,0 +1,120 @@
+{
+ "_why": "Gate F: contract keys with no frontend reader. May SHRINK, never GROW. Pinned to the measured set, never to a round number.",
+ "keys": {
+  "affected_count": [
+   "heatmap.cohort_patterns.patterns[].affected_count"
+  ],
+  "anchor_subcap_id": [
+   "overview.opportunity.tiles[].anchor_subcap_id"
+  ],
+  "below_threshold": [
+   "heatmap.cohort_patterns.patterns[].below_threshold"
+  ],
+  "cap_statement": [
+   "overview.sentiment.themes[].cap_statement"
+  ],
+  "claim_classes": [
+   "overview.evidence_coverage.claim_classes"
+  ],
+  "cohort_size": [
+   "heatmap.cohort_patterns.insufficient_cohorts[].cohort_size",
+   "heatmap.cohort_patterns.patterns[].cohort_size"
+  ],
+  "compliance_attestations": [
+   "techstack.techstack.compliance_attestations"
+  ],
+  "discovered_by": [
+   "heatmap.evidence.evidence[].discovered_by"
+  ],
+  "displayed_lines": [
+   "overview.sentiment.displayed_lines"
+  ],
+  "entity_ids": [
+   "heatmap.cohort_patterns.patterns[].entity_ids"
+  ],
+  "fact_count": [
+   "overview.evidence_coverage.fact_count"
+  ],
+  "gap_analysis": [
+   "overview.sentiment.gap_analysis"
+  ],
+  "identity_mismatch": [
+   "overview.firmographics.identity_mismatch"
+  ],
+  "insufficient_cohort": [
+   "heatmap.cohort_patterns.insufficient_cohorts[].insufficient_cohort"
+  ],
+  "item_count": [
+   "overview.evidence_coverage.item_count"
+  ],
+  "linking_stats": [
+   "heatmap.cell_evidence.linking_stats"
+  ],
+  "mapped_subcap_ids": [
+   "overview.sentiment.themes[].mapped_subcap_ids"
+  ],
+  "max_evidence_level": [
+   "overview.evidence_coverage.tiers[].max_evidence_level"
+  ],
+  "mix_implication": [
+   "overview.evidence_coverage.mix_implication"
+  ],
+  "named_items": [
+   "insights.landscape.tiles[].named_items"
+  ],
+  "new_evidence_ids": [
+   "heatmap.alerts.alerts[].new_evidence_ids",
+   "heatmap.focus_areas.focus_areas[].new_evidence_ids"
+  ],
+  "pattern_statement": [
+   "heatmap.cohort_patterns.patterns[].pattern_statement"
+  ],
+  "phase_id": [
+   "platform.roadmap.phases[].phase_id"
+  ],
+  "reach_note": [
+   "heatmap.cell_evidence.cells[].reach_note"
+  ],
+  "reconciles_to_register": [
+   "insights.landscape.reconciles_to_register"
+  ],
+  "reference_date": [
+   "heatmap.evidence_age.rows[].reference_date"
+  ],
+  "remediation_status": [
+   "context.regulatory_standing.enforcement_actions[].remediation_status"
+  ],
+  "self_sourced_basis": [
+   "overview.evidence_coverage.self_sourced_basis"
+  ],
+  "self_sourced_pct": [
+   "overview.evidence_coverage.self_sourced_pct"
+  ],
+  "source_kind": [
+   "overview.findings.findings[].source_kind"
+  ],
+  "stale_pct": [
+   "heatmap.evidence_age.stale_pct"
+  ],
+  "storyline_challenge": [
+   "overview.exec_summary.storyline_challenge"
+  ],
+  "structural_explanation": [
+   "heatmap.cohort_patterns.patterns[].structural_explanation"
+  ],
+  "sub_vertical_undefined": [
+   "overview.firmographics.sub_vertical_undefined"
+  ],
+  "supports_subcap_ids": [
+   "heatmap.evidence.evidence[].supports_subcap_ids"
+  ],
+  "undated_pct": [
+   "heatmap.evidence_age.undated_pct",
+   "overview.firmographics.undated_pct"
+  ],
+  "verified_absent": [
+   "context.issue_register.verified_absent",
+   "overview.leadership.verified_absent"
+  ]
+ }
+}

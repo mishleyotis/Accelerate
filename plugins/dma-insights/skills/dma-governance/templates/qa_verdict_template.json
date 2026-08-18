@@ -1,0 +1,82 @@
+{
+  "run_id": "DMA-XXXX-00000000-0000",
+  "institution_name": "[Institution Name]",
+  "audit_date": "2024-01-15T14:32:00Z",
+  "governance_skill_version": "2.2",
+  "verdict": "PASS_WITH_NOTES",
+  "recommendation": "DELIVER",
+  "issue_count_by_severity": {
+    "CRITICAL": {
+      "count": 0,
+      "open": 0,
+      "fixed": 0
+    },
+    "HIGH": {
+      "count": 0,
+      "open": 0,
+      "fixed": 0
+    },
+    "MEDIUM": {
+      "count": 2,
+      "open": 0,
+      "fixed": 2
+    },
+    "LOW": {
+      "count": 3,
+      "open": 3,
+      "fixed": 0
+    }
+  },
+  "check_results": {
+    "G1_row_counts": "PASS",
+    "G2_rationale_quality": "PASS",
+    "G3_evidence_traceability": "PASS",
+    "G4_score_integrity": "PASS",
+    "G5_aggregation": "PASS",
+    "G6_cross_pillar_caps": "PASS",
+    "G7_confidence_ers": "PASS",
+    "G8_contradiction_log": "PASS"
+  },
+  "distributional_flags": [
+    {
+      "flag_id": "DIST-001",
+      "description": "Score distribution in P2: 62% of subcaps scored 3.0 (exceeds 60% threshold). May indicate clustering on median rather than evidence-driven variation.",
+      "severity": "CAUTION",
+      "affected_pillar_or_metric": "P2",
+      "recommended_action": "Review P2 scoring methodology in next assessment cycle; consider whether threshold sensitivity is appropriate for institution type"
+    },
+    {
+      "flag_id": "DIST-004",
+      "description": "Cap application rate: 28% of subcaps capped. Suggests potential evidence quality issue; recommend evidence gathering strategy review.",
+      "severity": "ALERT",
+      "affected_pillar_or_metric": "Cap_Application_Rate",
+      "recommended_action": "In next similar-institution assessment, prioritize T1/T2 evidence collection to reduce cap application rates"
+    }
+  ],
+  "proof_verification": {
+    "PV01_structure_complete": "PASS_WITH_WARNINGS",
+    "PV02_rule_links_valid": "PASS",
+    "PV03_counterclaim_documented": "PASS",
+    "proof_issues": [
+      {
+        "subcap_id": "P1C5",
+        "issue_type": "MISSING_CLAIMS",
+        "description": "Rationale lacks explicit C1-C3 claims structure; instead reads as narrative paragraph. Evidence links present and rule links valid, but claim structure could be clearer."
+      }
+    ]
+  },
+  "critic_resolution": {
+    "CR01_findings_addressed": "PASS",
+    "critic_issues": []
+  },
+  "narrative_audit_result": "PASS",
+  "narrative_issues": [],
+  "sign_off": {
+    "auditor_id": "AUD-00001",
+    "auditor_name": "Jane Doe",
+    "organization": "Zennify Governance Team",
+    "verdict_date": "2024-01-16T10:15:00Z",
+    "is_approved": true,
+    "sign_off_notes": "Assessment meets governance standards for delivery. LOW-severity issues are documentation/formatting only and do not impact score validity. DIST flags noted for program calibration tracking but do not affect this assessment's verdict."
+  }
+}

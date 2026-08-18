@@ -1,0 +1,156 @@
+{
+  "case_id": "GOLDEN_CASE_E",
+  "case_name": "Proof-Carrying Compliance — Rationale Structure Validation",
+  "case_description": "Test case specifically designed for PV-01, PV-02, PV-03 (Proof Verification) governance checks. Contains 5 sample subcapability rationales: 3 with complete proof structures (PASS examples), 2 with intentional deficiencies (FAIL examples). Tests whether governance skill correctly identifies proof structure completeness.",
+  "institution_profile": {
+    "institution_name": "Test Institution (Proof Case)",
+    "institution_size_tier": "Medium_2B_to_10B",
+    "sub_vertical": "Credit_Union",
+    "evidence_mode": "HYBRID",
+    "purpose": "Not a real assessment; used for governance audit training and regression testing"
+  },
+  "sample_rationales": [
+    {
+      "sample_id": "PROOF_SAMPLE_1",
+      "subcap_id": "P1C2",
+      "subcap_name": "Governance & Risk Appetite",
+      "expected_status": "PASS",
+      "proof_status": "COMPLETE",
+      "rationale_text": "P1C2 scored M3.2 (Proactive Governance).\n\nCLAIMS: C1: Board has established digital risk committee (monthly meetings). C2: Risk appetite statement published annually with digital-specific thresholds. C3: Governance metrics tracked: 95% board meeting attendance, 100% committee charter updates.\n\nEVIDENCE: Board resolution authorizing digital risk committee (E-301:F5, T1, current), Annual risk appetite statement (E-302:F3, T2, trailing 12 months), Board meeting minutes showing digital agenda items (INT-BOARD-008, T2, recent).\n\nRULES: RULE_M3_GOVERNANCE_STRUCTURE (from capability_criteria.md line 247): 'M3 requires board-level visibility, documented appetite, and measurable governance cadence.' Applied: All three elements present and documented.\n\nCOUNTERCLAIM: Potential concern: Risk appetite statement is published but may not be actively managed in daily operations; committee may focus narrowly on compliance rather than strategic digital transformation. REBUTTAL: Board minutes show committee discussions of API strategy, cloud migration approval, and innovation initiatives (not compliance-only). Scope is broader than initial concern.\n\nCONSTRAINTS VERIFICATION: No severity caps apply (no enforcement). Cross-pillar dependency cap P1C2→P3: P1C2 = 3.2 > 2.5 threshold; no cap triggered on P3 capabilities.",
+      "proof_elements_present": {
+        "C1_claims": true,
+        "C2_claims": true,
+        "C3_claims": true,
+        "E_evidence_links": true,
+        "E_evidence_ids": ["E-301", "E-302", "INT-BOARD-008"],
+        "RuleID_links": true,
+        "RuleID": ["RULE_M3_GOVERNANCE_STRUCTURE"],
+        "counterclaim_documented": true,
+        "constraint_verification": true
+      },
+      "pv01_assessment": "PASS — All proof elements present with clear structure",
+      "pv02_assessment": "PASS — RuleID 'RULE_M3_GOVERNANCE_STRUCTURE' valid (exists in capability_criteria.md); rule correctly applied (M3 requires board-level visibility, appetite, cadence; all present)",
+      "pv03_assessment": "PASS — Counterclaim 'committee may be compliance-focused' documented with rebuttal using evidence (board minutes show broader scope)"
+    },
+    {
+      "sample_id": "PROOF_SAMPLE_2",
+      "subcap_id": "P2C1",
+      "subcap_name": "Digital Marketing & Acquisition",
+      "expected_status": "PASS",
+      "proof_status": "COMPLETE",
+      "rationale_text": "P2C1 scored M2.8 (Growing Digital Marketing).\n\nCLAIMS: C1: Digital acquisition channels (online app, mobile, social) account for 32% of new members. C2: Marketing automation platform deployed for email campaigns (Jan 2024). C3: Digital ad spend increased 45% YoY; social media followers +120%.\n\nEVIDENCE: Member origination report (E-303:F2, T2, current), Marketing technology vendor contract & implementation report (E-304:F1, T4, 1 month ago), Marketing budget allocation spreadsheet (INT-MARKET-012, T4, current), Social media analytics (E-305:F3, T3, current).\n\nRULES: RULE_M2_ACQUISITION_CAPABILITY (from scoring_methodology.md, Digital Acquisition section): 'M2–M3 transition requires measurable digital channel contribution (≥25%) and technology enablement (platform deployed).' Applied: Digital channels = 32% (exceeds 25%); marketing automation platform deployed ✓\n\nCOUNTERCLAIM: Concern: Strong spend growth (45% YoY) might be reactive (catching up to competitors) rather than strategic; attribution of new members to digital channels may overstate effectiveness (social followers growing but conversion rate unknown). REBUTTAL: Member origination data directly links digital application starts to new accounts (not indirect attribution); conversion analysis would be Level 4 detail. Current M2.8 reflects confirmed digital sourcing at 32%.\n\nCONSTRAINTS VERIFICATION: Sentiment cap check: App rating 4.1 (above 4.0 threshold); no sentiment cap applies. Cross-pillar: P4C1 Data Governance = 2.8 < 2.5 threshold? No, 2.8 > 2.5; no cap on P2C4 from this dependency.",
+      "proof_elements_present": {
+        "C1_claims": true,
+        "C2_claims": true,
+        "C3_claims": true,
+        "E_evidence_links": true,
+        "E_evidence_ids": ["E-303", "E-304", "INT-MARKET-012", "E-305"],
+        "RuleID_links": true,
+        "RuleID": ["RULE_M2_ACQUISITION_CAPABILITY"],
+        "counterclaim_documented": true,
+        "constraint_verification": true
+      },
+      "pv01_assessment": "PASS — All proof elements present; clear structure with 3 claims, 4 evidence links, rule reference, counterclaim",
+      "pv02_assessment": "PASS — RuleID valid; rule correctly applied (threshold 25%, actual 32%; platform deployed ✓)",
+      "pv03_assessment": "PASS — Counterclaim documented and rebutted with specific evidence"
+    },
+    {
+      "sample_id": "PROOF_SAMPLE_3",
+      "subcap_id": "P3C3",
+      "subcap_name": "Compliance, Supervision & Surveillance",
+      "expected_status": "PASS",
+      "proof_status": "COMPLETE",
+      "rationale_text": "P3C3 scored M3.4 (Proactive Compliance).\n\nCLAIMS: C1: Compliance committee meets quarterly with board oversight; charter updated annually. C2: Compliance exceptions tracked in centralized system; 847 exceptions closed YTD (95% resolution rate). C3: BSA/AML monitoring uses automated transaction rules; 3 SARs filed (trend stable vs. prior year).\n\nEVIDENCE: Board resolution & committee charter (E-306:F1, T1, current), Compliance exception tracking system report (INT-COMPLIANCE-034, T4, trailing 12 months), CFPB complaint database (E-307:F2, T1, past 12 months: 2 complaints, both resolved), FinCEN SAR database (E-308:F1, T1, YTD filing confirmation).\n\nRULES: RULE_M3_COMPLIANCE_MATURITY (from capability_criteria.md, Compliance Section): 'M3 requires: (a) governance structure with regular cadence, (b) tracked compliance actions with resolution metrics, (c) regulatory filing processes in place.' Applied: (a) Quarterly committee with board oversight ✓, (b) 847 exceptions tracked, 95% resolution ✓, (c) SAR filing process documented ✓\n\nCOUNTERCLAIM: Concern: 2 CFPB complaints in past 12 months suggests compliance may not be fully proactive (reactionary complaint response rather than prevention). Alternatively: complaint count is noise for large institution. REBUTTAL: 2 complaints in trailing 12 months for institution of this size is within industry norm (CFPB median for similar tier = 1–3); both were resolved quickly. Trend is stable (not increasing). No enforcement action or consent order. Complaint rate does not negate proactive exceptions management & SAR process.\n\nCONSTRAINTS VERIFICATION: Severity cap check: No outstanding enforcement action (CFPB DB shows none). No severity cap applies. Cross-pillar: P3C3 = 3.4 > 2.5 threshold; no cap triggered on downstream P2 capabilities.",
+      "proof_elements_present": {
+        "C1_claims": true,
+        "C2_claims": true,
+        "C3_claims": true,
+        "E_evidence_links": true,
+        "E_evidence_ids": ["E-306", "INT-COMPLIANCE-034", "E-307", "E-308"],
+        "RuleID_links": true,
+        "RuleID": ["RULE_M3_COMPLIANCE_MATURITY"],
+        "counterclaim_documented": true,
+        "constraint_verification": true
+      },
+      "pv01_assessment": "PASS — Complete proof structure: 3 claims, 4 evidence links, rule reference, counterclaim with rebuttal, constraint verification",
+      "pv02_assessment": "PASS — RuleID valid; all three rule requirements met (governance, metrics, filing process)",
+      "pv03_assessment": "PASS — Counterclaim (complaint indicator of weakness) explicitly addressed with rebuttal (complaint rate within norm, trend stable)"
+    },
+    {
+      "sample_id": "PROOF_SAMPLE_4_FAIL",
+      "subcap_id": "P4C1",
+      "subcap_name": "Data Management & Governance",
+      "expected_status": "FAIL",
+      "proof_status": "INCOMPLETE",
+      "deficiency_type": "MISSING_RULE_LINKS",
+      "rationale_text": "P4C1 scored M2.8 (Emerging Data Governance).\n\nCLAIMS: C1: Data governance committee established (monthly cadence). C2: Data dictionary covers 80% of critical data elements. C3: Data quality monitoring dashboard implemented.\n\nEVIDENCE: Committee charter & meeting minutes (E-309:F2, T2, current), Data element inventory (INT-DATA-001, T4, 6 months ago), Data quality dashboard screenshots (INT-DATA-002, T4, current).\n\nCOUNTERCLAIM: Concern: 80% coverage means 20% of critical data still unclassified; data quality dashboard may not be actively used. REBUTTAL: Prioritization strategy focuses on highest-risk data elements first; 80% coverage in 18 months is strong progress.\n\n[MISSING: Rule links. No RuleID reference. Scorer did not document which rule was applied or how score aligns with maturity framework.]",
+      "proof_elements_present": {
+        "C1_claims": true,
+        "C2_claims": true,
+        "C3_claims": true,
+        "E_evidence_links": true,
+        "E_evidence_ids": ["E-309", "INT-DATA-001", "INT-DATA-002"],
+        "RuleID_links": false,
+        "RuleID": [],
+        "counterclaim_documented": true,
+        "constraint_verification": false
+      },
+      "pv01_assessment": "PASS — Claims, evidence, and counterclaim all present",
+      "pv02_assessment": "FAIL — RuleID missing. No reference to capability_criteria.md or scoring_methodology.md rule. Governance audit cannot verify rule was correctly applied.",
+      "pv03_assessment": "PASS — Counterclaim documented with rebuttal",
+      "governance_fix_instructions": "Add RuleID field to rationale: 'RULE_M2_M3_DATA_GOVERNANCE_TRANSITION' (from capability_criteria.md, Data Governance section). Verify rule application: M2→M3 transition requires 'governance structure + >75% element coverage + quality monitoring.' Institution has all three; M2.8 is appropriate score given recent implementation (not yet M3 maturity)."
+    },
+    {
+      "sample_id": "PROOF_SAMPLE_5_FAIL",
+      "subcap_id": "P4C4",
+      "subcap_name": "Information Security & Cybersecurity",
+      "expected_status": "FAIL",
+      "proof_status": "INCOMPLETE",
+      "deficiency_type": "MISSING_COUNTERCLAIM",
+      "rationale_text": "P4C4 scored M3.1 (Managed Security).\n\nCLAIMS: C1: Annual pen test conducted; remediation of critical findings completed within SLA. C2: Security incident response plan updated quarterly; exercises conducted annually. C3: Vulnerability management: critical vulnerabilities patched within 15 days.\n\nEVIDENCE: Pen test report (E-310:F1, T3, 6 months ago), Incident response plan & exercise schedule (INT-SECURITY-045, T2, current), Vulnerability management SLA dashboard (INT-SECURITY-046, T4, current).\n\nRULES: RULE_M3_SECURITY_OPERATIONS (from scoring_methodology.md): 'M3 requires: (a) external validation (pen test), (b) documented IR process with testing, (c) defined vulnerability remediation SLAs.' Applied: (a) Pen test ✓, (b) IR plan + exercises ✓, (c) 15-day SLA ✓\n\nCONSTRAINTS VERIFICATION: No disclosed breach in trailing 24 months (verified CFPB complaint DB); no cybersecurity cap applies.\n\n[MISSING: Counterclaim. Rationale does not anticipate or address potential concerns about security maturity. For example: 'Are pen tests sufficient to claim M3? Are annual exercises enough? Is 15-day MTTR realistic given system complexity?']",
+      "proof_elements_present": {
+        "C1_claims": true,
+        "C2_claims": true,
+        "C3_claims": true,
+        "E_evidence_links": true,
+        "E_evidence_ids": ["E-310", "INT-SECURITY-045", "INT-SECURITY-046"],
+        "RuleID_links": true,
+        "RuleID": ["RULE_M3_SECURITY_OPERATIONS"],
+        "counterclaim_documented": false,
+        "constraint_verification": true
+      },
+      "pv01_assessment": "PASS — Claims, evidence, and rule links all present",
+      "pv02_assessment": "PASS — RuleID valid; rule correctly applied (all three requirements met)",
+      "pv03_assessment": "FAIL — Counterclaim missing. Rationale does not document anticipated skepticism or limitations of evidence base.",
+      "governance_fix_instructions": "Add counterclaim section: 'COUNTERCLAIM: Annual pen tests may not provide continuous validation; exercises may be insufficient for complex incident scenarios; 15-day MTTR may be optimistic. REBUTTAL: [Provide specific evidence addressing each concern, e.g., continuous monitoring in place, incident history shows sub-15-day response rates, IR exercises include realistic scenarios].' Without this, governance cannot verify assessor considered alternative interpretations."
+    }
+  ],
+  "governance_test_expectations": {
+    "pv01_check": "Verify all rationales have Claims (≥3), Evidence links, Rule links, Counterclaim, and Constraint verification. Results: Samples 1, 2, 3 = PASS; Samples 4, 5 = FAIL (missing specific elements).",
+    "pv02_check": "Verify all RuleIDs are valid (exist in framework) and correctly applied. Results: Samples 1, 2, 3, 5 = PASS; Sample 4 = FAIL (no RuleID present).",
+    "pv03_check": "Verify all scores include documented counterclaim check. Results: Samples 1, 2, 3, 4 = PASS; Sample 5 = FAIL (counterclaim missing)."
+  },
+  "pass_criteria": [
+    "PV-01 check correctly identifies 3 complete and 2 incomplete rationales",
+    "PV-02 check correctly identifies 4 valid RuleIDs and flags 1 missing RuleID (Sample 4)",
+    "PV-03 check correctly identifies 4 documented counterclaims and flags 1 missing counterclaim (Sample 5)",
+    "Governance fix instructions accurately describe what is missing and why it matters",
+    "Governance audit verdict for this case: PASS_WITH_NOTES (proof structure mostly complete; 2 rationales need improvement before delivery)"
+  ],
+  "regression_test_gate": {
+    "test_case_purpose": "Verify governance skill PV-01, PV-02, PV-03 proof verification checks work correctly. Ensure governance audit catches missing proof elements before assessment delivery.",
+    "test_execution": "Run governance Workflow A (Single Assessment Audit) on this case; review proof verification results (Steps 2 and outputs in Step 6)",
+    "expected_outcome": "Governance verdict PASS_WITH_NOTES; issue register contains 2 MEDIUM-severity issues (Samples 4 and 5 missing proof elements); fix instructions guide assessor to add RuleID and counterclaim"
+  },
+  "metadata": {
+    "case_created_date": "2024-01-15",
+    "case_updated_date": "2024-01-15",
+    "case_owner": "DMA Governance & Quality Assurance Team",
+    "use_in_workflows": [
+      "Workflow C: Rubric Version Regression (test proof-carrying requirements)",
+      "Training: Proof-Carrying Structures (show examples and counterexamples)",
+      "Governance Audit: PV-01, PV-02, PV-03 Check Validation"
+    ],
+    "compatibility": "DMA Governance Skill v2.0+, DMA Assessment Skill v3.0+"
+  }
+}

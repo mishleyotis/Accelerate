@@ -1,0 +1,46 @@
+# Secrets — never commit credentials of any kind
+*.pem
+*.key
+*service-account*.json
+*serviceaccount*.json
+.env
+.env.*
+!.env.example
+secrets/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+dist/
+out/
+*.tsbuildinfo
+
+# Local artefact store (docker-compose filesystem GCS stand-in)
+.local-artefacts/
+
+# OS / editor
+.DS_Store
+
+# Atomic-write scratch from the editor tooling. These appear beside a file
+# while it is being rewritten and vanish when the write lands — but a commit
+# taken mid-edit would capture one, and a half-written module in the tree is
+# worse than no commit at all.
+*.tmp.*
+
+# Client information never enters this repository. Assessment packages,
+# workbooks, exported payloads and evidence extracts are client property and
+# live in GCS and Drive, not in git. Fixtures use synthetic ids (E-XXX-nnn)
+# and neutral display names.
+fixtures/clients/
+*_Assessment_Workbook_*.xlsx
+*_Research_Workbook_*.xlsx
+**/startup-data/clients/

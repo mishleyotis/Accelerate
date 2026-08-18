@@ -1,0 +1,772 @@
+{
+ "_why": "Gate E's census input. See scripts/build_doc_digest.py.",
+ "source": {
+  "lines": 13992,
+  "headings": 2428,
+  "sha256": "abdc9842d2e350a474f9aa4b19b240a4c57f8cdda7f9eda6c882c039c80c09bc"
+ },
+ "surfaces": [
+  {
+   "line": 1,
+   "title": "Release Gate and Method",
+   "end_line": 39,
+   "headings": 2
+  },
+  {
+   "line": 40,
+   "title": "New tester quick start",
+   "end_line": 353,
+   "headings": 38
+  },
+  {
+   "line": 354,
+   "title": "Global Shell and Auth",
+   "end_line": 494,
+   "headings": 23
+  },
+  {
+   "line": 495,
+   "title": "Global navigation and responsive",
+   "end_line": 620,
+   "headings": 22
+  },
+  {
+   "line": 621,
+   "title": "Global nav \\- Search popover",
+   "end_line": 756,
+   "headings": 23
+  },
+  {
+   "line": 757,
+   "title": "Global nav \\- Notifications popover",
+   "end_line": 886,
+   "headings": 22
+  },
+  {
+   "line": 887,
+   "title": "Global nav \\- Settings popover",
+   "end_line": 1020,
+   "headings": 23
+  },
+  {
+   "line": 1021,
+   "title": "Global client context bar",
+   "end_line": 1147,
+   "headings": 22
+  },
+  {
+   "line": 1148,
+   "title": "Client bar \\- Run selector",
+   "end_line": 1277,
+   "headings": 22
+  },
+  {
+   "line": 1278,
+   "title": "Global universal actions",
+   "end_line": 1408,
+   "headings": 23
+  },
+  {
+   "line": 1409,
+   "title": "Universal \\- Request DMA modal",
+   "end_line": 1535,
+   "headings": 22
+  },
+  {
+   "line": 1536,
+   "title": "Universal \\- Evidence drawer",
+   "end_line": 1681,
+   "headings": 24
+  },
+  {
+   "line": 1682,
+   "title": "Universal \\- Recommendation modal",
+   "end_line": 1813,
+   "headings": 23
+  },
+  {
+   "line": 1814,
+   "title": "Universal \\- Intelligence panel",
+   "end_line": 1940,
+   "headings": 22
+  },
+  {
+   "line": 1941,
+   "title": "Dashboard",
+   "end_line": 2066,
+   "headings": 22
+  },
+  {
+   "line": 2067,
+   "title": "Dashboard \\- New assessment",
+   "end_line": 2184,
+   "headings": 21
+  },
+  {
+   "line": 2185,
+   "title": "Dashboard \\- Request DMA modal",
+   "end_line": 2310,
+   "headings": 22
+  },
+  {
+   "line": 2311,
+   "title": "Clients",
+   "end_line": 2436,
+   "headings": 22
+  },
+  {
+   "line": 2437,
+   "title": "Clients \\- New run",
+   "end_line": 2552,
+   "headings": 21
+  },
+  {
+   "line": 2553,
+   "title": "Clients \\- Request DMA modal",
+   "end_line": 2678,
+   "headings": 22
+  },
+  {
+   "line": 2679,
+   "title": "Overview",
+   "end_line": 2787,
+   "headings": 18
+  },
+  {
+   "line": 2788,
+   "title": "Overview \\- Header and actions",
+   "end_line": 2910,
+   "headings": 22
+  },
+  {
+   "line": 2911,
+   "title": "Overview header \\- Scorecard export",
+   "end_line": 3033,
+   "headings": 22
+  },
+  {
+   "line": 3034,
+   "title": "Overview header \\- Rerun modal",
+   "end_line": 3159,
+   "headings": 22
+  },
+  {
+   "line": 3160,
+   "title": "Overview header \\- Meeting prep panel",
+   "end_line": 3285,
+   "headings": 22
+  },
+  {
+   "line": 3286,
+   "title": "Overview \\- Source quality banner",
+   "end_line": 3408,
+   "headings": 22
+  },
+  {
+   "line": 3409,
+   "title": "Overview \\- Hero maturity card",
+   "end_line": 3541,
+   "headings": 23
+  },
+  {
+   "line": 3542,
+   "title": "Overview \\- Firmographics",
+   "end_line": 3672,
+   "headings": 23
+  },
+  {
+   "line": 3673,
+   "title": "Overview \\- Why Now",
+   "end_line": 3807,
+   "headings": 23
+  },
+  {
+   "line": 3808,
+   "title": "Why Now \\- Signal drilldown",
+   "end_line": 3930,
+   "headings": 22
+  },
+  {
+   "line": 3931,
+   "title": "Why Now \\- Evidence drawer",
+   "end_line": 4073,
+   "headings": 24
+  },
+  {
+   "line": 4074,
+   "title": "Overview \\- Executive Summary",
+   "end_line": 4205,
+   "headings": 23
+  },
+  {
+   "line": 4206,
+   "title": "Executive Summary \\- Evidence drawer",
+   "end_line": 4348,
+   "headings": 24
+  },
+  {
+   "line": 4349,
+   "title": "Overview \\- Opportunity surface",
+   "end_line": 4478,
+   "headings": 23
+  },
+  {
+   "line": 4479,
+   "title": "Overview \\- Top findings",
+   "end_line": 4610,
+   "headings": 23
+  },
+  {
+   "line": 4611,
+   "title": "Top findings \\- Finding drilldown",
+   "end_line": 4736,
+   "headings": 23
+  },
+  {
+   "line": 4737,
+   "title": "Top findings \\- Evidence drawer",
+   "end_line": 4879,
+   "headings": 24
+  },
+  {
+   "line": 4880,
+   "title": "Overview \\- Leadership",
+   "end_line": 5001,
+   "headings": 22
+  },
+  {
+   "line": 5002,
+   "title": "Overview \\- Financial trajectory",
+   "end_line": 5130,
+   "headings": 23
+  },
+  {
+   "line": 5131,
+   "title": "Overview \\- Coverage by pillar",
+   "end_line": 5258,
+   "headings": 23
+  },
+  {
+   "line": 5259,
+   "title": "Overview \\- Evidence tiers",
+   "end_line": 5378,
+   "headings": 22
+  },
+  {
+   "line": 5379,
+   "title": "Overview \\- Ceiling and uncertainty",
+   "end_line": 5506,
+   "headings": 23
+  },
+  {
+   "line": 5507,
+   "title": "Ceiling \\- Detail accordion",
+   "end_line": 5632,
+   "headings": 23
+  },
+  {
+   "line": 5633,
+   "title": "Ceiling \\- Evidence drawer",
+   "end_line": 5774,
+   "headings": 24
+  },
+  {
+   "line": 5775,
+   "title": "Overview \\- Sentiment",
+   "end_line": 5904,
+   "headings": 23
+  },
+  {
+   "line": 5905,
+   "title": "Overview \\- Sentiment detail",
+   "end_line": 6025,
+   "headings": 23
+  },
+  {
+   "line": 6026,
+   "title": "Overview \\- Thought leadership",
+   "end_line": 6145,
+   "headings": 22
+  },
+  {
+   "line": 6146,
+   "title": "Insights",
+   "end_line": 6244,
+   "headings": 17
+  },
+  {
+   "line": 6245,
+   "title": "Insights \\- Technology landscape",
+   "end_line": 6292,
+   "headings": 9
+  },
+  {
+   "line": 6293,
+   "title": "Insights \\- Insight cards",
+   "end_line": 6421,
+   "headings": 23
+  },
+  {
+   "line": 6422,
+   "title": "Insights \\- Detail modal",
+   "end_line": 6561,
+   "headings": 24
+  },
+  {
+   "line": 6562,
+   "title": "Insights \\- Evidence actions",
+   "end_line": 6686,
+   "headings": 22
+  },
+  {
+   "line": 6687,
+   "title": "Insights \\- Evidence drawer",
+   "end_line": 6829,
+   "headings": 24
+  },
+  {
+   "line": 6830,
+   "title": "Insights \\- Recommendations",
+   "end_line": 6956,
+   "headings": 23
+  },
+  {
+   "line": 6957,
+   "title": "Insights \\- Recommendation modal",
+   "end_line": 7087,
+   "headings": 23
+  },
+  {
+   "line": 7088,
+   "title": "Heatmap",
+   "end_line": 7186,
+   "headings": 17
+  },
+  {
+   "line": 7187,
+   "title": "Heatmap \\- Evidence store",
+   "end_line": 7236,
+   "headings": 9
+  },
+  {
+   "line": 7237,
+   "title": "Heatmap \\- Value-chain view",
+   "end_line": 7284,
+   "headings": 9
+  },
+  {
+   "line": 7285,
+   "title": "Heatmap \\- Grid and drilldowns",
+   "end_line": 7412,
+   "headings": 23
+  },
+  {
+   "line": 7413,
+   "title": "Heatmap \\- Subcap synthesis drawer",
+   "end_line": 7550,
+   "headings": 23
+  },
+  {
+   "line": 7551,
+   "title": "Heatmap \\- Category synthesis drawer",
+   "end_line": 7690,
+   "headings": 23
+  },
+  {
+   "line": 7691,
+   "title": "Heatmap \\- Evidence drawer",
+   "end_line": 7833,
+   "headings": 24
+  },
+  {
+   "line": 7834,
+   "title": "Heatmap \\- Cell evidence drawer",
+   "end_line": 7956,
+   "headings": 23
+  },
+  {
+   "line": 7957,
+   "title": "Heatmap \\- Focus areas",
+   "end_line": 8084,
+   "headings": 23
+  },
+  {
+   "line": 8085,
+   "title": "Heatmap \\- Focus detail",
+   "end_line": 8211,
+   "headings": 23
+  },
+  {
+   "line": 8212,
+   "title": "Heatmap \\- Archetype control",
+   "end_line": 8332,
+   "headings": 22
+  },
+  {
+   "line": 8333,
+   "title": "Heatmap \\- Archetype popover",
+   "end_line": 8461,
+   "headings": 23
+  },
+  {
+   "line": 8462,
+   "title": "Heatmap \\- Thin-evidence alerts",
+   "end_line": 8583,
+   "headings": 23
+  },
+  {
+   "line": 8584,
+   "title": "Heatmap \\- Safeguard gates",
+   "end_line": 8704,
+   "headings": 23
+  },
+  {
+   "line": 8705,
+   "title": "Platform",
+   "end_line": 8801,
+   "headings": 17
+  },
+  {
+   "line": 8802,
+   "title": "Platform \\- Stair-step curve",
+   "end_line": 8850,
+   "headings": 9
+  },
+  {
+   "line": 8851,
+   "title": "Platform \\- Affinity cards",
+   "end_line": 8980,
+   "headings": 23
+  },
+  {
+   "line": 8981,
+   "title": "Platform \\- Fit breakdown modal",
+   "end_line": 9117,
+   "headings": 23
+  },
+  {
+   "line": 9118,
+   "title": "Platform affinity \\- Evidence drawer",
+   "end_line": 9260,
+   "headings": 24
+  },
+  {
+   "line": 9261,
+   "title": "Platform \\- Recommendations",
+   "end_line": 9389,
+   "headings": 23
+  },
+  {
+   "line": 9390,
+   "title": "Platform \\- Recommendation modal",
+   "end_line": 9521,
+   "headings": 23
+  },
+  {
+   "line": 9522,
+   "title": "Platform recommendations \\- Evidence drawer",
+   "end_line": 9664,
+   "headings": 24
+  },
+  {
+   "line": 9665,
+   "title": "Platform \\- Readiness gate",
+   "end_line": 9784,
+   "headings": 23
+  },
+  {
+   "line": 9785,
+   "title": "Platform \\- Conversation starters",
+   "end_line": 9909,
+   "headings": 23
+  },
+  {
+   "line": 9910,
+   "title": "Platform \\- Copy confirmation toast",
+   "end_line": 10027,
+   "headings": 21
+  },
+  {
+   "line": 10028,
+   "title": "Platform \\- Roadmap phases",
+   "end_line": 10148,
+   "headings": 23
+  },
+  {
+   "line": 10149,
+   "title": "Context",
+   "end_line": 10245,
+   "headings": 17
+  },
+  {
+   "line": 10246,
+   "title": "Context \\- Regulatory standing",
+   "end_line": 10293,
+   "headings": 9
+  },
+  {
+   "line": 10294,
+   "title": "Context \\- Sentiment overview",
+   "end_line": 10341,
+   "headings": 9
+  },
+  {
+   "line": 10342,
+   "title": "Context \\- Acquisition history",
+   "end_line": 10389,
+   "headings": 9
+  },
+  {
+   "line": 10390,
+   "title": "Context \\- Financial trajectory",
+   "end_line": 10437,
+   "headings": 9
+  },
+  {
+   "line": 10438,
+   "title": "Context \\- Timeline and issue register",
+   "end_line": 10570,
+   "headings": 24
+  },
+  {
+   "line": 10571,
+   "title": "Context \\- Evidence drawer",
+   "end_line": 10713,
+   "headings": 24
+  },
+  {
+   "line": 10714,
+   "title": "Context \\- Event detail",
+   "end_line": 10834,
+   "headings": 23
+  },
+  {
+   "line": 10835,
+   "title": "Context \\- Issue detail",
+   "end_line": 10955,
+   "headings": 23
+  },
+  {
+   "line": 10956,
+   "title": "Health",
+   "end_line": 11058,
+   "headings": 18
+  },
+  {
+   "line": 11059,
+   "title": "Health \\- Thin-evidence alerts",
+   "end_line": 11107,
+   "headings": 9
+  },
+  {
+   "line": 11108,
+   "title": "Health \\- Version diff",
+   "end_line": 11155,
+   "headings": 9
+  },
+  {
+   "line": 11156,
+   "title": "Health \\- Safeguard gates",
+   "end_line": 11204,
+   "headings": 9
+  },
+  {
+   "line": 11205,
+   "title": "Health \\- Evidence age tracker",
+   "end_line": 11252,
+   "headings": 9
+  },
+  {
+   "line": 11253,
+   "title": "Health \\- Cross-entity patterns",
+   "end_line": 11300,
+   "headings": 9
+  },
+  {
+   "line": 11301,
+   "title": "Health \\- CSV export",
+   "end_line": 11425,
+   "headings": 23
+  },
+  {
+   "line": 11426,
+   "title": "Health \\- Rerun feedback",
+   "end_line": 11549,
+   "headings": 23
+  },
+  {
+   "line": 11550,
+   "title": "Tech Stack",
+   "end_line": 11641,
+   "headings": 16
+  },
+  {
+   "line": 11642,
+   "title": "Tech Stack \\- Technology rows",
+   "end_line": 11769,
+   "headings": 23
+  },
+  {
+   "line": 11770,
+   "title": "Tech Stack \\- Evidence actions",
+   "end_line": 11893,
+   "headings": 22
+  },
+  {
+   "line": 11894,
+   "title": "Tech Stack \\- Evidence drawer",
+   "end_line": 12036,
+   "headings": 24
+  },
+  {
+   "line": 12037,
+   "title": "Tech Detail",
+   "end_line": 12163,
+   "headings": 23
+  },
+  {
+   "line": 12164,
+   "title": "Runs",
+   "end_line": 12299,
+   "headings": 24
+  },
+  {
+   "line": 12300,
+   "title": "Runs \\- Rerun assessment",
+   "end_line": 12418,
+   "headings": 22
+  },
+  {
+   "line": 12419,
+   "title": "Runs \\- Request DMA modal",
+   "end_line": 12545,
+   "headings": 22
+  },
+  {
+   "line": 12546,
+   "title": "Alerts",
+   "end_line": 12674,
+   "headings": 23
+  },
+  {
+   "line": 12675,
+   "title": "Prospecting",
+   "end_line": 12802,
+   "headings": 23
+  },
+  {
+   "line": 12803,
+   "title": "Admin",
+   "end_line": 12932,
+   "headings": 23
+  },
+  {
+   "line": 12933,
+   "title": "Import and Jobs",
+   "end_line": 13063,
+   "headings": 23
+  },
+  {
+   "line": 13064,
+   "title": "Import Audit",
+   "end_line": 13192,
+   "headings": 23
+  },
+  {
+   "line": 13193,
+   "title": "Login and Errors",
+   "end_line": 13328,
+   "headings": 24
+  },
+  {
+   "line": 13329,
+   "title": "Narrative and Data Integrity",
+   "end_line": 13332,
+   "headings": 2
+  },
+  {
+   "line": 13333,
+   "title": "Purpose",
+   "end_line": 13336,
+   "headings": 1
+  },
+  {
+   "line": 13337,
+   "title": "The story contract",
+   "end_line": 13377,
+   "headings": 1
+  },
+  {
+   "line": 13378,
+   "title": "General story-break tests",
+   "end_line": 13392,
+   "headings": 1
+  },
+  {
+   "line": 13393,
+   "title": "Cohesive narrative acceptance",
+   "end_line": 13396,
+   "headings": 1
+  },
+  {
+   "line": 13397,
+   "title": "Screenshot record",
+   "end_line": 13401,
+   "headings": 1
+  },
+  {
+   "line": 13402,
+   "title": "Exit standard",
+   "end_line": 13631,
+   "headings": 36
+  },
+  {
+   "line": 13632,
+   "title": "Test-System Audit",
+   "end_line": 13637,
+   "headings": 2
+  },
+  {
+   "line": 13638,
+   "title": "Repository target",
+   "end_line": 13643,
+   "headings": 1
+  },
+  {
+   "line": 13644,
+   "title": "Observed test execution",
+   "end_line": 13649,
+   "headings": 1
+  },
+  {
+   "line": 13650,
+   "title": "Why current tests miss the live defects",
+   "end_line": 13666,
+   "headings": 1
+  },
+  {
+   "line": 13667,
+   "title": "Required production suites",
+   "end_line": 13683,
+   "headings": 1
+  },
+  {
+   "line": 13684,
+   "title": "Regression cases from the live pass",
+   "end_line": 13699,
+   "headings": 1
+  },
+  {
+   "line": 13700,
+   "title": "Screenshot record",
+   "end_line": 13703,
+   "headings": 1
+  },
+  {
+   "line": 13704,
+   "title": "Exit standard",
+   "end_line": 13992,
+   "headings": 45
+  }
+ ]
+}

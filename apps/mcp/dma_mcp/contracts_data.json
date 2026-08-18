@@ -1,0 +1,869 @@
+{
+ "heatmap": {
+  "_notes": [
+   "REQUIRED FLAGS: the skill's heatmap page table (03-pages/1-heatmap.md) marks BOTH value_chain AND cohort_patterns optional; context_sentiment is marked required ('yes') on the context page (03-pages/5-context.md). So the two optional sections of the 34 are value_chain and cohort_patterns — not value_chain + context sentiment. 32-of-34 required still holds, but the second optional section differs from the expected candidate. Flagged for adjudication.",
+   "cell_evidence SHAPE: the Surface Spec's H2 prompt block carries the pre-reissue linking-only shape {subcap_id, e_ids[], excerpts[], tiers[], reach_note}. The skill's REISSUED H2 prompt, the Surface Spec's own DD-1 synthesis prompt (same document, drilldown contracts) and section_templates.json all carry {subcap_id, e_ids[], items[], reach_note, synthesis, grounded_on, provenance, thin}. The Surface Spec's H2 contract line — 'Per-cell evidence linkage and synthesis prose, with the count of items reasoned over computed from the citation array' — requires the synthesis fields, so the registry adopts the reissued shape. Not treated as a spec-vs-skill conflict: the spec's own contract + DD-1 side with the reissue.",
+   "evidence claim_type ENUM DISAGREEMENT: Surface Spec H6 prompt says 'claim_type: FACT | INFERENCE | RANKING | ANNOUNCEMENT'; the skill's reissued H6 prompt says 'claim_type FACT | INFERENCE | HYPOTHESIS | CEILING_ESTIMATE'. Surface Spec wins per authority order and is encoded below — but note the Surface Spec's own O11 prompt counts a 'ceiling_estimate' claim class ('a ceiling_estimate count of zero ... means ceilings were asserted as facts'), so the two vocabularies are genuinely in tension inside the spec itself. Flagged for adjudication.",
+   "safeguard_gates SHAPE: the Surface Spec H5 prompt block emits ONE array {gate_id, kind, ceiling, affected_categories[], rationale, e_ids[]}. The skill's REISSUED H5 prompt, section_templates.json and the CLAUDE.md prototype-corrections table ('One safeguard gates blob' -> 'Two arrays: caps[] + gates[]') split it into caps[] (assessment applied) + gates[] (SG results). The two-array shape is adopted: CLAUDE.md invariant 12 requires SG results to render with plain_label (8-18 words) and explicit NOT_RUN + reason, which the spec's single-array shape cannot carry.",
+   "evidence_age CONTAINER NAME: no source names the row array — the prompt says only 'Per row: {...}'. 'rows' is assigned here and must be confirmed when the registry lands.",
+   "focus_areas: the Surface Spec's information-sources table names focus_areas[].title ('the priority in the client's own words') while the emit prompt names 'name'. The prompt's 'name' is adopted. The H1 contract also mentions 'a configurable KPI strip' (CustomizableKpiStrip) with no payload field stated for it.",
+   "alerts: 'severity' appears in the H3 contract ('with severity and the cell it concerns') and information-sources table ('severity | producer | mapped from the evidence deficit') but is absent from the prompt's per-cell brace list; it is included as an item key.",
+   "workbook_scores: rollup_score and score_source ('payload' | 'rollup', via workbook_scores.resolve_cell) appear in the information-sources table but are APP-COMPUTED at serve time (rollup from subcap_scores; the fallback is labelled by the app) — they are not payload fields.",
+   "cohort_patterns threshold_pct: the Surface Spec prompt carries threshold_pct per pattern; section_templates.json hoists it to section level and adds below_threshold + structural_explanation per pattern plus insufficient_cohorts[] at section level. Both placements are encoded; adjudicate one before freezing the registry."
+  ],
+  "_narrative_thread_note": "The skill (04-craft/3-page-narrative.md, SKILL.md) requires each page payload to carry narrative_thread (45-75 words, tracing the line through the surfaces in render order, written last) on the page's LEAD section, and check_consistency.py warns when a page has none. No source names which heatmap section is the lead: the page table lists workbook_scores (H4) first, but the D3 thread narration opens with focus areas ('Focus areas say what the client says matters. The grid says what the evidence scores...'). Not attached to a section pending adjudication.",
+  "workbook_scores": {
+   "surface_id": "H4",
+   "required": true,
+   "fields": {
+    "pillars": {
+     "required": true,
+     "type": "object",
+     "doc": "Map keyed by pillar id: '{P1..P4: {score, peer_median, source_cell}}'. These grains are STATED in the workbook and the assessment report — they are not projections and must not be recomputed by averaging subcapabilities (cap logic, category weighting and analyst override are applied when they are struck). source_cell is mandatory: a figure that names no workbook location cannot be checked against one and is rejected. Where the workbook states nothing at a grain, omit it — the app falls back to the rollup and labels the fallback (rollup_score / score_source are app-computed, never stored in the payload). The pillar and category zooms serve the workbook's OWN stated figure, with the subcap rollup shown alongside it, never instead of it; every aggregate cell ships both candidates and its source_cell. No colour and no band field in the payload: raw score only, band resolved in exactly one frontend module."
+    },
+    "categories": {
+     "required": true,
+     "type": "object",
+     "doc": "Map keyed by category id: '{PxCy: {score, peer_median, source_cell}}'. Same rules as pillars: stated figures with mandatory source_cell; never recomputed by averaging subcapabilities; omit a grain the workbook does not state and let the app label the rollup fallback."
+    }
+   }
+  },
+  "focus_areas": {
+   "surface_id": "H1",
+   "required": true,
+   "fields": {
+    "focus_areas": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Three to five client priorities. Per item: {fa_id, name, verbatim_quote, source_document, source_page, source_filename, involved_subcap_ids[], entity_score, peer_score, delta, currency_status, currency_note, new_evidence_ids[], confidence}. verbatim_quote: THE CLIENT'S OWN WORDS, copied exactly from their document, 50-400 chars; REJECT anything that contains a capability code (PxCy.z), contains 'Score M1..M5', contains the word 'category' followed by a code, is a scoring rationale, or is a [Section] tag. source_page REQUIRED — the provenance triple is document + page + filename; without the page an AE cannot show the client where it came from. involved_subcap_ids: cells THIS run serves; entity_score is COMPUTED as the mean over them and peer_score the same way, at the same grain — a focus-area score built from a different cell set than the peer figure is a grain violation; delta likewise computed. currency_status: CONFIRMED_CURRENT (restated in the last 12 months) | AGING (last stated 12-24 months ago) | SUPERSEDED (they now say something different — state what) | UNCONFIRMED (no recent statement found; say what you searched). currency_note: 20-45 words with the newest supporting statement and its date. new_evidence_ids[]: E-CC ids for every step-2 validation source, registered through the connector (server allocates ids; url + verbatim excerpt 50-500 chars + retrieval date + tier + claim label). fa_id is one of the agent-created id families. Gates: S29_focus_grounding; S9_focus_invalid; S18_focus_title_duplication; provenance triple present; quote is client prose. r_layer REQUIRED per item (AG-01): {hypothesis, counter, domain_test, probes_run[], verdict, confidence} — a ranked or causal claim carries the argument that survived its own counter-case. An item that asserts nothing (a recorded absence with its ladder, a null-valued row) is exempt."
+    }
+   }
+  },
+  "cell_evidence": {
+   "surface_id": "H2",
+   "required": true,
+   "fields": {
+    "cells": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Per item: {subcap_id, e_ids[], items[], reach_note, synthesis, grounded_on, provenance, thin, sources_searched[], closure_condition}. Per items[] element: {e_id, tier, claim_label, recency, source_title, publisher, excerpt} — excerpt verbatim, 50-500 chars, never a bare URL. GRAIN CHECK before anything else: the score, the peer median and the cell id must all come from the SAME row of subcap_scores; a mismatch STOPS and emits grain_violation — no prose over a mismatch. Link on substance, not proximity: map each research-workbook row to the subcapability its SHEET is about, then verify the excerpt speaks to that capability. synthesis: 40-90 words — what the evidence establishes about THIS capability, where the score sits against the peer median, and one clause of consequence (at or above median, what to protect; below, what it constrains downstream); cite inline; do NOT open by restating the score. grounded_on is COMPUTED = the count of items[] (the length of the citation list) and is printed beside the synthesis — never stored independently of the array. Below three linked items, mark the cell thin and say so in the panel. AT SCALE, READ CG-15 BEFORE WRITING SEVEN HUNDRED OF THESE: it compares syntheses against each other, and refuses any three or more that share 8-word spans AND still share their content vocabulary once the score and evidence-inventory registers are stripped out. Repetition of FORM is expected and fine — the frame this contract mandates is identical on every cell, and the registers it strips are exactly that frame. Repetition of CLAIM is the defect. A cell whose evidence is thin still owes its own argument: name the artefact THIS capability would leave, and where it was looked for, which differs per capability; an absence that names only the outcome is one sentence with a name substituted however many times it is pasted. A cell NO evidence reached is recorded WHERE IT SITS, with the protocol the TRD states at Representing absence: thin true, sources_searched[] naming every source the ladder ran across, and closure_condition saying what would settle it. All three or none — thin on its own is a switch, not a finding, and AG-03 and CG-15 both read the trio together. Both keys have a column of their own (migration 0041), so a properly declared absence survives promotion and renders; that is why they are declared here rather than invented. An invented key still buys nothing — no writer binds it and promote drops it before the client sees it. Leaving the cell out of cells[] stays honest where the absence is the SECTION's finding rather than this cell's, and linking_stats then carries the reach; but rule 17 wants a drawer row for every served cell, so the recorded absence is the better route. Peer figure fallback ladder where the peer table lacks one; label an inferred figure INFERENCE with one clause of reasoning; NEVER impute. Gates: grain lock (blocking); citation V1-V4; excerpt verbatim; identity on every source domain."
+    },
+    "linking_stats": {
+     "required": true,
+     "type": "object",
+     "doc": "{cells_scored, cells_linked, rows_unlinkable} — reach counters so a zero-reach client is visible (COMPUTED counts). If every row is unlinkable, say so — that is a source-data finding, not a silent zero."
+    }
+   }
+  },
+  "evidence": {
+   "surface_id": "H6",
+   "required": true,
+   "fields": {
+    "evidence": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "The run's full evidence index. Per item: {e_id, source_name, url, excerpt, claim_type, tier, published_date, discovered_by, supports_subcap_ids[], surfaces[]}. excerpt VERBATIM, 50-500 chars — the fail-closed floor is 50 characters for a grounded excerpt, above the 40-character linkable minimum; a paraphrase is not evidence; never a URL as an excerpt. claim_type: FACT | INFERENCE | RANKING | ANNOUNCEMENT (Surface Spec; the skill's reissued prompt says FACT | INFERENCE | HYPOTHESIS | CEILING_ESTIMATE — see page _notes; an inference is labelled as one). tier: T1-T5 — a machine technographic scan is T1, never T4; filing it at T4 caps the capability and silently suppresses the score. REGISTER BEFORE YOU CITE: package evidence keeps its original E-ID; anything found outside the package is registered through the connector, which allocates the id and computes the rank score — NEVER choose an id yourself (an invented id is fabrication by construction even when the source is real). discovered_by: 'claude-code' for minted rows. Do not register a row you did not read; do not register a URL you could not retrieve. supports_subcap_ids[]: bidirectional linkage — the cells each item supports, so a wrong link is visible from two directions. RECENCY: undated is UNVERIFIED, never CURRENT; age is computed against the run's pinned reference date or it is null — never a sentinel. content_hash (SHA256(url + claim_type + excerpt[:500]), evidence_dedup.py) and freshness_band (Postgres generated column) are server-computed, not payload fields. Gates: excerpt verbatim; id resolves and belongs to this entity; source domain identity-checked; rank score bounded."
+    }
+   }
+  },
+  "value_chain": {
+   "surface_id": "H9",
+   "required": false,
+   "fields": {},
+   "_note": "Prototype-only; optional per the skill's page table. Contract: 'The same scores arranged along the institution's value chain rather than the catalogue's taxonomy.' No prompt block exists in the design specification and no payload field contract is stated in any source ('It renders from server-derived data and its contract is the one stated above'); the skill directs production from the contract, the standing clauses and the seven-step prompt form. No fields to register until a contract is authored."
+  },
+  "alerts": {
+   "surface_id": "H3",
+   "required": true,
+   "fields": {
+    "alerts": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "One alert per cell scored on insufficient evidence, feeding the Alerts queue; the register is payload-produced, the legacy deriver is switched off. Per item: {subcap_id, severity, score, confidence, evidence_count, state, sources_searched[], queries_run[], new_evidence_ids[], justification, closure_condition, runs_open}. state: UNWORKED (the enrichment ladder has not been run) | WORKED_FOUND (the ladder ran and found evidence — emit the new E-CC ids and close the alert) | WORKED_ABSENT (the ladder ran across all mandatory sources and found nothing — a FINDING about the client); a count that merges these is useless. severity: mapped from the evidence deficit (producer); alerts are cleared only by real linked support, never set by the producer. Ladder tiers 1-6 mandatory before alerting (7-10 fire when 1-6 yield fewer than 3 items; tier 10 CONTRADICTORY mandatory, at least one per cell); LOG EVERY QUERY. Every minted item carries e_id, url THAT RESOLVES, verbatim excerpt 50-500 chars from the fetched document, retrieval date, tier, claim label. justification: 40-80 words — why the score is defensible on the evidence that DOES exist and the ceiling that evidence licenses (Evidence Level 1-4 -> the language allowed). closure_condition: the specific artefact that would close this alert — an alert with no closure condition cannot be worked by the next person. runs_open: ageing counter; an alert open across 3+ runs with no queries_run is escalated as a PROCESS defect. evidence_count is a computed count of linked evidence. Gates: S3_thin; S3_no_cite; S30_evidence_reach; every excerpt verified against the fetched source; every alert carries sources_searched."
+    }
+   }
+  },
+  "safeguard_gates": {
+   "surface_id": "H5",
+   "required": true,
+   "fields": {
+    "caps": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "What the ASSESSMENT applied. Per item: {cap_id, kind, ceiling, affected_categories[], rationale, e_ids[]}. kind: cap | uncertainty_band | qa_hold | analyst_override. Read the workbook's own cap log (IR-00N rows) and the QA verdict (qa_verdict.json); rationale is the stated reason, quoted or closely paraphrased. Do not invent a cap to explain a low score — only controls the assessment actually applied belong here. A served score above its cap is a hard defect.",
+     "absence_is_correct_when": "the run's cap log records no cap, uncertainty band, QA hold or analyst override"
+    },
+    "gates": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "The SG family results (submission gates). Per item: {gate_id, plain_label, result, detail, not_run_reason}. gate_id is SG-nn. result: PASS | FAIL | NOT_RUN. plain_label REQUIRED — a human sentence, 8-18 words; this card renders to the client and a bare code teaches them to distrust the page. not_run_reason REQUIRED when result is NOT_RUN — a gate reporting PASS because it did not run is worse than one reporting FAIL. DISCLOSE, DO NOT SUPPRESS: a failing gate is shown with its measurement; it does not block promotion.",
+     "not_producer_authored": true,
+     "absence_is_correct_when": null,
+     "not_producer_authored_why": "The connector runs SG-V4 and SG-S8 ON the payload at submit and writes gate_results; the serve layer joins that against gate_registry. A producer authoring a result asserts an outcome that does not exist yet."
+    }
+   }
+  },
+  "evidence_age": {
+   "surface_id": "H7",
+   "required": true,
+   "fields": {
+    "rows": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "One row per evidence item (container name assigned — sources say only 'Per row', see page _notes). Per item: {e_id, title, source_domain, published_or_asof, age_months, band, status, identity_ok, reference_date}. reference_date: the run's as-of date, PINNED and RENDERED — age is meaningless without the date it was computed against. age_months is COMPUTED = (reference_date - published_or_asof) in months; if published_or_asof is absent or unparseable, age_months=null and band=undated; NEVER emit NaN, and never let a null age produce a positive status. band: current <=12 | aging 12-24 | dated 24-36 | stale >36 | undated — the app's freshness_band values over the same 12/24/36 boundaries as the ERS Recency factor (CURRENT / RECENT / DATED / STALE / ARCHIVAL); do not invent a third vocabulary. status: derived from band ONLY — current->FRESH | aging->AGING | dated->DATED | stale->STALE (with the >3y marker) | undated->UNDATED; a status that does not follow from a computed band is a defect. identity_ok: source_domain resolved against the entity's own domains and the known registries; a domain belonging to a DIFFERENT institution -> identity_ok=false, quarantine the item, escalate, and do not let it count toward coverage (O10) or the tier distribution (O11). Quarter-precision dates: '2025-Q4' IS a date — resolve to the quarter end for age and render the quarter as given. Gates: no NaN in any age cell; status derived from band; every source domain identity-checked; undated_pct reported."
+    },
+    "undated_pct": {
+     "required": true,
+     "type": "number",
+     "doc": "Roll-up for the run, COMPUTED from the rows. Where undated_pct is material, every surface quoting a time-sensitive figure must carry an age marker."
+    },
+    "stale_pct": {
+     "required": true,
+     "type": "number",
+     "doc": "Roll-up for the run, COMPUTED from the rows (emitted alongside undated_pct)."
+    }
+   }
+  },
+  "cohort_patterns": {
+   "surface_id": "H8",
+   "required": false,
+   "fields": {
+    "threshold_pct": {
+     "required": true,
+     "type": "number",
+     "doc": "The publication threshold (measured: 60). ENFORCE IT — a pattern below threshold is not published; if one is shown deliberately, label it BELOW_THRESHOLD. Section-level per section_templates.json; the Surface Spec prompt also carries threshold_pct per pattern (see page _notes)."
+    },
+    "patterns": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Per item: {sub_vertical, category_id, category_name, pattern_statement, affected_count, cohort_size, share_pct, threshold_pct, confidence, entity_ids[], action, below_threshold, structural_explanation}. cohort_size: entities of the SAME sub-vertical with a completed run and a served score for this category — NEVER pool across sub-verticals. MINIMUM COHORT: cohort_size < 5 -> do NOT publish; emit insufficient_cohort=true. share_pct is COMPUTED = affected_count / cohort_size, rendered with BOTH numerator and denominator visible ('67%' alone hides that it is 4 of 6). confidence from cohort size: >=20 HIGH, >=12 MEDIUM, below 12 LOW — and RENDER it. pattern_statement: 15-30 words naming the category, the threshold crossed and the share. action: the campaign this justifies, actionable at portfolio level. below_threshold (template key): labels a deliberately-shown under-threshold pattern. structural_explanation (template key, from Challenge B): if every entity in the cohort runs the same shared core, a shared weakness is a fact about the VENDOR, not the cohort — say which it is. CONFIDENTIALITY (blocking): emit COUNTS and SHARES only; never render another entity's name, score or evidence on a client-scoped page; entity_ids[] is for internal audit and must be stripped from any client-visible or AE-visible rendering — stripped for EVERY audience (always in internal_only). METHOD HONESTY: state the score threshold used (<2.5) and the run recency window; where the cohort's runs span more than 18 months, say so. Gates: cohort >= 5 and same sub-vertical; threshold enforced or the exception labelled; numerator and denominator both rendered; no cross-client identifiers in any rendered output. r_layer REQUIRED per item (AG-01): {hypothesis, counter, domain_test, probes_run[], verdict, confidence} — a ranked or causal claim carries the argument that survived its own counter-case. An item that asserts nothing (a recorded absence with its ladder, a null-valued row) is exempt."
+    },
+    "insufficient_cohorts": {
+     "required": false,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Cohorts withheld under the minimum (spec H8: cohort_size < 5 -> do NOT publish; emit insufficient_cohort=true). Per item: {sub_vertical, category_id, cohort_size, insufficient_cohort} — the withheld cohort is recorded, never silently dropped, and nothing else about it is published. r_layer REQUIRED per item (AG-01): {hypothesis, counter, domain_test, probes_run[], verdict, confidence} — a ranked or causal claim carries the argument that survived its own counter-case. An item that asserts nothing (a recorded absence with its ladder, a null-valued row) is exempt.",
+     "absence_is_correct_when": "every cohort met the minimum size, so nothing was withheld"
+    }
+   }
+  }
+ },
+ "overview": {
+  "_notes": [
+   "why_now SIGNAL COUNT: the Surface Spec's must-present says 'Three to six trigger cards' while its own prompt (and the skill's) says 'Emit 2-4 signals' — an internal Surface Spec tension, not spec-vs-skill. Flagged for adjudication; the prompt's 2-4 is encoded.",
+   "why_now FIELD NAMES: the Surface Spec information-sources table names signals[].body and signals[].event_date; the emit prompt names trigger and dated_on. The emit prompt's shape is adopted; kind is taken from the sources table (the prompt omits it).",
+   "why_now UNNAMED FIELD: 'Then ONE synthesis paragraph across the signals, 60-110 words ... consistent with the executive summary's Complication and with the roadmap's phase 1' is required, but no source names its payload key. Needs a registry-assigned name.",
+   "exec_summary: the information-sources table names scqa_md ('Assessment report DOCX ... stored verbatim') while the prompt emits the six named SCQA fields; the prompt's shape is adopted — scqa_md reads as the legacy stored form.",
+   "findings: the prompt emits 'title' (a CLAIM, <=12 words) while the information-sources table also names findings[].name ('a capability label, humanised — never P4C1 and never [P2C3.2.IC1] Evidence') and findings[].subcap_id / findings[].score / findings[].peer_median — all encoded as item keys. Count tension: prompt says '5 findings, each with EVERY field'; must-present says 'Four to six findings'. The drilldown's four headings (WHAT / WHY / SO WHAT / EVIDENCE, each required, 25-45 words each, EVIDENCE rows {e_id, source_title, recency, tier, claim_label}) have no machine-stated payload key names — needs registry-assigned names.",
+   "financial_series: the information-sources table gives the point shape {year, metric, value, unit, e_id}; the prompt gives {period, value, unit, as_of, source_e_id, basis} — the prompt's shape is adopted. The trend word in must-present ('improving, stable, declining') differs from the prompt's enum GROWING | STABLE | DECLINING | VOLATILE — the prompt's enum is adopted. STEP 7's 'READING' (35-60 words, cited) is required but has no named payload key. C6 (Context) renders this same overview.financial_series section — one section, so the two cards cannot disagree.",
+   "sentiment: context_tiles item keys beyond the three tile audiences (customer, employee, market, 'each with drilldown rows and evidence chips') are not machine-stated; the theme->cell cap mapping ('Caps P2C2.1.1 at M3') is prose-specified only. Needs contract completion before strict validation.",
+   "leadership: the information-sources table names roster[].relevance ('which pillar/capability this person owns') while the prompt emits relevance_note (10-25 words) — the prompt's shape is adopted, divergence flagged.",
+   "thought_leadership: alignment carries 'a 12-25 word clause' whose payload key is not named in any source.",
+   "ceilings CONTAINER NAME: no source names the row array ('Per row', 'one row per category'); 'rows' assigned here — confirm at registry review. Same for firmographics ('Per field') and thought_leadership ('Per entry').",
+   "AUDIENCE (not fields, recorded for the redaction walker): 'For the customer audience, O1b, O9 and O12 are withheld whole' — ceilings, sentiment and thought_leadership never reach the customer audience; standing clause 4 lists what else is stripped.",
+   "NO BAND / NO COLOUR FIELDS: O1's information-sources row 'band | lib/maturity.ts | single source of truth for score->band->hex (ADR 0008)' places the band word and hex in exactly one frontend module — the payload carries raw scores and semantic flags only."
+  ],
+  "_narrative_thread_note": "Page-level thread: the skill (04-craft/3-page-narrative.md) puts narrative_thread (45-75 words, written last, tracing the line through the surfaces in render order) on each page's LEAD section; for the overview the lead is the hero (O1 scores — 'The hero states the position...'), so narrative_thread is encoded as a field on overview.scores. overview.findings additionally carries its own narrative_thread per the Surface Spec's O6 prompt (STEP 5) — two distinct threads; check_consistency.py asserts only that at least one exists per page.",
+  "scores": {
+   "surface_id": "O1",
+   "required": true,
+   "fields": {
+    "composite": {
+     "required": true,
+     "type": "number",
+     "doc": "Overall maturity: READ from the workbook, never derived (you never assign M1-M5). The mean of the four pillar means, NOT a flat mean of all sub-capabilities (those weight pillars by catalogue size). Round once, at 2dp, then present at 1dp — rounding to 2dp and then to 1dp is not the same function as rounding once, and .x5 ties diverge. The hero ring and the run row must render the SAME number. Its band word is resolved frontend-side (lib/maturity.ts) — no band or colour field in the payload."
+    },
+    "pillars": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Four pillar scores P1-P4. Per item: {pillar_id, score, peer_median, delta, direction, peer_n, peer_basis, proxy_disclosure}. delta is signed and is COMPUTED, never restated from the source. Peer fallback ladder where the table lacks a figure, stop at the first defensible number: (a) RECOMPUTE AT LOWER N — floor N=3 (N=5 -> sorted[2]; N=4 -> mean(sorted[1..2]); N=3 -> sorted[1]); emit peer_n so the reader knows the basis shrank; (b) ADJACENCY INFERENCE, labelled INFERENCE with one clause of reasoning, band widened; (c) PROXY CEILING (LinkedIn specialist ratio <5% caps P1C4 at L2.5; negative-dominant Glassdoor caps at L3.0; lowest cap wins); (d) STOP — accumulated uncertainty over +/-0.8 -> 'Cannot reliably estimate'. peer_basis (section_templates.json): table | recomputed | inferred | cannot_estimate. proxy_disclosure: disclose proxying with the literal phrase 'peer proxy'; NEVER write 'identical methodology'; NEVER impute a value into the peer cell. The peer set is immutable once selected. GRAIN ASSERTION (blocking): every '<label> at N/5' resolves to a served cell and the score matches within +/-0.05, else grain_violation and the card does not ship."
+    },
+    "posture": {
+     "required": true,
+     "type": "string",
+     "doc": "LEADING | COMPETING | LAGGING | MIXED, justified against the peer set."
+    },
+    "posture_basis": {
+     "required": true,
+     "type": "string",
+     "doc": "The evidence basis chip: EVIDENCE | HYBRID | INFERRED, set from what actually backs the scores."
+    },
+    "framing": {
+     "required": true,
+     "type": "string",
+     "doc": "The framing sentence, 18-32 words: state the gap, quantify it, and localise it to a pillar or a named capability (model: 'Trails regional bank peer median by -0.3 points. Gap concentrated in P4 Data foundation.'). Do NOT open with the composite — it is rendered beside you."
+    },
+    "claim_label": {
+     "required": true,
+     "type": "string",
+     "doc": "Claim class for the section's headline claim (section_templates.json shows 'FACT'; claim vocabulary per the evidence contract)."
+    },
+    "confidence": {
+     "required": true,
+     "type": "string",
+     "doc": "HIGH | MEDIUM | LOW (section_templates.json). R-Layer: UNCERTAIN ships with the band stated."
+    },
+    "narrative_thread": {
+     "required": true,
+     "type": "string",
+     "doc": "The overview page's thread, carried on this lead section (04-craft/3-page-narrative.md): 45-75 words tracing the line through the surfaces in the order they render — name the single constraint, what it blocks, where the leverage is, what makes it timely. Written last, from the surfaces actually produced. Test: the framing sentence in the hero and the top finding must be about the same thing."
+    }
+   }
+  },
+  "firmographics": {
+   "surface_id": "O2",
+   "required": true,
+   "fields": {
+    "fields": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Container name assigned (sources say only 'Per field' — see page _notes). Per item: {field, value, unit, as_of, recency_band, source_e_id, confidence, quarantined, quarantine_reason}. Sub-vertical decides WHICH fields, not just what values (SV1: total assets, deposits, loans, NIM, efficiency ratio, NPL ratio; SV2: total assets, SHARES, loans, net worth ratio, ROA, MEMBER COUNT; SV3: loan portfolio, CRE concentration, C&I volume, NPA ratio; SV4: revenue by segment, trading revenue, IB fees, AUM; SV5: AUM, client count, revenue, ADVISOR COUNT; SV6: AUM BY STRATEGY, fund performance, NET FLOWS, expense ratios; SV7: premium placed, commission revenue, PRODUCER COUNT, acquisitions; SV8: DWP, COMBINED RATIO, LOSS RATIO, investment income, surplus; Farm Credit: UNDEFINED — do NOT borrow SV1's metrics). Must-present set: employees, revenue, AUM or assets, CAGR, HQ, branches, founded year, primary regulator, charter, WEBSITE. `website` is the entity's own primary web domain, bare and lowercased (client.example — never a scheme, www., path or query). It is required on every sub-vertical because it is the one firmographic that is never sub-vertical specific, and because O11's self_sourced_pct is a share OF it: an evidence row published on this domain is the entity speaking about itself rather than a third party doing so. Cite it like any other field — the page it was read from — each as value + provenance. branches must be an integer count, never a serialised list or dict. primary_regulator is stated, not inferred from charter. IDENTITY GATE (blocking, per field): any failure -> QUARANTINE the field; emit it as absent with quarantine_reason, never as a value. RECENCY GATE (blocking): every figure carries {value, as_of, source_e_id, recency_band}; no as_of, no render; bands CURRENT <18mo | RECENT 18-36mo | LEGACY >36mo | UNVERIFIED undated; a LEGACY figure may render ONLY with its date visible; an UNVERIFIED figure never renders as current. MAGNITUDE SANITY: implausible -> quarantine, do not clamp. An unknown field renders an em dash, never a guess and never a dict repr — absent beats wrong.",
+     "must_present_key": "field",
+     "must_present": [
+      "employees",
+      "CAGR",
+      "HQ",
+      "branches",
+      [
+       "founded_year",
+       "founded",
+       "year_founded"
+      ],
+      "primary_regulator",
+      "charter",
+      "website"
+     ],
+     "must_present_any": [
+      [
+       "AUM",
+       "total_assets",
+       "assets"
+      ],
+      [
+       "revenue",
+       "total_income",
+       "interest_income",
+       "commission_revenue",
+       "trading_revenue",
+       "premium_placed",
+       "DWP",
+       "direct_written_premium",
+       "shares",
+       "deposits",
+       "loan_portfolio",
+       "net_flows",
+       "investment_income"
+      ]
+     ]
+    },
+    "undated_pct": {
+     "required": true,
+     "type": "number",
+     "doc": "'Report undated_pct for the panel' — COMPUTED share of undated figures."
+    },
+    "sub_vertical_undefined": {
+     "required": false,
+     "type": "boolean",
+     "doc": "Farm Credit: UNDEFINED in research. Emit sub_vertical_undefined=true and say so on the surface."
+    },
+    "identity_mismatch": {
+     "required": false,
+     "type": "boolean",
+     "doc": "Producer validator: set when a field's source names a different entity; quarantines the panel. Figures must be about THIS legal entity — a parent, subsidiary or same-name institution is a contamination, and the panel is quarantined rather than shown."
+    }
+   }
+  },
+  "why_now": {
+   "surface_id": "O3",
+   "required": true,
+   "fields": {
+    "signals": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Emit 2-4 signals (must-present says 'three to six trigger cards' — see page _notes). Per item: {wn_id, kind, trigger, window, consequence_of_waiting, cost_of_acting_now, why_this_sequence, linked_subcap_ids[], e_ids[], dated_on, claim_label, confidence}. ALL FIVE headers are required per signal. trigger: 25-45 words — WHAT CHANGED, dated to at least the month, cited; an undated trigger is not a trigger, drop it. window: 20-40 words — how long the opening lasts AND THE EVENT THAT CLOSES IT, with its date; no closing condition means no window — say 'no dated close established'. consequence_of_waiting: 30-55 words — which assessed capability degrades, in which direction, over what horizon; name the cell; ground it. cost_of_acting_now: 30-55 words, REQUIRED — the concurrent commitment this collides with; if the cost is genuinely low, state WHY; a signal with only upside is a pitch and is rejected. why_this_sequence: 20-35 words — why this is first rather than second, tied to the roadmap phase and any readiness gate. kind (sources table): LEADERSHIP | EARNINGS | REGULATORY | TECHNOLOGY | M&A | MARKET. dated_on required (an undated signal is dropped); e_ids at least one (uncited signals are dropped). wn_id is agent-created. A signal is an EVENT, not a score read-out ('P2 scores 2.4' is not a why-now); no signal may be the assessment itself. Gates: S25_whynow_provenance (every trigger dated and cited); no undated trigger; cost_of_acting_now non-empty."
+    },
+    "synthesis": {
+     "required": true,
+     "type": "string",
+     "item_type": null,
+     "doc": "ONE synthesis paragraph across the signals, 60-110 words: what the signals TOGETHER say about timing that no single one says. This is the card's reason to exist — a why-now is not a list of changes; the changes are the raw material and the synthesis is the product. It must be consistent with the executive summary's Complication (overview.exec_summary.complication) and with the roadmap's phase 1 (platform.roadmap phase 1). Not a restatement of any one signal and not a score read-out. Cited through the section envelope e_ids. Key name is registry-assigned: the requirement, the 60-110 budget and the two consistency constraints are the Surface Spec's O3 prompt verbatim, but no source names its payload key — the name matches the column 0008 already created, as with `kind` in 0017. Required even on a thin card: no source states a thin exemption. A card that genuinely cannot carry it declares empty_state."
+    },
+    "thin": {
+     "required": false,
+     "type": "boolean",
+     "doc": "Fewer than 2 defensible signals -> emit what you have and set thin=true. Do NOT manufacture urgency to fill the card. (The required section-level synthesis paragraph, 60-110 words across the signals, has no named key — see page _notes.)"
+    }
+   }
+  },
+  "exec_summary": {
+   "surface_id": "O4",
+   "required": true,
+   "fields": {
+    "situation": {
+     "required": true,
+     "type": "string",
+     "doc": "50-90 words. Where this client is, in terms they would use, anchored on ONE figure that is theirs (a firmographic, a trajectory, a footprint) — not a maturity score. Terminal punctuation on every field (section-wide mechanical safeguards: no sentence may consist of a score predicate; AT MOST ONE numeric maturity score in the entire summary; every quantitative claim carries an E-ID; no internal codes PxCy.z / E-nnn / REC-nn in client-visible prose — use capability NAMES; any score quoted must match the served cell +/-0.05 at the grain named)."
+    },
+    "complication": {
+     "required": true,
+     "type": "string",
+     "doc": "70-120 words. THE CONSTRAINT, AS A MECHANISM — what is blocking what, and through what causal path. MUST contain a causal connective (because / so that / which means / with the result that). If you cannot state a mechanism you have a measurement. COHESION (blocking): must be the same constraint the Top findings rank first, the same one the Platform page's effort profile leads with, and consistent with the timeline's arc."
+    },
+    "question": {
+     "required": true,
+     "type": "string",
+     "doc": "25-45 words. The decision the client actually faces, in their voice. Not 'how can we improve digital maturity'."
+    },
+    "answer": {
+     "required": true,
+     "type": "string",
+     "doc": "90-150 words. The sequenced recommendation. Name the recommendations by what they do, not by REC id. State what happens first and what it unblocks."
+    },
+    "sequencing_rationale": {
+     "required": true,
+     "type": "string",
+     "doc": "50-90 words. WHY THIS ORDER — the dependency, the readiness gate, or the window that fixes it. The judgement the client cannot make from the heatmap, and the highest-value sentence in the document."
+    },
+    "cost_of_delay": {
+     "required": true,
+     "type": "string",
+     "doc": "40-70 words. What degrades if the sequence slips a year, tied to a named capability and a dated trigger where one exists."
+    },
+    "claim_label": {
+     "required": true,
+     "type": "string",
+     "doc": "Claim class for the summary (per the emit shape {situation, complication, question, answer, sequencing_rationale, cost_of_delay, e_ids[], claim_label}; e_ids is the universal envelope field). Gates: S26_exec_synthesis; S16_headline_score_quoting; S20_score_recap_register; S1_jargon."
+    },
+    "storyline_challenge": {
+     "required": false,
+     "type": "object",
+     "doc": "The five adversarial volleys the storyline survived before promotion (04-craft/7-storyline-challenge.md). {volleys: [{volley, challenger, challenge, answer, outcome, changed}], survived}. volley 1-5. challenger client_executive|finance|incumbent_vendor|rival|ae. challenge: the objection in its own strongest form, not a soft version you can answer. answer: the story's response, citing. outcome held|changed|dropped. changed: what the storyline now says that it did not before — REQUIRED when outcome is changed or dropped, and it names the difference, not the effort ('strengthened the evidence' is not a difference). survived: boolean. Five held outcomes is a finding, not a triumph — it usually means the objections were written gently; re-run volleys 1 and 4 harder before believing it. INTERNAL: the serve layer strips this by key for the customer audience, because it is our preparation and not the client's assessment."
+    }
+   }
+  },
+  "opportunity": {
+   "surface_id": "O5",
+   "required": true,
+   "fields": {
+    "tiles": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Five tiles naming where value is available (container name from the sources table tiles[]). Per item: {platform, headline, anchor_subcap_id, composite, factors[], addressable_cells[], relevance, their_stack_context, rank, rank_rationale}. composite is COMPUTED = sum(priority x gap) over the addressable cells, normalised 0-100, and must be DECOMPOSABLE: factors[] elements {name, weight, value, contribution} MUST sum to the composite — the drilldown reproduces this arithmetic; rebake the factors after any override rather than render two numbers from two code paths. addressable_cells[] elements {subcap_id, name, current, peer, gap, feature_that_addresses_it} — every cell must be one THIS run serves. relevance: 0-1, how relevant this platform is to THIS sub-vertical. DISCARD rules: the candidate set is bounded by the entity's vertical BEFORE relevance is scored, so anchor cells belonging to another sub-vertical mean the platform is EXCLUDED, never discarded (ET-06); among the candidates that remain, discard when relevance < 0.5, when the client already runs it at the layer in question, or when it addresses fewer than 3 cells. VALIDATE against the assessment report (blocking): if the arithmetic's rank-1 is a platform the report does not discuss, resolve, state which won and why, and lower confidence. rank_rationale: 25-45 words — why this platform sits at this rank, naming the cells it addresses and the constraint it lifts; not a restatement of the composite. headline (sources table): the gap framed as available value — prose must be whole sentences, never head-clipped. anchor_subcap_id (sources table): the subcapability the tile is about. platform: from the platform fit engine v2 — deterministic; the agent explains, never recomputes. Gates: S13_platform_score_lead; S17_exec_fit_stale; S31_platform_distinctiveness; breakdown-equals-headline."
+    },
+    "discarded": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Per item: {platform, reason}. A visible discard is evidence of judgement, and it is what an AE needs when the client asks 'why not X'. A ranking that cannot reject is a sort. The candidate set is bounded by the entity's vertical BEFORE relevance is scored, so an out-of-vertical platform is never a discard — it was never a candidate (ET-06). A discard is a platform genuinely in contention: already run at that layer, fewer than 3 cells addressed, or a relevance the arithmetic put below the line."
+    }
+   }
+  },
+  "findings": {
+   "surface_id": "O6",
+   "required": true,
+   "fields": {
+    "findings": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "5 findings, each with EVERY field (must-present says four to six — see page _notes). Per item: {f_id, title, name, theme, consequence, body, rejected_alternative, strategic_alignment, linked_subcap_ids[], platform_chips[], e_ids[], source_kind, claim_label, confidence, subcap_id, score, peer_median}. title: <=12 words, A CLAIM, ideally one that rejects the obvious alternative in the same breath; NEVER a capability name alone, never a score, never a person's name, never an evidence sentence, never a raw code. name (sources table): a capability label, humanised — never 'P4C1' and never '[P2C3.2.IC1] Evidence'. theme: upper-case, 1-3 words, ONE of DATA FOUNDATION | WORKFLOW | DECISIONING | CHANNELS | TIMING | RISK & COMPLIANCE | OPERATING MODEL. consequence: 6-14 words, QUANTIFIED where the evidence allows; a consequence with no magnitude and no named event is not finished. body: 55-95 words, cited, must NOT open with a score predicate; bodies end in terminal punctuation and never repeat a sentence. rejected_alternative: 20-35 words — the competing explanation considered and why the evidence favours yours. strategic_alignment: 15-30 words PLUS a 0-1 score, quoting the entity's OWN stated objective — the RANKING KEY (order by it, tie-broken by breadth of downstream impact, then severity). source_kind: retrieved | derived. subcap_id / score / peer_median (sources table): subcap_id MUST be the cell whose score is quoted; score and peer_median are that cell's own figures, 2dp — the score chip and the anchor id must name the SAME cell (W1_workbook_fidelity). e_ids: at least one — a finding with zero evidence rows does not ship. The inline expansion carries exactly four required headings — WHAT (25-45 words), WHY (25-45 words), SO WHAT (25-45 words), EVIDENCE (one row per supporting item: {e_id, source_title, recency, tier, claim_label}, each id resolving to the evidence store) — whose payload key names are not stated in the sources (see page _notes). No internal codes (PxCy.z, URF-nn, REC-nn) in any of the four headings. Gates: W1_workbook_fidelity; S14_capability_gap_title; S14_jargon_title; S1_jargon; S20_score_recap_register; terminal punctuation. r_layer REQUIRED per item (AG-01): {hypothesis, counter, domain_test, probes_run[], verdict, confidence} — a ranked or causal claim carries the argument that survived its own counter-case. An item that asserts nothing (a recorded absence with its ladder, a null-valued row) is exempt."
+    },
+    "narrative_thread": {
+     "required": true,
+     "type": "string",
+     "doc": "45-75 words tracing the one story the five findings tell in order: the root constraint, then what it blocks, then where the leverage is, then the timing. If the five do not form a thread, you have five observations. (This is the O6 findings thread from the Surface Spec prompt, distinct from the page-level thread on the lead section — see page _narrative_thread_note.)"
+    },
+    "ranking_basis": {
+     "required": true,
+     "type": "string",
+     "doc": "State the ranking basis on the surface. Rank by strategic_alignment score; if you cannot establish the entity's strategic objectives, SAY SO, rank by downstream impact, and set ranking_basis=impact_fallback — do not pretend to an alignment you did not establish."
+    }
+   }
+  },
+  "leadership": {
+   "surface_id": "O7",
+   "required": true,
+   "fields": {
+    "roster": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Per item: {name, title, domain, appointed_on, tenure_months, as_of, source_e_id, relevance_note, confidence}. RECENCY VALIDATION (blocking per person): every entry carries as_of and a verification source — a name with no verification date does not render; cross-check against the CURRENT leadership page and remove departed people (a stale executive name is worse than a gap, because the AE will use it). Emit tenure where the source gives a start date. relevance_note: 10-25 words — why this person matters to THIS assessment, which capability they own, what they have said publicly about it; a roster without relevance is an org chart. (Sources table also names roster[].relevance, 'which pillar/capability this person owns' — see page _notes.) The Client Profile renders leaders in paragraphs OR a 5-column table; parse both shapes. Gates: no empty roster on a completed run; every entry dated; identity checks. CLAY CONTACT ROUTE (migration 0018, writer-bound 1:1): {email, linkedin_url, phone, enriched_at, enrichment_basis} are persisted per person and render in the same read as the name - the app makes NO third-party call while serving (invariant 1), so a route not established at synthesis time does not exist for the AE. enrichment_basis is the filing or profile the tool SURFACED, never the tool: 'Clay reports it' is not a source, and without a basis the contact route is the one field on the panel asserting something with no provenance. A name-similar match is an identity FAILURE, not a near-miss - a search for a named SVP Chief Data Officer returned an intern with the same surname at the same employer; the returned TITLE must match the person searched for, or the field is quarantined with its reason."
+    },
+    "verified_absent": {
+     "required": false,
+     "type": "boolean",
+     "doc": "true only after the profile was read and held none. An empty roster must be an explicit verified_absent naming every source searched, not a silent blank — and for a digital-ownership absence, only after ALL FIVE proxy searches (board bios, C-suite digital hires, LinkedIn digital titles, conference talks, strategic-plan filings); the recorded absence bears on P1C4 and belongs in the why-now."
+    }
+   }
+  },
+  "financial_series": {
+   "surface_id": "O8, C6",
+   "required": true,
+   "fields": {
+    "series": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Per item (per point, oldest first): {period, value, unit, as_of, source_e_id, basis}. basis is the metric definition (total assets / DWP / AUM / premium placed) taken from the sub-vertical — mixing definitions across periods is a silent error that produces a fake trend. Every point renders with its as_of; an undated point does not render. IDENTITY GATE (blocking, per point): legal name, REGULATOR and FOOTPRINT must all match the entity's own; any mismatch -> QUARANTINE the series, render the honest empty state, emit quarantine_reason; never render a quarantined series. CROSS-SURFACE RECONCILIATION GATE (blocking): any two figures for the same metric and period differing by more than 25% is a contradiction — resolve by recent>older, specific>general, T1>T2>T3 and emit the resolution row, or quarantine BOTH. MAGNITUDE SANITY: a single point 7x its neighbours is a parse or identity error, not growth; implausible -> quarantine, never clamp. (Sources-table point shape {year, metric, value, unit, e_id} superseded by this emit shape — see page _notes.) Gates: S6_financials; S27_financial_series; S24_firmo_integrity; cross-surface reconciliation."
+    },
+    "trend": {
+     "required": true,
+     "type": "string",
+     "doc": "GROWING | STABLE | DECLINING | VOLATILE, COMPUTED from the series, with the CAGR where 3+ dated points exist. FEWER THAN 3 DATED POINTS -> no trend label at all: emit trend=null, verified_sparse=true, and label it a snapshot. A trend drawn from two points is a line, not a trajectory — never asserted without >=3 dated points. Computed or null, never a sentinel.",
+     "absence_is_correct_when": "the series holds fewer than 3 dated points (the contract mandates trend=null and verified_sparse=true; there is no non-fabricated string)"
+    },
+    "verified_sparse": {
+     "required": false,
+     "type": "boolean",
+     "doc": "Producer flag: set when the sources hold fewer than 3 points — thin series must declare themselves; the card renders as a labelled snapshot with no trend line."
+    },
+    "quarantine_reason": {
+     "required": false,
+     "type": "string",
+     "doc": "Emitted when the identity gate quarantines the series (the honest empty state renders instead of the series). (The required 35-60 word READING of STEP 7 — what the trajectory means for the assessment, cited — has no named payload key; see page _notes.)",
+     "absence_is_correct_when": "the identity gate did NOT quarantine the series"
+    },
+    "reading": {
+     "required": true,
+     "type": "string",
+     "item_type": null,
+     "doc": "STEP 7 — 35-60 words: what the trajectory means for THE ASSESSMENT — does the growth outpace the digital capability that has to support it. That question is the card's reason to exist. Cited. Not a restatement of the series and not a restatement of the trend word: the series and the trend are already on the card. This section serves BOTH O8 (Overview) and C6 (Context), so the reading is written once and cannot disagree with itself. Key name is registry-assigned: STEP 7's requirement and its 35-60 budget are the Surface Spec's O8 prompt verbatim, but no source names its payload key; the name matches the column 0008 already created. Where the identity gate quarantines the series, declare empty_state and emit quarantine_reason instead — a quarantined series never renders, so it has no reading."
+    }
+   }
+  },
+  "sentiment": {
+   "surface_id": "O9",
+   "required": true,
+   "fields": {
+    "bars": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Source-level rating BARS grouped by audience on the Overview — 'Each bar names its source, its rating and its sample size.' Per item, EVERY interpretability field: {audience, source, rating, scale, n, as_of, url, e_id, trend_vs_prior} (Surface Spec O9 prompt STEP 2; the Information sources table's short form is {source, rating, n, audience, e_id}). audience is one of customer | employee | industry. No n -> not a signal, do not render a number. No scale -> the rating is meaningless (4.1 out of what?) and the card draws no bar. No as_of -> UNVERIFIED recency, never rendered as current. n below 30 -> render with a low-sample warning, not as a finding. Sentiment older than 18 months is RECENT not CURRENT; older than 36 is LEGACY and must not be presented as the current picture. Collect across all seven source families (App Store, Google Play, Glassdoor, Indeed, CFPB complaint narratives, BBB, Trustpilot/Google reviews) plus J.D. Power and Forrester where the entity appears (T3) and any self-published NPS (T4/T5, needs corroboration) before declaring thin; if only one source exists after searching all seven, emit it and let the thin-source state show — do NOT synthesise a second audience to fill the grid. There is no key for a display label: `metric` is a prototype leftover, is named by no source, and must not be emitted. Gate: SG-S8 (see gate registry); every rating carries n + scale + as_of."
+    },
+    "themes": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Two to four recurring themes PER AUDIENCE, extracted from the review and complaint TEXT, not from the star rating — the O9 prompt calls STEP 3 'THEMES, MAPPED TO CAPABILITIES (this is the analysis)'. Per item: {audience, theme, mapped_subcap_ids, cap_statement}. audience — the same customer | employee | industry vocabulary as bars[]. theme — the recurring pattern in the reviewers' own terms. mapped_subcap_ids — the ids the theme bears on. The prompt's own mapping is stated at CATEGORY grain (onboarding/account-opening friction -> P2C3, P2C1 · transfer, payment and processing delays -> P3C2, P2C2 · manual and spreadsheet-heavy internal work -> P3C1, P3C3 · data and personalisation complaints -> P4C1, P4C2 · app stability and release cadence -> P2C1 · advice and service quality -> P2C2), so category ids are legitimate here alongside cell ids; every id must be a catalogue id this run serves. cap_statement — PROSE, never a numeric field: which cell this sentiment caps and at what rubric level, with the cause distinguished. Measured exemplar: 'Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3.' Negative-dominant employee themes cap P1C4 and P4C3 at L3.0; mixed themes add +0.2 uncertainty — record which. Sentiment that does not connect to an assessed capability is decoration; sentiment that caps a cell is evidence. Emit [] together with the section empty_state (reason + sources_searched) when the review text supports no theme; never omit the key. ADJUDICATION 2026-08-05: the Surface Spec specifies this content in prose (O9 prompt STEP 3) and names no payload key; the four item keys are the serving DDL's own (overview_sentiment.themes). Item keys and id resolution are producer discipline — the connector type-checks the item as an object and nothing more."
+    },
+    "gap_analysis": {
+     "required": false,
+     "type": "object",
+     "doc": "The B2B/B2C and internal/external gaps — 'Where both sides exist, state the GAP and what it implies' (O9 prompt STEP 4). Conditional by construction: omit when only one audience was established. Object: {b2b_b2c, internal_external, e_ids}. b2b_b2c — 25-55 words: the gap between the customer-side and employee-side readings and what it implies. An employee rating well above the customer rating says the constraint is not capability but process; the reverse says delivery is outrunning the operating model. internal_external — 25-55 words, the gap INSIDE the organisation, localised to a named function. Measured exemplar: 'Engineering scores 4.2 - front-line ops scores 3.1'. e_ids — the citations behind both. The Overview card's 'B2B/B2C gap' chip is a presence flag computed at render from b2b_b2c being non-empty; it is never a stored boolean. PROPOSED, NOT RECOVERED — ADJUDICATION 2026-08-05: no source names this payload key or any key inside it; the serving DDL comment reads only 'the B2B/B2C and internal/external gaps'. The two prose slots are the minimum faithful reading of STEP 4; the key names are registry-assigned and open to revision.",
+     "absence_is_correct_when": "only one audience was established (the contract says omit)"
+    },
+    "displayed_lines": {
+     "required": false,
+     "type": "integer",
+     "doc": "Producer counter, named by the Surface Spec's O9 Information sources table ('displayed_lines | producer'): the number of rating lines this section will actually render. 'A single displayed line is not a sentiment picture — thin sources declare themselves.' Not persisted and no column exists, deliberately — counts are computed, never stored (invariant 8). SG-S8 recomputes the count from bars[] rather than trusting this field, and discloses; it does not block."
+    }
+   }
+  },
+  "ceilings": {
+   "surface_id": "O1b",
+   "required": true,
+   "fields": {
+    "rows": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "One row per category (container name assigned — sources say only 'Per row'; see page _notes). Per item: {category_id, category_name, ceiling, uncertainty_band, rationale, limiting_absence, urf_modifiers[], e_ids[], claim_label, confidence}. A CEILING IS NOT A SCORE — the highest maturity level the available evidence would support even under perfect execution; you never assign scores. ceiling: M1-M5 or null, set by the BEST evidence available and capped by its tier: T1/T2 -> up to L5 | T3 -> L4 | T4 -> L2.5 | T5 -> L2 and only with corroboration; a ceiling can never exceed the cap of its best tier. uncertainty_band: the +/- figure, base band plus URF modifiers — URF-01 Capability Plateau +0.2 | URF-02 Adoption Gap +0.2 | URF-03 Stagnation +0.1 | URF-04 Entitlement Underutilisation +0.2 | URF-05 Shadow Systems +0.2 | URF-06 Peripheral Tool +0.1 — name every modifier applied; OVER +/-0.8 -> emit ceiling=null and 'Cannot reliably estimate'; a band under +/-0.3 on a single-source category is overconfident. rationale: 35-70 words with TWO halves, both required: (a) what the evidence DOES establish, cited; (b) the specific thing whose ABSENCE set the ceiling. limiting_absence: the artefact that would raise the ceiling if found — a named document, metric or organisational unit; make it searchable (the research backlog for the next run). Withheld whole from the customer audience. Gates: G14 Ceiling Estimate Framing; +/-0.8 cap enforced; every ceiling cited."
+    }
+   }
+  },
+  "evidence_coverage": {
+   "surface_id": "O10, O11",
+   "required": true,
+   "fields": {
+    "overall_pct": {
+     "required": true,
+     "type": "number",
+     "doc": "O10. COMPUTE, DO NOT ESTIMATE: counted from the served cells and their linked evidence, over the SAME cell set the heatmap serves. Never round up across the gate: 79.6% renders as 79.6% with below_gate=true. Coverage counts LINKED evidence only — an item that resolves to no cell counts nowhere; a cell whose only evidence is undated DOES count toward coverage (freshness is the evidence age tracker's question)."
+    },
+    "per_pillar": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "O10. Per item: {pillar_id, pillar_name, pct, cells_total, cells_covered, below_gate}. below_gate: true per pillar under the gate, rendered distinctly — an overall 96% with one pillar at 62% is a failing assessment presented as a passing one. All counts computed. Gates: denominator stated; per-pillar breakdown present; no rounding across the gate; reconciles to the heatmap's cell set."
+    },
+    "gate_pct": {
+     "required": true,
+     "type": "number",
+     "doc": "O10. 80. A HARD GATE, not a target."
+    },
+    "denominator_definition": {
+     "required": true,
+     "type": "string",
+     "doc": "O10. REQUIRED and RENDERED. State exactly what is counted: 'share of scored sub-capabilities carrying at least one linked evidence item' is a different metric from 'share meeting the three-item sufficiency threshold', and the two differ by tens of points."
+    },
+    "note": {
+     "required": false,
+     "type": "string",
+     "doc": "O10. 15-30 words where any pillar is below gate: which cells drive it and what would close them. Otherwise omit.",
+     "absence_is_correct_when": "no pillar sits below the 80 gate (the contract says otherwise omit)"
+    },
+    "item_count": {
+     "required": true,
+     "type": "integer",
+     "doc": "O11. Distinct from fact_count and both reported: one annual report is ONE item carrying many facts with ids E-xxx:Fy. A census; no editorial layer; counts reconcile to the evidence store — computed, never stored independently."
+    },
+    "fact_count": {
+     "required": true,
+     "type": "integer",
+     "doc": "O11. See item_count — both reported, computed."
+    },
+    "tiers": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "O11. Per item: {tier, count, pct, max_evidence_level}. max_evidence_level per tier: T1/T2 -> L5 | T3 -> L4 | T4 -> L2.5 | T5 -> L2 (corroboration required) — RENDER it, because it is what the mix means. Machine scans (Hubbl / BuiltWith / Wappalyzer / Explorium) are T1, never T4."
+    },
+    "claim_classes": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "O11. Per item: {claim_label, count, pct}. A ceiling_estimate count of zero usually means ceilings were asserted as facts rather than labelled."
+    },
+    "self_sourced_pct": {
+     "required": true,
+     "type": "number",
+     "doc": "O11. Share of items from the entity's OWN publications (annual report, site, press releases). Above ~50%, corroboration is structurally weak regardless of the tier histogram — flag it. Computed."
+    },
+    "self_sourced_basis": {
+     "required": false,
+     "type": "string",
+     "doc": "O11. COMPUTED AT READ — do not send. Names the domains the share above was measured against, or, when the run records no publication domain for the entity itself, says that and what would close it. A percentage with no stated basis and an absent percentage are both unreadable: the first invites certainty, the second reads as 'the producer left it empty'.",
+     "not_producer_authored": true,
+     "absence_is_correct_when": null,
+     "not_producer_authored_why": "COMPUTED AT READ - do not send. computed.py fills it unconditionally and the writer spec binds no column, so a producer-sent value lands nowhere."
+    },
+    "mix_implication": {
+     "required": true,
+     "type": "string",
+     "doc": "O11. 25-50 words. THE POINT OF THE CARD: what vocabulary this mix licenses across the whole document — a T3-dominant mix licenses 'likely uses / signals suggest' and NOT 'uses'; a T5-heavy mix licenses almost nothing without corroboration. Non-empty (gate)."
+    }
+   }
+  },
+  "thought_leadership": {
+   "surface_id": "O12",
+   "required": true,
+   "fields": {
+    "entries": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Container name assigned (sources say only 'Per entry' — see page _notes). Per item: {kind, published_on, headline, quote, author_name, author_role, url, linked_subcap_ids[], alignment, e_id, claim_label}. kind: LINKEDIN POST | CONFERENCE | ARTICLE | PODCAST | EARNINGS CALL | BLOG | PANEL. published_on: REQUIRED, to the day where the source gives one; undated -> excluded (the card's own framing is a recency window). headline: as published — do NOT rewrite it. quote: VERBATIM, 80-260 chars, the executive's own sentence; never paraphrase an executive; never stitch two sentences into one quote. author_role: the role AS STATED AT THE TIME; a quote from someone who has since left is still evidence but must be dated and the departure noted — cross-check against the leadership roster. linked_subcap_ids: which assessed capabilities the statement bears on — a post that bears on none does not belong here. alignment: CORROBORATES | CONTRADICTS | EXTENDS our finding, with a 12-25 word clause (clause key unnamed — see page _notes); a CONTRADICTS entry is the most valuable thing on the card and must NOT be filtered out. Withheld whole from the customer audience. Gates: every entry dated, cited, attributed to a named person with a role, and linked to a served cell; verbatim quotes only; contradicting entries retained."
+    },
+    "thin": {
+     "required": false,
+     "type": "boolean",
+     "doc": "Fewer than 2 entries after searching all seven source families -> emit what you have, set thin=true, and name what was searched. Do NOT pad with corporate press releases: this card is about NAMED PEOPLE speaking."
+    }
+   }
+  }
+ },
+ "insights": {
+  "_notes": [
+   "I1 word budgets: the Surface Spec's prompt block says what_text 35-60 / why_text 35-60 / so_what_text 30-50 words, but the same spec's writing-budget appendix says I1 WHAT 30-60 / WHY 30-60 / SO WHAT 15-30. The prompt-block budgets are used here because they name the exact JSON fields; the appendix names display elements. Internal Surface Spec variance, flagged for adjudication.",
+   "I1 per-card evidence list: the Surface Spec's Information sources table names cards[].e_ids; its prompt block's per-card shape names supporting_e_ids[]. supporting_e_ids used per the prompt shape; the section-level envelope e_ids is separate and added by the registry.",
+   "T2 landscape has no prompt block in the design specification ('It renders from server-derived data and its contract is the one stated above'). The tile item shape {kind, count, basis, detail, named_items[]} plus reconciles_to_register comes from the TRD representative contract (which nests it under techstack.techstack as 'landscape') and the MCP Specification extraction (which titles it 'techstack.landscape (T2)'). The section registry (TRD + Backend Schema + skill) places it at insights.landscape, serving table insights_landscape — the registry rules on placement; the shape is the only one any source states."
+  ],
+  "insights": {
+   "surface_id": "I1",
+   "required": true,
+   "fields": {
+    "cards": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Six to ten cards, each a defensible argument: what, why it matters, what to do, with severity and the capability it anchors on. Zero cards on a completed run is a FAILURE STATE, not an empty state. Per card: {ic_id, title, what_text, why_text, so_what_text, alternative_explanation, severity, severity_rationale, linked_subcap_id, supporting_e_ids[], validation_question, confidence, claim_label}. title <=10 words — the argument in a phrase, not a capability name alone, not a score. what_text 35-60 words — the CLAIM about this client, cited; states a state of the world, not a measurement; must NOT open with or consist of a score read-out. why_text 35-60 words — THE MECHANISM; name the causal path; if you cannot state a mechanism you have an observation. so_what_text 30-50 words — the DECISION this implies, for a named owner where the leadership roster supports naming one; specific enough to act on this quarter; never 'consider investing in'. alternative_explanation 20-35 words — the strongest competing explanation considered and why the evidence favours yours; if equally supported, say so and set confidence MEDIUM. severity critical|high|opportunity|info, justified by CONSEQUENCE, not by how far the score sits from the median. severity_rationale 15-30 words arguing the consequence. linked_subcap_id a capability THIS run scored — must resolve to a served cell (dead links were 15 of 119). supporting_e_ids[] mandatory — the serve layer excludes uncited cards. validation_question the one question that would confirm or kill this card, phrased for a client conversation and naming an internal document type — a DISCOVERY QUESTION, never a toolkit diagnostic question. ic_id is agent-minted (IC-nnn). Do not write one card per pillar for symmetry. Gates: S28_insight_integrity (no score-predicate openers, no dead anchors, no zero-card completed runs); S2_accusatory; S1_jargon."
+    }
+   }
+  },
+  "landscape": {
+   "surface_id": "T2",
+   "required": true,
+   "fields": {
+    "tiles": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Confirmed, inferred, claimed and gaps: four counts recomputed from the register, each tile printing its evidence basis. Per tile: {kind, count, basis, detail, named_items[]}. kind CONFIRMED|INFERRED|CLAIMED|GAPS. count int — recomputed FROM the techstack register, never stored separately; the four counts must sum to the register (counts are computed, never stored). basis is PRINTED on the tile — a bare count invites certainty: '5 · T1-T3 evidence' tells the reader what kind of 5. named_items[]: the GAPS tile names the platforms. Every register row carries a status from CONFIRMED|INFERRED|CLAIMED|ABSENT, without which the landscape strip cannot be recomputed."
+    },
+    "reconciles_to_register": {
+     "required": true,
+     "type": "boolean",
+     "item_type": null,
+     "doc": "The four counts must sum to the register and be recomputed from it. Two code paths produce two numbers and the client sees the disagreement."
+    }
+   }
+  }
+ },
+ "platform": {
+  "_notes": [
+   "One rec_id space across the page: 'Every section here references the same recommendation ids, which is why they are submitted together: a phase citing a recommendation the payload does not describe fails in one pass' (Surface Spec D4). roadmap.phases[].rec_ids must resolve to recommendations this payload describes. rec_id is agent-authored (CLAUDE.md invariant 10).",
+   "P2 provenance vocabulary disagreement: the Surface Spec prompt block says ANALYST|DERIVED; the same spec's Information sources table says \"'analyst' or 'synthesised' — required, never blank\"; the skill's roadmap template uses analyst|derived. ANALYST|DERIVED adopted (prompt + template agree); flagged for adjudication.",
+   "P2 Information sources table names prerequisite_rec_ids (the dependency edges, from recommendation_validation.json) and target_subcap_ids (must resolve to served cells), which the prompt's per-recommendation shape does not carry — it has prerequisites[] (cells and minimums) and dependencies[]. Both table names are recorded in the recommendations doc; confirm the mapping before freezing the registry.",
+   "P2b field-name disagreement: the Surface Spec prompt and the skill prompt name the field opens_on; the TRD representative contract and the MCP Specification extraction name it opening_shape with enum gap|peer|timing|their_words|contradiction|system. opens_on adopted per Surface Spec/skill authority for this extraction; the six-shape vocabulary applies either way. Genuine conflict — the repo authority order (TRD over Surface Spec) would pick opening_shape, so this needs a user call.",
+   "P3: the Surface Spec prompt block names only {phase, horizon, capabilities[], depends_on[], rationale}; the skill's REISSUED prompt and section_templates.json add {phase_id, rec_ids[], provenance} and sequencing_basis. Adopted, because the Surface Spec's own page contract requires phases to cite recommendation ids and derived phasing to be labelled derived.",
+   "P4: the Surface Spec's Information sources table lists empty_state for stairstep; excluded here because the universal envelope already carries empty_state on every section.",
+   "P1 Step 5 requires an effort profile — the effort dimensions (integration, data quality, process redesign, change management, licensing) ranked for THIS client, consistent with the timeline's storyline — but no source names a payload field for it; not emitted rather than invented. stairstep.effort_band and the roadmap must stay consistent with it."
+  ],
+  "platform_story": {
+   "surface_id": "P1",
+   "required": true,
+   "fields": {
+    "platforms": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Five platform tiles, each with its fit score, the gaps it addresses, and a story that is about THIS client. Per platform: {fit_score, gaps[], story_md}. fit_score from platform_fit.py engine v2: fit = 100 x (0.66*opportunity + 0.34*readiness); read, never recomputed — the agent EXPLAINS it, never recomputes or re-ranks it; the breakdown modal must agree with the headline fit (570 of 685 cards disagreed). Out-of-vertical rank-1 is a defect: a carrier platform must not top a bank's list (vertical guard: subvertical adjacency, platform_fit_data.py). story_md 90-150 words, whole sentences (501 cards shipped head-clipped mid-sentence), grounded in the client's own gaps and stack: what this platform would change for THIS client, which constraint it lifts, what it depends on, and what it does not solve; name the cells; cite; must reconcile to the composite — if the story argues for a platform the arithmetic ranks third, say why. gaps[] per row: {subcap_id, name, current_score, peer_score, gap, pillar, l3_area, l4_feature, catalogue_path, e_ids[]} — the unit of recommendation is the L3 PLATFORM AREA and its L4 FEATURES; the path L3 -> L4 -> sub-capability must be renderable for every claim; catalogue_path present per row (gate); current_score MUST equal what the heatmap serves for that id, asserted within +/-0.05 before emitting; every row cites — a gap row with no evidence behind the current score is not addressable, it is a guess. Gates: S31_platform_distinctiveness; S13_platform_score_lead; S17_exec_fit_stale; breakdown-equals-headline."
+    },
+    "discarded": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Discard, with reasons. Per dropped platform: {platform, reason, relevance}. The candidate set is drawn from the catalogue's own per-cell platform vocabulary (l3_platform_areas / l4_features on the cells this run serves) and is BOUNDED BY THE ENTITY'S VERTICAL BEFORE relevance is scored — a platform outside that vertical is not a candidate, so it never enters the list and has no discard to render (ET-06 refuses one whose reason argues from vertical or entity type, or whose anchor cells belong to another sub-vertical; a credit union's page spent a client-facing card explaining why insurance policy administration does not apply to it). A discard is a platform that was GENUINELY IN CONTENTION: drop it when the client already runs it at that layer, when it addresses fewer than 3 of this run's cells, when relevance against the cells it does reach is < 0.5, or when it only pays off after another platform lands — naming which. Each reason names the cell count and, where the layer is occupied, the incumbent from the stack register, so it is checkable. A ranking that cannot discard is a sort."
+    }
+   }
+  },
+  "recommendations": {
+   "surface_id": "P2",
+   "required": true,
+   "fields": {
+    "recommendations": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "The analyst's recommendations with their detail: what, why, prerequisites, effort, and the capabilities each targets. Per recommendation: {rec_id, title, l3_area, l4_feature, phase, provenance, dma_impact[], root_cause, evidence_ids[], cost_of_inaction, prerequisites[], dependencies[], sequencing_reason, effort_band, kpi_triple, validation_gate, claim_label}. rec_id is agent-authored and shared across the platform page — roadmap phases cite these same ids. provenance ANALYST|DERIVED — required, never blank; DERIVED means composed from the pack by rule; never mislabel; a derived recommendation must never present as analyst judgement. dma_impact[] one row per affected cell {subcap_id, name, current, target, delta}; current MUST equal what the heatmap serves — assert it. root_cause 30-60 words, CITED — why the gap exists, not a restatement of the gap; a recommendation whose root cause is 'score is low' has no root cause. cost_of_inaction 30-60 words, REQUIRED — what degrades if this does not happen, over what horizon, and which capability absorbs the damage; GROUND IT in one of: a dated regulator milestone, a peer trajectory, a contract or licence expiry, a migration date already in evidence, a stated board commitment; if nothing grounds a cost, write 'no dated trigger established'. prerequisites[] what must be true before this can start, as cells and minimums. validation_gate the readiness condition, expressed as a cell and a threshold ('P4C1 >= 2.0'), plus its current verdict MET|NOT MET and the BACKING CELLS that produce that verdict — the readiness drilldown renders those backing cells, so the verdict must be traceable to them. kpi_triple {metric, baseline, target} — the baseline must be a figure that exists in the pack with an as_of, not an aspiration. sequencing_reason 20-40 words: why THIS phase; the dependency or gate that fixes its position; must agree with the roadmap phases AND the stair-step curve. The Information sources table additionally names prerequisite_rec_ids (dependency edges, recommendation_validation.json) and target_subcap_ids (must resolve to served cells) — see _notes. Gates: S32_rec_detail (panel and roadmap agree; provenance present); cost_of_inaction non-empty; every current figure reconciles to the heatmap."
+    }
+   }
+  },
+  "starters": {
+   "surface_id": "P2b",
+   "required": true,
+   "fields": {
+    "starters": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "45-90 word say-it-aloud openers with distinct opening shapes. Per starter: {rank, provenance, text, opens_on, named_gap_subcap_id, peer_reference, e_ids[], their_system_reference, followup_question}. provenance TEMPLATE_FILL|ANALYST, and RENDER it — a rule-composed starter labelled as analyst work is a credibility risk for the AE. text 45-90 words, must pass the SAY-IT-ALOUD TEST: no internal codes, no bracketed ids mid-sentence, no 'PxCy.z', no score-first opening; put the E-ID at the end. opens_on: VARY THE SHAPE — at most one starter per opening move from gap|peer|timing|their_words|contradiction|system (the gap opener names the capability and what it blocks; the peer opener what a comparable institution did, dated; the timing opener the window and what closes it; the their-words opener quotes their own executive, from O12; the contradiction opener two of their facts that do not fit together; the system opener something in THEIR stack the gap depends on); opening shape is enforced distinct across the set — the measured failure: 685 of 685 used one shape. peer_reference a NAMED comparable institution and a DATED action ({name, action, dated_on}) or omit the field (null) — if you cannot name and date it, do not imply it. their_system_reference str|null — something from the tech stack register, a platform they run or a migration in flight. followup_question a Discovery Question, never a toolkit diagnostic question. QUOTE HYGIENE: quoted material must be a clean, complete, verbatim sentence from a resolvable source; never repair a truncated excerpt — drop to a non-quoting shape. CLAIM HYGIENE: cite the count you can name, or state none. Gates: S31_platform_distinctiveness (client-specific, not templated); provenance rendered; no codes in spoken text; every claim cited; opening shapes varied."
+    }
+   }
+  },
+  "roadmap": {
+   "surface_id": "P3",
+   "required": true,
+   "fields": {
+    "phases": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Sequenced phases referencing the same recommendation ids the page already carries — order is meaning. Per phase: {phase_id, phase, horizon, rec_ids[], capabilities[], depends_on[], rationale, provenance}. horizon in plain terms: next two quarters | this year | beyond. rationale 30-60 words: why this phase sits here and not earlier. provenance analyst|derived — if the package states phasing, use it (source retrieved); derive only if it does not, and label it derived. REFERENTIAL INTEGRITY: every rec_id must resolve to a recommendation THIS payload describes — a phase citing a recommendation the page does not carry is a dead link in a document an AE reads aloud. SEQUENCING IS THE CONTENT: a phase cannot precede a phase it depends on; assert the dependency graph is acyclic before emitting; phase order must not contradict the recommendation prerequisites. Any metric quoted must come from THIS run and resolve to its named cell — never carried from a prior run. Gates: rec_ids resolve within the payload; dependency graph acyclic; grain lock."
+    },
+    "sequencing_basis": {
+     "required": true,
+     "type": "string",
+     "item_type": null,
+     "doc": "prerequisites|undetermined. If prerequisites do not determine a sequence, say so and emit the phases unordered with sequencing_basis=undetermined. Do not invent an order to look decisive."
+    }
+   }
+  },
+  "stairstep": {
+   "surface_id": "P4",
+   "required": true,
+   "fields": {
+    "ladder": {
+     "required": true,
+     "type": "object",
+     "item_type": null,
+     "doc": "{from_level, to_level, steps[]} from workbook current scores + roadmap; null when no ladder is derivable, with the reason stated via the envelope empty_state — never a blank card ('An absent ladder renders a stated empty state, not \"Couldn't load stairstep.\"'). The curve is scoped to a theme (measured scopes: 'Data foundation', 'Loan origination'), so everything below is per-theme. Per step: {step_level, label, covered_subcap_ids[], current_position, blocking_findings[], unlocks, effort_band, entry_condition, e_ids[]}. current_position: which step the client occupies TODAY, computed from the served scores of covered_subcap_ids — assert it equals those scores; the step the client stands on is a measurement, not a judgement. blocking_findings[]: THE POINT OF THE CARD — the specific findings that prevent the client reaching this step, BY ID, with their citations; they must be findings that exist elsewhere in the pack — a blocking finding invented for the ladder is a fabrication; a step with no blocking findings above the client's current position is unexplained: either find the blockers or drop the step. unlocks 20-40 words: what becomes possible AT this step that was not possible below it, in client outcomes rather than capability names. entry_condition: the readiness threshold, as cells and minimums, matching the corresponding recommendation's validation_gate. effort_band S|M|L, consistent with the platform page's effort profile. CONSISTENCY (blocking): current_position == the served scores for the covered cells; blocking_findings subset of the findings the pack actually serves; step order == roadmap phase order == recommendation sequencing_reason; covered_subcap_ids are all cells THIS run serves, and all belong to the theme this curve is scoped to. Gates: S33_pack_surface_completeness (the surface is exported at all); step-order consistency."
+    }
+   }
+  }
+ },
+ "context": {
+  "_notes": [
+   "Required status: context_sentiment is REQUIRED. The TRD section registry, the Backend Schema, the skill's page table and the skill's check_payload.py all mark every context section required; the only two optional sections in the 34 are heatmap.value_chain (H9) and heatmap.cohort_patterns (H8). The task brief's suggestion that context_sentiment might be one of the optional two is contradicted by the docs.",
+   "Audience: the entire context page is INTERNAL ONLY — 'The route is refused at the API, not only hidden in the navigation'; the customer audience receives a locked state, not a redacted page. This does not relax the identity gate or citation.",
+   "C2 item-shape disagreement: the Surface Spec prompt block carries {issue_id, title, severity, status, opened_on, resolved_on, rationale, linked_subcap_ids[], e_ids[]}; the skill's REISSUED prompt adds capped_subcap_ids[] (with cap level) and provenance, plus a verified_absent absence state. Adopted with the skill's additions because the Surface Spec's own C2 contract sentence requires each issue to 'name the cells it caps' and C3 hands capped actions to C2; flagged as skill-sourced.",
+   "C5 top-level array name: neither the Surface Spec nor the skill names the list (both say 'Per row:'); 'rows' is taken from the MCP Specification docx extraction (background material). Confirm before freezing the registry.",
+   "C4 has no prompt block of its own ('Prototype-only; produced under the O9 sentiment prompt at Context depth'). Its fields derive from O9 (overview.sentiment): the Information sources table names context_tiles[]; overview.bars[] and displayed_lines belong to overview.sentiment, not this section.",
+   "C6 financial trajectory renders overview.financial_series and is NOT a context section — one section, so the two cards cannot disagree; excluded here by design."
+  ],
+  "timeline": {
+   "surface_id": "C1",
+   "required": true,
+   "fields": {
+    "events": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "The client's technology history as dated events, each cited. Per event: {event_date, title, body, kind, signal, capability_ids[], maturity_effect, e_ids[], claim_label}. event_date REQUIRED, precise to at least the month — an undated item is EXCLUDED, never rendered as 'ongoing'. kind PLATFORM|LEADERSHIP|M&A|REGULATORY|CHANNEL|DATA|SECURITY|STRATEGY. body 25-45 words: what changed, and what it replaced or enabled. capability_ids[]: which assessed capabilities this bears on — an event bearing on none does not belong here; a rebrand is not a digital-evolution event. signal POSITIVE|NEUTRAL|NEGATIVE, and state the SCORE EFFECT in the panel: positive raises the ceiling on the affected capability, negative caps it, neutral is context with no direct effect — a badge without its consequence sentence is incomplete. maturity_effect ADVANCED|CONSTRAINED|NEUTRAL with one clause of reasoning — a ten-year-old core conversion never revisited CONSTRAINS current maturity; say so. Every acquisition is also a timeline event with kind=M&A, carrying the same date and direction of effect as C5. Gates: S34_timeline_provenance (every event cited); G9 (milestones dated)."
+    },
+    "storyline": {
+     "required": false,
+     "type": "string",
+     "item_type": null,
+     "doc": "60-110 words tracing how the SEQUENCE produced today's assessed position; name the inflection points and the consequence. Must be consistent with the executive summary's Complication and with the Platform page's effort profile: if the storyline says integration debt accumulated from a 2014 core conversion, integration had better rank first in the effort profile. FEWER THAN 3 DATED EVENTS -> emit the events, set verified_sparse=true, and do NOT write an arc from two points (G6: arc claims need >=3 dated points)."
+    },
+    "arc_shape": {
+     "required": false,
+     "type": "string",
+     "item_type": null,
+     "doc": "STEADY_INVESTMENT|STOP_START|POST_EVENT_CATCHUP|LEGACY_ANCHORED|RECENT_ACCELERATION, with one sentence of evidence. Subject to G6: arc claims need >=3 dated points."
+    },
+    "verified_sparse": {
+     "required": false,
+     "type": "boolean",
+     "item_type": null,
+     "doc": "Producer-set when the sources hold fewer than 3 dated events. Sparse timelines must declare themselves."
+    }
+   }
+  },
+  "issue_register": {
+   "surface_id": "C2",
+   "required": true,
+   "fields": {
+    "issues": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "The client's own open matters — ONE ROW PER MATTER; collapse duplicates that differ only by formatting or a trailing clause (dedup: issue_dedup.collapse_issue_rows — register key, exact title and prefix containment). Per issue: {issue_id, title, severity, status, opened_on, resolved_on, rationale, capped_subcap_ids[], linked_subcap_ids[], e_ids[], provenance}. title 8-16 words, the matter in the source's own terms. severity and status are ALWAYS populated; never emit a NULL status. rationale 25-60 words where the source gives one; if it does not, LEAVE IT EMPTY — the drilldown renders the title alone and that is honest; do not compose a rationale to make the card look full (across the corpus, 228 of 236 bare register rows had genuinely nothing behind them; the frontend guards each field independently). capped_subcap_ids[]: where a matter constrains an assessed capability, the cell with its cap level — an issue is only interesting here because it CAPS something; a regulatory matter that caps a cell and does not say so leaves the score looking unexplained. Ordered by opened_on — the Gantt renders in the order sent. Enforcement actions handed from C3 must carry the same date here. Gates: one row per matter; status non-null; identity on every regulator named."
+    },
+    "verified_absent": {
+     "required": false,
+     "type": "boolean",
+     "item_type": null,
+     "doc": "No matters found is a finding: emit verified_absent with the registries searched (the envelope empty_state carries sources_searched). Skill REISSUED prompt; the Surface Spec prompt block does not carry it — see _notes."
+    }
+   }
+  },
+  "regulatory_standing": {
+   "surface_id": "C3",
+   "required": true,
+   "fields": {
+    "primary_regulator": {
+     "required": true,
+     "type": "string",
+     "item_type": null,
+     "doc": "The prudential regulator, from the regulator's OWN registry, not from the entity's self-description. By sub-vertical: SV1 OCC/FDIC/Fed/State DOB · SV2 NCUA/State CU · SV4 SEC/FINRA/Fed/CFTC · SV5 SEC/FINRA/State securities · SV6 SEC/CFTC · SV7-SV8 State DOIs/NAIC · SV9 FCA/FCSIC. An FDIC or OCC chip on a Farm Credit entity, or an FCA chip on a national bank, is an IDENTITY ERROR: quarantine the whole card and escalate — it means the profile is contaminated. Verify the charter number / CIK / RSSD, never the name. Gates: G1 Identity & Boundary; G2 Regulatory Anchor."
+    },
+    "additional_regulators": {
+     "required": true,
+     "type": "list",
+     "item_type": "string",
+     "doc": "Additional regulators beyond the primary, from the registry."
+    },
+    "license_type": {
+     "required": true,
+     "type": "string",
+     "item_type": null,
+     "doc": "As the registry states it ('National bank holding co.', 'federally chartered credit union', 'Agricultural Credit Association'). This constrains which products the entity may offer and therefore which capabilities can legitimately be assessed."
+    },
+    "jurisdictions": {
+     "required": true,
+     "type": "list",
+     "item_type": "string",
+     "doc": "From the registry or the entity's filings. THE FASTEST CONTAMINATION CHECK IN THE PRODUCT: cross-check against every footprint claim on every other surface and flag disagreement as a contradiction, not as variation. Jurisdictions must reconcile across surfaces (gate)."
+    },
+    "charter_date": {
+     "required": true,
+     "type": "string",
+     "item_type": null,
+     "doc": "date|null (TRD representative contract)."
+    },
+    "enforcement_actions": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "ENFORCEMENT — search always; absence is a finding. Search EVERY applicable regulator's enforcement or order pages by entity name: NCUA, OCC, FDIC, Fed, CFPB, SEC, FINRA, state DOI/DOB, FCA. Dated actions only. Per action: {issue_id, regulator, kind, opened_on, status, summary, capped_subcap_ids[], remediation_status, e_id}. capped_subcap_ids: which cells this action CAPS and at what level (item shape {subcap_id, cap_level} per the TRD representative contract) — an action that caps nothing has not been analysed. A closed action must not render as open. Emit once, hand to the issue register (C2) and the why-now (O3); all three must carry the same date. Gates: every action dated and cited."
+    },
+    "absence_of_enforcement": {
+     "required": true,
+     "type": "object",
+     "item_type": null,
+     "doc": "{verified: bool, sources_searched: [str]} — searched all applicable regulators and found nothing -> RECORD THE SOURCES SEARCHED. Verified absence supports the compliance-posture cell; unverified silence supports nothing."
+    }
+   }
+  },
+  "context_sentiment": {
+   "surface_id": "C4",
+   "required": true,
+   "fields": {
+    "context_tiles": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "The sentiment grid at Context depth, each tile expanding inline to the items behind it — 'three tiles: customer, employee, market, each with drilldown rows and evidence chips' (Surface Spec O9 Information sources; the only field any source names for C4). Prototype-only surface; no prompt block of its own exists — produced under the O9 sentiment prompt at Context depth, and a RE-PROJECTION of the same dataset O9 renders as bars, so the two cards cannot disagree. Per tile: {audience, rows, e_ids}. audience — customer | employee | market ('market' at C4 is the same family O9's bars call 'industry'). rows[] — the drilldown source rows, one card each in the rendered grid, per row {source, rating, scale, n, as_of, url, e_id, note}: the first seven are the O9 bar's interpretability fields and carry its rules (no n -> not a signal, do not render a number; no scale -> the rating is meaningless and no bar is drawn; no as_of -> UNVERIFIED recency, never rendered as current; n below 30 -> low-sample warning, not a finding); note is the expansion body, which must END BY NAMING THE CELL IT CAPS — measured: 'Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3.' e_ids[] — the evidence chips on the tile; each must resolve, or the chip is a dead control. Sentiment older than 18 months is RECENT not CURRENT; older than 36 is LEGACY. SG-S8 flags a single-line render as thin — thin sources declare themselves; do NOT synthesise a second audience to fill the grid. RECONCILIATION: every rows[].e_id and rows[].rating must appear in overview.sentiment.bars. ADJUDICATION 2026-08-05: Backend Schema L504 gives C4 its own section and its own table, so it is not collapsed into O9 the way C6 shares overview.financial_series; but the tile and row item keys are not machine-stated anywhere ('each with drilldown rows and evidence chips' is the whole of it) — they are registry-assigned to match the O9 bar shape. THIS SECTION MUST BE READ BY THE ADAPTER: a column that promotes and is never read is the same defect as a field with no column."
+    }
+   }
+  },
+  "acquisitions": {
+   "surface_id": "C5",
+   "required": true,
+   "fields": {
+    "rows": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Closed and announced transactions with integration status and maturity effect. Per row: {closed_on, target_name, kind, status, scale_metrics, integration_target, affected_subcap_ids[], maturity_effect, effect_note, e_ids[]}. closed_on REQUIRED to the month; announced-but-not-closed is a SEPARATE row with status=ANNOUNCED and its own date. status ANNOUNCED|INTEGRATING|COMPLETE|ABANDONED — never NULL. scale_metrics quantified in the acquirer's own terms: branches, deposits or loan volume, members/customers, FTE. integration_target the date integration is tracking to, where stated (date|null). maturity_effect ADVANCED|CONSTRAINED|NEUTRAL|TEMPORARILY_CONSTRAINED with the named cells — TEMPORARILY_CONSTRAINED is honest and often correct during a cutover; do not smooth it to NEUTRAL. effect_note 20-45 words: what the integration does to the named capability and over what window — specific cell, direction, window. CROSS-SURFACE (emit once, hand to three): every acquisition is also a TIMELINE event with kind=M&A; an integration in flight is a COST OF ACTING NOW input for the why-now and a timing constraint for the roadmap; all three must carry the same date and the same direction of effect. Gates: every row dated and cited; status never NULL; affected cells resolve; consistent with C1 and O3."
+    }
+   }
+  }
+ },
+ "techstack": {
+  "_notes": [
+   "Layer/status vocabulary is settled by the Surface Spec's own 'Vocabulary resolved' paragraph and the CLAUDE.md corrections table (binding): layer keys are OPS|CUST|DATA|INFRA — never L2-L5 (they collide with the L1-L4 evidence levels rendered on the same card) — and every register row carries status CONFIRMED|INFERRED|CLAIMED|ABSENT, required per row, without which the T2 landscape strip cannot be recomputed. The Surface Spec's original T1 prompt block ({vendor, product, layer, confidence, as_of, e_ids[]} with layer enum core|crm|data|integration|channel|security) is superseded; the skill's REISSUED prompt shape is the operative one. 'confidence' from the original prompt does not survive the resolution — confidence never stands in for evidence; status replaces it.",
+   "TRD representative contract names the item field 'name' where the Surface Spec prompt and the skill use 'product' ('vendor and product are separate fields'); product wins per the Surface Spec's payload-shapes-are-law authority for this extraction.",
+   "The TRD representative contract nests the T2 landscape tiles under this section as 'landscape'; the section registry (TRD + Backend Schema) serves T2 from insights.landscape (serving table insights_landscape). The registry rules on placement; either way the landscape counts must be recomputed from and reconcile to this register (counts computed, never stored).",
+   "compliance_attestations appears in the Surface Spec's Information sources table ('where the client states one') and the TRD representative contract, but not in the skill's REISSUED prompt or section_templates.json; carried here as optional with item shape unstated.",
+   "T3 (platform detail sub-page) reads this same section — detection basis, evidence, the cells it touches and the gap it leaves; detection_basis and linked_subcap_ids are what it renders. No separate section exists."
+  ],
+  "techstack": {
+   "surface_id": "T1, T3",
+   "required": true,
+   "fields": {
+    "items": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "The client's actual stack, each entry a PRODUCT with its vendor and evidence. Per item: {ts_id, vendor, product, layer, pillar_id, status, evidence_level, detection_basis, as_of, linked_subcap_ids[], e_ids[]}. A PRODUCT, not a service and not a category — 'Salesforce Financial Services Cloud' is a product; 'CRM', 'Analytics/BI', 'Django' are not; vendor and product are separate fields. layer OPS|CUST|DATA|INFRA (OPS=Operations & core banking, P3 · CUST=Customer engagement, P2, primary gap · DATA=Data & analytics, P4 · INFRA=Infrastructure & cloud, P4) — NOT L2-L5, those keys collide with the L1-L4 evidence levels on the same card. status CONFIRMED|INFERRED|CLAIMED|ABSENT, REQUIRED on every row — the landscape strip recomputes its four counts from this field; without it the strip is uncomputable. evidence_level L1-L4, and it governs the verb the prose may use — CONFIRMED is Evidence Level 1-2 and requires a T1/T2 source; a CONFIRMED row without a citation is a defect, not a style (either the citation was dropped or the status should be INFERRED; confidence never stands in for evidence); an ABSENT row backed by a demand signal (e.g. job postings) licenses 'signals suggest', never 'uses'. detection_basis one clause, printed on the detail page (T3). Every item cites the evidence that places it in this client's estate — an item you cannot cite is a rumour: put it in dropped[] with the reason. ts_id agent-minted (TS-nnn). dma_impact, peer_coverage and peer_deployments are OPTIONAL per row and are the drilldown's explanation. dma_impact: 40-90 words saying WHICH of this row's linked_subcap_ids the product bears on, what it reaches and what it does not, and by what mechanism — the cells and their scores are already served, so this field is the reasoning that connects them. Never derive or restate a score, never project an uplift (no source states one), and frame what is not covered as available value rather than as a failing: 'the estate does not yet reach X', never 'the vendor fails to X'. peer_coverage: a share in 0..1 of the run's NAMED peer set publicly running this product — a percentage sent as 62 rather than 0.62 is refused. peer_deployments: the per-peer breakdown behind that share, [{peer, deployed, basis, source_url, as_of}], one row per peer INCLUDING the peers you could not establish (deployed: null) — a coverage figure of 2/5 with three unknowns is not 2/5, and the card has to be able to say so. A technographic claim about a named institution is a research finding: without source_url and as_of it is not one."
+    },
+    "layers": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Layer rollup, per layer: {layer, pillar_id, detected, expected, is_primary_gap}. Four layer cards — operations, customer engagement, data, infrastructure — each with a pillar tag and a detection count ('2 of 4 detected'). The layering is the analysis: detected-of-expected at a layer with a pillar tag says where the gap is and which pillar absorbs it. is_primary_gap is a semantic flag — PRIMARY GAP LAYER is a judgement the surface makes explicitly; no colour in the payload."
+    },
+    "dropped": {
+     "required": true,
+     "type": "list",
+     "item_type": "object",
+     "doc": "Per dropped candidate: {candidate, reason} — candidates rejected by the taxonomy, with the reason. dropped[] is reported, not hidden: it is how a taxonomy gap becomes visible. MAY BE EMPTY: a run that dropped no candidate has an empty list, and that is the ordinary case rather than a finding — so CG-17 does not require an empty_state for it. Every other required list on this page does.",
+     "may_be_empty": true
+    },
+    "compliance_attestations": {
+     "required": false,
+     "type": "list",
+     "item_type": "string",
+     "doc": "Client-stated compliance attestations (e.g. 'SOC 2 Type II'), one string per attestation, from profile/research only — never inferred from a vendor's marketing. The Surface Spec names the field without an item shape; kept as plain strings, cited via the envelope e_ids."
+    }
+   }
+  }
+ }
+}

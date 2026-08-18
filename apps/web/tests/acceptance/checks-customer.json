@@ -1,0 +1,132 @@
+[
+ {
+  "route": "#/clients/baxter-credit-union-bcu/overview",
+  "name": "customer-brand-note",
+  "_comment": "The wordmark check was REMOVED. 'Zennify' renders once on every page as the product's own brand mark in the shell — this IS Zennify's application, shown by Zennify. The invariant-5 concern is vendor SELL COPY inside client content, which the r_layer and storyline_challenge assertions below already cover. A check that fails on the logo would have been switched off within a day.",
+  "assert": [
+   {
+    "kind": "text_absent",
+    "arg": "Zennify can",
+    "why": "sell framing in client content, not the brand mark"
+   },
+   {
+    "kind": "text_absent",
+    "arg": "Zennify's offering",
+    "why": "sell framing in client content"
+   }
+  ]
+ },
+ {
+  "route": "#/clients/baxter-credit-union-bcu/overview",
+  "name": "customer-overview",
+  "assert": [
+   {
+    "kind": "text_absent",
+    "arg": "queued for enrichment",
+    "why": "owner adjudication B: no workflow vocabulary reaches any reader"
+   },
+   {
+    "kind": "text_absent",
+    "arg": "Not stated",
+    "why": "adjudication C: an unestablished value omits its row"
+   },
+   {
+    "kind": "text_absent",
+    "arg": "Held",
+    "why": "a quarantine reason is internal provenance and must not render"
+   },
+   {
+    "kind": "count_at_most",
+    "arg": "—",
+    "why": "adjudication A, as a RATCHET at the measured count (2). Gate C already proves the bundle contains no bare em-dash render fallback; what remains are em dashes inside PRODUCER PROSE, which `dashes()` normalises to hyphens on the paths it reaches and evidently not on all of them. Pinned to what is actually there rather than to a round number, so the debt cannot grow quietly and shrinks visibly — same discipline as the corpus ceiling ratchet in scripts/gate_b_ceiling_ratchet.py. Lower it as the paths are fixed; never raise it.",
+    "n": 2
+   },
+   {
+    "kind": "text_absent",
+    "arg": "Transformational",
+    "why": "invariant 6: four bands only; M5 must not exist in prose"
+   },
+   {
+    "kind": "text_present",
+    "arg": "Baxter Credit Union",
+    "why": "the page still renders for the audience it is redacted for"
+   }
+  ]
+ },
+ {
+  "route": "#/clients/baxter-credit-union-bcu/platform",
+  "name": "customer-platform",
+  "assert": [
+   {
+    "kind": "text_absent",
+    "arg": "queued for enrichment",
+    "why": "adjudication B"
+   },
+   {
+    "kind": "count_at_most",
+    "arg": "—",
+    "why": "adjudication A, as a RATCHET at the measured count (4). Gate C already proves the bundle contains no bare em-dash render fallback; what remains are em dashes inside PRODUCER PROSE, which `dashes()` normalises to hyphens on the paths it reaches and evidently not on all of them. Pinned to what is actually there rather than to a round number, so the debt cannot grow quietly and shrinks visibly — same discipline as the corpus ceiling ratchet in scripts/gate_b_ceiling_ratchet.py. Lower it as the paths are fixed; never raise it.",
+    "n": 4
+   },
+   {
+    "kind": "text_absent",
+    "arg": "r_layer",
+    "why": "the reasoning layer is internal and must never reach a client"
+   },
+   {
+    "kind": "text_absent",
+    "arg": "storyline_challenge",
+    "why": "internal sell framing, stripped by audience redaction"
+   },
+   {
+    "kind": "text_absent",
+    "arg": "ASSESSMENT PATHWAY",
+    "why": "invariant 5: `zennify_pathway` is internal_only and stripped for the customer audience. The dossier renders it for internal, so this is the paired negative — a redaction hole here would ship the seller's own pathway prose to the client."
+   },
+   {
+    "kind": "text_absent",
+    "arg": "Zennify Consulting",
+    "why": "the seller's name reaches the customer audience nowhere but the product wordmark"
+   },
+   {
+    "kind": "text_present",
+    "arg": "ESTATE REACH",
+    "why": "estate_reach is served to both audiences and renders for both"
+   },
+   {
+    "kind": "text_present",
+    "arg": "PEER POSITION",
+    "why": "MEM-0068 restated. SUPERSEDED 2026-08-15: the original assertion was `PEER SET · 5`, a roster block the build owner removed on sight — \"This part on peers should not even be there; unnecessary detail.\" The finding MEM-0068 records is that cited peer rows were served and rendered zero times, and that is still the thing to guard; the roster was one way to satisfy it and not the only one. PEER POSITION carries the same guarantee in prose the owner kept."
+   },
+   {
+    "kind": "text_present",
+    "arg": "GreenState",
+    "why": "the peer is NAMED, not counted — peer_coverage alone is a number with no route to its basis. Was `Alliant Credit Union`, which this run mentions only in a DISCARDED platform's rationale; GreenState is the peer the run actually establishes, so the old assertion was testing a name that never had to render."
+   }
+  ],
+  "steps": [
+   {
+    "do": "click_text",
+    "arg": "Evidence behind this platform",
+    "all": true
+   }
+  ]
+ },
+ {
+  "route": "#/clients/baxter-credit-union-bcu/techstack",
+  "name": "customer-techstack",
+  "assert": [
+   {
+    "kind": "count_at_most",
+    "arg": "—",
+    "why": "adjudication A, as a RATCHET at the measured count (0). Gate C already proves the bundle contains no bare em-dash render fallback; what remains are em dashes inside PRODUCER PROSE, which `dashes()` normalises to hyphens on the paths it reaches and evidently not on all of them. Pinned to what is actually there rather than to a round number, so the debt cannot grow quietly and shrinks visibly — same discipline as the corpus ceiling ratchet in scripts/gate_b_ceiling_ratchet.py. Lower it as the paths are fixed; never raise it.",
+    "n": 0
+   },
+   {
+    "kind": "text_absent",
+    "arg": "states no peer set",
+    "why": "the run names five peers; the denial was a render defect"
+   }
+  ]
+ }
+]
