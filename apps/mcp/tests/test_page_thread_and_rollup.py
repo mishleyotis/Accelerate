@@ -180,3 +180,72 @@ def test_a_missing_detected_is_not_this_gates_business():
                              _ts([_row("TS-001", "OPS", "CONFIRMED")],
                                  [{"layer": "OPS", "pillar_id": "P3",
                                    "expected": 7}])), "CG-24")
+
+
+# ── CG-25 · one card per argument ──────────────────────────────────────
+#
+# Nothing deduplicated insight cards anywhere in the pipeline. The adapter
+# is a straight map, so a card written twice renders twice AND counts twice
+# toward the headline count a reader takes on trust.
+
+def _card(ic_id, title, what):
+    return {"ic_id": ic_id, "title": title, "what_text": what,
+            "why_text": "The mechanism, named.",
+            "so_what_text": "The decision this implies.",
+            "alternative_explanation": "The reading that would refute it.",
+            "severity": "HIGH", "severity_rationale": "Why this severity.",
+            "linked_subcap_id": "P4C2.5.1", "supporting_e_ids": ["E-CC-001"],
+            "validation_question": "What would settle this?",
+            "confidence": "HIGH", "claim_label": "FACT"}
+
+
+def _ins(cards):
+    return {"insights": {
+        "produced_at": "2026-08-18T00:00:00Z", "producer_version": "t",
+        "e_ids": [], "internal_only": [], "narrative_thread": "thread",
+        "cards": cards}}
+
+
+def test_two_cards_with_one_id():
+    r = _ids(_reasons("insights", _ins([
+        _card("IC-001", "The interval before the threshold is the capacity", "A"*40),
+        _card("IC-001", "Models run today; the register does not", "B"*40)])), "CG-25")
+    assert r and r[0]["path"] == "insights.cards[1].ic_id"
+
+
+def test_the_same_argument_reformatted_is_still_one_argument():
+    """A byte comparison would let this through, which is the point.
+
+    The two titles differ by a comma and a capital. Nothing about that makes
+    a second argument.
+    """
+    r = _ids(_reasons("insights", _ins([
+        _card("IC-001", "Models run today; the register does not", "A"*40),
+        _card("IC-002", "Models run today, the Register does not", "B"*40)])), "CG-25")
+    assert r and "title" in r[0]["path"]
+
+
+def test_the_same_claim_under_two_titles():
+    claim = ("The register that governs the models this institution runs "
+             "does not exist in any retrievable form, and supervision asks "
+             "for it first.")
+    r = _ids(_reasons("insights", _ins([
+        _card("IC-001", "Models run today; the register does not", claim),
+        _card("IC-002", "Governance is the cheapest thing left", claim)])), "CG-25")
+    assert r and "what_text" in r[0]["path"]
+
+
+def test_eight_distinct_cards_pass():
+    cards = [_card(f"IC-{i:03d}", f"A distinct argument number {i}",
+                   f"The {i}th claim about this client, stated once and cited.")
+             for i in range(1, 9)]
+    assert not _ids(_reasons("insights", _ins(cards)), "CG-25")
+
+
+def test_a_blank_field_is_not_a_duplicate_of_another_blank():
+    """Two cards missing a title is a CG-01 problem, not a CG-25 one.
+
+    Two gates refusing one defect makes the verdict harder to act on.
+    """
+    cards = [_card("IC-001", "", "A"*40), _card("IC-002", "", "B"*40)]
+    assert not _ids(_reasons("insights", _ins(cards)), "CG-25")

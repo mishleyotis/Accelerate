@@ -170,6 +170,62 @@ _CG20_GENERIC = frozenset((
 ))
 
 
+def _card_key(text) -> str:
+    """The comparison both sides of a duplicate get reduced to.
+
+    Words, lowercased, in order. Punctuation, capitalisation and whitespace
+    are formatting; two cards that differ only in those are one argument
+    written twice, and a byte comparison would let a stray comma pass a
+    duplicate through.
+    """
+    return " ".join(re.findall(r"[a-z0-9]+", str(text or "").lower()))
+
+
+def _check_cards_unique(section, body) -> list:
+    """CG-25 — one card per argument.
+
+    Nothing deduplicates insight cards anywhere: `adaptInsights` is a
+    straight `.map`, so a card written twice renders twice and counts twice
+    toward the headline count the reader takes on trust. The issue register
+    carries a dedup rule for precisely this failure; the cards, which are
+    the page's whole argument, carried none.
+
+    Checked on three keys because they fail differently. A repeated `ic_id`
+    is a minting slip and the second row overwrites the first at promotion.
+    A repeated title or claim is the same argument written twice, which no
+    id check would ever see.
+    """
+    if section != "insights" or not isinstance(body, dict):
+        return []
+    cards = body.get("cards")
+    if not isinstance(cards, list):
+        return []
+    out = []
+    for field, label in (("ic_id", "identifier"),
+                         ("title", "title"),
+                         ("what_text", "claim")):
+        seen = {}
+        for i, c in enumerate(cards):
+            if not isinstance(c, dict):
+                continue
+            key = _card_key(c.get(field))
+            if not key:
+                continue
+            if key in seen:
+                first = seen[key]
+                out.append(_reason(
+                    "CG-25", section, f"{section}.cards[{i}].{field}",
+                    f"this card's {label} is the one card {first} already "
+                    f"carries. Two cards saying the same thing render twice "
+                    f"and count twice toward the headline the reader trusts, "
+                    f"so merge them into the argument you meant to make, or "
+                    f"make the second one a different argument. Compared on "
+                    f"words, so reformatting one copy does not separate them."))
+            else:
+                seen[key] = f"cards[{i}]"
+    return out
+
+
 def _check_page_thread(page, section, fields, body) -> list:
     """CG-23 — a section whose writer stores a thread carries one.
 
@@ -481,6 +537,7 @@ def validate_pass1(page: str, payload: dict) -> list:
 
         reasons.extend(_check_page_thread(page, name, fields, body))
         reasons.extend(_check_rollup_agrees(name, body))
+        reasons.extend(_check_cards_unique(name, body))
 
         # id-pattern discipline
         for i, e in enumerate(body.get("e_ids") or []):

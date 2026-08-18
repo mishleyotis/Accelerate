@@ -127,6 +127,16 @@ GATES = {
               "on one page counting different things is the shape a reader "
               "reads as 'this client has no tech stack'.",
               "block"),
+    "CG-25": ("One card per argument", None,
+              "No two insight cards share an ic_id, a title, or a "
+              "what_text — compared on words, so reformatting one copy does "
+              "not make it a second argument.",
+              "Nothing deduplicates insight cards anywhere in the pipeline: "
+              "the adapter is a straight map, so a card written twice renders "
+              "twice AND counts twice toward the headline the reader trusts. "
+              "The issue register has a dedup rule for exactly this reason "
+              "and the cards, which are the page's whole argument, had none.",
+              "block"),
     "CG-04": ("No invented fields", None,
               "No field outside the section contract, envelope included.",
               "Payload shapes are law; an invented field is a contract fork.",
