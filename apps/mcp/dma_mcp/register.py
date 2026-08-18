@@ -148,6 +148,14 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
     tier_bad = source_rules.tier_violation(source_url, tier)
     if tier_bad:
         errors.append(tier_bad)
+    # The same check running the other way. `tier_violation` catches a weak
+    # source claimed strong; this catches a STRONG source filed weak, which
+    # is the failure nobody looks for because it does not read like a defect
+    # — it reads like a thin client. MEM-0087.
+    scan_bad = source_rules.scan_tier_violation(
+        item.get("source_name"), tier, item.get("origin"))
+    if scan_bad:
+        errors.append(scan_bad)
     absence_bad = source_rules.absence_as_capability(excerpt, claim)
     if absence_bad:
         errors.append(absence_bad)

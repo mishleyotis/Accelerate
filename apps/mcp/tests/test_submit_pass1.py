@@ -28,8 +28,14 @@ ENVELOPE_OK = {"produced_at": "2026-08-04T12:00:00Z",
                "e_ids": [], "internal_only": []}
 
 
+#: techstack.techstack binds `narrative_thread`, so CG-23 requires one on
+#: any payload meant to PASS. The bad-payload cases below deliberately omit
+#: it and assert on the gate they are about.
+THREAD = "Thread " + " ".join(["thread"] * 49)
+
+
 def _min_section(**fields):
-    return {**ENVELOPE_OK, **fields}
+    return {**ENVELOPE_OK, "narrative_thread": THREAD, **fields}
 
 
 # ── pure pass-1 checks (no DB) ─────────────────────────────────────────

@@ -250,3 +250,60 @@ def test_no_url_is_not_a_regulator():
     assert not SR.regulatory_publisher(None)
     assert not SR.regulatory_publisher("")
     assert not SR.regulatory_publisher("not-a-url")
+
+
+# ── A machine technographic scan is T1 (MEM-0087) ──────────────────────
+#
+# The mirror image of the Fortinet case above. That one is a weak source
+# claimed strong and it reads like a defect on sight. This one is a STRONG
+# source filed weak, and it reads like a thin client — which is why it sat
+# in four documents as a warning and in no code as a check.
+
+def test_the_scan_that_was_filed_t4():
+    """The exact registration that shipped: T4 on a technographic scan."""
+    name = "Company technographic scan of logixbanking.com, third pass 2026-08-18"
+    flaw = SR.scan_tier_violation(name, "T4")
+    assert flaw and flaw.startswith("tier_too_low:"), flaw
+    # The refusal has to name the ceiling, not just the tier, because the
+    # consequence is what the producer needs in order to act.
+    assert "CONFIRMED" in flaw and "T1" in flaw
+
+
+@pytest.mark.parametrize("name", [
+    "Explorium enrich-business-technographics for logixbanking.com",
+    "BuiltWith technology profile, retrieved 2026-08-18",
+    "Wappalyzer scan of the client domain",
+    "HG Insights technographic enrichment",
+    "Clay technographic data point",
+    "webstack scan of www.example.com",
+])
+def test_the_scan_shapes(name):
+    assert SR.scan_tier_violation(name, "T3"), name
+    assert SR.scan_tier_violation(name, "T1") is None, name
+
+
+def test_a_document_about_a_scan_is_not_a_scan():
+    """The escape hatch the refusal itself names, and it has to work.
+
+    A vendor's blog post discussing technographic data is a T5 marketing
+    page; refusing it for being filed below T1 would be the rule inverting
+    into the very error it exists to prevent.
+    """
+    for name in ("Siemens case study naming the client's data preparation stack",
+                 "NCUA call report, 2026 Q1",
+                 "Logix Federal Credit Union job description, Programmer Analyst IV",
+                 "CUInsight press release on fraud operations"):
+        assert SR.scan_tier_violation(name, "T5") is None, name
+        assert SR.scan_tier_violation(name, "T3") is None, name
+
+
+def test_the_rule_reads_origin_when_the_name_is_silent():
+    assert SR.scan_tier_violation("logixbanking.com", "T4",
+                                  origin="explorium") is not None
+    assert SR.scan_tier_violation("logixbanking.com", "T4") is None
+
+
+def test_no_tier_and_no_name_are_not_violations():
+    assert SR.scan_tier_violation(None, "T4") is None
+    assert SR.scan_tier_violation("BuiltWith profile", None) is None
+    assert SR.scan_tier_violation("", "") is None

@@ -183,6 +183,89 @@ def tier_violation(source_url: str | None, tier: str | None) -> str | None:
         "from a page like this, registered T1 at ERS 4.20.")
 
 
+# ── A machine technographic scan is T1 ─────────────────────────────────
+#
+# THE CORPUS'S MOST COMMON MISCLASSIFICATION, documented in four places and
+# enforced in none: PRD 262 and 993, QA Report 687, Implementation Plan 451,
+# Surface Spec 1262 all state it flatly — *"A machine technographic scan is
+# T1, never T4 — filing it as T4 caps the capability and silently suppresses
+# the score."* The tier table puts machine scans beside regulatory and
+# audited sources at weight 1.0 with an L5 ceiling, because a scan is a
+# MEASUREMENT of the estate rather than anybody's account of it.
+#
+# Measured 2026-08-18 on the third client (MEM-0087). Its company
+# technographic scan was registered T4 at ERS 3.75. The same scan output,
+# registered T1, scored 4.4-4.8 across eight category spans: a mean ERS
+# swing of +0.85 on identical content, from the tier alone. T4's L2.5
+# ceiling is below the L1-L2 that CONFIRMED requires, so every register row
+# citing that scan alone was capped short of CONFIRMED — and the tech
+# surface rendered "0 of 6 detected" while naming six real products. The
+# suppression is invisible at the point it happens and only shows up as an
+# empty-looking page several stages later.
+#
+# The tier is checkable because the scan names itself: these are the
+# products that produce technographic scans, not an open set of vendors, so
+# an allowlist is the right shape here for the same reason it was right for
+# regulators and wrong for vendor collateral.
+_SCAN_PRODUCER = (
+    "explorium", "builtwith", "wappalyzer", "hubbl", "hg insights",
+    "hginsights", "datanyze", "similartech", "netcraft", "clearbit",
+    "zoominfo technologies", "predictleads", "slintel", "6sense",
+    "clay technographic",
+)
+#: The words a producer uses when it is describing a scan rather than a
+#: document. Paired with a producer name OR standing alone, because the
+#: scan's identity is in what it IS, and "company technographic scan of
+#: <domain>" named no vendor at all in the run this rule comes from.
+_SCAN_PHRASE = (
+    "technographic scan", "technographic enrichment", "technology scan",
+    "machine scan", "tech stack scan", "webstack scan", "technographics",
+)
+SCAN_MIN_TIER = "T1"
+
+
+def scan_source(source_name: str | None, origin: str | None = None) -> str | None:
+    """The scan class this source belongs to, or None if it is not a scan.
+
+    Matched on the source's own description rather than its URL, because a
+    scan characteristically HAS no URL — the artefact is a tool result, not
+    a page — which is exactly why the vendor-collateral path rule beside
+    this one cannot see it.
+    """
+    hay = " ".join(x for x in (source_name, origin) if x).lower()
+    if not hay:
+        return None
+    for phrase in _SCAN_PHRASE:
+        if phrase in hay:
+            return phrase
+    for producer in _SCAN_PRODUCER:
+        if producer in hay:
+            return f"a {producer} scan"
+    return None
+
+
+def scan_tier_violation(source_name: str | None, tier: str | None,
+                        origin: str | None = None) -> str | None:
+    """The reason this tier cannot be claimed for a machine scan, or None."""
+    what = scan_source(source_name, origin)
+    if not what or not tier:
+        return None
+    if _TIER_ORDER.get(tier, 9) <= _TIER_ORDER[SCAN_MIN_TIER]:
+        return None
+    return (
+        f"tier_too_low: this source describes {what}, and the tier table "
+        f"puts machine technographic scans at {SCAN_MIN_TIER} beside "
+        f"regulatory and audited sources — it was registered {tier}. "
+        f"{tier} carries a lower ceiling than the L1-L2 a CONFIRMED tech "
+        "register row needs, so filing a scan here does not merely weaken "
+        "the row, it caps every claim resting on it below confirmation and "
+        "says nothing about why. Measured once already: the same scan "
+        "output scored ERS 3.75 at T4 and 4.4-4.8 at T1, and the surface "
+        "rendered 0 detected while naming six products. Register it "
+        f"{SCAN_MIN_TIER}. If this is not a scan but a write-up ABOUT one, "
+        "name the document in source_name so the rule can tell them apart."
+    )
+
 # ── An absence is not a capability ─────────────────────────────────────
 #
 # Both spellings, because the adversarial pass found that the negation

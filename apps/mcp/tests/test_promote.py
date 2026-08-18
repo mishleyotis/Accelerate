@@ -45,8 +45,21 @@ def _connect(user):
                                 port=5432, database="dma_insights")
 
 
+#: CG-23 refuses a section whose writer stores a page thread and got none.
+#: The fixture adds one only where the CONTRACT binds it, because adding it
+#: everywhere would trip CG-04 on the sections that have nowhere to put one —
+#: which is the same asymmetry the gate itself reads.
+THREAD = "Thread " + " ".join(["thread"] * 49)
+
+
+def _thread_if_bound(page: str, name: str) -> dict:
+    return ({"narrative_thread": THREAD}
+            if "narrative_thread" in sections(page)[name]["fields"] else {})
+
+
 def _empty_page(page: str) -> dict:
-    return {name: {**ENV, "empty_state": EMPTY} for name in sections(page)}
+    return {name: {**ENV, "empty_state": EMPTY, **_thread_if_bound(page, name)}
+            for name in sections(page)}
 
 
 def _hero_page() -> dict:
@@ -63,7 +76,7 @@ def _hero_page() -> dict:
         "framing": ("Early digital maturity, with strategy work under way "
                     "and clear peer gaps across the group."),
         "claim_label": "FACT", "confidence": "HIGH",
-        "narrative_thread": "Thread " + " ".join(["thread"] * 49),
+        "narrative_thread": THREAD,
     }
     return page
 

@@ -102,6 +102,31 @@ GATES = {
               "so a list with one member passed every gate and which members "
               "it carried was documentation rather than contract.",
               "block"),
+    "CG-23": ("Every page's own thread is written", None,
+              "A section whose writer stores `narrative_thread` carries a "
+              "non-empty one. The contract's words: a page is not a "
+              "container for surfaces, and if the thread cannot be written "
+              "the surfaces are not yet a page.",
+              "Measured 2026-08-18 on the third client: 16 of its 34 "
+              "sections promoted with a null thread against 32 of 33 on the "
+              "reference client, and every gate was green. `required: false` "
+              "is right for the FIELD, because six writers bind the thread "
+              "at item grain instead, but it left the page-level obligation "
+              "unenforced everywhere, and the surfaces that lost it are the "
+              "ones a reader arrives at first.",
+              "block"),
+    "CG-24": ("A rollup agrees with the rows it rolls up", None,
+              "A layer rollup's `detected` equals the number of that layer's "
+              "own register rows carrying a detected status. Computed from "
+              "items[], never taken from the payload.",
+              "Invariant 8 — counts are computed, never stored where a "
+              "source of truth exists. Measured 2026-08-18: a tech register "
+              "serving six named operations products beside `detected: 0` "
+              "for the same layer, because the rollup was written before "
+              "four rows were added and nothing recomputed it. Two figures "
+              "on one page counting different things is the shape a reader "
+              "reads as 'this client has no tech stack'.",
+              "block"),
     "CG-04": ("No invented fields", None,
               "No field outside the section contract, envelope included.",
               "Payload shapes are law; an invented field is a contract fork.",

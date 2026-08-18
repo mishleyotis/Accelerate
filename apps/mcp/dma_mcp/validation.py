@@ -170,6 +170,92 @@ _CG20_GENERIC = frozenset((
 ))
 
 
+def _check_page_thread(page, section, fields, body) -> list:
+    """CG-23 — a section whose writer stores a thread carries one.
+
+    The contract registry merges `narrative_thread` into a section's fields
+    only where that section's WRITER binds the column (contracts.py,
+    `_section_meta_for`), so the presence of the key in `fields` is exactly
+    the question "does this section have somewhere to put a thread". Six of
+    the thirty-four writers bind it at item grain instead and are silently
+    exempt here, which is why the field itself stays `required: false` and
+    this check reads the writer rather than the flag.
+
+    Measured 2026-08-18: the third client promoted 16 of 34 sections with a
+    null thread; the reference client had 32 of 33 written. Nothing refused
+    either, because `required: false` is a statement about the FIELD and the
+    obligation is about the PAGE.
+    """
+    if "narrative_thread" not in (fields or {}):
+        return []
+    if not isinstance(body, dict):
+        return []
+    thread = body.get("narrative_thread")
+    if isinstance(thread, str) and thread.strip():
+        return []
+    return [_reason(
+        "CG-23", section, f"{section}.narrative_thread",
+        "this section's writer stores a page thread and none was sent. "
+        "45-75 words tracing the line through this page's surfaces in "
+        "render order, written last from what was actually produced. A "
+        "page is not a container for surfaces; if the thread cannot be "
+        "written, the surfaces are not yet a page.")]
+
+
+#: Statuses that count toward a layer's `detected` figure. CONFIRMED and
+#: INFERRED are the two the contract calls detected; CLAIMED is a supplier's
+#: word for it and ABSENT is a searched absence, and neither is a detection.
+_DETECTED_STATUSES = frozenset({"CONFIRMED", "INFERRED"})
+
+
+def _check_rollup_agrees(section, body) -> list:
+    """CG-24 — `layers[].detected` equals what items[] actually holds.
+
+    Invariant 8: counts are computed, never stored where a source of truth
+    exists, and `items` is the source of truth for `detected`. Measured
+    2026-08-18: a register serving six named OPS products beside
+    `detected: 0` on the OPS card, because four rows were appended after the
+    rollup was written and nothing recomputed it. Both numbers passed every
+    other gate; the page reads as an empty estate.
+
+    The refusal states the arithmetic, per charter invariant 12: the layer,
+    the figure sent, the figure computed, and which rows were counted.
+    """
+    if section != "techstack" or not isinstance(body, dict):
+        return []
+    layers, items = body.get("layers"), body.get("items")
+    if not isinstance(layers, list) or not isinstance(items, list):
+        return []
+    counted = {}
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        lay = str(it.get("layer") or "").strip().upper()
+        if str(it.get("status") or "").strip().upper() in _DETECTED_STATUSES:
+            counted[lay] = counted.get(lay, 0) + 1
+    out = []
+    for i, lay in enumerate(layers):
+        if not isinstance(lay, dict):
+            continue
+        name = str(lay.get("layer") or "").strip().upper()
+        sent = lay.get("detected")
+        if not isinstance(sent, int) or isinstance(sent, bool):
+            continue
+        got = counted.get(name, 0)
+        if sent != got:
+            rows = sum(1 for it in items
+                       if isinstance(it, dict)
+                       and str(it.get("layer") or "").strip().upper() == name)
+            out.append(_reason(
+                "CG-24", section, f"{section}.layers[{i}].detected",
+                f"layer {name} sends detected={sent} and its own items[] "
+                f"hold {got}: of the {rows} rows on this layer, {got} carry "
+                f"status CONFIRMED or INFERRED. Compute this figure from "
+                f"items[] at build time rather than asserting it, or the two "
+                f"numbers on the card drift apart the moment a row is added."))
+    return out
+
+
 def _check_vendor_is_a_company(section, fname, spec, val) -> list:
     if fname != "items" or section != "techstack":
         return []
@@ -380,6 +466,9 @@ def validate_pass1(page: str, payload: dict) -> list:
             reasons.extend(_check_must_present(name, fname, spec, val,
                                                empty_declared))
             reasons.extend(_check_vendor_is_a_company(name, fname, spec, val))
+
+        reasons.extend(_check_page_thread(page, name, fields, body))
+        reasons.extend(_check_rollup_agrees(name, body))
 
         # id-pattern discipline
         for i, e in enumerate(body.get("e_ids") or []):
