@@ -143,6 +143,121 @@ def check_dead_ends(page, body) -> list:
 
 
 # ── C · the drop signature ────────────────────────────────────────────
+#: Basis carriers — the payload keys where a producer STATES why a value is
+#: absent. Read by `_absence_attributed` below; the list is deliberately the
+#: same vocabulary the payload contracts use for stated absences.
+_BASIS_KEYS = ("peer_basis", "proxy_disclosure", "empty_state",
+               "enrichment_status", "peer_synthesis", "reach_note",
+               "not_run_reason", "quarantine_reason", "empty_reason")
+
+
+def _absence_attributed(body, shape: str, leaf: str) -> bool:
+    """Does the payload STATE why this column is null, where a reader gets it?
+
+    The C-DROP message has always said the next step is attribution — "a
+    producer short of data leaves a scatter, and a perfect column means the
+    value was either never written or lost". Measured 2026-08-18 on the first
+    fully promoted client, a third state exists: never written BECAUSE the
+    basis does not exist, and SAID so. `scores.pillars[]` served
+    `peer_basis: "cannot_estimate"` on every row while this check flagged the
+    null `peer_median` beside it as a drop. Peer scoring is a recorded pending
+    phase of that assessment; the column is a stated absence, not a lost value.
+
+    Two carriers count, both of which render to a reader:
+      · a sibling `*_basis` key non-null in the same section (row-level), or
+      · a section-level basis text (`proxy_disclosure`, `empty_state.reason`,
+        `peer_synthesis`, …) that NAMES the leaf or its stem.
+    A basis that names nothing attributes nothing — "peer" prose does not
+    excuse a null `fit_score` — and an unattributed perfect column still
+    BLOCKS, which is the negative control the tests pin.
+    """
+    stem = leaf.split("_")[0].lower()
+    section = shape.split(".")[1] if shape.startswith(".") else shape.split(".")[0]
+    hit = []
+
+    def _scan(node, in_section):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                inside = in_section or k == section
+                if inside and k in _BASIS_KEYS and v not in (None, "", [], {}):
+                    text = v if isinstance(v, str) else json.dumps(v)
+                    if stem in text.lower() or leaf.lower() in text.lower() \
+                            or k == f"{stem}_basis":
+                        hit.append(k)
+                _scan(v, inside)
+        elif isinstance(node, list):
+            for v in node:
+                _scan(v, in_section)
+
+    _scan(body, False)
+    if hit:
+        return True
+
+    # The connector's own stated-exception carrier. ET-07 accepts an unlinked
+    # citation when the section's `r_layer.probes_run` NAMES the id; the same
+    # rule holds here, and tighter than the stem match above: only the FULL
+    # leaf name counts, so "peer" prose cannot excuse `peer_deployments`.
+    def _probes(node):
+        if isinstance(node, dict):
+            rl = node.get("r_layer")
+            if isinstance(rl, dict):
+                for p in rl.get("probes_run") or []:
+                    if isinstance(p, str) and leaf.lower() in p.lower():
+                        hit.append("r_layer.probes_run")
+            for v in node.values():
+                _probes(v)
+        elif isinstance(node, list):
+            for v in node:
+                _probes(v)
+
+    _probes(body)
+    return bool(hit)
+
+
+_TERMINAL_STATUSES = {"RESOLVED", "CLOSED", "COMPLETE", "COMPLETED", "DONE",
+                      "ABANDONED", "WAIVED", "REMEDIATED"}
+
+
+def _event_not_yet(rows_by_container: dict, body, shape: str, leaf: str) -> bool:
+    """A null `*_on` / `*_at` / `*_date` beside a non-terminal status is an
+    event that has not happened — invariant 9's third clause, not a drop.
+
+    Measured 2026-08-18: `issue_register.issues[].resolved_on` null on all
+    three rows, every row `status: OPEN`. An open issue HAS no resolution
+    date; writing one would be a sentinel wearing a measurement's clothes.
+    The exemption is per-row and refuses the terminal case: a RESOLVED issue
+    with a null resolved_on is exactly the drop this check exists for, and
+    the tests pin that direction.
+    """
+    if not (leaf.endswith("_on") or leaf.endswith("_at")
+            or leaf.endswith("_date")):
+        return False
+    container_shape = shape.rpartition(".")[0]
+    rows = rows_by_container.get(container_shape) or ()
+    if not rows:
+        return False
+
+    def _row_at(node, concrete):
+        # concrete like ".issue_register.data.issues[2]" — walk it.
+        cur = node
+        for part in re.findall(r"\.([A-Za-z_0-9]+)|\[(\d+)\]", concrete):
+            key, idx = part
+            try:
+                cur = cur[key] if key else cur[int(idx)]
+            except Exception:
+                return None
+        return cur if isinstance(cur, dict) else None
+
+    for concrete in rows:
+        row = _row_at(body, concrete)
+        if row is None:
+            return False
+        status = str(row.get("status") or "").upper()
+        if not status or status in _TERMINAL_STATUSES:
+            return False
+    return True
+
+
 def check_drop_signature(page, body) -> list:
     """A field null on 100% of its rows, over enough rows to mean something.
 
@@ -203,6 +318,24 @@ def check_drop_signature(page, body) -> list:
         if n != t or t < DROP_MIN_ROWS:
             continue
         if any(r in shape for r in REDACTED_BY_DESIGN):
+            continue
+        _, _, leaf_name = shape.rpartition(".")
+        if _event_not_yet(rows, body, shape, leaf_name):
+            out.append(_v("WARN", "C-DROP", page, shape,
+                          f"null on all {t} rows of {container}, every row in "
+                          "a non-terminal status — the event has not happened "
+                          "and its date is correctly null (invariant 9).",
+                          rows_null=n, rows_total=t))
+            continue
+        if _absence_attributed(body, shape, leaf_name):
+            # A stated absence is visible, not silent: WARN keeps it in the
+            # findings list an operator reads; --api exits only on BLOCKERs.
+            out.append(_v("WARN", "C-DROP", page, shape,
+                          f"null on all {t} rows of {container}, and the "
+                          "payload states the basis for the absence — an "
+                          "attributed column, reported for visibility rather "
+                          "than as a drop.",
+                          rows_null=n, rows_total=t))
             continue
         out.append(_v("BLOCKER", "C-DROP", page, shape,
                       f"null on all {t} rows of {container}. That is the drop "

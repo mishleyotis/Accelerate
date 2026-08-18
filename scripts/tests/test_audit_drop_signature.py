@@ -99,3 +99,103 @@ def test_a_short_list_is_below_the_floor():
     """Two null rows is not a signature; it is two rows."""
     body = {"s": {"data": {"rows": [{"b": None}, {"b": None}]}}}
     assert au.check_drop_signature("p", body) == []
+
+
+# ── attributed absence: stated basis downgrades to WARN, never silence ─
+def _rows(basis=None, section_basis=None):
+    rows = [{"pillar_id": f"P{i}", "score": 1.5, "peer_median": None,
+             **({"peer_basis": basis} if basis else {})} for i in range(1, 5)]
+    body = {"scores": {"data": {"pillars": rows}}}
+    if section_basis:
+        body["scores"]["data"]["empty_state"] = {"reason": section_basis}
+    return body
+
+
+def test_a_stated_row_basis_downgrades_the_drop_to_a_warn():
+    from audit_promoted_client import check_drop_signature
+    out = check_drop_signature("overview", _rows(basis="cannot_estimate"))
+    drops = [v for v in out if ".peer_median" in str(v)]
+    assert drops and all(d["level"] == "WARN" for d in drops), drops
+
+
+def test_an_UNATTRIBUTED_perfect_column_still_blocks():
+    """The negative control that decides whether the exemption can be
+    trusted: with no basis anywhere, the drop signature is what it was."""
+    from audit_promoted_client import check_drop_signature
+    out = check_drop_signature("overview", _rows())
+    drops = [v for v in out if ".peer_median" in str(v)]
+    assert drops and all(d["level"] == "BLOCKER" for d in drops), drops
+
+
+def test_a_section_basis_must_NAME_the_absent_value():
+    """'peer' prose does not excuse a null fit_score — a basis that names
+    nothing attributes nothing."""
+    from audit_promoted_client import check_drop_signature
+    body = {"platform_story": {"data": {
+        "empty_state": {"reason": "Peer scoring is a pending phase."},
+        "platforms": [{"platform": f"X{i}", "fit_score": None}
+                      for i in range(4)]}}}
+    out = check_drop_signature("platform", body)
+    drops = [v for v in out if ".fit_score" in str(v)]
+    assert drops and all(d["level"] == "BLOCKER" for d in drops), drops
+
+
+def test_a_section_basis_that_names_the_value_attributes_it():
+    from audit_promoted_client import check_drop_signature
+    body = {"platform_story": {"data": {
+        "empty_state": {"reason": "The platform fit engine returned no rows "
+                                  "for this run, so every fit_score is null "
+                                  "rather than estimated."},
+        "platforms": [{"platform": f"X{i}", "fit_score": None}
+                      for i in range(4)]}}}
+    out = check_drop_signature("platform", body)
+    drops = [v for v in out if ".fit_score" in str(v)]
+    assert drops and all(d["level"] == "WARN" for d in drops), drops
+
+
+# ── invariant 9: an event that has not happened has a null date ────────
+def _issues(status="OPEN", resolved=None):
+    return {"issue_register": {"data": {"issues": [
+        {"issue_id": f"IR-{i}", "status": status, "severity": "HIGH",
+         "resolved_on": resolved} for i in range(3)]}}}
+
+
+def test_a_null_date_on_open_rows_is_the_event_not_happening():
+    from audit_promoted_client import check_drop_signature
+    out = check_drop_signature("context", _issues(status="OPEN"))
+    drops = [v for v in out if ".resolved_on" in str(v)]
+    assert drops and all(d["level"] == "WARN" for d in drops), drops
+
+
+def test_a_null_date_on_TERMINAL_rows_is_still_a_drop():
+    """A RESOLVED issue with no resolved_on is exactly the lost value the
+    check exists for — the negative control on the invariant-9 exemption."""
+    from audit_promoted_client import check_drop_signature
+    out = check_drop_signature("context", _issues(status="RESOLVED"))
+    drops = [v for v in out if ".resolved_on" in str(v)]
+    assert drops and all(d["level"] == "BLOCKER" for d in drops), drops
+
+
+# ── the connector's own carrier: r_layer.probes_run names the leaf ─────
+def test_probes_run_naming_the_full_leaf_attributes_it():
+    from audit_promoted_client import check_drop_signature
+    body = {"techstack": {"data": {
+        "r_layer": {"probes_run": [
+            "peer_coverage and peer_deployments are null on every row: the "
+            "peer technographic pass is a recorded pending phase."]},
+        "items": [{"product": f"X{i}", "peer_coverage": None}
+                  for i in range(4)]}}}
+    out = check_drop_signature("techstack", body)
+    drops = [v for v in out if ".peer_coverage" in str(v)]
+    assert drops and all(d["level"] == "WARN" for d in drops), drops
+
+
+def test_probes_run_NOT_naming_the_leaf_does_not_attribute():
+    from audit_promoted_client import check_drop_signature
+    body = {"techstack": {"data": {
+        "r_layer": {"probes_run": ["peer work is pending."]},
+        "items": [{"product": f"X{i}", "peer_coverage": None}
+                  for i in range(4)]}}}
+    out = check_drop_signature("techstack", body)
+    drops = [v for v in out if ".peer_coverage" in str(v)]
+    assert drops and all(d["level"] == "BLOCKER" for d in drops), drops
