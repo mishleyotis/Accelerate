@@ -10,12 +10,30 @@ expensive ones — grain, identity and grounding — which only the server can c
         --subvertical SV2 --cells bundle.json
 
 What it covers beyond the contract: face budgets (CG-12), item dating (CG-10),
-sentence case (CG-11), closed vocabularies on TEXT columns (CG-09, including
-`arc_shape`, which the connector's own list does not reach), per-ITEM citation
-(AG-03), and the P2 recommendation card's anatomy — the two lists both called
-prerequisites, the KPI that is not a KPI without its baseline, and
+sentence case (CG-11), closed vocabularies on TEXT columns (CG-09), per-ITEM
+citation (AG-03), and the P2 recommendation card's anatomy — the two lists both
+called prerequisites, the KPI that is not a KPI without its baseline, and
 `provenance`, which the contract calls required and which shipped absent on
 every recommendation of the run this was written against.
+
+The governing rule is `check_agreement.py`'s: **LOCAL ⊆ SERVER on the classes
+both police**. A local BLOCK the connector does not raise is a false alarm, and
+it costs a producer a repair cycle on content that would have passed. Measured
+against a run whose six pages all PASS the gates, four rules here were charging
+exactly that, and all four are fixed in place rather than deleted:
+
+  · AG-03 now implements the exemption its own registry text states — a
+    recorded absence carrying its ladder asserts nothing (629 false blocks).
+  · the raw-taxonomy-code rule no longer fires on fields that exist to carry
+    ids: `subcap_id`, `catalogue_path`, `linked_subcap_ids` (94 false blocks).
+  · CG-09 on `arc_shape` follows the server's `leading` rule — the badge leads,
+    the sentence of evidence follows it.
+  · the prose rules ask the KEY, not the whole JSON path, so `context.*`,
+    `exec_summary.*` and `platform_story.*` no longer read as prose wholesale.
+
+Each of the four keeps its teeth: a bare empty citation list with no ladder
+still blocks, a taxonomy code inside real prose still blocks, a coined
+`arc_shape` still blocks, and a genuinely clipped paragraph still warns.
 
 Two flags unlock the two checks that need to know something about the run:
 `--subvertical` (the entity's, SV1-SV9 or the workbook code) turns on the
@@ -135,13 +153,91 @@ PROSE_KEYS = {
     "denominator_definition", "target_basis", "enrichment_basis",
     "proxy_disclosure", "maturity_effect", "empty_reason",
 }
+
+# Keys that are never a sentence, in three families — because the rule that
+# walked every string leaf read all three as prose:
+#   · verbatim spans, locators and proper names (quoted, not written)
+#   · the section envelope and the argument record (metadata ABOUT a section,
+#     not content OF it)
+#   · ids, enums and dates, each of which has its own check above
+# Measured on a run whose six pages all PASS the connector's gates: every one
+# of overview's 38 warnings was one of these read as prose.
 NEVER_SENTENCE = {
+    # verbatim spans, locators, proper names
     "excerpt", "quote", "verbatim", "snippet", "url", "source_url",
-    "linkedin_url", "producer_version", "source_domain", "domain", "email",
-    "phone", "e_id", "source_name", "vendor", "product", "name", "field",
-    "unit", "value", "kind", "layer", "status", "tier", "id",
+    "linkedin_url", "source_domain", "domain", "email", "phone",
+    "source_name", "source_title", "vendor", "product", "name", "field",
+    # the section envelope and the r_layer argument record
+    "produced_at", "producer_version", "internal_only", "e_id", "e_ids",
+    "claim_label", "confidence", "verdict", "challenger", "outcome",
+    # ids, enums, dates
+    "id", "subcap_id", "catalogue_path", "unit", "value", "kind", "layer",
+    "status", "tier", "signal", "phase", "provenance", "result", "severity",
+    "recency", "recency_band", "recency_tag", "band", "as_of", "event_date",
 }
 CAMEL_FIRST_WORD = re.compile(r"^[a-z]+[A-Z]")     # nCino, iOS, eBay
+
+# Keys whose value is a LABEL — a card-face claim carrying a word budget, not
+# a paragraph. The contract states the budgets (findings `title` <=12 words,
+# `consequence` 6-14 words, landscape `detail` one line), and a label takes no
+# terminal stop.
+LABEL_KEYS = {"title", "headline", "statement", "consequence", "label",
+              "metric", "l4_feature", "theme"}
+# Long enough to BE a paragraph. Under it, a prose key is holding a card-face
+# label and a missing full stop is the house style, not a clip; over it, a
+# missing stop is the clipped text this rule exists to catch.
+PROSE_MIN_WORDS = 15
+
+# A key holds prose when the KEY says so. Asking the question of the whole
+# JSON PATH — which is what this checker did — made every leaf on the
+# `context` page match "text", every leaf under `exec_summary` match
+# "summary", and every leaf under `platform_story` match "story". On a run
+# whose six pages all pass the server's gates that collision produced 94
+# blocking "raw taxonomy code" findings on fields that exist to carry ids,
+# and terminal-punctuation warnings on `e_ids`, `internal_only`,
+# `produced_at`, `producer_version`, `claim_label` and the whole `r_layer`.
+PROSE_KEY_HINTS = ("body", "rationale", "story", "text", "framing",
+                   "synthesis", "summary", "title", "headline", "statement",
+                   "narrative", "consequence")
+
+# Fields that EXIST to carry a taxonomy id. The humanise rule is about PROSE:
+# a cell id in `subcap_id`, `catalogue_path` or `linked_subcap_ids` is the
+# field doing its job, and refusing it costs a repair cycle on content the
+# gates accept.
+ID_BEARING_KEYS = {"subcap_id", "catalogue_path", "cell", "cell_id", "anchor"}
+
+
+def is_prose_key(key: str) -> bool:
+    """Does this key hold prose a client reads?
+
+    Deliberately the SAME hint list the rule always used, asked of the key
+    rather than the path. Widening it to every key in PROSE_KEYS was tried and
+    reverted: it raised 26 fresh blocks on a page the connector passes, which
+    is the cost this repair exists to remove, not a standard to add.
+    """
+    if key in NEVER_SENTENCE:
+        return False
+    return any(h in key for h in PROSE_KEY_HINTS)
+
+
+def carries_ids(key: str) -> bool:
+    """Does this key exist to carry identifiers rather than sentences?
+
+    Held INDEPENDENTLY of is_prose_key on purpose. Today's hint list happens
+    not to reach `subcap_id` or `catalogue_path`, so the two guards agree — but
+    the 94 false blocks came from a prose test that WAS wide enough to reach
+    them, and the next widening would bring them straight back. A field that
+    exists to carry a taxonomy code is exempt from the humanise rule as a
+    standing property of the field, not as a side effect of how prose is
+    currently recognised.
+    """
+    return (key in ID_BEARING_KEYS
+            or key.endswith(("_id", "_ids", "_path", "_code", "_codes")))
+
+
+def leaf_key(path: str) -> str:
+    """The final key of a walked path, with any list index stripped."""
+    return path.rsplit(".", 1)[-1].split("[")[0]
 
 # CG-12 · what renders in a chip, badge or single-line slot, and what the
 # long form is instead. path is section-relative; `[*]` walks a list.
@@ -232,16 +328,8 @@ ABSENT_STATES = {"UNWORKED", "WORKED_ABSENT", "NOT_RUN", "verified_absent",
 # CG-09 · fields whose promoted column is plain TEXT but whose CONTRACT names
 # a closed vocabulary. Add one only where the contract states the values —
 # this is not a place to invent vocabulary.
-#
-# `arc_shape` is here because it is the field that proved the point: the run
-# this was written against served `"strategy-first, substrate-later"`, which
-# is prose in an enum slot. The connector's own CG-09 covers `signal` and
-# `status` and does NOT cover arc_shape, so nothing refused it. Until the
-# connector's list grows, this check is the only one that fires.
 CONTRACT_VOCABULARIES = {
     "timeline": {
-        "arc_shape": ("STEADY_INVESTMENT", "STOP_START", "POST_EVENT_CATCHUP",
-                      "LEGACY_ANCHORED", "RECENT_ACCELERATION"),
         "events[*].signal": ("POSITIVE", "NEUTRAL", "NEGATIVE"),
         "events[*].kind": ("PLATFORM", "LEADERSHIP", "M&A", "REGULATORY",
                            "CHANNEL", "DATA", "SECURITY", "STRATEGY"),
@@ -263,14 +351,30 @@ CONTRACT_VOCABULARIES = {
 # Fields whose contract says "one of these values WITH a clause of reasoning".
 # The value has to LEAD, because that prefix is what a filter reads and what a
 # badge prints; the clause after it is the contract doing its job, not a
-# vocabulary breach. `maturity_effect` is the one that matters — it renders as
+# vocabulary breach. `maturity_effect` is the one that renders as
 # "ADVANCED — the engagement stack was assembled component by component".
+#
+# `arc_shape` is here and not above because the SERVER marks it
+# `"leading": True` (apps/mcp/dma_mcp/validation.py, `_CONTRACT_VOCABULARIES`
+# under `context.timeline`): "the contract states the five 'with one sentence
+# of evidence' — the badge must be one of them, what follows it is the
+# producer's own prose". Values copied from that entry so the two lists cannot
+# drift. Demanding an exact match here refused
+# 'STEADY_INVESTMENT — <one sentence of evidence>' on a run the gates passed.
 LEADING_VOCABULARIES = {
-    "timeline": {"events[*].maturity_effect":
-                 ("ADVANCED", "CONSTRAINED", "NEUTRAL")},
+    "timeline": {
+        "arc_shape": ("STEADY_INVESTMENT", "STOP_START", "POST_EVENT_CATCHUP",
+                      "LEGACY_ANCHORED", "RECENT_ACCELERATION"),
+        "events[*].maturity_effect": ("ADVANCED", "CONSTRAINED", "NEUTRAL"),
+    },
     "thought_leadership": {"entries[*].alignment":
                            ("CORROBORATES", "CONTRADICTS", "EXTENDS")},
 }
+# The badge is the LEADING run of capitals and nothing else — the same
+# expression the connector applies (`_LEADING_TOKEN` in validation.py). A
+# `startswith` test would accept a coined word that merely opens with a
+# vocabulary value; this refuses it, exactly as the server does.
+LEADING_TOKEN = re.compile(r"^[A-Z][A-Z_]*")
 # Fields the contract marks required-and-never-blank on an ITEM, which a
 # missing-key check would otherwise pass silently because the key is simply
 # absent rather than empty.
@@ -458,26 +562,29 @@ def check_scalars(page, payload):
                         f"sentinel value {val!r} — a derived value is "
                         "computed or null")
                     break
-        # register rules on prose fields only
-        if any(k in low for k in ("body", "rationale", "story", "text", "framing",
-                                  "synthesis", "summary", "title", "headline",
-                                  "statement", "narrative", "consequence")):
+        # register rules on prose fields only — decided by the KEY, never by
+        # the path (see is_prose_key)
+        key = leaf_key(path)
+        if is_prose_key(key):
             for pat, why in BANNED_REGISTER:
                 if re.search(pat, val, re.I | re.M):
                     bad("WARN", path, f"{why}: matched /{pat}/")
-            if re.search(r"\bP[1-4]C\d", val):
+            if not carries_ids(key) and re.search(r"\bP[1-4]C\d", val):
                 bad("BLOCK", path, "raw taxonomy code in client-visible prose — "
                                    "humanise the capability name")
             if re.match(r"^\s*[A-Z0-9.]+\s+scores?\s+\d", val) or \
                re.match(r"^\s*(?:At|With)\s+\d\.\d", val):
                 bad("WARN", path, "score-predicate opener")
-            # Titles and headlines are labels, not sentences — no terminal stop.
-            is_label = any(low.endswith(x) for x in (".title", ".headline", ".statement"))
-            if val and not is_label and val.strip()[-1] not in ".?!\"')]":
+            # Titles, headlines and card-face labels are claims, not
+            # sentences — no terminal stop, and no clipped-text warning.
+            is_label = key in LABEL_KEYS
+            words = len(val.split())
+            if val and not is_label and words >= PROSE_MIN_WORDS \
+                    and val.strip()[-1] not in ".?!\"')]":
                 bad("WARN", path, "prose does not end in terminal punctuation — "
                                   "clipped text was a measured defect")
-            if is_label and len(val.split()) > 20:
-                bad("WARN", path, f"label is {len(val.split())} words — titles are claims, "
+            if is_label and words > 20:
+                bad("WARN", path, f"label is {words} words — titles are claims, "
                                   "not sentences; keep them tight")
         # vocabularies
         if low.endswith(".tier") and val not in TIERS:
@@ -607,7 +714,7 @@ def check_sentence_case(page, payload):
     """CG-11 — every prose field begins with a capital, except a first word
     that carries an uppercase letter after its first character."""
     for path, val in walk(payload, page):
-        key = path.rsplit(".", 1)[-1].split("[")[0]
+        key = leaf_key(path)
         word = sentence_case_offender(key, val if isinstance(val, str) else None)
         if word:
             bad("BLOCK", path,
@@ -644,15 +751,67 @@ def check_face_budgets(page, payload):
                         f"field holds {belongs}. Move the prose, do not trim it")
 
 
+def records_absence(item):
+    """True when the item carries the LADDER that establishes an absence.
+
+    The rungs are the record of what was reached: the sources searched, the
+    queries run, the reason the reach fell short. Without them an empty
+    citation list says only that nobody looked, which is a research failure
+    and not a finding.
+    """
+    for key in ("sources_searched", "queries_run", "searches_run",
+                "sources_checked", "search_ladder"):
+        rungs = item.get(key)
+        if isinstance(rungs, (list, tuple)) and any(str(r).strip() for r in rungs):
+            return True
+        if isinstance(rungs, str) and rungs.strip():
+            return True
+    return False
+
+
+def claims_a_find(item):
+    """True when the item says something WAS found.
+
+    AG-03's own words: "a state claiming a find with an empty id list is a
+    contradiction, not an empty state". Two shapes claim a find — a populated
+    item list, and a `grounded_on` above zero, which invariant 8 defines as
+    the LENGTH of the citation list and so cannot exceed it.
+    """
+    for key in ("items", "rows", "quotes", "excerpts", "spans", "hits",
+                "matches", "findings"):
+        found = item.get(key)
+        if isinstance(found, (list, tuple)) and len(found) > 0:
+            return True
+    grounded = item.get("grounded_on")
+    if isinstance(grounded, (int, float)) and not isinstance(grounded, bool):
+        return grounded > 0
+    return False
+
+
 def asserts_nothing(item):
-    """True when the item makes no claim, so no citation is owed."""
+    """True when the item makes no claim, so no citation is owed.
+
+    AG-03's registry text (apps/mcp/dma_mcp/gates.py) states the exemption in
+    full: "A null-valued row and a recorded absence carrying its ladder assert
+    nothing and are exempt; a state claiming a find with an empty id list is a
+    contradiction, not an empty state." This checker implemented the first
+    half and not the second, so it refused 629 cells of a run whose six pages
+    all PASS the connector's gates — every one of them thin, grounded on
+    nothing, and carrying six to eleven rungs of the search that established
+    the absence. Each was a repair cycle billed against content that was
+    already right.
+    """
+    if claims_a_find(item):
+        return False
     if item.get("quarantined"):
         return True
     for key in ("state", "status", "basis", "peer_basis", "coverage", "result"):
         state = item.get(key)
         if isinstance(state, str) and state in ABSENT_STATES:
             # an absence is a finding only with the search that established it
-            return bool(item.get("sources_searched") or item.get("queries_run"))
+            return records_absence(item)
+    if records_absence(item):
+        return True
     if item.get("empty_state"):
         return True
     return "value" in item and item.get("value") in (None, "")
@@ -748,9 +907,12 @@ def check_contract_vocabularies(page, payload):
                 if val is None:
                     continue
                 lead = val.get("value") if isinstance(val, dict) else val
-                if isinstance(lead, str) and \
-                        any(lead.strip().startswith(v) for v in values):
+                if isinstance(lead, str) and lead.strip() in values:
                     continue
+                if isinstance(lead, str):
+                    m = LEADING_TOKEN.match(lead.strip())
+                    if m and m.group(0) in values:
+                        continue
                 shown = lead if isinstance(lead, str) and len(lead) <= 60 else \
                     f"{str(lead)[:57]}…"
                 bad("BLOCK", f"{page}.{sec}.{jpath}",
@@ -835,7 +997,7 @@ def check_recommendation_shape(page, payload):
 def cell_citations(page, payload):
     """(path, key, cell_id) for every catalogue cell a payload cites."""
     for path, val in walk(payload, page):
-        key = path.rsplit(".", 1)[-1].split("[")[0]
+        key = leaf_key(path)
         if isinstance(val, str) and CELL_ID.match(val) and \
                 (key.endswith("subcap_ids") or key == "subcap_id"):
             yield path, key, val
