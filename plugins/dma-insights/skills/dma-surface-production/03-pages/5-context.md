@@ -332,15 +332,22 @@ is the analysis, and each `None` carries its reason in the same cell:
 cells under `linked_subcap_ids`, and put the reason in the rationale where it
 renders.
 
-**Persistence, so you do not lose the work.** `capped_subcap_ids` is validated at
-submit and has **no column on `context_issue_register`** — it is dropped at
-promote (the writer spec flags this for adjudication). What survives promotion is
+**Persistence, so you do not lose the work.** `capped_subcap_ids` **does**
+persist: migration `0027_promotion_field_gaps` gave
+`context_issue_register` a JSONB column for it, and the writer binds it. (This
+paragraph said the opposite until 2026-08-18 and told you to design around a
+loss that had already been closed — if you are reading a cached copy, check
+the writer spec rather than this sentence.) What promotes is
 `issue_id, title, severity, status, opened_on, resolved_on, rationale,
-linked_subcap_ids, e_ids`. Two consequences you must design around:
+linked_subcap_ids, capped_subcap_ids, e_ids`.
 
-- The cells must be in **`linked_subcap_ids`** or the reader never sees them.
-  Sending them only under `capped_subcap_ids` ships a drilldown that opens onto
-  nothing.
+**Write each cap as an object: `{subcap_id, cap_level}`.** That is the shape
+the table above asks for and the shape the serving layer reads. Two habits
+still worth keeping:
+
+- Put the cells in **`linked_subcap_ids`** as well. A cap is a stronger claim
+  than a linkage, not a substitute for one, and the drilldown's "bears on"
+  list reads that key.
 - Any per-item field the contract does not persist — `opened_on_basis`,
   `sources_searched` on an issue row — passes the gate and then vanishes. Send
   it *and* repeat the substance in the `rationale`, which is the only prose

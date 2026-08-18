@@ -1164,13 +1164,37 @@ function issueCapsOf(register) {
     const capped = x.capped_subcap_ids;
     const linked = x.linked_subcap_ids || x.capability_ids || [];
     const caps = {};
+    // A THIRD shape, and the one the producer prompt actually asks for:
+    // `[{subcap_id, cap_level}]`. 03-pages/5-context.md says "the level ->
+    // the cap_level on those ids", so a producer following its own
+    // instructions writes objects — and the bare-list branch below then used
+    // the OBJECT as a key, which JavaScript coerces to the string
+    // "[object Object]".
+    //
+    // Measured 2026-08-18 on a promoted client, reported from the rendered
+    // page: the drilldown printed "[object Object]" as the chip, as the cell
+    // name and inside "Open [object Object] in the heatmap". The second
+    // failure is the worse one — the resolver then looked "[object Object]"
+    // up in the served cell set, missed, and printed "Not carried by this
+    // run" under a cell the run carries and caps at M3. A cosmetic bug
+    // produced a false statement about the assessment.
+    const capLevel = v => {
+      if (v === null || v === undefined) return null;
+      // "M3" and 3 are the same ceiling written two ways.
+      const n = Number(typeof v === "string" ? v.replace(/^M/i, "") : v);
+      return isFinite(n) ? n : null;
+    };
     if (Array.isArray(capped)) {
-      for (const c of capped) caps[c] = null;
-    } else if (capped && typeof capped === "object") {
-      for (const [c, lvl] of Object.entries(capped)) {
-        const n = Number(lvl);
-        caps[c] = isFinite(n) ? n : null;
+      for (const c of capped) {
+        if (c && typeof c === "object") {
+          const id = c.subcap_id || c.id || c.cell_id;
+          if (id) caps[String(id)] = capLevel(c.cap_level ?? c.level);
+        } else if (c !== null && c !== undefined && c !== "") {
+          caps[String(c)] = null;
+        }
       }
+    } else if (capped && typeof capped === "object") {
+      for (const [c, lvl] of Object.entries(capped)) caps[c] = capLevel(lvl);
     }
     if (!Object.keys(caps).length && !linked.length) continue;
     out[x.issue_id] = {

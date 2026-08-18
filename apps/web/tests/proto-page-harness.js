@@ -147,5 +147,55 @@ async function selectAudience(page, which) {
   await settle(page);
 }
 
+/* The one assertion every render test should make, whatever it is about.
+ *
+ * "[object Object]" is what JavaScript prints when a value that is a record
+ * reaches a slot that wanted a word. It is never a legitimate render, it is
+ * never caught by a shape check on the wire (the payload is well-formed —
+ * the coercion happens in the browser), and it does not throw, so nothing
+ * else notices.
+ *
+ * Measured 2026-08-18, reported from a promoted client's rendered Context
+ * page. `capped_subcap_ids` is `[{subcap_id, cap_level}]` — the shape the
+ * producer prompt asks for in as many words — and the adapter read it as a
+ * list of id strings, so it used the record as an object KEY. Three slots
+ * printed "[object Object]": the chip, the cell name and "Open [object
+ * Object] in the heatmap".
+ *
+ * The cosmetic half is the smaller half. The resolver then looked
+ * "[object Object]" up in the served cell set, missed, and printed "Not
+ * carried by this run" beneath a cell the run does carry and caps at M3 —
+ * a false statement about the assessment, produced by a display bug.
+ *
+ * Checks text AND the attributes that become tooltips, because a code
+ * escaping into a `title=` is exactly how the last one of these survived a
+ * run of the suite that already asserted on innerText.
+ */
+const STRINGIFIED = /\[object (?:Object|Array|Null|Undefined)\]/;
+
+async function assertNoStringifiedObjects(page, where) {
+  const found = await page.evaluate(() => {
+    const hits = [];
+    const rx = /\[object (?:Object|Array|Null|Undefined)\]/;
+    const text = document.body ? document.body.innerText || "" : "";
+    for (const line of text.split("\n")) {
+      if (rx.test(line)) hits.push(`text: ${line.trim().slice(0, 120)}`);
+    }
+    for (const el of document.querySelectorAll("[title], [aria-label], [alt]")) {
+      for (const a of ["title", "aria-label", "alt"]) {
+        const v = el.getAttribute(a);
+        if (v && rx.test(v)) hits.push(`@${a}: ${v.slice(0, 120)}`);
+      }
+    }
+    return hits;
+  });
+  assert.deepStrictEqual(
+    found, [],
+    `${where}: a record reached a slot that wanted a word. `
+    + `Every hit below is a value the adapter stringified instead of reading:`
+    + `\n  ${found.join("\n  ")}`);
+}
+
 module.exports = { WEB, PUBLIC, JS_DIR, fsGlob, resolvePlaywright, scriptList,
-                   startServer, settle, selectAudience };
+                   startServer, settle, selectAudience,
+                   assertNoStringifiedObjects, STRINGIFIED };
