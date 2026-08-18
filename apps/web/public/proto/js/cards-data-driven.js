@@ -38,7 +38,7 @@ function CardAbsent({
     size: 14
   }), /*#__PURE__*/React.createElement("h3", null, title)), /*#__PURE__*/React.createElement("span", {
     className: "b"
-  }, "Not promoted")), /*#__PURE__*/React.createElement("div", {
+  }, absenceBadge(section))), /*#__PURE__*/React.createElement("div", {
     className: "card-body"
   }, section ? /*#__PURE__*/React.createElement(SectionEmpty, {
     section: section,

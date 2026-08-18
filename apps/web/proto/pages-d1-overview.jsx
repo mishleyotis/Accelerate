@@ -1530,7 +1530,7 @@ function FinancialTrajectoryD1({ entity, audience }) {
       <div className="card flush">
         <div className="card-head">
           <div className="row"><Icon name="money" size={14} /><h3>Financial trajectory</h3></div>
-          <span className="b">Not promoted</span>
+          <span className="b">{absenceBadge("overview.financial_series")}</span>
         </div>
         <div className="card-body">
           <SectionEmpty

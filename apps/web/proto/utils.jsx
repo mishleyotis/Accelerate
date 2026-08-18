@@ -617,6 +617,22 @@ function findingChipId(f) {
   return String(v);
 }
 
+/* The badge over an absent card, derived from WHY the section is absent.
+   "Not promoted" was hardcoded on two cards and rendered over a section the
+   serve layer had deliberately withheld from the customer audience — a wrong
+   label that reads as a production failure to the very reader redaction is
+   protecting. The vocabulary is LiveMissing's, held in one place. */
+function absenceBadge(section) {
+  const state = (typeof DMA !== "undefined" && typeof DMA.sectionStateFor === "function")
+    ? DMA.sectionStateFor(section) : null;
+  const kind = ((state && state.empty_state) || {}).kind
+    || (state && state.data_source) || null;
+  return { section_not_promoted: "Not promoted",
+           withheld_for_audience: "Not shown to this audience",
+           served_from_evidence_store: "Read per evidence id",
+           empty: "Nothing to show" }[kind] || "Not promoted";
+}
+
 function SectionEmpty({ section, absent, empty }) {
   const state = (typeof DMA !== "undefined" && typeof DMA.sectionStateFor === "function")
     ? DMA.sectionStateFor(section) : null;

@@ -26,7 +26,7 @@ function CardAbsent({ icon, title, note, section }) {
     <div className="card flush">
       <div className="card-head">
         <div className="row"><Icon name={icon} size={14} /><h3>{title}</h3></div>
-        <span className="b">Not promoted</span>
+        <span className="b">{absenceBadge(section)}</span>
       </div>
       <div className="card-body">
         {section

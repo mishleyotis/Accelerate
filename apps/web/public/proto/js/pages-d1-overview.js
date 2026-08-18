@@ -2673,7 +2673,7 @@ function FinancialTrajectoryD1({
       size: 14
     }), /*#__PURE__*/React.createElement("h3", null, "Financial trajectory")), /*#__PURE__*/React.createElement("span", {
       className: "b"
-    }, "Not promoted")), /*#__PURE__*/React.createElement("div", {
+    }, absenceBadge("overview.financial_series"))), /*#__PURE__*/React.createElement("div", {
       className: "card-body"
     }, /*#__PURE__*/React.createElement(SectionEmpty, {
       section: "overview.financial_series",
