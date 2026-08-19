@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 import re
 
+from . import subverticals
 from .shared_path import ensure as _ensure_shared
 
 _ensure_shared(__file__)
@@ -98,6 +99,14 @@ def _areas_of(raw) -> list:
         except Exception:                          # noqa: BLE001
             pass
     return [_norm_area(x) for x in s.strip("{}").split(",") if x.strip()]
+
+
+def _entity_subvertical(cur, run_id):
+    cur.execute("""SELECT e.sub_vertical FROM runs r
+                     JOIN entities e ON e.id = r.entity_id
+                    WHERE r.id = %s""", (run_id,))
+    row = cur.fetchone()
+    return row[0] if row else None
 
 
 def _cells_for_run(cur, run_id) -> dict:
@@ -195,6 +204,25 @@ def platform_fit(conn, run_id, candidates) -> dict:
     strength = _evidence_strength(cur, run_id)
     sev = _severities(cur, run_id)
     absent_areas, held_areas = _register(cur, run_id)
+    entity_code = subverticals.resolve_subvertical(
+        _entity_subvertical(cur, run_id))
+
+    def _cell(sid, area_held):
+        return engine.Cell(
+            subcap_id=sid,
+            current_score=cells[sid]["score"],
+            category_id=cells[sid]["category"],
+            severities=sev.get(sid, ()),
+            evidence_strength=strength.get(sid),
+            incumbent_covers=area_held,
+            peer_median=cells[sid]["peer"])
+
+    # THE RUN'S WHOLE GAP SURFACE. Interconnect is the share of the gap mass a
+    # platform's core would LIFT without addressing, so it is meaningless
+    # without the cells the platform does NOT touch — and 0.0 rather than a
+    # guess when they are absent.
+    all_gaps = [_cell(sid, False) for sid in sorted(cells)
+                if cells[sid]["score"] is not None]
 
     by_area: dict = {}
     for sid, c in cells.items():
@@ -211,14 +239,20 @@ def platform_fit(conn, run_id, candidates) -> dict:
             unmatched.append({"platform": raw.get("platform"),
                               "l3_area": raw.get("l3_area"),
                               "reason": "no cell this run serves lists this L3 area"})
-        rows = [engine.Cell(
-            subcap_id=sid,
-            current_score=cells[sid]["score"],
-            category_id=cells[sid]["category"],
-            severities=sev.get(sid, ()),
-            evidence_strength=strength.get(sid),
-            incumbent_covers=area in held_areas,
-            peer_median=cells[sid]["peer"]) for sid in sorted(sids)]
+        rows = [_cell(sid, area in held_areas) for sid in sorted(sids)]
+        # THE VERTICAL GUARD. "Out-of-vertical rank-1 is a defect: a carrier
+        # platform must not top a bank's list." Relevance is the share of the
+        # area's cells this entity's sub-vertical actually serves — computed
+        # from the catalogue, not taken from the producer, because it is a
+        # fact about the client rather than a judgement about the platform.
+        # Unknown sub-vertical keeps every cell (`serves` is one-sided by
+        # design: not knowing who you are is not grounds for hiding scores).
+        if entity_code and sids:
+            served = sum(1 for sid in sids
+                         if subverticals.serves(sid, entity_code))
+            relevance = served / len(sids)
+        else:
+            relevance = 1.0
         align = raw.get("alignment")
         built.append(engine.Candidate(
             platform=str(raw.get("platform") or "").strip() or "(unnamed)",
@@ -227,9 +261,11 @@ def platform_fit(conn, run_id, candidates) -> dict:
             family_absent=area in absent_areas,
             readiness=_readiness_token(raw.get("readiness")),
             alignment=None if align is None else float(align),
-            alignment_quote=raw.get("alignment_quote")))
+            alignment_quote=raw.get("alignment_quote"),
+            depends_on=tuple(raw.get("depends_on") or ()),
+            relevance=relevance))
 
-    ranked = engine.rank(built)
+    ranked = engine.rank(built, all_gap_cells=all_gaps)
     return {
         "run_id": str(run_id),
         "platforms": ranked,

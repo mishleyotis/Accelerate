@@ -47,8 +47,32 @@ nulls. That is the whole reason this section exists.
 | `platform` — the name a client would say | which cells the L3 area reaches |
 | `l3_area` — the catalogue area it belongs to | each cell's distance from the target band |
 | `alignment` 0–1 + `alignment_quote` | the severity of the issues on each cell |
-| `readiness` — green / amber / red | how well each cell is evidenced |
-| | whether the register calls the family absent |
+| `readiness` — the prerequisite verdict | how well each cell is evidenced |
+| `depends_on` — platforms this one needs first | whether the register calls the family absent |
+| | the run's whole gap surface, for interconnect |
+| | **relevance** — the share of the area's cells this sub-vertical serves |
+
+**`depends_on` is how a workload stays behind its foundation.** A card is
+never ranked above something it depends on. This was found by scoring a real
+client: its own summary asks whether to "fund the visible next step … or fix
+the foundation those steps depend on first", and the engine put the workload
+first because the foundation stated NOT READY YET. Name the dependency and the
+page reads as the argument does.
+
+**Relevance is computed, not sent.** It caps the fit, so an out-of-vertical
+family cannot buy its way back with gap surface — "out-of-vertical rank-1 is a
+defect". Below 0.5 the card comes back `OUT_OF_VERTICAL`.
+
+**Read `state` before you write the story.** `TOO_NARROW` (fewer than three
+cells — the contract's discard rule), `INSUFFICIENT_EVIDENCE` (the cells
+DRIVING the score carry no evidence, however many others do), or
+`OUT_OF_VERTICAL`. A card in any of those states is not a ranking position to
+argue for; it is a discard with a reason.
+
+**`top_contributors` is the traceability mandate.** Five cells with their own
+gap, severity and evidence numbers — the ones the score actually rests on.
+Cite them in `story_md`; a breakdown a reader cannot walk back to named cells
+explains nothing.
 
 **`alignment` is the objective in the client's own words.** Same 0–1 key the
 findings ranking already uses: *"15–30 words PLUS a 0-1 score, quoting the

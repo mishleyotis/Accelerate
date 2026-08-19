@@ -149,7 +149,15 @@ def get_platform_fit(run_id: str, candidates: list) -> dict:
                          `impact_fallback`, which is the contract's
                          instruction; sending 0 says you established that it
                          serves nothing, which is a different claim.
-      `readiness`        green | amber | red, from the prerequisite checks
+      `readiness`        the prerequisite verdict — green/amber/red, or the
+                         page's own phrase ("READY WITH CONDITIONS"). An
+                         unmapped phrase is read as RED, because the
+                         multiplier is a safety property; an ABSENT one is
+                         amber, the honest middle.
+      `depends_on`       platforms this one needs FIRST. A card is never
+                         ranked above something it depends on, so a workload
+                         cannot outrank the foundation it sits on — the
+                         defect this found on a real client.
 
     Everything else is the run's: which cells the area reaches, each cell's
     distance from the target band, the severity of the issues on it, how well
@@ -158,6 +166,16 @@ def get_platform_fit(run_id: str, candidates: list) -> dict:
     Readiness MULTIPLIES rather than adding, so a platform whose prerequisites
     are red cannot reach the hot band. That is deliberate: a 2026-06 audit
     found 95 of 470 cards scoring hot with every prerequisite failing.
+
+    Vertical relevance CAPS the fit and is computed here, not sent: it is the
+    share of the area's cells this entity's sub-vertical actually serves. An
+    out-of-vertical family cannot buy its way back with gap surface.
+
+    Each row comes back with `factors`, `subtotal`, `readiness_multiplier`,
+    `relevance`, `state`, `rank`, `rank_basis`, `fit_basis` and
+    `top_contributors` — the cells the score rests on, with their own gap,
+    severity and evidence numbers. Copy them; a breakdown a reader cannot
+    walk back to named cells explains nothing.
     """
     with _conn() as c:
         return fit_mod.platform_fit(c, run_id, candidates)

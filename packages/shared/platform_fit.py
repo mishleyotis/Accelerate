@@ -91,9 +91,32 @@ W_OPPORTUNITY = _V2_W_OPPORTUNITY * _SCALE
 W_INTERCONNECT = _V2_W_INTERCONNECT * _SCALE
 W_ABSENT = _V2_W_ABSENT * _SCALE
 
+# A platform addressing this many cells earns the full breadth bonus, and the
+# opportunity mean is taken over its best this-many cells rather than over all
+# of them. Both halves are one measured fix: the catalogue makes set sizes
+# differ fivefold between platforms, and an all-set mean punishes the broadest
+# one with hundreds of small-gap dilutors — measured on the corpus as
+# Salesforce ranking LAST for 93 of 94 clients purely by set size.
+BREADTH_FULL = 40
+BREADTH_BONUS = 0.20
+
+# Below this many addressable cells the contract says discard rather than
+# rank: "drop it when it addresses fewer than 3 of this run's cells".
+MIN_CELLS = 3
+
+# Vertical relevance CAPS the fit. 0.35 gives a ceiling near 35, so a
+# lending-origination platform cannot render hot for an entity with no lending
+# operation however large its gap surface. "Out-of-vertical rank-1 is a
+# defect" — the contract, and a stated defect class this engine had no term
+# for until 2026-08-19.
+RELEVANCE_DISCARD = 0.5
+
 # Readiness: red caps the reachable fit at 100 x 1.0 x 0.62 = 62, below the
 # hot threshold. Amber is a soft penalty.
 READINESS_MULTIPLIER = {"green": 1.00, "amber": 0.85, "red": 0.62}
+# Unknown readiness is AMBER, the honest middle. Green would reward a card
+# that established nothing; red would punish silence into a lie.
+READINESS_DEFAULT = "amber"
 HOT_THRESHOLD = 80.0
 
 # Severity -> priority MULTIPLIER, centred on 1.0 so an unlinked cell scores
@@ -121,6 +144,12 @@ FIT_CAP = 99.0
 
 STATE_READY = "READY"
 STATE_INSUFFICIENT = "INSUFFICIENT_EVIDENCE"
+STATE_TOO_NARROW = "TOO_NARROW"
+STATE_OUT_OF_VERTICAL = "OUT_OF_VERTICAL"
+
+# How many driving cells the evidence state is judged on, and how many are
+# returned for traceability.
+TOP_N = 5
 
 ALIGNMENT_STATED = "stated_objective"
 ALIGNMENT_FALLBACK = "impact_fallback"
@@ -136,6 +165,11 @@ class Cell:
     evidence_strength: float | None = None      # 0..1, None -> neutral prior
     incumbent_covers: bool = False
     peer_median: float | None = None
+    # Value-chain stages this cell sits in. Adjacency is "same category OR
+    # same stage"; the stage half was in the legacy engine and missing here,
+    # so a platform whose lift runs along a journey rather than a category
+    # scored no interconnect at all.
+    vc_stages: tuple = ()
 
 
 @dataclass
@@ -155,6 +189,10 @@ class Candidate:
     # was not ready yet. Ranking the visible next step above the thing it
     # depends on is the exact move that client's own answer warns against.
     depends_on: tuple = ()
+    # 0..1, how relevant this platform is to THIS sub-vertical. It CAPS the
+    # fit rather than being blended, so an out-of-vertical family cannot rank
+    # first however large its gap surface.
+    relevance: float = 1.0
 
 
 def _clamp(v, lo=0.0, hi=1.0):
@@ -186,68 +224,157 @@ def evidence_strength_of(cell: Cell) -> float:
     return ES_DAMP_FLOOR + (1.0 - ES_DAMP_FLOOR) * es
 
 
+def cell_opportunity(cell: Cell) -> float:
+    """One cell's opportunity, 0..1.
+
+    `gap x severity x evidence strength`, with severity CENTRED ON 1.0 so an
+    unlinked cell scores its raw opportunity — the legacy engine's own stated
+    intent, which an earlier version of this file broke by dividing through by
+    the heaviest severity. That capped every all-medium platform at 0.625 of
+    the term, and most cells carry no linked issue, so it was a systematic
+    depression driven by missing linkage rather than by real severity.
+    """
+    v = gap_of(cell) * severity_weight(cell) * evidence_strength_of(cell)
+    if cell.incumbent_covers:
+        v *= INCUMBENT_COVERAGE_DISCOUNT
+    return _clamp(v)
+
+
+def _ranked_cells(cand: Candidate) -> list:
+    return sorted(cand.cells, key=lambda c: (-cell_opportunity(c), c.subcap_id))
+
+
+def core_of(cand: Candidate) -> list:
+    """The cells actually driving the score: the best BREADTH_FULL of them."""
+    return _ranked_cells(cand)[:BREADTH_FULL]
+
+
 def opportunity_of(cand: Candidate) -> float:
-    """Mean per-cell opportunity, 0..1. MEAN and not SUM: a sum rewards a
-    platform for touching many cells shallowly, which is how a breadth term
-    becomes the whole score."""
-    if not cand.cells:
+    """Mean over the platform's BEST cells, lifted by a breadth bonus.
+
+    Not the mean over all of them. The catalogue makes set sizes differ
+    fivefold between platforms, and an all-set mean punishes the broadest with
+    hundreds of small-gap dilutors — measured as Salesforce ranking last for
+    93 of 94 clients purely by set size. Sets at or under the cap keep their
+    exact mean, so this changes nothing for a narrow platform.
+    """
+    core = core_of(cand)
+    if not core:
         return 0.0
-    total = 0.0
-    for c in cand.cells:
-        v = gap_of(c) * severity_weight(c) * evidence_strength_of(c)
-        if c.incumbent_covers:
-            v *= INCUMBENT_COVERAGE_DISCOUNT
-        total += v
-    # severity can exceed 1.0, so normalise by the heaviest reachable weight
-    return _clamp(total / (len(cand.cells) * SEVERITY_WEIGHTS["critical"]))
+    mean_opp = sum(cell_opportunity(c) for c in core) / len(core)
+    breadth = min(1.0, len(cand.cells) / BREADTH_FULL)
+    return _clamp(mean_opp * (1.0 + BREADTH_BONUS * breadth))
 
 
-def interconnect_of(cand: Candidate) -> float:
-    """Catalogue adjacency: closing a cell lifts its siblings in the same
-    category. Measured as the share of the platform's cells that sit in a
-    category where it reaches more than one — a platform whose cells are
-    scattered one-per-category lifts nothing."""
-    if not cand.cells:
+def interconnect_of(cand: Candidate, all_gap_cells=None) -> float:
+    """The gap mass this platform's core would LIFT without addressing.
+
+    For every category or value-chain stage the core touches, count the run's
+    other gap cells in that category or stage which the platform does not
+    itself address — the dependents that closing the core lifts. Normalised
+    per involved category so a platform tagged against two hundred cells
+    cannot saturate on volume alone.
+
+    An earlier version measured how tightly the platform's OWN cells
+    clustered, which is a different quantity entirely: it rewarded a narrow
+    platform for being narrow and told a reader nothing about compounding.
+
+    With no run context the term is 0.0 rather than a guess — an uplift
+    nobody measured is not an uplift.
+    """
+    core = core_of(cand)
+    if not core or not all_gap_cells:
         return 0.0
-    by_cat: dict = {}
-    for c in cand.cells:
-        by_cat.setdefault(c.category_id or c.subcap_id, []).append(c)
-    clustered = sum(len(v) for v in by_cat.values() if len(v) > 1)
-    return _clamp(clustered / len(cand.cells))
+    addr = {c.subcap_id for c in cand.cells}
+    cats = {c.category_id for c in core if c.category_id}
+    stages = {st for c in core for st in (c.vc_stages or ())}
+    if not cats and not stages:
+        return 0.0
+    pool = dependents = 0
+    for g in all_gap_cells:
+        if g.subcap_id in addr or gap_of(g) <= 0:
+            continue
+        pool += 1
+        if (g.category_id in cats) or (set(g.vc_stages or ()) & stages):
+            dependents += 1
+    if not pool:
+        return 0.0
+    # A SHARE of the run's remaining gap mass, which is normalised by
+    # construction: a platform tagged against two hundred cells cannot buy
+    # the term by volume, because volume shrinks the pool it is measured
+    # against as fast as it grows the dependents.
+    return _clamp(dependents / pool)
 
 
 def absent_of(cand: Candidate) -> float:
+    """Greenfield ground: the register confirms this family absent."""
     return 1.0 if cand.family_absent else 0.0
 
 
 def readiness_multiplier(cand: Candidate) -> float:
-    return READINESS_MULTIPLIER.get(str(cand.readiness).lower(), 0.62)
+    return READINESS_MULTIPLIER.get(str(cand.readiness).lower(),
+                                    READINESS_MULTIPLIER[READINESS_DEFAULT])
 
 
 def mean_evidence_strength(cand: Candidate) -> float:
-    if not cand.cells:
+    """Judged on the cells DRIVING the score, not on every tagged cell.
+
+    A platform whose top contributors carry no linked evidence is honestly
+    INSUFFICIENT_EVIDENCE however many cells it nominally addresses — and an
+    unevidenced cell counts as 0.0 here, not as the neutral prior. The prior
+    exists so a scored-but-unevidenced cell still contributes opportunity; it
+    must not also buy the card a clean bill of grounding.
+    """
+    top = core_of(cand)[:TOP_N]
+    if not top:
         return 0.0
-    raw = [NEUTRAL_EVIDENCE_STRENGTH if c.evidence_strength is None
-           else _clamp(float(c.evidence_strength)) for c in cand.cells]
-    return sum(raw) / len(raw)
+    return sum(0.0 if c.evidence_strength is None else _clamp(float(c.evidence_strength))
+               for c in top) / len(top)
 
 
 def state_for(cand: Candidate) -> str:
-    """INSUFFICIENT_EVIDENCE where the card cannot honestly claim grounding.
-    The v1 engine made this branch unreachable — 470 of 470 cards READY."""
-    if not cand.cells:
-        return STATE_INSUFFICIENT
+    """Why a card cannot be ranked as it stands, or READY.
+
+    The v1 engine made INSUFFICIENT_EVIDENCE unreachable — 470 of 470 cards
+    READY — so each branch here is one the corpus can actually reach.
+    """
+    if float(cand.relevance) < RELEVANCE_DISCARD:
+        return STATE_OUT_OF_VERTICAL
+    if len(cand.cells) < MIN_CELLS:
+        return STATE_TOO_NARROW
     if mean_evidence_strength(cand) < EVIDENCE_FLOOR:
         return STATE_INSUFFICIENT
     return STATE_READY
 
 
-def score(cand: Candidate) -> dict:
-    """The fit, its factors and its state. `factors` sum to the pre-multiplier
-    subtotal and the whole arithmetic is reproducible from what is returned —
-    the contract's breakdown-equals-headline rule, which 570 of 685 cards
-    broke by rendering two numbers from two code paths."""
-    opp, inter, absent = opportunity_of(cand), interconnect_of(cand), absent_of(cand)
+def top_contributors(cand: Candidate) -> list:
+    """The cells the score rests on, with their own numbers. The traceability
+    mandate: a breakdown a reader cannot walk back to named cells explains
+    nothing."""
+    return [{"subcap_id": c.subcap_id,
+             "pillar": c.subcap_id[:2],
+             "category_id": c.category_id,
+             "score": None if c.current_score is None else round(float(c.current_score), 2),
+             "peer_median": None if c.peer_median is None else round(float(c.peer_median), 2),
+             "gap": round(gap_of(c), 3),
+             "severity_weight": severity_weight(c),
+             "evidence_strength": (None if c.evidence_strength is None
+                                   else round(float(c.evidence_strength), 3)),
+             "contribution": round(cell_opportunity(c), 4)}
+            for c in core_of(cand)[:TOP_N]]
+
+
+def score(cand: Candidate, all_gap_cells=None) -> dict:
+    """The fit, its factors, its state and the cells it rests on.
+
+    `factors` sum to the pre-multiplier subtotal and everything needed to
+    reproduce the headline is on the row — the contract's
+    breakdown-equals-headline rule, which 570 of 685 cards broke by rendering
+    two numbers from two code paths.
+    """
+    opp = opportunity_of(cand)
+    inter = interconnect_of(cand, all_gap_cells)
+    absent = absent_of(cand)
     known_alignment = cand.alignment is not None
     align = _clamp(float(cand.alignment)) if known_alignment else 0.0
 
@@ -275,7 +402,10 @@ def score(cand: Candidate) -> dict:
     ]
     subtotal = sum(f["contribution"] for f in factors)
     mult = readiness_multiplier(cand)
-    fit = min(FIT_CAP, 100.0 * subtotal * mult)
+    relevance = _clamp(float(cand.relevance))
+    # Relevance CAPS rather than blends: an out-of-vertical family must not be
+    # able to buy its way back with gap surface.
+    fit = min(FIT_CAP, 100.0 * subtotal * mult * relevance)
     return {
         "platform": cand.platform,
         "l3_area": cand.l3_area,
@@ -285,10 +415,13 @@ def score(cand: Candidate) -> dict:
         "subtotal": round(subtotal, 4),
         "readiness": str(cand.readiness).lower(),
         "readiness_multiplier": mult,
+        "relevance": round(relevance, 3),
         "alignment_basis": basis,
         "alignment_quote": cand.alignment_quote,
         "cells_addressed": len(cand.cells),
+        "cells_driving": len(core_of(cand)),
         "evidence_strength_mean": round(mean_evidence_strength(cand), 4),
+        "top_contributors": top_contributors(cand),
     }
 
 
@@ -345,10 +478,10 @@ def _sequence(rows) -> list:
     return out
 
 
-def rank(candidates) -> list:
+def rank(candidates, all_gap_cells=None) -> list:
     """Scored, then sequenced. `rank` is 1-based and assigned after both, so
     two cards never share one and no card precedes its own prerequisite."""
-    scored = sorted((score(c) for c in candidates), key=_tie_key)
+    scored = sorted((score(c, all_gap_cells) for c in candidates), key=_tie_key)
     depends = {str(c.platform): tuple(getattr(c, "depends_on", ()) or ())
                for c in candidates}
     for r in scored:
@@ -371,9 +504,10 @@ def rank(candidates) -> list:
             "Computed by the shared platform-fit engine: 100 x ({terms})"
             " x {mult} readiness = {fit}. Readiness is a multiplier, not an"
             " addend: a platform whose prerequisites are red cannot reach the"
-            " hot band ({hot}). Alignment basis: {basis}. Rank basis:"
-            " {rank_basis}.".format(
+            " hot band ({hot}), and relevance {rel} caps it. Alignment basis:"
+            " {basis}. Rank basis: {rank_basis}. State: {state}.".format(
                 terms=terms, mult=row["readiness_multiplier"],
                 fit=row["fit_score"], hot=HOT_THRESHOLD,
-                basis=row["alignment_basis"], rank_basis=row["rank_basis"]))
+                basis=row["alignment_basis"], rank_basis=row["rank_basis"],
+                rel=row["relevance"], state=row["state"]))
     return rows

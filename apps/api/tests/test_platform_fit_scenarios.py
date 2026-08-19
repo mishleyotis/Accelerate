@@ -34,6 +34,16 @@ def cells(n, cat, score=2.4, es=0.8, sev=("high",)):
             for i in range(1, n + 1)]
 
 
+def run_gaps(cands):
+    """The run's whole gap surface — every candidate's cells plus a tail the
+    platforms do not address. Interconnect is measured against this, so a
+    scenario without it is scoring a different engine from production."""
+    out = [c for cand in cands for c in cand.cells]
+    out += [pf.Cell(f"P6C6.6.{i}", 2.2, "P6C6", ("medium",), 0.7)
+            for i in range(1, 9)]
+    return out
+
+
 # ── Logix: governance first, because it is cheap now and dear later ────
 
 LOGIX = [
@@ -54,7 +64,7 @@ def test_logix_leads_with_the_platform_its_own_answer_names_first():
     """The institution's answer: "Stand up model governance first — an
     inventory, a validation standard and a promotion path — so that anything
     built above it is auditable on the day supervision starts."""
-    ranked = pf.rank(LOGIX)
+    ranked = pf.rank(LOGIX, run_gaps(LOGIX))
     assert ranked[0]["platform"].startswith("MLflow"), \
         [r["platform"] for r in ranked]
 
@@ -62,13 +72,13 @@ def test_logix_leads_with_the_platform_its_own_answer_names_first():
 def test_logix_ranks_marketing_last_without_discarding_it():
     """No objective the institution states names growth tooling. Last is the
     honest place for it; absent would be a different claim."""
-    ranked = pf.rank(LOGIX)
+    ranked = pf.rank(LOGIX, run_gaps(LOGIX))
     assert ranked[-1]["platform"] == "Marketing Cloud Engagement"
     assert ranked[-1]["fit_score"] > 0
 
 
 def test_logix_order_follows_its_stated_sequence():
-    ranked = [r["platform"] for r in pf.rank(LOGIX)]
+    ranked = [r["platform"] for r in pf.rank(LOGIX, run_gaps(LOGIX))]
     assert ranked.index("Salesforce Data Cloud") < ranked.index("Fusion Framework System")
 
 
@@ -98,7 +108,7 @@ def test_baxter_leads_with_the_integration_backbone_its_answer_names_first():
     """"Lay the foundation first, in two moves … an integration backbone to
     replace point-to-point connections across the Jack Henry core, lending and
     channel platforms." """
-    ranked = pf.rank(BAXTER)
+    ranked = pf.rank(BAXTER, run_gaps(BAXTER))
     assert ranked[0]["platform"] == "MuleSoft Anypoint Platform", \
         [(r["platform"], r["fit_score"]) for r in ranked]
 
@@ -106,7 +116,7 @@ def test_baxter_leads_with_the_integration_backbone_its_answer_names_first():
 def test_every_not_ready_baxter_platform_falls_out_of_the_hot_band():
     """THE LIVE DEFECT. Two of these promoted at rank 2 and 3 with 70.0 and
     73.0 while stating "NOT READY YET"."""
-    ranked = {r["platform"]: r for r in pf.rank(BAXTER)}
+    ranked = {r["platform"]: r for r in pf.rank(BAXTER, run_gaps(BAXTER))}
     for name in ("Salesforce Data Cloud", "Service Cloud consolidation",
                  "Cross-system workflow orchestration"):
         assert ranked[name]["fit_score"] < pf.HOT_THRESHOLD, \
@@ -120,14 +130,14 @@ def test_a_workload_never_outranks_the_foundation_it_sits_on():
     the question this client's own summary asks. Engine v2 kept a prerequisite
     DAG beside the fit for exactly this; the first version of this engine
     dropped it."""
-    ranked = [r["platform"] for r in pf.rank(BAXTER)]
+    ranked = [r["platform"] for r in pf.rank(BAXTER, run_gaps(BAXTER))]
     assert ranked.index("Salesforce Data Cloud") < ranked.index("CRM Analytics"), ranked
     assert ranked.index("MuleSoft Anypoint Platform") < \
         ranked.index("Cross-system workflow orchestration")
 
 
 def test_a_card_held_back_by_a_prerequisite_says_so():
-    held = next(r for r in pf.rank(BAXTER) if r["platform"] == "CRM Analytics")
+    held = next(r for r in pf.rank(BAXTER, run_gaps(BAXTER)) if r["platform"] == "CRM Analytics")
     assert "sequenced" in held["rank_basis"]
     assert "Salesforce Data Cloud" in held["rank_basis"]
 
@@ -137,10 +147,10 @@ def test_a_ready_platform_outranks_a_better_aligned_unready_one():
     can actually start goes first. Data Cloud is only 0.05 less aligned than
     MuleSoft and addresses MORE cells — readiness is what separates them, and
     that is the point of folding it in as a multiplier."""
-    ranked = [r["platform"] for r in pf.rank(BAXTER)]
+    ranked = [r["platform"] for r in pf.rank(BAXTER, run_gaps(BAXTER))]
     assert ranked.index("MuleSoft Anypoint Platform") < \
         ranked.index("Salesforce Data Cloud")
-    fits = {r["platform"]: r["fit_score"] for r in pf.rank(BAXTER)}
+    fits = {r["platform"]: r["fit_score"] for r in pf.rank(BAXTER, run_gaps(BAXTER))}
     assert fits["MuleSoft Anypoint Platform"] > fits["Salesforce Data Cloud"]
 
 
@@ -148,7 +158,7 @@ def test_the_unnamed_orchestration_card_ranks_last():
     """It names no product, the institution states no objective for
     orchestration as such, and it is not ready. It also carries the lowest
     fit on the page, so nothing has to be done to put it last."""
-    ranked = pf.rank(BAXTER)
+    ranked = pf.rank(BAXTER, run_gaps(BAXTER))
     assert ranked[-1]["platform"] == "Cross-system workflow orchestration"
     assert ranked[-1]["fit_score"] == min(r["fit_score"] for r in ranked)
 
@@ -158,7 +168,7 @@ def test_within_one_dependency_level_the_better_fit_still_leads():
     first-found pass let a 30.9 card precede a 47.5 one that was waiting on
     one more prerequisite, which is the sequencing quietly outranking the
     fit."""
-    ranked = [r["platform"] for r in pf.rank(BAXTER)]
+    ranked = [r["platform"] for r in pf.rank(BAXTER, run_gaps(BAXTER))]
     assert ranked.index("CRM Analytics") < \
         ranked.index("Cross-system workflow orchestration")
 
@@ -166,7 +176,7 @@ def test_within_one_dependency_level_the_better_fit_still_leads():
 def test_a_page_with_no_declared_prerequisites_is_pure_fit_order():
     """Logix declares none, so nothing may move — and every card says `fit`
     as its basis rather than claiming a sequence that was not applied."""
-    ranked = pf.rank(LOGIX)
+    ranked = pf.rank(LOGIX, run_gaps(LOGIX))
     assert [r["rank_basis"] for r in ranked] == ["fit"] * 5
     fits = [r["fit_score"] for r in ranked]
     assert fits == sorted(fits, reverse=True)
@@ -175,7 +185,7 @@ def test_a_page_with_no_declared_prerequisites_is_pure_fit_order():
 # ── the two clients are comparable now, which was the complaint ────────
 
 def test_both_clients_are_scored_by_one_engine_on_one_scale():
-    for ranked in (pf.rank(LOGIX), pf.rank(BAXTER)):
+    for ranked in (pf.rank(LOGIX, run_gaps(LOGIX)), pf.rank(BAXTER, run_gaps(BAXTER))):
         assert [r["rank"] for r in ranked] == [1, 2, 3, 4, 5]
         for r in ranked:
             assert 0.0 <= r["fit_score"] <= pf.FIT_CAP
@@ -185,6 +195,6 @@ def test_both_clients_are_scored_by_one_engine_on_one_scale():
 
 
 def test_neither_client_renders_two_cards_with_one_rank():
-    for ranked in (pf.rank(LOGIX), pf.rank(BAXTER)):
+    for ranked in (pf.rank(LOGIX, run_gaps(LOGIX)), pf.rank(BAXTER, run_gaps(BAXTER))):
         ranks = [r["rank"] for r in ranked]
         assert len(set(ranks)) == len(ranks)
