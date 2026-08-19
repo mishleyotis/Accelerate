@@ -211,6 +211,51 @@ def submissions_for(cur, run_id) -> dict:
     return {p: (pl or {}) for p, pl in cur.fetchall()}
 
 
+# ── The six-month refresh sweep ─────────────────────────────────────────
+#
+# 0031 computes refresh_due_date in the serving directory and 0032 gives
+# refresh_requests an origin of 'cadence' — and then nothing raised one:
+# the queue endpoint listed due entities and no writer existed, so a client
+# past its date sat silent until a human noticed. This is that writer. It
+# runs inside the hourly loop because the loop is the one scheduled thing
+# that already owns "what should have happened and has not".
+#
+# Idempotent by the schema: refresh_requests_open_uq allows ONE open row
+# per entity, so a due entity is requested once and re-requested only after
+# the previous request closes. requested_by is NULL — the origin says who.
+_DUE_SWEEP_SQL = """
+    INSERT INTO refresh_requests (entity_id, observed_run_id, origin, reason,
+                                  status)
+    SELECT DISTINCT ON (r.entity_id)
+           r.entity_id, r.id, 'cadence',
+           'assessment dated ' || ad.assessment_date::date || ' passed its '
+           || 'six-month refresh date '
+           || (ad.assessment_date + INTERVAL '6 months')::date
+           || ' (basis ' || ad.basis || ')',
+           'REQUESTED'
+      FROM runs r
+      LEFT JOIN run_manifest rm ON rm.run_id = r.id
+     CROSS JOIN LATERAL run_assessment_date(rm.payload -> 'manifest',
+                                            r.request_id) ad
+     WHERE r.promoted_at IS NOT NULL
+       AND ad.assessment_date IS NOT NULL
+       AND (ad.assessment_date + INTERVAL '6 months')::date <= CURRENT_DATE
+       AND NOT EXISTS (SELECT 1 FROM refresh_requests q
+                        WHERE q.entity_id = r.entity_id
+                          AND q.status IN ('REQUESTED', 'ACKNOWLEDGED'))
+     ORDER BY r.entity_id, r.promoted_at DESC
+    ON CONFLICT DO NOTHING
+    RETURNING entity_id
+"""
+
+
+def sweep_refresh_due(cur) -> int:
+    """Raise a cadence refresh request for every promoted entity past its
+    six-month date with nothing already open. Returns rows raised."""
+    cur.execute(_DUE_SWEEP_SQL)
+    return len(cur.fetchall())
+
+
 def run_once(conn, trigger: str = "schedule") -> dict:
     """One execution. Idempotent by construction: it writes only attempt rows,
     reads only staged payloads, and changes nothing a later run depends on."""
@@ -264,6 +309,15 @@ def run_once(conn, trigger: str = "schedule") -> dict:
         conn.rollback()
         err = f"{type(exc).__name__}: {exc}"[:400]
 
+    # The refresh sweep commits separately from the gap loop: a resolver
+    # failure must not cost the due-date safeguard, and vice versa.
+    try:
+        tally["refresh_raised"] = sweep_refresh_due(cur)
+        conn.commit()
+    except Exception as exc:                                    # noqa: BLE001
+        conn.rollback()
+        err = err or f"refresh_sweep {type(exc).__name__}: {exc}"[:400]
+
     cur.execute("""UPDATE enrichment_jobs
                       SET finished_at = now(), runs_scanned = %s,
                           gaps_found = %s, resolved = %s, not_run = %s,
@@ -276,7 +330,9 @@ def run_once(conn, trigger: str = "schedule") -> dict:
     return {"job_id": job_id, "runs_scanned": len(runs),
             "gaps_found": tally["gaps"], "resolved": tally["resolved"],
             "not_run": tally["not_run"] + tally["no_source"],
-            "failed": tally["failed"], "error": err}
+            "failed": tally["failed"],
+            "refresh_requests_raised": tally["refresh_raised"],
+            "error": err}
 
 
 def _attempt(cur, job_id, run_id, entity_id, gap, resolver, status, value,

@@ -110,6 +110,13 @@ def test_the_routine_writes_only_its_own_workflow_tables():
     happened; a resolved VALUE still travels the only path content may take —
     registered as evidence and submitted through the connector. A write grant
     on a serving table would be the side door."""
-    assert tables_written() <= {"enrichment_jobs", "enrichment_attempts"}, (
+    # refresh_requests joined the sanctioned set on 2026-08-19 with the
+    # six-month sweep: it is workflow state, not serving content — 0032
+    # built the table with origin='cadence' for exactly this writer, made
+    # svc_worker the ONLY role granted INSERT on it, and the API's refresh
+    # Job already wrote it as dmai-worker. The rule this test protects is
+    # unchanged: no serving-content table gains a worker write.
+    assert tables_written() <= {"enrichment_jobs", "enrichment_attempts",
+                                "refresh_requests"}, (
         f"the routine writes {sorted(tables_written())}. Anything beyond its "
         "own two workflow tables is content entering outside the connector.")

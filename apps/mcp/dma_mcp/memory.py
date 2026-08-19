@@ -494,8 +494,18 @@ def list_open_findings(conn, *, component=None, severity=None,
                recurrences DESC, sightings DESC, last_seen_at DESC
              LIMIT %s""", [*params, limit])
     rows = _clean(_row(cur))
-    return {"count": len(rows), "statuses": statuses, "findings": rows,
-            "errors": []}
+    # The total is counted, never inferred from the page: this tool returned
+    # exactly 50 of 82 open findings with count=50 and nothing saying so,
+    # and the enumeration that noticed had to fall back to search_findings.
+    # A truncated listing that does not say it is truncated reads as the
+    # whole memory.
+    cur.execute(
+        f"SELECT count(*) FROM memory_finding_state WHERE {' AND '.join(where)}",
+        params)
+    total = cur.fetchone()[0]
+    return {"count": len(rows), "total": total,
+            "truncated": total > len(rows), "statuses": statuses,
+            "findings": rows, "errors": []}
 
 
 def list_defect_classes(conn) -> dict:
