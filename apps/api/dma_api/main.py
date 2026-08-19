@@ -25,6 +25,7 @@ from .db import close as db_close, connect as db_connect
 from .diff import build_diff
 from .evidence import fetch as ev_fetch, redact_items as ev_redact
 from .identity import ActorError, verified_actor
+from . import subverticals
 from .pages import ApiError, build_page, etag_for, resolve_run
 from .redaction import normalise_audience
 from .subverticals import SCOPE_TAG, scope_to_entity
@@ -77,13 +78,12 @@ _PILLAR_NAMES = {
 # The sub-vertical vocabulary, as the Surface Specification names it. The
 # serving tier stores the code (SV2), not the label, so the label has to come
 # from the contract rather than from a code echoed back at the reader.
-_SUBVERTICAL_NAMES = {
-    "SV1": "Regional Banks", "SV2": "Credit Unions",
-    "SV3": "Commercial Lending", "SV4": "CIB & Capital Markets",
-    "SV5": "RIAs & Broker-Dealers", "SV6": "Asset Management",
-    "SV7": "Insurance Brokers", "SV8": "Insurance Carriers",
-    "SV9": "Farm Credit",
-}
+# `_SUBVERTICAL_NAMES` lived here — a second name table keyed `SV1`..`SV9`,
+# with the RAW stored value as its fallback. Logix's stored sub_vertical is
+# the bare string `CU`, so the fallback labelled `CU` as "CU" and the browser
+# assigned that over its own entry, which knew better. The directory resolves
+# through `subverticals.display_name` now: one resolver, one name table, and
+# the same code every other layer joins on.
 
 
 @app.get("/v1/catalogue")
@@ -213,8 +213,14 @@ def directory(audience: str | None = None, role: str | None = None):
              scored_cells, completed_at, promoted_at, pillars,
              open_alerts, assessment_date, assessment_date_basis,
              assessment_date_source, refresh_due_date) in cur.fetchall():
-            key = (sub_vertical or "UNKNOWN").upper().replace(" ", "_")
-            labels[key] = _SUBVERTICAL_NAMES.get(key, sub_vertical or "Unknown")
+            # THE RESOLVER decides both, never `.upper().replace(" ", "_")`.
+            # The corpus writes 61 distinct spellings of nine sub-verticals —
+            # `CU`, `SV2`, `Credit Unions`, `SV2 — Credit Unions`,
+            # `SV2_CREDIT_UNIONS` are all this one — and a normalise-and-hope
+            # key made each of them its own sub-vertical with itself as its
+            # label.
+            key, label = subverticals.display_name(sub_vertical)
+            labels[key] = label
             ent = by_entity.setdefault(str(eid), {
                 "id": display_id, "slug": display_id, "name": name,
                 "domain": None, "subvertical": key,

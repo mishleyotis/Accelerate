@@ -2183,18 +2183,52 @@
   /* ── Subvertical labels ─────────────────────────────────────────── */
   // Production divergence: live sub-vertical labels merge over the mock
   // vocabulary (the API derives them from the promoted entities).
+  /* Keyed by the CANONICAL CODE the api's `resolve_subvertical` returns —
+     RB · CU · CL · CIB · FC · AM · RIA · IC · IB — with the prototype's own
+     key space kept below as aliases so a fixture that still says
+     REGIONAL_BANK renders.
+      THE BUG THIS ENDS: the api used to build its label table by normalising
+     the stored string and falling back to that string as its own label, so a
+     client whose sub_vertical is the bare `CU` arrived with `{CU: "CU"}` —
+     and the Object.assign below, which exists so the server can name a
+     sub-vertical this file has never heard of, dutifully overwrote the
+     correct entry with the code. The header read "CU · Valencia". The server
+     resolves properly now; this table is the fallback when a boot payload
+     carries no map at all, and the assign still lets the server win because
+     it is the side that knows the vocabulary. */
   const SUBVERTICAL_LABEL = {
-    REGIONAL_BANK: "Regional Bank",
+    RB: "Regional Banks",
+    CU: "Credit Unions",
+    CL: "Commercial Lending",
+    CIB: "Corporate & Investment Banking",
+    FC: "Farm Credit",
+    AM: "Asset & Wealth Management",
+    RIA: "RIAs & Broker-Dealers",
+    IC: "Insurance Carriers",
+    IB: "Insurance Brokers",
+    UNKNOWN: "Sub-vertical not resolved",
+    // prototype-era keys, kept so fixture data still renders
+    REGIONAL_BANK: "Regional Banks",
     FARM_CREDIT: "Farm Credit",
-    REIT: "REIT",
-    INSURANCE_CARRIER: "Insurance Carrier",
-    INSURANCE_BROKER: "Insurance Broker",
-    WEALTH_RIA: "Wealth / RIA",
-    ASSET_MANAGER: "Asset Manager",
+    // Spelled out like every other label: "REIT" is an abbreviation on a
+    // client surface, which is the thing this build has been asked to stop
+    // shipping four times.
+    REIT: "Real Estate Investment Trusts",
+    INSURANCE_CARRIER: "Insurance Carriers",
+    INSURANCE_BROKER: "Insurance Brokers",
+    WEALTH_RIA: "RIAs & Broker-Dealers",
+    ASSET_MANAGER: "Asset & Wealth Management",
     FINTECH_SAAS: "FinTech / SaaS",
-    CU: "Credit Union"
+    CREDIT_UNION: "Credit Unions"
   };
-  Object.assign(SUBVERTICAL_LABEL, LIVE && LIVE.subvertical_labels || {});
+  /* A server label that is just the code back again is not a label. It was
+     exactly that for one client, and this table's correct answer was
+     discarded for it. */
+  for (const [code, label] of Object.entries(LIVE && LIVE.subvertical_labels || {})) {
+    if (typeof label === "string" && label.trim() && label.trim() !== code) {
+      SUBVERTICAL_LABEL[code] = label;
+    }
+  }
 
   /* ── Active runs (in-progress dashboard strip) ───────────────────── */
   const ACTIVE_RUNS = LIVE ? LIVE.active_runs || [] : [{

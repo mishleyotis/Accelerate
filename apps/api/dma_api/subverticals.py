@@ -249,6 +249,60 @@ def serves(subcap_id, entity_code: str | None) -> bool:
 # ── END SHARED CORE — everything below is this service's own ──
 
 
+# ── The DISPLAY name for a code, in one place ─────────────────────────
+#
+# THE DEFECT THIS ENDS, reported 2026-08-19: "I still see CU on the clients
+# page as well as at the header of the Logix Page instead of Credit Union."
+#
+# The directory built its own name table keyed `SV1`..`SV9` and fell back to
+# the raw stored value when a key missed. Logix's stored sub_vertical is the
+# bare string `CU`, so the fallback mapped `CU` to `"CU"` — a label that is
+# the code — and the browser's own table, which DID know `CU`, was overwritten
+# by it. Baxter's row says `SV2`, which that table happened to know, so one
+# corpus called the same thing "Credit Unions" on one client and "CU" on the
+# next.
+#
+# There were three name tables for one fact: the directory's (`SV#` keys,
+# title case), the connector's (`SUBVERTICAL_NAMES`, code keys, lower case,
+# written for prose), and the browser's (`SUBVERTICAL_LABEL`, a third key
+# space). This is the one a reader sees, keyed by the code
+# `resolve_subvertical` returns, so the resolver that already reads 61 corpus
+# spellings is what decides the label too.
+#
+# A code with no entry here is a programming error rather than a data one —
+# `SUBVERTICAL_CODES` is closed — so the test asserts every code has a name
+# rather than the lookup falling back to something printable.
+SUBVERTICAL_DISPLAY = {
+    "RB": "Regional Banks",
+    "CU": "Credit Unions",
+    "CL": "Commercial Lending",
+    "CIB": "Corporate & Investment Banking",
+    "FC": "Farm Credit",
+    "AM": "Asset & Wealth Management",
+    "RIA": "RIAs & Broker-Dealers",
+    "IC": "Insurance Carriers",
+    "IB": "Insurance Brokers",
+}
+
+# What a reader is shown when the stored value resolves to no code. NOT the
+# raw value: `resolve_subvertical` returns None for a string naming two
+# sub-verticals as well as for one naming none, and printing either at a
+# client is how `CU` got on screen in the first place.
+UNKNOWN_SUBVERTICAL = "UNKNOWN"
+UNKNOWN_SUBVERTICAL_DISPLAY = "Sub-vertical not resolved"
+
+
+def display_name(raw) -> tuple:
+    """(code, display name) for a stored sub_vertical value, both safe to
+    serve. The code is the join key every other layer uses; the name is the
+    only form that reaches a page."""
+    code = resolve_subvertical(raw)
+    if code is None:
+        return UNKNOWN_SUBVERTICAL, UNKNOWN_SUBVERTICAL_DISPLAY
+    return code, SUBVERTICAL_DISPLAY[code]
+
+
+
 def scope_to_entity(rows, entity_sub_vertical, key=None) -> list:
     """`rows` less the cells belonging to another sub-vertical.
 
