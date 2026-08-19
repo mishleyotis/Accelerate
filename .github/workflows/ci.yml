@@ -150,6 +150,25 @@ jobs:
   python-tests:
     name: Python unit tests (worker · mcp · api · scripts)
     runs-on: ubuntu-latest
+    # Postgres, because without it this job was measuring almost nothing. Every
+    # DB-backed fixture guards with `pytest.skip("no migrated local database")`,
+    # so 30-plus modules — the promote transaction, the enrichment ledger, the
+    # retained-verdict refusal, the redaction tests that run against the real
+    # schema — passed on a developer's machine and were skipped here. Green
+    # meant "not run" and nothing said so. pgvector's image rather than stock
+    # postgres: migration 0009 creates the vector extension and HNSW index.
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: local
+          POSTGRES_DB: dma_insights
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 20
+    env:
+      LOCAL_DATABASE_URL: postgresql://postgres:local@localhost:5432/dma_insights
     steps:
       - uses: actions/checkout@v4
       # apps/api's tests import dma_api.main, which imports fastapi. The first
@@ -165,7 +184,30 @@ jobs:
       # scripts/tests/test_gate_g_citable_evidence.py and
       # apps/worker/tests/test_ingested_excerpt_contract.py, the pair that
       # keeps an ingested excerpt citable or None and never the empty string.
-      - run: python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ scripts/tests/ -q
+      # Same schema the migrate Job applies in production, from empty. pg8000
+      # rather than psycopg2 so the driver matches what the tests themselves
+      # use and CI installs one Postgres client, not two.
+      - working-directory: migrations
+        env:
+          LOCAL_DATABASE_URL: postgresql+pg8000://postgres:local@localhost:5432/dma_insights
+        run: |
+          pip install -q -r requirements.txt
+          python -m alembic upgrade head
+      # One run, and the skip count is read from it. A skip is how this job hid
+      # 30 modules for the whole build, so the count is asserted rather than
+      # printed: measured on a fresh migrated database the suite is 1397
+      # passed, 3 skipped, and a count that climbs means a fixture started
+      # skipping again — the failure mode this service block exists to end.
+      # Deliberate skips: raise the ceiling in the commit that adds them, and
+      # say which. `-rs` names every one in the log, so the diff is readable.
+      - name: Unit tests, and a suite that skips silently fails
+        run: |
+          set -o pipefail
+          python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
+                 scripts/tests/ -q -rs 2>&1 | tee /tmp/pytest.txt
+          n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
+          echo "skipped: ${n:-0} (ceiling 3)"
+          test "${n:-0}" -le 3
 
   # The frontend has its own suite (node's built-in runner, no framework) and
   # it too had never run here. It is the only place the COMPILED bundle is

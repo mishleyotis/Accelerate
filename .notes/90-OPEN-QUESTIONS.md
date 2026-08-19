@@ -77,33 +77,61 @@ upstream of that is verifiable from here today.
 
 ## Findings — reported, not acted on
 
-### F1 · `test_a_retained_pass_is_revalidated_and_disclosed` fails at HEAD
-`apps/mcp/tests/test_promote.py`. Injects an off-vocabulary
-`timeline.arc_shape` into a retained context page and asserts the promote
-still succeeds with disclosure. Actual: `promoted: false`,
+### F1 · CLOSED 2026-08-19 · the test was the stale side
+`apps/mcp/tests/test_promote.py`. It injected an off-vocabulary
+`timeline.arc_shape` into a retained context page and asserted the promote
+still succeeded with disclosure. Actual: `promoted: false`,
 `retained_pages_fail_current_gates`, `context → CG-09 (severity: block)`.
 
-The implementation refuses only on **blocking** gates and its own hint says
-SG reasons still disclose-and-promote — which matches charter invariant 12.
-The test injects CG-09, a blocking contract gate, and still expects a promote.
-Reading: the implementation was narrowed (commit `6e008b1`) and the test still
-encodes the older behaviour.
+Resolved against the charter rather than by preference. Invariant 12 grants
+disclose-and-promote to **SG and to nothing else**; CG, AG and ET are
+correctness reasons. The implementation (commit `6e008b1`) encodes exactly
+that and its own hint says so; the test predates it (`9daf58e`) and encoded
+the older behaviour. The test's argument — that refusing makes every gate
+change retroactively un-promotable — does not survive contact with the
+refusal text, which names ONLY the failing page and leaves the other five
+retained rows good. That is the repair invariant 3 exists to make cheap.
 
-Re-checked **after** the catalogue was seeded and it fails identically, so the
-catalogue is ruled out as a cause.
+Test rewritten to assert the refusal, and the SG half of the filter — which
+had no test anywhere in the suite, so a one-character slip in the prefix
+check would have stranded every run carrying a disclosed safeguard — now has
+one.
 
-Never caught because the fixture calls `pytest.skip("no migrated local
-database")` and CI's `python-tests` job runs with no Postgres service — so
-this test has never executed in CI.
+### F1b · the whole DB-backed suite has never run in CI
+Still open, and larger than it looks. `python-tests` in `.github/workflows/ci.yml`
+runs with no Postgres service, so every fixture that reaches a database calls
+`pytest.skip("no migrated local database")`. That is 30+ test modules across
+worker, mcp and api — including the enrichment ledger, the promote
+transaction, the retained-verdict refusal above, and the redaction tests that
+run against the real schema. They pass on a developer's machine and enforce
+nothing on a pull request.
 
-Claim label: **CONFIRMED** it fails at HEAD against a migrated local DB.
-**HIGH** confidence the test, not the promote path, is the stale side —
-falsifier I could not rule out: nobody has stated whether disclose-only was
-meant to survive for contract gates too. Needs the owner's call.
+Measured 2026-08-19, so the remaining gap is exact rather than estimated:
 
-Adjacent, worth deciding separately: should CI's `python-tests` job get a
-Postgres service? Right now a whole class of DB-backed tests is skipped there
-and only runs on a developer's machine.
+  * `alembic upgrade head` against an **empty** database succeeds cleanly
+    (driver `postgresql+pg8000://`, run from `migrations/`).
+  * Against that fresh database the suite is **1391 passed, 1 failed,
+    7 errors, 1 skipped**.
+  * All 8 non-passes are one cause: no catalogue. `runs.ccg_catalog_version`
+    carries an FK, so a fixture inserting a run with `'v7.0'` fails, and
+    `test_catalogue_pins_the_run_version_with_names` reads the version back
+    as null.
+
+So the blocker is **not** the migration and not the tests. It is that the
+v7.0 catalogue's source of record is a GCS bucket, and CI has no credential
+for it — nor should it be given one for this.
+
+The open call is which of two:
+  a. commit a minimal FK-satisfying catalogue skeleton (4 pillars, 16
+     categories, a few subcaps) as an explicit test fixture, labelled as a
+     skeleton and never as a catalogue substitute; or
+  b. leave the 8 catalogue-dependent tests skipped in CI and run the other
+     1391.
+
+(b) is available today and captures most of the value. (a) is better and
+carries a drift risk that needs a shape assertion of its own. Owner's call —
+it decides whether a committed fixture is allowed to stand in for catalogue
+data at all, which is a policy question, not a test question.
 
 ### F2 · Duplicate skills between the plugin and account-synced skills
 `~/.claude/skills/synced/` carries `dma-assessment`, `dma-first-call-deck`,
