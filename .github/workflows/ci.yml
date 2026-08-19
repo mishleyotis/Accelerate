@@ -5,10 +5,21 @@ on:
     branches: ['**']
   pull_request:
 
+# A run that has been superseded must not outlive the commit that superseded
+# it. Two hung jobs from 2026-08-19 held runners for half an hour after the
+# fix for the hang was already pushed, because nothing cancels the run a new
+# commit replaces. Keyed on the ref, so a push run only ever cancels an older
+# push run and a pull_request run an older pull_request run: which of the two
+# survives stays deterministic, and the merge-commit build is still measured.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   gates:
     name: Architecture gates
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -95,6 +106,14 @@ jobs:
       # simply always empty — so the wiring is asserted rather than trusted.
       - name: Gate K — a refused payload cannot be undetectable
         run: python3 scripts/gate_k_rejections_return.py
+      # A hung check is a check that did not run, wearing `in_progress`
+      # instead of `skipped`. Two runs of one commit sat on a single step for
+      # 33 minutes on 2026-08-19 against GitHub's six-HOUR default, and the
+      # only reason it was found is that someone was already reading the pull
+      # request. A bound makes it red instead, which is the state a person
+      # acts on.
+      - name: Gate L — every CI job carries a clock
+        run: python3 scripts/gate_l_ci_jobs_are_bounded.py
       - name: Gate J — no client is structurally thinner than the reference
         run: |
           set +e
@@ -159,6 +178,7 @@ jobs:
   schema-qa:
     name: Schema QA checklist (stage 0.3 DoD)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: pgvector/pgvector:pg16
@@ -188,6 +208,7 @@ jobs:
   python-tests:
     name: Python unit tests (worker · mcp · api · scripts)
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     # Postgres, because without it this job was measuring almost nothing. Every
     # DB-backed fixture guards with `pytest.skip("no migrated local database")`,
     # so 30-plus modules — the promote transaction, the enrichment ledger, the
@@ -315,6 +336,7 @@ jobs:
   web-tests:
     name: Web unit tests (compiled bundle)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -336,20 +358,65 @@ jobs:
         # which is worse than not running at all because it looks like a
         # product failure. `npx` keeps the installer out of the dependency
         # tree; the runner the tests require is playwright-core.
-        run: |
-          npx --yes playwright@1.62.1 install --with-deps chromium
-          # VERIFY THE INSTALL, here, where the message is short. The first
-          # attempt used playwright-core's CLI, which downloaded nothing and
-          # exited 0 — so the job carried on and failed twelve test files
-          # later with `executablePath: expected string, got object`, which
-          # names neither the cause nor the step.
-          node -e "
-            const { resolveChromium } = require('./tests/proto-page-harness.js');
-            const p = resolveChromium();
-            if (!p) { console.error('no chromium after install'); process.exit(1); }
-            console.log('chromium at', p);
-          "
+        #
+        # THE DOWNLOAD AND THE apt RUN ARE SEPARATE NOW, and the clock is not
+        # decoration. `--with-deps` welds an apt-get run onto the front of the
+        # download, and apt on a fresh runner queues behind unattended-upgrades
+        # holding the dpkg lock. Measured 2026-08-19: two independent runs of
+        # the same commit sat on this single step for 33 minutes with the
+        # browser still not fetched, against a job default timeout of six
+        # HOURS. A check that hangs past the end of the working day is
+        # indistinguishable from a check that is being thorough, which is the
+        # same failure this file keeps paying for — a check not running, with
+        # nothing saying so.
+        timeout-minutes: 12
+        env:
+          DEBIAN_FRONTEND: noninteractive
         working-directory: apps/web
+        run: |
+          set -euo pipefail
+          # 1 — the browser. The half the suites genuinely cannot run without,
+          # and the half that never needed root.
+          npx --yes playwright@1.62.1 install chromium
+          # 2 — the shared libraries: bounded, and NOT fatal. ubuntu-latest
+          # already ships most of what headless Chromium links against, so a
+          # failed apt run is a maybe rather than a verdict. The launch probe
+          # below is the verdict, and it answers in one line.
+          if ! timeout -k 15s 300s npx --yes playwright@1.62.1 install-deps chromium; then
+            echo "::warning::install-deps did not finish inside 5m; the launch probe decides whether that matters"
+          fi
+      # VERIFY THE INSTALL, here, where the message is short. The first
+      # attempt used playwright-core's CLI, which downloaded nothing and exited
+      # 0 — so the job carried on and failed twelve test files later with
+      # `executablePath: expected string, got object`, which names neither the
+      # cause nor the step. The second attempt resolved a PATH and stopped
+      # there, so it could not have caught a missing system library either: a
+      # library only goes missing at launch. So the probe LAUNCHES, the way
+      # every suite in this directory launches, and renders one element.
+      - name: Prove Chromium launches
+        timeout-minutes: 5
+        working-directory: apps/web
+        run: |
+          node -e "
+            const H = require('./tests/proto-page-harness.js');
+            const exe = H.resolveChromium();
+            if (!exe) { console.error('no chromium after install'); process.exit(1); }
+            console.log('chromium at', exe);
+            const pw = H.resolvePlaywright();
+            if (!pw) { console.error('no playwright runner resolvable'); process.exit(1); }
+            (async () => {
+              const b = await pw.chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
+              const page = await b.newPage();
+              await page.setContent('<h1 id=t>ok</h1>');
+              const t = await page.evaluate(() => document.querySelector('#t').textContent);
+              await b.close();
+              if (t !== 'ok') { console.error('chromium launched but rendered nothing'); process.exit(1); }
+              console.log('chromium launches and renders');
+            })().catch((e) => {
+              console.error('chromium will not launch here:', e.message);
+              process.exit(1);
+            });
+          "
       - working-directory: apps/web
         run: npm run build:proto
       - working-directory: apps/web
@@ -363,6 +430,7 @@ jobs:
   promoted-client-audit:
     name: Promoted-client audit (fixture)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - run: |
