@@ -420,3 +420,106 @@ def test_the_evidence_index_is_identity_grain():
     from dma_mcp.validation2 import _IDENTITY_GRAIN
     assert ("heatmap", "evidence") in _IDENTITY_GRAIN
     assert ("heatmap", "evidence_age") in _IDENTITY_GRAIN
+
+
+# ── CG-31: the tile is the same number as the card, from the same engine ──
+
+from dma_mcp.validation2 import _check_opportunity_tiles_are_the_engine_s
+
+TILE_CHECK = _check_opportunity_tiles_are_the_engine_s
+FOUR = [{"name": n, "value": 0.5, "weight": 0.25, "contribution": 0.125}
+        for n in ("Addressable opportunity", "Catalogue interconnect",
+                  "Greenfield family", "Strategic alignment")]
+
+
+class _SibCur(_Cur):
+    """_Cur plus a staged platform sibling for the cross-page read."""
+
+    def __init__(self, cells, sibling):
+        super().__init__(cells)
+        self._sib = sibling
+
+    def execute(self, sql, args=None):
+        if "FROM submissions" in sql and "superseded_at IS NULL" in sql:
+            self._rows = [(self._sib,)] if self._sib is not None else []
+        else:
+            super().execute(sql, args)
+
+
+def _ov(*tiles):
+    return {"opportunity": {"tiles": list(tiles)}}
+
+
+def _sib(*cards):
+    return {"platform_story": {"platforms": list(cards)}}
+
+
+def test_a_legacy_factor_vocabulary_is_refused_by_name():
+    """Baxter rendered a six-factor 76.5 and Logix a three-factor 67.0 for
+    the same concept — reported twice in one day. The names themselves are
+    refused, so neither vocabulary can re-enter."""
+    tile = {"platform": "X", "composite": 76.5, "rank": 1,
+            "factors": [{"name": "business_impact", "value": 9,
+                         "weight": 0.25, "contribution": 22.5}]}
+    out = TILE_CHECK(_Conn(_SibCur(CELLS, None)), "run", "overview", _ov(tile))
+    assert [r["gate_id"] for r in out] == ["CG-31"]
+    assert "business_impact" in out[0]["message"]
+    assert "pre-engine" in out[0]["message"]
+
+
+def test_a_wrong_factor_set_is_refused_even_without_legacy_names():
+    tile = {"platform": "X", "composite": 50.0, "rank": 1,
+            "factors": [{"name": "Vibes", "value": 1, "weight": 1,
+                         "contribution": 1}]}
+    out = TILE_CHECK(_Conn(_SibCur(CELLS, None)), "run", "overview", _ov(tile))
+    assert [r["gate_id"] for r in out] == ["CG-31"]
+    assert "engine's four" in out[0]["message"]
+
+
+def test_the_engine_s_four_names_pass_without_a_sibling():
+    tile = {"platform": "X", "composite": 50.0, "rank": 1, "factors": FOUR}
+    assert TILE_CHECK(_Conn(_SibCur(CELLS, None)), "run", "overview",
+                      _ov(tile)) == []
+
+
+def test_a_tile_that_disagrees_with_its_card_is_refused():
+    tile = {"platform": "X", "composite": 76.5, "rank": 1, "factors": FOUR}
+    sib = _sib({"platform": "X", "fit_score": 45.3, "rank": 1})
+    out = TILE_CHECK(_Conn(_SibCur(CELLS, sib)), "run", "overview", _ov(tile))
+    assert [r["gate_id"] for r in out] == ["CG-31"]
+    assert "45.3" in out[0]["message"] and "76.5" in out[0]["message"]
+
+
+def test_a_tile_matching_its_card_passes_within_grain():
+    tile = {"platform": "X", "composite": 45.3, "rank": 2, "factors": FOUR}
+    sib = _sib({"platform": "X", "fit_score": 45.3, "rank": 2})
+    assert TILE_CHECK(_Conn(_SibCur(CELLS, sib)), "run", "overview",
+                      _ov(tile)) == []
+
+
+def test_a_rank_disagreement_is_the_same_defect():
+    tile = {"platform": "X", "composite": 45.3, "rank": 1, "factors": FOUR}
+    sib = _sib({"platform": "X", "fit_score": 45.3, "rank": 2})
+    out = TILE_CHECK(_Conn(_SibCur(CELLS, sib)), "run", "overview", _ov(tile))
+    assert [r["gate_id"] for r in out] == ["CG-31"]
+    assert "rank" in out[0]["message"]
+
+
+def test_a_tile_with_no_card_is_a_story_less_score():
+    tile = {"platform": "Ghost", "composite": 45.3, "rank": 1, "factors": FOUR}
+    sib = _sib({"platform": "X", "fit_score": 45.3, "rank": 1})
+    out = TILE_CHECK(_Conn(_SibCur(CELLS, sib)), "run", "overview", _ov(tile))
+    assert [r["gate_id"] for r in out] == ["CG-31"]
+    assert "no card" in out[0]["message"]
+
+
+def test_an_unrankable_platform_is_null_on_both_pages():
+    tile = {"platform": "X", "composite": 12.0, "rank": 5, "factors": FOUR}
+    sib = _sib({"platform": "X", "fit_score": None, "state": "TOO_NARROW"})
+    out = TILE_CHECK(_Conn(_SibCur(CELLS, sib)), "run", "overview", _ov(tile))
+    assert [r["gate_id"] for r in out] == ["CG-31"]
+    assert "unrankable" in out[0]["message"]
+
+
+def test_another_page_is_not_cg31_s_business():
+    assert TILE_CHECK(None, "run", "platform", _ov({"platform": "X"})) == []

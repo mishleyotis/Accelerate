@@ -1431,6 +1431,134 @@ def _check_platform_fit_is_the_engine_s(conn, run_id, page, payload) -> list:
     return out[:6]
 
 
+
+
+# The engine's four factor names, and every name a pre-engine tile ever
+# rendered. The blacklist is matched against factor NAMES only: "business
+# impact analysis" is honest prose about the BIA capability, and a sweep of
+# both promoted corpora confirmed every prose occurrence is exactly that.
+_ENGINE_FACTORS = frozenset(("Addressable opportunity", "Catalogue interconnect",
+                             "Greenfield family", "Strategic alignment"))
+_LEGACY_FACTORS = frozenset((
+    "business_impact", "risk_exposure", "competitive_gap", "effort_inverse",
+    "quick_win", "trend_momentum", "business impact", "risk exposure",
+    "competitive gap", "effort inverse", "quick win", "trend momentum",
+    "Addressable gap depth", "Sub-vertical relevance",
+    "Substrate already in place"))
+
+
+def _check_opportunity_tiles_are_the_engine_s(conn, run_id, page,
+                                              payload) -> list:
+    """CG-31 — the tile is the same number as the card, from the same engine.
+
+    THE DEFECT, reported twice on 2026-08-19: the round-6 report was
+    "Platform fit scores calculation is very different from Baxter's", and
+    after the cards were pinned to the shared engine (CG-30) the report came
+    back as "Platform scores still reflect different composite factors" —
+    because the OVERVIEW tiles carried their own per-client factor systems
+    (Baxter a six-factor 76.5, Logix a three-factor 67.0) and no gate read
+    them. The cards were fixed by hand and nothing stopped the next
+    submission regressing.
+
+    Two rules, both cheap and both refusals:
+      · a tile's factor names are the engine's four — a legacy name is
+        refused BY NAME, so the six-factor and three-factor vocabularies
+        cannot re-enter through this section;
+      · where the platform page is staged, a tile's composite and rank equal
+        its card's fit_score and rank (0.05 grain). CG-30 pins the card to
+        the engine, so the tile is transitively the engine's — one number,
+        both pages, one code path. A tile whose platform has no card is a
+        scored recommendation with no story and is refused too.
+    A platform page not yet staged is nothing to compare; the promote-time
+    re-gate makes the comparison when both exist.
+    """
+    if page != "overview":
+        return []
+    body = (payload or {}).get("opportunity")
+    if not isinstance(body, dict):
+        return []
+    tiles = body.get("tiles")
+    if not isinstance(tiles, list) or not tiles:
+        return []
+
+    out = []
+    for i, t in enumerate(tiles):
+        if not isinstance(t, dict):
+            continue
+        names = [str(f.get("name")) for f in (t.get("factors") or [])
+                 if isinstance(f, dict)]
+        legacy = sorted(set(names) & _LEGACY_FACTORS)
+        if legacy:
+            out.append(_reason(
+                "CG-31", "opportunity",
+                f"overview.opportunity.tiles[{i}].factors",
+                f"factor name(s) {', '.join(legacy)} are a pre-engine "
+                "vocabulary. The tile reads composite, factors, rank and "
+                "relevance from `get_platform_fit`; its factor names are "
+                "exactly: " + ", ".join(sorted(_ENGINE_FACTORS)) + ". Two "
+                "clients rendered two factor systems for one number — that "
+                "is the defect this gate exists to refuse."))
+            continue
+        if set(names) != set(_ENGINE_FACTORS):
+            out.append(_reason(
+                "CG-31", "opportunity",
+                f"overview.opportunity.tiles[{i}].factors",
+                f"factor names {names!r} are not the engine's four "
+                f"({', '.join(sorted(_ENGINE_FACTORS))}). Read the tile's "
+                "breakdown from `get_platform_fit` — the breakdown a reader "
+                "opens must be the arithmetic that produced the headline."))
+    if len(out) >= 6:
+        return out[:6]
+
+    sibling = _live_submission(conn, run_id, "platform")
+    cards = ((sibling.get("platform_story") or {}).get("platforms")
+             if isinstance(sibling, dict) else None)
+    if not isinstance(cards, list) or not cards:
+        return out[:6]
+    by_name = {str(c.get("platform")): c for c in cards if isinstance(c, dict)}
+    for i, t in enumerate(tiles):
+        if not isinstance(t, dict):
+            continue
+        card = by_name.get(str(t.get("platform")))
+        if card is None:
+            out.append(_reason(
+                "CG-31", "opportunity",
+                f"overview.opportunity.tiles[{i}].platform",
+                f"tile {t.get('platform')!r} has no card on the staged "
+                "platform page — a scored recommendation with no story. "
+                "Card it, or drop the tile."))
+            continue
+        fit = card.get("fit_score")
+        comp = t.get("composite")
+        if fit is None or comp is None:
+            if fit != comp:
+                out.append(_reason(
+                    "CG-31", "opportunity",
+                    f"overview.opportunity.tiles[{i}].composite",
+                    f"tile composite {comp!r} against card fit {fit!r} — "
+                    "an unrankable platform is null on BOTH pages with the "
+                    "engine's state, never null on one and scored on the "
+                    "other."))
+            continue
+        if abs(float(comp) - float(fit)) > 0.05:
+            out.append(_reason(
+                "CG-31", "opportunity",
+                f"overview.opportunity.tiles[{i}].composite",
+                f"tile composite {comp} against card fit {fit} for "
+                f"{t.get('platform')!r}. One platform, one number: the tile "
+                "reads the same engine row the card reads (CG-30 pins the "
+                "card, this pins the tile to it)."))
+        elif (t.get("rank") is not None and card.get("rank") is not None
+              and int(t["rank"]) != int(card["rank"])):
+            out.append(_reason(
+                "CG-31", "opportunity",
+                f"overview.opportunity.tiles[{i}].rank",
+                f"tile rank {t['rank']} against card rank {card['rank']} "
+                f"for {t.get('platform')!r} — the reader takes tile order "
+                "as the recommendation, so the two pages must agree."))
+    return out[:6]
+
+
 def validate_pass2(conn, run_id, page: str, payload: dict,
                    encoder=None) -> tuple:
     """→ (blocking_reasons, sg_disclosures). SG results are also recorded
@@ -1483,6 +1611,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     # contamination that never cites, so it must not sit inside `if cited:`.
     reasons.extend(_check_foreign_entity_prose(conn, run_id, payload))
     reasons.extend(_check_platform_fit_is_the_engine_s(
+        conn, run_id, page, payload))
+    reasons.extend(_check_opportunity_tiles_are_the_engine_s(
         conn, run_id, page, payload))
 
     served = _served_figures(conn, run_id)
