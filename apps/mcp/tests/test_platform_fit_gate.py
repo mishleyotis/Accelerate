@@ -27,12 +27,6 @@ def page(*platforms):
     return {"platform_story": {"platforms": list(platforms)}}
 
 
-def test_a_card_with_no_fit_score_is_refused():
-    """Five nulls is exactly what the reported client shipped. A platform page
-    whose cards cannot be ranked is not a ranking."""
-    out = CHECK(None, "run", "platform", page({"platform": "X", "fit_score": None}))
-    assert [r["gate_id"] for r in out] == ["CG-30"]
-    assert "read the number" in out[0]["message"].lower()
 
 
 def test_another_page_is_not_this_gate_s_business():
@@ -46,10 +40,6 @@ def test_a_section_with_no_platforms_is_not_a_violation():
     assert CHECK(None, "run", "platform", {}) == []
 
 
-def test_the_gate_names_a_handful_not_a_wall():
-    out = CHECK(None, "run", "platform",
-                page(*[{"platform": f"P{i}", "fit_score": None} for i in range(20)]))
-    assert len(out) <= 6
 
 
 def test_an_engine_that_cannot_run_is_a_refusal_not_a_pass():
@@ -92,6 +82,27 @@ class _Conn:
 
 CELLS = [("P1C1.1.1", 2.0, "P1C1", "integration"),
          ("P1C1.1.2", 1.5, "P1C1", "integration")]
+
+
+def test_a_card_with_no_fit_score_the_engine_can_score_is_refused():
+    """Five nulls is exactly what the reported client shipped. A platform page
+    whose cards cannot be ranked is not a ranking — and the refusal quotes the
+    number the engine had ready, so the resubmission is a read, not a guess."""
+    wide = CELLS + [("P1C1.1.3", 1.0, "P1C1", "integration")]
+    out = CHECK(_Conn(_Cur(wide)), "run", "platform",
+                page({"platform": "MuleSoft", "l3_area": "Integration",
+                      "fit_score": None, "alignment": 0.5,
+                      "readiness": "green"}))
+    assert [r["gate_id"] for r in out] == ["CG-30"]
+    assert "read the number" in out[0]["message"].lower()
+    assert "state" in out[0]["message"]  # names what it computed
+
+
+def test_the_gate_names_a_handful_not_a_wall():
+    out = CHECK(_Conn(_Cur(CELLS)), "run", "platform",
+                page(*[{"platform": f"P{i}", "l3_area": "Integration",
+                        "fit_score": None} for i in range(20)]))
+    assert 0 < len(out) <= 6
 
 
 def test_a_score_the_engine_did_not_produce_is_refused():
@@ -243,3 +254,71 @@ def test_the_context_counts_what_the_engine_actually_read():
     assert ctx["cells_scored"] == len(CELLS)
     assert ctx["cells_with_citable_evidence"] == 0
     assert ctx["entity_subvertical_code"] == "CU"
+
+
+# ── the honest null, and the inputs the gate must not drop ─────────────
+
+def _mlflow_ranked(depends_on=None):
+    card = {"platform": "MuleSoft", "l3_area": "Integration",
+            "alignment": 0.5, "readiness": "green"}
+    if depends_on is not None:
+        card["depends_on"] = depends_on
+    return card
+
+
+def test_a_null_fit_is_honest_when_the_engine_itself_cannot_rank_it():
+    """TOO_NARROW is the engine's own verdict for an area binding fewer than
+    MIN_CELLS cells. A null with that state on the card renders as "not
+    scored: too narrow to rank"; a 0.0 would render as the worst platform on
+    the page — a sentinel that looks like data (invariant 9)."""
+    out = CHECK(_Conn(_Cur(CELLS)), "run", "platform",
+                page({"platform": "Nowhere", "l3_area": "Nothing here",
+                      "fit_score": None, "state": "TOO_NARROW"}))
+    assert out == [], out
+
+
+def test_a_null_fit_without_the_engine_s_state_is_refused():
+    out = CHECK(_Conn(_Cur(CELLS)), "run", "platform",
+                page({"platform": "Nowhere", "l3_area": "Nothing here",
+                      "fit_score": None}))
+    assert [r["gate_id"] for r in out] == ["CG-30"]
+    assert "state" in out[0]["message"]
+
+
+def test_a_null_fit_with_a_state_the_engine_did_not_give_is_refused():
+    out = CHECK(_Conn(_Cur(CELLS)), "run", "platform",
+                page({"platform": "Nowhere", "l3_area": "Nothing here",
+                      "fit_score": None, "state": "INSUFFICIENT_EVIDENCE"}))
+    assert [r["gate_id"] for r in out] == ["CG-30"]
+    assert "TOO_NARROW" in out[0]["message"]
+
+
+def test_depends_on_reaches_the_engine_so_its_own_ordering_passes():
+    """The engine refuses to rank a card above something it depends on. A
+    gate that dropped `depends_on` would refuse a producer for shipping the
+    engine's own ranks — the workload-above-foundation defect, reintroduced
+    by the check meant to prevent it."""
+    from dma_mcp import fit as fit_mod
+    two = [("P1C1.1.1", 2.0, "P1C1", "integration"),
+           ("P1C1.1.2", 1.5, "P1C1", "integration"),
+           ("P1C1.2.1", 1.0, "P1C1", "workload"),
+           ("P1C1.2.2", 1.0, "P1C1", "workload"),
+           ("P1C1.2.3", 1.0, "P1C1", "workload")]
+    cands = [
+        {"platform": "Foundation", "l3_area": "Integration",
+         "alignment": 0.2, "readiness": "green"},
+        {"platform": "Workload", "l3_area": "workload",
+         "alignment": 0.9, "readiness": "green",
+         "depends_on": ["Foundation"]},
+    ]
+    got = fit_mod.platform_fit(_Conn(_Cur(two)), "run", cands)["platforms"]
+    by = {p["platform"]: p for p in got}
+    # the premise of the case: on raw fit the workload would lead
+    assert by["Workload"]["fit_score"] >= by["Foundation"]["fit_score"]
+    assert by["Foundation"]["rank"] < by["Workload"]["rank"]
+    cards = []
+    for c in cands:
+        r = by[c["platform"]]
+        cards.append({**c, "fit_score": r["fit_score"], "rank": r["rank"]})
+    out = CHECK(_Conn(_Cur(two)), "run", "platform", page(*cards))
+    assert out == [], out

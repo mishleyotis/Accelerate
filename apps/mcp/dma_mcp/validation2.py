@@ -1330,10 +1330,20 @@ def _check_platform_fit_is_the_engine_s(conn, run_id, page, payload) -> list:
     tolerance.
 
     Two absences are refused as well as a disagreement:
-      · a card with no `fit_score` at all — five nulls is what the reported
-        client shipped, and a page that cannot rank is not a ranking;
+      · a card with no `fit_score` where the engine CAN score it — five nulls
+        is what the reported client shipped, and a page that cannot rank is
+        not a ranking. A null is honest in exactly one case: the engine's own
+        state for the candidate is unrankable (TOO_NARROW, OUT_OF_VERTICAL),
+        and the card carries that state so the reader sees why. A 0.0 there
+        would be a sentinel that looks like data (invariant 9);
       · a card whose `rank` disagrees with the engine's ordering, because a
         correct number in the wrong order is the same page.
+
+    `depends_on` is fed back through with the other producer inputs. The
+    engine refuses to rank a card above something it depends on; a gate that
+    dropped the field would refuse a producer for shipping the engine's own
+    ordering — the workload-above-foundation defect, reintroduced by the
+    check meant to prevent it.
     """
     if page != "platform":
         return []
@@ -1345,24 +1355,15 @@ def _check_platform_fit_is_the_engine_s(conn, run_id, page, payload) -> list:
         return []
 
     candidates, out = [], []
-    for i, r in enumerate(rows):
+    for r in rows:
         if not isinstance(r, dict):
             continue
-        if r.get("fit_score") is None:
-            out.append(_reason(
-                "CG-30", "platform_story",
-                f"platform.platform_story.platforms[{i}].fit_score",
-                "no fit score on this card. Call `get_platform_fit` and read "
-                "the number it returns; a platform page whose cards cannot be "
-                "ranked is not a ranking. If the engine cannot score it, that "
-                "is what `state` is for."))
         candidates.append({"platform": r.get("platform"),
                            "l3_area": r.get("l3_area"),
                            "alignment": r.get("alignment"),
                            "alignment_quote": r.get("alignment_quote"),
-                           "readiness": r.get("readiness") or "green"})
-    if out:
-        return out[:6]
+                           "readiness": r.get("readiness") or "green",
+                           "depends_on": r.get("depends_on") or []})
 
     try:
         from . import fit as fit_mod
@@ -1376,10 +1377,32 @@ def _check_platform_fit_is_the_engine_s(conn, run_id, page, payload) -> list:
                         f"unchecked. That is a refusal, not a pass.")]
 
     by_name = {str(p.get("platform")): p for p in computed.get("platforms", [])}
+    unrankable = {"TOO_NARROW", "OUT_OF_VERTICAL"}
     for i, r in enumerate(rows):
         if not isinstance(r, dict):
             continue
         got = by_name.get(str(r.get("platform")))
+        if r.get("fit_score") is None:
+            if got is None or got.get("state") not in unrankable:
+                out.append(_reason(
+                    "CG-30", "platform_story",
+                    f"platform.platform_story.platforms[{i}].fit_score",
+                    "no fit score on this card, and the engine can score it"
+                    + ("" if got is None else
+                       f" ({got['fit_score']}, state {got.get('state')})")
+                    + ". Call `get_platform_fit` and read the number it "
+                    "returns; a platform page whose cards cannot be ranked "
+                    "is not a ranking."))
+            elif str(r.get("state") or "") != str(got.get("state")):
+                out.append(_reason(
+                    "CG-30", "platform_story",
+                    f"platform.platform_story.platforms[{i}].state",
+                    f"fit_score is null, which is honest only with the "
+                    f"engine's own reason on the card: state "
+                    f"{got.get('state')!r}, not {r.get('state')!r}. A null "
+                    "with no stated reason reads as a rendering defect, and "
+                    "a 0.0 would read as the worst score on the page."))
+            continue
         if got is None:
             continue
         if abs(float(r["fit_score"]) - float(got["fit_score"])) > 0.05:
