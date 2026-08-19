@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import json
 
+from . import ledger
+
 
 def _rows(cur, sql, args=()):
     cur.execute(sql, args)
@@ -214,10 +216,22 @@ def get_client_state(conn, display_id: str) -> dict:
                       AND s.promoted_at IS NOT NULL
                       AND s.superseded_at IS NULL""", (entity_id,))
     served = [{"page": p, "promoted_at": t.isoformat()} for p, t in cur.fetchall()]
-    return _jsonable({
+    # The enrichment ledger's answer to "is this client done?". Reported
+    # here because this is the call a producer makes to orient itself before
+    # touching a client, and a facet that was enriched and never promoted is
+    # the single most useful thing it can be told at that moment.
+    #
+    # Never fatal: a state read that fails must not cost the caller the run
+    # history it actually asked for.
+    out = {
         "entity_id": entity_id, "display_id": display_id,
         "entity_name": legal_name, "sub_vertical": sub_vertical,
         "size_tier": size_tier, "status": status,
         "runs": runs,
         "served_pages": served,
-    })
+    }
+    try:
+        out["enrichment"] = ledger.summary(ledger.drift(cur, entity_id))
+    except Exception as e:                # noqa: BLE001 — reported, not silent
+        out["enrichment_error"] = str(e)[:200]
+    return _jsonable(out)

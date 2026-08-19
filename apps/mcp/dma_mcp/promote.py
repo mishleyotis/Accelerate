@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from . import ledger
 from .contracts import PAGES, SERVING_TABLES
 from .validation import validate_pass1
 
@@ -145,6 +146,20 @@ def _expand_h4_maps(section_payload: dict) -> list:
             rows.append({"pillar_id": cid.split("C")[0], "category_id": cid,
                          **entry})
     return rows
+
+
+def _promoted_sections(live):
+    """(page, section) for every section a promoted payload carries.
+
+    Read from the submissions this promote is writing, so it names what
+    happened rather than what a producer said would happen.
+    """
+    for page, sub in live.items():
+        payload = sub.get("payload") or {}
+        if isinstance(payload, dict):
+            for name in payload:
+                if not str(name).startswith("_"):
+                    yield (page, name)
 
 
 def promote_run(conn, run_id) -> dict:
@@ -301,6 +316,29 @@ def promote_run(conn, run_id) -> dict:
         cur.execute("""UPDATE submissions SET promoted_at = now()
                         WHERE id = ANY(%s)""",
                     ([s["id"] for s in live.values()],))
+        # ── the enrichment ledger's other half ─────────────────────────
+        #
+        # A promote is the only moment the system knows a facet reached a
+        # reader, so it is the only honest place to record it. Driven off the
+        # sections this promote ACTUALLY wrote rather than off a producer
+        # declaring anything, because the declaration is the thing that goes
+        # missing — three rounds of "the work was done but it is not showing"
+        # were all a promotion nobody recorded against an enrichment nobody
+        # versioned.
+        #
+        # Inside the transaction: a promote that rolls back must not leave
+        # the ledger claiming its facets are live.
+        promoted_facets, ledger_error = [], None
+        try:
+            promoted_facets = ledger.record_promotion_for_sections(
+                cur, entity_id,
+                list(_promoted_sections(live)),
+                run_id=run_id)
+        except Exception as e:            # noqa: BLE001 — reported, not silent
+            # The ledger is a safeguard, not the product. A promote that
+            # succeeded must not be reported as failed because its bookkeeping
+            # did — but it must not be reported as clean either.
+            ledger_error = str(e)[:200]
         conn.commit()
         # after commit: the directory's materialised view sees the new
         # promotion. A refresh failure never un-promotes — it is reported.
@@ -321,6 +359,17 @@ def promote_run(conn, run_id) -> dict:
                # dashboard unremarked in the first place.
                "open_alerts": alerts,
                "stats": stats}
+        # The drift flag, DISCLOSED and never blocking. A promote carrying
+        # five of seven facets forward is better than no promote; refusing it
+        # would strand the five. The refusal lives on "is this client done?",
+        # which is a claim about the whole client rather than one transaction.
+        try:
+            out["enrichment"] = ledger.summary(ledger.drift(cur, entity_id))
+            out["enrichment"]["promoted_now"] = promoted_facets
+        except Exception as e:            # noqa: BLE001 — reported, not silent
+            out["enrichment_error"] = str(e)[:200]
+        if ledger_error:
+            out["enrichment_ledger_error"] = ledger_error
         if refresh_error:
             out["directory_refresh_error"] = refresh_error
         if stale_verdicts:

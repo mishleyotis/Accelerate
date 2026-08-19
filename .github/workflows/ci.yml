@@ -64,6 +64,14 @@ jobs:
       # nothing (Gate G rode here once and failed on `No module named pytest`).
       - name: Gate H — the prompts do not claim a stored field is dropped
         run: python3 scripts/gate_h_prompt_persistence_claims.py
+      # Three rounds of "the work was done but it is not showing" — leadership,
+      # why-now, sentiment, the tech register — were all an enrichment that ran
+      # and a promotion that did not, with nothing in the system holding both
+      # halves of the sentence. Migration 0051 records both; this asserts the
+      # recording is still wired, because a safeguard nobody exercises is a
+      # comment. Stdlib plus the mcp package, no database.
+      - name: Gate I — the enrichment ledger is wired
+        run: python3 scripts/gate_i_enrichment_drift.py
       # The curation covered 115 of the specification's 127 surfaces and walked
       # past twelve — three whole Insights surfaces carrying eighteen P0 checks
       # among them, in neither artefact, not included and not excluded. Nothing
