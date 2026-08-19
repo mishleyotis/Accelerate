@@ -8,7 +8,20 @@ symptom would be a cell reading THIN on a page while the links behind it were
 right — a defect with no error and no log line.
 
   linked_evidence_count   every link, whatever it points at.
-  citable_evidence_count  links whose evidence row carries a verbatim span.
+  citable_evidence_count  links a reader can actually open. A link counts
+                          when its own row carries a verbatim span, OR when
+                          another row for the SAME artefact does — the rule
+                          `packages/shared/evidence_merge.py` applies to the
+                          served listing, written once more in SQL because a
+                          generated column cannot call Python.
+
+                          Both halves matter. The package supplies the CELL
+                          LINKS and no spans; a producer registers the span
+                          against the same url and no links. Counting only
+                          the first half left the drawer showing a quotable
+                          citation over a cell still flagged thin — the flag
+                          and the page disagreeing about the same evidence,
+                          which is worse than either being wrong alone.
                           `is_thin_evidence` is generated from this: one
                           citable item clears thin (migration 0053).
 
@@ -29,8 +42,18 @@ UPDATE subcap_scores sc
            JOIN evidence_index e ON e.e_id = l.e_id
           WHERE l.run_id = sc.run_id
             AND l.subcap_id = sc.subcap_id
-            AND e.excerpt IS NOT NULL
-            AND length(btrim(e.excerpt)) > 0)
+            AND ((e.excerpt IS NOT NULL AND length(btrim(e.excerpt)) > 0)
+                 OR EXISTS (SELECT 1 FROM evidence_index e2
+                             WHERE e2.entity_id = e.entity_id
+                               AND e2.e_id <> e.e_id
+                               AND e2.excerpt IS NOT NULL
+                               AND length(btrim(e2.excerpt)) > 0
+                               AND e.source_url IS NOT NULL
+                               AND e.source_url <> ''
+                               AND rtrim(lower(regexp_replace(
+                                     e2.source_url, '^https?://', '')), '/')
+                                 = rtrim(lower(regexp_replace(
+                                     e.source_url, '^https?://', '')), '/'))))
 """
 
 

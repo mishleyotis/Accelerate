@@ -210,3 +210,63 @@ def test_the_counts_are_recomputed_not_incremented(db):
     recount_run(cur, run_id)
     conn.commit()
     assert _flags(cur, run_id, "P1C1.1.1") == (0, 0, True)
+
+
+# ── the flag and the page must agree about the same evidence ───────────
+
+def test_a_span_registered_against_a_linked_url_makes_the_cell_citable(db):
+    """THE SHAPE THIS CORPUS ACTUALLY HAS. The package supplies the cell links
+    and no spans; a producer registers the span against the same url and no
+    links. The served listing merges the two, so the drawer shows a quotable
+    citation — and under 0053's strict rule the cell was still flagged thin.
+    The flag and the page disagreeing about the same evidence is worse than
+    either being wrong alone."""
+    conn, run_id = db
+    cur = conn.cursor()
+    cur.execute("""UPDATE evidence_index SET source_url = %s
+                    WHERE e_id = 'E-THIN-REF1'""",
+                ("http://Example.ORG/a-document/",))
+    cur.execute("""INSERT INTO evidence_index (e_id, entity_id, origin, excerpt,
+                                               tier, source_url, reference_date)
+                   SELECT 'E-THIN-PRODUCER', entity_id, 'producer', %s, 'T2',
+                          'https://example.org/a-document', '2026-08-01'
+                     FROM evidence_index WHERE e_id = 'E-THIN-REF1'""", (SPAN,))
+    _link(cur, run_id, "P1C1.1.2", "E-THIN-REF1")
+    recount_run(cur, run_id)
+    conn.commit()
+    linked, citable, thin = _flags(cur, run_id, "P1C1.1.2")
+    assert (linked, citable, thin) == (1, 1, False), \
+        "the drawer shows the producer's span for this cell and the flag " \
+        "still calls it thin"
+
+
+def test_the_url_rule_is_scheme_blind_and_slash_blind_like_the_listing():
+    """Written twice — Python for the listing, SQL for the generated column —
+    so the two are compared here. A merge rule that disagrees with the flag
+    rule is the same defect with extra steps."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "packages" / "shared"))
+    from evidence_merge import source_key
+    assert source_key("http://Example.ORG/a-document/") == \
+           source_key("https://example.org/a-document")
+    sql = (Path(__file__).resolve().parents[1] / "dma_worker" / "counts.py").read_text()
+    for piece in ("^https?://", "rtrim(lower(regexp_replace(", "'/'"):
+        assert piece in sql, \
+            f"the SQL rule no longer normalises with {piece!r}; it has drifted " \
+            "from packages/shared/evidence_merge.py"
+
+
+def test_an_unrelated_url_does_not_lend_its_span(db):
+    """The rule is url equality, not entity membership. A span somewhere else
+    on the register must not make an unquotable link readable."""
+    conn, run_id = db
+    cur = conn.cursor()
+    cur.execute("""UPDATE evidence_index SET source_url = 'https://a.example/one'
+                    WHERE e_id = 'E-THIN-REF2'""")
+    cur.execute("""UPDATE evidence_index SET source_url = 'https://b.example/two'
+                    WHERE e_id = 'E-THIN-SPAN'""")
+    _link(cur, run_id, "P1C1.1.4", "E-THIN-REF2")
+    recount_run(cur, run_id)
+    conn.commit()
+    assert _flags(cur, run_id, "P1C1.1.4") == (1, 0, True)
