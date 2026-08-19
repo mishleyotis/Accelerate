@@ -758,6 +758,32 @@ def enrichment_status(data: dict, page: str, section: str) -> None:
     if status["thin"]:
         status["thin_reason"] = spec.get("thin_reason")
         status["closes_with"] = spec.get("closes_with")
+
+    # A column that is null on EVERY row, and the sentence a reader gets
+    # instead of the figure.
+    #
+    # Two of this repo's own checks disagreed here, and a producer was caught
+    # between them. `audit_promoted_client.py`'s C-DROP blocks a perfect null
+    # column unless the payload states the basis in one of nine carrier keys;
+    # none of those nine is in the section contracts for sentiment, leadership
+    # or the tech register, so CG-04 refuses the producer that writes one. The
+    # only moves left were to fill a column that has nothing to fill it with,
+    # or to ship a blocker. Measured on Logix: four blockers, all four
+    # unattributable — `trend_vs_prior` on a first run, `phone` the enrichment
+    # never returned, and the two peer columns no peer scan has been run for.
+    #
+    # Computed, never asserted. The register declares WHICH columns can be
+    # structurally absent and why; the server looks at the rows and says
+    # nothing unless the column really is empty on all of them, so the run
+    # that fills one drops the note with no file edited. A declaration that
+    # outlived its truth is the sentinel invariant 9 refuses.
+    absent = {}
+    for col, reason in (spec.get("absent_columns") or {}).items():
+        present = [r for r in rows if isinstance(r, dict)]
+        if present and all(r.get(col) in (None, "", [], {}) for r in present):
+            absent[col] = reason
+    if absent:
+        status["absent_columns"] = absent
     _set(data, "enrichment_status", status)
 
 

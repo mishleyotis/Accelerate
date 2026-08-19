@@ -72,6 +72,37 @@ jobs:
       # comment. Stdlib plus the mcp package, no database.
       - name: Gate I — the enrichment ledger is wired
         run: python3 scripts/gate_i_enrichment_drift.py
+      # Gate J answers the one question no contract gate can: does this client
+      # carry what the client beside it carries? Three rounds of reports —
+      # "this page is empty", "this card is missing", "the reference has it
+      # and this one does not" — were all true, all contract-legal, and all
+      # found by a human with two browser tabs. Structure only, never values:
+      # a thinner number is an assessment result, and a gate that argued
+      # otherwise would push every client toward the reference's answers.
+      # Here it runs its own rules against fixtures; the corpus-gate-scanner
+      # runs it --api against the two promoted clients nightly.
+      # Driven end-to-end against a committed pair carrying three of the four
+      # gaps it exists for, plus a WITHHELD section it must stay silent about.
+      # `compare_page`'s rules are unit-tested; this asserts the CLI around
+      # them — arg handling, the exit code an operator branches on, and that
+      # the output names the gap rather than counting it. A step that ran
+      # `--help` and called itself a gate would be the shape this whole build
+      # keeps removing.
+      - name: Gate J — no client is structurally thinner than the reference
+        run: |
+          set +e
+          out=$(python3 scripts/gate_j_surface_parity.py \
+                  --reference-file fixtures/parity/reference-overview.json \
+                  --target-file fixtures/parity/target-overview.json \
+                  --page overview)
+          code=$?
+          echo "$out"
+          test "$code" -eq 1 || { echo "Gate J did not refuse a thinner target"; exit 1; }
+          for want in section_empty key_absent key_empty; do
+            echo "$out" | grep -q "$want" || { echo "Gate J stopped reporting $want"; exit 1; }
+          done
+          echo "$out" | grep -q ceilings && { echo "Gate J reported a withheld section as a gap"; exit 1; }
+          echo "Gate J: refuses a thinner target, stays silent on a withheld section."
       # The curation covered 115 of the specification's 127 surfaces and walked
       # past twelve — three whole Insights surfaces carrying eighteen P0 checks
       # among them, in neither artefact, not included and not excluded. Nothing

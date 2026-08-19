@@ -1083,7 +1083,22 @@ function TopFindingsCard({ entity, openEvidence, audience }) {
                       </div>
                     ) : null}
                   </div>
-                  {f.evidence.length > 0 ? (
+                  {/* Resolve FIRST, then decide whether there is a list.
+                      This block used to render its heading off
+                      `f.evidence.length` and then drop every id the served
+                      evidence index could not resolve, one `return null` at a
+                      time — so a finding citing two sources showed "Evidence ·
+                      click to view" above nothing at all, and a reader could
+                      not tell a card with no sources from a card whose sources
+                      did not arrive. Invariant 4 makes an unresolvable
+                      citation a fail-closed condition; rendering it as an
+                      empty list is the silent version of the same thing. */}
+                  {f.evidence.length > 0 && f.evidence.every(eid => !DMA.getEvidence(eid)) ? (
+                    <div style={{ fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.5 }}>
+                      The sources behind this finding are not among the evidence served for this run.
+                    </div>
+                  ) : null}
+                  {f.evidence.some(eid => DMA.getEvidence(eid)) ? (
                     <div>
                       <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>Evidence · click to view</div>
                       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>

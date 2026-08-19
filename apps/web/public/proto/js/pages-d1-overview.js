@@ -1848,7 +1848,13 @@ function TopFindingsCard({
         color: "var(--z-muted)",
         marginTop: 4
       }
-    }, "alignment to stated objectives \xB7 ", f.so_what_score) : null), f.evidence.length > 0 ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    }, "alignment to stated objectives \xB7 ", f.so_what_score) : null), f.evidence.length > 0 && f.evidence.every(eid => !DMA.getEvidence(eid)) ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: "var(--z-muted)",
+        lineHeight: 1.5
+      }
+    }, "The sources behind this finding are not among the evidence served for this run.") : null, f.evidence.some(eid => DMA.getEvidence(eid)) ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
         fontWeight: 700,
