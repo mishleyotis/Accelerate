@@ -322,11 +322,36 @@ function adaptSentiment(sentiment) {
   };
 }
 
-/* "NPS -100..100" -> 100; "0..5" -> 5; unstated -> null, and the card must
-   not draw a bar for a rating whose bounds nobody stated. */
+/* THE BAR THAT WOULD NOT DRAW.
+ *
+ * "NPS -100..100" -> 100; "0..5" -> 5; unstated -> null, and the card must
+ * not draw a bar for a rating whose bounds nobody stated.
+ *
+ * That last rule is right and it fired on a payload that HAD stated them.
+ * The contract's own words are "No scale -> the rating is meaningless (4.1
+ * out of what?)"; it never says the scale must be a RANGE STRING, and the
+ * promoted bars carry `"scale": 5` — a number, which is the plainest way to
+ * say "out of five". `String(5).match(/\d+\.\.\d+/)` is null, so
+ * `scale_max` came back null on every bar and the Overview drew five empty
+ * grey rails over five real ratings: 4.75 on 9,585 iOS ratings, 4.30 on
+ * 4,262 Android, 3.7 on 99 employee responses. Reported as "sentiment is
+ * still empty" three rounds running, because from the page it is.
+ *
+ * A number, a numeric string, a range and a "1-5 stars" phrasing are all the
+ * producer stating the bounds. Anything else is still null.
+ */
 function scaleMaxOf(scale) {
-  const m = String(scale || "").match(/(-?\d+(?:\.\d+)?)\s*\.\.\s*(-?\d+(?:\.\d+)?)/);
-  return m ? Number(m[2]) : null;
+  if (typeof scale === "number" && isFinite(scale)) return scale;
+  const text = String(scale == null ? "" : scale).trim();
+  if (!text) return null;
+  const range = text.match(/(-?\d+(?:\.\d+)?)\s*(?:\.\.|[-–—]|\bto\b)\s*(-?\d+(?:\.\d+)?)/);
+  if (range) return Number(range[2]);
+  const bare = text.match(/^(-?\d+(?:\.\d+)?)$/);
+  if (bare) return Number(bare[1]);
+  // "out of 5", "5-point", "scale of 10" — the bound stated in words.
+  const worded = text.match(/(?:out of|scale of)\s*(-?\d+(?:\.\d+)?)/i)
+    || text.match(/^(-?\d+(?:\.\d+)?)[- ]point\b/i);
+  return worded ? Number(worded[1]) : null;
 }
 
 /* The context tiles state their bounds as "1-5 stars" where the overview's
@@ -334,10 +359,10 @@ function scaleMaxOf(scale) {
    both are read; anything else stays null and the tile shows the stated
    string rather than a denominator nobody wrote. */
 function tileScaleMaxOf(scale) {
-  const viaRange = scaleMaxOf(scale);
-  if (viaRange !== null) return viaRange;
-  const m = String(scale || "").match(/(-?\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)/);
-  return m ? Number(m[2]) : null;
+  // One parser now: the range, the bare number and the "1-5 stars" phrasing
+  // all live in scaleMaxOf, so the tile and the bar can no longer disagree
+  // about what the producer said.
+  return scaleMaxOf(scale);
 }
 
 /* ── contextSentimentFor (C4) ────────────────────────────────────────
@@ -1573,7 +1598,7 @@ Object.assign(window, {
   adaptInsights, adaptRecommendations, adaptTechStack, adaptLeadership,
   adaptThoughtLeadership, adaptFocusAreas, adaptTimeline, adaptIssues,
   adaptRoadmap, adaptStairstep, adaptEvidence, adaptAnswers,
-  platformChips, scaleMaxOf,
+  platformChips, scaleMaxOf, tileScaleMaxOf,
   headlineOf, sectionStates, faIndex,
   // Exported so tests can assert them directly. Each of these was a silent
   // key or shape mismatch between the payload and a renderer, which is the

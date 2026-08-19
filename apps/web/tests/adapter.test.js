@@ -331,8 +331,50 @@ test("sentiment groups by the payload's own audience and keeps each scale", () =
 
 test("an unstated sentiment scale gives no bar rather than a wrong one", () => {
   const w = load(LIVE);
-  assert.strictEqual(w.scaleMaxOf("stars"), null);
+  assert.strictEqual(w.scaleMaxOf("stars"), null,
+                     "a word with no bound in it states no bound");
   assert.strictEqual(w.scaleMaxOf(undefined), null);
+  assert.strictEqual(w.scaleMaxOf(""), null);
+  assert.strictEqual(w.scaleMaxOf(null), null);
+});
+
+test("a scale STATED AS A NUMBER draws a bar", () => {
+  /* Three rounds of "sentiment is still empty", and from the page it was.
+     The promoted bars carry `"scale": 5` — the plainest way to say out of
+     five — and this parser only understood the range string "0..5", so
+     `scale_max` came back null on every bar and the rule that protects a
+     reader from an unbounded rating blanked five real ones: 4.75 on 9,585
+     iOS ratings, 4.30 on 4,262 Android, 3.7 on 99 employee responses.
+
+     The contract says "No scale -> the rating is meaningless (4.1 out of
+     what?)". It does not say the scale must be a range string, and a payload
+     that answers "out of what" in any of these forms has answered it. */
+  const w = load(LIVE);
+  for (const [stated, want] of [[5, 5], ["5", 5], ["0..5", 5], ["1-5 stars", 5],
+                                ["NPS -100..100", 100], ["out of 10", 10],
+                                ["5-point", 5], ["1 to 7", 7]]) {
+    assert.strictEqual(w.scaleMaxOf(stated), want,
+      `scale ${JSON.stringify(stated)} states a bound of ${want}`);
+  }
+  const s = w.adaptSentiment({ bars: [
+    { audience: "customer", source: "Apple App Store", rating: 4.75,
+      scale: 5, n: 9585, as_of: "2026-08-19" },
+  ] });
+  assert.strictEqual(s.customer[0].scale_max, 5,
+    "a numeric scale must yield a bound, or the card draws an empty grey rail "
+    + "over a real rating");
+  assert.strictEqual(s.customer[0].score, 4.75);
+});
+
+test("the tile and the bar cannot disagree about what the scale said", () => {
+  /* They were two parsers: the tile understood "1-5 stars" and the bar did
+     not, so the same run could show a filled tile on the Context page and an
+     empty rail on the Overview. */
+  const w = load(LIVE);
+  for (const stated of [5, "5", "0..5", "1-5 stars", "NPS -100..100"]) {
+    assert.strictEqual(w.tileScaleMaxOf(stated), w.scaleMaxOf(stated),
+      `tile and bar disagree on ${JSON.stringify(stated)}`);
+  }
 });
 
 test("a ceiling stated as a band word is placed and flagged, not read as a score", () => {

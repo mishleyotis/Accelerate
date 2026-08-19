@@ -735,6 +735,31 @@ function platformScopeOf(entityId) {
    twice. P4C3 ≥ 2.0 and P4C3 ≥ 2.5 are DIFFERENT prerequisites with different
    verdicts, so the key carries the minimum — deduping on the cell alone would
    silently drop the stricter of the two. */
+/* One prerequisite, whatever shape the producer wrote it in. */
+function prereqOf(q) {
+  if (!q) return null;
+  if (typeof q === "object") return q;
+  const text = String(q).trim();
+  if (!text) return null;
+  // "P4C2.1.1 >= 2.5", "P4C2.1.1 ≥ 2.5", "P4C2.1.1 at least 2.5"
+  const m = text.match(/\b(P\d+C\d+(?:\.\d+)*(?:\.[A-Z]{2}\d+)?)\b[^0-9]{0,24}?(-?\d+(?:\.\d+)?)/);
+  if (m && /(>=|≥|at least|minimum|min\.?|or (?:above|higher))/i.test(text)) {
+    // "which the run serves at 3.0" — the producer's own current reading,
+    // taken only when it is stated AFTER the threshold so the two numbers
+    // are never transposed.
+    const after = text.slice(text.indexOf(m[2]) + String(m[2]).length);
+    const cur = after.match(/(?:serves? (?:at|it at)|currently|today at|now)\s*(-?\d+(?:\.\d+)?)/i);
+    return {
+      cell: m[1],
+      minimum: Number(m[2]),
+      current: cur ? Number(cur[1]) : null,
+      note: text
+    };
+  }
+  return {
+    condition: text
+  };
+}
 function areaPrereqs(recs) {
   /* ONE ROW PER CELL, with its thresholds as a ladder beneath it.
       Owner, 2026-08-15, with a screenshot: "Readiness card with duplicates and
@@ -757,8 +782,23 @@ function areaPrereqs(recs) {
      would be the more dangerous of the two errors. */
   const byKey = new Map();
   for (const r of recs || []) {
-    for (const q of r.prerequisites || []) {
-      if (!q || typeof q !== "object") continue;
+    for (const raw of r.prerequisites || []) {
+      // A PREREQUISITE MAY BE A SENTENCE, and on this run every one of them
+      // is. The contract states `prerequisites[]` and no item shape, so a
+      // list of strings is legal — and this loop skipped anything that was
+      // not an object, so all five recommendations' prerequisites vanished
+      // and the readiness card said "No recommendation in this run promoted
+      // a prerequisite, so no readiness gate applies" above a payload
+      // carrying nine. Reported three rounds running as the readiness card
+      // being empty; the gates were there the whole time.
+      //
+      // A sentence that states a cell and a minimum — "P4C2.1.1 >= 2.5, which
+      // the run serves at 3.0" — becomes the same {cell, minimum} row an
+      // object prerequisite makes, so the two shapes render identically.
+      // Anything else is a text condition, which this card already has a row
+      // shape for.
+      const q = prereqOf(raw);
+      if (!q) continue;
       const cell = q.cell || null;
       const cond = q.condition || null;
       if (!cell && !cond) continue;
@@ -3702,6 +3742,14 @@ function CellImpactView({
     }))
   );
 }
+
+/* Two pure helpers exported for the suite. Both were shape readers that
+   silently dropped a legal payload shape — the defect class no per-field test
+   catches, because the field is present and the reader simply does not know
+   it. Asserting them directly is cheaper than driving a browser and it names
+   the failure precisely when it comes back. */
 Object.assign(window, {
-  ClientPlatform
+  ClientPlatform,
+  prereqOf,
+  areaPrereqs
 });

@@ -275,6 +275,21 @@ jobs:
             grep '^SKIPPED' /tmp/pytest.txt | sed 's/.*: //' | sort | uniq -c | sort -rn | head
             exit 1
           fi
+      # THE RESULT, WHERE IT CAN BE READ. A failing step's output is buried
+      # under the service container's log dump — Postgres prints every
+      # connection it refused, several hundred lines of it, appended after the
+      # step — so the pytest summary is unreachable from the job's tail and a
+      # diagnosis costs three round trips. The step summary is returned with
+      # the check itself.
+      - name: Report the result where the check can show it
+        if: always()
+        run: |
+          {
+            echo '### Python unit tests'
+            echo '```'
+            grep -E '^(FAILED|ERROR|[0-9]+ (passed|failed))' /tmp/pytest.txt | tail -40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # The frontend has its own suite (node's built-in runner, no framework) and
   # it too had never run here. It is the only place the COMPILED bundle is
