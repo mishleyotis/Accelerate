@@ -19,6 +19,7 @@ pure function in `packages/shared/platform_fit.py`.
 from __future__ import annotations
 
 import json
+import re
 
 from .shared_path import ensure as _ensure_shared
 
@@ -34,8 +35,48 @@ _FRESHNESS_WEIGHT = {"CURRENT": 1.00, "RECENT": 1.00, "AGING": 0.90,
                      "UNVERIFIED": 0.70}
 
 
+# `[L3-SF-DC-CORE] Data Cloud (count: 3)` is one real catalogue value. The
+# CODE is the stable identifier; the label drifts (a producer writes "Data
+# Cloud", the catalogue writes "Salesforce Data Cloud") and the "(count: N)"
+# suffix is a vote tally welded onto the label, which the platform page
+# already strips at render. So the code decides the match when there is one,
+# and the cleaned label when there is not.
+_AREA_CODE = re.compile(r"\[\s*(L3-[A-Z0-9-]+)\s*\]", re.I)
+_AREA_COUNT = re.compile(r"\(\s*count\s*:\s*\d+\s*\)", re.I)
+
+
 def _norm_area(v) -> str:
-    return " ".join(str(v or "").strip().lower().split())
+    s = str(v or "").strip()
+    if not s:
+        return ""
+    m = _AREA_CODE.search(s)
+    if m:
+        return m.group(1).upper()
+    s = _AREA_COUNT.sub(" ", _AREA_CODE.sub(" ", s))
+    return " ".join(s.lower().split())
+
+
+# A producer states readiness as the page's own verdict phrase, not as a
+# traffic light. Both are accepted; an unrecognised phrase is RED rather than
+# green, because the multiplier is a safety property — guessing green on a
+# phrase nobody mapped is how a red platform renders hot.
+_READINESS_VERDICT = {
+    "READY": "green",
+    "READY WITH CONDITIONS": "amber",
+    "CONDITIONAL": "amber",
+    "NOT READY": "red",
+    "BLOCKED": "red",
+    "GREEN": "green", "AMBER": "amber", "RED": "red",
+}
+
+
+def _readiness_token(raw) -> str:
+    if isinstance(raw, dict):
+        raw = raw.get("verdict") or raw.get("state") or raw.get("status")
+    key = " ".join(str(raw or "").strip().upper().split())
+    if not key:
+        return "green"
+    return _READINESS_VERDICT.get(key, "red")
 
 
 def _areas_of(raw) -> list:
@@ -180,7 +221,7 @@ def platform_fit(conn, run_id, candidates) -> dict:
             l3_area=raw.get("l3_area"),
             cells=rows,
             family_absent=area in absent_areas,
-            readiness=str(raw.get("readiness") or "green").lower(),
+            readiness=_readiness_token(raw.get("readiness")),
             alignment=None if align is None else float(align),
             alignment_quote=raw.get("alignment_quote")))
 

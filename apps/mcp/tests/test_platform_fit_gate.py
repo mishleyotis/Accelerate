@@ -144,3 +144,49 @@ def test_an_area_that_reaches_no_cell_is_named_rather_than_scored_silently():
     got = fit_mod.platform_fit(_Conn(_Cur(CELLS)), "run", [
         {"platform": "Nowhere", "l3_area": "Nothing here", "alignment": 0.5}])
     assert got["unmatched"] and got["unmatched"][0]["platform"] == "Nowhere"
+
+
+# ── the two shapes the corpus actually writes ──────────────────────────
+
+def test_an_area_matches_on_its_catalogue_code():
+    """`[L3-SF-DC-CORE] Data Cloud (count: 3)` is one real catalogue value.
+    The label drifts — a producer writes "Data Cloud", the catalogue writes
+    "Salesforce Data Cloud" — and the "(count: N)" suffix is a vote tally
+    welded onto it. The code is the stable half."""
+    from dma_mcp.fit import _norm_area
+    assert _norm_area("[L3-SF-DC-CORE] Data Cloud") == "L3-SF-DC-CORE"
+    assert _norm_area("[L3-SF-DC-CORE] Salesforce Data Cloud (count: 3)") \
+        == "L3-SF-DC-CORE"
+    assert _norm_area("[l3-sf-dc-core] whatever") == "L3-SF-DC-CORE"
+
+
+def test_an_area_with_no_code_falls_back_to_its_cleaned_label():
+    from dma_mcp.fit import _norm_area
+    assert _norm_area("  Salesforce   Data Cloud (count: 9) ") \
+        == "salesforce data cloud"
+
+
+def test_the_readiness_verdict_phrase_is_understood():
+    """A producer states readiness as the page's own verdict, not as a
+    traffic light: "READY WITH CONDITIONS" is what one promoted card says."""
+    from dma_mcp.fit import _readiness_token
+    assert _readiness_token({"verdict": "READY WITH CONDITIONS"}) == "amber"
+    assert _readiness_token("READY") == "green"
+    assert _readiness_token({"verdict": "NOT READY"}) == "red"
+
+
+def test_an_unmapped_readiness_phrase_is_red_not_green():
+    """The multiplier is a SAFETY property. Guessing green on a phrase nobody
+    mapped is how a red platform renders hot — the defect the multiplicative
+    shape was chosen to make impossible."""
+    from dma_mcp.fit import _readiness_token
+    assert _readiness_token("mostly fine probably") == "red"
+    assert _readiness_token({"verdict": "SOMEWHAT READY"}) == "red"
+
+
+def test_an_absent_readiness_is_green_because_nothing_was_claimed():
+    """Distinct from an unmapped one: a card that states no readiness has
+    made no claim to contradict, and penalising silence would push producers
+    to write green rather than to check."""
+    from dma_mcp.fit import _readiness_token
+    assert _readiness_token(None) == "green"
