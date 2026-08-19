@@ -220,6 +220,20 @@ GATES = {
               "defect, because the reader takes the top card as the "
               "recommendation.",
               "block"),
+    "CG-31": ("The tile is the same number as the card, from the same engine",
+              None,
+              "Every opportunity tile's factor names are the engine's four, "
+              "and where the platform page is staged the tile's composite "
+              "and rank equal its card's fit and rank at the 0.05 grain.",
+              "Reported twice in one day: after CG-30 pinned the cards to "
+              "the shared engine, the overview tiles still rendered their "
+              "own per-client factor systems — a six-factor 76.5 on one "
+              "client and a three-factor 67.0 on the other — because no "
+              "gate read them. Legacy factor names are refused BY NAME so "
+              "neither vocabulary can re-enter; the tile is pinned to the "
+              "card, and CG-30 pins the card to the engine, so one number "
+              "reaches both pages from one code path.",
+              "block"),
     "CG-04": ("No invented fields", None,
               "No field outside the section contract, envelope included.",
               "Payload shapes are law; an invented field is a contract fork.",
