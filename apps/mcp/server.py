@@ -255,22 +255,41 @@ def list_pending_runs() -> dict:
               LEFT JOIN run_claims cl ON cl.run_id = r.id
              WHERE r.status IN ('INGESTED','CLAIMED','SYNTHESISING')
              ORDER BY r.completed_at NULLS LAST""")
+        rows = cur.fetchall()
+        # HOW MANY RUNS THIS REQUEST HAS, said rather than left to be derived.
+        #
+        # Measured 2026-08-16: 105 of 171 entities carried more than one
+        # pending run, every other field identical — same request id, same
+        # composite, same cell count, same completed_at. The answer then was
+        # to expose `run_seq` so a caller could at least pick the latest.
+        # Measured again 2026-08-19: 109 of 287 pending runs are surplus, 101
+        # request ids carry more than one, and on 100 of those 101 every run
+        # shares one completed_at.
+        #
+        # `run_seq` alone makes the duplicate CHOOSABLE and leaves it
+        # invisible: a caller reading one row cannot tell it is one of two,
+        # and has to group the whole list to find out. So the row says so.
+        # `is_latest_for_request` is the one a producer should work;
+        # `runs_for_request` above 1 is a condition to report, not a
+        # preference to exercise quietly (MEM-0092).
+        per_request: dict = {}
+        for r in rows:
+            per_request.setdefault((r[1], r[3]), []).append(r[8])
         return {"pending": [
             {"run_id": str(r[0]), "display_id": r[1], "entity_name": r[2],
              "request_id": r[3], "status": r[4],
              "completed_at": r[5].isoformat() if r[5] else None,
-             # run_seq, because a caller choosing BETWEEN pending runs of one
-             # entity has nothing else to choose on. Measured 2026-08-16: 105
-             # of 171 entities carry more than one pending run, and for the
-             # duplicates every other field is identical — same request id,
-             # same composite, same cell count, same completed_at. Without
-             # this a scheduler picks by run id, which is stable and
-             # arbitrary; with it, it picks the latest ingest, which is the
-             # one a producer should work.
              "run_seq": r[8],
+             "runs_for_request": len(per_request[(r[1], r[3])]),
+             "is_latest_for_request": r[8] == max(per_request[(r[1], r[3])]),
              "claim": None if r[6] is None else
                       {"held_by": r[6], "live": bool(r[7])}}
-            for r in cur.fetchall()]}
+            for r in rows],
+            # The corpus-level number, so a scheduler about to fan out over
+            # this list knows what share of it is duplicate before it starts.
+            "duplicate_requests": sum(1 for v in per_request.values() if len(v) > 1),
+            "surplus_runs": sum(len(v) - 1 for v in per_request.values()),
+        }
 
 
 # ── claim ───────────────────────────────────────────────────────────────

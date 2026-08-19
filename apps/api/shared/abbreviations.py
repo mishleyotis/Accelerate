@@ -100,7 +100,12 @@ EXCERPT_FIELDS = frozenset((
     "headline", "title_verbatim",
     # Catalogue-controlled vocabulary: these are identifiers with a label
     # route of their own, and expanding one would stop it resolving.
+    # `sub_vertical` is the same shape and was the last thing a served-page
+    # scan flagged: the token is `CU` and the frontend resolves it through
+    # SUBVERTICAL_LABEL to "Credit Union", so the string a reader sees is
+    # already spelled out and rewriting the token would break the lookup.
     "platform", "vendor", "l3_area", "l4_feature",
+    "sub_vertical", "subvertical",
 ))
 
 # In a LABEL, a role is part of a title and takes title case: "President &
