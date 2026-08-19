@@ -234,7 +234,18 @@ def cell_opportunity(cell: Cell) -> float:
     the term, and most cells carry no linked issue, so it was a systematic
     depression driven by missing linkage rather than by real severity.
     """
-    v = gap_of(cell) * severity_weight(cell) * evidence_strength_of(cell)
+    gap = gap_of(cell)
+    if gap <= 0.0:
+        return 0.0
+    # THE ORDER MATTERS. Severity may lift a cell to full opportunity, and the
+    # clamp lands THERE — then evidence dampens what survives. Clamping after
+    # the damping instead lets a thinly-evidenced critical gap ride its
+    # saturated severity: gap x severity 1.6 with a 0.6 evidence damp scores
+    # 0.96 that way and 0.60 this way, so the thin one would have out-scored a
+    # fully-evidenced medium gap. Evidence discounts a claim; it never gets to
+    # be the reason a claim is large.
+    base = min(1.0, gap * severity_weight(cell))
+    v = base * evidence_strength_of(cell)
     if cell.incumbent_covers:
         v *= INCUMBENT_COVERAGE_DISCOUNT
     return _clamp(v)

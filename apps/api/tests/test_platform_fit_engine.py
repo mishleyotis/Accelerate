@@ -386,3 +386,27 @@ def test_sequencing_never_loses_or_duplicates_a_card():
              for i in range(5)]
     rows = pf.rank(cards)
     assert sorted(r["platform"] for r in rows) == [f"P{i}" for i in range(5)]
+
+
+def test_evidence_discounts_a_claim_but_never_makes_one_large():
+    """The clamp lands on `gap x severity`, and evidence dampens what
+    survives. Clamped the other way round, a thinly-evidenced critical gap
+    rode its saturated severity to 0.96 while a fully-evidenced medium gap
+    scored 1.00 — so the thin one out-scored the solid one on severity
+    alone."""
+    thin_critical = cell("a", 1.0, sev=("critical",), es=0.0)
+    solid_medium = cell("b", 1.0, sev=("medium",), es=1.0)
+    assert pf.cell_opportunity(solid_medium) > pf.cell_opportunity(thin_critical)
+    assert abs(pf.cell_opportunity(thin_critical) - 0.6) < 1e-9
+
+
+def test_severity_still_separates_two_equally_evidenced_gaps():
+    """The clamp must not flatten severity where it has room to work."""
+    low = cell("a", 3.0, sev=("low",))
+    crit = cell("b", 3.0, sev=("critical",))
+    assert pf.cell_opportunity(crit) > pf.cell_opportunity(low)
+
+
+def test_a_closed_cell_short_circuits_to_zero():
+    assert pf.cell_opportunity(cell("a", pf.TARGET_BAND_SCORE)) == 0.0
+    assert pf.cell_opportunity(cell("a", 4.9)) == 0.0

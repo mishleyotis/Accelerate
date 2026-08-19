@@ -304,6 +304,19 @@ def platform_fit(conn, run_id, candidates) -> dict:
             "The entity's sub-vertical did not resolve, so the vertical guard "
             "kept every cell — not knowing who the client is is not grounds "
             "for hiding scores, but it does mean relevance is unchecked.")
+    elif all(p.get("relevance", 1.0) >= 0.999 for p in ranked):
+        # SAY WHAT THE GUARD COULD SEE. Relevance is the share of the area's
+        # cells this sub-vertical serves, and the cells reaching this function
+        # were already scoped at ingest — so on a well-scoped run the term is
+        # 1.0 for everything and binds on nothing. It fires on a variant cell
+        # belonging to another sub-vertical, which a correctly scoped run does
+        # not carry. A guard that reads clean because it had nothing to catch
+        # must not read as a guard that caught nothing.
+        context["notes"].append(
+            "Vertical relevance is 1.0 on every candidate. The cells reaching "
+            "this engine were already sub-vertical scoped at ingest, so the "
+            "guard had nothing to bind on — that is a clean scope upstream, "
+            "not a platform set it examined and approved.")
     return {
         "run_id": str(run_id),
         "platforms": ranked,
