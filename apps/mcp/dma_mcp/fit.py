@@ -187,6 +187,56 @@ def _register(cur, run_id) -> tuple:
     return absent, held
 
 
+def _register_staged(cur, run_id) -> tuple:
+    """(cells an ABSENT register row names, cells an incumbent row names) —
+    from the run's own PROMOTED techstack register, by `linked_subcap_ids`.
+
+    `techstack_raw` is the ingest tier and it is EMPTY on both promoted runs:
+    their packages carried no tech workbook, so the producer registered the
+    stack from evidence into the techstack page instead. Reading only the raw
+    tier made the greenfield term and the incumbent discount silently zero —
+    on the reference client, while its own served register carried MuleSoft,
+    Data Cloud and CRM Analytics as ABSENT rows and the incumbent model
+    platform sat linked to the exact cells the rank-1 card recommends.
+
+    Rules, deliberately narrow:
+      · CONFIRMED and INFERRED hold a cell. CLAIMED does not — a claim is
+        provisional by the register's own vocabulary and must not discount a
+        recommendation, nor deny a greenfield term.
+      · A cell both held and absent is HELD: never award greenfield where any
+        row says the layer is occupied.
+    """
+    try:
+        cur.execute(
+            """SELECT payload FROM submissions
+                WHERE run_id = %s AND page = 'techstack'
+                  AND superseded_at IS NULL
+                ORDER BY submitted_at DESC LIMIT 1""", (run_id,))
+        row = cur.fetchone()
+    except Exception:                              # noqa: BLE001
+        return set(), set()
+    payload = row[0] if row else None
+    if isinstance(payload, str):
+        try:
+            payload = json.loads(payload)
+        except ValueError:
+            return set(), set()
+    if not isinstance(payload, dict):
+        return set(), set()
+    items = ((payload.get("techstack") or {}).get("items")) or []
+    absent_sids, held_sids = set(), set()
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        status = str(it.get("status") or "").upper()
+        sids = {str(s) for s in (it.get("linked_subcap_ids") or []) if s}
+        if status == "ABSENT":
+            absent_sids |= sids
+        elif status in ("CONFIRMED", "INFERRED"):
+            held_sids |= sids
+    return absent_sids - held_sids, held_sids
+
+
 def platform_fit(conn, run_id, candidates) -> dict:
     """Score and rank the candidate platforms for one run.
 
@@ -204,6 +254,7 @@ def platform_fit(conn, run_id, candidates) -> dict:
     strength = _evidence_strength(cur, run_id)
     sev = _severities(cur, run_id)
     absent_areas, held_areas = _register(cur, run_id)
+    absent_sids, held_sids = _register_staged(cur, run_id)
     entity_code = subverticals.resolve_subvertical(
         _entity_subvertical(cur, run_id))
 
@@ -214,7 +265,7 @@ def platform_fit(conn, run_id, candidates) -> dict:
             category_id=cells[sid]["category"],
             severities=sev.get(sid, ()),
             evidence_strength=strength.get(sid),
-            incumbent_covers=area_held,
+            incumbent_covers=area_held or sid in held_sids,
             peer_median=cells[sid]["peer"])
 
     # THE RUN'S WHOLE GAP SURFACE. Interconnect is the share of the gap mass a
@@ -240,6 +291,12 @@ def platform_fit(conn, run_id, candidates) -> dict:
                               "l3_area": raw.get("l3_area"),
                               "reason": "no cell this run serves lists this L3 area"})
         rows = [_cell(sid, area in held_areas) for sid in sorted(sids)]
+        # Greenfield from either tier: the raw register names an ABSENT area,
+        # or the promoted register carries an ABSENT row linked to this
+        # candidate's own cells (Data Cloud absent, linked to the member-data
+        # cells, is greenfield ground for the Data Cloud candidate).
+        family_absent = (area in absent_areas
+                         or bool(absent_sids & set(sids)))
         # THE VERTICAL GUARD. "Out-of-vertical rank-1 is a defect: a carrier
         # platform must not top a bank's list." Relevance is the share of the
         # area's cells this entity's sub-vertical actually serves — computed
@@ -258,7 +315,7 @@ def platform_fit(conn, run_id, candidates) -> dict:
             platform=str(raw.get("platform") or "").strip() or "(unnamed)",
             l3_area=raw.get("l3_area"),
             cells=rows,
-            family_absent=area in absent_areas,
+            family_absent=family_absent,
             readiness=_readiness_token(raw.get("readiness")),
             alignment=None if align is None else float(align),
             alignment_quote=raw.get("alignment_quote"),
@@ -281,6 +338,8 @@ def platform_fit(conn, run_id, candidates) -> dict:
         "issue_rows": len(sev),
         "register_rows_absent": len(absent_areas),
         "register_rows_held": len(held_areas),
+        "register_cells_absent": len(absent_sids),
+        "register_cells_held": len(held_sids),
         "entity_subvertical_code": entity_code,
         "notes": [],
     }
@@ -290,11 +349,19 @@ def platform_fit(conn, run_id, candidates) -> dict:
             "the neutral severity weight. Severity is not flat because the "
             "capabilities are equally urgent; it is flat because nothing was "
             "linked.")
-    if not absent_areas and not held_areas:
+    if not absent_areas and not held_areas and not absent_sids \
+            and not held_sids:
         context["notes"].append(
-            "The technology register is empty for this run, so no platform "
-            "can earn the greenfield term and no cell can be discounted for "
-            "an incumbent. Both read as zero, and zero here means unmeasured.")
+            "Neither the ingested technology register nor the promoted one "
+            "carries a row for this run, so no platform can earn the "
+            "greenfield term and no cell can be discounted for an incumbent. "
+            "Both read as zero, and zero here means unmeasured.")
+    elif not absent_areas and not held_areas:
+        context["notes"].append(
+            "techstack_raw is empty for this run (the package carried no "
+            "tech workbook); the greenfield term and the incumbent discount "
+            "were read from the promoted techstack register instead, by "
+            "linked_subcap_ids. CLAIMED rows bind nothing either way.")
     if not with_evidence:
         context["notes"].append(
             "No cell on this run carries a citable evidence span, so every "

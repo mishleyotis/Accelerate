@@ -322,3 +322,90 @@ def test_depends_on_reaches_the_engine_so_its_own_ordering_passes():
         cards.append({**c, "fit_score": r["fit_score"], "rank": r["rank"]})
     out = CHECK(_Conn(_Cur(two)), "run", "platform", page(*cards))
     assert out == [], out
+
+
+# ── the promoted register reaches the engine (techstack_raw is empty on
+#    both promoted runs; the facts live one tier over) ──────────────────
+
+class _RegCur(_Cur):
+    """_Cur plus a latest techstack submission carrying register items."""
+
+    def __init__(self, cells, items):
+        super().__init__(cells)
+        self._items = items
+
+    def execute(self, sql, args=None):
+        if "FROM submissions" in sql and "page = 'techstack'" in sql:
+            self._rows = [({"techstack": {"items": self._items}},)]
+        else:
+            super().execute(sql, args)
+
+
+def _fit_for(cells, items, cand):
+    from dma_mcp import fit as fit_mod
+    conn = _Conn(_RegCur(cells, items))
+    return fit_mod.platform_fit(conn, "run", [cand])
+
+
+def test_an_absent_row_in_the_promoted_register_is_greenfield_ground():
+    cells = [("P1C1.1.1", 2.0, "P1C1", "data cloud"),
+             ("P1C1.1.2", 1.5, "P1C1", "data cloud"),
+             ("P1C1.1.3", 1.0, "P1C1", "data cloud")]
+    cand = {"platform": "Data Cloud", "l3_area": "data cloud",
+            "alignment": 0.5, "readiness": "green"}
+    without = _fit_for(cells, [], cand)["platforms"][0]
+    with_absent = _fit_for(
+        cells, [{"status": "ABSENT", "linked_subcap_ids": ["P1C1.1.1"]}],
+        cand)["platforms"][0]
+    gf = {f["name"]: f for f in with_absent["factors"]}["Greenfield family"]
+    assert gf["value"] == 1.0
+    assert with_absent["fit_score"] > without["fit_score"]
+
+
+def test_an_incumbent_row_discounts_exactly_the_cells_it_links():
+    cells = [("P1C1.1.1", 1.0, "P1C1", "mlops"),
+             ("P1C1.1.2", 1.0, "P1C1", "mlops"),
+             ("P1C1.1.3", 1.0, "P1C1", "mlops")]
+    cand = {"platform": "MLflow", "l3_area": "mlops",
+            "alignment": 0.5, "readiness": "green"}
+    without = _fit_for(cells, [], cand)["platforms"][0]
+    held = _fit_for(
+        cells, [{"status": "INFERRED",
+                 "linked_subcap_ids": ["P1C1.1.1", "P1C1.1.2"]}],
+        cand)["platforms"][0]
+    assert held["fit_score"] < without["fit_score"]
+
+
+def test_a_claimed_row_binds_nothing_in_either_direction():
+    """CLAIMED is provisional by the register's own vocabulary: it must not
+    discount a recommendation, and it must not deny a greenfield term."""
+    cells = [("P1C1.1.1", 1.0, "P1C1", "mlops"),
+             ("P1C1.1.2", 1.0, "P1C1", "mlops"),
+             ("P1C1.1.3", 1.0, "P1C1", "mlops")]
+    cand = {"platform": "MLflow", "l3_area": "mlops",
+            "alignment": 0.5, "readiness": "green"}
+    without = _fit_for(cells, [], cand)["platforms"][0]
+    claimed = _fit_for(
+        cells, [{"status": "CLAIMED", "linked_subcap_ids": ["P1C1.1.1"]}],
+        cand)["platforms"][0]
+    assert claimed["fit_score"] == without["fit_score"]
+
+
+def test_a_cell_both_held_and_absent_is_held():
+    """Never award greenfield where any row says the layer is occupied."""
+    from dma_mcp import fit as fit_mod
+    absent, held = fit_mod._register_staged(
+        _RegCur([], [{"status": "ABSENT", "linked_subcap_ids": ["A"]},
+                     {"status": "CONFIRMED", "linked_subcap_ids": ["A"]}]),
+        "run")
+    assert held == {"A"} and absent == set()
+
+
+def test_the_context_names_which_register_tier_supplied_the_terms():
+    cells = [("P1C1.1.1", 1.0, "P1C1", "mlops")]
+    got = _fit_for(cells,
+                   [{"status": "ABSENT", "linked_subcap_ids": ["P1C1.1.1"]}],
+                   {"platform": "X", "l3_area": "mlops"})
+    notes = " ".join(got["context"]["notes"])
+    assert "promoted techstack register" in notes
+    assert got["context"]["register_cells_absent"] == 1
