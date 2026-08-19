@@ -47,6 +47,29 @@ def chunk_text(text: str) -> list:
     sentences = [s.strip() for s in _SENT.split(text.strip()) if s.strip()]
     if not sentences:
         return []
+    # A "SENTENCE" LONGER THAN THE WINDOW, split on words rather than carried
+    # whole. The splitter is punctuation-driven, so a wall of text with no
+    # terminator — a scraped table, a transcript with no full stops, an
+    # excerpt whose punctuation the parser lost — arrived here as ONE
+    # sentence and left as one chunk of any length. The encoder truncates at
+    # its context window without complaint, so everything past the first ~256
+    # tokens was absent from the index and nothing recorded that it had been:
+    # searchable text silently becoming unsearchable text.
+    split = []
+    for s in sentences:
+        w = words_of(s)
+        if len(w) <= _MAX_WORDS:
+            split.append(s)
+            continue
+        # HALF a window per piece, not a whole one. The packer below carries
+        # the previous sentence forward as overlap, so whole-window pieces
+        # produced 180-word chunks — twice what the encoder reads, which is
+        # the same silent truncation in a new place. At half a window a piece
+        # plus its carried predecessor is exactly one window.
+        piece_n = max(1, _MAX_WORDS // 2)
+        for i in range(0, len(w), piece_n):
+            split.append(" ".join(w[i:i + piece_n]))
+    sentences = split
     chunks, window, count = [], [], 0
     for s in sentences:
         n = len(words_of(s))

@@ -21,6 +21,7 @@ from pathlib import Path
 
 from . import transport
 from .gates import ensure_gate_registry
+from . import memory as memory_mod
 from . import rejections
 from .validation import validate_pass1
 from .validation2 import validate_pass2
@@ -208,6 +209,23 @@ def submit_page_payload(conn, run_id, page: str, payload: dict = None,
             conn, run_id, page, submission_id, reasons, producer_version)
     except Exception as exc:                       # noqa: BLE001 — reported
         rejection_report = {"error": str(exc)[:200]}
+    # WHAT THIS STORE ALREADY KNOWS, delivered where it is actionable.
+    #
+    # The findings memory has held defect classes, their measurements and the
+    # refinements that closed them since migration 0034, and on 2026-08-19 the
+    # producer skill named none of its tools on any of its 40 pages. A memory
+    # a producer must remember to consult is a memory nobody consults: every
+    # run started from zero and the same classes were rediscovered by a reader
+    # looking at a rendered page.
+    #
+    # So recall is attached to the refusal that earned it, exactly as the
+    # rejection ledger is. Never fatal: a memory that can break a submit is
+    # worse than one that is silent.
+    try:
+        memory_recall = memory_mod.recall_for_gates(
+            conn, [r.get("gate_id") for r in reasons if isinstance(r, dict)])
+    except Exception as exc:                       # noqa: BLE001 — reported
+        memory_recall = {"error": str(exc)[:200]}
     conn.commit()
     if upload_id:
         # spent, and naming what it became. The parts stay: they are the
@@ -220,7 +238,11 @@ def submit_page_payload(conn, run_id, page: str, payload: dict = None,
             # against the same page and clears the very rows it was opened
             # against, so "did the repair land" is answerable without diffing
             # payloads — and `attempts` past two says the repair is looping.
-            "rejections": rejection_report}
+            "rejections": rejection_report,
+            # `known` is empty when this store has nothing on these gates;
+            # `checked` says which gates were asked, so "nothing known" is
+            # distinguishable from "never asked".
+            "memory": memory_recall}
 
 
 def get_validation_verdict(conn, submission_id) -> dict:

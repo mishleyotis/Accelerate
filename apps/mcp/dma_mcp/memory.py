@@ -692,6 +692,61 @@ def report_recurrence(conn, finding_id: str, *, measurement: str,
 
 
 # ── the loop's own read ─────────────────────────────────────────────────
+def recall_for_gates(conn, gate_ids, *, limit: int = 3) -> dict:
+    """What this store already knows about the gates that just fired.
+
+    THE POINT, and it is the same one the rejection ledger makes. A findings
+    store the producer has to remember to consult is a store nobody consults:
+    on 2026-08-19 the surface-production skill named none of these tools on any
+    of its 40 pages, so every run began from zero and the same defect classes
+    were rediscovered by a reader looking at a rendered page. Recall arrives
+    where it is actionable instead — attached to the refusal itself, on the
+    submit that earned it, with the refinement that closed it last time.
+
+    Returns `{gate_id: [finding, ...]}` for gates this store has a finding
+    against, plus `checked` so a caller can tell "nothing known" from "not
+    asked". Never raises: a memory that can break a submit is worse than a
+    memory that is silent, and the caller wraps this anyway.
+    """
+    out: dict = {}
+    gates = [g for g in dict.fromkeys(str(x or "").strip() for x in gate_ids) if g]
+    if not gates:
+        return {"checked": [], "known": {}, "note": "no gate ids in this verdict"}
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT f.finding_id, f.gate_id, f.title, f.defect_class, f.status,
+                  f.severity,
+                  (SELECT count(*) FROM memory_finding_sightings s
+                    WHERE s.finding_id = f.finding_id),
+                  (SELECT r.change FROM memory_refinements r
+                     JOIN memory_refinement_findings rf
+                       ON rf.refinement_id = r.refinement_id
+                    WHERE rf.finding_id = f.finding_id
+                    ORDER BY r.applied_at DESC LIMIT 1),
+                  (SELECT r.gate_added FROM memory_refinements r
+                     JOIN memory_refinement_findings rf
+                       ON rf.refinement_id = r.refinement_id
+                    WHERE rf.finding_id = f.finding_id
+                    ORDER BY r.applied_at DESC LIMIT 1)
+             FROM memory_findings f
+            WHERE f.gate_id = ANY(%s)
+            ORDER BY f.gate_id, f.last_seen_at DESC""", (gates,))
+    for row in cur.fetchall():
+        bucket = out.setdefault(row[1], [])
+        if len(bucket) >= max(1, int(limit or 3)):
+            continue
+        bucket.append({
+            "finding_id": row[0], "title": row[2], "defect_class": row[3],
+            "status": row[4], "severity": row[5], "times_seen": row[6],
+            # What was changed the last time this gate produced a finding. A
+            # producer reading "the fix last time was X" repairs in one pass
+            # rather than rediscovering the shape of the refusal.
+            "last_refinement": row[7],
+            "gate_added_then": row[8],
+        })
+    return {"checked": gates, "known": out}
+
+
 def memory_digest(conn, days: int = 7) -> dict:
     """What a weekly refinement pass needs in one call: what came back, what
     is new, which refinements held, and which classes are still producing.

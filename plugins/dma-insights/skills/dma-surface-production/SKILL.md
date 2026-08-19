@@ -40,6 +40,9 @@ page packs.
 3. `01-start-here/3-language.md` — every gap is stated as available value. A client reads this.
 4. `01-start-here/4-absence-protocol.md` — never say no until a documented ladder has failed.
 5. `01-start-here/6-entity-shape.md` — sub-vertical, size tier, ownership and brand shape.
+6. `01-start-here/7-memory-first.md` — what this build already knows about the defect you are
+   about to make. `get_memory_digest` and `list_open_rejections` before you author; the recall
+   the connector returns beside a refusal before you repair one.
    Which cells this run may serve, whether the peer cohort is a cohort, and which enrichment
    ladders can return anything at all for this entity.
 6. `04-craft/4-card-anatomy.md` — the header, sub-header and budget each surface renders into.

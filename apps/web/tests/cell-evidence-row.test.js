@@ -95,3 +95,74 @@ test("the adapter keeps the whole url, not just the domain", () => {
   assert.strictEqual(out[0].source, "ncuso.org/credit-union/1999/");
   assert.strictEqual(`https://${out[0].source}`, items[0].source_url);
 });
+
+/* ── ordering: the narrowest citable item first ───────────────────────── */
+
+/* `cellCitationsOf` is module-private, so the ordering is exercised through
+   the comparator it uses, loaded out of the compiled bundle the way the page
+   loads it. Reported 2026-08-19: "evidence is so generic and not subcap
+   specific" — the derived list is the assessment's own link table, and the
+   package links a document to every cell it touches (21 cells for one
+   congressional testimony on this run, 38 for a vendor case study). In hash
+   order the reader met the broadest item first. */
+function comparator() {
+  const src = fs.readFileSync(path.join(JS_DIR, "pages-d3-heatmap.js"), "utf8");
+  const start = src.indexOf("function bySpecificity");
+  assert.ok(start > 0, "bySpecificity is gone — the derived list is unordered again");
+  const end = src.indexOf("\n}", start) + 2;
+  // `asText` comes from the compiled bundle, not a stand-in: the comparator's
+  // first term is "can this be quoted", and a local re-implementation of what
+  // counts as text is exactly the drift this repo keeps removing.
+  const { asText } = require("./adapter-window");
+  // eslint-disable-next-line no-new-func
+  return new Function("asText", `${src.slice(start, end)}; return bySpecificity;`)(asText);
+}
+
+const item = (id, { excerpt = "a span", subcaps = ["P1C1.1.1"], tier = "T3" } = {}) =>
+  ({ id, excerpt, subcaps, tier });
+
+test("a quotable item outranks a reference with no span", () => {
+  const order = [item("E-REF", { excerpt: null, subcaps: ["P1C1.1.1"] }),
+                 item("E-SPAN", { subcaps: Array(30).fill("x") })]
+    .sort(comparator()).map((x) => x.id);
+  assert.deepStrictEqual(order, ["E-SPAN", "E-REF"],
+    "a reference nobody can open sorted above a verbatim span");
+});
+
+test("the item linked to fewer cells comes first", () => {
+  const order = [item("E-BROAD", { subcaps: Array(21).fill("x") }),
+                 item("E-NARROW", { subcaps: ["P1C1.1.1"] })]
+    .sort(comparator()).map((x) => x.id);
+  assert.deepStrictEqual(order, ["E-NARROW", "E-BROAD"]);
+});
+
+test("tier breaks a tie, strongest first", () => {
+  const order = [item("E-WEAK", { tier: "T5" }), item("E-STRONG", { tier: "T1" })]
+    .sort(comparator()).map((x) => x.id);
+  assert.deepStrictEqual(order, ["E-STRONG", "E-WEAK"]);
+});
+
+test("the order is stable between two identical runs", () => {
+  const rows = () => [item("E-B"), item("E-A"), item("E-C")];
+  const a = rows().sort(comparator()).map((x) => x.id);
+  const b = rows().sort(comparator()).map((x) => x.id);
+  assert.deepStrictEqual(a, b);
+  assert.deepStrictEqual(a, ["E-A", "E-B", "E-C"]);
+});
+
+test("an item with no subcaps list never sorts above a linked one", () => {
+  /* `999` rather than `0`: an item carrying no link list is not the most
+     specific item on the page, it is the one we know least about. */
+  const order = [item("E-UNKNOWN", { subcaps: [] }), item("E-LINKED")]
+    .sort(comparator()).map((x) => x.id);
+  assert.deepStrictEqual(order, ["E-LINKED", "E-UNKNOWN"]);
+});
+
+test("the row says how broadly a source is linked", () => {
+  const block = evidenceRowBlock();
+  // Babel escapes the middot in the compiled string, so the assertion is on
+  // the words either side of it rather than on the character.
+  assert.ok(block.includes("linked to ${e.subcaps.length} cells"),
+    "an item linked to 21 cells renders identically to one linked to this "
+    + "cell alone, so a reader cannot tell a specific citation from a general one");
+});

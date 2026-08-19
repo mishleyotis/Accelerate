@@ -88,3 +88,44 @@ def test_the_verbatim_rule_and_the_gate_agree_on_which_fields_are_spans():
         assert field not in _VERBATIM_FIELDS, \
             f"{field} is a label, and the antipatterns now tell a producer to " \
             "spell it out — the gate must refuse it rather than exempt it"
+
+
+# ── the memory the producer must read ──────────────────────────────────
+
+MEMORY_STEP = (ROOT / "plugins" / "dma-insights" / "skills"
+               / "dma-surface-production" / "01-start-here" / "7-memory-first.md")
+
+
+def test_the_producer_skill_names_the_memory_tools():
+    """A store written by the rectifier and read by no producer is
+    WRITE_PATH_WITH_NO_READ_PATH — a defect class this build already names,
+    applied to itself. Measured 2026-08-19: none of this skill's 40 pages
+    mentioned any of these tools."""
+    text = MEMORY_STEP.read_text()
+    for tool in ("get_memory_digest", "list_open_rejections",
+                 "search_findings", "record_finding"):
+        assert tool in text, f"the memory step no longer tells a producer to call {tool}"
+
+
+def test_every_memory_tool_the_step_names_exists_on_the_server():
+    """The same binding the gate list has: a step naming a tool that was
+    renamed sends a producer to a dead call, and nothing else would notice."""
+    server = (ROOT / "apps" / "mcp" / "server.py").read_text()
+    text = MEMORY_STEP.read_text()
+    named = {t for t in ("get_memory_digest", "list_open_rejections",
+                         "search_findings", "record_finding",
+                         "list_open_findings", "report_recurrence")
+             if t in text}
+    assert named, "the step names no tools at all"
+    for tool in sorted(named):
+        assert f"def {tool}(" in server, \
+            f"the step tells a producer to call {tool}, which the server does not define"
+
+
+def test_the_step_is_reachable_from_the_skill_index():
+    """A file in the directory that the entry point does not list is a file
+    nobody opens."""
+    index = (ROOT / "plugins" / "dma-insights" / "skills"
+             / "dma-surface-production" / "SKILL.md").read_text()
+    assert "7-memory-first.md" in index, \
+        "the memory step exists and SKILL.md does not send anyone to it"

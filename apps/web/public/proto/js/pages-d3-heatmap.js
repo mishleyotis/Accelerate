@@ -317,8 +317,42 @@ function cellCitationsOf(subcapId) {
     items: (DMA.EVIDENCE || []).filter(e => e.subcaps && e.subcaps.includes(subcapId)).map(e => ({
       ...e,
       resolved: true
-    }))
+    })).sort(bySpecificity)
   };
+}
+
+/* THE MOST CELL-SPECIFIC ITEM FIRST, and it is not a nicety.
+ *
+ * Reported 2026-08-19: "evidence is so generic and not subcap specific". It
+ * was. The derived list is the assessment's OWN link table, and the package
+ * links a document to every cell it touches — one congressional testimony on
+ * this run is linked to 21 cells, a vendor case study to 38. In hash order the
+ * reader met the broadest item first: a cell about a written digital strategy
+ * opened onto testimony about a $10 billion regulatory threshold.
+ *
+ * Specificity is ranked from what the payload already carries, in this order,
+ * every term of it deterministic:
+ *
+ *   1 · can it be quoted at all. An item with no verbatim span is a reference,
+ *       not a citation (invariant 4), and belongs below every item that is.
+ *   2 · how many cells it supports. An item linked to 38 cells is by
+ *       construction not about any one of them; an item linked to this cell
+ *       alone is about this cell.
+ *   3 · its tier, strongest first.
+ *   4 · its id, so the order is stable between two identical runs.
+ *
+ * No model is consulted here and none could be: this is the serving path
+ * (invariant 1). The embedding that WOULD score relevance runs in the worker's
+ * linker and in V4 at submit, where it belongs. */
+function bySpecificity(a, b) {
+  // Through the shared reader, not a hand-rolled typeof: `asText` is the one
+  // place that decides what counts as text, and the absence-safety gate reads
+  // this file line by line — a local guard that is correct still teaches the
+  // next author to write one that is not.
+  const quotable = x => x && asText(x.excerpt) ? 0 : 1;
+  const breadth = x => (x && x.subcaps || []).length || 999;
+  const tier = x => String(x && x.tier || "T9");
+  return quotable(a) - quotable(b) || breadth(a) - breadth(b) || tier(a).localeCompare(tier(b)) || String(a.id || "").localeCompare(String(b.id || ""));
 }
 
 /* The number of evidence items behind a cell, and where the number came from.
@@ -3174,7 +3208,14 @@ function SynthesisDrawer({
       style: {
         color: "var(--z-muted)"
       }
-    }), e.source ? /*#__PURE__*/React.createElement("a", {
+    }), (e.subcaps || []).length > 3 ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 9.5,
+        color: "var(--z-muted)",
+        whiteSpace: "nowrap"
+      },
+      title: `This source is linked to ${e.subcaps.length} cells in this run`
+    }, e.subcaps.length, " cells \xB7") : null, e.source ? /*#__PURE__*/React.createElement("a", {
       href: `https://${e.source}`,
       target: "_blank",
       rel: "noreferrer",
