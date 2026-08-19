@@ -50,11 +50,26 @@ _other_key = ec.generate_private_key(ec.SECP256R1())
 
 
 def _jwk(private, kid=KID):
-    """The public half as a JWK, the shape Google publishes."""
-    from jwt.algorithms import ECAlgorithm
-    d = json.loads(ECAlgorithm.to_jwk(private.public_key()))
-    d.update({"kid": kid, "alg": "ES256", "use": "sig"})
-    return d
+    """The public half as a JWK, the shape Google publishes.
+
+    Built by hand rather than through `ECAlgorithm.to_jwk`, which emits a
+    31-byte coordinate whenever the point has a leading zero byte — and
+    `from_jwk` then refuses its own library's output with InvalidKeyError.
+    A fresh key is drawn at module scope every run, so roughly one CI run
+    in sixty-four failed all four verification tests at once with no code
+    change anywhere (measured: three red runs on 2026-08-19, the failing
+    JWK's y at 42 base64url chars in the log). RFC 7518 §6.2.1.2 requires
+    exactly ceil(key_size/8) octets, zero-padded; this does that.
+    """
+    import base64
+    nums = private.public_key().public_numbers()
+
+    def b64(n):
+        return base64.urlsafe_b64encode(
+            n.to_bytes(32, "big")).rstrip(b"=").decode()
+
+    return {"kty": "EC", "crv": "P-256", "x": b64(nums.x), "y": b64(nums.y),
+            "kid": kid, "alg": "ES256", "use": "sig"}
 
 
 def _fetch(keys=None):
@@ -230,3 +245,26 @@ def test_both_write_routes_take_their_actor_from_the_verified_identity():
     assert re.search(r"alert_act\(\s*\n?\s*cur, alert_id, body=body, "
                      r"idempotency_key=key, actor=actor\b", src) is None, \
         "the alert route must not pass the query parameter as the actor"
+
+
+def test_a_key_with_a_leading_zero_coordinate_still_verifies():
+    """The flake, pinned so it cannot come back as weather. One key in ~64
+    has a coordinate under 2^248; RFC 7518 requires the JWK coordinate
+    zero-padded to 32 octets regardless, and the fixture must produce that
+    for EVERY key — a fixture that fails one run in sixty-four is a
+    fixture that teaches people to re-run CI instead of reading it."""
+    for _ in range(4000):
+        k = ec.generate_private_key(ec.SECP256R1())
+        nums = k.public_key().public_numbers()
+        if nums.x >> 248 == 0 or nums.y >> 248 == 0:
+            break
+    else:
+        pytest.skip("no leading-zero coordinate in 4000 draws (p ~ 1e-14)")
+    d = _jwk(k)
+    assert len(d["x"]) == 43 and len(d["y"]) == 43, (
+        "coordinates must be exactly 32 zero-padded octets (43 base64url "
+        "chars); an unpadded coordinate is refused by PyJWK.from_dict")
+    reset_jwks_cache()
+    claims = verify_assertion(_token(key=k), audience=AUD,
+                              fetch=_fetch([_jwk(k)]))
+    assert claims["email"] == EMAIL

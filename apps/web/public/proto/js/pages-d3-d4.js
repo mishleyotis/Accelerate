@@ -1318,7 +1318,7 @@ function ClientPlatform({
       }, /*#__PURE__*/React.createElement("div", {
         className: "prog-fill",
         style: {
-          width: `${Math.max(0, Math.min(100, (pfNum(f.value) || 0) * 10))}%`
+          width: `${Math.max(0, Math.min(100, (pfNum(f.value) || 0) * 100))}%`
         }
       }))), f.contribution != null ? /*#__PURE__*/React.createElement("span", {
         className: "f-mono",
@@ -1329,8 +1329,8 @@ function ClientPlatform({
           textAlign: "right",
           flexShrink: 0
         },
-        title: "contribution to the composite"
-      }, "+", Number(f.contribution).toFixed(1)) : null))) : null, cells.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        title: "contribution to the fit subtotal, in points of 100"
+      }, "+", (Number(f.contribution) * 100).toFixed(1)) : null))) : null, cells.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
         className: "eyebrow",
         style: {
           fontSize: 9,

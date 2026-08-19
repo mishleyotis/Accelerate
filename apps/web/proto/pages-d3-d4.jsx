@@ -1110,12 +1110,12 @@ function ClientPlatform({ entity, run }) {
                               title={f.weight != null ? `weight ${f.weight}` : ""}>{String(f.name || "").replace(/_/g, " ")}</span>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div className="prog" style={{ height: 4 }}>
-                                <div className="prog-fill" style={{ width: `${Math.max(0, Math.min(100, (pfNum(f.value) || 0) * 10))}%` }} />
+                                <div className="prog-fill" style={{ width: `${Math.max(0, Math.min(100, (pfNum(f.value) || 0) * 100))}%` }} />
                               </div>
                             </div>
                             {f.contribution != null ? (
                               <span className="f-mono" style={{ fontSize: 9, color: "var(--z-muted)", width: 34, textAlign: "right", flexShrink: 0 }}
-                                title="contribution to the composite">+{Number(f.contribution).toFixed(1)}</span>
+                                title="contribution to the fit subtotal, in points of 100">+{(Number(f.contribution) * 100).toFixed(1)}</span>
                             ) : null}
                           </div>
                         ))}

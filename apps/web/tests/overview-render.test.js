@@ -381,20 +381,21 @@ test("D1 overview renders what the run promoted", { skip, concurrency: false }, 
       await page.close();
     });
 
-    await t.test("O-21/O-27 · the section traces are gone; the volleys stay", async () => {
-      /* SUPERSEDED 2026-08-19, deliberately.
+    await t.test("O-21/O-27 · the traces AND the volleys are gone", async () => {
+      /* SUPERSEDED TWICE, both times by the owner, both times with a
+         screenshot of the live page.
 
-         This used to assert a collapsed "REASONING TRACE · Self-check ·
-         ACCEPT · Show" control was mounted for six named sections. The live
-         app then showed three of them on ONE screen — above the firmographics
-         table, below it, and again under the why-now signals. The trace is
-         the producer arguing with itself; that is owed to the assessment and
-         not to the reader.
+         2026-08-19 morning: the collapsed "REASONING TRACE" controls went —
+         the trace is the producer arguing with itself, owed to the
+         assessment and not to the reader. `r_layer` is stripped at the API
+         boundary and every renderer for it is deleted.
 
-         `r_layer` is now stripped for every audience at the API boundary and
-         every renderer for it is deleted, so this test asserts absence. The
-         storyline challenge is a different thing and still renders: it is the
-         objections the STORY survived, which is content about the client. */
+         2026-08-19 evening: the storyline challenge followed, by explicit
+         instruction — "This should be excluded please." The volleys are the
+         same genus: the producer stress-testing its own story. The FIXTURE
+         still carries `storyline_challenge` with two volleys, so this case
+         proves the exclusion holds when the data is present, not merely
+         when it is absent. */
       const { page, errors } = await open({ variant: "unscored" });
       let text = await page.evaluate(() => document.body.innerText || "");
 
@@ -414,9 +415,13 @@ test("D1 overview renders what the run promoted", { skip, concurrency: false }, 
       });
       await settle(page);
       text = await page.evaluate(() => document.body.innerText || "");
-      assert.ok(text.includes("2 volleys"), "the storyline challenge did not render");
-      assert.ok(text.includes("Story held") && text.includes("Story changed"),
-        "a volley rendered without saying what the storyline did with it");
+      for (const banned of ["Storyline challenge", "STORYLINE CHALLENGE",
+                            "volley", "Story held", "Story changed"]) {
+        assert.ok(!text.includes(banned),
+          `"${banned}" rendered although the storyline challenge is excluded `
+          + "by owner instruction (2026-08-19) — and the fixture carries "
+          + "two volleys, so presence here means a renderer came back");
+      }
       assert.deepStrictEqual(errors, [], errors.join("\n"));
       await page.close();
     });

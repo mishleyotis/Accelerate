@@ -1011,168 +1011,18 @@ function SCQACard({
   }));
 }
 
-/* ── The storyline, challenged ────────────────────────────────────────
-   INTERNAL ONLY, and the customer envelope proves it was meant to render
-   somewhere: `storyline_challenge` is one of the two fields the server strips
-   for that audience (`redacted_count 2`), which is a redaction decision about
-   content that had no renderer at all.
+/* ── The storyline challenge, excluded ────────────────────────────────
+   Owner instruction, 2026-08-19, with a screenshot of the internal view:
+   "This should be excluded please." The volleys are the producer's
+   stress-test of its own story — five objections and what the story did
+   with each — and they are owed to the assessment, not to any reader.
+   `storyline_challenge` stays in the payload (the contract is law and the
+   producer still writes it); the server already strips it for the customer
+   audience; no renderer exists for it on any audience, and
+   overview-render.test.js asserts the absence with the field present in
+   its fixture. */
 
-   Five volleys on the reference run — the client executive defending a public
-   decision, finance asking for the return, the incumbent vendor, the rival,
-   and our own AE — each with the challenge, the answer, whether the storyline
-   HELD or CHANGED, and what changed when it did. This is the single most
-   useful thing on the page for anyone about to walk into the meeting, and it
-   travelled from the producer to the browser and stopped.
-
-   Rendered inside the expanded narrative, because that is where a reader is
-   already reading the story these volleys were fired at. */
-function OvStorylineChallenge({
-  challenge,
-  audience
-}) {
-  const [open, setOpen] = useState(null);
-  if (String(audience || "").toLowerCase() === "customer") return null;
-  const volleys = (challenge && challenge.volleys || []).filter(v => v && (v.challenge || v.answer));
-  if (!volleys.length) return null;
-  const who = v => asText(v.challenger) ? String(v.challenger).replace(/_/g, " ") : "challenge";
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 14,
-      borderTop: "1px solid var(--z-sep)",
-      paddingTop: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      gap: 8,
-      marginBottom: 8,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "eyebrow",
-    style: {
-      fontSize: 9.5,
-      color: "var(--z-dpur)"
-    }
-  }, "Storyline challenge"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-muted)"
-    }
-  }, volleys.length, " ", volleys.length === 1 ? "volley" : "volleys", " \xB7 the objections this story was tested against, and what it did with each")), volleys.map((v, i) => {
-    const isOpen = open === i;
-    const held = String(v.outcome || "").toLowerCase() === "held";
-    return /*#__PURE__*/React.createElement("div", {
-      key: v.volley != null ? v.volley : i,
-      style: {
-        borderTop: i ? "1px solid var(--z-sep)" : 0,
-        padding: "8px 0"
-      }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setOpen(o => o === i ? null : i),
-      style: {
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 8,
-        width: "100%",
-        background: "none",
-        border: 0,
-        padding: 0,
-        cursor: "pointer",
-        textAlign: "left"
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "f-mono",
-      style: {
-        fontSize: 9.5,
-        fontWeight: 700,
-        letterSpacing: ".06em",
-        textTransform: "uppercase",
-        color: "var(--z-dpur)",
-        background: "rgba(115,91,161,.14)",
-        borderRadius: 4,
-        padding: "2px 7px",
-        flexShrink: 0,
-        whiteSpace: "nowrap"
-      }
-    }, who(v)), /*#__PURE__*/React.createElement("span", {
-      style: {
-        flex: 1,
-        minWidth: 0,
-        fontSize: 12.5,
-        color: "var(--z-dark)",
-        lineHeight: 1.5
-      }
-    }, asText(v.challenge)), v.outcome ? /*#__PURE__*/React.createElement("span", {
-      className: `b ${held ? "b-muted" : "b-org"}`,
-      style: {
-        flexShrink: 0
-      }
-    }, held ? "Story held" : "Story changed") : null, /*#__PURE__*/React.createElement(Icon, {
-      name: isOpen ? "chevron-u" : "chevron-d",
-      size: 13,
-      style: {
-        color: "var(--z-muted)",
-        flexShrink: 0,
-        marginTop: 2
-      }
-    })), isOpen ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginTop: 8,
-        paddingLeft: 4
-      }
-    }, asText(v.answer) ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginBottom: 8
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9.5,
-        fontWeight: 700,
-        letterSpacing: ".08em",
-        color: "var(--z-muted)",
-        textTransform: "uppercase",
-        marginBottom: 2
-      }
-    }, "Answer"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12.5,
-        color: "var(--z-body)",
-        lineHeight: 1.6
-      }
-    }, asText(v.answer))) : null, asText(v.changed) ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "var(--z-lav)",
-        borderLeft: "3px solid var(--z-dpur)",
-        borderRadius: "0 6px 6px 0",
-        padding: "8px 12px"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9.5,
-        fontWeight: 700,
-        letterSpacing: ".08em",
-        color: "var(--z-dpur)",
-        textTransform: "uppercase",
-        marginBottom: 2
-      }
-    }, "What changed"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        color: "var(--z-body)",
-        lineHeight: 1.55
-      }
-    }, asText(v.changed))) : null) : null);
-  }));
-}
-
-/* The promoted SCQA, and nothing else. This card used to interpolate three
-   fields into a paragraph of prose about a fictional bank — "a mid-tier …
-   trails the peer median by 0.4 … Two recent C-suite hires open a 6-9 month
-   integration window", then an expanded body naming nCino, FIS Profile and
-   Databricks with two hardcoded evidence chips. All of it rendered under a
-   real client's name while the run's own six-field SCQA sat adapted and
-   unread. The contract's fields are the card. */
+/* The promoted SCQA, and nothing else. The contract's fields are the card. */
 const SCQA_PARTS = [["situation", "Situation"], ["complication", "Complication"], ["question", "Question"], ["answer", "Answer"], ["sequencing_rationale", "Why this order"], ["cost_of_delay", "Cost of delay"]];
 function SCQABody({
   entity,
@@ -1235,10 +1085,7 @@ function SCQABody({
       border: 0
     },
     onClick: () => openEvidence(eid)
-  }, eid))) : null, expanded ? /*#__PURE__*/React.createElement(OvStorylineChallenge, {
-    challenge: s.storyline_challenge,
-    audience: audience
-  }) : null);
+  }, eid))) : null);
 }
 
 /* ── Opportunity Surface · per platform ───────────────────────────────
