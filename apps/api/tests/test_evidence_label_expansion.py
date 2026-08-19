@@ -123,3 +123,17 @@ def test_the_tracked_copy_wins_over_a_staged_one():
     assert "packages/shared" in abbreviations.__file__, (
         f"the abbreviation list resolved from {abbreviations.__file__} — a "
         "staged build artefact is shadowing the tracked source")
+
+
+def test_a_controlled_vocabulary_token_is_left_to_its_label_route():
+    """`sub_vertical` carries `CU` and the frontend resolves it through
+    SUBVERTICAL_LABEL to "Credit Union". The string a reader sees is already
+    spelled out; rewriting the token would break the lookup. It was the last
+    thing a scan of the six served pages flagged, seven times, and every one
+    of them was this."""
+    from abbreviations import EXCERPT_FIELDS, expand, unexplained
+    assert "sub_vertical" in EXCERPT_FIELDS
+    # and the value itself is still a bare token, so the exclusion is by FIELD
+    # and not by shape — a bare `CU` in prose must still be caught.
+    assert list(unexplained("CU members expect it")) == ["CU"]
+    assert expand("CU members expect it", "label") == "Credit Union members expect it"

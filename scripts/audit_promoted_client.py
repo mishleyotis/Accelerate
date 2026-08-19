@@ -55,6 +55,12 @@ import sys
 from pathlib import Path
 
 PAGES = ("overview", "heatmap", "insights", "platform", "context", "techstack")
+
+# The abbreviation list, from the copy the connector's gate and the api's
+# projection both read. Imported rather than restated: three copies of a
+# vocabulary is three chances for one of them to be the stale one.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "packages" / "shared"))
+from abbreviations import EXCERPT_FIELDS, unexplained  # noqa: E402
 DROP_MIN_ROWS = 3
 
 # Keys that legitimately hold prose written for a person, where an em dash is
@@ -423,11 +429,45 @@ def check_redaction(page, body) -> list:
     return out
 
 
+# ── G · an abbreviation on a rendered surface ─────────────────────────
+#
+# CG-27 refuses one in a PAYLOAD, and two of the three routes to a served page
+# do not go through a payload: `source_name` on a package-ingested evidence row
+# is written by whoever assembled the assessment, and the cell-drawer item is
+# built by the api straight off that column. Both were spelling abbreviations
+# out on one endpoint and not the other, measured at 55 occurrences across six
+# served pages after the payload gate was clean.
+#
+# So the check runs where a reader actually meets the string. Verbatim spans
+# and catalogue-controlled tokens are excluded by the same list the expander
+# uses — a quote is not ours to rewrite, and `CU` in `sub_vertical` resolves
+# through the frontend's label map to "Credit Union".
+def check_abbreviations(page, body) -> list:
+    out, seen = [], set()
+    for path, v in walk(body):
+        if not isinstance(v, str):
+            continue
+        key = path.rsplit(".", 1)[-1].split("[")[0]
+        if key in EXCERPT_FIELDS:
+            continue
+        for short in unexplained(v):
+            if (page, key, short) in seen:
+                continue
+            seen.add((page, key, short))
+            out.append(_v("WARN", "G-ABBREV", page, path,
+                          f"'{short}' reaches a rendered surface unexplained. "
+                          f"Spell it out on first use in the field. Verbatim "
+                          f"spans and catalogue tokens are excluded; this is "
+                          f"neither. First seen: {v[:120]!r}"))
+    return out
+
+
 def audit_page(page, doc, audience, register) -> list:
     sections = (doc or {}).get("sections") or {}
     out = []
     out.extend(check_serialised(page, sections))
     out.extend(check_dead_ends(page, sections))
+    out.extend(check_abbreviations(page, sections))
     if audience == "internal":
         out.extend(check_drop_signature(page, sections))
         out.extend(check_alert_ceiling(page, sections))
