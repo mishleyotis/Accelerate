@@ -174,12 +174,54 @@ def test_the_gate_names_a_handful_not_a_wall():
 
 # ── CG-28 · an executive is not dropped for want of a phone number ─────
 
+# The reference client's real shape: the section names four accountable
+# seats in its own reasoning layer and serves three.
+ROSTER_AS_PROMOTED = {
+    "roster": [
+        {"name": "Ana Fonseca", "title": "President and Chief Executive Officer"},
+        {"name": "Clark Dilley",
+         "title": "Senior Vice President, Chief Information Officer"},
+        {"name": "Andrea Carpenter",
+         "title": "Executive Vice President, Chief Operating Officer"},
+    ],
+    "r_layer": {"domain_test":
+                "Chief executive officer, chief information officer, chief "
+                "operating officer and chief information security officer are "
+                "the accountability set for a credit union of this size."},
+}
+
+
+def test_a_seat_the_section_names_as_accountable_must_be_served():
+    out = V._check_roster_keeps_uncontactable("leadership", ROSTER_AS_PROMOTED)
+    assert [r["gate_id"] for r in out] == ["CG-28"]
+    assert "chief information security officer" in out[0]["message"]
+
+
+def test_serving_the_named_seat_clears_it_even_with_no_contact_route():
+    """The point of the gate: the seat belongs on the page, and the ABSENCE
+    belongs on the contact field rather than on the person."""
+    body = {**ROSTER_AS_PROMOTED,
+            "roster": ROSTER_AS_PROMOTED["roster"] + [
+                {"name": "Sébastien Carpentier", "email": None, "phone": None,
+                 "title": "Vice President, Chief Information Security Officer"}]}
+    assert V._check_roster_keeps_uncontactable("leadership", body) == []
+
+
+def test_titles_are_matched_never_names():
+    """A title is a small closed vocabulary and a name is not. Matching names
+    would fire on every spelling difference and miss every real omission."""
+    body = {"roster": [{"name": "Someone Else",
+                        "title": "Chief Information Security Officer"}],
+            "r_layer": {"domain_test": "The chief information security officer "
+                                       "owns this."}}
+    assert V._check_roster_keeps_uncontactable("leadership", body) == []
+
+
 def test_serving_fewer_seats_than_were_identified_is_refused():
     out = V._check_roster_keeps_uncontactable("leadership", {
         "seats_identified": 8,
         "roster": [{"name": "A"}, {"name": "B"}, {"name": "C"}]})
     assert [r["gate_id"] for r in out] == ["CG-28"]
-    assert "contact enrichment returned nothing" in out[0]["message"]
 
 
 def test_a_seat_marked_dropped_is_refused_even_when_the_count_agrees():
@@ -194,6 +236,13 @@ def test_a_complete_roster_passes():
         "seats_identified": 3,
         "roster": [{"name": "A", "email": "a@x"}, {"name": "B"},
                    {"name": "C", "phone": None}]}) == []
+
+
+def test_a_section_that_names_no_accountability_set_is_not_second_guessed():
+    """The gate reads what the payload states. Inventing an accountability set
+    would make it fire on every run that simply does not declare one."""
+    assert V._check_roster_keeps_uncontactable("leadership", {
+        "roster": [{"name": "A", "title": "President"}]}) == []
 
 
 def test_a_roster_that_declares_no_count_is_not_second_guessed():

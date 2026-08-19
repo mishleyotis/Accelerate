@@ -374,6 +374,13 @@ _VERBATIM_FIELDS = frozenset((
     "headline", "title_verbatim", "url", "source_url", "linkedin_url",
     "email", "name", "legal_name", "platform", "vendor", "l3_area",
     "l4_feature", "author_name", "author_role", "peer_name",
+    # Measured while expanding abbreviations on a real payload: a focus area's
+    # `verbatim_quote` was rewritten from "greater CFPB scrutiny" to the full
+    # phrase — a chief executive's congressional testimony, misquoted by a
+    # tidy-up, which is the exact harm this exclusion exists to prevent.
+    # `source_document` and `source_filename` are the artefact's own title as
+    # filed.
+    "verbatim_quote", "source_document", "source_filename", "trigger_label",
 ))
 
 
@@ -480,34 +487,68 @@ def _check_starter_tone(section, body) -> list:
     return out
 
 
+_OFFICER_TITLE = re.compile(
+    r"\bchief\s+(executive|information security|information|operating|"
+    r"technology|financial|data|risk|legal|marketing|administrative|"
+    r"lending|experience|digital)\s+officer\b", re.I)
+
+
 def _check_roster_keeps_uncontactable(section, body) -> list:
-    """CG-28 — an executive is not dropped for want of a phone number.
+    """CG-28 — an executive is not dropped for want of a contact route.
 
-    The roster is the accountability set for the assessment, and contact
+    The roster is the accountability set for the assessment; contact
     enrichment is a convenience on top of it. A seat that owns a finding
-    belongs on the page whether or not a work address came back; dropping it
+    belongs on the page whether or not a work address came back — dropping it
     silently makes the institution look smaller than it is and hides the owner
-    of the gap being discussed.
+    of the gap being discussed. Reported directly: "I do not see the CTO. Do
+    not exclude executives whose contacts cannot be retrieved."
 
-    Detected the only way a payload can show it: the section declares the
-    seats it knows about and serves fewer of them.
+    ENFORCED AGAINST THE PAYLOAD'S OWN STATEMENT of who is accountable. The
+    section's `r_layer.domain_test` names the accountability set in prose —
+    on the reference client, "chief executive, chief information officer,
+    chief operating officer and chief information security officer" — and the
+    roster served three of those four. Titles are matched, never names: a
+    title is a small closed vocabulary and a name is not.
+
+    What this CANNOT see, and says so rather than pretending: a seat nobody
+    named anywhere. That half lives in the producer skill's antipatterns and
+    in a render test that a roster row with no email still draws.
     """
     if section != "leadership" or not isinstance(body, dict):
         return []
     roster = body.get("roster")
     if not isinstance(roster, list):
         return []
-    known = body.get("seats_identified")
     out = []
+
+    served = {m.group(0).lower()
+              for r in roster if isinstance(r, dict)
+              for m in _OFFICER_TITLE.finditer(str(r.get("title") or ""))}
+
+    rl = body.get("r_layer")
+    accountable = []
+    if isinstance(rl, dict):
+        for key in ("domain_test", "hypothesis", "counter"):
+            text = rl.get(key)
+            if isinstance(text, str):
+                accountable.extend(m.group(0).lower()
+                                   for m in _OFFICER_TITLE.finditer(text))
+    missing = sorted({t for t in accountable if t not in served})
+    if missing:
+        out.append(_reason(
+            "CG-28", "leadership", "leadership.roster",
+            "this section names " + ", ".join(missing) + " as accountable and "
+            "serves no such seat. An executive is not dropped because contact "
+            "enrichment returned nothing: the roster IS the accountability "
+            "set, and a missing seat hides the owner of a gap this run is "
+            "discussing. Serve the seat with the fields that are known and "
+            "let the contact route be the thing that is absent."))
+
+    known = body.get("seats_identified")
     if isinstance(known, int) and known > len(roster):
         out.append(_reason(
             "CG-28", "leadership", "leadership.roster",
-            f"{known} seats were identified and {len(roster)} are served. An "
-            "executive is not dropped because contact enrichment returned "
-            "nothing: the roster is the accountability set, and a missing seat "
-            "hides the owner of a gap this run is discussing. Serve the seat "
-            "with the fields that ARE known and let the contact route be the "
-            "thing that is absent."))
+            f"{known} seats were identified and {len(roster)} are served."))
     for i, m in enumerate(roster):
         if isinstance(m, dict) and m.get("dropped_for_no_contact"):
             out.append(_reason(
