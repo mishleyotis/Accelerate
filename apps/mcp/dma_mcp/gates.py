@@ -196,6 +196,17 @@ GATES = {
               "discussed. The absence belongs on the contact field, not on "
               "the person.",
               "block"),
+    "CG-29": ("A narrative thread says what THIS section adds", None,
+              "No two sections on a page carry the same narrative_thread, "
+              "word for word.",
+              "Ten of twelve sections on one promoted overview carried the "
+              "identical thread. The field was present everywhere, so every "
+              "presence check passed, and a reader moving between cards read "
+              "the same paragraph ten times. A sentence that is true of ten "
+              "sections tells a reader nothing about any of them. Two "
+              "sections may connect to the story the same way; they may not "
+              "say so in the same words.",
+              "block"),
     "CG-04": ("No invented fields", None,
               "No field outside the section contract, envelope included.",
               "Payload shapes are law; an invented field is a contract fork.",

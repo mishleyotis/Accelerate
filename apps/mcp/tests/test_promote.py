@@ -52,8 +52,17 @@ def _connect(user):
 THREAD = "Thread " + " ".join(["thread"] * 49)
 
 
+#: CG-29 refuses two sections carrying the same thread word for word, so the
+#: fixture varies it by section name. The gate exists because ten of twelve
+#: sections on one promoted overview shared one paragraph — and this fixture
+#: would have shipped the same shape, which is why it is the fixture that
+#: changed rather than the gate.
+def _thread_for(name: str) -> str:
+    return f"Thread for {name}: " + " ".join(["thread"] * 49)
+
+
 def _thread_if_bound(page: str, name: str) -> dict:
-    return ({"narrative_thread": THREAD}
+    return ({"narrative_thread": _thread_for(name)}
             if "narrative_thread" in sections(page)[name]["fields"] else {})
 
 
@@ -76,7 +85,7 @@ def _hero_page() -> dict:
         "framing": ("Early digital maturity, with strategy work under way "
                     "and clear peer gaps across the group."),
         "claim_label": "FACT", "confidence": "HIGH",
-        "narrative_thread": THREAD,
+        "narrative_thread": _thread_for("scores"),
     }
     return page
 

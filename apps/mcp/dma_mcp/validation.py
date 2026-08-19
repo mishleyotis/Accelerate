@@ -746,6 +746,51 @@ def _valid_empty_state(es) -> bool:
             and len(es["sources_searched"]) > 0)
 
 
+def _check_narrative_thread_is_per_section(page, payload) -> list:
+    """CG-29 — the thread has to say what THIS section adds.
+
+    MEASURED on the promoted overview of run d7ed1d90: ten of twelve sections
+    carried the same `narrative_thread`, word for word. The field was present
+    everywhere, so every presence check passed, and a reader moving between
+    cards read the same paragraph ten times.
+
+    That is the difference between a page thread PASTED and a story WOVEN, and
+    it is invisible to any per-section gate: a duplicate is a relation BETWEEN
+    sections, so it can only be seen once, over the whole page.
+
+    Two sections may legitimately connect to the story in the same way. They
+    may not say so in the same words: the field exists to tell a reader what
+    the section in front of them adds, and a sentence that is true of ten
+    sections tells them nothing about any.
+    """
+    if not isinstance(payload, dict):
+        return []
+    seen, out = {}, []
+    for name in payload:
+        body = payload.get(name)
+        if not isinstance(body, dict):
+            continue
+        thread = body.get("narrative_thread")
+        if not isinstance(thread, str) or not thread.strip():
+            continue
+        key = re.sub(r"\s+", " ", thread.strip().lower())
+        first = seen.get(key)
+        if first is None:
+            seen[key] = name
+            continue
+        out.append(_reason(
+            "CG-29", name, f"{page}.{name}.narrative_thread",
+            f"the thread on {name!r} is word for word the thread on "
+            f"{first!r}. A reader moving between these two cards reads the "
+            "same paragraph twice, so neither one tells them what the "
+            "section in front of them adds. Write what THIS section "
+            "contributes to the argument; the page-level story belongs in "
+            "the summary once."))
+        if len(out) >= 6:
+            break
+    return out
+
+
 def validate_pass1(page: str, payload: dict) -> list:
     if page not in PAGES:
         return [_reason("CG-01", None, page, f"unknown page {page!r}; pages are {list(PAGES)}")]
@@ -885,6 +930,9 @@ def validate_pass1(page: str, payload: dict) -> list:
     # relation BETWEEN a field's items, not a property of one value, so it
     # cannot be answered inside the per-section loop above.
     reasons.extend(check_vacuity(page, payload))
+    # CG-29 for the same reason: a repeated thread is a relation BETWEEN
+    # sections and cannot be seen from inside one.
+    reasons.extend(_check_narrative_thread_is_per_section(page, payload))
 
     return reasons
 

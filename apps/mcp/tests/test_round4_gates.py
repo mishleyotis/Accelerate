@@ -269,3 +269,53 @@ def test_a_roster_that_declares_no_count_is_not_second_guessed():
     fire on every run that simply does not declare one."""
     assert V._check_roster_keeps_uncontactable("leadership", {
         "roster": [{"name": "A"}]}) == []
+
+
+# ── CG-29 · a thread says what THIS section adds ───────────────────────
+
+def test_the_same_thread_on_two_sections_is_refused():
+    """MEASURED on the promoted overview of run d7ed1d90: ten of twelve
+    sections carried the same `narrative_thread`, word for word. The field was
+    present everywhere, so every presence check passed, and a reader moving
+    between cards read the same paragraph ten times."""
+    out = V._check_narrative_thread_is_per_section("overview", {
+        "exec_summary": {"narrative_thread": "A compliance foundation bought "
+                                             "against a crossing."},
+        "why_now": {"narrative_thread": "A compliance foundation bought "
+                                        "against a crossing."},
+    })
+    assert [r["gate_id"] for r in out] == ["CG-29"]
+    assert "exec_summary" in out[0]["message"], \
+        "the refusal must name the section it duplicates, or the producer has " \
+        "to diff twelve sections to find the pair"
+
+
+def test_whitespace_and_case_do_not_make_a_thread_different():
+    out = V._check_narrative_thread_is_per_section("overview", {
+        "a": {"narrative_thread": "One  thread.\n"},
+        "b": {"narrative_thread": "one thread."},
+    })
+    assert len(out) == 1
+
+
+def test_distinct_threads_pass():
+    assert V._check_narrative_thread_is_per_section("overview", {
+        "a": {"narrative_thread": "What the scores establish."},
+        "b": {"narrative_thread": "What the findings rank, given those scores."},
+    }) == []
+
+
+def test_a_section_with_no_thread_is_not_a_duplicate_of_another():
+    """Absence is CG-13's business, not this gate's. Counting two missing
+    threads as a duplicate pair would refuse a page for the wrong reason and
+    send the producer to the wrong field."""
+    assert V._check_narrative_thread_is_per_section("overview", {
+        "a": {"narrative_thread": ""},
+        "b": {},
+        "c": {"narrative_thread": None},
+    }) == []
+
+
+def test_the_gate_names_a_handful_not_a_wall():
+    body = {f"s{i}": {"narrative_thread": "the same paragraph"} for i in range(20)}
+    assert len(V._check_narrative_thread_is_per_section("overview", body)) <= 6

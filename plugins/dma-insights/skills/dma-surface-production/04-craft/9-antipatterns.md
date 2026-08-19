@@ -107,6 +107,24 @@ payload and the projection that serves a stored evidence row.
 
 ---
 
+## 4b · One narrative thread pasted onto every section
+
+**Refused by CG-29.**
+
+Ten of twelve sections on one promoted overview carried the same
+`narrative_thread`, word for word. Every presence check passed — the field was
+there — and a reader moving between cards read the same paragraph ten times.
+
+A thread says what **this** section adds to the argument: what the scores
+establish, what the findings rank given those scores, what the opportunity
+does with the ranking. A sentence that is true of ten sections tells a reader
+nothing about any of them.
+
+Two sections may connect to the story the same way. They may not say so in the
+same words. The page-level story belongs in the summary, once.
+
+---
+
 ## 5 · An executive dropped because contact enrichment found nothing
 
 **Refused by CG-28 where the section names the seat; otherwise nothing sees it.**
