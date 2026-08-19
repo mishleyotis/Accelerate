@@ -409,3 +409,14 @@ def test_the_context_names_which_register_tier_supplied_the_terms():
     notes = " ".join(got["context"]["notes"])
     assert "promoted techstack register" in notes
     assert got["context"]["register_cells_absent"] == 1
+
+
+def test_the_evidence_index_is_identity_grain():
+    """The index is the inventory of the corpus: a row's presence there
+    makes no capability claim, and its writer (the ingested evidence_index
+    table) can carry neither r_layer nor empty_state — so ET-07's stated
+    repair was a field CG-04 refuses. The registry names the index for the
+    same reason it already names evidence_age."""
+    from dma_mcp.validation2 import _IDENTITY_GRAIN
+    assert ("heatmap", "evidence") in _IDENTITY_GRAIN
+    assert ("heatmap", "evidence_age") in _IDENTITY_GRAIN

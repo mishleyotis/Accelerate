@@ -549,6 +549,14 @@ _IDENTITY_GRAIN = {
     ("overview", "evidence_coverage"): "inventory of the corpus, not a claim inside it",
     ("context", "regulatory_standing"): "regulator registry — charter, licence and perimeter",
     ("heatmap", "evidence_age"): "inventory of the corpus, not a claim inside it",
+    # The index itself is the inventory: a row's presence in the listing
+    # makes no capability claim — the claims live in the sections that cite
+    # the row, and THOSE citations still owe links or a stated reason. The
+    # omission was found live: five registry/telemetry rows blocked the
+    # index while its own serving table (the ingested evidence_index) binds
+    # neither r_layer nor empty_state, so the gate's prescribed repair was
+    # a field CG-04 refuses — a gate demanding what the shape forbids.
+    ("heatmap", "evidence"): "inventory of the corpus, not a claim inside it",
 }
 
 
