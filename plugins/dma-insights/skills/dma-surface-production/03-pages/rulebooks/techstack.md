@@ -1,4 +1,4 @@
-# Rulebook: techstack · v1 (2026-08-19)
+# Rulebook: techstack · v2 (2026-08-19)
 
 This is the techstack page's anti-pattern rulebook: the measured record of what
 a promoted technology register looks like when it is right (Baxter, run
@@ -12,6 +12,17 @@ whatever later rounds conclude. Baxter is **v5.0-shaped — 17 categories
 including P1C5, 706 cells — so every shape-specific count quoted from it
 (51 register rows, a 5-peer cohort, 16/30/2/3 status split) is a v5.0 fact of
 that run, not a contract**; a v7.0 run has its own.
+
+The census for this page, so nothing is minted to fill it: the Surface
+Specification's D6 defines exactly two surfaces — T1, the register, and T3,
+the per-row detail sub-page a register row opens — and the T-family stops at
+T3. T2 recounts THIS register but renders on the insights page (its rulebook
+entry is `rulebooks/insights.md § T2`; the split is the spec's own), the
+run/version diff is V1 on Health, server-computed with no producer, and there
+are no T4–T8 anywhere in the Surface Specification — the surface map
+(`05-lifecycle/surface-map.md`) says so and forbids minting ids for the
+directory, refresh-cadence and run-history chrome that tasking vocabulary
+sometimes calls by those names.
 
 ---
 
@@ -209,6 +220,62 @@ r_layer` and the enumerated per-item/per-layer keys survive
 `packages/shared/serve_classes.json`, never the file); an invented key drops
 at serve with the drop counted in the receipt.
 
+### Enrichment pathways
+
+Connector pathways (facet `techstack`, `02-inputs/enrichment_sources.json`,
+in precedence order): the `explorium` machine technographic scan at ingest —
+T1, wired but not live: no live API key exists in Secret Manager, the routine
+records NOT_RUN with that reason, and the tool console
+(vibeprospecting.explorium.ai) is never a citable source; the `clay` Tech
+Stack company data point — T1, producer-session only, so a scheduled run
+cannot hold it; and `first_party` — the entity's own platform statements,
+T1-T2, which is where a `detection_basis` clause comes from. The tier rule is
+single-sourced in `02-inputs/clay_taxonomy.json` and it is D4 rule 5: a
+machine technographic scan is T1, never T4 — the misfile was silently capping
+every cell one scan grounded until MEM-0087 measured it (+0.85 mean ERS on
+identical content). Provenance names the DOCUMENT the scan or call surfaced,
+never the tool (MEM-0082): a scan that returned error or empty grounds
+nothing, and a thin register's enrichment state is machine-readable
+(`enrichment_register.json` → `enrichment_status`), never a prose note
+(MEM-0062).
+
+Web-search pathways (the dma-research discipline — decompose per row, proxy
+escalation before any ABSENT, entity name in every query, year markers in
+two-plus):
+
+- `"[Entity] [system] administrator OR analyst job description"` — a job
+  posting naming the system is a D4 rule-2 single-source pass: the posting
+  is first-party T2 on the entity's own careers page, T3 through an
+  aggregator; register the requirement line as the verbatim 50–500 char
+  span. On Logix this route confirmed rows the 403-answering website could
+  not.
+- A live technical read of the entity's own domain (server headers,
+  app-store package identifiers) — T1-T2 and dated by the read: the
+  calibration rows are TS-014 (Cloudflare header read at the domain on
+  2026-08-18, passes) against the scan-only TS-029/TS-030 (fail); carry
+  `as_of` on every row whose basis names a date (MEM-0002).
+- `"[Entity] selects OR implements OR migrates [vendor] 2019..2026"` — the
+  entity's own newsroom is official disclosure T2; the vendor's release
+  naming the institution is vendor collateral, T5 with corroboration
+  required (W6), whatever tier you type — it can still name the product,
+  and the status carries the epistemics (CLAIMED until corroborated).
+- `"[Entity] [absent platform] partnership OR integration platform OR data
+  cloud"` — the ABSENT rows' ladder: searched-and-not-found is the page's
+  gap argument, and the negative search registers as the row's basis prose
+  and the run's ladder, never as an evidence row (W6).
+- `"[Entity] [category] replacement OR modernization OR conversion RFP"` —
+  the migration signal `clay_taxonomy.json` names as this facet's custom
+  gap ("platform migrations announced in the last 24 months"): T2 in the
+  entity's own words, T3 in trade press.
+
+Gap-to-pathway: this section emits `empty_required` on `items` and `layers`
+and `empty_optional` on `compliance_attestations`; `dropped` is the
+contract's ONLY `may_be_empty` list (MEM-0060 pins the exemption count at
+exactly 1) and is never reported as a gap. Row-level holes — a missing
+`as_of`, an uncited CONFIRMED, an off-vocabulary status — never reach
+`list_enrichment_gaps`; CG-09, CG-17, the D4 serve filter and this rulebook
+are the guards there, and the rendered-page readback is yours.
+
 ---
 
 ## T3 · Platform detail
@@ -363,3 +430,55 @@ status, ts_id, vendor`) — anything else the producer invents drops at serve
 with the drop counted in the receipt (D1, fail-closed). No colour, no hex, no
 M-code in any prose (invariants 6–7); scores are served beside the prose and
 never restated inside it.
+
+### Enrichment pathways
+
+Connector pathways: the same section, the same `techstack` facet as T1 —
+plus the `clay` peer-deployments route under facet `peer_scores`
+(`02-inputs/enrichment_sources.json`): peer platform deployments land T1 per
+ESTABLISHED deployment, under AG-04's shape — one row per named peer,
+unknowns as `deployed: null`, `source_url` and `as_of` on every
+`deployed: true` row. No connector serves the peer set itself: it is the
+run's own, read from `peer_table` in the bundle, never assembled
+(9-antipatterns.md #6, above). The boundary move runs on the vendor's own
+documentation: fetch the scope statement and register it before writing move
+3 — a vendor-authored page bands as vendor collateral (T5, W6), which is
+sufficient here because the claim it grounds is the vendor describing its
+own product's architecture, never the assessed entity's capability; the
+entity-side claims stay on the register's own evidence.
+
+Web-search pathways (the peer protocol's routes, each named with the verdict
+it can earn):
+
+- `"[peer] [vendor] core conversion OR selects OR implements"` plus the
+  vendor's customer-story pages — the vendor naming the institution earns
+  `deployed: true` with `source_url` and `as_of`; the source is vendor
+  collateral (T5, W6) and travels on the peer row as its named source, the
+  basis quoting the verbatim span.
+- `"[peer] [competing vendor] digital banking OR core platform"` — a peer
+  named on a COMPETING product at the same layer earns `deployed: false`
+  with that source, the strongest verdict after true (TS-201's
+  Backbase-at-Alliant row is the exemplar).
+- `"[peer] [system] PowerOn OR administrator job description"` — the peer's
+  own careers posting naming the system earns `deployed: true` when the
+  posting is the peer's own and dated (T2); an aggregator's copy is T3.
+- `"[vendor] [product] API documentation OR developer"` — the boundary
+  fetch, usually one page (SymXchange; Salesforce's own Data Cloud scope
+  statement); registered before `dma_impact` move 3 is written, because a
+  boundary with no fetch behind it is an opinion.
+- A vendor aggregate ("seven of the top ten…", naming none) distributes as
+  `deployed: null` to every peer with the aggregate named in the basis
+  (TS-211) — a number is not a source for a named institution.
+
+A peer search that establishes nothing is the `deployed: null` row's basis,
+naming what was searched in the peer's own terms — a negative search is a
+ladder rung rendered as honesty, never an evidence row (W6), and "not
+researched" describes the producer, not the world.
+
+Gap-to-pathway: none of its own — T3 reads `techstack.techstack`, so the
+only worklist rows it can raise are T1's (`empty_required` on
+`items`/`layers`, `empty_optional` on `compliance_attestations`). A row
+missing its `dma_impact` or its peer breakdown is invisible to
+`list_enrichment_gaps` — MEM-0068 is the measured cost of trusting a write
+path over a read path on exactly this contract — so the rendered sub-page
+readback is the check that sees this panel's content.

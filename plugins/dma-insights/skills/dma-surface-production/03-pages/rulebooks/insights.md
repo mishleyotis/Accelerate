@@ -1,4 +1,4 @@
-# Rulebook: insights · v1 (2026-08-19)
+# Rulebook: insights · v2 (2026-08-19)
 
 The insights page's anti-pattern rulebook: what a promoted insights page looks
 like when it is right (Baxter, run `c1351d25`) and the named, measured failures
@@ -181,6 +181,161 @@ gets that far because CG-04 refuses it at submit. Within that:
   `storyline_challenge`, `enrichment_basis`, `enriched_at` are
   customer-stripped — never describe a person in an enrichment tool's words.
 
+### Enrichment pathways
+
+Connector pathways: no ledger facet is registered for I1 (the surface map's
+dash) — a card's enrichment travels the evidence ladder and exists only as
+registered evidence, entered through `register_evidence` citing the SOURCE a
+tool surfaced, never the tool. What the connectors feed is the JOINS: the
+`sentiment` facet (`first_party` published ratings carrying n, scale and
+date, T1-T2; `clay` news sentiment T3 — Glassdoor, Indeed and ZipRecruiter
+all 403, so that value is an inference with its route named, or omitted) is
+one half of IC-1's advocacy-against-review-record join; the `techstack`
+facet (`explorium` ingest scan and the `clay` Tech Stack data point, both
+T1, never T4 — the misfile caps the capability at L2.5) plus `clay` Open
+Jobs (T2-T3 — the posting is first-party, the aggregator is not) are the
+two halves of IC-3's hiring-against-technographic join; `clay` Recent News
+(T3) and Latest Funding (T1-T2 only when a filing is behind it) feed the
+timing joins, per `02-inputs/clay_taxonomy.json`. Per the pack's Information
+sources table, the argument itself comes from the assessment report deep
+dives and the research workbook; `supporting_e_ids` from the workbook plus
+enrichment.
+
+Web-search pathways (the dma-research discipline — five signal facets per
+claim, proxy escalation before any absence — applied to this page's known
+gaps):
+
+- `"[Entity] [area] failure complaint outage criticism"` — the mandatory
+  per-card contradictory query (R-Layer step B). A hit registers at its
+  source's tier (a regulator record T1, trade press T3) with a verbatim
+  50–500 char span; a miss is a rung in the card's `r_layer`, never an
+  evidence row (W6: an absence enters as INFERENCE with its ladder where it
+  enters at all).
+- `"[Entity] [platform] administrator OR engineer job posting 2025 2026"` —
+  the demand-signal half of a join: the posting is first-party T2, the
+  aggregator T3, and it licenses "signals suggest", never "uses".
+- `"[Entity] CFPB OR BBB complaint [product or channel]"` — the complaint
+  TEXT is the analysable half of a CX join, T3; the excerpt is the verbatim
+  narrative span, checked against THIS entity (the same-named-institution
+  probe fires here).
+- `"[Entity] [regulator] enforcement OR consent order 2024 2025"` — the
+  Regulatory Divergence probe's search; T1 when it lands on the regulator's
+  own record.
+- `"[Entity] [claimed initiative] paused OR completed OR replaced OR
+  delayed"` — the Temporal Inconsistency probe; whatever it finds registers
+  at its source's tier, and nothing found is a ladder rung in the r_layer.
+
+Query rules held from dma-research: entity name in every query, 4–8 words,
+year markers in two-plus; a vendor case study naming the entity is T5 with
+corroboration required (W6) and cannot carry a card alone. A card upgraded
+from thin to cited is the highest-value work on this page.
+
+Gap-to-pathway: `cards` is this section's only contract field, so the
+worklist can raise exactly one row here — `empty_required` on `cards` — and
+it names a failure, not a search: zero cards on a completed run closes by
+authoring from the joins above, never by declaring an empty state. Per-card
+holes (an empty `supporting_e_ids`, a bare causal claim) never reach
+`list_enrichment_gaps` — AG-03 and AG-01 refuse them at submit, which is the
+guard the worklist does not need to be.
+
+## DD-3 · Insight modal (drilldown from I1)
+
+The four-tab modal an I1 card opens (Drilldown atlas: DD-3, component
+InsightModal, centred shell). It renders `insights.insights.cards[*]` and has
+no payload of its own — the card face already showed title, flag, pillar and
+a truncated WHAT, and the modal completes it rather than repeating it. The
+spec's DD-3 shape adds `affects[]` and `linked_rec_id` to the I1 prompt
+shape; both are legal card columns and both serve. An evidence chip inside
+the modal opens DD-2 above it — that drawer's rules are
+`rulebooks/heatmap.md § H6`.
+
+### Baxter positive pattern
+
+> "Those same controls decide on the member context available to them today,
+> so legitimate activity trips them, and the cost lands precisely at the
+> moments a member is trying to move money."
+> (IC-1 `why_text` — the mechanism tab: the causal path from the claimed
+> state to its consequence, not a restatement of the WHAT above it)
+
+> "Can we see the last two quarters of fraud-hold volumes with their
+> false-positive rate, and the servicing contacts they generated?"
+> (IC-1 `validation_question` — the modal's closing line: a discovery
+> question naming the internal artefact that would confirm or kill the card)
+
+The modal-only columns have their exemplar on Logix, not Baxter:
+
+> `"affects": ["P2C3.2.6", "P2C3.2.1", "P2C3.2.2", "P2C3.2.3", "P2C3.2.CU1",
+> "P2C3.7.3", "P2C3.5.5", "P2C3.6.5"]`
+> (IC-005 — the tab's cell chips: eight cells THIS run serves, the
+> sub-vertical variant included; every chip resolves or the card carries a
+> dead link)
+
+Shape notes, measured: Baxter serves `affects: null` and `linked_rec_id:
+null` on 8 of 8 cards — on that run the modal renders its cell chips from
+`linked_subcap_id` alone. Logix populates `affects[]` on 8 of 8 and sets
+`linked_rec_id` on 3 of 8 (REC-2 once, REC-4 twice) — the cross-page pointer
+into P2's recommendations is set where a recommendation actually descends
+from the card, never for symmetry, and null is its ordinary value.
+
+### Anti-patterns
+
+- **MEM-0017 — pointer to I1** — the counter-case tab is where the reject
+  landed: `alternative_explanation` is the tab's reason to exist, and IC-2's
+  r_layer dismissing its strongest objection untested is what came back as
+  memory. Every counter names the test it survived; the modal is where the
+  reviewer reads it, and since REF-0007 where the verdict returns from.
+- **(no MEM) / 9-antipatterns §7 — pointer to I1** — the four fields this
+  modal renders (`alternative_explanation` under the claim,
+  `validation_question` as the closing line, `severity_rationale` beside the
+  chip, `claim_label` on the face) are the same four that were once written,
+  stored, served and displayed by nothing. The modal is the read path that
+  made them prose; write them as prose.
+- **(no MEM) / contract fork at the modal boundary** — the spec's DD-3 block
+  names `flag` and `pillar` among what the face "already showed"; both are
+  render derivations (`severity` → triage flag, pillar from the cell id's
+  leading token), not submit keys. `flag` falls to CG-04 as unknown;
+  `pillar_id` is the legal column nothing refuses — Logix sent it on 8 of 8
+  where Baxter sends null on 8 of 8, and the I1 entry above is the only
+  guard. `affects[]` ids must each resolve to a served cell — the dead-link
+  class was 15 of 119.
+- **(no MEM) / S2 in the closing line** — the `validation_question` is the
+  modal's last word to the client; a claim whose follow-up reads "why do you
+  not track that?" is an accusation wearing a question mark. State the
+  question from the opportunity end and name the document, not the omission.
+
+### Exclusion set
+
+I1's boundary, rendered: the customer body of each card is the allowlist's
+17 enumerated card keys — `affects` and `linked_rec_id` are among them and
+serve — minus `r_layer`, which is in `NEVER_SERVED_KEYS` and reaches no
+audience even though this modal is where its verdict comes back as memory
+(MEM-0013). Method vocabulary, cap vocabulary and contact-route keys drop at
+any depth, so the owner `so_what_text` names is a seat and a title, never an
+inbox. The modal adds no key of its own; the evidence drawer it opens is
+DD-2, whose exclusions are H6's.
+
+### Enrichment pathways
+
+Connector pathways: the parent's — no facet of its own; every chip and tab
+renders content I1 already cites, and nothing is fetched at click time
+(invariant 1). The modal is only ever as good as the joins and citations
+established at synthesis.
+
+Web-search pathways: the tab-shaped gaps, all of them I1 searches run before
+the card ships — the counter-case tab needs the mandatory contradictory
+query (`"[Entity] [area] failure complaint outage criticism"`), because an
+`alternative_explanation` written without one is an assertion, which is
+MEM-0017's shape; each probe the card's r_layer names (Input-Output
+Disconnect, Marketing-Reality Gap, Temporal Inconsistency, Regulatory
+Divergence, CX Disconnect, Peer Outlier, Tech Stack Mismatch) fires a
+required extra search before the modal may open on the result. A negative
+return is an r_layer rung, never an evidence row (W6).
+
+Gap-to-pathway: none of its own — the worklist sees I1's `cards`
+(`empty_required`) whole, and a hole inside a card is invisible to it. The
+submit gates (AG-01, AG-03, S28_insight_integrity) and the post-promote
+readback are the only checks that see this modal's content.
+
 ## T2 · Technology landscape strip
 
 ### Baxter positive pattern
@@ -285,3 +440,42 @@ every audience. Within that:
   `ceiling`, `uncertainty_band`, `urf_modifiers` and the contact-route keys
   have no business on a recount strip and are stripped by class anyway;
   `summary` is unbound and discarded (above) — never emit any of them.
+
+### Enrichment pathways
+
+Connector pathways: none of this section's own — the strip is a recount, and
+the split is deliberate: T2 renders on the insights page while every input it
+counts lives in the techstack register, so its data needs are T1's (the
+surface map records the facet as "— (techstack, via T1)"). That facet, per
+`02-inputs/enrichment_sources.json`: the `explorium` ingest scan (T1, wired
+but not live — the routine records NOT_RUN until the credential exists), the
+`clay` Tech Stack data point (T1 — a machine technographic scan is T1, never
+T4; the misfile caps the capability at L2.5), then `first_party` platform
+statements (T1-T2). Close a tile by closing register rows on the techstack
+page, then RECOUNT here; no pathway writes a tile directly. The `basis` tier
+mix is read off the counted rows' own evidence, which is the only method
+vocabulary this surface carries (Exclusion set, above).
+
+Web-search pathways (run against T1's rows; named here because these are the
+searches that move a tile):
+
+- `"[Entity] [gap platform] deployment OR selection announcement"` — a GAPS
+  `named_item` is a searched absence: a hit converts the register row, the
+  GAPS count falls and the strip is recounted, never adjusted. The negative
+  return lives in the row's basis and the run's ladder — a negative search
+  is a ladder rung, never an evidence row (W6).
+- `"[Entity] [claimed product] integration OR go-live 2024 2025"` — the
+  CLAIMED tile's move to a firmer status needs a second registrable domain
+  or a T1-T2 single source (D4 rule 2); the institution's own page is
+  T1-T2, the wallet vendor's is vendor collateral at T5 with corroboration
+  required (W6).
+- `site:[entity domain] [product]` plus a live technical read of the domain
+  — first-party detection, T1-T2, the cheapest CONFIRMED there is; register
+  the page with a verbatim 50–500 char span before the row changes status,
+  because the tile's basis will count it.
+
+Gap-to-pathway: this section emits `empty_required` on `tiles` only;
+`reconciles_to_register` is a boolean, and a boolean's absence is its value —
+never a worklist row. A strip that disagrees with the register is not a gap
+either: the API recomputes the four counts at read and exposes the
+disagreement, and the closure is a recount, not a search.

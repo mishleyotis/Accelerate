@@ -1,4 +1,4 @@
-# Rulebook: heatmap · v1 (2026-08-19)
+# Rulebook: heatmap · v2 (2026-08-19)
 
 The heatmap page's anti-pattern rulebook: what a promoted heatmap looks like when
 it is right (Baxter, run `c1351d25`) and the measured, gated failures that reached
@@ -81,6 +81,26 @@ Logix empty_state carries is a probe ladder and drops at serve. Never emit an
 M-code, cap ceiling or uncertainty band into this section's prose: `cap_level`,
 `ceiling`, `uncertainty_band`, `urf_modifiers` are excluded key classes.
 
+### Enrichment pathways
+
+- **Connector** (facet `peer_scores` — its `serving_surface` is this section):
+  the corpus — the peer table of promoted assessments, then the fallback
+  ladder; tier band "n/a — scores, not evidence". No external connector serves
+  a peer score. Clay's adjacent data point serves peer platform deployments on
+  the tech register (T1 per established deployment, under AG-04's shape),
+  never a score.
+- **Web search.** No query mints a score: pillars and categories are STATED in
+  the workbook and never recomputed, and an empty grid zoom is an ingest fault
+  to route (MEM-0088), not a figure to search for. The searches that do serve
+  this surface are identity checks on the cohort — the named peers' registry
+  records ("[peer] NCUA Research profile", "[peer] total assets [year]" — T1)
+  verify same-sub-vertical and size class, informing `peer_basis`; they
+  register only where a figure is actually cited, verbatim span and all
+  (MEM-0086: the cited span carries the figure).
+- **Gap-to-pathway.** `pillars` and `categories` emit `empty_required`. An
+  empty grain closes through `get_report_bundle` and the ingest route, never
+  through enrichment — no pathway on this list repairs a parser drop.
+
 ---
 
 ## H1 · Focus areas
@@ -158,6 +178,90 @@ source_filename, involved_subcap_ids, entity_score, peer_score, delta,
 currency_status, currency_note, confidence, new_evidence_ids`); `empty_state`
 serves `{reason, closure_condition}` only — its `sources_searched` drops. No probe
 vocabulary (`queries_run`, `searched_on`) anywhere in area prose.
+
+### Enrichment pathways
+
+- **Connector.** No facet of its own. `first_party` (wired, through
+  `register_evidence`) carries the step-2 currency sweep; `quartr` transcripts
+  (T1-T2, executives verbatim) are declared, not wired. No Clay data point
+  maps to this surface in `clay_taxonomy.json`.
+- **Web search** (STEP 2's currency validation, per area): the two most recent
+  quarterly filings and the latest annual report — strategy, outlook and MD&A
+  — T1-T2. "[Entity] CEO OR CIO interview 2025 2026" — T2-T3 by publisher.
+  The newsroom and blog, last 12 months — T2. "[Entity] [initiative] paused
+  OR completed OR replaced OR delayed" — the counter-evidence query; a
+  SUPERSEDED verdict is one of the most valuable findings this product
+  produces, and a negative return is the UNCONFIRMED status's ladder, never a
+  row. Every source used is minted E-CC with a verbatim 50–500 char span and
+  linked to the area AND its cells — `new_evidence_ids` is the sweep made
+  auditable (Baxter: E-BCU-058-R2, E-BCU-061).
+- **Gap-to-pathway.** `focus_areas` emits `empty_required` — the only kind
+  here, and CG-19 binds: items or a declared `empty_state` with the real
+  reason, never a bare `[]`.
+
+---
+
+## DD-10 · Focus area expansion (drilldown from H1)
+
+Inline expansion from a focus-area card (Drilldown atlas: DD-10, component
+FocusAreaView) — measured in the spec as the largest inline panel in the
+product (+2,594 characters). No separate prompt; it renders
+`heatmap.focus_areas.focus_areas[*]`, and its authority is the provenance
+triple it prints.
+
+### Baxter positive pattern
+
+The triple exemplar is Logix — a paged document rendered so an AE can show the
+client where it came from:
+
+> `source_document: "Written testimony of Ana Fonseca, President & CEO, Logix
+> Federal Credit Union, before the Subcommittee on Financial Institutions"` ·
+> `source_page: 2` · `source_filename:
+> "HHRG-119-BA20-Wstate-FonsecaA-20250326.pdf"` (FA-1 — the triple the panel
+> prints under SOURCE)
+
+> "Restated in the same terms in league coverage of the hearing on 27 March
+> 2025, which records five years of preparation, about $4 million a year and a
+> minimum of 30 compliance staff." (FA-1 `currency_note`, CONFIRMED_CURRENT —
+> the step-2 sweep rendered where the reader opens it)
+
+Shape notes: Baxter's four areas carry `source_page: null` honestly — panels
+and web stories have no pages, and the artefact is then named exactly (the H1
+provenance-triple entry is the rule's home).
+
+### Anti-patterns
+
+- **pointer / H1's entries** — quote hygiene (S9/S29), CG-19's never-a-bare-
+  `[]`, CG-27's span rule, the grain rule and the provenance triple are homed
+  under H1; the expansion is where each one renders.
+- **(no MEM) / the measured identity case** — the spec's worked example prints
+  "Client Profile · p.7 · FCE_DMA_Client_Profile_FINAL.docx" on a page for a
+  different bank: the filename and header must name THIS entity, and a
+  mismatch quarantines the area rather than rendering its authority.
+- **(no MEM) / spec DD-10** — "This panel renders from the payload its parent
+  surface already carries." A panel that needs content the area does not hold
+  means the area is incomplete — fixed in H1, never patched at the drill.
+
+### Exclusion set
+
+H1's boundary, rendered: customer keys per area are the contract fields;
+`focus_areas[*].r_layer` never serves and is marked per item; `empty_state`
+serves `{reason, closure_condition}` only; no probe vocabulary in area prose.
+
+### Enrichment pathways
+
+- **Connector.** The parent's — `first_party` through `register_evidence` for
+  the currency sweep; `quartr` transcripts declared, not wired. See H1.
+- **Web search.** The panel's own gaps are currency and page-anchoring:
+  "[Entity] [priority] 2025 2026" against filings and the newsroom (T1-T2)
+  refreshes `currency_status`; "[Entity] [initiative] paused OR completed OR
+  replaced OR delayed" is the counter-query whose hit makes SUPERSEDED — and
+  whose miss is a rung under UNCONFIRMED, never a row. Sweep finds mint E-CC
+  ids and land in `new_evidence_ids`, which is what lets this panel show its
+  own working.
+- **Gap-to-pathway.** None of its own — `focus_areas` reports `empty_required`
+  on the parent, and CG-19 is the guard against the silent empty list this
+  panel would otherwise vanish into.
 
 ---
 
@@ -273,6 +377,90 @@ label. `r_layer` never serves. The customer allowlist keeps `linking_stats` to
 default-deny until classified, so never rely on the client seeing them.
 `empty_state` serves `{reason, closure_condition}`; `searched_on` drops.
 
+### Enrichment pathways
+
+- **Connector.** Every facet lands here eventually; the ones that close cells
+  wholesale: `techstack` — the `explorium` ingest scan and the `clay` Tech
+  Stack data point, both T1 (never T4 — the misfile caps the cell at L2.5) —
+  covers the platform cells in one pass; `first_party` rich documents, T1-T2
+  — one annual report populates twenty to fifty cells with fact-level ids
+  E-xxx:Fy. The leadership, sentiment and why_now facets close the cells
+  their surfaces cite, which are tier 1 of the coverage order.
+- **Web search** (per cell, the dma-research five-signal decomposition): the
+  diagnostic question decomposed; the subcap's own keywords; the expected
+  evidence source for the question type (governance → proxy statements T1-T2,
+  customer experience → app stores T3); proxy signals, ladder tiers 7–10,
+  when fewer than 3 items; and the mandatory contradictory query. Rules held:
+  entity name in every query, 4–8 words, no duplicate framings, year markers
+  in two-plus queries, web-fetch every rich document. A negative per-cell
+  search feeds the declared synthesis and H3's ladder — it registers nothing
+  (W6: an absence enters as INFERENCE with its ladder where it enters at
+  all).
+- **Gap-to-pathway.** `cells` and `linking_stats` emit `empty_required` — the
+  worklist sees the fields whole. The per-cell deficit is carried by H3's
+  queue and by `linking_stats`' grade shape, not by worklist rows.
+
+---
+
+## DD-1 · Synthesis drawer (the H4 → H2 drill)
+
+The grid's two-level interaction, contracted in the Drilldown atlas: a
+category cell drills IN to its sub-capability rows, and a sub-capability row
+opens this drawer (right slide-in, component SynthesisDrawer). It renders
+`heatmap.cell_evidence.cells[*]` — H2's rows — plus the catalogue name and the
+workbook score resolved at read, so it is produced by producing H2 and H4 and
+holds no payload of its own.
+
+### Baxter positive pattern
+
+> `{"subcap_id": "P1C1.1.1", "grade": "cited", "grounded_on": 4, "e_ids":
+> ["E-BCU-016-R2", "E-BCU-018", "E-BCU-012-R2", "E-CC-019"]}` — the drawer's
+> whole inventory: the items resolve at read from `e_ids`, in order, and the
+> "on the 4 items above" label is `grounded_on`, computed (AG-02).
+
+The three synthesis grades this drawer renders — cited, inherited, declared —
+are quoted under H2; those exemplars are this panel's calibration.
+
+### Anti-patterns
+
+- **(no MEM) / DD-1's grain check, measured** — the score, the peer median and
+  the cell id must come from the SAME row of subcap_scores; one line pairing a
+  sub-capability's score with a category's id produced 125 violations across
+  the corpus — the rule: a mismatch is a grain_violation and no prose is
+  written over it.
+- **MEM-0041 — pointer to H2** — the drawer resolves the ids YOU cited, so a
+  dead id renders UNRESOLVED rather than vanishing; `cells_citable` 0 of 706
+  is what "computed at read, computed by nothing" looked like.
+- **(no MEM) / the spec's audit note** — a sub-capability row opens a drawer
+  while a category cell zooms inline, so a harness probing the DOM for
+  dialogs reports zero drilldowns on a page full of them; and a harness
+  reading "the open panel" must prefer the drawer over the modal behind it.
+
+### Exclusion set
+
+H2's boundary, rendered: the drawer's customer face is the excerpt, source and
+claim label — item-level `tier`, `ers`, `recency_band`, `provenance`,
+`link_basis`, `discovered_by` strip for the customer; per-cell
+`sources_searched` is probe-class and customer-stripped; `r_layer` never
+serves. Below three items the panel says thin rather than reading as complete.
+
+### Enrichment pathways
+
+- **Connector.** The facet matching the cell's capability domain — `techstack`
+  T1 for platform cells, `first_party` T1-T2 everywhere; see H2. Nothing is
+  fetched at click time (invariant 1): the drawer is only ever as good as the
+  linkage established at synthesis.
+- **Web search.** Enrich-when-thin, before settling: the cell's ladder tiers
+  1–6 per dma-research's five signals, with the mandatory contradictory query
+  ("[Entity] [capability area] failure complaint outage criticism"). A cell
+  upgraded from thin to cited is the highest-value work on this surface; a
+  ladder that returns nothing yields the declared grade — named artefacts,
+  never a row (W6).
+- **Gap-to-pathway.** None of its own — the worklist sees H2's `cells` and
+  `linking_stats` (`empty_required`) whole. The drawer-grain deficit is H3's
+  queue; `cells_cited_elsewhere_not_cited_here` is the number that says a
+  reader was sent to a drawer that cannot answer.
+
 ---
 
 ## H6 · Evidence store
@@ -343,6 +531,93 @@ boundary). `discovered_by` strips (Logix marks `evidence[*].discovered_by` in
 excerpt, claim_type, published_date, supports_subcap_ids, surfaces`. `empty_state`
 serves `{reason, closure_condition}` only.
 
+### Enrichment pathways
+
+- **Connector.** All of them, and only through the door: every wired facet's
+  finds terminate here via `register_evidence`, which allocates the id,
+  computes the rank score and dedupes by content hash. The tier follows the
+  SOURCE, never the tool (`clay_taxonomy.json`: `tier_condition` is part of
+  the tier; a machine technographic scan is T1, never T4; the tool console —
+  vibeprospecting.explorium.ai — is never a citable source).
+- **Web search.** The store runs no queries of its own — it registers what
+  the other surfaces' pathways find. What binds at the door: a verbatim
+  50–500 char excerpt from a document actually read; never a URL you could
+  not retrieve; distinguish cannot-read / not-present / refused-robot
+  (MEM-0070 + MEM-0074); and W6's four refusals — vendor collateral is T5, an
+  absence registers as INFERENCE with its ladder, a related entity's filing
+  never evidences operational capability, and one document may solely carry
+  at most 20% of scored cells. Each refuses the LINKS, never the
+  registration.
+- **Gap-to-pathway.** `evidence` emits `empty_required` — closed by
+  registering what the run actually used, with `linked_subcap_ids` at
+  registration time (MEM-0079: links sent late cost a round trip each).
+
+---
+
+## DD-2 · Evidence drawer (drilldown from H6)
+
+The one drawer every page shares: any evidence chip anywhere in the app opens
+it (Drilldown atlas: DD-2, component EvidenceDrawer), and it renders
+`heatmap.evidence` rows — which is why its rulebook entry is homed here, with
+the store, and the other rulebooks point at it (D2). No separate payload: a
+chip that opens onto nothing is an H6 row to register or a citation to fix.
+
+### Baxter positive pattern
+
+> `{"e_id": "E-BCU-057", "tier": "T3", "claim_type": "FACT", "source_name":
+> "CreditUnions.com - Chief Data Officer John Sahagian Deep Interview",
+> "excerpt": "John Sahagian = BCU's first CDO (since July 2018), 25+ year BCU
+> career. Responsible for member data ecosystem, strategy,",
+> "published_date": null, "supports_subcap_ids": ["P4C1.1.1", "P4C1.1.2",
+> "P4C1.1.3", "P4C1.1.4", "P4C1.1.5"]}` — the verbatim excerpt on its
+> tier-coloured rule, the null date carried as null (invariant 9), and the
+> supports chips that jump to the other cells the item backs — a wrong link
+> visible from two directions.
+
+### Anti-patterns
+
+- **pointer / H6's entries** — tool provenance (MEM-0011), tier
+  misclassification (MEM-0087), foreign ids (MEM-0020), the three error
+  states (MEM-0070 + MEM-0074) and registration-with-links (MEM-0079) are
+  homed under H6; this panel is where each one renders.
+- **(no MEM) / DD-2's own contract** — the url must RESOLVE: a drawer whose
+  link 404s is worse than an empty state, because it looks like diligence and
+  is not. Where two items disagree, suppress neither: resolve by
+  T1>T2>T3>T4>T5, recent>older, specific>general, outcome>input, and emit the
+  resolution row; two documents from the same institution are ONE source.
+- **(no MEM) / the spec's ERS divergence** — the prototype renders "ERS 0.78"
+  while the definition is a 1.0–5.0 scale; pick one, state it on the surface,
+  and make the store and the drawer agree — a score with an ambiguous scale
+  cannot be interpreted. `ers` is internal-only either way.
+
+### Exclusion set
+
+H6's boundary, rendered, plus the drawer's own: `tier` and `ers` strip for
+the customer; `discovered_by` strips; the Rationale callout and `ers` are
+marked internal_only so the serve layer can strip them — verify on the
+toggled render, not by reading the code. Customer keys per row are H6's:
+`e_id, source_name, url, excerpt, claim_type, published_date,
+supports_subcap_ids, surfaces`.
+
+### Enrichment pathways
+
+- **Connector.** Register-before-cite is the only door (invariants 2 and 10):
+  every wired facet's finds land here through `register_evidence`, citing the
+  SOURCE the tool surfaced, never the tool — the tool console
+  (vibeprospecting.explorium.ai) is never a citable source, and the tier
+  follows the source per `clay_taxonomy.json`.
+- **Web search.** This drawer runs no queries of its own — it receives every
+  other surface's. The rules that bind hardest here: verbatim 50–500 char
+  span from a document actually read; W6's four refusals (vendor collateral
+  T5; an absence registers as INFERENCE with its ladder; a related entity's
+  filing never evidences operational capability; the one-document 20% cap) —
+  each refusing the LINKS, never the registration; dedup by content hash, so
+  re-registering byte-identical content WITH links moves the links.
+- **Gap-to-pathway.** None of its own — `evidence` reports `empty_required`
+  on H6. A chip that opens an empty drawer for every cell of an entity is a
+  linking failure, not an evidence gap — the zero-unlinked check's territory,
+  answered on H2, not here.
+
 ---
 
 ## H9 · Value-chain view
@@ -388,6 +663,20 @@ Envelope only: `e_ids`, `internal_only`, `narrative_thread`, `produced_at`,
 `r_layer` (never served). The `sources_searched` Logix put in this empty_state
 drops at serve — record derivation probes there for the internal audience if
 useful, but never let the customer-facing `reason` depend on them.
+
+### Enrichment pathways
+
+- **Connector.** None — the arrangement is server-derived from
+  `ccg_value_chains` × `ccg_vc_mapping`, a property of the catalogue for this
+  sub-vertical and version. Nothing external feeds it.
+- **Web search.** None. An empty chain has two causes — a chain never
+  authored, or a derivation fault — and both live upstream of evidence, so no
+  query closes either; the `empty_state` names which cause was established.
+- **Gap-to-pathway.** The section declares `fields: {}`, so
+  `list_enrichment_gaps` emits nothing here. A gap reported against this
+  section was the measured worklist false positive (the `value_chain.fields`
+  fallthrough, since fixed in `shared/enrichment_gaps.py`) — report a
+  recurrence rather than authoring a key to satisfy it.
 
 ---
 
@@ -458,6 +747,27 @@ owner adjudication 2026-08-14: a producer's real reason renders, a probe never
 does. `r_layer` never serves (Baxter and Logix both mark it). Severity, state,
 `evidence_count`, `runs_open`, score and subcap_id serve to the customer.
 
+### Enrichment pathways
+
+- **Connector.** The facet matching the alerted cell's domain: `techstack`
+  (the T1 scan closes platform-family alerts in one pass), `clay` data points
+  per `clay_taxonomy.json` (Tech Stack T1; Open Jobs T2-T3 as the hiring
+  proxy), `first_party` T1-T2 everywhere. A connector find closes an alert
+  the same way a search does: new E-CC ids, state WORKED_FOUND.
+- **Web search.** The ladder IS this surface's method — tiers 1–6 mandatory
+  (direct capability · official document · keyword variant · regulatory per
+  applicable regulator, T1 · technology/platform · sentiment), 7–10 when 1–6
+  yield fewer than 3 items, tier 10 contradictory mandatory per cell. Rules
+  held: entity name in every query, 4–8 words, year markers in two-plus, log
+  every query. Every mint carries a url that resolves and a verbatim 50–500
+  char excerpt asserted byte-for-byte against the fetched text. A negative
+  rung is recorded in `sources_searched`; a 403 is refused-robot and never
+  becomes WORKED_ABSENT.
+- **Gap-to-pathway.** `alerts` emits `empty_required`. The queue itself is
+  the finer-grained worklist: UNWORKED rows name the cells the ladder has not
+  reached, and each `closure_condition` names the artefact that would close
+  it — the pathway is written on the alert.
+
 ---
 
 ## H5 · Safeguard gates
@@ -517,6 +827,19 @@ or numeric ceiling, which the client will not see. `uncertainty_band`,
 serves; `empty_state` serves `{reason, closure_condition}` and its
 `sources_searched` drops.
 
+### Enrichment pathways
+
+- **Connector.** None. `caps[]` is read from the workbook's own cap log and
+  QA verdict — package artefacts, already registered — and `gates[]` is
+  written by the connector at submit. No external source can author either,
+  and a cap invented to explain a low score is the anti-pattern above.
+- **Web search.** None — a gate result cannot be searched into being. The
+  only enrichable material adjacent to this section is the `e_ids` that
+  evidence a cap, and those are the workbook's own cap-log rows.
+- **Gap-to-pathway.** `caps` emits `conditional` — absence is CORRECT when
+  the assessment applied none, so read the cap log before the instruction.
+  `gates` is `not_producer_authored` and the worklist never reports it.
+
 ---
 
 ## H7 · Evidence age tracker
@@ -575,6 +898,23 @@ and `status` here are contract keys and serve; it is the evidence-method class
 (`recency_band`, `tier`, `ers`) that strips elsewhere. `r_layer` never serves;
 `empty_state` serves `{reason, closure_condition}` and Logix's `sources_searched`
 in it drops.
+
+### Enrichment pathways
+
+- **Connector.** None of its own — the tracker ages the citable corpus, and
+  its rows are H6's. What moves this surface is dating, not adding.
+- **Web search.** Date-establishment only: fetch the cited source page itself
+  for its dateline; take the registry copy where one exists — a call report
+  or filing carries its period explicitly, T1; "[source title] [Entity]
+  [year]" to locate the dated original of an undated republication. A date
+  established mints the dated source through `register_evidence`; the undated
+  row stays undated until its own source dates it (invariant 9 — never
+  backfill), and quarter-precision dates ARE dates, resolved to quarter end.
+- **Gap-to-pathway.** `rows`, `undated_pct` and `stale_pct` all emit
+  `empty_required`, and all are computed from the corpus against the pinned
+  `reference_date` — a gap here means the tracker was not computed, never
+  that research is missing. The `undated_pct` roll-up is this surface's
+  handoff to the dating pathway above.
 
 ---
 
@@ -640,3 +980,21 @@ serves. `empty_state` serves `{reason, closure_condition}`; the
 `sub_vertical, category_id, category_name, pattern_statement, affected_count,
 cohort_size, share_pct, threshold_pct, below_threshold, confidence,
 structural_explanation, action`.
+
+### Enrichment pathways
+
+- **Connector.** The corpus only — a cohort is promoted runs of the same
+  sub-vertical, and no connector adds a member. Clay's peer data point serves
+  platform deployments on the tech register (the `peer_scores` facet's note),
+  never a cohort row.
+- **Web search.** None can close an insufficient cohort — only more promoted
+  runs can, which is why the closure_condition names them. The one legitimate
+  check is structural: before calling anything a cohort pattern, read the
+  cohort members' own promoted tech registers for a shared core (for SV9,
+  the FPI / AgVantis / district-bank check is mandatory) — internal reasoning
+  over already-promoted rows, registering nothing on this section.
+- **Gap-to-pathway.** `threshold_pct` and `patterns` emit `empty_required`;
+  `insufficient_cohorts` emits `conditional` — it exists only when a cohort
+  fell below five, so read the corpus size before the instruction. A
+  below-five cohort is answered by `insufficient_cohort: true` and the
+  declared empty state, not by any pathway.

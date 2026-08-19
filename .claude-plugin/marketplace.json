@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "zennify-dma",
   "description": "Zennify Digital Maturity Assessment tooling: the skills, agents and connector that produce and audit DMA Insights surfaces.",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "owner": {
     "name": "Zennify \u2014 DMA Insights build",
     "email": "mishley.otiende@zennify.com"
@@ -12,8 +12,8 @@
       "name": "dma-insights",
       "source": "./plugins/dma-insights",
       "displayName": "DMA Insights",
-      "description": "The six DMA skills, fourteen DMA agents, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector.",
-      "version": "0.4.1",
+      "description": "The six DMA skills, sixteen DMA agents, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector.",
+      "version": "0.5.0",
       "category": "domain",
       "tags": [
         "dma",

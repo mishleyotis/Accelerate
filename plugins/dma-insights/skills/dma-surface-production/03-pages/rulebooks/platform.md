@@ -1,4 +1,4 @@
-# Rulebook: platform · v1 (2026-08-19)
+# Rulebook: platform · v2 (2026-08-19)
 
 This is the platform page's anti-pattern rulebook: the measured record of what
 a promoted platform page looks like when it is right (Baxter, run `c1351d25`)
@@ -196,6 +196,201 @@ peer row or readiness note loses the route, never the name. No colour, no hex,
 no M-code in any prose (invariants 6–7); an invented key drops at serve with
 the drop counted in the receipt (D1, fail-closed).
 
+### Enrichment pathways
+
+Connector pathways (`02-inputs/enrichment_sources.json` facet
+`platform_readiness` — its serving surface IS this section — plus the pack's
+Information sources table): `first_party` (T1-T2, wired) serves the entity's
+own careers pages, filings and announced programmes through
+`register_evidence`; `clay` Open Jobs (T2-T3, wired, producer-session only)
+is the cheapest capability signal — the posting is first-party, the
+aggregator is not, and `02-inputs/clay_taxonomy.json` maps it to "P1
+readiness" by name; `clay` peer platform deployments (T1 per established
+deployment, facet `peer_scores`) serve `peer_deployments`/`peer_coverage`
+under AG-04 — one row per peer, unknowns as `deployed: null`, `source_url`
+and `as_of` on every `deployed: true` row; the register `estate_reach` reads
+is facet `techstack`'s — `explorium` ingest scan (T1, wired, not live) and
+`clay` Tech Stack (T1, wired): a machine technographic scan is T1, never T4;
+filing it at T4 caps the capability at L2.5. `harmonic` (T3) is declared,
+not wired — listing it grants nothing. No connector serves the fit figure:
+`get_platform_fit` answers it and no pathway restates it (CG-31).
+
+Web-search pathways (the dma-research discipline: five signal facets, proxy
+escalation before any absence, this surface's gaps):
+
+- `"[peer] [SI partner] case study [platform area]"` — the pack's richest
+  peer route. Registers as vendor collateral: T5, ceiling L2, corroboration
+  required (W6), whatever tier you type; on the peer row it travels as
+  `source_url` + `as_of` with the basis quoting the verbatim span.
+- `"[peer] selects OR implements OR migrates [vendor] 2019..2026"` — the
+  peer's own newsroom is official disclosure, T2; a search that establishes
+  nothing becomes the `deployed: null` row's basis — a negative search is a
+  ladder rung, never an evidence row.
+- `"[entity] [platform area] engineer OR administrator job posting"` — a
+  T2-T3 demand signal for an ABSENT layer (STEP 3's priority raise);
+  register the posting with a verbatim 50–500 char span before the story
+  cites it.
+- `"[entity] [platform area] RFP OR board commitment OR strategic plan"` —
+  T2 in the entity's own words; the other STEP 3 demand ground.
+- `"[entity] [platform] implementation delay OR failure OR criticism"` —
+  the contradictory facet, R-Layer step B's falsifier; registers only with
+  a resolvable span, and a refused fetch is a rung naming its status code,
+  never a clean record.
+
+Gap-to-pathway: this section emits `empty_required` on `platforms` and
+`discarded` (two required lists; no must-present member and no conditional
+lives here). An empty engine tile set is a CATALOGUE or ingest LOAD DEFECT
+to report (MEM-0049), never a gap a search closes; per-tile holes — an
+unestablished peer row, a missing demand signal — close through the routes
+above; the fit figure closes only through `get_platform_fit`.
+
+---
+
+## DD-11 · Platform tile expansion
+
+Inline expansion from a platform fit tile (component ClientPlatform; the
+Drilldown atlas's inline shell). It renders from the payload the tile
+already holds — the gap rows, `estate_reach`, `peer_deployments`, the
+pathway prose — and fetches nothing, so everything the panel can ever show
+is written under P1's contract. The Spec gives it no separate prompt; this
+entry pins what the expansion reads.
+
+### Baxter positive pattern
+
+The pathway prose connects the peer's route to THIS client's cells, and the
+commercial third sentence lives elsewhere (`zennify_pathway`, marked):
+
+> "BCU already holds the Salesforce side of that route across nine detected
+> products; what is missing is the connectivity layer between them and the
+> Symitar core, which is why Technology Roadmap & Investment Planning and EA
+> Framework & Governance sit in the Building band while the applications
+> above them are in place." (`integration_pathway`, rank-1 tile)
+
+The peer synthesis scopes the share to the breakdown:
+
+> "One of five peers is established on this platform area and four are not,
+> so the share is stated as one established case rather than a trend."
+> (`peer_synthesis`, rank-1 tile)
+
+A gap row with no peer figure says why, on the row:
+
+> "The locked peer set is benchmarked at category grain, so no peer figure
+> exists for this cell; the category comparison is stated on the workbook
+> surface instead." (`gaps[0].peer_note`, with `peer_basis:
+> "cannot_estimate"` and `peer_score: null` — the null carries its basis)
+
+Shape notes, measured: this expansion is where MEM-0068's blanks rendered,
+so the check is visual — open the expanded tile and read the gap table, the
+reach counts and every peer row; a `deployed: null` row must read as a
+searched absence, not a blank. Logix's five tiles carry no `estate_reach`,
+no `peer_deployments` and no `integration_pathway` at all — under-filled
+tiles, not a second legal shape.
+
+### Anti-patterns
+
+- **MEM-0068 (measured on this panel, badged under P1)** — 25 cited peer
+  rows rendered zero times and 28 gap rows read as blanks; the panel's half
+  of the rule: after promotion the producer opens the EXPANDED tile, because
+  a tile face can look whole over an empty expansion.
+- **MEM-0003 (badged under P1)** — five tiles promoted as one: the client
+  clicked the other four expansions and found them empty; count the expanded
+  tiles on the served page, not the tiles in the payload.
+- **RC6 (measured on Logix, badged under P1)** — catalogue codes inside
+  expansion strings ("[L3-DB-MLFLOW] MLflow (Databricks-managed)") spend the
+  reader's attention on grammar; sayable names in `platform` and `l3_area`,
+  codes in `catalogue_path`, which the renderer resolves.
+
+### Exclusion set
+
+The panel renders P1's payload, so P1's exclusion set governs whole:
+`platforms[*].zennify_pathway` marked in `internal_only` (and stripped by
+`CUSTOMER_ALWAYS` regardless), `r_layer` never served to any audience,
+probe, method and cap key classes dropped from the customer body at any
+depth. Nothing panel-specific exists to add — which is the point: a field
+written for the expansion is still a P1 field and carries P1's marks.
+
+### Enrichment pathways
+
+The panel fetches nothing (Drilldown contracts: every panel renders from the
+page response), so its pathways are P1's, scoped to what the expansion
+shows: peer rows close through the peer routes (facet `peer_scores`, with
+W6's T5 rule on vendor and SI collateral), reach counts through the register
+(facet `techstack`, T1 and never T4), demand signals through `clay` Open
+Jobs (T2-T3). It emits no `list_enrichment_gaps` kinds of its own — the
+worklist is computed per section field — so a hole here surfaces as
+`platform_story`'s `empty_required` or as a held field whose reason is the
+content.
+
+---
+
+## DD-13 · Readiness gate expansion
+
+Inline expansion from a prerequisite gate row (component ClientPlatform; the
+Spec's P1 drilldown — "Readiness · click a row to drill in", rows expanding
+to BACKING SUBCAPS with their scores). It renders the readiness objects P1
+and P2 already carry; no separate prompt, no separate fetch.
+
+### Baxter positive pattern
+
+The verdict is a measurement with its arithmetic on the row:
+
+> "READY WITH CONDITIONS" (`readiness.verdict`, rank-1 tile) — backed by
+> `prerequisite_cells: [{cell: "P4C3", current: 2.19, minimum: 2.0,
+> verdict: "MET"}]`, the same cell and threshold REC-001's
+> `validation_gate` states, so the gate row and the modal cannot disagree.
+
+What is already true opens the panel, cited:
+
+> "The category threshold this recommendation gates on, Technology
+> Architecture & Integration at 2.0, is met at 2.19. Senior platform
+> engineering hiring is live, which is the capacity signal a first-phase
+> integration build needs." (`readiness.already_true`, excerpted)
+
+What must be true first is a condition with its reason:
+
+> "The core contract position has to be confirmed before the connector
+> scope is fixed, because the packaged connector is a vendor artefact and
+> its coverage of BCU's own core configuration is not established in this
+> run." (`readiness.must_be_true_first`, excerpted)
+
+### Anti-patterns
+
+- **9-antipatterns §7 (measured on Logix, badged under P2)** — prerequisites
+  written as plain strings rendered "no readiness gate applies" over nine
+  real gates; the panel reads two object shapes — `{cell, minimum, current,
+  verdict}` and `{condition, note, basis}` — and readiness reasoning lives
+  ONLY in the condition's `note`.
+- **one gate, two spellings (measured on the two payloads, badged under
+  P2)** — Baxter serves `{threshold, current_value, backing_cells[].score}`,
+  Logix `{condition, backing_cells[].served}` with no current value at the
+  gate level; emit the reference shape, because the panel reads one.
+- **(measured on Logix, badged under P1)** — a gate expansion with no
+  per-tile `r_layer` behind it is one argument wearing five hats; each tile
+  carries its own trace, and the gate's reasoning resolves to it.
+
+### Exclusion set
+
+The parent sections' sets govern (P1's and P2's); nothing panel-specific
+serves or strips. The condition `note` is client-facing prose: no cap
+vocabulary, no M-codes, and the threshold speaks in scores ("P4C3 >= 2.0 —
+met at 2.19"), which is the panel's whole vocabulary.
+
+### Enrichment pathways
+
+A gate's verdict is pack arithmetic — no connector and no search moves
+`current` against `minimum`. The enrichable input is the condition's
+evidence: hiring capacity (facet `platform_readiness`: `clay` Open Jobs,
+T2-T3 — Baxter's `already_true` closes on a live-hiring signal) and named
+ownership (facet `leadership`: `first_party` proxy statements and
+leadership pages, T1-T2; `clay` contact routes, T2-T3, with the
+title-must-match identity rule). Query pattern: `"[entity] [platform]
+engineer OR architect hiring"` → T2-T3, registered with a verbatim 50–500
+char span before the note cites it; a condition no search can establish
+stays `basis: "Not established"` with the ladder recorded — a negative
+search is a rung, never an evidence row. Emits no `list_enrichment_gaps`
+kinds of its own; holes surface under `platform_story` and
+`recommendations`.
+
 ---
 
 ## P2 · Recommendations
@@ -310,6 +505,112 @@ the customer body. `empty_state` serves `{reason, closure_condition, closure,
 kind}` only; searches go in `sources_searched` knowing they drop at the
 customer boundary.
 
+### Enrichment pathways
+
+Connector pathways: no facet in `02-inputs/enrichment_sources.json` serves
+this section directly — the rows are the analyst's own, from
+`recommendations_detail.json` and the workbook (the pack's Information
+sources table), never enriched into existence. The inputs the contract makes
+the producer ground travel facet `why_now`'s routes: `first_party` press
+releases and filings (T1, wired) for the dated event itself; `clay` Recent
+News (T3, wired), Latest Funding (T1-T2 when a filing is behind it —
+otherwise an inference, the tier follows the source) and Open Jobs (T2-T3);
+`quartr` (T1-T2) and `moodys` (T2-T3) are declared, not wired — listing
+grants nothing. `kpi_triple.baseline` is a pack figure with an `as_of`; a
+connector value with no traceable source is an inference and cannot be one.
+
+Web-search pathways (each closing a named contract requirement):
+
+- `"[entity] [regulator] deadline OR effective date 2025..2027"` — a dated
+  regulator milestone, T1 from the regulator's own page; register the order
+  or rule with a verbatim 50–500 char span before `cost_of_inaction` cites
+  it.
+- `"[entity] core OR platform contract renewal OR expiry"` — T2 from the
+  entity's own disclosure, T3 from trade press; a migration date already in
+  evidence grounds the horizon.
+- `"[peer] [platform area] implementation results 2023..2026"` — a peer
+  trajectory; the peer's own newsroom is T2, vendor or SI collateral is T5
+  with corroboration required (W6).
+- `"[entity] board OR strategic plan commitment [capability]"` — T2; a
+  stated board commitment is one of the contract's five grounding classes.
+- When every route misses, "No dated trigger established" IS the content
+  (Logix REC-1 and REC-5 are the exemplar); the misses are ladder rungs,
+  recorded, never evidence rows — an absence registers as INFERENCE with its
+  ladder, never as a FACT about urgency (W6).
+
+Gap-to-pathway: this section emits `empty_required` on `recommendations`
+only (one required list; no must-present member, no conditional). Per-item
+holes — a null KPI baseline, an ungrounded cost — never reach the worklist:
+they are held fields whose stated reason is the content, and the routes
+above are how the reason gets to say something dated.
+
+---
+
+## DD-4 · Recommendation
+
+Modal from a recommendation row (component RecommendationModal) — the
+card-to-detail drill, with DMA impact, Root cause & evidence and Sequencing
+tabs plus the dependency map. It renders the P2 row whole; the Spec gives it
+its own prompt, and S32_rec_detail is its gate.
+
+### Baxter positive pattern
+
+The sequencing tab's reason is the dependency that fixes the position:
+
+> "Phase one because nothing else in the plan starts cleanly without it:
+> the member-data layer, the onboarding flow and the orchestration work all
+> name it as their own predecessor." (`sequencing_reason`, REC-001)
+
+The KPI baseline is a pack figure with its date:
+
+> "0 of more than 200 technologies scanned" (`kpi_triple.baseline`,
+> REC-001, with `baseline_as_of: "2026-03"`)
+
+An impact target names itself a projection on the row the tab renders:
+
+> "Projection: the assessment's stated uplift for Technology Architecture &
+> Integration at its low end, applied to this cell — a projection, not a
+> measurement" (`dma_impact[0].target_basis`, REC-001)
+
+Shape notes, measured: `dependencies: []` on REC-001 is a true root, not an
+omission — the dependency map draws from it; every `dma_impact` row's
+`current` equals the heatmap's serve within 0.05, which is what lets the
+impact tab's arithmetic be checked from the modal itself.
+
+### Anti-patterns
+
+- **MEM-0001 / AG-03 + CG-13 (badged under P2)** — the modal is where a
+  validated-then-dropped field becomes visible: after promotion open the
+  modal and confirm `root_cause`, `cost_of_inaction`, `kpi_triple` and
+  `validation_gate` actually arrived; the panel promising detail it does
+  not carry is the measured shape of this class.
+- **invariant 8 (measured on REC-001, badged under P2)** — a duplicated
+  evidence id inflates `grounded_on`, and the modal prints that count;
+  each id once per list, deduped before emitting.
+- **S32_rec_detail** — a DERIVED row presented as analyst judgement in the
+  modal's provenance line; the line renders on the internal view only and
+  is still required at submit.
+
+### Exclusion set
+
+P2's customer-audience allowlist is the modal's: `{rec_id, title, l3_area,
+l4_feature, phase, dma_impact, root_cause, evidence_ids, cost_of_inaction,
+prerequisites, dependencies, sequencing_reason, effort_band, kpi_triple,
+validation_gate, claim_label}` plus the envelope; `provenance` is the
+excluded method class, internal view only; no cap vocabulary or M-codes in
+the two prose tabs.
+
+### Enrichment pathways
+
+The modal fetches nothing; P2's routes close its tabs — the dated trigger
+behind `cost_of_inaction` (facet `why_now`: `first_party` T1; `clay` Recent
+News T3, Latest Funding T1-T2 when a filing is behind it), the peer
+trajectory (peer newsroom T2; vendor or SI collateral T5 with corroboration
+required, W6). A KPI baseline never comes from a search — it exists in the
+pack with an `as_of` or the triple says so in plain words. Emits no
+`list_enrichment_gaps` kinds of its own; holes surface as
+`recommendations`' `empty_required` or as held fields whose reason renders.
+
 ---
 
 ## P2b · Conversation starters
@@ -419,6 +720,43 @@ it drops the row out of its filter, AG-05). Probe ladders stay in
 both) and drop at the customer boundary; the `reason` is what the customer
 reads, so write it as real information, not workflow status.
 
+### Enrichment pathways
+
+Connector pathways, one per opening shape's input: `their_system_reference`
+reads the run's own register — facet `techstack` (`explorium` scan T1,
+wired, not live; `clay` Tech Stack T1, wired — a machine technographic scan
+is T1, never T4; `first_party` platform statements T1-T2). The their-words
+opener quotes O12 — facet `thought_leadership` (`clay` Find Thought
+Leadership T2-T3 — T2 for a first-party publication or named conference, T3
+for trade press, per `02-inputs/clay_taxonomy.json`; `first_party` newsroom
+and trade-press rungs T1-T2; `quartr` transcripts T1-T2, declared, not
+wired). `peer_reference` — facet `peer_scores`, `clay` peer deployments (T1
+per established deployment): a NAMED institution with a DATED action or the
+field is omitted (MEM-0086's rule).
+
+Web-search pathways:
+
+- `"[executive] [entity] keynote OR interview OR podcast 2024..2026"` — the
+  their-words opener's source; T2 for a first-party publication or named
+  conference, T3 for trade press; the registered span is the verbatim
+  sentence itself (50–500 chars), and a broken excerpt drops the shape —
+  never repair a quote into fiction.
+- `"[peer] [action] announcement [year]"` — dates the peer opener; T2 from
+  the peer's own newsroom, T3 trade press; cite the span that carries the
+  figure, never the container (MEM-0086).
+- `"[entity] [system] migration OR rollout OR go-live"` — grounds the
+  system opener in the register's own facts at T1-T2; a vendor release
+  about the entity is T5 and requires corroboration (W6).
+- The contradiction opener adds no search class of its own — both facts
+  must already be registered evidence of THIS run, or the opener cannot
+  cite and is replaced with a different shape (the prompt's REJECT); the
+  searches that failed a shape are ladder rungs, never evidence rows.
+
+Gap-to-pathway: this section emits `empty_required` on `starters` only —
+and MEM-0060 is the reason the kind matters: `[]` passes every gate and the
+surface vanishes, so the pathway answer is items or a declared
+`empty_state`, decided deliberately, never silence.
+
 ---
 
 ## P3 · Transformation roadmap
@@ -499,6 +837,41 @@ lower-case — a capitalised value silently drops the row out of its filter.
 Metrics quoted in a rationale come from THIS run and resolve to their named
 cell; no M-code or cap vocabulary in phase prose. `empty_state` serves
 `{reason, closure_condition, closure, kind}` only.
+
+### Enrichment pathways
+
+Connector pathways: the phases come from `recommendations_detail.json` plus
+the assessment report, and any metric quoted comes from THIS run's workbook
+(the pack's Information sources table) — no facet in
+`02-inputs/enrichment_sources.json` serves this section directly. The one
+enrichable input is the timing constraint sequencing carries: an integration
+in flight or a migration date already in evidence, which travel `clay`
+Recent News (T3 — recorded against O3 and C5 in
+`02-inputs/clay_taxonomy.json`, reaching this page through the acquisitions
+and why-now surfaces) and `first_party` disclosures (T1-T2).
+
+Web-search pathways (searches date constraints; they never invent an order):
+
+- `"[entity] conversion OR cutover timetable [year]"` — dates a phase
+  boundary; T2 from the entity's own disclosure; the intention-vs-completion
+  probe applies, because a vendor release describing an intention fixes no
+  date.
+- `"[entity] [vendor] migration completion OR go-live"` — T2-T3; a
+  mid-migration platform is a timing constraint on everything downstream of
+  it, carried into the phase whose rationale names it.
+- `"[regulator] [rule] effective date"` — T1; fixes a statutory phase's
+  horizon (Baxter's statutory-analytics phase turns on one).
+
+Every result registers with a verbatim 50–500 char span before a rationale
+quotes it; a search that dates nothing is a ladder rung, never an evidence
+row. The order itself never comes from search — prerequisites determine it,
+or `sequencing_basis: undetermined` is emitted with the phases unordered.
+
+Gap-to-pathway: this section emits `empty_required` on `phases` and on
+`sequencing_basis` (no must-present member, no conditional). Neither closes
+by searching: `phases` closes from the recommendation set this payload
+already describes, and `sequencing_basis` closes by saying which basis
+ordered them — including the honest `undetermined`.
 
 ---
 
@@ -583,3 +956,37 @@ band words). `empty_state` serves `{reason, closure_condition, closure,
 kind}`; the searches that established a non-derivable ladder go in
 `sources_searched`, which drops at the customer boundary — the `reason` is
 what the client reads.
+
+### Enrichment pathways
+
+Connector pathways: the ladder is pack arithmetic — workbook current scores
+plus the roadmap (the pack's Information sources table) — and
+`blocking_findings` ⊂ the findings the pack serves, so no connector and no
+search may mint one (a blocker invented for the ladder is a fabrication). No
+facet in `02-inputs/enrichment_sources.json` serves this section; what the
+register contributes (theme scoping, effort consistency) arrives through the
+techstack and platform surfaces, already registered at their own tiers.
+
+Web-search pathways (bounded — searches inform the ladder's honesty; they
+never populate its steps):
+
+- `"[entity] [system] go-live OR completion [year]"` — T2; dates the work
+  behind a step's `effort_band` so it stays consistent with the platform
+  page's effort profile.
+- `"[entity] [theme] failure OR outage OR criticism"` — the contradictory
+  facet run against the theme's step claims; registers only with a
+  resolvable verbatim span, and a refused fetch is a rung with its status
+  code.
+- `"[entity] [theme] program OR initiative announcement"` — T2-T3;
+  corroborates the `unlocks` framing in client outcomes without entering
+  the ladder — the steps stay derived from cells and findings.
+
+A non-derivable ladder's empty state names what was searched
+(`sources_searched`), and every miss is a rung, never an evidence row — a
+negative search registers as the absence's ladder, not as a row (W6).
+
+Gap-to-pathway: this section emits `empty_required` on `ladder` only. The
+kind's honest closures are two: a ladder derived from the served scores and
+the pack's findings, or a STATED empty state ("no ladder is derivable
+because …") — S33 is the class where neither shipped, and no search closes
+it because the absence was the exporter's, not the evidence's.

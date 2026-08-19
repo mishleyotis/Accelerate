@@ -1,4 +1,4 @@
-# Rulebook: context · v1 (2026-08-19)
+# Rulebook: context · v2 (2026-08-19)
 
 The context page's anti-pattern rulebook: what a promoted context page looks like
 when it is right (Baxter, run `c1351d25`) and the measured failures that reached
@@ -124,6 +124,108 @@ claim_label, e_ids}`, `storyline`, `arc_shape`, `verified_sparse` and
 the drop counted (D1, fail-closed). No cap or M-code vocabulary in `body` or
 `storyline`: a ceiling is stated as its arithmetic ("held at a 3.0 ceiling for
 24 months"), never as a rubric code.
+
+### Enrichment pathways
+
+Connector pathways: the Information sources table names the section's inputs
+as "Research workbook + enrichment", and no Clay data point is recorded
+against C1 in `02-inputs/clay_taxonomy.json` — Recent News (T3) maps to O3
+and C5 — so an event a connector surfaces reaches this section only by
+registering the underlying SOURCE through `register_evidence`, never the
+tool (MEM-0011). The load-bearing routes are `first_party` (wired through
+`register_evidence`): the entity's own newsroom and annual reports at T1-T2,
+and regulator actions with dates at T1.
+
+Web-search pathways (the prompt's STEP 2 made concrete — enrichment is
+mandatory here, because the package rarely holds more than a handful of
+dated events):
+
+- `"[entity] selects OR implements OR migrates [vendor] 2019..2026"` —
+  platform events; the entity's own release is T2; the VENDOR's release
+  about the entity is T5 needing corroboration (W6), and it describes an
+  intention until a second source dates the completion.
+- `"[entity] names CIO OR CTO OR CDO"` — leadership events that moved
+  technology; T2 from the entity's own announcement, T3 trade press.
+- `"[entity] enforcement OR consent order [regulator] [year]"` — dated
+  regulator actions, T1; the same dated fact hands to C2 and O3 with the
+  same date.
+- `"[entity] annual report [year] digital OR technology initiatives"` — one
+  year per query, five years back; T1-T2.
+- `"[entity] app store release history first release redesign"` — T3; dates
+  channel inflections.
+
+Every mint carries url + verbatim 50–500 char span + retrieval date; an
+undated find is EXCLUDED, never rendered "ongoing"; a year searched and
+yielding nothing is a ladder rung, never an evidence row; fewer than 3 dated
+events → `verified_sparse: true` and no arc from two points.
+
+Gap-to-pathway: this section emits `empty_required` on `events` and
+`empty_optional` on `storyline` and `arc_shape`; `verified_sparse` is a
+boolean whose absence is its value and is never reported as a gap. The
+routes above close `events`; `storyline` and `arc_shape` close only from
+the events already emitted (G6: an arc needs ≥3 dated points), so no search
+closes them directly.
+
+---
+
+## DD-7 · Event detail
+
+Inline expansion from a timeline event (component EventDetail). The panel
+renders the event row C1 already carries — no separate fetch — so a drawer
+with "no depth" is a C1 authoring defect wearing the panel's name.
+
+### Baxter positive pattern
+
+The body says what changed and what it replaced or enabled, and the effect
+clause completes the badge:
+
+> "The twenty-five-year core relationship was extended onto the vendor's
+> cloud platform, with the chief technology officer on record about growth
+> and continuity." (`body`, the 2025-04 PLATFORM event)
+
+> "ADVANCED — The core is no longer the constraint; the integration layer
+> above it is." (`maturity_effect` on the same event — one clause, and it is
+> a claim about the assessment, not about the news)
+
+Shape notes, measured: the panel's capability chip resolves
+(`capability_ids: ["P4C3.1.1"]` on the event above); every `e_id` opens the
+evidence drawer for THIS run; `claim_label` present per event; the signal
+badge and the `maturity_effect` clause render together because they are one
+claim (AG-05).
+
+### Anti-patterns
+
+- **(measured, the pack — badged under C1)** — a `body` that restates its
+  title opens a panel that says nothing twice; 25–45 words of what changed
+  and what it replaced or enabled, or the event does not carry a panel
+  worth opening.
+- **(no MEM) / the Spec's own requirement** — a signal badge without its
+  consequence sentence is incomplete: the panel spells out the score
+  effect, and a badge over a sentence arguing a different direction is the
+  AG-05 disagreement measured on a promoted run (badged under C1).
+- **(no MEM) / measured (the pack, badged under C1)** — `body`,
+  `maturity_effect` and `capability_ids` were promoted and displayed by
+  nothing; after promotion, open one event on the served page and read the
+  panel — the payload being right is not the panel being right.
+
+### Exclusion set
+
+C1's whole-page rule governs: the context page is withheld from the customer
+audience whole, and `r_layer` is marked at the section level regardless. The
+event row's keys are all client-facing if the page ever stops being withheld
+(C1's projection list); no cap or M-code vocabulary in `body` or
+`maturity_effect` prose.
+
+### Enrichment pathways
+
+The panel fetches nothing; C1's routes close its holes, scoped so: an event
+whose `capability_ids` is empty is not enriched into bearing — it is removed
+(a rebrand is not a digital-evolution event); an imprecise `event_date`
+closes through the dated release or annual-report queries, and dating
+honesty stands — the event marks when the change is first evidenced if no
+source states the switch date (the Lumin event under C1 is the exemplar).
+Emits no `list_enrichment_gaps` kinds of its own; holes surface as
+`timeline`'s `empty_required` on `events`.
 
 ---
 
@@ -256,6 +358,107 @@ severity, status, opened_on, resolved_on, rationale, linked_subcap_ids,
 capped_subcap_ids, e_ids}` (minus excluded classes) and `empty_state{reason,
 closure_condition}`.
 
+### Enrichment pathways
+
+Connector pathways: the register is authored from the workbook's Issue Time
+Map and Severity Cap Impact report sections plus enrichment — never
+concluded absent from `bundle.issues == []` (MEM-0049). The Clay custom that
+`02-inputs/clay_taxonomy.json` names under `gaps` — "regulatory filings and
+enforcement mentions" — is a Custom data point: tier of whatever it returns,
+read the source before assigning. The registries themselves are
+`first_party` sources registered at T1 through `register_evidence`; the
+entity's own disclosures about a matter are T2.
+
+Web-search pathways:
+
+- `"[entity] consent order OR enforcement action [regulator]"` — T1, the
+  regulator's own order page, never an aggregator or the tool that surfaced
+  it (MEM-0011).
+- `"[entity] data breach notification [state] attorney general"` — T1;
+  Baxter's ISS-002 ladder names the Illinois register by name.
+- `"[entity] lawsuit OR litigation [matter keywords]"` — court records T1,
+  trade press T3; a filing the entity made about the matter is T2.
+- `"[entity] Consumer Financial Protection Bureau complaint database"` —
+  T1; a hit count is context, not a matter — one row per MATTER stands.
+
+The search that established a date absence is repeated in `rationale`,
+because the basis field is validated at submit and not persisted
+(MEM-0001); a registry that returns 403 is a rung naming its status code,
+never a clean record (MEM-0074); and enrichment's measured effect here is
+four one-citation rows becoming two-to-five citations each — the added ids
+are what let a rationale argue rather than assert.
+
+Gap-to-pathway: this section emits `empty_required` on `issues`;
+`verified_absent` is a boolean and never reported as a gap. "No matters
+found" closes the kind only as a finding — the registries searched and
+named in the declared `empty_state` — never as silence.
+
+---
+
+## DD-8 · Issue detail
+
+Inline expansion from an issue register row's Gantt bar (component
+IssueDetail). It renders the issue row C2 carries — the rationale, the
+linked cells and the caps table ("CAPS PLACED BY THIS ISSUE · 3" with the
+capped cell and its level) — and fetches nothing.
+
+### Baxter positive pattern
+
+The panel's argument names the layer, not the score (Logix carries the
+richest served exemplar):
+
+> "What neither store listing nor any other retrievable source shows above
+> it is a way for a member to ask a question and be answered: no
+> conversational assistant, no proactive prompt and no published complaint
+> path in the channel. The issue is the layer above a working channel, not
+> the channel." (Logix IR-003 `rationale`, excerpted)
+
+A cap the panel can read is `{subcap_id, cap_level}` per entry — IR-003 caps
+`P2C3.2.6` at `M1` and links `P2C3.2.1`, `P2C3.2.6`, `P2C3.7.3`, so the
+drilldown opens onto cells that resolve. Baxter's served issues carry
+`linked_subcap_ids` on every row (6 · 6 · 5 · 4) and no `capped_subcap_ids`
+key at all — the run pre-dates migration 0027's writer binding (MEM-0002,
+badged under C2) — so the reference client under-fills this panel; emit the
+caps.
+
+Shape notes: title-only is the honest thin shape — the measured IS-018
+expansion of 104 characters is correct behaviour, not a defect, because 228
+of 236 bare register rows had genuinely nothing behind them.
+
+### Anti-patterns
+
+- **9-antipatterns §7 (badged under C2)** — `capped_subcap_ids: [{...}]`
+  read as a list of ids rendered `[object Object]` three times; write
+  `{subcap_id, cap_level}` — the shape the serving layer reads — and look
+  at the rendered panel.
+- **MEM-0002 (badged under C2)** — the caps validated at submit and null on
+  the served row; after promoting, expand one bar and confirm the caps
+  table arrived.
+- **(no MEM) / measured (the pack, badged under C2)** — 4 of 5 issues with
+  no capability linkage rendered "This matter names no capability cell" on
+  every drilldown; two lists, two claims, and the rationale says which
+  applies.
+
+### Exclusion set
+
+Page withheld whole for the customer audience; even so,
+`capped_subcap_ids[].cap_level` is the cap-keys excluded class (measured
+escape: `cap_level='M3'` on Logix's served register, badged under C2), so
+ceilings state as score arithmetic in `rationale` and the M-code stays
+inside the caps list. Per-item `provenance` is method vocabulary, internal
+only.
+
+### Enrichment pathways
+
+The panel fetches nothing; C2's registry routes close its holes, and the
+measured effect of enrichment on this panel is the rationale's ability to
+argue (four one-citation rows to two-to-five each, badged under C2). A
+matter whose only basis is a bare register row stays title-only — composing
+a rationale to fill the panel is the guarded-against failure, and the
+frontend guards each field independently for exactly this reason. Emits no
+`list_enrichment_gaps` kinds of its own; holes surface as
+`issue_register`'s `empty_required` on `issues`.
+
 ---
 
 ## C3 · Regulatory standing
@@ -363,6 +566,48 @@ opened_on, status, summary, remediation_status, e_id}` in the customer
 projection — `capped_subcap_ids` on an action carries the cap class rules from
 C2.
 
+### Enrichment pathways
+
+Connector pathways: the regulator's OWN registry is the source of truth for
+every identity field (the pack's Information sources table) — a
+`first_party` source registered at T1 through `register_evidence`. The
+absence ladder is the protocol's Regulatory-standing rung set: the
+regulator's enforcement database → the second regulator where
+dual-chartered → consent-order trackers → the entity's own disclosures
+(`01-start-here/4-absence-protocol.md`), with the entity-shape replacement
+rungs — state licence registries, NAIC's producer database, SEC IAPD or
+FINRA BrokerCheck — where the entity files nothing prudential. The Clay
+custom "regulatory filings and enforcement mentions"
+(`02-inputs/clay_taxonomy.json`, `gaps`) is a Custom data point: tier of
+whatever it returns.
+
+Web-search pathways:
+
+- `"[regulator] locator charter [number]"` — the charter lookup by NUMBER,
+  T1; identity is verified by charter number / CIK / RSSD, never by name
+  (MEM-0020), and Logix's charter-1999 verification is the exemplar.
+- `"[regulator] administrative orders index [entity]"` — T1; a rung that
+  did not complete is recorded as exactly that, with its status code —
+  never as a rung that found nothing (MEM-0074).
+- The same enforcement sweep under EVERY brand name the entity operates —
+  a verified absence that names one of seven brands is not a verified
+  absence (MEM-0038).
+- `"[state regulator] enforcement [entity]"` — the rung Baxter's own
+  counter records as its verification bound; running it is how the ladder
+  stops having to state that limit.
+
+An absence registers as INFERENCE with its ladder, never as a FACT about a
+control (W6 — rephrasing it positively is the same span, refused the same
+way); `absence_of_enforcement.verified: true` requires the registries
+actually searched.
+
+Gap-to-pathway: this section emits `empty_required` on each of its seven
+required fields — `primary_regulator`, `additional_regulators`,
+`license_type`, `jurisdictions`, `charter_date`, `enforcement_actions`,
+`absence_of_enforcement` (no must-present member, no conditional). Every
+one closes through the registry routes above; none closes through prose,
+and an identity mismatch closes nothing — it quarantines the card.
+
 ---
 
 ## C4 · Sentiment overview
@@ -463,6 +708,106 @@ leak in waiting, not just a reconciliation defect. Tile rows keep `{source,
 rating, scale, n, as_of, url, e_id, note}` in the projection; no `tier`, `ers`
 or `recency_band` on a row — recency is expressed through `as_of` and the
 18/36-month reading rules, not through method vocabulary.
+
+### Enrichment pathways
+
+Connector pathways (`02-inputs/enrichment_sources.json` facet `sentiment`,
+whose serving surface is `overview.sentiment` — which is the point: O9 owns
+the dataset and C4 projects it, so enrichment lands on O9 first):
+`first_party` (T1-T2, wired) — client-satisfaction surveys the firm
+publishes itself, and retrievable ratings carrying sample size, scale and
+date; `clay` news sentiment (T3, wired) — one route of several, never
+review-site depth; Glassdoor, Indeed and ZipRecruiter all 403, so a value
+from that route is an inference with its route named, or it is omitted. A
+figure this page adds that O9 does not carry is a reconciliation defect
+(MEM-0071), whatever route delivered it.
+
+Web-search pathways (the prompt's seven source families, run for O9 and
+projected here):
+
+- `"[entity] mobile banking app store ratings"` — T3; a row renders a
+  number only with `rating`, `scale`, `n` and `as_of`.
+- `"site:greatplacetowork.com [entity]"`, then Comparably, Built In and the
+  entity's own culture pages — the reachable employer sources after the 403
+  wall; T2-T3; a disclosed limit (a percentage with no response count) goes
+  in the note, not in a dropped row.
+- `"[entity] Consumer Financial Protection Bureau complaint narratives"` —
+  T1; a complaint index is context, not a rating — no scale, no sample, so
+  ladder or note, never a tile number.
+- One query per named cohort peer's app rating — T3; each note says it is
+  context for the named cell, not a cap.
+
+A source that refuses the verifier's fetch is a rung, not an `e_id` — the
+WalletHub row was withheld for exactly this, and MEM-0089 covers the
+entity's own domain refusing while the direct fetch succeeds; every rated
+row registers with the verbatim span carrying the figure (50–500 chars).
+
+Gap-to-pathway: this section emits `empty_required` on `context_tiles`
+only. SG-S8 counts rated rows itself, so the pathway answer to thinness is
+the ladder run and disclosed — never a synthesised audience, never an
+unrated row promoted into a tile.
+
+---
+
+## DD-12 · Sentiment tile expansion
+
+Inline expansion from a sentiment context tile (component
+SentimentGridInteractive). It renders the tile's rows — `{source, rating,
+scale, n, as_of, url, e_id, note}` — and the `note` is the expansion body,
+the reason the surface exists. No separate fetch.
+
+### Baxter positive pattern
+
+A self-published figure renders with its limits, not as a finding:
+
+> "Self-published and carries no sample size, so it is corroboration at
+> best and renders without a sample figure. It does not move a cell on its
+> own; it is consistent with the App Store reading of P2C1.1.1." (the Net
+> Promoter Score row's `note`, customer tile)
+
+A cohort row ends by naming the cell and the direction:
+
+> "Named cohort member. The four established peers run a median of 4.57
+> against this institution's 4.87 on a far larger base, so the channel
+> leads its cohort. Read as context for P2C1.1.1, which it does not cap."
+> (a market-tile row `note`)
+
+Shape notes, measured: every rendered number carries `rating`, `scale`, `n`
+and `as_of`, or the note discloses the missing one and why; the chip's
+`e_id` resolves for this run; `scale` is the string the renderer reads —
+Baxter's three are "1-5 stars", "0-100 % of employees agreeing" and "Net
+Promoter Score -100..100" — not a bare numeral.
+
+### Anti-patterns
+
+- **9-antipatterns §7 (badged under C4)** — `"scale": 5` parsed only as the
+  string `"0..5"` drew five grey rails over five real ratings on Logix's
+  served C4; write the shape the renderer reads and look at the rendered
+  tile.
+- **(no MEM) / the prompt's own floor** — a note that restates the star
+  rating is not analysis; 25–55 words distinguishing the cause, ending on
+  the named cell and its cap state.
+- **MEM-0001's class (badged under C4)** — a hardcoded prototype fixture
+  rendered under a real client's name with chips that resolved to nothing;
+  expand each tile after promotion and click a chip.
+
+### Exclusion set
+
+Page withheld whole for the customer audience; the tile ladder
+(`sources_searched`) is a probe class and strips regardless. The numbers
+are O9's — a figure this expansion shows that O9 does not serve is an
+audience leak in waiting (C4's entry). Row keys `{source, rating, scale, n,
+as_of, url, e_id, note}` in the projection; no method vocabulary on a row.
+
+### Enrichment pathways
+
+The panel fetches nothing, and its dataset is not even C4's — it is O9's,
+projected. Closing a hole in this expansion means enriching O9 (facet
+`sentiment`: `first_party` T1-T2; `clay` news sentiment T3, never
+review-site depth) and re-projecting by `e_id` and `rating`. Emits no
+`list_enrichment_gaps` kinds of its own; holes surface as
+`context_sentiment`'s `empty_required` on `context_tiles`, or on the
+overview page as O9's own.
 
 ---
 
@@ -569,3 +914,163 @@ record"), never a workflow status word (9-antipatterns §9). Rows keep
 affected_subcap_ids, maturity_effect, effect_note, e_ids}` in the customer
 projection — no `tier`, `ers`, `provenance` or `discovered_by` on a row, and
 no M-code vocabulary in `effect_note`.
+
+### Enrichment pathways
+
+Connector pathways: `clay` Recent News (T3) is recorded against C5 by name
+in `02-inputs/clay_taxonomy.json`, and the absence ladder is the protocol's
+Acquisitions rung set — Clay Recent News → company newsroom → the wire
+archive → the regulator's approval notices
+(`01-start-here/4-absence-protocol.md`). The sources those rungs reach carry
+their own tiers at registration: regulator approval notices T1, the
+acquirer's own newsroom T2, the target's final filings T1-T2, trade press
+T3.
+
+Web-search pathways (M&A is public and dated, so silence is not evidence):
+
+- `"[entity] acquires OR merger OR acquisition OR purchases branches
+  2019..2026"` — T2 from the acquirer's release, T3 from trade press;
+  announced-but-not-closed is a SEPARATE row with its own date.
+- `"[regulator] merger approvals [entity]"` (OCC/FDIC/Fed applications,
+  NCUA merger approvals, FCA territory and merger approvals) — T1, and the
+  decisive rung: a federal credit union cannot merge without an NCUA
+  record, which is what Logix's six-rung empty state turns on.
+- `"[target] final filing OR statement of financial condition"` — T1-T2;
+  `scale_metrics` in the acquirer's own terms.
+- `"[sub-vertical trade press] [entity] merger"` — T3, corroboration and
+  dating.
+
+Every row is dated to the month and cited with a verbatim 50–500 char span;
+a rung that errored is recorded as a rung that did not complete, never as a
+rung that found nothing; and the same transaction hands to C1 and O3 with
+the same date and the same direction of effect (AG-05).
+
+Gap-to-pathway: this section emits `empty_required` on `rows` only. The
+kind's honest closures are two — dated, cited rows, or the declared
+`empty_state` with its ladder (MEM-0060) — and never a transaction composed
+to avoid the empty state.
+
+---
+
+## DD-14 · Acquisition expansion
+
+Inline expansion from an acquisition row (component ClientContext). It
+renders the row C5 carries — status, scale, the integration target, the
+affected cells and the effect note — and fetches nothing.
+
+### Baxter positive pattern
+
+The integration target is stated as scope, not a date invented for it:
+
+> "member accounts, servicing history and channel entitlements onto the
+> acquirer's platform estate" (`integration_target` on the one ANNOUNCED
+> row — what will move, with `closed_on: null` because no close date is
+> published)
+
+Shape notes, measured: `affected_subcap_ids` (`P4C3.1.1`, `P4C3.1.2`,
+`P2C3.2.6`) resolve to served surfaces, so the panel's cell chips open;
+`scale_metrics: null` is a recorded search, not an oversight (the r_layer
+probe quoted under C5); `kind: "MERGER"` and `status: "ANNOUNCED"` are the
+vocabulary's own words. Logix's panel is the empty state — `rows: []` with
+the six-rung ladder — so the expansion never opens, which is correct.
+
+### Anti-patterns
+
+- **(no MEM) / measured (the pack, badged under C5)** — the card rendered
+  two invented credit unions from an inline fixture with an `evidence: []`
+  that was never shown; the panel reads the payload now, and an honest
+  empty state beats what it replaced.
+- **(no MEM) / the standing probes (badged under C5)** — an announced deal
+  rendered as closed; a branch purchase described as a whole-institution
+  acquisition; an integration called complete while the timeline shows
+  cutover activity — each is checkable in the panel because status, dates
+  and cells all render together.
+- **AG-05** — the expansion's effect carries the same direction the same
+  transaction carries on C1 and O3; the panel is where a reader holds all
+  three in view, so it is where a disagreement is caught last and cheapest.
+
+### Exclusion set
+
+Page withheld whole for the customer audience; row keys per C5's projection
+— no `tier`, `ers`, `provenance` or `discovered_by` on a row, no M-code
+vocabulary in `effect_note`; `empty_state.searched_on` strips (probe class)
+while `reason` and `closure_condition` stay.
+
+### Enrichment pathways
+
+The panel fetches nothing; C5's routes close its holes — the approval
+notice dates the row (T1), the acquirer's newsroom scopes it (T2), the
+target's final filings quantify `scale_metrics` in the acquirer's own terms
+(T1-T2). A hole in `integration_target` closes only where a source states
+the date or scope; otherwise the field stays null and the effect note says
+what is known. Emits no `list_enrichment_gaps` kinds of its own; holes
+surface as `acquisitions`' `empty_required` on `rows`.
+
+---
+
+## C6 · Financial trajectory
+
+C6 renders `overview.financial_series` — one section, written once, on the
+overview page (component FinChartInteractive; D5 step 4 asserts C6 ≡ O8 at
+render: "a disagreement is a bug rather than a data question"). Authorship,
+exemplars and the section's own anti-patterns live in the **overview
+rulebook** per this rulebook's title block; what stands here is the
+render-side duty this page owes a section it never writes.
+
+### Baxter positive pattern
+
+What the shared section serves, quoted so the reconciliation has a fixture:
+
+> "Six December cycles compound at 7.2% a year, but the annual step
+> collapsed from 13.4% in 2022 to 2.1% in 2024 before recovering to 5.3%,
+> and the book stands at $6.40B at 30 June 2026." (`reading`, trend
+> `GROWING`, excerpted)
+
+> "The five year-end points are the audited statements; the June 2026 point
+> is the regulator cycle and is stated on that basis." (Logix `reading`,
+> closing — mixed bases disclosed on the card, which is what lets one
+> section serve two pages honestly)
+
+Shape notes, measured: every series row carries `{value, unit, period,
+as_of, basis, source_e_id}` — Baxter's FY2020 row cites "Total assets
+(National Credit Union Administration 5300 Call Report, Account 010)";
+`trend` is a bare token (`GROWING` on Baxter, `STABLE` on Logix);
+`verified_sparse: false` on both, at five-plus dated points.
+
+### Anti-patterns
+
+- **(no MEM) / D5 step 4** — two cards, one section, and a producer who
+  writes a second copy anyway: this page NEVER authors `financial_series`;
+  a context submission carrying one is a contract violation, and a C6↔O8
+  disagreement is a render bug to report, never a data question to
+  reconcile in payload.
+- **(measured, badged under C5)** — a second measurement of the asset
+  series: C5's organic-growth reading is checked against this section on
+  one metric definition; this page re-measures nothing.
+- **(no MEM) / the conditional the contract states** — `trend` is null BY
+  MANDATE below three dated points, with `verified_sparse: true`; a trend
+  word over two points is the same two-point-arc error C1 refuses.
+
+### Exclusion set
+
+The section is the overview page's, so the OVERVIEW exclusion rules govern
+what serves — it renders to the customer audience there even while this
+page's route stays withheld whole. Nothing context-side marks or strips it;
+`quarantine_reason` exists only when the identity gate quarantined the
+series, and its reason is a finding, not a blank.
+
+### Enrichment pathways
+
+Closing a C6 hole means enriching the OVERVIEW submission and re-promoting
+that page — nothing submits through context. The routes, recorded for the
+producer sent here by a blank chart: the protocol's Financial-series ladder
+— filings and results releases → investor presentations → the regulator's
+call-report data → the entity's own annual report — with the private-entity
+replacement rungs where the entity files nothing
+(`01-start-here/4-absence-protocol.md`); `clay` Latest Funding (T1-T2 when
+a filing is behind it; otherwise an inference — the tier follows the
+source) is recorded against O3 and O8 in `02-inputs/clay_taxonomy.json`,
+not C6. Gap kinds are emitted under the overview page: `empty_required` on
+`series` and `reading`, `conditional` on `trend` and `quarantine_reason` —
+the only kind whose correct resolution is often "do nothing", so read the
+run's state before reading it as an instruction.

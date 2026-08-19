@@ -57,7 +57,7 @@ DEFAULT_AUD = "https://dmai-mcp-dukrne5v4a-uc.a.run.app"
 # reported a clean install while seven agent files were missing — a floor
 # only catches total loss, equality catches partial packaging loss.
 EXPECTED_SKILLS = 6
-EXPECTED_AGENTS = 14   # 12 pipeline/QA + learning-grader + learning-testgen (2026-08-19)
+EXPECTED_AGENTS = 16   # 14 + insights-surface-producer + techstack-surface-producer, split out of context (2026-08-19)
 
 #: Fed to `python3 <handler>` on stdin: an event that names no tool and
 #: carries no payload. Every handler's contract is to fail open on it, so a

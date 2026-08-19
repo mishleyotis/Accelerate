@@ -12,7 +12,7 @@ route → produce → challenge → consolidate → submit → learn
 
 | stage | agent | may submit? |
 |---|---|---|
-| produce | one of the four surface producers (below) | no |
+| produce | one of the six surface producers (below) | no |
 | challenge | `finding-challenger` (dma-research discipline) | no |
 | consolidate | `page-consolidator` (refuses unchallenged input) | no |
 | submit + promote | `surface-producer` only | **yes** |
@@ -25,12 +25,16 @@ The qa-overseer runs at the END of every production or repair, green or not
 
 ## The routing table
 
+The authoritative surface census — every surface id, its owner, its payload section and its rulebook anchor — is `surface-map.md` in this directory; the table below routes by need, the map resolves by surface.
+
 | you need | route to |
 |---|---|
 | any of: hero score card, firmographics, exec summary, why now, thought leadership, leadership panel, financial trajectory, sentiment, ceilings, findings, opportunity tiles, evidence coverage | `overview-surface-producer` |
 | any of: workbook grid, focus areas, cell evidence drawers, evidence index, value chain, alerts, safeguard gates, evidence age, cohort patterns | `heatmap-surface-producer` |
 | any of: platform cards, recommendations, starters, roadmap, stair-step | `platform-surface-producer` |
-| any of: timeline, issue register, regulatory standing, context sentiment, acquisitions, techstack register, insight cards, landscape strip | `context-surface-producer` |
+| any of: timeline, issue register, regulatory standing, context sentiment, acquisitions | `context-surface-producer` |
+| any of: insight cards, insight card modal, landscape strip | `insights-surface-producer` |
+| any of: techstack register, platform detail rows | `techstack-surface-producer` |
 | a package to vet before anything is parsed | `package-vetter` |
 | a passing run about to be believed | `adversarial-verifier` |
 | what production actually serves | `deployed-app-auditor` |
@@ -67,7 +71,7 @@ is a defect in the rulebook too.
 
 ## Speed notes
 
-The four surface producers run on the fast model tier; the challenger,
+The six surface producers run on the fast model tier; the challenger,
 consolidator and overseer reason on the strong tier — checking is where
 depth pays. Producers return JSON, not prose about JSON. The PreToolUse
 hook refuses a doomed submit before the network sees it; treat a hook

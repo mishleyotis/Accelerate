@@ -61,7 +61,8 @@ grammar the producers already read (no YAML front matter anywhere in
 
 ```
 # Rulebook: <page> · v<N> (<date>)
-## <SurfaceID> · <Title>            ← same anchors as the page pack
+## <SurfaceID> · <Title>            ← same anchors as the page pack;
+                                      spec-named drilldowns get sections too
 ### Baxter positive pattern         ← quoted exemplars + shape notes
 ### Anti-patterns                   ← entries keyed MEM-#### / gate-id;
                                       user-flagged entries carry the marker
@@ -69,7 +70,18 @@ grammar the producers already read (no YAML front matter anywhere in
                                       their regression test
 ### Exclusion set                   ← the internal-only keys/paths for this
                                       surface, from D1
+### Enrichment pathways             ← connector sources per facet with tier
+                                      bands (enrichment_sources.json +
+                                      clay_taxonomy.json), 3–6 web-search
+                                      query patterns with the tier each
+                                      result registers at and the
+                                      register_evidence rule that applies,
+                                      and the list_enrichment_gaps
+                                      kind-to-pathway map
 ```
+
+v2 (2026-08-19) added the `### Enrichment pathways` subsection to every
+surface section.
 
 **Load path (constraint [E], structural not hook):** each producer agent's
 Method step 2 — already "get_memory_digest + search_findings for the routed

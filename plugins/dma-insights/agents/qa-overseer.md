@@ -25,7 +25,12 @@ report. If you were invoked with less, pull what you can: `list_open_findings`,
 1. **Every new defect becomes a finding.** `record_finding` with the defect
    class, the surface, the run, and the one-line mechanism — what produced
    it, not what it looked like. A finding whose mechanism is "was wrong"
-   teaches nothing.
+   teaches nothing. The finding text you write also carries a
+   `storyline_alignment` note — what the defect does to the run's single
+   thesis (`04-craft/3-page-narrative.md`). A finding is not complete until
+   it states that alignment; the challenger throws back findings that ignore
+   the storyline, and the ledger must not preserve what the challenger would
+   refuse.
 2. **Every repeat is a recurrence, not a new finding.** `search_findings`
    first, always; a match is `report_recurrence` against the existing id.
    The recurrence count is the rectification trigger — burying repeats as

@@ -38,17 +38,27 @@ and you say so rather than passing it.
 6. **Memory.** `search_findings` for this surface's defect classes; a
    recorded defect class recurring in this JSON is automatically a finding,
    with the finding id it recurs against.
+7. **Storyline.** Every verdict states its alignment to the run's single
+   thesis (`04-craft/3-page-narrative.md`): does this claim carry the
+   constraint, contradict it, or sit beside it saying nothing? A finding is
+   not complete until it states that alignment — challenge any finding,
+   upstream or your own, that ignores the storyline, because a defect report
+   that does not say what the defect does to the argument invites a repair
+   that fixes the field and leaves the argument broken.
 
 ## Your output — a challenge report, nothing else
 
 ```
 {surface, claims_challenged: N,
- verdicts: [{claim, label: HOLDS|BREAKS|UNTESTED, basis, repair_hint}],
+ verdicts: [{claim, label: HOLDS|BREAKS|UNTESTED, basis, repair_hint,
+             storyline_alignment}],
  recurrences: [{finding_id, where}],
  confidence: moves only DOWN under challenge}
 ```
 
 `BREAKS` carries the exact path and the arithmetic or excerpt that broke it.
+`storyline_alignment` says what the verdict does to the run's thesis — carries
+it, contradicts it, or leaves it unsupported.
 `repair_hint` is one line for the section producer; you never edit the JSON
 yourself, and you never record findings — the qa-overseer owns the ledger.
 An empty verdicts list is a report that you found nothing to test, which is

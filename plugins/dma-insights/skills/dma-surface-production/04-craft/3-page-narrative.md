@@ -60,6 +60,18 @@ permitted is six threads that quietly differ and leave the reader to reconcile t
 and it warns rather than blocks, because two sentences can carry one argument in different
 words — but a warning on all five anchors at once is not a vocabulary artefact.
 
+### Every finding aligns
+
+The thesis is the reference every finding aligns to — not only the surfaces. A finding,
+wherever it is raised (a challenge verdict, an audit FAIL, a ledger entry), states its
+`storyline_alignment`: does what it names carry the constraint, contradict it, or sit
+silent beside it? This is `check_consistency.py`'s rule applied to defects: **unresolved
+tension is the failure; resolved tension is the strength.** A timeline that points away
+from the top finding and says why has deepened the argument; one that points away and
+says nothing has fractured it. The same holds for the finding itself — a defect report
+that does not say what the defect does to the thesis prompts a repair that fixes the
+field and leaves the argument where it was.
+
 ## The thread each page must carry
 
 ### D1 Overview — *what is true, and what do I lead with*
