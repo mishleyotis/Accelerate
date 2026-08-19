@@ -173,6 +173,9 @@ Work in this order and read the page pack before starting each one:
 
 Each pack carries, per surface: the contract, what must be presented, the
 information-sources table naming the source of truth per field, and the synthesis prompt.
+Every page is produced against its rulebook at `03-pages/rulebooks/<page>.md` — the Baxter
+positive pattern, the learned anti-patterns and the page's exclusion set — applied by
+default, not recalled from memory.
 
 **Enrichment.** When a cell is thin or a field is empty, search. This is the
 highest-value work on any surface: a cell with two evidence items and a successful search
@@ -501,6 +504,7 @@ assets/          payload skeletons per section
 | `04-craft/8-answered-questions.md` | Before you promote — the fifteen questions the intelligence panel asks of the run |
 | `01-start-here/5-colour-and-bands.md` | Writing a band word, or describing the heatmap |
 | `03-pages/<n>-<page>.md` | Before producing that page |
+| `03-pages/rulebooks/<page>.md` | With the page pack — the rulebook every page is produced against, applied by default |
 
 ## Scripts
 

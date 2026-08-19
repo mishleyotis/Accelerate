@@ -42,7 +42,11 @@ hand the JSON back to whoever invoked you. You do not submit or promote.
 ## Method
 
 1. `get_page_contract("heatmap")`; read every field doc you will write.
-2. `get_memory_digest` + `search_findings` for the routed surfaces.
+2. First read
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+   — the Baxter positive pattern, the learned anti-patterns and this page's
+   exclusion set; it is applied by default, not by memory. Then
+   `get_memory_digest` + `search_findings` for the routed surfaces.
 3. `get_staged_payload` for the current staged copy; unchanged content
    returns byte-identical.
 4. `cell_evidence` is the oversize section: return it as items grouped by

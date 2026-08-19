@@ -69,7 +69,13 @@ column, and how many rows. A refusal is a finding.
    and the pages that consume it come last. Poll `get-task-context`; never
    conclude from an unpolled task.
 5. Heatmap first — everything else cites its linkage. Then overview,
-   insights, platform, context, techstack.
+   insights, platform, context, techstack. For the pages you produce
+   directly — insights and techstack — the producers' first step is yours
+   too: before the memory digest, read
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/insights.md`
+   and `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
+   — the Baxter positive pattern, the learned anti-patterns and each page's
+   exclusion set; they are applied by default, not by memory.
 
 ## Spend submissions on what only the server can answer
 

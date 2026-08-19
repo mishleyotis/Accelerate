@@ -1,6 +1,6 @@
 # dma-insights
 
-The six Digital Maturity Assessment skills, twelve DMA agents — five
+The six Digital Maturity Assessment skills, fourteen DMA agents — five
 producers, three pipeline QA, four standing QA/maintenance — two operator
 commands, the submit/verdict hooks and the remote DMA Insights MCP
 connector, as one installable plugin.
@@ -95,7 +95,7 @@ stand up another deployment, run the doctor against it before trusting it.
 ## Install
 
 **By upload (Claude Desktop · Cowork · claude.ai)** — one archive carries all
-six skills, all twelve agents, both commands and the connector declaration, so
+six skills, all fourteen agents, both commands and the connector declaration, so
 nothing is installed piecemeal. Package it so that `.claude-plugin/plugin.json`
 sits at the **root of the zip** (do not wrap the contents in a folder):
 

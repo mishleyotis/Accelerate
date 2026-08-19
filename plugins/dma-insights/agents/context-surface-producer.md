@@ -45,7 +45,12 @@ surface count is the size of one overview.
 ## Method
 
 1. `get_page_contract(page)` for each page you touch; read the field docs.
-2. `get_memory_digest` + `search_findings` for the routed surfaces.
+2. First read
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/<page>.md`
+   for each page you were routed — `context.md`, `techstack.md`,
+   `insights.md` — the Baxter positive pattern, the learned anti-patterns
+   and that page's exclusion set; it is applied by default, not by memory.
+   Then `get_memory_digest` + `search_findings` for the routed surfaces.
 3. `get_staged_payload` for the staged copy; unchanged content returns
    byte-identical.
 4. `get_evidence` for every cited id; `foreign` halts — report and stop.

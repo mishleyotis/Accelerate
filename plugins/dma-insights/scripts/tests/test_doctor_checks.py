@@ -93,7 +93,7 @@ class ExactInventory(unittest.TestCase):
             (root / "agents" / "qa-overseer.md").unlink()
             rows = {r["check"]: r for r in doctor.inventory_checks(root)}
             self.assertFalse(rows["agents inventory"]["ok"])
-            self.assertIn("11 of exactly 12", rows["agents inventory"]["detail"])
+            self.assertIn("13 of exactly 14", rows["agents inventory"]["detail"])
             self.assertTrue(rows["skills inventory"]["ok"])
 
     def test_extra_agent_fails_the_count(self):

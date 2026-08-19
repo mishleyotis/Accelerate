@@ -212,6 +212,32 @@ chose depends on something that did not happen.
 Full rules — how to pick, when R5 is wrong, what to do when the rung is out of
 reach: `01-loop/3-the-ladder.md`.
 
+## Admission — who grades, who tests, who commits
+
+A change to a skill, agent, rulebook or gate is not admitted because this run
+drafted it. The loop has four hands, and the separation is the anti-gaming
+property (D6: the graders carry no write tool, BY CONSTRUCTION):
+
+1. **QA agents detect and propose.** adversarial-verifier, package-vetter,
+   deployed-app-auditor, reviewer feedback and CI record the findings; this
+   skill clusters them and drafts the refinement (STEPs 0–5).
+2. **`learning-grader` scores** the proposed change against
+   `assets/learning_rubric.json` — seven weighted dimensions, admission
+   threshold **0.75** (DECISIONS.md D3). Below threshold the change returns to
+   the adversarial enrich-and-adjudicate loop with the per-dimension scores as
+   the work order. The grader is independent of the fixer: it cannot edit what
+   it grades and cannot write memory.
+3. **`learning-testgen` generates cases** — 5–15 adversarial and regression
+   cases per refinement, every one able to FAIL; a case that cannot fail is
+   rejected. Its `fails_before: true` cases are STEP 6's negative control at
+   volume.
+4. **The full regression corpus re-runs.** Everything previously admitted
+   stays green; a prior case that had to change to pass is a new finding, not
+   a cost of doing business.
+5. **Only graded + tested + regression-safe changes are committed — by the
+   rectifier, an invoked session, and by nothing else** (constraint [B]: the
+   rectifier is the only writer of skills, agents, rulebooks and gates).
+
 ## Clustering, and the identity of a finding
 
 A finding's identity is not its text. Two sightings are the same defect when
@@ -350,6 +376,38 @@ you.
 | `02-inputs/2-memory-tools.md` | Any memory tool call whose exchange you are unsure of |
 | `03-worked-example/1-discarded-fields.md` | Before your first cluster |
 | `04-routine/1-weekly-routine.md` | The weekly Routine's spec — cron, inputs, outputs, and the empty week |
+| `assets/learning_rubric.json` | Grading a proposed change — the machine-readable rubric `learning-grader` applies and `learning-testgen` cases against |
 | `templates/finding.schema.json` | Writing a finding |
 | `templates/refinement.schema.json` | Writing a refinement |
 | `templates/run_report.md` | STEP 7 |
+
+## The permanent corpus
+
+`fixtures/permanent_regressions.json` (repo root) registers every finding a
+person this product answers to has flagged — thirteen at commit — each with
+the pin that keeps it from recurring: a test id pytest collects, a gate id in
+the connector's registry, or `OPEN` where no pin yet exists and the entry
+states what the missing test must assert. It is the user-flagged core of the
+regression corpus the admission loop re-runs (step 4 above), and
+`scripts/tests/test_permanent_regressions.py` enforces it on every CI run:
+pins must resolve, and the OPEN count may only shrink.
+
+What this skill may do to the register, in the direction the rules bind:
+
+- **ADD entries.** A newly user-flagged finding belongs there the run it is
+  flagged — with a real pin, or an honest `OPEN` ref and the meta-test's
+  committed count raised in the same commit, visibly and on purpose.
+- **Flip `OPEN` pins to real tests or gates.** That is the standing work the
+  OPEN count is counting; lower the constant in the same commit. Decreasing
+  it is the only allowed direction.
+- **NEVER remove an entry and never weaken a pin.** `retirable` is false on
+  every row and stays false; a gate pin does not become a test, a test pin
+  does not become prose, and a pin is never deleted to green a run. When the
+  gate registry renumbers, the entry follows the check to its new id — it
+  does not lose its pin (MEM-0059 landed as CG-16 and is held today by
+  CG-18; MEM-0060 landed as CG-17 and is held by CG-19).
+
+A finding in this register being RESOLVED in the store changes nothing here:
+resolution says the fix landed, the register says the fix must keep holding.
+A pinned test that fails, or a pinned gate that vanishes, is a recurrence of
+a user-flagged finding — `report_recurrence`, and the rung moves up.

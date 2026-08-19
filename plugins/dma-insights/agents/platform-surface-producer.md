@@ -44,7 +44,11 @@ prose, never left for the reader to notice.
 1. `get_page_contract("platform")`; the per-field docs carry the card and
    row shapes — gaps rows need catalogue_path per row, current_score within
    0.05 of the heatmap, e_ids per row.
-2. `get_memory_digest` + `search_findings` for the routed surfaces.
+2. First read
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+   — the Baxter positive pattern, the learned anti-patterns and this page's
+   exclusion set; it is applied by default, not by memory. Then
+   `get_memory_digest` + `search_findings` for the routed surfaces.
 3. `get_staged_payload` for the staged copy; unchanged content returns
    byte-identical. Cross-page figures (heatmap scores, rec_ids, readiness
    gates) must reconcile — read the sibling section rather than remembering

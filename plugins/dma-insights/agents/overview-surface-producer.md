@@ -36,7 +36,11 @@ touch any other page. The invoker owns assembly, QA routing and submission.
 1. `get_page_contract("overview")` and read the `doc` of every field you are
    about to write. The doc text is the item-key contract; a remembered shape
    is a refusal.
-2. `get_memory_digest` scoped to this client, and `search_findings` for the
+2. First read
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+   — the Baxter positive pattern, the learned anti-patterns and this page's
+   exclusion set; it is applied by default, not by memory. Then
+   `get_memory_digest` scoped to this client, and `search_findings` for the
    surface names you were routed. What the memory holds about this surface on
    past runs binds you: a defect class recorded there must not recur in your
    output, and if you cannot avoid it, say so in your report.

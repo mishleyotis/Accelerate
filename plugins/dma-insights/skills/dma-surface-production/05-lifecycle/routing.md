@@ -54,12 +54,16 @@ The qa-overseer runs at the END of every production or repair, green or not
 
 ## Memory duties per stage
 
+Producers read the page rulebook at `03-pages/rulebooks/<page>.md` before
+the memory digest — the rulebook is applied by default, not recalled.
 Producers read (`get_memory_digest`, `search_findings`) before authoring.
 The challenger reports recurrences against finding ids but records nothing.
 The qa-overseer alone writes: `record_finding` for the new,
 `report_recurrence` for the repeat, `resolve_finding` for the fix that
 held, `record_refinement` for the method that worked. Twice-recurred goes
-to the rectifier with the finding ids.
+to the rectifier with the finding ids — and with the rulebook file that
+should have prevented them, because a recurrence that got past a rulebook
+is a defect in the rulebook too.
 
 ## Speed notes
 

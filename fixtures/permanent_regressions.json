@@ -1,0 +1,152 @@
+{
+  "what_this_is": "The permanent regression corpus: every finding flagged by a person this product answers to, with the pin that keeps it from recurring. One entry per user-flagged finding; titles and measurements are verbatim from the findings store (get_finding). A pin is a pytest test id (kind 'test'), a gate id in apps/mcp/dma_mcp/gates.py's registry (kind 'gate'), or 'OPEN' where no pin yet exists and ref states what the missing test must assert. scripts/tests/test_permanent_regressions.py re-runs this register: every test pin must collect, every gate pin must be registered, and the OPEN count may only shrink. Entries are never removed and never retired; the rectifier may add entries and may flip OPEN pins to real tests or gates, and may do nothing else to this file.",
+  "note_on_gate_numbers": "The connector's gate registry was renumbered after MEM-0059 and MEM-0060 were fixed: their fix_hints name CG-16 and CG-17, which today are transport gates. An entry pins the check, not the digits — the must-present gate is CG-18 and the empty-required-list gate is CG-19 in today's registry, and those are the ids recorded here.",
+  "entries": [
+    {
+      "finding_id": "MEM-0013",
+      "title": "The Accept/Reject pair on every insight card wrote nothing and could be read by nobody",
+      "flagged_by": "mishley.otiende@zennify.com",
+      "what_must_never_recur": "An interactive control rendered on every card whose write lands where nothing reads. Measured 2026-08-08: `annotations` had existed since migration 0007 with count(*) = 0, the only `FROM annotations` in the tree was the migration itself, the web adapter hardcoded `annotation: null` — and the served insights page rendered the pair on all 8 cards. Every write path a surface offers must have a read path that surfaces its effect: the API read returns the verdicts, and the MCP consumer turns a Reject into memory the improvement loop can see.",
+      "pinned_by": [
+        {"kind": "test", "ref": "apps/api/tests/test_annotation_feedback.py::test_the_read_returns_verdicts_with_their_actor"},
+        {"kind": "test", "ref": "apps/mcp/tests/test_reviewer_feedback.py::test_a_reject_raises_a_finding_carrying_the_card_and_its_r_layer"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0014",
+      "title": "A signed-in analyst resolves to no user row, so every attributable write refuses",
+      "flagged_by": "mishley.otiende@zennify.com",
+      "what_must_never_recur": "An attributable write refusing a real signed-in person because the users rows the deploy-time allowlist implies were never provisioned — a 403 `unknown_actor` that looked like a working safety check (users count 0 against an allowlist of 2), which is why it survived the whole build. Both directions are pinned: a provisioned actor's write lands and touches only annotations, idempotency_keys and users.last_seen_at; and the 403 STAYS a 403 for a genuinely unknown actor, because auto-creating a user inside the write path would delete the only thing standing between an annotation and an unattributable one.",
+      "pinned_by": [
+        {"kind": "test", "ref": "apps/api/tests/test_annotation_feedback.py::test_an_unknown_actor_is_still_refused"},
+        {"kind": "test", "ref": "apps/api/tests/test_annotation_feedback.py::test_a_known_actor_writes_and_the_write_boundary_holds"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0017",
+      "title": "Reviewer rejected: Five production AI systems stand on an unfinished data layer",
+      "flagged_by": "dma@zennify.com",
+      "what_must_never_recur": "A reviewer refused a chain of reasoning, not a headline: IC-2 of baxter-credit-union-bcu stacked five production AI deployments on an 'unfinished data layer' claim whose counter-case was asserted without evidence (1 rejected of 2 annotated cards on run c1351d25). The producing skill's prompt has not been refined against that claim shape, so the same shape can ship again on the next run. The rejection is the only human feedback on a rendered surface in this system; losing it to prose is the regression.",
+      "pinned_by": [
+        {"kind": "OPEN", "ref": "a learning-testgen case that replays IC-2's rejected r_layer claim shape against the dma-surface-production insights prompt: it must FAIL on the pre-refinement prompt and PASS once the refinement lands, recorded via record_refinement against MEM-0017"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0057",
+      "title": "The second client was promoted as-is by explicit decision, with its 62 unsupported top-band cells live",
+      "flagged_by": "user decision, relayed by claude-opus-5 session b6f97535",
+      "what_must_never_recur": "62 cells across the run's two highest-scoring categories stand live at 4.0-4.5 on cited documents that observe no capability — a subsidiary's officer list, a board biography, a website footer, the absence of enforcement actions, a security vendor's own case study recorded as T1. Promoted on the owner's explicit instruction, given four times with the full measurement in front of them; the finding stays OPEN so the decision stays visible. What must never recur: this run being cited as a reference for what a good assessment looks like, or top-band scores standing on evidence that answers no diagnostic question anywhere else.",
+      "pinned_by": [
+        {"kind": "OPEN", "ref": "a check that registers this promoted run as known-bad: no fixture, golden run, exemplar or rulebook may cite it as a reference; lifted only by rescoring the 62 against evidence that addresses their diagnostic questions, or NO_EVIDENCE with the recorded ladder, then re-scan, re-synthesise all six pages and re-promote"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0058",
+      "title": "The preflight printed the secrets doc's FAIL and then computed its verdict without it",
+      "flagged_by": "build owner (mishley.otiende@zennify.com)",
+      "what_must_never_recur": "A verdict computed without a check it printed. main() called doc_secrets() for the line it printed and discarded the return value; a doc that 404'd printed FAIL and exited 0, routine_preflight.sh mapped that to PREFLIGHT PASS, and a doc that parsed to zero keys was worse — every transport check passed, so it printed OK on zero credentials. An unreadable doc, or one parsed to zero keys, fails the preflight and the routine does not claim a run; the negative control measured 7 of 9 tests failing against the pre-fix module.",
+      "pinned_by": [
+        {"kind": "test", "ref": "scripts/tests/test_routine_secrets_doc.py::test_a_404_on_the_doc_fails_the_preflight"},
+        {"kind": "test", "ref": "scripts/tests/test_routine_secrets_doc.py::test_a_doc_that_parses_to_zero_keys_is_never_reported_ok"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0059",
+      "title": "Every must-present set was prose in a doc string, so no gate ever asked for its members",
+      "flagged_by": "build owner (mishley.otiende@zennify.com)",
+      "what_must_never_recur": "A must-present set held only as prose inside a contract's `doc` string, with `required: true` applying to the CONTAINER: a one-member firmographics list satisfied every gate the connector had, and which members it carried was documentation rather than contract. The set now lives machine-readably in the contract JSON (must_present / must_present_any / must_present_key) and the gate reads it, so a section that gains a member gains its enforcement in the same edit. Held-with-a-reason stays legal; silence does not. Landed as CG-16, held today by CG-18 after the registry renumber.",
+      "pinned_by": [
+        {"kind": "gate", "ref": "CG-18"},
+        {"kind": "test", "ref": "apps/mcp/tests/test_must_present_members.py::test_a_missing_member_blocks_and_names_it"},
+        {"kind": "test", "ref": "apps/mcp/tests/test_must_present_members.py::test_the_real_contract_declares_the_set_machine_readably"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0060",
+      "title": "A required list satisfied by [] writes no rows and the surface vanishes from the page",
+      "flagged_by": "build owner (mishley.otiende@zennify.com)",
+      "what_must_never_recur": "`required: true` satisfied by an empty list: [] is not None so CG-02's branch never ran, a list type-checks fine, promotion wrote zero rows, the read path omitted the key, and the surface disappeared from the served page with no empty_state to explain it — platform.starters.starters, the conversation starters the build owner reported as 'disappeared'. An empty list is a claim ('there are none') and must be made deliberately: send the items, or declare the section's empty_state. `may_be_empty` is granted exactly once (techstack.dropped) and a test holds that count at 1. Landed as CG-17, held today by CG-19 after the registry renumber.",
+      "pinned_by": [
+        {"kind": "gate", "ref": "CG-19"},
+        {"kind": "test", "ref": "apps/mcp/tests/test_required_list_not_silently_empty.py::test_an_empty_required_list_is_refused"},
+        {"kind": "test", "ref": "apps/mcp/tests/test_required_list_not_silently_empty.py::test_the_may_be_empty_exemption_has_not_spread"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0062",
+      "title": "No pipeline flagged that a surface needed enrichment, and Explorium was never built",
+      "flagged_by": "build owner (mishley.otiende@zennify.com)",
+      "what_must_never_recur": "A surface that depends on an enrichment source with nothing recording the dependency: one client's technology register served 12 rows against the reference's 51, its own empty_state said 'the technographic scan that would normally widen this register did not run', and no surface, gate, checker or routine read that sentence. packages/shared/enrichment_register.json now declares which surfaces depend on which sources; enrichment_status computes {required, sources, ran, count, thin, thin_reason, closes_with} at read from the rows actually served — ran counted from rows carrying a basis, never from a producer's boolean; CG-20 refuses a vendor that is a category or an unfinished-research placeholder.",
+      "pinned_by": [
+        {"kind": "gate", "ref": "CG-20"},
+        {"kind": "test", "ref": "apps/mcp/tests/test_vendor_is_a_company.py::test_the_three_real_placeholder_rows_are_refused"},
+        {"kind": "test", "ref": "apps/api/tests/test_enrichment_status.py::test_the_two_promoted_registers_are_separated_by_the_floor"},
+        {"kind": "test", "ref": "apps/api/tests/test_enrichment_status.py::test_the_register_is_loadable_and_every_entry_is_complete"},
+        {"kind": "OPEN", "ref": "the Explorium ingest job itself: a SCHEDULED run can enrich without a session connector (this organisation's trigger API refuses connector grants, so today every scheduled run produces an un-enriched client by construction); needs an API key from the build owner — the finding's fix_hint records this half as still open"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0063",
+      "title": "A run promoted with 98 open alerts because nothing anywhere counted them",
+      "flagged_by": "build owner (mishley.otiende@zennify.com)",
+      "what_must_never_recur": "A run reaching the dashboard with an alert queue nobody read: 98 open alerts (59 high, 39 medium) passed every gate the connector had, and the first surface an AE works was unusable. The ALERT_CEILING that answered it was retired 2026-08-16 when a second client owed 621 alerts against a ceiling of 15 — the SIZE was never the defect, the unread COUNT was. What must never be lost with the ceiling: promote_run reports open_alerts, computed from the payload about to be written and never from a stored total (invariant 8), honest about absence, returned to whoever promotes.",
+      "pinned_by": [
+        {"kind": "test", "ref": "apps/mcp/tests/test_alert_ceiling.py::test_THE_COUNT_IS_STILL_REPORTED_ON_PROMOTE"},
+        {"kind": "test", "ref": "apps/mcp/tests/test_alert_ceiling.py::test_the_count_reads_the_payload_not_a_stored_total"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0064",
+      "title": "A payload leaf carrying a JSON-encoded string renders as literal JSON on the client surface",
+      "flagged_by": "build owner (mishley.otiende@zennify.com)",
+      "what_must_never_recur": "A serialisation escaping into a value: platform.stairstep.ladder.steps[*].blocking_findings[] carried strings like '{\"f_id\": \"F-1\", \"e_ids\": [\"E-CC-139\"]}' on BOTH promoted clients, and the frontend rendered each straight into a chip, so the stair-step ladder showed literal JSON to the AE. CG-03 is structurally unable to see it because an encoded object is a valid string. A payload leaf is the value, not a serialisation of one, and the gate runs inside pass 1 so the shape is refused at submit.",
+      "pinned_by": [
+        {"kind": "gate", "ref": "CG-21"},
+        {"kind": "test", "ref": "apps/mcp/tests/test_serialised_leaves.py::test_the_promoted_shape_is_refused"},
+        {"kind": "test", "ref": "apps/mcp/tests/test_serialised_leaves.py::test_it_runs_inside_pass1"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0065",
+      "title": "No verification in this build has ever loaded the page a user sees",
+      "flagged_by": "build owner (mishley.otiende@zennify.com)",
+      "what_must_never_recur": "'Verified' meaning one of three weaker things — the tests pass, the source contains the change, the commit predates the build — with the weakest producing a false report: four render fixes declared live when the deployed web revision had been built 58 minutes BEFORE they were committed. dmai-web sits behind IAP; anonymous gets 302, an OIDC token minted for the service URL gets 401, and both admin routes to fix it are closed to this build's identity. A claim that a change is live must be backed by a fetch of the page that carries it, or must say which weaker sense it means.",
+      "pinned_by": [
+        {"kind": "OPEN", "ref": "a verification that fetches the IAP-protected rendered page with an authorised identity (roles/iap.httpsResourceAccessor on dmai-web, granted by an IAP admin) and asserts the change is live at the production URL; until the grant exists, scripts/verify_deployed.py's deployed-image-digest extraction is the standing substitute and no unqualified 'verified' is permitted"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0068",
+      "title": "The platform page renders blanks while the payload carries cited peer evidence nothing reads",
+      "flagged_by": "build owner (mishley.otiende@zennify.com)",
+      "what_must_never_recur": "A surface stating blanks the payload already answers: 25 peer_deployment rows served, every one carrying a fully cited basis, rendered zero times (grep -c peer_deployments returned 0 in both render modules); 28 gap rows all null while carrying usable name + catalogue_path + peer_note. A blank may appear only where the run genuinely established nothing — when deployed is null the basis IS the finding, the difference between 'no peer does this' and 'we did not look'. The roster form (`PEER SET · 5`) was superseded 2026-08-15 on the owner's word — the guarantee, not the roster, is what is guarded.",
+      "pinned_by": [
+        {"kind": "OPEN", "ref": "a pytest-collectable render check asserting a peer_deployments row with deployed=null renders its basis and a gap row falls back to name + catalogue_path + peer_note; today the guard is the JS acceptance check in apps/web/tests/acceptance/checks-platform.json ('PEER POSITION', MEM-0068 restated), which this corpus's meta-test cannot collect"}
+      ],
+      "retirable": false
+    },
+    {
+      "finding_id": "MEM-0095",
+      "title": "The opportunity tiles carried per-client factor systems and no gate read them",
+      "flagged_by": "owner report, 2026-08-19 (second sighting of the one-number-two-vocabularies defect)",
+      "what_must_never_recur": "One number wearing two factor vocabularies: after CG-30 pinned the platform cards to the shared engine, the overview tiles still showed their own composite factor systems — a six-factor breakdown summing to 76.5 on one client, a three-factor breakdown summing to 67.0 on the other — because the tiles were corrected by hand during the re-score while zero gates referenced tiles[].factors or tiles[].composite. The tile is the same number as the card, from the same engine, with the engine's four factor names, on every page that renders it.",
+      "pinned_by": [
+        {"kind": "gate", "ref": "CG-31"},
+        {"kind": "test", "ref": "apps/mcp/tests/test_platform_fit_gate.py::test_a_legacy_factor_vocabulary_is_refused_by_name"},
+        {"kind": "test", "ref": "apps/mcp/tests/test_platform_fit_gate.py::test_a_tile_that_disagrees_with_its_card_is_refused"}
+      ],
+      "retirable": false
+    }
+  ]
+}
