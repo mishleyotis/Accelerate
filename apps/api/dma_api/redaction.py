@@ -46,6 +46,8 @@ pass.
 from __future__ import annotations
 
 import copy
+import json
+from pathlib import Path
 import os
 import re
 
@@ -381,6 +383,87 @@ def _strip_vendor(node, path="", found=None, pattern=None) -> list:
     return found
 
 
+# ── The customer serve allowlist — the fail-closed net ─────────────────
+#
+# Everything above this line is deny-based, and every rule in it was added
+# after a measured leak. Deny-based means the NEXT internal-shaped key — the
+# one nobody thought to deny — serves by default; measured on the Logix run
+# 2026-08-19: 4,527 search-ladder strings across 705 cell drawers and tier
+# codes on 97 drawer items reached the customer body with every deny rule
+# green. For the CUSTOMER audience the default flips here: a key serves only
+# if the generated allowlist names it. The list is derived from the contract
+# minus packages/shared/serve_classes.json by scripts/gen_customer_allowlist.py,
+# so a key the contract gains tomorrow is dropped until classified — and the
+# drop is counted in the receipt, never silent.
+#
+# Missing file raises: the enrichment_register lesson — a loader that
+# swallows FileNotFoundError into an empty dict ships the exact fail-open
+# this net exists to end.
+_ALLOWLIST = None
+
+
+def _customer_allowlist() -> dict:
+    global _ALLOWLIST
+    if _ALLOWLIST is None:
+        path = Path(__file__).with_name("customer_allowlist.json")
+        _ALLOWLIST = json.loads(path.read_text())
+    return _ALLOWLIST
+
+
+def _apply_allowlist(page: str, section: str, body: dict) -> tuple[dict | None, list]:
+    """(body_or_None_if_unknown_section, dropped_key_paths)."""
+    allow = _customer_allowlist()
+    spec = allow["sections"].get(f"{page}.{section}")
+    if spec is None:
+        return None, [f"{section} (section not in the serve allowlist)"]
+    dropped = []
+    keep_top = set(spec["keys"])
+    for key in list(body.keys()):
+        if key not in keep_top:
+            del body[key]
+            dropped.append(key)
+    es = body.get("empty_state")
+    if isinstance(es, dict):
+        keep_es = set(allow["empty_state_keys"])
+        for key in list(es.keys()):
+            if key not in keep_es:
+                del es[key]
+                dropped.append(f"empty_state.{key}")
+    for field, item_allow in (spec.get("items") or {}).items():
+        rows = body.get(field)
+        if not isinstance(rows, list):
+            continue
+        keep = set(item_allow)
+        for i, row in enumerate(rows):
+            if not isinstance(row, dict):
+                continue
+            for key in list(row.keys()):
+                if key not in keep:
+                    del row[key]
+                    dropped.append(f"{field}[{i}].{key}")
+    # The excluded CLASSES die at any depth: the contract's item grammar is
+    # one level deep, but the drawer nests evidence items inside cells
+    # (cells[].items[].tier on 97 Logix rows) — a structural walk alone
+    # leaves the second level serving.
+    excluded = set(allow["excluded_key_classes"])
+
+    def _sweep(node, path):
+        if isinstance(node, dict):
+            for key in list(node.keys()):
+                sub = f"{path}.{key}" if path else key
+                if key in excluded:
+                    del node[key]
+                    dropped.append(sub)
+                else:
+                    _sweep(node[key], sub)
+        elif isinstance(node, list):
+            for i, item in enumerate(node):
+                _sweep(item, f"{path}[{i}]")
+
+    _sweep(body, "")
+    return body, dropped
+
+
 def redact_section(page: str, section: str, data: dict, internal_only,
                    audience: str) -> tuple[dict | None, dict]:
     """Return (data_or_None_if_withheld, redaction_report). Never mutates
@@ -439,6 +522,14 @@ def redact_section(page: str, section: str, data: dict, internal_only,
             # the second kind and named no vendor at all.
             report["vendor_named"] = _strip_vendor(out)
             report["seller_voice"] = _strip_vendor(out, pattern=SELLER_VOCABULARY)
+
+            # The allowlist runs LAST for the customer audience: whatever
+            # survived every deny rule above must also be NAMED to serve.
+            out, dropped = _apply_allowlist(page, section, out)
+            report["allowlist_dropped"] = dropped
+            if out is None:
+                return None, {**report, "withheld": True,
+                              "unknown_section": True}
 
     return out, report
 

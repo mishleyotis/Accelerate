@@ -217,12 +217,15 @@ def test_a_section_that_did_not_promote_is_not_an_empty_section():
 
 # ── redaction ──────────────────────────────────────────────────────────
 def test_customer_audience_strips_marked_paths_only():
-    data = {"rows": [{"e_id": "E-1", "ers": 4.5, "scoring_rationale": "internal"},
-                     {"e_id": "E-2", "ers": 2.1, "scoring_rationale": "internal"}],
+    # fields[] and undated_pct are firmographics' own contract keys: the
+    # customer serve allowlist (2026-08-19) drops anything else before the
+    # assertions below would read it.
+    data = {"fields": [{"field": "assets", "ers": 4.5, "scoring_rationale": "internal"},
+                       {"field": "members", "ers": 2.1, "scoring_rationale": "internal"}],
             "undated_pct": 0.0}
-    internal = ["rows[*].ers", "rows[*].scoring_rationale"]
+    internal = ["fields[*].ers", "fields[*].scoring_rationale"]
     out, rep = redact_section("heatmap", "evidence_age", dict(data), internal, "internal")
-    assert out["rows"][0]["ers"] == 4.5, "internal audience keeps marked fields"
+    assert out["fields"][0]["ers"] == 4.5, "internal audience keeps marked fields"
 
     # Deliberately a section that is NOT in CUSTOMER_WITHHELD: this test is
     # about path stripping, and a withheld section returns None before any
@@ -231,8 +234,8 @@ def test_customer_audience_strips_marked_paths_only():
     # started reading a withheld section's None as a dict.
     out, rep = redact_section("overview", "firmographics", json.loads(json.dumps(data)),
                               internal, "customer")
-    assert all("ers" not in r and "scoring_rationale" not in r for r in out["rows"])
-    assert out["rows"][0]["e_id"] == "E-1", "unmarked fields survive"
+    assert all("ers" not in r and "scoring_rationale" not in r for r in out["fields"])
+    assert out["fields"][0]["field"] == "assets", "unmarked fields survive"
     assert out["undated_pct"] == 0.0
     # `paths_stripped` used to be asserted equal to `internal` — the INPUT.
     # It passed while the walker deleted nothing, because the old strip_paths
@@ -382,12 +385,12 @@ def test_unmarked_vendor_copy_does_not_reach_the_client():
         "the vendor-free dma_impact is withheld too — by the rule, not the net"
 
     # And the net itself, on a field no rule names.
-    loose = {"narrative": "Zennify would sequence this after the data layer.",
-             "clean": "The data layer is the primary gap."}
+    loose = {"situation": "Zennify would sequence this after the data layer.",
+             "answer": "The data layer is the primary gap."}
     out, rep = redact_section("overview", "exec_summary",
                               json.loads(json.dumps(loose)), [], "customer")
-    assert "narrative" not in out and out["clean"].startswith("The data")
-    assert rep["vendor_named"] == ["narrative"]
+    assert "situation" not in out and out["answer"].startswith("The data")
+    assert rep["vendor_named"] == ["situation"]
 
 
 def test_a_named_persons_contact_route_and_our_notes_about_them_stay_internal():
@@ -407,9 +410,9 @@ def test_a_named_persons_contact_route_and_our_notes_about_them_stay_internal():
     The negative control is the second half: the roster is the finding, so
     the name, title, tenure and relevance must survive. A test that only
     asserted the strip would pass on `return {}`."""
-    roster = {"executives": [
+    roster = {"roster": [
         {"name": "A. Person", "title": "Chief Information Officer",
-         "tenure_months": 41, "relevance": "owns the core platform decision",
+         "tenure_months": 41, "relevance_note": "owns the core platform decision",
          "email": "a.person@example.org", "linkedin_url": "https://…/in/a",
          "phone": "+1 555 0100"},
         {"name": "B. Person", "title": "Chief Risk Officer",
@@ -420,19 +423,19 @@ def test_a_named_persons_contact_route_and_our_notes_about_them_stay_internal():
          "enriched_at": "2026-08-04T11:00:00Z"}]}
     out, rep = redact_section("overview", "leadership",
                               json.loads(json.dumps(roster)), [], "customer")
-    a, b = out["executives"]
+    a, b = out["roster"]
     assert not ({"email", "linkedin_url", "phone"} & set(a))
     assert not ({"enrichment_basis", "enriched_at"} & set(b))
     assert a["name"] == "A. Person" and a["title"] == "Chief Information Officer"
-    assert a["tenure_months"] == 41 and a["relevance"].startswith("owns the")
+    assert a["tenure_months"] == 41 and a["relevance_note"].startswith("owns the")
     assert b["title"] == "Chief Risk Officer", "the finding survives the strip"
     assert len(rep["keys_stripped"]) == 5
 
     # An AE needs the route; that is what the internal audience is for.
     keep, _ = redact_section("overview", "leadership",
                              json.loads(json.dumps(roster)), [], "internal")
-    assert keep["executives"][0]["linkedin_url"].endswith("/in/a")
-    assert keep["executives"][1]["enrichment_basis"].startswith("No contact")
+    assert keep["roster"][0]["linkedin_url"].endswith("/in/a")
+    assert keep["roster"][1]["enrichment_basis"].startswith("No contact")
 
 
 def test_audience_defaults_to_the_least_privileged_one():
@@ -494,10 +497,10 @@ def test_withheld_sections_and_pages():
 
 def test_redaction_never_mutates_the_shared_payload():
     # a section that is redacted rather than withheld
-    data = {"rows": [{"ers": 4.5}]}
-    out, _ = redact_section("heatmap", "cell_evidence", data, ["rows[*].ers"], "customer")
-    assert data["rows"][0]["ers"] == 4.5, "the promoted payload is shared across readers"
-    assert "ers" not in out["rows"][0]
+    data = {"cells": [{"ers": 4.5, "subcap_id": "P1C1.1.1"}]}
+    out, _ = redact_section("heatmap", "cell_evidence", data, ["cells[*].ers"], "customer")
+    assert data["cells"][0]["ers"] == 4.5, "the promoted payload is shared across readers"
+    assert "ers" not in out["cells"][0]
 
 
 def test_etag_carries_run_promotion_and_audience():

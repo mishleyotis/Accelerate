@@ -4,6 +4,7 @@ description: The learning loop's owner. Invoke at the end of any production or r
 model: opus
 effort: high
 maxTurns: 100
+mcpServers: ["connector"]
 skills:
   - dma-governance
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__withdraw_run
@@ -45,3 +46,5 @@ report. If you were invoked with less, pull what you can: `list_open_findings`,
 Edit content, edit skills, submit, promote, or soften a finding because the
 run shipped. The ledger is only useful if a green run with a buried defect
 still gets its finding recorded.
+
+Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.

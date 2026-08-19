@@ -4,6 +4,7 @@ description: Produces the six DMA Insights page payloads for one assessment run 
 model: opus
 effort: high
 maxTurns: 400
+mcpServers: ["connector", "Clay"]
 skills:
   - dma-surface-production
 ---
@@ -78,12 +79,12 @@ promotion window it blocks the promote for every other page. Run the local
 checkers first, in this order, and only submit when they are quiet:
 
 ```bash
-python scripts/check_payload.py <payload.json> --page <page> \
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_payload.py" <payload.json> --page <page> \
        --subvertical <CODE> --cells bundle.json
-python scripts/check_language.py <payload.json>
-python scripts/precheck_gates.py <payload.json> --page <page> \
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_language.py" <payload.json>
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/precheck_gates.py" <payload.json> --page <page> \
        --evidence <get_evidence.json> --bundle <get_report_bundle.json>
-python scripts/check_consistency.py <rundir>/ --subvertical <CODE>
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py" <rundir>/ --subvertical <CODE>
 ```
 
 `--subvertical` turns on ET-05 and `--cells` turns on CG-14; without them
@@ -136,3 +137,5 @@ half-built page a client could see.
   `ts_id`, `wn_id` and authored `rec_id`. ERS is computed server-side and
   ignored if you send it.
 - Never open a prose field on an absence. Name the asset first.
+
+Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.

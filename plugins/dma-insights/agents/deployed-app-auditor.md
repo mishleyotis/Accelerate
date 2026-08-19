@@ -4,6 +4,7 @@ description: Audits the LIVE deployed DMA Insights application — the productio
 model: opus
 effort: high
 maxTurns: 200
+mcpServers: ["connector"]
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run
 ---
 
@@ -131,3 +132,5 @@ Three verdicts, and the third is not a failure of yours:
 
 Never collapse UNVERIFIABLE into PASS. An audit that reports green because it
 could not look is worse than no audit, because it will be believed.
+
+Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.

@@ -19,18 +19,25 @@ evidence like any other source.
 
 ## The tier a Clay output lands at
 
+**`clay_taxonomy.json` (beside this file) is the source of truth for the data point →
+surface → tier mapping**, and this table is rendered from it:
+`python3 scripts/clay_plan.py --tier-table`. Edit the JSON, re-render, paste — the script's
+printed plan reads the same file, so the two cannot drift.
+
 Clay is not one tier. The tier follows the underlying source, and getting this wrong changes
 the score.
 
 | Data point | Tier | Why |
 |---|---|---|
 | `Tech Stack` | **T1** | A machine technographic scan is T1, never T4. Filing it at T4 caps the capability at L2.5 and silently suppresses the score — the commonest misclassification in the corpus. |
-| `Annual Revenue`, `Latest Funding` | T1–T2 **when a filing is behind it** | Filings and disclosures. For an entity that files nothing, this value is usually **modelled** and has no traceable source — that is an inference, not a T1 fact, and the tier follows the source as it does everywhere else |
-| `Open Jobs` | T2–T3 | The posting is first-party; the aggregator is not |
-| `Find Thought Leadership` | T2–T3 | T2 for a first-party publication or named conference; T3 for trade press |
-| `Recent News` | T3 | Third-party analysis |
-| `Summarize Work History` | T3 | Profile-derived |
-| Any `Custom` data point | Tier of whatever it returns — **read the source before assigning** | |
+| `Annual Revenue` | T1-T2 **when a filing is behind it** | Filings and disclosures. For an entity that files nothing, this value is usually modelled and has no traceable source — that is an inference, not a T1 fact, and the tier follows the source as it does everywhere else. |
+| `Headcount Growth` | T2 | A capability-trajectory signal. |
+| `Recent News` | T3 | Third-party analysis. |
+| `Open Jobs` | T2-T3 | The posting is first-party; the aggregator is not. Hiring is the cheapest capability signal there is. |
+| `Latest Funding` | T1-T2 **when a filing is behind it** | Filings and disclosures. For an entity that files nothing, this value is usually modelled and has no traceable source — that is an inference, not a T1 fact, and the tier follows the source as it does everywhere else. |
+| `Find Thought Leadership` | T2-T3 | T2 for a first-party publication or named conference; T3 for trade press. |
+| `Summarize Work History` | T3 | Profile-derived. |
+| Any `Custom` data point | Tier of whatever it returns — **read the source before assigning** |  |
 
 ## The enrichment budget
 

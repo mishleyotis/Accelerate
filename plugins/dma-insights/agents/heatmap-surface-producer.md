@@ -4,6 +4,7 @@ description: Produces or repairs individual HEATMAP page surfaces for one run â€
 model: sonnet
 effort: high
 maxTurns: 150
+mcpServers: ["connector", "Clay"]
 skills:
   - dma-surface-production
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part
@@ -53,3 +54,5 @@ hand the JSON back to whoever invoked you. You do not submit or promote.
 
 A surface not listed; an uncited score; a band from a rounded score; a
 fabricated or foreign evidence id; any submit or promote.
+
+Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.

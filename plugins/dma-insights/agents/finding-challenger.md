@@ -4,6 +4,7 @@ description: Adversarially challenges freshly produced surface JSON before it re
 model: opus
 effort: high
 maxTurns: 100
+mcpServers: ["connector"]
 skills:
   - dma-research
   - dma-surface-production
@@ -52,3 +53,5 @@ and you say so rather than passing it.
 yourself, and you never record findings — the qa-overseer owns the ledger.
 An empty verdicts list is a report that you found nothing to test, which is
 itself a finding about the surface.
+
+Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.

@@ -4,6 +4,7 @@ description: Turns accumulated findings into durable improvements to the DMA ski
 model: opus
 effort: high
 maxTurns: 250
+mcpServers: ["connector"]
 skills:
   - dma-rectifier
 disallowedTools: mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run
@@ -131,3 +132,5 @@ The run report from the skill's `templates/run_report.md`. Its spine:
   loop works, and the row a reader should be able to find first.
 
 End with the class you most suspect is still unnamed, and what would name it.
+
+Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.

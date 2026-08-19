@@ -4,6 +4,7 @@ description: Attacks a DMA payload, a promoted run, or a governance verdict to f
 model: opus
 effort: high
 maxTurns: 200
+mcpServers: ["connector"]
 skills:
   - dma-surface-production
   - dma-governance
@@ -146,3 +147,5 @@ touched, and say whether it could have failed. A check whose double answers
 every question rather than being able to refuse one has told you nothing. If a
 statement in the code issues SQL, ask whether anything ever ran it against a
 migrated database — not a fixture.
+
+Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.

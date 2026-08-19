@@ -4,6 +4,7 @@ description: Produces or repairs individual CONTEXT and TECHSTACK and INSIGHTS p
 model: sonnet
 effort: high
 maxTurns: 120
+mcpServers: ["connector", "Clay"]
 skills:
   - dma-surface-production
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part
@@ -54,3 +55,5 @@ surface count is the size of one overview.
 
 A fifth register status; a stored count; an undated "current"; an insight
 card that duplicates another in id or substance; any submit or promote.
+
+Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.

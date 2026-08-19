@@ -291,7 +291,13 @@ def test_redaction_runs_through_the_same_path_as_the_grid():
     assert customer["redacted_count"] >= 1
     assert "redacted_paths" not in customer
     assert customer["redaction_note"]
-    assert customer["data"]["chains"], "the arrangement itself still serves"
+    # SUPERSEDED 2026-08-19 by the customer serve allowlist: value_chain's
+    # contract declares no content fields yet (both reference runs serve it
+    # empty), so an unclassified `chains` key is DROPPED for the customer —
+    # fail-closed until the surface's contract lands. The internal audience
+    # above still carries the arrangement.
+    assert "chains" not in customer["data"], \
+        "an unclassified key served to a customer — the allowlist is open"
 
 
 def test_payload_carries_ids_only_no_scores_no_bands_no_colour():

@@ -4,6 +4,7 @@ description: Produces or repairs individual PLATFORM page surfaces for one run â
 model: sonnet
 effort: high
 maxTurns: 120
+mcpServers: ["connector", "Clay"]
 skills:
   - dma-surface-production
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part
@@ -55,3 +56,5 @@ prose, never left for the reader to notice.
 A recomputed or re-ranked fit; a card whose breakdown disagrees with its
 headline; a starter that fails the say-it-aloud test; a rec without
 provenance; a phase citing a rec_id the payload does not carry; any submit.
+
+Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.

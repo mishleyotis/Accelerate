@@ -5,7 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session_brief.py\""
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session_brief.py\"",
+            "timeout": 10
           }
         ]
       }
@@ -16,7 +17,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/precheck_submit.py\""
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/precheck_submit.py\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_dma-insights_connector__promote_run",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/precheck_promote.py\"",
+            "timeout": 10
           }
         ]
       }
@@ -27,7 +39,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/verdict_watch.py\""
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/verdict_watch.py\"",
+            "timeout": 10
           }
         ]
       },
@@ -36,7 +49,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/verdict_watch.py\""
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/verdict_watch.py\"",
+            "timeout": 10
           }
         ]
       }

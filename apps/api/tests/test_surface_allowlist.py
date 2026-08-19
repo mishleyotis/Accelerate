@@ -54,20 +54,21 @@ def test_the_reasoning_trace_reaches_no_audience_at_any_depth(audience):
     is one a producer has to remember, and the measured leak was on paths
     nobody had marked.
     """
+    # pillars[].deltas is inside scores' contract item grammar, so the
+    # depth assertion survives the customer allowlist (2026-08-19), which
+    # drops non-contract keys before this test would read them.
     payload = {
         "composite": 2.1,
         "r_layer": {"verdict": "ACCEPT", "confidence": "HIGH"},
-        "pillars": [{"pillar_id": "P1", "r_layer": {"verdict": "ACCEPT"}}],
-        "roster": [{"name": "A Person",
-                    "nested": {"deep": {"r_layer": {"verdict": "ACCEPT"}}}}],
+        "pillars": [{"pillar_id": "P1", "r_layer": {"verdict": "ACCEPT"},
+                     "score": {"r_layer": {"verdict": "ACCEPT"}}}],
     }
     out, _ = redact_section("overview", "scores", payload, [], audience)
     assert "r_layer" not in out
     assert "r_layer" not in out["pillars"][0]
-    assert "r_layer" not in out["roster"][0]["nested"]["deep"]
+    assert "r_layer" not in out["pillars"][0].get("score", {})
     # The finding itself survives; only our argument with ourselves goes.
     assert out["composite"] == 2.1
-    assert out["roster"][0]["name"] == "A Person"
 
 
 def test_the_allowlist_is_not_silently_shrunk():

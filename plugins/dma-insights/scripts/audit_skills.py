@@ -14,15 +14,26 @@ Two classes of path token appear in these skills and only one of them can be
 
 The second class is reported separately so it stops being counted as breakage.
 """
+import argparse
 import json
 import os
 import re
 import subprocess
 import sys
 
-ROOT = (sys.argv[1] if len(sys.argv) > 1
-        else os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "skills"))
-PLUGIN_ROOT = os.path.dirname(ROOT.rstrip("/")) if ROOT.rstrip("/").endswith("skills") else ROOT
+DEFAULT_ROOT = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "skills")
+
+
+def _plugin_root(root: str) -> str:
+    return (os.path.dirname(root.rstrip("/"))
+            if root.rstrip("/").endswith("skills") else root)
+
+
+# Set from the parsed arguments in main(); the audit functions read these.
+ROOT = DEFAULT_ROOT
+PLUGIN_ROOT = _plugin_root(DEFAULT_ROOT)
+SKILLS: list = []
 def _discover_skills(root):
     """Every skill directory under `root` that carries a SKILL.md, sorted.
 
@@ -43,8 +54,6 @@ def _discover_skills(root):
                          "to report a clean audit of nothing")
     return found
 
-
-SKILLS = _discover_skills(ROOT)
 
 # Prefixes that name the client package / run working tree, not the skill tree.
 RUNTIME_PREFIX = (
@@ -136,7 +145,18 @@ def refs_audit():
     return broken, runtime
 
 
-if __name__ == "__main__":
+def main(argv=None) -> None:
+    global ROOT, PLUGIN_ROOT, SKILLS
+    ap = argparse.ArgumentParser(
+        prog="audit_skills", description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("root", nargs="?", default=DEFAULT_ROOT,
+                    help="skills directory to audit "
+                         "(default: the plugin's own skills/)")
+    args = ap.parse_args(argv)
+    ROOT = args.root
+    PLUGIN_ROOT = _plugin_root(ROOT)
+    SKILLS = _discover_skills(ROOT)
     h = help_audit()
     broken, runtime = refs_audit()
     fails = [x for x in h if x["rc"] != 0]
@@ -148,3 +168,7 @@ if __name__ == "__main__":
         "runtime_by_skill": {s: sum(1 for x in runtime if x["skill"] == s)
                              for s in SKILLS},
     }, indent=1))
+
+
+if __name__ == "__main__":
+    main()

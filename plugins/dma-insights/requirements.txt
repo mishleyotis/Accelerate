@@ -9,18 +9,28 @@
 # Pins follow each skill's own scripts/requirements.txt where one exists.
 # Ranges are used where the skill pinned nothing, so an install here does not
 # silently downgrade an environment that already works.
+#
+# The scientific stack is ranged rather than pinned: the skills' exact pins
+# (pandas 2.0.3, numpy 1.24.3, pyarrow 12.0.0, matplotlib 3.7.2) publish no
+# cp312/cp313 wheels, so on 3.12/3.13 they resolve to sdists and a source
+# build. The lower bounds are those pins — the versions the skills were
+# validated on under 3.11. Per-interpreter resolution is pinned by the
+# constraints files alongside this one: constraints-py311.txt is the measured
+# working set, constraints-py312.txt / constraints-py313.txt pin the oldest
+# versions that publish cp312/cp313 wheels. dma-deps selects the file by
+# interpreter.
 
 # dma-assessment/scripts — retrieval, indexing, scoring QA (6 scripts)
-pandas==2.0.3
-numpy==1.24.3
-pyarrow==12.0.0
+pandas>=2.0.3,<3
+numpy>=1.24.3,<3
+pyarrow>=12,<26
 rank-bm25==0.2.2
 pdfplumber==0.9.0
 # pdfplumber -> pdfminer.six -> cryptography needs the compiled cffi backend.
 # Measured: without it ingest_evidence.py dies on ModuleNotFoundError
 # _cffi_backend, which names no package you can act on.
 cffi>=1.15
-matplotlib==3.7.2
+matplotlib>=3.7.2,<4
 
 # dma-first-call-deck/scripts — slide editors and visual QA (11 scripts)
 python-pptx>=0.6.21

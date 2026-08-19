@@ -4,10 +4,11 @@ description: Vets an assessment package before anything is parsed from it — wo
 model: opus
 effort: high
 maxTurns: 120
+mcpServers: ["connector"]
 skills:
   - dma-surface-production
   - dma-research
-disallowedTools: mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__claim_run
+disallowedTools: mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run
 ---
 
 You are the gate on the way in. Your output is a decision — ACCEPT, ACCEPT
@@ -131,3 +132,5 @@ actions.
 scored `NO_EVIDENCE`, with `Proxy_Searched = No` has had no ladder run either
 way. An absence with no search behind it is not a finding, and a top-band
 score with no search behind it is an archetype.
+
+Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.

@@ -3,8 +3,11 @@
 
 `bin/` is on the Bash tool's PATH while the plugin is enabled, so:
 
-    dma-deps check          what is missing, and which scripts each gap blocks
-    dma-deps install        pip install -r requirements.txt (current interpreter)
+    dma-deps check          what is missing, which scripts each gap blocks, and
+                            whether every requirement resolves to a wheel on the
+                            target interpreter
+    dma-deps install        pip install -r requirements.txt, pinned by the
+                            interpreter's constraints file (current interpreter)
     dma-deps install --venv into ${CLAUDE_PLUGIN_DATA}/venv instead, and print
                             the interpreter to use
     dma-deps which          the interpreter `dma-deps check` is reporting on
@@ -63,7 +66,35 @@ def venv_python() -> str | None:
 def target_python(prefer_venv: bool) -> str:
     if prefer_venv:
         return venv_python() or sys.executable
-    return venv_python() or sys.executable
+    return sys.executable
+
+
+def interpreter_version(python: str) -> tuple[int, int] | None:
+    if python == sys.executable:
+        return sys.version_info[0], sys.version_info[1]
+    out = subprocess.run(
+        [python, "-c", "import sys;print(sys.version_info[0],sys.version_info[1])"],
+        capture_output=True, text=True)
+    if out.returncode != 0:
+        return None
+    a, b = out.stdout.split()
+    return int(a), int(b)
+
+
+def constraints_path(python: str) -> str | None:
+    """Constraints file pinning this interpreter's resolution.
+
+    constraints-py311.txt is the measured working set; py312/py313 pin the
+    oldest scientific-stack versions that publish cp312/cp313 wheels — the
+    3.11 pins are sdist-only there. Minors outside 3.11–3.13 clamp to the
+    nearest measured file.
+    """
+    v = interpreter_version(python)
+    if v is None or v[0] != 3:
+        return None
+    minor = min(max(v[1], 11), 13)
+    p = os.path.join(ROOT, f"constraints-py3{minor}.txt")
+    return p if os.path.exists(p) else None
 
 
 def probe(python: str) -> dict[str, bool]:
@@ -79,8 +110,34 @@ def probe(python: str) -> dict[str, bool]:
     return json.loads(out.stdout)
 
 
+def wheels_resolve(py: str) -> int:
+    """Assert every requirement resolves to a wheel on `py`.
+
+    --ignore-installed forces a full resolution — without it an
+    already-installed package satisfies the dry run with no wheel ever
+    consulted, and a green check on 3.11 says nothing about 3.12/3.13,
+    where the un-constrained scientific pins are sdist-only.
+    """
+    cons = constraints_path(py)
+    label = os.path.basename(cons) if cons else "none found"
+    cmd = [py, "-m", "pip", "install", "--dry-run", "--ignore-installed",
+           "--only-binary", ":all:", "-r", REQS]
+    if cons:
+        cmd += ["-c", cons]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode == 0:
+        print(f"wheels: every requirement resolves to a wheel  "
+              f"(constraints: {label})")
+    else:
+        print(f"wheels: FAIL — not every requirement resolves to a wheel  "
+              f"(constraints: {label})")
+        for line in (r.stderr or r.stdout).strip().splitlines()[-8:]:
+            print(f"  {line}")
+    return r.returncode
+
+
 def cmd_check(args) -> int:
-    py = target_python(False)
+    py = target_python(True)
     have = probe(py)
     missing = [m for m, ok in have.items() if not ok]
     print(f"interpreter: {py}")
@@ -89,9 +146,10 @@ def cmd_check(args) -> int:
     for m in sorted(MODULES):
         mark = "ok  " if have[m] else "MISS"
         print(f"  [{mark}] {MODULES[m][0]:<16} {MODULES[m][1]}")
+    wheels_rc = wheels_resolve(py)
     if missing:
         print("\nblocked until installed. run: dma-deps install")
-    return 1 if missing else 0
+    return 1 if missing or wheels_rc != 0 else 0
 
 
 def cmd_install(args) -> int:
@@ -110,6 +168,9 @@ def cmd_install(args) -> int:
         py = os.path.join(vdir, "bin", "python")
 
     cmd = [py, "-m", "pip", "install", "-r", REQS]
+    cons = constraints_path(py)
+    if cons:
+        cmd += ["-c", cons]
     if args.user and not args.venv:
         cmd.append("--user")
     print(" ".join(cmd))
@@ -123,7 +184,7 @@ def cmd_install(args) -> int:
 
 
 def cmd_which(args) -> int:
-    print(target_python(False))
+    print(target_python(True))
     return 0
 
 

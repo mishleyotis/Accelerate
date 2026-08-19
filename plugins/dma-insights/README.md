@@ -1,6 +1,7 @@
 # dma-insights
 
-The six Digital Maturity Assessment skills, nine DMA agents, two operator
+The six Digital Maturity Assessment skills, twelve DMA agents — five
+producers, three pipeline QA, four standing QA/maintenance — two operator
 commands, the submit/verdict hooks and the remote DMA Insights MCP
 connector, as one installable plugin.
 
@@ -20,7 +21,7 @@ commands/  /dma-insights:doctor          is this install able to do the work?
            /dma-insights:setup-routines  reconcile the scheduled routines
 bin/       dma-deps                      on PATH while the plugin is enabled
 scripts/   mcp_auth_headers.sh · doctor.py · setup_routines.py
-           audit_skills.py · hooks/
+           audit_skills.py · hooks/ · tests/
 routines.json  the scheduled routines this product requires, declared
 .mcp.json      the deployed connector, declared remote
 ```
@@ -94,7 +95,7 @@ stand up another deployment, run the doctor against it before trusting it.
 ## Install
 
 **By upload (Claude Desktop · Cowork · claude.ai)** — one archive carries all
-six skills, all five agents, both commands and the connector declaration, so
+six skills, all twelve agents, both commands and the connector declaration, so
 nothing is installed piecemeal. Package it so that `.claude-plugin/plugin.json`
 sits at the **root of the zip** (do not wrap the contents in a folder):
 
@@ -136,7 +137,8 @@ Then, in a session, prove it rather than assuming it:
 /dma-insights:setup-routines    # the four scheduled routines, reconciled
 ```
 
-The plugin ships `defaultEnabled: false`, so nothing loads until you enable it.
+The plugin ships disabled (`defaultEnabled: false`): nothing loads until it is
+enabled after install. `/dma-insights:doctor` reports the enabled state.
 
 ## Requirements on the machine
 
@@ -199,7 +201,7 @@ if you override `mcp_base_url`, set `DMA_MCP_HOST` to the same value.
 
 ## Dependencies
 
-Seventeen bundled scripts import `pandas` or `python-pptx`. They are declared
+Twenty-two bundled scripts import `pandas` or `python-pptx`. They are declared
 in `requirements.txt`, not fixed in place:
 
 ```bash
@@ -223,6 +225,12 @@ defect) from paths in the client package or run working tree (`DMA_ROOT/…`,
 cannot resolve at rest).
 
 ## Agents
+
+Twelve in all: five producers (`surface-producer` plus the four per-page
+producers), three pipeline QA (`finding-challenger`, `page-consolidator`,
+`qa-overseer`), four standing QA/maintenance (below). The table lists the
+five invoked directly; the seven others are routed by `surface-producer`
+per the hierarchy above.
 
 | Agent | Invoke when | May submit or promote |
 |---|---|---|

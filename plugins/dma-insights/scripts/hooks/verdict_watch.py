@@ -10,10 +10,21 @@ The ledger is plumbing for a nudge, not the findings memory itself — the
 connector's `record_finding` / `report_recurrence` remain the system of
 record, written by the qa-overseer. This file never calls the network.
 """
-import collections
 import json
 import os
 import sys
+
+try:
+    import fcntl
+except ImportError:                       # non-POSIX: degrade to no lock
+    fcntl = None
+
+# The ledger is bounded plumbing, not history: the nudge needs "has this
+# gate refused twice in this install", never the full record. Counts live
+# in a sidecar read/written under the same lock, so the check is O(1) in
+# history; the JSONL keeps only the newest MAX_LEDGER_LINES rows for a
+# human reading it, rotated in place.
+MAX_LEDGER_LINES = 2000
 
 
 def _ledger_path() -> str:
@@ -59,22 +70,48 @@ def main() -> int:
     if not reasons:
         return 0
     path = _ledger_path()
+    counts_path = path + ".counts.json"
     run_id = (event.get("tool_input") or {}).get("run_id")
-    with open(path, "a") as f:
-        for r in reasons:
-            f.write(json.dumps({"run_id": run_id, **r}) + "\n")
-    counts = collections.Counter()
+    # One newline-terminated write per EVENT (not per reason), under an
+    # exclusive lock: concurrent per-page producers fire PostToolUse
+    # together, and interleaved partial appends corrupt JSONL.
+    record = "".join(json.dumps({"run_id": run_id, **r}) + "\n"
+                     for r in reasons)
     try:
-        with open(path) as f:
-            for line in f:
-                try:
-                    counts[json.loads(line).get("gate_id")] += 1
-                except ValueError:
-                    continue
+        with open(path, "a+") as f:
+            if fcntl is not None:
+                fcntl.flock(f, fcntl.LOCK_EX)
+            f.write(record)
+            f.flush()
+            # counts sidecar: read-modify-write inside the same lock
+            try:
+                with open(counts_path) as cf:
+                    counts = json.load(cf)
+                if not isinstance(counts, dict):
+                    counts = {}
+            except (OSError, ValueError):
+                counts = {}
+            for r in reasons:
+                counts[r["gate_id"]] = int(counts.get(r["gate_id"], 0)) + 1
+            tmp = counts_path + ".tmp"
+            with open(tmp, "w") as cf:
+                json.dump(counts, cf)
+            os.replace(tmp, counts_path)
+            # bound the human-readable ledger: rotate in place past the cap
+            f.seek(0)
+            lines = f.readlines()
+            if len(lines) > MAX_LEDGER_LINES:
+                keep = lines[-MAX_LEDGER_LINES:]
+                tmp = path + ".tmp"
+                with open(tmp, "w") as lf:
+                    lf.writelines(keep)
+                os.replace(tmp, path)
+            if fcntl is not None:
+                fcntl.flock(f, fcntl.LOCK_UN)
     except OSError:
         return 0
     repeats = sorted(g for g in {r["gate_id"] for r in reasons}
-                     if counts.get(g, 0) >= 2)
+                     if int(counts.get(g, 0)) >= 2)
     if repeats:
         print("dma-insights: gate(s) "
               + ", ".join(repeats)

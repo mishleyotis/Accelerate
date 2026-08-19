@@ -4,6 +4,7 @@ description: Consolidates challenged surface JSON into one coherent page for one
 model: opus
 effort: high
 maxTurns: 120
+mcpServers: ["connector"]
 skills:
   - dma-surface-production
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__withdraw_run
@@ -47,3 +48,5 @@ The assembled page payload, plus a consolidation report: challenges
 repaired / overruled (with reasons), reconciliations checked, orphan
 evidence, thread rewrites, and anything you left for the qa-overseer to
 record. The surface-producer submits; you never do.
+
+Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.

@@ -98,10 +98,14 @@ def test_r_layer_never_reaches_a_customer_body_however_it_is_marked():
     from dma_api.redaction import NEVER_SERVED_KEYS
     assert "r_layer" in NEVER_SERVED_KEYS
     assert "r_layer" not in CUSTOMER_STRIP_KEYS
-    body = {"r_layer": {"verdict": "ACCEPT"}, "rows": [{"r_layer": {"x": 1}}]}
+    # fields[] is firmographics' contract key — the customer allowlist
+    # (2026-08-19) drops non-contract keys, so the fixture must be
+    # contract-shaped for the nested assertion to say anything.
+    body = {"r_layer": {"verdict": "ACCEPT"},
+            "fields": [{"r_layer": {"x": 1}, "label": "Assets"}]}
     out, _ = redact_section("overview", "firmographics", body, [], "customer")
     assert "r_layer" not in out
-    assert "r_layer" not in out["rows"][0], "nested r_layer survived"
+    assert "r_layer" not in out["fields"][0], "nested r_layer survived"
 
 
 def test_the_withheld_set_is_not_silently_shrunk():
