@@ -74,14 +74,33 @@ function resolveChromium() {
     ? [process.env.PLAYWRIGHT_BROWSERS_PATH]
     : ["/opt/pw-browsers",
        path.join(process.env.HOME || "/root", ".cache", "ms-playwright")];
+  // The layout is NOT stable across Playwright releases and a hardcoded list
+  // of paths is how this broke on its first CI run: the container ships
+  // chromium-1194 with `chrome-linux/chrome`, and `npx playwright@1.62.1
+  // install` writes chromium-1234 with `chrome-linux64/chrome`. Known paths
+  // first because they are cheap, then a shallow scan of the build directory
+  // for an executable with the right name, so the next rename costs nothing.
+  const KNOWN = ["chrome-linux/chrome", "chrome-linux64/chrome",
+                 "chrome-linux/headless_shell", "chrome-linux64/headless_shell",
+                 "chrome-mac/Chromium.app/Contents/MacOS/Chromium"];
+  const NAMES = new Set(["chrome", "headless_shell", "chromium"]);
   for (const root of roots) {
     let entries;
     try { entries = fs.readdirSync(root); } catch { continue; }
     for (const d of entries.filter((x) => x.startsWith("chromium"))) {
-      for (const exe of ["chrome-linux/chrome", "chrome-linux/headless_shell",
-                         "chrome-mac/Chromium.app/Contents/MacOS/Chromium"]) {
+      for (const exe of KNOWN) {
         const p = path.join(root, d, exe);
         if (fs.existsSync(p)) return p;
+      }
+      let subs;
+      try { subs = fs.readdirSync(path.join(root, d)); } catch { continue; }
+      for (const sub of subs) {
+        for (const name of NAMES) {
+          const p = path.join(root, d, sub, name);
+          try {
+            if (fs.statSync(p).isFile()) { fs.accessSync(p, fs.constants.X_OK); return p; }
+          } catch { /* not this one */ }
+        }
       }
     }
   }

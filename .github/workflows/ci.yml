@@ -266,14 +266,27 @@ jobs:
       # including the four visual-QA gates added for the round-3 brief. The
       # harness now FAILS instead of skipping when CI is set, so this step
       # going missing is a red build rather than a quiet one.
-      - working-directory: apps/web
+      - name: Install Chromium for the browser-driven suites
         # The full package only to FETCH the browser, at the same version
         # playwright-core is pinned to: a driver and a browser build from
         # different releases either hang on launch or crash mid-navigation,
         # which is worse than not running at all because it looks like a
         # product failure. `npx` keeps the installer out of the dependency
         # tree; the runner the tests require is playwright-core.
-        run: npx --yes playwright-core@1.62.1 install --with-deps chromium
+        run: |
+          npx --yes playwright@1.62.1 install --with-deps chromium
+          # VERIFY THE INSTALL, here, where the message is short. The first
+          # attempt used playwright-core's CLI, which downloaded nothing and
+          # exited 0 — so the job carried on and failed twelve test files
+          # later with `executablePath: expected string, got object`, which
+          # names neither the cause nor the step.
+          node -e "
+            const { resolveChromium } = require('./tests/proto-page-harness.js');
+            const p = resolveChromium();
+            if (!p) { console.error('no chromium after install'); process.exit(1); }
+            console.log('chromium at', p);
+          "
+        working-directory: apps/web
       - working-directory: apps/web
         run: npm run build:proto
       - working-directory: apps/web

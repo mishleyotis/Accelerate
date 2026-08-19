@@ -138,11 +138,11 @@ def main() -> int:
     ap.add_argument("--page", default="overview")
     a = ap.parse_args()
 
-    gaps = []
+    gaps, compared = [], 0
     if a.reference_file and a.target_file:
         ref = json.loads(open(a.reference_file).read())
         tgt = json.loads(open(a.target_file).read())
-        gaps = compare_page(a.page, ref, tgt)
+        gaps, compared = compare_page(a.page, ref, tgt), 1
     elif a.api and a.reference and a.target:
         for page in PAGES:
             ref, rs = _fetch(a.api, a.reference, page, a.audience, a.token)
@@ -150,6 +150,7 @@ def main() -> int:
             if ref is None:
                 print(f"  [skip] reference {page}: HTTP {rs}")
                 continue
+            compared += 1
             if tgt is None:
                 # A page the target cannot serve at all is the largest gap
                 # there is, and it is not a shape question.
@@ -162,8 +163,19 @@ def main() -> int:
     else:
         ap.error("--api with --reference/--target, or both --*-file")
 
+    # A COMPARISON THAT COMPARED NOTHING IS NOT A CLEAN COMPARISON, and this
+    # gate said otherwise on its first live run: a mistyped reference slug
+    # 404ed on all six pages and it printed "no structural gap". That is the
+    # CHECK_NEVER_RAN_READS_AS_UNKNOWN shape, in the gate written to catch a
+    # sibling of it.
+    if not compared:
+        print("Gate J: the reference client served NO page — nothing was "
+              "compared, so nothing is clean. Check the reference slug "
+              "against /v1/directory and the audience the token can read.")
+        return 1
     if not gaps:
-        print("Gate J: no structural gap against the reference client.")
+        print(f"Gate J: no structural gap against the reference client "
+              f"({compared} page(s) compared).")
         return 0
     print(f"Gate J: {len(gaps)} structural gap(s) against the reference:")
     for g in gaps:

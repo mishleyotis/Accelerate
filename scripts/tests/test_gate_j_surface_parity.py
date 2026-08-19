@@ -110,3 +110,21 @@ def test_several_gaps_are_all_reported_not_just_the_first():
     tgt = page(a=sec({"x": [1]}))
     assert kinds(compare_page("overview", ref, tgt)) == [
         ("key_absent", "a", "y"), ("section_absent", "b", None)]
+
+
+def test_a_comparison_that_compared_nothing_is_not_clean():
+    """Measured on the first live run: a mistyped reference slug 404ed on all
+    six pages and the gate printed "no structural gap". A gate that reports
+    clean after reading nothing is the failure it was written to catch, one
+    level up — so the CLI refuses rather than passing."""
+    import subprocess
+    import sys as _sys
+    from pathlib import Path as _P
+    root = _P(__file__).resolve().parents[2]
+    r = subprocess.run(
+        [_sys.executable, str(root / "scripts" / "gate_j_surface_parity.py"),
+         "--api", "http://127.0.0.1:1", "--reference", "nope",
+         "--target", "also-nope"],
+        capture_output=True, text=True, timeout=120)
+    assert r.returncode == 1, "a comparison of nothing exited 0"
+    assert "nothing was compared" in r.stdout, r.stdout[:400]
