@@ -93,6 +93,12 @@ if [ -f apps/mcp/Dockerfile ]; then
   # reads it, and it is the same copy the api's evidence projection reads.
   cp packages/shared/abbreviations.py apps/mcp/shared/ || {
     echo "FATAL: packages/shared/abbreviations.py is missing" >&2; exit 1; }
+  # The platform fit engine. `get_platform_fit` computes from it and CG-30
+  # re-runs it at submit, so a missing copy would take the tool down and the
+  # gate with it -- the gate that exists because four definitions of one
+  # number reached two clients.
+  cp packages/shared/platform_fit.py apps/mcp/shared/ || {
+    echo "FATAL: packages/shared/platform_fit.py is missing" >&2; exit 1; }
   # Capability-URL token: the streamable-HTTP path embeds it, so the
   # Cowork connector needs only the URL. Rotating the secret rotates the
   # URL. Created once, never echoed.

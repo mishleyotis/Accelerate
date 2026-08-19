@@ -1313,6 +1313,93 @@ def _scope_for(obj: dict):
     return ("run", None)
 
 
+def _check_platform_fit_is_the_engine_s(conn, run_id, page, payload) -> list:
+    """CG-30 — the fit on the card is the fit the engine computed.
+
+    THE DEFECT, reported 2026-08-19: "Platform fit scores calculation is very
+    different from Baxter's." There were four definitions of one number. The
+    Surface Spec's, engine v2's (which the Spec names and mis-transcribes),
+    Baxter's — 76.5, whose own basis says it was read from the OPPORTUNITY
+    tile — and Logix's, which was null on all five.
+
+    The engine exists now and the contract's rule applies: "read, never
+    recomputed — the agent EXPLAINS it, never recomputes or re-ranks it."
+    This is what makes that enforceable. The producer's own inputs
+    (`l3_area`, `alignment`, `readiness`) are fed back through the engine and
+    the answer must match what it shipped, within the charter's 0.05 grain
+    tolerance.
+
+    Two absences are refused as well as a disagreement:
+      · a card with no `fit_score` at all — five nulls is what the reported
+        client shipped, and a page that cannot rank is not a ranking;
+      · a card whose `rank` disagrees with the engine's ordering, because a
+        correct number in the wrong order is the same page.
+    """
+    if page != "platform":
+        return []
+    body = (payload or {}).get("platform_story")
+    if not isinstance(body, dict):
+        return []
+    rows = body.get("platforms")
+    if not isinstance(rows, list) or not rows:
+        return []
+
+    candidates, out = [], []
+    for i, r in enumerate(rows):
+        if not isinstance(r, dict):
+            continue
+        if r.get("fit_score") is None:
+            out.append(_reason(
+                "CG-30", "platform_story",
+                f"platform.platform_story.platforms[{i}].fit_score",
+                "no fit score on this card. Call `get_platform_fit` and read "
+                "the number it returns; a platform page whose cards cannot be "
+                "ranked is not a ranking. If the engine cannot score it, that "
+                "is what `state` is for."))
+        candidates.append({"platform": r.get("platform"),
+                           "l3_area": r.get("l3_area"),
+                           "alignment": r.get("alignment"),
+                           "alignment_quote": r.get("alignment_quote"),
+                           "readiness": r.get("readiness") or "green"})
+    if out:
+        return out[:6]
+
+    try:
+        from . import fit as fit_mod
+        computed = fit_mod.platform_fit(conn, run_id, candidates)
+    except Exception as exc:                        # noqa: BLE001
+        # A gate that cannot run says so rather than passing: this file's
+        # whole subject is checks that report clean because they never ran.
+        return [_reason("CG-30", "platform_story", "platform.platform_story",
+                        f"the fit engine could not be run for this payload "
+                        f"({str(exc)[:120]}), so the scores on these cards are "
+                        f"unchecked. That is a refusal, not a pass.")]
+
+    by_name = {str(p.get("platform")): p for p in computed.get("platforms", [])}
+    for i, r in enumerate(rows):
+        if not isinstance(r, dict):
+            continue
+        got = by_name.get(str(r.get("platform")))
+        if got is None:
+            continue
+        if abs(float(r["fit_score"]) - float(got["fit_score"])) > 0.05:
+            out.append(_reason(
+                "CG-30", "platform_story",
+                f"platform.platform_story.platforms[{i}].fit_score",
+                f"the card says {r['fit_score']} and the engine computes "
+                f"{got['fit_score']} from the same inputs. Read the engine's "
+                f"number; explaining it is your job, recomputing it is not. "
+                f"{got['fit_basis']}"))
+        elif r.get("rank") is not None and int(r["rank"]) != int(got["rank"]):
+            out.append(_reason(
+                "CG-30", "platform_story",
+                f"platform.platform_story.platforms[{i}].rank",
+                f"ranked {r['rank']} on the card, {got['rank']} by the engine. "
+                "A correct score in the wrong order is the same defect: the "
+                "reader takes the top card as the recommendation."))
+    return out[:6]
+
+
 def validate_pass2(conn, run_id, page: str, payload: dict,
                    encoder=None) -> tuple:
     """→ (blocking_reasons, sg_disclosures). SG results are also recorded
@@ -1364,6 +1451,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     # Runs whether or not anything was cited: the whole point of ET-09 is the
     # contamination that never cites, so it must not sit inside `if cited:`.
     reasons.extend(_check_foreign_entity_prose(conn, run_id, payload))
+    reasons.extend(_check_platform_fit_is_the_engine_s(
+        conn, run_id, page, payload))
 
     served = _served_figures(conn, run_id)
 

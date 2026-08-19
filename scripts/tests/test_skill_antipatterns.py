@@ -129,3 +129,49 @@ def test_the_step_is_reachable_from_the_skill_index():
              / "dma-surface-production" / "SKILL.md").read_text()
     assert "7-memory-first.md" in index, \
         "the memory step exists and SKILL.md does not send anyone to it"
+
+
+# ── the fit score the producer must READ, not author ───────────────────
+
+PLATFORM_PAGE = (ROOT / "plugins" / "dma-insights" / "skills"
+                 / "dma-surface-production" / "03-pages" / "4-platform.md")
+
+
+def test_the_platform_page_sends_the_producer_to_the_engine():
+    """Until 2026-08-19 the engine the contract named existed only in the
+    legacy snapshot, so there was nothing to read and two clients answered
+    the gap two ways — one shipped 76.5 read off the opportunity tile, the
+    other shipped five nulls."""
+    text = PLATFORM_PAGE.read_text()
+    assert "get_platform_fit" in text, \
+        "the page no longer names the tool that computes the fit"
+    assert "CG-30" in text, "the page does not say what refuses a wrong fit"
+
+
+def test_the_page_states_that_readiness_multiplies():
+    """The owner chose the multiplicative shape over the Spec's additive one
+    precisely so a red platform cannot render hot. A producer who reads the
+    Spec's formula instead will argue a red platform into first place."""
+    text = PLATFORM_PAGE.read_text()
+    assert "MULTIPLIES" in text
+    assert "0.62" in text and "62" in text
+
+
+def test_the_page_and_the_engine_agree_on_the_weights():
+    """The one place a producer sees the arithmetic must be the arithmetic.
+    Written twice — prose and code — so they are compared."""
+    import sys
+    sys.path.insert(0, str(ROOT / "packages" / "shared"))
+    import platform_fit as pf
+    text = PLATFORM_PAGE.read_text()
+    for w in (pf.W_OPPORTUNITY, pf.W_INTERCONNECT, pf.W_ABSENT, pf.W_ALIGNMENT):
+        assert f"{round(w, 3)}" in text or f"{round(w, 2)}" in text, \
+            f"the page does not state the weight {w} the engine uses"
+
+
+def test_the_page_tells_a_producer_to_omit_an_unestablished_alignment():
+    """Sending 0 is a different claim from not knowing, and the contract is
+    explicit about which to do."""
+    text = PLATFORM_PAGE.read_text()
+    assert "omit `alignment`" in text or "omit **`alignment`**" in text
+    assert "impact_fallback" in text

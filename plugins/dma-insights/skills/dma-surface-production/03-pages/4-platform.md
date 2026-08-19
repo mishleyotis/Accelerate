@@ -27,9 +27,55 @@ Read `01-start-here/1-standing-clauses.md` before writing any section on this pa
 
 Five platform tiles, each with its fit score, the gaps it addresses, and a story that is about THIS client.
 
-The fit score is computed by engine v2 and is deterministic — the agent EXPLAINS it, never recomputes or re-ranks it.
+### The fit score comes from `get_platform_fit`. Call it. Read it.
 
-The breakdown modal must agree with the headline fit (570 of 685 cards disagreed).
+**Refused by CG-30.** The engine is real now and lives in
+`packages/shared/platform_fit.py`; the connector runs it for you and re-runs it
+at submit against your own inputs. A card whose `fit_score` differs by more
+than 0.05, whose `rank` disagrees with the engine's ordering, or that carries
+no score at all is refused.
+
+Until 2026-08-19 the engine the contract named existed only in the legacy
+snapshot, so there was nothing to read and two clients answered the gap two
+ways — one shipped `76.5` read off the OPPORTUNITY tile, the other shipped five
+nulls. That is the whole reason this section exists.
+
+**You supply judgement. The run supplies fact.**
+
+| You send | The engine reads from the run |
+|---|---|
+| `platform` — the name a client would say | which cells the L3 area reaches |
+| `l3_area` — the catalogue area it belongs to | each cell's distance from the target band |
+| `alignment` 0–1 + `alignment_quote` | the severity of the issues on each cell |
+| `readiness` — green / amber / red | how well each cell is evidenced |
+| | whether the register calls the family absent |
+
+**`alignment` is the objective in the client's own words.** Same 0–1 key the
+findings ranking already uses: *"15–30 words PLUS a 0-1 score, quoting the
+entity's OWN stated objective."* Quote it in `alignment_quote`. If you could
+not establish an objective, **omit `alignment`** — omitting renormalises to the
+three-term blend and reports `impact_fallback`, which is what the contract
+instructs. Sending `0` is a different claim: it says you established that this
+platform serves nothing they are trying to do.
+
+**Readiness MULTIPLIES.** Red is ×0.62, so the highest reachable red fit is 62
+and a platform whose prerequisites are failing cannot render hot. A 2026-06
+audit found 95 of 470 cards scoring ≥80 with every prerequisite red; this is
+that defect made arithmetically impossible. Do not argue a red platform into
+first place in prose — the number will not support you and CG-30 will refuse
+the card.
+
+**Rank-1 has to be defensible as the client's own priority.** The engine gives
+alignment a fifth of the weight precisely so that a broad platform serving no
+stated objective does not outrank a narrower one that does. If the engine's
+rank-1 is not the platform you would argue for, that is a signal about your
+`alignment` inputs, not licence to re-order: fix the input, or say in
+`story_md` why the arithmetic ranks it there and what you would argue instead.
+
+The breakdown modal must agree with the headline fit (570 of 685 cards
+disagreed). Everything needed to reproduce the number is on the row the engine
+returns — `factors[]`, `subtotal`, `readiness_multiplier` — so copy them
+rather than restating them.
 
 Out-of-vertical rank-1 is a defect: a carrier platform must not top a bank's list.
 
@@ -293,7 +339,7 @@ rule and it is not optional on this page.
 
 | Field / element | Source of truth | Where it comes from |
 | --- | --- | --- |
-| platforms[].fit_score | platform_fit.py engine v2 | fit = 100 × (0.66·opportunity + 0.34·readiness); read, never recomputed |
+| platforms[].fit_score | `get_platform_fit` (packages/shared/platform_fit.py) | fit = 100 × (0.528·opportunity + 0.208·interconnect + 0.064·greenfield + 0.20·alignment) × readiness_multiplier; read, never recomputed. The Spec's "0.34 × readiness" is a mis-transcription — 0.26 + 0.08 = 0.34, and those are interconnect and greenfield, not readiness (owner adjudication 2026-08-19) |
 | platforms[].gaps[] | scoring workbook | the subcapabilities this platform addresses |
 | platforms[].story_md | producer | grounded in the client's own gaps and stack |
 | platforms[].estate_reach | the run's own tech register | `linked_subcap_ids` per row against the cells this run scores — computed, never asserted |

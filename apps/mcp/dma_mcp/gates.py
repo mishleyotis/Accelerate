@@ -207,6 +207,19 @@ GATES = {
               "sections may connect to the story the same way; they may not "
               "say so in the same words.",
               "block"),
+    "CG-30": ("The fit on the card is the fit the engine computed", None,
+              "Every platform card carries a fit score, and it matches what "
+              "the shared engine computes from that card's own inputs within "
+              "the 0.05 grain tolerance — rank included.",
+              "There were four definitions of one number: the Surface Spec's, "
+              "engine v2's (which the Spec names and mis-transcribes), one "
+              "client's 76.5 read from the OPPORTUNITY tile, and another's "
+              "five nulls. The contract's rule is that the agent EXPLAINS the "
+              "fit and never recomputes or re-ranks it; this is what makes "
+              "that checkable. A correct score in the wrong order is the same "
+              "defect, because the reader takes the top card as the "
+              "recommendation.",
+              "block"),
     "CG-04": ("No invented fields", None,
               "No field outside the section contract, envelope included.",
               "Payload shapes are law; an invented field is a contract fork.",

@@ -40,6 +40,7 @@ from dma_mcp import ledger as ledger_mod
 from dma_mcp import memory as memory_mod
 from dma_mcp import promote as promote_mod
 from dma_mcp import register as register_mod
+from dma_mcp import fit as fit_mod
 from dma_mcp import staged as staged_mod
 from dma_mcp import submit as submit_mod
 from dma_mcp import transport as transport_mod
@@ -127,6 +128,39 @@ def get_capability_catalogue(run_id: str) -> dict:
     never copy a name out of report prose."""
     with _conn() as c:
         return bundle_mod.get_capability_catalogue(c, run_id)
+
+
+@mcp.tool()
+@_traced
+def get_platform_fit(run_id: str, candidates: list) -> dict:
+    """The fit score for each candidate platform, computed here and READ by
+    you — never recomputed, never re-ranked (the contract's rule, and the
+    same one `register_evidence` applies to the rank score).
+
+    You supply judgement only, per candidate:
+      `platform`         the platform's name as a client would say it
+      `l3_area`          the catalogue L3 area it belongs to; the cells it
+                         addresses are resolved from this, not from a list
+                         you write
+      `alignment`        0..1, how well it serves an objective the ENTITY
+                         states. Quote that objective in `alignment_quote`.
+                         OMIT it where you could not establish one — omitting
+                         renormalises to the three-term blend and reports
+                         `impact_fallback`, which is the contract's
+                         instruction; sending 0 says you established that it
+                         serves nothing, which is a different claim.
+      `readiness`        green | amber | red, from the prerequisite checks
+
+    Everything else is the run's: which cells the area reaches, each cell's
+    distance from the target band, the severity of the issues on it, how well
+    it is evidenced, and whether the register calls the family absent.
+
+    Readiness MULTIPLIES rather than adding, so a platform whose prerequisites
+    are red cannot reach the hot band. That is deliberate: a 2026-06 audit
+    found 95 of 470 cards scoring hot with every prerequisite failing.
+    """
+    with _conn() as c:
+        return fit_mod.platform_fit(c, run_id, candidates)
 
 
 @mcp.tool()
