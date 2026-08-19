@@ -196,7 +196,7 @@ jobs:
           POSTGRES_DB: dma_insights
         ports: ['5432:5432']
         options: >-
-          --health-cmd pg_isready --health-interval 5s
+          --health-cmd "pg_isready -U postgres -d dma_insights" --health-interval 5s
           --health-timeout 5s --health-retries 20
     env:
       LOCAL_DATABASE_URL: postgresql://postgres:local@localhost:5432/dma_insights
@@ -229,6 +229,33 @@ jobs:
         run: |
           pip install -q -r requirements.txt
           python -m alembic upgrade head
+      # PROVE THE SCHEMA IS THERE, through the exact call the fixtures make.
+      #
+      # Every DB-backed fixture in this repo wraps its connect in
+      # `except Exception: pytest.skip("no migrated local database")`, so a
+      # database that is unreachable, unmigrated, or reachable-but-different
+      # all produce the same silent skip. Measured 2026-08-19: one run got as
+      # far as an FK violation inside a fixture (so the schema was there) and
+      # the next skipped 66 tests with no other change to this job. Without a
+      # step that fails on its own terms, the two are indistinguishable in the
+      # log, and the ceiling check below reports the symptom rather than the
+      # cause.
+      - name: The database the fixtures will actually open
+        run: |
+          python - <<'PROOF'
+          import sys
+          import pg8000.dbapi
+          print("python", sys.version.split()[0], "· pg8000", pg8000.__version__)
+          c = pg8000.dbapi.connect(host="localhost", port=5432, user="postgres",
+                                   password="local", database="dma_insights")
+          cur = c.cursor()
+          cur.execute("SELECT count(*) FROM pg_tables WHERE schemaname='public'")
+          n = cur.fetchone()[0]
+          print("public tables:", n)
+          if n < 100:
+              raise SystemExit(f"only {n} tables — alembic did not reach head "
+                               "against the database these tests open")
+          PROOF
       # One run, and the skip count is read from it. A skip is how this job hid
       # 30 modules for the whole build, so the count is asserted rather than
       # printed: measured on a fresh migrated database the suite is 1397
@@ -243,7 +270,11 @@ jobs:
                  scripts/tests/ -q -rs 2>&1 | tee /tmp/pytest.txt
           n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
           echo "skipped: ${n:-0} (ceiling 3)"
-          test "${n:-0}" -le 3
+          if [ "${n:-0}" -gt 3 ]; then
+            echo "--- the reasons, most common first ---"
+            grep '^SKIPPED' /tmp/pytest.txt | sed 's/.*: //' | sort | uniq -c | sort -rn | head
+            exit 1
+          fi
 
   # The frontend has its own suite (node's built-in runner, no framework) and
   # it too had never run here. It is the only place the COMPILED bundle is
