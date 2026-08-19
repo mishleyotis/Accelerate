@@ -148,6 +148,13 @@ class Candidate:
     readiness: str = "green"                    # green | amber | red
     alignment: float | None = None              # 0..1, the entity's own objective
     alignment_quote: str | None = None
+    # Platforms this one needs FIRST. Engine v2 computed a prerequisite DAG
+    # beside the fit and this build dropped it; the omission was caught by
+    # scoring a real client, where a workload the institution places ON the
+    # new foundation outranked the foundation itself because the foundation
+    # was not ready yet. Ranking the visible next step above the thing it
+    # depends on is the exact move that client's own answer warns against.
+    depends_on: tuple = ()
 
 
 def _clamp(v, lo=0.0, hi=1.0):
@@ -296,21 +303,77 @@ def _tie_key(row: dict) -> tuple:
             -greenfield, row["platform"])
 
 
+def _sequence(rows) -> list:
+    """Reorder so a platform never precedes something it depends on.
+
+    Fit decides the order; this repairs it. A stable pass over the fit order,
+    emitting a card only once every prerequisite present in this set has been
+    emitted — so among cards with no dependency between them the fit order is
+    untouched, and the repair is visible on the row that moved.
+
+    A cycle cannot deadlock the page: once nothing is emittable the remaining
+    cards are appended in fit order and each says its prerequisite was not
+    resolvable. A ranking that hangs is worse than one that discloses.
+    """
+    remaining = list(rows)
+    names = {r["platform"] for r in remaining}
+    out, placed = [], set()
+    while remaining:
+        # THE BEST AVAILABLE CARD, not the first one the scan reaches. A
+        # first-found pass let a 30.9 card precede a 47.5 one that was merely
+        # waiting on one more prerequisite — the sequencing repair silently
+        # became the ranking. `remaining` is already in fit order, so the
+        # first emittable entry IS the highest-fit emittable one.
+        progressed = False
+        for r in list(remaining):
+            need = {d for d in (r.get("depends_on") or ()) if d in names}
+            if need <= placed:
+                out.append(r)
+                placed.add(r["platform"])
+                remaining.remove(r)
+                progressed = True
+                break                    # re-scan from the top: placing this
+                                         # card may free a better one
+        if not progressed:
+            for r in remaining:
+                r["sequence_note"] = (
+                    "prerequisite chain could not be resolved (it names a "
+                    "platform that in turn waits on this one); ranked on fit "
+                    "alone")
+            out.extend(remaining)
+            break
+    return out
+
+
 def rank(candidates) -> list:
-    """Scored and ranked, highest fit first. `rank` is 1-based and assigned
-    after the tie-break, so two cards never share one."""
-    rows = sorted((score(c) for c in candidates), key=_tie_key)
+    """Scored, then sequenced. `rank` is 1-based and assigned after both, so
+    two cards never share one and no card precedes its own prerequisite."""
+    scored = sorted((score(c) for c in candidates), key=_tie_key)
+    depends = {str(c.platform): tuple(getattr(c, "depends_on", ()) or ())
+               for c in candidates}
+    for r in scored:
+        r["depends_on"] = list(depends.get(r["platform"], ()))
+    fit_order = [r["platform"] for r in scored]
+    rows = _sequence(scored)
+
     for i, row in enumerate(rows, start=1):
         row["rank"] = i
+        moved = fit_order.index(row["platform"]) != (i - 1)
         terms = " + ".join(
             "{w} x {n}".format(w=f["weight"], n=f["name"].lower())
             for f in row["factors"])
+        row["rank_basis"] = (
+            "fit" if not moved else
+            "sequenced: it is held behind " + ", ".join(row["depends_on"])
+            if row["depends_on"] else
+            "sequenced: another card on this page waits on it")
         row["fit_basis"] = (
             "Computed by the shared platform-fit engine: 100 x ({terms})"
             " x {mult} readiness = {fit}. Readiness is a multiplier, not an"
             " addend: a platform whose prerequisites are red cannot reach the"
-            " hot band ({hot}). Alignment basis: {basis}.".format(
+            " hot band ({hot}). Alignment basis: {basis}. Rank basis:"
+            " {rank_basis}.".format(
                 terms=terms, mult=row["readiness_multiplier"],
                 fit=row["fit_score"], hot=HOT_THRESHOLD,
-                basis=row["alignment_basis"]))
+                basis=row["alignment_basis"], rank_basis=row["rank_basis"]))
     return rows

@@ -265,3 +265,55 @@ def test_every_row_carries_the_basis_that_explains_it():
     row = pf.rank([cand("P", [cell("P1C1.1.1")], alignment=0.5)])[0]
     assert "multiplier" in row["fit_basis"]
     assert str(row["fit_score"]) in row["fit_basis"]
+
+
+# ── the prerequisite sequence, which engine v2 had and this dropped ────
+
+def test_a_dependent_never_precedes_its_prerequisite():
+    foundation = cand("Foundation", [cell("P1C1.1.1")], readiness="red",
+                      alignment=0.9)
+    workload = pf.Candidate("Workload", "B", [cell("P1C1.1.2")],
+                            readiness="green", alignment=0.7,
+                            depends_on=("Foundation",))
+    order = [r["platform"] for r in pf.rank([foundation, workload])]
+    assert order == ["Foundation", "Workload"], order
+
+
+def test_the_card_that_moved_says_why():
+    foundation = cand("Foundation", [cell("P1C1.1.1")], readiness="red",
+                      alignment=0.9)
+    workload = pf.Candidate("Workload", "B", [cell("P1C1.1.2")],
+                            readiness="green", alignment=0.7,
+                            depends_on=("Foundation",))
+    held = next(r for r in pf.rank([foundation, workload])
+                if r["platform"] == "Workload")
+    assert "Foundation" in held["rank_basis"]
+    assert "sequenced" in held["rank_basis"]
+
+
+def test_a_prerequisite_naming_a_platform_not_on_this_page_is_ignored():
+    """A dependency on something the page does not carry cannot be satisfied
+    and must not hold a card back forever."""
+    solo = pf.Candidate("Solo", "A", [cell("P1C1.1.1")], alignment=0.5,
+                        depends_on=("Something else entirely",))
+    assert pf.rank([solo])[0]["rank"] == 1
+
+
+def test_a_dependency_cycle_discloses_instead_of_hanging():
+    """A ranking that hangs is worse than one that says its chain is broken."""
+    a = pf.Candidate("A", "a", [cell("P1C1.1.1")], alignment=0.5,
+                     depends_on=("B",))
+    b = pf.Candidate("B", "b", [cell("P1C1.1.2")], alignment=0.5,
+                     depends_on=("A",))
+    rows = pf.rank([a, b])
+    assert len(rows) == 2 and [r["rank"] for r in rows] == [1, 2]
+    assert any("could not be resolved" in (r.get("sequence_note") or "")
+               for r in rows)
+
+
+def test_sequencing_never_loses_or_duplicates_a_card():
+    cards = [pf.Candidate(f"P{i}", "a", [cell(f"P1C1.1.{i}")], alignment=0.5,
+                          depends_on=("P0",) if i else ())
+             for i in range(5)]
+    rows = pf.rank(cards)
+    assert sorted(r["platform"] for r in rows) == [f"P{i}" for i in range(5)]
