@@ -35,6 +35,7 @@ from dma_mcp import evidence_tools
 from dma_mcp import feedback as feedback_mod
 from dma_mcp import gaps as gaps_mod
 from dma_mcp import gates as gates_mod
+from dma_mcp import ledger as ledger_mod
 from dma_mcp import memory as memory_mod
 from dma_mcp import promote as promote_mod
 from dma_mcp import register as register_mod
@@ -158,7 +159,8 @@ def get_run_progress(run_id: str) -> dict:
 
 @mcp.tool()
 @_traced
-def get_staged_payload(run_id: str, page: str, section: str = "") -> dict:
+def get_staged_payload(run_id: str, page: str, section: str = "",
+                       submission_id: str = "", part: int = 0) -> dict:
     """What you last submitted for a page — STAGED, verbatim, unredacted.
 
     The read half of submit, and what makes the one-card repair the skill
@@ -170,11 +172,26 @@ def get_staged_payload(run_id: str, page: str, section: str = "") -> dict:
     inline budget is DESCRIBED rather than returned, because a truncated copy
     resubmitted would silently empty a complete section.
 
+    `part` reads an OVERSIZE section in numbered chunks: call once without it
+    to learn `parts`, then part=1..N, concatenate the `chunk` strings in order
+    and json.loads the result. The read half of the chunked write, and for the
+    same reason — a section you can submit in parts you must be able to read
+    in parts, or a resubmit that drops one strands it.
+
+    `submission_id` reads a SUPERSEDED submission instead of the live one.
+    That is the recovery route for the one trap this tool has: a resubmit
+    supersedes, so if your new payload omitted a section the old one carried
+    — most easily because the section was over the inline budget and the read
+    DESCRIBED it rather than returning it — the resubmit fails on CG-01 and
+    the content is behind a row you can no longer reach. Nothing is lost from
+    the database; pass the old id (`get_run_progress` had it) and read it back.
+
     This is not the served projection: the serve layer strips `internal_only`
     and redacts for audience, and a payload with those removed cannot be
     resubmitted — it would promote the redaction."""
     with _conn() as c:
-        return staged_mod.get_staged_payload(c, run_id, page, section)
+        return staged_mod.get_staged_payload(c, run_id, page, section,
+                                             submission_id, part)
 
 
 @mcp.tool()
@@ -390,6 +407,67 @@ def explain_gate(gate_id: str) -> dict:
 # Embedding happens HERE, at write time, inside the connector — the same place
 # and the same model V4 uses at submit. Invariant 1 forbids a model call on the
 # SERVING request path; this is not one. Do not read it as licence.
+@mcp.tool()
+@_traced
+def record_enrichment(display_id: str, facet: str, source: str,
+                      run_id: str = "", account: str = "",
+                      rows_written: int = 0, note: str = "") -> dict:
+    """Record that one FACET of a client was enriched. Call it every time.
+
+    This is the MCP half of the enrichment-versioning contract. Without it,
+    an enrichment that ran in this session and a surface that never got it
+    are two facts nobody holds together — which is the whole of "the work was
+    done but it is not showing", reported three rounds running across
+    leadership, why-now, sentiment and the tech register.
+
+    Call this AFTER the enrichment returns and BEFORE (or after) you submit
+    the page — the order does not matter, because the version is what orders
+    them. `promote_run` records the promotion side automatically from the
+    sections it writes, so a facet enriched and never promoted shows up as
+    `enriched_not_promoted` in `get_client_state` and in the app, and blocks
+    the client being called done.
+
+    facet         one of leadership · firmographics · techstack · sentiment ·
+                  why_now · platform_readiness · peer_scores. Not a free
+                  string: a typo would silently create an eighth facet that
+                  nobody watches, so the database refuses it.
+    source        REQUIRED. clay · explorium · exa · indeed · manual · … The
+                  answer to "run it again how?", which is the only question a
+                  stale facet raises.
+    account       WHICH account ran it, and worth the keystrokes: the same
+                  technographic scan returned empty twice under one account
+                  and sixty technologies under another, and with no record of
+                  which, the two runs were afterwards indistinguishable.
+    rows_written  how many rows the enrichment produced. 0 is a real answer
+                  and a useful one — it distinguishes "ran, found nothing"
+                  from "never ran".
+
+    Returns {enrichment_version, facet, entity_id, enrichment: {...}} where
+    the last is the same drift summary `get_client_state` reports.
+    """
+    with _conn() as c:
+        cur = c.cursor()
+        cur.execute("SELECT id FROM entities WHERE display_id = %s",
+                    (display_id,))
+        row = cur.fetchone()
+        if row is None:
+            return {"error": "unknown_entity", "display_id": display_id}
+        entity_id = row[0]
+        try:
+            version = ledger_mod.record_enrichment(
+                cur, entity_id, facet, source,
+                run_id=run_id or None, account=account or None,
+                rows_written=rows_written, note=note or None)
+        except ledger_mod.LedgerError as e:
+            c.rollback()
+            return {"error": "bad_enrichment", "detail": str(e)}
+        c.commit()
+        return {"enrichment_version": version, "facet": facet,
+                "entity_id": str(entity_id),
+                "enrichment": ledger_mod.summary(
+                    ledger_mod.drift(cur, entity_id))}
+
+
 @mcp.tool()
 @_traced
 def record_finding(finding: dict) -> dict:

@@ -50,17 +50,55 @@ from .transport import INLINE_SAFE_BYTES
 SECTION_INLINE_BYTES = INLINE_SAFE_BYTES
 
 
+_COLS = """s.id, enum_label(s.status), s.payload, s.submitted_at,
+           s.producer_version, s.contract_version, s.promoted_at"""
+
+
 def _live_submission(cur, run_id, page):
     cur.execute(
-        """SELECT s.id, enum_label(s.status), s.payload, s.submitted_at,
-                  s.producer_version, s.contract_version, s.promoted_at
+        f"""SELECT {_COLS}
              FROM submissions s
             WHERE s.run_id = %s AND s.page = %s AND s.superseded_at IS NULL""",
         (run_id, page))
     return cur.fetchone()
 
 
-def get_staged_payload(conn, run_id, page: str, section: str = "") -> dict:
+def _by_id(cur, run_id, page, submission_id):
+    """A named submission, superseded or not.
+
+    THE HAZARD THIS CLOSES, hit on 2026-08-19 and worth stating plainly
+    because the trap is invisible until you are in it.
+
+    A resubmit SUPERSEDES the previous submission for that page. If the new
+    payload is missing a section the old one carried — because the section
+    was over the inline budget, so the read that built the new payload
+    DESCRIBED it rather than returning it — then the resubmit fails on CG-01
+    for the missing section, and the content is now unreachable: the tool
+    returns only the live row, and the live row is the failure.
+
+    Measured: a heatmap resubmit dropped `cell_evidence`, 1.36 MB across 697
+    cells, which no producer is going to re-author. Nothing was lost from the
+    DATABASE — the superseded row is still there with its payload intact — so
+    the tool refusing to hand it back was the whole of the problem.
+
+    Named explicitly rather than "give me the last PASS", because a producer
+    recovering from this knows the id from `get_run_progress` and a rule that
+    guesses which old row was meant is a rule that will guess wrong.
+    """
+    cur.execute(
+        f"""SELECT {_COLS}
+             FROM submissions s
+            WHERE s.run_id = %s AND s.page = %s AND s.id = %s""",
+        (run_id, page, submission_id))
+    return cur.fetchone()
+
+
+def _part_count(n: int) -> int:
+    return max(1, -(-n // SECTION_INLINE_BYTES))
+
+
+def get_staged_payload(conn, run_id, page: str, section: str = "",
+                       submission_id: str = "", part: int = 0) -> dict:
     """The live staged submission for one page, or one section of it.
 
     Returns `{page, submission_id, status, submitted_at, producer_version,
@@ -68,13 +106,25 @@ def get_staged_payload(conn, run_id, page: str, section: str = "") -> dict:
     index when no section is named, and `{section: <verbatim>}` when one is.
     """
     cur = conn.cursor()
-    row = _live_submission(cur, run_id, page)
+    if submission_id:
+        row = _by_id(cur, run_id, page, submission_id)
+        if row is None:
+            return {"error": "unknown_submission", "page": page,
+                    "submission_id": submission_id,
+                    "hint": ("no submission with that id on this run and page. "
+                             "`get_run_progress` names the live one; a "
+                             "superseded id comes from your own record of what "
+                             "you submitted.")}
+    else:
+        row = _live_submission(cur, run_id, page)
     if row is None:
         return {"error": "no_staged_submission",
                 "page": page,
-                "hint": (f"this run has no live submission for {page!r}. A "
-                         "superseded row is not returned — the live one is "
-                         "what a resubmit would replace. Produce the page.")}
+                "hint": (f"this run has no live submission for {page!r}. Pass "
+                         "`submission_id` to read a SUPERSEDED one — that is "
+                         "the recovery route when a resubmit dropped a section "
+                         "the previous payload carried. Otherwise produce the "
+                         "page.")}
     sub_id, status, payload, submitted_at, pver, cver, promoted_at = row
     if isinstance(payload, (str, bytes)):
         payload = json.loads(payload)
@@ -124,20 +174,55 @@ def get_staged_payload(conn, run_id, page: str, section: str = "") -> dict:
 
     body = payload[section]
     n = _size(body)
-    if n > SECTION_INLINE_BYTES:
+    if n > SECTION_INLINE_BYTES and not part:
         # DESCRIBED, NOT TRUNCATED. A truncated payload that looks whole is
         # worse than a refusal: a producer would resubmit it and silently
-        # empty a section that was complete. Say the size and stop.
+        # empty a section that was complete. Say the size, say how to get it
+        # whole, and stop.
         head["section"] = section
         head["error"] = "section_too_large"
         head["bytes"] = n
+        head["parts"] = _part_count(n)
         head["keys"] = sorted(body) if isinstance(body, dict) else None
         head["item_count"] = len(body) if isinstance(body, (list, dict)) else None
         head["hint"] = (
             f"{section!r} is {n} bytes, over the {SECTION_INLINE_BYTES}-byte "
-            "inline budget, and is described rather than returned — a "
-            "truncated copy resubmitted would empty a complete section. "
-            "Produce this one.")
+            f"inline budget. Call again with part=1..{_part_count(n)} and "
+            "concatenate the `chunk` strings in order, then json.loads the "
+            "result — the same shape as the chunked WRITE, and for the same "
+            "reason: a section you can submit in parts you must be able to "
+            "read in parts. A truncated copy resubmitted would empty a "
+            "complete section, which is why nothing partial is returned "
+            "unless you ask for a numbered part.")
+        return head
+
+    if part:
+        # THE READ HALF OF CHUNKED TRANSPORT. Added 2026-08-19 after a resubmit
+        # dropped a 1.36 MB section and made it unrecoverable: the tool could
+        # describe it and could not return it, so the only route left was
+        # re-authoring 697 cells that were sitting intact in the database.
+        #
+        # Bytes, not items: the caller reassembles one JSON string, so the
+        # split cannot depend on the section's shape. Splitting a list by
+        # items would have to know it is a list.
+        blob = json.dumps(body, separators=(",", ":"), default=str)
+        total = _part_count(len(blob))
+        if part < 1 or part > total:
+            head["section"] = section
+            head["error"] = "no_such_part"
+            head["parts"] = total
+            head["hint"] = f"parts are numbered 1..{total} for this section."
+            return head
+        lo = (part - 1) * SECTION_INLINE_BYTES
+        head["section"] = section
+        head["part"] = part
+        head["parts"] = total
+        head["bytes"] = len(blob)
+        head["chunk"] = blob[lo:lo + SECTION_INLINE_BYTES]
+        head["hint"] = (
+            f"part {part} of {total}. Concatenate every part's `chunk` in "
+            "order and json.loads the result; each chunk alone is not valid "
+            "JSON and is not meant to be.")
         return head
 
     head["section"] = section

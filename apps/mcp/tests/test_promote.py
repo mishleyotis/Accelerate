@@ -403,7 +403,7 @@ def test_alert_status_is_initialised_at_promote():
     assert _value("const:open", {}, {}, {}) == "open"
 
 
-def test_a_retained_pass_is_revalidated_and_disclosed(seeded):
+def test_a_retained_pass_that_fails_a_current_gate_refuses(seeded):
     """A retained PASS is a DATED OBSERVATION, not a current state.
 
     Validation runs at submit. Retention is correct and load-bearing —
@@ -414,10 +414,15 @@ def test_a_retained_pass_is_revalidated_and_disclosed(seeded):
     learned `arc_shape`, and against today's gates the same stored payload
     returns seven blocking reasons. It is live, and its row says PASS.
 
-    Disclosed, never refused: a gate that tightened after a page was
-    authored is a reason to look, not a reason to strand five pages that
-    are fine — and refusing would make every gate change retroactively
-    un-promotable, which is how a build stops adding gates."""
+    An earlier draft of this test asserted disclose-and-still-promote, on
+    the argument that refusing makes every gate change retroactively
+    un-promotable. That argument does not survive invariant 12, which
+    grants disclose-and-promote to SG and to nothing else: CG, AG and ET
+    are correctness reasons, and `arc_shape: "strategy-first,
+    substrate-later"` reaches a client surface as an unrecognised badge.
+    Nor does the cost land where the argument said it would — the refusal
+    names ONLY the failing page and the other five retained rows stay
+    good, which is the repair invariant 3 was built to make cheap."""
     mcp, admin, rid = seeded
     _submit_all(mcp, rid)
     clean = promote_run(mcp, rid)
@@ -440,9 +445,43 @@ def test_a_retained_pass_is_revalidated_and_disclosed(seeded):
     admin.commit()
 
     out = promote_run(mcp, rid)
-    assert out["promoted"] is True, "disclosure must not block the promote"
-    assert "context" in out.get("stale_verdicts", {}), \
-        "a retained PASS that today's gates refuse must be named"
-    assert any(r["gate_id"] == "CG-09"
-               for r in out["stale_verdicts"]["context"])
+    assert out["promoted"] is False, \
+        "a CG reason on a retained page is a correctness reason, not a note"
+    assert out["error"] == "retained_pages_fail_current_gates"
+    assert out["pages"] == ["context"], \
+        "only the failing page may be named; the other five are still good"
+    assert any(r["gate_id"] == "CG-09" for r in out["reasons"]["context"])
+    assert "resubmit" in out["hint"].lower(), \
+        "a producer told only NO cannot act; the way out belongs in the text"
+
+
+def test_a_retained_safeguard_failure_discloses_and_still_promotes(seeded,
+                                                                   monkeypatch):
+    """Invariant 12's exception, tested rather than assumed.
+
+    The refusal above filters on the gate-id prefix. Nothing else in the
+    suite exercises the SG side of that filter, so a one-character slip in
+    the prefix test would strand every run carrying a disclosed safeguard
+    and no test would notice."""
+    mcp, admin, rid = seeded
+    _submit_all(mcp, rid)
+    assert promote_run(mcp, rid)["promoted"] is True
+
+    import dma_mcp.promote as promote_mod
+    real = promote_mod.validate_pass1
+
+    def only_sg_on_context(page, payload):
+        if page != "context":
+            return real(page, payload)
+        return [{"gate_id": "SG-03", "section": "caps", "path": "caps[0]",
+                 "severity": "block",
+                 "message": "a safeguard result, which discloses"}]
+
+    monkeypatch.setattr(promote_mod, "validate_pass1", only_sg_on_context)
+    out = promote_run(mcp, rid)
+    assert out["promoted"] is True, \
+        "invariant 12: a failing SG discloses and still promotes"
+    assert any(r["gate_id"] == "SG-03"
+               for r in out["stale_verdicts"]["context"]), \
+        "disclosing means naming it, not swallowing it"
     assert "resubmit" in out["stale_verdicts_note"].lower()
