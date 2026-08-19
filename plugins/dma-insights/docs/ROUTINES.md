@@ -105,9 +105,10 @@ in-context is precisely what these designs refuse — the connector's stores
 (runs, findings, refinements) are the memory, and a fresh session proves it
 can read them.
 
-Status at 2026-08-19 (`list_triggers`): **(a) exists and is enabled; (b) and
-(c) are declared here and not yet created.** That gap is exactly what
-section 3's manual reconciliation exists to catch.
+Status at 2026-08-19 (`list_triggers`, evening): **all three exist and are
+enabled.** (b) and (c) were created 2026-08-19T21:24Z from this file's fenced
+prompts; a firing that finds this paragraph disagreeing with `list_triggers`
+has found the drift section 3's manual reconciliation exists to catch.
 
 ### 2a · dma-synthesis-sequence — every 12 hours · EXISTS
 
@@ -140,21 +141,22 @@ STEP 5 — REPORT. End with: client + run id; first-pass verdict counts by gate 
 Hard rules: one client per firing; never BOK; never edit apps/ code; if package vetting fails or entity identity is PENDING_REVIEW unresolved, record the finding and stop rather than force a promote.
 ```
 
-### 2b · dma-rectification-weekly — Mondays 13:00 UTC · NOT YET CREATED
+### 2b · dma-rectification-weekly — Mondays 13:00 UTC · EXISTS
 
 | | |
 |---|---|
-| **Trigger** | to create: `create_trigger`, cron `0 13 * * 1`, `create_new_session_on_fire = true`, notifications push+email. Parameters and their rationale: `plugins/dma-insights/skills/dma-rectifier/04-routine/1-weekly-routine.md`. |
+| **Trigger** | `trig_01CoypdjU6bcwEewvRYxK3S3`, cron `0 13 * * 1`, `create_new_session_on_fire = true`, notifications push+email, created 2026-08-19. Parameters and their rationale: `plugins/dma-insights/skills/dma-rectifier/04-routine/1-weekly-routine.md`. |
 | **Cadence, and why** | **Weekly** because the unit of value is a defect *class*, and a class needs several sightings to become visible — a daily run patches single sightings, which is the queue behaviour the rectifier exists to replace. **Monday 13:00 UTC** so the window read is a complete closed week, the Sunday nightlies' CI signal is already in the store, and refinements land pre-workday, reviewable before the week's production runs rather than into the middle of them. |
 | **May** | Edit skills, agents, rulebooks and gates — it is the **only** writer of them (constraint [B], the rectifier as an invoked session); record refinements, resolve findings, report recurrences; commit on a branch and open a PR. |
 | **May not** | Merge the PR; produce, submit or promote client content; lower the admission threshold to have something to report; scan for defects nobody sighted; edit anything it cannot name a finding for; commit a change the grader scored below 0.75, that testgen could not case, or that the regression re-run did not clear. |
 | **Report shape** | `templates/run_report.md` from the rectifier skill, extended with: grader score per admitted change; testgen case counts (fails-before / passes-after); permanent-corpus and full-suite results; and the anti-pattern trend — this window's recurrence and reviewer-reject counts against the trailing four windows and the D3 convergence thresholds, stated as declining, flat or worsening. |
 
-The prompt to hand `create_trigger` — standalone, each firing starts from
-nothing. It executes the dma-rectifier skill's run protocol with the
-admission pipeline (learning-grader, learning-testgen, the regression re-run)
-spelled out, because an unattended session follows what its prompt states,
-not what a file it might not open implies:
+The live prompt — standalone, each firing starts from nothing; kept here
+verbatim so a drifted trigger is detectable by diff. It executes the
+dma-rectifier skill's run protocol with the admission pipeline
+(learning-grader, learning-testgen, the regression re-run) spelled out,
+because an unattended session follows what its prompt states, not what a
+file it might not open implies:
 
 ```
 You are the scheduled weekly DMA rectification routine (dma-insights), running as a
@@ -248,18 +250,18 @@ examined-and-empty, and stop. Do not lower the threshold, do not scan for defect
 nobody sighted, and do not tidy anything. An empty week is the system working.
 ```
 
-### 2c · dma-refresh-drift-daily — daily 15:00 UTC · NOT YET CREATED
+### 2c · dma-refresh-drift-daily — daily 15:00 UTC · EXISTS
 
 | | |
 |---|---|
-| **Trigger** | to create: `create_trigger`, cron `0 15 * * *`, `create_new_session_on_fire = true`. |
+| **Trigger** | `trig_01CvwqVMuLzWyQUsgwor98Sx`, cron `0 15 * * *`, `create_new_session_on_fire = true`, created 2026-08-19. |
 | **Cadence, and why** | **Daily** because the inputs move at day granularity: refresh due dates are dates, drift accumulates from each promote and each hourly enrich pass, and duplicates arrive with the half-hourly scan. Hourly would re-read the same answer (the app's own `dmai-enrich-loop` already raises the cadence rows hourly); weekly would let a due client sit silent for days. **15:00 UTC** sits after both nightlies (02:00 exporter, 03:00 scanner) and after the 12:08 synthesis firing has typically closed its loop, so it reads the day's production rather than racing it. |
 | **May** | Read the refresh queue, pending runs, drift state and loop health; record findings and recurrences with measurements; escalate by naming the owner of each actionable item. |
 | **May not** | **Promote — ever.** Nor submit, withdraw, claim a run, edit the repository, create refresh requests itself (the hourly sweep owns raising cadence rows; this session judges what the sweep raised), or resolve a finding it did not verify held. |
 | **Report shape** | Queue counts (requested vs due) with oldest ages; duplicate share of pending runs; top drift blocks worst-first; enrichment-loop health; finding ids written; what was escalated and to whom — or the explicit empty result, recorded as examined-and-empty. |
 
-The prompt to hand `create_trigger` — standalone, each firing starts from
-nothing:
+The live prompt — standalone, each firing starts from nothing; kept here
+verbatim so a drifted trigger is detectable by diff:
 
 ```
 You are the scheduled daily DMA refresh-and-drift review (dma-insights), running
