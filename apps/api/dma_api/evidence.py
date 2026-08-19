@@ -38,7 +38,37 @@ over the rows themselves, which is exactly where invariant 8 says counts belong.
 """
 from __future__ import annotations
 
+import sys
 from functools import lru_cache
+from pathlib import Path as _Path
+
+
+def _put_shared_on_path() -> None:
+    """REPO FIRST, image second — the same order computed.py argues for.
+
+    A build artefact shadowing its own source is how verification runs against
+    the wrong copy: `apps/api/shared/` is gitignored and written by deploy.sh,
+    so in a checkout it can be an old copy of a file a human has since fixed.
+    In the image the repo path does not exist and the staged one is the only
+    one. In the image this module is /app/dma_api/evidence.py — three parents,
+    so the repo path is built CONDITIONALLY or it raises IndexError on the
+    line before the path that would have worked.
+    """
+    here = _Path(__file__).resolve()
+    cands = []
+    if len(here.parents) > 3:
+        cands.append(here.parents[3] / "packages" / "shared")
+    cands.append(here.parent.parent / "shared")
+    for c in cands:
+        if c.exists() and str(c) not in sys.path:
+            sys.path.insert(0, str(c))
+
+
+_put_shared_on_path()
+# Imported hard, never in a try. A missing shared file must fail the deploy
+# loudly: enrichment_register.json was swallowed into an empty dict once and
+# five surfaces served without their status while every test passed.
+from abbreviations import expand as _expand_abbrev  # noqa: E402
 
 # Ordered so a distribution renders in ladder order rather than hash order.
 TIERS = ("T1", "T2", "T3", "T4", "T5")
@@ -56,6 +86,17 @@ _COLUMNS = ("e_id", "origin", "source_name", "source_url", "source_domain",
 
 def _row_to_item(row: tuple, columns=_COLUMNS) -> dict:
     item = dict(zip(columns, row))
+    # THE ABBREVIATION IN THE LABEL, spelled out here because there is nowhere
+    # else it can be. `source_name` on a package-ingested row is typed by
+    # whoever assembled the assessment; the ingested tier is read-only once
+    # scanned (charter), and no payload gate ever sees it because it never
+    # travels through a payload. Four rounds of sweeps cleared the prose and a
+    # reader still opened a drawer onto "Logix FCU call report aggregation".
+    #
+    # `excerpt` is NOT touched, here or anywhere: it is a byte-for-byte span of
+    # the artefact and the verifier compares it against those bytes.
+    if item.get("source_name"):
+        item["source_name"] = _expand_abbrev(item["source_name"], "label")
     for k in ("published_date", "reference_date"):
         v = item.get(k)
         item[k] = v.isoformat() if hasattr(v, "isoformat") else v

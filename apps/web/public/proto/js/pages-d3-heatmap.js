@@ -3098,17 +3098,22 @@ function SynthesisDrawer({
       }, "Cited for this cell but not present in this run's evidence store."));
     }
     const tier = DMA.getTier(e.tier);
-    // title and source_pretty are both `source_name` for most rows, so
-    // every row printed the same string twice. Show the source only
-    // when it says something the title does not.
+    // title and source_pretty are both `source_name` for most rows,
+    // so printing both repeats the string. When they agree, the LINK
+    // carries the url instead — which is the one thing on this row
+    // the title cannot say.
     const showSource = e.source_pretty && e.source_pretty !== e.title;
-    return /*#__PURE__*/React.createElement("button", {
+    const linkText = showSource ? e.source_pretty : e.source || e.source_pretty;
+    return /*#__PURE__*/React.createElement("div", {
       key: e.id,
+      style: {
+        marginBottom: 6
+      }
+    }, /*#__PURE__*/React.createElement("button", {
       className: "card-tile clickable",
       style: {
         width: "100%",
         padding: 11,
-        marginBottom: 6,
         textAlign: "left"
       },
       onClick: () => openEvidence(e.id)
@@ -3137,26 +3142,7 @@ function SynthesisDrawer({
         color: "var(--z-dark)"
       },
       className: "txt-fit-1"
-    }, e.title), showSource ? /*#__PURE__*/React.createElement("div", {
-      className: "row",
-      style: {
-        gap: 5,
-        marginTop: 3
-      }
-    }, /*#__PURE__*/React.createElement(Icon, {
-      name: "drive",
-      size: 10,
-      style: {
-        color: "var(--z-muted)"
-      }
-    }), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 10.5,
-        color: "var(--z-mid)",
-        fontWeight: 500
-      },
-      className: "txt-fit-1"
-    }, e.source_pretty)) : null, e.excerpt ? /*#__PURE__*/React.createElement("div", {
+    }, e.title), e.excerpt ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
         color: "var(--z-body)",
@@ -3166,7 +3152,47 @@ function SynthesisDrawer({
         borderLeft: "2px solid var(--z-sep)",
         fontStyle: "italic"
       }
-    }, "\u201C", e.excerpt, "\u201D") : null);
+    }, "\u201C", e.excerpt, "\u201D") : /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-muted)",
+        lineHeight: 1.45,
+        marginTop: 6,
+        paddingLeft: 8,
+        borderLeft: "2px dashed var(--z-sep)"
+      }
+    }, "No verbatim excerpt is served for this item.")), /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 5,
+        marginTop: 3,
+        paddingLeft: 11
+      }
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: e.source ? "external" : "drive",
+      size: 10,
+      style: {
+        color: "var(--z-muted)"
+      }
+    }), e.source ? /*#__PURE__*/React.createElement("a", {
+      href: `https://${e.source}`,
+      target: "_blank",
+      rel: "noreferrer",
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-mid)",
+        fontWeight: 500,
+        textDecoration: "none"
+      },
+      className: "txt-fit-1",
+      title: `https://${e.source}`
+    }, linkText) : /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-muted)"
+      },
+      className: "txt-fit-1"
+    }, showSource ? `${e.source_pretty} — no source url served` : "no source url served")));
   })), linkedIC.length > 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 14

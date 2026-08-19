@@ -1867,27 +1867,51 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
                 );
               }
               const tier = DMA.getTier(e.tier);
-              // title and source_pretty are both `source_name` for most rows, so
-              // every row printed the same string twice. Show the source only
-              // when it says something the title does not.
+              // title and source_pretty are both `source_name` for most rows,
+              // so printing both repeats the string. When they agree, the LINK
+              // carries the url instead — which is the one thing on this row
+              // the title cannot say.
               const showSource = e.source_pretty && e.source_pretty !== e.title;
+              const linkText = showSource ? e.source_pretty : (e.source || e.source_pretty);
               return (
-                <button key={e.id} className="card-tile clickable" style={{ width: "100%", padding: 11, marginBottom: 6, textAlign: "left" }} onClick={() => openEvidence(e.id)}>
-                  <div className="row" style={{ marginBottom: 4, gap: 6 }}>
-                    <span className={`tier-chip tier-${e.tier}`}>{e.id}</span>
-                    <span className="b b-muted" title={tier?.label}>{[e.tier, e.claim].filter(Boolean).join(" · ")}</span>
-                    <span className="spacer" />
-                    <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{e.recency}</span>
-                  </div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }} className="txt-fit-1">{e.title}</div>
-                  {showSource ? (
-                    <div className="row" style={{ gap: 5, marginTop: 3 }}>
-                      <Icon name="drive" size={10} style={{ color: "var(--z-muted)" }} />
-                      <span style={{ fontSize: 10.5, color: "var(--z-mid)", fontWeight: 500 }} className="txt-fit-1">{e.source_pretty}</span>
+                <div key={e.id} style={{ marginBottom: 6 }}>
+                  <button className="card-tile clickable" style={{ width: "100%", padding: 11, textAlign: "left" }} onClick={() => openEvidence(e.id)}>
+                    <div className="row" style={{ marginBottom: 4, gap: 6 }}>
+                      <span className={`tier-chip tier-${e.tier}`}>{e.id}</span>
+                      <span className="b b-muted" title={tier?.label}>{[e.tier, e.claim].filter(Boolean).join(" · ")}</span>
+                      <span className="spacer" />
+                      <span style={{ fontSize: 10, color: "var(--z-muted)" }}>{e.recency}</span>
                     </div>
-                  ) : null}
-                  {e.excerpt ? <div style={{ fontSize: 11, color: "var(--z-body)", lineHeight: 1.5, marginTop: 6, paddingLeft: 8, borderLeft: "2px solid var(--z-sep)", fontStyle: "italic" }}>“{e.excerpt}”</div> : null}
-                </button>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }} className="txt-fit-1">{e.title}</div>
+                    {/* An item with no verbatim span is a citation of nothing.
+                        It renders as a stated absence rather than as blank
+                        space, the same way the evidence drawer does — a reader
+                        who cannot tell "no quote" from "no excerpt field" has
+                        no way to ask for the right thing. */}
+                    {e.excerpt
+                      ? <div style={{ fontSize: 11, color: "var(--z-body)", lineHeight: 1.5, marginTop: 6, paddingLeft: 8, borderLeft: "2px solid var(--z-sep)", fontStyle: "italic" }}>“{e.excerpt}”</div>
+                      : <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.45, marginTop: 6, paddingLeft: 8, borderLeft: "2px dashed var(--z-sep)" }}>No verbatim excerpt is served for this item.</div>}
+                  </button>
+                  {/* THE SOURCE URL, and it is outside the button on purpose:
+                      an anchor nested in a button is invalid markup that
+                      browsers flatten, so the row could never have carried a
+                      working link while it was one element. Every evidence row
+                      on this page was reported as having no url; the url was in
+                      the store and in the projection the whole time, and only
+                      the evidence DRAWER rendered it. */}
+                  <div className="row" style={{ gap: 5, marginTop: 3, paddingLeft: 11 }}>
+                    <Icon name={e.source ? "external" : "drive"} size={10} style={{ color: "var(--z-muted)" }} />
+                    {e.source ? (
+                      <a href={`https://${e.source}`} target="_blank" rel="noreferrer"
+                         style={{ fontSize: 10.5, color: "var(--z-mid)", fontWeight: 500, textDecoration: "none" }}
+                         className="txt-fit-1" title={`https://${e.source}`}>{linkText}</a>
+                    ) : (
+                      <span style={{ fontSize: 10.5, color: "var(--z-muted)" }} className="txt-fit-1">
+                        {showSource ? `${e.source_pretty} — no source url served` : "no source url served"}
+                      </span>
+                    )}
+                  </div>
+                </div>
               );
             })}
           </div>

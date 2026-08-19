@@ -40,6 +40,14 @@ stage_shared_into_api() {
     echo "FATAL: packages/shared/enrichment_register.json is missing" >&2
     exit 1
   }
+  # dma_api/evidence.py imports this at module load to spell out the
+  # abbreviations in a package-supplied source label. Missing means the api
+  # does not start, which is the intended failure: a silent fallback here
+  # would serve "Logix FCU" to a client and pass every test.
+  cp packages/shared/abbreviations.py apps/api/shared/ 2>/dev/null || {
+    echo "FATAL: packages/shared/abbreviations.py is missing" >&2
+    exit 1
+  }
 }
 
 if [ -f apps/api/Dockerfile ]; then
@@ -73,6 +81,10 @@ if [ -f apps/mcp/Dockerfile ]; then
     echo "FATAL: packages/shared/enrichment_gaps.py is missing" >&2; exit 1; }
   cp packages/shared/contracts_data.json apps/mcp/shared/ || {
     echo "FATAL: packages/shared/contracts_data.json is missing" >&2; exit 1; }
+  # dma_mcp/validation.py imports the abbreviation list at load time: CG-27
+  # reads it, and it is the same copy the api's evidence projection reads.
+  cp packages/shared/abbreviations.py apps/mcp/shared/ || {
+    echo "FATAL: packages/shared/abbreviations.py is missing" >&2; exit 1; }
   # Capability-URL token: the streamable-HTTP path embeds it, so the
   # Cowork connector needs only the URL. Rotating the secret rotates the
   # URL. Created once, never echoed.

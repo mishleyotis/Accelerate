@@ -2,28 +2,35 @@
    DMA INSIGHTS · App root - router + provider + tweaks
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* `audience_default` is "customer", and that is a deliberate reversal.
+/* `audience_default` is "internal", by owner instruction on 2026-08-19:
+   "the default view for all clients is the internal view".
 
-   It was "internal", and because audience is a UI toggle rather than
-   anything derived from the signed-in role, EVERY reader landed on the
-   internal body: the reasoning traces, the capability ceilings, the evidence
-   census and the whole Context dashboard, on the first page load, with no
-   action taken to ask for them. Reported three times as "information I
-   instructed to be removed still shows up", and each time it was this line
-   rather than a redaction defect — the API withholds all of it from the
-   customer audience already, and had been all along.
+   IT HAS BEEN BOTH, and the history is worth keeping because the two
+   instructions look contradictory and are not.
 
-   Defaulting to the client-safe body matches what every other layer here
-   does: `normalise_audience` resolves an unknown audience to `customer`,
-   and `build_page` no longer defaults at all. The browser was the one tier
-   still failing open.
+   It was "internal" first. Because audience is a UI toggle rather than
+   anything derived from the signed-in role, every reader landed on the
+   internal body — reasoning traces, capability ceilings, the evidence census,
+   the whole Context dashboard — on first paint, and it was reported three
+   times as "information I instructed to be removed still shows up". So it was
+   reversed to "customer" on 2026-08-18.
 
-   The toggle is unchanged and one click away, so an analyst who wants the
-   internal body still has it — they now ask for it, which is the right way
-   round for a surface a client can be sitting in front of. */
+   That reversal treated the symptom. What was on screen was internal
+   MACHINERY rendered into a client surface, and rounds 3 and 4 removed it at
+   the source: the red internal boxes, the reasoning traces beside findings,
+   the raw catalogue codes. With those gone, the internal body is what the
+   analyst using this application actually needs to see, and hiding it behind
+   a toggle costs them a click on every page load.
+
+   The redaction posture is unchanged and does not depend on this line. The
+   API is default-deny at every layer — `normalise_audience` resolves an
+   unknown audience to `customer` and `build_page` does not default at all —
+   so a customer body is what a caller gets unless one is explicitly asked
+   for. This is the browser's landing position, and the toggle is one click
+   away in either direction. */
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "role": "ANALYST",
-  "audience_default": "customer",
+  "audience_default": "internal",
   "ip_open_default": false,
   "overview_layout": "balanced",
   "heatmap_density": "comfortable",

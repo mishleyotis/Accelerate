@@ -361,11 +361,11 @@ test("surfaces read the axis they name, and answer the control the reader presse
     // surfaces these cases are about are withheld on load. Role state is
     // per-document, so this is redone for every case rather than once.
     await actAsAdmin(page);
-    // And the view now lands on the CUSTOMER body by default (app-root's
-    // `audience_default`, moved off "internal" so a reader is not handed the
-    // internal one before asking). These cases are ABOUT internal surfaces —
-    // reasoning traces, the self-check, thought leadership — so they ask for
-    // the internal body the same way an analyst does.
+    // These cases are ABOUT internal surfaces — reasoning traces, the
+    // self-check, thought leadership — so the internal body is asked for
+    // explicitly rather than assumed from `audience_default`. That default has
+    // been both values and is now "internal" again (owner, 2026-08-19); asking
+    // makes these cases independent of it either way.
     await selectAudience(page, "internal");
     return { ctx, page, errors };
   };

@@ -19,7 +19,16 @@ from pathlib import Path
 from .contracts import ENVELOPE, PAGES, sections
 from .dates import ACCEPTED as DATE_SHAPES, resolve as resolve_date
 from .identifiers import EID_TOKEN_RE, agent_id_class
+from .shared_path import ensure as _ensure_shared
 from .vacuity import check_vacuity
+
+_ensure_shared(__file__)
+from abbreviations import (  # noqa: E402  packages/shared/abbreviations.py
+    EXCERPT_FIELDS as _ABBREV_VERBATIM,
+    EXPANSION as _ABBREV_EXPANSION,
+    PATTERN as _ABBREV,
+    unexplained as _unexplained_abbrevs,
+)
 
 _AGENT_ID_KEYS = ("ic_id", "f_id", "fa_id", "ts_id", "wn_id", "rec_id")
 
@@ -320,68 +329,22 @@ def _check_thought_leadership_unique(section, body) -> list:
     return out
 
 
-# Abbreviations a client surface must not use unexplained. Kept short and
-# specific: an aggressive list would fire on ticker symbols and product names,
-# and a gate that cries wolf gets switched off.
-# Abbreviation -> the expansion that licenses it. Each abbreviation is paired
-# with ITS OWN expansion, not with a pool of them: the first version checked
-# whether ANY expansion appeared in the field, so "The NCUA call report shows
-# the credit union above nine billion" read as clean — "credit union" was
-# present, so NCUA was treated as already spelled out. The same containment
-# slip bit the expander written beside this gate.
-_ABBREV_EXPANSION = {
-    "NCUA": r"National Credit Union Administration",
-    "FCU": r"Federal Credit Union",
-    "CFPB": r"Consumer Financial Protection Bureau",
-    "CU": r"credit union",
-    "CUs": r"credit unions",
-    "CEO": r"chief executive",
-    "CIO": r"chief information officer",
-    "COO": r"chief operating officer",
-    "CTO": r"chief technology officer",
-    "CISO": r"chief information security officer",
-    "CFO": r"chief financial officer",
-    "CDO": r"chief data officer",
-    "KPI": r"key performance indicator",
-    "KPIs": r"key performance indicators",
-    "ROI": r"return on investment",
-    "SLA": r"service level agreement",
-    "SLAs": r"service level agreements",
-    "NPS": r"Net Promoter Score",
-    "FTE": r"full-time employee",
-    "FTEs": r"full-time employees",
-    "YoY": r"year on year",
-    "QoQ": r"quarter on quarter",
-    "AE": r"account executive",
-    "AEs": r"account executives",
-    "API": r"application programming interface",
-    "APIs": r"application programming interfaces",
-    "UX": r"user experience",
-    "UI": r"user interface",
-    "B2B": r"business-to-business",
-    "B2C": r"business-to-consumer",
-}
-_ABBREV = re.compile(r"\b(" + "|".join(
-    sorted(_ABBREV_EXPANSION, key=len, reverse=True)) + r")\b")
 
 # VERBATIM BY CONTRACT, and therefore never rewritten: an excerpt is a
-# byte-for-byte span of a fetched artefact (invariant 4) and a source title, a
-# quote and a person's own words are what someone actually said. Expanding an
-# abbreviation inside one would misquote a source and break the verifier that
-# compares an excerpt against the bytes it was taken from.
-_VERBATIM_FIELDS = frozenset((
-    "excerpt", "quote", "source_title", "source_name", "their_words",
-    "headline", "title_verbatim", "url", "source_url", "linkedin_url",
-    "email", "name", "legal_name", "platform", "vendor", "l3_area",
-    "l4_feature", "author_name", "author_role", "peer_name",
-    # Measured while expanding abbreviations on a real payload: a focus area's
-    # `verbatim_quote` was rewritten from "greater CFPB scrutiny" to the full
-    # phrase — a chief executive's congressional testimony, misquoted by a
-    # tidy-up, which is the exact harm this exclusion exists to prevent.
-    # `source_document` and `source_filename` are the artefact's own title as
-    # filed.
-    "verbatim_quote", "source_document", "source_filename", "trigger_label",
-))
+# byte-for-byte span of a fetched artefact (invariant 4), and a quote or a
+# person's own words are what someone actually said. Expanding an abbreviation
+# inside one would misquote a source and break the verifier that compares an
+# excerpt against the bytes it was taken from. Measured: a focus area's
+# `verbatim_quote` was rewritten from "greater CFPB scrutiny" to the full
+# phrase — a chief executive's congressional testimony, misquoted by a tidy-up.
+#
+# `source_name`, `source_title` and `author_role` USED TO BE IN THIS SET and
+# are not any more. They are labels this application writes about an artefact,
+# not spans of it: the package author typed "…Logix FCU" and a producer typed
+# "…Logix Federal Credit Union" for the same document at the same URL, and
+# neither is its filed title. The artefact's identity is its URL, which the
+# drawer shows beside the label. See packages/shared/abbreviations.py.
+_VERBATIM_FIELDS = _ABBREV_VERBATIM
 
 
 def _check_no_bare_abbreviations(page, section, body) -> list:
@@ -392,10 +355,12 @@ def _check_no_bare_abbreviations(page, section, body) -> list:
     reader inside it does not need them shortened; either way the abbreviation
     costs comprehension and buys nothing on a page that is not short of room.
 
-    Only AUTHORED prose. A quote, an excerpt, a source's own title and a
-    person's role as they state it are verbatim, and rewriting one would
-    misquote the source and break the evidence verifier that compares an
-    excerpt against the bytes it was taken from.
+    Only AUTHORED prose and the labels this application writes. A quote or an
+    excerpt is a verbatim span, and rewriting one would misquote the source and
+    break the evidence verifier that compares an excerpt against the bytes it
+    was taken from — those are exempt. A source NAME is not a span: see
+    packages/shared/abbreviations.py for where that line now falls and why it
+    moved.
     """
     if not isinstance(body, dict):
         return []
@@ -427,9 +392,10 @@ def _check_no_bare_abbreviations(page, section, body) -> list:
                     "CG-27", section, f"{page}.{path}",
                     f"'{short}' reaches a client surface unexplained. "
                     "Spell it out on first use in the field; the short "
-                    "form is fine afterwards. Quotes, excerpts, source "
-                    "titles and a person's stated role are verbatim and "
-                    "are never rewritten."))
+                    "form is fine afterwards. Quotes and excerpts are "
+                    "verbatim spans and are never rewritten — a source "
+                    "NAME is a label this application writes, so it is "
+                    "spelled out like any other."))
                 break            # one reason per field: it is one edit
 
     walk(body, section)

@@ -146,7 +146,7 @@ def test_an_abbreviation_in_authored_prose_is_refused():
     assert [r["gate_id"] for r in out] == ["CG-27"]
 
 
-def test_a_verbatim_field_is_never_rewritten():
+def test_a_verbatim_span_is_never_rewritten():
     """An excerpt is a byte-for-byte span of a fetched artefact (invariant 4)
     and a quote is what someone said. Expanding an abbreviation inside either
     would misquote the source and break the verifier that compares the excerpt
@@ -155,9 +155,28 @@ def test_a_verbatim_field_is_never_rewritten():
         "excerpt": "For an institution like Logix, crossing the threshold that "
                    "subjects us to greater CFPB scrutiny has a cost.",
         "quote": "Logix FCU has utilised CaseHUB for more than a decade.",
-        "source_title": "Testimony of Ana Fonseca, President & CEO, Logix FCU",
-        "author_role": "President and CEO",
     }) == []
+
+
+def test_a_source_label_is_not_a_verbatim_span():
+    """THE REVERSAL, pinned so it cannot drift back.
+
+    `source_title`, `source_name` and `author_role` were exempt here, on the
+    reading that a source's title is what someone said. They are labels this
+    application writes ABOUT an artefact, and the corpus proves it: two rows
+    cite the same congressional testimony at the same URL, one labelled
+    "…Logix FCU" by the package and one "…Logix Federal Credit Union" by a
+    producer. Neither is the filed title. The artefact's identity is its URL,
+    which the drawer shows beside the label.
+
+    Owner instruction, 2026-08-19: "I still see abbreviations eg CU. Kindly
+    ensure this is communicated in full ie Credit Unions."
+    """
+    for field in ("source_title", "source_name", "author_role"):
+        out = V._check_no_bare_abbreviations("overview", "thought_leadership", {
+            field: "Testimony of Ana Fonseca, President & CEO, Logix FCU"})
+        assert [r["gate_id"] for r in out] == ["CG-27"], \
+            f"{field} must be spelled out; it is a label, not a quotation"
 
 
 def test_spelling_it_out_once_licenses_the_short_form():
