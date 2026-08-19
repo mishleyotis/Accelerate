@@ -78,6 +78,7 @@ import json
 import os
 import re
 import sys
+from .counts import recount_run
 from dataclasses import dataclass
 
 # ── Policy constants (provenance in the module docstring) ──────────────
@@ -324,15 +325,9 @@ def persist_result(conn, run_id, result, *, dry_run: bool = False) -> dict:
             "skip_reasons": skip_reasons,
             "accepted": result["accepted"]})))
     if stats["links_written"]:
-        # The linker count — recomputed from the links table for the whole
-        # run, exactly as ingest does it.
-        cur.execute(
-            """UPDATE subcap_scores sc
-                  SET linked_evidence_count =
-                        (SELECT count(*) FROM evidence_subcap_links l
-                          WHERE l.run_id = sc.run_id AND l.subcap_id = sc.subcap_id)
-                WHERE sc.run_id = %s""",
-            (run_id,))
+        # Both linker counts — recomputed from the links table for the whole
+        # run, exactly as ingest does it. See dma_worker/counts.py.
+        recount_run(cur, run_id)
     conn.commit()
     return stats
 

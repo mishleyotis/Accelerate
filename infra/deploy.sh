@@ -48,6 +48,14 @@ stage_shared_into_api() {
     echo "FATAL: packages/shared/abbreviations.py is missing" >&2
     exit 1
   }
+  # The listing collapses a reference row into the row that quotes the same
+  # artefact. Without this the api does not start, which is correct: serving
+  # the un-merged listing would put a citation with no quote in front of a
+  # reader beside the quote it was missing.
+  cp packages/shared/evidence_merge.py apps/api/shared/ 2>/dev/null || {
+    echo "FATAL: packages/shared/evidence_merge.py is missing" >&2
+    exit 1
+  }
 }
 
 if [ -f apps/api/Dockerfile ]; then

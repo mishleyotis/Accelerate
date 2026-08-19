@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 
+from .counts import recount_run
 from .entity_resolution import DMA_ASM, resolve
 from .evidence_ids import EvidenceLander
 from .workbook_parser import WorkbookParse, mine_evidence_from_rationales
@@ -633,16 +634,10 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
         # superseded row still carries alone is a gap rather than a
         # competing basis — carry it, and only then count.
         _carry_forward()
-        # The linker count — written only now that both sides of the join
+        # The linker counts — written only now that both sides of the join
         # exist. The linker ran for this run, so an unlinked cell's count is
         # a computed zero; NULL is reserved for runs the linker never saw.
-        cur.execute(
-            """UPDATE subcap_scores sc
-                  SET linked_evidence_count =
-                        (SELECT count(*) FROM evidence_subcap_links l
-                          WHERE l.run_id = sc.run_id AND l.subcap_id = sc.subcap_id)
-                WHERE sc.run_id = %s""",
-            (run_id,))
+        recount_run(cur, run_id)
 
     # The scoring workbook's own observations, plus everything the companion
     # tabs could not read. A tab whose shape the parser does not recognise

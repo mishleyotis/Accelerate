@@ -72,12 +72,19 @@ def test_it_carries_the_measured_text_not_a_paraphrase():
         assert measured in text, f"the measured example {measured!r} is gone"
 
 
-def test_the_verbatim_rule_and_the_gate_agree_on_which_fields_are_quotes():
-    """The file tells a producer that quotes, excerpts, source titles and a
-    stated role are never rewritten. CG-27 has to exclude the same set, or one
-    of them is wrong."""
+def test_the_verbatim_rule_and_the_gate_agree_on_which_fields_are_spans():
+    """The file tells a producer which fields are never rewritten. CG-27 has to
+    exclude the same set, or one of them is wrong.
+
+    The set MOVED on 2026-08-19: `source_title` and `author_role` were in it and
+    are not any more, because they are labels this application writes rather
+    than spans of an artefact. Both halves are asserted, so neither the file nor
+    the gate can drift back alone."""
     from dma_mcp.validation import _VERBATIM_FIELDS
-    for field in ("excerpt", "quote", "source_title", "author_role",
-                  "verbatim_quote"):
+    for field in ("excerpt", "quote", "verbatim_quote"):
         assert field in _VERBATIM_FIELDS, \
             f"CG-27 would rewrite {field}, which the antipatterns call verbatim"
+    for field in ("source_name", "source_title", "author_role"):
+        assert field not in _VERBATIM_FIELDS, \
+            f"{field} is a label, and the antipatterns now tell a producer to " \
+            "spell it out — the gate must refuse it rather than exempt it"

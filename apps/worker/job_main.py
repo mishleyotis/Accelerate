@@ -20,6 +20,7 @@ import traceback
 from datetime import datetime, timezone
 
 from dma_worker import drive, intake_status, persist
+from dma_worker.counts import recount_run, recount_where
 from dma_worker.persist import persist_package
 from dma_worker.report_parser import parse_report
 from dma_worker.scan_runner import (SCAN_FAILED, SCAN_SUCCEEDED, finish_scan,
@@ -472,15 +473,10 @@ def dedup_remint_links(conn) -> int:
                         WHERE m.e_id = p.copy_id AND m.subcap_id = k.subcap_id
                           AND m.run_id = k.run_id)""")
     removed = cur.rowcount
-    cur.execute(f"""
-        UPDATE subcap_scores sc
-           SET linked_evidence_count =
-                 (SELECT count(*) FROM evidence_subcap_links l
-                   WHERE l.run_id = sc.run_id AND l.subcap_id = sc.subcap_id)
-         WHERE sc.run_id IN (SELECT DISTINCT l.run_id
-                               FROM ({pairs}) p
-                               JOIN evidence_subcap_links l ON l.e_id = p.copy_id)""")
-    recounted = cur.rowcount
+    recounted = recount_where(
+        cur, f"""sc.run_id IN (SELECT DISTINCT l.run_id
+                                FROM ({pairs}) p
+                                JOIN evidence_subcap_links l ON l.e_id = p.copy_id)""")
     conn.commit()
     print(f"dedup: removed {removed} duplicate base-row link(s); "
           f"linked_evidence_count recomputed on {recounted} subcap_scores row(s). "
@@ -607,12 +603,7 @@ def repair_evidence_namespace(conn, token, groups, limit: int = 0) -> int:
             if lander.superseded:
                 _observe("evidence_remint_links_carried",
                          {"pairs": len(lander.superseded), "carried": carried})
-            cur.execute(
-                """UPDATE subcap_scores sc
-                      SET linked_evidence_count =
-                            (SELECT count(*) FROM evidence_subcap_links l
-                              WHERE l.run_id = sc.run_id AND l.subcap_id = sc.subcap_id)
-                    WHERE sc.run_id = %s""", (run_id,))
+            recount_run(cur, run_id)
             landed = len(lander.landed) - before
             _observe("evidence_namespace_repaired",
                      {"items_read": len(merged), "rows_landed": landed,

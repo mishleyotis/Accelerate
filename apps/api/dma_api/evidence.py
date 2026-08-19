@@ -69,6 +69,7 @@ _put_shared_on_path()
 # loudly: enrichment_register.json was swallowed into an empty dict once and
 # five surfaces served without their status while every test passed.
 from abbreviations import expand as _expand_abbrev  # noqa: E402
+from evidence_merge import merge_same_source  # noqa: E402
 
 # Ordered so a distribution renders in ladder order rather than hash order.
 TIERS = ("T1", "T2", "T3", "T4", "T5")
@@ -198,6 +199,21 @@ def fetch(cur, entity_id, e_ids: list[str] | None = None,
     cur.execute(sql, params)
     items = [_row_to_item(r, columns) for r in cur.fetchall()]
 
+    # THE LISTING ONLY, and the asymmetry is the point. A row with no verbatim
+    # span that references an artefact a sibling row already quotes adds
+    # nothing to a reader except its cell links — and on this corpus 10 such
+    # rows held the links while the spans sat on a different row, so a cell
+    # opened onto a citation with no quote while a quote from the same document
+    # was one row away. Merging joins the two.
+    #
+    # RESOLUTION is never merged: `get_evidence` asks for specific ids and each
+    # one must answer for itself (invariant 4). This rewrites what is LISTED,
+    # and every absorbed id is named on the survivor as `also_filed_as` and
+    # still resolves on its own.
+    merge_report = {"absorbed": 0, "groups": 0, "excerpts_recovered": 0}
+    if not e_ids:
+        items, merge_report = merge_same_source(items)
+
     found = [i["e_id"] for i in items]
     not_found: list[str] = []
     foreign: list[str] = []
@@ -214,7 +230,10 @@ def fetch(cur, entity_id, e_ids: list[str] | None = None,
             not_found = sorted(x for x in missing if x not in elsewhere)
 
     return {"items": items, "found": found, "not_found": not_found,
-            "foreign": foreign, "distribution": distribution(items)}
+            "foreign": foreign, "distribution": distribution(items),
+            # Counted, never silent: a listing that shrank without saying so is
+            # indistinguishable from a query that lost rows.
+            "merged": merge_report}
 
 
 def distribution(items: list[dict]) -> dict:

@@ -85,12 +85,25 @@ reader outside this industry does not know them; a reader inside it does not
 need them shortened. Spell it out on first use in the field; the short form is
 fine afterwards.
 
-**The exception is not politeness.** A quote, an excerpt, a source's own title
-and a person's stated role are **verbatim**. An excerpt is a byte-for-byte span
-of a fetched artefact, and expanding an abbreviation inside one misquotes the
-source and breaks the verifier. Measured while fixing this: a tidy-up rewrote a
-chief executive's congressional testimony from "greater CFPB scrutiny" to the
-full phrase. Never edit a quote.
+**The exception is a SPAN, not a label.** A quote and an excerpt are
+**verbatim**: an excerpt is a byte-for-byte span of a fetched artefact, and
+expanding an abbreviation inside one misquotes the source and breaks the
+verifier. Measured while fixing this: a tidy-up rewrote a chief executive's
+congressional testimony from "greater CFPB scrutiny" to the full phrase. Never
+edit a quote.
+
+`source_name`, `source_title` and `author_role` are **not** spans, and they used
+to be listed here as though they were. They are labels this application writes
+about an artefact. The corpus settles it: two rows cite the same congressional
+testimony at the same url, one labelled "…Logix FCU" by the package and one
+"…Logix Federal Credit Union" by a producer — neither is the filed title, and
+the artefact's identity is its url, which the drawer shows beside the label.
+Spell them out. In a label a role takes title case: "President & Chief
+Executive", not "President & chief executive".
+
+The one list of abbreviations and the boundary itself live in
+`packages/shared/abbreviations.py`, read by both the gate that refuses a
+payload and the projection that serves a stored evidence row.
 
 ---
 
