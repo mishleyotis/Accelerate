@@ -137,3 +137,25 @@ def test_a_controlled_vocabulary_token_is_left_to_its_label_route():
     # and not by shape — a bare `CU` in prose must still be caught.
     assert list(unexplained("CU members expect it")) == ["CU"]
     assert expand("CU members expect it", "label") == "Credit Union members expect it"
+
+
+def test_an_alignment_quote_is_a_verbatim_span_and_never_rewritten():
+    """CG-27 flagged 'CFPB' inside an alignment_quote on the first
+    engine-scored resubmission. The quote is the client's own words — the
+    same standing as an excerpt — so the FIELD is exempt and the check
+    walks past it, rather than the quote being edited to please a gate."""
+    from abbreviations import EXCERPT_FIELDS, unexplained
+    assert "alignment_quote" in EXCERPT_FIELDS
+    # the quote DOES carry an unexplained short form — which is exactly why
+    # the exemption has to be on the field, not on the text
+    assert list(unexplained(
+        "crossing the arbitrary $10 billion threshold that subjects us to "
+        "greater CFPB scrutiny")) == ["CFPB"]
+
+
+def test_a_catalogue_path_is_controlled_vocabulary_and_never_rewritten():
+    """The path L3 -> L4 -> sub-capability must stay renderable and
+    resolvable (contract, gap rows). Its segments l3_area and l4_feature
+    are individually exempt; the joined path is the same vocabulary."""
+    from abbreviations import EXCERPT_FIELDS
+    assert "catalogue_path" in EXCERPT_FIELDS

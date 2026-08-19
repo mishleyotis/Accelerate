@@ -92,6 +92,12 @@ PATTERN = re.compile(r"\b(" + "|".join(
 # gated: see the boundary note above.
 EXCERPT_FIELDS = frozenset((
     "excerpt", "quote", "their_words", "verbatim_quote",
+    # The entity's own stated objective, quoted onto a platform card for the
+    # fit engine's alignment term. CG-27 flagged 'CFPB' inside one on the
+    # first engine-scored resubmission (2026-08-19): the field is a verbatim
+    # span of the client's words, so the field joins this set rather than
+    # the quote being rewritten.
+    "alignment_quote",
     "url", "source_url", "linkedin_url", "email",
     "name", "legal_name", "author_name", "peer_name",
     # An artefact's own filename, its published headline, and the label a
@@ -105,6 +111,12 @@ EXCERPT_FIELDS = frozenset((
     # SUBVERTICAL_LABEL to "Credit Union", so the string a reader sees is
     # already spelled out and rewriting the token would break the lookup.
     "platform", "vendor", "l3_area", "l4_feature",
+    # The rendered join of the two lines above plus the subcap name — the
+    # contract requires the path L3 -> L4 -> sub-capability to be renderable
+    # and resolvable per gap row, and expanding inside it broke exactly that
+    # ("Integration & application programming interface Management") on the
+    # first pass that tried.
+    "catalogue_path",
     "sub_vertical", "subvertical",
 ))
 
