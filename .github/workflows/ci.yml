@@ -265,19 +265,29 @@ jobs:
           PROOF
       # One run, and the skip count is read from it. A skip is how this job hid
       # 30 modules for the whole build, so the count is asserted rather than
-      # printed: measured on a fresh migrated database the suite is 1397
-      # passed, 3 skipped, and a count that climbs means a fixture started
-      # skipping again — the failure mode this service block exists to end.
-      # Deliberate skips: raise the ceiling in the commit that adds them, and
-      # say which. `-rs` names every one in the log, so the diff is readable.
+      # printed, and a count that climbs means a fixture started skipping
+      # again — the failure mode this service block exists to end.
+      #
+      # The ceiling is 5, and every one is named, because an unnamed allowance
+      # is how the count creeps:
+      #   1  apps/mcp/shared/contracts_data.json — a deploy artefact staged by
+      #      deploy.sh, absent in a checkout, and absent on purpose;
+      #   2  apps/worker/shared/contracts_data.json — the same, for the worker;
+      #   3  test_bundle.py — the v7.0 catalogue is not loaded here (the
+      #      migrations create the tables; the loader fills them from a bucket
+      #      this runner has no credential for, and should not);
+      #   4  test_computed_against_the_real_schema.py — the same catalogue;
+      #   5  test_gap_false_positives.py — every overview section wraps its
+      #      fields today, so the case it guards cannot be constructed.
+      # Raise it only in the commit that adds a skip, and say which.
       - name: Unit tests, and a suite that skips silently fails
         run: |
           set -o pipefail
           python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
                  scripts/tests/ -q -rs 2>&1 | tee /tmp/pytest.txt
           n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
-          echo "skipped: ${n:-0} (ceiling 3)"
-          if [ "${n:-0}" -gt 3 ]; then
+          echo "skipped: ${n:-0} (ceiling 5)"
+          if [ "${n:-0}" -gt 5 ]; then
             echo "--- the reasons, most common first ---"
             grep '^SKIPPED' /tmp/pytest.txt | sed 's/.*: //' | sort | uniq -c | sort -rn | head
             exit 1

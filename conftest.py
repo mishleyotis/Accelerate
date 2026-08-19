@@ -54,6 +54,52 @@ def _connect():
         database=(u.path or "/dma_insights").lstrip("/"))
 
 
+# The four service identities the DB-backed fixtures log in as. In production
+# these are Cloud SQL IAM principals and no password exists; locally and in CI
+# they are ordinary login roles, and the tests connect as them ON PURPOSE —
+# asserting a grant works is the whole point of several of them.
+_SERVICE_ROLES = (
+    ("dmai-migrate@digital-maturity-assessor.iam", "svc_migrate"),
+    ("dmai-worker@digital-maturity-assessor.iam", "svc_worker"),
+    ("dmai-mcp@digital-maturity-assessor.iam", "svc_mcp"),
+    ("dmai-api@digital-maturity-assessor.iam", "svc_api"),
+)
+
+
+def _seed_service_roles(conn):
+    """CREATE the login roles, because roles are CLUSTER-scoped and a fresh
+    Postgres has none.
+
+    This is what actually cost 62 tests in CI, and it hid behind the same
+    message as everything else. The fixtures connect as
+    `dmai-worker@digital-maturity-assessor.iam` and friends; the migrations
+    create the GROUP roles (`svc_worker`, `svc_mcp`, …) and grant to them, but
+    the per-service LOGIN roles come from `infra/provision.sh` against Cloud
+    SQL, which no test runner has ever run. On a developer's machine they
+    happen to exist from an earlier setup, so every DB-backed test passed
+    locally; on a fresh cluster the connect raised, the fixture's blanket
+    `except` reported "no migrated local database", and the database was
+    migrated perfectly. `Role "dmai-worker@…" does not exist` was in the
+    service container's log the whole time, several hundred lines below where
+    anyone was looking.
+
+    Idempotent, and superuser-only — which the test runner is, and production
+    is not: nothing here can run against Cloud SQL, where these identities are
+    IAM principals with no password at all.
+    """
+    cur = conn.cursor()
+    for login, group in _SERVICE_ROLES:
+        cur.execute("SELECT 1 FROM pg_roles WHERE rolname = %s", (login,))
+        if not cur.fetchone():
+            # `local` matches what every fixture in this repo passes, and the
+            # password only exists on a throwaway cluster.
+            cur.execute(f'CREATE ROLE "{login}" LOGIN PASSWORD \'local\'')
+        cur.execute("SELECT 1 FROM pg_roles WHERE rolname = %s", (group,))
+        if cur.fetchone():
+            cur.execute(f'GRANT "{group}" TO "{login}"')
+    conn.commit()
+
+
 def _seed_gate_registry(conn):
     """`gate_results.gate_id` has an FK onto `gate_registry`, and the registry
     is seeded at runtime by `ensure_gate_registry` rather than by a migration.
@@ -93,6 +139,16 @@ def _catalogue_version_fk_targets():
         conn.commit()
     except Exception:
         conn.rollback()          # a schema without the table is not our call
+    # Roles first: the gate-registry seed and every DB-backed fixture below
+    # need them, and a failure here is the one worth seeing rather than
+    # swallowing into another skip.
+    try:
+        _seed_service_roles(conn)
+    except Exception as exc:                       # noqa: BLE001
+        print(f"conftest: could not create the service login roles ({exc}). "
+              f"Every fixture that connects as one will report "
+              f"'no migrated local database' whatever the database is.")
+        conn.rollback()
     try:
         _seed_gate_registry(conn)
     except Exception:
