@@ -4704,7 +4704,7 @@ function ClientRuns({
     className: "col-drop"
   }, /*#__PURE__*/React.createElement("span", {
     className: `b ${r.data_source === "DRIVE_PARSE" ? "b-ph0" : "b-ph1"}`
-  }, r.data_source === "DRIVE_PARSE" ? "DRIVE PARSE" : "PROJECT API")), /*#__PURE__*/React.createElement("td", {
+  }, r.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface")), /*#__PURE__*/React.createElement("td", {
     "data-label": "Score"
   }, /*#__PURE__*/React.createElement(MaturityChip, {
     score: r.overall

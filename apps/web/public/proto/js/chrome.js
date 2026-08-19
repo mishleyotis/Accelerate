@@ -2,6 +2,11 @@
    DMA INSIGHTS · App shell - Sidebar, TopBar, ClientShell, Banners
    ═══════════════════════════════════════════════════════════════════════ */
 
+const ROLE_LABEL = {
+  AE: "Account executive",
+  ANALYST: "Analyst",
+  ADMIN: "Admin"
+};
 function Sidebar() {
   const {
     route,
@@ -132,7 +137,7 @@ function Sidebar() {
     className: "sb-foot-name"
   }, sessionUser().short), /*#__PURE__*/React.createElement("div", {
     className: "sb-foot-role"
-  }, role)), /*#__PURE__*/React.createElement("button", {
+  }, ROLE_LABEL[role] || role)), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
     style: {
       color: "rgba(255,255,255,.6)"
@@ -675,7 +680,9 @@ function SettingsPopover({
       ADMIN: 2
     };
     const cap = RANK[String(granted).toUpperCase()] ?? 0;
-    return [["AE", "AE"], ["ANALYST", "Analyst"], ["ADMIN", "Admin"]].filter(([k]) => RANK[k] <= cap).map(([k, l]) => /*#__PURE__*/React.createElement("button", {
+    // The VALUE stays "AE" — it is the enum the app keys on and the
+    // API returns. Only the label a reader sees is spelled out.
+    return [["AE", "Account executive"], ["ANALYST", "Analyst"], ["ADMIN", "Admin"]].filter(([k]) => RANK[k] <= cap).map(([k, l]) => /*#__PURE__*/React.createElement("button", {
       key: k,
       className: role === k ? "on" : "",
       style: {
@@ -808,7 +815,7 @@ function ClientBar({
     className: `pill pill-active`
   }, run.status.replace(/_/g, " ")) : null, run ? /*#__PURE__*/React.createElement("span", {
     className: `pill ${dsPill}`
-  }, run.data_source === "DRIVE_PARSE" ? "DRIVE PARSE" : "PROJECT API") : null, fresh ? /*#__PURE__*/React.createElement("span", {
+  }, run.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface") : null, fresh ? /*#__PURE__*/React.createElement("span", {
     className: `pill ${fresh.tone === "ok" ? "pill-fresh" : "pill-stale"}`
   }, "\u25CF ", fresh.label, " \xB7 ", fresh.months, " mo") : null), /*#__PURE__*/React.createElement("div", {
     className: "client-bar-r"

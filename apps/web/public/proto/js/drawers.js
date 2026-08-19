@@ -3638,7 +3638,7 @@ function RecommendationModal() {
       style: {
         color: "var(--z-muted)"
       }
-    }, "the run states no KPI for this recommendation")
+    }, "the run states no measure for this recommendation")
   },
   /* PAGE-KILLER, fixed: `v: r.validation_gate` put the raw
      object into JSX. A promoted gate is

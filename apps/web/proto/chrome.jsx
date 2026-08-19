@@ -2,6 +2,9 @@
    DMA INSIGHTS · App shell - Sidebar, TopBar, ClientShell, Banners
    ═══════════════════════════════════════════════════════════════════════ */
 
+const ROLE_LABEL = { AE: "Account executive", ANALYST: "Analyst",
+                     ADMIN: "Admin" };
+
 function Sidebar() {
   const { route, role, openAlerts, activeRuns, setAuthed, sidebarOpen, setSidebarOpen } = useApp();
   const path = route.path;
@@ -65,7 +68,9 @@ function Sidebar() {
           <div className="sb-avatar">{sessionUser().initials}</div>
           <div className="sb-foot-meta">
             <div className="sb-foot-name">{sessionUser().short}</div>
-            <div className="sb-foot-role">{role}</div>
+            {/* The enum is what the app keys on; the badge is what a person reads.
+                It printed "AE" on every page of the product. */}
+            <div className="sb-foot-role">{ROLE_LABEL[role] || role}</div>
           </div>
           <button className="icon-btn" style={{ color: "rgba(255,255,255,.6)" }} title="Sign out" onClick={() => { setAuthed(false); signOutSession(); }}>
             <Icon name="logout" size={14} />
@@ -278,7 +283,10 @@ function SettingsPopover({ onClose }) {
             {(() => {
               const RANK = { AE: 0, ANALYST: 1, ADMIN: 2 };
               const cap = RANK[String(granted).toUpperCase()] ?? 0;
-              return [["AE", "AE"], ["ANALYST", "Analyst"], ["ADMIN", "Admin"]]
+              // The VALUE stays "AE" — it is the enum the app keys on and the
+              // API returns. Only the label a reader sees is spelled out.
+              return [["AE", "Account executive"], ["ANALYST", "Analyst"],
+                      ["ADMIN", "Admin"]]
                 .filter(([k]) => RANK[k] <= cap)
                 .map(([k, l]) => (
                   <button key={k} className={role === k ? "on" : ""} style={{ flex: 1 }} onClick={() => { setRole(k); onClose(); }}>{l}</button>
@@ -338,7 +346,7 @@ function ClientBar({ entity, run, tab }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <div className="name">{entity.name}</div>
           {run ? <span className={`pill pill-active`}>{run.status.replace(/_/g, " ")}</span> : null}
-          {run ? <span className={`pill ${dsPill}`}>{run.data_source === "DRIVE_PARSE" ? "DRIVE PARSE" : "PROJECT API"}</span> : null}
+          {run ? <span className={`pill ${dsPill}`}>{run.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface"}</span> : null}
           {fresh ? <span className={`pill ${fresh.tone === "ok" ? "pill-fresh" : "pill-stale"}`}>● {fresh.label} · {fresh.months} mo</span> : null}
         </div>
         <div className="client-bar-r">

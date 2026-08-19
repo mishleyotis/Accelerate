@@ -2509,7 +2509,7 @@ function RecommendationModal() {
                             </>)
                       : r.outcomes
                         ? <><strong>{r.outcomes.metric}</strong> · {r.outcomes.time} · {r.outcomes.effort} effort</>
-                        : <span style={{ color: "var(--z-muted)" }}>the run states no KPI for this recommendation</span> },
+                        : <span style={{ color: "var(--z-muted)" }}>the run states no measure for this recommendation</span> },
                     /* PAGE-KILLER, fixed: `v: r.validation_gate` put the raw
                        object into JSX. A promoted gate is
                        {threshold, verdict, current_value, cell, grain_note,

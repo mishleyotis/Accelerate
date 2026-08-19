@@ -154,7 +154,7 @@ function MyTweaks() {
             const RANK = { AE: 0, ANALYST: 1, ADMIN: 2 };
             const cap = RANK[grantedRole()] ?? 0;
             return [
-              { label: "AE",       value: "AE" },
+              { label: "Account executive", value: "AE" },
               { label: "Analyst",  value: "ANALYST" },
               { label: "Admin",    value: "ADMIN" },
             ].filter(o => RANK[o.value] <= cap);

@@ -2195,7 +2195,7 @@ function ClientPlatform({
       style: {
         fontSize: 10
       }
-    }, "KPI"), /*#__PURE__*/React.createElement("strong", {
+    }, "Measure"), /*#__PURE__*/React.createElement("strong", {
       style: {
         fontWeight: 500
       }

@@ -1036,7 +1036,7 @@ function EntityDirectoryPage() {
     value: "ALL"
   }, "All sources"), /*#__PURE__*/React.createElement("option", {
     value: "PROJECT_API"
-  }, "Project API"), /*#__PURE__*/React.createElement("option", {
+  }, "Project interface"), /*#__PURE__*/React.createElement("option", {
     value: "DRIVE_PARSE"
   }, "Drive parse")), /*#__PURE__*/React.createElement("select", {
     className: "inp",

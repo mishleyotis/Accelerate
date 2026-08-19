@@ -470,7 +470,7 @@ function EntityDirectoryPage() {
         </select>
         <select className="inp" style={{ maxWidth: 200 }} value={sourceFilter} onChange={e => setSourceFilter(e.target.value)}>
           <option value="ALL">All sources</option>
-          <option value="PROJECT_API">Project API</option>
+          <option value="PROJECT_API">Project interface</option>
           <option value="DRIVE_PARSE">Drive parse</option>
         </select>
         <select className="inp" style={{ maxWidth: 200 }} value={sortBy} onChange={e => setSortBy(e.target.value)}>

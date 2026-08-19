@@ -1701,7 +1701,7 @@ function ClientPlatform({ entity, run }) {
                          overflows into. 1/-1 is "the whole row", whatever the
                          count came out as. */
                       <div style={{ gridColumn: "1 / -1", minWidth: 0 }}>
-                        <div className="muted" style={{ fontSize: 10 }}>KPI</div>
+                        <div className="muted" style={{ fontSize: 10 }}>Measure</div>
                         <strong style={{ fontWeight: 500 }}>{pfText(kpi.metric)}</strong>
                         {kpi.baseline ? (
                           <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.5 }}>

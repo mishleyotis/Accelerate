@@ -451,6 +451,16 @@ _ACCUSATORY = (
 )
 
 
+# Every section whose prose a CLIENT reads. Restricting this to `starters` was
+# the first version's mistake: the phrase that reached the live page —
+# "What it cannot do is answer a question" — was on a platform-story tile, one
+# card away from the starters and read by exactly the same person.
+_CLIENT_FACING = frozenset((
+    "starters", "platform_story", "recommendations", "roadmap", "stairstep",
+    "opportunity", "findings", "exec_summary", "why_now",
+))
+
+
 def _check_starter_tone(section, body) -> list:
     """AG-12 — a starter opens on an opportunity, never on an accusation.
 
@@ -464,26 +474,32 @@ def _check_starter_tone(section, body) -> list:
     The gate refuses the MOVE, not a word list: each pattern is a way of
     making the client the subject of a failure.
     """
-    if section != "starters" or not isinstance(body, dict):
+    if section not in _CLIENT_FACING or not isinstance(body, dict):
         return []
     out = []
-    for i, st in enumerate(body.get("starters") or []):
-        if not isinstance(st, dict):
-            continue
-        for field in ("text", "followup_question", "their_system_reference"):
-            text = st.get(field)
-            if not isinstance(text, str):
-                continue
+
+    def walk(node, path, key=None):
+        if len(out) >= 8:
+            return
+        if isinstance(node, dict):
+            for k, v in node.items():
+                walk(v, f"{path}.{k}", k)
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                walk(v, f"{path}[{i}]", key)
+        elif isinstance(node, str) and len(node) > 30 and key not in _VERBATIM_FIELDS:
             for pat, why in _ACCUSATORY:
-                if re.search(pat, text, re.I):
+                if re.search(pat, node, re.I):
                     out.append(_reason(
-                        "AG-12", "starters", f"starters.starters[{i}].{field}",
-                        f"this starter {why}, and the client reads it. State "
-                        "the same fact as the opening it is: what is in place, "
-                        "and the next thing it makes possible. A gap presented "
-                        "as an opportunity is the same information and a "
-                        "different conversation."))
+                        "AG-12", section, path,
+                        f"this {why}, and the client reads it. State the same "
+                        "fact as the opening it is: what is in place, and the "
+                        "next thing it makes possible. A gap presented as an "
+                        "opportunity is the same information and a different "
+                        "conversation."))
                     break
+
+    walk(body, section)
     return out
 
 

@@ -3148,7 +3148,7 @@ function ClientRuns({ entity }) {
                 <td data-label="Run date"><strong>{fmtDate(r.date)}</strong></td>
                 <td data-label="Run ID" className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{r.id}</td>
                 <td data-label="Status"><span className={`b ${r.status === "ACTIVE" ? "b-teal" : "b-muted"}`}>{r.status}</span></td>
-                <td data-label="Source" className="col-drop"><span className={`b ${r.data_source === "DRIVE_PARSE" ? "b-ph0" : "b-ph1"}`}>{r.data_source === "DRIVE_PARSE" ? "DRIVE PARSE" : "PROJECT API"}</span></td>
+                <td data-label="Source" className="col-drop"><span className={`b ${r.data_source === "DRIVE_PARSE" ? "b-ph0" : "b-ph1"}`}>{r.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface"}</span></td>
                 <td data-label="Score"><MaturityChip score={r.overall} /></td>
                 <td data-label="Evidence mode" className="col-drop">{r.evidence_mode}</td>
                 <td data-label="Subcaps">{r.subcap_count}</td>

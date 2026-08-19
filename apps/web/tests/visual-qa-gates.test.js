@@ -116,6 +116,17 @@ function overviewPayload() {
     ranking_basis: "By the width of the gap each names.",
     narrative_thread: "Two findings, one of them the sequencing decision.",
   });
+  // Bars whose scale is stated as a NUMBER, which is how the promoted
+  // payloads state it and what blanked five real ratings for three rounds.
+  sections.sentiment = sec({
+    bars: [
+      { audience: "customer", source: "Apple App Store", rating: 4.75,
+        scale: 5, n: 9585, as_of: "2026-08-19" },
+      { audience: "employee", source: "Indeed — employer profile", rating: 3.7,
+        scale: 5, n: 99, as_of: "2026-08-19" },
+    ],
+    themes: [], narrative_thread: "Members rate it above the people serving.",
+  });
   return { entity: { display_id: ENTITY, name: "Gate Credit Union" },
            run: { run_id: RUN_ID, promoted_at: "2026-08-19T00:00:00Z",
                   completed_at: "2026-08-19T00:00:00Z", evidence_mode: "PUBLIC" },
@@ -384,6 +395,71 @@ test("visual QA gates", { skip, concurrency: false }, async (t) => {
         "a finding that cites nothing is showing evidence chips");
       assert.ok(!/not among the evidence served/.test(text),
         "a finding with no citations is being told its sources went missing");
+      await page.close();
+    });
+
+    // ── ABBREVIATIONS, ON SCREEN ──────────────────────────────────────
+    await t.test("no abbreviation reaches the page, chrome included", async () => {
+      /* The payload gate (CG-27) reads payloads. It cannot see the app's own
+         chrome, and that is where four of them were: the sidebar printed the
+         role enum "AE" on every page of the product, the client bar printed
+         "PROJECT API", and two card headings read "KPI". Found by reading a
+         rendered page, which is the only place they exist. */
+      const BARE = /\b(CU|FCU|NCUA|CFPB|CEO|CIO|COO|CTO|CISO|KPI|ROI|SLA|NPS|AE|API|UX|B2B|B2C)\b/;
+      // A quoted source title and a verbatim excerpt carry whatever the source
+      // wrote; rewriting either would misquote it.
+      const QUOTED = /^\s*["“]|Testimony of |^\s*[A-Z][^.]{0,60} — /;
+      for (const which of ["overview", "platform"]) {
+        const { page } = await open(which);
+        const hits = await page.evaluate(([bare, quoted]) => {
+          const rx = new RegExp(bare), qx = new RegExp(quoted);
+          return (document.body.innerText || "").split("\n")
+            .filter((l) => rx.test(l) && !qx.test(l)).slice(0, 4);
+        }, [BARE.source, QUOTED.source]);
+        assert.deepStrictEqual(hits, [],
+          `${which}: an abbreviation is on screen. Spell it out — the payload `
+          + `gate cannot see the app's own chrome:\n  ${hits.join("\n  ")}`);
+        await page.close();
+      }
+    });
+
+    // ── TONE, ON SCREEN ───────────────────────────────────────────────
+    await t.test("no accusatory line reaches the page from any card", async () => {
+      /* AG-12 started life reading `starters` only, and the phrase that
+         reached the live page — "What it cannot do is answer a question" —
+         was on a platform-story tile one card away, read by the same person.
+         The gate is wider now; this asserts the outcome rather than the
+         gate. */
+      const ACC = /do not quite line up|what it cannot do|you do not (have|know|track|measure)|fall(s|ing)? (short|behind)/i;
+      for (const which of ["overview", "platform"]) {
+        const { page } = await open(which);
+        const hits = await page.evaluate((src) => {
+          const rx = new RegExp(src, "i");
+          return (document.body.innerText || "").split("\n")
+            .filter((l) => rx.test(l)).slice(0, 3);
+        }, ACC.source);
+        assert.deepStrictEqual(hits, [],
+          `${which}: a card makes the client the subject of a failure:\n  `
+          + hits.join("\n  "));
+        await page.close();
+      }
+    });
+
+    // ── THE BAR THAT WOULD NOT DRAW ───────────────────────────────────
+    await t.test("a rating with a numeric scale draws a filled bar", async () => {
+      /* Reported three rounds running as "sentiment is still empty", and from
+         the page it was: `scale: 5` parsed as no bound at all, so the rule
+         that protects a reader from an unbounded rating blanked five bounded
+         ones. */
+      const { page } = await open("overview");
+      const text = await page.evaluate(() => document.body.innerText || "");
+      assert.ok(/4\.8|4\.75/.test(text) && /3\.7/.test(text),
+        "the ratings do not render as figures");
+      const filled = await page.evaluate(() =>
+        [...document.querySelectorAll("[class*='bar'] *")]
+          .filter((e) => e.getBoundingClientRect().width > 1).length);
+      assert.ok(filled > 0,
+        "every bar is an empty grey rail over a rating the payload states");
       await page.close();
     });
 

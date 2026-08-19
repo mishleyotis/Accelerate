@@ -204,7 +204,7 @@ function MyTweaks() {
       };
       const cap = RANK[grantedRole()] ?? 0;
       return [{
-        label: "AE",
+        label: "Account executive",
         value: "AE"
       }, {
         label: "Analyst",
