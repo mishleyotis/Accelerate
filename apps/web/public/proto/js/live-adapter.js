@@ -369,16 +369,14 @@ function adaptSentiment(sentiment) {
  * producer stating the bounds. Anything else is still null.
  */
 function scaleMaxOf(scale) {
-  if (typeof scale === "number" && isFinite(scale)) return scale;
-  const text = String(scale == null ? "" : scale).trim();
-  if (!text) return null;
-  const range = text.match(/(-?\d+(?:\.\d+)?)\s*(?:\.\.|[-–—]|\bto\b)\s*(-?\d+(?:\.\d+)?)/);
-  if (range) return Number(range[2]);
-  const bare = text.match(/^(-?\d+(?:\.\d+)?)$/);
-  if (bare) return Number(bare[1]);
-  // "out of 5", "5-point", "scale of 10" — the bound stated in words.
-  const worded = text.match(/(?:out of|scale of)\s*(-?\d+(?:\.\d+)?)/i) || text.match(/^(-?\d+(?:\.\d+)?)[- ]point\b/i);
-  return worded ? Number(worded[1]) : null;
+  // DELEGATES. This function and `scaleBounds` in utils.jsx were two parsers
+  // of one notation, and fixing this one while the CARD used the other is how
+  // "sentiment is still empty" survived a round that reported it fixed: the
+  // adapter's `scale_max` was right and the bar drew off `scaleFraction`,
+  // which was not. One parser cannot disagree with itself.
+  const b = typeof scaleBounds === "function" ? scaleBounds(scale) : null;
+  if (b) return b.max;
+  return typeof scale === "number" && isFinite(scale) ? scale : null;
 }
 
 /* The context tiles state their bounds as "1-5 stars" where the overview's

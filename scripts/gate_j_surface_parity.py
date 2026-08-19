@@ -45,6 +45,17 @@ PAGES = ("overview", "heatmap", "insights", "platform", "context", "techstack")
 # `context` is internal-only, so a customer read 403s by design.
 AUDIENCE_DECIDED = ("withheld", "never_served", "redacted")
 
+# A STATED absence is not a gap either. The envelope's `data_source: "empty"`
+# is the producer saying "this section is empty and that is the finding" —
+# measured on the reference pair, where the target's acquisitions section
+# carries `data_source: "empty"` and a thread reading "Acquisitions record
+# what did not happen". Reporting that as thinness against a client who HAS
+# made acquisitions is the gate arguing with the assessment.
+#
+# Read from the ENVELOPE, never from the values: the rule stays "structure
+# only", and a section that is empty WITHOUT saying so is still a gap.
+STATED_EMPTY = ("empty", "none", "verified_absent")
+
 
 def _sections(doc: dict) -> dict:
     return (doc or {}).get("sections") or {}
@@ -52,6 +63,14 @@ def _sections(doc: dict) -> dict:
 
 def _is_withheld(sec: dict) -> bool:
     return any(bool(sec.get(k)) for k in AUDIENCE_DECIDED)
+
+
+def _states_its_emptiness(sec: dict) -> bool:
+    """Did the producer SAY this section is empty, in the envelope?"""
+    if str((sec or {}).get("data_source") or "").strip().lower() in STATED_EMPTY:
+        return True
+    es = (sec or {}).get("empty_state")
+    return isinstance(es, dict) and bool(es.get("reason") or es.get("basis"))
 
 
 def _filled(value) -> bool:
@@ -88,6 +107,8 @@ def compare_page(page: str, ref: dict, tgt: dict) -> list:
             continue                      # an audience decision, not a gap
         t_data = t_sec.get("data")
         if not _filled(t_data):
+            if _states_its_emptiness(t_sec):
+                continue
             out.append({"page": page, "section": name, "key": None,
                         "kind": "section_empty",
                         "detail": "the reference fills this section and the "
@@ -104,6 +125,8 @@ def compare_page(page: str, ref: dict, tgt: dict) -> list:
                             "kind": "key_absent",
                             "detail": "carried by the reference, absent here"})
             elif not _filled(t_data[key]):
+                if _states_its_emptiness(t_sec):
+                    continue
                 out.append({"page": page, "section": name, "key": key,
                             "kind": "key_empty",
                             "detail": "carried by the reference, empty here"})

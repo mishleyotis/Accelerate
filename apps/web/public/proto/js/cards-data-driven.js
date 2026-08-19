@@ -299,7 +299,12 @@ function SentimentCard({
    the producer wrote; a count nobody stated contributes nothing. */
 function footerCounts(f) {
   const emp = (f.employees || [])[(f.employees || []).length - 1];
-  return [fmtCount(f.branches) != null ? `${fmtCount(f.branches)} branches` : null, fmtCount(emp) != null ? `${fmtCount(emp)} FTE` : null].filter(Boolean).join(" · ") || null;
+  return [fmtCount(f.branches) != null ? `${fmtCount(f.branches)} branches` : null,
+  // "employees", not "FTE". Short strings slipped past both the payload
+  // expander and CG-27 — each skips anything under twelve characters — so a
+  // three-letter unit survived every abbreviation sweep and rendered on the
+  // overview footer of every client.
+  fmtCount(emp) != null ? `${fmtCount(emp)} employees` : null].filter(Boolean).join(" · ") || null;
 }
 
 /* ── Financial trajectory ──────────────────────────────────────────────

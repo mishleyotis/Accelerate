@@ -410,7 +410,13 @@ def _check_no_bare_abbreviations(page, section, body) -> list:
         elif isinstance(node, list):
             for i, v in enumerate(node):
                 walk(v, f"{path}[{i}]", key)
-        elif isinstance(node, str) and key not in _VERBATIM_FIELDS and len(node) > 12:
+        elif isinstance(node, str) and key not in _VERBATIM_FIELDS and node.strip():
+            # NO LENGTH FLOOR. It was 12 characters, on the reasoning that a
+            # short string is a label rather than prose — and a unit is the
+            # shortest string on any page. "FTE" is three characters and
+            # rendered on the overview footer of every client, invisible to
+            # this gate and to the expander beside it, through four rounds of
+            # abbreviation sweeps.
             for m in _ABBREV.finditer(node):
                 short = m.group(1)
                 # Spelled out in the same field is a second reference and

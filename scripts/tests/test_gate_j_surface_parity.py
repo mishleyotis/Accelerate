@@ -128,3 +128,44 @@ def test_a_comparison_that_compared_nothing_is_not_clean():
         capture_output=True, text=True, timeout=120)
     assert r.returncode == 1, "a comparison of nothing exited 0"
     assert "nothing was compared" in r.stdout, r.stdout[:400]
+
+
+def test_a_section_that_states_its_own_emptiness_is_not_a_gap():
+    """Measured on the reference pair: the target's acquisitions section
+    carries `data_source: "empty"` and a thread reading "Acquisitions record
+    what did not happen". Reporting that as thinness against a client who has
+    made acquisitions is the gate arguing with the assessment.
+
+    Read from the ENVELOPE, so the rule stays structure-only."""
+    ref = page(acquisitions=sec({"rows": [{"target": "Someone"}]}))
+    tgt = page(acquisitions=sec({"rows": []}, data_source="empty"))
+    assert compare_page("context", ref, tgt) == []
+
+
+def test_an_empty_state_with_a_reason_also_counts_as_stated():
+    ref = page(acquisitions=sec({"rows": [1]}))
+    tgt = page(acquisitions=sec({"rows": []},
+                                empty_state={"reason": "No merger approval "
+                                                       "notice exists."}))
+    assert compare_page("context", ref, tgt) == []
+
+
+def test_empty_WITHOUT_saying_so_is_still_a_gap():
+    """The negative control, and the whole reason this is envelope-only: a
+    section that is simply blank has told the reader nothing, and that is the
+    defect the gate exists for."""
+    ref = page(acquisitions=sec({"rows": [1]}))
+    tgt = page(acquisitions=sec({"rows": []}))
+    # `key_empty`, not `section_empty`: the section carries the key and the key
+    # is empty, which is the more precise of the two and names the field a
+    # reader would go looking for.
+    assert kinds(compare_page("context", ref, tgt)) == [
+        ("key_empty", "acquisitions", "rows")]
+
+
+def test_a_stated_absence_does_not_excuse_a_sibling_section():
+    """Scoped to the section that said it, never to the page."""
+    ref = page(a=sec({"rows": [1]}), b=sec({"rows": [1]}))
+    tgt = page(a=sec({"rows": []}, data_source="empty"), b=sec({"rows": []}))
+    assert kinds(compare_page("context", ref, tgt)) == [
+        ("key_empty", "b", "rows")]

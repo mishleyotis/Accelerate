@@ -446,21 +446,73 @@ test("visual QA gates", { skip, concurrency: false }, async (t) => {
     });
 
     // ── THE BAR THAT WOULD NOT DRAW ───────────────────────────────────
-    await t.test("a rating with a numeric scale draws a filled bar", async () => {
+    /* THE SENTIMENT CARD'S OWN BARS, and only those.
+     *
+     * An earlier version of this counted filled bars anywhere on the page,
+     * found fifteen — the pillar rails — and reported the sentiment card
+     * fixed while every one of its rows was still an empty grey track. A
+     * screenshot showed otherwise. A check scoped wider than the defect
+     * cannot see the defect.
+     */
+    const sentimentRows = (page) => page.evaluate(() => {
+      const card = [...document.querySelectorAll(".card")]
+        .find((c) => /^\s*Sentiment/m.test(c.innerText || ""));
+      if (!card) return null;
+      // Each row is `120px 1fr 40px`: label, track, figure. The track is the
+      // grid child with a rounded background; its fill is the child of that.
+      // The track is the one element with `overflow: hidden` and the rail's
+      // own height — anything looser catches the card's padding wrappers and
+      // reports them as empty bars, which is a false alarm dressed as the
+      // real one.
+      return [...card.querySelectorAll("div")]
+        .filter((d) => getComputedStyle(d).overflow === "hidden"
+                    && Math.round(d.getBoundingClientRect().height) === 7
+                    && d.getBoundingClientRect().width > 40)
+        .map((track) => ({
+          track: track.getBoundingClientRect().width,
+          fill: [...track.children]
+            .reduce((m, c) => Math.max(m, c.getBoundingClientRect().width), 0),
+        }));
+    });
+
+    await t.test("every sentiment row with a rating draws a filled bar", async () => {
       /* Reported three rounds running as "sentiment is still empty", and from
-         the page it was: `scale: 5` parsed as no bound at all, so the rule
-         that protects a reader from an unbounded rating blanked five bounded
-         ones. */
+         the page it was. `scale: 5` parsed as no bound at all, so the rule
+         that protects a reader from an UNBOUNDED rating blanked two bounded
+         ones — and the parser I fixed first was not the one the card uses.
+         The reference client states "1-5 stars" and every one of its bars
+         fills. */
       const { page } = await open("overview");
       const text = await page.evaluate(() => document.body.innerText || "");
       assert.ok(/4\.8|4\.75/.test(text) && /3\.7/.test(text),
-        "the ratings do not render as figures");
-      const filled = await page.evaluate(() =>
-        [...document.querySelectorAll("[class*='bar'] *")]
-          .filter((e) => e.getBoundingClientRect().width > 1).length);
-      assert.ok(filled > 0,
-        "every bar is an empty grey rail over a rating the payload states");
+        "the ratings do not render as figures at all");
+      const rows = await sentimentRows(page);
+      assert.ok(rows && rows.length >= 2,
+        `the sentiment card renders no bar tracks (found ${rows ? rows.length : "no card"})`);
+      const empty = rows.filter((r) => r.fill <= 1);
+      assert.strictEqual(empty.length, 0,
+        `${empty.length} of ${rows.length} sentiment rows are an empty grey `
+        + `rail over a rating the payload states. That is what "sentiment is `
+        + `still empty" looks like.`);
       await page.close();
+    });
+
+    await t.test("the reference client's own notations all draw", async () => {
+      /* Baxter is the ideal case and states its scales as
+         "1-5 stars", "NPS -100..100" and "0-100 % of employees agreeing".
+         Every one must fill, or a fix aimed at the bare number has broken the
+         notation that was working. */
+      const w = require("./adapter-window");
+      for (const [scale, value] of [["1-5 stars", 4.87],
+                                    ["NPS -100..100", 79.81],
+                                    ["0-100 % of employees agreeing", 88],
+                                    [5, 4.3], ["5", 4.3], ["out of 10", 7]]) {
+        const f = w.scaleFraction(value, scale);
+        assert.ok(f !== null && f > 0,
+          `scale ${JSON.stringify(scale)} draws nothing for ${value}`);
+      }
+      assert.strictEqual(w.scaleFraction(4.3, "stars"), null,
+        "a notation stating no bound must still draw no bar");
     });
 
     await t.test("no record reaches a slot that wanted a word", async () => {

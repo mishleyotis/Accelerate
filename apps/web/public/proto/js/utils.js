@@ -283,6 +283,21 @@ function scaleBounds(scale) {
   };
   m = s.match(/(\d+(?:\.\d+)?)\s*stars?/i);
   if (m) return num2(1, m[1]);
+  // "out of 10", "5-point" — the upper bound stated in words.
+  m = s.match(/(?:out of|scale of)\s*(\d+(?:\.\d+)?)/i) || s.match(/^(\d+(?:\.\d+)?)[- ]point\b/i);
+  if (m) return num2(0, m[1]);
+  // A BARE NUMBER. `scale: 5` is the plainest way a payload can answer "4.1
+  // out of what", and this returned null for it — so the rule that protects
+  // a reader from an unbounded rating drew five empty grey rails over five
+  // bounded ratings, and did it for three reported rounds.
+  //
+  // The reference client states "1-5 stars" and "NPS -100..100" and every one
+  // of its bars fills; the client that stated `5` filled none. Reading the
+  // bare form is what stops a legal payload rendering blank, and the second
+  // half of that repair is upstream: a payload that says "1-5 stars" also
+  // tells the reader the notation, which the card prints beside the source.
+  m = s.match(/^(\d+(?:\.\d+)?)$/);
+  if (m) return num2(0, m[1]);
   return null;
 }
 
@@ -2274,6 +2289,12 @@ Object.assign(window, {
   moneyMultiplier,
   isMoneyUnit,
   scaleMoneySeries,
+  // Exported so the suite can assert them directly and so the adapter's
+  // `scaleMaxOf` can DELEGATE rather than keep a second copy: two
+  // parsers of one notation is exactly how a bar stayed empty through a
+  // round that reported it fixed.
+  scaleBounds,
+  scaleFraction,
   numOrText,
   fmtCount,
   fmtFieldValue,
