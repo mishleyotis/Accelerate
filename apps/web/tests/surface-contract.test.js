@@ -528,8 +528,15 @@ test("surfaces read the axis they name, and answer the control the reader presse
       await ctx.close();
     });
 
-    await t.test("insights · the self-check is labelled and the reviewer gets a pair",
+    await t.test("insights · the reviewer gets a pair, and no producer self-check",
                  async () => {
+      /* The "Reasoning trace / Self-check · ACCEPT" half of this test is
+         SUPERSEDED as of 2026-08-19: `r_layer` is stripped for every audience
+         at the API boundary and the modal's trace block is deleted.
+
+         The reviewer pair is unaffected and still asserted — it was never the
+         producer's verdict, it is the human's, and it was deliberately built
+         to render whether or not a card carries a trace. */
       const { ctx, page, errors } = await open("insights");
       await page.evaluate(() => document.querySelector("#app .main .ic").click());
       await page.waitForTimeout(600);
@@ -539,9 +546,10 @@ test("surfaces read the axis they name, and answer the control the reader presse
                  buttons: [...(m ? m.querySelectorAll("button") : [])]
                    .map((b) => b.textContent.trim()) };
       });
-      assert.match(modal.text, /Reasoning trace/i);
-      assert.match(modal.text, /Self-check · ACCEPT/i,
-        "the producer's verdict must not read as a control");
+      assert.doesNotMatch(modal.text, /Reasoning trace/i,
+        "the producer's trace reached the insight modal");
+      assert.doesNotMatch(modal.text, /Self-check/i,
+        "the producer's self-check reached the insight modal");
       assert.match(modal.text, /Your verdict/i);
       const accepts = modal.buttons.filter((b) => /^Accept$/.test(b)).length;
       const rejects = modal.buttons.filter((b) => /^Reject$/.test(b)).length;

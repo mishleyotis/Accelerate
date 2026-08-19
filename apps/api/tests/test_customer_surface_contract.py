@@ -57,15 +57,24 @@ def test_the_evidence_census_is_withheld_from_the_customer():
     assert rep["withheld"] is True
 
 
-def test_the_internal_audience_still_gets_the_census():
-    """The other half. Withholding it from the client must not cost the
-    analyst the figure that explains every ceiling on the page."""
-    out, _ = redact_section("overview", "evidence_coverage",
-                            _census_body(), ["r_layer"], "internal")
-    assert out is not None
-    for key in CENSUS_KEYS:
-        assert key in out, f"the internal body lost {key}"
-    assert out["r_layer"]["verdict"] == "ACCEPT"
+def test_the_census_now_reaches_no_audience_at_all():
+    """SUPERSEDED, deliberately, and the history matters.
+
+    This test used to assert the analyst still received the census after it
+    was withheld from the client. Owner instruction 2026-08-19, after the
+    census turned up in a live screenshot: internal artifacts are "dropped
+    at the payload boundary and render nowhere". The audience is a toggle in
+    a browser, so "withheld from the customer" and "not on the client's
+    screen" were never the same statement.
+
+    The census is still promoted, validated and readable through the
+    connector. It stops at the boundary where bytes leave for a browser.
+    """
+    for audience in ("internal", "customer", "ae", ""):
+        out, rep = redact_section("overview", "evidence_coverage",
+                                  _census_body(), ["r_layer"], audience)
+        assert out is None, f"the census was served to {audience!r}"
+        assert rep.get("never_served") is True
 
 
 @pytest.mark.parametrize("key", CENSUS_KEYS)
@@ -84,7 +93,11 @@ def test_r_layer_never_reaches_a_customer_body_however_it_is_marked():
     """Restates the invariant from the key-strip side. `r_layer` is declared
     per SECTION and was marked per PATH, which is how it reached the customer
     body on 36 paths across two clients."""
-    assert "r_layer" in CUSTOMER_STRIP_KEYS
+    # `r_layer` moved from CUSTOMER_STRIP_KEYS to NEVER_SERVED_KEYS on
+    # 2026-08-19: stripped for every audience rather than for one of them.
+    from dma_api.redaction import NEVER_SERVED_KEYS
+    assert "r_layer" in NEVER_SERVED_KEYS
+    assert "r_layer" not in CUSTOMER_STRIP_KEYS
     body = {"r_layer": {"verdict": "ACCEPT"}, "rows": [{"r_layer": {"x": 1}}]}
     out, _ = redact_section("overview", "firmographics", body, [], "customer")
     assert "r_layer" not in out

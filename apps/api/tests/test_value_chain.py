@@ -270,11 +270,19 @@ def test_redaction_runs_through_the_same_path_as_the_grid():
         return _Cur(stages=[stage("VC-CU-01", "Origination", 1)],
                     mapping=[mapped("P1C1.1.1", "Origination")],
                     served=["P1C1.1.1"])
-    built = _built(data={"r_layer": {"verdict": "analyst reasoning"}},
-                   env={"internal_only": ["r_layer"]})
+    # `note` stands in for the marked-and-survives case that `r_layer` used
+    # to demonstrate. `r_layer` moved to the allowlist on 2026-08-19 and now
+    # reaches no audience, so it can no longer show that a marking survives
+    # for the analyst — it shows the stronger rule instead, below.
+    built = _built(data={"note": "analyst reasoning",
+                         "r_layer": {"verdict": "analyst reasoning"}},
+                   env={"internal_only": ["note"]})
     internal = serve_value_chain(fresh(), ENTITY, RUN, built, "internal")
-    assert internal["data"]["r_layer"] == {"verdict": "analyst reasoning"}
+    assert internal["data"]["note"] == "analyst reasoning"
+    assert "r_layer" not in internal["data"], \
+        "the reasoning trace is on the allowlist: no audience receives it"
     customer = serve_value_chain(fresh(), ENTITY, RUN, built, "customer")
+    assert "note" not in customer["data"]
     assert "r_layer" not in customer["data"]
     # A COUNT, not the paths: a path string carries the field's name, and one
     # of them named the assessing vendor five times inside a client's own

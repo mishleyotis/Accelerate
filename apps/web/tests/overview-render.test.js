@@ -229,12 +229,28 @@ test("D1 overview renders what the run promoted", { skip, concurrency: false }, 
       const { page, errors } = await open({ variant: "unscored" });
       const text = await page.evaluate(() => document.body.innerText || "");
 
-      // The promoted explanation is on the page — ONCE. It is identical on all
-      // four rows and printing one paragraph four times is noise, not
-      // disclosure.
-      const hits = text.split("No peer figure is served at this grain").length - 1;
-      assert.strictEqual(hits, 1,
-        `the proxy_disclosure should render exactly once under the bars, found ${hits}`);
+      // SUPERSEDED 2026-08-19, and the history is the point.
+      //
+      // This used to assert the ~900-character proxy_disclosure rendered
+      // exactly once under the bars, de-duplicated across four identical
+      // rows. The live app then showed it FOUR times: the paragraphs differ
+      // only in the cell count (187 / 232 / 115 / 171), so the string-equality
+      // de-duplication never matched. Owner instruction: delete the repeated
+      // explanations and the internal jargon.
+      //
+      // Nothing about the assessment is lost. The one fact a reader needs
+      // from that paragraph — there is no peer benchmark, so no comparison is
+      // drawn — is now one short sentence, said once.
+      assert.ok(!text.includes("serve grain"),
+        "internal vocabulary reached the page: 'serve grain'");
+      assert.ok(!text.includes("computed_mean_of_subcaps"),
+        "internal vocabulary reached the page: 'computed_mean_of_subcaps'");
+      const disclosures = text.split("No peer figure is served at this grain").length - 1;
+      assert.strictEqual(disclosures, 0,
+        `the proxy_disclosure must not render at all, found ${disclosures}`);
+      const short = text.split("No peer benchmark is published for this run").length - 1;
+      assert.strictEqual(short, 1,
+        `the short stand-in renders exactly once, found ${short}`);
 
       // No 8px grey rail on a row with no figure. A rail with a zero-width
       // fill is read as a score of zero by everyone who has not seen the
@@ -364,30 +380,31 @@ test("D1 overview renders what the run promoted", { skip, concurrency: false }, 
       await page.close();
     });
 
-    await t.test("O-21/O-27 · the volleys and the section traces render, internal only", async () => {
+    await t.test("O-21/O-27 · the section traces are gone; the volleys stay", async () => {
+      /* SUPERSEDED 2026-08-19, deliberately.
+
+         This used to assert a collapsed "REASONING TRACE · Self-check ·
+         ACCEPT · Show" control was mounted for six named sections. The live
+         app then showed three of them on ONE screen — above the firmographics
+         table, below it, and again under the why-now signals. The trace is
+         the producer arguing with itself; that is owed to the assessment and
+         not to the reader.
+
+         `r_layer` is now stripped for every audience at the API boundary and
+         every renderer for it is deleted, so this test asserts absence. The
+         storyline challenge is a different thing and still renders: it is the
+         objections the STORY survived, which is content about the client. */
       const { page, errors } = await open({ variant: "unscored" });
       let text = await page.evaluate(() => document.body.innerText || "");
-      // Collapsed, not absent: the control is on the page for every section
-      // that promoted a trace.
-      const traces = await page.$$eval("[data-trace]",
-        (els) => els.map((e) => e.getAttribute("data-trace")).sort());
-      for (const want of ["overview.scores", "overview.leadership",
-                          "overview.exec_summary", "overview.opportunity",
-                          "overview.evidence_coverage", "overview.ceilings"]) {
-        assert.ok(traces.includes(want), `no reasoning trace mounted for ${want} — got ${traces}`);
-      }
-      assert.ok(text.includes("Self-check · ACCEPT"),
-        "the producer's own verdict must be labelled as a verdict, not left as a bare pill");
 
-      await page.evaluate(() => {
-        [...document.querySelectorAll("[data-trace] button")].forEach((b) => b.click());
-      });
-      await settle(page);
-      text = await page.evaluate(() => document.body.innerText || "");
-      assert.ok(text.includes("chief information security officer"),
-        "the leadership trace names the seats the roster could not establish, and it did not render");
-      assert.ok(text.includes("The strongest objection the producer could put against it"),
-        "a section's counter-case did not render");
+      const traces = await page.$$eval("[data-trace]",
+        (els) => els.map((e) => e.getAttribute("data-trace")));
+      assert.deepStrictEqual(traces, [],
+        `reasoning traces are mounted and must not be: ${traces}`);
+      for (const banned of ["REASONING TRACE", "Reasoning trace", "Self-check"]) {
+        assert.ok(!text.includes(banned),
+          `"${banned}" reached the page on the internal audience`);
+      }
 
       await page.evaluate(() => {
         const b = [...document.querySelectorAll("button")]
@@ -403,24 +420,35 @@ test("D1 overview renders what the run promoted", { skip, concurrency: false }, 
       await page.close();
     });
 
-    await t.test("O-24/O-25 · coverage and ceilings render, ceilings internal only", async () => {
-      const { page, errors } = await open({ variant: "unscored" });
-      const text = await page.evaluate(() => document.body.innerText || "");
-      assert.ok(text.includes("Evidence coverage"), "the coverage card is not mounted on any page");
-      assert.ok(text.includes("33% overall"), "the overall coverage percentage did not render");
-      assert.ok(text.includes("80% hard gate"), "the gate the coverage is measured against did not render");
-      assert.ok(text.includes("Capability ceiling"), "the ceilings card is not mounted on any page");
-      assert.ok(text.includes("Digital Strategy"), "a ceiling row rendered without its category");
-      /* The `ceiling` vocabulary is the assessment's M1–M5 LEVEL scale, not
-         the four-value band_t. It resolves to a level and the level goes
-         through the one colour resolver — a row that renders neither figure
-         nor token is the passthrough this guards against. */
-      assert.ok(/M3/.test(text) && /3\.0/.test(text),
-        "the stated ceiling token and the level it resolves to must both render");
-      assert.ok(!/M5|Transformational/.test(text),
-        "M5/Transformational must not exist in code, enum or prose");
-      assert.deepStrictEqual(errors, [], errors.join("\n"));
-      await page.close();
+    await t.test("O-24/O-25 · coverage and ceilings render on no page, for anyone", async () => {
+      /* SUPERSEDED 2026-08-19. These two cards were restored to this page in
+         an earlier round, on the reasoning that they were promoted, served,
+         complete and rendering nowhere. That reasoning was about the
+         PIPELINE. The live screenshots answered the question the pipeline
+         cannot: what they look like to a reader.
+
+         The evidence census reports how well WE evidenced the assessment —
+         33% overall, an 80% hard gate, "233 of 705 · 51 quote a source · 629
+         absences". The ceilings table states how confident we are, in M-level
+         and uncertainty bands. Both are our method, printed under the
+         client's own scores.
+
+         Both sections are on the API's NEVER_SERVED allowlist and both
+         renderers are deleted. They still promote, still validate, and are
+         still readable through the connector. */
+      for (const audience of [undefined, "customer"]) {
+        const { page, errors } = await open({ variant: "unscored", audience });
+        const text = await page.evaluate(() => document.body.innerText || "");
+        for (const banned of ["Evidence coverage", "33% overall", "80% hard gate",
+                              "Capability ceiling", "How this assessment was evidenced"]) {
+          assert.ok(!text.includes(banned),
+            `"${banned}" renders for audience ${audience || "internal"} and must not`);
+        }
+        assert.ok(!/M5|Transformational/.test(text),
+          "M5/Transformational must not exist in code, enum or prose");
+        assert.deepStrictEqual(errors, [], errors.join("\n"));
+        await page.close();
+      }
     });
 
     await t.test("the customer audience gets none of the internal content", async () => {
@@ -441,10 +469,8 @@ test("D1 overview renders what the run promoted", { skip, concurrency: false }, 
           `"${banned}" is internal-only and reached the customer audience`);
       }
       // …and still gets what the producer DID promote to it.
-      assert.ok(text.includes("No peer figure is served at this grain"),
+      assert.ok(text.includes("No peer benchmark is published for this run"),
         "the customer gets four blank bars and no reason for them");
-      assert.ok(text.includes("Evidence coverage"),
-        "coverage is promoted to this audience and must render");
       assert.ok(text.includes("Cells it addresses"),
         "the opportunity tile body is promoted to this audience and must render");
       assert.deepStrictEqual(errors, [], errors.join("\n"));
@@ -459,16 +485,30 @@ test("D1 overview renders what the run promoted", { skip, concurrency: false }, 
 /* The two cards were not broken — they had no CALL SITE. That is the failure
    mode this file exists for, and it is invisible to any test that renders a
    component directly, so it is asserted against the shipped bundle. */
-test("the coverage and ceiling surfaces are mounted by a page", () => {
+test("the coverage and ceiling renderers have no call site anywhere", () => {
+  /* The exact inverse of what this test asserted until 2026-08-19.
+
+     It was written to catch a card that existed and was mounted by nothing —
+     "would render on no page of the application" was the failure. The owner
+     has now looked at those cards on a live client dashboard and asked for
+     them gone, so rendering nowhere is the requirement rather than the bug,
+     and this asserts it from the compiled bundle rather than the sources.
+
+     Kept as a test rather than deleted with the cards, because the way this
+     regresses is somebody restoring a call site while reading the earlier
+     round's reasoning, which is still in the file above and still persuasive.
+     The sections are not deleted: they promote, validate, and are readable
+     through the connector. */
   const js = path.join(__dirname, "..", "public", "proto", "js");
-  const src = fs.readdirSync(js).filter((f) => f.endsWith(".js") && f !== "cards-data-driven.js")
+  const src = fs.readdirSync(js).filter((f) => f.endsWith(".js"))
     .map((f) => fs.readFileSync(path.join(js, f), "utf8")).join("\n");
-  for (const [name, why] of [
-    ["CoverageByPillarCard", "evidence_coverage: 5 percentages promoted and served"],
-    ["OvCeilingCard", "ceilings: 16 rows with zero nulls on ten columns"],
+  for (const [name, what] of [
+    ["CoverageByPillarCard", "the evidence census: 33% overall, the 80% gate"],
+    ["OvCeilingCard", "the capability ceiling and uncertainty table"],
+    ["OvCoverageBand", "the census card and its denominator prose"],
+    ["OvTrace", "the per-section reasoning trace"],
   ]) {
-    assert.ok(new RegExp(`createElement\\(${name}`).test(src),
-      `${name} has no call site outside the file that defines it — ${why} `
-      + `would render on no page of the application.`);
+    assert.ok(!new RegExp(`createElement\\(${name}`).test(src),
+      `${name} is mounted somewhere — ${what} reaches a reader again.`);
   }
 });

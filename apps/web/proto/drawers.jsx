@@ -445,43 +445,12 @@ function InsightModal() {
                 </div>
               ) : null}
 
-              {/* The R-Layer. Internal only: it is the producer's reasoning
-                  trace, not client-facing prose. */}
-              {ic.r_layer && audience !== "customer" ? (
-                <div style={{ background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", borderRadius: 8, padding: "12px 14px", marginTop: 14 }}>
-                  <div className="row" style={{ marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase" }}>
-                      Reasoning trace
-                    </span>
-                    <span className="spacer" />
-                    {/* This is the PRODUCER's verdict on its own hypothesis,
-                        and as a bare pill reading "ACCEPT" beside nothing else
-                        it was read as a button with a missing Reject. It is
-                        labelled as what it is, in text no control uses, and
-                        the reviewer's real pair is directly below. */}
-                    {ic.r_layer.verdict ? (
-                      <span className="b b-purple" style={{ cursor: "default" }}
-                            title="the producer's own verdict on its hypothesis, promoted with the card — not a control">
-                        Self-check · {ic.r_layer.verdict}</span>
-                    ) : null}
-                    {ic.r_layer.confidence ? <span className="b b-muted">{ic.r_layer.confidence}</span> : null}
-                  </div>
-                  {[["Hypothesis", ic.r_layer.hypothesis],
-                    ["Counter-evidence", ic.r_layer.counter],
-                    ["Domain test", ic.r_layer.domain_test]].map(([k, v]) => v ? (
-                    <div key={k} style={{ marginBottom: 8 }}>
-                      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 2 }}>{k}</div>
-                      <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.55 }}>{v}</div>
-                    </div>
-                  ) : null)}
-                  {/* `probes_run` is deliberately NOT rendered. The probes are
-                      the producer's own audit trail — which checks it ran —
-                      not client content, and as chips they read as sentences
-                      chopped mid-word. The prose that IS for the reader
-                      (alternative explanation, validation question) renders
-                      above. */}
-                </div>
-              ) : null}
+              {/* The reasoning trace — DELETED 2026-08-19.
+                  `r_layer` is on the API's NEVER_SERVED_KEYS allowlist and reaches no
+                  audience, so this block had nothing left to read. Removed rather than
+                  left audience-gated: a gated trace is one browser toggle away from
+                  rendering, which is how it reached a live screenshot three times on
+                  one page. */}
 
               {/* The reviewer's verdict — a real pair, where the reader looked
                   for it. It used to be two buttons in the modal footer, a
@@ -2562,34 +2531,12 @@ function RecommendationModal() {
                     </div>
                   ))}
                 </div>
-                {/* The reasoning trace, internal only. */}
-                {r.r_layer && audience !== "customer" ? (
-                  <div style={{ background: "var(--ph0-lt)", border: "1px solid var(--ph0-bd)", borderRadius: 8, padding: "12px 14px", marginTop: 14 }}>
-                    <div className="row" style={{ marginBottom: 8 }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-dpur)", textTransform: "uppercase" }}>Reasoning trace</span>
-                      <span className="spacer" />
-                      {/* Same relabel as the insight card's: the producer's own
-                          verdict, said in words no control uses. There is no
-                          reviewer pair here — the API implements an annotation
-                          endpoint for `insight_card` only, and a `recommendation`
-                          anchor has no route, so a pair on this drawer would be
-                          two buttons that cannot record anything. */}
-                      {r.r_layer.verdict ? (
-                        <span className="b b-purple" style={{ cursor: "default" }}
-                              title="the producer's own verdict on its hypothesis, promoted with the recommendation — not a control">
-                          Self-check · {r.r_layer.verdict}</span>
-                      ) : null}
-                    </div>
-                    {[["Hypothesis", r.r_layer.hypothesis],
-                      ["Counter-evidence", r.r_layer.counter],
-                      ["Domain test", r.r_layer.domain_test]].map(([k, v]) => v ? (
-                      <div key={k} style={{ marginBottom: 8 }}>
-                        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 2 }}>{k}</div>
-                        <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.55 }}>{v}</div>
-                      </div>
-                    ) : null)}
-                  </div>
-                ) : null}
+                {/* The reasoning trace — DELETED 2026-08-19.
+                    `r_layer` is on the API's NEVER_SERVED_KEYS allowlist and reaches no
+                    audience, so this block had nothing left to read. Removed rather than
+                    left audience-gated: a gated trace is one browser toggle away from
+                    rendering, which is how it reached a live screenshot three times on
+                    one page. */}
               </div>
 
               {/* AE notes — persisted, flagged for future synthesis */}

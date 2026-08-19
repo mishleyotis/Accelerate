@@ -554,60 +554,7 @@ function InsightModal() {
     className: "co-title"
   }, "Ask in discovery"), /*#__PURE__*/React.createElement("div", {
     className: "co-body"
-  }, ic.validation_question))) : null, ic.r_layer && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "var(--ph0-lt)",
-      border: "1px solid var(--ph0-bd)",
-      borderRadius: 8,
-      padding: "12px 14px",
-      marginTop: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      marginBottom: 8,
-      flexWrap: "wrap",
-      gap: 6
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      fontWeight: 700,
-      letterSpacing: ".1em",
-      color: "var(--z-dpur)",
-      textTransform: "uppercase"
-    }
-  }, "Reasoning trace"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), ic.r_layer.verdict ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-purple",
-    style: {
-      cursor: "default"
-    },
-    title: "the producer's own verdict on its hypothesis, promoted with the card \u2014 not a control"
-  }, "Self-check \xB7 ", ic.r_layer.verdict) : null, ic.r_layer.confidence ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-muted"
-  }, ic.r_layer.confidence) : null), [["Hypothesis", ic.r_layer.hypothesis], ["Counter-evidence", ic.r_layer.counter], ["Domain test", ic.r_layer.domain_test]].map(([k, v]) => v ? /*#__PURE__*/React.createElement("div", {
-    key: k,
-    style: {
-      marginBottom: 8
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9.5,
-      fontWeight: 700,
-      letterSpacing: ".08em",
-      color: "var(--z-muted)",
-      textTransform: "uppercase",
-      marginBottom: 2
-    }
-  }, k), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12.5,
-      color: "var(--z-body)",
-      lineHeight: 1.55
-    }
-  }, v)) : null)) : null, audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
+  }, ic.validation_question))) : null, audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--z-bg)",
       border: "1px solid var(--z-sep)",
@@ -3750,56 +3697,7 @@ function RecommendationModal() {
       color: "var(--z-body)",
       lineHeight: 1.6
     }
-  }, row.v))))), r.r_layer && audience !== "customer" ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "var(--ph0-lt)",
-      border: "1px solid var(--ph0-bd)",
-      borderRadius: 8,
-      padding: "12px 14px",
-      marginTop: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      marginBottom: 8
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      fontWeight: 700,
-      letterSpacing: ".1em",
-      color: "var(--z-dpur)",
-      textTransform: "uppercase"
-    }
-  }, "Reasoning trace"), /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), r.r_layer.verdict ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-purple",
-    style: {
-      cursor: "default"
-    },
-    title: "the producer's own verdict on its hypothesis, promoted with the recommendation \u2014 not a control"
-  }, "Self-check \xB7 ", r.r_layer.verdict) : null), [["Hypothesis", r.r_layer.hypothesis], ["Counter-evidence", r.r_layer.counter], ["Domain test", r.r_layer.domain_test]].map(([k, v]) => v ? /*#__PURE__*/React.createElement("div", {
-    key: k,
-    style: {
-      marginBottom: 8
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9.5,
-      fontWeight: 700,
-      letterSpacing: ".08em",
-      color: "var(--z-muted)",
-      textTransform: "uppercase",
-      marginBottom: 2
-    }
-  }, k), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12.5,
-      color: "var(--z-body)",
-      lineHeight: 1.55
-    }
-  }, v)) : null)) : null), /*#__PURE__*/React.createElement("div", {
+  }, row.v)))))), /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       padding: 14

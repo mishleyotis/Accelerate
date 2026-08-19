@@ -660,21 +660,32 @@ function SectionEmpty({ section, absent, empty }) {
   const state = (typeof DMA !== "undefined" && typeof DMA.sectionStateFor === "function")
     ? DMA.sectionStateFor(section) : null;
   const es = (state && state.empty_state) || null;
-  const kind = es && es.kind ? String(es.kind).replace(/_/g, " ") : null;
   const searched = (es && Array.isArray(es.sources_searched)) ? es.sources_searched : [];
   const line = { fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 };
+  /* ONE SENTENCE, and the producer's own first one.
+
+     The reason field runs to 1,400 characters on a real run and used to
+     print whole, prefixed by the empty_state `kind` — so a card with no
+     rows carried more prose than a card with rows. A reader needs to know
+     the section is empty and roughly why; the rest is the producer's
+     working and belongs in the payload, where it still is.
+
+     `closure_condition` ("Closes when · ...") is dropped entirely: it is a
+     note to ourselves about what would fill the card, addressed to nobody
+     the page is for. */
+  const short = (t) => {
+    const s0 = String(t || "").trim();
+    if (!s0) return "";
+    const first = (s0.match(/^[^.!?]{1,220}[.!?]/) || [null])[0];
+    return first ? first.trim() : (s0.length > 220 ? `${s0.slice(0, 217)}…` : s0);
+  };
   return (
     <div data-empty-section={section}>
       <div style={line}>
         {!state ? (absent || "This section did not promote for this run.")
-                : es ? `${kind ? `${kind}. ` : ""}${es.reason || empty || "The section promoted with nothing in it."}`
+                : es ? (short(es.reason) || empty || "The section promoted with nothing in it.")
                      : (empty || "The section promoted with nothing in it.")}
       </div>
-      {es && es.closure_condition ? (
-        <div style={{ ...line, marginTop: 6 }}>
-          <strong style={{ color: "var(--z-body)" }}>Closes when · </strong>{es.closure_condition}
-        </div>
-      ) : null}
       {searched.length ? (
         <details style={{ marginTop: 6 }}>
           <summary style={{ fontSize: 11, color: "var(--z-mid)", cursor: "pointer" }}>
@@ -691,22 +702,32 @@ function SectionEmpty({ section, absent, empty }) {
   );
 }
 
-/* The same account, at the foot of a card that DID render rows. A section can
-   carry data and a declared absence at once; this renders only the absence,
-   and renders nothing at all when the section declared none. */
-function SectionEmptyFoot({ section, title }) {
-  const state = (typeof DMA !== "undefined" && typeof DMA.sectionStateFor === "function")
-    ? DMA.sectionStateFor(section) : null;
-  if (!state || !state.empty_state) return null;
-  return (
-    <div style={{ marginTop: 12, borderTop: "1px solid var(--z-sep)", paddingTop: 8 }}>
-      <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase",
-                    letterSpacing: ".06em", marginBottom: 4 }}>
-        {title || "Not established"}
-      </div>
-      <SectionEmpty section={section} />
-    </div>
-  );
+/* The absence account at the foot of a card that DID render rows —
+   NOW RENDERS NOTHING. Deleted 2026-08-19.
+
+   What it printed, measured from the live app: under the sentiment card,
+   which serves a rated bar, "WHAT THIS SECTION COULD NOT ESTABLISH"
+   followed by a 1,400-character paragraph about seven refused spans and a
+   verifier that retrieves a different copy of a publisher's record, then
+   "Closes when · Themes close on any text source...". Under the leadership
+   panel, which names three executives, a "Thin roster" badge and the
+   contact-enrichment ladder.
+
+   The reasoning that put it there was mine and it was half right: an
+   absence a reader cannot see is indistinguishable from a bug. But this is
+   the wrong half of the card to spend on it. The card already showed what
+   it HAS; the footer explained, at length and in our vocabulary, the shape
+   of what it does not, and a reader meeting a paragraph about our evidence
+   verifier under a 4.3-star rating is reading our workings.
+
+   The absence is not hidden from the SYSTEM: `list_enrichment_gaps` computes
+   the same set from the staged payload, `audit_promoted_client.py` fails on
+   it, and the enrichment ledger now flags the facet as under-enriched and
+   blocks completion. It is hidden from the page, which is where it was
+   noise. A card with NO rows still says so — see `SectionEmpty`, which is a
+   short line rather than a paragraph. */
+function SectionEmptyFoot() {
+  return null;
 }
 
 /* ── Icons ───────────────────────────────────────────────────────── */

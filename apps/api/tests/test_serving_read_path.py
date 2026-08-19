@@ -312,9 +312,12 @@ def test_r_layer_never_reaches_the_customer_however_it_is_marked():
                               json.loads(json.dumps(data)), [], "customer")
     assert "r_layer" not in out and "r_layer" not in out["platforms"][0]
     assert set(rep["keys_stripped"]) == {"r_layer", "platforms[0].r_layer"}
+    # SUPERSEDED 2026-08-19. This used to assert the internal body kept the
+    # trace. It reaches nobody now: the audience is a browser toggle, and a
+    # rule that depends on the toggle is not the rule that was asked for.
     keep, _ = redact_section("platform", "platform_story",
                              json.loads(json.dumps(data)), [], "internal")
-    assert keep["r_layer"]["verdict"] == "ACCEPT"
+    assert "r_layer" not in keep and "r_layer" not in keep["platforms"][0]
 
 
 def test_a_sentence_written_to_our_own_account_executive_is_not_client_content():
@@ -464,12 +467,21 @@ def test_cohort_entity_ids_are_stripped_for_every_audience():
 
 
 def test_withheld_sections_and_pages():
-    for section in ("ceilings", "sentiment", "thought_leadership"):
+    # Withheld from the customer, served to the analyst. Two of the three
+    # sections this loop used to cover moved to the allowlist below, where
+    # the rule is stronger: nobody gets them.
+    for section in ("sentiment", "thought_leadership"):
         assert ("overview", section) in CUSTOMER_WITHHELD
         out, rep = redact_section("overview", section, {"rows": [1]}, [], "customer")
         assert out is None and rep["withheld"] is True
         keep, _ = redact_section("overview", section, {"rows": [1]}, [], "internal")
         assert keep == {"rows": [1]}
+    # The allowlist: no audience, not "not the default audience".
+    for section in ("ceilings", "evidence_coverage"):
+        for audience in ("customer", "internal"):
+            out, rep = redact_section("overview", section, {"rows": [1]}, [],
+                                      audience)
+            assert out is None and rep.get("never_served") is True
     assert page_forbidden("context", "customer", None), "D5 is locked, not partial"
     # USER ADJUDICATION 2026-08-07 (overrides the Implementation Plan's "AE
     # token is refused on Context" QA bullet): context is AE-visible on the

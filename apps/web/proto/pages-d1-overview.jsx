@@ -95,119 +95,43 @@ function ClientOverview({ entity, run }) {
         ? <CardBoundary name="thought leadership"><ThoughtLeadershipPanel /></CardBoundary>
         : null}
 
-      {/* How this assessment was evidenced.
-          The two sections that report on the ASSESSMENT rather than on the
-          institution — O10 evidence_coverage and O11 ceilings — restored
-          BELOW everything about the client and labelled as what they are.
-          They rendered on no page of this application in either audience
-          while both were promoted, served and complete. See OvCeilingCard. */}
-      <div className="section-label" style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "4px 0 12px" }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", textTransform: "uppercase", letterSpacing: ".06em" }}>How this assessment was evidenced</span>
-        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>reach of the evidence behind the scores above · what would lift each ceiling</span>
-      </div>
-      {/* One column when the ceilings card is withheld: a two-track grid with
-          one card in it leaves half the page blank and reads as a card that
-          failed to load, which is the void this page keeps having to fill. */}
-      <div className={audience === "customer" ? "" : "cards-grid-2"} style={{ marginBottom: 18 }}>
-        <CardBoundary name="evidence coverage">
-          <OvCoverageBand entity={entity} audience={audience} />
-        </CardBoundary>
-        {audience !== "customer" ? (
-          <CardBoundary name="capability ceilings">
-            <OvCeilingCard entity={entity} audience={audience} />
-          </CardBoundary>
-        ) : null}
-      </div>
+      {/* "How this assessment was evidenced" — DELETED 2026-08-19.
+          The two sections here reported on the ASSESSMENT rather than on the
+          institution: O10 evidence_coverage (33% overall, per-pillar shares,
+          the 80% hard gate, "233 of 705 · 51 quote a source · 629 absences")
+          and O11 ceilings (16 categories with M-level and uncertainty bands).
+          They were restored to this page in an earlier round, and the third
+          round of live screenshots is what they look like to a reader: our
+          method, with its own percentages, sitting under the client's scores.
+
+          Both are now on the API's NEVER_SERVED allowlist, so this block had
+          nothing left to render anyway. It is deleted rather than left
+          reading an empty payload, because a heading with no card under it
+          is the "did this fail to load?" void this page keeps having to fill.
+          Nothing was removed from the pipeline: both sections still promote,
+          still validate, and are still readable through the connector. */}
     </div>
   );
 }
 
-/* ── The producer's reasoning trace, per section ──────────────────────
-   INTERNAL ONLY.
+/* The producer's reasoning trace, per section — DELETED 2026-08-19.
 
-   Every section of this page promotes an `r_layer`: the hypothesis the
-   producer worked from, the strongest counter-case they could put against
-   their own answer, the probes they ran, the domain test and their own
-   verdict. Twelve of the twelve sections on the reference run carry one, and
-   not one word of any of them reached a reader — the shaped views the cards
-   read (`adaptCoverage`, `adaptLeadership`, `adaptUncertainty`) return the
-   figures and drop the trace, so it travelled from the producer to Postgres
-   to the browser and stopped there. A finding without its counter-case is
-   half the finding.
+   `OvTrace` rendered the "REASONING TRACE · Self-check · ACCEPT · HIGH ·
+   Show" strip under thirteen cards on this page. The third round of live
+   screenshots caught three of them on one screen, above the firmographics
+   table, below it, and again under the why-now signals.
 
-   Collapsed by default and opened per card. A trace is 400–1500 characters
-   of prose and eleven of them expanded would bury the page they explain;
-   collapsed, the reader sees that the section was challenged and chooses
-   which challenge to read. The treatment is the insights modal's
-   (`drawers.jsx`) — including its reason for the "Self-check ·" prefix: a
-   bare pill reading ACCEPT beside nothing else was read as a button with a
-   missing Reject.
+   The trace is the record of the producer arguing against its own answer.
+   That is something we owe the assessment; it is not something we owe the
+   reader, and a client meeting "Self-check · ACCEPT" under their own scores
+   is reading our working rather than their assessment.
 
-   `probes_run` IS rendered here, where the modal deliberately does not. The
-   modal's probes are chip-sized fragments; a section's are whole sentences
-   naming the route that was tried and what it returned ("the institution's
-   own domain does not serve a non-browser client"), which is exactly the
-   working a reader asking "did you look?" wants. */
-function OvTrace({ section, audience }) {
-  const [open, setOpen] = useState(false);
-  const customer = String(audience || "").toLowerCase() === "customer";
-  const r = customer ? null : (DMA.rLayerFor ? DMA.rLayerFor(section) : null);
-  const parts = [["Hypothesis", r && r.hypothesis],
-                 ["Counter-case", r && r.counter],
-                 ["Domain test", r && r.domain_test]]
-    .map(([k, v]) => [k, asText(v)]).filter(([, v]) => v);
-  const probes = ((r && r.probes_run) || []).map(asText).filter(Boolean);
-  if (!r || (!parts.length && !probes.length)) return null;
-  return (
-    <div data-trace={section}
-         style={{ borderTop: "1px solid var(--z-sep)", marginTop: 12, paddingTop: 8 }}>
-      <button onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
-              style={{ display: "flex", alignItems: "center", gap: 7, width: "100%",
-                       background: "none", border: 0, padding: "2px 0", cursor: "pointer",
-                       textAlign: "left" }}>
-        <span className="eyebrow" style={{ fontSize: 9.5, color: "var(--z-dpur)" }}>
-          Reasoning trace
-        </span>
-        {r.verdict ? (
-          <span className="b b-purple" style={{ cursor: "pointer" }}
-                title="the producer's own verdict on its hypothesis, promoted with the section — not a control">
-            Self-check · {r.verdict}</span>
-        ) : null}
-        {r.confidence ? <span className="b b-muted">{r.confidence}</span> : null}
-        <span className="spacer" style={{ flex: 1 }} />
-        <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}>
-          {open ? "Hide" : "Show"}</span>
-        <Icon name={open ? "chevron-u" : "chevron-d"} size={12}
-              style={{ color: "var(--z-muted)", flexShrink: 0 }} />
-      </button>
-      {open ? (
-        <div style={{ marginTop: 8 }}>
-          {parts.map(([k, v]) => (
-            <div key={k} style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em",
-                            color: "var(--z-muted)", textTransform: "uppercase",
-                            marginBottom: 2 }}>{k}</div>
-              <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.55 }}>{v}</div>
-            </div>
-          ))}
-          {probes.length ? (
-            <div>
-              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em",
-                            color: "var(--z-muted)", textTransform: "uppercase",
-                            marginBottom: 3 }}>Probes run</div>
-              <ul style={{ margin: 0, paddingLeft: 16 }}>
-                {probes.map((t, i) => (
-                  <li key={i} style={{ fontSize: 11.5, color: "var(--z-body)",
-                                       lineHeight: 1.5, marginBottom: 3 }}>{t}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-    </div>
-  );
-}
+   `r_layer` is now on the API's NEVER_SERVED_KEYS allowlist, stripped at any
+   depth for every audience, so this component had nothing left to read. The
+   component is deleted rather than left returning null, because a renderer
+   that cannot render is indistinguishable from one that is merely quiet, and
+   the next reader of this file would have to prove which. It still promotes,
+   still validates, and is still readable through the connector. */
 
 /* ── O1 · the four pillar bars ────────────────────────────────────────
    A bar with no figure must not look like a bar with a figure of zero, and
@@ -245,22 +169,15 @@ function OvPillarBars({ entity, run, audience }) {
   /* The promoted explanation, de-duplicated. The producer writes it per row
      because a future run may have a different reason per pillar; on this one
      all four are the same paragraph. */
-  const why = [];
-  for (const p of DMA.PILLARS) {
-    const t = asText((rows[p.id] || {}).proxy_disclosure);
-    if (t && !why.includes(t)) why.push(t);
-  }
+  /* `why` (the four proxy disclosures) and `bases` ("computed_mean_of_subcaps")
+     were read here and are deleted with the block that printed them. */
   /* The basis a served figure was computed on, where the run states one.
      Rendered as the row's own tooltip and, when every row agrees, once under
      the bars — a mean nobody can resolve to a basis is the thing the maturity
      grid exists to avoid publishing. */
   const basisOf = (row) => asText(row.basis || row.score_basis) || null;
   const nOf = (row) => num(row.n != null ? row.n : row.n_cells);
-  const bases = [];
-  for (const p of DMA.PILLARS) {
-    const b = basisOf(rows[p.id] || {});
-    if (b && !bases.includes(b)) bases.push(b);
-  }
+
 
   return (
     <div>
@@ -273,10 +190,14 @@ function OvPillarBars({ entity, run, audience }) {
         // unscored pillar as ▼peer — a movement nobody measured.
         const delta = (peer == null || s == null) ? null : s - peer;
         const basis = basisOf(row), n = nOf(row);
+        /* The row tooltip carried the 900-character proxy disclosure on an
+           unscored pillar. A tooltip is not where a paragraph goes, and this
+           one carried "serve grain" and "computed_mean_of_subcaps" into a
+           hover a client can trigger by accident. */
         const rowTitle = s != null
-          ? [`${p.id} ${fx(s, 1)} / 5`, basis, n != null ? `n=${n}` : null]
+          ? [`${p.id} ${fx(s, 1)} / 5`, n != null ? `n=${n}` : null]
               .filter(Boolean).join(" · ")
-          : (asText(row.proxy_disclosure) || undefined);
+          : undefined;
         return (
           <div className="pbar" key={p.id} title={rowTitle}
                onClick={() => navigate(`/clients/${entity.id}/heatmap`, { pillar: p.id, run: run.id })}
@@ -323,20 +244,30 @@ function OvPillarBars({ entity, run, audience }) {
           ) : null}
         </div>
       ) : null}
-      {bases.length && anyScore ? (
-        <div style={{ marginTop: 6, paddingLeft: 122, fontSize: 10.5, color: "var(--z-muted)" }}>
-          Basis · {bases.join(" · ")}
+      {/* "Basis · computed_mean_of_subcaps" and the four proxy disclosures —
+          DELETED 2026-08-19.
+
+          Both were mine, from the round that made this card explain its own
+          blank rails, and the live screenshots show what they became. The
+          basis line printed a column name at the reader. The disclosures
+          printed FOUR near-identical 900-character paragraphs, one per
+          pillar, each opening "This run's workbook states no pillar rollup,
+          so this figure is derived at serve grain: the mean of the 187
+          evidence-scored subcapability cells...". They were meant to
+          de-duplicate; they differ only in the cell count, so the
+          `why.includes(t)` guard never matched and all four printed.
+
+          That is three defects in one block: our internal vocabulary
+          (serve grain, computed_mean_of_subcaps), the same explanation
+          repeated, and a de-duplication that could not work. The short
+          version a reader actually needs — that no peer figure is served —
+          is said once by `OvPillarBars` itself, below. */}
+      {anyBlank && !anyPeer ? (
+        <div style={{ marginTop: 8, paddingLeft: 122, fontSize: 10.5,
+                      color: "var(--z-muted)", lineHeight: 1.5 }}>
+          No peer benchmark is published for this run, so no comparison is drawn.
         </div>
       ) : null}
-      {why.length && anyBlank ? (
-        <div style={{ marginTop: 10, paddingLeft: 122 }}>
-          {why.map((t, i) => (
-            <p key={i} style={{ margin: i ? "8px 0 0" : 0, fontSize: 11,
-                                color: "var(--z-muted)", lineHeight: 1.55 }}>{t}</p>
-          ))}
-        </div>
-      ) : null}
-      <OvTrace section="overview.scores" audience={audience} />
     </div>
   );
 }
@@ -459,16 +390,29 @@ function FirmographicsPanel({ entity, audience }) {
         </div>
       ) : null}
       {rows.map(([k, v], i) => <Row key={`f${i}`} k={k} v={v} />)}
-      {(entity.extra_fields || []).map((f, i) => (
-        <Row key={`x${i}`} k={humaniseFieldName(f.field)}
-             v={f.held
-                 ? <EnrichmentGap what={humaniseFieldName(f.field)} held
-                                  reason={f.reason} audience={audience} />
-                 : `${f.value}${f.unit ? ` ${f.unit}` : ""}`} />
-      ))}
+      {/* A HELD field renders NO ROW. Owner rule, 2026-08-19: "when there is
+          no revenue figure, remove the Revenue row entirely. Do not show the
+          explanation."
+
+          What this printed instead, measured from the live app: a Revenue
+          label with, in its value column, "A credit union returns its surplus
+          to members rather than reporting commercial revenue, so no..." — a
+          sentence set in italic, overflowing its column, between Loans and
+          Leases and ROA. The explanation is true and it is ours; the reader
+          asked for a number.
+
+          The row is still on the wire and still quarantined with its reason,
+          because CG-18 is right that a must-present member may be stated or
+          held but never simply deleted. This is the render deciding not to
+          draw it, which is the correct place for that decision. */}
+      {(entity.extra_fields || [])
+        .filter(f => !f.held && f.value !== null && f.value !== undefined && f.value !== "")
+        .map((f, i) => (
+          <Row key={`x${i}`} k={humaniseFieldName(f.field)}
+               v={`${f.value}${f.unit ? ` ${f.unit}` : ""}`} />
+        ))}
       <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).firmographics}
                       what="firmographics" audience={audience} />
-      <OvTrace section="overview.firmographics" audience={audience} />
     </div>
   );
 }
@@ -654,7 +598,6 @@ function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
           </div>
         </div>
       ) : null}
-      <OvTrace section="overview.why_now" audience={audience} />
     </div>
   );
 }
@@ -674,7 +617,6 @@ function SCQACard({ entity, expanded, onToggle, openEvidence, audience }) {
         <button className="btn btn-tertiary btn-sm" onClick={onToggle}>{expanded ? "Collapse ↑" : "Read full ↓"}</button>
       </div>
       <SCQABody entity={entity} expanded={expanded} openEvidence={openEvidence} audience={audience} />
-      <OvTrace section="overview.exec_summary" audience={audience} />
     </div>
   );
 }
@@ -1034,7 +976,6 @@ function OpportunitySurfaceStrip({ entity, run, audience }) {
           ))}
         </div>
       ) : null}
-      <OvTrace section="overview.opportunity" audience={audience} />
     </div>
   );
 }
@@ -1174,7 +1115,6 @@ function TopFindingsCard({ entity, openEvidence, audience }) {
         })}
       </div>
       <div style={{ padding: "0 16px 12px" }}>
-        <OvTrace section="overview.findings" audience={audience} />
       </div>
     </div>
   );
@@ -1506,7 +1446,6 @@ function LeadershipPanel({ audience }) {
           against, and its counter-case says why naming them without a citable
           route was refused. Internal only. */}
       <div style={{ padding: "0 16px 12px" }}>
-        <OvTrace section="overview.leadership" audience={audience} />
       </div>
     </div>
   );
@@ -1575,7 +1514,6 @@ function FinancialTrajectoryD1({ entity, audience }) {
           <span className="spacer" />
           {counts ? <span style={{ flexShrink: 0 }}>{counts}</span> : null}
         </div>
-        <OvTrace section="overview.financial_series" audience={audience} />
       </div>
     </div>
   );
@@ -1708,196 +1646,33 @@ function ThoughtLeadershipPanel() {
       <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).thought_leadership}
                       what="entries" audience={audience} />
       <div style={{ padding: "0 16px 12px" }}>
-        <OvTrace section="overview.thought_leadership" audience={audience} />
       </div>
     </div>
   );
 }
 
-/* ── How this assessment was evidenced ────────────────────────────────
-   O10 `evidence_coverage` and O11 `ceilings`: 5 percentages, a five-tier
-   histogram, three claim classes and 16 complete ceiling rows — zero nulls on
-   all ten of their columns — promoted, served, and rendered on NO page of the
-   application in either audience. `CoverageByPillarCard` and
-   `CeilingEstimateCard` are both defined and exported in
-   `cards-data-driven.jsx` and neither has a call site.
+/* `OvCeilingCard` — DELETED 2026-08-19.
 
-   They were removed from D1 on 2026-08-05 because they report on the
-   ASSESSMENT's own workings rather than on the institution, and D7 Health is
-   where that belongs. That reasoning is kept: they are restored BELOW the
-   institution's content, under a heading that says what they are, rather than
-   back among the findings. If D7 grows a mount, this band is the thing to
-   move, not to copy.
+   The "Capability ceiling & uncertainty" card: sixteen categories, each with
+   an M-level, a score and an uncertainty band (P1C1 M3 3.0 ±0.4, and so on).
+   It is a statement about how confident the ASSESSMENT is, expressed in the
+   assessment's own vocabulary, and the third round of live screenshots is
+   what that looks like sitting under a client's scores.
 
-   Coverage is served to BOTH audiences (the producer's redaction kept it);
-   ceilings are internal — the customer payload carries `data: null` for that
-   section, and the card is gated on audience as well, because default-deny is
-   not a thing to infer from an absence.
+   `overview.ceilings` is on the API's NEVER_SERVED allowlist, so this card
+   had nothing to read. Deleted rather than left gated, because an
+   audience-gated card is one toggle away from rendering and the instruction
+   was "renders nowhere". */
 
-   The ceiling card here is D1's own rather than the shared one for a single
-   reason: `ceilings[].ceiling` speaks the assessment's `M1…M5` LEVEL
-   vocabulary, not `band_t`, and the shared card both fails to resolve the
-   token (`adaptUncertainty` yields null, so the row renders no figure at all)
-   and then colours the figure on its own thresholds — `<= 2` red — which is a
-   second score→colour rule beside the resolver. Invariant 7 allows exactly
-   one. Here the token resolves to its level and the level goes through
-   `DMA.helpers.maturityHex`, the same resolver the pillar bars use. */
-function OvCeilingCard({ entity, audience }) {
-  const [open, setOpen] = useState(null);
-  const { openEvidence } = useApp();
-  if (String(audience || "").toLowerCase() === "customer") return null;
-  const u = DMA.uncertaintyFor(entity.id);
-  const rows = u ? Object.entries(u) : [];
-  if (!rows.length) {
-    return (
-      <div className="card flush">
-        <div className="card-head">
-          <div className="row"><Icon name="stack" size={14} /><h3>Capability ceiling &amp; uncertainty</h3></div>
-        </div>
-        <div className="card-body">
-          <SectionEmpty
-            section="overview.ceilings"
-            absent="No ceiling estimates promoted for this run."
-            empty="The ceilings section promoted with no rows in it." />
-        </div>
-      </div>
-    );
-  }
-  /* `M3` is maturity LEVEL three, which is the score 3.0 on the same 1–5 axis
-     every other figure on this page uses. It is resolved here and nowhere
-     else, and the four-value band vocabulary is unchanged by it: the level
-     goes to the resolver and the resolver names the band. */
-  const levelOf = (d) => {
-    if (d.ceiling != null && isFinite(Number(d.ceiling))) return Number(d.ceiling);
-    const m = String(d.ceiling_stated == null ? "" : d.ceiling_stated).trim().match(/^M([1-5])(\.\d+)?$/i);
-    return m ? Number(m[1] + (m[2] || "")) : null;
-  };
-  return (
-    <div className="card flush">
-      <div className="card-head">
-        <div className="row"><Icon name="stack" size={14} /><h3>Capability ceiling &amp; uncertainty</h3></div>
-        <span className="b b-purple">{rows.length} categories · click to drill</span>
-      </div>
-      <div className="card-body" style={{ maxHeight: 340, overflowY: "auto" }}>
-        <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5, marginBottom: 8 }}>
-          The highest maturity the evidence on this run could support per category, with the
-          artefact that would lift it. A ceiling is a research backlog, not a score.
-        </div>
-        {rows.map(([cat, d]) => {
-          const lvl = levelOf(d);
-          const band = (d.band != null && isFinite(Number(d.band))) ? Number(d.band) : null;
-          const lo = lvl == null || band == null ? null : Math.max(1, lvl - band);
-          const hi = lvl == null || band == null ? null : Math.min(5, lvl + band);
-          const pct = v => ((v - 1) / 4) * 100;
-          const isOpen = open === cat;
-          const ev = (d.evidence || []).map(id => DMA.getEvidence(id)).filter(Boolean);
-          const name = d.category_name || (DMA.getCategory(cat) || {}).name || null;
-          return (
-            <div key={cat} style={{ borderBottom: "1px solid var(--z-sep)" }}>
-              <button onClick={() => setOpen(o => o === cat ? null : cat)}
-                style={{ width: "100%", display: "grid", gridTemplateColumns: "150px 1fr 78px 16px", gap: 8, alignItems: "center", padding: "8px 0", background: "none", border: 0, cursor: "pointer", textAlign: "left" }}>
-                <div style={{ fontSize: 10.5, color: "var(--z-body)", minWidth: 0 }}>
-                  <span className="f-mono">{cat}</span>{name ? ` ${name}` : ""}
-                </div>
-                <div style={{ position: "relative", height: 8, background: "var(--z-sep)", borderRadius: 4 }}
-                     title={lvl == null ? `${cat} ceiling not stated`
-                            : lo == null ? `Ceiling ${fx(lvl, 1)}`
-                            : `Ceiling ${fx(lvl, 1)} · band ${fx(lo, 1)}–${fx(hi, 1)}`}>
-                  {lo == null ? null : (
-                    <div style={{ position: "absolute", left: `${pct(lo)}%`, width: `${pct(hi) - pct(lo)}%`, top: 0, bottom: 0, background: "rgba(124,93,201,.25)", borderRadius: 4 }} />
-                  )}
-                  {lvl == null ? null : (
-                    <div style={{ position: "absolute", left: `calc(${pct(lvl)}% - 4px)`, top: -1, width: 8, height: 10, borderRadius: 2, background: DMA.helpers.maturityHex(lvl) }} />
-                  )}
-                </div>
-                <div style={{ fontSize: 11, fontWeight: 600, textAlign: "right", whiteSpace: "nowrap",
-                              color: lvl == null ? "var(--z-muted)" : DMA.helpers.maturityHex(lvl) }}>
-                  {/* The stated token AND the level it resolves to, because a
-                      reader holding the workbook is looking for "M3" and a
-                      reader holding this page is looking for a figure on the
-                      axis every other bar uses. */}
-                  {lvl == null ? (d.ceiling_stated ? String(d.ceiling_stated) : null)
-                    : <React.Fragment>{d.ceiling_stated ? `${d.ceiling_stated} · ` : ""}{fx(lvl, 1)}
-                        {band == null ? null : <span style={{ color: "var(--z-muted)", fontWeight: 400 }}> ±{band}</span>}
-                      </React.Fragment>}
-                </div>
-                <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={12} style={{ color: "var(--z-muted)" }} />
-              </button>
-              {isOpen ? (
-                <div style={{ padding: "2px 0 12px", paddingLeft: 4 }}>
-                  {lvl == null ? null : (
-                    <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginBottom: 6 }}>
-                      Ceiling band · {DMA.helpers.maturityLabel(lvl)}
-                    </div>
-                  )}
-                  {d.rationale ? <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55, marginBottom: 8 }}>{d.rationale}</div> : null}
-                  {d.limiting_absence ? (
-                    <div style={{ background: "var(--z-lav)", borderLeft: "3px solid var(--z-dpur)", borderRadius: "0 6px 6px 0", padding: "8px 12px", marginBottom: 8 }}>
-                      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-dpur)", textTransform: "uppercase", marginBottom: 2 }}>What would lift it</div>
-                      <div style={{ fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55 }}>{d.limiting_absence}</div>
-                    </div>
-                  ) : null}
-                  {d.modifiers && d.modifiers.length ? (
-                    <div style={{ marginBottom: 8 }}>
-                      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 3 }}>Ceiling modifiers</div>
-                      {d.modifiers.map((m, i) => <div key={i} style={{ fontSize: 11, color: "var(--z-body)", lineHeight: 1.5 }}>{m}</div>)}
-                    </div>
-                  ) : null}
-                  {d.claim || d.confidence ? (
-                    <div className="row" style={{ gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
-                      {d.claim ? <span className="b b-muted">{d.claim}</span> : null}
-                      {d.confidence ? <span className="b b-muted">{d.confidence}</span> : null}
-                    </div>
-                  ) : null}
-                  {ev.length ? (
-                    <div>
-                      <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 4 }}>Evidence · click to open</div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                        {ev.map(e => (
-                          <button key={e.id} onClick={() => openEvidence(e.id)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 9px", background: "var(--z-bg)", border: "1px solid var(--z-sep)", borderRadius: 6, cursor: "pointer", textAlign: "left" }}>
-                            <span className={`tier-chip tier-${e.tier}`}>{e.id}</span>
-                            <span style={{ fontSize: 11, color: "var(--z-dark)", fontWeight: 500, flex: 1, minWidth: 0 }} className="txt-fit-1">{e.source_pretty || e.title}</span>
-                            <Icon name="arrow-r" size={11} style={{ color: "var(--z-mid)" }} />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
-        <OvTrace section="overview.ceilings" audience={audience} />
-      </div>
-    </div>
-  );
-}
+/* `OvCoverageBand` — DELETED 2026-08-19.
 
-/* The coverage card's own read, wrapped so the section's reasoning trace and
-   its denominator definition travel with the five percentages. The bars
-   themselves are `CoverageByPillarCard`, which is correct as written — a
-   coverage percentage against a gate is a pass/fail, not a maturity band, so
-   its colours are not the resolver's business. */
-function OvCoverageBand({ entity, audience }) {
-  const c = DMA.coverageFor(entity.id);
-  return (
-    <div>
-      <CoverageByPillarCard entity={entity} />
-      {c && c.denominator_definition ? (
-        <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5, padding: "8px 2px 0" }}>
-          {c.denominator_definition}
-        </div>
-      ) : null}
-      {c && c.note ? (
-        <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5, padding: "6px 2px 0" }}>
-          {c.note}
-        </div>
-      ) : null}
-      <OvTrace section="overview.evidence_coverage" audience={audience} />
-    </div>
-  );
-}
+   The evidence census: 33% overall, per-pillar shares, the 80% hard gate,
+   and the "233 of 705 · 51 quote a source · 629 absences · quarantined on
+   identity" prose. How well WE evidenced the assessment, on the client's
+   own dashboard.
+
+   `overview.evidence_coverage` is on the API's NEVER_SERVED allowlist.
+   `CoverageByPillarCard` in cards-data-driven.jsx is deleted with it. */
 
 function Row({ k, v }) {
   return (

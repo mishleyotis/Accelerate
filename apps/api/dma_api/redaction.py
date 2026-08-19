@@ -92,6 +92,42 @@ ALWAYS_STRIP = {
                                      "insufficient_cohorts[*].entity_ids"),
 }
 
+# ── The surface-contract allowlist ─────────────────────────────────────
+#
+# Sections that are OUR RECORD OF OUR OWN METHOD rather than the client's
+# assessment, and therefore reach no audience at all. Owner instruction,
+# 2026-08-19, third round on the same material: "internal artifacts
+# (reasoning traces, capability ceiling, evidence coverage, tiers, counts,
+# uncertainty) are dropped at the payload boundary and render nowhere."
+#
+# Withholding them from the CUSTOMER audience was the previous rule, and it
+# was measured insufficient twice: the audience is a toggle in the browser,
+# so anybody who moved it met the capability-ceiling table, the evidence
+# census and a reasoning trace on the same screen as the client's own
+# scores. "Nowhere" is a different rule from "not by default", and it is
+# the one that was asked for.
+#
+# The sections are not deleted from the database or from the producer's
+# contract — they are still promoted, still validated, still auditable
+# through the connector. They are removed at the point where bytes leave
+# for a browser, which is the only boundary that decides what renders.
+NEVER_SERVED = frozenset((
+    ("overview", "ceilings"),            # O1b — the capability ceiling and
+                                         #       uncertainty table
+    ("overview", "evidence_coverage"),   # O10 — the census: tiers, counts,
+                                         #       the gate line, the share
+))
+
+# Keys stripped at any depth for EVERY audience, in every section.
+#
+#   r_layer  the reasoning trace: hypothesis, counter, domain test, probes,
+#            verdict, confidence. It renders as the "REASONING TRACE ·
+#            Self-check · ACCEPT · Show" strip that appeared on twelve of
+#            twelve overview sections, three times on one screen. It is the
+#            record of us arguing with ourselves, which is a thing we owe
+#            the assessment and not a thing we owe the reader.
+NEVER_SERVED_KEYS = ("r_layer",)
+
 # Keys stripped for the CUSTOMER audience wherever they appear, at any depth,
 # in any section. These are internal by their own definition rather than by a
 # producer's decision:
@@ -117,7 +153,9 @@ ALWAYS_STRIP = {
 #             not a near-miss)". That is our process vocabulary attached
 #             to a real person on their employer's dashboard, and
 #             standing clause 12 says never describe a person.
-CUSTOMER_STRIP_KEYS = ("r_layer", "storyline_challenge",
+# `r_layer` used to live here. It is now in NEVER_SERVED_KEYS above,
+# stripped for every audience rather than for one of them.
+CUSTOMER_STRIP_KEYS = ("storyline_challenge",
                        "enrichment_basis", "enriched_at")
 
 # Contact routes for NAMED INDIVIDUALS. Personal work email, direct line
@@ -352,11 +390,22 @@ def redact_section(page: str, section: str, data: dict, internal_only,
               "keys_stripped": [], "vendor_named": [],
               "seller_voice": []}
 
+    # The allowlist runs FIRST and for every audience, because a section
+    # that reaches no reader has nothing further to decide about it.
+    if (page, section) in NEVER_SERVED:
+        return None, {"withheld": True, "never_served": True,
+                      "paths_stripped": [], "paths_unmatched": [],
+                      "keys_stripped": [], "vendor_named": [],
+                      "seller_voice": []}
+
     always = ALWAYS_STRIP.get((page, section), ())
     if isinstance(out, dict) and always:
         did, missed = strip_paths(out, always, section)
         report["paths_stripped"] += did
         report["paths_unmatched"] += missed
+
+    if isinstance(out, dict):
+        report["keys_stripped"] += _strip_keys(out, NEVER_SERVED_KEYS)
 
     if audience == "customer":
         if (page, section) in CUSTOMER_WITHHELD:
@@ -376,7 +425,12 @@ def redact_section(page: str, section: str, data: dict, internal_only,
             # not reported as a producer defect.
             del missed
 
-            report["keys_stripped"] = _strip_keys(
+            # `+=`, not `=`. The unconditional pass above already recorded
+            # what it removed, and an assignment here silently discarded it —
+            # so the receipt for a customer read reported fewer removals than
+            # were actually made, which is the exact class of lying receipt
+            # this module was rewritten to end.
+            report["keys_stripped"] += _strip_keys(
                 out, CUSTOMER_STRIP_KEYS + CUSTOMER_STRIP_CONTACT_KEYS)
 
             # The safety nets run LAST, over what survived every rule

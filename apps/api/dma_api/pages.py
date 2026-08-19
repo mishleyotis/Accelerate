@@ -208,7 +208,7 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       the page, which is the worst pair: a hand check of the screen agrees
 #       with a green test and neither is looking at the body. A customer who
 #       fetched before this bump holds a body carrying the census.
-SERVE_RULES = "serve-rules@8"
+SERVE_RULES = "serve-rules@9"
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
