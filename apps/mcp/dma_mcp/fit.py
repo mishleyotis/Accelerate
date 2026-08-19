@@ -65,6 +65,10 @@ _READINESS_VERDICT = {
     "READY WITH CONDITIONS": "amber",
     "CONDITIONAL": "amber",
     "NOT READY": "red",
+    # The reference client writes this one on three of its five cards, two of
+    # which were promoted at rank 2 and 3 with fits of 70.0 and 73.0 — the
+    # "red but hot" shape, live.
+    "NOT READY YET": "red",
     "BLOCKED": "red",
     "GREEN": "green", "AMBER": "amber", "RED": "red",
 }
