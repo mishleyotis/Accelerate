@@ -67,3 +67,59 @@ def test_a_row_with_no_label_survives_the_projection():
 def test_a_label_already_spelled_out_is_left_alone():
     name = "National Credit Union Administration — Call Report Quarterly Data"
     assert _row_to_item(row(source_name=name))["source_name"] == name
+
+
+# ── an identifier is not an abbreviation ───────────────────────────────
+
+def test_an_identifier_is_left_alone():
+    """`VC-CU-01` is a catalogue value-chain id and the `CU` in it names the
+    chain, not the phrase. Expanding it breaks the id; flagging it sends a
+    producer to fix something already right. Sixteen of these were counted as
+    abbreviations on a served page before the shape was excluded."""
+    from abbreviations import expand, unexplained
+    for ident in ("VC-CU-01", "P1C1.1.1", "E-CC-188", "TS-14"):
+        assert list(unexplained(ident)) == [], f"{ident} read as an abbreviation"
+        assert expand(ident, "label") == ident
+
+
+def test_prose_around_an_identifier_is_still_expanded():
+    from abbreviations import expand, unexplained
+    text = "Stage VC-CU-01 of the CU chain"
+    assert list(unexplained(text)) == ["CU"]
+    assert expand(text, "label") == "Stage VC-CU-01 of the Credit Union chain"
+
+
+# ── the second projection, which is how the abbreviation survived ──────
+
+def test_the_cell_item_projection_spells_its_label_out():
+    """The evidence endpoint spells a package label out in `_row_to_item`;
+    `computed.py` builds the SAME field for the cell drawer straight off the
+    column and was not changed with it. 26 cell items served "President & CEO"
+    on a page whose evidence tab served the same source spelled out."""
+    src = (ROOT / "apps" / "api" / "dma_api" / "computed.py").read_text()
+    assert '"source_title": _expand_abbrev(' in src, \
+        "the cell-item projection reads source_name straight off the column " \
+        "again, so a package label reaches the drawer unexpanded"
+
+
+def test_the_cell_item_carries_its_source_url():
+    """An item that names a source and cannot link to it makes the reader take
+    the title on trust."""
+    src = (ROOT / "apps" / "api" / "dma_api" / "computed.py").read_text()
+    assert "ei.source_url" in src and '"source_url": r[8]' in src
+
+
+def test_the_tracked_copy_wins_over_a_staged_one():
+    """A build artefact shadowing its own source is how verification runs
+    against the wrong copy, and it does not announce itself: the file is
+    there, it parses, and it is merely old.
+
+    `apps/api/shared/` is gitignored and written by deploy.sh. The first
+    version of the loader skipped any candidate already on `sys.path` and
+    inserted the other at position 0, so the staged copy won whenever a caller
+    had put the repo path on first — and a stale copy from an earlier deploy
+    answered a rule the tracked file had and it did not."""
+    import abbreviations
+    assert "packages/shared" in abbreviations.__file__, (
+        f"the abbreviation list resolved from {abbreviations.__file__} — a "
+        "staged build artefact is shadowing the tracked source")

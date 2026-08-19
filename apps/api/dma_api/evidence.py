@@ -59,9 +59,21 @@ def _put_shared_on_path() -> None:
     if len(here.parents) > 3:
         cands.append(here.parents[3] / "packages" / "shared")
     cands.append(here.parent.parent / "shared")
-    for c in cands:
-        if c.exists() and str(c) not in sys.path:
-            sys.path.insert(0, str(c))
+    wanted = [str(c) for c in cands if c.exists()]
+    # ALREADY PRESENT IS NOT THE SAME AS PRESENT IN THE RIGHT ORDER, and the
+    # first version of this treated them as the same: it skipped a candidate
+    # found anywhere on the path and inserted the other at position 0, so the
+    # gitignored staged copy won whenever a caller had put the repo path on
+    # first. A stale `apps/api/shared/abbreviations.py` from an earlier deploy
+    # then answered a rule the tracked file had and it did not — the exact
+    # shadowing computed.py's loader comments warn about, reproduced by the
+    # code that quotes them. So: drop every occurrence, then lay them down in
+    # priority order.
+    for path in wanted:
+        while path in sys.path:
+            sys.path.remove(path)
+    for path in reversed(wanted):
+        sys.path.insert(0, path)
 
 
 _put_shared_on_path()

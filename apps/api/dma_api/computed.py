@@ -30,6 +30,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+# The abbreviation list, from the one copy `evidence.py` also reads. Imported
+# through that module so the shared-path resolution lives in one place: two
+# modules each finding `packages/shared` their own way is how a build artefact
+# came to shadow its own source.
+from .evidence import _expand_abbrev  # noqa: F401
+
 # Tier -> the highest evidence level that tier can carry, RENDERED beside the
 # count because it is what the mix means (O11 contract). T5 is vendor
 # collateral: corroboration required, ceiling L2.
@@ -483,14 +489,25 @@ def cell_items(cur, data: dict, entity_id) -> None:
     cur.execute(
         """SELECT w.cited, ei.e_id, ei.tier::text, ei.claim_type::text,
                   ei.recency_band::text, ei.source_name, ei.source_domain,
-                  ei.excerpt
+                  ei.excerpt, ei.source_url
              FROM unnest(%s::text[]) AS w(cited)
              JOIN evidence_index ei
                ON ei.e_id = resolve_evidence_id(w.cited)
             WHERE ei.entity_id = %s""", (wanted, entity_id))
+    # THE SECOND PROJECTION, and it is why the abbreviation survived. The
+    # evidence endpoint spells a package label out in `_row_to_item`; this
+    # builds the SAME field for the cell drawer straight off the column, and
+    # was not changed with it — 26 cell items served "President & CEO" on a
+    # page whose evidence tab served the same source spelled out. One rule,
+    # two readers, one of them updated.
+    #
+    # `source_url` comes with it for the same reason: an item that names a
+    # source and cannot link to it makes the reader take the title on trust.
     by_id = {r[0]: {"e_id": r[1], "tier": r[2], "claim_label": r[3],
-                    "recency": r[4], "source_title": r[5], "publisher": r[6],
-                    "excerpt": r[7],
+                    "recency": r[4],
+                    "source_title": _expand_abbrev(r[5], "label"),
+                    "publisher": r[6],
+                    "excerpt": r[7], "source_url": r[8],
                     **({"cited_as": r[0]} if r[0] != r[1] else {})}
              for r in cur.fetchall()}
 

@@ -127,19 +127,38 @@ TITLE_EXPANSION = {
 LABEL_FIELDS = frozenset(("source_name", "source_title", "author_role"))
 
 
+# An IDENTIFIER, not prose. `VC-CU-01` is a catalogue value-chain id and the
+# `CU` in it names the chain, not the phrase "credit union" — expanding it
+# would break the id, and flagging it sends a producer to fix something that is
+# already right. Sixteen of these were counted as abbreviations on a served
+# page before the shape was excluded. A token is an identifier when it is a
+# hyphen- or underscore-joined run of upper-case letters and digits with at
+# least one digit-bearing or multi-part segment: `VC-CU-01`, `TS-14`,
+# `P1C1.1.1`, `E-CC-188`.
+_IDENT = re.compile(r"[A-Z][A-Z0-9]*(?:[-_.][A-Z0-9]+)+")
+
+
+def _identifier_spans(text: str):
+    return [(m.start(), m.end()) for m in _IDENT.finditer(text)]
+
+
 def unexplained(text: str):
     """Abbreviations present in `text` without their own expansion beside them.
 
     Yields each short form once, in the order it appears. A field that already
     spells it out is a second reference and reads correctly as one — but only
-    ITS OWN expansion counts.
+    ITS OWN expansion counts. A match inside an identifier is not an
+    abbreviation at all and is skipped.
     """
     if not isinstance(text, str) or not text.strip():
         return
+    idents = _identifier_spans(text)
     seen = set()
     for m in PATTERN.finditer(text):
         short = m.group(1)
         if short in seen:
+            continue
+        if any(a <= m.start() and m.end() <= b for a, b in idents):
             continue
         if re.search(re.escape(EXPANSION[short]), text, re.I):
             continue
@@ -164,8 +183,14 @@ def expand(text, style="prose"):
 
     table = {**EXPANSION, **TITLE_EXPANSION} if style == "label" else EXPANSION
 
+    idents = _identifier_spans(text)
+
     def sub(m):
         short = m.group(1)
+        # An identifier is not prose: expanding the CU in `VC-CU-01` breaks
+        # the id and resolves nothing.
+        if any(a <= m.start() and m.end() <= b for a, b in idents):
+            return m.group(0)
         full = table[short]
         start = m.start()
         # At the start of the string, or after a sentence end, the expansion
