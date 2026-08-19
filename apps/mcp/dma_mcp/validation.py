@@ -226,6 +226,298 @@ def _check_cards_unique(section, body) -> list:
     return out
 
 
+# ── round-4 gates: four ways a payload passed every check and still read
+#    wrong on the page ────────────────────────────────────────────────────
+
+# `\d+\.\d+`, not `\d\.\d`: the first version of this pattern could not
+# match "2.52" — the trailing word boundary failed against the second decimal
+# — so it read the very sentence it was written for as clean. And the
+# separator class covers a typographic apostrophe, because prose written for a
+# client surface uses one.
+_NUM = r"\d+\.\d+"
+_RUN = r"this run['’]?s?"
+_SCORE_RECAP = re.compile(
+    r"(?:\b(?:pillar|category|composite|subcap|cell)s?\b[^.\n]{0,80}?" + _NUM
+    + r"|" + _NUM + r"[^\n]{0,60}?\bagainst\s+" + _RUN
+    + r"|\b" + _RUN + r"[^\n]{0,60}?" + _NUM
+    + r"|\bcohort\b[^\n]{0,80}?" + _NUM + r")", re.I)
+
+
+def _check_why_now_is_an_event(section, body) -> list:
+    """AG-11 — a why-now signal is a DATED EXTERNAL EVENT, never a score recap.
+
+    Measured on the reference client: WN-4's trigger read "a five-member
+    same-sub-vertical cohort read on 19 August 2026 sits at 2.52, 2.70, 2.50
+    and 2.36 across the four pillars against this run's 1.60, 1.52, 1.75 and
+    1.43". Every figure in it is this assessment's own output. It passed every
+    gate, because nothing in the contract said a trigger has to be about the
+    world.
+
+    The distinction is not stylistic. Why-now answers "what changed outside
+    this institution that makes now the moment"; a score recap answers "what
+    did we score", which the heatmap already answers and the reader has
+    already seen. A signal that recaps is a signal the page did not need, and
+    it displaces one it did.
+    """
+    if section != "why_now" or not isinstance(body, dict):
+        return []
+    out = []
+    for i, sig in enumerate(body.get("signals") or []):
+        if not isinstance(sig, dict):
+            continue
+        for field in ("trigger", "headline", "so_what", "metric"):
+            text = sig.get(field)
+            if not isinstance(text, str) or not text.strip():
+                continue
+            if _SCORE_RECAP.search(text):
+                out.append(_reason(
+                    "AG-11", "why_now", f"why_now.signals[{i}].{field}",
+                    f"{sig.get('wn_id') or f'signal {i}'} states this "
+                    "assessment's own scores where a dated external event "
+                    "belongs. Why-now answers what changed OUTSIDE the "
+                    "institution to make now the moment; the scores are the "
+                    "heatmap's answer to a different question and the reader "
+                    "has already seen them. Replace it with an event that has "
+                    "a date and a source, or drop the signal — a recap "
+                    "displaces a signal the page needed."))
+                break
+    return out
+
+
+def _check_thought_leadership_unique(section, body) -> list:
+    """CG-26 — one entry per SOURCE DOCUMENT.
+
+    Reported as "thought leadership signals at 3 with 2 duplicates". Two of
+    the three carried the same `url` — one congressional testimony quoted
+    twice, with different quotes, different e_ids and different alignments.
+    Not duplicates by any field check, and duplicates to every reader: same
+    headline stem, same author, same date, same link.
+
+    A second quote from a document already cited belongs IN that entry, and
+    the freed slot belongs to a document the ladder has not reached.
+    """
+    if section != "thought_leadership" or not isinstance(body, dict):
+        return []
+    out, seen = [], {}
+    for i, e in enumerate(body.get("entries") or []):
+        if not isinstance(e, dict):
+            continue
+        url = str(e.get("url") or "").strip().rstrip("/").lower()
+        if not url:
+            continue
+        if url in seen:
+            out.append(_reason(
+                "CG-26", "thought_leadership",
+                f"thought_leadership.entries[{i}].url",
+                f"entry {i} cites the same document as entry {seen[url]}. To a "
+                "reader that is the same item listed twice — same link, same "
+                "author, same date — however different the quotes are. Merge "
+                "the second quote into the first entry, citing both evidence "
+                "ids, and give the slot to a document this ladder has not "
+                "reached."))
+        else:
+            seen[url] = i
+    return out
+
+
+# Abbreviations a client surface must not use unexplained. Kept short and
+# specific: an aggressive list would fire on ticker symbols and product names,
+# and a gate that cries wolf gets switched off.
+# Abbreviation -> the expansion that licenses it. Each abbreviation is paired
+# with ITS OWN expansion, not with a pool of them: the first version checked
+# whether ANY expansion appeared in the field, so "The NCUA call report shows
+# the credit union above nine billion" read as clean — "credit union" was
+# present, so NCUA was treated as already spelled out. The same containment
+# slip bit the expander written beside this gate.
+_ABBREV_EXPANSION = {
+    "NCUA": r"National Credit Union Administration",
+    "FCU": r"Federal Credit Union",
+    "CFPB": r"Consumer Financial Protection Bureau",
+    "CU": r"credit union",
+    "CUs": r"credit unions",
+    "CEO": r"chief executive",
+    "CIO": r"chief information officer",
+    "COO": r"chief operating officer",
+    "CTO": r"chief technology officer",
+    "CISO": r"chief information security officer",
+    "CFO": r"chief financial officer",
+    "CDO": r"chief data officer",
+    "KPI": r"key performance indicator",
+    "KPIs": r"key performance indicators",
+    "ROI": r"return on investment",
+    "SLA": r"service level agreement",
+    "SLAs": r"service level agreements",
+    "NPS": r"Net Promoter Score",
+    "FTE": r"full-time employee",
+    "FTEs": r"full-time employees",
+    "YoY": r"year on year",
+    "QoQ": r"quarter on quarter",
+    "AE": r"account executive",
+    "AEs": r"account executives",
+    "API": r"application programming interface",
+    "APIs": r"application programming interfaces",
+    "UX": r"user experience",
+    "UI": r"user interface",
+    "B2B": r"business-to-business",
+    "B2C": r"business-to-consumer",
+}
+_ABBREV = re.compile(r"\b(" + "|".join(
+    sorted(_ABBREV_EXPANSION, key=len, reverse=True)) + r")\b")
+
+# VERBATIM BY CONTRACT, and therefore never rewritten: an excerpt is a
+# byte-for-byte span of a fetched artefact (invariant 4) and a source title, a
+# quote and a person's own words are what someone actually said. Expanding an
+# abbreviation inside one would misquote a source and break the verifier that
+# compares an excerpt against the bytes it was taken from.
+_VERBATIM_FIELDS = frozenset((
+    "excerpt", "quote", "source_title", "source_name", "their_words",
+    "headline", "title_verbatim", "url", "source_url", "linkedin_url",
+    "email", "name", "legal_name", "platform", "vendor", "l3_area",
+    "l4_feature", "author_name", "author_role", "peer_name",
+))
+
+
+def _check_no_bare_abbreviations(page, section, body) -> list:
+    """CG-27 — a client surface spells it out the first time.
+
+    Fifty occurrences of FCU, forty-eight of NCUA, and CU itself reached
+    promoted prose. A reader outside this industry does not know them, and a
+    reader inside it does not need them shortened; either way the abbreviation
+    costs comprehension and buys nothing on a page that is not short of room.
+
+    Only AUTHORED prose. A quote, an excerpt, a source's own title and a
+    person's role as they state it are verbatim, and rewriting one would
+    misquote the source and break the evidence verifier that compares an
+    excerpt against the bytes it was taken from.
+    """
+    if not isinstance(body, dict):
+        return []
+    out = []
+
+    def walk(node, path, key=None):
+        if len(out) >= 6:            # name a handful, not a wall
+            return
+        if isinstance(node, dict):
+            for k, v in node.items():
+                walk(v, f"{path}.{k}", k)
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                walk(v, f"{path}[{i}]", key)
+        elif isinstance(node, str) and key not in _VERBATIM_FIELDS and len(node) > 12:
+            for m in _ABBREV.finditer(node):
+                short = m.group(1)
+                # Spelled out in the same field is a second reference and
+                # reads correctly as one — but only ITS OWN expansion counts.
+                if re.search(re.escape(_ABBREV_EXPANSION[short]), node, re.I):
+                    continue
+                out.append(_reason(
+                    "CG-27", section, f"{page}.{path}",
+                    f"'{short}' reaches a client surface unexplained. "
+                    "Spell it out on first use in the field; the short "
+                    "form is fine afterwards. Quotes, excerpts, source "
+                    "titles and a person's stated role are verbatim and "
+                    "are never rewritten."))
+                break            # one reason per field: it is one edit
+
+    walk(body, section)
+    return out
+
+
+# Words that make a finding read as an accusation. Each was measured in a
+# promoted starter or is the same move in different words.
+_ACCUSATORY = (
+    (r"\bdo(?:es)? not (?:quite )?line up\b",
+     "says the client contradicted itself"),
+    (r"\bwhat it cannot do\b", "opens on an incapacity"),
+    (r"\byou (?:have )?(?:failed|neglected|ignored|missed)\b",
+     "assigns fault"),
+    (r"\b(?:do|does|did)?\s*you\s+(?:do not|don'?t|not)\s+"
+     r"(?:have|know|track|measure|hold|report)\b",
+     "opens on an absence in the second person"),
+    (r"\bwhy (?:do|does|did)n'?t? you\b|\bwhy do you not\b",
+     "asks the client to account for an absence"),
+    (r"\byour (?:problem|weakness|deficienc)\w*\b", "names a deficiency"),
+    (r"\bfall(?:s|ing)? (?:short|behind)\b", "ranks the client down"),
+    (r"\blag(?:s|ging)? (?:behind|the)\b", "ranks the client down"),
+    (r"\bno (?:real|actual) \w+ (?:exists|in place)\b",
+     "states a bare absence where an opening belongs"),
+)
+
+
+def _check_starter_tone(section, body) -> list:
+    """AG-12 — a starter opens on an opportunity, never on an accusation.
+
+    A conversation starter is read by the client. "Two things you have told
+    the market do not quite line up" is an accusation of inconsistency, and
+    "what it cannot do is answer a question" opens on an incapacity — both
+    were promoted. The same fact stated as an opening ("the app does the
+    transactional work well, and the next thing it could do is answer a
+    question") costs nothing and lands better.
+
+    The gate refuses the MOVE, not a word list: each pattern is a way of
+    making the client the subject of a failure.
+    """
+    if section != "starters" or not isinstance(body, dict):
+        return []
+    out = []
+    for i, st in enumerate(body.get("starters") or []):
+        if not isinstance(st, dict):
+            continue
+        for field in ("text", "followup_question", "their_system_reference"):
+            text = st.get(field)
+            if not isinstance(text, str):
+                continue
+            for pat, why in _ACCUSATORY:
+                if re.search(pat, text, re.I):
+                    out.append(_reason(
+                        "AG-12", "starters", f"starters.starters[{i}].{field}",
+                        f"this starter {why}, and the client reads it. State "
+                        "the same fact as the opening it is: what is in place, "
+                        "and the next thing it makes possible. A gap presented "
+                        "as an opportunity is the same information and a "
+                        "different conversation."))
+                    break
+    return out
+
+
+def _check_roster_keeps_uncontactable(section, body) -> list:
+    """CG-28 — an executive is not dropped for want of a phone number.
+
+    The roster is the accountability set for the assessment, and contact
+    enrichment is a convenience on top of it. A seat that owns a finding
+    belongs on the page whether or not a work address came back; dropping it
+    silently makes the institution look smaller than it is and hides the owner
+    of the gap being discussed.
+
+    Detected the only way a payload can show it: the section declares the
+    seats it knows about and serves fewer of them.
+    """
+    if section != "leadership" or not isinstance(body, dict):
+        return []
+    roster = body.get("roster")
+    if not isinstance(roster, list):
+        return []
+    known = body.get("seats_identified")
+    out = []
+    if isinstance(known, int) and known > len(roster):
+        out.append(_reason(
+            "CG-28", "leadership", "leadership.roster",
+            f"{known} seats were identified and {len(roster)} are served. An "
+            "executive is not dropped because contact enrichment returned "
+            "nothing: the roster is the accountability set, and a missing seat "
+            "hides the owner of a gap this run is discussing. Serve the seat "
+            "with the fields that ARE known and let the contact route be the "
+            "thing that is absent."))
+    for i, m in enumerate(roster):
+        if isinstance(m, dict) and m.get("dropped_for_no_contact"):
+            out.append(_reason(
+                "CG-28", "leadership", f"leadership.roster[{i}]",
+                "a seat is marked dropped for want of a contact route. Serve "
+                "it; the absence belongs on the contact field, not on the "
+                "person."))
+    return out
+
+
 def _check_page_thread(page, section, fields, body) -> list:
     """CG-23 — a section whose writer stores a thread carries one.
 
@@ -538,6 +830,11 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_page_thread(page, name, fields, body))
         reasons.extend(_check_rollup_agrees(name, body))
         reasons.extend(_check_cards_unique(name, body))
+        reasons.extend(_check_why_now_is_an_event(name, body))
+        reasons.extend(_check_thought_leadership_unique(name, body))
+        reasons.extend(_check_no_bare_abbreviations(page, name, body))
+        reasons.extend(_check_starter_tone(name, body))
+        reasons.extend(_check_roster_keeps_uncontactable(name, body))
 
         # id-pattern discipline
         for i, e in enumerate(body.get("e_ids") or []):

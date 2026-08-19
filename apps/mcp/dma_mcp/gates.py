@@ -137,6 +137,65 @@ GATES = {
               "The issue register has a dedup rule for exactly this reason "
               "and the cards, which are the page's whole argument, had none.",
               "block"),
+    "AG-11": ("A why-now signal is an event, not a recap", None,
+              "No signal's prose states this assessment's own pillar, "
+              "category or composite figures where a dated external event "
+              "belongs.",
+              "Why-now answers what changed OUTSIDE the institution to make "
+              "now the moment. A signal that restates the scores answers the "
+              "heatmap's question instead, over ground the reader has already "
+              "covered, and displaces a signal the page needed. Measured: a "
+              "promoted WN-4 whose trigger was the cohort medians against "
+              "this run's four pillar scores, and every figure in it was this "
+              "assessment's own output.",
+              "block"),
+    "AG-12": ("A starter opens on an opportunity", None,
+              "No conversation starter makes the client the subject of a "
+              "failure — no contradiction claimed, no incapacity as the "
+              "opening, no second-person absence, no ranking down.",
+              "The client reads these. 'Two things you have told the market "
+              "do not quite line up' is an accusation of inconsistency and "
+              "'what it cannot do is answer a question' opens on an "
+              "incapacity; both were promoted. The same fact stated as an "
+              "opening — what is in place and the next thing it makes "
+              "possible — is the same information and a different "
+              "conversation.",
+              "block"),
+    "CG-26": ("One thought-leadership entry per document", None,
+              "No two entries carry the same source url, compared without "
+              "trailing-slash or case differences.",
+              "Two entries citing one congressional testimony read to a "
+              "client as the same item listed twice — same link, same author, "
+              "same date — however different the quotes are. Reported as "
+              "'three signals, two duplicates'. A second quote from a cited "
+              "document belongs inside that entry; the freed slot belongs to "
+              "a document the ladder has not reached.",
+              "block"),
+    "CG-27": ("Spelled out on first use", None,
+              "No abbreviation from the registry's list reaches AUTHORED "
+              "prose without its own expansion in the same field. Quotes, "
+              "excerpts, source titles and a person's stated role are "
+              "verbatim and are never read.",
+              "Fifty occurrences of FCU and forty-eight of NCUA reached "
+              "promoted prose. A reader outside the industry does not know "
+              "them and a reader inside it does not need them shortened; "
+              "either way the abbreviation costs comprehension and buys "
+              "nothing on a page that is not short of room. The verbatim "
+              "exclusion is not politeness: an excerpt is a byte-for-byte "
+              "span of a fetched artefact and rewriting one breaks the "
+              "verifier.",
+              "block"),
+    "CG-28": ("No executive dropped for want of a contact route", None,
+              "The roster serves every seat the section says it identified, "
+              "and no seat is marked dropped for missing contact details.",
+              "The roster is the accountability set for the assessment and "
+              "contact enrichment is a convenience on top of it. A seat that "
+              "owns a finding belongs on the page whether or not a work "
+              "address came back; dropping it silently makes the institution "
+              "look smaller than it is and hides the owner of the gap being "
+              "discussed. The absence belongs on the contact field, not on "
+              "the person.",
+              "block"),
     "CG-04": ("No invented fields", None,
               "No field outside the section contract, envelope included.",
               "Payload shapes are law; an invented field is a contract fork.",
