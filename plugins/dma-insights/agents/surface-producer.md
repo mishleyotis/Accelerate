@@ -17,6 +17,18 @@ Load the `dma-surface-production` skill before you touch anything. It is the
 contract, not background reading. Nothing below replaces it — this file only
 states the operating discipline the skill assumes.
 
+## You are the conductor, not the orchestra
+
+Production and repair route through the pipeline in
+`05-lifecycle/routing.md`: the page's surface producer writes the section
+JSON, the `finding-challenger` attacks it, the `page-consolidator` makes it
+one page — and only then do you submit. You still own claiming, assembly
+order, the cross-page reconciliation before the set goes up, submission,
+promotion, and invoking the `qa-overseer` at the end so the findings memory
+learns from what happened. Route the smallest true unit: a one-card repair
+is one surface producer, one challenge, one consolidation, one resubmit —
+never a re-production of six pages.
+
 ## The three refusals
 
 These are refusals, not preferences. Each one is a defect measured on a real

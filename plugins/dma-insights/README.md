@@ -1,21 +1,51 @@
 # dma-insights
 
-The six Digital Maturity Assessment skills, five DMA agents, two operator
-commands and the remote DMA Insights MCP connector, as one installable plugin.
+The six Digital Maturity Assessment skills, nine DMA agents, two operator
+commands, the submit/verdict hooks and the remote DMA Insights MCP
+connector, as one installable plugin.
 
 ```
 skills/    dma-research · dma-assessment · dma-governance
            dma-surface-production · dma-first-call-deck · dma-rectifier
-agents/    surface-producer · deployed-app-auditor · package-vetter
-           adversarial-verifier · rectifier
+agents/    surface-producer (conductor; the only one that submits/promotes)
+           overview-surface-producer · heatmap-surface-producer
+           platform-surface-producer · context-surface-producer
+           finding-challenger · page-consolidator · qa-overseer
+           deployed-app-auditor · package-vetter · adversarial-verifier
+           rectifier
+hooks/     precheck_submit (refuses a doomed submit before the network)
+           verdict_watch (nudges the memory when a gate refuses twice)
+           session_brief (the routing and memory rules, at session start)
 commands/  /dma-insights:doctor          is this install able to do the work?
            /dma-insights:setup-routines  reconcile the scheduled routines
 bin/       dma-deps                      on PATH while the plugin is enabled
 scripts/   mcp_auth_headers.sh · doctor.py · setup_routines.py
-           audit_skills.py
+           audit_skills.py · hooks/
 routines.json  the scheduled routines this product requires, declared
 .mcp.json      the deployed connector, declared remote
 ```
+
+## The agent hierarchy, and why it is faster
+
+One monolithic producer re-produced six pages to fix one card. Work now
+routes to the smallest true unit — the pipeline and the full routing table
+live in `skills/dma-surface-production/05-lifecycle/routing.md`:
+
+```
+route → produce → challenge → consolidate → submit → learn
+        (surface    (finding-    (page-        (surface-  (qa-
+         producers,   challenger,  consolidator)  producer   overseer,
+         fast tier)   dma-research  refuses        only)      writes the
+                      discipline)   unchallenged              findings
+                                    input)                    memory)
+```
+
+The four surface producers cover the six pages (overview, heatmap, platform,
+and one agent for context + techstack + insights) and run on the fast model
+tier; the challenger, consolidator and overseer reason on the strong tier,
+because checking is where depth pays. Submission and promotion never leave
+`surface-producer` — the plugin-level expression of the invariant that
+content enters through the connector in one place.
 
 ## The two credentials, which are not the same thing
 
