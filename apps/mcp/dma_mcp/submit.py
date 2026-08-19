@@ -21,6 +21,7 @@ from pathlib import Path
 
 from . import transport
 from .gates import ensure_gate_registry
+from . import rejections
 from .validation import validate_pass1
 from .validation2 import validate_pass2
 
@@ -191,6 +192,22 @@ def submit_page_payload(conn, run_id, page: str, payload: dict = None,
            VALUES (%s,%s,%s,%s,%s, now())""",
         (submission_id, status, json.dumps(reasons), json.dumps(warnings),
          json.dumps(counts)))
+
+    # THE REFUSAL GETS A NAME AND A QUEUE, on every submit — pass or fail.
+    # A pass is what CLOSES the tickets the last failure opened, so doing this
+    # only on failure would leave a queue that never empties. Before this,
+    # a refused payload superseded a passing row and then sat there: nothing
+    # listed it across runs, so a producer session that ended left no trace
+    # anything was outstanding, and all three refusals measured on this build
+    # were found by a human reading a verdict.
+    #
+    # Never fatal. A submission is the producer's work and a bookkeeping
+    # failure must not cost it — the verdict above is already committed to.
+    try:
+        rejection_report = rejections.record_verdict(
+            conn, run_id, page, submission_id, reasons, producer_version)
+    except Exception as exc:                       # noqa: BLE001 — reported
+        rejection_report = {"error": str(exc)[:200]}
     conn.commit()
     if upload_id:
         # spent, and naming what it became. The parts stay: they are the
@@ -198,7 +215,12 @@ def submit_page_payload(conn, run_id, page: str, payload: dict = None,
         transport.close_upload(conn, upload_id, submission_id)
     return {"submission_id": str(submission_id),
             "verdict": {"status": status.lower(), "reasons": reasons,
-                        "warnings": warnings, "counts": counts}}
+                        "warnings": warnings, "counts": counts},
+            # The identifiers the brief asks for: a refined copy is submitted
+            # against the same page and clears the very rows it was opened
+            # against, so "did the repair land" is answerable without diffing
+            # payloads — and `attempts` past two says the repair is looping.
+            "rejections": rejection_report}
 
 
 def get_validation_verdict(conn, submission_id) -> dict:

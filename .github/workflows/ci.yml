@@ -88,6 +88,13 @@ jobs:
       # the output names the gap rather than counting it. A step that ran
       # `--help` and called itself a gate would be the shape this whole build
       # keeps removing.
+      # A refused payload used to supersede a passing row and then sit there
+      # with nothing anywhere listing it. Three refusals in one day on this
+      # build were all found by a person reading a verdict. The ledger's
+      # failure mode is SILENT — everything keeps working and the queue is
+      # simply always empty — so the wiring is asserted rather than trusted.
+      - name: Gate K — a refused payload cannot be undetectable
+        run: python3 scripts/gate_k_rejections_return.py
       - name: Gate J — no client is structurally thinner than the reference
         run: |
           set +e

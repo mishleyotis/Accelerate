@@ -30,6 +30,7 @@ from contextlib import contextmanager
 from mcp.server import MCPServer
 
 from dma_mcp import bundle as bundle_mod
+from dma_mcp import rejections
 from dma_mcp import claims as claims_mod
 from dma_mcp import evidence_tools
 from dma_mcp import feedback as feedback_mod
@@ -201,6 +202,41 @@ def get_client_state(display_id: str) -> dict:
     though it were a first run silently empties the longitudinal surfaces."""
     with _conn() as c:
         return bundle_mod.get_client_state(c, display_id)
+
+
+@mcp.tool()
+@_traced
+def list_open_rejections(display_id: str = "", page: str = "",
+                         limit: int = 200) -> dict:
+    """Every payload this connector has REFUSED and nobody has repaired.
+
+    Read this FIRST in any producer session, before choosing a run. A
+    refused submission supersedes the passing row for its page and then sits
+    there: `get_run_progress` shows it, but only for one run and only if you
+    already know to ask, so a session that ends leaves no trace anything is
+    outstanding. Measured three times in one day on this build — a heatmap
+    that dropped `cell_evidence` and failed CG-01, an overview refused on
+    ET-07 and again on ET-09 — and every one was found by a person reading a
+    verdict rather than by the system saying so.
+
+    Each row carries a stable `rejection_id` keyed on (run, page, gate,
+    path). Submit a refined payload for that page and the rows it clears are
+    the rows it was opened against — `submit_page_payload` returns them under
+    `rejections.closed`, so "did the repair land" is answerable without
+    diffing payloads.
+
+    `attempts` is the number to read first. Past two it means the repair is
+    not landing and the next attempt should CHANGE APPROACH rather than
+    repeat: three identical fixes for one gate is the loop this field exists
+    to make visible.
+
+    Safeguard (SG) results never appear here. The charter says a failing
+    safeguard discloses and still promotes, so it is not an outstanding
+    repair.
+    """
+    with _conn() as c:
+        rows = rejections.open_corpus_wide(c, display_id, page, limit)
+    return {"rejections": rows, **rejections.summary(rows)}
 
 
 @mcp.tool()

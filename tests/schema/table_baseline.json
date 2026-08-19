@@ -94,6 +94,7 @@
     "platform_story",
     "recommendations_raw",
     "refresh_requests",
+    "rejection_ledger",
     "run_claims",
     "run_manifest",
     "runs",
