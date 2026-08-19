@@ -166,7 +166,16 @@ function payloadFor(page, audience) {
             catalogue_path: `P4 > P4C3 > P4C3.2 > P4C3.2.1 > ${AREA2_CLEAN} > MLflow Tracking`,
             e_ids: [] },
         ] },
-    ], discarded: [] });
+    ], discarded: [
+      { platform: "Tableau",
+        reason: "Tableau is the reporting layer this institution's own "
+          + "business intelligence manager describes her team working in, "
+          + "alongside a credit union data warehouse (E-CC-285, E-CC-204), "
+          + "so visualisation is an adoption conversation at that layer." },
+      { platform: AREA2_CLEAN,
+        reason: "Its addressable cells sit inside the service tile and depend "
+          + "on the model-governance work at rank two." },
+    ] });
     // Both recommendations state their area CLEAN — the shape that made the
     // tile join fail on every tallied area.
     sections.recommendations = sec({ recommendations: [
@@ -321,6 +330,66 @@ for (const AUDIENCE of ["internal", "customer"]) {
           "guard must yield the human field, not silence");
         assert.ok(text.includes("F-77"),
           "the finding's id is the reader's handle on it and must render as a chip");
+      });
+
+      await t.test("R3-02 · the discards render HERE, and only here", async () => {
+        /* Owner's third round: "Considered and set aside" was on the
+           Overview, which is the wrong page — it is a platform argument. It
+           was also told twice, because `platform_story.discarded` carries the
+           same list with its own wording and rendered inside a drawer. It now
+           renders openly on this page and nowhere else. */
+        assert.ok(text.includes("Considered and set aside"),
+          "the platforms considered and not ranked do not render on the "
+          + "Platform page, which is where they belong");
+        assert.ok(text.includes("Tableau is the reporting layer"),
+          "a discard rendered without the reason it was discarded for");
+
+        const overview = await openRoute(browser, base, "overview", AUDIENCE);
+        assert.ok(!overview.text.includes("Considered and set aside"),
+          "the discards are still on the Overview as well — the same analysis "
+          + "told twice, and the copy a reader meets first is on the wrong page");
+        await overview.page.close();
+      });
+
+      await t.test("R3-03 · no evidence id reaches client prose", () => {
+        /* Measured live: "…alongside a credit union data warehouse
+           (E-CC-285, E-CC-204), so visualisation is…". E-CC-285 is our
+           internal handle for a row in our own evidence index.
+
+           Bracketed groups only — a bare inline id is a payload defect,
+           because removing one mid-sentence ("named in E-CC-197 and
+           corroborated" → "named in and corroborated") is worse than leaving
+           it, and a renderer cannot rewrite a sentence. */
+        assert.ok(!/\((?:\s*E-[A-Z]{0,4}-?\d+\s*[,;]?)+\)/.test(text),
+          `a bracketed evidence citation reached the page:\n${
+            (text.match(/[^\n]*\(E-[^\n]*/g) || []).slice(0, 2).join("\n")}`);
+        assert.ok(text.includes("credit union data warehouse, so visualisation"),
+          "the sentence did not survive having its citation removed");
+      });
+
+      await t.test("R3-04 · no card title is clipped", async () => {
+        /* The live app showed "Readiness · MLflow (Databricks-…". A card
+           title is the one string on a card that must survive: a reader who
+           cannot tell WHICH platform the gates below belong to cannot use
+           them.
+
+           Measured from geometry rather than from text, because a CSS clamp
+           leaves the full string in the DOM and only the pixels say it is
+           cut. */
+        const clipped = await page.evaluate(() => {
+          const out = [];
+          for (const el of document.querySelectorAll("h1, h2, h3, .card-head div, [class*=txt-fit]")) {
+            const t = (el.textContent || "").trim();
+            if (!t || el.children.length > 2) continue;
+            if (el.scrollHeight > el.clientHeight + 2
+                || el.scrollWidth > el.clientWidth + 2) {
+              out.push(t.slice(0, 80));
+            }
+          }
+          return out;
+        });
+        assert.deepStrictEqual(clipped, [],
+          `card titles are cut off:\n  ${clipped.join("\n  ")}`);
       });
 
       assert.deepStrictEqual(pageErrors.filter((e) => !/ResizeObserver/.test(e)), []);

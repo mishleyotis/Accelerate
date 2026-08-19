@@ -640,6 +640,45 @@ function findingChipId(f) {
   return String(v);
 }
 
+/* Evidence ids in client prose.
+
+   Measured on the live app, 2026-08-19: "…alongside a credit union data
+   warehouse (E-CC-285, E-CC-204), so visualisation is an adoption and depth
+   conversation" — on the Overview page, in a paragraph about the client's
+   own reporting layer. `E-CC-285` is our internal handle for a row in our
+   evidence index. It means nothing to the reader and it reads like a defect.
+
+   Stripped at RENDER rather than asked for at the producer, because the
+   producer is right to carry the citation — the id is how the claim is
+   traceable, and `check_language.py` is where the payload rule belongs. The
+   page is where it should stop being printed.
+
+   ONLY BRACKETED GROUPS. "(E-CC-285, E-CC-204)" and "[E-029]" are
+   parenthetical citations: the sentence reads correctly without them, so
+   removing them is safe. A BARE inline id is not — "named in E-CC-197 and
+   corroborated" becomes "named in and corroborated", which is worse than
+   the id was. A renderer cannot rewrite a sentence; the producer can, so a
+   bare id is a payload defect (`check_language.py`) rather than something
+   to paper over here.
+
+   The citation CHIPS are untouched: those are the provenance affordance and
+   the owner's brief requires every evidence source to be clickable. This is
+   about ids inside sentences. */
+const EVIDENCE_ID = String.raw`E-(?:[A-Z]{1,4}-)?\d{1,5}`;
+const EVIDENCE_CITATION_GROUP = new RegExp(
+  String.raw`\s*[\(\[](?:\s*${EVIDENCE_ID}\s*[,;]?)+[\)\]]`, "g");
+
+function clientProse(value) {
+  const t = typeof value === "string" ? value : asText(value);
+  if (!t) return t;
+  return t.replace(EVIDENCE_CITATION_GROUP, "")
+          .replace(/\s+([,.;:!?])/g, "$1")
+          .replace(/\(\s*\)|\[\s*\]/g, "")
+          .replace(/\s{2,}/g, " ")
+          .trim();
+}
+
+
 /* The badge over an absent card, derived from WHY the section is absent.
    "Not promoted" was hardcoded on two cards and rendered over a section the
    serve layer had deliberately withheld from the customer audience — a wrong
@@ -1472,6 +1511,7 @@ Object.assign(window, {
   Icon, BrandMark, ZennifyWordmark, PillarBadge, MaturityChip, ToastStack,
   RenderBoundary, CardBoundary, ItemBoundary, PageBoundary,
   SectionEmpty, SectionEmptyFoot, EnrichmentFlag, EnrichmentGap, findingChipId,
+  clientProse,
   LoadingScreen, SectionLoader, ConnectionWatcher,
   parseHash, buildHash, navigate, useRoute,
   fmtDate, fmtDateLong, fmtDatesInText, toDate,

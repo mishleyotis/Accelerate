@@ -812,8 +812,12 @@ function OpportunitySurfaceStrip({ entity, run, audience }) {
       })
     : Object.entries(entity.oss || {}).sort((a, b) => b[1] - a[1])
         .map(([pid, score]) => ({ platform: pid, composite: num(score) }));
-  const discarded = ((sec && sec.discarded) || []).filter(d => d && (d.platform || d.reason));
-  if (!tiles.length && !discarded.length) return null;
+  /* `discarded` was read here for the "Considered and set aside" block that
+     now lives on the Platform page. The section still promotes it; this page
+     no longer renders it. */
+  /* The strip is the TILES now. `discarded` moved to the Platform page, so a
+     run with no tiles and only discards has nothing to draw here. */
+  if (!tiles.length) return null;
   const sel = open != null ? tiles[open] : null;
 
   const factorRows = (t) => (t.factors || []).filter(f => f && f.name).map(f => ({
@@ -955,27 +959,19 @@ function OpportunitySurfaceStrip({ entity, run, audience }) {
         </div>
       ) : null}
 
-      {/* What was considered and NOT ranked, with the reason. A shortlist
-          without its discards reads as the only five platforms anyone thought
-          of; the reasons here are the ones a client asks for by name. */}
-      {discarded.length ? (
-        <div style={{ marginTop: 14, borderTop: "1px solid var(--z-sep)", paddingTop: 10 }}>
-          <div className="row" style={{ gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".04em", color: "var(--z-dark)" }}>Considered and set aside</span>
-            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
-              {discarded.length} {discarded.length === 1 ? "platform" : "platforms"}, each with the reason it is not ranked
-            </span>
-          </div>
-          {discarded.map((d, i) => (
-            <div key={`${d.platform}-${i}`} style={{ display: "flex", gap: 8, alignItems: "flex-start", padding: "6px 0", borderTop: i ? "1px solid var(--z-sep)" : 0 }}>
-              {asText(d.platform) ? <span className="chip" style={{ flexShrink: 0 }}>{asText(d.platform)}</span> : null}
-              <div style={{ flex: 1, minWidth: 0, fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55 }}>
-                {asText(d.reason)}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : null}
+      {/* "Considered and set aside" — MOVED TO THE PLATFORM PAGE, 2026-08-19.
+
+          Seven platforms, each with the reason it is not ranked, rendered
+          here under the opportunity strip on the OVERVIEW. The owner's third
+          round marks it as wrong-page content: it is a platform argument and
+          it belongs beside the platforms.
+
+          It was also being told twice. `platform.platform_story.discarded`
+          carries the same seven with its own wording, and rendered inside a
+          drawer on the page where the list belongs — so the copy a reader
+          met first was the one on the wrong page, and the one on the right
+          page was behind a click. The Platform page now shows its own list
+          openly; this one is gone rather than duplicated. */}
     </div>
   );
 }

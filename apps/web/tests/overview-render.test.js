@@ -333,13 +333,18 @@ test("D1 overview renders what the run promoted", { skip, concurrency: false }, 
       await page.close();
     });
 
-    await t.test("O-20 · the tile body and the reasoned discards render", async () => {
+    await t.test("O-20 · the tile body renders; the discards moved to Platform", async () => {
       const { page, errors } = await open({ variant: "unscored" });
       let text = await page.evaluate(() => document.body.innerText || "");
-      assert.ok(text.includes("Considered and set aside"),
-        "the platforms that were considered and not ranked are missing");
-      assert.ok(text.includes("Origination is the one layer"),
-        "a discard rendered without the reason it was discarded for");
+      /* SUPERSEDED 2026-08-19. "Considered and set aside" was asserted HERE
+         and the owner's third round marks it as wrong-page content: it is a
+         platform argument and belongs beside the platforms. It was also being
+         told twice — `platform_story.discarded` carries the same seven with
+         its own wording — so the copy a reader met first was the one on the
+         wrong page. See platform-techstack-render.test.js for the assertion
+         that it renders where it now belongs. */
+      assert.ok(!text.includes("Considered and set aside"),
+        "the discards are still on the Overview and belong on the Platform page");
       assert.ok(text.includes("Cells it addresses"),
         "the tile face does not say how much of the assessment the platform touches");
 

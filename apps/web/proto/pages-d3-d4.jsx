@@ -1398,8 +1398,19 @@ function ClientPlatform({ entity, run }) {
         <div className="card" style={{ flex: "1 1 300px", minWidth: 0, maxWidth: "100%" }}>
           <div className="row" style={{ marginBottom: 10, gap: 6 }}>
             <Icon name="shield" size={16} />
-            <div style={{ fontSize: 13, fontWeight: 600, flex: 1, minWidth: 0 }} className="txt-fit-1"
-              title={selKey ? `Readiness · ${selKey}` : ""}>Readiness · {selKey || "no platform"}</div>
+            {/* WRAPS. It was `txt-fit-1`, a one-line clamp, and the live app
+                showed "Readiness · MLflow (Databricks-…" with the rest of the
+                platform's name cut off. A card title is the one string on a
+                card that must survive: a reader who cannot tell WHICH
+                platform the gates below belong to cannot use them.
+
+                Two lines rather than none, because a genuinely long name
+                still should not push the gates off the fold — and the
+                `title` keeps the whole string reachable either way. */}
+            <div style={{ fontSize: 13, fontWeight: 600, flex: 1, minWidth: 0,
+                          lineHeight: 1.35, overflowWrap: "anywhere" }}
+                 className="txt-fit-2"
+                 title={selKey ? `Readiness · ${selKey}` : ""}>Readiness · {selKey || "no platform"}</div>
             <span style={{ fontSize: 10, color: "var(--z-muted)", flexShrink: 0 }}>click a row to drill in</span>
           </div>
           {[...prereqRows, ...otherPrereqRows].map((p, idx) => {
@@ -1891,6 +1902,62 @@ function ClientPlatform({ entity, run }) {
 
       {/* ── Transformation Roadmap ───────────────────────────────── */}
       <TransformationRoadmap entity={entity} selKey={selKey} area={area} />
+
+      {/* ── Considered and set aside ────────────────────────────────
+          MOVED HERE from the Overview, 2026-08-19, on the owner's third
+          round: it is a platform argument and it belongs beside the
+          platforms. A shortlist without its discards reads as the only five
+          platforms anyone thought of, and the reasons are the ones a client
+          asks for by name — but on the page where the platforms are.
+
+          Reads `platform_story.discarded`, which is this page's own list.
+          The Overview carried a second copy under `opportunity.discarded`
+          with its own wording, so the same analysis was told twice and the
+          copy a reader met first was on the wrong page. That one is gone.
+
+          Prose runs through `clientProse`, which drops bracketed evidence
+          ids: the live copy read "…alongside a credit union data warehouse
+          (E-CC-285, E-CC-204), so visualisation is…", and E-CC-285 is our
+          internal handle for a row in our own index. */}
+      <PlatformsSetAside entity={entity} />
+    </div>
+  );
+}
+
+function PlatformsSetAside({ entity }) {
+  const story = DMA.platformStoryFor ? DMA.platformStoryFor(entity.id) : null;
+  const rows = ((story && story.discarded) || [])
+    .filter(d => d && (pfText(d.platform) || pfText(d.reason)));
+  if (!rows.length) return null;
+  return (
+    <div className="card" style={{ marginTop: 16 }}>
+      <div className="card-head">
+        <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+          <Icon name="stack" size={14} />
+          <h3>Considered and set aside</h3>
+        </div>
+        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
+          {rows.length} {rows.length === 1 ? "platform" : "platforms"}, each with the reason it is not ranked
+        </span>
+      </div>
+      <div className="card-body">
+        {rows.map((d, i) => (
+          <div key={`${pfText(d.platform) || "p"}-${i}`}
+               style={{ display: "flex", gap: 10, alignItems: "flex-start",
+                        padding: "8px 0",
+                        borderTop: i ? "1px solid var(--z-sep)" : 0 }}>
+            {pfText(d.platform) ? (
+              <span className="chip" style={{ flexShrink: 0, maxWidth: 200 }}>
+                {areaLabel(d.platform) || pfText(d.platform)}
+              </span>
+            ) : null}
+            <div style={{ flex: 1, minWidth: 0, fontSize: 12,
+                          color: "var(--z-body)", lineHeight: 1.55 }}>
+              {clientProse(pfText(d.reason))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

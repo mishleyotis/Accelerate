@@ -1292,8 +1292,12 @@ function OpportunitySurfaceStrip({
     platform: pid,
     composite: num(score)
   }));
-  const discarded = (sec && sec.discarded || []).filter(d => d && (d.platform || d.reason));
-  if (!tiles.length && !discarded.length) return null;
+  /* `discarded` was read here for the "Considered and set aside" block that
+     now lives on the Platform page. The section still promotes it; this page
+     no longer renders it. */
+  /* The strip is the TILES now. `discarded` moved to the Platform page, so a
+     run with no tiles and only discards has nothing to draw here. */
+  if (!tiles.length) return null;
   const sel = open != null ? tiles[open] : null;
   const factorRows = t => (t.factors || []).filter(f => f && f.name).map(f => ({
     name: asText(f.name),
@@ -1637,54 +1641,7 @@ function OpportunitySurfaceStrip({
       flexShrink: 0,
       whiteSpace: "nowrap"
     }
-  }, num(c.current) == null ? null : `now ${fx(num(c.current), 1)}`, num(c.gap) == null ? null : ` · gap ${fx(num(c.gap), 1)}`)))) : null)) : null, discarded.length ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 14,
-      borderTop: "1px solid var(--z-sep)",
-      paddingTop: 10
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row",
-    style: {
-      gap: 8,
-      marginBottom: 6,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10.5,
-      fontWeight: 700,
-      letterSpacing: ".04em",
-      color: "var(--z-dark)"
-    }
-  }, "Considered and set aside"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-muted)"
-    }
-  }, discarded.length, " ", discarded.length === 1 ? "platform" : "platforms", ", each with the reason it is not ranked")), discarded.map((d, i) => /*#__PURE__*/React.createElement("div", {
-    key: `${d.platform}-${i}`,
-    style: {
-      display: "flex",
-      gap: 8,
-      alignItems: "flex-start",
-      padding: "6px 0",
-      borderTop: i ? "1px solid var(--z-sep)" : 0
-    }
-  }, asText(d.platform) ? /*#__PURE__*/React.createElement("span", {
-    className: "chip",
-    style: {
-      flexShrink: 0
-    }
-  }, asText(d.platform)) : null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      minWidth: 0,
-      fontSize: 11.5,
-      color: "var(--z-body)",
-      lineHeight: 1.55
-    }
-  }, asText(d.reason))))) : null);
+  }, num(c.current) == null ? null : `now ${fx(num(c.current), 1)}`, num(c.gap) == null ? null : ` · gap ${fx(num(c.gap), 1)}`)))) : null)) : null);
 }
 
 /* ── Top findings ─────────────────────────────────────────────────

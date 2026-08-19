@@ -1665,9 +1665,11 @@ function ClientPlatform({
       fontSize: 13,
       fontWeight: 600,
       flex: 1,
-      minWidth: 0
+      minWidth: 0,
+      lineHeight: 1.35,
+      overflowWrap: "anywhere"
     },
-    className: "txt-fit-1",
+    className: "txt-fit-2",
     title: selKey ? `Readiness · ${selKey}` : ""
   }, "Readiness \xB7 ", selKey || "no platform"), /*#__PURE__*/React.createElement("span", {
     style: {
@@ -2495,7 +2497,63 @@ function ClientPlatform({
     entity: entity,
     selKey: selKey,
     area: area
+  }), /*#__PURE__*/React.createElement(PlatformsSetAside, {
+    entity: entity
   }));
+}
+function PlatformsSetAside({
+  entity
+}) {
+  const story = DMA.platformStoryFor ? DMA.platformStoryFor(entity.id) : null;
+  const rows = (story && story.discarded || []).filter(d => d && (pfText(d.platform) || pfText(d.reason)));
+  if (!rows.length) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "stack",
+    size: 14
+  }), /*#__PURE__*/React.createElement("h3", null, "Considered and set aside")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, rows.length, " ", rows.length === 1 ? "platform" : "platforms", ", each with the reason it is not ranked")), /*#__PURE__*/React.createElement("div", {
+    className: "card-body"
+  }, rows.map((d, i) => /*#__PURE__*/React.createElement("div", {
+    key: `${pfText(d.platform) || "p"}-${i}`,
+    style: {
+      display: "flex",
+      gap: 10,
+      alignItems: "flex-start",
+      padding: "8px 0",
+      borderTop: i ? "1px solid var(--z-sep)" : 0
+    }
+  }, pfText(d.platform) ? /*#__PURE__*/React.createElement("span", {
+    className: "chip",
+    style: {
+      flexShrink: 0,
+      maxWidth: 200
+    }
+  }, areaLabel(d.platform) || pfText(d.platform)) : null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0,
+      fontSize: 12,
+      color: "var(--z-body)",
+      lineHeight: 1.55
+    }
+  }, clientProse(pfText(d.reason)))))));
 }
 
 /* ── Stair-step ladder ───────────────────────────────────────────────
