@@ -31,19 +31,15 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const { resolvePlaywright, startServer, settle, selectAudience,
-        assertNoStringifiedObjects } = require("./proto-page-harness");
+        assertNoStringifiedObjects,
+        resolveChromium, browserSkip } = require("./proto-page-harness");
 
 const ENTITY = "gate-credit-union";
 const RUN_ID = "DMA-ASM-GCU-20260819-0001";
 
 const pw = resolvePlaywright();
-const CHROME = process.env.CHROMIUM_PATH
-  || (fs.existsSync("/opt/pw-browsers")
-      ? fs.readdirSync("/opt/pw-browsers").filter((d) => d.startsWith("chromium"))
-          .map((d) => `/opt/pw-browsers/${d}/chrome-linux/chrome`)
-          .find((p) => fs.existsSync(p))
-      : null);
-const skip = (!pw || !CHROME) ? "playwright-core or Chromium is not resolvable here" : false;
+const CHROME = resolveChromium();
+const skip = browserSkip();
 
 const BOOT = {
   authed: true, role: "ADMIN", email: "dma@zennify.com", name: "QA",

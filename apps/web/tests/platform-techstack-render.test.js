@@ -30,7 +30,8 @@ const { test } = require("node:test");
 const assert = require("node:assert");
 const fs = require("node:fs");
 
-const { resolvePlaywright, startServer, settle } = require("./proto-page-harness");
+const { resolvePlaywright, startServer, settle,
+        resolveChromium, browserSkip } = require("./proto-page-harness");
 
 const ENTITY = "test-credit-union";
 const RUN_ID = "DMA-ASM-TCU-20260801-0001";
@@ -228,9 +229,8 @@ function payloadFor(page, audience) {
 /* ── the run ─────────────────────────────────────────────────────────── */
 
 const pw = resolvePlaywright();
-const CHROME = process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium";
-const skip = !pw ? "playwright-core not resolvable"
-  : !fs.existsSync(CHROME) ? `no chromium at ${CHROME}` : false;
+const CHROME = resolveChromium();
+const skip = browserSkip();
 
 async function openRoute(browser, base, tab, audience, steps) {
   const page = await browser.newPage({ viewport: { width: 1512, height: 1100 } });

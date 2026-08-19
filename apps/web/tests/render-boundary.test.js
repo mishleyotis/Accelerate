@@ -32,7 +32,8 @@ const fs = require("node:fs");
 // The server, the script list, the playwright lookup and the settle rule are
 // shared with tests/surface-contract.test.js — one harness, so the two suites
 // cannot end up driving two different apps.
-const { resolvePlaywright, startServer, settle } = require("./proto-page-harness");
+const { resolvePlaywright, startServer, settle,
+        resolveChromium, browserSkip } = require("./proto-page-harness");
 
 const ENTITY = "test-credit-union";
 
@@ -233,9 +234,8 @@ const CASES = [
 /* ── the run ─────────────────────────────────────────────────────────── */
 
 const pw = resolvePlaywright();
-const CHROME = process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium";
-const skip = !pw ? "playwright-core not resolvable"
-  : !fs.existsSync(CHROME) ? `no chromium at ${CHROME}` : false;
+const CHROME = resolveChromium();
+const skip = browserSkip();
 
 test("fault injection: one bad field costs one card, never the app",
      { skip, concurrency: false }, async (t) => {

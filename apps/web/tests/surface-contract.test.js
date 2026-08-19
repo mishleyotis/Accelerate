@@ -26,7 +26,8 @@ const { test } = require("node:test");
 const assert = require("node:assert");
 const path = require("node:path");
 
-const { JS_DIR, resolvePlaywright, startServer, settle, selectAudience } =
+const { JS_DIR, resolvePlaywright, startServer, settle, selectAudience,
+        resolveChromium } =
   require("./proto-page-harness");
 
 const ENTITY = "test-credit-union";
@@ -337,8 +338,7 @@ test("surfaces read the axis they name, and answer the control the reader presse
      { skip: pw ? false : "playwright-core not installed" }, async (t) => {
   const { chromium } = pw;
   const browser = await chromium.launch({
-    executablePath: process.env.CHROMIUM_PATH
-      || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+    executablePath: resolveChromium(),
     args: ["--no-sandbox"],
   });
   const { server, base } = await startServer(BOOT);

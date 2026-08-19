@@ -41,13 +41,73 @@ function resolvePlaywright() {
   const candidates = [
     process.env.PLAYWRIGHT_CORE,
     "playwright-core",
+    "playwright",
     path.join(WEB, "node_modules", "playwright-core"),
+    path.join(WEB, "node_modules", "playwright"),
     ...fsGlob("/tmp/claude-0", "scratchpad/node_modules/playwright-core"),
   ].filter(Boolean);
   for (const p of candidates) {
     try { return require(p); } catch { /* keep looking */ }
   }
   return null;
+}
+
+/* WHERE THE BROWSER IS, in one place.
+ *
+ * Nine files had grown their own copy of this, each reading only
+ * /opt/pw-browsers — the path this container happens to use. On a CI runner
+ * `npx playwright install` puts it under ~/.cache/ms-playwright instead, so
+ * every browser-driven suite in this directory resolved no Chromium there and
+ * SKIPPED. They reported `# pass 147` locally and enforced nothing on a pull
+ * request, which is the same shape as a Python suite skipping for want of a
+ * database: green meaning "not run", with nothing saying so.
+ */
+function resolveChromium() {
+  if (process.env.CHROMIUM_PATH && fs.existsSync(process.env.CHROMIUM_PATH)) {
+    return process.env.CHROMIUM_PATH;
+  }
+  // PLAYWRIGHT_BROWSERS_PATH is AUTHORITATIVE when set, the way Playwright
+  // itself treats it — an image that pins a browser directory means that
+  // directory, and searching past it would launch a different build from the
+  // one the environment installed.
+  const roots = process.env.PLAYWRIGHT_BROWSERS_PATH
+    ? [process.env.PLAYWRIGHT_BROWSERS_PATH]
+    : ["/opt/pw-browsers",
+       path.join(process.env.HOME || "/root", ".cache", "ms-playwright")];
+  for (const root of roots) {
+    let entries;
+    try { entries = fs.readdirSync(root); } catch { continue; }
+    for (const d of entries.filter((x) => x.startsWith("chromium"))) {
+      for (const exe of ["chrome-linux/chrome", "chrome-linux/headless_shell",
+                         "chrome-mac/Chromium.app/Contents/MacOS/Chromium"]) {
+        const p = path.join(root, d, exe);
+        if (fs.existsSync(p)) return p;
+      }
+    }
+  }
+  return null;
+}
+
+/* A browser suite that SKIPS must not read as a browser suite that passed.
+ *
+ * Returns the node:test `skip` value: `false` when the suite can run, a
+ * reason string when it cannot — except under CI, where it THROWS. On a
+ * developer's laptop without a browser, skipping is a convenience; on a pull
+ * request it is a check silently not running, and this repo has now paid for
+ * that twice in one week.
+ */
+function browserSkip() {
+  const ok = resolvePlaywright() && resolveChromium();
+  if (ok) return false;
+  const why = "playwright or Chromium is not resolvable here";
+  if (process.env.CI) {
+    throw new Error(
+      `${why}. In CI this is a FAILURE, not a skip: every browser-driven `
+      + `suite in apps/web/tests depends on it, and a skipped suite reports `
+      + `green while asserting nothing. Install it in the workflow `
+      + `(npx playwright install --with-deps chromium).`);
+  }
+  return why;
 }
 
 function scriptList() {
@@ -196,6 +256,7 @@ async function assertNoStringifiedObjects(page, where) {
     + `\n  ${found.join("\n  ")}`);
 }
 
-module.exports = { WEB, PUBLIC, JS_DIR, fsGlob, resolvePlaywright, scriptList,
+module.exports = { WEB, PUBLIC, JS_DIR, fsGlob, resolvePlaywright,
+                   resolveChromium, browserSkip, scriptList,
                    startServer, settle, selectAudience,
                    assertNoStringifiedObjects, STRINGIFIED };

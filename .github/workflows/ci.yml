@@ -207,7 +207,12 @@ jobs:
       # widening the install, so two route-wiring tests failed on
       # ModuleNotFoundError — a green suite locally and a red one here, which
       # is the same repo-versus-runtime gap Gate D exists for one layer up.
-      - run: pip install -q pytest openpyxl pg8000 -r apps/api/requirements.txt
+      # pypdf too, and deliberately: `test_fetch_pdf.py` gates on it with
+      # `pytest.importorskip`, so without it EIGHT tests over the PDF fetch
+      # path skip as one line. The connector ships pypdf
+      # (apps/mcp/requirements.txt), so a runner without it is testing a
+      # different program from the one that deploys.
+      - run: pip install -q pytest openpyxl pg8000 pypdf -r apps/api/requirements.txt
       # Gate G rides in here rather than in the gates job above. That job runs
       # bare `python3 script.py` against the stdlib and installs nothing, so a
       # step shelling out to pytest dies on `No module named pytest` — which
@@ -254,9 +259,26 @@ jobs:
           node-version: '22'
       - working-directory: apps/web
         run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      # THE BROWSER, and it is not optional here. Nine suites in
+      # apps/web/tests drive the compiled bundle through Chromium, and every
+      # one of them resolved none on this runner and SKIPPED — 147 tests
+      # reporting green locally and asserting nothing on a pull request,
+      # including the four visual-QA gates added for the round-3 brief. The
+      # harness now FAILS instead of skipping when CI is set, so this step
+      # going missing is a red build rather than a quiet one.
+      - working-directory: apps/web
+        # The full package only to FETCH the browser, at the same version
+        # playwright-core is pinned to: a driver and a browser build from
+        # different releases either hang on launch or crash mid-navigation,
+        # which is worse than not running at all because it looks like a
+        # product failure. `npx` keeps the installer out of the dependency
+        # tree; the runner the tests require is playwright-core.
+        run: npx --yes playwright-core@1.62.1 install --with-deps chromium
       - working-directory: apps/web
         run: npm run build:proto
       - working-directory: apps/web
+        env:
+          CI: "1"
         run: npm run test:web
 
   # The deep audit, run against the golden fixture rather than production, so a
