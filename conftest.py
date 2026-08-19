@@ -26,16 +26,22 @@ from __future__ import annotations
 
 import os
 
+import sys
+from pathlib import Path
+
 import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "apps" / "mcp"))
 
 _DSN = os.environ.get(
     "LOCAL_DATABASE_URL",
     "postgresql://postgres:local@localhost:5432/dma_insights")
 
-# Versions the fixtures pin runs to. v5.0 is the HISTORICAL lineage version
-# (charter adjudication, 2026-08-04); a run pinned to it must be insertable
-# for the cross-version diff tests to be reachable at all.
-_FK_VERSIONS = ("v7.0", "v5.0")
+# The version the DB-backed fixtures pin runs to, and only that one. v5.0 is
+# the HISTORICAL lineage version, but every test that reaches for it drives a
+# fake connection rather than the database, so seeding it here would add a row
+# no test needs and one more thing for a schema check to have an opinion about.
+_FK_VERSIONS = ("v7.0",)
 
 
 def _connect():
@@ -46,6 +52,25 @@ def _connect():
         host=u.hostname or "localhost", port=u.port or 5432,
         user=u.username or "postgres", password=u.password or "local",
         database=(u.path or "/dma_insights").lstrip("/"))
+
+
+def _seed_gate_registry(conn):
+    """`gate_results.gate_id` has an FK onto `gate_registry`, and the registry
+    is seeded at runtime by `ensure_gate_registry` rather than by a migration.
+
+    So on a fresh database the row set exists only after something has run the
+    connector. That made an api suite depend on an mcp suite having run first
+    — invisible for as long as this whole class of test was skipped in CI, and
+    the first thing to surface when it stopped being: `Key (gate_id)=(SG-S8)
+    is not present in table "gate_registry"`, on the run where the tests began
+    executing rather than skipping.
+
+    Calling production's own seeder, never a hand-written row list: a fixture
+    that wrote its own registry would let a gate pass here that the connector
+    does not actually publish."""
+    import dma_mcp.gates as gates
+    gates.ensure_gate_registry(conn)
+    conn.commit()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -68,5 +93,9 @@ def _catalogue_version_fk_targets():
         conn.commit()
     except Exception:
         conn.rollback()          # a schema without the table is not our call
+    try:
+        _seed_gate_registry(conn)
+    except Exception:
+        conn.rollback()
     finally:
         conn.close()

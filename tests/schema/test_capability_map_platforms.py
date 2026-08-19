@@ -130,10 +130,25 @@ def db():
 def test_every_loaded_version_carries_a_platform_vocabulary(db):
     """Not "some cells have platforms" — MOST do, in every generation. A
     version at zero is the signature of the alias miss this file exists to
-    prevent, and it is the shape three separate columns arrived in."""
+    prevent, and it is the shape three separate columns arrived in.
+
+    LOADED is the operative word, and it now says so in SQL. `ccg_versions`
+    holds two kinds of row: a catalogue the loader filled, and a bare version
+    identifier that exists so `runs.ccg_catalog_version` has an FK target on a
+    database no catalogue has been loaded into (the repo-root conftest writes
+    those, so the DB-backed suites can run in CI at all). A row with no
+    `cell_count` is the second kind — no cells were read, so "how many of them
+    carry a platform" is a question about nothing, and asserting on it fails
+    every fresh database while catching no alias miss.
+
+    Nothing is weakened. The defect this file exists for is `cell_count > 0`
+    with `platform_mapped_cells` at zero or half, and every such row is still
+    read here."""
     cur = db.cursor()
     cur.execute("""SELECT version, cell_count, platform_mapped_cells
-                     FROM ccg_versions ORDER BY version""")
+                     FROM ccg_versions
+                    WHERE cell_count IS NOT NULL AND cell_count > 0
+                    ORDER BY version""")
     for version, cells, mapped in cur.fetchall():
         assert mapped, f"{version}: {cells} cells, none carrying a platform"
         assert mapped > cells / 2, (
