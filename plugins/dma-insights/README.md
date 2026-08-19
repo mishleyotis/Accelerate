@@ -63,6 +63,25 @@ stand up another deployment, run the doctor against it before trusting it.
 
 ## Install
 
+**By upload (Claude Desktop · Cowork · claude.ai)** — one archive carries all
+six skills, all five agents, both commands and the connector declaration, so
+nothing is installed piecemeal. Package it so that `.claude-plugin/plugin.json`
+sits at the **root of the zip** (do not wrap the contents in a folder):
+
+```bash
+cd plugins/dma-insights
+zip -r ../../dma-insights-$(python3 -c "import json;print(json.load(open('.claude-plugin/plugin.json'))['version'])").zip . \
+  -x '*__pycache__*' '*.pyc' '.DS_Store'
+```
+
+Upload it under **Customize → Plugins → Upload plugin** (the uploader accepts
+`.zip` only; a `.plugin` extension is rejected). On enable you are prompted for
+the three configuration values below — the base URL is prefilled with
+production, the path token is stored in the OS keychain. The connector still
+needs a Google identity: on a machine without an authenticated `gcloud` the
+skills, agents and commands all load, and connector calls fail closed with a
+403 until one exists.
+
 **From GitHub**, which is what to use on a machine that does not have the repo:
 
 ```bash
@@ -181,8 +200,9 @@ cannot resolve at rest).
 | `package-vetter` | a client folder arrives, before anything is parsed | no |
 | `adversarial-verifier` | six pages already pass and the run is about to be believed | no |
 | `deployed-app-auditor` | after a deploy or a promotion; a surface is reported wrong in production | no |
+| `rectifier` | findings accumulate, a defect looks familiar, or a skill/agent file is about to be edited | no |
 
-The three read-only agents have `submit_page_payload`, `promote_run`,
+The four read-only agents have `submit_page_payload`, `promote_run`,
 `register_evidence` and `claim_run` denied by name. That is the plugin-level
 expression of the invariant that content enters through the connector and
 nowhere else.
