@@ -16,15 +16,37 @@ from pathlib import Path
 
 
 def roots(module_file: str) -> list[Path]:
+    """Highest priority first: the tracked source, then the staged copies."""
     here = Path(module_file).resolve()
-    out = [here.parent / "shared", here.parent.parent / "shared"]
+    out = []
     if len(here.parents) > 3:
         out.append(here.parents[3] / "packages" / "shared")
+    out += [here.parent / "shared", here.parent.parent / "shared"]
     return out
 
 
 def ensure(module_file: str) -> None:
-    """Put every existing candidate root on `sys.path`, image layout first."""
-    for cand in roots(module_file):
-        if cand.exists() and str(cand) not in sys.path:
-            sys.path.insert(0, str(cand))
+    """Lay the existing candidate roots on `sys.path` in PRIORITY order.
+
+    THE REPO COPY WINS WHERE THERE IS ONE. In the image there is no repo copy,
+    so the staged one is the only answer and nothing changes; in a checkout
+    the staged directory is a gitignored artefact that deploy.sh wrote, and it
+    can be an old copy of a file a human has since fixed.
+
+    Measured 2026-08-19, twice. The api's loader had this backwards and a
+    stale `abbreviations.py` answered a rule the tracked file plainly had.
+    Then this one did it again with `platform_fit.py`: a test failed with
+    "Candidate.__init__() got an unexpected keyword argument 'relevance'"
+    against a file that declares `relevance` on line 195.
+
+    Two mistakes, one shape. `insert(0, ...)` in order puts the LAST candidate
+    first, and "already on the path" is not the same as "on the path in the
+    right order" — a caller that had put the repo root on first was overtaken
+    by the staged one anyway. So: drop every occurrence, then lay them down.
+    """
+    wanted = [str(c) for c in roots(module_file) if c.exists()]
+    for path in wanted:
+        while path in sys.path:
+            sys.path.remove(path)
+    for path in reversed(wanted):
+        sys.path.insert(0, path)

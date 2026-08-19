@@ -266,9 +266,48 @@ def platform_fit(conn, run_id, candidates) -> dict:
             relevance=relevance))
 
     ranked = engine.rank(built, all_gap_cells=all_gaps)
+    # WHAT THE ENGINE ACTUALLY HAD TO WORK WITH.
+    #
+    # `issue_register_raw` and `techstack_raw` are both EMPTY for at least one
+    # promoted run. Empty is not neutral: with no issues every cell falls to
+    # the medium severity weight, and with no register no platform can earn
+    # the greenfield term or the incumbent discount. Returning the scores
+    # without saying so is the shape this build keeps removing — a term that
+    # could not run, reading as a term that ran and found nothing.
+    with_evidence = sum(1 for sid in cells if sid in strength)
+    context = {
+        "cells_scored": sum(1 for c in cells.values() if c["score"] is not None),
+        "cells_with_citable_evidence": with_evidence,
+        "issue_rows": len(sev),
+        "register_rows_absent": len(absent_areas),
+        "register_rows_held": len(held_areas),
+        "entity_subvertical_code": entity_code,
+        "notes": [],
+    }
+    if not sev:
+        context["notes"].append(
+            "The issue register is empty for this run, so every cell carries "
+            "the neutral severity weight. Severity is not flat because the "
+            "capabilities are equally urgent; it is flat because nothing was "
+            "linked.")
+    if not absent_areas and not held_areas:
+        context["notes"].append(
+            "The technology register is empty for this run, so no platform "
+            "can earn the greenfield term and no cell can be discounted for "
+            "an incumbent. Both read as zero, and zero here means unmeasured.")
+    if not with_evidence:
+        context["notes"].append(
+            "No cell on this run carries a citable evidence span, so every "
+            "opportunity is computed on the neutral prior.")
+    if entity_code is None:
+        context["notes"].append(
+            "The entity's sub-vertical did not resolve, so the vertical guard "
+            "kept every cell — not knowing who the client is is not grounds "
+            "for hiding scores, but it does mean relevance is unchecked.")
     return {
         "run_id": str(run_id),
         "platforms": ranked,
+        "context": context,
         # Named rather than dropped: a candidate whose area reaches no cell
         # this run serves scores zero, and a producer reading only the ranking
         # would think the engine disagreed with them rather than that the area

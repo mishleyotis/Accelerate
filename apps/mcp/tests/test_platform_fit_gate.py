@@ -190,3 +190,56 @@ def test_an_absent_readiness_is_green_because_nothing_was_claimed():
     to write green rather than to check."""
     from dma_mcp.fit import _readiness_token
     assert _readiness_token(None) == "green"
+
+
+# ── an empty register is unmeasured, not neutral ───────────────────────
+
+class _CtxCur(_Cur):
+    """Adds the two raw registers, so a test can make them empty on purpose."""
+
+    def __init__(self, cells, issues=None, stack=None, sub="CU"):
+        super().__init__(cells)
+        self.issues, self.stack, self.sub = issues or [], stack or [], sub
+
+    def execute(self, sql, args=None):
+        if "FROM entities" in sql or "e.sub_vertical" in sql:
+            self._rows = [(self.sub,)]
+        elif "issue_register_raw" in sql:
+            self._rows = [(p,) for p in self.issues]
+        elif "techstack_raw" in sql:
+            self._rows = [(p,) for p in self.stack]
+        elif "evidence_subcap_links" in sql:
+            self._rows = []
+        else:
+            super().execute(sql, args)
+
+
+def test_an_empty_issue_register_is_reported_not_silently_neutral():
+    """Both raw registers are EMPTY on a promoted run. With no issues every
+    cell falls to the neutral severity weight, and returning the scores
+    without saying so is a term that could not run reading as a term that ran
+    and found nothing."""
+    from dma_mcp import fit as fit_mod
+    got = fit_mod.platform_fit(_Conn(_CtxCur(CELLS)), "run", [
+        {"platform": "MuleSoft", "l3_area": "Integration", "alignment": 0.5}])
+    notes = " ".join(got["context"]["notes"])
+    assert got["context"]["issue_rows"] == 0
+    assert "issue register is empty" in notes
+    assert "flat because nothing was linked" in notes
+
+
+def test_an_empty_technology_register_says_zero_means_unmeasured():
+    from dma_mcp import fit as fit_mod
+    got = fit_mod.platform_fit(_Conn(_CtxCur(CELLS)), "run", [
+        {"platform": "MuleSoft", "l3_area": "Integration", "alignment": 0.5}])
+    assert "zero here means unmeasured" in " ".join(got["context"]["notes"])
+
+
+def test_the_context_counts_what_the_engine_actually_read():
+    from dma_mcp import fit as fit_mod
+    got = fit_mod.platform_fit(_Conn(_CtxCur(CELLS)), "run", [
+        {"platform": "MuleSoft", "l3_area": "Integration", "alignment": 0.5}])
+    ctx = got["context"]
+    assert ctx["cells_scored"] == len(CELLS)
+    assert ctx["cells_with_citable_evidence"] == 0
+    assert ctx["entity_subvertical_code"] == "CU"
