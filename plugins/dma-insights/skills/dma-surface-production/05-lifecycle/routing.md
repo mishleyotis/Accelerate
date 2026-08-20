@@ -23,6 +23,31 @@ method assumes per-claim verdicts exist, and it refuses input without them.
 The qa-overseer runs at the END of every production or repair, green or not
 — a green run with a buried defect still gets its finding recorded.
 
+## Dispatch mode — when the session has no Agent tool
+
+Trigger-fired sessions run under the subagent harness and carry no
+agent-launch tool (measured 2026-08-20: the first live synthesis firing
+correctly blocked rather than write six pages inline). The pipeline does
+not change — the dispatch mechanism does. Every routed stage runs through
+`scripts/agent_run.py --agent <name>` (prompt via `--prompt-file`), which
+starts the agent as a headless CLI session with its own front matter —
+model tier, effort, skills, tool bans — exactly as the Agent tool would.
+Same agents, same order, same refusals; writing a stage inline because
+dispatch feels slow is the improvisation this file forbids.
+
+Division of labour in dispatch mode: headless children reach the DMA
+connector natively but carry NO claude.ai enrichment connectors — those
+exist only in the top session, attached to the Routine. So connector-bound
+searches (Clay, Exa, Tavily, Vibe-Prospecting, Indeed) run only in the top
+session: a dispatched producer that needs one emits it in a
+`search_requests` array (query + falsifier pairing + facet — the preamble
+agent_run.py prepends demands this) instead of fabricating or skipping;
+the top session executes the requests through its real connectors,
+registers the evidence, logs the source outcomes in the yield ledger, and
+re-invokes the producer with the evidence ids. Enrichment honesty survives
+the hop: a search the top session refused or could not run is recorded
+not-run, never invented.
+
 ## Two tiers of producer, and which tier a request reaches
 
 There are thirty producing agents in two tiers, and the tier is chosen by

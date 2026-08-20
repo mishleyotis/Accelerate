@@ -83,6 +83,17 @@ signals fall back to Tavily/Exa site-scoped searches where it is not.
 † Clay via its claude.ai connector in the correct workspace; a refused
 grant records as not-run — never invented technographics (MEM-0082).
 
+## Dispatch mode and where the connectors actually live
+
+The claude.ai connector tools exist ONLY in the top trigger-fired session —
+headless children dispatched via `scripts/agent_run.py` (the fallback for
+sessions without an Agent tool) do not inherit them. The rule that keeps
+enrichment honest across that boundary lives in
+`skills/dma-surface-production/05-lifecycle/routing.md` § Dispatch mode:
+children emit `search_requests`, the top session runs them through the real
+connectors and re-invokes. The dma-insights connector itself reaches every
+layer (static /mcp + header token), children included.
+
 Per-facet source detail (tiers, ceilings, query shapes) stays where it
 lives: `02-inputs/enrichment_sources.json` and each page rulebook's
 "Enrichment pathways" section. This file maps surfaces to services; those

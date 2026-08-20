@@ -80,3 +80,87 @@ def test_the_one_precondition_is_named_in_the_module():
     src = (HERE / "drive_fetch.py").read_text()
     assert drive_fetch.SA_EMAIL in src
     assert "Share" in src and "Editor" in src
+
+# ── the first live run's three defects, pinned ────────────────────────────
+
+def test_pull_descends_into_workbook_subfolders(monkeypatch, tmp_path):
+    """Flat pull left both workbooks behind (2026-08-20): the scoring and
+    research workbooks live in subfolders and the package cannot be vetted
+    without them."""
+    tree = {
+        "root": [
+            {"id": "readme", "name": "README.md", "mimeType": "text/markdown"},
+            {"id": "scoring", "name": "03_scoring_workbook",
+             "mimeType": drive_fetch.FOLDER_MIME},
+        ],
+        "scoring": [
+            {"id": "wb", "name": "DMA_Scoring_Workbook_TROW.xlsx",
+             "mimeType": "application/octet-stream"},
+        ],
+    }
+    monkeypatch.setattr(drive_fetch, "_list_children",
+                        lambda tok, fid: tree.get(fid, []))
+    monkeypatch.setattr(
+        drive_fetch, "_download",
+        lambda tok, f, into: (into.mkdir(parents=True, exist_ok=True),
+                              (into / f["name"]).write_bytes(b"x"),
+                              f["name"])[-1])
+    got = drive_fetch._pull_tree("tok", "root", tmp_path)
+    assert got == 2
+    assert (tmp_path / "03_scoring_workbook"
+            / "DMA_Scoring_Workbook_TROW.xlsx").is_file()
+
+
+def test_memory_file_is_found_under_a_variant_slug(monkeypatch):
+    """A session pushed 't-rowe-price — synthesis memory.md'; the next
+    session asks with the display_id. Identity decides, not spelling —
+    otherwise the client ends up with two diverging memories."""
+    rows = [{"id": "m1", "name": "t-rowe-price — synthesis memory.md",
+             "mimeType": "text/markdown"},
+            {"id": "x", "name": "README.md", "mimeType": "text/markdown"}]
+    monkeypatch.setattr(drive_fetch, "_list_children", lambda tok, fid: rows)
+    hit = drive_fetch._find_memory_file("tok", "fid", "t-rowe-price-group-inc")
+    assert hit and hit["id"] == "m1"
+
+
+def test_memory_lookup_never_crosses_clients(monkeypatch):
+    rows = [{"id": "m1", "name": "houlihan-lokey — synthesis memory.md",
+             "mimeType": "text/markdown"}]
+    monkeypatch.setattr(drive_fetch, "_list_children", lambda tok, fid: rows)
+    assert drive_fetch._find_memory_file(
+        "tok", "fid", "t-rowe-price-group-inc") is None
+
+
+def test_push_memory_heals_a_variant_name(monkeypatch, tmp_path):
+    """When the found file's name differs from the canonical slug the push
+    renames it — one client, one memory file, forever."""
+    import io
+    import json
+    monkeypatch.setattr(drive_fetch, "MEMORY_DIR", tmp_path)
+    (tmp_path / "t-rowe-price-group-inc.md").write_text("# memory")
+    monkeypatch.setattr(drive_fetch, "_token", lambda: "tok")
+    monkeypatch.setattr(drive_fetch, "_find_client_folder",
+                        lambda tok, c: {"id": "fld", "name": "T. Rowe Price - DMA"})
+    monkeypatch.setattr(drive_fetch, "_find_memory_file",
+                        lambda tok, fid, c: {
+                            "id": "m1",
+                            "name": "t-rowe-price — synthesis memory.md"})
+    calls = []
+
+    class _Resp:
+        def __enter__(self):
+            return io.BytesIO(b"{}")
+
+        def __exit__(self, *a):
+            return False
+
+    def fake_req(tok, url, data=None, method="GET", ctype=None):
+        calls.append((method, url, data))
+        return _Resp()
+
+    monkeypatch.setattr(drive_fetch, "_req", fake_req)
+    assert drive_fetch.push_memory("t-rowe-price-group-inc") == 0
+    patches = [c for c in calls if c[0] == "PATCH"]
+    assert len(patches) == 2  # content update + rename
+    rename = json.loads(patches[1][2])
+    assert rename["name"] == "t-rowe-price-group-inc — synthesis memory.md"

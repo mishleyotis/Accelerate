@@ -1,7 +1,7 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "0.6.2",
+  "version": "0.6.4",
   "description": "The six Digital Maturity Assessment skills, sixteen DMA agents and the remote DMA Insights MCP connector (33 tools) as one installable unit. All 53 mapped surfaces route to per-page producers, an adversarial finding-challenger, a page-consolidator and a qa-overseer that writes the findings memory; hooks refuse a doomed submit before the network sees it. Ships gates AG-11/12 and CG-26 through CG-31, per-surface anti-pattern rulebooks with enrichment pathways, and the shared platform-fit engine.",
   "author": {
     "name": "Zennify \u2014 DMA Insights build"

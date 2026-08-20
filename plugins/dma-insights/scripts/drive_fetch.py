@@ -65,6 +65,7 @@ EXPORTS = {
     "application/vnd.google-apps.presentation": ("application/pdf", ".pdf"),
 }
 FOLDER_MIME = "application/vnd.google-apps.folder"
+MEMORY_SUFFIX = " — synthesis memory.md"
 
 
 def _token() -> str:
@@ -109,20 +110,36 @@ def _slug(name: str) -> str:
     return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", name.lower())).strip("-")
 
 
+def _norm(name: str) -> str:
+    """Client identity slug: the intake tree names folders 'Client Name -
+    DMA' (measured 2026-08-20, 178 folders), and serving display_ids carry
+    legal-form tails the folder omits ('-group-inc'). Strip the DMA suffix
+    tokens and the noise words, keep the identity."""
+    toks = [t for t in _slug(name).split("-")
+            if t not in ("dma", "v2", "inc", "group", "llc", "corp", "co")]
+    return "-".join(toks)
+
+
 def _find_client_folder(tok: str, client: str) -> dict:
-    want = _slug(client)
+    want = _norm(client)
     folders = [f for f in _list_children(tok, INTAKE_FOLDER_ID)
                if f["mimeType"] == FOLDER_MIME]
-    exact = [f for f in folders if _slug(f["name"]) == want]
+    exact = [f for f in folders if _norm(f["name"]) == want]
     partial = [f for f in folders
-               if want in _slug(f["name"]) or _slug(f["name"]) in want]
+               if _norm(f["name"]).startswith(want + "-")
+               or want.startswith(_norm(f["name"]) + "-")]
     hit = exact or partial
     if len(hit) == 1:
         return hit[0]
+    if len(hit) > 1:
+        names = " | ".join(sorted(f["name"] for f in hit))
+        raise SystemExit(
+            f"multiple client folders matching {client!r}: {names} — "
+            f"duplicate folders are adjudicated by a human, never guessed")
     names = ", ".join(sorted(f["name"] for f in folders)) or "none visible"
     raise SystemExit(
-        f"{'no' if not hit else 'multiple'} client folder(s) matching "
-        f"{client!r} under the intake tree — folders visible: {names}")
+        f"no client folder matching {client!r} under the intake tree — "
+        f"folders visible: {names}")
 
 
 def check() -> int:
@@ -150,34 +167,84 @@ def check() -> int:
     return 0
 
 
+def _download(tok: str, f: dict, into: Path) -> str:
+    if f["mimeType"] in EXPORTS:
+        mime, ext = EXPORTS[f["mimeType"]]
+        url = (f"{API}/files/{f['id']}/export?"
+               + urllib.parse.urlencode({"mimeType": mime}))
+        name = f["name"] + ext
+    else:
+        url = f"{API}/files/{f['id']}?alt=media&supportsAllDrives=true"
+        name = f["name"]
+    with _req(tok, url) as resp, open(into / name, "wb") as out:
+        while True:
+            chunk = resp.read(1 << 20)
+            if not chunk:
+                break
+            out.write(chunk)
+    return name
+
+
+def _pull_tree(tok: str, folder_id: str, dest: Path, depth: int = 0) -> int:
+    """Recursive: the intake packages keep their workbooks in subfolders
+    (03_scoring_workbook/, 02_research_workbook/ — measured on the first
+    live run, 2026-08-20, when a flat pull left both workbooks behind and
+    the package could not be vetted). Depth-capped against cycles."""
+    if depth > 6:
+        return 0
+    dest.mkdir(parents=True, exist_ok=True)
+    got = 0
+    for f in _list_children(tok, folder_id):
+        if f["mimeType"] == FOLDER_MIME:
+            got += _pull_tree(tok, f["id"], dest / f["name"], depth + 1)
+        else:
+            _download(tok, f, dest)
+            got += 1
+    return got
+
+
+def _find_memory_file(tok: str, folder_id: str, client: str) -> dict | None:
+    """The client's memory file, whatever slug it was pushed under. One
+    session pushed 't-rowe-price — synthesis memory.md' while the next
+    looks for 't-rowe-price-group-inc — …'; identity, not spelling, must
+    decide, or the client ends up with two diverging memories."""
+    want = _norm(client)
+    for f in _list_children(tok, folder_id):
+        if f["mimeType"] == FOLDER_MIME or not f["name"].endswith(MEMORY_SUFFIX):
+            continue
+        have = _norm(f["name"][: -len(MEMORY_SUFFIX)])
+        if have == want or have.startswith(want) or want.startswith(have):
+            return f
+    return None
+
+
 def pull(client: str) -> int:
     tok = _token()
     folder = _find_client_folder(tok, client)
     dest = PACKAGES_DIR / _slug(folder["name"])
-    dest.mkdir(parents=True, exist_ok=True)
-    got, skipped = 0, []
-    for f in _list_children(tok, folder["id"]):
-        if f["mimeType"] == FOLDER_MIME:
-            skipped.append(f"{f['name']}/ (subfolder — flat pull only)")
-            continue
-        if f["mimeType"] in EXPORTS:
-            mime, ext = EXPORTS[f["mimeType"]]
-            url = (f"{API}/files/{f['id']}/export?"
-                   + urllib.parse.urlencode({"mimeType": mime}))
-            name = f["name"] + ext
+    got = _pull_tree(tok, folder["id"], dest)
+    print(f"pulled {got} files from {folder['name']!r} -> {dest} (recursive)")
+    # Land the client's memory beside the packages so the session never has
+    # to guess the local path: canonical is /root/.dma/clients/<client>.md
+    # under the slug of the NAME THE CALLER USED (the display_id).
+    mem = _find_memory_file(tok, folder["id"], client)
+    if mem:
+        local = MEMORY_DIR / f"{_slug(client)}.md"
+        if local.is_file():
+            print(f"memory: local {local} already exists — kept; the Drive "
+                  f"copy is in the package dir")
         else:
-            url = f"{API}/files/{f['id']}?alt=media&supportsAllDrives=true"
-            name = f["name"]
-        with _req(tok, url) as resp, open(dest / name, "wb") as out:
-            while True:
-                chunk = resp.read(1 << 20)
-                if not chunk:
-                    break
-                out.write(chunk)
-        got += 1
-    print(f"pulled {got} files from {folder['name']!r} -> {dest}")
-    for s in skipped:
-        print(f"  skipped: {s}")
+            MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+            pulled_copy = dest / mem["name"]
+            if pulled_copy.is_file():
+                local.write_bytes(pulled_copy.read_bytes())
+            else:
+                _download(tok, mem, MEMORY_DIR)
+                (MEMORY_DIR / mem["name"]).rename(local)
+            print(f"memory: landed {mem['name']!r} -> {local}")
+    else:
+        print("memory: none in the client folder yet — "
+              "client_memory.py init creates the skeleton")
     return 0 if got else 1
 
 
@@ -186,19 +253,29 @@ def push_memory(client: str) -> int:
     local = MEMORY_DIR / f"{slug}.md"
     if not local.is_file():
         raise SystemExit(f"no local memory file at {local} — "
-                         f"client_memory.py init writes it")
+                         f"drive_fetch.py pull lands an existing one there, "
+                         f"client_memory.py init writes a new skeleton")
     tok = _token()
     folder = _find_client_folder(tok, client)
-    remote_name = f"{slug} — synthesis memory.md"
-    existing = [f for f in _list_children(tok, folder["id"])
-                if f["name"] == remote_name]
+    remote_name = f"{slug}{MEMORY_SUFFIX}"
+    existing = _find_memory_file(tok, folder["id"], client)
     body = local.read_bytes()
     if existing:
-        url = (f"{UPLOAD}/files/{existing[0]['id']}?uploadType=media"
+        url = (f"{UPLOAD}/files/{existing['id']}?uploadType=media"
                f"&supportsAllDrives=true")
         with _req(tok, url, data=body, method="PATCH",
                   ctype="text/markdown") as resp:
             json.load(resp)
+        if existing["name"] != remote_name:
+            # heal a file pushed under a variant slug: one client, one
+            # memory file, canonical name = the display_id's slug
+            meta = json.dumps({"name": remote_name}).encode()
+            with _req(tok, f"{API}/files/{existing['id']}"
+                           f"?supportsAllDrives=true", data=meta,
+                      method="PATCH", ctype="application/json") as resp:
+                json.load(resp)
+            print(f"memory renamed in Drive: {existing['name']!r} -> "
+                  f"{remote_name!r}")
         print(f"memory updated in Drive: {remote_name!r} in {folder['name']!r}")
     else:
         meta = json.dumps({"name": remote_name,
