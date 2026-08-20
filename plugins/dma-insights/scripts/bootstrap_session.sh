@@ -135,15 +135,31 @@ if [ ! -f "$REPO_DIR/.claude-plugin/marketplace.json" ]; then
   log "no marketplace manifest at $REPO_DIR/.claude-plugin/marketplace.json —"
   log "skipping plugin install rather than registering a dead source"
 elif command -v claude >/dev/null 2>&1; then
-  claude plugin marketplace add "$REPO_DIR" >/dev/null 2>&1 \
-    || claude plugin marketplace update zennify-dma >/dev/null 2>&1 \
-    || log "marketplace add/update failed"
+  # THE ||-CHAIN TRAP (measured 2026-08-20, five consecutive dead firings):
+  # `marketplace add` on an already-registered marketplace exits 0 WITHOUT
+  # refreshing, and `plugin install` on an already-installed plugin exits 0
+  # WITHOUT updating — so on a container restored from a snapshot the whole
+  # chain short-circuits on success-shaped no-ops and the session starts on
+  # the snapshot's ancient plugin (0.2.0 observed), which fails STEP 0's
+  # version floor and kills the firing in minutes. Update steps therefore
+  # run UNCONDITIONALLY, and the installed version is verified against the
+  # repo's own plugin.json at the end — a mismatch is logged loudly.
+  claude plugin marketplace add "$REPO_DIR" >/dev/null 2>&1 || true
+  claude plugin marketplace update zennify-dma >/dev/null 2>&1 \
+    || log "marketplace update failed"
   INSTALL_ARGS=(--scope user --config "mcp_base_url=$MCP_URL" --config "repo_root=$REPO_DIR")
-  claude plugin install dma-insights@zennify-dma "${INSTALL_ARGS[@]}" >/dev/null 2>&1 \
-    || claude plugin update dma-insights@zennify-dma >/dev/null 2>&1 \
-    || log "plugin install failed"
+  claude plugin install dma-insights@zennify-dma "${INSTALL_ARGS[@]}" >/dev/null 2>&1 || true
+  claude plugin update dma-insights@zennify-dma >/dev/null 2>&1 \
+    || log "plugin update failed"
   claude plugin enable dma-insights@zennify-dma >/dev/null 2>&1 || true
-  log "plugin state: $(claude plugin list 2>/dev/null | grep -A2 'dma-insights@zennify-dma' | tr '\n' ' ' | tr -s ' ')"
+  WANT="$(python3 -c "import json;print(json.load(open('$REPO_DIR/plugins/dma-insights/.claude-plugin/plugin.json'))['version'])" 2>/dev/null)" || WANT=""
+  HAVE="$(claude plugin list 2>/dev/null | grep -A2 'dma-insights@zennify-dma' | grep -o 'Version: [0-9.]*' | head -1 | cut -d' ' -f2)" || HAVE=""
+  if [ -n "$WANT" ] && [ "$HAVE" != "$WANT" ]; then
+    log "PLUGIN VERSION MISMATCH: installed ${HAVE:-none}, repo ships $WANT —"
+    log "the session will fail its version floor; plugin update above must be fixed"
+  else
+    log "plugin at ${HAVE:-unknown} (repo ships ${WANT:-unknown})"
+  fi
 else
   log "claude CLI not found — cannot install the plugin"
 fi
