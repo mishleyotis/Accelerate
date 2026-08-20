@@ -159,3 +159,53 @@ def test_exclusions_match_the_api_never_served_allowlist(census):
     assert census_side == api_side, (
         f"excluded-surface drift: census says {sorted(census_side)}, "
         f"API NEVER_SERVED says {sorted(api_side)}")
+
+
+def test_every_agent_is_reachable_from_the_routing_authority():
+    """routing.md is where the SessionStart hook points every session, and
+    what the routine prompt calls the routing authority. An agent the file
+    never names is one no session will ever dispatch — it ships, it is
+    listed in the manifest, and it is dead.
+
+    Measured 2026-08-20: nine of forty-seven were absent, including all
+    three pre-submit checkers (evidence integrity, numeric reconciliation,
+    exclusion boundary) that the routine prompt itself instructs sessions to
+    run. The prompt named them; the authority it pointed at did not.
+    """
+    import yaml
+
+    agents_dir = PLUGIN / "agents"
+    routing = (PLUGIN / "skills" / "dma-surface-production" /
+               "05-lifecycle" / "routing.md").read_text()
+    names = []
+    for f in sorted(agents_dir.rglob("*.md")):
+        front = f.read_text().split("---", 2)[1]
+        names.append(yaml.safe_load(front)["name"])
+    missing = [n for n in names if n not in routing]
+    assert not missing, (
+        f"{len(missing)} of {len(names)} agents are not named in routing.md, "
+        f"so no session can route to them: {missing}")
+
+
+def test_every_agent_front_matter_parses_as_yaml():
+    """A description carrying an unquoted colon ('Read-only: it repairs
+    nothing') makes YAML read a mapping where a sentence was meant, and the
+    agent's front-matter does not parse at all. Four agents shipped that way
+    until 2026-08-20; string-splitting checks could not see it, so this one
+    uses the parser."""
+    import yaml
+
+    broken = []
+    for f in sorted((PLUGIN / "agents").rglob("*.md")):
+        txt = f.read_text()
+        if not txt.startswith("---"):
+            broken.append((f.name, "no front-matter"))
+            continue
+        try:
+            d = yaml.safe_load(txt.split("---", 2)[1])
+        except Exception as e:                               # noqa: BLE001
+            broken.append((f.name, f"{type(e).__name__}: {str(e)[:80]}"))
+            continue
+        if not isinstance(d, dict) or "name" not in d or "description" not in d:
+            broken.append((f.name, "front-matter lacks name/description"))
+    assert not broken, f"agent front-matter does not parse: {broken}"

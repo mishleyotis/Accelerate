@@ -161,6 +161,54 @@ abbreviation guesses, and a guessed agent name is a route to nothing.
 | context / D5 | `context-surface-producer` | `context-timeline-producer`, `context-risk-producer`, and `context-sentiment-producer` once O9 exists |
 | techstack / D6 | `techstack-surface-producer` | `techstack-register-producer`, then `techstack-layers-producer`; the T3 detail pass stays with the page producer |
 
+## The three checkers, and where each one runs
+
+They are not optional and they are not interchangeable. Each answers a
+question the producers cannot answer about themselves, and each runs at a
+fixed point — a checker invoked after promotion is a post-mortem, not a
+gate.
+
+| checker | the question | runs |
+|---|---|---|
+| `evidence-integrity-checker` | does every cited id resolve, belong to this entity and this run, and carry a verbatim 50–500 character excerpt? | after any producer touches `heatmap.cell_evidence`, `heatmap.evidence` or `heatmap.evidence_age`, and before promotion. A `foreign` id HALTS production (invariant 4) |
+| `numeric-reconciliation-checker` | does every figure rendered twice agree, at the 0.05 grain tolerance? | after the page-consolidator, before submit — the composite against the grid, the landscape counts against the register, the tiles against the engine |
+| `exclusion-boundary-auditor` | does the customer projection carry anything internal — probe ladders, tiers, cap vocabulary, contact routes, reasoning traces, cohort entity ids? | before submit on any page, and again after promotion before a client link is shared |
+
+All three are READ-ONLY by construction: they carry no write tool and no
+submit or promote tool, so a checker cannot repair what it judges. Route
+the repair to the surface's own producer.
+
+## The enrichment tier — plan, then fetch, then audit the record
+
+`enrichment-planner` reads `list_enrichment_gaps` and returns a ranked
+worklist with a pathway per gap. The two specialists execute one pathway
+each, and neither mints an evidence id — they return candidates for the
+top session to register:
+
+| you need | route to |
+|---|---|
+| which gaps are worth closing, by what route, in what order | `enrichment-planner` |
+| a Clay call plan or a machine technographic scan | `enrichment-connector-specialist` |
+| a web pathway, a contradictory source, or an empty state that must be earned | `enrichment-web-specialist` |
+| proof that every facet's attempt is recorded with the outcome it actually had | `enrichment-ledger-auditor` |
+
+The ledger auditor is the honesty check on the other three: it holds
+`list_enrichment_gaps` beside each section's `enrichment_status` and
+reports a facet that never ran but reads as though it found nothing
+(MEM-0082). It is read-only.
+
+## The learning pair — never invoked from a production session
+
+`learning-grader` and `learning-testgen` belong to the weekly rectifier,
+not to synthesis. The grader scores a proposed refinement against
+`skills/dma-rectifier/assets/learning_rubric.json` at a 0.75 admission
+threshold; the testgen writes 5–15 adversarial and regression cases per
+admitted refinement, every one able to FAIL. Both are independent of the
+fixer BY CONSTRUCTION — no write tool, no connector write tool — so
+neither can edit what it grades or cases. A production session that finds
+itself reaching for them is repairing the toolchain mid-run, which is the
+rectifier's job and nobody else's.
+
 ## Everything else
 
 | you need | route to |
