@@ -111,7 +111,21 @@ general opinion about which fields matter.
 1. `list_enrichment_gaps(run_id)` — the worklist itself. Read every row's
    `kind`, `path`, `reason`, `doc` and `closes_with`. The `closes_with` string
    is the contract's own instruction and it differs by kind; do not paraphrase it
-   into your plan, carry it.
+   into your plan, carry it. Four things about the response you must not
+   re-derive. It is **already ordered** to be workable: `must_present_member`
+   first, then `empty_required`, then `empty_optional`, and `conditional`
+   **last on purpose** — *"it is the only kind whose correct resolution is often
+   'do nothing', so it must never sit above a gap that genuinely needs work"* —
+   with a resolved routine attempt floated to the top of its own kind. It is
+   computed from the **STAGED** submissions, never the served projection,
+   because *"a gap list built from what the API returns would report the
+   redaction machinery working correctly as content the producer failed to
+   write"*. A row may carry an `enrichment_attempt` — what the hourly routine
+   already tried for that exact path — and the top-level
+   `with_resolved_value`, `attempted_by_routine` and `never_attempted` counters
+   tell you how much of the list has history behind it before you rank anything.
+   And a run with nothing staged returns an empty list with a `note` saying so;
+   report that note rather than presenting an empty worklist as a complete run.
 2. `/home/user/Accelerate/packages/shared/enrichment_gaps.py` — **how the list
    is computed**, which is the only way to read it correctly. Four things live
    there and nowhere else: the four-way distinction the module turns on
@@ -355,9 +369,11 @@ Each is phrased so a wrong answer is visible rather than arguable.
   (a below-gate pillar from O10's `note`, an open rejection, a memory finding)?
   If you invented a row from the contract because it "should" be there, drop it —
   the worklist is computed from what is staged, and a plan that ranges beyond it
-  is describing a different run. Conversely: did you check each row against
-  `attempts_for_run` history, so you are not sending someone after a value the
-  hourly routine already resolved, or down a route it already recorded as failed?
+  is describing a different run. Conversely: did you read each row's
+  `enrichment_attempt`, so you are not sending someone after a value the hourly
+  routine already resolved, or down a route it already recorded as failed? Do
+  your plan's counts agree with the response's own `with_resolved_value`,
+  `attempted_by_routine` and `never_attempted`?
 - **The four-way distinction.** For every field you are about to call a gap: is
   it **silent**, or is it **held** — null or quarantined **with a reason**? A held
   field is not a gap; it is *"a finding, and the reason is the content"*, and
@@ -510,8 +526,10 @@ Return to your caller, and nothing else:
    producer named. `closure_test` is the checkable statement of what closes it —
    the artefact, in the shape H3's `closure_condition` requires, not "find more
    evidence". `blocks_what` names what the page cannot say until this closes.
-   `prior_attempt` carries what `attempts_for_run` already holds, resolved or
-   unresolved, so nobody repeats a dead route.
+   `prior_attempt` carries the row's own `enrichment_attempt`, resolved or
+   unresolved, so nobody repeats a dead route — and a RESOLVED one is a **lead,
+   not a promotion**: the value still has to be registered and submitted through
+   the connector.
 3. **The honest-absence list**, separately and never merged into item 2: one row
    per gap that nothing can close, each with its **class** from the table above,
    the closure condition to state on the surface, and the exact field the run

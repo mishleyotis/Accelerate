@@ -56,7 +56,12 @@ file is that somewhere.
 
 - **research log** — every enrichment search: facet, query, date, tier of
   what came back, or the empty result. The enrichment ledger in the payload
-  is the client-facing digest; this is the working record behind it.
+  is the client-facing digest; this is the working record behind it. Each
+  search ALSO logs its source and outcome to the shared yield ledger
+  (`scripts/source_yield.py log`) — taxonomy only — so the trend that
+  worked here opens first on the next client, and a source rich twice but
+  undeclared becomes a register candidate. Client story here, cross-client
+  yield there; neither substitutes for the other.
 - **package synthesis** — what the DMA package itself established: workbook
   shape, scored-cell count, sub-vertical scope, register rows, quarantines.
   Written once at vetting, corrected as parsing learns more.

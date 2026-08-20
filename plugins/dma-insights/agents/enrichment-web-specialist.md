@@ -172,9 +172,16 @@ in this discipline, not optional.
 12. `search_findings` for the surface, for `W6`, `MEM-0086`, `MEM-0011` and the
     gap's own field name, and `get_client_state` for this client's enrichment
     drift — a prior run may already have established what you are about to search
-    for. `attempts_for_run` history reaches the worklist for the same reason: an
-    **unresolved** attempt is the more valuable of the two on a second pass,
-    because it says which route was tried and why it failed.
+    for. Each row `list_enrichment_gaps` returns may carry an
+    `enrichment_attempt` — what the hourly routine already tried for that exact
+    path — and the response's `with_resolved_value`, `attempted_by_routine` and
+    `never_attempted` counters say how much of the list has history behind it.
+    A **RESOLVED** attempt saves the search and carries the value's provenance
+    (it is a lead, not a promotion — the producer still registers and submits
+    it). An **UNRESOLVED** attempt is the more valuable of the two on a second
+    pass, because it says which route was tried and why it failed, so you
+    neither repeat a dead search nor mistake an unattempted field for an
+    exhausted one.
 
 ## THE CONTRACT — what the specification requires of the surfaces you feed
 

@@ -692,6 +692,15 @@ defect. Per `is_thin_evidence` cell, in order, every rung recorded in the
 client's memory file (05-lifecycle/client-memory.md, "thin subcap
 resolution"):
 
+**Which cells first — impact order, not workbook order.** Thin cells are
+worked in the order their thinness costs the client: cells flagged
+`is_primary_gap`, then cells driving a focus area or a platform tile's
+`top_contributors`, then cells inside an alerted category, then the rest by
+severity. A session with tokens for six cells spends them on the six the
+pages actually argue from. Before ANY search: read the client memory file's
+research log — a search it already records, positive or empty, is never
+re-run.
+
 1. **Re-match before re-search.** Run `scripts/subcap_match.py rank` over
    the run's already-registered evidence: thinness is often mis-filing, not
    absence — the item that grounds this cell exists and is cited on its
@@ -699,10 +708,28 @@ resolution"):
    terms to the feedback ledger (`subcap_match.py learn`) and the story to
    the memory file. An AMBIGUOUS verdict is never auto-assigned — it goes to
    the producer with the contenders listed.
-2. **The enrichment pathways for this cell's facet** (the page pack's
-   Information sources table): each search logged with query and date in the
-   research log, empty results included. New material enters ONLY through
-   `register_evidence` with a verbatim 50–500 char excerpt.
+2. **Subcap-specific enrichment, never generic (owner, 2026-08-20).** The
+   query names THIS subcap's own artefact vocabulary — the nouns of its
+   catalogue name and description ("model registry", "challenger testing"),
+   never the category's ("model governance") and never the pillar's. Open
+   sources in measured-yield order: `scripts/source_yield.py rank --facet
+   <facet> --family <subcap family>` — the source that paid before is opened
+   first, which is most of the token discipline. **Every corroborating
+   search is PAIRED with its falsifier** (the R-Layer step B rule): the
+   search that would prove the capability present travels with the one that
+   would prove it absent, stalled or criticised — "[entity] [artefact]
+   implemented" beside "[entity] [artefact] delay OR failure OR abandoned" —
+   and BOTH outcomes are recorded. Evidence that survives its own falsifier
+   is what resolution means; a cell fattened only with corroboration is
+   thinner than it looks. New material enters ONLY through
+   `register_evidence` with a verbatim 50–500 char excerpt, and every search
+   logs twice: query and date in the client memory research log, source and
+   outcome (`rich · thin · empty`) in the shared yield ledger
+   (`source_yield.py log`) — the trend that worked joins the learning loop,
+   and a source rich twice but undeclared surfaces through
+   `source_yield.py candidates` for the rectifier to promote into
+   `02-inputs/enrichment_sources.json`. That is how the source list keeps
+   expanding without a session ever inventing a tier.
 3. **The alert, when 1 and 2 leave it thin.** State the deficit
    (`evidence_count`), the queries run, and a `closure_condition` naming the
    internal artefact that would settle it — the Baxter pattern below. The
@@ -711,7 +738,9 @@ resolution"):
 
 What resolution never is: lowering the thinness bar, widening an excerpt's
 meaning, or citing a generic source against a specific subcap (R5-2). The
-thin-evidence rule stands — one specific item above T3 is not thin.
+thin-evidence rule stands — one specific item above T3 is not thin. And a
+contradicting result is never suppressed to keep a resolution: it registers
+like anything else and the cell's story carries it.
 
 ### Baxter positive pattern
 
