@@ -5,12 +5,17 @@ the credential. No token is printed, echoed, logged, or written by any
 script in this plugin — `doctor.py` and `mcp_auth_headers.sh` both follow
 it, and a change that breaks it fails review.
 
-## 1. The capability-path token (`user_config.mcp_path_token`)
+## 1. The capability-path token (the `X-DMA-Path-Token` header)
 
-**What it is.** The URL path segment the connector is mounted under:
-`{mcp_base_url}/mcp/{token}`. Since 2026-08-16 it is a capability only —
-Cloud Run IAM (`roles/run.invoker`, `domain:zennify.com` plus the deployer
-service account) is the identity layer, so the token alone opens nothing.
+**What it is.** The capability the connector is mounted under. Since
+2026-08-16 it is a capability only — Cloud Run IAM (`roles/run.invoker`,
+`domain:zennify.com` plus the deployer service account) is the identity
+layer, so the token alone opens nothing. Since 2026-08-20 it travels as
+the `X-DMA-Path-Token` HEADER on the static `{mcp_base_url}/mcp` URL
+(owner: install must be automatic, all tools availed — a token embedded
+in the URL made every install sit MCP-pending until a human pasted it,
+and a URL is also what an access log or an xtrace prints). The
+URL-segment form `/mcp/{token}` still works for back-compat.
 
 **Where it lives.**
 - Source of record: Secret Manager, secret `dmai-mcp-path-token`, project
@@ -20,10 +25,11 @@ service account) is the identity layer, so the token alone opens nothing.
   read once at process boot and baked into the route. Rotation therefore
   requires a new secret version AND a new service revision, then every
   consumer updates.
-- Client side (this plugin): stored in the OS keychain by Claude Code when
-  the user fills the `mcp_path_token` config field (`sensitive: true` in the
-  manifest — never in settings.json). Interpolated into the connector URL by
-  `.mcp.json` at connection time.
+- Client side (this plugin): no config field at all. At connection time
+  `scripts/mcp_auth_headers.sh` obtains it by rung — `DMA_MCP_PATH_TOKEN`
+  env override, the 600-mode cache file `/root/.dma/pathtok` that
+  `bootstrap_session.sh` lands, else Secret Manager REST with an access
+  token from the same identity rungs — and sends it as the header.
 - CLI side (`scripts/dma_connector.py` in the repo): read from Secret
   Manager at call time (`gcloud secrets versions access latest
   --secret=dmai-mcp-path-token`), so the CLI follows a rotation

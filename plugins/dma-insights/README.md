@@ -56,7 +56,7 @@ the connector's tools are simply absent, and absent carries no reason.
 
 | | what it proves | where it lives | if it is wrong |
 |---|---|---|---|
-| **path token** | *which* connector you meant | OS keychain, as `user_config.mcp_path_token` | 404 — the capability URL resolves to nothing |
+| **path token** | *which* connector you meant | fetched per connection by `scripts/mcp_auth_headers.sh` (env, cache file, Secret Manager) and sent as `X-DMA-Path-Token` | 404 — the static /mcp path answers nothing without it |
 | **Google ID token** | *who you are* | minted per connection by `scripts/mcp_auth_headers.sh` from your active `gcloud` account | 403 — Cloud Run rejects the call before the connector sees it |
 
 The ID token is minted for an **audience**, and Cloud Run checks it. The
@@ -122,8 +122,6 @@ claude plugin install dma-insights@zennify-dma \
   --config mcp_base_url="$(gcloud run services describe dmai-mcp \
       --project=digital-maturity-assessor --region=us-central1 \
       --format='value(status.url)')" \
-  --config mcp_path_token="$(gcloud secrets versions access latest \
-      --secret=dmai-mcp-path-token --project=digital-maturity-assessor)" \
   --config repo_root="$PWD"
 claude plugin enable dma-insights@zennify-dma
 ```
@@ -177,7 +175,6 @@ them.
 | Key | Sensitive | What it is |
 |---|---|---|
 | `mcp_base_url` | no | Cloud Run URL of `dmai-mcp`. Default is the current production URL; override for staging. |
-| `mcp_path_token` | **yes** | The capability path segment the connector is mounted under. Stored in the OS keychain, never in `settings.json` and never in this repository. |
 | `repo_root` | no | Optional checkout of this repository. Only `precheck_gates.py` uses it. |
 
 ## Why the connector is remote
