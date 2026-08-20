@@ -115,8 +115,25 @@ class DocExtractor(html.parser.HTMLParser):
 
 
 def main():
-    docs_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("docs")
-    out_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else docs_dir / "text"
+    """Extract docs/*.html to greppable text.
+
+    usage: extract_docs.py [DOCS_DIR] [OUT_DIR]
+
+    The source directory is validated BEFORE anything is created. Until
+    2026-08-20 the first argument went straight into a mkdir, so
+    `extract_docs.py --help` created a directory called "--help" in the
+    repository root, and a typo created a junk tree beside it.
+    """
+    args = [a for a in sys.argv[1:]]
+    if args and args[0] in ("-h", "--help"):
+        print(main.__doc__.strip())
+        return 0
+    docs_dir = Path(args[0]) if args else Path("docs")
+    if not docs_dir.is_dir():
+        print(f"not a directory: {docs_dir}\n\n{main.__doc__.strip()}",
+              file=sys.stderr)
+        return 2
+    out_dir = Path(args[1]) if len(args) > 1 else docs_dir / "text"
     out_dir.mkdir(parents=True, exist_ok=True)
     for src in sorted(docs_dir.glob("*.html")):
         parser = DocExtractor()
@@ -127,4 +144,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)

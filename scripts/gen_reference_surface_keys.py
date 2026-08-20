@@ -83,6 +83,19 @@ def main(argv) -> int:
             for k, v in sorted(acc.items())},
     }
     target = ROOT / "fixtures" / "reference_surface_keys.json"
+    # AN EMPTY RESULT IS A FAILED READ, NOT A SMALL SURFACE. This script
+    # writes the input the customer serve allowlist is generated from, so
+    # writing {} when the payload snapshots could not be read hands the
+    # allowlist generator a false answer — and on 2026-08-20 that chain
+    # narrowed the customer surface by 49 keys in a commit nobody wrote.
+    # Refuse, name what was and was not read, and leave the good fixture
+    # exactly where it is.
+    if not out["sections"]:
+        raise SystemExit(
+            f"read {files} page file(s) and found no sections — refusing to "
+            f"overwrite {target.name} with an empty result. Point this script "
+            "at the promoted reference payload snapshots (Baxter, Logix) and "
+            "run it again; the committed fixture is left untouched.")
     target.write_text(json.dumps(out, indent=1) + "\n")
     print(f"reference_surface_keys.json: {len(out['sections'])} sections "
           f"from {files} page files")

@@ -317,9 +317,15 @@ jobs:
       - name: Unit tests, and a suite that skips silently fails
         run: |
           set -o pipefail
+          # `-rf` beside `-rs`: `-q` alone prints NO "FAILED ..." lines, and
+          # the report step below greps for exactly those. Measured
+          # 2026-08-20 — a red build's own summary showed only SKIPPED
+          # reasons, so finding which three tests failed took three round
+          # trips through a log whose tail is Postgres teardown noise. The
+          # check now names its failures where the check is read.
           python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
                  scripts/tests/ plugins/dma-insights/scripts/tests/ \
-                 tests/skills/ -q -rs 2>&1 | tee /tmp/pytest.txt
+                 tests/skills/ -q -rs -rf 2>&1 | tee /tmp/pytest.txt
           n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
           echo "skipped: ${n:-0} (ceiling 11)"
           if [ "${n:-0}" -gt 11 ]; then
@@ -339,7 +345,12 @@ jobs:
           {
             echo '### Python unit tests'
             echo '```'
-            grep -E '^(FAILED|ERROR|[0-9]+ (passed|failed))' /tmp/pytest.txt | tail -40
+            # Both shapes: the short-summary "FAILED node - msg" lines that
+            # -rf prints, and the "___ test_name ___" headers pytest always
+            # emits for a failure even under -q. Either alone has been the
+            # empty set on a red build.
+            grep -E '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
+                 /tmp/pytest.txt | tail -40
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
