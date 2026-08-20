@@ -330,7 +330,8 @@ def inventory_checks(plugin_root: Path = PLUGIN) -> list:
     """Exact component counts, not floors — see EXPECTED_SKILLS/EXPECTED_AGENTS."""
     skills = sorted(p.name for p in (plugin_root / "skills").glob("*")
                     if p.is_dir() and not p.name.startswith(("_", ".")))
-    agents = sorted(p.stem for p in (plugin_root / "agents").rglob("*.md"))
+    agents = sorted(p.stem for p in (plugin_root / "agents").rglob("*.md")
+                    if p.name != "README.md")
     rows = []
     for label, found, expected in (("skills", skills, EXPECTED_SKILLS),
                                    ("agents", agents, EXPECTED_AGENTS)):

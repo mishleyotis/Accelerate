@@ -90,7 +90,8 @@ def check(manifest: dict, entries: list) -> list:
     if re.search(r"https?://", desc):
         fails.append("description contains a URL — the uploader rejects them; "
                      "use homepage/repository fields")
-    for agent in sorted((PLUGIN / "agents").rglob("*.md")):
+    for agent in sorted(p for p in (PLUGIN / "agents").rglob("*.md")
+                        if p.name != "README.md"):
         head = agent.read_text().split("---")[1]
         keys = {line.split(":")[0].strip() for line in head.splitlines()
                 if ":" in line and not line.startswith((" ", "\t", "-", "#"))}
@@ -98,6 +99,38 @@ def check(manifest: dict, entries: list) -> list:
             fails.append(f"agents/{agent.name} front matter carries {bad} — "
                          "forbidden for plugin-provided agents")
     return fails
+
+
+def flatten_agents(entries) -> dict:
+    """Zip arcname per repo path: agents flatten to agents/<name>.md.
+
+    Measured 2026-08-20, both directions, both by rejection: the claude.ai
+    upload validator does NOT recurse into agents/ subdirectories and treats
+    manifest `agents` entries as DIRECTORIES to scan ("No agent files found
+    in specified directories"), while the CLI refuses to INSTALL a manifest
+    whose `agents` entries are directories ("agents: Invalid input") — and a
+    refused install would break every routine's bootstrap. No single layout
+    satisfies both, so each consumer gets the shape it demands: the
+    REPOSITORY keeps the taxonomy folders (the CLI loader recurses — that is
+    what routines and local installs read), and the ZIP — consumed only by
+    claude.ai — carries the same files flat, with the `agents` manifest key
+    dropped so default agents/ discovery applies. Names are unique and
+    family-prefixed, so flattening loses nothing; a collision fails the
+    build rather than shipping a silent overwrite.
+    """
+    arcnames, seen = {}, {}
+    for rel in (str(e) for e in entries):
+        if (rel.startswith("agents/") and rel.endswith(".md")
+                and not rel.endswith("README.md")):
+            flat = "agents/" + rel.rsplit("/", 1)[-1]
+            if flat in seen:
+                raise SystemExit(f"agent name collision flattening the zip: "
+                                 f"{rel} and {seen[flat]} both become {flat}")
+            seen[flat] = rel
+            arcnames[rel] = flat
+        else:
+            arcnames[rel] = rel
+    return arcnames
 
 
 def main(argv=None) -> int:
@@ -115,9 +148,16 @@ def main(argv=None) -> int:
 
     out_dir = Path(args.out) if args.out else PLUGIN.parent.parent
     out = out_dir / f"dma-insights-{manifest['version']}.zip"
+    arcnames = flatten_agents(entries)
+    zip_manifest = dict(manifest)
+    zip_manifest.pop("agents", None)
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
         for rel in entries:
-            z.write(PLUGIN / rel, str(rel))
+            arc = arcnames[str(rel)]
+            if arc == ".claude-plugin/plugin.json":
+                z.writestr(arc, json.dumps(zip_manifest, indent=2) + "\n")
+            else:
+                z.write(PLUGIN / rel, arc)
     size = out.stat().st_size
     if size > MAX_ZIP_BYTES:
         print(f"FAIL zip is {size} bytes (bound {MAX_ZIP_BYTES})", file=sys.stderr)

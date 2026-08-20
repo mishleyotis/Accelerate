@@ -102,3 +102,43 @@ def test_every_shipped_agent_is_declared_in_the_manifest():
                  agents=manifest["agents"] + ["./agents/qa/never-written.md"])
     fails = pkg.check(ghost, entries)
     assert any("no such file ships" in f for f in fails)
+
+
+def test_the_zip_flattens_agents_and_drops_the_agents_key(tmp_path):
+    """Both validators, measured by rejection on the same day: claude.ai does
+    not recurse agents/ and scans manifest `agents` entries as directories;
+    the CLI refuses to install directory entries. The zip therefore carries
+    the agents flat with no `agents` key, while the repo keeps the taxonomy
+    folders the CLI loader recurses."""
+    import json
+    import subprocess
+    import sys
+    import zipfile
+    proc = subprocess.run(
+        [sys.executable, str(pkg.__file__), "--out", str(tmp_path)],
+        capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+    zips = list(tmp_path.glob("*.zip"))
+    assert len(zips) == 1
+    with zipfile.ZipFile(zips[0]) as z:
+        agent_files = [n for n in z.namelist()
+                       if n.startswith("agents/") and n.endswith(".md")
+                       and not n.endswith("README.md")]
+        nested = [n for n in agent_files if n.count("/") != 1]
+        assert not nested, f"nested agent paths in the zip: {nested[:3]}"
+        repo_count = len([f for f in (pkg.PLUGIN / "agents").rglob("*.md")
+                          if f.name != "README.md"])
+        assert len(agent_files) == repo_count
+        manifest = json.loads(z.read(".claude-plugin/plugin.json"))
+        assert "agents" not in manifest, (
+            "the zip manifest kept the agents key — claude.ai scans its "
+            "entries as directories and finds no files in a file path")
+        assert "docs/AGENT-TAXONOMY.md" in z.namelist(), (
+            "the taxonomy doc must ship in the flat zip")
+
+
+def test_flattening_refuses_a_name_collision():
+    import pytest as _pytest
+    entries = ["agents/qa/twin.md", "agents/checkers/twin.md"]
+    with _pytest.raises(SystemExit):
+        pkg.flatten_agents(entries)
