@@ -162,7 +162,7 @@ has found the drift section 3's manual reconciliation exists to catch.
 | **May not** | Produce more than one client per firing; touch BOK Financial or its twin (the held-out); edit `apps/` code; force a promote past a failed vetting or an unresolved PENDING_REVIEW identity; fabricate technographics when an enrichment grant is refused (record the attempt honestly — MEM-0082 is the permanent lesson); improvise ad-hoc multi-agent workflows around the plugin, because the plugin **is** the system under test. |
 | **Report shape** | Under 25 lines: client + run id; first-pass verdict counts by gate (the learning-curve datum); repairs made and how routed; final six-page state; gold-standard deltas vs Baxter; enrichment honesty (what ran, what was refused); finding ids written; explicit confirmation that no PERMANENT class recurred. |
 
-The live prompt, read back from the trigger 2026-08-19 — kept here verbatim
+The live prompt, read back from the trigger after the 2026-08-20 congruency update — kept here verbatim
 so a drifted trigger is detectable by diff:
 
 ```
@@ -170,19 +170,21 @@ You are the scheduled DMA synthesis routine (dma-insights). One client per firin
 
 STEP -1 — SELF-PROVISION IF THE PLUGIN IS MISSING. Trigger-fired containers start with no repository and no plugin. If `claude plugin list` shows no dma-insights: (a) attach the repository — call the claude-code-remote add_repo tool (owner mishleyotis, repo accelerate, access read), clone it to /home/user/Accelerate at branch claude/dma-insights-onboarding-0ryrd0 as the tool instructs, then call register_repo_root — the repo's .claude/settings.json declares the plugin from its own marketplace, so it loads on your NEXT turn; (b) run `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh` — it lands the service-account identity from the DMA_ROUTINE_SA_KEY_B64 environment variable (base64 of the key JSON on one line; raw DMA_ROUTINE_SA_KEY also accepted), fetches the connector path token fresh from Secret Manager, and installs the plugin with its config; (c) proceed to STEP 0 on the next turn. If /root/.dma/sa.json is still absent or empty after (b), the connector cannot authenticate — STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must be added in the claude.ai/code environment settings, one line, the base64 of Secret Manager secret dmai-routine-sa-key.
 
-STEP 0 — VERIFY THE TOOLING. This container was provisioned before the session started by the environment setup script (plugins/dma-insights/scripts/bootstrap_session.sh, wired in the claude.ai/code environment settings together with the DMA_ROUTINE_SA_KEY_B64 variable): repo checkout, plugin install, service-account identity, connector path token. Run `claude plugin list` and the dma-insights doctor command (/dma-insights:doctor). Require: plugin dma-insights version >= 0.5.1, doctor fully green including the live tool-roster check. If the plugin is missing, stale, or the doctor fails, STOP and report exactly what is missing, naming bootstrap_session.sh and DMA_ROUTINE_SA_KEY_B64 so the fix is actionable — producing anything with degraded tooling is worse than producing nothing.
+STEP 0 — VERIFY THE TOOLING. This container was provisioned before the session started by the environment setup script (plugins/dma-insights/scripts/bootstrap_session.sh, wired in the claude.ai/code environment settings together with the DMA_ROUTINE_SA_KEY_B64 variable): repo checkout, plugin install, service-account identity, connector path token. Run `claude plugin list` and the dma-insights doctor command (/dma-insights:doctor). Require: plugin dma-insights version >= 0.6.0 (the 47-agent roster — an older version routes to agents that no longer own their surfaces), doctor fully green including the live tool-roster check. If the plugin is missing, stale, or the doctor fails, STOP and report exactly what is missing, naming bootstrap_session.sh and DMA_ROUTINE_SA_KEY_B64 so the fix is actionable — producing anything with degraded tooling is worse than producing nothing.
 
 STEP 1 — PICK ONE CLIENT. list_pending_runs via the connector; respect is_latest_for_request=true rows only. The learning sequence (docs/DECISIONS.md D7 in the plugin): 1) t-rowe-price-group-inc, 2) houlihan-lokey-inc, 3) hughes-federal-credit-union, 4) sl-green-realty-corp-nyse-slg (adjudicate its twin 'slg' by the worker's dedup rules first), 5) corporate-america-credit-union. Take the FIRST not yet serving six pages. HELD OUT — never produce from this routine: bok-financial-corporation and its twin bok-financial. If all five learners serve, take stress candidates in order: brick-city-capital, thrivent, bank-of-utah. If those too are done, report "sequence complete" and stop.
 
-STEP 2 — PRODUCE THROUGH THE SKILL. Invoke /dma-insights:dma-surface-production for that run and follow its own workflow and routing table exactly: memory digest and open rejections BEFORE authoring; package vetting via the package-vetter agent; per-page surface producers (each reads its page rulebook at 03-pages/rulebooks/<page>.md — applied by default); finding-challenger BEFORE page-consolidator on every page; only the surface-producer submits and promotes; enrichment attempted at full depth (Clay in the correct account — if the connector grant is refused in this scheduled context, record the attempt honestly via record_enrichment / the ledger as not-run, never fabricate technographics; MEM-0082 is the permanent lesson). Repair verdicts through the routed single-surface path, never by re-synthesising six pages.
+STEP 1b — OPEN THE CLIENT'S MEMORY (05-lifecycle/client-memory.md is the contract). Search this client's folder in the Google Drive intake tree for "<client-slug> — synthesis memory"; if present, download it to /root/.dma/clients/<client-slug>.md and READ the open questions section plus the sections for the pages in scope — a search the research log already records, positive or empty, is never re-run. If absent, create the skeleton with `python3 plugins/dma-insights/scripts/client_memory.py init --client <client-slug>` and upload it to the client's folder. One file per client, never one for all; nothing from another client's file ever enters this session's context. WRITE BACK to Drive after every page submitted and at session end — a session that ends without writing back has lost its memory: treat that as a failed step and say so in the report.
 
-STEP 3 — ASSESS AGAINST THE GOLD STANDARD. After promotion, run the deployed-app-auditor agent: compare every page against Baxter (run c1351d25-a612-4dbe-b498-127bccaf6810) — section presence and richness, narrative thread cohesion, the customer-audience exclusion boundary (no probe ladders, tiers, cap vocabulary, contact routes or reasoning traces in a customer body), techstack confirmed-only discipline (CONFIRMED+ABSENT for customers, thresholds per DECISIONS.md D4), and platform-fit engine agreement (tiles == cards == engine).
+STEP 2 — PRODUCE THROUGH THE SKILL. Invoke /dma-insights:dma-surface-production for that run and follow its own workflow and routing exactly. The routing authority is 05-lifecycle/routing.md + 05-lifecycle/surface-map.md + docs/AGENTS.md: the surface-producer orchestrates; each page's *-surface-producer is a ROUTER that dispatches to the per-surface producers that own each payload section (every served path has a named owner — the coverage test pins it); the checkers run where the routing table says — finding-challenger BEFORE page-consolidator on every page, evidence-integrity-checker and numeric-reconciliation-checker where routed, exclusion-boundary-auditor before submit. Memory digest and open rejections BEFORE authoring; package vetting via the package-vetter agent (record its result in the memory file's package synthesis section); only the surface-producer submits and promotes. Enrichment at full depth through the enrichment-planner's prioritisation: thin subcaps worked by the H3 resolution ladder (rulebooks/heatmap.md — impact order; re-match with scripts/subcap_match.py before re-search, AMBIGUOUS never auto-assigned; subcap-specific queries paired with their falsifiers; sources opened in scripts/source_yield.py rank order). EVERY search logs twice: query+date in the memory file's research log, source+outcome via `source_yield.py log`. Platform and opportunity surfaces walk the composite-factor discipline in rulebooks/platform.md § P1: the DQ ladder with the engine's thresholds, the greenfield deep-search ladder before any greenfield point is explained, the alignment check (stated_objective only with the entity's own words; otherwise disclosed impact_fallback). Clay in the correct account — if the connector grant is refused in this scheduled context, record the attempt honestly via record_enrichment / the ledger as not-run, never fabricate technographics; MEM-0082 is the permanent lesson. Repair verdicts through the routed single-surface path, never by re-synthesising six pages.
 
-STEP 4 — CLOSE THE LEARNING LOOP (mandatory, green or not). The qa-overseer writes the findings memory: record_finding for anything new, report_recurrence for anything seen before, resolve_finding where this run proves a fix held, record_refinement for any method that worked. Any defect class recurring twice or more is handed to the rectifier BY NAME with the rulebook file that should have prevented it. A user-flagged (PERMANENT) class recurring is a blocker-severity finding in its own right.
+STEP 3 — ASSESS AGAINST THE GOLD STANDARD. After promotion, run the deployed-app-auditor agent: compare every page against Baxter (run c1351d25-a612-4dbe-b498-127bccaf6810, v5.0-pinned — fixtures/gold_manifest.json pins the exemplar shapes) — section presence and richness, narrative thread cohesion, the customer-audience exclusion boundary (no probe ladders, tiers, cap vocabulary, contact routes or reasoning traces in a customer body; ceilings and evidence_coverage are NEVER_SERVED for every audience and their keys must be absent), techstack confirmed-only discipline (CONFIRMED+ABSENT for customers, thresholds per DECISIONS.md D4), platform-fit engine agreement (tiles == cards == engine, factor vocabulary is the engine's four), and no hashtag numbering in any served prose (check_language.py rule).
 
-STEP 5 — REPORT. End with: client + run id; first-pass verdict counts by gate (the curve datum); repairs made and how routed; final six-page state; gold-standard deltas vs Baxter; enrichment honesty (what ran, what was refused); findings written (ids); explicit confirmation that no PERMANENT class recurred. Keep it under 25 lines.
+STEP 4 — CLOSE THE LEARNING LOOP (mandatory, green or not). The qa-overseer writes the findings memory: record_finding for anything new, report_recurrence for anything seen before, resolve_finding where this run proves a fix held, record_refinement for any method that worked. Evidence-matching corrections ALSO go to the matcher's ledger (`subcap_match.py learn` — deciding terms and cell id only) with the story in the memory file; rich sources join the yield ledger so the source list keeps expanding. Any defect class recurring twice or more is handed to the rectifier BY NAME with the rulebook file that should have prevented it. A user-flagged (PERMANENT) class recurring is a blocker-severity finding in its own right.
 
-Hard rules: one client per firing; never BOK; never edit apps/ code; if package vetting fails or entity identity is PENDING_REVIEW unresolved, record the finding and stop rather than force a promote.
+STEP 5 — REPORT. End with: client + run id; first-pass verdict counts by gate (the curve datum); repairs made and how routed; final six-page state; gold-standard deltas vs Baxter; enrichment honesty (what ran, what was refused, sources logged rich/thin/empty); thin subcaps resolved vs honestly still thin; memory file written back to Drive (yes/no — no is a failure); findings written (ids); explicit confirmation that no PERMANENT class recurred. Keep it under 25 lines.
+
+Hard rules: one client per firing; never BOK; never edit apps/ code; never write another client's memory file; if package vetting fails or entity identity is PENDING_REVIEW unresolved, record the finding and stop rather than force a promote.
 ```
 
 ### 2b · dma-rectification-weekly — Mondays 13:00 UTC · EXISTS
@@ -226,15 +228,15 @@ STEP 0 — HANDSHAKE. This container was provisioned before the session started 
 the environment setup script (plugins/dma-insights/scripts/bootstrap_session.sh
 plus the DMA_ROUTINE_SA_KEY_B64 variable, both wired in the claude.ai/code
 environment settings). Run `claude plugin list` and /dma-insights:doctor; require
-the dma-insights plugin present at version >= 0.5.1 and the doctor green — if
-either fails, STOP and report what is missing, naming bootstrap_session.sh and
-DMA_ROUTINE_SA_KEY so the fix is actionable. Then confirm the connector's
-memory tools answer by calling them for real: list_defect_classes, then
-get_memory_digest(days=7). Record the handshake numbers: tools seen, open finding
-count, classes seen, oldest open, newest sighting. If the memory tools are absent
-or error, STOP, report "memory unreachable — no rectification performed", and
-change nothing. Never work from a transcript, a scratchpad or a local file in
-place of the store.
+the dma-insights plugin present at version >= 0.6.0 (the 47-agent roster and its
+ledgers) and the doctor green — if either fails, STOP and report what is missing,
+naming bootstrap_session.sh and DMA_ROUTINE_SA_KEY_B64 so the fix is actionable.
+Then confirm the connector's memory tools answer by calling them for real:
+list_defect_classes, then get_memory_digest(days=7). Record the handshake
+numbers: tools seen, open finding count, classes seen, oldest open, newest
+sighting. If the memory tools are absent or error, STOP, report "memory
+unreachable — no rectification performed", and change nothing. Never work from a
+transcript, a scratchpad or a local file in place of the store.
 
 STEP 1 — DRAIN, THEN READ. Call ingest_reviewer_feedback() first, so the week's
 Accept/Reject verdicts are in the store before the digest is read. Window: the
@@ -245,8 +247,15 @@ recurrences_in_window, new_findings_in_window, refinements_in_window (with `held
 per row), open_by_class, ageing_unrefined. Sweep the repository working tree for
 feedback memory has never seen (the skill's scripts/drain_local.py emits
 record_finding payloads); record those BEFORE triage so this run's clustering
-counts them as sightings. For anything that looks new, search_findings first and
-read paths_skipped before concluding it is new.
+counts them as sightings. THEN read the two learning ledgers the sessions feed:
+(a) `python3 plugins/dma-insights/scripts/source_yield.py candidates` — every
+source rich twice but undeclared is a register-expansion work item: promote it
+into 02-inputs/enrichment_sources.json with tier, facet and provenance, exactly
+as measured, never above the tier the evidence class earns; (b)
+fixtures/match_feedback.json — recurring vetoes or boosts on the same cell
+family are a vocabulary defect in that family's rulebook anchor and cluster like
+any finding. For anything that looks new, search_findings first and read
+paths_skipped before concluding it is new.
 
 STEP 2 — THE TWICE-RECURRED CLASSES FIRST. Cluster with the skill's
 scripts/triage.py. Order clusters by recurrence depth, then client reach, then
@@ -260,7 +269,9 @@ recorded 15-40 word reason. A recurrence lands STRICTLY ABOVE the rung its
 previous refinement landed on; a defect that reached a rendered client surface
 never lands below R3. Draft the change with the finding ids in hand — an edit
 with no finding behind it is a preference, and preferences are how skills drift
-away from what was measured.
+away from what was measured. Register expansions from STEP 1(a) are exempt from
+the rung ladder — they are additive, carry their yield provenance, and still go
+through the grader.
 
 STEP 4 — GRADE. Hand each proposed change to the learning-grader agent with the
 rubric at skills/dma-rectifier/assets/learning_rubric.json. Admission threshold
@@ -279,7 +290,9 @@ STEP 6 — RE-RUN THE CORPUS. Run the permanent regression corpus:
 `python -m pytest scripts/tests/test_permanent_regressions.py` (it pins
 fixtures/permanent_regressions.json — every user-flagged finding; pins must
 resolve and the OPEN count may only shrink). Then the full suites: apps/mcp/tests,
-apps/api/tests, scripts/tests. Everything previously admitted stays green; a
+apps/api/tests, scripts/tests — and the plugin's own suite,
+plugins/dma-insights/scripts/tests (coverage, gold traceability, memory, matcher,
+yield ledger, doctor, packaging). Everything previously admitted stays green; a
 prior case that had to change to pass is a NEW finding, not a cost of doing
 business. A pinned test failing is a recurrence of a user-flagged finding —
 report_recurrence, and the rung moves up.
@@ -297,15 +310,19 @@ verification). resolve_finding naming that refinement for every finding actually
 closed. report_recurrence, with a measurement of 30 characters or more, for every
 fix found not to have held. Also reconcile the session-routine inventory: run
 list_triggers and diff it against plugins/dma-insights/docs/ROUTINES.md — a
-missing, paused or drifted trigger is a finding like any other.
+missing, paused or drifted trigger is a finding like any other. Client memory
+files (per-client md in each client's Drive folder) are READ-ONLY context here:
+read one only when a ledger entry's story is needed to judge a cluster; never
+edit one — they belong to the synthesis sessions.
 
 STEP 9 — REPORT the anti-pattern trend. From templates/run_report.md, plus: the
-handshake numbers; clusters opened, the rung each landed on and why; grader score
-per change; testgen case counts; corpus and suite results; what closed with its
-negative control; what stays open and the rung it waits on; the PR link; and the
-trend — this window's recurrences and reviewer rejects against the trailing four
-windows and DECISIONS.md D3's convergence thresholds, stated plainly as
-declining, flat or worsening.
+handshake numbers; clusters opened, the rung each landed on and why; register
+expansions made with their yield provenance; grader score per change; testgen
+case counts; corpus and suite results; what closed with its negative control;
+what stays open and the rung it waits on; the PR link; and the trend — this
+window's recurrences and reviewer rejects against the trailing four windows and
+DECISIONS.md D3's convergence thresholds, stated plainly as declining, flat or
+worsening.
 
 If there is nothing above threshold: say so, record the run as
 examined-and-empty, and stop. Do not lower the threshold, do not scan for defects
@@ -351,11 +368,12 @@ they add nothing to it; the clone and the bootstrap only read it.)
 STEP 0 — VERIFY THE TOOLING. This container was provisioned before the session
 started by the environment setup script (plugins/dma-insights/scripts/
 bootstrap_session.sh plus the DMA_ROUTINE_SA_KEY_B64 variable, both wired in the
-claude.ai/code environment settings). Run /dma-insights:doctor; require it green
-and the connector's tools present. If the plugin is missing or the connector is
-unreachable, STOP and report exactly which layer failed, naming
-bootstrap_session.sh and DMA_ROUTINE_SA_KEY so the fix is actionable. A drift
-review that cannot read the state invents it.
+claude.ai/code environment settings). Run /dma-insights:doctor; require the
+plugin at version >= 0.6.0, the doctor green and the connector's tools present.
+If the plugin is missing or the connector is unreachable, STOP and report
+exactly which layer failed, naming bootstrap_session.sh and
+DMA_ROUTINE_SA_KEY_B64 so the fix is actionable. A drift review that cannot read
+the state invents it.
 
 STEP 1 — THE REFRESH QUEUE. Read GET /v1/ops/refresh-queue on the api (internal
 audience — the queue names actors and reasons and is never served to customers).
@@ -380,7 +398,14 @@ called done. Read the worst 10 clients at most. Then read
 GET /v1/ops/enrichment-loop: `healthy` is strict, and a job that never closed,
 errored, or scanned zero runs is UNHEALTHY — each of those is a finding, because
 a loop that finds nothing to look at reports the same numbers as a loop with
-nothing to do, and only one of those is fine.
+nothing to do, and only one of those is fine. For the worst clients, ALSO read
+that client's memory file from its Drive folder (READ-ONLY — "<client-slug> —
+synthesis memory", per 05-lifecycle/client-memory.md): open questions older
+than 14 days and thin-subcap resolution entries with no follow-up are drift the
+facet states cannot see, and a memory file that exists but was last written
+before the client's latest promotion means a session skipped its write-back —
+each of those is a finding naming the synthesis routine. Never write a memory
+file from this session.
 
 STEP 4 — RAISE OR ESCALATE WHAT IS ACTIONABLE. For each actionable observation,
 record_finding through the connector with a real measurement — the endpoint or
@@ -391,13 +416,15 @@ Escalation means naming the owner in the finding: a due client the learner order
 will not reach goes to the synthesis routine by name; an UNHEALTHY loop names
 the dmai-enrich-loop trigger and apps/worker/dma_worker/enrichment.py; a due
 client with no open request names the sweep; a duplicate-share rise names the
-worker dedup rules. Do not fix any of them here.
+worker dedup rules; a stale memory file or aged open question names the
+synthesis routine's write-back step. Do not fix any of them here.
 
 STEP 5 — REPORT. Queue counts (requested, due) with the oldest age in each
 list; duplicate_requests and the share of pending runs it represents; the top
 drift blocks worst-first with client and facet; loop health with the last job's
-tallies; finding ids written; what was escalated and to whom. If the queue is
-empty, no drift is blocking and the loop is healthy, say exactly that and record
+tallies; memory-file staleness observed (client, days); finding ids written;
+what was escalated and to whom. If the queue is empty, no drift is blocking,
+the loop is healthy and no memory file is stale, say exactly that and record
 the run as examined-and-empty — "the window was read and held nothing" and "no
 one looked" must stay distinguishable.
 ```
