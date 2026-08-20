@@ -44,7 +44,13 @@ def staged_files():
 
 def tracked_files():
     out = subprocess.run(
-        ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=True
+        # --others --exclude-standard: untracked-but-unignored files scan too,
+        # so the local gate sees exactly what CI will see AFTER the commit.
+        # Measured 2026-08-20: a new test fixture scanned locally before
+        # `git add`, passed (untracked, invisible to plain ls-files), and
+        # failed the same scanner in CI one push later.
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
+        cwd=ROOT, capture_output=True, text=True, check=True
     ).stdout.split()
     return [f for f in out if f]
 
