@@ -83,9 +83,55 @@ def build() -> dict:
     return out
 
 
-def main() -> int:
-    target = ROOT / "apps" / "api" / "dma_api" / "customer_allowlist.json"
+def main(argv=None) -> int:
+    """Write the allowlist, or — with --out/--check — do not touch the repo.
+
+    WHY THE FLAGS EXIST (measured 2026-08-20): the test that was supposed to
+    prove the committed file matched a fresh generation RAN THIS SCRIPT with
+    no arguments, overwriting the tracked file, and then compared the file to
+    itself. It could never fail, and it silently rewrote the working tree —
+    so an ordinary `git add -A` after any test run committed a regenerated
+    allowlist. That is exactly how 49 keys were removed from the customer
+    serve surface in one commit nobody wrote.
+    """
+    import argparse
+
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--out", default=None,
+                    help="write here instead of the tracked file")
+    ap.add_argument("--check", action="store_true",
+                    help="write nothing; exit 1 if the tracked file is not a "
+                         "superset of a fresh generation")
+    args = ap.parse_args(argv)
+
+    tracked = ROOT / "apps" / "api" / "dma_api" / "customer_allowlist.json"
     data = build()
+    if args.check:
+        import sys as _sys
+        have = json.loads(tracked.read_text())
+        missing = []
+        for sec, spec in data["sections"].items():
+            hs = have["sections"].get(sec)
+            if hs is None:
+                missing.append(sec)
+                continue
+            for k in spec.get("keys", []):
+                if k not in hs.get("keys", []):
+                    missing.append(f"{sec}.{k}")
+            for field, keys in (spec.get("items") or {}).items():
+                for k in keys:
+                    if k not in (hs.get("items") or {}).get(field, []):
+                        missing.append(f"{sec}.{field}.{k}")
+        if missing:
+            print("the contract serves keys the committed allowlist does not "
+                  f"name ({len(missing)}):", file=_sys.stderr)
+            for m in missing[:40]:
+                print("  " + m, file=_sys.stderr)
+            return 1
+        print(f"allowlist covers a fresh generation: {len(data['sections'])} "
+              "sections, nothing unclassified")
+        return 0
+    target = Path(args.out) if args.out else tracked
     target.write_text(json.dumps(data, indent=1, sort_keys=True) + "\n")
     n = len(data["sections"])
     itemed = sum(1 for s in data["sections"].values() if s.get("items"))

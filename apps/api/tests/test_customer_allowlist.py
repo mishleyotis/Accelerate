@@ -7,6 +7,7 @@ must NOT reach a customer body, and the drop must be receipted.
 """
 import json
 import subprocess
+import tempfile
 import sys
 from pathlib import Path
 
@@ -91,23 +92,79 @@ def test_an_unknown_section_is_withheld_not_served():
     assert report["withheld"] and report.get("unknown_section")
 
 
-def test_the_committed_allowlist_matches_a_fresh_generation():
+def test_the_committed_allowlist_covers_a_fresh_generation():
     """A contract change that widens the serve surface fails here until the
-    new key is classified — the fail-closed property, pinned in CI."""
-    gen = subprocess.run(
-        [sys.executable, str(ROOT / "scripts" / "gen_customer_allowlist.py")],
-        capture_output=True, text=True, cwd=ROOT)
-    assert gen.returncode == 0, gen.stderr
+    new key is classified — the fail-closed property, pinned in CI.
+
+    REWRITTEN 2026-08-20 because the previous version could not fail and
+    damaged the repo while not failing. It ran the generator with no
+    arguments — which OVERWRITES the tracked allowlist — and then compared
+    the file to itself, both reads taken after the write. Two consequences,
+    both measured: the assertion was tautological, and any `git add -A` after
+    a test run committed a silently regenerated allowlist. One did: 49 keys
+    left the customer serve surface in a commit whose message was about
+    something else entirely.
+
+    The generation now goes to a temporary path, and the assertion is the
+    one that carries the intent: every key a fresh generation would serve
+    must already be named in the committed file. The committed file may be
+    WIDER — it is, deliberately, and the extras are keys the deny passes
+    strip before the allowlist ever runs (contact routes, r_layer) plus
+    client content the generator's classification does not yet recognise —
+    but it may never be NARROWER, because that is the direction in which a
+    new contract key reaches a client unclassified.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        fresh = Path(tmp) / "generated.json"
+        gen = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "gen_customer_allowlist.py"),
+             "--out", str(fresh)],
+            capture_output=True, text=True, cwd=ROOT)
+        assert gen.returncode == 0, gen.stderr
+        generated = json.loads(fresh.read_text())
     committed = json.loads(
         (ROOT / "apps" / "api" / "dma_api" / "customer_allowlist.json")
         .read_text())
-    # the generator just rewrote the file; git-diff cleanliness is asserted
-    # by re-reading — identical content means the commit was fresh
-    regenerated = json.loads(
-        (ROOT / "apps" / "api" / "dma_api" / "customer_allowlist.json")
-        .read_text())
-    assert committed == regenerated
     assert len(committed["sections"]) == 34
+    unclassified = []
+    for sec, spec in generated["sections"].items():
+        have = committed["sections"].get(sec)
+        assert have is not None, f"{sec} is served but not in the allowlist"
+        unclassified += [f"{sec}.{k}" for k in spec.get("keys", [])
+                         if k not in have.get("keys", [])]
+        for field, keys in (spec.get("items") or {}).items():
+            have_keys = (have.get("items") or {}).get(field, [])
+            unclassified += [f"{sec}.{field}.{k}" for k in keys
+                             if k not in have_keys]
+    assert not unclassified, (
+        "the contract serves keys the allowlist does not name: "
+        + ", ".join(unclassified[:20]))
+
+
+def test_regenerating_the_allowlist_never_touches_the_tracked_file():
+    """The damage half of the same defect, pinned on its own.
+
+    A generator that writes the repo by default is one careless `git add`
+    away from a serving-surface change nobody reviewed, so the test suite
+    must never invoke it that way.
+    """
+    tracked = ROOT / "apps" / "api" / "dma_api" / "customer_allowlist.json"
+    before = tracked.read_bytes()
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "x.json"
+        subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "gen_customer_allowlist.py"),
+             "--out", str(out)], capture_output=True, text=True, cwd=ROOT)
+        assert out.is_file()
+    subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "gen_customer_allowlist.py"),
+         "--check"], capture_output=True, text=True, cwd=ROOT)
+    assert tracked.read_bytes() == before, (
+        "--out or --check rewrote the tracked allowlist")
+    src = (ROOT / "apps" / "api" / "tests" / "test_customer_allowlist.py").read_text()
+    assert "gen_customer_allowlist.py\")]" not in src.replace(" ", ""), (
+        "a test invokes the generator with no --out/--check and will "
+        "overwrite the tracked file")
 
 
 def test_excluded_classes_cover_the_measured_logix_leaks():

@@ -66,6 +66,7 @@
     "context_tiles": [
      "audience",
      "e_ids",
+     "note",
      "rows"
     ],
     "empty_state": [
@@ -104,6 +105,7 @@
      "issue_id",
      "linked_subcap_ids",
      "opened_on",
+     "opened_on_basis",
      "rationale",
      "resolved_on",
      "severity",
@@ -257,9 +259,11 @@
     "cells": [
      "closure_condition",
      "e_ids",
+     "grade",
      "grounded_on",
      "items",
      "reach_note",
+     "state",
      "subcap_id",
      "synthesis",
      "thin"
@@ -304,6 +308,7 @@
      "category_id",
      "cohort_size",
      "insufficient_cohort",
+     "r_layer",
      "sub_vertical"
     ],
     "patterns": [
@@ -416,6 +421,7 @@
      "name",
      "new_evidence_ids",
      "peer_score",
+     "r_layer",
      "source_document",
      "source_filename",
      "source_page",
@@ -538,11 +544,15 @@
   "insights.insights": {
    "items": {
     "cards": [
+     "affects",
      "alternative_explanation",
      "claim_label",
      "confidence",
      "ic_id",
+     "linked_rec_id",
      "linked_subcap_id",
+     "pillar_id",
+     "r_layer",
      "severity",
      "severity_rationale",
      "so_what_text",
@@ -792,18 +802,24 @@
      "confidence",
      "consequence",
      "e_ids",
+     "evidence",
      "f_id",
      "linked_subcap_ids",
      "name",
      "peer_median",
      "platform_chips",
+     "r_layer",
      "rejected_alternative",
      "score",
+     "so_what",
      "source_kind",
      "strategic_alignment",
+     "strategic_alignment_score",
      "subcap_id",
      "theme",
-     "title"
+     "title",
+     "what",
+     "why"
     ]
    },
    "keys": [
@@ -875,7 +891,12 @@
      "as_of",
      "confidence",
      "domain",
+     "email",
+     "enriched_at",
+     "enrichment_basis",
+     "linkedin_url",
      "name",
+     "phone",
      "relevance_note",
      "source_e_id",
      "tenure_months",
@@ -944,8 +965,10 @@
      "reason"
     ],
     "pillars": [
+     "basis",
      "delta",
      "direction",
+     "n",
      "peer_basis",
      "peer_median",
      "peer_n",
@@ -1012,6 +1035,9 @@
     "themes": [
      "audience",
      "cap_statement",
+     "direction",
+     "e_ids",
+     "evidence",
      "mapped_subcap_ids",
      "theme"
     ]
@@ -1038,6 +1064,7 @@
     ],
     "entries": [
      "alignment",
+     "alignment_note",
      "author_name",
      "author_role",
      "claim_label",
@@ -1124,19 +1151,35 @@
      "reason"
     ],
     "platforms": [
+     "alignment",
+     "alignment_basis",
+     "alignment_quote",
      "catalogue_path",
      "current_score",
+     "depends_on",
      "e_ids",
+     "estate_reach",
+     "fit_basis",
      "fit_score",
      "gap",
      "gaps",
+     "integration_pathway",
      "l3_area",
      "l4_feature",
      "name",
+     "peer_coverage",
+     "peer_deployments",
      "peer_score",
+     "peer_synthesis",
      "pillar",
+     "platform",
+     "r_layer",
+     "rank",
+     "readiness",
+     "state",
      "story_md",
-     "subcap_id"
+     "subcap_id",
+     "zennify_pathway"
     ],
     "r_layer": [
      "confidence",
@@ -1177,6 +1220,7 @@
      "l4_feature",
      "phase",
      "prerequisites",
+     "r_layer",
      "rec_id",
      "root_cause",
      "sequencing_reason",
@@ -1316,10 +1360,13 @@
     "items": [
      "as_of",
      "detection_basis",
+     "dma_impact",
      "e_ids",
      "evidence_level",
      "layer",
      "linked_subcap_ids",
+     "peer_coverage",
+     "peer_deployments",
      "pillar_id",
      "product",
      "status",
@@ -1328,7 +1375,9 @@
     ],
     "layers": [
      "detected",
+     "detected_basis",
      "expected",
+     "expected_basis",
      "is_primary_gap",
      "layer",
      "pillar_id"
