@@ -1,31 +1,33 @@
 # Connectors — what each surface uses, and how access actually works
 
-Owner instruction, 2026-08-20: connectors must avail their tools without
-per-session intervention, and the use case per surface must be written
-down. This file is that record.
+Owner decisions, 2026-08-20: enrichment runs through the ALREADY
+AUTHENTICATED claude.ai connectors — no API keys; and Google Drive runs by
+service account (the owner shared the intake folder with the routine
+identity, verified: 178 client folders visible). The use case per surface
+is recorded below.
 
 ## The two access paths
 
-| Path | How it authenticates | Where it works |
+| What | How | One-time setup (done once, works forever) |
 |---|---|---|
-| **Service-account APIs** (the floor) | the dmai-routine key the container holds mints tokens; API keys live in Secret Manager | **every** session, including trigger-fired — `scripts/drive_fetch.py` (Google Drive), `scripts/enrich_api.py` (Exa · Tavily · Clay · Explorium), `scripts/mcp_auth_headers.sh` (the dma-insights connector) |
-| **claude.ai connectors** (a bonus) | interactive OAuth in the user's claude.ai account | interactive sessions only — measured repeatedly: they do NOT load in trigger-fired sessions, and this organisation cannot attach them to triggers via API |
+| **Google Drive** (packages in, memory round-trip) | `scripts/drive_fetch.py` — the dmai-routine service account the container already holds | share the intake folder with `dmai-routine@digital-maturity-assessor.iam.gserviceaccount.com` as Editor — **DONE 2026-08-20** |
+| **Enrichment** (Clay · Exa · Tavily · Vibe-Prospecting/Explorium · Indeed) | the claude.ai connectors' own tools (`mcp__<Name>__…`), with the owner's existing authentication | attach the connectors to each Routine in the claude.ai routines UI — already done for drift and rectification; the same edit on **dma-synthesis-sequence** completes it |
+| **The dma-insights connector** (the parsed package, submit, promote, memory) | plugin MCP server, auto-connecting (static /mcp + header token) | none |
 
-Rule: a routine plans around the floor and treats a loaded claude.ai
-connector as a faster substitute, never a dependency. A facet whose service
-has no stored key records as not-run (MEM-0082) — named, never fabricated.
-
-One-time setup (each already named by the preflights when missing):
-Drive — share the intake folder with
-`dmai-routine@digital-maturity-assessor.iam.gserviceaccount.com` as Editor;
-per service — `printf '%s' 'THE-API-KEY' | gcloud secrets versions add
-dmai-<service>-api-key --project=digital-maturity-assessor --data-file=-`.
+Rules: a routine PLANS for connector absence — a facet whose connector is
+not attached records as not-run (MEM-0082), named with the UI attach as the
+fix; nothing is ever fabricated to cover an unattached connector. API keys
+are deliberately NOT used for enrichment (owner, 2026-08-20); the
+Secret Manager slots briefly created for them were deleted the same day.
+Trigger-fired sessions receive exactly the connectors attached to their
+Routine in the UI — attachment is per-Routine and one-time, never
+per-session (the org's API cannot attach them; the UI can).
 
 ## Preflight (STEP 0 of every synthesis firing)
 
 1. `drive_fetch.py check` — REQUIRED: the intake folder answers the SA.
-2. `enrich_api.py check` — reported: which services are configured; missing
-   ones degrade their facets honestly, they do not block production.
+2. Connector-tool presence per enrichment service — recorded; absences
+   degrade honestly and name the one-time UI attach.
 3. The connector roster (33 tools) via the doctor — REQUIRED.
 
 ## Per-surface connector use cases
@@ -42,7 +44,7 @@ The table lists what each surface uses BEYOND the package, and why.
 | overview.exec_summary | — | synthesis over other surfaces; no direct enrichment |
 | overview.why_now | Exa · Tavily | dated external signals: announcements, filings, leadership statements — each registered with excerpt + URL |
 | overview.thought_leadership | Exa | the entity's own publications, talks, bylines |
-| overview.leadership | Explorium · Tavily · (Clay) | roster verification, arrivals/departures, profile facts; Clay contact enrichment where its API plan allows |
+| overview.leadership | Explorium · Tavily · (Clay) | roster verification, arrivals/departures, profile facts; Clay contact enrichment via its connector |
 | overview.financial_series | Tavily | regulator series (call reports, 10-K figures) corroboration |
 | overview.sentiment | Tavily | app-store / review aggregate figures with n, scale, as_of |
 | overview.findings | — | package + cross-surface reconciliation |
@@ -70,12 +72,10 @@ The table lists what each surface uses BEYOND the package, and why.
 | context.context_sentiment | Tavily | rated-source aggregates |
 | context.acquisitions | Exa · Tavily | deal records, integration statements |
 
-\* Indeed has no key-API floor yet — job-posting demand signals fall back to
-Tavily/Exa site-scoped searches in fired sessions; the claude.ai Indeed
-connector serves interactive sessions.
-† Clay's API surface depends on the workspace plan; `enrich_api.py call`
-speaks it where enabled, and a refusal records as not-run — never invented
-technographics (MEM-0082).
+\* Indeed via its claude.ai connector where attached; job-posting demand
+signals fall back to Tavily/Exa site-scoped searches where it is not.
+† Clay via its claude.ai connector in the correct workspace; a refused
+grant records as not-run — never invented technographics (MEM-0082).
 
 Per-facet source detail (tiers, ceilings, query shapes) stays where it
 lives: `02-inputs/enrichment_sources.json` and each page rulebook's
