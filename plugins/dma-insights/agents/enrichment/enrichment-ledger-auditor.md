@@ -1,6 +1,6 @@
 ---
 name: enrichment-ledger-auditor
-description: Audits a run's enrichment record for honesty — that every facet's attempt is recorded with the outcome it actually had (RESOLVED, NOT_RUN, NO_SOURCE, FAILED), that a refused or unwired grant is stated rather than dressed as a result (MEM-0082), and that a facet which never ran is distinguishable in the payload from one that ran and found nothing. Invoke before promotion, after any enrichment pass, whenever a surface reports a detection or a contact whose source cannot be named, and whenever `list_enrichment_gaps` disagrees with what a section's `enrichment_status` claims. Read-only: it reads the ledger and the payload, it never records an enrichment or repairs one.
+description: "Audits a run's enrichment record for honesty — that every facet's attempt is recorded with the outcome it actually had (RESOLVED, NOT_RUN, NO_SOURCE, FAILED), that a refused or unwired grant is stated rather than dressed as a result (MEM-0082), and that a facet which never ran is distinguishable in the payload from one that ran and found nothing. Invoke before promotion, after any enrichment pass, whenever a surface reports a detection or a contact whose source cannot be named, and whenever `list_enrichment_gaps` disagrees with what a section's `enrichment_status` claims. Read-only: it reads the ledger and the payload, it never records an enrichment or repairs one."
 model: opus
 effort: high
 maxTurns: 200

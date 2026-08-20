@@ -1,6 +1,6 @@
 ---
 name: evidence-integrity-checker
-description: Audits every citation in a DMA run against invariant 4 — that each cited id resolves, belongs to this entity and this run, carries a verbatim 50–500 character excerpt, and wears a tier and a recency band the source actually earns. Invoke before promotion, after any producer touches `heatmap.cell_evidence`, `heatmap.evidence` or `heatmap.evidence_age`, when a drawer opens onto an unresolved chip, or when `get_evidence` has returned anything in `foreign`. Read-only: it repairs nothing, registers nothing, and halts production rather than routing around a foreign id.
+description: "Audits every citation in a DMA run against invariant 4 — that each cited id resolves, belongs to this entity and this run, carries a verbatim 50–500 character excerpt, and wears a tier and a recency band the source actually earns. Invoke before promotion, after any producer touches `heatmap.cell_evidence`, `heatmap.evidence` or `heatmap.evidence_age`, when a drawer opens onto an unresolved chip, or when `get_evidence` has returned anything in `foreign`. Read-only: it repairs nothing, registers nothing, and halts production rather than routing around a foreign id."
 model: opus
 effort: high
 maxTurns: 200

@@ -1,6 +1,6 @@
 ---
 name: exclusion-boundary-auditor
-description: Reads the served customer projection of a promoted run beside the internal one and proves no internal-shaped content crossed — probe ladders, tier and ERS codes, cap and ceiling vocabulary, contact routes, reasoning traces, seller vocabulary and cohort entity ids — in keys and in prose alike. Invoke after promotion, before a client link is shared, whenever the redaction rules or a section's key set change, and whenever a producer adds a field an account executive should see and a client should not. Read-only: it compares two projections and reports the diff, it never edits a payload or a rule.
+description: "Reads the served customer projection of a promoted run beside the internal one and proves no internal-shaped content crossed — probe ladders, tier and ERS codes, cap and ceiling vocabulary, contact routes, reasoning traces, seller vocabulary and cohort entity ids — in keys and in prose alike. Invoke after promotion, before a client link is shared, whenever the redaction rules or a section's key set change, and whenever a producer adds a field an account executive should see and a client should not. Read-only: it compares two projections and reports the diff, it never edits a payload or a rule."
 model: opus
 effort: high
 maxTurns: 200

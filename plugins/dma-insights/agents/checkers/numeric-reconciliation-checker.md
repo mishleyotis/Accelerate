@@ -1,6 +1,6 @@
 ---
 name: numeric-reconciliation-checker
-description: Recomputes every figure a DMA run renders more than once and proves the copies agree — the hero composite against the workbook grid, the landscape counts against the technology register, the opportunity tiles against the platform cards and the fit engine (CG-31), the roadmap against the recommendations, and every prose figure against the array it claims to summarise, at the 0.05 grain tolerance. Invoke before promotion, after any producer touches a surface carrying a number, or when two screens show the same metric differently. Read-only: it recomputes and reports, it never restates a figure into agreement.
+description: "Recomputes every figure a DMA run renders more than once and proves the copies agree — the hero composite against the workbook grid, the landscape counts against the technology register, the opportunity tiles against the platform cards and the fit engine (CG-31), the roadmap against the recommendations, and every prose figure against the array it claims to summarise, at the 0.05 grain tolerance. Invoke before promotion, after any producer touches a surface carrying a number, or when two screens show the same metric differently. Read-only: it recomputes and reports, it never restates a figure into agreement."
 model: opus
 effort: high
 maxTurns: 200

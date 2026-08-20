@@ -11,7 +11,7 @@
     "size_tier": "[Mega / Large / Medium / Small / Micro / Nano]",
     "size_tier_basis": "Total assets in most recent fiscal year: $[X] million",
     "geography": "[Primary state/region served]",
-    "founding_year": [Year],
+    "founding_year": "[Year]",
     "headquarters_location": "[City, State]"
   },
   "assessment_scope": {
@@ -53,7 +53,7 @@
         "evidence_tier": "[T1 / T2 / T3 / T4 / T5]",
         "document_date": "YYYY-MM-DD or 'Current' or 'Trailing [Period]'",
         "file_path": "[Path in uploads folder]",
-        "file_size_bytes": [Size],
+        "file_size_bytes": "[Size]",
         "document_status": "[READY_TO_PROCESS / IN_PROGRESS / PROCESSED]",
         "processing_notes": "[Any special notes or limitations]"
       }
