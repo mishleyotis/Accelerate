@@ -119,7 +119,8 @@ curl -sfL https://raw.githubusercontent.com/mishleyotis/Accelerate/claude/dma-in
 ```
 
 together with one environment variable in the same settings screen:
-`DMA_ROUTINE_SA_KEY` — the `dmai-routine@` service-account key JSON
+`DMA_ROUTINE_SA_KEY_B64` — the `dmai-routine@` service-account key JSON,
+base64-encoded to one line because the settings field is .env format
 (retrieval and rotation: `plugins/dma-insights/docs/secrets.md` §1b). The
 script clones the repo, installs the plugin from the repo marketplace,
 lands the key at `/root/.dma/sa.json`, fetches the connector path token
@@ -151,9 +152,9 @@ so a drifted trigger is detectable by diff:
 ```
 You are the scheduled DMA synthesis routine (dma-insights). One client per firing, end to end, through the installed plugin only — its skills, agents, hooks and routing are the system under test, so do not improvise around them and do not use ad-hoc multi-agent workflows.
 
-STEP -1 — SELF-PROVISION IF THE PLUGIN IS MISSING. Trigger-fired containers start with no repository and no plugin. If `claude plugin list` shows no dma-insights: (a) attach the repository — call the claude-code-remote add_repo tool (owner mishleyotis, repo accelerate, access read), clone it to /home/user/Accelerate at branch claude/dma-insights-onboarding-0ryrd0 as the tool instructs, then call register_repo_root — the repo's .claude/settings.json declares the plugin from its own marketplace, so it loads on your NEXT turn; (b) run `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh` — it lands the service-account identity from the DMA_ROUTINE_SA_KEY environment variable, fetches the connector path token fresh from Secret Manager, and installs the plugin with its config; (c) proceed to STEP 0 on the next turn. If DMA_ROUTINE_SA_KEY is not set in this environment, the connector cannot authenticate — finish (a) and (b), then STOP and report exactly that: the variable must be added in the claude.ai/code environment settings (value: Secret Manager dmai-routine-sa-key).
+STEP -1 — SELF-PROVISION IF THE PLUGIN IS MISSING. Trigger-fired containers start with no repository and no plugin. If `claude plugin list` shows no dma-insights: (a) attach the repository — call the claude-code-remote add_repo tool (owner mishleyotis, repo accelerate, access read), clone it to /home/user/Accelerate at branch claude/dma-insights-onboarding-0ryrd0 as the tool instructs, then call register_repo_root — the repo's .claude/settings.json declares the plugin from its own marketplace, so it loads on your NEXT turn; (b) run `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh` — it lands the service-account identity from the DMA_ROUTINE_SA_KEY_B64 environment variable (base64 of the key JSON on one line; raw DMA_ROUTINE_SA_KEY also accepted), fetches the connector path token fresh from Secret Manager, and installs the plugin with its config; (c) proceed to STEP 0 on the next turn. If /root/.dma/sa.json is still absent or empty after (b), the connector cannot authenticate — STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must be added in the claude.ai/code environment settings, one line, the base64 of Secret Manager secret dmai-routine-sa-key.
 
-STEP 0 — VERIFY THE TOOLING. This container was provisioned before the session started by the environment setup script (plugins/dma-insights/scripts/bootstrap_session.sh, wired in the claude.ai/code environment settings together with the DMA_ROUTINE_SA_KEY variable): repo checkout, plugin install, service-account identity, connector path token. Run `claude plugin list` and the dma-insights doctor command (/dma-insights:doctor). Require: plugin dma-insights version >= 0.5.1, doctor fully green including the live tool-roster check. If the plugin is missing, stale, or the doctor fails, STOP and report exactly what is missing, naming bootstrap_session.sh and DMA_ROUTINE_SA_KEY so the fix is actionable — producing anything with degraded tooling is worse than producing nothing.
+STEP 0 — VERIFY THE TOOLING. This container was provisioned before the session started by the environment setup script (plugins/dma-insights/scripts/bootstrap_session.sh, wired in the claude.ai/code environment settings together with the DMA_ROUTINE_SA_KEY_B64 variable): repo checkout, plugin install, service-account identity, connector path token. Run `claude plugin list` and the dma-insights doctor command (/dma-insights:doctor). Require: plugin dma-insights version >= 0.5.1, doctor fully green including the live tool-roster check. If the plugin is missing, stale, or the doctor fails, STOP and report exactly what is missing, naming bootstrap_session.sh and DMA_ROUTINE_SA_KEY_B64 so the fix is actionable — producing anything with degraded tooling is worse than producing nothing.
 
 STEP 1 — PICK ONE CLIENT. list_pending_runs via the connector; respect is_latest_for_request=true rows only. The learning sequence (docs/DECISIONS.md D7 in the plugin): 1) t-rowe-price-group-inc, 2) houlihan-lokey-inc, 3) hughes-federal-credit-union, 4) sl-green-realty-corp-nyse-slg (adjudicate its twin 'slg' by the worker's dedup rules first), 5) corporate-america-credit-union. Take the FIRST not yet serving six pages. HELD OUT — never produce from this routine: bok-financial-corporation and its twin bok-financial. If all five learners serve, take stress candidates in order: brick-city-capital, thrivent, bank-of-utah. If those too are done, report "sequence complete" and stop.
 
@@ -200,12 +201,14 @@ claude/dma-insights-onboarding-0ryrd0 as the tool instructs, then call
 register_repo_root — the repo's .claude/settings.json declares the plugin, so
 it loads on your NEXT turn; (b) run
 `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`;
-(c) proceed to STEP 0 on the next turn. If DMA_ROUTINE_SA_KEY is not set in
-this environment, finish (a) and (b), then STOP and report exactly that.
+(c) proceed to STEP 0 on the next turn. If /root/.dma/sa.json is still absent
+or empty after (b), STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must
+be added in the claude.ai/code environment settings (one line, base64 of
+Secret Manager secret dmai-routine-sa-key).
 
 STEP 0 — HANDSHAKE. This container was provisioned before the session started by
 the environment setup script (plugins/dma-insights/scripts/bootstrap_session.sh
-plus the DMA_ROUTINE_SA_KEY variable, both wired in the claude.ai/code
+plus the DMA_ROUTINE_SA_KEY_B64 variable, both wired in the claude.ai/code
 environment settings). Run `claude plugin list` and /dma-insights:doctor; require
 the dma-insights plugin present at version >= 0.5.1 and the doctor green — if
 either fails, STOP and report what is missing, naming bootstrap_session.sh and
@@ -322,14 +325,16 @@ claude/dma-insights-onboarding-0ryrd0 as the tool instructs, then call
 register_repo_root — the repo's .claude/settings.json declares the plugin, so
 it loads on your NEXT turn; (b) run
 `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`;
-(c) proceed to STEP 0 on the next turn. If DMA_ROUTINE_SA_KEY is not set in
-this environment, finish (a) and (b), then STOP and report exactly that.
+(c) proceed to STEP 0 on the next turn. If /root/.dma/sa.json is still absent
+or empty after (b), STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must
+be added in the claude.ai/code environment settings (one line, base64 of
+Secret Manager secret dmai-routine-sa-key).
 (The self-provision steps are the one exception to "never edit the repository" —
 they add nothing to it; the clone and the bootstrap only read it.)
 
 STEP 0 — VERIFY THE TOOLING. This container was provisioned before the session
 started by the environment setup script (plugins/dma-insights/scripts/
-bootstrap_session.sh plus the DMA_ROUTINE_SA_KEY variable, both wired in the
+bootstrap_session.sh plus the DMA_ROUTINE_SA_KEY_B64 variable, both wired in the
 claude.ai/code environment settings). Run /dma-insights:doctor; require it green
 and the connector's tools present. If the plugin is missing or the connector is
 unreachable, STOP and report exactly which layer failed, naming

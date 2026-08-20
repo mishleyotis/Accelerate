@@ -42,7 +42,7 @@ rotated on the next connector deploy):
 3. Every plugin user re-runs the retrieval command and updates the config
    field; the repo CLI needs nothing.
 
-## 1b. The routine service-account key (`DMA_ROUTINE_SA_KEY`)
+## 1b. The routine service-account key (`DMA_ROUTINE_SA_KEY_B64`)
 
 **What it is.** The JSON key of
 `dmai-routine@digital-maturity-assessor.iam.gserviceaccount.com` — the
@@ -55,7 +55,7 @@ database, touch storage, or mint other identities.
 
 **Where it lives.**
 - Escrow: Secret Manager, secret `dmai-routine-sa-key`, same project.
-- Runtime: the `DMA_ROUTINE_SA_KEY` environment variable in the CCR
+- Runtime: the `DMA_ROUTINE_SA_KEY_B64` environment variable in the CCR
   environment settings (claude.ai/code → environments → `Default - full
   network access`), set by hand once. `bootstrap_session.sh` writes it to
   `/root/.dma/sa.json` (0600) at container boot; `gcp_token.py` signs with
@@ -63,15 +63,18 @@ database, touch storage, or mint other identities.
   is absent.
 - NEVER in this repository — the repository is public.
 
-**How a person retrieves it** (to fill the environment variable):
+**How a person retrieves it** (to fill the environment variable — the
+settings field is .env format, one KEY=value per line, so the value is the
+base64 of the key JSON):
 
     gcloud secrets versions access latest \
-      --secret=dmai-routine-sa-key --project=digital-maturity-assessor
+      --secret=dmai-routine-sa-key --project=digital-maturity-assessor \
+      | base64 -w0
 
 **Rotation.**
 1. `gcloud iam service-accounts keys create` a new key for `dmai-routine@`,
    add it as a new version of `dmai-routine-sa-key`, update the
-   `DMA_ROUTINE_SA_KEY` environment variable from it.
+   `DMA_ROUTINE_SA_KEY_B64` environment variable from it (base64 -w0).
 2. `gcloud iam service-accounts keys delete` the old key id — from that
    moment the old JSON is dead everywhere, whatever still holds a copy.
 3. Nothing else updates: the path token is fetched per boot, and the plugin

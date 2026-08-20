@@ -54,13 +54,25 @@ else
 fi
 
 # ---- 2 · the service-account key from the environment variable ----------
+# The environment-settings field is .env format — one KEY=value per line —
+# so the multi-line key JSON cannot be pasted raw (measured 2026-08-20:
+# "Couldn't parse ... Use KEY=value format"). DMA_ROUTINE_SA_KEY_B64 is the
+# supported spelling: the key JSON base64-encoded to a single line. The raw
+# spelling still works for contexts that can carry newlines.
 mkdir -p "$(dirname "$KEY_FILE")" && chmod 700 "$(dirname "$KEY_FILE")"
-if [ -n "${DMA_ROUTINE_SA_KEY:-}" ]; then
+if [ -n "${DMA_ROUTINE_SA_KEY_B64:-}" ]; then
+  umask 077
+  printf '%s' "$DMA_ROUTINE_SA_KEY_B64" | base64 -d > "$KEY_FILE" 2>/dev/null \
+    || log "DMA_ROUTINE_SA_KEY_B64 did not base64-decode"
+elif [ -n "${DMA_ROUTINE_SA_KEY:-}" ]; then
   umask 077
   printf '%s' "$DMA_ROUTINE_SA_KEY" > "$KEY_FILE"
 fi
+if [ -s "$KEY_FILE" ] && ! python3 -c "import json;json.load(open('$KEY_FILE'))" 2>/dev/null; then
+  log "key file does not parse as JSON — check the pasted value"
+fi
 if [ ! -s "$KEY_FILE" ]; then
-  log "DMA_ROUTINE_SA_KEY is not set and no key file exists — connector"
+  log "DMA_ROUTINE_SA_KEY_B64 is not set and no key file exists — connector"
   log "auth will 403. Set the variable in the environment settings."
 fi
 
