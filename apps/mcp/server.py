@@ -882,10 +882,11 @@ def ingest_reviewer_feedback(limit: int = 200) -> dict:
 
 def build_app():
     """Streamable-HTTP app on the capability path (stateless: Cloud Run
-    may serve consecutive requests from different instances)."""
-    return mcp.streamable_http_app(
+    may serve consecutive requests from different instances), reachable
+    either as /mcp/{token} or as /mcp with the token in a header."""
+    return transport_mod.HeaderPathToken(mcp.streamable_http_app(
         streamable_http_path=f"/mcp/{token}", stateless_http=True,
-        json_response=True, host="0.0.0.0")
+        json_response=True, host="0.0.0.0"), token)
 
 
 if __name__ == "__main__":

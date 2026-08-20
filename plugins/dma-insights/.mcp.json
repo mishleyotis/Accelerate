@@ -2,7 +2,7 @@
   "mcpServers": {
     "connector": {
       "type": "http",
-      "url": "${user_config.mcp_base_url}/mcp/${user_config.mcp_path_token}",
+      "url": "${user_config.mcp_base_url}/mcp",
       "headersHelper": "${CLAUDE_PLUGIN_ROOT}/scripts/mcp_auth_headers.sh"
     }
   }

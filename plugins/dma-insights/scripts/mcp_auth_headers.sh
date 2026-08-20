@@ -3,18 +3,28 @@
 #
 # The connector needs two credentials and they are not the same thing:
 #
-#   * the capability-path token  — proves which connector you meant. It is a
-#     path segment, so it lives in the `url` (from ${user_config.mcp_path_token},
-#     stored in the OS keychain). Not this script's business.
 #   * a Google-signed ID token   — proves who you are. Cloud Run enforces
 #     roles/run.invoker on the audience before the request reaches the MCP
-#     server, so without this header every call is a 403 whatever the path
-#     token says. That is what this mints, per connection.
+#     server, so without this header every call is a 403 whatever else is
+#     right. Minted per connection, below.
+#   * the capability-path token  — proves which connector you meant. It used
+#     to be a URL segment filled from a REQUIRED plugin config option, which
+#     meant every install sat "MCP pending" until a human pasted a secret
+#     (owner, 2026-08-20: install must be automatic and all tools availed).
+#     It now travels as the `X-DMA-Path-Token` header and THIS script fetches
+#     it — environment override, then the cache bootstrap_session.sh lands,
+#     then Secret Manager with an access token from the same identity rungs.
+#     A header is also what an access log or an xtrace does NOT print the way
+#     it prints a URL — the 2026-08-20 leak printed the capability URL.
 #
 # Contract: print a JSON object of headers on stdout, nothing else. Diagnostics
-# go to stderr. The ID token appears on stdout because that is the transport;
-# it is never logged, never written to disk, and never echoed to stderr.
+# go to stderr. The tokens appear on stdout because that is the transport;
+# they are never logged and never echoed to stderr. The path-token cache file
+# is 600 under /root/.dma, the same trust boundary as the key itself.
 set -uo pipefail
+# Trace-proofing, same incident, same rule as bootstrap_session.sh: a caller's
+# bash -x must not print a credential this script handles.
+set +x
 
 AUD="${DMA_MCP_HOST:-https://dmai-mcp-dukrne5v4a-uc.a.run.app}"
 
@@ -87,4 +97,48 @@ fi
 
 [ -n "$IDT" ] || fail "no gcloud identity, no key file (DMA_SA_KEY_FILE, default /root/.dma/sa.json) and no DMA_ROUTINE_SA_KEY_B64 in the environment"
 
-printf '{"Authorization": "Bearer %s"}\n' "$IDT"
+# ── the capability-path token, by rung ─────────────────────────────────────
+# 1 · DMA_MCP_PATH_TOKEN in the environment (explicit override, and tests)
+# 2 · the cache file bootstrap_session.sh writes (survives within a container)
+# 3 · Secret Manager, read with an access token from the same identity rungs
+#     as above — then cached for rung 2, so rotation propagates on the next
+#     fresh connection and a Secret Manager blip does not break an
+#     established container.
+PATHTOK_FILE="${DMA_PATHTOK_FILE:-/root/.dma/pathtok}"
+PATHTOK="${DMA_MCP_PATH_TOKEN:-}"
+if [ -z "$PATHTOK" ] && [ -s "$PATHTOK_FILE" ]; then
+  PATHTOK="$(cat "$PATHTOK_FILE" 2>/dev/null | tr -d '[:space:]')"
+fi
+if [ -z "$PATHTOK" ]; then
+  ACT=""
+  if [ -n "${GCLOUD:-}" ]; then
+    ACT="$(CLOUDSDK_AUTH_ACCESS_TOKEN= "$GCLOUD" auth print-access-token 2>/dev/null)" || ACT=""
+  fi
+  if [ -z "$ACT" ]; then
+    here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    keyfile="${DMA_SA_KEY_FILE:-/root/.dma/sa.json}"
+    if [ -s "$keyfile" ]; then
+      ACT="$(python3 "$here/gcp_token.py" access --key "$keyfile" 2>/dev/null)" || ACT=""
+    else
+      ACT="$(python3 "$here/gcp_token.py" access 2>/dev/null)" || ACT=""
+    fi
+  fi
+  if [ -n "$ACT" ]; then
+    PATHTOK="$(curl -sf -H "Authorization: Bearer $ACT" \
+      "https://secretmanager.googleapis.com/v1/projects/digital-maturity-assessor/secrets/dmai-mcp-path-token/versions/latest:access" \
+      | python3 -c 'import sys,json,base64;sys.stdout.write(base64.b64decode(json.load(sys.stdin)["payload"]["data"]).decode())' 2>/dev/null)" || PATHTOK=""
+    if [ -n "$PATHTOK" ]; then
+      ( umask 077 && mkdir -p "$(dirname "$PATHTOK_FILE")" 2>/dev/null \
+        && printf '%s' "$PATHTOK" > "$PATHTOK_FILE" ) 2>/dev/null || true
+    fi
+  fi
+fi
+
+if [ -n "$PATHTOK" ]; then
+  printf '{"Authorization": "Bearer %s", "X-DMA-Path-Token": "%s"}\n' "$IDT" "$PATHTOK"
+else
+  # Identity without the path token: a URL-segment install still works with
+  # this; a static-URL install will 404 on /mcp, which stderr names here.
+  echo "dma-insights: no connector path token (DMA_MCP_PATH_TOKEN, $PATHTOK_FILE, or Secret Manager via the identity above); static-URL connections will 404" >&2
+  printf '{"Authorization": "Bearer %s"}\n' "$IDT"
+fi

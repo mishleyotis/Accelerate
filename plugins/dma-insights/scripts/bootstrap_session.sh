@@ -89,7 +89,10 @@ if [ ! -s "$KEY_FILE" ]; then
 fi
 
 # ---- 3 · the connector path token, fresh from Secret Manager ------------
-# Fetched per boot so a rotation needs no client-side update anywhere.
+# Fetched per boot so a rotation needs no client-side update anywhere. The
+# token is no longer plugin config (the URL is static /mcp and the token
+# travels as a header) — it lands in the cache file mcp_auth_headers.sh
+# reads, so the helper skips a Secret Manager round-trip per connection.
 PATHTOK=""
 if [ -s "$KEY_FILE" ]; then
   ACT="$(python3 "$REPO_DIR/plugins/dma-insights/scripts/gcp_token.py" access --key "$KEY_FILE" 2>/dev/null)" || ACT=""
@@ -98,7 +101,12 @@ if [ -s "$KEY_FILE" ]; then
       "https://secretmanager.googleapis.com/v1/projects/$PROJECT/secrets/dmai-mcp-path-token/versions/latest:access" \
       | python3 -c 'import sys,json,base64;sys.stdout.write(base64.b64decode(json.load(sys.stdin)["payload"]["data"]).decode())' 2>/dev/null)" || PATHTOK=""
   fi
-  [ -n "$PATHTOK" ] || log "could not fetch the connector path token from Secret Manager"
+  if [ -n "$PATHTOK" ]; then
+    ( umask 077 && printf '%s' "$PATHTOK" > "$(dirname "$KEY_FILE")/pathtok" ) \
+      || log "could not cache the path token beside the key"
+  else
+    log "could not fetch the connector path token from Secret Manager"
+  fi
 fi
 
 # ---- 4 · the plugin, installed from the repo marketplace ----------------
@@ -117,7 +125,6 @@ elif command -v claude >/dev/null 2>&1; then
     || claude plugin marketplace update zennify-dma >/dev/null 2>&1 \
     || log "marketplace add/update failed"
   INSTALL_ARGS=(--scope user --config "mcp_base_url=$MCP_URL" --config "repo_root=$REPO_DIR")
-  [ -n "$PATHTOK" ] && INSTALL_ARGS+=(--config "mcp_path_token=$PATHTOK")
   claude plugin install dma-insights@zennify-dma "${INSTALL_ARGS[@]}" >/dev/null 2>&1 \
     || claude plugin update dma-insights@zennify-dma >/dev/null 2>&1 \
     || log "plugin install failed"

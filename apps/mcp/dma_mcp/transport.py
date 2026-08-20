@@ -74,6 +74,7 @@ assembled payload byte-for-byte as they always have.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 
 # What a producing model can reliably emit in one tool call. Derived from the
@@ -443,3 +444,43 @@ def close_upload(conn, upload_id, submission_id) -> None:
                     WHERE id = %s AND state = 'OPEN'""",
                 (submission_id, upload_id))
     conn.commit()
+
+
+class HeaderPathToken:
+    """ASGI wrapper: accept the capability token as a HEADER on static /mcp.
+
+    Why (owner, 2026-08-20): a plugin whose server URL embeds the token
+    cannot connect until a human pastes it into plugin config, so every
+    install sat "MCP pending" — and a token in the URL is also what an
+    xtrace or an access log prints (the 2026-08-20 leak printed the
+    capability URL). With the token in `X-DMA-Path-Token`, the plugin ships
+    a static URL, its headers helper fetches the token itself from Secret
+    Manager at connection time, and install-to-tools needs no manual step
+    anywhere an identity exists. Cloud Run IAM remains the identity gate in
+    front of all of this; the token stays defense in depth.
+
+    A request to /mcp with the right header (constant-time compare) is
+    rewritten to the mounted capability path. The URL-segment form keeps
+    working — the rotation story is unchanged, because clients read the
+    secret per connection. A wrong or missing header falls through
+    untouched and meets the same 404 as any wrong path: never a
+    distinguishable error, so the header is not an oracle.
+    """
+
+    def __init__(self, inner, token: str):
+        self.inner = inner
+        self.token = token
+
+    async def __call__(self, scope, receive, send):
+        if (scope.get("type") == "http"
+                and scope.get("path", "").rstrip("/") == "/mcp"):
+            supplied = ""
+            for name, value in scope.get("headers") or ():
+                if name == b"x-dma-path-token":
+                    supplied = value.decode("latin-1").strip()
+                    break
+            if supplied and hmac.compare_digest(supplied, self.token):
+                scope = dict(scope)
+                scope["path"] = f"/mcp/{self.token}"
+                scope["raw_path"] = scope["path"].encode("latin-1")
+        await self.inner(scope, receive, send)

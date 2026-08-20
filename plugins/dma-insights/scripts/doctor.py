@@ -6,7 +6,8 @@ from the outside — the connector's tools are simply absent, and "absent"
 carries no reason:
 
   1. the plugin is enabled and its components loaded
-  2. `mcp_path_token` is set, so the capability URL resolves to a connector
+  2. the capability-path token is obtainable (header architecture: the
+     headers helper fetches it — env, cache file, or Secret Manager)
   3. a Google identity token can be minted, so Cloud Run lets the call through
   4. the token's AUDIENCE matches the URL being called
   5. the deployment actually ENFORCES that token
@@ -424,15 +425,22 @@ def _mint_via_keyfile(mode: str, value: str | None = None) -> str | None:
 
 
 def _path_token(gcloud: str | None) -> tuple:
-    """(capability-path token, source-or-reason). The plugin proper reads it
-    from the OS keychain (user_config.mcp_path_token), which no subprocess can
-    read portably; the doctor accepts the env override and falls back to the
-    Secret Manager entry the manifest documents — via gcloud where it exists,
-    else via Secret Manager REST with a key-file access token. The value is
-    returned to be SENT, never printed."""
+    """(capability-path token, source-or-reason). Same rungs as
+    mcp_auth_headers.sh, which now owns the token (it travels as the
+    X-DMA-Path-Token header on a static /mcp URL — no plugin config): the
+    env override, the cache file bootstrap lands, then Secret Manager — via
+    gcloud where it exists, else via REST with a key-file access token. The
+    value is returned to be SENT, never printed."""
     token = (os.environ.get("DMA_MCP_PATH_TOKEN") or "").strip()
     if token:
         return token, "DMA_MCP_PATH_TOKEN"
+    cache = Path(os.environ.get("DMA_PATHTOK_FILE", "/root/.dma/pathtok"))
+    try:
+        cached = cache.read_text().strip()
+    except OSError:
+        cached = ""
+    if cached:
+        return cached, f"cache file {cache}"
     if gcloud:
         env = dict(os.environ)
         env.pop("CLOUDSDK_AUTH_ACCESS_TOKEN", None)
@@ -720,8 +728,9 @@ def run_checks(base_url: str | None) -> list:
     out.append(_check(
         "connector path token", True,
         "set in this environment" if token_set else
-        "not in this environment — expected: the plugin stores it in the OS "
-        "keychain as user_config.mcp_path_token, not as an env var",
+        "not in this environment — expected: the headers helper fetches it "
+        "itself (cache file, then Secret Manager) and sends it as the "
+        "X-DMA-Path-Token header on the static /mcp URL",
         "if the connector 404s, read it with: gcloud secrets versions access "
         "latest --secret=dmai-mcp-path-token"))
     return out
