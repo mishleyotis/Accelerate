@@ -11,7 +11,7 @@
       "name": "dma-insights",
       "source": "./plugins/dma-insights",
       "displayName": "DMA Insights",
-      "description": "The six DMA skills, sixteen DMA agents, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector.",
+      "description": "The six DMA skills, the 47-agent production and audit roster, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector.",
       "version": "0.6.0",
       "category": "domain",
       "tags": [
