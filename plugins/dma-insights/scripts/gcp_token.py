@@ -20,11 +20,12 @@ stdout is the transport — it is never logged, never written to disk, never
 echoed to stderr. Diagnostics go to stderr; any failure exits non-zero with
 an empty stdout so callers can fail closed or fail open as THEY choose.
 
-The default key path (/root/.dma/sa.json) is where bootstrap_session.sh
-lands the DMA_ROUTINE_SA_KEY environment value; override with --key or the
-DMA_SA_KEY_FILE environment variable. Signing shells out to openssl rather
-than importing a crypto package so the script runs on the stock container
-with zero pip installs.
+The key is found by `load_key` — a key file if one exists (default
+/root/.dma/sa.json, where bootstrap_session.sh lands it; override with
+--key or DMA_SA_KEY_FILE), otherwise straight from the environment. See
+that function for why the environment rung is what makes scheduled routines
+work. Signing shells out to openssl rather than importing a crypto package
+so the script runs on the stock container with zero pip installs.
 """
 from __future__ import annotations
 
@@ -77,6 +78,49 @@ def sign_rs256(signing_input: bytes, private_key_pem: str) -> bytes:
             pass
 
 
+def load_key(path: str | None = None) -> tuple:
+    """(key dict, source) — the key file if one exists, else the environment.
+
+    THE ENVIRONMENT RUNG IS WHY ROUTINES WORK AT ALL. A plugin's MCP servers
+    register at session START, and mcp_auth_headers.sh is invoked at that
+    moment; bootstrap_session.sh, if it runs as a step inside the session,
+    lands /root/.dma/sa.json minutes too late — the connector has already
+    failed to authenticate and its 33 tools never resolve into the session
+    (measured 2026-08-20: a firing bootstrapped successfully, the doctor went
+    14/14 green over direct HTTP, and the connector's tools were still absent
+    because the session had already started). Reading the key straight from
+    the environment removes the ordering problem: the credential is present
+    before the first tool registration, with nothing to run beforehand.
+
+    Order: an explicit key file (a bootstrapped container, or a developer's
+    own path), then DMA_ROUTINE_SA_KEY_B64 (base64 of the key JSON on one
+    line — the shape the .env-format settings field accepts), then raw
+    DMA_ROUTINE_SA_KEY for contexts that carry newlines. Nothing is written
+    to disk on the environment rungs; the key is parsed in memory.
+    """
+    path = path or DEFAULT_KEY
+    try:
+        if os.path.getsize(path) > 0:
+            with open(path) as fh:
+                return json.load(fh), f"key file {path}"
+    except (OSError, ValueError):
+        pass
+    raw = os.environ.get("DMA_ROUTINE_SA_KEY_B64", "").strip()
+    if raw:
+        try:
+            return json.loads(base64.b64decode(raw)), "DMA_ROUTINE_SA_KEY_B64"
+        except Exception as exc:
+            return None, f"DMA_ROUTINE_SA_KEY_B64 set but unusable: {exc}"
+    raw = os.environ.get("DMA_ROUTINE_SA_KEY", "").strip()
+    if raw:
+        try:
+            return json.loads(raw), "DMA_ROUTINE_SA_KEY"
+        except Exception as exc:
+            return None, f"DMA_ROUTINE_SA_KEY set but unusable: {exc}"
+    return None, (f"no key file at {path} and neither DMA_ROUTINE_SA_KEY_B64 "
+                  "nor DMA_ROUTINE_SA_KEY is set")
+
+
 def mint_assertion(key: dict, extra_claims: dict) -> str:
     now = int(time.time())
     claims = {
@@ -112,12 +156,9 @@ def main(argv=None) -> int:
     p_ac.add_argument("--key", default=DEFAULT_KEY)
     args = ap.parse_args(argv)
 
-    try:
-        with open(args.key) as fh:
-            key = json.load(fh)
-    except (OSError, ValueError) as exc:
-        print(f"gcp_token: cannot read key file {args.key}: {exc}",
-              file=sys.stderr)
+    key, source = load_key(args.key)
+    if key is None:
+        print(f"gcp_token: no usable key — {source}", file=sys.stderr)
         return 2
 
     extra = ({"target_audience": args.audience} if args.mode == "id"

@@ -375,9 +375,8 @@ def deps_check(plugin_root: Path = PLUGIN) -> dict:
 
 def _keyfile() -> str | None:
     """The dmai-routine service-account key file, if this container has one.
-    bootstrap_session.sh lands it from the DMA_ROUTINE_SA_KEY environment
-    value; fresh routine containers have no gcloud, and this file is their
-    entire identity."""
+    bootstrap_session.sh lands it; a container that never ran bootstrap has
+    no file and reaches its identity through the environment instead."""
     path = os.environ.get("DMA_SA_KEY_FILE", "/root/.dma/sa.json")
     try:
         return path if os.path.getsize(path) > 0 else None
@@ -385,15 +384,33 @@ def _keyfile() -> str | None:
         return None
 
 
+def _identity_source() -> str | None:
+    """How this container can prove who it is, without gcloud — the key file
+    if bootstrap landed one, else the environment variable the connector's
+    auth helper reads at session start. Reporting only the file was a
+    false negative: a fired routine authenticates from the environment with
+    no file on disk anywhere (measured 2026-08-20)."""
+    keyfile = _keyfile()
+    if keyfile:
+        return f"key file {keyfile}"
+    for var in ("DMA_ROUTINE_SA_KEY_B64", "DMA_ROUTINE_SA_KEY"):
+        if (os.environ.get(var) or "").strip():
+            return var
+    return None
+
+
 def _mint_via_keyfile(mode: str, value: str | None = None) -> str | None:
     """Run the bundled gcp_token.py (same directory) — 'id' with an audience
-    or 'access' with the default scope. Returns the token or None; the token
-    is returned to be SENT, never printed."""
-    keyfile = _keyfile()
-    if not keyfile:
+    or 'access' with the default scope. Passes --key only when a file exists;
+    with no file, gcp_token.py's own load_key reaches the environment. Returns
+    the token or None; the token is returned to be SENT, never printed."""
+    if not _identity_source():
         return None
+    keyfile = _keyfile()
     cmd = [sys.executable, str(Path(__file__).resolve().parent / "gcp_token.py"),
-           mode, "--key", keyfile]
+           mode]
+    if keyfile:
+        cmd += ["--key", keyfile]
     if mode == "id" and value:
         cmd += ["--audience", value]
     try:
@@ -413,40 +430,44 @@ def _path_token(gcloud: str | None) -> tuple:
     token = (os.environ.get("DMA_MCP_PATH_TOKEN") or "").strip()
     if token:
         return token, "DMA_MCP_PATH_TOKEN"
-    if not gcloud:
-        access = _mint_via_keyfile("access")
-        if access:
-            import base64
-            import json as _json
-            import urllib.request
-            req = urllib.request.Request(
-                "https://secretmanager.googleapis.com/v1/projects/"
-                "digital-maturity-assessor/secrets/dmai-mcp-path-token/"
-                "versions/latest:access",
-                headers={"Authorization": f"Bearer {access}"})
-            try:
-                with urllib.request.urlopen(req, timeout=30) as resp:
-                    data = _json.loads(resp.read())
-                got = base64.b64decode(data["payload"]["data"]).decode().strip()
-                if got:
-                    return got, "secret manager (key-file identity)"
-            except Exception:
-                pass
-        return None, ("path token unobtainable: DMA_MCP_PATH_TOKEN unset, "
-                      "no gcloud, and the key-file Secret Manager read failed")
-    env = dict(os.environ)
-    env.pop("CLOUDSDK_AUTH_ACCESS_TOKEN", None)
-    try:
-        proc = subprocess.run(
-            [gcloud, "secrets", "versions", "access", "latest",
-             "--secret=dmai-mcp-path-token"],
-            capture_output=True, text=True, env=env, timeout=30)
-    except Exception:
-        proc = None
-    if proc and proc.returncode == 0 and proc.stdout.strip():
-        return proc.stdout.strip(), "secret manager"
-    return None, ("path token unobtainable: DMA_MCP_PATH_TOKEN unset and the "
-                  "Secret Manager read failed")
+    if gcloud:
+        env = dict(os.environ)
+        env.pop("CLOUDSDK_AUTH_ACCESS_TOKEN", None)
+        try:
+            proc = subprocess.run(
+                [gcloud, "secrets", "versions", "access", "latest",
+                 "--secret=dmai-mcp-path-token"],
+                capture_output=True, text=True, env=env, timeout=30)
+        except Exception:
+            proc = None
+        if proc and proc.returncode == 0 and proc.stdout.strip():
+            return proc.stdout.strip(), "secret manager"
+    # gcloud's PRESENCE is not its capability: an installed SDK with no active
+    # account reads exactly like no SDK at all, and a fired container has
+    # neither. Fall through to the key/environment identity rather than
+    # reporting the token unobtainable while a working credential sits in the
+    # environment (measured 2026-08-20).
+    access = _mint_via_keyfile("access")
+    if access:
+        import base64
+        import json as _json
+        import urllib.request
+        req = urllib.request.Request(
+            "https://secretmanager.googleapis.com/v1/projects/"
+            "digital-maturity-assessor/secrets/dmai-mcp-path-token/"
+            "versions/latest:access",
+            headers={"Authorization": f"Bearer {access}"})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = _json.loads(resp.read())
+            got = base64.b64decode(data["payload"]["data"]).decode().strip()
+            if got:
+                return got, "secret manager (service-account identity)"
+        except Exception:
+            pass
+    return None, ("path token unobtainable: DMA_MCP_PATH_TOKEN unset, gcloud "
+                  "absent or unauthenticated, and the service-account Secret "
+                  "Manager read failed")
 
 
 def _sse_or_json(raw: str, content_type: str):
@@ -615,14 +636,14 @@ def run_checks(base_url: str | None) -> list:
     # 2 — an identity: gcloud where it exists, else the service-account key
     # file bootstrap_session.sh lands (fresh routine containers have no SDK).
     gcloud = _gcloud()
-    keyfile = _keyfile()
+    keyfile = _identity_source()
     out.append(_check(
         "gcloud found", bool(gcloud or keyfile),
-        gcloud or (f"absent — using service-account key file {keyfile}"
+        gcloud or (f"absent — identity from {keyfile}"
                    if keyfile else "not on PATH or in the usual install "
-                   "locations, and no key file"),
+                   "locations, and no key file or key in the environment"),
         "" if (gcloud or keyfile) else "install the Google Cloud SDK, set "
-        "GCLOUD_BIN, or land a key via DMA_ROUTINE_SA_KEY (bootstrap_session.sh)"))
+        "GCLOUD_BIN, or set DMA_ROUTINE_SA_KEY_B64 in the environment"))
     account = None
     if gcloud:
         env = dict(os.environ)
@@ -632,10 +653,21 @@ def run_checks(base_url: str | None) -> list:
              "--format=value(account)"], capture_output=True, text=True, env=env)
         account = (proc.stdout or "").strip().splitlines()
         account = account[0] if account else None
-    elif keyfile:
+    gcloud_account = account          # only gcloud can mint with THIS one
+    # An SDK with no active account is not an identity. Fall through to the
+    # key or the environment instead of failing next to a working credential.
+    if not account and keyfile:
+        kf = _keyfile()
         try:
-            account = json.loads(Path(keyfile).read_text()).get("client_email")
-        except (OSError, ValueError):
+            if kf:
+                account = json.loads(Path(kf).read_text()).get("client_email")
+            else:
+                import base64 as _b64
+                raw = (os.environ.get("DMA_ROUTINE_SA_KEY_B64") or "").strip()
+                blob = _b64.b64decode(raw) if raw else (
+                    os.environ.get("DMA_ROUTINE_SA_KEY") or "").strip()
+                account = json.loads(blob).get("client_email") if blob else None
+        except (OSError, ValueError, Exception):
             account = None
     out.append(_check("active google account", account, account or "none active",
                       "gcloud auth login, activate a service account, or check "
@@ -647,7 +679,7 @@ def run_checks(base_url: str | None) -> list:
 
     # 4 — can a token actually be minted for that audience
     id_token = None
-    if gcloud and account:
+    if gcloud and gcloud_account:
         env = dict(os.environ)
         env.pop("CLOUDSDK_AUTH_ACCESS_TOKEN", None)
         proc = subprocess.run(
@@ -665,13 +697,14 @@ def run_checks(base_url: str | None) -> list:
         id_token = _mint_via_keyfile("id", aud)
         out.append(_check(
             "identity token mints", bool(id_token),
-            "yes, from the service-account key file (value not shown)"
-            if id_token else "key file present but the token exchange failed",
+            f"yes, from {keyfile} (value not shown)"
+            if id_token else f"{keyfile} present but the token exchange failed",
             "" if id_token else "run gcp_token.py id --audience <url> by hand "
-            "and read its stderr — a disabled key reports invalid_grant"))
+            "and read its stderr — a deleted key reports invalid_grant"))
     else:
         out.append(_check("identity token mints", False,
-                          "skipped: no gcloud, no active account, no key file"))
+                          "skipped: no gcloud identity, no key file, and no "
+                          "key in the environment"))
 
     # 5 — is the identity token actually ENFORCED, or merely minted?
     out.append(enforcement_check(base_url))

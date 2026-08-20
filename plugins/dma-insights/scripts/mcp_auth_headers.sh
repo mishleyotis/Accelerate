@@ -49,14 +49,24 @@ find_gcloud() {
 }
 
 # Fresh routine containers have no gcloud at all (measured 2026-08-19), so
-# identity has two rungs: gcloud when present, else an ID token minted from
-# the service-account key file that bootstrap_session.sh lands from the
-# DMA_ROUTINE_SA_KEY environment value. Same output contract either way.
-mint_from_keyfile() {
-  local keyfile="${DMA_SA_KEY_FILE:-/root/.dma/sa.json}"
-  [ -s "$keyfile" ] || return 1
+# identity has two rungs: gcloud when present, else gcp_token.py, which finds
+# the service-account key itself — the file bootstrap_session.sh lands, or
+# failing that the DMA_ROUTINE_SA_KEY_B64 environment value directly.
+#
+# The environment rung is deliberate and load-bearing. THIS SCRIPT RUNS AT
+# SESSION START, when the connector registers; a bootstrap that runs as a
+# step inside the session lands its key minutes too late and the connector's
+# tools never resolve (measured 2026-08-20). Reading the credential from the
+# environment means a scheduled routine authenticates from its first turn
+# with nothing having to run beforehand.
+mint_from_key() {
   local here; here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  python3 "$here/gcp_token.py" id --audience "$AUD" --key "$keyfile" 2>/dev/null
+  local keyfile="${DMA_SA_KEY_FILE:-/root/.dma/sa.json}"
+  if [ -s "$keyfile" ]; then
+    python3 "$here/gcp_token.py" id --audience "$AUD" --key "$keyfile" 2>/dev/null
+  else
+    python3 "$here/gcp_token.py" id --audience "$AUD" 2>/dev/null
+  fi
 }
 
 # Named IDT, not TOKEN: scripts/scan_secrets.py reads `token="<20 chars>"` as
@@ -72,9 +82,9 @@ if GCLOUD="$(find_gcloud)"; then
              --audiences="$AUD" 2>/dev/null)" || IDT=""
 fi
 if [ -z "$IDT" ]; then
-  IDT="$(mint_from_keyfile)" || IDT=""
+  IDT="$(mint_from_key)" || IDT=""
 fi
 
-[ -n "$IDT" ] || fail "no gcloud identity and no service-account key file (DMA_SA_KEY_FILE, default /root/.dma/sa.json)"
+[ -n "$IDT" ] || fail "no gcloud identity, no key file (DMA_SA_KEY_FILE, default /root/.dma/sa.json) and no DMA_ROUTINE_SA_KEY_B64 in the environment"
 
 printf '{"Authorization": "Bearer %s"}\n' "$IDT"

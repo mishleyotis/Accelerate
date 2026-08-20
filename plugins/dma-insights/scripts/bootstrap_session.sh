@@ -30,6 +30,18 @@
 # loudly instead.
 set -uo pipefail
 
+# TRACE-PROOFING, and it is not optional. On 2026-08-20 a routine session ran
+# this script as `bash -x` to capture its log lines for a report; xtrace
+# expanded every command, printing the base64 service-account key, a minted
+# OAuth access token, a signed identity JWT and the connector's capability URL
+# into the transcript. Both credentials had to be rotated. A script that
+# handles secrets must not be traceable into a log by a caller who only wanted
+# verbose output, so tracing is turned off HERE, where the secrets are,
+# whatever the caller asked for. The log lines below are the supported way to
+# see what this script did; they name states, never values.
+set +x
+export PS4=''
+
 log() { echo "dma-bootstrap: $*"; }
 
 REPO_DIR="${DMA_REPO_DIR:-/home/user/Accelerate}"
@@ -90,7 +102,17 @@ if [ -s "$KEY_FILE" ]; then
 fi
 
 # ---- 4 · the plugin, installed from the repo marketplace ----------------
-if command -v claude >/dev/null 2>&1; then
+# Refuse to register a marketplace from a directory that does not hold one.
+# Measured 2026-08-20: run with DMA_REPO_DIR pointing at a path that did not
+# exist (a test harness), `claude plugin marketplace add` accepted it anyway
+# and rewrote the caller's settings.json to a dead source — a working install
+# was replaced by a broken one because the clone had failed silently earlier.
+# A provisioning script must leave a half-provisioned machine no worse than
+# it found it.
+if [ ! -f "$REPO_DIR/.claude-plugin/marketplace.json" ]; then
+  log "no marketplace manifest at $REPO_DIR/.claude-plugin/marketplace.json —"
+  log "skipping plugin install rather than registering a dead source"
+elif command -v claude >/dev/null 2>&1; then
   claude plugin marketplace add "$REPO_DIR" >/dev/null 2>&1 \
     || claude plugin marketplace update zennify-dma >/dev/null 2>&1 \
     || log "marketplace add/update failed"
