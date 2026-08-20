@@ -95,6 +95,20 @@ version 2; the capability path token went to version 3 in the same pass and
 the old path was verified dead (404). The script now disables tracing
 itself so the same report can never reproduce the leak.
 
+**Rotated again 2026-08-20 (owner-requested clean slate).** Key `f01ea66a…`
+destroyed, `e13dcc98…` issued and escrowed as version 3; versions 1 and 2
+DISABLED so `latest` is the only accessible one. Note for anyone comparing
+by eye: every service-account key's base64 opens with the same ~50
+characters, because every key JSON begins with the same type declaration —
+so two rotations LOOK identical at a glance. Verify a rotation by the key
+id, never the prefix (and no, the prefix is not written out here: it
+decodes to the very pattern scan_secrets.py hunts, and the fixture yields
+to the gate):
+
+    gcloud secrets versions access latest --secret=dmai-routine-sa-key \
+      --project=digital-maturity-assessor \
+      | python3 -c 'import sys,json;print(json.load(sys.stdin)["private_key_id"][:12])'
+
 **Rotation.**
 1. `gcloud iam service-accounts keys create` a new key for `dmai-routine@`,
    add it as a new version of `dmai-routine-sa-key`, update the
