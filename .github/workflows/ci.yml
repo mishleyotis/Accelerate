@@ -373,8 +373,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      # NO `|| npm install` FALLBACK. `npm ci` fails for exactly one reason —
+      # package.json and package-lock.json disagree — and falling back to
+      # `npm install` resolves a different tree, rewrites the lockfile in the
+      # runner, and reports green. That is the drift the lockfile exists to
+      # catch, caught and then discarded. If this step goes red, run
+      # `npm install` locally and commit the lockfile it writes.
       - working-directory: apps/web
-        run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       # THE BROWSER, and it is not optional here. Nine suites in
       # apps/web/tests drive the compiled bundle through Chromium, and every
       # one of them resolved none on this runner and SKIPPED — 147 tests
