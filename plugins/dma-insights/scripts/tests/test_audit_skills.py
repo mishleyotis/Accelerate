@@ -141,6 +141,80 @@ def test_a_script_that_fails_its_help_fails_the_audit(tmp_path):
     assert out["fails"][0]["path"].endswith("boom.py")
 
 
+# ─────────────────────────────────────────────────────────────────────
+# A missing dependency is a bare machine, not a defect.
+#
+# The exit code above went in and CI went red the same hour: "17 script(s)
+# fail --help" — seventeen skill scripts wanting openpyxl on a runner that
+# installs the services' requirements and not the plugin's. The failure was
+# in the audit, not the scripts.
+#
+# Widening a gate to forgive a class is where gates go to die, so each of the
+# three tests below is paired with a control that must still fail.
+# ─────────────────────────────────────────────────────────────────────
+
+
+def _skill(tmp_path, name, body):
+    skill = tmp_path / "skills" / "dep-skill"
+    skill.mkdir(parents=True, exist_ok=True)
+    (skill / "SKILL.md").write_text("a skill\n")
+    (skill / name).write_text(body)
+    return tmp_path / "skills"
+
+
+def test_an_absent_third_party_import_is_reported_not_counted(tmp_path):
+    root = _skill(tmp_path, "needs_dep.py",
+                  "import definitely_not_a_real_package_xyz\n")
+    r, out = _run(str(root))
+    assert r.returncode == 0, r.stderr
+    assert out["scripts_env"] == 1 and out["scripts_fail"] == 0
+    assert out["env_modules"] == ["definitely_not_a_real_package_xyz"]
+
+
+def test_a_script_that_prints_its_own_install_hint_is_not_breakage(tmp_path):
+    """Eight of the scripts catch ImportError and print a clean hint instead
+    of a traceback. A classifier reading only tracebacks marks exactly the
+    well-behaved ones as broken — and some print it on stdout."""
+    root = _skill(tmp_path, "polite.py",
+                  "import sys\n"
+                  "print('ERROR: openpyxl not installed. "
+                  "Run: pip install openpyxl --break-system-packages')\n"
+                  "sys.exit(1)\n")
+    r, out = _run(str(root))
+    assert r.returncode == 0, r.stderr
+    assert out["scripts_env"] == 1
+    assert out["env_modules"] == ["openpyxl"]
+
+
+def test_a_first_party_import_failure_is_still_breakage(tmp_path):
+    """`import dma_mcp` failing is wrong on every machine, so the forgiveness
+    stops at the repository's own modules."""
+    root = _skill(tmp_path, "ours.py", "import dma_mcp.no_such_submodule\n")
+    r, out = _run(str(root))
+    assert r.returncode == 1, "a first-party import failure was excused"
+    assert out["scripts_fail"] == 1 and out["scripts_env"] == 0
+
+
+def test_a_syntax_error_is_still_breakage(tmp_path):
+    """THE CONTROL ON THE WIDENING. Nothing about a missing dependency
+    excuses a script that cannot be parsed."""
+    root = _skill(tmp_path, "unparseable.py", "def broken(:\n    pass\n")
+    r, out = _run(str(root))
+    assert r.returncode == 1
+    assert out["scripts_fail"] == 1 and out["scripts_env"] == 0
+
+
+def test_a_failure_that_merely_mentions_installing_is_not_excused(tmp_path):
+    """The hint rule keys on `pip install <pkg>`; prose about installation in
+    an unrelated crash must not buy a pass."""
+    root = _skill(tmp_path, "chatty.py",
+                  "import sys\n"
+                  "sys.exit('the config is malformed; reinstall will not help')\n")
+    r, out = _run(str(root))
+    assert r.returncode == 1
+    assert out["scripts_fail"] == 1 and out["scripts_env"] == 0
+
+
 def test_an_empty_skills_tree_refuses_rather_than_reporting_clean(tmp_path):
     empty = tmp_path / "skills"
     empty.mkdir()

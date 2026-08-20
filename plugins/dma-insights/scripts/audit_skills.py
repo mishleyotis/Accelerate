@@ -41,6 +41,10 @@ def _repo_root(plugin_root: str) -> str:
     return plugin_root
 
 
+# Where THIS script lives, independent of what it is pointed at.
+SELF_PLUGIN_ROOT = _plugin_root(DEFAULT_ROOT)
+SELF_REPO = _repo_root(SELF_PLUGIN_ROOT)
+
 # Set from the parsed arguments in main(); the audit functions read these.
 ROOT = DEFAULT_ROOT
 PLUGIN_ROOT = _plugin_root(DEFAULT_ROOT)
@@ -114,6 +118,48 @@ def scripts(skill):
     return sorted(out)
 
 
+_MISSING_MODULE = re.compile(r"ModuleNotFoundError: No module named '([\w.]+)'")
+# A script that catches its own ImportError and prints a clean install hint —
+# "ERROR: openpyxl not installed. Run: pip install openpyxl" — is doing the
+# RIGHT thing, and a classifier that reads only tracebacks marks exactly those
+# scripts as broken. Eight of them, all better-behaved than the eighteen that
+# let the traceback through.
+_PIP_HINT = re.compile(r"pip install\s+(?:-[\w-]+\s+)*([A-Za-z][\w.-]*)")
+
+
+def _is_first_party(mod: str) -> bool:
+    """Does this repository ship the missing module?
+
+    The distinction decides whether a failing `--help` is a DEFECT or a bare
+    machine. `import openpyxl` failing says the runner has no openpyxl;
+    `import dma_worker` failing says the script's own imports are wrong, and
+    that is true on every machine.
+    """
+    top = mod.split(".")[0]
+    seen = set()
+    # SELF_REPO, not only the audited tree. "What this repository ships" is a
+    # property of the auditor's own repository and does not change with the
+    # directory you point it at — pointed at a temporary tree, the derived
+    # roots are that tree, and `import dma_mcp` failing would be excused as a
+    # missing third-party package.
+    for base in (PLUGIN_ROOT, REPO_ROOT, SELF_PLUGIN_ROOT, SELF_REPO):
+        if not base or base in seen:
+            continue
+        seen.add(base)
+        roots = [base]
+        for parent in ("apps", "packages", "scripts", "plugins"):
+            p = os.path.join(base, parent)
+            if os.path.isdir(p):
+                roots.append(p)
+                roots.extend(os.path.join(p, d) for d in os.listdir(p)
+                             if os.path.isdir(os.path.join(p, d)))
+        for r in roots:
+            if os.path.exists(os.path.join(r, top)) or \
+                    os.path.exists(os.path.join(r, top + ".py")):
+                return True
+    return False
+
+
 def help_audit():
     rows = []
     for s in SKILLS:
@@ -122,15 +168,36 @@ def help_audit():
                 r = subprocess.run([sys.executable, p, "--help"],
                                    capture_output=True, text=True, timeout=60,
                                    cwd=os.path.dirname(p))
-                rc, err = r.returncode, (r.stderr or "").strip().splitlines()
+                rc = r.returncode
+                err = (r.stderr or "").strip().splitlines()
+                # BOTH STREAMS. Several of these scripts print their install
+                # hint on stdout, so a stderr-only read saw an empty reason and
+                # had nothing to classify.
+                out = ((r.stderr or "") + "\n" + (r.stdout or "")).strip()
             except Exception as exc:
-                rc, err = 99, [repr(exc)]
-            reason = ""
+                rc, err, out = 99, [repr(exc)], repr(exc)
+            reason, kind, missing = "", "ok", ""
             if rc != 0:
-                tail = [l for l in err if "Error" in l or "error" in l]
-                reason = (tail[-1] if tail else (err[-1] if err else ""))[:160]
+                tail = [l for l in (err or out.splitlines())
+                        if "Error" in l or "error" in l or "ERROR" in l]
+                reason = (tail[-1] if tail
+                          else (err[-1] if err else out.splitlines()[-1]
+                                if out else ""))[:160]
+                # A THIRD-PARTY IMPORT THE RUNNER LACKS IS NOT BREAKAGE.
+                # Measured 2026-08-20: this audit gained an exit code and CI
+                # went red with "17 script(s) fail --help" — seventeen skill
+                # scripts whose only sin was wanting openpyxl on a runner that
+                # installs the services' requirements and not the plugin's.
+                # Reported, counted, and not fatal; a first-party import that
+                # fails still is, because that one fails everywhere.
+                m = _MISSING_MODULE.search(out) or _PIP_HINT.search(out)
+                if m and not _is_first_party(m.group(1)):
+                    kind, missing = "env", m.group(1)
+                else:
+                    kind = "fail"
             rows.append({"skill": s, "path": os.path.relpath(p, ROOT),
-                         "rc": rc, "reason": reason})
+                         "rc": rc, "reason": reason, "kind": kind,
+                         "missing": missing})
     return rows
 
 
@@ -217,10 +284,13 @@ def main(argv=None) -> int:
     SKILLS = _discover_skills(ROOT)
     h = help_audit()
     broken, runtime = refs_audit()
-    fails = [x for x in h if x["rc"] != 0]
+    fails = [x for x in h if x["kind"] == "fail"]
+    env = [x for x in h if x["kind"] == "env"]
     print(json.dumps({
-        "scripts_total": len(h), "scripts_ok": len(h) - len(fails),
+        "scripts_total": len(h), "scripts_ok": len(h) - len(fails) - len(env),
         "scripts_fail": len(fails), "fails": fails,
+        "scripts_env": len(env),
+        "env_modules": sorted({x["missing"] for x in env}),
         "broken_refs_total": len(broken), "broken_refs": broken,
         "broken_refs_ceiling": args.max_broken,
         "runtime_paths_total": len(runtime),
@@ -231,9 +301,13 @@ def main(argv=None) -> int:
     # THE EXIT CODE. Without it this script printed a defect list forever and
     # every caller read success. A failing --help is breakage outright; a
     # broken reference is breakage above the pinned backlog.
+    if env:
+        print(f"audit_skills: {len(env)} script(s) could not run --help for "
+              f"want of {', '.join(sorted({x['missing'] for x in env}))} — "
+              f"reported, not counted as breakage", file=sys.stderr)
     if fails:
-        print(f"audit_skills: {len(fails)} script(s) fail --help",
-              file=sys.stderr)
+        print(f"audit_skills: {len(fails)} script(s) fail --help: "
+              f"{', '.join(x['path'] for x in fails[:5])}", file=sys.stderr)
         return 1
     if len(broken) > args.max_broken:
         print(f"audit_skills: {len(broken)} broken references, ceiling "
