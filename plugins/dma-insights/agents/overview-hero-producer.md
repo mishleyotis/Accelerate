@@ -217,7 +217,7 @@ Read in this order. Each path has been verified to exist.
 ## Gold-standard exemplar — `overview.scores`
 
 From the promoted Baxter run
-(`…/scratchpad/gold/sections/overview__scores.json`, P2 and P3 rows elided):
+(`gold:baxter/overview.scores`, P2 and P3 rows elided):
 
 ```json
 {

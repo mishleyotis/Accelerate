@@ -321,7 +321,7 @@ anyway, because marking is the invariant and the strip is only the backstop.
 ## Gold-standard exemplar — the alert as a work item
 
 From the promoted Baxter run
-(`…/scratchpad/gold/sections/heatmap__alerts.json`, one alert of eleven):
+(`gold:baxter/heatmap.alerts`, one alert of eleven):
 
 ```json
 {
@@ -359,7 +359,7 @@ rather than silently inside it."*
 
 ## Gold-standard exemplar — the safeguard card, both arrays
 
-From the same run (`…/scratchpad/gold/sections/heatmap__safeguard_gates.json`):
+From the same run (`gold:baxter/heatmap.safeguard_gates`):
 
 ```json
 {
@@ -397,7 +397,7 @@ own `e_ids` array — the union rule, satisfied.
 
 ## Gold-standard exemplar — the cohort that was withheld
 
-From the same run (`…/scratchpad/gold/sections/heatmap__cohort_patterns.json`, the
+From the same run (`gold:baxter/heatmap.cohort_patterns`, the
 whole section):
 
 ```json
@@ -429,7 +429,7 @@ definition, and widening it would publish a comparison the spec forbids."*
 
 The reference client is audited like any other, and its alerts queue carries the
 defect MEM-0038 named. Measured over
-`…/scratchpad/gold/sections/heatmap__alerts.json`: **one distinct
+`gold:baxter/heatmap.alerts`: **one distinct
 `sources_searched` ladder across all eleven alerts**, the same closing sentence on
 **11 of 11** justifications, and `closure_condition` byte-identical to
 `queries_run[0]` on **11 of 11**:
@@ -478,7 +478,7 @@ Two on this cluster, both measured, both the same defect class as the peer-colum
 contradiction this round exists to remove.
 
 **The cohort thread that counts a cohort it does not have.** Logix
-(`…/scratchpad/gold/sections/logix_heatmap__cohort_patterns.json`):
+(`gold:logix/heatmap.cohort_patterns`):
 
 ```json
 {

@@ -196,7 +196,7 @@ carries no thread — its `empty_state` speaks instead.
 ## Gold-standard exemplar — the summary that argues in client facts
 
 From the promoted Baxter run
-(`…/scratchpad/gold/sections/overview__exec_summary.json`, `situation` and
+(`gold:baxter/overview.exec_summary`, `situation` and
 `answer` elided):
 
 ```json

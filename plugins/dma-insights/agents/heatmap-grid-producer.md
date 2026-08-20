@@ -219,7 +219,7 @@ Everything below is that contract stated at field level.
 ## Gold-standard exemplar — `heatmap.workbook_scores`
 
 From the promoted Baxter run
-(`…/scratchpad/gold/sections/heatmap__workbook_scores.json`, two pillars and
+(`gold:baxter/heatmap.workbook_scores`, two pillars and
 three categories of the seventeen shown):
 
 ```json

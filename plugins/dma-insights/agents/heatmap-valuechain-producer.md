@@ -213,7 +213,7 @@ it at all.
 ## Gold-standard exemplar — `heatmap.value_chain`
 
 From the promoted Baxter run
-(`…/scratchpad/gold/sections/heatmap__value_chain.json`, one stage of eight with
+(`gold:baxter/heatmap.value_chain`, one stage of eight with
 its 141 cell ids elided, and the run-level counters that close the section):
 
 ```json
@@ -266,7 +266,7 @@ Same run, same section, one file. The thread above says:
 ```
 
 The internal projection of that same section
-(`…/scratchpad/gold/served/heatmap_internal.json`) ships, beside it:
+(`the served gold heatmap page (run c1351d25, GET /v1/entities/baxter-credit-union-bcu/heatmap?audience=internal)`) ships, beside it:
 
 ```json
 {
@@ -286,7 +286,7 @@ from this round holds here as everywhere: **the disclosure and the field must
 agree, object by object, in every projection the section is served into.**
 
 Logix shows the wording that survives beside rendered stages
-(`…/scratchpad/gold/sections/logix_heatmap__value_chain.json`):
+(`gold:logix/heatmap.value_chain`):
 
 > "This section maps the grid onto the operating chain a member actually moves
 > through, so a cell score can be read as a step in a journey rather than a cell in

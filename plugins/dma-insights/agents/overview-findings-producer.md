@@ -255,7 +255,7 @@ promoted clients carry. Each finding is a complete object.
 ## Gold-standard exemplar
 
 From the promoted Baxter run
-(`…/scratchpad/gold/sections/overview__findings.json`, finding F-1 of five):
+(`gold:baxter/overview.findings`, finding F-1 of five):
 
 ```json
 {
@@ -316,7 +316,7 @@ expansion argue about the same cell.
 
 ### The envelope that contradicts its own payload
 
-From `…/scratchpad/gold/sections/logix_overview__findings.json`, the section
+From `gold:logix/overview.findings`, the section
 envelope beneath five fully populated findings:
 
 ```json

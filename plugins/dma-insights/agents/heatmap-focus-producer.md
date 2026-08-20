@@ -232,7 +232,7 @@ report and its page number, plus a configurable KPI strip.
 ## Gold-standard exemplar — `heatmap.focus_areas`
 
 From the promoted Baxter run
-(`…/scratchpad/gold/sections/heatmap__focus_areas.json`, two areas of four, with
+(`gold:baxter/heatmap.focus_areas`, two areas of four, with
 the forty and forty-seven cell ids elided):
 
 ```json

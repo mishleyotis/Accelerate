@@ -296,7 +296,7 @@ The O11 half — mix:
 ### What the served projection returns, and why it is not the exemplar
 
 The served gold file for either section
-(`…/scratchpad/gold/sections/overview__ceilings.json`, and
+(`gold:baxter/overview.ceilings`, and
 `overview__evidence_coverage.json` byte for byte the same) is this, complete:
 
 ```json
