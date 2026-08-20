@@ -4,7 +4,6 @@ description: Grades every learning note, rulebook refinement and fix against the
 model: claude-sonnet-5
 effort: high
 maxTurns: 40
-mcpServers: ["connector"]
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__record_refinement
 ---
 

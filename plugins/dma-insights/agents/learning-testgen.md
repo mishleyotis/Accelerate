@@ -4,7 +4,6 @@ description: Generates adversarial and regression cases for a named refinement â
 model: claude-haiku-4-5-20251001
 effort: high
 maxTurns: 60
-mcpServers: ["connector"]
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__record_refinement
 ---
 

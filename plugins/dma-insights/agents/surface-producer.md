@@ -4,7 +4,6 @@ description: Produces the six DMA Insights page payloads for one assessment run 
 model: opus
 effort: high
 maxTurns: 400
-mcpServers: ["connector", "Clay"]
 skills:
   - dma-surface-production
 ---

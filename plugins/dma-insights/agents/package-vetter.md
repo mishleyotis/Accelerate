@@ -4,7 +4,6 @@ description: Vets an assessment package before anything is parsed from it — wo
 model: opus
 effort: high
 maxTurns: 120
-mcpServers: ["connector"]
 skills:
   - dma-surface-production
   - dma-research

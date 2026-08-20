@@ -27,10 +27,17 @@ EXCLUDE_PARTS = {"__pycache__", ".pytest_cache", ".DS_Store"}
 EXCLUDE_SUFFIX = {".pyc"}
 
 # Every rule the claude.ai upload validator has enforced against this plugin,
-# with the date it was learned. Add to this list; never remove.
+# with the date it was learned, plus documented rules worth failing early on.
+# Add to this list; never remove.
 DESCRIPTION_MAX = 500          # "at most 500 characters" (2026-08-20)
 FORBIDDEN_TOP_LEVEL = {"bin"}  # "may not ship bin/ executables" (2026-08-20)
-MAX_ZIP_BYTES = 50 * 1024 * 1024  # not yet validator-confirmed; sanity bound
+MAX_ZIP_BYTES = 50 * 1024 * 1024  # documented org-plugin cap
+NAME_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")  # kebab-case, documented
+# Plugin-provided agents may not carry these front-matter fields (documented
+# restriction; all sixteen agents carried mcpServers until 2026-08-20 —
+# disallowedTools stays the actual guard, per-agent MCP scoping was
+# defense-in-depth the hosted schema refuses).
+FORBIDDEN_AGENT_KEYS = {"mcpServers", "hooks", "permissionMode"}
 
 
 def iter_files():
@@ -63,6 +70,18 @@ def check(manifest: dict, entries: list) -> list:
     for e in entries:
         if "__pycache__" in str(e) or str(e).endswith(".pyc"):
             fails.append(f"bytecode shipped: {e}")
+    if not NAME_RE.fullmatch(manifest.get("name") or ""):
+        fails.append(f"name {manifest.get('name')!r} is not kebab-case")
+    if re.search(r"https?://", desc):
+        fails.append("description contains a URL — the uploader rejects them; "
+                     "use homepage/repository fields")
+    for agent in sorted((PLUGIN / "agents").glob("*.md")):
+        head = agent.read_text().split("---")[1]
+        keys = {line.split(":")[0].strip() for line in head.splitlines()
+                if ":" in line and not line.startswith((" ", "\t", "-", "#"))}
+        for bad in sorted(FORBIDDEN_AGENT_KEYS & keys):
+            fails.append(f"agents/{agent.name} front matter carries {bad} — "
+                         "forbidden for plugin-provided agents")
     return fails
 
 

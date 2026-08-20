@@ -52,6 +52,25 @@ def test_checker_fails_on_top_level_bin():
     assert any("top-level bin/" in f for f in fails)
 
 
+def test_no_agent_carries_forbidden_front_matter():
+    """All sixteen agents carried mcpServers until 2026-08-20; the hosted
+    schema forbids it and disallowedTools is the real guard."""
+    fails = pkg.check(_manifest(), list(pkg.iter_files()))
+    assert not any("front matter carries" in f for f in fails)
+
+
+def test_checker_fails_on_url_in_description():
+    m = _manifest()
+    m["description"] = "See https://example.com for details (33 tools)"
+    fails = pkg.check(m, list(pkg.iter_files()))
+    assert any("contains a URL" in f for f in fails)
+
+
+def test_manifest_has_no_schema_field():
+    """$schema is outside the uploader's documented field set."""
+    assert "$schema" not in _manifest()
+
+
 def test_zip_builds_clean(tmp_path):
     rc = pkg.main(["--out", str(tmp_path)])
     assert rc == 0

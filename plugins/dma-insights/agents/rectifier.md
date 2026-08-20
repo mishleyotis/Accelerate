@@ -4,7 +4,6 @@ description: Turns accumulated findings into durable improvements to the DMA ski
 model: opus
 effort: high
 maxTurns: 250
-mcpServers: ["connector"]
 skills:
   - dma-rectifier
 disallowedTools: mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run

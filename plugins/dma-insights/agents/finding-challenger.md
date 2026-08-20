@@ -4,7 +4,6 @@ description: Adversarially challenges freshly produced surface JSON before it re
 model: opus
 effort: high
 maxTurns: 100
-mcpServers: ["connector"]
 skills:
   - dma-research
   - dma-surface-production

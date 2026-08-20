@@ -4,7 +4,6 @@ description: The learning loop's owner. Invoke at the end of any production or r
 model: opus
 effort: high
 maxTurns: 100
-mcpServers: ["connector"]
 skills:
   - dma-governance
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__withdraw_run

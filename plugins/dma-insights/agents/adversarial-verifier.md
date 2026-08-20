@@ -4,7 +4,6 @@ description: Attacks a DMA payload, a promoted run, or a governance verdict to f
 model: opus
 effort: high
 maxTurns: 200
-mcpServers: ["connector"]
 skills:
   - dma-surface-production
   - dma-governance
