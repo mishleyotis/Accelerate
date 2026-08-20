@@ -94,8 +94,8 @@ else
 fi
 
 # ---- 5 · skill script dependencies (pandas et al., wheel-only) ----------
-if [ -x "$REPO_DIR/plugins/dma-insights/bin/dma-deps" ]; then
-  "$REPO_DIR/plugins/dma-insights/bin/dma-deps" install >/dev/null 2>&1 \
+if [ -x "$REPO_DIR/plugins/dma-insights/scripts/dma-deps" ]; then
+  "$REPO_DIR/plugins/dma-insights/scripts/dma-deps" install >/dev/null 2>&1 \
     && log "skill script dependencies installed" \
     || log "dma-deps install failed — skills needing pandas/matplotlib will degrade"
 fi

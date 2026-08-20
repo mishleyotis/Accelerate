@@ -352,12 +352,12 @@ def enabled_state_check(manifest: dict) -> dict:
 
 
 def deps_check(plugin_root: Path = PLUGIN) -> dict:
-    """`bin/dma-deps check` folded into one row: its exit is the verdict."""
-    deps = plugin_root / "bin" / "dma-deps"
+    """`scripts/dma-deps check` folded into one row: its exit is the verdict."""
+    deps = plugin_root / "scripts" / "dma-deps"
     if not deps.is_file():
         return _check("skill script dependencies", False, f"{deps} not found",
-                      "reinstall the plugin; bin/dma-deps declares what the "
-                      "bundled skill scripts import")
+                      "reinstall the plugin; scripts/dma-deps declares what "
+                      "the bundled skill scripts import")
     try:
         proc = subprocess.run([sys.executable, str(deps), "check"],
                               capture_output=True, text=True, timeout=120)
@@ -369,7 +369,8 @@ def deps_check(plugin_root: Path = PLUGIN) -> dict:
     ok = proc.returncode == 0
     return _check("skill script dependencies", ok,
                   summary or f"dma-deps check exited {proc.returncode}",
-                  "" if ok else "run: dma-deps install (or dma-deps install --venv)")
+                  "" if ok else "run: scripts/dma-deps install (or scripts/"
+                  "dma-deps install --venv)")
 
 
 def _keyfile() -> str | None:

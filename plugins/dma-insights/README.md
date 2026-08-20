@@ -19,9 +19,10 @@ hooks/     precheck_submit (refuses a doomed submit before the network)
            session_brief (the routing and memory rules, at session start)
 commands/  /dma-insights:doctor          is this install able to do the work?
            /dma-insights:setup-routines  reconcile the scheduled routines
-bin/       dma-deps                      on PATH while the plugin is enabled
-scripts/   mcp_auth_headers.sh · doctor.py · setup_routines.py
+scripts/   dma-deps · mcp_auth_headers.sh · doctor.py · setup_routines.py
            audit_skills.py · hooks/ · tests/
+           (no bin/: claude.ai-hosted plugins may not ship PATH-added
+            executables — invoke dma-deps by path)
 routines.json  the scheduled routines this product requires, declared
 .mcp.json      the deployed connector, declared remote
 ```
@@ -205,9 +206,9 @@ Twenty-two bundled scripts import `pandas` or `python-pptx`. They are declared
 in `requirements.txt`, not fixed in place:
 
 ```bash
-dma-deps check      # what is missing and which scripts each gap blocks
-dma-deps install    # into the current interpreter
-dma-deps install --venv   # into ${CLAUDE_PLUGIN_DATA}/venv instead
+scripts/dma-deps check      # what is missing and which scripts each gap blocks
+scripts/dma-deps install    # into the current interpreter
+scripts/dma-deps install --venv   # into ${CLAUDE_PLUGIN_DATA}/venv instead
 ```
 
 Everything else runs on the standard library plus `openpyxl`.

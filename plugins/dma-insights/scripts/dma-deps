@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Declare, check and install the Python the bundled skill scripts import.
 
-`bin/` is on the Bash tool's PATH while the plugin is enabled, so:
+Lives in scripts/, invoked by path — claude.ai-hosted plugins may not ship a
+top-level bin/ (PATH-added executables bypass the admin approval surface, and
+the upload validator refuses them; measured 2026-08-20). From the plugin root:
 
-    dma-deps check          what is missing, which scripts each gap blocks, and
-                            whether every requirement resolves to a wheel on the
-                            target interpreter
-    dma-deps install        pip install -r requirements.txt, pinned by the
-                            interpreter's constraints file (current interpreter)
-    dma-deps install --venv into ${CLAUDE_PLUGIN_DATA}/venv instead, and print
-                            the interpreter to use
-    dma-deps which          the interpreter `dma-deps check` is reporting on
+    scripts/dma-deps check    what is missing, which scripts each gap blocks,
+                              and whether every requirement resolves to a wheel
+                              on the target interpreter
+    scripts/dma-deps install  pip install -r requirements.txt, pinned by the
+                              interpreter's constraints file
+    scripts/dma-deps install --venv   into ${CLAUDE_PLUGIN_DATA}/venv instead,
+                              and print the interpreter to use
+    scripts/dma-deps which    the interpreter `check` is reporting on
 
 Why a declaration rather than a fix in place: the eleven deck editors and six
 retrieval scripts are not broken, they have dependencies. Vendoring pandas or
