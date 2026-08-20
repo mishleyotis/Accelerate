@@ -128,8 +128,11 @@ def _run(gate, path, headers=()):
 def _gate(inner=None, jwt_claims=None, token_claims=None):
     calls = {"jwt": 0, "lookup": 0}
 
-    def verify_jwt(tok):
+    def verify_jwt(tok, audiences):
         calls["jwt"] += 1
+        assert isinstance(audiences, list) and audiences, (
+            "the gate must hand the verifier its accepted-audience list — "
+            "audience=None is not reliably skipped by google-auth")
         if jwt_claims is None:
             raise ValueError("bad signature")
         return jwt_claims

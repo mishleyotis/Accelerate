@@ -105,15 +105,19 @@ def check_identity(claims: dict, rung: str, *, host: str,
     return True, 200, f"oauth user {email}"
 
 
-def _default_verify_jwt(token: str):
-    """Rung A verifier: Google-signed JWT → claims. Signature, expiry and
-    issuer are enforced by google-auth against Google's published certs;
-    audience is checked by policy above (two legitimate audiences exist)."""
+def _default_verify_jwt(token: str, audiences: list):
+    """Rung A verifier: Google-signed JWT → claims. Signature, expiry,
+    issuer AND audience-membership are enforced by google-auth against
+    Google's published certs (audience=None does NOT reliably skip the
+    check across google-auth versions — measured live 2026-08-20, 'Invalid
+    audience' on a valid service token — so the accepted list is passed
+    explicitly); policy above then refines WHICH audience each identity
+    class may use."""
     import google.auth.transport.requests
     import google.oauth2.id_token
     request = google.auth.transport.requests.Request()
     return google.oauth2.id_token.verify_token(
-        token, request, audience=None,
+        token, request, audience=audiences,
         certs_url="https://www.googleapis.com/oauth2/v3/certs")
 
 
@@ -219,8 +223,12 @@ class OAuthGate:
     def _decide(self, token: str, host: str) -> tuple:
         oauth_client_id = os.environ.get("OAUTH_CLIENT_ID", "").strip()
         if token.count(".") == 2:
+            audiences = [f"https://{host}", GCLOUD_CLI_AUD]
+            svc = os.environ.get("MCP_SERVICE_URL", "").rstrip("/")
+            if svc:
+                audiences.append(svc)
             try:
-                claims = self.verify_jwt(token)
+                claims = self.verify_jwt(token, audiences)
             except Exception as e:                          # noqa: BLE001
                 return False, 401, f"id token failed verification: {e}"
             return check_identity(claims, "A", host=host,
