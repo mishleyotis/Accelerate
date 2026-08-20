@@ -785,7 +785,10 @@ function OpportunitySurfaceStrip({ entity, run, audience }) {
                         style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 5,
                                  background: "none", border: 0, padding: 0, cursor: "pointer",
                                  fontSize: 10.5, color: "var(--z-mid)", whiteSpace: "nowrap" }}>
-                  {t.rank != null ? <span className="f-mono" style={{ color: "var(--z-muted)" }}>#{t.rank}</span> : null}
+                  {/* No rank stamp here (owner, 2026-08-20: "remove the
+                      #number, just have the writing after"): the tiles are
+                      already in rank order and the expansion opens with
+                      "Why it ranks here". */}
                   {/* The count is on the tile FACE and the list is one click
                       below it, so a reader who only scans the strip still
                       learns how much of their assessment each platform

@@ -1,6 +1,6 @@
 ---
 name: heatmap-evidence-producer
-description: Produces or repairs the HEATMAP evidence surfaces for one run — H2 cell evidence (`heatmap.cell_evidence`, the per-cell synthesis drawer every grid click opens, DD-1) and H6 the run's evidence index (`heatmap.evidence`, which the DD-2 drawer opens from any evidence chip on any page). Invoke with the run id when a drawer opens onto nothing, when a cited id does not resolve, when CG-15 refuses the syntheses, or when a verdict, rejection ticket or audit names either section, instead of re-running the whole heatmap page; it returns section JSON and never submits.
+description: Produces or repairs the HEATMAP evidence pair for one run — H2 cell evidence (`heatmap.cell_evidence`, the per-cell synthesis drawer a grid click opens) and H6 the run's evidence index (`heatmap.evidence`, which any evidence chip on any page opens). Invoke with the run id when a drawer opens onto nothing, a cited id does not resolve, CG-15 refuses the syntheses, or a verdict, rejection ticket or audit names either section — instead of re-running the whole heatmap page; it returns section JSON and never submits.
 model: sonnet
 effort: high
 maxTurns: 200

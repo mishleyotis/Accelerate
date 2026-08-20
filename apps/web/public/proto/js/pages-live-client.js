@@ -781,7 +781,7 @@ function LiveOpportunity({
     }
   }, t.rank != null ? /*#__PURE__*/React.createElement("span", {
     className: "b b-purple"
-  }, "#", t.rank) : null, /*#__PURE__*/React.createElement("span", {
+  }, t.rank, ".") : null, /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 12.5,
       fontWeight: 600,
@@ -3235,7 +3235,7 @@ function LiveStarters({
     }
   }, st.rank != null ? /*#__PURE__*/React.createElement("span", {
     className: "b b-purple"
-  }, "#", st.rank) : null, st.opens_on ? /*#__PURE__*/React.createElement("span", {
+  }, st.rank, ".") : null, st.opens_on ? /*#__PURE__*/React.createElement("span", {
     className: "b"
   }, st.opens_on) : null, /*#__PURE__*/React.createElement("span", {
     className: "spacer"

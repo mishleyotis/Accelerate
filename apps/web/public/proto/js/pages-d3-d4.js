@@ -1184,7 +1184,7 @@ function ClientPlatform({
         style: {
           marginRight: 5
         }
-      }, "#", pfText(t.rank)) : null, pfText(t.platform) || "Platform not named"), /*#__PURE__*/React.createElement("div", {
+      }, pfText(t.rank), ".") : null, pfText(t.platform) || "Platform not named"), /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 9.5,
           color: "var(--z-muted)",
@@ -2246,8 +2246,8 @@ function ClientPlatform({
     },
     onClick: () => {
       const text = starters.map((s, i) => {
-        const head = `#${s.rank != null ? s.rank : i + 1}`;
-        return [`${head} — ${pfText(s.text) || ""}`, s.followup_question ? `Follow-up: ${pfText(s.followup_question)}` : null, (s.e_ids || []).length ? `Evidence: ${s.e_ids.join(", ")}` : null].filter(Boolean).join("\n");
+        const head = `${s.rank != null ? s.rank : i + 1}.`;
+        return [`${head} ${pfText(s.text) || ""}`, s.followup_question ? `Follow-up: ${pfText(s.followup_question)}` : null, (s.e_ids || []).length ? `Evidence: ${s.e_ids.join(", ")}` : null].filter(Boolean).join("\n");
       }).join("\n\n");
       try {
         navigator.clipboard.writeText(text);
@@ -2321,7 +2321,7 @@ function ClientPlatform({
       style: {
         flexShrink: 0
       }
-    }, "#", s.rank != null ? s.rank : i + 1), stamp ? /*#__PURE__*/React.createElement("span", {
+    }, s.rank != null ? s.rank : i + 1, "."), stamp ? /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 10,
         color: "var(--z-dpur)",

@@ -8,7 +8,7 @@ lost capitals.
 Mostly a prompt, not a gate: it finds the sentence, you decide. Everything on a
 client dashboard is read by, or in front of, the client.
 
-TWO sections of it are rules and say so.
+THREE sections of it are rules and say so.
 
 Sentence case (CG-11) is mechanical and the connector refuses on it: a prose
 field on a client surface begins with a capital. The exception is a first word
@@ -32,6 +32,12 @@ into a marketing audience, and every hop is a place lineage would be recorded.
 No catalogue, no lineage tool, no impact-analysis practice appears anywhere in
 the record." That is the rule being followed, not broken, and flagging it would
 be flagging the good writing.
+
+HASHTAG NUMBERING is the third (owner, 2026-08-20, from the live platform
+page: "I would rather have natural numbering than any hashtags anywhere").
+Prose never writes "#1" — a rank is written naturally ("1.", "ranked first",
+"the top starter") or carried by order. Verbatim excerpts are exempt as
+always: a quotation keeps whatever its source wrote.
 """
 from __future__ import annotations
 import argparse, json, re, sys
@@ -159,6 +165,19 @@ def sentence_case_offender(key, value):
     word = text.split()[0].strip(".,;:")
     return None if CAMEL_FIRST_WORD.match(word) else word
 
+HASHTAG_NUM = re.compile(r"#\d+\b")
+
+
+def hashtag_numbering(key, value):
+    """→ the offending '#N' token, or None. Word-boundary keeps a hex colour
+    ('#62D7B8') from matching — not that a colour may be in a payload either,
+    but it must fail the no-colour gate under its own name, not this one."""
+    if not isinstance(value, str) or key in NEVER_CASE:
+        return None
+    m = HASHTAG_NUM.search(value)
+    return m.group(0) if m else None
+
+
 def absence_opening(value):
     """→ (matched opener, why, fix) if the FIELD opens on an absence."""
     text = (value or "").strip().lstrip("\"'“‘([{")
@@ -191,7 +210,7 @@ def main():
     try: payload = json.load(open(a.payload, encoding="utf-8"))
     except Exception as e: print(f"could not read payload: {e}"); return 1
 
-    hits, unpaired, checked, lower, opens = [], [], 0, [], []
+    hits, unpaired, checked, lower, opens, hashes = [], [], 0, [], [], []
     for path, val in walk(payload):
         if not isinstance(val, str): continue
         # CG-11 runs over EVERY string, not just the prose-keyed ones: the
@@ -199,6 +218,8 @@ def main():
         key = path.rsplit(".", 1)[-1].split("[")[0]
         word = sentence_case_offender(key, val)
         if word: lower.append((path, word, val))
+        tok = hashtag_numbering(key, val)
+        if tok: hashes.append((path, tok, val))
         if len(val) < 12: continue
         if not any(path.lower().endswith(k) or f".{k}" in path.lower() for k in PROSE_KEYS): continue
         checked += 1
@@ -221,7 +242,8 @@ def main():
     print(f"  fields that OPEN on an absence: {len(opens)}")
     print(f"  accusatory constructions: {len(hits)}")
     print(f"  gap statements with no adjacent asset: {len(unpaired)}")
-    print(f"  sentences that lost their capital (CG-11, BLOCKING): {len(lower)}\n")
+    print(f"  sentences that lost their capital (CG-11, BLOCKING): {len(lower)}")
+    print(f"  hashtag numbering (BLOCKING — write '1.', never '#1'): {len(hashes)}\n")
 
     if opens:
         print("  OPENS ON AN ABSENCE — name the asset first\n")
@@ -236,6 +258,12 @@ def main():
             print(f"    {path}")
             print(f"      begins {word!r} → write {word.capitalize()!r}")
             print(f"      {val[:120]}{'…' if len(val) > 120 else ''}\n")
+    if hashes:
+        print("  HASHTAG NUMBERING — natural numbering, no hashtags anywhere\n")
+        for path, tok, val in hashes:
+            print(f"    {path}")
+            print(f"      carries {tok!r} → write it naturally ('1.', 'ranked first')")
+            print(f"      {val[:120]}{'…' if len(val) > 120 else ''}\n")
     if hits:
         print("  ACCUSATORY — rewrite these\n")
         for path, tok, kind, fix, sent in hits:
@@ -248,11 +276,11 @@ def main():
         for path, sent in unpaired[:12]:
             print(f"    {path}\n      {sent[:150]}{'…' if len(sent) > 150 else ''}\n")
         if len(unpaired) > 12: print(f"    … and {len(unpaired) - 12} more\n")
-    if not hits and not unpaired and not lower and not opens:
+    if not hits and not unpaired and not lower and not opens and not hashes:
         print("  clean — reads as opportunity framing throughout.\n")
         print("  Still read the framing line and the top finding aloud. The checker finds")
         print("  constructions; it cannot tell you whether the argument lands.")
-    return 1 if hits or lower or opens or (a.strict and unpaired) else 0
+    return 1 if hits or lower or opens or hashes or (a.strict and unpaired) else 0
 
 if __name__ == "__main__":
     sys.exit(main())

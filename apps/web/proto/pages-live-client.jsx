@@ -534,7 +534,7 @@ function LiveOpportunity({ data, state }) {
           .map((t, i) => (
           <div key={t.platform || i} className="card-tile" style={{ padding: 14 }}>
             <div className="row" style={{ marginBottom: 8, gap: 6 }}>
-              {t.rank != null ? <span className="b b-purple">#{t.rank}</span> : null}
+              {t.rank != null ? <span className="b b-purple">{t.rank}.</span> : null}
               <span style={{ fontSize: 12.5, fontWeight: 600, flex: 1, minWidth: 0 }}>
                 {t.platform}</span>
               {t.composite != null ? (
@@ -1928,7 +1928,7 @@ function LiveStarters({ data, state }) {
           .map((st, i) => (
           <div key={i} className="card-tile" style={{ padding: "12px 14px" }}>
             <div className="row" style={{ gap: 8, marginBottom: 5 }}>
-              {st.rank != null ? <span className="b b-purple">#{st.rank}</span> : null}
+              {st.rank != null ? <span className="b b-purple">{st.rank}.</span> : null}
               {st.opens_on ? <span className="b">{st.opens_on}</span> : null}
               <span className="spacer" />
               {st.named_gap_subcap_id ? (

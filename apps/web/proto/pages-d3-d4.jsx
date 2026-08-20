@@ -1028,7 +1028,9 @@ function ClientPlatform({ entity, run }) {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.3 }}>
-                      {t.rank != null ? <span className="b b-purple" style={{ marginRight: 5 }}>#{pfText(t.rank)}</span> : null}
+                      {/* "1." not "#1" — natural numbering, no hashtags
+                          anywhere (owner, 2026-08-20). */}
+                      {t.rank != null ? <span className="b b-purple" style={{ marginRight: 5 }}>{pfText(t.rank)}.</span> : null}
                       {pfText(t.platform) || "Platform not named"}
                     </div>
                     {/* The prototype's sub-line is the platform's product list.
@@ -1754,8 +1756,8 @@ function ClientPlatform({ entity, run }) {
                 box at 1100px. */}
             <button className="btn btn-tertiary btn-sm" style={{ flexShrink: 0 }} onClick={() => {
               const text = starters.map((s, i) => {
-                const head = `#${s.rank != null ? s.rank : i + 1}`;
-                return [`${head} — ${pfText(s.text) || ""}`,
+                const head = `${s.rank != null ? s.rank : i + 1}.`;
+                return [`${head} ${pfText(s.text) || ""}`,
                         s.followup_question ? `Follow-up: ${pfText(s.followup_question)}` : null,
                         (s.e_ids || []).length ? `Evidence: ${s.e_ids.join(", ")}` : null]
                   .filter(Boolean).join("\n");
@@ -1808,7 +1810,7 @@ function ClientPlatform({ entity, run }) {
                   title={extras && !isOpen ? "Show the rest of this starter" : ""}
                   onClick={() => { if (extras) setOpenStarter(o => o === key ? null : key); }}>
                   <div className="row" style={{ marginBottom: 6, gap: 6, flexWrap: "wrap" }}>
-                    <span className="b b-purple" style={{ flexShrink: 0 }}>#{s.rank != null ? s.rank : i + 1}</span>
+                    <span className="b b-purple" style={{ flexShrink: 0 }}>{s.rank != null ? s.rank : i + 1}.</span>
                     {stamp ? <span style={{ fontSize: 10, color: "var(--z-dpur)", opacity: .85 }}>{stamp}</span> : null}
                     {gapCell ? (
                       <button className="chip f-mono" style={{ fontSize: 9, flexShrink: 0 }}

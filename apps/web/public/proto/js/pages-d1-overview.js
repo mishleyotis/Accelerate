@@ -1291,12 +1291,7 @@ function OpportunitySurfaceStrip({
         color: "var(--z-mid)",
         whiteSpace: "nowrap"
       }
-    }, t.rank != null ? /*#__PURE__*/React.createElement("span", {
-      className: "f-mono",
-      style: {
-        color: "var(--z-muted)"
-      }
-    }, "#", t.rank) : null, /*#__PURE__*/React.createElement("span", null, cells.length ? `Cells it addresses · ${cells.length}` : "Why this ranks"), /*#__PURE__*/React.createElement(Icon, {
+    }, /*#__PURE__*/React.createElement("span", null, cells.length ? `Cells it addresses · ${cells.length}` : "Why this ranks"), /*#__PURE__*/React.createElement(Icon, {
       name: open === i ? "chevron-u" : "chevron-d",
       size: 11
     })) : null);
