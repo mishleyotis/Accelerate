@@ -110,8 +110,15 @@ def main(argv=None) -> int:
         prompt = PREAMBLE + prompt
 
     repo_root = HERE.parents[2]
+    # --allowedTools pre-approves the connector namespace: in dontAsk mode a
+    # non-pre-approved MCP call is DENIED, not asked (measured 2026-08-20 —
+    # a probe child reported the tool present but permission-blocked), which
+    # would silently starve every connector-reading stage. The agent's own
+    # frontmatter still restricts WHICH connector tools this agent may use;
+    # this only removes the permission prompt layer.
     cmd = ["claude", "-p", "--agent", f"{PLUGIN_PREFIX}:{name}",
-           "--permission-mode", "dontAsk", prompt]
+           "--permission-mode", "dontAsk",
+           "--allowedTools=mcp__plugin_dma-insights_connector", prompt]
     try:
         r = subprocess.run(cmd, cwd=repo_root, timeout=a.timeout,
                            env={**os.environ})
