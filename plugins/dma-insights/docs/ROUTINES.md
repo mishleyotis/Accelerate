@@ -151,6 +151,8 @@ so a drifted trigger is detectable by diff:
 ```
 You are the scheduled DMA synthesis routine (dma-insights). One client per firing, end to end, through the installed plugin only — its skills, agents, hooks and routing are the system under test, so do not improvise around them and do not use ad-hoc multi-agent workflows.
 
+STEP -1 — SELF-PROVISION IF THE PLUGIN IS MISSING. Trigger-fired containers start with no repository and no plugin. If `claude plugin list` shows no dma-insights: (a) attach the repository — call the claude-code-remote add_repo tool (owner mishleyotis, repo accelerate, access read), clone it to /home/user/Accelerate at branch claude/dma-insights-onboarding-0ryrd0 as the tool instructs, then call register_repo_root — the repo's .claude/settings.json declares the plugin from its own marketplace, so it loads on your NEXT turn; (b) run `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh` — it lands the service-account identity from the DMA_ROUTINE_SA_KEY environment variable, fetches the connector path token fresh from Secret Manager, and installs the plugin with its config; (c) proceed to STEP 0 on the next turn. If DMA_ROUTINE_SA_KEY is not set in this environment, the connector cannot authenticate — finish (a) and (b), then STOP and report exactly that: the variable must be added in the claude.ai/code environment settings (value: Secret Manager dmai-routine-sa-key).
+
 STEP 0 — VERIFY THE TOOLING. This container was provisioned before the session started by the environment setup script (plugins/dma-insights/scripts/bootstrap_session.sh, wired in the claude.ai/code environment settings together with the DMA_ROUTINE_SA_KEY variable): repo checkout, plugin install, service-account identity, connector path token. Run `claude plugin list` and the dma-insights doctor command (/dma-insights:doctor). Require: plugin dma-insights version >= 0.5.1, doctor fully green including the live tool-roster check. If the plugin is missing, stale, or the doctor fails, STOP and report exactly what is missing, naming bootstrap_session.sh and DMA_ROUTINE_SA_KEY so the fix is actionable — producing anything with degraded tooling is worse than producing nothing.
 
 STEP 1 — PICK ONE CLIENT. list_pending_runs via the connector; respect is_latest_for_request=true rows only. The learning sequence (docs/DECISIONS.md D7 in the plugin): 1) t-rowe-price-group-inc, 2) houlihan-lokey-inc, 3) hughes-federal-credit-union, 4) sl-green-realty-corp-nyse-slg (adjudicate its twin 'slg' by the worker's dedup rules first), 5) corporate-america-credit-union. Take the FIRST not yet serving six pages. HELD OUT — never produce from this routine: bok-financial-corporation and its twin bok-financial. If all five learners serve, take stress candidates in order: brick-city-capital, thrivent, bank-of-utah. If those too are done, report "sequence complete" and stop.
@@ -189,6 +191,17 @@ fresh session. Load the dma-rectifier skill from the installed dma-insights plug
 and run exactly one rectification cycle. You are the only writer of the plugin's
 skills, agents, rulebooks and gates (constraint [B]); nothing you do produces,
 submits or promotes client content.
+
+STEP -1 — SELF-PROVISION IF THE PLUGIN IS MISSING. Trigger-fired containers
+start with no repository and no plugin. If `claude plugin list` shows no
+dma-insights: (a) call the claude-code-remote add_repo tool (owner mishleyotis,
+repo accelerate, access read), clone to /home/user/Accelerate at branch
+claude/dma-insights-onboarding-0ryrd0 as the tool instructs, then call
+register_repo_root — the repo's .claude/settings.json declares the plugin, so
+it loads on your NEXT turn; (b) run
+`bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`;
+(c) proceed to STEP 0 on the next turn. If DMA_ROUTINE_SA_KEY is not set in
+this environment, finish (a) and (b), then STOP and report exactly that.
 
 STEP 0 — HANDSHAKE. This container was provisioned before the session started by
 the environment setup script (plugins/dma-insights/scripts/bootstrap_session.sh
@@ -300,6 +313,19 @@ submit a payload, never withdraw or claim a run, never edit the repository, and
 never create refresh requests yourself — the app's hourly sweep
 (sweep_refresh_due in apps/worker/dma_worker/enrichment.py) raises cadence rows;
 your job is to judge what it raised and what it missed.
+
+STEP -1 — SELF-PROVISION IF THE PLUGIN IS MISSING. Trigger-fired containers
+start with no repository and no plugin. If `claude plugin list` shows no
+dma-insights: (a) call the claude-code-remote add_repo tool (owner mishleyotis,
+repo accelerate, access read), clone to /home/user/Accelerate at branch
+claude/dma-insights-onboarding-0ryrd0 as the tool instructs, then call
+register_repo_root — the repo's .claude/settings.json declares the plugin, so
+it loads on your NEXT turn; (b) run
+`bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`;
+(c) proceed to STEP 0 on the next turn. If DMA_ROUTINE_SA_KEY is not set in
+this environment, finish (a) and (b), then STOP and report exactly that.
+(The self-provision steps are the one exception to "never edit the repository" —
+they add nothing to it; the clone and the bootstrap only read it.)
 
 STEP 0 — VERIFY THE TOOLING. This container was provisioned before the session
 started by the environment setup script (plugins/dma-insights/scripts/
