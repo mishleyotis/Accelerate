@@ -1190,7 +1190,7 @@ function OpportunitySurfaceStrip({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, "Composite fit score 0\u2013100 \xB7 \u03A3(priority \xD7 gap) for ABSENT, high-confidence subcaps")), /*#__PURE__*/React.createElement("button", {
+  }, "Composite fit score 0\u2013100")), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => navigate(`/clients/${entity.id}/platform`, {
       run: run.id
@@ -1403,11 +1403,19 @@ function OpportunitySurfaceStrip({
        their contributions are on one scale. */
     const total = fs.reduce((a, x) => a + (x.contribution || 0), 0);
     const share = f.contribution != null && total > 0 ? f.contribution / total * 100 : null;
+    /* Owner, 2026-08-20, from a screenshot of this block: the
+       `value×weight` working rendered beside the contribution
+       ("+0.5 · 0.9389×0.52") overran its 96px column across the
+       bars, and it is arithmetic the reader never asked to
+       check — "the platform page just gives the scores; I can
+       add up the block figures." The platform page's factor
+       rows are the pattern this block must match: contribution
+       in points of 100, weight on hover, no products. */
     return /*#__PURE__*/React.createElement("div", {
       key: i,
       style: {
         display: "grid",
-        gridTemplateColumns: "180px 1fr 96px",
+        gridTemplateColumns: "180px 1fr 56px",
         gap: 8,
         alignItems: "center",
         padding: "3px 0"
@@ -1416,7 +1424,8 @@ function OpportunitySurfaceStrip({
       style: {
         fontSize: 11,
         color: "var(--z-body)"
-      }
+      },
+      title: f.weight != null ? `weight ${f.weight}` : ""
     }, f.name), /*#__PURE__*/React.createElement("div", {
       style: {
         height: 6,
@@ -1437,9 +1446,12 @@ function OpportunitySurfaceStrip({
         fontSize: 10.5,
         color: "var(--z-muted)",
         textAlign: "right",
-        whiteSpace: "nowrap"
-      }
-    }, f.contribution == null ? null : `+${fx(f.contribution, 1)}`, f.value != null && f.weight != null ? ` · ${f.value}×${f.weight}` : ""));
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+      },
+      title: "contribution to the fit subtotal, in points of 100"
+    }, f.contribution == null ? null : `+${(Number(f.contribution) * 100).toFixed(1)}`));
   }))(factorRows(sel))) : null, (sel.addressable_cells || []).filter(c => c && c.subcap_id).length ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,

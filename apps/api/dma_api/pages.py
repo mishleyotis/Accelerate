@@ -208,7 +208,7 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       the page, which is the worst pair: a hand check of the screen agrees
 #       with a green test and neither is looking at the body. A customer who
 #       fetched before this bump holds a body carrying the census.
-SERVE_RULES = "serve-rules@9"
+SERVE_RULES = "serve-rules@10"
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
@@ -226,6 +226,29 @@ def etag_for(run_meta: dict, audience: str) -> str:
         except ValueError:
             epoch = "0"
     return f'W/"{run_meta["run_id"]}.{epoch}.{audience}.{SERVE_RULES}"'
+
+
+def withheld_entry(report: dict) -> dict | None:
+    """What a withheld section leaves behind in the page body.
+
+    Two different absences. A section on the NEVER_SERVED allowlist was
+    excluded by owner adjudication for EVERY audience — its key must not
+    appear in the payload at all (owner, 2026-08-20: "do not include any
+    surface I excluded in the live payload"). A stub with data:null still
+    names the surface, which is inclusion. An audience withholding, by
+    contrast, keeps the stub: the internal reader of a customer preview is
+    owed the fact that a surface exists and was withheld, not a silent hole.
+    """
+    if report.get("never_served"):
+        return None
+    return {
+        "data": None, "data_source": "withheld", "provenance": None,
+        "produced_at": None, "producer_version": None, "e_ids": [],
+        "empty_state": {"kind": "withheld_for_audience",
+                        "reason": "this surface is not served to the "
+                                  "customer audience",
+                        "sources_searched": []},
+    }
 
 
 # `audience` has NO default. It used to default to "internal", which is
@@ -322,14 +345,10 @@ def build_page(cur, page: str, display_id: str, audience: str,
         data, report = redact_section(page, section, built["data"],
                                       env.get("internal_only"), audience)
         if data is None:
-            out_sections[section] = {
-                "data": None, "data_source": "withheld", "provenance": None,
-                "produced_at": None, "producer_version": None, "e_ids": [],
-                "empty_state": {"kind": "withheld_for_audience",
-                                "reason": "this surface is not served to the "
-                                          "customer audience",
-                                "sources_searched": []},
-            }
+            entry = withheld_entry(report)
+            if entry is None:
+                continue
+            out_sections[section] = entry
             continue
 
         empty = env.get("empty_state")

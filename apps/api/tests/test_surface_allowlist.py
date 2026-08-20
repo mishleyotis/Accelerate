@@ -114,7 +114,7 @@ def test_the_serve_rules_tag_moved():
     """The ETag carries the rules version. Changing what is served without
     changing the tag serves the old body from every cache that has one."""
     from dma_api import pages
-    assert pages.SERVE_RULES == "serve-rules@9", (
+    assert pages.SERVE_RULES == "serve-rules@10", (
         "the allowlist changed what is served; bump SERVE_RULES or caches "
         "keep answering with the body that carried the ceilings table")
 
@@ -123,3 +123,35 @@ def test_build_page_has_no_fail_open_audience_default():
     sig = inspect.signature(__import__("dma_api.pages", fromlist=["pages"])
                             .build_page)
     assert sig.parameters["audience"].default is inspect.Parameter.empty
+
+
+def test_a_never_served_section_leaves_no_key_behind():
+    """Owner, 2026-08-20: "do not include any surface I excluded in the live
+    payload." The stub the page body used to emit for an allowlisted section
+    (data: null, data_source: "withheld") still NAMED the excluded surface in
+    every response, which is inclusion. Negative control for the pre-fix
+    tree: `withheld_entry` did not exist — this fails by ImportError there.
+    """
+    from dma_api.pages import withheld_entry
+
+    # the allowlist absence: no entry at all, the key vanishes
+    assert withheld_entry({"withheld": True, "never_served": True}) is None
+
+    # the audience absence keeps its stub: an internal reader previewing the
+    # customer body is owed the fact that a surface exists and was withheld
+    stub = withheld_entry({"withheld": True})
+    assert stub is not None
+    assert stub["data"] is None and stub["data_source"] == "withheld"
+    assert stub["empty_state"]["kind"] == "withheld_for_audience"
+
+
+def test_never_served_omission_reaches_the_page_body():
+    """The seam above proves the decision; this proves build_page consults
+    it — a build loop that inlines the stub again would pass the seam test
+    while re-including the excluded keys."""
+    import inspect as _inspect
+    from dma_api import pages
+    src = _inspect.getsource(pages.build_page)
+    assert "withheld_entry(" in src, (
+        "build_page no longer routes withheld sections through "
+        "withheld_entry; the never-served omission is unenforced")

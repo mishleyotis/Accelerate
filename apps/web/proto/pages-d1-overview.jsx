@@ -748,7 +748,7 @@ function OpportunitySurfaceStrip({ entity, run, audience }) {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, fontWeight: 600 }}>Opportunity Surface · per platform</div>
-          <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Composite fit score 0–100 · Σ(priority × gap) for ABSENT, high-confidence subcaps</div>
+          <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Composite fit score 0–100</div>
         </div>
         <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/platform`, { run: run.id })}>Open matrix <Icon name="arrow-r" size={11} /></button>
       </div>
@@ -835,15 +835,24 @@ function OpportunitySurfaceStrip({ entity, run, audience }) {
                      their contributions are on one scale. */
                   const total = fs.reduce((a, x) => a + (x.contribution || 0), 0);
                   const share = (f.contribution != null && total > 0) ? (f.contribution / total) * 100 : null;
+                  /* Owner, 2026-08-20, from a screenshot of this block: the
+                     `value×weight` working rendered beside the contribution
+                     ("+0.5 · 0.9389×0.52") overran its 96px column across the
+                     bars, and it is arithmetic the reader never asked to
+                     check — "the platform page just gives the scores; I can
+                     add up the block figures." The platform page's factor
+                     rows are the pattern this block must match: contribution
+                     in points of 100, weight on hover, no products. */
                   return (
-                    <div key={i} style={{ display: "grid", gridTemplateColumns: "180px 1fr 96px", gap: 8, alignItems: "center", padding: "3px 0" }}>
-                      <div style={{ fontSize: 11, color: "var(--z-body)" }}>{f.name}</div>
+                    <div key={i} style={{ display: "grid", gridTemplateColumns: "180px 1fr 56px", gap: 8, alignItems: "center", padding: "3px 0" }}>
+                      <div style={{ fontSize: 11, color: "var(--z-body)" }}
+                        title={f.weight != null ? `weight ${f.weight}` : ""}>{f.name}</div>
                       <div style={{ height: 6, background: "var(--z-sep)", borderRadius: 3, overflow: "hidden" }}>
                         {share == null ? null : <div style={{ width: `${share}%`, height: "100%", background: "var(--z-mid)", borderRadius: 3 }} />}
                       </div>
-                      <div className="f-mono" style={{ fontSize: 10.5, color: "var(--z-muted)", textAlign: "right", whiteSpace: "nowrap" }}>
-                        {f.contribution == null ? null : `+${fx(f.contribution, 1)}`}
-                        {f.value != null && f.weight != null ? ` · ${f.value}×${f.weight}` : ""}
+                      <div className="f-mono" style={{ fontSize: 10.5, color: "var(--z-muted)", textAlign: "right", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                        title="contribution to the fit subtotal, in points of 100">
+                        {f.contribution == null ? null : `+${(Number(f.contribution) * 100).toFixed(1)}`}
                       </div>
                     </div>
                   );
