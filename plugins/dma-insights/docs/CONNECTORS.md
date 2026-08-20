@@ -14,9 +14,11 @@ is recorded below.
 | **Enrichment** (Clay · Exa · Tavily · Vibe-Prospecting/Explorium · Indeed) | the claude.ai connectors' own tools (`mcp__<Name>__…`), with the owner's existing authentication | attach the connectors to each Routine in the claude.ai routines UI — already done for drift and rectification; the same edit on **dma-synthesis-sequence** completes it |
 | **The dma-insights connector** (the parsed package, submit, promote, memory) | plugin MCP server, auto-connecting (static /mcp + header token) | none |
 
-Rules: a routine PLANS for connector absence — a facet whose connector is
-not attached records as not-run (MEM-0082), named with the UI attach as the
-fix; nothing is ever fabricated to cover an unattached connector. API keys
+Rules: the synthesis routine REFUSES to produce without its enrichment
+connectors (owner: never degrade mode) — a stopped firing names exactly
+what it carried; and nothing is ever fabricated to cover an unattached
+connector (MEM-0082). Optional extras (Indeed, LunarCrush, PDF-Viewer)
+degrade per facet when absent. API keys
 are deliberately NOT used for enrichment (owner, 2026-08-20); the
 Secret Manager slots briefly created for them were deleted the same day.
 Trigger-fired sessions receive exactly the connectors attached to their
@@ -26,8 +28,12 @@ per-session (the org's API cannot attach them; the UI can).
 ## Preflight (STEP 0 of every synthesis firing)
 
 1. `drive_fetch.py check` — REQUIRED: the intake folder answers the SA.
-2. Connector-tool presence per enrichment service — recorded; absences
-   degrade honestly and name the one-time UI attach.
+2. Connector-tool presence — REQUIRED (owner: the routine never runs in
+   degrade mode): Exa, Tavily and at least one of Clay/Vibe-Prospecting
+   present, or the firing STOPS naming exactly what it carries. Attachment
+   happens on the Routine's own EDIT screen in the routines UI — the
+   connector browse list's Use buttons enable a connector for the org,
+   not for a Routine (measured 2026-08-20).
 3. The connector roster (33 tools) via the doctor — REQUIRED.
 
 ## Per-surface connector use cases
