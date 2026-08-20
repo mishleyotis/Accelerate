@@ -30,10 +30,41 @@ def _plugin_root(root: str) -> str:
             if root.rstrip("/").endswith("skills") else root)
 
 
+def _repo_root(plugin_root: str) -> str:
+    """The repository containing the plugin, or the plugin root if the audit is
+    pointed at a tree that is not inside one (an unpacked zip, a fixture)."""
+    d = os.path.abspath(plugin_root)
+    for _ in range(4):
+        d = os.path.dirname(d)
+        if os.path.isdir(os.path.join(d, ".git")):
+            return d
+    return plugin_root
+
+
 # Set from the parsed arguments in main(); the audit functions read these.
 ROOT = DEFAULT_ROOT
 PLUGIN_ROOT = _plugin_root(DEFAULT_ROOT)
+REPO_ROOT = _repo_root(PLUGIN_ROOT)
 SKILLS: list = []
+
+# THE RATCHET, and the reason this script now has an exit code at all.
+#
+# It reported 21 broken references and exited 0 — for every run it had ever
+# made. A report nothing reads is not an audit, and CI could not adopt it
+# while 12 of those 21 were the script's own resolution blind spots.
+#
+# Twelve are fixed above. The eight below are real dead links in skill
+# markdown, which only the rectifier may edit (the weekly cycle owns skills,
+# agents and gates), so they are pinned here rather than absorbed:
+#
+#   1  03-pages/rulebooks/heatmap.md -> shared/enrichment_gaps.py
+#      — no file of that name exists anywhere in the repository
+#   2-8 05-lifecycle/{surface-map,client-memory}.md -> rulebooks/*.md
+#      — the rulebooks live under 03-pages/; these seven need that segment
+#
+# Lower it when the rectifier closes one. Raising it needs a reason in the
+# commit that raises it.
+MAX_BROKEN = 8
 def _discover_skills(root):
     """Every skill directory under `root` that carries a SKILL.md, sorted.
 
@@ -63,6 +94,11 @@ RUNTIME_PREFIX = (
     "templates/retail_banking", "templates/wealth_asset_management", "templates/wealth_rias",
     "/home/claude/", "peers/", "unpacked/", "$DMA_ROOT/", "{DMA_ROOT}/",
     "deprecated/",  # appears only inside the SKILL.md ASCII tree diagram
+    # `DMA Insights/state.json` and its siblings — the client's Drive tree,
+    # written by drive_fetch.py push-bundle. PATH_RE cannot include the space,
+    # so the token arrives clipped to "Insights/..." and read as a skill-tree
+    # reference. It is a runtime path like every other entry here.
+    "Insights/",
 )
 RUNTIME_RE = re.compile(r"^(/?\d\d[_a-z]*|.*?/\d\d_[a-z_]+)/")
 
@@ -130,11 +166,29 @@ def refs_audit():
                             PLUGIN_ROOT, tok[len("${CLAUDE_PLUGIN_ROOT}/"):])
                         (runtime if False else broken).append(row) if not os.path.exists(real) else None
                         continue
+                    # EVERY BASE A READER WOULD ACTUALLY TRY. The first four
+                    # were the skill's own tree, so twelve references that
+                    # resolve perfectly well — `scripts/agent_run.py` at the
+                    # plugin root, `scripts/tests/...` at the repo root,
+                    # `rulebooks/heatmap.md` from a sibling inside 03-pages —
+                    # were reported as breakage. An audit whose finding list
+                    # is mostly false is an audit nobody reads, which is how
+                    # the eight real dead links below sat in it unnoticed.
                     cands = [
                         os.path.join(os.path.dirname(fp), tok),
                         os.path.join(base, tok),
                         os.path.join(base, "scripts", tok),
                         os.path.join(ROOT, tok),
+                        # the plugin's own scripts/ and skills/ — what a bare
+                        # `scripts/x.py` in a skill doc means at runtime
+                        os.path.join(PLUGIN_ROOT, tok),
+                        # the repository, for a doc pointing a DEVELOPER at a
+                        # test or a design note rather than the reader at a
+                        # runtime file
+                        os.path.join(REPO_ROOT, tok),
+                        # the section directory: `rulebooks/heatmap.md` written
+                        # from inside 03-pages/rulebooks/ means its sibling
+                        os.path.join(os.path.dirname(os.path.dirname(fp)), tok),
                     ]
                     if any(os.path.exists(os.path.normpath(c)) for c in cands):
                         continue
@@ -145,17 +199,21 @@ def refs_audit():
     return broken, runtime
 
 
-def main(argv=None) -> None:
-    global ROOT, PLUGIN_ROOT, SKILLS
+def main(argv=None) -> int:
+    global ROOT, PLUGIN_ROOT, REPO_ROOT, SKILLS
     ap = argparse.ArgumentParser(
         prog="audit_skills", description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("root", nargs="?", default=DEFAULT_ROOT,
                     help="skills directory to audit "
                          "(default: the plugin's own skills/)")
+    ap.add_argument("--max-broken", type=int, default=MAX_BROKEN,
+                    help=f"fail above this many broken references "
+                         f"(default: {MAX_BROKEN}, the pinned backlog)")
     args = ap.parse_args(argv)
     ROOT = args.root
     PLUGIN_ROOT = _plugin_root(ROOT)
+    REPO_ROOT = _repo_root(PLUGIN_ROOT)
     SKILLS = _discover_skills(ROOT)
     h = help_audit()
     broken, runtime = refs_audit()
@@ -164,11 +222,26 @@ def main(argv=None) -> None:
         "scripts_total": len(h), "scripts_ok": len(h) - len(fails),
         "scripts_fail": len(fails), "fails": fails,
         "broken_refs_total": len(broken), "broken_refs": broken,
+        "broken_refs_ceiling": args.max_broken,
         "runtime_paths_total": len(runtime),
         "runtime_by_skill": {s: sum(1 for x in runtime if x["skill"] == s)
                              for s in SKILLS},
     }, indent=1))
 
+    # THE EXIT CODE. Without it this script printed a defect list forever and
+    # every caller read success. A failing --help is breakage outright; a
+    # broken reference is breakage above the pinned backlog.
+    if fails:
+        print(f"audit_skills: {len(fails)} script(s) fail --help",
+              file=sys.stderr)
+        return 1
+    if len(broken) > args.max_broken:
+        print(f"audit_skills: {len(broken)} broken references, ceiling "
+              f"{args.max_broken}. Fix them, or raise MAX_BROKEN in this file "
+              f"with a reason in the commit that raises it.", file=sys.stderr)
+        return 1
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
