@@ -206,7 +206,7 @@ jobs:
   # mcp only: the API's 251 tests and the routine-preflight tests had never run
   # in CI at all, so a change could break the serving layer and merge green.
   python-tests:
-    name: Python unit tests (worker · mcp · api · scripts)
+    name: Python unit tests (worker · mcp · api · scripts · plugin · skills · infra)
     runs-on: ubuntu-latest
     timeout-minutes: 25
     # Postgres, because without it this job was measuring almost nothing. Every
@@ -301,7 +301,13 @@ jobs:
       #   5  test_gap_false_positives.py — every overview section wraps its
       #      fields today, so the case it guards cannot be constructed.
       #  6-11 tests/skills/test_check_payload_false_positives.py — six cases
-      #      needing a staged run this runner has no database to hold.
+      #      needing a run the connector PASSED, whole and un-redacted. Staged
+      #      rows are verbatim by construction, so that fixture is a named
+      #      institution's internal record (45 r_layer, 34 internal_only, 7
+      #      LinkedIn profiles, 3 work addresses on the run measured
+      #      2026-08-20) and this repository is public. Gitignored, fetched by
+      #      `scripts/fetch_staged_fixtures.py` where credentials exist, and
+      #      skipped here on purpose — not for want of a database.
       # Raise it only in the commit that adds a skip, and say which.
       # THE PLUGIN'S OWN SUITE RIDES HERE, and its absence was a real hole.
       # Until 2026-08-20 CI ran four suites and never
@@ -325,7 +331,7 @@ jobs:
           # check now names its failures where the check is read.
           python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
                  scripts/tests/ plugins/dma-insights/scripts/tests/ \
-                 tests/skills/ -q -rs -rf 2>&1 | tee /tmp/pytest.txt
+                 tests/skills/ infra/jobs/tests/ -q -rs -rf 2>&1 | tee /tmp/pytest.txt
           n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
           echo "skipped: ${n:-0} (ceiling 11)"
           if [ "${n:-0}" -gt 11 ]; then

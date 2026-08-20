@@ -175,3 +175,45 @@ def test_excluded_classes_cover_the_measured_logix_leaks():
     for k in ("sources_searched", "queries_run", "searched_on",
               "tier", "ers", "discovered_by", "cap_level"):
         assert k in excluded, f"{k} is not excluded — the measured leak class"
+
+
+def test_the_reference_fixture_is_not_empty():
+    """The allowlist is GENERATED from this fixture, so an empty fixture is
+    not a small customer surface — it is a missing input that silently
+    narrows what every client can see. It shipped empty once (2026-08-20)
+    and cost 49 keys before anyone noticed."""
+    ref = json.loads(
+        (ROOT / "fixtures" / "reference_surface_keys.json").read_text())
+    assert ref.get("sections"), (
+        "fixtures/reference_surface_keys.json has no sections — recover it "
+        "with: git checkout ff79471 -- fixtures/reference_surface_keys.json")
+    assert len(ref["sections"]) == 34, (
+        f"the reference covers {len(ref['sections'])} sections, not 34")
+
+
+def test_generation_from_an_empty_reference_refuses():
+    """The guard, asserted against the REAL corrupt shape.
+
+    The first version of this guard tested the truthiness of the fixture's
+    non-underscore keys — and the corrupt shape is
+    {"_doc": ..., "sections": {}}, which has one such key and is therefore
+    truthy. The guard never fired on the only input it was written for. A
+    test that used a bare {} would have passed just as vacuously, so this
+    one writes the shape that actually occurred.
+    """
+    fixture = ROOT / "fixtures" / "reference_surface_keys.json"
+    original = fixture.read_bytes()
+    try:
+        fixture.write_text(json.dumps({"_doc": "placeholder", "sections": {}}))
+        with tempfile.TemporaryDirectory() as tmp:
+            r = subprocess.run(
+                [sys.executable,
+                 str(ROOT / "scripts" / "gen_customer_allowlist.py"),
+                 "--out", str(Path(tmp) / "out.json")],
+                capture_output=True, text=True, cwd=ROOT)
+        assert r.returncode != 0, (
+            "the generator accepted an empty reference and produced an "
+            "allowlist from it")
+        assert "refusing to narrow" in r.stderr, r.stderr[:300]
+    finally:
+        fixture.write_bytes(original)

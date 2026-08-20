@@ -402,9 +402,21 @@ def test_every_prose_key_still_gets_the_clipped_check(key):
 # coverage; it is a note.
 #
 # The path is now a repository location, overridable for a local
-# investigation. To turn these six on, drop the six staged page JSONs
-# (overview, insights, heatmap, platform, context, techstack — as
-# get_staged_payload returns them) into that directory and they run.
+# investigation. To turn these six on:
+#
+#     python3 scripts/fetch_staged_fixtures.py <run_id>
+#
+# The payloads themselves are gitignored and always will be. What makes them
+# worth testing against is what makes them unpublishable: get_staged_payload
+# returns staged rows VERBATIM — "not redacted, not the served projection"
+# (apps/mcp/dma_mcp/staged.py) — so a whole-payload fixture is the internal
+# record of a named institution, and this repository is public. Measured on
+# run d7ed1d90: 45 r_layer records, 34 internal_only blocks, 7 named
+# individuals' LinkedIn URLs, 3 work email addresses. So these six skip on a
+# clean checkout, by design and in the open, and run for anyone holding
+# connector credentials. That is a different thing from the scratchpad path:
+# skipping for a stated reason with a one-command route to running is not the
+# same as skipping because the path was nonsense.
 STAGED = Path(os.environ.get(
     "DMA_STAGED_DIR",
     str(Path(__file__).resolve().parents[2] / "fixtures" / "staged_runs"

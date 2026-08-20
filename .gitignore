@@ -41,6 +41,12 @@ out/
 # live in GCS and Drive, not in git. Fixtures use synthetic ids (E-XXX-nnn)
 # and neutral display names.
 fixtures/clients/
+# Staged page payloads of a real run: verbatim rows, so they carry the
+# r_layer records, internal_only blocks, named leadership and contact details
+# the served projection strips. `scripts/fetch_staged_fixtures.py` puts them
+# here on a machine that already holds connector credentials; the READMEs that
+# say what belongs here stay tracked.
+fixtures/staged_runs/*/*.json
 *_Assessment_Workbook_*.xlsx
 *_Research_Workbook_*.xlsx
 **/startup-data/clients/

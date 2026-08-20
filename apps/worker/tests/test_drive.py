@@ -1,5 +1,17 @@
 
 
+import sys
+from pathlib import Path
+
+# This file's own path setup, rather than a sibling's. Until
+# 2026-08-20 it passed ONLY inside the full suite: an
+# alphabetically-earlier module inserted apps/worker on sys.path at
+# import time, and this one inherited it. Alone — which is what
+# `pytest --lf`, a single-file re-run and every `git bisect` over
+# worker code do — it died on ModuleNotFoundError: dma_worker, a
+# failure with nothing to do with the code under test.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 def test_a_long_run_re_mints_rather_than_outliving_its_token():
     """The measured failure: `40 ingested, 114 failed, 1 quarantined`, every
     failure HTTPError 401. main() minted ONE token and passed the string to
