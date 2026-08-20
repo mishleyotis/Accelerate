@@ -118,18 +118,34 @@ START, so provisioning cannot be a step inside the routine. It is the
 curl -sfL https://raw.githubusercontent.com/mishleyotis/Accelerate/claude/dma-insights-onboarding-0ryrd0/plugins/dma-insights/scripts/bootstrap_session.sh | bash
 ```
 
-together with one environment variable in the same settings screen:
-`DMA_ROUTINE_SA_KEY_B64` — the `dmai-routine@` service-account key JSON,
-base64-encoded to one line because the settings field is .env format
-(retrieval and rotation: `plugins/dma-insights/docs/secrets.md` §1b). The
-script clones the repo, installs the plugin from the repo marketplace,
-lands the key at `/root/.dma/sa.json`, fetches the connector path token
-fresh from Secret Manager (so a token rotation needs no client update
-anywhere), installs the skill script dependencies, and probes the connector
-roster — logging loudly and never blocking session start, because every
-routine's STEP 0 is the enforcement point. `mcp_auth_headers.sh` and
-`doctor.py` both carry the key-file identity path for containers without
-gcloud; `gcp_token.py` is the minter both lean on.
+**The environment variable is the load-bearing half, and it is enough on
+its own.** `DMA_ROUTINE_SA_KEY_B64` — the `dmai-routine@` service-account
+key JSON, base64-encoded to one line because the settings field is .env
+format (retrieval and rotation: `plugins/dma-insights/docs/secrets.md`
+§1b). `gcp_token.py` reads it directly, so `mcp_auth_headers.sh`
+authenticates the connector at session start and the routine has live tools
+from its first turn, whether or not the setup script ever ran.
+
+That ordering is the whole reason the variable matters more than the
+script. A plugin's MCP servers register at session START: on 2026-08-20 a
+firing bootstrapped its key mid-session, reached 14/14 on the doctor over
+direct HTTP, and still had none of the connector's 33 tools, because
+registration had already happened and Claude Code has no MCP hot-reload.
+Anything a session needs in order to authenticate must already be present
+when it starts.
+
+The setup script remains worth wiring as the belt to that braces: it clones
+the repo, installs the plugin from the repo marketplace, lands the key at
+`/root/.dma/sa.json`, fetches the connector path token fresh from Secret
+Manager (so a token rotation needs no client update anywhere), installs the
+skill script dependencies, and probes the connector roster — logging loudly
+and never blocking session start, because every routine's STEP 0 is the
+enforcement point. It refuses to register a marketplace from a directory
+holding no manifest, having once rewritten a working install to a dead
+source when a caller pointed it at a path that did not exist. It also
+disables shell tracing for itself: run as `bash -x` on 2026-08-20 it
+printed a service-account key and a signed token into a transcript, and
+both credentials had to be rotated.
 
 Status at 2026-08-19 (`list_triggers`, evening): **all three exist and are
 enabled.** (b) and (c) were created 2026-08-19T21:24Z from this file's fenced

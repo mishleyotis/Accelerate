@@ -57,10 +57,21 @@ database, touch storage, or mint other identities.
 - Escrow: Secret Manager, secret `dmai-routine-sa-key`, same project.
 - Runtime: the `DMA_ROUTINE_SA_KEY_B64` environment variable in the CCR
   environment settings (claude.ai/code → environments → `Default - full
-  network access`), set by hand once. `bootstrap_session.sh` writes it to
-  `/root/.dma/sa.json` (0600) at container boot; `gcp_token.py` signs with
-  it; `mcp_auth_headers.sh` and `doctor.py` fall back to it whenever gcloud
-  is absent.
+  network access`), set by hand once. **The variable alone is sufficient** —
+  `gcp_token.py`'s `load_key` reads it directly, so `mcp_auth_headers.sh`
+  authenticates the connector at session start with nothing having to run
+  beforehand. `bootstrap_session.sh` still writes `/root/.dma/sa.json`
+  (0600) when it runs, and the file is preferred when present, but no part
+  of the identity path depends on the bootstrap having run.
+
+**Why the variable and not a file (measured 2026-08-20).** A plugin's MCP
+servers register at session START. A firing that bootstrapped its key as a
+step inside the session reached 14/14 on the doctor over direct HTTP and
+still had none of the connector's 33 tools, because registration had
+already happened and there is no supported MCP hot-reload mid-session. A
+credential that must be fetched before the session can be authenticated
+has to live somewhere the session already has at its first instruction —
+which is the environment.
 - NEVER in this repository — the repository is public.
 
 **How a person retrieves it** (to fill the environment variable — the
@@ -70,6 +81,13 @@ base64 of the key JSON):
     gcloud secrets versions access latest \
       --secret=dmai-routine-sa-key --project=digital-maturity-assessor \
       | base64 -w0
+
+**Rotated 2026-08-20** after a routine ran `bootstrap_session.sh` under
+`bash -x` and xtrace printed the key, an OAuth token and a signed JWT into
+its transcript. Key `5afa7791…` was destroyed and `f01ea66a…` issued as
+version 2; the capability path token went to version 3 in the same pass and
+the old path was verified dead (404). The script now disables tracing
+itself so the same report can never reproduce the leak.
 
 **Rotation.**
 1. `gcloud iam service-accounts keys create` a new key for `dmai-routine@`,
