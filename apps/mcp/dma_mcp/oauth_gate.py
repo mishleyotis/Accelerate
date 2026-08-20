@@ -116,9 +116,21 @@ def _default_verify_jwt(token: str, audiences: list):
     import google.auth.transport.requests
     import google.oauth2.id_token
     request = google.auth.transport.requests.Request()
-    return google.oauth2.id_token.verify_token(
-        token, request, audience=audiences,
-        certs_url="https://www.googleapis.com/oauth2/v3/certs")
+    # One verify per candidate audience STRING: the deployed google-auth
+    # lineage predates list-audience support in verify_token (measured live
+    # 2026-08-20 on revision 00092 — a valid token failed against a list),
+    # and audience=None does not reliably skip. Trying each string is
+    # version-proof; the first success returns, and the failure raised is
+    # the last audience's, which names the real mismatch.
+    last = None
+    for aud in audiences:
+        try:
+            return google.oauth2.id_token.verify_token(
+                token, request, audience=aud,
+                certs_url="https://www.googleapis.com/oauth2/v3/certs")
+        except Exception as e:                              # noqa: BLE001
+            last = e
+    raise last
 
 
 def _default_lookup_access_token(token: str):
