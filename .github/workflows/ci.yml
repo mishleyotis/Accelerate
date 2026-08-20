@@ -300,15 +300,29 @@ jobs:
       #   4  test_computed_against_the_real_schema.py — the same catalogue;
       #   5  test_gap_false_positives.py — every overview section wraps its
       #      fields today, so the case it guards cannot be constructed.
+      #  6-11 tests/skills/test_check_payload_false_positives.py — six cases
+      #      needing a staged run this runner has no database to hold.
       # Raise it only in the commit that adds a skip, and say which.
+      # THE PLUGIN'S OWN SUITE RIDES HERE, and its absence was a real hole.
+      # Until 2026-08-20 CI ran four suites and never
+      # plugins/dma-insights/scripts/tests — 19 files covering the exact code
+      # the scheduled routines load: the bootstrap, the connector proxy, the
+      # Drive client, the package resolver, the doctor. A failing doctor test
+      # sat green in CI for as long as it took someone to run the suite by
+      # hand, and the binding defects that killed six firings that day were
+      # in code no check ever exercised. tests/skills joins for the same
+      # reason. The ceiling below rises to 11 with the six skips tests/skills
+      # declares (a staged run it cannot construct here), stated rather than
+      # absorbed.
       - name: Unit tests, and a suite that skips silently fails
         run: |
           set -o pipefail
           python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
-                 scripts/tests/ -q -rs 2>&1 | tee /tmp/pytest.txt
+                 scripts/tests/ plugins/dma-insights/scripts/tests/ \
+                 tests/skills/ -q -rs 2>&1 | tee /tmp/pytest.txt
           n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
-          echo "skipped: ${n:-0} (ceiling 5)"
-          if [ "${n:-0}" -gt 5 ]; then
+          echo "skipped: ${n:-0} (ceiling 11)"
+          if [ "${n:-0}" -gt 11 ]; then
             echo "--- the reasons, most common first ---"
             grep '^SKIPPED' /tmp/pytest.txt | sed 's/.*: //' | sort | uniq -c | sort -rn | head
             exit 1

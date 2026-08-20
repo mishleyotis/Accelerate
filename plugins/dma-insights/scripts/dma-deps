@@ -139,6 +139,17 @@ def wheels_resolve(py: str) -> int:
 
 
 def cmd_check(args) -> int:
+    """Report what is importable, and — unless --offline — whether every
+    requirement still resolves to a wheel.
+
+    The wheel resolution shells out to pip and therefore NEEDS THE NETWORK.
+    On a machine that is offline, or behind a TLS-inspecting proxy pip does
+    not trust, it fails for a reason that has nothing to do with the
+    dependencies being present (measured 2026-08-20: 13 of 13 modules
+    present, wheels FAIL, exit 1 — and the install doctor duly reported a
+    red row saying "missing: 0"). --offline is how the doctor asks for the
+    half of this check that is true without a network.
+    """
     py = target_python(True)
     have = probe(py)
     missing = [m for m, ok in have.items() if not ok]
@@ -148,7 +159,11 @@ def cmd_check(args) -> int:
     for m in sorted(MODULES):
         mark = "ok  " if have[m] else "MISS"
         print(f"  [{mark}] {MODULES[m][0]:<16} {MODULES[m][1]}")
-    wheels_rc = wheels_resolve(py)
+    if getattr(args, "offline", False):
+        print("wheels: not checked (--offline)")
+        wheels_rc = 0
+    else:
+        wheels_rc = wheels_resolve(py)
     if missing:
         print("\nblocked until installed. run: dma-deps install")
     return 1 if missing or wheels_rc != 0 else 0
@@ -195,6 +210,8 @@ def main() -> int:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd")
     c = sub.add_parser("check", help="report missing modules and what they block")
+    c.add_argument("--offline", action="store_true",
+                   help="skip the wheel resolution, which needs the network")
     c.set_defaults(fn=cmd_check)
     i = sub.add_parser("install", help="pip install the declared requirements")
     i.add_argument("--venv", action="store_true",

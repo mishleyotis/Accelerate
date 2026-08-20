@@ -104,12 +104,42 @@ def test_no_base_url_says_it_compared_nothing():
 def test_the_doctor_never_puts_a_token_in_its_output():
     """Every check reports whether a credential could be obtained, never what
     it was. Enforced on the source rather than on a run, because a run that
-    happens not to mint a token proves nothing about one that does."""
-    src = (ROOT / "plugins" / "dma-insights" / "scripts" / "doctor.py").read_text()
-    # the mint check must report a fixed string, not the subprocess stdout
+    happens not to mint a token proves nothing about one that does.
+
+    Read with the parser rather than by splitting on strings: the string form
+    broke the moment a SECOND row named "identity token mints" was added (the
+    --no-probe skip, 2026-08-20) and began reporting a leak that was not
+    there. A test that fails for the wrong reason gets weakened by the next
+    person in a hurry, so this one asks the actual question — does any
+    argument of a credential row's _check() call read a subprocess's output —
+    which no amount of rearranging the file can confuse.
+    """
+    import ast
+
+    path = ROOT / "plugins" / "dma-insights" / "scripts" / "doctor.py"
+    src = path.read_text()
     assert '"yes (value not shown)"' in src
-    assert "proc.stdout" not in src.split("identity token mints")[1].split(
-        "connector path token")[0]
+
+    CREDENTIAL_ROWS = {"identity token mints", "connector path token",
+                       "access token mints"}
+    tree = ast.parse(src)
+    leaks = []
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Call)
+                and getattr(node.func, "id", "") == "_check"
+                and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and node.args[0].value in CREDENTIAL_ROWS):
+            continue
+        for arg in node.args[1:]:
+            for sub in ast.walk(arg):
+                # `.stdout` anywhere in a reported value is the leak: it is
+                # the credential itself, straight from the subprocess.
+                if isinstance(sub, ast.Attribute) and sub.attr == "stdout":
+                    leaks.append(f"{node.args[0].value} line {node.lineno}")
+    assert not leaks, (
+        "a credential row reports a subprocess's stdout — that IS the token: "
+        + ", ".join(leaks))
 
 
 # ── the enforcement probe ──────────────────────────────────────────────────

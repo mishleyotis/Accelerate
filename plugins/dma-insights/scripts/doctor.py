@@ -355,16 +355,23 @@ def enabled_state_check(manifest: dict) -> dict:
         "must be enabled per install (informational row, never fails)")
 
 
-def deps_check(plugin_root: Path = PLUGIN) -> dict:
-    """`scripts/dma-deps check` folded into one row: its exit is the verdict."""
+def deps_check(plugin_root: Path = PLUGIN, offline: bool = False) -> dict:
+    """`scripts/dma-deps check` folded into one row: its exit is the verdict.
+
+    Under --no-probe the wheel resolution is skipped, because it reaches
+    PyPI and this row is otherwise a network check wearing a local row's
+    name — the defect that made an offline doctor report red with
+    "missing: 0" in its own detail text.
+    """
     deps = plugin_root / "scripts" / "dma-deps"
     if not deps.is_file():
         return _check("skill script dependencies", False, f"{deps} not found",
                       "reinstall the plugin; scripts/dma-deps declares what "
                       "the bundled skill scripts import")
     try:
-        proc = subprocess.run([sys.executable, str(deps), "check"],
-                              capture_output=True, text=True, timeout=120)
+        proc = subprocess.run(
+            [sys.executable, str(deps), "check"] + (["--offline"] if offline else []),
+            capture_output=True, text=True, timeout=120)
     except subprocess.TimeoutExpired:
         return _check("skill script dependencies", False,
                       "dma-deps check did not finish in 120s")
@@ -642,7 +649,7 @@ def run_checks(base_url: str | None) -> list:
                       str(mcp_json) if mcp_json.exists() else "not found"))
     out.append(hooks_wired_check())
     out.extend(inventory_checks())
-    out.append(deps_check())
+    out.append(deps_check(offline=base_url is None))
 
     # 2 — an identity: gcloud where it exists, else the service-account key
     # file bootstrap_session.sh lands (fresh routine containers have no SDK).
@@ -689,8 +696,20 @@ def run_checks(base_url: str | None) -> list:
     out.append(audience_check(aud, base_url))
 
     # 4 — can a token actually be minted for that audience
+    #
+    # MINTING REACHES GOOGLE, so under --no-probe it is skipped rather than
+    # attempted and failed: an offline doctor that reports "identity token
+    # mints: ERROR ... Max retries exceeded" is describing the network, not
+    # the install, and it turned every offline run red (measured
+    # 2026-08-20). The rows above still state WHICH identity was found,
+    # which is the part that is knowable without a network.
     id_token = None
-    if gcloud and gcloud_account:
+    if base_url is None:
+        out.append(_check(
+            "identity token mints", True,
+            "SKIPPED: not probed (--no-probe) — minting reaches Google",
+            "drop --no-probe (or pass --base-url) to check this"))
+    elif gcloud and gcloud_account:
         env = dict(os.environ)
         env.pop("CLOUDSDK_AUTH_ACCESS_TOKEN", None)
         proc = subprocess.run(

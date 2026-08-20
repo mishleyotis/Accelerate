@@ -15,6 +15,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -177,3 +178,58 @@ class BaseUrlDefault(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class NoProbeIsTrulyOffline(unittest.TestCase):
+    """--no-probe must mean NO NETWORK, not "fewer network calls".
+
+    Measured 2026-08-20: an offline doctor still shelled out to pip (through
+    dma-deps' wheel resolution) and to gcloud (to mint an identity token),
+    so on any machine without a network — or behind a proxy pip or gcloud
+    does not trust — it reported red rows whose own detail text said
+    everything was present. Both are pinned here because both were the same
+    mistake: a network check wearing a local row's name.
+    """
+
+    def test_the_dependency_row_does_not_reach_pypi(self):
+        import doctor as d
+        seen = {}
+
+        def fake_run(cmd, **kw):
+            seen["cmd"] = cmd
+            class R:
+                returncode = 0
+                stdout = "declared: 13  present: 13  missing: 0\n"
+                stderr = ""
+            return R()
+
+        with mock.patch.object(d.subprocess, "run", fake_run):
+            row = d.deps_check(offline=True)
+        self.assertTrue(row["ok"], row)
+        self.assertIn("--offline", seen["cmd"],
+                      "deps_check(offline=True) must ask dma-deps to skip the "
+                      "wheel resolution; without the flag it reaches PyPI")
+
+    def test_the_identity_mint_row_is_skipped_offline(self):
+        proc = subprocess.run(
+            [sys.executable, str(HERE.parent / "doctor.py"),
+             "--no-probe", "--json"],
+            capture_output=True, text=True, timeout=300)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        rows = json.loads(proc.stdout)["checks"]
+        mint = [r for r in rows if r["check"] == "identity token mints"]
+        self.assertEqual(len(mint), 1, "the row must still be REPORTED")
+        self.assertTrue(mint[0]["ok"])
+        self.assertIn("SKIPPED", mint[0]["detail"],
+                      "an offline run must say it skipped, never claim a "
+                      "mint it did not attempt")
+
+    def test_every_row_passes_on_a_healthy_offline_checkout(self):
+        """The whole point: a correct install with no network is GREEN."""
+        proc = subprocess.run(
+            [sys.executable, str(HERE.parent / "doctor.py"),
+             "--no-probe", "--json"],
+            capture_output=True, text=True, timeout=300)
+        rows = json.loads(proc.stdout)["checks"]
+        failing = [r["check"] for r in rows if not r["ok"]]
+        self.assertEqual(failing, [], f"offline doctor is red on: {failing}")
