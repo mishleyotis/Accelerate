@@ -203,7 +203,9 @@ STEP 5 — REPORT. End with: client + run id; the gate's verdict lines; the clai
 Hard rules: one client per firing; never BOK; never edit apps/ code; never write another client's memory file; never synthesize a run the gate did not emit; never produce without holding the claim; if package vetting fails or entity identity is PENDING_REVIEW unresolved, record the finding and stop rather than force a promote.
 ```
 
-### 2a-ii · dma-synthesis-shore-united — every 12 hours at :38 · EXISTS (pinned client)
+### 2a-ii · dma-synthesis-shore-united — every 12 hours at :38 · DELETED in the routines UI ~12:35Z 2026-08-20
+
+Observed 12:41Z: trig_01R6AdANhLbG7SZQZ5SvyEeB no longer exists (update returned not-found; absent from list_triggers). The first production (session cse_016KRhfTfyzbBjFMq2D2SMAz, fired 12:23Z through the connector-carrying main trigger) is unaffected and continues. The prompt below is preserved verbatim so the Routine can be recreated on request — at 0.6.7 it should be recreated from THIS text (it already carries top-session dispatch and the connector self-heal ladder in the repo copy).
 
 | | |
 |---|---|
