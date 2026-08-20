@@ -1,5 +1,10 @@
 # dma-insights
 
+> The MCP connector's display name is **DMA Insights** — its own
+> initialize response says so, and it is the name to install it under in
+> claude.ai's custom-connector dialog (docs/CONNECTORS.md § DMA Insights
+> in claude.ai; access contract in docs/DECISIONS.md D8).
+
 The six Digital Maturity Assessment skills, fourteen DMA agents — five
 producers, three pipeline QA, four standing QA/maintenance — two operator
 commands, the submit/verdict hooks and the remote DMA Insights MCP

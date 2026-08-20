@@ -19,8 +19,15 @@ whether the change held. They write no serving content and are for agents
 — QA agents reporting, a rectifier agent asking "have we seen this
 before", a weekly pass reading what came back.
 
-Access: the endpoint is a capability URL — /mcp/{MCP_PATH_TOKEN}/...
-with the token from Secret Manager. Rotating the secret rotates the URL.
+Access (owner, 2026-08-20 — claude.ai reachability): every request is
+identity-checked IN-APP by dma_mcp.oauth_gate — a Google-signed ID token
+for the routine service account and @zennify.com humans, or a Google
+OAuth access token minted through the pre-registered "DMA Insights"
+client (claude.ai custom connector; only verified @zennify.com accounts
+pass). The capability path token (/mcp/{MCP_PATH_TOKEN} or the
+X-DMA-Path-Token header) remains defense in depth for the service path;
+authenticated callers reach bare /mcp without it. The connector's display
+name is "DMA Insights".
 """
 from __future__ import annotations
 
@@ -106,7 +113,7 @@ def _traced(fn):
     return _w
 
 token = os.environ.get("MCP_PATH_TOKEN", "dev").strip()
-mcp = MCPServer("dma-insights")
+mcp = MCPServer("DMA Insights")
 
 
 # ── read and discover ───────────────────────────────────────────────────
@@ -882,11 +889,14 @@ def ingest_reviewer_feedback(limit: int = 200) -> dict:
 
 def build_app():
     """Streamable-HTTP app on the capability path (stateless: Cloud Run
-    may serve consecutive requests from different instances), reachable
-    either as /mcp/{token} or as /mcp with the token in a header."""
-    return transport_mod.HeaderPathToken(mcp.streamable_http_app(
+    may serve consecutive requests from different instances), reachable as
+    /mcp/{token}, as /mcp with the token in a header, or as bare /mcp for
+    any caller the OAuthGate authenticated — the gate wraps OUTSIDE the
+    header wrapper, so identity is established before any routing."""
+    from dma_mcp.oauth_gate import OAuthGate
+    return OAuthGate(transport_mod.HeaderPathToken(mcp.streamable_http_app(
         streamable_http_path=f"/mcp/{token}", stateless_http=True,
-        json_response=True, host="0.0.0.0"), token)
+        json_response=True, host="0.0.0.0"), token), token)
 
 
 if __name__ == "__main__":

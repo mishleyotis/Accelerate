@@ -219,3 +219,36 @@ rulebooks load structurally through the skill, never a hook ([E]); the
 authoritative exclusion gate is `apps/mcp` + `apps/api` server code with the
 client mirror failing open ([F]); the `precheck_gates.py` invocation anchor
 fix is [G].
+
+
+## D8 · Connector identity: open ingress, in-app gate, "DMA Insights" by name
+
+Owner, 2026-08-20. The connector must be reachable from claude.ai's
+custom-connector dialog and "anyone with the @zennify domain is authorized";
+its display name — in its own initialize response, in the claude.ai install,
+and in every document — is **DMA Insights**.
+
+The dialog's client speaks OAuth, not Google IAM, so the 2026-08-16
+IAM-closed posture could not serve it. Resolution: ingress reopened and the
+identity check moved INTO the app (`apps/mcp/dma_mcp/oauth_gate.py`), which
+reads more than IAM did, not less — the 2026-08-16 lesson ("nothing on the
+other side read it") is honoured by construction:
+
+- **Rung A — Google-signed ID token**: the routine service account
+  (audience must be the service URL), or any verified `@zennify.com`
+  account (service URL or the gcloud CLI audience). The plugin path is
+  unchanged.
+- **Rung B — Google OAuth access token**: minted through the pre-registered
+  **DMA Insights** Google OAuth client (Secret Manager:
+  `dmai-oauth-client-id`, `dmai-oauth-client-secret`); audience must be
+  that client (the anti-passthrough property) and the email a verified
+  `@zennify.com` address. Google is the authorization server — this app
+  issues no tokens and never holds the client secret.
+- Discovery (`/.well-known/oauth-protected-resource`) is public; every 401
+  carries the `WWW-Authenticate` metadata pointer the dialog follows.
+- The capability path token stays as defense in depth on the service path;
+  authenticated callers reach bare `/mcp` without it. Rotation story
+  unchanged.
+- The IAM `domain:zennify.com` / deployer invoker grants remain in
+  `infra/deploy.sh`: inert under open ingress, load-bearing again if
+  ingress is ever re-closed.

@@ -110,47 +110,69 @@ if [ -f apps/mcp/Dockerfile ]; then
     --project="$PROJECT_ID" \
     --member="serviceAccount:dmai-mcp@${SA_DOMAIN}" \
     --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
+  # The claude.ai OAuth client id (owner, 2026-08-20): wired only once the
+  # owner has created the Google OAuth client and stored its id — until
+  # then the gate's rung B answers 401 naming exactly this secret.
+  MCP_SECRETS="MCP_PATH_TOKEN=dmai-mcp-path-token:latest"
+  if gcloud secrets describe dmai-oauth-client-id --project="$PROJECT_ID" >/dev/null 2>&1; then
+    gcloud secrets add-iam-policy-binding dmai-oauth-client-id \
+      --project="$PROJECT_ID" \
+      --member="serviceAccount:dmai-mcp@${SA_DOMAIN}" \
+      --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
+    MCP_SECRETS="${MCP_SECRETS},OAUTH_CLIENT_ID=dmai-oauth-client-id:latest"
+    say "svc_mcp: OAuth client id wired from Secret Manager"
+  else
+    say "svc_mcp: dmai-oauth-client-id not present — claude.ai sign-in stays 401 until it is"
+  fi
   gcloud run deploy dmai-mcp --source=apps/mcp \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-mcp@${SA_DOMAIN}" \
     --network=default --subnet=default --vpc-egress=private-ranges-only \
-    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-mcp@${PROJECT_ID}.iam;DB_NAME=dma_insights" \
-    --set-secrets="MCP_PATH_TOKEN=dmai-mcp-path-token:latest" \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-mcp@${PROJECT_ID}.iam;DB_NAME=dma_insights;MCP_SERVICE_URL=https://dmai-mcp-dukrne5v4a-uc.a.run.app" \
+    --set-secrets="$MCP_SECRETS" \
     --memory=2Gi --cpu=2 \
-    --concurrency=4 --timeout=900 --min-instances=1 --no-allow-unauthenticated --quiet
-  # THE CONNECTOR IS NOT PUBLIC, and this line is why it stays that way.
+    --concurrency=4 --timeout=900 --min-instances=1 --allow-unauthenticated --quiet
+  # INGRESS IS OPEN; IDENTITY IS READ IN-APP (owner decision, 2026-08-20).
   #
-  # This deploy passed `--allow-unauthenticated` until 2026-08-16, which
-  # grants roles/run.invoker to allUsers. The plugin minted a Google identity
-  # token on every connection and sent it; nothing on the other side read it.
-  # Authentication rested entirely on the path token in the URL — on the one
-  # component permitted to write serving content — while dmai-api and dmai-web
-  # were correctly closed. Fixing the IAM policy by hand would have been undone
-  # by the next release, silently, which is the only reason this comment is
-  # here rather than in a runbook.
-  #
-  # The path token is a capability, not an identity. It says WHICH connector;
-  # it cannot say WHO, it travels in a URL, and it cannot be revoked per user.
+  # History, kept because it is the reason the current shape is safe: this
+  # deploy passed `--allow-unauthenticated` until 2026-08-16 while NOTHING
+  # read the identity tokens the plugin dutifully sent — authentication
+  # rested on the path token alone, a capability that says WHICH connector
+  # and can never say WHO. The 2026-08-16 fix closed ingress at IAM. That
+  # posture could not serve claude.ai's custom-connector client (it speaks
+  # OAuth, not Google IAM), so on 2026-08-20 the owner directed: reachable
+  # from claude.ai, any @zennify.com account authorised. Ingress reopened —
+  # and this time every request's bearer IS read: dma_mcp/oauth_gate.py
+  # verifies a Google-signed ID token (routine SA, or @zennify.com humans)
+  # or a Google OAuth access token minted through the pre-registered
+  # "DMA Insights" client (audience-checked, verified @zennify.com only).
+  # The path token stays as defense in depth on the service path. The
+  # domain/deployer invoker grants below are kept: harmless under open
+  # ingress, and load-bearing again if ingress is ever re-closed.
   for member in "domain:${MCP_INVOKER_DOMAIN:-zennify.com}" \
                 "serviceAccount:${MCP_INVOKER_SA:-claude-deployer@${PROJECT_ID}.iam.gserviceaccount.com}"; do
     gcloud run services add-iam-policy-binding dmai-mcp \
       --project="$PROJECT_ID" --region="$REGION" \
       --member="$member" --role="roles/run.invoker" --quiet >/dev/null
   done
-  # Prove it rather than assuming it: an ANONYMOUS request to a bogus path
-  # token must die at IAM (403), not reach the application (404).
+  # Prove it rather than assuming it, both directions: an ANONYMOUS request
+  # must be refused BY THE APP with the OAuth challenge (401 + WWW-Authenticate
+  # naming the resource metadata), and the discovery document must be public.
   mcp_url=$(gcloud run services describe dmai-mcp --project="$PROJECT_ID" \
       --region="$REGION" --format='value(status.url)')
-  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
-      "${mcp_url}/mcp/deploy-probe-no-such-path-token" \
+  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "${mcp_url}/mcp" \
       -H 'Content-Type: application/json' -d '{}' || echo 000)
-  case "$code" in
-    401|403) say "svc_mcp: anonymous call rejected at IAM (HTTP $code)" ;;
-    *) echo "FATAL: dmai-mcp answered an ANONYMOUS request with HTTP $code." \
-            "403 means IAM rejected it; anything else means the connector is" \
-            "reachable without a Google identity. Refusing to call this deploy" \
-            "done." >&2; exit 1 ;;
-  esac
+  challenge=$(curl -s -o /dev/null -w '%{header_json}' -X POST "${mcp_url}/mcp" \
+      -H 'Content-Type: application/json' -d '{}' | grep -c resource_metadata || true)
+  meta=$(curl -s -o /dev/null -w '%{http_code}' \
+      "${mcp_url}/.well-known/oauth-protected-resource" || echo 000)
+  if [ "$code" = "401" ] && [ "$meta" = "200" ]; then
+    say "svc_mcp: anonymous call refused in-app (401, challenge headers: ${challenge}); discovery public (200)"
+  else
+    echo "FATAL: dmai-mcp anonymous probe expected 401 with public discovery," \
+         "got /mcp=$code metadata=$meta. The identity gate is not standing" \
+         "where ingress is open. Refusing to call this deploy done." >&2; exit 1
+  fi
 fi
 if [ -f apps/web/Dockerfile ]; then
   say "web"

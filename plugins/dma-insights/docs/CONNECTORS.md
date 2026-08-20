@@ -98,3 +98,59 @@ Per-facet source detail (tiers, ceilings, query shapes) stays where it
 lives: `02-inputs/enrichment_sources.json` and each page rulebook's
 "Enrichment pathways" section. This file maps surfaces to services; those
 map services to evidence discipline.
+
+
+## The DMA connector itself in claude.ai — install name: **DMA Insights**
+
+The connector's display name is **DMA Insights** everywhere: its own MCP
+initialize response says so, and it is the name to type in claude.ai's
+"Add custom connector" dialog, so its tools surface under the DMA Insights
+connector in chat and Cowork. (Inside Claude Code the plugin binds it as
+the plugin server `connector`; those tool ids are load-bearing across
+agents and hooks and deliberately unchanged.)
+
+Access contract (docs/DECISIONS.md D8): any verified **@zennify.com**
+Google account is authorized — humans via OAuth from claude.ai or a bare
+`gcloud auth print-identity-token`; the routine service account via its
+audience-bound ID token, exactly as the plugin has always sent it.
+
+### Dialog entries, and the commands that fetch them
+
+| Field | Value |
+|---|---|
+| Name | `DMA Insights` (typed) |
+| URL | the service URL + `/mcp` — no token segment |
+| OAuth Client ID / Secret | the pre-registered Google OAuth client, from Secret Manager |
+
+```bash
+# URL (append /mcp to the output):
+gcloud run services describe dmai-mcp --project digital-maturity-assessor \
+  --region us-central1 --format='value(status.url)'
+
+# Client ID and Secret (values print in YOUR terminal only — never paste
+# them into a chat):
+gcloud secrets versions access latest --secret dmai-oauth-client-id \
+  --project digital-maturity-assessor
+gcloud secrets versions access latest --secret dmai-oauth-client-secret \
+  --project digital-maturity-assessor
+```
+
+One-time creation of that client (Google offers no CLI for standard web
+OAuth clients): console.cloud.google.com/apis/credentials (project
+digital-maturity-assessor) → Create Credentials → OAuth client ID →
+consent screen **Internal** (this is the Workspace-level half of the
+@zennify.com restriction; the gate enforces it server-side regardless) →
+type **Web application**, name `DMA Insights — claude.ai`, authorized
+redirect URIs `https://claude.ai/api/mcp/auth_callback` and
+`https://claude.com/api/mcp/auth_callback`. Then store both values:
+
+```bash
+gcloud secrets create dmai-oauth-client-id --project digital-maturity-assessor --data-file=- \
+  # paste the client id, press Enter, then Ctrl-D
+gcloud secrets create dmai-oauth-client-secret --project digital-maturity-assessor --data-file=- \
+  # paste the client secret, press Enter, then Ctrl-D
+```
+
+`infra/deploy.sh` wires `dmai-oauth-client-id` into the service when the
+secret exists (the app needs only the id, for the audience check); until
+then claude.ai sign-in answers 401 naming exactly that secret.
