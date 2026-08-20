@@ -1,26 +1,26 @@
-"""The connector must not be deployed public, asserted where it is decided.
+"""Identity posture, asserted where it is decided — and its 2026-08-20 turn.
 
 `infra/deploy.sh` passed `--allow-unauthenticated` for `dmai-mcp` until
 2026-08-16. That flag grants roles/run.invoker to allUsers. The plugin minted
 a Google identity token on every connection and sent it; nothing on the other
 side read it, so authentication rested entirely on a 32-character path token
 travelling in a URL — on the single component permitted to write serving
-content, while `dmai-api` and `dmai-web` were correctly closed.
+content. The 2026-08-16 fix closed ingress at IAM, and this file pinned it.
 
-Two things had to be true for that to survive as long as it did, and this file
-is about the second:
+On 2026-08-20 the owner directed a different contract (docs/DECISIONS.md D8):
+the connector must be installable from claude.ai's custom-connector dialog —
+whose client speaks OAuth, not Google IAM — with any verified @zennify.com
+account authorized. Ingress reopened, and the identity check moved INTO the
+app (apps/mcp/dma_mcp/oauth_gate.py), which READS every request's bearer:
+that is the difference between this and the pre-2026-08-16 state, and it is
+exactly what these tests now assert. The defect class stays impossible: a
+deploy line that opens ingress WITHOUT the in-app gate wired fails CI red.
 
-  1. no check measured ENFORCEMENT. Every check measured that a credential
-     EXISTED — a token minted, an audience matched — and all of them passed.
-  2. the posture lived in one line of a shell script that nothing read back.
-
-Repairing the IAM policy by hand fixes (1)'s symptom for exactly as long as it
-takes someone to run the next release. The flag is the source of truth, so the
-assertion belongs on the flag.
-
-This is a text test on purpose. It needs no GCP credentials, so it runs in CI
-on every commit, which is where a reopened service has to be caught — not at
-deploy time, when the argument for shipping anyway is strongest.
+`dmai-api` remains IAM-closed; `dmai-web` remains public behind IAP. This is
+a text test on purpose: it needs no GCP credentials, so it runs on every
+commit — where a silently reopened (or silently unguarded) service has to be
+caught, not at deploy time when the argument for shipping anyway is
+strongest.
 """
 from __future__ import annotations
 
@@ -29,15 +29,19 @@ from pathlib import Path
 
 import pytest
 
-DEPLOY = Path(__file__).resolve().parents[2] / "infra" / "deploy.sh"
+ROOT = Path(__file__).resolve().parents[2]
+DEPLOY = ROOT / "infra" / "deploy.sh"
+GATE = ROOT / "apps" / "mcp" / "dma_mcp" / "oauth_gate.py"
+SERVER = ROOT / "apps" / "mcp" / "server.py"
 
-#: Services that must never be reachable without a Google identity, and why
-#: each one matters. `dmai-web` is deliberately absent: it is the browser
-#: entry point and is fronted by IAP, which does the authenticating.
+#: Services that must never be reachable without a Google identity at IAM.
+#: `dmai-web` is deliberately absent (public behind IAP); `dmai-mcp` moved to
+#: the gated set below on 2026-08-20 (D8).
 CLOSED_SERVICES = {
-    "dmai-mcp": "the only component permitted to write serving content",
     "dmai-api": "serves promoted client content, including internal audiences",
 }
+
+PUBLIC_FLAG = re.compile(r"(?<!-)(?<!no-)--allow-unauthenticated\b")
 
 
 def _deploy_block(service: str) -> str:
@@ -65,8 +69,7 @@ def test_THE_SERVICE_IS_NOT_DEPLOYED_PUBLIC(service):
     # `--no-allow-unauthenticated` contains `--allow-unauthenticated` as a
     # substring, so match the flag on a word boundary or this passes on the
     # exact bug it exists to catch.
-    public = re.search(r"(?<!-)(?<!no-)--allow-unauthenticated\b", block)
-    assert not public, (
+    assert not PUBLIC_FLAG.search(block), (
         f"{service} is deployed with --allow-unauthenticated, which grants "
         f"roles/run.invoker to allUsers. {CLOSED_SERVICES[service]}. "
         "Use --no-allow-unauthenticated and grant the specific principals "
@@ -77,30 +80,69 @@ def test_THE_SERVICE_IS_NOT_DEPLOYED_PUBLIC(service):
         "anyone chose; say it explicitly.")
 
 
+def test_THE_CONNECTOR_IS_PUBLIC_ONLY_WITH_THE_GATE_STANDING():
+    """The D8 contract, both halves — and the 2026-08-16 defect class held
+    impossible: open ingress may appear ONLY together with the in-app gate
+    that reads every bearer. Remove or unwire the gate and this fails red
+    before any deploy runs."""
+    block = _deploy_block("dmai-mcp")
+    assert PUBLIC_FLAG.search(block), (
+        "dmai-mcp is no longer deployed --allow-unauthenticated; if the D8 "
+        "contract has been reversed, restore this file's 2026-08-16 shape "
+        "(CLOSED_SERVICES) deliberately rather than leaving both halves "
+        "ambiguous")
+    assert GATE.is_file(), (
+        "dmai-mcp deploys PUBLIC but apps/mcp/dma_mcp/oauth_gate.py is gone "
+        "— that is the pre-2026-08-16 defect verbatim: open ingress with "
+        "nothing reading identity")
+    gate_src = GATE.read_text()
+    for needle, why in [
+        ("class OAuthGate", "the ASGI gate class"),
+        ("def check_identity", "the pure policy function"),
+        ("zennify.com", "the authorized domain default"),
+        ("tokeninfo", "rung B validation against Google"),
+        ("WWW-Authenticate".lower(), "the 401 challenge header (lowercase "
+                                     "wire form) claude.ai discovery needs"),
+    ]:
+        assert needle.lower() in gate_src.lower(), (
+            f"oauth_gate.py no longer carries {why} ({needle!r})")
+    server_src = SERVER.read_text()
+    assert "OAuthGate" in server_src, (
+        "server.py builds the app without wrapping OAuthGate — the gate "
+        "exists but nothing routes requests through it")
+    assert "MCP_SERVICE_URL" in block, (
+        "the deploy no longer pins MCP_SERVICE_URL, the audience rung-A "
+        "service tokens are checked against")
+
+
 def test_the_connector_deploy_grants_someone_before_it_closes_the_door():
-    """Closing a service without granting an invoker is an outage, not a fix.
-    The deploy has to do both, or the first person to run it loses access to
-    the connector and has no obvious way back."""
+    """The invoker grants stay: inert under open ingress, load-bearing the
+    moment ingress is ever re-closed — losing them silently would turn a
+    future re-close into an outage."""
     text = DEPLOY.read_text()
     grant = re.search(
         r"add-iam-policy-binding dmai-mcp\b[\s\S]{0,400}?roles/run\.invoker",
         text)
-    assert grant, ("infra/deploy.sh closes dmai-mcp but never grants "
-                   "roles/run.invoker to anything — nobody could call it")
+    assert grant, ("infra/deploy.sh no longer grants roles/run.invoker on "
+                   "dmai-mcp to anyone — a future ingress re-close would "
+                   "lock everyone out")
 
 
 def test_the_deploy_verifies_the_posture_it_just_set():
-    """A grant that was applied is not a service that rejects anonymous calls;
-    IAM is eventually consistent and a typo in a member string fails quietly.
-    The deploy probes it and refuses to report success on anything but a
-    rejection — the same token-free probe the install doctor makes."""
+    """A gate that was written is not a service that refuses anonymous calls;
+    the deploy probes the LIVE service and refuses to report success unless
+    an anonymous /mcp call is refused in-app (401) AND the OAuth discovery
+    document is public (200) — both halves of the D8 contract, measured."""
     text = DEPLOY.read_text()
-    assert "deploy-probe-no-such-path-token" in text, (
-        "the deploy sets the posture but never measures it")
-    probe = text[text.find("deploy-probe-no-such-path-token"):]
-    assert re.search(r"401\|403|403\|401", probe), (
-        "the probe does not treat 401/403 as the passing answer")
-    assert "exit 1" in probe[:1200], (
+    start = text.find("Prove it rather than assuming it")
+    assert start != -1, "the deploy sets the posture but never measures it"
+    probe = text[start:start + 1600]
+    assert "/.well-known/oauth-protected-resource" in probe, (
+        "the probe never checks that OAuth discovery is public")
+    assert re.search(r'"\$code"\s*=\s*"401"', probe), (
+        "the probe does not require the anonymous call to be refused 401 "
+        "by the app")
+    assert "exit 1" in probe, (
         "the probe reports but does not FAIL the deploy; a warning in a "
         "release log is not a gate")
 
