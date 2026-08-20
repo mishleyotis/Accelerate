@@ -90,7 +90,7 @@ class ExactInventory(unittest.TestCase):
     def test_hidden_agent_fails_the_count(self):
         with tempfile.TemporaryDirectory() as td:
             root = _copy_tree(Path(td))
-            (root / "agents" / "qa-overseer.md").unlink()
+            (root / "agents" / "qa" / "qa-overseer.md").unlink()
             rows = {r["check"]: r for r in doctor.inventory_checks(root)}
             self.assertFalse(rows["agents inventory"]["ok"])
             # Derived from EXPECTED_AGENTS rather than written out: the literal
@@ -108,7 +108,7 @@ class ExactInventory(unittest.TestCase):
     def test_extra_agent_fails_the_count(self):
         with tempfile.TemporaryDirectory() as td:
             root = _copy_tree(Path(td))
-            (root / "agents" / "thirteenth.md").write_text(
+            (root / "agents" / "qa" / "thirteenth.md").write_text(
                 "---\nname: thirteenth\n---\n")
             rows = {r["check"]: r for r in doctor.inventory_checks(root)}
             self.assertFalse(rows["agents inventory"]["ok"])

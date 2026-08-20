@@ -1,14 +1,16 @@
 # Agents — the index
 
-Forty agent files sit flat in `plugins/dma-insights/agents/`; this file is the
-only place that says what each one owns, which tier it belongs to, and who is
-allowed to call it.
+Forty-seven agent files live in taxonomy folders under
+`plugins/dma-insights/agents/` (owner, 2026-08-20: "every agent and subagent
+organized well into folders and subfolders so it is easy to follow"); this
+file says what each one owns, which tier it belongs to, and who is allowed
+to call it.
 
-Read it as the folder structure the filesystem is not permitted to express. The
-Claude Code plugin loader discovers `agents/*.md` and nothing below it, so the
-grouping that would normally live in subdirectories has to live here instead —
-the reasoning for that is in **[Why the directory is flat](#why-the-directory-is-flat)**,
-and it is the reason this index is load-bearing rather than convenient.
+The tree on disk IS the tier structure described below —
+**[The taxonomy on disk](#the-taxonomy-on-disk)** shows it and states the
+loading contract that makes nesting safe. This index stays load-bearing for
+OWNERSHIP: a folder tells you an agent's family; only the tables here and
+the surface map tell you which payload sections it owns.
 
 Two companion files answer the questions this one deliberately does not. The
 pipeline — what runs before what, and how a repair is sized down to one
@@ -195,20 +197,40 @@ paragraph.
 
 ---
 
-## Why the directory is flat
+## The taxonomy on disk
 
-Agent files live at `plugins/dma-insights/agents/<name>.md` and nowhere else. The
-Claude Code plugin loader discovers agent files in that one directory and does
-**not** recurse into subdirectories — this is confirmed in the plugin reference,
-and it fails silently. A file at `agents/overview/hero-producer.md` produces no
-error, no warning and no agent; the router simply cannot find something that was
-never registered, and the first symptom is a surface that renders empty under a
-real client's name.
+```
+agents/
+  orchestration/            surface-producer · package-vetter · page-consolidator
+  production/
+    overview/               overview-surface-producer (router) + hero · narrative ·
+                            opportunity · people · whynow · market · findings · governance
+    heatmap/                heatmap-surface-producer (router) + grid · focus ·
+                            evidence · valuechain · signals · freshness
+    platform/               platform-surface-producer (router) + fit · conversation · roadmap
+    context/                context-surface-producer (router) + risk · sentiment · timeline
+    insights/               insights-surface-producer (router) + cards · landscape
+    techstack/              techstack-surface-producer (router) + register · layers
+  enrichment/               enrichment-planner · enrichment-web-specialist ·
+                            enrichment-connector-specialist · enrichment-ledger-auditor
+  checkers/                 finding-challenger · evidence-integrity-checker ·
+                            numeric-reconciliation-checker · exclusion-boundary-auditor
+  qa/                       adversarial-verifier · deployed-app-auditor · qa-overseer
+  learning/                 rectifier · learning-grader · learning-testgen
+```
 
-So the tiers described above are not directories and cannot be made into
-directories. **This index is the folder structure.** A new agent that is not
-added to the table above is invisible to everyone except the person who wrote
-it, which is precisely the flat-directory problem this file exists to solve.
+The loading contract, stated because an earlier revision of this file asserted
+the opposite: the plugin loader DOES discover agent files in subdirectories
+(measured 2026-08-20 — a probe plugin with `agents/groupa/nested-agent.md`
+registered both its flat and its nested agent in a live session; the plugin
+reference is silent on recursion). Because silence is not a guarantee,
+`plugin.json` also declares **every agent file individually** in its `agents`
+array — the manifest schema accepts file paths only — so a loader that does
+not recurse still sees the full roster. `scripts/package_plugin.py` fails the
+build when the manifest and the tree disagree in either direction, which makes
+"added a file, forgot the manifest" unshippable rather than silent. Agent
+NAMES stay unique across all folders: routing and `skills:`/agent references
+resolve by front-matter name, never by path.
 
 Three other files carry per-agent facts and each of them can drift from the
 directory:
@@ -226,10 +248,14 @@ directory:
 
 ## Adding a new agent
 
-**One file, flat, kebab-case.** Create
-`plugins/dma-insights/agents/<name>.md`. The `name` in front matter must equal
-the filename without `.md`; a mismatch is how an agent becomes unroutable while
-looking present on disk.
+**One file, in its taxonomy folder, kebab-case.** Create
+`plugins/dma-insights/agents/<family>/<name>.md` under the folder the tree
+above assigns (a new family means a new folder AND a new tree entry here).
+The `name` in front matter must equal the filename without `.md` and stay
+unique across ALL folders; a mismatch is how an agent becomes unroutable
+while looking present on disk. Then declare the file in `plugin.json`'s
+`agents` array and bump `scripts/doctor.py` EXPECTED_AGENTS — the packager
+and the doctor both fail loudly until you do, which is the point.
 
 **Front matter may contain only these seven keys**, and nothing else:
 

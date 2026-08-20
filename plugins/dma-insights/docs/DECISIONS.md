@@ -85,7 +85,7 @@ surface section.
 
 **Load path (constraint [E], structural not hook):** each producer agent's
 Method step 2 — already "get_memory_digest + search_findings for the routed
-surfaces" (`agents/heatmap-surface-producer.md:43-50`) — gains "read
+surfaces" (`agents/production/heatmap/heatmap-surface-producer.md:43-50`) — gains "read
 `03-pages/rulebooks/<page>.md`" before authoring. The rulebook is versioned
 in its title line; the rectifier is the only writer (constraint [B]).
 

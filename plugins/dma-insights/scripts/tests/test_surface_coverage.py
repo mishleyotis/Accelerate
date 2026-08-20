@@ -90,7 +90,7 @@ def find_orphans(census: dict, claims: dict) -> list:
                 orphans.append(f"{section}: no surface-map row claims it")
                 continue
             live = {o for o in entry["owners"]
-                    if (AGENTS_DIR / f"{o}.md").is_file()}
+                    if any(AGENTS_DIR.rglob(f"{o}.md"))}
             if not live and not entry["server_computed"]:
                 named = ", ".join(sorted(entry["owners"])) or "nobody"
                 orphans.append(
@@ -121,7 +121,7 @@ def test_named_owners_all_exist_as_agent_files(claims):
     dead = sorted({owner
                    for entry in claims.values()
                    for owner in entry["owners"]
-                   if not (AGENTS_DIR / f"{owner}.md").is_file()})
+                   if not any(AGENTS_DIR.rglob(f"{owner}.md"))})
     assert not dead, (
         "surface-map.md names producing agents that do not exist: "
         + ", ".join(dead))

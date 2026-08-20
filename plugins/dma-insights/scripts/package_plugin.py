@@ -63,6 +63,21 @@ def check(manifest: dict, entries: list) -> list:
     for bad in FORBIDDEN_TOP_LEVEL & tops:
         fails.append(f"top-level {bad}/ present — claude.ai refuses PATH-added "
                      "executables")
+    # The agents live in taxonomy folders (owner, 2026-08-20: "organized well
+    # into folders and subfolders"). The manifest schema accepts individual
+    # FILE paths only (directory entries fail validate), so plugin.json must
+    # declare every agent file explicitly — the belt for any loader that does
+    # not recurse into agents/ by default. Manifest and disk must be the same
+    # set, or an agent exists that some loader will never see.
+    declared = {a.lstrip("./") for a in manifest.get("agents", [])}
+    on_disk = {e for e in (str(x) for x in entries)
+               if e.startswith("agents/") and e.endswith(".md")
+               and not e.endswith("README.md")}
+    for missing in sorted(on_disk - declared):
+        fails.append(f"agent file {missing} not declared in plugin.json "
+                     f"agents[] — a non-recursive loader never sees it")
+    for ghost in sorted(declared - on_disk):
+        fails.append(f"plugin.json declares {ghost} but no such file ships")
     if ".claude-plugin/plugin.json" not in {str(e) for e in entries}:
         fails.append("manifest missing from archive root")
     if not re.fullmatch(r"\d+\.\d+\.\d+", manifest.get("version") or ""):
@@ -75,7 +90,7 @@ def check(manifest: dict, entries: list) -> list:
     if re.search(r"https?://", desc):
         fails.append("description contains a URL — the uploader rejects them; "
                      "use homepage/repository fields")
-    for agent in sorted((PLUGIN / "agents").glob("*.md")):
+    for agent in sorted((PLUGIN / "agents").rglob("*.md")):
         head = agent.read_text().split("---")[1]
         keys = {line.split(":")[0].strip() for line in head.splitlines()
                 if ":" in line and not line.startswith((" ", "\t", "-", "#"))}

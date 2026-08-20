@@ -20,7 +20,7 @@ _GOLD = re.compile(r"gold:[a-z]+/[a-z]+\.[a-z_]+")
 
 
 def test_no_agent_cites_a_transient_path():
-    for f in AGENTS.glob("*.md"):
+    for f in AGENTS.rglob("*.md"):
         text = f.read_text()
         assert "scratchpad" not in text, (
             f"{f.name} cites a transient scratchpad path — use the gold: "
@@ -31,7 +31,7 @@ def test_no_agent_cites_a_transient_path():
 def test_every_gold_citation_resolves_in_the_manifest():
     manifest = json.loads(MANIFEST.read_text())["sections"]
     unresolved = []
-    for f in sorted(AGENTS.glob("*.md")):
+    for f in sorted(AGENTS.rglob("*.md")):
         for ref in _GOLD.findall(f.read_text()):
             if ref not in manifest:
                 unresolved.append(f"{f.name}: {ref}")

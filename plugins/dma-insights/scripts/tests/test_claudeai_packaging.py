@@ -80,3 +80,25 @@ def test_zip_builds_clean(tmp_path):
     assert ".claude-plugin/plugin.json" in names
     assert not any(n.startswith("bin/") for n in names)
     assert not any("__pycache__" in n for n in names)
+
+
+def test_every_shipped_agent_is_declared_in_the_manifest():
+    """The taxonomy folders are safe only because plugin.json declares every
+    agent file individually (the manifest schema takes file paths, not
+    directories) — a loader that does not recurse must still see the roster.
+    Both drift directions fail: a shipped-but-undeclared agent, and a declared
+    ghost."""
+    import json
+    manifest = json.loads((pkg.PLUGIN / ".claude-plugin"
+                           / "plugin.json").read_text())
+    entries = list(pkg.iter_files())
+    assert not pkg.check(manifest, entries), "the real tree must be in sync"
+
+    undeclared = dict(manifest, agents=manifest["agents"][:-1])
+    fails = pkg.check(undeclared, entries)
+    assert any("not declared in plugin.json" in f for f in fails)
+
+    ghost = dict(manifest,
+                 agents=manifest["agents"] + ["./agents/qa/never-written.md"])
+    fails = pkg.check(ghost, entries)
+    assert any("no such file ships" in f for f in fails)
