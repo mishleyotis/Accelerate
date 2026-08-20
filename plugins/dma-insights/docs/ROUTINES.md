@@ -154,6 +154,20 @@ has found the drift section 3's manual reconciliation exists to catch.
 
 ### 2a · dma-synthesis-sequence — every 12 hours · EXISTS
 
+**Connectors — UI-attach required (measured 2026-08-20).** A trigger created
+through the API carries NO claude.ai connectors, and this organisation has
+the API's `connectors` parameter disabled — so connectors reach a routine's
+fired sessions ONLY when a human attaches them in the claude.ai routines UI
+(as was done for 2b and 2c). Until that edit is made on this trigger, fired
+sessions run with the plugin's own connector (the 33 dma-insights tools,
+which load regardless) plus web search; Google Drive, Clay and the rest are
+absent, so the client-memory round-trip stays local-and-flagged and Clay
+facets record as not-run. The DMA package itself is unaffected either way:
+packages enter through the app's package scan (worker Job, server-side) and
+sessions read the parsed package through the connector — invariant 2; a
+session never parses a workbook from Drive.
+
+
 | | |
 |---|---|
 | **Trigger** | `trig_01WTf9nQdFPQb6jiSVVyf37u`, cron `8 */12 * * *` (00:08 and 12:08 UTC; the minute is the creation anchor), enabled, push notifications on, created 2026-08-19 |
