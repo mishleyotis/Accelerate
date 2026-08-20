@@ -682,6 +682,37 @@ useful, but never let the customer-facing `reason` depend on them.
 
 ## H3 · Thin-evidence alerts
 
+### The resolution ladder — a thin subcap may be resolved, if need be
+
+Owner, 2026-08-20: "ensure that thin subcaps may be resolved, if need be and
+that evidence matching to subcaps is accurate." *If need be* is a judgement
+the ladder makes explicit — a cell honestly thin after the ladder is a
+result, not a failure; a cell thin because nobody ran the ladder is a
+defect. Per `is_thin_evidence` cell, in order, every rung recorded in the
+client's memory file (05-lifecycle/client-memory.md, "thin subcap
+resolution"):
+
+1. **Re-match before re-search.** Run `scripts/subcap_match.py rank` over
+   the run's already-registered evidence: thinness is often mis-filing, not
+   absence — the item that grounds this cell exists and is cited on its
+   sibling. A re-assignment corrects both cells at once; write the deciding
+   terms to the feedback ledger (`subcap_match.py learn`) and the story to
+   the memory file. An AMBIGUOUS verdict is never auto-assigned — it goes to
+   the producer with the contenders listed.
+2. **The enrichment pathways for this cell's facet** (the page pack's
+   Information sources table): each search logged with query and date in the
+   research log, empty results included. New material enters ONLY through
+   `register_evidence` with a verbatim 50–500 char excerpt.
+3. **The alert, when 1 and 2 leave it thin.** State the deficit
+   (`evidence_count`), the queries run, and a `closure_condition` naming the
+   internal artefact that would settle it — the Baxter pattern below. The
+   cell then STAYS thin and says so: dashed outline, never a fill it did not
+   earn.
+
+What resolution never is: lowering the thinness bar, widening an excerpt's
+meaning, or citing a generic source against a specific subcap (R5-2). The
+thin-evidence rule stands — one specific item above T3 is not thin.
+
 ### Baxter positive pattern
 
 An alert is a work item with a state, a licence and a named closure artefact:
