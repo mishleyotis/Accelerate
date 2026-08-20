@@ -164,3 +164,68 @@ def test_push_memory_heals_a_variant_name(monkeypatch, tmp_path):
     assert len(patches) == 2  # content update + rename
     rename = json.loads(patches[1][2])
     assert rename["name"] == "t-rowe-price-group-inc — synthesis memory.md"
+
+
+def test_push_bundle_creates_nested_folders_and_updates_in_place(monkeypatch, tmp_path):
+    """The DMA Insights resume store: state.json + surfaces/<section>.json
+    per client (owner, 2026-08-20) — created on first push, updated in
+    place after, so a resuming workflow reads structure, not racing prose."""
+    import json as _json
+    bundle = tmp_path / "b.json"
+    bundle.write_text('{"ok": true}')
+    monkeypatch.setattr(drive_fetch, "_token", lambda: "tok")
+    monkeypatch.setattr(drive_fetch, "_find_client_folder",
+                        lambda tok, c: {"id": "root", "name": "X - DMA"})
+    tree = {"root": [], "bundle-root": [], "surf": []}
+    created = []
+
+    def fake_list(tok, fid):
+        return tree.get(fid, [])
+
+    class _Resp:
+        def __init__(self, payload):
+            self._p = payload
+
+        def __enter__(self):
+            import io as _io
+            return _io.BytesIO(_json.dumps(self._p).encode())
+
+        def __exit__(self, *a):
+            return False
+
+    def fake_req(tok, url, data=None, method="GET", ctype=None):
+        if method == "POST" and "uploadType" not in url:
+            meta = _json.loads(data)
+            fid = {"DMA Insights": "bundle-root",
+                   "surfaces": "surf"}.get(meta["name"], "newf")
+            created.append(meta["name"])
+            tree.setdefault(meta["parents"][0], []).append(
+                {"id": fid, "name": meta["name"],
+                 "mimeType": drive_fetch.FOLDER_MIME})
+            return _Resp({"id": fid})
+        created.append(("upload", method, url.split("?")[0].rsplit("/", 1)[-1]))
+        return _Resp({"id": "f1"})
+
+    monkeypatch.setattr(drive_fetch, "_list_children", fake_list)
+    monkeypatch.setattr(drive_fetch, "_req", fake_req)
+    rc = drive_fetch.push_bundle("x", str(bundle),
+                                 "surfaces/heatmap.workbook_scores.json")
+    assert rc == 0
+    assert "DMA Insights" in created and "surfaces" in created
+    # second push: file now exists in 'surf' -> update via PATCH
+    tree["surf"] = [{"id": "f1", "name": "heatmap.workbook_scores.json",
+                     "mimeType": "application/json"}]
+    created.clear()
+    rc = drive_fetch.push_bundle("x", str(bundle),
+                                 "surfaces/heatmap.workbook_scores.json")
+    assert rc == 0
+    assert any(c[1] == "PATCH" for c in created if isinstance(c, tuple))
+
+
+def test_push_bundle_refuses_invalid_json(tmp_path):
+    bad = tmp_path / "bad.json"
+    bad.write_text("{not json")
+    import pytest as _pytest
+    with _pytest.raises(SystemExit) as e:
+        drive_fetch.push_bundle("x", str(bad), None)
+    assert "valid JSON" in str(e.value)

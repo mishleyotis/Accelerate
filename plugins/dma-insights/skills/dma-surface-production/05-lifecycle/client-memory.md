@@ -86,3 +86,38 @@ in scope; if absent, `client_memory.py init` and upload the skeleton. After
 every page submitted and at session end: upload the updated file back to
 the same Drive file id. A routine that ends without writing back has lost
 its session's memory — treat it as a failed step, not a formality.
+
+## Resume bundles — the structured half of memory
+
+Owner instruction, 2026-08-20: each client's findings consolidate under ONE
+`DMA Insights/` folder in the client's Drive folder, as JSON bundles per
+surface, so a resuming workflow knows exactly what to look for instead of
+parsing racing prose (measured failure: two true handoff records of
+different moments disagreed, and the resuming session had to flag the
+discrepancy rather than resume).
+
+Layout, written by `drive_fetch.py push-bundle` and landed locally by the
+recursive pull:
+
+- `DMA Insights/state.json` — run-level: `run_id`, `display_id`,
+  `updated_at`, `updated_by`, the package-vetter verdict + quarantine list
+  verbatim, claim history, and a per-section status map
+  (`unstarted / produced_citations_unverified / produced_validated /
+  in_flight_at_outage / submitted / promoted`).
+- `DMA Insights/surfaces/<payload_section>.json` — per produced surface:
+  the section payload, its challenge verdicts, and citation-check state.
+
+Rules:
+1. Bundles are RESUME STATE, never a serving source. Once submitted, the
+   connector's staged rows are authoritative; on any disagreement the
+   connector wins.
+2. A bundle carrying a payload is re-validated on resume (citations
+   re-checked live), not re-produced. A status without a payload guides
+   priority; it is not content.
+3. `state.json` is pushed after every stage transition and every
+   submit/promote; a surface bundle is pushed the moment its challenge
+   passes. A session that dies mid-run then costs at most one surface.
+4. The memory file stays the narrative half (open questions, adjudication
+   stories, research log); the bundles are the structural half. They
+   reference, never duplicate, each other's authority.
+

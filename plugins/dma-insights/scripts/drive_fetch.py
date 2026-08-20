@@ -28,6 +28,11 @@ Commands:
                               /root/.dma/packages/<slug>/
   push-memory --client <slug> upload/update "<slug> — synthesis memory.md"
                               into the client's subfolder
+  push-bundle --client <id> --file <local.json> [--name <remote.json>]
+                              upload/update a JSON bundle into the client's
+                              "DMA Insights" folder — the structured resume
+                              state (state.json + surfaces/<section>.json)
+                              a resuming workflow reads instead of prose
 
 No value of any token is ever printed. Errors name the layer and the fix.
 """
@@ -295,6 +300,78 @@ def push_memory(client: str) -> int:
     return 0
 
 
+BUNDLE_FOLDER = "DMA Insights"
+
+
+def _ensure_folder(tok: str, parent_id: str, name: str) -> str:
+    """Find or create a child folder; returns its id."""
+    for f in _list_children(tok, parent_id):
+        if f["mimeType"] == FOLDER_MIME and f["name"] == name:
+            return f["id"]
+    meta = json.dumps({"name": name, "mimeType": FOLDER_MIME,
+                       "parents": [parent_id]}).encode()
+    with _req(tok, f"{API}/files?supportsAllDrives=true", data=meta,
+              method="POST", ctype="application/json") as resp:
+        return json.load(resp)["id"]
+
+
+def push_bundle(client: str, file_path: str, name: str | None) -> int:
+    """Owner instruction, 2026-08-20: per-client findings consolidate under
+    one 'DMA Insights' folder as JSON bundles per surface, so a resuming
+    workflow knows exactly what to look for. Convention: state.json for the
+    run-level record (run id, vetter verdict + quarantine list, claim
+    history, per-section status map, updated_at), surfaces/<page>.<section>.json
+    for each produced surface (payload + challenge verdicts + citation-check
+    state). These bundles are RESUME STATE, never a serving source — the
+    connector's staged rows stay authoritative once submitted, and on any
+    disagreement the connector wins."""
+    local = Path(file_path)
+    if not local.is_file():
+        raise SystemExit(f"no such file: {local}")
+    try:
+        json.loads(local.read_bytes())
+    except Exception as e:                                  # noqa: BLE001
+        raise SystemExit(f"bundle must be valid JSON ({e}) — a resume "
+                         f"reader that hits a parse error re-derives, which "
+                         f"defeats the point")
+    remote_name = name or local.name
+    tok = _token()
+    folder = _find_client_folder(tok, client)
+    bundle_root = _ensure_folder(tok, folder["id"], BUNDLE_FOLDER)
+    parent = bundle_root
+    parts = remote_name.split("/")
+    for sub in parts[:-1]:
+        parent = _ensure_folder(tok, parent, sub)
+    leaf = parts[-1]
+    existing = [f for f in _list_children(tok, parent)
+                if f["mimeType"] != FOLDER_MIME and f["name"] == leaf]
+    body = local.read_bytes()
+    if existing:
+        url = (f"{UPLOAD}/files/{existing[0]['id']}?uploadType=media"
+               f"&supportsAllDrives=true")
+        with _req(tok, url, data=body, method="PATCH",
+                  ctype="application/json") as resp:
+            json.load(resp)
+        print(f"bundle updated: {BUNDLE_FOLDER}/{remote_name} in "
+              f"{folder['name']!r}")
+    else:
+        meta = json.dumps({"name": leaf, "parents": [parent]}).encode()
+        boundary = "dma-bundle-upload"
+        payload = io.BytesIO()
+        for part, ct in ((meta, "application/json; charset=UTF-8"),
+                         (body, "application/json")):
+            payload.write(f"--{boundary}\r\nContent-Type: {ct}\r\n\r\n".encode())
+            payload.write(part + b"\r\n")
+        payload.write(f"--{boundary}--".encode())
+        url = f"{UPLOAD}/files?uploadType=multipart&supportsAllDrives=true"
+        with _req(tok, url, data=payload.getvalue(), method="POST",
+                  ctype=f"multipart/related; boundary={boundary}") as resp:
+            json.load(resp)
+        print(f"bundle created: {BUNDLE_FOLDER}/{remote_name} in "
+              f"{folder['name']!r}")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -303,6 +380,12 @@ def main(argv=None) -> int:
     p_pull.add_argument("--client", required=True)
     p_push = sub.add_parser("push-memory")
     p_push.add_argument("--client", required=True)
+    p_b = sub.add_parser("push-bundle")
+    p_b.add_argument("--client", required=True)
+    p_b.add_argument("--file", required=True)
+    p_b.add_argument("--name", default=None,
+                     help="remote path inside 'DMA Insights/', e.g. "
+                          "surfaces/heatmap.workbook_scores.json")
     a = ap.parse_args(argv)
     if a.cmd == "check":
         return check()
@@ -310,6 +393,8 @@ def main(argv=None) -> int:
         return pull(a.client)
     if a.cmd == "push-memory":
         return push_memory(a.client)
+    if a.cmd == "push-bundle":
+        return push_bundle(a.client, a.file, a.name)
     return 2
 
 
