@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import os
 import sys
 import time
 import urllib.error
@@ -151,8 +152,19 @@ def forward(url: str, msg: dict) -> list:
 
 
 def main() -> int:
-    base = (sys.argv[1] if len(sys.argv) > 1 and sys.argv[1].strip()
-            else "https://dmai-mcp-dukrne5v4a-uc.a.run.app").rstrip("/")
+    # The arg comes from plugin config (${user_config.mcp_base_url}); when
+    # that config never landed — a restored container, an install whose
+    # --config did not persist (measured 2026-08-20: no mcp_base_url
+    # anywhere in the config store, proxy handed the unresolved
+    # placeholder, no tools bound) — the placeholder arrives VERBATIM.
+    # Anything unresolved or empty falls back to the production URL, then
+    # the DMA_MCP_HOST environment override, so the binding never depends
+    # on install-time config being present.
+    raw = sys.argv[1].strip() if len(sys.argv) > 1 else ""
+    if not raw or "${" in raw:
+        raw = os.environ.get(
+            "DMA_MCP_HOST", "https://dmai-mcp-dukrne5v4a-uc.a.run.app")
+    base = raw.rstrip("/")
     if not base.endswith("/mcp"):
         base = base + "/mcp"
     for line in sys.stdin:

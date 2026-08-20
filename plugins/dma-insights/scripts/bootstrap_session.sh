@@ -153,6 +153,18 @@ elif command -v claude >/dev/null 2>&1; then
     || log "plugin update failed"
   claude plugin enable dma-insights@zennify-dma >/dev/null 2>&1 || true
   WANT="$(python3 -c "import json;print(json.load(open('$REPO_DIR/plugins/dma-insights/.claude-plugin/plugin.json'))['version'])" 2>/dev/null)" || WANT=""
+  # PRUNE STALE CACHED VERSIONS (measured 2026-08-20, second binding killer):
+  # after an update the old version's cache dir remains beside the new one,
+  # and a session can resolve the STALE .mcp.json — a 0.2.0 http config with
+  # an unresolvable path-token variable shadowed the 0.6.8 stdio proxy, so
+  # `plugin list` said 0.6.8 while the session bound nothing. Keep only the
+  # version the repo ships.
+  if [ -n "$WANT" ] && [ -d "$HOME/.claude/plugins/cache/zennify-dma/dma-insights" ]; then
+    for d in "$HOME"/.claude/plugins/cache/zennify-dma/dma-insights/*/; do
+      v="$(basename "$d")"
+      [ "$v" = "$WANT" ] || { rm -rf "$d" && log "pruned stale plugin cache $v"; }
+    done
+  fi
   HAVE="$(claude plugin list 2>/dev/null | grep -A2 'dma-insights@zennify-dma' | grep -o 'Version: [0-9.]*' | head -1 | cut -d' ' -f2)" || HAVE=""
   if [ -n "$WANT" ] && [ "$HAVE" != "$WANT" ]; then
     log "PLUGIN VERSION MISMATCH: installed ${HAVE:-none}, repo ships $WANT —"
