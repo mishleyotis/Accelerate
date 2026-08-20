@@ -297,21 +297,35 @@ def main(argv: list[str]) -> int:
     scoring: Path | None = None
     research: Path | None = None
     if target.is_dir():
-        for p in sorted(target.rglob("*.xls[xm]")):
-            n = p.name.lower()
-            if "research" in n and research is None:
-                research = p
-            elif "scoring" in n and scoring is None:
-                scoring = p
-        if scoring is None:
-            xl = [p for p in sorted(target.rglob("*.xls[xm]")) if p != research]
-            scoring = xl[0] if xl else None
+        # Discovery goes through package_map: packages come in at least four
+        # structure generations (wrappers, 03_Assessment, workbooks in
+        # 08_appendices, version stacks with INTERIM copies beside the live
+        # workbook — measured across the 178-client corpus, 2026-08-20).
+        # Naive rglob picked whichever xlsx sorted first.
+        sys.path.insert(0, str(Path(__file__).resolve().parents[3]
+                               / "scripts"))
+        import package_map  # noqa: PLC0415
+        pm = package_map.map_package(target)
+        scoring = Path(pm["scoring"]["primary"]) \
+            if pm["scoring"]["primary"] else None
+        research = Path(pm["research"]["primary"]) \
+            if pm["research"]["primary"] else None
+        for amb in pm["ambiguities"]:
+            note("WARN", f"package_map: {amb}")
+        for aux in pm["auxiliary_xlsx"]:
+            note("PIN", f"auxiliary workbook (not vetted as scoring): {aux}")
+        if pm["evidence_tables"]:
+            note("PIN", f"{len(pm['evidence_tables'])} evidence stores "
+                        f"beyond the workbooks — evidence_normalize.py "
+                        f"merges them; vet gaps there, not here")
     else:
         scoring = target
         research = Path(argv[2]) if len(argv) > 2 else None
 
     if scoring is None:
-        print("no workbook found", file=sys.stderr)
+        print("no scoring workbook found — package_map classified the tree; "
+              "a briefing- or research-only folder is not a synthesis input",
+              file=sys.stderr)
         return 2
     try:
         vet_scoring(scoring)

@@ -137,19 +137,50 @@ def g1_ingested(pending: list, display_id: str) -> tuple:
                            f"{bundle.get('ccg_catalog_version')}")
 
 
+def _tree_files(tok, folder_id: str, depth: int = 0) -> list:
+    """Recursive file list (names only), wrapper-transparent. ~30 of 178
+    client folders keep the whole package inside one wrapper folder
+    (measured 2026-08-20) — a top-level-only count called them EMPTY."""
+    if depth > 4:
+        return []
+    out = []
+    for f in drive_fetch._list_children(tok, folder_id):
+        if f["mimeType"] == drive_fetch.FOLDER_MIME:
+            out += _tree_files(tok, f["id"], depth + 1)
+        elif f["name"] != ".DS_Store":
+            out.append(f["name"])
+    return out
+
+
 def g2_raw_package(display_id: str) -> tuple:
     """(ok, detail)."""
     try:
         tok = drive_fetch._token()
         folder = drive_fetch._find_client_folder(tok, display_id)
-        files = [f for f in drive_fetch._list_children(tok, folder["id"])
-                 if f["mimeType"] != drive_fetch.FOLDER_MIME]
+        top = drive_fetch._list_children(tok, folder["id"])
+        files = _tree_files(tok, folder["id"])
     except SystemExit as e:
         return False, str(e)
+    top_dirs = [f["name"] for f in top
+                if f["mimeType"] == drive_fetch.FOLDER_MIME]
+    top_files = [f for f in top if f["mimeType"] != drive_fetch.FOLDER_MIME
+                 and f["name"] != ".DS_Store"]
+    wrapper = (f" (via wrapper {top_dirs[0]!r})"
+               if len(top_dirs) == 1 and not top_files else "")
     if not files:
         return False, f"client folder {folder['name']!r} is EMPTY — no raw " \
                       f"package to trace the parsed bundle to"
-    return True, f"{len(files)} package files in {folder['name']!r}"
+    workbooks = [n for n in files
+                 if n.lower().endswith((".xlsx", ".xlsm"))
+                 and re.search(r"scor|assessment.*workbook", n, re.I)]
+    if not workbooks:
+        sample = ", ".join(sorted(files)[:3])
+        return False, (f"{len(files)} files in {folder['name']!r}{wrapper} "
+                       f"but NO scoring workbook anywhere in the tree — "
+                       f"briefing- or research-only, not a synthesis input "
+                       f"(e.g. {sample})")
+    return True, (f"{len(files)} package files in {folder['name']!r}"
+                  f"{wrapper}, scoring workbook present")
 
 
 def g3_serving_state(display_id: str) -> tuple:
