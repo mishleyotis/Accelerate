@@ -11,29 +11,33 @@ construction: every request's bearer is cryptographically verified and its
 identity checked against policy, and the capability path token stays as
 defense in depth for the service path.
 
-Two rungs, matching the two kinds of caller:
+THREE RUNGS, matching the three kinds of caller:
 
   A · Google-signed ID TOKEN (a JWT) — the service path. The plugin's
       stdio proxy and gcp_token.py mint these with the service URL as
-      audience; the routine service account is allowlisted. A @zennify.com
-      person with plain `gcloud auth print-identity-token` also lands here
-      (their token's audience is the gcloud CLI's own client id, accepted
-      for DOMAIN users only — a service account must name this service).
-  B · Google OAuth ACCESS TOKEN (opaque, ya29.…) — the claude.ai path.
-      claude.ai obtains it from Google using the pre-registered OAuth
-      client (Secret Manager: dmai-oauth-client-id/-secret; the dialog's
-      Client ID + Client Secret fields). Validated against Google's
-      tokeninfo endpoint: audience must be OUR client id — a token minted
-      through anyone else's app is refused, which is what keeps this from
-      being a token-passthrough hole — and the email must be a verified
-      @zennify.com address. Verdicts are cached briefly by token hash.
+      audience; any service account of this project is an operator
+      identity. A @zennify.com person with plain `gcloud auth
+      print-identity-token` also lands here.
+  B · Google OAuth ACCESS TOKEN (opaque) — a person who obtained one
+      directly through this project's Google client, validated at Google's
+      tokeninfo endpoint: audience must be OUR client id, email a verified
+      @zennify.com address.
+  C · OUR OWN access token — the claude.ai path, issued by the
+      authorization server in dma_mcp.oauth_as after Google has proved the
+      person is a verified @zennify.com account. Verified by HMAC here, and
+      the domain re-checked from the token's own subject, because one
+      enforcement point is a single edit away from being none.
 
-Discovery: /.well-known/oauth-protected-resource is served UNAUTHENTICATED
-(RFC 9728) naming accounts.google.com as the authorization server, and every
-401 carries WWW-Authenticate with resource_metadata — that header is how the
-claude.ai dialog finds the flow. Google is the authorization server; this
-app never issues tokens and never sees the client secret (the audience
-check needs only the client ID).
+Rung C exists because Google cannot BE the authorization server for a
+generic MCP client: it publishes no registration endpoint, and it issues no
+refresh token without proprietary parameters a standard client never sends —
+which is exactly why the connection died every hour and had to be
+reconnected. See dma_mcp/oauth_as.py for the measurements.
+
+PUBLIC BY DESIGN, and only these: the two metadata documents, the
+authorization, token, registration and callback endpoints, and CORS
+preflight. Everything else needs a bearer. A path that answered 401 where a
+client expected metadata is what made discovery impossible before.
 
 Invariant 1 is untouched: an auth lookup is not a model call, and this is
 the agent-facing connector, not the serving path.
@@ -46,6 +50,8 @@ import os
 import time
 import urllib.parse
 import urllib.request
+
+from dma_mcp import oauth_as
 
 DOMAIN = os.environ.get("DMA_OAUTH_DOMAIN", "zennify.com").lower()
 ALLOWED_SAS = {
@@ -167,24 +173,117 @@ class OAuthGate:
                 return v.decode("latin-1").strip()
         return ""
 
+    # A browser-based client (which is what the claude.ai dialog is) cannot
+    # read a 401 challenge it is not allowed to see: without
+    # Access-Control-Expose-Headers the WWW-Authenticate header is invisible
+    # to the JavaScript that has to follow it, and the whole discovery chain
+    # silently stops at "authorization failed".
+    CORS = [
+        (b"access-control-allow-origin", b"*"),
+        (b"access-control-allow-headers",
+         b"authorization, content-type, mcp-protocol-version, mcp-session-id, "
+         b"x-dma-path-token, last-event-id"),
+        (b"access-control-allow-methods", b"GET, POST, DELETE, OPTIONS"),
+        (b"access-control-expose-headers",
+         b"WWW-Authenticate, mcp-session-id, mcp-protocol-version"),
+        (b"access-control-max-age", b"86400"),
+    ]
+
     async def _send_json(self, send, status: int, body: dict,
                          extra_headers=()):
         raw = json.dumps(body).encode()
         headers = [(b"content-type", b"application/json"),
+                   (b"cache-control", b"no-store"),
                    (b"content-length", str(len(raw)).encode())]
+        headers.extend(self.CORS)
         headers.extend(extra_headers)
         await send({"type": "http.response.start", "status": status,
                     "headers": headers})
         await send({"type": "http.response.body", "body": raw})
 
+    async def _send_raw(self, send, status: int, headers, body: bytes):
+        hdrs = list(headers) + list(self.CORS) + [
+            (b"content-length", str(len(body)).encode())]
+        await send({"type": "http.response.start", "status": status,
+                    "headers": hdrs})
+        await send({"type": "http.response.body", "body": body})
+
+    @staticmethod
+    async def _body(receive) -> bytes:
+        chunks = []
+        while True:
+            msg = await receive()
+            chunks.append(msg.get("body") or b"")
+            if not msg.get("more_body"):
+                break
+        return b"".join(chunks)
+
+    async def _authorization_server(self, scope, receive, send, path, base):
+        """The public OAuth surface. Returns True when it handled the request.
+
+        Every path here is deliberately unauthenticated: they are how a
+        client LEARNS to authenticate. Answering them with a bearer
+        challenge — which this service did until 2026-08-20 — makes the
+        connector undiscoverable and is the defect this method exists to
+        close.
+        """
+        method = scope.get("method", "GET").upper()
+        query = urllib.parse.parse_qs(
+            (scope.get("query_string") or b"").decode(), keep_blank_values=True)
+        params = {k: v[0] for k, v in query.items()}
+
+        if path in ("/.well-known/oauth-authorization-server",
+                    "/.well-known/oauth-authorization-server/mcp",
+                    "/.well-known/openid-configuration",
+                    "/.well-known/openid-configuration/mcp"):
+            await self._send_json(send, 200, oauth_as.as_metadata(base))
+            return True
+        if path in ("/.well-known/oauth-protected-resource",
+                    "/.well-known/oauth-protected-resource/mcp"):
+            await self._send_json(send, 200, oauth_as.resource_metadata(base))
+            return True
+        if path == "/register" and method == "POST":
+            try:
+                meta = json.loads(await self._body(receive) or b"{}")
+            except ValueError:
+                await self._send_json(send, 400, {
+                    "error": "invalid_client_metadata",
+                    "error_description": "body is not JSON"})
+                return True
+            reg = oauth_as.register_client(meta)
+            await self._send_json(send, 400 if "error" in reg else 201, reg)
+            return True
+        if path == "/authorize" and method == "GET":
+            status, headers, body = oauth_as.authorize_redirect(params, base)
+            await self._send_raw(send, status, headers, body)
+            return True
+        if path == oauth_as.CALLBACK_PATH and method == "GET":
+            status, headers, body = oauth_as.callback(params, base)
+            await self._send_raw(send, status, headers, body)
+            return True
+        if path == "/token" and method == "POST":
+            raw = (await self._body(receive)).decode("utf-8", "replace")
+            form = {k: v[0] for k, v in
+                    urllib.parse.parse_qs(raw, keep_blank_values=True).items()}
+            status, payload = oauth_as.token_grant(
+                form, self._header(scope, b"authorization"))
+            await self._send_json(send, status, payload)
+            return True
+        return False
+
+    def _base(self, host: str) -> str:
+        """The canonical origin, so every document and every redirect agrees.
+
+        Cloud Run answers on more than one hostname; metadata that varied by
+        which one the client happened to use would send a client to endpoints
+        it never discovered, and would break the one redirect URI Google has
+        registered.
+        """
+        return (os.environ.get("MCP_SERVICE_URL", "").rstrip("/")
+                or f"https://{host}")
+
     def _metadata(self, host: str) -> dict:
-        return {
-            "resource": f"https://{host}/mcp",
-            "resource_name": "DMA Insights",
-            "authorization_servers": ["https://accounts.google.com"],
-            "bearer_methods_supported": ["header"],
-            "scopes_supported": ["openid", "email", "profile"],
-        }
+        return oauth_as.resource_metadata(self._base(host))
 
     # ── the gate ────────────────────────────────────────────────────────
     async def __call__(self, scope, receive, send):
@@ -192,11 +291,14 @@ class OAuthGate:
             await self.inner(scope, receive, send)
             return
         host = self._header(scope, b"host") or "localhost"
-        path = (scope.get("path") or "").rstrip("/")
+        path = (scope.get("path") or "").rstrip("/") or "/"
+        base = self._base(host)
 
-        if path in ("/.well-known/oauth-protected-resource",
-                    "/.well-known/oauth-protected-resource/mcp"):
-            await self._send_json(send, 200, self._metadata(host))
+        if scope.get("method", "").upper() == "OPTIONS":
+            await self._send_raw(send, 204, [], b"")
+            return
+
+        if await self._authorization_server(scope, receive, send, path, base):
             return
 
         challenge = (b"www-authenticate",
@@ -240,6 +342,17 @@ class OAuthGate:
 
     def _decide(self, token: str, host: str) -> tuple:
         oauth_client_id = os.environ.get("OAUTH_CLIENT_ID", "").strip()
+        # Rung C first: an HMAC verify is cheap, deterministic and cannot be
+        # confused with anything else — a token either carries our signature
+        # or it does not, which is a better discriminator than token shape
+        # (Google's opaque tokens and ours both contain dots).
+        ours = oauth_as.verify(token, typ="at")
+        if ours is not None:
+            email = (ours.get("sub") or "").lower()
+            if email.endswith(f"@{DOMAIN}"):
+                return True, 200, f"oauth user {email} (issued here)"
+            return False, 403, (f"token subject {email!r} is not an "
+                                f"@{DOMAIN} account")
         if token.count(".") == 2:
             audiences = [f"https://{host}", GCLOUD_CLI_AUD]
             svc = os.environ.get("MCP_SERVICE_URL", "").rstrip("/")

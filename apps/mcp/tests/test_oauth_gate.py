@@ -148,12 +148,18 @@ def _gate(inner=None, jwt_claims=None, token_claims=None):
     return g, calls
 
 
-def test_discovery_is_public_and_names_google_and_the_display_name():
+def test_discovery_is_public_and_names_OUR_authorization_server(monkeypatch):
+    """Changed deliberately on 2026-08-20 and measured, not assumed: Google
+    publishes no registration endpoint and issues no refresh token to a
+    standard OAuth client, so naming accounts.google.com here made the
+    connector unregisterable and its connection expire hourly. The
+    authorization server is now this service (dma_mcp/oauth_as.py)."""
+    monkeypatch.setenv("MCP_SERVICE_URL", f"https://{HOST}")
     g, _ = _gate()
     status, _, body = _run(g, "/.well-known/oauth-protected-resource")
     assert status == 200
     doc = json.loads(body)
-    assert doc["authorization_servers"] == ["https://accounts.google.com"]
+    assert doc["authorization_servers"] == [f"https://{HOST}"]
     assert doc["resource_name"] == "DMA Insights"
     assert doc["resource"] == f"https://{HOST}/mcp"
 
