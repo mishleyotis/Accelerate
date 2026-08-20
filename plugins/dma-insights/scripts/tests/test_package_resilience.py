@@ -113,7 +113,7 @@ def test_g2_refuses_briefing_only_by_name(monkeypatch):
                  {"id": "f2", "name": "Research_Report.docx",
                   "mimeType": "x"}]})
     ok, detail = run_gate.g2_raw_package("ziphq")
-    assert not ok and "NO scoring workbook" in detail
+    assert not ok and "NO scoring artefact" in detail
 
 
 # ── corpus_search ────────────────────────────────────────────────────────
@@ -185,3 +185,29 @@ def test_conflicting_urls_across_stores_are_reported(tmp_path):
         b"evidence_id,url\nE-002,https://b.example/2\n")
     _, conflicts = evidence_normalize.merge(tmp_path)
     assert conflicts and conflicts[0]["field"] == "url"
+
+
+def test_g2_accepts_an_export_only_scoring_package(monkeypatch):
+    """54 of 177 corpus clients have no workbook — the flattened exports
+    are the score authority (measured 2026-08-20)."""
+    F = run_gate.drive_fetch.FOLDER_MIME
+    _fake_drive(monkeypatch, {
+        "root": [{"id": "s", "name": "03_scoring_workbook", "mimeType": F}],
+        "s": [{"id": "f1", "name": "export_scoring_detail.csv",
+               "mimeType": "x"},
+              {"id": "f2", "name": "export_pillar_summary.csv",
+               "mimeType": "x"}]})
+    ok, detail = run_gate.g2_raw_package("access-credit-union")
+    assert ok and "EXPORT-ONLY" in detail
+
+
+def test_package_map_names_export_only_scoring(tmp_path):
+    _mk(tmp_path, "03_scoring_workbook/export_scoring_detail.csv",
+        b"subcap_id,score\nP1C1.1,3.2\n")
+    _mk(tmp_path, "02_research_workbook/DMA_Research_Workbook_X.xlsx")
+    m = package_map.map_package(tmp_path)
+    assert m["scoring"]["primary"] is None
+    assert m["source_map"]["scores"] == [
+        "03_scoring_workbook/export_scoring_detail.csv"]
+    assert any("EXPORT-ONLY" in a for a in m["ambiguities"])
+    assert not any("BRIEFING-ONLY" in a for a in m["ambiguities"])

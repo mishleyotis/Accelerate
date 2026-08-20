@@ -271,6 +271,9 @@ def trends(jsonl_path: str) -> dict:
             "client": r["client"], "files": r["files"],
             "wrapper": r.get("wrapper", False),
             "scoring_workbooks": len(scoring),
+            "score_exports": any(
+                i["path"].lower().endswith("export_scoring_detail.csv")
+                for i in inv),
             "has_evidence_table": any(
                 i["kind"] == "evidence_table" for i in inv),
             "interim": any("interim" in i["path"].lower()
@@ -281,8 +284,12 @@ def trends(jsonl_path: str) -> dict:
         "clients_surveyed": n,
         "errors": [r["client"] for r in rows if "error" in r],
         "wrapper_clients": sum(1 for c in per_client if c["wrapper"]),
-        "no_scoring_workbook": sorted(c["client"] for c in per_client
-                                      if not c["scoring_workbooks"]),
+        "export_only_scoring": sorted(
+            c["client"] for c in per_client
+            if not c["scoring_workbooks"] and c["score_exports"]),
+        "no_scoring_artifacts": sorted(
+            c["client"] for c in per_client
+            if not c["scoring_workbooks"] and not c["score_exports"]),
         "multi_scoring_workbook": sorted(
             c["client"] for c in per_client if c["scoring_workbooks"] > 1),
         "interim_or_draft_present": sum(1 for c in per_client if c["interim"]),

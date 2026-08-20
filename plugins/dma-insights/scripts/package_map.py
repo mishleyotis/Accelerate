@@ -181,12 +181,22 @@ def map_package(root) -> dict:
             f"no workbook named 'scoring' — unclassified xlsx exist: "
             f"{unclassified_xlsx[:3]}; the vetter decides whether one is the "
             f"scoring workbook")
-    if scoring["primary"] is None and not xlsx:
+    score_exports = sorted(
+        str(q.relative_to(root)) for q in entries
+        if q.name.lower().startswith("export_")
+        and "scor" in q.name.lower())
+    if scoring["primary"] is None and score_exports:
+        ambiguities.append(
+            f"EXPORT-ONLY scoring: no workbook, but flattened exports exist "
+            f"({score_exports[0]}) — measured on ~2 dozen corpus clients; "
+            f"the exports are the score authority here, vetter confirms")
+    if scoring["primary"] is None and not xlsx and not score_exports:
         ambiguities.append("BRIEFING-ONLY package: no workbook anywhere in "
                            "the tree — not a synthesis input")
 
     src = {
-        "scores": [scoring["primary"]] if scoring["primary"] else [],
+        "scores": ([scoring["primary"]] if scoring["primary"]
+                   else score_exports),
         "evidence": evidence_tables + ([research["primary"]]
                                        if research["primary"] else []),
         "governance": governance,

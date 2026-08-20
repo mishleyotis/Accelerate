@@ -173,14 +173,20 @@ def g2_raw_package(display_id: str) -> tuple:
     workbooks = [n for n in files
                  if n.lower().endswith((".xlsx", ".xlsm"))
                  and re.search(r"scor|assessment.*workbook", n, re.I)]
-    if not workbooks:
+    exports = [n for n in files
+               if n.lower() == "export_scoring_detail.csv"]
+    if not workbooks and not exports:
         sample = ", ".join(sorted(files)[:3])
         return False, (f"{len(files)} files in {folder['name']!r}{wrapper} "
-                       f"but NO scoring workbook anywhere in the tree — "
-                       f"briefing- or research-only, not a synthesis input "
+                       f"but NO scoring artefact anywhere in the tree (no "
+                       f"workbook, no export_scoring_detail.csv) — briefing- "
+                       f"or research-only, not a synthesis input "
                        f"(e.g. {sample})")
+    kind = ("scoring workbook present" if workbooks else
+            "EXPORT-ONLY scoring (flattened exports are the score "
+            "authority; workbook absent from Drive — the vetter confirms)")
     return True, (f"{len(files)} package files in {folder['name']!r}"
-                  f"{wrapper}, scoring workbook present")
+                  f"{wrapper}, {kind}")
 
 
 def g3_serving_state(display_id: str) -> tuple:

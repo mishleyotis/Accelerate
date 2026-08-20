@@ -32,7 +32,7 @@ live?" is answered mechanically.
 
 | Surface | Package sources (primary → fallback) | Storyline inputs | Enrichment |
 |---|---|---|---|
-| O1 scores & peers | scoring wb `Pillar_Summary`/`Category_Detail` → `export_pillar_summary.csv`/`export_category_summary.csv`; peers: `06_peers/peer_comparison_table.csv` → `Peer_Benchmarks` tab | composite vs peer median AND vs full peer range (the sharper finding when below every individual peer); the package's own methodology caveats (e.g. peer-depth asymmetry) temper the claim | — (scores never enriched) |
+| O1 scores & peers | scoring wb `Pillar_Summary`/`Category_Detail` → `export_pillar_summary.csv`/`export_category_summary.csv` (54 corpus clients are export-ONLY — the exports are then the authority); peers: `06_peers/peer_comparison_table.csv` → `Peer_Benchmarks` tab | composite vs peer median AND vs full peer range (the sharper finding when below every individual peer); the package's own methodology caveats (e.g. peer-depth asymmetry) temper the claim | — (scores never enriched) |
 | O2 firmographics | `run_manifest*.json` → `00/01_evidence/entity_profile` → Client Profile report | identity anchor: charter, regulator, scale — every later claim hangs on it | P2 verification (Explorium/Tavily) |
 | O3 why-now | report strategic sections; `A7_time_maps.csv`; research wb `Entity_Timeline` | dated triggers + windows; consequence of waiting argued from the client's own events | **P1 currency re-check** — a package signal is as old as the assessment date |
 | O4 exec summary | the report's own executive summary is an INPUT TO CHALLENGE, never copy | written last, over settled claims; the run's single thesis | — |
@@ -98,25 +98,42 @@ Ranked by what the corpus can and cannot answer (see § Measured corpus):
 - **P3 · opportunistic signals** — job postings as demand signals, social
   aggregates where a facet wants them. Degrade per facet when absent.
 
-## Measured corpus (survey of 2026-08-20)
+## Measured corpus (survey of 2026-08-20, all 178 client folders)
 
-Numbers from `package_survey.py corpus` + `trends` (JSONL retained in the
-session scratchpad; re-run any time — the survey is a plugin command, so
-the next generation shift is measured, not felt):
+Numbers from `package_survey.py corpus` + `trends` — re-run any time; the
+survey is a plugin command, so the next generation shift is measured, not
+felt. 177 of 178 surveyed (one folder errored and is itself a finding).
 
-- Shapes: see trends output — canonical majority, ~30 wrapper packages,
-  at least four structure generations, briefing-only folders, version
-  stacks with INTERIM copies, duplicate client folders needing human
-  adjudication (two identically-named "Corporate America Credit Union -
-  DMA" folders; case-twin "MidFirst/Midfirst"; "IMA Financial" vs "IMA
-  Financial Group" resolving to one identity).
-- Evidence stores per package: up to TEN; locations vary by generation
-  (01_evidence, 03_scoring_workbook/exports, 07_governance/layer2_audit,
-  04_Governance, version folders); JSON/JSONL ledgers are first-class.
+- **Scoring truth comes in three shapes**: 95 clients carry an xlsx
+  scoring workbook (79 in `03_scoring_workbook/`, 9 in `08_appendices/`,
+  5 misfiled under `02_research_workbook/`, plus wrapper and
+  `03_Assessment/workbook` variants); **54 clients are EXPORT-ONLY** —
+  `export_scoring_detail.csv` and siblings are the score authority, no
+  workbook ever reached Drive; **28 clients hold no scoring artefacts at
+  all** (research-, briefing- or report-only — honestly not synthesis
+  inputs, and G2 refuses them by name).
+- 28 wrapper packages (everything one level down); 13 clients carry more
+  than one scoring workbook (version stacks); 2 carry INTERIM/DRAFT
+  copies beside the live one.
+- **Evidence schema gaps, quantified** (69,766 rows profiled across every
+  evidence/governance table under 2 MB): 27% carry a date, **1.5% carry a
+  50-char excerpt** — which is why P1 schema-fit retrieval exists and why
+  `evidence_normalize.py` corpus-fills before any web call. `url` is a
+  header in 196 tables, absent in whole generations.
+- **Where evidence tables actually live**: `07_governance/` dominates
+  (262 tables), then `01_evidence/` (119), `08_appendices/` (119),
+  `03_scoring_workbook(+/exports)` (125), `02_research_workbook` (24),
+  `02_Evidence/` (5) — five naming generations, one resolver
+  (`package_map.py`).
 - Workbook naming: `DMA_Scoring_Workbook_*` and
   `DMA_Assessment_Workbook_*` are the same artefact, two generations.
+- Duplicate client folders needing HUMAN adjudication (the matcher
+  refuses to guess): two identically-named "Corporate America Credit
+  Union - DMA"; case-twins "MidFirst/Midfirst Bank" and
+  "DovenMuehle/Dovenmuehle Mortgage"; "IMA Financial" vs "IMA Financial
+  Group" resolving to one identity.
 - The flagship package (T. Rowe Price) normalized: 754 evidence records,
-  751 schema-complete from the package itself, 3 web gaps — the package
+  751 schema-complete from the package itself, 3 web gaps — a package
   answers ~99.6% of its own schema when ALL its stores are read.
 
 An update to this file that changes a number re-runs the survey first.
