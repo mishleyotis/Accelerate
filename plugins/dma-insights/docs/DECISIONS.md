@@ -242,8 +242,22 @@ other side read it") is honoured by construction:
   **DMA Insights** Google OAuth client (Secret Manager:
   `dmai-oauth-client-id`, `dmai-oauth-client-secret`); audience must be
   that client (the anti-passthrough property) and the email a verified
-  `@zennify.com` address. Google is the authorization server — this app
-  issues no tokens and never holds the client secret.
+  `@zennify.com` address.
+- **Revised the same day, after measuring what a generic OAuth client
+  actually needs.** Google cannot BE the authorization server here: it
+  publishes no `registration_endpoint`, so a client that registers
+  dynamically — which the claude.ai dialog does — has nowhere to register;
+  and it issues a refresh token only for `access_type=offline` plus
+  `prompt=consent`, proprietary parameters a standard client never sends,
+  so the connection died hourly and had to be re-made. This app therefore
+  IS the authorization server (`apps/mcp/dma_mcp/oauth_as.py`): it
+  registers clients, runs authorization-code with mandatory PKCE S256,
+  and issues its own access and refresh tokens, all HMAC-signed and
+  stateless. It holds the Google client secret (`dmai-oauth-client-secret`)
+  because it performs the code exchange, and a signing key
+  (`dmai-oauth-signing-key`) that mints and verifies its own tokens;
+  rotating that key revokes every token issued. Google remains the
+  IDENTITY PROVIDER and still decides who the person is.
 - Discovery (`/.well-known/oauth-protected-resource`) is public; every 401
   carries the `WWW-Authenticate` metadata pointer the dialog follows.
 - The capability path token stays as defense in depth on the service path;

@@ -104,53 +104,74 @@ map services to evidence discipline.
 
 The connector's display name is **DMA Insights** everywhere: its own MCP
 initialize response says so, and it is the name to type in claude.ai's
-"Add custom connector" dialog, so its tools surface under the DMA Insights
-connector in chat and Cowork. (Inside Claude Code the plugin binds it as
+"Add custom connector" dialog. (Inside Claude Code the plugin binds it as
 the plugin server `connector`; those tool ids are load-bearing across
 agents and hooks and deliberately unchanged.)
 
 Access contract (docs/DECISIONS.md D8): any verified **@zennify.com**
-Google account is authorized — humans via OAuth from claude.ai or a bare
-`gcloud auth print-identity-token`; the routine service account via its
-audience-bound ID token, exactly as the plugin has always sent it.
+Google account is authorized — humans through the OAuth flow below, the
+routine service account through its audience-bound ID token, exactly as
+the plugin has always sent it.
 
-### Dialog entries, and the commands that fetch them
+### What to type in the dialog
 
 | Field | Value |
 |---|---|
-| Name | `DMA Insights` (typed) |
-| URL | the service URL + `/mcp` — no token segment |
-| OAuth Client ID / Secret | the pre-registered Google OAuth client, from Secret Manager |
+| Name | `DMA Insights` |
+| URL | `https://dmai-mcp-dukrne5v4a-uc.a.run.app/mcp` — bare, no token segment |
+| OAuth Client ID | **leave blank** |
+| OAuth Client Secret | **leave blank** |
 
-```bash
-# URL (append /mcp to the output):
-gcloud run services describe dmai-mcp --project digital-maturity-assessor \
-  --region us-central1 --format='value(status.url)'
+The Advanced fields stay EMPTY, and that is the correction: this document
+used to tell you to paste a Google OAuth client id and secret there. That
+never worked and could not — Google publishes no registration endpoint and
+issues no refresh token to a standard OAuth client, so the connection
+failed to authorize and, when it did connect, expired within the hour.
+The connector now runs its own OAuth 2.1 authorization server
+(`apps/mcp/dma_mcp/oauth_as.py`) which registers Claude dynamically, so
+there is nothing for a human to paste. Google is the identity provider
+behind it and still decides who you are.
 
-# Client ID and Secret (values print in YOUR terminal only — never paste
-# them into a chat):
-gcloud secrets versions access latest --secret dmai-oauth-client-id \
-  --project digital-maturity-assessor
-gcloud secrets versions access latest --secret dmai-oauth-client-secret \
-  --project digital-maturity-assessor
+### The one thing that must be configured, once
+
+The Google OAuth client the server logs people in with needs OUR callback
+on its authorized list — not claude.ai's:
+
+```
+https://dmai-mcp-dukrne5v4a-uc.a.run.app/oauth/callback
 ```
 
-One-time creation of that client (Google offers no CLI for standard web
-OAuth clients): console.cloud.google.com/apis/credentials (project
-digital-maturity-assessor) → Create Credentials → OAuth client ID →
-consent screen **Internal** (this is the Workspace-level half of the
-@zennify.com restriction; the gate enforces it server-side regardless) →
-type **Web application**, name `DMA Insights — claude.ai`, authorized
-redirect URIs `https://claude.ai/api/mcp/auth_callback` and
-`https://claude.com/api/mcp/auth_callback`. Then store both values:
+Add it at console.cloud.google.com/apis/credentials → the OAuth client →
+Authorized redirect URIs. The consent screen should be **Internal**, which
+is the Workspace half of the @zennify.com restriction; the gate enforces
+the domain server-side regardless.
+
+Then store the client's id and secret, and prove the three of them work
+together:
 
 ```bash
-gcloud secrets create dmai-oauth-client-id --project digital-maturity-assessor --data-file=- \
-  # paste the client id, press Enter, then Ctrl-D
-gcloud secrets create dmai-oauth-client-secret --project digital-maturity-assessor --data-file=- \
-  # paste the client secret, press Enter, then Ctrl-D
+bash scripts/set_oauth_secret.sh        # reads the secret with echo off
+python3 scripts/verify_oauth_client.py  # PASS means Google accepts all three
 ```
 
-`infra/deploy.sh` wires `dmai-oauth-client-id` into the service when the
-secret exists (the app needs only the id, for the audience check); until
-then claude.ai sign-in answers 401 naming exactly that secret.
+`verify_oauth_client.py` is the check that matters, because every failure
+in this chain reaches the dialog as the same sentence — "Authorization
+with DMA Insights failed". It distinguishes them: `invalid_client` is a
+wrong id/secret pair (measured 2026-08-20: the stored secret was a
+24-character placeholder beginning "YOU"), `redirect_uri_mismatch` is the
+callback above missing from the client, and `invalid_grant` is the PASS —
+the deliberately invalid probe code was the only thing wrong.
+
+### Reading the server's own answer
+
+Every layer states itself, so a failure names its cause:
+
+```bash
+M=https://dmai-mcp-dukrne5v4a-uc.a.run.app
+curl -s $M/.well-known/oauth-protected-resource      # 200: names the AS
+curl -s $M/.well-known/oauth-authorization-server    # 200: registration_endpoint, S256, offline_access
+curl -sD- -o /dev/null -X POST $M/mcp                # 401 + WWW-Authenticate: resource_metadata=...
+```
+
+A 401 on the two well-known paths means the identity gate is standing
+where discovery must be public — the defect fixed on 2026-08-20.

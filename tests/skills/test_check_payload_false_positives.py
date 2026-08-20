@@ -27,6 +27,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import os
+
 import pytest
 
 SCRIPT = (Path(__file__).resolve().parents[2] / "plugins" / "dma-insights" /
@@ -391,8 +393,22 @@ def test_every_prose_key_still_gets_the_clipped_check(key):
 # checker raises no block of any of the four repaired classes.
 # ─────────────────────────────────────────────────────────────────────
 
-STAGED = Path("/tmp/claude-0/-home-user-Accelerate/"
-              "b6f97535-828b-5567-bb3f-29ccb7385dc7/scratchpad/LX_STAGED")
+# WHERE THE STAGED RUN LIVES, and why this is not a scratchpad path any
+# more. Until 2026-08-20 this pointed inside the scratchpad of a DIFFERENT,
+# long-finished Claude session (b6f97535-…), a directory that exists on no
+# machine anyone will ever run these tests on. The six cases below were
+# therefore skipped permanently — present in the file, counted in the skip
+# budget, and incapable of ever failing. A test that cannot run is not
+# coverage; it is a note.
+#
+# The path is now a repository location, overridable for a local
+# investigation. To turn these six on, drop the six staged page JSONs
+# (overview, insights, heatmap, platform, context, techstack — as
+# get_staged_payload returns them) into that directory and they run.
+STAGED = Path(os.environ.get(
+    "DMA_STAGED_DIR",
+    str(Path(__file__).resolve().parents[2] / "fixtures" / "staged_runs"
+        / "logix")))
 REPAIRED = ("AG-03", "raw taxonomy code", "CG-09", "terminal punctuation")
 
 
