@@ -86,6 +86,85 @@ and **omitted** on the tile where nothing was; `internal_only` marks
 `platform_story.platforms[*].zennify_pathway`, keeping the client-facing
 pathway sentences and giving the AE the pitch.
 
+### Composite factors — provenance, disqualifiers, the two validations
+
+Owner instruction, 2026-08-20: "the composite factors for platforms should
+have clear DQs … greenfield opportunities has no deep search validation and
+strategic alignment checks. Ensure thorough reasoning through the composite
+factor scoring." The engine (`packages/shared/platform_fit.py`) computes;
+this section is the reasoning the producer owes each candidate BEFORE the
+engine's number is explained to a reader. Every threshold below is the
+engine's own constant, quoted so a story can name the failing figure.
+
+The four factors, each with where its input comes from and what disqualifies
+it:
+
+1. **Addressable opportunity** (weight 0.528 stated-alignment / 0.66
+   fallback). Input: this run's own scored cells — gap to target × issue
+   severity × per-cell evidence strength, over the cells the L3 area
+   reaches. Provenance: the DMA package's workbook scores and issue
+   register; evidence strength from the evidence register (tier ×
+   freshness). Reasoning owed: the tile's `top_contributors` names the
+   driving cells — a contribution you cannot walk back to named cells with
+   their own gap/severity/strength figures is unexplained and does not ship.
+2. **Catalogue interconnect** (0.208 / 0.26). Input: catalogue adjacency
+   against ALL of the run's gap cells, from the pinned catalogue version.
+   No enrichment moves this figure; a story that attributes it to anything
+   but the catalogue is inventing.
+3. **Greenfield family** (0.064 / 0.08) — binary: the register confirms the
+   family ABSENT. **Deep-search validation is REQUIRED before a greenfield
+   point is explained as ground**, because `family_absent` is a register bit
+   and the register can be wrong for reasons the engine cannot see (measured:
+   the technographic scan "completed with an empty result" twice on one
+   client while its own domain 403'd the verifier — RC2). The ladder, in
+   order, every rung registered:
+   - the techstack register scan actually RETURNED ROWS for this entity — a
+     scan that returned nothing proves nothing absent; the greenfield bit is
+     then UNVERIFIED, not true;
+   - the absence ladder ran for this family: Clay Tech Stack, the entity's
+     job postings naming the family's products, and web search
+     `"[entity]" uses OR selects OR implements [family vendors]` — each
+     negative search recorded as a rung with query and date, never as an
+     evidence row;
+   - if the entity's own domain refuses the verifier, greenfield claims that
+     domain would confirm or deny are stated as provisional, with the refusal
+     named.
+   A greenfield contribution the ladder cannot back is a `record_finding`
+   (the register is wrong or unverifiable), never a selling point. The stakes
+   are larger than 6.4 points: greenfield is also the engine's second
+   tie-break, so a wrong bit reorders the page.
+4. **Strategic alignment** (0.20 stated / 0.0 fallback). **The alignment
+   check is REQUIRED**: alignment counts only when `alignment_basis` is
+   `stated_objective` and `alignment_quote` is the entity's own words —
+   board commitment, strategic plan, RFP, earnings language — resolving
+   through `get_evidence` to a T1–T3 item for THIS entity and run. A
+   paraphrase, an AE's characterisation, or a vendor's claim about the
+   entity is not a stated objective: leave `alignment` null, let the engine
+   renormalise (0.66/0.26/0.08, basis `impact_fallback`) and let the card
+   DISCLOSE that basis. Renormalisation exists so an unknown is never scored
+   as zero; it is not a licence to invent a quote to reach the stated basis.
+
+The disqualification ladder (the engine's states, in evaluation order — a
+discard names the state AND the failing figure):
+
+| DQ | Threshold | What the discard reason must say |
+|---|---|---|
+| `OUT_OF_VERTICAL` | relevance < 0.5 | the vertical judgement and its relevance figure — and note relevance also CAPS the fit multiplicatively, so a borderline family cannot buy its way back with gap surface |
+| `TOO_NARROW` | cells addressed < 3 | the sweep's cell count against the three-cell floor |
+| `INSUFFICIENT_EVIDENCE` | mean evidence strength of the DRIVING cells < 0.10 | which driving cells are unevidenced — an unevidenced cell counts 0.0 here, not the neutral prior |
+
+`readiness_multiplier` is the fourth brake: not a DQ, but the story must say
+when it, not the factors, is what holds a card down. An empty `discarded[]`
+on a ranked page fails the only question an AE is asked in the room — *why
+not X* — and a discard that says "not a fit" without its DQ state and figure
+is that failure wearing a reason.
+
+Rendering discipline (owner, 2026-08-20, from a screenshot of the live
+tile): the app gives the scores; the `value×weight` working stays in
+`factors[]` for the gates, never in prose or on a surface. Explain each
+factor's contribution from its inputs — the reader can add up the block
+figures.
+
 ### Anti-patterns
 
 - **MEM-0068 / WRITE_PATH_WITH_NO_READ_PATH** — the page renders blanks while

@@ -453,6 +453,15 @@ only. Customer keys are otherwise the six SCQA fields plus `claim_label`,
 
 ## O5 · Opportunity surface tiles
 
+The tiles carry the platform engine's composite — same factors, same number,
+same rank as the platform page's cards (CG-31, 0.05 grain). Factor
+provenance, the disqualification ladder with the engine's thresholds, the
+greenfield deep-search validation and the strategic-alignment check live in
+**rulebooks/platform.md § P1 · Composite factors** and bind here unchanged:
+the tile EXPLAINS the composite from those validated inputs, never recomputes
+or re-ranks it, and renders scores only — the `value×weight` working stays in
+`factors[]` (owner, 2026-08-20).
+
 ### Baxter positive pattern
 
 > "Ranked first by two tenths — its gate is already met, so readiness holds
