@@ -69,23 +69,37 @@ fi
 # The environment-settings field is .env format — one KEY=value per line —
 # so the multi-line key JSON cannot be pasted raw (measured 2026-08-20:
 # "Couldn't parse ... Use KEY=value format"). DMA_ROUTINE_SA_KEY_B64 is the
-# supported spelling: the key JSON base64-encoded to a single line. The raw
-# spelling still works for contexts that can carry newlines.
+# supported spelling: the key JSON base64-encoded to ONE line, generated
+# with `gcloud secrets versions access latest --secret=dmai-routine-sa-key
+# --project=digital-maturity-assessor | base64 -w0` and pasted unquoted.
+# Decode and validation live in gcp_token.py ensure-key, which tolerates
+# the measured paste imperfections (76-column wraps, quotes, stripped
+# padding, urlsafe alphabet, a zsh %-tail), refuses a value that is not a
+# service-account key BY NAME, and writes the file 0600. Every consumer
+# (mcp_auth_headers.sh, drive_fetch.py, mcp_proxy.py) reads the key through
+# the same load_key rungs, so even when THIS script never ran — the
+# provisioning-lottery case — the first in-session use self-heals the file
+# from the environment variable.
 mkdir -p "$(dirname "$KEY_FILE")" && chmod 700 "$(dirname "$KEY_FILE")"
-if [ -n "${DMA_ROUTINE_SA_KEY_B64:-}" ]; then
+if [ -f "$REPO_DIR/plugins/dma-insights/scripts/gcp_token.py" ]; then
+  ENSURE="$(python3 "$REPO_DIR/plugins/dma-insights/scripts/gcp_token.py" ensure-key --key "$KEY_FILE" 2>&1)" \
+    && log "$ENSURE" \
+    || { log "$ENSURE"; log "connector auth will 403 until DMA_ROUTINE_SA_KEY_B64 is fixed in the environment settings (see retrieval command in the header above)"; }
+elif [ -n "${DMA_ROUTINE_SA_KEY_B64:-}" ]; then
+  # clone failed, so decode inline — python3 mirrors ensure-key's tolerance
   umask 077
-  printf '%s' "$DMA_ROUTINE_SA_KEY_B64" | base64 -d > "$KEY_FILE" 2>/dev/null \
-    || log "DMA_ROUTINE_SA_KEY_B64 did not base64-decode"
-elif [ -n "${DMA_ROUTINE_SA_KEY:-}" ]; then
-  umask 077
-  printf '%s' "$DMA_ROUTINE_SA_KEY" > "$KEY_FILE"
-fi
-if [ -s "$KEY_FILE" ] && ! python3 -c "import json;json.load(open('$KEY_FILE'))" 2>/dev/null; then
-  log "key file does not parse as JSON — check the pasted value"
+  python3 - > "$KEY_FILE" <<'PY' 2>/dev/null || log "DMA_ROUTINE_SA_KEY_B64 did not decode (and the repo clone failed, so ensure-key is unavailable)"
+import base64, json, os, sys
+raw = "".join(os.environ["DMA_ROUTINE_SA_KEY_B64"].split()).strip("'\"").rstrip("%")
+raw = raw.replace("-", "+").replace("_", "/")
+raw += "=" * (-len(raw) % 4)
+sys.stdout.write(json.dumps(json.loads(base64.b64decode(raw))))
+PY
+  [ -s "$KEY_FILE" ] || rm -f "$KEY_FILE"
 fi
 if [ ! -s "$KEY_FILE" ]; then
-  log "DMA_ROUTINE_SA_KEY_B64 is not set and no key file exists — connector"
-  log "auth will 403. Set the variable in the environment settings."
+  log "no key file and no usable DMA_ROUTINE_SA_KEY_B64 — connector auth"
+  log "will 403. Set the variable in the environment settings."
 fi
 
 # ---- 3 · the connector path token, fresh from Secret Manager ------------

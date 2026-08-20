@@ -78,6 +78,60 @@ def sign_rs256(signing_input: bytes, private_key_pem: str) -> bytes:
             pass
 
 
+def _lenient_b64_decode(raw: str) -> bytes:
+    """Decode a pasted base64 value the way a human actually pastes it.
+
+    The environment-settings field is hand-fed: measured failure shapes are
+    GNU base64's default 76-column wrapping (the -w0 flag forgotten), values
+    pasted with surrounding quotes, a zsh prompt's trailing %, urlsafe
+    alphabet from another tool, and stripped = padding. Every one of those
+    used to surface as "DMA_ROUTINE_SA_KEY_B64 set but unusable" and cost a
+    firing; every one is unambiguous, so tolerating them is correctness,
+    not guesswork. Whitespace and quotes carry no information in base64 —
+    removing them cannot corrupt a value that was correct.
+    """
+    cleaned = "".join(raw.split())            # newlines, spaces, tabs
+    cleaned = cleaned.strip("'\"").rstrip("%")
+    cleaned = cleaned.replace("-", "+").replace("_", "/")
+    if len(cleaned) % 4:
+        cleaned += "=" * (-len(cleaned) % 4)
+    return base64.b64decode(cleaned)
+
+
+def _validate_key(key: dict, source: str) -> tuple:
+    """A decodable value can still be the WRONG secret — name that loudly."""
+    missing = [f for f in ("client_email", "private_key") if f not in key]
+    if missing:
+        return None, (f"{source} decodes to JSON but is not a service-account "
+                      f"key (missing {', '.join(missing)}) — was the right "
+                      "secret pasted? Expected: dmai-routine-sa-key")
+    return key, source
+
+
+def _write_through(key: dict, path: str, source: str) -> str:
+    """Land an environment-sourced key at the file path, best-effort.
+
+    This is the self-heal the environment variable exists to power: once any
+    consumer loads the key from the environment, every LATER consumer — bash
+    [ -s ] gates in bootstrap and mcp_auth_headers.sh, the path-token cache
+    step, a different process — finds the file a bootstrap would have landed.
+    Same trust boundary as bootstrap_session.sh writing it (0600 under a
+    0700 dir); set DMA_NO_KEY_WRITE=1 to keep the key memory-only.
+    """
+    if os.environ.get("DMA_NO_KEY_WRITE"):
+        return source
+    try:
+        d = os.path.dirname(path) or "."
+        os.makedirs(d, exist_ok=True)
+        os.chmod(d, 0o700)
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w") as fh:
+            json.dump(key, fh)
+        return f"{source} (written through to {path})"
+    except OSError:
+        return f"{source} (write-through to {path} failed; key in memory only)"
+
+
 def load_key(path: str | None = None) -> tuple:
     """(key dict, source) — the key file if one exists, else the environment.
 
@@ -95,8 +149,10 @@ def load_key(path: str | None = None) -> tuple:
     Order: an explicit key file (a bootstrapped container, or a developer's
     own path), then DMA_ROUTINE_SA_KEY_B64 (base64 of the key JSON on one
     line — the shape the .env-format settings field accepts), then raw
-    DMA_ROUTINE_SA_KEY for contexts that carry newlines. Nothing is written
-    to disk on the environment rungs; the key is parsed in memory.
+    DMA_ROUTINE_SA_KEY for contexts that carry newlines. An environment
+    rung that succeeds WRITES THE FILE THROUGH (0600, best-effort, disable
+    with DMA_NO_KEY_WRITE=1), so one successful load re-provisions the
+    container for every consumer that gates on the file's existence.
     """
     path = path or DEFAULT_KEY
     try:
@@ -108,15 +164,27 @@ def load_key(path: str | None = None) -> tuple:
     raw = os.environ.get("DMA_ROUTINE_SA_KEY_B64", "").strip()
     if raw:
         try:
-            return json.loads(base64.b64decode(raw)), "DMA_ROUTINE_SA_KEY_B64"
+            key = json.loads(_lenient_b64_decode(raw))
         except Exception as exc:
-            return None, f"DMA_ROUTINE_SA_KEY_B64 set but unusable: {exc}"
+            return None, (f"DMA_ROUTINE_SA_KEY_B64 set but unusable even "
+                          f"after cleanup: {exc} — regenerate with: gcloud "
+                          "secrets versions access latest "
+                          "--secret=dmai-routine-sa-key "
+                          "--project=digital-maturity-assessor | base64 -w0")
+        key, source = _validate_key(key, "DMA_ROUTINE_SA_KEY_B64")
+        if key is None:
+            return None, source
+        return key, _write_through(key, path, source)
     raw = os.environ.get("DMA_ROUTINE_SA_KEY", "").strip()
     if raw:
         try:
-            return json.loads(raw), "DMA_ROUTINE_SA_KEY"
+            key = json.loads(raw.strip("'\""))
         except Exception as exc:
             return None, f"DMA_ROUTINE_SA_KEY set but unusable: {exc}"
+        key, source = _validate_key(key, "DMA_ROUTINE_SA_KEY")
+        if key is None:
+            return None, source
+        return key, _write_through(key, path, source)
     return None, (f"no key file at {path} and neither DMA_ROUTINE_SA_KEY_B64 "
                   "nor DMA_ROUTINE_SA_KEY is set")
 
@@ -154,9 +222,20 @@ def main(argv=None) -> int:
     p_ac = sub.add_parser("access", help="OAuth2 access token")
     p_ac.add_argument("--scope", default=DEFAULT_SCOPE)
     p_ac.add_argument("--key", default=DEFAULT_KEY)
+    p_ek = sub.add_parser(
+        "ensure-key",
+        help="materialise the key file from the environment if absent; "
+             "prints source states only, never values")
+    p_ek.add_argument("--key", default=DEFAULT_KEY)
     args = ap.parse_args(argv)
 
     key, source = load_key(args.key)
+    if args.mode == "ensure-key":
+        if key is None:
+            print(f"ensure-key: FAILED — {source}")
+            return 2
+        print(f"ensure-key: ok — source {source}")
+        return 0
     if key is None:
         print(f"gcp_token: no usable key — {source}", file=sys.stderr)
         return 2

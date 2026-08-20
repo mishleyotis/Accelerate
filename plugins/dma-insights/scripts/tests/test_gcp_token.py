@@ -107,14 +107,14 @@ def test_signature_does_not_verify_when_tampered(throwaway_key, tmp_path):
     assert proc.returncode != 0
 
 
-def test_missing_key_file_exits_2(monkeypatch, capsys):
+def test_missing_key_file_exits_2(monkeypatch, capsys, tmp_path):
     """No file AND no key in the environment is the only real 'no key' case —
     load_key reaches the environment before giving up, so the fixture has to
     clear it to test the failure path."""
     for var in ("DMA_ROUTINE_SA_KEY_B64", "DMA_ROUTINE_SA_KEY"):
         monkeypatch.delenv(var, raising=False)
     rc = gcp_token.main(["id", "--audience", "https://aud",
-                         "--key", "/nonexistent/sa.json"])
+                         "--key", str(tmp_path / "absent" / "sa.json")])
     assert rc == 2
     captured = capsys.readouterr()
     assert captured.out == ""          # nothing but tokens ever on stdout

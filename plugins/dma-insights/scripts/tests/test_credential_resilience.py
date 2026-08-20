@@ -69,39 +69,47 @@ def test_load_key_prefers_an_existing_key_file(clean_env, tmp_path):
     assert "key file" in source
 
 
-def test_load_key_falls_back_to_the_base64_environment_value(clean_env):
-    """The rung that makes a scheduled routine authenticate at session start."""
+def test_load_key_falls_back_to_the_base64_environment_value(clean_env, tmp_path):
+    """The rung that makes a scheduled routine authenticate at session start.
+
+    Since 0.6.8 a successful environment load also WRITES THE FILE THROUGH
+    (the self-heal for containers whose setup script never ran), so the
+    tests give load_key a private tmp path, never a shared literal one."""
     clean_env.setenv("DMA_ROUTINE_SA_KEY_B64",
                      base64.b64encode(json.dumps(FAKE_KEY).encode()).decode())
-    key, source = gcp_token.load_key("/nonexistent/sa.json")
+    keyfile = tmp_path / "sa.json"
+    key, source = gcp_token.load_key(str(keyfile))
     assert key["client_email"] == FAKE_KEY["client_email"]
-    assert source == "DMA_ROUTINE_SA_KEY_B64"
+    assert source.startswith("DMA_ROUTINE_SA_KEY_B64")
+    assert keyfile.is_file()  # the write-through re-provisioned the path
 
 
-def test_load_key_accepts_raw_json_where_newlines_survive(clean_env):
+def test_load_key_accepts_raw_json_where_newlines_survive(clean_env, tmp_path):
     clean_env.setenv("DMA_ROUTINE_SA_KEY", json.dumps(FAKE_KEY))
-    key, source = gcp_token.load_key("/nonexistent/sa.json")
+    key, source = gcp_token.load_key(str(tmp_path / "sa.json"))
     assert key["client_email"] == FAKE_KEY["client_email"]
-    assert source == "DMA_ROUTINE_SA_KEY"
+    assert source.startswith("DMA_ROUTINE_SA_KEY")
 
 
-def test_load_key_explains_itself_when_nothing_is_available(clean_env):
-    key, source = gcp_token.load_key("/nonexistent/sa.json")
+def test_load_key_explains_itself_when_nothing_is_available(clean_env, tmp_path):
+    key, source = gcp_token.load_key(str(tmp_path / "sa.json"))
     assert key is None
     assert "DMA_ROUTINE_SA_KEY_B64" in source
 
 
-def test_load_key_names_the_variable_when_it_is_set_but_malformed(clean_env):
-    """A truncated paste must be diagnosable, not silently identical to unset."""
+def test_load_key_names_the_variable_when_it_is_set_but_malformed(clean_env, tmp_path):
+    """A truncated paste must be diagnosable, not silently identical to unset —
+    and since 0.6.8 the failure text carries the exact regeneration command."""
     clean_env.setenv("DMA_ROUTINE_SA_KEY_B64", "not-base64-at-all!!")
-    key, source = gcp_token.load_key("/nonexistent/sa.json")
+    key, source = gcp_token.load_key(str(tmp_path / "sa.json"))
     assert key is None
     assert "DMA_ROUTINE_SA_KEY_B64" in source and "unusable" in source
+    assert "base64 -w0" in source
 
 
-def test_cli_exits_2_and_prints_nothing_on_stdout_without_a_key(clean_env, capsys):
+def test_cli_exits_2_and_prints_nothing_on_stdout_without_a_key(clean_env, capsys, tmp_path):
     rc = gcp_token.main(["id", "--audience", "https://aud",
-                         "--key", "/nonexistent/sa.json"])
+                         "--key", str(tmp_path / "absent" / "sa.json")])
     assert rc == 2
     captured = capsys.readouterr()
     assert captured.out == ""          # stdout carries tokens and nothing else
