@@ -105,6 +105,31 @@ in-context is precisely what these designs refuse — the connector's stores
 (runs, findings, refinements) are the memory, and a fresh session proves it
 can read them.
 
+**The provisioning contract (measured 2026-08-19).** A fresh container in
+this environment ships with python3/node/git/curl and nothing else this
+product needs: no gcloud, no Google identity, no plugin, no repo, and its
+disk does not survive container reclaim — even a persistent session loses
+its toolchain between firings. Plugins register their MCP tools at session
+START, so provisioning cannot be a step inside the routine. It is the
+**environment setup script** (claude.ai/code → environment settings for
+`Default - full network access`), which must be wired once, by hand, as:
+
+```
+curl -sfL https://raw.githubusercontent.com/mishleyotis/Accelerate/claude/dma-insights-onboarding-0ryrd0/plugins/dma-insights/scripts/bootstrap_session.sh | bash
+```
+
+together with one environment variable in the same settings screen:
+`DMA_ROUTINE_SA_KEY` — the `dmai-routine@` service-account key JSON
+(retrieval and rotation: `plugins/dma-insights/docs/secrets.md` §1b). The
+script clones the repo, installs the plugin from the repo marketplace,
+lands the key at `/root/.dma/sa.json`, fetches the connector path token
+fresh from Secret Manager (so a token rotation needs no client update
+anywhere), installs the skill script dependencies, and probes the connector
+roster — logging loudly and never blocking session start, because every
+routine's STEP 0 is the enforcement point. `mcp_auth_headers.sh` and
+`doctor.py` both carry the key-file identity path for containers without
+gcloud; `gcp_token.py` is the minter both lean on.
+
 Status at 2026-08-19 (`list_triggers`, evening): **all three exist and are
 enabled.** (b) and (c) were created 2026-08-19T21:24Z from this file's fenced
 prompts; a firing that finds this paragraph disagreeing with `list_triggers`
@@ -126,7 +151,7 @@ so a drifted trigger is detectable by diff:
 ```
 You are the scheduled DMA synthesis routine (dma-insights). One client per firing, end to end, through the installed plugin only — its skills, agents, hooks and routing are the system under test, so do not improvise around them and do not use ad-hoc multi-agent workflows.
 
-STEP 0 — VERIFY THE TOOLING. Run `claude plugin list` and the dma-insights doctor command (/dma-insights:doctor). Require: plugin dma-insights version >= 0.5.0, doctor fully green including the live tool-roster check. If the plugin is missing, stale, or the doctor fails, STOP and report exactly what is missing — producing anything with degraded tooling is worse than producing nothing.
+STEP 0 — VERIFY THE TOOLING. This container was provisioned before the session started by the environment setup script (plugins/dma-insights/scripts/bootstrap_session.sh, wired in the claude.ai/code environment settings together with the DMA_ROUTINE_SA_KEY variable): repo checkout, plugin install, service-account identity, connector path token. Run `claude plugin list` and the dma-insights doctor command (/dma-insights:doctor). Require: plugin dma-insights version >= 0.5.1, doctor fully green including the live tool-roster check. If the plugin is missing, stale, or the doctor fails, STOP and report exactly what is missing, naming bootstrap_session.sh and DMA_ROUTINE_SA_KEY so the fix is actionable — producing anything with degraded tooling is worse than producing nothing.
 
 STEP 1 — PICK ONE CLIENT. list_pending_runs via the connector; respect is_latest_for_request=true rows only. The learning sequence (docs/DECISIONS.md D7 in the plugin): 1) t-rowe-price-group-inc, 2) houlihan-lokey-inc, 3) hughes-federal-credit-union, 4) sl-green-realty-corp-nyse-slg (adjudicate its twin 'slg' by the worker's dedup rules first), 5) corporate-america-credit-union. Take the FIRST not yet serving six pages. HELD OUT — never produce from this routine: bok-financial-corporation and its twin bok-financial. If all five learners serve, take stress candidates in order: brick-city-capital, thrivent, bank-of-utah. If those too are done, report "sequence complete" and stop.
 
@@ -165,8 +190,13 @@ and run exactly one rectification cycle. You are the only writer of the plugin's
 skills, agents, rulebooks and gates (constraint [B]); nothing you do produces,
 submits or promotes client content.
 
-STEP 0 — HANDSHAKE. Run `claude plugin list` and /dma-insights:doctor; require the
-dma-insights plugin present and the doctor green. Then confirm the connector's
+STEP 0 — HANDSHAKE. This container was provisioned before the session started by
+the environment setup script (plugins/dma-insights/scripts/bootstrap_session.sh
+plus the DMA_ROUTINE_SA_KEY variable, both wired in the claude.ai/code
+environment settings). Run `claude plugin list` and /dma-insights:doctor; require
+the dma-insights plugin present at version >= 0.5.1 and the doctor green — if
+either fails, STOP and report what is missing, naming bootstrap_session.sh and
+DMA_ROUTINE_SA_KEY so the fix is actionable. Then confirm the connector's
 memory tools answer by calling them for real: list_defect_classes, then
 get_memory_digest(days=7). Record the handshake numbers: tools seen, open finding
 count, classes seen, oldest open, newest sighting. If the memory tools are absent
@@ -271,9 +301,14 @@ never create refresh requests yourself — the app's hourly sweep
 (sweep_refresh_due in apps/worker/dma_worker/enrichment.py) raises cadence rows;
 your job is to judge what it raised and what it missed.
 
-STEP 0 — VERIFY THE TOOLING. Run /dma-insights:doctor; require it green and the
-connector's tools present. If the connector is unreachable, STOP and report
-exactly which layer failed. A drift review that cannot read the state invents it.
+STEP 0 — VERIFY THE TOOLING. This container was provisioned before the session
+started by the environment setup script (plugins/dma-insights/scripts/
+bootstrap_session.sh plus the DMA_ROUTINE_SA_KEY variable, both wired in the
+claude.ai/code environment settings). Run /dma-insights:doctor; require it green
+and the connector's tools present. If the plugin is missing or the connector is
+unreachable, STOP and report exactly which layer failed, naming
+bootstrap_session.sh and DMA_ROUTINE_SA_KEY so the fix is actionable. A drift
+review that cannot read the state invents it.
 
 STEP 1 — THE REFRESH QUEUE. Read GET /v1/ops/refresh-queue on the api (internal
 audience — the queue names actors and reasons and is never served to customers).

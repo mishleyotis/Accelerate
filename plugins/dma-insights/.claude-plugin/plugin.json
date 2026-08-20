@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "The six Digital Maturity Assessment skills, sixteen DMA agents and the remote DMA Insights MCP connector (33 tools) as one installable unit. The agent hierarchy routes every one of the 53 mapped surfaces (38 top-level + 15 drilldowns) to a dedicated per-page surface producer, an adversarial finding-challenger, a page-consolidator and a qa-overseer that writes the findings memory \u2014 plus the learning loop's independent grader and test generator \u2014 with hooks that refuse a doomed submit before the network sees it. Carries the payload gates AG-11/12 and CG-26 through CG-31, the refusal ledger, per-surface anti-pattern rulebooks with enrichment pathways, and the shared platform-fit engine the producer reads rather than recomputes.",
   "author": {
     "name": "Zennify \u2014 DMA Insights build"

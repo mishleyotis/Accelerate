@@ -48,13 +48,29 @@ find_gcloud() {
   return 1
 }
 
-GCLOUD="$(find_gcloud)" || fail "gcloud not found on PATH or in the usual install locations"
+# Fresh routine containers have no gcloud at all (measured 2026-08-19), so
+# identity has two rungs: gcloud when present, else an ID token minted from
+# the service-account key file that bootstrap_session.sh lands from the
+# DMA_ROUTINE_SA_KEY environment value. Same output contract either way.
+mint_from_keyfile() {
+  local keyfile="${DMA_SA_KEY_FILE:-/root/.dma/sa.json}"
+  [ -s "$keyfile" ] || return 1
+  local here; here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  python3 "$here/gcp_token.py" id --audience "$AUD" --key "$keyfile" 2>/dev/null
+}
 
-# A stale CLOUDSDK_AUTH_ACCESS_TOKEN in the environment overrides the activated
-# account and fails with a 401 that reads like a permissions problem.
-TOKEN="$(CLOUDSDK_AUTH_ACCESS_TOKEN= "$GCLOUD" auth print-identity-token \
-           --audiences="$AUD" 2>/dev/null)" || fail "gcloud auth failed"
+TOKEN=""
+if GCLOUD="$(find_gcloud)"; then
+  # A stale CLOUDSDK_AUTH_ACCESS_TOKEN in the environment overrides the
+  # activated account and fails with a 401 that reads like a permissions
+  # problem.
+  TOKEN="$(CLOUDSDK_AUTH_ACCESS_TOKEN= "$GCLOUD" auth print-identity-token \
+             --audiences="$AUD" 2>/dev/null)" || TOKEN=""
+fi
+if [ -z "$TOKEN" ]; then
+  TOKEN="$(mint_from_keyfile)" || TOKEN=""
+fi
 
-[ -n "$TOKEN" ] || fail "gcloud returned an empty token"
+[ -n "$TOKEN" ] || fail "no gcloud identity and no service-account key file (DMA_SA_KEY_FILE, default /root/.dma/sa.json)"
 
 printf '{"Authorization": "Bearer %s"}\n' "$TOKEN"

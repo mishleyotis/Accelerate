@@ -42,6 +42,41 @@ rotated on the next connector deploy):
 3. Every plugin user re-runs the retrieval command and updates the config
    field; the repo CLI needs nothing.
 
+## 1b. The routine service-account key (`DMA_ROUTINE_SA_KEY`)
+
+**What it is.** The JSON key of
+`dmai-routine@digital-maturity-assessor.iam.gserviceaccount.com` — the
+identity fresh routine containers use, because they have no gcloud and no
+other Google credential (measured 2026-08-19). Deliberately weak: exactly
+`roles/run.invoker` on the `dmai-mcp` and `dmai-api` services and
+`roles/secretmanager.secretAccessor` on `dmai-mcp-path-token`. It can call
+the connector and read that one secret; it cannot deploy, read the
+database, touch storage, or mint other identities.
+
+**Where it lives.**
+- Escrow: Secret Manager, secret `dmai-routine-sa-key`, same project.
+- Runtime: the `DMA_ROUTINE_SA_KEY` environment variable in the CCR
+  environment settings (claude.ai/code → environments → `Default - full
+  network access`), set by hand once. `bootstrap_session.sh` writes it to
+  `/root/.dma/sa.json` (0600) at container boot; `gcp_token.py` signs with
+  it; `mcp_auth_headers.sh` and `doctor.py` fall back to it whenever gcloud
+  is absent.
+- NEVER in this repository — the repository is public.
+
+**How a person retrieves it** (to fill the environment variable):
+
+    gcloud secrets versions access latest \
+      --secret=dmai-routine-sa-key --project=digital-maturity-assessor
+
+**Rotation.**
+1. `gcloud iam service-accounts keys create` a new key for `dmai-routine@`,
+   add it as a new version of `dmai-routine-sa-key`, update the
+   `DMA_ROUTINE_SA_KEY` environment variable from it.
+2. `gcloud iam service-accounts keys delete` the old key id — from that
+   moment the old JSON is dead everywhere, whatever still holds a copy.
+3. Nothing else updates: the path token is fetched per boot, and the plugin
+   store is rebuilt per boot.
+
 ## 2. The Google-signed ID token (per connection)
 
 **What it is.** An OIDC identity token minted per connection by
