@@ -16,14 +16,22 @@ expires.
 THE SELF-HEAL LADDER (also in the routine prompts):
   1. A connector tool call fails 401 / "Dynamic Client Registration
      rejected" -> run `mcp_raw.py probe`.
-  2. probe OK  -> the server is UP; the broken layer is this session's MCP
-     client, which cannot be reloaded mid-session. SWITCH: every remaining
-     connector call goes through `mcp_raw.py call <tool>` — reads, submits,
-     promote, findings, everything. Continue the run.
-  3. probe FAILS -> re-run bootstrap_session.sh (re-lands key + path token),
-     probe again. Still failing = a real outage: STOP submissions, record
-     the finding with the exact HTTP status, push memory (Drive auth is
-     separate and unaffected), report — never fabricate, never force.
+  2. probe OK -> the server is UP; the broken layer is the session's MCP
+     client, which cannot be reloaded mid-session. This bridge is a
+     DIAGNOSTIC and a last resort, not a production channel: session
+     harnesses may classifier-block direct credential-minting calls
+     (measured 2026-08-20), and writes through it bypass the harness's
+     audited tool path. HAND OFF instead: write the vetter verdict,
+     per-section status and what remains into the client memory file, push
+     it to Drive via drive_fetch, end the firing with the report — the
+     next firing binds the 0.6.7 stdio transport at session start
+     (ordinary audited tool calls) and resumes from the memory file,
+     re-claiming after the lease lapses. Reads here for diagnosis are
+     fine; WRITE actions only with the owner's explicit re-affirmation.
+  3. probe FAILS -> re-run bootstrap_session.sh (re-lands key + path
+     token), probe again. Still failing = a real outage: same handoff,
+     plus the exact HTTP status in the report — never fabricate, never
+     force a submission.
 
 Usage:
   mcp_raw.py probe                      # tools/list; prints the tool count
