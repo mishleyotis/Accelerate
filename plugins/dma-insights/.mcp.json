@@ -1,9 +1,11 @@
 {
   "mcpServers": {
     "connector": {
-      "type": "http",
-      "url": "${user_config.mcp_base_url}/mcp",
-      "headersHelper": "${CLAUDE_PLUGIN_ROOT}/scripts/mcp_auth_headers.sh"
+      "command": "python3",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/mcp_proxy.py",
+        "${user_config.mcp_base_url}"
+      ]
     }
   }
 }

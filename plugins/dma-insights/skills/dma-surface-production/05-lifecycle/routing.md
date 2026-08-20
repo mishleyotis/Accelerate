@@ -23,30 +23,38 @@ method assumes per-claim verdicts exist, and it refuses input without them.
 The qa-overseer runs at the END of every production or repair, green or not
 — a green run with a buried defect still gets its finding recorded.
 
-## Dispatch mode — when the session has no Agent tool
+## Dispatch mode — the top session orchestrates, one level deep
 
-Trigger-fired sessions run under the subagent harness and carry no
-agent-launch tool (measured 2026-08-20: the first live synthesis firing
-correctly blocked rather than write six pages inline). The pipeline does
-not change — the dispatch mechanism does. Every routed stage runs through
-`scripts/agent_run.py --agent <name>` (prompt via `--prompt-file`), which
-starts the agent as a headless CLI session with its own front matter —
-model tier, effort, skills, tool bans — exactly as the Agent tool would.
-Same agents, same order, same refusals; writing a stage inline because
-dispatch feels slow is the improvisation this file forbids.
+Trigger-fired sessions DO carry the Agent tool, but only ONE nesting level:
+a subagent cannot spawn further subagents (MEM-0106, measured 2026-08-20 —
+an enclosing surface-producer subagent stalled the whole pipeline, then
+overturned the package-vetter's REFUSE by its own re-analysis because it
+could not dispatch the sanctioned re-vet). Two rules follow:
 
-Division of labour in dispatch mode: headless children reach the DMA
-connector natively but carry NO claude.ai enrichment connectors — those
-exist only in the top session, attached to the Routine. So connector-bound
+1. **The TOP session is the orchestrator.** It dispatches every routed
+   stage DIRECTLY — the per-surface producers, the checkers, the
+   consolidator, the vetter — via the Agent tool, in this file's order.
+   Never delegate the pipeline to one enclosing orchestrator subagent: it
+   cannot fan out, and an orchestrator that cannot dispatch improvises.
+   Where the Agent tool is genuinely absent, `scripts/agent_run.py` runs a
+   stage as a headless CLI session — same agents, same order, same
+   refusals.
+2. **Verdict integrity survives dispatch.** A package-vetter REFUSE is
+   overturned only by a fresh, sanctioned re-vet dispatched from the top
+   session — never by a producer's own re-analysis, however correct it
+   reads.
+
+Division of labour is unchanged: headless children and subagents reach the
+DMA connector natively but carry NO claude.ai enrichment connectors — those
+exist only in the top session, attached to the Routine. Connector-bound
 searches (Clay, Exa, Tavily, Vibe-Prospecting, Indeed) run only in the top
 session: a dispatched producer that needs one emits it in a
-`search_requests` array (query + falsifier pairing + facet — the preamble
-agent_run.py prepends demands this) instead of fabricating or skipping;
-the top session executes the requests through its real connectors,
-registers the evidence, logs the source outcomes in the yield ledger, and
-re-invokes the producer with the evidence ids. Enrichment honesty survives
-the hop: a search the top session refused or could not run is recorded
-not-run, never invented.
+`search_requests` array (query + falsifier pairing + facet) instead of
+fabricating or skipping; the top session executes the requests through its
+real connectors, registers the evidence, logs the source outcomes in the
+yield ledger, and re-invokes the producer with the evidence ids. Enrichment
+honesty survives the hop: a search the top session refused or could not run
+is recorded not-run, never invented.
 
 ## Two tiers of producer, and which tier a request reaches
 
