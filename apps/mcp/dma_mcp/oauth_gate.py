@@ -56,6 +56,12 @@ ALLOWED_SAS = {
         "claude-deployer@digital-maturity-assessor.iam.gserviceaccount.com",
     ).split(",") if s.strip()
 }
+# Any service account OF THIS PROJECT is an operator identity: under the
+# IAM posture each was granted run.invoker individually, and enumerating
+# them in an allowlist just breaks the next legitimate one (measured
+# 2026-08-20: the deployer container's active SA 403'd the service path).
+PROJECT_SA_SUFFIX = os.environ.get(
+    "DMA_SA_SUFFIX", "@digital-maturity-assessor.iam.gserviceaccount.com")
 # gcloud's own OAuth client — the audience of a bare
 # `gcloud auth print-identity-token`. Accepted for DOMAIN humans only.
 GCLOUD_CLI_AUD = "32555940559.apps.googleusercontent.com"
@@ -82,7 +88,7 @@ def check_identity(claims: dict, rung: str, *, host: str,
     if rung == "A":
         service_auds = {f"https://{host}",
                         os.environ.get("MCP_SERVICE_URL", "").rstrip("/")}
-        if email in ALLOWED_SAS:
+        if email in ALLOWED_SAS or email.endswith(PROJECT_SA_SUFFIX):
             if aud in service_auds:
                 return True, 200, f"service-account {email}"
             return False, 403, ("service-account token audience must be the "

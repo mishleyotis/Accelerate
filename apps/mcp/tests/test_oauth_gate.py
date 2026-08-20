@@ -204,3 +204,19 @@ def test_legacy_capability_url_still_requires_identity():
     g, _ = _gate()
     status, _, _ = _run(g, "/mcp/captok")
     assert status == 401
+
+
+def test_any_project_service_account_passes_with_service_audience():
+    """Operator SAs of this project each held run.invoker under IAM; the
+    gate accepts the project SA domain rather than an allowlist that
+    breaks the next legitimate one (measured: the deployer 403'd)."""
+    ok, _, reason = _a(
+        "mishleyotiende@digital-maturity-assessor.iam.gserviceaccount.com",
+        f"https://{HOST}")
+    assert ok and "service-account" in reason
+
+
+def test_a_foreign_project_service_account_is_refused():
+    ok, status, _ = _a("attacker@some-other-project.iam.gserviceaccount.com",
+                       f"https://{HOST}")
+    assert not ok and status == 403
