@@ -301,6 +301,7 @@ def push_memory(client: str) -> int:
 
 
 BUNDLE_FOLDER = "DMA Insights"
+LEDGER_FOLDER = "DMA Insights — ledgers"   # intake-root, cross-client
 
 
 def _ensure_folder(tok: str, parent_id: str, name: str) -> str:
@@ -372,6 +373,67 @@ def push_bundle(client: str, file_path: str, name: str | None) -> int:
     return 0
 
 
+def push_ledger(file_path: str, session_tag: str) -> int:
+    """Persist a session's learning-ledger snapshot (match_feedback.json,
+    source_yield.json) to the intake root's shared ledger folder. Routine
+    containers are ephemeral and their repo attach is READ-ONLY by design —
+    a git push from a synthesis or drift firing fails at the boundary, and
+    that is the boundary working. Durability instead: each session pushes
+    its ledger files here under a session-stamped name; the weekly
+    rectification (the ONE routine that opens PRs) merges the snapshots
+    into the repo fixtures."""
+    local = Path(file_path)
+    if not local.is_file():
+        raise SystemExit(f"no such file: {local}")
+    try:
+        json.loads(local.read_bytes())
+    except Exception as e:                                  # noqa: BLE001
+        raise SystemExit(f"ledger must be valid JSON ({e})")
+    tok = _token()
+    root = _ensure_folder(tok, INTAKE_FOLDER_ID, LEDGER_FOLDER)
+    remote = f"{local.stem}.{session_tag}{local.suffix}"
+    existing = [f for f in _list_children(tok, root)
+                if f["mimeType"] != FOLDER_MIME and f["name"] == remote]
+    body = local.read_bytes()
+    if existing:
+        url = (f"{UPLOAD}/files/{existing[0]['id']}?uploadType=media"
+               f"&supportsAllDrives=true")
+        with _req(tok, url, data=body, method="PATCH",
+                  ctype="application/json") as resp:
+            json.load(resp)
+        print(f"ledger snapshot updated: {LEDGER_FOLDER}/{remote}")
+    else:
+        meta = json.dumps({"name": remote, "parents": [root]}).encode()
+        boundary = "dma-ledger-upload"
+        payload = io.BytesIO()
+        for part, ct in ((meta, "application/json; charset=UTF-8"),
+                         (body, "application/json")):
+            payload.write(f"--{boundary}\r\nContent-Type: {ct}\r\n\r\n".encode())
+            payload.write(part + b"\r\n")
+        payload.write(f"--{boundary}--".encode())
+        url = f"{UPLOAD}/files?uploadType=multipart&supportsAllDrives=true"
+        with _req(tok, url, data=payload.getvalue(), method="POST",
+                  ctype=f"multipart/related; boundary={boundary}") as resp:
+            json.load(resp)
+        print(f"ledger snapshot created: {LEDGER_FOLDER}/{remote}")
+    return 0
+
+
+def pull_ledgers(dest_dir: str) -> int:
+    """Download every ledger snapshot (rectification merges them)."""
+    tok = _token()
+    root = _ensure_folder(tok, INTAKE_FOLDER_ID, LEDGER_FOLDER)
+    dest = Path(dest_dir)
+    dest.mkdir(parents=True, exist_ok=True)
+    n = 0
+    for f in _list_children(tok, root):
+        if f["mimeType"] != FOLDER_MIME:
+            _download(tok, f, dest)
+            n += 1
+    print(f"pulled {n} ledger snapshots -> {dest}")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -386,6 +448,13 @@ def main(argv=None) -> int:
     p_b.add_argument("--name", default=None,
                      help="remote path inside 'DMA Insights/', e.g. "
                           "surfaces/heatmap.workbook_scores.json")
+    p_l = sub.add_parser("push-ledger")
+    p_l.add_argument("--file", required=True)
+    p_l.add_argument("--session", required=True,
+                     help="session tag for the snapshot name, e.g. "
+                          "20260820-synthesis")
+    p_pl = sub.add_parser("pull-ledgers")
+    p_pl.add_argument("--dest", required=True)
     a = ap.parse_args(argv)
     if a.cmd == "check":
         return check()
@@ -395,6 +464,10 @@ def main(argv=None) -> int:
         return push_memory(a.client)
     if a.cmd == "push-bundle":
         return push_bundle(a.client, a.file, a.name)
+    if a.cmd == "push-ledger":
+        return push_ledger(a.file, a.session)
+    if a.cmd == "pull-ledgers":
+        return pull_ledgers(a.dest)
     return 2
 
 
