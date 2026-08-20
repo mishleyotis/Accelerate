@@ -136,6 +136,8 @@ def flatten_agents(entries) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=None)
+    ap.add_argument("--walkthrough", action="store_true",
+                    help="ALSO build the hierarchical human-tour zip")
     args = ap.parse_args(argv)
 
     manifest = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())
@@ -164,7 +166,96 @@ def main(argv=None) -> int:
         return 1
     print(f"ok  {out}  {len(entries)} files  {size//1024} KiB  "
           f"description {len(manifest['description'])}/{DESCRIPTION_MAX} chars")
+    if args.walkthrough:
+        wt = build_walkthrough(out.parent, manifest["version"])
+        print(f"ok  {wt}  walkthrough (hierarchical, for humans — "
+              f"NOT for claude.ai upload)  {wt.stat().st_size//1024} KiB")
     return 0
+
+
+
+# ── walkthrough zip: the hierarchy, for humans ───────────────────────────
+
+TEST_THEMES = (
+    ("1-gates-and-vetting", ("run_gate", "vet_workbooks", "check_language",
+                             "corpus_map", "gate")),
+    ("2-drive-and-memory", ("drive_fetch", "client_memory", "memory")),
+    ("3-corpus-resilience", ("package_resilience", "package_map",
+                             "corpus_search", "evidence_normalize",
+                             "agent_run", "survey")),
+    ("4-learning-loops", ("subcap_match", "source_yield", "learning",
+                          "regression", "feedback")),
+)
+
+
+def _test_theme(name: str) -> str:
+    low = name.lower()
+    for theme, keys in TEST_THEMES:
+        if any(k in low for k in keys):
+            return theme
+    return "5-plugin-infrastructure"
+
+
+def build_walkthrough(out_dir: Path, version: str) -> Path:
+    """The SAME plugin, laid out for a human tour: agents keep their
+    hierarchy (11 folders, subagents beneath their pages), tests are
+    grouped by theme, and a TOUR.md at the root explains the shape.
+    NOT for claude.ai upload — the upload validator wants the flat shape
+    the default build produces; this zip is for walking someone through."""
+    out = out_dir / f"dma-insights-{version}-walkthrough.zip"
+    entries = [(str(rel), PLUGIN / rel) for rel in iter_files()]
+    tour = [
+        "# dma-insights — walkthrough layout", "",
+        f"Version {version}. This zip mirrors the REPOSITORY hierarchy so a",
+        "human can be walked through it; the flat sibling zip is the one",
+        "claude.ai upload accepts.", "",
+        "## agents/ — the 47-agent roster, hierarchical",
+        "- orchestration/  the surface-producer (only submitter), the",
+        "  package-vetter, adversarial-verifier, deployed-app-auditor,",
+        "  rectifier",
+        "- production/<page>/  one folder per dashboard page; the page",
+        "  producer beside the per-surface subagents it fans out to",
+        "- enrichment/  planner + connector/web specialists + ledger auditor",
+        "- checkers/  finding-challenger, page-consolidator, evidence and",
+        "  numeric checkers, exclusion-boundary auditor",
+        "- qa/  qa-overseer (the learning loop's only writer)",
+        "- learning/  learning-grader + learning-testgen (graders carry no",
+        "  write tools by construction)", "",
+        "## skills/dma-surface-production/ — the production system",
+        "- 02-inputs/  1-package (landing table) · 5-corpus-map (source ->",
+        "  storyline -> enrichment precedence per surface) · 4-vetting",
+        "- 03-pages/  per-page rulebooks",
+        "- 05-lifecycle/  routing (incl. Dispatch mode) · surface-map",
+        "  (census) · gates · client-memory", "",
+        "## scripts/ — the mechanical layer",
+        "- run_gate.py  the pre-synthesis gate (G1-G4)",
+        "- package_map.py / corpus_search.py / evidence_normalize.py  the",
+        "  messy-corpus resolution ladder",
+        "- drive_fetch.py / client_memory.py  Drive + per-client memory",
+        "- agent_run.py  headless agent dispatch for trigger-fired sessions",
+        "- package_survey.py  the measuring instrument (survey/deep/corpus/",
+        "  trends)", "",
+        "## scripts/tests/ — grouped by theme",
+    ]
+    theme_counts = {}
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+        for rel, path in entries:
+            arc = rel
+            parts = rel.split("/")
+            if parts[0] == "scripts" and len(parts) > 2 \
+                    and parts[1] == "tests" and parts[-1] != "__init__.py":
+                theme = _test_theme(parts[-1])
+                theme_counts[theme] = theme_counts.get(theme, 0) + 1
+                arc = "/".join(parts[:2] + [theme, parts[-1]])
+            z.write(path, arc)
+        for theme, _ in TEST_THEMES:
+            if theme in theme_counts:
+                tour.append(f"- {theme}/  {theme_counts[theme]} test files")
+        if "5-plugin-infrastructure" in theme_counts:
+            tour.append(f"- 5-plugin-infrastructure/  "
+                        f"{theme_counts['5-plugin-infrastructure']} test files")
+        z.writestr("TOUR.md", "\n".join(tour) + "\n")
+    return out
 
 
 if __name__ == "__main__":

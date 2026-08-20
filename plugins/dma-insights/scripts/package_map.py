@@ -181,6 +181,15 @@ def map_package(root) -> dict:
             f"no workbook named 'scoring' — unclassified xlsx exist: "
             f"{unclassified_xlsx[:3]}; the vetter decides whether one is the "
             f"scoring workbook")
+    if research["primary"] is None:
+        misnamed = [str(q.relative_to(root)) for q in scoring_cand
+                    if "research" in str(q.parent).lower()]
+        if misnamed:
+            ambiguities.append(
+                f"research workbook MISSING but a scoring-named workbook "
+                f"sits in the research folder ({misnamed[0]}) — likely a "
+                f"misnamed research workbook (measured: Shore United Bank, "
+                f"Houlihan Lokey); the vetter opens it and decides")
     score_exports = sorted(
         str(q.relative_to(root)) for q in entries
         if q.name.lower().startswith("export_")

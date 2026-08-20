@@ -211,3 +211,14 @@ def test_package_map_names_export_only_scoring(tmp_path):
         "03_scoring_workbook/export_scoring_detail.csv"]
     assert any("EXPORT-ONLY" in a for a in m["ambiguities"])
     assert not any("BRIEFING-ONLY" in a for a in m["ambiguities"])
+
+
+def test_a_scoring_named_workbook_in_the_research_folder_is_flagged(tmp_path):
+    """Shore United Bank keeps its research workbook named
+    DMA_Scoring_Workbook_* inside 02_research_workbook/ — the map must not
+    silently conclude the research workbook is absent."""
+    _mk(tmp_path, "03_scoring_workbook/DMA_Scoring_Workbook_X_SCORED.xlsx")
+    _mk(tmp_path, "02_research_workbook/DMA_Scoring_Workbook_X.xlsx")
+    m = package_map.map_package(tmp_path)
+    assert m["research"]["primary"] is None
+    assert any("misnamed research workbook" in a for a in m["ambiguities"])
