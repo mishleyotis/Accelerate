@@ -1,0 +1,240 @@
+#!/usr/bin/env python3
+"""Google Drive access for routine sessions — the SA credential, no connector.
+
+Owner instruction, 2026-08-20: "Preflight should include access to the DMA
+drive folder where the DMAs are stored … The connector should automatically
+load without my intervention or use authentication to access the Google
+drive and download the specific client folder."
+
+Why not the claude.ai Drive connector: measured twice today, interactively-
+authenticated connectors do not load in trigger-fired sessions
+(enabledInChat: false), the organisation has the API's trigger-connectors
+parameter disabled, and the connector's own account was refused permission
+to share the folder onward. The dependable path is the one the plugin
+already uses for everything else: the dmai-routine service-account key the
+container holds mints a Drive-scoped access token (gcp_token.py, the same
+rungs — key file, then DMA_ROUTINE_SA_KEY_B64), and this module speaks the
+Drive REST API directly. Works in every container, no OAuth, no UI.
+
+The ONE precondition, once, forever: the intake folder must be shared with
+  dmai-routine@digital-maturity-assessor.iam.gserviceaccount.com
+as Editor (Editor rather than Viewer so the per-client memory file can be
+written back). `check` names exactly this when it is missing — a 404 from
+Drive for a real folder means "not shared with this identity".
+
+Commands:
+  check                       preflight: folder reachable, children listable
+  pull  --client <name>       download the client's subfolder to
+                              /root/.dma/packages/<slug>/
+  push-memory --client <slug> upload/update "<slug> — synthesis memory.md"
+                              into the client's subfolder
+
+No value of any token is ever printed. Errors name the layer and the fix.
+"""
+from __future__ import annotations
+
+import argparse
+import io
+import json
+import mimetypes
+import re
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import gcp_token  # noqa: E402
+
+INTAKE_FOLDER_ID = "1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo"   # "General DMAs"
+SA_EMAIL = "dmai-routine@digital-maturity-assessor.iam.gserviceaccount.com"
+DRIVE_SCOPE = "https://www.googleapis.com/auth/drive"
+API = "https://www.googleapis.com/drive/v3"
+UPLOAD = "https://www.googleapis.com/upload/drive/v3"
+PACKAGES_DIR = Path("/root/.dma/packages")
+MEMORY_DIR = Path("/root/.dma/clients")
+
+# Google-native files cannot download as bytes; they export to a real format.
+EXPORTS = {
+    "application/vnd.google-apps.spreadsheet":
+        ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+         ".xlsx"),
+    "application/vnd.google-apps.document": ("application/pdf", ".pdf"),
+    "application/vnd.google-apps.presentation": ("application/pdf", ".pdf"),
+}
+FOLDER_MIME = "application/vnd.google-apps.folder"
+
+
+def _token() -> str:
+    key, source = gcp_token.load_key("/root/.dma/sa.json")
+    if key is None:
+        raise SystemExit(f"no service-account identity ({source}) — "
+                         f"bootstrap_session.sh lands it, or set "
+                         f"DMA_ROUTINE_SA_KEY_B64")
+    tok = gcp_token.exchange(gcp_token.mint_assertion(
+        key, {"scope": DRIVE_SCOPE})).get("access_token", "")
+    if not tok:
+        raise SystemExit("could not exchange a Drive-scoped access token")
+    return tok
+
+
+def _req(tok: str, url: str, data: bytes | None = None,
+         method: str = "GET", ctype: str | None = None):
+    r = urllib.request.Request(url, data=data, method=method)
+    r.add_header("Authorization", f"Bearer {tok}")
+    if ctype:
+        r.add_header("Content-Type", ctype)
+    return urllib.request.urlopen(r, timeout=120)
+
+
+def _list_children(tok: str, folder_id: str) -> list:
+    out, page = [], None
+    while True:
+        q = urllib.parse.urlencode({
+            "q": f"'{folder_id}' in parents and trashed = false",
+            "fields": "nextPageToken,files(id,name,mimeType,size)",
+            "pageSize": 200, **({"pageToken": page} if page else {}),
+            "supportsAllDrives": "true", "includeItemsFromAllDrives": "true"})
+        with _req(tok, f"{API}/files?{q}") as resp:
+            d = json.load(resp)
+        out += d.get("files", [])
+        page = d.get("nextPageToken")
+        if not page:
+            return out
+
+
+def _slug(name: str) -> str:
+    return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", name.lower())).strip("-")
+
+
+def _find_client_folder(tok: str, client: str) -> dict:
+    want = _slug(client)
+    folders = [f for f in _list_children(tok, INTAKE_FOLDER_ID)
+               if f["mimeType"] == FOLDER_MIME]
+    exact = [f for f in folders if _slug(f["name"]) == want]
+    partial = [f for f in folders
+               if want in _slug(f["name"]) or _slug(f["name"]) in want]
+    hit = exact or partial
+    if len(hit) == 1:
+        return hit[0]
+    names = ", ".join(sorted(f["name"] for f in folders)) or "none visible"
+    raise SystemExit(
+        f"{'no' if not hit else 'multiple'} client folder(s) matching "
+        f"{client!r} under the intake tree — folders visible: {names}")
+
+
+def check() -> int:
+    """Preflight: the folder answers this identity and its children list."""
+    tok = _token()
+    try:
+        with _req(tok, f"{API}/files/{INTAKE_FOLDER_ID}?fields=id,name"
+                       f"&supportsAllDrives=true") as resp:
+            meta = json.load(resp)
+        kids = _list_children(tok, INTAKE_FOLDER_ID)
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            print(f"DRIVE PREFLIGHT FAILED: the intake folder is NOT shared "
+                  f"with {SA_EMAIL} — a 404 for a real folder means this "
+                  f"identity cannot see it. Fix (one time): open the folder "
+                  f"in Drive, Share, add that address as Editor.",
+                  file=sys.stderr)
+        else:
+            print(f"DRIVE PREFLIGHT FAILED: HTTP {e.code} from the Drive "
+                  f"API — {e.reason}", file=sys.stderr)
+        return 1
+    folders = sum(1 for k in kids if k["mimeType"] == FOLDER_MIME)
+    print(f"drive preflight OK: {meta.get('name')!r} reachable as {SA_EMAIL}; "
+          f"{len(kids)} children, {folders} client folders")
+    return 0
+
+
+def pull(client: str) -> int:
+    tok = _token()
+    folder = _find_client_folder(tok, client)
+    dest = PACKAGES_DIR / _slug(folder["name"])
+    dest.mkdir(parents=True, exist_ok=True)
+    got, skipped = 0, []
+    for f in _list_children(tok, folder["id"]):
+        if f["mimeType"] == FOLDER_MIME:
+            skipped.append(f"{f['name']}/ (subfolder — flat pull only)")
+            continue
+        if f["mimeType"] in EXPORTS:
+            mime, ext = EXPORTS[f["mimeType"]]
+            url = (f"{API}/files/{f['id']}/export?"
+                   + urllib.parse.urlencode({"mimeType": mime}))
+            name = f["name"] + ext
+        else:
+            url = f"{API}/files/{f['id']}?alt=media&supportsAllDrives=true"
+            name = f["name"]
+        with _req(tok, url) as resp, open(dest / name, "wb") as out:
+            while True:
+                chunk = resp.read(1 << 20)
+                if not chunk:
+                    break
+                out.write(chunk)
+        got += 1
+    print(f"pulled {got} files from {folder['name']!r} -> {dest}")
+    for s in skipped:
+        print(f"  skipped: {s}")
+    return 0 if got else 1
+
+
+def push_memory(client: str) -> int:
+    slug = _slug(client)
+    local = MEMORY_DIR / f"{slug}.md"
+    if not local.is_file():
+        raise SystemExit(f"no local memory file at {local} — "
+                         f"client_memory.py init writes it")
+    tok = _token()
+    folder = _find_client_folder(tok, client)
+    remote_name = f"{slug} — synthesis memory.md"
+    existing = [f for f in _list_children(tok, folder["id"])
+                if f["name"] == remote_name]
+    body = local.read_bytes()
+    if existing:
+        url = (f"{UPLOAD}/files/{existing[0]['id']}?uploadType=media"
+               f"&supportsAllDrives=true")
+        with _req(tok, url, data=body, method="PATCH",
+                  ctype="text/markdown") as resp:
+            json.load(resp)
+        print(f"memory updated in Drive: {remote_name!r} in {folder['name']!r}")
+    else:
+        meta = json.dumps({"name": remote_name,
+                           "parents": [folder["id"]]}).encode()
+        boundary = "dma-memory-upload"
+        payload = io.BytesIO()
+        for part, ct in ((meta, "application/json; charset=UTF-8"),
+                         (body, "text/markdown")):
+            payload.write(f"--{boundary}\r\nContent-Type: {ct}\r\n\r\n".encode())
+            payload.write(part + b"\r\n")
+        payload.write(f"--{boundary}--".encode())
+        url = f"{UPLOAD}/files?uploadType=multipart&supportsAllDrives=true"
+        with _req(tok, url, data=payload.getvalue(), method="POST",
+                  ctype=f"multipart/related; boundary={boundary}") as resp:
+            json.load(resp)
+        print(f"memory created in Drive: {remote_name!r} in {folder['name']!r}")
+    return 0
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("check")
+    p_pull = sub.add_parser("pull")
+    p_pull.add_argument("--client", required=True)
+    p_push = sub.add_parser("push-memory")
+    p_push.add_argument("--client", required=True)
+    a = ap.parse_args(argv)
+    if a.cmd == "check":
+        return check()
+    if a.cmd == "pull":
+        return pull(a.client)
+    if a.cmd == "push-memory":
+        return push_memory(a.client)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())
