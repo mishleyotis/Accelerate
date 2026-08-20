@@ -159,6 +159,30 @@ conversation, not a fit conversation), or when it addresses fewer than three
 served cells. Plus `narrative_thread`, and the standard envelope `{data,
 data_source, provenance, produced_at, producer_version, e_ids, empty_state}`.
 
+**The composite-factor discipline binds here unchanged** — the tile explains
+the same number the platform card carries, so the rules live once, in
+`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+§ P1 · Composite factors, and you follow them before explaining any tile
+(owner, 2026-08-20: "clear DQs … deep search validation and strategic
+alignment checks … thorough reasoning through the composite factor scoring"):
+
+- **The DQ ladder, with the engine's own thresholds.** Every discard names its
+  state and the failing figure: `OUT_OF_VERTICAL` (relevance < 0.5, which also
+  CAPS the fit multiplicatively), `TOO_NARROW` (< 3 cells against the
+  three-cell floor), `INSUFFICIENT_EVIDENCE` (mean evidence strength of the
+  DRIVING cells < 0.10). "Not a fit" without the arithmetic is that ladder
+  unwalked.
+- **Greenfield is validated, never assumed.** `family_absent` is a register
+  bit and the register has been wrong (a scan that returned empty proves
+  nothing absent). Before a greenfield contribution is explained as ground,
+  the rulebook's deep-search ladder must have run — and it is also the
+  engine's tie-break, so a wrong bit reorders the page.
+- **Alignment counts only as the entity's own words.** `alignment_basis:
+  stated_objective` requires an `alignment_quote` resolving through
+  `get_evidence`; otherwise alignment stays null, the engine renormalises,
+  and the tile discloses `impact_fallback` — never a quote invented to reach
+  the stated basis.
+
 **No colour and no band hex in any tile** (invariant 7). `tier` and `ers` on any
 nested evidence reference drop by class; `r_layer` reaches no audience.
 
