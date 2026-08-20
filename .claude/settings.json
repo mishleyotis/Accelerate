@@ -25,7 +25,8 @@
     ],
     "deny": [
       "WebFetch(domain:docs.google.com)",
-      "Read(//root/.dma/**)"
+      "Read(//root/.dma/sa.json)",
+      "Read(//root/.dma/pathtok)"
     ]
   }
 }

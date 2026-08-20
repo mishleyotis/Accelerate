@@ -44,6 +44,7 @@ import json
 import mimetypes
 import re
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -300,8 +301,87 @@ def push_memory(client: str) -> int:
     return 0
 
 
-BUNDLE_FOLDER = "DMA Insights"
+BUNDLE_FOLDER = "DMA Insights"             # legacy name, still recognised
 LEDGER_FOLDER = "DMA Insights — ledgers"   # intake-root, cross-client
+BUNDLE_CACHE = Path("/root/.dma/bundles")
+
+
+def _insights_name(client_folder_name: str) -> str:
+    """Owner taxonomy (2026-08-20): 'DMAI - <Client Name>' — the client name
+    is the client Drive folder's own name minus its ' - DMA'-style suffix,
+    e.g. 'T. Rowe Price - DMA' -> 'DMAI - T. Rowe Price'. Applied to every
+    new client; existing folders are healed to it on preflight, the same
+    one-name-forever rule push-memory applies to memory files."""
+    base = re.sub(r"\s*[-–—]\s*DMA\s*$", "", client_folder_name).strip()
+    return f"DMAI - {base or client_folder_name.strip()}"
+
+
+def _bundle_cache_path(client: str) -> Path:
+    return BUNDLE_CACHE / _slug(client) / "folder_ids.json"
+
+
+def _insights_root(tok: str, client: str, pinned_id: str | None = None) -> tuple:
+    """(client_folder, insights_folder) — found, healed to taxonomy, or
+    created. With pinned_id the owner names the folder outright (preflight
+    captures the id); it is validated as a folder and renamed to taxonomy."""
+    folder = _find_client_folder(tok, client)
+    want = _insights_name(folder["name"])
+    chosen = None
+    if pinned_id:
+        with _req(tok, f"{API}/files/{pinned_id}"
+                       f"?fields=id,name,mimeType&supportsAllDrives=true") as r:
+            meta = json.load(r)
+        if meta.get("mimeType") != FOLDER_MIME:
+            raise SystemExit(f"pinned id {pinned_id} is not a folder "
+                             f"(mimeType {meta.get('mimeType')!r})")
+        chosen = {"id": meta["id"], "name": meta.get("name", "")}
+    else:
+        kids = [f for f in _list_children(tok, folder["id"])
+                if f["mimeType"] == FOLDER_MIME]
+        chosen = (next((f for f in kids if f["name"] == want), None)
+                  or next((f for f in kids if f["name"] == BUNDLE_FOLDER), None)
+                  or next((f for f in kids
+                           if f["name"].startswith("DMAI - ")), None))
+    if chosen is None:
+        meta = json.dumps({"name": want, "mimeType": FOLDER_MIME,
+                           "parents": [folder["id"]]}).encode()
+        with _req(tok, f"{API}/files?supportsAllDrives=true", data=meta,
+                  method="POST", ctype="application/json") as resp:
+            chosen = {"id": json.load(resp)["id"], "name": want}
+        print(f"insights folder created: {want!r} in {folder['name']!r}")
+    elif chosen["name"] != want:
+        with _req(tok, f"{API}/files/{chosen['id']}?supportsAllDrives=true",
+                  data=json.dumps({"name": want}).encode(), method="PATCH",
+                  ctype="application/json") as resp:
+            json.load(resp)
+        print(f"insights folder healed to taxonomy: {chosen['name']!r} "
+              f"-> {want!r}")
+        chosen = {"id": chosen["id"], "name": want}
+    return folder, chosen
+
+
+def ensure_insights(client: str, folder_id: str | None = None) -> int:
+    """Preflight (owner, 2026-08-20): the client's insights folder exists
+    BEFORE production starts and its id is captured locally, so every later
+    snapshot push writes by id — resilient to renames, sibling ambiguity and
+    a mid-session listing failure. Prints states and ids, never content."""
+    tok = _token()
+    folder, chosen = _insights_root(tok, client, folder_id)
+    surf = _ensure_folder(tok, chosen["id"], "surfaces")
+    cache = _bundle_cache_path(client)
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    cache.write_text(json.dumps({
+        "client": client,
+        "client_folder_id": folder["id"],
+        "client_folder_name": folder["name"],
+        "insights_folder_id": chosen["id"],
+        "insights_folder_name": chosen["name"],
+        "surfaces_folder_id": surf,
+        "captured_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }, indent=1))
+    print(f"folder ids captured: {cache}")
+    print(f"insights_folder_id={chosen['id']}")
+    return 0
 
 
 def _ensure_folder(tok: str, parent_id: str, name: str) -> str:
@@ -337,8 +417,15 @@ def push_bundle(client: str, file_path: str, name: str | None) -> int:
                          f"defeats the point")
     remote_name = name or local.name
     tok = _token()
-    folder = _find_client_folder(tok, client)
-    bundle_root = _ensure_folder(tok, folder["id"], BUNDLE_FOLDER)
+    cache = _bundle_cache_path(client)
+    if cache.is_file():
+        ids = json.loads(cache.read_text())
+        bundle_root = ids["insights_folder_id"]
+        shown = ids.get("insights_folder_name") or BUNDLE_FOLDER
+        holder = ids.get("client_folder_name", client)
+    else:
+        folder, chosen = _insights_root(tok, client)
+        bundle_root, shown, holder = chosen["id"], chosen["name"], folder["name"]
     parent = bundle_root
     parts = remote_name.split("/")
     for sub in parts[:-1]:
@@ -353,8 +440,7 @@ def push_bundle(client: str, file_path: str, name: str | None) -> int:
         with _req(tok, url, data=body, method="PATCH",
                   ctype="application/json") as resp:
             json.load(resp)
-        print(f"bundle updated: {BUNDLE_FOLDER}/{remote_name} in "
-              f"{folder['name']!r}")
+        print(f"bundle updated: {shown}/{remote_name} in {holder!r}")
     else:
         meta = json.dumps({"name": leaf, "parents": [parent]}).encode()
         boundary = "dma-bundle-upload"
@@ -368,8 +454,7 @@ def push_bundle(client: str, file_path: str, name: str | None) -> int:
         with _req(tok, url, data=payload.getvalue(), method="POST",
                   ctype=f"multipart/related; boundary={boundary}") as resp:
             json.load(resp)
-        print(f"bundle created: {BUNDLE_FOLDER}/{remote_name} in "
-              f"{folder['name']!r}")
+        print(f"bundle created: {shown}/{remote_name} in {holder!r}")
     return 0
 
 
@@ -455,6 +540,14 @@ def main(argv=None) -> int:
                           "20260820-synthesis")
     p_pl = sub.add_parser("pull-ledgers")
     p_pl.add_argument("--dest", required=True)
+    p_ei = sub.add_parser(
+        "ensure-insights",
+        help="preflight: find-or-create the client's 'DMAI - <Client>' "
+             "folder, heal its name to taxonomy, capture ids locally")
+    p_ei.add_argument("--client", required=True)
+    p_ei.add_argument("--folder-id", default=None,
+                      help="pin a known Drive folder id (owner-supplied); "
+                           "validated and renamed to taxonomy")
     a = ap.parse_args(argv)
     if a.cmd == "check":
         return check()
@@ -468,6 +561,8 @@ def main(argv=None) -> int:
         return push_ledger(a.file, a.session)
     if a.cmd == "pull-ledgers":
         return pull_ledgers(a.dest)
+    if a.cmd == "ensure-insights":
+        return ensure_insights(a.client, a.folder_id)
     return 2
 
 

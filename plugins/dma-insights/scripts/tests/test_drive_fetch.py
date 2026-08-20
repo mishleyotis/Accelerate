@@ -166,21 +166,22 @@ def test_push_memory_heals_a_variant_name(monkeypatch, tmp_path):
     assert rename["name"] == "t-rowe-price-group-inc — synthesis memory.md"
 
 
-def test_push_bundle_creates_nested_folders_and_updates_in_place(monkeypatch, tmp_path):
-    """The DMA Insights resume store: state.json + surfaces/<section>.json
-    per client (owner, 2026-08-20) — created on first push, updated in
-    place after, so a resuming workflow reads structure, not racing prose."""
-    import json as _json
-    bundle = tmp_path / "b.json"
-    bundle.write_text('{"ok": true}')
-    monkeypatch.setattr(drive_fetch, "_token", lambda: "tok")
-    monkeypatch.setattr(drive_fetch, "_find_client_folder",
-                        lambda tok, c: {"id": "root", "name": "X - DMA"})
-    tree = {"root": [], "bundle-root": [], "surf": []}
-    created = []
+def test_insights_taxonomy_name_derivation():
+    """Owner, 2026-08-20: 'DMAI - <Client Name>' across all new clients."""
+    assert drive_fetch._insights_name("T. Rowe Price - DMA") == \
+        "DMAI - T. Rowe Price"
+    assert drive_fetch._insights_name("Houlihan Lokey — DMA") == \
+        "DMAI - Houlihan Lokey"
+    assert drive_fetch._insights_name("Thrivent") == "DMAI - Thrivent"
 
-    def fake_list(tok, fid):
-        return tree.get(fid, [])
+
+def _bundle_rig(monkeypatch, tmp_path, tree, client_name="X - DMA"):
+    import json as _json
+    monkeypatch.setattr(drive_fetch, "_token", lambda: "tok")
+    monkeypatch.setattr(drive_fetch, "BUNDLE_CACHE", tmp_path / "cache")
+    monkeypatch.setattr(drive_fetch, "_find_client_folder",
+                        lambda tok, c: {"id": "root", "name": client_name})
+    created = []
 
     class _Resp:
         def __init__(self, payload):
@@ -196,23 +197,37 @@ def test_push_bundle_creates_nested_folders_and_updates_in_place(monkeypatch, tm
     def fake_req(tok, url, data=None, method="GET", ctype=None):
         if method == "POST" and "uploadType" not in url:
             meta = _json.loads(data)
-            fid = {"DMA Insights": "bundle-root",
+            fid = {"DMAI - X": "bundle-root",
                    "surfaces": "surf"}.get(meta["name"], "newf")
             created.append(meta["name"])
             tree.setdefault(meta["parents"][0], []).append(
                 {"id": fid, "name": meta["name"],
                  "mimeType": drive_fetch.FOLDER_MIME})
             return _Resp({"id": fid})
+        if method == "PATCH" and "uploadType" not in url:
+            created.append(("rename", _json.loads(data).get("name")))
+            return _Resp({"id": "renamed"})
         created.append(("upload", method, url.split("?")[0].rsplit("/", 1)[-1]))
         return _Resp({"id": "f1"})
 
-    monkeypatch.setattr(drive_fetch, "_list_children", fake_list)
+    monkeypatch.setattr(drive_fetch, "_list_children",
+                        lambda tok, fid: tree.get(fid, []))
     monkeypatch.setattr(drive_fetch, "_req", fake_req)
+    return created
+
+
+def test_push_bundle_creates_taxonomy_folders_and_updates_in_place(monkeypatch, tmp_path):
+    """The resume store under the owner taxonomy: DMAI - <Client>/state.json
+    + surfaces/<section>.json — created on first push, updated in place
+    after, so a resuming workflow reads structure, not racing prose."""
+    bundle = tmp_path / "b.json"
+    bundle.write_text('{"ok": true}')
+    tree = {"root": [], "bundle-root": [], "surf": []}
+    created = _bundle_rig(monkeypatch, tmp_path, tree)
     rc = drive_fetch.push_bundle("x", str(bundle),
                                  "surfaces/heatmap.workbook_scores.json")
     assert rc == 0
-    assert "DMA Insights" in created and "surfaces" in created
-    # second push: file now exists in 'surf' -> update via PATCH
+    assert "DMAI - X" in created and "surfaces" in created
     tree["surf"] = [{"id": "f1", "name": "heatmap.workbook_scores.json",
                      "mimeType": "application/json"}]
     created.clear()
@@ -220,6 +235,47 @@ def test_push_bundle_creates_nested_folders_and_updates_in_place(monkeypatch, tm
                                  "surfaces/heatmap.workbook_scores.json")
     assert rc == 0
     assert any(c[1] == "PATCH" for c in created if isinstance(c, tuple))
+
+
+def test_ensure_insights_heals_a_legacy_folder_name_and_captures_ids(monkeypatch, tmp_path):
+    """A pre-taxonomy 'DMA Insights' folder is renamed, never duplicated,
+    and the preflight lands folder_ids.json for every later push."""
+    import json as _json
+    tree = {"root": [{"id": "legacy", "name": "DMA Insights",
+                      "mimeType": drive_fetch.FOLDER_MIME}],
+            "legacy": []}
+    created = _bundle_rig(monkeypatch, tmp_path, tree)
+    rc = drive_fetch.ensure_insights("x")
+    assert rc == 0
+    assert ("rename", "DMAI - X") in created
+    ids = _json.loads((tmp_path / "cache" / "x" /
+                       "folder_ids.json").read_text())
+    assert ids["insights_folder_id"] == "legacy"
+    assert ids["insights_folder_name"] == "DMAI - X"
+    assert ids["surfaces_folder_id"]
+
+
+def test_push_bundle_writes_by_captured_id_without_a_folder_walk(monkeypatch, tmp_path):
+    """After preflight the push must not depend on name resolution at all —
+    resilience against renames and listing failures mid-session."""
+    import json as _json
+    cache = tmp_path / "cache" / "x"
+    cache.mkdir(parents=True)
+    (cache / "folder_ids.json").write_text(_json.dumps(
+        {"insights_folder_id": "pinned-root",
+         "insights_folder_name": "DMAI - X",
+         "client_folder_name": "X - DMA"}))
+    tree = {"pinned-root": [], "surf": []}
+    created = _bundle_rig(monkeypatch, tmp_path, tree)
+
+    def boom(tok, c):
+        raise AssertionError("name resolution ran despite a captured id")
+    monkeypatch.setattr(drive_fetch, "_find_client_folder", boom)
+    bundle = tmp_path / "b.json"
+    bundle.write_text('{"ok": true}')
+    rc = drive_fetch.push_bundle("x", str(bundle), "state.json")
+    assert rc == 0
+    assert ("upload", "POST", "files") in created
 
 
 def test_push_bundle_refuses_invalid_json(tmp_path):

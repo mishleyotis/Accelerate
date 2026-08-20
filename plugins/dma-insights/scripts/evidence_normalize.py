@@ -237,6 +237,60 @@ def corpus_fill(package: Path, records: dict) -> int:
     return filled
 
 
+DATE_IN_NAME = re.compile(
+    r"(20\d{2})[-_.]?(0[1-9]|1[0-2])(?:[-_.]?(0[1-9]|[12]\d|3[01]))?")
+ISO_DATE = re.compile(r"20\d{2}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])")
+
+
+def collection_date(package: Path) -> tuple:
+    """(iso_date, basis) — the package's own latest date stamp, or (None,
+    reason). WHY (owner, 2026-08-20: 'for most evidence, recency is tagged
+    unverified — improve this'): most ingested rows carry no publication
+    date, but every row in an assessment package was OBSERVED no later than
+    the package's own stamp, and 'observed as of the assessment date' is a
+    real, defensible date with explicit provenance — strictly more honest
+    than UNVERIFIED for a fact the assessors verified when they wrote it.
+    File mtimes are NEVER used (a Drive pull stamps download time); only
+    dates the package itself states: file/folder names first, then the
+    heads of export CSVs and JSON stores. A publication date still outranks
+    it — gaps_out keeps emitting dating search_requests for these rows."""
+    hits = []
+    for f in package.rglob("*"):
+        if f.is_dir():
+            continue
+        m = DATE_IN_NAME.search(f.name)
+        if m:
+            y, mo, d = m.group(1), m.group(2), m.group(3) or "01"
+            hits.append((f"{y}-{mo}-{d}", f"file name {f.name!r}"))
+        if f.suffix.lower() in (".csv", ".json", ".jsonl"):
+            try:
+                head = f.open(errors="ignore").read(2048)
+            except OSError:
+                continue
+            for iso in ISO_DATE.findall(head):
+                hits.append((iso, f"head of {f.name!r}"))
+    from datetime import date as _date
+    today = _date.today().isoformat()
+    hits = [h for h in hits if h[0] <= today]     # never a future stamp
+    if not hits:
+        return None, ("no date stamp in package file names or store heads — "
+                      "rows without dates stay UNVERIFIED")
+    best = max(hits)
+    return best[0], f"latest package stamp: {best[1]}"
+
+
+def apply_collection_date(records: dict, cdate: str, basis: str) -> int:
+    """Date the still-dateless rows at collection, provenance explicit."""
+    n = 0
+    for rec in records.values():
+        if not rec.get("date"):
+            rec["date"] = cdate
+            rec["date_provenance"] = "collection"
+            rec["date_basis"] = basis
+            n += 1
+    return n
+
+
 def gaps_out(records: dict, client: str | None) -> list:
     out = []
     for eid, rec in sorted(records.items()):
@@ -244,17 +298,23 @@ def gaps_out(records: dict, client: str | None) -> list:
                    if not rec.get(f)]
         if not rec.get("date"):
             rec["recency"] = "UNVERIFIED"
+        elif rec.get("date_provenance") == "collection":
+            missing = sorted(set(missing) | {"publication_date"})
         if not missing:
             continue
         src = rec.get("source") or ""
         q = " ".join(x for x in (client or "", src,
                                  (rec.get("excerpt") or "")[:60]) if x)
+        note = ("dated at collection ({}) — a publication date outranks it; "
+                "connector search upgrades the row".format(
+                    rec.get("date_basis", "package stamp"))
+                if rec.get("date_provenance") == "collection" else
+                "corpus exhausted — web retrieval through the session's "
+                "connectors; undated stays UNVERIFIED until a real date lands")
         out.append({"eid": (f"{client}:{eid}" if client else eid),
                     "missing": missing,
                     "query": q.strip() or eid,
-                    "note": "corpus exhausted — web retrieval through the "
-                            "session's connectors; undated stays UNVERIFIED "
-                            "until a real date lands"})
+                    "note": note})
     return out
 
 
@@ -265,6 +325,9 @@ def main(argv=None) -> int:
                     help="client slug — prefixes ids in the gaps output")
     ap.add_argument("--out", default=None,
                     help="write normalized records as JSONL here")
+    ap.add_argument("--assessment-date", default=None,
+                    help="ISO date the package was collected; overrides "
+                         "auto-derivation from the package's own stamps")
     a = ap.parse_args(argv)
     package = Path(a.package)
     if not package.is_dir():
@@ -272,6 +335,12 @@ def main(argv=None) -> int:
         return 2
     records, conflicts = merge(package)
     filled = corpus_fill(package, records)
+    if a.assessment_date:
+        cdate, basis = a.assessment_date, "owner-supplied --assessment-date"
+    else:
+        cdate, basis = collection_date(package)
+    dated_at_collection = (
+        apply_collection_date(records, cdate, basis) if cdate else 0)
     gaps = gaps_out(records, a.client)
     if a.out:
         with open(a.out, "w") as fh:
@@ -283,7 +352,10 @@ def main(argv=None) -> int:
                if r.get("url") and r.get("date") and r.get("excerpt"))
     print(json.dumps({
         "records": len(records), "schema_complete": full,
-        "corpus_fills": filled, "conflicts": conflicts[:20],
+        "corpus_fills": filled,
+        "collection_date": cdate, "collection_basis": basis,
+        "dated_at_collection": dated_at_collection,
+        "conflicts": conflicts[:20],
         "conflict_count": len(conflicts),
         "gaps": gaps[:25], "gap_count": len(gaps)}, indent=1))
     return 0

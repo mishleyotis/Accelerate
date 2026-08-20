@@ -222,3 +222,55 @@ def test_a_scoring_named_workbook_in_the_research_folder_is_flagged(tmp_path):
     m = package_map.map_package(tmp_path)
     assert m["research"]["primary"] is None
     assert any("misnamed research workbook" in a for a in m["ambiguities"])
+
+
+# ── the collection-date rung (owner, 2026-08-20: most evidence UNVERIFIED) ──
+
+def test_collection_date_takes_the_latest_package_stamp(tmp_path):
+    (tmp_path / "04_reports").mkdir(parents=True)
+    (tmp_path / "04_reports" / "DMA_Report_FINAL_2026-05.docx").write_bytes(b"x")
+    (tmp_path / "export_scoring_detail.csv").write_text(
+        "run,generated\nr1,2026-06-12\n")
+    cdate, basis = evidence_normalize.collection_date(tmp_path)
+    assert cdate == "2026-06-12"
+    assert "export_scoring_detail.csv" in basis
+
+
+def test_collection_date_never_takes_a_future_stamp(tmp_path):
+    (tmp_path / "notes_2099-01.txt").write_bytes(b"x")
+    cdate, basis = evidence_normalize.collection_date(tmp_path)
+    assert cdate is None
+    assert "UNVERIFIED" in basis
+
+
+def test_apply_collection_date_only_touches_dateless_rows():
+    records = {
+        "E-001": {"date": "2025-11-03", "url": "https://a"},
+        "E-002": {"url": "https://b"},
+    }
+    n = evidence_normalize.apply_collection_date(
+        records, "2026-06-12", "latest package stamp: test")
+    assert n == 1
+    assert records["E-001"]["date"] == "2025-11-03"       # publication wins
+    assert "date_provenance" not in records["E-001"]
+    assert records["E-002"]["date"] == "2026-06-12"
+    assert records["E-002"]["date_provenance"] == "collection"
+
+
+def test_collection_dated_rows_still_ask_for_a_publication_date():
+    records = {"E-002": {"url": "https://b", "excerpt": "x" * 60,
+                         "date": "2026-06-12",
+                         "date_provenance": "collection",
+                         "date_basis": "latest package stamp: test"}}
+    gaps = evidence_normalize.gaps_out(records, "cl")
+    assert len(gaps) == 1
+    assert "publication_date" in gaps[0]["missing"]
+    assert "dated at collection" in gaps[0]["note"]
+    assert records["E-002"].get("recency") != "UNVERIFIED"
+
+
+def test_truly_dateless_rows_stay_unverified(tmp_path):
+    records = {"E-003": {"url": "https://c"}}
+    gaps = evidence_normalize.gaps_out(records, "cl")
+    assert records["E-003"]["recency"] == "UNVERIFIED"
+    assert "date" in gaps[0]["missing"]
