@@ -44,3 +44,4 @@ fixtures/clients/
 *_Assessment_Workbook_*.xlsx
 *_Research_Workbook_*.xlsx
 **/startup-data/clients/
+dma-insights-*.zip

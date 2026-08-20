@@ -87,7 +87,12 @@ Whatever you conclude, record it so the next run does not re-derive it:
 - the catalogue version and how you inferred it
 - the entity's sub-vertical, ownership shape and brand set, and where each came from
 - the variant-cell counts by code, and the cohort's size range against the entity's
-- every duplicate id, out-of-range score and missing `source_cell`
+- every id defined more than once with DIFFERENT content (duplicate **by
+  content**, never by id alone — an id cited from many tabs is a reference,
+  and evidence ids are unique per client only: 43 false REFUSEs on the
+  first live vetting, owner-adjudicated 2026-08-20; any cross-client ledger
+  entry carries the client slug as a prefix, e.g.
+  `t-rowe-price-group-inc:E-017`), out-of-range score and missing `source_cell`
 - the reference date and where you got it
 - the excerpt median, and the count below 50 characters
 - every contention and its adjudication

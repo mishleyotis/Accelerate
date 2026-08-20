@@ -80,6 +80,7 @@ def vet_scoring(path: Path) -> None:
     cells: list[str] = []
     scores: list[float] = []
     e_ids: list[str] = []
+    ev_defs: dict[str, list[str]] = {}
     missing_source_cell = 0
     saw_source_cell_col = False
 
@@ -88,6 +89,7 @@ def vet_scoring(path: Path) -> None:
         if hi is None:
             continue
         low = [h.lower() for h in hdr]
+        is_register = "evidence" in name.lower()
 
         # peer columns that are really statistics
         for h in hdr:
@@ -105,6 +107,7 @@ def vet_scoring(path: Path) -> None:
         for r in rows[hi + 1:]:
             if r is None or all(c is None or str(c).strip() == "" for c in r):
                 continue
+            row_eids: list[str] = []
             for c in r:
                 if isinstance(c, str):
                     t = c.strip()
@@ -112,9 +115,17 @@ def vet_scoring(path: Path) -> None:
                         cells.append(t.upper())
                     elif EID_RE.match(t):
                         e_ids.append(t.upper())
+                        row_eids.append(t.upper())
                 elif isinstance(c, (int, float)):
                     if 0 < float(c) <= 5.0 or float(c) == 0:
                         pass
+            if is_register and len(row_eids) == 1:
+                fp = " | ".join(
+                    re.sub(r"\s+", " ", str(c).strip().lower())
+                    for c in r
+                    if c is not None and str(c).strip()
+                    and str(c).strip().upper() != row_eids[0])
+                ev_defs.setdefault(row_eids[0], []).append(fp)
             if idx_src is not None and (idx_src >= len(r) or r[idx_src] in (None, "")):
                 missing_source_cell += 1
 
@@ -139,13 +150,28 @@ def vet_scoring(path: Path) -> None:
         note("WARN", f"{len(zeros)} score(s) are exactly 0 — confirm these are "
                      f"blanks, not measurements.")
 
-    # duplicate evidence ids lose rows silently under ON CONFLICT DO NOTHING
-    dupes = {k: n for k, n in Counter(e_ids).items() if n > 1}
-    if dupes:
-        worst = sorted(dupes.items(), key=lambda kv: -kv[1])[:6]
-        note("REFUSE", f"{len(dupes)} evidence id(s) appear more than once "
-                       f"({', '.join(f'{k}×{n}' for k, n in worst)}). Repeated ids "
-                       f"for DIFFERENT sources lose rows with no observation.")
+    # Evidence ids are unique PER CLIENT, and one id cited from many tabs is
+    # a reference, not a defect (owner adjudication 2026-08-20: 43 false
+    # REFUSEs on the first live vetting were exactly this). The defect that
+    # loses rows silently under ON CONFLICT DO NOTHING is one id DEFINED
+    # more than once with DIFFERENT content in a register tab — duplicate
+    # by content decides, never duplicate by id alone.
+    conflicting = {k: v for k, v in ev_defs.items() if len(set(v)) > 1}
+    repeated = {k: len(v) for k, v in ev_defs.items()
+                if len(v) > 1 and len(set(v)) == 1}
+    if conflicting:
+        worst = sorted(conflicting.items(), key=lambda kv: -len(kv[1]))[:6]
+        note("REFUSE", f"{len(conflicting)} evidence id(s) defined more than "
+                       f"once with DIFFERENT content "
+                       f"({', '.join(f'{k}×{len(v)}' for k, v in worst)}). One "
+                       f"of each pair would be lost silently — adjudicate "
+                       f"which row is real before parsing.")
+    if repeated:
+        note("WARN", f"{len(repeated)} evidence id(s) re-defined with "
+                     f"identical content — benign repetition; dedup is by "
+                     f"content hash. Ids are unique per client only: any "
+                     f"cross-client ledger entry carries the client slug as "
+                     f"a prefix (e.g. t-rowe-price-group-inc:E-017).")
 
     # catalogue version, from the category count
     cats = {c.split(".")[0] for c in cells if CELL_RE.match(c)}

@@ -56,6 +56,23 @@ observation — never silently reconciled.
 | 4 | Package structured files | Evidence index, issue register, peer cohort, recommendation detail, run identity |
 | 5 | Ops sheet and connectors | AE ownership, firmographic enrichment |
 
+## The corpus is the whole package
+
+Owner instruction, 2026-08-20: everything above except the bulky
+`05_narrative_deck` is synthesis input. `drive_fetch.py pull` lands the tree
+recursively; a synthesis that reads only the two workbooks re-derives what
+`01_evidence`, `04_reports`, `06_peers`, `07_governance` and
+`08_appendices` already hold — and re-derivation is where drift enters.
+Consult the landing table above for where each artefact belongs.
+
+Evidence ids are scoped to the client. The same `E-017` in two clients'
+packages is two unrelated items — expected, never a finding. Inside one
+package, duplicate **by content** decides: one id defined twice with
+identical content dedups silently; defined twice with different content
+refuses at vetting. Wherever an id leaves its client's namespace (a
+cross-client ledger, a shared log), it carries the client slug as a prefix:
+`t-rowe-price-group-inc:E-017`.
+
 ## Two folders to treat differently
 
 **`03_scoring_workbook` is the only authority for a score.** Nothing else may set one. The
