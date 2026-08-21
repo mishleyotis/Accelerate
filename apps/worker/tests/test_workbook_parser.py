@@ -203,6 +203,44 @@ def test_fuzzy_date_impossible_month_is_unverified():
     assert parse_fuzzy_date("2025-07") is not None
 
 
+def test_a_date_at_day_grain_keeps_its_day():
+    """The fuzzy expression reads year, year-month and year-quarter only, so
+    the commonest form of all — a full ISO date — resolved to the first of the
+    month and aged every evidence row by up to 30 days. Never enough to move a
+    band on its own; always enough to make the workbook's stated date and the
+    served one disagree with no explanation available afterwards."""
+    from datetime import date, datetime
+
+    from dma_worker.workbook_parser import parse_fuzzy_date
+    assert parse_fuzzy_date("2026-03-15") == date(2026, 3, 15)
+    assert parse_fuzzy_date("2026-3-5") == date(2026, 3, 5)
+    # openpyxl hands back a datetime for a real date cell; str() of it is
+    # "2026-03-15 00:00:00", which the fuzzy path also truncated.
+    assert parse_fuzzy_date(datetime(2026, 3, 15, 9, 30)) == date(2026, 3, 15)
+    assert parse_fuzzy_date(date(2026, 3, 15)) == date(2026, 3, 15)
+
+
+def test_the_coarser_grains_still_resolve_as_before():
+    """The day-grain path must not have moved anything else."""
+    from datetime import date
+
+    from dma_worker.workbook_parser import parse_fuzzy_date
+    assert parse_fuzzy_date("2025-07") == date(2025, 7, 1)
+    assert parse_fuzzy_date("2025-Q4") == date(2025, 12, 31)
+    assert parse_fuzzy_date("2025") == date(2025, 1, 1)
+    assert parse_fuzzy_date("not a date") is None
+
+
+def test_an_impossible_DAY_falls_back_to_the_month_it_does_name():
+    """"2025-02-31" has a wrong day and a right month. Dropping the whole
+    value would band the row UNVERIFIED over information the cell does carry;
+    a mangled date never sinks the package."""
+    from datetime import date
+
+    from dma_worker.workbook_parser import parse_fuzzy_date
+    assert parse_fuzzy_date("2025-02-31") == date(2025, 2, 1)
+
+
 def test_peer_grid_nonnumeric_cells_become_none(tmp_path):
     """A gap in a peer's row is a null, not a zero — and a column that never
     holds a score at all is not a peer, it is a label (see
@@ -219,7 +257,11 @@ def test_peer_grid_nonnumeric_cells_become_none(tmp_path):
     p = tmp_path / "peers.xlsx"
     wb.save(p)
     obs = []
-    out = parse_peer_benchmarks(str(p), obs)
+    # Named subject, as job_main now calls it: without one the parser cannot
+    # tell the entity's own score column from a peer's and says so, which
+    # would be an observation this test is not about.
+    out = parse_peer_benchmarks(str(p), obs,
+                                subject_names=("Fake Subject Bank",))
     assert out[0]["stated_median"] is None
     assert out[0]["peers"] == [("Fake Peer A", Decimal("2.1")), ("Fake Peer B", None)]
     assert out[1]["peers"] == [("Fake Peer A", None), ("Fake Peer B", Decimal("3"))]

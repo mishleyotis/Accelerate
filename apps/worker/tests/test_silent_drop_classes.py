@@ -224,7 +224,12 @@ def test_a_real_peer_whose_name_starts_with_delta_is_not_a_statistic(tmp_path):
 
 def test_first_united_zero_filled_peer_grid_is_refused_by_name(tmp_path):
     """Five named peers, every score literally 0. Zero is not a maturity
-    level; storing it puts five banks on the cohort at M1."""
+    level; storing it puts five banks on the cohort at M1.
+
+    `FUB_Score` is First United Bank's OWN column, and this test used to
+    assert it INTO the cohort — see class 17 below, which is the defect that
+    assertion was pinning in place.
+    """
     from dma_worker.workbook_parser import parse_peer_benchmarks
     path = _peer_tab(tmp_path, [
         ["Category", "FUB_Score", "Fake Peer One", "Peer_Median"],
@@ -232,12 +237,112 @@ def test_first_united_zero_filled_peer_grid_is_refused_by_name(tmp_path):
         ["P1C2", 1.86, 0, 2.5],
     ])
     obs = []
-    out = parse_peer_benchmarks(path, obs)
-    assert [n for n, _ in out[0]["peers"]] == ["FUB_Score"]
+    out = parse_peer_benchmarks(path, obs,
+                                subject_names=("First United Bank",))
+    assert [n for n, _ in out[0]["peers"]] == [], (
+        "the only two columns are the subject's own and a zero-filled peer")
     refused = [c for o in obs if o.kind == "peer_column_unrecognised"
                for c in o.detail["columns"]]
     assert refused[0]["column"] == "Fake Peer One"
     assert refused[0]["outside_rubric"] == ["0", "0"]
+
+
+# ── class 17: the entity is stored as a peer of itself ────────────────────
+# `Peer_Benchmarks` carries the subject's own score in a NAMED column beside
+# the cohort's — `FUB_Score` for First United Bank. The parser was never told
+# whose assessment it was reading (`parse_peer_benchmarks(path, obs)` took no
+# identity, and job_main passed none), so that column passed every test a peer
+# has to pass: it names no known statistic, and it holds perfectly valid
+# scores on the maturity scale. It was stored as an institution.
+#
+# The consequence is not a stray row. The client joins its own cohort, its own
+# score contributes to the benchmark it is being measured against, and the
+# cohort statistics computed downstream measure the subject partly against
+# itself. Nothing anywhere said so.
+
+def test_the_subject_is_not_stored_as_a_peer_of_itself(tmp_path):
+    from dma_worker.workbook_parser import parse_peer_benchmarks
+    path = _peer_tab(tmp_path, [
+        ["Category", "FUB_Score", "Fake Trust Bank", "Peer_Median"],
+        ["P1C1", 1.77, 2.4, 2.5],
+    ])
+    obs = []
+    out = parse_peer_benchmarks(path, obs,
+                                subject_names=("First United Bank",))
+    assert [n for n, _ in out[0]["peers"]] == ["Fake Trust Bank"]
+    named = [o for o in obs if o.kind == "peer_column_is_the_subject"]
+    assert named and named[0].detail["columns"] == ["FUB_Score"]
+
+
+@pytest.mark.parametrize("column,subject", [
+    ("FUB_Score", "First United Bank"),
+    ("FUB", "First United Bank, Inc."),          # the suffix is not identity
+    ("First_United_Bank", "First United Bank"),
+    ("BCU_Score", "Baxter Credit Union (BCU)"),  # the parenthesised short form
+    ("Fake Bank Of Elsewhere", "Fake Bank of Elsewhere - DMA"),
+])
+def test_the_subject_is_recognised_under_the_spellings_the_corpus_uses(
+        tmp_path, column, subject):
+    from dma_worker.workbook_parser import parse_peer_benchmarks
+    path = _peer_tab(tmp_path, [
+        ["Category", column, "Fake Trust Bank", "Peer_Median"],
+        ["P1C1", 1.77, 2.4, 2.5],
+    ])
+    out = parse_peer_benchmarks(path, [], subject_names=(subject,))
+    assert [n for n, _ in out[0]["peers"]] == ["Fake Trust Bank"]
+
+
+@pytest.mark.parametrize("peer,subject", [
+    # Refusing a REAL peer is the mirror defect and the more expensive one,
+    # so nothing matches on a prefix or a substring.
+    ("First United Bancorp", "First United Bank"),
+    ("Fake United Bank", "First United Bank"),
+    ("FUBAR Savings", "First United Bank"),
+    ("Delta_Community", "Delta Air Lines"),
+])
+def test_a_real_peer_that_merely_resembles_the_subject_is_kept(
+        tmp_path, peer, subject):
+    from dma_worker.workbook_parser import parse_peer_benchmarks
+    path = _peer_tab(tmp_path, [
+        ["Category", peer, "Peer_Median"],
+        ["P1C1", 2.4, 2.5],
+    ])
+    out = parse_peer_benchmarks(path, [], subject_names=(subject,))
+    assert [n for n, _ in out[0]["peers"]] == [peer]
+
+
+def test_a_cohort_read_without_knowing_the_subject_says_so(tmp_path):
+    """Passing no identity stays legal — a caller may genuinely not know — but
+    it is never silent. "This cohort may contain the subject" has to be
+    readable in the run, not inferred from a page months later."""
+    from dma_worker.workbook_parser import parse_peer_benchmarks
+    path = _peer_tab(tmp_path, [
+        ["Category", "FUB_Score", "Fake Trust Bank", "Peer_Median"],
+        ["P1C1", 1.77, 2.4, 2.5],
+    ])
+    obs = []
+    parse_peer_benchmarks(path, obs)
+    named = [o for o in obs if o.kind == "peer_subject_unknown"]
+    assert named, "an unidentified cohort must name itself"
+    assert "FUB_Score" in named[0].detail["candidate_columns"]
+
+
+def test_the_ingest_path_tells_the_peer_parser_who_the_subject_is():
+    """Asserted over the CALL, not over the file's text: the comment beside
+    that call explains `subject_names`, and a substring check would match its
+    own explanation. Three earlier tests in this repo failed exactly that way.
+    """
+    import ast
+    from pathlib import Path
+    src = (Path(__file__).resolve().parents[1] / "job_main.py").read_text()
+    calls = [n for n in ast.walk(ast.parse(src))
+             if isinstance(n, ast.Call)
+             and getattr(n.func, "id", None) == "parse_peer_benchmarks"]
+    assert calls, "job_main no longer calls the peer parser"
+    for call in calls:
+        assert "subject_names" in {kw.arg for kw in call.keywords}, (
+            "the ingest path knows the client and must say so, or the "
+            "subject rejoins its own cohort")
 
 
 def test_a_named_peer_nobody_scored_keeps_its_column_and_says_so(tmp_path):
@@ -381,7 +486,18 @@ def test_zions_evidence_ledger_under_every_shipped_tab_name(tmp_path, tab):
     obs = []
     out = parse_evidence_master(str(path), obs)
     assert [e["e_id"] for e in out] == ["E-001", "INT-BOARD-003"]
-    assert obs == []
+    # Nothing went wrong with the TAB or the ids under any spelling.
+    assert [o.kind for o in obs if o.kind != "column_not_found"] == []
+    # The column_not_found observations that do appear are correct and are the
+    # point: this fixture carries five columns, so the ledger's other fields
+    # genuinely have no column, and each one now says so rather than landing
+    # as a null indistinguishable from a column of blanks.
+    missed = {o.detail["field"] for o in obs if o.kind == "column_not_found"}
+    assert missed == {"ers", "published", "recency", "fact_count", "subcaps",
+                      "excerpt"}
+    assert not missed & {"e_id", "source_name", "source_url", "tier",
+                         "claim_type"}, "a column that IS present must not be "\
+                                        "reported missing"
 
 
 def test_a_package_with_no_evidence_tab_names_what_it_looked_for(tmp_path):
@@ -409,8 +525,113 @@ def test_a_ledger_whose_ids_are_all_unrecognised_is_not_an_empty_ledger(tmp_path
     wb.save(path)
     obs = []
     assert parse_evidence_master(str(path), obs) == []
-    assert obs[0].kind == "evidence_ledger_ids_unrecognised"
-    assert obs[0].detail["rows_seen"] == 2
+    # By kind, not by position: the reader also names the columns this
+    # three-column fixture does not carry, and those observations are emitted
+    # at column-resolution time, before any row is read.
+    named = [o for o in obs if o.kind == "evidence_ledger_ids_unrecognised"]
+    assert len(named) == 1
+    assert named[0].detail["rows_seen"] == 2
+
+
+# ── class 16: ledger columns read under one spelling, misses unrecorded ───
+# The tab-name fix above (class 8) got the reader to the right sheet. Inside
+# it, two columns were still read under one spelling each:
+#
+#   url_or_citation   the dma-assessment skill's OWN published column name
+#                     (skills/dma-assessment/templates/
+#                     01_evidence_index_template.json). Packages built from
+#                     that template landed every row with source_url NULL.
+#   date_published    the name used by the dma-research CSV schema, by
+#                     evidence_index_schema.json, by vet_workbooks.py, and by
+#                     this very module's linkage-matrix reader — everywhere
+#                     except here.
+#
+# The date is the worse of the two: an unresolved date bands the row
+# UNVERIFIED, which weights 1.0, tied with ARCHIVAL. Every row of such a
+# package reads as equally worthless while the workbook holds the dates.
+#
+# And neither miss was recorded, which is what let both survive: `_pick`
+# returning None looked exactly like a column of blanks.
+
+def _ledger(tmp_path, header, rows, tab="Evidence_Master"):
+    from openpyxl import Workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = tab
+    ws.append(header)
+    for r in rows:
+        ws.append(r)
+    path = tmp_path / "ev.xlsx"
+    wb.save(path)
+    return str(path)
+
+
+def test_the_assessment_template_url_column_is_read(tmp_path):
+    from dma_worker.workbook_parser import parse_evidence_master
+    path = _ledger(tmp_path,
+                   ["Evidence_ID", "Source_Name", "URL or Citation", "Tier"],
+                   [["E-001", "Fake Bank 2026 annual report",
+                     "https://example.test/ar2026", "T2"]])
+    obs = []
+    out = parse_evidence_master(path, obs)
+    assert out[0]["source_url"] == "https://example.test/ar2026"
+    assert "source_url" not in {o.detail["field"] for o in obs
+                                if o.kind == "column_not_found"}
+
+
+def test_the_research_schema_date_column_is_read(tmp_path):
+    from dma_worker.workbook_parser import parse_evidence_master
+    path = _ledger(tmp_path,
+                   ["Evidence_ID", "Source_Name", "Date_Published", "Tier"],
+                   [["E-001", "Fake Bank 2026 annual report", "2026-03-15",
+                     "T2"]])
+    out = parse_evidence_master(path, [])
+    assert out[0]["published_date"] is not None, (
+        "an unread date bands the row UNVERIFIED at weight 1.0, tied with "
+        "ARCHIVAL — indistinguishable from having no evidence at all")
+    assert out[0]["published_date"].isoformat() == "2026-03-15"
+
+
+def test_a_publication_date_outranks_a_bare_date_column(tmp_path):
+    """At fact grain a bare `date` carries EVENT dates — E-083's 1979 is a
+    timeline fact, not when its source was published. evidence_normalize.py
+    already ranks the aliases this way; this reader now does too."""
+    from dma_worker.workbook_parser import parse_evidence_master
+    path = _ledger(tmp_path,
+                   ["Evidence_ID", "Source_Name", "Date", "Date_Published"],
+                   [["E-001", "Fake source", "1979-01-01", "2026-03-15"]])
+    out = parse_evidence_master(path, [])
+    assert out[0]["published_date"].isoformat() == "2026-03-15"
+
+
+def test_a_missing_ledger_column_is_named_with_what_it_costs(tmp_path):
+    """The observation is the fix. Without it a null column and a column of
+    nulls are the same thing downstream, and the next spelling cannot be added
+    without opening the workbook first."""
+    from dma_worker.workbook_parser import parse_evidence_master
+    path = _ledger(tmp_path, ["Evidence_ID", "Source_Name", "Tier"],
+                   [["E-001", "Fake source", "T2"]])
+    obs = []
+    parse_evidence_master(path, obs)
+    misses = {o.detail["field"]: o.detail for o in obs
+              if o.kind == "column_not_found"}
+    assert "published" in misses and "source_url" in misses
+    for field, detail in misses.items():
+        assert detail["tab"] == "Evidence_Master"
+        assert detail["expected_any_of"], "must name the spellings it accepts"
+        assert detail["headers_present"], "must name what it actually found"
+        assert detail["consequence"], "a miss without its cost cannot be triaged"
+    assert "UNVERIFIED" in misses["published"]["consequence"]
+    assert "date_published" in misses["published"]["expected_any_of"]
+    assert "url_or_citation" in misses["source_url"]["expected_any_of"]
+
+
+def test_the_cost_table_covers_every_alias_so_a_new_one_cannot_be_silent(tmp_path):
+    """A field added to _EV_ALIASES without a cost entry would raise KeyError
+    on the miss path — which only runs when a column is absent, so it would
+    ship green and fail on the first package that lacked it."""
+    from dma_worker.workbook_parser import _EV_ALIASES, _EV_MISS_COST
+    assert set(_EV_ALIASES) | {"e_id"} == set(_EV_MISS_COST)
 
 
 # ── class 14: packages grouped by folder NAME, not folder id ──────────────

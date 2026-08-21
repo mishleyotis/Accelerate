@@ -558,6 +558,7 @@ def _parse_scorecard(ws, facets: dict) -> WorkbookParse:
 
 # ── General-DMA companion tabs ─────────────────────────────────────────
 
+DATE_EXACT = re.compile(r"^(\d{4})-(\d{1,2})-(\d{1,2})(?:\D|$)")
 DATE_FUZZY = re.compile(r"^(\d{4})(?:-(?:Q([1-4])|(\d{2})))?")
 
 
@@ -567,7 +568,25 @@ def parse_fuzzy_date(value):
     resolved to Jan 1 conservatively. Unparseable → None (UNVERIFIED)."""
     if value is None:
         return None
-    from datetime import date
+    from datetime import date, datetime
+    # A DATE THAT ARRIVES AT DAY GRAIN KEEPS ITS DAY. The fuzzy expression
+    # below reads only year, year-month and year-quarter, so "2026-03-15" —
+    # by far the commonest form, and what openpyxl hands back for a real date
+    # cell as "2026-03-15 00:00:00" — resolved to 2026-03-01 and every
+    # evidence row silently aged by up to a month. Never enough to sink a
+    # band on its own; always enough to make a stated date and a served one
+    # disagree, which is the kind of difference nobody can explain later.
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    m = DATE_EXACT.match(str(value).strip())
+    if m:
+        try:
+            return date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+        except ValueError:
+            pass          # "2025-02-31": the DAY is wrong, the month is not —
+                          # fall through to month grain rather than to nothing
     m = DATE_FUZZY.match(str(value).strip())
     if not m:
         return None
@@ -593,10 +612,26 @@ def parse_fuzzy_date(value):
 # subcaps_supported. First alias present wins.
 _EV_ALIASES = {
     "source_name": ("source_name", "source", "source_title", "publisher"),
-    "source_url": ("url", "source_url", "link"),
+    # `url_or_citation` is the dma-assessment skill's OWN published column
+    # name (skills/dma-assessment/templates/01_evidence_index_template.json):
+    # "[URL or full citation if not URL-accessible]". Packages built from that
+    # template landed every evidence row with source_url NULL, so the drawer
+    # showed a quote with nothing to open — while the workbook carried the
+    # link the whole time, one column over under a name nothing read.
+    "source_url": ("url", "source_url", "link", "url_or_citation"),
     "tier": ("tier", "evidence_tier"),
     "ers": ("ers_score", "ers"),
-    "published": ("publish_date", "published_date", "published", "date"),
+    # `date_published` FIRST, and the bare `date` last. Both orderings are
+    # deliberate: this file's own linkage-matrix reader (below) and
+    # plugins/dma-insights/scripts/evidence_normalize.py already rank a
+    # publication-flavoured column above a bare `date`, because at fact grain
+    # `date` carries EVENT dates — E-083's 1979 is a timeline fact, not when
+    # its source was published. This reader was the one place `date_published`
+    # was missing, and the cost is the highest of any alias in this table: a
+    # date that does not resolve bands the row UNVERIFIED, which weights 1.0,
+    # tied with ARCHIVAL. Every row of such a package looks equally worthless.
+    "published": ("date_published", "publish_date", "published_date",
+                  "published", "date"),
     # A separate column, and a different KIND of value: "Recency" states a
     # band word (CURRENT / RECENT / …), never a date. Kept apart so a band is
     # never parsed as a date nor a date mistaken for a band.
@@ -648,6 +683,28 @@ _EV_TABS = ("Evidence_Master", "Evidence_Index", "Evidence_Register",
             "Evidence_Ledger", "Evidence_Detail", "Evidence_Linkage_Matrix",
             "Evidence_Linkage", "Evidence_Inventory")
 _EV_ID_ANCHORS = ("Evidence_ID", "E_ID", "Evidence Id", "EvidenceID", "ID")
+_EV_E_ID_KEYS = ("evidence_id", "e_id", "id", "evidenceid")
+
+# What a MISSING ledger column actually costs, per field — recorded WITH the
+# observation, because the misses are not equivalent and a reader triaging a
+# list of them needs to know which one sank the run.
+_EV_MISS_COST = {
+    "e_id": "no row can be identified, so the whole ledger reads as empty",
+    "source_name": "every row lands unattributed",
+    "source_url": "every row lands unlinkable — a drawer shows a quote with "
+                  "no source to open",
+    "tier": "every row lands untiered, so thin evidence cannot be judged",
+    "ers": "none: ERS is computed server-side and a sent value is ignored",
+    "published": "EVERY row bands UNVERIFIED (weight 1.0, tied with ARCHIVAL) "
+                 "and the whole package reads as undated",
+    "recency": "the workbook's own band claim is lost; the date still governs",
+    "claim_type": "FACT and HYPOTHESIS become indistinguishable",
+    "fact_count": "none: grounded_on is the length of the citation list",
+    "subcaps": "no row links to a subcap, so no cell drawer can cite one",
+    "excerpt": "no verbatim text from the ledger — EXPECTED on general_dma, "
+               "which carries it in the scoring tabs' Rationale column and is "
+               "mined from there instead",
+}
 
 
 def parse_evidence_master(path: str, obs: list | None = None) -> list:
@@ -683,7 +740,26 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
                                "not be located; no evidence row was read"})
             return []
         cols = {k: _pick(headers, names) for k, names in _EV_ALIASES.items()}
-        cols["e_id"] = _pick(headers, ("evidence_id", "e_id", "id", "evidenceid"))
+        cols["e_id"] = _pick(headers, _EV_E_ID_KEYS)
+
+        # A COLUMN THIS READER DID NOT RECOGNISE IS NAMED, ALWAYS.
+        #
+        # Until this loop existed, `_pick` returning None was indistinguishable
+        # from a column full of blanks: every row landed with the field null,
+        # the run recorded nothing, and the producer was left to explain an
+        # evidence set the parser had half-read. That is how `date_published`
+        # went unread across a whole generation of packages — nothing anywhere
+        # said a date column had been looked for and not found.
+        #
+        # Each miss carries what it COSTS, because the consequences are not
+        # comparable: an absent `ers` changes nothing (the server recomputes
+        # it), while an absent date bands every row UNVERIFIED.
+        for field, names in list(_EV_ALIASES.items()) + [("e_id", _EV_E_ID_KEYS)]:
+            if cols.get(field) is None:
+                miss = _column_not_found(tab, field, names, headers)
+                miss.detail["consequence"] = _EV_MISS_COST[field]
+                if obs is not None:
+                    obs.append(miss)
         out = []
         rows_seen = 0
         for row in ws.iter_rows(min_row=first, values_only=True):
@@ -1179,6 +1255,63 @@ _STAT_PATTERNS = (
 )
 
 
+# Words that carry no identity and must not reach an acronym: "First United
+# Bank, Inc." and "First United Bank" have to produce the same key.
+_ENTITY_NOISE = {"inc", "llc", "lp", "ltd", "limited", "corp", "corporation",
+                 "company", "co", "na", "plc", "sa", "the", "and", "of",
+                 "group", "holdings", "holding", "dma"}
+
+
+def _subject_keys(names) -> set:
+    """Every spelling of the SUBJECT that a peer column might be wearing.
+
+    THE ENTITY IS NOT ITS OWN PEER. `Peer_Benchmarks` puts the subject's own
+    score in a named column beside the cohort's — `FUB_Score` for First United
+    Bank — and the parser, which was never told whose assessment it was
+    reading, stored it as a peer institution. The client then appeared in its
+    own cohort, its own score set the benchmark it was being measured against,
+    and every cohort statistic computed from that column was measuring the
+    subject against itself.
+
+    So: the full normalised name, the acronym of its meaningful words, and any
+    parenthesised short form the name carries ("Baxter Credit Union (BCU)").
+    Conservative on purpose — refusing a REAL peer is the mirror defect, and
+    it is the more expensive one, so nothing here matches on a prefix or a
+    substring. Only an exact key, after a trailing score/rating suffix is
+    stripped, counts.
+    """
+    keys = set()
+    for raw in names or ():
+        if raw is None or not str(raw).strip():
+            continue
+        s = re.sub(r"\s*-\s*DMA\s*$", "", str(raw).strip(), flags=re.I)
+        for short in re.findall(r"\(([^)]{2,12})\)", s):
+            if _norm(short):
+                keys.add(_norm(short))
+        n = _norm(s)
+        if not n:
+            continue
+        keys.add(n)
+        words = [w for w in n.split("_") if w and w not in _ENTITY_NOISE]
+        acronym = "".join(w[0] for w in words)
+        # Three letters minimum. A two-letter acronym collides too easily with
+        # a real institution's short name, and dropping a genuine peer costs
+        # more than keeping a subject column that a later gate can still see.
+        if len(acronym) >= 3:
+            keys.add(acronym)
+    return keys
+
+
+_SCORE_SUFFIX = re.compile(r"_?(?:score|scores|maturity|rating)$")
+
+
+def _is_subject_column(header: str, keys: set) -> bool:
+    if not keys:
+        return False
+    n = _norm(header)
+    return n in keys or (_SCORE_SUFFIX.sub("", n) or n) in keys
+
+
 def _stat_key(header: str):
     """The canonical stat a header names, or None when it names a peer."""
     n = _norm(header)
@@ -1360,7 +1493,8 @@ def _peer_header_row(rows: list):
     return best
 
 
-def parse_peer_benchmarks(path: str, obs: list | None = None) -> list:
+def parse_peer_benchmarks(path: str, obs: list | None = None,
+                          subject_names=()) -> list:
     """Peer_Benchmarks is CATEGORY grain with named-peer columns after the
     stat block. Only the per-peer scores are data — Entity_Score and the
     stat columns (median/quartiles/min/max/delta) are derivable, so they
@@ -1371,7 +1505,15 @@ def parse_peer_benchmarks(path: str, obs: list | None = None) -> list:
     values on the maturity scale. The name test alone invents institutions:
     28 clients in the corpus carried a peer called `Gap_vs_Median`,
     `Position`, `Peer_Name`, `Cat_ID` or `Unknown`, and every one of those
-    would have rendered in the cohort as a bank that does not exist."""
+    would have rendered in the cohort as a bank that does not exist.
+
+    `subject_names` is who this assessment is ABOUT — the manifest's
+    institution name and the client folder name. Without it the parser cannot
+    tell the subject's own score column (`FUB_Score`) from a peer's, and the
+    client joins its own cohort. Passing nothing is allowed, because a caller
+    may genuinely not know, but it is RECORDED: a cohort read without knowing
+    whose it is may contain the subject, and that has to be visible in the run
+    rather than inferred from a page months later."""
     def observe(kind, detail):
         if obs is not None:
             obs.append(Observation(kind, None, detail))
@@ -1423,8 +1565,24 @@ def parse_peer_benchmarks(path: str, obs: list | None = None) -> list:
         # entity; a column of gaps, ranks or words is a statistic or a label
         # whatever it calls itself, and is refused BY NAME rather than
         # stored as an institution.
-        peer_cols, refused, unscored = [], [], []
+        subject_keys = _subject_keys(subject_names)
+        if candidates and not subject_keys:
+            observe("peer_subject_unknown", {
+                "tab": "Peer_Benchmarks",
+                "candidate_columns": [n for _, n in candidates][:12],
+                "reason": "the cohort was read without knowing whose "
+                          "assessment this is, so the subject's own score "
+                          "column cannot be told from a peer's and may have "
+                          "been stored as an institution"})
+
+        peer_cols, refused, unscored, subject_cols = [], [], [], []
         for i, name in candidates:
+            # The subject is not its own peer — checked BEFORE the value test,
+            # because the subject's column holds perfectly valid scores and
+            # would sail through it.
+            if _is_subject_column(name, subject_keys):
+                subject_cols.append(name)
+                continue
             values = [row[i] for row in graded if i < len(row)]
             populated = [v for v in values if v is not None and str(v).strip()]
             nums = [d for d in (num(v) for v in populated) if d is not None]
@@ -1450,6 +1608,13 @@ def parse_peer_benchmarks(path: str, obs: list | None = None) -> list:
                 "rubric": f"{SCORE_MIN}–{SCORE_MAX}",
                 "reason": "column names no known statistic and does not hold "
                           "scores on the maturity scale; not stored as a peer"})
+        if subject_cols:
+            observe("peer_column_is_the_subject", {
+                "tab": "Peer_Benchmarks", "columns": sorted(subject_cols),
+                "subject": sorted(subject_keys),
+                "reason": "the column names the entity this assessment is "
+                          "about; kept out of the cohort so the client is not "
+                          "benchmarked against itself"})
         if unscored:
             observe("peer_column_unscored", {
                 "tab": "Peer_Benchmarks", "columns": sorted(unscored),

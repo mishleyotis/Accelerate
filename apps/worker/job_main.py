@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 
 from dma_worker import drive, intake_status, persist
 from dma_worker.counts import recount_run, recount_where
-from dma_worker.persist import persist_package
+from dma_worker.persist import _institution, persist_package
 from dma_worker.report_parser import parse_report
 from dma_worker.scan_runner import (SCAN_FAILED, SCAN_SUCCEEDED, finish_scan,
                                     open_scan, run_scan)
@@ -272,7 +272,18 @@ def _ingest_one(conn, token, folder, parts, remint=False):
             workbook=wb,
             source_folder_id=folder,
             evidence=parse_evidence_master(wb_path, companion),
-            peers=parse_peer_benchmarks(wb_path, companion),
+            # WHOSE assessment this is, so the peer parser can keep the
+            # subject out of its own cohort. `Peer_Benchmarks` carries the
+            # entity's own score in a named column (`FUB_Score`) beside the
+            # cohort's, and a parser told nothing about the client stored it
+            # as a peer institution — the client benchmarked against itself.
+            # Both signals are passed because either may be absent: the
+            # manifest's institution block is heterogeneous across the corpus
+            # and some packages ship no manifest at all, in which case the
+            # folder name is the identity the rest of the pipeline uses too.
+            peers=parse_peer_benchmarks(
+                wb_path, companion,
+                subject_names=(_institution(manifest).get("name"), folder)),
             recommendations=parse_recommendations(wb_path, companion),
             companion_observations=companion,
             artefact_id=parts["workbook"].file_id,
