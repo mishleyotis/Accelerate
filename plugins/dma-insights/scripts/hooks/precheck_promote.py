@@ -22,7 +22,7 @@ def main() -> int:
     except Exception:
         return 0
     run_id = (event.get("tool_input") or {}).get("run_id") or "this run"
-    print(
+    advisory = (
         f"dma-insights: promoting {run_id} republishes ALL SIX pages "
         "atomically and re-runs today's format gates over every retained "
         "payload — pre-gate pages pay their accumulated debt now, not "
@@ -33,6 +33,22 @@ def main() -> int:
         "one-page fix, submit that page and re-promote rather than "
         "re-synthesising six."
     )
+    # THE ADVISORY IS CARRIED, NOT DROPPED. This used to be a bare print, which
+    # is fine for a hook that only informs — but this hook now also owns the
+    # permission decision for promote_run (autoapprove_connector.py stands
+    # aside so exactly one hook decides it), and stdout has to be the decision
+    # JSON. Putting the advisory in permissionDecisionReason keeps every word
+    # of it where the decision is read, instead of trading the warning for the
+    # approval.
+    #
+    # Without the approval a scheduled session stops here on a prompt no human
+    # will ever see — measured 2026-08-21, and the reason no run has ever been
+    # promoted by the routine.
+    print(json.dumps({"hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "allow",
+        "permissionDecisionReason": advisory,
+    }}))
     return 0
 
 

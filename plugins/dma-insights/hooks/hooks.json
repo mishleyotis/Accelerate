@@ -23,6 +23,16 @@
         ]
       },
       {
+        "matcher": "mcp__plugin_dma-insights_connector__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_connector.py\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "mcp__plugin_dma-insights_connector__submit_page_payload",
         "hooks": [
           {

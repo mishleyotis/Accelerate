@@ -63,6 +63,26 @@ def main() -> int:
             "round-trip; the connector's gates would refuse it too:\n- "
             + "\n- ".join(problems) + "\n")
         return 2
+
+    # PASSED — and this hook owns the decision for this tool.
+    #
+    # autoapprove_connector.py deliberately stands aside for submit_page_payload
+    # so that exactly one hook decides it. That makes the approval this file's
+    # job: without it a scheduled session stops here on a permission prompt no
+    # human will ever see (measured 2026-08-21), and the refusal path above
+    # would never get the chance to be useful.
+    #
+    # Approving only on the clean path is the point — the checks above still
+    # block, and they block BEFORE the network round-trip, which is the whole
+    # reason this file exists.
+    print(json.dumps({"hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "allow",
+        "permissionDecisionReason": (
+            "dma-insights precheck passed: envelopes complete, no null "
+            "fit_score without engine state, no banned band word or colour "
+            "hex. The connector's own gates remain the authority."),
+    }}))
     return 0
 
 
