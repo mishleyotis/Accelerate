@@ -73,6 +73,16 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/artifact_cadence.py\"",
+            "timeout": 30
+          }
+        ]
       }
     ]
   }
