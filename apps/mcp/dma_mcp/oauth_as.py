@@ -48,6 +48,7 @@ import hashlib
 import hmac
 import json
 import os
+import sys
 import time
 import urllib.parse
 import urllib.request
@@ -163,12 +164,37 @@ def _client_id_metadata(url: str) -> dict | None:
     if hit and hit[0] > time.time():
         return hit[1]
     try:
-        req = urllib.request.Request(url, headers={"Accept": "application/json"})
+        # THE USER-AGENT IS LOAD-BEARING, and its absence cost a working
+        # connector. urllib sends `Python-urllib/3.x` by default, and
+        # claude.ai's edge answers that with HTTP 403 and Cloudflare error
+        # 1010 — the "browser integrity" refusal — so the fetch below failed,
+        # this function returned None, and /authorize told the user
+        # `invalid_client: unknown or tampered client_id` for a client_id that
+        # was completely valid. Measured 2026-08-21: python default UA 403,
+        # curl/8.5.0 200, this UA 200.
+        #
+        # It says who we are and where to complain, rather than impersonating
+        # a browser — the block is on the anonymous default, not on being a
+        # robot.
+        req = urllib.request.Request(url, headers={
+            "Accept": "application/json",
+            "User-Agent": "dma-insights-mcp/1.0 (+https://github.com/"
+                          "mishleyotis/Accelerate)",
+        })
         with urllib.request.urlopen(req, timeout=10) as resp:
             doc = json.loads(resp.read(65536))
-    except Exception:                                        # noqa: BLE001
+    except Exception as e:                                   # noqa: BLE001
+        # SAY WHY. This returning None renders as an opaque `invalid_client`
+        # at /authorize, which is indistinguishable from a genuinely bad
+        # client_id — it took a packet-level comparison to tell a 403 from a
+        # tampered id. One log line makes the next one a lookup.
+        print(f"CIMD fetch failed for {url}: {type(e).__name__}: {e}",
+              file=sys.stderr, flush=True)
         return None
     if doc.get("client_id") != url:
+        print(f"CIMD document at {url} does not self-identify "
+              f"(client_id={doc.get('client_id')!r})",
+              file=sys.stderr, flush=True)
         return None
     redirects = [u for u in (doc.get("redirect_uris") or [])
                  if isinstance(u, str)]
