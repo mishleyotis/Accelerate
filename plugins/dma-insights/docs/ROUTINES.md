@@ -134,6 +134,52 @@ registration had already happened and Claude Code has no MCP hot-reload.
 Anything a session needs in order to authenticate must already be present
 when it starts.
 
+**AUTHENTICATING IS NOT THE SAME AS BEING ALLOWED (measured 2026-08-21T02:34Z,
+and it is what had actually been killing the routine).** The paragraph above
+says the variable is "enough on its own." It is enough for AUTH. It is not
+enough to run. A session created with this repo attached bound the connector
+perfectly — `mcp__plugin_dma-insights_connector__get_run_progress` existed and
+the session called it — and then stopped on:
+
+```
+Waiting on permission: mcp__plugin_dma-insights_connector__get_run_progress
+```
+
+A trigger-fired container has nobody to answer that prompt. The firing burns
+its twelve-hour slot, stages nothing and records nothing — precisely the trace
+the 00:08 firing left (fired 00:10:43Z, zero staged rows, zero findings, 178
+clients still INGESTED per MEM-0118).
+
+Every prior diagnosis reached for MEM-0112 (binding) because from the outside
+the two are indistinguishable: a session that *cannot* call a tool and one that
+is *not allowed* to call it both simply stop, with `claude plugin list` enabled
+and the doctor green. MEM-0112 is real; it was not the blocker.
+
+So there is a THIRD prerequisite beside the script and the variable, and its
+scope is the trap:
+
+* The grant must be **user scope** — `~/.claude/settings.json`. The repo's own
+  `.claude/settings.json` is PROJECT scope, and project permission rules are
+  **not applied in a non-interactive session**: the workspace is untrusted and
+  the rules are skipped. A grant committed there reviews as correct, appears in
+  every diff as the fix, and changes nothing.
+* The server segment must be **glob-free**: `mcp__<server>__*` is honoured;
+  `mcp__*` is skipped with a warning and approves nothing.
+* `acceptEdits` does **not** auto-approve MCP calls — it covers file edits and
+  common filesystem commands only. `dontAsk` auto-DENIES anything not
+  pre-approved. Neither mode substitutes for the grant.
+
+`bootstrap_session.sh` now writes that grant (merged, never clobbering the
+plugin keys it wrote earlier in the same run; refusing rather than repairing a
+malformed settings file, since a broken settings.json silently disables every
+setting in it). Because settings are read at session START, this only helps a
+session the script ran BEFORE — which is exactly the environment-setup-script
+path, and one more reason that wiring is load-bearing rather than belt-and-
+braces. A session spawned via `create_session` can carry the same grant
+directly through `extra_allowed_tools`.
+
+Pinned by `plugins/dma-insights/scripts/tests/test_bootstrap_permission_grant.py`.
+
 The setup script remains worth wiring as the belt to that braces: it clones
 the repo, installs the plugin from the repo marketplace, lands the key at
 `/root/.dma/sa.json`, fetches the connector path token fresh from Secret
