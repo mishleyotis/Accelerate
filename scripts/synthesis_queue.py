@@ -42,7 +42,7 @@ from collections import defaultdict
 
 #: Reasons a pending run is not offered to a producer. Stated, never silent —
 #: a queue that quietly drops work is indistinguishable from an empty one.
-SKIP_CLAIMED = "another session holds a live claim"
+SKIP_CLAIMED = "another session holds a live claim on this entity"
 SKIP_SUPERSEDED = "a newer run_seq exists for this entity"
 SKIP_NO_DATE = "no assessment date; ordering it against the others would guess"
 
@@ -73,23 +73,44 @@ def _newer(a: dict, b: dict) -> dict:
     return a if str(a.get("run_id")) > str(b.get("run_id")) else b
 
 
-def select(pending: list, limit: int | None = None) -> dict:
-    """Split the pending queue into what to work and what to skip, with why."""
-    live_claim, unclaimed = [], []
-    for run in pending:
-        claim = run.get("claim") or {}
-        (live_claim if claim.get("live") else unclaimed).append(run)
+def _key(run: dict):
+    return run.get("display_id") or run.get("run_id")
 
-    # One run per entity: the newest. The rest are superseded, not extra work.
+
+def select(pending: list, limit: int | None = None) -> dict:
+    """Split the pending queue into what to work and what to skip, with why.
+
+    THE CLAIM IS AN ENTITY-LEVEL FACT, NOT A RUN-LEVEL ONE, and the ordering of
+    these two steps is the whole correctness of this function.
+
+    An earlier version partitioned claimed from unclaimed FIRST and deduped the
+    remainder, which quietly reintroduced the duplicate it exists to prevent:
+    the claimed run never entered the pool, so the entity's SECOND-newest run
+    won `best` and was handed out as if the entity were free. Measured on
+    2026-08-21: `t-rowe-price-group-inc` seq 4 was live-claimed and seq 3 — a
+    different request, three days older — was offered. 105 of 171 entities
+    carry more than one pending run, so this is the common shape, not an edge.
+
+    The other direction is the same harm: an older run under a live claim while
+    a newer one is offered puts two producers on one entity's six pages. Both
+    promote, and the directory chooses between them. So a live claim ANYWHERE
+    in an entity's runs holds the WHOLE entity, and every one of its runs is
+    skipped naming that claim.
+    """
+    # One run per entity: the newest, chosen over ALL pending runs including
+    # claimed ones. Deduping first is what makes the claim check meaningful.
     best: dict = {}
-    for run in unclaimed:
-        key = run.get("display_id") or run.get("run_id")
+    for run in pending:
+        key = _key(run)
         best[key] = run if key not in best else _newer(best[key], run)
 
-    superseded = [r for r in unclaimed
-                  if r is not best.get(r.get("display_id") or r.get("run_id"))]
+    held = {_key(r) for r in pending if (r.get("claim") or {}).get("live")}
 
-    ready = list(best.values())
+    claimed = [r for r in pending if _key(r) in held]
+    superseded = [r for r in pending
+                  if _key(r) not in held and r is not best.get(_key(r))]
+
+    ready = [r for k, r in best.items() if k not in held]
     # Newest assessment first: a six-week-old DMA is worth more to a client
     # conversation than a six-month-old one, and the queue is long enough that
     # the order decides what actually gets done.
@@ -106,7 +127,10 @@ def select(pending: list, limit: int | None = None) -> dict:
         "counts": {
             "pending": len(pending),
             "entities": len({r.get("display_id") for r in pending}),
-            "claimed": len(live_claim),
+            # Runs held back because their ENTITY carries a live claim — which
+            # is more runs than carry the claim themselves, and deliberately so.
+            "claimed": len(claimed),
+            "held_entities": len(held),
             "superseded": len(superseded),
             "ready": len(ready),
             "undated": len(undated),
@@ -117,7 +141,7 @@ def select(pending: list, limit: int | None = None) -> dict:
                       "request_id": r.get("request_id")} for r in plan],
         "skipped": (
             [{"run_id": r["run_id"], "display_id": r.get("display_id"),
-              "why": SKIP_CLAIMED} for r in live_claim]
+              "why": SKIP_CLAIMED} for r in claimed]
             + [{"run_id": r["run_id"], "display_id": r.get("display_id"),
                 "why": SKIP_SUPERSEDED} for r in superseded]),
     }
@@ -141,7 +165,8 @@ def main() -> int:
 
     c = out["counts"]
     print(f"pending          {c['pending']} runs across {c['entities']} entities")
-    print(f"  claimed        {c['claimed']}  ({SKIP_CLAIMED})")
+    print(f"  claimed        {c['claimed']} run(s) across {c['held_entities']} "
+          f"entity(ies)  ({SKIP_CLAIMED})")
     print(f"  superseded     {c['superseded']}  ({SKIP_SUPERSEDED})")
     print(f"  ready          {c['ready']}   of which undated {c['undated']}")
     print(f"  SELECTED       {c['selected']}\n")

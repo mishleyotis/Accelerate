@@ -68,6 +68,51 @@ def test_a_live_claim_is_skipped_and_says_so():
     assert [s["why"] for s in out["skipped"]] == [sq.SKIP_CLAIMED]
 
 
+def test_a_claim_holds_the_whole_entity_not_just_the_claimed_run():
+    """The defect this test was written for, measured on 2026-08-21.
+
+    `t-rowe-price-group-inc` had seq 4 under a live claim and seq 3 — an older
+    ingest of a different request — sitting unclaimed. `select` partitioned
+    claimed from unclaimed BEFORE deduping, so seq 4 never entered the pool,
+    seq 3 won `best`, and the entity was handed out while a producer was
+    already working it.
+
+    `test_a_live_claim_is_skipped_and_says_so` cannot see this: it uses two
+    DIFFERENT entities with one run each, so the dedup step has nothing to do
+    and the ordering bug is invisible. 105 of 171 entities carry more than one
+    pending run, so this shape is the common one.
+    """
+    out = sq.select([_run("seq4", "x", "2026-08-10", 4, live=True),
+                     _run("seq3", "x", "2026-08-03", 3)])
+    assert out["selected"] == [], (
+        "the entity is held; its older run is not a free substitute")
+    assert {s["why"] for s in out["skipped"]} == {sq.SKIP_CLAIMED}
+    assert out["counts"]["held_entities"] == 1
+    assert out["counts"]["claimed"] == 2, (
+        "both runs are held back, and the count must say so")
+
+
+def test_a_claim_on_an_older_run_still_holds_the_entity():
+    """The mirror case. Offering the newer run while a producer works the
+    older one puts two producers on one entity's six pages; both promote, and
+    the directory is left choosing. The claim is a fact about the entity."""
+    out = sq.select([_run("seq4", "x", "2026-08-10", 4),
+                     _run("seq3", "x", "2026-08-03", 3, live=True)])
+    assert out["selected"] == []
+    assert {s["why"] for s in out["skipped"]} == {sq.SKIP_CLAIMED}
+
+
+def test_a_held_entity_does_not_hold_any_other_entity():
+    """The guard must be per-entity, not global — one live claim anywhere
+    would otherwise empty the whole queue."""
+    out = sq.select([_run("a", "x", "2026-08-10", 2, live=True),
+                     _run("b", "x", "2026-08-03", 1),
+                     _run("c", "y", "2026-08-05", 1),
+                     _run("d", "y", "2026-08-06", 2)])
+    assert [s["run_id"] for s in out["selected"]] == ["d"]
+    assert out["counts"]["claimed"] == 2 and out["counts"]["superseded"] == 1
+
+
 def test_a_lapsed_claim_is_not_a_claim():
     """`live: false` means the lease expired; staged work survives and the run
     is workable again."""
