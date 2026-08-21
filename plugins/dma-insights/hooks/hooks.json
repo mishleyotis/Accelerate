@@ -23,7 +23,7 @@
         ]
       },
       {
-        "matcher": "mcp__plugin_dma-insights_connector__.*",
+        "matcher": "mcp__.*",
         "hooks": [
           {
             "type": "command",

@@ -61,6 +61,56 @@ REASON = (
     "hooks, which this hook does not touch."
 )
 
+# ── the enrichment connectors ────────────────────────────────────────────
+#
+# Measured 2026-08-21T03:09Z: with the connector above approved, the routine
+# got through its preflight and the Drive pull, then stopped on
+# `mcp__5e0fe4f4-…__search_jobs` — an enrichment connector, same failure
+# class, different owner. STEP 0(b) makes these REQUIRED (the routine never
+# runs in degrade mode), so a prompt on one of them stops a firing exactly as
+# dead as a prompt on ours.
+#
+# THESE CANNOT BE MATCHED BY SERVER, which is why this list is by tool name.
+# A claude.ai connector's server segment is an opaque per-attachment UUID —
+# `5e0fe4f4-8fd9-448d-a1b5-fafc63f9aa67` here, and not the connector_uuid the
+# Routine record carries — so it is neither stable nor predictable, and a
+# server-shaped rule cannot be written for it at all.
+#
+# The list is therefore an exact allowlist of READ-ONLY research calls: search
+# the web, read a page, look up a company or a role. Every one of them fetches
+# and returns; none writes anywhere, spends anything, or sends a message. A
+# tool whose suffix is not listed draws no decision, so the blast radius of
+# this being wrong is "the routine stops and asks", never "the routine did
+# something nobody sanctioned".
+ENRICHMENT_TOOLS = frozenset({
+    # Exa
+    "web_search_exa", "web_fetch_exa",
+    # Tavily
+    "tavily_search", "tavily_extract", "tavily_crawl", "tavily_map",
+    "tavily_research",
+    # Firecrawl
+    "firecrawl_search",
+    # Indeed — the one that stopped the run
+    "search_jobs", "get_job_details", "get_company_data",
+    # Clay
+    "find-and-enrich-company", "find-and-enrich-contacts-at-company",
+    "find-and-enrich-list-of-contacts", "ask-question-about-accounts",
+    "query-objects", "get-current-workspace",
+    # Vibe Prospecting / Explorium
+    "enrich-business", "match-business", "fetch-entities",
+    "fetch-businesses-events", "enrich-prospects", "match-prospects",
+    "autocomplete", "show-sample",
+})
+
+ENRICHMENT_REASON = (
+    "read-only enrichment lookup, auto-approved by the dma-insights hook: the "
+    "synthesis routine requires these connectors and a scheduled session has "
+    "nobody to answer a prompt. Allowlisted by tool name because a claude.ai "
+    "connector's server segment is a per-attachment UUID that no rule can "
+    "name; every tool on the list fetches and returns, and none writes, "
+    "spends or sends."
+)
+
 
 def main() -> int:
     try:
@@ -76,13 +126,27 @@ def main() -> int:
     # startswith on the full prefix — never a substring match, never a regex.
     # `mcp__plugin_dma-insights_connector__x` is ours; anything else is not,
     # including a server that merely contains this name inside a longer one.
-    if not tool.startswith(PREFIX) or tool in GUARDED:
-        return 0
+    if tool.startswith(PREFIX):
+        if tool in GUARDED:
+            return 0
+        return _allow(REASON)
 
+    # An enrichment connector, matched by TOOL NAME because its server segment
+    # is an opaque per-attachment UUID. Only ever an MCP tool, and only ever
+    # one on the read-only allowlist.
+    if tool.startswith("mcp__") and tool.count("__") >= 2:
+        suffix = tool.rsplit("__", 1)[1]
+        if suffix in ENRICHMENT_TOOLS:
+            return _allow(ENRICHMENT_REASON)
+
+    return 0
+
+
+def _allow(reason: str) -> int:
     print(json.dumps({"hookSpecificOutput": {
         "hookEventName": "PreToolUse",
         "permissionDecision": "allow",
-        "permissionDecisionReason": REASON,
+        "permissionDecisionReason": reason,
     }}))
     return 0
 

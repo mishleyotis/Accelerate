@@ -178,15 +178,76 @@ def test_promote_is_approved_and_keeps_its_whole_advisory():
 # ── 4 · the wiring ──
 
 
-def test_the_hook_is_registered_for_the_connector():
+def test_the_hook_is_registered_for_every_mcp_tool():
+    """The matcher is deliberately wide and the SCRIPT is narrow.
+
+    It has to see enrichment connectors too, and their server segment is an
+    opaque per-attachment UUID that no matcher can name — so the matcher lets
+    every MCP tool through and the allowlists above decide. The scope tests in
+    this file are what keep that safe; a narrow matcher would have hidden them
+    behind a rule nobody could read."""
     cfg = json.loads(HOOKS_JSON.read_text())
-    pre = cfg["hooks"]["PreToolUse"]
-    matchers = {e["matcher"]: e for e in pre}
-    ours = [m for m in matchers if m.startswith("mcp__plugin_dma-insights_connector__")
-            and m.endswith(".*")]
-    assert ours, f"no connector-wide PreToolUse matcher in hooks.json: {list(matchers)}"
-    cmds = " ".join(h["command"] for h in matchers[ours[0]]["hooks"])
+    matchers = {e["matcher"]: e for e in cfg["hooks"]["PreToolUse"]}
+    assert "mcp__.*" in matchers, f"matchers present: {list(matchers)}"
+    cmds = " ".join(h["command"] for h in matchers["mcp__.*"]["hooks"])
     assert "autoapprove_connector.py" in cmds
+
+
+# ── the enrichment connectors ──
+
+
+@pytest.mark.parametrize("tool", [
+    "mcp__5e0fe4f4-8fd9-448d-a1b5-fafc63f9aa67__search_jobs",  # the real one
+    "mcp__Exa__web_search_exa",
+    "mcp__Exa__web_fetch_exa",
+    "mcp__Tavily__tavily_search",
+    "mcp__Tavily__tavily_extract",
+    "mcp__Clay__find-and-enrich-company",
+    "mcp__Vibe_Prospecting__enrich-business",
+    "mcp__Indeed__get_company_data",
+])
+def test_a_read_only_enrichment_lookup_is_approved(tool):
+    """STEP 0(b) makes these REQUIRED — the routine never runs in degrade
+    mode — so a prompt on one of them stops a firing as dead as a prompt on
+    our own connector. Measured 2026-08-21T03:09Z: the run reached the Drive
+    pull and then stopped on search_jobs."""
+    assert decision(AUTO, {"tool_name": tool}) == "allow"
+
+
+def test_the_uuid_server_segment_is_not_what_grants_it():
+    """The allowlist is by TOOL NAME. An unlisted tool on the very same server
+    that carries an approved one draws nothing — otherwise approving one
+    connector would approve everything it ever exposes."""
+    server = "mcp__5e0fe4f4-8fd9-448d-a1b5-fafc63f9aa67__"
+    assert decision(AUTO, {"tool_name": server + "search_jobs"}) == "allow"
+    for unlisted in ("delete_everything", "send_message", "post_application",
+                     "update_profile", "pay_invoice"):
+        assert decision(AUTO, {"tool_name": server + unlisted}) is None, unlisted
+
+
+@pytest.mark.parametrize("tool", [
+    "mcp__Gmail__send_message", "mcp__Gmail__trash_thread",
+    "mcp__Gmail__create_draft", "mcp__Google_Drive__update_file",
+    "mcp__Google_Drive__trash_file", "mcp__github__create_pull_request",
+    "mcp__github__merge_pull_request", "mcp__Figma__create_new_file",
+])
+def test_no_tool_that_writes_sends_or_spends_is_ever_approved(tool):
+    assert decision(AUTO, {"tool_name": tool}) is None
+
+
+def test_the_allowlist_contains_no_obvious_write_verb():
+    """A cheap guard on the list itself: someone adding `send_message` or
+    `create_*` to it later should have to notice they are doing so."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("aac", AUTO)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    for name in mod.ENRICHMENT_TOOLS:
+        low = name.lower().replace("-", "_")
+        for verb in ("send", "delete", "trash", "create", "update", "write",
+                     "post", "pay", "purchase", "merge", "apply"):
+            assert not low.startswith(verb), (
+                f"{name!r} looks like a write; this list is read-only lookups")
 
 
 def test_the_credential_guard_is_still_registered():
