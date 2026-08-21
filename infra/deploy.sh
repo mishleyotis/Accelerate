@@ -300,6 +300,24 @@ if [ -f apps/worker/Dockerfile ]; then
     --command="python,-m,dma_worker.enrichment" \
     --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-worker@${PROJECT_ID}.iam;DB_NAME=dma_insights;ENRICH_TRIGGER=schedule" \
     --max-retries=1 --task-timeout=900 --memory=1Gi --quiet
+  # THE GRANT THE SCHEDULER NEEDS TO RUN WHAT WAS JUST DEPLOYED. Every other
+  # job here gets one — dmai-worker, dmai-refresh, and the exporter/scanner
+  # pair in the loop below — and dmai-enrich was the single one that did not.
+  # Deploying a job does not make it runnable: the scheduler below posts to
+  # the Run Admin API as dmai-worker@, and without run.invoker on THIS job
+  # that POST is PERMISSION_DENIED.
+  #
+  # Measured 2026-08-21: dmai-enrich-loop had been ENABLED and failing with
+  # status code 7 on every hourly firing, while `gcloud run jobs get-iam-policy
+  # dmai-enrich` returned no bindings at all. Nothing surfaced it, because a
+  # scheduler job that fails still reads as ENABLED and the enrichment loop's
+  # own failure mode is silence — it looks identical to a loop with nothing to
+  # do. Granted by hand to stop the bleeding; here so it survives the next
+  # rebuild.
+  gcloud run jobs add-iam-policy-binding dmai-enrich \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --member="serviceAccount:dmai-worker@${SA_DOMAIN}" \
+    --role="roles/run.invoker" --quiet >/dev/null
   # Hourly. The gap set only changes when a run is submitted or re-promoted,
   # so a tighter cadence would spend the same answer repeatedly; an hour keeps
   # the loop visibly alive without becoming noise.
