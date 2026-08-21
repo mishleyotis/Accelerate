@@ -285,3 +285,183 @@ def test_push_bundle_refuses_invalid_json(tmp_path):
     with _pytest.raises(SystemExit) as e:
         drive_fetch.push_bundle("x", str(bad), None)
     assert "valid JSON" in str(e.value)
+
+
+# ── the artefact taxonomy on Drive ───────────────────────────────────────
+#
+# artifact_store.py decides where an artefact belongs LOCALLY. These two
+# subcommands carry that to Drive and back. What has to hold: the remote path
+# is derived from the artefact's own name and never passed by a caller, the
+# search is recursive so a misfiled artefact still prevents a redo, and asking
+# whether work exists never creates the folder it asks about.
+
+import artifact_store as _store  # noqa: E402
+
+
+def _named(run="7a6ad71c-6225-4e0b-80fb-135cfd04b2dd", page="overview",
+           section="hero", agent="overview-hero-producer", kind="payload",
+           ts="20260821T050000Z"):
+    return _store.artifact_name(run, page, section, agent, kind, ts)
+
+
+def test_push_artifact_derives_the_remote_path_from_the_name(monkeypatch, tmp_path):
+    """The destination is never passed. A caller that could name its own
+    folder could file an overview payload under the heatmap, and the whole
+    point of the naming scheme is that the file itself says where it goes."""
+    name = _named()
+    local = tmp_path / name
+    local.write_text('{"run_id": "7a6ad71c-6225-4e0b-80fb-135cfd04b2dd", '
+                     '"page": "overview", "section": "hero"}')
+    tree = {"root": [], "bundle-root": []}
+    created = _bundle_rig(monkeypatch, tmp_path, tree)
+    assert drive_fetch.push_artifact("x", str(local)) == 0
+    # The folders the taxonomy asks for, and no others.
+    assert "10_overview" in created and "hero" in created
+    assert "overview-hero-producer" in created
+
+
+def test_push_artifact_refuses_a_file_that_is_not_named_by_the_store(tmp_path):
+    """An unnamed artefact cannot say where it belongs, so nothing may guess
+    on its behalf."""
+    bad = tmp_path / "overview.json"
+    bad.write_text('{"ok": true}')
+    with pytest.raises(SystemExit) as e:
+        drive_fetch.push_artifact("x", str(bad))
+    assert "taxonomy name" in str(e.value)
+    assert "artifact_store.py put" in str(e.value), "must name the fix"
+
+
+def test_push_artifact_refuses_a_body_that_contradicts_its_name(monkeypatch, tmp_path):
+    """Two sources agreeing and one dissenting is a refusal, never a majority
+    vote — writing it anywhere leaves the tree lying about what it holds."""
+    local = tmp_path / _named(page="overview", section="hero")
+    local.write_text('{"run_id": "7a6ad71c-0000-0000-0000-000000000000", '
+                     '"page": "heatmap"}')
+    with pytest.raises(SystemExit) as e:
+        drive_fetch.push_artifact("x", str(local))
+    assert "heatmap" in str(e.value)
+
+
+def test_push_artifact_refuses_invalid_json(tmp_path):
+    local = tmp_path / _named()
+    local.write_text("{not json")
+    with pytest.raises(SystemExit) as e:
+        drive_fetch.push_artifact("x", str(local))
+    assert "valid JSON" in str(e.value)
+
+
+def test_push_artifact_reports_a_local_misfile_and_still_routes_home(
+        monkeypatch, tmp_path, capsys):
+    """The healing case: the file is in the wrong local folder, its name is
+    right, and the remote copy lands where the name says."""
+    root = tmp_path / "artifacts"
+    wrong = root / "30_heatmap" / "focus" / "overview-hero-producer"
+    wrong.mkdir(parents=True)
+    local = wrong / _named()
+    local.write_text('{"ok": true}')
+    tree = {"root": [], "bundle-root": []}
+    created = _bundle_rig(monkeypatch, tmp_path, tree)
+    assert drive_fetch.push_artifact("x", str(local), str(root)) == 0
+    out = capsys.readouterr().out
+    assert "locally filed under" in out and "heal" in out
+    assert "10_overview" in created
+
+
+def _find_rig(monkeypatch, tree, insights_name="DMAI - X"):
+    monkeypatch.setattr(drive_fetch, "_token", lambda: "tok")
+    monkeypatch.setattr(drive_fetch, "_find_client_folder",
+                        lambda tok, c: {"id": "root", "name": "X - DMA"})
+
+    def boom(*a, **k):
+        raise AssertionError("a read-only search created a folder")
+    monkeypatch.setattr(drive_fetch, "_ensure_folder", boom)
+    monkeypatch.setattr(drive_fetch, "_insights_root", boom)
+    monkeypatch.setattr(drive_fetch, "_list_children",
+                        lambda tok, fid: tree.get(fid, []))
+
+
+def _folder(fid, name):
+    return {"id": fid, "name": name, "mimeType": drive_fetch.FOLDER_MIME}
+
+
+def _file(fid, name):
+    return {"id": fid, "name": name, "mimeType": "application/json"}
+
+
+def test_find_artifact_searches_the_whole_tree_not_just_the_right_folder(
+        monkeypatch, capsys):
+    """RECURSIVE, and the misfiled case is the reason. A lookup that reads
+    only the correct folder reports misplaced work as absent, which is the
+    exact condition under which it gets produced a second time."""
+    name = _named()
+    tree = {
+        "root": [_folder("ins", "DMAI - X")],
+        "ins": [_folder("hm", "30_heatmap")],
+        "hm": [_folder("f", "focus")],
+        "f": [_folder("a", "some-other-producer"), _file("x1", name)],
+        "a": [],
+    }
+    _find_rig(monkeypatch, tree)
+    assert drive_fetch.find_artifact("x", run="7a6ad71c") == 0
+    out = capsys.readouterr().out
+    assert "overview/hero" in out
+    assert "MISFILED" in out, "found, and told it is in the wrong place"
+
+
+def test_find_artifact_filters_on_every_taxonomy_field(monkeypatch, capsys):
+    tree = {
+        "root": [_folder("ins", "DMAI - X")],
+        "ins": [_folder("ov", "10_overview")],
+        "ov": [_folder("h", "hero")],
+        "h": [_folder("p", "overview-hero-producer")],
+        "p": [_file("x1", _named(kind="payload", ts="20260821T050000Z")),
+              _file("x2", _named(kind="challenge", ts="20260821T060000Z"))],
+    }
+    _find_rig(monkeypatch, tree)
+    drive_fetch.find_artifact("x", page="overview", kind="challenge")
+    out = capsys.readouterr().out
+    assert "challenge" in out and "payload" not in out
+    assert "MISFILED" not in out
+
+
+def test_find_artifact_reports_no_folder_rather_than_creating_one(
+        monkeypatch, capsys):
+    """A search that creates what it reports on makes every client compliant
+    on its first run and agrees with itself forever after — the same defect
+    ingestion_status.py exists to avoid. `_ensure_folder` and `_insights_root`
+    are booby-trapped in the rig; reaching either fails the test."""
+    _find_rig(monkeypatch, {"root": []})
+    assert drive_fetch.find_artifact("x") == 0
+    assert "ensure-insights" in capsys.readouterr().out
+
+
+def test_find_artifact_says_nothing_matched_without_saying_nothing_was_done(
+        monkeypatch, capsys):
+    tree = {"root": [_folder("ins", "DMAI - X")], "ins": []}
+    _find_rig(monkeypatch, tree)
+    drive_fetch.find_artifact("x", run="deadbeef")
+    out = capsys.readouterr().out
+    assert "has not been filed" in out and "not the same as not done" in out
+
+
+def test_the_taxonomy_is_never_restated_in_drive_fetch():
+    """One authority for the page/section/agent mapping. A second copy is a
+    second thing to drift, and asserted over AST constants with docstrings
+    excluded, because the comments here explain the rule and a substring
+    check would match its own explanation."""
+    import ast
+    src = (HERE / "drive_fetch.py").read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    docstrings = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef,
+                             ast.ClassDef)):
+            d = ast.get_docstring(node, clean=False)
+            if d:
+                docstrings.add(d)
+    literals = [n.value for n in ast.walk(tree)
+                if isinstance(n, ast.Constant) and isinstance(n.value, str)
+                and n.value not in docstrings]
+    for lit in literals:
+        assert "10_overview" not in lit and "30_heatmap" not in lit, (
+            f"the folder taxonomy is restated in a literal: {lit!r}")

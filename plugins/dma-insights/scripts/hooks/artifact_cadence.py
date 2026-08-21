@@ -40,6 +40,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 STORE = HERE.parent / "artifact_store.py"
+DRIVE = HERE.parent / "drive_fetch.py"
 BUNDLES = Path(os.environ.get("DMA_BUNDLE_CACHE", "/root/.dma/bundles"))
 
 # Agents whose whole job is to produce something that must survive the session.
@@ -117,10 +118,13 @@ def main() -> int:
             f"  python3 {STORE} put --root {root} --run {run} "
             f"--page <page> --section <section> --agent {agent} "
             f"--kind <payload|challenge|report> --file <local.json>\n"
-            f"then push it with drive_fetch. The store verifies the placement "
-            f"and refuses a body that disagrees with its name. An artifact "
-            f"that is not filed is indistinguishable from work never done, "
-            f"and the next session will produce it again."),
+            f"  python3 {DRIVE} push-artifact --client <display_id> "
+            f"--file <the path put printed> --root {root}\n"
+            f"The store verifies the placement and refuses a body that "
+            f"disagrees with its name; the push derives the remote path from "
+            f"that name rather than taking one. An artifact that is not filed "
+            f"is indistinguishable from work never done, and the next session "
+            f"will produce it again from scratch."),
     }}))
     return 0
 

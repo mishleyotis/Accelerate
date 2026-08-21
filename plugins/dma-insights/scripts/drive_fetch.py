@@ -33,6 +33,15 @@ Commands:
                               "DMA Insights" folder — the structured resume
                               state (state.json + surfaces/<section>.json)
                               a resuming workflow reads instead of prose
+  push-artifact --client <id> --file <named.json> [--root <dir>]
+                              file one produced artefact at the path its own
+                              NAME dictates. The destination is derived, never
+                              passed: a caller that could name its own folder
+                              could file a payload under another page
+  find-artifact --client <id> [--run --page --section --agent --kind] [--json]
+                              has this work already been done? RECURSIVE, so a
+                              misplaced artefact still answers, and READ-ONLY,
+                              so asking does not create what it reports on
 
 No value of any token is ever printed. Errors name the layer and the fix.
 """
@@ -426,35 +435,197 @@ def push_bundle(client: str, file_path: str, name: str | None) -> int:
     else:
         folder, chosen = _insights_root(tok, client)
         bundle_root, shown, holder = chosen["id"], chosen["name"], folder["name"]
-    parent = bundle_root
+    verb = _upload_json(tok, bundle_root, remote_name, local.read_bytes())
+    print(f"bundle {verb}: {shown}/{remote_name} in {holder!r}")
+    return 0
+
+
+def _upload_json(tok: str, root_id: str, remote_name: str,
+                 body: bytes) -> str:
+    """Create-or-update one JSON file at `remote_name` under `root_id`,
+    building the folder tree the name asks for. Returns "created"/"updated".
+
+    Shared by push-bundle and push-artifact so the taxonomy's folders are made
+    the same way the resume bundles' are — one uploader, one set of failure
+    modes."""
+    parent = root_id
     parts = remote_name.split("/")
     for sub in parts[:-1]:
         parent = _ensure_folder(tok, parent, sub)
     leaf = parts[-1]
     existing = [f for f in _list_children(tok, parent)
                 if f["mimeType"] != FOLDER_MIME and f["name"] == leaf]
-    body = local.read_bytes()
     if existing:
         url = (f"{UPLOAD}/files/{existing[0]['id']}?uploadType=media"
                f"&supportsAllDrives=true")
         with _req(tok, url, data=body, method="PATCH",
                   ctype="application/json") as resp:
             json.load(resp)
-        print(f"bundle updated: {shown}/{remote_name} in {holder!r}")
+        return "updated"
+    meta = json.dumps({"name": leaf, "parents": [parent]}).encode()
+    boundary = "dma-bundle-upload"
+    payload = io.BytesIO()
+    for part, ct in ((meta, "application/json; charset=UTF-8"),
+                     (body, "application/json")):
+        payload.write(f"--{boundary}\r\nContent-Type: {ct}\r\n\r\n".encode())
+        payload.write(part + b"\r\n")
+    payload.write(f"--{boundary}--".encode())
+    url = f"{UPLOAD}/files?uploadType=multipart&supportsAllDrives=true"
+    with _req(tok, url, data=payload.getvalue(), method="POST",
+              ctype=f"multipart/related; boundary={boundary}") as resp:
+        json.load(resp)
+    return "created"
+
+
+# ── the artefact taxonomy, on Drive ──────────────────────────────────────
+#
+# artifact_store.py decides where an artefact belongs; this pushes it there and
+# finds it again. The taxonomy is NEVER restated here — every rule comes from
+# that module, because a second copy of the page/section/agent mapping is a
+# second thing to drift, and the store's own docstring names that as the third
+# most common open defect class in this system.
+
+
+def _artifact_store():
+    import artifact_store                                     # noqa: PLC0415
+    return artifact_store
+
+
+def push_artifact(client: str, file_path: str, root: str | None = None) -> int:
+    """Put one produced artefact in the client's DMAI folder, at the path its
+    own NAME dictates — verified first, never on trust.
+
+    The remote path is DERIVED, not passed. A caller that could name its own
+    destination is a caller that can file a payload under another page, and
+    the whole point of the naming scheme is that the file itself says where it
+    belongs. `--root` is optional and only widens the check: when given, a file
+    sitting in the wrong local folder is REPORTED (and still pushed to the
+    right remote one, which is the healing case).
+    """
+    store = _artifact_store()
+    local = Path(file_path)
+    if not local.is_file():
+        raise SystemExit(f"no such file: {local}")
+    parsed = store.parse_name(local.name)
+    if parsed is None:
+        raise SystemExit(
+            f"{local.name!r} is not a taxonomy name, so nothing can say where "
+            f"it belongs. Produce it through `artifact_store.py put`, which "
+            f"names it: <run8>__<page>__<section>__<agent>__<kind>__<utc>.json")
+    try:
+        body = json.loads(local.read_bytes())
+    except Exception as e:                                    # noqa: BLE001
+        raise SystemExit(f"artefact must be valid JSON ({e}) — a retrieval "
+                         f"that hits a parse error re-derives the work, which "
+                         f"is the redo this store exists to prevent")
+    dest_rel = store.folder_for_name(local.name)
+    problems = store.verify_placement(local.parent, local.name, dest_rel,
+                                      body if isinstance(body, dict) else None)
+    if problems:
+        raise SystemExit("refusing to place this artefact: "
+                         + "; ".join(problems))
+    if root:
+        try:
+            actual = str(local.parent.resolve().relative_to(
+                Path(root).resolve())).replace("\\", "/")
+        except ValueError:
+            actual = None
+        if actual and actual.strip("/") != dest_rel:
+            print(f"note: locally filed under {actual!r}, which its name does "
+                  f"not support; pushing to {dest_rel!r} and leaving the local "
+                  f"copy for `artifact_store.py heal`")
+
+    tok = _token()
+    cache = _bundle_cache_path(client)
+    if cache.is_file():
+        ids = json.loads(cache.read_text())
+        root_id = ids["insights_folder_id"]
+        shown = ids.get("insights_folder_name") or BUNDLE_FOLDER
+        holder = ids.get("client_folder_name", client)
     else:
-        meta = json.dumps({"name": leaf, "parents": [parent]}).encode()
-        boundary = "dma-bundle-upload"
-        payload = io.BytesIO()
-        for part, ct in ((meta, "application/json; charset=UTF-8"),
-                         (body, "application/json")):
-            payload.write(f"--{boundary}\r\nContent-Type: {ct}\r\n\r\n".encode())
-            payload.write(part + b"\r\n")
-        payload.write(f"--{boundary}--".encode())
-        url = f"{UPLOAD}/files?uploadType=multipart&supportsAllDrives=true"
-        with _req(tok, url, data=payload.getvalue(), method="POST",
-                  ctype=f"multipart/related; boundary={boundary}") as resp:
-            json.load(resp)
-        print(f"bundle created: {shown}/{remote_name} in {holder!r}")
+        folder, chosen = _insights_root(tok, client)
+        root_id, shown, holder = chosen["id"], chosen["name"], folder["name"]
+    remote = f"{dest_rel}/{local.name}"
+    verb = _upload_json(tok, root_id, remote, local.read_bytes())
+    print(f"artefact {verb}: {shown}/{remote} in {holder!r}")
+    return 0
+
+
+def _walk_files(tok: str, folder_id: str, prefix: str = "",
+                depth: int = 0) -> list:
+    """Every file under this folder, at any depth, with its path. Lists only —
+    downloads nothing."""
+    out = []
+    if depth > 8:
+        return out
+    for f in _list_children(tok, folder_id):
+        if f["mimeType"] == FOLDER_MIME:
+            out += _walk_files(tok, f["id"], f"{prefix}{f['name']}/", depth + 1)
+        else:
+            out.append({"name": f["name"], "id": f["id"],
+                        "path": prefix + f["name"]})
+    return out
+
+
+def find_artifact(client: str, run=None, page=None, section=None, agent=None,
+                  kind=None, as_json=False) -> int:
+    """Has this work already been done? Searched RECURSIVELY and READ-ONLY.
+
+    Recursive because a lookup that reads only the correct folder cannot see
+    work that was filed wrongly, reports it absent, and so causes it to be
+    produced a second time — the exact redo the taxonomy exists to stop. A
+    misplaced artefact still answers "this exists"; `artifact_store.py heal`
+    puts it right afterwards.
+
+    Read-only because a search that creates the folder it searches makes every
+    client compliant on its first run and agrees with itself forever after.
+    So this never calls `_insights_root` (which finds-or-CREATES): a client
+    with no DMAI folder is reported as having none.
+    """
+    store = _artifact_store()
+    tok = _token()
+    folder = _find_client_folder(tok, client)
+    want = _insights_name(folder["name"])
+    kids = [f for f in _list_children(tok, folder["id"])
+            if f["mimeType"] == FOLDER_MIME]
+    root = next((f for f in kids if f["name"] == want), None) or \
+        next((f for f in kids if f["name"].startswith("DMAI - ")), None)
+    if root is None:
+        out = {"client": client, "insights_folder": None, "artifacts": [],
+               "why": f"no {want!r} folder — run "
+                      f"`drive_fetch.py ensure-insights --client {client}`"}
+        print(json.dumps(out, indent=1) if as_json else out["why"])
+        return 0
+
+    run8 = (run or "").replace("-", "")[:8].lower() or None
+    hits = []
+    for f in _walk_files(tok, root["id"]):
+        p = store.parse_name(f["name"])
+        if p is None:
+            continue
+        if run8 and p["run"] != run8:
+            continue
+        for got, wanted in ((p["page"], page), (p["section"], section),
+                            (p["agent"], agent), (p["kind"], kind)):
+            if wanted and got != wanted:
+                break
+        else:
+            hits.append({**p, "path": f["path"], "id": f["id"],
+                         "misfiled": f["path"].rsplit("/", 1)[0]
+                         != store.folder_for_name(f["name"])})
+    hits.sort(key=lambda h: h["ts"], reverse=True)
+    if as_json:
+        print(json.dumps({"client": client, "insights_folder": root["name"],
+                          "artifacts": hits}, indent=1))
+        return 0
+    if not hits:
+        print(f"no artefact matches under {root['name']!r} — this work has "
+              f"not been filed, which is not the same as not done")
+        return 0
+    for h in hits:
+        flag = "  [MISFILED — artifact_store.py heal]" if h["misfiled"] else ""
+        print(f"  {h['ts']}  {h['page']}/{h['section']}  {h['agent']}  "
+              f"{h['kind']}{flag}\n    {h['path']}")
     return 0
 
 
@@ -548,6 +719,24 @@ def main(argv=None) -> int:
     p_ei.add_argument("--folder-id", default=None,
                       help="pin a known Drive folder id (owner-supplied); "
                            "validated and renamed to taxonomy")
+    p_pa = sub.add_parser(
+        "push-artifact",
+        help="file one produced artefact under the client's DMAI folder at "
+             "the path its own name dictates (verified, never on trust)")
+    p_pa.add_argument("--client", required=True)
+    p_pa.add_argument("--file", required=True,
+                      help="a file named by artifact_store.py put")
+    p_pa.add_argument("--root", default=None,
+                      help="local artefact root; when given, a file in the "
+                           "wrong local folder is reported")
+    p_fa = sub.add_parser(
+        "find-artifact",
+        help="has this been produced already? recursive, read-only search of "
+             "the client's DMAI folder — a misplaced artefact still answers")
+    p_fa.add_argument("--client", required=True)
+    for opt in ("run", "page", "section", "agent", "kind"):
+        p_fa.add_argument(f"--{opt}", default=None)
+    p_fa.add_argument("--json", action="store_true", dest="as_json")
     a = ap.parse_args(argv)
     if a.cmd == "check":
         return check()
@@ -563,6 +752,11 @@ def main(argv=None) -> int:
         return pull_ledgers(a.dest)
     if a.cmd == "ensure-insights":
         return ensure_insights(a.client, a.folder_id)
+    if a.cmd == "push-artifact":
+        return push_artifact(a.client, a.file, a.root)
+    if a.cmd == "find-artifact":
+        return find_artifact(a.client, a.run, a.page, a.section, a.agent,
+                             a.kind, a.as_json)
     return 2
 
 
