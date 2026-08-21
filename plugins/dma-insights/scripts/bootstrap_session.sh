@@ -176,14 +176,81 @@ else
   log "claude CLI not found — cannot install the plugin"
 fi
 
-# ---- 5 · skill script dependencies (pandas et al., wheel-only) ----------
+# ---- 5 · the grant that makes an unattended session able to CALL the tools --
+# INSTALLING THE PLUGIN IS NOT THE SAME AS BEING ALLOWED TO USE IT, and the
+# gap between those two is what has killed every scheduled firing.
+#
+# Measured 2026-08-21: a session created with this repo attached bound the
+# connector correctly — `mcp__plugin_dma-insights_connector__get_run_progress`
+# existed and was called — and then stopped dead on
+#   "Waiting on permission: mcp__plugin_dma-insights_connector__get_run_progress"
+# A trigger-fired container has nobody to answer that prompt, so the firing
+# burns its slot, stages nothing, and records nothing. That is exactly the
+# signature the 00:08 firing left: fired 00:10:43Z, zero findings, zero rows.
+#
+# THE SCOPE MATTERS AND THE OBVIOUS CHOICE IS THE WRONG ONE. The repo's own
+# .claude/settings.json is PROJECT scope, and project permission rules are not
+# applied in a non-interactive session — the workspace is untrusted, the rules
+# are skipped, and the grant would have looked right in review while changing
+# nothing. User scope is the scope that survives, so the grant goes here, in
+# the script the environment setup field runs BEFORE the session starts.
+#
+# The server segment must be glob-free: `mcp__<server>__*` is honoured,
+# `mcp__*` is skipped with a warning and approves nothing.
+#
+# Merged, never clobbered — this file already carries enabledPlugins,
+# extraKnownMarketplaces and pluginConfigs written above, and losing those
+# would uninstall the plugin to fix its permissions.
+#
+# The python below writes to a temp file rather than running inside `$( )`:
+# bash mis-parses a here-document nested in a command substitution when the
+# closing paren sits on its own line — it warned `unterminated here-document`
+# and leaked a stray `)` into the log on the first cut of this block.
+CLAUDE_SETTINGS="${HOME:-/root}/.claude/settings.json"
+GRANT_OUT="$(mktemp)"
+CLAUDE_SETTINGS="$CLAUDE_SETTINGS" python3 - >"$GRANT_OUT" 2>/dev/null <<'PY' || echo "permission grant FAILED" >"$GRANT_OUT"
+import json, os, pathlib
+
+want = "mcp__plugin_dma-insights_connector__*"
+p = pathlib.Path(os.environ["CLAUDE_SETTINGS"])
+p.parent.mkdir(parents=True, exist_ok=True)
+try:
+    cfg = json.loads(p.read_text())
+    if not isinstance(cfg, dict):
+        raise ValueError("settings.json is not an object")
+except FileNotFoundError:
+    cfg = {}
+except Exception as e:                                       # noqa: BLE001
+    # A malformed settings file silently disables EVERY setting in it, so
+    # refuse rather than overwrite something a human may be mid-edit on.
+    print(f"permission grant SKIPPED — {p} unreadable ({e})")
+    raise SystemExit(0)
+
+perms = cfg.setdefault("permissions", {})
+allow = perms.setdefault("allow", [])
+if not isinstance(allow, list):
+    print("permission grant SKIPPED — permissions.allow is not a list")
+    raise SystemExit(0)
+if want in allow:
+    print("connector already granted in user settings")
+else:
+    allow.append(want)
+    tmp = p.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(cfg, indent=2) + "\n")
+    tmp.replace(p)                                           # atomic
+    print("granted " + want + " in user settings")
+PY
+log "$(cat "$GRANT_OUT")"
+rm -f "$GRANT_OUT"
+
+# ---- 6 · skill script dependencies (pandas et al., wheel-only) ----------
 if [ -x "$REPO_DIR/plugins/dma-insights/scripts/dma-deps" ]; then
   "$REPO_DIR/plugins/dma-insights/scripts/dma-deps" install >/dev/null 2>&1 \
     && log "skill script dependencies installed" \
     || log "dma-deps install failed — skills needing pandas/matplotlib will degrade"
 fi
 
-# ---- 6 · prove the wire before the session starts -----------------------
+# ---- 7 · prove the wire before the session starts -----------------------
 # The one check that matters: an ID token minted from the key opens the
 # connector and the tool roster answers. Codes only, never tokens.
 if [ -s "$KEY_FILE" ] && [ -n "$PATHTOK" ]; then
