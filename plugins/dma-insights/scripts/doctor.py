@@ -603,13 +603,38 @@ def tool_roster_check(base_url, gcloud, id_token, manifest: dict) -> dict:
     prefixes = _scoped_prefixes(manifest)
     unresolved = []
     matchers = hook_matchers()
+    # WHAT THIS ROW IS FOR, and what it is not.
+    #
+    # The drift worth catching is a matcher that NAMES one connector tool
+    # which the connector has stopped serving — that hook silently never
+    # fires again. Two other kinds of matcher are legitimate and were being
+    # failed as though they were that:
+    #
+    #   * a matcher on a non-MCP tool. `Bash` has matched deny_credential_ops
+    #     since that guard was written; it is not a connector tool and never
+    #     was.
+    #   * a PATTERN rather than a name. `mcp__.*` is how autoapprove_connector
+    #     reaches the enrichment connectors, whose server segment is an opaque
+    #     per-attachment UUID that no exact matcher can name. Its scoping is
+    #     enforced inside the script and by its own tests, not here.
+    #
+    # Failing those made the row red for a correct configuration — and the
+    # synthesis routine's STEP 0 requires a fully green doctor, so this row
+    # alone would have stopped every scheduled firing. A check that fails a
+    # correct config is worse than no check: it trains people to skip the row.
+    _META = set(".*+?[]{}()|^$\\")
+    named = patterns = foreign = 0
     for matcher in matchers:
+        if set(matcher) & _META:
+            patterns += 1
+            continue
         bare = next((matcher[len(p):] for p in prefixes
                      if matcher.startswith(p)), None)
         if bare is None:
-            unresolved.append(f"{matcher} (not scoped to a server this "
-                              "plugin defines)")
-        elif bare not in live:
+            foreign += 1          # a tool this plugin's connector never served
+            continue
+        named += 1
+        if bare not in live:
             unresolved.append(matcher)
     advertised = re.search(r"\((\d+) tools\)", manifest.get("description") or "")
     advertised = int(advertised.group(1)) if advertised else None
@@ -626,9 +651,14 @@ def tool_roster_check(base_url, gcloud, id_token, manifest: dict) -> dict:
         return _check(name, False, "; ".join(problems),
                       "update the hooks and the manifest description's "
                       "'(N tools)' to match the deployed connector")
+    # Say what was RECONCILED and what was merely counted — a row that reports
+    # "all N resolve" while silently skipping most of them is the kind of
+    # comfortable half-truth this build keeps removing.
     return _check(name, True,
                   f"{len(live)} live tools == manifest's advertised "
-                  f"{advertised}; all {len(matchers)} hook matcher(s) resolve "
+                  f"{advertised}; {named} named connector matcher(s) resolve "
+                  f"({patterns} pattern, {foreign} non-connector matcher(s) "
+                  f"not name-checked) "
                   f"(path token via {source}, value not shown)")
 
 

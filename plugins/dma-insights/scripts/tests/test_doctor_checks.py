@@ -265,3 +265,87 @@ class NoProbeIsTrulyOffline(unittest.TestCase):
         if not failing:
             self.assertEqual(proc.returncode, 0,
                              "every row green must mean exit 0")
+
+
+class ToolRosterReconciliation(unittest.TestCase):
+    """The row that would have stopped every scheduled firing.
+
+    `tool_roster_check` reconciles hook matchers against the connector's live
+    tool list. It treated EVERY matcher as a connector tool name, so two
+    legitimate kinds failed as though the connector had dropped a tool:
+
+      * `Bash`, which has matched deny_credential_ops since that guard existed
+        and is not a connector tool at all;
+      * `mcp__.*`, which is how autoapprove_connector reaches the enrichment
+        connectors — their server segment is an opaque per-attachment UUID
+        that no exact matcher can name.
+
+    Measured 2026-08-21T03:33Z: `13/14 checks passed`, the failing row naming
+    both. The synthesis routine's STEP 0 requires a FULLY GREEN doctor, so
+    that single row would have stopped the routine at the gate — a check that
+    fails a correct configuration is worse than no check, because it teaches
+    people to skip the row.
+
+    The drift it exists for must still be caught, so both halves are tested.
+    """
+
+    LIVE = ["get_run_progress", "claim_run", "submit_page_payload",
+            "promote_run", "register_evidence"]
+
+    def _row(self, matchers):
+        with mock.patch.object(doctor, "live_tool_names",
+                               return_value=self.LIVE), \
+             mock.patch.object(doctor, "hook_matchers",
+                               return_value=matchers), \
+             mock.patch.object(doctor, "_path_token",
+                               return_value=("tok", "test")):
+            return doctor.tool_roster_check(
+                "https://example.invalid", "gcloud", "idtok",
+                {"description": f"connector ({len(self.LIVE)} tools)"})
+
+    def test_a_named_connector_tool_that_is_gone_still_fails(self):
+        """THE DRIFT THE ROW EXISTS FOR — a hook that silently stopped firing."""
+        row = self._row(["mcp__plugin_dma-insights_connector__deleted_tool"])
+        self.assertFalse(row["ok"], row["detail"])
+        self.assertIn("deleted_tool", row["detail"])
+
+    def test_a_named_connector_tool_that_is_live_passes(self):
+        row = self._row(["mcp__plugin_dma-insights_connector__promote_run"])
+        self.assertTrue(row["ok"], row["detail"])
+
+    def test_a_non_mcp_matcher_is_not_treated_as_a_connector_tool(self):
+        """Bash matches the credential guard and is not a connector tool."""
+        row = self._row(["Bash"])
+        self.assertTrue(row["ok"], row["detail"])
+
+    def test_a_pattern_matcher_is_not_name_checked(self):
+        """`mcp__.*` cannot name a tool; its scoping lives in the hook script
+        and that script's own tests, not in this row."""
+        row = self._row(["mcp__.*"])
+        self.assertTrue(row["ok"], row["detail"])
+
+    def test_the_real_hooks_json_reconciles(self):
+        row = self._row(doctor.hook_matchers())
+        self.assertTrue(row["ok"], row["detail"])
+
+    def test_the_row_says_what_it_did_not_name_check(self):
+        """A row reporting 'all N resolve' while silently skipping most of
+        them is the comfortable half-truth this build keeps removing."""
+        row = self._row(["Bash", "mcp__.*",
+                         "mcp__plugin_dma-insights_connector__promote_run"])
+        self.assertTrue(row["ok"], row["detail"])
+        self.assertIn("1 named connector matcher(s) resolve", row["detail"])
+        self.assertIn("1 pattern", row["detail"])
+        self.assertIn("1 non-connector", row["detail"])
+
+    def test_a_drifted_advertised_count_still_fails(self):
+        with mock.patch.object(doctor, "live_tool_names",
+                               return_value=self.LIVE), \
+             mock.patch.object(doctor, "hook_matchers", return_value=[]), \
+             mock.patch.object(doctor, "_path_token",
+                               return_value=("tok", "test")):
+            row = doctor.tool_roster_check(
+                "https://example.invalid", "gcloud", "idtok",
+                {"description": "connector (99 tools)"})
+        self.assertFalse(row["ok"], row["detail"])
+        self.assertIn("99", row["detail"])
