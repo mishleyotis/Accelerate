@@ -317,10 +317,36 @@ def hooks_wired_check(plugin_root: Path = PLUGIN) -> dict:
                             "on a benign event")
         else:
             ran += 1
+
+    # THE HOOK A SCHEDULED FIRING CANNOT RUN WITHOUT, checked here because a
+    # session that is missing it does not fail — it HANGS, on a permission
+    # prompt no human will ever see (measured 2026-08-21: three firings died
+    # exactly this way, two on the connector and one on an enrichment
+    # lookup).
+    #
+    # Instructions in the routine prompt cannot help that case: a session
+    # blocked mid-tool-call is not reading anything. The check has to happen
+    # BEFORE work starts, and STEP 0 already requires this doctor fully
+    # green — so putting it here is what makes an old plugin fail loudly at
+    # the gate instead of silently burning a twelve-hour slot.
+    approver = plugin_root / "scripts" / "hooks" / "autoapprove_connector.py"
+    if not approver.is_file():
+        problems.append("scripts/hooks/autoapprove_connector.py is missing — "
+                        "an unattended session will hang on a permission "
+                        "prompt nobody can answer")
+    else:
+        wired = any("autoapprove_connector.py" in (h.get("command") or "")
+                    for ev, _, h in entries if ev == "PreToolUse")
+        if not wired:
+            problems.append("autoapprove_connector.py exists but no PreToolUse "
+                            "entry runs it — an unattended session will hang "
+                            "on a permission prompt nobody can answer")
+
     return _check(
         "hooks wired", not problems,
         f"{ran} handler run(s): every entry parses, exists, has a numeric "
-        "timeout and exits 0 on a benign event" if not problems
+        "timeout and exits 0 on a benign event; the connector auto-approver "
+        "is present and wired" if not problems
         else "; ".join(problems),
         "" if not problems else
         "in this state the hook never fires, or fires and dies — no submit "

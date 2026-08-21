@@ -349,3 +349,47 @@ class ToolRosterReconciliation(unittest.TestCase):
                 {"description": "connector (99 tools)"})
         self.assertFalse(row["ok"], row["detail"])
         self.assertIn("99", row["detail"])
+
+
+class AutoApproverIsWired(unittest.TestCase):
+    """A scheduled firing that lacks the auto-approver does not fail — it HANGS.
+
+    Three firings died that way on 2026-08-21, two on the connector and one on
+    an enrichment lookup, each waiting on a permission prompt the owner has
+    confirmed is never surfaced to a human at all.
+
+    Instructions in the routine prompt cannot cover it: a session blocked
+    mid-tool-call is not reading anything. So the check runs BEFORE work
+    starts, in the row STEP 0 already requires green — which turns a stale
+    plugin from a silently burned twelve-hour slot into a loud refusal at the
+    gate.
+    """
+
+    def test_the_real_tree_has_the_approver_wired(self):
+        row = doctor.hooks_wired_check()
+        self.assertTrue(row["ok"], row["detail"])
+        self.assertIn("auto-approver is present and wired", row["detail"])
+
+    def test_a_missing_approver_fails_the_row(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = _copy_tree(Path(td))
+            (root / "scripts" / "hooks" / "autoapprove_connector.py").unlink()
+            row = doctor.hooks_wired_check(root)
+        self.assertFalse(row["ok"], row["detail"])
+        self.assertIn("hang on a permission prompt", row["detail"])
+
+    def test_an_unwired_approver_fails_the_row(self):
+        """Present on disk but named by no PreToolUse entry — the file exists
+        and never runs, which is indistinguishable from absent at runtime."""
+        with tempfile.TemporaryDirectory() as td:
+            root = _copy_tree(Path(td))
+            hj = root / "hooks" / "hooks.json"
+            spec = json.loads(hj.read_text())
+            spec["hooks"]["PreToolUse"] = [
+                e for e in spec["hooks"]["PreToolUse"]
+                if "autoapprove_connector.py" not in
+                " ".join(h["command"] for h in e["hooks"])]
+            hj.write_text(json.dumps(spec, indent=2))
+            row = doctor.hooks_wired_check(root)
+        self.assertFalse(row["ok"], row["detail"])
+        self.assertIn("no PreToolUse entry runs it", row["detail"])
