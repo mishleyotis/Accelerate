@@ -64,6 +64,45 @@ def test_g3_produces_when_the_refresh_queue_names_the_client(monkeypatch):
     assert verdict == "produce" and "refresh" in detail
 
 
+def test_g3_asks_the_refresh_queue_for_the_internal_audience(monkeypatch):
+    """The queue 403s to any audience but `internal`, and an OMITTED audience
+    default-denies to `customer` (invariant 5). Called bare, this returned 403
+    on every client, the queue was never read, and every serving client was
+    skipped — including ones a human had asked to refresh.
+
+    The two tests above cannot see it: their `api_get` stub matches on the path
+    substring and discards the rest, so a missing query parameter is invisible
+    to them. This one captures the path.
+    """
+    seen = []
+
+    def _api(path):
+        seen.append(path)
+        return ((200, {"requested": [], "due": []})
+                if "refresh-queue" in path else (200, {}))
+
+    monkeypatch.setattr(run_gate, "api_get", _api)
+    run_gate.g3_serving_state("acme-credit-union")
+    queue_calls = [p for p in seen if "refresh-queue" in p]
+    assert queue_calls == ["/v1/ops/refresh-queue?audience=internal"]
+
+
+def test_g3_never_claims_no_refresh_is_due_when_it_could_not_look(monkeypatch):
+    """"Nobody looked" and "nothing is due" must stay distinguishable.
+
+    The old branch fell through to "no refresh is requested or due" on ANY
+    non-200 — a statement of fact it had not established, and the sentence
+    that made the 403 invisible for the life of the queue.
+    """
+    monkeypatch.setattr(run_gate, "api_get", lambda path: (
+        (403, {"error": "audience_forbidden"}) if "refresh-queue" in path
+        else (200, {})))
+    verdict, detail = run_gate.g3_serving_state("acme-credit-union")
+    assert verdict == "produce"
+    assert "UNREADABLE" in detail and "403" in detail
+    assert "no refresh is requested or due" not in detail
+
+
 def test_g3_produces_a_client_not_serving(monkeypatch):
     monkeypatch.setattr(run_gate, "api_get", lambda path: (404, None))
     verdict, detail = run_gate.g3_serving_state("acme-credit-union")

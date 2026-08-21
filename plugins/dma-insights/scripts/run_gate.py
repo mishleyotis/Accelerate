@@ -203,13 +203,27 @@ def g3_serving_state(display_id: str) -> tuple:
         == 200)
     if served < len(PAGES):
         return "produce", f"serving {served}/6 pages — incomplete, finish it"
-    code, queue = api_get("/v1/ops/refresh-queue")
-    if code == 200 and queue:
-        listed = {e.get("display_id") for lst in ("requested", "due")
-                  for e in (queue.get(lst) or [])}
-        if display_id in listed:
-            return "produce", "serving 6/6 but the refresh queue names it — " \
-                              "refresh run"
+    # audience=internal, EXPLICITLY. `refresh_queue` raises 403 for any other
+    # audience (apps/api/dma_api/cadence.py) and the endpoint default-denies an
+    # omitted parameter to `customer` (invariant 5). Called bare, this returned
+    # 403 on every client, the queue was never consulted, and the gate skipped
+    # every serving client — including the ones a human had explicitly asked to
+    # refresh. A requested refresh that silently never runs is the worst shape
+    # of this bug, because the request is recorded and looks answered.
+    code, queue = api_get("/v1/ops/refresh-queue?audience=internal")
+    if code != 200 or not isinstance(queue, dict):
+        # NOT "no refresh is due" — nobody looked. Saying otherwise states a
+        # fact this branch did not establish, and that is exactly how the 403
+        # stayed invisible. Produce, because an unreadable queue must not be
+        # the thing that stops a refresh.
+        return "produce", (f"serving 6/6 but the refresh queue is UNREADABLE "
+                           f"(HTTP {code}) — cannot show a refresh is not "
+                           f"needed, so treating as due")
+    listed = {e.get("display_id") for lst in ("requested", "due")
+              for e in (queue.get(lst) or [])}
+    if display_id in listed:
+        return "produce", "serving 6/6 but the refresh queue names it — " \
+                          "refresh run"
     return "skip", "already serving 6/6 and no refresh is requested or due " \
                    "— re-producing a current client is not synthesis, skip"
 

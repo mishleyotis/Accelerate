@@ -240,7 +240,14 @@ jobs:
       # path skip as one line. The connector ships pypdf
       # (apps/mcp/requirements.txt), so a runner without it is testing a
       # different program from the one that deploys.
-      - run: pip install -q pytest openpyxl pg8000 pypdf -r apps/api/requirements.txt
+      # httpx for the same reason, one layer along: `fastapi.testclient` needs
+      # it, and without it the whole HTTP-level ops suite
+      # (test_ops_endpoint_audience.py) importorskips away as one line. That
+      # suite pins the endpoint DEFAULT-DENY — the step that turned a bare
+      # `GET /v1/ops/refresh-queue` into a silent 403 and made the refresh
+      # queue unreadable to the gate that drains it. Skipping it would leave
+      # the one layer where that could be seen untested.
+      - run: pip install -q pytest openpyxl pg8000 pypdf httpx -r apps/api/requirements.txt
       # Gate G rides in here rather than in the gates job above. That job runs
       # bare `python3 script.py` against the stdlib and installs nothing, so a
       # step shelling out to pytest dies on `No module named pytest` — which

@@ -475,8 +475,14 @@ exactly which layer failed, naming bootstrap_session.sh and
 DMA_ROUTINE_SA_KEY_B64 so the fix is actionable. A drift review that cannot read
 the state invents it.
 
-STEP 1 — THE REFRESH QUEUE. Read GET /v1/ops/refresh-queue on the api (internal
-audience — the queue names actors and reasons and is never served to customers).
+STEP 1 — THE REFRESH QUEUE. Read GET /v1/ops/refresh-queue?audience=internal on
+the api. The parameter is NOT optional and NOT decorative: an omitted audience
+default-denies to `customer` (invariant 5), the queue 403s, and the 403 reads as
+a permissions fault rather than as your own missing parameter. That is not
+hypothetical — run_gate.py called it bare, 403'd on every client, never read the
+queue once, and skipped every serving client including ones a human had asked to
+refresh. So: a 403 or any other non-200 here means NOBODY LOOKED. It never means
+nothing is due, and reporting it as an empty queue is the failure itself.
 It returns two deliberately unmerged lists: `requested` (a human asked, with a
 reason) and `due` (six months ran out, a date and nothing else). If the api is
 unreachable, read the same state client by client through the connector:
