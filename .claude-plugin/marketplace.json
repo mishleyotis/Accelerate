@@ -1,0 +1,27 @@
+{
+  "name": "zennify-dma",
+  "description": "Zennify Digital Maturity Assessment tooling: the skills, agents and connector that produce and audit DMA Insights surfaces.",
+  "version": "0.6.7",
+  "owner": {
+    "name": "Zennify \u2014 DMA Insights build",
+    "email": "mishley.otiende@zennify.com"
+  },
+  "plugins": [
+    {
+      "name": "dma-insights",
+      "source": "./plugins/dma-insights",
+      "displayName": "DMA Insights",
+      "description": "The six DMA skills, the 47-agent production and audit roster, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector.",
+      "version": "0.6.8",
+      "category": "domain",
+      "tags": [
+        "dma",
+        "financial-services",
+        "assessment",
+        "zennify"
+      ],
+      "license": "UNLICENSED",
+      "defaultEnabled": false
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "checkpoint_id": "04_scores",
+  "checkpoint_phase": "Phase 7: Score Subcapabilities",
+  "description": "All subcapability scores with evidence linkage, rationales, and applied caps. Core scoring output; single source of truth for all score values.",
+  "checkpoint_metadata": {
+    "assessment_id": "DMA-[ABBREV]-[YYYYMMDD]-[SEQNUM]",
+    "institution_name": "[Institution Name]",
+    "sub_vertical": "[Sub-Vertical]",
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "scoring_status": "[PILLAR_P1_COMPLETE / PILLAR_P2_COMPLETE / PILLAR_P3_COMPLETE / PILLAR_P4_COMPLETE / ALL_PILLARS_COMPLETE]",
+    "scoring_methodology_version": "[Assessment Skill v3.0+]"
+  },
+  "aggregation_summary": {
+    "overall_score": {
+      "value": "[1.0–5.0; calculated per weighted aggregation]",
+      "maturity_level": "[M1 / M2 / M3 / M4 / M5]",
+      "confidence": "[HIGH / MEDIUM / LOW]"
+    },
+    "pillar_scores": {
+      "P1_Governance_and_Organization": {
+        "score": "[1.0–5.0]",
+        "maturity_level": "[M1–M5]",
+        "confidence": "[HIGH / MEDIUM / LOW]",
+        "calculation_source": "Weighted average of P1C1–P1C5 category scores"
+      },
+      "P2_Customer_Experience": {
+        "score": "[1.0–5.0]",
+        "maturity_level": "[M1–M5]",
+        "confidence": "[HIGH / MEDIUM / LOW]",
+        "calculation_source": "Weighted average of P2C1–P2C4 category scores"
+      },
+      "P3_Operations_and_Compliance": {
+        "score": "[1.0–5.0]",
+        "maturity_level": "[M1–M5]",
+        "confidence": "[HIGH / MEDIUM / LOW]",
+        "calculation_source": "Weighted average of P3C1–P3C4 category scores"
+      },
+      "P4_Technology_and_Data": {
+        "score": "[1.0–5.0]",
+        "maturity_level": "[M1–M5]",
+        "confidence": "[HIGH / MEDIUM / LOW]",
+        "calculation_source": "Weighted average of P4C1–P4C4 category scores"
+      }
+    }
+  },
+  "pillar_scoring_detail": {
+    "pillar_1_governance": [
+      {
+        "category_id": "P1C1",
+        "category_name": "Digital Strategy & Vision",
+        "category_score": "[1.0–5.0]",
+        "category_maturity": "[M1–M5]",
+        "weight": "[0.25 for CU / 0.20 for RB, etc.; per PILLAR_WEIGHTS_BY_SUBVERTICAL]",
+        "subcapabilities": [
+          {
+            "subcap_id": "P1C1-001",
+            "subcap_name": "[From taxonomy]",
+            "raw_score": "[1.0–5.0 before caps]",
+            "evidence_ids": "[E-### or INT-### IDs supporting this score]",
+            "evidence_tier_mix": "[Breakdown: X% T1, Y% T2, etc.]",
+            "rationale_excerpt": "[Quote from full rationale showing argument chain]",
+            "confidence": "[HIGH / MEDIUM / LOW]",
+            "caps_applied": "[List of cap IDs applied]",
+            "final_score": "[1.0–5.0 after caps]"
+          }
+        ],
+        "calculation": "[Sum of (subcap_score × subcap_weight); show formula]"
+      }
+    ],
+    "pillar_2_customer_experience": [
+      {
+        "category_id": "P2C1",
+        "category_name": "Digital Marketing & Acquisition",
+        "category_score": "[Score]",
+        "weight": "[0.30 for CU]",
+        "subcapabilities": [
+          {
+            "subcap_id": "P2C1-001",
+            "subcap_name": "[From taxonomy]",
+            "raw_score": "[1.0–5.0]",
+            "evidence_ids": "[E-### list]",
+            "rationale_excerpt": "[Brief quote]",
+            "confidence": "[HIGH / MEDIUM / LOW]",
+            "sentiment_cap_applied": "[true / false; if P2C1-XXX and app rating <3.0, cap = 2.0]",
+            "caps_applied": "[List]",
+            "final_score": "[After caps]"
+          }
+        ]
+      }
+    ],
+    "pillar_3_operations": [
+      {
+        "category_id": "P3C1",
+        "category_name": "Core Process Automation",
+        "category_score": "[Score]",
+        "weight": "[0.20 for CU]",
+        "subcapabilities": [
+          {
+            "subcap_id": "P3C1-001",
+            "subcap_name": "[From taxonomy]",
+            "raw_score": "[1.0–5.0]",
+            "evidence_ids": "[E-### list]",
+            "rationale_excerpt": "[Brief quote]",
+            "confidence": "[HIGH / MEDIUM / LOW]",
+            "cross_pillar_caps_applied": "[List; e.g., 'P4C3 Architecture <2.5 → cap P3C1 at 3.0']",
+            "caps_applied": "[List]",
+            "final_score": "[After caps]"
+          }
+        ]
+      }
+    ],
+    "pillar_4_technology": [
+      {
+        "category_id": "P4C1",
+        "category_name": "Data Management & Governance",
+        "category_score": "[Score]",
+        "weight": "[0.25 for CU]",
+        "subcapabilities": [
+          {
+            "subcap_id": "P4C1-001",
+            "subcap_name": "[From taxonomy]",
+            "raw_score": "[1.0–5.0]",
+            "evidence_ids": "[E-### list]",
+            "rationale_excerpt": "[Brief quote]",
+            "confidence": "[HIGH / MEDIUM / LOW]",
+            "evidence_cap_applied": "[true / false; if only T5 evidence, cap = 2.0]",
+            "caps_applied": "[List]",
+            "final_score": "[After caps]"
+          }
+        ]
+      }
+    ]
+  },
+  "caps_applied_summary": {
+    "severity_caps": [
+      {
+        "cap_id": "CAP-SEV-001",
+        "issue_triggering": "[Issue ID that triggered]",
+        "severity": "[S3 / S2 / S1]",
+        "affected_capabilities": "[List of P[1-4]C[1-5]]",
+        "cap_ceiling": "[1.5 / 2.0 / 3.0 / 3.5]",
+        "applications": "[Count of times applied]"
+      }
+    ],
+    "evidence_caps": [
+      {
+        "cap_id": "CAP-EVI-001",
+        "trigger_reason": "[T5_only / single_source / etc.]",
+        "affected_subcaps": "[List]",
+        "cap_ceiling": "[2.0 / 2.5 / 3.0]",
+        "applications": "[Count]"
+      }
+    ],
+    "sentiment_caps": [
+      {
+        "cap_id": "CAP-SENT-001",
+        "metric": "[App rating / Complaint trend]",
+        "value": "[e.g., 3.2 rating]",
+        "affected_capabilities": "[P2 categories]",
+        "cap_ceiling": "[2.0 / 2.5 / etc.]",
+        "applications": "[Count]"
+      }
+    ],
+    "cross_pillar_caps": [
+      {
+        "cap_id": "CAP-XPIL-001",
+        "trigger_capability": "[e.g., P1C2]",
+        "trigger_score": "[Score that triggered]",
+        "affected_capability": "[Downstream cap]",
+        "affected_categories": "[List]",
+        "cap_ceiling": "[3.0 / 3.5]",
+        "applications": "[Count]"
+      }
+    ]
+  },
+  "n_a_capabilities": {
+    "n_a_count": "[Count of capabilities marked N/A]",
+    "n_a_list": [
+      {
+        "capability_id": "[P[1-4]C[1-5]]",
+        "reason_for_n_a": "[>30% subcaps have NO_EVIDENCE]",
+        "evidence_coverage": "[X% of subcaps have evidence]",
+        "business_implication": "[Brief note on what this means for the assessment]"
+      }
+    ]
+  },
+  "scoring_quality_checks": {
+    "row_count_validation": {
+      "status": "[PASS / FAIL]",
+      "expected_subcap_count": "[Per taxonomy, typically ~836]",
+      "actual_scored_count": "[Count of scored subcaps]",
+      "missing_subcaps": "[List if any]"
+    },
+    "evidence_linkage_validation": {
+      "status": "[PASS / FAIL]",
+      "all_scores_linked": "[true / false]",
+      "orphaned_evidence": "[Evidence items not referenced in any score; should be minimal]"
+    },
+    "cap_application_validation": {
+      "status": "[PASS / FAIL]",
+      "total_caps_applied": "[Count across all types]",
+      "cap_log_reconciliation": "[Do caps in scores match caps_applied_log.csv?]"
+    },
+    "aggregation_calculation_validation": {
+      "status": "[PASS / FAIL]",
+      "sample_calculation": "[E.g., 'P1 = sum(P1C1:0.25×3.1 + P1C2:0.25×3.2 + ... ) = 3.06 ✓']",
+      "weight_sum_check": "[Do weights sum to 100% (±1%)?]"
+    }
+  },
+  "metadata": {
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_version": "1.0",
+    "total_subcaps_scored": "[Count]",
+    "total_subcaps_no_evidence": "[Count of NO_EVIDENCE scores]",
+    "total_caps_applied": "[Count across all types]",
+    "checkpoint_status": "COMPLETE"
+  }
+}

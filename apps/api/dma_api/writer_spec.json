@@ -1,0 +1,4588 @@
+{
+ "specs": [
+  {
+   "page": "heatmap",
+   "writers": [
+    {
+     "section": "workbook_scores",
+     "table": "heatmap_workbook_scores",
+     "grain": "item",
+     "item_field": null,
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "subcap_id",
+       "source": "skip:no contract field — never written, NULL on aggregate rows (see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "name",
+       "source": "skip:no contract field — never written, NULL (see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "capability_id",
+       "source": "skip:no contract field — never written, NULL (see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "category_id",
+       "source": "item:category_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "pillar_id",
+       "source": "item:pillar_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "score",
+       "source": "item:score",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "band",
+       "source": "skip:GENERATED ALWAYS — band_t from raw score, four-branch strict-less-than",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "peer_median",
+       "source": "item:peer_median",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "delta",
+       "source": "skip:GENERATED ALWAYS (score - peer_median)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "peer_n",
+       "source": "skip:no contract field — never written, NULL (see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "peer_basis",
+       "source": "skip:no contract field — never written, NULL (see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "skip:no contract field — never written, NULL (see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "is_thin_evidence",
+       "source": "skip:no contract field — never written, NULL (see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "below_threshold",
+       "source": "skip:no contract field — never written, NULL (see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "is_primary_gap",
+       "source": "skip:no contract field — never written, NULL (see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "source_cell",
+       "source": "item:source_cell",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "GRAIN MISMATCH, the load-bearing note for this writer: the registered contract has NO list field — its two required fields are OBJECT MAPS, pillars {P1..P4: {score, peer_median, source_cell}} and categories {PxCy: {score, peer_median, source_cell}}, so item_field is null. The writer fans BOTH maps into rows, one row per map entry: pillar rows set pillar_id from the map key; category rows set category_id from the map key and pillar_id from its Px prefix; each row takes score, peer_median, source_cell from the entry (source_cell is mandatory in the contract — a figure naming no workbook location is rejected). The DDL mirrors the Surface Spec's per-subcap H4 cell shape, so the subcap-grain columns (subcap_id, name, capability_id, peer_n, peer_basis, confidence, is_thin_evidence, below_threshold, is_primary_gap) have no source in the current contract and stay NULL on aggregate rows; if the grid's 851 subcap rows are meant to be served from this table they must arrive as workbook pass-through from the ingested subcap_scores register (the DDL's own comment on `score` says 'workbook pass-through; authoritative for the grid') — ADJUDICATE before freezing. rollup_score and score_source are APP-COMPUTED at serve time (workbook_scores.resolve_cell), never stored. Payload carries no band and no colour (invariant 7); band and delta are GENERATED. Page-level: contracts_data's _narrative_thread_note says no source names the heatmap lead section — narrative_thread stays NULL on every heatmap section pending adjudication (the page table lists workbook_scores first; the D3 thread opens with focus areas).",
+     "expand": "h4_maps"
+    },
+    {
+     "section": "focus_areas",
+     "table": "heatmap_focus_areas",
+     "grain": "item",
+     "item_field": "focus_areas",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "fa_id",
+       "source": "item:fa_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "name",
+       "source": "item:name",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "verbatim_quote",
+       "source": "item:verbatim_quote",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "source_document",
+       "source": "item:source_document",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "source_page",
+       "source": "item:source_page",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "source_filename",
+       "source": "item:source_filename",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "involved_subcap_ids",
+       "source": "item:involved_subcap_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "entity_score",
+       "source": "item:entity_score",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "peer_score",
+       "source": "item:peer_score",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "delta",
+       "source": "skip:GENERATED ALWAYS (entity_score - peer_score) — payload's delta item key is validated at submit, never written",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "currency_status",
+       "source": "item:currency_status",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "currency_note",
+       "source": "item:currency_note",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "new_evidence_ids",
+       "source": "item:new_evidence_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "item:confidence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "item:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "Contract item keys map 1:1 to columns EXCEPT: (1) item key `confidence` has NO column in heatmap_focus_areas — it is currently dropped at write; flag for adjudication (add a confidence_t column or accept payload-only). (2) item key `delta` maps to a GENERATED column — cross-checked (CG grain tolerance), never written. Name mapping already resolved upstream: the Surface Spec's information-sources table called this field `title`; the emit prompt's `name` was adopted in the contract and matches the column. Items become 3-5 rows (client priorities). r_layer: no item key carries it, so section-level, nullable. RESOLVED (0027): confidence has a confidence_t column."
+    },
+    {
+     "section": "cell_evidence",
+     "table": "heatmap_cell_evidence",
+     "grain": "item",
+     "item_field": "cells",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "subcap_id",
+       "source": "item:subcap_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "synthesis",
+       "source": "item:synthesis",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "grounded_on",
+       "source": "skip:GENERATED ALWAYS (COALESCE(array_length(e_ids, 1), 0)) — invariant 8; payload's grounded_on item key is validated, never written",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "claim_label",
+       "source": "skip:no per-cell contract field — never written, NULL (claim_label exists only per items[] element; see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "skip:no per-cell contract field — never written, NULL (see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "reach_note",
+       "source": "item:reach_note",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "item_provenance",
+       "source": "item:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "sources_searched",
+       "source": "item:sources_searched",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "closure_condition",
+       "source": "item:closure_condition",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "CRITICAL DEVIATION from the default envelope rule: e_ids is item-sourced here (item:e_ids, the CELL's own citation list), NOT env:e_ids — grounded_on is GENERATED from the row's e_ids array, so writing the section envelope's union onto every row would corrupt every cell's 'on the N items above' count. Contract item keys with NO column: items[] (per-element {e_id, tier, claim_label, recency, source_title, publisher, excerpt} — re-joinable from evidence_index via the row's e_ids at read; the drawer renders from the index), reach_note, and thin (the dashed-outline thin-cell flag has no storage — flag for adjudication). Section-level field linking_stats {cells_scored, cells_linked, rows_unlinkable} has NO column — computed reach counters, recomputable at read but currently unstored; flag whether they must persist. Item key `provenance` collides with the envelope provenance column — spec'd here as sys:provenance per the promote-transaction rule; if the per-cell payload value should win, adjudicate. Columns claim_label and confidence have no per-cell source in the reissued H2 shape {subcap_id, e_ids[], items[], reach_note, synthesis, grounded_on, provenance, thin} — NULL is correct under the current contract; flag. RESOLVED (0027): reach_note has a TEXT column. Of the cell item shape's other unstored keys, items[] is the resolved form of e_ids (grounded_on is GENERATED as the length of that very array) and thin is grounded_on < 3 — both recorded in the item-level census register with their source named, per invariant 8. RESOLVED (0027): per-item provenance now has its own column (item_provenance TEXT, bound to the payload key `provenance`). The envelope column stays sys:provenance — the Backend Schema wins on table shape and the Surface Specification wins on payload shape, and they are two different facts: who produced the SECTION, and how THIS row was arrived at. Collapsing them dropped the per-item value at promote and left a page unable to express a mix. TEXT rather than provenance_t because the declared vocabularies differ per surface; CG-09 polices them at submit, where a bad value is refused instead of aborting a promotion. RESOLVED (0041): the cell-grain absence protocol now has storage. The TRD (authority 2) declares it at `Representing absence` — thin + sources_searched + closure_condition — and the Surface Spec's H2 item shape omitted the last two, so producers invented them: measured on one Frost Bank payload, 394 of 697 cells carried `state` and `sources_searched` as undeclared item keys. Undeclared keys are swept by no gate and bound by no writer, so they bought exemption from CG-15 and AG-03 and were then dropped at promotion — the discarded-field class used as an escape hatch. Strip them and AG-03 refuses all 394. `heatmap_alerts` already carries both columns, so this brings one table in line with its sibling rather than inventing a shape."
+    },
+    {
+     "section": "evidence",
+     "table": "evidence_index",
+     "grain": "none",
+     "item_field": null,
+     "columns": [],
+     "notes": "SPECIAL CASE: SERVING_TABLES maps heatmap.evidence to evidence_index, an INGESTED-tier table whose rows already exist before promote — package ingest plus register_evidence (server-allocated e_ids, dedup by content hash, ERS computed server-side, freshness_band a generated column there). The writer WRITES NOTHING: it holds its slot in the ordered writer registry (invariant 11 — the 34-writer acquisition order is load-bearing; removing the slot would shift lock order under concurrent promotes) and the H6 payload is validated against the existing rows (every cited e_id must resolve, belong to this entity and run, carry a verbatim 50-500 char excerpt; get_evidence found/not_found/foreign, foreign halts). Ingested tier is read-only once scanned; content_hash and freshness_band are server-computed, not payload fields."
+    },
+    {
+     "section": "value_chain",
+     "table": "heatmap_value_chain",
+     "grain": "run",
+     "item_field": null,
+     "columns": [
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "chain_id",
+       "source": "skip:no contract field yet — H9 contract unauthored, pinned at stage 6.3; names the ccg_value_chains arrangement; server-derived, NULL until then",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "payload",
+       "source": "skip:no contract field yet — server-derived arrangement, pinned at stage 6.3; NULL until then",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "OPTIONAL section (one of the two optional sections of the 34, per the contracts _notes adjudication flag). The contract registers fields: {} — no payload field contract exists in any source; H9 renders from server-derived data and its stored payload is deliberately minimal, pinned at stage 6.3 (migration header). Run grain: run_id UUID PRIMARY KEY, one row per run, envelope from ENVELOPE_RUN. Until the stage-6 contract is authored the writer can insert at most the envelope row (or skip entirely when the section is absent); chain_id and payload have no source and stay NULL — do not invent fields."
+    },
+    {
+     "section": "alerts",
+     "table": "heatmap_alerts",
+     "grain": "item",
+     "item_field": "alerts",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL — server-allocated, never written; FK target of alert_actions.alert_id (see notes)",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "subcap_id",
+       "source": "item:subcap_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "score",
+       "source": "item:score",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "item:confidence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "evidence_count",
+       "source": "item:evidence_count",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "state",
+       "source": "item:state",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "severity",
+       "source": "item:severity",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "status",
+       "source": "skip:no contract field — queue lifecycle (open/resolved/waived) owned by alert_actions; promote must initialise it, presumably 'open' (NO DDL DEFAULT exists); see notes",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "sources_searched",
+       "source": "item:sources_searched",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "queries_run",
+       "source": "item:queries_run",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "new_evidence_ids",
+       "source": "item:new_evidence_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "justification",
+       "source": "item:justification",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "closure_condition",
+       "source": "item:closure_condition",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "runs_open",
+       "source": "item:runs_open",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "created_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "severity IS an item key per the contract's own note (absent from the prompt's brace list, present in the H3 contract line and information-sources table). Two columns have no contract field: (1) status — the alert_actions queue lifecycle (open/resolved/waived); promote must initialise it (presumably 'open'; there is no DDL DEFAULT, and a NULL status row will not match status filters on the queue index heatmap_alerts_queue (entity_id, status, created_at DESC)) — flag whether the writer sets 'open' or the API treats NULL as open. (2) created_at — the queue cursor ordering column; spec'd here as stamped with promoted_at by the promote transaction, BUT if alerts persist across runs (runs_open ageing counter, alerts open 3+ runs escalate), first-seen carry-forward semantics need adjudication. STRUCTURAL WARNING for the writer design: alert_actions.alert_id has an FK to heatmap_alerts(id) (added in 0008), so delete-then-insert re-promotion would violate or orphan referencing actions — this writer cannot blindly delete; id-preserving upsert or FK strategy must be designed. evidence_count is producer-computed (count of linked evidence) but is a stored item key. queries_run is the only item-level JSONB."
+    },
+    {
+     "section": "safeguard_gates",
+     "table": "heatmap_safeguard_gates",
+     "grain": "item",
+     "item_field": "caps",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "cap_id",
+       "source": "item:cap_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "kind",
+       "source": "item:kind",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "ceiling",
+       "source": "item:ceiling",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "affected_categories",
+       "source": "item:affected_categories",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "rationale",
+       "source": "item:rationale",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "This table stores caps[] ONLY — the section's second required array, gates[] (SG results: {gate_id, plain_label, result, detail, not_run_reason}), is NOT written by this writer; per the 0008 header it composes from gate_results at read (QA B-03 two-array shape; invariant 12's plain_label 8-18 words and explicit NOT_RUN + reason render from there). item_field is caps: one row per cap the ASSESSMENT applied ({cap_id, kind, ceiling, affected_categories[], rationale, e_ids[]}; kind is cap_kind_t: cap | uncertainty_band | qa_hold | analyst_override; cap_id from the workbook's IR-00N cap-log rows). e_ids deviates from the env default: the caps item carries its own e_ids[] and the envelope e_ids column takes the CAP's citations per row (item:e_ids) — if adjudicated back to the section-envelope union, no generated column depends on it here (unlike cell_evidence), so the change is safe. A served score above its stored ceiling is a hard defect — a natural post-write assertion for this writer."
+    },
+    {
+     "section": "evidence_age",
+     "table": "heatmap_evidence_age",
+     "grain": "item",
+     "item_field": "rows",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "reference_date",
+       "source": "item:reference_date",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "e_id",
+       "source": "item:e_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "title",
+       "source": "item:title",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "source_domain",
+       "source": "item:source_domain",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "published_or_asof",
+       "source": "item:published_or_asof",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "age_months",
+       "source": "skip:GENERATED ALWAYS — months between published_or_asof and reference_date; payload's age_months is validated, never written",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "band",
+       "source": "skip:GENERATED ALWAYS — age_band_t from age_months (undated/current<=12/aging<=24/dated<=36/stale); payload's band is validated, never written",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "status",
+       "source": "skip:GENERATED ALWAYS — age_status_t derived from band ONLY (UNDATED/FRESH/AGING/DATED/STALE); payload's status is validated, never written",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "identity_ok",
+       "source": "item:identity_ok",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "identity_note",
+       "source": "skip:no contract field — never written, NULL (see notes)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "item_field 'rows' is a REGISTRY-ASSIGNED container name — no source names the array (prompts say only 'Per row'); the contracts _notes require confirming it when the registry lands. reference_date is a per-item key in the contract but is constant across the section (the run's pinned as-of date) and is the table's only non-envelope NOT NULL — the writer must reject a row without it. The H7 age->band->status chain (age_months, band, status) is fully GENERATED (PostgreSQL forbids generated-from-generated, so the CASE logic is inlined three times); the payload carries all three as item keys for the agent's own consistency, but they are cross-checked against the DB chain and never written — the fixture test asserts agreement. identity_note has NO contract item key — NULL is correct under the current contract, though it plainly exists to carry the identity-resolution/quarantine reason when identity_ok=false; flag for adjudication. Section-level REQUIRED fields undated_pct and stale_pct have NO columns — computed roll-ups, recomputable from the rows at read (share of band='undated' / band='stale'); flag whether they must be stored or stay render-time-computed (invariant 8 favours recompute). e_id carries an FK to evidence_index(e_id) — a row citing an unregistered item fails at insert, which is the fail-closed behaviour wanted."
+    },
+    {
+     "section": "cohort_patterns",
+     "table": "heatmap_cohort_patterns",
+     "grain": "item",
+     "item_field": "patterns",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "sub_vertical",
+       "source": "item:sub_vertical",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "category_id",
+       "source": "item:category_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "pattern_statement",
+       "source": "item:pattern_statement",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "affected_count",
+       "source": "item:affected_count",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "cohort_size",
+       "source": "item:cohort_size",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "share_pct",
+       "source": "skip:GENERATED ALWAYS (round(100.0 * affected_count / cohort_size, 2)) — payload's share_pct is validated (0.05 grain tolerance), never written",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "threshold_pct",
+       "source": "item:threshold_pct",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "below_threshold",
+       "source": "skip:GENERATED ALWAYS (share_pct expression < threshold_pct) — payload's below_threshold label is validated, never written",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "item:confidence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "structural_explanation",
+       "source": "item:structural_explanation",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "action",
+       "source": "item:action",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "entity_ids",
+       "source": "item:entity_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "category_name",
+       "source": "item:category_name",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "item:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "OPTIONAL section (the other of the two optional sections of the 34). Item keys with NO column: category_name (render-time catalogue join on category_id is the natural fill; flag), and the generated pair share_pct/below_threshold (payload carries both; validated only). threshold_pct has DUAL PLACEMENT in the sources — section-level per section_templates.json, per-pattern per the Surface Spec prompt; the DDL stores it per row, so this spec sources it item:threshold_pct (if the section-level placement wins adjudication, the writer stamps the hoisted section value onto every row — same column either way; adjudicate before freezing, per the contracts _notes). entity_ids UUID[] is AUDIT ONLY: the DDL comment and invariant 5 require it always listed in the section's internal_only and stripped from EVERY audience, customer and internal alike — the writer should assert the internal_only marking is present before insert. cohort_size carries CHECK cohort_size >= 5 (constraint cohort_min) but is nullable — an under-minimum pattern fails at insert, which enforces the do-not-publish rule at the DB. Section fields with no storage: threshold_pct (section placement) rides on rows as above; insufficient_cohorts[] ({sub_vertical, category_id, cohort_size, insufficient_cohort} — withheld cohorts recorded, never silently dropped) has NO columns anywhere — flag for adjudication (empty_state is the closest existing carrier but is not contract-shaped for it). RESOLVED (0027): category_name has a TEXT column."
+    }
+   ]
+  },
+  {
+   "page": "overview",
+   "writers": [
+    {
+     "section": "scores",
+     "table": "overview_scores",
+     "grain": "run",
+     "item_field": null,
+     "columns": [
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "composite",
+       "source": "section:composite",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "pillars",
+       "source": "section:pillars",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "posture",
+       "source": "section:posture",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "posture_basis",
+       "source": "section:posture_basis",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "framing",
+       "source": "section:framing",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "band",
+       "source": "skip:GENERATED ALWAYS band_t from composite (four-branch strict-less-than resolver) — never written",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "claim_label",
+       "source": "section:claim_label",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "section:confidence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O1, the page lead. pillars JSONB stores the contract's pillars[] list verbatim; the contract item key `direction` is absent from the DDL comment's key list ({pillar_id, score, peer_median, delta, peer_n, peer_basis, proxy_disclosure}) but rides in the JSONB regardless. narrative_thread here is a real REQUIRED contract field on this section (the overview page thread lives on the lead section per the registry's _narrative_thread_note) and fills the envelope column — not NULL on this table. band is GENERATED from composite (no band/colour field exists in the payload, invariant 7); posture/posture_basis are enum-typed columns (posture_t/basis_t) fed by contract string fields (LEADING|COMPETING|LAGGING|MIXED, EVIDENCE|HYBRID|INFERRED). r_layer: no contract field on this section; NULL is correct (nullable envelope column)."
+    },
+    {
+     "section": "firmographics",
+     "table": "overview_firmographics",
+     "grain": "item",
+     "item_field": "fields",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "field",
+       "source": "item:field",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "value",
+       "source": "item:value",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "unit",
+       "source": "item:unit",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "as_of",
+       "source": "item:as_of",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "recency_band",
+       "source": "item:recency_band",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "source_e_id",
+       "source": "item:source_e_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "item:confidence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "quarantined",
+       "source": "item:quarantined",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "quarantine_reason",
+       "source": "item:quarantine_reason",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "sub_vertical_undefined",
+       "source": "section:sub_vertical_undefined",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O2. Item container name `fields` is registry-assigned (sources say only 'Per field'). Item keys {field, value, unit, as_of, recency_band, source_e_id, confidence, quarantined, quarantine_reason} match columns 1:1. sub_vertical_undefined is a section-level optional boolean (Farm Credit) stored on every row; NULL when the payload omits it. Contract fields with NO column: undated_pct (required section number — a computed roll-up, recomputable from the rows' as_of at read; not stored, consistent with computed-never-stored) and identity_mismatch (optional producer flag that quarantines the panel — validation-time, not persisted; a quarantined panel is expressed through quarantined/quarantine_reason per row and the envelope empty_state). narrative_thread NULL is correct (not the lead section)."
+    },
+    {
+     "section": "why_now",
+     "table": "overview_why_now",
+     "grain": "item",
+     "item_field": "signals",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "wn_id",
+       "source": "item:wn_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "kind",
+       "source": "item:kind",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "trigger",
+       "source": "item:trigger",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "\"window\"",
+       "source": "item:window",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "consequence_of_waiting",
+       "source": "item:consequence_of_waiting",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "cost_of_acting_now",
+       "source": "item:cost_of_acting_now",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "why_this_sequence",
+       "source": "item:why_this_sequence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "linked_subcap_ids",
+       "source": "item:linked_subcap_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "dated_on",
+       "source": "item:dated_on",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "claim_label",
+       "source": "item:claim_label",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "item:confidence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "synthesis",
+       "source": "section:synthesis",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "thin",
+       "source": "section:thin",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O3. Column \"window\" is a double-quoted PostgreSQL reserved word in the DDL; the payload item key is plain `window` — writer must quote the identifier in SQL. synthesis is the required 60-110 word section-level paragraph across the signals whose payload key NO source names (page _notes: registry-assigned name pending) — the DDL's `synthesis` is that assignment; stored on every row of the section (delete-then-insert keeps it consistent). thin is the optional section-level boolean, stored per row. Contract item keys with NO column: `kind` (LEADERSHIP|EARNINGS|REGULATORY|TECHNOLOGY|M&A|MARKET, from the sources table) is not persisted; per-signal e_ids[] have no per-row column — only the section envelope e_ids TEXT[] is stored."
+    },
+    {
+     "section": "exec_summary",
+     "table": "overview_exec_summary",
+     "grain": "run",
+     "item_field": null,
+     "columns": [
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "situation",
+       "source": "section:situation",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "complication",
+       "source": "section:complication",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "question",
+       "source": "section:question",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "answer",
+       "source": "section:answer",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "sequencing_rationale",
+       "source": "section:sequencing_rationale",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "cost_of_delay",
+       "source": "section:cost_of_delay",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "claim_label",
+       "source": "section:claim_label",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "storyline_challenge",
+       "source": "section:storyline_challenge",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O4. Clean 1:1 map: the prompt's six named SCQA fields plus claim_label. The legacy stored form scqa_md (information-sources table) is superseded per page _notes and has no column. e_ids in the emit shape is the universal envelope field, not a section extra. narrative_thread NULL is correct."
+    },
+    {
+     "section": "opportunity",
+     "table": "overview_opportunity",
+     "grain": "item",
+     "item_field": "tiles",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "platform",
+       "source": "item:platform",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "composite",
+       "source": "item:composite",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "factors",
+       "source": "item:factors",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "addressable_cells",
+       "source": "item:addressable_cells",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "relevance",
+       "source": "item:relevance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "their_stack_context",
+       "source": "item:their_stack_context",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "rank",
+       "source": "item:rank",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "rank_rationale",
+       "source": "item:rank_rationale",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "discarded",
+       "source": "section:discarded",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "headline",
+       "source": "item:headline",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "anchor_subcap_id",
+       "source": "item:anchor_subcap_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O5. factors JSONB holds [{name, weight, value, contribution}] which must sum to composite; addressable_cells JSONB holds [{subcap_id, name, current, peer, gap, feature_that_addresses_it}]. discarded is the section-level required list stored on every row: the contract's item shape is {platform, reason} while the DDL comment says [{platform, reason, relevance}] — JSONB absorbs either; the contract shape governs what the producer sends. Contract item keys with NO column: `headline` (the gap framed as available value) and `anchor_subcap_id` (the subcapability the tile is about) — both from the sources table, neither persisted; flag for registry review since the tile card renders a headline. RESOLVED (0027): headline and anchor_subcap_id now have columns. Both are named '(sources table)' by the tile contract and neither had one."
+    },
+    {
+     "section": "findings",
+     "table": "overview_findings",
+     "grain": "item",
+     "item_field": "findings",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "f_id",
+       "source": "item:f_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "title",
+       "source": "item:title",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "theme",
+       "source": "item:theme",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "consequence",
+       "source": "item:consequence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "body",
+       "source": "item:body",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "rejected_alternative",
+       "source": "item:rejected_alternative",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "strategic_alignment",
+       "source": "item:strategic_alignment",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "strategic_alignment_score",
+       "source": "skip:contract gap — column named by DDL, never by the contract (adjudication list)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "linked_subcap_ids",
+       "source": "item:linked_subcap_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "platform_chips",
+       "source": "item:platform_chips",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "source_kind",
+       "source": "item:source_kind",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "what_text",
+       "source": "skip:contract gap (drilldown headings unnamed in contract)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "why_text",
+       "source": "skip:contract gap (drilldown headings unnamed in contract)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "so_what_text",
+       "source": "skip:contract gap (drilldown headings unnamed in contract)",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "ranking_basis",
+       "source": "section:ranking_basis",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "claim_label",
+       "source": "item:claim_label",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "item:confidence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "subcap_id",
+       "source": "item:subcap_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "score",
+       "source": "item:score",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "peer_median",
+       "source": "item:peer_median",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "name",
+       "source": "item:name",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "item:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O6. Name mappings: strategic_alignment_score — the contract bundles '15-30 words PLUS a 0-1 score' under strategic_alignment and names no separate key; the column takes the numeric ranking key (registry-assigned name, must be confirmed with the producer). what_text/why_text/so_what_text are the drilldown's WHAT/WHY/SO WHAT headings whose payload key names 'are not stated in the sources' (page _notes) — the DDL's names are the registry's assignment. ranking_basis is the section-level required field (alignment | impact_fallback), stored on every row. narrative_thread: this section carries its OWN required narrative_thread (the O6 findings thread, distinct from the page thread on scores) — it fills the envelope column; NOT NULL in practice here. Contract item keys with NO column: `name` (humanised capability label), `subcap_id`, `score`, `peer_median` (the score chip's anchor cell and its 2dp figures — W1_workbook_fidelity checks them at validation; joinable from heatmap_workbook_scores at read but unpersisted here), per-item e_ids[], and the fourth drilldown heading EVIDENCE's rows ({e_id, source_title, recency, tier, claim_label}) — render-time from the evidence store via the cited ids. RESOLVED (0027): the finding's ANCHOR now has columns — subcap_id, score, peer_median and name. W1_workbook_fidelity asserts at submit that the chip's score and the anchor id name the same cell, and the three figures it compared were then discarded, so the chip had nothing to render from; linked_subcap_ids is a list and cannot say WHICH cell the quoted score belongs to."
+    },
+    {
+     "section": "leadership",
+     "table": "overview_leadership",
+     "grain": "item",
+     "item_field": "roster",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "name",
+       "source": "item:name",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "title",
+       "source": "item:title",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "domain",
+       "source": "item:domain",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "appointed_on",
+       "source": "item:appointed_on",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "tenure_months",
+       "source": "item:tenure_months",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "as_of",
+       "source": "item:as_of",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "source_e_id",
+       "source": "item:source_e_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "relevance_note",
+       "source": "item:relevance_note",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "item:confidence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "email",
+       "source": "item:email",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "linkedin_url",
+       "source": "item:linkedin_url",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "phone",
+       "source": "item:phone",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "enriched_at",
+       "source": "item:enriched_at",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "enrichment_basis",
+       "source": "item:enrichment_basis",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O7. Item keys {name, title, domain, appointed_on, tenure_months, as_of, source_e_id, relevance_note, confidence} match columns 1:1. The sources-table key roster[].relevance is superseded by relevance_note (page _notes). Contract field with NO column: verified_absent (optional section boolean) — an empty roster with verified_absent=true is expressed through the envelope empty_state JSONB ({reason, sources_searched[], closure_condition}), which is exactly the naming-every-source-searched the contract demands; no dedicated column is correct."
+    },
+    {
+     "section": "financial_series",
+     "table": "overview_financial_series",
+     "grain": "run",
+     "item_field": null,
+     "columns": [
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "series",
+       "source": "section:series",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "basis",
+       "source": "skip:hoisted at read from series[].basis — the contract states basis PER POINT only and mixing definitions across periods is prohibited, so the set has cardinality 1. A section-level basis would be a SECOND place the metric definition is stated, which is how two definitions come to disagree. Validation asserts one distinct basis across the series rather than storing a hoist; live-adapter hoists it for the card.",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "trend",
+       "source": "section:trend",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "cagr",
+       "source": "skip:computed at read from series[].period/value (invariants 8 and 9) — no source states a CAGR arithmetic, a threshold or a payload key; the only mention rides on STEP 6's 'computed from the series'. `trend` differs because no doc gives a VOLATILE-vs-STABLE threshold, so only the producer can state that. A producer-stated, cited CAGR belongs on O2 firmographics.fields[], whose must-present set names CAGR — not here. The adapter's cagrOf() computes it from the first and last dated points over the real number of years between them, returning nothing when fewer than two dated points exist.",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "verified_sparse",
+       "source": "section:verified_sparse",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "reading",
+       "source": "section:reading",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O8 + C6 (one section, two surfaces — the DDL comment says 'serves O8 and C6'; the two cards cannot disagree). series JSONB stores the points [{period, value, unit, as_of, source_e_id, basis}] oldest first. Three registry-assigned names with no contract key: basis — the contract carries basis only PER POINT inside series; the column stores the run-level metric definition (well-defined because mixing definitions across periods is prohibited; writer hoists it or takes a to-be-named section key); cagr — mentioned only inside the trend doc ('with the CAGR where 3+ dated points exist'), no payload key named; reading — STEP 7's required 35-60 word READING has no named payload key (page _notes). trend is nullable by design: under 3 dated points trend=null + verified_sparse=true. Contract field with NO column: quarantine_reason (optional) — a quarantined series renders the honest empty state, so it belongs in the envelope empty_state JSONB, not a column."
+    },
+    {
+     "section": "sentiment",
+     "table": "overview_sentiment",
+     "grain": "run",
+     "item_field": null,
+     "columns": [
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "ratings",
+       "source": "section:bars",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "themes",
+       "source": "section:themes",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "gap_analysis",
+       "source": "section:gap_analysis",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O9. NAME MISMATCH: the contract's payload key is `bars` and it fills the `ratings` column — the item shape {audience, source, rating, scale, n, as_of, url, e_id, trend_vs_prior} matches the DDL comment key-for-key, so the mapping is certain. Columns with no named contract field: `themes` (DDL comment [{audience, theme, mapped_subcap_ids, cap_statement}]) and `gap_analysis` ('the B2B/B2C and internal/external gaps') — the page _notes flag the theme-to-cell cap mapping as prose-specified only, 'needs contract completion before strict validation'; the writer takes payload keys of those names when present and writes NULL otherwise. Contract fields with NO column: context_tiles (required — the three audience tiles are derivable at render by grouping the stored bars rows by audience) and displayed_lines (optional producer gate counter for S8, not persisted). O9 is withheld whole from the customer audience — redaction-walker concern, not a column."
+    },
+    {
+     "section": "ceilings",
+     "table": "overview_ceilings",
+     "grain": "item",
+     "item_field": "rows",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "category_id",
+       "source": "item:category_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "category_name",
+       "source": "item:category_name",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "ceiling",
+       "source": "item:ceiling",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "uncertainty_band",
+       "source": "item:uncertainty_band",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "rationale",
+       "source": "item:rationale",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "limiting_absence",
+       "source": "item:limiting_absence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "urf_modifiers",
+       "source": "item:urf_modifiers",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "claim_label",
+       "source": "item:claim_label",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "item:confidence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O1b. Item container `rows` is registry-assigned (sources say only 'Per row' / 'one row per category'). Item keys match columns 1:1 except per-item e_ids[] which has no per-row column — only the section envelope e_ids TEXT[] is stored. ceiling is TEXT (M1-M5 or NULL 'Cannot reliably estimate'); NULL ceiling with a recorded uncertainty_band over ±0.8 is data, not absence. O1b is withheld whole from the customer audience — redaction layer, not schema. urf_modifiers is TEXT[] (URF-01..URF-06 names), not JSONB."
+    },
+    {
+     "section": "evidence_coverage",
+     "table": "overview_evidence_coverage",
+     "grain": "run",
+     "item_field": null,
+     "columns": [
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "overall_pct",
+       "source": "section:overall_pct",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "per_pillar",
+       "source": "section:per_pillar",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "gate_pct",
+       "source": "section:gate_pct",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "denominator_definition",
+       "source": "section:denominator_definition",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "note",
+       "source": "section:note",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "tier_distribution",
+       "source": "skip:no contract field (section:tier_distribution)",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "mix_implication",
+       "source": "section:mix_implication",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O10 + O11 in one table (DDL comment: 'serves O10 and O11'). O10 fields map 1:1 (overall_pct, per_pillar [{pillar_id, pillar_name, pct, cells_total, cells_covered, below_gate}], gate_pct, denominator_definition, note — note is the only optional one). COMPOSED COLUMN: tier_distribution has NO payload key of that name — the writer assembles the O11 census object {item_count, fact_count, tiers[], claim_classes[], self_sourced_pct, mix_implication} from the contract's six separate section fields, exactly the shape the DDL comment states. overall_pct/gate_pct are NUMERIC(5,1) — never rounded across the gate (79.6 stays 79.6). MIX_IMPLICATION (0023): required by the contract and previously unstored — validated at submit and then discarded at promotion."
+    },
+    {
+     "section": "thought_leadership",
+     "table": "overview_thought_leadership",
+     "grain": "item",
+     "item_field": "entries",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "kind",
+       "source": "item:kind",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "published_on",
+       "source": "item:published_on",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "headline",
+       "source": "item:headline",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "quote",
+       "source": "item:quote",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "author_name",
+       "source": "item:author_name",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "author_role",
+       "source": "item:author_role",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "url",
+       "source": "item:url",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "linked_subcap_ids",
+       "source": "item:linked_subcap_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "alignment",
+       "source": "item:alignment",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_id",
+       "source": "item:e_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "claim_label",
+       "source": "item:claim_label",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "O12. Item container `entries` is registry-assigned (sources say only 'Per entry'). Item keys match columns 1:1. alignment carries the verdict (CORROBORATES | CONTRADICTS | EXTENDS) PLUS the required 12-25 word clause whose payload key no source names (page _notes) — the DDL comment '(+clause)' confirms both land in this one TEXT column. Contract field with NO column: thin (optional section boolean — why_now got a thin column, this section did not); if it must persist it can only ride in the envelope (e.g. empty_state) — flag for registry review. O12 is withheld whole from the customer audience — redaction layer, not schema."
+    }
+   ]
+  },
+  {
+   "page": "insights",
+   "writers": [
+    {
+     "section": "insights",
+     "table": "insight_cards",
+     "grain": "item",
+     "item_field": "cards",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL — server-allocated PK, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "ic_id",
+       "source": "item:ic_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "title",
+       "source": "item:title",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "pillar_id",
+       "source": "item:pillar_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "what_text",
+       "source": "item:what_text",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "why_text",
+       "source": "item:why_text",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "so_what_text",
+       "source": "item:so_what_text",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "alternative_explanation",
+       "source": "item:alternative_explanation",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "severity",
+       "source": "item:severity",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "severity_rationale",
+       "source": "item:severity_rationale",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "linked_subcap_id",
+       "source": "item:linked_subcap_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "affects",
+       "source": "item:affects",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "linked_rec_id",
+       "source": "item:linked_rec_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "validation_question",
+       "source": "item:validation_question",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "confidence",
+       "source": "item:confidence",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "claim_label",
+       "source": "item:claim_label",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:supporting_e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "item:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "One row per cards[] item (I1; contract mandates 6-10 cards — zero cards on a completed run is a FAILURE STATE at validation, so an empty write here is never legitimate for a completed run). NAME MAPPING: envelope column e_ids is filled from the card's supporting_e_ids[] (contract key differs from column name). Rationale: supporting_e_ids[] is mandatory per card ('the serve layer excludes uncited cards'), the table has no other evidence column, contracts_data _notes adjudicate supporting_e_ids as the per-card form of cards[].e_ids, and the item-grain convention in 0008 stores the ITEM's citation list in e_ids (heatmap_cell_evidence.grounded_on is GENERATED from e_ids per row — invariant 8 only works per-item). Consequence: the section-envelope e_ids union is NOT separately stored on this table; it remains in the retained staged submission and is reconstructible as the union of row e_ids. If env:e_ids were used instead, per-card citations would be lost at promotion — flagged for adjudication. COLUMNS WITH NO CONTRACT FIELD (all three resolve NULL via item.get under the current contract, which is correct today): pillar_id — not in the I1 card shape; derivable from linked_subcap_id's pillar prefix (P2C3.1 -> P2); derivation TODO or render-time, NULL until then. affects TEXT[] — present in the superseded 2026-07-29 docx-upload card shape, absent from the ruling HTML Surface Spec shape; NULL correct. linked_rec_id — the I1->P2 recommendation cross-link; not in the current card shape; NULL correct, source picks it up if the contract adds it. CONTRACT FIELDS WITH NO COLUMN: none unmapped — all 13 card keys land in typed columns (supporting_e_ids via the mapping above). r_layer: cards do not carry r_layer, so section:r_layer per the item-grain rule (nullable; contract does not define it — NULL unless the section payload carries one). sys:promoted_at is written as SQL now() by the promote transaction so every row shares one instant. id is BIGSERIAL (skip; NOT NULL via PRIMARY KEY); run_id/promoted_at/producer_version are the only DDL NOT NULLs among written columns."
+    },
+    {
+     "section": "landscape",
+     "table": "insights_landscape",
+     "grain": "run",
+     "item_field": null,
+     "columns": [
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "summary",
+       "source": "skip:no source defines a summary for T2. T2's contract is four counts recomputed from the T1 register, each tile printing its basis, and the Surface Spec states that no prompt block exists for the surface and it renders from server-derived data. The only 'summary line' in the corpus belongs to the TECHSTACK page (T1), not to insights.landscape — this column's DDL comment imported it across a page boundary (adjudication 2026-08-05). That line is composable at read from techstack_items (count and distinct layer of status='ABSENT') plus layers[].is_primary_gap, so it needs no stored column on either table.",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "Run grain: one row per run, run_id is the PK (NOT NULL via PRIMARY KEY; DDL uses ENVELOPE_RUN, which omits run_id from the envelope block — run_id is the table's own first line). T2/insights_landscape is deliberately minimal (0008 docstring): the strip renders from counts RECOMPUTED from techstack_items at read (invariant 8); its stored payload is pinned at stage 6. CONTRACT FIELDS WITH NO COLUMN: tiles[] — the four tile counts are never stored; recomputed from the techstack register (every techstack_items row carries status CONFIRMED|INFERRED|CLAIMED|ABSENT NOT NULL for exactly this reason); tile basis/detail/named_items are likewise render-time from the register today. reconciles_to_register — a submit-time assertion enforced by validation/gates, never stored (storing it would create the second code path the contract warns about). COLUMN WITH NO CONTRACT FIELD: summary — the strip's summary line per the DDL comment; the current T2 contract has no such field, so section:summary resolves NULL, which is correct until the stage-6 pinning adds a summary field to the contract (it will then flow through unchanged). r_layer: run grain, so section:r_layer per the rule (nullable, contract does not define it). sys:promoted_at is written as SQL now() by the promote transaction. promoted_at and producer_version are the only envelope NOT NULLs."
+    }
+   ]
+  },
+  {
+   "page": "platform",
+   "writers": [
+    {
+     "section": "platform_story",
+     "table": "platform_story",
+     "grain": "run",
+     "item_field": null,
+     "columns": [
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "gap_rows",
+       "source": "section:platforms",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "discarded",
+       "source": "section:discarded",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "effort_profile",
+       "source": "skip:no contract source (page notes: nothing names it)",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "story",
+       "source": "section:platforms.0.story_md",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "SHAPE MISMATCH TO ADJUDICATE: the contract's primary field is platforms[] = five tiles of {fit_score, gaps[], story_md}, but the table is run-grain with flat columns. gap_rows' DDL comment ([{subcap_id, name, current_score, peer_score, gap, pillar, l3_area, l4_feature, catalogue_path, e_ids}]) is exactly the contract's platforms[].gaps[] item shape, and story's DDL comment (90-150 words: what it changes, lifts, depends on, does not solve) is exactly story_md's contract — the DDL apparently predates the five-tile shape and models ONE platform story. fit_score and the per-tile grouping have no typed column; the writer should store the full platforms[] list (tiles with fit_score/gaps/story_md) in gap_rows JSONB, or the table needs revisiting — flag before freezing. story then holds the rank-1 tile's story_md. discarded maps 1:1 ([{platform, reason, relevance}]). effort_profile has NO contract field: page _notes record that P1 Step 5 requires an effort profile but no source names a payload field ('not emitted rather than invented') — writer writes NULL until adjudicated; NULL is correct. r_layer: no section or item field carries it; NULL. ADJUDICATED (0027): gap_rows now takes the WHOLE platforms[] list — five tiles of {platform, rank, fit_score, gaps[], story_md, readiness, peer_coverage, peer_deployments, peer_synthesis, integration_pathway, zennify_pathway, estate_reach, fit_basis, l3_area, e_ids, r_layer}. Sourcing platforms.0.gaps kept ONE tile's gap rows and discarded four whole tiles: the run submitted five, production served one, and a reader clicking the other four found them empty. The reader inverts this by the same spec (section:platforms lands the list at data.platforms), so the serving projection needed no code change. `story` still takes the rank-1 tile's story_md and is written AFTER gap_rows, so on the read side it lands back on platforms[0].story_md — the same value, for readers that predate the change."
+    },
+    {
+     "section": "recommendations",
+     "table": "platform_recommendations",
+     "grain": "item",
+     "item_field": "recommendations",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "rec_id",
+       "source": "item:rec_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "title",
+       "source": "item:title",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "l3_area",
+       "source": "item:l3_area",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "l4_feature",
+       "source": "item:l4_feature",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "phase",
+       "source": "item:phase",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "dma_impact",
+       "source": "item:dma_impact",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "root_cause",
+       "source": "item:root_cause",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "cost_of_inaction",
+       "source": "item:cost_of_inaction",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "prerequisites",
+       "source": "item:prerequisites",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "dependencies",
+       "source": "item:dependencies",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "sequencing_reason",
+       "source": "item:sequencing_reason",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "effort_band",
+       "source": "item:effort_band",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "kpi_triple",
+       "source": "item:kpi_triple",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "validation_gate",
+       "source": "item:validation_gate",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "claim_label",
+       "source": "item:claim_label",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "item_provenance",
+       "source": "item:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:evidence_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "item:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "NAME MISMATCH: contract item key evidence_ids[] fills the envelope column e_ids (per-item citations, not the section envelope — same pattern that makes heatmap_cell_evidence.grounded_on generate from e_ids). PROVENANCE: the item carries provenance ANALYST|DERIVED (required, never blank), which fills the envelope provenance column rather than sys — provenance_t is lowercase (analyst|derived|producer), so the writer case-folds; deviates deliberately from the default sys:provenance stamping. Nested contract shapes ride as JSONB: dma_impact ([{subcap_id, name, current, target, delta}]), prerequisites (cells and minimums), kpi_triple ({metric, baseline, target}), validation_gate ({cell, threshold, verdict, backing_cells[]}). NO COLUMN: prerequisite_rec_ids and target_subcap_ids from the Surface Spec Information sources table — the contract _notes leave that mapping unconfirmed ('confirm before freezing the registry'); no column and no adopted item key today, so they ride nowhere. r_layer: items do not carry it; NULL. RESOLVED (0027): per-item provenance now has its own column (item_provenance TEXT, bound to the payload key `provenance`). The envelope column stays sys:provenance — the Backend Schema wins on table shape and the Surface Specification wins on payload shape, and they are two different facts: who produced the SECTION, and how THIS row was arrived at. Collapsing them dropped the per-item value at promote and left a page unable to express a mix. TEXT rather than provenance_t because the declared vocabularies differ per surface; CG-09 polices them at submit, where a bad value is refused instead of aborting a promotion."
+    },
+    {
+     "section": "starters",
+     "table": "platform_starters",
+     "grain": "item",
+     "item_field": "starters",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "rank",
+       "source": "item:rank",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "text",
+       "source": "item:text",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "opens_on",
+       "source": "item:opens_on",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "named_gap_subcap_id",
+       "source": "item:named_gap_subcap_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "peer_reference",
+       "source": "item:peer_reference",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "their_system_reference",
+       "source": "item:their_system_reference",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "followup_question",
+       "source": "item:followup_question",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "item_provenance",
+       "source": "item:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "opens_on: contract adopts opens_on (Surface Spec + skill) over the TRD/MCP-extraction name opening_shape — the contract _notes flag this as a genuine conflict needing a user call, since repo authority order would pick opening_shape; the column is spelled opens_on, so the payload key maps 1:1 today. TYPE MISMATCH: peer_reference is TEXT in the DDL but the contract describes an object {name, action, dated_on} or null — the writer must serialise (JSON-in-TEXT) or the column should become JSONB; flag before freezing. VOCABULARY MISMATCH: the item's provenance is TEMPLATE_FILL|ANALYST (and must RENDER), but provenance_t is analyst|derived|producer — TEMPLATE_FILL has no enum member; nearest is derived (rule-composed), but that mapping loses the rendered label, so adjudicate rather than map silently. e_ids fills from the item's own e_ids[] (per-starter citations). r_layer: items do not carry it; NULL. RESOLVED (0027): per-item provenance now has its own column (item_provenance TEXT, bound to the payload key `provenance`). The envelope column stays sys:provenance — the Backend Schema wins on table shape and the Surface Specification wins on payload shape, and they are two different facts: who produced the SECTION, and how THIS row was arrived at. Collapsing them dropped the per-item value at promote and left a page unable to express a mix. TEXT rather than provenance_t because the declared vocabularies differ per surface; CG-09 polices them at submit, where a bad value is refused instead of aborting a promotion."
+    },
+    {
+     "section": "roadmap",
+     "table": "platform_roadmap",
+     "grain": "item",
+     "item_field": "phases",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "phase",
+       "source": "item:phase",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "horizon",
+       "source": "item:horizon",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "capabilities",
+       "source": "item:rec_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "depends_on",
+       "source": "item:depends_on",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "rationale",
+       "source": "item:rationale",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "phase_id",
+       "source": "item:phase_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "capability_labels",
+       "source": "item:capabilities",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "item_provenance",
+       "source": "item:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "sequencing_basis",
+       "source": "section:sequencing_basis",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "COLUMN/KEY AMBIGUITY TO ADJUDICATE: the DDL comment on capabilities TEXT[] says 'the rec ids assigned to this phase; ids must resolve', so it is mapped from item:rec_ids (the referential-integrity gate is on rec_ids). But the contract carries BOTH rec_ids[] (skill/section_templates, adopted per _notes) AND capabilities[] (Surface Spec prompt) as separate item keys — the contract's capabilities[] then has no column of its own; the DDL likely predates the split. NO COLUMN: phase_id (skill-added identifier) rides nowhere — the BIGSERIAL id plus phase (SMALLINT, order is meaning) serve the table. NO COLUMN, SECTION-LEVEL: sequencing_basis (required string, prerequisites|undetermined) has no home — the migration's own pattern stores section-level fields of item-grain sections on every row (cf. overview_why_now.synthesis, context_timeline.storyline), so this needs a column or an explicit ride in r_layer; flag, do not drop silently. provenance: item carries analyst|derived, matching provenance_t directly; fills the envelope provenance column per row. e_ids: phases carry no per-item citation list, so the section envelope's e_ids stamps every row. r_layer: NULL. SEQUENCING_BASIS (0023): required by the contract and previously unstored — validated at submit and then discarded at promotion. RESOLVED (0027): phase_id has a column. The contract lists rec_ids[] AND capabilities[] separately; 0008's `capabilities` column carries the REC IDS by its own DDL comment, so the capability labels get a column under a name that is free (capability_labels) and are bound to the contract's `capabilities` key — the reader maps column to key through this spec, so the payload shape is unchanged. RESOLVED (0027): per-item provenance now has its own column (item_provenance TEXT, bound to the payload key `provenance`). The envelope column stays sys:provenance — the Backend Schema wins on table shape and the Surface Specification wins on payload shape, and they are two different facts: who produced the SECTION, and how THIS row was arrived at. Collapsing them dropped the per-item value at promote and left a page unable to express a mix. TEXT rather than provenance_t because the declared vocabularies differ per surface; CG-09 polices them at submit, where a bad value is refused instead of aborting a promotion."
+    },
+    {
+     "section": "stairstep",
+     "table": "platform_stairstep",
+     "grain": "item",
+     "item_field": "ladder.steps",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "theme",
+       "source": "section:ladder.theme",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "step_level",
+       "source": "item:step_level",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "label",
+       "source": "item:label",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "covered_subcap_ids",
+       "source": "item:covered_subcap_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "current_position",
+       "source": "item:current_position",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "blocking_findings",
+       "source": "item:blocking_findings",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "unlocks",
+       "source": "item:unlocks",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "effort_band",
+       "source": "item:effort_band",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "entry_condition",
+       "source": "item:entry_condition",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "NESTED item_field: the section's contract field is ladder (an OBJECT {from_level, to_level, steps[]}, or null) — rows are ladder.steps items, whose keys map 1:1 onto the typed columns. theme: the DDL scopes the curve to a theme ('the curve is scoped to a theme') and the contract doc agrees (measured scopes 'Data foundation', 'Loan origination'), but the stated ladder shape names no theme key — writer fills from the ladder's theme if the payload carries one, else NULL; flag the missing contract key. NO COLUMN: ladder.from_level and ladder.to_level — derivable at render from min/max step_level over the run's rows, or they are lost; confirm render-time derivation before freezing. entry_condition is TEXT while the recommendation validation_gate it must match is JSONB — cells-and-minimums serialise to text here; note the asymmetry. EMPTY LADDER: ladder null must render a stated empty state via the envelope, but zero steps means zero rows, leaving envelope empty_state with no row to ride on — the writer needs a carrier row (item columns NULL, envelope populated) or another home for the empty state; flag for the registry. e_ids fills per step from the item's e_ids[]. provenance: neither section nor steps carry provenance, so the promote transaction's default stamps it (or NULL). r_layer: NULL."
+    }
+   ]
+  },
+  {
+   "page": "context",
+   "writers": [
+    {
+     "section": "timeline",
+     "table": "context_timeline",
+     "grain": "item",
+     "item_field": "events",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "event_date",
+       "source": "item:event_date",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "title",
+       "source": "item:title",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "body",
+       "source": "item:body",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "kind",
+       "source": "item:kind",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "signal",
+       "source": "item:signal",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "capability_ids",
+       "source": "item:capability_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "maturity_effect",
+       "source": "item:maturity_effect",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "claim_label",
+       "source": "item:claim_label",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "storyline",
+       "source": "section:storyline",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "arc_shape",
+       "source": "section:arc_shape",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "verified_sparse",
+       "source": "section:verified_sparse",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "C1. Item keys map 1:1 to columns (event_date, title, body, kind, signal, capability_ids, maturity_effect, claim_label) — no renames. storyline/arc_shape/verified_sparse are section-level, stored on every row per the 0008 header comment ('Section-level fields of item-grain sections ... are stored on every row'). DELIBERATE DEVIATION from the generic env:e_ids rule: each event carries its own e_ids[] in the contract, and the DDL's own precedent (heatmap_cell_evidence.grounded_on GENERATED from cardinality(e_ids), 0008 line 324) proves the e_ids column on item-grain tables holds the ITEM's citations, so e_ids is item:e_ids; the section-envelope aggregate e_ids is not separately stored on this table (it is validated at submit and recoverable as the union of rows). r_layer: no contract item or section field defines it (contracts.py ENVELOPE defines only produced_at/producer_version/e_ids/internal_only/empty_state); sourced section:r_layer so it flows if present, else NULL is correct. narrative_thread likewise has no contract field — env:narrative_thread flows it if the section payload carries it, else NULL. capability_ids is TEXT[], not JSONB (list adapts to a Postgres array)."
+    },
+    {
+     "section": "issue_register",
+     "table": "context_issue_register",
+     "grain": "item",
+     "item_field": "issues",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "issue_id",
+       "source": "item:issue_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "title",
+       "source": "item:title",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "severity",
+       "source": "item:severity",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "status",
+       "source": "item:status",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "opened_on",
+       "source": "item:opened_on",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "resolved_on",
+       "source": "item:resolved_on",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "rationale",
+       "source": "item:rationale",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "linked_subcap_ids",
+       "source": "item:linked_subcap_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "capped_subcap_ids",
+       "source": "item:capped_subcap_ids",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "item_provenance",
+       "source": "item:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "C2. severity and status are the table's only two field NOT NULLs ('never emit a NULL status' — DDL enforces). CONTRACT FIELDS WITH NO COLUMN, both flagged for adjudication: (1) capped_subcap_ids[] — the skill-REISSUED addition the contract adopted ('an issue is only interesting here because it CAPS something') has no column on context_issue_register and no JSONB carrier, so it is DROPPED at promote; the same data survives inside context_regulatory_standing.enforcement_actions JSONB for enforcement-sourced matters only. Either 0008 needs a capped_subcap_ids TEXT[] (expand-migrate) or the contract note should say it is validate-only. (2) verified_absent (section-level boolean) has no column; absence renders from the envelope empty_state (whose doc carries sources_searched), which IS written — acceptable, but the boolean itself is not persisted. DEVIATIONS from the generic envelope-source rule, both because the C2 item shape explicitly carries the field (same pattern the r_layer rule prescribes): e_ids is item:e_ids (per-issue citations; see timeline note for the DDL precedent), and provenance is item:provenance — the C2 item carries provenance with the same name and enum domain (provenance_t = analyst|derived|producer) and would otherwise be lost; the submission-level provenance stays recoverable from the submissions row. If the verifier prefers uniform sys:provenance, per-issue provenance must be declared validate-only. Ordering of rows follows the list as sent (Gantt renders in send order); BIGSERIAL preserves it. RESOLVED (0027): capped_subcap_ids[] now has a JSONB column and is written from item:capped_subcap_ids — the item shape's element is {subcap_id, cap_level}, an object, so JSONB and not TEXT[]. NOTE the note above was stale about provenance: the column is sys:provenance (the submission stamp the serving envelope reads), NOT item:provenance. Per-issue provenance is therefore validate-only and recorded as such in the item-level census register. RESOLVED (0027): per-item provenance now has its own column (item_provenance TEXT, bound to the payload key `provenance`). The envelope column stays sys:provenance — the Backend Schema wins on table shape and the Surface Specification wins on payload shape, and they are two different facts: who produced the SECTION, and how THIS row was arrived at. Collapsing them dropped the per-item value at promote and left a page unable to express a mix. TEXT rather than provenance_t because the declared vocabularies differ per surface; CG-09 polices them at submit, where a bad value is refused instead of aborting a promotion."
+    },
+    {
+     "section": "regulatory_standing",
+     "table": "context_regulatory_standing",
+     "grain": "run",
+     "item_field": null,
+     "columns": [
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "primary_regulator",
+       "source": "section:primary_regulator",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "additional_regulators",
+       "source": "section:additional_regulators",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "license_type",
+       "source": "section:license_type",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "jurisdictions",
+       "source": "section:jurisdictions",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "charter_date",
+       "source": "section:charter_date",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "enforcement_actions",
+       "source": "section:enforcement_actions",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "absence_of_enforcement",
+       "source": "section:absence_of_enforcement",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "C3, run grain — run_id UUID PRIMARY KEY on its own DDL line, body uses ENVELOPE_RUN. All six contract fields map 1:1 by name. enforcement_actions JSONB carries the full item objects {issue_id, regulator, kind, opened_on, status, summary, capped_subcap_ids[] (item shape {subcap_id, cap_level}), remediation_status, e_id} — nothing exploded to columns, nothing dropped. absence_of_enforcement JSONB carries {verified, sources_searched[]}. charter_date: contract type is string (TRD 'date|null'); the DATE column takes the ISO string via PG cast — an empty string would fail the cast, null is fine. additional_regulators and jurisdictions are TEXT[] (Postgres arrays), NOT jsonb. Although the contract marks all six fields required, no field column is NOT NULL — the DDL is the authority here; NULLs are legal at the table even where the validator would have rejected the payload."
+    },
+    {
+     "section": "context_sentiment",
+     "table": "context_sentiment",
+     "grain": "run",
+     "item_field": null,
+     "columns": [
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "ratings",
+       "source": "skip:adjudicated 2026-08-05 — C4 RE-PROJECTS the dataset O9 renders as bars, so the ratings, themes and gap analysis live on overview_sentiment where O9 already stores them, and the two cards cannot disagree. The Surface Spec names context_tiles for C4 and names nothing else. Column retained rather than dropped: nothing has read it, so there is no data to migrate, but it is the only record of the mirror reading and a later stage may decide C4 stores its own projection.",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "themes",
+       "source": "skip:adjudicated 2026-08-05 — C4 RE-PROJECTS the dataset O9 renders as bars, so the ratings, themes and gap analysis live on overview_sentiment where O9 already stores them, and the two cards cannot disagree. The Surface Spec names context_tiles for C4 and names nothing else. Column retained rather than dropped: nothing has read it, so there is no data to migrate, but it is the only record of the mirror reading and a later stage may decide C4 stores its own projection.",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "gap_analysis",
+       "source": "skip:adjudicated 2026-08-05 — C4 RE-PROJECTS the dataset O9 renders as bars, so the ratings, themes and gap analysis live on overview_sentiment where O9 already stores them, and the two cards cannot disagree. The Surface Spec names context_tiles for C4 and names nothing else. Column retained rather than dropped: nothing has read it, so there is no data to migrate, but it is the only record of the mirror reading and a later stage may decide C4 stores its own projection.",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "context_tiles",
+       "source": "section:context_tiles",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "env:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "C4, run grain. GENUINE CONTRACT/DDL MISMATCH — DO NOT FREEZE WITHOUT ADJUDICATION: the contract's ONLY defined field is context_tiles[] (list of tiles), which has NO column on this table; the DDL instead mirrors overview_sentiment's O9 shape (its inline comment: \"O9's prompt at Context depth (C4)\") with ratings/themes/gap_analysis JSONB. Mapped section:ratings / section:themes / section:gap_analysis so those keys flow if the producer emits the O9-shaped fields at Context depth; if the payload carries only context_tiles, all three columns are NULL and context_tiles is silently dropped — the section would serve empty despite a PASS. Resolution options: add a context_tiles JSONB column (expand-migrate), or align the C4 contract to ratings/themes/gap_analysis, or have the writer registry map ratings <- context_tiles (rejected here: not a rename, tiles are a composite shape). The page _notes already flag C4 as derived from O9 with no prompt block of its own, which sides with the DDL's shape. Every rating inside ratings keeps its interpretability fields {audience, source, rating, scale, n, as_of, url, e_id, trend_vs_prior} inside the JSONB. Reminder from page _notes: the section IS required (only H8/H9 are optional), and the whole context page is internal-only at the route level, which does not change this writer."
+    },
+    {
+     "section": "acquisitions",
+     "table": "context_acquisitions",
+     "grain": "item",
+     "item_field": "rows",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — server-allocated, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "closed_on",
+       "source": "item:closed_on",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "target_name",
+       "source": "item:target_name",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "kind",
+       "source": "item:kind",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "status",
+       "source": "item:status",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "scale_metrics",
+       "source": "item:scale_metrics",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "integration_target",
+       "source": "item:integration_target",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "affected_subcap_ids",
+       "source": "item:affected_subcap_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "maturity_effect",
+       "source": "item:maturity_effect",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "effect_note",
+       "source": "item:effect_note",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "C5. Item keys map 1:1 to columns, no renames. item_field 'rows' carries a caveat from the page _notes: neither the Surface Spec nor the skill names the top-level array (both say 'Per row:'); 'rows' comes from the MCP Specification docx extraction (background material) — confirm before freezing the registry, since a payload keyed differently would write zero rows and pass silently. status is the table's only field NOT NULL (contract: 'ANNOUNCED|INTEGRATING|COMPLETE|ABANDONED — never NULL'). integration_target is TEXT in the DDL though the contract says date|null — no cast risk, stored as sent. maturity_effect legitimately includes TEMPORARILY_CONSTRAINED (a value C1's maturity_effect vocabulary does not have — cross-surface consistency gates compare direction, not vocabulary). e_ids is item:e_ids (each row carries its own citations — same deviation and rationale as timeline). affected_subcap_ids is TEXT[], not JSONB. No columns lack a source and no contract item field is dropped on this table."
+    }
+   ]
+  },
+  {
+   "page": "techstack",
+   "writers": [
+    {
+     "section": "techstack",
+     "table": "techstack_items",
+     "grain": "item",
+     "item_field": "items",
+     "columns": [
+      {
+       "column": "id",
+       "source": "skip:BIGSERIAL PRIMARY KEY — server-allocated row id, never written",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "ts_id",
+       "source": "item:ts_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "name",
+       "source": "item:product",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "vendor",
+       "source": "item:vendor",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "layer",
+       "source": "item:layer",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "pillar_id",
+       "source": "item:pillar_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "status",
+       "source": "item:status",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "evidence_level",
+       "source": "item:evidence_level",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "detection_basis",
+       "source": "item:detection_basis",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "linked_subcap_ids",
+       "source": "item:linked_subcap_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "dma_impact",
+       "source": "item:dma_impact",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "peer_coverage",
+       "source": "item:peer_coverage",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "peer_deployments",
+       "source": "item:peer_deployments",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "is_primary_gap",
+       "source": "skip:derived from layers[] per layer at serve time, not per item",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "as_of",
+       "source": "item:as_of",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "run_id",
+       "source": "sys:run_id",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "entity_id",
+       "source": "sys:entity_id",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "promoted_at",
+       "source": "sys:promoted_at",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "producer_version",
+       "source": "sys:producer_version",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
+       "column": "provenance",
+       "source": "sys:provenance",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "e_ids",
+       "source": "item:e_ids",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "internal_only",
+       "source": "env:internal_only",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "empty_state",
+       "source": "env:empty_state",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "dropped",
+       "source": "section:dropped",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "r_layer",
+       "source": "section:r_layer",
+       "jsonb": true,
+       "nullable": true
+      },
+      {
+       "column": "narrative_thread",
+       "source": "section:narrative_thread",
+       "jsonb": false,
+       "nullable": true
+      },
+      {
+       "column": "produced_at",
+       "source": "env:produced_at",
+       "jsonb": false,
+       "nullable": true
+      }
+     ],
+     "notes": "NAME MISMATCH: contract item key is `product`, column is `name` — the contract's own _notes record that the TRD representative contract called this field `name` while the Surface Spec/skill REISSUED prompt use `product` (vendor and product are separate fields; product wins in the payload); the DDL kept the TRD spelling `name`, so the writer maps item.product -> name. NO-ITEM-KEY COLUMN: `is_primary_gap` is not in the item shape — it is carried per layer in the section-level `layers[]` rollup ({layer, pillar_id, detected, expected, is_primary_gap}); the writer fills each row by matching item.layer to its layers[] entry and copying that entry's is_primary_gap flag (matches the §06 DDL comment on techstack_items placing the flag per row). E_IDS: on this item-grain table the row-level `e_ids` takes each item's own e_ids[] (the contract requires every item to cite the evidence placing it in the estate — an uncitable item goes to dropped[]), not the section-envelope union; same item-over-section rule as r_layer. CONTRACT FIELDS WITH NO COLUMN: (a) item key `as_of` has no column and this table has no JSONB payload carrier — it is validated in the payload but not persisted, flag if row-level dating is later needed; (b) section field `layers[]` is not stored beyond the per-row is_primary_gap derivation — the T2 landscape strip and the four layer cards recompute detected-of-expected counts from this register at read (invariant 8, and insights_landscape.summary's comment says counts are NEVER stored); (c) section field `dropped[]` ({candidate, reason}) has no column — not persisted in the serving tier by this writer; (d) optional `compliance_attestations[]` (plain strings) has no column — not persisted here. NARRATIVE_THREAD: the techstack section contract declares no narrative_thread field; the skill puts the page-level thread on each page's lead section and techstack has exactly one section, so if the payload carries one it lands here via the envelope path — NULL is correct when absent. R_LAYER: items do not carry r_layer, so section-level (nullable, NULL when the section has none). STATUS is the table's only payload NOT NULL — CONFIRMED|INFERRED|CLAIMED|ABSENT required per row because the landscape strip recomputes its four counts from this column. UNIQUENESS: 0008 creates UNIQUE INDEX techstack_items_ts_uq ON (run_id, ts_id) — ts_id is agent-minted (TS-nnn) and must be unique within the run, so delete-then-insert ordering inside the promote transaction matters. GENERATED columns: none on this table. DROPPED (0023): section-grain on an item-grain table, repeated per row and read once — the same shape overview_firmographics uses for sub_vertical_undefined. The sibling required field `layers` is deliberately NOT bound: every ingredient of the rollup is on these item rows, so it is recomputed at read (invariant 8) and a column would be a second answer that could disagree with the rows beneath it. RESOLVED (0027): as_of has a DATE column (and an enum_fields date_fields entry, so month and quarter precision resolve at promote rather than aborting the transaction). 'A technographic claim about a named institution is a research finding: without source_url and as_of it is not one.'"
+    }
+   ]
+  }
+ ]
+}

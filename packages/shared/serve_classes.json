@@ -1,0 +1,15 @@
+{
+  "_doc": "Key classes the customer-audience serve boundary excludes, read by scripts/gen_customer_allowlist.py (build time) and mirrored by the plugin's precheck hooks (advisory, fail-open). The authoritative enforcement is apps/api/dma_api/redaction.py against the GENERATED allowlist — these classes are the classification input, never the runtime rule. Measured basis: the Logix promoted payload census, 2026-08-19 — 4,527 sources_searched strings across 705 cell drawers, 29 raw queries_run in alerts, searched_on in 20 empty_states, tier codes in the evidence index and 97 cell items — all unmarked, all serving to the customer body before this boundary existed.",
+  "probe_keys": {
+    "keys": ["sources_searched", "queries_run", "searched_on"],
+    "why": "Search ladders are the record of how an absence was established — owed to the assessment, not the reader. The producer's authored reason (empty_state.reason) and what would close it (closure_condition) stay client-facing per the 2026-08-14 owner adjudication: a real reason renders, a probe never does."
+  },
+  "method_keys": {
+    "keys": ["tier", "ers", "recency_band", "discovered_by", "provenance", "link_basis"],
+    "why": "Evidence-method vocabulary (T1-T5 tiers, rank scores, freshness bands, producer identity). The census section that explains the method (overview.evidence_coverage) is NEVER_SERVED; these are the same vocabulary escaping row-by-row through the evidence index and cell drawer items."
+  },
+  "cap_keys": {
+    "keys": ["cap_level", "ceiling", "uncertainty_band", "urf_modifiers"],
+    "why": "M-code cap vocabulary. The ceilings table carrying it is NEVER_SERVED; cap_level='M3' rows in context.issue_register and free-text ceiling fields escape by another name. The context page is customer-withheld whole today; this pins the class if that ever changes."
+  }
+}

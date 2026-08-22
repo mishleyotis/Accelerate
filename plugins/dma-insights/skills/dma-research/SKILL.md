@@ -1,0 +1,620 @@
+---
+name: dma-research
+description: >
+  Conducts subcapability-level public evidence research for Digital Maturity Assessments
+  of financial services institutions. Reads diagnostic questions from Pillar XLSX toolkits,
+  generates targeted search queries for each of ~836 subcapabilities, executes web searches,
+  maps evidence to specific subcap rows, and populates the scoring workbook with evidence
+  (leaving score columns empty for dma-assessment). NO scoring, NO maturity levels — ceiling
+  estimates with uncertainty bands ONLY. ALWAYS use when the user mentions: DMA research,
+  evidence collection, pre-assessment research, tech stack discovery, entity profiling,
+  subvertical classification, or any request to gather evidence before DMA scoring.
+---
+
+# DMA Research Skill v2.3
+
+This skill produces the **evidence foundation** for a Digital Maturity Assessment. It does
+NOT score — it researches. Output: a partially-filled scoring workbook with evidence columns
+populated and scoring columns empty for `dma-assessment`.
+
+**v2.3 Changes:** Restored subcap-level search enforcement (3-5 queries per subcap via
+web_search + Moody's dual-source). Mandatory proxy escalation when signals unknown.
+No thin evidence at subcap level. URL enforcement per workbook row. Aligned query counts
+with dma-assessment skill (3-5 per subcap).
+
+## ⛔ ABSOLUTE RULES
+
+| # | Rule | Prevents |
+|---|------|----------|
+| 1 | **NO SCORING** — Ceiling estimates with uncertainty bands ONLY. Never assign M1-M5. | Premature scoring |
+| 2 | **EVERY claim labeled** — FACT / INFERENCE / HYPOTHESIS / CEILING_ESTIMATE. | Unlabeled assertions |
+| 3 | **EVERY claim cited** — Evidence ID `[E-xxx]` + KB Source ID `[KB-XX-xxx]`. | Ungrounded prose |
+| 4 | **Compact output** — One line per finding. No narrating, no previewing. | Token waste |
+| 5 | **Presence ≠ Utilization** — Tech findings are ceiling estimates. Flag utilization uncertainty. | Over-estimation |
+| 6 | **`web_search` at SUBCAPABILITY level** — 3-5 queries per subcap via `references/deep_search_protocol.md`. Execute Tiers 1-6. If signals remain unknown or <3 evidence items after Tiers 1-6, proxy searches (Tiers 7-10) are MANDATORY — do not skip. This is the PRIMARY research mechanism — no shortcuts. | Thin evidence, shallow single-search-per-category |
+| 6b | **Dual-source: `web_search` FIRST, then Moody's connector** — web_search is PRIMARY (≥70% of queries). Moody's SUPPLEMENTS with structured credit/financial data. web_search MUST precede Moody's in every batch. Moody's does NOT replace subcap-level web searches. | Single-source dependency |
+| 7 | **Batch execution** — 6 batches. Stop after each. Wait for "continue". Checkpoint after each batch. | Context overflow |
+| 8 | **Fill the workbook** — Columns A-I, K, L, M, U, V. Leave J, N-T EMPTY. Every row: specific URL in L, ERS in M, excerpt ≥50 chars in U. | Evidence trapped in chat / truncated evidence |
+| 9 | **Read diagnostic Qs FIRST** — Column H drives the search. | Generic searches |
+| 10 | **Calculate ERS** — 0.35×Tier + 0.25×Recency + 0.20×Specificity + 0.20×Corroboration. | Undifferentiated evidence |
+| 11 | **Extract at FACT level** — `[E-xxx:Fy]` notation. One `web_fetch` → 20+ subcap facts. | Single-fact extraction |
+| 12 | **5-Layer Analysis** (HYBRID/INTERNAL) — Explicit → Implicit → Absence → Contradiction → Strategic. | Surface-level extraction |
+| 13 | **Use project knowledge base templates** — Client Profile report MUST use the `DMA_Client_Profile_Research_Template.docx` from the project knowledge base. Retrieve it, fill it. NO deviation, NO ad hoc structures. | Inconsistent report formats |
+| 14 | **Peer set locked in Batch 1** — Select 3-5 peers during entity profiling. Peers are IMMUTABLE after Batch 1. Saved to peer_set.json and carried into handoff. | Assessment delays from deferred peer selection |
+| 15 | **Canonical evidence schema** — Every evidence item uses identical field names across all batches. See Evidence Item Schema below. | Schema inconsistency across batches (QA-010) |
+
+---
+
+## Context Window Management (CRITICAL)
+
+| Batch | Max Tokens | Focus |
+|-------|-----------|-------|
+| 1 | ~4,000 | Entity profile — one line per finding |
+| 2 | ~15,000 | P1+P2 evidence — one line per fact |
+| 3 | ~15,000 | P3+P4 + tech deep dive |
+| 4 | ~8,000 | Workbook generation — code-heavy |
+| 5 | ~6,000 | Report — code-heavy |
+| 6 | ~4,000 | Appendices + handoff |
+
+**Anti-Bloat Rules:**
+1. NEVER narrate what you're about to do — just do it
+2. NEVER explain methodology in chat — it's in the reference files
+3. Evidence findings: ONE LINE per fact — no paragraphs
+4. Batch summaries: MAX 15 lines
+5. File generation: go straight to code — no preamble
+6. Approaching context limit: CHECKPOINT immediately
+7. Reference files: read ONCE at batch start, don't re-read
+
+**Scratchpad-First Pattern (CRITICAL for Batches 2-3):**
+Do NOT accumulate evidence findings in chat. Instead:
+1. Search → extract facts → append to `evidence_index.json` on disk using this pattern:
+   ```python
+   import json, os
+   EI_PATH = f"{RUN_DIR}/01_evidence/evidence_index.json"
+   
+   def append_evidence(subcap_id, items):
+       """Append evidence for one subcap. Call after scoring each subcap."""
+       if os.path.exists(EI_PATH):
+           with open(EI_PATH) as f:
+               data = json.load(f)
+       else:
+           data = {"run_id": RUN_ID, "items": []}
+       data["items"].extend(items)
+       with open(EI_PATH, "w") as f:
+           json.dump(data, f, indent=2)
+   
+   # Call after EACH subcap's searches complete:
+   append_evidence("P1C1.1.1", [
+       {"evidence_id": "E-001", "source_name": "...", "url": "https://...",
+        "tier": "T2", "ers_score": 3.2, "subcap_mappings": ["P1C1.1.1"],
+        "facts": [{"fact_id": "F1", "text": "...", "claim_label": "FACT"}],
+        "publish_date": "2024-06", "signal_direction": "POSITIVE"}
+   ])
+   ```
+2. Chat output: only print capability-level progress (e.g., "P1C1: 12 facts, 4 subcaps covered")
+3. After each CATEGORY: save checkpoint, print coverage stats (3 lines max)
+4. This keeps context clean for the next category's searches
+
+If you are printing more than 5 lines of evidence per capability in chat, you are wasting
+context. Write to disk, summarize in chat.
+
+**Banned patterns:** "Let me search for..." / "I'll now look into..." / "Based on my
+research..." / "Now I'll create..." / "First, I'll..." — Just DO it.
+
+### Cross-Conversation Execution (SUPPORTED)
+
+Batches can run in separate conversations. All state lives in checkpoint files within
+`$RUN_DIR/checkpoints/`. On new conversation start:
+
+1. Read this SKILL.md
+2. Load the most recent checkpoint from `$RUN_DIR/checkpoints/`
+3. Confirm entity name, batch number, and progress with user
+4. Proceed from the checkpoint — do NOT re-derive prior batches' output from conversation
+
+When approaching context limits mid-batch, save an emergency checkpoint at the nearest
+category boundary and instruct the user to continue in a new conversation.
+
+---
+
+## Output Directory Taxonomy (MANDATORY)
+
+```
+/home/claude/dma_output/{RUN_ID}/
+├── run_manifest.json
+├── 00_entity_profile/         # Batch 1
+│   ├── entity_profile.json
+│   ├── subvertical_classification.json
+│   ├── financial_baseline.json
+│   └── peer_set.json          # LOCKED peer set (3-5 peers, immutable after Batch 1)
+├── 01_evidence/               # Batches 2-3
+│   ├── evidence_index.json
+│   ├── evidence_index.csv
+│   ├── search_log.json
+│   └── rich_documents/
+├── 02_workbook/               # Batch 4
+│   ├── DMA_Research_Workbook_{INST}_{DATE}.xlsx
+│   └── workbook_validation.json
+├── 03_appendices/             # Batches 4+6 (A1-A9 CSVs)
+├── 04_visualizations/         # Batch 6 (VIZ-01 to VIZ-05 PNGs)
+├── 05_report/                 # Batch 5
+├── 06_handoff/                # Batch 6 (research_handoff.json)
+├── 07_qa/                     # QA artifacts
+└── checkpoints/               # Batch checkpoints
+```
+
+**Run ID:** `DMA-RES-{INST_CODE}-{YYYYMMDD}-{SEQ}` (e.g., DMA-RES-GESA-20260304-0001)
+
+**At Batch 1 start:** Generate RUN_ID → create full tree → create `run_manifest.json` →
+all subsequent file writes use these paths — no exceptions.
+
+**Provenance:** Every file references `run_id`. CSVs: header comment `# run_id: {RUN_ID}`.
+Workbook: `Run_Metadata` sheet. VIZ: footer text. Hard gate: mismatched `run_id` = build fails.
+
+**Clean build:** Never reuse artifacts from different RUN_ID. Final package = manifest list only.
+
+---
+
+## Evidence Tier System
+
+| Tier | Type | Weight | Max Ceiling | Examples |
+|------|------|--------|-------------|---------|
+| T1 | Regulatory/Audited + Verified Tech Scans | 1.0 | L5 | Call reports, enforcement orders, **Hubbl scans**, BuiltWith, Wappalyzer |
+| T2 | Official Disclosures + Structured Internal | 0.85 | L5 | Annual reports, 10-K, investor decks, **discovery notes** with specific tech/metrics |
+| T3 | Third-Party Analysis | 0.7 | L4 | J.D. Power, Forrester, app ratings |
+| T4 | Internal (Unvalidated Narrative) | 0.55 | L2.5 | Unstructured memos, anecdotal claims |
+| T5 | Marketing/Claims | 0.3 | L2 | Website claims, brochures — REQUIRES corroboration |
+
+### ⚠️ Hubbl & Discovery Notes — CRITICAL Tier Rules
+
+**Hubbl scans = T1.** Machine-generated, timestamped, objective deployment data.
+**Structured discovery notes = T2.** Formal engagement outputs with specific tech/metrics.
+**NEVER classify Hubbl as T4.** Most common misclassification — suppresses scores via T4 ceilings.
+
+```
+Classification decision tree:
+  Machine-generated scan (Hubbl, BuiltWith)? → T1
+  Structured engagement notes with metrics?  → T2
+  Formal internal doc (policy, board deck)?  → T3 (use with corroboration)
+  Informal memo, email, anecdotal claim?     → T4
+```
+
+**Recency tags:** CURRENT (<18mo), RECENT (18-36mo), LEGACY (>36mo), UNVERIFIED (undated)
+
+---
+
+## Canonical Evidence Item Schema (MANDATORY — all batches)
+
+Every evidence item across ALL batches MUST use this exact schema. No field name variations.
+This prevents the schema inconsistencies documented in QA-010.
+
+```json
+{
+  "evidence_id": "E-xxx",
+  "source_name": "string",
+  "url": "string (specific URL — NEVER 'multiple searches' or blank)",
+  "tier": "T1|T2|T3|T4|T5",
+  "ers_score": 0.0,
+  "recency_tag": "CURRENT|RECENT|LEGACY|UNVERIFIED",
+  "subcap_mappings": ["P1C1.1.1", "P1C1.1.2"],
+  "facts": [{"fact_id": "F1", "text": "string", "claim_label": "FACT|INFERENCE|HYPOTHESIS|CEILING_ESTIMATE"}],
+  "publish_date": "YYYY-MM",
+  "signal_direction": "POSITIVE|NEGATIVE|NEUTRAL|CONTRADICTORY"
+}
+```
+
+**Hard enforcement:** `scripts/merge_evidence.py` and `scripts/validate_workbook.py` reject
+items not conforming to this schema. Field aliases (e.g., `id` instead of `evidence_id`,
+`finding` instead of `facts`) are NOT accepted.
+
+---
+
+## Dual-Source Research Protocol (web_search + Moody's Connector)
+
+**web_search is the PRIMARY evidence tool.** Moody's connectors SUPPLEMENT but never replace
+targeted web searches. This is enforced per-batch.
+
+### Invocation Order (MANDATORY per batch)
+
+```
+STEP 1: Targeted web searches (≥10 per batch, ≥70% of total queries)
+  → web_search for institution-specific evidence
+  → web_fetch on discovered pages (vendor case studies, press releases, tech blogs)
+  → Fetch institution's primary website for first-party source data
+
+STEP 2: Moody's connector calls (structured credit/financial data)
+  → Moody's scorecard data (financial ratios, credit metrics)
+  → Moody's sector outlook (industry context)
+  → Moody's document search (analyst reports, research notes)
+
+STEP 3: Regulatory database deep dive
+  → Regulator-specific searches (FDIC, NCUA, OCC, FCA, state regulators)
+  → Enforcement action searches
+  → Call report / financial filing retrieval
+
+STEP 4: Proxy signal searches (Tiers 7-10)
+  → Industry associations mentioning entity
+  → Vendor case studies, partner press releases
+  → Job postings (LinkedIn, Indeed) for capability indicators
+  → Glassdoor reviews, community forums
+```
+
+**Safeguard Checks (verified after each batch):**
+- SG-01: web_search invoked BEFORE Moody's in this batch
+- SG-02: ≥10 targeted web searches executed this batch
+- SG-03: Entity primary website fetched for first-party data
+- SG-04: Moody's data layered on top of (not replacing) web search results
+- SG-05: Negative results documented (absence = evidence)
+- SG-06: Financial data covers ≥3 years for trend analysis
+
+**Search log (A2 CSV) must show web_search as dominant query type (≥70% of total).**
+
+---
+
+## Internal Evidence Integration Protocol (HYBRID/INTERNAL mode)
+
+**MANDATORY for every capability when internal evidence exists.**
+
+1. **LOAD internal evidence FIRST** — before web search. Read all uploaded client documents,
+   discovery notes, Hubbl scans, and internal files at batch start.
+2. **CLASSIFY using decision tree** — NEVER default internal evidence to T4:
+   ```
+   Machine-generated scan (Hubbl, BuiltWith, Wappalyzer)?  → T1
+   Structured engagement notes with specific tech/metrics?  → T2
+   Client-provided policy docs, board decks, roadmaps?      → T2
+   Formal internal doc (general, no specific metrics)?       → T3
+   Informal memo, email, anecdotal claim?                    → T4
+   ```
+3. **CROSS-REFERENCE** against public evidence — note agreements and contradictions
+4. **WEIGHT CORRECTLY:** Internal T2 evidence OUTWEIGHS public T3-T5 evidence for the same subcap
+5. **Flag in workbook Column U** when internal evidence contradicts public evidence
+6. **HARD GATE:** If HYBRID/INTERNAL mode and >50% of subcaps have zero internal evidence
+   cited → STOP and verify internal docs were actually loaded and analyzed
+
+---
+
+## Claim Labels (MANDATORY — every finding)
+
+| Label | Citation Rule | Format |
+|-------|--------------|--------|
+| FACT | E-ID + KB-ID | `[E-003] NCUA Q4 2024 (T1, CURRENT): Assets $4.2B. [KB-US-001] (FACT)` |
+| INFERENCE | 2+ E-IDs + logic | `[E-012, E-015] AppExchange listing + job posting for "Salesforce Admin": Likely uses FSC. (INFERENCE)` |
+| HYPOTHESIS | E-IDs + proxy attempts | `[E-030] LinkedIn shows no digital officer titles in leadership. Proxy: board bios searched, no tech background found [E-031]. Org chart suggests digital reports to CIO. (HYPOTHESIS — validate via internal org chart)` |
+| CEILING_ESTIMATE | E-IDs + uncertainty | `P4C3 ceiling: L3.5 (±0.5). Tech presence confirmed [E-018] but utilization unknown. (CEILING_ESTIMATE)` |
+
+**FORBIDDEN HYPOTHESIS PATTERNS (these indicate skipped proxy searches):**
+- "No CDO found" — Did you search board bios, LinkedIn, press releases, job postings?
+- "No governance strategy" — Did you search annual reports, investor decks, proxy statements?
+- "No digital strategy" — Did you search strategic plan filings, CDO/CTO appointments, conference talks?
+If your hypothesis is "not found", you MUST list the proxy searches attempted and their results.
+
+---
+
+## Core Engine: Diagnostic Q → Search → Evidence → Subcap Row
+
+### Step 1: Load Diagnostic Questions
+At batch start, open Pillar XLSX → Capability Map → Column H for every subcap.
+Fallback: `references/diagnostic_questions.md`.
+
+### Step 2: Generate Search Queries
+Per subcap, 3-5 queries combining `web_search` + Moody's (`references/deep_search_protocol.md`).
+**This is the single most important step. Shallow searches produce generic assessments.**
+
+| Signal | Source | Mandatory? |
+|--------|--------|-----------|
+| 1. Diagnostic Q decomposition | Subject + verb + qualifier + evidence target | Tiers 1-2 (MANDATORY) |
+| 2. Subcap keywords | Domain terms from subcap name + parent | Tier 3 (MANDATORY) |
+| 3. Expected evidence sources | Tier-aware targeting (governance→proxy, CX→app stores) | Tiers 4-5 (MANDATORY) |
+| 4. Proxy signals | When direct evidence unlikely (board bios, job posts) | Tier 7+ (MANDATORY when signals unknown or <3 items) |
+| 5. Contradictory/negative | Failures, complaints, enforcement | Tier 10 (MANDATORY/capability) |
+
+**Proxy Escalation Rule:** If Tiers 1-5 yield unknown or ambiguous signals for a subcap,
+proxy searches (Tiers 7-10) are NOT optional — execute them immediately. The goal is
+NO thin evidence at the subcap level. Every subcap must have either substantive evidence
+or a thoroughly documented NO_EVIDENCE determination with proxy search attempts logged.
+
+**Anti-shortcut rule:** If you find yourself running the same query for multiple subcaps,
+you are searching at the WRONG level. Each subcap's diagnostic question asks something
+DIFFERENT — your queries must reflect that difference.
+
+**Rules:** Include institution name in every query. 4-8 words. Don't repeat diagnostic Q
+verbatim. Include "2024 2025" in 2+ queries. Use `web_fetch` on rich documents.
+
+### Step 3: Execute & Extract
+Per subcap: search → fact-level extraction `[E-xxx:Fy]` → tier classify → recency tag →
+calculate ERS → label claim → map to subcap IDs → check red flags.
+For HYBRID/INTERNAL: 5-Layer Analysis on every internal doc.
+
+**Thin Evidence Gate (per subcap, fires BEFORE moving to next subcap):**
+- If <3 evidence items after initial searches → execute proxy searches (Tiers 7-10) immediately
+- If signals still unknown after proxy → document as NO_EVIDENCE with full search log
+- NEVER record thin/vague evidence — either substantive evidence or NO_EVIDENCE
+- Every evidence item MUST have a specific URL (not blank, not "multiple searches")
+
+### Step 4: Populate Workbook Row
+Columns A-I (from Pillar XLSX), K (Evidence_IDs), L (URLs), M (Tier), U (Excerpt), V (Source).
+**J, N-T: LEAVE EMPTY.** No evidence found: G=`NO_EVIDENCE`, U=search attempt documentation.
+
+**URL Enforcement (per row):**
+- Column L MUST contain a specific, resolvable URL for every evidence item
+- "multiple searches", blank, or placeholder URLs = REJECTED
+- For Moody's data: use the Moody's report/document URL
+- For web_search results: use the source page URL from web_fetch
+- For NO_EVIDENCE rows: Column L = "N/A — no evidence found"
+
+---
+
+## Diagnostic Question Patterns
+
+| Pattern | Evidence Needed | Query Strategy |
+|---------|----------------|----------------|
+| "Does [entity] have..." | Existence proof | Search for the thing |
+| "Is [thing] documented..." | T2+ documentation | Annual reports, filings |
+| "Is there a defined process..." | Process maturity T2/T3 | Process descriptions, job posts |
+| "Are metrics tracked..." | Measurement T1/T2 | Reported metrics, KPIs |
+| "Is [thing] automated..." | Technology T3/T4 | Platform, vendor, case study |
+| "Is there board oversight..." | Governance T1/T2 | Proxy statements, charters |
+| "Are results used to improve..." | Optimization T2/T3 | Iteration evidence, A/B testing, CI |
+| "Is [capability] integrated across..." | Enterprise adoption T2/T3 | Cross-dept mentions, unified platform |
+
+### Evidence Sufficiency by Question Type
+
+| Question Type | Minimum Evidence | Below Minimum Action |
+|---------------|-----------------|---------------------|
+| Existence | 1 confirming OR 3 non-findings + proxy attempts | NO_EVIDENCE only after proxy searches (Tiers 7-10) also fail |
+| Process maturity | 2 sources | EVIDENCE_THIN, flag for internal validation |
+| Measurement | 1 T1/T2 with actual values | T3+ only → label INFERRED, note no hard data |
+| Technology | 1 tech evidence + 1 utilization | Presence alone → CEILING_ESTIMATE |
+| Governance | 1 T1/T2 governance evidence + proxy search | Proxy/board composition only → HYPOTHESIS with proxy log |
+| Optimization | 2 improvement cycle references | Single mention → HYPOTHESIS, low confidence |
+| Enterprise adoption | 2+ cross-department references | Single dept → cap at L3.0 |
+
+**MANDATORY PROXY RULE for Governance & Strategy subcaps (P1C1-P1C5):**
+These subcaps are the most likely to produce false "not found" conclusions because
+governance evidence is often indirect. For EVERY governance/strategy subcap:
+1. Search board bios for tech/digital background (Tier 7)
+2. Search for C-suite digital hires — CDO, CTO, CIO appointments (Tier 7)
+3. Search LinkedIn for leadership with digital titles (Tier 7)
+4. Search conference presentations by entity leadership (Tier 8)
+5. Search for strategic plan filings or investor deck mentions (Tier 2)
+Only AFTER all 5 proxy types are attempted can you conclude NO_EVIDENCE.
+"No CDO found" without these searches = research failure, not a finding.
+
+---
+
+## Batch Execution Protocol
+
+6 batches × ~836 subcaps × 3-5 searches/subcap = 2,500-4,200 web searches + Moody's enrichment + 100-300 web_fetches.
+Each subcap gets its OWN 3-5 queries derived from its diagnostic question.
+Shared document mining (annual reports, 10-Ks) supplements but does NOT replace per-subcap searches.
+Complete batch → HANDOFF SUMMARY → STOP → wait for "continue."
+
+When user says "continue": find most recent HANDOFF → resume next batch. NEVER restart.
+
+### Batch 1: ENTITY PROFILING, CLASSIFICATION & PEER SELECTION
+Follow Dual-Source Research Protocol (web_search FIRST, then Moody's, then regulatory).
+1. Entity identity + website → 2. Regulatory search → 3. Financial metrics (3-5yr T1/T2)
+→ 4. Subvertical classification → 5. Issues & enforcement → 6. Sentiment
+→ 7. **PEER SET SELECTION** → 8. PARAMETER LOCK
+
+**Step 7 — Peer Set Selection & Lock (NEW):**
+Select 3-5 peers based on: sub-vertical match, size tier proximity, geographic overlap,
+competitive relevance. For each peer, document:
+- peer_name, size_tier, key_metric (assets/revenue/AUM)
+- geography, overlap_pct, selection_rationale
+Save to `00_entity_profile/peer_set.json`.
+**Peer set is IMMUTABLE after Batch 1.** Assessment skill inherits this set unchanged.
+
+**Output:** Compact findings. **Stop:** "--- BATCH 1 COMPLETE ---"
+
+### Batch 2: P1 + P2 SUBCAP-LEVEL RESEARCH
+**READ `references/deep_search_protocol.md` FIRST — it defines the query tier system.**
+Follow Dual-Source Research Protocol: web_search FIRST (≥70%), then Moody's enrichment.
+
+**Execute this EXACT loop for P1, then repeat for P2:**
+```
+FOR each category in pillar (e.g., P1C1, P1C2, P1C3...):
+  FOR each capability in category (e.g., P1C1.1, P1C1.2...):
+    subcaps = extract_subcaps(capability)  # from Pillar XLSX Column H
+    
+    # Step A: Fetch shared rich documents ONCE per capability
+    rich_docs = web_fetch(annual_report, 10K, proxy_statement)  # if not already fetched
+    shared_facts = extract_all_facts(rich_docs)  # map facts to ALL subcaps they apply to
+    
+    FOR each subcap in subcaps (e.g., P1C1.1.1, P1C1.1.2, P1C1.1.3...):
+      diagnostic_q = subcap.column_H
+      
+      # Step B: Run 3-5 SUBCAP-SPECIFIC searches derived from THIS diagnostic Q
+      queries = decompose_diagnostic_q(diagnostic_q, entity_name)  # 3-5 unique queries
+      results = []
+      for q in queries:
+        results += web_search(q)
+        results += moodys_search(q)  # if applicable
+      
+      # Step C: Combine shared_facts relevant to THIS subcap + subcap-specific results
+      subcap_evidence = shared_facts.filter(subcap.id) + results
+      
+      # Step D: Proxy escalation if evidence is thin
+      IF len(subcap_evidence) < 3:
+        proxy_queries = generate_proxy_queries(subcap, entity_name)  # Tiers 7-10
+        subcap_evidence += execute_searches(proxy_queries)
+      
+      # Step E: Write to disk immediately (NOT to chat)
+      append_to_evidence_index(subcap.id, subcap_evidence)
+    
+    # Checkpoint after each capability
+    save_checkpoint(capability.id, evidence_count)
+    print(f"{capability.id}: {len(subcaps)} subcaps, {evidence_count} items")  # 1 line
+  
+  # Checkpoint after each category
+  save_category_checkpoint(category.id)
+  print(f"--- {category.id} complete: {coverage}% coverage ---")  # 1 line
+```
+
+**The agent MUST execute this loop literally.** "For each subcap" means opening each
+subcap's diagnostic question and generating queries specific to THAT question.
+If you are running fewer searches than `(number_of_subcaps × 3)`, you are not
+executing the loop — you are batching at category level.
+
+For HYBRID/INTERNAL: Load internal evidence FIRST per Internal Evidence Integration Protocol.
+**Stop:** "--- BATCH 2 COMPLETE ---"
+
+### Batch 3: P3 + P4 + TECH DEEP DIVE
+**READ `references/deep_search_protocol.md` if not already loaded this conversation.**
+Follow Dual-Source Research Protocol: web_search FIRST (≥70%), then Moody's enrichment.
+
+**Execute the SAME subcap-by-subcap loop as Batch 2, for P3 then P4.**
+P4 adds utilization analysis per `references/tech_discovery.md`:
+- After finding tech evidence, search separately for UTILIZATION evidence
+- Presence ≠ utilization. "Uses Salesforce" ≠ "Uses Salesforce effectively"
+- Flag utilization uncertainty on every tech finding
+
+→ After P4 subcaps: tech stack discovery → org capability proxies.
+For HYBRID/INTERNAL: Load internal evidence FIRST per Internal Evidence Integration Protocol.
+**Stop:** "--- BATCH 3 COMPLETE ---"
+
+### Batch 4: WORKBOOK POPULATION & CONSOLIDATION
+1. `scripts/merge_evidence.py` → 2. Recalculate ERS → 3. `scripts/validate_coverage.py`
+(HARD GATE: ≥80% coverage) → 4. Safeguard gates → 5. Uncertainty bands →
+6. `scripts/populate_workbook.py` (read `references/research_workbook_spec.md` + xlsx skill FIRST)
+→ 7. `scripts/validate_workbook.py` → 8. Generate CSVs (A1,A3-A6)
+
+**Column U format:** `[ERS: X.XX] [CLAIM_TYPE] [E-xxx:Fy] Source (Tier, Recency): Finding.`
+**Stop:** "--- BATCH 4 COMPLETE ---"
+
+### Batch 5: RESEARCH REPORT (Client Profile)
+
+**Template is MANDATORY — NO deviation.**
+
+1. Read the `docx` skill FIRST (invoke it by name; do not hardcode a path to it)
+2. **Retrieve `DMA_Client_Profile_Research_Template.docx` from the project knowledge base.**
+   This is the ONLY acceptable report structure. Do NOT create ad hoc layouts.
+3. Execute PRE-WRITE PROTOCOL before writing ANY section:
+   ```
+   a. WHAT DATA is relevant for this entity? (Load evidence, count items, identify patterns)
+   b. WHY is it important to a Sales Account Executive? (Business impact, risk, opportunity)
+   c. WHAT is the implication to Zennify? (Which of the 12 Zennify solutions apply and why?)
+   ```
+4. Fill template sections in order:
+   - Section 1 (Executive Summary): Entity snapshot, top findings WITH Zennify relevance column, critical gaps
+   - Section 2 (Entity Profile): Corporate identity, scale metrics, regulatory standing, business composition
+   - Section 3 (Market Position): **Peer set from Batch 1 (LOCKED)**, financial trajectory, digital evolution timeline, sentiment
+   - Section 4 (Strategic Intelligence): Insight Cards using WHAT/WHY/SO WHAT structure, tech landscape, leadership overview
+   - Section 5 (Risk & Issues): Issue register with timeline, negative search results, assumptions register
+   - Appendix A (Assessment Quality): Evidence summary, capability coverage map, safeguard gates
+   - Appendix B (Handoff Package): Parameter lock, priority/caution capabilities, cap triggers, internal evidence request
+   - Appendix C (Metadata): Assessment ID, evidence mode, search log, audit trail
+5. **Assessment ID and Evidence Mode on cover page, header, and Appendix C MUST match run_manifest.json**
+6. **Analyze → Synthesize → Write.** Do NOT just list facts. For every insight: what does the data MEAN for this institution?
+
+**Stop:** "--- BATCH 5 COMPLETE ---"
+
+### Batch 6: APPENDIX & HANDOFF
+CSVs (A2,A7-A9) + VIZ PNGs + research_handoff.json. **Stop:** "--- RESEARCH COMPLETE ---"
+
+### Handoff Summary Template (MAX 15 lines)
+```
+=== BATCH [N] HANDOFF ===
+Entity: [Name] | Classification: [SV]
+Assessment ID: [RUN_ID] | Evidence Mode: [PUBLIC/INTERNAL/HYBRID]
+Evidence: E-001–E-[XXX] | Subcaps: [N]/836 ([X]%)
+Coverage: [N] ≥3, [M] thin, [P] none | Claims: [F/I/H/CE counts]
+Tech: [N] total, [M] Zennify-priority | Gates: [N] PASS, [M] FAIL
+Peers (LOCKED): [Peer1, Peer2, Peer3, ...]
+Key findings: [5 bullets max]
+Next: Batch [N+1] | Inputs: [what's needed]
+=== END ===
+```
+
+### Emergency Checkpoint
+```
+--- CHECKPOINT: Batch [N], Step [X], Category [P#C#].
+Completed: [N] subcaps, [M] evidence. Remaining: [list].
+CONTINUE to resume from [subcap ID]. ---
+```
+
+---
+
+## Workbook Columns (Research Responsibility)
+
+| Cols | Research Fills | Cols | Assessment Fills |
+|------|---------------|------|-----------------|
+| A-I | Taxonomy + diagnostic Q + weights | J | Score |
+| K,L,M | Evidence IDs, URLs, Tier | N-T | Confidence, caps, rationale, proof |
+| U,V | Evidence excerpt + source doc | — | May enrich U,V |
+
+---
+
+## Reference Files
+
+| File | Read When | Key Contents |
+|------|-----------|-------------|
+| `references/evidence_methodology.md` | Batch 1 start | ERS formula, fact-level extraction, 5-Layer analysis, red flags |
+| `references/deep_search_protocol.md` | Batch 2 start | 10-tier query system, proxy signals, smart batching |
+| `references/research_workbook_spec.md` | Batch 4 | Column specs, Column U protocol, sheet structure |
+| `references/source_catalogue.md` | Batch 1 | KB Source IDs, URLs, query templates |
+| `references/subvertical_profiles.md` | Batch 1 | Decision tree, T1 sources, financial metrics |
+| `references/tech_discovery.md` | Batch 3 | Tech categories, utilization, URF-01-06, vendor tenure |
+| `references/org_capability_proxies.md` | Batch 3 | LinkedIn density, job seniority, Glassdoor |
+| `references/uncertainty_framework.md` | Batch 4 | Base uncertainty, red flag modifiers, ±0.8 cap |
+| `references/safeguard_gates.md` | Batch 4 | 16 safeguard gates |
+| `references/deliverables_spec.md` | Batch 5 | D0-D6 structure, appendix specs |
+| `references/document_formatting.md` | Batch 5 | Zennify branding, DM Sans, python-docx |
+| `references/diagnostic_questions.md` | Fallback | All ~836 diagnostic questions |
+
+## Scripts
+
+| Script | Batch | Purpose |
+|--------|-------|---------|
+| `scripts/extract_diagnostic_questions.py` | 2 | Parse Pillar XLSX → subcap IDs, names, diagnostic Qs |
+| `scripts/generate_query_plan.py` | 2-3 | Diagnostic Qs + entity → 10-tier query plan |
+| `scripts/calculate_ers.py` | All | Calculate ERS scores, optionally write back |
+| `scripts/merge_evidence.py` | 4 | Deduplicate, link corroborations, coverage stats |
+| `scripts/populate_workbook.py` | 4 | Evidence index + diagnostic Qs → 10-sheet workbook |
+| `scripts/validate_coverage.py` | 4 | Coverage thresholds, tier distribution, hard gates |
+| `scripts/validate_workbook.py` | 4 | Structure, evidence quality, cross-references |
+
+---
+
+## Domain-Specific Rules
+
+**P4 Stricter Thresholds:** HIGH=T1/T2+corroboration+UTILIZATION. MEDIUM=T3+stack confirmed.
+LOW=T4-T5 or any red flag. Inferred tech→cap L3.0. Tenure >10yr basic→internal validation.
+
+**Minimum Coverage (HARD GATE — blocks Batch 4):**
+1+ T1 regulatory anchor | 2+ T1/T2 financials | 2+ operating model sources |
+5-year trend data | Issue search all regulators | Sentiment attempted |
+Tech stack all categories | Org proxies | Diagnostic Qs loaded | ≥80% subcaps with evidence
+
+**Tech Utilization:** See `references/tech_discovery.md` (evidence levels 1-4, utilization
+levels, URF-01-06 red flags, vendor tenure, Zennify-priority, recency protocol).
+
+**Uncertainty:** See `references/uncertainty_framework.md` (base ±0.3-0.5, red flags +0.1-0.2,
+evidence gaps +0.1-0.2, formula capped ±0.8).
+
+**Org Proxies:** See `references/org_capability_proxies.md` (LinkedIn density, job seniority,
+Glassdoor culture, impact on P1C4/P4 ceilings).
+
+---
+
+## PARAMETER LOCK Block (Final Output)
+
+```
+════════════════════════════════════════════════════════
+ASSESSMENT ID: [RUN_ID]
+EVIDENCE MODE: [PUBLIC/INTERNAL/HYBRID]
+PARAMETER LOCK: [Subvertical] toolkit bound
+SUBCAPS: [N]/836 ([X]%) | COVERAGE: [N]≥3, [M] thin, [P] none
+CEILINGS: [X] caps, avg ±[Y] | TECH: [N] total, [M] Zennify-priority
+CLAIMS: [F/I/H/CE] | GATES: [N] PASS, [M] FAIL
+PEERS (LOCKED): [Peer1 (SizeTier), Peer2 (SizeTier), ...]
+WORKBOOK: Evidence populated, scores empty
+REPORT: Client Profile generated from project KB template
+STOP: NO SCORING. Run dma-assessment.
+════════════════════════════════════════════════════════
+```
+
+**research_handoff.json must include:**
+- `assessment_id`: RUN_ID (top-level, IMMUTABLE)
+- `evidence_mode`: PUBLIC/INTERNAL/HYBRID (top-level, IMMUTABLE)
+- `locked_peer_set[]`: Array of {peer_name, size_tier, key_metric, geography, overlap_pct, selection_rationale}
+- All other existing handoff fields

@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+"""Declare, check and install the Python the bundled skill scripts import.
+
+Lives in scripts/, invoked by path — claude.ai-hosted plugins may not ship a
+top-level bin/ (PATH-added executables bypass the admin approval surface, and
+the upload validator refuses them; measured 2026-08-20). From the plugin root:
+
+    scripts/dma-deps check    what is missing, which scripts each gap blocks,
+                              and whether every requirement resolves to a wheel
+                              on the target interpreter
+    scripts/dma-deps install  pip install -r requirements.txt, pinned by the
+                              interpreter's constraints file
+    scripts/dma-deps install --venv   into ${CLAUDE_PLUGIN_DATA}/venv instead,
+                              and print the interpreter to use
+    scripts/dma-deps which    the interpreter `check` is reporting on
+
+Why a declaration rather than a fix in place: the eleven deck editors and six
+retrieval scripts are not broken, they have dependencies. Vendoring pandas or
+rewriting eleven scripts around python-pptx would be a worse plugin than one
+that says plainly what it needs and installs it on request.
+"""
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import os
+import subprocess
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REQS = os.path.join(ROOT, "requirements.txt")
+
+# import name -> (pip name, what it blocks)
+MODULES = {
+    "pandas": ("pandas", "dma-assessment: assessment_runner, build_index, "
+                         "eval_retrieval, ingest_evidence, qa_auditor, retrieve"),
+    "numpy": ("numpy", "dma-assessment: transitive (pandas, matplotlib)"),
+    "pyarrow": ("pyarrow", "dma-assessment: parquet evidence index"),
+    "rank_bm25": ("rank-bm25", "dma-assessment: retrieve, eval_retrieval"),
+    "pdfplumber": ("pdfplumber", "dma-assessment: ingest_evidence (PDF sources)"),
+    "matplotlib": ("matplotlib", "dma-assessment: calibration plots"),
+    "pptx": ("python-pptx", "dma-first-call-deck: 6 slide editors, "
+                            "heatmap_editor, solution_slides_editor, "
+                            "cross_slide_checker, slide_autofix, "
+                            "visual_overflow_inspector, scan_template"),
+    "PIL": ("Pillow", "dma-first-call-deck: radar_chart_generator, image sizing"),
+    "openpyxl": ("openpyxl", "dma-research: validate_workbook, populate_workbook; "
+                             "dma-surface-production: vet_workbooks; "
+                             "dma-governance: gov_auditor"),
+    "docx": ("python-docx", "dma-assessment: report rendering; "
+                            "dma-governance: report audit"),
+    "dateutil": ("python-dateutil", "evidence recency ladder"),
+    "lxml": ("lxml", "transitive (python-pptx, python-docx)"),
+    "cffi": ("cffi", "dma-assessment: ingest_evidence — pdfplumber's "
+                     "cryptography backend; its absence surfaces as "
+                     "ModuleNotFoundError _cffi_backend"),
+}
+
+
+def venv_python() -> str | None:
+    data = os.environ.get("CLAUDE_PLUGIN_DATA")
+    if not data:
+        return None
+    p = os.path.join(data, "venv", "bin", "python")
+    return p if os.path.exists(p) else None
+
+
+def target_python(prefer_venv: bool) -> str:
+    if prefer_venv:
+        return venv_python() or sys.executable
+    return sys.executable
+
+
+def interpreter_version(python: str) -> tuple[int, int] | None:
+    if python == sys.executable:
+        return sys.version_info[0], sys.version_info[1]
+    out = subprocess.run(
+        [python, "-c", "import sys;print(sys.version_info[0],sys.version_info[1])"],
+        capture_output=True, text=True)
+    if out.returncode != 0:
+        return None
+    a, b = out.stdout.split()
+    return int(a), int(b)
+
+
+def constraints_path(python: str) -> str | None:
+    """Constraints file pinning this interpreter's resolution.
+
+    constraints-py311.txt is the measured working set; py312/py313 pin the
+    oldest scientific-stack versions that publish cp312/cp313 wheels — the
+    3.11 pins are sdist-only there. Minors outside 3.11–3.13 clamp to the
+    nearest measured file.
+    """
+    v = interpreter_version(python)
+    if v is None or v[0] != 3:
+        return None
+    minor = min(max(v[1], 11), 13)
+    p = os.path.join(ROOT, f"constraints-py3{minor}.txt")
+    return p if os.path.exists(p) else None
+
+
+def probe(python: str) -> dict[str, bool]:
+    if python == sys.executable:
+        return {m: importlib.util.find_spec(m) is not None for m in MODULES}
+    code = ("import importlib.util,json,sys;"
+            f"print(json.dumps({{m: importlib.util.find_spec(m) is not None "
+            f"for m in {list(MODULES)!r}}}))")
+    out = subprocess.run([python, "-c", code], capture_output=True, text=True)
+    if out.returncode != 0:
+        return {m: False for m in MODULES}
+    import json
+    return json.loads(out.stdout)
+
+
+def wheels_resolve(py: str) -> int:
+    """Assert every requirement resolves to a wheel on `py`.
+
+    --ignore-installed forces a full resolution — without it an
+    already-installed package satisfies the dry run with no wheel ever
+    consulted, and a green check on 3.11 says nothing about 3.12/3.13,
+    where the un-constrained scientific pins are sdist-only.
+    """
+    cons = constraints_path(py)
+    label = os.path.basename(cons) if cons else "none found"
+    cmd = [py, "-m", "pip", "install", "--dry-run", "--ignore-installed",
+           "--only-binary", ":all:", "-r", REQS]
+    if cons:
+        cmd += ["-c", cons]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode == 0:
+        print(f"wheels: every requirement resolves to a wheel  "
+              f"(constraints: {label})")
+    else:
+        print(f"wheels: FAIL — not every requirement resolves to a wheel  "
+              f"(constraints: {label})")
+        for line in (r.stderr or r.stdout).strip().splitlines()[-8:]:
+            print(f"  {line}")
+    return r.returncode
+
+
+def cmd_check(args) -> int:
+    """Report what is importable, and — unless --offline — whether every
+    requirement still resolves to a wheel.
+
+    The wheel resolution shells out to pip and therefore NEEDS THE NETWORK.
+    On a machine that is offline, or behind a TLS-inspecting proxy pip does
+    not trust, it fails for a reason that has nothing to do with the
+    dependencies being present (measured 2026-08-20: 13 of 13 modules
+    present, wheels FAIL, exit 1 — and the install doctor duly reported a
+    red row saying "missing: 0"). --offline is how the doctor asks for the
+    half of this check that is true without a network.
+    """
+    py = target_python(True)
+    have = probe(py)
+    missing = [m for m, ok in have.items() if not ok]
+    print(f"interpreter: {py}")
+    print(f"declared: {len(MODULES)}  present: {len(MODULES) - len(missing)}  "
+          f"missing: {len(missing)}")
+    for m in sorted(MODULES):
+        mark = "ok  " if have[m] else "MISS"
+        print(f"  [{mark}] {MODULES[m][0]:<16} {MODULES[m][1]}")
+    if getattr(args, "offline", False):
+        print("wheels: not checked (--offline)")
+        wheels_rc = 0
+    else:
+        wheels_rc = wheels_resolve(py)
+    if missing:
+        print("\nblocked until installed. run: dma-deps install")
+    return 1 if missing or wheels_rc != 0 else 0
+
+
+def cmd_install(args) -> int:
+    py = sys.executable
+    if args.venv:
+        data = os.environ.get("CLAUDE_PLUGIN_DATA")
+        if not data:
+            print("CLAUDE_PLUGIN_DATA is unset — run this from a session with "
+                  "the plugin enabled, or drop --venv", file=sys.stderr)
+            return 2
+        vdir = os.path.join(data, "venv")
+        if not os.path.exists(os.path.join(vdir, "bin", "python")):
+            r = subprocess.run([sys.executable, "-m", "venv", vdir])
+            if r.returncode != 0:
+                return r.returncode
+        py = os.path.join(vdir, "bin", "python")
+
+    cmd = [py, "-m", "pip", "install", "-r", REQS]
+    cons = constraints_path(py)
+    if cons:
+        cmd += ["-c", cons]
+    if args.user and not args.venv:
+        cmd.append("--user")
+    print(" ".join(cmd))
+    r = subprocess.run(cmd)
+    if r.returncode != 0 and not args.user and not args.venv:
+        print("retrying with --user", file=sys.stderr)
+        r = subprocess.run(cmd + ["--user"])
+    if r.returncode == 0 and args.venv:
+        print(f"\nuse this interpreter for skill scripts:\n  {py}")
+    return r.returncode
+
+
+def cmd_which(args) -> int:
+    print(target_python(True))
+    return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(prog="dma-deps", description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = ap.add_subparsers(dest="cmd")
+    c = sub.add_parser("check", help="report missing modules and what they block")
+    c.add_argument("--offline", action="store_true",
+                   help="skip the wheel resolution, which needs the network")
+    c.set_defaults(fn=cmd_check)
+    i = sub.add_parser("install", help="pip install the declared requirements")
+    i.add_argument("--venv", action="store_true",
+                   help="install into ${CLAUDE_PLUGIN_DATA}/venv instead")
+    i.add_argument("--user", action="store_true", help="pip install --user")
+    i.set_defaults(fn=cmd_install)
+    w = sub.add_parser("which", help="print the interpreter being reported on")
+    w.set_defaults(fn=cmd_which)
+    args = ap.parse_args()
+    if not getattr(args, "fn", None):
+        ap.print_help()
+        return 0
+    return args.fn(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

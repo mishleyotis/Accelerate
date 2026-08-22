@@ -1,0 +1,69 @@
+[
+  {
+    "route": "#/clients/baxter-credit-union-bcu/health",
+    "name": "SGR-01",
+    "steps": [
+      {
+        "do": "click_text",
+        "arg": "Settings",
+        "exact": true
+      },
+      {
+        "do": "click_text",
+        "arg": "Analyst",
+        "exact": true
+      },
+      {
+        "do": "click_text",
+        "arg": "Safeguard gates"
+      }
+    ],
+    "assert": [
+      {
+        "kind": "text_present",
+        "arg": "SG-S8",
+        "why": "the run states its own gate ids; the card showed a hardcoded G01-G10 fixture set"
+      },
+      {
+        "kind": "text_present",
+        "arg": "SG-V4",
+        "why": "a FAILING grounding gate was served and invisible"
+      },
+      {
+        "kind": "text_absent",
+        "arg": "G01",
+        "why": "the prototype fixture ids must not appear on a live run"
+      },
+      {
+        "kind": "text_absent",
+        "arg": "/ 10 PASS",
+        "why": "invariant 8: the denominator is the length of what the run states, not ten"
+      },
+      {
+        "kind": "text_present",
+        "arg": "1 / 2 PASS",
+        "why": "computed: two gates served, one PASS one FAIL"
+      },
+      {
+        "kind": "text_present",
+        "arg": "CAPG-01",
+        "why": "caps[] and gates[] are two arrays; the cap the assessment applied rendered nowhere"
+      },
+      {
+        "kind": "text_present",
+        "arg": "P2C4",
+        "why": "the cap names the categories it ceilings"
+      },
+      {
+        "kind": "text_absent",
+        "arg": "undefined",
+        "why": "no leaked JS values"
+      },
+      {
+        "kind": "text_absent",
+        "arg": "[object Object]",
+        "why": "the detail object must be rendered, not stringified as an object"
+      }
+    ]
+  }
+]

@@ -1,0 +1,56 @@
+{
+ "_doc": "Payload sections the deployed app SERVES for the gold-standard client (Baxter run c1351d25, internal audience, fetched 2026-08-20). Names only. This is the write-path census test_surface_coverage.py enforces owners for; regenerate only from a live fetch, never by hand.",
+ "excluded": {
+  "_doc": "Surfaces the owner excluded from the live payload (adjudication 2026-08-20). The API withholds them for every audience via NEVER_SERVED in apps/api/dma_api/redaction.py; they are still promoted and auditable through the connector, but no page lists them here and no producer agent may claim them as a client-facing surface.",
+  "overview": [
+   "ceilings",
+   "evidence_coverage"
+  ]
+ },
+ "pages": {
+  "context": [
+   "acquisitions",
+   "context_sentiment",
+   "issue_register",
+   "regulatory_standing",
+   "timeline"
+  ],
+  "heatmap": [
+   "alerts",
+   "cell_evidence",
+   "cohort_patterns",
+   "evidence",
+   "evidence_age",
+   "focus_areas",
+   "safeguard_gates",
+   "value_chain",
+   "workbook_scores"
+  ],
+  "insights": [
+   "insights",
+   "landscape"
+  ],
+  "overview": [
+   "exec_summary",
+   "financial_series",
+   "findings",
+   "firmographics",
+   "leadership",
+   "opportunity",
+   "scores",
+   "sentiment",
+   "thought_leadership",
+   "why_now"
+  ],
+  "platform": [
+   "platform_story",
+   "recommendations",
+   "roadmap",
+   "stairstep",
+   "starters"
+  ],
+  "techstack": [
+   "techstack"
+  ]
+ }
+}

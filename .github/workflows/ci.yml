@@ -1,0 +1,489 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# A run that has been superseded must not outlive the commit that superseded
+# it. Two hung jobs from 2026-08-19 held runners for half an hour after the
+# fix for the hang was already pushed, because nothing cancels the run a new
+# commit replaces. Keyed on the ref, so a push run only ever cancels an older
+# push run and a pull_request run an older pull_request run: which of the two
+# survives stays deterministic, and the merge-commit build is still measured.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: Architecture gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Secret scan
+        run: python3 scripts/scan_secrets.py
+      - name: Gate A — no inference import
+        run: python3 scripts/gate_a_no_inference_imports.py
+      - name: Gate B — corpus ceiling ratchet
+        run: |
+          if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          elif git rev-parse HEAD~1 >/dev/null 2>&1; then
+            BASE="HEAD~1"
+          else
+            BASE=""
+          fi
+          if [ -n "$BASE" ]; then python3 scripts/gate_b_ceiling_ratchet.py "$BASE"; else echo "No base commit; skipping ratchet"; fi
+      - name: Docs extraction is reproducible
+        run: |
+          python3 scripts/extract_docs.py docs /tmp/docs-text-check
+          diff -r /tmp/docs-text-check docs/text --exclude='*docx upload*' && echo "docs/text matches sources"
+      # An em dash is a render dead end: it cannot say WHICH absence it is, and
+      # gives the reader no route to getting the field filled. Removed once by
+      # hand across 11 files; this is what stops the next component reaching
+      # for `: "—"` because it is the shortest thing that renders.
+      - name: Gate C — no render dead ends
+        run: python3 scripts/gate_c_no_render_dead_ends.py
+      # A shared contract the serving code READS must be in the image that
+      # reads it. enrichment_register.json was not, the loader swallowed the
+      # FileNotFoundError, and five surfaces served without their status while
+      # the whole suite passed — because in the repo the file is there.
+      - name: Gate D — shared contracts ship in the image
+        run: python3 scripts/gate_d_shared_files_ship.py
+      # `platform_story` served sixteen keys per platform and the page read
+      # two: the ranked fit score, the readiness verdict, the estate reach and
+      # twenty-five cited peer rows were promoted and shown nowhere. Nothing
+      # was broken in a way any test could see — the payload was right, the
+      # promote was right, the suite was green and the content was invisible.
+      # Finding it took a hand census against a live payload; this is that
+      # census, run against the contract so it needs no promoted run, and
+      # ratcheted like Gate B because plenty of declared keys legitimately
+      # have no reader.
+      - name: Gate F — a declared key has a reader
+        run: python3 scripts/gate_f_declared_keys_have_readers.py
+      # The producer prompts are the synthesis agent's whole picture of what
+      # survives promotion, so a stale claim there does not merely misinform:
+      # a producer told a field is dropped stops sending it, and the surface
+      # goes empty for a reason no payload, gate or page can show. One such
+      # paragraph said `capped_subcap_ids` has no column on
+      # `context_issue_register` and was true when written; migration 0027
+      # gave it one. Stdlib only, like the gates above it — this job installs
+      # nothing (Gate G rode here once and failed on `No module named pytest`).
+      - name: Gate H — the prompts do not claim a stored field is dropped
+        run: python3 scripts/gate_h_prompt_persistence_claims.py
+      # Three rounds of "the work was done but it is not showing" — leadership,
+      # why-now, sentiment, the tech register — were all an enrichment that ran
+      # and a promotion that did not, with nothing in the system holding both
+      # halves of the sentence. Migration 0051 records both; this asserts the
+      # recording is still wired, because a safeguard nobody exercises is a
+      # comment. Stdlib plus the mcp package, no database.
+      - name: Gate I — the enrichment ledger is wired
+        run: python3 scripts/gate_i_enrichment_drift.py
+      # Gate J answers the one question no contract gate can: does this client
+      # carry what the client beside it carries? Three rounds of reports —
+      # "this page is empty", "this card is missing", "the reference has it
+      # and this one does not" — were all true, all contract-legal, and all
+      # found by a human with two browser tabs. Structure only, never values:
+      # a thinner number is an assessment result, and a gate that argued
+      # otherwise would push every client toward the reference's answers.
+      # Here it runs its own rules against fixtures; the corpus-gate-scanner
+      # runs it --api against the two promoted clients nightly.
+      # Driven end-to-end against a committed pair carrying three of the four
+      # gaps it exists for, plus a WITHHELD section it must stay silent about.
+      # `compare_page`'s rules are unit-tested; this asserts the CLI around
+      # them — arg handling, the exit code an operator branches on, and that
+      # the output names the gap rather than counting it. A step that ran
+      # `--help` and called itself a gate would be the shape this whole build
+      # keeps removing.
+      # A refused payload used to supersede a passing row and then sit there
+      # with nothing anywhere listing it. Three refusals in one day on this
+      # build were all found by a person reading a verdict. The ledger's
+      # failure mode is SILENT — everything keeps working and the queue is
+      # simply always empty — so the wiring is asserted rather than trusted.
+      - name: Gate K — a refused payload cannot be undetectable
+        run: python3 scripts/gate_k_rejections_return.py
+      # A hung check is a check that did not run, wearing `in_progress`
+      # instead of `skipped`. Two runs of one commit sat on a single step for
+      # 33 minutes on 2026-08-19 against GitHub's six-HOUR default, and the
+      # only reason it was found is that someone was already reading the pull
+      # request. A bound makes it red instead, which is the state a person
+      # acts on.
+      - name: Gate L — every CI job carries a clock
+        run: python3 scripts/gate_l_ci_jobs_are_bounded.py
+      - name: Gate J — no client is structurally thinner than the reference
+        run: |
+          set +e
+          out=$(python3 scripts/gate_j_surface_parity.py \
+                  --reference-file fixtures/parity/reference-overview.json \
+                  --target-file fixtures/parity/target-overview.json \
+                  --page overview)
+          code=$?
+          echo "$out"
+          test "$code" -eq 1 || { echo "Gate J did not refuse a thinner target"; exit 1; }
+          for want in section_empty key_absent key_empty; do
+            echo "$out" | grep -q "$want" || { echo "Gate J stopped reporting $want"; exit 1; }
+          done
+          echo "$out" | grep -q ceilings && { echo "Gate J reported a withheld section as a gap"; exit 1; }
+          echo "Gate J: refuses a thinner target, stays silent on a withheld section."
+      # The curation covered 115 of the specification's 127 surfaces and walked
+      # past twelve — three whole Insights surfaces carrying eighteen P0 checks
+      # among them, in neither artefact, not included and not excluded. Nothing
+      # noticed until a completeness critic counted. This is that count, and it
+      # also refuses an exclusion whose reason names no file or contract:
+      # three of the first pass's rested on a comment inside a module that is
+      # mounted nowhere.
+      - name: Gate E — every document surface has a disposition
+        run: python3 scripts/gate_e_acceptance_coverage.py
+      # The gate has to be able to fail. Removing a surface's disposition must
+      # be caught, or "0 unaccounted" is a sentence rather than a measurement.
+      - name: Gate E negative control
+        run: |
+          python3 - <<'PY'
+          import json, subprocess, sys, shutil
+          INV = "apps/web/tests/acceptance/inventory.json"
+          shutil.copyfile(INV, "/tmp/inv.bak")
+          d = json.loads(open(INV).read())
+          before = len(d["sections"])
+          d["sections"] = [s for s in d["sections"]
+                           if s.get("surface_id") != "insights.recmodal"]
+          assert len(d["sections"]) == before - 1, "control target not found"
+          open(INV, "w").write(json.dumps(d, indent=1, ensure_ascii=False))
+          rc = subprocess.run([sys.executable,
+                               "scripts/gate_e_acceptance_coverage.py"],
+                              capture_output=True).returncode
+          shutil.copyfile("/tmp/inv.bak", INV)
+          if rc == 0:
+              print("Gate E passed with a surface removed — it measures nothing")
+              sys.exit(1)
+          print("Gate E negative control ok: dropping one surface fails it")
+          PY
+      # verify_deployed.py needs gcloud and production credentials, which CI
+      # does not have — so CI cannot run the byte comparison. What it CAN
+      # enforce is that the script stays wired into the release path, which is
+      # the failure that actually happened: the script existed and nothing
+      # called it.
+      - name: The deploy verifies its own result
+        run: |
+          grep -q "verify_deployed.py" infra/deploy.sh || {
+            echo "infra/deploy.sh no longer runs verify_deployed.py."
+            echo "A deploy that does not check what it shipped is how four"
+            echo "render fixes were reported live against a revision built"
+            echo "58 minutes before they were committed."
+            exit 1; }
+
+  schema-qa:
+    name: Schema QA checklist (stage 0.3 DoD)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: dma_insights
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: local
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parity users (mirror Cloud SQL IAM users)
+        run: PGPASSWORD=local psql -h localhost -U postgres -d dma_insights -f infra/local/pg-init/01-iam-parity-users.sql
+      - name: Install
+        run: pip install -q -r migrations/requirements.txt pytest
+      - name: Migrate
+        working-directory: migrations
+        run: LOCAL_DATABASE_URL='postgresql+pg8000://postgres:local@localhost:5432/dma_insights' alembic upgrade head
+      - name: QA checklist as tests
+        run: LOCAL_DATABASE_URL='postgresql+pg8000://postgres:local@localhost:5432/dma_insights' python -m pytest tests/schema/ -q
+
+  # Every python suite, not a subset. Until 2026-08-14 this job ran worker and
+  # mcp only: the API's 251 tests and the routine-preflight tests had never run
+  # in CI at all, so a change could break the serving layer and merge green.
+  python-tests:
+    name: Python unit tests (worker · mcp · api · scripts · plugin · skills · infra)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # Postgres, because without it this job was measuring almost nothing. Every
+    # DB-backed fixture guards with `pytest.skip("no migrated local database")`,
+    # so 30-plus modules — the promote transaction, the enrichment ledger, the
+    # retained-verdict refusal, the redaction tests that run against the real
+    # schema — passed on a developer's machine and were skipped here. Green
+    # meant "not run" and nothing said so. pgvector's image rather than stock
+    # postgres: migration 0009 creates the vector extension and HNSW index.
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: local
+          POSTGRES_DB: dma_insights
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dma_insights" --health-interval 5s
+          --health-timeout 5s --health-retries 20
+    env:
+      LOCAL_DATABASE_URL: postgresql://postgres:local@localhost:5432/dma_insights
+    steps:
+      - uses: actions/checkout@v4
+      # apps/api's tests import dma_api.main, which imports fastapi. The first
+      # version of this job widened the pytest targets to include them WITHOUT
+      # widening the install, so two route-wiring tests failed on
+      # ModuleNotFoundError — a green suite locally and a red one here, which
+      # is the same repo-versus-runtime gap Gate D exists for one layer up.
+      # pypdf too, and deliberately: `test_fetch_pdf.py` gates on it with
+      # `pytest.importorskip`, so without it EIGHT tests over the PDF fetch
+      # path skip as one line. The connector ships pypdf
+      # (apps/mcp/requirements.txt), so a runner without it is testing a
+      # different program from the one that deploys.
+      # httpx for the same reason, one layer along: `fastapi.testclient` needs
+      # it, and without it the whole HTTP-level ops suite
+      # (test_ops_endpoint_audience.py) importorskips away as one line. That
+      # suite pins the endpoint DEFAULT-DENY — the step that turned a bare
+      # `GET /v1/ops/refresh-queue` into a silent 403 and made the refresh
+      # queue unreadable to the gate that drains it. Skipping it would leave
+      # the one layer where that could be seen untested.
+      - run: pip install -q pytest openpyxl pg8000 pypdf httpx -r apps/api/requirements.txt
+      # Gate G rides in here rather than in the gates job above. That job runs
+      # bare `python3 script.py` against the stdlib and installs nothing, so a
+      # step shelling out to pytest dies on `No module named pytest` — which
+      # is exactly how it failed once. These two paths already cover it:
+      # scripts/tests/test_gate_g_citable_evidence.py and
+      # apps/worker/tests/test_ingested_excerpt_contract.py, the pair that
+      # keeps an ingested excerpt citable or None and never the empty string.
+      # Same schema the migrate Job applies in production, from empty. pg8000
+      # rather than psycopg2 so the driver matches what the tests themselves
+      # use and CI installs one Postgres client, not two.
+      - working-directory: migrations
+        env:
+          LOCAL_DATABASE_URL: postgresql+pg8000://postgres:local@localhost:5432/dma_insights
+        run: |
+          pip install -q -r requirements.txt
+          python -m alembic upgrade head
+      # PROVE THE SCHEMA IS THERE, through the exact call the fixtures make.
+      #
+      # Every DB-backed fixture in this repo wraps its connect in
+      # `except Exception: pytest.skip("no migrated local database")`, so a
+      # database that is unreachable, unmigrated, or reachable-but-different
+      # all produce the same silent skip. Measured 2026-08-19: one run got as
+      # far as an FK violation inside a fixture (so the schema was there) and
+      # the next skipped 66 tests with no other change to this job. Without a
+      # step that fails on its own terms, the two are indistinguishable in the
+      # log, and the ceiling check below reports the symptom rather than the
+      # cause.
+      - name: The database the fixtures will actually open
+        run: |
+          python - <<'PROOF'
+          import sys
+          import pg8000.dbapi
+          print("python", sys.version.split()[0], "· pg8000", pg8000.__version__)
+          c = pg8000.dbapi.connect(host="localhost", port=5432, user="postgres",
+                                   password="local", database="dma_insights")
+          cur = c.cursor()
+          cur.execute("SELECT count(*) FROM pg_tables WHERE schemaname='public'")
+          n = cur.fetchone()[0]
+          print("public tables:", n)
+          if n < 100:
+              raise SystemExit(f"only {n} tables — alembic did not reach head "
+                               "against the database these tests open")
+          PROOF
+      # One run, and the skip count is read from it. A skip is how this job hid
+      # 30 modules for the whole build, so the count is asserted rather than
+      # printed, and a count that climbs means a fixture started skipping
+      # again — the failure mode this service block exists to end.
+      #
+      # The ceiling is 5, and every one is named, because an unnamed allowance
+      # is how the count creeps:
+      #   1  apps/mcp/shared/contracts_data.json — a deploy artefact staged by
+      #      deploy.sh, absent in a checkout, and absent on purpose;
+      #   2  apps/worker/shared/contracts_data.json — the same, for the worker;
+      #   3  test_bundle.py — the v7.0 catalogue is not loaded here (the
+      #      migrations create the tables; the loader fills them from a bucket
+      #      this runner has no credential for, and should not);
+      #   4  test_computed_against_the_real_schema.py — the same catalogue;
+      #   5  test_gap_false_positives.py — every overview section wraps its
+      #      fields today, so the case it guards cannot be constructed.
+      #  6-11 tests/skills/test_check_payload_false_positives.py — six cases
+      #      needing a run the connector PASSED, whole and un-redacted. Staged
+      #      rows are verbatim by construction, so that fixture is a named
+      #      institution's internal record (45 r_layer, 34 internal_only, 7
+      #      LinkedIn profiles, 3 work addresses on the run measured
+      #      2026-08-20) and this repository is public. Gitignored, fetched by
+      #      `scripts/fetch_staged_fixtures.py` where credentials exist, and
+      #      skipped here on purpose — not for want of a database.
+      # Raise it only in the commit that adds a skip, and say which.
+      # THE PLUGIN'S OWN SUITE RIDES HERE, and its absence was a real hole.
+      # Until 2026-08-20 CI ran four suites and never
+      # plugins/dma-insights/scripts/tests — 19 files covering the exact code
+      # the scheduled routines load: the bootstrap, the connector proxy, the
+      # Drive client, the package resolver, the doctor. A failing doctor test
+      # sat green in CI for as long as it took someone to run the suite by
+      # hand, and the binding defects that killed six firings that day were
+      # in code no check ever exercised. tests/skills joins for the same
+      # reason. The ceiling below rises to 11 with the six skips tests/skills
+      # declares (a staged run it cannot construct here), stated rather than
+      # absorbed.
+      - name: Unit tests, and a suite that skips silently fails
+        run: |
+          set -o pipefail
+          # `-rf` beside `-rs`: `-q` alone prints NO "FAILED ..." lines, and
+          # the report step below greps for exactly those. Measured
+          # 2026-08-20 — a red build's own summary showed only SKIPPED
+          # reasons, so finding which three tests failed took three round
+          # trips through a log whose tail is Postgres teardown noise. The
+          # check now names its failures where the check is read.
+          python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
+                 scripts/tests/ plugins/dma-insights/scripts/tests/ \
+                 tests/skills/ infra/jobs/tests/ -q -rs -rf 2>&1 | tee /tmp/pytest.txt
+          n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
+          echo "skipped: ${n:-0} (ceiling 11)"
+          if [ "${n:-0}" -gt 11 ]; then
+            echo "--- the reasons, most common first ---"
+            grep '^SKIPPED' /tmp/pytest.txt | sed 's/.*: //' | sort | uniq -c | sort -rn | head
+            exit 1
+          fi
+      # THE RESULT, WHERE IT CAN BE READ. A failing step's output is buried
+      # under the service container's log dump — Postgres prints every
+      # connection it refused, several hundred lines of it, appended after the
+      # step — so the pytest summary is unreachable from the job's tail and a
+      # diagnosis costs three round trips. The step summary is returned with
+      # the check itself.
+      - name: Report the result where the check can show it
+        if: always()
+        run: |
+          {
+            echo '### Python unit tests'
+            echo '```'
+            # Both shapes: the short-summary "FAILED node - msg" lines that
+            # -rf prints, and the "___ test_name ___" headers pytest always
+            # emits for a failure even under -q. Either alone has been the
+            # empty set on a red build.
+            grep -E '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
+                 /tmp/pytest.txt | tail -40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # The frontend has its own suite (node's built-in runner, no framework) and
+  # it too had never run here. It is the only place the COMPILED bundle is
+  # asserted against the register and the adapter — the check that caught four
+  # of five enrichment surfaces rendering nothing.
+  web-tests:
+    name: Web unit tests (compiled bundle)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # NO `|| npm install` FALLBACK. `npm ci` fails for exactly one reason —
+      # package.json and package-lock.json disagree — and falling back to
+      # `npm install` resolves a different tree, rewrites the lockfile in the
+      # runner, and reports green. That is the drift the lockfile exists to
+      # catch, caught and then discarded. If this step goes red, run
+      # `npm install` locally and commit the lockfile it writes.
+      - working-directory: apps/web
+        run: npm ci --no-audit --no-fund
+      # THE BROWSER, and it is not optional here. Nine suites in
+      # apps/web/tests drive the compiled bundle through Chromium, and every
+      # one of them resolved none on this runner and SKIPPED — 147 tests
+      # reporting green locally and asserting nothing on a pull request,
+      # including the four visual-QA gates added for the round-3 brief. The
+      # harness now FAILS instead of skipping when CI is set, so this step
+      # going missing is a red build rather than a quiet one.
+      - name: Install Chromium for the browser-driven suites
+        # The full package only to FETCH the browser, at the same version
+        # playwright-core is pinned to: a driver and a browser build from
+        # different releases either hang on launch or crash mid-navigation,
+        # which is worse than not running at all because it looks like a
+        # product failure. `npx` keeps the installer out of the dependency
+        # tree; the runner the tests require is playwright-core.
+        #
+        # THE DOWNLOAD AND THE apt RUN ARE SEPARATE NOW, and the clock is not
+        # decoration. `--with-deps` welds an apt-get run onto the front of the
+        # download, and apt on a fresh runner queues behind unattended-upgrades
+        # holding the dpkg lock. Measured 2026-08-19: two independent runs of
+        # the same commit sat on this single step for 33 minutes with the
+        # browser still not fetched, against a job default timeout of six
+        # HOURS. A check that hangs past the end of the working day is
+        # indistinguishable from a check that is being thorough, which is the
+        # same failure this file keeps paying for — a check not running, with
+        # nothing saying so.
+        timeout-minutes: 12
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        working-directory: apps/web
+        run: |
+          set -euo pipefail
+          # 1 — the browser. The half the suites genuinely cannot run without,
+          # and the half that never needed root.
+          npx --yes playwright@1.62.1 install chromium
+          # 2 — the shared libraries: bounded, and NOT fatal. ubuntu-latest
+          # already ships most of what headless Chromium links against, so a
+          # failed apt run is a maybe rather than a verdict. The launch probe
+          # below is the verdict, and it answers in one line.
+          if ! timeout -k 15s 300s npx --yes playwright@1.62.1 install-deps chromium; then
+            echo "::warning::install-deps did not finish inside 5m; the launch probe decides whether that matters"
+          fi
+      # VERIFY THE INSTALL, here, where the message is short. The first
+      # attempt used playwright-core's CLI, which downloaded nothing and exited
+      # 0 — so the job carried on and failed twelve test files later with
+      # `executablePath: expected string, got object`, which names neither the
+      # cause nor the step. The second attempt resolved a PATH and stopped
+      # there, so it could not have caught a missing system library either: a
+      # library only goes missing at launch. So the probe LAUNCHES, the way
+      # every suite in this directory launches, and renders one element.
+      - name: Prove Chromium launches
+        timeout-minutes: 5
+        working-directory: apps/web
+        run: |
+          node -e "
+            const H = require('./tests/proto-page-harness.js');
+            const exe = H.resolveChromium();
+            if (!exe) { console.error('no chromium after install'); process.exit(1); }
+            console.log('chromium at', exe);
+            const pw = H.resolvePlaywright();
+            if (!pw) { console.error('no playwright runner resolvable'); process.exit(1); }
+            (async () => {
+              const b = await pw.chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
+              const page = await b.newPage();
+              await page.setContent('<h1 id=t>ok</h1>');
+              const t = await page.evaluate(() => document.querySelector('#t').textContent);
+              await b.close();
+              if (t !== 'ok') { console.error('chromium launched but rendered nothing'); process.exit(1); }
+              console.log('chromium launches and renders');
+            })().catch((e) => {
+              console.error('chromium will not launch here:', e.message);
+              process.exit(1);
+            });
+          "
+      - working-directory: apps/web
+        run: npm run build:proto
+      - working-directory: apps/web
+        env:
+          CI: "1"
+        run: npm run test:web
+
+  # The deep audit, run against the golden fixture rather than production, so a
+  # payload shape that would fail in front of a client fails here first. The
+  # same script runs nightly against the live API from the corpus-gate-scanner.
+  promoted-client-audit:
+    name: Promoted-client audit (fixture)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          if [ -d fixtures/served ]; then
+            python3 scripts/audit_promoted_client.py --from-dir fixtures/served
+          else
+            echo "no served fixture yet; audit runs against production nightly"
+          fi
+
+  # Per-service lint/type/build jobs are added when each service's
+  # first code lands (Implementation Plan S.3); the gates above run from
+  # the first commit so no code was ever merged without them.

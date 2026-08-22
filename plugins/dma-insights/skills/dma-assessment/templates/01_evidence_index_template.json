@@ -1,0 +1,146 @@
+{
+  "checkpoint_id": "01_evidence_index",
+  "checkpoint_phase": "Phase 3: Process Internal Documents + Phase 2: Load External Evidence",
+  "description": "Complete inventory of all evidence items (internal and external) with tier classification, ERS scoring, and capability mapping. Single source of truth for evidence traceability.",
+  "checkpoint_metadata": {
+    "assessment_id": "DMA-[ABBREV]-[YYYYMMDD]-[SEQNUM]",
+    "institution_name": "[Institution Name]",
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "evidence_collection_status": "[IN_PROGRESS / COMPLETE]",
+    "total_evidence_items": "[Count]"
+  },
+  "external_evidence": {
+    "source": "A1_Evidence_Inventory.csv (from research package or public sources)",
+    "evidence_items": [
+      {
+        "evidence_id": "E-001",
+        "source_name": "[Database or publication name]",
+        "source_type": "[Regulatory Filing / News Article / Analyst Report / Government Database / Third-Party Survey / etc.]",
+        "tier": "[T1 / T2 / T3 / T4 / T5]",
+        "fact_summary": "[Concise 1-2 sentence summary of what this evidence shows]",
+        "fact_text": "[Full quoted or paraphrased fact from source; max 200 words]",
+        "url_or_citation": "[URL or full citation if not URL-accessible]",
+        "document_date": "[YYYY-MM-DD or 'Current' or 'Trailing [Period]']",
+        "recency_age_months": "[Months since publication; calculated as current_date - document_date]",
+        "recency_score": "[1.0–5.0; per ERS: current year=5.0, prior=4.0, 2yr=3.0, 3yr=2.0, 4+yr=1.0]",
+        "specificity_score": "[1.0–5.0; 5.0=direct to institution/capability, 1.0=generic industry benchmark]",
+        "corroboration_score": "[1.0–5.0; 5.0=independent 3+ sources confirm, 1.0=single source]",
+        "ers_score": "[(0.35 × tier_score) + (0.25 × recency_score) + (0.20 × specificity_score) + (0.20 × corroboration_score); rounded to 1 decimal]",
+        "supported_capabilities": "[Array of P[1-4]C[1-5] IDs supported by this evidence]",
+        "maturity_signal": "[Positive / Negative / Neutral]",
+        "maturity_implication": "[M1–M5 level range that evidence suggests for supported capabilities]",
+        "confidence_indicator": "[HIGH / MEDIUM / LOW; reflects strength and relevance of evidence]",
+        "cross_references": "[Array of other Evidence IDs that corroborate or contradict this one]",
+        "status": "[ACTIVE / SUPERSEDED / STALE]"
+      }
+    ]
+  },
+  "internal_evidence": {
+    "source": "Internal documents uploaded by institution",
+    "collection_method": "[5-layer analysis for each document per skill methodology]",
+    "evidence_items": [
+      {
+        "evidence_id": "INT-[DOCTYPE]-[SEQ]",
+        "example": "INT-BOARD-001",
+        "source_document": "[Document ID and name, e.g., 'DOC-003: Board Strategy Deck 2024']",
+        "source_type": "[Board Deck / Audit Report / Risk Register / Strategy Document / Policy Document / etc.]",
+        "tier": "[T2 / T3 / T4; internal documents rarely T1, never T5]",
+        "extraction_layer": "[1=Explicit / 2=Implicit / 3=Absence / 4=Contradiction / 5=Strategic]",
+        "fact_summary": "[Concise fact summary]",
+        "fact_text": "[Extracted fact or quote; max 200 words]",
+        "page_or_section": "[Document section reference for traceability]",
+        "document_date": "[YYYY-MM-DD when available]",
+        "recency_age_months": "[Months since document creation]",
+        "recency_score": "[1.0–5.0 per ERS]",
+        "specificity_score": "[1.0–5.0; internal docs usually high (4.0–5.0)]",
+        "corroboration_score": "[1.0–5.0; within-org corroboration if multiple internal docs support]",
+        "ers_score": "[Calculated per ERS formula; for T2/T4 internal docs typically 2.5–4.0]",
+        "supported_capabilities": "[Array of P[1-4]C[1-5]]",
+        "maturity_signal": "[Positive / Negative / Neutral]",
+        "maturity_implication": "[M1–M5 range]",
+        "confidence_indicator": "[HIGH / MEDIUM / LOW]",
+        "internal_validation_notes": "[Notes from 5-layer analysis; e.g., 'Corroborates public claims' or 'Contradicts public disclosure']",
+        "cross_references": "[External evidence IDs that align or conflict with this internal fact]",
+        "status": "[ACTIVE / ARCHIVED]"
+      }
+    ]
+  },
+  "evidence_tier_distribution": {
+    "T1_count": "[Count of T1 evidence items]",
+    "T1_percentage": "[Percentage of total evidence]",
+    "T2_count": "[Count]",
+    "T2_percentage": "[Percentage]",
+    "T3_count": "[Count]",
+    "T3_percentage": "[Percentage]",
+    "T4_count": "[Count]",
+    "T4_percentage": "[Percentage]",
+    "T5_count": "[Count]",
+    "T5_percentage": "[Percentage]",
+    "distribution_assessment": "[E.g., 'Healthy mix with 45% T1/T2, 35% T3, 20% T4; no T5 marketing claims' or 'Heavy T5 reliance (18%); recommend additional T1/T2 evidence collection']"
+  },
+  "evidence_by_capability": {
+    "capability_coverage": "[Summary: how many capabilities have evidence, how many have zero evidence]",
+    "high_evidence_capabilities": "[Array of P[1-4]C[1-5] with 5+ evidence items]",
+    "sparse_evidence_capabilities": "[Array of P[1-4]C[1-5] with 1–2 evidence items only]",
+    "zero_evidence_capabilities": "[Array of capabilities with no evidence; likely to score N/A]"
+  },
+  "contradiction_tracking": {
+    "contradictions_identified": "[Count of contradictions found]",
+    "contradiction_log_reference": "[Link to detailed contradiction_log.json if separate file]",
+    "sample_contradictions": [
+      {
+        "contradiction_id": "CONTR-001",
+        "metric_or_claim": "[What is being contradicted]",
+        "evidence_a_id": "[Evidence ID for claim A]",
+        "evidence_a_source": "[Source for claim A]",
+        "evidence_b_id": "[Evidence ID for claim B]",
+        "evidence_b_source": "[Source for claim B]",
+        "conflict_type": "[T1 vs T3 / Timing Conflict / Quantification Mismatch / etc.]",
+        "resolution": "[Which source wins and why; per skill precedence rules]",
+        "score_impact": "[Which capabilities affected; how score should be derived from resolved fact]"
+      }
+    ]
+  },
+  "evidence_recency_analysis": {
+    "evidence_age_distribution": {
+      "current_year": "[Count and % of evidence from current FY]",
+      "prior_year": "[Count and % from prior FY]",
+      "2_years_ago": "[Count and %]",
+      "3_years_ago": "[Count and %]",
+      "4_plus_years": "[Count and %]"
+    },
+    "staleness_flags": "[Any evidence >24 months old that would trigger -0.3 staleness discount]",
+    "currency_assessment": "[E.g., '72% of evidence within 12 months; recency is strong' or 'Only 45% current; many historical sources; may limit confidence']"
+  },
+  "quality_assurance_checks": {
+    "evidence_completeness_check": {
+      "status": "[PASS / FAIL]",
+      "description": "All evidence items have required fields populated (ID, source, tier, fact, capability mapping)",
+      "missing_fields": "[If any]"
+    },
+    "ers_calculation_validation": {
+      "status": "[PASS / FAIL]",
+      "sample_calculation": "[Example: 'Evidence E-001: Tier=3, Recency=4.0, Specificity=5.0, Corroboration=4.0 → ERS = (0.35×3) + (0.25×4.0) + (0.20×5.0) + (0.20×4.0) = 1.05 + 1.0 + 1.0 + 0.8 = 3.85']",
+      "validation_notes": "[Any calculation issues; e.g., 'All ERS values within 1.0–5.0 range ✓']"
+    },
+    "capability_mapping_validation": {
+      "status": "[PASS / FAIL]",
+      "coverage_percentage": "[% of P1–P4 capabilities with at least one evidence item]",
+      "unmapped_evidence": "[Evidence items not mapped to any capability; should be minimal]"
+    },
+    "contradiction_log_validation": {
+      "status": "[PASS / FAIL]",
+      "contradictions_documented": "[Count of contradictions in log]",
+      "all_resolved": "[true / false; all contradictions have resolution documented]"
+    }
+  },
+  "metadata": {
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_version": "1.0",
+    "total_evidence_items": "[Sum of external + internal]",
+    "avg_ers_score": "[Average ERS across all evidence items]",
+    "checkpoint_status": "COMPLETE"
+  }
+}

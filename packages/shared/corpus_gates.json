@@ -1,0 +1,11 @@
+{
+  "_doc": [
+    "Corpus gate ceilings — per-client defect-rate ceilings enforced by the",
+    "corpus-gate-scanner. Populated at stage 8, set by MEASUREMENT of the",
+    "current corpus, never by aspiration (Implementation Plan, stage 8).",
+    "Every entry: { \"ceiling\": <number>, \"direction\": \"max\", \"rationale\": <string> }.",
+    "CI Gate B (scripts/gate_b_ceiling_ratchet.py) fails any commit that RAISES",
+    "a ceiling relative to the base commit. Ceilings only ratchet down."
+  ],
+  "gates": {}
+}

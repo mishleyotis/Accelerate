@@ -1,0 +1,10 @@
+# CPython 3.12 constraints. The 3.11 pins (pandas 2.0.3, numpy 1.24.3,
+# pyarrow 12.0.0, matplotlib 3.7.2) publish no cp312 wheels — sdist-only
+# there. Measured 2026-08-19 (pip download --python-version 312
+# --only-binary :all:): these are the oldest versions of each that ship a
+# cp312 wheel; the release below each (pandas 2.1.0, numpy 1.25.2,
+# pyarrow 13.0.0, matplotlib 3.7.2) does not.
+pandas==2.1.1
+numpy==1.26.0
+pyarrow==14.0.0
+matplotlib==3.7.3

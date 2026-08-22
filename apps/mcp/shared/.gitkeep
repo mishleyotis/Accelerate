@@ -1,0 +1,2 @@
+Staging directory. deploy.sh copies packages/shared here before building the
+mcp image; the files are NOT committed, so packages/shared holds the single copy.

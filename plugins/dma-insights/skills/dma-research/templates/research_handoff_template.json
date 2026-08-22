@@ -1,0 +1,95 @@
+{
+  "$schema": "dma_research_handoff_v1",
+  "entity": {
+    "name": "",
+    "subvertical": "",
+    "size_tier": "",
+    "primary_regulator": "",
+    "geography": "",
+    "total_assets_or_aum": "",
+    "website": ""
+  },
+  "parameter_lock": {
+    "subvertical": "",
+    "toolkit": "",
+    "confidence_score": 0,
+    "confidence_breakdown": {
+      "regulatory_anchor": 0,
+      "operating_model": 0,
+      "revenue_engine": 0,
+      "boundary_clarity": 0,
+      "deductions": 0
+    }
+  },
+  "evidence_summary": {
+    "total_items": 0,
+    "tier_distribution": {"T1": 0, "T2": 0, "T3": 0, "T4": 0, "T5": 0},
+    "recency_distribution": {"CURRENT": 0, "RECENT": 0, "LEGACY": 0, "UNVERIFIED": 0},
+    "claim_distribution": {"FACT": 0, "INFERENCE": 0, "HYPOTHESIS": 0, "CEILING_ESTIMATE": 0},
+    "web_searches_executed": 0,
+    "web_fetches_executed": 0,
+    "coverage_percentage": 0
+  },
+  "capability_ceilings": {
+    "P1C1": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P1C2": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P1C3": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P1C4": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P1C5": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P2C1": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P2C2": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P2C3": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P2C4": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P3C1": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P3C2": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P3C3": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P3C4": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P4C1": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P4C2": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P4C3": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []},
+    "P4C4": {"ceiling": 0.0, "uncertainty": 0.0, "evidence_count": 0, "confidence": "", "claim_type": "", "key_evidence": []}
+  },
+  "tech_utilization": [
+    {
+      "platform": "",
+      "category": "",
+      "zennify_priority": false,
+      "evidence_level": 0,
+      "utilization_level": "",
+      "recency": "",
+      "last_confirmed": "",
+      "vendor_tenure": "",
+      "red_flags": [],
+      "ceiling_impact": "",
+      "uncertainty_modifier": 0.0,
+      "capability_mapping": [],
+      "discovery_questions": [],
+      "evidence_ids": []
+    }
+  ],
+  "critical_unknowns": [
+    {
+      "capability": "",
+      "knowable": "",
+      "unknowable": "",
+      "uncertainty_band": 0.0,
+      "discovery_questions": [],
+      "internal_doc_refs": []
+    }
+  ],
+  "org_capability_proxies": {
+    "linkedin_specialist_ratio": 0.0,
+    "linkedin_level": "",
+    "job_posting_seniority": "",
+    "glassdoor_tech_theme": "",
+    "p1c4_ceiling": 0.0,
+    "p1c4_uncertainty": 0.0
+  },
+  "blocked_subcaps": [],
+  "safeguard_gates": {
+    "G1": "", "G2": "", "G3": "", "G4": "", "G5": "", "G6": "", "G7": "", "G8": "",
+    "G9": "", "G10": "", "G11": "", "G12": "", "G13": "", "G14": "", "G15": "", "G16": ""
+  },
+  "files_generated": [],
+  "research_notes": ""
+}

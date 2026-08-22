@@ -1,0 +1,169 @@
+{
+  "case_id": "GOLDEN_CASE_F",
+  "case_name": "Critic Pass Effectiveness — Adversarial Findings Consumption",
+  "case_description": "Test case specifically designed for CR-01 (Critic Log Resolution) governance checks. Contains 8 sample critic findings of varying types: 3 valid concerns requiring evidence-backed resolution, 2 edge-case concerns eligible for deferral, 2 invalid concerns that should be marked INVALID with justification, and 1 finding that was addressed by adding new evidence. Tests whether governance skill correctly verifies that all critic findings are resolved or documented.",
+  "case_status": "STUB — Critic findings and resolution scenarios to be fully populated before use in Workflow C regression testing",
+  "institution_profile": {
+    "institution_name": "Test Institution (Critic Case)",
+    "institution_size_tier": "Medium_2B_to_10B",
+    "sub_vertical": "Credit_Union",
+    "evidence_mode": "HYBRID",
+    "purpose": "Not a real assessment; used for governance audit training and regression testing of CR-01 checks"
+  },
+  "critic_findings": [
+    {
+      "finding_id": "CRI-P1C2-001",
+      "finding_type": "VALID_CONCERN",
+      "subcap_id": "P1C2",
+      "critic_text": "Governance score of 3.2 appears high given that board digital committee was established only 6 months ago. Recent formation suggests early-stage governance, not M3 maturity. Recommend verifying whether committee has demonstrable output beyond initial charter.",
+      "expected_resolution_status": "ADDRESSED",
+      "expected_resolution_approach": "Scorer must cite specific committee outputs (meeting minutes, decisions made, policies approved) beyond initial charter to justify M3. If only charter exists, score should be reduced to 2.5–2.8.",
+      "resolution_evidence_required": ["Board meeting minutes showing committee decisions", "Policy documents approved by committee"],
+      "severity_if_unaddressed": "HIGH"
+    },
+    {
+      "finding_id": "CRI-P2C1-001",
+      "finding_type": "VALID_CONCERN",
+      "subcap_id": "P2C1",
+      "critic_text": "Digital acquisition channel contribution cited as 32% of new members, but the evidence source (E-303) is an internal member origination report. No independent verification of this metric. Self-reported adoption data may overstate actual digital-first acquisition.",
+      "expected_resolution_status": "ADDRESSED",
+      "expected_resolution_approach": "Scorer should acknowledge single-source limitation in rationale. If no independent corroboration available, reduce confidence to MEDIUM. Score may remain if 32% metric is from audited internal report (T4 with quality controls).",
+      "resolution_evidence_required": ["Acknowledgment of single-source limitation", "Confidence adjustment or corroborating evidence"],
+      "severity_if_unaddressed": "MEDIUM"
+    },
+    {
+      "finding_id": "CRI-P3C1-002",
+      "finding_type": "VALID_CONCERN",
+      "subcap_id": "P3C1",
+      "critic_text": "Fraud automation claim unsupported by evidence tier. Rationale states 'automated fraud detection deployed' but supporting evidence (E-312) is a vendor press release (T5). No T1-T3 evidence confirms actual deployment, transaction monitoring volumes, or detection rates.",
+      "expected_resolution_status": "ADDRESSED",
+      "expected_resolution_approach": "Either (a) find T1-T3 evidence confirming fraud automation deployment and metrics, or (b) reduce score to reflect T5-only evidence basis with evidence ceiling applied, or (c) remove fraud automation claim from rationale and re-score based on remaining evidence.",
+      "resolution_evidence_required": ["T1-T3 evidence of fraud automation", "OR score adjustment with evidence ceiling", "OR rationale revision"],
+      "severity_if_unaddressed": "HIGH"
+    },
+    {
+      "finding_id": "CRI-P2C3-001",
+      "finding_type": "EDGE_CASE",
+      "subcap_id": "P2C3",
+      "critic_text": "Member satisfaction score of 72/100 is below industry median (75/100), yet rationale describes customer experience as 'competitive.' The 3-point gap may be within margin of error, but language should reflect below-median positioning.",
+      "expected_resolution_status": "ACCEPTED_WITH_RATIONALE",
+      "expected_resolution_approach": "Scorer may accept the critic finding and adjust language from 'competitive' to 'near-median' or 'approaching competitive.' Score impact is minimal (within 0.25 tolerance). Document decision rationale: '3-point gap within survey margin of error; score reflects overall trajectory not single metric.'",
+      "resolution_evidence_required": ["Language adjustment in rationale OR documented decision to maintain with reasoning"],
+      "severity_if_unaddressed": "LOW"
+    },
+    {
+      "finding_id": "CRI-P4C3-001",
+      "finding_type": "EDGE_CASE",
+      "subcap_id": "P4C3",
+      "critic_text": "API count of 3 pilot integrations seems low for M3 scoring on technology architecture. Industry benchmarks suggest M3 typically involves 10+ production APIs. However, this may be appropriate for institution size tier.",
+      "expected_resolution_status": "ACCEPTED_WITH_RATIONALE",
+      "expected_resolution_approach": "Scorer should document that M3 criteria for this size tier (Medium) are different from Mega/Large tiers. 3 pilot APIs for a $5B CU may represent appropriate progress. Cite size-tier adjustment in rationale. May also defer to calibration analysis (Workflow B) for cross-institution comparison.",
+      "resolution_evidence_required": ["Size-tier context documented in rationale", "Reference to capability_criteria.md tier-specific thresholds"],
+      "severity_if_unaddressed": "LOW"
+    },
+    {
+      "finding_id": "CRI-P1C4-001",
+      "finding_type": "INVALID",
+      "subcap_id": "P1C4",
+      "critic_text": "Talent management score appears generous. Website careers page showing 5 IT positions is not evidence of talent strategy maturity.",
+      "expected_resolution_status": "INVALID",
+      "expected_resolution_approach": "Scorer should mark finding as INVALID because: (a) the careers page (E-108, T5) was already capped via evidence ceiling; (b) score was derived from multiple evidence items including internal HR strategy document (INT-HR-015, T4), not solely from careers page; (c) critic may have missed the additional evidence supporting the score.",
+      "resolution_evidence_required": ["Explanation that T5 evidence was already capped", "Citation of additional evidence items supporting score"],
+      "severity_if_unaddressed": "N/A"
+    },
+    {
+      "finding_id": "CRI-P4C2-001",
+      "finding_type": "INVALID",
+      "subcap_id": "P4C2",
+      "critic_text": "Analytics capability scored N/A but institution has a basic reporting dashboard mentioned on their website. Should this be scored instead of marked N/A?",
+      "expected_resolution_status": "INVALID",
+      "expected_resolution_approach": "Scorer should mark finding as INVALID because: (a) website mention of 'reporting dashboard' is T5 marketing claim with no evidence of actual analytics capability, (b) >30% of P4C2 subcaps have NO_EVIDENCE, meeting the N/A threshold, (c) a single T5 mention does not constitute scoreable evidence per evidence_ranking.md.",
+      "resolution_evidence_required": ["Reference to N/A threshold (>30% NO_EVIDENCE)", "Explanation of T5 insufficiency"],
+      "severity_if_unaddressed": "N/A"
+    },
+    {
+      "finding_id": "CRI-P3C3-001",
+      "finding_type": "ADDRESSED_WITH_NEW_EVIDENCE",
+      "subcap_id": "P3C3",
+      "critic_text": "Compliance score of 3.4 relies heavily on 'no enforcement actions' as positive evidence. Absence of enforcement does not prove proactive compliance. Need affirmative evidence of compliance program maturity (e.g., tracking systems, training programs, audit schedules).",
+      "expected_resolution_status": "ADDRESSED",
+      "expected_resolution_approach": "Scorer addressed this finding by adding new evidence: compliance exception tracking system report (INT-COMPLIANCE-034, T4) showing 847 exceptions closed with 95% resolution rate, plus BSA/AML monitoring data (E-308, T1). Rationale was updated to cite proactive compliance indicators beyond mere absence of enforcement.",
+      "resolution_evidence_required": ["New evidence items added to Evidence_Index", "Rationale updated to cite affirmative compliance evidence"],
+      "new_evidence_added": [
+        {
+          "evidence_id": "INT-COMPLIANCE-034",
+          "description": "Compliance exception tracking system report",
+          "tier": "T4"
+        },
+        {
+          "evidence_id": "E-308",
+          "description": "FinCEN SAR database filing confirmation",
+          "tier": "T1"
+        }
+      ],
+      "severity_if_unaddressed": "HIGH"
+    }
+  ],
+  "governance_test_expectations": {
+    "cr01_check": "Verify all 8 critic findings have a documented resolution status in Critic_Log or rationale",
+    "expected_results": {
+      "ADDRESSED": 3,
+      "ACCEPTED_WITH_RATIONALE": 2,
+      "INVALID": 2,
+      "ADDRESSED_WITH_NEW_EVIDENCE": 1,
+      "UNADDRESSED": 0
+    },
+    "resolution_quality_criteria": [
+      "ADDRESSED findings cite specific evidence or score adjustments",
+      "ACCEPTED_WITH_RATIONALE findings document decision reasoning (not just 'acknowledged')",
+      "INVALID findings explain why the concern does not apply with specific references",
+      "ADDRESSED_WITH_NEW_EVIDENCE findings show new evidence items in Evidence_Index and updated rationale"
+    ]
+  },
+  "pass_criteria": [
+    "CR-01 check result: PASS (all 8 findings have documented resolution)",
+    "≥95% of critic findings have status ADDRESSED, ACCEPTED_WITH_RATIONALE, or INVALID (100% in this case = 8/8)",
+    "No UNADDRESSED findings remain in Critic_Log",
+    "Resolution quality: each resolution includes specific evidence citations or documented reasoning",
+    "Governance audit verdict for critic resolution: PASS",
+    "If any finding were left UNADDRESSED: governance should flag as PASS_WITH_WARNINGS with fix instructions"
+  ],
+  "negative_test_scenarios": [
+    {
+      "scenario_id": "NEG-001",
+      "description": "If CRI-P3C1-002 (fraud automation) is left UNADDRESSED",
+      "expected_governance_behavior": "CR-01 result = PASS_WITH_WARNINGS; issue register entry ISS-XXX with severity HIGH; fix instruction = 'Address critic finding CRI-P3C1-002 by providing T1-T3 evidence or adjusting score'",
+      "verdict_impact": "Verdict degrades to PASS_WITH_NOTES with recommendation FIX_AND_REAUDIT"
+    },
+    {
+      "scenario_id": "NEG-002",
+      "description": "If CRI-P1C2-001 (governance committee output) and CRI-P3C1-002 are both UNADDRESSED",
+      "expected_governance_behavior": "CR-01 result = FAIL; 2 HIGH-severity unaddressed findings; issue register contains both with fix instructions",
+      "verdict_impact": "Verdict may remain PASS_WITH_NOTES (not FAIL unless issues are CRITICAL), but recommendation = FIX_AND_REAUDIT"
+    }
+  ],
+  "regression_test_gate": {
+    "test_case_purpose": "Verify governance skill CR-01 (Critic Log Resolution) check works correctly: (1) Identifies all critic findings, (2) Verifies each has a documented resolution status, (3) Validates resolution quality (not just status but substance), (4) Correctly handles INVALID findings, (5) Detects UNADDRESSED findings and logs appropriate issues",
+    "test_execution": "Run governance Workflow A (Single Assessment Audit) on this case; review CR-01 results in Step 2 and outputs in Step 6",
+    "expected_outcome": "Governance verdict PASS; CR-01 = PASS; no unaddressed critic findings; issue register may contain LOW-severity documentation notes"
+  },
+  "metadata": {
+    "case_created_date": "2025-03-01",
+    "case_updated_date": "2025-03-01",
+    "case_status": "STUB",
+    "case_owner": "DMA Governance & Quality Assurance Team",
+    "use_in_workflows": [
+      "Workflow C: Rubric Version Regression (test critic resolution requirements)",
+      "Training: Critic Pass Effectiveness (show resolution examples by type)",
+      "Governance Audit: CR-01 Check Validation"
+    ],
+    "compatibility": "DMA Governance Skill v2.0+, DMA Assessment Skill v3.0+",
+    "completion_todo": [
+      "Populate full Critic_Log worksheet with all 8 findings and resolution columns",
+      "Create sample rationale updates showing how each finding was addressed",
+      "Add Evidence_Index entries for the new evidence items (INT-COMPLIANCE-034, E-308)",
+      "Build negative test variants with 1-2 findings intentionally left UNADDRESSED",
+      "Peer review by QA lead before promoting to ACTIVE status"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+ "packages": 154,
+ "parsed": 154,
+ "parse_failures": 0,
+ "zero_cell_packages": 7,
+ "duplicate_ids_remaining": 0,
+ "subvertical_resolved": 85,
+ "subvertical_unresolved": 7,
+ "packages_without_identity": 6,
+ "scored_cells_total": 96199,
+ "scored_cells_max": 836,
+ "observations_total": 14355,
+ "observation_kinds": {
+  "superseded_duplicate": 12448,
+  "missing_score": 989,
+  "unparseable_cell": 853,
+  "score_out_of_range": 38,
+  "duplicate_score_disagreement": 13,
+  "unrecognised_cell_id_format": 8,
+  "unrecognised_pillar_tab": 4,
+  "no_subcap_grain_tabs": 2
+ }
+}

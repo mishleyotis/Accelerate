@@ -1,0 +1,172 @@
+{
+  "checkpoint_id": "02_peer_benchmarks",
+  "checkpoint_phase": "Phase 5: Peer Selection Gate",
+  "description": "User-selected peer institutions and their scored benchmarks. Establishes comparison context for all institutional scores.",
+  "checkpoint_metadata": {
+    "assessment_id": "DMA-[ABBREV]-[YYYYMMDD]-[SEQNUM]",
+    "institution_name": "[Institution Name]",
+    "assessment_sub_vertical": "[Sub-Vertical]",
+    "assessment_size_tier": "[Size Tier]",
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "peer_selection_status": "[CONFIRMED / PENDING_USER_APPROVAL]",
+    "peer_selection_date": "YYYY-MM-DD",
+    "peer_selection_confirmed_by": "[User Name]"
+  },
+  "peer_selection_process": {
+    "selection_criteria": {
+      "sub_vertical_match": "[Require same sub-vertical as assessed institution]",
+      "size_tier_match": "[Require same or adjacent size tier; note adjustment if different]",
+      "comparability_notes": "[Any geographic, business model, or other comparability considerations]"
+    },
+    "selection_methodology": "[Per skill's references/peer_benchmarking.md: present 5–8 suggestions, user selects 3–5]",
+    "user_suggested_peers": [
+      "[Peer institution names provided by user]"
+    ],
+    "assessed_institution_suggested_peers": [
+      "[Peers Zennify assessed with most recent versions of assessment skill]"
+    ]
+  },
+  "selected_peers": [
+    {
+      "peer_rank": 1,
+      "peer_name": "[Peer Institution Name]",
+      "peer_id": "[Institution ID / Charter Number]",
+      "peer_size_tier": "[Size Tier]",
+      "peer_sub_vertical": "[Sub-Vertical]",
+      "peer_geography": "[Geographic location / region]",
+      "peer_selection_rationale": "[Why this peer is appropriate for comparison]",
+      "peer_assessment_id": "[Run ID of prior assessment, if available]",
+      "peer_assessment_date": "[Date of peer assessment]",
+      "peer_overall_score": "[Overall DMA score for this peer]",
+      "peer_pillar_scores": {
+        "P1": "[P1 score]",
+        "P2": "[P2 score]",
+        "P3": "[P3 score]",
+        "P4": "[P4 score]"
+      },
+      "peer_category_scores": {
+        "P1C1": "[Score]",
+        "P1C2": "[Score]",
+        "P2C1": "[Score]",
+        "P2C2": "[Score]",
+        "P2C3": "[Score]",
+        "P2C4": "[Score]",
+        "P3C1": "[Score]",
+        "P3C2": "[Score]",
+        "P3C3": "[Score]",
+        "P3C4": "[Score]",
+        "P4C1": "[Score]",
+        "P4C2": "[Score]",
+        "P4C3": "[Score]",
+        "P4C4": "[Score]"
+      },
+      "peer_score_source": "[Assessment workbook path / External peer data]"
+    }
+  ],
+  "peer_count": "[Number of selected peers, typically 3–5]",
+  "peer_set_confirmed": true,
+  "peer_set_locked_date": "YYYY-MM-DD",
+  "peer_set_locked_by": "[User Name]",
+  "benchmark_statistics": {
+    "overall_score_statistics": {
+      "peer_median": "[Median of selected peers' overall scores]",
+      "peer_mean": "[Mean overall score]",
+      "peer_p25": "[25th percentile]",
+      "peer_p75": "[75th percentile]",
+      "peer_std_dev": "[Standard deviation]",
+      "peer_min": "[Lowest peer score]",
+      "peer_max": "[Highest peer score]"
+    },
+    "pillar_score_statistics": {
+      "P1": {
+        "peer_median": "[Score]",
+        "peer_mean": "[Score]",
+        "peer_p25": "[Score]",
+        "peer_p75": "[Score]",
+        "peer_std_dev": "[Score]"
+      },
+      "P2": {
+        "peer_median": "[Score]",
+        "peer_mean": "[Score]",
+        "peer_p25": "[Score]",
+        "peer_p75": "[Score]",
+        "peer_std_dev": "[Score]"
+      },
+      "P3": {
+        "peer_median": "[Score]",
+        "peer_mean": "[Score]",
+        "peer_p25": "[Score]",
+        "peer_p75": "[Score]",
+        "peer_std_dev": "[Score]"
+      },
+      "P4": {
+        "peer_median": "[Score]",
+        "peer_mean": "[Score]",
+        "peer_p25": "[Score]",
+        "peer_p75": "[Score]",
+        "peer_std_dev": "[Score]"
+      }
+    },
+    "category_score_statistics": {
+      "P1C1": {
+        "peer_median": "[Score]",
+        "peer_mean": "[Score]",
+        "peer_p75": "[Score]"
+      }
+    }
+  },
+  "assessment_vs_peer_positioning": {
+    "overall_positioning_notes": "[Draft comparison: e.g., 'Assessed institution scoring [X] vs. peer median [Y]; [X-Y] points below/above peers']",
+    "pillar_positioning": {
+      "P1_vs_median": "[Score delta]",
+      "P2_vs_median": "[Score delta]",
+      "P3_vs_median": "[Score delta]",
+      "P4_vs_median": "[Score delta]"
+    },
+    "strengths_vs_peers": "[Categories where assessed institution scores above peer P75 (top quartile)]",
+    "improvement_areas_vs_peers": "[Categories where assessed institution scores below peer P25 (bottom quartile)]"
+  },
+  "benchmark_source_documentation": {
+    "baseline_source": "[Is benchmark from: (a) Program historical baseline, (b) Selected peers, (c) Sector-wide published data]",
+    "baseline_version": "[Reference framework version used for baseline]",
+    "data_currency": "[Date baseline was last updated]",
+    "limitations": "[Any limitations on baseline applicability; e.g., 'Peer data from 2023 Q2; may not reflect recent changes']"
+  },
+  "quality_assurance_checks": {
+    "peer_count_validation": {
+      "status": "[PASS / FAIL]",
+      "required": "[3–5 peers]",
+      "actual": "[Count selected]"
+    },
+    "peer_comparability_validation": {
+      "status": "[PASS / FAIL]",
+      "checks": [
+        {
+          "check": "All peers same sub-vertical as assessed institution",
+          "result": "[PASS / FAIL / WITH_NOTES]"
+        },
+        {
+          "check": "All peers same or adjacent size tier",
+          "result": "[PASS / FAIL]",
+          "notes": "[If size tier adjustment applied]"
+        },
+        {
+          "check": "Peer data currency (all assessed within past 18 months)",
+          "result": "[PASS / FAIL]",
+          "notes": "[Most recent peer assessment date]"
+        }
+      ]
+    },
+    "benchmark_calculation_validation": {
+      "status": "[PASS / FAIL]",
+      "sample_calculation": "[E.g., 'Median = median(3.2, 3.5, 3.1, 3.4, 3.0) = 3.2 ✓']"
+    }
+  },
+  "metadata": {
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_version": "1.0",
+    "checkpoint_status": "COMPLETE"
+  }
+}

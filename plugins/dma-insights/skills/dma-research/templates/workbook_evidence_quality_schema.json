@@ -1,0 +1,136 @@
+{
+  "$schema": "dma_workbook_evidence_quality_v1",
+  "description": "Validation schema for research workbook evidence quality. Used by validate_workbook.py to ensure all evidence columns meet minimum standards before handoff to dma-assessment.",
+
+  "structural_checks": {
+    "required_sheets": [
+      "Summary", "Calculation_Chain",
+      "P1_Scoring_Detail", "P2_Scoring_Detail", "P3_Scoring_Detail", "P4_Scoring_Detail",
+      "Evidence_Linkage_Matrix", "Caps_Applied_Log", "Absent_Evidence_Log", "QA_Validation_Log"
+    ],
+    "required_columns_per_scoring_sheet": {
+      "A": "Category_ID",
+      "B": "Category_Name",
+      "C": "Cap_ID",
+      "D": "Capability",
+      "E": "SubCap_ID",
+      "F": "SubCapability",
+      "G": "Tier",
+      "H": "Diagnostic_Question",
+      "I": "Weight_Pct",
+      "J": "Score_1_to_5",
+      "K": "Evidence_IDs",
+      "L": "Evidence_URLs",
+      "M": "Evidence_Tier",
+      "N": "Confidence",
+      "O": "Caps_Applied",
+      "P": "Final_Score",
+      "Q": "Prior_Score",
+      "R": "Scoring_Rationale",
+      "S": "Proof_Claims",
+      "T": "Proof_Links",
+      "U": "Evidence_Excerpt",
+      "V": "Source_Document"
+    },
+    "row_count_targets": {
+      "P1_Scoring_Detail": {"target": 203, "tolerance_pct": 5},
+      "P2_Scoring_Detail": {"target": 291, "tolerance_pct": 5},
+      "P3_Scoring_Detail": {"target": 164, "tolerance_pct": 5},
+      "P4_Scoring_Detail": {"target": 189, "tolerance_pct": 5},
+      "total": {"target": 836, "tolerance_pct": 5}
+    }
+  },
+
+  "evidence_column_rules": {
+    "column_G_tier": {
+      "valid_values": ["T1", "T2", "T3", "T4", "T5", "NO_EVIDENCE"],
+      "required": true,
+      "severity": "BLOCK"
+    },
+    "column_K_evidence_ids": {
+      "pattern_with_evidence": "^(E-\\d{3}(:\\F\\d+)?)(,\\s*E-\\d{3}(:\\F\\d+)?)*$",
+      "pattern_no_evidence": "^NO_EVIDENCE$",
+      "required": true,
+      "severity": "BLOCK"
+    },
+    "column_L_evidence_urls": {
+      "required_when": "column_G != NO_EVIDENCE",
+      "valid_patterns": ["^https?://", "^internal$"],
+      "severity": "WARNING"
+    },
+    "column_M_evidence_tier": {
+      "required_when": "column_G != NO_EVIDENCE",
+      "valid_values_csv": ["T1", "T2", "T3", "T4", "T5"],
+      "severity": "WARNING"
+    },
+    "column_U_evidence_excerpt": {
+      "required": true,
+      "min_length_with_evidence": 50,
+      "min_length_no_evidence": 100,
+      "must_contain_with_evidence": ["[E-", "[CEILING", "[ERS"],
+      "must_contain_no_evidence": ["No evidence identified", "searches"],
+      "severity": "BLOCK"
+    },
+    "column_V_source_document": {
+      "required_when": "column_G != NO_EVIDENCE",
+      "min_length": 10,
+      "severity": "WARNING"
+    }
+  },
+
+  "scoring_columns_must_be_empty": {
+    "columns": ["J", "N", "O", "P", "Q", "R", "S", "T"],
+    "severity": "BLOCK",
+    "message": "Scoring columns must be empty — research skill does not score"
+  },
+
+  "evidence_quality_thresholds": {
+    "overall_coverage_minimum": 0.80,
+    "tier_distribution": {
+      "t1_t2_minimum_pct": 0.20,
+      "t5_maximum_pct": 0.30,
+      "no_evidence_maximum_pct": 0.20
+    },
+    "ers_quality": {
+      "mean_ers_minimum": 2.5,
+      "pct_above_3_0_minimum": 0.40
+    },
+    "excerpt_quality": {
+      "mean_length_minimum": 100,
+      "pct_with_ceiling_estimate": 0.70,
+      "pct_with_claim_label": 0.90,
+      "pct_with_ers_score": 0.85
+    }
+  },
+
+  "evidence_linkage_matrix_checks": {
+    "all_evidence_ids_present": {
+      "description": "Every E-xxx referenced in scoring sheets must exist in ELM",
+      "severity": "BLOCK"
+    },
+    "ers_populated": {
+      "description": "Every evidence item must have ERS_Total calculated",
+      "severity": "WARNING"
+    },
+    "subcap_mappings_populated": {
+      "description": "Every evidence item must list which subcaps it maps to",
+      "severity": "WARNING"
+    }
+  },
+
+  "absent_evidence_log_checks": {
+    "all_no_evidence_logged": {
+      "description": "Every NO_EVIDENCE subcap must have an entry",
+      "severity": "BLOCK"
+    },
+    "search_count_minimum": {
+      "description": "Each NO_EVIDENCE entry must show ≥6 search attempts",
+      "minimum": 6,
+      "severity": "WARNING"
+    },
+    "discovery_question_present": {
+      "description": "Each entry must include a specific internal discovery question",
+      "severity": "WARNING"
+    }
+  }
+}

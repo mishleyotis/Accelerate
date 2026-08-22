@@ -1,0 +1,223 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DMA First Call Slide Plan",
+  "description": "Maps facts to slides. Every content_block MUST have source_facts[]. Includes storyline test.",
+  "type": "object",
+  "required": [
+    "metadata",
+    "big_idea",
+    "storyline_test",
+    "slides"
+  ],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": [
+        "client_name",
+        "subvertical",
+        "template_file",
+        "framework",
+        "audience",
+        "total_slides"
+      ],
+      "properties": {
+        "client_name": {
+          "type": "string"
+        },
+        "subvertical": {
+          "type": "string"
+        },
+        "template_file": {
+          "type": "string"
+        },
+        "framework": {
+          "type": "string",
+          "default": "AIDA_80_Consultant_20"
+        },
+        "audience": {
+          "type": "string"
+        },
+        "total_slides": {
+          "type": "integer",
+          "const": 22
+        }
+      }
+    },
+    "big_idea": {
+      "type": "string",
+      "description": "[Client] [situation], but [opportunity] enables [outcome] by [timeframe]."
+    },
+    "storyline_test": {
+      "type": "object",
+      "required": [
+        "headlines",
+        "passes",
+        "narrative_summary"
+      ],
+      "properties": {
+        "headlines": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "All headlines in slide order"
+        },
+        "passes": {
+          "type": "boolean"
+        },
+        "narrative_summary": {
+          "type": "string",
+          "description": "1-paragraph story told by headlines alone"
+        },
+        "missing_beats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Story beats not covered by headlines"
+        }
+      }
+    },
+    "slides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "slide_number",
+          "headline",
+          "action",
+          "aida_phase"
+        ],
+        "properties": {
+          "slide_number": {
+            "type": "integer"
+          },
+          "headline": {
+            "type": "string"
+          },
+          "headline_score": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "edit",
+              "do_not_change",
+              "read_only",
+              "verify",
+              "swap",
+              "minimal_edit"
+            ]
+          },
+          "aida_phase": {
+            "type": "string",
+            "enum": [
+              "attention",
+              "interest",
+              "desire",
+              "action",
+              "static"
+            ]
+          },
+          "content_blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "shape_id",
+                "replacement",
+                "source_facts"
+              ],
+              "properties": {
+                "shape_id": {
+                  "type": "string"
+                },
+                "replacement": {
+                  "type": "string"
+                },
+                "source_facts": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1
+                },
+                "max_chars": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "color_changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "shape_id": {
+                  "type": "string"
+                },
+                "attribute": {
+                  "type": "string"
+                },
+                "old_value": {
+                  "type": "string"
+                },
+                "new_value": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "size_changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "shape_id": {
+                  "type": "string"
+                },
+                "attribute": {
+                  "type": "string",
+                  "enum": [
+                    "cx",
+                    "x_position"
+                  ]
+                },
+                "new_value": {
+                  "type": "integer"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Only for Slide 14 progress bars and median markers"
+          },
+          "batch": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Which batch this slide is edited in (1-6). Null for static slides.",
+            "minimum": 1,
+            "maximum": 6
+          },
+          "turn": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Which conversation turn edits this slide (3-8). Null for static.",
+            "minimum": 3,
+            "maximum": 8
+          }
+        }
+      }
+    }
+  }
+}

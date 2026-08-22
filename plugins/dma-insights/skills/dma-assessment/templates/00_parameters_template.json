@@ -1,0 +1,166 @@
+{
+  "checkpoint_id": "00_parameters",
+  "checkpoint_phase": "Phase 0: Entity Check and Evidence Mode",
+  "description": "Institution profile, assessment scope, evidence mode, and document inventory. Created at assessment start; referenced throughout for consistency.",
+  "institution_profile": {
+    "institution_name": "[Full Legal Name]",
+    "institution_display_name": "[Short Name for Reports]",
+    "institution_id": "[NCUA Charter Number / OCC ID / DUNS / Custom ID]",
+    "institution_type": "[Bank / Credit Union / Insurance Carrier / etc.]",
+    "sub_vertical": "[Credit Unions / Regional Banks / Commercial Lending / CIB / Insurance Carriers / Insurance Brokerages / Wealth Managers / RIAs / Asset Management]",
+    "size_tier": "[Mega / Large / Medium / Small / Micro / Nano]",
+    "size_tier_basis": "Total assets in most recent fiscal year: $[X] million",
+    "geography": "[Primary state/region served]",
+    "founding_year": "[Year]",
+    "headquarters_location": "[City, State]"
+  },
+  "assessment_scope": {
+    "assessment_type": "[New Assessment / Reassessment]",
+    "assessment_id": "DMA-[ABBREV]-[YYYYMMDD]-[SEQNUM]",
+    "assessment_start_date": "YYYY-MM-DD",
+    "assessment_target_completion_date": "YYYY-MM-DD",
+    "assessment_status": "[IN_PROGRESS / SCORING_COMPLETE / REPORT_DRAFT / AWAITING_REVIEW / DELIVERED]",
+    "assessment_scope_description": "[Brief description: full DMA vs. targeted update vs. specific pillar reassessment]",
+    "special_conditions": "[Any assessment limitations, scope constraints, or unique conditions]"
+  },
+  "evidence_mode": {
+    "mode": "[PUBLIC / INTERNAL / HYBRID]",
+    "mode_rationale": "[Why this mode was selected]",
+    "mode_confirmation_date": "YYYY-MM-DD",
+    "confirmed_by": "[User Name or Role]"
+  },
+  "sub_vertical_binding": {
+    "sub_vertical_confirmed": "[Sub-vertical name]",
+    "maturity_model_source": "[File path to loaded maturity model DOCX]",
+    "maturity_model_version": "[e.g., v4.0]",
+    "scoring_toolkit_source": "[File path to loaded scoring toolkit, if available]",
+    "scoring_toolkit_version": "[e.g., v4.0]",
+    "capability_count_expected": {
+      "P1": "[Expected capability count for P1]",
+      "P2": "[Expected capability count for P2]",
+      "P3": "[Expected capability count for P3]",
+      "P4": "[Expected capability count for P4]",
+      "total_capabilities": "[Sum of P1+P2+P3+P4]"
+    },
+    "subcapability_count_expected": "[Total expected subcapabilities across all capabilities and pillars; typically 836±10]"
+  },
+  "document_inventory": {
+    "documents_uploaded": [
+      {
+        "document_id": "DOC-001",
+        "document_name": "[Filename]",
+        "document_type": "[Board Deck / Annual Report / Audit Report / Risk Register / Strategy Doc / Technology Assessment / Vendor Assessment / Policy Document / Other]",
+        "evidence_tier": "[T1 / T2 / T3 / T4 / T5]",
+        "document_date": "YYYY-MM-DD or 'Current' or 'Trailing [Period]'",
+        "file_path": "[Path in uploads folder]",
+        "file_size_bytes": "[Size]",
+        "document_status": "[READY_TO_PROCESS / IN_PROGRESS / PROCESSED]",
+        "processing_notes": "[Any special notes or limitations]"
+      }
+    ],
+    "external_evidence_inventory": {
+      "a1_evidence_inventory_csv": "[File path to A1_Evidence_Inventory.csv]",
+      "a1_loaded": true,
+      "a1_evidence_count": "[Number of rows in A1]"
+    },
+    "documents_to_process": [
+      "[Document ID list]"
+    ],
+    "total_documents": "[Count of unique documents]",
+    "document_status_summary": {
+      "not_started": "[Count]",
+      "in_progress": "[Count]",
+      "complete": "[Count]"
+    }
+  },
+  "skill_versions": {
+    "assessment_skill_version": "[e.g., 3.0]",
+    "assessment_skill_location": "[File path to SKILL.md]",
+    "assessment_skill_loaded": true,
+    "skill_references_to_read": [
+      "analytical_framework.md",
+      "sub_verticals.md",
+      "capability_criteria.md",
+      "scoring_methodology.md",
+      "evidence_ranking.md",
+      "peer_benchmarking.md",
+      "priority_framework.md",
+      "communication_standards.md",
+      "report_template.md",
+      "quality_assurance.md",
+      "regression_tests.md",
+      "zennify_solutions.md",
+      "workbook_specification.md",
+      "qa_error_log.md",
+      "reasoning_chain_schema.md"
+    ],
+    "skill_references_read": [
+      "[Completed: check off as read]"
+    ]
+  },
+  "entity_folder_structure": {
+    "entity_folder_path": "/home/claude/dma_assessments/[ENTITY_NAME]_DMA/",
+    "subfolders_created": {
+      "checkpoints": true,
+      "evidence": true,
+      "outputs": true,
+      "peers": true
+    },
+    "checkpoint_files": {
+      "00_parameters": "[This file path]",
+      "01_evidence_index": "[Path to file or 'TBD']",
+      "02_peer_benchmarks": "[Path to file or 'TBD']",
+      "03_issue_register": "[Path to file or 'TBD']",
+      "04_scores": "[Path to file or 'TBD']",
+      "05_priorities": "[Path to file or 'TBD']",
+      "06_recommendations": "[Path to file or 'TBD']"
+    }
+  },
+  "reassessment_detection": {
+    "is_reassessment": false,
+    "prior_assessment_found": false,
+    "prior_assessment_details": {
+      "prior_assessment_id": "[If applicable]",
+      "prior_assessment_date": "[If applicable]",
+      "prior_overall_score": "[If applicable]",
+      "prior_sub_vertical": "[If applicable]",
+      "months_since_prior": "[If applicable]",
+      "prior_assessment_status": "[RECENT / MODERATE / STALE]"
+    },
+    "reassessment_type": "[FULL_REASSESSMENT / TARGETED_UPDATE / CONTINUE_PRIOR / IGNORE_PRIOR (if reassessment=true)]",
+    "reassessment_rationale": "[If reassessment, explain why and what changed since prior]"
+  },
+  "peer_selection": {
+    "peer_selection_status": "[NOT_STARTED / IN_PROGRESS / CONFIRMED]",
+    "peer_selection_date": "[Date when user confirmed peer set]",
+    "selected_peers": [
+      "[Peer institution names TBD until peer selection gate complete]"
+    ],
+    "peer_count": "[TBD until Phase 5]",
+    "peer_benchmarking_baseline": "[Program baseline being used; e.g., 'Credit Unions — Mega']"
+  },
+  "assessment_constraints_and_notes": {
+    "evidence_constraints": "[Any limitations on evidence availability, e.g., 'No internal documents available; PUBLIC mode only']",
+    "timeline_constraints": "[Any timeline pressures or deadlines]",
+    "scope_constraints": "[Any capabilities or pillars explicitly excluded]",
+    "institutional_context": "[Key business context affecting assessment; e.g., 'Recent merger', 'Under regulatory review', 'Digital transformation in progress']",
+    "assessor_notes": "[Assessor's pre-assessment observations or assumptions]"
+  },
+  "quality_assurance_checkpoints": {
+    "parameter_lock_confirmed": true,
+    "parameter_lock_date": "YYYY-MM-DD",
+    "parameter_lock_confirmed_by": "[User Name]",
+    "skill_initialization_complete": true,
+    "entity_folder_created": true,
+    "evidence_mode_validation_passed": true,
+    "sub_vertical_binding_valid": true,
+    "documents_inventory_complete": true
+  },
+  "metadata": {
+    "checkpoint_created_date": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_last_updated": "YYYY-MM-DDTHH:MM:SSZ",
+    "checkpoint_version": "1.0",
+    "created_by": "[Assessment skill version or assessor name]",
+    "checkpoint_status": "COMPLETE"
+  }
+}

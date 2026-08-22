@@ -1,0 +1,10 @@
+{
+  "_doc": "The same overview from a client with three of the four gaps Gate J is for: a section it serves empty, a key it does not carry, and a key it carries empty. The fourth section is WITHHELD, which is an audience decision and must not be reported.",
+  "entity": {"display_id": "target-client"},
+  "sections": {
+    "scores": {"data": {"composite": 1.59, "pillars": [1, 2, 3, 4]}},
+    "leadership": {"data": {}},
+    "sentiment": {"data": {"bars": [{"source": "a"}], "themes": []}},
+    "ceilings": {"data": null, "withheld": true, "never_served": true}
+  }
+}
