@@ -571,6 +571,27 @@ function adaptWhyNow(whyNow) {
    when it ends a sentence rather than an abbreviation or a decimal — "$6.5
    billion" and "Jan. 2026" must not split. Nothing is truncated; a long
    trigger makes a taller card, and the grid levels the row. */
+/* Tokens that end in a full stop WITHOUT ending a sentence.
+ *
+ * THE SINGLE LETTER IS THE ONE THAT BROKE THIS. The boundary test below looks
+ * for a full stop followed by whitespace and a capital, which is precisely the
+ * shape of an initial in front of a surname: "T. Rowe Price", "J.P. Morgan",
+ * "A.G. Edwards". Measured on the promoted T. Rowe Price run, all three
+ * why-now cards rendered their face as a fragment of the client's own name:
+ *
+ *     WN-2  "T."
+ *     WN-3  "On the 7 August 2026 Q2 earnings call, chief executive Rob
+ *            Sharps told analysts T."
+ *     WN-4  "On the same 7 August 2026 Q2 2026 earnings call, T."
+ *
+ * The guard the comment below describes protects "$6.5 billion" and
+ * "Jan. 2026" because a DIGIT follows the stop. An initial is the mirror case
+ * — a CAPITAL follows — and it was never covered, so the bug was invisible on
+ * every client whose name does not start with one.
+ *
+ * The leading class accepts a full stop as well as whitespace so that the
+ * second initial of "U.S." and "J.P." is guarded too. */
+const NOT_A_SENTENCE_END = new RegExp('(?:^|[\\s("“.])(?:[A-Za-z]|Mr|Mrs|Ms|Dr|Prof|Rev|Hon|Sr|Jr|St|Inc|Corp' + '|Co|Ltd|LLC|LLP|plc|Bros|Assn|Dept|Univ|No|vs|etc|approx|Fig' + '|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept|Sep|Oct|Nov|Dec)\\.$');
 function headlineOf(text) {
   if (!text) return null;
   const t = String(text).trim();
@@ -581,8 +602,20 @@ function headlineOf(text) {
   // correctly does. Guarding on the preceding character instead was the
   // subtler bug — it protected decimals and broke every sentence that ends
   // in a year, which in this corpus is most of them.
-  const m = t.match(/^(.*?[.;!?])(?=\s+["“(]?[A-Z]|\s*$)/);
-  const head = m ? m[1] : t;
+  //
+  // But what comes after is not sufficient on its own. An initial is also
+  // followed by whitespace and a capital, so each candidate is now checked
+  // against what precedes it too, and the first one that is a real boundary
+  // wins. `;`, `!` and `?` never end an abbreviation, so only `.` is checked.
+  const BOUNDARY = /[.;!?](?=\s+["“(]?[A-Z]|\s*$)/g;
+  let head = t;
+  let m;
+  while ((m = BOUNDARY.exec(t)) !== null) {
+    const end = m.index + 1;
+    if (m[0] === "." && NOT_A_SENTENCE_END.test(t.slice(0, end))) continue;
+    head = t.slice(0, end);
+    break;
+  }
   // An em dash introduces the elaboration rather than ending the sentence,
   // so it is a legitimate face boundary when it comes first. This reads the
   // PAYLOAD, which still holds whatever the producer wrote — the hyphen

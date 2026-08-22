@@ -745,6 +745,85 @@ def _check_financial_series_reach(section, body) -> list:
         f"the years, and this passes on the search rather than on the result.")]
 
 
+#: Characters that never belong in anything a client reads.
+#:
+#: DELIBERATELY NARROW. `§` is NOT here — a regulatory citation ("12 CFR
+#: § 1026.36") is real and common in this corpus, and a gate that refused it
+#: would be refusing correct work. What is listed either marks up a manuscript
+#: rather than a sentence (pilcrow, dagger, double dagger), is invisible and
+#: therefore un-auditable (zero-width, soft hyphen, byte-order mark), or is
+#: already the evidence of a decoding failure (the replacement character).
+_BAD_CHARS = {
+    "¶": "PILCROW SIGN",
+    "†": "DAGGER",
+    "‡": "DOUBLE DAGGER",
+    "­": "SOFT HYPHEN (invisible)",
+    "​": "ZERO WIDTH SPACE",
+    "‌": "ZERO WIDTH NON-JOINER",
+    "‍": "ZERO WIDTH JOINER",
+    "﻿": "BYTE ORDER MARK",
+    "�": "REPLACEMENT CHARACTER (a decode already failed)",
+}
+
+
+def _walk_strings(node, path=""):
+    if isinstance(node, dict):
+        for k, v in node.items():
+            yield from _walk_strings(v, f"{path}.{k}" if path else str(k))
+    elif isinstance(node, list):
+        for i, v in enumerate(node):
+            yield from _walk_strings(v, f"{path}[{i}]")
+    elif isinstance(node, str):
+        yield path, node
+
+
+def _check_no_typesetting_marks(section, body) -> list:
+    """CG-35 — a manuscript mark is not a sentence.
+
+    Reported 2026-08-22 from the focus-area drilldown: "Invalid characters".
+    Four pilcrows had reached the served page, inside `source_document`:
+
+        "T. Rowe Price press release — T. Rowe Price Announces Creation of
+         Global Strategy Function (¶4 of the release (Sharps quote),
+         immediately after ¶3's introduction of Andrew Reich)"
+
+    The provenance was true and the placement was useful to whoever wrote it.
+    It is still not a document title, and `¶` is a mark most readers cannot
+    name. It arrived because the same annotation had first been written into
+    `source_page` — an INTEGER column — and was moved to the nearest string
+    field rather than dropped, so this gate is the second half of that repair.
+
+    Also catches the invisible ones. A zero-width space or a soft hyphen
+    changes nothing on screen and silently breaks every search, comparison and
+    dedup that touches the field; the replacement character means a decode
+    already failed upstream and the run is serving the damage.
+    """
+    if not isinstance(body, dict):
+        return []
+    out = []
+    for path, text in _walk_strings(body):
+        hits = {ch for ch in text if ch in _BAD_CHARS}
+        if not hits:
+            continue
+        named = ", ".join(f"{ch!r} ({_BAD_CHARS[ch]})" for ch in sorted(hits))
+        where = text
+        for ch in hits:
+            i = where.find(ch)
+            if i >= 0:
+                where = where[max(0, i - 40):i + 40]
+                break
+        out.append(_reason(
+            "CG-35", section, f"{section}.{path}" if path else section,
+            f"served text carries {named}. Around it: …{where.strip()}… "
+            f"A pilcrow or a dagger marks up a manuscript rather than saying "
+            f"anything to a reader, and the invisible ones break every search "
+            f"and comparison that touches the field without changing what is "
+            f"on screen. If the detail is worth keeping, say it in words; if "
+            f"it is a placement note for the producer, it does not belong in "
+            f"a field the client reads."))
+    return out
+
+
 def _check_page_thread(page, section, fields, body) -> list:
     """CG-23 — a section whose writer stores a thread carries one.
 
@@ -1110,6 +1189,7 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_resolved_contacts_are_served(name, body))
         reasons.extend(_check_thought_leadership_depth(name, body))
         reasons.extend(_check_financial_series_reach(name, body))
+        reasons.extend(_check_no_typesetting_marks(name, body))
 
         # id-pattern discipline
         for i, e in enumerate(body.get("e_ids") or []):

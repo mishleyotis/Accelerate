@@ -979,15 +979,22 @@ function FocusAreaView({
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
-      marginBottom: 4
+      marginBottom: 4,
+      flexWrap: "wrap",
+      alignItems: "flex-start",
+      rowGap: 4
     }
   }, /*#__PURE__*/React.createElement("span", {
-    className: "b b-purple"
+    className: "b b-purple",
+    style: {
+      flexShrink: 0
+    }
   }, "SOURCE"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)",
       minWidth: 0,
+      flex: "1 1 200px",
       overflowWrap: "anywhere"
     }
   }, srcBits.length ? srcBits.join(" · ") : "the run states no source for this focus area")), fa.strategic_quote ? /*#__PURE__*/React.createElement("div", {

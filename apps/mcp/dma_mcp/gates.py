@@ -250,6 +250,26 @@ GATES = {
               "on luck: an entity with genuinely no published history passes "
               "by showing which years it looked at.",
               "block"),
+    "CG-35": ("A manuscript mark is not a sentence", None,
+              "No served string carries a pilcrow, a dagger, a zero-width "
+              "character, a soft hyphen, a byte-order mark or a replacement "
+              "character. The section sign is NOT covered: a regulatory "
+              "citation is real work.",
+              "Reported from the focus-area drilldown as 'invalid "
+              "characters'. Four pilcrows had reached the served page inside "
+              "source_document — '(\u00b64 of the release (Sharps quote), "
+              "immediately after \u00b63's introduction of Andrew Reich)'. The "
+              "provenance was true and the placement was useful to whoever "
+              "wrote it; it is still not a document title, and a reader "
+              "cannot name the glyph. It arrived because the same annotation "
+              "had first been written into source_page, an INTEGER column, "
+              "and was moved to the nearest string field rather than dropped. "
+              "The invisible members of the set are worse: a zero-width space "
+              "or a soft hyphen changes nothing on screen and silently breaks "
+              "every search, comparison and dedup that touches the field, and "
+              "a replacement character means a decode already failed upstream "
+              "and the run is serving the damage.",
+              "block"),
     "CG-29": ("A narrative thread says what THIS section adds", None,
               "No two sections on a page carry the same narrative_thread, "
               "word for word.",

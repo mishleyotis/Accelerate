@@ -660,9 +660,22 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
         <div style={{ padding: "14px 20px", background: "var(--z-bg)", display: "flex", gap: 14, alignItems: "flex-start", borderBottom: "1px solid var(--z-sep)" }}>
           <Icon name="doc" size={16} style={{ color: "var(--z-dpur)", flexShrink: 0, marginTop: 2 }} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="row" style={{ marginBottom: 4 }}>
-              <span className="b b-purple">SOURCE</span>
-              <span style={{ fontSize: 11, color: "var(--z-muted)", minWidth: 0, overflowWrap: "anywhere" }}>
+            {/* THE CHIP DOES NOT SHRINK, and the row wraps.
+                `.b` is `white-space: nowrap` with the DEFAULT `flex-shrink: 1`,
+                so under width pressure its box shrank while its text did not:
+                the word SOURCE overflowed its own chip and painted over the
+                citation beside it. Reported 2026-08-22 from the focus-area
+                drilldown, where it rendered as "SOURCEAI section (after the
+                ETF/SMA…" and "SOURCE T. Rowe Price press release —". The
+                citation is long by nature — document, page and filename joined
+                with " · " — so it is the neighbour that must wrap and the chip
+                that must hold its size. `flex-start` keeps the chip on the
+                first line rather than centred against a three-line citation. */}
+            <div className="row" style={{ marginBottom: 4, flexWrap: "wrap",
+                                          alignItems: "flex-start", rowGap: 4 }}>
+              <span className="b b-purple" style={{ flexShrink: 0 }}>SOURCE</span>
+              <span style={{ fontSize: 11, color: "var(--z-muted)", minWidth: 0,
+                             flex: "1 1 200px", overflowWrap: "anywhere" }}>
                 {srcBits.length ? srcBits.join(" · ") : "the run states no source for this focus area"}
               </span>
             </div>

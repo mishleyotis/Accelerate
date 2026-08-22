@@ -363,21 +363,34 @@ function ClientContext({
     },
     onClick: () => setAcqOpen(acqOpen === (a.id || i) ? null : a.id || i)
   }, /*#__PURE__*/React.createElement("div", {
-    className: "row"
+    className: "row",
+    style: {
+      flexWrap: "wrap",
+      rowGap: 6
+    }
   }, a.date ? /*#__PURE__*/React.createElement("span", {
     className: "f-mono",
     style: {
       fontSize: 10,
-      color: "var(--z-muted)"
+      color: "var(--z-muted)",
+      flexShrink: 0
     }
   }, a.date) : null, /*#__PURE__*/React.createElement("div", {
     style: {
-      flex: 1,
+      flex: "1 1 140px",
+      minWidth: 0,
+      overflowWrap: "anywhere",
       fontWeight: 500,
       fontSize: 12.5
     }
   }, a.target), a.kind ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-muted"
+    className: "b b-muted",
+    style: {
+      whiteSpace: "normal",
+      overflowWrap: "anywhere",
+      maxWidth: "100%",
+      textAlign: "left"
+    }
   }, a.kind) : null, /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
   }, a.status), a.effect_token ? /*#__PURE__*/React.createElement("span", {
