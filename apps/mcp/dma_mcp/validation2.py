@@ -374,6 +374,106 @@ def _check_peer_research(page: str, payload: dict) -> list:
 EXCERPT_MIN, EXCERPT_MAX = 50, 500
 
 
+#: Sections whose numbers are FINANCIAL DISCLOSURES rather than assessment
+#: outputs. A maturity score is produced by the assessment and belongs to us;
+#: an assets-under-management figure belongs to the filer, and the only
+#: honest way to carry it is to quote the sentence that states it.
+_QUOTED_FIGURE_PATHS = {
+    "financial_series": ("series", "value"),
+}
+
+_DIGITS = re.compile(r"\d")
+
+
+def _mantissa(x) -> str:
+    """The significant digits of a number, scale and separators removed.
+
+    1687.8 · "1,687.8" · "$1,687.8 billion"  ->  "16878"
+    1890   · "1.89 trillion"                 ->  "189"
+
+    WHY SCALE IS ALLOWED AND ARITHMETIC IS NOT. Writing a stated $1.89
+    trillion as 1890 USD billions changes the representation of a number the
+    source states; the digits are the filer's. Computing $1,444.5 billion by
+    subtracting $162.1 billion from $1,606.6 billion produces a number that
+    appears in no sentence anywhere, and its digits are ours. This function
+    is what separates the two, and it is why the gate compares mantissas
+    rather than strings or floats.
+    """
+    s = str(x if x is not None else "")
+    digits = "".join(_DIGITS.findall(s))
+    return digits.strip("0") or ("0" if digits else "")
+
+
+def _check_financial_figures_are_quoted(found, cited_by, payload) -> list:
+    """CG-38 — a financial figure is quoted from a filing, never computed.
+
+    Owner, 2026-08-22: "Have a clear prohibition against derived figures,
+    figures should verbatim come from 10-K filings or company financials."
+
+    The rule this makes enforceable had, until now, only ever been a habit.
+    Building the T. Rowe Price five-year trajectory, the FY2023 figure was
+    available two ways: the FY2023 Form 10-K states "$1,444.5 billion", and
+    the FY2024 filing states "$1,606.6 billion, an increase of $162.1 billion
+    from the end of 2023", from which the same number falls out by
+    subtraction. Both routes give 1444.5. Only one of them is a disclosure.
+
+    A derived figure is undetectable downstream: it is the right number, it
+    carries a real evidence id, the id resolves, belongs to the entity, and
+    its excerpt is a genuine verbatim span from a genuine filing. Every
+    existing check passes. What is false is only the relationship between the
+    number and the sentence — and nothing looked at that.
+
+    So this looks at exactly that: the figure's significant digits must occur
+    in the excerpt of the row it cites. Scale is not the test (see
+    `_mantissa`); arithmetic is.
+    """
+    if not isinstance(payload, dict):
+        return []
+    by_id = {}
+    for row in found:
+        for key in ("e_id", "stored_id"):
+            if row.get(key):
+                by_id[row[key]] = row
+    out = []
+    for section, (list_key, value_key) in _QUOTED_FIGURE_PATHS.items():
+        body = payload.get(section)
+        if not isinstance(body, dict):
+            continue
+        for i, item in enumerate(body.get(list_key) or []):
+            if not isinstance(item, dict):
+                continue
+            value = item.get(value_key)
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                continue
+            e_id = item.get("source_e_id")
+            row = by_id.get(e_id)
+            if row is None:
+                continue          # ET-01/ET-02 own an unresolvable id
+            want = _mantissa(value)
+            excerpt = row.get("excerpt") or ""
+            if not want or want in _mantissa(excerpt):
+                continue
+            # A cheaper, more forgiving second look: the digits may be split
+            # across the excerpt by separators the mantissa of the WHOLE
+            # excerpt already removes, so also try each number in it alone.
+            if any(want == _mantissa(tok)
+                   for tok in re.findall(r"[\d][\d,.]*", excerpt)):
+                continue
+            out.append(_reason(
+                "CG-38", section, f"{section}.{list_key}[{i}].{value_key}",
+                f"{value} does not appear in the span this point cites "
+                f"({e_id}). A financial figure is a DISCLOSURE: it is carried "
+                f"by quoting the sentence that states it, never by computing "
+                f"it from one that states something else. The commonest route "
+                f"in is a neighbouring year's comparative — a filing saying "
+                f"'X, an increase of Y from last year' gives last year by "
+                f"subtraction, and the result appears in no sentence anywhere. "
+                f"Cite the filing that states {value} itself. Rescaling a "
+                f"stated figure between units is fine and passes this check; "
+                f"arithmetic on two figures is not."))
+    return out
+
+
 def _check_excerpt_completeness(found, cited_by) -> list:
     out = []
     for row in found:
@@ -1586,6 +1686,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
         split = get_evidence(conn, run_id, sorted(cited))
         reasons.extend(_check_excerpt_completeness(split.get("found", []), cited))
         reasons.extend(_check_evidence_dating(split.get("found", []), cited))
+        reasons.extend(_check_financial_figures_are_quoted(
+            split.get("found", []), cited, payload))
         reasons.extend(_check_cited_linkage(page, payload,
                                             split.get("found", []), cited,
                                             conn))

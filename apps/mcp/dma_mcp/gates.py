@@ -311,6 +311,26 @@ GATES = {
               "fifteen fields to check by hand, which is how a marking gets "
               "missed to begin with.",
               "block"),
+
+    "CG-38": ("A financial figure is quoted from a filing, never computed", None,
+              "Every value in a financial series carries significant digits "
+              "that occur in the excerpt of the evidence row it cites. "
+              "Rescaling a stated figure between units passes; arithmetic on "
+              "two stated figures does not.",
+              "Owner, 2026-08-22: a clear prohibition against derived "
+              "figures — figures come verbatim from 10-K filings or company "
+              "financials. Building the T. Rowe Price five-year trajectory, "
+              "FY2023 was available two ways: the FY2023 Form 10-K states "
+              "$1,444.5 billion, and the FY2024 filing states $1,606.6 "
+              "billion 'an increase of $162.1 billion from the end of 2023', "
+              "from which the same number falls out by subtraction. Both give "
+              "1444.5; only one is a disclosure. A derived figure is "
+              "undetectable downstream — right number, real evidence id, id "
+              "resolves, belongs to the entity, excerpt a genuine verbatim "
+              "span from a genuine filing. Every existing check passes. What "
+              "is false is only the relationship between the number and the "
+              "sentence, and nothing looked at that.",
+              "block"),
     "CG-29": ("A narrative thread says what THIS section adds", None,
               "No two sections on a page carry the same narrative_thread, "
               "word for word.",

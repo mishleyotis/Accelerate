@@ -206,6 +206,29 @@ PROSE_KEY_HINTS = ("body", "rationale", "story", "text", "framing",
 # gates accept.
 ID_BEARING_KEYS = {"subcap_id", "catalogue_path", "cell", "cell_id", "anchor"}
 
+# Containers whose whole PURPOSE is to hold what was refused publication. A
+# threshold rule asks "may this be published?" — inside one of these lists the
+# answer is already no, recorded on purpose, so asking again refuses the
+# disclosure instead of the defect.
+#
+# Measured 2026-08-22 on the promoted T. Rowe Price heatmap: one BLOCK,
+# `cohort_patterns.insufficient_cohorts[0].cohort_size` — "cohort of 4, below
+# five it is not published" — against a payload where `patterns` is EMPTY and
+# the withholding is disclosed with its arithmetic. The producer did exactly
+# the right thing and the tool would have sent it back to repair it.
+WITHHELD_CONTAINERS = ("insufficient_cohorts", "discarded", "not_run",
+                       "withheld", "excluded", "considered_and_set_aside")
+
+
+def in_withheld_container(path: str) -> bool:
+    """Is this path inside a list of things deliberately NOT published?
+
+    Segment-wise, not substring: `patterns` must never match because some
+    other key happens to contain it.
+    """
+    return any(seg.split("[", 1)[0] in WITHHELD_CONTAINERS
+               for seg in str(path or "").split("."))
+
 
 def is_prose_key(key: str) -> bool:
     """Does this key hold prose a client reads?
@@ -633,7 +656,12 @@ def check_numbers(page, payload):
                 bad("BLOCK", path, f"{val} outside the 1–5 maturity scale")
             if low.endswith("_pct") and not (0 <= val <= 100):
                 bad("BLOCK", path, f"{val} is not a percentage")
-            if low.endswith("cohort_size") and val < 5:
+            # The floor governs PUBLICATION, so it is asked only where
+            # publication is claimed. `insufficient_cohorts` is the record of
+            # cohorts refused for this very reason; blocking there refuses the
+            # disclosure rather than the defect.
+            if (low.endswith("cohort_size") and val < 5
+                    and not in_withheld_container(path)):
                 bad("BLOCK", path, f"cohort of {val} — below five it is not published")
         if val is None and low.endswith(("status", "severity")):
             bad("BLOCK", path, "status and severity are always populated")

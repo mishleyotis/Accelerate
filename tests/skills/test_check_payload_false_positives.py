@@ -441,3 +441,77 @@ def test_the_passing_run_raises_none_of_the_four_repaired_classes(page):
     for needle in REPAIRED:
         assert matching(blocks(found), needle) == [], needle
         assert matching(warns(found), needle) == [], needle
+
+
+# ─────────────────────────────────────────────────────────────────────
+# E · a publication floor asked inside the record of what was NOT published
+#
+# Measured 2026-08-22 on the promoted T. Rowe Price heatmap. One BLOCK on a
+# page the connector had already accepted:
+#
+#     [BLOCK] heatmap.cohort_patterns.insufficient_cohorts[0].cohort_size
+#             cohort of 4 — below five it is not published
+#
+# `patterns` was EMPTY. Nothing was published. `insufficient_cohorts` is the
+# record of cohorts refused publication, carrying the arithmetic for the
+# refusal — the producer had done exactly the right thing, and the tool would
+# have sent it back to repair correct content.
+#
+# The rule and its threshold are both right. What was wrong is that it keyed
+# off a field-name suffix and so could not see which list it was standing in.
+# ─────────────────────────────────────────────────────────────────────
+
+WITHHELD = {"cohort_patterns": {
+    "patterns": [],
+    "insufficient_cohorts": [{"cohort_size": 4, "cohort": "Asset management",
+                              "insufficient_cohort": True}]}}
+
+
+def test_a_small_cohort_recorded_as_withheld_does_not_block():
+    found = blocks(run(cp.check_numbers, "heatmap", WITHHELD))
+    assert matching(found, "below five") == []
+
+
+def test_a_small_cohort_claimed_as_PUBLISHED_still_blocks():
+    """The pair. A rule that stopped costing repair cycles by having stopped
+    working is not a fix — the defect it exists for is a cohort of four served
+    as a pattern."""
+    payload = {"cohort_patterns": {"patterns": [
+        {"cohort_size": 4, "pattern": "Four of four run a legacy core"}]}}
+    found = blocks(run(cp.check_numbers, "heatmap", payload))
+    assert len(matching(found, "below five")) == 1
+    assert "patterns[0].cohort_size" in matching(found, "below five")[0][0]
+
+
+def test_a_published_cohort_at_the_floor_passes():
+    payload = {"cohort_patterns": {"patterns": [{"cohort_size": 5}]}}
+    assert matching(blocks(run(cp.check_numbers, "heatmap", payload)),
+                    "below five") == []
+
+
+@pytest.mark.parametrize("container", sorted(cp.WITHHELD_CONTAINERS))
+def test_every_withheld_container_is_exempt(container):
+    """The other lists share the defect exactly: `discarded` opportunity
+    tiles, `not_run` gates, `considered_and_set_aside` platforms. Each holds
+    what a rule already decided against."""
+    payload = {"s": {container: [{"cohort_size": 1}]}}
+    assert matching(blocks(run(cp.check_numbers, "s", payload)),
+                    "below five") == []
+
+
+def test_the_container_match_is_by_segment_not_substring():
+    """A substring test would exempt any key CONTAINING a withheld name —
+    `insufficient_cohorts_reviewed`, say — and quietly widen the hole."""
+    assert cp.in_withheld_container("x.insufficient_cohorts[0].cohort_size")
+    assert cp.in_withheld_container("discarded[2].cohort_size")
+    assert not cp.in_withheld_container("patterns[0].cohort_size")
+    assert not cp.in_withheld_container("s.insufficient_cohorts_reviewed[0].n")
+
+
+def test_the_other_numeric_rules_are_untouched_inside_a_withheld_list():
+    """Scoped to the publication floor. A score outside the maturity scale is
+    wrong wherever it sits — being unpublished does not make 9.0 a score."""
+    payload = {"s": {"discarded": [{"score": 9.0, "cohort_size": 1}]}}
+    found = blocks(run(cp.check_numbers, "s", payload))
+    assert matching(found, "outside the 1–5 maturity scale")
+    assert matching(found, "below five") == []
