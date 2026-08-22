@@ -196,6 +196,28 @@ GATES = {
               "discussed. The absence belongs on the contact field, not on "
               "the person.",
               "block"),
+    "CG-32": ("An enrichment that resolved is an enrichment that serves", None,
+              "A section whose own disclosure states that an enrichment task "
+              "completed and RESOLVED a positive count of values must serve at "
+              "least one of them. Resolved-but-not-served is a dropped result, "
+              "not an absence.",
+              "Measured on the promoted T. Rowe Price run: the leadership "
+              "section served six seats with every contact route null, and its "
+              "own sources_searched said why — 'Clay contact enrichment task "
+              "mcp-task_0tk3p6ia8ykw5sfVpVR RAN and COMPLETED this session, 20 "
+              "C-suite contacts resolved; per-contact output not delivered to "
+              "this producer invocation, so 0 of 6'. Twenty contacts were "
+              "fetched, paid for, and lost between the tool and the producer. "
+              "Every gate passed, because each half is individually legal: a "
+              "null contact route is a permitted absence, and a disclosure "
+              "naming what was searched is exactly what the contract asks for. "
+              "It is the COMBINATION that is a defect, and nothing was reading "
+              "both halves of the sentence. CG-28 cannot see it either — it "
+              "guards against a person being DROPPED for want of a route, and "
+              "here nobody was dropped. The enrichment ledger was blind too: "
+              "list_enrichment_gaps reported attempted_by_routine 0 for the "
+              "run, so the attempt left no trace anywhere else.",
+              "block"),
     "CG-29": ("A narrative thread says what THIS section adds", None,
               "No two sections on a page carry the same narrative_thread, "
               "word for word.",

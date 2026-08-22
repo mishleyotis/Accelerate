@@ -547,6 +547,81 @@ def _check_roster_keeps_uncontactable(section, body) -> list:
     return out
 
 
+#: "20 C-suite contacts resolved", "resolved 20 contacts", "returned 14
+#: contact records". A COUNT next to a resolution verb, in the section's own
+#: account of what it searched. Zero is matched too and is harmless: the gate
+#: only fires on a positive count.
+_RESOLVED_CONTACTS = re.compile(
+    r"(?:(\d+)\s+(?:[\w-]+\s+){0,3}contacts?\s+(?:were\s+)?(?:resolved|returned|found)"
+    r"|(?:resolved|returned)\s+(\d+)\s+(?:[\w-]+\s+){0,3}contacts?)", re.I)
+
+#: The fields migration 0018 binds 1:1 per person. Any one of them present is
+#: a route the reader can act on.
+_CONTACT_ROUTE_FIELDS = ("email", "linkedin_url", "phone")
+
+
+def _check_resolved_contacts_are_served(section, body) -> list:
+    """CG-32 — an enrichment that resolved is an enrichment that serves.
+
+    On the promoted T. Rowe Price run the leadership section served six seats
+    with every contact route null, and said why in its own `sources_searched`:
+
+        "Clay contact enrichment task mcp-task_0tk3p6ia8ykw5sfVpVR — RAN and
+         COMPLETED this session, 20 C-suite contacts resolved; per-contact
+         output not delivered to this producer invocation, so 0 of 6"
+
+    Twenty contacts were fetched and lost between the tool and the producer.
+    Every gate passed, because each half is individually legal: a null contact
+    route is a permitted absence (CG-28 exists precisely to keep the person on
+    the page when the route does not come back), and naming what was searched
+    is what the contract asks for. Only the COMBINATION is a defect, and
+    nothing read both halves of the sentence.
+
+    So this gate reads both. It fires ONLY on the contradiction — a positive
+    resolved count beside zero served routes. A section that says the tool was
+    not attached, or ran and resolved nothing, is honestly thin and passes:
+    thin content is an assessment result, and a gate that refused it would
+    push producers toward inventing contact details.
+    """
+    if section != "leadership" or not isinstance(body, dict):
+        return []
+    roster = body.get("roster")
+    if not isinstance(roster, list) or not roster:
+        return []
+
+    served = sum(1 for r in roster if isinstance(r, dict)
+                 and any(str(r.get(f) or "").strip() for f in _CONTACT_ROUTE_FIELDS))
+    if served:
+        return []
+
+    es = body.get("empty_state")
+    texts = []
+    if isinstance(es, dict):
+        for v in es.values():
+            if isinstance(v, str):
+                texts.append(v)
+            elif isinstance(v, list):
+                texts.extend(x for x in v if isinstance(x, str))
+    for text in texts:
+        m = _RESOLVED_CONTACTS.search(text)
+        if not m:
+            continue
+        count = int(m.group(1) or m.group(2) or 0)
+        if count <= 0:
+            continue
+        return [_reason(
+            "CG-32", "leadership", "leadership.roster",
+            f"this section's own disclosure says {count} contacts were "
+            f"resolved, and it serves a contact route on none of its "
+            f"{len(roster)} seats. That is a dropped result, not an absence: "
+            f"the enrichment ran, the values exist, and they did not reach "
+            f"the payload. Hand the per-contact output to the producer and "
+            f"re-emit, or — if the values genuinely cannot be recovered — say "
+            f"that the delivery failed rather than reporting a count that "
+            f"never reached a reader.")]
+    return []
+
+
 def _check_page_thread(page, section, fields, body) -> list:
     """CG-23 — a section whose writer stores a thread carries one.
 
@@ -909,6 +984,7 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_no_bare_abbreviations(page, name, body))
         reasons.extend(_check_starter_tone(name, body))
         reasons.extend(_check_roster_keeps_uncontactable(name, body))
+        reasons.extend(_check_resolved_contacts_are_served(name, body))
 
         # id-pattern discipline
         for i, e in enumerate(body.get("e_ids") or []):
