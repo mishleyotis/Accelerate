@@ -173,3 +173,94 @@ def test_the_browser_agent_is_still_what_edgar_refuses():
     with pytest.raises(urllib.error.HTTPError) as e:
         urllib.request.urlopen(req, timeout=30)
     assert e.value.code == 403
+
+
+# ── the cache: successes only ──
+#
+# Measured on the T. Rowe Price evidence store: 120 rows carry a url, 109 are
+# distinct. The 9% hit rate understates the saving badly — the repeats are
+# the heaviest documents, a DEF 14A four times and two multi-MB PDFs three
+# times each, every one re-extracted.
+
+
+import time                                                     # noqa: E402
+
+from dma_mcp import fetching                                    # noqa: E402
+
+
+def _clear():
+    fetching._cache.clear()
+
+
+def test_a_second_read_of_one_document_does_not_refetch(monkeypatch):
+    _clear()
+    calls = []
+
+    def fake_open(req, timeout=None):
+        calls.append(req.full_url)
+        class R:
+            headers = {"Content-Type": "text/html"}
+            status = 200
+            def read(self, n=None): return b"<p>At December 31, 2025.</p>"
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+        return R()
+
+    import urllib.request
+    monkeypatch.setattr(urllib.request, "urlopen", fake_open)
+    a = fetching._fetch("https://example.test/10k")
+    b = fetching._fetch("https://example.test/10k")
+    assert a == b and "At December 31, 2025." in a
+    assert len(calls) == 1, "the second read must come from the cache"
+
+
+def test_a_failure_is_never_cached(monkeypatch):
+    """MEM-0072 was a 403 from an entity's own domain — transient and
+    WAF-shaped, and the correct response is to try again. Caching it would
+    freeze a momentary block into a permanent one and make the entity look
+    like it has no website."""
+    _clear()
+    calls = []
+
+    def fake_open(req, timeout=None):
+        calls.append(req.full_url)
+        raise OSError("403 from a bot filter")
+
+    import urllib.request
+    monkeypatch.setattr(urllib.request, "urlopen", fake_open)
+    assert fetching._fetch("https://blocked.test/x") is None
+    assert fetching._fetch("https://blocked.test/x") is None
+    assert len(calls) == 2, "a refused fetch must be retried, never cached"
+
+
+def test_an_entry_expires(monkeypatch):
+    _clear()
+    fetching._cache["u"] = (time.monotonic() - fetching.CACHE_TTL_SECONDS - 1, "old")
+    assert fetching._cache_get("u", time.monotonic()) is None
+    assert "u" not in fetching._cache, "an expired entry is dropped, not kept"
+
+
+def test_a_fresh_entry_is_returned():
+    _clear()
+    now = time.monotonic()
+    fetching._cache_put("u", "text", now)
+    assert fetching._cache_get("u", now + 1) == "text"
+
+
+def test_the_cache_is_bounded_and_evicts_oldest_first(monkeypatch):
+    _clear()
+    monkeypatch.setattr(fetching, "CACHE_MAX_CHARS", 100)
+    now = time.monotonic()
+    fetching._cache_put("old", "x" * 60, now)
+    fetching._cache_put("new", "y" * 60, now + 1)
+    assert "old" not in fetching._cache, "oldest should have been evicted"
+    assert "new" in fetching._cache
+
+
+def test_a_single_oversized_document_is_still_usable(monkeypatch):
+    """Evicting down to nothing would make one big filing uncacheable AND
+    unreadable-through-the-cache, which is worse than not caching it."""
+    _clear()
+    monkeypatch.setattr(fetching, "CACHE_MAX_CHARS", 100)
+    fetching._cache_put("huge", "z" * 500, time.monotonic())
+    assert fetching._cache_get("huge", time.monotonic()) == "z" * 500

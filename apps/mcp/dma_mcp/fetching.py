@@ -177,14 +177,66 @@ def _html_text(markup: str) -> str:
     return _html.unescape(s)
 
 
+#: How long an extracted document stays usable. A page's worth of
+#: registrations happens in minutes; beyond that the document should be read
+#: again, because "is this span in the current document" is the question.
+CACHE_TTL_SECONDS = 900
+#: Total characters held. Roughly 40MB of text — a handful of filings — on a
+#: 2Gi container. Oldest out first.
+CACHE_MAX_CHARS = 40_000_000
+
+_cache: dict = {}          # url -> (stored_at_monotonic, text)
+
+
+def _cache_get(url: str, now: float):
+    hit = _cache.get(url)
+    if hit is None:
+        return None
+    stored_at, text = hit
+    if now - stored_at > CACHE_TTL_SECONDS:
+        _cache.pop(url, None)
+        return None
+    return text
+
+
+def _cache_put(url: str, text: str, now: float) -> None:
+    _cache[url] = (now, text)
+    total = sum(len(t) for _, t in _cache.values())
+    while total > CACHE_MAX_CHARS and len(_cache) > 1:
+        oldest = min(_cache, key=lambda k: _cache[k][0])
+        total -= len(_cache.pop(oldest)[1])
+
+
 def _fetch(url: str):
     """Excerpt-verification fetcher: GET with the User-Agent this host wants,
     TEXT out, None on failure.
 
     Neither PDFs nor HTML are handed back as their container: `_pdf_text`
     extracts the one, `_html_text` the other, so what the caller compares an
-    excerpt against is always prose."""
+    excerpt against is always prose.
+
+    SUCCESSES ARE CACHED, FAILURES ARE NOT, and the asymmetry is the whole
+    design. Measured on the T. Rowe Price evidence store: 120 rows carry a
+    url and 109 are distinct, so 11 fetches repeat — a 9% hit rate that
+    understates the saving badly, because the repeats are the HEAVIEST
+    documents. A DEF 14A proxy statement is fetched four times and a Form ADV
+    and a BrokerCheck PDF three times each, and every PDF is run through
+    `pypdf` extraction again on each one.
+
+    A FAILURE MUST NEVER BE CACHED. MEM-0072 was a 403 from an entity's own
+    domain — transient, WAF-shaped, and the producer's correct response is to
+    try again or find another source. Freezing that into a cache would turn a
+    momentary block into a permanent one for the rest of the process's life,
+    and the entity would look like it has no website. `None` goes back
+    uncached every time.
+    """
+    import time
     import urllib.request
+
+    now = time.monotonic()
+    cached = _cache_get(url, now)
+    if cached is not None:
+        return cached
     try:
         req = urllib.request.Request(url, headers={
             "User-Agent": _ua_for(url),
@@ -222,8 +274,14 @@ def _fetch(url: str):
     # that 200s with an HTML error page is still HTML — trusting either one
     # alone gets the common cases backwards.
     if raw[:5] == b"%PDF-" or "application/pdf" in ctype:
-        return _pdf_text(raw)
-    return _html_text(raw.decode("utf-8", "replace"))
+        text = _pdf_text(raw)
+    else:
+        text = _html_text(raw.decode("utf-8", "replace"))
+    # A scanned PDF extracts to None — an unreachable document, not an empty
+    # one — and takes the same uncached path as any other failure.
+    if text is not None:
+        _cache_put(url, text, now)
+    return text
 
 
 #: Last failure reason, set by `_fetch` and read by callers that report it.
