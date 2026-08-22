@@ -168,3 +168,52 @@ def test_both_checks_are_wired_into_the_dispatch():
               if isinstance(n, ast.Call)}
     for fn in ("_check_thought_leadership_depth", "_check_financial_series_reach"):
         assert fn in called, f"{fn} is defined but never called by validate()"
+
+
+# ── the refusal has to escalate, not just refuse ──
+#
+# Owner, 2026-08-22: "The search depth where information lacks should be
+# incremental." A depth gate that only reports a shortfall sends a producer
+# back to do the same search again — which is precisely what happened on
+# T. Rowe Price. That section had climbed a real ladder (per-executive
+# searches across transcripts, PR Newswire, DEF 14A and investor relations)
+# and its disclosure said so; the shortfall was that registration captured
+# paraphrases rather than quotable spans. Told only "one entry, three
+# required", the next producer looks for a sixth publication. Told where the
+# next rung IS, it re-registers the five sources it already holds.
+#
+# So the property held here is not "did it search" — the contract already
+# requires sources_searched — but "does the refusal name a DIFFERENT action
+# from the one already taken".
+
+
+def test_the_thought_leadership_refusal_names_the_registration_rung():
+    body = {"entries": [{"quote": "x"}]}
+    msg = depth("thought_leadership", body)[0]["message"]
+    assert "already registered" in msg, "it must point at what is in hand"
+    assert "re-register" in msg.lower()
+    assert "80-260" in msg, "the admissibility bar is the actionable detail"
+    assert "does not excuse it" in msg, (
+        "thin=true is a disclosure, not a discharge — say so or the next "
+        "producer sets the flag and stops")
+
+
+def test_the_financial_refusal_names_the_year_to_walk_back_to():
+    body = {"series": [{"as_of": "2026-06-30"}, {"as_of": "2025-12-31"}]}
+    msg = reach("financial_series", body)[0]["message"]
+    assert "2022" in msg, "name the year, not just the count"
+    assert "OWN filings" in msg
+    assert "investor-relations" in msg or "annual report" in msg, (
+        "name WHERE the earlier figures are, since that is the rung")
+
+
+def test_both_refusals_say_what_to_do_not_only_what_is_wrong():
+    """The shared property. A message that stops at the measurement is a
+    measurement, not a gate."""
+    msgs = [depth("thought_leadership", {"entries": []})[0]["message"],
+            reach("financial_series", {"series": [{"as_of": "2026-06-30"}]})[0]["message"]]
+    for m in msgs:
+        assert len(m) > 200, "an actionable refusal is not one sentence"
+        # An imperative naming the next move.
+        assert any(v in m.lower() for v in
+                   ("re-register", "walk back", "cite", "check")), m[:120]
