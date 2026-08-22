@@ -270,6 +270,27 @@ GATES = {
               "a replacement character means a decode already failed upstream "
               "and the run is serving the damage.",
               "block"),
+
+    "CG-36": ("A source label names a document, it does not locate a quote", None,
+              "Every source_document is a citation LABEL — publisher, subject "
+              "and period — under 120 characters, with no parenthetical saying "
+              "where inside the document the quote sits. verbatim_quote "
+              "already carries the span that was used.",
+              "Reported as 'the focus area heatmap drilldown has very "
+              "different shapes as required by the golden standards'. "
+              "Measured across the two promoted clients: Baxter's four focus "
+              "areas cite in 37-52 characters ('PYMNTS — BCU Data Culture & AI "
+              "panel (2025-08)'); T. Rowe Price's ran 178-266, each a title "
+              "with a locator note welded on. Same contract, same field set, "
+              "every gate green — what differed was the shape, and a "
+              "paragraph in a one-line SOURCE row wraps over its neighbour "
+              "instead of naming the source. It arrived by repair: the "
+              "locator was first written into source_page, an INTEGER column, "
+              "where it broke promotion outright, and moving it to the "
+              "nearest string field produced three defects from one cause — "
+              "this one, the pilcrows CG-35 now refuses, and a chip that "
+              "overflowed its own box on the rendered page.",
+              "block"),
     "CG-29": ("A narrative thread says what THIS section adds", None,
               "No two sections on a page carry the same narrative_thread, "
               "word for word.",

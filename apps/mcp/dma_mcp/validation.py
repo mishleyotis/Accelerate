@@ -824,6 +824,90 @@ def _check_no_typesetting_marks(section, body) -> list:
     return out
 
 
+#: How long a citation LABEL runs. Measured 2026-08-22 across the two
+#: promoted clients: Baxter's four focus areas cite in 37, 46, 47 and 52
+#: characters — `Publisher — subject (YYYY-MM)`. T. Rowe Price's four ran
+#: 178, 211, 236 and 266. The ceiling sits at more than twice Baxter's
+#: longest, so a genuinely long publication title passes and a paragraph
+#: does not.
+SOURCE_LABEL_MAX = 120
+
+#: The words a locator note uses. Present INSIDE a parenthetical, they are
+#: what separates "where in the document" from a subtitle that is part of the
+#: document's actual name.
+_LOCATOR_WORDS = re.compile(
+    r"(?i)\b(?:paragraph|para\.?|immediately\s+(?:after|before|above|below)|"
+    r"directly\s+(?:above|below|after|before)|"
+    r"(?:sub)?heading\s+(?:beneath|above|below)|"
+    r"opening\s+statement|prepared\s+remarks|"
+    r"(?:after|before)\s+the\s+\w+[\w /-]*\s+(?:discussion|section|block))\b")
+
+_PARENTHETICAL = re.compile(r"\(([^()]*(?:\([^()]*\)[^()]*)*)\)")
+
+
+def _check_source_label_is_a_citation(section, body) -> list:
+    """CG-36 — `source_document` names a document; it does not locate a quote.
+
+    Reported 2026-08-22 as "the focus area heatmap drilldown has very
+    different shapes as required by the golden standards", with a screenshot
+    of a SOURCE line running three wrapped lines under a clipped title.
+
+    The shapes, measured rather than eyeballed:
+
+        Baxter          37  46  47  52   'PYMNTS — BCU Data Culture & AI panel (2025-08)'
+        T. Rowe Price  178 211 236 266   '... Global Strategy Function (¶4 of the
+                                          release (Sharps quote), immediately
+                                          after ¶3's introduction of Andrew Reich)'
+
+    Same contract, same field set, same section keys — every gate passed. What
+    differs is that one is a citation and the other is a citation with a
+    locator note welded onto it.
+
+    IT GOT THERE BY A REPAIR. The locator was first written into `source_page`,
+    an INTEGER column, where it broke promotion with a Postgres type error.
+    Moving it to the nearest string field made the promote succeed, put a
+    pilcrow on a client's page (CG-35), and made the chip overflow its own box
+    (the SOURCE row fix in `pages-d3-heatmap.jsx`). Three defects, one cause,
+    and the field has no home for that note because a document's name is not
+    where a quote sits inside it. `verbatim_quote` already says which span was
+    used; that IS the locator.
+
+    Length alone would be a blunt rule, so the refusal names whichever of the
+    two it found — a locator parenthetical, or a label past the ceiling — and
+    a long title with no locator note is refused on length only, which is the
+    honest reason.
+    """
+    if not isinstance(body, dict):
+        return []
+    out = []
+    for path, text in _walk_strings(body):
+        if not path.endswith("source_document"):
+            continue
+        label = text.strip()
+        locators = [p for p in _PARENTHETICAL.findall(label)
+                    if _LOCATOR_WORDS.search(p) or "¶" in p]
+        if not locators and len(label) <= SOURCE_LABEL_MAX:
+            continue
+        if locators:
+            why = (f"it carries a locator note — \"({locators[0][:90]}…)\" — "
+                   f"which says where in the document the quote sits, not what "
+                   f"the document is called")
+        else:
+            why = (f"it runs {len(label)} characters against a "
+                   f"{SOURCE_LABEL_MAX}-character ceiling for a citation label")
+        out.append(_reason(
+            "CG-36", section, f"{section}.{path}" if path else section,
+            f"this source label is not a citation: {why}. A reader sees this "
+            f"string in a one-line SOURCE row beside the document link, so a "
+            f"paragraph here wraps over its neighbour instead of naming the "
+            f"source. Cite it the way the rest of the corpus does — publisher, "
+            f"subject, and the period in brackets, e.g. "
+            f"\"PR Newswire — Global Strategy function (2025-11)\" — and let "
+            f"`verbatim_quote` carry which span was used, which is what a "
+            f"locator note was standing in for."))
+    return out
+
+
 def _check_page_thread(page, section, fields, body) -> list:
     """CG-23 — a section whose writer stores a thread carries one.
 
@@ -1190,6 +1274,7 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_thought_leadership_depth(name, body))
         reasons.extend(_check_financial_series_reach(name, body))
         reasons.extend(_check_no_typesetting_marks(name, body))
+        reasons.extend(_check_source_label_is_a_citation(name, body))
 
         # id-pattern discipline
         for i, e in enumerate(body.get("e_ids") or []):

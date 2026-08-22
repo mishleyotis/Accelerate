@@ -107,17 +107,87 @@ def _describe(exc: BaseException, url: str) -> str:
     return f"{type(exc).__name__} fetching {host}: {str(exc)[:120]}"
 
 
-def _fetch(url: str):
-    """Excerpt-verification fetcher: GET with a browser-shaped UA (bare
-    python-urllib is WAF-blocked by most entity sites — bcu.org rejected
-    the first prod registration), text out, None on failure.
+#: The browser-shaped default. Bare python-urllib is WAF-blocked by most
+#: entity sites — bcu.org rejected the first prod registration.
+_BROWSER_UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+               "(KHTML, like Gecko) Chrome/126.0 Safari/537.36")
 
-    PDFs are extracted rather than decoded; see `_pdf_text`."""
+#: What we send to hosts that ASK to be told who is calling. SEC EDGAR's
+#: access policy requires an automated client to identify itself and answers
+#: 403 to browser-spoofed traffic — so the header that gets us past every
+#: entity WAF is precisely the one EDGAR refuses.
+#:
+#: It names the tool and a public contact URL. No personal address is sent:
+#: EDGAR's policy asks for a way to be contacted, and a published company URL
+#: is one, so there is no reason to put a person's mailbox in a header.
+_DECLARED_UA = "Zennify DMA-Insights/1.0 (+https://www.zennify.com)"
+
+#: Suffix-matched, so `data.sec.gov` and `efts.sec.gov` are covered without
+#: enumerating subdomains, and a lookalike like `notsec.gov` is not.
+_DECLARE_HOSTS = ("sec.gov",)
+
+
+def _ua_for(url: str) -> str:
+    """Which User-Agent this host wants.
+
+    Measured 2026-08-22 against every T. Rowe Price 10-K: 403 with the
+    browser UA, 200 with the declared one. This is not a bot-filter
+    workaround — it is the opposite. EDGAR asks automated clients to say what
+    they are, and until this existed the connector could not cite a single US
+    public filer's own annual report, which is the primary source for the
+    financial trajectory on every public-company assessment we produce.
+    """
+    m = re.match(r"^[a-z]+://([^/:?#]+)", url or "", flags=re.I)
+    host = (m.group(1) if m else "").lower().rstrip(".")
+    for suffix in _DECLARE_HOSTS:
+        if host == suffix or host.endswith("." + suffix):
+            return _DECLARED_UA
+    return _BROWSER_UA
+
+
+def _html_text(markup: str) -> str:
+    """The prose of an HTML document, so an excerpt is compared against prose.
+
+    The same defect `_pdf_text` fixed, one container along. A modern filing is
+    inline-XBRL: every tagged figure is wrapped, so
+
+        At December 31, 2025, we had <ix:nonFraction ...>$1,775.6</ix:nonFraction> billion
+
+    contains the sentence a reader sees and does NOT contain it as a
+    substring. Measured 2026-08-22: 0 of 5 T. Rowe Price 10-K excerpts matched
+    the raw bytes; 5 of 5 match the extracted text. `register_evidence`
+    answered `excerpt_not_verbatim` — a refusal indistinguishable from the
+    producer having invented the citation, whose only remaining moves are to
+    drop a true finding or to fabricate one it can pass.
+
+    INLINE TAGS CLOSE UP, BLOCK TAGS BECOME A SPACE. `<b>Fin</b>ancial` is one
+    word and must not become two; `<td>a</td><td>b</td>` is two and must not
+    become one. Getting that backwards silently corrupts every comparison.
+
+    Extraction only — no fuzzy matching, no repair. The verbatim comparison
+    downstream still normalises nothing but whitespace and case.
+    """
+    import html as _html
+    s = re.sub(r"(?is)<(script|style|head)\b.*?</\1>", " ", markup)
+    s = re.sub(r"(?is)<!--.*?-->", " ", s)
+    s = re.sub(r"(?i)</?(p|div|br|hr|tr|td|th|li|ul|ol|dl|dd|dt|h[1-6]|table|"
+               r"thead|tbody|tfoot|section|article|header|footer|nav|aside|"
+               r"blockquote|pre|figure|figcaption|option)\b[^>]*>", " ", s)
+    s = re.sub(r"<[^>]+>", "", s)
+    return _html.unescape(s)
+
+
+def _fetch(url: str):
+    """Excerpt-verification fetcher: GET with the User-Agent this host wants,
+    TEXT out, None on failure.
+
+    Neither PDFs nor HTML are handed back as their container: `_pdf_text`
+    extracts the one, `_html_text` the other, so what the caller compares an
+    excerpt against is always prose."""
     import urllib.request
     try:
         req = urllib.request.Request(url, headers={
-            "User-Agent": ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                           "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"),
+            "User-Agent": _ua_for(url),
             # `*/*` last, but application/pdf named explicitly: a server that
             # content-negotiates will not offer a PDF to a client whose Accept
             # header only ever asked for HTML.
@@ -153,7 +223,7 @@ def _fetch(url: str):
     # alone gets the common cases backwards.
     if raw[:5] == b"%PDF-" or "application/pdf" in ctype:
         return _pdf_text(raw)
-    return raw.decode("utf-8", "replace")
+    return _html_text(raw.decode("utf-8", "replace"))
 
 
 #: Last failure reason, set by `_fetch` and read by callers that report it.
