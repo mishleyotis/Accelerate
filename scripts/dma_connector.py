@@ -235,6 +235,68 @@ def _cli_args(rest: list) -> dict:
     return json.loads(rest[0])
 
 
+#: Exceptions that mean "the answer did not come back", NOT "it failed".
+#: Deliberately narrow: a RuntimeError raised by `call` is the SERVER
+#: speaking — a verdict, a refusal — and must never be retried as though the
+#: request had been lost.
+TRANSPORT_ERRORS = (ConnectionError, TimeoutError, OSError)
+
+PAGES = ("overview", "insights", "heatmap", "platform", "context", "techstack")
+
+
+def _submission_id(run_id: str, page: str):
+    prog = call("get_run_progress", run_id=run_id)
+    return ((prog.get("pages") or {}).get(page) or {}).get("submission_id")
+
+
+def submit_confirmed(run_id: str, page: str, *, attempts: int = 3, **kwargs):
+    """`submit_page_payload`, with a dropped connection resolved rather than guessed.
+
+    Measured 2026-08-22 submitting the 2.7MB T. Rowe Price heatmap: the 35
+    parts were accepted, the submit call died with
+
+        http.client.RemoteDisconnected: Remote end closed connection
+        without response
+
+    and the submission HAD SUCCEEDED — `get_run_progress` showed heatmap PASS
+    at submission 8203526d, written while the client was reading a socket
+    that was no longer there. The Cloud Run service allows 900s and the
+    client waits 900s, so neither is the ceiling; something in between gave
+    up during a validation pass that runs V4 embeddings over 876 evidence
+    rows and 595 cells.
+
+    The danger is not the drop, it is what a caller does next. A dropped
+    connection is indistinguishable from a failure, and the obvious response
+    — send it again — re-opens an upload, re-sends every part, and re-runs
+    the most expensive validation in the system to produce a second
+    submission of a payload that was already accepted. Worse on a page whose
+    sections APPEND: the same script that duplicated three thought-leadership
+    entries into six did it by being run twice after what looked like a
+    failure.
+
+    So a transport error resolves to a QUESTION — did the submission id
+    change? — and the connector answers it. Only an unchanged id across every
+    attempt is a real failure.
+    """
+    before = _submission_id(run_id, page)
+    last = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return call("submit_page_payload", run_id=run_id, page=page, **kwargs)
+        except TRANSPORT_ERRORS as exc:            # the answer was lost
+            last = exc
+            after = _submission_id(run_id, page)
+            if after and after != before:
+                # It landed. Fetch the verdict the dropped response carried.
+                return call("get_validation_verdict", run_id=run_id, page=page)
+            # It did not land; the payload is still assembled server-side, so
+            # resending is the same upload_id and costs no re-transmission.
+    raise RuntimeError(
+        f"{page} submission did not land after {attempts} attempts and the "
+        f"submission id never moved from {before!r} — this is a real failure, "
+        f"not a dropped response. Last transport error: {last}")
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.exit("usage: dma_connector.py <tool> ['<json-args>' | --file path.json]")
