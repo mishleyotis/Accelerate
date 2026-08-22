@@ -249,6 +249,25 @@ def test_a_scoring_named_workbook_in_the_research_folder_IS_the_research_one(
                for s in m["source_map"]["evidence"])
 
 
+def test_a_research_named_workbook_in_the_scoring_folder_is_still_research(
+        tmp_path):
+    """ProPartners: `04_scoring/DMA_Research_Workbook_ProPartners_….xlsx`.
+
+    The exact inverse of Houlihan Lokey, and the reason the rule is not
+    "the folder wins". A folder-first rule recovered Houlihan Lokey and
+    LOST this one — caught by replaying both rules over 146 surveyed
+    clients before shipping. "Scoring" is the template default stamped on
+    every workbook the generator emits; "research" is only ever written
+    deliberately, so the deliberate word outranks the default one wherever
+    each appears."""
+    _mk(tmp_path, "04_scoring/DMA_Scoring_Workbook_PP.xlsx")
+    _mk(tmp_path, "04_scoring/DMA_Research_Workbook_PP_20260317.xlsx")
+    m = package_map.map_package(tmp_path)
+    assert m["research"]["primary"].endswith(
+        "DMA_Research_Workbook_PP_20260317.xlsx")
+    assert m["scoring"]["primary"].endswith("DMA_Scoring_Workbook_PP.xlsx")
+
+
 def test_one_file_never_serves_both_roles(tmp_path):
     """The mirror risk of folder-first classification: a package with a
     single workbook must not have it stand in for the missing role."""

@@ -96,6 +96,31 @@ def role_signals(path: Path, root: Path) -> tuple:
     return dir_role, _match_role(path.name, NAME_ROLE_RE)
 
 
+def role_of(path: Path, root: Path) -> str | None:
+    """Which role this workbook fills — RESEARCH is the discriminating word.
+
+    Measured across 141 corpus clients, the two signals disagree in both
+    directions and neither one always wins:
+
+      Houlihan Lokey  02_research_workbook/DMA_Scoring_Workbook_HL.xlsx
+      ProPartners     04_scoring/DMA_Research_Workbook_ProPartners_…xlsx
+
+    Both are research workbooks. What separates them is not folder-beats-
+    name — a rule that reads the folder first recovers Houlihan Lokey and
+    loses ProPartners, which is how this was caught. It is that "scoring"
+    is the TEMPLATE DEFAULT, stamped on every workbook the generator emits,
+    while "research" is only ever written deliberately. So a deliberate
+    word anywhere outranks a default word anywhere, and the two roles stay
+    mutually exclusive: one file can never serve both.
+    """
+    signals = role_signals(path, root)
+    if "research" in signals:
+        return "research"
+    if "scoring" in signals:
+        return "scoring"
+    return None
+
+
 def _version_rank(name: str) -> int:
     if FINAL_RE.search(name):
         return 100
@@ -209,14 +234,9 @@ def map_package(root) -> dict:
     # a file under a role-named folder belongs to that role however the
     # shared template named it. The name decides only where the folder is
     # silent (`08_appendices/Foo_Research_Workbook.xlsx`, top-level files).
-    roles = {p: role_signals(p, root) for p in xlsx}
-
-    def _claims(p, role):
-        dir_role, name_role = roles[p]
-        return dir_role == role or (dir_role is None and name_role == role)
-
-    scoring_cand = [p for p in xlsx if _claims(p, "scoring")]
-    research_cand = [p for p in xlsx if _claims(p, "research")]
+    roles = {p: role_of(p, root) for p in xlsx}
+    scoring_cand = [p for p in xlsx if roles[p] == "scoring"]
+    research_cand = [p for p in xlsx if roles[p] == "research"]
     aux = [str(p.relative_to(root)) for p in xlsx if AUX_RE.search(str(p))]
     unclassified_xlsx = [str(p.relative_to(root)) for p in xlsx
                          if p not in scoring_cand and p not in research_cand
