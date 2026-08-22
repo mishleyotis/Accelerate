@@ -62,6 +62,14 @@ def _pkg(tmp_path, files: dict) -> Path:
 # ── C · the verbatim span lives one level down ──
 
 
+#: The real pair, from `01_evidence_index.json` — the assessor's analysis
+#: and the span the filing contains. 899 facts in that one package carry
+#: both, and not one pair is identical.
+ANALYSIS = ('HL explicitly positions its advisory-only independence as its '
+            'core strategic differentiator: "We do not lend or engage in '
+            'any securities sales and trading operations".')
+
+
 def test_a_nested_fact_list_yields_its_verbatim_text(tmp_path):
     """The ledger.jsonl shape: one record per id, spans inside `facts`."""
     pkg = _pkg(tmp_path, {"01_evidence/ledger.jsonl": json.dumps({
@@ -69,13 +77,62 @@ def test_a_nested_fact_list_yields_its_verbatim_text(tmp_path):
         "source_name": "Houlihan Lokey, Inc. Form 10-K",
         "url": "https://www.sec.gov/x.htm",
         "publish_date": "2025-05",
-        "facts": [{"fact_id": "E-001:F1", "text": REAL}],
+        "facts": [{"fact_id": "E-001:F1", "anchor_quote": REAL}],
     })})
     records, _ = en.merge(pkg)
     assert records["E-001"]["excerpt"] == REAL
     # the parent's fields still travel with the fact
     assert records["E-001"]["url"] == "https://www.sec.gov/x.htm"
     assert records["E-001"]["date"] == "2025-05"
+
+
+def test_a_facts_text_is_the_analysis_not_the_quotation(tmp_path):
+    """The measurement that overturned this module's own vocabulary: `text`
+    was in the excerpt synonyms, and it is the assessor's sentence ABOUT the
+    source — long, fluent, and often containing the quote inside it. Taking
+    it as the excerpt serves a paraphrase as a quotation, which is the same
+    defect as the fabrication, one layer up."""
+    pkg = _pkg(tmp_path, {"01_evidence/ledger.jsonl": json.dumps({
+        "evidence_id": "E-001",
+        "facts": [{"fact_id": "E-001:F1", "text": ANALYSIS,
+                   "anchor_quote": REAL}],
+    })})
+    records, _ = en.merge(pkg)
+    assert records["E-001"]["excerpt"] == REAL
+    assert records["E-001"]["summary"] == ANALYSIS
+
+
+def test_a_fact_with_only_analysis_yields_no_excerpt(tmp_path):
+    pkg = _pkg(tmp_path, {"01_evidence/ledger.jsonl": json.dumps({
+        "evidence_id": "E-002",
+        "facts": [{"fact_id": "E-002:F1", "text": ANALYSIS}],
+    })})
+    records, _ = en.merge(pkg)
+    assert not records["E-002"].get("excerpt")
+    assert records["E-002"]["summary"] == ANALYSIS
+
+
+@pytest.mark.parametrize("header,canonical", [
+    ("Source Name", "source_name"),
+    ("source name", "source_name"),
+    ("URL_or_Citation", "url_or_citation"),
+    ("Key Facts (F1..)", "key_facts"),
+    ("Key Finding", "key_finding"),
+    ("Anchor Quote", "anchor_quote"),
+])
+def test_a_header_written_with_spaces_is_the_same_column(header, canonical):
+    """Lowercasing alone left `source name` matching nothing, so the corpus's
+    space-separated generation lost its source, url and excerpt columns."""
+    assert en._norm_key(header) == canonical
+
+
+def test_a_spaced_header_actually_reaches_the_record(tmp_path):
+    pkg = _pkg(tmp_path, {"01_evidence/register.csv":
+                          "Evidence ID,Source Name,Anchor Quote\n"
+                          f'E-070,Form 10-K,"{REAL}"\n'})
+    records, _ = en.merge(pkg)
+    assert records["E-070"]["source"] == "Form 10-K"
+    assert records["E-070"]["excerpt"] == REAL
 
 
 def test_a_nested_fact_does_not_become_its_own_evidence_row(tmp_path):

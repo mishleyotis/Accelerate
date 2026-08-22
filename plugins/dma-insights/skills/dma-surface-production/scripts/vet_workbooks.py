@@ -33,6 +33,31 @@ except ImportError:                                            # pragma: no cove
 STAT_HEADERS = {"median", "p25", "p75", "mean", "average", "avg", "stdev",
                 "std", "min", "max", "count", "n", "quartile"}
 
+# Columns whose header contains "score" and which are NOT 1–5 maturity
+# scores. Measured across 111 corpus clients, which carry 130 distinct
+# *score* headers between them — matching on the substring alone refused
+# Houlihan Lokey for 26 "scores outside 1.0–5.0" that were a COUNT of
+# sub-capabilities scored (14–25) and a recommendation PRIORITY on its own
+# scale (6.0–7.05). Neither is a maturity score and neither was dirty.
+NON_MATURITY_SCORE = (
+    "scored",        # subcaps_scored, scored_count, categories_scored — counts
+    "priority",      # priority_score — its own ranking scale
+    "ers",           # ers_score — evidence strength, a different scale
+    "delta",         # score_delta — a difference, legitimately negative
+    "max_", "max ",  # max_score — the scale's ceiling, not a measurement
+    "target",        # target_score — an aspiration
+    "weighted",      # weighted_score — score x weight, exceeds 5 by design
+    "rationale",     # score_rationale — prose
+    "count", "total", "/",
+)
+
+
+def is_maturity_score_column(header: str) -> bool:
+    h = (header or "").strip().lower()
+    if "score" not in h or "peer" in h:
+        return False
+    return not any(m in h for m in NON_MATURITY_SCORE)
+
 CELL_RE = re.compile(r"^P[1-4]C\d+(\.\d+)*(\.[A-Z]{2,3}\d+)?$", re.I)
 EID_RE = re.compile(r"^E[-_][A-Z0-9]+[-_]?\d*(:F\d+)?$", re.I)
 
@@ -133,12 +158,33 @@ def vet_scoring(path: Path) -> None:
         for j, h in enumerate(low):
             if "score" not in h or "peer" in h:
                 continue
+            col = []
             for r in rows[hi + 1:]:
                 if r is None or j >= len(r):
                     continue
                 v = r[j]
                 if isinstance(v, (int, float)):
-                    scores.append(float(v))
+                    col.append(float(v))
+            if not col:
+                continue
+            if not is_maturity_score_column(h):
+                note("WARN", f"{name}: column {hdr[j]!r} is named like a "
+                             f"score and is not one (a count, a different "
+                             f"scale, or prose). Its range is NOT checked "
+                             f"against 1.0-5.0.")
+                continue
+            live = [v for v in col if v != 0]
+            in_range = [v for v in live if 1.0 <= v <= 5.0]
+            if live and not in_range:
+                # EVERY value out of range is a misidentified column, not
+                # 26 dirty measurements. Refusing here is how a package is
+                # halted for a header this script did not recognise.
+                note("WARN", f"{name}: column {hdr[j]!r} holds no value in "
+                             f"1.0-5.0 at all ({len(live)} values, e.g. "
+                             f"{sorted(set(live))[:4]}) — it is very likely "
+                             f"not a maturity score. Name it here if it is.")
+                continue
+            scores.extend(col)
 
     bad = [v for v in scores if v != 0 and not (1.0 <= v <= 5.0)]
     if bad:

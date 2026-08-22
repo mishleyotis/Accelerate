@@ -57,16 +57,30 @@ DATE_IN_TEXT = re.compile(r"\b(20[12]\d[-/]\d{1,2}[-/]\d{1,2}|"
 # excerpt, so a summary column must be recognised in order to be REFUSED for
 # that purpose, not left out of the vocabulary where it gets silently missed
 # and then replaced by something worse.
+#
+# Which side each column falls on was MEASURED, not inferred from its name.
+# The corpus keeps 899 facts carrying both a `text` and an `anchor_quote`,
+# and ZERO of them are identical: `text` is the assessor writing "HL
+# explicitly positions its advisory-only independence as its core strategic
+# differentiator: …", `anchor_quote` is the span the filing actually
+# contains. So the whole `fact*` family is paraphrase however long and
+# quotable it looks — and it looks very quotable, which is the trap.
+# Only a column that NAMES a quotation is treated as one.
 VERBATIM_COLS = ("evidence_excerpt", "excerpt", "anchor_quote", "quote",
-                 "verbatim", "passage", "text", "snippet")
-SUMMARY_COLS = ("fact_summary", "key_finding", "key_extract", "claim",
-                "summary", "finding", "description", "note")
+                 "verbatim", "passage", "snippet")
+SUMMARY_COLS = ("fact_summary", "key_finding", "key_finding_summary",
+                "key_extract", "key_facts", "key_fact", "fact_text",
+                "lead_fact", "top_fact", "sample_fact", "fact_preview",
+                "facts", "fact", "text", "claim", "summary", "finding",
+                "description", "note")
 
 SYN = {
-    "eid": ("evidence_id", "evidence id", "e_id", "fact_id", "id"),
+    "eid": ("evidence_id", "e_id", "fact_id", "id"),
     "source": ("source_name", "source_title", "source", "publisher",
                "kb_source_id", "title"),
-    "url": ("url", "link", "source_url"),
+    # `url_or_citation` is the scoring workbook's column on 6 register tabs
+    # in the corpus; without it those clients' URLs are invisible.
+    "url": ("url", "link", "source_url", "url_or_citation", "citation_url"),
     # ordered best-first: a publication-flavoured column outranks a bare
     # "date", which in fact-level rows carries EVENT dates (E-083's 1979
     # is a timeline fact, not when its source was published — measured)
@@ -76,11 +90,23 @@ SYN = {
     "summary": SUMMARY_COLS,
     "tier": ("tier",),
     "ers": ("ers_total", "ers_score", "ers", "ers_core"),
-    "subcaps": ("subcaps_supported", "subcaps", "subcap_id",
+    "subcaps": ("subcaps_supported", "subcaps", "subcap_id", "subcap_ids",
+                "subcaps_cited", "subcaps_mapped", "mapped_subcaps",
+                "subcaps_covered", "subcap_mappings",
                 "categories_referenced", "pillars_mapped"),
 }
 
-FIELDS = ("source", "url", "date", "excerpt", "summary", "tier", "ers",
+
+def _norm_key(k) -> str:
+    """`Source Name` and `source_name` are one column; the corpus writes it
+    both ways, and lowercasing alone left `source name` matching nothing.
+    A trailing parenthetical is decoration — `Key Facts (F1..)` is the
+    `key_facts` column with a note about its contents stuck to the header."""
+    s = re.sub(r"\(.*?\)", " ", str(k or "").lower())
+    return re.sub(r"[^a-z0-9]+", "_", s).strip("_")
+
+
+FIELDS =("source", "url", "date", "excerpt", "summary", "tier", "ers",
           "subcaps")
 
 # Stores nest their real rows one level down. Houlihan Lokey's ledger.jsonl
@@ -121,14 +147,14 @@ def _rows_from_csv(path: Path):
         text = path.read_bytes().decode("utf-8-sig", errors="replace")
         rd = csv.DictReader(io.StringIO(text))
         for r in rd:
-            yield {(k or "").strip().lower(): (v or "") for k, v in r.items()}
+            yield {_norm_key(k): (v or "") for k, v in r.items()}
     except Exception as e:                                  # noqa: BLE001
         print(f"unreadable csv {path.name}: {e}", file=sys.stderr)
 
 
 def _flat(d: dict) -> dict:
     """Scalar cells only — a nested list is not a value, it is more rows."""
-    return {str(k).lower(): ("" if v is None else v) for k, v in d.items()
+    return {_norm_key(k): ("" if v is None else v) for k, v in d.items()
             if not isinstance(v, (list, dict))}
 
 
@@ -185,7 +211,7 @@ def _rows_from_xlsx(path: Path):
                 cells = ["" if c is None else str(c).strip() for c in r]
                 if hdr is None:
                     if sum(1 for c in cells if c) >= 3:
-                        hdr = [c.lower() for c in cells]
+                        hdr = [_norm_key(c) for c in cells]
                     continue
                 if any(cells):
                     yield dict(zip(hdr, cells))
