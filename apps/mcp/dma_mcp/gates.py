@@ -291,6 +291,26 @@ GATES = {
               "this one, the pilcrows CG-35 now refuses, and a chip that "
               "overflowed its own box on the rendered page.",
               "block"),
+
+    "CG-37": ("A contact route for a named person is marked internal_only", None,
+              "Every email, linkedin_url or phone sitting beside a person's "
+              "name appears in that section's internal_only list, by exact "
+              "path. Company contact details not attached to a named "
+              "individual are out of scope.",
+              "Invariant 5 is default-deny and server-side, but the deny list "
+              "is the PRODUCER's: redaction strips the paths a section marks "
+              "and serves the paths it does not, and the contract requires "
+              "the internal_only field without ever checking its contents. "
+              "That was survivable while every contact column was null. It "
+              "stopped being survivable when a re-polled Clay task put five "
+              "named executives' work addresses and LinkedIn profiles onto a "
+              "promoted roster — real personal data for real people, one "
+              "forgotten list entry away from the customer body. Each "
+              "unmarked path is named individually, because a producer told "
+              "only that 'something is unmarked' on a six-seat roster has "
+              "fifteen fields to check by hand, which is how a marking gets "
+              "missed to begin with.",
+              "block"),
     "CG-29": ("A narrative thread says what THIS section adds", None,
               "No two sections on a page carry the same narrative_thread, "
               "word for word.",

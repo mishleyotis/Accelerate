@@ -908,6 +908,70 @@ def _check_source_label_is_a_citation(section, body) -> list:
     return out
 
 
+def _check_contact_routes_are_marked(section, body) -> list:
+    """CG-37 — a way to reach a named person is marked, or it reaches the client.
+
+    Invariant 5 is default-deny and server-side, but the DENY LIST IS THE
+    PRODUCER'S: `redaction.py` strips the paths a section marks in
+    `internal_only`, and a path nobody marks is served. The contract says as
+    much in as many words — "Marking is the producer's duty: a path you do not
+    mark reaches the client" — and until now nothing checked that the duty was
+    discharged. The contract requires the FIELD, never its contents.
+
+    That was survivable while the field was always null. It stopped being
+    survivable on 2026-08-22, when a re-polled Clay task put five named
+    executives' work addresses and LinkedIn profiles onto a promoted roster:
+    real personal contact data for real people at a real firm, one forgotten
+    list entry away from the customer-facing body.
+
+    Scoped to a route beside a NAME, which is what makes it personal. A
+    switchboard number on a firmographics card is a company's published
+    contact and not this gate's business; the same column beside "Rob Sharps"
+    is. So the trigger is a dict that carries both a person's name and a way
+    to reach them.
+
+    Every unmarked path is named individually. A producer told only "something
+    is unmarked" on a six-seat roster has fifteen fields to check by hand,
+    which is how a marking gets missed in the first place.
+    """
+    if not isinstance(body, dict):
+        return []
+    marked = {str(p) for p in (body.get("internal_only") or [])
+              if isinstance(p, str)}
+    unmarked = []
+
+    def walk(node, path):
+        if isinstance(node, dict):
+            name = str(node.get("name") or "").strip()
+            if name and name not in ("-", "—"):
+                for f in _CONTACT_ROUTE_FIELDS:
+                    if str(node.get(f) or "").strip():
+                        p = f"{path}.{f}" if path else f
+                        if p not in marked:
+                            unmarked.append((p, name))
+            for k, v in node.items():
+                walk(v, f"{path}.{k}" if path else str(k))
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                walk(v, f"{path}[{i}]")
+
+    walk(body, "")
+    if not unmarked:
+        return []
+    shown = ", ".join(f"{p} ({who})" for p, who in unmarked[:6])
+    more = f" and {len(unmarked) - 6} more" if len(unmarked) > 6 else ""
+    return [_reason(
+        "CG-37", section, f"{section}.internal_only",
+        f"{len(unmarked)} contact route{'' if len(unmarked) == 1 else 's'} for "
+        f"a named individual {'is' if len(unmarked) == 1 else 'are'} not in "
+        f"this section's internal_only list: {shown}{more}. The serve layer "
+        f"strips what a section marks and serves what it does not, so an "
+        f"unmarked work address is published to the customer audience — not "
+        f"hidden by a default, not caught downstream. Add each path exactly as "
+        f"written above; marking is per-field and per-person, because a roster "
+        f"that gains a seat gains five paths nobody re-checks.")]
+
+
 def _check_page_thread(page, section, fields, body) -> list:
     """CG-23 — a section whose writer stores a thread carries one.
 
@@ -1275,6 +1339,7 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_financial_series_reach(name, body))
         reasons.extend(_check_no_typesetting_marks(name, body))
         reasons.extend(_check_source_label_is_a_citation(name, body))
+        reasons.extend(_check_contact_routes_are_marked(name, body))
 
         # id-pattern discipline
         for i, e in enumerate(body.get("e_ids") or []):
