@@ -641,7 +641,18 @@ _EV_ALIASES = {
     "subcaps": ("subcaps_supported", "subcaps", "subcap_ids"),
     # Only some generations carry the verbatim text here; where they do not,
     # it is mined out of the scoring tabs' Rationale column (see below).
-    "excerpt": ("fact_summary", "excerpt", "verbatim", "quote", "summary"),
+    #
+    # ORDER IS THE CONTRACT, and it used to be backwards: `fact_summary`
+    # came first, so a register carrying BOTH a real quotation column and a
+    # summary served the summary. Measured 2026-08-22 on the intake tree,
+    # one package holds 899 facts with both a paraphrase and an
+    # `anchor_quote` and not one pair is identical — the paraphrase is the
+    # assessor's sentence about the source, the quote is the source. A
+    # column that NAMES a quotation now outranks every summary spelling;
+    # the summaries stay last because for some generations they are the only
+    # text that exists and an evidence drawer cannot ship empty.
+    "excerpt": ("excerpt", "anchor_quote", "verbatim", "quote", "passage",
+                "fact_summary", "summary"),
 }
 
 # The excerpt tag the scoring rationales use: "[E-012:F1] Board committees: …"

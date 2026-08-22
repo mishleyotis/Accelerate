@@ -161,3 +161,36 @@ def test_the_lander_records_every_uncitable_row_and_stores_NULL():
     finally:
         conn.rollback()
         conn.close()
+
+
+# ── which column an excerpt may come FROM (2026-08-22) ──
+
+
+def test_a_quotation_column_outranks_every_summary_spelling():
+    """`_EV_ALIASES["excerpt"]` used to open with `fact_summary`, so a
+    register carrying BOTH a real quotation column and a summary served the
+    summary — an assessor's sentence ABOUT the source, stored as the source's
+    own words behind a citation.
+
+    The measurement that settles it, taken on the production intake tree:
+    one package holds 899 facts carrying both a paraphrase and an
+    `anchor_quote`, and ZERO of the pairs are identical. They are different
+    kinds of text, not two spellings of one.
+
+    The summaries stay in the tuple, last, because some generations ship no
+    quotation column at all and an evidence drawer cannot render empty —
+    but they are the fallback, never the preference.
+    """
+    from dma_worker.workbook_parser import _EV_ALIASES
+
+    order = list(_EV_ALIASES["excerpt"])
+    quotations = {"excerpt", "anchor_quote", "verbatim", "quote", "passage"}
+    summaries = {"fact_summary", "summary"}
+
+    assert quotations <= set(order), "a quotation spelling went missing"
+    assert summaries <= set(order), "the fallback must still exist"
+
+    last_quotation = max(order.index(q) for q in quotations if q in order)
+    first_summary = min(order.index(s) for s in summaries if s in order)
+    assert last_quotation < first_summary, (
+        f"a summary column outranks a quotation column: {order}")
