@@ -138,3 +138,148 @@ def test_g4_held_out_twins_do_not_block():
 def test_the_learner_order_is_the_d7_sequence():
     assert run_gate.LEARNERS[0] == "t-rowe-price-group-inc"
     assert run_gate.HELD_OUT == {"bok-financial-corporation", "bok-financial"}
+
+
+# ── the walk reaches the whole queue, not a hardcoded eight ──
+#
+# Owner, 2026-08-22: "ensure that no clients are hardcoded, that it processes
+# clients who have not been processed that meet package vetting. Right now it
+# is so confined to the list of 10."
+#
+# It was: LEARNERS + STRESS named eight, minus two held out. The pending queue
+# holds 286 runs across 172 entities, so 164 vetted, unprocessed clients could
+# never be reached however long the routine ran — and the walk reported
+# "sequence complete" having never looked at them.
+
+
+def _queued(display_id, completed_at="2026-08-17", live_claim=False, **over):
+    row = _pending(display_id=display_id, run_id=display_id + "-run",
+                   request_id="REQ-" + display_id)
+    row["completed_at"] = completed_at
+    row["claim"] = {"live": True} if live_claim else None
+    row.update(over)
+    return row
+
+
+def test_the_queue_supplies_candidates_no_list_names():
+    """The whole point. An entity nobody wrote down still gets gated."""
+    pending = [_queued("never-heard-of-this-bank")]
+    order = run_gate.queue_order(pending, prefer=[])
+    assert order == ["never-heard-of-this-bank"]
+
+
+def test_the_learner_order_still_leads():
+    """It is a curriculum, and the curve it measures is only readable if the
+    order holds. Preference, not a fence — and only over what the queue
+    actually offers: a learner with nothing pending is not a candidate."""
+    pending = [_queued("zzz-other-bank", completed_at="2026-08-20"),
+               _queued("t-rowe-price-group-inc", completed_at="2026-01-01")]
+    order = run_gate.queue_order(pending, prefer=run_gate.LEARNERS)
+    assert order[0] == "t-rowe-price-group-inc", (
+        "the learner leads even though its assessment is seven months older")
+    assert order[1] == "zzz-other-bank"
+    assert len(order) == 2, "learners with nothing pending are not candidates"
+
+
+def test_the_held_out_control_is_never_admitted_from_the_queue():
+    """Widening the source of candidates must not widen what may be produced.
+    HELD_OUT subtracts, which is why it survives the change."""
+    pending = [_queued("bok-financial"), _queued("bok-financial-corporation"),
+               _queued("fine-bank")]
+    order = run_gate.queue_order(pending, prefer=run_gate.LEARNERS)
+    assert "bok-financial" not in order
+    assert "bok-financial-corporation" not in order
+    assert "fine-bank" in order
+
+
+def test_an_entity_under_a_live_claim_is_not_offered():
+    """A claim is an entity-level fact; offering it puts two producers on one
+    client's six pages."""
+    pending = [_queued("busy-bank", live_claim=True), _queued("free-bank")]
+    order = run_gate.queue_order(pending, prefer=[])
+    assert order == ["free-bank"]
+
+
+def test_the_newest_assessment_comes_first():
+    pending = [_queued("older", completed_at="2026-01-02"),
+               _queued("newer", completed_at="2026-08-17")]
+    assert run_gate.queue_order(pending, prefer=[])[0] == "newer"
+
+
+def test_no_entity_is_offered_twice():
+    pending = [_queued("t-rowe-price-group-inc")]
+    order = run_gate.queue_order(pending, prefer=run_gate.LEARNERS)
+    assert order.count("t-rowe-price-group-inc") == 1
+
+
+def test_a_failing_candidate_no_longer_blocks_the_queue(monkeypatch, capsys):
+    """The other half of "confined". Any G1/G2/G4 failure used to return
+    immediately, so one client with a stub bundle blocked every entity behind
+    it until a human noticed."""
+    # broken-bank must be gated FIRST or the test proves nothing, so give it
+    # the newer assessment — the queue's own ordering rule.
+    pending = [_queued("broken-bank", completed_at="2026-08-20"),
+               _queued("good-bank", completed_at="2026-08-01")]
+    monkeypatch.setattr(run_gate, "mcp_call",
+                        lambda tool, args: {"pending": pending})
+
+    def fake_evaluate(_pending, display_id):
+        ok = display_id == "good-bank"
+        return {
+            "G1_ingested": {"ok": ok, "detail": "stub" if not ok else "fine"},
+            "G2_raw_package": {"ok": True, "detail": "traced"},
+            "G3_serving": {"ok": True, "detail": "not serving"},
+            "G4_non_duplicate": {"ok": True, "detail": "no twin"},
+            "run_id": "good-run" if ok else None,
+        }
+
+    monkeypatch.setattr(run_gate, "evaluate", fake_evaluate)
+    assert run_gate.pick([]) == 0
+    out = capsys.readouterr().out
+    assert "GATE: PRODUCE good-bank run good-run" in out
+    assert "walked past 1" in out, "what was skipped must be visible"
+    assert "broken-bank" in out
+
+
+def test_every_failure_is_still_printed_with_its_gate(monkeypatch, capsys):
+    """"Never silently advance past a failure" is kept in the half that
+    matters: nothing is silent. Only the blocking is dropped."""
+    pending = [_queued("broken-bank")]
+    monkeypatch.setattr(run_gate, "mcp_call",
+                        lambda tool, args: {"pending": pending})
+    monkeypatch.setattr(run_gate, "evaluate", lambda p, d: {
+        "G1_ingested": {"ok": False, "detail": "parsed to only 3 scored cells"},
+        "G2_raw_package": {"ok": True, "detail": "traced"},
+        "G3_serving": {"ok": True, "detail": "not serving"},
+        "G4_non_duplicate": {"ok": True, "detail": "no twin"},
+        "run_id": None})
+    assert run_gate.pick([]) == 1
+    out = capsys.readouterr().out
+    assert "G1_ingested: FAIL — parsed to only 3 scored cells" in out
+    assert "skipped broken-bank: failed G1_ingested" in out
+    assert "not a reason to stop looking" in out
+
+
+def test_an_empty_queue_says_so_rather_than_claiming_completion(monkeypatch, capsys):
+    monkeypatch.setattr(run_gate, "mcp_call", lambda tool, args: {"pending": []})
+    assert run_gate.pick(run_gate.LEARNERS) == 1
+    assert "offered no unclaimed entity" in capsys.readouterr().out
+
+
+def test_the_walk_is_bounded_so_selection_cannot_eat_the_session(monkeypatch):
+    """A firing produces ONE client. Gating hundreds to find it would spend
+    the session on selection; the next firing continues from here."""
+    pending = [_queued(f"bank-{i:03d}") for i in range(200)]
+    seen = []
+    monkeypatch.setattr(run_gate, "mcp_call",
+                        lambda tool, args: {"pending": pending})
+
+    def fake_evaluate(_p, display_id):
+        seen.append(display_id)
+        return {g: {"ok": True, "detail": "-"} for g in
+                ("G1_ingested", "G2_raw_package", "G3_serving",
+                 "G4_non_duplicate")} | {"run_id": None}
+
+    monkeypatch.setattr(run_gate, "evaluate", fake_evaluate)
+    run_gate.pick([], max_candidates=5)
+    assert len(seen) == 5

@@ -7,10 +7,29 @@ the web app, then the scores may be hallucinated. Ensure this is always the
 first case. Before any synthesis starts a non-duplicate entity should be
 ingested for analysis."
 
-This script IS that first case, mechanical rather than prose. `pick` walks
-the learner order and emits exactly one run id a synthesis may claim — or a
-refusal naming which gate failed. A routine synthesizes ONLY a run this
-gate emitted; anything else is how a hallucinated score happens.
+This script IS that first case, mechanical rather than prose. `pick` emits
+exactly one run id a synthesis may claim — or a refusal naming which gate
+failed. A routine synthesizes ONLY a run this gate emitted; anything else is
+how a hallucinated score happens.
+
+WHAT `pick` WALKS, changed 2026-08-22 on the owner's instruction. It used to
+walk a hardcoded list of eight names and stop. The pending queue holds 286
+runs across 172 entities, so 164 vetted, unprocessed clients could never be
+reached however long the routine ran, and the sequence reported itself
+"complete" having never looked at the overwhelming majority of the corpus.
+
+It now walks the QUEUE: the learner order first, because the learning curve
+it measures is only readable if that order holds, and then every other ready
+entity the queue offers, newest assessment first. The queue's own selector
+decides what "ready" means — one run per entity, nothing whose entity carries
+a live claim. No client is named to be admitted; the only name-based rule
+left is HELD_OUT, which subtracts.
+
+A failing candidate no longer stops the walk either. Every failure is
+printed with its gate and its detail, and the PRODUCE line names what was
+walked past — nothing is silent. What is gone is only the blocking, which
+protected nothing: a client whose package is broken is not made sound by
+refusing to look at the next one.
 
 The four gates, per candidate:
 
@@ -61,11 +80,34 @@ PATHTOK_FILE = Path("/root/.dma/pathtok")
 PAGES = ("overview", "heatmap", "insights", "platform", "context", "techstack")
 MIN_SCORED_CELLS = 50     # a real workbook scores hundreds; below this the
                           # scan produced a stub, not a package
+#: A PREFERENCE ORDER, NOT A FENCE. These five were the deliberate learning
+#: curriculum (docs/DECISIONS.md D7) and they still go first when they have
+#: producible work — the curve they measure is only readable if the order
+#: holds. What changed on 2026-08-22, on the owner's instruction, is what
+#: happens AFTER them: the walk continues into the whole pending queue instead
+#: of stopping.
+#:
+#: It had to change. The queue holds 286 pending runs across 172 entities and
+#: this list named eight, so 164 vetted, unprocessed clients could never be
+#: reached however long the routine ran — the sequence reported "sequence
+#: complete" while the overwhelming majority of the corpus had never been
+#: looked at once.
 LEARNERS = ["t-rowe-price-group-inc", "houlihan-lokey-inc",
             "hughes-federal-credit-union", "sl-green-realty-corp-nyse-slg",
             "corporate-america-credit-union"]
 STRESS = ["brick-city-capital", "thrivent", "bank-of-utah"]
+
+#: Never produced, by owner decision: the held-out control the learning
+#: measurements are read against. This is an EXCLUSION and stays one — it is
+#: the only name-based rule left in the walk, and it subtracts rather than
+#: admits, which is why widening the queue does not touch it.
 HELD_OUT = {"bok-financial-corporation", "bok-financial"}
+
+#: How many candidates one firing will gate before giving up. The gates each
+#: cost connector calls, and a firing produces ONE client, so walking hundreds
+#: to find it would spend the session on selection. Failures are reported and
+#: skipped, so the next firing starts where this one got to.
+MAX_CANDIDATES = 40
 
 
 def _idt(audience: str) -> str:
@@ -264,11 +306,101 @@ def evaluate(pending: list, display_id: str) -> dict:
     return out
 
 
-def pick(candidates: list) -> int:
-    pending = mcp_call("list_pending_runs", {}).get("pending", [])
-    for display_id in candidates:
-        if display_id in HELD_OUT:
+def queue_order(pending: list, prefer: list) -> list:
+    """Every entity worth gating, preferred names first, then the whole queue.
+
+    The queue's own selector decides what is READY — one run per entity
+    (newest), nothing whose entity carries a live claim, newest assessment
+    first. This adds only the ordering the curriculum needs, and never
+    invents a candidate the queue did not offer.
+    """
+    ready = _queue_ready(pending)
+    offered = [r.get("display_id") for r in ready if r.get("display_id")]
+    available = set(offered)
+
+    # `prefer` REORDERS the queue; it never adds to it. A preferred name with
+    # nothing pending is not a candidate — gating it spends connector calls to
+    # print "failed G1_ingested" about an entity that has no run to ingest,
+    # which reads as a broken client rather than an absent one.
+    seen, order = set(), []
+    for display_id in prefer:
+        if (display_id in HELD_OUT or display_id in seen
+                or display_id not in available):
             continue
+        seen.add(display_id)
+        order.append(display_id)
+    for display_id in offered:
+        if display_id in seen or display_id in HELD_OUT:
+            continue
+        seen.add(display_id)
+        order.append(display_id)
+    return order
+
+
+def _queue_ready(pending: list) -> list:
+    """The ready set, from the queue selector if it is importable.
+
+    The selector lives in the repo (scripts/synthesis_queue.py) and the plugin
+    ships without it, so this degrades to the same rule inline rather than
+    failing: newest run per entity, entities with a live claim held back,
+    newest assessment first. Duplicating the rule is the lesser evil — a pick
+    that cannot run at all reaches no clients whatsoever.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "dma_synthesis_queue",
+            Path(__file__).resolve().parents[3] / "scripts" / "synthesis_queue.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        # `selected` is the key; an earlier version of this read `plan` — the
+        # name of the local variable inside select() rather than the one it
+        # returns — and silently produced an empty candidate list, which reads
+        # exactly like an empty queue.
+        picked = mod.select(pending).get("selected") or []
+        if not picked and pending:
+            raise RuntimeError("selector returned nothing for a non-empty "
+                               "queue; falling back to the inline rule")
+        return picked
+    except Exception:                                       # noqa: BLE001
+        best: dict = {}
+        for run in pending:
+            key = run.get("display_id") or run.get("run_id")
+            cur = best.get(key)
+            if cur is None or (run.get("completed_at") or "") > (
+                    cur.get("completed_at") or ""):
+                best[key] = run
+        held = {(r.get("display_id") or r.get("run_id"))
+                for r in pending if (r.get("claim") or {}).get("live")}
+        ready = [r for k, r in best.items() if k not in held]
+        ready.sort(key=lambda r: (r.get("completed_at") or "",
+                                  str(r.get("run_id"))), reverse=True)
+        return ready
+
+
+def pick(prefer: list, max_candidates: int = MAX_CANDIDATES) -> int:
+    """Emit exactly one producible run, or a refusal that names what it saw.
+
+    A FAILING CANDIDATE NO LONGER STOPS THE QUEUE. It used to: any G1, G2 or
+    G4 failure returned immediately, so one client with a stub bundle or an
+    unadjudicated twin blocked all 172 ready entities behind it until a human
+    noticed. The rule that produced that behaviour — "never silently advance
+    past a failure" — is kept in the half that matters: nothing is silent.
+    Every failure is printed with its gate and its detail, and the PRODUCE
+    line is followed by a summary of what was skipped to reach it, so a reader
+    can see the whole walk. What is dropped is only the blocking, which
+    protected nothing: a client whose package is broken is not made sound by
+    refusing to look at the next one.
+    """
+    pending = mcp_call("list_pending_runs", {}).get("pending", [])
+    order = queue_order(pending, prefer)
+    if not order:
+        print("GATE: STOP — the pending queue offered no unclaimed entity; "
+              "nothing to gate")
+        return 1
+
+    skipped: list = []
+    for display_id in order[:max_candidates]:
         v = evaluate(pending, display_id)
         for g in ("G1_ingested", "G2_raw_package", "G3_serving",
                   "G4_non_duplicate"):
@@ -277,30 +409,47 @@ def pick(candidates: list) -> int:
             print(f"  {display_id} {g}: {mark} — {v[g]['detail']}")
         if v["run_id"]:
             print(f"GATE: PRODUCE {display_id} run {v['run_id']}")
+            if skipped:
+                print(f"  (walked past {len(skipped)}: "
+                      + "; ".join(f"{d} {why}" for d, why in skipped[:8])
+                      + ("; …" if len(skipped) > 8 else "") + ")")
             return 0
         if v["G3_serving"].get("skip"):
-            continue                     # current client — next candidate
-        print(f"GATE: STOP — {display_id} failed above; do not synthesize "
-              f"and do not silently advance past a failure that is not a "
-              f"clean serving-and-current skip")
-        return 1
-    print("GATE: STOP — every candidate is serving-and-current or held out; "
-          "sequence complete")
+            skipped.append((display_id, "serving and current"))
+            continue
+        bad = next((g for g in ("G1_ingested", "G2_raw_package",
+                                "G4_non_duplicate") if not v[g]["ok"]),
+                   "unknown")
+        skipped.append((display_id, f"failed {bad}"))
+
+    print(f"GATE: STOP — gated {len(skipped)} of {len(order)} queued "
+          f"entities and none was producible. Not a clean end: every one is "
+          f"listed above with the gate it failed, and a package failure is a "
+          f"finding to record, not a reason to stop looking.")
+    for d, why in skipped:
+        print(f"  skipped {d}: {why}")
     return 1
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    p_pick = sub.add_parser("pick", help="walk the learner order, emit one "
-                                         "producible run or a refusal")
+    p_pick = sub.add_parser("pick", help="walk the learners then the whole "
+                                         "pending queue, emit one producible "
+                                         "run or a refusal")
     p_pick.add_argument("--stress", action="store_true",
-                        help="include the stress candidates after learners")
+                        help="put the stress candidates straight after the "
+                             "learners; the rest of the queue follows either "
+                             "way")
+    p_pick.add_argument("--max-candidates", type=int, default=MAX_CANDIDATES,
+                        help="how many queued entities to gate before giving "
+                             "up this firing (default %(default)s)")
     p_one = sub.add_parser("evaluate", help="all four gates for one client")
     p_one.add_argument("--client", required=True)
     a = ap.parse_args(argv)
     if a.cmd == "pick":
-        return pick(LEARNERS + (STRESS if a.stress else []))
+        return pick(LEARNERS + (STRESS if a.stress else []),
+                    max_candidates=a.max_candidates)
     if a.cmd == "evaluate":
         pending = mcp_call("list_pending_runs", {}).get("pending", [])
         print(json.dumps(evaluate(pending, a.client), indent=1))
