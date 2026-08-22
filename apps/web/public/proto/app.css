@@ -627,6 +627,26 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
   font-family: var(--font-mono);
   letter-spacing: .02em;
   white-space: nowrap;
+  /* NOWRAP WITHOUT THIS IS A BUG GENERATOR, and it produced two of the
+     defects reported on 2026-08-22 from different pages.
+
+     A badge is almost always a flex item, and the flex default is
+     `flex-shrink: 1`. So under width pressure the BOX shrinks while the text,
+     being nowrap, does not: the label spills out of its own box and paints
+     over whatever sits beside it. On the focus-area drilldown that rendered as
+     "SOURCEAI section (after the ETF/SMA…"; on the acquisition card the same
+     mechanism pushed a kind chip 235px past its card.
+
+     It was fixed at both call sites first. That was the wrong altitude — the
+     property belongs to the badge, and every one of the ~40 `.b` sites was one
+     narrow viewport away from the same defect.
+
+     What changes when a row really is too narrow: chips now overflow their
+     row (visible, and caught by the overflow assertions in the browser tests)
+     instead of overlapping their neighbours (invisible to those assertions,
+     and unreadable to a client). A row that expects to run out of space wraps
+     — `flex-wrap: wrap` on the row, not shrink on the chip. */
+  flex-shrink: 0;
 }
 .b-teal   { background: var(--z-ice);     color: var(--z-mid); }
 .b-ph0    { background: var(--ph0-lt);    color: var(--ph0); }
