@@ -54,6 +54,48 @@ GOV_RE = re.compile(r"caps_applied|contradiction|issue", re.I)
 PEER_RE = re.compile(r"peer", re.I)
 
 
+#: A folder named for a role is the STRONGER signal, and the corpus is why.
+#: Houlihan Lokey ships `02_research_workbook/DMA_Scoring_Workbook_HL.xlsx`:
+#: the filename comes off a shared template and says "Scoring" on every
+#: workbook in the package, while the folder says which one this is. Reading
+#: the name alone left research.primary=None, and the research workbook is
+#: the ONLY store that carries verbatim `Excerpt`/`Anchor_Quote` columns —
+#: the scoring workbook's Evidence_Master carries a summary or nothing. So a
+#: filename-only match does not merely mislabel a file, it silently removes
+#: every verbatim excerpt in the package (measured 2026-08-22: 462 of 462
+#: HL excerpts were then fabricated downstream to fill the vacuum).
+DIR_ROLE_RE = (("research", re.compile(r"research", re.I)),
+               ("scoring", re.compile(r"scoring|assessment", re.I)))
+NAME_ROLE_RE = (("research", re.compile(r"research", re.I)),
+                ("scoring", re.compile(r"scor|assessment.*workbook", re.I)))
+
+
+def _match_role(text: str, table) -> str | None:
+    for role, rx in table:
+        if rx.search(text):
+            return role
+    return None
+
+
+def role_signals(path: Path, root: Path) -> tuple:
+    """(dir_role, name_role) — what the folder says, what the name says.
+
+    The folder is read from every ancestor inside the package, nearest
+    first, so a wrapper generation (`DMAI - Client/02_research_workbook/…`)
+    reads the same as a canonical one.
+    """
+    dir_role = None
+    try:
+        rel_parents = path.relative_to(root).parts[:-1]
+    except ValueError:                                     # pragma: no cover
+        rel_parents = ()
+    for part in reversed(rel_parents):
+        dir_role = _match_role(part, DIR_ROLE_RE)
+        if dir_role:
+            break
+    return dir_role, _match_role(path.name, NAME_ROLE_RE)
+
+
 def _version_rank(name: str) -> int:
     if FINAL_RE.search(name):
         return 100
@@ -63,10 +105,8 @@ def _version_rank(name: str) -> int:
     return 11        # plain, undecorated — newer than v1, older than v2+
 
 
-def _rank_workbooks(paths: list, role: str) -> dict:
+def _rank_workbooks(paths: list, role: str, root: Path) -> dict:
     """role: 'scoring' | 'research'."""
-    role_dirs = ("scoring", "assessment") if role == "scoring" \
-        else ("research",)
     scored, set_aside = [], []
     for p in paths:
         name = p.name
@@ -78,10 +118,11 @@ def _rank_workbooks(paths: list, role: str) -> dict:
                                         "auto-picked over a live workbook"})
             continue
         score = _version_rank(name)
-        if any(d in str(p.parent).lower() for d in role_dirs):
-            score += 5
+        if role_signals(p, root)[0] == role:
+            score += 5                     # the folder confirms the role
         scored.append((score, str(p)))
     scored.sort(reverse=True)
+    set_aside.sort(key=lambda s: s["path"])
     ambiguities = []
     primary = scored[0][1] if scored else None
     if primary is None and set_aside:
@@ -161,35 +202,48 @@ def map_package(root) -> dict:
         else:
             other.append(rel)
 
-    # "DMA_Scoring_Workbook_X" and "DMA_Assessment_Workbook_X" are the
-    # same artefact under two naming generations (measured: CoBank,
-    # Achieve, Brick City use the assessment spelling)
-    SCORING_NAME = re.compile(r"scor|assessment.*workbook", re.I)
-    scoring_cand = [p for p in xlsx if SCORING_NAME.search(p.name)]
-    research_cand = [p for p in xlsx if re.search(r"research", p.name, re.I)
-                     and not SCORING_NAME.search(p.name)]
+    # "DMA_Scoring_Workbook_X" and "DMA_Assessment_Workbook_X" are the same
+    # artefact under two naming generations (measured: CoBank, Achieve,
+    # Brick City use the assessment spelling) — so the NAME cannot separate
+    # the two roles on its own. The FOLDER can, and does whenever it speaks:
+    # a file under a role-named folder belongs to that role however the
+    # shared template named it. The name decides only where the folder is
+    # silent (`08_appendices/Foo_Research_Workbook.xlsx`, top-level files).
+    roles = {p: role_signals(p, root) for p in xlsx}
+
+    def _claims(p, role):
+        dir_role, name_role = roles[p]
+        return dir_role == role or (dir_role is None and name_role == role)
+
+    scoring_cand = [p for p in xlsx if _claims(p, "scoring")]
+    research_cand = [p for p in xlsx if _claims(p, "research")]
     aux = [str(p.relative_to(root)) for p in xlsx if AUX_RE.search(str(p))]
     unclassified_xlsx = [str(p.relative_to(root)) for p in xlsx
                          if p not in scoring_cand and p not in research_cand
                          and str(p.relative_to(root)) not in aux]
 
-    scoring = _rank_workbooks(scoring_cand, "scoring")
-    research = _rank_workbooks(research_cand, "research")
+    scoring = _rank_workbooks(scoring_cand, "scoring", root)
+    research = _rank_workbooks(research_cand, "research", root)
     ambiguities = scoring.pop("_ambiguities") + research.pop("_ambiguities")
     if scoring["primary"] is None and unclassified_xlsx:
         ambiguities.append(
             f"no workbook named 'scoring' — unclassified xlsx exist: "
             f"{unclassified_xlsx[:3]}; the vetter decides whether one is the "
             f"scoring workbook")
-    if research["primary"] is None:
-        misnamed = [str(q.relative_to(root)) for q in scoring_cand
-                    if "research" in str(q.parent).lower()]
-        if misnamed:
-            ambiguities.append(
-                f"research workbook MISSING but a scoring-named workbook "
-                f"sits in the research folder ({misnamed[0]}) — likely a "
-                f"misnamed research workbook (measured: Shore United Bank, "
-                f"Houlihan Lokey); the vetter opens it and decides")
+    if scoring["primary"] is None and research["primary"]:
+        ambiguities.append(
+            f"no scoring workbook — the only role-named workbook is the "
+            f"research one ({research['primary']}); scores must come from "
+            f"the exports or the vetter refuses. It is NOT re-used as the "
+            f"scoring workbook: one file never serves both roles")
+    if research["primary"] is None and scoring["primary"]:
+        ambiguities.append(
+            f"NO RESEARCH WORKBOOK anywhere in the tree. Verbatim excerpts "
+            f"live in its register tab and nowhere else — the scoring "
+            f"workbook's Evidence_Master carries a summary column at best. "
+            f"Expect an evidence pass with excerpts missing, NOT excerpts "
+            f"invented to fill the gap; the vetter decides whether the "
+            f"package can be produced from at all")
     score_exports = sorted(
         str(q.relative_to(root)) for q in entries
         if q.name.lower().startswith("export_")

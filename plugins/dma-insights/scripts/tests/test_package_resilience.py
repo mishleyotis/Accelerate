@@ -42,8 +42,20 @@ def test_interim_is_never_auto_picked_over_a_live_workbook(tmp_path):
     _mk(tmp_path, "02_research_workbook/DMA_Scoring_Workbook_X_INTERIM.xlsx")
     m = package_map.map_package(tmp_path)
     assert m["scoring"]["primary"].endswith("DMA_Scoring_Workbook_X.xlsx")
-    assert any("INTERIM" in s["path"] for s in m["scoring"]["set_aside"])
-    assert any("set aside" in a for a in m["ambiguities"])
+    # Which ROLE owns the set-aside follows the folder it sits in, so assert
+    # the invariant rather than the bookkeeping: an interim never displaces a
+    # LIVE workbook of the same role, and is always named. (Here research has
+    # nothing else, so the module's deliberate rule applies — it is used under
+    # protest rather than dropped, because an interim register still carries
+    # real excerpts and losing them is the worse failure.)
+    set_aside = m["scoring"]["set_aside"] + m["research"]["set_aside"]
+    assert any("INTERIM" in s["path"] for s in set_aside)
+    assert "INTERIM" not in m["scoring"]["primary"]
+    # "set aside" and "under protest" are the two halves of one rule and
+    # never both fire for a role: set aside when a live workbook won, under
+    # protest when the interim was all there was. Either way it is on record.
+    assert any(("under protest" in a) or ("set aside" in a)
+               for a in m["ambiguities"])
 
 
 def test_explorium_noise_is_auxiliary_not_scoring(tmp_path):
@@ -213,15 +225,52 @@ def test_package_map_names_export_only_scoring(tmp_path):
     assert not any("BRIEFING-ONLY" in a for a in m["ambiguities"])
 
 
-def test_a_scoring_named_workbook_in_the_research_folder_is_flagged(tmp_path):
-    """Shore United Bank keeps its research workbook named
-    DMA_Scoring_Workbook_* inside 02_research_workbook/ — the map must not
-    silently conclude the research workbook is absent."""
+def test_a_scoring_named_workbook_in_the_research_folder_IS_the_research_one(
+        tmp_path):
+    """Shore United Bank and Houlihan Lokey both keep their research workbook
+    named DMA_Scoring_Workbook_* inside 02_research_workbook/.
+
+    This test used to assert `research.primary is None` as long as an
+    ambiguity was raised, and that assertion is what let the defect ship:
+    on 2026-08-22 Houlihan Lokey's research workbook was "flagged" exactly
+    as designed and then never opened, so the ONE store carrying verbatim
+    Excerpt/Anchor_Quote columns left the pipeline and 462 of 462 excerpts
+    were fabricated downstream to fill the vacuum. Noticing is not using.
+    The folder names the role; the shared filename template does not."""
     _mk(tmp_path, "03_scoring_workbook/DMA_Scoring_Workbook_X_SCORED.xlsx")
     _mk(tmp_path, "02_research_workbook/DMA_Scoring_Workbook_X.xlsx")
     m = package_map.map_package(tmp_path)
+    assert m["research"]["primary"].endswith(
+        "02_research_workbook/DMA_Scoring_Workbook_X.xlsx")
+    assert m["scoring"]["primary"].endswith(
+        "03_scoring_workbook/DMA_Scoring_Workbook_X_SCORED.xlsx")
+    # and the research workbook actually reaches the evidence readers
+    assert any("02_research_workbook" in s
+               for s in m["source_map"]["evidence"])
+
+
+def test_one_file_never_serves_both_roles(tmp_path):
+    """The mirror risk of folder-first classification: a package with a
+    single workbook must not have it stand in for the missing role."""
+    _mk(tmp_path, "02_research_workbook/DMA_Scoring_Workbook_X.xlsx")
+    m = package_map.map_package(tmp_path)
+    assert m["research"]["primary"] is not None
+    assert m["scoring"]["primary"] is None
+    assert m["research"]["primary"] not in (m["source_map"]["scores"] or [])
+    assert any("one file never serves both roles" in a
+               for a in m["ambiguities"])
+
+
+def test_a_package_with_no_research_workbook_says_excerpts_will_be_missing(
+        tmp_path):
+    """An honest absence, and the ambiguity has to name the consequence —
+    that the excerpts are gone, not that they should be found elsewhere."""
+    _mk(tmp_path, "03_scoring_workbook/DMA_Scoring_Workbook_X.xlsx")
+    m = package_map.map_package(tmp_path)
     assert m["research"]["primary"] is None
-    assert any("misnamed research workbook" in a for a in m["ambiguities"])
+    amb = " ".join(m["ambiguities"])
+    assert "NO RESEARCH WORKBOOK" in amb
+    assert "NOT excerpts invented" in amb
 
 
 # ── the collection-date rung (owner, 2026-08-20: most evidence UNVERIFIED) ──

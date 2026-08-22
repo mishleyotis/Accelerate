@@ -139,7 +139,15 @@ def main(argv=None) -> int:
     p_c.add_argument("--limit", type=int, default=None)
     p_t = sub.add_parser("trends")
     p_t.add_argument("--from", dest="src", required=True)
+    p_w = sub.add_parser("workbooks")
+    p_w.add_argument("--out", required=True,
+                     help="JSONL sink, APPENDED to so a run can be resumed")
+    p_w.add_argument("--limit", type=int, default=None)
+    p_w.add_argument("--skip", type=int, default=0)
     a = ap.parse_args(argv)
+    if a.cmd == "workbooks":
+        print(json.dumps(workbooks(a.out, a.limit, a.skip)))
+        return 0
     if a.cmd == "survey":
         print(json.dumps(survey(a.limit), indent=1))
         return 0
@@ -303,6 +311,127 @@ def trends(jsonl_path: str) -> dict:
         "evidence_rows_with_date": date_rows,
         "evidence_rows_with_50char_excerpt": excerpt_rows,
     }
+
+
+# ── workbook-shape survey: what a register ACTUALLY looks like ──
+#
+# Added 2026-08-22 after Houlihan Lokey. The `corpus` mode above profiles
+# CSVs and never opens a workbook, so every rule about workbook ROLE, tab
+# naming and excerpt columns was written from two or three examples. That
+# is how `02_research_workbook/DMA_Scoring_Workbook_HL.xlsx` came to be
+# classified by its filename, and how `Fact_Summary` came to be in no
+# synonym tuple. This mode opens every workbook in the corpus and records
+# the three things those rules need: where the file sits, what its tabs are
+# called, and which column actually carries verbatim text.
+
+XLSX_MAX_BYTES = 60_000_000
+EXCERPT_FLOOR = 50
+
+
+def _header_row(rows):
+    """The same rule the live parsers use: first row with 3+ non-empty
+    strings. Measuring with a different rule would measure a fiction."""
+    for i, r in enumerate(rows[:20]):
+        strs = [c for c in r if isinstance(c, str) and c.strip()]
+        if len(strs) >= 3:
+            return i, [str(c).strip() if c is not None else "" for c in r]
+    return None, []
+
+
+def _profile_workbook(raw: bytes) -> dict:
+    from openpyxl import load_workbook
+    bio = io.BytesIO(raw)
+    try:
+        wb = load_workbook(bio, read_only=True, data_only=True)
+    except Exception as e:                                  # noqa: BLE001
+        return {"error": f"unreadable workbook: {e}"}
+    tabs = []
+    try:
+        for ws in wb.worksheets:
+            try:
+                rows = [list(r) for r in
+                        ws.iter_rows(max_row=1200, values_only=True)]
+            except Exception as e:                          # noqa: BLE001
+                tabs.append({"tab": ws.title, "error": str(e)})
+                continue
+            hi, hdr = _header_row(rows)
+            if hi is None:
+                tabs.append({"tab": ws.title, "rows": 0, "header": []})
+                continue
+            body = rows[hi + 1:]
+            body = [r for r in body
+                    if r and any(c is not None and str(c).strip() for c in r)]
+            # which column holds evidence ids, and which holds long text
+            eid_col = None
+            long_cols = {}
+            for j, h in enumerate(hdr):
+                if not h:
+                    continue
+                vals = [r[j] for r in body if j < len(r)]
+                strs = [str(v).strip() for v in vals
+                        if isinstance(v, str) and str(v).strip()]
+                if eid_col is None and strs and \
+                        sum(1 for s in strs if EID_RE.match(s)) >= max(
+                            3, len(strs) // 2):
+                    eid_col = h.lower()
+                if strs:
+                    over = sum(1 for s in strs if len(s) >= EXCERPT_FLOOR)
+                    if over:
+                        long_cols[h.lower()] = {
+                            "n_over_floor": over,
+                            "median_len": sorted(len(s) for s in strs)[
+                                len(strs) // 2]}
+            tabs.append({"tab": ws.title, "rows": len(body),
+                         "header": [h.lower() for h in hdr if h][:24],
+                         "eid_column": eid_col,
+                         "long_text_columns": long_cols})
+    finally:
+        wb.close()
+    return {"tabs": tabs}
+
+
+def workbooks(out_path: str, limit: int | None = None,
+              skip: int = 0) -> dict:
+    """One JSONL line per client: every workbook, where it sits, its tabs."""
+    tok = drive_fetch._token()
+    clients = [f for f in drive_fetch._list_children(
+        tok, drive_fetch.INTAKE_FOLDER_ID)
+        if f["mimeType"] == drive_fetch.FOLDER_MIME]
+    sel = clients[skip:None if limit is None else skip + limit]
+    n = 0
+    with open(out_path, "a") as sink:
+        for i, cf in enumerate(sel):
+            row = {"client": cf["name"], "workbooks": []}
+            try:
+                files = list(_walk(tok, cf["id"]))
+            except Exception as e:                          # noqa: BLE001
+                row["error"] = str(e)
+                sink.write(json.dumps(row) + "\n")
+                sink.flush()
+                continue
+            row["folders"] = sorted({p.rsplit("/", 1)[0]
+                                     for p, _ in files if "/" in p})
+            for path, f in files:
+                if not path.lower().endswith((".xlsx", ".xlsm")):
+                    continue
+                size = int(f.get("size") or 0)
+                entry = {"path": path, "size": size,
+                         "dir": path.rsplit("/", 1)[0] if "/" in path
+                         else "(top)"}
+                if size > XLSX_MAX_BYTES:
+                    entry["error"] = f"skipped, {size} bytes"
+                else:
+                    try:
+                        entry.update(_profile_workbook(_grab(tok, f["id"])))
+                    except Exception as e:                  # noqa: BLE001
+                        entry["error"] = str(e)
+                row["workbooks"].append(entry)
+            sink.write(json.dumps(row) + "\n")
+            sink.flush()
+            n += 1
+            print(f"[{skip + i + 1}] {cf['name']}: "
+                  f"{len(row['workbooks'])} workbook(s)", file=sys.stderr)
+    return {"clients": n}
 
 
 if __name__ == "__main__":
