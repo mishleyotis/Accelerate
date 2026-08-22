@@ -264,17 +264,34 @@ function ClientContext({ entity, run }) {
             </div>
           ) : (DMA.ACQUISITIONS || []).map((a, i, arr) => (
             <div key={a.id || i} style={{ padding: "10px 0", borderBottom: i < arr.length - 1 ? "1px solid var(--z-sep)" : "none", cursor: "pointer" }} onClick={() => setAcqOpen(acqOpen === (a.id || i) ? null : (a.id || i))}>
-              <div className="row">
+              {/* WRAPS, and every child can shrink. `.row` is
+                  `display:flex` with no `flex-wrap`, `.b` is
+                  `white-space:nowrap`, and this row carries up to four chips
+                  beside a `flex:1` name whose default `min-width:auto` stops
+                  it shrinking below its own text. Reported 2026-08-22 on the
+                  promoted T. Rowe Price run: `kind` came through as "Private
+                  markets and alternative credit investment manager
+                  (acquisition)" — 68 characters in a 10px chip built for a
+                  token — and pushed the row past the card edge at every
+                  viewport. `status` and `maturity_effect` are enums and stay
+                  nowrap; `kind` is free text the contract does not bound, so
+                  it is the one that must be allowed to wrap. */}
+              <div className="row" style={{ flexWrap: "wrap", rowGap: 6 }}>
                 {/* The date slot holds a date or nothing. It used to print the
                     word "undated" in the date's own place, which reads as a
                     label on the acquisition rather than as the absence of a
                     figure — the run's dating discipline is a producer problem
                     and does not belong in a client's title row. */}
                 {a.date ? (
-                  <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{a.date}</span>
+                  <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)", flexShrink: 0 }}>{a.date}</span>
                 ) : null}
-                <div style={{ flex: 1, fontWeight: 500, fontSize: 12.5 }}>{a.target}</div>
-                {a.kind ? <span className="b b-muted">{a.kind}</span> : null}
+                <div style={{ flex: "1 1 140px", minWidth: 0, overflowWrap: "anywhere", fontWeight: 500, fontSize: 12.5 }}>{a.target}</div>
+                {a.kind ? (
+                  <span className="b b-muted"
+                        style={{ whiteSpace: "normal", overflowWrap: "anywhere", maxWidth: "100%", textAlign: "left" }}>
+                    {a.kind}
+                  </span>
+                ) : null}
                 <span className="b b-muted">{a.status}</span>
                 {/* The same axis the timeline chips filter by, on the row that
                     makes the reader ask about it. It was promoted and dropped:
