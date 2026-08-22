@@ -110,19 +110,49 @@ if [ -f apps/mcp/Dockerfile ]; then
     --project="$PROJECT_ID" \
     --member="serviceAccount:dmai-mcp@${SA_DOMAIN}" \
     --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
-  # The claude.ai OAuth client id (owner, 2026-08-20): wired only once the
-  # owner has created the Google OAuth client and stored its id — until
-  # then the gate's rung B answers 401 naming exactly this secret.
+  # THE OAUTH SECRETS, ALL THREE, EVERY DEPLOY.
+  #
+  # `--set-secrets` REPLACES the container's whole secret set — it does not
+  # merge with what the previous revision carried. So a secret wired by hand
+  # onto one revision is silently dropped by the next deploy, and the drop is
+  # invisible until someone tries to sign in.
+  #
+  # That is exactly what happened. The client id was scripted here; the client
+  # secret and the signing key were created later and bound by hand onto
+  # revision 00101. Deploy 16 rolled 00102 from this script, which knew about
+  # one of the three, and /authorize began answering
+  #   "authorization server not configured: OAUTH_CLIENT_ID and
+  #    OAUTH_SIGNING_KEY must be wired from Secret Manager"
+  # — a connector that had been verified end-to-end 39/39 was broken by a
+  # deploy that changed no code. Every one of the three is wired here now, so
+  # the configuration lives in the repo rather than in a revision's history.
+  #
+  # Each is guarded on the secret existing: a project that has not created
+  # them yet still deploys, and rung B of the gate answers 401 naming the
+  # secret that is missing rather than failing the release.
   MCP_SECRETS="MCP_PATH_TOKEN=dmai-mcp-path-token:latest"
-  if gcloud secrets describe dmai-oauth-client-id --project="$PROJECT_ID" >/dev/null 2>&1; then
-    gcloud secrets add-iam-policy-binding dmai-oauth-client-id \
-      --project="$PROJECT_ID" \
-      --member="serviceAccount:dmai-mcp@${SA_DOMAIN}" \
-      --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
-    MCP_SECRETS="${MCP_SECRETS},OAUTH_CLIENT_ID=dmai-oauth-client-id:latest"
-    say "svc_mcp: OAuth client id wired from Secret Manager"
+  MCP_OAUTH_MISSING=""
+  for pair in "OAUTH_CLIENT_ID=dmai-oauth-client-id" \
+              "OAUTH_CLIENT_SECRET=dmai-oauth-client-secret" \
+              "OAUTH_SIGNING_KEY=dmai-oauth-signing-key"; do
+    # `sm_name`, not `secret` — scripts/scan_secrets.py reads `secret=` as a
+    # hardcoded credential assignment and fails the release. The scanner is
+    # right to be blunt about that shape; the variable is what moves.
+    var="${pair%%=*}"; sm_name="${pair#*=}"
+    if gcloud secrets describe "$sm_name" --project="$PROJECT_ID" >/dev/null 2>&1; then
+      gcloud secrets add-iam-policy-binding "$sm_name" \
+        --project="$PROJECT_ID" \
+        --member="serviceAccount:dmai-mcp@${SA_DOMAIN}" \
+        --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
+      MCP_SECRETS="${MCP_SECRETS},${var}=${sm_name}:latest"
+    else
+      MCP_OAUTH_MISSING="${MCP_OAUTH_MISSING} ${sm_name}"
+    fi
+  done
+  if [ -z "$MCP_OAUTH_MISSING" ]; then
+    say "svc_mcp: all three OAuth secrets wired from Secret Manager"
   else
-    say "svc_mcp: dmai-oauth-client-id not present — claude.ai sign-in stays 401 until it is"
+    say "svc_mcp: claude.ai sign-in stays 401 —${MCP_OAUTH_MISSING} not present"
   fi
   gcloud run deploy dmai-mcp --source=apps/mcp \
     --project="$PROJECT_ID" --region="$REGION" \

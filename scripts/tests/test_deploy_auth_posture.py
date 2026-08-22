@@ -155,3 +155,80 @@ def test_web_is_exempt_and_the_reason_is_written_down():
     assert "dmai-web" in text and "iap" in text.lower(), (
         "dmai-web is deployed public with no IAP configuration in the same "
         "file; either it is protected somewhere unstated or it is exposed")
+
+
+# ── the OAuth secrets a deploy must carry, derived from the code ──────────
+#
+# `--set-secrets` REPLACES the container's whole secret set; it does not merge
+# with the previous revision's. So a secret bound by hand onto one revision is
+# dropped by the very next deploy, silently, and stays dropped until someone
+# tries to sign in.
+#
+# That happened. `deploy.sh` scripted OAUTH_CLIENT_ID; OAUTH_CLIENT_SECRET and
+# OAUTH_SIGNING_KEY were created later and bound by hand onto revision 00101.
+# Deploy 16 rolled 00102 from the script and /authorize started answering
+# "authorization server not configured: OAUTH_CLIENT_ID and OAUTH_SIGNING_KEY
+# must be wired from Secret Manager" — a connector verified end-to-end 39/39
+# broken by a deploy that changed no code. The end-to-end verifier caught it
+# only because it was re-run; nothing failed at deploy time.
+#
+# The list is READ FROM `oauth_as.py`, never restated, so a newly required
+# variable fails this test on the commit that introduces it rather than on the
+# deploy that drops it.
+
+OAUTH_AS = ROOT / "apps" / "mcp" / "dma_mcp" / "oauth_as.py"
+
+
+def _oauth_env_vars_the_code_requires() -> set:
+    import ast
+    tree = ast.parse(OAUTH_AS.read_text(encoding="utf-8"))
+    names = set()
+    for node in ast.walk(tree):
+        # os.environ.get("OAUTH_…")
+        if (isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "get"
+                and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and isinstance(node.args[0].value, str)
+                and node.args[0].value.startswith("OAUTH_")):
+            names.add(node.args[0].value)
+    return names
+
+
+def test_the_authorization_server_reads_the_three_we_think_it_does():
+    """A guard on the guard: if this set changes, the wiring test below is
+    checking the wrong thing and should be read again, not silently widened."""
+    assert _oauth_env_vars_the_code_requires() == {
+        "OAUTH_CLIENT_ID", "OAUTH_CLIENT_SECRET", "OAUTH_SIGNING_KEY"}
+
+
+def test_every_oauth_variable_the_code_reads_is_wired_by_the_deploy():
+    src = DEPLOY.read_text(encoding="utf-8")
+    for var in sorted(_oauth_env_vars_the_code_requires()):
+        secret = var.lower().replace("_", "-").replace("oauth-", "dmai-oauth-")
+        assert secret in src, (
+            f"{var} is read by oauth_as.py and Secret Manager holds {secret}, "
+            f"but infra/deploy.sh never wires it — --set-secrets replaces the "
+            f"whole set, so the next deploy drops it and sign-in breaks with "
+            f"no code change")
+        assert f"{var}=" in src, (
+            f"{secret} is named in deploy.sh but not bound to {var}")
+
+
+def test_the_mcp_secret_set_is_built_in_one_place():
+    """One variable carries every secret into --set-secrets. Two builders
+    would let one of them be complete and the other not — which is the shape
+    of the bug this file is about, one level up."""
+    src = DEPLOY.read_text(encoding="utf-8")
+    assert src.count('--set-secrets="$MCP_SECRETS"') == 1
+    assert 'MCP_SECRETS="MCP_PATH_TOKEN=dmai-mcp-path-token:latest"' in src
+
+
+def test_a_missing_oauth_secret_does_not_fail_the_release():
+    """A project that has not created them yet still deploys — the gate then
+    answers 401 naming what is missing. A deploy that hard-failed here would
+    make the first deploy of a new environment impossible."""
+    src = DEPLOY.read_text(encoding="utf-8")
+    assert "gcloud secrets describe" in src
+    assert "MCP_OAUTH_MISSING" in src
