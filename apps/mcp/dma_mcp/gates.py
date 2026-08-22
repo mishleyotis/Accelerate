@@ -218,6 +218,38 @@ GATES = {
               "list_enrichment_gaps reported attempted_by_routine 0 for the "
               "run, so the attempt left no trace anywhere else.",
               "block"),
+    "CG-33": ("Three executives speaking, or the reason none were found", None,
+              "overview.thought_leadership serves at least three entries. "
+              "thin=true records a shortfall; it does not excuse one.",
+              "The Surface Specification's floor was two, and the T. Rowe "
+              "Price page served ONE — honestly, with thin=true and a real "
+              "per-executive search account, so nothing refused it. Owner "
+              "raised the floor to three on 2026-08-22. What makes three "
+              "reachable is the cause the run itself identified: the evidence "
+              "store carried executive coverage for five of six roster members "
+              "as paraphrases and quoted fragments UNDER the 80-character "
+              "verbatim floor, or truncated mid-word. The chief technology "
+              "officer seat alone had five publications with no admissible "
+              "quote among them. The speech exists; registration was not "
+              "capturing quotable spans — so the refusal names that route "
+              "rather than sending a producer hunting for a sixth source.",
+              "block"),
+    "CG-34": ("A trajectory reaches back five years, or the search did", None,
+              "overview.financial_series serves five distinct years, or its "
+              "search account names a period at least four years older than "
+              "its newest point.",
+              "The Surface Specification states the intent in the Context "
+              "page header — '8 of 8 events · 4 issues · 5-year financials'. "
+              "The T. Rowe Price page served two points, FY2025 year-end and "
+              "Q2 2026, and its own reading called it 'a snapshot, not a "
+              "trajectory'. verified_sparse was set and the search was named, "
+              "so every gate passed. The producer had resolved the latest "
+              "results release and stopped; for a public filer the earlier "
+              "figures sit in the same investor-relations page and annual "
+              "report it had already opened. The test is on REACH rather than "
+              "on luck: an entity with genuinely no published history passes "
+              "by showing which years it looked at.",
+              "block"),
     "CG-29": ("A narrative thread says what THIS section adds", None,
               "No two sections on a page carry the same narrative_thread, "
               "word for word.",

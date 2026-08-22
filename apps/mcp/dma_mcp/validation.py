@@ -622,6 +622,129 @@ def _check_resolved_contacts_are_served(section, body) -> list:
     return []
 
 
+#: The Surface Specification's own floor was 2 ("Fewer than 2 entries after
+#: searching all seven source families -> emit what you have, set thin=true").
+#: Raised to 3 by the owner on 2026-08-22 after the T. Rowe Price page served
+#: one. Held here as a named constant so the number has one home.
+THOUGHT_LEADERSHIP_FLOOR = 3
+
+#: How far back a financial trajectory must reach. The Surface Specification's
+#: Context page header states it in as many words — "8 of 8 events · 4 issues ·
+#: 5-year financials".
+FINANCIAL_SERIES_YEARS = 5
+
+_YEAR = re.compile(r"\b(19|20)\d{2}\b")
+
+
+def _years_in(*values) -> set:
+    out = set()
+    for v in values:
+        for m in _YEAR.finditer(str(v or "")):
+            out.add(int(m.group(0)))
+    return out
+
+
+def _check_thought_leadership_depth(section, body) -> list:
+    """CG-33 — the card carries three executives speaking, or says why not.
+
+    The T. Rowe Price page served ONE entry. The section was honest about it —
+    thin=true, and a `sources_searched` naming per-executive searches across
+    earnings transcripts, PR Newswire, DEF 14A and investor relations — so
+    nothing refused it: the spec's floor was 2 and the disclosure was real.
+
+    The owner raised the floor to 3 (2026-08-22). What makes that reachable
+    rather than a wall is the second half of the same decision: the run's own
+    reason said the evidence store carries executive coverage for five of six
+    roster members as researcher paraphrases and quoted fragments UNDER THE
+    80-CHARACTER FLOOR or truncated mid-word — the chief technology officer
+    seat alone had five publications with no admissible quote among them. The
+    speech exists; the registration was not capturing quotable spans. So this
+    message names that route, because a producer told only "find one more" will
+    go looking for a sixth publication rather than re-registering the five it
+    already has.
+    """
+    if section != "thought_leadership" or not isinstance(body, dict):
+        return []
+    entries = body.get("entries")
+    if not isinstance(entries, list) or len(entries) >= THOUGHT_LEADERSHIP_FLOOR:
+        return []
+    return [_reason(
+        "CG-33", "thought_leadership", "thought_leadership.entries",
+        f"{len(entries)} entr{'y' if len(entries) == 1 else 'ies'} served and "
+        f"{THOUGHT_LEADERSHIP_FLOOR} are required. Before searching for another "
+        f"publication, check the ones already registered: an entry is "
+        f"admissible only on a VERBATIM quote of 80-260 characters, and the "
+        f"commonest cause of a thin card is evidence registered with a "
+        f"paraphrase, a fragment under the floor, or a span truncated "
+        f"mid-word. Re-register those sources with a continuous quoted span "
+        f"and the entries follow. thin=true records the shortfall; it does not "
+        f"excuse it.")]
+
+
+def _check_financial_series_reach(section, body) -> list:
+    """CG-34 — a trajectory reaches back five years, or the search did.
+
+    The T. Rowe Price page served two points — FY2025 year-end and Q2 2026 —
+    and its own `reading` called it "a snapshot, not a trajectory". The section
+    set verified_sparse and named what it searched, so every gate passed; the
+    Surface Specification nonetheless states the intent plainly, in the Context
+    page header: "8 of 8 events · 4 issues · 5-year financials".
+
+    The producer resolved the latest results release and stopped. For a public
+    filer, prior-year assets under management sit in the same investor-relations
+    page and the same annual report it had already opened.
+
+    So the test is on REACH, not on luck: either five distinct years are
+    served, or the disclosure shows the ladder actually looked at a period at
+    least four years older than the newest point. That is checked by reading
+    the YEARS named in the search account, not by matching the words "10-K" or
+    "annual report" — a producer that searched a 2021 filing says 2021, in
+    whatever form of words it likes, and an entity with genuinely no published
+    history can still satisfy it by showing where it looked.
+    """
+    if section != "financial_series" or not isinstance(body, dict):
+        return []
+    series = body.get("series")
+    if not isinstance(series, list) or not series:
+        return []                       # an empty series is CG's empty-state job
+
+    served = set()
+    for p in series:
+        if isinstance(p, dict):
+            served |= _years_in(p.get("as_of"), p.get("period"))
+    if len(served) >= FINANCIAL_SERIES_YEARS:
+        return []
+
+    newest = max(served) if served else None
+    if newest is None:
+        return []                       # undated points are the date gates' job
+
+    reach = newest - (FINANCIAL_SERIES_YEARS - 1)
+    es = body.get("empty_state")
+    searched = set()
+    if isinstance(es, dict):
+        for v in es.values():
+            if isinstance(v, str):
+                searched |= _years_in(v)
+            elif isinstance(v, list):
+                searched |= _years_in(*[x for x in v if isinstance(x, str)])
+    if any(y <= reach for y in searched):
+        return []
+
+    return [_reason(
+        "CG-34", "financial_series", "financial_series.series",
+        f"{len(served)} distinct year{'' if len(served) == 1 else 's'} served "
+        f"({', '.join(str(y) for y in sorted(served))}) against the "
+        f"{FINANCIAL_SERIES_YEARS}-year trajectory the surface is specified to "
+        f"carry, and the search account names no period at or before {reach}. "
+        f"A trajectory is the point of this card — two dated points are a "
+        f"snapshot. For a public filer the earlier figures are in the "
+        f"investor-relations page and the annual report already cited for the "
+        f"latest one, so walk back to {reach} in the entity's OWN filings. If the "
+        f"history genuinely is not published, say where you looked and name "
+        f"the years, and this passes on the search rather than on the result.")]
+
+
 def _check_page_thread(page, section, fields, body) -> list:
     """CG-23 — a section whose writer stores a thread carries one.
 
@@ -985,6 +1108,8 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_starter_tone(name, body))
         reasons.extend(_check_roster_keeps_uncontactable(name, body))
         reasons.extend(_check_resolved_contacts_are_served(name, body))
+        reasons.extend(_check_thought_leadership_depth(name, body))
+        reasons.extend(_check_financial_series_reach(name, body))
 
         # id-pattern discipline
         for i, e in enumerate(body.get("e_ids") or []):
