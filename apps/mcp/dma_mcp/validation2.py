@@ -2161,6 +2161,112 @@ def _check_date_reach(page, section, body):
     return out
 
 
+def _sentiment_bar_rows(body):
+    """The overview's rating bars, by evidence id."""
+    if not isinstance(body, dict):
+        return {}
+    return {str(b["e_id"]): b for b in (body.get("bars") or [])
+            if isinstance(b, dict) and b.get("e_id")}
+
+
+def _sentiment_grid_rows(body):
+    """The context grid's drilldown rows, by evidence id — the same readings
+    the overview draws as bars, one card each."""
+    out = {}
+    if not isinstance(body, dict):
+        return out
+    for tile in body.get("context_tiles") or []:
+        if not isinstance(tile, dict):
+            continue
+        for row in tile.get("rows") or []:
+            if isinstance(row, dict) and row.get("e_id"):
+                out[str(row["e_id"])] = row
+    return out
+
+
+def _check_sentiment_projections_agree(conn, run_id, page, payload) -> list:
+    """CG-43 — the Context grid and the Overview bars are one dataset.
+
+    The contract says it outright, in the context_tiles field doc: the grid is
+    "a RE-PROJECTION of the same dataset O9 renders as bars, so the two cards
+    cannot disagree". Nothing read that sentence, and the two surfaces drifted
+    the moment either was edited alone.
+
+    Measured 2026-08-23, and the drift was mine: I added a second customer bar
+    to axos-bank's overview (UFB Direct, 4.83 over 19,831 ratings) without
+    touching the context grid, so the Overview showed two readings and the
+    Context page showed one. Nothing refused it. The owner had asked for this
+    exact congruence the same evening.
+
+    Keyed on `e_id`, because that is the one identifier both sides already
+    carry and it survives a source string being reworded on one page. A
+    reading present on one surface and absent from the other is the finding;
+    where both carry it, the RATING has to match too, since a re-projection
+    that renumbers is worse than one that omits.
+
+    BOTH EMPTY IS CONGRUENT and passes: gulf-coast-business-credit serves no
+    bar and no tile because a business-to-business lender accumulates no
+    consumer review estate, and both cards say so in the same terms. The gate
+    is about disagreement, never about depth — CG-40 owns depth.
+    """
+    if page not in ("overview", "context") or not isinstance(payload, dict):
+        return []
+    if page == "overview":
+        bars = _sentiment_bar_rows(payload.get("sentiment"))
+        sibling = _live_submission(conn, run_id, "context")
+        grid = _sentiment_grid_rows(
+            (sibling or {}).get("context_sentiment") if isinstance(sibling, dict) else None)
+        here, there = "overview.sentiment.bars", "context.context_sentiment"
+        staged = isinstance(sibling, dict) and bool(sibling)
+    else:
+        grid = _sentiment_grid_rows(payload.get("context_sentiment"))
+        sibling = _live_submission(conn, run_id, "overview")
+        bars = _sentiment_bar_rows(
+            (sibling or {}).get("sentiment") if isinstance(sibling, dict) else None)
+        here, there = "context.context_sentiment.context_tiles", "overview.sentiment"
+        staged = isinstance(sibling, dict) and bool(sibling)
+    if not staged:
+        return []                    # nothing to compare yet; promote re-gates
+    if not bars and not grid:
+        return []                    # congruently empty, which is a real answer
+
+    out = []
+    only_bars = sorted(set(bars) - set(grid))
+    only_grid = sorted(set(grid) - set(bars))
+    if only_bars:
+        out.append(_reason(
+            "CG-43", "sentiment" if page == "overview" else "context_sentiment",
+            here,
+            f"{len(only_bars)} reading(s) render as a bar on the Overview and "
+            f"appear nowhere in the Context grid: {', '.join(only_bars[:6])}"
+            f"{'' if len(only_bars) <= 6 else f' (+{len(only_bars) - 6} more)'}. "
+            "The contract calls the grid a re-projection of the same dataset, "
+            f"so the two cards cannot disagree — add the row to {there}, or "
+            "drop the bar. A reader who opens the Context page to see the "
+            "detail behind a bar and finds it missing has been told the "
+            "assessment looked twice and saw different things."))
+    if only_grid:
+        out.append(_reason(
+            "CG-43", "sentiment" if page == "overview" else "context_sentiment",
+            here,
+            f"{len(only_grid)} reading(s) sit in the Context grid with no bar "
+            f"on the Overview: {', '.join(only_grid[:6])}. Same rule, the "
+            "other way round: the Overview is the summary of this dataset and "
+            "a reading it omits is one the summary hides."))
+    for eid in sorted(set(bars) & set(grid)):
+        b, g = bars[eid].get("rating"), grid[eid].get("rating")
+        if isinstance(b, (int, float)) and isinstance(g, (int, float)) \
+                and abs(float(b) - float(g)) > 0.005:
+            out.append(_reason(
+                "CG-43", "sentiment" if page == "overview" else "context_sentiment",
+                here,
+                f"{eid} reads {b} on the Overview and {g} in the Context "
+                "grid. One dataset, one number: a re-projection that "
+                "renumbers is worse than one that omits, because both look "
+                "authoritative."))
+    return out[:6]
+
+
 def _check_depth_floors(page, payload):
     """CG-40 — a section whose value is its depth reaches a floor or says why.
 
@@ -2259,6 +2365,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
         conn, run_id, page, payload))
     reasons.extend(_check_depth_floors(page, payload))
     reasons.extend(_check_contact_enrichment_baseline(page, payload))
+    reasons.extend(_check_sentiment_projections_agree(
+        conn, run_id, page, payload))
 
     served = _served_figures(conn, run_id)
 

@@ -387,6 +387,27 @@ GATES = {
               "mean one thing. Only near-misses are refused, and a shared "
               "vendor name is never a near-miss.",
               "block"),
+    "CG-43": ("The Context sentiment grid and the Overview bars are one "
+              "dataset", None,
+              "Every reading the Overview draws as a bar appears as a row in "
+              "the Context grid and vice versa, keyed on e_id, and where both "
+              "carry a reading the rating matches. Both surfaces empty is "
+              "congruent and passes.",
+              "The contract already said it, in the context_tiles field doc: "
+              "the grid is 'a RE-PROJECTION of the same dataset O9 renders as "
+              "bars, so the two cards cannot disagree'. Nothing read that "
+              "sentence, so the two drifted the moment either was edited "
+              "alone. Measured 2026-08-23 and the drift was the build's own: "
+              "a second customer bar was added to axos-bank's Overview (UFB "
+              "Direct, 4.83 over 19,831 ratings) without touching the Context "
+              "grid, so one page showed two readings and the other showed "
+              "one, and nothing refused it — while the owner was asking for "
+              "exactly this congruence. Keyed on e_id because that is the "
+              "identifier both sides already carry and it survives a source "
+              "string being reworded on one page. Depth is not this gate's "
+              "business: an entity with no rated source serves neither a bar "
+              "nor a tile and passes, which is gulf-coast-business-credit.",
+              "block"),
 
     "CG-39": ("The run's recommendations reach the platform page", None,
               "When the run's bundle carries recommendations and the platform "
