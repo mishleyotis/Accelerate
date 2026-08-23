@@ -1659,6 +1659,55 @@ def _check_opportunity_tiles_are_the_engine_s(conn, run_id, page,
     return out[:6]
 
 
+
+def _check_recommendations_reach_the_platform_page(conn, run_id, page, payload):
+    """CG-39 — a run whose analyst wrote recommendations must serve some.
+
+    Measured 2026-08-23 on a promoted run. get_report_bundle returned SEVEN
+    recommendations — integrate FactorSoft with Salesforce, deliver as managed
+    services, operationalise Pardot — each with a category, an evidence_basis
+    of real e_ids and a named offering. The promoted platform page served four
+    tiles reading "5 cells · 0 recs", one of them Marketing Cloud Account
+    Engagement (Pardot), which is the subject of the third recommendation.
+
+    Nothing was wrong with the analysis. The write path had no read path, and
+    a client saw four cards recommending nothing.
+
+    The check is deliberately weak — ONE recommendation served clears it. It
+    is not trying to judge the mapping, only to catch the case where the whole
+    set was dropped, which is the one that reached a client.
+    """
+    if page != "platform" or not isinstance(payload, dict):
+        return []
+    tiles = ((payload.get("platform_story") or {}).get("platforms")
+             if isinstance(payload.get("platform_story"), dict) else None)
+    if not isinstance(tiles, list) or not tiles:
+        return []                       # no tiles: CG-30 owns that case
+    served = ((payload.get("recommendations") or {}).get("recommendations")
+              if isinstance(payload.get("recommendations"), dict) else None)
+    if isinstance(served, list) and served:
+        return []                       # something reached the page
+    try:
+        cur = conn.cursor()
+        cur.execute("""SELECT count(*) FROM recommendations_raw
+                        WHERE run_id = %s""", (run_id,))
+        available = int((cur.fetchone() or [0])[0])
+    except Exception:                                        # noqa: BLE001
+        # Unreadable: this check did not run. It must not manufacture a
+        # verdict either way — that is the defect class it belongs to.
+        return []
+    if not available:
+        return []                       # nothing to drop; an honest absence
+    return [_reason(
+        "CG-39", "recommendations", "platform.recommendations.recommendations",
+        f"the run carries {available} recommendation(s) in its bundle and "
+        f"this payload serves none, while platform_story shows "
+        f"{len(tiles)} tile(s) — every card will read '0 recs'. Read them "
+        f"with get_report_bundle(run_id)['recommendations'] and serve the "
+        f"ones this page supports; if a recommendation genuinely maps to no "
+        f"tile, serve it anyway with its own l3_area, because the analyst "
+        f"wrote it about this client. Exactly one served clears this gate.")]
+
 def validate_pass2(conn, run_id, page: str, payload: dict,
                    encoder=None) -> tuple:
     """→ (blocking_reasons, sg_disclosures). SG results are also recorded
@@ -1715,6 +1764,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_platform_fit_is_the_engine_s(
         conn, run_id, page, payload))
     reasons.extend(_check_opportunity_tiles_are_the_engine_s(
+        conn, run_id, page, payload))
+    reasons.extend(_check_recommendations_reach_the_platform_page(
         conn, run_id, page, payload))
 
     served = _served_figures(conn, run_id)

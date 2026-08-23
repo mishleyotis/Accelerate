@@ -312,6 +312,26 @@ GATES = {
               "missed to begin with.",
               "block"),
 
+    "CG-39": ("The run's recommendations reach the platform page", None,
+              "When the run's bundle carries recommendations and the platform "
+              "payload serves platform tiles, at least one recommendation "
+              "must reach the page. A run whose analyst wrote "
+              "recommendations and whose platform cards all read zero has "
+              "dropped them between the bundle and the surface.",
+              "Owner, 2026-08-23, reading a promoted platform page: 'Gulf has "
+              "platforms with no recommendations. Is there a synthesis layer "
+              "that challenges recommendations, enhances them, confirms "
+              "validity?' Measured on that run: get_report_bundle returned "
+              "SEVEN recommendations — REC-1 integrate FactorSoft with "
+              "Salesforce, REC-2 deliver as managed services, REC-3 "
+              "operationalise Pardot — each carrying a category, an "
+              "evidence_basis of real e_ids and a named offering. The "
+              "promoted page served four platform tiles reading '5 cells · 0 "
+              "recs', one of them Marketing Cloud Account Engagement "
+              "(Pardot), the subject of REC-3. platform_fits_raw was empty. "
+              "Nothing was wrong with the analysis; the write path had no "
+              "read path, and a client saw four cards recommending nothing.",
+              "block"),
     "CG-38": ("A financial figure is quoted from a filing, never computed", None,
               "Every value in a financial series carries significant digits "
               "that occur in the excerpt of the evidence row it cites. "

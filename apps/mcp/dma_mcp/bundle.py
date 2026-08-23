@@ -76,6 +76,39 @@ def get_report_bundle(conn, run_id) -> dict:
                           "basis": "computed_mean_of_subcaps"}
                     for cid, (total, n) in caps.items()}
 
+    # A STATED GRAIN THAT DOES NOT EXIST IS NOT AN EMPTY ONE.
+    #
+    # `pillars` and `categories` are deliberately never recomputed: cap logic
+    # and weighting are applied when the workbook strikes those rows, and a
+    # mean taken here would discard both silently. That design is right, and
+    # it left a hole. Measured 2026-08-23: a promoted run whose workbook
+    # publishes no pillar tab served `pillars: []`, and the overview rendered
+    # "No pillar figure is served on this run" four times over 355 scored
+    # cells — a client looking at four blank bars cannot tell an absent
+    # workbook tab from a broken page, which is MEM-0060's shape exactly.
+    #
+    # So the stated rows stay stated, `*_basis` says which case this is, and
+    # a computed fallback is offered ALONGSIDE — never in place of them —
+    # carrying the same declared basis the capability rollups already carry,
+    # plus the warning that makes it safe to read. The producer decides
+    # whether to serve it; the payload discloses what it served.
+    def _mean_by(key):
+        acc: dict = {}
+        for s in scores:
+            if s["score"] is not None and s.get(key):
+                a = acc.setdefault(s[key], [0.0, 0])
+                a[0] += float(s["score"])
+                a[1] += 1
+        return {k: {"score": round(t / n, 2), "n": n,
+                    "basis": "computed_mean_of_subcaps",
+                    "caution": "cap logic and weighting are NOT applied — "
+                               "the workbook applies those when it strikes a "
+                               "stated row, and this run states none"}
+                for k, (t, n) in acc.items()}
+
+    stated_pillars = grains.get("pillars") or []
+    stated_categories = grains.get("categories") or []
+
     evidence = _rows(cur, """
         SELECT e.e_id, e.source_name, e.source_url, e.source_domain,
                e.excerpt, enum_label(e.tier) AS tier,
@@ -122,11 +155,25 @@ def get_report_bundle(conn, run_id) -> dict:
         "catalogue_cells": catalogue_cells, "composite": composite,
         "scores": scores,
         "rollups": {
-            "pillars": grains.get("pillars") or [],
-            "categories": grains.get("categories") or [],
+            "pillars": stated_pillars,
+            "categories": stated_categories,
             "capabilities": capabilities,
+            # Which case an empty list is. "absent" means the workbook
+            # publishes no such tab; "stated" means it does.
+            "pillars_basis": "stated" if stated_pillars else "absent",
+            "categories_basis": "stated" if stated_categories else "absent",
+            # Offered only where nothing is stated, so a reader can never
+            # mistake one for the other or quietly prefer the weaker figure.
+            "pillars_computed": (_mean_by("pillar_id")
+                                 if not stated_pillars else {}),
+            "categories_computed": (_mean_by("category_id")
+                                    if not stated_categories else {}),
             "note": "pillar and category rows are STATED (workbook tabs, "
-                    "with source cells); capabilities are computed and say so",
+                    "with source cells); capabilities are computed and say "
+                    "so. Where a run states none, *_basis reads 'absent' and "
+                    "*_computed carries a declared-basis mean WITHOUT cap "
+                    "logic or weighting — serve it only with that disclosure, "
+                    "and never as though the workbook had struck it",
         },
         "evidence": evidence,
         "report_sections": report_sections,
