@@ -38,6 +38,12 @@ MODULES = {
     "pyarrow": ("pyarrow", "dma-assessment: parquet evidence index"),
     "rank_bm25": ("rank-bm25", "dma-assessment: retrieve, eval_retrieval"),
     "pdfplumber": ("pdfplumber", "dma-assessment: ingest_evidence (PDF sources)"),
+    # UNDECLARED UNTIL 2026-08-23, and corpus_search imports THIS one, not
+    # pdfplumber. Without it every PDF in a package reports "no extractor
+    # for this type" — a false reason — the corpus index skips the reports,
+    # and a producer is told the package cannot answer and sent to the web
+    # for something the package holds. 35 PDFs across the sampled corpus.
+    "pypdf": ("pypdf", "dma-surface-production: corpus_search (report PDFs)"),
     "matplotlib": ("matplotlib", "dma-assessment: calibration plots"),
     "pptx": ("python-pptx", "dma-first-call-deck: 6 slide editors, "
                             "heatmap_editor, solution_slides_editor, "

@@ -70,52 +70,86 @@ def _xlsx_text(path: Path) -> str:
     return "\n".join(out)
 
 
-def _pdf_text(path: Path) -> str | None:
+def _pdf_text(path: Path):
+    """(text, None) on success, or (None, why) — and `why` is the truth.
+
+    This returned a bare None for BOTH "pypdf is not installed" and "this
+    PDF would not parse", and the caller then recorded the reason as "no
+    extractor for this type" for either. That sentence is false in both
+    cases and consequential in the first: the reports never enter the index,
+    `search` returns nothing, the CLI says "the corpus cannot answer this;
+    a search_requests entry (web) is the next rung", and a producer goes to
+    the web for a document sitting in the package. pypdf was also undeclared
+    in dma-deps until 2026-08-23, so nothing checked for it either.
+    """
     try:
         import pypdf                                   # noqa: PLC0415
     except ImportError:
-        return None
+        return None, ("extractor unavailable: pypdf is not installed — run "
+                      "scripts/dma-deps install. THIS FILE WAS NOT READ; it "
+                      "is not a file without an extractor")
     try:
         return "\n".join((pg.extract_text() or "")
-                         for pg in pypdf.PdfReader(str(path)).pages)
-    except Exception:                                  # noqa: BLE001
-        return None
+                         for pg in pypdf.PdfReader(str(path)).pages), None
+    except Exception as exc:                           # noqa: BLE001
+        return None, (f"unreadable PDF: {type(exc).__name__} — encrypted, "
+                      f"scanned or corrupt. THIS FILE WAS NOT READ")
 
 
-def _extract(path: Path) -> str | None:
+def _extract(path: Path) -> tuple:
     low = path.name.lower()
     ext = path.suffix.lower()
     if SLIDES_RE.search(str(path).lower()):
-        return None                                    # policy exclusion
+        return None, "slides excluded by the corpus rule"   # policy
     if ext in TEXT_EXT:
         raw = path.read_bytes()
         if ext == ".csv":
             try:
                 rows = list(csv.reader(io.StringIO(
                     raw.decode("utf-8-sig", errors="replace"))))
-                return "\n".join(" | ".join(r) for r in rows)
+                return "\n".join(" | ".join(r) for r in rows), None
             except Exception:                          # noqa: BLE001
                 pass
-        return raw.decode("utf-8", errors="replace")
+        return raw.decode("utf-8", errors="replace"), None
     if ext in (".xlsx", ".xlsm"):
         try:
-            return _xlsx_text(path)
+            return _xlsx_text(path), None
         except Exception as e:                         # noqa: BLE001
-            return f"[unreadable workbook: {e}]"
+            # NOT indexed as an error string. A workbook that would not open
+            # used to be written into the index as "[unreadable workbook: …]",
+            # counted as indexed, and answer nothing — "I read it and it says
+            # nothing" reported for "I could not read it".
+            return None, f"unreadable workbook: {type(e).__name__}"
     if ext == ".docx":
         try:
-            return _docx_text(path)
+            return _docx_text(path), None
         except Exception as e:                         # noqa: BLE001
-            return f"[unreadable docx: {e}]"
+            return None, f"unreadable docx: {type(e).__name__}"
     if ext == ".pdf":
         return _pdf_text(path)
     if low == ".ds_store" or ext in (".png", ".jpg", ".jpeg", ".gif",
                                      ".zip", ".pptx", ".ppt"):
-        return None
+        return None, "binary type, nothing to index"
+    if ext in (".doc", ".xls", ".rtf", ".eml", ".msg", ".numbers", ".key"):
+        # These used to fall through to the byte decode below, land in the
+        # index as replacement-character mush, count as INDEXED with a
+        # character count, and answer no query. A legacy .xls evidence
+        # register reported as read.
+        return None, (f"legacy binary format ({ext}) — no extractor. Convert "
+                      f"it or read it by hand; it is NOT empty")
     try:
-        return path.read_bytes().decode("utf-8", errors="replace")
-    except OSError:
-        return None
+        return path.read_bytes().decode("utf-8", errors="replace"), None
+    except OSError as exc:
+        return None, f"unreadable: {type(exc).__name__}"
+
+
+def _unread_files(package: Path) -> list:
+    """Files the index skipped, from the manifest it already writes."""
+    try:
+        m = json.loads((package / INDEX_DIR / "manifest.json").read_text())
+    except (OSError, ValueError):
+        return []
+    return m.get("skipped") or []
 
 
 def build_index(package: Path) -> dict:
@@ -126,13 +160,10 @@ def build_index(package: Path) -> dict:
         if not p.is_file() or INDEX_DIR in p.parts:
             continue
         rel = str(p.relative_to(package))
-        text = _extract(p)
+        text, why = _extract(p)
         if text is None:
-            manifest["skipped"].append(
-                {"path": rel,
-                 "reason": ("slides excluded by the corpus rule"
-                            if SLIDES_RE.search(rel.lower())
-                            else "no extractor for this type")})
+            manifest["skipped"].append({"path": rel, "reason": why or
+                                        "no extractor for this type"})
             continue
         out = idx / (rel.replace("/", "__") + ".txt")
         out.write_text(text, encoding="utf-8")
@@ -207,8 +238,24 @@ def main(argv=None) -> int:
         print(json.dumps(hits, indent=1))
     else:
         if not hits:
-            print(f"no corpus hits for {q!r} — the corpus cannot answer "
-                  f"this; a search_requests entry (web) is the next rung")
+            # "THE CORPUS CANNOT ANSWER" IS A CLAIM ABOUT THE CORPUS, and it
+            # is only true if the corpus was read. A file skipped for a
+            # missing extractor is a file nobody looked in, and concluding
+            # otherwise sends a producer to the web for a document sitting
+            # in the package — the mechanism behind an invented excerpt.
+            unread = [x for x in _unread_files(package)
+                      if "NOT READ" in x.get("reason", "")]
+            if unread:
+                print(f"no corpus hits for {q!r} — BUT {len(unread)} file(s) "
+                      f"were never read, so this is not evidence the corpus "
+                      f"lacks the answer:")
+                for x in unread[:5]:
+                    print(f"    {x['path']}: {x['reason']}")
+                print("  fix the extractor and re-index before treating this "
+                      "as a gap; the web is NOT the next rung yet")
+            else:
+                print(f"no corpus hits for {q!r} — the corpus cannot answer "
+                      f"this; a search_requests entry (web) is the next rung")
         for h in hits:
             print(f"{h['score']:5d}  {h['file']}")
             for m in h["matches"]:

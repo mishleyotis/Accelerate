@@ -215,7 +215,14 @@ def scan_caps(root: Path, pm: dict, books: list) -> dict:
     for book in [b for b in books if b]:
         try:
             tabs = sheets_of(book)
-        except Exception:                                      # noqa: BLE001
+        except Exception as exc:                               # noqa: BLE001
+            # NOT a silent drop. This `continue` left the workbook out of
+            # `checked` entirely, so report_caps could print "no caps sheet,
+            # log or column exists anywhere in this package" about a book it
+            # never opened — inside the one function rewritten to make an
+            # absence honest.
+            checked.append(f"{Path(str(book)).name}: UNREADABLE "
+                           f"({type(exc).__name__}) — NOT SEARCHED")
             continue
         rel = str(book)
         counted_sheets = set()
@@ -253,7 +260,6 @@ def scan_caps(root: Path, pm: dict, books: list) -> dict:
         if not CAPS_RE.search(rel):
             continue
         p = root / rel
-        checked.append(rel)
         try:
             if p.suffix.lower() in (".csv", ".tsv"):
                 lines = [ln for ln in p.read_text(
@@ -269,9 +275,13 @@ def scan_caps(root: Path, pm: dict, books: list) -> dict:
                     n = len(d) if isinstance(d, list) else len(
                         next((v for v in d.values() if isinstance(v, list)), []))
             else:
+                checked.append(f"{rel}: format not parsed here — NOT SEARCHED")
                 continue
-        except Exception:                                      # noqa: BLE001
+        except Exception as exc:                               # noqa: BLE001
+            checked.append(f"{rel}: UNPARSEABLE ({type(exc).__name__}) "
+                           f"— NOT SEARCHED")
             continue
+        checked.append(rel)
         if n:
             sources.append(f"{rel}: {n} row(s)")
             records += n
@@ -536,7 +546,15 @@ def vet_research(path: Path, evidence_stores: list | None = None) -> None:
         low = [h.lower() for h in hdr]
         col = lambda *keys: next(  # noqa: E731
             (low.index(k) for k in keys if k in low), None)
-        i_ex = col("evidence_excerpt", "excerpt", "quote", "passage")
+        # anchor_quote is the research workbook's OWN primary verbatim
+        # column — package_map names it, evidence_normalize ranks it
+        # first. Omitting it here meant a workbook that used only that
+        # spelling reported "no excerpt column found" and got ZERO
+        # excerpt vetting, on the one artefact that carries real
+        # quotations. Latent on today's corpus (those tabs carry both
+        # spellings); a one-word gap all the same.
+        i_ex = col("evidence_excerpt", "excerpt", "anchor_quote",
+                   "quote", "verbatim", "passage", "snippet")
         i_dt = col("date_published", "published_date", "publish_date", "date")
         i_er = col("ers_total", "ers", "ers_score")
         for r in rows[hi + 1:]:
