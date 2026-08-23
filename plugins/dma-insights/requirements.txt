@@ -36,6 +36,20 @@ matplotlib>=3.7.2,<4
 python-pptx>=0.6.21
 Pillow>=9.0
 
+# dma-surface-production/scripts — corpus_search reads the package's PDFs.
+# It imports pypdf, NOT the pdfplumber above. Declared in dma-deps on
+# 2026-08-23 and left out of this file, which is the worse half of the same
+# bug: a session ran the doctor, got a red dependency row naming pypdf, ran
+# the fix the row printed — `dma-deps install` — and pypdf was still missing,
+# because that install installs -r THIS FILE. A declared dependency the
+# documented fix cannot install is a dead end with a green-looking exit path.
+# test_dma_deps_declaration.py now asserts every module in MODULES appears
+# here, in both directions.
+# Floor: 3.9 is the pypdf line (post-PyPDF2 rename) carrying the stable
+# `PdfReader(path).pages` / `page.extract_text()` API corpus_search uses.
+# Measured working set on 3.11: 6.16.1, pinned in constraints-py311.txt.
+pypdf>=3.9
+
 # shared across dma-research, dma-assessment, dma-governance,
 # dma-surface-production — workbook and document readers
 openpyxl>=3.1.0

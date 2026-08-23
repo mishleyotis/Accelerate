@@ -237,5 +237,73 @@ def test_no_prompt_names_a_client_to_produce():
         f"in run_gate.HELD_OUT and subtracts")
 
 
+def test_no_prompt_asserts_the_container_state_it_is_meant_to_check():
+    """A firing on 2026-08-23 read "This Routine's container arrives with NO
+    REPOSITORY", found /home/user/Accelerate already present and complete,
+    and reported the prompt as wrong.
+
+    The guard underneath was always conditional (`if ... does not exist`), so
+    nothing broke — but a session that believes a premise instead of testing
+    it reports on the premise, which is the failure mode these routines exist
+    to catch, one level up. Carrying no `sources` means nothing GUARANTEES a
+    repository; it does not mean none arrives. Say "check", not "arrives
+    with" — and the same day proved the sharper version of the point: a
+    container arrived WITH a checkout that was 136 commits behind and a clean
+    working tree, which no assertion about presence would have caught."""
+    banned = re.compile(
+        r"(container|Routine'?s? container)[^.]{0,60}"
+        r"arrives with (NO REPOSITORY|no repository)", re.I)
+    offenders = [(section, m.group(0))
+                 for section, prompt in prompts().items()
+                 for m in banned.finditer(prompt)
+                 # The correction quotes the old assertion as the reason the
+                 # rule exists; a quoted claim is inside quotes.
+                 if '"' not in prompt[max(0, m.start() - 40):m.end() + 5]]
+    assert not offenders, (
+        f"a prompt asserts a container state instead of checking it: "
+        f"{offenders}. `ls` the path and branch on the answer — no `sources` "
+        f"means nothing guarantees a repository, not that none is there")
+
+
+def test_no_prompt_claims_an_update_needs_a_new_session_to_be_readable():
+    """The other assertion a session caught, same day, same class.
+
+    The prompts said a plugin update "applies at NEXT session start". A
+    session ran the update, re-checked in the same firing, got OK, and filed
+    the prompt as contradicted. Both halves were true of different things:
+    installed_plugins.json and the cache tree change immediately — and
+    plugin_version.py reads exactly those — while agents, skills and hooks
+    bind once at session start and do not reload. The prompts now say which,
+    and plugin_version.py MEASURES it (`UPDATED_MID_SESSION`) rather than
+    asserting a mechanism."""
+    offenders = [(section, m.group(0))
+                 for section, prompt in prompts().items()
+                 for m in re.finditer(
+                     r"appl(?:ies|y) at NEXT session start", prompt, re.I)
+                 # The correction quotes the old sentence as the reason the
+                 # rule exists; a quoted claim is inside quotes.
+                 if '"' not in prompt[max(0, m.start() - 40):m.end() + 5]]
+    assert not offenders, (
+        f"a prompt still asserts the old update-timing mechanism: "
+        f"{offenders}. The disk changes immediately and the session does "
+        f"not; plugin_version.py reports UPDATED_MID_SESSION when they "
+        f"disagree")
+
+
+@pytest.mark.parametrize("section", sorted(
+    s for s in prompts() if "watchdog" in s.lower() or s.startswith("2e")))
+def test_the_self_provisioning_prompts_check_before_cloning(section):
+    """The positive half — a ban alone would be satisfied by saying nothing.
+    Both prompts that may have to clone must first look, and must say what
+    to do when the answer is "already there"."""
+    prompt = prompts()[section]
+    assert "ls /home/user/Accelerate/plugins/dma-insights" in prompt, (
+        f"{section} clones conditionally but never says how to test the "
+        f"condition")
+    assert re.search(r"skip to STEP 0", prompt, re.I), (
+        f"{section} does not say what to do when the repository is already "
+        f"there — 'do not clone over it' is the whole point")
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))

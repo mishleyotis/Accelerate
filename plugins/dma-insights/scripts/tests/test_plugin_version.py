@@ -55,12 +55,14 @@ def _repo(tmp_path, version="0.8.1", agents=47, market_version=None,
 
 
 def _state(tmp_path, version="0.8.1", agents=47, scope="user", extra=(),
-           skills=6):
+           skills=6, updated_at=None):
     """An installed_plugins.json plus the cache tree it points at."""
     cache = _plugin_tree(tmp_path / "cache" / str(version), version, agents,
                          skills)
     records = [{"scope": scope, "version": version,
                 "installPath": str(cache), "gitCommitSha": "deadbeef"}]
+    if updated_at:
+        records[0]["lastUpdated"] = updated_at
     records += list(extra)
     path = tmp_path / "installed_plugins.json"
     path.write_text(json.dumps({"version": 2, "plugins": {
@@ -290,6 +292,118 @@ def test_the_manifest_agent_list_matches_the_agent_files():
     assert declared == on_disk, (
         f"only in manifest: {sorted(declared - on_disk)}; "
         f"only on disk: {sorted(on_disk - declared)}")
+
+
+# ── the disk is not the session ───────────────────────────────────────────
+#
+# Reported by a routine session, 2026-08-23: it ran `claude plugin update`,
+# re-ran this check inside the same firing, got OK, and filed the module's own
+# guidance — "the update applies at NEXT session start" — as contradicted by
+# observation. Both halves were true of different things. The state file and
+# the cache tree change immediately, and this script reads exactly those; the
+# agents, skills and hooks a session dispatches were bound at session start
+# and do not reload. The old note asserted a mechanism; these tests measure
+# one.
+
+SESSION_START = "2026-08-23T05:21:19+00:00"
+BEFORE, AFTER = "2026-08-23T04:00:00Z", "2026-08-23T08:16:12Z"
+
+
+def _began(monkeypatch, when=SESSION_START):
+    import datetime as dt
+    monkeypatch.setattr(pv, "session_started_at",
+                        lambda: dt.datetime.fromisoformat(when).timestamp())
+
+
+def test_an_install_written_after_this_session_started_is_not_ok(
+        tmp_path, monkeypatch):
+    """The live case, reproduced: on the container that reported this, the
+    session process began 05:21:19Z and the install record was last written
+    08:16:12Z. The disk is right and the session is running something else,
+    and the caller's next act — produce, or end the firing — turns on the
+    session, not the disk."""
+    _began(monkeypatch)
+    v = pv.compare(_repo(tmp_path), _state(tmp_path, updated_at=AFTER))
+    assert v["status"] == "UPDATED_MID_SESSION"
+    assert not v["ok"], (
+        "exit 0 here sends a routine to work on the very agents it was "
+        "trying to stop using")
+    joined = " ".join(v["reasons"])
+    assert AFTER in joined and "05:21:19Z" in joined, (
+        "both timestamps, so a reader can check the claim rather than "
+        "believe it")
+
+
+def test_an_install_older_than_the_session_is_plain_ok(tmp_path, monkeypatch):
+    """The ordinary path. bootstrap_session.sh installs during environment
+    setup, BEFORE the session exists, so the routine's own provisioning must
+    not trip this."""
+    _began(monkeypatch)
+    v = pv.compare(_repo(tmp_path), _state(tmp_path, updated_at=BEFORE))
+    assert v["status"] == "OK" and v["ok"]
+
+
+def test_an_unknown_session_start_judges_neither_way(tmp_path, monkeypatch):
+    """No /proc, no CLAUDE_PID — a CI runner, a non-Linux box. An unmeasured
+    start time must not manufacture a verdict in either direction; the whole
+    point of the correction is to stop asserting this."""
+    monkeypatch.setattr(pv, "session_started_at", lambda: None)
+    v = pv.compare(_repo(tmp_path), _state(tmp_path, updated_at=AFTER))
+    assert v["status"] == "OK" and v["ok"]
+    assert pv.installed(_state(tmp_path, updated_at=AFTER)
+                        )["loaded_by_this_session"] is None
+
+
+def test_a_missing_timestamp_judges_neither_way(tmp_path, monkeypatch):
+    """The other unknown. A record with no lastUpdated and no installedAt
+    carries no answer, and None is the answer."""
+    _began(monkeypatch)
+    assert pv.installed(_state(tmp_path))["loaded_by_this_session"] is None
+
+
+def test_a_disk_disagreement_outranks_a_session_disagreement(tmp_path,
+                                                              monkeypatch):
+    """Ordering, which is load-bearing. A session running a stale tree that
+    the DISK also disagrees with needs the disk fixed first — reporting
+    UPDATED_MID_SESSION there would name the wrong problem and print the
+    wrong fix."""
+    _began(monkeypatch)
+    v = pv.compare(_repo(tmp_path, "0.8.1"),
+                   _state(tmp_path, "0.2.0", agents=5, updated_at=AFTER))
+    assert v["status"] == "STALE"
+    assert "claude plugin update" in v["fix"]
+
+
+def test_the_fix_for_a_mid_session_update_installs_nothing(tmp_path,
+                                                            monkeypatch):
+    """There is nothing to install. Printing the update command again is how
+    a session ends up re-running a command that already worked."""
+    _began(monkeypatch)
+    v = pv.compare(_repo(tmp_path), _state(tmp_path, updated_at=AFTER))
+    assert "claude plugin update" not in v["fix"]
+    assert "end the firing" in v["fix"]
+
+
+def test_the_update_note_no_longer_claims_the_recheck_is_pointless():
+    """The sentence that was wrong. The re-check DOES work in the same
+    firing — it reads the disk at call time — and the note now says which
+    half of the question that answers."""
+    note = pv.UPDATE_NOTE
+    assert "NEXT session start" not in note, (
+        "the corrected claim: the state file and cache change immediately")
+    assert "same firing" in note and "session start" in note
+    assert "DISK" in note
+
+
+def test_session_start_is_read_from_the_process_not_guessed(monkeypatch):
+    """A wrong-but-plausible implementation is `time.time() - something`.
+    /proc/<pid> is created with the process, so its ctime IS the start."""
+    monkeypatch.delenv("CLAUDE_PID", raising=False)
+    assert pv.session_started_at() is None
+    monkeypatch.setenv("CLAUDE_PID", "not-a-pid")
+    assert pv.session_started_at() is None
+    monkeypatch.setenv("CLAUDE_PID", "999999999")
+    assert pv.session_started_at() is None, "a pid that does not exist"
 
 
 if __name__ == "__main__":

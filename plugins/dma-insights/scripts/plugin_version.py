@@ -175,6 +175,55 @@ def _from_cli() -> dict:
     return {"version": block.group(1), "source": "claude plugin list"} if block else {}
 
 
+def session_started_at() -> float | None:
+    """When THIS session's process began, as a POSIX timestamp, or None.
+
+    The one fact that separates "the install is current" from "this session
+    is running the current install". Everything else here reads the disk, and
+    the disk changes the instant `claude plugin update` returns — but a
+    session binds its agents, skills and hooks once, at start, from whatever
+    the cache held then. Those two facts were conflated in this file's own
+    guidance until 2026-08-23, when a session updated the plugin, re-ran this
+    check inside the same firing, saw OK, and reported the note here as wrong
+    because the update had "taken effect without a restart". Half right: the
+    STATE FILE had. The session had not.
+
+    `/proc/<pid>` is created when the process is, so its ctime is the start
+    time. Absent /proc, or absent CLAUDE_PID (a CI runner, a non-Linux box),
+    this returns None and the comparison is simply not made — an unknown
+    start time must not manufacture either verdict.
+    """
+    pid = os.environ.get("CLAUDE_PID")
+    if not pid or not pid.isdigit():
+        return None
+    try:
+        return Path("/proc", pid).stat().st_ctime
+    except OSError:
+        return None
+
+
+def _epoch(stamp: str | None) -> float | None:
+    """An ISO-8601 install timestamp as POSIX seconds, or None."""
+    if not stamp:
+        return None
+    try:
+        import datetime as _dt                             # noqa: PLC0415
+        return _dt.datetime.fromisoformat(
+            stamp.replace("Z", "+00:00")).timestamp()
+    except (ValueError, TypeError):
+        return None
+
+
+def _stamp(epoch: float | None) -> str:
+    """A POSIX timestamp back as UTC, so a reason line can be checked rather
+    than believed."""
+    if epoch is None:
+        return "unknown"
+    import datetime as _dt                                 # noqa: PLC0415
+    return _dt.datetime.fromtimestamp(
+        epoch, _dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def installed(state_path: Path | None = None) -> dict:
     """What the running session loads — version, install path, and the
     components actually present in that path.
@@ -215,6 +264,13 @@ def installed(state_path: Path | None = None) -> dict:
     skills = (len([p for p in (install_path / "skills").glob("*") if p.is_dir()])
               if (install_path / "skills").is_dir() else 0)
     declared = _load(install_path / ".claude-plugin" / "plugin.json")
+    # `lastUpdated` moves on every update; `installedAt` is the first install
+    # and stays put. The question here is "did the tree change under a running
+    # session", so the later of the two is the one that answers it.
+    changed_at = _epoch(best.get("lastUpdated")) or _epoch(best.get("installedAt"))
+    began = session_started_at()
+    loaded_this = None if (began is None or changed_at is None) \
+        else changed_at <= began
     return {
         "version": best.get("version"),
         "state_file_exists": True,
@@ -222,6 +278,12 @@ def installed(state_path: Path | None = None) -> dict:
         "install_path": str(install_path) if install_path.name else None,
         "commit": best.get("gitCommitSha"),
         "installed_at": best.get("installedAt"),
+        "updated_at": best.get("lastUpdated") or best.get("installedAt"),
+        "session_started_at": began,
+        # True: the install predates this session, so this session loaded it.
+        # False: the tree changed after this session bound its agents.
+        # None: no measurable session start — do not judge either way.
+        "loaded_by_this_session": loaded_this,
         "agents": agents,
         "skills": skills,
         "declared_agents": len(declared.get("agents") or []),
@@ -234,15 +296,49 @@ def installed(state_path: Path | None = None) -> dict:
 
 UPDATE = (f"claude plugin marketplace update {MARKETPLACE_NAME} && "
           f"claude plugin update {PLUGIN_NAME}@{MARKETPLACE_NAME}")
-UPDATE_NOTE = ("the update applies at NEXT session start, so re-check there "
-               "and end the firing cleanly rather than producing on stale skills")
+#: WHAT AN UPDATE ACTUALLY DOES, and the correction that produced this text.
+#: Until 2026-08-23 this note read "the update applies at NEXT session start,
+#: so re-check there" — and a session that ran the update, re-checked in the
+#: SAME firing and got OK reported the note as contradicted by observation.
+#: Both halves were real, and they are about different things:
+#:
+#:   * The install cache and installed_plugins.json change IMMEDIATELY. This
+#:     script reads exactly those, so re-running it in the same firing does
+#:     work and does flip to OK. That is a true reading of the DISK.
+#:   * Agents, skills, hooks and the MCP roster were bound when the session
+#:     started, from whatever the cache held then. Those do NOT change. A
+#:     session that began stale keeps dispatching the old agents no matter
+#:     what the state file now says.
+#:
+#: So the re-check is worth running — it proves the install landed — and its
+#: OK is not permission to produce. `loaded_by_this_session` is the field
+#: that separates them, and it is measured, not assumed.
+UPDATE_NOTE = (
+    "then run this check again in the same firing — it reads the state file "
+    "and the cache tree at call time, so it flips to OK as soon as the "
+    "install lands. That OK proves the DISK, not this session: agents, "
+    "skills and hooks were bound at session start and do not reload, so a "
+    "session that began stale still dispatches the old ones. End the firing "
+    "cleanly and let the next one produce")
+
+#: Said when the tree changed under a running session — the case the old note
+#: was reaching for and could not name.
+SESSION_NOTE = (
+    "the install on disk is correct and THIS SESSION IS NOT RUNNING IT: the "
+    "tree changed after this session started, and agents, skills and hooks "
+    "load once at start. Report the versions and end the firing; the next "
+    "session picks it up")
 
 
 def compare(repo_root: Path | None = None,
             state_path: Path | None = None) -> dict:
     """The verdict, with the arithmetic shown. Statuses:
 
-      OK              installed is what the repo publishes, and whole
+      OK              installed is what the repo publishes, and whole, and
+                      this session is the one running it
+      UPDATED_MID_SESSION
+                      the DISK is correct and this session is not running it
+                      — the tree changed after the session bound its agents
       MISSING         no plugin installed at all
       STALE           installed is older than published — the common case
       AHEAD           installed is newer than the checkout — the CHECKOUT is
@@ -302,6 +398,19 @@ def compare(repo_root: Path | None = None,
             f"{pub['version']} is installed and {pub['version']} is published, "
             f"but the two trees differ — the plugin was edited after this "
             f"version was built. Differing: {', '.join(changed)}")
+    elif inst.get("loaded_by_this_session") is False:
+        # LAST, deliberately. Every branch above is a disagreement about what
+        # is ON DISK, and those are worse: a session running a stale tree that
+        # the disk also disagrees with needs the disk fixed first. This branch
+        # is only reached once the disk is right, which is exactly when the
+        # remaining question is whether this session is running it.
+        status = "UPDATED_MID_SESSION"
+        reasons.append(
+            f"{inst['version']} on disk matches the checkout, but the install "
+            f"was last written {inst.get('updated_at')} and this session's "
+            f"process started {_stamp(inst.get('session_started_at'))} — the "
+            f"tree changed under a running session, which loaded its agents, "
+            f"skills and hooks before that and does not reload them")
     else:
         status = "OK"
 
@@ -320,6 +429,8 @@ def compare(repo_root: Path | None = None,
     fix = ""
     if status in ("STALE", "MISSING", "INCOMPLETE"):
         fix = f"{UPDATE}  ({UPDATE_NOTE})"
+    elif status == "UPDATED_MID_SESSION":
+        fix = f"nothing to install — {SESSION_NOTE}"
     elif status == "DIVERGED":
         fix = ("bump the version in BOTH manifests, then " + UPDATE +
                f" — reinstalling without a bump leaves the cache on a "
@@ -330,6 +441,10 @@ def compare(repo_root: Path | None = None,
     elif status == "MANIFEST_SPLIT":
         fix = ("set the same version in both .claude-plugin/marketplace.json "
                "and plugins/dma-insights/.claude-plugin/plugin.json")
+    # UPDATED_MID_SESSION is deliberately NOT ok. The install is fine and the
+    # session is not, and the caller's next act — produce, or end the firing —
+    # depends on the session, not the disk. An exit 0 there would send a
+    # routine to work on the very agents it was trying to stop using.
     return {"status": status, "ok": status in ("OK", "NOT_INSTALLED"),
             "reasons": reasons, "fix": fix, "published": pub,
             "installed": inst}
