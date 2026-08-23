@@ -1,7 +1,7 @@
 {
   "name": "zennify-dma",
   "description": "Zennify Digital Maturity Assessment tooling: the skills, agents and connector that produce and audit DMA Insights surfaces.",
-  "version": "0.6.9",
+  "version": "0.7.0",
   "owner": {
     "name": "Zennify \u2014 DMA Insights build",
     "email": "mishley.otiende@zennify.com"
@@ -11,8 +11,8 @@
       "name": "dma-insights",
       "source": "./plugins/dma-insights",
       "displayName": "DMA Insights",
-      "description": "The six DMA skills, the 47-agent roster with explicit tool allow-lists, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector (33 tools). The pre-synthesis gate walks the pending queue, not a hardcoded client list. An evidence excerpt is read from a register column or left absent, never scavenged.",
-      "version": "0.7.0",
+      "description": "The six DMA skills, the 47-agent roster with explicit tool allow-lists, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector (33 tools). The gate carries two clients a firing with reserves. Gate M fails a run whose evidence cannot be opened.",
+      "version": "0.8.0",
       "category": "domain",
       "tags": [
         "dma",
