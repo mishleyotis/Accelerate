@@ -337,6 +337,33 @@ GATES = {
               "refuses is silence — a thin section that never says it "
               "searched.",
               "block"),
+
+    "CG-41": ("Every roster seat records a contact-search OUTCOME", None,
+              "For each person on overview.leadership, the payload says one "
+              "of two things: a contact route was resolved (email, "
+              "linkedin_url or phone) and its enrichment_basis names the "
+              "profile or filing it came from; or the search RAN and matched "
+              "nothing, recorded in that seat's own basis. A seat carrying "
+              "neither has an unknown search state.",
+              "Owner, 2026-08-23, on a promoted run: 'Clay enrichment for "
+              "Gulf has no emails. Is the baseline for contact enrichment "
+              "established?' It was not. CG-37 makes sure a route that "
+              "EXISTS is marked internal_only, and CG-40 sets depth floors "
+              "for sentiment, why_now and techstack — nothing anywhere said "
+              "what contact enrichment owes per seat, so a roster with no "
+              "emails because Clay found none and a roster with no emails "
+              "because Clay never ran were the same payload. Gulf was the "
+              "second (7 of 7 facets never_enriched) and promoted anyway. "
+              "THE BASELINE IS THE SEARCH, NOT THE EMAIL, and the "
+              "distinction is the whole gate: a private company's CFO may "
+              "have no reachable address and that run must still promote, "
+              "so this can always be satisfied by recording the negative — "
+              "the same escape CG-40 leaves open, for the same reason. What "
+              "it refuses is a seat about which nothing is known. Measured "
+              "on Logix at the time this landed: 4 of 7 roster rows carried "
+              "a linkedin_url with enrichment_basis null.",
+              "block"),
+
     "CG-39": ("The run's recommendations reach the platform page", None,
               "When the run's bundle carries recommendations and the platform "
               "payload serves platform tiles, at least one recommendation "

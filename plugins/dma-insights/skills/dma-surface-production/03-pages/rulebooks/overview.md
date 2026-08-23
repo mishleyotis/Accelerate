@@ -765,6 +765,42 @@ and `source_e_id` stay — those are the finding; the route to their inbox is no
 `verified_absent` serves (true only after the profile was read and held none).
 `r_layer` reaches no audience.
 
+### The contact baseline — CG-41
+
+**Every seat records an OUTCOME. The baseline is the search, not the email.**
+
+Per roster seat, exactly one of two things reaches the payload:
+
+| State | What the seat carries |
+|---|---|
+| resolved | a route (`email` · `linkedin_url` · `phone` · …) **and** an `enrichment_basis` naming the profile or filing it came from |
+| recorded negative | no route, and an `enrichment_basis` stating the search ran and matched nothing |
+
+A seat with neither is refused. Not because the address is missing — a
+private company's CFO may have none anywhere, and that run promotes — but
+because nothing distinguishes that seat from one the enrichment never
+reached. Owner, 2026-08-23: *"Clay enrichment for Gulf has no emails. Is the
+baseline for contact enrichment established?"* It was not; Gulf was 7 of 7
+facets `never_enriched` and promoted anyway.
+
+Three things this makes explicit, each measured on a promoted run:
+
+- **A route with a null basis does not count as resolved.** Logix served 4 of
+  7 roster rows with a `linkedin_url` and `enrichment_basis: null` — a value
+  on the page and no answer to "from where". Unattributed, not resolved.
+- **A token is not a basis.** `n/a`, `none`, `Clay`, `-`. Below ~25
+  characters nothing can distinguish a search that ran from one that did not,
+  which is the only question being asked. "Clay reports it" is not a source.
+- **The negative has a shape.** *"The enrichment search returned no profile
+  whose TITLE matched this person (a name-similar match is an identity
+  failure, not a near-miss)"* — the contract's own wording, and it satisfies
+  the gate on its own.
+
+One section-level `empty_state` or `thin` flag naming the queries run also
+satisfies CG-41, for a run where the contact pass genuinely did not happen.
+Use it rather than leaving seats bare: thinness that discloses is honest,
+silence is the refusal.
+
 ### Enrichment pathways
 
 - **Connector** (facet `leadership`): `clay` — the contact routes (email,

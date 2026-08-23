@@ -1797,6 +1797,114 @@ def _why_now_span_days(body):
     return (max(seen) - min(seen)).days
 
 
+#: The contact routes a roster seat can carry. Mirrors
+#: `CUSTOMER_STRIP_CONTACT_KEYS` in the overview rulebook — one vocabulary,
+#: because a key this list forgets is a route CG-41 cannot see and redaction
+#: still has to strip.
+CONTACT_ROUTE_KEYS = ("email", "contact_email", "work_email", "linkedin_url",
+                      "linkedin", "phone", "direct_line", "mobile")
+
+#: Where a seat may record what the contact search did. `enrichment_basis` is
+#: the contract's field; the rest are shapes promoted runs have actually used,
+#: read rather than declared wrong after the fact.
+CONTACT_BASIS_KEYS = ("enrichment_basis", "contact_basis", "contact_search",
+                      "searched_on", "enrichment_note")
+
+#: A basis has to be a sentence. Below this it is a token — "n/a", "none",
+#: "Clay" — and a token cannot distinguish a search that ran from one that
+#: did not, which is the only thing this gate is asking.
+_BASIS_MIN = 25
+
+
+def _seat_contact_state(seat) -> str:
+    """`resolved` · `recorded_negative` · `unknown` for one roster seat."""
+    if not isinstance(seat, dict):
+        return "unknown"
+    basis = ""
+    for k in CONTACT_BASIS_KEYS:
+        v = seat.get(k)
+        if isinstance(v, str) and len(v.strip()) > len(basis):
+            basis = v.strip()
+        elif isinstance(v, (list, dict)) and v:
+            basis = basis or "structured"
+    has_route = any(isinstance(seat.get(k), str) and seat[k].strip()
+                    for k in CONTACT_ROUTE_KEYS)
+    if has_route:
+        # A route with no basis is the Logix shape: a value on the page and
+        # no answer to "from where". It is not resolved, it is unattributed.
+        return "resolved" if (basis == "structured" or len(basis) >= _BASIS_MIN) \
+            else "unknown"
+    if basis == "structured" or len(basis) >= _BASIS_MIN:
+        return "recorded_negative"
+    return "unknown"
+
+
+def _roster_of(body):
+    for k in ("roster", "people", "leaders", "rows"):
+        v = body.get(k)
+        if isinstance(v, list):
+            return v
+    return None
+
+
+def _check_contact_enrichment_baseline(page, payload):
+    """CG-41 — every roster seat says what the contact search found.
+
+    The baseline is the SEARCH, not the email. A private company's CFO may
+    have no reachable address anywhere and that run must still promote, so
+    the gate is always satisfiable by recording the negative — deliberately
+    the same escape CG-40 leaves, because a gate that can only be satisfied
+    by data the world may not hold is a gate that teaches producers to refuse
+    packages.
+
+    What it refuses is a seat nobody can say anything about: no route, no
+    basis, nothing. That seat is indistinguishable from one where the tool
+    was never called, which is exactly what happened on the run that prompted
+    this.
+    """
+    if page != "overview" or not isinstance(payload, dict):
+        return []
+    body = payload.get("leadership")
+    if not isinstance(body, dict):
+        return []
+    body = body.get("data") if isinstance(body.get("data"), dict) else body
+    roster = _roster_of(body or {})
+    if not roster:
+        return []
+
+    states = [(i, _seat_contact_state(s)) for i, s in enumerate(roster)]
+    unknown = [i for i, st in states if st == "unknown"]
+    if not unknown:
+        return []
+
+    # SECTION-LEVEL DISCLOSURE STILL COUNTS. A roster that states once, for
+    # the whole section, that the contact pass did not run is honest — it is
+    # thin and it says so. Silence is the refusal, not thinness.
+    if _says_it_searched(body):
+        return []
+
+    n = len(roster)
+    resolved = sum(1 for _, st in states if st == "resolved")
+    negative = sum(1 for _, st in states if st == "recorded_negative")
+    where = ", ".join(f"roster[{i}]" for i in unknown[:12])
+    more = "" if len(unknown) <= 12 else f" (+{len(unknown) - 12} more)"
+    return [_reason(
+        "CG-41", "leadership", f"overview.leadership.{('roster')}",
+        f"{len(unknown)} of {n} roster seats record no contact-search "
+        f"outcome — no route and no basis: {where}{more}. "
+        f"({resolved} resolved with a basis, {negative} recorded a negative.) "
+        f"The baseline is the SEARCH, not the email: a seat with no reachable "
+        f"address is fine and promotes, but it has to say so. Give each seat "
+        f"either a contact route WITH the profile or filing its "
+        f"enrichment_basis came from, or a basis stating the search ran and "
+        f"matched nothing — 'the enrichment search returned no profile whose "
+        f"TITLE matched this person' is the contract's own wording. A seat "
+        f"carrying neither is indistinguishable from a seat the enrichment "
+        f"never reached, which is the state three of four promoted clients "
+        f"were in. One section-level empty_state or thin flag naming the "
+        f"queries run also satisfies this.")]
+
+
 def _check_depth_floors(page, payload):
     """CG-40 — a section whose value is its depth reaches a floor or says why.
 
@@ -1899,6 +2007,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_recommendations_reach_the_platform_page(
         conn, run_id, page, payload))
     reasons.extend(_check_depth_floors(page, payload))
+    reasons.extend(_check_contact_enrichment_baseline(page, payload))
 
     served = _served_figures(conn, run_id)
 

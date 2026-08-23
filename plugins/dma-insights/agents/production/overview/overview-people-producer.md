@@ -487,6 +487,49 @@ Each is phrased so a wrong answer is visible rather than arguable.
   your search. If a contradicting entry exists, it is entry one; record that the
   challenge found it and what it changed.
 
+## The contact baseline — CG-41, and it is per SEAT
+
+Before you return O7, walk the roster once more and answer for **each** row:
+*what did the contact search do here?* There are exactly two acceptable
+answers, and no third.
+
+| | The seat carries |
+|---|---|
+| **resolved** | a route (`email` · `linkedin_url` · `phone`) **and** an `enrichment_basis` naming the profile or filing it came from |
+| **recorded negative** | no route, and an `enrichment_basis` stating the search ran and matched nothing |
+
+A row with neither is refused at submit, and the reason is not that the
+address is missing. A private company's CFO may have no reachable address
+anywhere and that run promotes. The reason is that such a row is
+**indistinguishable from a row the enrichment never reached** — and that is
+not hypothetical: on the run that prompted this gate, all seven enrichment
+facets were `never_enriched` and the page promoted anyway, so "Clay found
+nothing" and "Clay was never called" rendered identically.
+
+Three specifics, each measured on a promoted run rather than imagined:
+
+- **A route with a null basis is not resolved, it is unattributed.** Logix
+  served four of seven rows with a `linkedin_url` and `enrichment_basis:
+  null`. A value on the page and no answer to "from where" fails this, and it
+  fails the arithmetic bullet above for the same reason.
+- **A token is not a basis.** `n/a`, `none`, `Clay`, `-`. Nothing under about
+  twenty-five characters can distinguish a search that ran from one that did
+  not, which is the only question being asked. The rulebook already says it:
+  *"Clay reports it" is not a source*.
+- **The negative has a written shape and it is the contract's own**: *"The
+  enrichment search returned no profile whose TITLE matched this person (a
+  name-similar match is an identity failure, not a near-miss)."* That
+  sentence, with the queries behind it, satisfies the gate on its own.
+
+If the contact pass genuinely did not run for this entity, do not leave the
+seats bare — say so once at section level with an `empty_state` or `thin`
+flag naming the queries you would have run and what would change the answer.
+Thinness that discloses is honest; silence is what is refused.
+
+**This is a floor on your effort, never on the world.** You are never being
+asked to invent an address, and you are never being asked to refuse a package
+for want of one. You are being asked to leave a record of having looked.
+
 ## Enrichment checks
 
 **O7's facet is `leadership`, and both its sources are wired.** Per

@@ -225,7 +225,39 @@ Per tile:
   is honest **only** with the engine's own state carried on the card.
 - **`fit_basis`** — the engine's own sentence, copied across. It is what lets the
   drilldown walk the arithmetic back. Print the multipliers; do not silently
-  reconcile them.
+  reconcile them. **It now ends with the fusion note; carry that too.** A
+  `fit_basis` truncated before the fusion sentence is the one case where
+  copying the engine's own words half-way produces a card that contradicts
+  itself — see below.
+- **`signal_ranks`, `rrf_score`, `rrf_rank`, `fusion_note`** — the engine's,
+  copied, and **this is what a card is explained with**. Owner, 2026-08-23:
+  the promoted readiness card was "basic … no deep reasoning". The engine now
+  ranks every candidate on each factor list AND on the v2 blend, fuses those
+  placings by reciprocal rank fusion (k=60), and lets the fused order reorder
+  two cards only when their fits differ by at most the 8-point near-tie band.
+  So a card that came **third on gap surface and first on the other three
+  signals** is a fact the engine hands you, and "why is this one above that
+  one" has an answer that is not "the number is bigger".
+
+  Two things to get right, and one to never do:
+
+  - **A card whose `rank_basis` is `rank fusion within the … band` sits above
+    a card with a HIGHER fit on purpose.** Say so in the story, in the
+    client's terms — *"these two are within a point of each other on the
+    blend; this one leads because it is first on three of the four signals
+    and second on the fourth"* — and never as arithmetic a reader has to
+    reconstruct. AG-09 refuses an inversion carrying nothing beside it, and a
+    reader who sees 41.1 above 41.5 with no reason concludes the whole page
+    is broken.
+  - **`fusion_note` is present whether fusion moved the card or not.** "Rank
+    fusion agreed with the fit order" is an answer worth having: without it,
+    agreement and never-ran read identically, which is this build's most
+    repeated defect shape.
+  - **Never re-rank on the fused score, and never fuse anything yourself.**
+    Fusion is inside the engine for exactly the reason `fit_score` is: the
+    weights are an audited calibration, and a producer re-weighting them by
+    hand is MEM-0095 recurring in a new coordinate system. You explain the
+    placings; you do not compute them.
 - **`alignment`, `alignment_basis`, `alignment_quote`** — see the refusal above.
   `stated_objective` with the entity's verbatim words, or null with
   `impact_fallback` disclosed.
@@ -514,6 +546,22 @@ section level.
   rank equal the overview page's opportunity tile for the same platform at the
   0.05 grain?** If they differ, that is the permanent finding recurring; report
   it, do not reconcile it by editing your own number.
+- **The order, and whether the page can defend it.** For every adjacent pair
+  of tiles: is the one above either higher on `fit_score`, or higher on
+  `rrf_score` with the two within the engine's near-tie band, or held there by
+  a `depends_on` the card names? Those are the only three reasons the engine
+  produces, and every card carries which one applies in `rank_basis`. If a
+  tile sits above a higher-scoring tile and your story does not say why in
+  words a client would use, you have written the exact page AG-09 refuses —
+  and you cannot fix it by editing the number.
+- **The reasoning a reader gets.** Read your top card's story with the
+  `signal_ranks` beside it. Does the story say anything the placings do not
+  already say, and does it say the thing the placings DO say? A card that
+  came first on strategic alignment and third on gap surface is a different
+  argument from one that led on gap surface, and a story that would fit
+  either was written without looking. This is the check the "basic … no deep
+  reasoning" report is about: the material is on the row now, so a shallow
+  card is a choice.
 - **Arithmetic — the cross-surface figures.** Does every gap row's
   `current_score` and every `dma_impact[].current` equal what the heatmap serves
   for that cell within 0.05, asserted against the staged heatmap rather than
