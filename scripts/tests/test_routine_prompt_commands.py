@@ -124,6 +124,16 @@ def test_enough_commands_are_actually_checked():
         f"only {len(ALL)} commands extracted from the routine prompts — the "
         f"extraction has broken, and every assertion below it is vacuous. "
         f"Extracted: {[(c[1], c[2]) for c in ALL]}")
+    # Each parametrized set gets its own floor: ALL could stay healthy while
+    # one of the two filters below silently emptied, and a parametrize over
+    # an empty list is zero tests reported as zero failures.
+    assert len(SUBCOMMANDED) >= 12, (
+        f"only {len(SUBCOMMANDED)} subcommanded invocations — "
+        f"test_every_subcommand_a_routine_prompt_names_exists has stopped "
+        f"checking anything")
+    assert len([c for c in ALL if c[3]]) >= 12, (
+        "the flag filter has emptied — "
+        "test_every_flag_a_routine_prompt_names_exists is vacuous")
 
 
 @pytest.mark.parametrize(
@@ -149,17 +159,25 @@ def test_every_flag_a_routine_prompt_names_exists(section, script, sub, flags):
         f"not exist. Defined for this subcommand: {sorted(defined)}")
 
 
+#: Only invocations that HAVE a subcommand. Parametrizing over all of them
+#: and skipping the rest produced six skips that could never do anything —
+#: and CI's skip ceiling caught it, correctly: a skip that is structurally
+#: guaranteed carries no information and buries the ones that do. A case with
+#: nothing to check should not be generated, not generated and then skipped.
+SUBCOMMANDED = [c for c in ALL if c[2]]
+
+
 @pytest.mark.parametrize(
-    "section,script,sub,flags", ALL,
-    ids=[f"{c[1].rsplit('/', 1)[-1]}:{c[2] or '-'}" for c in ALL])
+    "section,script,sub,flags", SUBCOMMANDED,
+    ids=[f"{c[1].rsplit('/', 1)[-1]}:{c[2]}" for c in SUBCOMMANDED])
 def test_every_subcommand_a_routine_prompt_names_exists(section, script, sub,
                                                         flags):
     """A wrong SUBCOMMAND fails the same way a wrong flag does, and reads
     even more like the script being broken."""
     path = ROOT / script
     assert path.is_file(), f"{section} names {script}, which does not exist"
-    if sub is None or (script, sub) in UNRUNNABLE:
-        pytest.skip("no subcommand to check")
+    if (script, sub) in UNRUNNABLE:
+        pytest.skip(UNRUNNABLE[(script, sub)])
     r = subprocess.run([sys.executable, str(path), sub, "--help"],
                        capture_output=True, text=True, timeout=90, cwd=ROOT)
     combined = (r.stdout or "") + (r.stderr or "")
