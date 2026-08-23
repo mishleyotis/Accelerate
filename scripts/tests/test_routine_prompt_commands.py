@@ -300,7 +300,8 @@ def test_the_self_provisioning_prompts_check_before_cloning(section):
     assert "ls /home/user/Accelerate/plugins/dma-insights" in prompt, (
         f"{section} clones conditionally but never says how to test the "
         f"condition")
-    assert re.search(r"skip to STEP 0", prompt, re.I), (
+    assert re.search(r"(skip|go|proceed|continue)\s+(straight\s+)?to STEP 0",
+                     prompt, re.I), (
         f"{section} does not say what to do when the repository is already "
         f"there — 'do not clone over it' is the whole point")
 

@@ -349,13 +349,25 @@ and run exactly one rectification cycle. You are the only writer of the plugin's
 skills, agents, rulebooks and gates (constraint [B]); nothing you do produces,
 submits or promotes client content.
 
-STEP -1 — SELF-PROVISION IF THE PLUGIN IS MISSING. Trigger-fired containers
-start with no repository and no plugin. If `claude plugin list` shows no
-dma-insights: (a) call the claude-code-remote add_repo tool (owner mishleyotis,
-repo accelerate, access push — all routines attach with push access through the harness's own credentials (owner, 2026-08-20); this routine ALONE edits the plugin and opens PRs against it, synthesis pushes only its own outcome branch, drift pushes nothing), clone to /home/user/Accelerate at branch
-claude/dma-insights-onboarding-0ryrd0 as the tool instructs, then call
-register_repo_root — the repo's .claude/settings.json declares the plugin, so
-it loads on your NEXT turn; (b) run
+STEP -1 — SELF-PROVISION IF THE REPOSITORY IS MISSING. Check, do not assume: a
+trigger's `sources` can be added or removed without this text changing, so
+nothing written here guarantees you a repository and nothing forbids you one.
+Presence is not health either — a container turned up on 2026-08-23 WITH a
+checkout 136 commits behind and a clean working tree. So `ls` first, and let
+STEP 0's fetch and reset be what makes a present-but-stale checkout safe. If
+/home/user/Accelerate/plugins/dma-insights does not exist: (a) get the
+repository. `git clone --branch claude/dma-insights-onboarding-0ryrd0
+https://github.com/mishleyotis/Accelerate /home/user/Accelerate` is the FIRST
+thing to try, with that exact real URL — never a placeholder. If the
+claude-code-remote add_repo tool happens to be present it is the tidier route
+(owner mishleyotis, repo accelerate, access push — all routines attach with push
+access through the harness's own credentials (owner, 2026-08-20); this routine
+ALONE edits the plugin and opens PRs against it, synthesis pushes only its own
+outcome branch, drift pushes nothing), followed by register_repo_root — BUT DO
+NOT WAIT ON IT: measured 2026-08-23, no trigger-fired session carries any
+claude-code-remote tool, so a step that depends on one is a step that does not
+run. The repo's .claude/settings.json declares the plugin, so it loads on your
+NEXT turn; (b) run
 `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`;
 (c) proceed to STEP 0 on the next turn. If /root/.dma/sa.json is still absent
 or empty after (b), STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must
@@ -410,6 +422,18 @@ away from what was measured. Register expansions from STEP 1(a) are exempt from
 the rung ladder — they are additive, carry their yield provenance, and still go
 through the grader.
 
+NO CLIENT NAME IS EVER HARDCODED INTO A SKILL, AGENT, GATE OR ROUTINE PROMPT
+(owner, 2026-08-23: "Ensure no client hardcoding. This is a routine meant to run
+and ingest DMAs."). A measured lesson keeps its numbers and its date and loses
+the name — "462 of 462 excerpts in one package were fabricated" carries every bit
+of the evidence and none of the bias. The one permitted exception is a rule that
+SUBTRACTS: the held-out control in run_gate.HELD_OUT. If a cluster's proposed
+change would write a client name into any of those files, that change is
+rejected at this step, whatever it scores. Equally: NO VERSION LITERAL. A floor
+written as prose is never evaluated — `plugins/dma-insights/scripts/plugin_version.py`
+is how a version is checked, and a change that reintroduces ">= x.y.z" into a
+prompt or a script is rejected here too.
+
 STEP 4 — GRADE. Hand each proposed change to the learning-grader agent with the
 rubric at skills/dma-rectifier/assets/learning_rubric.json. Admission threshold
 0.75. Below threshold, the change returns to the enrich-and-adjudicate loop with
@@ -429,10 +453,10 @@ fixtures/permanent_regressions.json — every user-flagged finding; pins must
 resolve and the OPEN count may only shrink). Then the full suites: apps/mcp/tests,
 apps/api/tests, scripts/tests — and the plugin's own suite,
 plugins/dma-insights/scripts/tests (coverage, gold traceability, memory, matcher,
-yield ledger, doctor, packaging). Everything previously admitted stays green; a
-prior case that had to change to pass is a NEW finding, not a cost of doing
-business. A pinned test failing is a recurrence of a user-flagged finding —
-report_recurrence, and the rung moves up.
+yield ledger, doctor, packaging, plugin version). Everything previously admitted
+stays green; a prior case that had to change to pass is a NEW finding, not a cost
+of doing business. A pinned test failing is a recurrence of a user-flagged
+finding — report_recurrence, and the rung moves up.
 
 STEP 7 — COMMIT ONLY REGRESSION-SAFE CHANGES. A change is committable only when
 it is graded >= 0.75, cased with fails-before/passes-after both recorded, and the
@@ -440,6 +464,11 @@ permanent corpus plus full suites are green with it applied. One branch; one
 commit per cluster; named paths only; each message naming the class and the
 finding ids it closes. Open a PR. Do not merge it — skills and agents are read by
 every future session, and an unreviewed change to them is executed by everybody.
+IF A CHANGE TOUCHES THE PLUGIN, BUMP ITS VERSION IN BOTH MANIFESTS in the same
+commit — plugins/dma-insights/.claude-plugin/plugin.json and the dma-insights
+entry in .claude-plugin/marketplace.json. They are edited separately and drift
+silently; plugin_version.py reports that drift as MANIFEST_SPLIT, and a session
+that hits it cannot tell which version it is running.
 
 STEP 8 — WRITE BACK. record_refinement per change (target_kind IS the rung; open
 rationale with "RUNG: Rn — "; put the negative control, both directions, in
@@ -447,10 +476,12 @@ verification). resolve_finding naming that refinement for every finding actually
 closed. report_recurrence, with a measurement of 30 characters or more, for every
 fix found not to have held. Also reconcile the session-routine inventory: run
 list_triggers and diff it against plugins/dma-insights/docs/ROUTINES.md — a
-missing, paused or drifted trigger is a finding like any other. Client memory
-files (per-client md in each client's Drive folder) are READ-ONLY context here:
-read one only when a ledger entry's story is needed to judge a cluster; never
-edit one — they belong to the synthesis sessions.
+missing, paused or drifted trigger is a finding like any other, AND the doc
+records every live trigger prompt verbatim, so a prompt that has changed without
+the doc changing is the same finding. Client memory files (per-client md in each
+client's Drive folder) are READ-ONLY context here: read one only when a ledger
+entry's story is needed to judge a cluster; never edit one — they belong to the
+synthesis sessions.
 
 STEP 9 — REPORT the anti-pattern trend. From templates/run_report.md, plus: the
 handshake numbers; clusters opened, the rung each landed on and why; register
@@ -487,13 +518,25 @@ never create refresh requests yourself — the app's hourly sweep
 (sweep_refresh_due in apps/worker/dma_worker/enrichment.py) raises cadence rows;
 your job is to judge what it raised and what it missed.
 
-STEP -1 — SELF-PROVISION IF THE PLUGIN IS MISSING. Trigger-fired containers
-start with no repository and no plugin. If `claude plugin list` shows no
-dma-insights: (a) call the claude-code-remote add_repo tool (owner mishleyotis,
-repo accelerate, access push — push access is attached uniformly across routines (owner, 2026-08-20) through the harness's own credentials; this session's own rules still forbid editing the repository, so the access exists and goes unused), clone to /home/user/Accelerate at branch
-claude/dma-insights-onboarding-0ryrd0 as the tool instructs, then call
-register_repo_root — the repo's .claude/settings.json declares the plugin, so
-it loads on your NEXT turn; (b) run
+STEP -1 — SELF-PROVISION IF THE REPOSITORY IS MISSING. Check, do not assume: a
+trigger's `sources` can be added or removed without this text changing, so
+nothing written here guarantees you a repository and nothing forbids you one.
+Presence is not health either — a container turned up on 2026-08-23 WITH a
+checkout 136 commits behind and a clean working tree. So `ls` first, and let
+STEP 0's fetch and reset be what makes a present-but-stale checkout safe. If
+/home/user/Accelerate/plugins/dma-insights does not exist: (a) get the
+repository. `git clone --branch claude/dma-insights-onboarding-0ryrd0
+https://github.com/mishleyotis/Accelerate /home/user/Accelerate` is the FIRST
+thing to try, with that exact real URL — never a placeholder. If the
+claude-code-remote add_repo tool happens to be present it is the tidier route
+(owner mishleyotis, repo accelerate, access push — push access is attached
+uniformly across routines (owner, 2026-08-20) through the harness's own
+credentials; this session's own rules still forbid editing the repository, so
+the access exists and goes unused), followed by register_repo_root — BUT DO NOT
+WAIT ON IT: measured 2026-08-23, no trigger-fired session carries any
+claude-code-remote tool, so a step that depends on one is a step that does not
+run. The repo's .claude/settings.json declares the plugin, so it loads on your
+NEXT turn; (b) run
 `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`;
 (c) proceed to STEP 0 on the next turn. If /root/.dma/sa.json is still absent
 or empty after (b), STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must
@@ -527,7 +570,7 @@ unreachable, read the same state client by client through the connector:
 get_client_state(display_id) for every serving client, whose drift summary
 carries the facet states. For each queue entry note its age (requested_at or
 refresh_due_date to today) and whether anything is already working it — an open
-run for the entity, or its place in the synthesis routine's learner order.
+run for the entity, or a live claim on it.
 
 STEP 2 — DUPLICATES. Call list_pending_runs and read its disclosure: the
 top-level duplicate_requests count and per-row is_latest_for_request. Work is
@@ -556,12 +599,13 @@ record_finding through the connector with a real measurement — the endpoint or
 tool called and the count with its denominator, 30 characters minimum. Use
 report_recurrence, not a new finding, when memory already knows it
 (search_findings first; read paths_skipped before concluding it is new).
-Escalation means naming the owner in the finding: a due client the learner order
-will not reach goes to the synthesis routine by name; an UNHEALTHY loop names
-the dmai-enrich-loop trigger and apps/worker/dma_worker/enrichment.py; a due
-client with no open request names the sweep; a duplicate-share rise names the
-worker dedup rules; a stale memory file or aged open question names the
-synthesis routine's write-back step. Do not fix any of them here.
+Escalation means naming the owner in the finding: a due client the synthesis
+queue is not reaching goes to the synthesis routine, with the queue position
+that shows why; an UNHEALTHY loop names the dmai-enrich-loop trigger and
+apps/worker/dma_worker/enrichment.py; a due client with no open request names
+the sweep; a duplicate-share rise names the worker dedup rules; a stale memory
+file or aged open question names the synthesis routine's write-back step. Do
+not fix any of them here.
 
 STEP 5 — REPORT. Queue counts (requested, due) with the oldest age in each
 list; duplicate_requests and the share of pending runs it represents; the top
@@ -620,7 +664,7 @@ You are the DMA Insights synthesis watchdog, running as a fresh session. Run onc
 
 WHY YOU EXIST. A synthesis producer fans work out to subagents and its turn ends. Dispatched subagents do not survive a turn boundary, so the verdicts never arrive and the session sits holding a live claim with nothing running inside it. From outside that is indistinguishable from a session thinking hard, and it stays that way until someone notices. The one time noticing took a while, the redo cost 2.1M output tokens. A safeguard living inside the stalled session would share its fate, so it lives here — and in its own session, not bound to any producer's.
 
-STEP -1 — SELF-PROVISION IF THE REPOSITORY IS MISSING. LOOK BEFORE YOU CONCLUDE: this Routine's trigger carries no `sources`, so NOTHING GUARANTEES a repository — but nothing forbids one either, and a firing on 2026-08-23 found /home/user/Accelerate already present and complete. So this step is a check, not a premise. Run `ls /home/user/Accelerate/plugins/dma-insights` first: if it is there, say so in one line, SKIP to STEP 0, and do not clone over it — STEP 0's fetch-and-reset is what makes a PRESENT-BUT-STALE checkout safe, and a checkout can be many commits behind while looking perfectly healthy (measured 2026-08-23: a container arrived 136 commits behind with a clean working tree). (An earlier version of this prompt asserted "this container arrives with NO REPOSITORY" as fact, which is the same defect this routine exists to catch, one level up — a session that believes a premise instead of testing it reports on the premise.) If /home/user/Accelerate/plugins/dma-insights does not exist: (a) get the repository. `git clone --branch claude/dma-insights-onboarding-0ryrd0 https://github.com/mishleyotis/Accelerate /home/user/Accelerate` is the FIRST thing to try, with that exact real URL. If the claude-code-remote add_repo tool happens to be present, it is the tidier route (owner mishleyotis, repo accelerate, access push — push access is attached uniformly across routines (owner, 2026-08-20) through the harness's own credentials; this session's rules still forbid editing the repository, so the access exists and goes unused), followed by register_repo_root — BUT DO NOT WAIT ON IT: measured 2026-08-23, no trigger-fired session carries any claude-code-remote tool, so a step that depends on one is a step that does not run. Report which route worked. (b) run `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`; (c) verify the plugin with `python3 plugins/dma-insights/scripts/plugin_version.py` — no version is written down in this prompt; the script compares what is installed against what the checkout publishes and prints the exact fix if they disagree; (d) proceed on the next turn. If /root/.dma/sa.json is still absent or empty after (b), STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must be added in the claude.ai/code environment settings (one line, base64 of Secret Manager secret dmai-routine-sa-key). NEVER run a git clone against a PLACEHOLDER. An earlier version of this prompt carried a literal angle-bracket placeholder where a repository URL belonged; it cannot resolve, and it is how this routine spent firings erroring instead of watching. The ban is on the placeholder, not on cloning: the real URL is written out in (a) above and is the one to use.
+STEP -1 — SELF-PROVISION IF THE REPOSITORY IS MISSING. LOOK BEFORE YOU CONCLUDE: nothing in this prompt guarantees you a repository and nothing forbids you one. A trigger's `sources` can be added or removed without this text changing — measured 2026-08-23, lane B was documented as carrying none and was found carrying one — so the only reliable answer is the one you read off this container. A firing the same day found /home/user/Accelerate already present and complete. This step is a check, not a premise. Run `ls /home/user/Accelerate/plugins/dma-insights` first: if it is there, say so in one line, SKIP to STEP 0, and do not clone over it — STEP 0's fetch-and-reset is what makes a PRESENT-BUT-STALE checkout safe, and a checkout can be many commits behind while looking perfectly healthy (measured 2026-08-23: a container arrived 136 commits behind with a clean working tree). (An earlier version of this prompt asserted "this container arrives with NO REPOSITORY" as fact, which is the same defect this routine exists to catch, one level up — a session that believes a premise instead of testing it reports on the premise.) If /home/user/Accelerate/plugins/dma-insights does not exist: (a) get the repository. `git clone --branch claude/dma-insights-onboarding-0ryrd0 https://github.com/mishleyotis/Accelerate /home/user/Accelerate` is the FIRST thing to try, with that exact real URL. If the claude-code-remote add_repo tool happens to be present, it is the tidier route (owner mishleyotis, repo accelerate, access push — push access is attached uniformly across routines (owner, 2026-08-20) through the harness's own credentials; this session's rules still forbid editing the repository, so the access exists and goes unused), followed by register_repo_root — BUT DO NOT WAIT ON IT: measured 2026-08-23, no trigger-fired session carries any claude-code-remote tool, so a step that depends on one is a step that does not run. Report which route worked. (b) run `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`; (c) verify the plugin with `python3 plugins/dma-insights/scripts/plugin_version.py` — no version is written down in this prompt; the script compares what is installed against what the checkout publishes and prints the exact fix if they disagree; (d) proceed on the next turn. If /root/.dma/sa.json is still absent or empty after (b), STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must be added in the claude.ai/code environment settings (one line, base64 of Secret Manager secret dmai-routine-sa-key). NEVER run a git clone against a PLACEHOLDER. An earlier version of this prompt carried a literal angle-bracket placeholder where a repository URL belonged; it cannot resolve, and it is how this routine spent firings erroring instead of watching. The ban is on the placeholder, not on cloning: the real URL is written out in (a) above and is the one to use.
 
 IF EVERY BASH CALL FAILS A PreToolUse HOOK, that is a stale plugin install, not a harness fault, and it is recoverable. The plugin registers hooks whose commands live in the INSTALLED tree; an install predating a hook's script leaves the command pointing at a file that is not there, and a PreToolUse hook on Bash that cannot run blocks every Bash call — including the ones that would diagnose it. From 0.8.6 each hook command tests for its script and degrades to a loud allow, so this cannot recur; on an older install it can. Recovery without Bash: read plugins/dma-insights/hooks/hooks.json and the hooks directory with Read/Glob, name the missing script and the installed version in your report, and END THE FIRING. Do not attempt to edit the plugin or the settings, and do not report it as a missing file in the repository — it is present there; it is the INSTALL that is behind.
 
@@ -664,8 +708,8 @@ specification.
 | **Why ten minutes** | Long enough that lane A has run its gate and taken its claim — the queue selector removes a claimed entity, so lane B is simply offered a different one. Short enough that the two overlap and the cycle really is parallel. Ten minutes is a comfort margin, not a correctness one: correctness is `claim_run` being atomic. |
 | **On collision** | Lane B's claim is refused; it moves to its first `GATE: RESERVE` line rather than waiting or racing. Two producers on one client's six pages is the outcome the claim exists to prevent. |
 | **May / May not** | Exactly as § 2a, with one addition: lane B never treats lane A's claim as an orphaned lease. A lease held by a session that started ten minutes ago is a live producer, not a stall. |
-| **KNOWN GAP — connectors are not attached** | This trigger was created through the API, which carries NO claude.ai connectors, and this organisation has the API's `connectors` parameter disabled (the call was refused by name, 2026-08-23). **A human must attach Exa, Tavily and at least one of Clay / Vibe-Prospecting on this Routine's own edit screen in the claude.ai routines UI** — the connector browse list's Use buttons enable a connector for the *org*, not for a Routine. Until that edit is made, lane B's STEP 0 preflight will STOP the firing and report which connectors it carries, rather than produce a thin client: the routine never runs in degrade mode (owner, 2026-08-20). Lane A is unaffected; its connectors were attached in the UI. |
-| **Also missing: `sources`** | Like the watchdog and unlike 2a/2b/2c, this trigger carries no `session_context.sources`, so **nothing guarantees** its container a repository. Not the same as "arrives with none": a firing on 2026-08-23 found /home/user/Accelerate already present and reported the prompt's assertion as false. Both prompts now say CHECK rather than assert, and STEP -1 clones with a real URL only when the check comes back empty. It is also the reason the self-provision step no longer depends on a claude-code-remote tool. |
+| **Connectors — GAP CLOSED 2026-08-23** | Created through the API, which carries no claude.ai connectors, and this organisation has the API's `connectors` parameter disabled (the call was refused by name). A human attached them in the routines UI: read back off the trigger record at 10:33Z, `mcp_connections` carries Clay, DMA-Insights, Exa, Firecrawl, Google-Drive, LunarCrush, Indeed, PDF-Viewer, Vibe-Prospecting, Tavily and Context7 — the preflight minimum (Exa + Tavily + one of Clay / Vibe-Prospecting) is met, so lane B no longer stops at STEP 0. The preflight stays in the prompt: it checks what the SESSION carries, and a trigger record is not a session. |
+| **`sources` — the doc was wrong** | This table said the trigger carried no `session_context.sources` and that its container therefore arrived with no repository. Read back off the live record at 10:33Z it carries `sources: [{git_repository: mishleyotis/Accelerate}]`, which is why a firing found /home/user/Accelerate already present and reported the prompt as false. Two lessons kept rather than one: a trigger's record changes without this doc changing, so **neither this table nor a prompt may assert what a container holds** — STEP -1 now reads it off the container; and the self-provision step no longer depends on a claude-code-remote tool either way. |
 
 The live prompt, kept here verbatim so a drifted trigger is detectable by
 diff. It deliberately delegates the body of the work to § 2a's prompt rather
@@ -678,7 +722,9 @@ YOU ARE THE CYCLE'S SECOND CLIENT. Lane A (Routine `dma-synthesis-sequence-a`) f
 
 Because lane A claimed first, the queue selector will not offer you its entity — a live claim removes it. If you somehow gate the same one anyway, `claim_run` is atomic: your claim is refused, and you move to your first `GATE: RESERVE` line rather than waiting or racing. Never work a run another session holds.
 
-Everything else is identical to lane A. Follow the `dma-synthesis-sequence-a` Routine prompt exactly as written — STEP -1 self-provision — CHECK, DO NOT ASSUME: this Routine carries no `sources`, so nothing guarantees a repository, and nothing forbids one; a firing on 2026-08-23 found /home/user/Accelerate already there. Run `ls /home/user/Accelerate/plugins/dma-insights` first, and if it is present say so and skip to STEP 0 rather than cloning over it — STEP 0's `git fetch` + `git checkout -B` is what makes a present-but-stale checkout safe, and one arrived 136 commits behind with a clean working tree on 2026-08-23. Only if it is missing: `git clone --branch claude/dma-insights-onboarding-0ryrd0 https://github.com/mishleyotis/Accelerate /home/user/Accelerate` with that exact real URL, never a placeholder, then `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`, STEP 0 verify the tooling (`python3 plugins/dma-insights/scripts/plugin_version.py` — no version is written down in this prompt; the script compares what this session loads against what the checkout publishes and prints the exact fix — then /dma-insights:doctor green and the in-session binding stress test), STEP 1 the pre-synthesis gate (`python3 plugins/dma-insights/scripts/run_gate.py pick`, obeyed verbatim, walking the pending queue and nothing else — no client is named to be admitted), STEP 1b pull the package and open the client's memory, STEP 2 produce through /dma-insights:dma-surface-production with top-session dispatch, STEP 3 assess against the gold exemplar fixtures/gold_manifest.json names, STEP 4 close the learning loop, STEP 5 report.
+STEP -1 — CHECK, DO NOT ASSUME. This Routine carries no `sources`, so nothing GUARANTEES a repository — and nothing forbids one: a firing on 2026-08-23 found /home/user/Accelerate already present. Run `ls /home/user/Accelerate/plugins/dma-insights` FIRST. If it is there, say so in one line and skip to STEP 0; do not clone over it. STEP 0's `git fetch` + `git checkout -B` is what makes a present-but-stale checkout safe, and that is the case worth guarding: a container arrived on 2026-08-23 with a checkout 136 commits behind and a clean working tree, which looks healthy and is not. Only if the path is missing: `git clone --branch claude/dma-insights-onboarding-0ryrd0 https://github.com/mishleyotis/Accelerate /home/user/Accelerate` with that exact real URL, never a placeholder, then `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`.
+
+Everything else is identical to lane A. Follow the `dma-synthesis-sequence-a` Routine prompt exactly as written — STEP 0 verify the tooling (`python3 plugins/dma-insights/scripts/plugin_version.py` — no version is written down in this prompt; the script compares what this session loads against what the checkout publishes and prints the exact fix — then /dma-insights:doctor green and the in-session binding stress test), STEP 1 the pre-synthesis gate (`python3 plugins/dma-insights/scripts/run_gate.py pick`, obeyed verbatim, walking the pending queue and nothing else — no client is named to be admitted), STEP 1b pull the package and open the client's memory, STEP 2 produce through /dma-insights:dma-surface-production with top-session dispatch, STEP 3 assess against the gold exemplar fixtures/gold_manifest.json names, STEP 4 close the learning loop, STEP 5 report.
 
 Read that Routine's prompt as your specification: it is the authority, and it is kept verbatim in plugins/dma-insights/docs/ROUTINES.md § 2 alongside this one, so the two lanes cannot drift apart unnoticed. If the two ever disagree, lane A wins and the difference is a finding to record.
 
