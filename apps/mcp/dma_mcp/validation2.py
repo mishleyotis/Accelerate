@@ -1854,8 +1854,58 @@ def _roster_of(body):
     return None, None
 
 
+#: The email routes specifically. Kept apart from CONTACT_ROUTE_KEYS because
+#: a LinkedIn profile and a mailbox are not interchangeable, and treating them
+#: as one is what let the reported run through — see the second half of the
+#: docstring below.
+EMAIL_ROUTE_KEYS = ("email", "contact_email", "work_email")
+
+#: Words that mean the basis is talking about the ADDRESS search rather than
+#: about a profile match. Deliberately broad: the gate wants evidence that the
+#: question was asked, not a particular phrasing.
+_EMAIL_WORDS = ("email", "e-mail", "mailbox", "address", "mail")
+
+#: The wider set for "did this section speak to the CONTACT search at all",
+#: which is the escape for the per-seat check. Wider than the address set
+#: because a producer that says "no contact route could be established for
+#: these seats" has answered honestly without naming a mailbox.
+_CONTACT_WORDS = _EMAIL_WORDS + ("contact", "phone", "reach", "route",
+                                 "direct line")
+
+
+def _mentions_email_search(body, roster, words=_EMAIL_WORDS) -> bool:
+    """Does anything in this section speak to the ADDRESS search?
+
+    `words` widens it to the contact search generally — see `_CONTACT_WORDS`.
+    Scans the section's own prose AND every seat's basis, because a producer
+    may answer this once at the top or once per seat and both are honest.
+    """
+    blobs = []
+    for k in ("empty_state", "thin_reason", "narrative_thread", "contact_note"):
+        v = body.get(k)
+        if isinstance(v, str):
+            blobs.append(v)
+        elif isinstance(v, dict):
+            blobs += [str(x) for x in v.values() if isinstance(x, str)]
+    r = body.get("r_layer")
+    if isinstance(r, dict):
+        for v in r.values():
+            if isinstance(v, str):
+                blobs.append(v)
+            elif isinstance(v, list):
+                blobs += [str(x) for x in v if isinstance(x, str)]
+    for seat in roster:
+        if isinstance(seat, dict):
+            for k in CONTACT_BASIS_KEYS:
+                if isinstance(seat.get(k), str):
+                    blobs.append(seat[k])
+    text = " ".join(blobs).lower()
+    return any(w in text for w in words)
+
+
 def _check_contact_enrichment_baseline(page, payload):
-    """CG-41 — every roster seat says what the contact search found.
+    """CG-41 — every roster seat says what the contact search found, and a
+    roster with NO EMAIL AT ALL says why.
 
     The baseline is the SEARCH, not the email. A private company's CFO may
     have no reachable address anywhere and that run must still promote, so
@@ -1864,10 +1914,22 @@ def _check_contact_enrichment_baseline(page, payload):
     by data the world may not hold is a gate that teaches producers to refuse
     packages.
 
-    What it refuses is a seat nobody can say anything about: no route, no
-    basis, nothing. That seat is indistinguishable from one where the tool
-    was never called, which is exactly what happened on the run that prompted
-    this.
+    THE SECOND CHECK EXISTS BECAUSE THE FIRST ONE MISSED THE REPORTED RUN.
+    Measured 2026-08-23 against gulf-coast-business-credit's live promoted
+    payload, which is the run the owner reported with "Clay enrichment for
+    Gulf has no emails": all three seats carry a `linkedin_url` and a long,
+    genuine `enrichment_basis`, so every one of them scored `resolved` and the
+    per-seat check PASSED a roster with zero email addresses on it. The basis
+    text describes the profile match and never mentions an address search at
+    all — so "we looked for emails and found none" and "we never looked" were
+    still the same payload, one level down from where the gate was looking.
+
+    A LinkedIn profile and a mailbox are not interchangeable. So the roster is
+    also asked, once, at section level: if NOT ONE seat carries an email and
+    nothing anywhere in the section speaks to the address search, that is
+    refused. One sentence closes it — in a seat's basis, the section's
+    empty_state, or the r_layer's probe list — and a roster where addresses
+    genuinely do not exist still promotes.
     """
     if page != "overview" or not isinstance(payload, dict):
         return []
@@ -1881,21 +1943,78 @@ def _check_contact_enrichment_baseline(page, payload):
 
     states = [(i, _seat_contact_state(s)) for i, s in enumerate(roster)]
     unknown = [i for i, st in states if st == "unknown"]
-    if not unknown:
-        return []
 
-    # SECTION-LEVEL DISCLOSURE STILL COUNTS. A roster that states once, for
-    # the whole section, that the contact pass did not run is honest — it is
-    # thin and it says so. Silence is the refusal, not thinness.
-    if _says_it_searched(body):
-        return []
+    # ── the second check: a roster with NO EMAIL AT ALL says why ──────
+    #
+    # Runs BEFORE the early return, because the reported run had ZERO unknown
+    # seats — every one carried a linkedin_url and a real basis — and still
+    # served no addresses. Returning early on `not unknown` was exactly how it
+    # got through.
+    # AND ONLY WHERE A SEARCH ACTUALLY SUCCEEDED. A roster whose every seat
+    # recorded a negative has already said the search found nothing, and
+    # demanding a second, address-specific sentence from it would buy nothing
+    # but boilerplate. The Gulf shape is the opposite and is the one worth
+    # refusing: the search WORKED — three profiles came back — and produced no
+    # address, with nothing said about why. So the question is only asked of a
+    # roster that has at least one resolved seat.
+    out = []
+    seats = [s for s in roster if isinstance(s, dict)]
+    resolved_any = any(st == "resolved" for _, st in states)
+    with_email = [i for i, s in enumerate(roster)
+                  if isinstance(s, dict)
+                  and any(isinstance(s.get(k), str) and s[k].strip()
+                          for k in EMAIL_ROUTE_KEYS)]
+    # SUPPRESSED ONLY BY TEXT THAT SPEAKS TO ADDRESSES, never by
+    # `_says_it_searched`. That helper answers the FIRST check's question —
+    # "did this section disclose that its contact pass did not run" — and it
+    # returns True for any section carrying an `r_layer.probes_run` at all.
+    # Gulf carries five probes, every one about IDENTITY (management page,
+    # title match, start year), and reusing the helper here let those probes
+    # answer a question they never addressed: the gate went green on the exact
+    # payload it was written for. `_mentions_email_search` reads the same
+    # r_layer, and the seats' bases, for words that are actually about an
+    # address.
+    if seats and resolved_any and not with_email \
+            and not _mentions_email_search(body, roster):
+        out.append(_reason(
+            "CG-41", "leadership", f"overview.leadership.{container}",
+            f"not one of {len(seats)} roster seats carries an email address, "
+            f"and nothing in this section speaks to the address search — not "
+            f"a seat's enrichment_basis, not the empty_state, not the "
+            f"r_layer's probes. A LinkedIn profile is not a mailbox, so a "
+            f"roster full of resolved profiles with no address on it is still "
+            f"the state where 'we searched for addresses and found none' and "
+            f"'we never searched' read identically. Measured on the run that "
+            f"prompted this gate: three seats, three profiles, three genuine "
+            f"bases, zero emails, and no sentence anywhere about an address. "
+            f"ONE sentence closes this — in a seat's basis, in the section's "
+            f"empty_state, or as an r_layer probe — and a roster whose "
+            f"addresses genuinely are not discoverable still promotes. What "
+            f"is refused is the silence, never the absence."))
+
+    if not unknown:
+        return out
+
+    # SECTION-LEVEL DISCLOSURE STILL COUNTS, AND IT HAS TO BE ABOUT CONTACTS.
+    # A roster that states once, for the whole section, that the contact pass
+    # did not run is honest — it is thin and it says so. Silence is the
+    # refusal, not thinness.
+    #
+    # `_says_it_searched` is deliberately NOT used here. It is CG-40's escape,
+    # where "this section documents its search" is exactly the right test, and
+    # it returns True for any section carrying an `r_layer.probes_run` at all.
+    # Gulf carries five probes, every one about IDENTITY — the management page,
+    # the title match, the start year — and none about reaching anybody. Borrowed
+    # here it let an identity ladder excuse a contact silence.
+    if _mentions_email_search(body, roster, _CONTACT_WORDS):
+        return out
 
     n = len(roster)
     resolved = sum(1 for _, st in states if st == "resolved")
     negative = sum(1 for _, st in states if st == "recorded_negative")
     where = ", ".join(f"{container}[{i}]" for i in unknown[:12])
     more = "" if len(unknown) <= 12 else f" (+{len(unknown) - 12} more)"
-    return [_reason(
+    out.append(_reason(
         "CG-41", "leadership", f"overview.leadership.{container}",
         f"{len(unknown)} of {n} roster seats record no contact-search "
         f"outcome — no route and no basis: {where}{more}. "
@@ -1909,7 +2028,8 @@ def _check_contact_enrichment_baseline(page, payload):
         f"carrying neither is indistinguishable from a seat the enrichment "
         f"never reached, which is the state three of four promoted clients "
         f"were in. One section-level empty_state or thin flag naming the "
-        f"queries run also satisfies this.")]
+        f"queries run also satisfies this."))
+    return out
 
 
 def _check_depth_floors(page, payload):
