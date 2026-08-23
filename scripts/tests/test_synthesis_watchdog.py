@@ -298,3 +298,79 @@ def test_the_routine_prompt_carries_no_inline_heredoc():
         "belongs in synthesis_watchdog.py --promote-ready, where it is tested")
     assert "<this repo>" not in block, (
         "the watchdog prompt still has the literal <this repo> placeholder")
+
+
+# ── a routine prompt may not name a flag its script does not have ──
+#
+# Found 2026-08-23, in a prompt I had just written: the watchdog's STEP 1
+# said `drive_fetch.py pull-ledgers --into …` and the parser defines
+# `--dest`. It would have failed on the first firing, at the first step, in
+# a fresh session with nobody reading — which is precisely the class of
+# defect the rest of this file exists to stop. Prompts are not code and
+# nothing type-checks them, so the flags they name are checked here.
+
+
+def _watchdog_prompt() -> str:
+    from pathlib import Path
+    doc = Path(__file__).resolve().parents[2] / \
+        "plugins/dma-insights/docs/ROUTINES.md"
+    if not doc.is_file():
+        return ""
+    t = doc.read_text(encoding="utf-8")
+    i = t.find("### 2d · DMA synthesis watchdog")
+    if i < 0:
+        return ""
+    start = t.index("```", i) + 3
+    return t[start:t.index("\n```", start)]
+
+
+def _flags_for(script: str, sub: str) -> set:
+    """The flags a script's subcommand actually defines, read from its own
+    parser rather than from a list kept in step with it by hand."""
+    import subprocess
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2]
+    r = subprocess.run(["python3", str(root / script), sub, "--help"],
+                       capture_output=True, text=True, timeout=60)
+    import re
+    return set(re.findall(r"(--[a-z][a-z0-9-]+)", r.stdout + r.stderr))
+
+
+@pytest.mark.parametrize("script,sub", [
+    ("plugins/dma-insights/scripts/drive_fetch.py", "pull-ledgers"),
+    ("plugins/dma-insights/scripts/drive_fetch.py", "push-ledger"),
+])
+def test_every_flag_the_watchdog_prompt_names_exists(script, sub):
+    import re
+    prompt = _watchdog_prompt()
+    if not prompt:
+        pytest.skip("watchdog prompt not in ROUTINES.md")
+    defined = _flags_for(script, sub)
+    if not defined:
+        pytest.skip(f"could not read {script} {sub} --help")
+    name = script.rsplit("/", 1)[-1]
+    for line in re.findall(rf"{re.escape(name)}\s+{re.escape(sub)}([^`\n]*)",
+                           prompt):
+        for flag in re.findall(r"(--[a-z][a-z0-9-]+)", line):
+            assert flag in defined, (
+                f"the watchdog prompt tells a routine to run `{name} {sub} "
+                f"{flag}`, and that flag does not exist. Defined: "
+                f"{sorted(defined)}")
+
+
+def test_the_watchdog_prompt_names_only_real_watchdog_flags():
+    import re
+    import subprocess
+    from pathlib import Path
+    prompt = _watchdog_prompt()
+    if not prompt:
+        pytest.skip("watchdog prompt not in ROUTINES.md")
+    root = Path(__file__).resolve().parents[2]
+    r = subprocess.run(["python3", str(root / "scripts/synthesis_watchdog.py"),
+                        "--help"], capture_output=True, text=True, timeout=60)
+    defined = set(re.findall(r"(--[a-z][a-z0-9-]+)", r.stdout + r.stderr))
+    for line in re.findall(r"synthesis_watchdog\.py([^`\n]*)", prompt):
+        for flag in re.findall(r"(--[a-z][a-z0-9-]+)", line):
+            assert flag in defined, (
+                f"the prompt names `synthesis_watchdog.py {flag}`, which does "
+                f"not exist. Defined: {sorted(defined)}")
