@@ -270,3 +270,62 @@ def test_citation_rows_never_shadow_the_register(tmp_path):
     records, conflicts, _ = en.merge(root)
     assert any(c["eid"] == "E-001" and c["field"] == "url"
                for c in conflicts), "the disagreement must be visible"
+
+
+# ── token decorations: the residue of the citation mode ───────────────────
+#
+# After list expansion, 3,361 rows still dropped across the 60-package
+# cohort — one decorated token disqualified its whole list under the
+# all-tokens-valid rule. Measured decorations: `(ctx)`, trailing subcap
+# annotations `->P1C1.1.4` / `[P1C1.1.3]` (redundant with the subcap column
+# beside them), `|` as delimiter, doubled ids `E-021:E-021:F1`, and absence
+# markers decorated with the same suffixes. After stripping: 168 drops, all
+# honest (range expressions and foreign token vocabularies).
+
+@pytest.mark.parametrize("cell,want", [
+    ("E-023:F1, E-002:F1(ctx)", {"E-023", "E-002"}),
+    ("E-013|E-036|E-005", {"E-013", "E-036", "E-005"}),
+    ("E-003:F1, E-002:F1 [P1C1.1.3]", {"E-003", "E-002"}),
+    ("E-008:F1, E-010:F1 ->P1C1.1.4", {"E-008", "E-010"}),
+    ("E-014, RECOVERED-SUMMARY-ONLY, E-015", {"E-014", "E-015"}),
+])
+def test_decorated_citation_lists_resolve(tmp_path, cell, want):
+    root = _citation_pkg(tmp_path, cell, "")
+    records, _, unrec = en.merge(root)
+    assert set(records) == want, f"{cell!r} -> {set(records)}"
+    assert sum(len(v) for v in unrec.values()) == 0
+
+
+def test_a_doubled_id_collapses_only_on_exact_equality(tmp_path):
+    """`E-021:E-021:F1` is one id stuttered; `E-021:E-022` is two ids joined
+    by a colon and guessing between them is refused."""
+    assert en._clean_id_token("E-021:E-021:F1") == "E-021:F1"
+    assert en._base_eid(en._clean_id_token("E-021:E-021:F1"), wide=True) == "E-021"
+    assert en._base_eid(en._clean_id_token("E-021:E-022"), wide=True) is None
+
+
+def test_decorated_absence_markers_are_absences(tmp_path):
+    root = tmp_path / "pkg"
+    (root / "01_evidence").mkdir(parents=True)
+    (root / "01_evidence" / "evidence_index.csv").write_text(
+        "evidence_id,url\n"
+        "NO_EVIDENCE [P1C1.1.1],\n"
+        "NO_EVIDENCE:F1,\n"
+        "RECOVERED-SUMMARY-ONLY,\n"
+        "E-001,https://x.test/1\n")
+    records, _, unrec = en.merge(root)
+    assert set(records) == {"E-001"}
+    assert sum(len(v) for v in unrec.values()) == 0
+
+
+def test_a_range_expression_stays_honestly_unrecognised(tmp_path):
+    """`E-001 through E-030 range` names ids it does not write. Expanding it
+    would mint records from interpolation; it stays in the drop report,
+    where a human can decide."""
+    root = tmp_path / "pkg"
+    (root / "01_evidence").mkdir(parents=True)
+    (root / "01_evidence" / "evidence_index.csv").write_text(
+        "evidence_id,url\nE-001 through E-030 range (30 unique),\n")
+    records, _, unrec = en.merge(root)
+    assert records == {}
+    assert sum(len(v) for v in unrec.values()) == 1

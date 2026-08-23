@@ -251,7 +251,8 @@ def _rows_from_xlsx(path: Path):
 #: `NO_EVIDENCE (ladder-complete)` on 188 rows of one workbook — the
 #: assessment saying the search ladder ran to completion and found nothing.
 ABSENCE_MARK_RE = re.compile(
-    r"^(n/?a|none|no[_ ]?evidence|-+)\s*(\(.*\))?$", re.I)
+    r"^(n/?a|none|no[_ ]?evidence|recovered-summary-only|-+)"
+    r"(:F\d+)?\s*(\(.*\))?$", re.I)
 
 EID_WIDE_RE = re.compile(
     r"^([A-Z]{1,6}[-_][A-Z0-9][A-Z0-9._-]*\d)(:F\d+)?$", re.I)
@@ -278,7 +279,7 @@ def _base_eid(value: str, wide: bool = False) -> str | None:
 
 #: Delimiters a citation cell uses between ids: `E-001, E-002` and
 #: `E-030:F9;E-031:F1` are both measured spellings.
-MULTI_SPLIT = re.compile(r"[;,\n]+")
+MULTI_SPLIT = re.compile(r"[;,|\n]+")   # `|` measured on subcap-map CSVs
 
 #: URL lists measured `;`-separated (and occasionally comma-separated); a
 #: comma INSIDE a URL must not shred it, so the comma split fires only when
@@ -286,6 +287,34 @@ MULTI_SPLIT = re.compile(r"[;,\n]+")
 _URL_SPLIT = re.compile(r"[;\n]+|,(?=\s*https?://)", re.I)
 #: Dates like "Jan 5, 2026" carry commas that are not delimiters.
 _PLAIN_SPLIT = re.compile(r"[;\n]+")
+
+
+#: Decorations a citation token wears that never change WHICH id is cited:
+#: a parenthetical context marker (`E-002:F1(ctx)`), a trailing subcap
+#: annotation naming the row's own cell (`E-008:F1 ->P1C1.1.4`,
+#: `E-003:F1 [P1C1.1.3]` — redundant with the subcap column beside it), and
+#: a doubled id (`E-021:E-021:F1`). Measured across the last-60 cohort:
+#: 2,800+ rows dropped whole because ONE decorated token disqualified its
+#: entire list under the all-tokens-valid rule.
+_TOKEN_DECOR_RE = re.compile(
+    r"\s*(\(.*?\)|\[[^\]]*\]|->\s*P[1-4]C[\d.]+[A-Z0-9]*)\s*$", re.I)
+_DOUBLED_ID_RE = re.compile(r"^([A-Z]+-[A-Z0-9-]*\d):(\1)(:F\d+)?$", re.I)
+
+
+def _clean_id_token(tok: str) -> str:
+    t = tok.strip()
+    while True:
+        t2 = _TOKEN_DECOR_RE.sub("", t).strip()
+        if t2 == t:
+            break
+        t = t2
+    m = _DOUBLED_ID_RE.match(t)
+    if m:
+        # `E-021:E-021:F1` — the same id twice with a colon. Collapsed ONLY
+        # on exact equality; two DIFFERENT ids joined by a colon stay
+        # unrecognised rather than guessed between.
+        t = m.group(1) + (m.group(3) or "")
+    return t
 
 
 def split_citation_ids(value: str) -> list | None:
@@ -300,7 +329,10 @@ def split_citation_ids(value: str) -> list | None:
     them threw away the very Evidence_IDs/Source_URLs pairing the tab
     exists to state.
     """
-    toks = [t.strip() for t in MULTI_SPLIT.split(value) if t.strip()]
+    toks = [_clean_id_token(t) for t in MULTI_SPLIT.split(value)]
+    # A marker token inside a list ("E-014,RECOVERED-SUMMARY-ONLY") is that
+    # slot saying it has no citable id; it must not disqualify its siblings.
+    toks = [t for t in toks if t and not ABSENCE_MARK_RE.match(t)]
     if len(toks) < 2:
         return None
     ids = [_base_eid(t, wide=True) for t in toks]
@@ -385,11 +417,12 @@ def merge(package: Path) -> tuple[dict, list, dict]:
                 if multi:
                     expand_citation_row(row, multi, rel, records, conflicts)
                     continue
-                if ABSENCE_MARK_RE.match(str(raw_id).strip()):
+                if ABSENCE_MARK_RE.match(_clean_id_token(str(raw_id))):
                     continue        # "N/A" / "NO_EVIDENCE" in an id column is
                                     # the row saying it cites nothing — an
                                     # explicit absence, not an unrecognised id
-            eid = _base_eid(str(raw_id), wide=named_col)
+            eid = _base_eid(_clean_id_token(str(raw_id)) if named_col
+                            else str(raw_id), wide=named_col)
             if not eid:
                 # NOT SILENT. This `continue` dropped 1,029 URL-carrying rows
                 # across four packages with no counter anywhere. A catalogue
