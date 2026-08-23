@@ -17,10 +17,14 @@ The version is allocated server-side by `next_enrichment_version`, so a
 caller cannot mint one that collides or one that goes backwards, and two
 producers enriching the same facet concurrently order rather than collide.
 
-WHERE THE REFUSAL LIVES. Not at promote: a promote carrying five of seven
-facets forward is better than no promote, and refusing it strands the five.
-`blocking(...)` answers the question "is this client done?", which is the
-claim the owner's rule is actually about.
+WHERE THE REFUSAL LIVES. Not at promote, with one floor. A promote carrying
+five of seven facets forward is better than no promote, and refusing it
+strands the five; `blocking(...)` answers "is this client done?", which is
+the claim the owner's rule is actually about. But that argument has a floor
+it did not draw until 2026-08-23: at ZERO of seven there is nothing to
+strand, and `promote_run` refuses with `no_enrichment_ever_run` (see the
+comment there for the measurement — three of four promoted clients were in
+that state). Every partial count above zero still promotes and discloses.
 """
 from __future__ import annotations
 

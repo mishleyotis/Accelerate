@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pg8000.dbapi
 
+from dma_mcp import ledger
 from dma_mcp.contracts import PAGES, SERVING_TABLES, sections
 from dma_mcp.promote import _SPEC_PATH, promote_run, writer_registry
 from dma_mcp.submit import submit_page_payload
@@ -129,6 +130,23 @@ def seeded():
                 (rid, '{"manifest": {}, "workbook_grains": {"pillars": '
                       '[{"pillar_id": "P1", "score": 2.1, "peer_median": 3.1}], '
                       '"categories": []}}'))
+    # THE ENRICHMENT THIS RUN HAD, because a run that reaches promote has had
+    # it. Until 2026-08-23 this fixture seeded no ledger rows at all, which
+    # made every promote here a run where all seven facets were
+    # `never_enriched` — the exact state `no_enrichment_ever_run` now refuses,
+    # and the state three of four promoted clients were measured in
+    # (MEM-0206). Six machinery tests went red on the gate landing, and they
+    # were right to: they were exercising the writer transaction against a
+    # precondition production must never reach.
+    #
+    # All seven, not a token one. Seeding a single facet would clear the gate
+    # (it fires only at zero of seven) while leaving the fixture modelling a
+    # client nobody would ship, and the next reader would have no way to tell
+    # the number was chosen to satisfy a check rather than to describe a run.
+    for facet in ledger.FACETS:
+        ledger.record_enrichment(cur, eid, facet, source="test-fixture",
+                                 run_id=rid, account="pytest",
+                                 note="seeded by the promote fixture")
     admin.commit()
     yield mcp, admin, rid
     mcp.rollback()
@@ -494,3 +512,92 @@ def test_a_retained_safeguard_failure_discloses_and_still_promotes(seeded,
                for r in out["stale_verdicts"]["context"]), \
         "disclosing means naming it, not swallowing it"
     assert "resubmit" in out["stale_verdicts_note"].lower()
+
+
+def _facet_states(admin, rid):
+    """What `enrichment_drift` says for the entity behind this run."""
+    cur = admin.cursor()
+    cur.execute("SELECT entity_id FROM runs WHERE id = %s", (rid,))
+    eid = cur.fetchone()[0]
+    cur.execute("SELECT facet, state FROM enrichment_drift WHERE entity_id = %s",
+                (eid,))
+    return dict(cur.fetchall()), eid
+
+
+def test_a_run_with_nothing_ever_enriched_refuses_against_the_real_schema(seeded):
+    """The floor under the drift disclosure, asserted where the view lives.
+
+    `test_zero_enrichment_refused.py` covers this against a fake cursor, which
+    proves the branch but not the query: `no_enrichment_ever_run` reads the
+    `enrichment_drift` VIEW, and a view that stops enumerating facets for an
+    entity with no ledger rows would turn the refusal into a no-op with every
+    unit test still green.
+
+    This is also the test the suite did not have on 2026-08-23. The gate
+    landed and six machinery tests went red because the fixture seeded no
+    ledger rows at all — they were promoting a run in exactly the state the
+    gate refuses, and nothing in the file said whether that was the gate
+    working or the gate broken. The fixture now seeds all seven facets; this
+    test takes them away again on purpose, so the refusal has one place that
+    asserts it rather than six that trip over it.
+    """
+    mcp, admin, rid = seeded
+    _submit_all(mcp, rid)
+
+    states, eid = _facet_states(admin, rid)
+    assert set(states) == set(ledger.FACETS), \
+        "the drift view must enumerate every facet, or the all() below is vacuous"
+    assert all(s == "enriched_not_promoted" for s in states.values()), \
+        f"the fixture seeds enrichment for all seven facets, got {states}"
+
+    # Take the enrichment away — the state three of four promoted clients
+    # were measured in (MEM-0206).
+    cur = admin.cursor()
+    cur.execute("DELETE FROM enrichment_ledger WHERE entity_id = %s", (eid,))
+    admin.commit()
+    states, _ = _facet_states(admin, rid)
+    assert all(s == "never_enriched" for s in states.values()), states
+
+    out = promote_run(mcp, rid)
+    assert out["promoted"] is False, \
+        "zero of seven facets enriched is an empty shell, not a thin client"
+    assert out["error"] == "no_enrichment_ever_run"
+    assert out["enriched"] == 0 and out["of"] == len(ledger.FACETS)
+    assert sorted(out["facets"]) == sorted(ledger.FACETS)
+    assert "record_enrichment" in out["hint"], \
+        "a producer told only NO cannot act; the way out belongs in the text"
+
+    # AND IT WROTE NOTHING. A refusal that half-promoted would be worse than
+    # no gate — invariant 3 is all six pages or none, refusals included.
+    cur.execute("SELECT count(*) FROM overview_scores WHERE run_id = %s", (rid,))
+    assert cur.fetchone()[0] == 0
+    cur.execute("SELECT status FROM runs WHERE id = %s", (rid,))
+    assert cur.fetchone()[0] != "PROMOTED"
+
+
+def test_one_facet_of_seven_still_promotes(seeded):
+    """The floor is ZERO, not "fewer than all".
+
+    The ledger's own docstring argues that refusing a promote carrying five of
+    seven facets forward would strand the five, and that argument is the
+    reason the gate is written `all(... never_enriched)` rather than `any(`.
+    A one-word slip there — `any` for `all`, `not any(current)` for the same
+    idea — would refuse every partially-enriched client in the corpus, which
+    is most of them, and every test above would still pass because the fixture
+    seeds all seven.
+    """
+    mcp, admin, rid = seeded
+    _submit_all(mcp, rid)
+    cur = admin.cursor()
+    cur.execute("SELECT entity_id FROM runs WHERE id = %s", (rid,))
+    eid = cur.fetchone()[0]
+    # Six of seven gone; `leadership` alone remains.
+    cur.execute("DELETE FROM enrichment_ledger WHERE entity_id = %s "
+                "AND facet <> 'leadership'", (eid,))
+    admin.commit()
+    states, _ = _facet_states(admin, rid)
+    assert sum(1 for s in states.values() if s == "never_enriched") == 6, states
+
+    out = promote_run(mcp, rid)
+    assert out["promoted"] is True, \
+        "one of seven is a thin client, and refusing it strands the one"
