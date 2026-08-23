@@ -159,6 +159,44 @@ NO_CAP = {"", "-", "--", "n/a", "na", "none", "no", "no cap", "no caps",
           "not applied", "nil", "0", "0.0", "false"}
 
 
+#: Defining columns grouped into the family they state, so `url` and
+#: `source_url` compare against each other rather than past each other.
+def _field_family(header: str) -> str:
+    h = header.lower()
+    if "url" in h or "link" in h:
+        return "url"
+    if "date" in h or "published" in h:
+        return "date"
+    if "source" in h or "title" in h or "publisher" in h:
+        return "source"
+    if "excerpt" in h or "quote" in h or "verbatim" in h or "passage" in h:
+        return "excerpt"
+    return h
+
+
+def _disagreeing(vals: list) -> bool:
+    """Do these values genuinely contradict, or restate one another?
+
+    Measured false positives this replaces: a tab that TRUNCATES its sibling
+    ("…Vibe CU, charte" beside "…charter 61522" — same call report, one cell
+    cut short) read as different content. One value being a prefix of the
+    other is the same statement at two lengths; the longer row survives an
+    ON CONFLICT and nothing is lost. Trailing-slash and case differences on
+    a URL are likewise the same address.
+    """
+    norm = []
+    for v in set(vals):
+        n = re.sub(r"\s+", " ", v.strip().lower()).rstrip("/")
+        if n:
+            norm.append(n)
+    norm = sorted(set(norm), key=len)
+    for i, a in enumerate(norm):
+        for b in norm[i + 1:]:
+            if not b.startswith(a):
+                return True
+    return False
+
+
 def _is_cap_value(v) -> bool:
     return str(v if v is not None else "").strip().lower() not in NO_CAP
 
@@ -358,7 +396,7 @@ def vet_scoring(path: Path) -> None:
     cells: list[str] = []
     scores: list[float] = []
     e_ids: list[str] = []
-    ev_defs: dict[str, list[str]] = {}
+    ev_defs: dict[str, dict] = {}      # eid -> field family -> [values]
     missing_source_cell = 0
     saw_source_cell_col = False
 
@@ -407,17 +445,22 @@ def vet_scoring(path: Path) -> None:
                     if 0 < float(c) <= 5.0 or float(c) == 0:
                         pass
             if is_register and len(row_eids) == 1:
-                # Fingerprint the CONTENT columns only. The whole row carries
-                # linkage fields — subcap, tier, confidence — that vary by
-                # design across the rows of one evidence id, so hashing the
-                # row reports every multi-subcap citation as a contradiction.
-                fp = " | ".join(
-                    re.sub(r"\s+", " ", str(r[i]).strip().lower())
-                    for i in defining_cols
-                    if i < len(r) and r[i] is not None and str(r[i]).strip()
-                    and str(r[i]).strip().upper() != row_eids[0])
-                if fp:
-                    ev_defs.setdefault(row_eids[0], []).append(fp)
+                # PER FIELD, not per row-fingerprint. A fingerprint built by
+                # joining whichever defining columns a tab happens to carry
+                # refused three June packages for "58 duplicates with
+                # different content" whose content was IDENTICAL: one tab
+                # stated (name, url, date) and its sibling (name, url), so
+                # every id "differed" by the projection. Only a FIELD that
+                # carries two genuinely disagreeing values loses a row under
+                # ON CONFLICT DO NOTHING.
+                for i in defining_cols:
+                    if i >= len(r) or r[i] is None:
+                        continue
+                    v = re.sub(r"\s+", " ", str(r[i]).strip())
+                    if not v or v.upper() == row_eids[0]:
+                        continue
+                    ev_defs.setdefault(row_eids[0], {}).setdefault(
+                        _field_family(low[i]), []).append(v)
             if idx_src is not None and (idx_src >= len(r) or r[idx_src] in (None, "")):
                 missing_source_cell += 1
 
@@ -469,9 +512,17 @@ def vet_scoring(path: Path) -> None:
     # loses rows silently under ON CONFLICT DO NOTHING is one id DEFINED
     # more than once with DIFFERENT content in a register tab — duplicate
     # by content decides, never duplicate by id alone.
-    conflicting = {k: v for k, v in ev_defs.items() if len(set(v)) > 1}
-    repeated = {k: len(v) for k, v in ev_defs.items()
-                if len(v) > 1 and len(set(v)) == 1}
+    conflicting = {}
+    for k, fields in ev_defs.items():
+        bad = {fam: vals for fam, vals in fields.items()
+               if _disagreeing(vals)}
+        if bad:
+            conflicting[k] = [f"{fam}: {' <> '.join(sorted(set(vals))[:2])[:90]}"
+                              for fam, vals in bad.items()]
+    repeated = {k: max(len(v) for v in fields.values())
+                for k, fields in ev_defs.items()
+                if any(len(v) > 1 for v in fields.values())
+                and k not in conflicting}
     if conflicting:
         worst = sorted(conflicting.items(), key=lambda kv: -len(kv[1]))[:6]
         note("REFUSE", f"{len(conflicting)} evidence id(s) defined more than "

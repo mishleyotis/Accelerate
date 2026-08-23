@@ -274,3 +274,85 @@ def test_the_agent_doc_lists_exactly_the_registry():
     assert in_doc <= set(vw.REFUSALS) | {"V6"}, (
         f"the agent doc names codes the registry does not: "
         f"{sorted(in_doc - set(vw.REFUSALS))}")
+
+
+# ── V3 compares fields, not row projections ───────────────────────────────
+#
+# Three June-cohort packages refused with "58/46/13 ids defined more than
+# once with DIFFERENT content" whose content was IDENTICAL. Two sub-modes,
+# both measured:
+#   projection — Evidence_Master states (name, url) while Evidence_Index
+#   states (name, url, date); the row-fingerprint differed by the date the
+#   other tab never carried.
+#   truncation — one tab cuts a cell short ("…Vibe CU, charte" beside
+#   "…charter 61522"); same call report, one statement at two lengths.
+# The genuine case (one id, two entirely different documents) must keep
+# refusing — it is the row lost silently under ON CONFLICT DO NOTHING.
+
+def _register_book(tmp_path, tabs):
+    import openpyxl as _o
+    root = tmp_path / "pkg"; (root / "03_scoring_workbook").mkdir(parents=True)
+    wb = _o.Workbook(); wb.remove(wb.active)
+    for name, rows in tabs.items():
+        ws = wb.create_sheet(name)
+        for r in rows: ws.append(r)
+    path = root / "03_scoring_workbook" / "DMA_Scoring_Workbook_X.xlsx"
+    wb.save(path)
+    return path
+
+
+def _vet_refusals(path):
+    vw.findings.clear()
+    vw.vet_scoring(path)
+    out = [m for lvl, m in vw.findings if lvl == "REFUSE"]
+    vw.findings.clear()
+    return out
+
+
+def test_a_projection_difference_is_not_a_contradiction(tmp_path):
+    book = _register_book(tmp_path, {
+        "Evidence_Master": [["Evidence_ID", "Source_Name", "URL"],
+                            ["E-001", "FY2024 Q4 results (press release)",
+                             "https://x.test/q4"]],
+        "Evidence_Index": [["Evidence_ID", "Source_Name", "URL",
+                            "Date_Published"],
+                           ["E-001", "FY2024 Q4 results (press release)",
+                            "https://x.test/q4", "2025-03"]]})
+    assert not [m for m in _vet_refusals(book) if m.startswith("V3")], (
+        "a field the sibling tab never states is not a disagreement")
+
+
+def test_a_truncated_copy_is_not_a_contradiction(tmp_path):
+    book = _register_book(tmp_path, {
+        "Evidence_Master": [["Evidence_ID", "Source_Name", "URL"],
+                            ["E-001", "NCUA Call Report — Vibe CU, charte",
+                             "https://ncuso.test/61522/"]],
+        "Evidence_Index": [["Evidence_ID", "Source_Name", "URL"],
+                           ["E-001", "NCUA Call Report — Vibe CU, charter 61522",
+                            "https://ncuso.test/61522"]]})
+    assert not [m for m in _vet_refusals(book) if m.startswith("V3")], (
+        "a prefix of the same statement, and a trailing slash, are the same "
+        "content at two lengths")
+
+
+def test_two_genuinely_different_documents_still_refuse(tmp_path):
+    """The Baird case — the true positive the loosening must not lose."""
+    book = _register_book(tmp_path, {
+        "Evidence_Master": [["Evidence_ID", "Source_Name", "URL"],
+                            ["E-128", "Tech Deep Dive — Utilization Summary",
+                             "N/A — framework applied"],
+                            ["E-128", "Newsroom — Strategic Investment Close",
+                             "https://rwb.test/newsroom/2026"]]})
+    hits = [m for m in _vet_refusals(book) if m.startswith("V3")]
+    assert hits and "E-128" in hits[0], (
+        "one id defined as two different documents is the lost-row case and "
+        "must keep refusing")
+
+
+def test_disagreeing_is_field_scoped():
+    assert vw._disagreeing(["https://a.test/x", "https://a.test/x/"]) is False
+    assert vw._disagreeing(["Report — part", "Report — partial, full title"]) is False
+    assert vw._disagreeing(["Document A", "Document B"]) is True
+    assert vw._field_family("Source_URL") == "url"
+    assert vw._field_family("Date_Published") == "date"
+    assert vw._field_family("Source_Name") == "source"
