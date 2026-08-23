@@ -148,24 +148,16 @@ def test_a_package_with_no_stores_yields_nothing_rather_than_failing(tmp_path):
     assert urls_from_package(tmp_path) == {}
 
 
-# ── the real package, when this container has pulled it ──
-
-PKG = Path("/root/.dma/packages/t-rowe-price-dma")
-
-
-def _pulled() -> bool:
-    try:
-        return (PKG / "01_evidence" / "evidence_index.json").is_file()
-    except OSError:
-        return False
-
-
-@pytest.mark.skipif(not _pulled(),
-                    reason="T. Rowe package not pulled/readable here")
-def test_the_real_package_answers_almost_every_stored_row():
-    urls = urls_from_package(PKG)
-    assert len(urls) > 700, f"only {len(urls)} URLs read from the package"
-    got = plan([{"e_id": f"E-TROW-{n:03d}", "source_url": None}
-                for n in range(2, 200)], urls)
-    assert len(got["fills"]) > 150
-    assert all(f["source_url"].startswith("http") for f in got["fills"])
+# THE REAL PACKAGE IS NOT TESTED HERE, DELIBERATELY.
+#
+# A test gated on /root/.dma/packages/ can never run on a CI runner, so it
+# protects nothing there — it only spends a slot in the suite's skip ceiling,
+# which exists so that a test quietly ceasing to run is visible. I added one,
+# it took the count from 12 to 13, and the honest fix was to remove it rather
+# than raise the guard a second time for a check CI cannot perform.
+#
+# The real package WAS measured, by hand, before any of this was written:
+# 748 URLs read from 01_evidence/evidence_index.json, 747 of the 757 URL-less
+# stored rows fillable, 10 that nothing in the package can answer. Those
+# numbers are in the module docstring and the commit that added it. Every
+# branch they exercise is covered above with fixtures that always run.
