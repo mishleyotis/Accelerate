@@ -465,3 +465,152 @@ def test_a_lapsed_claim_is_not_a_running_session():
 def test_an_unnamed_holder_is_still_counted():
     out = w.sessions_holding([{**_held("a", None, 0), "claim_held_by": None}])
     assert out and out[0]["holder"] == "(unnamed)"
+
+
+# ── the finish line the filter could not see ──────────────────────────────
+#
+# Measured 2026-08-23. Gulf Coast Business Credit sat six pages PASS,
+# promotable and UNCLAIMED from 09:03, when its lease lapsed, to 10:17, when a
+# fresh session re-claimed it — straight through the 09:23 watchdog firing,
+# which did not promote it. It could not: the scope filter admitted a run only
+# if its claim was LIVE or the run was already on the state file, and no
+# watchdog state had reached Drive since 06:23, so `known` was empty on every
+# firing. `classify` had a test for exactly this state
+# (test_ready_to_promote_fires_even_when_the_claim_has_lapsed, above) and it
+# passed the whole time — because classify never saw the run. The gap was one
+# layer up, in what got asked about at all.
+
+def _row(run_id, live=None, held_by=None):
+    claim = {}
+    if live is not None:
+        claim["live"] = live
+    if held_by:
+        claim["held_by"] = held_by
+    return {"run_id": run_id, "claim": claim or None}
+
+
+def scope(rows, known=()):
+    """The filter as `main` applies it, kept in one place so the test and the
+    script cannot drift into agreeing on different rules."""
+    known = set(known)
+    return [r["run_id"] for r in rows
+            if r.get("run_id")
+            and ((r.get("claim") or {}).get("live")
+                 or (r.get("claim") or {}).get("held_by")
+                 or r["run_id"] in known)]
+
+
+def test_a_lapsed_claim_keeps_a_run_in_scope():
+    """THE FIX. A lease that lapsed is the likeliest road to
+    READY_TO_PROMOTE — a producer got six pages passing and stopped — so it is
+    the one case the watchdog must never lose sight of."""
+    assert scope([_row("gcbc", live=False, held_by="20260823-0733-synthesis")]) \
+        == ["gcbc"]
+
+
+def test_scope_does_not_depend_on_a_file_that_may_not_exist():
+    """The state file travels only through the STEP 5 Drive push, so one
+    failed firing empties it for every firing after. A filter that needs it is
+    a filter that fails closed on exactly the runs that matter."""
+    rows = [_row("gcbc", live=False, held_by="a-producer")]
+    assert scope(rows, known=set()) == ["gcbc"], (
+        "with no state file at all, the unattended finish line is still seen")
+
+
+def test_a_run_nobody_ever_claimed_stays_out():
+    """The cost control the narrow filter existed for. The queue holds 286
+    pending runs; a run with no claim has no submitted pages and cannot be
+    READY_TO_PROMOTE, so widening to lapsed claims does not widen to the
+    queue."""
+    assert scope([_row("never-touched")]) == []
+    assert scope([{"run_id": "no-claim-key"}]) == []
+
+
+def test_a_live_claim_is_still_in_scope():
+    assert scope([_row("busy", live=True, held_by="h")]) == ["busy"]
+
+
+def test_the_state_file_still_widens_scope():
+    """Belt and braces: the old mechanism keeps working where it survives."""
+    assert scope([{"run_id": "remembered"}], known={"remembered"}) \
+        == ["remembered"]
+
+
+def test_the_script_applies_this_exact_filter():
+    """Pins the rule to the source rather than to a copy of it — the test
+    above would happily pass against a script that had drifted."""
+    src = (ROOT / "scripts" / "synthesis_watchdog.py").read_text()
+    assert 'get("held_by")' in src and 'get("live")' in src, (
+        "main()'s scope filter must admit a lapsed claim as well as a live one")
+
+
+# ── a transient failure must not end the firing ───────────────────────────
+#
+# Two of three consecutive live reads on 2026-08-23 died on 429 Too Many
+# Requests from the Cloud SQL Admin API's connectSettings endpoint — the
+# connector's connection setup being rate-limited, nothing to do with the
+# query. The third, unchanged, succeeded. An abort there is not one lost
+# reading: the firing dies before writing its state file, nothing reaches
+# Drive, and the next firing starts with an empty `known`.
+
+def test_a_429_is_transient():
+    assert w.is_transient(RuntimeError(
+        "Error executing tool list_pending_runs: 429, message='Too Many "
+        "Requests', url='https://sqladmin.googleapis.com/sql/v1beta4/…'"))
+
+
+@pytest.mark.parametrize("msg", ["503 Service Unavailable", "deadline exceeded",
+                                 "RemoteDisconnected", "connection reset"])
+def test_the_other_ask_again_shapes(msg):
+    assert w.is_transient(RuntimeError(msg))
+
+
+@pytest.mark.parametrize("msg", [
+    "unknown_run: no such id",
+    "41 runs matched — refusing to poll that many",
+    "list_pending_runs returned a dict carrying no row list",
+])
+def test_a_real_signal_is_not_retried(msg):
+    """The dangerous direction. The queue-shape refusal and the runaway-filter
+    refusal are findings the prompt is explicitly told NOT to retry; turning
+    them into four slow attempts buries the signal."""
+    assert not w.is_transient(RuntimeError(msg))
+
+
+def test_retry_returns_the_late_success():
+    calls, waits = {"n": 0}, []
+
+    def flaky(name):
+        calls["n"] += 1
+        if calls["n"] < 3:
+            raise RuntimeError("429 Too Many Requests")
+        return {"ok": name}
+
+    assert w.retrying(flaky, waits.append)("list_pending_runs") == {
+        "ok": "list_pending_runs"}
+    assert calls["n"] == 3
+    assert waits == [2.0, 4.0], "exponential, and it actually waited"
+
+
+def test_a_permanent_error_raises_on_the_first_attempt():
+    waits = []
+
+    def permanent(name):
+        raise RuntimeError("unknown_run")
+
+    with pytest.raises(RuntimeError, match="unknown_run"):
+        w.retrying(permanent, waits.append)("x")
+    assert waits == [], "no backoff spent on an answer that will not change"
+
+
+def test_a_transient_error_that_never_clears_still_raises():
+    """Retry is not swallowing. A watchdog that reports a quiet queue it could
+    not read is the defect this whole file exists for."""
+    waits = []
+
+    def always(name):
+        raise RuntimeError("429 Too Many Requests")
+
+    with pytest.raises(RuntimeError, match="429"):
+        w.retrying(always, waits.append)("list_pending_runs")
+    assert len(waits) == 3, "three backoffs across four attempts"

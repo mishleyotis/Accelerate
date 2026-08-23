@@ -75,6 +75,49 @@ def _iso(t) -> str:
     return str(t or "")
 
 
+#: Errors that mean "ask again", not "the answer is no". Measured 2026-08-23:
+#: two of three consecutive watchdog reads died on
+#: `429 Too Many Requests` from sqladmin.googleapis.com/…/connectSettings —
+#: the Cloud SQL Admin API rate-limiting the connector's connect-settings
+#: fetch, nothing to do with the query. The third succeeded unchanged.
+#:
+#: An abort here is not one lost reading. The firing dies before it writes its
+#: state file, so nothing reaches Drive at STEP 5, so the NEXT firing starts
+#: with an empty `known` set and a narrower scope. Retrying the transient case
+#: is what keeps that from compounding.
+TRANSIENT = ("429", "too many requests", "503", "502", "504",
+             "temporarily unavailable", "deadline exceeded",
+             "connection reset", "remotedisconnected")
+
+
+def is_transient(exc: BaseException) -> bool:
+    text = str(exc).lower()
+    return any(t in text for t in TRANSIENT)
+
+
+def retrying(call, sleep, attempts: int = 4, base: float = 2.0):
+    """`call` with backoff on transient failures only.
+
+    A permanent error — an unknown run, a refused promote, a shape the parser
+    does not recognise — is raised on the first attempt, unchanged. Retrying
+    those would turn a real signal into a slow real signal, and the queue-shape
+    refusal in particular is a finding the prompt is told not to retry.
+    """
+    def wrapped(*a, **kw):
+        for i in range(attempts):
+            try:
+                return call(*a, **kw)
+            except Exception as exc:                       # noqa: BLE001
+                if i == attempts - 1 or not is_transient(exc):
+                    raise
+                wait = base * (2 ** i)
+                print(f"  transient {type(exc).__name__} on {a[0] if a else '?'}"
+                      f" — retry {i + 1}/{attempts - 1} in {wait:.0f}s",
+                      file=sys.stderr)
+                sleep(wait)
+    return wrapped
+
+
 def fingerprint(progress: dict) -> str:
     """What "progress" means, reduced to one comparable string.
 
@@ -302,7 +345,9 @@ def main() -> int:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import time
 
-    from dma_connector import call
+    from dma_connector import call as _call
+
+    call = retrying(_call, time.sleep)
 
     now = args.now if args.now is not None else time.time()
     pending = call("list_pending_runs")
@@ -314,13 +359,33 @@ def main() -> int:
     # already carries the claim, so the filter costs nothing — and a watchdog
     # slow enough to be run rarely is a watchdog that misses stalls.
     #
-    # Runs already carried on the state file stay in scope even without a live
-    # claim: that is how READY_TO_PROMOTE is still seen after a lease lapses,
-    # which is the likeliest way to reach it.
+    # A LAPSED CLAIM KEEPS A RUN IN SCOPE, and this is the part that was
+    # wrong. The filter used to be `claim.live OR on the state file`, with a
+    # comment saying the state file is "how READY_TO_PROMOTE is still seen
+    # after a lease lapses, which is the likeliest way to reach it". The
+    # mechanism was load-bearing and it does not survive: the state file lives
+    # in an ephemeral container and travels only through the STEP 5 Drive
+    # push, so one failed firing empties `known` for every firing after it.
+    #
+    # Measured 2026-08-23: no watchdog snapshot had been pushed since 06:23,
+    # so `known` was empty on every firing. Gulf Coast Business Credit sat six
+    # pages PASS, promotable and UNCLAIMED from 09:03 (lease lapsed) to 10:17
+    # (re-claimed) — straight through the 09:23 firing, which could not
+    # promote it because it could not SEE it. The finish line unattended is
+    # exactly the state this watchdog exists for, and it was the one state the
+    # filter excluded.
+    #
+    # So scope is now: a live claim, OR a claim that ever existed, OR the
+    # state file. A run nobody has claimed has no submitted pages and cannot
+    # be READY_TO_PROMOTE, so the queue's 286 pending rows stay out and the
+    # cost does not move; what comes in is the handful someone worked and let
+    # go. The 40-run cap below still guards a runaway filter.
     known = set(_load(Path(args.state)))
     watch = [r for r in rows
              if r.get("run_id")
-             and ((r.get("claim") or {}).get("live") or r["run_id"] in known)]
+             and ((r.get("claim") or {}).get("live")
+                  or (r.get("claim") or {}).get("held_by")
+                  or r["run_id"] in known)]
     if len(watch) > 40:                    # a runaway filter, not a real queue
         raise SystemExit(f"{len(watch)} runs matched — refusing to poll that "
                          f"many; check the claim field in list_pending_runs")

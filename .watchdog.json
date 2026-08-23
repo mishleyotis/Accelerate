@@ -18,10 +18,10 @@
   "state": "UNCLAIMED",
   "run_id": "b1aca0f6-eba1-417c-b61e-4460f3f8c17f",
   "entity": "Houlihan Lokey, Inc.",
-  "seen_at": 1787470907.284815
+  "seen_at": 1787482170.816247
  },
  "60082d6f-c3b3-4507-9e03-4e36872a9ed1": {
-  "fingerprint": "context:PASS:faaf6c34-0c16-4606-88c3-a7f43c2c5ac9|heatmap:PASS:ddab1032-69d0-463b-98df-84298dd07e40|insights:PASS:eacd29ad-0ec0-46e7-8078-59b7e08f5722|overview:PASS:84c886db-2929-4ab4-a4e8-15cb860f54ec|platform:PASS:cf4c8d68-49ae-4f2c-9976-3fa516387b01|techstack:PASS:bd58cced-2305-4b54-8c49-4810a6f963b5",
+  "fingerprint": "context:PASS:79e08295-b968-4112-b125-c84735513c28|heatmap:PASS:ddab1032-69d0-463b-98df-84298dd07e40|insights:PASS:eacd29ad-0ec0-46e7-8078-59b7e08f5722|overview:PASS:8d7efd55-65c5-474f-92ee-b576ba5f0e3e|platform:PASS:cf4c8d68-49ae-4f2c-9976-3fa516387b01|techstack:PASS:bd58cced-2305-4b54-8c49-4810a6f963b5",
   "passed": [
    "context",
    "heatmap",
@@ -34,13 +34,13 @@
   "promotable": true,
   "blocking": 0,
   "claim_live": true,
-  "claim_held_by": "20260823-0733-synthesis-gulf-coast-business-credit",
-  "claim_expires_at": "2026-08-23T09:03:37.788400+00:00",
+  "claim_held_by": "gcbc-finish-20260823",
+  "claim_expires_at": "2026-08-23T12:17:31.520146+00:00",
   "state": "READY_TO_PROMOTE",
   "run_id": "60082d6f-c3b3-4507-9e03-4e36872a9ed1",
   "entity": "Gulf Coast Business Credit",
-  "seen_at": 1787470907.284815,
-  "resume": "All six pages PASS and the run is promotable, and nothing has been promoted. The work is done and serving nothing.\n\nRun 60082d6f-c3b3-4507-9e03-4e36872a9ed1 (Gulf Coast Business Credit), read from the connector just now:\n  ALREADY BANKED (do NOT reproduce these): context, heatmap, insights, overview, platform, techstack\n  still missing: none\n  promotable: True   blocking reasons: 0\n  claim: 20260823-0733-synthesis-gulf-coast-business-credit live=True expires 2026-08-23T09:03:37.788400+00:00\n\nBefore dispatching anything, establish what already exists and do not redo it. A section whose payload is banked gets RE-VALIDATED, not re-produced:\n  python3 plugins/dma-insights/scripts/artifact_store.py find --root <artifacts-dir> --run 60082d6f\nThen call get_run_progress yourself and continue from what it says, not from what this message says \u2014 this was true when it was written."
+  "seen_at": 1787482170.816247,
+  "resume": "All six pages PASS and the run is promotable, and nothing has been promoted. The work is done and serving nothing.\n\nRun 60082d6f-c3b3-4507-9e03-4e36872a9ed1 (Gulf Coast Business Credit), read from the connector just now:\n  ALREADY BANKED (do NOT reproduce these): context, heatmap, insights, overview, platform, techstack\n  still missing: none\n  promotable: True   blocking reasons: 0\n  claim: gcbc-finish-20260823 live=True expires 2026-08-23T12:17:31.520146+00:00\n\nBefore dispatching anything, establish what already exists and do not redo it. A section whose payload is banked gets RE-VALIDATED, not re-produced:\n  python3 plugins/dma-insights/scripts/artifact_store.py find --root <artifacts-dir> --run 60082d6f\nThen call get_run_progress yourself and continue from what it says, not from what this message says \u2014 this was true when it was written."
  },
  "bf3754b8-5c0f-444f-bde2-550d9f35f27f": {
   "fingerprint": "context:missing:-|heatmap:missing:-|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
@@ -55,14 +55,13 @@
   ],
   "promotable": false,
   "blocking": 6,
-  "claim_live": true,
-  "claim_held_by": "accelerate-63",
-  "claim_expires_at": "2026-08-23T08:07:52.932071+00:00",
-  "stalled_for_seconds": 44,
-  "state": "PROGRESSING",
+  "claim_live": false,
+  "claim_held_by": "laneB-20260823T082509Z",
+  "claim_expires_at": "2026-08-23T10:07:10.908814+00:00",
+  "state": "UNCLAIMED",
   "run_id": "bf3754b8-5c0f-444f-bde2-550d9f35f27f",
   "entity": "Lawley",
-  "seen_at": 1787470907.284815
+  "seen_at": 1787482170.816247
  },
  "a326d784-3a63-4e10-829d-d1f379ab9711": {
   "fingerprint": "context:missing:-|heatmap:missing:-|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
@@ -77,13 +76,12 @@
   ],
   "promotable": false,
   "blocking": 6,
-  "claim_live": true,
-  "claim_held_by": "accelerate-63",
-  "claim_expires_at": "2026-08-23T07:54:35.204091+00:00",
-  "stalled_for_seconds": 44,
-  "state": "PROGRESSING",
+  "claim_live": false,
+  "claim_held_by": "laneB-20260823T082509Z",
+  "claim_expires_at": "2026-08-23T09:55:12.695876+00:00",
+  "state": "UNCLAIMED",
   "run_id": "a326d784-3a63-4e10-829d-d1f379ab9711",
   "entity": "Richwood Bank",
-  "seen_at": 1787470907.284815
+  "seen_at": 1787482170.816247
  }
 }
