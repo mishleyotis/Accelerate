@@ -75,6 +75,134 @@ def note(level: str, msg: str) -> None:
     findings.append((level, msg))
 
 
+#: Where a cap can be recorded. A cap is a scoring ceiling the assessment
+#: applied, and it is written wherever that assessment kept its issue log —
+#: a workbook sheet, a CSV, a JSON ledger, a column on the scoring detail.
+CAPS_RE = re.compile(r"caps?[_ ]?applied|caps?[_ ]?log|issues?|"
+                     r"contradiction", re.I)
+
+#: A `Caps_Applied` cell saying, in the ways packages say it, "none".
+NO_CAP = {"", "-", "--", "n/a", "na", "none", "no", "no cap", "no caps",
+          "not applied", "nil", "0", "0.0", "false"}
+
+
+def _is_cap_value(v) -> bool:
+    return str(v if v is not None else "").strip().lower() not in NO_CAP
+
+
+def scan_caps(root: Path, pm: dict, books: list) -> dict:
+    """Every place this package could have recorded a cap, and what is in them.
+
+    THE RULE THIS EXISTS TO ENFORCE (owner, 2026-08-23): "Caps applied may
+    even exist in the scoring and research workbook and usually relate to
+    the issue log or issues raised in the client research report, or an
+    issue log in csv or any other format. If no caps were applied, then
+    there were no issues."
+
+    Both halves matter. Caps are not confined to a `Caps_Applied_Log` sheet,
+    so looking only there and finding nothing proves nothing — and an EMPTY
+    result is a real answer, not a missing one. On 2026-08-23 a vetter
+    refused three consecutive packages for a missing sheet and the routine
+    burned its entire reserve list in one firing on a state that means "this
+    assessment raised no issues".
+
+    So this returns what it found and where it looked, and the caller reports
+    both. Nothing here refuses.
+    """
+    checked, sources, records = [], [], 0
+    for book in [b for b in books if b]:
+        try:
+            tabs = sheets_of(book)
+        except Exception:                                      # noqa: BLE001
+            continue
+        rel = str(book)
+        counted_sheets = set()
+        for name, rows in tabs.items():
+            if CAPS_RE.search(name):
+                checked.append(f"{Path(rel).name}[{name}]")
+                counted_sheets.add(name)
+                body = [r for r in rows[1:] if any(
+                    str(c or "").strip() for c in r)]
+                if body:
+                    sources.append(f"{Path(rel).name}[{name}]: {len(body)} row(s)")
+                    records += len(body)
+        # The COLUMN, which is where a cap is recorded per scored row and
+        # which no "is the sheet present" check can see. A sheet already
+        # counted whole is skipped: an Issue_Log sheet with an `Issue`
+        # column would otherwise be counted once as rows and again as cells.
+        for name, rows in tabs.items():
+            if not rows or name in counted_sheets:
+                continue
+            hdr = [str(c or "").strip().lower() for c in rows[0]]
+            cols = [i for i, h in enumerate(hdr) if CAPS_RE.search(h)]
+            if not cols:
+                continue
+            checked.append(f"{Path(rel).name}[{name}].{hdr[cols[0]]}")
+            hits = sum(1 for r in rows[1:] for i in cols
+                       if i < len(r) and _is_cap_value(r[i]))
+            if hits:
+                sources.append(f"{Path(rel).name}[{name}] column "
+                               f"{hdr[cols[0]]!r}: {hits} capped row(s)")
+                records += hits
+
+    # Files, in any format the package chose.
+    for rel in (pm.get("governance") or []) + (pm.get("other") or []) + \
+            (pm.get("evidence_tables") or []):
+        if not CAPS_RE.search(rel):
+            continue
+        p = root / rel
+        checked.append(rel)
+        try:
+            if p.suffix.lower() in (".csv", ".tsv"):
+                lines = [ln for ln in p.read_text(
+                    errors="replace").splitlines() if ln.strip()]
+                n = max(0, len(lines) - 1)
+            elif p.suffix.lower() in (".json", ".jsonl"):
+                import json                                    # noqa: PLC0415
+                if p.suffix.lower() == ".jsonl":
+                    n = sum(1 for ln in p.read_text(
+                        errors="replace").splitlines() if ln.strip())
+                else:
+                    d = json.loads(p.read_text(errors="replace"))
+                    n = len(d) if isinstance(d, list) else len(
+                        next((v for v in d.values() if isinstance(v, list)), []))
+            else:
+                continue
+        except Exception:                                      # noqa: BLE001
+            continue
+        if n:
+            sources.append(f"{rel}: {n} row(s)")
+            records += n
+
+    # A report is where a human reads the issues; it is named, never parsed.
+    prose = [r for r in (pm.get("reports") or []) if CAPS_RE.search(r)]
+    return {"records": records, "sources": sources, "checked": checked,
+            "prose": prose}
+
+
+def report_caps(caps: dict) -> None:
+    """Say what was found, and say plainly that nothing found is an answer."""
+    if caps["records"]:
+        note("PIN", f"caps applied: {caps['records']} record(s) across "
+                    f"{len(caps['sources'])} source(s) — "
+                    f"{'; '.join(caps['sources'][:4])}. Every cap is a "
+                    f"scoring ceiling the assessment applied; it belongs in "
+                    f"the payload's caps[] and is NOT a safeguard gate")
+        return
+    where = (f"looked in {len(caps['checked'])} place(s): "
+             f"{', '.join(caps['checked'][:6])}"
+             if caps["checked"] else
+             "no caps sheet, log or column exists anywhere in this package")
+    note("PIN", f"NO CAPS APPLIED — {where}. This is a valid state and NEVER "
+                f"a refusal (owner, 2026-08-23): if no caps were applied, "
+                f"then there were no issues. Serve caps[] empty and say so; "
+                f"do not hunt for a Caps_Applied_Log that a clean assessment "
+                f"had no reason to write")
+    if caps["prose"]:
+        note("PIN", f"issue narrative to read if a cap is later claimed: "
+                    f"{', '.join(caps['prose'][:3])}")
+
+
 def sheets_of(path: Path):
     wb = load_workbook(path, read_only=True, data_only=True)
     try:
@@ -364,6 +492,7 @@ def main(argv: list[str]) -> int:
             note("PIN", f"{len(pm['evidence_tables'])} evidence stores "
                         f"beyond the workbooks — evidence_normalize.py "
                         f"merges them; vet gaps there, not here")
+        report_caps(scan_caps(target, pm, [scoring, research]))
     else:
         scoring = target
         research = Path(argv[2]) if len(argv) > 2 else None

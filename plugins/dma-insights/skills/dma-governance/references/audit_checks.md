@@ -25,10 +25,10 @@ Run these before any scoring checks.
 | IV-02 | run_manifest.json schema valid | All required fields populated, enums valid | CRITICAL |
 | IV-03 | run_manifest overall score matches pillar weighted average | ±0.02 | CRITICAL |
 | IV-04 | run_manifest evidence total = sum of tier distribution | Exact match | HIGH |
-| IV-05 | caps_applied_log.csv present and parseable | File exists, correct column count | CRITICAL |
+| IV-05 | caps_applied_log, WHEREVER it lives, is parseable when it exists | Sheet, column, CSV or JSON — parseable if present. **ABSENT IS A PASS**: if no caps were applied there were no issues (owner, 2026-08-23), and a clean assessment writes no cap log | HIGH |
 | IV-06 | contradiction_log.csv present and parseable | File exists, correct column count | CRITICAL |
 | IV-07 | evidence_index.csv present and parseable | File exists, correct column count | CRITICAL |
-| IV-08 | Workbook (.xlsx) present with all required tabs | Summary, Calculation_Chain, P1-P4_Scoring_Detail, Evidence_Index, Caps_Applied_Log, Contradiction_Log, Absent_Evidence_Log, QA_Validation_Log | CRITICAL |
+| IV-08 | Workbook (.xlsx) present with the tabs that carry data | Summary, Calculation_Chain, P1-P4_Scoring_Detail, Evidence_Index. Caps_Applied_Log, Contradiction_Log and Absent_Evidence_Log are CONDITIONAL — required only when the assessment has caps, contradictions or absences to log; an empty finding set writes no sheet, and their absence is never CRITICAL | CRITICAL for the data tabs |
 | IV-09 | Report (.docx) present | File exists | CRITICAL |
 | IV-10 | Rubric version in manifest matches skill version in workbook | Exact match | HIGH |
 | IV-11 | reasoning_chain_log.json present and parseable | File exists, valid JSON, `summary.total_subcaps` matches workbook row count | HIGH |

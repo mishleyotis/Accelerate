@@ -81,6 +81,34 @@ today is a REFUSE.
 the entity, or fewer than the cohort floor, are not a cohort; a peer
 comparison built on them is arithmetic on an empty set.
 
+## An absent caps log is an answer, not a gap — never a REFUSE
+
+Owner, 2026-08-23, verbatim: *"Caps applied may even exist in the scoring
+and research workbook and usually relate to the issue log or issues raised
+in the client research report, or an issue log in csv or any other format.
+**If no caps were applied, then there were no issues.**"*
+
+Two rules, and the second is the one that gets broken.
+
+**A cap is recorded wherever that assessment kept its issue log** — a
+`Caps_Applied_Log` sheet, a `Caps_Applied` column on the scoring detail, an
+issue log in CSV or JSON, or prose in the client research report. Looking in
+one of those places and finding nothing establishes nothing.
+`vet_workbooks.py` scans all of them and prints where it looked; read that
+line before you conclude anything about caps.
+
+**Zero caps is a valid, common and expected state.** It means the assessment
+raised no issues. It does not mean the package is incomplete, and a missing
+`Caps_Applied_Log` sheet is not a defect in an assessment that had no cap to
+log — a clean assessment has no reason to write that sheet at all. Serve
+`caps[]` empty and say so.
+
+This cost a full firing. On 2026-08-23 a vetter refused three consecutive
+packages for a missing caps sheet; the routine spent its client slot and its
+entire reserve list on a state that means "nothing was wrong here", and
+produced nobody. Any check that turns an ABSENCE into a REFUSE deserves the
+same suspicion as the header rule below: read it twice before believing it.
+
 ## How to write a refusal
 
 A refusal is a finding, not a failure, and it is only useful if it is
