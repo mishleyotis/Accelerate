@@ -305,6 +305,55 @@ def promote_run(conn, run_id) -> dict:
                     "disclose-and-promote, per the charter."),
             }
 
+        # NOTHING ENRICHED IS NOT A THIN CLIENT, IT IS AN EMPTY SHELL.
+        #
+        # The disclosure below (search "The drift flag, DISCLOSED and never
+        # blocking") argues correctly that a promote carrying five of seven
+        # facets forward beats no promote, because refusing would strand the
+        # five. That argument has a floor it never drew: at ZERO of seven
+        # there is nothing to strand.
+        #
+        # Measured 2026-08-23 (MEM-0206) across every promoted client:
+        # gulf-coast-business-credit 7 of 7 never_enriched, axos-bank 7 of 7,
+        # baxter-credit-union 7 of 7, logix-federal-credit-union 0 of 7. Three
+        # of four promoted clients had never had a single facet run, and all
+        # three promoted anyway. The owner reported eight separate surface
+        # defects on those runs — a basic platform readiness card, sentiment
+        # with one parameter, a one-year evolution timeline, too few techstack
+        # items, platform cards reading "0 recs", no contact emails, under
+        # three historical news items, empty cards throughout — and every one
+        # of them is this.
+        #
+        # "The routine never runs in degrade mode" (owner, 2026-08-20) was
+        # written in a Routine prompt, and prose is not evaluated. The facet
+        # states were stored, and this function already READ them a hundred
+        # lines below to report them. What was missing was a consequence.
+        try:
+            facet_rows = ledger.drift(cur, entity_id)
+        except Exception:                                    # noqa: BLE001
+            facet_rows = []          # unreadable: disclosed later, not guessed
+        if facet_rows and all(r["state"] == "never_enriched" for r in facet_rows):
+            conn.rollback()
+            return {
+                "promoted": False, "error": "no_enrichment_ever_run",
+                "facets": [r["facet"] for r in facet_rows],
+                "enriched": 0, "of": len(facet_rows),
+                "hint": (
+                    f"All {len(facet_rows)} enrichment facets for this entity "
+                    f"are never_enriched, so every surface that depends on one "
+                    f"would serve its empty state: the platform readiness "
+                    f"card, sentiment, the why-now timeline and news, the "
+                    f"techstack register, leadership contacts and peer scores. "
+                    f"That is not a thin client, it is an empty shell, and the "
+                    f"routine does not run in degrade mode (owner, "
+                    f"2026-08-20). Run the enrichment facets and record each "
+                    f"with record_enrichment — including the ones that came "
+                    f"back EMPTY, which is a real result and clears this — "
+                    f"then promote again. A PARTIAL result does not reach this "
+                    f"refusal: one recorded facet is enough, because a promote "
+                    f"carrying some forward beats stranding them."),
+            }
+
         stats = {p: {"sections": 0, "rows_written": 0} for p in PAGES}
         for (page, section), writer in registry:
             sub = live[page]
@@ -388,6 +437,17 @@ def promote_run(conn, run_id) -> dict:
         try:
             out["enrichment"] = ledger.summary(ledger.drift(cur, entity_id))
             out["enrichment"]["promoted_now"] = promoted_facets
+            # THE GATE'S BLIND SPOT, NAMED. The no_enrichment_ever_run refusal
+            # above fires only when facet rows EXIST and all say
+            # never_enriched. No rows at all is a different fact — the ledger
+            # knows nothing about this entity — and it must not pass as "fine".
+            if not facet_rows:
+                out["enrichment"]["facets_unknown"] = True
+                out["enrichment"]["note"] = (
+                    "the enrichment ledger holds no facet rows for this "
+                    "entity, so whether enrichment ran is UNKNOWN rather than "
+                    "confirmed — the zero-enrichment refusal could not "
+                    "evaluate and did not fire")
         except Exception as e:            # noqa: BLE001 — reported, not silent
             out["enrichment_error"] = str(e)[:200]
         if ledger_error:
