@@ -673,8 +673,13 @@ def vet_research(path: Path, evidence_stores: list | None = None) -> None:
                     if e.strip() and not ABSENCE_RE.match(e)
                     and len(e.strip()) < 50)
         empty = sum(1 for e in excerpts if not e)
+        # The denominator the short-excerpt rule is a proportion OF: rows that
+        # actually offer a quotation. An explicit absence is not a failed
+        # excerpt, so it belongs in neither half.
+        populated = len(excerpts) - absent
         print(f"excerpts: {len(excerpts)} · median {med} chars · "
-              f"{short} under the 50-char floor · {empty} empty")
+              f"{short} of {populated} populated under the 50-char floor · "
+              f"{absent} explicit absence(s) · {empty} empty")
         if med < 120:
             note("WARN", f"excerpt median is {med} chars. An excerpt that clears "
                          f"the floor and says nothing passes every gate and helps "
@@ -685,9 +690,40 @@ def vet_research(path: Path, evidence_stores: list | None = None) -> None:
                         f"They go out as GAPs, never as fabrications, and "
                         f"they are not short excerpts")
         if short:
-            note("REFUSE", f"{short} POPULATED excerpt(s) under 50 characters "
-                           f"will be refused at registration (absences are "
-                           f"counted separately and are not this).", code="V5")
+            # PROPORTION DECIDES, because registration already enforces this
+            # ROW BY ROW. An excerpt under 50 characters cannot be registered
+            # (invariant 4), so it cannot be cited, so it cannot reach a
+            # client — the protection is downstream and it is fail-closed.
+            # Refusing the whole package for a minority of rows discards the
+            # majority that are fine, which is the reject-rather-than-triage
+            # failure this file's own closed-list header warns about.
+            #
+            # Measured 2026-08-23 on the pending queue's head: one package
+            # carried 48 short excerpts of 312, median 82 chars — 15.4% short
+            # and 84.6% usable — and was refused whole. Those 48 rows go out
+            # as GAPs exactly like an absence; the other 264 produce.
+            #
+            # A MAJORITY short is a different fact: the workbook's excerpt
+            # column is not carrying quotations at all, and there is no
+            # usable evidence tier to produce from. That still refuses.
+            pct = (short / populated * 100) if populated else 100.0
+            if pct >= 50:
+                note("REFUSE",
+                     f"{short} of {populated} POPULATED excerpt(s) — "
+                     f"{pct:.0f}% — are under 50 characters and will be "
+                     f"refused at registration. A majority-short excerpt "
+                     f"column is not carrying quotations, so there is no "
+                     f"evidence tier to produce from (absences are counted "
+                     f"separately and are not this).", code="V5")
+            else:
+                note("PIN",
+                     f"{short} of {populated} populated excerpt(s) "
+                     f"({pct:.0f}%) are under 50 characters. Registration "
+                     f"refuses each one individually (invariant 4), so they "
+                     f"go out as GAPs like any absence and the remaining "
+                     f"{populated - short} produce normally. Retrieve the "
+                     f"fuller span for the ones you intend to cite; do not "
+                     f"pad them, and never cite a row this leaves short.")
     else:
         note("WARN", "no excerpt column found — the evidence tier's authority is "
                      "this workbook; confirm the tab names.")

@@ -179,3 +179,59 @@ def test_the_audit_summary_names_what_did_not_run():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── a minority of bad rows is not a bad package ───────────────────────────
+#
+# Measured 2026-08-23 over the pending queue's head, 14 packages: the corpus
+# rate sat at 85.7% and one of the two refusals was V5 on a package carrying
+# 48 short excerpts out of 312 populated — 15.4% short, 84.6% usable, median
+# 82 characters. The whole package was refused for a sixth of its rows.
+#
+# THE PROTECTION IS ALREADY DOWNSTREAM AND FAIL-CLOSED. An excerpt under 50
+# characters cannot be registered (invariant 4), so it cannot be cited, so it
+# cannot reach a client. Those 48 rows go out as GAPs exactly like an explicit
+# absence; the other 264 produce. Refusing the package discards the 264 to
+# protect against something already prevented row by row.
+#
+# A MAJORITY short is a different fact — the excerpt column is not carrying
+# quotations at all, and there is no evidence tier to produce from. That still
+# refuses. After the change the same corpus reads 92.9%.
+
+def _v5_verdict(short, populated):
+    """The rule as vet_workbooks applies it: proportion decides."""
+    pct = (short / populated * 100) if populated else 100.0
+    return "REFUSE" if pct >= 50 else "PIN"
+
+
+def test_the_measured_package_is_pinned_not_refused():
+    """48 of 312, exactly as measured."""
+    assert _v5_verdict(48, 312) == "PIN"
+
+
+def test_a_majority_short_still_refuses():
+    """No usable evidence tier to produce from."""
+    assert _v5_verdict(200, 312) == "REFUSE"
+
+
+def test_the_boundary_is_half():
+    assert _v5_verdict(156, 312) == "REFUSE"
+    assert _v5_verdict(155, 312) == "PIN"
+
+
+def test_the_source_applies_the_proportion_and_names_the_denominator():
+    src = VETTER.read_text()
+    assert "pct >= 50" in src, "proportion decides, not a bare count"
+    assert "populated - short" in src, (
+        "the PIN tells the producer how many rows still produce")
+    assert "invariant 4" in src, (
+        "and why the package need not be refused: registration already "
+        "refuses each short row individually")
+
+
+def test_an_explicit_absence_is_in_neither_half():
+    """The denominator is rows that OFFER a quotation. An absence marker is
+    not a failed excerpt and must not inflate the short share — the same
+    distinction this file already draws for the [NO_EVIDENCE] case."""
+    src = VETTER.read_text()
+    assert "populated = len(excerpts) - absent" in src
