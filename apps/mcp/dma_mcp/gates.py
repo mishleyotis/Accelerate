@@ -363,6 +363,30 @@ GATES = {
               "on Logix at the time this landed: 4 of 7 roster rows carried "
               "a linkedin_url with enrichment_basis null.",
               "block"),
+    "CG-42": ("Every recommendation names an L3 area the page can join on",
+              None,
+              "Each item in platform.recommendations states a non-empty "
+              "l3_area, and an area that NEARLY matches a promoted card's "
+              "area must match it exactly. The platform page joins cards to "
+              "recommendations on that label alone, so a missing or drifted "
+              "one silently unlinks both ends.",
+              "Measured 2026-08-23 on two promoted runs, and it is the "
+              "second half of the defect CG-39 caught. CG-39 refuses a page "
+              "that serves NO recommendations; it says nothing about one "
+              "that serves them under a label nothing can join. Gulf served "
+              "seven recommendations with l3_area absent on all seven, so "
+              "all four cards read '0 recs' and all seven became orphans — "
+              "the exact symptom CG-39 was written for, one level down. "
+              "Axos served six WITH the field and still lost two cards to "
+              "one word: 'Salesforce Data Cloud' against the card's "
+              "'Salesforce Data Cloud (Data 360)', and 'Agentforce 360 "
+              "Platform' against 'Salesforce Agentforce'. A recommendation "
+              "that genuinely names a platform this page does not rank is "
+              "NOT refused — the page reports those as orphans on purpose, "
+              "and reparenting one would be this app deciding two labels "
+              "mean one thing. Only near-misses are refused, and a shared "
+              "vendor name is never a near-miss.",
+              "block"),
 
     "CG-39": ("The run's recommendations reach the platform page", None,
               "When the run's bundle carries recommendations and the platform "

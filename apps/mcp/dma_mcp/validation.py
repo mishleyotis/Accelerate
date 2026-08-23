@@ -1211,6 +1211,135 @@ def _valid_empty_state(es) -> bool:
             and len(es["sources_searched"]) > 0)
 
 
+# ── CG-42 · a recommendation names an area the page can join on ───────
+#
+# The platform page has no id joining a card to a recommendation. It joins
+# on ONE string: the L3 area label, normalised by stripping the `[L3-...]`
+# code and the producer's `(count: N)` tally. Everything downstream reads
+# that join — the per-card "N recs" line, the roadmap's per-area grouping,
+# and the orphan list that reports recommendations no card reaches.
+#
+# So the label is load-bearing, and until this gate nothing checked it.
+# Both defects it refuses were measured on promoted runs the same day:
+#
+#   gulf-coast-business-credit   l3_area ABSENT on 7 of 7 recommendations.
+#                                Four cards read "0 recs"; all seven recs
+#                                fell into the orphan list. This is CG-39's
+#                                symptom exactly, with the recommendations
+#                                present — CG-39 passes it, because they
+#                                were served.
+#   axos-bank-…-nyse-ax          l3_area present on 6 of 6 and two cards
+#                                still read "0 recs": "Salesforce Data
+#                                Cloud" against the card's "Salesforce Data
+#                                Cloud (Data 360)", and "Agentforce 360
+#                                Platform" against "Salesforce Agentforce".
+#
+# What it does NOT refuse is the honest orphan. Axos's "Write the
+# integration method from the deal in flight" names Salesforce Platform
+# Foundation, which this page neither ranks nor discards; the page reports
+# that as an orphan on purpose, and folding it into MuleSoft would be this
+# app deciding two labels mean one platform. That is a producer's call.
+# The line between the two is near-ness, and a SHARED VENDOR NAME is never
+# near-ness: Databricks MLflow and Databricks Lakehouse Platform are two
+# products, and refusing that pair would teach producers to rename things
+# until the gate stopped complaining.
+_L3_CODE = re.compile(r"^\s*\[L3-[A-Za-z0-9._-]+\]\s*")
+_L3_TALLY = re.compile(r"\s*\(count:\s*\d+\)")
+#: Words that carry no product identity. Vendors are here for the reason
+#: above; the generics because two Salesforce clouds share "cloud" and are
+#: still two clouds.
+_L3_GENERIC = frozenset((
+    "salesforce", "databricks", "microsoft", "oracle", "mulesoft", "google",
+    "amazon", "aws", "adobe", "sap", "ibm", "sf", "ms",
+    "platform", "cloud", "suite", "edition", "core", "the", "and", "for",
+    "data", "360", "enterprise", "service", "services", "system",
+))
+
+
+def _l3_label(v) -> str:
+    """The card label with the code and the producer's tally removed."""
+    if not isinstance(v, str):
+        return ""
+    return _L3_TALLY.sub("", _L3_CODE.sub("", v)).strip()
+
+
+def _l3_tokens(label: str) -> set:
+    return {t for t in re.split(r"[^A-Za-z0-9]+", label.lower())
+            if len(t) > 2 and t not in _L3_GENERIC}
+
+
+def _check_recommendation_areas_join(page, payload) -> list:
+    """CG-42 — every recommendation states an L3 area, and a near-match to a
+    promoted card's area is exact."""
+    if page != "platform" or not isinstance(payload, dict):
+        return []
+    story = payload.get("platform_story")
+    recs_sec = payload.get("recommendations")
+    if not isinstance(story, dict) or not isinstance(recs_sec, dict):
+        return []
+    cards = story.get("platforms")
+    recs = recs_sec.get("recommendations")
+    if not isinstance(cards, list) or not cards:
+        return []                       # no cards: CG-30/CG-39 own that case
+    if not isinstance(recs, list) or not recs:
+        return []                       # nothing served: CG-39 owns that case
+
+    areas = {_l3_label(c.get("l3_area")) for c in cards if isinstance(c, dict)}
+    areas.discard("")
+    # A discarded platform is a real area the page names, so a recommendation
+    # may point at one without being an orphan or a near-miss.
+    for d in (story.get("discarded") or []):
+        if isinstance(d, dict):
+            for k in ("l3_area", "platform"):
+                lab = _l3_label(d.get(k))
+                if lab:
+                    areas.add(lab)
+    out, missing = [], []
+    for i, r in enumerate(recs):
+        if not isinstance(r, dict):
+            continue
+        rid = r.get("rec_id") or f"recommendations[{i}]"
+        label = _l3_label(r.get("l3_area"))
+        if not label:
+            missing.append(rid)
+            continue
+        if label in areas:
+            continue
+        toks = _l3_tokens(label)
+        near = [a for a in areas
+                if a.lower() != label.lower()
+                and (label.lower() in a.lower() or a.lower() in label.lower()
+                     or (toks and toks & _l3_tokens(a)))]
+        if near:
+            out.append(_reason(
+                "CG-42", "recommendations",
+                f"platform.recommendations.recommendations[{i}].l3_area",
+                f"{rid} states {label!r}, and this page's own card says "
+                f"{near[0]!r} — the platform page joins a card to its "
+                "recommendations on this label and nothing else, so one "
+                "word apart means the card renders '0 recs' and this "
+                "recommendation renders as an orphan. Write the card's "
+                "label exactly. (A recommendation naming a platform this "
+                "page neither ranks nor discards is left alone: that "
+                "orphan is reported on purpose.)"))
+    if missing:
+        shown = ", ".join(missing[:12])
+        more = "" if len(missing) <= 12 else f" (+{len(missing) - 12} more)"
+        out.append(_reason(
+            "CG-42", "recommendations",
+            "platform.recommendations.recommendations",
+            f"{len(missing)} of {len(recs)} recommendations state no "
+            f"l3_area: {shown}{more}. The contract lists it in the item "
+            "shape, and the platform page joins cards to recommendations on "
+            f"it alone — without it every one of this page's {len(cards)} "
+            "cards reads '0 recs' and every recommendation lands in the "
+            "orphan list, while the analysis behind them is fine. Name the "
+            "area each one belongs to, using the card's own label; a "
+            "recommendation that belongs to no ranked card still states "
+            "its own area."))
+    return out
+
+
 def _check_narrative_thread_is_per_section(page, payload) -> list:
     """CG-29 — the thread has to say what THIS section adds.
 
@@ -1404,6 +1533,9 @@ def validate_pass1(page: str, payload: dict) -> list:
     # CG-29 for the same reason: a repeated thread is a relation BETWEEN
     # sections and cannot be seen from inside one.
     reasons.extend(_check_narrative_thread_is_per_section(page, payload))
+    # CG-42 for the same reason: the card↔recommendation join is a relation
+    # BETWEEN two sections of the platform page.
+    reasons.extend(_check_recommendation_areas_join(page, payload))
 
     return reasons
 
