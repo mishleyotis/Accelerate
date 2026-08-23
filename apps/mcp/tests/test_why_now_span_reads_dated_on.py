@@ -101,11 +101,18 @@ def test_an_unparseable_date_is_skipped_not_guessed():
     assert span == 1461
 
 
-def test_the_check_is_reachable_from_the_gate_that_uses_it():
-    """A gate nobody dispatches is a gate that does not exist — and this
-    file's whole subject is a check that was dispatched and blind."""
+def test_the_date_keys_are_shared_with_the_rule_that_replaced_this_one():
+    """The span floor this file was written for has since moved to the
+    evolution timeline and been replaced on why_now by a STALENESS ceiling
+    (see test_why_now_is_recent_and_the_timeline_reaches_back.py). The key
+    list is the part that mattered and it is still the one both rules read —
+    which is what keeps `dated_on` visible to whichever rule is asking."""
     import inspect
 
     from dma_mcp import validation2
-    src = inspect.getsource(validation2._check_depth_floors)
-    assert "_why_now_span_days" in src
+    src = inspect.getsource(validation2._check_date_reach)
+    assert "_why_now_staleness_days" in src
+    assert "_timeline_span_days" in src
+    assert validation2._why_now_staleness_days(
+        {"signals": [{"dated_on": "2026-08-19"}],
+         "produced_at": "2026-08-23"}) == 4

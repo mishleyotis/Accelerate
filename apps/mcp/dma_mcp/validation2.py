@@ -1790,6 +1790,70 @@ _WHY_NOW_DATE_KEYS = ("dated_on", "date", "as_of", "observed_at",
                       "published_date", "window")
 
 
+#: Eighteen months. Past this, a why-now signal is describing the world as it
+#: was rather than as it is, and the card stops being an argument for acting.
+WHY_NOW_STALE_DAYS = 548
+#: The reach-back floor, moved to the surface the owner was actually reading.
+TIMELINE_SPAN_DAYS = 1095
+
+
+def _dates_of(rows, keys):
+    """Every parseable date on these rows, first matching key per row."""
+    import datetime as _dt
+    seen = []
+    for s in rows or []:
+        if not isinstance(s, dict):
+            continue
+        for k in keys:
+            v = s.get(k)
+            if not isinstance(v, str):
+                continue
+            m = re.search(r"(\d{4})-(\d{2})(?:-(\d{2}))?", v)
+            if m:
+                try:
+                    seen.append(_dt.date(int(m.group(1)), int(m.group(2)),
+                                         int(m.group(3) or 1)))
+                except ValueError:
+                    pass
+                break
+    return seen
+
+
+def _timeline_span_days(body):
+    """How far back the evolution timeline reaches, or None when undatable.
+
+    THIS is the surface the owner meant. The floor lived on why_now for a
+    day and that was the wrong home: a why-now signal argues for acting NOW,
+    so a reach-back floor there rewards quoting an old event as a trigger —
+    which is the exact defect reported the next morning ("Why quote something
+    from 2015… is it still relevant?"). A history reaching back three years
+    and a trigger dated this month are both correct at once, and only a rule
+    per surface can say so.
+    """
+    seen = _dates_of(body.get("events"), ("event_date", "date", "as_of",
+                                          "occurred_on", "dated_on"))
+    if len(seen) < 2:
+        return None
+    return (max(seen) - min(seen)).days
+
+
+def _why_now_staleness_days(body):
+    """Days between the NEWEST signal and this section's own produced_at.
+
+    Measured against the payload's own timestamp rather than the wall clock,
+    so the verdict is deterministic and a run re-validated next year does not
+    fail for having aged. The producer's own honesty is what is being checked:
+    on the day you wrote this, how old was your freshest reason to act?
+    """
+    seen = _dates_of(body.get("signals"), _WHY_NOW_DATE_KEYS)
+    if not seen:
+        return None
+    made = _dates_of([body], ("produced_at",))
+    if not made:
+        return None
+    return (max(made) - max(seen)).days
+
+
 def _why_now_span_days(body):
     """The span the signals actually cover, or None when undatable."""
     import datetime as _dt
@@ -2049,6 +2113,54 @@ def _check_contact_enrichment_baseline(page, payload):
     return out
 
 
+def _check_date_reach(page, section, body):
+    """CG-40's two DATE rules, one per surface.
+
+    They pull in opposite directions on purpose. The evolution timeline
+    must REACH BACK, because a history that starts this year is a
+    snapshot. A why-now trigger must be RECENT, because it is an argument
+    for acting now. Holding both as one rule on one surface is what put a
+    2015 vendor acquisition on a why-now card and had the gate call it
+    compliant.
+    """
+    out = []
+    # The reach-back floor belongs to the EVOLUTION TIMELINE, which is
+    # what the owner was reading when they asked for three years.
+    if section == "timeline":
+        span = _timeline_span_days(body)
+        if span is not None and span < TIMELINE_SPAN_DAYS \
+                and not _says_it_searched(body):
+            out.append(_reason(
+                "CG-40", section, f"{page}.{section}.events",
+                f"the evolution timeline spans {span} days "
+                f"({span // 365}y) against a floor of three years. Owner, "
+                f"2026-08-23: 'the evolution timeline spans 1 year? At "
+                f"least 3 years should be covered.' A history that starts "
+                f"this year is a snapshot, not an evolution. Reach "
+                f"further back — acquisitions, platform decisions, "
+                f"leadership changes and filings are all dated and "
+                f"citable — or say what was searched and why the trail "
+                f"ends where it does."))
+    # …and why_now gets the OPPOSITE test. A trigger is an argument for
+    # acting NOW, so the defect there is staleness, never shortness.
+    if section == "why_now":
+        stale = _why_now_staleness_days(body)
+        if stale is not None and stale > WHY_NOW_STALE_DAYS \
+                and not _says_it_searched(body):
+            out.append(_reason(
+                "CG-40", section, f"{page}.{section}.signals",
+                f"the newest signal predates this section's own "
+                f"produced_at by {stale} days ({stale // 365}y), against "
+                f"a staleness ceiling of {WHY_NOW_STALE_DAYS // 30} "
+                f"months. Owner, 2026-08-23, on a signal dated 2015: "
+                f"'Why Now signals seem stale. Why quote something from "
+                f"2015 — is it still relevant?' An old event can be "
+                f"DURATION inside a trigger; it cannot be the trigger. "
+                f"Re-date to what changed recently, or say what was "
+                f"searched and why nothing newer exists."))
+    return out
+
+
 def _check_depth_floors(page, payload):
     """CG-40 — a section whose value is its depth reaches a floor or says why.
 
@@ -2063,6 +2175,12 @@ def _check_depth_floors(page, payload):
     for section, body in payload.items():
         if not isinstance(body, dict):
             continue
+        # The date rules below are NOT depth floors and must not sit behind
+        # the depth-floor guard: `timeline` has no entry in DEPTH_FLOORS, so
+        # a `continue` here skipped its reach-back check entirely and the
+        # gate reported nothing on a one-year history — the same shape as the
+        # `dated_on` blindness this file already carries a fixture for.
+        out.extend(_check_date_reach(page, section, body))
         floor = DEPTH_FLOORS.get((page, section))
         if not floor:
             continue
@@ -2078,17 +2196,6 @@ def _check_depth_floors(page, payload):
                 f"ran and what would change the answer. A thin section that "
                 f"says so is fine; a thin section that is silent is "
                 f"indistinguishable from one nobody worked."))
-        if section == "why_now":
-            span = _why_now_span_days(body)
-            if span is not None and span < WHY_NOW_SPAN_DAYS \
-                    and not _says_it_searched(body):
-                out.append(_reason(
-                    "CG-40", section, f"{page}.{section}.signals",
-                    f"the signals span {span} days ({span // 365}y) against a "
-                    f"floor of three years. Owner, 2026-08-23: 'the evolution "
-                    f"timeline spans 1 year? At least 3 years should be "
-                    f"covered. Enrichment should pick this up.' Reach further "
-                    f"back, or say what was searched and why the trail ends."))
     return out
 
 def validate_pass2(conn, run_id, page: str, payload: dict,

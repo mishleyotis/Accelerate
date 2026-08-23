@@ -69,22 +69,29 @@ def test_fifteen_techstack_products_pass():
     assert check("techstack", body) == []
 
 
-def test_a_one_year_why_now_span_blocks():
-    """"the evolution timeline spans 1 year? At least 3 years should be
-    covered." Two signals clears the COUNT floor, so this proves the span
-    check is independent of it."""
-    out = check("overview", {"why_now": {"signals": [
-        {"wn_id": "WN-1", "date": "2026-01-15"},
-        {"wn_id": "WN-2", "date": "2026-08-01"}]}})
-    assert len(out) == 1
-    assert "span" in out[0]["message"] and "three years" in out[0]["message"]
-    assert out[0]["path"].endswith(".signals")
+def test_a_one_year_why_now_span_is_no_longer_a_finding():
+    """MOVED, and the move is the point. The three-year reach-back floor lived
+    here for a day; the owner then read the run that satisfied it and asked
+    "Why Now signals seem stale. Why quote something from 2015?" — because the
+    cheapest way to clear a span floor on why_now is to date a signal to an old
+    event. Two signals seven months apart is a GOOD why-now.
 
-
-def test_a_four_year_span_passes():
+    The reach-back rule now sits on context.timeline, which is the "evolution
+    timeline" the owner was reading, and why_now carries a STALENESS ceiling
+    instead. Both are pinned in
+    test_why_now_is_recent_and_the_timeline_reaches_back.py.
+    """
     assert check("overview", {"why_now": {"signals": [
-        {"wn_id": "WN-1", "date": "2022-03-01"},
+        {"wn_id": "WN-1", "date": "2026-01-15"},
         {"wn_id": "WN-2", "date": "2026-08-01"}]}}) == []
+
+
+def test_the_reach_back_floor_now_answers_on_the_timeline():
+    out = check("context", {"timeline": {"events": [
+        {"event_date": "2026-01-15"}, {"event_date": "2026-08-01"}]}})
+    assert len(out) == 1
+    assert "three years" in out[0]["message"]
+    assert out[0]["path"] == "context.timeline.events"
 
 
 # ── the escape, tested hardest ────────────────────────────────────────────
