@@ -327,6 +327,24 @@ root_cause, evidence_ids[], cost_of_inaction, prerequisites[], dependencies[],
 sequencing_reason, effort_band, kpi_triple, validation_gate, claim_label}` plus
 `r_layer`.
 
+**THE RUN'S RECOMMENDATIONS HAVE TO REACH THE PAGE — CG-39.** Owner,
+2026-08-23, reading a promoted platform page: *"Gulf has platforms with no
+recommendations. Is there a synthesis layer that challenges recommendations,
+enhances them, confirms validity?"* Measured on that run: `get_report_bundle`
+returned **seven** recommendations, the platform tiles served `fits: []`, and
+every card read "0 recs" — while REC-3 was literally "Operationalize
+Pardot", the name of a platform on the page. The analyst's work existed and
+died between the bundle and the surface.
+
+So before you return P2: pull the bundle's recommendation list and reconcile
+it against what you are emitting, by `rec_id` and by the L3 area each names.
+A recommendation you are deliberately not carrying is a **discard with a
+reason**, not an omission — and the reason belongs on the page, because a
+reader who sees platforms with no recommended action concludes there is
+nothing to do. If the bundle carries recommendations and your tiles carry
+none, that is the defect CG-39 refuses, and re-running the fit is not the
+fix: the mapping is.
+
 - **`provenance`** — `ANALYST │ DERIVED`, required, never blank. It is stripped
   from the customer projection as method vocabulary and still required at submit;
   measured on the reference run, the customer row carries 16 keys and the

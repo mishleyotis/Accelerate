@@ -291,6 +291,53 @@ Each is phrased so that a wrong answer is visible rather than arguable.
   [initiative]" — and if the wait case is strong, the signal changes or goes.
   Record what the challenge changed, not just that it ran.
 
+## The depth floor — CG-40, two signals and a three-year span
+
+Two rules now gate this section, and both come from the same report.
+
+**Count.** Below two signals the section carries an `empty_state` or `thin`
+flag naming the queries run. The field doc asks for three to six trigger
+cards; the contract already defines `thin=true` below two. Owner,
+2026-08-23: *"Gulf has less than 3 historical news. Is this logical? This is
+a crosscutting issue insinuating less rigor around enrichment."*
+
+**Span.** The dated signals must cover **at least three years** end to end.
+Owner: *"the evolution timeline spans 1 year? At least 3 years should be
+covered."* A one-year window is not a trajectory — it is a snapshot, and a
+reader cannot tell acceleration from noise inside it. The gate measures the
+span between your earliest and latest dated signal, so a set of four events
+all from this quarter fails on span while passing on count, which is exactly
+the shape that prompted it.
+
+**How to reach the span, and it is a different search from the count.** The
+pathways below are tuned for *recent* triggers, which is why runs come back
+one year wide. To reach three years, walk the year markers explicitly:
+
+- run the platform, leadership and regulator queries **once per year across
+  the window** — `2023`, `2024`, `2025`, `2026` — rather than once with
+  "recent". A query with no year marker returns this year.
+- the entity's own newsroom and IR archive paginate; read back through the
+  window rather than taking page one
+- a regulator's enforcement and order pages are indexed by date and are the
+  most reliable way to anchor the far end of the span at T1
+- a core conversion or charter event three years old is still the reason the
+  current programme exists, and it is usually the signal that makes the
+  recent ones legible
+
+**THE FLOOR IS ON EFFORT, NEVER ON THE WORLD.** An institution genuinely two
+years old has two years of history and that run promotes. Say so: which years
+you queried, which returned nothing, and what the span actually is. A short
+span that names its window is honest; a short span that is silent is
+indistinguishable from a search that only asked about this quarter.
+
+When you disclose, name **what would change the answer** — a specific
+missing thing, never "further research". The specific things here are: a
+newsroom archive that paginates further back than it does, a regulator index
+that covers this charter type, a filing series the entity began only
+recently, or a year you queried that genuinely returned nothing. An AE can
+act on "the newsroom archive starts in 2024"; nobody can act on "limited
+information available".
+
 ## Enrichment checks
 
 The facet is **`why_now`**. The declared sources, in precedence order, are in

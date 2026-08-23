@@ -417,6 +417,39 @@ Each is phrased so that a wrong answer is visible rather than arguable.
   low-sample warning acknowledged, a cohort comparison narrowed to the rows that
   support it.
 
+## The depth floor — CG-40, more than one rating line
+
+**Owner, 2026-08-23: "Sentiment overview on most clients have only 1
+parameter."** Below two displayed rating lines the section must carry an
+`empty_state` or `thin` flag naming what was searched. The contract's own
+field doc already said it in as many words — *"a single displayed line is not
+a sentiment picture"* — and until now nothing enforced it.
+
+One line is not a picture because a reader cannot tell a rating from a
+distribution: 4.3 from members says nothing about what employees think, or
+what a regulator's complaint index shows, or whether the figure moved. Two
+audiences is the minimum at which the card carries an argument rather than a
+number.
+
+**Where the second line comes from, in order of yield** (all seven families
+are in the enrichment checks below; these are the two that most often close
+the gap on a client with only an app rating):
+
+- **the employee side.** Great Place To Work, then Comparably, then Built In,
+  then the entity's own culture pages. Measured across promoted runs: this is
+  the line most often missing, and it is usually reachable — the 403 wall is
+  on the entity's own domain, not on these.
+- **the other app store.** A client with an Apple rating usually has a Google
+  Play rating and vice versa, and the two are different populations. A row
+  renders only with `rating`, `scale`, `n` and `as_of` — a store listing with
+  no review count is not a line.
+
+**THE FLOOR IS ON EFFORT, NEVER ON THE WORLD.** A regional institution with
+no employee reviews anywhere and one app listing has one line, and that run
+promotes. Say which of the seven families you ran, which returned nothing,
+and what would change it. A thin section that says so is fine; a thin section
+that is silent is indistinguishable from one nobody worked.
+
 ## Enrichment checks
 
 The registered facet is **`sentiment`**

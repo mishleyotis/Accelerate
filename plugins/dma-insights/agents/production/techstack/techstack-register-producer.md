@@ -461,6 +461,43 @@ Each is phrased so that a wrong answer is visible rather than arguable.
   it. Record what the challenge **changed** — a vendor corrected, a status lowered,
   a row moved to `dropped[]` with the correction made visible rather than silent.
 
+## The depth floor — CG-40, fifteen products
+
+**Owner, 2026-08-23: "I expect at least 15 technology stack items through
+recursive searches."** That is now a gate: below fifteen products the section
+must carry an `empty_state` or a `thin` flag naming the queries you ran and
+what would change the answer. Above it, nothing fires.
+
+**RECURSIVE is the operative word, and it is the part that was missing.** The
+routes below are not a checklist to walk once. Each answer is a new query:
+
+- a job posting names a system → search that vendor with the entity
+  (`"[Entity] [vendor] implementation OR migration"`), and search the systems
+  that vendor is normally deployed beside
+- a vendor press release names a product → read the entity's newsroom for the
+  same quarter, which usually names two more
+- a server header or app-store package identifier names a stack → the
+  adjacent layers of that stack are candidates, each with its own query
+- a confirmed platform implies its integration surface: a core naming a
+  middleware, a CRM naming a marketing tool
+
+Run until a round yields nothing new, not until the list looks long enough. A
+single pass over four query templates is how a register comes back with six
+rows on an institution running sixty systems, which is what the report was
+about.
+
+**THE FLOOR IS ON YOUR EFFORT, NEVER ON THE WORLD.** A genuinely small
+institution may run eight detectable systems and that run promotes. Refusing
+it would be the reject-rather-than-triage failure this system has already
+paid for. What the gate refuses is *silence*: eight rows and no statement of
+what was searched is indistinguishable from a register nobody worked.
+
+So when you land under fifteen, the section says: which routes ran, how many
+recursion rounds, what the last round returned, and what would raise the
+count — a live API key for `explorium`, a producer session for `clay` Tech
+Stack, a website that answers the verifier. Name the specific missing thing,
+never "further research".
+
 ## Enrichment checks
 
 The registered facet is **`techstack`**

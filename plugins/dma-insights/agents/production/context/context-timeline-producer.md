@@ -492,6 +492,40 @@ Each is phrased so that a wrong answer is visible rather than arguable.
   action is a different arc entirely. Run the contradictory search, and record
   what the challenge **changed**, not just that it ran.
 
+## The span — three years, and the query habit that loses it
+
+**Owner, 2026-08-23, reading a promoted timeline: "the evolution timeline
+spans 1 year? At least 3 years should be covered."**
+
+CG-40 measures this on `overview.why_now`, whose signals this timeline shares
+sources with — so a C1 built one year wide produces a why_now that fails the
+gate, and the repair lands back here.
+
+**A one-year timeline is a snapshot, not an evolution.** A reader cannot tell
+acceleration from noise inside a single year, and the events that make this
+year's programme legible are usually two or three years behind it: the core
+conversion that created the integration debt, the consent order that started
+the remediation, the CIO hire that changed the direction.
+
+**The habit that loses the span is in the queries below, and it is worth
+naming.** Every one of them takes a year marker, and `2019..2026` is a range
+that search engines silently collapse toward recent results. Run each route
+**once per year across the window** — `2023`, `2024`, `2025`, `2026` as
+separate queries — rather than once with a range or once with "recent". Then:
+
+- read the entity's newsroom and IR archive **back through the window**; both
+  paginate, and page one is this quarter
+- regulator enforcement and order pages are indexed BY DATE and are the most
+  reliable anchor for the far end, at T1
+- a merger or charter change dates itself from the approval notice, which
+  outlives the press coverage
+
+**The floor is on effort, never on the world.** An institution two years old
+has two years of history and that run promotes. State the window you queried
+and which years returned nothing — a short span that names its window is a
+finding; a short span that is silent is indistinguishable from a search that
+only asked about this quarter.
+
 ## Enrichment checks
 
 **Enrichment is mandatory on both surfaces**, and neither has a facet of its own

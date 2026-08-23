@@ -135,6 +135,23 @@ Read in this order. Each path has been verified to exist.
   direction, peer_n, peer_basis, proxy_disclosure}`, plus `n` and `basis` where
   the run carries them. `delta` is **signed and computed** by you from `score`
   and `peer_median`, never restated from the source table.
+
+  **FOUR ROWS, ALWAYS, AND CHECK THE BUNDLE BEFORE YOU BELIEVE IT.** Owner,
+  2026-08-23, on two promoted clients: the pillar score bars rendered with no
+  fill at all. Cause was upstream and is fixed — `get_report_bundle` returned
+  `rollups.pillars: []` while the same run carried 47 scored capabilities,
+  because the rollup was computed from a stated-pillars list nobody had
+  populated rather than from the capabilities themselves. The bundle now
+  carries `pillars_basis` and `pillars_computed` beside the rows so the two
+  cases are distinguishable.
+
+  What that means for you: **an empty `rollups.pillars` on a run with scored
+  capabilities is a bundle defect, not an empty world.** Do not emit four
+  null-scored rows and do not emit fewer than four. Read `pillars_basis`; if
+  it says the rollup was computed and the list is still empty on a run that
+  has capabilities, stop and report it rather than serving a hero card whose
+  bars are blank. A blank bar and a genuinely unscored pillar look identical
+  to a reader, and only one of them is true.
 - `peer_median` and the cohort it is drawn from. Where the table has no figure,
   work the sanctioned ladder in order and stop at the first that yields a
   defensible number: recompute at lower N (drop the peer lacking the figure;
