@@ -235,3 +235,95 @@ def test_the_pillar_bar_defect_names_its_upstream_cause():
     text = _read("overview/overview-hero-producer.md")
     assert "rollups.pillars" in text or "pillars_basis" in text
     assert re.search(r"not an empty world|bundle defect", text, re.I)
+
+
+# ── the Explorium correction ──────────────────────────────────────────
+
+SOURCES = (ROOT / "plugins" / "dma-insights" / "skills"
+           / "dma-surface-production" / "02-inputs" / "enrichment_sources.json")
+TECHSTACK_RULEBOOK = (ROOT / "plugins" / "dma-insights" / "skills"
+                      / "dma-surface-production" / "03-pages" / "rulebooks"
+                      / "techstack.md")
+
+#: The sentence that was wrong, in the three places it was written. It said
+#: the connector needed a Secret Manager key that does not exist, so a
+#: producer reading it recorded NOT_RUN for a source that answers.
+STALE = "no live API"
+
+
+def test_explorium_is_not_described_as_dark_anywhere():
+    """Measured 2026-08-23: `match-business` resolved 3 of 3 DMA clients and
+    `enrich-business` returned 392 / 357 / 147 premium technologies for
+    Baxter, Axos and Logix. The connector authenticates at the SESSION — there
+    is no key — and it is already in the routine's auto-approve list.
+
+    Every file that said otherwise was telling a producer to record NOT_RUN
+    for the source that would have taken its register past the fifteen-product
+    floor. This pins the correction in all three places at once, because the
+    same sentence had been copied into all three and correcting two of them
+    would leave the third teaching the old lesson.
+    """
+    bad = []
+    for path in (SOURCES, TECHSTACK_RULEBOOK,
+                 AGENTS / "techstack/techstack-register-producer.md"):
+        text = path.read_text(encoding="utf-8")
+        if STALE in text and "CORRECTED" not in text and "corrected" not in text:
+            bad.append(str(path.relative_to(ROOT)))
+    assert bad == [], (
+        "a file still says the Explorium connector has no live API without "
+        "carrying the correction. A producer reading it records NOT_RUN for a "
+        "source that answers:\n  " + "\n  ".join(bad))
+
+
+def test_the_two_explorium_paths_are_kept_apart():
+    """The correction is not "Explorium is live" — it is that TWO paths wear
+    one name. The ingest scan genuinely needs a Secret Manager key and
+    genuinely does not have one; the producer-session connector needs no key.
+    A file that flattens them in either direction is wrong again, in the other
+    direction, and the next reader cannot tell which.
+    """
+    for path in (TECHSTACK_RULEBOOK,
+                 AGENTS / "techstack/techstack-register-producer.md"):
+        text = path.read_text(encoding="utf-8")
+        low = text.lower()
+        assert "ingest" in low, f"{path.name} does not name the ingest path"
+        assert re.search(r"producer session|producer-session", low), \
+            f"{path.name} does not name the producer-session path"
+        assert "secret manager" in low, \
+            (f"{path.name} says the connector is live without saying which "
+             f"path still needs the key that does not exist")
+
+
+def test_the_call_sequence_is_written_down_where_a_producer_will_look():
+    """"It is live" is not actionable. The producer needs the two calls, in
+    order, with what to pass — otherwise the correction lands as encouragement
+    and the register stays at ten products."""
+    text = _read("techstack/techstack-register-producer.md")
+    assert "match-business" in text and "enrich-business" in text
+    assert "technographics" in text
+    assert re.search(r"name AND domain|name and domain", text, re.I)
+
+
+def test_the_console_is_still_not_citable():
+    """The correction must not be read as loosening the evidence rule. A
+    machine scan is a DETECTION; the console has never been a source, and a
+    producer that took "live" as "citable" would ship a register whose rows
+    cite a tool — the exact shape MEM-0082 refuses."""
+    for path in (SOURCES, TECHSTACK_RULEBOOK,
+                 AGENTS / "techstack/techstack-register-producer.md"):
+        low = path.read_text(encoding="utf-8").lower()
+        assert "vibeprospecting.explorium.ai" in low, path.name
+        assert "never a citable source" in low or "never citable" in low, \
+            f"{path.name} describes the live scan without keeping the console rule"
+
+
+def test_the_scan_is_framed_as_the_candidate_list():
+    """What makes fifteen products reachable is not the scan's row count — it
+    is that the scan tells the recursive search WHERE TO LOOK. A producer that
+    reads "147 technologies" and emits 147 rows has skipped corroboration
+    entirely, which is a worse defect than the ten it replaces."""
+    for path in (AGENTS / "techstack/techstack-register-producer.md",
+                 TECHSTACK_RULEBOOK):
+        low = path.read_text(encoding="utf-8").lower()
+        assert "candidate list" in low, path.name
+        assert "corroborat" in low, path.name

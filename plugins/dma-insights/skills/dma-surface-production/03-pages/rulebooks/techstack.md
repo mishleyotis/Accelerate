@@ -223,10 +223,22 @@ at serve with the drop counted in the receipt.
 ### Enrichment pathways
 
 Connector pathways (facet `techstack`, `02-inputs/enrichment_sources.json`,
-in precedence order): the `explorium` machine technographic scan at ingest —
-T1, wired but not live: no live API key exists in Secret Manager, the routine
-records NOT_RUN with that reason, and the tool console
-(vibeprospecting.explorium.ai) is never a citable source; the `clay` Tech
+in precedence order): the `explorium` machine technographic scan — T1, and
+**live in a producer session**, corrected 2026-08-23. Two paths carry this
+name and only the ingest one is dark: the worker's scan
+(`apps/worker/dma_worker/enrichment.py`) needs a Secret Manager key that does
+not exist, while the **Vibe Prospecting MCP connector authenticates at the
+session, needs no key, and is already auto-approved** — `match-business` with
+name and domain, then `enrich-business` with `technographics` + `webstack`.
+Measured on three promoted clients: 392 premium technologies for Baxter, 357
+for Axos, 147 for Logix, naming Symitar Episys, Temenos, Fiserv, FICO Falcon,
+Jack Henry SilverLake, nCino and Yodlee among them. The instruction this
+replaces ("no live API … records NOT_RUN with that reason") conflated the two
+paths and was costing every run its technographics. What does not change: the
+tool console (vibeprospecting.explorium.ai) is never a citable source, so the
+scan is the CANDIDATE LIST that makes the recursive search converge and each
+row is corroborated to `CONFIRMED`/`INFERRED`/`CLAIMED` from a first-party
+source, a posting, a vendor release or a live technical read. Then the `clay` Tech
 Stack company data point — T1, producer-session only, so a scheduled run
 cannot hold it; and `first_party` — the entity's own platform statements,
 T1-T2, which is where a `detection_basis` clause comes from. The tier rule is

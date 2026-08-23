@@ -504,9 +504,43 @@ The registered facet is **`techstack`**
 (`/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/enrichment_sources.json`),
 and its routes run in precedence order:
 
-- **`explorium`**, the machine technographic scan at ingest — **T1**, wired but not
-  live: no live API key exists in Secret Manager, so the routine records `NOT_RUN`
-  with that reason, and the tool console is **never a citable source**.
+- **`explorium`**, the machine technographic scan — **T1**, and **LIVE IN YOUR
+  SESSION**. Two paths wear this name and only one of them is dark:
+
+  | path | state |
+  |---|---|
+  | ingest scan (`apps/worker/dma_worker/enrichment.py`) | not live — needs a Secret Manager key that does not exist |
+  | **producer session, Vibe Prospecting MCP connector** | **live**, no key involved, already auto-approved |
+
+  Corrected 2026-08-23, because the previous instruction here said "no live
+  API … records `NOT_RUN` with that reason" and that sentence was costing
+  every run its technographics. The connector authenticates at the session,
+  it is in the routine's auto-approve list, and it answers.
+
+  **The call sequence, verified:**
+
+  1. `match-business` with `{name, domain}` — returns a `business_id` and a
+     `table_name`. Give both name AND domain; it resolved 3 of 3 DMA clients.
+  2. `enrich-business` on that `table_name` with
+     `["enrich-business-technographics", "enrich-business-webstack"]`.
+
+  **What it returns, measured on three promoted clients:** baxter-credit-union
+  **392** premium technologies, axos-bank **357**, logix-federal-credit-union
+  **147** — each split across ~20 named categories (finance and accounting, IT
+  security, platform and storage, BI and analytics, …) and naming real core
+  systems: Symitar Episys and Temenos at Baxter, Symitar Episys and Fiserv and
+  FICO Falcon at Logix, Jack Henry SilverLake and nCino and Yodlee at Axos. Two
+  credits per enrichment per row.
+
+  **EXPLORIUM IS THE CANDIDATE LIST, NOT THE CITATION.** The tool console
+  (`vibeprospecting.explorium.ai`) remains never citable — that rule does not
+  move. What changes is where your recursion starts: instead of guessing which
+  vendors to search for, you get a hundred-plus named candidates and
+  corroborate the ones that matter through a job posting, the entity's
+  newsroom, a vendor release or a live technical read. `CONFIRMED` where a
+  first-party source names it, `INFERRED` where the scan and a circumstantial
+  source agree, `CLAIMED` where only a vendor says so. That is how a register
+  reaches fifteen rows rather than the ten a promoted client shipped with.
 - **`clay` Tech Stack** company data point — **T1**, producer-session only, so a
   scheduled run cannot hold it.
 - **`first_party`** — the entity's own platform statements, **T1–T2**, which is

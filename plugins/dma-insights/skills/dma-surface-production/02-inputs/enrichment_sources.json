@@ -160,11 +160,11 @@
       "sources": [
         {
           "connector": "explorium",
-          "serves": "the machine technographic scan at ingest, so a scheduled run gets a full register with no connector",
+          "serves": "the machine technographic scan — LIVE in a producer session through the Vibe Prospecting MCP connector (match-business then enrich-business with technographics + webstack); the INGEST-time scan is the separate path and remains not live",
           "tier_band": "T1",
-          "status": "wired, not live",
-          "grounding": "packages/shared/enrichment_register.json; apps/worker/dma_worker/enrichment.py",
-          "notes": "Ingest-scan only — no live API: the key is not in Secret Manager, and the routine records NOT_RUN with that reason until it is. The tool console (vibeprospecting.explorium.ai) is never a citable source (scripts/check_evidence.py TOOL_HOSTS)."
+          "status": "wired; live in a producer session, not live at ingest",
+          "grounding": "producer-session MCP connector (match-business, enrich-business); the ingest path is packages/shared/enrichment_register.json; apps/worker/dma_worker/enrichment.py",
+          "notes": "CORRECTED 2026-08-23, and the previous note was costing every run its technographics. It read 'Ingest-scan only — no live API: the key is not in Secret Manager, and the routine records NOT_RUN with that reason until it is', which conflated TWO paths. The ingest scan does need a Secret Manager key and does not have one. The PRODUCER SESSION does not use a key at all — Vibe Prospecting/Explorium is an MCP connector authenticated at the session, it is in the routine's auto-approve list (scripts/hooks/autoapprove_connector.py: match-business, enrich-business, fetch-entities), and it answers. Measured 2026-08-23 on three promoted clients: baxter-credit-union 392 premium technologies, axos-bank 357, logix-federal-credit-union 147, each broken into ~20 named categories (finance, IT security, platform and storage, BI and analytics, ...) and naming real core systems — Symitar Episys and Temenos for Baxter, Symitar Episys and Fiserv and FICO Falcon for Logix, Jack Henry SilverLake and nCino and Yodlee for Axos. Cost is 2 credits per enrichment per row. So a producer recording NOT_RUN for this facet was recording it for a source it could reach, which is how a register reaches a client with ten named products. WHAT EXPLORIUM IS FOR: it is the CANDIDATE LIST that makes the recursive search converge, not the citation. The tool console (vibeprospecting.explorium.ai) is still never a citable source (scripts/check_evidence.py TOOL_HOSTS) — each candidate is corroborated through a job posting, the entity's newsroom, a vendor release or a live technical read, and carries CONFIRMED/INFERRED/CLAIMED accordingly."
         },
         {
           "connector": "clay",
