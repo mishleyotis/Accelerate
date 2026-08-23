@@ -69,14 +69,10 @@ def _idt() -> str:
 
 
 def _pathtok() -> str:
-    import os
-    env = os.environ.get("DMA_MCP_PATH_TOKEN", "").strip()
-    if env:
-        return env
-    if PATHTOK_FILE.is_file():
-        return PATHTOK_FILE.read_text().strip()
-    raise SystemExit(f"no connector path token at {PATHTOK_FILE} — "
-                     f"bootstrap_session.sh lands it")
+    """One ladder, shared with run_gate and the doctor — env, then file,
+    then Secret Manager. Three copies of this drifted to three different
+    numbers of rungs, which is why it lives in gcp_token now."""
+    return gcp_token.path_token()
 
 
 def rpc(method: str, params: dict | None = None) -> dict:

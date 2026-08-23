@@ -35,6 +35,7 @@ import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 import tempfile
 import time
 import urllib.error
@@ -45,6 +46,60 @@ TOKEN_URL = "https://oauth2.googleapis.com/token"
 DEFAULT_KEY = os.environ.get("DMA_SA_KEY_FILE", "/root/.dma/sa.json")
 DEFAULT_SCOPE = "https://www.googleapis.com/auth/cloud-platform"
 JWT_GRANT = "urn:ietf:params:oauth:grant-type:jwt-bearer"
+
+
+#: The connector's path token, by every route that can supply it.
+#:
+#: THE DEFECT THIS CLOSES, found 2026-08-23 running the synthesis routine's
+#: OWN FIRST COMMAND: `run_gate.py pick` read one location — a file
+#: bootstrap_session.sh lands — and called SystemExit when it was absent.
+#: A container restored from a snapshot without that file, or one whose
+#: bootstrap partly failed, therefore ended the entire firing at STEP 1 with
+#: "no connector path token", for a secret it could have fetched itself.
+#: `scripts/dma_connector.py` had been doing exactly that all along.
+#:
+#: Three rungs, cheapest first, and the LAST one is what makes a firing
+#: survivable: the env var costs nothing, the file costs a stat, and Secret
+#: Manager costs a subprocess but always works where the service account is
+#: provisioned. Never echoed, never logged — callers put it in a header.
+PATHTOK_FILE = "/root/.dma/pathtok"
+PATHTOK_SECRET = "dmai-mcp-path-token"
+PATHTOK_ENV = ("DMA_MCP_PATH_TOKEN", "MCP_PATH_TOKEN")
+
+
+def path_token(project: str = "digital-maturity-assessor") -> str:
+    """The path token, or SystemExit naming every route that was tried."""
+    for var in PATHTOK_ENV:
+        v = (os.environ.get(var) or "").strip()
+        if v:
+            return v
+    f = Path(PATHTOK_FILE)
+    try:
+        if f.is_file():
+            v = f.read_text(encoding="utf-8").strip()
+            if v:
+                return v
+    except OSError:
+        pass                      # unreadable is the same as absent here
+    gcloud = "/opt/google-cloud-sdk/bin/gcloud"
+    if not Path(gcloud).exists():
+        gcloud = "gcloud"
+    try:
+        r = subprocess.run(
+            [gcloud, "secrets", "versions", "access", "latest",
+             f"--secret={PATHTOK_SECRET}", f"--project={project}"],
+            capture_output=True, text=True, timeout=60,
+            env={**os.environ, "CLOUDSDK_AUTH_ACCESS_TOKEN": ""})
+        v = (r.stdout or "").strip()
+        if v:
+            return v
+    except Exception:                                        # noqa: BLE001
+        pass
+    raise SystemExit(
+        f"no connector path token: none of {', '.join(PATHTOK_ENV)} is set, "
+        f"{PATHTOK_FILE} is absent or empty, and Secret Manager "
+        f"({PATHTOK_SECRET}) did not answer. bootstrap_session.sh lands the "
+        f"file; the service account can read the secret directly.")
 
 
 def _b64url(raw: bytes) -> bytes:

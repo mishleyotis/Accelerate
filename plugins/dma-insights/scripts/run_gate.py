@@ -125,10 +125,11 @@ def _idt(audience: str) -> str:
 
 
 def _pathtok() -> str:
-    if PATHTOK_FILE.is_file():
-        return PATHTOK_FILE.read_text().strip()
-    raise SystemExit(f"no connector path token at {PATHTOK_FILE} — "
-                     f"bootstrap_session.sh lands it")
+    """Every route, not just the file. This is the routine's FIRST command:
+    a firing that dies here because bootstrap did not land one file has
+    ended before it looked at a single client, for a secret the service
+    account can read itself (gcp_token.path_token)."""
+    return gcp_token.path_token()
 
 
 def mcp_call(tool: str, args: dict) -> dict:

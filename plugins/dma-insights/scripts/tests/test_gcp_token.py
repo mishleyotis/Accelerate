@@ -119,3 +119,118 @@ def test_missing_key_file_exits_2(monkeypatch, capsys, tmp_path):
     captured = capsys.readouterr()
     assert captured.out == ""          # nothing but tokens ever on stdout
     assert "no usable key" in captured.err
+
+
+# ── the connector path token: every route, not just the file ──
+#
+# Found 2026-08-23 by running the synthesis routine's OWN FIRST COMMAND in a
+# container whose bootstrap had not landed the file. `run_gate.py pick` read
+# exactly one location and called SystemExit — so the whole firing ended at
+# STEP 1 with "no connector path token", for a secret the service account can
+# read itself. dma_connector.py had been doing exactly that all along.
+#
+# Three copies of this logic had drifted to three different numbers of rungs:
+# run_gate had 1 (file), mcp_raw had 2 (env, file), dma_connector had 2 (env,
+# Secret Manager). One ladder now, here.
+
+
+def _clear_env(monkeypatch):
+    for var in gcp_token.PATHTOK_ENV:
+        monkeypatch.delenv(var, raising=False)
+
+
+def test_the_env_var_is_the_first_rung(monkeypatch):
+    _clear_env(monkeypatch)
+    monkeypatch.setenv("DMA_MCP_PATH_TOKEN", "from-env")
+    assert gcp_token.path_token() == "from-env"
+
+
+def test_the_legacy_env_name_still_answers(monkeypatch):
+    """dma_connector.py reads MCP_PATH_TOKEN; a container set up for one
+    script must not be invisible to the other."""
+    _clear_env(monkeypatch)
+    monkeypatch.setenv("MCP_PATH_TOKEN", "legacy-name")
+    assert gcp_token.path_token() == "legacy-name"
+
+
+def test_the_file_answers_when_no_env_is_set(monkeypatch, tmp_path):
+    _clear_env(monkeypatch)
+    f = tmp_path / "pathtok"
+    f.write_text("  from-file\n")
+    monkeypatch.setattr(gcp_token, "PATHTOK_FILE", str(f))
+    assert gcp_token.path_token() == "from-file"
+
+
+def test_an_empty_file_is_not_a_token(monkeypatch, tmp_path):
+    """An empty file reads as populated to `is_file()` and would have been
+    returned as the empty string, producing a 401 that names nothing."""
+    _clear_env(monkeypatch)
+    f = tmp_path / "pathtok"
+    f.write_text("   \n")
+    monkeypatch.setattr(gcp_token, "PATHTOK_FILE", str(f))
+    monkeypatch.setattr(gcp_token.subprocess, "run",
+                        lambda *a, **k: type("R", (), {"stdout": "from-sm"})())
+    assert gcp_token.path_token() == "from-sm"
+
+
+def test_secret_manager_is_the_rung_that_saves_the_firing(monkeypatch,
+                                                          tmp_path):
+    _clear_env(monkeypatch)
+    monkeypatch.setattr(gcp_token, "PATHTOK_FILE", str(tmp_path / "absent"))
+    monkeypatch.setattr(gcp_token.subprocess, "run",
+                        lambda *a, **k: type("R", (), {"stdout": "from-sm\n"})())
+    assert gcp_token.path_token() == "from-sm"
+
+
+def test_when_nothing_answers_the_error_names_every_route(monkeypatch,
+                                                          tmp_path):
+    """A failure here ends a firing, so it has to say what was tried —
+    'no connector path token at /root/.dma/pathtok' sent a reader to the one
+    place that is hardest to fix."""
+    _clear_env(monkeypatch)
+    absent = str(tmp_path / "absent")
+    monkeypatch.setattr(gcp_token, "PATHTOK_FILE", absent)
+    monkeypatch.setattr(gcp_token.subprocess, "run",
+                        lambda *a, **k: type("R", (), {"stdout": ""})())
+    with pytest.raises(SystemExit) as e:
+        gcp_token.path_token()
+    msg = str(e.value)
+    assert "DMA_MCP_PATH_TOKEN" in msg and "MCP_PATH_TOKEN" in msg
+    # the file it ACTUALLY tried, not the default — a message naming a path
+    # the run never looked at sends the reader to the wrong machine
+    assert absent in msg
+    assert gcp_token.PATHTOK_SECRET in msg
+
+
+def test_a_gcloud_that_raises_is_not_a_crash(monkeypatch, tmp_path):
+    _clear_env(monkeypatch)
+    monkeypatch.setattr(gcp_token, "PATHTOK_FILE", str(tmp_path / "absent"))
+
+    def boom(*a, **k):
+        raise OSError("gcloud not on PATH")
+
+    monkeypatch.setattr(gcp_token.subprocess, "run", boom)
+    with pytest.raises(SystemExit):
+        gcp_token.path_token()
+
+
+def test_the_token_value_is_never_in_the_failure_message(monkeypatch,
+                                                        tmp_path):
+    """Secrets are never echoed. The message names ROUTES, not values."""
+    _clear_env(monkeypatch)
+    monkeypatch.setattr(gcp_token, "PATHTOK_FILE", str(tmp_path / "absent"))
+    monkeypatch.setattr(gcp_token.subprocess, "run",
+                        lambda *a, **k: type("R", (), {"stdout": ""})())
+    with pytest.raises(SystemExit) as e:
+        gcp_token.path_token()
+    assert "sk-" not in str(e.value) and "Bearer" not in str(e.value)
+
+
+def test_both_callers_share_the_one_ladder(monkeypatch):
+    """run_gate and mcp_raw must not grow private copies again."""
+    import mcp_raw
+    import run_gate
+    _clear_env(monkeypatch)
+    monkeypatch.setenv("DMA_MCP_PATH_TOKEN", "shared")
+    assert run_gate._pathtok() == "shared"
+    assert mcp_raw._pathtok() == "shared"
