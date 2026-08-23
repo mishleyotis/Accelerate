@@ -72,6 +72,24 @@ def roster() -> dict:
     return out
 
 
+#: Below this, a "verdict" is not one. A real stage report names its surface,
+#: its claims and its basis; 200 characters is far under any of them and well
+#: over an empty string, so it separates "produced nothing" from "produced
+#: something terse" without guessing at content.
+_MIN_VERDICT = 200
+
+#: Phrases a starved child emits instead of doing the work. Each was measured
+#: from a real dispatch (MEM-0111): the child says plainly that it was blocked,
+#: and the caller used to discard that and read the empty result as a verdict.
+_BLOCKED_MARKERS = (
+    "was blocked. For security",
+    "haven't granted it yet",
+    "requested permissions to",
+    "blocked_capabilities",
+    "permission denied by hook",
+)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--agent", help="agent name from the plugin roster")
@@ -110,18 +128,41 @@ def main(argv=None) -> int:
         prompt = PREAMBLE + prompt
 
     repo_root = HERE.parents[2]
-    # --allowedTools pre-approves the connector namespace: in dontAsk mode a
-    # non-pre-approved MCP call is DENIED, not asked (measured 2026-08-20 —
-    # a probe child reported the tool present but permission-blocked), which
-    # would silently starve every connector-reading stage. The agent's own
-    # frontmatter still restricts WHICH connector tools this agent may use;
-    # this only removes the permission prompt layer.
+    # WHAT A DISPATCHED CHILD MAY DO, and why the list is this wide.
+    #
+    # Measured 2026-08-20 (MEM-0111, MEM-0112, both BLOCKER): this dispatched
+    # with `--allowedTools=mcp__plugin_dma-insights_connector` alone, and in
+    # dontAsk mode everything NOT pre-approved is DENIED rather than asked. So
+    # the child lost Bash and Read too. One probe returned
+    # `verified_this_session: []` with three tool families blocked; another
+    # measured 0 of 4 connector-or-python capabilities available, which is 0
+    # of the 4 mandatory local checkers runnable and 0 of 34 sections
+    # producible. An agent with no tools does not report that it had no tools:
+    # it returns an empty verdict, which reads as "looked and found nothing".
+    #
+    # The agent's OWN frontmatter still decides which tools it may use — the
+    # 47 manifests carry `tools:` and `disallowedTools:` and those are
+    # enforced independently. This list only removes the permission-prompt
+    # layer that a scheduled container has nobody to answer.
+    ALLOWED = ",".join([
+        "mcp__plugin_dma-insights_connector",   # the connector namespace
+        "Bash", "Read", "Glob", "Grep",         # the four local checkers
+        "Write", "Edit",                        # denied per-agent where wrong
+        "TodoWrite", "Skill", "WebSearch", "WebFetch",
+    ])
+    # THE PACKAGE IS NOT IN THE REPOSITORY. A child's working directory is the
+    # checkout, so `/root/.dma/packages/<slug>` is out of scope and every read
+    # of it is refused — measured verbatim: "ls in '/root/.dma/packages/...'
+    # was blocked. For security, Claude Code may only list files in the
+    # allowed working directories for this session: '/home/user/Accelerate'."
+    # The package, the bundles and the client memory all live under /root/.dma.
     cmd = ["claude", "-p", "--agent", f"{PLUGIN_PREFIX}:{name}",
            "--permission-mode", "dontAsk",
-           "--allowedTools=mcp__plugin_dma-insights_connector", prompt]
+           "--add-dir", "/root/.dma",
+           f"--allowedTools={ALLOWED}", prompt]
     try:
         r = subprocess.run(cmd, cwd=repo_root, timeout=a.timeout,
-                           env={**os.environ})
+                           capture_output=True, text=True, env={**os.environ})
     except subprocess.TimeoutExpired:
         print(f"DISPATCH TIMEOUT: {name} exceeded {a.timeout}s — treat as a "
               f"failed stage, never as an empty verdict", file=sys.stderr)
@@ -130,6 +171,26 @@ def main(argv=None) -> int:
         print("DISPATCH FAILED: the claude CLI is not on PATH in this "
               "container", file=sys.stderr)
         return 127
+    out = r.stdout or ""
+    sys.stdout.write(out)
+    if r.stderr:
+        sys.stderr.write(r.stderr)
+    # AN EMPTY VERDICT IS A FAILED STAGE, NEVER A CLEAN ONE. This returned the
+    # child's exit code alone, and a child that produced nothing exits 0 — so
+    # a starved dispatch was indistinguishable from a stage that ran and found
+    # nothing to report. That is the whole defect MEM-0111 records, and it
+    # survives any permission fix, because the next thing to starve a child
+    # will be something else.
+    blocked = [m for m in _BLOCKED_MARKERS if m in out or m in (r.stderr or "")]
+    if r.returncode == 0 and (len(out.strip()) < _MIN_VERDICT or blocked):
+        print(f"\nDISPATCH PRODUCED NOTHING: {name} exited 0 with "
+              f"{len(out.strip())} characters of output"
+              + (f" and reported {blocked[0]!r}" if blocked else "")
+              + ". A stage that could not run is not a stage that found "
+                "nothing — refusing rather than passing an empty verdict "
+                "upward. Check the child's tool grants and --add-dir scope.",
+              file=sys.stderr)
+        return 125
     return r.returncode
 
 
