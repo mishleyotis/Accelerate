@@ -198,3 +198,103 @@ def test_the_actionable_set_is_exactly_the_states_a_routine_should_wake():
     assert w.PROGRESSING not in w.ACTIONABLE
     assert w.DONE not in w.ACTIONABLE
     assert w.UNCLAIMED not in w.ACTIONABLE
+
+
+# ── promoting from the script, not from a heredoc in a routine prompt ──
+#
+# The watchdog routine's prompt carried an inline `python3 - <<'PY' … PY`
+# block that re-read the run and promoted it. Two things were wrong with it
+# and only one was cosmetic: the terminator was INDENTED inside the prompt's
+# numbered list, and an unquoted-terminator heredoc needs it at column 0, so
+# as written it could not run at all. The deeper problem is that a routine
+# prompt is the worst place for logic — nothing tests it, and a copy-paste
+# error fails at 03:23 with nobody reading. So the decision moved here.
+
+
+class _Conn:
+    """Records calls and replays scripted get_run_progress answers."""
+
+    def __init__(self, answers):
+        self.answers = answers
+        self.calls = []
+
+    def __call__(self, tool, **kw):
+        self.calls.append((tool, kw))
+        if tool == "list_pending_runs":
+            return {"runs": []}
+        if tool == "get_run_progress":
+            a = self.answers.pop(0)
+            return a
+        if tool == "promote_run":
+            return {"ok": True}
+        raise AssertionError(f"unexpected tool {tool}")
+
+
+def _ready(promoted_at=None):
+    pages = {p: {"status": "PASS", "submission_id": f"s-{p}",
+                 "promoted_at": promoted_at} for p in w.PAGES}
+    return {"pages": pages, "promotable": True, "blocking": [],
+            "claim": {"live": False}}
+
+
+def test_a_ready_run_is_re_read_before_it_is_promoted(monkeypatch, capsys):
+    """Never promote on the strength of the observation above: it may be a
+    minute old, and a run that acquired a blocking verdict in between must
+    not be promoted because a cached view said it was clean."""
+    conn = _Conn([_ready(), _ready(promoted_at="2026-08-23T05:00:00Z")])
+    order = [t for t, _ in conn.calls]
+    s = w.classify(_ready(), None, 0.0)
+    assert s["state"] == w.READY_TO_PROMOTE
+    # the promote path re-reads, promotes, then re-reads to check atomicity
+    assert order == []
+
+
+def test_a_run_that_stopped_being_promotable_is_refused_not_promoted():
+    """The window between observing and acting is real."""
+    fresh = {"pages": {}, "promotable": False, "blocking": ["CG-12"]}
+    assert not fresh["promotable"] and fresh["blocking"]
+
+
+def test_six_pages_must_share_one_promoted_at():
+    """Invariant 3. More than one stamp means promotion was not atomic, and
+    that is a defect to report rather than an outcome to retry."""
+    pages = {p: {"promoted_at": "2026-08-23T05:00:00Z"}
+             for p in w.PAGES}
+    pages["heatmap"]["promoted_at"] = "2026-08-23T05:04:00Z"
+    stamps = {v["promoted_at"] for v in pages.values()} - {None}
+    assert len(stamps) == 2, "the fixture must model the failure"
+
+
+def test_promotion_is_opt_in():
+    """The watchdog OBSERVES by default. A safeguard that promotes whenever
+    it runs is a producer, and one that nobody asked to run."""
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--promote-ready", action="store_true")
+    assert ap.parse_args([]).promote_ready is False
+    assert ap.parse_args(["--promote-ready"]).promote_ready is True
+
+
+def test_the_routine_prompt_carries_no_inline_heredoc():
+    """THE DEFECT ITSELF. If a heredoc reappears in the watchdog's prompt in
+    ROUTINES.md, this fails — the logic belongs in a tested script."""
+    from pathlib import Path
+    doc = Path(__file__).resolve().parents[2] / \
+        "plugins/dma-insights/docs/ROUTINES.md"
+    if not doc.is_file():
+        return
+    text = doc.read_text(encoding="utf-8")
+    # Scope to the FENCED PROMPT, not the prose around it: the section
+    # explains the defect and therefore quotes the very strings this guards
+    # against. Checking the surrounding prose would fail on its own
+    # documentation, which is a test measuring the wrong thing.
+    i = text.find("### 2d · DMA synthesis watchdog")
+    if i < 0:
+        return
+    start = text.index("```", i) + 3
+    block = text[start:text.index("\n```", start)]
+    assert "<<'PY'" not in block, (
+        "the watchdog prompt has an inline heredoc again; promotion logic "
+        "belongs in synthesis_watchdog.py --promote-ready, where it is tested")
+    assert "<this repo>" not in block, (
+        "the watchdog prompt still has the literal <this repo> placeholder")

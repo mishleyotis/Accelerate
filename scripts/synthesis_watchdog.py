@@ -207,6 +207,12 @@ def main() -> int:
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--now", type=float, default=None,
                     help="epoch seconds, for tests")
+    ap.add_argument("--promote-ready", action="store_true",
+                    help="promote every run the walk classified "
+                         "READY_TO_PROMOTE — six pages PASS, promotable, "
+                         "nothing promoted. Opt-in: the watchdog observes "
+                         "unless asked. Each one is re-read and re-checked "
+                         "immediately before promoting.")
     args = ap.parse_args()
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -254,7 +260,53 @@ def main() -> int:
         for s in act:
             print("\n" + "─" * 68)
             print(s["resume"])
-    return 0
+
+    # PROMOTING FROM HERE, rather than from a heredoc in the routine prompt.
+    #
+    # The prompt used to carry an inline `python3 - <<'PY' … PY` block that
+    # re-read the run and called promote_run. It was indented inside the
+    # prompt's numbered list, and an unquoted-terminator heredoc needs its
+    # terminator at column 0 — so as written it could not run at all. Beyond
+    # that, a routine prompt is the worst place for logic: nothing tests it,
+    # and a copy-paste error in it fails at 03:23 with nobody reading.
+    #
+    # So the decision lives here, where the tests are. It stays OPT-IN: the
+    # watchdog observes by default, and only promotes when the caller asks.
+    promoted, refused = [], []
+    if args.promote_ready:
+        ready = [s for s in result if s["state"] == READY_TO_PROMOTE]
+        for s in ready:
+            fresh = call("get_run_progress", run_id=s["run_id"])
+            # RE-READ AND RE-CHECK, never promote on the strength of the
+            # observation above: it may be a minute old, and a run that
+            # acquired a blocking verdict in between must not be promoted
+            # because a cached view said it was clean.
+            if not fresh.get("promotable") or fresh.get("blocking"):
+                refused.append({"run_id": s["run_id"],
+                                "blocking": fresh.get("blocking")})
+                print(f"  REFUSED  {s['run_id'][:8]} — no longer promotable: "
+                      f"{fresh.get('blocking')}")
+                continue
+            call("promote_run", run_id=s["run_id"])
+            after = call("get_run_progress", run_id=s["run_id"])
+            stamps = {p.get("promoted_at") for p in
+                      (after.get("pages") or {}).values()
+                      if isinstance(p, dict)} - {None}
+            # Invariant 3: promotion is atomic across all six pages. More than
+            # one promoted_at means it was not, and that is a defect to report
+            # rather than an outcome to retry.
+            if len(stamps) > 1:
+                print(f"  ATOMICITY FAILURE {s['run_id'][:8]}: six pages "
+                      f"carry {len(stamps)} distinct promoted_at values "
+                      f"{sorted(stamps)} — reporting, not retrying")
+                refused.append({"run_id": s["run_id"],
+                                "atomicity": sorted(stamps)})
+                continue
+            promoted.append(s["run_id"])
+            print(f"  PROMOTED {s['run_id'][:8]}  {s['entity'][:40]}")
+        if not ready:
+            print("  nothing was READY_TO_PROMOTE")
+    return 1 if refused else 0
 
 
 if __name__ == "__main__":
