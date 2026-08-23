@@ -86,10 +86,26 @@ def vet(package: Path, timeout: int = 900) -> dict:
             "detail": out.strip().splitlines()[-1][:200] if out.strip() else ""}
 
 
-def measure(root: Path, timeout: int = 900) -> dict:
-    packages = sorted(p for p in root.iterdir() if p.is_dir()) \
-        if root.is_dir() else []
-    rows = [vet(p, timeout) for p in packages]
+def measure(root: Path, timeout: int = 900, manifest: list | None = None) -> dict:
+    """`manifest` scopes the measurement to a NAMED set of package dirs.
+
+    Without it the rate is "whatever is on disk", which drifts with every
+    pull — a rate quoted against "the last 60 delivered DMAs" must be
+    computed over exactly those 60. A manifest entry with no directory is
+    counted as MISSING, never silently dropped: a package that could not be
+    pulled shrinks the sample, and a shrunken sample must say so.
+    """
+    if manifest is not None:
+        packages = [root / name for name in manifest]
+        rows = [vet(p, timeout) if p.is_dir() else
+                {"package": p.name, "verdict": "MISSING", "refusals": [],
+                 "warns": [], "pins": [],
+                 "detail": "named in the manifest, not on disk"}
+                for p in packages]
+    else:
+        packages = sorted(p for p in root.iterdir() if p.is_dir()) \
+            if root.is_dir() else []
+        rows = [vet(p, timeout) for p in packages]
     counts = Counter(r["verdict"] for r in rows)
     # THE DENOMINATOR IS THE ARGUABLE PART, so it is stated rather than
     # chosen quietly. A package that was never a synthesis input cannot be
@@ -108,7 +124,8 @@ def measure(root: Path, timeout: int = 900) -> dict:
 
 def render(m: dict) -> str:
     out = [f"packages on disk: {m['packages']}  ({m['root']})", ""]
-    for verdict in ("PRODUCIBLE", "REFUSE", "NOT_AN_INPUT", "TIMEOUT", "ERROR"):
+    for verdict in ("PRODUCIBLE", "REFUSE", "NOT_AN_INPUT", "TIMEOUT",
+                    "ERROR", "MISSING"):
         if m["counts"].get(verdict):
             out.append(f"  {verdict:14} {m['counts'][verdict]}")
     out.append("")
@@ -142,13 +159,25 @@ def main(argv=None) -> int:
     ap.add_argument("--floor", type=float, default=None,
                     help="exit 1 if the producible rate is below this "
                          "(e.g. 0.70). Omit to report without judging")
+    ap.add_argument("--manifest", default=None,
+                    help="file of package dir names, one per line — scope "
+                         "the measurement to exactly this set; entries not "
+                         "on disk count as MISSING and are reported")
     a = ap.parse_args(argv)
     root = Path(a.root)
     if not root.is_dir():
         print(f"no package directory at {root} — pull some first with "
               f"drive_fetch.py pull --client <display_id>", file=sys.stderr)
         return 2
-    m = measure(root, a.timeout)
+    manifest = None
+    if a.manifest:
+        manifest = [ln.strip() for ln in
+                    Path(a.manifest).read_text().splitlines() if ln.strip()]
+        if not manifest:
+            print(f"manifest {a.manifest} is empty — refusing to measure "
+                  f"nothing and call it a rate", file=sys.stderr)
+            return 2
+    m = measure(root, a.timeout, manifest)
     print(render(m))
     if a.json:
         Path(a.json).write_text(json.dumps(m, indent=1))

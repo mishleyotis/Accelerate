@@ -209,3 +209,40 @@ def test_json_output_round_trips(monkeypatch, tmp_path):
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── the manifest, which is what makes "the last 60" a real denominator ────
+
+def test_a_manifest_scopes_the_measurement(monkeypatch, tmp_path):
+    """A rate quoted against a named set must be computed over exactly that
+    set — not over whatever else is on disk beside it."""
+    for name in ("in-scope-a", "in-scope-b", "not-in-scope"):
+        (tmp_path / name).mkdir()
+    monkeypatch.setattr(vc, "vet", lambda p, timeout=900: {
+        "package": p.name, "verdict": "PRODUCIBLE", "refusals": [],
+        "warns": [], "pins": [], "exit": 0})
+    m = vc.measure(tmp_path, manifest=["in-scope-a", "in-scope-b"])
+    assert m["packages"] == 2
+    assert {r["package"] for r in m["rows"]} == {"in-scope-a", "in-scope-b"}
+
+
+def test_a_manifest_entry_not_on_disk_is_missing_not_dropped(monkeypatch,
+                                                             tmp_path):
+    """A package that could not be pulled shrinks the sample, and a shrunken
+    sample must say so — silently measuring 58 of 60 and quoting it as 60 is
+    the lie this flag exists to prevent."""
+    (tmp_path / "here").mkdir()
+    monkeypatch.setattr(vc, "vet", lambda p, timeout=900: {
+        "package": p.name, "verdict": "PRODUCIBLE", "refusals": [],
+        "warns": [], "pins": [], "exit": 0})
+    m = vc.measure(tmp_path, manifest=["here", "never-pulled"])
+    assert m["counts"].get("MISSING") == 1
+    assert m["considered"] == 1, "MISSING is not evidence either way"
+    assert "MISSING" in vc.render(m)
+
+
+def test_an_empty_manifest_refuses_rather_than_measuring_nothing(tmp_path):
+    (tmp_path / "p").mkdir()
+    empty = tmp_path / "manifest.txt"
+    empty.write_text("\n")
+    assert vc.main(["--root", str(tmp_path), "--manifest", str(empty)]) == 2
