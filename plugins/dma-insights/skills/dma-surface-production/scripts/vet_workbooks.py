@@ -353,13 +353,72 @@ def report_caps(caps: dict) -> None:
                     f"{', '.join(caps['prose'][:3])}")
 
 
+#: The most rows this vetter will read from one sheet. High enough that no
+#: observed package reaches it (the largest measured tab is Evidence_Detail
+#: at 1,642 rows); low enough to bound a pathological file. If a sheet DOES
+#: reach it, `sheets_of` says so — see TRUNCATED_SHEETS.
+MAX_SHEET_ROWS = 50_000
+
+#: Sheets that hit the ceiling, as {title: rows_read}. Read by the caller so
+#: a truncation becomes a stated finding instead of a quiet one.
+TRUNCATED_SHEETS: dict[str, int] = {}
+
+
 def sheets_of(path: Path):
+    """Every row of every sheet, and a record of anything not read.
+
+    THIS CAPPED EVERY SHEET AT 400 ROWS until 2026-08-23, and said nothing.
+    Two defects came out of one line:
+
+      · MEM-0103, measured on t-rowe-price-dma: Evidence_Detail holds 1,642
+        rows and the vetter read 400, then reported row counts and duplicate
+        analysis for the whole tab from a quarter of it.
+
+      · Worse, and unreported until now: the rows this function returns are
+        where `cells` comes from, `cells` is what `scored` counts, and
+        `scored` is compared against a grain threshold of 400. So a genuine
+        subcapability-grain workbook — measured at 713 and 795 distinct cells
+        — could be truncated to at most ~400 and then PINned as COARSE GRAIN,
+        instructing the producer to publish a denominator that is an artefact
+        of this reader rather than a fact about the assessment.
+
+    The two 400s were unrelated in intent and collided in effect. The grain
+    threshold stays where it is (it is measured); the read ceiling moves to
+    a number no real package approaches, and announces itself if reached,
+    because a reader that stops early and stays quiet is indistinguishable
+    from a sheet that ended.
+    """
+    TRUNCATED_SHEETS.clear()
     wb = load_workbook(path, read_only=True, data_only=True)
     try:
-        return {ws.title: [list(r) for r in ws.iter_rows(max_row=400, values_only=True)]
-                for ws in wb.worksheets}
+        out = {}
+        for ws in wb.worksheets:
+            rows = [list(r) for r in ws.iter_rows(max_row=MAX_SHEET_ROWS,
+                                                  values_only=True)]
+            if len(rows) >= MAX_SHEET_ROWS:
+                TRUNCATED_SHEETS[ws.title] = len(rows)
+            out[ws.title] = rows
+        return out
     finally:
         wb.close()
+
+
+def _note_truncation() -> None:
+    """A sheet that hit the read ceiling is REPORTED, never assumed complete.
+
+    Every count downstream — rows, duplicate analysis, distinct scored cells,
+    and therefore the grain PIN — is computed from what this reader returned.
+    If it stopped early, those numbers describe the reader and not the
+    package, and the vetter has to say which it is.
+    """
+    for title, read in sorted(TRUNCATED_SHEETS.items()):
+        note("WARN",
+             f"sheet '{title}' hit this vetter's read ceiling at {read:,} "
+             f"rows, so every count below for it — row totals, duplicate "
+             f"analysis and the distinct-cell figure the grain PIN turns on "
+             f"— describes what was READ, not what the sheet holds. Raise "
+             f"MAX_SHEET_ROWS and re-run before treating any of them as a "
+             f"fact about this package.")
 
 
 def header_row(rows):
@@ -374,6 +433,7 @@ def header_row(rows):
 def vet_scoring(path: Path) -> None:
     print(f"\n=== scoring workbook · {path.name}")
     tabs = sheets_of(path)
+    _note_truncation()
     print(f"tabs ({len(tabs)}): {', '.join(list(tabs)[:12])}"
           + (" …" if len(tabs) > 12 else ""))
     if len(tabs) <= 3:
@@ -624,6 +684,7 @@ def vet_scoring(path: Path) -> None:
 def vet_research(path: Path, evidence_stores: list | None = None) -> None:
     print(f"\n=== research workbook · {path.name}")
     tabs = sheets_of(path)
+    _note_truncation()
     print(f"tabs ({len(tabs)}): {', '.join(list(tabs)[:12])}"
           + (" …" if len(tabs) > 12 else ""))
     excerpts: list[str] = []

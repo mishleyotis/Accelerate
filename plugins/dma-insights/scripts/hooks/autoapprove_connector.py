@@ -153,6 +153,30 @@ ENRICHMENT_TOOLS = frozenset({
     # session ever attaches. LunarCrush's `search`, `list`, `post`, `fetch`,
     # `topic` and `creator` are all in that class. They are not in the
     # routine's required set, so the safe reading is the narrow one.
+    #
+    # `mcp__Quartr__search` IS required — the enrichment specialist's own
+    # frontmatter grants it — and it is allowed through QUALIFIED_TOOLS
+    # below, by its full name, precisely because the suffix alone is unsafe.
+})
+
+# ── tools allowed by their FULL name ─────────────────────────────────────
+#
+# The suffix list above exists because a claude.ai connector's server segment
+# is an opaque per-attachment UUID. Not every connector is like that: some
+# attach under a stable, human-named segment, and for those the full tool
+# name can be written down exactly.
+#
+# That distinction is what lets a common-word tool be allowed safely. Added
+# 2026-08-23 after diffing the allowlist against every MCP tool the plugin's
+# own agents and skills name: `mcp__Quartr__search` was the one required call
+# the suffix rule could not express, because allowing the bare suffix
+# `search` would have allowed `search` on every connector this session ever
+# attaches — LunarCrush's included.
+#
+# Anything added here must be READ-ONLY, like the list above, and must name a
+# server segment that is stable rather than a per-attachment UUID.
+QUALIFIED_TOOLS = frozenset({
+    "mcp__Quartr__search",
 })
 
 ENRICHMENT_REASON = (
@@ -183,6 +207,12 @@ def main() -> int:
         if tool in GUARDED:
             return 0
         return _allow(REASON)
+
+    # A connector that attaches under a stable, nameable server segment, so
+    # its full tool name can be written down exactly. This is checked BEFORE
+    # the suffix rule because it is the stricter of the two.
+    if tool in QUALIFIED_TOOLS:
+        return _allow(ENRICHMENT_REASON)
 
     # An enrichment connector, matched by TOOL NAME because its server segment
     # is an opaque per-attachment UUID. Only ever an MCP tool, and only ever

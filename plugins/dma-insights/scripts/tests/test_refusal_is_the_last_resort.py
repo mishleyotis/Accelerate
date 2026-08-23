@@ -27,6 +27,7 @@ three: 3 of 3 PRODUCIBLE.
 Three separable rules come out of that, and these tests hold each.
 """
 import importlib.util
+import re
 import sys
 from pathlib import Path
 
@@ -109,10 +110,21 @@ def test_coarse_grain_is_pinned_not_refused():
     src = VETTER.read_text()
     assert "COARSE GRAIN" in src
     assert "DISCLOSURE, not dirt" in src
-    # and it must be a PIN, never a REFUSE
-    idx = src.index("COARSE GRAIN")
-    window = src[max(0, idx - 400):idx]
-    assert 'note("PIN"' in window, "the coarse-grain finding is emitted as PIN"
+
+    # It must be EMITTED as a PIN, never a REFUSE. Checked at the emission
+    # site rather than by proximity to the first mention of the phrase: prose
+    # above the code discusses coarse grain too (the read-ceiling fix explains
+    # how a truncated read could have PINned a subcapability workbook as
+    # coarse), and a test that keys on the first occurrence starts measuring
+    # the commentary instead of the behaviour.
+    emissions = [m for m in re.finditer(r'note\(\s*"(\w+)"\s*,\s*\n?\s*f?"?COARSE GRAIN', src)]
+    assert emissions, "no note(...) call emits the coarse-grain finding at all"
+    assert all(m.group(1) == "PIN" for m in emissions), (
+        f"the coarse-grain finding must be a PIN, got "
+        f"{[m.group(1) for m in emissions]}")
+    assert 'note("REFUSE"' not in src[src.index("COARSE GRAIN"):
+                                      src.index("COARSE GRAIN") + 600], (
+        "and nothing near it may refuse")
 
 
 def test_the_grain_threshold_is_a_measurement_not_a_guess():

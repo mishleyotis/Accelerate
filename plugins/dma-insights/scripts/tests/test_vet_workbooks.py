@@ -166,3 +166,96 @@ def test_the_measured_maturity_headers_are_still_checked(header):
 ])
 def test_the_measured_non_maturity_headers_are_excluded(header):
     assert not vw.is_maturity_score_column(header)
+
+
+# ── the 400-row read ceiling, and the grain PIN it corrupted ──────────────
+#
+# MEM-0103, measured on t-rowe-price-dma: Evidence_Detail holds 1,642 rows
+# and the vetter read 400, then reported row counts and duplicate analysis
+# for the whole tab from a quarter of it.
+#
+# The second half was unreported until 2026-08-23 and is worse. The rows
+# sheets_of() returns are where `cells` comes from; `cells` is what `scored`
+# counts; and `scored` is compared against a grain threshold that is ALSO
+# 400. A genuine subcapability-grain workbook — measured at 713 and 795
+# distinct cells across the corpus — could be truncated to at most ~400 and
+# then PINned as COARSE GRAIN, instructing the producer to publish a
+# denominator that is an artefact of the reader rather than a fact about the
+# assessment. Two unrelated 400s, colliding.
+
+def _book(tmp_path, rows):
+    from openpyxl import Workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "P1_Subcap_Scoring"
+    ws.append(["SubCap_ID", "SubCap_Name", "Final_Score"])
+    for i in range(rows):
+        ws.append([f"P1C{1 + i // 40}.{1 + i % 40}.1", f"Cell {i}", 3.0])
+    p = tmp_path / "scoring.xlsx"
+    wb.save(p)
+    return p
+
+
+def test_a_sheet_past_the_old_ceiling_is_read_whole(tmp_path):
+    """700 rows in, 700 rows out. The old reader returned 401."""
+    import vet_workbooks as V
+    tabs = V.sheets_of(_book(tmp_path, 700))
+    assert len(tabs["P1_Subcap_Scoring"]) == 701, "header plus every data row"
+
+
+def test_the_read_ceiling_no_longer_collides_with_the_grain_threshold(tmp_path):
+    """The regression that mattered: a subcapability-grain workbook must not
+    be readable as coarse grain because the reader stopped at the threshold."""
+    import vet_workbooks as V
+    tabs = V.sheets_of(_book(tmp_path, 713))
+    cells = {str(c).upper() for row in tabs["P1_Subcap_Scoring"] for c in row
+             if isinstance(c, str) and V.CELL_RE.match(c.strip())}
+    assert len(cells) == 713, (
+        f"read {len(cells)} distinct cells of 713 — anything at or under the "
+        f"grain threshold of 400 would PIN this real subcapability-grain "
+        f"workbook as COARSE GRAIN and send a wrong denominator to a client")
+    assert len(cells) > 400
+
+
+def test_the_grain_threshold_itself_is_unchanged(tmp_path):
+    """The two 400s were unrelated in intent. Only the reader's moved."""
+    import vet_workbooks as V
+    src = Path(V.__file__).read_text()
+    assert "if scored < 400:" in src, (
+        "the grain threshold is measured — capability grain lands at 144 and "
+        "subcapability at 713/795, with nothing observed between — and must "
+        "not be moved as a side effect of fixing the reader")
+    assert V.MAX_SHEET_ROWS > 400
+
+
+def test_nothing_is_marked_truncated_when_nothing_was(tmp_path):
+    import vet_workbooks as V
+    V.sheets_of(_book(tmp_path, 50))
+    assert V.TRUNCATED_SHEETS == {}
+
+
+def test_hitting_the_ceiling_is_reported_never_silent(tmp_path, monkeypatch):
+    """A reader that stops early and says nothing is indistinguishable from a
+    sheet that ended — the defect class this whole build keeps paying for."""
+    import vet_workbooks as V
+    monkeypatch.setattr(V, "MAX_SHEET_ROWS", 20)
+    V.findings.clear()
+    V.sheets_of(_book(tmp_path, 100))
+    assert V.TRUNCATED_SHEETS, "the ceiling was hit and left no record"
+    V._note_truncation()
+    levels = {lvl for lvl, _ in V.findings}
+    msgs = " ".join(m for _, m in V.findings)
+    assert "WARN" in levels
+    assert "read ceiling" in msgs and "grain PIN" in msgs
+    assert "describes what was READ" in msgs
+
+
+def test_the_truncation_record_resets_between_books(tmp_path, monkeypatch):
+    """Stale state would report a clean package as truncated."""
+    import vet_workbooks as V
+    monkeypatch.setattr(V, "MAX_SHEET_ROWS", 20)
+    V.sheets_of(_book(tmp_path, 100))
+    assert V.TRUNCATED_SHEETS
+    monkeypatch.setattr(V, "MAX_SHEET_ROWS", 50_000)
+    V.sheets_of(_book(tmp_path, 30))
+    assert V.TRUNCATED_SHEETS == {}

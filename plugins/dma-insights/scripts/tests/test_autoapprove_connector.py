@@ -325,3 +325,139 @@ def test_a_present_handler_can_still_deny():
     assert b"deny" in r.stdout, (
         f"the credential guard stopped denying through the wrapper: "
         f"{r.stdout[:200]!r}")
+
+
+# ── the allowlist must keep step with what the agents actually require ────
+#
+# Owner, 2026-08-23: "each time I have to approve MCP tool calls in the
+# routine eg Tavily, Clay etc. Ensure this runs headless."
+#
+# The list was extended by hand that day and one required call was still
+# missing — not because anyone forgot it, but because the SUFFIX rule could
+# not express it: `mcp__Quartr__search` would have needed the bare suffix
+# `search`, which allows `search` on every connector a session ever attaches.
+# That is why QUALIFIED_TOOLS exists.
+#
+# The test below is the part that lasts. It reads every MCP tool the plugin's
+# own agents and skills name and asserts each is either allowed or
+# deliberately not, so the next agent that gains a connector tool either gets
+# it allowed or fails here — instead of a routine stopping in a container
+# with nobody to answer.
+
+import importlib.util as _ilu
+import re as _re
+from pathlib import Path as _Path
+
+_PLUGIN = _Path(__file__).resolve().parents[2]
+
+
+def _load_hook():
+    """Import the hook as a module. The tests above drive it as a subprocess,
+    which is the right shape for asserting its OUTPUT; these assert its
+    allowlists against the plugin's own files, which needs the objects."""
+    spec = _ilu.spec_from_file_location("autoapprove_connector", AUTO)
+    mod = _ilu.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+aac = _load_hook()
+
+#: Named by an agent and deliberately NOT auto-approved, each with the reason.
+#: A tool may only sit here because approving it would be WRONG, never because
+#: nobody got to it.
+_DELIBERATELY_PROMPTING = {
+    # Clay writes into the user's own workspace. Granted in the enrichment
+    # specialist's frontmatter, never actually called anywhere in its prose,
+    # so leaving the prompt costs no firing and auto-approving would hand a
+    # scheduled session a write nobody sanctioned.
+    "add-company-data-points": "writes to the user's Clay workspace",
+    "add-contact-data-points": "writes to the user's Clay workspace",
+}
+
+
+def _tools_named_by_the_plugin():
+    pat = _re.compile(r"\bmcp__([A-Za-z0-9_\-]+)__([A-Za-z0-9_\-]+)")
+    found = {}
+    for f in _PLUGIN.rglob("*.md"):
+        for m in pat.finditer(f.read_text(errors="ignore")):
+            found.setdefault(m.group(0), set()).add(
+                str(f.relative_to(_PLUGIN)))
+    return found
+
+
+def _is_allowed(full: str) -> bool:
+    if full.startswith(aac.PREFIX):
+        return full not in aac.GUARDED          # the connector's own tools
+    if full in aac.QUALIFIED_TOOLS:
+        return True
+    return full.rsplit("__", 1)[1] in aac.ENRICHMENT_TOOLS
+
+
+def test_every_mcp_tool_the_plugin_names_is_allowed_or_deliberately_not():
+    named = _tools_named_by_the_plugin()
+    assert named, "found no MCP tool names to check — the scan is broken"
+    unexplained = {}
+    for full, where in named.items():
+        if _is_allowed(full):
+            continue
+        if full in aac.GUARDED:
+            # submit_page_payload and promote_run carry their OWN PreToolUse
+            # hooks (precheck_submit.py, precheck_promote.py) which emit the
+            # decision. This hook stands aside on purpose — two hooks on one
+            # tool with opposite opinions is not a resolution order to bet a
+            # promote on — so they are answered for, not left prompting.
+            continue
+        if full.rsplit("__", 1)[1] in _DELIBERATELY_PROMPTING:
+            continue
+        unexplained[full] = sorted(where)[0]
+    assert not unexplained, (
+        "these MCP tools are named by the plugin's own agents or skills and "
+        "will stop a scheduled firing on a permission prompt nobody can "
+        "answer. Either add each to ENRICHMENT_TOOLS (read-only, opaque "
+        "server segment) or QUALIFIED_TOOLS (read-only, stable server "
+        "segment), or record it in _DELIBERATELY_PROMPTING with the reason "
+        f"approving it would be wrong: {unexplained}")
+
+
+def test_quartr_search_is_allowed_by_its_full_name_only():
+    """The call the suffix rule could not express."""
+    assert "mcp__Quartr__search" in aac.QUALIFIED_TOOLS
+    assert "search" not in aac.ENRICHMENT_TOOLS, (
+        "allowing the bare suffix would allow `search` on every connector "
+        "this session ever attaches — LunarCrush's included")
+
+
+def test_a_common_word_suffix_stays_unapproved_on_another_connector():
+    assert not _is_allowed("mcp__LunarCrush__search")
+    assert not _is_allowed("mcp__SomeOtherServer__search")
+
+
+def test_the_qualified_list_never_carries_an_opaque_server_segment():
+    """A per-attachment UUID cannot be written down in advance; a full name
+    containing one is a rule that will silently stop matching."""
+    uuidish = _re.compile(r"__[0-9a-f]{8}-[0-9a-f]{4}-", _re.I)
+    for t in aac.QUALIFIED_TOOLS:
+        assert not uuidish.search(t), t
+        assert t.startswith("mcp__") and t.count("__") >= 2, t
+
+
+def test_the_clay_writes_are_still_refused():
+    for t in ("mcp__Clay__add-company-data-points",
+              "mcp__Clay__add-contact-data-points",
+              "mcp__Clay__run_subroutine",
+              "mcp__Clay__run_subroutine_direct"):
+        assert not _is_allowed(t), t
+
+
+def test_the_guarded_pair_is_answered_by_its_own_hooks_not_left_prompting():
+    """This hook stands aside for them; something else must not. If either
+    precheck hook stopped emitting a decision, a scheduled firing would hang
+    on a submit — the exact failure this whole file exists to prevent."""
+    cfg = json.loads(HOOKS_JSON.read_text())
+    pre = json.dumps(cfg["hooks"]["PreToolUse"])
+    for tool, script in ((PREFIX + "submit_page_payload", "precheck_submit.py"),
+                         (PREFIX + "promote_run", "precheck_promote.py")):
+        assert tool in pre, f"{tool} has no PreToolUse entry of its own"
+        assert script in pre, f"{script} is not wired for {tool}"
+        assert (HOOKS / script).exists(), f"{script} is missing from the plugin"
