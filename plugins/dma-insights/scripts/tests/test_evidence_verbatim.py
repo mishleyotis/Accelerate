@@ -288,9 +288,25 @@ def test_a_missing_excerpt_goes_out_as_a_gap_that_says_what_is_needed():
 # ── the real package, when this container has pulled it ──
 
 PKG = Path("/root/.dma/packages/houlihan-lokey-dma")
+
+
+def _real_package_available() -> bool:
+    """A container that has not pulled the package may also be one that
+    cannot even LOOK: on the CI runner tests do not run as root, and
+    `Path.is_dir()` re-raises PermissionError rather than answering False —
+    it only swallows ENOENT/ENOTDIR/EBADF/ELOOP. Raised at module scope that
+    became a COLLECTION error, which aborts the entire suite rather than
+    skipping one test, so this single line turned four green commits red.
+    Locally it passed, because locally the session is root."""
+    try:
+        return (PKG / "02_research_workbook").is_dir()
+    except OSError:
+        return False
+
+
 REALPKG = pytest.mark.skipif(
-    not (PKG / "02_research_workbook").is_dir(),
-    reason="Houlihan Lokey package not pulled in this container")
+    not _real_package_available(),
+    reason="Houlihan Lokey package not pulled/readable in this container")
 
 
 @REALPKG
