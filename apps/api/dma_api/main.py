@@ -714,8 +714,30 @@ def ops_refresh_queue(audience: str | None = None, role: str | None = None,
         conn.close()
 
 
+def _age_seconds(when):
+    """Seconds since `when`, or None when there is nothing to measure.
+
+    None is not zero. A missing timestamp means the age is UNKNOWN, and an
+    unknown age must not read as "just now" — that is the shape of defect this
+    helper was added to fix.
+    """
+    if when is None:
+        return None
+    import datetime as _dt
+    if isinstance(when, str):
+        try:
+            when = _dt.datetime.fromisoformat(when.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    if not isinstance(when, _dt.datetime):
+        return None
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=_dt.timezone.utc)
+    return int((_dt.datetime.now(_dt.timezone.utc) - when).total_seconds())
+
+
 @app.get("/v1/ops/enrichment-loop")
-def ops_enrichment_loop(limit: int = 10):
+def ops_enrichment_loop(limit: int = 10, stale_after_hours: int = 3):
     """Is the enrichment loop alive, and what did it last do?
 
     Owner, 2026-08-15: "confirm that this enrichment loop happens robustly as
@@ -741,13 +763,28 @@ def ops_enrichment_loop(limit: int = 10):
                  "resolved": r[6], "not_run": r[7], "failed": r[8],
                  "error": r[9]} for r in cur.fetchall()]
         last = jobs[0] if jobs else None
+        # HEALTH HAS A RECENCY TERM, and it did not until 2026-08-23.
+        #
+        # MEM-0102: this reported healthy:true while the dmai-enrich-loop
+        # trigger had not fired in about five days. Every clause below is
+        # about WHAT the last job did and none was about WHEN, so a loop that
+        # stopped entirely stayed green on the strength of the last run it
+        # ever managed. The trigger's cadence is hourly (`7 * * * *`), so a
+        # last job older than the window below means the loop is not running,
+        # whatever that job reported. `stale_after_hours` is a parameter so
+        # ops can widen it deliberately rather than by editing this file.
+        age = _age_seconds(last and last["started_at"])
+        stale = age is not None and age > max(1, stale_after_hours) * 3600
         healthy = bool(last and last["finished_at"] and not last["error"]
-                       and last["runs_scanned"] > 0)
+                       and last["runs_scanned"] > 0 and not stale)
         why = ("no enrichment job has ever run" if not last
                else "the last job never finished" if not last["finished_at"]
                else f"the last job errored: {last['error']}" if last["error"]
                else "the last job scanned zero runs, which is a failure to "
                     "look rather than a clean result" if not last["runs_scanned"]
+               else (f"the last job started {age // 3600}h ago and the trigger "
+                     f"fires hourly — the loop has stopped, whatever that job "
+                     f"reported") if stale
                else None)
         # The open worklist, computed from the latest attempt per field so a
         # gap closed last hour stops being reported this hour.
@@ -757,6 +794,11 @@ def ops_enrichment_loop(limit: int = 10):
                         ORDER BY run_id, field, attempted_at DESC""")
         rows = cur.fetchall()
         return {"healthy": healthy, "unhealthy_because": why,
+                # Reported whether or not it trips the threshold, so a reader
+                # can judge the cadence rather than trust this endpoint's
+                # arithmetic about it.
+                "last_job_age_seconds": age,
+                "stale_after_hours": stale_after_hours,
                 "last_job": last, "jobs": jobs,
                 "open_gaps": sum(1 for r in rows if r[1] != "RESOLVED"),
                 "resolved_awaiting_producer": sum(1 for r in rows if r[1] == "RESOLVED")}
