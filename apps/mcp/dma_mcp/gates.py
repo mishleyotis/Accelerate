@@ -312,6 +312,31 @@ GATES = {
               "missed to begin with.",
               "block"),
 
+    "CG-40": ("An enriched surface reaches its depth floor, or says why not",
+              None,
+              "Sections whose value is their DEPTH carry a floor: sentiment "
+              "serves more than one rating line, why_now spans at least three "
+              "years, techstack serves at least fifteen products. Below a "
+              "floor the section must carry an empty_state or a thin flag "
+              "naming the searches that were run — the floor is a floor on "
+              "EFFORT, never on the world.",
+              "Owner, 2026-08-23, on promoted runs: 'Sentiment overview on "
+              "most clients have only 1 parameter'; 'the evolution timeline "
+              "spans 1 year? At least 3 years should be covered'; 'I expect "
+              "at least 15 technology stack items through recursive "
+              "searches'; 'Gulf has less than 3 historical news. Is this "
+              "logical? This is a crosscutting issue insinuating less rigor "
+              "around enrichment.' Each floor is already written into the "
+              "contract and was enforced by nothing: the sentiment field doc "
+              "says in as many words that 'a single displayed line is not a "
+              "sentiment picture', and why_now's own doc asks for three to "
+              "six trigger cards. THE ESCAPE IS DELIBERATE AND LOAD-BEARING: "
+              "a client with eight detectable products has eight, and "
+              "refusing the run would be the reject-rather-than-triage "
+              "failure this system has already paid for. What the gate "
+              "refuses is silence — a thin section that never says it "
+              "searched.",
+              "block"),
     "CG-39": ("The run's recommendations reach the platform page", None,
               "When the run's bundle carries recommendations and the platform "
               "payload serves platform tiles, at least one recommendation "

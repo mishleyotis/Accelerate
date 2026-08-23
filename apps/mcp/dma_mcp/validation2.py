@@ -1708,6 +1708,137 @@ def _check_recommendations_reach_the_platform_page(conn, run_id, page, payload):
         f"tile, serve it anyway with its own l3_area, because the analyst "
         f"wrote it about this client. Exactly one served clears this gate.")]
 
+
+#: The depth floors, and what each is a floor ON. Every one is already in the
+#: contract's own field docs; none had a reader until 2026-08-23.
+DEPTH_FLOORS = {
+    ("overview", "sentiment"): (
+        2, "rating lines",
+        "the contract's own field doc says it: 'A single displayed line is "
+        "not a sentiment picture'"),
+    ("overview", "why_now"): (
+        2, "signals",
+        "the field doc asks for three to six trigger cards; below two the "
+        "contract already defines thin=true"),
+    ("techstack", "techstack"): (
+        15, "products",
+        "owner, 2026-08-23: 'I expect at least 15 technology stack items "
+        "through recursive searches'"),
+}
+
+#: Three years, in days, for the why_now span. The owner's words: "the
+#: evolution timeline spans 1 year? At least 3 years should be covered."
+WHY_NOW_SPAN_DAYS = 3 * 365
+
+
+def _depth_count(page, section, body):
+    """How many things this section actually serves, by its own shape."""
+    if section == "sentiment":
+        bars = body.get("bars")
+        n = len(bars) if isinstance(bars, list) else 0
+        # `displayed_lines` is the producer's own counter for the same thing;
+        # take the larger so a section cannot be thin by miscounting itself.
+        d = body.get("displayed_lines")
+        return max(n, d if isinstance(d, int) else 0)
+    if section == "why_now":
+        sig = body.get("signals")
+        return len(sig) if isinstance(sig, list) else 0
+    if section == "techstack":
+        items = body.get("items")
+        return len(items) if isinstance(items, list) else 0
+    return 0
+
+
+def _says_it_searched(body) -> bool:
+    """Does this section name the work behind a thin result?
+
+    The empty-state discipline the rest of the payload already keeps: an
+    absence names its search and its closure condition. `thin` alone counts
+    only when something travels with it — a bare boolean is an assertion.
+    """
+    if body.get("thin") is True and (
+            body.get("empty_state") or body.get("searches")
+            or body.get("sources_searched") or body.get("r_layer")):
+        return True
+    es = body.get("empty_state")
+    if isinstance(es, dict) and (es.get("sources_searched")
+                                 or es.get("searches_run")
+                                 or es.get("reason")):
+        return True
+    if isinstance(es, str) and len(es.strip()) >= 40:
+        return True
+    r = body.get("r_layer")
+    if isinstance(r, dict) and (r.get("probes_run") or r.get("searches")):
+        return True
+    return False
+
+
+def _why_now_span_days(body):
+    """The span the signals actually cover, or None when undatable."""
+    import datetime as _dt
+    seen = []
+    for s in body.get("signals") or []:
+        if not isinstance(s, dict):
+            continue
+        for k in ("date", "as_of", "observed_at", "published_date", "window"):
+            v = s.get(k)
+            if not isinstance(v, str):
+                continue
+            m = re.search(r"(\d{4})-(\d{2})(?:-(\d{2}))?", v)
+            if m:
+                try:
+                    seen.append(_dt.date(int(m.group(1)), int(m.group(2)),
+                                         int(m.group(3) or 1)))
+                except ValueError:
+                    pass
+                break
+    if len(seen) < 2:
+        return None
+    return (max(seen) - min(seen)).days
+
+
+def _check_depth_floors(page, payload):
+    """CG-40 — a section whose value is its depth reaches a floor or says why.
+
+    The floor is a floor on EFFORT, never on the world. A client with eight
+    detectable products has eight, and refusing that run would be the
+    reject-rather-than-triage failure this system has already paid for. What
+    this refuses is SILENCE: a thin section that never says it searched.
+    """
+    if not isinstance(payload, dict):
+        return []
+    out = []
+    for section, body in payload.items():
+        if not isinstance(body, dict):
+            continue
+        floor = DEPTH_FLOORS.get((page, section))
+        if not floor:
+            continue
+        need, unit, why = floor
+        got = _depth_count(page, section, body)
+        if got < need and not _says_it_searched(body):
+            out.append(_reason(
+                "CG-40", section, f"{page}.{section}",
+                f"serves {got} {unit} against a floor of {need}, and names no "
+                f"search. {why}. Either serve the floor — the enrichment "
+                f"connectors are what this depth comes from — or keep what "
+                f"you have and set thin/empty_state naming the queries you "
+                f"ran and what would change the answer. A thin section that "
+                f"says so is fine; a thin section that is silent is "
+                f"indistinguishable from one nobody worked."))
+        if section == "why_now":
+            span = _why_now_span_days(body)
+            if span is not None and span < WHY_NOW_SPAN_DAYS \
+                    and not _says_it_searched(body):
+                out.append(_reason(
+                    "CG-40", section, f"{page}.{section}.signals",
+                    f"the signals span {span} days ({span // 365}y) against a "
+                    f"floor of three years. Owner, 2026-08-23: 'the evolution "
+                    f"timeline spans 1 year? At least 3 years should be "
+                    f"covered. Enrichment should pick this up.' Reach further "
+                    f"back, or say what was searched and why the trail ends."))
+    return out
+
 def validate_pass2(conn, run_id, page: str, payload: dict,
                    encoder=None) -> tuple:
     """→ (blocking_reasons, sg_disclosures). SG results are also recorded
@@ -1767,6 +1898,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
         conn, run_id, page, payload))
     reasons.extend(_check_recommendations_reach_the_platform_page(
         conn, run_id, page, payload))
+    reasons.extend(_check_depth_floors(page, payload))
 
     served = _served_figures(conn, run_id)
 
