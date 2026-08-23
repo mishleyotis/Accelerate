@@ -352,7 +352,24 @@ a { color: inherit; text-decoration: none; }
   position: sticky; top: 0; z-index: 50;
 }
 .topbar-l { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1; }
-.topbar-crumbs { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--z-muted); }
+.topbar-crumbs { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--z-muted); min-width: 0; }
+/* A CRUMB THAT MUST SHRINK CLIPS; IT DOES NOT PAINT OUTSIDE ITSELF.
+   Measured 2026-08-23 at 1180 and 900px with a long client name in the bar:
+   the "Clients" link had 42px of text in a 27px box and "Overview" 59px in
+   38px, both drawn straight over the neighbour — the reported "overlapping
+   text". Cause is the flexbox default: a flex item's `min-width` is `auto`
+   in theory but these had already been squeezed below their content width by
+   a longer sibling, and `overflow-x` defaults to `visible`, so the surplus
+   was painted rather than clipped. The chevron's `flex-shrink: 0` on the
+   line below says somebody met the same pressure here before and fixed only
+   the icon.
+   `min-width: 0` lets them shrink honestly; the ellipsis makes the shrink
+   legible instead of destructive. Not `flex-shrink: 0` — that only moves the
+   overflow up to the row and paints it over the topbar's right-hand side
+   instead. `apps/web/tests/text-overlap.test.js` measures the painted ink
+   against the box on every page at three widths. */
+.topbar-crumbs a,
+.topbar-crumbs span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .topbar-crumbs a { color: var(--z-muted); text-decoration: none; transition: color var(--motion-fast) var(--ease); }
 .topbar-crumbs a:hover { color: var(--z-teal); }
 .topbar-crumbs .sep { color: var(--z-muted); opacity: .45; flex-shrink: 0; }
@@ -404,7 +421,29 @@ a { color: inherit; text-decoration: none; }
   padding: 10px 24px;
   display: flex; align-items: center; gap: 12px;
 }
-.client-bar .name { font-size: 14px; font-weight: 600; }
+/* THE ONLY VARIABLE-WIDTH THING IN THIS BAR IS THE CLIENT NAME, so it is the
+   one that gives way. Everything else here — the status pills, the run date,
+   the audience toggle — is a short fixed label, and a bar that squeezes those
+   to fit a name is a bar that paints them over each other.
+
+   Measured 2026-08-23 with "American Airlines Federal Credit Union —
+   Consolidated Technology and Digital Transformation Programme Office" in the
+   bar: the run date rendered 27px of ink inside a 20px box and, once the
+   audience toggle was pinned, landed 39x17px on top of the Internal button.
+   The two media queries below (1457, 1533) already clip `.name` and pin the
+   pills; the base rule never got either, so at a full-width laptop — the
+   width the defect was reported from — nothing bounded it.
+
+   `> div:first-of-type` is the pill group, which wraps the name; without
+   `min-width: 0` a flex item refuses to shrink below its content and the
+   ellipsis below can never engage. */
+.client-bar > div:first-of-type { min-width: 0; }
+.client-bar .name {
+  font-size: 14px; font-weight: 600;
+  min-width: 0; max-width: 42vw;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.client-bar-r { flex-shrink: 0; }
 .client-bar .pill {
   font-family: var(--font-mono);
   font-size: 9px; font-weight: 700; letter-spacing: .04em;
@@ -423,12 +462,21 @@ a { color: inherit; text-decoration: none; }
   display: inline-flex; background: rgba(255,255,255,.08);
   border-radius: var(--r); padding: 3px;
   border: 1px solid rgba(255,255,255,.08);
+  /* The control a reader uses to decide what a client may see does not
+     shrink. Measured 2026-08-23 at 900px: "Internal" carried 43px of ink in
+     a 56px button and painted 4px outside it, "Customer" 9px — the button
+     had been squeezed by the topbar's flex distribution while its 12px
+     padding stayed fixed, so the label spilled through the padding. The
+     crumbs beside it now shrink with an ellipsis, which is what should give
+     way here. */
+  flex-shrink: 0;
 }
 .audience-toggle button {
   padding: 5px 12px; font-size: 11.5px; font-weight: 600;
   color: rgba(255,255,255,.55); border-radius: 5px;
   display: inline-flex; align-items: center; gap: 5px;
   transition: all var(--motion-fast) var(--ease);
+  flex-shrink: 0; white-space: nowrap;
 }
 .audience-toggle button.on {
   background: var(--z-teal); color: #fff;
@@ -448,7 +496,16 @@ a { color: inherit; text-decoration: none; }
   font-size: 11px;
   color: rgba(255,255,255,.85);
   cursor: pointer;
+  /* Same rule as the audience toggle beside it, and it surfaced only after
+     that one was fixed: with the toggle no longer absorbing the squeeze, the
+     run date took it instead and rendered 27px of "Aug 23, 2026" inside a
+     20px box. Every control in this bar is a short fixed label; the only
+     variable-width thing is the crumb, and that is the one that ellipsises.
+     Chasing the spill from control to control is what happens when the fix
+     is applied where the symptom appeared rather than to the rule. */
+  flex-shrink: 0; white-space: nowrap;
 }
+.run-selector > span { white-space: nowrap; }
 .run-selector:hover { background: rgba(255,255,255,.12); }
 
 /* Client tab bar */
