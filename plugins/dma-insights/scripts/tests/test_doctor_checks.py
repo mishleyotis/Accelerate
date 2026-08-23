@@ -94,13 +94,13 @@ class ExactInventory(unittest.TestCase):
             (root / "agents" / "qa" / "qa-overseer.md").unlink()
             rows = {r["check"]: r for r in doctor.inventory_checks(root)}
             self.assertFalse(rows["agents inventory"]["ok"])
-            # Derived from EXPECTED_AGENTS rather than written out: the literal
+            # Derived from the manifest rather than written out: the literal
             # was "15 of exactly 16" and went stale the first time the agent
             # roster grew, failing a test that was still testing the right
             # thing — one missing file is caught by the equality check.
             self.assertIn(
-                f"{doctor.EXPECTED_AGENTS - 1} of exactly "
-                f"{doctor.EXPECTED_AGENTS}",
+                f"{doctor.expected_agents() - 1} of exactly "
+                f"{doctor.expected_agents()}",
                 rows["agents inventory"]["detail"])
             self.assertNotIn("qa-overseer",
                              rows["agents inventory"]["detail"])

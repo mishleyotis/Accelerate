@@ -58,9 +58,20 @@ DEFAULT_AUD = "https://dmai-mcp-dukrne5v4a-uc.a.run.app"
 # reported a clean install while seven agent files were missing — a floor
 # only catches total loss, equality catches partial packaging loss.
 EXPECTED_SKILLS = 6
-EXPECTED_AGENTS = 47   # 16 + the 2026-08-20 round: per-surface producers, the
-                       # techstack register/layers split, four QA checkers, and
-                       # the three enrichment agents (connector, web, planner).
+
+def expected_agents(manifest: dict | None = None) -> int:
+    """How many agents this plugin ships — READ FROM THE MANIFEST, not typed.
+
+    This was `EXPECTED_AGENTS = 47` for three days, and 47 was correct for
+    all of them. The problem is not the number, it is that a second copy of
+    it exists: `plugin.json` already lists every agent path, and the two can
+    disagree the moment one is edited. Deriving it makes the manifest the
+    only place the roster is stated, which is also why the routine prompts
+    stopped saying "the 47-agent roster" — see `plugin_version.py`.
+    """
+    listed = len(((manifest if manifest is not None else read_manifest())
+                  .get("agents")) or [])
+    return listed
 
 #: Fed to `python3 <handler>` on stdin: an event that names no tool and
 #: carries no payload. Every handler's contract is to fail open on it, so a
@@ -68,11 +79,16 @@ EXPECTED_AGENTS = 47   # 16 + the 2026-08-20 round: per-surface producers, the
 BENIGN_EVENT = b"{}\n"
 
 
-def read_manifest() -> dict:
+def _load_manifest(plugin_root: Path) -> dict:
     try:
-        return json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())
+        return json.loads(
+            (plugin_root / ".claude-plugin" / "plugin.json").read_text())
     except (OSError, ValueError):
         return {}
+
+
+def read_manifest() -> dict:
+    return _load_manifest(PLUGIN)
 
 
 def manifest_base_url() -> str | None:
@@ -354,14 +370,23 @@ def hooks_wired_check(plugin_root: Path = PLUGIN) -> dict:
 
 
 def inventory_checks(plugin_root: Path = PLUGIN) -> list:
-    """Exact component counts, not floors — see EXPECTED_SKILLS/EXPECTED_AGENTS."""
+    """Exact component counts, not floors — see EXPECTED_SKILLS/expected_agents.
+
+    CAVEAT THIS ROW CANNOT ESCAPE, and the reason `installed_plugin_check`
+    sits beside it: `plugin_root` defaults to the checkout this file lives
+    in, so these counts describe the REPO. A session dispatches against the
+    install cache, and on 2026-08-23 that cache held 5 agents while this row
+    read 47 and passed. Green here means "the checkout is whole", never "the
+    session can reach them".
+    """
     skills = sorted(p.name for p in (plugin_root / "skills").glob("*")
                     if p.is_dir() and not p.name.startswith(("_", ".")))
     agents = sorted(p.stem for p in (plugin_root / "agents").rglob("*.md")
                     if p.name != "README.md")
+    manifest = read_manifest() if plugin_root == PLUGIN else _load_manifest(plugin_root)
     rows = []
     for label, found, expected in (("skills", skills, EXPECTED_SKILLS),
-                                   ("agents", agents, EXPECTED_AGENTS)):
+                                   ("agents", agents, expected_agents(manifest))):
         ok = len(found) == expected
         rows.append(_check(
             f"{label} inventory", ok,
@@ -369,6 +394,29 @@ def inventory_checks(plugin_root: Path = PLUGIN) -> list:
             "" if ok else f"the plugin ships exactly {expected} {label}; any "
             "other count means packaging dropped or leaked files — reinstall"))
     return rows
+
+
+def installed_plugin_check() -> dict:
+    """Is the plugin the session LOADS the one this checkout publishes?
+
+    The row `inventory_checks` cannot be. Those counts come from the repo;
+    this one comes from the install cache, and on 2026-08-23 they read 47
+    and 5 on the same container. Everything it compares is read at call
+    time from a manifest or the install state — no version literal lives in
+    this file, which is the whole point (see plugin_version.py)."""
+    try:
+        sys.path.insert(0, str(HERE))
+        import plugin_version                                   # noqa: PLC0415
+        v = plugin_version.compare()
+    except Exception as exc:                                    # noqa: BLE001
+        return _check("installed plugin", False,
+                      f"could not be determined: {exc}",
+                      "run plugins/dma-insights/scripts/plugin_version.py "
+                      "directly for the reason")
+    detail = plugin_version.summary(v)
+    if v["reasons"]:
+        detail += " — " + "; ".join(v["reasons"])
+    return _check("installed plugin", v["ok"], detail, v["fix"])
 
 
 def enabled_state_check(manifest: dict) -> dict:
@@ -699,6 +747,7 @@ def run_checks(base_url: str | None) -> list:
         str(manifest_path) if manifest_path.exists() else "not found",
         "install the plugin from the marketplace: /plugin marketplace add "
         "mishleyotis/Accelerate, then /plugin install dma-insights@zennify-dma"))
+    out.append(installed_plugin_check())
     out.append(enabled_state_check(manifest))
     mcp_json = PLUGIN / ".mcp.json"
     out.append(_check("connector definition", mcp_json.exists(),

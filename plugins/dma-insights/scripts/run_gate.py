@@ -18,12 +18,16 @@ runs across 172 entities, so 164 vetted, unprocessed clients could never be
 reached however long the routine ran, and the sequence reported itself
 "complete" having never looked at the overwhelming majority of the corpus.
 
-It now walks the QUEUE: the learner order first, because the learning curve
-it measures is only readable if that order holds, and then every other ready
-entity the queue offers, newest assessment first. The queue's own selector
-decides what "ready" means — one run per entity, nothing whose entity carries
-a live claim. No client is named to be admitted; the only name-based rule
-left is HELD_OUT, which subtracts.
+It now walks the QUEUE and nothing but the queue, in the queue's own order:
+every ready entity it offers, newest assessment first. The queue's own
+selector decides what "ready" means — one run per entity, nothing whose
+entity carries a live claim.
+
+NO CLIENT IS NAMED TO BE ADMITTED (owner, 2026-08-23). Until then a
+five-name learning curriculum still went first; that was a build-phase
+instrument, and in production it decided which client a firing carried and
+kept re-offering names that had already failed vetting. The only name-based
+rule left is HELD_OUT, which subtracts.
 
 A failing candidate no longer stops the walk either. Every failure is
 printed with its gate and its detail, and the PRODUCE line names what was
@@ -80,27 +84,25 @@ PATHTOK_FILE = Path("/root/.dma/pathtok")
 PAGES = ("overview", "heatmap", "insights", "platform", "context", "techstack")
 MIN_SCORED_CELLS = 50     # a real workbook scores hundreds; below this the
                           # scan produced a stub, not a package
-#: A PREFERENCE ORDER, NOT A FENCE. These five were the deliberate learning
-#: curriculum (docs/DECISIONS.md D7) and they still go first when they have
-#: producible work — the curve they measure is only readable if the order
-#: holds. What changed on 2026-08-22, on the owner's instruction, is what
-#: happens AFTER them: the walk continues into the whole pending queue instead
-#: of stopping.
+#: NO CLIENT IS NAMED TO BE ADMITTED. Owner, 2026-08-23: "Ensure no client
+#: hardcoding. This is a routine meant to run and ingest DMAs."
 #:
-#: It had to change. The queue holds 286 pending runs across 172 entities and
-#: this list named eight, so 164 vetted, unprocessed clients could never be
-#: reached however long the routine ran — the sequence reported "sequence
-#: complete" while the overwhelming majority of the corpus had never been
-#: looked at once.
-LEARNERS = ["t-rowe-price-group-inc", "houlihan-lokey-inc",
-            "hughes-federal-credit-union", "sl-green-realty-corp-nyse-slg",
-            "corporate-america-credit-union"]
-STRESS = ["brick-city-capital", "thrivent", "bank-of-utah"]
-
+#: Two named lists used to sit here — a five-name learning curriculum
+#: (docs/DECISIONS.md D7) and three stress candidates — reordering the queue
+#: so those eight went first. That order was a build-phase instrument for
+#: reading a learning curve. In production it is a bias: it decided which
+#: client a firing carried, it kept re-offering the same names after they had
+#: already failed vetting once, and it made the routine's behaviour depend on
+#: who was on a list rather than on what the queue holds.
+#:
+#: `pick` now takes an EMPTY preference and walks the queue in the queue's own
+#: order. `prefer` survives as a parameter because it costs nothing and a
+#: human re-running one client by hand is a real need — but nothing in the
+#: routine passes it.
+#:
 #: Never produced, by owner decision: the held-out control the learning
-#: measurements are read against. This is an EXCLUSION and stays one — it is
-#: the only name-based rule left in the walk, and it subtracts rather than
-#: admits, which is why widening the queue does not touch it.
+#: measurements are read against. This is an EXCLUSION, and it stays — it is
+#: the only name-based rule in the walk, and it subtracts rather than admits.
 HELD_OUT = {"bok-financial-corporation", "bok-financial"}
 
 #: How many candidates one firing will gate before giving up. The gates each
@@ -472,13 +474,14 @@ def pick(prefer: list, max_candidates: int = MAX_CANDIDATES,
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    p_pick = sub.add_parser("pick", help="walk the learners then the whole "
-                                         "pending queue, emit one producible "
-                                         "run or a refusal")
-    p_pick.add_argument("--stress", action="store_true",
-                        help="put the stress candidates straight after the "
-                             "learners; the rest of the queue follows either "
-                             "way")
+    p_pick = sub.add_parser("pick", help="walk the pending queue in its own "
+                                         "order, emit producible runs or a "
+                                         "refusal")
+    p_pick.add_argument("--prefer", nargs="*", default=[],
+                        help="display_ids to gate first — REORDERS, never "
+                             "admits: a name with nothing pending is not a "
+                             "candidate. For a human re-running one client by "
+                             "hand; the routine passes nothing")
     p_pick.add_argument("--count", type=int, default=1,
                         help="how many clients this firing will carry (2 runs "
                              "two sessions); fewer are produced when fewer "
@@ -490,8 +493,8 @@ def main(argv=None) -> int:
     p_one.add_argument("--client", required=True)
     a = ap.parse_args(argv)
     if a.cmd == "pick":
-        return pick(LEARNERS + (STRESS if a.stress else []),
-                    max_candidates=a.max_candidates, count=max(1, a.count))
+        return pick(a.prefer, max_candidates=a.max_candidates,
+                    count=max(1, a.count))
     if a.cmd == "evaluate":
         pending = mcp_call("list_pending_runs", {}).get("pending", [])
         print(json.dumps(evaluate(pending, a.client), indent=1))

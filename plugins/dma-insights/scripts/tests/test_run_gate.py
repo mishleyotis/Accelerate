@@ -6,6 +6,7 @@ first execution). What pins here is the refusal logic — the owner's rule
 is that synthesis NEVER starts on an unverified chain, so the failure
 paths are the product.
 """
+import re
 import sys
 from pathlib import Path
 
@@ -135,9 +136,56 @@ def test_g4_held_out_twins_do_not_block():
     assert ok2, detail2
 
 
-def test_the_learner_order_is_the_d7_sequence():
-    assert run_gate.LEARNERS[0] == "t-rowe-price-group-inc"
-    assert run_gate.HELD_OUT == {"bok-financial-corporation", "bok-financial"}
+def test_no_client_is_named_to_be_admitted():
+    """Owner, 2026-08-23: "Ensure no client hardcoding. This is a routine
+    meant to run and ingest DMAs."
+
+    The module used to carry two name lists — a five-name learning
+    curriculum and three stress candidates — that reordered the queue so
+    those eight went first. This asserts the module now names clients in
+    exactly one place, and that that place SUBTRACTS.
+    """
+    source = Path(run_gate.__file__).read_text()
+    admitting = [name for name in ("LEARNERS", "STRESS")
+                 if re.search(rf"^{name}\s*=", source, re.M)]
+    assert not admitting, (
+        f"{admitting} names clients to be admitted; the queue decides who is "
+        f"a candidate")
+    assert run_gate.HELD_OUT == {"bok-financial-corporation", "bok-financial"}, (
+        "the held-out control is an owner exclusion and subtracts — it is the "
+        "one name-based rule that may remain")
+
+
+def test_the_routine_passes_no_preference():
+    """`--prefer` survives for a human re-running one client by hand. What
+    matters is that the ROUTINE's own invocation carries none: a default of
+    [] is what makes the walk client-agnostic in production."""
+    parsed = run_gate.main.__globals__  # module scope, for the parser build
+    assert "LEARNERS" not in parsed and "STRESS" not in parsed
+    ap_default = _pick_parser_default("--prefer")
+    assert ap_default == [], (
+        "the gate must default to no preference; anything else reintroduces "
+        "the bias under a new name")
+
+
+def _pick_parser_default(flag: str):
+    """The default argparse would apply for `pick <flag>`, read from the
+    parser the CLI actually builds rather than from a copy of it."""
+    import contextlib, io
+    with contextlib.redirect_stdout(io.StringIO()), \
+            contextlib.redirect_stderr(io.StringIO()):
+        with pytest.raises(SystemExit):
+            run_gate.main(["pick", "--help"])
+    # --help proves the flag exists; the default comes from a real parse of a
+    # command line that omits it.
+    seen = {}
+    real_pick = run_gate.pick
+    try:
+        run_gate.pick = lambda prefer, **kw: seen.setdefault("prefer", prefer) or 0
+        run_gate.main(["pick"])
+    finally:
+        run_gate.pick = real_pick
+    return seen.get("prefer")
 
 
 # ── the walk reaches the whole queue, not a hardcoded eight ──
@@ -168,17 +216,19 @@ def test_the_queue_supplies_candidates_no_list_names():
     assert order == ["never-heard-of-this-bank"]
 
 
-def test_the_learner_order_still_leads():
-    """It is a curriculum, and the curve it measures is only readable if the
-    order holds. Preference, not a fence — and only over what the queue
-    actually offers: a learner with nothing pending is not a candidate."""
+def test_a_preference_reorders_and_never_admits():
+    """`--prefer` is for a human re-running one client by hand. It moves a
+    name UP the queue and cannot put one in it: a preferred name with nothing
+    pending is not a candidate, or the gate spends connector calls printing
+    "failed G1_ingested" about an entity that has no run to ingest."""
     pending = [_queued("zzz-other-bank", completed_at="2026-08-20"),
-               _queued("t-rowe-price-group-inc", completed_at="2026-01-01")]
-    order = run_gate.queue_order(pending, prefer=run_gate.LEARNERS)
-    assert order[0] == "t-rowe-price-group-inc", (
-        "the learner leads even though its assessment is seven months older")
+               _queued("chosen-by-hand", completed_at="2026-01-01")]
+    order = run_gate.queue_order(
+        pending, prefer=["chosen-by-hand", "not-in-the-queue-at-all"])
+    assert order[0] == "chosen-by-hand", (
+        "the preferred name leads even though its assessment is older")
     assert order[1] == "zzz-other-bank"
-    assert len(order) == 2, "learners with nothing pending are not candidates"
+    assert len(order) == 2, "a preferred name with nothing pending is not a candidate"
 
 
 def test_the_held_out_control_is_never_admitted_from_the_queue():
@@ -186,7 +236,7 @@ def test_the_held_out_control_is_never_admitted_from_the_queue():
     HELD_OUT subtracts, which is why it survives the change."""
     pending = [_queued("bok-financial"), _queued("bok-financial-corporation"),
                _queued("fine-bank")]
-    order = run_gate.queue_order(pending, prefer=run_gate.LEARNERS)
+    order = run_gate.queue_order(pending, prefer=[])
     assert "bok-financial" not in order
     assert "bok-financial-corporation" not in order
     assert "fine-bank" in order
@@ -207,9 +257,11 @@ def test_the_newest_assessment_comes_first():
 
 
 def test_no_entity_is_offered_twice():
-    pending = [_queued("t-rowe-price-group-inc")]
-    order = run_gate.queue_order(pending, prefer=run_gate.LEARNERS)
-    assert order.count("t-rowe-price-group-inc") == 1
+    """A name that is both preferred and offered by the queue is one
+    candidate, not two."""
+    pending = [_queued("some-bank")]
+    order = run_gate.queue_order(pending, prefer=["some-bank"])
+    assert order.count("some-bank") == 1
 
 
 def test_a_failing_candidate_no_longer_blocks_the_queue(monkeypatch, capsys):
@@ -262,7 +314,7 @@ def test_every_failure_is_still_printed_with_its_gate(monkeypatch, capsys):
 
 def test_an_empty_queue_says_so_rather_than_claiming_completion(monkeypatch, capsys):
     monkeypatch.setattr(run_gate, "mcp_call", lambda tool, args: {"pending": []})
-    assert run_gate.pick(run_gate.LEARNERS) == 1
+    assert run_gate.pick([]) == 1
     assert "offered no unclaimed entity" in capsys.readouterr().out
 
 
