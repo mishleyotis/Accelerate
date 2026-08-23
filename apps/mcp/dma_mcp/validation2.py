@@ -1954,13 +1954,47 @@ _ENTITY_MATTER = re.compile(
     r"|breach|incident|data loss|ransomware|outage|lawsuit|litigation"
     r"|settlement|fine|penalt|investigation|subpoena|recall|sanction"
     r"|regulator|examination finding|matter requiring attention|MRA"
-    r"|class action|complaint|indictment|violation|deficienc)\b", re.I)
+    r"|class action|complaint|indictment|violation|deficienc"
+    # Added 2026-08-23 from the T. Rowe Price register, which carries the
+    # arbitration and supervisory vocabulary the first list missed: a FINRA
+    # customer-dispute award is an entity matter by any reading and matched
+    # none of the words above.
+    r"|arbitration|award|censure|disciplinar|FINRA|SEC|OCC|FDIC|NCUA|FTC"
+    r"|BrokerCheck|dispute|claim|exposure|fiduciary|misconduct"
+    r"|restitution|disgorgement|suspension|revocation|bar(?:red)?)\b", re.I)
 
 
-def _issue_text(issue) -> str:
-    return " ".join(str(issue.get(k) or "") for k in
-                    ("title", "summary", "description", "rationale",
-                     "detail", "matter", "impact", "name")) \
+#: WHAT the row is about. The subject test reads only these.
+_ISSUE_SUBJECT_KEYS = ("title", "summary", "description", "matter", "name")
+
+#: WHY it is here and how it was handled. Read for the entity-matter test —
+#: a real matter is often only named in full in the reasoning — but never for
+#: the subject test.
+#:
+#: MEASURED ON T. ROWE PRICE, 2026-08-23, and this split is the repair. CG-46
+#: refused three of its eleven rows on the phrase "the workbook", which in
+#: every case sat in `rationale` describing how the row was SCORED:
+#:
+#:   · "The registered rows and the workbook's Issue Time Map disagree on the
+#:      award years … so this row keeps the workbook's dates" — on a row
+#:      about three FINRA customer arbitration awards.
+#:   · "both board-oversight cells were scored under the workbook's Step 6
+#:      conservative-default rule" — on a disclosure conflict between a 10-K
+#:      and a proxy.
+#:   · "the workbook applied its Step 6 conservative-default rule rather than
+#:      picking a reading" — on an unresolved data-organization structure.
+#:
+#: All three are the institution's own matters and all three were refused.
+#: A row may explain its own provenance in assessment vocabulary without
+#: BEING about the assessment, and a gate that cannot tell those apart is
+#: the reject-rather-than-triage failure wearing a gate's clothes.
+_ISSUE_REASONING_KEYS = ("rationale", "detail", "impact", "provenance",
+                         "opened_on_basis")
+
+
+def _issue_text(issue, keys=None) -> str:
+    keys = keys or (_ISSUE_SUBJECT_KEYS + _ISSUE_REASONING_KEYS)
+    return " ".join(str(issue.get(k) or "") for k in keys) \
         if isinstance(issue, dict) else ""
 
 
@@ -2000,8 +2034,13 @@ def _check_issue_register_is_the_entitys(page, payload) -> list:
 
     out = []
     for i, issue in enumerate(issues):
+        # The SUBJECT is read from the naming fields only; the entity-matter
+        # test reads everything, because a real matter is often named in full
+        # only in the reasoning. See _ISSUE_REASONING_KEYS for the three live
+        # rows that made this split necessary.
+        subject = _issue_text(issue, _ISSUE_SUBJECT_KEYS)
         text = _issue_text(issue)
-        hit = _ASSESSMENT_SUBJECT.search(text)
+        hit = _ASSESSMENT_SUBJECT.search(subject)
         if hit and not _ENTITY_MATTER.search(text):
             out.append(_reason(
                 "CG-46", "issue_register", f"context.issue_register.issues[{i}]",
