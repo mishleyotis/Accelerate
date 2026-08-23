@@ -283,3 +283,104 @@ def test_the_walk_is_bounded_so_selection_cannot_eat_the_session(monkeypatch):
     monkeypatch.setattr(run_gate, "evaluate", fake_evaluate)
     run_gate.pick([], max_candidates=5)
     assert len(seen) == 5
+
+
+# ── two clients per firing, and somewhere to go when a package fails ──
+#
+# Owner, 2026-08-23: "Ensure the routine can run even 2 client synthesis at a
+# go. Invoke 2 sessions in the routine. If 1 package is not up to par, try
+# another one."
+#
+# The gate's four checks all pass BEFORE the package-vetter looks at the
+# workbooks, so a REFUSE lands inside the producing session, where this script
+# is no longer running. Without a named alternative that session's only moves
+# are to end the firing or to argue with the vetter — which is how Houlihan
+# Lokey ended a firing having produced nothing. RESERVE lines are the third
+# option.
+
+
+def _queue(names):
+    return [{"display_id": n, "run_id": f"run-{n}"} for n in names]
+
+
+def _all_pass(monkeypatch, producible, order=None):
+    """Every named client is producible; the rest fail G1."""
+    monkeypatch.setattr(run_gate, "queue_order",
+                        lambda pending, prefer: order or
+                        [r["display_id"] for r in pending])
+
+    def fake_eval(pending, display_id):
+        ok = display_id in producible
+        base = {g: {"ok": ok, "detail": "x"} for g in
+                ("G1_ingested", "G2_raw_package", "G3_serving",
+                 "G4_non_duplicate")}
+        base["run_id"] = f"run-{display_id}" if ok else None
+        return base
+
+    monkeypatch.setattr(run_gate, "evaluate", fake_eval)
+    monkeypatch.setattr(run_gate, "mcp_call",
+                        lambda tool, args: {"pending": []})
+
+
+def test_two_clients_are_emitted_when_two_are_producible(monkeypatch, capsys):
+    _all_pass(monkeypatch, {"a", "b", "c", "d"}, order=["a", "b", "c", "d"])
+    assert run_gate.pick([], count=2) == 0
+    out = capsys.readouterr().out
+    assert "GATE: PRODUCE a run run-a" in out
+    assert "GATE: PRODUCE b run run-b" in out
+
+
+def test_the_spares_are_named_as_reserve_not_as_produce(monkeypatch, capsys):
+    """A RESERVE is not a second client to synthesise — it is where to go if
+    a package fails vetting. Emitting it as PRODUCE would have the firing
+    quietly carry four."""
+    _all_pass(monkeypatch, {"a", "b", "c", "d"}, order=["a", "b", "c", "d"])
+    run_gate.pick([], count=2)
+    out = capsys.readouterr().out
+    assert out.count("GATE: PRODUCE") == 2
+    assert "GATE: RESERVE c run run-c" in out
+
+
+def test_one_producible_client_still_produces(monkeypatch, capsys):
+    """Asking for two and finding one is not a failed firing. Refusing to
+    produce the one would be the queue-blocking behaviour in a new place."""
+    _all_pass(monkeypatch, {"a"}, order=["a", "b", "c"])
+    assert run_gate.pick([], count=2) == 0
+    out = capsys.readouterr().out
+    assert out.count("GATE: PRODUCE") == 1
+    assert "asked for 2, found 1" in out
+
+
+def test_none_producible_still_stops_and_lists_every_failure(monkeypatch,
+                                                             capsys):
+    _all_pass(monkeypatch, set(), order=["a", "b"])
+    assert run_gate.pick([], count=2) == 1
+    out = capsys.readouterr().out
+    assert "GATE: STOP" in out
+    assert "skipped a:" in out and "skipped b:" in out
+
+
+def test_count_one_is_unchanged_behaviour(monkeypatch, capsys):
+    """The default has to stay exactly what it was, or every existing
+    routine changes meaning on upgrade."""
+    _all_pass(monkeypatch, {"a", "b"}, order=["a", "b"])
+    assert run_gate.pick([], count=1) == 0
+    out = capsys.readouterr().out
+    assert out.count("GATE: PRODUCE") == 1
+    assert "GATE: PRODUCE a run run-a" in out
+
+
+def test_the_held_out_client_is_never_produced_or_reserved(monkeypatch,
+                                                           capsys):
+    """Widening the walk must not widen this. bok-financial stays out of
+    both lists however many clients a firing carries."""
+    names = ["bok-financial", "a", "b", "c"]
+    monkeypatch.setattr(run_gate, "queue_order",
+                        lambda pending, prefer: run_gate.queue_order.__wrapped__(
+                            pending, prefer) if False else
+                        [n for n in names if n not in run_gate.HELD_OUT])
+    _all_pass(monkeypatch, set(names),
+              order=[n for n in names if n not in run_gate.HELD_OUT])
+    run_gate.pick([], count=2)
+    out = capsys.readouterr().out
+    assert "bok-financial" not in out

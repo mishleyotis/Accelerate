@@ -125,8 +125,18 @@ DEFAULTS = {
     # Adversaries and auditors: read-only by construction. They exist to
     # disbelieve a result, and an adversary that can repair what it found is
     # not an adversary.
-    "checkers": dict(writes=(), extra=[], external=["exa"], research=True),
-    "qa": dict(writes=(), extra=[], external=["exa"], research=True),
+    #
+    # They DO get Drive and Tavily reads, added 2026-08-23. A checker asked
+    # whether an evidence row's URL is real has two honest answers and one
+    # dishonest one: confirm it, refuse it, or — with no way to look — call
+    # a row unciteable because it could not see the package that states it.
+    # 757 of T. Rowe's 894 items were served without a URL while the package
+    # held 748 of them, and nothing in the pipeline could look. Reading is
+    # not repairing; these stay writes=() .
+    "checkers": dict(writes=(), extra=[],
+                     external=["exa", "tavily", "drive"], research=True),
+    "qa": dict(writes=(), extra=[],
+               external=["exa", "tavily", "drive"], research=True),
     "orchestration": dict(writes=(), extra=[], external=["exa"], research=True),
     "learning": dict(writes=(), extra=[], external=[], research=False),
 }

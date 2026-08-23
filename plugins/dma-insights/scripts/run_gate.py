@@ -108,6 +108,9 @@ HELD_OUT = {"bok-financial-corporation", "bok-financial"}
 #: to find it would spend the session on selection. Failures are reported and
 #: skipped, so the next firing starts where this one got to.
 MAX_CANDIDATES = 40
+#: How many spare producible runs to name beyond the ones asked for,
+#: so a session whose package fails VETTING has somewhere to go.
+RESERVE_DEPTH = 2
 
 
 def _idt(audience: str) -> str:
@@ -378,8 +381,23 @@ def _queue_ready(pending: list) -> list:
         return ready
 
 
-def pick(prefer: list, max_candidates: int = MAX_CANDIDATES) -> int:
-    """Emit exactly one producible run, or a refusal that names what it saw.
+def pick(prefer: list, max_candidates: int = MAX_CANDIDATES,
+         count: int = 1) -> int:
+    """Emit `count` producible runs, or a refusal that names what it saw.
+
+    COUNT EXISTS SO A FIRING CAN CARRY TWO CLIENTS (owner, 2026-08-23). The
+    walk is the same walk; it simply does not stop at the first PRODUCE. Each
+    pick names its own run, and a firing that can only find one says so and
+    produces one rather than failing — one client synthesised is not a failed
+    firing, and refusing to produce it because a second could not be found
+    would be the queue-blocking behaviour again in a new place.
+
+    RESERVE, and it is the reason the emitted list runs longer than `count`:
+    a package that fails VETTING fails after the gate has passed it, inside
+    the producing session, where this script is no longer running. Without a
+    named alternative the session's only options are to end the firing or to
+    argue with the vetter. So every producible candidate the walk found is
+    printed as a RESERVE line, in order, and the session takes the next one.
 
     A FAILING CANDIDATE NO LONGER STOPS THE QUEUE. It used to: any G1, G2 or
     G4 failure returned immediately, so one client with a stub bundle or an
@@ -400,20 +418,26 @@ def pick(prefer: list, max_candidates: int = MAX_CANDIDATES) -> int:
         return 1
 
     skipped: list = []
+    produced: list = []
+    reserve: list = []
     for display_id in order[:max_candidates]:
         v = evaluate(pending, display_id)
+        verbose = len(produced) < count
         for g in ("G1_ingested", "G2_raw_package", "G3_serving",
                   "G4_non_duplicate"):
             mark = "PASS" if v[g]["ok"] else ("SKIP" if v[g].get("skip")
                                               else "FAIL")
-            print(f"  {display_id} {g}: {mark} — {v[g]['detail']}")
+            if verbose:
+                print(f"  {display_id} {g}: {mark} — {v[g]['detail']}")
         if v["run_id"]:
-            print(f"GATE: PRODUCE {display_id} run {v['run_id']}")
-            if skipped:
-                print(f"  (walked past {len(skipped)}: "
-                      + "; ".join(f"{d} {why}" for d, why in skipped[:8])
-                      + ("; …" if len(skipped) > 8 else "") + ")")
-            return 0
+            if len(produced) < count:
+                produced.append((display_id, v["run_id"]))
+                print(f"GATE: PRODUCE {display_id} run {v['run_id']}")
+            elif len(reserve) < RESERVE_DEPTH:
+                reserve.append((display_id, v["run_id"]))
+            if len(produced) >= count and len(reserve) >= RESERVE_DEPTH:
+                break
+            continue
         if v["G3_serving"].get("skip"):
             skipped.append((display_id, "serving and current"))
             continue
@@ -421,6 +445,19 @@ def pick(prefer: list, max_candidates: int = MAX_CANDIDATES) -> int:
                                 "G4_non_duplicate") if not v[g]["ok"]),
                    "unknown")
         skipped.append((display_id, f"failed {bad}"))
+
+    if produced:
+        for display_id, run_id in reserve:
+            print(f"GATE: RESERVE {display_id} run {run_id}")
+        if len(produced) < count:
+            print(f"  (asked for {count}, found {len(produced)} — producing "
+                  f"what there is; a firing that synthesises one client is "
+                  f"not a failed firing)")
+        if skipped:
+            print(f"  (walked past {len(skipped)}: "
+                  + "; ".join(f"{d} {why}" for d, why in skipped[:8])
+                  + ("; …" if len(skipped) > 8 else "") + ")")
+        return 0
 
     print(f"GATE: STOP — gated {len(skipped)} of {len(order)} queued "
           f"entities and none was producible. Not a clean end: every one is "
@@ -441,6 +478,10 @@ def main(argv=None) -> int:
                         help="put the stress candidates straight after the "
                              "learners; the rest of the queue follows either "
                              "way")
+    p_pick.add_argument("--count", type=int, default=1,
+                        help="how many clients this firing will carry (2 runs "
+                             "two sessions); fewer are produced when fewer "
+                             "are producible, never zero-by-refusal")
     p_pick.add_argument("--max-candidates", type=int, default=MAX_CANDIDATES,
                         help="how many queued entities to gate before giving "
                              "up this firing (default %(default)s)")
@@ -449,7 +490,7 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     if a.cmd == "pick":
         return pick(LEARNERS + (STRESS if a.stress else []),
-                    max_candidates=a.max_candidates)
+                    max_candidates=a.max_candidates, count=max(1, a.count))
     if a.cmd == "evaluate":
         pending = mcp_call("list_pending_runs", {}).get("pending", [])
         print(json.dumps(evaluate(pending, a.client), indent=1))

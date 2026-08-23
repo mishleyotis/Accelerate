@@ -137,3 +137,60 @@ felt. 177 of 178 surveyed (one folder errored and is itself a finding).
   answers ~99.6% of its own schema when ALL its stores are read.
 
 An update to this file that changes a number re-runs the survey first.
+
+## A missing URL: the recovery ladder
+
+Reported 2026-08-23 by opening a drawer — "no URLs on the T. Rowe
+evidence". Measured over the COMPLETE served set: 757 of 894 items carried
+none, against 153 of 154 on the Baxter exemplar. Not one of them had been
+researched wrong. The package stated 753 of 757 in its own workbook
+register and 748 of 752 in `01_evidence/evidence_index.json`.
+
+That is the shape this defect almost always has, so the ladder starts
+where the answer usually already is. **Climb it in order and stop at the
+first rung that answers — a web search for a URL the package is holding
+costs a day and can find a different document that says something
+similar.**
+
+1. **The evidence register the run was built from.** `URL_or_Citation` on
+   the scoring workbook's `Evidence_Master`, `URL` on the research
+   workbook's `Evidence_Detail`. `evidence_normalize.py` already merges
+   both; read its output before anything else.
+2. **The package's JSON evidence stores.** `01_evidence/evidence_index
+   .json` and `01_evidence/ledger.jsonl` carry a `url` per record and are
+   the richest store in a canonical package. They are keyed by the
+   package-LOCAL id (`E-002`), which the store minted to `E-TROW-002`:
+   `local_id_of_stored` runs the mint backwards and is the only key that
+   joins them.
+3. **The reports.** `04_reports/*.docx` cite their sources inline, and the
+   DOCX twin of every PDF indexes fully — `corpus_search.py --eid E-017`
+   finds the citation without opening anything by hand.
+4. **The rest of the corpus.** `corpus_search.py search --query` over
+   `07_governance/`, `08_appendices/` and the manifests. A URL is an opaque
+   string that appears literally, so a corpus hit on the id's own line is
+   recognition rather than inference.
+5. **Only now, the web.** The session's connectors — Exa and Tavily for the
+   document, Quartr for a transcript, Drive for a file the package
+   references but does not contain. Search for the DOCUMENT the source name
+   already names, not for the claim: the row states "T. Rowe Price Group,
+   Inc. 2026 Proxy Statement (DEF 14A)", and that is a filing with one
+   canonical location, not a topic to go reading around.
+
+**What is never a URL.** `multiple`, `N/A`, `see source`, `TBD`, a local
+file path, or a bare hostname standing in for a document. A row the ladder
+cannot answer keeps `url: null` and goes out as a gap naming what is
+needed. An unopenable link is worse than an honest blank, because the
+blank is visible and the link is not.
+
+**Explorium / Vibe-Prospecting is the honest exception, and it is a
+warning rather than a refusal.** A technographic scan is a machine
+observation with no document behind it, so it is minted with the entity's
+own front door — 18 T. Rowe items and 15 Baxter items carry
+`https://<entity>.com` and nothing more specific. That is truthful about
+ORIGIN and misleading as a CITATION: the reader clicks expecting the claim
+and lands on a home page. Say so in the source name ("Vibe Prospecting
+enrich-business technographic scan"), never dress it as a document, and
+never go looking for a deeper URL that does not exist.
+
+`scripts/gate_m_evidence_url_and_span.py` measures all of this over the
+complete set and fails the run rather than sampling it.
