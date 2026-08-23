@@ -487,6 +487,39 @@ GATES = {
               "disclosure, and Gulf's were moved there (MEM-0209, MEM-0210).",
               "block"),
 
+    "CG-47": ("why_now's summary prose counts the signals it serves", None,
+              "Where why_now's narrative_thread, synthesis or storyline "
+              "states a number of its own signals - 'the three signals', "
+              "'Three dated signals' - that number equals the length of the "
+              "signals list. Years, partition numerators, and any count "
+              "carrying a narrowing adjective are not counts of the section "
+              "and are not read as such.",
+              "Invariant 8: counts are computed, never stored where a source "
+              "of truth exists. A count written into a sentence IS a stored "
+              "count and stops agreeing with its list the moment a signal is "
+              "added or dropped. Measured on both promoted runs 2026-08-23, "
+              "in both directions. gulf-coast-business-credit lost WN-1 when "
+              "ET-04 refused its evidence id, and the synthesis still read "
+              "'the three signals describe a business ...' while still "
+              "describing the dropped one. axos-bank gained WN-04 in a later "
+              "repair and its synthesis still read 'the three dates' over "
+              "four served signals. Removal and addition, same defect, "
+              "neither caught, both promoted. THE SCOPE IS THE DESIGN: a "
+              "first version covering thirteen sections was run against every "
+              "promoted page of both runs before shipping and produced three "
+              "true findings on why_now and four FALSE ones on techstack and "
+              "issue_register - 'three automation products' as a slice of a "
+              "30-row register, 'the promoted register carried four' as a "
+              "prior state, 'the two matters it found ... neither survives' "
+              "over a register correctly serving zero, and per-item "
+              "sequencing prose read as an array index. A gate that refuses "
+              "writing like that is worse than the defect it catches, so the "
+              "scope is one section and the adjectives that may stand between "
+              "number and noun are an allowlist. It does not catch a wrong "
+              "subset count or a count in any other section; those stay with "
+              "the consolidator's cross-surface reconciliation.",
+              "block"),
+
     "CG-39": ("The run's recommendations reach the platform page", None,
               "When the run's bundle carries recommendations and the platform "
               "payload serves platform tiles, at least one recommendation "

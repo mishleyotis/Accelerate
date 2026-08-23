@@ -2033,6 +2033,140 @@ def _check_issue_register_is_the_entitys(page, payload) -> list:
     return out[:6]
 
 
+#: (page, section) -> (the list field that IS the count, the nouns the prose
+#: uses for its members). Explicit rather than inferred: a gate that guessed
+#: which nouns name a section's items would fire on prose about the world.
+COUNTED_SECTIONS = {
+    ("overview", "why_now"): ("signals", ("signals", "signal", "dates")),
+}
+
+_NUMBER_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+                 "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+                 "eleven": 11, "twelve": 12}
+
+#: Adjectives that describe every member rather than selecting some of them.
+#: ONLY these may stand between the number and the noun. "Three DATED
+#: signals" counts the whole set because every signal is dated; "three
+#: AUTOMATION products" counts a slice, and an allowlist is the only way to
+#: tell those apart without parsing. Anything not on this list makes the
+#: phrase a subset claim, and the gate stays silent.
+_WHOLE_SET_ADJECTIVES = frozenset((
+    "dated", "distinct", "separate", "such", "these", "those", "same",
+    "remaining", "published", "named", "listed", "supporting"))
+
+#: The section's own summary voice. Per-item prose is NOT read: an item that
+#: says "this is second" is describing the recommended SEQUENCE, not its
+#: array position, and conflating the two fired on axos-bank's WN-01 ("It
+#: comes first because the standard has to exist before the estate it
+#: governs arrives") on the very first measurement.
+_PROSE_KEYS = ("narrative_thread", "synthesis", "storyline")
+
+
+def _stated_counts(text, nouns):
+    """Every "<number> [whole-set adjective] <noun>" the prose asserts, as
+    (phrase, number).
+
+    Guarded against everything measured that looks like a count and is not:
+    a year ("each 2026 signal"), a partition's numerator ("three of the
+    five"), and - the guard that matters most - a narrowing adjective, which
+    makes the phrase a slice of the set rather than the set itself.
+    """
+    if not isinstance(text, str) or not text:
+        return []
+    alt = "|".join(sorted((re.escape(n) for n in nouns), key=len, reverse=True))
+    pat = re.compile(
+        r"\b(?P<num>" + "|".join(_NUMBER_WORDS) + r"|\d{1,3})\b"
+        r"(?P<mid>(?:\s+[A-Za-z][\w-]*)?)\s+"
+        r"(?P<noun>" + alt + r")\b", re.I)
+    out = []
+    for m in pat.finditer(text):
+        raw = m.group("num").lower()
+        mid = (m.group("mid") or "").strip().lower()
+        if mid and mid not in _WHOLE_SET_ADJECTIVES:
+            continue                    # a slice of the set, not the set
+        n = _NUMBER_WORDS.get(raw) or (int(raw) if raw.isdigit() else None)
+        if n is None or n > 900:                       # a year, not a count
+            continue
+        out.append((m.group(0).strip(), n))
+    return out
+
+
+def _check_prose_counts_what_is_served(page, payload) -> list:
+    """CG-47 - why_now's summary prose counts the signals it serves.
+
+    Invariant 8: counts are computed, never stored where a source of truth
+    exists. A count written into a sentence IS a stored count, and it stops
+    agreeing with its own list the moment an item is added or dropped.
+
+    MEASURED ON BOTH PROMOTED RUNS, 2026-08-23, in both directions:
+
+      - gulf-coast-business-credit lost WN-1 when ET-04 refused its evidence
+        id (an ingested row carrying an empty excerpt, so the chip would have
+        opened onto nothing). Two signals remained. The synthesis still read
+        "the three signals describe a business ..." and still described the
+        dropped one - "a decade-old platform decision now sits with a
+        different vendor".
+
+      - axos-bank gained WN-04 in a later repair. Four signals served, and
+        the synthesis still read "Taken together the three dates describe".
+
+    Removal and addition, same defect, neither caught, both promoted.
+
+    WHY THIS GATE IS ONE SECTION WIDE, WHICH IS THE IMPORTANT PART. The first
+    version covered thirteen sections and was run against every promoted page
+    of both runs before shipping. It produced three findings on why_now, all
+    real, and four on techstack and issue_register, ALL FALSE - every one of
+    them on prose that was better than the rule judging it:
+
+      - "three automation products, four source-control systems" - category
+        slices of a 30-row register, not a claim that it holds three.
+      - "Twenty-four rows where the promoted register carried four" - the
+        four is a PRIOR state of a different register.
+      - "This register tested the two matters it found ... Neither survives
+        that test" - two candidates found and excluded, over a register that
+        correctly serves zero.
+
+    A gate that refuses writing like that is worse than the defect it
+    catches, because it teaches producers to strip informative numbers out of
+    their prose. So: one section, the section's own nouns, and only an
+    adjective from _WHOLE_SET_ADJECTIVES may stand between number and noun.
+
+    What it therefore does NOT catch, said plainly so nobody assumes
+    otherwise: a wrong subset count, a count in any other section, and any
+    count phrased around a narrowing adjective. Those remain the
+    consolidator's cross-surface reconciliation to hold.
+    """
+    if not isinstance(payload, dict):
+        return []
+    out = []
+    for section, body in payload.items():
+        spec = COUNTED_SECTIONS.get((page, section))
+        if not spec or not isinstance(body, dict):
+            continue
+        field, nouns = spec
+        served = body.get(field)
+        if not isinstance(served, list):
+            continue
+        n = len(served)
+        for key in _PROSE_KEYS:
+            for phrase, said in _stated_counts(body.get(key), nouns):
+                if said == n:
+                    continue
+                out.append(_reason(
+                    "CG-47", section, f"{page}.{section}.{key}",
+                    f"the prose says \'{phrase}\' and this section serves "
+                    f"{n}. Counts are computed, never written into a "
+                    f"sentence: a stated count stops agreeing with its own "
+                    f"list the moment a signal is added or dropped, and the "
+                    f"reader is looking at the list. Say \'{n}\', or say it "
+                    f"without a number. If the missing signal should be "
+                    f"there, the repair is the signal - not the sentence; "
+                    f"and read the prose around it, because a sentence that "
+                    f"miscounts usually still describes what it lost."))
+    return out[:6]
+
+
+
 #: The depth floors, and what each is a floor ON. Every one is already in the
 #: contract's own field docs; none had a reader until 2026-08-23.
 DEPTH_FLOORS = {
@@ -2694,6 +2828,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_peer_scores_cascade(conn, run_id, page, payload))
     reasons.extend(_check_cards_state_their_reach(conn, run_id, page, payload))
     reasons.extend(_check_issue_register_is_the_entitys(page, payload))
+    reasons.extend(_check_prose_counts_what_is_served(page, payload))
 
     served = _served_figures(conn, run_id)
 
