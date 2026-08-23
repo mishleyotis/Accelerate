@@ -12,7 +12,7 @@
       "source": "./plugins/dma-insights",
       "displayName": "DMA Insights",
       "description": "The six DMA skills, the 47-agent roster with explicit tool allow-lists, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector (33 tools). The gate carries two clients a firing with reserves. Gate M fails a run whose evidence cannot be opened.",
-      "version": "0.8.2",
+      "version": "0.8.3",
       "category": "domain",
       "tags": [
         "dma",

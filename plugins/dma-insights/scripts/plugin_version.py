@@ -32,6 +32,7 @@ Exit 1 names which of the two it is not, and the command that fixes it.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -70,6 +71,63 @@ def _load(path: Path) -> dict:
         return {}
 
 
+#: Never shipped, never compared — build artefacts, not plugin content.
+_SKIP = ("__pycache__", ".pyc", ".DS_Store", ".git/")
+
+
+def tree_files(root: Path) -> dict:
+    """`relpath -> sha256` for everything the plugin ships.
+
+    The packager copies the plugin directory whole (measured 2026-08-23:
+    357 files in the install cache against 357 shippable in the checkout,
+    tests included), so the two trees are comparable file for file.
+    """
+    out = {}
+    if not root or not root.is_dir():
+        return out
+    for p in sorted(root.rglob("*")):
+        if not p.is_file():
+            continue
+        rel = p.relative_to(root).as_posix()
+        if any(s in rel for s in _SKIP):
+            continue
+        h = hashlib.sha256()
+        try:
+            h.update(p.read_bytes())
+        except OSError:
+            continue
+        out[rel] = h.hexdigest()
+    return out
+
+
+def digest(root: Path) -> str | None:
+    """One hash for a whole plugin tree, or None when there is no tree.
+
+    WHY A VERSION NUMBER IS NOT ENOUGH, measured on this container within an
+    hour of writing the version check: the repo published 0.8.2, the install
+    was 0.8.2, and `compare` said OK — while three files differed, including
+    the very rule a vetter agent needed to stop refusing packages. A plugin
+    edited after its version was built is stale in the way that matters and
+    invisible to every check that only reads a number.
+    """
+    files = tree_files(root)
+    if not files:
+        return None
+    h = hashlib.sha256()
+    for rel, fh in sorted(files.items()):
+        h.update(f"{rel}\0{fh}\n".encode())
+    return h.hexdigest()
+
+
+def diverged_paths(a: Path, b: Path, limit: int = 6) -> list:
+    """Which files differ, so the report is actionable rather than a hash."""
+    fa, fb = tree_files(a), tree_files(b)
+    out = [f"{p} (only in the checkout)" for p in sorted(set(fa) - set(fb))]
+    out += [f"{p} (only in the install)" for p in sorted(set(fb) - set(fa))]
+    out += [p for p in sorted(set(fa) & set(fb)) if fa[p] != fb[p]]
+    return out[:limit]
+
+
 def published(repo_root: Path | None = None) -> dict:
     """What this checkout publishes: version, and the component counts its
     own manifest declares.
@@ -95,6 +153,8 @@ def published(repo_root: Path | None = None) -> dict:
         if (root / "plugins" / PLUGIN_NAME / "skills").is_dir() else 0,
         "manifest": str(root / "plugins" / PLUGIN_NAME /
                         ".claude-plugin" / "plugin.json"),
+        "tree": str(root / "plugins" / PLUGIN_NAME),
+        "digest": digest(root / "plugins" / PLUGIN_NAME),
     }
 
 
@@ -165,6 +225,7 @@ def installed(state_path: Path | None = None) -> dict:
         "agents": agents,
         "skills": skills,
         "declared_agents": len(declared.get("agents") or []),
+        "digest": digest(install_path),
         "shadowed": shadowed,
         "state_file": str(path),
         "source": "installed_plugins.json",
@@ -231,6 +292,16 @@ def compare(repo_root: Path | None = None,
         reasons.append(f"{inst['version']} is installed but carries "
                        f"{inst['agents']} agent files where its own manifest "
                        f"declares {inst['declared_agents']}")
+    elif (pub.get("digest") and inst.get("digest")
+            and pub["digest"] != inst["digest"]):
+        # Same number, different content. The version check's own blind spot,
+        # found within an hour of writing it.
+        status = "DIVERGED"
+        changed = diverged_paths(Path(pub["tree"]), Path(inst["install_path"]))
+        reasons.append(
+            f"{pub['version']} is installed and {pub['version']} is published, "
+            f"but the two trees differ — the plugin was edited after this "
+            f"version was built. Differing: {', '.join(changed)}")
     else:
         status = "OK"
 
@@ -249,6 +320,10 @@ def compare(repo_root: Path | None = None,
     fix = ""
     if status in ("STALE", "MISSING", "INCOMPLETE"):
         fix = f"{UPDATE}  ({UPDATE_NOTE})"
+    elif status == "DIVERGED":
+        fix = ("bump the version in BOTH manifests, then " + UPDATE +
+               f" — reinstalling without a bump leaves the cache on a "
+               f"version number that no longer describes its contents")
     elif status == "AHEAD":
         fix = ("pull the branch — the checkout, not the plugin, is what needs "
                "to move")
