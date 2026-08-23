@@ -200,6 +200,14 @@ ENVIRONMENT_DEPENDENT_ROWS = {
     "skill script dependencies",
     "active google account",
     "identity source",
+    # `installed plugin` compares the CHECKOUT to whatever this machine has
+    # installed, so it is a statement about the machine by construction: red
+    # on a CI runner with no install (NOT_INSTALLED is green, but a stale one
+    # is not), and red on any developer machine between an edit and the next
+    # `claude plugin update`. That is the row doing its job — it is exactly
+    # how a 0.2.0 container with five of forty-seven agents was found — and
+    # it is not something the repository can make green.
+    "installed plugin",
 }
 
 

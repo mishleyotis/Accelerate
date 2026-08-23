@@ -202,3 +202,75 @@ def test_the_governance_audit_no_longer_calls_an_absent_cap_log_critical():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── the closed refusal list ───────────────────────────────────────────────
+#
+# The caps defect was one rule refusing wrongly. The class behind it is an
+# agent that may refuse for any reason it can articulate: a live session
+# refused a package for "103 cell names mismatched against the catalogue",
+# a condition no check in this repository raises. Fixing checks one at a
+# time cannot bound that; a closed list can.
+
+def test_every_refusal_the_script_raises_carries_a_listed_code():
+    """A REFUSE with no code, or a code not on the list, must be impossible
+    to write — `note` raises rather than accepting it."""
+    import re as _re
+    src = Path(vw.__file__).read_text()
+    calls = _re.findall(r'note\(\s*"REFUSE".*?\)\s*$', src, _re.S | _re.M)
+    assert calls, "no refusals found — the extraction has broken"
+    for call in calls:
+        m = _re.search(r'code="(V\d+)"', call)
+        assert m, f"refusal with no code:\n{call[:200]}"
+        assert m.group(1) in vw.SCRIPT_REFUSALS, (
+            f"{m.group(1)} is not in SCRIPT_REFUSALS")
+
+
+def test_an_unlisted_code_cannot_be_emitted():
+    with pytest.raises(ValueError, match="refusal without a listed code"):
+        vw.note("REFUSE", "something a rule invented", code="V99")
+    with pytest.raises(ValueError):
+        vw.note("REFUSE", "no code at all")
+
+
+def test_a_warning_needs_no_code():
+    """Only refusals are bounded. Findings must stay cheap to write, or the
+    pressure is to upgrade them to refusals to say anything at all."""
+    vw.note("WARN", "a column is named oddly")
+    assert vw.findings == [("WARN", "a column is named oddly")]
+
+
+def test_every_script_code_has_a_call_site():
+    """A listed code nothing raises advertises a protection that does not
+    exist — the same defect as a guard that checks nothing. V6 was removed
+    for exactly this reason."""
+    src = Path(vw.__file__).read_text()
+    for code in vw.SCRIPT_REFUSALS:
+        assert f'code="{code}"' in src, (
+            f"{code} is listed but never raised — either wire it up or "
+            f"retire the number")
+
+
+def test_the_two_groups_do_not_overlap():
+    assert not (set(vw.SCRIPT_REFUSALS) & set(vw.AGENT_REFUSALS))
+    assert set(vw.REFUSALS) == set(vw.SCRIPT_REFUSALS) | set(vw.AGENT_REFUSALS)
+
+
+def test_v6_stays_retired():
+    """A retired code must never be reused: a code that changes meaning is
+    worse than a gap in the numbering."""
+    assert "V6" not in vw.REFUSALS
+    assert "no excerpt column found" in Path(vw.__file__).read_text()
+
+
+def test_the_agent_doc_lists_exactly_the_registry():
+    """The script reports and the AGENT decides, so the list has to be in
+    front of the agent. A list that lives only in Python bounds nothing."""
+    md = (HERE / "agents" / "orchestration" / "package-vetter.md").read_text()
+    for code, criterion in vw.REFUSALS.items():
+        assert code in md, f"{code} is in the registry and not in the agent doc"
+    import re as _re
+    in_doc = set(_re.findall(r"\b(V\d+)\b", md))
+    assert in_doc <= set(vw.REFUSALS) | {"V6"}, (
+        f"the agent doc names codes the registry does not: "
+        f"{sorted(in_doc - set(vw.REFUSALS))}")

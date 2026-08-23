@@ -48,6 +48,11 @@ NON_MATURITY_SCORE = (
     "target",        # target_score — an aspiration
     "weighted",      # weighted_score — score x weight, exceeds 5 by design
     "rationale",     # score_rationale — prose
+    "impact",        # impact_score — recommendation prioritisation, own scale
+    "effort",        # effort_score — the same, measured 5.2-6.8 on a real
+                     # Recommendations sheet and refused as dirty maturity
+    "confidence",    # confidence_score — a 0-1 or 0-100 scale
+    "coverage", "readiness", "risk_score", "fit",
     "count", "total", "/",
 )
 
@@ -57,6 +62,20 @@ def is_maturity_score_column(header: str) -> bool:
     if "score" not in h or "peer" in h:
         return False
     return not any(m in h for m in NON_MATURITY_SCORE)
+
+#: How a package says "I searched and found nothing". Measured spellings
+#: from the corpus; a blank cell means the same thing.
+ABSENCE_RE = re.compile(
+    r"^\s*(\[?(no[_ ]?evidence|not[_ ]?found|none|n/?a|absent|"
+    r"no public evidence|not available|not evidenced)\]?)\b", re.I)
+
+#: A column that carries the CONTENT of an evidence row — what a second
+#: definition would have to contradict. Linkage columns (subcap, tier,
+#: confidence, weight) are deliberately absent: they vary across the rows of
+#: one id by design.
+DEFINING_COL_RE = re.compile(
+    r"excerpt|anchor_quote|quote|passage|verbatim|url|link|source_doc|"
+    r"source_name|source_title|title|publisher|published", re.I)
 
 CELL_RE = re.compile(r"^P[1-4]C\d+(\.\d+)*(\.[A-Z]{2,3}\d+)?$", re.I)
 EID_RE = re.compile(r"^E[-_][A-Z0-9]+[-_]?\d*(:F\d+)?$", re.I)
@@ -71,7 +90,61 @@ findings: list[tuple[str, str]] = []
 entity_sv: str | None = None
 
 
-def note(level: str, msg: str) -> None:
+#: THE CLOSED LIST. A package enters the system unless one of these is true.
+#:
+#: Owner, 2026-08-23: a firing refused its client and both reserves and
+#: produced nobody. One of those refusals was a missing sheet whose contents
+#: sat in a column; another ("103 cell names mismatched against the
+#: catalogue") is raised by no check in this repository at all — an agent
+#: reasoned its way to it. An agent that may refuse for any reason it can
+#: articulate will, and no amount of fixing individual checks bounds that.
+#:
+#: WHY A PERMISSIVE VETTER IS SAFE, and this is the argument a future
+#: tightening must answer: the vetter is a PRE-FILTER, not the last line.
+#: Fabricated content cannot reach a client through a lenient vetter,
+#: because promotion is gated independently — evidence is fail-closed
+#: (invariant 4: every cited id resolves, belongs to this run, and carries a
+#: verbatim 50-500 character excerpt), Gate M fails a run whose citations
+#: cannot be opened, and the AG/SG/ET/CG families run at submit. A package
+#: that gets past this list still cannot promote a score it cannot evidence.
+#: What a false refusal costs, by contrast, is the whole firing.
+SCRIPT_REFUSALS = {
+    "V1": "the workbook has too few tabs to be a generation the parser knows",
+    "V2": "maturity scores fall outside 1.0-5.0",
+    "V3": "one evidence id is defined twice with DIFFERENT content",
+    "V4": "scored rows carry no source_cell, which cannot be backfilled",
+    "V5": "excerpts are under 50 characters and will be refused at registration",
+    "V7": "no research workbook exists anywhere in the tree",
+}
+
+#: Conditions no script can check, already stated in package-vetter.md. An
+#: agent may refuse for one of these and must quote the code when it does.
+AGENT_REFUSALS = {
+    "V8": "the run names no catalogue version, so its cell names come from nowhere",
+    "V9": "a score was taken from the research workbook rather than the scoring one",
+    "V10": "undated evidence was dated to today rather than left UNVERIFIED",
+    "V11": "entity identity is PENDING_REVIEW and unadjudicated",
+}
+
+#: V6 was "no excerpt column found". It is NOT here: the script already
+#: raises that as a WARN, deliberately, and a registry entry with no call
+#: site is the same defect as a guard that checks nothing — it advertises a
+#: protection that does not exist. The number is retired rather than reused,
+#: because a code that changes meaning is worse than a gap.
+REFUSALS = {**SCRIPT_REFUSALS, **AGENT_REFUSALS}
+
+
+def note(level: str, msg: str, code: str | None = None) -> None:
+    """A REFUSE must name its code. Anything a code cannot be found for is a
+    finding that travels with the run, never a refusal."""
+    if level == "REFUSE":
+        if code not in REFUSALS:
+            raise ValueError(
+                f"refusal without a listed code: {code!r}. Add it to REFUSALS "
+                f"with its criterion, or emit this as WARN — an unlisted "
+                f"refusal is how a firing loses its client slot to a rule "
+                f"nobody agreed to")
+        msg = f"{code}: {msg}"
     findings.append((level, msg))
 
 
@@ -88,6 +161,35 @@ NO_CAP = {"", "-", "--", "n/a", "na", "none", "no", "no cap", "no caps",
 
 def _is_cap_value(v) -> bool:
     return str(v if v is not None else "").strip().lower() not in NO_CAP
+
+
+def _sheet_has_scores(rows) -> bool:
+    """Does this sheet resolve to scored rows — a subcap-id column beside a
+    1-5 score — whatever the sheet is called?
+
+    Shape, not name. The corpus carries at least three sheet-naming
+    generations plus flattened single-sheet workbooks, and every check that
+    matched on a name refused one of them.
+    """
+    if not rows:
+        return False
+    hi, hdr = header_row(rows)
+    if hi is None:
+        return False
+    low = [str(c or "").strip().lower() for c in hdr]
+    has_id = any("subcap" in h and "id" in h for h in low) or any(
+        CELL_RE.match(str(c or "").strip())
+        for r in rows[hi + 1:hi + 40] for c in (r or []) if isinstance(c, str))
+    if not has_id:
+        return False
+    for j, h in enumerate(low):
+        if "score" not in h or not is_maturity_score_column(hdr[j]):
+            continue
+        for r in rows[hi + 1:]:
+            if j < len(r) and isinstance(r[j], (int, float)) \
+                    and 1.0 <= float(r[j]) <= 5.0:
+                return True
+    return False
 
 
 def scan_caps(root: Path, pm: dict, books: list) -> dict:
@@ -227,8 +329,21 @@ def vet_scoring(path: Path) -> None:
     print(f"tabs ({len(tabs)}): {', '.join(list(tabs)[:12])}"
           + (" …" if len(tabs) > 12 else ""))
     if len(tabs) <= 3:
-        note("REFUSE", f"only {len(tabs)} tab(s) — this may be a generation the "
-                       f"parser does not know. Name the tabs in your refusal.")
+        # COUNT WHAT THE TABS CONTAIN, NOT HOW MANY THERE ARE. A flattened
+        # single-sheet generation is real and carries everything: measured on
+        # a corpus package refused for "only 3 tab(s)" whose one
+        # `Scoring_Workbook` sheet held 160 rows under the full canonical
+        # header — SubCap_ID, Score, Confidence, Evidence_IDs, Source_URLs,
+        # Caps_Applied. Refusing on cardinality refuses a shape, not a defect.
+        scored = sum(1 for rows in tabs.values() if _sheet_has_scores(rows))
+        if scored:
+            note("PIN", f"only {len(tabs)} tab(s) — a flattened generation. "
+                        f"{scored} of them resolve to scored rows, so the "
+                        f"shape is unfamiliar, not empty")
+        else:
+            note("REFUSE", f"only {len(tabs)} tab(s) and NONE resolves to "
+                           f"scored rows (a subcap-id column beside a 1-5 "
+                           f"score). Name the tabs in your refusal.", code="V1")
 
     cells: list[str] = []
     scores: list[float] = []
@@ -242,7 +357,16 @@ def vet_scoring(path: Path) -> None:
         if hi is None:
             continue
         low = [h.lower() for h in hdr]
-        is_register = "evidence" in name.lower()
+        # A DEFINITION TAB DEFINES; A LINKAGE TAB REFERS. Matching on the
+        # tab NAME alone swept in Evidence_Linkage, Evidence_Index and
+        # Absent_Evidence_Log — tables where one evidence id legitimately
+        # appears once per subcap it supports. The vetter's own note says a
+        # reference is never a defect; this is how references were reaching
+        # the check anyway. A definition tab is one that carries the CONTENT
+        # being defined.
+        defining_cols = [i for i, h in enumerate(low)
+                         if DEFINING_COL_RE.search(h)]
+        is_register = "evidence" in name.lower() and bool(defining_cols)
 
         # peer columns that are really statistics
         for h in hdr:
@@ -273,12 +397,17 @@ def vet_scoring(path: Path) -> None:
                     if 0 < float(c) <= 5.0 or float(c) == 0:
                         pass
             if is_register and len(row_eids) == 1:
+                # Fingerprint the CONTENT columns only. The whole row carries
+                # linkage fields — subcap, tier, confidence — that vary by
+                # design across the rows of one evidence id, so hashing the
+                # row reports every multi-subcap citation as a contradiction.
                 fp = " | ".join(
-                    re.sub(r"\s+", " ", str(c).strip().lower())
-                    for c in r
-                    if c is not None and str(c).strip()
-                    and str(c).strip().upper() != row_eids[0])
-                ev_defs.setdefault(row_eids[0], []).append(fp)
+                    re.sub(r"\s+", " ", str(r[i]).strip().lower())
+                    for i in defining_cols
+                    if i < len(r) and r[i] is not None and str(r[i]).strip()
+                    and str(r[i]).strip().upper() != row_eids[0])
+                if fp:
+                    ev_defs.setdefault(row_eids[0], []).append(fp)
             if idx_src is not None and (idx_src >= len(r) or r[idx_src] in (None, "")):
                 missing_source_cell += 1
 
@@ -318,7 +447,7 @@ def vet_scoring(path: Path) -> None:
     if bad:
         note("REFUSE", f"{len(bad)} score(s) outside 1.0–5.0 "
                        f"(e.g. {sorted(set(bad))[:5]}). A 0 bands as Activating "
-                       f"and looks assessed.")
+                       f"and looks assessed.", code="V2")
     zeros = [v for v in scores if v == 0]
     if zeros:
         note("WARN", f"{len(zeros)} score(s) are exactly 0 — confirm these are "
@@ -339,7 +468,7 @@ def vet_scoring(path: Path) -> None:
                        f"once with DIFFERENT content "
                        f"({', '.join(f'{k}×{len(v)}' for k, v in worst)}). One "
                        f"of each pair would be lost silently — adjudicate "
-                       f"which row is real before parsing.")
+                       f"which row is real before parsing.", code="V3")
     if repeated:
         note("WARN", f"{len(repeated)} evidence id(s) re-defined with "
                      f"identical content — benign repetition; dedup is by "
@@ -388,10 +517,10 @@ def vet_scoring(path: Path) -> None:
                          f"cells the run cannot serve.")
     if saw_source_cell_col and missing_source_cell:
         note("REFUSE", f"{missing_source_cell} row(s) have no source_cell. It "
-                       f"cannot be backfilled after the scan.")
+                       f"cannot be backfilled after the scan.", code="V4")
 
 
-def vet_research(path: Path) -> None:
+def vet_research(path: Path, evidence_stores: list | None = None) -> None:
     print(f"\n=== research workbook · {path.name}")
     tabs = sheets_of(path)
     print(f"tabs ({len(tabs)}): {', '.join(list(tabs)[:12])}"
@@ -423,7 +552,17 @@ def vet_research(path: Path) -> None:
     if excerpts:
         lens = sorted(len(e) for e in excerpts)
         med = lens[len(lens) // 2]
-        short = sum(1 for n in lens if n < 50)
+        # AN EXPLICIT ABSENCE IS NOT A SHORT EXCERPT. Measured on a real
+        # package: all 28 "short excerpts" that refused it were the literal
+        # string "[NO_EVIDENCE] No public evidence found." — the assessment
+        # declaring it searched and found nothing, which 02-inputs/4-vetting.md
+        # requires ("Do not exclude a cell for having no evidence"). A blank
+        # cell is the same statement with less ceremony. Neither is a
+        # 0-character quotation, and neither will be offered at registration.
+        absent = sum(1 for e in excerpts if not e.strip() or ABSENCE_RE.match(e))
+        short = sum(1 for e in excerpts
+                    if e.strip() and not ABSENCE_RE.match(e)
+                    and len(e.strip()) < 50)
         empty = sum(1 for e in excerpts if not e)
         print(f"excerpts: {len(excerpts)} · median {med} chars · "
               f"{short} under the 50-char floor · {empty} empty")
@@ -431,9 +570,15 @@ def vet_research(path: Path) -> None:
             note("WARN", f"excerpt median is {med} chars. An excerpt that clears "
                          f"the floor and says nothing passes every gate and helps "
                          f"no reader. Take the whole claim.")
+        if absent:
+            note("PIN", f"{absent} row(s) record NO evidence rather than a "
+                        f"quotation — an explicit absence marker or a blank. "
+                        f"They go out as GAPs, never as fabrications, and "
+                        f"they are not short excerpts")
         if short:
-            note("REFUSE", f"{short} excerpt(s) under 50 characters will be "
-                           f"refused at registration.")
+            note("REFUSE", f"{short} POPULATED excerpt(s) under 50 characters "
+                           f"will be refused at registration (absences are "
+                           f"counted separately and are not this).", code="V5")
     else:
         note("WARN", "no excerpt column found — the evidence tier's authority is "
                      "this workbook; confirm the tab names.")
@@ -470,6 +615,7 @@ def main(argv: list[str]) -> int:
     target = Path(argv[1])
     scoring: Path | None = None
     research: Path | None = None
+    evidence_stores: list = []
     if target.is_dir():
         # Discovery goes through package_map: packages come in at least four
         # structure generations (wrappers, 03_Assessment, workbooks in
@@ -492,6 +638,7 @@ def main(argv: list[str]) -> int:
             note("PIN", f"{len(pm['evidence_tables'])} evidence stores "
                         f"beyond the workbooks — evidence_normalize.py "
                         f"merges them; vet gaps there, not here")
+        evidence_stores = list(pm["evidence_tables"])
         report_caps(scan_caps(target, pm, [scoring, research]))
     else:
         scoring = target
@@ -505,11 +652,25 @@ def main(argv: list[str]) -> int:
     try:
         vet_scoring(scoring)
         if research:
-            vet_research(research)
+            vet_research(research, evidence_stores)
+        elif evidence_stores:
+            # THE RESEARCH WORKBOOK IS THE USUAL AUTHORITY, NOT THE ONLY ONE.
+            # Measured across the corpus: two packages refused here carried 49
+            # and 4 evidence stores respectively — JSON registers, issue
+            # registers, search logs, inventory CSVs — which
+            # evidence_normalize.py merges. This script says so itself sixteen
+            # lines above, and then refused anyway.
+            note("WARN", f"no research workbook, but {len(evidence_stores)} "
+                         f"evidence store(s) exist ({', '.join(evidence_stores[:3])}"
+                         f"{' …' if len(evidence_stores) > 3 else ''}). "
+                         f"evidence_normalize.py merges them; excerpts and "
+                         f"dates are vetted THERE, not here. Expect gaps to "
+                         f"go out as GAPs, never as inventions")
         else:
-            note("REFUSE", "no research workbook found. It is the authority for "
-                           "evidence ids, excerpts, ERS and published dates; "
-                           "without it every item bands UNVERIFIED.")
+            note("REFUSE", "no research workbook AND no evidence store of any "
+                           "format anywhere in the tree — nothing carries an "
+                           "excerpt, so every item would band UNVERIFIED.",
+                 code="V7")
     except Exception as e:                                     # noqa: BLE001
         print(f"could not read: {type(e).__name__}: {e}", file=sys.stderr)
         return 2

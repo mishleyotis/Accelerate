@@ -277,23 +277,70 @@ def check_required_columns(wb):
 # ──────────────────────────────────────────────────────────────────────
 # CHECK 6: Caps Applied Log
 # ──────────────────────────────────────────────────────────────────────
-def check_caps_applied(wb):
-    """Caps_Applied_Log should have real entries, not just 'None/N/A'."""
-    issues = []
-    if "Caps_Applied_Log" not in wb.sheetnames:
-        issues.append("CRITICAL: Caps_Applied_Log sheet missing")
-        return issues
+#: Sheets and columns a cap can be recorded in. A cap is a scoring ceiling,
+#: and it is written wherever that assessment kept its issue log.
+_CAPS_RE = re.compile(r"caps?[_ ]?applied|caps?[_ ]?log|issues?|contradiction",
+                      re.I)
+_NO_CAP = {"", "-", "--", "n/a", "na", "none", "no", "no cap", "no caps",
+           "not applied", "nil", "0", "0.0", "false"}
 
-    ws = wb["Caps_Applied_Log"]
-    data_rows = ws.max_row - 1
-    if data_rows <= 1:
-        first_val = str(ws.cell(row=2, column=1).value or "").lower()
-        if "none" in first_val or "n/a" in first_val:
-            issues.append(
-                "WARNING: Caps_Applied_Log has no real entries. Verify that evidence "
-                "ceilings, severity caps, and cross-pillar dependencies were actually "
-                "evaluated. Most assessments have at least some caps."
-            )
+
+def check_caps_applied(wb):
+    """How many caps this workbook records, and where.
+
+    THIS RETURNED A CRITICAL FOR A MISSING SHEET until 2026-08-23, and
+    `package-vetter.md` instructs that a CRITICAL from this script is a
+    REFUSE. So a package with no `Caps_Applied_Log` tab did not enter the
+    system — while the same workbook carried 380 capped rows in the
+    `Caps_Applied` COLUMN of its four scoring sheets, and the package carried
+    `exports/caps_applied_log.csv` with those same 380 rows. The sheet was
+    absent; the caps were not.
+
+    Owner, 2026-08-23: "Caps applied may even exist in the scoring and
+    research workbook and usually relate to the issue log or issues raised in
+    the client research report, or an issue log in csv or any other format.
+    If no caps were applied, then there were no issues."
+
+    Both halves are honoured here. Every sheet and column is searched, and
+    zero is reported as a state — never as an issue of any severity. The one
+    thing that can still be raised is a cap log that EXISTS and cannot be
+    read, because that is a fact about the file rather than about the
+    assessment.
+    """
+    issues, found, where = [], 0, []
+    for name in wb.sheetnames:
+        ws = wb[name]
+        if _CAPS_RE.search(name):
+            rows = [r for r in ws.iter_rows(min_row=2, values_only=True)
+                    if any(str(c or "").strip() for c in r)]
+            if rows:
+                found += len(rows)
+                where.append(f"{name} sheet ({len(rows)} rows)")
+            continue
+        header = [str(c or "").strip().lower()
+                  for c in next(ws.iter_rows(min_row=1, max_row=1,
+                                             values_only=True), ())]
+        cols = [i for i, h in enumerate(header) if _CAPS_RE.search(h)]
+        if not cols:
+            continue
+        hits = sum(1 for r in ws.iter_rows(min_row=2, values_only=True)
+                   for i in cols
+                   if i < len(r) and str(r[i] if r[i] is not None else "")
+                   .strip().lower() not in _NO_CAP)
+        if hits:
+            found += hits
+            where.append(f"{name}.{header[cols[0]]} ({hits} capped rows)")
+
+    if found:
+        print(f"    caps recorded: {found} across {len(where)} source(s) — "
+              f"{'; '.join(where[:4])}")
+    else:
+        print("    NO CAPS APPLIED — searched every sheet and every "
+              "caps/issue column. Valid state, not a defect: if no caps were "
+              "applied, then there were no issues (owner, 2026-08-23). A cap "
+              "log may also live outside this workbook (CSV, JSON, the "
+              "research report); this check does not see those and does not "
+              "need to.")
     return issues
 
 

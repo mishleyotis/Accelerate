@@ -75,12 +75,20 @@ SUMMARY_COLS = ("fact_summary", "key_finding", "key_finding_summary",
                 "description", "note")
 
 SYN = {
-    "eid": ("evidence_id", "e_id", "fact_id", "id"),
-    "source": ("source_name", "source_title", "source", "publisher",
-               "kb_source_id", "title"),
+    # PLURALS ARE THE SCORING-DETAIL SPELLING. Those tabs write
+    # `Evidence_IDs`, `Evidence_URLs`, `Source_URLs` — one row citing
+    # several — and they were unreachable for as long as the tab itself was
+    # (22,501 rows across 19 corpus packages). Reading the tab and then not
+    # recognising its columns recovers the row and loses its content.
+    "eid": ("evidence_id", "evidence_ids", "e_id", "fact_id", "id"),
+    "source": ("source_name", "source_names", "source_title", "source",
+               "sources", "publisher", "kb_source_id", "title",
+               "source_document", "source_documents"),
     # `url_or_citation` is the scoring workbook's column on 6 register tabs
     # in the corpus; without it those clients' URLs are invisible.
-    "url": ("url", "link", "source_url", "url_or_citation", "citation_url"),
+    "url": ("url", "urls", "link", "links", "source_url", "source_urls",
+            "evidence_url", "evidence_urls", "url_or_citation",
+            "citation_url", "source_link"),
     # ordered best-first: a publication-flavoured column outranks a bare
     # "date", which in fact-level rows carries EVENT dates (E-083's 1979
     # is a timeline fact, not when its source was published — measured)
@@ -203,8 +211,6 @@ def _rows_from_xlsx(path: Path):
         return
     try:
         for ws in wb.worksheets:
-            if "evidence" not in ws.title.lower():
-                continue
             rows = ws.iter_rows(max_row=3000, values_only=True)
             hdr = None
             for r in rows:
@@ -212,6 +218,20 @@ def _rows_from_xlsx(path: Path):
                 if hdr is None:
                     if sum(1 for c in cells if c) >= 3:
                         hdr = [_norm_key(c) for c in cells]
+                        # A TAB IS EVIDENCE-SHAPED, NOT EVIDENCE-NAMED. This
+                        # read `if "evidence" not in ws.title.lower(): continue`
+                        # and skipped 134 tabs across 19 corpus packages —
+                        # 22,501 rows, every one of them carrying a URL column
+                        # and 9,552 of them an excerpt column. They are the
+                        # P1..P4 _Scoring_Detail and _Subcap_Scoring tabs,
+                        # whose headers are Evidence_IDs, Evidence_URLs,
+                        # Evidence_Excerpt. One client merged 120 records with
+                        # ZERO excerpts while Evidence_Excerpt sat in four
+                        # unread tabs. package_map already accepts three words
+                        # for a CSV; this accepted one for a worksheet.
+                        if not _evidence_shaped(hdr):
+                            hdr = None
+                            break
                     continue
                 if any(cells):
                     yield dict(zip(hdr, cells))
@@ -219,12 +239,47 @@ def _rows_from_xlsx(path: Path):
         wb.close()
 
 
-def _base_eid(value: str) -> str | None:
-    m = EID_RE.match(value.strip())
+#: What an evidence id looks like when a package does not spell it `E-`.
+#: Measured across the corpus: `EV-P1C1-001`, `EV-CONN-001` (1,013 rows in
+#: one client, across five stores that all agree), `INT-BRIEF-*`, `US-*`,
+#: `PX-P1C1.1.1-1`. `EID_RE` rejected every one, `merge` returned 0 records,
+#: and the tool printed `"records": 0` — which reads as an empty package
+#: rather than as an id vocabulary nothing recognised.
+EID_WIDE_RE = re.compile(
+    r"^([A-Z]{1,6}[-_][A-Z0-9][A-Z0-9._-]*\d)(:F\d+)?$", re.I)
+
+#: Never an evidence id, whatever their shape: catalogue cell ids and the
+#: variant suffixes that decorate them.
+NOT_AN_EID_RE = re.compile(r"^P[1-4]C\d", re.I)
+
+
+def _base_eid(value: str, wide: bool = False) -> str | None:
+    """The canonical id, or None.
+
+    `wide` is used ONLY when a column is already known to be the evidence-id
+    column: the value in it IS the id, so the pattern is a guard against
+    junk rather than a vocabulary. Value-scanning a whole row still uses the
+    strict pattern, or every product code in the row becomes evidence.
+    """
+    v = value.strip()
+    if NOT_AN_EID_RE.match(v):
+        return None
+    m = EID_RE.match(v) or (EID_WIDE_RE.match(v) if wide else None)
     return m.group(1).upper() if m else None
 
 
-def merge(package: Path) -> tuple[dict, list]:
+def _evidence_shaped(hdr: list) -> bool:
+    """Does this header row carry evidence: an id column beside a url,
+    excerpt or source column? Shape, not name."""
+    has_id = any(h in SYN["eid"] or "evidence_id" in h or h == "e_id"
+                 for h in hdr)
+    has_content = any(h in SYN["url"] or h in VERBATIM_COLS
+                      or h in SYN.get("source", ()) or "url" in h
+                      or "excerpt" in h for h in hdr)
+    return has_id and has_content
+
+
+def merge(package: Path) -> tuple[dict, list, dict]:
     pm = package_map.map_package(package)
     stores = list(pm["evidence_tables"])
     if pm["research"]["primary"]:
@@ -233,6 +288,7 @@ def merge(package: Path) -> tuple[dict, list]:
         stores.append(str(Path(pm["scoring"]["primary"]).relative_to(package)))
     records: dict[str, dict] = {}
     conflicts: list[dict] = []
+    unrecognised: dict[str, list] = {}
     for rel in stores:
         path = package / rel
         if path.suffix in (".csv",):
@@ -245,13 +301,21 @@ def merge(package: Path) -> tuple[dict, list]:
             continue
         for row in rows:
             raw_id, _, _ = _pick(row, "eid")
+            named_col = bool(raw_id)
             if not raw_id:
                 raw_id = next((v for v in row.values()
                                if isinstance(v, str) and _base_eid(v)), None)
             if not raw_id:
                 continue
-            eid = _base_eid(str(raw_id))
+            eid = _base_eid(str(raw_id), wide=named_col)
             if not eid:
+                # NOT SILENT. This `continue` dropped 1,029 URL-carrying rows
+                # across four packages with no counter anywhere. A catalogue
+                # CELL id is excluded from the count: it is a known non-id
+                # shape, not an evidence row nobody recognised, and reporting
+                # 712 of them buries the handful that matter.
+                if not NOT_AN_EID_RE.match(str(raw_id).strip()):
+                    unrecognised.setdefault(rel, []).append(str(raw_id)[:40])
                 continue
             rec = records.setdefault(eid, {"eid": eid, "provenance": []})
             if rel not in rec["provenance"]:
@@ -286,7 +350,7 @@ def merge(package: Path) -> tuple[dict, list]:
                           and rec.get("_store", {}).get("date") != rel):
                         conflicts.append({"eid": eid, "field": "date",
                                           "values": [old, v], "store": rel})
-    return records, conflicts
+    return records, conflicts, unrecognised
 
 
 #: Fields a corpus SCAN may fill, and the only one on the list.
@@ -447,7 +511,7 @@ def main(argv=None) -> int:
     if not package.is_dir():
         print(f"not a directory: {package}", file=sys.stderr)
         return 2
-    records, conflicts = merge(package)
+    records, conflicts, unrecognised = merge(package)
     filled = corpus_fill(package, records)
     if a.assessment_date:
         cdate, basis = a.assessment_date, "owner-supplied --assessment-date"
@@ -464,8 +528,15 @@ def main(argv=None) -> int:
                 fh.write(json.dumps(rec) + "\n")
     full = sum(1 for r in records.values()
                if r.get("url") and r.get("date") and r.get("excerpt"))
+    # AN UNRECOGNISED ID VOCABULARY IS NOT AN EMPTY PACKAGE. Reported at the
+    # top of the output, because "records: 0" was previously the only trace
+    # of 1,013 rows that five agreeing stores all carried.
+    dropped = sum(len(v) for v in unrecognised.values())
     print(json.dumps({
         "records": len(records), "schema_complete": full,
+        "unrecognised_ids": dropped,
+        "unrecognised_by_store": {k: {"rows": len(v), "examples": v[:3]}
+                                  for k, v in unrecognised.items()} or None,
         "corpus_fills": filled,
         "collection_date": cdate, "collection_basis": basis,
         "dated_at_collection": dated_at_collection,

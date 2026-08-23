@@ -172,7 +172,7 @@ def test_merge_unifies_stores_and_event_dates_never_win(tmp_path):
         + json.dumps({"evidence_id": "E-001",
                       "date": "1979-01-15",
                       "text": "founding event " * 5}).encode() + b"\n")
-    records, conflicts = evidence_normalize.merge(tmp_path)
+    records, conflicts, _ = evidence_normalize.merge(tmp_path)
     rec = records["E-001"]
     assert rec["url"] == "https://x.example/ar"
     assert rec["date"] == "2026-02-01"      # publication beats event date
@@ -183,7 +183,7 @@ def test_merge_unifies_stores_and_event_dates_never_win(tmp_path):
 def test_gaps_carry_the_client_prefix_and_unverified_recency(tmp_path):
     _mk(tmp_path, "01_evidence/evidence_index.csv",
         b"evidence_id,source_name\nE-009,Some source\n")
-    records, _ = evidence_normalize.merge(tmp_path)
+    records, _, _ = evidence_normalize.merge(tmp_path)
     gaps = evidence_normalize.gaps_out(records, "acme-credit-union")
     assert gaps and gaps[0]["eid"] == "acme-credit-union:E-009"
     assert set(gaps[0]["missing"]) == {"url", "date", "excerpt"}
@@ -195,7 +195,7 @@ def test_conflicting_urls_across_stores_are_reported(tmp_path):
         b"evidence_id,url\nE-002,https://a.example/1\n")
     _mk(tmp_path, "07_governance/evidence_index.csv",
         b"evidence_id,url\nE-002,https://b.example/2\n")
-    _, conflicts = evidence_normalize.merge(tmp_path)
+    _, conflicts, _ = evidence_normalize.merge(tmp_path)
     assert conflicts and conflicts[0]["field"] == "url"
 
 

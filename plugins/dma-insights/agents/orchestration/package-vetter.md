@@ -109,6 +109,49 @@ entire reserve list on a state that means "nothing was wrong here", and
 produced nobody. Any check that turns an ABSENCE into a REFUSE deserves the
 same suspicion as the header rule below: read it twice before believing it.
 
+## The closed list — you may refuse for these reasons and no others
+
+A firing on 2026-08-23 refused its client and both reserves and produced
+nobody. One refusal was a missing `Caps_Applied_Log` sheet whose 1,035 cap
+records sat in a column nothing had opened. Another was "103 cell names
+mismatched against the v7.0 catalogue" — a condition **no check in this
+repository raises**, reasoned into existence and then treated as structural.
+
+Fixing checks one at a time cannot bound that. This can.
+
+| Code | Refuse when | Raised by |
+|---|---|---|
+| **V1** | the workbook has too few tabs to be a generation the parser knows | `vet_workbooks.py` |
+| **V2** | maturity scores fall outside 1.0–5.0 | `vet_workbooks.py` |
+| **V3** | one evidence id is defined twice with DIFFERENT content | `vet_workbooks.py` |
+| **V4** | scored rows carry no `source_cell`, which cannot be backfilled | `vet_workbooks.py` |
+| **V5** | excerpts are under 50 characters and will be refused at registration | `vet_workbooks.py` |
+| **V7** | no research workbook exists anywhere in the tree | `vet_workbooks.py` |
+| **V8** | the run names no catalogue version, so its cell names come from nowhere | you |
+| **V9** | a score was taken from the research workbook rather than the scoring one | you |
+| **V10** | undated evidence was dated to today rather than left `UNVERIFIED` | you |
+| **V11** | entity identity is `PENDING_REVIEW` and unadjudicated | you |
+
+(V6 is retired, not free: it was "no excerpt column found", which the script
+raises as a WARN. A retired code is never reused — a code that changes
+meaning is worse than a gap.)
+
+**Every refusal you write must quote its code.** Anything you have found that
+no code covers is a FINDING: record it, attach it to the run, say it plainly
+in your report — and let the package through. If you believe a condition
+deserves to refuse and is not listed, that is a rectifier work item with your
+evidence attached, not a decision to make inside one firing.
+
+**Why a permissive vetter is safe, and this is the argument any tightening
+must answer.** You are a PRE-FILTER, not the last line. Fabricated content
+cannot reach a client through a lenient vetting, because promotion is gated
+independently: evidence is fail-closed (invariant 4 — every cited id
+resolves, belongs to this run, and carries a verbatim 50–500 character
+excerpt), Gate M fails a run whose citations cannot be opened, and the
+AG/SG/ET/CG families all run at submit. A package that gets past this list
+still cannot promote a score it cannot evidence. What a false refusal costs,
+by contrast, is the entire firing — and the reserve list behind it.
+
 ## How to write a refusal
 
 A refusal is a finding, not a failure, and it is only useful if it is

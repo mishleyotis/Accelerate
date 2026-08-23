@@ -79,7 +79,7 @@ def test_a_nested_fact_list_yields_its_verbatim_text(tmp_path):
         "publish_date": "2025-05",
         "facts": [{"fact_id": "E-001:F1", "anchor_quote": REAL}],
     })})
-    records, _ = en.merge(pkg)
+    records, _, _ = en.merge(pkg)
     assert records["E-001"]["excerpt"] == REAL
     # the parent's fields still travel with the fact
     assert records["E-001"]["url"] == "https://www.sec.gov/x.htm"
@@ -97,7 +97,7 @@ def test_a_facts_text_is_the_analysis_not_the_quotation(tmp_path):
         "facts": [{"fact_id": "E-001:F1", "text": ANALYSIS,
                    "anchor_quote": REAL}],
     })})
-    records, _ = en.merge(pkg)
+    records, _, _ = en.merge(pkg)
     assert records["E-001"]["excerpt"] == REAL
     assert records["E-001"]["summary"] == ANALYSIS
 
@@ -107,7 +107,7 @@ def test_a_fact_with_only_analysis_yields_no_excerpt(tmp_path):
         "evidence_id": "E-002",
         "facts": [{"fact_id": "E-002:F1", "text": ANALYSIS}],
     })})
-    records, _ = en.merge(pkg)
+    records, _, _ = en.merge(pkg)
     assert not records["E-002"].get("excerpt")
     assert records["E-002"]["summary"] == ANALYSIS
 
@@ -130,7 +130,7 @@ def test_a_spaced_header_actually_reaches_the_record(tmp_path):
     pkg = _pkg(tmp_path, {"01_evidence/register.csv":
                           "Evidence ID,Source Name,Anchor Quote\n"
                           f'E-070,Form 10-K,"{REAL}"\n'})
-    records, _ = en.merge(pkg)
+    records, _, _ = en.merge(pkg)
     assert records["E-070"]["source"] == "Form 10-K"
     assert records["E-070"]["excerpt"] == REAL
 
@@ -143,7 +143,7 @@ def test_a_nested_fact_does_not_become_its_own_evidence_row(tmp_path):
         "facts": [{"fact_id": "E-001:F1", "text": REAL},
                   {"fact_id": "E-001:F2", "text": REAL.replace("not", "NOT")}],
     })})
-    records, _ = en.merge(pkg)
+    records, _, _ = en.merge(pkg)
     assert list(records) == ["E-001"]
 
 
@@ -158,7 +158,7 @@ def test_a_summary_column_never_becomes_an_excerpt(tmp_path, column):
         column: "The firm describes itself as advisory-only and says it "
                 "holds no trading positions of any material size.",
     }])})
-    records, _ = en.merge(pkg)
+    records, _, _ = en.merge(pkg)
     assert not records["E-009"].get("excerpt")
     assert records["E-009"]["summary"].startswith("The firm describes")
 
@@ -170,7 +170,7 @@ def test_a_verbatim_column_still_becomes_an_excerpt(tmp_path):
         {"evidence_id": "E-010", "anchor_quote": REAL},
         {"evidence_id": "E-011", "excerpt": REAL},
     ])})
-    records, _ = en.merge(pkg)
+    records, _, _ = en.merge(pkg)
     assert records["E-010"]["excerpt"] == REAL
     assert records["E-011"]["excerpt"] == REAL
 
@@ -225,7 +225,7 @@ def test_a_serialized_record_is_refused_even_from_a_verbatim_column(tmp_path):
         "excerpt": '{"evidence_id": "E-001", "source_name": "Houlihan '
                    'Lokey, Inc. Form 10-K", "url": "https://sec.gov/x"}',
     }])})
-    records, _ = en.merge(pkg)
+    records, _, _ = en.merge(pkg)
     assert not records["E-001"].get("excerpt")
 
 
@@ -238,14 +238,14 @@ def test_prose_that_merely_contains_pipes_is_not_refused(tmp_path):
                "Automation, Multi-Tenant Environments")
     pkg = _pkg(tmp_path, {"01_evidence/evidence_index.json": json.dumps(
         [{"evidence_id": "E-482", "anchor_quote": posting}])})
-    records, _ = en.merge(pkg)
+    records, _, _ = en.merge(pkg)
     assert records["E-482"]["excerpt"] == posting
 
 
 def test_the_fifty_character_floor_still_applies(tmp_path):
     pkg = _pkg(tmp_path, {"01_evidence/evidence_index.json": json.dumps(
         [{"evidence_id": "E-030", "excerpt": "Too short."}])})
-    records, _ = en.merge(pkg)
+    records, _, _ = en.merge(pkg)
     assert not records["E-030"].get("excerpt")
 
 
@@ -256,7 +256,7 @@ def test_a_register_value_names_the_store_and_the_column(tmp_path):
     pkg = _pkg(tmp_path, {"01_evidence/evidence_index.json": json.dumps(
         [{"evidence_id": "E-040", "anchor_quote": REAL,
           "publish_date": "2025-05"}])})
-    records, _ = en.merge(pkg)
+    records, _, _ = en.merge(pkg)
     fp = records["E-040"]["field_provenance"]
     assert fp["excerpt"] == {"how": "register",
                              "store": "01_evidence/evidence_index.json",
@@ -317,7 +317,7 @@ def test_the_real_package_yields_real_excerpts():
     m = package_map.map_package(PKG)
     assert m["research"]["primary"].endswith("DMA_Scoring_Workbook_HL.xlsx")
 
-    records, _ = en.merge(PKG)
+    records, _, _ = en.merge(PKG)
     assert en.corpus_fill(PKG, records) >= 0
     with_ex = [r for r in records.values() if r.get("excerpt")]
     assert len(with_ex) > 400, f"only {len(with_ex)} excerpts recovered"
