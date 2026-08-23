@@ -1709,6 +1709,330 @@ def _check_recommendations_reach_the_platform_page(conn, run_id, page, payload):
         f"wrote it about this client. Exactly one served clears this gate.")]
 
 
+#: Peer arithmetic is derived, so it is checked rather than trusted. The value
+#: matches the contract's grain tolerance: two figures rounded for display
+#: agree to within a twentieth, and anything wider is a different subtraction.
+PEER_DELTA_TOLERANCE = 0.05
+
+
+def _num(v):
+    """A real number, or None. `True` is not a score."""
+    return float(v) if isinstance(v, (int, float)) \
+        and not isinstance(v, bool) else None
+
+
+def _pillar_rows(body):
+    """The overview score strip's pillar rows."""
+    return [p for p in ((body or {}).get("pillars") or [])
+            if isinstance(p, dict)] if isinstance(body, dict) else []
+
+
+def _heatmap_peer_scores(body):
+    """Every peer figure the heatmap's focus areas actually carry. A null
+    peer_score is not a peer figure — it is the row saying it has none."""
+    if not isinstance(body, dict):
+        return []
+    return [n for row in (body.get("focus_areas") or [])
+            if isinstance(row, dict)
+            for n in [_num(row.get("peer_score"))] if n is not None]
+
+
+def _check_peer_scores_cascade(conn, run_id, page, payload) -> list:
+    """CG-44 — a peer figure the assessment holds reaches the overview strip.
+
+    Owner, 2026-08-23: "For Gulf and Axos, the overview has no peer scores
+    which have not been cascaded from the heatmaps."
+
+    The heatmap's focus areas carry `peer_score` per area. The overview's
+    pillar strip is where a reader forms the comparison, and it was serving
+    the entity's own bar alone. Nothing was wrong with either surface in
+    isolation, which is why no gate saw it: the failure is that a figure the
+    assessment already holds stopped one page short of the page that needed
+    it. Same shape as CG-39 (recommendations written, never served) and CG-43
+    (one dataset, two drifting projections).
+
+    TWO HALVES, and the second is the one that keeps this honest:
+
+    1. CASCADE. If the heatmap carries any peer figure at all, the strip may
+       not be silent about peers. It may still carry none — the workbook's
+       area-level peers need not roll up to a pillar — but then it says so,
+       in the same disclosure discipline the rest of the payload keeps.
+
+    2. ARITHMETIC. Where a row states both its own score and a peer median,
+       the delta is DERIVED and must be the subtraction, and `direction` must
+       agree with its sign. Invariant 9: derived values are computed, never a
+       sentinel and never a default that looks like data. A restated delta
+       that drifts from its own operands is the adjacent-column defect
+       wearing a comparison's clothes.
+
+    GULF PASSES ON THE FIRST HALF BY BEING HONEST. Its focus areas carry
+    `peer_score: null` throughout, because the workbook states no area-level
+    cohort; its strip still carries pillar medians read from the workbook's
+    own Pillar_Summary sheet, with `peer_n: null` and a disclosure saying the
+    cohort size was not stated rather than guessing one. That is the right
+    answer in both directions and the gate must not punish it.
+    """
+    if page != "overview" or not isinstance(payload, dict):
+        return []
+    rows = _pillar_rows(payload.get("scores"))
+    if not rows:
+        return []                       # no strip: other gates own that
+
+    out = []
+    with_peer = [r for r in rows if _num(r.get("peer_median")) is not None]
+    if not with_peer:
+        sibling = _live_submission(conn, run_id, "heatmap")
+        peers = _heatmap_peer_scores(
+            (sibling or {}).get("focus_areas") if isinstance(sibling, dict)
+            else None)
+        # Silence is only a finding when the run demonstrably HAS peer data.
+        # An unstaged sibling proves nothing; promotion re-gates every page.
+        if peers and not _says_it_searched(payload.get("scores")):
+            out.append(_reason(
+                "CG-44", "scores", "overview.scores.pillars[].peer_median",
+                f"the heatmap carries {len(peers)} focus area(s) with a peer "
+                f"score (median {sorted(peers)[len(peers) // 2]:.2f}) and not "
+                f"one pillar row on the overview strip carries a peer figure. "
+                f"The comparison a reader forms is formed here, on the strip, "
+                f"and this run already holds the numbers to form it. Cascade "
+                f"them, or state on the section why area-level peers do not "
+                f"roll up to a pillar for this assessment — an absence that "
+                f"names its reason is fine, an absence that says nothing is "
+                f"indistinguishable from a figure that was dropped."))
+
+    for i, r in enumerate(rows):
+        pid = r.get("pillar_id") or r.get("pillar") or f"[{i}]"
+        score, peer = _num(r.get("score")), _num(r.get("peer_median"))
+        if score is None or peer is None:
+            continue
+        want = round(score - peer, 4)
+        delta = _num(r.get("delta"))
+        if delta is None:
+            out.append(_reason(
+                "CG-44", "scores", f"overview.scores.pillars[{i}].delta",
+                f"{pid} states its own score ({score}) and a peer median "
+                f"({peer}) and leaves the delta empty. The subtraction is "
+                f"available — it is {want:+.2f}. A derived value with both "
+                f"operands in hand is computed, never left null; null here "
+                f"reads to a client as 'not comparable' when the comparison "
+                f"is one line of arithmetic."))
+            continue
+        if abs(delta - want) > PEER_DELTA_TOLERANCE:
+            out.append(_reason(
+                "CG-44", "scores", f"overview.scores.pillars[{i}].delta",
+                f"{pid} states a delta of {delta} against {score} - {peer} = "
+                f"{want:+.2f} (Δ {abs(delta - want):.2f} > "
+                f"{PEER_DELTA_TOLERANCE}). The delta is derived from the two "
+                f"figures beside it; when it disagrees with them, one of the "
+                f"three came from a different row. Fix the pairing, not the "
+                f"number."))
+            continue
+        got = str(r.get("direction") or "").strip().lower()
+        if not got:
+            continue                    # optional field; the delta carries it
+        want_dir = ("at" if abs(want) <= PEER_DELTA_TOLERANCE
+                    else "below" if want < 0 else "above")
+        if got not in (want_dir, {"at": "level"}.get(want_dir, want_dir)):
+            out.append(_reason(
+                "CG-44", "scores", f"overview.scores.pillars[{i}].direction",
+                f"{pid} reads '{got}' against a delta of {want:+.2f}, which "
+                f"is '{want_dir}'. The word and the number are the same fact "
+                f"stated twice, and a reader who takes the word away from "
+                f"this card takes away the opposite of what the bar shows."))
+    return out[:6]
+
+
+#: The reach a card has to state, in the order the surfaces carry it. The
+#: platform card names its estate structurally; the overview tile carries the
+#: same account as prose, because a tile has no room for a table.
+_REACH_KEYS = ("estate_reach", "their_stack_context", "current_estate")
+
+#: What "we could not see how much of it is used" has to look like to count.
+#: Naming the platform is not the same as sizing the client's hold on it.
+_REACH_MIN_CHARS = 120
+
+
+def _reach_statement(card) -> str:
+    """Whatever the card says about the estate it is proposing into."""
+    if not isinstance(card, dict):
+        return ""
+    for key in _REACH_KEYS:
+        v = card.get(key)
+        if isinstance(v, str):
+            return v
+        if isinstance(v, dict):
+            # a structured reach: the derivation is the part that is checkable
+            return " ".join(str(v.get(k) or "") for k in
+                            ("derivation", "why_this_is_established",
+                             "products_holding_this_layer", "utilization"))
+    return ""
+
+
+def _check_cards_state_their_reach(conn, run_id, page, payload) -> list:
+    """CG-45 — a card proposing a platform says how far the client already
+    reaches into it.
+
+    Owner, 2026-08-23: "The platform still ignores that Gulf has a lot of the
+    platform proposed. No work has been done to infer utilization."
+
+    Both halves of that sentence are one defect. Gulf licenses Salesforce and
+    Pardot already — its own intake brief asks for help ON THE EXISTING
+    INSTANCE — and four cards proposed the Salesforce family as though the
+    estate were empty. A card that has not looked at what the client holds is
+    not a recommendation, it is a catalogue page.
+
+    WHAT THIS GATE WILL AND WILL NOT ACCEPT. It cannot check whether the
+    reach is *right* — no gate can. It checks that the card ANSWERED, with
+    enough text to carry a derivation. `_REACH_MIN_CHARS` is deliberately low
+    and deliberately non-zero: naming the platform again is not an answer,
+    and a sentence is.
+
+    AND IT MUST NOT PUSH ANYONE INTO INVENTING UTILIZATION. Login counts,
+    seat counts and query volumes are not visible from outside, and the right
+    answer on both these runs says exactly that: "nothing this run can reach
+    shows how much of the licence is actually used ... and no claim is made
+    about them". That is a complete answer and it passes. What fails is a
+    card that never raises the question — because a reader cannot tell that
+    from a card whose author looked and found the estate empty.
+    """
+    if not isinstance(payload, dict):
+        return []
+    if page == "platform":
+        cards = ((payload.get("platform_story") or {}).get("platforms")
+                 if isinstance(payload.get("platform_story"), dict) else None)
+        sect, base = "platform_story", "platform.platform_story.platforms"
+        name_of = (lambda c: c.get("platform") or c.get("name"))
+    elif page == "overview":
+        cards = ((payload.get("opportunity") or {}).get("tiles")
+                 if isinstance(payload.get("opportunity"), dict) else None)
+        sect, base = "opportunity", "overview.opportunity.tiles"
+        name_of = (lambda c: c.get("platform") or c.get("headline"))
+    else:
+        return []
+    if not isinstance(cards, list):
+        return []
+
+    out = []
+    for i, card in enumerate(cards):
+        if not isinstance(card, dict):
+            continue
+        said = _reach_statement(card).strip()
+        if len(said) >= _REACH_MIN_CHARS:
+            continue
+        label = str(name_of(card) or f"card {i}")[:70]
+        out.append(_reason(
+            "CG-45", sect, f"{base}[{i}].estate_reach",
+            f"'{label}' proposes a platform without saying how far this "
+            f"client's existing estate already reaches into it"
+            + (f" (it carries {len(said)} characters where a derivation "
+               f"needs {_REACH_MIN_CHARS})" if said else "")
+            + ". The client's own register is in this run: say what it "
+            "already holds in this area, how that was established, and — "
+            "separately — what could not be seen about how much of it is "
+            "actually used. 'Nothing available here shows utilization, and "
+            "none is claimed' is a complete answer. Silence is not: a card "
+            "that never raises the question reads identically to one whose "
+            "author looked and found the estate empty, and this client "
+            "already licenses part of what is being proposed."))
+    return out[:6]
+
+
+#: Subjects that belong to the ASSESSMENT, not to the institution. Each is a
+#: phrase a producer actually filed on an issue register during this build.
+_ASSESSMENT_SUBJECT = re.compile(
+    r"\b(evidence (?:register|index|coverage|base|discipline)"
+    r"|uncited|citation coverage|source concentration|single[- ]source"
+    r"|scoring workbook|the workbook|this (?:run|assessment)'s own"
+    r"|assessment'?s? own|register completeness|qa[_ ]verdict"
+    r"|scoring methodolog|grain tolerance|coverage of the register)\b",
+    re.I)
+
+#: What an issue IS, in the owner's words: "enforcement actions; breaches;
+#: news that may affect the entity's scores etc."
+_ENTITY_MATTER = re.compile(
+    r"\b(enforcement|consent order|cease and desist|civil money penalt"
+    r"|breach|incident|data loss|ransomware|outage|lawsuit|litigation"
+    r"|settlement|fine|penalt|investigation|subpoena|recall|sanction"
+    r"|regulator|examination finding|matter requiring attention|MRA"
+    r"|class action|complaint|indictment|violation|deficienc)\b", re.I)
+
+
+def _issue_text(issue) -> str:
+    return " ".join(str(issue.get(k) or "") for k in
+                    ("title", "summary", "description", "rationale",
+                     "detail", "matter", "impact", "name")) \
+        if isinstance(issue, dict) else ""
+
+
+def _check_issue_register_is_the_entitys(page, payload) -> list:
+    """CG-46 — the issue register holds the institution's own matters.
+
+    Owner, 2026-08-23: "Issue register for Gulf are not issues. Issues entail
+    enforcement actions; breaches; news that may affect the entity's scores
+    etc."
+
+    What Gulf's register actually held was two findings about THE ASSESSMENT:
+    26 of 61 evidence items uncited, and source concentration across 58 of 70
+    cells. Both true, both useful, both filed in the one place a client reads
+    as "what is wrong at this company". Each row stated "Cap: none" in its own
+    text, so the producer had already noticed the mismatch and filed it here
+    anyway — which is why this needs a gate and not a note.
+
+    The contract agrees with the owner: C2 scopes the register to "the
+    client's OWN open matters", and "an issue is only interesting here
+    because it CAPS something".
+
+    THE EMPTY REGISTER IS THE OTHER HALF, and it is the half that matters
+    more often. Most institutions have no open enforcement matter, so most
+    registers are empty and empty is the correct answer. But an empty
+    register that names no search is indistinguishable from one nobody ran —
+    the defect class this build keeps paying for. Gulf's repaired register
+    names five databases searched, the one civil matter it found against the
+    PARENT, and why that matter reaches no scored capability. That is a
+    finding. A bare `issues: []` is not.
+    """
+    if page != "context" or not isinstance(payload, dict):
+        return []
+    body = payload.get("issue_register")
+    if not isinstance(body, dict):
+        return []
+    issues = [i for i in (body.get("issues") or []) if isinstance(i, dict)]
+
+    out = []
+    for i, issue in enumerate(issues):
+        text = _issue_text(issue)
+        hit = _ASSESSMENT_SUBJECT.search(text)
+        if hit and not _ENTITY_MATTER.search(text):
+            out.append(_reason(
+                "CG-46", "issue_register", f"context.issue_register.issues[{i}]",
+                f"this row's subject is the assessment, not the institution — "
+                f"it turns on '{hit.group(0)}'. The register is scoped to the "
+                f"client's OWN open matters: enforcement actions, breaches, "
+                f"conduct matters, news that bears on the scores. A finding "
+                f"about how this run was evidenced is real and worth keeping, "
+                f"and its home is the findings memory (record_finding) or the "
+                f"safeguard disclosure, not the card a client reads as 'what "
+                f"is wrong at my company'. Telling a client their own file is "
+                f"an open matter against them is the failure here."))
+    if issues:
+        return out[:6]
+
+    # Empty — which is usually correct, and has to prove it looked.
+    if not _says_it_searched(body):
+        out.append(_reason(
+            "CG-46", "issue_register", "context.issue_register.empty_state",
+            "the register is empty and names no search. Most institutions "
+            "have no open enforcement matter, so empty is usually the right "
+            "answer — but an empty register that cannot say where it looked "
+            "is indistinguishable from one nobody ran, and a client reading "
+            "'no issues' is entitled to know it is a result. Name the "
+            "databases queried (the federal enforcement registers, court "
+            "records, trade press), any matter found and set aside with the "
+            "reason it does not reach a scored capability, and what would "
+            "change the answer."))
+    return out[:6]
+
+
 #: The depth floors, and what each is a floor ON. Every one is already in the
 #: contract's own field docs; none had a reader until 2026-08-23.
 DEPTH_FLOORS = {
@@ -2367,6 +2691,9 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_contact_enrichment_baseline(page, payload))
     reasons.extend(_check_sentiment_projections_agree(
         conn, run_id, page, payload))
+    reasons.extend(_check_peer_scores_cascade(conn, run_id, page, payload))
+    reasons.extend(_check_cards_state_their_reach(conn, run_id, page, payload))
+    reasons.extend(_check_issue_register_is_the_entitys(page, payload))
 
     served = _served_figures(conn, run_id)
 

@@ -409,6 +409,84 @@ GATES = {
               "nor a tile and passes, which is gulf-coast-business-credit.",
               "block"),
 
+    "CG-44": ("A peer figure the assessment holds reaches the overview strip",
+              None,
+              "If the heatmap's focus areas carry peer scores, the overview "
+              "pillar strip carries peer figures too or says why they do not "
+              "roll up. And where a pillar row states both its own score and "
+              "a peer median, the delta is the subtraction of those two "
+              "within 0.05 and `direction` agrees with its sign.",
+              "Reported 2026-08-23: 'For Gulf and Axos, the overview has no "
+              "peer scores which have not been cascaded from the heatmaps.' "
+              "Neither surface was wrong in isolation, which is why no gate "
+              "saw it — a figure the assessment already held stopped one page "
+              "short of the page where a reader forms the comparison. Same "
+              "shape as CG-39 (recommendations written, never served) and "
+              "CG-43 (one dataset, two drifting projections). The arithmetic "
+              "half is invariant 9: a delta with both operands in hand is "
+              "computed, never left null and never restated from a source, "
+              "because a restated delta that drifts from its own operands is "
+              "the adjacent-column defect wearing a comparison's clothes. "
+              "gulf-coast-business-credit passes by being honest in both "
+              "directions: its focus areas carry peer_score null throughout "
+              "because the workbook states no area-level cohort, and its "
+              "strip still carries pillar medians with peer_n null and a "
+              "disclosure saying the cohort size was never stated.",
+              "block"),
+
+    "CG-45": ("A card proposing a platform states the client's reach into it",
+              None,
+              "Every platform_story card and every overview opportunity tile "
+              "carries a reach statement — what the client already holds in "
+              "that area, how that was established, and separately what could "
+              "not be seen about how much of it is used. A stated inability "
+              "to observe utilization is a complete answer; silence is not.",
+              "Reported 2026-08-23: 'The platform still ignores that Gulf has "
+              "a lot of the platform proposed. No work has been done to infer "
+              "utilization.' Both halves are one defect. Gulf licenses "
+              "Salesforce and Pardot already — its own intake brief asks for "
+              "help ON THE EXISTING INSTANCE — and four cards proposed the "
+              "Salesforce family as though the estate were empty. A card that "
+              "has not looked at what the client holds is not a "
+              "recommendation, it is a catalogue page. The gate cannot check "
+              "whether the reach is RIGHT; it checks that the card ANSWERED, "
+              "with enough text to carry a derivation, because naming the "
+              "platform again is not an answer. It must never push anyone "
+              "into inventing utilization: login counts, seat counts and "
+              "query volumes are not visible from outside, and 'nothing this "
+              "run can reach shows how much of the licence is actually used, "
+              "and no claim is made about them' passes. What fails is a card "
+              "that never raises the question, because a reader cannot tell "
+              "that from one whose author looked and found the estate empty.",
+              "block"),
+
+    "CG-46": ("The issue register holds the institution's own matters", None,
+              "An issue row whose subject is the assessment's own "
+              "construction — evidence coverage, uncited items, source "
+              "concentration, the scoring workbook — is refused unless it "
+              "also names a matter of the institution's. An empty register "
+              "must name the search that found nothing.",
+              "Reported 2026-08-23: 'Issue register for Gulf are not issues. "
+              "Issues entail enforcement actions; breaches; news that may "
+              "affect the entity's scores etc.' What the register held was "
+              "two findings about THE ASSESSMENT — 26 of 61 evidence items "
+              "uncited, source concentration across 58 of 70 cells. Both "
+              "true, both useful, both filed in the one place a client reads "
+              "as 'what is wrong at this company'. Each row stated 'Cap: "
+              "none' in its own text, so the producer had already noticed the "
+              "mismatch and filed it here anyway, which is why this needs a "
+              "gate and not a note. The contract agrees with the owner: C2 "
+              "scopes the register to 'the client's OWN open matters' and 'an "
+              "issue is only interesting here because it CAPS something'. The "
+              "empty half matters more often: most institutions have no open "
+              "enforcement matter, so most registers are empty and empty is "
+              "correct — but an empty register that names no search is "
+              "indistinguishable from one nobody ran, which is the defect "
+              "class this build keeps paying for. Findings about the run "
+              "itself belong in the findings memory or the safeguard "
+              "disclosure, and Gulf's were moved there (MEM-0209, MEM-0210).",
+              "block"),
+
     "CG-39": ("The run's recommendations reach the platform page", None,
               "When the run's bundle carries recommendations and the platform "
               "payload serves platform tiles, at least one recommendation "
