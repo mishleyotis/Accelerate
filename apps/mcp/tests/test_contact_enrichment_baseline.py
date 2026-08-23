@@ -236,3 +236,29 @@ def test_the_gate_is_registered_with_its_family_and_severity():
     assert GATES["CG-41"][-1] == "block"
     why = GATES["CG-41"][3]
     assert "Gulf" in why and "baseline" in why.lower()
+
+
+def test_the_refusal_quotes_the_container_it_actually_found():
+    """Invariant 12: a verdict names the gate, the JSON path and the
+    arithmetic. A path that says `roster` on a payload whose container is
+    `people` sends the producer to a field that is not there — and the seat
+    indices below it are then unreadable too.
+
+    This is a real hazard rather than a hypothetical: `_roster_of` accepts
+    four container names on purpose, because promoted payloads have used more
+    than one, and the first version of the refusal hard-coded `roster` in both
+    the path and every index.
+    """
+    for key in ("roster", "people", "leaders", "rows"):
+        out = _check_contact_enrichment_baseline(
+            "overview",
+            {"leadership": {key: [{"name": "A", "email": "a@x.org",
+                                   "enrichment_basis": BASIS},
+                                  {"name": "B"}]}})
+        assert ids(out) == ["CG-41"], key
+        assert out[0]["path"] == f"overview.leadership.{key}", out[0]["path"]
+        assert f"{key}[1]" in out[0]["message"], out[0]["message"]
+        # And no other container name leaks into the message.
+        for other in ("roster", "people", "leaders", "rows"):
+            if other != key:
+                assert f"{other}[" not in out[0]["message"], (key, other)

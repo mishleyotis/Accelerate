@@ -1840,11 +1840,18 @@ def _seat_contact_state(seat) -> str:
 
 
 def _roster_of(body):
+    """The seat list and the KEY it was found under.
+
+    The key travels with it because the refusal quotes a JSON path (invariant
+    12: a verdict names the gate, the path and the arithmetic). A path that
+    says `roster` on a payload whose container is `people` sends the producer
+    to a field that is not there.
+    """
     for k in ("roster", "people", "leaders", "rows"):
         v = body.get(k)
         if isinstance(v, list):
-            return v
-    return None
+            return v, k
+    return None, None
 
 
 def _check_contact_enrichment_baseline(page, payload):
@@ -1868,7 +1875,7 @@ def _check_contact_enrichment_baseline(page, payload):
     if not isinstance(body, dict):
         return []
     body = body.get("data") if isinstance(body.get("data"), dict) else body
-    roster = _roster_of(body or {})
+    roster, container = _roster_of(body or {})
     if not roster:
         return []
 
@@ -1886,10 +1893,10 @@ def _check_contact_enrichment_baseline(page, payload):
     n = len(roster)
     resolved = sum(1 for _, st in states if st == "resolved")
     negative = sum(1 for _, st in states if st == "recorded_negative")
-    where = ", ".join(f"roster[{i}]" for i in unknown[:12])
+    where = ", ".join(f"{container}[{i}]" for i in unknown[:12])
     more = "" if len(unknown) <= 12 else f" (+{len(unknown) - 12} more)"
     return [_reason(
-        "CG-41", "leadership", f"overview.leadership.{('roster')}",
+        "CG-41", "leadership", f"overview.leadership.{container}",
         f"{len(unknown)} of {n} roster seats record no contact-search "
         f"outcome — no route and no basis: {where}{more}. "
         f"({resolved} resolved with a basis, {negative} recorded a negative.) "
