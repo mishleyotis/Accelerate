@@ -340,8 +340,16 @@ jobs:
                  scripts/tests/ plugins/dma-insights/scripts/tests/ \
                  tests/skills/ infra/jobs/tests/ -q -rs -rf 2>&1 | tee /tmp/pytest.txt
           n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
-          echo "skipped: ${n:-0} (ceiling 11)"
-          if [ "${n:-0}" -gt 11 ]; then
+          # Ceiling raised 11 -> 12 on 2026-08-22 for exactly one test:
+          # test_evidence_verbatim.py::test_the_real_package_yields_real_excerpts,
+          # which runs end to end against a client package pulled from Drive
+          # and therefore cannot run on a runner that has no Drive identity.
+          # It is deliberately environment-gated, not quietly broken — every
+          # rule it exercises is also covered by unit tests in the same file
+          # that DO run here. Raise this number only with the same kind of
+          # note; the ratchet is the point.
+          echo "skipped: ${n:-0} (ceiling 12)"
+          if [ "${n:-0}" -gt 12 ]; then
             echo "--- the reasons, most common first ---"
             grep '^SKIPPED' /tmp/pytest.txt | sed 's/.*: //' | sort | uniq -c | sort -rn | head
             exit 1

@@ -1,8 +1,8 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "0.6.9",
-  "description": "The six Digital Maturity Assessment skills, 47 DMA agents and the remote DMA Insights MCP connector (33 tools) as one installable unit. The pre-synthesis gate now walks the whole pending queue rather than a hardcoded client list, so every unprocessed client that meets vetting is reachable. Every agent carries an explicit tool allow-list. Ships gates AG-11/12 and CG-26 through CG-38, per-surface anti-pattern rulebooks, and the shared platform-fit engine.",
+  "version": "0.7.0",
+  "description": "The six Digital Maturity Assessment skills, 47 DMA agents and the remote DMA Insights MCP connector (33 tools) as one installable unit. The pre-synthesis gate walks the whole pending queue rather than a hardcoded client list. Every agent carries an explicit tool allow-list. An evidence excerpt is read from a register column or left absent, never scavenged from a nearby line. Ships gates AG-11/12 and CG-26 through CG-38, per-surface rulebooks and the shared platform-fit engine.",
   "author": {
     "name": "Zennify \u2014 DMA Insights build"
   },
