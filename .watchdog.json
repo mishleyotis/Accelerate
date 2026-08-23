@@ -1,4 +1,88 @@
 {
+ "2383ed3c-17f8-4c20-8737-ad37ac364050": {
+  "fingerprint": "context:missing:-|heatmap:missing:-|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
+  "passed": [],
+  "missing": [
+   "context",
+   "heatmap",
+   "insights",
+   "overview",
+   "platform",
+   "techstack"
+  ],
+  "promotable": false,
+  "blocking": 6,
+  "claim_live": false,
+  "claim_held_by": "cowork-scheduled-synthesis-20260805",
+  "claim_expires_at": "2026-08-05T17:51:45.378498+00:00",
+  "state": "UNCLAIMED",
+  "run_id": "2383ed3c-17f8-4c20-8737-ad37ac364050",
+  "entity": "Capital Farm Credit",
+  "seen_at": 1787514668.2369673
+ },
+ "b33181f3-cbf2-4d51-ba7f-182f07f86dea": {
+  "fingerprint": "context:missing:-|heatmap:missing:-|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
+  "passed": [],
+  "missing": [
+   "context",
+   "heatmap",
+   "insights",
+   "overview",
+   "platform",
+   "techstack"
+  ],
+  "promotable": false,
+  "blocking": 6,
+  "claim_live": false,
+  "claim_held_by": "skill-client2-acuity",
+  "claim_expires_at": "2026-08-05T13:59:29.352482+00:00",
+  "state": "UNCLAIMED",
+  "run_id": "b33181f3-cbf2-4d51-ba7f-182f07f86dea",
+  "entity": "Acuity, A Mutual Insurance Company",
+  "seen_at": 1787514668.2369673
+ },
+ "edce02e8-d6ae-4f7c-9e54-4f3e9a4e8f74": {
+  "fingerprint": "context:missing:-|heatmap:FAIL:9c780acc-ad91-4a94-9d9e-5442582795e8|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
+  "passed": [],
+  "missing": [
+   "context",
+   "heatmap",
+   "insights",
+   "overview",
+   "platform",
+   "techstack"
+  ],
+  "promotable": false,
+  "blocking": 6,
+  "claim_live": false,
+  "claim_held_by": "b6f97535-828b-5567-bb3f-29ccb7385dc7",
+  "claim_expires_at": "2026-08-09T00:39:16.836091+00:00",
+  "state": "UNCLAIMED",
+  "run_id": "edce02e8-d6ae-4f7c-9e54-4f3e9a4e8f74",
+  "entity": "Fisher Investments",
+  "seen_at": 1787514668.2369673
+ },
+ "31033d29-6634-4d5b-9cc9-8bc6f1e48edc": {
+  "fingerprint": "context:missing:-|heatmap:missing:-|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
+  "passed": [],
+  "missing": [
+   "context",
+   "heatmap",
+   "insights",
+   "overview",
+   "platform",
+   "techstack"
+  ],
+  "promotable": false,
+  "blocking": 6,
+  "claim_live": false,
+  "claim_held_by": "cowork-trial-1",
+  "claim_expires_at": "2026-08-05T05:01:13.982296+00:00",
+  "state": "UNCLAIMED",
+  "run_id": "31033d29-6634-4d5b-9cc9-8bc6f1e48edc",
+  "entity": "fpcu",
+  "seen_at": 1787514668.2369673
+ },
  "b1aca0f6-eba1-417c-b61e-4460f3f8c17f": {
   "fingerprint": "context:missing:-|heatmap:missing:-|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
   "passed": [],
@@ -18,11 +102,12 @@
   "state": "UNCLAIMED",
   "run_id": "b1aca0f6-eba1-417c-b61e-4460f3f8c17f",
   "entity": "Houlihan Lokey, Inc.",
-  "seen_at": 1787482170.816247
+  "seen_at": 1787514668.2369673
  },
- "60082d6f-c3b3-4507-9e03-4e36872a9ed1": {
-  "fingerprint": "context:PASS:79e08295-b968-4112-b125-c84735513c28|heatmap:PASS:ddab1032-69d0-463b-98df-84298dd07e40|insights:PASS:eacd29ad-0ec0-46e7-8078-59b7e08f5722|overview:PASS:8d7efd55-65c5-474f-92ee-b576ba5f0e3e|platform:PASS:cf4c8d68-49ae-4f2c-9976-3fa516387b01|techstack:PASS:bd58cced-2305-4b54-8c49-4810a6f963b5",
-  "passed": [
+ "52dcb6b8-8b05-420f-8bb0-b36ced59de2e": {
+  "fingerprint": "context:missing:-|heatmap:missing:-|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
+  "passed": [],
+  "missing": [
    "context",
    "heatmap",
    "insights",
@@ -30,17 +115,15 @@
    "platform",
    "techstack"
   ],
-  "missing": [],
-  "promotable": true,
-  "blocking": 0,
-  "claim_live": true,
-  "claim_held_by": "gcbc-finish-20260823",
-  "claim_expires_at": "2026-08-23T12:17:31.520146+00:00",
-  "state": "READY_TO_PROMOTE",
-  "run_id": "60082d6f-c3b3-4507-9e03-4e36872a9ed1",
-  "entity": "Gulf Coast Business Credit",
-  "seen_at": 1787482170.816247,
-  "resume": "All six pages PASS and the run is promotable, and nothing has been promoted. The work is done and serving nothing.\n\nRun 60082d6f-c3b3-4507-9e03-4e36872a9ed1 (Gulf Coast Business Credit), read from the connector just now:\n  ALREADY BANKED (do NOT reproduce these): context, heatmap, insights, overview, platform, techstack\n  still missing: none\n  promotable: True   blocking reasons: 0\n  claim: gcbc-finish-20260823 live=True expires 2026-08-23T12:17:31.520146+00:00\n\nBefore dispatching anything, establish what already exists and do not redo it. A section whose payload is banked gets RE-VALIDATED, not re-produced:\n  python3 plugins/dma-insights/scripts/artifact_store.py find --root <artifacts-dir> --run 60082d6f\nThen call get_run_progress yourself and continue from what it says, not from what this message says \u2014 this was true when it was written."
+  "promotable": false,
+  "blocking": 6,
+  "claim_live": false,
+  "claim_held_by": "aa7dc4ec-0563-5f85-812e-ecf9ea406edb",
+  "claim_expires_at": "2026-08-20T11:37:44.277180+00:00",
+  "state": "UNCLAIMED",
+  "run_id": "52dcb6b8-8b05-420f-8bb0-b36ced59de2e",
+  "entity": "Hughes Federal Credit Union",
+  "seen_at": 1787514668.2369673
  },
  "bf3754b8-5c0f-444f-bde2-550d9f35f27f": {
   "fingerprint": "context:missing:-|heatmap:missing:-|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
@@ -61,7 +144,7 @@
   "state": "UNCLAIMED",
   "run_id": "bf3754b8-5c0f-444f-bde2-550d9f35f27f",
   "entity": "Lawley",
-  "seen_at": 1787482170.816247
+  "seen_at": 1787514668.2369673
  },
  "a326d784-3a63-4e10-829d-d1f379ab9711": {
   "fingerprint": "context:missing:-|heatmap:missing:-|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
@@ -82,6 +165,112 @@
   "state": "UNCLAIMED",
   "run_id": "a326d784-3a63-4e10-829d-d1f379ab9711",
   "entity": "Richwood Bank",
-  "seen_at": 1787482170.816247
+  "seen_at": 1787514668.2369673
+ },
+ "caa5597b-3f63-4894-826d-19da96488bcb": {
+  "fingerprint": "context:missing:-|heatmap:missing:-|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
+  "passed": [],
+  "missing": [
+   "context",
+   "heatmap",
+   "insights",
+   "overview",
+   "platform",
+   "techstack"
+  ],
+  "promotable": false,
+  "blocking": 6,
+  "claim_live": false,
+  "claim_held_by": "b6f97535-828b-5567-bb3f-29ccb7385dc7",
+  "claim_expires_at": "2026-08-09T01:40:49.587165+00:00",
+  "state": "UNCLAIMED",
+  "run_id": "caa5597b-3f63-4894-826d-19da96488bcb",
+  "entity": "kitsap-credit-union",
+  "seen_at": 1787514668.2369673
+ },
+ "1c4eeae7-c1e5-4e65-8c59-848defe2964d": {
+  "fingerprint": "context:missing:-|heatmap:FAIL:8c14dc48-e16e-480e-b157-6e8832e1e237|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
+  "passed": [],
+  "missing": [
+   "context",
+   "heatmap",
+   "insights",
+   "overview",
+   "platform",
+   "techstack"
+  ],
+  "promotable": false,
+  "blocking": 6,
+  "claim_live": false,
+  "claim_held_by": "b6f97535-828b-5567-bb3f-29ccb7385dc7",
+  "claim_expires_at": "2026-08-09T00:39:36.732207+00:00",
+  "state": "UNCLAIMED",
+  "run_id": "1c4eeae7-c1e5-4e65-8c59-848defe2964d",
+  "entity": "Frost Bank",
+  "seen_at": 1787514668.2369673
+ },
+ "087b41d2-a748-4671-802e-89ad899aac5b": {
+  "fingerprint": "context:missing:-|heatmap:FAIL:5c361032-9c63-4b91-8126-9ca900df3bbf|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
+  "passed": [],
+  "missing": [
+   "context",
+   "heatmap",
+   "insights",
+   "overview",
+   "platform",
+   "techstack"
+  ],
+  "promotable": false,
+  "blocking": 6,
+  "claim_live": false,
+  "claim_held_by": "b6f97535-828b-5567-bb3f-29ccb7385dc7",
+  "claim_expires_at": "2026-08-09T01:28:45.688882+00:00",
+  "state": "UNCLAIMED",
+  "run_id": "087b41d2-a748-4671-802e-89ad899aac5b",
+  "entity": "northern-trust",
+  "seen_at": 1787514668.2369673
+ },
+ "c5b49b90-2dd3-41ad-95c9-0a8325a41980": {
+  "fingerprint": "context:missing:-|heatmap:missing:-|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
+  "passed": [],
+  "missing": [
+   "context",
+   "heatmap",
+   "insights",
+   "overview",
+   "platform",
+   "techstack"
+  ],
+  "promotable": false,
+  "blocking": 6,
+  "claim_live": false,
+  "claim_held_by": "b6f97535-828b-5567-bb3f-29ccb7385dc7",
+  "claim_expires_at": "2026-08-08T17:25:55.409485+00:00",
+  "state": "UNCLAIMED",
+  "run_id": "c5b49b90-2dd3-41ad-95c9-0a8325a41980",
+  "entity": "Bank OZK",
+  "seen_at": 1787514668.2369673
+ },
+ "dfaa4936-a69c-484e-82d1-23309f3e9eab": {
+  "fingerprint": "context:missing:-|heatmap:PASS:98e3aa75-058b-4bc1-b980-1ae1ec7664ce|insights:missing:-|overview:missing:-|platform:missing:-|techstack:missing:-",
+  "passed": [
+   "heatmap"
+  ],
+  "missing": [
+   "context",
+   "insights",
+   "overview",
+   "platform",
+   "techstack"
+  ],
+  "promotable": false,
+  "blocking": 5,
+  "claim_live": false,
+  "claim_held_by": "b6f97535-828b-5567-bb3f-29ccb7385dc7",
+  "claim_expires_at": "2026-08-08T17:28:17.524645+00:00",
+  "state": "UNCLAIMED",
+  "run_id": "dfaa4936-a69c-484e-82d1-23309f3e9eab",
+  "entity": "mercury",
+  "seen_at": 1787514668.2369673
  }
 }
