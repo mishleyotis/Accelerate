@@ -1,10 +1,10 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "The six Digital Maturity Assessment skills, 47 DMA agents and the remote DMA Insights MCP connector (33 tools) as one installable unit. The pre-synthesis gate walks the whole pending queue and can carry two clients a firing, with reserves to fall back on when a package fails vetting. Every agent carries an explicit tool allow-list. Gate M fails a run whose evidence cannot be opened or whose excerpts were stitched. Ships AG-11/12 and CG-26 through CG-38 and the shared platform-fit engine.",
   "author": {
-    "name": "Zennify \u2014 DMA Insights build"
+    "name": "Zennify — DMA Insights build"
   },
   "license": "UNLICENSED",
   "keywords": [

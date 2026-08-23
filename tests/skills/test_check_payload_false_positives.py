@@ -404,7 +404,7 @@ def test_every_prose_key_still_gets_the_clipped_check(key):
 # The path is now a repository location, overridable for a local
 # investigation. To turn these six on:
 #
-#     python3 scripts/fetch_staged_fixtures.py <run_id>
+#     python3 scripts/fetch_staged_fixtures.py <run_id> --slug <dir>
 #
 # The payloads themselves are gitignored and always will be. What makes them
 # worth testing against is what makes them unpublishable: get_staged_payload

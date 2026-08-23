@@ -80,8 +80,12 @@ def fetch_page(run_id: str, page: str) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("run_id")
-    ap.add_argument("--slug", default="logix",
-                    help="directory under fixtures/staged_runs/ (default: logix)")
+    ap.add_argument("--slug", required=True,
+                    help="directory under fixtures/staged_runs/ to fill. "
+                         "REQUIRED: this defaulted to one client's slug, so "
+                         "a run id fetched without --slug landed in that "
+                         "client's directory and looked like its data. "
+                         "Naming the destination is cheaper than noticing")
     ap.add_argument("--pages", nargs="*", default=list(PAGES))
     args = ap.parse_args()
 

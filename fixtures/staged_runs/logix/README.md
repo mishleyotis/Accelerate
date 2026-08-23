@@ -35,7 +35,7 @@ CI** — reported in the run's skip list (`-rs`), not hidden.
 
 On a machine that already holds connector credentials:
 
-    python3 scripts/fetch_staged_fixtures.py d7ed1d90-d406-4e8e-9ab0-75f91a0c15bb
+    python3 scripts/fetch_staged_fixtures.py d7ed1d90-d406-4e8e-9ab0-75f91a0c15bb --slug logix
 
 and the six cases run. `DMA_STAGED_DIR` points them at a different directory
 for a local investigation against another run.
