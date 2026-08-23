@@ -245,6 +245,14 @@ def _rows_from_xlsx(path: Path):
 #: `PX-P1C1.1.1-1`. `EID_RE` rejected every one, `merge` returned 0 records,
 #: and the tool printed `"records": 0` — which reads as an empty package
 #: rather than as an id vocabulary nothing recognised.
+#: An id cell explicitly saying "no evidence". Counting these as
+#: unrecognised ids buried the real signal under absence markers.
+#: A trailing qualifier is part of the absence, not an id: measured
+#: `NO_EVIDENCE (ladder-complete)` on 188 rows of one workbook — the
+#: assessment saying the search ladder ran to completion and found nothing.
+ABSENCE_MARK_RE = re.compile(
+    r"^(n/?a|none|no[_ ]?evidence|-+)\s*(\(.*\))?$", re.I)
+
 EID_WIDE_RE = re.compile(
     r"^([A-Z]{1,6}[-_][A-Z0-9][A-Z0-9._-]*\d)(:F\d+)?$", re.I)
 
@@ -266,6 +274,71 @@ def _base_eid(value: str, wide: bool = False) -> str | None:
         return None
     m = EID_RE.match(v) or (EID_WIDE_RE.match(v) if wide else None)
     return m.group(1).upper() if m else None
+
+
+#: Delimiters a citation cell uses between ids: `E-001, E-002` and
+#: `E-030:F9;E-031:F1` are both measured spellings.
+MULTI_SPLIT = re.compile(r"[;,\n]+")
+
+#: URL lists measured `;`-separated (and occasionally comma-separated); a
+#: comma INSIDE a URL must not shred it, so the comma split fires only when
+#: the next token is itself a URL.
+_URL_SPLIT = re.compile(r"[;\n]+|,(?=\s*https?://)", re.I)
+#: Dates like "Jan 5, 2026" carry commas that are not delimiters.
+_PLAIN_SPLIT = re.compile(r"[;\n]+")
+
+
+def split_citation_ids(value: str) -> list | None:
+    """The ids in a multi-citation cell, or None when this is not one.
+
+    THE MEASURED SHAPE (2026-08-23, 15 packages of the last-60 cohort):
+    2,532 rows whose named id column carries a DELIMITED LIST — `E-001,
+    E-002, E-003` on research tabs, `E-030:F9;E-031:F1` fact-qualified on
+    scoring tabs — 9,935 id references in all. `_base_eid` matches one id,
+    so every such row landed in `unrecognised` whole: 1,218 rows on one
+    client. They are CITATIONS (a subcap naming its evidence), and dropping
+    them threw away the very Evidence_IDs/Source_URLs pairing the tab
+    exists to state.
+    """
+    toks = [t.strip() for t in MULTI_SPLIT.split(value) if t.strip()]
+    if len(toks) < 2:
+        return None
+    ids = [_base_eid(t, wide=True) for t in toks]
+    if all(ids):
+        return ids
+    return None
+
+
+def expand_citation_row(row, ids, rel, records, conflicts) -> None:
+    """Per-id records from one citation row, attaching a field value ONLY
+    when that field's own cell splits into a list of exactly the same
+    length — measured: 44% of multi-id rows carry a positionally parallel
+    source_urls list, and for those the pairing is stated by the row
+    itself. Everything else attaches nothing: a single URL against three
+    ids is the ROW's source, and guessing which id owns it is how a drawer
+    gets a wrong link.
+
+    EXCERPTS ARE NEVER SPLIT-ATTACHED. An excerpt is one verbatim span;
+    splitting a cell on delimiters and attaching the fragments manufactures
+    quotations — the Houlihan Lokey fabrication in miniature. A citation
+    row contributes urls, dates, sources, tiers; never spans.
+    """
+    for i, eid in enumerate(ids):
+        rec = records.setdefault(eid, {"eid": eid, "provenance": []})
+        if rel not in rec["provenance"]:
+            rec["provenance"].append(rel)
+        for field in FIELDS:
+            if field == "excerpt":
+                continue
+            v, rank, col = _pick(row, field)
+            if v is None:
+                continue
+            splitter = _URL_SPLIT if field == "url" else _PLAIN_SPLIT
+            parts = [t.strip() for t in splitter.split(str(v)) if t.strip()]
+            if len(parts) != len(ids):
+                continue            # not parallel: attach nothing, guess nothing
+            _attach(rec, eid, field, parts[i], rank, col, rel, conflicts,
+                    how="citation")
 
 
 def _evidence_shaped(hdr: list) -> bool:
@@ -307,6 +380,15 @@ def merge(package: Path) -> tuple[dict, list, dict]:
                                if isinstance(v, str) and _base_eid(v)), None)
             if not raw_id:
                 continue
+            if named_col:
+                multi = split_citation_ids(str(raw_id))
+                if multi:
+                    expand_citation_row(row, multi, rel, records, conflicts)
+                    continue
+                if ABSENCE_MARK_RE.match(str(raw_id).strip()):
+                    continue        # "N/A" / "NO_EVIDENCE" in an id column is
+                                    # the row saying it cites nothing — an
+                                    # explicit absence, not an unrecognised id
             eid = _base_eid(str(raw_id), wide=named_col)
             if not eid:
                 # NOT SILENT. This `continue` dropped 1,029 URL-carrying rows
@@ -322,35 +404,41 @@ def merge(package: Path) -> tuple[dict, list, dict]:
                 rec["provenance"].append(rel)
             for field in FIELDS:
                 v, rank, col = _pick(row, field)
-                if v is None:
-                    continue
-                if field == "excerpt" and (len(v) < 50
-                                          or SERIALIZED_RE.search(v)):
-                    continue        # below the floor, or not a quotation
-                old = rec.get(field)
-                if old is None:
-                    rec[field] = v
-                    rec.setdefault("_rank", {})[field] = rank
-                    rec.setdefault("_store", {})[field] = rel
-                    rec.setdefault("field_provenance", {})[field] = {
-                        "how": "register", "store": rel, "column": col}
-                    continue
-                if field == "url" and old.rstrip("/") != v.rstrip("/"):
-                    conflicts.append({"eid": eid, "field": "url",
-                                      "values": [old, v], "store": rel})
-                elif field == "date" and old != v:
-                    old_rank = rec.get("_rank", {}).get("date", 99)
-                    if rank < old_rank:
-                        rec["date"] = v          # better column wins quietly
-                        rec["_rank"]["date"] = rank
-                        rec["_store"]["date"] = rel
-                        rec.setdefault("field_provenance", {})["date"] = {
-                            "how": "register", "store": rel, "column": col}
-                    elif (rank == old_rank
-                          and rec.get("_store", {}).get("date") != rel):
-                        conflicts.append({"eid": eid, "field": "date",
-                                          "values": [old, v], "store": rel})
+                _attach(rec, eid, field, v, rank, col, rel, conflicts)
     return records, conflicts, unrecognised
+
+
+def _attach(rec, eid, field, v, rank, col, rel, conflicts, how="register"):
+    """One field value onto one record — the single place the better-column
+    and conflict rules live, so the citation-expansion path cannot drift from
+    the register path."""
+    if v is None:
+        return
+    if field == "excerpt" and (len(v) < 50 or SERIALIZED_RE.search(v)):
+        return                      # below the floor, or not a quotation
+    old = rec.get(field)
+    if old is None:
+        rec[field] = v
+        rec.setdefault("_rank", {})[field] = rank
+        rec.setdefault("_store", {})[field] = rel
+        rec.setdefault("field_provenance", {})[field] = {
+            "how": how, "store": rel, "column": col}
+        return
+    if field == "url" and old.rstrip("/") != v.rstrip("/"):
+        conflicts.append({"eid": eid, "field": "url",
+                          "values": [old, v], "store": rel})
+    elif field == "date" and old != v:
+        old_rank = rec.get("_rank", {}).get("date", 99)
+        if rank < old_rank:
+            rec["date"] = v          # better column wins quietly
+            rec["_rank"]["date"] = rank
+            rec["_store"]["date"] = rel
+            rec.setdefault("field_provenance", {})["date"] = {
+                "how": how, "store": rel, "column": col}
+        elif (rank == old_rank
+              and rec.get("_store", {}).get("date") != rel):
+            conflicts.append({"eid": eid, "field": "date",
+                              "values": [old, v], "store": rel})
 
 
 #: Fields a corpus SCAN may fill, and the only one on the list.

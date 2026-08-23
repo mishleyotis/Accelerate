@@ -152,3 +152,121 @@ def test_merge_returns_three_things(tmp_path):
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── multi-id citation cells, the measured 9,935-reference mode ────────────
+#
+# 2,532 rows across 15 packages of the last-60 cohort carry a DELIMITED LIST
+# in their named id column — `E-001, E-002` on research tabs,
+# `E-030:F9;E-031:F1` fact-qualified on scoring tabs — beside a source_urls
+# cell that is a parallel list on 44% of them. `_base_eid` matches one id,
+# so every such row dropped whole: 1,218 on one client. After expansion the
+# same 15 packages went from 80% to 98% URL coverage.
+
+
+def _citation_pkg(tmp_path, ids, urls, extra_cols=None):
+    root = tmp_path / "pkg"
+    (root / "03_scoring_workbook").mkdir(parents=True)
+    wb = openpyxl.Workbook(); wb.remove(wb.active)
+    ws = wb.create_sheet("P1_Subcap_Scoring")
+    hdr = ["SubCap_ID", "Score", "Evidence_IDs", "Source_URLs"]
+    row = ["P1C1.1", 3, ids, urls]
+    for k, v in (extra_cols or {}).items():
+        hdr.append(k); row.append(v)
+    ws.append(hdr); ws.append(row)
+    wb.save(root / "03_scoring_workbook" / "DMA_Scoring_Workbook_X.xlsx")
+    return root
+
+
+def test_parallel_lists_pair_positionally(tmp_path):
+    """The 44% case: id list and url list the same length — the pairing is
+    stated by the row itself."""
+    root = _citation_pkg(tmp_path, "E-001; E-002; E-003",
+                         "https://a.test/1; https://b.test/2; https://c.test/3")
+    records, _, unrec = en.merge(root)
+    assert set(records) == {"E-001", "E-002", "E-003"}
+    assert records["E-002"]["url"] == "https://b.test/2"
+    assert sum(len(v) for v in unrec.values()) == 0
+    assert records["E-002"]["field_provenance"]["url"]["how"] == "citation"
+
+
+def test_a_single_url_against_many_ids_attaches_to_none(tmp_path):
+    """A single URL against three ids is the ROW's source; guessing which id
+    owns it is how a drawer gets a wrong link. The ids are still minted —
+    they are real citations — with nothing attached."""
+    root = _citation_pkg(tmp_path, "E-001, E-002, E-003", "https://only.test/x")
+    records, _, _ = en.merge(root)
+    assert set(records) == {"E-001", "E-002", "E-003"}
+    assert all("url" not in records[e] for e in records)
+
+
+def test_mismatched_list_lengths_attach_nothing(tmp_path):
+    root = _citation_pkg(tmp_path, "E-001; E-002; E-003",
+                         "https://a.test/1; https://b.test/2")
+    records, _, _ = en.merge(root)
+    assert set(records) == {"E-001", "E-002", "E-003"}
+    assert all("url" not in records[e] for e in records)
+
+
+def test_fact_qualified_ids_resolve_to_their_base(tmp_path):
+    """`E-030:F9;E-031:F1` — the scoring tabs' spelling. The fact suffix
+    names which fact inside the id; the record is the id."""
+    root = _citation_pkg(tmp_path, "E-030:F9;E-031:F1",
+                         "https://a.test/1;https://b.test/2")
+    records, _, _ = en.merge(root)
+    assert set(records) == {"E-030", "E-031"}
+    assert records["E-031"]["url"] == "https://b.test/2"
+
+
+def test_an_excerpt_is_never_split_attached(tmp_path):
+    """An excerpt is ONE verbatim span. Splitting a cell on delimiters and
+    attaching the fragments manufactures quotations — the fabrication
+    incident in miniature. Even a length-matched excerpt list is refused."""
+    long_a = "A" * 60
+    long_b = "B" * 60
+    root = _citation_pkg(tmp_path, "E-001; E-002",
+                         "https://a.test/1; https://b.test/2",
+                         extra_cols={"Evidence_Excerpt": f"{long_a}; {long_b}"})
+    records, _, _ = en.merge(root)
+    assert all("excerpt" not in records[e] for e in records), (
+        "a split fragment attached as an excerpt is a fabricated span")
+
+
+def test_a_url_containing_a_comma_is_not_shredded(tmp_path):
+    """Comma splits only when the next token is itself a URL."""
+    u1 = "https://a.test/report?ids=1,2,3"
+    u2 = "https://b.test/x"
+    root = _citation_pkg(tmp_path, "E-001, E-002", f"{u1}, {u2}")
+    records, _, _ = en.merge(root)
+    assert records["E-001"]["url"] == u1
+    assert records["E-002"]["url"] == u2
+
+
+def test_absence_markers_with_qualifiers_are_not_unrecognised(tmp_path):
+    """Measured: 188 rows of `NO_EVIDENCE (ladder-complete)` in one id
+    column — the assessment stating its search ladder completed empty. An
+    explicit absence is the row's statement, never an unrecognised id."""
+    root = tmp_path / "pkg"
+    (root / "01_evidence").mkdir(parents=True)
+    (root / "01_evidence" / "evidence_index.csv").write_text(
+        "evidence_id,url\n"
+        "NO_EVIDENCE (ladder-complete),\n"
+        "N/A,\n"
+        "E-001,https://x.test/1\n")
+    records, _, unrec = en.merge(root)
+    assert set(records) == {"E-001"}
+    assert sum(len(v) for v in unrec.values()) == 0
+
+
+def test_citation_rows_never_shadow_the_register(tmp_path):
+    """A citation-supplied url is rank-arbitrated by the same _attach rules
+    as everything else — a register that later states a different url is a
+    recorded conflict, not a silent overwrite."""
+    root = _citation_pkg(tmp_path, "E-001; E-002",
+                         "https://cite.test/1; https://cite.test/2")
+    (root / "01_evidence").mkdir(parents=True)
+    (root / "01_evidence" / "evidence_index.csv").write_text(
+        "evidence_id,url\nE-001,https://register.test/1\n")
+    records, conflicts, _ = en.merge(root)
+    assert any(c["eid"] == "E-001" and c["field"] == "url"
+               for c in conflicts), "the disagreement must be visible"
