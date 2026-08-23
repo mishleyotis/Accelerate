@@ -495,6 +495,65 @@ def dedup_remint_links(conn) -> int:
     return 0
 
 
+def backfill_evidence_urls(conn, groups, *, entity: str | None = None,
+                           dry_run: bool = False) -> int:
+    """Give stored evidence rows back the URL their package already states.
+
+    For runs ingested before 2026-08-18 the ingest did not write source_url at
+    all, so the drawer serves citations nobody can open — 757 of 894 on
+    T. Rowe Price. The package still holds them; this joins the stored id back
+    to its package-local one and fills ONLY what is NULL.
+
+        EVIDENCE_URL_BACKFILL=1 [EVIDENCE_URL_BACKFILL_ENTITY=<display_id>]
+                                [EVIDENCE_URL_BACKFILL_DRY=1]
+
+    Dry run first, always: it prints the same counts and writes nothing.
+    """
+    from pathlib import Path
+
+    from dma_worker.url_backfill import apply as _apply
+    from dma_worker.url_backfill import plan as _plan
+    from dma_worker.url_backfill import urls_from_package
+
+    cur = conn.cursor()
+    where, args = "", []
+    if entity:
+        where = " WHERE e.display_id = %s"
+        args = [entity]
+    cur.execute(
+        "SELECT e.display_id, i.e_id, i.source_url"
+        "  FROM evidence_index i JOIN entities e ON e.id = i.entity_id"
+        f"{where} ORDER BY e.display_id, i.e_id", args)
+    by_entity: dict = {}
+    for display_id, e_id, url in cur.fetchall():
+        by_entity.setdefault(display_id, []).append(
+            {"e_id": e_id, "source_url": url})
+
+    total_filled = total_unanswered = 0
+    for display_id, rows in sorted(by_entity.items()):
+        pkg_dir = Path(f"/root/.dma/packages/{display_id}")
+        if not pkg_dir.is_dir():
+            print(f"BACKFILL {display_id}: package not pulled locally, skipped "
+                  f"({len(rows)} rows left as they are)")
+            continue
+        urls = urls_from_package(pkg_dir)
+        rep = _plan(rows, urls)
+        print(f"BACKFILL {display_id}: considered {rep['considered']} | "
+              f"already had one {rep['already_had_one']} | "
+              f"fillable {len(rep['fills'])} | "
+              f"unanswered {len(rep['unanswered'])}")
+        if not dry_run and rep["fills"]:
+            n = _apply(cur, rep["fills"])
+            conn.commit()
+            print(f"BACKFILL {display_id}: filled {n}")
+            total_filled += n
+        total_unanswered += len(rep["unanswered"])
+    print(f"BACKFILL total: filled {total_filled} | "
+          f"still unanswered {total_unanswered}"
+          + ("  (DRY RUN, nothing written)" if dry_run else ""))
+    return 0
+
+
 def repair_evidence_namespace(conn, token, groups, limit: int = 0) -> int:
     """Re-land the package evidence the id collision left unpersistable.
 
@@ -876,6 +935,14 @@ def main() -> int:
 
         if os.environ.get("BACKFILL_EVIDENCE"):
             rc = backfill_evidence(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
+        if os.environ.get("EVIDENCE_URL_BACKFILL"):
+            rc = backfill_evidence_urls(
+                conn, groups,
+                entity=os.environ.get("EVIDENCE_URL_BACKFILL_ENTITY") or None,
+                dry_run=bool(os.environ.get("EVIDENCE_URL_BACKFILL_DRY")))
             conn.close()
             return rc
 
