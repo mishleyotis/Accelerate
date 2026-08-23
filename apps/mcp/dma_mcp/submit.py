@@ -41,6 +41,80 @@ def contract_version() -> str:
     return _CONTRACT_VERSION
 
 
+def mark_carry_through(cur, run_id, page, payload, reasons) -> None:
+    """Label every blocking reason that lands on content this submission did
+    not change.
+
+    GATE DEBT IS REAL AND IT IS NOT THE PRODUCER'S CHANGE. Measured
+    2026-08-23 (MEM-0177, MEM-0197): a heatmap resubmission drew 51 blocking
+    reasons, of which 14 (27%) were CG-23 and CG-27 on sections verified
+    BYTE-EXACT against a submission that had passed on 2026-08-17 — CG-23 was
+    created on 2026-08-18. One day of drift, and repairing any one section
+    re-exposed the whole page to a registry that had moved underneath it.
+
+    The charter forbids the obvious shortcut: a retained PASS is a DATED
+    observation, not a current state, and grandfathering it would put content
+    on a client surface this connector would refuse today (promote.py says so
+    in its own refusal text). So the debt is not waived — it is NAMED, which
+    is the difference between "your change has 51 problems" and "your change
+    has 37; the other 14 are on sections you did not touch, against a gate
+    younger than the last time they passed".
+
+    Adds `carry_through: true`, the prior submission id and its date to each
+    such reason. Never removes a reason and never changes a severity: a
+    verdict this cannot annotate is returned exactly as it arrived.
+    """
+    named = {r.get("section") for r in reasons if r.get("section")}
+    if not named:
+        return
+    try:
+        cur.execute(
+            """SELECT id, payload, submitted_at
+                 FROM submissions
+                WHERE run_id = %s AND page = %s
+                  AND enum_label(status) = 'PASS'
+             ORDER BY submitted_at DESC
+                LIMIT 1""", (run_id, page))
+        row = cur.fetchone()
+    except Exception:                                        # noqa: BLE001
+        # A comparison that could not run annotates nothing and says nothing
+        # false. The verdict is still complete; it simply lacks the labels.
+        return
+    if not row:
+        return
+    prior_id, prior_payload, prior_at = row[0], row[1], row[2]
+    if not isinstance(prior_payload, dict):
+        return
+    unchanged = set()
+    for name in named:
+        if name in prior_payload and name in payload:
+            # Byte-exact by canonical JSON: key order and whitespace are not
+            # content, and a producer that re-emitted the same section through
+            # a different serialiser did not change it.
+            a = json.dumps(prior_payload[name], sort_keys=True,
+                           separators=(",", ":"), default=str)
+            b = json.dumps(payload[name], sort_keys=True,
+                           separators=(",", ":"), default=str)
+            if a == b:
+                unchanged.add(name)
+    if not unchanged:
+        return
+    for r in reasons:
+        if r.get("section") in unchanged:
+            r["carry_through"] = True
+            r["unchanged_since"] = {
+                "submission_id": str(prior_id),
+                "passed_at": str(prior_at),
+                "note": ("this section is byte-identical to the submission "
+                         "named here, which PASSED. The reason is real and "
+                         "still blocks — a retained verdict is a dated "
+                         "observation — but it is debt against a gate set "
+                         "that moved, not a defect in this change. Repair it, "
+                         "and scope the repair to the whole page rather than "
+                         "to the section you meant to fix."),
+            }
+
+
 def _counts(payload: dict) -> dict:
     e_ids = set()
     for body in payload.values() if isinstance(payload, dict) else []:
@@ -162,6 +236,8 @@ def submit_page_payload(conn, run_id, page: str, payload: dict = None,
         p2, sg = validate_pass2(conn, run_id, page, payload, encoder=encoder)
         reasons.extend(p2)
         warnings.extend(sg)
+    if isinstance(payload, dict):
+        mark_carry_through(cur, run_id, page, payload, reasons)
     status = "FAIL" if any(r["severity"] == "block" for r in reasons) else "PASS"
     # The transport facts ride in `counts`, not in a gate: how the bytes
     # arrived, how many there were and their digest. A producer that has just
