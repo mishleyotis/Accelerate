@@ -748,8 +748,8 @@ is the only thing that asks.
 
 **Session routines have no reconciler today — reconciliation is manual.**
 This file is their declaration; the check is `list_triggers` (CCR) diffed
-against section 2 — name, cron, enabled state, fresh-session mode, and the
-prompt itself, which is why 2a's live prompt is quoted verbatim. The
+against section 2 — name, cron, enabled state, fresh-session mode, **model**,
+and the prompt itself, which is why 2a's live prompt is quoted verbatim. The
 `/dma-insights:doctor` command checks plugin, identity, token audience and
 connector reachability and has **no routine check yet**; when it grows one,
 it should perform exactly this diff. Until then the diff belongs to the
@@ -758,3 +758,35 @@ the gap is examined at least weekly by the one routine whose job is noticing
 what quietly stopped holding. A missing, paused or drifted trigger found by
 that diff is a finding like any other: recorded, measured, and closed by a
 refinement — not silently re-created.
+
+### Model, and why it is in the diff
+
+Added 2026-08-23 (MEM-0219). The owner's standing instruction is that
+everything defaults to Sonnet 5 while agents and subagents switch on their
+own configuration. The repo half is settled and tested: `.claude/settings.json`
+sets `"model": "sonnet"`, all 47 plugin agents declare their own model in
+frontmatter (33 sonnet · 13 opus · 1 haiku), and
+`scripts/tests/test_model_defaults.py` holds **both** halves — the default,
+and that the deliberate opus and haiku overrides survive, so nobody satisfies
+"everything on sonnet" by flattening the switching the same sentence asks for.
+
+None of that reaches a Routine. **A trigger that fires a fresh session takes
+its model from the trigger record, not from `settings.json`**, so the one
+setting that decides what a scheduled firing runs on was the one setting
+nothing tracked. Last direct observation, recorded in that test's docstring:
+lane A ran `claude-sonnet-5`; `dma-rectification-weekly`
+(`trig_01CoypdjU6bcwEewvRYxK3S3`) and `dma-refresh-drift-daily`
+(`trig_01CvwqVMuLzWyQUsgwor98Sx`) ran `claude-opus-5`.
+
+Those two are **not** assumed wrong. A rectifier and a drift scanner are
+reasoning-heavy work, which is exactly what an override is for — the point of
+putting model in the diff is that the value is *known and intended*, not that
+it is uniform. A model that differs from this file is a finding; a model this
+file records as a deliberate override is not.
+
+Per-routine model is deliberately **not** transcribed into section 2 yet: this
+session could not call `list_triggers` (every claude-code-remote MCP tool
+returns "requires approval" here), and writing an unverified value into a file
+whose whole discipline is verbatim accuracy would be worse than leaving the
+column empty. Fill it from a session that can read the triggers, and from then
+on the diff covers it.
