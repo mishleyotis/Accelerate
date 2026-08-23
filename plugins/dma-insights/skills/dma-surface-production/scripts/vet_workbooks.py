@@ -553,6 +553,46 @@ def vet_scoring(path: Path) -> None:
                          f"v5.0 (17). State what you inferred and from what.")
     print(f"cells seen: {len(set(cells))} · evidence ids seen: {len(set(e_ids))}")
 
+    # SCORING GRAIN IS A DISCLOSURE, NEVER A REFUSAL.
+    #
+    # Owner, 2026-08-23: the routines "default to rejecting in case of issues,
+    # rather than triaging and fixing the issues especially if package was
+    # already vetted and passed". This is the case that produced that
+    # sentence. dma-assessment's Phase-4 gate raises CRITICAL when a pillar
+    # tab holds fewer than 50 rows — "You are scoring at CAPABILITY level, not
+    # SUBCAPABILITY level" — and a vetter reading that as a refusal loses the
+    # client. Measured the same day: one package scored 128 of 722 cells and
+    # was refused on four such CRITICALs, while its rationales, evidence
+    # differentiation, proof columns, caps log, fact granularity and derived
+    # ceilings all PASSED.
+    #
+    # A coarser assessment is a real assessment. What it changes is how much
+    # of the grid carries a score, and that is a NUMBER THE PAYLOAD STATES —
+    # so it is pinned here, with its denominator, and the producer must carry
+    # it into the coverage disclosure rather than discovering it on screen.
+    scored = len({c for c in cells if CELL_RE.match(c)})
+    if scored:
+        # 400 is the floor between the two grains as the corpus actually
+        # shows them, not a rounded guess: measured 2026-08-23 across three
+        # packages, capability grain lands at 144 and subcapability grain at
+        # 713 and 795. Nothing observed sits between.
+        if scored < 400:
+            note("PIN",
+                 f"COARSE GRAIN: {scored} distinct cells carry a score. A "
+                 f"subcapability-grain assessment of this catalogue runs into "
+                 f"the hundreds, so this one is scored nearer capability "
+                 f"grain. That is a DISCLOSURE, not dirt: the grid serves "
+                 f"{scored} cells and the payload must say so — state the "
+                 f"count and its denominator in the coverage section, and "
+                 f"never present an unscored cell as an assessed one. "
+                 f"dma-assessment's Phase-4 gate calls this CRITICAL because "
+                 f"it is judging whether an ASSESSOR should ship the "
+                 f"workbook; you are judging whether six honest pages can be "
+                 f"produced from what was delivered, and they can.")
+        else:
+            note("PIN", f"grain: {scored} distinct scored cells — "
+                        f"subcapability grain. State the count in coverage.")
+
     # variant cells the workbook scored for OTHER sub-verticals. They are the
     # catalogue's, not this entity's, and the serve layer drops them — so a payload
     # that cites one cites a cell that renders nowhere.

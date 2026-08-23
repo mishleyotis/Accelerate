@@ -97,13 +97,41 @@ REPORT_APPENDICES_EXPECTED = 3
 # Data Classes
 # ---------------------------------------------------------------------------
 
+#: A check whose INPUT IS ABSENT did not run. It did not fail.
+#:
+#: Owner, 2026-08-23: the routines "default to rejecting in case of issues,
+#: rather than triaging and fixing". This constant is most of the mechanism
+#: behind that. Measured the same day (MEM-0158, MEM-0168): session
+#: accelerate-63 vetted three packages — all three carried governance
+#: artifacts asserting PASS / 0 CRITICAL, and a fresh gov_auditor returned
+#: CRITICAL on the same bytes, so all three were refused. Two of those
+#: CRITICALs were checks that never ran:
+#:
+#:   * AG-01 read an absent weight column as a list of ZEROS, so `if weights`
+#:     was satisfied, the sum was 0.0, and "weights do not sum to 1.0" fired
+#:     CRITICAL against a workbook generation that simply does not carry the
+#:     column.
+#:   * AG-08 required a sheet literally named `Summary` and reported its
+#:     absence as a CRITICAL aggregation failure.
+#:
+#: Neither says anything about the assessment. A verdict that cannot tell
+#: "this is wrong" from "I could not look" carries no information, and it
+#: costs a whole client — which is what it did, three times in one session.
+#: NOT_RUN carries the reason and never counts toward CRITICAL or FAIL.
+NOT_RUN = "NOT_RUN"
+
+
 class CheckResult:
     def __init__(self, check_id, status, severity, description, details=""):
         self.check_id = check_id
-        self.status = status  # PASS or FAIL
+        self.status = status  # PASS, FAIL or NOT_RUN
         self.severity = severity
         self.description = description
         self.details = details
+
+    @property
+    def ran(self) -> bool:
+        return self.status != NOT_RUN
 
     def to_dict(self):
         return {
@@ -113,6 +141,12 @@ class CheckResult:
             "description": self.description,
             "details": self.details,
         }
+
+
+def not_run(check_id, description, why):
+    """A check that could not look, said so. `why` names the missing input in
+    words an author can act on — never "check failed"."""
+    return CheckResult(check_id, NOT_RUN, "INFO", description, why)
 
 
 class Issue:
@@ -925,14 +959,41 @@ def run_aggregation_checks(wb):
             if cap_id:
                 subcap_data[str(cap_id)].append(row)
 
-    # AG-01: Subcap weights sum to 1.0 per capability
-    ag01_fails = []
+    # AG-01: Subcap weights sum to 1.0 per capability.
+    #
+    # ONLY WHERE THERE ARE WEIGHTS TO SUM. The old form defaulted a missing
+    # column to 0 inside the comprehension, so a workbook generation with no
+    # weight column produced a non-empty list of zeros: `if weights` passed,
+    # the sum was 0.0, and every capability was reported as violating a rule
+    # about a column the workbook does not have. Measured 2026-08-23
+    # (MEM-0158): that CRITICAL, with AG-08's, set the FAIL that refused a
+    # canonical package.
+    WEIGHT_KEYS = ("Weight", "weight", "Subcap_Weight", "subcap_weight",
+                   "Weight_Pct", "Weighting")
+
+    def _weight(row):
+        for k in WEIGHT_KEYS:
+            if k in row and str(row[k]).strip() not in ("", "None"):
+                return sf(row[k])
+        return None
+
+    ag01_fails, ag01_weighed, ag01_unweighed = [], 0, 0
     for cap_id, subcaps in subcap_data.items():
-        weights = [sf(s.get("Weight", s.get("weight", s.get("Subcap_Weight", 0)))) for s in subcaps]
+        weights = [w for w in (_weight(s) for s in subcaps) if w is not None]
+        if not weights:
+            ag01_unweighed += 1
+            continue                       # nothing to sum: not a violation
+        ag01_weighed += 1
         wt_sum = sum(weights)
-        if weights and abs(wt_sum - 1.0) > 0.01:
+        if abs(wt_sum - 1.0) > 0.01:
             ag01_fails.append((cap_id, round(wt_sum, 4)))
-    if not ag01_fails:
+    if not ag01_weighed:
+        results.append(not_run(
+            "AG-01", "Subcap weights sum to 1.0 per capability",
+            f"no weight column in any of {len(subcap_data)} capabilities — "
+            f"this workbook generation does not carry one, so there is "
+            f"nothing to sum. Looked for: {', '.join(WEIGHT_KEYS)}"))
+    elif not ag01_fails:
         results.append(CheckResult("AG-01", "PASS", "CRITICAL",
             "Subcap weights sum to 1.0 per capability"))
     else:
@@ -1066,29 +1127,47 @@ def run_aggregation_checks(wb):
                     "Aggregation reconciliation",
                     "Recalculate aggregation from children weighted contributions"))
     else:
+        # "Cannot verify" is the definition of NOT_RUN, and it used to print
+        # as three CRITICAL failures. A package without a Calculation_Chain
+        # sheet is not a package whose arithmetic is wrong.
         for check_id in ["AG-05", "AG-06", "AG-07"]:
-            results.append(CheckResult(check_id, "FAIL", "CRITICAL",
-                f"{check_id}: Cannot verify — Calculation_Chain missing"))
+            results.append(not_run(
+                check_id, f"{check_id}: pillar/category aggregation",
+                "Calculation_Chain sheet absent — the aggregation this check "
+                "walks is not in this workbook, so the check did not run"))
 
-    # AG-08: Overall = pillar aggregation
-    if "Summary" in wb.sheetnames:
-        summary_rows, _ = sheet_to_dicts(wb["Summary"])
+    # AG-08: Overall = pillar aggregation.
+    #
+    # BY SHAPE, NOT BY LITERAL NAME. Requiring a sheet called exactly
+    # `Summary` graded a naming convention as an aggregation defect, and
+    # reported its absence as CRITICAL (MEM-0158). Real packages carry
+    # Pillar_Summary, Executive_Summary, Overall_Summary and Scoring_Summary.
+    summary_sheet = next(
+        (n for n in wb.sheetnames if n.strip().lower() == "summary"), None)
+    if not summary_sheet:
+        summary_sheet = next(
+            (n for n in wb.sheetnames if "summary" in n.strip().lower()), None)
+    if summary_sheet:
+        summary_rows, _ = sheet_to_dicts(wb[summary_sheet])
         results.append(CheckResult("AG-08", "PASS", "CRITICAL",
-            "Summary sheet present", f"{len(summary_rows)} rows"))
+            "Summary sheet present",
+            f"{summary_sheet}: {len(summary_rows)} rows"))
     else:
-        results.append(CheckResult("AG-08", "FAIL", "CRITICAL",
-            "Summary sheet present", "Summary sheet not found"))
+        results.append(not_run(
+            "AG-08", "Summary sheet present",
+            f"no sheet whose name contains 'summary' among "
+            f"{len(wb.sheetnames)} tabs — the pillar roll-up is not published "
+            f"in this workbook, so it could not be compared"))
 
     # AG-09: Calculation_Chain exists and populated
     if calc_rows:
         results.append(CheckResult("AG-09", "PASS", "CRITICAL",
             "Calculation_Chain populated", f"{len(calc_rows)} rows"))
     else:
-        results.append(CheckResult("AG-09", "FAIL", "CRITICAL",
-            "Calculation_Chain populated", "Sheet missing or empty"))
-        issues.append(Issue("CRITICAL", "AGGREGATION", "AG-09", "Calculation_Chain",
-            "Calculation_Chain sheet missing or empty", "Sheet check",
-            "Add Calculation_Chain sheet with aggregation hierarchy"))
+        results.append(not_run(
+            "AG-09", "Calculation_Chain populated",
+            "sheet missing or empty — recorded so the gap is visible, but an "
+            "absent sheet is not a failed aggregation"))
 
     # AG-10: N/A capabilities: >30% subcaps have NO_EVIDENCE
     na_caps_verified = True
@@ -2051,7 +2130,9 @@ def run_audit(assessment_dir, output_dir=None):
             all_issues.extend(cat_issues)
             passes = sum(1 for r in cat_results if r.status == "PASS")
             fails = sum(1 for r in cat_results if r.status == "FAIL")
-            print(f"  ✅ {passes} pass, ❌ {fails} fail")
+            skipped = sum(1 for r in cat_results if r.status == NOT_RUN)
+            tail = f", ⏭ {skipped} not run" if skipped else ""
+            print(f"  ✅ {passes} pass, ❌ {fails} fail{tail}")
         except Exception as e:
             print(f"  ⚠️ Error: {e}")
             all_results.append(CheckResult(f"{cat_name}_ERROR", "FAIL", "HIGH",
@@ -2064,14 +2145,22 @@ def run_audit(assessment_dir, output_dir=None):
     severity_counts = Counter(i.severity for i in all_issues)
     total_pass = sum(1 for r in all_results if r.status == "PASS")
     total_fail = sum(1 for r in all_results if r.status == "FAIL")
+    # NAMED, NEVER SILENT. A check that did not run is the thing a reader most
+    # needs to know about — the alternative to reporting it as CRITICAL is
+    # reporting it, not hiding it.
+    not_ran = [r for r in all_results if r.status == NOT_RUN]
 
     print()
     print(f"{'='*60}")
     print(f"AUDIT SUMMARY")
     print(f"{'='*60}")
-    print(f"Checks run:    {len(all_results)}")
+    print(f"Checks run:    {len(all_results) - len(not_ran)} of {len(all_results)}")
     print(f"Passed:        {total_pass}")
     print(f"Failed:        {total_fail}")
+    if not_ran:
+        print(f"Not run:       {len(not_ran)}  (input absent — NOT a failure)")
+        for r in not_ran:
+            print(f"  · {r.check_id}: {r.details}")
     print(f"Issues found:  {len(all_issues)}")
     print(f"  CRITICAL:    {severity_counts.get('CRITICAL', 0)}")
     print(f"  HIGH:        {severity_counts.get('HIGH', 0)}")
@@ -2103,9 +2192,14 @@ def run_audit(assessment_dir, output_dir=None):
         "audit_date": datetime.utcnow().isoformat() + "Z",
         "assessment_dir": str(assessment_dir),
         "governance_skill_version": "2.1",
-        "checks_run": len(all_results),
+        "checks_run": len(all_results) - len(not_ran),
+        "checks_declared": len(all_results),
         "checks_passed": total_pass,
         "checks_failed": total_fail,
+        # A reader of this file must be able to tell a clean audit from an
+        # audit that could not look. Both used to print the same numbers.
+        "checks_not_run": [
+            {"check_id": r.check_id, "why": r.details} for r in not_ran],
         "issues_found": len(all_issues),
         "severity_counts": dict(severity_counts),
         "verdict": verdict,

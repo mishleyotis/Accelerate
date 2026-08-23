@@ -166,15 +166,53 @@ institutions on a dashboard.
 
 ## Run the Phase-4 validator before you read a single score
 
+Resolve the workbook first — NEVER hand a path to a glob:
+
 ```bash
-python ../skills/dma-assessment/scripts/validate_scoring_quality.py <workbook.xlsx>
+W=$(python3 plugins/dma-insights/scripts/package_map.py <package> \
+      | python3 -c "import json,sys; print(json.load(sys.stdin)['scoring']['primary'])")
+python3 plugins/dma-insights/skills/dma-assessment/scripts/validate_scoring_quality.py "$W"
 ```
 
-It exits 1 on any CRITICAL, and a CRITICAL is a REFUSE — the package does not
-enter the system until the workbook is re-emitted. This is not advisory: the
-script is declared MANDATORY after Phase 4 by the assessment skill, and a
-package arriving here without it having passed is a package where nobody ran
-it.
+**Both halves of that matter, and both have cost a client.**
+
+*The path.* One package carries `DMA_Scoring_Workbook_Houlihan_Lokey.xlsx`,
+`DMA_Scoring_Workbook_HL.xlsx` and `DMA_Scoring_Workbook_HL_INTERIM.xlsx`; the
+second is the RESEARCH workbook and the third is a draft. Measured 2026-08-23:
+pointed at the research workbook the validator reports `712/712 rationales
+under 150 characters` and 2 CRITICAL — a devastating-looking verdict about a
+file that was never supposed to have rationales. `package_map` names the right
+one and sets the interim aside; a glob does not.
+
+*The verdict.* **A CRITICAL here is EVIDENCE FOR YOUR JUDGEMENT, NOT A
+REFUSAL.** This script is `dma-assessment`'s Phase-4 authoring gate. It
+answers "should an assessor ship this workbook?" — a different question from
+yours, which is "can six honest pages be produced from what was delivered?"
+A delivered package is not going to be re-emitted; the assessment is done.
+
+This text used to read "a CRITICAL is a REFUSE … this is not advisory", and on
+2026-08-23 one session vetted three packages, hit a CRITICAL in each, and
+refused all three — a whole firing and its reserve list, for nothing. Re-run
+today against the correctly-resolved workbooks: houlihan-lokey **0 CRITICAL**
+(17 WARNING), richwood-bank **0 CRITICAL** (18 WARNING) — both of those
+CRITICALs were the Caps_Applied_Log check that has since been fixed — and
+lawley 4 CRITICAL, every one of them the same thing: the workbook is scored at
+capability grain, 128 of 722 cells.
+
+So map what it says onto the closed refusal list, and if it does not map, it
+is a disclosure:
+
+| Phase-4 CRITICAL | What it is here |
+|---|---|
+| Scores outside 1.0–5.0 | V2 if it is genuinely a maturity column — read the header first, a column where EVERY value is out of range is a header nobody recognised |
+| Row count below the subcap floor ("scoring at CAPABILITY level") | **A DISCLOSURE.** The assessment is coarser-grained; the grid serves fewer cells and the payload states the coverage. Not dirt |
+| Template-stamped or short rationales | A disclosure — thin analysis is a quality the surfaces report, and it is the reason the thin-evidence flag exists |
+| Caps log absent | **Nothing.** An absent caps log means no caps were applied, which means there were no issues (owner, 2026-08-23) |
+| Ceiling asserted rather than derived | Worth a WARN and a named check at submit; the AG family re-derives it |
+
+Refuse only for a reason on the closed list. Everything else that this script
+raises goes into your report as a finding the producer must disclose — with
+the number, so the disclosure is checkable.
 
 **Read its denominators, not just its verdict.** The version of this script
 that shipped for most of the build checked the LEGACY 22-column sheets, found

@@ -100,6 +100,59 @@ ENRICHMENT_TOOLS = frozenset({
     "enrich-business", "match-business", "fetch-entities",
     "fetch-businesses-events", "enrich-prospects", "match-prospects",
     "autocomplete", "show-sample",
+
+    # ── added 2026-08-23, owner: "each time I have to approve MCP tool calls
+    # in the routine eg Tavily, Clay etc. Ensure this runs headless." Every
+    # one below is a call the routine's own rulebooks REQUIRE, so a prompt on
+    # it stops a firing as dead as a prompt on the connector.
+
+    # Clay. get-task-context is the one that mattered most: CG-32 makes it
+    # MANDATORY — Clay returns a task HANDLE and the rows arrive only from
+    # this call, so a producer that cannot make it reads an acknowledgement
+    # as a result. That is the defect CG-32 exists to refuse, and the gap in
+    # this list was making it unavoidable. `run_subroutine` and
+    # `run_subroutine_direct` are deliberately NOT here: a workspace
+    # subroutine is user-authored and can do anything, so it keeps its prompt.
+    "get-task-context", "list_subroutines",
+
+    # Vibe Prospecting / Explorium — the rest of the read surface.
+    # `export-to-csv` is deliberately absent: it sends data outward.
+    "fetch-entities-statistics", "fetch-prospects-events", "get-dataset",
+    "estimate-cost", "show-pricing-plans",
+
+    # Firecrawl research — reads papers and public repositories.
+    "firecrawl_research_search_papers", "firecrawl_research_read_paper",
+    "firecrawl_research_inspect_paper", "firecrawl_research_related_papers",
+    "firecrawl_research_search_github",
+
+    # Google Drive, READS ONLY. The routine reads the client's own intake
+    # folder through these. Every WRITE — create_file, update_file,
+    # share_file, trash_file, copy_file — is absent on purpose: the routine's
+    # own writes go through drive_fetch.py on the service account, never
+    # through this connector, so there is nothing to allow. get_file_
+    # permissions is also absent: it reads, but it reads who can see a
+    # document, and that is not enrichment.
+    "search_files", "read_file_content", "download_file_content",
+    "get_file_metadata", "list_recent_files",
+
+    # Quartr — transcripts and filings for the trajectory and thought-
+    # leadership surfaces. Reads only; save_item, write_workspace,
+    # move_saved_items and remove_saved_item keep their prompts.
+    "list_conferences", "get_conference", "read_transcript",
+    "list_saved_items",
+
+    # Context7 and the PDF viewer.
+    "resolve-library-id", "query-docs", "list_pdfs", "display_pdf",
+
+    # Dice, beside Indeed's three above.
+    "get_company",
+
+    # NOT ADDED, and the reason is the matching rule rather than the tool:
+    # this list matches the SUFFIX after the server segment, so a name that
+    # is a common English word would allow that word on ANY connector this
+    # session ever attaches. LunarCrush's `search`, `list`, `post`, `fetch`,
+    # `topic` and `creator` are all in that class. They are not in the
+    # routine's required set, so the safe reading is the narrow one.
 })
 
 ENRICHMENT_REASON = (
