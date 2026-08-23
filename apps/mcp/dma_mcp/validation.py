@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from pathlib import Path
 
 from .contracts import ENVELOPE, PAGES, sections
@@ -346,6 +347,12 @@ def _check_thought_leadership_unique(section, body) -> list:
 # drawer shows beside the label. See packages/shared/abbreviations.py.
 _VERBATIM_FIELDS = _ABBREV_VERBATIM
 
+#: How many CG-27 paths a verdict spells out before it switches to a count.
+#: Enough that a small section is fully enumerated and a producer can work
+#: straight down the list; past it, the total plus the per-abbreviation
+#: breakdown is what makes the repair converge.
+_CG27_LISTED = 24
+
 
 def _check_no_bare_abbreviations(page, section, body) -> list:
     """CG-27 — a client surface spells it out the first time.
@@ -367,8 +374,17 @@ def _check_no_bare_abbreviations(page, section, body) -> list:
     out = []
 
     def walk(node, path, key=None):
-        if len(out) >= 6:            # name a handful, not a wall
-            return
+        # NO EARLY RETURN. This used to stop at six reasons — "name a handful,
+        # not a wall" — and the handful read as the whole job. Measured
+        # 2026-08-23 (MEM-0195): one heatmap verdict listed 13 CG-27 paths;
+        # walking the identical tree with the same PATTERN and EXPANSION
+        # found 102, a factor of 7.8. A producer repairs what the verdict
+        # names, resubmits, and is handed the next six — so the repair never
+        # converges and the run burns a round trip per handful.
+        #
+        # The wall was a real concern, so the fix is not to print 102 reasons:
+        # it is to walk the whole section, list a readable prefix, and say
+        # HOW MANY there are and where, so one sweep can finish the section.
         if isinstance(node, dict):
             for k, v in node.items():
                 walk(v, f"{path}.{k}", k)
@@ -399,7 +415,31 @@ def _check_no_bare_abbreviations(page, section, body) -> list:
                 break            # one reason per field: it is one edit
 
     walk(body, section)
-    return out
+    if len(out) <= _CG27_LISTED:
+        return out
+    # More than a reader can act on one at a time. List a prefix, then say
+    # exactly how many there are and which abbreviations account for them, so
+    # the producer sweeps the section ONCE instead of discovering the size of
+    # the job six reasons at a time.
+    tally = Counter()
+    for r in out:
+        m = re.search(r"'([A-Za-z0-9]+)' reaches", r.get("message", ""))
+        if m:
+            tally[m.group(1)] += 1
+    spread = ", ".join(f"{k} {v}" for k, v in tally.most_common(8))
+    listed = out[:_CG27_LISTED]
+    listed.append(_reason(
+        "CG-27", section, f"{page}.{section}",
+        f"{len(out)} unexplained abbreviations in this section, of which "
+        f"{_CG27_LISTED} are listed above. By abbreviation: {spread}. "
+        f"REPAIR THE WHOLE SECTION IN ONE PASS — the listed paths are a "
+        f"sample, not the job. Repairing only what is named here resubmits "
+        f"into the same gate with {len(out) - _CG27_LISTED} still there. "
+        f"Every expansion this gate knows is in "
+        f"packages/shared/abbreviations.py; a sibling section often already "
+        f"carries the clean label for the same id, which is the cheapest "
+        f"repair available."))
+    return listed
 
 
 # Words that make a finding read as an accusation. Each was measured in a

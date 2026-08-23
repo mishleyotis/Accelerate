@@ -436,3 +436,58 @@ def test_the_held_out_client_is_never_produced_or_reserved(monkeypatch,
     run_gate.pick([], count=2)
     out = capsys.readouterr().out
     assert "bok-financial" not in out
+
+
+# ── vetting history orders the walk; it never ends it ─────────────────────
+#
+# MEM-0159: G1-G4 never read vetting history, so a client whose package stands
+# REFUSED is offered again next firing, gated again, claimed again and refused
+# again — a whole firing spent re-learning what memory already knew.
+#
+# The obvious fix is a blacklist, and it would have been wrong. On 2026-08-23
+# three packages stood REFUSED; re-vetted the same day, after the caps-log and
+# grain rules were corrected, all three came back PRODUCIBLE (vet_corpus: 3 of
+# 3, 100%). A blacklist buries a client permanently on the strength of a
+# checker defect, which is the failure the owner named — "most default to
+# rejecting in case of issues, rather than triaging and fixing".
+
+def test_a_refused_package_is_demoted_not_dropped(monkeypatch, capsys):
+    monkeypatch.setattr(run_gate, "refused_recently",
+                        lambda: {"was-refused": ("MEM-0161", "2026-08-23")})
+    out = run_gate.demote_recently_refused(["was-refused", "fresh-one", "another"])
+    assert out == ["fresh-one", "another", "was-refused"], (
+        "fresh candidates first, the refused one last — and STILL THERE")
+    assert "was-refused" in out, "a blacklist would have removed it"
+
+
+def test_the_demotion_is_never_silent(monkeypatch, capsys):
+    monkeypatch.setattr(run_gate, "refused_recently",
+                        lambda: {"was-refused": ("MEM-0161", "2026-08-23")})
+    run_gate.demote_recently_refused(["was-refused", "fresh-one"])
+    printed = capsys.readouterr().out
+    assert "deprioritised" in printed and "MEM-0161" in printed
+    assert "still producible" in printed, (
+        "a reader must know the demoted one can still be produced")
+
+
+def test_no_history_leaves_the_order_untouched(monkeypatch):
+    monkeypatch.setattr(run_gate, "refused_recently", dict)
+    assert run_gate.demote_recently_refused(["a", "b", "c"]) == ["a", "b", "c"]
+
+
+def test_an_unreachable_memory_does_not_stop_the_gate(monkeypatch):
+    """The queue walk is the primary job; vetting history is an optimisation
+    over it. A memory this cannot reach must not cost a firing."""
+    def boom(tool, args):
+        raise RuntimeError("connector down")
+    monkeypatch.setattr(run_gate, "mcp_call", boom)
+    assert run_gate.refused_recently() == {}
+
+
+def test_every_candidate_still_reaches_the_walk(monkeypatch):
+    """The property that matters most: demotion is a permutation. Nothing
+    the queue offered may be lost between queue_order and the gate."""
+    monkeypatch.setattr(run_gate, "refused_recently",
+                        lambda: {"b": ("MEM-1", "x"), "d": ("MEM-2", "y")})
+    order = ["a", "b", "c", "d", "e"]
+    assert sorted(run_gate.demote_recently_refused(order)) == sorted(order)

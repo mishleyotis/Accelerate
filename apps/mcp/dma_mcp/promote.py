@@ -16,6 +16,7 @@ NULL; a column the DDL generates is never written.
 from __future__ import annotations
 
 import json
+from collections import Counter
 from pathlib import Path
 
 from . import ledger
@@ -243,6 +244,8 @@ def promote_run(conn, run_id) -> dict:
         # failing CG, AG or ET is a correctness reason and does not.
         stale_verdicts = {}
         refusing = {}
+        families: dict = {}          # page -> {gate_id: count}, complete
+        totals: dict = {}            # page -> how many blocking reasons
         for page, sub in sorted(live.items()):
             try:
                 now = validate_pass1(page, sub["payload"] or {})
@@ -264,13 +267,32 @@ def promote_run(conn, run_id) -> dict:
                             if r.get("severity") == "block"
                             and not str(r.get("gate_id", "")).startswith("SG")]
                 if blocking:
+                    # TRUNCATED FOR READING, COUNTED IN FULL. `blocking[:8]`
+                    # alone made the repair non-convergent: measured
+                    # 2026-08-23 (MEM-0181/MEM-0188), one run carried 54
+                    # blocking reasons across 8 gate families and the repair
+                    # was scoped against the 3 families the first 8 happened
+                    # to name. The producer fixed those, resubmitted, and met
+                    # the rest. The count and the family spread travel with
+                    # the sample so one pass can cover the page.
                     refusing[page] = blocking[:8]
+                    families[page] = dict(
+                        Counter(str(r.get("gate_id", "?")) for r in blocking)
+                        .most_common())
+                    totals[page] = len(blocking)
         if refusing:
             conn.rollback()
             return {
                 "promoted": False, "error": "retained_pages_fail_current_gates",
                 "pages": sorted(refusing),
                 "reasons": refusing,
+                # THE THREE FIELDS THAT MAKE THIS DIAGNOSABLE. `reasons` is a
+                # sample; these say how big the job really is and which gates
+                # to dispatch against, so nobody has to infer scope from a
+                # truncated list.
+                "blocking_total": totals,
+                "blocking_by_gate": families,
+                "truncated": {p: totals[p] > len(refusing[p]) for p in refusing},
                 "hint": (
                     "These pages hold a PASS issued by an earlier gate set and "
                     "do not pass today's. A retained verdict is a DATED "

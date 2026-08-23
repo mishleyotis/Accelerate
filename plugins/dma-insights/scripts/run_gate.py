@@ -384,6 +384,69 @@ def _queue_ready(pending: list) -> list:
         return ready
 
 
+def refused_recently() -> dict:
+    """display_id -> the newest open package-vetter refusal against it.
+
+    MEM-0159: the gate's G1–G4 never read vetting history, so a client whose
+    package stands REFUSED is offered again next firing, gated again, claimed
+    again, and refused again — a whole firing spent re-learning something the
+    memory already knows.
+
+    Returns {} on any failure. A memory this cannot reach must not stop the
+    gate: the queue walk is the primary job and vetting history is an
+    optimisation over it.
+    """
+    try:
+        res = mcp_call("search_findings", {
+            "query": "package vetting REFUSE", "limit": 100})
+    except Exception:                                        # noqa: BLE001
+        return {}
+    rows = res if isinstance(res, list) else (
+        res.get("findings") or res.get("results") or res.get("rows") or [])
+    out: dict = {}
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        blob = " ".join(str(r.get(k, "")) for k in
+                        ("title", "measurement", "detail", "component"))
+        if "vet" not in blob.lower():
+            continue
+        for d in re.findall(r"\b([a-z0-9]+(?:-[a-z0-9]+){1,5})\b", blob):
+            if d.count("-") >= 1 and len(d) > 6:
+                prev = out.get(d)
+                seen = str(r.get("observed_at") or "")
+                if prev is None or seen > prev[1]:
+                    out[d] = (r.get("finding_id"), seen)
+    return out
+
+
+def demote_recently_refused(order: list) -> list:
+    """Move previously-refused clients to the BACK of the walk, never out.
+
+    DEMOTE, DO NOT DROP, and the reason is measured. On 2026-08-23 three
+    packages stood REFUSED — and re-vetted the same day, after the caps-log
+    and grain rules were corrected, all three came back PRODUCIBLE (vet_corpus
+    3 of 3). A blacklist would have buried them permanently on the strength of
+    a checker defect, which is the exact failure the owner named: "most
+    default to rejecting in case of issues, rather than triaging and fixing".
+
+    So a refusal is a hint about ORDER, nothing more: fresh candidates are
+    tried first, and a previously-refused one is still produced when nothing
+    better is queued. Every demotion is printed, so it is never silent.
+    """
+    hist = refused_recently()
+    if not hist:
+        return order
+    front = [d for d in order if d not in hist]
+    back = [d for d in order if d in hist]
+    if back:
+        print(f"  (deprioritised {len(back)} previously-refused package(s), "
+              f"still producible if nothing fresher gates: "
+              + "; ".join(f"{d} {hist[d][0]}" for d in back[:5])
+              + ("; …" if len(back) > 5 else "") + ")")
+    return front + back
+
+
 def pick(prefer: list, max_candidates: int = MAX_CANDIDATES,
          count: int = 1) -> int:
     """Emit `count` producible runs, or a refusal that names what it saw.
@@ -419,6 +482,7 @@ def pick(prefer: list, max_candidates: int = MAX_CANDIDATES,
         print("GATE: STOP — the pending queue offered no unclaimed entity; "
               "nothing to gate")
         return 1
+    order = demote_recently_refused(order)
 
     skipped: list = []
     produced: list = []
