@@ -51,3 +51,13 @@ fixtures/staged_runs/*/*.json
 *_Research_Workbook_*.xlsx
 **/startup-data/clients/
 dma-insights-*.zip
+
+# One session's own permission grants, not the project's. `settings.json`
+# beside it IS tracked and carries what every session here should have;
+# `settings.local.json` is the documented place for a personal override and
+# is machine-local by convention. Committing one would push whichever MCP
+# tools one operator happened to pre-approve into everybody else's sessions,
+# which is a permission decision made in the wrong place and invisible to the
+# person it lands on. The routine's headless approvals do not come from here
+# either — they come from the plugin's own PreToolUse hook.
+.claude/settings.local.json
