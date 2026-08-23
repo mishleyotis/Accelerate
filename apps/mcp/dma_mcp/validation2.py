@@ -1773,6 +1773,23 @@ def _says_it_searched(body) -> bool:
     return False
 
 
+#: Read in this order, first hit wins. `dated_on` leads because it is the
+#: contract's own field — "dated_on required (an undated signal is dropped)"
+#: — and every producer in the corpus writes it. The original list omitted
+#: it and started at `date`, so on a real payload the loop found nothing,
+#: returned None, and the span check reported "undatable" instead of a
+#: number: measured on axos-bank 2026-08-23, three signals dated 2026-01-26,
+#: 2026-07-07 and 2026-07-30 spanning six months, and the gate never fired.
+#: A check that cannot see the field it is about is the defect class this
+#: whole gate family exists for.
+#:
+#: `window` stays last and only as a fallback: its date is the event that
+#: CLOSES the opening, which is in the future and inflates the span. It is
+#: better than nothing on a payload that dates signals no other way.
+_WHY_NOW_DATE_KEYS = ("dated_on", "date", "as_of", "observed_at",
+                      "published_date", "window")
+
+
 def _why_now_span_days(body):
     """The span the signals actually cover, or None when undatable."""
     import datetime as _dt
@@ -1780,7 +1797,7 @@ def _why_now_span_days(body):
     for s in body.get("signals") or []:
         if not isinstance(s, dict):
             continue
-        for k in ("date", "as_of", "observed_at", "published_date", "window"):
+        for k in _WHY_NOW_DATE_KEYS:
             v = s.get(k)
             if not isinstance(v, str):
                 continue
