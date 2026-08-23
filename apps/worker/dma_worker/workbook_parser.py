@@ -816,6 +816,47 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
                 "expected": "E-… or INT-…-…",
                 "reason": "the ledger has rows and not one id was in a form "
                           "this parser recognises; no evidence was read"})
+
+        # PER-COLUMN CENSUS, because a row count cannot see this defect.
+        #
+        # The loop above names a header this reader could not FIND. It says
+        # nothing about a header it found whose column then landed empty on
+        # every row — an alias that matched the wrong column, an index off by
+        # one, values that failed to parse. Those produce a full row count, a
+        # clean parse, no `column_not_found`, and a field that is null all the
+        # way to a client's page.
+        #
+        # MEM-0006, third sighting: "a header spelling the parser does not
+        # know drops a column with the row count unchanged … assert per-COLUMN
+        # non-null counts after a parse, not row counts. A row count cannot
+        # see this defect and never will."
+        #
+        # Reported, never raised. A column can be legitimately empty — a
+        # package that carries no `claim_type` at all is thin, not broken —
+        # so this states the denominator and lets the vetter and the run
+        # decide, which is the same discipline every absence here keeps.
+        if out:
+            for field in list(_EV_ALIASES) + ["e_id"]:
+                if cols.get(field) is None:
+                    continue            # already reported as not found
+                filled = sum(1 for r in out
+                             if r.get(field) not in (None, "", [], {}))
+                if filled == 0:
+                    observe("column_mapped_but_empty", {
+                        "tab": tab, "field": field,
+                        "header_index": cols[field],
+                        "rows_emitted": len(out), "non_null": 0,
+                        "consequence": _EV_MISS_COST.get(field),
+                        "reason": "a header for this field WAS recognised and "
+                                  "every row still landed null. That is not a "
+                                  "column this reader failed to find — it is "
+                                  "one it found and read nothing from, which "
+                                  "a row count cannot see. Either the "
+                                  "workbook's column is genuinely empty (thin, "
+                                  "not broken) or the alias matched the wrong "
+                                  "column; the two look identical downstream, "
+                                  "so the denominator is stated here rather "
+                                  "than discovered on a page."})
         return out
     finally:
         wb.close()

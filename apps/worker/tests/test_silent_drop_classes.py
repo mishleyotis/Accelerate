@@ -854,3 +854,103 @@ def test_a_caps_row_naming_several_cells_caps_each_of_them(tmp_path):
     assert out["caps"][0]["cap_reason"] == "T4 evidence only"
     assert out["caps"][0]["pre_cap_score"] == 4.0
     assert out["caps"][0]["post_cap_score"] == 3.0
+
+
+# ── MEM-0006: a column found and read as nothing ──────────────────────────
+#
+# The parser already names a header it could not FIND (`column_not_found`,
+# each with what the miss costs). It said nothing about a header it DID find
+# whose column then landed null on every row — an alias matching the wrong
+# column, an index off by one, values that failed to parse. Those produce a
+# full row count, a clean parse, no observation at all, and a field that is
+# null all the way to a client's page.
+#
+# MEM-0006's own fix hint, third sighting: "Assert per-COLUMN non-null counts
+# after a parse, not row counts. A row count cannot see this defect and never
+# will."
+
+def _evidence_book(tmp_path, rows, headers=None):
+    from openpyxl import Workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Evidence_Master"
+    ws.append(headers or ["Evidence_ID", "Source_Name", "URL", "Excerpt",
+                          "Tier", "Date_Published"])
+    for r in rows:
+        ws.append(r)
+    p = tmp_path / "research.xlsx"
+    wb.save(p)
+    return str(p)
+
+
+def test_a_mapped_column_that_lands_all_null_is_reported(tmp_path):
+    """Every row has an id and a source; Date_Published is present as a
+    header and empty in every row. The row count is perfect and the column
+    is gone."""
+    from dma_worker import workbook_parser as W
+    rows = [[f"E-CC-{i}", f"Source {i}", f"https://x/{i}",
+             "an excerpt long enough to be a real excerpt for row %d" % i,
+             "T2", None] for i in range(5)]
+    obs = []
+    out = W.parse_evidence_master(_evidence_book(tmp_path, rows), obs)
+    assert len(out) == 5, "the rows parsed — that is the point"
+    kinds = [o.kind for o in obs]
+    assert "column_mapped_but_empty" in kinds, (
+        "a header was recognised, every row landed null, and nothing said so")
+    hit = next(o for o in obs if o.kind == "column_mapped_but_empty")
+    assert hit.detail["non_null"] == 0
+    assert hit.detail["rows_emitted"] == 5
+    assert "a row count cannot see" in hit.detail["reason"]
+
+
+def test_a_column_that_carries_values_is_not_reported(tmp_path):
+    from dma_worker import workbook_parser as W
+    rows = [[f"E-CC-{i}", f"Source {i}", f"https://x/{i}",
+             "an excerpt long enough to be a real excerpt for row %d" % i,
+             "T2", "2026-01-0%d" % (i + 1)] for i in range(5)]
+    obs = []
+    W.parse_evidence_master(_evidence_book(tmp_path, rows), obs)
+    fields = {o.detail.get("field") for o in obs
+              if o.kind == "column_mapped_but_empty"}
+    assert "date_published" not in fields
+
+
+def test_a_column_never_found_is_not_double_reported(tmp_path):
+    """`column_not_found` already owns that case. Reporting both would send a
+    producer looking for a mapping error that is really a missing column."""
+    from dma_worker import workbook_parser as W
+    rows = [[f"E-CC-{i}", f"Source {i}"] for i in range(3)]
+    obs = []
+    W.parse_evidence_master(
+        _evidence_book(tmp_path, rows, ["Evidence_ID", "Source_Name"]), obs)
+    missing = {o.detail.get("field") for o in obs if o.kind == "column_not_found"}
+    empty = {o.detail.get("field") for o in obs
+             if o.kind == "column_mapped_but_empty"}
+    assert missing, "a genuinely absent column is still named"
+    assert not (missing & empty), (
+        f"reported twice under two different causes: {missing & empty}")
+
+
+def test_the_census_states_what_the_miss_costs(tmp_path):
+    """The existing not-found observations carry a consequence because an
+    absent `ers` changes nothing and an absent date bands every row
+    UNVERIFIED. A census that dropped that would be a worse report."""
+    from dma_worker import workbook_parser as W
+    rows = [[f"E-CC-{i}", f"Source {i}", f"https://x/{i}",
+             "an excerpt long enough to be a real excerpt for row %d" % i,
+             "T2", None] for i in range(3)]
+    obs = []
+    W.parse_evidence_master(_evidence_book(tmp_path, rows), obs)
+    hit = next(o for o in obs if o.kind == "column_mapped_but_empty")
+    assert "consequence" in hit.detail
+
+
+def test_an_empty_parse_reports_no_census(tmp_path):
+    """Nothing emitted means nothing to count, and a census over zero rows
+    would call every column empty — a check that fails its whole population
+    carries no information."""
+    from dma_worker import workbook_parser as W
+    obs = []
+    out = W.parse_evidence_master(_evidence_book(tmp_path, []), obs)
+    assert out == []
+    assert not [o for o in obs if o.kind == "column_mapped_but_empty"]
