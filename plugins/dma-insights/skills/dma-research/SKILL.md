@@ -238,13 +238,22 @@ STEP 4: Proxy signal searches (Tiers 7-10)
   → Glassdoor reviews, community forums
 ```
 
-**Safeguard Checks (verified after each batch):**
-- SG-01: web_search invoked BEFORE Moody's in this batch
-- SG-02: ≥10 targeted web searches executed this batch
-- SG-03: Entity primary website fetched for first-party data
-- SG-04: Moody's data layered on top of (not replacing) web search results
-- SG-05: Negative results documented (absence = evidence)
-- SG-06: Financial data covers ≥3 years for trend analysis
+**Research batch checks (verified after each batch).** These are checks on
+THIS SKILL's own search behaviour. They are not connector gates, they never
+appear in a payload, and `explain_gate` does not know them — which is why they
+carry the `RS-` prefix and not `SG-`. They were `SG-01…SG-06` until
+2026-08-23, and the collision cost a production session a contradiction it
+could not settle: one challenger called `explain_gate` on a payload's `SG-01`,
+got `unknown_gate`, and reported the id fabricated (correctly — CG-22 refuses
+exactly that); a second challenger found these definitions and argued the same
+ids were legitimate disclosures to preserve. Both read a real document. The
+`SG-` namespace belongs to `apps/mcp/dma_mcp/gates.py` alone.
+- RS-01: web_search invoked BEFORE Moody's in this batch
+- RS-02: ≥10 targeted web searches executed this batch
+- RS-03: Entity primary website fetched for first-party data
+- RS-04: Moody's data layered on top of (not replacing) web search results
+- RS-05: Negative results documented (absence = evidence)
+- RS-06: Financial data covers ≥3 years for trend analysis
 
 **Search log (A2 CSV) must show web_search as dominant query type (≥70% of total).**
 
