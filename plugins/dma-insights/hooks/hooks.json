@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session_brief.py\"",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session_brief.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: session_brief.py is MISSING from the installed plugin, so this hook is NOT enforcing. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
             "timeout": 10
           }
         ]
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deny_credential_ops.py\"",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deny_credential_ops.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: deny_credential_ops.py is MISSING from the installed plugin, so this hook is NOT enforcing. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
             "timeout": 10
           }
         ]
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_connector.py\"",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_connector.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: autoapprove_connector.py is MISSING from the installed plugin, so this hook is NOT enforcing. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
             "timeout": 10
           }
         ]
@@ -37,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/precheck_submit.py\"",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/precheck_submit.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: precheck_submit.py is MISSING from the installed plugin, so this hook is NOT enforcing. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
             "timeout": 10
           }
         ]
@@ -47,7 +47,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/precheck_promote.py\"",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/precheck_promote.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: precheck_promote.py is MISSING from the installed plugin, so this hook is NOT enforcing. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
             "timeout": 10
           }
         ]
@@ -59,7 +59,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/verdict_watch.py\"",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/verdict_watch.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: verdict_watch.py is MISSING from the installed plugin, so this hook is NOT enforcing. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
             "timeout": 10
           }
         ]
@@ -69,7 +69,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/verdict_watch.py\"",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/verdict_watch.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: verdict_watch.py is MISSING from the installed plugin, so this hook is NOT enforcing. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
             "timeout": 10
           }
         ]
@@ -79,7 +79,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/artifact_cadence.py\"",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/artifact_cadence.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: artifact_cadence.py is MISSING from the installed plugin, so this hook is NOT enforcing. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
             "timeout": 30
           }
         ]

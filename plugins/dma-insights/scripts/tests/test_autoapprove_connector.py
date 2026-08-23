@@ -23,6 +23,8 @@ prechecks must still be able to REFUSE. An approval that also disabled the
 M5-band and colour-hex checks would trade one silent failure for another.
 """
 import json
+import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -261,10 +263,65 @@ def test_the_credential_guard_is_still_registered():
     assert "precheck_promote.py" in cmds
 
 
+#: The handler path inside a hook command, wrapped or bare.
+_HOOK_PATH = re.compile(r"/scripts/hooks/([A-Za-z0-9_.-]+\.py)")
+
+
 def test_every_registered_hook_script_exists():
+    """THE PACKAGING INVARIANT, and it has teeth now.
+
+    A hooks.json that registers a script the package does not ship is not a
+    cosmetic defect: a PreToolUse hook on Bash whose handler is missing
+    blocks EVERY Bash call, which leaves the session unable to run
+    plugin_version.py or the doctor — the two things that would tell it the
+    install is stale. Measured 2026-08-23: a synthesis lane lost its whole
+    firing to exactly that deadlock and misdiagnosed it as a harness hook.
+    """
     cfg = json.loads(HOOKS_JSON.read_text())
+    seen = 0
     for event, entries in cfg["hooks"].items():
         for e in entries:
             for h in e["hooks"]:
-                name = h["command"].split("/")[-1].strip('"')
-                assert (HOOKS / name).exists(), f"{event}: {name} is missing"
+                names = _HOOK_PATH.findall(h["command"])
+                assert names, f"{event}: no handler path in {h['command'][:80]}"
+                # A wrapped command names the same script more than once
+                # (the test and the message); they must agree.
+                assert len(set(names)) == 1, f"{event}: {set(names)}"
+                assert (HOOKS / names[0]).exists(), \
+                    f"{event}: {names[0]} is registered and not shipped"
+                seen += 1
+    assert seen >= 8, f"only {seen} hook commands checked — extraction broke"
+
+
+def test_a_missing_handler_allows_rather_than_blocking():
+    """The other half of the same lesson. Shipping is enforced above; this
+    pins what happens if it ever fails anyway — the session must keep its
+    Bash tool and be TOLD, not silently lose every command."""
+    cfg = json.loads(HOOKS_JSON.read_text())
+    bash = [g for g in cfg["hooks"]["PreToolUse"] if g.get("matcher") == "Bash"]
+    assert bash, "no Bash PreToolUse hook registered"
+    cmd = bash[0]["hooks"][0]["command"]
+    r = subprocess.run(["sh", "-c", cmd], input=b'{"tool_name":"Bash"}',
+                       capture_output=True,
+                       env={**os.environ,
+                            "CLAUDE_PLUGIN_ROOT": "/nonexistent-plugin-root"})
+    assert r.returncode == 0, "a missing handler must not block the call"
+    assert b"MISSING" in r.stdout, "and it must say so"
+    assert b"plugin_version" in r.stdout, "and name the check that diagnoses it"
+
+
+def test_a_present_handler_can_still_deny():
+    """The guard must keep guarding. `a && b || c` would have swallowed a
+    real deny, because a deny exits non-zero; the wrapper uses an explicit
+    if and passes the handler's exit through with exec."""
+    cfg = json.loads(HOOKS_JSON.read_text())
+    bash = [g for g in cfg["hooks"]["PreToolUse"] if g.get("matcher") == "Bash"]
+    cmd = bash[0]["hooks"][0]["command"]
+    payload = json.dumps({"tool_name": "Bash", "tool_input": {"command":
+        "git push https://x:ghp_" + "A" * 36 + "@github.com/a/b"}}).encode()
+    r = subprocess.run(["sh", "-c", cmd], input=payload, capture_output=True,
+                       env={**os.environ,
+                            "CLAUDE_PLUGIN_ROOT": str(HOOKS.parents[1])})
+    assert b"deny" in r.stdout, (
+        f"the credential guard stopped denying through the wrapper: "
+        f"{r.stdout[:200]!r}")

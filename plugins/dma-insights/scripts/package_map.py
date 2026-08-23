@@ -169,6 +169,25 @@ def _rank_workbooks(paths: list, role: str, root: Path) -> dict:
             "_ambiguities": ambiguities}
 
 
+#: A research register is not always a workbook. Measured across the corpus
+#: 2026-08-23, counting every file under a research-named path: .json 109,
+#: .py 83, .csv 26, .md 19, **.xlsx 19**, .docx 14, .txt 4, .pdf 3 — the
+#: spreadsheet is not even the common case, and TEN research-named folders
+#: hold files and no .xlsx at all. Owner, same day: "I also thought research
+#: workbook may be in multiple formats? Ensure it can detect all mime types."
+#:
+#: So a research SOURCE is resolved by shape and role, not by extension. The
+#: workbook keeps its own slot (`research.primary`) because the tab contract
+#: is real where a workbook exists; these are the stores that carry the same
+#: content in another container.
+RESEARCH_PATH_RE = re.compile(r"research", re.I)
+
+#: Formats a register can be READ from. A .docx or .pdf under a research
+#: path is a report, not a table — named, never parsed as one.
+TABULAR_EXT = (".csv", ".tsv", ".json", ".jsonl", ".xlsx", ".xlsm")
+NARRATIVE_EXT = (".docx", ".pdf", ".md", ".txt", ".rtf")
+
+
 def _json_head_has_eids(path: Path) -> bool:
     """A JSON/JSONL store whose head names evidence_id/fact_id keys is an
     evidence table whatever its filename says (measured: the canonical
@@ -207,8 +226,13 @@ def map_package(root) -> dict:
             excluded.append(rel)
         elif low.endswith((".xlsx", ".xlsm")):
             xlsx.append(p)
-        elif low.endswith(".csv"):
-            if EVID_NAME_RE.search(low) or EVID_HDR_RE.search(_csv_header(p)):
+        elif low.endswith((".csv", ".tsv")):
+            # A research-path table is an evidence source whatever it is
+            # called: the name test alone missed registers living under
+            # `08_appendices/research/` and `… Background Research/`.
+            if (EVID_NAME_RE.search(low) or EVID_HDR_RE.search(_csv_header(p))
+                    or (RESEARCH_PATH_RE.search(low)
+                        and EVID_HDR_RE.search(_csv_header(p)))):
                 evidence_tables.append(rel)
             elif GOV_RE.search(low):
                 governance.append(rel)
@@ -218,7 +242,8 @@ def map_package(root) -> dict:
                 other.append(rel)
         elif low.endswith((".json", ".jsonl")) and (
                 re.search(r"evidence|ledger|register", low)
-                or _json_head_has_eids(p)):
+                or _json_head_has_eids(p)
+                or (RESEARCH_PATH_RE.search(low) and _json_head_has_eids(p))):
             evidence_tables.append(rel)
         elif low.endswith(".json") and "manifest" in low:
             manifests.append(rel)

@@ -200,6 +200,90 @@ def _load(path: Path) -> dict:
         return {}
 
 
+#: Keys the queue has been known to return its rows under. `pending` is what
+#: the deployed connector uses.
+QUEUE_KEYS = ("pending", "runs", "rows", "items")
+
+
+def queue_rows(payload):
+    """The queue's rows, or a refusal — never a silent empty list.
+
+    THE BUG THIS REPLACES, and it is the worst possible one to have here:
+    `payload.get("runs") or []`. The connector nests its rows under
+    `pending`, so `runs` was always None, `rows` was always [], and the
+    watchdog could never see a single run — claimed, stalled or promotable —
+    whatever the real state was. Verified against the live connector
+    2026-08-23: the top-level keys are `pending` (286 rows),
+    `duplicate_requests`, `surplus_runs`.
+
+    Every firing since it shipped reported a quiet queue while unable to look
+    at one. A watchdog that cannot see is worse than no watchdog: it
+    manufactures the reassurance that nothing is stalled, which is the exact
+    condition it exists to deny.
+
+    So an unrecognised shape RAISES. The whole point of this file is that "I
+    looked and found nothing" and "I could not look" are different answers,
+    and the second must never be able to impersonate the first.
+    """
+    if isinstance(payload, list):
+        return payload
+    if not isinstance(payload, dict):
+        raise RuntimeError(
+            f"list_pending_runs returned {type(payload).__name__}, not a "
+            f"queue — the watchdog cannot report on a queue it did not get")
+    for key in QUEUE_KEYS:
+        if isinstance(payload.get(key), list):
+            return payload[key]
+    raise RuntimeError(
+        f"list_pending_runs returned a dict carrying no row list under any "
+        f"of {QUEUE_KEYS}; its keys are {sorted(payload)}. Refusing to report "
+        f"an empty queue from a response this code does not understand — "
+        f"that is exactly how this watchdog went blind before")
+
+
+def sessions_holding(result: list) -> list:
+    """Which sessions are working, and which are only holding.
+
+    Owner, 2026-08-23: "The watchdog is to check for any running sessions in
+    the synthesis routines."
+
+    A claim names its holder, and the queue row is the only place a watchdog
+    without MCP tools can learn who is working. Grouping by holder turns four
+    unrelated rows into the signal that matters: ONE PRODUCER SHOULD HOLD ONE
+    RUN. A holder carrying several at once, none of them progressing, is the
+    stall signature this file exists to make visible — measured live on
+    2026-08-23, when one holder had three runs at 0 of 6 pages while a fourth
+    session held one run at 6 of 6 and had not promoted it.
+
+    This reports; it never releases. A lease belongs to its holder until it
+    lapses, and taking one from a session that is merely slow is how two
+    producers end up on one client's six pages.
+    """
+    by_holder: dict = {}
+    for s in result:
+        if not s.get("claim_live"):
+            continue
+        by_holder.setdefault(s.get("claim_held_by") or "(unnamed)", []).append(s)
+    out = []
+    for holder, runs in sorted(by_holder.items()):
+        pages = sum(len(r.get("passed") or []) for r in runs)
+        out.append({
+            "holder": holder,
+            "runs_held": len(runs),
+            "pages_passed": pages,
+            "states": sorted({r.get("state") for r in runs}),
+            "entities": [r.get("entity") for r in runs],
+            "expires": min((r.get("claim_expires_at") or "") for r in runs),
+            # A producer holding more than one run is either batching (which
+            # the routine forbids: one client per session) or leaking leases.
+            "holds_more_than_one": len(runs) > 1,
+            # Nothing passed across every run it holds: either it just
+            # started, or it stopped. The next firing's fingerprint decides.
+            "no_pages_yet": pages == 0,
+        })
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--state", default=".watchdog.json",
@@ -222,7 +306,7 @@ def main() -> int:
 
     now = args.now if args.now is not None else time.time()
     pending = call("list_pending_runs")
-    rows = pending if isinstance(pending, list) else (pending.get("runs") or [])
+    rows = queue_rows(pending)
 
     # NARROW BEFORE ASKING. The queue holds 286 pending runs across 171
     # entities; a per-run get_run_progress over all of them is 286 round trips
@@ -249,8 +333,9 @@ def main() -> int:
     path.write_text(json.dumps({s["run_id"]: s for s in result}, indent=1),
                     encoding="utf-8")
 
+    holders = sessions_holding(result)
     if args.json:
-        print(json.dumps(result, indent=1))
+        print(json.dumps({"runs": result, "sessions": holders}, indent=1))
     else:
         act = [s for s in result if s["state"] in ACTIONABLE]
         print(f"{len(result)} run(s) watched · {len(act)} actionable")

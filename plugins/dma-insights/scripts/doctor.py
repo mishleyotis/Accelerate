@@ -276,9 +276,20 @@ def hook_matchers(plugin_root: Path = PLUGIN) -> list:
     return sorted({m for _, m, _ in _hook_entries(spec) if m})
 
 
+#: `${CLAUDE_PLUGIN_ROOT}/scripts/hooks/<name>.py`, wherever it appears in a
+#: command. Matched on the PATH rather than on token position, because the
+#: command is no longer a bare `python3 <path>`: each hook is wrapped in a
+#: presence test so a missing handler degrades to a loud allow instead of
+#: blocking every Bash call in the session (see hooks/hooks.json).
+_HOOK_PATH_RE = re.compile(
+    r"\$\{CLAUDE_PLUGIN_ROOT\}(/scripts/hooks/[A-Za-z0-9_.-]+\.py)")
+
+
 def _handler_path(command: str, plugin_root: Path) -> Path | None:
-    """The handler file a hook command runs. ${CLAUDE_PLUGIN_ROOT} resolves to
-    `plugin_root`; hooks.json quotes it, so shlex sees one token."""
+    """The handler file a hook command runs, wrapped or bare."""
+    m = _HOOK_PATH_RE.search(command or "")
+    if m:
+        return Path(str(plugin_root) + m.group(1))
     try:
         tokens = shlex.split(command)
     except ValueError:

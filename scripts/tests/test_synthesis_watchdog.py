@@ -374,3 +374,94 @@ def test_the_watchdog_prompt_names_only_real_watchdog_flags():
             assert flag in defined, (
                 f"the prompt names `synthesis_watchdog.py {flag}`, which does "
                 f"not exist. Defined: {sorted(defined)}")
+
+
+# ── the blind watchdog ────────────────────────────────────────────────────
+#
+# Reported live 2026-08-23: `python3 scripts/synthesis_watchdog.py --json`
+# returned `[]`, which reads as "nothing to watch". It was not. The code was
+#
+#     rows = pending if isinstance(pending, list) else (pending.get("runs") or [])
+#
+# and the connector nests its rows under `pending`, not `runs`. Verified
+# against the live connector: top-level keys are `pending` (286 rows),
+# `duplicate_requests`, `surplus_runs`. So `rows` was always [], and the
+# watchdog could never see a single run — claimed, stalled or promotable —
+# whatever the real state was. Every firing since it shipped reported a quiet
+# queue while unable to look at one.
+#
+# After the fix, the same call saw four runs, one of them READY_TO_PROMOTE
+# with six pages passing and nothing serving. That is precisely the case this
+# file exists to catch, and it had been invisible.
+
+
+def test_the_connectors_own_key_is_read():
+    """`pending` is what the deployed connector returns. This is the bug."""
+    payload = {"pending": [{"run_id": "a"}, {"run_id": "b"}],
+               "duplicate_requests": 3, "surplus_runs": []}
+    assert len(w.queue_rows(payload)) == 2
+
+
+def test_a_bare_list_still_works():
+    assert w.queue_rows([{"run_id": "a"}]) == [{"run_id": "a"}]
+
+
+@pytest.mark.parametrize("key", ["pending", "runs", "rows", "items"])
+def test_every_known_key_is_accepted(key):
+    assert w.queue_rows({key: [{"run_id": "x"}]}) == [{"run_id": "x"}]
+
+
+def test_an_unrecognised_shape_raises_rather_than_reporting_empty():
+    """THE PROPERTY THAT MATTERS. A watchdog that cannot see must say so. An
+    empty list from a response this code does not understand is the original
+    defect wearing a different key name, and it manufactures the exact
+    reassurance the watchdog exists to deny."""
+    with pytest.raises(RuntimeError, match="no row list"):
+        w.queue_rows({"queue": [{"run_id": "a"}], "total": 1})
+    with pytest.raises(RuntimeError, match="not a queue"):
+        w.queue_rows("286 runs")
+
+
+def test_an_empty_queue_is_still_an_empty_queue():
+    """The other direction: a genuinely empty `pending` is a real answer and
+    must not raise, or every quiet hour becomes an alert."""
+    assert w.queue_rows({"pending": [], "duplicate_requests": 0}) == []
+
+
+# ── which sessions are working, and which are only holding ────────────────
+
+def _held(run_id, holder, passed, state="PROGRESSING", live=True):
+    return {"run_id": run_id, "entity": run_id.upper(), "state": state,
+            "claim_live": live, "claim_held_by": holder,
+            "claim_expires_at": "2026-08-23T09:00:00+00:00",
+            "passed": ["overview"] * passed}
+
+
+def test_one_producer_holding_several_runs_is_surfaced():
+    """Owner, 2026-08-23: "The watchdog is to check for any running sessions
+    in the synthesis routines." Measured live the same day: one holder had
+    three runs at 0 of 6 pages while another held one at 6 of 6. The routine
+    is one client per session, so a holder with several is either batching
+    against the rule or leaking leases — and with nothing passed it is the
+    stall signature."""
+    out = w.sessions_holding([_held("a", "accelerate-63", 0),
+                               _held("b", "accelerate-63", 0),
+                               _held("c", "good-session", 6,
+                                     "READY_TO_PROMOTE")])
+    by = {h["holder"]: h for h in out}
+    assert by["accelerate-63"]["runs_held"] == 2
+    assert by["accelerate-63"]["holds_more_than_one"] is True
+    assert by["accelerate-63"]["no_pages_yet"] is True
+    assert by["good-session"]["holds_more_than_one"] is False
+    assert by["good-session"]["no_pages_yet"] is False
+
+
+def test_a_lapsed_claim_is_not_a_running_session():
+    """The roll-up answers "who is working". A run kept in scope because the
+    state file remembers it is not evidence that anybody holds it."""
+    assert w.sessions_holding([_held("a", "ghost", 0, live=False)]) == []
+
+
+def test_an_unnamed_holder_is_still_counted():
+    out = w.sessions_holding([{**_held("a", None, 0), "claim_held_by": None}])
+    assert out and out[0]["holder"] == "(unnamed)"
