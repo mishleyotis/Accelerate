@@ -154,6 +154,68 @@ TOP_N = 5
 ALIGNMENT_STATED = "stated_objective"
 ALIGNMENT_FALLBACK = "impact_fallback"
 
+# ── reciprocal rank fusion ────────────────────────────────────────────
+#
+# REQUESTED 2026-08-23: "reciprocal rank fusion for platform selection,
+# tested against client corpus", against a promoted platform card the owner
+# read as "basic ... no deep reasoning".
+#
+# WHAT RRF FIXES HERE, and what it does not. The four factors above are
+# incommensurate in SPREAD even though they share a 0..1 scale: greenfield is
+# effectively binary, alignment is a producer's 0..1 judgement usually quoted
+# in coarse steps, opportunity is a continuous mean that on a real corpus
+# occupies a narrow band. A weighted sum is dominated by whichever term
+# happens to vary widest on THIS client, whatever its weight says — so the
+# ordering is stable in the arithmetic and unstable in the data. Rank fusion
+# is invariant to any monotone rescaling of any single signal, which is
+# precisely that failure mode.
+#
+# WHAT RRF MUST NOT DO here is replace the blend. The three v2 weights are a
+# calibration against a measured skew (a flat absence bonus top-ranking
+# whatever family a client lacked, on 20 of 28 sampled clients); pure RRF
+# discards it, because rank fusion cannot express "this term matters a
+# twelfth as much as that one" — it only knows who came first. Swapping a
+# calibrated blend for an uncalibrated vote would be the same mistake as
+# re-tuning the weights by hand, in the other direction.
+#
+# So fusion is a NEAR-TIE RESOLVER, and its scope is stated arithmetically
+# rather than asserted:
+#
+#   · every candidate is ranked on each signal, INCLUDING the v2 blend, which
+#     votes as a list of its own and carries the largest weight;
+#   · the fused order may reorder two cards only when their fits differ by at
+#     most FUSION_BAND. Beyond the band, fit wins outright and fusion is
+#     recorded as consulted-and-overruled;
+#   · every card carries `signal_ranks`, `rrf_score` and a `fusion_note`,
+#     whether fusion moved it or not — a reader who cannot see why one card
+#     beat another is the "no deep reasoning" complaint, and agreement is as
+#     much of an answer as disagreement.
+#
+# GUARANTEE, and it is tested: if A is ordered above B, then either A's fit is
+# at least B's, or their fits differ by no more than FUSION_BAND. A card can
+# never overtake one that beats it decisively.
+#
+# K=60 is Cormack, Clarke & Buettcher's constant (SIGIR 2009), unchanged. It
+# damps the top of each list so that rank 1 versus rank 2 is worth more than
+# rank 9 versus rank 10 without letting any single first place decide the
+# fusion alone.
+RRF_K = 60
+
+# In fit points, on the 0..99 scale the cards render. 8.0 is a little under a
+# tenth of the usable range: wide enough to cover the cluster a client's
+# middle cards actually land in, narrow enough that the top card cannot be
+# displaced by a card the arithmetic separates clearly.
+FUSION_BAND = 8.0
+
+#: The lists fused, and the vote each carries. The four factor weights are the
+#: engine's own — reusing them keeps the calibration inside the fusion instead
+#: of inventing a second set of numbers nobody audited. The blend votes at
+#: W_FIT because it already contains all four; without it, fusion would treat
+#: a card that came second on everything as equal to one that came first on
+#: the term that matters most.
+W_FIT = 1.0
+FIT_LIST = "Fit (engine v2 blend)"
+
 
 @dataclass
 class Cell:
@@ -436,6 +498,87 @@ def score(cand: Candidate, all_gap_cells=None) -> dict:
     }
 
 
+def _factor(row: dict, name: str) -> float:
+    return next((f["value"] for f in row["factors"] if f["name"] == name), 0.0)
+
+
+def fusion_lists(rows) -> list:
+    """The (name, weight, value-getter) triples fused, in a fixed order.
+
+    Derived from `factors` rather than restated, so a factor added to `score`
+    joins the fusion instead of silently sitting outside it — the shape of
+    every "we added a term and half the system never saw it" defect in this
+    build.
+    """
+    weights = {f["name"]: f["weight"] for f in (rows[0]["factors"] if rows else ())}
+    out = [(name, weights.get(name, 0.0),
+            (lambda n: (lambda r: _factor(r, n)))(name))
+           for name in [f["name"] for f in (rows[0]["factors"] if rows else ())]]
+    out.append((FIT_LIST, W_FIT, lambda r: r["fit_score"]))
+    return out
+
+
+def _competition_ranks(rows, getter) -> dict:
+    """1-based ranks, highest value first, TIES SHARING THE BEST RANK.
+
+    Standard competition ranking (1,2,2,4) rather than ordinal (1,2,3,4). Two
+    candidates that are genuinely equal on a signal must contribute equally to
+    the fusion; ordinal ranking would break the tie by list position, which is
+    itself derived from fit, and quietly give the fit order a second vote.
+    """
+    vals = sorted({round(float(getter(r)), 6) for r in rows}, reverse=True)
+    at = {v: i + 1 for i, v in enumerate(vals)}
+    return {r["platform"]: at[round(float(getter(r)), 6)] for r in rows}
+
+
+def fuse(rows, k: int = RRF_K) -> list:
+    """Attach `signal_ranks` and `rrf_score` to every row. Pure; returns rows.
+
+    rrf(P) = sum over lists of  weight / (k + rank of P on that list)
+    """
+    if not rows:
+        return rows
+    lists = fusion_lists(rows)
+    ranks = {name: _competition_ranks(rows, get) for name, _, get in lists}
+    for r in rows:
+        r["signal_ranks"] = {name: ranks[name][r["platform"]]
+                             for name, _, _ in lists}
+        r["rrf_score"] = round(
+            sum(w / (k + ranks[name][r["platform"]]) for name, w, _ in lists), 6)
+    order = sorted(rows, key=lambda r: (-r["rrf_score"], r["platform"]))
+    for i, r in enumerate(order, start=1):
+        r["rrf_rank"] = i
+    return rows
+
+
+def _fusion_runs(rows) -> list:
+    """Split a FIT-ORDERED list into runs that fusion may reorder within.
+
+    A run continues while the next card is within FUSION_BAND of the run's
+    LEADER — not of its predecessor. Chaining off the predecessor would let
+    80, 74, 68 form one run and put the 68 above the 80, eight points at a
+    time; measuring from the leader is what makes the guarantee in the block
+    comment above provable rather than approximate.
+    """
+    runs, cur = [], []
+    for r in rows:
+        if cur and (cur[0]["fit_score"] - r["fit_score"]) > FUSION_BAND:
+            runs.append(cur)
+            cur = []
+        cur.append(r)
+    if cur:
+        runs.append(cur)
+    return runs
+
+
+def _fused_order(rows) -> list:
+    """Fit order, re-sorted by RRF inside each near-tie run."""
+    out = []
+    for run in _fusion_runs(rows):
+        out.extend(sorted(run, key=lambda r: (-r["rrf_score"], _tie_key(r))))
+    return out
+
+
 def _tie_key(row: dict) -> tuple:
     """Deterministic separation for equal fits, so no client renders five
     identical cards (42 of 470 clamped identically under v1). Evidence
@@ -490,35 +633,70 @@ def _sequence(rows) -> list:
 
 
 def rank(candidates, all_gap_cells=None) -> list:
-    """Scored, then sequenced. `rank` is 1-based and assigned after both, so
-    two cards never share one and no card precedes its own prerequisite."""
+    """Scored, fused, then sequenced. `rank` is 1-based and assigned after all
+    three, so two cards never share one and no card precedes its own
+    prerequisite.
+
+    The three passes are deliberately in this order and each may only undo the
+    one before it within a stated bound: fusion reorders inside FUSION_BAND,
+    sequencing reorders only to satisfy a declared prerequisite, and both say
+    on the row when they moved it.
+    """
     scored = sorted((score(c, all_gap_cells) for c in candidates), key=_tie_key)
     depends = {str(c.platform): tuple(getattr(c, "depends_on", ()) or ())
                for c in candidates}
     for r in scored:
         r["depends_on"] = list(depends.get(r["platform"], ()))
-    fit_order = [r["platform"] for r in scored]
+    fit_only_order = [r["platform"] for r in scored]
+
+    fuse(scored)
+    scored = _fused_order(scored)
+    fit_order = [r["platform"] for r in scored]     # what sequencing sees
     rows = _sequence(scored)
 
     for i, row in enumerate(rows, start=1):
         row["rank"] = i
         moved = fit_order.index(row["platform"]) != (i - 1)
+        fused_from = fit_only_order.index(row["platform"])
+        fused_to = fit_order.index(row["platform"])
         terms = " + ".join(
             "{w} x {n}".format(w=f["weight"], n=f["name"].lower())
             for f in row["factors"])
+        # THE FUSION, SAID OUT LOUD on every card. A reader who cannot see why
+        # one card beat another is the complaint this was built for, and
+        # "fusion agreed with the arithmetic" is as much of an answer as a
+        # move — silence would leave the two indistinguishable.
+        won = [n for n, r_ in row["signal_ranks"].items() if r_ == 1]
+        placing = ", ".join(f"{n} #{r_}" for n, r_ in row["signal_ranks"].items())
+        if fused_to == fused_from:
+            row["fusion_note"] = (
+                f"Rank fusion (RRF, k={RRF_K}) agreed with the fit order. "
+                f"Placings: {placing}." +
+                (f" First on {', '.join(won)}." if won else ""))
+        else:
+            direction = "up" if fused_to < fused_from else "down"
+            row["fusion_note"] = (
+                f"Rank fusion (RRF, k={RRF_K}) moved this card {direction} "
+                f"{abs(fused_to - fused_from)} place(s) against the fit order, "
+                f"within the {FUSION_BAND:g}-point near-tie band. Placings: "
+                f"{placing}. Fusion only reorders cards the fit does not "
+                f"separate by more than {FUSION_BAND:g} points.")
         row["rank_basis"] = (
-            "fit" if not moved else
+            "fit" if not moved and fused_to == fused_from else
             "sequenced: it is held behind " + ", ".join(row["depends_on"])
-            if row["depends_on"] else
-            "sequenced: another card on this page waits on it")
+            if moved and row["depends_on"] else
+            "sequenced: another card on this page waits on it" if moved else
+            f"rank fusion within the {FUSION_BAND:g}-point near-tie band")
         row["fit_basis"] = (
             "Computed by the shared platform-fit engine: 100 x ({terms})"
             " x {mult} readiness = {fit}. Readiness is a multiplier, not an"
             " addend: a platform whose prerequisites are red cannot reach the"
             " hot band ({hot}), and relevance {rel} caps it. Alignment basis:"
-            " {basis}. Rank basis: {rank_basis}. State: {state}.".format(
+            " {basis}. Rank basis: {rank_basis}. State: {state}."
+            " {fusion}".format(
                 terms=terms, mult=row["readiness_multiplier"],
                 fit=row["fit_score"], hot=HOT_THRESHOLD,
                 basis=row["alignment_basis"], rank_basis=row["rank_basis"],
-                rel=row["relevance"], state=row["state"]))
+                rel=row["relevance"], state=row["state"],
+                fusion=row["fusion_note"]))
     return rows

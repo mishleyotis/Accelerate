@@ -401,9 +401,26 @@ def platform_fit(conn, run_id, candidates) -> dict:
             "readiness_multiplier": engine.READINESS_MULTIPLIER,
             "hot_threshold": engine.HOT_THRESHOLD,
             "cap": engine.FIT_CAP,
+            # THE FUSION, DECLARED. Every row already carries `signal_ranks`,
+            # `rrf_score`, `rrf_rank` and `fusion_note`; without the
+            # parameters beside them a producer reading a card that placed
+            # third on one signal and first on three others cannot tell
+            # whether the order it sees was fused or merely sorted.
+            "fusion": {
+                "method": "reciprocal rank fusion (Cormack et al., SIGIR 2009)",
+                "k": engine.RRF_K,
+                "band": engine.FUSION_BAND,
+                "lists": [f["name"] for f in (ranked[0]["factors"] if ranked else ())]
+                         + [engine.FIT_LIST],
+                "rule": ("Fusion resolves NEAR-TIES only: it may reorder two "
+                         "cards whose fits differ by at most the band, and "
+                         "never a card the arithmetic separates. Each row's "
+                         "fusion_note says whether it moved and by how much."),
+            },
             "rule": ("Readiness MULTIPLIES. A platform whose prerequisites are "
                      "red cannot reach the hot band. Read these numbers into "
                      "the payload; explaining them is the producer's job, "
-                     "recomputing them is not."),
+                     "recomputing them is not. The ORDER is fit then fusion "
+                     "then dependency sequencing — all three are on the row."),
         },
     }
