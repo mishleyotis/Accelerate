@@ -11,8 +11,8 @@
       "name": "dma-insights",
       "source": "./plugins/dma-insights",
       "displayName": "DMA Insights",
-      "description": "The six DMA skills, the 47-agent roster with explicit tool allow-lists, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector (33 tools). Provisioning is fail-closed on the checkout and records what it did; the version check names the cause of a stale bind.",
-      "version": "0.9.11",
+      "description": "The six DMA skills, the 47-agent roster with explicit tool allow-lists, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector (33 tools). A lost connector binding — a continued session after a token reset included — is revived with mcp_raw.py revive rather than declared unrecoverable.",
+      "version": "0.9.12",
       "category": "domain",
       "tags": [
         "dma",

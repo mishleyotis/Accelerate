@@ -101,9 +101,21 @@ elif [ -n "$(git -C "$REPO_DIR" status --porcelain --untracked-files=no 2>/dev/n
   CHECKOUT_NOTE="working tree has local modifications; not reset"
   log "checkout has LOCAL MODIFICATIONS — refusing to reset it; the plugin"
   log "installed below is whatever this tree holds, which may not be $BRANCH"
+elif ! git -C "$REPO_DIR" merge-base --is-ancestor HEAD "origin/$BRANCH" 2>/dev/null; then
+  # Clean tree whose HEAD holds commits origin/$BRANCH does not: somebody's
+  # WORK, exactly like a dirty tree, and work is never discarded. Measured
+  # 2026-08-24: a leak-hunting test handed this script the real checkout on
+  # a developer's clean work branch, this section switched it onto $BRANCH
+  # mid test-suite, and every test collected after it read the wrong tree —
+  # locally and on CI. Routine containers are only ever at-or-behind the
+  # branch tip, so the livelock fix below keeps its full reach there.
+  CHECKOUT_STATE="unmerged_work"
+  CHECKOUT_NOTE="HEAD holds commits origin/$BRANCH does not have; not reset"
+  log "checkout HEAD is NOT AN ANCESTOR of origin/$BRANCH — somebody's work;"
+  log "refusing to reset; the plugin installed below is whatever this tree holds"
 else
-  # Clean tree: reset covers every shape the measured failures took —
-  # behind, detached, or on another branch entirely.
+  # Clean tree at or behind the branch tip: reset covers every shape the
+  # measured failures took — behind, detached, or on another branch entirely.
   if git -C "$REPO_DIR" checkout -q -B "$BRANCH" "origin/$BRANCH" 2>/dev/null \
      && git -C "$REPO_DIR" reset -q --hard "origin/$BRANCH" 2>/dev/null; then
     CHECKOUT_STATE="reset"

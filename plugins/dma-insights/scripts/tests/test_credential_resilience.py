@@ -116,6 +116,28 @@ def test_cli_exits_2_and_prints_nothing_on_stdout_without_a_key(clean_env, capsy
     assert "no usable key" in captured.err
 
 
+def _seed_repo(path: str, branch: str) -> str:
+    """A hermetic stand-in for the checkout: one commit, self-remote.
+
+    bootstrap_session.sh's section 1 fetches origin/$BRANCH and, on a clean
+    tree, resets to it. Handing it a repo whose origin is itself keeps that
+    whole section real — fetch, ancestry check, reset — with every side
+    effect owned by the sandbox.
+    """
+    os.makedirs(os.path.join(path, ".claude-plugin"))
+    Path(path, ".claude-plugin", "marketplace.json").write_text("{}\n")
+    run = lambda *a: subprocess.run(  # noqa: E731
+        ["git", "-C", path, "-c", "user.email=t@t", "-c", "user.name=t",
+         "-c", "commit.gpgsign=false", *a],
+        check=True, capture_output=True, text=True)
+    subprocess.run(["git", "init", "-q", "-b", branch, path],
+                   check=True, capture_output=True, text=True)
+    run("add", "-A")
+    run("commit", "-qm", "seed")
+    run("remote", "add", "origin", path)
+    return path
+
+
 def test_bootstrap_cannot_be_traced_into_a_log():
     """THE 2026-08-20 INCIDENT, as a test: `bash -x` must not print the key.
 
@@ -133,8 +155,16 @@ def test_bootstrap_cannot_be_traced_into_a_log():
         # HOME is redirected so the CLI's marketplace/install writes land in
         # the sandbox: this test once rewrote the real settings.json to a dead
         # marketplace source, which is a worse outcome than the leak it hunts.
+        # The repo is a sandbox repo for the same reason: this test once
+        # handed the script the REAL checkout ("no clone"), and section 1
+        # switched a developer's clean work branch onto the routine branch
+        # mid test-suite, so every test collected after it read the wrong
+        # tree — locally and on CI (2026-08-24). A test that provisions runs
+        # provisioning against something it owns.
         env["HOME"] = sandbox
-        env["DMA_REPO_DIR"] = str(HERE.parents[2])   # the real checkout: no clone
+        env["DMA_REPO_DIR"] = _seed_repo(os.path.join(sandbox, "repo"),
+                                         "sandbox-branch")
+        env["DMA_REPO_BRANCH"] = "sandbox-branch"
         env["DMA_SA_KEY_FILE"] = os.path.join(sandbox, "sa.json")
         proc = subprocess.run(
             ["bash", "-x", str(HERE / "bootstrap_session.sh")],
@@ -144,6 +174,48 @@ def test_bootstrap_cannot_be_traced_into_a_log():
         "bootstrap_session.sh leaked a credential under `bash -x` — the "
         "trace-proofing (set +x near the top) has regressed")
     assert env["DMA_ROUTINE_SA_KEY_B64"] not in output
+
+
+def test_bootstrap_never_discards_unmerged_commits():
+    """THE 2026-08-24 INCIDENT, as a test: a clean tree AHEAD of the branch
+    tip is somebody's work, exactly like a dirty one.
+
+    Section 1's hard reset exists for routine containers, which are only
+    ever at-or-behind the branch tip. Run against a repo whose clean HEAD
+    holds a commit origin/$BRANCH does not have — a developer's work branch,
+    the shape that was silently switched out from under a test suite — the
+    script must refuse, say so, and leave HEAD exactly where it was.
+    """
+    import tempfile
+    with tempfile.TemporaryDirectory() as sandbox:
+        repo = _seed_repo(os.path.join(sandbox, "repo"), "sandbox-branch")
+        run = lambda *a: subprocess.run(  # noqa: E731
+            ["git", "-C", repo, "-c", "user.email=t@t", "-c", "user.name=t",
+             "-c", "commit.gpgsign=false", *a],
+            check=True, capture_output=True, text=True).stdout.strip()
+        run("checkout", "-q", "-b", "somebody's-work")
+        Path(repo, "work.txt").write_text("unmerged\n")
+        run("add", "-A")
+        run("commit", "-qm", "work the branch tip does not have")
+        head_before = run("rev-parse", "HEAD")
+        env = dict(os.environ)
+        env["HOME"] = sandbox
+        env["DMA_REPO_DIR"] = repo
+        env["DMA_REPO_BRANCH"] = "sandbox-branch"
+        env["DMA_SA_KEY_FILE"] = os.path.join(sandbox, "sa.json")
+        env.pop("DMA_ROUTINE_SA_KEY_B64", None)
+        env.pop("DMA_ROUTINE_SA_KEY", None)
+        proc = subprocess.run(
+            ["bash", str(HERE / "bootstrap_session.sh")],
+            capture_output=True, text=True, timeout=180, env=env)
+        head_after = run("rev-parse", "HEAD")
+        branch_after = run("rev-parse", "--abbrev-ref", "HEAD")
+    assert head_after == head_before, (
+        "bootstrap_session.sh moved HEAD off a clean tree that held commits "
+        "origin/$BRANCH does not have — that is somebody's work, discarded")
+    assert branch_after == "somebody's-work"
+    assert "NOT AN ANCESTOR" in (proc.stdout or "") + (proc.stderr or ""), (
+        "the refusal must be loud — a silent skip reads as provisioned")
 
 
 def test_bootstrap_refuses_to_register_a_marketplace_that_is_not_there():
