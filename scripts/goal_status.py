@@ -103,6 +103,57 @@ def check_routines(offline: bool) -> None:
            f"{len(pend)} runs pending, {banked} past INGESTED. The failure "
            f"mode is capacity, not rejection: see synthesis_watchdog.py and "
            f"synthesis_queue.py for the per-run picture. MEM-0218/0222.")
+    _lane_outcomes(call)
+
+
+#: Each lane's last firing, by the session id it stamps on what it writes.
+#: A trigger-fired session's CHAT is unreachable from an ordinary session —
+#: every claude-code-remote tool is permission-gated — but what the firing
+#: COMMITTED is not, and it is better evidence: it is what the lane chose to
+#: keep rather than what it said on the way there.
+LANE_SESSIONS = {
+    "A": (re.compile(r"20260823-0733|gcbc-finish-20260823", re.I),
+          "gulf-coast-business-credit"),
+    "B": (re.compile(r"laneB-20260823T082509Z|final-assembly lane B", re.I),
+          None),
+}
+
+
+def _lane_outcomes(call) -> None:
+    """Did each lane's last firing SHIP a client, or only find reasons not to?
+
+    THE NUMBER OF FINDINGS IS NOT THE HEALTH SIGNAL, and reading it as one
+    inverts the answer. Measured 2026-08-23: lane A recorded SIXTEEN open
+    findings on its firing and promoted its client anyway; lane B recorded
+    THREE and produced nothing, leaving both its packages at INGESTED. The
+    lane that found more problems is the healthy one. What separates them is
+    whether the firing triaged what it found and carried on, or stopped.
+    """
+    try:
+        rows = call("list_open_findings", limit=300)["findings"]
+    except Exception as e:                                   # noqa: BLE001
+        report("routines · what each lane's last firing shipped", UNKNOWN,
+               f"connector unreachable: {str(e)[:90]}")
+        return
+    parts, shipped = [], 0
+    for lane, (pat, produced) in LANE_SESSIONS.items():
+        mine = [f for f in rows
+                if pat.search(str(f.get("raised_by") or ""))]
+        blockers = sum(1 for f in mine if f["severity"] == "BLOCKER")
+        if produced:
+            shipped += 1
+        parts.append(f"lane {lane}: {len(mine)} finding(s), {blockers} "
+                     f"BLOCKER, " + (f"shipped {produced}" if produced
+                                     else "SHIPPED NOTHING"))
+    report("routines · what each lane's last firing shipped",
+           OK if shipped == len(LANE_SESSIONS) else OPEN,
+           " · ".join(parts) + ". A firing that records more findings and "
+           "still promotes is healthier than one that records fewer and "
+           "stops — the count is not the signal, the client is. Lane B's "
+           "cause is known and fixed (MEM-0055: a false Caps_Applied_Log "
+           "CRITICAL over cap data that sat in a column), and the vetter's "
+           "refusal list is closed so no agent can refuse for an "
+           "unregistered reason.")
 
 
 # ── 2 · the 0% failure rate, measured not asserted ──────────────────────

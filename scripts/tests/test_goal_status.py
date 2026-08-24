@@ -150,3 +150,69 @@ def test_the_tool_runs_offline_and_reports_every_part():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── the lane gauge ─────────────────────────────────────────────────────
+#
+# "Gauge each last chat" cannot be answered from a chat: a trigger-fired
+# session's transcript is unreachable from an ordinary session, every
+# claude-code-remote tool being permission-gated. It CAN be answered from
+# what each firing committed, which is better evidence — it is what the lane
+# chose to keep rather than what it said on the way there.
+
+def test_both_lanes_are_gauged():
+    assert set(GS.LANE_SESSIONS) == {"A", "B"}
+
+
+def test_each_lane_is_matched_by_its_own_session_stamp():
+    """The stamps are the ones the firings actually wrote, so a pattern that
+    stops matching means the lane changed how it identifies itself — which
+    should surface as an empty gauge, not as a silent pass."""
+    a, b = GS.LANE_SESSIONS["A"][0], GS.LANE_SESSIONS["B"][0]
+    assert a.search("agent:dma-governance learning-loop pass, session "
+                    "20260823-0733-synthesis-gulf-coast-business-credit")
+    assert a.search("dma-surface-production producer session gcbc-finish-20260823")
+    assert b.search("dma-surface-production assembly session laneB-20260823T082509Z")
+    assert b.search("agent:dma-surface-production final-assembly lane B")
+    # and they must not match each other
+    assert not a.search("laneB-20260823T082509Z")
+    assert not b.search("gcbc-finish-20260823")
+
+
+def test_a_lane_that_shipped_nothing_is_not_reported_as_passing():
+    """Lane B produced no client on its last firing. Reporting the pair as
+    green because both lanes exist would be the exact laundering this file
+    was written to stop."""
+    GS.results.clear()
+
+    def fake(tool, **kw):
+        if tool == "list_open_findings":
+            return {"findings": [
+                {"raised_by": "session gcbc-finish-20260823", "severity": "MAJOR"},
+                {"raised_by": "assembly session laneB-20260823T082509Z",
+                 "severity": "BLOCKER"}]}
+        raise AssertionError(tool)
+
+    GS._lane_outcomes(fake)
+    part, state, detail = GS.results[0]
+    assert state == GS.OPEN, (state, detail)
+    assert "SHIPPED NOTHING" in detail
+
+
+def test_the_gauge_says_the_finding_count_is_not_the_health_signal():
+    """Measured: lane A recorded 16 findings and promoted its client; lane B
+    recorded 3 and produced nothing. Reading the count as health inverts the
+    answer, so the tool states the rule where a reader will meet it."""
+    src = TOOL.read_text()
+    assert "NUMBER OF FINDINGS IS NOT THE HEALTH SIGNAL" in src
+    assert "the count is not the signal, the client is" in src
+
+
+def test_an_unreachable_connector_makes_the_gauge_unknown_not_green():
+    GS.results.clear()
+
+    def boom(tool, **kw):
+        raise RuntimeError("429 Too Many Requests")
+
+    GS._lane_outcomes(boom)
+    assert GS.results[0][1] == GS.UNKNOWN
