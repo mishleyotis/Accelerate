@@ -404,8 +404,46 @@ def test_the_update_note_no_longer_claims_the_recheck_is_pointless():
     note = pv.UPDATE_NOTE
     assert "NEXT session start" not in note, (
         "the corrected claim: the state file and cache change immediately")
-    assert "same firing" in note and "session start" in note
+    assert "same firing" in note
     assert "DISK" in note
+    assert "--heal" in note, "the note must offer the self-healing path"
+
+
+# ── the script's own guidance must prescribe production, never an ending ──
+#
+# Measured 2026-08-24 ~14:00Z, the third distinct stop in one day on the same
+# verdict: a firing whose PROMPT said to produce trusted this script's
+# freshly-read output over the stored prompt — reasonably; a prompt can be
+# stale or manipulated and this file cannot — and this file still said "end
+# the firing; the next session picks it up". The prompt fix moved the
+# contradiction instead of removing it. These pins make every written
+# authority say the same thing.
+
+def test_the_mid_session_guidance_prescribes_recovery_mode():
+    note = pv.SESSION_NOTE
+    assert "RECOVERY MODE" in note
+    assert "agent_run.py" in note, (
+        "the productive path must be named IN the script's own output — a "
+        "session that trusts only this file must still learn how to produce")
+
+
+def test_no_note_tells_a_session_to_end_the_firing():
+    """The exact sentence three firings died on, banned from both notes.
+    The historical quotation of it is allowed; the instruction is not."""
+    for name in ("UPDATE_NOTE", "SESSION_NOTE"):
+        note = getattr(pv, name)
+        head, _, tail = note.partition("(Until 2026-08-24")
+        assert "end the firing" not in head.lower(), (
+            f"{name} instructs ending the firing outside the historical "
+            f"quotation — that is the sentence that killed three firings")
+
+
+def test_heal_is_a_noop_on_verdicts_an_update_cannot_change():
+    """--heal must never run installs on OK / UPDATED_MID_SESSION /
+    AHEAD — an update there is at best pointless and at worst a downgrade."""
+    for status in ("OK", "UPDATED_MID_SESSION", "AHEAD", "NOT_INSTALLED"):
+        v, log = pv.heal({"status": status})
+        assert v == {"status": status} and log == [], status
 
 
 def test_session_start_is_read_from_the_process_not_guessed(monkeypatch):
