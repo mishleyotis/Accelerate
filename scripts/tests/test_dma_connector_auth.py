@@ -192,13 +192,23 @@ def test_service_account_key_is_tried_before_gcloud(monkeypatch):
     assert calls == [], "shelled out to gcloud while the key rung was working"
 
 
-def test_a_missing_gcloud_binary_is_a_result_not_an_exception():
+def test_a_missing_gcloud_binary_is_a_result_not_an_exception(monkeypatch):
     """`_find_gcloud` falls back to a bare name "so it fails with gcloud's own
     error" — but a bare name absent from PATH raises FileNotFoundError out of
     Popen, which no caller reads as a returncode. That exception escaped the
     fallback ladder and crashed the routine with a stack trace instead of the
-    error naming what to set."""
-    r = C._gcloud(["version"])          # no gcloud on this image
+    error naming what to set.
+
+    THE BINARY IS REMOVED, NOT ASSUMED ABSENT. The first cut of this test read
+    `C._gcloud(["version"])` on the bare machine and asserted a non-zero
+    returncode, with the comment "no gcloud on this image" — true of the
+    routine container it was written on, false of the CI runner, which ships
+    the SDK. It went red on GitHub within the hour. A test that asserts what
+    the MACHINE holds tests the machine; this one points the module at a path
+    that cannot exist, so it exercises the code path on any host.
+    """
+    monkeypatch.setattr(C, "_GCLOUD", "/nonexistent/dir/gcloud")
+    r = C._gcloud(["version"])
     assert r.returncode != 0
     assert "gcloud" in r.stderr
     assert r.stdout == ""
