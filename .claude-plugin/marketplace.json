@@ -12,7 +12,7 @@
       "source": "./plugins/dma-insights",
       "displayName": "DMA Insights",
       "description": "The six DMA skills, the 47-agent roster with explicit tool allow-lists, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector (33 tools). Provisioning is fail-closed on the checkout and records what it did; the version check names the cause of a stale bind.",
-      "version": "0.9.8",
+      "version": "0.9.9",
       "category": "domain",
       "tags": [
         "dma",
