@@ -51,6 +51,56 @@ def _recency_band(published: date | None, reference: date | None) -> str:
     return "ARCHIVAL"
 
 
+#: The width a package-origin excerpt was hard-clipped to, per clause.
+#: MEM-0129/MEM-0143 measured it on t-rowe-price-group-inc: every one of 24
+#: package-origin ids on the techstack page had clauses of EXACTLY this many
+#: characters, and the served heatmap carried 4,461 clauses of exactly 140
+#: against 281 of 139 out of 4,906 — the next most common length was 114,
+#: with 23. That distribution is not prose.
+CLAUSE_CLIP_WIDTH = 140
+
+#: Clauses are joined with this in package-origin rows.
+_CLAUSE_SPLIT = " | "
+
+
+def _clause_truncated(excerpt: str) -> str | None:
+    """The defect the 50-500 window cannot see, and why it needs its own check.
+
+    Three clauses clipped at 140 and joined by " | " total 426 characters and
+    look perfectly healthy to a length rule. What they are is three sentences
+    cut mid-word, and the consequence reached a client: a producer read a
+    vendor name out of an excerpt the CITABLE SPAN DOES NOT CONTAIN, because
+    the name fell past the cut. MEM-0129 tested every register row against
+    its own cited excerpt and found 9 distinct product names present in zero
+    of them; repairing the register against that test took it from 41 items
+    to 27, and CONFIRMED from 9 to 3.
+
+    The signature is unmistakable once looked for: a clause of exactly 140
+    characters whose last character is a word character, so the cut landed
+    inside a word rather than at a boundary. Prose does that by chance about
+    once in a hundred clauses; this corpus did it 4,461 times out of 4,906.
+
+    A clause that happens to be 140 characters and ENDS CLEANLY is left
+    alone — the check is for a cut, not for a width.
+    """
+    if not excerpt:
+        return None
+    clipped = [c for c in excerpt.split(_CLAUSE_SPLIT)
+               if len(c) == CLAUSE_CLIP_WIDTH and c[-1:].isalnum()]
+    if not clipped:
+        return None
+    return (f"excerpt_clause_truncated: {len(clipped)} clause(s) are exactly "
+            f"{CLAUSE_CLIP_WIDTH} characters and end mid-word — the hard clip "
+            f"the package ingest used to apply. The 50-500 length rule cannot "
+            f"see this: three clipped clauses joined by ' | ' total 426 and "
+            f"look healthy. Register the WHOLE span. A truncated excerpt is "
+            f"worse than a short one, because a producer reads a vendor name "
+            f"out of it that the citable span does not contain — measured on "
+            f"one register as 9 product names present in zero of their own "
+            f"cited excerpts. First clipped clause ends: "
+            f"...{clipped[0][-40:]!r}")
+
+
 def _specificity(excerpt: str, facts: list) -> int:
     """Deterministic reading of the PRD ladder (quantified with method /
     quantified / specific-qualitative / general / vague). Digits mark a
@@ -137,6 +187,9 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
     if not (50 <= len(excerpt) <= 500):
         errors.append(f"excerpt_length: {len(excerpt)} chars — a verbatim "
                       "span of 50-500 is required")
+    clipped = _clause_truncated(excerpt)
+    if clipped:
+        errors.append(clipped)
     if claim not in _CLAIMS:
         errors.append(f"claim_type: {claim!r} not in {_CLAIMS}")
     if tier not in _TIERS:
