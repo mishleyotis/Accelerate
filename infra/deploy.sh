@@ -56,6 +56,16 @@ stage_shared_into_api() {
     echo "FATAL: packages/shared/evidence_merge.py is missing" >&2
     exit 1
   }
+  # The one pattern that says what may not appear in a sentence a client
+  # reads. dma_api/redaction.py imports it at module load to withhold an
+  # empty_state whose prose names a MEM id, a gate id or a connector call
+  # (MEM-0137, measured live on three promoted clients). Missing means the api
+  # does not start, which is the intended failure: the alternative is serving
+  # `get_evidence('platform')` to a client and passing every test.
+  cp packages/shared/internal_ids.py apps/api/shared/ 2>/dev/null || {
+    echo "FATAL: packages/shared/internal_ids.py is missing" >&2
+    exit 1
+  }
 }
 
 if [ -f apps/api/Dockerfile ]; then
@@ -99,6 +109,14 @@ if [ -f apps/mcp/Dockerfile ]; then
   # number reached two clients.
   cp packages/shared/platform_fit.py apps/mcp/shared/ || {
     echo "FATAL: packages/shared/platform_fit.py is missing" >&2; exit 1; }
+  # CG-49 refuses a client-visible absence that names this system's
+  # machinery, and CG-50 asks whether a missing product name fell past a hard
+  # clip. Both rules are shared with the api and the worker rather than
+  # restated per image — a rule held in two places drifts.
+  cp packages/shared/internal_ids.py apps/mcp/shared/ || {
+    echo "FATAL: packages/shared/internal_ids.py is missing" >&2; exit 1; }
+  cp packages/shared/excerpt_clip.py apps/mcp/shared/ || {
+    echo "FATAL: packages/shared/excerpt_clip.py is missing" >&2; exit 1; }
   # The clip rule, shared with the worker so it is not held in two places.
   # `register_evidence` refuses a hard-clipped excerpt at the door; the
   # worker names a clipped CORPUS at the tier it arrives in. A missing copy

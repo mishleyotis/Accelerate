@@ -29,6 +29,7 @@ shared_path.ensure(__file__)
 # that changes the fix from 'rewrite the row' to 're-ingest the store'. One
 # rule, in packages/shared, read by the worker's parse and by both gates.
 import excerpt_clip as clip  # noqa: E402  packages/shared/excerpt_clip.py
+import internal_ids  # noqa: E402  packages/shared/internal_ids.py
 
 GRAIN_TOLERANCE = 0.05
 V4_MIN_MEMBERS = 5
@@ -2400,14 +2401,10 @@ CUSTOMER_EMPTY_STATE_KEYS = ("reason", "closure_condition", "closure", "kind")
 #: that refused them would be refusing good prose - the failure this build
 #: has already paid for twice, on the vetter and on CG-47. Only the tokens
 #: that cannot occur by accident are listed.
-_INTERNAL_ID = re.compile(
-    r"\b(?:MEM|REF)-\d{3,4}\b"                  # findings-memory ids
-    r"|\b(?:CG|AG|ET)-\d{2,3}\b"                # gate ids (SG below)
-    r"|\bSG-[A-Z0-9]{1,3}\d?\b"                 # SG-01, SG-V4, SG-AC1
-    r"|\bCUSTOMER_WITHHELD\b"                    # the redaction constant
-    r"|\bno_staged_submission\b"
-    r"|\b(?:get|list|submit|promote|register|record|resolve|report)_[a-z_]+\("
-    , re.I)
+# Moved to packages/shared/internal_ids.py and imported, not restated. CG-49
+# refuses this at SUBMIT and the api withholds it at SERVE (MEM-0137) — two
+# jobs, one rule, and a rule held in two places drifts.
+_INTERNAL_ID = internal_ids.INTERNAL_ID
 
 
 # ── CG-50 · a named product appears in the excerpt cited for it ───────

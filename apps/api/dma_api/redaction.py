@@ -402,6 +402,17 @@ def _strip_vendor(node, path="", found=None, pattern=None) -> list:
 _ALLOWLIST = None
 
 
+# `packages/shared` is resolved by the loader evidence.py already owns —
+# reused rather than re-written, because its comments record two separate
+# occasions when a fourth copy of these three lines shadowed the tracked file
+# with a stale staged one.
+from .evidence import _put_shared_on_path      # noqa: E402
+
+_put_shared_on_path()
+
+import internal_ids  # noqa: E402  packages/shared/internal_ids.py
+
+
 def _customer_allowlist() -> dict:
     global _ALLOWLIST
     if _ALLOWLIST is None:
@@ -462,6 +473,67 @@ def _apply_allowlist(page: str, section: str, body: dict) -> tuple[dict | None, 
 
     _sweep(body, "")
     return body, dropped
+
+
+def redact_empty_state(empty, audience: str) -> tuple[object, list]:
+    """(empty_state_or_None, dropped) — the ONE part of a section that never
+    went through the walker.
+
+    MEM-0137, BLOCKER. `pages.py` redacts `built["data"]` and then attaches
+    `env["empty_state"]` beside it, straight off the envelope. So every rule
+    this module enforces — the internal_only paths, CUSTOMER_STRIP_KEYS, the
+    vendor and seller-voice safety nets, the serve allowlist — applied to the
+    section's content and to nothing in its empty state.
+
+    Measured in production 2026-08-24 on three promoted clients:
+    `platform.starters.empty_state.sources_searched` serves a customer
+    `get_evidence('platform')`, `r_layer` and the literal string
+    `CUSTOMER_WITHHELD`, and `heatmap.safeguard_gates.empty_state
+    .sources_searched` serves SG-01 and SG-V4. Ten fields between them.
+
+    An empty state is exactly where this hurts most. It is the surface a
+    reader lands on when there is nothing else there — the one place they
+    read every word — and it is the surface whose whole job is to say "here
+    is what we looked for", which is a sentence about OUR machinery unless
+    someone rewrites it for them.
+
+    The internal audience keeps the ladder: `sources_searched` is the
+    evidence that a search ran, and stripping it there would destroy the very
+    distinction the ladder exists to make.
+    """
+    if not isinstance(empty, dict) or audience != "customer":
+        return empty, []
+    allow = _customer_allowlist()
+    keep = set(allow["empty_state_keys"])
+    out = copy.deepcopy(empty)
+    dropped = [k for k in list(out) if k not in keep]
+    for k in dropped:
+        del out[k]
+    # The kept keys are PROSE, and prose carries what a key filter cannot
+    # see. CG-50's sibling CG-49 refuses a MEM id or a connector call inside
+    # `reason` at submit — but only for content submitted after it existed,
+    # and all three promoted clients predate it. So the same safety nets that
+    # run over a section body run here too.
+    dropped += [f"{k} (key)" for k in
+                _strip_keys(out, CUSTOMER_STRIP_KEYS
+                            + CUSTOMER_STRIP_CONTACT_KEYS)]
+    # THE WHOLE KEY, NEVER HALF A SENTENCE. An allowed key with a MEM id in
+    # its value is the case a key filter structurally cannot see, and the
+    # owner-level decision already recorded on CG-49 is that surgery on prose
+    # is the wrong repair: "stripping prose leaves a client reading half a
+    # sentence, while refusing it makes the producer write the sentence a
+    # client can read." At serve time there is no producer to ask, so the
+    # sentence is withheld whole and the section's redaction receipt says one
+    # was. The right fix stays upstream: CG-49 refuses it at submit.
+    for key, hit in list(internal_ids.scan(out)):
+        top = (key.split(".")[0].split("[")[0]) or key
+        if top in out:
+            del out[top]
+            dropped.append(f"{top} (names {hit})")
+    dropped += [f"{k} (vendor)" for k in _strip_vendor(out)]
+    dropped += [f"{k} (seller voice)" for k in
+                _strip_vendor(out, pattern=SELLER_VOCABULARY)]
+    return (out or None), dropped
 
 
 def redact_section(page: str, section: str, data: dict, internal_only,
