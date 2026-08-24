@@ -99,6 +99,14 @@ if [ -f apps/mcp/Dockerfile ]; then
   # number reached two clients.
   cp packages/shared/platform_fit.py apps/mcp/shared/ || {
     echo "FATAL: packages/shared/platform_fit.py is missing" >&2; exit 1; }
+  # The clip rule, shared with the worker so it is not held in two places.
+  # `register_evidence` refuses a hard-clipped excerpt at the door; the
+  # worker names a clipped CORPUS at the tier it arrives in. A missing copy
+  # here takes registration down entirely -- which is the safe direction,
+  # and deliberately so: the alternative was 4,461 clipped clauses reaching
+  # a client with nothing saying they were cuts (MEM-0129, MEM-0143).
+  cp packages/shared/excerpt_clip.py apps/mcp/shared/ || {
+    echo "FATAL: packages/shared/excerpt_clip.py is missing" >&2; exit 1; }
   # Capability-URL token: the streamable-HTTP path embeds it, so the
   # Cowork connector needs only the URL. Rotating the secret rotates the
   # URL. Created once, never echoed.
@@ -305,6 +313,11 @@ if [ -f apps/worker/Dockerfile ]; then
     echo "FATAL: packages/shared/enrichment_gaps.py is missing" >&2; exit 1; }
   cp packages/shared/contracts_data.json apps/worker/shared/ || {
     echo "FATAL: packages/shared/contracts_data.json is missing" >&2; exit 1; }
+  # The clip rule. The package parse is where clipped evidence ENTERS the
+  # system -- it never passes register_evidence -- so a worker that cannot
+  # import this must not read a corpus in silence.
+  cp packages/shared/excerpt_clip.py apps/worker/shared/ || {
+    echo "FATAL: packages/shared/excerpt_clip.py is missing" >&2; exit 1; }
   gcloud run jobs deploy dmai-worker --source=apps/worker \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-worker@${SA_DOMAIN}" \

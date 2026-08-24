@@ -30,6 +30,36 @@ from decimal import Decimal, InvalidOperation
 
 import openpyxl
 
+# The clip rule is shared with the connector, not restated here. See the
+# `_excerpt_clip_scan` call below for why the worker needs the CORPUS half
+# of it and `register_evidence` needs the single-string half.
+import sys
+from pathlib import Path as _Path
+
+
+def _shared_roots():
+    here = _Path(__file__).resolve()
+    roots = [here.parent / "shared", here.parent.parent / "shared"]
+    if len(here.parents) > 3:
+        roots.append(here.parents[3] / "packages" / "shared")
+    return roots
+
+
+for _cand in _shared_roots():
+    if _cand.exists() and str(_cand) not in sys.path:
+        sys.path.insert(0, str(_cand))
+
+try:
+    import excerpt_clip
+except ImportError as exc:                                       # pragma: no cover
+    raise ImportError(
+        "excerpt_clip is not in this image — deploy.sh stages packages/shared "
+        "into the worker's build context. A parser that cannot run the clip "
+        "check must not read a clipped corpus in silence; that is the exact "
+        "shape of MEM-0129, where nothing said the excerpts were cuts and a "
+        "producer named nine vendors their own citable spans do not contain."
+    ) from exc
+
 SUBCAP_RE = re.compile(r"^P\d+C\d+(?:\.(?:\d+|[A-Z]+\d+))+$")
 GRAIN_RE = re.compile(r"^(P\d+)(C\d+)\.(\d+|[A-Z]+\d+)")
 # Two evidence-id families, both published by the upstream dma-assessment
@@ -684,6 +714,48 @@ def _pick(headers: dict, names) -> int | None:
     return None
 
 
+def _pick_all(headers: dict, names) -> list:
+    """EVERY alias present, in alias order — not just the winner.
+
+    `_pick` answers "which column is this field", which is the right question
+    for a field with one home. It is the wrong question for the excerpt,
+    because a workbook can carry TWO columns that both claim to hold one:
+    `Excerpt` and `Anchor_Quote`. Measured 2026-08-22 on the intake tree, one
+    package holds 899 facts with both, and not one pair is identical.
+
+    MEM-0162 measured which is which on richwood-bank: the `Excerpt` column
+    held the assessor's paraphrase and only `Anchor_Quote` was verbatim. A
+    fixed order gets that wrong half the time, so the row picks by CONDITION
+    instead — see `_best_excerpt`.
+    """
+    return [headers[n] for n in names if n in headers]
+
+
+def _best_excerpt(values) -> str | None:
+    """Of the excerpt-class columns this row carries, the one to keep.
+
+    Order is the tie-break, never the rule. A clipped span outranked a whole
+    one for as long as the alias order decided it, and the whole point of
+    MEM-0129 is that a cut excerpt is WORSE than a short one: a producer
+    reads a vendor name out of it that the citable span does not contain.
+
+    So: the first candidate that is not a hard clip wins; if every candidate
+    is clipped, the first non-empty one is kept and the corpus census names
+    the package. Keeping something clipped rather than nothing is deliberate
+    — an evidence drawer that ships empty tells a client less than one that
+    ships a cut, and the census is what makes the cut visible.
+    """
+    texts = [str(v).strip() for v in values
+             if v is not None and str(v).strip()
+             and not str(v).strip().isdigit()]
+    if not texts:
+        return None
+    for t in texts:
+        if excerpt_clip.clause_truncated(t) is None:
+            return t
+    return texts[0]
+
+
 # The ledger tab, under every name the corpus gives it. Measured: of the 153
 # packages carrying a workbook, 15 have no `Evidence_Master` at all — eleven
 # of those name the same tab `Evidence_Index`, `Evidence_Linkage_Matrix`,
@@ -752,6 +824,11 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
             return []
         cols = {k: _pick(headers, names) for k, names in _EV_ALIASES.items()}
         cols["e_id"] = _pick(headers, _EV_E_ID_KEYS)
+        # Every excerpt-class column, because a row can carry two and the
+        # first alias is not always the verbatim one (MEM-0162). `_pick`
+        # still answers `cols["excerpt"]` for the per-column census below,
+        # which asks whether the field landed at all.
+        excerpt_cols = _pick_all(headers, _EV_ALIASES["excerpt"])
 
         # A COLUMN THIS READER DID NOT RECOGNISE IS NAMED, ALWAYS.
         #
@@ -804,8 +881,8 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
                               ("FACT", "INFERENCE", "HYPOTHESIS",
                                "CEILING_ESTIMATE") else None,
                 "fact_count": None if facts in (None, "UNPARSEABLE") else int(facts),
-                "excerpt": (str(v("excerpt")).strip() if v("excerpt")
-                            and not str(v("excerpt")).strip().isdigit() else None),
+                "excerpt": _best_excerpt(
+                    [row[i] if i < len(row) else None for i in excerpt_cols]),
                 "subcaps": [s for s in
                             (x.strip() for x in str(v("subcaps") or "").split(","))
                             if SUBCAP_RE.match(s)],
@@ -835,6 +912,51 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
         # package that carries no `claim_type` at all is thin, not broken —
         # so this states the denominator and lets the vetter and the run
         # decide, which is the same discipline every absence here keeps.
+        # IS THIS WHOLE CORPUS A CLIP RATHER THAN A QUOTATION?
+        #
+        # MEM-0129 and MEM-0143, both BLOCKER, both this reader's tier. The
+        # package arrived with every clause cut at exactly 140 characters and
+        # joined with " | ". Three of those total 426 and pass the 50-500
+        # verbatim window without a murmur, so nothing fired — and 1,960 of
+        # 2,063 served evidence items across 583 of 595 cells showed a client
+        # a quotation cut mid-word. `register_evidence` now refuses one at
+        # the door, but PACKAGE-ORIGIN EVIDENCE NEVER GOES THROUGH THAT DOOR:
+        # it arrives here. A rule enforced in one of the two places it is
+        # needed is the half-fix MEM-0143 recorded the first time round,
+        # where the repair covered only the ids one surface cited and left
+        # the 752-record corpus the heatmap cites untouched.
+        #
+        # The corpus check works the width out for itself rather than being
+        # told it. That matters: `_RATIONALE_KEYS` above already carries a
+        # `rationale_150_chars` spelling, so a second clip width is a column
+        # name in the shipped corpus, not a hypothetical, and a rule that
+        # only knows 140 would walk straight past it.
+        #
+        # REPORTED, NOT RAISED — the same discipline every absence here
+        # keeps. Refusing the package would take down every run whose only
+        # evidence is clipped, which is most of the T. Rowe corpus; what the
+        # vetter and the producer need is to KNOW, so the producer stops
+        # citing past the cut and the package can be re-ingested whole.
+        if out:
+            scan = excerpt_clip.clip_signature(r.get("excerpt") for r in out)
+            if scan["verdict"] == "CLIPPED":
+                observe("evidence_excerpts_clause_truncated", {
+                    "tab": tab, **scan,
+                    "consequence":
+                        "every excerpt in this ledger is a CUT, not a "
+                        "quotation. A producer reading one names what fell "
+                        "past the cut: measured on one register as 9 product "
+                        "names present in zero of their own cited excerpts, "
+                        "and repairing it against that test took the register "
+                        "from 41 rows to 27 and CONFIRMED from 9 to 3. The "
+                        "50-500 length window cannot see this and never "
+                        "will — three clipped clauses joined by ' | ' total "
+                        "426 and look healthy.",
+                    "fix": "re-ingest this package's evidence with whole "
+                           "spans; until then no excerpt here may be read "
+                           "for anything the visible text does not itself "
+                           "say."})
+
         if out:
             for field in list(_EV_ALIASES) + ["e_id"]:
                 if cols.get(field) is None:
