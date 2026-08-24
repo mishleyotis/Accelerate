@@ -216,3 +216,81 @@ def test_an_unreachable_connector_makes_the_gauge_unknown_not_green():
 
     GS._lane_outcomes(boom)
     assert GS.results[0][1] == GS.UNKNOWN
+
+
+# ── would a firing starting NOW get a client? ──────────────────────────
+#
+# The rejection-vs-triage question, answered by running the gate rather than
+# reading it. Reading run_gate.py shows a triage-first design; running it
+# shows whether that design holds against the queue as it actually is.
+
+def test_a_gate_that_produces_nothing_is_a_failure_not_an_open_item():
+    """This one IS a defect rather than a state of the world: a queue with
+    ready runs and a gate that returns no client is the exact behaviour the
+    owner reported."""
+    GS.results.clear()
+    import subprocess as sp
+    real = sp.run
+
+    class R:
+        stdout = ("GATE: STOP — gated 40 of 170 queued entities and none was "
+                  "producible.")
+        stderr = ""
+
+    try:
+        sp.run = lambda *a, **k: R()
+        GS.subprocess.run = sp.run
+        GS.check_gate_produces(offline=False)
+    finally:
+        sp.run = real
+        GS.subprocess.run = real
+    assert GS.results[0][1] == GS.FAIL
+    assert "none was producible" in GS.results[0][2]
+
+
+def test_a_produce_line_reports_pass_with_the_run_it_named():
+    GS.results.clear()
+    import subprocess as sp
+    real = sp.run
+
+    class R:
+        stdout = ("GATE: PRODUCE lawley run bf3754b8-5c0f-444f-bde2-550d9f35f27f\n"
+                  "GATE: RESERVE bank-of-the-sierra run bfc6cb31\n"
+                  "GATE: RESERVE galway-holdings run 51b57dab")
+        stderr = ""
+
+    try:
+        sp.run = lambda *a, **k: R()
+        GS.subprocess.run = sp.run
+        GS.check_gate_produces(offline=False)
+    finally:
+        sp.run = real
+        GS.subprocess.run = real
+    part, state, detail = GS.results[0]
+    assert state == GS.OK
+    assert "lawley" in detail and "2 reserve(s)" in detail
+
+
+def test_the_check_states_why_walking_past_a_failure_is_correct():
+    """Asserted on the RENDERED detail, not the source. The sentence is
+    wrapped across f-string fragments, so a source match would be pinning
+    concatenation seams rather than the words a reader sees."""
+    GS.results.clear()
+    import subprocess as sp
+    real = sp.run
+
+    class R:
+        stdout = "GATE: PRODUCE lawley run bf3754b8\nGATE: RESERVE x run y"
+        stderr = ""
+
+    try:
+        GS.subprocess.run = lambda *a, **k: R()
+        GS.check_gate_produces(offline=False)
+    finally:
+        GS.subprocess.run = real
+    detail = GS.results[0][2]
+    assert "a finding to record, not a reason to stop looking" in detail
+    src = TOOL.read_text()
+    assert "lawley" in src, (
+        "the measurement names the package lane B refused, which is what "
+        "makes this evidence rather than an assertion")

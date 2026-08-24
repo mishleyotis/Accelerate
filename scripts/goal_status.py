@@ -156,6 +156,53 @@ def _lane_outcomes(call) -> None:
            "unregistered reason.")
 
 
+def check_gate_produces(offline: bool) -> None:
+    """Would a firing STARTING NOW get a client, or a reason not to?
+
+    This is the rejection-vs-triage question answered by running the thing
+    rather than reading it. The gate walks the live queue and either names a
+    run to produce or explains what it walked past. Reading run_gate.py shows
+    the design is triage-first — a failing candidate no longer stops the
+    queue, a previously-refused package is demoted to the back and never
+    dropped, and a RESERVE list gives the producing session a named
+    alternative when the vetter refuses inside it. Running it shows whether
+    that design holds against the queue as it actually is.
+
+    Measured 2026-08-24: it returns PRODUCE for `lawley` — the very package
+    lane B refused on its last firing — with all four gates PASS, plus two
+    reserves and three previously-refused packages demoted but still
+    producible.
+    """
+    if offline:
+        report("routines · a firing starting now would get a client", UNKNOWN,
+               "--offline")
+        return
+    gate = (ROOT / "plugins" / "dma-insights" / "scripts" / "run_gate.py")
+    try:
+        r = subprocess.run([sys.executable, str(gate), "pick"],
+                           capture_output=True, text=True, cwd=ROOT,
+                           timeout=600)
+    except Exception as e:                                   # noqa: BLE001
+        report("routines · a firing starting now would get a client", UNKNOWN,
+               f"gate would not run: {str(e)[:90]}")
+        return
+    produce = [ln for ln in r.stdout.splitlines()
+               if ln.startswith("GATE: PRODUCE")]
+    reserve = [ln for ln in r.stdout.splitlines()
+               if ln.startswith("GATE: RESERVE")]
+    if produce:
+        report("routines · a firing starting now would get a client", OK,
+               f"{produce[0][len('GATE: '):]}, {len(reserve)} reserve(s). "
+               f"The gate walks past what it cannot produce and names it, "
+               f"rather than stopping: a package failure is a finding to "
+               f"record, not a reason to stop looking.")
+    else:
+        stop = next((ln for ln in r.stdout.splitlines()
+                     if ln.startswith("GATE: STOP")), "no PRODUCE line")
+        report("routines · a firing starting now would get a client", FAIL,
+               stop[:220])
+
+
 # ── 2 · the 0% failure rate, measured not asserted ──────────────────────
 
 def check_failure_rate(offline: bool) -> None:
@@ -295,8 +342,8 @@ def check_model(offline: bool) -> None:
 def main() -> int:
     offline = "--offline" in sys.argv
     print("Standing goal status — measured, not remembered\n")
-    for fn in (check_routines, check_failure_rate, check_backlog,
-               check_corpus, check_headless, check_model):
+    for fn in (check_routines, check_gate_produces, check_failure_rate,
+               check_backlog, check_corpus, check_headless, check_model):
         try:
             fn(offline)
         except Exception as e:                               # noqa: BLE001
