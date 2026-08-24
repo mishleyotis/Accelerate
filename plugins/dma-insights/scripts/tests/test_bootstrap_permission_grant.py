@@ -219,3 +219,74 @@ def test_no_command_substitution_closes_on_the_heredoc_opener_line():
     assert not offenders, (
         "command substitution closed on the here-doc opener line:\n  "
         + "\n  ".join(offenders))
+
+# ── the connector was never the only server that prompts ─────────────────
+#
+# Measured 2026-08-24 on a provisioned container: user settings carried
+# exactly one rule, `mcp__plugin_dma-insights_connector__*`, while the
+# routines are required to read the world through Clay, Exa, Tavily,
+# Vibe-Prospecting and Indeed. Every one of those is a separate MCP server
+# with its own permission rule, so the first enrichment call in an unattended
+# firing stops on a prompt nobody can answer — the same way the connector did
+# before it was granted, and with the same result: the slot burns and nothing
+# is produced. The set is DERIVED from the plugin tree so that adding a
+# connector to an agent's allow-list grants it, rather than requiring someone
+# to remember this file.
+
+CONNECTORS_DOC = HERE.parent.parent / "docs" / "CONNECTORS.md"
+
+
+def derived_grants() -> list:
+    """The grant list the REAL script computes, run as the script computes it."""
+    text = BOOTSTRAP.read_text(encoding="utf-8")
+    start = text.index('GRANTS="$(')
+    end = text.index('\n)"', start) + len('\n)"')
+    snippet = text[start:end] + '\nprintf "%s\\n" $GRANTS\n'
+    r = subprocess.run(["bash", "-c", snippet], capture_output=True, text=True,
+                       env={"REPO_DIR": str(HERE.parent.parent.parent.parent),
+                            "PATH": "/usr/bin:/bin:/usr/local/bin"})
+    assert r.returncode == 0, r.stderr
+    return [l for l in r.stdout.split() if l]
+
+
+def test_every_enrichment_connector_the_docs_require_is_granted():
+    """CONNECTORS.md is the authority on which connectors the routines need;
+    a grant list that does not cover it is a firing that stops on a prompt."""
+    grants = derived_grants()
+    required = ["Clay", "Exa", "Tavily", "Vibe_Prospecting", "Indeed"]
+    missing = [n for n in required if f"mcp__{n}__*" not in grants]
+    assert not missing, (
+        f"CONNECTORS.md names these as the enrichment set and they are not "
+        f"granted: {missing}. An unattended firing stops on the first call "
+        f"to one of them.")
+
+
+def test_the_connector_itself_is_always_granted():
+    assert GRANT in derived_grants()
+
+
+def test_no_rule_is_written_with_the_hyphen_spelling_the_docs_use():
+    """The Routine record and the docs say Vibe-Prospecting, Google-Drive,
+    PDF-Viewer; the TOOL names carry underscores. A rule written the way the
+    docs read matches nothing, and matches nothing SILENTLY."""
+    bad = [g for g in derived_grants()
+           if "-" in g.split("__")[1] and not g.startswith("mcp__plugin_")]
+    assert not bad, f"hyphenated server segments match no tool: {bad}"
+
+
+def test_the_server_segment_is_never_a_glob():
+    """`mcp__*` is skipped by the permission engine with a warning and
+    approves nothing — it looks like a grant and is none."""
+    for g in derived_grants():
+        server = g[len("mcp__"):g.rindex("__")]
+        assert "*" not in server, f"glob in the server segment: {g}"
+
+
+def test_the_set_is_derived_rather_than_a_typed_list():
+    """If someone replaces the derivation with a literal list, the connectors
+    stop tracking the agents' allow-lists and drift silently. Pinned by
+    checking that a server named ONLY in an agent file still comes out."""
+    grants = derived_grants()
+    assert "mcp__Quartr__*" in grants, (
+        "Quartr appears only in agent allow-lists — its presence is the "
+        "evidence that the list is read out of the tree, not typed")

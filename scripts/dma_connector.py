@@ -12,14 +12,31 @@ usage:
 
 Two credentials, and they are not the same thing:
 
-  * the capability-path token — read from Secret Manager at call time (never
-    committed, never echoed); the URL rotates when the secret rotates. It
-    proves which connector you meant.
+  * the capability-path token — env, then the file bootstrap lands, then
+    Secret Manager (never committed, never echoed); the URL rotates when the
+    secret rotates. It proves which connector you meant.
   * a Google-signed ID token for the Cloud Run service — minted per call from
-    the active gcloud credential. It proves who you are. Cloud Run enforces
+    the routine service-account key. It proves who you are. Cloud Run enforces
     `roles/run.invoker` on the audience before the request ever reaches the
     MCP server, so a call without this header is a 403 no matter how good the
     path token is.
+
+NEITHER CREDENTIAL MAY DEPEND ON gcloud, and until 2026-08-24 both did.
+Measured on a routine container that day: `gcloud` is not on PATH and
+/opt/google-cloud-sdk does not exist, so `gcloud auth print-identity-token`
+raised and every call through this module failed before it reached the wire.
+The watchdog routine is told in its own prompt that it carries no mcp__*
+tools and must reach the connector "over HTTP through scripts/dma_connector.py"
+— so a gcloud-only minter meant that routine could never do its job on the
+image it actually runs on, and said so as a token error rather than as a
+missing SDK.
+
+`plugins/dma-insights/scripts/gcp_token.py` already mints both tokens in pure
+Python from the service-account key (JWT-bearer exchange, stdlib only), which
+is the same key bootstrap_session.sh lands and the same identity every other
+consumer uses. That is now the FIRST rung here; gcloud remains as a fallback
+for a workstation that has it and no key, so nothing that worked before
+stops working.
 
 Identity tokens live one hour. A synthesis run outlives that easily, so the
 cache below is expiry-aware — it re-mints when the token it holds is inside
@@ -63,8 +80,44 @@ def _find_gcloud() -> str:
 
 
 _GCLOUD = _find_gcloud()
+#: The plugin's pure-Python token minter, imported by path rather than by
+#: package name: this script is run as `python3 scripts/dma_connector.py` from
+#: the repo root, where `plugins/dma-insights/scripts` is not importable and
+#: the directory name is not a legal identifier anyway.
+#: `_UNSET` distinguishes "not looked yet" from "looked, not there" — without
+#: it a missing plugin tree is re-imported on every single call.
+_UNSET = object()
+_GCP_TOKEN = _UNSET
+
+
+def _gcp_token():
+    """The gcp_token module, or None when the plugin tree is not beside us.
+
+    None is a real answer — a bare checkout of scripts/ without the plugin is
+    a machine where gcloud is the only route left — so callers fall back
+    rather than crash on the import.
+    """
+    global _GCP_TOKEN
+    if _GCP_TOKEN is not _UNSET:
+        return _GCP_TOKEN
+    _GCP_TOKEN = None
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    path = os.path.join(here, "plugins", "dma-insights", "scripts",
+                        "gcp_token.py")
+    try:
+        import importlib.util                                # noqa: PLC0415
+        spec = importlib.util.spec_from_file_location("dma_gcp_token", path)
+        if spec and spec.loader:
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            _GCP_TOKEN = mod
+    except Exception:                                        # noqa: BLE001
+        _GCP_TOKEN = None
+    return _GCP_TOKEN
+
+
 _MCP_HOST = os.environ.get(
-    "DMA_MCP_HOST", "https://dmai-mcp-306195530103.us-central1.run.app")
+    "DMA_MCP_HOST", "https://dmai-mcp-dukrne5v4a-uc.a.run.app")
 _PROJECT = os.environ.get("GCP_PROJECT", "digital-maturity-assessor")
 _REGION = os.environ.get("REGION", "us-central1")
 _SERVICE = os.environ.get("DMA_MCP_SERVICE", "dmai-mcp")
@@ -78,23 +131,73 @@ TOKEN_REFRESH_MARGIN = int(os.environ.get("MCP_TOKEN_REFRESH_MARGIN", 120))
 _idtok_cache: "tuple[str, float] | None" = None
 
 
+class _NoGcloud:
+    """What a gcloud call returns on an image that has no gcloud.
+
+    A missing binary is a RESULT, not an exception. `_find_gcloud` already
+    falls back to the bare name "so it fails with gcloud's own error" — but a
+    bare name that is not on PATH does not produce gcloud's error, it produces
+    `FileNotFoundError` from Popen, which is not a returncode any caller was
+    written to read. Measured 2026-08-24 on the routine image: that exception
+    escaped the fallback ladder in `_mint_identity_token`, so a container with
+    no SDK crashed with a stack trace instead of reporting which credentials
+    it had tried and what to set.
+    """
+    returncode = 127
+    stdout = ""
+
+    def __init__(self, exc):
+        self.stderr = f"gcloud is not installed on this image ({exc})"
+
+
 def _gcloud(args):
     """Run gcloud with a cleared CLOUDSDK_AUTH_ACCESS_TOKEN: a stale token in
     the environment overrides the activated account and fails with a 401 that
-    reads like a permissions problem."""
-    return subprocess.run(
-        [_GCLOUD, *args], capture_output=True, text=True,
-        env={**os.environ, "CLOUDSDK_AUTH_ACCESS_TOKEN": ""})
+    reads like a permissions problem.
+
+    Never raises for a missing or unrunnable binary — see `_NoGcloud`.
+    """
+    try:
+        return subprocess.run(
+            [_GCLOUD, *args], capture_output=True, text=True,
+            env={**os.environ, "CLOUDSDK_AUTH_ACCESS_TOKEN": ""})
+    except OSError as exc:
+        return _NoGcloud(exc)
 
 
 def _url():
+    """The connector URL, path token included. Never logged.
+
+    `gcp_token.path_token` is the same three-rung ladder every other consumer
+    climbs — env, the file bootstrap lands, then Secret Manager — so a
+    container missing any one of them still answers. The bare gcloud read that
+    used to be the only route past the env var is kept last, for a machine
+    with the SDK and no plugin tree.
+    """
     global _URL
     if _URL is None:
         tok = os.environ.get("MCP_PATH_TOKEN")
+        mod = _gcp_token()
+        if not tok and mod is not None:
+            try:
+                tok = mod.path_token(_PROJECT)
+            except SystemExit:
+                # path_token exits with the routes it tried; here that is one
+                # rung of several, so it is caught and the next rung runs.
+                tok = ""
+            except Exception:                                # noqa: BLE001
+                tok = ""
         if not tok:
             tok = _gcloud(["secrets", "versions", "access", "latest",
                            "--secret=dmai-mcp-path-token",
                            f"--project={_PROJECT}"]).stdout.strip()
+        if not tok:
+            raise RuntimeError(
+                "no connector path token: MCP_PATH_TOKEN is unset, "
+                "/root/.dma/pathtok is absent or empty, and neither the "
+                "service-account key nor gcloud could read Secret Manager "
+                "(dmai-mcp-path-token). bootstrap_session.sh lands the file; "
+                "DMA_ROUTINE_SA_KEY_B64 is what lets it.")
         _URL = f"{_MCP_HOST}/mcp/{tok}"
     return _URL
 
@@ -138,14 +241,47 @@ def _member(who):
 
 
 def _mint_identity_token():
-    """A fresh Google-signed ID token whose audience is the connector host."""
+    """A fresh Google-signed ID token whose audience is the connector host.
+
+    Two rungs, and the ORDER is the fix. The service-account key is what a
+    routine container actually has; gcloud is what a workstation has. Trying
+    the key first means the scheduled sessions — the ones with nobody watching
+    — stop depending on an SDK that is not in their image.
+    """
+    tried = []
+    mod = _gcp_token()
+    if mod is not None:
+        try:
+            key, source = mod.load_key()
+            if key is None:
+                tried.append(f"service-account key: {source}")
+            else:
+                tok = mod.exchange(mod.mint_assertion(
+                    key, {"target_audience": _MCP_HOST})).get("id_token", "")
+                if tok:
+                    return tok
+                tried.append("service-account key: exchange carried no "
+                             "id_token")
+        except Exception as exc:                             # noqa: BLE001
+            # The message names the failure class, never the key or a token.
+            tried.append(f"service-account key: {type(exc).__name__}: "
+                         f"{str(exc)[:200]}")
+    else:
+        tried.append("service-account key: gcp_token.py not found beside "
+                     "this checkout")
+
     r = _gcloud(["auth", "print-identity-token", f"--audiences={_MCP_HOST}"])
     tok = r.stdout.strip()
-    if r.returncode != 0 or not tok:
-        raise RuntimeError(
-            f"could not mint an identity token for {_MCP_HOST}: "
-            f"{r.stderr.strip()[:300] or 'gcloud returned an empty token'}")
-    return tok
+    if r.returncode == 0 and tok:
+        return tok
+    tried.append(f"gcloud: {r.stderr.strip()[:200] or 'empty token'}")
+    raise RuntimeError(
+        f"could not mint an identity token for {_MCP_HOST}. "
+        + "; ".join(tried)
+        + ". The routine fix is DMA_ROUTINE_SA_KEY_B64 in the claude.ai/code "
+          "environment settings (one line, base64 of Secret Manager secret "
+          "dmai-routine-sa-key); bootstrap_session.sh materialises the key "
+          "from it.")
 
 
 def identity_token():

@@ -306,5 +306,102 @@ def test_the_self_provisioning_prompts_check_before_cloning(section):
         f"there — 'do not clone over it' is the whole point")
 
 
+# ── a path is a command too ───────────────────────────────────────────────
+#
+# The walk above proves every SCRIPT a prompt names exists with the flags it
+# names. It never looked at the FILES those scripts are pointed at, and three
+# of them did not resolve — measured 2026-08-24, all in one class:
+#
+#   fixtures/gold_manifest.json     STEP 3's gold exemplar, lanes A and B
+#   fixtures/match_feedback.json    STEP 4's ledger snapshot, lane A + weekly
+#   fixtures/source_yield.json      STEP 4's ledger snapshot, lane A
+#
+# All three live under plugins/dma-insights/fixtures/. The repo ALSO has a
+# top-level fixtures/ directory, which is what makes the short spelling read
+# as correct to everyone who has ever looked at it — including the guard
+# above, which resolved the token against the plugin tree and called it
+# found. From a routine's actual working directory it is a missing file, so
+# STEP 3 could not read the exemplar and STEP 4's ledger push failed every
+# firing — the step whose own prompt says "treat a failed push as a failed
+# step". The learning loop was losing its ledgers quietly.
+#
+# The fix is not a corrected string, it is this: a prompt's path is checked
+# against the CONSTANT the owning script writes, so the two cannot drift.
+
+def live_prompts() -> dict:
+    """Prompts for routines that still fire. Section 2a-ii is kept in the doc
+    as the record of a routine DELETED in the routines UI; holding a retired
+    prompt to today's paths would force edits to a historical record."""
+    text = DOC.read_text(encoding="utf-8")
+    dead = {m.group(1) for m in re.finditer(
+        r"^### (2[a-z-]*(?:-[a-z]+)?) · .*DELETED", text, re.M)}
+    return {k: v for k, v in prompts().items()
+            if k.split()[0] not in dead}
+
+
+def _plugin_const(module: str, name: str) -> str:
+    """A path constant from a plugin script, as a repo-root-relative string —
+    which is the form a prompt has to spell, because that is where a routine
+    stands when it runs one."""
+    import importlib.util
+    src = ROOT / "plugins" / "dma-insights" / "scripts" / f"{module}.py"
+    spec = importlib.util.spec_from_file_location(f"_pc_{module}", src)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return str(Path(getattr(mod, name)).resolve().relative_to(ROOT.resolve()))
+
+
+@pytest.mark.parametrize("module,const", [
+    ("subcap_match", "FEEDBACK"),
+    ("source_yield", "LEDGER"),
+])
+def test_a_ledger_path_a_prompt_pushes_is_the_path_the_script_writes(
+        module, const):
+    """`push-ledger --file <path>` has to name the file the ledger script
+    actually wrote, or the snapshot the weekly rectification merges is a file
+    that was never there."""
+    want = _plugin_const(module, const)
+    short = "fixtures/" + Path(want).name
+    for section, prompt in live_prompts().items():
+        if short not in prompt:
+            continue
+        assert want in prompt, (
+            f"{section} names {short}, which does not exist from the repo "
+            f"root — {module}.{const} writes {want}. The repo's top-level "
+            f"fixtures/ directory is what makes the short spelling look "
+            f"right; from a routine's working directory it is a missing file")
+
+
+def test_the_gold_exemplar_path_resolves_from_the_repo_root():
+    """STEP 3 reads the exemplar from a manifest. A manifest it cannot open
+    is a gold-standard comparison that silently does not happen."""
+    for section, prompt in live_prompts().items():
+        for tok in set(re.findall(r"[\w/.-]*gold_manifest\.json", prompt)):
+            assert (ROOT / tok).is_file(), (
+                f"{section} names {tok}, which does not resolve from the "
+                f"repo root; the manifest is at "
+                f"plugins/dma-insights/fixtures/gold_manifest.json")
+
+
+def test_no_live_prompt_names_a_file_that_only_exists_under_the_plugin():
+    """The general form of the same defect, so the next one is caught before
+    a firing finds it. A token that misses from the repo root and hits under
+    plugins/dma-insights/ is always the short spelling of a real file."""
+    plugin = ROOT / "plugins" / "dma-insights"
+    pattern = re.compile(
+        r"(?<![\w/.-])((?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+"
+        r"\.(?:py|json|md|sh|txt|ya?ml))")
+    offenders = []
+    for section, prompt in live_prompts().items():
+        for tok in sorted(set(pattern.findall(prompt))):
+            if (ROOT / tok).exists() or not (plugin / tok).exists():
+                continue
+            offenders.append((section, tok, f"plugins/dma-insights/{tok}"))
+    assert not offenders, (
+        "a prompt names a path that resolves only under the plugin tree, so "
+        "a routine standing at the repo root cannot open it: " +
+        "; ".join(f"{s}: {t} -> {fix}" for s, t, fix in offenders))
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))

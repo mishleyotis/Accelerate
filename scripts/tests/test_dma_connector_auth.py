@@ -145,9 +145,74 @@ class _Sub:
 
 
 def test_mint_failure_is_an_error_not_an_empty_token(monkeypatch):
+    """Both rungs empty is an error. Stubbing gcloud alone is no longer
+    enough: since 2026-08-24 the service-account key is tried FIRST, and on a
+    provisioned container that rung answers — this test passed a stubbed
+    gcloud and then minted a real token off the key, which is the opposite of
+    what it claims to assert."""
+    monkeypatch.setattr(C, "_gcp_token", lambda: None)
     monkeypatch.setattr(C, "_gcloud", lambda args: _Sub())
     with pytest.raises(RuntimeError, match="could not mint an identity token"):
         C._mint_identity_token()
+
+
+# ── the routine image has no gcloud, and that is the normal case ───────
+#
+# Measured 2026-08-24 on a routine container: `command -v gcloud` finds
+# nothing and /opt/google-cloud-sdk does not exist. The watchdog Routine is
+# told in its own prompt that it carries no mcp__* tools and must reach the
+# connector "over HTTP through scripts/dma_connector.py" — so while both
+# credentials came only from gcloud, that Routine could not perform its
+# function on the image it actually runs on, and every firing failed at the
+# token rather than reporting a missing SDK.
+def test_service_account_key_is_tried_before_gcloud(monkeypatch):
+    """The key is what a routine container has; gcloud is what a workstation
+    has. Order is the fix, so it is pinned."""
+    calls = []
+    monkeypatch.setattr(C, "_gcloud",
+                        lambda args: calls.append(args) or _Sub())
+
+    class _Mod:
+        @staticmethod
+        def load_key(path=None):
+            return {"client_email": "x", "private_key": "y"}, "test key"
+
+        @staticmethod
+        def mint_assertion(key, extra):
+            assert extra == {"target_audience": C._MCP_HOST}, \
+                "minted for the wrong audience — Cloud Run 403s on that"
+            return "assertion"
+
+        @staticmethod
+        def exchange(assertion):
+            return {"id_token": "TOKEN"}
+
+    monkeypatch.setattr(C, "_gcp_token", lambda: _Mod)
+    assert C._mint_identity_token() == "TOKEN"
+    assert calls == [], "shelled out to gcloud while the key rung was working"
+
+
+def test_a_missing_gcloud_binary_is_a_result_not_an_exception():
+    """`_find_gcloud` falls back to a bare name "so it fails with gcloud's own
+    error" — but a bare name absent from PATH raises FileNotFoundError out of
+    Popen, which no caller reads as a returncode. That exception escaped the
+    fallback ladder and crashed the routine with a stack trace instead of the
+    error naming what to set."""
+    r = C._gcloud(["version"])          # no gcloud on this image
+    assert r.returncode != 0
+    assert "gcloud" in r.stderr
+    assert r.stdout == ""
+
+
+def test_mint_failure_names_the_variable_that_fixes_it(monkeypatch):
+    """An unattended firing's error message is the whole bug report."""
+    monkeypatch.setattr(C, "_gcp_token", lambda: None)
+    monkeypatch.setattr(C, "_gcloud", lambda args: _Sub())
+    with pytest.raises(RuntimeError) as ei:
+        C._mint_identity_token()
+    msg = str(ei.value)
+    assert "DMA_ROUTINE_SA_KEY_B64" in msg
+    assert "bootstrap_session.sh" in msg
 
 
 # ── finding gcloud when PATH has already reset ─────────────────────────

@@ -54,15 +54,81 @@ KEY_FILE="${DMA_SA_KEY_FILE:-/root/.dma/sa.json}"
 PROJECT="digital-maturity-assessor"
 
 # ---- 1 · the repository (public — anonymous clone works) ----------------
+# THE CHECKOUT IS THE MARKETPLACE, so this step decides which plugin version
+# the session binds. `.claude/settings.json` registers zennify-dma as a
+# DIRECTORY source pointing at $REPO_DIR, and Claude Code installs enabled
+# plugins from it at session start — before any prompt runs. So a checkout
+# that is behind at this moment is a session that binds a plugin that is
+# behind, and no STEP 0 inside the session can undo it: agents, skills and
+# hooks load once.
+#
+# That is the whole shape of the livelock measured 2026-08-23/24 and reported
+# by two synthesis firings: container arrives with a stale checkout (136
+# commits behind, clean working tree — which looks perfectly healthy), the
+# plugin installs from it at 0.6.2, the routine's STEP 0 then fetches the
+# branch, plugin_version.py correctly reports STALE against the now-current
+# checkout, the routine updates the install to 0.9.7, re-checks, gets
+# UPDATED_MID_SESSION — the disk is right and the session is not — and ends
+# the firing without producing. The next firing repeats it exactly. Nothing
+# is broken anywhere and no client is ever produced.
+#
+# `merge --ff-only` was the wrong verb for this: it fails on a detached HEAD,
+# on any divergence, and on a dirty tree, and the old ||-chain then logged
+# "continuing on what is checked out" and installed the plugin from the stale
+# tree anyway — fail-open, at the one point in provisioning where failing
+# open pins the defect for every firing that follows. A routine container's
+# checkout is disposable, so the right verb is a hard reset to the branch
+# tip; a tree with LOCAL MODIFICATIONS is somebody's work and is never reset,
+# it is reported instead.
+CHECKOUT_STATE="unknown"
+CHECKOUT_NOTE=""
 if [ ! -d "$REPO_DIR/.git" ]; then
   log "cloning $REPO_URL @ $BRANCH"
-  git clone --branch "$BRANCH" "$REPO_URL" "$REPO_DIR" 2>&1 | tail -1 \
-    || log "clone FAILED — plugin install below will also fail"
+  if git clone --branch "$BRANCH" "$REPO_URL" "$REPO_DIR" 2>&1 | tail -1; then
+    CHECKOUT_STATE="cloned"
+  else
+    CHECKOUT_STATE="clone_failed"
+    CHECKOUT_NOTE="clone of $BRANCH failed"
+    log "clone FAILED — plugin install below will also fail"
+  fi
+elif ! git -C "$REPO_DIR" fetch origin "$BRANCH" 2>/dev/null; then
+  CHECKOUT_STATE="fetch_failed"
+  CHECKOUT_NOTE="could not fetch origin/$BRANCH"
+  log "FETCH FAILED for $BRANCH — cannot tell whether this checkout is current"
+elif [ -n "$(git -C "$REPO_DIR" status --porcelain --untracked-files=no 2>/dev/null)" ]; then
+  # Tracked files differ from HEAD: real work. Never discarded.
+  CHECKOUT_STATE="dirty"
+  CHECKOUT_NOTE="working tree has local modifications; not reset"
+  log "checkout has LOCAL MODIFICATIONS — refusing to reset it; the plugin"
+  log "installed below is whatever this tree holds, which may not be $BRANCH"
 else
-  git -C "$REPO_DIR" fetch origin "$BRANCH" 2>/dev/null \
-    && git -C "$REPO_DIR" checkout -q "$BRANCH" 2>/dev/null \
-    && git -C "$REPO_DIR" merge -q --ff-only "origin/$BRANCH" 2>/dev/null \
-    || log "repo present but could not fast-forward $BRANCH (continuing on what is checked out)"
+  # Clean tree: reset covers every shape the measured failures took —
+  # behind, detached, or on another branch entirely.
+  if git -C "$REPO_DIR" checkout -q -B "$BRANCH" "origin/$BRANCH" 2>/dev/null \
+     && git -C "$REPO_DIR" reset -q --hard "origin/$BRANCH" 2>/dev/null; then
+    CHECKOUT_STATE="reset"
+  else
+    CHECKOUT_STATE="reset_failed"
+    CHECKOUT_NOTE="could not reset a clean tree to origin/$BRANCH"
+    log "could not reset to origin/$BRANCH on a clean tree — unexpected"
+  fi
+fi
+
+# VERIFY rather than assume: the states above say what was attempted, this
+# says what is true. It is the fact plugin_version.py needs to tell a stale
+# BIND apart from a stale CHECKOUT, and they have different fixes.
+HEAD_SHA="$(git -C "$REPO_DIR" rev-parse HEAD 2>/dev/null || echo '')"
+ORIGIN_SHA="$(git -C "$REPO_DIR" rev-parse "origin/$BRANCH" 2>/dev/null || echo '')"
+if [ -n "$HEAD_SHA" ] && [ "$HEAD_SHA" = "$ORIGIN_SHA" ]; then
+  CHECKOUT_CURRENT=true
+  log "checkout at origin/$BRANCH ($(git -C "$REPO_DIR" rev-parse --short HEAD 2>/dev/null), $CHECKOUT_STATE)"
+else
+  CHECKOUT_CURRENT=false
+  BEHIND="$(git -C "$REPO_DIR" rev-list --count "HEAD..origin/$BRANCH" 2>/dev/null || echo '?')"
+  [ -n "$CHECKOUT_NOTE" ] || CHECKOUT_NOTE="HEAD is not origin/$BRANCH"
+  log "CHECKOUT IS NOT $BRANCH ($CHECKOUT_STATE, $BEHIND commits behind) —"
+  log "the plugin installed below comes from THIS tree, so the session will"
+  log "bind that version; $CHECKOUT_NOTE"
 fi
 
 # ---- 2 · the service-account key from the environment variable ----------
@@ -131,6 +197,8 @@ fi
 # was replaced by a broken one because the clone had failed silently earlier.
 # A provisioning script must leave a half-provisioned machine no worse than
 # it found it.
+WANT=""
+HAVE=""
 if [ ! -f "$REPO_DIR/.claude-plugin/marketplace.json" ]; then
   log "no marketplace manifest at $REPO_DIR/.claude-plugin/marketplace.json —"
   log "skipping plugin install rather than registering a dead source"
@@ -165,16 +233,88 @@ elif command -v claude >/dev/null 2>&1; then
       [ "$v" = "$WANT" ] || { rm -rf "$d" && log "pruned stale plugin cache $v"; }
     done
   fi
+  # THE SELF-COMPARISON TRAP, and it is why this check reported green through
+  # every failing firing. `WANT` is read from $REPO_DIR — the SAME tree the
+  # install was just made from. When section 1 failed to bring that tree to
+  # the branch tip, the install and the expectation were both the stale
+  # version, `HAVE` equalled `WANT`, and this logged "plugin at 0.6.2 (repo
+  # ships 0.6.2)". Then the harness finished updating the checkout to the tip,
+  # the session started and bound 0.6.2, and STEP 0 compared it against a
+  # 0.9.7 checkout and called it STALE — correctly, and far too late.
+  #
+  # So the comparison that matters is against the BRANCH, not against the
+  # directory. `git show origin/$BRANCH:...` reads the tip's manifest whatever
+  # the working tree happens to hold, which is exactly the number the session
+  # will be measured against once it starts.
   HAVE="$(claude plugin list 2>/dev/null | grep -A2 'dma-insights@zennify-dma' | grep -o 'Version: [0-9.]*' | head -1 | cut -d' ' -f2)" || HAVE=""
+  TIP_WANT="$(git -C "$REPO_DIR" show "origin/$BRANCH:plugins/dma-insights/.claude-plugin/plugin.json" 2>/dev/null \
+    | python3 -c 'import json,sys;print(json.load(sys.stdin)["version"])' 2>/dev/null)" || TIP_WANT=""
+  [ -n "$TIP_WANT" ] && WANT="$TIP_WANT"
+
+  # ONE FORCED RETRY. A logged mismatch is not a remediation: the old script
+  # named the problem and left the session to bind it anyway. An update that
+  # did not take on a tree that IS current is worth exactly one more attempt
+  # before the firing is spent.
   if [ -n "$WANT" ] && [ "$HAVE" != "$WANT" ]; then
-    log "PLUGIN VERSION MISMATCH: installed ${HAVE:-none}, repo ships $WANT —"
-    log "the session will fail its version floor; plugin update above must be fixed"
+    log "plugin at ${HAVE:-none} but $BRANCH ships $WANT — retrying the update"
+    claude plugin marketplace update zennify-dma >/dev/null 2>&1 || true
+    claude plugin update dma-insights@zennify-dma >/dev/null 2>&1 || true
+    claude plugin install dma-insights@zennify-dma "${INSTALL_ARGS[@]}" >/dev/null 2>&1 || true
+    HAVE="$(claude plugin list 2>/dev/null | grep -A2 'dma-insights@zennify-dma' | grep -o 'Version: [0-9.]*' | head -1 | cut -d' ' -f2)" || HAVE=""
+  fi
+
+  if [ -n "$WANT" ] && [ "$HAVE" != "$WANT" ]; then
+    log "PLUGIN VERSION MISMATCH AFTER RETRY: installed ${HAVE:-none}, "
+    log "$BRANCH ships $WANT — this session will bind ${HAVE:-nothing}. The"
+    log "provisioning record carries both numbers; plugin_version.py reads it"
+    log "and reports this as a recurring provisioning defect rather than as a"
+    log "transient the next firing will clear."
   else
-    log "plugin at ${HAVE:-unknown} (repo ships ${WANT:-unknown})"
+    log "plugin at ${HAVE:-unknown} (origin/$BRANCH ships ${WANT:-unknown})"
   fi
 else
   log "claude CLI not found — cannot install the plugin"
 fi
+
+# ---- 4b · the breadcrumb, so a stale session can name its own cause -----
+# WHY A FILE AND NOT A LOG LINE. Everything this script logs is written
+# before the session exists and is read by nobody: the setup script's output
+# does not reach the session's transcript, so from inside a firing there is
+# no way to tell these three apart —
+#
+#   1. this script never ran (the environment setup field is empty, or the
+#      curl failed) — the plugin then comes from whatever the container image
+#      or snapshot carried, which is how 0.2.0 and 0.6.2 both survived;
+#   2. it ran and could not bring the checkout to the branch tip, so it
+#      installed the plugin from a stale tree;
+#   3. it ran, the checkout was current, the install matched — and the
+#      session STILL bound something older, which is a different bug.
+#
+# All three surface inside a firing as the same two words, STALE or
+# UPDATED_MID_SESSION, and the routines' answer to both is "end the firing,
+# the next one picks it up". When the cause is (1) or (2) the next one does
+# not pick it up, because the next container reproduces it; the routines then
+# report the same non-failure forever and produce nothing. plugin_version.py
+# reads this file and says which of the three it is, with the fix for that
+# one. Facts only — no token, no key, no path token ever goes in here.
+PROV_FILE="$(dirname "$KEY_FILE")/provisioning.json"
+STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)"
+( umask 077 && cat > "$PROV_FILE" <<JSON
+{
+  "bootstrap_ran_at": "$STAMP",
+  "repo_dir": "$REPO_DIR",
+  "branch": "$BRANCH",
+  "head": "$HEAD_SHA",
+  "origin_head": "$ORIGIN_SHA",
+  "checkout_current": $CHECKOUT_CURRENT,
+  "checkout_state": "$CHECKOUT_STATE",
+  "checkout_note": "$CHECKOUT_NOTE",
+  "plugin_installed": "$HAVE",
+  "plugin_expected": "$WANT"
+}
+JSON
+) && log "provisioning record written to $PROV_FILE" \
+  || log "could not write the provisioning record to $PROV_FILE"
 
 # ---- 5 · the grant that makes an unattended session able to CALL the tools --
 # INSTALLING THE PLUGIN IS NOT THE SAME AS BEING ALLOWED TO USE IT, and the
@@ -206,12 +346,53 @@ fi
 # bash mis-parses a here-document nested in a command substitution when the
 # closing paren sits on its own line — it warned `unterminated here-document`
 # and leaked a stray `)` into the log on the first cut of this block.
+# THE CONNECTOR IS NOT THE ONLY SERVER THAT PROMPTS, and until 2026-08-24
+# it was the only one granted. The routines read the world through the
+# claude.ai enrichment connectors — CONNECTORS.md names Clay, Exa, Tavily,
+# Vibe-Prospecting/Explorium and Indeed as the enrichment set, and the agents'
+# own allow-lists add Google Drive and Quartr — and every one of those is a
+# separate MCP server with a separate permission rule. A trigger-fired session
+# calling an ungranted one stops on a prompt nobody can answer: measured
+# 2026-08-21 as "Waiting on permission: mcp__…__search_jobs", which burns the
+# firing exactly as the connector prompt did before it was granted here.
+#
+# THE SET IS DERIVED, NOT TYPED. Every `mcp__<Server>__` spelling that appears
+# anywhere in the plugin tree is a server something in this product is
+# expected to call, and reading them out means adding a connector to an
+# agent's allow-list grants it on the next boot with nothing else to remember.
+# The two extras below are declared because they are real and NOT derivable:
+# CONNECTORS.md requires them of the TOP session, which is not an agent, so
+# they appear in no allow-list to be read out of.
+#
+# Note the spelling gap that makes a hand-typed list wrong: the Routine record
+# and the docs say "Vibe-Prospecting", "Google-Drive", "PDF-Viewer" with
+# HYPHENS, while the tool names carry UNDERSCORES. A rule written the way the
+# docs read matches nothing and fails silently.
+GRANTS="$(
+  {
+    grep -rhoE "mcp__[A-Za-z0-9_-]+__" \
+      "$REPO_DIR/plugins/dma-insights/agents" \
+      "$REPO_DIR/plugins/dma-insights/skills" \
+      "$REPO_DIR/plugins/dma-insights/docs" 2>/dev/null
+    printf 'mcp__Vibe_Prospecting__\nmcp__Indeed__\n'
+    printf 'mcp__plugin_dma-insights_connector__\n'
+  } | sort -u | sed 's/$/*/'
+)"
 CLAUDE_SETTINGS="${HOME:-/root}/.claude/settings.json"
 GRANT_OUT="$(mktemp)"
-CLAUDE_SETTINGS="$CLAUDE_SETTINGS" python3 - >"$GRANT_OUT" 2>/dev/null <<'PY' || echo "permission grant FAILED" >"$GRANT_OUT"
+CLAUDE_SETTINGS="$CLAUDE_SETTINGS" DMA_GRANTS="$GRANTS" \
+python3 - >"$GRANT_OUT" 2>/dev/null <<'PY' || echo "permission grant FAILED" >"$GRANT_OUT"
 import json, os, pathlib
 
-want = "mcp__plugin_dma-insights_connector__*"
+wanted = [w for w in (os.environ.get("DMA_GRANTS") or "").split() if w]
+# The connector is the one rule this script must never be talked out of: it
+# is what every routine needs before it can read anything at all.
+if "mcp__plugin_dma-insights_connector__*" not in wanted:
+    wanted.append("mcp__plugin_dma-insights_connector__*")
+# `mcp__*` is skipped by the permission engine with a warning and approves
+# nothing, so a glob that reached the server segment would look like a grant
+# and be none. Dropped here rather than written and trusted.
+wanted = [w for w in wanted if "*" not in w[: w.rindex("__") + 2]]
 p = pathlib.Path(os.environ["CLAUDE_SETTINGS"])
 p.parent.mkdir(parents=True, exist_ok=True)
 try:
@@ -231,14 +412,16 @@ allow = perms.setdefault("allow", [])
 if not isinstance(allow, list):
     print("permission grant SKIPPED — permissions.allow is not a list")
     raise SystemExit(0)
-if want in allow:
-    print("connector already granted in user settings")
+added = [w for w in wanted if w not in allow]
+if not added:
+    print(f"all {len(wanted)} MCP grants already granted in user settings")
 else:
-    allow.append(want)
+    allow.extend(added)
     tmp = p.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(cfg, indent=2) + "\n")
     tmp.replace(p)                                           # atomic
-    print("granted " + want + " in user settings")
+    print(f"granted {len(added)} of {len(wanted)} MCP servers in user "
+          f"settings: {', '.join(a.replace('mcp__', '').rstrip('_*') for a in added)}")
 PY
 log "$(cat "$GRANT_OUT")"
 rm -f "$GRANT_OUT"

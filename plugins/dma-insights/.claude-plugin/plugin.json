@@ -1,10 +1,10 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "0.9.7",
-  "description": "The six Digital Maturity Assessment skills, 47 DMA agents and the remote DMA Insights MCP connector (33 tools) as one installable unit. The pre-synthesis gate walks the whole pending queue and can carry two clients a firing, with reserves when a package fails vetting. Every agent carries an explicit tool allow-list. All 65 connector gates now carry producer guidance, including CG-44 to CG-49 and the four-band rule, and a test refuses a new gate that ships without it.",
+  "version": "0.9.8",
+  "description": "The six Digital Maturity Assessment skills, 47 DMA agents and the remote DMA Insights MCP connector (33 tools) as one installable unit. The environment setup script now resets a clean checkout to the branch tip BEFORE the plugin installs from it, records what it provisioned, and grants every MCP server the routines call — not just the connector. plugin_version.py reads that record and names why a session is stale, so a provisioning defect stops reading as a transient.",
   "author": {
-    "name": "Zennify \u2014 DMA Insights build"
+    "name": "Zennify — DMA Insights build"
   },
   "license": "UNLICENSED",
   "keywords": [
