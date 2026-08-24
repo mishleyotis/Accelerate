@@ -520,6 +520,35 @@ GATES = {
               "the consolidator's cross-surface reconciliation.",
               "block"),
 
+    "CG-49": ("A client-visible absence does not name this system's machinery",
+              None,
+              "The four empty_state keys the serve allowlist keeps for a "
+              "customer - reason, closure_condition, closure, kind - carry no "
+              "MEM/REF finding id, gate id, CUSTOMER_WITHHELD, or connector "
+              "tool call. Ordinary words like 'gate', 'connector' and "
+              "'staged' are deliberately NOT matched: they are English in a "
+              "sentence like 'no regulatory gate applies', and refusing them "
+              "would be refusing good prose.",
+              "Invariant 5 is default-deny redaction and the serve layer "
+              "honours it at KEY grain: customer_allowlist.json keeps those "
+              "four keys and drops the rest, so sources_searched and r_layer "
+              "never reach a client. What a key-grain allowlist structurally "
+              "cannot see is what the kept keys SAY. MEM-0137 measured the "
+              "leak on a promoted run; this gate's own sweep found it still "
+              "live on all five clients in the directory, 12 fields between "
+              "them - platform.starters naming CUSTOMER_WITHHELD and "
+              "MEM-0081, heatmap.cohort_patterns naming MEM-0099, "
+              "heatmap.safeguard_gates naming SG-01 and SG-06, and "
+              "context.issue_register naming MEM-0209 and MEM-0210, which "
+              "the session that wrote this gate had written hours earlier. "
+              "Refused at SUBMIT rather than stripped at serve: stripping "
+              "prose leaves a client reading half a sentence, while refusing "
+              "it makes the producer write the sentence a client can read. "
+              "The substance is never lost - 'recorded where assessment "
+              "defects belong' says everything the id says, to a reader who "
+              "can act on it.",
+              "block"),
+
     "CG-48": ("A value is refused if its column cannot hold it", None,
               "Every non-jsonb field a page writes is checked against the SQL "
               "type of the column it lands in, joining writer_spec.json to "

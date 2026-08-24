@@ -2377,6 +2377,91 @@ def _check_values_fit_their_columns(page, payload) -> list:
     return out[:8]
 
 
+#: The empty_state keys the API serves to a CUSTOMER. Mirrors
+#: apps/api/dma_api/customer_allowlist.json["empty_state_keys"]; a key added
+#: there and not here is prose this gate stops reading, which the test beside
+#: it pins.
+CUSTOMER_EMPTY_STATE_KEYS = ("reason", "closure_condition", "closure", "kind")
+
+#: Identifiers that are UNAMBIGUOUSLY this system talking about itself. Every
+#: one names a thing a client has no way to look up and no business seeing.
+#:
+#: WHAT IS DELIBERATELY ABSENT, and it is most of the vocabulary: "gate",
+#: "connector", "staged", "promoted". Those are ordinary English in a
+#: sentence like "no regulatory gate applies to this division", and a gate
+#: that refused them would be refusing good prose - the failure this build
+#: has already paid for twice, on the vetter and on CG-47. Only the tokens
+#: that cannot occur by accident are listed.
+_INTERNAL_ID = re.compile(
+    r"\b(?:MEM|REF)-\d{3,4}\b"                  # findings-memory ids
+    r"|\b(?:CG|AG|ET)-\d{2,3}\b"                # gate ids (SG below)
+    r"|\bSG-[A-Z0-9]{1,3}\d?\b"                 # SG-01, SG-V4, SG-AC1
+    r"|\bCUSTOMER_WITHHELD\b"                    # the redaction constant
+    r"|\bno_staged_submission\b"
+    r"|\b(?:get|list|submit|promote|register|record|resolve|report)_[a-z_]+\("
+    , re.I)
+
+
+def _check_customer_empty_state_prose(page, payload) -> list:
+    """CG-49 - a client-visible absence does not name this system's machinery.
+
+    Invariant 5 is default-deny redaction, and the serve layer honours it at
+    KEY grain: apps/api/dma_api/customer_allowlist.json keeps `reason`,
+    `closure_condition`, `closure` and `kind` from an empty_state and drops
+    the rest, so `sources_searched` and `r_layer` never reach a customer.
+
+    What a key-grain allowlist structurally cannot see is what those four
+    kept keys SAY. MEM-0137 measured the leak on a promoted run and this
+    gate's own sweep found it still live on all five clients in the
+    directory, 12 fields between them:
+
+      · platform.starters.closure_condition naming CUSTOMER_WITHHELD and
+        MEM-0081
+      · heatmap.cohort_patterns.reason naming MEM-0099
+      · heatmap.safeguard_gates.reason naming SG-01 and SG-06
+      · context.issue_register.reason naming MEM-0209 and MEM-0210 - which
+        this session wrote, hours before writing this gate
+
+    Refused at SUBMIT rather than stripped at serve, and the distinction is
+    the point: stripping prose leaves a client reading half a sentence, while
+    refusing it makes the producer write the sentence a client can read. The
+    substance never has to be lost - "recorded where assessment defects
+    belong" says everything "recorded as MEM-0209 and MEM-0210" says, to a
+    reader who can act on it.
+    """
+    if not isinstance(payload, dict):
+        return []
+    out = []
+    for section, body in payload.items():
+        if not isinstance(body, dict):
+            continue
+        es = body.get("empty_state")
+        if not isinstance(es, dict):
+            continue
+        for key in CUSTOMER_EMPTY_STATE_KEYS:
+            v = es.get(key)
+            if not isinstance(v, str) or not v:
+                continue
+            hits = sorted({m.group(0) for m in _INTERNAL_ID.finditer(v)})
+            if not hits:
+                continue
+            out.append(_reason(
+                "CG-49", section, f"{page}.{section}.empty_state.{key}",
+                f"this sentence reaches the CUSTOMER audience and names "
+                f"{len(hits)} piece(s) of this system\'s own machinery: "
+                f"{', '.join(hits[:5])}"
+                f"{'' if len(hits) <= 5 else f' (+{len(hits) - 5} more)'}. "
+                f"The serve allowlist keeps this key by design - an absence "
+                f"owes a client a reason - but it can only drop KEYS, so what "
+                f"the kept prose says is nobody\'s check but this one. Say the "
+                f"same thing in the client\'s terms: \'recorded where "
+                f"assessment defects belong\' carries everything \'recorded as "
+                f"MEM-0209\' carries, to a reader who can act on it. The "
+                f"internal id belongs in r_layer, which the walker already "
+                f"strips."))
+    return out[:6]
+
+
 #: The depth floors, and what each is a floor ON. Every one is already in the
 #: contract's own field docs; none had a reader until 2026-08-23.
 DEPTH_FLOORS = {
@@ -3040,6 +3125,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_issue_register_is_the_entitys(page, payload))
     reasons.extend(_check_prose_counts_what_is_served(page, payload))
     reasons.extend(_check_values_fit_their_columns(page, payload))
+    reasons.extend(_check_customer_empty_state_prose(page, payload))
 
     served = _served_figures(conn, run_id)
 
