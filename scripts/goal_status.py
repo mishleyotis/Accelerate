@@ -208,7 +208,26 @@ def check_gate_produces(offline: bool) -> None:
 def check_failure_rate(offline: bool) -> None:
     vet = (ROOT / "plugins" / "dma-insights" / "skills"
            / "dma-surface-production" / "scripts" / "vet_workbooks.py")
-    if not PKGS.is_dir():
+    # ABSENT AND UNREADABLE ARE DIFFERENT ANSWERS, and `Path.is_dir()` will
+    # not give you both: it swallows ENOENT, ENOTDIR, EBADF and ELOOP and
+    # RE-RAISES everything else, EACCES included. On a CI runner /root is
+    # 0700 and root-owned, so this line raised PermissionError where it
+    # looked like it would return False, main()'s catch reported it under
+    # the FUNCTION's name instead of this part's, and the report quietly
+    # stopped covering the failure rate at all — six commits red before
+    # anyone read the log, with a tidy "3 passing" count the whole way. A
+    # status tool losing the name of the thing it could not measure is the
+    # exact defect this file exists to refuse.
+    try:
+        present = PKGS.is_dir()
+    except OSError as e:
+        report("failure rate · vetter refusals across the corpus", UNKNOWN,
+               f"{PKGS} cannot be read from here ({e.strerror}). NOT the "
+               f"same as absent: the corpus may well be there and this "
+               f"process may not look at it, so no refusal rate can be "
+               f"claimed either way.")
+        return
+    if not present:
         report("failure rate · vetter refusals across the corpus", UNKNOWN,
                f"{PKGS} is not present in this container")
         return
@@ -339,6 +358,20 @@ def check_model(offline: bool) -> None:
             "satisfies 'everything on sonnet' by flattening the switching")
 
 
+#: The name each check is known by, for when the check itself cannot say.
+#: Asserted against what the passing path actually prints, so a part renamed
+#: in its report cannot leave a crash filed under a name nobody looks for.
+PART = {
+    "check_routines": "routines",
+    "check_gate_produces": "routines · a firing starting now would get a client",
+    "check_failure_rate": "failure rate",
+    "check_backlog": "backlog",
+    "check_corpus": "corpus",
+    "check_headless": "headless",
+    "check_model": "model",
+}
+
+
 def main() -> int:
     offline = "--offline" in sys.argv
     print("Standing goal status — measured, not remembered\n")
@@ -347,7 +380,13 @@ def main() -> int:
         try:
             fn(offline)
         except Exception as e:                               # noqa: BLE001
-            report(fn.__name__, UNKNOWN, f"check raised: {str(e)[:120]}")
+            # PART, not fn.__name__. A reader looks for "failure rate", not
+            # for "check_failure_rate", and a crash is the moment they most
+            # need to find it. Reporting the symbol renamed the line out of
+            # the report while the count stayed tidy.
+            report(f"{PART[fn.__name__]} · CHECK CRASHED", UNKNOWN,
+                   f"{type(e).__name__}: {str(e)[:160]}. Nothing is claimed "
+                   f"about this part — a crash is not a pass and not a fail.")
         print()
     counts = {s: sum(1 for _p, st, _d in results if st == s)
               for s in (OK, FAIL, OPEN, UNKNOWN)}

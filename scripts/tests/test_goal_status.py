@@ -16,6 +16,7 @@ identifiers it prints are pinned here against the document it reads.
 from __future__ import annotations
 
 import importlib.util
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -146,6 +147,92 @@ def test_the_tool_runs_offline_and_reports_every_part():
                  "model"):
         assert part in out, part
     assert "passing ·" in out
+
+
+# ── the two defects that kept CI red for six commits ──────────────────
+#
+# Neither was in a check. Both were in the machinery that REPORTS the
+# checks, which is worse: the report stayed tidy, the counts stayed right,
+# and one whole part quietly stopped being covered.
+
+
+def test_an_unreadable_package_dir_is_not_the_same_answer_as_an_absent_one():
+    """`Path.is_dir()` swallows ENOENT, ENOTDIR, EBADF and ELOOP and
+    RE-RAISES everything else — EACCES included. On a CI runner /root is
+    0700 and root-owned, so the probe raised where it looked like it would
+    return False. Absent and unreadable are different claims."""
+    class Denied:
+        """Stands in for the path: Path is not subclassable before 3.12, and
+        the check only ever calls is_dir() and formats the value."""
+        def is_dir(self):
+            raise PermissionError(13, "Permission denied")
+
+        def __str__(self):
+            return "/root/.dma/packages"
+
+    GS.results.clear()
+    old = GS.PKGS
+    try:
+        GS.PKGS = Denied()
+        GS.check_failure_rate(offline=True)
+    finally:
+        GS.PKGS = old
+    (part, state, detail), = GS.results
+    assert part.startswith("failure rate"), \
+        "the part keeps its own name even when its probe cannot run"
+    assert state == GS.UNKNOWN
+    assert "cannot be read" in detail and "NOT the same as absent" in detail
+
+
+def test_an_absent_package_dir_still_says_absent():
+    """The other half: the fix must not turn every miss into 'unreadable'."""
+    GS.results.clear()
+    old = GS.PKGS
+    try:
+        GS.PKGS = Path("/nonexistent-corpus-root/packages")
+        GS.check_failure_rate(offline=True)
+    finally:
+        GS.PKGS = old
+    (_part, state, detail), = GS.results
+    assert state == GS.UNKNOWN and "is not present" in detail
+
+
+def test_a_crashed_check_is_still_findable_under_its_own_name():
+    """main()'s fallback reported `fn.__name__`, so "failure rate" vanished
+    from a report that still printed a tidy 3-passing count. A reader
+    scanning for a part concludes the tool does not cover it."""
+    prog = (
+        "import sys; sys.path.insert(0, %r); import goal_status as g\n"
+        "def boom(offline): raise RuntimeError('boom')\n"
+        "boom.__name__ = 'check_failure_rate'\n"
+        "g.check_failure_rate = boom\n"
+        "sys.argv = ['goal_status', '--offline']; g.main()\n"
+        % str(ROOT / "scripts"))
+    r = subprocess.run([sys.executable, "-c", prog], capture_output=True,
+                       text=True, cwd=ROOT, timeout=900)
+    assert "failure rate" in r.stdout, r.stdout[-600:] + r.stderr[-600:]
+    assert "CHECK CRASHED" in r.stdout
+    assert "RuntimeError: boom" in r.stdout
+    assert "a crash is not a pass and not a fail" in r.stdout
+
+
+def test_every_check_has_a_name_to_fall_back_to():
+    """A check added without a PART entry would crash the crash handler."""
+    import inspect
+    named = re.findall(r"\bcheck_\w+", inspect.getsource(GS.main))
+    assert named, "could not find the check list in main()"
+    for fn in named:
+        assert fn in GS.PART, f"{fn} has no name to report a crash under"
+
+
+def test_the_fallback_names_match_the_names_the_checks_print():
+    """The two must not drift: a part renamed in its report but not in PART
+    would file a crash under a name no reader is looking for. This caught a
+    real mismatch when it was written."""
+    r = subprocess.run([sys.executable, str(TOOL), "--offline"],
+                       capture_output=True, text=True, cwd=ROOT, timeout=900)
+    for fn, label in GS.PART.items():
+        assert label in r.stdout, (fn, label)
 
 
 if __name__ == "__main__":
