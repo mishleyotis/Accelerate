@@ -129,15 +129,23 @@ def clip_signature(excerpts) -> dict:
     nothing on its neighbours. Baxter's full distinct histogram is 67 lengths
     holding one or two clauses each, and 80 holding fourteen.
     """
+    # MATERIALISE FIRST. Callers pass a generator — the worker's census does,
+    # `(r.get("excerpt") for r in out)` — and the loop below consumed it, so
+    # the `excerpts_scanned` sum that followed counted an exhausted iterator
+    # and reported 0. Measured on T. Rowe's real package: "excerpts_scanned:
+    # 0" beside "total_clauses: 1386", a denominator of zero attached to a
+    # finding about 1,121 clipped clauses. A report that miscounts what it
+    # examined is worse than one that says nothing, because it invites the
+    # reader to conclude nothing was examined.
+    seen = [e for e in (excerpts or ()) if e]
     clauses: list[str] = []
-    for e in excerpts or ():
-        if e:
-            clauses += [c for c in str(e).split(CLAUSE_SPLIT) if c]
+    for e in seen:
+        clauses += [c for c in str(e).split(CLAUSE_SPLIT) if c]
 
     distinct = set(clauses)
     total = len(clauses)
     base = {"total_clauses": total, "distinct_clauses": len(distinct),
-            "excerpts_scanned": sum(1 for e in (excerpts or ()) if e)}
+            "excerpts_scanned": len(seen)}
 
     if total < MIN_CLAUSES:
         return {**base, "verdict": "TOO_FEW", "width": None, "clipped": 0,
@@ -200,3 +208,36 @@ def clip_signature(excerpts) -> dict:
                        f"past the cut, measured on one register as 9 product "
                        f"names present in zero of their own cited excerpts."),
             "example_ends": f"...{example[-40:]!r}"}
+
+
+def prefer(sig_a: dict, sig_b: dict) -> int:
+    """Which of two corpora carries the less-damaged spans: -1 for a, 1 for b,
+    0 when there is nothing to choose.
+
+    LENGTH IS THE WRONG CRITERION and measuring it proved so. T. Rowe's
+    scoring workbook offers 426-character excerpts and its research workbook
+    434 — a rounding apart, and the ingest that picked by length picked
+    either. But the 426 is THREE clauses each cut at 140, and the 434 is ONE
+    clause cut at 480. The first reads "…live in T. Row | Technog"; the
+    second reads as a sentence. Three fragments that total more characters
+    than one span carry less of the source, not more, and a producer reading
+    the fragments is the exact mechanism of MEM-0129.
+
+    So the comparison is CLIP SEVERITY: an unclipped corpus beats a clipped
+    one, and among clipped corpora the larger cut wins, because a 480-
+    character cut keeps three and a half times as much of each sentence as a
+    140-character one.
+
+    TOO_FEW never wins on merit — a corpus too small to judge is not evidence
+    that it is clean — but it does beat a corpus known to be clipped, since
+    "not measurable" is a weaker claim against it than "measured and cut".
+    """
+    rank = {"CLEAN": 2, "TOO_FEW": 1, "CLIPPED": 0}
+    ra, rb = rank.get(sig_a.get("verdict"), 0), rank.get(sig_b.get("verdict"), 0)
+    if ra != rb:
+        return -1 if ra > rb else 1
+    if ra == 0:                       # both clipped: the wider cut keeps more
+        wa, wb = sig_a.get("width") or 0, sig_b.get("width") or 0
+        if wa != wb:
+            return -1 if wa > wb else 1
+    return 0

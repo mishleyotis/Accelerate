@@ -1113,7 +1113,33 @@ def parse_research_workbook(path: str, obs: list | None = None) -> dict:
                     "claim_type": claim if claim in ("FACT", "INFERENCE", "HYPOTHESIS",
                                                      "CEILING_ESTIMATE") else None,
                     "fact_count": None if facts in (None, "UNPARSEABLE") else int(facts),
-                    "excerpt": None,       # filled from the detail tabs below
+                    # READ THE COLUMN IF THIS GENERATION HAS ONE, and fall
+                    # back to the fact-tagged detail tabs if it does not.
+                    #
+                    # This was a flat `None` with the comment "filled from the
+                    # detail tabs below", which is true of the generation that
+                    # writes its excerpts as a fact-tagged blob under
+                    # `Evidence_Excerpt` on a SubCap-anchored tab — and false
+                    # of the one measured here. T. Rowe's research workbook
+                    # carries an `Evidence_Detail` tab anchored on Evidence_ID
+                    # with PLAIN `Excerpt` and `Anchor_Quote` columns: 1,642
+                    # values, the longest 480 characters. The ledger read set
+                    # them all to None, the fill-in below never matched the
+                    # tab shape, and the parse produced 0 excerpts out of
+                    # 1,642 while reporting nothing.
+                    #
+                    # The consequence is what makes it worth the change rather
+                    # than a note. The ingest then fell through to the SCORING
+                    # workbook's `fact_summary`, which is hard-clipped at 140,
+                    # and that is what reached the store and the client: 1,964
+                    # of 2,063 served evidence items on the promoted heatmap
+                    # cut mid-word. The 480-character source was in the
+                    # package the whole time. `_best_excerpt` picks the
+                    # unclipped candidate between the two columns present.
+                    "excerpt": _best_excerpt(
+                        [v(*_EV_ALIASES["excerpt"][:1]),
+                         v("anchor_quote"), v("verbatim"), v("quote"),
+                         v("passage")]),
                     "subcaps": [s for s in
                                 (x.strip() for x in
                                  re.split(r"[,;]", str(v("subcap_mappings", "subcaps") or "")))

@@ -25,7 +25,8 @@ from decimal import Decimal, ROUND_HALF_UP
 from .counts import recount_run
 from .entity_resolution import DMA_ASM, resolve
 from .evidence_ids import EvidenceLander
-from .workbook_parser import WorkbookParse, mine_evidence_from_rationales
+from .workbook_parser import (WorkbookParse, excerpt_clip,
+                              mine_evidence_from_rationales)
 
 # The content-hash recompute that finds the kept row after the (entity_id,
 # content_hash) dedup index rejects an insert now lives with the landing rules
@@ -517,6 +518,43 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
             "with_published_date": sum(1 for x in rledger.values() if x.get("published_date")),
             "with_excerpt": sum(1 for x in rledger.values() if x.get("excerpt"))})
 
+    # WHICH SOURCE'S SPANS ARE LESS DAMAGED — decided once over the whole
+    # corpus, not per row, because a single string cannot reveal the width it
+    # was cut at.
+    #
+    # Measured on T. Rowe Price's real package, 2026-08-24. The scoring
+    # workbook's ledger offers excerpts clipped at 140 per clause and joined
+    # with " | "; the research workbook's Evidence_Detail offers them clipped
+    # at 480. By LENGTH the two are indistinguishable — 426 characters against
+    # 434 — and the ingest that picked by length picked either. But the 426 is
+    # THREE cuts and reads "…live in T. Row | Technog", while the 434 is one
+    # span and reads as a sentence. Three fragments totalling more characters
+    # carry LESS of the source, and a producer reading the fragments is the
+    # exact mechanism of MEM-0129: nine products named that the citable spans
+    # do not contain.
+    #
+    # What actually reached the client before this: 1,964 of 2,063 served
+    # evidence items on the promoted heatmap cut mid-word, while the
+    # 480-character source sat in the same package unread.
+    led_sig = excerpt_clip.clip_signature(
+        [e.get("excerpt") for e in (evidence or [])])
+    res_sig = excerpt_clip.clip_signature(
+        [x.get("excerpt") for x in rledger.values()])
+    research_wins = excerpt_clip.prefer(led_sig, res_sig) > 0
+    if led_sig["verdict"] == "CLIPPED" or res_sig["verdict"] == "CLIPPED":
+        _observe("excerpt_source_chosen_by_clip_severity", {
+            "ledger": {k: led_sig.get(k) for k in
+                       ("verdict", "width", "clipped", "total_clauses")},
+            "research": {k: res_sig.get(k) for k in
+                         ("verdict", "width", "clipped", "total_clauses")},
+            "chose": "research_workbook" if research_wins else "scoring_ledger",
+            "reason": "an unclipped corpus beats a clipped one, and among "
+                      "clipped corpora the WIDER cut keeps more of each "
+                      "sentence. Length is the wrong criterion and was "
+                      "measured to be: 426 characters of three 140-cuts "
+                      "against 434 of one 480-cut, indistinguishable by "
+                      "length and not remotely equivalent to read."})
+
     for ev in (evidence or []):
         r = rledger.get(ev["e_id"]) or {}
         # authoritative-where-present, never overwriting a stated value with a
@@ -537,8 +575,11 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
         for field in ("source_name", "source_url"):
             if r.get(field) and len(r[field]) > len(ev.get(field) or ""):
                 ev = {**ev, field: r[field]}
-        if r.get("excerpt"):
-            # a verbatim 50–500 char passage beats a mined fragment
+        # A verbatim 50-500 char passage beats a mined fragment; between two
+        # verbatim ones, the corpus comparison above decides. Either source
+        # still fills in for the other where it has nothing — a preference is
+        # not a reason to serve an empty drawer.
+        if r.get("excerpt") and (research_wins or not ev.get("excerpt")):
             ev = {**ev, "excerpt": r["excerpt"]}
         m = mined.get(ev["e_id"]) or {}
         if not ev.get("excerpt") and m.get("excerpt"):
