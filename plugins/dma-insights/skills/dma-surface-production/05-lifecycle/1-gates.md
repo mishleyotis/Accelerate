@@ -461,6 +461,207 @@ What counts, and what does not:
   source names NPS, the gate fails regardless of how many there are — one voice about itself,
   repeated, is still one voice.
 
+### CG-44 · a peer figure the assessment holds reaches the overview strip
+
+Two halves, and the second is arithmetic.
+
+**The cascade.** A heatmap that carries peer figures and an overview strip that
+carries none is a page hiding what the assessment knows. Either the strip
+carries them too, or the strip says WHY not — a named, readable reason, not a
+null. Owner, 2026-08-23: the overview had no peer scores while the heatmap
+underneath it did.
+
+**The identity.** `delta` is not free text: it must equal `score − peer_median`
+within **0.05**, and `direction` must agree with its sign. A delta that
+disagrees with the two numbers beside it is worse than an absent one, because
+a reader checks the subtraction and stops trusting the page.
+
+Refused, not repaired: recompute the delta from the two figures you served
+rather than adjusting either figure to fit a delta you already wrote.
+
+### CG-45 · a card proposing a platform says how far the client already reaches into it
+
+Every `platform_story.platforms[]` card and every `overview.opportunity.tiles[]`
+tile carries a reach statement of at least **120 characters** under one of
+`estate_reach` · `their_stack_context` · `current_estate`.
+
+Owner, 2026-08-23: a platform recommendation ignored that the client *already
+owns much of the platform being proposed*. A card that does not say what they
+hold today reads as a greenfield pitch to someone who has already bought it.
+
+**This gate must never push you into inventing utilization.** "They own the
+licence; nothing observed says how much of it is switched on" is a complete,
+passing reach statement. What is refused is silence about the estate, never an
+honest statement that the estate's depth is unknown. Deployment counts,
+seat counts and adoption percentages that no evidence carries are a separate
+defect and AG-03 will take them.
+
+### CG-46 · the issue register holds the institution's own matters
+
+An issue is something that happened to the entity and bears on its scores —
+an enforcement action, a breach, an arbitration award, a regulatory censure,
+a news event. It is **not** an observation about the assessment: "the workbook
+scores this cell thinly" is a note about our own working, and Gulf's register
+was made of those.
+
+The gate reads the SUBJECT keys (`title` · `summary` · `description` ·
+`matter` · `name`) for assessment-shaped language, and refuses only when the
+REASONING keys (`rationale` · `detail` · `impact` · `provenance` ·
+`opened_on_basis`) carry no entity matter either.
+
+That split is the whole gate, and it was learned by getting it wrong: the
+first version read every key together and refused three genuine FINRA
+arbitration awards on T. Rowe Price, because the word "workbook" appeared in
+a `rationale` explaining how the row had been SCORED. Describing your own
+method in the reasoning field is correct and stays passing. Putting your
+method in the title is the defect.
+
+### CG-47 · why_now's summary prose counts the signals it serves
+
+Invariant 8: counts are computed, never stored where a source of truth exists.
+A count written into a sentence IS a stored count, and it stops agreeing with
+its own list the moment a signal is added or dropped.
+
+Scoped deliberately to `overview.why_now`'s prose keys (`narrative_thread` ·
+`synthesis` · `storyline`) against its `signals` array — nothing wider. A
+whole-set adjective ("every", "all", "both", "each") is allowed, because those
+stay true as the list changes; a numeral does not.
+
+Write *"the signals below"*, not *"these four signals"*. The first version of
+this gate was broader and produced four false positives on good prose across
+thirteen sections; all four now ship as passing fixtures, which is why the
+scope is one section rather than a principle applied everywhere.
+
+### CG-48 · a value is refused at submit if its column cannot hold it
+
+The writer registry maps every section field to a column with a type, and
+`column_types.json` carries all 1,156 of them across 82 tables. A value whose
+column cannot hold it validates at submit today and is discarded at promotion
+tomorrow — the card renders empty under a real client's name and nothing
+failed. MEM-0136 and MEM-0194, both BLOCKER, both this shape: a prose locator
+went into `heatmap_focus_areas.source_page`, an INTEGER column.
+
+Three families are checked — `numeric`, `boolean`, `dateish`. **A numeric
+STRING is refused**: `"3.4"` is not 3.4, and the quote marks are how a value
+that looks right on screen becomes null in the database.
+
+### CG-49 · a client-visible absence does not name this system's machinery
+
+Invariant 5 is default-deny redaction, and the serve layer honours it at KEY
+grain: `reason`, `closure_condition`, `closure` and `kind` from an
+`empty_state` reach the customer body intact. So an absence explained in terms
+of OUR plumbing is a leak with a valid passport — it was allowed through by
+name, not by accident.
+
+Refused inside those keys: `MEM-`/`REF-` ids, gate ids, `CUSTOMER_WITHHELD`,
+connector tool calls. All five promoted clients carried at least one.
+
+Deliberately NOT refused: the plain words "gate", "connector", "staged". A
+client-facing sentence may legitimately need one of them, and a gate that
+refuses ordinary English teaches producers to fight it rather than read it.
+Say what is missing and what would close it, in the client's terms.
+
+### ET-02 · no id is invented in a minted namespace
+
+The server allocates identifiers. An id shaped like one the catalogue or
+`register_evidence` mints, that neither of them actually minted, is refused —
+it would resolve to nothing while looking exactly like something that
+resolves. This is the fabrication case, and it is why an id you cannot
+account for is never worth guessing at: mint it, or cite the one you have.
+
+### ET-03 · you create five id classes and no others
+
+`ic_id` · `f_id` · `fa_id` · `ts_id` · `wn_id`, plus an authored `rec_id`.
+Everything else comes from the catalogue or from `register_evidence`, which
+dedups by content hash and computes the ERS server-side (a sent ERS is
+ignored, not honoured). Reaching outside those five is how a payload cites an
+evidence id that never existed — and fail-closed evidence means the citation,
+not the run, is what breaks.
+
+### CG-02 · a required field is present, or the section declares an empty state
+
+There is no third option and there was never meant to be. A required field
+that is simply absent is refused; a required field the run genuinely cannot
+fill is satisfied by the section's `empty_state`. Leaving it out silently is
+how a card renders blank under a real client's name with nothing having
+failed.
+
+### CG-03 · a value is the type the contract declares
+
+Objects where the contract says object, strings where it says string, and the
+same one level down for a list's items. It is the plainest gate in the set and
+it fires more than any other, usually on a list whose items are the wrong
+grain.
+
+**What CG-03 cannot see, and never will:** a JSON-encoded object IS a valid
+string. `'{"f_id": "F-1", "e_ids": ["E-CC-139"]}'` in a field the contract
+declares as ids passes every type check in the module and reaches the client
+as literal JSON inside a chip. That is why encoding has its own gate rather
+than a widened CG-03. If the contract asks for ids, send ids; if it asks for
+objects, send objects and let CG-03 check their type.
+
+### CG-06 · an absence names its reason and what was searched
+
+`empty_state` is not a flag. It carries a `reason` and a non-empty
+`sources_searched` list, and an absence with no ladder is rejected. This is
+the gate that separates *"I looked here, here and here, and there is nothing"*
+from *"nothing came out"* — the distinction the whole build turns on. Compose
+the reason for a client's eyes; CG-49 governs what may not appear in it.
+
+### CG-07 · a figure quoted in prose resolves to a cell this run serves
+
+Prose that names a pillar or category figure the run does not carry cannot be
+checked by anyone, including the reader. The gate refuses the quotation rather
+than the sentence: quote a grain the run serves, or drop the number and make
+the qualitative claim.
+
+### CG-08 · there is no fifth band
+
+Invariant 6, enforced at submit. Four bands, strict less-than, on the raw
+score: `<2 Activating · <3 Building · <4 Competing · ≥4 Differentiating`.
+Anything at or above 4.0 is Differentiating — the resolver has four branches
+and a fifth band word does not render, so a payload carrying one is refused
+rather than silently dropped. M5 and "Transformational" must not exist in
+code, enum or prose.
+
+### CG-24 · `layers[].detected` equals what `items[]` actually holds
+
+Invariant 8 again: `items` is the source of truth for `detected`, so the count
+is computed and never asserted. Measured 2026-08-18 on a promoted register —
+operations served **0 detected against 7 expected while carrying 6 named
+products**, because `detected` counted only CONFIRMED and INFERRED rows. That
+is the figure that reads to a client as "no tech stack". Count what you
+served, and let the status field carry the confidence.
+
+### CG-25 · one card per argument
+
+Nothing deduplicates insight cards anywhere downstream — the adapter is a
+straight `.map`, so a card written twice renders twice and counts twice
+toward a headline the reader takes on trust. Two cards making one argument
+with different wording are one card; write it once, with the stronger
+evidence.
+
+### CG-42 · a recommendation names an area the page can join on
+
+The platform page has no id joining a card to a recommendation. It joins on
+ONE string — the L3 area label with the `[L3-…]` code stripped and
+normalised — so a recommendation naming an area no card carries renders
+detached from the story it belongs to. Use the label the card uses.
+
+### CG-43 · the Context grid and the Overview bars are one dataset
+
+The contract says it outright: the grid is *a re-projection of the same
+dataset the overview renders as bars*, so the two cannot disagree. A client
+reading both sees the contradiction immediately, and it is the cheapest
+possible loss of trust. Re-project; do not re-derive.
+
+### ET-08 · a cell-link field carries a cell id, or names nothing
+
+Deliberately narrow: it fires only on a key this connector already treats as
+a cell link, and only on a non-empty string that is not a cell id. An empty
+value is CG-02's business, not this gate's — the two do not both report one
+absence.
+
 ## The citation stack
 
 | | Check | Catches |
