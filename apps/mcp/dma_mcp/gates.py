@@ -520,6 +520,33 @@ GATES = {
               "the consolidator's cross-surface reconciliation.",
               "block"),
 
+    "CG-48": ("A value is refused if its column cannot hold it", None,
+              "Every non-jsonb field a page writes is checked against the SQL "
+              "type of the column it lands in, joining writer_spec.json to "
+              "column_types.json (generated from the migrations). Numeric, "
+              "boolean and date-like columns are read; TEXT, arrays and the "
+              "custom enums are not, because almost anything is a valid TEXT "
+              "and enum members belong to CG-08 and the contract.",
+              "MEM-0136 and MEM-0194, both BLOCKER, both the same shape. A "
+              "producer put a prose locator into heatmap_focus_areas."
+              "source_page, an INTEGER column. Every submit gate passed the "
+              "page; it failed later inside promote_run as Postgres SQLSTATE "
+              "22P02, 'invalid input syntax for type integer', naming a "
+              "parameter index and nothing a producer can act on - and it "
+              "failed there HAVING ALREADY PASSED HERE, so the run was "
+              "part-way through an atomic promotion of six pages when the "
+              "database refused it. MEM-0194 then measured the surface "
+              "rather than the field: 135 values type-checked across 33 "
+              "tables, 6 mismatches, every one a numeric column receiving a "
+              "string. Three were that source_page; three were "
+              "platform_roadmap.phase (SMALLINT) carrying '1', '2', '3', "
+              "which Postgres coerced from an unknown-typed literal and "
+              "which therefore did NOT fail - the same defect surviving on "
+              "an accident of type inference, which is why a numeric string "
+              "is refused here too. Both inputs already shipped in the "
+              "package; nothing read them together until this gate.",
+              "block"),
+
     "CG-39": ("The run's recommendations reach the platform page", None,
               "When the run's bundle carries recommendations and the platform "
               "payload serves platform tiles, at least one recommendation "

@@ -2206,6 +2206,177 @@ def _check_prose_counts_what_is_served(page, payload) -> list:
 
 
 
+def _load_json_beside(name):
+    """A generated file next to this module, or {} if it is not there.
+
+    Returning {} rather than raising is deliberate and narrow: this gate is
+    additive, and a connector that refused to start because a generated index
+    was missing would turn a stale artefact into an outage. The gate reports
+    nothing when the index is empty; `gen_column_types.py --check` in CI is
+    what keeps the file present and current.
+    """
+    try:
+        import pathlib
+        return json.loads((pathlib.Path(__file__).parent / name).read_text())
+    except Exception:                                        # noqa: BLE001
+        return {}
+
+
+COLUMN_TYPES = _load_json_beside("column_types.json")
+_WRITER_SPEC = _load_json_beside("writer_spec.json")
+
+#: Column families this gate checks. TEXT, arrays and the custom enum types
+#: are deliberately absent: almost anything is a valid TEXT, and an enum's
+#: members already belong to CG-08 and the contract. Reading only what can
+#: HARD-FAIL a write keeps every entry on the verdict list real.
+_NUMERIC_SQL = ("SMALLINT", "INTEGER", "INT", "BIGINT", "NUMERIC", "DECIMAL",
+                "REAL", "DOUBLE PRECISION")
+_DATEISH_SQL = ("DATE", "TIMESTAMPTZ", "TIMESTAMP",
+                "TIMESTAMP WITH TIME ZONE")
+_ISO_DATE = re.compile(r"^\s*\d{4}-\d{2}(-\d{2})?")
+
+
+def _sql_family(sqltype):
+    t = (sqltype or "").upper().strip()
+    if not t or t.endswith("[]"):
+        return None                    # arrays: element checking is CG-03's
+    base = t.split("(")[0].strip()
+    if base in _NUMERIC_SQL:
+        return "numeric"
+    if base in ("BOOLEAN", "BOOL"):
+        return "boolean"
+    if base in _DATEISH_SQL:
+        return "dateish"
+    return None
+
+
+def _fits(value, family):
+    if value is None:
+        return True
+    if family == "numeric":
+        # A NUMERIC STRING IS STILL REFUSED. MEM-0194 measured three of these
+        # on platform.roadmap.phases[].phase - '1', '2', '3' into a SMALLINT
+        # - which Postgres coerced from an unknown-typed literal and so did
+        # NOT fail. A value that survives only by coercion is one type-
+        # inference change away from the outage its neighbour already caused.
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
+    if family == "boolean":
+        return isinstance(value, bool)
+    if family == "dateish":
+        return isinstance(value, str) and bool(_ISO_DATE.match(value))
+    return True
+
+
+def _writers_for(page):
+    for spec in (_WRITER_SPEC.get("specs") or []):
+        if spec.get("page") == page:
+            return spec.get("writers") or []
+    return []
+
+
+def _column_reason(section, path, value, table, column, sqltype, family):
+    shown = repr(value)
+    if len(shown) > 90:
+        shown = shown[:87] + "...'"
+    advice = {
+        "numeric": "Send the number, or null.",
+        "boolean": "Send true or false, or null - not the word.",
+        "dateish": ("Send an ISO-8601 date or timestamp, or null. A phrase "
+                    "about when something happened is not a date."),
+    }[family]
+    # The one column where the right repair is not obvious from the type
+    # alone: a web source has no page, and the paragraph detail a producer
+    # was reaching for has somewhere else to go.
+    if column == "source_page" and family == "numeric":
+        advice += (" A web source has no page number, so source_page is null "
+                   "and the paragraph or section detail goes into "
+                   "source_document as a parenthetical - which is where a "
+                   "reader meets it anyway, on the one-line SOURCE row.")
+    return _reason(
+        "CG-48", section, path,
+        f"{shown} cannot be written to {table}.{column}, which is {sqltype}. "
+        f"{advice} This is refused HERE because of where it used to surface "
+        f"instead: inside promote_run, as Postgres SQLSTATE 22P02 naming a "
+        f"parameter index, with the run already part-way through an atomic "
+        f"promotion of six pages.")
+
+
+def _check_values_fit_their_columns(page, payload) -> list:
+    """CG-48 - a value is refused at submit if its column cannot hold it.
+
+    MEM-0136 and MEM-0194, both BLOCKER, both the same shape. A producer put
+    a prose locator into heatmap_focus_areas.source_page, an INTEGER column:
+
+        "P4 of the release (Sharps quote), immediately after P3's
+         introduction of Andrew Reich"
+
+    Every submit gate passed the page. It failed later, inside promote_run,
+    as a raw Postgres error - SQLSTATE 22P02, invalid input syntax for type
+    integer - naming a parameter index and nothing a producer can act on.
+    And it failed there having already passed here, so the run was part-way
+    through an atomic promotion when the database refused it.
+
+    MEM-0194 then measured the whole surface rather than the one field: 135
+    values type-checked across 33 tables, 6 mismatches, every one a numeric
+    column receiving a string. Three were that source_page; three were
+    platform_roadmap.phase (SMALLINT) carrying '1', '2', '3', which Postgres
+    coerced and which therefore did not fail - the same defect surviving on
+    an accident of type inference.
+
+    Both inputs already ship in this package: writer_spec.json maps every
+    section field to its column, and column_types.json is generated from the
+    migrations that create it. This walks the pair.
+
+    WHAT IT DOES NOT CHECK, so nobody reads more into a pass than is there:
+    TEXT columns, arrays, and the custom enum types. Only the families that
+    can hard-fail a write are read - numeric, boolean and date-like.
+    """
+    if not isinstance(payload, dict) or not COLUMN_TYPES or not _WRITER_SPEC:
+        return []
+    out = []
+    for w in _writers_for(page):
+        section = w.get("section")
+        body = payload.get(section)
+        if not isinstance(body, dict):
+            continue
+        table = w.get("table") or ""
+        table_types = COLUMN_TYPES.get(table) or {}
+        if not table_types:
+            continue
+        item_field = w.get("item_field")
+        items = body.get(item_field) if item_field else None
+        items = items if isinstance(items, list) else []
+
+        for col in (w.get("columns") or []):
+            src = str(col.get("source") or "")
+            if src.startswith(("skip:", "sys:")) or col.get("jsonb"):
+                continue
+            name = col.get("column")
+            family = _sql_family(table_types.get(name))
+            if not family:
+                continue
+            kind, _sep, field = src.partition(":")
+            if not field:
+                continue
+            if kind == "item":
+                for i, it in enumerate(items):
+                    if not isinstance(it, dict) or field not in it:
+                        continue
+                    if not _fits(it.get(field), family):
+                        out.append(_column_reason(
+                            section,
+                            f"{page}.{section}.{item_field}[{i}].{field}",
+                            it.get(field), table, name,
+                            table_types[name], family))
+            elif kind in ("section", "env"):
+                if field in body and not _fits(body.get(field), family):
+                    out.append(_column_reason(
+                        section, f"{page}.{section}.{field}",
+                        body.get(field), table, name,
+                        table_types[name], family))
+    return out[:8]
+
+
 #: The depth floors, and what each is a floor ON. Every one is already in the
 #: contract's own field docs; none had a reader until 2026-08-23.
 DEPTH_FLOORS = {
@@ -2868,6 +3039,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_cards_state_their_reach(conn, run_id, page, payload))
     reasons.extend(_check_issue_register_is_the_entitys(page, payload))
     reasons.extend(_check_prose_counts_what_is_served(page, payload))
+    reasons.extend(_check_values_fit_their_columns(page, payload))
 
     served = _served_figures(conn, run_id)
 
