@@ -1,7 +1,7 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "0.9.10",
+  "version": "0.9.11",
   "description": "The six Digital Maturity Assessment skills, 47 DMA agents and the remote DMA Insights MCP connector (33 tools) as one installable unit. The environment setup script now resets a clean checkout to the branch tip BEFORE the plugin installs from it, records what it provisioned, and grants every MCP server the routines call — not just the connector. plugin_version.py reads that record and names why a session is stale, so a provisioning defect stops reading as a transient.",
   "author": {
     "name": "Zennify — DMA Insights build"

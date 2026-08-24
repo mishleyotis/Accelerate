@@ -454,19 +454,42 @@ UPDATE = (f"claude plugin marketplace update {MARKETPLACE_NAME} && "
 #: that separates them, and it is measured, not assumed.
 UPDATE_NOTE = (
     "then run this check again in the same firing — it reads the state file "
-    "and the cache tree at call time, so it flips to OK as soon as the "
-    "install lands. That OK proves the DISK, not this session: agents, "
-    "skills and hooks were bound at session start and do not reload, so a "
-    "session that began stale still dispatches the old ones. End the firing "
-    "cleanly and let the next one produce")
+    "and the cache tree at call time, so it flips as soon as the install "
+    "lands (or pass --heal and this script runs the update and the re-check "
+    "itself, one command). The post-update verdict proves the DISK is "
+    "current, not this session — bound agents, skills and hooks load once at "
+    "start — which is RECOVERY MODE, not an ending: see that verdict's own "
+    "instructions")
 
-#: Said when the tree changed under a running session — the case the old note
-#: was reaching for and could not name.
+#: Said when the tree changed under a running session. THIS SENTENCE IS THE
+#: ONE EVERY ROUTINE OBEYS, so it must prescribe the productive path itself:
+#: it used to say "end the firing; the next session picks it up", and on
+#: 2026-08-24 a firing whose PROMPT said to produce trusted this script's
+#: freshly-read output over the stored prompt — reasonably, a prompt can be
+#: stale or manipulated and this file cannot — and ended a healthy firing on
+#: this sentence's say-so. Three firings that morning ended the same way and
+#: the next container reproduced the state every time: the environment's
+#: base snapshot carries the old install, so "the next session" inherits the
+#: problem, never the fix. The script and the Routine prompts now say the
+#: same thing, and where they ever disagree, THIS output is the current one.
 SESSION_NOTE = (
     "the install on disk is correct and THIS SESSION IS NOT RUNNING IT: the "
     "tree changed after this session started, and agents, skills and hooks "
-    "load once at start. Report the versions and end the firing; the next "
-    "session picks it up")
+    "load once at start. THIS IS RECOVERY MODE, NOT AN ENDING — produce "
+    "this firing anyway: dispatch every routed stage via `python3 "
+    "plugins/dma-insights/scripts/agent_run.py --agent <name> --prompt-file "
+    "<file>` (fresh child processes bind the just-updated install at their "
+    "own start, so they run the CURRENT agents where the in-process Agent "
+    "tool would dispatch the stale roster this session bound), follow skill "
+    "files from the current checkout rather than the Skill tool, and use "
+    "the Routine-attached connectors normally — they are not plugin-bound. "
+    "Report both versions and name RECOVERY MODE in the report. The one "
+    "true ending is STALE that survives the update: a disk that will not "
+    "come current. (Until 2026-08-24 this sentence said 'end the firing; "
+    "the next session picks it up' — three firings ended on it that morning "
+    "and the next container reproduced the state every time, because the "
+    "environment's base snapshot carries the old install. Ending produces "
+    "nothing and fixes nothing.)")
 
 
 def compare(repo_root: Path | None = None,
@@ -616,6 +639,46 @@ def summary(verdict: dict) -> str:
             f"{pub.get('version') or 'unreadable'} ({pub.get('agents', 0)} agents)")
 
 
+def heal(verdict: dict) -> tuple:
+    """Run the update this verdict prescribes, then re-measure.
+
+    THE SELF-HEALING LOOP (owner, 2026-08-24: "It should be a self healing
+    loop"). Before this, a stale verdict printed a command and left a
+    judgment point: the session had to choose to run it, choose to re-check,
+    and choose what the re-check's answer meant — and every one of those
+    choices was made wrongly at least once in a single morning. --heal
+    collapses them: the check runs the update itself, re-reads the disk, and
+    hands back ONE final verdict whose fix text already says what to do.
+
+    The commands mutate only this container's local install cache (~/.claude
+    on an ephemeral VM); the marketplace is the repo checkout on this disk.
+    Returns (final_verdict, heal_log_lines). No-op unless the verdict is one
+    an update can change.
+    """
+    import subprocess
+    if verdict["status"] not in ("STALE", "MISSING", "INCOMPLETE"):
+        return verdict, []
+    log = []
+    for argv_ in (["claude", "plugin", "marketplace", "update",
+                   MARKETPLACE_NAME],
+                  ["claude", "plugin", "update",
+                   f"{PLUGIN_NAME}@{MARKETPLACE_NAME}"],
+                  ["claude", "plugin", "install",
+                   f"{PLUGIN_NAME}@{MARKETPLACE_NAME}", "--scope", "user"]):
+        try:
+            r = subprocess.run(argv_, capture_output=True, text=True,
+                               timeout=180)
+            log.append(f"heal: {' '.join(argv_[1:4])} -> exit {r.returncode}")
+        except OSError as exc:
+            # No claude CLI is a result to report, not a crash: the caller
+            # sees the unchanged verdict and its provisioning cause.
+            log.append(f"heal: {argv_[0]} unavailable ({exc})")
+            return verdict, log
+        except subprocess.TimeoutExpired:
+            log.append(f"heal: {' '.join(argv_[1:4])} timed out")
+    return None, log
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--repo-root", default=None,
@@ -626,9 +689,22 @@ def main(argv=None) -> int:
     ap.add_argument("--provisioning", default=None,
                     help="path to the setup script's provisioning record "
                          "(default: beside the service-account key)")
+    ap.add_argument("--heal", action="store_true",
+                    help="on STALE/MISSING/INCOMPLETE, run the plugin update "
+                         "itself (container-local install cache only) and "
+                         "re-check, printing one final verdict")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
     v = compare(a.repo_root, a.state, a.provisioning)
+    if a.heal:
+        healed, heal_log = heal(v)
+        if healed is None:                    # update ran — re-measure
+            pre = summary(v)
+            v = compare(a.repo_root, a.state, a.provisioning)
+            v.setdefault("reasons", []).insert(0, f"before --heal: {pre}")
+            v["reasons"][1:1] = heal_log
+        elif heal_log:                        # heal attempted, could not run
+            v.setdefault("reasons", []).extend(heal_log)
     if a.json:
         print(json.dumps(v, indent=1))
     else:
