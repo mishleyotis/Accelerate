@@ -32,36 +32,73 @@ from dma_worker.workbook_parser import (            # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] /
                        "packages" / "shared"))
 from excerpt_clip import (                          # noqa: E402
-    CLAUSE_CLIP_WIDTH, CLIP_SHARE, MIN_CLAUSES, MIN_CLIP_WIDTH,
-    clause_truncated, clip_signature,
+    CLAUSE_CLIP_WIDTH, CLAUSE_SPLIT, MIN_CLAUSES, MIN_CLIPPED,
+    MIN_CLIP_WIDTH, NEIGHBOUR_RATIO, clause_truncated,
+    clip_signature,
 )
 
 W = CLAUSE_CLIP_WIDTH
 
 
 def cut(width: int = W, seed: str = "a") -> str:
-    """A clause of exactly `width` characters ending mid-word."""
+    """A DISTINCT clause of exactly `width` characters ending mid-word.
+
+    Distinct matters. The first version of these fixtures repeated one string
+    and the corpus check counted occurrences, so a single sentence stacked
+    fifty clauses on one length and looked exactly like a clip. Production
+    said otherwise: baxter serves 1,517 excerpt renderings drawn from 87
+    distinct strings. Five separate sentences ending on the same integer is
+    the evidence; the same sentence fifty times is one coincidence, not
+    fifty.
+    """
     body = (f"the {seed} vendor deployed a platform across every region and "
-            f"the filing describes it in detail ") * 6
+            f"the filing describes it in detail ") * 8
     out = body[:width - 6] + "Salesf"
     assert len(out) == width and out[-1].isalnum()
     return out
 
 
+def clipped_corpus(width: int = W, n: int = 10) -> list:
+    """`n` distinct excerpts, each two distinct clauses cut at `width`."""
+    return [CLAUSE_SPLIT.join([cut(width, f"a{i}"), cut(width, f"b{i}")])
+            for i in range(n)]
+
+
 def whole(n: int = 90, seed: str = "a") -> str:
-    """Ordinary prose of a length that varies with the seed."""
+    """Ordinary prose of length `n`, ENDING ON A WHOLE WORD.
+
+    Ending on a word character is what a natural clause does — the last
+    character of the last word. That is why the width coincidence is the
+    signal and the mid-word test is only corroboration, and it is why these
+    fixtures must not end every clause with a full stop: a corpus that did
+    would pass the check without ever exercising it.
+    """
     body = (f"The {seed} bank published a statement describing the migration "
-            f"of its core platform in under four months. ") * 4
-    return body[:n].rstrip() + "."
+            f"of its core platform in under four months and named the "
+            f"vendors involved ") * 4
+    out = body[:n]
+    while out and not out[-1].isalnum():
+        out = out[:-1] + "x"
+    assert len(out) == n
+    return out
+
+
+def spread(lo: int = 60, hi: int = 140, skip: int | None = None) -> list:
+    """A corpus whose clause lengths spread the way prose does.
+
+    `skip` leaves one length free, so a fixture that plants a clip at that
+    width is measuring only what it planted.
+    """
+    return [whole(n, chr(97 + n % 26)) for n in range(lo, hi) if n != skip]
 
 
 # ── the corpus check finds the width rather than being told it ────────
 
 def test_the_measured_signature_is_reported_as_clipped():
-    scan = clip_signature([" | ".join([cut(), cut(), cut()])] * 8)
+    scan = clip_signature(clipped_corpus())
     assert scan["verdict"] == "CLIPPED"
     assert scan["width"] == W
-    assert scan["clipped"] == 24 and scan["total_clauses"] == 24
+    assert scan["clipped"] == 20 and scan["distinct_clauses"] == 20
 
 
 @pytest.mark.parametrize("width", [140, 150, 200, 120, 61])
@@ -69,7 +106,7 @@ def test_a_clip_at_any_width_is_found_without_being_told_it(width):
     """The hole in the first pass at this fix, closed. A rule that knows only
     140 walks straight past a package clipped at 150 — and the parser's own
     `rationale_150_chars` alias says that package exists."""
-    scan = clip_signature([" | ".join([cut(width), cut(width)])] * 8)
+    scan = clip_signature(clipped_corpus(width))
     assert scan["verdict"] == "CLIPPED"
     assert scan["width"] == width
 
@@ -77,28 +114,39 @@ def test_a_clip_at_any_width_is_found_without_being_told_it(width):
 def test_the_verdict_carries_the_arithmetic_that_produced_it():
     """Invariant 12's discipline, applied to an observation: a reader must be
     able to check the claim without re-running the scan."""
-    scan = clip_signature([" | ".join([cut(), cut(), cut()])] * 8)
-    assert f"{scan['clipped']} of {scan['total_clauses']}" in scan["reason"]
+    scan = clip_signature(clipped_corpus())
+    assert f"{scan['clipped']} DISTINCT" in scan["reason"]
     assert f"exactly {W} characters" in scan["reason"]
-    assert scan["share"] == 1.0
+    assert f"against {scan['neighbours']} distinct" in scan["reason"]
     assert "Salesf" in scan["example_ends"]
 
 
-def test_the_runner_up_length_is_stated_so_the_spike_can_be_judged():
-    """The measured corpus was 4,461 at 140 against 23 at the next length.
-    A spike is only a spike relative to something."""
-    corpus = [" | ".join([cut(), cut(), whole(70, "b")])] * 8
+def test_the_spike_is_measured_against_its_neighbours_not_the_corpus():
+    """A clip does not have to be most of a corpus — production proved that.
+    Here the clipped rows are a minority and the spike is still a spike."""
+    scan = clip_signature(clipped_corpus(n=6) + spread())
+    assert scan["verdict"] == "CLIPPED" and scan["width"] == W
+    assert scan["clipped"] < scan["distinct_clauses"] / 4, \
+        "the clipped clauses are well under a quarter of the corpus"
+    assert scan["ratio"] >= NEIGHBOUR_RATIO
+
+
+def test_the_verdict_separates_distinct_clauses_from_renderings():
+    """87 distinct strings serving 1,517 renderings is the shape production
+    has. Both numbers matter and they are not the same number."""
+    corpus = clipped_corpus() * 5
     scan = clip_signature(corpus)
-    assert scan["verdict"] == "CLIPPED"
-    assert scan["runner_up"] < scan["clipped"]
+    assert scan["distinct_clauses"] == 20
+    assert scan["total_clauses"] == 100
+    assert scan["clipped"] == 20 and scan["clipped_served"] == 100
 
 
 # ── and does not cry wolf on prose ────────────────────────────────────
 
 def test_ordinary_prose_of_varying_lengths_is_clean():
-    corpus = [" | ".join([whole(n, chr(97 + n % 26)), whole(n + 7, "z")])
-              for n in range(60, 120)]
-    scan = clip_signature(corpus)
+    scan = clip_signature([CLAUSE_SPLIT.join([whole(n, chr(97 + n % 26)),
+                                              whole(n + 7, "z")])
+                           for n in range(60, 120)])
     assert scan["verdict"] == "CLEAN", scan["reason"]
 
 
@@ -120,26 +168,100 @@ def test_real_excerpts_from_the_corpus_are_clean():
     assert scan["verdict"] == "CLEAN", scan["reason"]
 
 
+def test_one_sentence_repeated_is_one_coincidence_not_fifty():
+    """The defect that counting OCCURRENCES produced. A corpus that reuses
+    one excerpt across many cells is thin, not clipped, and calling it
+    clipped would put a false BLOCKER on an honest package."""
+    scan = clip_signature([cut()] * 50)
+    assert scan["verdict"] == "CLEAN", scan["reason"]
+    assert scan["distinct_clauses"] == 1 and scan["total_clauses"] == 50
+
+
 def test_short_repeated_clauses_are_not_a_clip():
     """A ticker, a quarter, a role legitimately collide at one length. Below
     MIN_CLIP_WIDTH that is prose, not a cut."""
-    short = "x" * (MIN_CLIP_WIDTH - 1)
-    scan = clip_signature([" | ".join([short] * 3)] * 20)
+    scan = clip_signature([CLAUSE_SPLIT.join(
+        ["x" * (MIN_CLIP_WIDTH - 1) + str(i) for i in range(3)])
+        for i in range(20)])
     assert scan["verdict"] == "CLEAN"
 
 
 def test_a_clause_at_the_width_that_ends_cleanly_is_not_a_cut():
     """The rule is a CUT, not a WIDTH — a sentence that happens to run to
     the clip width and ends at a boundary is ordinary prose."""
-    clean = cut()[:-1] + "."
-    scan = clip_signature([" | ".join([clean] * 3)] * 8)
+    scan = clip_signature([cut(seed=f"s{i}")[:-1] + "." for i in range(20)])
     assert scan["verdict"] == "CLEAN"
+
+
+def test_a_handful_of_distinct_clauses_at_one_length_is_below_the_floor():
+    scan = clip_signature(clipped_corpus(n=2) + spread())
+    assert scan["verdict"] == "CLEAN"
+    assert str(MIN_CLIPPED) in scan["reason"]
+
+
+# ── the case production found that the first rule missed ──────────────
+
+BAXTER_80 = [
+    "Active LinkedIn postings: Sr Salesforce Software Engineer (Vernon "
+    "Hills), Sr Clo",
+    "BCU selected Glia for digital member service: messaging, video "
+    "banking, voice, C",
+    "Casual dress code, flexible work arrangements, inclusive culture "
+    "supporting work",
+    "Department distribution: Finance 13%, Customer Service 12%, "
+    "Operations 5%, Sales",
+    "Banking Tech Awards USA 2025 finalist: Best Digital Initiative by "
+    "Community Bank",
+    "Brett Craig: former EVP & CIO of Target (Fortune 50), led global "
+    "tech/digital/da",
+    "Trustpilot reviews (25 reviews): complaints about false fraud flags "
+    "on legitimat",
+    "BCU member intelligence team deployed 2016: 2 analysts + 1 data tech "
+    "manager. On",
+    "BCU ranked #1 in proactive guidance among all Tethr users; excelled "
+    "in action-fo",
+    "Bhavna Guglani (BCU CDO): digital channels are primary growth "
+    "engines; branch-ce",
+]
+
+
+def test_the_baxter_clip_at_eighty_is_found():
+    """Verbatim from production, 2026-08-24, the promoted baxter heatmap.
+
+    THE FIRST RULE CALLED THIS CLEAN and it was serving a client quotations
+    ending "Sr Clo", "branch-ce" and "voice, C". It covered 12 of 87 distinct
+    clauses — 14% — so a share threshold could not see it, while the whole
+    rest of that histogram is 67 lengths holding one or two clauses each and
+    80 holding fourteen. That is what fixed the rule: a spike is measured
+    against its NEIGHBOURS, never against the corpus."""
+    assert all(len(c) == 80 and c[-1].isalnum() for c in BAXTER_80)
+    scan = clip_signature(BAXTER_80 + spread(skip=80))
+    assert scan["verdict"] == "CLIPPED"
+    assert scan["width"] == 80
+    assert scan["clipped"] == len(BAXTER_80)
+    assert scan["ratio"] >= NEIGHBOUR_RATIO
+
+
+def test_the_baxter_clip_survives_the_repetition_it_ships_with():
+    """Those 12 render 173 times across the page. Deduplicating must not
+    lose the clip, only stop the repetition from inventing one."""
+    scan = clip_signature(BAXTER_80 * 15 + spread(skip=80))
+    assert scan["verdict"] == "CLIPPED" and scan["width"] == 80
+    assert scan["clipped"] == 10 and scan["clipped_served"] == 150
+
+
+def test_a_minority_clip_would_have_passed_a_share_rule():
+    """The control that says why the rule changed rather than the threshold."""
+    corpus = BAXTER_80 + spread(skip=80)
+    scan = clip_signature(corpus)
+    assert scan["clipped"] / scan["distinct_clauses"] < 0.25
+    assert scan["verdict"] == "CLIPPED"
 
 
 # ── "I could not look" is never reported as "I found nothing" ──────────
 
 def test_a_corpus_too_small_to_judge_says_so_rather_than_clean():
-    scan = clip_signature([whole(90)] * 3)
+    scan = clip_signature([whole(90, str(i)) for i in range(3)])
     assert scan["verdict"] == "TOO_FEW"
     assert scan["width"] is None
     assert "NOT a finding of clean" in scan["reason"]
@@ -151,11 +273,12 @@ def test_an_empty_corpus_is_too_few_and_not_clean():
     assert clip_signature(None)["verdict"] == "TOO_FEW"
 
 
-def test_every_verdict_states_its_denominator():
-    for corpus in ([], [whole(90)] * 3, [whole(n) for n in range(60, 120)],
-                   [" | ".join([cut()] * 3)] * 8):
+def test_every_verdict_states_its_denominators():
+    for corpus in ([], [whole(90, str(i)) for i in range(3)], spread(),
+                   clipped_corpus()):
         scan = clip_signature(corpus)
-        assert "total_clauses" in scan and "excerpts_scanned" in scan
+        assert {"total_clauses", "distinct_clauses",
+                "excerpts_scanned"} <= set(scan)
         assert scan["verdict"] in ("CLIPPED", "CLEAN", "TOO_FEW")
         assert scan["reason"]
 
@@ -163,23 +286,31 @@ def test_every_verdict_states_its_denominator():
 def test_a_clean_verdict_names_what_it_measured():
     """A check that ran and found nothing must show its working, or the next
     reader cannot tell it from a check that was skipped."""
-    scan = clip_signature([whole(n, chr(97 + n % 26)) for n in range(60, 120)])
+    scan = clip_signature(spread())
     assert scan["verdict"] == "CLEAN"
-    assert f"{CLIP_SHARE:.0%}" in scan["reason"] or "no clause ends" in scan["reason"]
+    assert "distinct" in scan["reason"]
 
 
 # ── the two halves of the rule agree ──────────────────────────────────
 
 def test_the_single_excerpt_check_and_the_corpus_check_are_one_rule():
-    excerpt = " | ".join([cut(), cut(), cut()])
-    assert clause_truncated(excerpt) is not None
-    assert clip_signature([excerpt] * 8)["verdict"] == "CLIPPED"
+    corpus = clipped_corpus()
+    assert all(clause_truncated(e) for e in corpus)
+    assert clip_signature(corpus)["verdict"] == "CLIPPED"
+
+
+def test_the_single_check_finds_baxters_clip_only_when_told_the_width():
+    """Which is exactly why the corpus check exists. The door check is told
+    140 and cannot know 80; the corpus check works 80 out for itself."""
+    assert all(clause_truncated(c) is None for c in BAXTER_80)
+    assert all(clause_truncated(c, 80) for c in BAXTER_80)
+    assert clip_signature(BAXTER_80 + spread(skip=80))["width"] == 80
 
 
 def test_three_clipped_clauses_still_pass_the_length_window():
     """The reason both checks exist: 3 x 140 joined by ' | ' is 426
     characters, comfortably inside 50-500."""
-    excerpt = " | ".join([cut(), cut(), cut()])
+    excerpt = CLAUSE_SPLIT.join([cut(seed="a"), cut(seed="b"), cut(seed="c")])
     assert 50 <= len(excerpt) <= 500
 
 

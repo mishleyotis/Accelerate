@@ -46,13 +46,25 @@ MIN_CLIP_WIDTH = 60
 #: result says TOO_FEW rather than CLEAN — the two are not the same claim.
 MIN_CLAUSES = 12
 
-#: The share of all clauses landing on ONE exact length that stops being
-#: chance. The measured corpus was 90.9%; prose over a real sample does not
-#: reach a quarter.
-CLIP_SHARE = 0.25
+#: DISTINCT clauses landing on one exact length before it stops being chance.
+#: Five separate sentences ending on the same integer is not a coincidence
+#: anyone should explain away; one sentence repeated fifty times is.
+MIN_CLIPPED = 5
 
-#: …and that many clauses at least, so a tiny corpus cannot trip it on two.
-MIN_CLIPPED = 8
+#: …and that many times the DENSITY of the surrounding lengths — distinct
+#: clauses per length, not a raw count, so the rule reads the same on a
+#: corpus of 87 clauses and one of 1,384. A raw count is not scale-invariant:
+#: a dense neighbourhood swallows a small spike and a sparse one invents one.
+#: Measured on production 2026-08-24, against a 5-either-side window:
+#:   t-rowe  1,119 distinct at 140 · 94 across the other ten lengths
+#:           (9.4 per length) · 119x
+#:   baxter     14 distinct at  80 ·  3 across the other ten lengths
+#:           (0.3 per length) ·  47x
+#:   logix / gulf / axos — one distinct clause per length, no spike at all.
+NEIGHBOUR_RATIO = 3.0
+
+#: The window either side of a candidate length that "neighbouring" means.
+NEIGHBOURHOOD = 5
 
 
 def clause_truncated(excerpt: str, width: int = CLAUSE_CLIP_WIDTH) -> str | None:
@@ -92,64 +104,99 @@ def clip_signature(excerpts) -> dict:
     and found nothing" and "I could not look" are different claims and a
     caller that cannot tell them apart will report the wrong one:
 
-      CLIPPED  — one exact clause length holds `CLIP_SHARE` of the corpus
+      CLIPPED  — one exact clause length spikes above its neighbours
       CLEAN    — enough clauses to judge, and no length spikes
       TOO_FEW  — under `MIN_CLAUSES`; this corpus cannot answer
 
     `width` is the clip found, not a width supplied — which is the point of
     having this alongside `clause_truncated`.
+
+    TWO THINGS HERE WERE WRONG IN THE FIRST PASS, AND PRODUCTION SAID SO.
+
+    (1) It counted OCCURRENCES. Baxter serves 1,517 excerpt renderings drawn
+    from 87 distinct strings, so one repeated sentence stacked 158 clauses on
+    a length and a genuinely varied corpus could be called clipped for
+    repeating itself. Distinct clauses are what carry the evidence: five
+    separate sentences ending on the same integer is not chance; the same
+    sentence fifty times is not five coincidences, it is one.
+
+    (2) It measured a SHARE of the whole corpus, and that hid a real clip on
+    a live client. Baxter's clip at 80 covers 12 of 87 distinct clauses —
+    14% — so a 25% share rule called it clean while it served a client
+    quotations ending "Sr Clo", "branch-ce" and "become an agen". A clip does
+    not have to be most of a corpus. It has to be a SPIKE: real prose spreads
+    across adjacent lengths, a hard cut puts everything on one integer and
+    nothing on its neighbours. Baxter's full distinct histogram is 67 lengths
+    holding one or two clauses each, and 80 holding fourteen.
     """
     clauses: list[str] = []
     for e in excerpts or ():
         if e:
             clauses += [c for c in str(e).split(CLAUSE_SPLIT) if c]
 
+    distinct = set(clauses)
     total = len(clauses)
-    base = {"total_clauses": total, "excerpts_scanned":
-            sum(1 for e in (excerpts or ()) if e)}
+    base = {"total_clauses": total, "distinct_clauses": len(distinct),
+            "excerpts_scanned": sum(1 for e in (excerpts or ()) if e)}
 
     if total < MIN_CLAUSES:
         return {**base, "verdict": "TOO_FEW", "width": None, "clipped": 0,
-                "share": None,
                 "reason": f"only {total} clause(s); a length spike needs at "
                           f"least {MIN_CLAUSES} to mean anything. This is NOT "
                           f"a finding of clean — the corpus is too small to "
                           f"carry the signature either way."}
 
-    hist: dict[int, int] = {}
-    for c in clauses:
+    lengths: dict[int, int] = {}
+    for c in distinct:
+        lengths[len(c)] = lengths.get(len(c), 0) + 1
+
+    cuts: dict[int, int] = {}
+    for c in distinct:
         if len(c) >= MIN_CLIP_WIDTH and c[-1:].isalnum():
-            hist[len(c)] = hist.get(len(c), 0) + 1
+            cuts[len(c)] = cuts.get(len(c), 0) + 1
 
-    if not hist:
+    def neighbours(width: int) -> int:
+        return sum(n for w, n in lengths.items()
+                   if w != width and abs(w - width) <= NEIGHBOURHOOD)
+
+    best = None
+    for width, count in sorted(cuts.items()):
+        near = neighbours(width)
+        density = near / (2 * NEIGHBOURHOOD)
+        ratio = count / density if density else float("inf")
+        if count >= MIN_CLIPPED and ratio >= NEIGHBOUR_RATIO:
+            if best is None or count > best[1]:
+                best = (width, count, near, ratio)
+
+    if best is None:
+        top = max(cuts.items(), key=lambda kv: kv[1], default=(None, 0))
         return {**base, "verdict": "CLEAN", "width": None, "clipped": 0,
-                "share": 0.0,
-                "reason": "no clause ends mid-word at a repeatable length"}
+                "reason": (f"no length spikes. The most repeated mid-word "
+                           f"clause length is {top[0]} at {top[1]} distinct "
+                           f"clause(s) across {len(distinct)} distinct — "
+                           f"under the {MIN_CLIPPED}-clause floor or inside "
+                           f"{NEIGHBOUR_RATIO:g}x the density of its "
+                           f"neighbouring lengths, which is what ordinary "
+                           f"prose looks like."
+                           if top[0] else
+                           "no distinct clause ends mid-word at a repeatable "
+                           "length")}
 
-    width, count = max(hist.items(), key=lambda kv: (kv[1], -kv[0]))
-    share = count / total
-    runner = max((n for w, n in hist.items() if w != width), default=0)
-
-    if count < MIN_CLIPPED or share < CLIP_SHARE:
-        return {**base, "verdict": "CLEAN", "width": None, "clipped": 0,
-                "share": round(share, 4),
-                "reason": (f"the most repeated mid-word clause length is "
-                           f"{width} at {count} of {total} clause(s) "
-                           f"({share:.1%}) — under the {CLIP_SHARE:.0%} share "
-                           f"and {MIN_CLIPPED}-clause floor a clip has to "
-                           f"clear, so this reads as ordinary prose")}
-
-    example = next(c for c in clauses
+    width, count, near, ratio = best
+    served = sum(1 for c in clauses if len(c) == width and c[-1:].isalnum())
+    example = next(c for c in distinct
                    if len(c) == width and c[-1:].isalnum())
     return {**base, "verdict": "CLIPPED", "width": width, "clipped": count,
-            "share": round(share, 4), "runner_up": runner,
-            "reason": (f"{count} of {total} clause(s) ({share:.1%}) are "
-                       f"exactly {width} characters and end mid-word, against "
-                       f"{runner} at the next most repeated length. Prose "
-                       f"spreads its clause lengths; a hard clip stacks them "
-                       f"on one integer. Every excerpt in this corpus is a "
-                       f"CUT, not a quotation — a producer reading one names "
-                       f"what fell past the cut, measured on one register as "
-                       f"9 product names present in zero of their own cited "
-                       f"excerpts."),
+            "clipped_served": served, "neighbours": near,
+            "ratio": round(ratio, 2) if near else None,
+            "reason": (f"{count} DISTINCT clause(s) are exactly {width} "
+                       f"characters and end mid-word, against {near} distinct "
+                       f"clause(s) across the {NEIGHBOURHOOD} lengths either "
+                       f"side ({near / (2 * NEIGHBOURHOOD):.2f} per length) "
+                       f"— a {ratio:.0f}x spike where prose spreads. "
+                       f"Those {count} render {served} time(s) in this "
+                       f"corpus. Every one of them is a CUT, not a "
+                       f"quotation: a producer reading one names what fell "
+                       f"past the cut, measured on one register as 9 product "
+                       f"names present in zero of their own cited excerpts."),
             "example_ends": f"...{example[-40:]!r}"}
