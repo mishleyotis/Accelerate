@@ -662,6 +662,56 @@ a cell link, and only on a non-empty string that is not a cell id. An empty
 value is CG-02's business, not this gate's — the two do not both report one
 absence.
 
+### CG-50 · the product a row names appears in the span it cites
+
+MEM-0129, BLOCKER. A producer read a truncated excerpt, reached past the cut
+into the scan summary it remembered, and named **nine products the citable
+spans do not contain**. Substring-testing all fourteen rows against their own
+cited excerpts: nine present in zero of them. Repairing the register against
+that test took it from 41 rows to 27, CONFIRMED from 9 to 3, and removed the
+run's entire security-tooling incumbency story — a story that had never been
+there.
+
+The finding made this a producer HABIT: *"substring-test every product name
+against its own stored excerpt before citing it."* A habit is not a control.
+It was written on 2026-08-21 and a run promoted the next day with 95% of its
+client-facing evidence clipped, because nothing checked.
+
+**What it checks:** does the span you cited contain the name you asserted?
+Not whether the client really runs the product — no gate can know that.
+
+**Matching is by distinctive token OR multi-word phrase**, so correct work
+passes. An excerpt saying *"Financial Services Cloud"* corroborates a row
+named *"Salesforce Financial Services Cloud"*, and the vendor counts too:
+"Fiserv" in the excerpt corroborates a Fiserv product whose own name is
+entirely generic. Generic words alone never corroborate — a match on "Cloud"
+proves nothing.
+
+**ABSENT rows are exempt.** Evidence of absence rarely names the absent
+product, and refusing those rows would push you to delete honest ABSENT rows
+rather than record them — trading a documented gap for a silent one.
+
+**Three outcomes, kept apart:**
+
+| What happened | What the verdict says |
+|---|---|
+| the name or its vendor appears | pass |
+| no cited excerpt contains it, and one is a HARD CLIP | fix the STORE — re-ingest with whole spans. Rewriting the row against a truncated excerpt loses a product they may really run |
+| no cited excerpt contains it, none truncated | fix the ROW — cite the source that does, or move it to `dropped[]`. *An item you cannot cite is a rumour*, in the contract's own words |
+
+A row whose ids resolve but carry **no excerpt** is refused with its own
+reason. That is deliberate: MEM-0129's nine looked exactly like rows that had
+passed, so "could not check" is never reported as "checked and fine". An id
+that does not resolve at all is ET-04's business and this gate stays quiet.
+
+**Measured on the live corpus, 2026-08-24, 80 promoted rows across three
+clients.** T. Rowe's repaired register passes 27 of 27 — the gate agrees with
+the hand repair exactly. Gulf refuses 15 and Logix 2, and every one is real:
+Gulf cites `E-CC-224`, a 258-character WCAG accessibility statement from its
+privacy policy, on **twenty** rows including Salesforce CRM, Pardot, HubSpot,
+Cloudflare and GitHub; Logix's Marketo Engage row cites a technographic list
+that does not contain Marketo. Zero false positives.
+
 ## The citation stack
 
 | | Check | Catches |

@@ -549,6 +549,40 @@ GATES = {
               "can act on it.",
               "block"),
 
+    "CG-50": ("The product a techstack row names appears in the span it "
+              "cites", None,
+              "Every non-ABSENT techstack.items[] row is substring-tested "
+              "against the excerpts of its own cited e_ids. Matching is by "
+              "DISTINCTIVE TOKEN or MULTI-WORD PHRASE, never by a generic "
+              "word alone: an excerpt saying 'Financial Services Cloud' "
+              "corroborates a row named 'Salesforce Financial Services "
+              "Cloud', and the vendor counts too, but a match on 'Cloud' "
+              "proves nothing. ABSENT rows are exempt because evidence of "
+              "absence rarely names the absent product, and refusing them "
+              "would trade a documented gap for a silent one. A row whose "
+              "ids resolve but carry no excerpt is refused with its own "
+              "reason - 'could not check' is never reported as 'checked and "
+              "fine'. An id that does not resolve at all is ET-04's.",
+              "MEM-0129, BLOCKER. A producer read a truncated excerpt, "
+              "reached past the cut into the scan summary it remembered, and "
+              "named nine products the citable spans do not contain. "
+              "Repairing that register against the test took it from 41 rows "
+              "to 27 and CONFIRMED from 9 to 3, removing an entire "
+              "security-tooling incumbency story that had never been there. "
+              "The finding made the test a producer HABIT; a habit is not a "
+              "control, and a run promoted the next day with 95% of its "
+              "client-facing evidence clipped. Verified on the live corpus "
+              "2026-08-24 over 80 promoted rows with 100% cited-id "
+              "resolution: T. Rowe's repaired register passes 27 of 27, so "
+              "the gate reproduces the hand repair exactly, while Gulf "
+              "refuses 15 and Logix 2 with zero false positives (MEM-0228) - "
+              "Gulf cites a 258-character WCAG accessibility statement as "
+              "the evidence for twenty products. The verdict distinguishes a "
+              "CLIPPED store, which is re-ingested, from a wrong citation, "
+              "which is re-cited or dropped: they are opposite repairs and "
+              "confusing them loses a product the client really runs.",
+              "block"),
+
     "CG-48": ("A value is refused if its column cannot hold it", None,
               "Every non-jsonb field a page writes is checked against the SQL "
               "type of the column it lands in, joining writer_spec.json to "

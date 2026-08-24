@@ -16,11 +16,19 @@ from __future__ import annotations
 import json
 import re
 
+from . import shared_path
 from .contracts import sections
 from .evidence_tools import get_evidence
 from .identifiers import MINT_RE
 from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical, serves,
                            variant_subvertical)
+
+shared_path.ensure(__file__)
+
+# CG-50 asks whether a missing product name fell past a HARD CLIP, because
+# that changes the fix from 'rewrite the row' to 're-ingest the store'. One
+# rule, in packages/shared, read by the worker's parse and by both gates.
+import excerpt_clip as clip  # noqa: E402  packages/shared/excerpt_clip.py
 
 GRAIN_TOLERANCE = 0.05
 V4_MIN_MEMBERS = 5
@@ -2402,6 +2410,218 @@ _INTERNAL_ID = re.compile(
     , re.I)
 
 
+# ── CG-50 · a named product appears in the excerpt cited for it ───────
+#
+# MEM-0129, BLOCKER. A producer read a truncated excerpt, reached past the
+# cut into the scan summary it remembered, and named nine products the
+# citable spans do not contain: Splunk, Cortex XSOAR, Ping Identity, Azure
+# MFA, ServiceNow, Proofpoint, GCP, Snowflake, Prometheus. Only five of
+# fourteen survived the test. Repairing the register against it took 41 rows
+# to 27 and CONFIRMED from 9 to 3, and removed the run's entire
+# security-tooling incumbency story — a story that was never there.
+#
+# The finding's own fix_hint made this a PRODUCER HABIT: "substring-test
+# every product name against its own stored excerpt before citing it, and
+# never rely on source_name or on recollection of what the scan found." A
+# habit is not a control. It was written on 2026-08-21 and a run promoted
+# the following day with 95% of its client-facing evidence clipped, because
+# nothing checked.
+
+#: Words that identify nothing. A product name matching only on one of these
+#: has not been corroborated by its source — "Cloud" appears in every second
+#: vendor's catalogue, and letting it count would make the gate decorative.
+_GENERIC_PRODUCT_TOKENS = frozenset("""
+ cloud platform data suite service services manager management core system
+ systems software solution solutions enterprise server edition online pro
+ plus premium standard advanced engine hub studio center centre portal app
+ apps application applications tool tools api gateway network security
+ analytics intelligence experience digital banking finance financial
+ customer marketing sales commerce for and the with next gen one
+""".split())
+
+#: A token shorter than this cannot carry identity on its own. "SAP" and
+#: "AWS" are three characters and do identify; two-character fragments are
+#: noise that would match almost any prose.
+_MIN_TOKEN = 3
+
+#: A row asserting the client does NOT hold something is exempt: evidence of
+#: absence very rarely names the absent product, and refusing those rows
+#: would push a producer to drop honest ABSENT rows rather than record them.
+_NAME_CHECK_EXEMPT_STATUS = frozenset({"ABSENT"})
+
+
+def _distinctive_tokens(*names) -> list:
+    """The tokens of a product or vendor name that could corroborate it."""
+    out = []
+    for name in names:
+        for tok in re.split(r"[^A-Za-z0-9]+", str(name or "")):
+            low = tok.lower()
+            if len(tok) >= _MIN_TOKEN and low not in _GENERIC_PRODUCT_TOKENS:
+                out.append(tok)
+    return out
+
+
+def _name_phrases(*names) -> list:
+    """Multi-word forms of a name, which corroborate even when every WORD in
+    them is generic.
+
+    Token matching alone refuses correct work here, and the case is common
+    enough to matter: a row reads "Salesforce Financial Services Cloud" and
+    the excerpt says "Financial Services Cloud". Every word of that is in the
+    generic stoplist and the only distinctive token is the vendor, which the
+    excerpt never repeats — so a token-only gate calls a perfectly
+    corroborated row a fabrication.
+
+    A phrase of two or more words is distinctive even when its words are not:
+    prose does not stumble into "financial services cloud" by accident.
+    """
+    out = []
+    for name in names:
+        words = [w for w in re.split(r"[^A-Za-z0-9]+", str(name or "")) if w]
+        if len(words) >= 2:
+            out.append(" ".join(words).lower())
+            # …and the same name with a leading vendor word removed, because
+            # the excerpt usually names the product without repeating who
+            # makes it.
+            if len(words) >= 3:
+                out.append(" ".join(words[1:]).lower())
+    return out
+
+
+def _check_named_product_is_in_its_excerpt(conn, run_id, page, payload) -> list:
+    """CG-50 — the product a techstack row names appears in what it cites.
+
+    WHAT THIS CHECKS AND WHAT IT DELIBERATELY DOES NOT.
+
+    It checks CORROBORATION, not truth: does the span this row cites contain
+    the name this row asserts? It cannot tell whether the client really runs
+    the product, and no gate can. What it can tell — and what nothing told
+    anyone for two days — is when a row's own citation does not mention the
+    thing the row is about.
+
+    Matching is by DISTINCTIVE TOKEN, not by full string, because a real
+    excerpt says "Financial Services Cloud" where the row says "Salesforce
+    Financial Services Cloud", and refusing that would be a false positive on
+    correct work. The vendor's tokens count too: "Fiserv" in the excerpt
+    corroborates a Fiserv product whose own name is entirely generic.
+
+    THREE OUTCOMES, KEPT DISTINCT, because collapsing them is the defect
+    this whole build keeps removing:
+
+    - the name (or its vendor) appears -> pass
+    - no cited excerpt contains it -> REFUSED, and the verdict says whether
+      the excerpts were CLIPPED, because that changes the fix completely:
+      a clipped store is re-ingested, a wrong name is rewritten
+    - the row cites ids that resolve but carry no excerpt -> REFUSED with a
+      different reason, naming that the check could not run. "I looked and
+      found nothing" must never be indistinguishable from "I could not look".
+
+    An id that does not resolve at all is ET-04's business and this gate
+    stays silent on it — two gates reporting one absence makes a verdict
+    list nobody reads.
+    """
+    if page != "techstack" or not isinstance(payload, dict):
+        return []
+    sect = payload.get("techstack")
+    if not isinstance(sect, dict):
+        return []
+    items = sect.get("items")
+    if not isinstance(items, list):
+        return []
+
+    from . import evidence_tools as ev
+    scope = ev._run_scope(conn, run_id)
+    if scope is None:
+        return []
+    cur = conn.cursor()
+    cache: dict = {}
+
+    def excerpt_of(e_id):
+        if e_id not in cache:
+            try:
+                row, _scoped = ev._resolve(cur, e_id, scope)
+            except Exception:                            # pragma: no cover
+                row = None
+            cache[e_id] = (row[4] if row else None, row is not None)
+        return cache[e_id]
+
+    out = []
+    for i, item in enumerate(items):
+        if not isinstance(item, dict):
+            continue
+        status = str(item.get("status") or "").strip().upper()
+        if status in _NAME_CHECK_EXEMPT_STATUS:
+            continue
+        product = item.get("product")
+        tokens = _distinctive_tokens(product)
+        vendor_tokens = _distinctive_tokens(item.get("vendor"))
+        if not tokens and not vendor_tokens and not _name_phrases(product):
+            continue          # nothing identifying to look for; CG-12's grain
+        e_ids = item.get("e_ids")
+        if not isinstance(e_ids, list) or not e_ids:
+            continue          # an uncitable row is the contract's dropped[]
+        path = f"techstack.techstack.items[{i}]"
+        label = f"{item.get('vendor') or ''} {product or ''}".strip()
+
+        excerpts, resolved_any, had_text = [], False, False
+        for e_id in e_ids:
+            text, resolved = excerpt_of(e_id)
+            resolved_any = resolved_any or resolved
+            if text:
+                had_text = True
+                excerpts.append((e_id, str(text)))
+
+        if not resolved_any:
+            continue          # ET-04 owns an id that resolves to nothing
+        if not had_text:
+            out.append(_reason(
+                "CG-50", "techstack", path,
+                f"{label!r} cites {len(e_ids)} id(s) that resolve to rows "
+                f"carrying NO excerpt, so whether the source names this "
+                f"product could not be checked at all. This is reported as a "
+                f"refusal rather than a pass because a row nobody could "
+                f"verify and a row that verified are not the same claim — "
+                f"MEM-0129 named nine products their own citable spans do "
+                f"not contain, and every one of them looked exactly like a "
+                f"row that had passed. Register the span, then cite it."))
+            continue
+
+        phrases = _name_phrases(product)
+        hit = None
+        for e_id, text in excerpts:
+            low = " ".join(re.split(r"[^A-Za-z0-9]+", text.lower()))
+            for needle in [t.lower() for t in tokens + vendor_tokens] + phrases:
+                if needle in low:
+                    hit = (e_id, needle)
+                    break
+            if hit:
+                break
+        if hit:
+            continue
+
+        clipped = [e_id for e_id, text in excerpts
+                   if clip.clause_truncated(text) is not None]
+        why = (
+            f"and {len(clipped)} of {len(excerpts)} of those excerpts is a "
+            f"HARD CLIP, so the name may well have fallen past the cut. Fix "
+            f"the STORE, not the row: re-ingest this package's evidence with "
+            f"whole spans and re-check. Rewriting the row against a truncated "
+            f"excerpt is how a register loses a product it really does run."
+            if clipped else
+            f"and none of those excerpts is truncated, so the span genuinely "
+            f"does not mention it. Either cite the source that does, or move "
+            f"the row to dropped[] with the reason — an item you cannot cite "
+            f"is a rumour, in the contract's own words."
+        )
+        out.append(_reason(
+            "CG-50", "techstack", path,
+            f"{label!r} appears in none of the {len(excerpts)} excerpt(s) it "
+            f"cites ({', '.join(e for e, _ in excerpts[:4])}). Searched for "
+            f"{sorted(set(tokens + vendor_tokens))[:6]}, ignoring generic "
+            f"words that identify nothing — {why}"))
+    return out
+
+
 def _check_customer_empty_state_prose(page, payload) -> list:
     """CG-49 - a client-visible absence does not name this system's machinery.
 
@@ -3126,6 +3346,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_prose_counts_what_is_served(page, payload))
     reasons.extend(_check_values_fit_their_columns(page, payload))
     reasons.extend(_check_customer_empty_state_prose(page, payload))
+    reasons.extend(_check_named_product_is_in_its_excerpt(
+        conn, run_id, page, payload))
 
     served = _served_figures(conn, run_id)
 
