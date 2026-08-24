@@ -475,6 +475,37 @@ def _apply_allowlist(page: str, section: str, body: dict) -> tuple[dict | None, 
     return body, dropped
 
 
+#: Keys whose whole job is to BE an identifier, so a machinery-shaped value in
+#: one is the value and not a leak. `gate_id` is the measured case:
+#: heatmap.safeguard_gates is a section invariant 12 DESIGNS to render to the
+#: client, through `plain_label`, and the id is the resolver's key beside it.
+#: `gate` is exempt with it because the one renderer reads `g.gate_id || g.gate`.
+_MACHINERY_EXEMPT_KEYS = frozenset({"gate_id", "gate"})
+
+
+def _strip_machinery(node, path: str = "", found=None) -> list:
+    """Delete every non-exempt key whose string value names our machinery.
+
+    Depth-first and in place, deleting the KEY that holds the string rather
+    than any ancestor of it. Returns the paths removed, so the section's
+    redaction receipt can count them.
+    """
+    found = [] if found is None else found
+    if isinstance(node, dict):
+        for key in list(node.keys()):
+            value = node[key]
+            if (isinstance(value, str) and key not in _MACHINERY_EXEMPT_KEYS
+                    and internal_ids.names_machinery(value)):
+                found.append(f"{path}.{key}".lstrip("."))
+                del node[key]
+                continue
+            _strip_machinery(value, f"{path}.{key}".lstrip("."), found)
+    elif isinstance(node, list):
+        for i, value in enumerate(node):
+            _strip_machinery(value, f"{path}[{i}]", found)
+    return found
+
+
 def redact_empty_state(empty, audience: str) -> tuple[object, list]:
     """(empty_state_or_None, dropped) — the ONE part of a section that never
     went through the walker.
@@ -599,6 +630,27 @@ def redact_section(page: str, section: str, data: dict, internal_only,
             # survived every deny rule above must also be NAMED to serve.
             out, dropped = _apply_allowlist(page, section, out)
             report["allowlist_dropped"] = dropped
+
+            # …and then the one thing an allowlist structurally cannot see:
+            # what the NAMED keys SAY. `narrative_thread` is allowed and its
+            # VALUE is where a gate id sits, which is why ten fields reached
+            # three clients' customer bodies while the allowlist was working
+            # exactly as designed.
+            #
+            # DEFAULT-DENY WITH A MEASURED EXEMPTION, not a list of prose
+            # keys: the customer bodies hold 93 distinct keys carrying a
+            # sentence, so any such list is incomplete the day it is written.
+            # Across the internal bodies of all five clients on all five
+            # pages, only three keys ever hold a string matching the pattern —
+            # sources_searched (the empty_state ladder, handled in
+            # `redact_empty_state`), gate_id, and narrative_thread. So one key
+            # is exempt and everything else is checked.
+            #
+            # THE KEY GOES, NOT ITS PARENT. `scan` returns
+            # `gates[0].gate_id`; keying off the first path segment would
+            # delete the whole `gates` array and empty
+            # heatmap.safeguard_gates on every client.
+            report["machinery_named"] = _strip_machinery(out)
             if out is None:
                 return None, {**report, "withheld": True,
                               "unknown_section": True}
