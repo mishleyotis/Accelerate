@@ -54,6 +54,14 @@ INSTALL_STATE = Path(
     os.environ.get("CLAUDE_CONFIG_DIR", Path.home() / ".claude")
 ) / "plugins" / "installed_plugins.json"
 
+#: What the environment setup script recorded about this container, written by
+#: bootstrap_session.sh section 4b before the session existed. Absence is
+#: itself a reading — see `provisioning()`.
+PROV_FILE = Path(os.environ.get(
+    "DMA_PROVISIONING_FILE",
+    Path(os.environ.get("DMA_SA_KEY_FILE", "/root/.dma/sa.json")).parent
+    / "provisioning.json"))
+
 _SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 
 
@@ -294,6 +302,115 @@ def installed(state_path: Path | None = None) -> dict:
     }
 
 
+#: The line that wires the setup script, quoted so a report can be acted on
+#: without anyone going to look it up.
+SETUP_CURL = (
+    "curl -sfL https://raw.githubusercontent.com/mishleyotis/Accelerate/"
+    "claude/dma-insights-onboarding-0ryrd0/plugins/dma-insights/scripts/"
+    "bootstrap_session.sh | bash")
+
+
+def provisioning(prov_path: Path | None = None) -> dict:
+    """What happened BEFORE this session started, and whether the next
+    session will differ.
+
+    WHY THIS IS PART OF A VERSION CHECK. Every status below is a fact about
+    one container, and the routines' answer to the two commonest ones —
+    STALE and UPDATED_MID_SESSION — is "end the firing and let the next one
+    pick it up". That answer is only true when the staleness was a one-off.
+    When the container reproduces it, the next firing repeats the same three
+    steps and the routine reports the same clean non-failure forever while
+    producing nothing. Two synthesis lanes did exactly that, which is what
+    this function exists to make sayable.
+
+    The verdict has three shapes and they have different fixes:
+
+      not_run        no record — the setup script did not run before this
+                     session, so the plugin came from whatever the image or
+                     a restored snapshot carried. RECURS every firing.
+      stale_checkout it ran and could not bring the checkout to the branch
+                     tip, and the checkout IS the marketplace, so it
+                     installed an old plugin on purpose. RECURS every firing
+                     until the checkout is fixed.
+      ok             it ran and the checkout was current — a stale bind here
+                     is a genuinely new fact, and ending the firing is the
+                     right answer.
+    """
+    path = Path(prov_path) if prov_path else PROV_FILE
+    rec = _load(path)
+    if not rec:
+        # AN ABSENT RECORD HAS TWO CAUSES AND THEY HAVE DIFFERENT FIXES, so
+        # it is not reported as one. The setup script also lands the
+        # service-account key and the connector path token beside this file;
+        # if THOSE are present and this is not, the script ran — from a
+        # revision built before it wrote a record. Saying "it did not run"
+        # there sends someone to check a setting that is already correct,
+        # which is the same class of mistake as the loop this diagnoses.
+        siblings = [p.name for p in (path.parent / "sa.json",
+                                     path.parent / "pathtok") if p.exists()]
+        if siblings:
+            return {
+                "state": "not_run",
+                "recurs": True,
+                "record": str(path),
+                "reason": (
+                    f"no provisioning record at {path}, but "
+                    f"{' and '.join(siblings)} are there — the setup script "
+                    "DID run, from a revision that predates the record it "
+                    "now writes. What it provisioned is therefore unknown, "
+                    "including whether the checkout it installed the plugin "
+                    "from was on this branch. THE NEXT FIRING WILL DO THE "
+                    "SAME until the pinned revision moves"),
+                "fix": ("re-point the Setup script in the claude.ai/code "
+                        "environment settings at the current branch, so it "
+                        "runs the version that resets the checkout before "
+                        f"installing and records what it did:  {SETUP_CURL}"),
+            }
+        return {
+            "state": "not_run",
+            "recurs": True,
+            "record": str(path),
+            "reason": (
+                "no provisioning record at "
+                f"{path}, and neither the service-account key nor the path "
+                "token is beside it — the environment setup script did not "
+                "run before this session, so the plugin bound here came from "
+                "the container image or a restored snapshot rather than from "
+                "this branch. THE NEXT FIRING WILL DO THE SAME"),
+            "fix": ("wire bootstrap_session.sh in the claude.ai/code "
+                    "environment settings (Setup script), alongside the "
+                    f"DMA_ROUTINE_SA_KEY_B64 variable:  {SETUP_CURL}"),
+        }
+    if rec.get("checkout_current") is False:
+        return {
+            "state": "stale_checkout",
+            "recurs": True,
+            "record": str(path),
+            "reason": (
+                f"the setup script ran at {rec.get('bootstrap_ran_at')} and "
+                f"left the checkout OFF {rec.get('branch')} "
+                f"({rec.get('checkout_state')}: {rec.get('checkout_note')}) "
+                "— .claude/settings.json registers the marketplace as that "
+                "directory, so the plugin was installed from a stale tree. "
+                "THE NEXT FIRING WILL DO THE SAME"),
+            "fix": (f"make {rec.get('repo_dir')} reach "
+                    f"origin/{rec.get('branch')} before the session starts; "
+                    "a working tree with local modifications is never reset "
+                    "by the setup script, by design"),
+        }
+    return {
+        "state": "ok",
+        "recurs": False,
+        "record": str(path),
+        "reason": (
+            f"the setup script ran at {rec.get('bootstrap_ran_at')} with the "
+            f"checkout at origin/{rec.get('branch')} and installed "
+            f"{rec.get('plugin_installed') or 'nothing'} against an expected "
+            f"{rec.get('plugin_expected') or 'unknown'}"),
+        "fix": "",
+    }
+
+
 UPDATE = (f"claude plugin marketplace update {MARKETPLACE_NAME} && "
           f"claude plugin update {PLUGIN_NAME}@{MARKETPLACE_NAME}")
 #: WHAT AN UPDATE ACTUALLY DOES, and the correction that produced this text.
@@ -331,7 +448,8 @@ SESSION_NOTE = (
 
 
 def compare(repo_root: Path | None = None,
-            state_path: Path | None = None) -> dict:
+            state_path: Path | None = None,
+            prov_path: Path | None = None) -> dict:
     """The verdict, with the arithmetic shown. Statuses:
 
       OK              installed is what the repo publishes, and whole, and
@@ -441,13 +559,31 @@ def compare(repo_root: Path | None = None,
     elif status == "MANIFEST_SPLIT":
         fix = ("set the same version in both .claude-plugin/marketplace.json "
                "and plugins/dma-insights/.claude-plugin/plugin.json")
+    # WHY THE DRIFT HAPPENED, not just that it did. Only asked when there IS
+    # drift: on a healthy container the provisioning record is noise, and a
+    # check that narrates a working machine trains people to skim it.
+    prov = provisioning(prov_path)
+    if status in ("STALE", "MISSING", "INCOMPLETE", "UPDATED_MID_SESSION",
+                  "DIVERGED"):
+        reasons.append(f"cause: {prov['reason']}")
+        if prov["recurs"]:
+            # The correction that matters. Both prompts and this script have
+            # told sessions that ending the firing hands the problem to the
+            # next one; when provisioning reproduces the state, that is false
+            # and the routine loops reporting a clean non-failure.
+            reasons.append(
+                "ENDING THE FIRING WILL NOT FIX THIS — the next container "
+                "reproduces the same state, so every following firing "
+                "repeats this verdict and produces nothing. This is a "
+                "provisioning defect to report, not a transient to wait out")
+
     # UPDATED_MID_SESSION is deliberately NOT ok. The install is fine and the
     # session is not, and the caller's next act — produce, or end the firing —
     # depends on the session, not the disk. An exit 0 there would send a
     # routine to work on the very agents it was trying to stop using.
     return {"status": status, "ok": status in ("OK", "NOT_INSTALLED"),
             "reasons": reasons, "fix": fix, "published": pub,
-            "installed": inst}
+            "installed": inst, "provisioning": prov}
 
 
 def summary(verdict: dict) -> str:
@@ -465,9 +601,12 @@ def main(argv=None) -> int:
                          "(default: the one this script lives in)")
     ap.add_argument("--state", default=None,
                     help="path to installed_plugins.json (default: the CLI's)")
+    ap.add_argument("--provisioning", default=None,
+                    help="path to the setup script's provisioning record "
+                         "(default: beside the service-account key)")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
-    v = compare(a.repo_root, a.state)
+    v = compare(a.repo_root, a.state, a.provisioning)
     if a.json:
         print(json.dumps(v, indent=1))
     else:
@@ -476,6 +615,14 @@ def main(argv=None) -> int:
             print(f"  - {r}")
         if v["fix"]:
             print(f"  -> {v['fix']}")
+        # LAST AND SEPARATE, because it is a different kind of instruction:
+        # everything above is for the session, this is for whoever owns the
+        # environment. Folding it into `fix` produced one unreadable line
+        # ending in nested parentheses, and the part that recurs every firing
+        # was buried in the middle of it.
+        prov = v.get("provisioning") or {}
+        if prov.get("recurs") and prov.get("fix"):
+            print(f"  => ROOT CAUSE, RECURS EVERY FIRING: {prov['fix']}")
     return 0 if v["ok"] else 1
 
 

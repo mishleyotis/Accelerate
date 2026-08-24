@@ -20,6 +20,19 @@ sys.path.insert(0, str(HERE))
 import plugin_version as pv  # noqa: E402
 
 
+@pytest.fixture(autouse=True)
+def _no_provisioning_record(tmp_path, monkeypatch):
+    """Every test below is about the INSTALL, so provisioning is pinned to a
+    known-absent record rather than left to read whatever the machine has.
+
+    Without this the suite reads /root/.dma/provisioning.json, which does not
+    exist on a workstation and DOES exist on exactly the containers these
+    tests are meant to describe — so the same assertions would exercise two
+    different code paths depending on where they ran.
+    """
+    monkeypatch.setattr(pv, "PROV_FILE", tmp_path / "no-provisioning.json")
+
+
 def _plugin_tree(plugin_dir: Path, version="0.8.1", agents=47, skills=6):
     """The tree BOTH sides build, so an install and a checkout at the same
     version are byte-identical by construction.
@@ -404,6 +417,111 @@ def test_session_start_is_read_from_the_process_not_guessed(monkeypatch):
     assert pv.session_started_at() is None
     monkeypatch.setenv("CLAUDE_PID", "999999999")
     assert pv.session_started_at() is None, "a pid that does not exist"
+
+
+# ── why the drift happened, and whether the next firing will differ ───────
+#
+# THE LIVELOCK, reported by two synthesis lanes on 2026-08-24. Every routine's
+# STEP 0 answers UPDATED_MID_SESSION with "end the firing, the next one picks
+# it up". That is true of a one-off and false of a container that reproduces
+# the state, and nothing could tell the two apart — so the lanes ended every
+# firing with a clean report and produced no client at all. These pin the
+# distinction the report needs to make.
+
+def _prov(tmp_path, **fields):
+    rec = {"bootstrap_ran_at": "2026-08-24T09:11:02Z",
+           "repo_dir": "/home/user/Accelerate",
+           "branch": "claude/dma-insights-onboarding-0ryrd0",
+           "checkout_current": True, "checkout_state": "reset",
+           "checkout_note": "", "plugin_installed": "0.8.1",
+           "plugin_expected": "0.8.1"}
+    rec.update(fields)
+    path = tmp_path / "provisioning.json"
+    path.write_text(json.dumps(rec))
+    return path
+
+
+def test_an_absent_record_with_nothing_beside_it_means_it_did_not_run(tmp_path):
+    p = pv.provisioning(tmp_path / "nothing-here.json")
+    assert p["state"] == "not_run"
+    assert p["recurs"] is True
+    assert "did not run" in p["reason"]
+    assert "bootstrap_session.sh" in p["fix"]
+
+
+def test_an_absent_record_beside_a_landed_key_says_it_ran_and_was_old(tmp_path):
+    """The setup script lands the key and the path token beside this record.
+    Key present + record absent means it RAN, from a revision built before it
+    wrote one — reporting that as "did not run" sends someone to check a
+    setting that is already correct, which is the same class of mistake as
+    the loop this diagnosis exists to break."""
+    (tmp_path / "sa.json").write_text("{}")
+    p = pv.provisioning(tmp_path / "nothing-here.json")
+    assert p["state"] == "not_run"
+    assert p["recurs"] is True
+    assert "DID run" in p["reason"]
+    assert "did not run" not in p["reason"]
+    assert "re-point" in p["fix"]
+
+
+def test_a_stale_checkout_is_named_as_the_cause(tmp_path):
+    """The checkout IS the marketplace, so a checkout left off the branch
+    installs an old plugin on purpose."""
+    p = pv.provisioning(_prov(tmp_path, checkout_current=False,
+                              checkout_state="dirty",
+                              checkout_note="local modifications"))
+    assert p["state"] == "stale_checkout"
+    assert p["recurs"] is True
+    assert "origin/claude/dma-insights-onboarding-0ryrd0" in p["fix"]
+
+
+def test_a_healthy_record_does_not_claim_recurrence(tmp_path):
+    p = pv.provisioning(_prov(tmp_path))
+    assert p["state"] == "ok"
+    assert p["recurs"] is False
+    assert p["fix"] == ""
+
+
+def test_a_recurring_cause_says_ending_the_firing_will_not_fix_it(tmp_path):
+    """The sentence the routines were missing."""
+    v = pv.compare(_repo(tmp_path), _state(tmp_path, "0.2.0", agents=5),
+                   tmp_path / "nothing-here.json")
+    assert v["status"] == "STALE"
+    joined = " ".join(v["reasons"])
+    assert "ENDING THE FIRING WILL NOT FIX THIS" in joined
+    assert v["provisioning"]["recurs"] is True
+
+
+def test_a_one_off_is_not_dressed_up_as_a_provisioning_defect(tmp_path):
+    """A correctly provisioned container that still drifts is a NEW fact, and
+    ending the firing really is the right answer there. Crying provisioning
+    at it would send someone to fix a setting that is already correct."""
+    v = pv.compare(_repo(tmp_path), _state(tmp_path, "0.2.0", agents=5),
+                   _prov(tmp_path))
+    assert v["status"] == "STALE"
+    joined = " ".join(v["reasons"])
+    assert "ENDING THE FIRING WILL NOT FIX THIS" not in joined
+    assert v["provisioning"]["recurs"] is False
+
+
+def test_a_healthy_install_is_not_narrated(tmp_path):
+    """No provisioning commentary on an OK verdict: a check that explains a
+    working machine every time teaches its reader to skim it."""
+    v = pv.compare(_repo(tmp_path), _state(tmp_path),
+                   tmp_path / "nothing-here.json")
+    assert v["status"] == "OK"
+    assert not any("cause:" in r for r in v["reasons"])
+
+
+def test_the_root_cause_line_is_printed_separately(tmp_path, capsys):
+    """It addresses whoever owns the environment, not the session, and it was
+    unreadable folded into `fix` behind nested parentheses."""
+    pv.main(["--repo-root", str(_repo(tmp_path)),
+             "--state", str(_state(tmp_path, "0.2.0", agents=5)),
+             "--provisioning", str(tmp_path / "nothing-here.json")])
+    out = capsys.readouterr().out
+    assert "=> ROOT CAUSE, RECURS EVERY FIRING:" in out
+    assert out.count("=> ROOT CAUSE") == 1
 
 
 if __name__ == "__main__":
