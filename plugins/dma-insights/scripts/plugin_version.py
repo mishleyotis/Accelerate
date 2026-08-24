@@ -381,6 +381,28 @@ def provisioning(prov_path: Path | None = None) -> dict:
                     "environment settings (Setup script), alongside the "
                     f"DMA_ROUTINE_SA_KEY_B64 variable:  {SETUP_CURL}"),
         }
+    have, want = rec.get("plugin_installed"), rec.get("plugin_expected")
+    if have and want and have != want:
+        # The setup script ran, brought the checkout to the tip, tried the
+        # install twice and STILL could not land the version the branch
+        # ships. Nothing in the session can fix that, and every firing on
+        # this image will reproduce it.
+        return {
+            "state": "stale_install",
+            "recurs": True,
+            "record": str(path),
+            "reason": (
+                f"the setup script ran at {rec.get('bootstrap_ran_at')} and "
+                f"could not install the version the branch ships: it left "
+                f"{have} installed where origin/{rec.get('branch')} ships "
+                f"{want}, after a retry. The session bound {have}. THE NEXT "
+                "FIRING WILL DO THE SAME"),
+            "fix": ("the plugin install on this image is not taking the "
+                    "update — check the setup script's log for the `claude "
+                    "plugin update` step, and whether the container's plugin "
+                    "cache is restored read-only or from a snapshot that "
+                    "post-dates it"),
+        }
     if rec.get("checkout_current") is False:
         return {
             "state": "stale_checkout",

@@ -464,6 +464,26 @@ def test_an_absent_record_beside_a_landed_key_says_it_ran_and_was_old(tmp_path):
     assert "re-point" in p["fix"]
 
 
+def test_an_install_that_would_not_take_is_its_own_cause(tmp_path):
+    """The setup script ran, the checkout was current, and the install STILL
+    came out behind. That is neither "it did not run" nor "the checkout was
+    stale", and telling a reader either one sends them to the wrong place."""
+    p = pv.provisioning(_prov(tmp_path, plugin_installed="0.6.2",
+                              plugin_expected="0.9.8"))
+    assert p["state"] == "stale_install"
+    assert p["recurs"] is True
+    assert "0.6.2" in p["reason"] and "0.9.8" in p["reason"]
+
+
+def test_a_stale_install_outranks_a_stale_checkout(tmp_path):
+    """Both can be true at once. The install is the more specific fact — it
+    names the version the session actually bound — so it is reported."""
+    p = pv.provisioning(_prov(tmp_path, checkout_current=False,
+                              plugin_installed="0.6.2",
+                              plugin_expected="0.9.8"))
+    assert p["state"] == "stale_install"
+
+
 def test_a_stale_checkout_is_named_as_the_cause(tmp_path):
     """The checkout IS the marketplace, so a checkout left off the branch
     installs an old plugin on purpose."""

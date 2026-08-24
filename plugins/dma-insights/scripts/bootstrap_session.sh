@@ -233,12 +233,44 @@ elif command -v claude >/dev/null 2>&1; then
       [ "$v" = "$WANT" ] || { rm -rf "$d" && log "pruned stale plugin cache $v"; }
     done
   fi
+  # THE SELF-COMPARISON TRAP, and it is why this check reported green through
+  # every failing firing. `WANT` is read from $REPO_DIR — the SAME tree the
+  # install was just made from. When section 1 failed to bring that tree to
+  # the branch tip, the install and the expectation were both the stale
+  # version, `HAVE` equalled `WANT`, and this logged "plugin at 0.6.2 (repo
+  # ships 0.6.2)". Then the harness finished updating the checkout to the tip,
+  # the session started and bound 0.6.2, and STEP 0 compared it against a
+  # 0.9.7 checkout and called it STALE — correctly, and far too late.
+  #
+  # So the comparison that matters is against the BRANCH, not against the
+  # directory. `git show origin/$BRANCH:...` reads the tip's manifest whatever
+  # the working tree happens to hold, which is exactly the number the session
+  # will be measured against once it starts.
   HAVE="$(claude plugin list 2>/dev/null | grep -A2 'dma-insights@zennify-dma' | grep -o 'Version: [0-9.]*' | head -1 | cut -d' ' -f2)" || HAVE=""
+  TIP_WANT="$(git -C "$REPO_DIR" show "origin/$BRANCH:plugins/dma-insights/.claude-plugin/plugin.json" 2>/dev/null \
+    | python3 -c 'import json,sys;print(json.load(sys.stdin)["version"])' 2>/dev/null)" || TIP_WANT=""
+  [ -n "$TIP_WANT" ] && WANT="$TIP_WANT"
+
+  # ONE FORCED RETRY. A logged mismatch is not a remediation: the old script
+  # named the problem and left the session to bind it anyway. An update that
+  # did not take on a tree that IS current is worth exactly one more attempt
+  # before the firing is spent.
   if [ -n "$WANT" ] && [ "$HAVE" != "$WANT" ]; then
-    log "PLUGIN VERSION MISMATCH: installed ${HAVE:-none}, repo ships $WANT —"
-    log "the session will fail its version floor; plugin update above must be fixed"
+    log "plugin at ${HAVE:-none} but $BRANCH ships $WANT — retrying the update"
+    claude plugin marketplace update zennify-dma >/dev/null 2>&1 || true
+    claude plugin update dma-insights@zennify-dma >/dev/null 2>&1 || true
+    claude plugin install dma-insights@zennify-dma "${INSTALL_ARGS[@]}" >/dev/null 2>&1 || true
+    HAVE="$(claude plugin list 2>/dev/null | grep -A2 'dma-insights@zennify-dma' | grep -o 'Version: [0-9.]*' | head -1 | cut -d' ' -f2)" || HAVE=""
+  fi
+
+  if [ -n "$WANT" ] && [ "$HAVE" != "$WANT" ]; then
+    log "PLUGIN VERSION MISMATCH AFTER RETRY: installed ${HAVE:-none}, "
+    log "$BRANCH ships $WANT — this session will bind ${HAVE:-nothing}. The"
+    log "provisioning record carries both numbers; plugin_version.py reads it"
+    log "and reports this as a recurring provisioning defect rather than as a"
+    log "transient the next firing will clear."
   else
-    log "plugin at ${HAVE:-unknown} (repo ships ${WANT:-unknown})"
+    log "plugin at ${HAVE:-unknown} (origin/$BRANCH ships ${WANT:-unknown})"
   fi
 else
   log "claude CLI not found — cannot install the plugin"
