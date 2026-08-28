@@ -192,7 +192,7 @@ evidence mode of Stage 3. Different concept entirely.
 **(d) The installed `dma-research` is not the real one** (§1.3). Grepping
 `plugins/dma-insights/skills/dma-research/` for MECE, Stage-2a, floors or
 challenge machinery returns **zero** — that is version drift, not a design
-absence. Audit Stages 5-6 against the **owner-supplied v4.2 archive**, and state
+absence. Audit §§5–6 against the **owner-supplied v4.2 archive**, and state
 which artefact each finding came from. Getting this backwards produces a report
 saying the practice has no reasoning discipline, which is false and would send a
 rectifier to build what already exists.
@@ -534,356 +534,9 @@ Then:
 
 ---
 
-## 4. The seven owner-specified checks
+## 4. Cross-cutting audits
 
-Seven areas the owner named directly. Each gets its own verdict and its own
-place in the deliverable. Findings here outrank the generic sweep.
-
----
-
-### 4.1 The entry document, and routing at three moments
-
-**What must be true:** one `.md` loads first, stays resident, and routes an
-agent to the right documentation — without exceeding the size a resident file
-can afford.
-
-The entry chain today, verified on the default branch:
-
-- `plugins/dma-insights/hooks/hooks.json` fires **SessionStart** → `scripts/hooks/session_brief.py`
-- That prints ~50 words: route before you produce · one surface → that page's producer → finding-challenger → page-consolidator · only surface-producer submits or promotes · read `get_memory_digest` first · end with qa-overseer · **routing table: `skills/dma-surface-production/05-lifecycle/routing.md`**
-- The routed-to file is **17 KB** (`routing.md`); its siblings in `05-lifecycle/` are `1-gates.md` (**42 KB**), `surface-map.md` (18 KB), `2-versioning.md`, `client-memory.md`
-
-Audit, at each of the three moments the owner named:
-
-**At session start.** Does the hook actually fire in a *headless, trigger-fired*
-session, or only in an interactive one? The hooks are declared in the plugin
-manifest; establish whether `claude -p --agent …` (the `agent_run.py` path)
-loads plugin hooks at all. **If it does not, the routing rule never enters an
-unattended run** — and every dispatched producer starts unrouted. This is the
-single highest-value check in 4.1.
-
-**While the session runs.** `session_brief.py` prints **only** when
-`source ∈ {startup, clear}`. Its docstring gives the reason:
-
-> *resumes and compaction continuations already carry the brief in context, and
-> re-printing it on every continuation is noise.*
-
-Test that assumption rather than accepting it. After a real compaction, is the
-brief still in context? Compaction summarises; a 50-word line early in a long
-session is exactly the kind of thing a summariser drops. If it does drop, the
-routing rule is gone mid-run and **nothing reprints it** — the hook has
-deliberately excluded the one moment it would be needed.
-
-**As the session proceeds into new work.** Does anything re-assert routing when
-the agent changes page, or when a sub-agent is dispatched? `agent_run.py`
-prepends a DISPATCH-MODE preamble, but that preamble covers connectors and
-output format — **not** the routing table. Check whether a dispatched producer
-is told how to route, or only how to report.
-
-**Size.** Nothing enforces a limit: `plugins/dma-insights/scripts/audit_skills.py`
-checks broken references and that scripts answer `--help`, and has **no
-word or line ceiling**. Measured:
-
-| SKILL.md | words | lines |
-|---|---:|---:|
-| `dma-first-call-deck` | 9,091 | **903** |
-| `dma-assessment` | 5,986 | **852** |
-| `dma-surface-production` | 5,138 | **587** |
-| `dma-research` (installed v2.3) | 4,439 | 629 |
-| `dma-rectifier` | 3,868 | 413 |
-| `dma-governance` | 2,133 | 332 |
-| *supplied `dma-research` v4.2* | *5,065* | *409* |
-
-Against the ~500-line working guidance for a resident SKILL.md, three exceed it
-and one is near double. Establish the real ceiling for this harness, measure
-each file against it, and say which are over. Then ask the harder question:
-**is `routing.md` at 17 KB a routing table or a second manual?** A router that
-must itself be read in full has not reduced anything. Judge whether an agent
-can reach the right rulebook from the brief plus a scan, or whether it must
-read 17 KB first — and note that `1-gates.md` at 42 KB sits behind it.
-
-**Reachability.** Pick five plausible tasks (repair one card; a failed CG-30;
-author the context page; a rejected insight card; resume after compaction). For
-each, trace the path from the 50-word brief to the file that answers it. Count
-the hops and the bytes. Any task needing more than two hops is a routing
-failure, whatever the table says.
-
----
-
-### 4.2 Drift, memory, resumability, compaction
-
-**What must be true:** the workflow resists model drift; memory is updated
-continuously and recalled on demand; a run whose tokens ran out can be resumed
-from its last state; compaction is used deliberately rather than survived.
-
-The supplied v4.2 skill is unusually strong here — audit whether the strength is
-real and whether it reaches the app.
-
-**Drift.** Two distinct meanings; separate them.
-
-- *Instruction drift within a run* — R23 **path citation + checksum halt**: every phase action names the `kg/` or `references/` file it executed from, and `kg_reader.py guard` HARD HALTs on a build-checksum mismatch. Verify the halt fires. Then ask the unattended question: **a hard halt with no listener is a silent stall.** What surfaces it?
-- *Behavioural drift across runs* — the findings memory (`record_finding` → `record_refinement` → `resolve_finding` → `report_recurrence`). `report_recurrence` is the load-bearing one: a fix that did not hold. Check `get_memory_digest`'s `recurrences_in_window` is populated and that anything reads it.
-
-**Continuous update and recall.** R21 append-only `01_evidence/ledger.jsonl`;
-conflicts preserved, never resolved by deletion; compaction only at category
-close. R32 requires every session to OPEN with `orient.py --run $RUN` and follow
-its `do_first`. Establish: is `orient.py` actually called first in practice, or
-only instructed? Is there a mechanical check that a session read state before
-writing?
-
-**Resumability — the token-exhaustion case the owner named.** R27 sets a budget
-rule: check `ledger.py stats` at every capability close, and **≥40 search-ops in
-a conversation → checkpoint and STOP**. R32 closes every batch with compact →
-floors → orient rerun. `templates/schemas/checkpoint.schema.json` defines the
-checkpoint.
-
-Test the actual failure, do not read about it: **kill a run mid-category and
-resume it.** Does `orient.py` reconstruct where it was? Is the partially-worked
-subcap correctly pending rather than silently closed? R27 says a subcap counts
-as closed ONLY when the ledger holds its synthesis, negative or remediation
-record, and `worklist` proves zero pending before a category closes — verify
-both against a real interrupted run.
-
-Then the durability question that decides all of it: **`$RUN` is a path.** If it
-is container-local, "disk is truth" holds only until the container exits — and
-in the target architecture the container always exits. Establish where `$RUN`
-lives, what persists it, and what a resumed Routine firing on a *fresh
-container* can actually recover. If the answer is nothing, resumability is a
-same-container property and the headless plan needs a durable store.
-
-Also: R34 states ledger appends are `O_APPEND` atomic and ids are minted via
-`ledger.new_evidence_id(run)` under `fcntl` locking, "parallel-safe". **`fcntl`
-locks are per-host.** If dispatch ever spans machines, that guarantee is void.
-
-**Compaction efficiency.** R27 forbids `cat` on `kg` packs,
-`engagement_set.json`, `evidence_index.json` and `ledger.jsonl` — read through
-`worklist` / `next` / `map-fact` / floors summaries instead. R32 requires
-syntheses be written by filling `orient.py --skeleton <SID>` templates, with
-`STUB_` values failing the gates. Audit: is compaction *used* (deliberate
-compact at category close, state on disk, cheap re-hydrate) or merely
-*survived*? And does the skeleton discipline invite form-filling — a synthesis
-structurally complete and substantively empty? A schema cannot catch that, and
-it is what an unattended run will produce most often.
-
----
-
-### 4.3 Token optimisation across the knowledge graph
-
-**What must be true:** the KG makes the work cheaper, measurably.
-
-The claimed mechanisms, each with a number to verify:
-
-| Mechanism | Claim | Verify |
-|---|---|---|
-| Lean briefs | `briefs --lean` is **~35% smaller** than the disk pack | Measure both on the same capability |
-| Work card | `kg_reader.py next` returns one card, **≤~750 tok** | Measure the real distribution, not the cap |
-| Category funnel (R25) | B-I sweep then B-II only for below-floor subcaps: **+25–32%** saved in doc-rich/large categories, **+11%** granular, **+3%** even when the sweep is a dud | Reproduce on ≥3 categories of differing shape |
-| Batched challenge | ~150–250 tok/subcap | Measure, and check batching does not dilute scrutiny |
-| Semantic index (R26) | TF-IDF over 851 briefs, offline, deterministic — replaces guesswork mapping | Cost to load vs. benefit |
-| Never-cat rule (R27) | Never `cat` kg packs, `engagement_set.json`, `evidence_index.json`, `ledger.jsonl` | Is it enforced, or an instruction an agent under pressure will break? |
-| Scope modes | `OFFERING` ≈ 6–12 conversations for 3 offerings; `T1_CORE` (686 universal) ≈ 27–33 | Are the budgets honest? Measure one real run against its band |
-
-Then the questions the numbers do not answer:
-
-- **Where does the budget actually go?** Instrument one category end to end and apportion tokens across brief loading, search results, synthesis writing, and challenge. Optimising the wrong term is the usual mistake.
-- **Is the semantic index load amortised?** A TF-IDF index over 851 briefs costs something to hold. At what engagement size does it pay for itself?
-- **What happens at the budget wall?** ≥40 search-ops → checkpoint and STOP is a *soft* rule an agent applies to itself. Unattended, does it stop, or does it keep going and blow the context? Test it.
-- **Does the funnel ever cost more than it saves?** R25 claims +3% even on a dud sweep. Verify the floor case rather than trusting it — a sweep that surfaces nothing still spent its queries.
-
----
-
-### 4.4 Report templates, and linkage to productized offerings
-
-**Templates.** Two report paths, both template-bound, both with an unpinned
-external dependency:
-
-- `dma-assessment` Phase 7 **STEP 0** retrieves `DMA_Assessment_Report_Template.docx` "from the project knowledge base" — *"the ONLY acceptable report structure. Do NOT create ad hoc layouts."*
-- Supplied v4.2 **R13** requires `DMA_Client_Profile_Research_Template.docx` from the project knowledge base *when present*, else falls back to `scripts/deliver/make_report_template.py`, with a placeholder sweep before delivery.
-
-Audit:
-
-- Neither template is version-pinned in the repo. In an unattended run, what happens when one is missing or has changed? The v4.2 path at least has a declared fallback; the assessment path says "the ONLY acceptable structure" and names no fallback at all. Establish what it actually does.
-- Is the placeholder sweep enforced, or advisory? A delivered report containing `{{CLIENT_NAME}}` is the failure this exists to prevent.
-- `render_client_report.py` composes via template **v6.3** structure. Confirm the renderer, the spec (`references/specs/client_report_spec.md`, `assets/report_template_spec.md`) and the template agree on version.
-- The two reports must reconcile numerically at the 0.05 grain. Check.
-
-**Productized offerings.** `kg/catalog/offering_map.json` (schema `kg-v3.1`) is
-the linkage. Measured on the supplied archive:
-
-- **23 distinct `offering_id`s** — matching the skill's "23 offerings" claim
-- **458 of 851 subcaps carry an offering mapping — 393 do not**
-- Each mapping carries `offering_id`, `offering` (display name) and a `rationale`
-- **`OFF-PMI` ships two display names** — "Post-Merger Integration" and "Post-Merger Integration Solution" — 24 (id, name) pairs across 23 ids
-
-So:
-
-- **A report that links by display name splits `OFF-PMI` into two offerings.** Establish whether linkage is by id or by name anywhere it is rendered, and normalise the finding.
-- **What happens to a finding on one of the 393 unmapped subcaps?** Does it reach a report with no offering linkage, silently? Is the unmapped set deliberate (subcaps Zennify has no offering for — a legitimate and useful answer) or an incomplete map? The `rationale` field suggests deliberate curation; verify by sampling.
-- R33's **LINKAGE** move requires: named strategic objective → where value is or is not converting → *the Zennify implication*. The composer rejects "linkages to unknown objectives". Does it also reject a linkage to an unknown *offering*, or is the Zennify implication free text that need not resolve to `offering_map.json` at all? **If free text, offering linkage is asserted rather than referential** — the finding the owner is asking for.
-- Does the DMA app surface offering linkage anywhere, or does it stop at the report? Cross-check against the platform recommendation surfaces.
-
----
-
-### 4.5 Peer synthesis: category grain for reports, platform grain for the app
-
-**The owner's rule:** peer synthesis and benchmarking happen **strictly at
-category level for the reports**, and **at the specific platform level for the
-recommendations in the web app**. Audit against that rule, and report every
-place the system does peer comparison at a *different* grain.
-
-Peer fields in the app's page contracts today:
-
-| Surface | Peer content | Grain |
-|---|---|---|
-| `heatmap.workbook_scores.pillars` | `peer_median` + mandatory `source_cell` | **pillar** |
-| `heatmap.workbook_scores.categories` | `peer_median` + mandatory `source_cell` | **category** |
-| `overview.scores.pillars[]` | `peer_median`, `delta`, `peer_n`, `peer_basis`, `proxy_disclosure` | **pillar** |
-| `overview.scores.posture` | LEADING/COMPETING/LAGGING/MIXED "justified against the peer set" | entity |
-| `heatmap.focus_areas` | `peer_score` | focus area |
-| `platform.platform_story` | `peer_score` | **platform** |
-| `techstack.techstack` | `peer_deployments`, `peer_coverage` | **platform / vendor** |
-| `platform.starters` | `peer_reference` | platform |
-
-Two things fall out immediately, and both need a verdict rather than an
-assumption:
-
-- **The app benchmarks at pillar grain in two places** (`overview.scores.pillars`, `heatmap.workbook_scores.pillars`). If the rule is category-for-reports and platform-for-app, pillar-grain peer medians on the app are outside both. Establish whether the rule is being violated, or whether the rule is about *reports* only and the app's pillar row is intentional. **Do not resolve this silently — it is an owner decision if the contract and the rule genuinely disagree.**
-- **`heatmap.workbook_scores` peer medians are STATED, not computed** — read from the workbook with a mandatory `source_cell`, "never recomputed by averaging subcapabilities". So the *reports'* category-grain peer figures and the *app's* category-grain peer figures should be the same numbers from the same cells. Verify they are, at 0.05 tolerance.
-
-Then:
-
-- **The peer fallback ladder** on `overview.scores.pillars` is elaborate: (a) recompute at lower N, floor N=3 (N=5 → sorted[2]; N=4 → mean(sorted[1..2]); N=3 → sorted[1]), emitting `peer_n` so the reader sees the basis shrank; (b) adjacency inference, labelled INFERENCE with one clause of reasoning and a widened band; (c) proxy ceiling. Verify each rung is implemented, that `peer_n` is actually emitted when the basis shrinks, and that an INFERENCE rung is labelled as such on the rendered surface — **a peer median silently computed from three peers reads identically to one computed from ten.**
-- **Peer set immutability.** R14: 3–5 peers locked in Phase A, IMMUTABLE, saved to `peer_set.json`, carried into the handoff; `dma-assessment` imports `locked_peer_set[]` and "SCORES them; it does NOT re-select them". Verify the lock holds across the handoff, and that no downstream stage quietly re-selects.
-- **Platform-grain peer claims are gated by AG-04**: where `peer_coverage` is stated, a per-peer breakdown must exist with one row per peer *including peers that could not be established* (`deployed: null`); every deployed row carries `source_url` and `as_of`; and the share must agree with its own breakdown to within one peer. The gate exists because "a verdict beside a NAMED institution was derived from a hash". Test it fires. This is the strongest peer control in the system — confirm it covers every surface that names a peer, not just `techstack`.
-- **Category-level peer synthesis in the reports**: does `dma-assessment`'s Peer Analysis output actually work at category grain, and does the category challenge dimension `single_source_concentration` (>40% one domain) apply to peer evidence too?
-
----
-
-### 4.6 Challenging a platform recommendation
-
-**The owner's questions, in order:** is the solution already there? has the
-agent looked for contradicting evidence? is there contradictory evidence that
-would materially change the recommendation? what parameters and what questions?
-
-**"Is it already there?" — this part is built.** `packages/shared/platform_fit.py`
-models incumbency arithmetically:
-
-- `Cell.incumbent_covers` → `INCUMBENT_COVERAGE_DISCOUNT = 0.5`. A gapped cell an installed third-party incumbent already covers is **halved, not zeroed** — "the capability can still be improved or integrated, but it is not net-new ground."
-- `Cell.family_absent` → confirmed-ABSENT in the register → **greenfield ground**, weighted `W_ABSENT`
-- Fed from the promoted techstack register by `linked_subcap_ids`: CONFIRMED/INFERRED holds a cell, ABSENT is greenfield, **CLAIMED binds nothing**
-- `STATE_TOO_NARROW` / `STATE_OUT_OF_VERTICAL` produce an honest null rather than a 0.0, and a discard list
-
-Verify each: force a candidate whose cells are all incumbent-covered and confirm
-the fit falls; force an all-ABSENT family and confirm greenfield lifts it; check
-CLAIMED really binds nothing.
-
-**"Has it looked for contradicting evidence?" — this part appears absent.**
-A search of `packages/shared/platform_fit.py` and `apps/mcp/dma_mcp/fit.py` for
-`contradict` / `refute` / `counter-evidence` / `disconfirm` returns **nothing**.
-The engine is a scoring function; it has no disconfirmation pass. **Verify, then
-follow the consequence:**
-
-- Does any *agent* run a disconfirmation pass on a platform card? Read `plugins/dma-insights/agents/production/platform/platform-fit-producer.md` — it asks whether the incumbent is named from the register and whether a discard is reasoned from vertical relevance. Is that a contradiction check, or a completeness check? They are different, and only the first answers the owner's question.
-- The generic `finding-challenger` (steelman → falsify) exists. Is it invoked on `platform.platform_story` and `platform.recommendations`, and does its falsifier reach *the recommendation* or only the prose describing it?
-- **The specific contradiction that matters most:** the client already runs something that solves this, and the register does not know. CLAIMED binds nothing and an un-scanned estate reads as ABSENT — so a **missing** register row and a **confirmed-absent** one both produce greenfield. Establish whether the engine can distinguish "we know it is not there" from "we never looked". If it cannot, every unscanned client looks like greenfield, and that is a systematic over-recommendation.
-
-**Parameters actually used** (state them, then check each is evidenced):
-
-```
-fit = 100 × (0.528·opportunity + 0.208·interconnect + 0.064·greenfield
-             + 0.20·stated_alignment)
-           × readiness_multiplier (green 1.00 / amber 0.85 / red 0.62)
-           capped by vertical_relevance, ceiling 99.0
-```
-
-- **Readiness multiplies, never adds** — a red-prerequisite platform cannot reach the hot band. Motive: 95 of 470 cards previously scored hot with every prerequisite failing. Verify the multiplier, and verify an *unmapped* readiness phrase reads as RED while an *absent* one reads as amber.
-- **Alignment quotes the client's own stated objective or is omitted** — omission renormalises to the three-term blend and reports `impact_fallback`; sending 0 is a different claim. Check the incentive was not just asserted: does stating an above-blend alignment help, and is a fabricated `alignment_quote` catchable?
-- **`depends_on` repairs rank** so a workload never outranks its foundation.
-- **CG-30** recomputes every card from its own fields at submit — score off by >0.05, rank out of order, or a null the engine did not itself declare unrankable, all refused. **CG-31** pins the overview tiles to the engine's four factor names and the card's composite/rank at 0.05.
-
-**The questions that should be asked and are not.** Draft the disconfirmation
-set the system lacks, then check each against what exists: *Does the client
-already run a product that covers these cells — and did we look, or merely not
-find? Is the readiness verdict evidenced or inferred? Does any evidence
-contradict the gap this recommendation rests on? Would the recommendation change
-if the single largest contributing cell were wrong? What would have to be true
-for this to be the wrong platform?* Report which have a mechanical answer today,
-which are asked in prose, and which nobody asks.
-
----
-
-### 4.7 Research and scoring workbook: one template, aligned with the app
-
-**The contract (supplied v4.2, `references/specs/workbook_spec_v3.md`).**
-File `{run}/02_workbook/DMA_Scoring_Workbook_{INST}.xlsx`, written by
-`scripts/deliver/populate_workbook.py`, validated by
-`scripts/deliver/validate_workbook.py` (**exit 1 blocks Phase D**).
-
-Sheets: `P1_Subcap_Scoring` … `P4_Subcap_Scoring` (rows = engagement_set ∩
-pillar, taxonomy order), `Evidence_Detail`, `Negative_Findings`,
-`Subcap_Synthesis`, `Entity_Timeline`, `Coverage`, `Run_Metadata`.
-
-Eleven columns, ownership split:
-
-| Col | Header | Owner |
-|---|---|---|
-| A · B · C | `SubCap_ID` · `SubCap_Name` · `Category` | research |
-| **D · E** | `Score` · `Confidence` | **assessment** (research leaves EMPTY) |
-| F · G | `Evidence_IDs` · `Source_URLs` | research |
-| **H · I · J** | `Evidence_Ceiling` · `Caps_Applied` · `Rationale` | **assessment** |
-| K | `Proxy_Searched` | research |
-
-`dma-assessment` v5.5 bans more than 11 columns.
-
-**Alignment with the app — the scoring sheet lines up.** Verified in
-`apps/worker/dma_worker/workbook_parser.py`:
-
-- `_is_pillar_tab` matches `^P\d+($|[_ ])` and `P1_Subcap_Scoring` survives the `_NOT_SCORING` exclusion list
-- `P{n}_Subcap_Scoring` is explicitly the **authoritative** tab over `P{n}_Scoring_Detail` — settled by measurement, because 23 of 154 corpus workbooks are merged files carrying both and the parser was reading every cell twice (1,420 rows for a 710-cell assessment)
-- `_SCORE_KEYS` begins with `"score"`, matching column D
-- `SubCap_ID` is among the anchors the parser tries
-
-So do **not** report a scoring-sheet mismatch without re-measuring — the obvious
-suspicion is wrong.
-
-**Where alignment fails is the other six sheets.** Grepping the live app
-(`apps/worker/dma_worker/`, `apps/mcp/dma_mcp/`) for each sheet name:
-
-| Sheet | App references |
-|---|---:|
-| `Evidence_Detail` | 4 |
-| `Negative_Findings` | **0** |
-| `Subcap_Synthesis` | **0** |
-| `Entity_Timeline` | **0** |
-| `Coverage` | **0** |
-| `Run_Metadata` | **0** |
-
-`Subcap_Synthesis` is where R24's synthesis records land — dominant claim,
-five-facet coverage, triangulation, contradiction disposition, ceiling
-reasoning, timeline. `Negative_Findings` holds the ladder-complete absences.
-`Entity_Timeline` holds the time model.
-
-**Verify this before believing it**, then answer the question it raises: the
-reasoning the v4.2 skill works hardest to produce may reach the app by a
-different route — through the connector payloads the surface producers author,
-rather than through the workbook. Establish **which route, if any**, carries
-synthesis, negative findings and the timeline into the app. If neither does,
-then the deepest analytical work in the pipeline stops at a spreadsheet nobody
-downstream opens — and the owner's plan to publish the workbook to the app is
-the fix, not a nice-to-have.
-
-Also check:
-
-- **One template, or several?** The installed v2.3 skill writes a different workbook (columns A–I, K, L, M, U, V; `Evidence_Detail` richness in column U). The corpus already holds multiple shipped variants — hence the parser's preference-ordered `_SCORE_KEYS` and its variant handling. Establish how many distinct workbook shapes are live, and whether v3 is genuinely the single standard or the newest of several.
-- **Does `validate_workbook.py` block, or warn?** It claims exit 1 blocks Phase D. Force a bad workbook and confirm.
-- **Grey-cell discipline.** Research must leave D, E, H, I, J empty. What happens if research writes a score there — does anything catch it, or does a research ceiling reach the app as an assessment score? This is invariant 1 of the research skill (NO SCORING) crossing a file boundary, and a spreadsheet has no gate of its own.
-- **Row set.** Rows are `engagement_set ∩ pillar`. A FOCUSED run (R34) narrows the set. Does the app distinguish "not in scope for this engagement" from "in scope and unscored"? If not, a focused run renders as a thin assessment.
-
----
-
-## 5. Cross-cutting audits
-
-### 5.1 Autonomy readiness (do this as a standalone pass)
+### 4.1 Autonomy readiness (do this as a standalone pass)
 
 Walk the whole pipeline once more asking only: **what breaks with no human in
 the loop?**
@@ -895,7 +548,7 @@ the loop?**
 - **Observability.** When an unattended run produces a wrong assessment, how would anyone find out? Enumerate every alerting path and rate each: real alert, log line nobody reads, or nothing.
 - `scripts/synthesis_watchdog.py`, `backlog_sweep.py`, `goal_status.py`, `ingest_readiness.py` — what do they watch, and does anything consume their output?
 
-### 5.2 The twelve invariants
+### 4.2 The twelve invariants
 
 From `CLAUDE.md`. For **each**: name the enforcing mechanism, the test proving
 it, and whether that test can fail. An invariant with no mechanism is
@@ -907,7 +560,7 @@ ABSENT–UNNOTICED however true it currently happens to be. Give extra weight to
 - **(7)** No colour in any payload; score→band→hex in exactly **one** frontend module. Confirm `apps/web/lib/bands.js` is the only one and `#62D7B8` (not `#B0EDD3`) is the M2 value that renders.
 - **(10)** The server allocates identifiers — agent mints only `ic_id, f_id, fa_id, ts_id, wn_id` + authored `rec_id`. Prove a client-supplied id elsewhere is **rejected**, not ignored.
 
-### 5.3 Gate coverage
+### 4.3 Gate coverage
 
 Roughly **AG-01…AG-12, CG-01…CG-50, ET-01…ET-09**, plus SG. Sample across all
 four families:
@@ -918,14 +571,14 @@ four families:
 - Which gates have **never** fired in production? Cross-reference the rejection ledger. Never-fired means redundant or broken; distinguish.
 - **Map the gates onto the thirteen §1.1 defects.** Which of those defects does the current gate set catch, and which would ship silently today?
 
-### 5.4 Test-suite honesty
+### 4.4 Test-suite honesty
 
 - Full suites at HEAD: **3,807 Python passed, 12 skipped** (ceiling 12), **240 web passed**, **35 schema passed**. Reproduce. A different number is a finding.
 - Read all 12 skips. Is any hiding an untested behaviour rather than an absent environment? Confirm none is "no migrated local database" — that skip means the DB-backed suites did not run at all.
 - Sample ~10 tests across services: **could this fail?** Mutate the code and confirm red. `scripts/mutation_check.py` may help.
 - Gate E has a negative control in CI. Which other gates need one and lack it?
 
-### 5.5 Documentation-to-reality drift
+### 4.5 Documentation-to-reality drift
 
 - The skill descriptions for `dma-research` and `dma-assessment` still say **"17 categories"** and **"~836 subcapabilities"** against a settled **16 / 851**. Establish blast radius: description text only, or the maths too?
 - `plugins/dma-insights/docs/MCP-TOOLS.md` is generated from `apps/mcp/server.py` by `scripts/gen_mcp_tools_md.py` and **nothing regenerates it** (known gap, commit `df1688f`). In sync now? What other generated artefacts lack a freshness check? (`docs/text/` has a CI reproducibility check; what does not?)
@@ -933,7 +586,7 @@ four families:
 
 ---
 
-## 6. Instruments
+## 5. Instruments
 
 ```bash
 # Environment (no docker daemon; install postgres directly)
@@ -966,7 +619,7 @@ python3 plugins/dma-insights/skills/dma-research/scripts/extract_diagnostic_ques
 python3 plugins/dma-insights/skills/dma-research/scripts/generate_query_plan.py --help
 python3 plugins/dma-insights/skills/dma-research/scripts/validate_coverage.py --help
 
-# DQ / MECE work — SUPPLIED v4.2 archive (the real system; Stages 5-6 target this)
+# DQ / MECE work — SUPPLIED v4.2 archive (the real system; §§5-6 target this)
 unzip -q dma-research.skill -d /tmp/dmar && cd /tmp/dmar/dma-research
 python3 scripts/build/validate_kg.py            # incl. G10 platform-agnostic, build-time only
 python3 scripts/build/dq_generator.py --help    # generates the 5 MECE facets
@@ -989,42 +642,6 @@ for f in glob.glob('kg/packs/P*/P*C*.json'):
         if len(got)<5: miss.append((sid,sorted(got)))
 print('facet-count histogram:',dict(c)); print('incomplete:',len(miss), miss[:5])
 EOF
-
-# The seven checks (§4)
-cat plugins/dma-insights/hooks/hooks.json                    # 4.1 what fires when
-cat plugins/dma-insights/scripts/hooks/session_brief.py      # 4.1 the resident brief; note the source filter
-for f in plugins/dma-insights/skills/*/SKILL.md; do printf '%6s w %5s l  %s\n' \
-  "$(wc -w<$f)" "$(wc -l<$f)" "$f"; done                     # 4.1 size against the ~500-line guidance
-wc -c plugins/dma-insights/skills/dma-surface-production/05-lifecycle/*.md   # 4.1 routing.md 17K, 1-gates.md 42K
-python3 plugins/dma-insights/scripts/audit_skills.py         # 4.1 broken refs — note: NO size ceiling
-# 4.4 offering linkage: ids, display-name collisions, unmapped subcaps
-python3 - <<'EOF'
-import json,collections
-d=json.load(open('/tmp/dmar/dma-research/kg/catalog/offering_map.json'))['by_subcap']
-ids=collections.defaultdict(set)
-for v in d.values():
-    for o in v: ids[o['offering_id']].add(o['offering'])
-print('offering_ids:',len(ids),'| mapped subcaps:',len(d),'| unmapped of 851:',851-len(d))
-print('ids with >1 display name:',{i:sorted(n) for i,n in ids.items() if len(n)>1})
-EOF
-# 4.5 every peer field and its grain, straight from the contract
-python3 - <<'EOF'
-import json,re
-d=json.load(open('packages/shared/contracts_data.json'))
-for p in d:
-    for s,b in (d[p] or {}).items():
-        h=sorted(set(re.findall(r'peer[a-zA-Z_]*',json.dumps(b))))
-        if h: print(f'  {p}.{s}: {h}')
-EOF
-grep -nE 'incumbent_covers|INCUMBENT_COVERAGE_DISCOUNT|family_absent|STATE_TOO_NARROW' \
-  packages/shared/platform_fit.py                            # 4.6 "already there" is modelled
-grep -rniE 'contradict|refut|counter.evidence|disconfirm' \
-  packages/shared/platform_fit.py apps/mcp/dma_mcp/fit.py    # 4.6 expect NOTHING — verify
-grep -n -A8 '_NOT_SCORING *=\|def _is_pillar_tab\|_SCORE_KEYS *=' \
-  apps/worker/dma_worker/workbook_parser.py                  # 4.7 what the app really accepts
-for s in Evidence_Detail Negative_Findings Subcap_Synthesis Entity_Timeline Coverage Run_Metadata; do
-  printf '  %-20s app-hits: %s\n' "$s" \
-    "$(grep -rho "$s" apps/worker/dma_worker apps/mcp/dma_mcp 2>/dev/null | wc -l)"; done   # 4.7
 
 # Pipeline + plugin state
 python3 scripts/ingestion_status.py
@@ -1054,7 +671,7 @@ and they are recorded differently.
 
 ---
 
-## 7. Recording findings
+## 6. Recording findings
 
 - `search_findings(query, mode="auto")` — **first, always.**
 - `record_finding({...})` — required: `title`, `observed`, `measurement` (≥30 chars, with denominator), `component`, `defect_class` (from `list_defect_classes` — a foreign key), `severity`, `raised_by_kind`, `raised_by`.
@@ -1072,7 +689,7 @@ Severity, calibrated for **autonomous operation**:
 
 ---
 
-## 8. Deliverable
+## 7. Deliverable
 
 1. **Autonomy verdict** — one paragraph: can this repo run an unattended DMA end to end today? If not, the shortest list of things that must be true.
 2. **Stage table** — the nine stages, one of the five verdicts each, one sentence of justification.
@@ -1081,15 +698,7 @@ Severity, calibrated for **autonomous operation**:
 5. **Skill-version reconciliation** — what shipping v4.2 into the plugin costs (manifest, `scripts/requirements.txt`, `kg/` artefacts, packaging-validator limits), and what stays broken until it lands. State plainly whether the reasoning rigour the owner wants is *missing* or merely *unshipped* — the answers imply very different work.
 6. **MECE DQ report** — five-facet completeness across all 851 briefs (histogram, with denominators), anti-clone (R22) collision count, the generic-render and post-G10 vendor-name findings, and the DQ→query drift rate.
 7. **Reasoning-trap report** — the §6.1 table completed with enforcement status; a verdict on the §6.2 challenge layer's independence, on whether `provisional: true` survives to the app, and on the terminal state of an `open_conflict` with no human to ask; plus the §6.3 walk-through naming every gate the wrong-but-perfect conclusion passes.
-8. **The seven owner-specified checks (§4)** — one verdict each, in order, each with its measurement:
-   1. entry document and routing at the three moments — including whether the SessionStart hook fires at all in a headless run, and whether the brief survives compaction
-   2. drift, memory, resumability, compaction — led by the kill-and-resume test and by where `$RUN` actually lives
-   3. token optimisation across the KG — the claimed percentages reproduced or refuted, with a token apportionment for one category
-   4. report templates and offering linkage — the unpinned template dependency, the `OFF-PMI` two-name split, the 393 unmapped subcaps, and whether linkage is referential or free text
-   5. peer grain — every surface benchmarking at a grain other than category-for-reports / platform-for-app, with a verdict on the two pillar-grain surfaces
-   6. platform-recommendation challenge — incumbency verified working, disconfirmation verified absent or present, and the draft question set with what answers each
-   7. workbook template and app alignment — the scoring sheet re-measured, the six other sheets' fate established, and the grey-cell discipline tested
-9. **Publication gap** — what building the four new deliverables costs, and whether it strains invariant 2 enough to need an owner decision.
+8. **Publication gap** — what building the four new deliverables costs, and whether it strains invariant 2 enough to need an owner decision.
 9. **ABSENT–UNNOTICED register.**
 10. **Findings**, worst first, each with measurement and `MEM-####`.
 11. **Refuted leads** — every `[LEAD]` you disproved, and how.
@@ -1100,7 +709,7 @@ A finding without a measurement is an opinion, and this repo will reject it.
 
 ---
 
-## 9. Stop conditions
+## 8. Stop conditions
 
 Stop and report immediately, without finishing the sweep:
 
@@ -1111,7 +720,7 @@ Stop and report immediately, without finishing the sweep:
 
 ---
 
-## 10. Scope boundaries
+## 9. Scope boundaries
 
 - **Do not extend or import from `apps/dma-insights/`** (legacy snapshot). Auditing it as a source of divergence is in scope; treating it as the system is not.
 - **Do not resolve the open decisions.** Retention for superseded runs (default: retain), `CLAIMED` vs `INFERRED` visual treatment, and partitioning (**not yet** — do not pre-build) are deliberately open. Finding them open is not a finding.
