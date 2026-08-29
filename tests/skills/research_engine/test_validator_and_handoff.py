@@ -12,15 +12,16 @@ import pytest
 from engine import contract as C
 from engine import handoff, ledger as L, patch_validator, strip_working_area
 from engine import validator
+from engine.workbook import WorkbookError
 
-from fixtures import CAT, bank_evidence, good_synthesis, new_run
+from fixtures import CAT, bank_evidence, good_synthesis, new_run, synthesise
 
 
 def _good_run(tmp_path, n=8):
     run = new_run(tmp_path, n=n)
     wb = run.open()
     for cell in wb.selected_subcaps():
-        L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
+        synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
     return run, wb
 
 
@@ -285,3 +286,47 @@ def test_a_migration_that_would_drop_a_column_refuses(tmp_path):
     book.save(legacy)
     with pytest.raises(SystemExit, match="no home in the contract"):
         patch_validator.apply(legacy)
+
+
+# ── AUD-0042 / AUD-0043 · the peer store, and the lock on it ────────────
+
+def test_the_contract_carries_a_peer_store_at_all():
+    """AUD-0042: the category-grain peer store had NO FEEDER — the pinned
+    workbook removed Peer_Benchmarks — so peer_scores is empty for every new
+    run, which also empties ET-09's allow-list."""
+    assert "Peer_Benchmarks" in C.SHEETS
+    for col in ("Category_ID", "Peer_Median", "Peer_N", "Peer_Basis",
+                "Peer_Names", "Source_Cell"):
+        assert col in C.PEER_BENCHMARK_COLUMNS
+
+
+def test_a_peer_figure_must_declare_the_rung_it_came_from():
+    assert C.PEER_BASIS == ("table", "recomputed", "inferred",
+                            "cannot_estimate")
+
+
+def test_the_peer_set_locks_once_and_refuses_a_different_cohort(tmp_path):
+    """AUD-0043: Handoff_Lock is the immutability mechanism both templates
+    depend on and it existed in neither tree."""
+    run, wb = _good_run(tmp_path, n=2)
+    first = wb.lock_peer_set(["Alpha CU", "Beta CU"], basis="table")
+    assert first["peer_n"] == 2 and first["already_locked"] is False
+    again = wb.lock_peer_set(["Beta CU", "Alpha CU"], basis="table")
+    assert again["already_locked"] is True
+    with pytest.raises(WorkbookError, match="already locked"):
+        wb.lock_peer_set(["Alpha CU", "Gamma CU"], basis="table")
+
+
+def test_a_peer_basis_outside_the_ladder_is_refused(tmp_path):
+    run, wb = _good_run(tmp_path, n=2)
+    with pytest.raises(WorkbookError, match="peer basis"):
+        wb.lock_peer_set(["Alpha CU"], basis="vibes")
+
+
+def test_the_locked_set_reaches_the_handoff(tmp_path):
+    run, wb = _good_run(tmp_path, n=8)
+    wb.lock_peer_set(["Alpha CU", "Beta CU"], basis="recomputed")
+    doc = handoff.build(wb, qa_dir=run.qa_dir, strict=False)
+    lock = doc["_contract"]["handoff_lock"]
+    assert lock["locked_peer_set"] == "Alpha CU|Beta CU"
+    assert lock["peer_basis"] == "recomputed"

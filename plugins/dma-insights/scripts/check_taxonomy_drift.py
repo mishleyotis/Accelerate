@@ -132,6 +132,8 @@ EXEMPT = {
      "Two scales"): "the paragraph that teaches the score/band distinction",
     ("skills/dma-research/references/diagnostic_questions.md",
      "which is the claim this"): "quotes the stale claim in order to retract it",
+    ("skills/dma-research/scripts/merge_evidence.py",
+     "baked into the signature"): "quotes the removed default to explain it",
 }
 
 

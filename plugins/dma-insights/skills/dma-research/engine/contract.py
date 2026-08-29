@@ -336,7 +336,61 @@ GATE_LOG_COLUMNS = (
     "Timestamp", "Gate", "Scope", "Verdict", "Detail", "Blocking",
 )
 
+#: WHO did each step. AUD-0018 / AUD-0024: the repository solved reviewer
+#: independence BY CONSTRUCTION in one agent — `learning-grader` carries no
+#: Write/Edit and no connector write tool, so it cannot touch the change it
+#: is scoring — and then explicitly inverted it in the research challenge,
+#: where the same actor writes a synthesis and its own verdict on that
+#: synthesis. A verdict you wrote on your own work is a feeling.
+#:
+#: Independence is only checkable if authorship is RECORDED, so every write
+#: names its actor here and the gate compares them.
+PROVENANCE_COLUMNS = ("SubCap_ID", "Step", "Actor", "At", "Detail")
+
+#: The steps whose authorship is load-bearing.
+PROVENANCE_STEPS = ("synthesis", "challenge", "repair", "enrichment")
+
+#: The challenge, in full — the verdict on the scoring row is a
+#: denormalised copy of the latest row here, and the gate reconciles them.
+CHALLENGE_LOG_COLUMNS = (
+    "SubCap_ID", "Verdict", "Actor", "Dimensions", "Rationale",
+    "Ceiling_Band_Delta", "At",
+)
+
+#: A challenge verdict says one of these. AUD-0102: the schema required a
+#: `dimensions` object with no required keys, so a ZERO-dimension verdict
+#: validated and the whole challenge could be a token.
+CHALLENGE_VERDICTS = ("PASS", "FAIL", "NOT_RUN")
+
+#: The dimensions a challenge must actually address. `synthesis_quality` is
+#: the one the shipped card silently omitted, and it carries ten
+#: sub-conditions — so it is required by name, not by count.
+CHALLENGE_DIMENSIONS = (
+    "evidence_sufficiency", "claim_label_fit", "facet_coverage",
+    "contradiction_handling", "ceiling_reasoning", "recency",
+    "synthesis_quality",
+)
+
 HANDOFF_LOCK_COLUMNS = ("Key", "Value")
+
+#: The category-grain peer store, which AUD-0042 found had no feeder at all:
+#: the pinned workbook removed `Peer_Benchmarks` and the app's missing-tab
+#: path recorded nothing, so `peer_scores` is empty for every new run — which
+#: also empties ET-09's allow-list, making a legitimate peer who is also a
+#: corpus client read as foreign-entity contamination.
+#:
+#: The column names are the app's own (`workbook_parser._STAT_ALIASES` and
+#: the named-peer columns after them), so a workbook this engine writes is
+#: readable by the parser that already exists rather than needing a new one.
+PEER_BENCHMARK_COLUMNS = (
+    "Category_ID", "Category_Name", "Entity_Score", "Peer_Median",
+    "Peer_P25", "Peer_P75", "Peer_N", "Peer_Basis", "Source_Cell",
+    "Peer_Names", "Peer_Scores", "As_Of",
+)
+
+#: What `Peer_Basis` may say. The app serves a five-rung ladder and discloses
+#: which rung a figure came from; a figure with no basis cannot be disclosed.
+PEER_BASIS = ("table", "recomputed", "inferred", "cannot_estimate")
 
 DQ_BANK_COLUMNS = ("SubCap_ID", "Order", "Facet", "Probe_Tier", "Question")
 
@@ -386,7 +440,10 @@ SHEETS = {
     "Search_Log": SEARCH_LOG_COLUMNS,
     "Gate_Log": GATE_LOG_COLUMNS,
     "Report_Narrative": REPORT_NARRATIVE_COLUMNS,
+    "Provenance": PROVENANCE_COLUMNS,
+    "Challenge_Log": CHALLENGE_LOG_COLUMNS,
     "Handoff_Lock": HANDOFF_LOCK_COLUMNS,
+    "Peer_Benchmarks": PEER_BENCHMARK_COLUMNS,
     "Run_Metadata": RUN_METADATA_COLUMNS,
     "REF_Method": ("Key", "Value"),
 }

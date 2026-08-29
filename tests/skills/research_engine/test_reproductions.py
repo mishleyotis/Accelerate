@@ -13,7 +13,7 @@ from engine import floors_gate, ledger as L, orient, runstate
 from engine.ledger import LedgerRefusal
 from engine.workbook import RunWorkbook, WorkbookError
 
-from fixtures import CAT, bank_evidence, good_synthesis, new_run
+from fixtures import CAT, bank_evidence, good_synthesis, new_run, synthesise
 
 
 # ── AUD-0008 / AUD-0036 · `stats` raised NameError on 1 of 1 invocations ──
@@ -61,7 +61,7 @@ def test_an_interrupted_subcap_is_served_not_skipped(tmp_path):
     cells = wb.selected_subcaps()
     a, b, c = cells[0], cells[1], cells[2]
     eids = bank_evidence(wb, a)
-    L.append_synthesis(wb, a, good_synthesis(a, eids))
+    synthesise(wb, a, good_synthesis(a, eids))
     bank_evidence(wb, b)                      # banked, not synthesised
 
     out = orient.orient(wb, CAT, qa_dir=run.qa_dir)
@@ -77,7 +77,7 @@ def test_a_category_with_a_volleyed_subcap_is_never_reported_clean(tmp_path):
     run = new_run(tmp_path, n=3); wb = run.open()
     a, b, c = wb.selected_subcaps()
     for cell in (a, c):
-        L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
+        synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
     bank_evidence(wb, b)
     out = orient.orient(wb, CAT, qa_dir=run.qa_dir)
     assert out["clean"] is False
@@ -210,7 +210,7 @@ def test_the_gate_verdict_is_also_in_the_workbook(tmp_path):
 def test_a_category_below_the_item_floor_cannot_pass(tmp_path):
     run = new_run(tmp_path, n=2); wb = run.open()
     for cell in wb.selected_subcaps():
-        L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
+        synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
     v = floors_gate.run(wb, CAT, require_synthesis=True, qa_dir=run.qa_dir)
     assert v["category_floor_met"] is False
     assert "category_items_below_floor" in v["blocking"]
@@ -269,7 +269,7 @@ def test_every_step_lands_in_the_workbook_as_it_happens(tmp_path):
     L.append_search(wb, subcap=cell, facet="works", query='"Acme" x',
                     tool="web_search", hits=3, kept=1)
     eids = bank_evidence(wb, cell)
-    L.append_synthesis(wb, cell, good_synthesis(cell, eids))
+    synthesise(wb, cell, good_synthesis(cell, eids))
     # Reopened from disk by a DIFFERENT reader — the container-death test.
     fresh = RunWorkbook(run.workbook_path)
     assert len(fresh.rows("Search_Log")) == 1
@@ -287,7 +287,7 @@ def test_a_good_run_reaches_a_passing_gate(tmp_path):
                         query=f'"Acme Credit Union" enforcement OR lawsuit OR '
                               f'criticism OR abandoned {i}',
                         tool="web_search", hits=0, kept=0, outcome="no hits")
-        L.append_synthesis(wb, cell, good_synthesis(cell, eids))
+        synthesise(wb, cell, good_synthesis(cell, eids))
     wb.append("Entity_Timeline", {
         "Event_Date": "2024-09-01", "Event": "Alkami digital banking go-live",
         "Signal": "EXPANSION", "SubCap_IDs": ", ".join(wb.selected_subcaps()),
@@ -296,3 +296,112 @@ def test_a_good_run_reaches_a_passing_gate(tmp_path):
     assert v["gate"] == "PASS", v["blocking"]
     out = orient.orient(wb, CAT, qa_dir=run.qa_dir)
     assert out["clean"] is True
+
+
+# ── AUD-0018 / AUD-0024 · the challenge has to be independent ────────────
+
+def test_the_synthesis_author_cannot_challenge_their_own_work(tmp_path):
+    """The repository already solves this BY CONSTRUCTION for the learning
+    loop — learning-grader carries no Write/Edit and no connector write tool
+    — and then inverted it for the research challenge. Construction is not
+    available here, so the guarantee is made checkable: authorship recorded,
+    self-challenge refused."""
+    run = new_run(tmp_path, n=2); wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)),
+                       actor="surface-producer")
+    from fixtures import challenge
+    with pytest.raises(LedgerRefusal, match="cannot also be its"):
+        challenge(wb, cell, actor="surface-producer")
+    assert challenge(wb, cell, actor="finding-challenger")["verdict"] == "PASS"
+
+
+def test_a_challenge_on_an_unattributed_synthesis_is_refused(tmp_path):
+    run = new_run(tmp_path, n=2); wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
+    from fixtures import challenge
+    with pytest.raises(LedgerRefusal, match="no recorded synthesis author"):
+        challenge(wb, cell)
+
+
+def test_a_verdict_on_the_row_with_no_challenge_behind_it_fails_the_gate(tmp_path):
+    """AUD-0025: the row's Challenge_Verdict was the only thing anyone
+    looked at, so writing PASS into it WAS the challenge."""
+    run = new_run(tmp_path, n=2); wb = run.open()
+    for cell in wb.selected_subcaps():
+        L.append_synthesis(wb, cell,
+                           good_synthesis(cell, bank_evidence(wb, cell)),
+                           actor="surface-producer")
+        wb.set_scoring(cell, {"Challenge_Verdict": "PASS"})   # by hand
+    v = floors_gate.run(wb, CAT, require_synthesis=True, qa_dir=run.qa_dir)
+    assert "challenge_missing" in v["blocking"]
+
+
+def test_a_self_challenge_that_got_written_anyway_fails_the_gate(tmp_path):
+    """Belt and braces: the write path refuses, and the gate catches a row
+    that reached the workbook by some other route."""
+    run = new_run(tmp_path, n=2); wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)),
+                       actor="surface-producer")
+    wb.append("Challenge_Log", {
+        "SubCap_ID": cell, "Verdict": "PASS", "Actor": "surface-producer",
+        "Dimensions": {d: "PASS" for d in C.CHALLENGE_DIMENSIONS},
+        "Rationale": "x" * 60, "At": "2026-08-29T00:00:00Z"})
+    wb.set_scoring(cell, {"Challenge_Verdict": "PASS"})
+    v = floors_gate.run(wb, CAT, qa_dir=run.qa_dir)
+    assert "challenge_not_independent" in v["blocking"]
+    assert v["challenge_not_independent"][0]["subcap"] == cell
+
+
+# ── AUD-0102 · a verdict that does no work does not validate ────────────
+
+def test_a_zero_dimension_verdict_is_refused(tmp_path):
+    run = new_run(tmp_path, n=2); wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)),
+                       actor="surface-producer")
+    with pytest.raises(LedgerRefusal, match="omits"):
+        L.record_challenge(wb, cell, verdict="PASS", actor="challenger",
+                           dimensions={}, rationale="x" * 60)
+
+
+def test_the_dimension_the_shipped_card_omitted_is_required_by_name(tmp_path):
+    """The card's own output_example showed six dimensions, silently
+    dropping synthesis_quality — the one carrying ten sub-conditions."""
+    run = new_run(tmp_path, n=2); wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)),
+                       actor="surface-producer")
+    six = {d: "PASS" for d in C.CHALLENGE_DIMENSIONS if d != "synthesis_quality"}
+    with pytest.raises(LedgerRefusal, match="synthesis_quality"):
+        L.record_challenge(wb, cell, verdict="PASS", actor="challenger",
+                           dimensions=six, rationale="x" * 60)
+
+
+def test_any_dimension_failing_makes_the_verdict_fail(tmp_path):
+    run = new_run(tmp_path, n=2); wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)),
+                       actor="surface-producer")
+    dims = {d: "PASS" for d in C.CHALLENGE_DIMENSIONS}
+    dims["synthesis_quality"] = "FAIL"
+    with pytest.raises(LedgerRefusal, match="Any FAIL means FAIL"):
+        L.record_challenge(wb, cell, verdict="PASS", actor="challenger",
+                           dimensions=dims, rationale="x" * 60)
+    out = L.record_challenge(wb, cell, verdict="FAIL", actor="challenger",
+                             dimensions=dims, rationale="x" * 60)
+    assert out["failed_dimensions"] == ["synthesis_quality"]
+
+
+def test_a_rubber_stamp_rationale_is_refused(tmp_path):
+    run = new_run(tmp_path, n=2); wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)),
+                       actor="surface-producer")
+    with pytest.raises(LedgerRefusal, match="rubber stamp"):
+        L.record_challenge(
+            wb, cell, verdict="PASS", actor="challenger",
+            dimensions={d: "PASS" for d in C.CHALLENGE_DIMENSIONS},
+            rationale="looks fine")

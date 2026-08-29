@@ -29,6 +29,33 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
+def _catalogue_categories():
+    """The category ids in the pinned catalogue, or a refusal.
+
+    Read rather than listed: a hand-kept set is a second place for the
+    taxonomy to live, and AUD-0051 is what happens when the two disagree."""
+    import json
+    import re
+    from pathlib import Path as _P
+    here = _P(__file__).resolve()
+    for anc in here.parents:
+        cand = anc / "packages" / "shared" / "catalogue_v70_tier.json"
+        if cand.is_file():
+            tier = json.loads(cand.read_text())["tier"]
+            return sorted({m.group(0) for c in tier
+                           if (m := re.match(r"P\dC\d+", c))})
+        cand = anc / "skills" / "dma-research" / "engine" / "data" / \
+            "catalogue_v70_tier.json"
+        if cand.is_file():
+            tier = json.loads(cand.read_text())["tier"]
+            return sorted({m.group(0) for c in tier
+                           if (m := re.match(r"P\dC\d+", c))})
+    raise SystemExit(
+        "validate_contracts: the catalogue is not resolvable from "
+        f"{here}, so the category set cannot be counted. It is not "
+        "hardcoded on purpose — see AUD-0051.")
+
+
 class ContractValidator:
     """Validates governance output files against Layer 2 interface contracts."""
 
@@ -130,14 +157,14 @@ class ContractValidator:
             if conf_sum == 0:
                 self.note("C1", "VR3", "confidence_distribution sums to 0 — may be unpopulated")
 
-        # Check categories has all 17
-        cats = scores.get("categories", {})
-        expected_cats = {
-            "P1C1", "P1C2", "P1C3", "P1C4", "P1C5",
-            "P2C1", "P2C2", "P2C3", "P2C4",
-            "P3C1", "P3C2", "P3C3", "P3C4",
-            "P4C1", "P4C2", "P4C3", "P4C4",
-        }
+        # Every category the CATALOGUE holds — counted, not listed.
+        #
+        # AUD-0051: this was a hand-kept set of 17 including P1C5, the
+        # category v7.0 retired and every one of whose cells resolves
+        # NOT_COMPARABLE. A complete v7.0 run was reported as missing a
+        # category it correctly does not have, and the count fed coverage
+        # maths that then read over 100%.
+        expected_cats = set(_catalogue_categories())
         missing_cats = expected_cats - set(cats.keys())
         if missing_cats:
             self.warn("C1", "categories", f"Missing category scores: {sorted(missing_cats)}")

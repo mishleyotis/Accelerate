@@ -256,15 +256,20 @@ def _ingest_one(conn, token, folder, parts, remint=False):
         wb_path = os.path.join(td, "wb.xlsx")
         with open(wb_path, "wb") as fh:
             fh.write(drive.download(token, parts["workbook"].file_id))
+        # Declared BEFORE the report parse, which appends to it.
+        companion: list = []
         sections = []
         if "report" in parts:
             rp = os.path.join(td, "report.docx")
             with open(rp, "wb") as fh:
                 fh.write(drive.download(token, parts["report"].file_id))
-            sections = parse_report(rp)
+            # `companion` collects what the readers could not
+            # recognise; the report parser now files an unmapped
+            # Heading1 under its own name and says so, instead of
+            # under whichever numbered kind the count reached.
+            sections = parse_report(rp, companion)
 
         research = {}
-        companion: list = []
         evidence_index: list = []
         if "evidence_index" in parts:
             ei_path = os.path.join(td, "evidence_index.json")
@@ -362,6 +367,10 @@ def backfill_sections(conn, token, groups) -> int:
                 rp = os.path.join(td, "report.docx")
                 with open(rp, "wb") as fh:
                     fh.write(drive.download(token, parts["report"].file_id))
+                # No observation sink on the backfill path: it inserts
+                # sections against an EXISTING run and writes no
+                # parser_observations, so an unmapped-heading note would have
+                # nowhere to land. The kinding itself is the same.
                 sections = parse_report(rp)
             for sec in sections:
                 cur.execute(

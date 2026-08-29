@@ -44,6 +44,13 @@ from collections import defaultdict
 #: a queue that quietly drops work is indistinguishable from an empty one.
 SKIP_CLAIMED = "another session holds a live claim on this entity"
 SKIP_SUPERSEDED = "a newer run_seq exists for this entity"
+#: A DIFFERENT request for an entity already in the plan. Distinguished from
+#: SKIP_SUPERSEDED because they are not the same event: an obsolete re-ingest
+#: has nobody waiting on it, and a second request has a requester who is
+#: never told their ask was absorbed into someone else's (AUD-0072).
+SKIP_ABSORBED = ("a different request for the same entity is already in the "
+                 "plan — this one is DEFERRED, not obsolete; re-queue it "
+                 "once the entity's current run is promoted")
 SKIP_NO_DATE = "no assessment date; ordering it against the others would guess"
 
 
@@ -110,6 +117,25 @@ def select(pending: list, limit: int | None = None) -> dict:
     superseded = [r for r in pending
                   if _key(r) not in held and r is not best.get(_key(r))]
 
+    # AUD-0072: the dedupe grain is the ENTITY, and that is correct — the
+    # docstring above is the measured reason. What was missing is the
+    # distinction inside `superseded`. Two runs of the SAME request are a
+    # re-ingest and the older one is genuinely obsolete. Two runs of
+    # DIFFERENT requests are two people who each asked for an assessment, and
+    # collapsing them silently means the second requester is never told their
+    # request was absorbed into someone else's.
+    #
+    # The grain does not change — two producers on one entity's six pages
+    # both promote and the directory picks between them, which is the harm
+    # this function exists to prevent. The ABSORPTION is now named, so a
+    # human or a routine can see it and re-queue.
+    absorbed = [r for r in superseded
+                if r.get("request_id")
+                and (best.get(_key(r)) or {}).get("request_id")
+                and r["request_id"] != best[_key(r)]["request_id"]]
+    absorbed_ids = {id(r) for r in absorbed}
+    superseded = [r for r in superseded if id(r) not in absorbed_ids]
+
     ready = [r for k, r in best.items() if k not in held]
     # Newest assessment first: a six-week-old DMA is worth more to a client
     # conversation than a six-month-old one, and the queue is long enough that
@@ -132,6 +158,10 @@ def select(pending: list, limit: int | None = None) -> dict:
             "claimed": len(claimed),
             "held_entities": len(held),
             "superseded": len(superseded),
+            # A DIFFERENT request for an entity already in the plan. Not an
+            # obsolete re-ingest — a second asker, whose request is being
+            # deferred rather than served.
+            "absorbed_requests": len(absorbed),
             "ready": len(ready),
             "undated": len(undated),
             "selected": len(plan),
@@ -143,7 +173,13 @@ def select(pending: list, limit: int | None = None) -> dict:
             [{"run_id": r["run_id"], "display_id": r.get("display_id"),
               "why": SKIP_CLAIMED} for r in claimed]
             + [{"run_id": r["run_id"], "display_id": r.get("display_id"),
-                "why": SKIP_SUPERSEDED} for r in superseded]),
+                "why": SKIP_SUPERSEDED} for r in superseded]
+            + [{"run_id": r["run_id"], "display_id": r.get("display_id"),
+                "request_id": r.get("request_id"),
+                "absorbed_into": (best.get(_key(r)) or {}).get("run_id"),
+                "absorbed_into_request": (best.get(_key(r)) or {}
+                                          ).get("request_id"),
+                "why": SKIP_ABSORBED} for r in absorbed]),
     }
 
 

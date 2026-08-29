@@ -72,6 +72,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "closed_below_floor": [], "synthesis_missing": [], "boilerplate": [],
         "claim_unsupported": [], "contradicts_unprobed": [],
         "ladder_overstated": [], "evidence_smear": [], "challenge_missing": [],
+        "challenge_not_independent": [],
         "timeline_missing": [], "followups_outstanding": [],
     }
     items = 0
@@ -138,11 +139,25 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
 
         # AUD-0025 / AUD-0082: no gate anywhere required a challenge verdict
         # to exist, and a FAILED provisional challenge still reported HIGH
-        # confidence.
+        # confidence. AUD-0018 / AUD-0024: and the challenge had no
+        # structural independence — the same actor wrote the synthesis and
+        # its verdict.
         verdict = str(r.get("Challenge_Verdict") or "").strip().upper()
         if verdict not in ("PASS", "FAIL", "NOT_RUN") and \
                 not verdict.startswith("NOT_RUN"):
             findings["challenge_missing"].append(cell)
+        else:
+            logged = L.challenge_for(wb, cell)
+            if logged is None:
+                findings["challenge_missing"].append(cell)
+            else:
+                author = L.actor_for(wb, cell, "synthesis")
+                challenger = str(logged.get("Actor") or "")
+                if author and challenger == author:
+                    findings["challenge_not_independent"].append(
+                        {"subcap": cell, "actor": challenger})
+                if str(logged.get("Verdict") or "").upper() != verdict:
+                    findings["challenge_missing"].append(cell)
 
     findings["evidence_smear"] = Q.evidence_smear(rows)
 
@@ -159,6 +174,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     blocking = [k for k in (
         "unresolved_citations", "boilerplate", "claim_unsupported",
         "absence_undeclared", "evidence_smear", "challenge_missing",
+        "challenge_not_independent",
         "synthesis_missing", "dq_gaps",
     ) if findings[k]]
     if not category_floor_met:

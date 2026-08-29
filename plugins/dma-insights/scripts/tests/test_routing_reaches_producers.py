@@ -238,3 +238,30 @@ def test_secrets_md_states_the_drive_scope_the_key_mints():
     text = (PLUGIN / "docs" / "secrets.md").read_text()
     assert "auth/drive" in text
     assert "not `drive.readonly`" in text or "not `drive.readonly`" in text
+
+
+# ── AUD-0032 · the handoff seam reads the workbook, not the JSON ────────
+
+def test_dma_assessment_keys_its_handoff_on_the_workbook():
+    """The documented primary mode keyed on `research_handoff.json`'s
+    PRESENCE, and the workbook played no role in the handoff at all — so
+    the artefact the owner audits and the artefact the pipeline trusted
+    could diverge with no gate noticing."""
+    text = (PLUGIN / "skills" / "dma-assessment" / "SKILL.md").read_text()
+    phase0 = text[text.index("## Phase 0"):text.index("## Phase 1")] \
+        if "## Phase 1" in text else text[text.index("## Phase 0"):]
+    assert "THE WORKBOOK, not the JSON" in phase0
+    assert "Handoff_Lock" in phase0
+    assert "catalogue_hash" in phase0
+    assert "HARD STOP" in phase0
+    assert "the workbook is right" in phase0
+
+
+def test_the_handoff_json_is_described_as_an_index_not_an_interface():
+    # Whitespace-normalised: the sentence wraps in the source, and a test
+    # that breaks on a reflow tells you nothing about the rule.
+    text = " ".join((PLUGIN / "skills" / "dma-assessment" / "SKILL.md")
+                    .read_text().split())
+    assert "read-only index over those same sheets" in text
+    assert "It is not the interface." in text
+    assert "If the two ever disagree, the workbook is right." in text

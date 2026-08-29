@@ -183,18 +183,48 @@ def recalculate_ers(evidence_items, corroboration_pairs):
 
 
 def calculate_coverage_stats(subcap_map, total_subcaps=None):
-    """Calculate evidence coverage statistics."""
+    """Evidence coverage against THIS RUN'S engagement set.
+
+    AUD-0051: `total_subcaps=836` was baked into the signature, so coverage
+    was computed against a taxonomy that no longer exists — a complete v7.0
+    run reported 101.8% coverage and a NEGATIVE `no_evidence` count, both of
+    which read as data. The denominator is now required, because the honest
+    one is the SELECTED set: a focused engagement of 200 cells is not 23%
+    covered, it is fully covered at its own scope, and the catalogue's 851 is
+    the wrong denominator for it too.
+
+    `total_subcaps` is None-safe on purpose: an unknown denominator yields a
+    null percentage, never a plausible one (invariant 9)."""
     ready = sum(1 for v in subcap_map.values() if len(v) >= 3)
     thin = sum(1 for v in subcap_map.values() if 1 <= len(v) < 3)
-    no_evidence = total_subcaps - len(subcap_map)
-
+    have = len(subcap_map)
+    if total_subcaps is None:
+        return {
+            'total_subcaps': None,
+            'with_evidence': have,
+            'ready_3plus': ready,
+            'thin_1_2': thin,
+            'no_evidence': None,
+            'coverage_pct': None,
+            'basis': ('no engagement set supplied, so coverage has no '
+                      'denominator. Pass the count of SELECTED subcaps — the '
+                      'workbook seeds one row per selection and '
+                      'Run_Metadata.subcaps_selected records it.'),
+        }
+    if have > total_subcaps:
+        raise ValueError(
+            f"{have} subcaps carry evidence against an engagement set of "
+            f"{total_subcaps}. Coverage above 100% and a negative gap are the "
+            f"AUD-0051 signature: the denominator is not this run's.")
     return {
         'total_subcaps': total_subcaps,
-        'with_evidence': len(subcap_map),
+        'with_evidence': have,
         'ready_3plus': ready,
         'thin_1_2': thin,
-        'no_evidence': no_evidence,
-        'coverage_pct': round(len(subcap_map) / total_subcaps * 100, 1)
+        'no_evidence': total_subcaps - have,
+        'coverage_pct': (round(have / total_subcaps * 100, 1)
+                         if total_subcaps else None),
+        'basis': 'the run\'s own engagement set',
     }
 
 

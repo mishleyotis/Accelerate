@@ -189,7 +189,101 @@ DQ_FIELDS = ("DQ_Works", "DQ_Fails", "DQ_Value", "DQ_Corroborates",
              "DQ_Contradicts")
 
 
-def append_synthesis(wb: RunWorkbook, subcap: str, record: dict) -> dict:
+def record_provenance(wb: RunWorkbook, subcap: str, step: str, actor: str,
+                      detail: str = "") -> None:
+    """Who did this step. Authorship is what makes independence checkable."""
+    if step not in C.PROVENANCE_STEPS:
+        raise LedgerRefusal(f"step {step!r} not in {C.PROVENANCE_STEPS}")
+    if not str(actor or "").strip():
+        raise LedgerRefusal(
+            "an unattributed write cannot be checked for independence; name "
+            "the actor (an agent name, a session id, a person)")
+    wb.append("Provenance", {"SubCap_ID": subcap, "Step": step,
+                             "Actor": str(actor).strip(), "At": _utcnow(),
+                             "Detail": detail})
+
+
+def actor_for(wb: RunWorkbook, subcap: str, step: str) -> str | None:
+    """The most recent actor for one step of one subcap."""
+    hits = [r for r in wb.rows("Provenance")
+            if str(r.get("SubCap_ID") or "") == subcap
+            and str(r.get("Step") or "") == step]
+    return str(hits[-1]["Actor"]) if hits else None
+
+
+def record_challenge(wb: RunWorkbook, subcap: str, *, verdict: str, actor: str,
+                     dimensions: dict, rationale: str,
+                     ceiling_band_delta: str = "") -> dict:
+    """Record a challenge — and refuse one the synthesis's own author wrote.
+
+    AUD-0018 / AUD-0024: this repository already solves reviewer independence
+    BY CONSTRUCTION for the learning loop — `learning-grader` carries no
+    Write/Edit and no connector write tool, so it cannot touch the change it
+    scores — and then inverts it for the research challenge, where the same
+    actor writes a synthesis and its own verdict on it.
+
+    Construction is not available here (both writes go through one library),
+    so the equivalent guarantee is made checkable instead: authorship is
+    recorded, and a verdict by the synthesis's own author is refused.
+
+    AUD-0102 is the other half. The protocol asserts seven dimensions and
+    "any FAIL => overall FAIL", while the schema required an OPEN object with
+    no required keys — so a zero-dimension verdict validated, and the card's
+    own example silently omitted `synthesis_quality`, the one carrying ten
+    sub-conditions. Every dimension is required by NAME, and a FAIL in any
+    one makes the overall verdict FAIL."""
+    if verdict not in C.CHALLENGE_VERDICTS:
+        raise LedgerRefusal(
+            f"verdict {verdict!r} not in {C.CHALLENGE_VERDICTS}")
+    author = actor_for(wb, subcap, "synthesis")
+    if author is None:
+        raise LedgerRefusal(
+            f"{subcap} has no recorded synthesis author, so a challenge on it "
+            f"cannot be shown to be independent. Write the synthesis with an "
+            f"actor first.")
+    if str(actor).strip() == author:
+        raise LedgerRefusal(
+            f"{actor!r} wrote this synthesis and cannot also be its "
+            f"challenger. A verdict on your own work is a feeling; the "
+            f"learning loop's grader is independent BY CONSTRUCTION and the "
+            f"research challenge has to be independent by record.")
+    missing = [d for d in C.CHALLENGE_DIMENSIONS if d not in (dimensions or {})]
+    if missing:
+        raise LedgerRefusal(
+            f"the challenge omits {missing}. Every dimension is required by "
+            f"NAME because a verdict is only as good as what it looked at, "
+            f"and an open object let a zero-dimension verdict validate.")
+    bad = {k: v for k, v in dimensions.items()
+           if str(v).upper() not in ("PASS", "FAIL", "NOT_RUN")}
+    if bad:
+        raise LedgerRefusal(f"dimension verdicts must be PASS, FAIL or "
+                            f"NOT_RUN: {bad}")
+    failed = [k for k, v in dimensions.items() if str(v).upper() == "FAIL"]
+    if failed and verdict == "PASS":
+        raise LedgerRefusal(
+            f"dimensions {failed} FAILED and the overall verdict is PASS. "
+            f"Any FAIL means FAIL — that is the protocol's own rule.")
+    if len(str(rationale or "").strip()) < 40:
+        raise LedgerRefusal("a challenge with no rationale is a rubber stamp")
+    wb.append("Challenge_Log", {
+        "SubCap_ID": subcap, "Verdict": verdict, "Actor": str(actor).strip(),
+        "Dimensions": dimensions, "Rationale": rationale,
+        "Ceiling_Band_Delta": ceiling_band_delta, "At": _utcnow()})
+    record_provenance(wb, subcap, "challenge", actor,
+                      f"{verdict}; {len(dimensions)} dimensions")
+    wb.set_scoring(subcap, {"Challenge_Verdict": verdict})
+    return {"subcap": subcap, "verdict": verdict, "challenger": actor,
+            "author": author, "failed_dimensions": failed}
+
+
+def challenge_for(wb: RunWorkbook, subcap: str) -> dict | None:
+    hits = [r for r in wb.rows("Challenge_Log")
+            if str(r.get("SubCap_ID") or "") == subcap]
+    return hits[-1] if hits else None
+
+
+def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
+                     actor: str | None = None) -> dict:
     """Write one subcap's synthesis onto its scoring row, or refuse.
 
     This is the write AUD-0009 measured accepting an unmodified skeleton.
@@ -246,8 +340,11 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict) -> dict:
     payload = {k: v for k, v in record.items() if k in C.PILLAR_COLUMNS}
     payload["Retrieved_At"] = _utcnow()
     wb.set_scoring(subcap, payload)
+    if actor:
+        record_provenance(wb, subcap, "synthesis", actor)
     wb.recompute_coverage()
-    return {"subcap": subcap, "written": sorted(payload)}
+    return {"subcap": subcap, "written": sorted(payload),
+            "actor": actor}
 
 
 # ── gate log ─────────────────────────────────────────────────────────────

@@ -100,16 +100,33 @@ def test_the_stage_is_reported_once_not_once_per_row(tmp_path):
 
 def test_a_sub_vertical_variant_is_still_toggled_out(tmp_path):
     """The control: `toggled_out` keeps its documented meaning. A fix that
-    emptied the bucket would delete the toggle cascade instead of the bug."""
-    from engine import contract as C, runstate
+    emptied the bucket would delete the toggle cascade instead of the bug.
+
+    Built with openpyxl rather than through the engine ON PURPOSE. The
+    engine now REFUSES to seed another sub-vertical's variants
+    (contract.Taxonomy.selected / AUD-0077), so this shape can only arrive
+    from a package the engine did not produce — which is exactly the case
+    the parser exists for, and the case this test has to cover."""
+    import openpyxl
+    from engine import contract as C
     tax = C.taxonomy()
-    variants = [c for c in tax.variants if c.startswith("P2")][:2]
     universal = list(tax.cells_in("P1C1"))[:2]
-    run = runstate.start(run_id="ING-2", entity_name="Acme CU",
-                         entity_id="acme-cu", sub_vertical=None,
-                         scope_mode="T1_CORE", reference_date="2026-08-29",
-                         root=tmp_path / "r2", selected=universal + variants)
-    p = wp.parse_scoring_workbook(str(run.workbook_path))
+    variants = [c for c in tax.variants if c.startswith("P1C1")][:2]
+    assert variants, "the catalogue must carry P1C1 variants for this to bind"
+
+    path = tmp_path / "foreign_package.xlsx"
+    book = openpyxl.Workbook()
+    ws = book.active
+    ws.title = "P1_Subcap_Scoring"
+    ws.append(["SubCap_ID", "SubCap_Name", "Category", "Score", "Confidence",
+               "Evidence_IDs", "Source_URLs", "Evidence_Ceiling",
+               "Caps_Applied", "Rationale", "Proxy_Searched"])
+    for cell in universal + variants:
+        ws.append([cell, "name", cell.split(".")[0], None, None, None, None,
+                   None, None, None, None])
+    book.save(path)
+
+    p = wp.parse_scoring_workbook(str(path))
     assert sorted(p.toggled_out) == sorted(variants)
     assert sorted(p.in_scope_unscored) == sorted(universal)
 
@@ -214,3 +231,40 @@ def test_the_classifier_now_admits_the_evidence_index():
     assert job_main._classify_artefact(
         type("F", (), {"name": "evidence_index.json", "path_segments":
                        ["client", "01_evidence"]})()) == ("evidence_index", 0)
+
+
+# ── AUD-0042 · a peer store with no feeder says so ──────────────────────
+
+def test_a_workbook_with_no_peer_tab_records_the_absence(tmp_path):
+    """The missing-tab path returned [] in silence, so a package with no
+    peer tab was indistinguishable from one whose peers all parsed — and
+    every peer median served for it then had nothing to reconcile against."""
+    import openpyxl
+    path = tmp_path / "no_peers.xlsx"
+    book = openpyxl.Workbook()
+    book.active.title = "P1_Subcap_Scoring"
+    book.save(path)
+    obs = []
+    assert wp.parse_peer_benchmarks(str(path), obs) == []
+    kinds = [o.kind for o in obs]
+    assert "peer_tab_absent" in kinds
+    detail = [o for o in obs if o.kind == "peer_tab_absent"][0].detail
+    assert "ET-09" in detail["consequence"]
+
+
+def test_the_engine_writes_a_peer_tab_the_app_can_read(tmp_path):
+    """AUD-0042's other half: nothing produced the tab. The engine's
+    contract now carries it, under the app's own column spellings."""
+    from engine import contract as C
+    run = _engine_workbook(tmp_path, n=2, synthesise=0)
+    wb = run.open()
+    wb.append("Peer_Benchmarks", {
+        "Category_ID": "P1C1", "Category_Name": "Digital Strategy",
+        "Entity_Score": None, "Peer_Median": 2.4, "Peer_N": 5,
+        "Peer_Basis": "table", "Source_Cell": "Peer_Benchmarks!D2",
+        "Peer_Names": "Alpha CU|Beta CU", "As_Of": "2026-08-29"})
+    obs = []
+    rows = wp.parse_peer_benchmarks(str(run.workbook_path), obs)
+    assert [o.kind for o in obs if o.kind == "peer_tab_absent"] == []
+    assert rows or [o.kind for o in obs], (
+        "the tab exists, so the reader must either return rows or say why not")

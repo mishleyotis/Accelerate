@@ -7,7 +7,7 @@ from docx import Document
 from engine import ledger as L, report_spec as RS, reports
 from engine.reports import ReportRefused
 
-from fixtures import CAT, bank_evidence, good_synthesis, new_run
+from fixtures import CAT, bank_evidence, good_synthesis, new_run, synthesise
 
 LOREM = ("Acme Credit Union runs member-facing digital banking on Alkami, "
          "live since Q3 2024, with adoption measured at 47 percent within "
@@ -37,7 +37,7 @@ def _run_with_content(tmp_path, n=8):
     run = new_run(tmp_path, n=n)
     wb = run.open()
     for cell in wb.selected_subcaps():
-        L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
+        synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
     wb.append("Entity_Timeline", {
         "Event_Date": "2024-09-01", "Event": "Alkami go-live",
         "Signal": "EXPANSION", "SubCap_IDs": wb.selected_subcaps()[0],

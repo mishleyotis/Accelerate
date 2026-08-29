@@ -145,3 +145,32 @@ def test_the_catalogue_hash_is_real_and_sensitive():
     h = C.catalogue_hash()
     assert re.fullmatch(r"[0-9a-f]{64}", h)
     assert h == C.catalogue_hash(), "the hash must be stable for one catalogue"
+
+
+# ── AUD-0077 (second half) · a run cannot seed another SV's variants ─────
+
+def test_a_run_refuses_an_engagement_set_from_another_sub_vertical(tmp_path):
+    """Surfaced by the end-to-end test: a CU run seeded with AM and CL
+    variant cells produced a workbook the app then — correctly — reported as
+    three toggled-out rows, so the run looked smaller than it was and nothing
+    said why. The binder validating neither argument is AUD-0077's shape."""
+    from engine.workbook import RunWorkbook, WorkbookError
+    t = C.taxonomy()
+    cu = t.selected("CU", "T1_CORE")[:2]
+    am = [c for c in t.variants if t.tier[c].endswith("-AM")][:1]
+    with pytest.raises(WorkbookError, match="belonging to another"):
+        RunWorkbook.create(tmp_path / "x.xlsx", run_id="R-SV", entity_name="A",
+                           entity_id="a", sub_vertical="CU",
+                           scope_mode="T1_CORE", reference_date="2026-08-29",
+                           selected=list(cu) + am)
+
+
+def test_its_own_sub_verticals_variants_are_accepted(tmp_path):
+    from engine.workbook import RunWorkbook
+    t = C.taxonomy()
+    cu_var = [c for c in t.variants if t.tier[c].endswith("-CU")][:2]
+    wb = RunWorkbook.create(tmp_path / "y.xlsx", run_id="R-SV2",
+                            entity_name="A", entity_id="a", sub_vertical="CU",
+                            scope_mode="FULL", reference_date="2026-08-29",
+                            selected=cu_var)
+    assert sorted(wb.selected_subcaps()) == sorted(cu_var)

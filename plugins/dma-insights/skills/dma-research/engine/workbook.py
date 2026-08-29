@@ -257,6 +257,41 @@ class RunWorkbook:
             self.append("Handoff_Lock", {"Key": k, "Value": v}, save=False)
         self.save()
 
+    def lock_peer_set(self, peers: list[str], *, basis: str) -> dict:
+        """Freeze the peer set into Handoff_Lock, once.
+
+        AUD-0043: `Handoff_Lock` is the peer-set immutability mechanism both
+        pinned templates depend on, and it existed nowhere — 0 hits across
+        the archive and 0 across the repository. Without it the assessment
+        stage can silently choose a different cohort from the one the
+        research stage compared against, and every peer figure in the report
+        is then about a set nobody can name.
+
+        Locking is idempotent for the SAME set and refused for a different
+        one. A cohort that changes mid-assessment is a decision, and a
+        decision needs a person, not a second write."""
+        if basis not in C.PEER_BASIS:
+            raise WorkbookError(f"peer basis {basis!r} not in {C.PEER_BASIS}")
+        wanted = sorted({str(p).strip() for p in peers if str(p).strip()})
+        lock = self.handoff_lock()
+        have = [p for p in str(lock.get("locked_peer_set") or "").split("|") if p]
+        if have and have != wanted:
+            raise WorkbookError(
+                f"the peer set is already locked to {have} and this call "
+                f"names {wanted}. A cohort that changes mid-assessment "
+                f"invalidates every peer figure already written against it; "
+                f"withdraw the run and re-research, or keep the locked set.")
+        if not have:
+            self.append("Handoff_Lock",
+                        {"Key": "locked_peer_set", "Value": "|".join(wanted)},
+                        save=False)
+            self.append("Handoff_Lock",
+                        {"Key": "peer_basis", "Value": basis}, save=False)
+            self.append("Handoff_Lock",
+                        {"Key": "peer_n", "Value": len(wanted)})
+        return {"locked_peer_set": wanted, "peer_basis": basis,
+                "peer_n": len(wanted), "already_locked": bool(have)}
+
     def handoff_lock(self) -> dict:
         return {str(r["Key"]): r["Value"] for r in self.rows("Handoff_Lock")}
 
@@ -303,11 +338,31 @@ class RunWorkbook:
         declaration; `Evidence_IDs` starts at the literal NO_EVIDENCE so
         rule 5 is never vacuous on a blank (AUD-0064)."""
         tax = C.taxonomy()
+        sv = str(self.metadata().get("sub_vertical") or "") or None
         by_sheet: dict[str, list[str]] = {s: [] for s in C.PILLAR_SHEETS}
+        foreign = []
         for cell in selected:
             if cell not in tax.tier:
                 raise WorkbookError(f"{cell} is not in catalogue {tax.version}")
+            # A variant cell belongs to ONE sub-vertical. Seeding another
+            # sub-vertical's variant produces a run that asks an institution
+            # about capabilities defined for a different kind of institution,
+            # and the app then — correctly — reports those rows as toggled
+            # out, so the run looks 3 cells smaller than it is and nothing
+            # says why. AUD-0077's family: the binder validated neither its
+            # sub-vertical nor its scope.
+            tier = tax.tier.get(cell, "")
+            if "-" in tier and tier.split("-", 1)[1] != (sv or ""):
+                foreign.append((cell, tier))
+                continue
             by_sheet[f"{cell[:2]}_Subcap_Scoring"].append(cell)
+        if foreign:
+            raise WorkbookError(
+                f"this run is sub-vertical {sv!r} and the engagement set names "
+                f"{len(foreign)} variant cell(s) belonging to another: "
+                f"{foreign[:6]}. Select with Taxonomy.selected(sv, scope), "
+                f"which resolves the overlay for THIS sub-vertical and "
+                f"withdraws the base cells it supersedes.")
         for sheet, cells in by_sheet.items():
             ws = self._sheet(sheet)
             for cell in sorted(cells):

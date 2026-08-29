@@ -83,7 +83,19 @@ _RANKED_SECTIONS = {
     ("platform", "recommendations"),
 }
 
-_SCORE_KEYS = ("score", "entity_score")
+# AUD-0046: CG-07 compares a numeric score beside a grain id to what the run
+# SERVES, and it read two key names. `platform.recommendations[].dma_impact[]`
+# is `{subcap_id, name, current, target, delta}` and the contract says in as
+# many words "current MUST equal what the heatmap serves — assert it". No key
+# in this tuple was named `current`, so the one field the contract tells you
+# to assert was the one the grain lock could not see, and a stale metric in
+# the impact table was unenforceable.
+#
+# `target` is deliberately NOT here: a target is where the client is going,
+# and comparing it to today's served figure would reject every recommendation
+# that proposes an improvement.
+_SCORE_KEYS = ("score", "entity_score", "current", "current_score",
+               "baseline_score")
 _ID_KEYS = ("subcap_id", "category_id", "pillar_id")
 _SUBCAP_RE = re.compile(r"^P\d+C\d+\.")
 _CATEGORY_RE = re.compile(r"^P\d+C\d+$")
@@ -1369,6 +1381,16 @@ def _served_figures(conn, run_id) -> dict:
         if c.get("score") is not None:
             served[c["category_id"]] = float(c["score"])
     return served
+
+
+#: What an r_layer verdict may say. AUD-0045: AG-01 asserted a verdict was
+#: PRESENT and never read it, so a self-REJECTED recommendation passed the
+#: one hard rule the template states.
+_ACCEPTING_VERDICTS = {"SHIP", "SUPPORTED", "HOLDS", "CONFIRMED", "PASS",
+                       "ACCEPT", "ACCEPTED", "SHIP_LOW_CONF"}
+_REJECTING_VERDICTS = {"REJECT", "REJECTED", "DROP", "DROPPED", "REFUTED",
+                       "FAIL", "FAILED", "NOT_SUPPORTED", "UNSUPPORTED",
+                       "WITHDRAWN"}
 
 
 def _walk_strings(node, path):
@@ -3507,6 +3529,34 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                                 "r_layer verdict — a verdict you did not "
                                 "write down is a step you can convince "
                                 "yourself you took"))
+                            continue
+                        # AUD-0045: the gate checked that a verdict EXISTS
+                        # and never what it SAID, so a recommendation whose
+                        # own reasoning layer concluded REJECT shipped as a
+                        # recommendation. The template's one hard rule —
+                        # a self-rejected item is not published — was
+                        # enforced by nothing.
+                        verdict = str(rl.get("verdict") or "").strip().upper()
+                        if verdict in _REJECTING_VERDICTS:
+                            reasons.append(_reason(
+                                "AG-01", name,
+                                f"{name}.{fname}[{i}].r_layer.verdict",
+                                f"this item's own reasoning layer concluded "
+                                f"{verdict} and it is still being published. "
+                                f"A rejected hypothesis is a step in the "
+                                f"work, not a recommendation: drop the item, "
+                                f"or change the verdict because the reasoning "
+                                f"changed — never because the item is "
+                                f"inconvenient to lose."))
+                        elif verdict not in _ACCEPTING_VERDICTS:
+                            reasons.append(_reason(
+                                "AG-01", name,
+                                f"{name}.{fname}[{i}].r_layer.verdict",
+                                f"r_layer.verdict is {rl.get('verdict')!r}, "
+                                f"which is not in the vocabulary "
+                                f"{sorted(_ACCEPTING_VERDICTS | _REJECTING_VERDICTS)}. "
+                                f"A verdict nobody can read is a verdict "
+                                f"nobody can check."))
 
     # ── AG-03: every claim-bearing item cites evidence ─────────────────
     reasons.extend(_check_item_evidence(page, payload))

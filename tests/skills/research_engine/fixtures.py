@@ -71,3 +71,25 @@ def good_synthesis(subcap: str, eids: list[str]) -> dict:
         "Uncertainty": 0.3,
         "Challenge_Verdict": "PASS",
     }
+
+
+#: A full, independent challenge. `CHALLENGE_DIMENSIONS` is required by name
+#: (AUD-0102) and the challenger may not be the synthesis's author
+#: (AUD-0018 / AUD-0024).
+def challenge(wb, subcap, *, verdict="PASS", actor="finding-challenger"):
+    from engine import contract as CC
+    return L.record_challenge(
+        wb, subcap, verdict=verdict, actor=actor,
+        dimensions={d: "PASS" for d in CC.CHALLENGE_DIMENSIONS},
+        rationale=("Two independent sources carry the launch date and the "
+                   "adoption figure; the ceiling reasoning stops at Competing "
+                   "and the contradicts probe returned nothing."),
+        ceiling_band_delta="0")
+
+
+def synthesise(wb, subcap, record, *, author="surface-producer",
+               challenger="finding-challenger", verdict="PASS"):
+    """Write a synthesis and have a DIFFERENT actor challenge it."""
+    out = L.append_synthesis(wb, subcap, record, actor=author)
+    challenge(wb, subcap, verdict=verdict, actor=challenger)
+    return out

@@ -89,11 +89,43 @@ def get_run_progress(conn, run_id: str) -> dict:
     cur.execute("""SELECT held_by, expires_at, expires_at > now()
                      FROM run_claims WHERE run_id = %s""", (run_id,))
     claim = cur.fetchone()
+
+    # ── what the INTAKE could not read, surfaced where the producer looks ──
+    #
+    # AUD-0030: `parser_observations` is written durably on every ingest —
+    # a column the parser did not recognise, a score outside the rubric, a
+    # peer tab that is absent, an evidence index that would not parse — and
+    # it had NO READER outside the worker and no grant beyond it. So the
+    # producer, whose whole job is to synthesise from that package, could
+    # not see what the package failed to yield, and the absence looked
+    # exactly like an entity with nothing to say.
+    #
+    # It is reported grouped, worst first, because a producer needs the
+    # SHAPE of what is missing, not 800 rows of it.
+    cur.execute(
+        """SELECT kind, count(*), min(occurred_at), max(detail::text)
+             FROM parser_observations WHERE run_id = %s
+            GROUP BY kind ORDER BY count(*) DESC""", (run_id,))
+    intake = [{"kind": k, "count": n,
+               "first_seen": (t.isoformat() if t else None),
+               "example": (d[:300] if d else None)}
+              for k, n, t, d in cur.fetchall()]
+
     return {
         "run_id": str(run_id),
         "pages": pages,
         "blocking": blocking,
         "promotable": not blocking,
+        "intake_observations": intake,
+        "intake_note": (
+            "What the ingest could not read from this package. An empty list "
+            "means the parse was clean, NOT that nothing was checked — every "
+            "reader records what it could not recognise."
+            if not intake else
+            "The ingest recorded these while reading the package. A surface "
+            "that renders empty here often renders empty because the column "
+            "behind it was not recognised, not because the client has "
+            "nothing to say — check this before writing an absence."),
         "claim": (None if not claim else
                   {"held_by": claim[0], "expires_at": claim[1].isoformat(),
                    "live": bool(claim[2])}),

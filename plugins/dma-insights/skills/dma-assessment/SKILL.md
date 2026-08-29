@@ -402,10 +402,43 @@ for any capped score. Confidence (Col E) reflects evidence depth.
 
 ## Phase 0: Engagement Setup
 
-1. **Research Handoff Check:** Look for `research_handoff.json`. IF FOUND → set RESEARCH_HANDOFF mode, skip Phase 1. IF `locked_peer_set[]` present in handoff → import peer set, skip peer selection below.
+1. **Research Handoff Check — THE WORKBOOK, not the JSON.**
+
+   Look for the **scoring workbook** (`DMA_Scoring_Workbook_*.xlsx`, contract
+   v3). It is the handoff. Open it and read `Handoff_Lock`:
+
+   ```
+   python3 ${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/validator.py \
+       --workbook <WORKBOOK> --json
+   ```
+
+   * **FAILS=0** → set `RESEARCH_HANDOFF` mode and skip Phase 1. The
+     engagement set is the seeded rows; `Run_Metadata.subcaps_selected` is
+     the denominator for every coverage figure you report.
+   * **`Handoff_Lock.catalogue_hash` ≠ the catalogue you are about to score
+     against → HARD STOP.** The catalogue moved between research and
+     assessment and the scores would be against a different taxonomy. This
+     is the refusal the Client Profile template asserts and that nothing
+     implemented.
+   * **`locked_peer_set` in `Handoff_Lock`** → import the peer set and skip
+     peer selection below.
+   * **Any FAIL** → the workbook does not satisfy its own contract. Repair
+     the research run; do not score around it.
+
+   `research_handoff.json`, where present, is a **read-only index over those
+   same sheets** and says so in its own `_contract` block. It is not the
+   interface. Two skills once agreed on that JSON file as a private contract
+   the owner never designated, so the artefact the owner audits (the
+   workbook) and the artefact the pipeline trusted (the handoff) could
+   diverge with no gate noticing — and three gate-required analysis fields
+   died in the gap. **If the two ever disagree, the workbook is right.**
 
 2. **Evidence Mode:** PUBLIC / INTERNAL / HYBRID / RESEARCH_HANDOFF
-   - RESEARCH_HANDOFF: Phase 1 skipped. Handoff includes claim-labeled evidence, tech utilization, uncertainty bands.
+   - RESEARCH_HANDOFF: Phase 1 skipped. The WORKBOOK carries claim-labelled
+     evidence (`Evidence_Detail`), the per-subcap synthesis and its ceiling
+     reasoning (columns L..AG), the search log, the gate log and the
+     uncertainty band — all of it beside the rows it bears on. Read the
+     sheets; do not re-derive from a JSON copy of them.
    - PUBLIC: ~2,500-4,200 web searches + Moody's connector enrichment. HYBRID: internal docs + full web search + Moody's (highest quality).
    - **Dual-Source Mandate:** web_search is PRIMARY (≥70% of queries). Moody's connectors SUPPLEMENT with structured credit/financial data. web_search MUST precede Moody's in every phase.
 

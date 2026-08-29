@@ -1830,6 +1830,20 @@ def parse_peer_benchmarks(path: str, obs: list | None = None,
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
         if "Peer_Benchmarks" not in wb.sheetnames:
+            # AUD-0042: the category-grain peer store has no feeder, and the
+            # missing-tab path RECORDED NOTHING — a package with no peer tab
+            # was indistinguishable from one whose peers all parsed, so every
+            # peer median downstream silently had no source to reconcile
+            # against. An absence is a finding; a silent return is not.
+            observe("peer_tab_absent", {
+                "expected": "Peer_Benchmarks",
+                "tabs_present": list(wb.sheetnames)[:30],
+                "consequence": "this run has NO category-grain peer scores. "
+                               "Every peer median served for it is a producer "
+                               "assertion with nothing to reconcile against, "
+                               "and ET-09's peer allow-list is empty, so a "
+                               "legitimate peer who is also a corpus client "
+                               "reads as foreign-entity contamination."})
             return []
         ws = wb["Peer_Benchmarks"]
         rows = [r for r in ws.iter_rows(values_only=True) if r]

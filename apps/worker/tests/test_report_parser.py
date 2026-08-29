@@ -94,3 +94,73 @@ def test_preamble_pillars_tables_and_page_semantics(tmp_path):
 def test_the_vocabulary_is_exactly_twelve():
     assert len(SECTION_KINDS) == 12
     assert len(set(SECTION_KINDS.values())) == 12
+
+
+# ── AUD-0039 · the number is not the identity ───────────────────────────
+
+def test_a_v8_report_is_kinded_by_heading_not_by_count(tmp_path):
+    """The measured defect: this parser mapped Heading1 NUMBER -> kind
+    against a 12-section report, so on the pinned v8 report every section
+    from §3 on was stored under the wrong kind. §3 "Maturity by pillar"
+    landed as `trend_analysis` — and nothing was lost, which is worse,
+    because a wrongly-kinded section reads as a correct one."""
+    body = (
+        _p("1. Executive summary", "Heading1")
+        + _p("What we found", "Heading2") + _p("The bank is Building.")
+        + _p("3. Maturity by pillar", "Heading1")
+        + _p("P1", "Heading2") + _p("Strategy scores 2.1.")
+        + _p("5. Findings", "Heading1")
+        + _p("Finding 1", "Heading2") + _p("The register is thin.")
+        + _p("7. Recommendations", "Heading1")
+        + _p("Rec 1", "Heading2") + _p("Consolidate the estate.")
+        + _p("8. What would change this assessment", "Heading1")
+        + _p("Limits", "Heading2") + _p("Two categories are unevidenced.")
+    )
+    rows = parse_report(_docx(tmp_path, body))
+    kinds = [r.section_kind for r in rows]
+    assert kinds == ["executive_summary", "assessment_results", "findings",
+                     "recommendations", "data_gaps_confidence"]
+    assert "trend_analysis" not in kinds
+
+
+def test_the_legacy_twelve_section_report_still_maps(tmp_path):
+    """The control: the numbered vocabulary must keep working, because the
+    corpus is full of reports written to it."""
+    body = (
+        _p("3. Trend Analysis", "Heading1")
+        + _p("Trajectory", "Heading2") + _p("Scores rose.")
+        + _p("6. Pillar Deep Dives (P2)", "Heading1")
+        + _p("Pillar 2 (P2)", "Heading2") + _p("Detail.")
+    )
+    rows = parse_report(_docx(tmp_path, body))
+    assert [(r.section_kind, r.pillar_id) for r in rows] == [
+        ("trend_analysis", None), ("pillar_deep_dive", "P2")]
+
+
+def test_an_unrecognised_numbered_section_keeps_its_own_name(tmp_path):
+    body = (_p("9. Acquisition history and integration debt", "Heading1")
+            + _p("Acquisitions", "Heading2") + _p("Three since 2019."))
+    obs = []
+    rows = parse_report(_docx(tmp_path, body), obs)
+    assert rows[0].section_kind.startswith("unmapped:"), rows[0].section_kind
+    assert "acquisition" in rows[0].section_kind
+    assert obs and obs[0].kind == "report_section_unmapped"
+
+
+def test_front_and_back_matter_stay_out_of_scope(tmp_path):
+    body = (_p("Table of Contents", "Heading1") + _p("1. Exec ... 3")
+            + _p("Appendix A: Capability Definitions", "Heading1")
+            + _p("Defs", "Heading2") + _p("Never stored.")
+            + _p("Glossary", "Heading1") + _p("Terms", "Heading2") + _p("x"))
+    obs = []
+    assert parse_report(_docx(tmp_path, body), obs) == []
+    assert obs == [], "front matter is out of scope, not an unmapped section"
+
+
+def test_every_legacy_kind_is_reachable_from_its_own_heading():
+    """The number fallback was removed, so this is what keeps the legacy
+    twelve working: each name must match its own title pattern."""
+    from dma_worker.report_parser import SECTION_KINDS, section_kind_for
+    for n, kind in SECTION_KINDS.items():
+        title = f"{n}. " + kind.replace("_", " ").title()
+        assert section_kind_for(n, title) == (kind, "heading"), title
