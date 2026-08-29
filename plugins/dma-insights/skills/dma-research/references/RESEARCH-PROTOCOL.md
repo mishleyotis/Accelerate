@@ -63,9 +63,13 @@ query seeds. Work it in this order:
    the ledger's reason. Repair the NOTE (usually the verbatim excerpt or the
    URL), never work around the gate.
 6. **Synthesise** the subcap (`engine.cli synthesise --run R --subcap X
-   --json rec.json`, with `--actor <your-agent-name>` recorded). The write
-   path refuses placeholder prose, unanswered DQ facets, unsupported claim
-   labels and undeclared absences — a refusal names exactly what is missing.
+   --json rec.json`, with `--actor <your-agent-name>` recorded). Write the
+   prose to `references/functional_language.md` — impact as consequence,
+   gaps as the opportunity they open, never a verdict on people, every
+   figure from a cited excerpt. The write path refuses placeholder prose,
+   unanswered DQ facets, unsupported claim labels, undeclared absences,
+   accusatory language and any figure no registered excerpt carries — a
+   refusal names exactly what is missing.
    Deferred questions on your card (mode-filtered out) go into
    `Discovery_Questions` as the card gives them (`INT-Q:` / `PUB-Q:`),
    never silently skipped.

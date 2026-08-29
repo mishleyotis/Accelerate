@@ -32,7 +32,8 @@ def _engine_workbook(tmp_path, *, n=6, synthesise=2):
             wb, source_name=f"Annual report {i}",
             source_url=f"https://acme.example/ar#{i}", tier="T2",
             excerpt=("Alkami digital banking went live in Q3 2024 and reached "
-                     "47 percent member adoption within ninety days."),
+                     "47 percent member adoption within ninety days, restated "
+                     "at 52 percent in the 2025 annual report."),
             subcaps=[cell], published="2025-03-01") for i in range(3)]
         L.append_synthesis(wb, cell, {
             "Dominant_Claim": (

@@ -314,6 +314,105 @@ def claim_label_supported(row) -> str | None:
     return None
 
 
+# ── the hallucination pinpointer: numbers must come from somewhere ────────
+#
+# A fabricated figure is the highest-damage hallucination this pipeline can
+# ship: it reads as the most rigorous sentence in the synthesis and it is
+# the one a client will quote back. RRF + the excerpt discipline mean every
+# real figure entered through a VERBATIM excerpt of a fused, cited source —
+# so a number in the synthesis prose that appears in NO excerpt registered
+# to the subcap has no provenance at all, and the refusal can name it.
+
+_NUM_TOKEN = re.compile(r"\d[\d,]*(?:\.\d+)?")
+_CITATION = re.compile(r"\[[^\]]*\]")   # [E-0001:F2] — ids are not figures
+
+#: Prose fields whose numbers must be grounded — the fields that CLAIM what
+#: sources say. NOT_RUN values are skipped whole ("no hits across four
+#: queries" is a reason, not a finding). The analyst-argument fields
+#: (Ceiling_Reasoning, Why_It_Matters, DMA_Impact) are deliberately absent:
+#: "changes what 2026 planning can lean on" is forward reasoning, not a
+#: sourced figure, and flagging it teaches agents to strip years from
+#: analysis instead of grounding claims.
+NUMERIC_CLAIM_FIELDS = (
+    "Dominant_Claim", "What_We_Found", "DQ_Works", "DQ_Fails", "DQ_Value",
+    "DQ_Contradicts", "DQ_Corroborates", "Triangulation",
+)
+
+
+def _figures(text: str) -> set[str]:
+    """Comma-stripped numeric tokens big enough to be claims.
+
+    Small bare integers ("two of three sources", "5 branches") are left
+    alone — the false-positive cost outruns the risk — but decimals,
+    percent-scale figures and years all check."""
+    out = set()
+    for tok in _NUM_TOKEN.findall(_CITATION.sub(" ", text or "")):
+        plain = tok.replace(",", "")
+        try:
+            big = float(plain) >= 13 or "." in plain
+        except ValueError:
+            continue
+        if big:
+            out.add(plain)
+    return out
+
+
+def ungrounded_numbers(record: dict, excerpts: list[str]) -> list[str]:
+    """Figures asserted in the synthesis that no registered excerpt carries.
+
+    `excerpts` is every Excerpt + Anchor_Quote registered to this subcap.
+    Grounding is plain containment on comma-stripped text: the excerpt is
+    VERBATIM source material, so if the figure is real it is in there."""
+    ground = " ".join(str(e or "") for e in excerpts).replace(",", "")
+    missing = []
+    for field in NUMERIC_CLAIM_FIELDS:
+        v = str(record.get(field) or "").strip()
+        if not v or v.upper().startswith("NOT_RUN"):
+            continue
+        for fig in sorted(_figures(v)):
+            if fig not in ground and fig not in missing:
+                missing.append(fig)
+    return missing
+
+
+# ── functional language: impact without accusation ────────────────────────
+#
+# Two tiers, per references/functional_language.md. JUDGMENT words are
+# banned everywhere — they are verdicts about people, not findings about
+# capabilities. BLAME constructions are banned in the fields a client
+# reads as being about THEM (Why_It_Matters, DMA_Impact, report
+# narrative); a gap is framed as the opportunity it opens, with the
+# evidence, not as a fault.
+
+_JUDGMENT = ("woefully", "abysmal", "dismal", "embarrassing", "incompetent",
+             "negligent", "lazy", "inexcusable", "shockingly", "hopeless",
+             "pathetic", "reckless", "asleep at the wheel", "amateurish",
+             "clueless")
+_BLAME = ("failed to", "fails to", "neglected to", "refuses to",
+          "does not bother", "ignored the", "chose to ignore",
+          "can't be bothered", "dropped the ball")
+
+#: The impact fields — where blame constructions are also refused.
+IMPACT_FIELDS = ("Why_It_Matters", "DMA_Impact")
+
+
+def accusatory(text: str, *, impact_field: bool = False) -> str | None:
+    """The offending phrase and the repair, or None."""
+    low = f" {str(text or '').lower()} "
+    for w in _JUDGMENT:
+        if w in low:
+            return (f"{w!r} is a verdict about people, not a finding about a "
+                    f"capability — state what the evidence shows and what it "
+                    f"makes possible")
+    if impact_field:
+        for w in _BLAME:
+            if w in low:
+                return (f"{w!r} frames the gap as a fault. Frame it as the "
+                        f"opportunity it opens: what becomes possible when "
+                        f"closed, grounded in the cited evidence")
+    return None
+
+
 if __name__ == "__main__":  # a library, but it must answer --help
     import argparse as _ap
     _ap.ArgumentParser(

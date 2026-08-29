@@ -334,6 +334,28 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     bad = Q.claim_label_supported(merged)
     if bad:
         problems.append(bad)
+    # The hallucination pinpointer: every figure the synthesis asserts must
+    # appear in an excerpt registered to this subcap. The excerpts are
+    # verbatim spans of fused, cited sources — a number none of them carries
+    # entered the prose from nowhere, and the refusal names it so the repair
+    # is 'cite the source that states it or remove the figure'.
+    excerpts = [f"{r.get('Excerpt') or ''} {r.get('Anchor_Quote') or ''}"
+                for r in wb.rows("Evidence_Detail")
+                if subcap in Q._ids(r.get("SubCap_IDs"))]
+    for fig in Q.ungrounded_numbers(record, excerpts):
+        problems.append(
+            f"ungrounded figure {fig!r}: no excerpt registered to {subcap} "
+            f"carries it — cite the source that states it or remove it")
+    # Functional language: verdict words nowhere, blame constructions never
+    # in the fields a client reads as being about them
+    # (references/functional_language.md).
+    for field in C.PILLAR_COLUMNS:
+        v = str(record.get(field) or "")
+        if not v or v.upper().startswith("NOT_RUN"):
+            continue
+        why = Q.accusatory(v, impact_field=field in Q.IMPACT_FIELDS)
+        if why:
+            problems.append(f"{field}: {why}")
     if problems:
         raise LedgerRefusal(
             f"{subcap}: synthesis refused — " + "; ".join(problems))

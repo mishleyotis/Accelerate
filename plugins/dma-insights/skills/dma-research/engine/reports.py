@@ -55,6 +55,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt, RGBColor
 
 from . import contract as C
+from . import quality as Q
 from . import report_spec as RS
 from . import runstate
 from .workbook import RunWorkbook, _split_ids
@@ -208,6 +209,16 @@ def check(wb: RunWorkbook, curated: dict) -> list[str]:
             elif sec.kind != "insight_card" and n == 0:
                 problems.append(
                     f"§{sec.id} {sec.heading}: no {sec.kind} rows.")
+        # Functional language on everything a client reads: report bodies
+        # are impact prose by definition, so both tiers apply — verdict
+        # words and blame constructions alike
+        # (references/functional_language.md).
+        for r in b["rows"]:
+            why = Q.accusatory(str(r.get("Body") or ""), impact_field=True)
+            if why:
+                problems.append(
+                    f"§{sec.id} {sec.heading}: {why}")
+                break
 
     if total < spec.min_words:
         problems.append(

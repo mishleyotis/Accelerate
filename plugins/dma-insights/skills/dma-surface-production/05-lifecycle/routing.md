@@ -370,6 +370,23 @@ guessed against and fails the next one.
   a page to fix a field the verdict located for you, and do not route through
   the page producer to reach a surface producer it would only pass through to.
 
+## Producers consume the research; they never redo it
+
+The package a producer opens already carries a gated category's worth of
+work per grain: fused-and-cited evidence with verbatim excerpts, five
+volleys answered or NOT_RUN with reasons, an independent challenge, a
+technographic register, and the absence ladders. The corpus map
+(`02-inputs/5-corpus-map.md`) turns that into an ordered ladder per
+surface — **climb it in order and stop at the first rung that answers**,
+and the first rung is the package/workbook, not the web. A producer that
+re-searches a fact `Evidence_Detail` already states pays three times: the
+tokens of the search, the risk of a second answer that now needs
+reconciling, and a fresh chance to cite a worse source than the one the
+run's RRF consensus already ranked. New searching belongs only to gaps the
+enrichment planner names — and a dispatched producer emits those as
+`search_requests` for the top session (see Dispatch mode above), never
+fires them itself.
+
 ## Memory duties per stage
 
 Producers of both tiers read the page rulebook at
