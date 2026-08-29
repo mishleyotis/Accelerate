@@ -53,7 +53,7 @@ These must hold for ANY assessment, regardless of institution or rubric version.
 | RI-03 | Contradiction_Log subcap_ids ⊆ scored subcap IDs |
 | RI-04 | Absent_Evidence_Log subcap_ids ⊆ taxonomy subcap IDs |
 | RI-05 | Run manifest scores match workbook Summary sheet |
-| RI-06 | Report scores match workbook scores (all 17 categories + 4 pillars + overall) |
+| RI-06 | Report scores match workbook scores (all 16 categories + 4 pillars + overall) |
 
 ---
 

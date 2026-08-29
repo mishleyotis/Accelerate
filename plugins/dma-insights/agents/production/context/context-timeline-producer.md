@@ -107,32 +107,32 @@ cannot see where it sits.
 1. `get_page_contract("context")` — the item-key contract for `timeline` and
    `acquisitions` plus the `doc` text on every field you are about to write. A
    remembered shape is a refusal; read the doc.
-2. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/context.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context.md`
    — **§ C1** (heading `## C1 · Digital evolution timeline`), **§ DD-7**, **§ C5**
    (heading `## C5 · Acquisition history`) and **§ DD-14**: the Baxter positive
    patterns, the learned anti-patterns, the customer exclusion sets and the
    enrichment pathways. Applied by default, not by memory. **The rulebook is the
    authority on anti-patterns; the Surface Specification is the authority on
    payload shape**, and where they differ that is the split.
-3. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/5-context.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/5-context.md`
    — **§ C1** and **§ C5**: the pack's contract, and in particular § C1's
    `signal` treatment, which is the longest single explanation in the pack and
    the one this agent exists to apply — the three value definitions, the
    three-rung borderline test, the five worked events, and the note on why the
    enum is not being replaced.
-4. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+4. `docs/text/DMA Insights - Surface Specification.txt`
    — **§ C1 · Digital evolution timeline** and **§ C5 · Acquisition history**:
    "What must be presented", "Why it is shaped this way", the information-source
    tables and the two synthesis prompts. This is the contract; nothing below it
    may narrow a field it requires. Read also the **D5 · Context** preamble
    immediately above C1: *"INTERNAL ONLY. The route is refused at the API, not
    only hidden in the navigation."*
-5. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census rows: C1 → `context.timeline`, no enrichment facet registered,
    gate families `SG:S34 · CG (G6 arc ≥ 3 points; G9 dated; CG-09 signal) · AG`,
    drilldown DD-7; C5 → `context.acquisitions`, no facet, gate families
    `CG (dated; status enum; consistent with C1, O3) · AG`, drilldown DD-14.
-6. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
    — what the most-blocking gates test, and `explain_gate` for the one that
    fired. **CG-09** (a closed vocabulary takes one of its values) is the
    most-hit vocabulary failure in the corpus and it lives on this page;
@@ -151,13 +151,13 @@ cannot see where it sits.
    tenure evidence and regulator dates; `get_capability_catalogue` to resolve
    every `capability_ids` and `affected_subcap_ids` entry — never copy a
    capability name out of report prose; `get_evidence` for every id you cite.
-10. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/4-absence-protocol.md`
+10. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/4-absence-protocol.md`
     — the rung sets behind an honest empty state, including the Acquisitions rung
     set (Clay Recent News → company newsroom → the wire archive → the regulator's
     approval notices). And
-    `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/3-language.md`
+    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/3-language.md`
     for the house voice.
-11. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/scripts/check_payload.py`
+11. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_payload.py`
     before you return. It refuses an `arc_shape` outside the five, and it is the
     **only** check that covers `arc_shape` — the connector's CG-09 covers
     `events[].signal` and `techstack.items[].status` and does not reach it.
@@ -531,7 +531,7 @@ only asked about this quarter.
 **Enrichment is mandatory on both surfaces**, and neither has a facet of its own
 in the ledger. The rulebook is explicit: **no Clay data point is recorded against
 C1** in
-`/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/clay_taxonomy.json`
+`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/clay_taxonomy.json`
 — Recent News (T3) maps to O3 and **C5** — so an event a connector surfaces
 reaches C1 **only by registering the underlying source**, never the tool
 (MEM-0011). The load-bearing route for C1 is `first_party`: the entity's own

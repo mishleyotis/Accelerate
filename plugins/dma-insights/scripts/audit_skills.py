@@ -68,7 +68,13 @@ SKILLS: list = []
 #
 # Lower it when the rectifier closes one. Raising it needs a reason in the
 # commit that raises it.
-MAX_BROKEN = 8
+# 8 -> 0 on 2026-08-29. The ceiling was set to exactly the then-current defect
+# count, so the check passed while 49 of surface-map.md's 53 data rows pointed
+# at `rulebooks/<page>.md` relative to 05-lifecycle/, where no such directory
+# has ever existed (AUD-0005). A ratchet pinned to today's breakage cannot
+# report breakage; the anchors are fixed, so the ceiling is 0 and the next
+# broken reference fails the build.
+MAX_BROKEN = 0
 def _discover_skills(root):
     """Every skill directory under `root` that carries a SKILL.md, sorted.
 

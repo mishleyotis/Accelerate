@@ -115,7 +115,7 @@ Refuse to register, or to rely on, a machine technographic scan at any tier belo
 1. `get_page_contract("techstack")` — the item-key contract for `techstack` plus
    the `doc` text on every field you are about to write. A remembered shape is a
    refusal; read the doc.
-2. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
    — **§ T1** (heading `## T1 · Technology stack register`): the D4 serve rules that
    open it, the Baxter positive patterns, the learned anti-patterns, the exclusion
    set and the enrichment pathways. Read **§ T3** too, so you know what you are
@@ -123,14 +123,14 @@ Refuse to register, or to rely on, a machine technographic scan at any tier belo
    memory. **The rulebook is the authority on anti-patterns; the Surface
    Specification is the authority on payload shape**, and where they differ that is
    the split.
-3. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/6-techstack.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/6-techstack.md`
    — **§ T1**, and in particular the **REISSUED** prompt: the original prompt in the
    design specification omits the `status` field the landscape strip recomputes
    from, and the specification carries two conflicting layer lists while the
    prototype carries a third. The prompt's step 1 (*a product, not a service and not
    a category*) and step 2 (the full item shape and the four-layer vocabulary) are
    your contract.
-4. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+4. `docs/text/DMA Insights - Surface Specification.txt`
    — **§ T1 · Technology stack register**: "What must be presented", "Why it is
    shaped this way", the information-source table, the synthesis prompt and the
    **Vocabulary resolved** paragraph that settles the layer keys. Two measured rows
@@ -142,13 +142,13 @@ Refuse to register, or to rely on, a machine technographic scan at any tier belo
    Q1"*, the most actionable row on the page because the evidence is a **demand
    signal** rather than a deployment — and five job postings license *"signals
    suggest"*, never *"uses"*.
-5. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census rows: T1 → `techstack.techstack`, enrichment facet `techstack`, gate
    families `ET (cited or dropped[]) · CG (CG-09 status; CG-12 detection_basis)`; T3
    → the same payload section, `AG (AG-04 peer technographics) · CG`. The Surface
    Specification's T-family stops at T3 — there are no T4–T8, and T2 renders on the
    Insights page.
-6. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
    — **CG-09** (a closed vocabulary takes one of its values — the most-hit
    vocabulary failure in the corpus), **CG-12** (`detection_basis` is ONE clause,
    ≤160 chars, and the repair is to **move** the prose to `dma_impact`, not to trim
@@ -168,17 +168,17 @@ Refuse to register, or to rely on, a machine technographic scan at any tier belo
    which is also how you preserve the T3 fields on rows you touch.
 9. `get_report_bundle` for the research workbook's technology rows and the client
    profile; `get_evidence` for every id you cite.
-10. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/clay_taxonomy.json`
+10. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/clay_taxonomy.json`
     — the single source for the tier rule (a machine technographic scan is **T1**),
     and this facet's custom gap ("platform migrations announced in the last 24
     months"). And
-    `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/enrichment_sources.json`
+    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`
     for the facet's routes in precedence order.
-11. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/3-language.md`
+11. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/3-language.md`
     for the house voice, including acronym expansion on first use in prose (Baxter
     writes *"web-services application programming interface"* in impact prose) and
     never inside a verbatim span; and
-    `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/scripts/check_payload.py`
+    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_payload.py`
     before you return.
 
 ## The contract — field by field
@@ -501,7 +501,7 @@ never "further research".
 ## Enrichment checks
 
 The registered facet is **`techstack`**
-(`/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/enrichment_sources.json`),
+(`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`),
 and its routes run in precedence order:
 
 - **`explorium`**, the machine technographic scan — **T1**, and **LIVE IN YOUR

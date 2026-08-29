@@ -54,7 +54,7 @@ any stakeholder-driven changes with rationale.
 
 ## Peer Scoring Protocol
 
-For each of 5 peers, for each of 17 categories:
+For each of 5 peers, for each of the 16 categories:
 
 1. **Gather public evidence** (abbreviated search — focus on T1-T3 sources)
 2. **Apply identical scoring methodology** (same rubrics, same decision tree, same caps)
@@ -71,7 +71,7 @@ For each of 5 peers, for each of 17 categories:
 
 ## Benchmark Calculation
 
-For each of the 17 categories:
+For each of the 16 categories:
 
 ```python
 peer_scores = [peer_1, peer_2, peer_3, peer_4, peer_5]
@@ -124,7 +124,7 @@ comparable [sub-vertical] institutions. The calculated peer median of [Y.YY]
 of [+/-Z.ZZ].
 
 [If below median]: This [gap amount] represents the [Nth] largest improvement
-opportunity across the 17 categories assessed, driven primarily by [root cause
+opportunity across the 16 categories assessed, driven primarily by [root cause
 with evidence citation].
 
 [If above median]: This [lead amount] reflects [specific institutional strength

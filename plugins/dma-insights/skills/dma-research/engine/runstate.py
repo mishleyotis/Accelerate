@@ -20,6 +20,17 @@ claims success it did not have is the same defect with worse consequences.
 """
 from __future__ import annotations
 
+# Runnable both ways. `python3 -m engine.<mod>` is the documented invocation,
+# but every audit and every operator reaches for `python3 <path> --help`
+# first, and a relative import dies there. Binding __package__ makes the two
+# equivalent instead of making one of them a trap.
+if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
+    import os as _os
+    import sys as _sys
+    _sys.path.insert(0, _os.path.dirname(_os.path.dirname(
+        _os.path.abspath(__file__))))
+    __package__ = "engine"
+
 import datetime as _dt
 import json
 import os
@@ -164,3 +175,14 @@ def persist(run: Run, dest: str | None = None) -> dict:
     target = d / run.workbook_path.name
     shutil.copy2(run.workbook_path, target)
     return {"outcome": "RESOLVED", "target": str(target)}
+
+
+if __name__ == "__main__":  # a library, but it must answer --help
+    import argparse as _ap
+    _ap.ArgumentParser(
+        prog=__file__.rsplit("/", 1)[-1],
+        description=__doc__.split("\n")[0],
+        epilog="A library module: import it, or run the modules that do have "
+               "a command line (cli, orient, floors_gate, validator, handoff, "
+               "reports, strip_working_area, patch_validator, watchdog).",
+    ).parse_args()

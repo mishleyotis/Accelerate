@@ -10,7 +10,7 @@ This script suite implements a production-grade pipeline for Digital Maturity As
 1. **Evidence Ingestion** - Extract text from PDF/DOCX/PPTX/TXT/CSV documents
 2. **Indexing** - Build BM25 retrieval index with smart tokenization
 3. **Query Generation** - Generate taxonomy-aware queries for subcapabilities
-4. **Batch Scoring** - Score all ~836 subcapabilities with caching and checkpointing
+4. **Batch Scoring** - Score all 851 subcapabilities (full scope) with caching and checkpointing
 5. **QA Auditing** - Validate workbooks for compliance and quality
 6. **Retrieval Evaluation** - Measure retrieval quality against test sets
 
@@ -399,7 +399,7 @@ This runs:
 1. Ingests all documents from `/home/docs/navy_federal`
 2. Builds BM25 index
 3. Generates queries from Pillar XLSX files
-4. Scores all 836 subcapabilities
+4. Scores all 851 subcapabilities (full scope)
 5. Audits the resulting workbook
 6. Outputs workbook, QA results, and visualizations to `./assessment_output`
 

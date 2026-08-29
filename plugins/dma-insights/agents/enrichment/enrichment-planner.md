@@ -127,7 +127,7 @@ general opinion about which fields matter.
    tell you how much of the list has history behind it before you rank anything.
    And a run with nothing staged returns an empty list with a `note` saying so;
    report that note rather than presenting an empty worklist as a complete run.
-2. `/home/user/Accelerate/packages/shared/enrichment_gaps.py` — **how the list
+2. `packages/shared/enrichment_gaps.py` — **how the list
    is computed**, which is the only way to read it correctly. Four things live
    there and nowhere else: the four-way distinction the module turns on
    (**stated** → not a gap; **held**, meaning null or quarantined **with a
@@ -138,7 +138,7 @@ general opinion about which fields matter.
    `not_producer_authored` drop; and the `absence_is_correct_when` demotion.
 3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`
    (real path:
-   `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/enrichment_sources.json`)
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`)
    — per facet, which connector serves it in precedence order and each source's
    `status`. **`declared, not wired` grants nothing** — routing a row to Moody's,
    Harmonic, CB Insights, Mergr or Quartr is routing it nowhere.
@@ -154,7 +154,7 @@ general opinion about which fields matter.
    (10), `.../rulebooks/platform.md` (8), `.../rulebooks/insights.md` (3),
    `.../rulebooks/techstack.md` (2). Every one ends in a **Gap-to-pathway**
    bullet naming which kinds that section emits and what closes each.
-6. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+6. `docs/text/DMA Insights - Surface Specification.txt`
    § **H3 · Thin-evidence alerts** (the three-state classification, the ladder,
    `closure_condition`, and the ageing escalation), § **O10 · Evidence
    coverage** and § **O11 · Evidence tier distribution** (the two censuses your
@@ -167,7 +167,7 @@ general opinion about which fields matter.
    empty is not yours to write. Skip it."* That decision narrows your plan
    sharply and you must apply it: enrichment effort goes to the cells another
    surface cites and the cells below threshold, **and stops there**.
-8. `/home/user/Accelerate/packages/shared/enrichment_register.json` — per
+8. `packages/shared/enrichment_register.json` — per
    surface, its sources, its `thin_below` **count**, and whether `ran` is
    observable at all. Three surfaces — firmographics, sentiment, thought
    leadership — declare `ran_observable: false`, because *"a filing Clay

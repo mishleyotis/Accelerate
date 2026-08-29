@@ -34,6 +34,17 @@ Three further defects are designed out rather than carried over:
 """
 from __future__ import annotations
 
+# Runnable both ways. `python3 -m engine.<mod>` is the documented invocation,
+# but every audit and every operator reaches for `python3 <path> --help`
+# first, and a relative import dies there. Binding __package__ makes the two
+# equivalent instead of making one of them a trap.
+if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
+    import os as _os
+    import sys as _sys
+    _sys.path.insert(0, _os.path.dirname(_os.path.dirname(
+        _os.path.abspath(__file__))))
+    __package__ = "engine"
+
 import argparse
 import json
 import sys

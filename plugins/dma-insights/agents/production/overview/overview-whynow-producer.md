@@ -67,7 +67,7 @@ cannot see from inside your own prose.
    refusal; read the doc.
 2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
    **§ O3 and § "O3 drilldown · Why-now signal row (inline)"** (real path:
-   `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/overview.md`,
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`,
    the O3 block begins at the heading `## O3 · Why-now signals`) — the Baxter
    positive pattern, the three learned anti-patterns, the customer exclusion set
    and the enrichment pathways. Applied by default, not by memory. The rulebook
@@ -78,7 +78,7 @@ cannot see from inside your own prose.
    spec states less sharply: `synthesis` is a **required field, not a closing
    flourish**, and `cost_of_acting_now` is **required per signal** and is the
    field that gets dropped. It also carries the disclosing-entity rule below.
-4. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+4. `docs/text/DMA Insights - Surface Specification.txt`
    **§ O3 · Why-now signals** — "What must be presented", "Why it is shaped this
    way", the information-source table and the synthesis prompt. This is the
    contract; nothing below it may narrow a field it requires.

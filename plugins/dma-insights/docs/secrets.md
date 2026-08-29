@@ -53,11 +53,31 @@ rotated on the next connector deploy):
 **What it is.** The JSON key of
 `dmai-routine@digital-maturity-assessor.iam.gserviceaccount.com` — the
 identity fresh routine containers use, because they have no gcloud and no
-other Google credential (measured 2026-08-19). Deliberately weak: exactly
-`roles/run.invoker` on the `dmai-mcp` and `dmai-api` services and
-`roles/secretmanager.secretAccessor` on `dmai-mcp-path-token`. It can call
-the connector and read that one secret; it cannot deploy, read the
-database, touch storage, or mint other identities.
+other Google credential (measured 2026-08-19).
+
+**Its IAM is deliberately weak: exactly** `roles/run.invoker` on the
+`dmai-mcp` and `dmai-api` services and `roles/secretmanager.secretAccessor`
+on `dmai-mcp-path-token`. It cannot deploy, read the database, touch
+storage, or mint other identities.
+
+**Its DRIVE reach is not weak, and this section used to omit it.** Drive
+access is granted by FOLDER SHARING, not by IAM, so no role above bounds it.
+`scripts/drive_fetch.py` mints `https://www.googleapis.com/auth/drive` — the
+FULL read-write scope, not `drive.readonly` — from this same key, and the
+routine uses it to write back into client folders (push-bundle, push-memory,
+push-ledger). So the real blast radius of this key is: call two Cloud Run
+services, read one secret, **and read or write every Drive file or folder
+shared with `dmai-routine@`.**
+
+Two consequences worth stating where the key is described:
+
+* Whoever shares a folder with this service account sets its reach. Sharing
+  a parent folder shares everything under it, and nothing in this repository
+  can see or limit that.
+* Files it writes back carry internal-audience content and are outside every
+  server-side redaction check — `get_report_bundle` takes no audience
+  parameter, and the exclusion-boundary auditor compares two API projections,
+  never a file on Drive.
 
 **Where it lives.**
 - Escrow: Secret Manager, secret `dmai-routine-sa-key`, same project.
@@ -145,6 +165,9 @@ audience check compares the two service names for exactly this reason.
   no third-party API credentials.
 - `repo_root` is a path, not a secret; it only lets `precheck_gates.py`
   import the connector's own gate modules.
+- No Drive restriction. This is an absence, not a safeguard: see §1b — the
+  routine key holds the full `auth/drive` scope and its reach is whatever
+  has been shared with it.
 
 ## Preflight
 

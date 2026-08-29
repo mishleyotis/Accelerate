@@ -127,7 +127,7 @@ Every path below has been verified to exist.
 5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
    and `.../03-pages/rulebooks/insights.md` — the register-to-landscape recomputation and
    the `reconciles_to_register` flag.
-6. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+6. `docs/text/DMA Insights - Surface Specification.txt`
    §§ **O1** (line 41), **O5** (line 217), **H4** (line 543), **P1** (line 720),
    **T2** (line 527) and the page-lifecycle **Reconcile** step (line 1370
    onward). **Where the specification and the rulebook disagree, the

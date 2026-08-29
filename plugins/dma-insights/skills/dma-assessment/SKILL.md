@@ -2,8 +2,9 @@
 name: dma-assessment
 description: >
   Conducts Digital Maturity Assessments (DMA) for financial services institutions using
-  argument-based reasoning. Covers 8 sub-verticals across 4 pillars, 17 categories, 144
-  capabilities, ~836 subcapabilities scored M1-M5. Works best when preceded by dma-research
+  argument-based reasoning. Covers 9 sub-verticals across 4 pillars, 16 categories, 136
+  capabilities, 851 subcapabilities (686 universal + 165 sub-vertical
+  variants) scored 1-5 and rendered in four bands. Works best when preceded by dma-research
   skill (research_handoff.json with claim-labeled evidence, tech utilization, uncertainty
   bands). ALWAYS use this skill when the user mentions: DMA, digital maturity, scoring
   subcapabilities, maturity rubric, pillar scoring, scoring workbook, cap enforcement, peer
@@ -66,7 +67,7 @@ This is the ONLY acceptable column layout. It matches the proven CFC workbook fo
 **Additional sheets (same as CFC workbook):**
 - Executive_Summary — Overall maturity snapshot
 - Pillar_Summary — 4 pillar rows + Overall, with weights, scores, peer medians, gaps
-- Category_Detail — 17 category rows with scores, weights, peer medians, priorities
+- Category_Detail — 16 category rows with scores, weights, peer medians, priorities
 - Evidence_Master — All evidence items with ID, Source, URL, Tier, Recency, Claim_Type, Finding
 - Peer_Benchmarks — Peer scores per category
 - Recommendations — Top recommendations with evidence linkage
@@ -149,7 +150,7 @@ and instruct the user to continue in a new conversation.
 ## Taxonomy & Maturity Scale
 
 ```
-Pillar (4) → Category (17) → Capability (144) → Subcapability (~836)
+Pillar (4) → Category (16) → Capability (136) → Subcapability (851)
 ```
 
 | Pillar | Name | Subcaps |
@@ -159,7 +160,10 @@ Pillar (4) → Category (17) → Capability (144) → Subcapability (~836)
 | P3 | Operations, Risk & Compliance | ~162 |
 | P4 | Data, Analytics & Technology | ~187 |
 
-**Note:** Taxonomy counts (~836) are the theoretical maximum from the Pillar XLSX toolkits.
+**Note:** Taxonomy counts (851 = 205 P1 + 292 P2 + 164 P3 + 190 P4) are
+COUNTED FROM THE CATALOGUE, never asserted: run
+`python3 plugins/dma-insights/skills/dma-research/engine/contract.py`.
+They are the theoretical maximum from the Pillar XLSX toolkits.
 Actual workbook rows vary by sub-vertical (some subcaps are N/A). Typical observed ranges:
 P1≈186, P2≈232, P3≈118, P4≈172 (~708 total). Both are valid — the workbook contains
 all applicable subcaps for the specific institution's sub-vertical.
@@ -430,7 +434,7 @@ Execute Phase Gate Protocol. Apply ERR-003, ERR-008, ERR-009.
 **Dual-Source Mandate:** web_search is PRIMARY (≥70% of queries). Moody's connectors supplement
 with structured credit/financial data. web_search MUST precede Moody's for each capability.
 
-**For every subcap (~836):** 3-5 `web_search` queries → Moody's enrichment → `web_fetch` rich docs → fact-level extraction [E-xxx:Fy] → tier classify → map to specific subcap IDs.
+**For every subcap (851 at full scope):** 3-5 `web_search` queries → Moody's enrichment → `web_fetch` rich docs → fact-level extraction [E-xxx:Fy] → tier classify → map to specific subcap IDs.
 
 **For HYBRID/INTERNAL mode:** Load internal evidence FIRST per Internal Evidence Integration Protocol (see below). Internal T1/T2 evidence takes priority over public T3-T5.
 
@@ -771,7 +775,11 @@ qa_verdict = {
 - Heading text: Dark Teal `#1F9A90`
 - Table header bg: Primary Teal `#27BBAF` (white text)
 - Body: Charcoal `#333333` | Alt rows: Light Teal `#E8F8F6`
-- Maturity: M1=`#D32F2F` M2=`#F57C00` M3=`#FBC02D` M4=`#388E3C` M5=`#1565C0`
+- Maturity BANDS (four, and only four — charter invariant 6):
+  Activating=`#D32F2F` Building=`#62D7B8` Competing=`#FBC02D`
+  Differentiating=`#388E3C`. A null score gets NO swatch. There is no
+  fifth band and no hex for one; the score levels 1-5 are a different
+  scale from the four display bands and never carry a colour.
 
 **Layout:** Letter, 1" margins, 11pt body, 1.15 spacing. Cover page: teal bg, white text. See `references/report_template.md`.
 

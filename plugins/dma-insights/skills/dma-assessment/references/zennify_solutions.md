@@ -10,7 +10,7 @@ Solution recommendations in DMA assessments demonstrate alignment between identi
 
 ## Solution Overview
 
-Zennify offers 12 primary solutions addressing gaps across the 4 pillars and 17 categories of digital maturity:
+Zennify offers 12 primary solutions addressing gaps across the 4 pillars and 16 categories of digital maturity:
 
 1. Salesforce Service Cloud
 2. Financial Services Cloud

@@ -483,9 +483,18 @@ def compare_to_workbook(path) -> list[str]:
 
 
 if __name__ == "__main__":  # a one-line answer to "what is the shape?"
+    import argparse
     import sys
-    if len(sys.argv) > 1:
-        for line in compare_to_workbook(sys.argv[1]) or ["contract: no divergence"]:
+    ap = argparse.ArgumentParser(
+        description=__doc__.split("\n")[0],
+        epilog="With no --workbook this prints the counts, measured from the "
+               "catalogue. With one, it prints how that workbook diverges "
+               "from the contract — which is the honest answer when the "
+               "pinned template is exported and compared (AUD-0069).")
+    ap.add_argument("--workbook", help="compare this workbook to the contract")
+    a = ap.parse_args()
+    if a.workbook:
+        for line in compare_to_workbook(a.workbook) or ["contract: no divergence"]:
             print(line)
-    else:
-        print(json.dumps(counts(), indent=2))
+        sys.exit(0)
+    print(json.dumps(counts(), indent=2))

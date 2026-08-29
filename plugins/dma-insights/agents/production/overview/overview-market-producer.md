@@ -101,7 +101,7 @@ average.
    renderer-only, and filling one is this pair's most common defect.
 2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
    **§ O8 and § O9** (real path:
-   `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/overview.md`;
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`;
    the blocks begin at `## O8 · Financial trajectory` and `## O9 · Sentiment`, and
    `## DD-12 · Sentiment source card (drilldown from O9)` carries the drilldown) —
    the Baxter positive patterns, the learned anti-patterns, the customer exclusion
@@ -114,7 +114,7 @@ average.
    `themes` and `gap_analysis` **are now writable** (they were discarded at
    promotion until recently, which is why older runs render nine words of sentiment
    and it was not producer laziness).
-4. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+4. `docs/text/DMA Insights - Surface Specification.txt`
    **§ O8 · Financial trajectory** and **§ O9 · Sentiment** — "What must be
    presented", "Why it is shaped this way", the information-source tables, the
    O9 drilldown note and both synthesis prompts. This is the contract; nothing
@@ -142,7 +142,7 @@ average.
    at `facets.firmographics` (which carries O8) and `facets.sentiment`, and
    `.../02-inputs/2-clay-enrichment.md` for what Clay can and cannot reach — news
    sentiment at T3 is one route of several and is never review-site depth.
-10. `/home/user/Accelerate/packages/shared/enrichment_register.json` at
+10. `packages/shared/enrichment_register.json` at
     `surfaces["overview.sentiment"]` — `counts: bars`, `thin_below: 1`,
     `ran_observable: false` with the reason string to reproduce rather than invent,
     and the `absent_columns.trend_vs_prior` sentence. There is **no register entry

@@ -71,7 +71,10 @@ Geography: [Branch count], [Geographic footprint]
 ### Methodology & Evidence
 ```
 Framework: Zennify [Sub-Vertical] Digital Maturity Model v5.0 — 4 pillars,
-17 categories; 1-5 maturity scale (M1 Foundational → M5 Transformational)
+16 categories; a 1-5 SCORE scale (M1 Foundational … M5, the workbook's
+own scale) which RENDERS in four bands — Activating, Building,
+Competing, Differentiating. Never name a fifth band in prose: it has no
+colour to render into (charter invariant 6).
 Benchmarks: [Sub-Vertical] — [Size Tier] capability medians, P25/P75, best, laggard
 Evidence Mode: [PUBLIC / INTERNAL / HYBRID]
 ```
@@ -349,7 +352,7 @@ List each with hyperlink and date. Sort by ERS within tier.
 
 ## Appendix A: Capability Definitions
 
-For each of the 17 categories, provide a 2-3 sentence definition. These are standard
+For each of the 16 categories, provide a 2-3 sentence definition. These are standard
 across all assessments:
 
 **P1C1: Digital Strategy & Vision** — Existence of a documented digital strategy and vision

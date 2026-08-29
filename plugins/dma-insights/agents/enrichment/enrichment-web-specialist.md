@@ -112,7 +112,7 @@ in this discipline, not optional.
 
 1. `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/references/deep_search_protocol.md`
    (real path:
-   `/home/user/Accelerate/plugins/dma-insights/skills/dma-research/references/deep_search_protocol.md`)
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/references/deep_search_protocol.md`)
    — the ten-tier query system, the decomposition of a diagnostic question into
    Subject / Verb / Qualifier / Evidence / Negative, the ten query-construction
    rules, the proxy library and the escalation protocol. **Tiers 1–6 are
@@ -150,7 +150,7 @@ in this discipline, not optional.
    `.../rulebooks/techstack.md` (§ T1, § T3), `.../rulebooks/platform.md`
    (§ P1, § P2), `.../rulebooks/context.md` (§ C1, § C2),
    `.../rulebooks/heatmap.md` (§ H1, § H3).
-8. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+8. `docs/text/DMA Insights - Surface Specification.txt`
    § **O9 · Sentiment**, § **O12 · Thought leadership signal**, § **O2 ·
    Firmographics strip**, § **O3 · Why-now signals** and § **T1 · Technology
    stack register** — "What must be presented" and the synthesis prompts, which

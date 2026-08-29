@@ -50,7 +50,7 @@ These are REAL headlines extracted from Zennify's 7 PPTX templates. Each entry s
 
 **Pattern 3: Scope + Stakes**
 - Structure: "[Initiative] for [Client] — [N deliverables] addressing [core challenge]"
-- Example: "Digital Maturity Assessment for Pacific Coast CU — 144 capabilities revealing the path from 2.4 to 3.2"
+- Example: "Digital Maturity Assessment for Pacific Coast CU — 136 capabilities revealing the path from 2.4 to 3.2"
 - When to use: Executive summary covers; when engagement scope matters to the audience
 - Word count: 14–22 words
 - Power: Establishes both breadth and focus in one breath
@@ -82,7 +82,7 @@ These are REAL headlines extracted from Zennify's 7 PPTX templates. Each entry s
 
 **Pattern 7: Distribution Insight**
 - Structure: "[N] of [total] capabilities cluster [below/above] benchmark, concentrated in [area]"
-- Example: "76 of 144 capabilities cluster below peer benchmark, concentrated in AI/ML readiness and data governance — two areas with known resource constraints"
+- Example: "76 of 136 capabilities cluster below peer benchmark, concentrated in AI/ML readiness and data governance — two areas with known resource constraints"
 - When to use: Segmenting a large capability universe; showing where help is needed most
 - Word count: 18–24 words
 - Power: Converts overwhelming data into actionable geography

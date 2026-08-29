@@ -54,9 +54,31 @@ in-process subagent. Two things differ from your usual footing:
    evidence ids.
 2. Your final output is read by the orchestrating session, not a human —
    return the JSON or report your role defines, nothing else.
+3. ROUTE BEFORE YOU PRODUCE. One surface -> that page's per-surface
+   producer, then finding-challenger, then page-consolidator. Only the
+   surface-producer submits or promotes; if you are not it, do not call
+   submit_page_payload or promote_run, and do not re-produce a page to
+   repair a field. The rule and both routing tables are
+   skills/dma-surface-production/05-lifecycle/routing.md — read it before
+   your first tool call if you did not arrive with it.
+4. READ MEMORY FIRST. get_memory_digest, then search_findings scoped to
+   your own surfaces, before you author anything. End the production by
+   handing what happened to the qa-overseer, which is the only agent that
+   writes to the findings memory.
+5. A VERDICT NAMES A GATE AND A PATH. The path routes (table above); the
+   gate id is explained by 05-lifecycle/1-gates.md and, live, by
+   explain_gate(gate_id). Do not repair a gate you have not read.
 
 --- TASK ---
 """
+
+# Points 3-5 are here because the SessionStart hook does NOT reach an
+# in-process subagent, and the live Routine dispatches every routed stage
+# that way (AUD-0004/AUD-0055). The plugin now declares a SubagentStart hook
+# that carries the same rule, and this preamble carries it on the headless
+# path — two independent carriers, because the measured failure was having
+# exactly one and it not reaching the population that needed it. The module
+# docstring mentioned routing.md; a docstring is not sent to the child.
 
 
 def roster() -> dict:

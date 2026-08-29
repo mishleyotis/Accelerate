@@ -87,7 +87,7 @@ what produces a card of press releases with no people in it.
    Read the `doc` for `alignment` in particular; a remembered shape is a refusal.
 2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
    **§ O7 and § O12** (real path:
-   `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/overview.md`;
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`;
    the blocks begin at the headings `## O7 · Leadership panel` and
    `## O12 · Thought leadership signal`) — the Baxter positive patterns, the four
    learned anti-patterns each, the customer exclusion sets and the enrichment
@@ -100,7 +100,7 @@ what produces a card of press releases with no people in it.
    does not exist** (invariant 1 — the app makes no third-party call while
    serving), and O12 targets **three to five** admitted entries under a stated
    ranking, not three.
-4. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+4. `docs/text/DMA Insights - Surface Specification.txt`
    **§ O7 · Leadership panel** and **§ O12 · Thought leadership signal** — "What
    must be presented", "Why it is shaped this way", the information-source table
    and the synthesis prompts. This is the contract; nothing below it may narrow a
@@ -125,7 +125,7 @@ what produces a card of press releases with no people in it.
    search and the excludes — Intern, Assistant, Coordinator — that are the guard),
    and `.../02-inputs/enrichment_sources.json` at `facets.leadership` and
    `facets.thought_leadership`.
-10. `/home/user/Accelerate/packages/shared/enrichment_register.json` at
+10. `packages/shared/enrichment_register.json` at
     `surfaces["overview.leadership"]` (`basis_key: enrichment_basis`,
     `contact_keys: [email, linkedin_url, phone]`, `counts: roster`,
     `thin_below: 4`) and `surfaces["overview.thought_leadership"]`

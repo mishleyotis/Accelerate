@@ -312,3 +312,14 @@ def claim_label_supported(row) -> str | None:
                               "CEILING_ESTIMATE"):
         return f"claim label {label!r} is not in the vocabulary"
     return None
+
+
+if __name__ == "__main__":  # a library, but it must answer --help
+    import argparse as _ap
+    _ap.ArgumentParser(
+        prog=__file__.rsplit("/", 1)[-1],
+        description=__doc__.split("\n")[0],
+        epilog="A library module: import it, or run the modules that do have "
+               "a command line (cli, orient, floors_gate, validator, handoff, "
+               "reports, strip_working_area, patch_validator, watchdog).",
+    ).parse_args()

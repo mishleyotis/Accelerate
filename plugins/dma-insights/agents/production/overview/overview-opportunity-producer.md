@@ -76,7 +76,7 @@ is against the report, not just the score matrix.
    the `doc` on every field. Read the doc; a remembered shape is a refusal.
 2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
    **§ O5** (real path:
-   `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/overview.md`,
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`,
    the block begins at the heading `## O5 · Opportunity surface tiles`) — the
    Baxter positive pattern, MEM-0095/CG-31, MEM-0001/CG-13, the measured
    must-present gap, the customer exclusion set and the enrichment pathways.
@@ -92,7 +92,7 @@ is against the report, not just the score matrix.
    `l3_area` resolves which cells a candidate addresses and is never a list you
    write. Copy `top_contributors` across, and read `context.notes` — a term that
    could not run says so.
-4. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+4. `docs/text/DMA Insights - Surface Specification.txt`
    **§ O5 · Opportunity surface tiles** — "What must be presented", the
    decomposable/validated rationale, the information-source table and the
    six-step synthesis prompt.

@@ -94,7 +94,7 @@ the three unresolved dependencies it exists to resolve).
    `platform_roadmap` twice among eighteen item-grain keys that validated at
    submit and were dropped at promotion, every gate green, surfaces empty under a
    real client's name.
-2. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
    — **§ P3** (heading `## P3 · Transformation roadmap`) and **§ P4** (heading
    `## P4 · Stair-step curve`): the Baxter positive pattern, the learned
    anti-patterns, the customer exclusion set and the enrichment pathways for each.
@@ -102,21 +102,21 @@ the three unresolved dependencies it exists to resolve).
    anti-patterns; the Surface Specification is the authority on payload shape**,
    and where they differ that is the split — one place it comes up is named under
    "the contract" below.
-3. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/4-platform.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/4-platform.md`
    — **§ P3** and **§ P4**: the pack's contract, including the reissued P3 prompt
    with its six steps (retrieve-or-derive, emit, referential integrity, acyclicity,
    metrics, absence) and the rule that `phases[].rationale` **renders** and was
    displayed by nothing until recently.
-4. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+4. `docs/text/DMA Insights - Surface Specification.txt`
    — **§ P3 · Transformation roadmap** and **§ P4 · Stair-step curve**: "What
    must be presented", "Why it is shaped this way", the information-source tables
    and the two synthesis prompts. This is the contract; nothing below it may
    narrow a field it requires.
-5. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census rows: P3 → `platform.roadmap`, no enrichment facet, gate family
    `CG (P3 ↔ P2 rec ids reconcile)`; P4 → `platform.stairstep`, no enrichment
    facet, gate families `SG:S33 · CG (step order = roadmap = sequencing)`.
-6. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
    — what the most-blocking gates test, and `explain_gate` for the one that fired.
    CG-09 (a closed vocabulary takes one of its values) governs `horizon`; CG-13
    (every required field has somewhere to live) is the promotion-drop class above.
@@ -133,13 +133,13 @@ the three unresolved dependencies it exists to resolve).
    drawn from; `get_capability_catalogue` to resolve every cell id and category
    name — never copy a capability name out of report prose; `get_evidence` for
    every id you cite.
-10. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/04-craft/3-page-narrative.md`
+10. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/04-craft/3-page-narrative.md`
     for the `narrative_thread` standard, and
-    `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/3-language.md`
+    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/3-language.md`
     for the house voice. When a ladder is not derivable,
-    `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/4-absence-protocol.md`
+    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/4-absence-protocol.md`
     is how the empty state is written.
-11. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/scripts/check_consistency.py`
+11. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py`
     reconciles phase `rec_ids` against the recommendation set, and
     `.../scripts/check_payload.py` catches vocabulary values the connector's own
     CG-09 does not reach. Run them before you return.
@@ -463,7 +463,7 @@ What *is* enrichable is the **timing constraint** the sequence carries. An
 integration in flight or a migration date already in evidence reaches this page
 through the acquisitions (C5) and why-now (O3) surfaces, where `clay` Recent News
 sits at T3 in
-`/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/clay_taxonomy.json`,
+`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/clay_taxonomy.json`,
 and through `first_party` disclosures at T1–T2. The bounded web-search pathways,
 which **date** constraints and never invent an order, are in the rulebook's
 § P3 and § P4 enrichment blocks:

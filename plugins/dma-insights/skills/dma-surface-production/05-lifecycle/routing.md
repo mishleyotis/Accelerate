@@ -218,6 +218,79 @@ rectifier's job and nobody else's.
 | what production actually serves | `deployed-app-auditor` |
 | a defect class that keeps recurring | `rectifier` |
 
+## Two routes that used to dead-end
+
+Five tasks were traced from the session brief through this table. Three
+resolved in two hops. These two did not, and both are fixed here rather than
+left to be rediscovered.
+
+### A reviewer Accepted or Rejected an insight card
+
+The rule above routes "when a verdict, a rejection ticket, an audit finding or
+a reviewer note **names a JSON path**". Reviewer feedback does not name one:
+`list_reviewer_feedback` is keyed by `ic_id` / `display_id` / `run_id` and
+carries no path column, so the reviewer channel — the one way a human's
+judgement re-enters the pipeline — was the only repair channel this table
+could not resolve. Unattended, a rejected card either went unrepaired or was
+repaired by re-producing the whole insights page, which is exactly the cost
+the two tiers exist to prevent.
+
+**Route by id prefix.** Every authored id belongs to one surface:
+
+| id prefix | what it is | payload section | route to |
+|---|---|---|---|
+| `ic_id` | an insight card | `insights.insights` | `insights-cards-producer` |
+| `rec_id` | a recommendation | `platform.recommendations` | `platform-fit-producer` |
+| `f_id` | a top finding | `overview.findings` | `overview-findings-producer` |
+| `fa_id` | a focus area | `heatmap.focus_areas` | `heatmap-focus-producer` |
+| `ts_id` | a techstack register row | `techstack.techstack` | `techstack-register-producer` |
+| `wn_id` | a why-now signal | `overview.why_now` | `overview-whynow-producer` |
+
+These are the six id classes the agent is permitted to mint (invariant 10), so
+the table is closed: an id that is not one of these was not authored here, and
+a note naming one is a bug report about the id allocator, not a surface repair.
+
+### After a compaction, a resume or a fork
+
+A synthesis firing that produces six pages **will** compact. When it does, the
+routing rule, the memory rule and the submit boundary are whatever the
+summariser chose to keep — and there was no file that said what to do about
+it, so an agent that lost the brief mid-run had nowhere to route even if it
+knew to look.
+
+**On the first turn after a compaction, resume or fork, before any other tool
+call:**
+
+1. Re-read this file. It is the whole rule; it is 17 KB and it is cheaper than
+   one wrong page.
+2. `get_run_progress(run_id)` — what is already staged is what you do not
+   redo. Staged sections survive compaction; your memory of writing them does
+   not.
+3. `list_open_rejections(run_id)` and `get_validation_verdict(run_id)` — a
+   verdict that landed before the compaction is still the current instruction.
+4. Only then take work, and take it through the routing tables above.
+
+The plugin's `SessionStart` hook prints an abbreviated form of this on all
+five start sources — `startup`, `clear`, `resume`, `compact`, `fork` — and its
+`SubagentStart` hook prints it to every dispatched producer, which do not
+inherit the parent's context. If you are reading this because a hook told you
+to, that is the mechanism working.
+
+## Gates, and reading a verdict
+
+A verdict names a gate id and the JSON path it fired on. The **path** is what
+routes — through the tables above, to one producer. The **gate id** is what
+tells you what to change:
+
+- `05-lifecycle/1-gates.md` explains the gates that block most often at
+  length, and carries a generated census of all 69 ids in the connector's
+  registry. No id the connector can emit is absent from it.
+- `explain_gate(gate_id)` is the connector's own authority: the registry's
+  wording plus the threshold history, live, for any id.
+
+Do not repair a gate you have not read. A guessed rule passes the gate it was
+guessed against and fails the next one.
+
 ## Sizing the route
 
 - **One surface flagged** (a reviewer note, a failed gate on one path):

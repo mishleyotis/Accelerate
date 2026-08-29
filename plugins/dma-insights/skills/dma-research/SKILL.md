@@ -3,7 +3,7 @@ name: dma-research
 description: >
   Conducts subcapability-level public evidence research for Digital Maturity Assessments
   of financial services institutions. Reads diagnostic questions from Pillar XLSX toolkits,
-  generates targeted search queries for each of ~836 subcapabilities, executes web searches,
+  generates targeted search queries for each of 851 subcapabilities, executes web searches,
   maps evidence to specific subcap rows, and populates the scoring workbook with evidence
   (leaving score columns empty for dma-assessment). NO scoring, NO maturity levels — ceiling
   estimates with uncertainty bands ONLY. ALWAYS use when the user mentions: DMA research,
@@ -392,7 +392,7 @@ Only AFTER all 5 proxy types are attempted can you conclude NO_EVIDENCE.
 
 ## Batch Execution Protocol
 
-6 batches × ~836 subcaps × 3-5 searches/subcap = 2,500-4,200 web searches + Moody's enrichment + 100-300 web_fetches.
+6 batches × up to 851 subcaps × 3-5 searches/subcap = 2,500-4,200 web searches + Moody's enrichment + 100-300 web_fetches.
 Each subcap gets its OWN 3-5 queries derived from its diagnostic question.
 Shared document mining (annual reports, 10-Ks) supplements but does NOT replace per-subcap searches.
 Complete batch → HANDOFF SUMMARY → STOP → wait for "continue."
@@ -525,7 +525,7 @@ CSVs (A2,A7-A9) + VIZ PNGs + research_handoff.json. **Stop:** "--- RESEARCH COMP
 === BATCH [N] HANDOFF ===
 Entity: [Name] | Classification: [SV]
 Assessment ID: [RUN_ID] | Evidence Mode: [PUBLIC/INTERNAL/HYBRID]
-Evidence: E-001–E-[XXX] | Subcaps: [N]/836 ([X]%)
+Evidence: E-001–E-[XXX] | Subcaps: [N]/[SELECTED] ([X]%)
 Coverage: [N] ≥3, [M] thin, [P] none | Claims: [F/I/H/CE counts]
 Tech: [N] total, [M] Zennify-priority | Gates: [N] PASS, [M] FAIL
 Peers (LOCKED): [Peer1, Peer2, Peer3, ...]
@@ -568,7 +568,7 @@ CONTINUE to resume from [subcap ID]. ---
 | `references/safeguard_gates.md` | Batch 4 | 16 safeguard gates |
 | `references/deliverables_spec.md` | Batch 5 | D0-D6 structure, appendix specs |
 | `references/document_formatting.md` | Batch 5 | Zennify branding, DM Sans, python-docx |
-| `references/diagnostic_questions.md` | Fallback | All ~836 diagnostic questions |
+| `references/diagnostic_questions.md` | Fallback | ONE question per category, not per subcapability — 71 in all. It is NOT a substitute for the toolkits; a run that falls back to it is running on 8% of the coverage the name implies, and must say so. |
 
 ## Scripts
 
@@ -612,7 +612,7 @@ Glassdoor culture, impact on P1C4/P4 ceilings).
 ASSESSMENT ID: [RUN_ID]
 EVIDENCE MODE: [PUBLIC/INTERNAL/HYBRID]
 PARAMETER LOCK: [Subvertical] toolkit bound
-SUBCAPS: [N]/836 ([X]%) | COVERAGE: [N]≥3, [M] thin, [P] none
+SUBCAPS: [N]/[SELECTED] ([X]%) | COVERAGE: [N]≥3, [M] thin, [P] none
 CEILINGS: [X] caps, avg ±[Y] | TECH: [N] total, [M] Zennify-priority
 CLAIMS: [F/I/H/CE] | GATES: [N] PASS, [M] FAIL
 PEERS (LOCKED): [Peer1 (SizeTier), Peer2 (SizeTier), ...]

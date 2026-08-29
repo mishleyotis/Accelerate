@@ -137,7 +137,7 @@ Every path below has been verified to exist.
    pathways and the gap-to-pathway mapping), `.../03-pages/rulebooks/platform.md` and
    `.../03-pages/rulebooks/heatmap.md` § H5 (which has *none*, deliberately — a gate
    result cannot be searched into being).
-7. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+7. `docs/text/DMA Insights - Surface Specification.txt`
    §§ **O7** (line 304), **O2** (line 86), **O9** (line 379), **O12** (line 462),
    **T1** (line 1031) and **H5** (line 1137). **Where the specification and the
    rulebook disagree, the specification wins on payload shape and the rulebook

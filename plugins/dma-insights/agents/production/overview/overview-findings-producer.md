@@ -115,7 +115,7 @@ Read in this order. Each path has been verified to exist.
 3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
    § O6 — the packaged contract with the full synthesis prompt and its seven
    numbered steps. The repo-side source of the same text is
-   `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+   `docs/text/DMA Insights - Surface Specification.txt`
    § O6, and where the two disagree **the specification wins on payload shape
    while the rulebook wins on anti-patterns**.
 4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/04-craft/4-card-anatomy.md`

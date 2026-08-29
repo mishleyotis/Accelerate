@@ -182,7 +182,7 @@ def recalculate_ers(evidence_items, corroboration_pairs):
     return evidence_items
 
 
-def calculate_coverage_stats(subcap_map, total_subcaps=836):
+def calculate_coverage_stats(subcap_map, total_subcaps=None):
     """Calculate evidence coverage statistics."""
     ready = sum(1 for v in subcap_map.values() if len(v) >= 3)
     thin = sum(1 for v in subcap_map.values() if 1 <= len(v) < 3)

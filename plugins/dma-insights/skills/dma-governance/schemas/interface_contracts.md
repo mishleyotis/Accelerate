@@ -313,7 +313,7 @@ schema definition.
     }
   ],
   "summary": {
-    "total_subcaps": 836,
+    "total_subcaps": 851,
     "decision_paths_logged": 836,
     "critic_attacks": 400,
     "critic_downgrades": 25,

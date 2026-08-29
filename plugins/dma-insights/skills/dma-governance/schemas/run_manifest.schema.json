@@ -185,7 +185,7 @@
         },
         "categories": {
           "type": "object",
-          "description": "Category-level scores (all 17 categories)",
+          "description": "Category-level scores (all 16 categories in v7.0)",
           "required": ["P1C1","P1C2","P1C3","P1C4","P1C5","P2C1","P2C2","P2C3","P2C4","P3C1","P3C2","P3C3","P3C4","P4C1","P4C2","P4C3","P4C4"],
           "patternProperties": {
             "^P[1-4]C[1-5]$": {

@@ -93,33 +93,33 @@ having none.
 
 1. `get_page_contract("platform")` — the item-key contract for `starters` and the
    `doc` text on every field. A remembered shape is a refusal; read the doc.
-2. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
    — **§ P2b** (heading `## P2b · Conversation starters`): the Baxter positive
    pattern with its measured shape notes, the seven learned anti-patterns, the
    customer exclusion set and the enrichment pathways. Applied by default, not by
    memory. **The rulebook is the authority on anti-patterns; the Surface
    Specification is the authority on payload shape**, and where they differ that
    is the split.
-3. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/4-platform.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/4-platform.md`
    — **§ P2b**: the pack's contract and the synthesis prompt verbatim.
-4. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+4. `docs/text/DMA Insights - Surface Specification.txt`
    — **§ P2b · Conversation starters**: the contract line ("45–90 word
    say-it-aloud openers with distinct opening shapes. No codes, no bracketed ids
    mid-sentence, no score-first opening") and the synthesis prompt with its six
    opening moves, its quote hygiene and its claim hygiene. This is the contract;
    nothing below it may narrow a field it requires.
-5. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census row for P2b: payload anchor `platform.starters`, no enrichment
    facet registered against the surface itself, gate families
    `SG:S31 · CG (no codes in spoken text) · AG`.
-6. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/04-craft/9-antipatterns.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/04-craft/9-antipatterns.md`
    — **§ 2** carries the refused openers this surface's accusation class was
    measured on, and § 9 carries the workflow-status-as-reason rule that governs
    your `empty_state.reason`.
-7. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/3-language.md`
+7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/3-language.md`
    — the house voice, which for this surface is stricter than elsewhere: it must
    survive being read aloud.
-8. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md`
+8. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
    — what the most-blocking gates test, and `explain_gate` for the one that
    fired. AG-03 (every claim-bearing item cites) and CG-15 (a payload that says
    nothing) both sweep this surface.
@@ -135,7 +135,7 @@ having none.
     resolve `named_gap_subcap_id` (never copy a capability name out of report
     prose), and `get_evidence` for every id you cite — including every id behind
     every quoted sentence.
-12. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/scripts/check_language.py`
+12. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_language.py`
     and `.../scripts/check_repetition.py` before you return: the first catches
     codes and register drift in spoken text, the second catches five openers that
     are one opener.
@@ -373,9 +373,9 @@ Each is phrased so that a wrong answer is visible rather than arguable.
 **The surface map registers no facet against P2b itself**; its enrichment arrives
 through the facets its inputs already own, and the rulebook's § P2b names them
 one per opening shape. All of them are declared in
-`/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/enrichment_sources.json`
+`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`
 and tiered in
-`/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/clay_taxonomy.json`:
+`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/clay_taxonomy.json`:
 
 - `their_system_reference` → facet **`techstack`**. `explorium` scan at T1 (wired,
   not live) and `clay` Tech Stack at T1 (wired); `first_party` platform

@@ -1,5 +1,18 @@
 # Capability Scoring Criteria
 
+**16 categories, v7.0.** The retired 17th (P1C5, Sustainable Finance & ESG
+Integration) has been removed: it does not exist in catalogue v7.0 and every
+one of its cells resolves NOT_COMPARABLE across versions, so scoring against
+it produced criteria for a category the app cannot render.
+
+**Two scales, and they are not the same.** The SCORE is 1-5 (M1…M5) and is
+what the workbook carries and this file calibrates. The BAND is what
+RENDERS, and there are exactly four of them — `<2 Activating`, `<3 Building`,
+`<4 Competing`, `>=4 Differentiating`, on the raw score before display
+rounding. There is no fifth band and no colour for one. Never write a fifth
+band word into prose or a payload: it will not match what renders (charter
+invariant 6).
+
 Read this file when scoring specific categories. For each category, use the diagnostic
 questions to guide evidence collection and the level indicators to calibrate scoring.
 For subcapability-level M1-M5 descriptors, always load the relevant Pillar XLSX file.
@@ -91,26 +104,6 @@ LEVEL INDICATORS:
 - M5: Industry-recognized culture; employer brand for digital talent
 
 SEARCH QUERIES: "[Institution] Glassdoor reviews", "[Institution] digital training", "[Institution] employer awards technology"
-
-### P1C5: Sustainable Finance & ESG Integration
-
-DIAGNOSTIC QUESTIONS:
-1. Are ESG criteria integrated into digital/technology decisions?
-2. Is there sustainability reporting on digital operations?
-3. Are green technology options prioritized?
-4. Is climate risk considered in technology planning?
-5. Are there digital products supporting sustainability goals?
-
-LEVEL INDICATORS:
-- M1: No ESG consideration in technology decisions
-- M2: Basic awareness; some environmental reporting
-- M3: ESG policy covers technology; sustainability metrics tracked
-- M4: ESG integrated into technology strategy; climate scenario analysis
-- M5: Industry leader in sustainable technology; net-zero commitments
-
-SEARCH QUERIES: "[Institution] sustainability report ESG", "[Institution] climate commitment", "[Institution] green technology"
-
----
 
 ## P2: Member/Customer Experience & Engagement
 
