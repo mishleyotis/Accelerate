@@ -98,11 +98,38 @@ change nothing without being asked.
 
 ## 2 · Claude-session routines (CCR triggers, fresh session per firing)
 
-Five live: **2a** synthesis lane A, **2e** synthesis lane B (the same work
-ten minutes later, which is how two clients get produced per cycle without
-a session spawning another), **2b** weekly rectification, **2c** daily
-refresh-and-drift, **2d** the hourly watchdog. 2a-ii is retained as a
-deleted routine's record, not as a live one.
+> ## ALL FIVE WERE DELETED ON 2026-08-29, ON THE OWNER'S INSTRUCTION.
+>
+> `list_triggers(enabled=true)` returns `{"data":[]}`. **Nothing in this
+> section is scheduled.** Every prompt is kept verbatim in
+> [`routines-archive/`](routines-archive/) so the schedule can be rebuilt
+> exactly, and everything below stays as written because it is the measured
+> record of why each prompt said what it said — thirteen separate failures
+> are encoded in this prose, and deleting the triggers does not make those
+> lessons wrong. Read it as history, not as a description of what runs.
+>
+> | Routine | id | cron | archived prompt |
+> |---|---|---|---|
+> | dma-synthesis-sequence-a | `trig_01WTf9nQdFPQb6jiSVVyf37u` | `8 */12 * * *` | [dma-synthesis-sequence-a.md](routines-archive/dma-synthesis-sequence-a.md) |
+> | dma-synthesis-sequence-b | `trig_01U8v332dJzmcz47DWRK9qyR` | `18 */12 * * *` | [dma-synthesis-sequence-b.md](routines-archive/dma-synthesis-sequence-b.md) |
+> | dma-rectification-weekly | `trig_01CoypdjU6bcwEewvRYxK3S3` | `0 13 * * 1` | [dma-rectification-weekly.md](routines-archive/dma-rectification-weekly.md) |
+> | dma-refresh-drift-daily | `trig_01CvwqVMuLzWyQUsgwor98Sx` | `0 15 * * *` | [dma-refresh-drift-daily.md](routines-archive/dma-refresh-drift-daily.md) |
+> | DMA synthesis watchdog | `trig_0157aWa8HMryS9nJcxVf9Scm` | `23 * * * *` | [dma-synthesis-watchdog-resume-stalled-runs.md](routines-archive/dma-synthesis-watchdog-resume-stalled-runs.md) |
+>
+> **What stops when these stop.** No client is produced (2a, 2e); no stalled
+> claim is promoted or resumed and a lease that lapses is simply left (2d);
+> the findings store still accepts writes but nothing triages them into
+> refinements (2b); the refresh queue still fills from the app's own hourly
+> sweep but nobody judges it (2c). Section 1's four Cloud Scheduler jobs are
+> **unaffected** — they are the app doing its own bookkeeping and never
+> involved a model. Runs therefore keep coming into existence; nothing turns
+> them into surfaces.
+
+*The five that were live, for reading the sections below:* **2a** synthesis
+lane A, **2e** synthesis lane B (the same work ten minutes later, which is
+how two clients got produced per cycle without a session spawning another),
+**2b** weekly rectification, **2c** daily refresh-and-drift, **2d** the
+hourly watchdog. 2a-ii was already retained as a deleted routine's record.
 
 **NO VERSION LITERAL AND NO CLIENT NAME LIVES IN ANY OF THESE PROMPTS**
 (owner, 2026-08-23). Both rules exist because both failed in the same week.
@@ -235,7 +262,7 @@ triggers existed and were enabled. (b) and (c) were created 2026-08-19T21:24Z fr
 prompts; a firing that finds this paragraph disagreeing with `list_triggers`
 has found the drift section 3's manual reconciliation exists to catch.
 
-### 2a · dma-synthesis-sequence-a — every 12 hours · EXISTS
+### 2a · dma-synthesis-sequence-a — every 12 hours · DELETED 2026-08-29
 
 **Two lanes, not one session spawning another (owner, 2026-08-23; mechanism
 revised the same day).** The owner asked for two clients a cycle in two
@@ -344,7 +371,7 @@ STEP 5 — REPORT. End with: client + run id; the gate's verdict lines; the clai
 Hard rules: this Routine produces shore-united-bank-n-a and nothing else, one firing at a time; never BOK; never edit apps/ code; never write another client's memory file; never synthesize a run the gate did not emit; never produce without holding the claim; if package vetting fails or entity identity is PENDING_REVIEW unresolved, record the finding and stop rather than force a promote.
 ```
 
-### 2b · dma-rectification-weekly — Mondays 13:00 UTC · EXISTS
+### 2b · dma-rectification-weekly — Mondays 13:00 UTC · DELETED 2026-08-29
 
 | | |
 |---|---|
@@ -516,7 +543,7 @@ examined-and-empty, and stop. Do not lower the threshold, do not scan for defect
 nobody sighted, and do not tidy anything. An empty week is the system working.
 ```
 
-### 2c · dma-refresh-drift-daily — daily 15:00 UTC · EXISTS
+### 2c · dma-refresh-drift-daily — daily 15:00 UTC · DELETED 2026-08-29
 
 | | |
 |---|---|
@@ -636,7 +663,7 @@ the run as examined-and-empty — "the window was read and held nothing" and "no
 one looked" must stay distinguishable.
 ```
 
-### 2d · DMA synthesis watchdog — `23 * * * *` · EXISTS
+### 2d · DMA synthesis watchdog — `23 * * * *` · DELETED 2026-08-29
 
 `trig_019rSxYzhDBSTdPry5xABpxr` (recreated 2026-08-29 from this fenced prompt after the 2026-08-23 trigger, trig_0157aWa8HMryS9nJcxVf9Scm, was found missing), fires a FRESH
 session every hour and carries no connectors — by design, since the
@@ -714,7 +741,7 @@ NEVER: re-produce a page that get_run_progress already shows as PASS. Never star
 
 ---
 
-### 2e · dma-synthesis-sequence-b — every 12 hours at :18 · EXISTS
+### 2e · dma-synthesis-sequence-b — every 12 hours at :18 · DELETED 2026-08-29
 
 Lane B: the cycle's SECOND client. Created 2026-08-23 to replace a mechanism
 that could not run — see § 2a for why. It is not a different routine; it is
@@ -766,6 +793,16 @@ deploy that touches `infra/deploy.sh`'s scheduler section, and whenever a
 routine is suspected of not firing — a paused job, a drifted schedule and a
 duplicate all look like nothing at all from inside the app, and the reconciler
 is the only thing that asks.
+
+**Since 2026-08-29 there are no session routines to reconcile, and the thing
+that did the reconciling was one of them.** Section 2's diff was carried by
+the weekly rectifier's STEP 8, so deleting all five removed both the subjects
+and the checker in one act. That is worth stating plainly rather than leaving
+the paragraph below to read as live: while section 2 is empty the diff is
+trivially satisfied, and the moment a routine is recreated the diff has no
+owner until one is given to it. `/dma-insights:doctor` still has no routine
+check. Whoever rebuilds the schedule from `routines-archive/` inherits that
+gap and should close it in the same change.
 
 **Session routines have no reconciler today — reconciliation is manual.**
 This file is their declaration; the check is `list_triggers` (CCR) diffed
