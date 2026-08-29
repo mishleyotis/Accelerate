@@ -262,7 +262,19 @@ jobs:
       # `GET /v1/ops/refresh-queue` into a silent 403 and made the refresh
       # queue unreadable to the gate that drains it. Skipping it would leave
       # the one layer where that could be seen untested.
-      - run: pip install -q pytest openpyxl pg8000 pypdf httpx -r apps/api/requirements.txt
+      # python-docx, and it is the third repetition of the same gap rather
+      # than a new one: the research tier landed three tests under
+      # tests/skills/research_engine/ that open a .docx to check what the
+      # engine wrote, and `from docx import Document` is a COLLECTION-time
+      # import. That is worse than the skips above — an unimportable module
+      # is not one silent skip, it aborts the whole run at collection with
+      # exit 2, so on 2026-08-29 all 4,091 tests stopped running because
+      # three could not be imported. The repo has declared the dependency
+      # since long before (plugins/dma-insights/requirements.txt, and
+      # constraints-py311.txt pins 1.2.0, which is what a dev box already
+      # has); only this runner did not, which is exactly why the suite was
+      # green locally and red here.
+      - run: pip install -q pytest openpyxl pg8000 pypdf httpx python-docx -r apps/api/requirements.txt
       # Gate G rides in here rather than in the gates job above. That job runs
       # bare `python3 script.py` against the stdlib and installs nothing, so a
       # step shelling out to pytest dies on `No module named pytest` — which
