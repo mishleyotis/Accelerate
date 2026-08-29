@@ -157,3 +157,43 @@ def test_the_selection_is_stable_across_calls():
 def test_an_empty_queue_is_not_an_error():
     out = sq.select([])
     assert out["counts"]["selected"] == 0 and out["selected"] == []
+
+
+# ── AUD-0072 · a second request is deferred, not absorbed in silence ─────
+
+def test_a_different_request_for_the_same_entity_is_named():
+    """The dedupe grain stays the ENTITY — two producers on one entity's six
+    pages both promote and the directory picks between them, which is the
+    harm this function exists to prevent. What was missing is the
+    distinction: an obsolete re-ingest has nobody waiting on it, and a
+    second REQUEST has a requester who was never told."""
+    from synthesis_queue import SKIP_ABSORBED, select
+    pending = [
+        {"run_id": "r1", "display_id": "acme", "request_id": "REQ-1",
+         "completed_at": "2026-08-01"},
+        {"run_id": "r2", "display_id": "acme", "request_id": "REQ-1",
+         "completed_at": "2026-07-01"},
+        {"run_id": "r3", "display_id": "acme", "request_id": "REQ-2",
+         "completed_at": "2026-06-01"},
+    ]
+    out = select(pending)
+    assert out["counts"]["selected"] == 1
+    assert out["counts"]["superseded"] == 1     # r2: same request, older run
+    assert out["counts"]["absorbed_requests"] == 1  # r3: a different asker
+    absorbed = [s for s in out["skipped"] if s["why"] == SKIP_ABSORBED]
+    assert [s["run_id"] for s in absorbed] == ["r3"]
+    assert absorbed[0]["absorbed_into"] == "r1"
+    assert absorbed[0]["absorbed_into_request"] == "REQ-1"
+
+
+def test_runs_of_one_request_are_still_plain_supersession():
+    from synthesis_queue import select
+    pending = [
+        {"run_id": "r1", "display_id": "acme", "request_id": "REQ-1",
+         "completed_at": "2026-08-01"},
+        {"run_id": "r2", "display_id": "acme", "request_id": "REQ-1",
+         "completed_at": "2026-07-01"},
+    ]
+    out = select(pending)
+    assert out["counts"]["absorbed_requests"] == 0
+    assert out["counts"]["superseded"] == 1

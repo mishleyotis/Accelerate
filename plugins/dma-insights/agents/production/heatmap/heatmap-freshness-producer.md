@@ -110,7 +110,7 @@ Read in this order. Each path has been verified to exist.
 3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
    § H7 — the packaged contract and the full synthesis prompt. The repo-side source
    of the same prompt is
-   `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+   `docs/text/DMA Insights - Surface Specification.txt`
    § H7 ("Age against a pinned reference date. Status follows band, band follows
    age, age follows a real date — or all three are null"). Where the two disagree
    **the specification wins on payload shape and the rulebook wins on

@@ -66,7 +66,7 @@ file is that somewhere.
   shape, scored-cell count, sub-vertical scope, register rows, quarantines.
   Written once at vetting, corrected as parsing learns more.
 - **thin subcap resolution** — one entry per `is_thin_evidence` cell worked:
-  the ladder run (rulebooks/heatmap.md § H3), what was registered, or why
+  the ladder run (../03-pages/rulebooks/heatmap.md § H3), what was registered, or why
   the cell honestly stays thin. "May be resolved, if need be" (owner,
   2026-08-20) — the ladder decides *need*, this section proves the attempt.
 - **evidence matching corrections** — every assignment a session corrected,

@@ -19,7 +19,7 @@ import re
 from . import shared_path
 from .contracts import sections
 from .evidence_tools import get_evidence
-from .identifiers import MINT_RE
+from .identifiers import MINT_RE, find_fabricated, find_ids
 from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical, serves,
                            variant_subvertical)
 
@@ -83,7 +83,19 @@ _RANKED_SECTIONS = {
     ("platform", "recommendations"),
 }
 
-_SCORE_KEYS = ("score", "entity_score")
+# AUD-0046: CG-07 compares a numeric score beside a grain id to what the run
+# SERVES, and it read two key names. `platform.recommendations[].dma_impact[]`
+# is `{subcap_id, name, current, target, delta}` and the contract says in as
+# many words "current MUST equal what the heatmap serves — assert it". No key
+# in this tuple was named `current`, so the one field the contract tells you
+# to assert was the one the grain lock could not see, and a stale metric in
+# the impact table was unenforceable.
+#
+# `target` is deliberately NOT here: a target is where the client is going,
+# and comparing it to today's served figure would reject every recommendation
+# that proposes an improvement.
+_SCORE_KEYS = ("score", "entity_score", "current", "current_score",
+               "baseline_score")
 _ID_KEYS = ("subcap_id", "category_id", "pillar_id")
 _SUBCAP_RE = re.compile(r"^P\d+C\d+\.")
 _CATEGORY_RE = re.compile(r"^P\d+C\d+$")
@@ -1369,6 +1381,75 @@ def _served_figures(conn, run_id) -> dict:
         if c.get("score") is not None:
             served[c["category_id"]] = float(c["score"])
     return served
+
+
+#: What an r_layer verdict may say. AUD-0045: AG-01 asserted a verdict was
+#: PRESENT and never read it, so a self-REJECTED recommendation passed the
+#: one hard rule the template states.
+_ACCEPTING_VERDICTS = {"SHIP", "SUPPORTED", "HOLDS", "CONFIRMED", "PASS",
+                       "ACCEPT", "ACCEPTED", "SHIP_LOW_CONF"}
+_REJECTING_VERDICTS = {"REJECT", "REJECTED", "DROP", "DROPPED", "REFUTED",
+                       "FAIL", "FAILED", "NOT_SUPPORTED", "UNSUPPORTED",
+                       "WITHDRAWN"}
+
+
+def _walk_strings(node, path):
+    """Yield (path, text) for every string in the payload tree."""
+    if isinstance(node, str):
+        yield path, node
+    elif isinstance(node, dict):
+        for k, v in node.items():
+            yield from _walk_strings(v, f"{path}.{k}")
+    elif isinstance(node, list):
+        for i, item in enumerate(node):
+            yield from _walk_strings(item, f"{path}[{i}]")
+
+
+def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
+    """Evidence ids cited in PROSE, not under a citation key.
+
+    WHY. `identifiers.find_fabricated()` was written to reject a
+    client-supplied evidence id and AUD-0125 measured it called nowhere in
+    production — dead code guarding invariant 10. The keyed path (ET-01 /
+    ET-02 above) collects `e_ids`, `supporting_e_ids` and their siblings, so
+    the hole it leaves is exactly the one this function was built for: an
+    id written into a sentence.
+
+    A reader treats `[E-047]` in a paragraph as a citation whether or not a
+    key carries it, so an unresolvable one opens the same empty drawer under
+    the client's name. Ids already checked by the keyed path are skipped:
+    reporting the same fabrication twice is noise, not rigour."""
+    claimed: dict = {}
+    for path, text in _walk_strings(payload, ""):
+        for e in find_ids(text):
+            if e in already:
+                continue
+            claimed.setdefault(e, path.lstrip("."))
+    if not claimed:
+        return []
+    split = get_evidence(conn, run_id, sorted(claimed))
+    allowed = {row.get("e_id") for row in split.get("found", [])}
+    out = []
+    for e in find_fabricated(sorted(claimed), allowed):
+        section = claimed[e].split(".")[0] or "payload"
+        gate = "ET-02" if MINT_RE.match(e.split(":")[0]) else "ET-01"
+        out.append(_reason(
+            gate, section, claimed[e],
+            f"{e} is cited in PROSE and does not resolve for this run. A "
+            f"reader takes a bracketed id in a sentence as a citation, so an "
+            f"unresolvable one opens an empty drawer under the client's name "
+            + ("— and the mint namespace is server-allocated, so an invented "
+               "mint id is fabrication by construction."
+               if gate == "ET-02" else
+               "— register the source, or remove the reference.")))
+    for f in split.get("foreign", []):
+        e = f["e_id"]
+        out.append(_reason(
+            "ET-01", claimed[e].split(".")[0] or "payload", claimed[e],
+            f"{e} is cited in prose and is a real row belonging to another "
+            f"institution ({f['belongs_to']}) — STOP: this is contamination; "
+            "quarantine and escalate, do not filter it out quietly"))
+    return out
 
 
 def _walk(node, path):
@@ -3324,6 +3405,11 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                 "contamination; quarantine and escalate, do not filter it "
                 "out quietly"))
 
+    # Prose citations, OUTSIDE the `if cited:` block: a payload whose only
+    # evidence references are in sentences has an empty `cited` map and is
+    # exactly the case the keyed path cannot see (AUD-0125).
+    reasons.extend(_check_prose_citations_resolve(conn, run_id, payload, cited))
+
     # Runs whether or not anything was cited: the whole point of ET-09 is the
     # contamination that never cites, so it must not sit inside `if cited:`.
     reasons.extend(_check_foreign_entity_prose(conn, run_id, payload))
@@ -3443,6 +3529,34 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                                 "r_layer verdict — a verdict you did not "
                                 "write down is a step you can convince "
                                 "yourself you took"))
+                            continue
+                        # AUD-0045: the gate checked that a verdict EXISTS
+                        # and never what it SAID, so a recommendation whose
+                        # own reasoning layer concluded REJECT shipped as a
+                        # recommendation. The template's one hard rule —
+                        # a self-rejected item is not published — was
+                        # enforced by nothing.
+                        verdict = str(rl.get("verdict") or "").strip().upper()
+                        if verdict in _REJECTING_VERDICTS:
+                            reasons.append(_reason(
+                                "AG-01", name,
+                                f"{name}.{fname}[{i}].r_layer.verdict",
+                                f"this item's own reasoning layer concluded "
+                                f"{verdict} and it is still being published. "
+                                f"A rejected hypothesis is a step in the "
+                                f"work, not a recommendation: drop the item, "
+                                f"or change the verdict because the reasoning "
+                                f"changed — never because the item is "
+                                f"inconvenient to lose."))
+                        elif verdict not in _ACCEPTING_VERDICTS:
+                            reasons.append(_reason(
+                                "AG-01", name,
+                                f"{name}.{fname}[{i}].r_layer.verdict",
+                                f"r_layer.verdict is {rl.get('verdict')!r}, "
+                                f"which is not in the vocabulary "
+                                f"{sorted(_ACCEPTING_VERDICTS | _REJECTING_VERDICTS)}. "
+                                f"A verdict nobody can read is a verdict "
+                                f"nobody can check."))
 
     # ── AG-03: every claim-bearing item cites evidence ─────────────────
     reasons.extend(_check_item_evidence(page, payload))

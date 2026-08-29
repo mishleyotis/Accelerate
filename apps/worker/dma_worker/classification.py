@@ -24,6 +24,13 @@ ARTEFACT_REGISTRY: list[tuple[str, int, re.Pattern]] = [
     ("scoring_workbook", 1, re.compile(r"(scoring|workbook|capability[_ ]mapping).*\.xlsx$|\.xlsm$", re.I)),
     ("assessment_report", 2, re.compile(r"assessment[_ ]report.*\.docx$", re.I)),
     ("client_profile", 3, re.compile(r"client[_ ]profile.*(research)?.*\.docx$", re.I)),
+    # The fourth final output of a package (engine/assemble.py's contract).
+    # The .docx is the human document; the .json sidecar is what the ingest
+    # actually parses — both classify, so neither is silently dropped (the
+    # AUD-0091 lesson: 'classified and then dropped' is worse than
+    # unclassified, because the record says it was seen).
+    ("technographic_scan", 3, re.compile(
+        r"technographic[_ ]scan.*\.(docx|json)$", re.I)),
     ("package_manifest", 4, re.compile(r"(^|/)(manifest|run_manifest)\.json$", re.I)),
     ("package_structured", 4, re.compile(
         r"(evidence_index|issue_register|peer_(comparison|scores)|recommendations?_detail|"

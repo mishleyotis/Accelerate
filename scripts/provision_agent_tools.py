@@ -108,6 +108,11 @@ ROLES = {
     "learning/rectifier": dict(
         writes=MEMORY_TOOLS, extra=["Write", "Edit", "Agent"],
         external=[], research=True),
+    # Orchestrates the research run: dispatches the sixteen category
+    # researchers, gates, renders and ships. Everything it writes goes
+    # through the engine CLI (Bash) — no Write/Edit, no connector writes.
+    "research/research-conductor": dict(
+        writes=(), extra=["Agent"], external=["drive"], research=True),
     "learning/learning-testgen": dict(
         writes=(), extra=["Write", "Edit"], external=[], research=False),
     "learning/learning-grader": dict(
@@ -139,6 +144,14 @@ DEFAULTS = {
                external=["exa", "tavily", "drive"], research=True),
     "orchestration": dict(writes=(), extra=[], external=["exa"], research=True),
     "learning": dict(writes=(), extra=[], external=[], research=False),
+    # The sixteen category researchers (generated — gen_research_agents.py
+    # derives its tools line from THIS table). They write only through the
+    # engine CLI over Bash: the workbook refusals are the write control, so
+    # Write/Edit stay denied and no connector write is reachable. Drive
+    # reads are for INTERNAL/HYBRID evidence in the client folder; the
+    # toolkits come via drive_fetch.py under Bash.
+    "research": dict(writes=(), extra=[],
+                     external=["exa", "tavily", "drive"], research=True),
 }
 
 

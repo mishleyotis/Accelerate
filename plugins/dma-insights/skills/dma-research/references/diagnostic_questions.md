@@ -1,11 +1,46 @@
 # Diagnostic Questions Reference (Fallback)
 
+**What this file is, measured.** It holds **one group of question PATTERNS per
+category — 16 groups, ~66 questions in all**, not one question per
+subcapability. Against a catalogue of 851 subcapabilities that is roughly 8%
+of the coverage a per-subcap bank would give. The skill's own index used to
+describe it as "All ~836 diagnostic questions", which is the claim this
+paragraph replaces: a run that falls back to this file is running on
+category-level patterns and **must say so in its coverage statement**.
+
+**These are patterns, and a pattern is not a question until it is graded.**
+Many are written in a closed form ("Does the organization have…"). A closed
+question cannot produce a graded answer, and a five-level scale needs one
+that can. Before you search, rewrite each as a graded probe — the rule is in
+`Grading a closed pattern` below, and every pattern is followed by the graded
+form to use.
+
 Use this file ONLY if the Pillar Scoring Toolkit XLSX files are not available. When the
 XLSX files ARE available, read diagnostic questions directly from Column H of each pillar's
 Capability Map sheet — that is the authoritative source.
 
 This file provides the STRUCTURE and MAPPING LOGIC for diagnostic questions. The actual
 questions vary by subvertical toolkit version. The patterns below apply universally.
+
+## Grading a closed pattern
+
+Every closed pattern converts the same way, and the conversion is mechanical:
+
+| closed | graded |
+|---|---|
+| Does X have Y? | To what extent is Y established at X, and since when? |
+| Is Y documented? | How far does Y's documentation reach, and who owns it? |
+| Are Ys defined? | Which Ys are defined, by whom, and how are they reviewed? |
+| Can X do Y? | Where has X demonstrated Y, and where has it not held? |
+| Has X done Y? | What is the arc of Y at X — earliest signal, refreshes, stalls? |
+
+The graded form is what goes in the search plan and what the answer is scored
+against. A yes/no answer scores nothing, because there is no level in it.
+
+**The retired 17th category (P1C5, ESG) has been removed from this file.** It
+does not exist in catalogue v7.0, and every one of its cells resolves
+NOT_COMPARABLE across versions. A run that finds it in an older toolkit is
+looking at a v5.0 workbook.
 
 ---
 
@@ -69,13 +104,6 @@ the header row. Look for columns labeled "Diagnostic Question" or "Assessment Qu
 - Are change management practices formalized?
 - Is digital literacy assessed across the organization?
 - Is technology adoption measured and reported?
-
-**P1C5 ESG Integration**:
-- Is there a published ESG/sustainability strategy?
-- Are ESG metrics tracked and reported?
-- Is climate risk integrated into strategic planning?
-
-### P2: Member/Customer Experience (~290 subcaps)
 
 **P2C1 Digital Marketing**:
 - Is digital marketing strategy documented?

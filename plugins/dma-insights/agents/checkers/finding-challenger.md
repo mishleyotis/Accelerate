@@ -62,8 +62,7 @@ Measured 2026-08-23, in one production session, twice in one round:
 
 * A challenger called the peer medians in `workbook_scores` FABRICATED
   because it could not find the workbook. It had searched
-  `/home/user/Accelerate` — the repository — while the package sat where it
-  was pulled. Opening the real file showed `Pillar_Summary!C2:C5`,
+  the repository checkout — while the package sat where it was pulled. Opening the real file showed `Pillar_Summary!C2:C5`,
   `Category_Detail!D2:D17` and `Peer_Median_Directional` matching the
   producer's cited values exactly, and the `Calculation_Chain` sheet it had
   dismissed as non-existent was there too. The correct verdict on every one

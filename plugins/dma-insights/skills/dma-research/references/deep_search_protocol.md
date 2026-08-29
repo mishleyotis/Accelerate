@@ -385,7 +385,7 @@ signal), what skills are prioritized, what gaps exist.
 ## Search Volume Management
 
 ### Expected Volume
-~836 subcaps × 3-5 queries = **2,500-4,200 web searches** per assessment.
+up to 851 subcaps × 3-5 queries = **2,500-4,200 web searches** per assessment.
 Plus ~100-200 `web_fetch` calls on rich documents.
 
 ### Batching Strategy

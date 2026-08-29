@@ -29,9 +29,12 @@ from dma_worker.workbook_parser import (mine_evidence_from_rationales,
                                         parse_evidence_master,
                                         parse_grain_summaries,
                                         parse_peer_benchmarks,
+                                        parse_evidence_index,
                                         parse_recommendations,
                                         parse_research_workbook,
-                                        parse_scoring_workbook)
+                                        parse_scoring_workbook,
+                                        parse_technographic_scan,
+                                        merge_evidence_sources)
 
 
 def _connect():
@@ -65,6 +68,25 @@ def _classify_artefact(f):
     if name.endswith(".json") and "manifest" in name:
         # run_manifest.json canonical; L1_run_manifest.json / MANIFEST.json seen.
         return "manifest", (0 if name == "run_manifest.json" else 1)
+    if name.endswith(".json") and "evidence_index" in name:
+        # AUD-0091: the richest evidence store in every package was
+        # classified `package_structured` by classification.py, recorded into
+        # import_files.classified_kind by the scanner — and then DROPPED,
+        # because this function accepted nothing but manifest.json, .xlsx,
+        # .xlsm and .docx, and `_package_groups` keys only on this function.
+        #
+        # Gate M exists because of exactly this file: a client shipped with
+        # 85% of its evidence unURLed while `01_evidence/evidence_index.json`
+        # carried 752 items with 748 URLs. The link was in the package the
+        # whole time and nothing read it.
+        return "evidence_index", (0 if name == "evidence_index.json" else 1)
+    if "technographic" in name and name.endswith((".json", ".docx")):
+        # The fourth final output (engine/assemble.py's package contract).
+        # The .json sidecar outranks the .docx because it is the machine
+        # copy the ingest parses; classifying the .docx too means a package
+        # that shipped only the document is still SEEN, and the miss of its
+        # sidecar is reportable rather than invisible.
+        return "techscan", (0 if name.endswith(".json") else 1)
     if name.endswith((".xlsx", ".xlsm")):
         # The research workbook is its own artefact, not a decoy. It carries
         # the evidence tier's authority — per-subcap linkage at fact grain,
@@ -242,15 +264,40 @@ def _ingest_one(conn, token, folder, parts, remint=False):
         wb_path = os.path.join(td, "wb.xlsx")
         with open(wb_path, "wb") as fh:
             fh.write(drive.download(token, parts["workbook"].file_id))
+        # Declared BEFORE the report parse, which appends to it.
+        companion: list = []
         sections = []
         if "report" in parts:
             rp = os.path.join(td, "report.docx")
             with open(rp, "wb") as fh:
                 fh.write(drive.download(token, parts["report"].file_id))
-            sections = parse_report(rp)
+            # `companion` collects what the readers could not
+            # recognise; the report parser now files an unmapped
+            # Heading1 under its own name and says so, instead of
+            # under whichever numbered kind the count reached.
+            sections = parse_report(rp, companion)
 
         research = {}
-        companion: list = []
+        evidence_index: list = []
+        if "evidence_index" in parts:
+            ei_path = os.path.join(td, "evidence_index.json")
+            with open(ei_path, "wb") as fh:
+                fh.write(drive.download(token, parts["evidence_index"].file_id))
+            evidence_index = parse_evidence_index(ei_path, companion)
+            print(f"ingest: {folder} evidence index — {len(evidence_index)} "
+                  f"items, "
+                  f"{sum(1 for e in evidence_index if e.get('source_url'))} "
+                  f"with a URL")
+        if "techscan" in parts:
+            ts_name = parts["techscan"].name.lower()
+            ts_path = os.path.join(td, "technographic_scan"
+                                       + (".json" if ts_name.endswith(".json")
+                                          else ".docx"))
+            with open(ts_path, "wb") as fh:
+                fh.write(drive.download(token, parts["techscan"].file_id))
+            n = parse_technographic_scan(ts_path, companion)
+            print(f"ingest: {folder} technographic scan — {n} detection(s) "
+                  f"recorded from {parts['techscan'].name}")
         if "research" in parts:
             rw_path = os.path.join(td, "research.xlsx")
             with open(rw_path, "wb") as fh:
@@ -271,7 +318,12 @@ def _ingest_one(conn, token, folder, parts, remint=False):
             manifest=manifest,
             workbook=wb,
             source_folder_id=folder,
-            evidence=parse_evidence_master(wb_path, companion),
+            # The workbook's ledger FIRST, the package index second: the
+            # index fills gaps (a URL, a date, a longer excerpt) and never
+            # overwrites what the workbook stated. AUD-0091 / gate M.
+            evidence=merge_evidence_sources(
+                parse_evidence_master(wb_path, companion), evidence_index,
+                companion),
             # WHOSE assessment this is, so the peer parser can keep the
             # subject out of its own cohort. `Peer_Benchmarks` carries the
             # entity's own score in a named column (`FUB_Score`) beside the
@@ -333,6 +385,10 @@ def backfill_sections(conn, token, groups) -> int:
                 rp = os.path.join(td, "report.docx")
                 with open(rp, "wb") as fh:
                     fh.write(drive.download(token, parts["report"].file_id))
+                # No observation sink on the backfill path: it inserts
+                # sections against an EXISTING run and writes no
+                # parser_observations, so an unmapped-heading note would have
+                # nowhere to land. The kinding itself is the same.
                 sections = parse_report(rp)
             for sec in sections:
                 cur.execute(

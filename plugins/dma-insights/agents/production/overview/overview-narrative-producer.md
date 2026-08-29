@@ -101,7 +101,7 @@ Each path has been verified to exist.
    § O4 — the packaged **Must present** list, the information sources and the
    full synthesis prompt with its per-field word bands, safeguards, cohesion
    block and challenge block. The repo-side source of the same text is
-   `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+   `docs/text/DMA Insights - Surface Specification.txt`
    § O4. Where the two disagree, the specification wins on payload shape and the
    rulebook wins on anti-patterns.
 5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/04-craft/7-storyline-challenge.md`

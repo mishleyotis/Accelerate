@@ -112,7 +112,7 @@ pointed at it.
 
 1. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/2-clay-enrichment.md`
    (real path:
-   `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/2-clay-enrichment.md`)
+   `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/2-clay-enrichment.md`)
    — the five-step call sequence verbatim, the standing per-run budget, the
    multi-domain warning, the poll-before-concluding rule, and the two worked
    contradictions (scan versus register; peer share versus breakdown). This is
@@ -151,12 +151,12 @@ pointed at it.
    the fixed seven, `source` required, `rows_written: 0` distinguishing "ran,
    found nothing" from "never ran". Never invent a tool name; the list in that
    file is the whole surface.
-8. `/home/user/Accelerate/packages/shared/enrichment_register.json` — per served
+8. `packages/shared/enrichment_register.json` — per served
    surface, the `counts` key, the `thin_below` **count** (a count, deliberately,
    because a rate needs a denominator this product does not have), the
    `basis_key` or `contact_keys` that make enrichment observable, and
    `ran_observable: false` with its `ran_unobservable_reason` where it is not.
-9. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+9. `docs/text/DMA Insights - Surface Specification.txt`
    § **T1 · Technology stack register**, § **O2 · Firmographics strip**,
    § **O7 · Leadership panel**, § **O3 · Why-now signals** — "What must be
    presented" and the synthesis prompts. **The specification wins on payload

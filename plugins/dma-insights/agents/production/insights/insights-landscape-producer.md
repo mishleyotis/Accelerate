@@ -112,7 +112,7 @@ evidence.
 
 1. `get_page_contract("insights")` — the item-key contract for `landscape` and
    the `doc` on every field. Read the doc; a remembered shape is a refusal.
-2. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/insights.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/insights.md`
    **§ T2** (the block begins at the heading `## T2 · Technology landscape
    strip`) — the Baxter positive pattern, MEM-0046, the counts-are-computed
    entry, MEM-0010/CG-09, the `landscape.summary` discard, the exclusion set and
@@ -123,7 +123,7 @@ evidence.
    block exists for this surface in the design specification"*, so the pack's
    authored contract is the operative one and the census records that as
    deliberate drift, not omission.
-3. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+3. `docs/text/DMA Insights - Surface Specification.txt`
    **§ T2 · Technology landscape strip** — the contract sentence ("Confirmed,
    inferred, claimed and gaps. Four counts recomputed from the register, each
    tile printing its evidence basis"), and the **Vocabulary resolved** paragraph,
@@ -131,19 +131,19 @@ evidence.
    DATA · INFRA`: the prototype's `L2–L5` collided with the **L1–L4 evidence
    levels rendered on this same card**. Read that paragraph before you write a
    single `basis` string.
-4. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/3-insights.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/3-insights.md`
    **§ T2** — the pack's Must-present block, the information-source table naming
    `tiles[].count` as **computed**, and the section prompt.
-5. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
    **§ CG-12 · a face field is a label, not a paragraph** — the budget table,
    where `landscape.tiles[*].detail` is capped at **≤90 characters**; and
    **§ CG-09 · a closed vocabulary takes one of its values**.
-6. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census row for T2: payload anchor `insights.landscape`, producing agent
    scoped to *"tile `basis`/`detail`/`named_items` only; counts recomputed from
    T1, never stored"*, enrichment facet *"— (techstack, via T1)"*, gate family
    *"CG (T2 ↔ T1 reconcile; CG-12 detail ≤ 90 chars)"*.
-7. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/2-evidence.md`
+7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/2-evidence.md`
    — the tier ladder T1–T5 with what each tier licenses; and
    `.../01-start-here/4-absence-protocol.md`, because the GAPS tile is an absence
    claim and absences have a protocol.
@@ -364,7 +364,7 @@ Close a tile by closing register rows on the techstack page, then **recount
 here**.
 
 The facet those rows travel, per
-`/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/enrichment_sources.json`:
+`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`:
 the `explorium` ingest scan (T1, wired but **not live** — the routine records
 NOT_RUN until the credential exists), the `clay` Tech Stack data point (T1 — **a
 machine technographic scan is T1, never T4**; the misfile caps the capability at

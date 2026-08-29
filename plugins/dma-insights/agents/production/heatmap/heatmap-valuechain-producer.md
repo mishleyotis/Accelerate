@@ -129,7 +129,7 @@ Read in this order. Each path has been verified to exist.
    § H9 — the packaged contract, the two causes of an empty chain, the per-stage
    `chain_id` flaw, and the explicit statement that there is no prompt and that
    this is not an omission. The repo-side source of the same text is
-   `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+   `docs/text/DMA Insights - Surface Specification.txt`
    § H9, and where the two disagree the specification wins on payload shape while
    the rulebook wins on anti-patterns.
 4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`

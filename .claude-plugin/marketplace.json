@@ -3,7 +3,7 @@
   "description": "Zennify Digital Maturity Assessment tooling: the skills, agents and connector that produce and audit DMA Insights surfaces.",
   "version": "0.7.1",
   "owner": {
-    "name": "Zennify — DMA Insights build",
+    "name": "Zennify \u2014 DMA Insights build",
     "email": "mishley.otiende@zennify.com"
   },
   "plugins": [
@@ -11,8 +11,8 @@
       "name": "dma-insights",
       "source": "./plugins/dma-insights",
       "displayName": "DMA Insights",
-      "description": "The six DMA skills, the 47-agent roster with explicit tool allow-lists, two operator commands, submit/verdict/promote hooks and the remote DMA Insights MCP connector (33 tools). A lost connector binding — a continued session after a token reset included — is revived with mcp_raw.py revive rather than declared unrecoverable.",
-      "version": "0.9.12",
+      "description": "The six Digital Maturity Assessment skills, 64 DMA agents \u2014 including the 16 category-clustered researchers and their conductor \u2014 the remote DMA Insights MCP connector (33 tools), and the research ENGINE that makes a run finish unattended: the scoring workbook is the substrate every step writes to, and the four deliverables (workbook, Assessment Report, Client Research Profile, Technographic Scan) each have a producer and a reader. See docs/END-TO-END.md and scripts/aud_ledger.py.",
+      "version": "1.3.0",
       "category": "domain",
       "tags": [
         "dma",

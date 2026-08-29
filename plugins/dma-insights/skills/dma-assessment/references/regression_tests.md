@@ -24,7 +24,7 @@ Validates that the scoring_detail sheets (P1, P2, P3, P4) contain the correct nu
 - **P2_Scoring_Detail sheet:** ~288 rows (±5%, range 273-303)
 - **P3_Scoring_Detail sheet:** ~162 rows (±5%, range 154-170)
 - **P4_Scoring_Detail sheet:** ~187 rows (±5%, range 178-196)
-- **Total across all pillars:** ~836 rows
+- **Total across all pillars:** 851 rows at full scope (205 + 292 + 164 + 190)
 
 ### Pass/Fail Criteria
 
@@ -35,7 +35,7 @@ Validates that the scoring_detail sheets (P1, P2, P3, P4) contain the correct nu
 ✓ P2 rows: [actual_count] (target 288 ± 5%)
 ✓ P3 rows: [actual_count] (target 162 ± 5%)
 ✓ P4 rows: [actual_count] (target 187 ± 5%)
-✓ Total: [actual_total] (target 836 ± 5%)
+✓ Total: [actual_total] (target 851 ± 5%)
 ```
 
 **WARNING:** One sheet is within ±7.5% (e.g., P2 has 310 rows = 7.6% over).
@@ -59,7 +59,7 @@ REG-001: Row Count Validation
 [PASS] P2_Scoring_Detail: 291 rows (target 288 ± 14)
 [PASS] P3_Scoring_Detail: 164 rows (target 162 ± 8)
 [PASS] P4_Scoring_Detail: 189 rows (target 187 ± 9)
-[PASS] Total: 847 rows (target 836 ± 42)
+[PASS] Total: 847 rows (target 851 ± 42)
 RESULT: PASS
 ```
 

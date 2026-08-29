@@ -168,7 +168,8 @@ These are the primary output sheets. Each has ONE ROW PER SUBCAPABILITY.
 - Sheet 4 (P2): ~274-300 rows
 - Sheet 5 (P3): ~154-170 rows
 - Sheet 6 (P4): ~178-196 rows
-- **Total: ~836 rows** (range 805-875)
+- **Total: 851 rows** at full scope (205 P1 + 292 P2 + 164 P3 + 190 P4);
+  fewer for a focused engagement, and the SELECTED set is what the workbook seeds.
 
 **All 22 columns (A-V) must exist**. Research fills A-I, K, L, M, U, V. Leaves J, N-T empty.
 
@@ -179,7 +180,7 @@ Fill only: Pillar names, Evidence_Coverage_Pct (calculated from evidence per sub
 
 ### Sheet 2: Calculation_Chain (SKELETON)
 
-Create Section A structure with all ~836 subcap rows (SubCap_ID, SubCapability, Weight).
+Create Section A structure with one row per SELECTED subcap (SubCap_ID, SubCapability, Weight).
 Leave Raw_Score and Weighted_Value columns empty. Assessment skill fills these.
 
 ### Sheet 7: Evidence_Linkage_Matrix (POPULATED by research)
@@ -208,9 +209,9 @@ Research skill runs its OWN validation checks and logs results here:
 | Check_ID | Check_Name | Status | Details | Actions_Taken |
 |----------|-----------|--------|---------|--------------|
 | RES-001 | Subcap Row Count | PASS/FAIL | "P1: 203, P2: 291, P3: 164, P4: 189, Total: 847" |
-| RES-002 | Evidence Coverage ≥80% | PASS/FAIL | "Coverage: 89% (744/836 subcaps with evidence)" |
-| RES-003 | Column U Completeness | PASS/FAIL | "836/836 rows have Evidence_Excerpt populated" |
-| RES-004 | Column V Completeness | PASS/FAIL | "744/836 rows have Source_Document (92 are NO_EVIDENCE)" |
+| RES-002 | Evidence Coverage ≥80% | PASS/FAIL | "Coverage: 89% (744/851 subcaps with evidence)" |
+| RES-003 | Column U Completeness | PASS/FAIL | "851/851 rows have Evidence_Excerpt populated" |
+| RES-004 | Column V Completeness | PASS/FAIL | "744/851 rows have Source_Document (107 are NO_EVIDENCE)" |
 | RES-005 | ERS Calculated | PASS/FAIL | "All 450 evidence items have ERS scores" |
 | RES-006 | NO_EVIDENCE Documented | PASS/FAIL | "92 NO_EVIDENCE rows have search count ≥6" |
 | RES-007 | Evidence_IDs Format | PASS/FAIL | "All IDs match E-\\d{3}(:F\\d+)? pattern" |

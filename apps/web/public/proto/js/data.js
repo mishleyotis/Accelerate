@@ -9,28 +9,27 @@
      reference and the local-preview fallback. Entity-scoped mock data
      is unreachable once ENTITIES is live. */
   const LIVE = typeof window !== "undefined" && window.DMA_LIVE || null;
-  /* ── Maturity color helpers ──────────────────────────────────────── */
-  function maturityClass(s) {
-    if (s == null) return "muted";
-    if (s < 2) return "b-act";
-    if (s < 3) return "b-bld";
-    if (s < 4) return "b-cmp";
-    return "b-dif";
+  /* ── Maturity color helpers ──────────────────────────────────────────
+     DELEGATED, not defined. These three used to carry their own copy of the
+     score->band->hex mapping, and it was the copy that won: 50 call sites
+     reached it against 1 that reached lib/bands.js, the module invariant 7
+     names as the only one allowed to do this (AUD-0048). The second copy
+     also disagreed with the first — `maturityHex(null)` returned "#E5E7EB",
+     painting a grey swatch for a score that does not exist, which a client
+     reads as a measurement that came out low (AUD-0049, invariants 6 and 9).
+      proto/bands.js is generated from lib/bands.js by
+     scripts/gen_proto_bands.py and loaded before this file; CI runs
+     --check. There is one authored resolver and one runtime resolver, and
+     a divergence fails the build. */
+  const _B = typeof window !== "undefined" && window.DMA_BANDS || null;
+  if (!_B) {
+    /* Loud, not silent. A missing resolver used to be indistinguishable
+       from an unscored corpus. */
+    throw new Error("DMA_BANDS is not loaded: proto/bands.js must be the first script " + "(see apps/web/app/route.js SCRIPTS). Refusing to fall back to a " + "second colour mapping — that is the invariant-7 defect this file " + "exists to have stopped.");
   }
-  function maturityHex(s) {
-    if (s == null) return "#E5E7EB";
-    if (s < 2) return "#FFCB99";
-    if (s < 3) return "#62D7B8";
-    if (s < 4) return "#27BBAF";
-    return "#139F94";
-  }
-  function maturityLabel(s) {
-    if (s === null || s === undefined || !isFinite(Number(s))) return null;
-    if (s < 2) return "Activating";
-    if (s < 3) return "Building";
-    if (s < 4) return "Competing";
-    return "Differentiating";
-  }
+  const maturityClass = _B.classFor;
+  const maturityHex = _B.hexFor; /* null for a null score, never grey */
+  const maturityLabel = _B.labelFor;
   function freshnessOf(date) {
     const now = new Date();
     const d = new Date(date);

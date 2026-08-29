@@ -7,7 +7,7 @@ Usage:
         --entity "Gesa Credit Union" --subvertical "Credit Union" \
         [--output <query_plan.json>]
 
-Reads all ~836 diagnostic questions and generates 6-10 search queries per subcap
+Reads every selected subcap's diagnostic questions and generates 6-10 search queries per subcap
 using the 10-tier query system. Output is a structured plan that can be executed
 during Batches 2-3.
 """

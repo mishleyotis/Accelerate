@@ -120,7 +120,7 @@ Read in this order. Each path has been verified to exist.
    three-grade table, *The inherited and declared grades are where CG-15 kills a
    run*, *The order the work is done in*, and both reissued synthesis prompts with
    their numbered steps. The repo-side source of the same text is
-   `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+   `docs/text/DMA Insights - Surface Specification.txt`
    §§ H2 and H6. **Where the two disagree the specification wins on payload shape
    and the rulebook wins on anti-patterns** — and it comes up here twice, both
    flagged in the contract's own `_notes`: the specification's H2 prompt block still

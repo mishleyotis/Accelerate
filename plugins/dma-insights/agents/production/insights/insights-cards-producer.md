@@ -116,7 +116,7 @@ sends `null` on 8 of 8. Sending it creates two answers to one question.
 
 1. `get_page_contract("insights")` — the item-key contract for `insights` and the
    `doc` on every field. Read the doc. A remembered shape is a refusal.
-2. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/insights.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/insights.md`
    **§ I1** (the block begins at the heading `## I1 · Insight cards`) and
    **§ DD-3** (`## DD-3 · Insight modal (drilldown from I1)`) — the Baxter
    positive pattern, MEM-0017, MEM-0013, MEM-0093/CG-27, the `theme`/`pillar_id`
@@ -126,25 +126,25 @@ sends `null` on 8 of 8. Sending it creates two answers to one question.
    **The rulebook governs anti-patterns; the Surface Specification governs
    payload shape.** Where they differ on a field's name or presence, the spec
    wins and you say so in your self-report.
-3. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+3. `docs/text/DMA Insights - Surface Specification.txt`
    **§ I1 · Insight cards** — "What must be presented", the "what really IS an
    insight card" passage that defines the object, the information-source table,
    the DD-3 note and the full synthesis prompt with its per-field word budgets
    and its seven named probes.
-4. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/3-insights.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/3-insights.md`
    **§ I1** — the pack's copy of the same contract with three things the spec
    does not carry: the claim-versus-topic table, the theme lens and where its
    data actually comes from, and the three gates this page dies on.
-5. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/04-craft/1-reasoning.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/04-craft/1-reasoning.md`
    — the R-Layer method, which AG-01 requires per card.
    `.../04-craft/7-storyline-challenge.md` is its page-level companion;
    `.../04-craft/4-card-anatomy.md` **§ DD-1** covers the drawer an evidence chip
    opens above your modal.
-6. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census row for I1: payload anchor `insights.insights`, **no enrichment
    facet of its own** (the dash), gate families `SG:S28,S2,S1 · AG`, and the
    DD-3 row confirming the modal renders your payload and fetches nothing.
-7. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/3-language.md`
+7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/3-language.md`
    for the house voice and `.../01-start-here/2-evidence.md` for the tier ladder
    (T1–T5) and what each tier licenses you to say.
 8. `get_memory_digest` for this client and `search_findings` for `insights`,
@@ -422,7 +422,7 @@ What the connectors actually feed here is the **joins**:
 - Facet **`why_now`** — `clay` Recent News (T3) and Latest Funding (T1–T2 only
   when a filing is behind it) feed the timing joins. Precedence and wiring status
   live in
-  `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/enrichment_sources.json`
+  `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`
   and the Clay mapping in `.../02-inputs/clay_taxonomy.json`.
 
 Web-search pathways, per the rulebook's list — entity name in every query, 4–8

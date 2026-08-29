@@ -35,7 +35,7 @@ The DMA Assessment Scoring Workbook is the **single source of truth** for all as
 Sheets match the proven CFC workbook structure:
 1. Executive_Summary — Overall assessment snapshot
 2. Pillar_Summary — 4 pillars + Overall with weights, scores, peer medians, gaps
-3. Category_Detail — 17 categories with scores, weights, peer medians, priorities
+3. Category_Detail — 16 categories with scores, weights, peer medians, priorities
 4. P1_Subcap_Scoring — ~186 subcap rows (11 columns A-K)
 5. P2_Subcap_Scoring — ~232 subcap rows (11 columns A-K)
 6. P3_Subcap_Scoring — ~118 subcap rows (11 columns A-K)
@@ -82,7 +82,7 @@ Sheets match the proven CFC workbook structure:
 
 **Structure (in row order):**
 
-**Section A: Subcapability Level (~836 rows)**
+**Section A: Subcapability Level (851 rows at full scope)**
 
 | SubCap_ID | SubCapability | Raw_Score | SubCap_Weight | Weighted_Value |
 |-----------|---------------|-----------|---------------|-----------------|
@@ -353,7 +353,7 @@ Sheets match the proven CFC workbook structure:
 | REG-002 | Rationale Quality | Phase 8 | Regression | PASS | 80/80 spot-check pass (20 per pillar): all ≥150 chars, evidence cited, M[X] descriptor present | N/A | Spot-check passed |
 | INP_01 | Document Inventory Complete | Phase 1 | Input Validation | PASS | All 18 documents in /mnt/user-data/uploads/ inventoried and readable | N/A | Inventory complete |
 | INP_05 | Toolkit Binding Verified | Phase 1 | Input Validation | PASS | Zennify Credit Union Maturity Model v4.0 bound, Pillar scoring toolkits loaded | N/A | Correct toolkit verified |
-| SCR_01 | Subcap Count Validation | Phase 4 | Scoring | PASS | 847 subcaps scored (target 836 ±5%) | N/A | Row count within tolerance |
+| SCR_01 | Subcap Count Validation | Phase 4 | Scoring | PASS | 847 subcaps scored (target 851 ±5%) | N/A | Row count within tolerance |
 | SCR_05 | Caps Applied Correctly | Phase 4 | Scoring | PASS | 23 caps applied, all documented in Caps_Applied_Log, raw_score > cap_ceiling verified | N/A | All caps verified |
 | OUT_05 | No Generic Statements | Phase 7 | Output | WARNING | One instance: "Strong governance structure" in P1C2 narrative (should be "governance structure demonstrating documented risk oversight per [evidence]") | Corrected narrative | 1 generic phrase rewritten |
 | WB_07 | Entity Folder Saved | Phase 8 | Workbook | PASS | Workbook saved to /home/claude/dma_assessments/[ENTITY]_DMA/outputs/ and /mnt/user-data/outputs/ | N/A | Both locations verified |

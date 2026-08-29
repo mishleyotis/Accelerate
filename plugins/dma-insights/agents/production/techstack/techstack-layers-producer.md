@@ -111,7 +111,7 @@ costume of a measurement.
    rows and for `enrichment_status`, plus the `doc` text on every field you are
    about to write. Both `detected_basis` and `expected_basis` are **in the served
    contract**; write them. A remembered shape is a refusal; read the doc.
-2. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
    — **§ T1**: the Baxter shape notes on the rollup (*"the layer rollup puts
    `is_primary_gap: true` on DATA (detected 6, expected 8) — exactly the layer whose
    two ABSENT rows carry the argument"*), the anti-patterns — **MEM-0084**,
@@ -120,11 +120,11 @@ costume of a measurement.
    and the enrichment pathways. Applied by default, not by memory. **The rulebook is
    the authority on anti-patterns; the Surface Specification is the authority on
    payload shape**, and where they differ that is the split.
-3. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/6-techstack.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/6-techstack.md`
    — **§ T1**, step 3 of the REISSUED prompt: *"Per layer: `{layer, pillar_id,
    detected, expected, is_primary_gap}`"*, and the four-layer vocabulary with its
    pillar tags.
-4. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+4. `docs/text/DMA Insights - Surface Specification.txt`
    — **§ T1 · Technology stack register**, and specifically its "Why it is shaped
    this way", which is the only place the **rendered** card is described:
    *"Operations & core banking · P3 · 2 of 3 detected"*; *"Customer engagement ·
@@ -134,13 +134,13 @@ costume of a measurement.
    engagement opportunity"*. Read also **§ T2 · Technology landscape strip**, whose
    contract is *"four counts recomputed from the register"* — the strip you must
    keep reconcilable but must not write.
-5. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census rows: T1 → `techstack.techstack`, enrichment facet `techstack`, gate
    families `ET (cited or dropped[]) · CG (CG-09 status; CG-12 detection_basis)`;
    T2 → `insights.landscape`, facet `— (techstack, via T1)`, gate family
    `CG (T2 ↔ T1 reconcile; CG-12 detail ≤ 90 chars)`, produced by the
    `insights-landscape-producer` with *"counts recomputed from T1, never stored"*.
-6. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
    — **CG-09** (the register's status vocabulary, without which nothing here is
    computable), **CG-15** (a payload that says nothing — which is what four counts
    with no basis and no gap flag amount to), and the cross-surface reconciliation
@@ -154,12 +154,12 @@ costume of a measurement.
    staged rollup, and `get_staged_payload(run_id, "insights")` for the landscape
    strip you have to stay reconcilable with. You are usually repairing, and
    everything you do not change comes back byte-identical.
-9. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/enrichment_sources.json`
+9. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`
    for the `techstack` facet's routes and their wired state, which is what
    `enrichment_status` reports honestly.
-10. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/3-language.md`
+10. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/3-language.md`
     for the house voice, and
-    `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/scripts/check_payload.py`
+    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_payload.py`
     before you return.
 
 ## The contract — field by field
@@ -409,7 +409,7 @@ Each is phrased so that a wrong answer is visible rather than arguable.
 
 **This surface enriches nothing of its own.** It is a recount and a judgement, and
 its data needs are the register's: the facet is **`techstack`**, and its routes, per
-`/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/enrichment_sources.json`,
+`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`,
 run in precedence order — the `explorium` ingest scan (**T1**, wired but not live:
 no credential exists, so the routine records `NOT_RUN` with that reason and the tool
 console is never a citable source), the `clay` Tech Stack data point (**T1** — a

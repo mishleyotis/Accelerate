@@ -42,7 +42,7 @@
       "P4": "[Expected capability count for P4]",
       "total_capabilities": "[Sum of P1+P2+P3+P4]"
     },
-    "subcapability_count_expected": "[Total expected subcapabilities across all capabilities and pillars; typically 836±10]"
+    "subcapability_count_expected": "[Total expected subcapabilities across all capabilities and pillars; 851 at full scope (205+292+164+190); count the catalogue, never assume]"
   },
   "document_inventory": {
     "documents_uploaded": [

@@ -37,7 +37,7 @@
       "P2_Scoring_Detail": {"target": 291, "tolerance_pct": 5},
       "P3_Scoring_Detail": {"target": 164, "tolerance_pct": 5},
       "P4_Scoring_Detail": {"target": 189, "tolerance_pct": 5},
-      "total": {"target": 836, "tolerance_pct": 5}
+      "total": {"target": 851, "tolerance_pct": 5}
     }
   },
 

@@ -154,7 +154,7 @@ Read in this order. Each path has been verified to exist.
 3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
    §§ O1b, O10 and O11 — the packaged contract with the full synthesis prompts.
    The repo-side source of the same text is
-   `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+   `docs/text/DMA Insights - Surface Specification.txt`
    §§ O1b, O10 and O11, and where the two disagree **the specification wins on
    payload shape while the rulebook wins on anti-patterns**. This surface has a
    live instance of that rule, worked below under the ceiling vocabulary.

@@ -133,7 +133,7 @@ by writing a quote.
    the `doc` on every field. Read the doc; a remembered shape is a refusal. Gap
    rows need `catalogue_path` per row, `current_score` within 0.05 of the
    heatmap, and `e_ids` per row.
-2. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
    **§ P1** (`## P1 · Platform fit &amp; story`), its **Composite factors**
    subsection, **§ P2** (`## P2 · Recommendations`), and the three drilldown
    blocks **§ DD-11**, **§ DD-13**, **§ DD-4**. In the plugin this path is
@@ -145,7 +145,7 @@ by writing a quote.
    **The rulebook governs anti-patterns; the Surface Specification governs
    payload shape.** Where they differ on a field's name or presence, the spec
    wins and you say so in your self-report.
-3. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+3. `docs/text/DMA Insights - Surface Specification.txt`
    **§ P1 · Platform fit & story** and **§ P2 · Recommendations** — "What must be
    presented" for each, the information-source tables, and the two synthesis
    prompts: P1's eight steps (catalogue not vendor brands; per-gap-row grounding;
@@ -153,14 +153,14 @@ by writing a quote.
    profile; the 90–150 word story; the R-Layer; reconcile with the analyst) and
    P2's per-field contract with its five grounding classes for
    `cost_of_inaction`.
-4. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/4-platform.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/4-platform.md`
    **§ P1** and **§ P2** — the pack's copy with five things the spec does not
    carry: the you-send/engine-reads table, *One tile per promoted L3 area, or the
    area renders empty*, *Peer deployment is research, not flavour*, *Estate reach
    is derived from the register, never asserted*, and *Readiness carries its
    reasoning, or it is a list of conditions* — that last one is where the two
    prerequisite row shapes and the 40–80 word `note` are specified.
-5. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/3-mcp-tools.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/3-mcp-tools.md`
    **§ `get_platform_fit` — you supply judgement, the engine supplies
    arithmetic** — the request and response shape and the three rules that change
    the answer: `alignment` omitted renormalises and reports `impact_fallback`
@@ -168,23 +168,23 @@ by writing a quote.
    claim); `readiness` **multiplies**, so red prerequisites cannot reach the hot
    band and an unmapped phrase reads as RED; `l3_area` resolves which cells a
    candidate addresses and is never a list you write.
-6. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/04-craft/2-platform-story.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/04-craft/2-platform-story.md`
    — the shared platform reasoning: the fit score is not yours, the L3 unit, the
    stack register changing the answer, discarding with reasons, the effort
    profile matching the history, estate reach as arithmetic, peers and the
    pathway back, readiness that reasons, the 90–150 word story, reconciling with
    the analyst, and the R-Layer applied here.
-7. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md`
+7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census rows: P1 anchored at `platform.platform_story`, facet
    `platform_readiness`, gates `SG:S31,S13,S17 · CG (breakdown = headline;
    catalogue_path) · AG`; P2 anchored at `platform.recommendations`, no facet,
    gates `SG:S32 · CG · AG`; plus the DD-11, DD-13 and DD-4 rows confirming all
    three render your payload and fetch nothing.
-8. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md`
+8. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
    — **§ AG-03** (every claim-bearing item cites), **§ AG-04** (a named peer's
    technographics carry their source), **§ ET-04** (a cited id resolves to a row
    that carries its excerpt), **§ CG-11** (prose begins as a sentence).
-9. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/3-language.md`
+9. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/3-language.md`
    — the house voice, and the rule that governs coverage prose: name what is
    available, never what is missing; the reader may be the person who chose the
    incumbent.
@@ -383,7 +383,7 @@ fix: the mapping is.
   phase. It must agree with the roadmap **and** the stair-step; 17 clients
   shipped a sequence contradicting their own roadmap, and no per-page gate can
   see that —
-  `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/scripts/check_consistency.py`
+  `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py`
   runs before submit.
 - **`evidence_ids[]`** — non-empty per row, each id **once**. `grounded_on` is the
   length of the list (invariant 8), so a duplicate inflates the count the reader
@@ -648,7 +648,7 @@ What is enrichable on P2 are the inputs the contract makes you ground.
   Latest Funding (T1–T2 when a filing is behind it — otherwise an inference, and
   the tier follows the source). `harmonic`, `quartr` and `moodys` are declared,
   not wired; listing them grants nothing. Precedence in
-  `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/enrichment_sources.json`,
+  `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`,
   Clay mapping in `.../02-inputs/clay_taxonomy.json`.
 - **No connector serves the fit figure.** `get_platform_fit` answers it and no
   pathway restates it (CG-31).

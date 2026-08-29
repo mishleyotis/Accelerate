@@ -128,7 +128,7 @@ Read in this order. Each path has been verified to exist.
 3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
    § H1 — the packaged contract: *Must present*, the information-source table and
    the full five-step synthesis prompt. The repo-side source of the same text is
-   `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+   `docs/text/DMA Insights - Surface Specification.txt`
    § H1, and where the two disagree the specification wins on payload shape while
    the rulebook wins on anti-patterns.
 4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/2-evidence.md`

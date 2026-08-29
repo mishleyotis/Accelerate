@@ -675,7 +675,7 @@ useful, but never let the customer-facing `reason` depend on them.
 - **Gap-to-pathway.** The section declares `fields: {}`, so
   `list_enrichment_gaps` emits nothing here. A gap reported against this
   section was the measured worklist false positive (the `value_chain.fields`
-  fallthrough, since fixed in `shared/enrichment_gaps.py`) — report a
+  fallthrough, since fixed in `packages/shared/enrichment_gaps.py`) — report a
   recurrence rather than authoring a key to satisfy it.
 
 ---

@@ -188,7 +188,7 @@
   "scoring_quality_checks": {
     "row_count_validation": {
       "status": "[PASS / FAIL]",
-      "expected_subcap_count": "[Per taxonomy, typically ~836]",
+      "expected_subcap_count": "[Counted from the catalogue: 851 at full scope, fewer for a focused engagement]",
       "actual_scored_count": "[Count of scored subcaps]",
       "missing_subcaps": "[List if any]"
     },

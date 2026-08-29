@@ -128,7 +128,7 @@ Every path below has been verified to exist.
 4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
    §§ H2, H6 and H7 — the packaged contracts and the reissued synthesis prompts,
    including the claim-label enum the producer was actually served.
-5. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+5. `docs/text/DMA Insights - Surface Specification.txt`
    §§ **H2** (line 622), **H6** (line 664), **H7** (line 1168) and the DD-2
    evidence-drawer prompt (line 1262). **Where the specification and the rulebook
    disagree, the specification wins on payload shape and the rulebook wins on

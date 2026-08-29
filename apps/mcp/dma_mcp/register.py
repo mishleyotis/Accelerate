@@ -38,6 +38,11 @@ _RECENCY_FACTOR = {"CURRENT": 5.0, "RECENT": 4.0, "DATED": 3.0,
                    "STALE": 2.0, "ARCHIVAL": 1.0, "UNVERIFIED": 1.0}
 _CLAIMS = ("FACT", "INFERENCE", "HYPOTHESIS", "CEILING_ESTIMATE")
 _TIERS = ("T1", "T2", "T3", "T4", "T5")
+#: `evidence_origin_t`, in full (migration 0002). `internal` was unreachable
+#: from any code path until AUD-0028; it is the label that makes a client's
+#: own material storable AS internal instead of laundered as a weak public
+#: claim, and audience redaction is what reads it.
+_ORIGINS = ("package", "producer", "connector", "internal")
 
 
 def _recency_band(published: date | None, reference: date | None) -> str:
@@ -162,6 +167,13 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
     source_url = item.get("source_url") or None
     claim = str(item.get("claim_type") or "").upper() or None
     tier = str(item.get("tier") or "").upper() or None
+    # AUD-0028: the INSERT hardcoded 'producer', so `evidence_origin_t`'s
+    # `internal` label could never be set by any code path — migration 0045
+    # records that no row has ever carried it. An origin that cannot be
+    # written is not an enum member, it is a comment.
+    origin = str(item.get("origin") or "producer").lower()
+    if origin not in _ORIGINS:
+        errors.append(f"origin: {origin!r} not in {_ORIGINS}")
 
     if not (50 <= len(excerpt) <= 500):
         errors.append(f"excerpt_length: {len(excerpt)} chars — a verbatim "
@@ -194,10 +206,30 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
     if errors:
         return {"e_id": None, "deduped": False, "ers": None, "errors": errors}
 
+    # AUD-0029: a URL-less FACT used to be SILENTLY DEMOTED to INFERENCE,
+    # whatever it was. That is right for an unsourced public claim and wrong
+    # for an internal one: a client's own board pack is not weaker evidence
+    # than a press release, it is evidence of a different KIND, and demoting
+    # it hides the fact that internal material entered the run at all.
+    #
+    # So the two are separated. An internal source keeps its claim type and
+    # is LABELLED; an unsourced public claim is still demoted, and now says
+    # that internal registration was the alternative it did not take.
     if not source_url and claim == "FACT":
-        claim = "INFERENCE"
-        adjustments.append("no traceable source URL: claim_type FACT "
-                           "downgraded to INFERENCE")
+        if origin == "internal":
+            adjustments.append(
+                "internal source with no public URL: claim_type FACT KEPT "
+                "and origin recorded as internal. It is redacted from every "
+                "customer projection and never counts toward public "
+                "corroboration.")
+        else:
+            claim = "INFERENCE"
+            adjustments.append(
+                "no traceable source URL: claim_type FACT downgraded to "
+                "INFERENCE. If this IS internal material, register it with "
+                "origin='internal' and it keeps its claim type and is "
+                "labelled, rather than being laundered into a weak public "
+                "claim.")
 
     # Verbatim verification against the fetched artefact — fail closed.
     if source_url:
@@ -274,9 +306,9 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
               (e_id, entity_id, origin, source_name, source_url, excerpt,
                claim_type, tier, published_date, reference_date,
                specificity, corroboration, identity_ok, identity_note, ers)
-            VALUES (%s,%s,'producer',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             ON CONFLICT DO NOTHING RETURNING e_id""",
-        (e_id, entity_id, item.get("source_name"), source_url, excerpt,
+        (e_id, entity_id, origin, item.get("source_name"), source_url, excerpt,
          claim, tier, published, reference_date, spec, corr,
          identity_ok, identity_note, ers))
     minted = cur.fetchone()

@@ -4,6 +4,23 @@ The pipeline exists so that the smallest true unit of work runs, not the
 whole run. A one-card repair that re-produces six pages is the slow response
 the hierarchy was built to remove.
 
+## First: which pipeline is this request even for?
+
+Three request shapes arrive at this system, and mistaking one for another
+costs a whole wrong run — a research ask that gets answered by re-scanning
+the intake Drive produces nothing, and an ingestion ask that spawns a
+research run researches a client who already shipped.
+
+| the request hands you | it is | route to |
+|---|---|---|
+| an entity + sub-vertical + evidence mode, and NO finished package | a research engagement — the package must be PRODUCED | `research-conductor` (the research tier below) |
+| a finished `<Client> - DMA` folder, or "load/publish/make live this client" | package intake | `package-vetter` first, then production; the scheduled package scan is how the app itself notices the folder |
+| a verdict, ticket, reviewer note or surface/page id | a repair | the surface and page tables below |
+
+When a request could read as two of these, the decider is what EXISTS: no
+client folder in the intake Drive → research; folder present and vetted →
+production; run already promoted → repair. Check, don't infer.
+
 ## The pipeline, in order
 
 ```
@@ -218,6 +235,118 @@ rectifier's job and nobody else's.
 | what production actually serves | `deployed-app-auditor` |
 | a defect class that keeps recurring | `rectifier` |
 
+## The research tier — upstream of every package
+
+Surface production consumes a finished assessment package; the research
+tier is what produces one. A research engagement (an entity, a
+sub-vertical, an evidence mode) routes to **`research-conductor`**, which
+creates the run on the workbook substrate, builds the knowledge graph from
+the pillar toolkits, and dispatches one researcher per catalogue category —
+sixteen, generated from one template by `scripts/gen_research_agents.py`,
+each bound to its grain and nothing else. A repair that names a category
+(a FAILED floors gate, a challenged subcap) routes to that category's
+researcher directly, never through a full re-run — the same
+smallest-true-unit rule as the per-surface producers above.
+
+| category | agent |
+|---|---|
+| P1C1 Digital Strategy & Vision | `research-p1c1-producer` |
+| P1C2 Governance & Risk Appetite | `research-p1c2-producer` |
+| P1C3 Innovation Management & Funding | `research-p1c3-producer` |
+| P1C4 Culture & Change Enablement | `research-p1c4-producer` |
+| P2C1 Digital Marketing & Acquisition | `research-p2c1-producer` |
+| P2C2 Onboarding & Fulfillment | `research-p2c2-producer` |
+| P2C3 Omnichannel Servicing & Support | `research-p2c3-producer` |
+| P2C4 Personalization & Proactive Engagement | `research-p2c4-producer` |
+| P3C1 Core Process Automation | `research-p3c1-producer` |
+| P3C2 Operational Risk & Fraud Management | `research-p3c2-producer` |
+| P3C3 Compliance, Supervision & Surveillance | `research-p3c3-producer` |
+| P3C4 Business Resilience & Third-Party Management | `research-p3c4-producer` |
+| P4C1 Data Management & Governance | `research-p4c1-producer` |
+| P4C2 Analytics & AI Enablement | `research-p4c2-producer` |
+| P4C3 Technology Architecture & Integration | `research-p4c3-producer` |
+| P4C4 Information Security & Cybersecurity | `research-p4c4-producer` |
+
+The researchers write only their own category, only through the engine CLI
+(the workbook's refusals are the write control); the conductor gates,
+renders the four deliverables, assembles and ships the `<Entity> - DMA`
+folder, and runs the memory backup-then-cleanup lifecycle. None of them
+touches the connector's write tools — a research run that is ready for
+surface production enters, like every package, through the package-vetter.
+
+## Two routes that used to dead-end
+
+Five tasks were traced from the session brief through this table. Three
+resolved in two hops. These two did not, and both are fixed here rather than
+left to be rediscovered.
+
+### A reviewer Accepted or Rejected an insight card
+
+The rule above routes "when a verdict, a rejection ticket, an audit finding or
+a reviewer note **names a JSON path**". Reviewer feedback does not name one:
+`list_reviewer_feedback` is keyed by `ic_id` / `display_id` / `run_id` and
+carries no path column, so the reviewer channel — the one way a human's
+judgement re-enters the pipeline — was the only repair channel this table
+could not resolve. Unattended, a rejected card either went unrepaired or was
+repaired by re-producing the whole insights page, which is exactly the cost
+the two tiers exist to prevent.
+
+**Route by id prefix.** Every authored id belongs to one surface:
+
+| id prefix | what it is | payload section | route to |
+|---|---|---|---|
+| `ic_id` | an insight card | `insights.insights` | `insights-cards-producer` |
+| `rec_id` | a recommendation | `platform.recommendations` | `platform-fit-producer` |
+| `f_id` | a top finding | `overview.findings` | `overview-findings-producer` |
+| `fa_id` | a focus area | `heatmap.focus_areas` | `heatmap-focus-producer` |
+| `ts_id` | a techstack register row | `techstack.techstack` | `techstack-register-producer` |
+| `wn_id` | a why-now signal | `overview.why_now` | `overview-whynow-producer` |
+
+These are the six id classes the agent is permitted to mint (invariant 10), so
+the table is closed: an id that is not one of these was not authored here, and
+a note naming one is a bug report about the id allocator, not a surface repair.
+
+### After a compaction, a resume or a fork
+
+A synthesis firing that produces six pages **will** compact. When it does, the
+routing rule, the memory rule and the submit boundary are whatever the
+summariser chose to keep — and there was no file that said what to do about
+it, so an agent that lost the brief mid-run had nowhere to route even if it
+knew to look.
+
+**On the first turn after a compaction, resume or fork, before any other tool
+call:**
+
+1. Re-read this file. It is the whole rule; it is 17 KB and it is cheaper than
+   one wrong page.
+2. `get_run_progress(run_id)` — what is already staged is what you do not
+   redo. Staged sections survive compaction; your memory of writing them does
+   not.
+3. `list_open_rejections(run_id)` and `get_validation_verdict(run_id)` — a
+   verdict that landed before the compaction is still the current instruction.
+4. Only then take work, and take it through the routing tables above.
+
+The plugin's `SessionStart` hook prints an abbreviated form of this on all
+five start sources — `startup`, `clear`, `resume`, `compact`, `fork` — and its
+`SubagentStart` hook prints it to every dispatched producer, which do not
+inherit the parent's context. If you are reading this because a hook told you
+to, that is the mechanism working.
+
+## Gates, and reading a verdict
+
+A verdict names a gate id and the JSON path it fired on. The **path** is what
+routes — through the tables above, to one producer. The **gate id** is what
+tells you what to change:
+
+- `05-lifecycle/1-gates.md` explains the gates that block most often at
+  length, and carries a generated census of all 69 ids in the connector's
+  registry. No id the connector can emit is absent from it.
+- `explain_gate(gate_id)` is the connector's own authority: the registry's
+  wording plus the threshold history, live, for any id.
+
+Do not repair a gate you have not read. A guessed rule passes the gate it was
+guessed against and fails the next one.
+
 ## Sizing the route
 
 - **One surface flagged** (a reviewer note, a failed gate on one path):
@@ -240,6 +369,23 @@ rectifier's job and nobody else's.
   the surface; the surface names the per-surface producer. Do not re-produce
   a page to fix a field the verdict located for you, and do not route through
   the page producer to reach a surface producer it would only pass through to.
+
+## Producers consume the research; they never redo it
+
+The package a producer opens already carries a gated category's worth of
+work per grain: fused-and-cited evidence with verbatim excerpts, five
+volleys answered or NOT_RUN with reasons, an independent challenge, a
+technographic register, and the absence ladders. The corpus map
+(`02-inputs/5-corpus-map.md`) turns that into an ordered ladder per
+surface — **climb it in order and stop at the first rung that answers**,
+and the first rung is the package/workbook, not the web. A producer that
+re-searches a fact `Evidence_Detail` already states pays three times: the
+tokens of the search, the risk of a second answer that now needs
+reconciling, and a fresh chance to cite a worse source than the one the
+run's RRF consensus already ranked. New searching belongs only to gaps the
+enrichment planner names — and a dispatched producer emits those as
+`search_requests` for the top session (see Dispatch mode above), never
+fires them itself.
 
 ## Memory duties per stage
 

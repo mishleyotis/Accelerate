@@ -115,21 +115,21 @@ searched — not the ones you meant to.
    which per-item keys **persist**: `capped_subcap_ids` does (migration
    `0027_promotion_field_gaps`, JSONB, writer bound), and `opened_on_basis` and any
    per-row `sources_searched` do not.
-2. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/context.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context.md`
    — **§ C2** (heading `## C2 · Issue register &amp; Gantt`), **§ DD-8** and
    **§ C3** (heading `## C3 · Regulatory standing`): the Baxter positive patterns,
    the learned anti-patterns, the customer exclusion sets and the enrichment
    pathways. Applied by default, not by memory. **The rulebook is the authority on
    anti-patterns; the Surface Specification is the authority on payload shape**,
    and where they differ that is the split.
-3. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/5-context.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/5-context.md`
    — **§ C2** and **§ C3**: the pack's contract, and in particular § C2's *"What a
    cap is, and where it comes from"* (the four things a caps-log row puts on a
    register row), *"An issue that caps nothing still says so"* (the three drilldown
    states, of which the middle one is the one that goes wrong) and *"Issue depth —
    the standard"* (the seven things every row owes a reader); and § C3's *"The
    prudential regulator, and the four things that get mistaken for one"*.
-4. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+4. `docs/text/DMA Insights - Surface Specification.txt`
    — **§ C2 · Issue register & Gantt** and **§ C3 · Regulatory standing**: "What
    must be presented", "Why it is shaped this way", the information-source tables
    and the two synthesis prompts. This is the contract; nothing below it may narrow
@@ -137,12 +137,12 @@ searched — not the ones you meant to.
    (*"INTERNAL ONLY. The route is refused at the API, not only hidden in the
    navigation"*) and the card-anatomy line for C2, which sets the issue title at
    **8–16 words** in the source's own terms.
-5. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census rows: C2 → `context.issue_register`, no enrichment facet
    registered, gate family `CG (one row per matter; status never NULL)`, drilldown
    DD-8; C3 → `context.regulatory_standing`, no facet, gate families
    `ET (G1 identity, G2 anchor) · CG · AG`, no drilldown.
-6. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
    — what the most-blocking gates test, and `explain_gate` for the one that fired.
    **CG-14** (a linked cell exists on this run) governs every id in
    `linked_subcap_ids` and `capped_subcap_ids`; **CG-10** (a date that could not be
@@ -164,19 +164,19 @@ searched — not the ones you meant to.
    the report's compliance sections; `get_capability_catalogue` to resolve every
    `linked_subcap_ids` and `capped_subcap_ids` entry — never copy a capability name
    out of report prose; `get_evidence` for every id you cite.
-10. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/4-absence-protocol.md`
+10. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/4-absence-protocol.md`
     — the Regulatory-standing rung set (the regulator's enforcement database → the
     second regulator where dual-chartered → consent-order trackers → the entity's
     own disclosures), plus the entity-shape replacement rungs (state licence
     registries, the NAIC producer database, SEC IAPD or FINRA BrokerCheck) where
     the entity files nothing prudential. And
-    `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/3-language.md`
+    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/3-language.md`
     for the house voice, including the rule that regulator names spell out in full
     on every prose field (CG-27; 48 occurrences of `NCUA` once reached promoted
     prose) except inside a verbatim span, which is never edited.
-11. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/scripts/check_payload.py`
+11. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_payload.py`
     and
-    `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/scripts/check_language.py`
+    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_language.py`
     before you return.
 
 ## The contract — field by field
@@ -532,7 +532,7 @@ Severity Cap Impact sections **plus** enrichment, and never concluded absent fro
 `bundle.issues == []` (MEM-0049). The registries themselves are `first_party`
 sources registered at **T1**; the entity's own disclosures about a matter are
 **T2**. The Clay custom that
-`/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/clay_taxonomy.json`
+`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/clay_taxonomy.json`
 names under `gaps` — "regulatory filings and enforcement mentions" — is a Custom
 data point whose tier is the tier of whatever it returns: read the source before
 assigning one.

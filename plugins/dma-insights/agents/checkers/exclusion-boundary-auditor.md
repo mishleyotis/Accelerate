@@ -105,7 +105,7 @@ Every path below has been verified to exist.
    sections you are auditing; they name the excluded key classes, the
    per-section allowlist, and — this is the part a diff cannot tell you —
    **what the prose must therefore carry instead**.
-2. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+2. `docs/text/DMA Insights - Surface Specification.txt`
    — the page lifecycle **Redact** step (line 1387), **Protect** (line 1564), the
    Context dashboard's audience line (line 898: *the customer audience receives a
    locked state, not a redacted page; the route is refused at the API, not only

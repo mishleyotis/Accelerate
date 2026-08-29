@@ -8,7 +8,7 @@ Read this file during Phase 8, before any deliverable is shared. Run EVERY check
 
 ### Section A: Score Integrity
 
-- [ ] All 17 category Final Scores populated in workbook
+- [ ] All 16 category Final Scores populated in workbook
 - [ ] Final Score = min(Raw, Evidence Ceiling, All Applicable Caps) verified for each
 - [ ] Workbook Final Score matches EXACTLY in:
   - [ ] Narrative text mentions

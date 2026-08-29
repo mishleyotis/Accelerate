@@ -112,19 +112,19 @@ entity's **own** domain: MEM-0089 measured 11 of 26 uncitable Logix rows on
 1. `get_page_contract("context")` — the item-key contract for `context_sentiment`
    plus the `doc` text on every field you are about to write. A remembered shape is
    a refusal; read the doc.
-2. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/rulebooks/context.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context.md`
    — **§ C4** (heading `## C4 · Sentiment overview`) and **§ DD-12**: the Baxter
    positive pattern, the learned anti-patterns, the customer exclusion set and the
    enrichment pathways. Applied by default, not by memory. **The rulebook is the
    authority on anti-patterns; the Surface Specification is the authority on payload
    shape**, and where they differ that is the split.
-3. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/03-pages/5-context.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/5-context.md`
    — **§ C4**, and in particular *"It is a re-projection of O9. It is not a second
    measurement."*, the `n`/`scale`/`as_of` consequence table, *"SG-S8 discloses, and
    thinness is not a defect to hide"*, *"An unmeasured audience still fills its
    tile"* (the reachable employer-side sources after the 403 wall), and the
    five-step prompt this surface is produced under.
-4. `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+4. `docs/text/DMA Insights - Surface Specification.txt`
    — **§ C4 · Sentiment overview**. Note what it says and what it does not: *"The
    sentiment grid at Context depth, each tile expanding inline to the items behind
    it. Prototype-only; produced under the O9 sentiment prompt at Context depth."*
@@ -133,12 +133,12 @@ entity's **own** domain: MEM-0089 measured 11 of 26 uncitable Logix rows on
    your contract and not background. Read also the **D5 · Context** preamble
    (*"INTERNAL ONLY. The route is refused at the API, not only hidden in the
    navigation."*).
-5. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census row: C4 → `context.context_sentiment`, enrichment facet
    `sentiment`, gate families `SG:S8 · CG (reconciles to O9 by e_id)`, drilldown
    DD-12, and the note that this surface *"projects O9's bars under the O9 prompt at
    Context depth — produce O9 first"*.
-6. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
    — **§ SG-S8** in full. It **discloses and still promotes**, with the plain label
    *"Sentiment rests on a single source, so treat it as indicative only"*; it counts
    `overview.sentiment.bars[]` and `context.context_sentiment.context_tiles[].rows[]`
@@ -158,15 +158,15 @@ entity's **own** domain: MEM-0089 measured 11 of 26 uncitable Logix rows on
    and everything you do not change comes back byte-identical.
 9. `get_evidence` for every id you cite; `get_capability_catalogue` to resolve every
    cell a `note` names — never copy a capability name out of report prose.
-10. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/2-evidence.md`
+10. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/2-evidence.md`
     for why a blocked source cannot be an `e_id` at all, and
-    `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/4-absence-protocol.md`
+    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/4-absence-protocol.md`
     for the shape of an honest ladder. And
-    `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/01-start-here/3-language.md`
+    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/3-language.md`
     for the house voice, including acronym expansion on first use in prose.
-11. `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/scripts/check_payload.py`
+11. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_payload.py`
     and
-    `/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/scripts/check_repetition.py`
+    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_repetition.py`
     before you return — the second because this surface's characteristic prose
     defect is one note pasted across four rows.
 
@@ -453,7 +453,7 @@ that is silent is indistinguishable from one nobody worked.
 ## Enrichment checks
 
 The registered facet is **`sentiment`**
-(`/home/user/Accelerate/plugins/dma-insights/skills/dma-surface-production/02-inputs/enrichment_sources.json`),
+(`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`),
 and its serving surface is **`overview.sentiment`** — which is the point. O9 owns
 the dataset and C4 projects it, so enrichment lands on O9 first and reaches this
 page as a projection. Record the pass against `sentiment` with `record_enrichment`,

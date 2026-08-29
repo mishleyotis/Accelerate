@@ -42,7 +42,7 @@ Every error log entry includes the phase where the error was caught, the root ca
 ### ERR-001 [PHASE:4] CRITICAL: Category-Level Scoring Instead of Subcapability-Level
 
 **Description:**
-Assessment generated only 17 scores (one per category across P1-P4) instead of ~836 subcapability scores. The scoring_detail sheets have single aggregate rows per category rather than full subcapability-level detail. This breaks the entire assessment model and makes evidence linkage impossible.
+Assessment generated only 17 scores (one per category across P1-P4) instead of 851 subcapability scores. The scoring_detail sheets have single aggregate rows per category rather than full subcapability-level detail. This breaks the entire assessment model and makes evidence linkage impossible.
 
 **Root Cause:**
 - Misunderstanding that "scoring toolkit" column count = number of scores to generate
@@ -51,7 +51,8 @@ Assessment generated only 17 scores (one per category across P1-P4) instead of ~
 - Not reading the Pillar Scoring Toolkit XLSX with all subcapability row identifiers
 
 **Prevention Rule:**
-1. BEFORE scoring, count expected subcapabilities: P1 ~199, P2 ~288, P3 ~162, P4 ~187 (total ~836)
+1. BEFORE scoring, count expected subcapabilities from the catalogue:
+   P1 205, P2 292, P3 164, P4 190 (total 851 at full scope)
 2. Read the Pillar Scoring Toolkit XLSX BEFORE starting Phase 4
 3. Verify scoresheet row count matches expected subcap count (±5%) BEFORE finalizing workbook
 4. Mark each subcapability with explicit SubCap_ID from toolkit
@@ -164,7 +165,7 @@ Workbook contains precise scores like 3.81, 3.94, 3.67 with no quantitative just
 ### ERR-005 [PHASE:4] HIGH: Calculation_Chain Starts at Capability Level, Not Subcap Level
 
 **Description:**
-Calculation_Chain sheet begins with Capability rows (17 per pillar) instead of starting with all SubCapability rows (~836 total). This makes it impossible to audit the aggregation from subcap→capability→category→pillar→overall.
+Calculation_Chain sheet begins with Capability rows (17 per pillar) instead of starting with all SubCapability rows (851 at full scope). This makes it impossible to audit the aggregation from subcap→capability→category→pillar→overall.
 
 **Root Cause:**
 - Not reading workbook_specification.md Calculation_Chain requirements
@@ -174,7 +175,7 @@ Calculation_Chain sheet begins with Capability rows (17 per pillar) instead of s
 
 **Prevention Rule:**
 1. Calculation_Chain sheet MUST have this row structure (in order):
-   - Row 1: All subcapabilities (~836 rows) with raw scores and subcap weights
+   - Row 1: All subcapabilities (851 rows at full scope) with raw scores and subcap weights
    - Rows 838-843: Capability aggregates (raw capability scores)
    - Rows 844-847: Category aggregates (if applicable)
    - Rows 848-851: Pillar aggregates
@@ -371,7 +372,7 @@ Gesa CU assessment, 139/139 capabilities (100%) had zero score differentiation.
 - Model scores at capability level mentally, then stamps the same score across all subcaps
 - Evidence is mapped at capability level (ERR-003), so all subcaps cite identical evidence
 - Differentiation check (step 3e) is described in prose but never enforced programmatically
-- Context overflow causes the model to take shortcuts during the 836-row scoring pass
+- Context overflow causes the model to take shortcuts during the 851-row scoring pass
 
 **Prevention Rule:**
 1. After scoring each capability, COUNT unique scores. If 100% identical = HARD BLOCK
@@ -491,7 +492,7 @@ generic, non-analytical scoring. In the Gesa CU assessment, all 707 rationales w
 Use this checklist to prevent these errors in the next assessment:
 
 - [ ] **Before Phase 1:** Read qa_error_log.md and understand all 14 errors
-- [ ] **Before Phase 4:** Verify subcap count in toolkit (~836 expected)
+- [ ] **Before Phase 4:** Verify subcap count against the catalogue (851 at full scope)
 - [ ] **Before Phase 4:** Confirm workbook structure includes Columns A-V (22 columns)
 - [ ] **During Phase 4:** Execute Capability Micro-Loop (3a-3g) for each capability
 - [ ] **During Phase 4:** Run differentiation check after each capability (ERR-001 prevention)

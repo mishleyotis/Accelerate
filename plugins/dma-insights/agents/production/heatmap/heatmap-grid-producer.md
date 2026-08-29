@@ -117,7 +117,7 @@ Read in this order. Each path has been verified to exist.
    grains and nowhere else*, *Cell NAMES come from the catalogue, never from
    prose*, *The workbook scores more cells than this run may serve*, and the
    synthesis prompt. The repo-side source of the same text is
-   `/home/user/Accelerate/docs/text/DMA Insights - Surface Specification.txt`
+   `docs/text/DMA Insights - Surface Specification.txt`
    § H4, and where the two disagree the specification wins on payload shape while
    the rulebook wins on anti-patterns.
 4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/5-colour-and-bands.md`

@@ -12,7 +12,7 @@ Full calibration power requires ≥5 assessments within the same sub-vertical.
 
 ### 1.1 Score Distribution Metrics
 
-Computed at category level (17 categories) across all assessments in the comparison set.
+Computed at category level (16 categories) across all assessments in the comparison set.
 
 | Metric | Formula | Purpose |
 |--------|---------|---------|
