@@ -329,7 +329,9 @@
      "verdict": "ADOPT",
      "layer": "ci",
      "severity": "P0",
-     "catches_known_defect": null
+     "catches_known_defect": "Two resolvers, and the unsanctioned one won 50 call sites to 1; its maturityHex(null) painted #E5E7EB for a score that does not exist.",
+     "rule": "No colour in any payload: a payload carries the raw score, the band word and semantic flags, never a hex. Score -> band -> hex is resolved in ONE authored frontend module, apps/web/lib/bands.js; apps/web/proto/bands.js is GENERATED from it by scripts/gen_proto_bands.py for the classic scripts, and every proto call site delegates there. A null score resolves to no colour at all \u2014 never a grey swatch.",
+     "enforced_by": "scripts/gate_n_one_colour_resolver.py"
     },
     {
      "qa_id": "BD-05",
@@ -7483,7 +7485,7 @@
    "doc_line": 6245,
    "status": "INCLUDED",
    "surface_id": "insights.landscape",
-   "disposition_evidence": "Contract-required and mounted. (1) packages/shared/contracts_data.json:598 declares the section under `insights` with \"surface_id\": \"T2\", \"required\": true, fields `tiles` (required) and `reconciles_to_register` (required). (2) apps/mcp/dma_mcp/contracts.py:74 maps (\"insights\",\"landscape\") -> serving table `insights_landscape`; migrations/versions/0008_serving_tier.py:276 creates it; tests/schema/table_baseline.json:63 and tests/schema/test_qa_checklist.py:48 both list it. (3) It is SERVED and COMPUTED: apps/api/dma_api/computed.py:245-283 (`def landscape`) recomputes the four counts from techstack_items, dispatched at apps/api/dma_api/computed.py:690-691; covered by apps/api/tests/test_computed_at_read.py:100 and apps/api/tests/test_computed_against_the_real_schema.py:162. (4) It is MOUNTED: apps/web/proto/app-root.jsx:446 `case \"insights\": page = <ClientInsights .../>`, and ClientInsights renders the strip at apps/web/proto/pages-d1-overview.jsx:1444-1487 (`<CardBoundary name=\"technology landscape\">`). The unmounted pack apps/web/proto/pages-live-client.jsx:2663-2690 (LiveLandscape) is a SECOND renderer and is NOT the basis of this call — the mounted d1-overview path is. No exclusion argument survives any of the four.",
+   "disposition_evidence": "Contract-required and mounted. (1) packages/shared/contracts_data.json:598 declares the section under `insights` with \"surface_id\": \"T2\", \"required\": true, fields `tiles` (required) and `reconciles_to_register` (required). (2) apps/mcp/dma_mcp/contracts.py:74 maps (\"insights\",\"landscape\") -> serving table `insights_landscape`; migrations/versions/0008_serving_tier.py:276 creates it; tests/schema/table_baseline.json:63 and tests/schema/test_qa_checklist.py:48 both list it. (3) It is SERVED and COMPUTED: apps/api/dma_api/computed.py:245-283 (`def landscape`) recomputes the four counts from techstack_items, dispatched at apps/api/dma_api/computed.py:690-691; covered by apps/api/tests/test_computed_at_read.py:100 and apps/api/tests/test_computed_against_the_real_schema.py:162. (4) It is MOUNTED: apps/web/proto/app-root.jsx:446 `case \"insights\": page = <ClientInsights .../>`, and ClientInsights renders the strip at apps/web/proto/pages-d1-overview.jsx:1444-1487 (`<CardBoundary name=\"technology landscape\">`). The unmounted pack apps/web/proto/pages-live-client.jsx:2663-2690 (LiveLandscape) is a SECOND renderer and is NOT the basis of this call \u2014 the mounted d1-overview path is. No exclusion argument survives any of the four.",
    "checks": [
     {
      "qa_id": "ITL-01",
@@ -7496,7 +7498,7 @@
     {
      "qa_id": "ITL-02",
      "verdict": "ADOPT",
-     "rule": "All four counts are recomputed server-side from techstack_items for the run (apps/api/dma_api/computed.py:245-283) and no count is ever read from a stored column or from the submitted payload — insights_landscape has no tiles column by design (writer_spec.json:3083: \"the four tile counts are never stored\"), which is charter invariant 8 and the document's own \"do not accept submitted counts\" (line 6265).",
+     "rule": "All four counts are recomputed server-side from techstack_items for the run (apps/api/dma_api/computed.py:245-283) and no count is ever read from a stored column or from the submitted payload \u2014 insights_landscape has no tiles column by design (writer_spec.json:3083: \"the four tile counts are never stored\"), which is charter invariant 8 and the document's own \"do not accept submitted counts\" (line 6265).",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
@@ -7512,7 +7514,7 @@
     {
      "qa_id": "ITL-04",
      "verdict": "AMEND(the document's phrase \"all four layer and status counts\" at line 6265 conflates two different rollups on two different sections; kept as one rule that separates them)",
-     "rule": "T2's four tiles are STATUS counts drawn from techstack_items.status; the four LAYER counts (OPS/CUST/DATA/INFRA) are a separate rollup computed by techstack_layers for techstack.techstack — the landscape strip must not restate layer counts, and no grouping key outside the register's own status and stack_layer_t enums may appear on this surface (that is what \"a second technology taxonomy\" means here).",
+     "rule": "T2's four tiles are STATUS counts drawn from techstack_items.status; the four LAYER counts (OPS/CUST/DATA/INFRA) are a separate rollup computed by techstack_layers for techstack.techstack \u2014 the landscape strip must not restate layer counts, and no grouping key outside the register's own status and stack_layer_t enums may appear on this surface (that is what \"a second technology taxonomy\" means here).",
      "layer": "payload",
      "severity": "P1",
      "catches_known_defect": null
@@ -7520,7 +7522,7 @@
     {
      "qa_id": "ITL-05",
      "verdict": "ADOPT",
-     "rule": "Layer keys are OPS, CUST, DATA and INFRA only and never L2-L5, which collide with the L1-L4 evidence levels rendered on the same card — enforced by the stack_layer_t enum at migrations/versions/0002_enumerated_types.py:48 (\"deliberately NOT L2-L5\") and by the CLAUDE.md corrections table, which is binding over the prototype.",
+     "rule": "Layer keys are OPS, CUST, DATA and INFRA only and never L2-L5, which collide with the L1-L4 evidence levels rendered on the same card \u2014 enforced by the stack_layer_t enum at migrations/versions/0002_enumerated_types.py:48 (\"deliberately NOT L2-L5\") and by the CLAUDE.md corrections table, which is binding over the prototype.",
      "layer": "payload",
      "severity": "P1",
      "catches_known_defect": null
@@ -7528,7 +7530,7 @@
     {
      "qa_id": "ITL-06",
      "verdict": "ADOPT",
-     "rule": "The four tiles partition the register: every techstack_items row lands in exactly one tile through TILE_FOR_STATUS (ABSENT maps to GAPS, apps/api/dma_api/computed.py:42-46), no row is counted twice, and no CLAIMED or INFERRED row is folded into the CONFIRMED total — a row whose status is null or unrecognised is dropped from all four counts and must therefore drive reconciles_to_register false rather than disappearing silently.",
+     "rule": "The four tiles partition the register: every techstack_items row lands in exactly one tile through TILE_FOR_STATUS (ABSENT maps to GAPS, apps/api/dma_api/computed.py:42-46), no row is counted twice, and no CLAIMED or INFERRED row is folded into the CONFIRMED total \u2014 a row whose status is null or unrecognised is dropped from all four counts and must therefore drive reconciles_to_register false rather than disappearing silently.",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
@@ -7536,7 +7538,7 @@
     {
      "qa_id": "ITL-07",
      "verdict": "AMEND(line 6286 is a prohibition with nothing to assert against; restated as a countable rule over the rows the tiles read)",
-     "rule": "Every counted row is a PRODUCT with vendor and product in separate fields — a category name (\"CRM\", \"Analytics/BI\"), a service, or a duplicate alias of a row already counted must not appear as its own row, and ts_id is unique per run (UNIQUE INDEX techstack_items_ts_uq on (run_id, ts_id)) so an alias re-registered under a second ts_id inflates whichever tile it lands in.",
+     "rule": "Every counted row is a PRODUCT with vendor and product in separate fields \u2014 a category name (\"CRM\", \"Analytics/BI\"), a service, or a duplicate alias of a row already counted must not appear as its own row, and ts_id is unique per run (UNIQUE INDEX techstack_items_ts_uq on (run_id, ts_id)) so an alias re-registered under a second ts_id inflates whichever tile it lands in.",
      "layer": "payload",
      "severity": "P1",
      "catches_known_defect": null
@@ -7544,7 +7546,7 @@
     {
      "qa_id": "ITL-08",
      "verdict": "ADOPT",
-     "rule": "No independent count of the register exists anywhere in the system: no stored tile count, no producer-supplied count, and no second arithmetic in the frontend — today this FAILS, because the mounted strip computes its own four counts client-side from DMA.TECH_STACK at apps/web/proto/pages-d1-overview.jsx:1466-1474, which is exactly the independent count line 6284 names as a story breaker.",
+     "rule": "No independent count of the register exists anywhere in the system: no stored tile count, no producer-supplied count, and no second arithmetic in the frontend \u2014 today this FAILS, because the mounted strip computes its own four counts client-side from DMA.TECH_STACK at apps/web/proto/pages-d1-overview.jsx:1466-1474, which is exactly the independent count line 6284 names as a story breaker.",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
@@ -7552,7 +7554,7 @@
     {
      "qa_id": "ITL-09",
      "verdict": "ADOPT",
-     "rule": "Only the GAPS tile names its members — named_items lists the absent platforms, while CONFIRMED, INFERRED and CLAIMED carry named_items == [] — because a list of what is present is the register and a list of what is absent is the finding.",
+     "rule": "Only the GAPS tile names its members \u2014 named_items lists the absent platforms, while CONFIRMED, INFERRED and CLAIMED carry named_items == [] \u2014 because a list of what is present is the register and a list of what is absent is the finding.",
      "layer": "payload",
      "severity": "P1",
      "catches_known_defect": null
@@ -7560,7 +7562,7 @@
     {
      "qa_id": "ITL-10",
      "verdict": "AMEND(owner adjudications A, B and C supersede line 6271's \"state unknown, sparse, quarantined, not-run\" vocabulary: no em dash for an unknown, no workflow words to any reader, and an unsourceable value omits its row)",
-     "rule": "With no techstack register for the run the strip states WHICH absence it is — section never promoted versus promoted with no rows — and never renders four zeros, never an em dash, and never workflow vocabulary (\"queued for enrichment\", \"held\", \"validating\", UNWORKED/WORKED_FOUND); four zeros are an assertion that a technographic scan ran and found nothing, which is a claim about work nobody did.",
+     "rule": "With no techstack register for the run the strip states WHICH absence it is \u2014 section never promoted versus promoted with no rows \u2014 and never renders four zeros, never an em dash, and never workflow vocabulary (\"queued for enrichment\", \"held\", \"validating\", UNWORKED/WORKED_FOUND); four zeros are an assertion that a technographic scan ran and found nothing, which is a claim about work nobody did.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": null
@@ -7576,7 +7578,7 @@
     {
      "qa_id": "ITL-12",
      "verdict": "AMEND(8.1's \"changes orientation, confidence, sequence, action or a client question\" at line 6261 cannot fail a test; replaced with the falsifiable form of the same intent)",
-     "rule": "Each tile's basis is derived from the rows that tile actually counted — the evidence_level range of its members (\"2 · L1-L2 evidence\"), or the literal \"evidence level not recorded\" when none of them carry one — and is never a fixed sentence authored in the renderer.",
+     "rule": "Each tile's basis is derived from the rows that tile actually counted \u2014 the evidence_level range of its members (\"2 \u00b7 L1-L2 evidence\"), or the literal \"evidence level not recorded\" when none of them carry one \u2014 and is never a fixed sentence authored in the renderer.",
      "layer": "payload",
      "severity": "P1",
      "catches_known_defect": null
@@ -7584,7 +7586,7 @@
     {
      "qa_id": "ITL-13",
      "verdict": "AMEND(8.4's \"record the contradiction and resolution\" at line 6276 turned into arithmetic that can fail)",
-     "rule": "For one run and one audience the four T2 tile counts equal the counts of the same four statuses in the T1 register rendered on the Tech Stack page, and when they do not the disagreement is rendered as a stated contradiction rather than smoothed away — today reconciles_to_register has zero frontend consumers (grep: only apps/api/dma_api/computed.py, apps/api/tests/*, apps/mcp/tests/*; no .jsx match outside the unmounted pack), so a false value is computed, served, and invisible.",
+     "rule": "For one run and one audience the four T2 tile counts equal the counts of the same four statuses in the T1 register rendered on the Tech Stack page, and when they do not the disagreement is rendered as a stated contradiction rather than smoothed away \u2014 today reconciles_to_register has zero frontend consumers (grep: only apps/api/dma_api/computed.py, apps/api/tests/*, apps/mcp/tests/*; no .jsx match outside the unmounted pack), so a false value is computed, served, and invisible.",
      "layer": "narrative",
      "severity": "P0",
      "catches_known_defect": null
@@ -7592,7 +7594,7 @@
     {
      "qa_id": "ITL-14",
      "verdict": "AMEND(8.5's \"cannot rank first\" at line 6280 asserts ranking on a surface that ranks nothing; restated as the ordering rule this surface actually has)",
-     "rule": "The strip performs no sub-vertical re-ordering: tiles render in the fixed order CONFIRMED, INFERRED, CLAIMED, GAPS, and GAPS.named_items preserve register order (ORDER BY id, apps/api/dma_api/computed.py:253-255) so two reads of one promoted run return identical ordering — sub-vertical relevance is a T1/T3 judgement, not a T2 one.",
+     "rule": "The strip performs no sub-vertical re-ordering: tiles render in the fixed order CONFIRMED, INFERRED, CLAIMED, GAPS, and GAPS.named_items preserve register order (ORDER BY id, apps/api/dma_api/computed.py:253-255) so two reads of one promoted run return identical ordering \u2014 sub-vertical relevance is a T1/T3 judgement, not a T2 one.",
      "layer": "payload",
      "severity": "P2",
      "catches_known_defect": null
@@ -7600,7 +7602,7 @@
     {
      "qa_id": "ITL-15",
      "verdict": "AMEND(line 6291 is a cross-reference, not an assertion; given the consequence that makes it testable)",
-     "rule": "insights.landscape is a required section in the release gate's section register, and a failing landscape verdict blocks the entire promote — promotion is atomic across all six pages, so a landscape failure cannot be waived to ship the other five.",
+     "rule": "insights.landscape is a required section in the release gate's section register, and a failing landscape verdict blocks the entire promote \u2014 promotion is atomic across all six pages, so a landscape failure cannot be waived to ship the other five.",
      "layer": "ci",
      "severity": "P2",
      "catches_known_defect": null
@@ -7615,15 +7617,15 @@
     },
     {
      "qa_id": "ITL-ADD-01",
-     "verdict": "ADD(beyond baseline — the document's audience clause at line 6272 names only item-level markers and misses the count itself)",
-     "rule": "The tile counts are consistent with the audience they are served to: computed.landscape reads techstack_items with no audience filter (apps/api/dma_api/computed.py:253-257) while the redaction walker supports index-qualified paths such as items[0] (apps/api/dma_api/redaction.py:37-38), so an internal_only marking on a techstack item removes the row from the customer's register while leaving it inside the customer's count — the count must be taken over the rows that audience is actually served.",
+     "verdict": "ADD(beyond baseline \u2014 the document's audience clause at line 6272 names only item-level markers and misses the count itself)",
+     "rule": "The tile counts are consistent with the audience they are served to: computed.landscape reads techstack_items with no audience filter (apps/api/dma_api/computed.py:253-257) while the redaction walker supports index-qualified paths such as items[0] (apps/api/dma_api/redaction.py:37-38), so an internal_only marking on a techstack item removes the row from the customer's register while leaving it inside the customer's count \u2014 the count must be taken over the rows that audience is actually served.",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
     },
     {
      "qa_id": "ITL-ADD-02",
-     "verdict": "ADD(beyond baseline — the document never checks that the served payload is the thing rendered)",
+     "verdict": "ADD(beyond baseline \u2014 the document never checks that the served payload is the thing rendered)",
      "rule": "The mounted strip renders the SERVED insights.landscape payload: apps/web/proto/app-root.jsx:446 mounts ClientInsights, whose landscape block recomputes its own counts from DMA.TECH_STACK (apps/web/proto/pages-d1-overview.jsx:1466-1474) while apps/web/proto/data.js contains no `landscape` binding at all (grep: zero matches), so the server's basis, named_items and reconciles_to_register are computed, served, and never reach a reader.",
      "layer": "dom",
      "severity": "P0",
@@ -7631,15 +7633,15 @@
     },
     {
      "qa_id": "ITL-ADD-03",
-     "verdict": "ADD(beyond baseline — a fabrication the document's \"do not fill a missing contract field with generic prose\" gestures at but does not catch)",
-     "rule": "No tile carries renderer-authored provenance prose: the mounted strip hardcodes \"Active deployments validated via Explorium and primary sources\", \"Job + press signals\" and \"T4-T5 marketing\" for every client (apps/web/proto/pages-d1-overview.jsx:1467-1473), naming a specific scanning tool and specific source kinds on a client-facing surface irrespective of how those rows were actually detected — the tile's words must come from the register's own evidence_level and detection_basis or not appear.",
+     "verdict": "ADD(beyond baseline \u2014 a fabrication the document's \"do not fill a missing contract field with generic prose\" gestures at but does not catch)",
+     "rule": "No tile carries renderer-authored provenance prose: the mounted strip hardcodes \"Active deployments validated via Explorium and primary sources\", \"Job + press signals\" and \"T4-T5 marketing\" for every client (apps/web/proto/pages-d1-overview.jsx:1467-1473), naming a specific scanning tool and specific source kinds on a client-facing surface irrespective of how those rows were actually detected \u2014 the tile's words must come from the register's own evidence_level and detection_basis or not appear.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": null
     },
     {
      "qa_id": "ITL-ADD-04",
-     "verdict": "ADD(beyond baseline — a live customer-facing defect the document's anti-pattern list does not reach)",
+     "verdict": "ADD(beyond baseline \u2014 a live customer-facing defect the document's anti-pattern list does not reach)",
      "rule": "A named item never repeats its vendor: _product_label (apps/api/dma_api/computed.py:49-66) suppresses the vendor when the product string already begins with it, so \"Salesforce Salesforce Data Cloud\" and \"MuleSoft MuleSoft Anypoint Platform\" cannot render, while a row carrying only one of the two fields still renders that one.",
      "layer": "payload",
      "severity": "P2",
@@ -7647,7 +7649,7 @@
     },
     {
      "qa_id": "ITL-ADD-05",
-     "verdict": "ADD(beyond baseline — submit-side gates the document's section 8 omits entirely)",
+     "verdict": "ADD(beyond baseline \u2014 submit-side gates the document's section 8 omits entirely)",
      "rule": "At submit, tiles[*].detail stays inside its 90-character face budget (CG-12, registered at apps/mcp/dma_mcp/validation.py:932-935 and described at apps/mcp/dma_mcp/gates.py:132), and a landscape section whose only content is an empty tiles[] is refused as a vacuous shell by CG-15 (apps/mcp/tests/test_vacuity.py:172-176) rather than promoting an empty strip.",
      "layer": "connector",
      "severity": "P2",
@@ -7655,15 +7657,15 @@
     },
     {
      "qa_id": "ITL-ADD-06",
-     "verdict": "ADD(beyond baseline — the precondition without which every other check on this surface is uncomputable)",
-     "rule": "Every techstack_items row carries a status from CONFIRMED|INFERRED|CLAIMED|ABSENT, NOT NULL, enforced at submit and in the DDL — it is the only payload NOT NULL on that table precisely because the landscape strip recomputes its four counts from it, and a null-status row would vanish from all four tiles while still occupying the register.",
+     "verdict": "ADD(beyond baseline \u2014 the precondition without which every other check on this surface is uncomputable)",
+     "rule": "Every techstack_items row carries a status from CONFIRMED|INFERRED|CLAIMED|ABSENT, NOT NULL, enforced at submit and in the DDL \u2014 it is the only payload NOT NULL on that table precisely because the landscape strip recomputes its four counts from it, and a null-status row would vanish from all four tiles while still occupying the register.",
      "layer": "connector",
      "severity": "P1",
      "catches_known_defect": null
     },
     {
      "qa_id": "ITL-ADD-07",
-     "verdict": "ADD(beyond baseline — the cross-surface trace the document asks for at line 6276 has an interaction half it never states)",
+     "verdict": "ADD(beyond baseline \u2014 the cross-surface trace the document asks for at line 6276 has an interaction half it never states)",
      "rule": "The strip's \"Open full stack\" control carries the same run id as the counts (apps/web/proto/pages-d1-overview.jsx:1449 navigates to /clients/:id/techstack with { run: run.id }), so the register the reader lands on is the one the tiles were computed from and the two pages can be compared without a run switch.",
      "layer": "interaction",
      "severity": "P2",
@@ -7671,7 +7673,7 @@
     },
     {
      "qa_id": "ITL-ADD-08",
-     "verdict": "ADD(beyond baseline — the empty-register path the document's \"state conditions explicitly\" bullet points at but does not pin down)",
+     "verdict": "ADD(beyond baseline \u2014 the empty-register path the document's \"state conditions explicitly\" bullet points at but does not pin down)",
      "rule": "When the run has no techstack rows the served section states which absence it is: computed.landscape returns early on an empty register (`if not rows: return`, apps/api/dma_api/computed.py:250-251) leaving the section with no tiles key and no empty_state of its own, so an absent register, a producer that promoted an envelope only, and a failed computation are indistinguishable in the served payload.",
      "layer": "payload",
      "severity": "P1",
@@ -7684,7 +7686,7 @@
    "doc_line": 6830,
    "status": "INCLUDED",
    "surface_id": "platform.recommendations",
-   "disposition_evidence": "INCLUDED, with the surface re-homed. The document files this under Insights and marks it FAIL because \"Live Insights ends with cards and Technology landscape\" (doc:6836). The Surface Specification files it under D4 Platform: \"## P2 · Recommendations — Payload section platform.recommendations · component ClientPlatform + RecommendationModal\" (docs/text/DMA Insights - Surface Specification.txt:768). packages/shared/contracts_data.json declares platform.recommendations, surface_id P2, required:true, with the 17-key item shape {rec_id,title,l3_area,l4_feature,phase,provenance,dma_impact[],root_cause,evidence_ids[],cost_of_inaction,prerequisites[],dependencies[],sequencing_reason,effort_band,kpi_triple,validation_gate,claim_label}; the `insights` page in the same file declares exactly two sections — insights (I1) and landscape (T2) — so no Insights-page Recommendations section is contract-required and the doc's FAIL rests on a wrong location, not a missing surface. MOUNTED, not merely defined: apps/web/proto/app-root.jsx:448 routes case \"platform\" to ClientPlatform; the Recommendations card renders at apps/web/proto/pages-d3-d4.jsx:1330-1420; RecommendationModal is mounted at apps/web/proto/app-root.jsx:560 and defined at apps/web/proto/drawers.jsx:2402. Storage exists (migrations/versions/0008_serving_tier.py:404 platform_recommendations; migrations/versions/0027 adds item_provenance) and the connector gates it (apps/mcp/dma_mcp/validation.py:538 CG-09 provenance ANALYST|DERIVED; apps/mcp/dma_mcp/validation2.py:74 lists (platform,recommendations) in _RANKED_SECTIONS so AG-01 requires r_layer). Nothing in this disposition rests on apps/web/proto/pages-live-client.jsx, which app-root.jsx never mounts (grep LiveClientPage over apps/web/proto/app-root.jsx returns nothing; only apps/web/app/route.js:57 ships the bytes). The existing inventory's \"Platform - Recommendations\" entry at doc_line 9261 curates a DIFFERENT doc slice of the same surface; these checks are additive and keep the document's own IR-* ids.",
+   "disposition_evidence": "INCLUDED, with the surface re-homed. The document files this under Insights and marks it FAIL because \"Live Insights ends with cards and Technology landscape\" (doc:6836). The Surface Specification files it under D4 Platform: \"## P2 \u00b7 Recommendations \u2014 Payload section platform.recommendations \u00b7 component ClientPlatform + RecommendationModal\" (docs/text/DMA Insights - Surface Specification.txt:768). packages/shared/contracts_data.json declares platform.recommendations, surface_id P2, required:true, with the 17-key item shape {rec_id,title,l3_area,l4_feature,phase,provenance,dma_impact[],root_cause,evidence_ids[],cost_of_inaction,prerequisites[],dependencies[],sequencing_reason,effort_band,kpi_triple,validation_gate,claim_label}; the `insights` page in the same file declares exactly two sections \u2014 insights (I1) and landscape (T2) \u2014 so no Insights-page Recommendations section is contract-required and the doc's FAIL rests on a wrong location, not a missing surface. MOUNTED, not merely defined: apps/web/proto/app-root.jsx:448 routes case \"platform\" to ClientPlatform; the Recommendations card renders at apps/web/proto/pages-d3-d4.jsx:1330-1420; RecommendationModal is mounted at apps/web/proto/app-root.jsx:560 and defined at apps/web/proto/drawers.jsx:2402. Storage exists (migrations/versions/0008_serving_tier.py:404 platform_recommendations; migrations/versions/0027 adds item_provenance) and the connector gates it (apps/mcp/dma_mcp/validation.py:538 CG-09 provenance ANALYST|DERIVED; apps/mcp/dma_mcp/validation2.py:74 lists (platform,recommendations) in _RANKED_SECTIONS so AG-01 requires r_layer). Nothing in this disposition rests on apps/web/proto/pages-live-client.jsx, which app-root.jsx never mounts (grep LiveClientPage over apps/web/proto/app-root.jsx returns nothing; only apps/web/app/route.js:57 ships the bytes). The existing inventory's \"Platform - Recommendations\" entry at doc_line 9261 curates a DIFFERENT doc slice of the same surface; these checks are additive and keep the document's own IR-* ids.",
    "checks": [
     {
      "qa_id": "IR-01",
@@ -7696,7 +7698,7 @@
     },
     {
      "qa_id": "IR-02",
-     "verdict": "AMEND(the propagation half already holds — nested evidence chips call ev.stopPropagation() at apps/web/proto/pages-d3-d4.jsx:90 and the roadmap chip calls e.stopPropagation() at :2157 — so as written the check cannot fail. It also cannot fail for keyboard, because the row is a bare <div onClick> at pages-d3-d4.jsx:1350 with no role, tabIndex or key handler, so no keyboard activation exists to test. Widened to require exactly one overlay from BOTH activation paths)",
+     "verdict": "AMEND(the propagation half already holds \u2014 nested evidence chips call ev.stopPropagation() at apps/web/proto/pages-d3-d4.jsx:90 and the roadmap chip calls e.stopPropagation() at :2157 \u2014 so as written the check cannot fail. It also cannot fail for keyboard, because the row is a bare <div onClick> at pages-d3-d4.jsx:1350 with no role, tabIndex or key handler, so no keyboard activation exists to test. Widened to require exactly one overlay from BOTH activation paths)",
      "rule": "Activating a recommendation row by pointer or by keyboard opens exactly one RecommendationModal and causes no second overlay and no route change; every nested control inside the row stops propagation; and the row exposes a button role, is focus-reachable and carries one unambiguous accessible name.",
      "layer": "interaction",
      "severity": "P0",
@@ -7704,7 +7706,7 @@
     },
     {
      "qa_id": "IR-03",
-     "verdict": "AMEND(four of the seven fields it names — benefit, why-now, risk, owner — do not exist in the P2 item shape in packages/shared/contracts_data.json platform.recommendations. Asserting them would invent fields, which authority rule 3 forbids: \"Payload shapes are law; never invent a field.\" Rewritten onto the shape the contract actually states, keeping the grounding requirement intact)",
+     "verdict": "AMEND(four of the seven fields it names \u2014 benefit, why-now, risk, owner \u2014 do not exist in the P2 item shape in packages/shared/contracts_data.json platform.recommendations. Asserting them would invent fields, which authority rule 3 forbids: \"Payload shapes are law; never invent a field.\" Rewritten onto the shape the contract actually states, keeping the grounding requirement intact)",
      "rule": "Every contract-stated field of a promoted recommendation is present and grounded: root_cause is cited prose explaining why the gap exists rather than restating the score; cost_of_inaction is non-empty and either grounded in a dated trigger or states \"no dated trigger established\"; kpi_triple carries metric, a baseline that exists in the pack with an as_of, and a target; validation_gate carries cell, threshold, a MET/NOT MET verdict and the backing_cells that produce that verdict; sequencing_reason names the dependency or gate that fixes the phase; and every evidence_id resolves to this run and entity.",
      "layer": "payload",
      "severity": "P0",
@@ -7712,15 +7714,15 @@
     },
     {
      "qa_id": "IR-04",
-     "verdict": "ADOPT(the document is right and the app is wrong — this becomes a defect to fix, not a check to delete)",
-     "rule": "openRec with an id the current run does not serve renders a named unresolved state saying which id failed and in which run — never a blank and never a silent no-op — and never resolves to a recommendation belonging to another entity; apps/web/proto/drawers.jsx:2410 currently does `const r = DMA.getRecommendation(recModal); if (!r) return null;`, so the click renders nothing at all, which is the failure this check must catch. The cross-entity half already holds: in LIVE, DMA.getRecommendation reads only the current entity's promoted payload (apps/web/proto/data.js:1193).",
+     "verdict": "ADOPT(the document is right and the app is wrong \u2014 this becomes a defect to fix, not a check to delete)",
+     "rule": "openRec with an id the current run does not serve renders a named unresolved state saying which id failed and in which run \u2014 never a blank and never a silent no-op \u2014 and never resolves to a recommendation belonging to another entity; apps/web/proto/drawers.jsx:2410 currently does `const r = DMA.getRecommendation(recModal); if (!r) return null;`, so the click renders nothing at all, which is the failure this check must catch. The cross-entity half already holds: in LIVE, DMA.getRecommendation reads only the current entity's promoted payload (apps/web/proto/data.js:1193).",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": 7
     },
     {
      "qa_id": "IR-05",
-     "verdict": "AMEND(\"copy is safe\" and \"does not become more certain\" are both unfalsifiable as written. Made falsifiable by naming the comparison — the customer body against the internal body for the same run — and by naming the mechanisms that already exist in apps/api/dma_api/redaction.py)",
+     "verdict": "AMEND(\"copy is safe\" and \"does not become more certain\" are both unfalsifiable as written. Made falsifiable by naming the comparison \u2014 the customer body against the internal body for the same run \u2014 and by naming the mechanisms that already exist in apps/api/dma_api/redaction.py)",
      "rule": "For one run, the customer body of platform.recommendations contains no r_layer, no seller vocabulary and no assessing-vendor name (CUSTOMER_STRIP_KEYS, SELLER_VOCABULARY and VENDOR_NAME nets, apps/api/dma_api/redaction.py:110-170); it is strictly smaller than the internal body wherever a redaction was declared; every surviving claim keeps the hedge, claim_label and confidence marker attached to it, so a claim whose qualifier was stripped while the claim survived is a fail; and the redaction receipt lists only paths a deletion actually happened for, reporting unmatched internal_only paths separately as producer defects.",
      "layer": "payload",
      "severity": "P0",
@@ -7728,7 +7730,7 @@
     },
     {
      "qa_id": "IR-06",
-     "verdict": "AMEND(split — the \"circular\" half is promoted to its own P0 check IR-ADD-06, because the contract calls the acyclic assertion blocking and nothing implements it. What remains here is multiplicity, duplication and deletion, which the DDL does not constrain: migrations/versions/0008_serving_tier.py:404-422 declares rec_id TEXT with no NOT NULL and no UNIQUE(run_id, rec_id))",
+     "verdict": "AMEND(split \u2014 the \"circular\" half is promoted to its own P0 check IR-ADD-06, because the contract calls the acyclic assertion blocking and nothing implements it. What remains here is multiplicity, duplication and deletion, which the DDL does not constrain: migrations/versions/0008_serving_tier.py:404-422 declares rec_id TEXT with no NOT NULL and no UNIQUE(run_id, rec_id))",
      "rule": "rec_id is unique within a run's promoted recommendations and a payload carrying two rows with the same rec_id is refused at submit rather than colliding on the React render key; a recommendation withdrawn between runs disappears in the same promote from every surface that cites it, leaving no dangling rec_id on the roadmap phases, the stairstep or an insight card.",
      "layer": "payload",
      "severity": "P1",
@@ -7744,15 +7746,15 @@
     },
     {
      "qa_id": "IR-ADD-01",
-     "verdict": "ADD(beyond baseline — from §3.1 \"Accept when\", which the document states as prose and gives no id)",
-     "rule": "Opening a recommendation from any origin — the P2 panel row, a roadmap phase chip, or an insight card's linked-recommendation control — preserves entity_id, run_id and the originating record id in what the modal renders, and the control that opened it carries one accessible name identifying the recommendation; at HEAD the P2 row has no role, no accessible name and no focus target (apps/web/proto/pages-d3-d4.jsx:1350).",
+     "verdict": "ADD(beyond baseline \u2014 from \u00a73.1 \"Accept when\", which the document states as prose and gives no id)",
+     "rule": "Opening a recommendation from any origin \u2014 the P2 panel row, a roadmap phase chip, or an insight card's linked-recommendation control \u2014 preserves entity_id, run_id and the originating record id in what the modal renders, and the control that opened it carries one accessible name identifying the recommendation; at HEAD the P2 row has no role, no accessible name and no focus target (apps/web/proto/pages-d3-d4.jsx:1350).",
      "layer": "interaction",
      "severity": "P0",
      "catches_known_defect": null
     },
     {
      "qa_id": "IR-ADD-02",
-     "verdict": "ADD(beyond baseline — from §3.2, mapped onto the contract's actual fields rather than the document's abstract triple)",
+     "verdict": "ADD(beyond baseline \u2014 from \u00a73.2, mapped onto the contract's actual fields rather than the document's abstract triple)",
      "rule": "Intervention, outcome and constraint are separately rendered and separately sourced: the intervention is title with its l3_area and l4_feature; the measurable outcome is kpi_triple's metric, baseline and target and is never an activity restated as a result; the limiting condition is validation_gate's threshold with its verdict plus prerequisites expressed as cells and minimums. A row whose kpi_triple.metric restates the action, or that renders as ready with no validation_gate, fails.",
      "layer": "payload",
      "severity": "P0",
@@ -7760,7 +7762,7 @@
     },
     {
      "qa_id": "IR-ADD-03",
-     "verdict": "AMEND(from §3.3. The P2 item shape carries no `owner` field — \"resolve the displayed person or role to a current source record\" describes O7 leadership, not P2 — so the owner requirement is recorded as a contract gap instead of being asserted against a field that does not exist. Standing redaction also strips contact keys for named individuals, apps/api/dma_api/redaction.py:122)",
+     "verdict": "AMEND(from \u00a73.3. The P2 item shape carries no `owner` field \u2014 \"resolve the displayed person or role to a current source record\" describes O7 leadership, not P2 \u2014 so the owner requirement is recorded as a contract gap instead of being asserted against a field that does not exist. Standing redaction also strips contact keys for named individuals, apps/api/dma_api/redaction.py:122)",
      "rule": "A recommendation renders no named individual as owner, because the contract gives it no owner field; where a horizon is shown it is the row's own `phase` or the roadmap's plain-terms horizon and must not contradict the roadmap phase carrying the same rec_id; prerequisites render as cells and minimums with their verdicts and never as an undated promise. If an owner is later contracted it must resolve to a current accountable ROLE with an effective date, never an inferred buyer or a stale title.",
      "layer": "payload",
      "severity": "P1",
@@ -7768,23 +7770,23 @@
     },
     {
      "qa_id": "IR-ADD-04",
-     "verdict": "ADD(beyond baseline — from §3.4 \"independently recompute the result\"; the contract's own gate line says \"every current figure reconciles to the heatmap\" and nothing implements it)",
-     "rule": "Every score-shaped figure a recommendation quotes beside a cell id — dma_impact[].current, the target/delta arithmetic, validation_gate.current_value and the threshold's cell — reconciles to what the heatmap serves for that cell within the 0.05 grain tolerance and is rounded once. At HEAD this is unenforced: CG-07's _SCORE_KEYS is (\"score\", \"entity_score\") at apps/mcp/dma_mcp/validation2.py:77, so the keys `current` and `target` are never compared against _served_figures.",
+     "verdict": "ADD(beyond baseline \u2014 from \u00a73.4 \"independently recompute the result\"; the contract's own gate line says \"every current figure reconciles to the heatmap\" and nothing implements it)",
+     "rule": "Every score-shaped figure a recommendation quotes beside a cell id \u2014 dma_impact[].current, the target/delta arithmetic, validation_gate.current_value and the threshold's cell \u2014 reconciles to what the heatmap serves for that cell within the 0.05 grain tolerance and is rounded once. At HEAD this is unenforced: CG-07's _SCORE_KEYS is (\"score\", \"entity_score\") at apps/mcp/dma_mcp/validation2.py:77, so the keys `current` and `target` are never compared against _served_figures.",
      "layer": "connector",
      "severity": "P0",
      "catches_known_defect": 3
     },
     {
      "qa_id": "IR-ADD-05",
-     "verdict": "AMEND(from §3.5 first half. Ordering IS deterministic at HEAD — byPhaseThenId at apps/web/proto/pages-d3-d4.jsx:604-606 is a total order over phase then id — but it compares String(phase), so phase 10 sorts before phase 2; the check is amended to require a numeric phase comparison so it can fail on that)",
-     "rule": "The recommendation list order is a total, deterministic function of promoted fields — phase compared NUMERICALLY, then rec_id — that does not change across refresh, re-render or platform-tile selection, and the header count \"N of M promoted\" equals the rendered row count in both the scoped and the unscoped group.",
+     "verdict": "AMEND(from \u00a73.5 first half. Ordering IS deterministic at HEAD \u2014 byPhaseThenId at apps/web/proto/pages-d3-d4.jsx:604-606 is a total order over phase then id \u2014 but it compares String(phase), so phase 10 sorts before phase 2; the check is amended to require a numeric phase comparison so it can fail on that)",
+     "rule": "The recommendation list order is a total, deterministic function of promoted fields \u2014 phase compared NUMERICALLY, then rec_id \u2014 that does not change across refresh, re-render or platform-tile selection, and the header count \"N of M promoted\" equals the rendered row count in both the scoped and the unscoped group.",
      "layer": "dom",
      "severity": "P1",
      "catches_known_defect": null
     },
     {
      "qa_id": "IR-ADD-06",
-     "verdict": "ADD(beyond baseline — the circular half split out of IR-06 and raised to P0; the document is right and nothing in the build implements it)",
+     "verdict": "ADD(beyond baseline \u2014 the circular half split out of IR-06 and raised to P0; the document is right and nothing in the build implements it)",
      "rule": "Before promote, the dependency graph over recommendations[].dependencies and roadmap.phases[].depends_on is asserted acyclic, every roadmap phases[].rec_ids resolves to a recommendation THIS payload describes, and no recommendation sits in a phase preceding a phase it depends on. All three are contract-stated (packages/shared/contracts_data.json platform._notes and platform.roadmap doc) and none is implemented: grep over apps/mcp for acyclic|topolog|cycle returns only an import-cycle comment.",
      "layer": "connector",
      "severity": "P0",
@@ -7792,7 +7794,7 @@
     },
     {
      "qa_id": "IR-ADD-07",
-     "verdict": "ADD(beyond baseline — from §3.4 second half, \"not-run, unavailable, failed, waived and passed are distinct\")",
+     "verdict": "ADD(beyond baseline \u2014 from \u00a73.4 second half, \"not-run, unavailable, failed, waived and passed are distinct\")",
      "rule": "A readiness gate renders not-run, unavailable, failed, waived and passed as five distinct states and none renders as another; a gate carrying no verdict renders as a named absence identifying the unstated field rather than defaulting to NOT MET; and a gate whose backing_cells are empty cannot render a MET verdict, because the drilldown has nothing to trace the verdict to.",
      "layer": "dom",
      "severity": "P0",
@@ -7800,7 +7802,7 @@
     },
     {
      "qa_id": "IR-ADD-08",
-     "verdict": "ADD(beyond baseline — from §3.6, whose stress list names Escape, double-activation, stacking and pending-route-switch)",
+     "verdict": "ADD(beyond baseline \u2014 from \u00a73.6, whose stress list names Escape, double-activation, stacking and pending-route-switch)",
      "rule": "Activating the opener produces exactly one overlay named for the recommendation, moves initial focus into it, makes the background inert, closes on Escape and returns focus to the opener; double-activation, a stacked second overlay and a route change while the response is pending each leave exactly one or zero overlays and never a locked page. At HEAD none of this exists: grep for Escape|keydown|tabIndex|aria-modal|inert over apps/web/proto/drawers.jsx and app-root.jsx returns nothing.",
      "layer": "interaction",
      "severity": "P0",
@@ -7808,7 +7810,7 @@
     },
     {
      "qa_id": "IR-ADD-09",
-     "verdict": "ADD(beyond baseline — from §8.3 \"Analyst-authored and derived recommendations remain distinguishable in the card, modal, export and audit record\". The document's and the Surface Specification's \"32 clients shipped synthetic recs laundered as analyst output\" is a fabricated corpus figure — this system has two promoted clients — so the number is removed and the rule kept. Note also the vocabulary: ANALYST|DERIVED, adjudicated in contracts_data _notes and enforced at apps/mcp/dma_mcp/validation.py:538-546, not the Surface Spec table's \"analyst or synthesised\")",
+     "verdict": "ADD(beyond baseline \u2014 from \u00a78.3 \"Analyst-authored and derived recommendations remain distinguishable in the card, modal, export and audit record\". The document's and the Surface Specification's \"32 clients shipped synthetic recs laundered as analyst output\" is a fabricated corpus figure \u2014 this system has two promoted clients \u2014 so the number is removed and the rule kept. Note also the vocabulary: ANALYST|DERIVED, adjudicated in contracts_data _notes and enforced at apps/mcp/dma_mcp/validation.py:538-546, not the Surface Spec table's \"analyst or synthesised\")",
      "rule": "Per-item provenance is ANALYST or DERIVED, never blank, and is RENDERED on both the recommendation row and the modal so a reader can tell the two apart without opening an export. At HEAD it is validated (CG-09), stored (item_provenance, migration 0027) and served (the read side inverts apps/api/dma_api/writer_spec.json:3292), then dropped by the web adapter: apps/web/proto/live-adapter.jsx:636-657 maps every other key and not provenance, and neither pages-d3-d4.jsx:1330-1420 nor drawers.jsx:2402-2600 renders it.",
      "layer": "dom",
      "severity": "P0",
@@ -7816,7 +7818,7 @@
     },
     {
      "qa_id": "IR-ADD-10",
-     "verdict": "SUPERSEDED(Surface Specification places Recommendations on D4 Platform — \"Payload section platform.recommendations · component ClientPlatform + RecommendationModal\", docs/text/DMA Insights - Surface Specification.txt:768 — and contracts_data.json declares only insights/I1 and landscape/T2 on the insights page. The document's Execution status FAIL and its HOLD condition \"No Recommendations section exists on Insights\" both rest on expecting P2 at the Insights route)",
+     "verdict": "SUPERSEDED(Surface Specification places Recommendations on D4 Platform \u2014 \"Payload section platform.recommendations \u00b7 component ClientPlatform + RecommendationModal\", docs/text/DMA Insights - Surface Specification.txt:768 \u2014 and contracts_data.json declares only insights/I1 and landscape/T2 on the insights page. The document's Execution status FAIL and its HOLD condition \"No Recommendations section exists on Insights\" both rest on expecting P2 at the Insights route)",
      "rule": "Recommendations render on the Platform dashboard (route /clients/<id>/platform, ClientPlatform mounted at apps/web/proto/app-root.jsx:448), and the Insights dashboard is not required to carry a Recommendations section; the insight-to-action continuity the document asks for is served by an insight card's linked-recommendation control, whose absence is a contract gap on I1 (see IR-01) rather than a missing section on Insights.",
      "layer": "narrative",
      "severity": "P1",
@@ -7824,7 +7826,7 @@
     },
     {
      "qa_id": "IR-ADD-11",
-     "verdict": "SUPERSEDED(the document's §1 splices the I1 insights-card contract into this surface — \"Six to ten cards\", \"Zero cards on a completed run is a failure state\", \"the what_text is a claim, not a metric\". Those are insights.insights fields; platform.recommendations has no what_text and no count floor. Enforcing them here would invent fields)",
+     "verdict": "SUPERSEDED(the document's \u00a71 splices the I1 insights-card contract into this surface \u2014 \"Six to ten cards\", \"Zero cards on a completed run is a failure state\", \"the what_text is a claim, not a metric\". Those are insights.insights fields; platform.recommendations has no what_text and no count floor. Enforcing them here would invent fields)",
      "rule": "The 6-10 count floor, what_text and the zero-cards-is-a-failure-state rule belong to insights.insights (I1) and are asserted there; platform.recommendations carries no count floor, and an empty recommendations[] on a required section is refused by CG-19 (\"a required list is not silently empty\", apps/mcp/dma_mcp/validation.py:333-355) rather than by a card-count rule.",
      "layer": "payload",
      "severity": "P2",
@@ -7832,7 +7834,7 @@
     },
     {
      "qa_id": "IR-ADD-12",
-     "verdict": "ADD(beyond baseline — from §8.3 \"Item-level citations, dates, units, claim labels and internal-only markers must survive the final served payload and audience toggle\")",
+     "verdict": "ADD(beyond baseline \u2014 from \u00a78.3 \"Item-level citations, dates, units, claim labels and internal-only markers must survive the final served payload and audience toggle\")",
      "rule": "Each recommendation's evidence_ids survive promotion as that row's own e_ids and resolve through get_evidence for THIS run and entity, with a foreign id halting production (invariant 4); claim_label survives into the served row and renders; and internal_only markings declared on the section are actually deleted by the walker, with the receipt naming only paths a deletion happened for and reporting unmatched markings separately.",
      "layer": "payload",
      "severity": "P0",
@@ -7840,7 +7842,7 @@
     },
     {
      "qa_id": "IR-ADD-13",
-     "verdict": "AMEND(from §7 HOLD, \"a rejected insight still promotes action\". The serving app has no insight accept/reject lifecycle that could block a promote — CLAUDE.md invariant 2 limits API writes to annotations and alert actions, and drawers.jsx:2555 records that the annotation endpoint exists for insight_card only. Relocated to the layer that can enforce it: submit)",
+     "verdict": "AMEND(from \u00a77 HOLD, \"a rejected insight still promotes action\". The serving app has no insight accept/reject lifecycle that could block a promote \u2014 CLAUDE.md invariant 2 limits API writes to annotations and alert actions, and drawers.jsx:2555 records that the annotation endpoint exists for insight_card only. Relocated to the layer that can enforce it: submit)",
      "rule": "A recommendation whose own r_layer verdict is REJECT is not submitted, and a recommendation naming an insight card that this run's promoted insights[] does not contain fails at submit; reviewer annotations on an insight card are feedback and never gate a promote, so no serving-side rule may claim to block promotion on them.",
      "layer": "connector",
      "severity": "P0",
@@ -7848,16 +7850,16 @@
     },
     {
      "qa_id": "IR-ADD-14",
-     "verdict": "ADD(beyond baseline — from §8.5, \"Keep the root cause at the served variant-cell grain\")",
-     "rule": "Every subcap_id a recommendation names — dma_impact[].subcap_id, the cells inside prerequisites, validation_gate.cell and its backing_cells — resolves against this run's own served cell set at the variant-cell grain the run was scored at, including sub-vertical variant cells such as P1C1.3.CU1; a cell from another catalogue version or another sub-vertical's variant set is refused (CG-14, apps/mcp/dma_mcp/validation2.py:986-1017).",
+     "verdict": "ADD(beyond baseline \u2014 from \u00a78.5, \"Keep the root cause at the served variant-cell grain\")",
+     "rule": "Every subcap_id a recommendation names \u2014 dma_impact[].subcap_id, the cells inside prerequisites, validation_gate.cell and its backing_cells \u2014 resolves against this run's own served cell set at the variant-cell grain the run was scored at, including sub-vertical variant cells such as P1C1.3.CU1; a cell from another catalogue version or another sub-vertical's variant set is refused (CG-14, apps/mcp/dma_mcp/validation2.py:986-1017).",
      "layer": "connector",
      "severity": "P0",
      "catches_known_defect": null
     },
     {
      "qa_id": "IR-ADD-15",
-     "verdict": "ADD(beyond baseline — owner adjudications A, B and C applied to this surface, which the document's own \"an unknown field renders an em dash\" contradicts)",
-     "rule": "No field of a recommendation renders an em dash or a bare blank for an unknown value: an absent root_cause, cost_of_inaction, kpi_triple, validation_gate or sequencing_reason renders a component naming WHICH field the run did not state — apps/web/proto/drawers.jsx:2496 and :2524 do this, while the bare \"not stated\" at :2498 and :2534 names the field only through its adjacent label and must name it explicitly — and no workflow vocabulary (\"queued for enrichment\", \"held\", \"validating\", UNWORKED, WORKED_FOUND) reaches this surface in any state.",
+     "verdict": "ADD(beyond baseline \u2014 owner adjudications A, B and C applied to this surface, which the document's own \"an unknown field renders an em dash\" contradicts)",
+     "rule": "No field of a recommendation renders an em dash or a bare blank for an unknown value: an absent root_cause, cost_of_inaction, kpi_triple, validation_gate or sequencing_reason renders a component naming WHICH field the run did not state \u2014 apps/web/proto/drawers.jsx:2496 and :2524 do this, while the bare \"not stated\" at :2498 and :2534 names the field only through its adjacent label and must name it explicitly \u2014 and no workflow vocabulary (\"queued for enrichment\", \"held\", \"validating\", UNWORKED, WORKED_FOUND) reaches this surface in any state.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": 7
@@ -7869,7 +7871,7 @@
    "doc_line": 6957,
    "status": "INCLUDED",
    "surface_id": "insights.recmodal",
-   "disposition_evidence": "MOUNTED AND CONTRACT-REQUIRED. `RecommendationModal` is defined at apps/web/proto/drawers.jsx:2402, exported at drawers.jsx:2264 and MOUNTED by the app root at apps/web/proto/app-root.jsx:560 (compiled twin apps/web/public/proto/js/app-root.js:793) — it is not a pages-live-client.jsx orphan. The Insights route itself is mounted at app-root.jsx:446 (`case \"insights\": page = <ClientInsights .../>`, defined pages-d1-overview.jsx:1313). The Insights ENTRY PATH exists in code at drawers.jsx:567 and drawers.jsx:702, both `onClick={() => { closeInsight(); openRec(rec.id); }}`, where `rec = ic.rec ? DMA.getRecommendation(ic.rec) : null` (drawers.jsx:301) and `ic.rec = c.linked_rec_id` (live-adapter.jsx:626). The document's FAIL observation (\"No recommendation opener exists on Insights\") is CORRECT and reproducible from the repo: `linked_rec_id` is contract-required at the I2 insight-drilldown grain by the Surface Specification (docs/text/DMA Insights - Surface Specification.txt:1274) and has a serving column (migrations/versions/0008_serving_tier.py:270) and a writer mapping (apps/api/dma_api/writer_spec.json:2912 `\"source\": \"item:linked_rec_id\"`), but `grep -c linked_rec_id packages/shared/contracts_data.json` returns 0 — the I1 registry field spec omits it, so the connector never asks for it, writer_spec.json:3002 records \"not in the current card shape; NULL correct\", and drawers.jsx:661-663 states in a code comment that \"`platform_chips` and `linked_rec_id` are null on all eight cards\" of the promoted run. So the surface is mounted, the entry path is contract-required, and the opener's absence is a DEFECT TO FIX, not a reason to exclude. Distinct from the two already-inventoried recommendation-modal entries: universal.rec (doc 1682, REC-01..13) governs the component generically and platform.recmodal (doc 9390, PRM-01/02) governs the Platform entry; neither carries the Insights parent-insight linkage that INR-07/08/09/11 assert, and the critic recorded this range as entirely absent from both inventory.json and ACCEPTANCE.md. No test file in apps/web/tests references RecommendationModal, openRec or recModal — coverage today is zero.",
+   "disposition_evidence": "MOUNTED AND CONTRACT-REQUIRED. `RecommendationModal` is defined at apps/web/proto/drawers.jsx:2402, exported at drawers.jsx:2264 and MOUNTED by the app root at apps/web/proto/app-root.jsx:560 (compiled twin apps/web/public/proto/js/app-root.js:793) \u2014 it is not a pages-live-client.jsx orphan. The Insights route itself is mounted at app-root.jsx:446 (`case \"insights\": page = <ClientInsights .../>`, defined pages-d1-overview.jsx:1313). The Insights ENTRY PATH exists in code at drawers.jsx:567 and drawers.jsx:702, both `onClick={() => { closeInsight(); openRec(rec.id); }}`, where `rec = ic.rec ? DMA.getRecommendation(ic.rec) : null` (drawers.jsx:301) and `ic.rec = c.linked_rec_id` (live-adapter.jsx:626). The document's FAIL observation (\"No recommendation opener exists on Insights\") is CORRECT and reproducible from the repo: `linked_rec_id` is contract-required at the I2 insight-drilldown grain by the Surface Specification (docs/text/DMA Insights - Surface Specification.txt:1274) and has a serving column (migrations/versions/0008_serving_tier.py:270) and a writer mapping (apps/api/dma_api/writer_spec.json:2912 `\"source\": \"item:linked_rec_id\"`), but `grep -c linked_rec_id packages/shared/contracts_data.json` returns 0 \u2014 the I1 registry field spec omits it, so the connector never asks for it, writer_spec.json:3002 records \"not in the current card shape; NULL correct\", and drawers.jsx:661-663 states in a code comment that \"`platform_chips` and `linked_rec_id` are null on all eight cards\" of the promoted run. So the surface is mounted, the entry path is contract-required, and the opener's absence is a DEFECT TO FIX, not a reason to exclude. Distinct from the two already-inventoried recommendation-modal entries: universal.rec (doc 1682, REC-01..13) governs the component generically and platform.recmodal (doc 9390, PRM-01/02) governs the Platform entry; neither carries the Insights parent-insight linkage that INR-07/08/09/11 assert, and the critic recorded this range as entirely absent from both inventory.json and ACCEPTANCE.md. No test file in apps/web/tests references RecommendationModal, openRec or recModal \u2014 coverage today is zero.",
    "checks": [
     {
      "qa_id": "INR-01",
@@ -7938,7 +7940,7 @@
     {
      "qa_id": "INR-09",
      "verdict": "AMEND('supports both problem and proposed action' is not assertable from the payload; bound it instead to invariant 4's fail-closed evidence rule and to the recommendation's own claim_label, both of which are checkable)",
-     "rule": "Every e_id on the Root-cause evidence tab resolves to an item registered to THIS entity and run and renders its verbatim excerpt; an id that does not resolve renders as an explicit dead-citation row (drawers.jsx already does this - 'cited id — not in this run's served evidence') and is never silently skipped; and where claim_label marks the action as inferred rather than evidenced, the tab prints that label beside the action rather than presenting it as grounded.",
+     "rule": "Every e_id on the Root-cause evidence tab resolves to an item registered to THIS entity and run and renders its verbatim excerpt; an id that does not resolve renders as an explicit dead-citation row (drawers.jsx already does this - 'cited id \u2014 not in this run's served evidence') and is never silently skipped; and where claim_label marks the action as inferred rather than evidenced, the tab prints that label beside the action rather than presenting it as grounded.",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
@@ -7977,7 +7979,7 @@
     },
     {
      "qa_id": "INR-ADD-01",
-     "verdict": "ADD(beyond baseline - the doc's §3.2 acceptance for the Rationale and notes tab asserts a behaviour nobody built: notes are browser-local only)",
+     "verdict": "ADD(beyond baseline - the doc's \u00a73.2 acceptance for the Rationale and notes tab asserts a behaviour nobody built: notes are browser-local only)",
      "rule": "A reviewer note on a recommendation is either a recorded annotation - carrying author, timestamp, audience visibility and the run and record version it was written against, written behind an Idempotency-Key per CLAUDE.md invariant 2, and refusing to silently overwrite a concurrent edit - or the notes affordance is not offered at all; the current implementation writes `localStorage.setItem(\"dma_rec_note_\" + recModal, v)` (drawers.jsx:2408) with no author, no timestamp, no run or audience binding and no server route (the only annotation endpoint is /api/entity/[display_id]/insights/[ic_id]/annotation, insight_card anchors only), which satisfies none of it and additionally leaks across clients.",
      "layer": "interaction",
      "severity": "P0",
@@ -7985,7 +7987,7 @@
     },
     {
      "qa_id": "INR-ADD-02",
-     "verdict": "ADD(beyond baseline - the doc's §3.6 stress 'deny clipboard permission' has a live bug behind it that no numbered check names)",
+     "verdict": "ADD(beyond baseline - the doc's \u00a73.6 stress 'deny clipboard permission' has a live bug behind it that no numbered check names)",
      "rule": "The Copy summary control reports success only after the clipboard write actually resolves: navigator.clipboard.writeText returns a promise, so a denied permission rejects asynchronously and the synchronous try/catch at drawers.jsx:2806 emits a 'Recommendation summary copied' success toast for a copy that never happened (same bug at drawers.jsx:270, 746 and 1036 - a class, not an instance); the copied payload must also carry entity display_id, run_id, rec_id and the recommendation's provenance, and must contain no internal_only field.",
      "layer": "interaction",
      "severity": "P0",
@@ -8009,7 +8011,7 @@
     },
     {
      "qa_id": "INR-ADD-05",
-     "verdict": "ADD(beyond baseline - the doc's §3.3 'trace every claimed impact to exact current capability cells' states the aim but names no arithmetic; the contract does, and CLAUDE.md invariant 12 sets the tolerance)",
+     "verdict": "ADD(beyond baseline - the doc's \u00a73.3 'trace every claimed impact to exact current capability cells' states the aim but names no arithmetic; the contract does, and CLAUDE.md invariant 12 sets the tolerance)",
      "rule": "Every dma_impact row's `current` equals the score the heatmap serves for that subcap_id within the 0.05 grain tolerance, `delta` is computed from target minus current rather than read from storage, and a row whose subcap_id is not served by this run renders as an explicit dead link rather than being silently dropped - the modal and the heatmap must not state two different current values for one cell.",
      "layer": "payload",
      "severity": "P0",
@@ -8017,7 +8019,7 @@
     },
     {
      "qa_id": "INR-ADD-06",
-     "verdict": "ADD(beyond baseline - the doc's §3.5 asks the tab to 'match every other sequence view' without naming which values must match or how unlocks is derived)",
+     "verdict": "ADD(beyond baseline - the doc's \u00a73.5 asks the tab to 'match every other sequence view' without naming which values must match or how unlocks is derived)",
      "rule": "The Sequencing tab's phase, predecessors and unlocks are the same values the Platform roadmap and stair-step render for this rec_id: unlocks is COMPUTED by asking which other promoted recommendations name this one in their dependencies (invariant 8, one source of truth) rather than stored, the dependency graph is asserted acyclic before promote, and the modal's phase must equal the roadmap phase whose rec_ids contain this id - a disagreement between modal and roadmap blocks promotion.",
      "layer": "payload",
      "severity": "P0",
@@ -8025,7 +8027,7 @@
     },
     {
      "qa_id": "INR-ADD-07",
-     "verdict": "ADD(beyond baseline - CLAUDE.md invariant 5, the systemic gap the completeness critic named; the doc's §3.6 mentions internal-only fields only in the copy payload, and the app enforces audience client-side)",
+     "verdict": "ADD(beyond baseline - CLAUDE.md invariant 5, the systemic gap the completeness critic named; the doc's \u00a73.6 mentions internal-only fields only in the copy payload, and the app enforces audience client-side)",
      "rule": "Internal-only content on the recommendation modal - the reasoning trace, internal rationale, ERS and any internal_only-marked path - must be ABSENT from the customer-audience API response, not merely hidden by a client-side branch: the r_layer block is gated by `audience !== \"customer\"` at drawers.jsx:2545 and the Insights opener by the same test at drawers.jsx:566, which is concealment in the DOM, not redaction; assert the served customer payload for platform.recommendations carries none of those paths and that the audience cannot be escaped by refresh, deep link, a second tab or a client-side state edit.",
      "layer": "payload",
      "severity": "P0",
@@ -8033,7 +8035,7 @@
     },
     {
      "qa_id": "INR-ADD-08",
-     "verdict": "ADD(beyond baseline - owner adjudications A, B and C applied to this surface; the doc's §8.3 says only 'do not fill a missing contract field with generic prose', which does not say what to render instead)",
+     "verdict": "ADD(beyond baseline - owner adjudications A, B and C applied to this surface; the doc's \u00a78.3 says only 'do not fill a missing contract field with generic prose', which does not say what to render instead)",
      "rule": "Every unfilled field on the recommendation modal names WHICH absence it is, in the run's own terms ('the run states no root cause for this recommendation', 'effort not stated', 'no verbatim excerpt served for this item'), never an em dash and never a workflow word ('queued for enrichment', 'held', 'validating', UNWORKED); a value that genuinely cannot be sourced omits its row entirely rather than rendering a labelled empty box.",
      "layer": "dom",
      "severity": "P0",
@@ -8046,11 +8048,11 @@
    "doc_line": 11059,
    "status": "INCLUDED",
    "surface_id": "health.thinalerts",
-   "disposition_evidence": "CONTRACT-REQUIRED AND MOUNTED; the first pass's EXCLUDE-AS-SEPARATE at inventory.json doc_line 11063 (\"not separately mountable\") is disproved three ways. (1) Contract: packages/shared/contracts_data.json -> heatmap.alerts carries \"surface_id\": \"H3\", \"required\": true, with a per-item field spec naming subcap_id, severity, score, confidence, evidence_count, state, sources_searched[], queries_run[], new_evidence_ids[], justification, closure_condition, runs_open. (2) Mount: apps/web/proto/app-root.jsx:450 `case \"health\": page = <ClientHealth entity={ent} run={run} />` -> ClientHealth at apps/web/proto/pages-d5-d6-tech-runs.jsx:1531, whose DEFAULT tab is \"alerts\" (:1533) and whose table renders at :1564-1590 — this surface is the first thing the Health page shows, not a sub-fragment. (3) Server: apps/api/dma_api/alerts.py serves GET /v1/alerts (queue) and POST /v1/alerts/{alert_id}/actions, and apps/mcp/dma_mcp/promote.py:31,178 gates promotion on ALERT_CEILING = 15 counted from this very section. The exclusion was written on apps/web/proto/pages-live-client.jsx (LiveAlerts at :1396) — `grep -rn LiveClientPage apps/web/proto apps/web/app apps/web/lib` returns only its definition (:2371) and its window export (:2693), i.e. that pack is mounted nowhere; but the mounted twin exists in the D5/D6 pack, so the surface stays. Doc range 11059-11107 carries NO numbered acceptance ids (only the composition contract, sections 8.1-8.7), so every check below is an ADD-prefixed extraction of a stated requirement, one of which (H3-ADD-01) is already NAMED in ACCEPTANCE.md's shipped-defect table for defect 11 and was never defined anywhere. No fabricated corpus number appears in this range; the only threshold present (evidence < 3) is real and traceable to migrations/versions/0005_ingested_tier.py:145-146.",
+   "disposition_evidence": "CONTRACT-REQUIRED AND MOUNTED; the first pass's EXCLUDE-AS-SEPARATE at inventory.json doc_line 11063 (\"not separately mountable\") is disproved three ways. (1) Contract: packages/shared/contracts_data.json -> heatmap.alerts carries \"surface_id\": \"H3\", \"required\": true, with a per-item field spec naming subcap_id, severity, score, confidence, evidence_count, state, sources_searched[], queries_run[], new_evidence_ids[], justification, closure_condition, runs_open. (2) Mount: apps/web/proto/app-root.jsx:450 `case \"health\": page = <ClientHealth entity={ent} run={run} />` -> ClientHealth at apps/web/proto/pages-d5-d6-tech-runs.jsx:1531, whose DEFAULT tab is \"alerts\" (:1533) and whose table renders at :1564-1590 \u2014 this surface is the first thing the Health page shows, not a sub-fragment. (3) Server: apps/api/dma_api/alerts.py serves GET /v1/alerts (queue) and POST /v1/alerts/{alert_id}/actions, and apps/mcp/dma_mcp/promote.py:31,178 gates promotion on ALERT_CEILING = 15 counted from this very section. The exclusion was written on apps/web/proto/pages-live-client.jsx (LiveAlerts at :1396) \u2014 `grep -rn LiveClientPage apps/web/proto apps/web/app apps/web/lib` returns only its definition (:2371) and its window export (:2693), i.e. that pack is mounted nowhere; but the mounted twin exists in the D5/D6 pack, so the surface stays. Doc range 11059-11107 carries NO numbered acceptance ids (only the composition contract, sections 8.1-8.7), so every check below is an ADD-prefixed extraction of a stated requirement, one of which (H3-ADD-01) is already NAMED in ACCEPTANCE.md's shipped-defect table for defect 11 and was never defined anywhere. No fabricated corpus number appears in this range; the only threshold present (evidence < 3) is real and traceable to migrations/versions/0005_ingested_tier.py:145-146.",
    "checks": [
     {
      "qa_id": "H3-ADD-01",
-     "verdict": "ADD(ACCEPTANCE.md's defect table already cites H3-ADD-01 as a covering check for shipped defect 11, but inventory.json defines no such check anywhere — the citation pointed at nothing)",
+     "verdict": "ADD(ACCEPTANCE.md's defect table already cites H3-ADD-01 as a covering check for shipped defect 11, but inventory.json defines no such check anywhere \u2014 the citation pointed at nothing)",
      "rule": "The open-alert number in the Health page header, the row count of the Health alerts table, this entity+run's rows in the /v1/alerts queue, and promote's `_open_alert_count` (apps/mcp/dma_mcp/promote.py:34) must all be the same number derived from the promoted `heatmap.alerts` array, and any two of them disagreeing fails.",
      "layer": "payload",
      "severity": "P0",
@@ -8059,15 +8061,15 @@
     {
      "qa_id": "H3-ADD-02",
      "verdict": "ADOPT",
-     "rule": "The doc's §8.3 statement \"the register is payload-produced; the legacy deriver is switched off\" is adopted as an assertion and it FAILS at HEAD — assert that every rendered alert row originates in one item of the promoted `heatmap.alerts` payload and that no mounted module references the legacy deriver, because apps/web/proto/pages-d5-d6-tech-runs.jsx:1534 calls `DMA.alertsForEntity` -> `buildAlerts()` (apps/web/proto/data.js:707-729), which recomputes alerts client-side from `subcaps[].thin` while the adapter's mapped payload alerts (apps/web/proto/live-adapter.jsx:1351) are read only by the unmounted pack.",
+     "rule": "The doc's \u00a78.3 statement \"the register is payload-produced; the legacy deriver is switched off\" is adopted as an assertion and it FAILS at HEAD \u2014 assert that every rendered alert row originates in one item of the promoted `heatmap.alerts` payload and that no mounted module references the legacy deriver, because apps/web/proto/pages-d5-d6-tech-runs.jsx:1534 calls `DMA.alertsForEntity` -> `buildAlerts()` (apps/web/proto/data.js:707-729), which recomputes alerts client-side from `subcaps[].thin` while the adapter's mapped payload alerts (apps/web/proto/live-adapter.jsx:1351) are read only by the unmounted pack.",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": 10
     },
     {
      "qa_id": "H3-ADD-03",
-     "verdict": "SUPERSEDED(owner adjudication B — UNWORKED / WORKED_FOUND / WORKED_ABSENT are producer workflow vocabulary and must never reach a reader; the contract key survives, the rendered label does not)",
-     "rule": "The DOM must never emit the tokens UNWORKED, WORKED_FOUND or WORKED_ABSENT nor a whitespace-transformed form of them (as apps/web/proto/pages-live-client.jsx:1409 does with `a.state.replace(/_/g,\" \")`); each row instead states in reader language which absence it is — no source has been searched yet, versus every mandatory source was searched and nothing was found — while the payload continues to carry `state` per the contract.",
+     "verdict": "SUPERSEDED(owner adjudication B \u2014 UNWORKED / WORKED_FOUND / WORKED_ABSENT are producer workflow vocabulary and must never reach a reader; the contract key survives, the rendered label does not)",
+     "rule": "The DOM must never emit the tokens UNWORKED, WORKED_FOUND or WORKED_ABSENT nor a whitespace-transformed form of them (as apps/web/proto/pages-live-client.jsx:1409 does with `a.state.replace(/_/g,\" \")`); each row instead states in reader language which absence it is \u2014 no source has been searched yet, versus every mandatory source was searched and nothing was found \u2014 while the payload continues to carry `state` per the contract.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": null
@@ -8075,7 +8077,7 @@
     {
      "qa_id": "H3-ADD-04",
      "verdict": "ADOPT",
-     "rule": "The doc's §8.6 anti-pattern \"conflate nobody looked with searched and absent\" is adopted as a render assertion: each alert row must name the sources actually searched, and the two-value Proxy cell at apps/web/proto/pages-d5-d6-tech-runs.jsx:1577 (\"✓ Searched\" / \"Not yet\") fails it because a single boolean cannot distinguish an unrun ladder from an exhausted one; where the fact cannot be sourced the row omits it entirely rather than rendering a placeholder or an em dash (adjudications A and C).",
+     "rule": "The doc's \u00a78.6 anti-pattern \"conflate nobody looked with searched and absent\" is adopted as a render assertion: each alert row must name the sources actually searched, and the two-value Proxy cell at apps/web/proto/pages-d5-d6-tech-runs.jsx:1577 (\"\u2713 Searched\" / \"Not yet\") fails it because a single boolean cannot distinguish an unrun ladder from an exhausted one; where the fact cannot be sourced the row omits it entirely rather than rendering a placeholder or an em dash (adjudications A and C).",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": 7
@@ -8083,7 +8085,7 @@
     {
      "qa_id": "H3-ADD-05",
      "verdict": "ADOPT",
-     "rule": "Submit must refuse an alerts item missing any contract-required key — subcap_id, severity, evidence_count, state, sources_searched[], queries_run[], justification (40-80 words), closure_condition, runs_open — with `must_present` declared on each field spec rather than on the ~3 specs that carry it today, since the doc's own words are that \"an alert with no closure condition cannot be worked by the next person\".",
+     "rule": "Submit must refuse an alerts item missing any contract-required key \u2014 subcap_id, severity, evidence_count, state, sources_searched[], queries_run[], justification (40-80 words), closure_condition, runs_open \u2014 with `must_present` declared on each field spec rather than on the ~3 specs that carry it today, since the doc's own words are that \"an alert with no closure condition cannot be worked by the next person\".",
      "layer": "connector",
      "severity": "P0",
      "catches_known_defect": 3
@@ -8091,7 +8093,7 @@
     {
      "qa_id": "H3-ADD-06",
      "verdict": "ADOPT",
-     "rule": "closure_condition, sources_searched and justification must reach the rendered row, because the mounted table's six columns (Severity, Subcap, Evidence, Action, Proxy, Status — apps/web/proto/pages-d5-d6-tech-runs.jsx:1568) render none of them, so contract-required and fully cited fields are served and drawn zero times.",
+     "rule": "closure_condition, sources_searched and justification must reach the rendered row, because the mounted table's six columns (Severity, Subcap, Evidence, Action, Proxy, Status \u2014 apps/web/proto/pages-d5-d6-tech-runs.jsx:1568) render none of them, so contract-required and fully cited fields are served and drawn zero times.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": 3
@@ -8099,7 +8101,7 @@
     {
      "qa_id": "H3-ADD-07",
      "verdict": "ADOPT",
-     "rule": "Every alert's subcap_id must resolve to a cell served by THIS run and THIS entity, and an alert naming a foreign or unserved cell halts production rather than rendering (doc §8.6 bullet 4; CLAUDE.md invariant 4's `foreign` verdict).",
+     "rule": "Every alert's subcap_id must resolve to a cell served by THIS run and THIS entity, and an alert naming a foreign or unserved cell halts production rather than rendering (doc \u00a78.6 bullet 4; CLAUDE.md invariant 4's `foreign` verdict).",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
@@ -8107,7 +8109,7 @@
     {
      "qa_id": "H3-ADD-08",
      "verdict": "ADD(the doc calls this \"a worked queue\" but never asserts a write path, and the mounted controls only simulate one)",
-     "rule": "The row's \"In review\" and \"Waive\" controls must POST /v1/alerts/{alert_id}/actions with an Idempotency-Key and then re-read the derived status, because at HEAD they only call pushToast (apps/web/proto/pages-d5-d6-tech-runs.jsx:1580-1581) and the toast announces IN_REVIEW, a status that is not in alert_action_t at all (acknowledged · assigned · waived · resolved · reopened, apps/api/dma_api/alerts.py:47).",
+     "rule": "The row's \"In review\" and \"Waive\" controls must POST /v1/alerts/{alert_id}/actions with an Idempotency-Key and then re-read the derived status, because at HEAD they only call pushToast (apps/web/proto/pages-d5-d6-tech-runs.jsx:1580-1581) and the toast announces IN_REVIEW, a status that is not in alert_action_t at all (acknowledged \u00b7 assigned \u00b7 waived \u00b7 resolved \u00b7 reopened, apps/api/dma_api/alerts.py:47).",
      "layer": "interaction",
      "severity": "P0",
      "catches_known_defect": null
@@ -8115,7 +8117,7 @@
     {
      "qa_id": "H3-ADD-09",
      "verdict": "ADD(zero-state provenance at the mounted location; the first pass carried this subject only as HTA-01 against the unmounted Heatmap copy)",
-     "rule": "The \"✓ No open alerts / Evidence coverage meets the minimum threshold\" state (apps/web/proto/pages-d5-d6-tech-runs.jsx:1586) may render only when the promoted alerts array is present and empty, must state the eligible-cell denominator and the eligibility rule it computed over, and an absent or unreadable `heatmap.alerts` section must render a distinct unavailable state and fail the contract gate — since the section is `required: true` while promote's counter returns 0 for a missing section (apps/mcp/dma_mcp/promote.py:43-46), an omitted section would otherwise read as a clean queue.",
+     "rule": "The \"\u2713 No open alerts / Evidence coverage meets the minimum threshold\" state (apps/web/proto/pages-d5-d6-tech-runs.jsx:1586) may render only when the promoted alerts array is present and empty, must state the eligible-cell denominator and the eligibility rule it computed over, and an absent or unreadable `heatmap.alerts` section must render a distinct unavailable state and fail the contract gate \u2014 since the section is `required: true` while promote's counter returns 0 for a missing section (apps/mcp/dma_mcp/promote.py:43-46), an omitted section would otherwise read as a clean queue.",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": 1
@@ -8123,7 +8125,7 @@
     {
      "qa_id": "H3-ADD-10",
      "verdict": "ADOPT",
-     "rule": "The alert denominator is computed over the sub-vertical-filtered served set for this entity (doc §8.5), while the thinness threshold itself stays client-neutral — the filter changes the denominator, never the rule.",
+     "rule": "The alert denominator is computed over the sub-vertical-filtered served set for this entity (doc \u00a78.5), while the thinness threshold itself stays client-neutral \u2014 the filter changes the denominator, never the rule.",
      "layer": "payload",
      "severity": "P1",
      "catches_known_defect": null
@@ -8131,7 +8133,7 @@
     {
      "qa_id": "H3-ADD-11",
      "verdict": "ADOPT",
-     "rule": "An alert clears only on a real linkage change — a resolve must carry new_evidence_ids that each resolve to evidence registered for this run and entity — and severity is mapped from the evidence deficit by the producer, never set or cleared by prose (doc §8.2 \"clear only after real linkage changes\", §8.6 bullet 3).",
+     "rule": "An alert clears only on a real linkage change \u2014 a resolve must carry new_evidence_ids that each resolve to evidence registered for this run and entity \u2014 and severity is mapped from the evidence deficit by the producer, never set or cleared by prose (doc \u00a78.2 \"clear only after real linkage changes\", \u00a78.6 bullet 3).",
      "layer": "connector",
      "severity": "P0",
      "catches_known_defect": null
@@ -8146,8 +8148,8 @@
     },
     {
      "qa_id": "H3-ADD-13",
-     "verdict": "AMEND(the doc records \"Execution status - NOT YET RE-EXECUTED\" and \"attach the signed-in reference-client screenshot\" as if they were results; neither is a pass, and §8.2's own words say a screenshot cannot prove provenance)",
-     "rule": "This surface is BLOCKED — counted against release exactly as a FAIL — until it is re-executed against a deployment whose bytes are proven to be built from the commit under test, with the run id, catalogue version, served cell ids and registered e_ids recorded as the evidence, and with both promoted clients exercised rather than one reference client.",
+     "verdict": "AMEND(the doc records \"Execution status - NOT YET RE-EXECUTED\" and \"attach the signed-in reference-client screenshot\" as if they were results; neither is a pass, and \u00a78.2's own words say a screenshot cannot prove provenance)",
+     "rule": "This surface is BLOCKED \u2014 counted against release exactly as a FAIL \u2014 until it is re-executed against a deployment whose bytes are proven to be built from the commit under test, with the run id, catalogue version, served cell ids and registered e_ids recorded as the evidence, and with both promoted clients exercised rather than one reference client.",
      "layer": "ci",
      "severity": "P0",
      "catches_known_defect": 13
@@ -8155,7 +8157,7 @@
     {
      "qa_id": "H3-ADD-14",
      "verdict": "ADOPT",
-     "rule": "Per doc §8.3 bullet 1 and §8.4, the alert register must reconcile with its inbound fact and its outbound consumer — one alert per cell scored on insufficient evidence, so the alert set equals the set of served cells flagged is_thin_evidence (or the difference is stated as a recorded contradiction, never smoothed), and the outbound consumers are the global Alerts queue and the promote ceiling.",
+     "rule": "Per doc \u00a78.3 bullet 1 and \u00a78.4, the alert register must reconcile with its inbound fact and its outbound consumer \u2014 one alert per cell scored on insufficient evidence, so the alert set equals the set of served cells flagged is_thin_evidence (or the difference is stated as a recorded contradiction, never smoothed), and the outbound consumers are the global Alerts queue and the promote ceiling.",
      "layer": "narrative",
      "severity": "P1",
      "catches_known_defect": 11
@@ -8167,11 +8169,11 @@
    "doc_line": 11108,
    "status": "INCLUDED",
    "surface_id": "health.versiondiff",
-   "disposition_evidence": "IN-SCOPE BY CHARTER AND MOUNTED. CLAUDE.md names \"run/version diff\" in its list of prototype-only surfaces IN SCOPE, and its v5.0/v7.0 adjudication specifies the diff's own arithmetic (795 direct · 10 bridged renames · 31 NOT_COMPARABLE, all 31 P1C5/ESG; \"cross-version diffs render P1C5 as NOT_COMPARABLE\"). Mount, by grep: apps/web/proto/app-root.jsx:450 mounts ClientHealth; ClientHealth's tab strip declares [\"diff\",\"Version diff\"] at apps/web/proto/pages-d5-d6-tech-runs.jsx:1558 and renders `<VersionDiff .../>` at :1591; the component is defined at :1758 — the critic already ran this grep (critic_report.md hole C4) and found the first pass's \"not separately mountable\" untrue. Server side is built and tested: GET /v1/entities/{display_id}/diff at apps/api/dma_api/main.py:485 -> build_diff in apps/api/dma_api/diff.py (NOT_COMPARABLE tuple at :55, ccg_aliases bridge at :84-90), with 16 tests in apps/api/tests/test_diff.py. So the surface is excluded on nothing: it is charter-named, mounted, and served. As with H3, doc lines 11108-11155 carry no numbered acceptance ids — only the §8.1-8.7 composition contract — so every check is an ADD-prefixed extraction; no fabricated corpus figure appears in the range.",
+   "disposition_evidence": "IN-SCOPE BY CHARTER AND MOUNTED. CLAUDE.md names \"run/version diff\" in its list of prototype-only surfaces IN SCOPE, and its v5.0/v7.0 adjudication specifies the diff's own arithmetic (795 direct \u00b7 10 bridged renames \u00b7 31 NOT_COMPARABLE, all 31 P1C5/ESG; \"cross-version diffs render P1C5 as NOT_COMPARABLE\"). Mount, by grep: apps/web/proto/app-root.jsx:450 mounts ClientHealth; ClientHealth's tab strip declares [\"diff\",\"Version diff\"] at apps/web/proto/pages-d5-d6-tech-runs.jsx:1558 and renders `<VersionDiff .../>` at :1591; the component is defined at :1758 \u2014 the critic already ran this grep (critic_report.md hole C4) and found the first pass's \"not separately mountable\" untrue. Server side is built and tested: GET /v1/entities/{display_id}/diff at apps/api/dma_api/main.py:485 -> build_diff in apps/api/dma_api/diff.py (NOT_COMPARABLE tuple at :55, ccg_aliases bridge at :84-90), with 16 tests in apps/api/tests/test_diff.py. So the surface is excluded on nothing: it is charter-named, mounted, and served. As with H3, doc lines 11108-11155 carry no numbered acceptance ids \u2014 only the \u00a78.1-8.7 composition contract \u2014 so every check is an ADD-prefixed extraction; no fabricated corpus figure appears in the range.",
    "checks": [
     {
      "qa_id": "V1-ADD-01",
-     "verdict": "ADD(a fully built and tested server read that no client can call — the render-reach class the document never inspects)",
+     "verdict": "ADD(a fully built and tested server read that no client can call \u2014 the render-reach class the document never inspects)",
      "rule": "The mounted VersionDiff must call GET /v1/entities/{display_id}/diff and render its rows, because at HEAD the BFF's page whitelist (apps/web/app/api/entity/[display_id]/[page]/route.js:16-18) contains no \"diff\" member and no source module under apps/web references /diff, so a 16-test server read reaches no reader and the surface shows an empty state instead.",
      "layer": "dom",
      "severity": "P0",
@@ -8180,7 +8182,7 @@
     {
      "qa_id": "V1-ADD-02",
      "verdict": "ADD(the synthesised base is a repository fact the document never mentions, and it is the exact failure this surface exists to prevent)",
-     "rule": "No base score may be derived from the target — the expression `score - 0.2 - ((id.charCodeAt(2) % 5) / 12)` at apps/web/proto/pages-d5-d6-tech-runs.jsx:1791 must not exist on any render path that can mount, since at HEAD only the `isLive` guard at :1774 keeps it off production and the demo path still draws movement between two assessments that never happened.",
+     "rule": "No base score may be derived from the target \u2014 the expression `score - 0.2 - ((id.charCodeAt(2) % 5) / 12)` at apps/web/proto/pages-d5-d6-tech-runs.jsx:1791 must not exist on any render path that can mount, since at HEAD only the `isLive` guard at :1774 keeps it off production and the demo path still draws movement between two assessments that never happened.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": null
@@ -8188,7 +8190,7 @@
     {
      "qa_id": "V1-ADD-03",
      "verdict": "ADOPT",
-     "rule": "A renamed cell compares only through the catalogue's own `ccg_aliases` bridge and the rendered row discloses that it was bridged and from which id, with the alias reason (renamed / split / merged / retired) read from the catalogue and never inferred (doc §8.2; apps/api/dma_api/diff.py:84-90; apps/api/tests/test_diff.py:199).",
+     "rule": "A renamed cell compares only through the catalogue's own `ccg_aliases` bridge and the rendered row discloses that it was bridged and from which id, with the alias reason (renamed / split / merged / retired) read from the catalogue and never inferred (doc \u00a78.2; apps/api/dma_api/diff.py:84-90; apps/api/tests/test_diff.py:199).",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
@@ -8196,7 +8198,7 @@
     {
      "qa_id": "V1-ADD-04",
      "verdict": "ADOPT",
-     "rule": "A cell present in only one of the two pinned catalogue versions renders NOT_COMPARABLE with its stated reason and contributes to no count or average, and it is listed rather than silently dropped — for the v5.0→v7.0 case that is exactly the 31 P1C5 (ESG) cells against 795 direct and 10 bridged comparisons (doc §8.6 bullet 4; CLAUDE.md adjudication; apps/api/tests/test_diff.py:214,231).",
+     "rule": "A cell present in only one of the two pinned catalogue versions renders NOT_COMPARABLE with its stated reason and contributes to no count or average, and it is listed rather than silently dropped \u2014 for the v5.0\u2192v7.0 case that is exactly the 31 P1C5 (ESG) cells against 795 direct and 10 bridged comparisons (doc \u00a78.6 bullet 4; CLAUDE.md adjudication; apps/api/tests/test_diff.py:214,231).",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
@@ -8204,7 +8206,7 @@
     {
      "qa_id": "V1-ADD-05",
      "verdict": "ADOPT",
-     "rule": "The surface must state each side's comparable denominator and label a change in the comparable set as a catalogue change, computing deltas only over comparable cells, so that a taxonomy change can never be read as client movement (doc §8.6 bullet 2).",
+     "rule": "The surface must state each side's comparable denominator and label a change in the comparable set as a catalogue change, computing deltas only over comparable cells, so that a taxonomy change can never be read as client movement (doc \u00a78.6 bullet 2).",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
@@ -8212,7 +8214,7 @@
     {
      "qa_id": "V1-ADD-06",
      "verdict": "ADOPT",
-     "rule": "Both ends of a diff must be PROMOTED runs of the same entity, and naming the same run twice, an unpromoted run, or a second entity is refused with a stated reason rather than rendered (doc §8.6 bullet 3; apps/api/tests/test_diff.py:251,258,268).",
+     "rule": "Both ends of a diff must be PROMOTED runs of the same entity, and naming the same run twice, an unpromoted run, or a second entity is refused with a stated reason rather than rendered (doc \u00a78.6 bullet 3; apps/api/tests/test_diff.py:251,258,268).",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
@@ -8220,7 +8222,7 @@
     {
      "qa_id": "V1-ADD-07",
      "verdict": "ADD(adjudications A and C applied to the one-promoted-run case, which the document does not cover and which is the state of every client here today)",
-     "rule": "With fewer than two promoted runs the surface must name which absence it is and the run count it saw (the API's `comparable: false`, `kind: \"no_base_run\"`), never an empty table, a zero delta, or an em dash — and the current copy's \"the two-run cell read is not wired up yet\" (apps/web/proto/pages-d5-d6-tech-runs.jsx:1785-1787) is build-workflow vocabulary under adjudication B and must be replaced when V1-ADD-01 is fixed.",
+     "rule": "With fewer than two promoted runs the surface must name which absence it is and the run count it saw (the API's `comparable: false`, `kind: \"no_base_run\"`), never an empty table, a zero delta, or an em dash \u2014 and the current copy's \"the two-run cell read is not wired up yet\" (apps/web/proto/pages-d5-d6-tech-runs.jsx:1785-1787) is build-workflow vocabulary under adjudication B and must be replaced when V1-ADD-01 is fixed.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": null
@@ -8236,14 +8238,14 @@
     {
      "qa_id": "V1-ADD-09",
      "verdict": "ADD(adjudication E guard placed on the one surface that renders two bands side by side, where a fifth band would be hardest to spot)",
-     "rule": "Both the base and target chips resolve through the single four-band resolver on the RAW score with strict less-than (<2 Activating, <3 Building, <4 Competing, ≥4 Differentiating), so no M5 or \"Transformational\" branch and no `#185F60` may appear, M2 renders `#62D7B8`, and a null score yields no band rather than a default.",
+     "rule": "Both the base and target chips resolve through the single four-band resolver on the RAW score with strict less-than (<2 Activating, <3 Building, <4 Competing, \u22654 Differentiating), so no M5 or \"Transformational\" branch and no `#185F60` may appear, M2 renders `#62D7B8`, and a null score yields no band rather than a default.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": null
     },
     {
      "qa_id": "V1-ADD-10",
-     "verdict": "ADD(selector integrity — the mounted control offers whatever the entity object happens to hold)",
+     "verdict": "ADD(selector integrity \u2014 the mounted control offers whatever the entity object happens to hold)",
      "rule": "The base and target selectors must offer only promoted runs of this entity, must never default to the same run on both sides, and each change must re-read the server rather than recompute client-side, because at HEAD they list every entry of `entity.runs` with its status text and apply no promoted filter (apps/web/proto/pages-d5-d6-tech-runs.jsx:1798-1806).",
      "layer": "interaction",
      "severity": "P1",
@@ -8259,8 +8261,8 @@
     },
     {
      "qa_id": "V1-ADD-12",
-     "verdict": "AMEND(the same status-and-screenshot correction as H3; §9 states each of these surfaces keeps its own screenshot and release decision, so the blocking status is recorded per surface rather than inherited from the Health page)",
-     "rule": "This surface is BLOCKED until re-executed against a deployment whose bytes are proven to be built from the commit under test, with both run ids, both pinned catalogue versions and the served cell ids recorded as evidence — a screenshot of the reference client is not provenance.",
+     "verdict": "AMEND(the same status-and-screenshot correction as H3; \u00a79 states each of these surfaces keeps its own screenshot and release decision, so the blocking status is recorded per surface rather than inherited from the Health page)",
+     "rule": "This surface is BLOCKED until re-executed against a deployment whose bytes are proven to be built from the commit under test, with both run ids, both pinned catalogue versions and the served cell ids recorded as evidence \u2014 a screenshot of the reference client is not provenance.",
      "layer": "ci",
      "severity": "P0",
      "catches_known_defect": 13
@@ -8268,7 +8270,7 @@
     {
      "qa_id": "V1-ADD-13",
      "verdict": "ADOPT",
-     "rule": "Per §8.4, V1 must trace to its inbound facts (two immutable run snapshots with their pinned catalogue versions) and its outbound consumer (the rerun decision on the Runs register), and where the diff's run set disagrees with the register's promoted list the contradiction is recorded rather than resolved by hiding a run.",
+     "rule": "Per \u00a78.4, V1 must trace to its inbound facts (two immutable run snapshots with their pinned catalogue versions) and its outbound consumer (the rerun decision on the Runs register), and where the diff's run set disagrees with the register's promoted list the contradiction is recorded rather than resolved by hiding a run.",
      "layer": "narrative",
      "severity": "P2",
      "catches_known_defect": null
@@ -8280,7 +8282,7 @@
    "doc_line": 10298,
    "status": "INCLUDED",
    "surface_id": "context.sentimentoverview",
-   "disposition_evidence": "The first pass EXCLUDED this as 'EXCLUDE-UNTIL-CONTRACTED ... context_sentiment is declared ENVELOPE_ONLY - the D5 sentiment contract names no payload field yet'. That sentence is a near-verbatim copy of the comment at apps/web/proto/pages-live-client.jsx:49 ('the D5 sentiment contract names no payload field yet - the promoted sentiment for this run is on the overview page'), a module the router never renders (apps/web/proto/utils.jsx:208; apps/web/tests/render-boundary.test.js:11). It is false at HEAD on five independent counts: (1) packages/shared/contracts_data.json declares context.context_sentiment surface_id C4, required:true, with the required field context_tiles (list of object) and a page note stating 'Required status: context_sentiment is REQUIRED ... the only two optional sections in the 34 are heatmap.value_chain and heatmap.cohort_patterns'; (2) the column exists — migrations/versions/0020_c4_context_tiles.py:52 ADD COLUMN IF NOT EXISTS context_tiles JSONB, and migrations/versions/0027_promotion_field_gaps.py:6 closed its promotion drop; (3) the connector reads it — apps/mcp/dma_mcp/validation2.py:1466 iterates body['context_tiles'] in SG-S8; (4) the adapter reads it — apps/web/proto/live-adapter.jsx:1305 adaptContextSentiment(secOf(context,'context_sentiment')), defined at :336; (5) it is mounted — apps/web/proto/pages-d5-d6-tech-runs.jsx:249 mounts <SentimentGridInteractive> (defined :1248, an inline-expanding per-audience tile grid) inside ClientContext, which apps/web/proto/app-root.jsx:449 mounts. CLAUDE.md line 70-71 names context sentiment as a prototype-only surface IN SCOPE. Disposition flipped to INCLUDED.",
+   "disposition_evidence": "The first pass EXCLUDED this as 'EXCLUDE-UNTIL-CONTRACTED ... context_sentiment is declared ENVELOPE_ONLY - the D5 sentiment contract names no payload field yet'. That sentence is a near-verbatim copy of the comment at apps/web/proto/pages-live-client.jsx:49 ('the D5 sentiment contract names no payload field yet - the promoted sentiment for this run is on the overview page'), a module the router never renders (apps/web/proto/utils.jsx:208; apps/web/tests/render-boundary.test.js:11). It is false at HEAD on five independent counts: (1) packages/shared/contracts_data.json declares context.context_sentiment surface_id C4, required:true, with the required field context_tiles (list of object) and a page note stating 'Required status: context_sentiment is REQUIRED ... the only two optional sections in the 34 are heatmap.value_chain and heatmap.cohort_patterns'; (2) the column exists \u2014 migrations/versions/0020_c4_context_tiles.py:52 ADD COLUMN IF NOT EXISTS context_tiles JSONB, and migrations/versions/0027_promotion_field_gaps.py:6 closed its promotion drop; (3) the connector reads it \u2014 apps/mcp/dma_mcp/validation2.py:1466 iterates body['context_tiles'] in SG-S8; (4) the adapter reads it \u2014 apps/web/proto/live-adapter.jsx:1305 adaptContextSentiment(secOf(context,'context_sentiment')), defined at :336; (5) it is mounted \u2014 apps/web/proto/pages-d5-d6-tech-runs.jsx:249 mounts <SentimentGridInteractive> (defined :1248, an inline-expanding per-audience tile grid) inside ClientContext, which apps/web/proto/app-root.jsx:449 mounts. CLAUDE.md line 70-71 names context sentiment as a prototype-only surface IN SCOPE. Disposition flipped to INCLUDED.",
    "checks": [
     {
      "qa_id": "C4-01",
@@ -8301,7 +8303,7 @@
     {
      "qa_id": "C4-ADD-01",
      "verdict": "ADD(beyond baseline)",
-     "rule": "Every context_tiles[*].rows[*].e_id and every rows[*].rating appears unchanged in overview.sentiment.bars for the same run, and a C4 row with no O9 counterpart is refused at submit as a second dataset; the contract states this reconciliation in prose and nothing implements it — SG-S8 (apps/mcp/dma_mcp/validation2.py:1442) counts rated rows across both shapes but never compares them.",
+     "rule": "Every context_tiles[*].rows[*].e_id and every rows[*].rating appears unchanged in overview.sentiment.bars for the same run, and a C4 row with no O9 counterpart is refused at submit as a second dataset; the contract states this reconciliation in prose and nothing implements it \u2014 SG-S8 (apps/mcp/dma_mcp/validation2.py:1442) counts rated rows across both shapes but never compares them.",
      "layer": "connector",
      "severity": "P0",
      "catches_known_defect": null
@@ -8341,7 +8343,7 @@
     {
      "qa_id": "C4-ADD-06",
      "verdict": "ADD(beyond baseline; owner adjudication B)",
-     "rule": "No tile or row state token — WORKED_ABSENT, UNWORKED, WORKED_FOUND, queued, held, validating — reaches the DOM; an audience that was worked and could not be established renders the ladder of sources searched in reader language, which is what apps/web/proto/live-adapter.jsx:363 branches on and must never print.",
+     "rule": "No tile or row state token \u2014 WORKED_ABSENT, UNWORKED, WORKED_FOUND, queued, held, validating \u2014 reaches the DOM; an audience that was worked and could not be established renders the ladder of sources searched in reader language, which is what apps/web/proto/live-adapter.jsx:363 branches on and must never print.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": null
@@ -8365,7 +8367,7 @@
     {
      "qa_id": "C4-ADD-09",
      "verdict": "AMEND(document 8.5 says the sub-vertical noun 'is an acceptance assertion, not a copy edit' but names no artefact to assert it against; bound to the shipped vocabulary module)",
-     "rule": "The tile label rendered for each audience uses the run's sub-vertical noun — members for credit unions, customers for retail banks, clients or borrowers for commercial lending, institutional clients for CIB, clients and advisors for RIA/BD, investors for asset management, clients and producers for insurance brokers, policyholders for carriers — resolved against apps/api/dma_api/subverticals.py for the entity's sub-vertical, not the raw payload token.",
+     "rule": "The tile label rendered for each audience uses the run's sub-vertical noun \u2014 members for credit unions, customers for retail banks, clients or borrowers for commercial lending, institutional clients for CIB, clients and advisors for RIA/BD, investors for asset management, clients and producers for insurance brokers, policyholders for carriers \u2014 resolved against apps/api/dma_api/subverticals.py for the entity's sub-vertical, not the raw payload token.",
      "layer": "dom",
      "severity": "P2",
      "catches_known_defect": null
@@ -8401,7 +8403,7 @@
    "doc_line": 10394,
    "status": "INCLUDED",
    "surface_id": "context.financialseries",
-   "disposition_evidence": "The first pass EXCLUDED this as 'EXCLUDE-AS-ROUTED ... financial_series is registered under OVERVIEW and the financials component is wired only in the overview branch. C6's checks are carried on Overview - Financial trajectory'. The routing premise is true and the conclusion does not follow; the wiring premise is false. apps/web/proto/pages-d5-d6-tech-runs.jsx:227-235 renders a 'Financial trajectory' card inside ClientContext with <FinChartInteractive> (defined :1191), and apps/web/proto/app-root.jsx:449 mounts ClientContext at the context route — so the second card is mounted, on a different page, in a different component from FinancialTrajectoryD1 (apps/web/proto/pages-d1-overview.jsx:964). packages/shared/contracts_data.json:706 states the routing as design intent — 'C6 financial trajectory renders overview.financial_series ... one section, so the two cards cannot disagree' — which is the whole reason the surface exists; that proposition is only testable by testing the second card, and is invisible from the Overview card alone. It is in fact false at HEAD: the two cards render different bar counts and different fields from the same series (see C6-ADD-01, C6-ADD-02). Carrying C6's checks on 'Overview - Financial trajectory' therefore cannot discharge them. Disposition flipped to INCLUDED.",
+   "disposition_evidence": "The first pass EXCLUDED this as 'EXCLUDE-AS-ROUTED ... financial_series is registered under OVERVIEW and the financials component is wired only in the overview branch. C6's checks are carried on Overview - Financial trajectory'. The routing premise is true and the conclusion does not follow; the wiring premise is false. apps/web/proto/pages-d5-d6-tech-runs.jsx:227-235 renders a 'Financial trajectory' card inside ClientContext with <FinChartInteractive> (defined :1191), and apps/web/proto/app-root.jsx:449 mounts ClientContext at the context route \u2014 so the second card is mounted, on a different page, in a different component from FinancialTrajectoryD1 (apps/web/proto/pages-d1-overview.jsx:964). packages/shared/contracts_data.json:706 states the routing as design intent \u2014 'C6 financial trajectory renders overview.financial_series ... one section, so the two cards cannot disagree' \u2014 which is the whole reason the surface exists; that proposition is only testable by testing the second card, and is invisible from the Overview card alone. It is in fact false at HEAD: the two cards render different bar counts and different fields from the same series (see C6-ADD-01, C6-ADD-02). Carrying C6's checks on 'Overview - Financial trajectory' therefore cannot discharge them. Disposition flipped to INCLUDED.",
    "checks": [
     {
      "qa_id": "C6-01",
@@ -8422,7 +8424,7 @@
     {
      "qa_id": "C6-ADD-01",
      "verdict": "ADD(beyond baseline)",
-     "rule": "The Context card and the Overview card render the same number of points with the same labels and the same values for one run, asserted as a diff between the two rendered card bodies; at HEAD they diverge — apps/web/proto/pages-d1-overview.jsx:1006 draws (f.total_assets[i] || 0) so a null point becomes a zero-height bar with no label, while apps/web/proto/pages-d5-d6-tech-runs.jsx:1212 filters null points out, so one series renders a different number of bars on the two pages.",
+     "rule": "The Context card and the Overview card render the same number of points with the same labels and the same values for one run, asserted as a diff between the two rendered card bodies; at HEAD they diverge \u2014 apps/web/proto/pages-d1-overview.jsx:1006 draws (f.total_assets[i] || 0) so a null point becomes a zero-height bar with no label, while apps/web/proto/pages-d5-d6-tech-runs.jsx:1212 filters null points out, so one series renders a different number of bars on the two pages.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": 8
@@ -8430,7 +8432,7 @@
     {
      "qa_id": "C6-ADD-02",
      "verdict": "ADD(beyond baseline)",
-     "rule": "The Context card's trend badge is sourced from overview.financial_series.trend and from nothing else; at HEAD apps/web/proto/pages-d5-d6-tech-runs.jsx:231 renders {entity.trend}, a directory-row field no API response carries (no trend key exists anywhere in apps/api), so the badge is empty while the same card's footer at :1240 prints f.trend from the promoted series — two trend statements on one card from two sources.",
+     "rule": "The Context card's trend badge is sourced from overview.financial_series.trend and from nothing else; at HEAD apps/web/proto/pages-d5-d6-tech-runs.jsx:231 renders {entity.trend}, a directory-row field no API response carries (no trend key exists anywhere in apps/api), so the badge is empty while the same card's footer at :1240 prints f.trend from the promoted series \u2014 two trend statements on one card from two sources.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": 5
@@ -8454,7 +8456,7 @@
     {
      "qa_id": "C6-ADD-05",
      "verdict": "ADD(beyond baseline)",
-     "rule": "A basis change between points is refused at submit — mixing total assets with DWP, AUM or premium placed across periods manufactures a trend from a definition change; the contract names the gate S27_financial_series and no gate id in apps/mcp implements it (implemented families are AG, CG, ET and SG-S8 only).",
+     "rule": "A basis change between points is refused at submit \u2014 mixing total assets with DWP, AUM or premium placed across periods manufactures a trend from a definition change; the contract names the gate S27_financial_series and no gate id in apps/mcp implements it (implemented families are AG, CG, ET and SG-S8 only).",
      "layer": "connector",
      "severity": "P0",
      "catches_known_defect": null
@@ -8462,7 +8464,7 @@
     {
      "qa_id": "C6-ADD-06",
      "verdict": "ADD(beyond baseline)",
-     "rule": "A series failing the identity gate — legal name, regulator or footprint not matching the entity's own — renders the honest empty state with its quarantine_reason and never renders a value, and two figures for the same metric and period differing by more than 25% are resolved with an emitted resolution row or both are quarantined; no quarantine handling exists on the financial render path in apps/web/proto.",
+     "rule": "A series failing the identity gate \u2014 legal name, regulator or footprint not matching the entity's own \u2014 renders the honest empty state with its quarantine_reason and never renders a value, and two figures for the same metric and period differing by more than 25% are resolved with an emitted resolution row or both are quarantined; no quarantine handling exists on the financial render path in apps/web/proto.",
      "layer": "connector",
      "severity": "P0",
      "catches_known_defect": null
@@ -8494,7 +8496,7 @@
     {
      "qa_id": "C6-ADD-10",
      "verdict": "AMEND(document 8.5 lists per-sub-vertical metric sets as prose; restated as an assertion against the contract's own sub-vertical field table)",
-     "rule": "The metrics rendered are the run's sub-vertical's own — shares, net worth ratio, ROA and members from NCUA for credit unions; deposits, NIM, efficiency and NPL for regional banks; DWP, combined ratio and loss ratio for carriers; AUM by strategy, performance and flows for asset managers — and a Farm Credit entity borrows no deposit or member-share field, rendering the metric absent until a dedicated contract defines it.",
+     "rule": "The metrics rendered are the run's sub-vertical's own \u2014 shares, net worth ratio, ROA and members from NCUA for credit unions; deposits, NIM, efficiency and NPL for regional banks; DWP, combined ratio and loss ratio for carriers; AUM by strategy, performance and flows for asset managers \u2014 and a Farm Credit entity borrows no deposit or member-share field, rendering the metric absent until a dedicated contract defines it.",
      "layer": "payload",
      "severity": "P1",
      "catches_known_defect": null
@@ -8522,20 +8524,20 @@
    "doc_line": 11156,
    "status": "INCLUDED",
    "surface_id": "health.safeguard_gates",
-   "disposition_evidence": "CONTRACT-REQUIRED AND MOUNTED. packages/shared/contracts_data.json heatmap.safeguard_gates declares surface_id H5, required:true, with BOTH arrays required (caps[] + gates[]) — the two-array shape CLAUDE.md's prototype-corrections table mandates over the Surface Spec's single blob. It is mounted: apps/web/proto/app-root.jsx:450 routes tab 'health' to ClientHealth, defined at apps/web/proto/pages-d5-d6-tech-runs.jsx:1531, whose tab strip (line 1558) carries 'gates' and renders the card at lines 1596-1690. Server side it is composed at read by apps/api/dma_api/computed.py:505 (gate_results JOIN gate_registry, DISTINCT ON latest per gate_id) and the caps writer is apps/api/dma_api/writer_spec.json:745 -> heatmap_safeguard_gates (DDL migrations/versions/0008_serving_tier.py:355-362). The first pass excluded this surface inside a lump entry 'health.subsurfaces' (inventory.json, doc_line 11063) on the reason 'not separately mountable' — refuted by app-root.jsx:450 plus the tab at pages-d5-d6-tech-runs.jsx:1558; the reviewer's grep at fault reached apps/web/proto/pages-live-client.jsx:2498, a pack whose only page component LiveClientPage (pages-live-client.jsx:2371) is referenced by nothing outside its own file and its window assignment at :2693. Note also that the parent 'Health' inventory entry rebound the id HLT-04 to a file-reference amendment; the binding below restores the document's own HLT-04 text (doc line 11028), which is release-linked to this surface by its own 8.7.",
+   "disposition_evidence": "CONTRACT-REQUIRED AND MOUNTED. packages/shared/contracts_data.json heatmap.safeguard_gates declares surface_id H5, required:true, with BOTH arrays required (caps[] + gates[]) \u2014 the two-array shape CLAUDE.md's prototype-corrections table mandates over the Surface Spec's single blob. It is mounted: apps/web/proto/app-root.jsx:450 routes tab 'health' to ClientHealth, defined at apps/web/proto/pages-d5-d6-tech-runs.jsx:1531, whose tab strip (line 1558) carries 'gates' and renders the card at lines 1596-1690. Server side it is composed at read by apps/api/dma_api/computed.py:505 (gate_results JOIN gate_registry, DISTINCT ON latest per gate_id) and the caps writer is apps/api/dma_api/writer_spec.json:745 -> heatmap_safeguard_gates (DDL migrations/versions/0008_serving_tier.py:355-362). The first pass excluded this surface inside a lump entry 'health.subsurfaces' (inventory.json, doc_line 11063) on the reason 'not separately mountable' \u2014 refuted by app-root.jsx:450 plus the tab at pages-d5-d6-tech-runs.jsx:1558; the reviewer's grep at fault reached apps/web/proto/pages-live-client.jsx:2498, a pack whose only page component LiveClientPage (pages-live-client.jsx:2371) is referenced by nothing outside its own file and its window assignment at :2693. Note also that the parent 'Health' inventory entry rebound the id HLT-04 to a file-reference amendment; the binding below restores the document's own HLT-04 text (doc line 11028), which is release-linked to this surface by its own 8.7.",
    "checks": [
     {
      "qa_id": "HLT-04",
      "verdict": "ADOPT",
-     "rule": "Every served gate row renders its gate_id, its plain_label sentence, its result (PASS | FAIL | NOT_RUN), the measurement in detail for a FAIL and the recorded not_run_reason for a NOT_RUN, and a run whose gates[] is empty renders a stated absence naming which gate results were not recorded — never a clear state, a zero-failure count or an implied pass.",
+     "rule": "Every served gate row renders its gate_id, its plain_label sentence, its result (PASS | FAIL | NOT_RUN), the measurement in detail for a FAIL and the recorded not_run_reason for a NOT_RUN, and a run whose gates[] is empty renders a stated absence naming which gate results were not recorded \u2014 never a clear state, a zero-failure count or an implied pass.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": 11
     },
     {
      "qa_id": "H5-ADD-01",
-     "verdict": "AMEND(the doc sets the fixture requirement on a fabricated denominator — 'All 93 committed client packages have empty safeguard_gates', doc line 11034 — when this system has two promoted clients; and it names five gate states (not-run, unavailable, failed, waived, passed) where the contract's result enum is three. Number removed, state list corrected, requirement kept)",
-     "rule": "CI exercises this surface against four fixtures — a PASS gate, a FAIL gate, a NOT_RUN gate with its reason, and a run whose gates[] is empty — before H5 may be recorded as tested, and no corpus-wide count is used as the trigger or the target.",
+     "verdict": "AMEND(the doc sets the fixture requirement on a fabricated denominator \u2014 'All 93 committed client packages have empty safeguard_gates', doc line 11034 \u2014 when this system has two promoted clients; and it names five gate states (not-run, unavailable, failed, waived, passed) where the contract's result enum is three. Number removed, state list corrected, requirement kept)",
+     "rule": "CI exercises this surface against four fixtures \u2014 a PASS gate, a FAIL gate, a NOT_RUN gate with its reason, and a run whose gates[] is empty \u2014 before H5 may be recorded as tested, and no corpus-wide count is used as the trigger or the target.",
      "layer": "ci",
      "severity": "P0",
      "catches_known_defect": null
@@ -8550,7 +8552,7 @@
     },
     {
      "qa_id": "H5-ADD-03",
-     "verdict": "ADD(contract marks gates[] not_producer_authored, but grep shows that flag is read only by the enrichment-gap suppressor — packages/shared/enrichment_gaps.py:219 — and nothing refuses a producer-submitted gates array)",
+     "verdict": "ADD(contract marks gates[] not_producer_authored, but grep shows that flag is read only by the enrichment-gap suppressor \u2014 packages/shared/enrichment_gaps.py:219 \u2014 and nothing refuses a producer-submitted gates array)",
      "rule": "A submitted payload carrying gates[] results is refused at submit with a named reason, and the served array is composed only from gate_results joined to gate_registry, one latest row per gate_id, so no producer can assert an outcome the connector has not yet measured.",
      "layer": "connector",
      "severity": "P0",
@@ -8558,7 +8560,7 @@
     },
     {
      "qa_id": "H5-ADD-04",
-     "verdict": "ADD(the contract calls a served score above its cap 'a hard defect' and 8.6 names it as a story breaker, but grep for affected_categories across the tree returns only two render sites — pages-d5-d6-tech-runs.jsx:1669 and pages-live-client.jsx:1461 — and no comparison anywhere)",
+     "verdict": "ADD(the contract calls a served score above its cap 'a hard defect' and 8.6 names it as a story breaker, but grep for affected_categories across the tree returns only two render sites \u2014 pages-d5-d6-tech-runs.jsx:1669 and pages-live-client.jsx:1461 \u2014 and no comparison anywhere)",
      "rule": "For every cap in caps[], each category named in affected_categories is served at or below that cap's ceiling, asserted post-write against the run's served scores, with a violation failing promotion rather than rendering beside the cap that forbids it.",
      "layer": "payload",
      "severity": "P0",
@@ -8567,7 +8569,7 @@
     {
      "qa_id": "H5-ADD-05",
      "verdict": "ADD(invariant 12's disclose-and-promote rule has no test on this surface)",
-     "rule": "A run whose SG result is FAIL still promotes and discloses the failure with its measurement on the card, while a failing evidence reason never promotes — asserted as two promote outcomes, not as prose.",
+     "rule": "A run whose SG result is FAIL still promotes and discloses the failure with its measurement on the card, while a failing evidence reason never promotes \u2014 asserted as two promote outcomes, not as prose.",
      "layer": "connector",
      "severity": "P0",
      "catches_known_defect": null
@@ -8575,7 +8577,7 @@
     {
      "qa_id": "H5-ADD-06",
      "verdict": "ADD(8.2 forbids synthesising a gate and 8.6 forbids inventing one to rationalise a low score; nothing traces caps back to their source artifact)",
-     "rule": "Every caps[] row resolves to a row of the run's own workbook cap log or qa_verdict.json — named artifact, named row — and a cap with no such source is refused rather than rendered with a plausible rationale.",
+     "rule": "Every caps[] row resolves to a row of the run's own workbook cap log or qa_verdict.json \u2014 named artifact, named row \u2014 and a cap with no such source is refused rather than rendered with a plausible rationale.",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
@@ -8583,14 +8585,14 @@
     {
      "qa_id": "H5-ADD-07",
      "verdict": "ADD(the page-head summary at pages-d5-d6-tech-runs.jsx:1548 computes 'N failing gates' from DMA.QA_GATES, which is [] under LIVE, so a run with no recorded gate results advertises zero failures)",
-     "rule": "Any summary of this surface — the failing-gate count in the page head and the 'n / m PASS' badge — derives its numerator and denominator from the served gates array itself (invariant 8), and renders no summary at all when that array is empty.",
+     "rule": "Any summary of this surface \u2014 the failing-gate count in the page head and the 'n / m PASS' badge \u2014 derives its numerator and denominator from the served gates array itself (invariant 8), and renders no summary at all when that array is empty.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": 11
     },
     {
      "qa_id": "H5-ADD-08",
-     "verdict": "ADD(invariant 12 says an SG result renders to the client, and apps/api/dma_api/redaction.py:56-60 deliberately leaves heatmap.safeguard_gates out of CUSTOMER_WITHHELD — yet its only render sits behind the analyst gate at pages-d5-d6-tech-runs.jsx:1538)",
+     "verdict": "ADD(invariant 12 says an SG result renders to the client, and apps/api/dma_api/redaction.py:56-60 deliberately leaves heatmap.safeguard_gates out of CUSTOMER_WITHHELD \u2014 yet its only render sits behind the analyst gate at pages-d5-d6-tech-runs.jsx:1538)",
      "rule": "The customer-audience body carries safeguard_gates with plain_label and not_run_reason intact, and a client-reachable surface actually renders them, so the section is not served to an audience that has no page able to show it.",
      "layer": "dom",
      "severity": "P0",
@@ -8603,12 +8605,12 @@
    "doc_line": 11205,
    "status": "INCLUDED",
    "surface_id": "health.evidence_age",
-   "disposition_evidence": "CONTRACT-REQUIRED, DB-BACKED AND MOUNTED. packages/shared/contracts_data.json heatmap.evidence_age declares surface_id H7, required:true, with rows[], undated_pct and stale_pct all required. The DDL is migrations/versions/0008_serving_tier.py:363-376: reference_date DATE NOT NULL ('PINNED and RENDERED'), published_or_asof nullable, and age_months / band / status GENERATED ALWAYS from H7_AGE / H7_BAND / H7_STATUS (lines 79-95, boundaries 12/24/36, undated -> UNDATED). Roll-ups are computed at read in apps/api/dma_api/computed.py:493-503; the writer is apps/api/dma_api/writer_spec.json:856 -> heatmap_evidence_age. It is mounted: app-root.jsx:450 -> ClientHealth (pages-d5-d6-tech-runs.jsx:1531), tab 'age' (line 1558), table at lines 1691-1733. The same first-pass lump entry ('health.subsurfaces', inventory.json doc_line 11063) excluded it as 'not separately mountable', which the tab strip and route above refute. The document's own observed failure for this page — 'Evidence age labels CURRENT or RECENT beside NO DATE' (doc line 10962) — is reproducible from the code: live-adapter.jsx:1241-1243 puts the ERS band token into `recency` whenever one exists, and pages-d5-d6-tech-runs.jsx:1706-1712 feeds that token to new Date(), yielding an unparseable date, a null age and a NO DATE badge printed beside the word CURRENT.",
+   "disposition_evidence": "CONTRACT-REQUIRED, DB-BACKED AND MOUNTED. packages/shared/contracts_data.json heatmap.evidence_age declares surface_id H7, required:true, with rows[], undated_pct and stale_pct all required. The DDL is migrations/versions/0008_serving_tier.py:363-376: reference_date DATE NOT NULL ('PINNED and RENDERED'), published_or_asof nullable, and age_months / band / status GENERATED ALWAYS from H7_AGE / H7_BAND / H7_STATUS (lines 79-95, boundaries 12/24/36, undated -> UNDATED). Roll-ups are computed at read in apps/api/dma_api/computed.py:493-503; the writer is apps/api/dma_api/writer_spec.json:856 -> heatmap_evidence_age. It is mounted: app-root.jsx:450 -> ClientHealth (pages-d5-d6-tech-runs.jsx:1531), tab 'age' (line 1558), table at lines 1691-1733. The same first-pass lump entry ('health.subsurfaces', inventory.json doc_line 11063) excluded it as 'not separately mountable', which the tab strip and route above refute. The document's own observed failure for this page \u2014 'Evidence age labels CURRENT or RECENT beside NO DATE' (doc line 10962) \u2014 is reproducible from the code: live-adapter.jsx:1241-1243 puts the ERS band token into `recency` whenever one exists, and pages-d5-d6-tech-runs.jsx:1706-1712 feeds that token to new Date(), yielding an unparseable date, a null age and a NO DATE badge printed beside the word CURRENT.",
    "checks": [
     {
      "qa_id": "HLT-05",
      "verdict": "ADOPT",
-     "rule": "Age is computed from the item's own publication or as-of date against the run's pinned reference_date, and that reference date is rendered on the surface; an item with no resolvable date renders band=undated / status=UNDATED with no age and never a fresh, current or recent word — at HEAD the mounted tab computes against wall-clock new Date() (pages-d5-d6-tech-runs.jsx:1707-1712) and renders no reference date, so this check fails today and is a defect to fix.",
+     "rule": "Age is computed from the item's own publication or as-of date against the run's pinned reference_date, and that reference date is rendered on the surface; an item with no resolvable date renders band=undated / status=UNDATED with no age and never a fresh, current or recent word \u2014 at HEAD the mounted tab computes against wall-clock new Date() (pages-d5-d6-tech-runs.jsx:1707-1712) and renders no reference date, so this check fails today and is a defect to fix.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": null
@@ -8616,7 +8618,7 @@
     {
      "qa_id": "H7-ADD-01",
      "verdict": "ADD(pins the document's own observed defect at line 10962 to its cause: a band token used as a date)",
-     "rule": "No row prints an ERS band token (CURRENT, RECENT, DATED, STALE, ARCHIVAL) in the date column, and no row shows a freshness word beside an absent-date marker — a row with no date states that one absence, once, in one vocabulary.",
+     "rule": "No row prints an ERS band token (CURRENT, RECENT, DATED, STALE, ARCHIVAL) in the date column, and no row shows a freshness word beside an absent-date marker \u2014 a row with no date states that one absence, once, in one vocabulary.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": 8
@@ -8647,7 +8649,7 @@
     },
     {
      "qa_id": "H7-ADD-05",
-     "verdict": "ADD(undated_pct and stale_pct are required section fields computed at apps/api/dma_api/computed.py:493, and grep for either name across apps/web/proto/*.jsx returns nothing — served, never rendered)",
+     "verdict": "ADD(undated_pct and stale_pct are required section fields computed at apps/api/dma_api/computed.py:493, and grep for either name across apps/web/proto/*.jsx returns nothing \u2014 served, never rendered)",
      "rule": "The surface renders undated_pct and stale_pct and they reconcile exactly with the rows it displays (invariant 8: recomputed from the served rows, never a stored or stale figure), and any surface quoting a time-sensitive figure carries the age marker they justify.",
      "layer": "dom",
      "severity": "P0",
@@ -8671,7 +8673,7 @@
     },
     {
      "qa_id": "H7-ADD-08",
-     "verdict": "ADD(the mounted tab maps DMA.EVIDENCE — the evidence catalogue via live-adapter.jsx:1221 — while the adapter's evidenceAge rows, live-adapter.jsx:1354, are consumed only by the unmounted pages-live-client.jsx:2501)",
+     "verdict": "ADD(the mounted tab maps DMA.EVIDENCE \u2014 the evidence catalogue via live-adapter.jsx:1221 \u2014 while the adapter's evidenceAge rows, live-adapter.jsx:1354, are consumed only by the unmounted pages-live-client.jsx:2501)",
      "rule": "The rows this surface renders are the served heatmap.evidence_age rows, matched one-to-one by e_id and equal in count, rather than the evidence catalogue re-derived client-side.",
      "layer": "dom",
      "severity": "P0",
@@ -8684,7 +8686,7 @@
    "doc_line": 11253,
    "status": "INCLUDED",
    "surface_id": "health.cohort_patterns",
-   "disposition_evidence": "CONTRACT-DEFINED, NAMED IN A CHARTER INVARIANT, AND MOUNTED. packages/shared/contracts_data.json heatmap.cohort_patterns declares surface_id H8 with threshold_pct and patterns[] required within it, plus insufficient_cohorts[]; CLAUDE.md invariant 5 names this surface explicitly ('entity_ids in cohort patterns stripped for EVERY audience'), which alone forecloses exclusion. Server side: apps/api/dma_api/redaction.py:81-82 ALWAYS_STRIP covers patterns[*].entity_ids and insufficient_cohorts[*].entity_ids, with a unit test at apps/api/tests/test_serving_read_path.py:442; the DDL at migrations/versions/0008_serving_tier.py:377-394 enforces CHECK (cohort_size >= 5) and generates share_pct and below_threshold; the writer is apps/api/dma_api/writer_spec.json:997. It is mounted: app-root.jsx:450 -> ClientHealth, tab 'patterns' (pages-d5-d6-tech-runs.jsx:1558), table at lines 1736-1752. The first pass's lump exclusion ('health.subsurfaces', inventory.json doc_line 11063, reason 'not separately mountable') is refuted by those two lines. What is true — and is a defect, not a reason to exclude — is that the mounted tab reads DMA.PATTERNS, which apps/web/proto/data.js:820 defines as `LIVE ? [] : [...]` and data.js:1168 exports with no live getter, so under LIVE it is permanently empty while live-adapter.jsx:1355 maps `cohorts` for a consumer mounted nowhere.",
+   "disposition_evidence": "CONTRACT-DEFINED, NAMED IN A CHARTER INVARIANT, AND MOUNTED. packages/shared/contracts_data.json heatmap.cohort_patterns declares surface_id H8 with threshold_pct and patterns[] required within it, plus insufficient_cohorts[]; CLAUDE.md invariant 5 names this surface explicitly ('entity_ids in cohort patterns stripped for EVERY audience'), which alone forecloses exclusion. Server side: apps/api/dma_api/redaction.py:81-82 ALWAYS_STRIP covers patterns[*].entity_ids and insufficient_cohorts[*].entity_ids, with a unit test at apps/api/tests/test_serving_read_path.py:442; the DDL at migrations/versions/0008_serving_tier.py:377-394 enforces CHECK (cohort_size >= 5) and generates share_pct and below_threshold; the writer is apps/api/dma_api/writer_spec.json:997. It is mounted: app-root.jsx:450 -> ClientHealth, tab 'patterns' (pages-d5-d6-tech-runs.jsx:1558), table at lines 1736-1752. The first pass's lump exclusion ('health.subsurfaces', inventory.json doc_line 11063, reason 'not separately mountable') is refuted by those two lines. What is true \u2014 and is a defect, not a reason to exclude \u2014 is that the mounted tab reads DMA.PATTERNS, which apps/web/proto/data.js:820 defines as `LIVE ? [] : [...]` and data.js:1168 exports with no live getter, so under LIVE it is permanently empty while live-adapter.jsx:1355 maps `cohorts` for a consumer mounted nowhere.",
    "checks": [
     {
      "qa_id": "HLT-06",
@@ -8696,7 +8698,7 @@
     },
     {
      "qa_id": "H8-ADD-01",
-     "verdict": "ADD(render reach: a promoted section that reaches the page and renders nothing — the class of shipped defect 10)",
+     "verdict": "ADD(render reach: a promoted section that reaches the page and renders nothing \u2014 the class of shipped defect 10)",
      "rule": "The mounted Cross-entity patterns tab renders the served heatmap.cohort_patterns section, asserted by row count and by pattern identity, instead of a module-scope fixture array that LIVE fixes at empty (data.js:820, exported without a getter at data.js:1168).",
      "layer": "dom",
      "severity": "P0",
@@ -8704,7 +8706,7 @@
     },
     {
      "qa_id": "H8-ADD-02",
-     "verdict": "ADD(key provenance: the tab reads p.count, p.total, p.title and p.category at pages-d5-d6-tech-runs.jsx:1741-1747, none of which the contract declares — its keys are affected_count, cohort_size, share_pct, pattern_statement and category_id)",
+     "verdict": "ADD(key provenance: the tab reads p.count, p.total, p.title and p.category at pages-d5-d6-tech-runs.jsx:1741-1747, none of which the contract declares \u2014 its keys are affected_count, cohort_size, share_pct, pattern_statement and category_id)",
      "rule": "Every field this surface reads exists in contracts_data.json heatmap.cohort_patterns, checked mechanically, so wiring the served section cannot render undefined over undefined where a share belongs.",
      "layer": "dom",
      "severity": "P0",
@@ -8721,14 +8723,14 @@
     {
      "qa_id": "H8-ADD-04",
      "verdict": "ADD(the existing test at apps/api/tests/test_serving_read_path.py:442 exercises the redactor function only, not a served HTTP body and not the export path)",
-     "rule": "No entity identifier appears in any served response for this section under the internal, AE or customer audience, nor in any CSV or export generated from the Health page — asserted end to end on the response bytes, with the strip receipt naming a path that matched nothing as a producer defect.",
+     "rule": "No entity identifier appears in any served response for this section under the internal, AE or customer audience, nor in any CSV or export generated from the Health page \u2014 asserted end to end on the response bytes, with the strip receipt naming a path that matched nothing as a producer defect.",
      "layer": "payload",
      "severity": "P0",
      "catches_known_defect": null
     },
     {
      "qa_id": "H8-ADD-05",
-     "verdict": "ADD(8.2 requires same-sub-vertical cohorts of completed recent runs and 8.6 forbids mixing runs across a long window; nothing in apps/mcp validates either — grep for cohort_size across apps/*/dma_* returns no enforcement outside the DDL check)",
+     "verdict": "ADD(8.2 requires same-sub-vertical cohorts of completed recent runs and 8.6 forbids mixing runs across a long window; nothing in apps/mcp validates either \u2014 grep for cohort_size across apps/*/dma_* returns no enforcement outside the DDL check)",
      "rule": "A cohort is built only from entities of the same sub_vertical holding a completed run with a served score for that category, a submission pooling sub-verticals is refused at submit with a named reason, and a cohort whose runs span more than 18 months discloses that window on the card.",
      "layer": "connector",
      "severity": "P0",
@@ -8737,7 +8739,7 @@
     {
      "qa_id": "H8-ADD-06",
      "verdict": "ADD(8.6 names 'Call a shared-vendor effect an institution pattern' as a story breaker; structural_explanation is a served column, migrations 0008:390, and appears in no mounted render)",
-     "rule": "Where the cohort's entities run the same shared core platform, the pattern carries structural_explanation and its statement says which fact it is — a property of the vendor or a property of the institutions — rather than presenting a vendor artefact as a market pattern.",
+     "rule": "Where the cohort's entities run the same shared core platform, the pattern carries structural_explanation and its statement says which fact it is \u2014 a property of the vendor or a property of the institutions \u2014 rather than presenting a vendor artefact as a market pattern.",
      "layer": "narrative",
      "severity": "P0",
      "catches_known_defect": null
@@ -8745,15 +8747,15 @@
     {
      "qa_id": "H8-ADD-07",
      "verdict": "ADD(carries owner adjudications A and C onto this surface: with two promoted clients no cohort can reach the minimum of five, so the only honest state today is a withheld one)",
-     "rule": "When no cohort meets the minimum, the surface renders the recorded withholding — naming which absence it is and what would close it — instead of an empty table under a threshold badge, and no synthetic cohort fixture is served to make the tab look populated.",
+     "rule": "When no cohort meets the minimum, the surface renders the recorded withholding \u2014 naming which absence it is and what would close it \u2014 instead of an empty table under a threshold badge, and no synthetic cohort fixture is served to make the tab look populated.",
      "layer": "dom",
      "severity": "P0",
      "catches_known_defect": 7
     },
     {
      "qa_id": "H8-ADD-08",
-     "verdict": "AMEND(8.5's per-sub-vertical pillar weight table — CU/RB 25/30/20/25 and the rest — is a scoring-configuration claim asserted as an acceptance fact, and no such weights exist anywhere in packages/shared or apps/mcp; this follows the CO-01 precedent already recorded in this inventory: weights are read from the run manifest, never asserted. The weights are dropped from the check and only the served-set rule and the Farm Credit publication bar are kept)",
-     "rule": "Cohort membership and every denominator on this surface are computed on the sub-vertical-filtered served set (base cells plus only the confirmed sub-vertical's variant cells), and a run whose sub-vertical has no defined weight and variant contract — Farm Credit today — cannot publish a cohort pattern at all.",
+     "verdict": "AMEND(8.5's per-sub-vertical pillar weight table \u2014 CU/RB 25/30/20/25 and the rest \u2014 is a scoring-configuration claim asserted as an acceptance fact, and no such weights exist anywhere in packages/shared or apps/mcp; this follows the CO-01 precedent already recorded in this inventory: weights are read from the run manifest, never asserted. The weights are dropped from the check and only the served-set rule and the Farm Credit publication bar are kept)",
+     "rule": "Cohort membership and every denominator on this surface are computed on the sub-vertical-filtered served set (base cells plus only the confirmed sub-vertical's variant cells), and a run whose sub-vertical has no defined weight and variant contract \u2014 Farm Credit today \u2014 cannot publish a cohort pattern at all.",
      "layer": "payload",
      "severity": "P1",
      "catches_known_defect": null

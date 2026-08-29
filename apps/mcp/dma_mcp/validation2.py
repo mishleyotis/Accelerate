@@ -19,7 +19,7 @@ import re
 from . import shared_path
 from .contracts import sections
 from .evidence_tools import get_evidence
-from .identifiers import MINT_RE
+from .identifiers import MINT_RE, find_fabricated, find_ids
 from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical, serves,
                            variant_subvertical)
 
@@ -1369,6 +1369,65 @@ def _served_figures(conn, run_id) -> dict:
         if c.get("score") is not None:
             served[c["category_id"]] = float(c["score"])
     return served
+
+
+def _walk_strings(node, path):
+    """Yield (path, text) for every string in the payload tree."""
+    if isinstance(node, str):
+        yield path, node
+    elif isinstance(node, dict):
+        for k, v in node.items():
+            yield from _walk_strings(v, f"{path}.{k}")
+    elif isinstance(node, list):
+        for i, item in enumerate(node):
+            yield from _walk_strings(item, f"{path}[{i}]")
+
+
+def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
+    """Evidence ids cited in PROSE, not under a citation key.
+
+    WHY. `identifiers.find_fabricated()` was written to reject a
+    client-supplied evidence id and AUD-0125 measured it called nowhere in
+    production — dead code guarding invariant 10. The keyed path (ET-01 /
+    ET-02 above) collects `e_ids`, `supporting_e_ids` and their siblings, so
+    the hole it leaves is exactly the one this function was built for: an
+    id written into a sentence.
+
+    A reader treats `[E-047]` in a paragraph as a citation whether or not a
+    key carries it, so an unresolvable one opens the same empty drawer under
+    the client's name. Ids already checked by the keyed path are skipped:
+    reporting the same fabrication twice is noise, not rigour."""
+    claimed: dict = {}
+    for path, text in _walk_strings(payload, ""):
+        for e in find_ids(text):
+            if e in already:
+                continue
+            claimed.setdefault(e, path.lstrip("."))
+    if not claimed:
+        return []
+    split = get_evidence(conn, run_id, sorted(claimed))
+    allowed = {row.get("e_id") for row in split.get("found", [])}
+    out = []
+    for e in find_fabricated(sorted(claimed), allowed):
+        section = claimed[e].split(".")[0] or "payload"
+        gate = "ET-02" if MINT_RE.match(e.split(":")[0]) else "ET-01"
+        out.append(_reason(
+            gate, section, claimed[e],
+            f"{e} is cited in PROSE and does not resolve for this run. A "
+            f"reader takes a bracketed id in a sentence as a citation, so an "
+            f"unresolvable one opens an empty drawer under the client's name "
+            + ("— and the mint namespace is server-allocated, so an invented "
+               "mint id is fabrication by construction."
+               if gate == "ET-02" else
+               "— register the source, or remove the reference.")))
+    for f in split.get("foreign", []):
+        e = f["e_id"]
+        out.append(_reason(
+            "ET-01", claimed[e].split(".")[0] or "payload", claimed[e],
+            f"{e} is cited in prose and is a real row belonging to another "
+            f"institution ({f['belongs_to']}) — STOP: this is contamination; "
+            "quarantine and escalate, do not filter it out quietly"))
+    return out
 
 
 def _walk(node, path):
@@ -3323,6 +3382,11 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                 f"institution ({f['belongs_to']}) — STOP: this is "
                 "contamination; quarantine and escalate, do not filter it "
                 "out quietly"))
+
+    # Prose citations, OUTSIDE the `if cited:` block: a payload whose only
+    # evidence references are in sentences has an empty `cited` map and is
+    # exactly the case the keyed path cannot see (AUD-0125).
+    reasons.extend(_check_prose_citations_resolve(conn, run_id, payload, cited))
 
     # Runs whether or not anything was cited: the whole point of ET-09 is the
     # contamination that never cites, so it must not sit inside `if cited:`.

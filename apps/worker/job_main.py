@@ -29,9 +29,11 @@ from dma_worker.workbook_parser import (mine_evidence_from_rationales,
                                         parse_evidence_master,
                                         parse_grain_summaries,
                                         parse_peer_benchmarks,
+                                        parse_evidence_index,
                                         parse_recommendations,
                                         parse_research_workbook,
-                                        parse_scoring_workbook)
+                                        parse_scoring_workbook,
+                                        merge_evidence_sources)
 
 
 def _connect():
@@ -65,6 +67,18 @@ def _classify_artefact(f):
     if name.endswith(".json") and "manifest" in name:
         # run_manifest.json canonical; L1_run_manifest.json / MANIFEST.json seen.
         return "manifest", (0 if name == "run_manifest.json" else 1)
+    if name.endswith(".json") and "evidence_index" in name:
+        # AUD-0091: the richest evidence store in every package was
+        # classified `package_structured` by classification.py, recorded into
+        # import_files.classified_kind by the scanner — and then DROPPED,
+        # because this function accepted nothing but manifest.json, .xlsx,
+        # .xlsm and .docx, and `_package_groups` keys only on this function.
+        #
+        # Gate M exists because of exactly this file: a client shipped with
+        # 85% of its evidence unURLed while `01_evidence/evidence_index.json`
+        # carried 752 items with 748 URLs. The link was in the package the
+        # whole time and nothing read it.
+        return "evidence_index", (0 if name == "evidence_index.json" else 1)
     if name.endswith((".xlsx", ".xlsm")):
         # The research workbook is its own artefact, not a decoy. It carries
         # the evidence tier's authority — per-subcap linkage at fact grain,
@@ -251,6 +265,16 @@ def _ingest_one(conn, token, folder, parts, remint=False):
 
         research = {}
         companion: list = []
+        evidence_index: list = []
+        if "evidence_index" in parts:
+            ei_path = os.path.join(td, "evidence_index.json")
+            with open(ei_path, "wb") as fh:
+                fh.write(drive.download(token, parts["evidence_index"].file_id))
+            evidence_index = parse_evidence_index(ei_path, companion)
+            print(f"ingest: {folder} evidence index — {len(evidence_index)} "
+                  f"items, "
+                  f"{sum(1 for e in evidence_index if e.get('source_url'))} "
+                  f"with a URL")
         if "research" in parts:
             rw_path = os.path.join(td, "research.xlsx")
             with open(rw_path, "wb") as fh:
@@ -271,7 +295,12 @@ def _ingest_one(conn, token, folder, parts, remint=False):
             manifest=manifest,
             workbook=wb,
             source_folder_id=folder,
-            evidence=parse_evidence_master(wb_path, companion),
+            # The workbook's ledger FIRST, the package index second: the
+            # index fills gaps (a URL, a date, a longer excerpt) and never
+            # overwrites what the workbook stated. AUD-0091 / gate M.
+            evidence=merge_evidence_sources(
+                parse_evidence_master(wb_path, companion), evidence_index,
+                companion),
             # WHOSE assessment this is, so the peer parser can keep the
             # subject out of its own cohort. `Peer_Benchmarks` carries the
             # entity's own score in a named column (`FUB_Score`) beside the

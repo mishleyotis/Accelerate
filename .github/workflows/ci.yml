@@ -46,6 +46,21 @@ jobs:
       # gives the reader no route to getting the field filled. Removed once by
       # hand across 11 files; this is what stops the next component reaching
       # for `: "—"` because it is the shortest thing that renders.
+      - name: Gate N — one score-band-hex resolver (invariant 7)
+        # AUD-0048/0049/0050: two resolvers, the unsanctioned one winning 50
+        # call sites to 1, painting a grey swatch for a null score — while the
+        # acceptance ledger claimed CI enforced this and BD-04 sat textless.
+        run: python3 scripts/gate_n_one_colour_resolver.py
+
+      - name: Generated artefacts are current
+        # AUD-0131: one generated-artefact freshness check across thirty CI
+        # steps. These are the others: the gate census the producers route to,
+        # the band resolver the browser runs, and the taxonomy the skills state.
+        run: |
+          python3 plugins/dma-insights/scripts/gen_gates_md.py --check
+          python3 scripts/gen_proto_bands.py --check
+          python3 plugins/dma-insights/scripts/check_taxonomy_drift.py
+
       - name: Gate C — no render dead ends
         run: python3 scripts/gate_c_no_render_dead_ends.py
       # A shared contract the serving code READS must be in the image that

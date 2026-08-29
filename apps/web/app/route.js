@@ -40,6 +40,10 @@ async function apiFetch(path) {
 const SCRIPTS = [
   "vendor/react.production.min.js",
   "vendor/react-dom.production.min.js",
+  // FIRST among the prototype's own modules: data.js throws without it,
+  // because the alternative — falling back to a second colour mapping — is
+  // the invariant-7 defect (AUD-0048). Generated from lib/bands.js.
+  "proto/js/bands.js",
   "proto/js/data.js",
   // Before utils.js: useLiveEntity calls buildLiveEntity, and the loader must
   // not be able to run before the mappings exist.

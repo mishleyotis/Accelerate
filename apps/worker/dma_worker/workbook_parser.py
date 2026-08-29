@@ -24,6 +24,8 @@ Three row states, three different meanings:
 """
 from __future__ import annotations
 
+import json
+import os
 import re
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
@@ -177,6 +179,38 @@ class WorkbookParse:
     scored_cells: int = 0
     composite: Decimal | None = None
     composite_source_cell: str | None = None
+    #: In scope for this engagement and NOT YET SCORED. A different fact from
+    #: `toggled_out`, and the parser used to have nowhere to put it.
+    #:
+    #: AUD-0014: on a real research-stage workbook — where empty scores ARE
+    #: the contract — the parser reported 0 of 49 scores and reclassified 44
+    #: of them as `toggled_out`, "variant cells excluded by the toggle
+    #: cascade". A FOCUSED engagement rendered as an assessment where 90% of
+    #: the requested capabilities had been declared inapplicable rather than
+    #: pending. Emptiness is not a scope signal; it never was.
+    in_scope_unscored: list = field(default_factory=list)
+
+
+#: A sub-vertical VARIANT cell ends in a lettered suffix (P1C1.3.CU1); a
+#: UNIVERSAL cell ends in a number (P1C1.3.1). The catalogue's own shape, and
+#: the only scope signal available from an id alone.
+_VARIANT_SUFFIX = re.compile(r"\.[A-Z]{2,4}\d+$")
+
+
+def _is_variant(subcap_id: str) -> bool:
+    return bool(_VARIANT_SUFFIX.search(subcap_id or ""))
+
+
+def _unscored_bucket(result, sid: str) -> None:
+    """File an unscored, contentless row under scope, not under emptiness.
+
+    A universal cell applies to every engagement, so an empty one is in
+    scope and unscored — which is what a research-stage workbook looks like
+    on every row by contract. Only a sub-vertical variant can be excluded by
+    the toggle cascade, and that is what `toggled_out` has always meant
+    (AUD-0014)."""
+    (result.toggled_out if _is_variant(sid)
+     else result.in_scope_unscored).append(sid)
 
 
 def _header_map(ws, anchor: str, marker: str | None = None, max_scan: int = 30):
@@ -211,7 +245,8 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
         pillar_tabs = [t for t in wb.sheetnames if _is_pillar_tab(t)]
         if pillar_tabs:
             out = _parse_pillar_scoring(wb, pillar_tabs)
-            if not out.scores and not out.observations and not out.toggled_out:
+            if not out.scores and not out.observations and not out.toggled_out \
+                    and not out.in_scope_unscored:
                 # Structurally impossible to reach silently: a workbook whose
                 # pillar tabs yielded nothing at all still names itself.
                 out.observations.append(Observation(
@@ -355,8 +390,59 @@ def _dedupe_scores(result: "WorkbookParse") -> None:
         result.scores = ordered
 
 
+def _report_stage(result, stage) -> None:
+    """One observation stating what the workbook IS, instead of one per row.
+
+    A research-stage workbook has no scores by contract (rule 4). Reporting
+    that as N missing scores buries the one fact a reader needs — which
+    stage this is — under N copies of a non-defect, and AUD-0014 measured
+    the alternative reading of the same emptiness: 44 of 49 in-scope rows
+    declared inapplicable."""
+    if stage is None:
+        return
+    seen = (len(result.scores) + len(result.in_scope_unscored)
+            + len(result.toggled_out))
+    result.observations.append(Observation(
+        "workbook_stage", None, {
+            "contract": str(stage.get("workbook_contract") or "unknown"),
+            "scope_mode": str(stage.get("scope_mode") or "unknown"),
+            "declared_selected": str(stage.get("subcaps_selected") or ""),
+            "rows_seen": str(seen),
+            "scored": str(len(result.scores)),
+            "in_scope_unscored": str(len(result.in_scope_unscored)),
+            "toggled_out": str(len(result.toggled_out)),
+            "stage": ("research — column D is empty by contract"
+                      if not result.scores else "assessment"),
+        }))
+
+
+#: Run_Metadata keys that identify a contract-v3 workbook and its stage.
+_STAGE_KEYS = ("workbook_contract", "scope_mode", "subcaps_selected")
+
+
+def _declared_stage(wb) -> dict | None:
+    """What the workbook says about itself, or None if it does not say.
+
+    A contract-v3 workbook carries its own engagement set and its own stage:
+    `scope_mode` names how the set was chosen, `subcaps_selected` how many
+    rows were seeded, and at the RESEARCH stage column D is empty on every
+    row BY CONTRACT (rule 4). Reading that is what lets the parser tell an
+    unscored research workbook from a broken assessment one — AUD-0014's
+    whole cost was having no way to ask."""
+    if "Run_Metadata" not in wb.sheetnames:
+        return None
+    md = {}
+    for row in wb["Run_Metadata"].iter_rows(min_row=1, values_only=True):
+        if row and row[0] and len(row) > 1:
+            md[_norm(row[0])] = row[1]
+    if not any(k in md for k in _STAGE_KEYS):
+        return None
+    return md
+
+
 def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
     result = WorkbookParse(scores=[], observations=[], toggled_out=[])
+    stage = _declared_stage(wb)
     for tab in sorted(pillar_tabs):
         ws = wb[tab]
         headers = first = None
@@ -427,11 +513,16 @@ def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
             rationale = (str(cell_at(rationale_col)).strip()
                          if cell_at(rationale_col) else None)
             if score is None:
-                if refs_raw.strip() or rationale:
+                if stage is not None:
+                    # The workbook declares its own scope, so an unscored row
+                    # is a POSITION in a run, not a defect in one. Filed by
+                    # scope; the stage is reported ONCE below, not 851 times.
+                    _unscored_bucket(result, sid)
+                elif refs_raw.strip() or rationale:
                     result.observations.append(Observation(
                         "missing_score", sid, {"source_cell": cell}))
                 else:
-                    result.toggled_out.append(sid)
+                    _unscored_bucket(result, sid)
                 continue
             if not (SCORE_MIN <= score <= SCORE_MAX):
                 # Out of the M1–M5 rubric: never stored, never rescaled. A 0
@@ -479,6 +570,7 @@ def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
     # overstates every merged workbook by the size of its second tab set.
     _dedupe_scores(result)
     result.scored_cells = len(result.scores)
+    _report_stage(result, stage)
     return result
 
 
@@ -567,7 +659,7 @@ def _parse_scorecard(ws, facets: dict) -> WorkbookParse:
                      "facets_with_content": sum(1 for f in sub_facets
                                                 if f.score is not None or f.evidence_refs)}))
             else:
-                result.toggled_out.append(sid)
+                _unscored_bucket(result, sid)
             continue
 
         refs = sorted({e for f in sub_facets for e in f.evidence_refs})
@@ -1140,9 +1232,26 @@ def parse_research_workbook(path: str, obs: list | None = None) -> dict:
                         [v(*_EV_ALIASES["excerpt"][:1]),
                          v("anchor_quote"), v("verbatim"), v("quote"),
                          v("passage")]),
+                    # THE ALIAS TABLE, not a hand-kept pair.
+                    #
+                    # AUD-0067: this read `v("subcap_mappings", "subcaps")`,
+                    # a two-name lookup, while the contract-v3 column is
+                    # `SubCap_IDs`. The module's own `_EV_ALIASES["subcaps"]`
+                    # already listed `subcap_ids` — it was used for the
+                    # per-column census and not for the read, so the census
+                    # reported the column PRESENT while every row lost its
+                    # linkage and no observation was emitted. Measured on a
+                    # generated workbook: 4 of 4 ledger rows returned
+                    # `subcaps: []` while Evidence_Detail carried
+                    # "P1C1.1.1, P1C1.1.5" in 4 of 4. Every fact ingested
+                    # from a contract-v3 workbook arrived unlinked to any
+                    # capability — the workbook's own stated failure for this
+                    # join, happening by construction on every run.
                     "subcaps": [s for s in
                                 (x.strip() for x in
-                                 re.split(r"[,;]", str(v("subcap_mappings", "subcaps") or "")))
+                                 re.split(r"[,;]",
+                                          str(v(*_EV_ALIASES["subcaps"],
+                                                "subcap_mappings") or "")))
                                 if SUBCAP_RE.match(s)],
                     "signal_direction": (str(v("signal_direction")).strip().upper()
                                          if v("signal_direction") else None),
@@ -1957,3 +2066,185 @@ def parse_recommendations(path: str, obs: list | None = None) -> list:
         return out
     finally:
         wb.close()
+
+
+# ── the package evidence index: 01_evidence/evidence_index.json ──────────
+
+#: What an evidence-index item may call each field. The workbook's aliases
+#: reused, plus the JSON spellings the corpus actually ships.
+_EI_ALIASES = {
+    "e_id": ("e_id", "evidence_id", "id"),
+    "source_name": ("source_name", "source", "title", "source_title",
+                    "publisher"),
+    "source_url": ("url", "source_url", "link", "url_or_citation"),
+    "tier": ("tier", "evidence_tier"),
+    "ers": ("ers", "ers_score"),
+    "published": ("date_published", "published_date", "publish_date",
+                  "published", "date"),
+    "recency": ("recency", "recency_band"),
+    "claim_type": ("claim_type", "claim"),
+    "fact_count": ("fact_count", "facts"),
+    "subcaps": ("subcaps_supported", "subcaps", "subcap_ids",
+                "subcap_mappings"),
+    "excerpt": ("excerpt", "anchor_quote", "verbatim", "quote", "passage",
+                "fact_summary", "summary"),
+}
+
+
+def parse_evidence_index(path: str, obs: list | None = None) -> list:
+    """Read `01_evidence/evidence_index.json` into evidence rows.
+
+    WHY THIS READER EXISTS. AUD-0091: this file is the richest evidence
+    store in every package, `classification.py` has recognised it as
+    `package_structured` since stage 1.1, and the scanner records it into
+    `import_files.classified_kind` — and the ingest then dropped it, because
+    the artefact grouper accepted only manifest.json and the Office formats.
+
+    Gate M was built after the consequence: one client shipped with 85% of
+    its evidence unURLed while this file carried 752 items and 748 URLs.
+
+    The shape is heterogeneous across the corpus — a bare list, `{"items":
+    [...]}`, `{"evidence": [...]}` — so all three are read, and anything
+    else is REPORTED rather than returning an empty list that looks like an
+    empty index."""
+    def observe(kind, detail):
+        if obs is not None:
+            obs.append(Observation(kind, None, detail))
+
+    try:
+        with open(path, encoding="utf-8-sig") as fh:
+            doc = json.load(fh)
+    except (OSError, ValueError) as e:
+        observe("evidence_index_unreadable",
+                {"path": os.path.basename(path), "error": str(e)[:200],
+                 "consequence": "the package's own evidence index was not "
+                                "read; rows keep whatever the workbook gave "
+                                "them"})
+        return []
+
+    items = None
+    if isinstance(doc, list):
+        items = doc
+    elif isinstance(doc, dict):
+        for key in ("items", "evidence", "evidence_index", "records"):
+            if isinstance(doc.get(key), list):
+                items = doc[key]
+                break
+    if items is None:
+        observe("evidence_index_shape_unrecognised",
+                {"top_level": (list(doc)[:12] if isinstance(doc, dict)
+                               else type(doc).__name__),
+                 "expected": "a list, or an object with items/evidence/records",
+                 "consequence": "no item was read from an index that exists"})
+        return []
+
+    def pick(item, field):
+        for k in _EI_ALIASES[field]:
+            for cand in (k, k.replace("_", ""), k.upper()):
+                if isinstance(item, dict) and item.get(cand) not in (None, ""):
+                    return item[cand]
+        return None
+
+    out, skipped = [], 0
+    for item in items:
+        if not isinstance(item, dict):
+            skipped += 1
+            continue
+        e_id = str(pick(item, "e_id") or "").strip()
+        if not (e_id.startswith("E-") or e_id.startswith("INT-")):
+            skipped += 1
+            continue
+        tier = str(pick(item, "tier") or "").strip().upper()
+        ers = _decimal(pick(item, "ers"))
+        claim = str(pick(item, "claim_type") or "").strip().upper() or None
+        facts = _decimal(pick(item, "fact_count"))
+        subs = pick(item, "subcaps")
+        if isinstance(subs, str):
+            subs = re.split(r"[,;]", subs)
+        out.append({
+            "e_id": e_id,
+            "source_name": (str(pick(item, "source_name")).strip()
+                            if pick(item, "source_name") else None),
+            "source_url": (str(pick(item, "source_url")).strip()
+                           if pick(item, "source_url") else None),
+            "tier": tier if tier in ("T1", "T2", "T3", "T4", "T5") else None,
+            "ers": None if ers in (None, "UNPARSEABLE") else ers,
+            "published_date": parse_fuzzy_date(pick(item, "published")),
+            "stated_recency": _stated_band(pick(item, "recency"),
+                                           pick(item, "published")),
+            "claim_type": claim if claim in
+                          ("FACT", "INFERENCE", "HYPOTHESIS",
+                           "CEILING_ESTIMATE") else None,
+            "fact_count": None if facts in (None, "UNPARSEABLE") else int(facts),
+            "excerpt": _best_excerpt([pick(item, "excerpt")]),
+            "subcaps": [s for s in (str(x).strip() for x in (subs or []))
+                        if SUBCAP_RE.match(s)],
+        })
+    if skipped:
+        observe("evidence_index_items_skipped",
+                {"skipped": skipped, "kept": len(out),
+                 "expected": "an object carrying an E-… or INT-… id"})
+    return out
+
+
+#: Fields the index may FILL when the workbook left them empty. Never a
+#: field the workbook stated: the workbook is the artefact under assessment,
+#: and an index that disagrees with it is a disagreement to record, not to
+#: resolve in the index's favour.
+_FILLABLE = ("source_url", "source_name", "published_date", "stated_recency",
+             "tier", "ers", "claim_type", "fact_count", "excerpt")
+
+
+def merge_evidence_sources(workbook_rows: list, index_rows: list,
+                           obs: list | None = None) -> list:
+    """Workbook rows first; the index fills what they left blank.
+
+    Two rules, and the asymmetry is the point:
+
+      * A field the workbook STATED is never overwritten. If the index
+        disagrees, that is recorded as an observation and the workbook wins —
+        the workbook is the artefact being assessed.
+      * A field the workbook left blank is filled from the index, and the
+        fill is recorded. This is the 748 URLs that were in the package the
+        whole time (AUD-0091).
+
+    An id only the index carries is ADDED, because dropping it would repeat
+    the original defect one level down."""
+    by_id = {r["e_id"]: dict(r) for r in workbook_rows}
+    filled, disagreed, added = {}, [], 0
+    for item in index_rows:
+        eid = item["e_id"]
+        row = by_id.get(eid)
+        if row is None:
+            by_id[eid] = dict(item)
+            added += 1
+            continue
+        for f in _FILLABLE:
+            have, come = row.get(f), item.get(f)
+            if come in (None, ""):
+                continue
+            if have in (None, ""):
+                row[f] = come
+                filled[f] = filled.get(f, 0) + 1
+            elif str(have).strip() != str(come).strip():
+                disagreed.append({"e_id": eid, "field": f,
+                                  "workbook": str(have)[:120],
+                                  "index": str(come)[:120]})
+        merged = {s for s in (row.get("subcaps") or [])} | \
+                 {s for s in (item.get("subcaps") or [])}
+        if merged != set(row.get("subcaps") or []):
+            row["subcaps"] = sorted(merged)
+    if obs is not None:
+        if filled or added:
+            obs.append(Observation("evidence_index_merged", None, {
+                "filled": {k: str(v) for k, v in sorted(filled.items())},
+                "items_only_in_index": str(added),
+                "reason": "the package's evidence index carried values the "
+                          "workbook ledger left blank"}))
+        if disagreed:
+            obs.append(Observation("evidence_index_disagreement", None, {
+                "count": str(len(disagreed)),
+                "examples": disagreed[:5],
+                "resolution": "the workbook's value is kept; the index's is "
+                              "recorded, never averaged and never preferred"}))
+    return list(by_id.values())

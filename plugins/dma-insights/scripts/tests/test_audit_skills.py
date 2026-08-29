@@ -18,6 +18,7 @@ would pass the "no false positives" half perfectly.
 """
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -54,9 +55,19 @@ def audit(*args):
     return _cache[args]
 
 
-def test_the_audit_exits_nonzero_when_breakage_passes_the_ceiling():
-    """The whole point. Before this, the number below could be anything."""
-    r, out = audit("--max-broken", "0")
+def test_the_audit_exits_nonzero_when_breakage_passes_the_ceiling(tmp_path):
+    """The whole point: a defect list must not exit 0.
+
+    This used to prove it against the REPOSITORY'S OWN backlog — `audit()`
+    with `--max-broken 0` on the real tree, which worked only for as long as
+    the tree was broken. The backlog is now empty (AUD-0005: 49 dead rulebook
+    anchors fixed, MAX_BROKEN 8 -> 0), so the proof moves to a purpose-built
+    tree, where it keeps working whatever the repository does."""
+    skill = tmp_path / "skills" / "probe-skill"
+    skill.mkdir(parents=True)
+    (skill / "SKILL.md").write_text(
+        "Read `rulebooks/nowhere.md` and `helpers/absent.py`.\n")
+    r, out = _run(str(tmp_path / "skills"), "--max-broken", "0")
     assert r.returncode == 1, "a defect list still exited 0"
     assert out["broken_refs_total"] > 0
     assert "ceiling" in r.stderr
@@ -116,15 +127,28 @@ def test_a_reference_that_resolves_nowhere_is_still_reported(tmp_path):
     assert "helpers/does_not_exist_anywhere.py" in refs, refs
 
 
-def test_the_seven_dead_rulebook_links_are_still_reported():
-    """The backlog is pinned, not hidden. If the rectifier fixes these the
-    count drops and `test_the_pinned_ceiling_is_not_slack` demands MAX_BROKEN
-    come down with it."""
+def test_the_lifecycle_rulebook_anchors_all_resolve_now():
+    """This test used to assert the DEFECT: seven dead rulebook links under
+    05-lifecycle/, pinned as a backlog. AUD-0005 measured the cost — 49 of
+    surface-map.md's 53 data rows pointed at `rulebooks/<page>.md` relative
+    to a directory that has never had one, so a producer following the
+    routing chain as documented hit a file-not-found on the rulebook for
+    whichever page it owned.
+
+    The anchors are fixed and the ceiling is 0, so the assertion inverts:
+    nothing under 05-lifecycle/ may be dead, and every anchor there must be
+    the `../03-pages/rulebooks/` form that resolves."""
     _, out = audit()
     dead = [b for b in out["broken_refs"]
             if b["file"].startswith("dma-surface-production/05-lifecycle/")]
-    assert len(dead) == 7, [b["ref"] for b in dead]
-    assert all(b["ref"].startswith("rulebooks/") for b in dead)
+    assert dead == [], [f"{b['file']} -> {b['ref']}" for b in dead]
+    lifecycle = (SKILLS / "dma-surface-production" / "05-lifecycle")
+    for f in lifecycle.glob("*.md"):
+        for line in f.read_text().splitlines():
+            for ref in re.findall(r"(?<![-/\w])rulebooks/[a-z]+\.md", line):
+                raise AssertionError(
+                    f"{f.name} still writes {ref!r}, which resolves under "
+                    f"05-lifecycle/ where no rulebooks/ directory exists")
 
 
 # ── the other half of the exit code ──

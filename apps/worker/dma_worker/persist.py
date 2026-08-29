@@ -391,7 +391,26 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
             return PersistResult(str(entity_id), str(prior[0]), prior[1],
                                  prior[2] or 0, 0)
 
-    cur.execute("SELECT COALESCE(max(run_seq), 0) + 1 FROM runs WHERE entity_id = %s", (entity_id,))
+    # AUD-0089: this was an unguarded read-modify-write. The only
+    # serialisation was `pg_try_advisory_lock(815002)` in job_main.main(),
+    # which exists inside the worker Job and nowhere else — so a backfill, a
+    # remint, a manual repair or a second revision mid-deploy raced it, and
+    # the collision was SILENT: two runs for one entity on the same run_seq,
+    # after which `serving_directory (entity_id, run_seq DESC)` resolves to
+    # whichever row the planner reached first.
+    #
+    # Two changes, and the second is the one that holds. The ENTITY row is
+    # locked before the maximum is read, which serialises concurrent
+    # allocators for this entity and no others — `FOR UPDATE` cannot be
+    # applied to the aggregate itself, and locking the entity is both legal
+    # and narrower than an advisory lock over the whole ingest. Migration
+    # 0056's partial unique index on (entity_id, run_seq) is the guarantee:
+    # it makes a collision FAIL rather than persist, in every writer
+    # including ones not yet written.
+    cur.execute("SELECT id FROM entities WHERE id = %s FOR UPDATE",
+                (entity_id,))
+    cur.execute("SELECT COALESCE(max(run_seq), 0) + 1 FROM runs "
+                "WHERE entity_id = %s", (entity_id,))
     run_seq = cur.fetchone()[0]
     composite = _round_once(workbook.composite)   # rounded ONCE
     composite_from_manifest = False
