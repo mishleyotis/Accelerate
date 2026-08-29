@@ -33,6 +33,7 @@ from dma_worker.workbook_parser import (mine_evidence_from_rationales,
                                         parse_recommendations,
                                         parse_research_workbook,
                                         parse_scoring_workbook,
+                                        parse_technographic_scan,
                                         merge_evidence_sources)
 
 
@@ -79,6 +80,13 @@ def _classify_artefact(f):
         # carried 752 items with 748 URLs. The link was in the package the
         # whole time and nothing read it.
         return "evidence_index", (0 if name == "evidence_index.json" else 1)
+    if "technographic" in name and name.endswith((".json", ".docx")):
+        # The fourth final output (engine/assemble.py's package contract).
+        # The .json sidecar outranks the .docx because it is the machine
+        # copy the ingest parses; classifying the .docx too means a package
+        # that shipped only the document is still SEEN, and the miss of its
+        # sidecar is reportable rather than invisible.
+        return "techscan", (0 if name.endswith(".json") else 1)
     if name.endswith((".xlsx", ".xlsm")):
         # The research workbook is its own artefact, not a decoy. It carries
         # the evidence tier's authority — per-subcap linkage at fact grain,
@@ -280,6 +288,16 @@ def _ingest_one(conn, token, folder, parts, remint=False):
                   f"items, "
                   f"{sum(1 for e in evidence_index if e.get('source_url'))} "
                   f"with a URL")
+        if "techscan" in parts:
+            ts_name = parts["techscan"].name.lower()
+            ts_path = os.path.join(td, "technographic_scan"
+                                       + (".json" if ts_name.endswith(".json")
+                                          else ".docx"))
+            with open(ts_path, "wb") as fh:
+                fh.write(drive.download(token, parts["techscan"].file_id))
+            n = parse_technographic_scan(ts_path, companion)
+            print(f"ingest: {folder} technographic scan — {n} detection(s) "
+                  f"recorded from {parts['techscan'].name}")
         if "research" in parts:
             rw_path = os.path.join(td, "research.xlsx")
             with open(rw_path, "wb") as fh:

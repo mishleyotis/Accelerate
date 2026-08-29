@@ -86,7 +86,8 @@ def locate(run_id: str, root: Path | None = None) -> Run:
 def start(*, run_id: str, entity_name: str, entity_id: str,
           sub_vertical: str | None, scope_mode: str, reference_date: str,
           root: Path | None = None, overwrite: bool = False,
-          selected: list[str] | None = None) -> Run:
+          selected: list[str] | None = None,
+          evidence_mode: str = "PUBLIC") -> Run:
     """Create the run tree and its workbook, metadata already resolved."""
     base = Path(root) if root else RUN_ROOT / run_id
     for d in SUBDIRS:
@@ -97,7 +98,8 @@ def start(*, run_id: str, entity_name: str, entity_id: str,
     RunWorkbook.create(path, run_id=run_id, entity_name=entity_name,
                        entity_id=entity_id, sub_vertical=sub_vertical,
                        scope_mode=scope_mode, reference_date=reference_date,
-                       overwrite=overwrite, selected=selected)
+                       overwrite=overwrite, selected=selected,
+                       evidence_mode=evidence_mode)
     run = Run(run_id=run_id, root=base, workbook_path=path)
     (base / "00_entity_profile" / "context.json").write_text(json.dumps({
         "entity": entity_name, "entity_id": entity_id,
@@ -125,6 +127,8 @@ def resume(run_id: str, root: Path | None = None) -> tuple[Run, dict]:
     drift = wb.verify_handoff_lock()
     return run, {
         "run_id": md.get("run_id"), "entity": md.get("entity_name"),
+        "evidence_mode": md.get("evidence_mode"),
+        "kg_built": bool(str(md.get("kg_checksum") or "").strip()),
         "sub_vertical": md.get("sub_vertical"),
         "scope_mode": md.get("scope_mode"),
         "checkpoint": md.get("checkpoint") or None,

@@ -14,6 +14,15 @@
     python3 -m engine.cli status  [--root ...]
     python3 -m engine.cli counts
 
+Delegated families — each is `engine.cli <family> <args…>`, passed through
+verbatim to the module that owns it (its --help lists the subcommands):
+
+    kg …        engine.kg        build / route / show / verify
+    fuse …      engine.retrieval fuse / plan   (RRF + BM25 + query variants)
+    memory …    engine.memory    note / status / consolidate / backup / cleanup
+    techscan …  engine.techscan  record / render / status
+    assemble …  engine.assemble  package / verify / contract
+
 Every subcommand reads and writes the SAME workbook. There is no second
 substrate to fall out of step with, which is the whole point (AUD-0001).
 """
@@ -39,9 +48,40 @@ from . import (contract, floors_gate, handoff, ledger, orient, report_spec,
                reports, runstate, strip_working_area, validator, watchdog)
 
 
+#: family name -> the module whose main() owns it. Dispatched BEFORE
+#: argparse so the family's own --help answers, not this wrapper's.
+_FAMILIES = ("kg", "fuse", "memory", "techscan", "assemble")
+
+
+def _family_main(name: str):
+    if name == "kg":
+        from . import kg as m
+    elif name == "fuse":
+        from . import retrieval as m
+    elif name == "memory":
+        from . import memory as m
+    elif name == "techscan":
+        from . import techscan as m
+    else:
+        from . import assemble as m
+    return m.main
+
+
 def main(argv=None) -> int:
+    args = list(sys.argv[1:] if argv is None else argv)
+    if args and args[0] in _FAMILIES:
+        rest = args[1:]
+        if args[0] == "fuse" and (not rest or rest[0].startswith("-")):
+            # `engine.cli fuse …` is retrieval's own `fuse` subcommand
+            # unless the caller already named one (fuse/plan).
+            rest = ["fuse"] + rest
+        return _family_main(args[0])(rest)
+
     ap = argparse.ArgumentParser(prog="engine", description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
+    for fam in _FAMILIES:
+        sub.add_parser(fam, help=f"delegated to engine.{fam if fam != 'fuse' else 'retrieval'} — "
+                                 f"run `engine.cli {fam} --help`")
 
     def common(p):
         p.add_argument("--run", required=True)
@@ -54,6 +94,10 @@ def main(argv=None) -> int:
     s.add_argument("--sv")
     s.add_argument("--scope", default="FULL", choices=contract.SCOPE_MODES)
     s.add_argument("--reference-date", required=True)
+    s.add_argument("--mode", default="PUBLIC",
+                   choices=contract.ASSESSMENT_MODES,
+                   help="evidence mode — decides which diagnostic questions "
+                        "are answerable and which are deferred to discovery")
 
     o = common(sub.add_parser("orient")); o.add_argument("--category")
     q = common(sub.add_parser("search"))
@@ -99,9 +143,10 @@ def main(argv=None) -> int:
         run = runstate.start(run_id=a.run, entity_name=a.entity,
                              entity_id=a.entity_id, sub_vertical=a.sv,
                              scope_mode=a.scope, reference_date=a.reference_date,
-                             root=root)
+                             root=root, evidence_mode=a.mode)
         print(json.dumps({"run": run.run_id, "workbook": str(run.workbook_path),
-                          "selected": len(run.open().selected_subcaps())},
+                          "selected": len(run.open().selected_subcaps()),
+                          "evidence_mode": a.mode},
                          indent=2))
         return 0
 

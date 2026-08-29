@@ -163,7 +163,7 @@ def main(argv=None) -> int:
     # it returns an empty verdict, which reads as "looked and found nothing".
     #
     # The agent's OWN frontmatter still decides which tools it may use — the
-    # 47 manifests carry `tools:` and `disallowedTools:` and those are
+    # 64 manifests carry `tools:` and `disallowedTools:` and those are
     # enforced independently. This list only removes the permission-prompt
     # layer that a scheduled container has nobody to answer.
     ALLOWED = ",".join([

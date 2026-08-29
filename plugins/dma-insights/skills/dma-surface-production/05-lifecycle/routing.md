@@ -218,6 +218,45 @@ rectifier's job and nobody else's.
 | what production actually serves | `deployed-app-auditor` |
 | a defect class that keeps recurring | `rectifier` |
 
+## The research tier — upstream of every package
+
+Surface production consumes a finished assessment package; the research
+tier is what produces one. A research engagement (an entity, a
+sub-vertical, an evidence mode) routes to **`research-conductor`**, which
+creates the run on the workbook substrate, builds the knowledge graph from
+the pillar toolkits, and dispatches one researcher per catalogue category —
+sixteen, generated from one template by `scripts/gen_research_agents.py`,
+each bound to its grain and nothing else. A repair that names a category
+(a FAILED floors gate, a challenged subcap) routes to that category's
+researcher directly, never through a full re-run — the same
+smallest-true-unit rule as the per-surface producers above.
+
+| category | agent |
+|---|---|
+| P1C1 Digital Strategy & Vision | `research-p1c1-producer` |
+| P1C2 Governance & Risk Appetite | `research-p1c2-producer` |
+| P1C3 Innovation Management & Funding | `research-p1c3-producer` |
+| P1C4 Culture & Change Enablement | `research-p1c4-producer` |
+| P2C1 Digital Marketing & Acquisition | `research-p2c1-producer` |
+| P2C2 Onboarding & Fulfillment | `research-p2c2-producer` |
+| P2C3 Omnichannel Servicing & Support | `research-p2c3-producer` |
+| P2C4 Personalization & Proactive Engagement | `research-p2c4-producer` |
+| P3C1 Core Process Automation | `research-p3c1-producer` |
+| P3C2 Operational Risk & Fraud Management | `research-p3c2-producer` |
+| P3C3 Compliance, Supervision & Surveillance | `research-p3c3-producer` |
+| P3C4 Business Resilience & Third-Party Management | `research-p3c4-producer` |
+| P4C1 Data Management & Governance | `research-p4c1-producer` |
+| P4C2 Analytics & AI Enablement | `research-p4c2-producer` |
+| P4C3 Technology Architecture & Integration | `research-p4c3-producer` |
+| P4C4 Information Security & Cybersecurity | `research-p4c4-producer` |
+
+The researchers write only their own category, only through the engine CLI
+(the workbook's refusals are the write control); the conductor gates,
+renders the four deliverables, assembles and ships the `<Entity> - DMA`
+folder, and runs the memory backup-then-cleanup lifecycle. None of them
+touches the connector's write tools — a research run that is ready for
+surface production enters, like every package, through the package-vetter.
+
 ## Two routes that used to dead-end
 
 Five tasks were traced from the session brief through this table. Three

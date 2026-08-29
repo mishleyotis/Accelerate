@@ -322,6 +322,21 @@ EVIDENCE_COLUMNS = (
 
 TIMELINE_COLUMNS = ("Event_Date", "Event", "Signal", "SubCap_IDs", "Evidence_IDs")
 
+#: The technographic register — the research-stage record behind the fourth
+#: deliverable (the Technographic Scan). Vocabulary is the CHARTER's, not the
+#: prototype's: four layers OPS/CUST/DATA/INFRA (never L2-L5), four statuses
+#: with CLAIMED present and required per row.
+TECH_REGISTER_COLUMNS = (
+    "TS_ID", "Product", "Vendor", "Layer", "Status", "Evidence_Level",
+    "Detection_Basis", "Detection_Method", "SubCap_IDs", "Evidence_IDs",
+    "Source_URLs", "As_Of",
+)
+TECH_LAYERS = ("OPS", "CUST", "DATA", "INFRA")
+TECH_STATUS = ("CONFIRMED", "INFERRED", "CLAIMED", "ABSENT")
+#: How a detection was made — the scan must say, per row.
+TECH_METHODS = ("technographic_scan", "public_document", "job_posting",
+                "vendor_announcement", "internal_document", "client_stated")
+
 COVERAGE_COLUMNS = (
     "Category_ID", "Selected", "Researched", "Items", "Floor_Pass",
     "Floor_Pass_Pct", "Synthesised", "Verdict",
@@ -392,7 +407,15 @@ PEER_BENCHMARK_COLUMNS = (
 #: which rung a figure came from; a figure with no basis cannot be disclosed.
 PEER_BASIS = ("table", "recomputed", "inferred", "cannot_estimate")
 
-DQ_BANK_COLUMNS = ("SubCap_ID", "Order", "Facet", "Probe_Tier", "Question")
+#: One row per diagnostic question. `Mode_Fit`, `Internal_Sources` and
+#: `Public_Sources` come from the Pillar Scoring Toolkit's own columns I/J/K
+#: — the toolkit names, per subcap, exactly which internal artefacts and
+#: which public artefacts answer its question, which is the highest-value
+#: routing information the workbook carries: a researcher told WHAT to look
+#: for stops fishing.
+DQ_BANK_COLUMNS = ("SubCap_ID", "Order", "Facet", "Probe_Tier", "Question",
+                   "Mode_Fit", "Internal_Sources", "Public_Sources",
+                   "Weight_Pct")
 
 #: Where the two client-facing reports are WRITTEN, so they can be CURATED.
 #:
@@ -421,6 +444,7 @@ RUN_METADATA_KEYS = (
     "catalogue_version", "catalogue_hash", "taxonomy_pillars",
     "taxonomy_categories", "taxonomy_capabilities", "taxonomy_cells",
     "subcaps_selected", "reference_date", "engine_version", "workbook_contract",
+    "evidence_mode", "kg_checksum",
     "created_at", "last_written_at", "checkpoint",
 )
 
@@ -436,6 +460,7 @@ SHEETS = {
     "P4_Subcap_Scoring": PILLAR_COLUMNS,
     "Evidence_Detail": EVIDENCE_COLUMNS,
     "Entity_Timeline": TIMELINE_COLUMNS,
+    "Tech_Register": TECH_REGISTER_COLUMNS,
     "Coverage": COVERAGE_COLUMNS,
     "Search_Log": SEARCH_LOG_COLUMNS,
     "Gate_Log": GATE_LOG_COLUMNS,
@@ -465,6 +490,39 @@ NO_EVIDENCE = "NO_EVIDENCE"
 TIERS = ("T1", "T2", "T3", "T4", "T5", NO_EVIDENCE)
 CLAIM_LABELS = ("FACT", "INFERENCE", "HYPOTHESIS", "CEILING_ESTIMATE")
 FACETS = ("works", "fails", "value", "contradicts", "corroborates")
+
+#: The AI overlay, measured from the pinned workbook's own DQ_Bank: its
+#: question set is "4255 catalogue + 2553 AI overlay" — 851 x 5 facet probes
+#: and 851 x 3 overlay questions exactly, so EVERY subcap carries all three.
+AI_FACETS = ("ai_deployment", "ai_data", "ai_constraint")
+ALL_FACETS = FACETS + AI_FACETS
+
+#: The DQ that seeds the rest: the Pillar Scoring Toolkit's own Diagnostic
+#: Question for the subcap (column H), regraded to an open form where the
+#: toolkit wrote it closed.
+PRIMARY_FACET = "primary"
+DQ_FACETS = (PRIMARY_FACET,) + ALL_FACETS
+
+#: How a run gathers evidence. PUBLIC = web only; INTERNAL = client-supplied
+#: documents only; HYBRID = both. The mode decides WHICH diagnostic
+#: questions are answerable and which are deferred to discovery — it never
+#: silently drops one.
+ASSESSMENT_MODES = ("PUBLIC", "INTERNAL", "HYBRID")
+
+#: What a DQ's own toolkit row declares about where its answer lives.
+#: Measured from Pillar1_Scoring_Toolkit.xlsx (Source Type column): the
+#: values shipped are "Both" and "Public Only"; "Internal Only" is the third
+#: member the vocabulary admits. Normalised here to a closed enum.
+DQ_MODE_FIT = ("PUBLIC", "INTERNAL", "BOTH")
+
+#: mode -> the mode_fit values whose DQs are ANSWERABLE in that mode.
+#: Everything else is DEFERRED: emitted as an INT-Q (or PUB-Q) discovery
+#: question with the reason, never silently dropped.
+MODE_ANSWERABLE = {
+    "PUBLIC": ("PUBLIC", "BOTH"),
+    "INTERNAL": ("INTERNAL", "BOTH"),
+    "HYBRID": ("PUBLIC", "INTERNAL", "BOTH"),
+}
 
 #: The evidence-recency ladder. Undated evidence is UNVERIFIED, never
 #: current (invariant 9) — so UNVERIFIED is a member here, not an absence.

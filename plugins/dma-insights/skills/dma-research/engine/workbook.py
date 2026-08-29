@@ -82,6 +82,7 @@ class RunWorkbook:
     def create(cls, path, *, run_id: str, entity_name: str, entity_id: str,
                sub_vertical: str | None, scope_mode: str,
                reference_date: str, selected: list[str] | None = None,
+               evidence_mode: str = "PUBLIC",
                overwrite: bool = False) -> "RunWorkbook":
         """Build the workbook once, at the START of the run, with its
         metadata resolved.
@@ -115,7 +116,7 @@ class RunWorkbook:
                              entity_id=entity_id, sub_vertical=sub_vertical,
                              scope_mode=scope_mode,
                              reference_date=reference_date,
-                             selected=selected)
+                             selected=selected, evidence_mode=evidence_mode)
         self._seed_scoring_rows(selected)
         self._write_handoff_lock()
         self.recompute_coverage()
@@ -188,7 +189,14 @@ class RunWorkbook:
     _TOKENISH = ("{{", "}}", "TODO", "TBD")
 
     def _write_metadata(self, *, run_id, entity_name, entity_id, sub_vertical,
-                        scope_mode, reference_date, selected) -> None:
+                        scope_mode, reference_date, selected,
+                        evidence_mode="PUBLIC") -> None:
+        if evidence_mode not in C.ASSESSMENT_MODES:
+            raise WorkbookError(
+                f"evidence_mode {evidence_mode!r} is not one of "
+                f"{C.ASSESSMENT_MODES}. The mode decides which diagnostic "
+                f"questions are answerable, so a run cannot start without "
+                f"declaring one.")
         tax = C.taxonomy()
         vals = {
             "run_id": run_id,
@@ -206,6 +214,11 @@ class RunWorkbook:
             "reference_date": reference_date,
             "engine_version": C.ENGINE_VERSION,
             "workbook_contract": C.WORKBOOK_CONTRACT,
+            "evidence_mode": evidence_mode,
+            # Written by kg.build once the DQ bank is seeded; empty is the
+            # honest value for a run whose KG has not been built, and the
+            # resume path REPORTS it rather than treating it as fine.
+            "kg_checksum": "",
             "created_at": _utcnow(),
             "last_written_at": _utcnow(),
             "checkpoint": "",

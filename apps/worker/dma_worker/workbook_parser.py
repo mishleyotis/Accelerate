@@ -2262,3 +2262,60 @@ def merge_evidence_sources(workbook_rows: list, index_rows: list,
                 "resolution": "the workbook's value is kept; the index's is "
                               "recorded, never averaged and never preferred"}))
     return list(by_id.values())
+
+
+# ── the technographic scan: the package's fourth final output ────────────
+
+def parse_technographic_scan(path: str, obs: list | None = None) -> int:
+    """Read the scan's machine copy and record its shape as observations.
+
+    The scan's DETECTIONS reach the serving tier through the connector's
+    techstack producers; the worker's job here is narrower and honest —
+    record that the scan arrived, what it holds, and which layers it never
+    looked at, so a producer reading get_run_progress can tell 'clean
+    estate' from 'never scanned' (the AUD-0115 distinction) without opening
+    the file. Returns the detection count.
+
+    A .docx (the human copy arriving without its sidecar) is recorded as
+    exactly that — present, unparsed, and the sidecar named as what is
+    missing — never silently skipped."""
+    def observe(kind, detail):
+        if obs is not None:
+            obs.append(Observation(kind, None, detail))
+
+    if str(path).lower().endswith(".docx"):
+        observe("technographic_scan_docx_only", {
+            "file": os.path.basename(path),
+            "expected_sidecar": "technographic_scan.json",
+            "consequence": "the scan's detections are not machine-readable "
+                           "from the document alone; the package shipped the "
+                           "human copy without the sidecar the assembler "
+                           "writes beside it"})
+        return 0
+    try:
+        with open(path, encoding="utf-8-sig") as fh:
+            doc = json.load(fh)
+    except (OSError, ValueError) as e:
+        observe("technographic_scan_unreadable", {
+            "file": os.path.basename(path), "error": str(e)[:200]})
+        return 0
+    detections = doc.get("detections") or []
+    by_status: dict = {}
+    by_layer: dict = {}
+    for d in detections:
+        by_status[str(d.get("status"))] = by_status.get(str(d.get("status")), 0) + 1
+        by_layer[str(d.get("layer"))] = by_layer.get(str(d.get("layer")), 0) + 1
+    never = ((doc.get("counts") or {}).get("layers_never_looked_at")
+             or [l for l in ("OPS", "CUST", "DATA", "INFRA")
+                 if l not in by_layer])
+    observe("technographic_scan_summary", {
+        "run_id": str(doc.get("run_id") or ""),
+        "detections": str(len(detections)),
+        "by_status": {k: str(v) for k, v in sorted(by_status.items())},
+        "by_layer": {k: str(v) for k, v in sorted(by_layer.items())},
+        "layers_never_looked_at": never,
+        "note": ("layers in layers_never_looked_at were NOT SCANNED — that "
+                 "is a gap in the scan, not a clean estate, and nothing may "
+                 "be read as ABSENT there"),
+    })
+    return len(detections)

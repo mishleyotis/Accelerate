@@ -16,12 +16,15 @@ sys.path.insert(0, str(HERE))
 import agent_run  # noqa: E402
 
 
-def test_the_roster_is_the_full_47():
+def test_the_roster_is_the_full_64():
     names = agent_run.roster()
-    assert len(names) == 47
+    assert len(names) == 64, (
+        "47 production/QA agents + the research-conductor + 16 "
+        "category researchers")
     for required in ("finding-challenger", "page-consolidator",
                      "package-vetter", "surface-producer", "qa-overseer",
-                     "overview-whynow-producer"):
+                     "overview-whynow-producer", "research-conductor",
+                     "research-p1c1-producer", "research-p4c4-producer"):
         assert required in names, required
 
 

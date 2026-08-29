@@ -158,23 +158,41 @@ def _card(wb: RunWorkbook, subcap: str, entity: str, md: dict,
     tax = C.taxonomy()
     row = wb.scoring_row(subcap) or {}
     sv = md.get("sub_vertical") or ""
-    dq = [d for d in wb.rows("DQ_Bank")
-          if str(d.get("SubCap_ID") or "") == subcap]
-    if dq:
-        questions = [{"facet": d.get("Facet"), "question":
-                      _bind(str(d.get("Question") or ""), entity, sv)}
-                     for d in sorted(dq, key=lambda d: d.get("Order") or 0)]
+    ev_mode = str(md.get("evidence_mode") or "PUBLIC")
+    # The KG's split: only the questions ANSWERABLE in this run's evidence
+    # mode are asked; the rest ride the card as deferred discovery questions
+    # so the gap is disclosed in the synthesis, never silently unprobed.
+    from . import kg as _kg
+    split = _kg.dqs_for(wb, subcap, ev_mode)
+    if split["ask"] or split["deferred"]:
+        questions = [{"facet": d["facet"],
+                      "question": _bind(str(d["question"] or ""), entity, sv),
+                      "probe_tier": d.get("probe_tier"),
+                      "internal_sources": d.get("internal_sources"),
+                      "public_sources": d.get("public_sources")}
+                     for d in sorted(split["ask"],
+                                     key=lambda d: d.get("order") or 0)]
+        deferred = [{"facet": d["facet"],
+                     "discovery_question":
+                         _bind(str(d["question"] or ""), entity, sv),
+                     "mode_fit": d.get("mode_fit")}
+                    for d in split["deferred"]]
     else:
         questions = [{"facet": f, "question": _bind(_DEFAULT_DQ[f], entity, sv)}
                      for f in C.FACETS]
+        deferred = []
     queries = [{"facet": f, "query": _bind(_DEFAULT_Q[f], entity, sv)}
                for f in C.FACETS]
     card = {
         "id": subcap, "mode": mode, "entity": entity,
+        "evidence_mode": ev_mode,
         "category": subcap.split(".")[0],
         "tier": tax.tier.get(subcap),
         "evidence_on_row": row.get("Evidence_IDs"),
-        "questions": questions, "queries": queries,
+        "questions": questions,
+        "deferred_questions": deferred,
+        "queries": queries,
+        "kg_built": bool(str(md.get("kg_checksum") or "").strip()),
     }
     blob = json.dumps(card)
     leftovers = [t for t in ("{entity}", "{sv}", "{{", "}}") if t in blob]

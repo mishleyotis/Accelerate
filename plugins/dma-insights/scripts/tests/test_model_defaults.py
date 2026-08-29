@@ -10,7 +10,7 @@ Two halves, and they pull in opposite directions, so both are pinned here:
     claude-sonnet-5, the rectification and drift Routines ran claude-opus-5,
     and the watchdog and lane B named no model at all, so the same fleet was
     running three different answers to one question.
-  * The OVERRIDE stays. All 47 agents declare a model in their own front
+  * The OVERRIDE stays. All 64 agents declare a model in their own front
     matter, which is exactly the mechanism the owner is asking to keep: a
     grader that needs to reason harder says so where it is defined, not
     wherever it happens to be dispatched from. A change that forced every
@@ -32,9 +32,9 @@ SETTINGS = ROOT / ".claude" / "settings.json"
 # first run of this file, and the parametrised tests reported "skipped" —
 # the same shape as the defect class this repo tracks as
 # CHECK_NEVER_RAN_READS_AS_UNKNOWN. Assert the denominator at import.
-assert len(AGENTS) > 40, (
+assert len(AGENTS) > 60, (
     f"found {len(AGENTS)} agent files under {PLUGIN / 'agents'} — the roster "
-    f"is 47; a path that resolves to nothing would make every test below "
+    f"is 64; a path that resolves to nothing would make every test below "
     f"vacuous")
 assert SETTINGS.is_file(), f"{SETTINGS} does not exist"
 

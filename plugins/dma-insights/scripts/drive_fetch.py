@@ -440,14 +440,30 @@ def push_bundle(client: str, file_path: str, name: str | None) -> int:
     return 0
 
 
+_MIME_BY_SUFFIX = {
+    ".json": "application/json",
+    ".md": "text/markdown",
+    ".xlsx": ("application/vnd.openxmlformats-officedocument"
+              ".spreadsheetml.sheet"),
+    ".docx": ("application/vnd.openxmlformats-officedocument"
+              ".wordprocessingml.document"),
+    ".csv": "text/csv",
+    ".zip": "application/zip",
+}
+
+
 def _upload_json(tok: str, root_id: str, remote_name: str,
                  body: bytes) -> str:
-    """Create-or-update one JSON file at `remote_name` under `root_id`,
-    building the folder tree the name asks for. Returns "created"/"updated".
+    return _upload_bytes(tok, root_id, remote_name, body, "application/json")
 
-    Shared by push-bundle and push-artifact so the taxonomy's folders are made
-    the same way the resume bundles' are — one uploader, one set of failure
-    modes."""
+
+def _upload_bytes(tok: str, root_id: str, remote_name: str, body: bytes,
+                  ctype: str) -> str:
+    """Create-or-update one file at `remote_name` under `root_id`, building
+    the folder tree the name asks for. Returns "created"/"updated".
+
+    Shared by push-bundle, push-artifact and push-backup so the folders are
+    made the same way everywhere — one uploader, one set of failure modes."""
     parent = root_id
     parts = remote_name.split("/")
     for sub in parts[:-1]:
@@ -458,15 +474,14 @@ def _upload_json(tok: str, root_id: str, remote_name: str,
     if existing:
         url = (f"{UPLOAD}/files/{existing[0]['id']}?uploadType=media"
                f"&supportsAllDrives=true")
-        with _req(tok, url, data=body, method="PATCH",
-                  ctype="application/json") as resp:
+        with _req(tok, url, data=body, method="PATCH", ctype=ctype) as resp:
             json.load(resp)
         return "updated"
     meta = json.dumps({"name": leaf, "parents": [parent]}).encode()
     boundary = "dma-bundle-upload"
     payload = io.BytesIO()
     for part, ct in ((meta, "application/json; charset=UTF-8"),
-                     (body, "application/json")):
+                     (body, ctype)):
         payload.write(f"--{boundary}\r\nContent-Type: {ct}\r\n\r\n".encode())
         payload.write(part + b"\r\n")
     payload.write(f"--{boundary}--".encode())
@@ -737,6 +752,49 @@ def main(argv=None) -> int:
     for opt in ("run", "page", "section", "agent", "kind"):
         p_fa.add_argument(f"--{opt}", default=None)
     p_fa.add_argument("--json", action="store_true", dest="as_json")
+    p_tk = sub.add_parser(
+        "pull-toolkits",
+        help="download the four Pillar*_Scoring_Toolkit.xlsx (newest copy of "
+             "each) into a directory — the DQ source engine/kg.py builds from")
+    p_tk.add_argument("--dest", required=True)
+    p_bk = sub.add_parser(
+        "push-backup",
+        help="push one notebook/workbook file into the client's "
+             "memory-backup folder (the in-flight safety copy "
+             "engine/memory.py maintains)")
+    p_bk.add_argument("--client", required=True)
+    p_bk.add_argument("--file", required=True)
+    p_bk.add_argument("--name", default=None)
+    p_fn = sub.add_parser(
+        "push-final",
+        help="push one finished deliverable to the ROOT of the client's "
+             "DMAI folder — the durable copy that survives cleanup-backup")
+    p_fn.add_argument("--client", required=True)
+    p_fn.add_argument("--file", required=True)
+    p_cb = sub.add_parser(
+        "cleanup-backup",
+        help="delete the client's memory-backup folder — call through "
+             "engine/memory.py cleanup, which verifies consolidation first")
+    p_cb.add_argument("--client", required=True)
+    p_pk = sub.add_parser(
+        "push-package",
+        help="one finished deliverable into the client's INTAKE folder "
+             "('<Client> - DMA' under General DMAs, created if new) — the "
+             "folder the app's package scan reads")
+    p_pk.add_argument("--client", required=True)
+    p_pk.add_argument("--file", required=True)
+    p_pk.add_argument("--name", default=None,
+                      help="remote path under the client folder "
+                           "(default: the file's own name)")
+    p_rv = sub.add_parser(
+        "push-review",
+        help="one review artefact (e.g. the packaged plugin zip) into the "
+             f"'{REVIEW_FOLDER}' folder under General DMAs — for the owner "
+             "to inspect, never a client deliverable and never scanned as "
+             "a package")
+    p_rv.add_argument("--file", required=True)
+    p_rv.add_argument("--name", default=None,
+                      help="remote name (default: the file's own name)")
     a = ap.parse_args(argv)
     if a.cmd == "check":
         return check()
@@ -754,10 +812,190 @@ def main(argv=None) -> int:
         return ensure_insights(a.client, a.folder_id)
     if a.cmd == "push-artifact":
         return push_artifact(a.client, a.file, a.root)
+    if a.cmd == "pull-toolkits":
+        return pull_toolkits(a.dest)
+    if a.cmd == "push-backup":
+        return push_backup(a.client, a.file, a.name)
+    if a.cmd == "push-final":
+        return push_final(a.client, a.file)
+    if a.cmd == "cleanup-backup":
+        return cleanup_backup(a.client)
+    if a.cmd == "push-package":
+        return push_package(a.client, a.file, a.name)
+    if a.cmd == "push-review":
+        return push_review(a.file, a.name)
     if a.cmd == "find-artifact":
         return find_artifact(a.client, a.run, a.page, a.section, a.agent,
                              a.kind, a.as_json)
     return 2
+
+
+BACKUP_FOLDER = "memory-backup"
+REVIEW_FOLDER = "DMA Insights Plugin - Review"
+
+
+def push_review(file_path: str, name: str | None = None) -> int:
+    """One review artefact into '<REVIEW_FOLDER>' under General DMAs.
+
+    Built for the packaged plugin zips the owner reviews. The folder sits
+    beside the client '<Client> - DMA' folders because that is the Drive
+    the owner already looks at, but its name matches no client-folder form,
+    so the app's package scan never mistakes it for an assessment package.
+    Create-or-update by name: re-pushing a new build of the same zip
+    replaces the stale copy rather than accumulating versions."""
+    local = Path(file_path)
+    if not local.is_file():
+        raise SystemExit(f"no such file: {local}")
+    tok = _token()
+    ctype = _MIME_BY_SUFFIX.get(local.suffix.lower(),
+                                "application/octet-stream")
+    remote = f"{REVIEW_FOLDER}/{name or local.name}"
+    verb = _upload_bytes(tok, INTAKE_FOLDER_ID, remote,
+                         local.read_bytes(), ctype)
+    print(f"review artefact {verb}: General DMAs/{remote}")
+    return 0
+
+
+def push_package(client: str, file_path: str, name: str | None) -> int:
+    """One finished deliverable into the client's INTAKE folder —
+    '<Client> - DMA' under 'General DMAs' — creating the folder when the
+    client is new. This is the folder the app's package scan reads, and the
+    defined final structure: the scoring workbook, the research report, the
+    assessment report and the technographic scan sit at its root, with
+    machine extras (01_evidence/evidence_index.json, run_manifest.json)
+    under it at the paths their names dictate.
+
+    Distinct from push-final on purpose: push-final writes to the 'DMAI -
+    <Client>' synthesis-side folder; THIS is intake, where ingestion looks."""
+    local = Path(file_path)
+    if not local.is_file():
+        raise SystemExit(f"no such file: {local}")
+    tok = _token()
+    try:
+        folder = _find_client_folder(tok, client)
+        made = False
+    except SystemExit as e:
+        if "no client folder matching" not in str(e):
+            raise                      # duplicates stay a human's call
+        folder_name = client if client.rstrip().endswith("- DMA") \
+            else f"{client} - DMA"
+        meta = json.dumps({"name": folder_name, "parents": [INTAKE_FOLDER_ID],
+                           "mimeType": FOLDER_MIME}).encode()
+        with _req(tok, f"{API}/files?supportsAllDrives=true", data=meta,
+                  method="POST", ctype="application/json") as resp:
+            folder = json.load(resp)
+        folder["name"] = folder_name
+        made = True
+    ctype = _MIME_BY_SUFFIX.get(local.suffix.lower(),
+                                "application/octet-stream")
+    remote = name or local.name
+    verb = _upload_bytes(tok, folder["id"], remote, local.read_bytes(), ctype)
+    print(f"package {verb}: {folder['name']}/{remote}"
+          + (" (client folder CREATED)" if made else ""))
+    return 0
+
+
+def push_backup(client: str, file_path: str, name: str | None) -> int:
+    """One research-notebook or workbook file into the client's
+    'memory-backup' folder — the IN-FLIGHT safety copy of the .md memory
+    layer, so a dead container does not cost the notebook. This is the
+    folder `cleanup-backup` later removes, once engine/memory.py has
+    verified every entry is consolidated into the workbook."""
+    local = Path(file_path)
+    if not local.is_file():
+        raise SystemExit(f"no such file: {local}")
+    tok = _token()
+    folder, chosen = _insights_root(tok, client)
+    ctype = _MIME_BY_SUFFIX.get(local.suffix.lower(),
+                                "application/octet-stream")
+    remote = f"{BACKUP_FOLDER}/{name or local.name}"
+    verb = _upload_bytes(tok, chosen["id"], remote, local.read_bytes(), ctype)
+    print(f"backup {verb}: {chosen['name']}/{remote} in {folder['name']!r}")
+    return 0
+
+
+def push_final(client: str, file_path: str) -> int:
+    """One finished deliverable at the ROOT of the client's DMAI folder —
+    outside memory-backup, so it survives the backup's cleanup. This is the
+    durable copy engine/memory.py's cleanup requires before it will delete
+    the notebook backup."""
+    local = Path(file_path)
+    if not local.is_file():
+        raise SystemExit(f"no such file: {local}")
+    tok = _token()
+    folder, chosen = _insights_root(tok, client)
+    ctype = _MIME_BY_SUFFIX.get(local.suffix.lower(),
+                                "application/octet-stream")
+    verb = _upload_bytes(tok, chosen["id"], local.name, local.read_bytes(),
+                         ctype)
+    print(f"final {verb}: {chosen['name']}/{local.name} in {folder['name']!r}")
+    return 0
+
+
+def cleanup_backup(client: str) -> int:
+    """Delete the client's 'memory-backup' folder — the Drive copy of the
+    notebooks. NEVER call this directly during a run: engine/memory.py's
+    `cleanup` is the sanctioned caller, and it verifies first that no entry
+    is unconsolidated and that the workbook has a durable copy elsewhere.
+    This command only performs the deletion it is asked for, and says what
+    it deleted."""
+    tok = _token()
+    folder, chosen = _insights_root(tok, client)
+    hits = [f for f in _list_children(tok, chosen["id"])
+            if f["mimeType"] == FOLDER_MIME and f["name"] == BACKUP_FOLDER]
+    if not hits:
+        print(f"cleanup-backup: no {BACKUP_FOLDER!r} folder under "
+              f"{chosen['name']} in {folder['name']!r} — nothing to delete")
+        return 0
+    n = 0
+    for f in hits:
+        url = f"{API}/files/{f['id']}?supportsAllDrives=true"
+        with _req(tok, url, method="DELETE"):
+            pass
+        n += 1
+    print(f"cleanup-backup: deleted {n} {BACKUP_FOLDER!r} folder(s) under "
+          f"{chosen['name']} in {folder['name']!r}")
+    return 0
+
+
+def pull_toolkits(dest: str) -> int:
+    """The four pillar toolkits, newest copy of each, into `dest`.
+
+    The toolkits are the diagnostic-question source: per subcap they carry
+    the question (column H), the INTERNAL artefacts that answer it (I), the
+    PUBLIC artefacts that answer it (J) and the Source Type that decides
+    which assessment modes can ask it. `engine/kg.py build --toolkits`
+    consumes exactly what this writes. Copies exist in many client folders;
+    the NEWEST by modifiedTime wins, and which copy won is printed so a
+    stale pick is visible."""
+    tok = _token()
+    if not tok:
+        print("pull-toolkits: no Drive credential (DMA_ROUTINE_SA_KEY_B64 / "
+              "/root/.dma/sa.json) — NOT_RUN, nothing downloaded")
+        return 1
+    out_dir = Path(dest)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    missing = []
+    for n in (1, 2, 3, 4):
+        name = f"Pillar{n}_Scoring_Toolkit.xlsx"
+        q = urllib.parse.quote(f"name = '{name}' and trashed = false")
+        u = (f"{API}/files?q={q}&pageSize=10&orderBy=modifiedTime%20desc"
+             f"&fields=files(id,name,mimeType,modifiedTime,parents)"
+             f"&supportsAllDrives=true&includeItemsFromAllDrives=true")
+        with _req(tok, u) as resp:
+            hits = json.load(resp).get("files") or []
+        if not hits:
+            missing.append(name)
+            print(f"pull-toolkits: {name}: NO COPY visible to this identity")
+            continue
+        f = hits[0]
+        _download(tok, f, out_dir)
+        print(f"pull-toolkits: {name} <- copy modified {f['modifiedTime']} "
+              f"(file {f['id']})")
+    if missing:
+        print(f"pull-toolkits: {len(missing)} of 4 toolkits missing — "
+              f"kg.build will report the degradation per pillar")
+    return 1 if missing else 0
 
 
 if __name__ == "__main__":

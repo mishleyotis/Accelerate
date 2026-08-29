@@ -61,6 +61,26 @@ refused if they still look like a template placeholder: `run_id` and
   version. The assessment stage compares against it and refuses to score if
   the catalogue moved (AUD-0060).
 
+## Stage 1b · Build the knowledge graph, then route by category
+
+```
+python3 scripts/drive_fetch.py pull-toolkits --dest $ROOT/toolkits
+python3 -m engine.kg build --run $RUN --toolkits $ROOT/toolkits
+python3 -m engine.kg route --run $RUN            # 16 categories, each naming its agent
+```
+
+The four pillar toolkits carry the diagnostic questions and, per subcap,
+where each answer lives (internal sources, public sources, Source Type).
+`kg build` seeds the workbook's `DQ_Bank` — 9 questions per subcap: the
+toolkit primary, five facet probes, three AI-overlay — each with a
+`Mode_Fit`, so the run's declared `--mode` (PUBLIC / INTERNAL / HYBRID)
+decides which are askable; the rest ride as `INT-Q:`/`PUB-Q:` discovery
+questions, never silent gaps. `kg route` is the dispatch table: one
+category → one researcher (`research-p1c1-producer` …
+`research-p4c4-producer`), sixteen in all, orchestrated by
+`research-conductor`; the per-agent loop is
+`skills/dma-research/references/RESEARCH-PROTOCOL.md`.
+
 ## Stage 2 · Work the categories
 
 ```
@@ -211,9 +231,25 @@ The script the pinned workbook mandates, which existed nowhere in any tree
 "nothing that matters downstream", and that is true of seven fields and false
 of three, which the handoff did not carry (AUD-0065).
 
+## Stage 7b · Assemble the client folder, and ship it
+
+```
+python3 -m engine.techscan render --run $RUN
+python3 -m engine.assemble package --run $RUN --push
+python3 -m engine.memory backup --run $RUN && python3 -m engine.memory cleanup --run $RUN --apply
+```
+
+`assemble package` builds `<Entity> - DMA` — the four client deliverables
+plus the machine extras — verifies it against the output contract
+(`engine.assemble verify`: workbook validation, the ≤15%-unURLed
+evidence check in gate-M's shape, folder-name form) and, with `--push`,
+creates-or-finds the folder under the intake Drive and uploads. Memory
+cleanup runs last and **refuses** while any notebook entry is NOTED or
+BLOCKED — the backup must land before the notebooks go.
+
 ## Stage 8 · Ingest
 
-The package now holds three artefacts, and each has a producer **and** a
+The package now holds four artefacts, and each has a producer **and** a
 reader:
 
 | artefact | produced by | read by |
@@ -221,6 +257,7 @@ reader:
 | `DMA_Scoring_Workbook_<client>_<date>.xlsx` | `engine.cli` (throughout) | `workbook_parser.parse_scoring_workbook` / `parse_research_workbook` |
 | `DMA_Assessment_Report_<client>_<date>.docx` | `engine.cli report` | `report_parser.parse_report` |
 | `Client_Profile_Research_<client>_<date>.docx` | `engine.cli report` | `classification.classify` → `client_profile` |
+| `Technographic_Scan_<client>_<date>.docx` (+ `technographic_scan.json`) | `engine.techscan render` | `workbook_parser.parse_technographic_scan` |
 
 On the app side:
 

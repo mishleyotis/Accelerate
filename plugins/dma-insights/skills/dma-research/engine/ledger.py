@@ -158,8 +158,8 @@ def append_search(wb: RunWorkbook, *, subcap: str | None, facet: str | None,
 
     Every search is logged before its results are used, so the budget check
     reads a real number rather than an agent's recollection of one."""
-    if facet is not None and facet not in C.FACETS:
-        raise LedgerRefusal(f"facet {facet!r} is not in {C.FACETS}")
+    if facet is not None and facet not in C.DQ_FACETS:
+        raise LedgerRefusal(f"facet {facet!r} is not in {C.DQ_FACETS}")
     if "{entity}" in (query or "") or "{" in (query or "") and "}" in (query or ""):
         # AUD-0015: orient issued work cards containing 15 literal {entity}
         # placeholders and nothing warned, so an unattended agent fired
