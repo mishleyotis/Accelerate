@@ -204,13 +204,28 @@ def load_toolkits(toolkit_dir, sub_vertical: str | None) -> tuple[dict, list]:
                     return (str(row[j]).strip()
                             if j is not None and len(row) > j and row[j]
                             else None)
-                raw_type = (v(c_type) or "both").strip().lower()
+                raw_type = (v(c_type) or "").strip().lower()
+                internal, public = v(c_int), v(c_pub)
+                if raw_type in _MODE_NORM:
+                    # The toolkit author said so; believe the label.
+                    fit = _MODE_NORM[raw_type]
+                else:
+                    # No (recognised) label. Derive from where the toolkit
+                    # says the answer LIVES: a row whose only evidence
+                    # sources are internal is an INTERNAL question whatever
+                    # a blank cell defaults to — labelling it BOTH would
+                    # make a PUBLIC run "answer" it from sources the mode
+                    # cannot reach, which is the silent-gap shape the
+                    # deferral machinery exists to prevent.
+                    fit = ("INTERNAL" if internal and not public
+                           else "PUBLIC" if public and not internal
+                           else "BOTH")
                 out[sid] = {
                     "name": v(c_name),
                     "question": v(c_q),
-                    "internal_sources": v(c_int),
-                    "public_sources": v(c_pub),
-                    "mode_fit": _MODE_NORM.get(raw_type, "BOTH"),
+                    "internal_sources": internal,
+                    "public_sources": public,
+                    "mode_fit": fit,
                     "weight_pct": v(c_w),
                     "sheet": f"{fname}/{sheet}",
                 }

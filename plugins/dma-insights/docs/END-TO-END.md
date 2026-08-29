@@ -41,12 +41,19 @@ cd plugins/dma-insights/skills/dma-research
 python3 -m engine.cli start \
     --run   DMA-2026-ACME-001 \
     --entity "Acme Credit Union" --entity-id acme-cu \
-    --sv CU --scope FULL \
+    --sv CU --scope FULL --mode PUBLIC \
+    --sv-basis  "NCUA-chartered federal credit union; single retail LOB" \
+    --mode-basis "engagement letter grants public-only review" \
     --reference-date 2026-08-29
 ```
 
-Creates the run tree and the workbook, **with its metadata already
-resolved**. Two values are the anchors a resumed run reads and both are
+`--sv-basis` and `--mode-basis` are required and refused when they read as
+filler: the sub-vertical selects 165 variant cells and the mode decides
+every question's askability, so both choices carry their WHY into
+`Run_Metadata` (an entity with several plausible sub-verticals is the
+engagement owner's question — the conductor stops and asks rather than
+binding on a guess). Creates the run tree and the workbook, **with its
+metadata already resolved**. Two values are the anchors a resumed run reads and both are
 refused if they still look like a template placeholder: `run_id` and
 `catalogue_hash`. The audit found both shipping as `{{RUN_ID}}` and
 `{{CHECKSUM}}` (AUD-0010).
@@ -274,6 +281,15 @@ On the app side:
 * `get_run_progress` reports what the intake could not read, so a producer
   can tell an unrecognised column from an entity with nothing to say
   (AUD-0030).
+
+## Stress-testing the pipeline
+
+`scripts/stress_research_pipeline.py --toolkits <dir> --workdir <dir>`
+drives every stage above through the same CLI the agents use, against the
+REAL pillar toolkits, and passes only when each stage does the right thing
+— which for the bad-note consolidation, the self-challenge, the unfinished
+floors gate, the L2 layer key, the blocked cleanup and the incomplete
+package is a refusal with a named reason. 20/20 measured 2026-08-29.
 
 ## Stage 9 · Nothing is watching, so the run says when it has stopped
 

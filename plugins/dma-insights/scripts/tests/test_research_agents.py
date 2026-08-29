@@ -103,6 +103,32 @@ def test_researchers_cannot_write_score_or_promote(cat):
     assert f"--category {cat}" in body, "the binding is the manifest's job"
 
 
+def test_research_subagents_get_the_research_brief_not_the_production_one():
+    """The SubagentStart hook briefs every dispatched child. A category
+    researcher told 'produce only the surface you were dispatched for'
+    has been handed a rule from the wrong pipeline — after a compaction
+    that half-applicable sentence is all it has. The hook routes research
+    children to their own brief."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "session_brief", HERE / "hooks" / "session_brief.py")
+    sb = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(sb)
+    research = sb.brief({"hook_event_name": "SubagentStart",
+                         "agent_type": "dma-insights:research-p1c1-producer"})
+    assert "five volleys" in research and "orient" in research
+    assert "surface-producer" not in research, (
+        "the production submit boundary is meaningless to a researcher and "
+        "reads as an instruction anyway")
+    producer = sb.brief({"hook_event_name": "SubagentStart",
+                         "agent_type": "dma-insights:overview-hero-producer"})
+    assert "SUBAGENT" in producer and "surface" in producer
+    top = sb.brief({"source": "startup"})
+    assert "research-conductor" in top, (
+        "the top-session brief must carry the entry fork, or a research "
+        "ask gets answered by re-scanning the intake Drive")
+
+
 def test_the_conductor_is_the_only_research_agent_allowed_to_assemble():
     """The conductor dispatches, gates, renders and assembles; the sixteen
     only research. If a category manifest ever mentions assemble/push the

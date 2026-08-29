@@ -4,6 +4,23 @@ The pipeline exists so that the smallest true unit of work runs, not the
 whole run. A one-card repair that re-produces six pages is the slow response
 the hierarchy was built to remove.
 
+## First: which pipeline is this request even for?
+
+Three request shapes arrive at this system, and mistaking one for another
+costs a whole wrong run — a research ask that gets answered by re-scanning
+the intake Drive produces nothing, and an ingestion ask that spawns a
+research run researches a client who already shipped.
+
+| the request hands you | it is | route to |
+|---|---|---|
+| an entity + sub-vertical + evidence mode, and NO finished package | a research engagement — the package must be PRODUCED | `research-conductor` (the research tier below) |
+| a finished `<Client> - DMA` folder, or "load/publish/make live this client" | package intake | `package-vetter` first, then production; the scheduled package scan is how the app itself notices the folder |
+| a verdict, ticket, reviewer note or surface/page id | a repair | the surface and page tables below |
+
+When a request could read as two of these, the decider is what EXISTS: no
+client folder in the intake Drive → research; folder present and vetted →
+production; run already promoted → repair. Check, don't infer.
+
 ## The pipeline, in order
 
 ```

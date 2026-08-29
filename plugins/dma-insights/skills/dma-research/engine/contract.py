@@ -444,7 +444,7 @@ RUN_METADATA_KEYS = (
     "catalogue_version", "catalogue_hash", "taxonomy_pillars",
     "taxonomy_categories", "taxonomy_capabilities", "taxonomy_cells",
     "subcaps_selected", "reference_date", "engine_version", "workbook_contract",
-    "evidence_mode", "kg_checksum",
+    "evidence_mode", "sv_basis", "mode_basis", "lob_census", "kg_checksum",
     "created_at", "last_written_at", "checkpoint",
 )
 

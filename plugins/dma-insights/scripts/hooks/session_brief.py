@@ -37,11 +37,33 @@ import sys
 ROUTING = "skills/dma-surface-production/05-lifecycle/routing.md"
 
 CORE = (
-    "dma-insights: route before you produce. One surface -> that page's "
-    "per-surface producer, then finding-challenger, then page-consolidator; "
-    "only the surface-producer submits or promotes. Read get_memory_digest "
-    "before authoring anything, and end every production with the qa-overseer "
-    f"so the findings memory learns. Routing table: {ROUTING}"
+    "dma-insights: route before you produce. Entry fork first — an entity + "
+    "evidence mode with NO package yet is a RESEARCH engagement "
+    "(research-conductor produces the package; it is not Drive ingestion); "
+    "a finished '<Client> - DMA' folder goes to package-vetter, then "
+    "production; a repair naming a surface or page routes by the table. In "
+    "production: one surface -> that page's per-surface producer, then "
+    "finding-challenger, then page-consolidator; only the surface-producer "
+    "submits or promotes. Read get_memory_digest before authoring anything, "
+    "and end every production with the qa-overseer so the findings memory "
+    f"learns. Routing table: {ROUTING}"
+)
+
+#: The research children work a different substrate (the scoring workbook,
+#: not the connector), so the production brief is wrong for them — telling a
+#: category researcher "produce only the surface you were dispatched for"
+#: is exactly the kind of half-applicable rule a compacted child obeys into
+#: a mess. They get their own.
+RESEARCH_BRIEF = (
+    "dma-insights research tier: the workbook is the substrate — what you do "
+    "not write there did not happen. First command (and after ANY "
+    "interruption or compaction): engine.cli orient --run <R> --root <ROOT> "
+    "--category <YOURS>; obey its do_first literally, then engine.memory "
+    "status for notes your context no longer holds. Protocol: "
+    "skills/dma-research/references/RESEARCH-PROTOCOL.md — the five volleys "
+    "in order (works, fails, value, contradicts, corroborates; every one "
+    "answered or NOT_RUN with reason), the memory notebook, the refusals. "
+    "Work only your own category; never score, never submit, never promote."
 )
 
 #: What each start source needs ON TOP of the core rule. `resume`, `compact`
@@ -71,7 +93,10 @@ SUBAGENT = (
 
 def brief(event: dict) -> str:
     hook = str(event.get("hook_event_name") or event.get("hookEventName") or "")
-    if hook == "SubagentStart" or event.get("agent_type") or event.get("agentType"):
+    agent = str(event.get("agent_type") or event.get("agentType") or "")
+    if hook == "SubagentStart" or agent:
+        if "research-" in agent:
+            return RESEARCH_BRIEF
         return CORE + SUBAGENT
     source = str(event.get("source") or "startup")
     return CORE + BY_SOURCE.get(source, BY_SOURCE["resume"])

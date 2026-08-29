@@ -18,15 +18,33 @@ workbook is the substrate: anything not written there did not happen.
 
 ## The run, in order
 
+0. **Bind before you start — and never bind on a guess.** The sub-vertical
+   choice selects 165 variant cells and withdraws their superseded bases;
+   the mode decides every question's askability. Preflight the entity
+   first: its charter/regulator (NCUA → CU, OCC/Fed/FDIC → RB, FCA → FC …)
+   and a census of its lines of business. If MORE THAN ONE sub-vertical
+   plausibly fits (a bank holding company with a broker-dealer, a CU with
+   a CUSO lending arm), STOP: in an interactive session put the candidates
+   to the user with the evidence for each (AskUserQuestion where you have
+   it); in a headless firing, report the candidates and their evidence as
+   the firing's outcome and do not start the run. A run bound to the wrong
+   sub-vertical researches the wrong 851 cells to completion. The same for
+   mode: it is the client's engagement terms, never inferred from how much
+   internal material happens to be reachable.
+
 1. **Start (or resume).** New engagement:
    `engine.cli start --run <RUN_ID> --root <ROOT> --entity "<Entity>"
    --entity-id <slug> --sv <CU|RB|CL|FC|CIB|RIA|AM|IC|IB> --scope FULL
-   --mode PUBLIC|INTERNAL|HYBRID --reference-date <YYYY-MM-DD>`.
-   The mode is the client's engagement terms, not your guess — it decides
-   which diagnostic questions are askable. Resuming:
-   `engine.cli resume --run <RUN_ID> --root <ROOT>` recovers entity,
-   position, mode, catalogue drift and whether the KG was built; act on
-   what it reports.
+   --mode PUBLIC|INTERNAL|HYBRID --reference-date <YYYY-MM-DD>
+   --sv-basis "<the charter/regulator/LOB evidence>"
+   --mode-basis "<the engagement terms>"
+   [--lob-census "<LOBs found; candidates considered/rejected>"]`.
+   The two basis flags are REQUIRED and refused when they read as filler —
+   they are step 0's record, written into Run_Metadata where every later
+   stage (and the assessment skill) can read why the run is shaped as it
+   is. Resuming: `engine.cli resume --run <RUN_ID> --root <ROOT>` recovers
+   entity, position, mode, `binding_stated`, catalogue drift and whether
+   the KG was built; act on what it reports.
 
 2. **Build the knowledge graph.** Pull the DQ source, then build:
    `scripts/drive_fetch.py pull-toolkits --dest <ROOT>/toolkits`, then
@@ -77,6 +95,25 @@ workbook is the substrate: anything not written there did not happen.
    working. Then `engine.cli strip --run <RUN_ID>` if the engagement ships
    a stripped workbook (the strip refuses until the handoff carries the
    three analysis fields).
+
+9. **Say it shipped.** Your final report names the client folder, the four
+   deliverables, every gate verdict, the deferred-question total and
+   anything UNTESTED. You carry no Slack tools — so when a deal-desk
+   notification is wanted, END with a `notifications` block (channel
+   intent + one-line ship notice + folder link) for the TOP session to
+   post through its own Slack connector, the same emit-don't-fabricate
+   rule the routing table sets for connector-bound searches. If the top
+   session has no Slack connector, the notice stays in the report — never
+   pretend it was posted.
+
+## After a compaction or interruption
+
+`engine.cli resume` then `engine.cli status --root <ROOT>` re-derive the
+whole run's position from the workbook — which categories are closed,
+gated, stalled or at budget. Re-read this manifest and the routing table;
+trust the two commands over anything you remember, and re-dispatch only
+the categories `status` says are open (a researcher whose gate PASSED is
+done, whatever your summary retained).
 
 ## What you never do
 

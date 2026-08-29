@@ -83,12 +83,47 @@ def locate(run_id: str, root: Path | None = None) -> Run:
     return Run(run_id=run_id, root=base, workbook_path=wb)
 
 
+#: Tokens that mark a "rationale" written to satisfy the flag rather than to
+#: record a decision. Case-insensitive; matched on whole words where it
+#: matters ("n/a") and substrings where it cannot false-positive.
+_BASIS_BANNED = ("tbd", "todo", "placeholder", "lorem", "xxx", "n/a")
+_BASIS_MIN = 20
+
+
+def vet_basis(flag: str, text: str) -> str:
+    """A binding rationale is a recorded decision, or it is refused.
+
+    The sub-vertical choice selects 165 variant cells and withdraws their
+    superseded bases; the evidence mode decides every DQ's askability. Both
+    are the cheapest mistakes in the pipeline to make and the most expensive
+    to discover — a run bound RB when the entity's dominant line of business
+    is a credit union researches the wrong 851 cells to completion. So the
+    CLI requires the reason, and this refuses a reason-shaped token."""
+    t = " ".join((text or "").split())
+    low = t.lower()
+    if len(t) < _BASIS_MIN or any(b in low for b in _BASIS_BANNED):
+        raise ValueError(
+            f"{flag} = {text!r} is not a binding rationale. Name the evidence "
+            f"the choice rests on — the charter/regulator/LOB census for the "
+            f"sub-vertical, the engagement terms for the mode (>= {_BASIS_MIN} "
+            f"chars, no filler tokens). An entity with several plausible "
+            f"sub-verticals is a question for the engagement owner, not a "
+            f"guess: stop and ask rather than binding.")
+    return t
+
+
 def start(*, run_id: str, entity_name: str, entity_id: str,
           sub_vertical: str | None, scope_mode: str, reference_date: str,
           root: Path | None = None, overwrite: bool = False,
           selected: list[str] | None = None,
-          evidence_mode: str = "PUBLIC") -> Run:
+          evidence_mode: str = "PUBLIC",
+          sv_basis: str | None = None, mode_basis: str | None = None,
+          lob_census: str | None = None) -> Run:
     """Create the run tree and its workbook, metadata already resolved."""
+    if sv_basis is not None:
+        sv_basis = vet_basis("--sv-basis", sv_basis)
+    if mode_basis is not None:
+        mode_basis = vet_basis("--mode-basis", mode_basis)
     base = Path(root) if root else RUN_ROOT / run_id
     for d in SUBDIRS:
         (base / d).mkdir(parents=True, exist_ok=True)
@@ -99,12 +134,15 @@ def start(*, run_id: str, entity_name: str, entity_id: str,
                        entity_id=entity_id, sub_vertical=sub_vertical,
                        scope_mode=scope_mode, reference_date=reference_date,
                        overwrite=overwrite, selected=selected,
-                       evidence_mode=evidence_mode)
+                       evidence_mode=evidence_mode, sv_basis=sv_basis,
+                       mode_basis=mode_basis, lob_census=lob_census)
     run = Run(run_id=run_id, root=base, workbook_path=path)
     (base / "00_entity_profile" / "context.json").write_text(json.dumps({
         "entity": entity_name, "entity_id": entity_id,
         "sub_vertical": sub_vertical, "scope_mode": scope_mode,
         "reference_date": reference_date, "run_id": run_id,
+        "sv_basis": sv_basis, "mode_basis": mode_basis,
+        "lob_census": lob_census,
     }, indent=2))
     return run
 
@@ -130,6 +168,8 @@ def resume(run_id: str, root: Path | None = None) -> tuple[Run, dict]:
         "evidence_mode": md.get("evidence_mode"),
         "kg_built": bool(str(md.get("kg_checksum") or "").strip()),
         "sub_vertical": md.get("sub_vertical"),
+        "binding_stated": not str(md.get("sv_basis") or "").startswith(
+            "UNSTATED"),
         "scope_mode": md.get("scope_mode"),
         "checkpoint": md.get("checkpoint") or None,
         "subcaps_selected": md.get("subcaps_selected"),

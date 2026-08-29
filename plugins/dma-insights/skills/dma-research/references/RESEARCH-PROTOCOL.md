@@ -74,6 +74,63 @@ query seeds. Work it in this order:
    discipline) records the challenge verdict, all seven dimensions by name.
    `record_challenge` refuses a self-challenge — do not try.
 
+## The five volleys — the order that keeps you honest
+
+Every subcap's card carries nine questions: the toolkit `primary`, five
+facet probes, three AI-overlay. The five probes are five VOLLEYS at the
+same claim, and their order is load-bearing — each exists to break the
+anchor the previous one set:
+
+| volley | facet | what it must do |
+|---|---|---|
+| 1 | `works` | steelman: the best honest case that the capability exists and functions |
+| 2 | `fails` | falsify volley 1 with fresh queries — outages, complaints, abandonment, workarounds. NEVER a negated copy of the works query; shape it around failure artefacts (status pages, review sites, regulator complaints) |
+| 3 | `value` | quantify: what the capability measurably does for the client — a number, a date, a named outcome, or honestly nothing |
+| 4 | `contradicts` | hunt the disconfirming source for whatever volleys 1–3 currently support. Runs BEFORE corroborates so confirmation cannot close ranks first |
+| 5 | `corroborates` | only now: the independent second source for what survived volley 4 |
+
+Rules the gates enforce and you must not soften:
+
+- **Every volley fires or is `NOT_RUN: <reason>`** — the synthesise path
+  refuses a facet that is neither (AUD-0017). Rich evidence on `works` is
+  not a reason to skip `fails`; it is the reason `fails` matters.
+- **Fuse within a volley, never across volleys.** RRF consensus is only
+  meaningful between probes asking the SAME question; blending `contradicts`
+  hits into a `corroborates` list launders disagreement into agreement.
+- **A contradiction is a finding, not friction.** Note it
+  (`--kind contradiction`) with both sides; consolidation records an OPEN
+  disposition the synthesis must argue, not bury.
+- **The `contradicts` gate reads the search log**, so an unlogged volley 4
+  reads as a volley that never happened — because it didn't.
+- The three AI-overlay questions (`ai_deployment`, `ai_data`,
+  `ai_constraint`) ride after the volleys and follow the same
+  answered-or-NOT_RUN rule.
+
+## Internal artefacts (HYBRID / INTERNAL runs)
+
+Your card's `internal_sources` name the client documents that answer the
+DQ. In HYBRID/INTERNAL mode those live in the client's Drive folder — use
+your Drive READ tools (`search_files` scoped to the client folder,
+`read_file_content` / `download_file_content`) to fetch the NAMED artefact,
+then register what it says with `--origin internal` and a verbatim excerpt.
+You never write to Drive; the conductor owns backup and shipping.
+
+## After a compaction, a resume, or any interruption
+
+Your context can be summarised away mid-category; the workbook and your
+notebook cannot. On the first turn after any interruption, in order:
+
+1. `engine.cli orient --run R --root ROOT --category <YOURS>` — the card
+   server re-derives your position from the workbook: volleyed subcaps are
+   re-served before anything new, and `do_first` is the recovery plan.
+2. `engine.memory status --run R --root ROOT` — what you NOTED but never
+   consolidated is still there; consolidate before you research anything
+   new, because a note that predates the compaction is evidence your
+   context no longer holds.
+3. Never re-derive from recall what these two commands state from disk. A
+   remembered position that disagrees with `orient` is wrong — the workbook
+   is the substrate, and your memory of writing it is not.
+
 ## Evidence discipline (the short form; the gates enforce the long one)
 
 - An excerpt is a VERBATIM 50–500 character span of the source, or it is

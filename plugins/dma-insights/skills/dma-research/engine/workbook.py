@@ -83,6 +83,8 @@ class RunWorkbook:
                sub_vertical: str | None, scope_mode: str,
                reference_date: str, selected: list[str] | None = None,
                evidence_mode: str = "PUBLIC",
+               sv_basis: str | None = None, mode_basis: str | None = None,
+               lob_census: str | None = None,
                overwrite: bool = False) -> "RunWorkbook":
         """Build the workbook once, at the START of the run, with its
         metadata resolved.
@@ -116,7 +118,9 @@ class RunWorkbook:
                              entity_id=entity_id, sub_vertical=sub_vertical,
                              scope_mode=scope_mode,
                              reference_date=reference_date,
-                             selected=selected, evidence_mode=evidence_mode)
+                             selected=selected, evidence_mode=evidence_mode,
+                             sv_basis=sv_basis, mode_basis=mode_basis,
+                             lob_census=lob_census)
         self._seed_scoring_rows(selected)
         self._write_handoff_lock()
         self.recompute_coverage()
@@ -188,9 +192,17 @@ class RunWorkbook:
 
     _TOKENISH = ("{{", "}}", "TODO", "TBD")
 
+    #: The honest value for a binding rationale nobody recorded. It says so
+    #: in words rather than posing as a rationale, so a reader (and the
+    #: resume report) can tell "bound with a reason" from "bound bare
+    #: through the API".
+    _UNSTATED_BASIS = ("UNSTATED — bound through the Python API without a "
+                       "recorded rationale (engine.cli start records one)")
+
     def _write_metadata(self, *, run_id, entity_name, entity_id, sub_vertical,
                         scope_mode, reference_date, selected,
-                        evidence_mode="PUBLIC") -> None:
+                        evidence_mode="PUBLIC", sv_basis=None,
+                        mode_basis=None, lob_census=None) -> None:
         if evidence_mode not in C.ASSESSMENT_MODES:
             raise WorkbookError(
                 f"evidence_mode {evidence_mode!r} is not one of "
@@ -215,6 +227,16 @@ class RunWorkbook:
             "engine_version": C.ENGINE_VERSION,
             "workbook_contract": C.WORKBOOK_CONTRACT,
             "evidence_mode": evidence_mode,
+            # The binding provenance. Which sub-vertical the entity was bound
+            # to and which evidence mode the engagement runs under are the
+            # two choices that decide WHAT gets researched (165 variant cells
+            # ride on the first; every DQ's askability on the second) — so
+            # each records WHY, verbatim from the caller. "UNSTATED" is the
+            # honest value for an API-created run; the CLI path requires a
+            # real rationale and runstate refuses a placeholder one.
+            "sv_basis": sv_basis or self._UNSTATED_BASIS,
+            "mode_basis": mode_basis or self._UNSTATED_BASIS,
+            "lob_census": lob_census or "",
             # Written by kg.build once the DQ bank is seeded; empty is the
             # honest value for a run whose KG has not been built, and the
             # resume path REPORTS it rather than treating it as fine.

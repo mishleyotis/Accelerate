@@ -98,6 +98,19 @@ def main(argv=None) -> int:
                    choices=contract.ASSESSMENT_MODES,
                    help="evidence mode — decides which diagnostic questions "
                         "are answerable and which are deferred to discovery")
+    s.add_argument("--sv-basis", required=True,
+                   help="WHY this sub-vertical: the charter type, regulator "
+                        "or LOB census the binding rests on. Refused when it "
+                        "reads as filler; an entity with several plausible "
+                        "sub-verticals is a question for the engagement "
+                        "owner, never a guess")
+    s.add_argument("--mode-basis", required=True,
+                   help="WHY this evidence mode: the engagement terms that "
+                        "granted (or withheld) internal access")
+    s.add_argument("--lob-census", default=None,
+                   help="optional: the lines of business found during "
+                        "preflight and the sub-vertical candidates "
+                        "considered/rejected — the disambiguation record")
 
     o = common(sub.add_parser("orient")); o.add_argument("--category")
     q = common(sub.add_parser("search"))
@@ -115,6 +128,12 @@ def main(argv=None) -> int:
 
     y = common(sub.add_parser("synthesise"))
     y.add_argument("--subcap", required=True); y.add_argument("--json", required=True)
+    y.add_argument("--actor", required=True,
+                   help="the agent name writing this synthesis — recorded to "
+                        "Provenance so record_challenge can refuse a "
+                        "self-challenge. Required on the CLI because an "
+                        "unattributed synthesis makes challenge independence "
+                        "unverifiable (AUD-0018/AUD-0024)")
 
     g = common(sub.add_parser("gate"))
     g.add_argument("--category", required=True)
@@ -143,10 +162,15 @@ def main(argv=None) -> int:
         run = runstate.start(run_id=a.run, entity_name=a.entity,
                              entity_id=a.entity_id, sub_vertical=a.sv,
                              scope_mode=a.scope, reference_date=a.reference_date,
-                             root=root, evidence_mode=a.mode)
+                             root=root, evidence_mode=a.mode,
+                             sv_basis=a.sv_basis, mode_basis=a.mode_basis,
+                             lob_census=a.lob_census)
         print(json.dumps({"run": run.run_id, "workbook": str(run.workbook_path),
                           "selected": len(run.open().selected_subcaps()),
-                          "evidence_mode": a.mode},
+                          "evidence_mode": a.mode,
+                          "binding": {"sv": a.sv, "sv_basis": a.sv_basis,
+                                      "mode_basis": a.mode_basis,
+                                      "lob_census": a.lob_census}},
                          indent=2))
         return 0
 
@@ -174,7 +198,8 @@ def main(argv=None) -> int:
         print(json.dumps({"e_id": eid}, indent=2)); return 0
     if a.cmd == "synthesise":
         rec = json.loads(Path(a.json).read_text())
-        print(json.dumps(ledger.append_synthesis(wb, a.subcap, rec), indent=2))
+        print(json.dumps(ledger.append_synthesis(wb, a.subcap, rec,
+                                                 actor=a.actor), indent=2))
         return 0
     if a.cmd == "gate":
         out = floors_gate.run(wb, a.category,
