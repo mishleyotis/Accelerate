@@ -35,6 +35,8 @@ function load(live) {
   // runs correctly. Loading what the page loads is what this harness
   // claims to do, and utils.js only needs React in scope to do it.
   global.React = require(path.join(VENDOR, "react.production.min.js"));
+  // bands.js FIRST, as app/route.js SCRIPTS loads it: data.js throws without window.DMA_BANDS rather than fall back to a second colour mapping (invariant 7, AUD-0048).
+  require(path.join(JS, "bands.js"));
   require(path.join(JS, "data.js"));
   require(path.join(JS, "live-adapter.js"));
   require(path.join(JS, "utils.js"));

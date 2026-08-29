@@ -58,7 +58,8 @@ function load(liveEntity, live = true) {
   };
   global.document = { addEventListener() {}, removeEventListener() {},
                       querySelectorAll: () => [], createElement: () => ({ style: {} }) };
-  for (const f of ["data.js", "live-adapter.js", "utils.js",
+  // bands.js FIRST, as app/route.js SCRIPTS loads it: data.js throws without window.DMA_BANDS rather than fall back to a second colour mapping (invariant 7, AUD-0048).
+  for (const f of ["bands.js", "data.js", "live-adapter.js", "utils.js",
                    "pages-d3-heatmap.js", "pages-d5-d6-tech-runs.js"]) {
     require(path.join(JS, f));
   }

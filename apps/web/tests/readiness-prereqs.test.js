@@ -33,7 +33,8 @@ function load() {
   // The real load order from app/route.js, up to the module under test.
   // Anything later is not needed to reach two pure helpers, and loading it
   // would only add ways for this test to fail for reasons of its own.
-  for (const m of ["data.js", "live-adapter.js", "utils.js",
+  // bands.js FIRST, as app/route.js SCRIPTS loads it: data.js throws without window.DMA_BANDS rather than fall back to a second colour mapping (invariant 7, AUD-0048).
+  for (const m of ["bands.js", "data.js", "live-adapter.js", "utils.js",
                    "cards-data-driven.js", "drawers.js", "pages-d3-d4.js"]) {
     require(path.join(JS, m));
   }

@@ -38,6 +38,8 @@ const RUN_ID = "DMA-ASM-TCU-20260801-0001";
 function loadAdapter() {
   for (const k of Object.keys(require.cache)) delete require.cache[k];
   global.window = {};
+  // bands.js FIRST, as app/route.js SCRIPTS loads it: data.js throws without window.DMA_BANDS rather than fall back to a second colour mapping (invariant 7, AUD-0048).
+  require(path.join(JS_DIR, "bands.js"));
   require(path.join(JS_DIR, "data.js"));
   require(path.join(JS_DIR, "live-adapter.js"));
   return global.window;
