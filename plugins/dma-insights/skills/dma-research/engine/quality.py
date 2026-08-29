@@ -367,7 +367,10 @@ def ungrounded_numbers(record: dict, excerpts: list[str]) -> list[str]:
     missing = []
     for field in NUMERIC_CLAIM_FIELDS:
         v = str(record.get(field) or "").strip()
-        if not v or v.upper().startswith("NOT_RUN"):
+        # NOT_RUN and NO_FINDING are outcome reports about the volley, not
+        # claims about a source — "hunted 2023-2026, nothing came back" has
+        # no excerpt to ground against and needs none.
+        if not v or v.upper().startswith(("NOT_RUN", "NO_FINDING")):
             continue
         for fig in sorted(_figures(v)):
             if fig not in ground and fig not in missing:

@@ -334,6 +334,27 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     bad = Q.claim_label_supported(merged)
     if bad:
         problems.append(bad)
+    # The band is the ceiling reasoning's CONCLUSION, and it must be stated
+    # in the four-band vocabulary for any positively-evidenced claim: a
+    # calibration run (2026-08-29) shipped six syntheses whose
+    # Ceiling_Reasoning argued a ceiling at length while Ceiling_Band stayed
+    # empty, so nothing downstream could read what the reasoning concluded.
+    # HYPOTHESIS — a documented absence — may leave it empty on purpose:
+    # null means no score, never a default that looks like data
+    # (invariant 9).
+    label = str(record.get("Claim_Label") or row.get("Claim_Label")
+                or "").strip().upper()
+    band = str(record.get("Ceiling_Band") or "").strip()
+    if label in ("FACT", "INFERENCE", "CEILING_ESTIMATE") \
+            and band not in C.BANDS:
+        problems.append(
+            f"Ceiling_Band {band!r}: a {label} synthesis states its ceiling "
+            f"as one of {C.BANDS} — the reasoning's conclusion, readable, "
+            f"in vocabulary. Only HYPOTHESIS (a documented absence) may "
+            f"leave it empty.")
+    elif band and band not in C.BANDS:
+        problems.append(f"Ceiling_Band {band!r} is not in {C.BANDS} — "
+                        f"a fifth band must not exist (invariant 6)")
     # The hallucination pinpointer: every figure the synthesis asserts must
     # appear in an excerpt registered to this subcap. The excerpts are
     # verbatim spans of fused, cited sources — a number none of them carries

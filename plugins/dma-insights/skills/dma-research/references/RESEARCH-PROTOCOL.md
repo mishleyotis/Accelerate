@@ -98,6 +98,22 @@ Rules the gates enforce and you must not soften:
 - **Every volley fires or is `NOT_RUN: <reason>`** — the synthesise path
   refuses a facet that is neither (AUD-0017). Rich evidence on `works` is
   not a reason to skip `fails`; it is the reason `fails` matters.
+- **`NOT_RUN` means the volley never fired — nothing else.** A volley that
+  RAN and surfaced nothing relevant writes
+  `NO_FINDING after <n> logged searches: <what was hunted and what came
+  back instead>`. The 2026-08-29 calibration wrote NOT_RUN over volleys
+  whose searches sat right there in the log, which makes "we looked and
+  found nothing" indistinguishable from "nobody looked" — the exact
+  distinction AUD-0017 exists to keep.
+- **A FACT needs two source identities.** The floors gate refuses a
+  FACT-labelled synthesis whose evidence resolves to a single URL host or
+  source name (`single_source_fact`) — two pages of one annual report are
+  one source. Corroboration can come from evidence you already hold; it
+  cannot come from the same document twice.
+- **State the band.** `Ceiling_Band` is the ceiling reasoning's conclusion
+  and the synthesise path refuses a FACT / INFERENCE / CEILING_ESTIMATE
+  record without one of the four band words. Only HYPOTHESIS (a documented
+  absence) leaves it empty — null means no score, never a default.
 - **Fuse within a volley, never across volleys.** RRF consensus is only
   meaningful between probes asking the SAME question; blending `contradicts`
   hits into a `corroborates` list launders disagreement into agreement.
@@ -176,6 +192,18 @@ STOP). Do not read whole state files into your context — `cat` on the
 evidence index, the ledger or the engagement set is denied by hook, and the
 bounded reads it suggests answer the same questions. One `orient` call is
 cheaper than any re-derivation.
+
+**Turns are the cost driver, not searches.** Your context is re-read on
+every turn, so cost grows with TURN COUNT far faster than with work done —
+the 2026-08-29 calibration measured ~31 turns per subcap and 24.5M
+cached-input tokens for six subcaps, with turn overhead (one engine call
+per Bash invocation) the dominant share. Work each card in **at most four
+Bash invocations**: (1) chain ALL of the card's `engine.cli search` logging
+in one call (`cmd && cmd && …`); (2) chain the card's `engine.memory note`
+calls in one; (3) `engine.memory consolidate` once per card or batch it per
+2–3 cards; (4) write the synthesis JSON and `engine.cli synthesise` in one.
+Web searches and fetches cannot batch — spend your turns there, where they
+buy evidence, not on one-liner bookkeeping.
 
 ## Refusals you must respect rather than route around
 

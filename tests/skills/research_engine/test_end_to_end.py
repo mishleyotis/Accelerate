@@ -62,9 +62,18 @@ def finished_run(tmp_path_factory):
             query=f'"Acme Credit Union" enforcement OR lawsuit OR criticism '
                   f'OR abandoned OR delayed {i}',
             tool="web_search", hits=0, kept=0, outcome="no hits")
+        # Two source identities per subcap: single_source_fact (a blocking
+        # gate term since the 2026-08-29 calibration) refuses a FACT whose
+        # whole base is one host, and the synthesis below claims two
+        # independent sources agree.
         eids = [L.append_evidence(
-            wb, source_name=f"Acme 2025 annual report p{j}",
-            source_url=f"https://acme.example/ar25#{cell}-{j}", tier="T2",
+            wb,
+            source_name=("NCUA Call Report 2025 — digital channel volumes"
+                         if j == 2 else f"Acme 2025 annual report p{j}"),
+            source_url=(f"https://ncua.example/callreport/2025#{cell}"
+                        if j == 2 else
+                        f"https://acme.example/ar25#{cell}-{j}"),
+            tier="T2",
             excerpt=("Alkami digital banking went live in Q3 2024 and reached "
                      f"47 percent member adoption within ninety days, "
                      f"restated at {50 + j} percent in the 2025 report."),
