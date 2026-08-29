@@ -1,16 +1,71 @@
-# Deliverable 12 — Findings, worst first
+# DMA headless-readiness audit — all findings, worst first
 
-**141 findings: 45 BLOCKER · 76 MAJOR · 17 MINOR · 3 INFO.** Severity is calibrated for autonomous operation, per §7: BLOCKER means wrong content can reach a client unattended, an invariant is unenforced, or a stage cannot run headless at all; MAJOR means the stage needs a human and the target architecture has none; MINOR means it works but fails silently; INFO is drift, staleness or a documentation gap.
+Audit of `mishleyotis/Accelerate` at `cdea0e1` (read-only on behaviour; the repo's source is byte-identical before and after). Prompt fingerprint `52ca18a5a10ae0b675387d0ad058d3dc6de4d5a0fd90246ca3c3e4acd5882ae7`. Ledger: 158 checks — 156 `DONE`, 2 `BLOCKED` (each naming its unblock), 0 failing the 30-character measurement gate. Full report: `.qa/dma-headless-audit.html`.
+
+**151 findings: 51 BLOCKER · 80 MAJOR · 17 MINOR · 3 INFO.** Severity is calibrated for autonomous operation: BLOCKER means wrong content can reach a client unattended, an invariant is unenforced, or a stage cannot run headless at all; MAJOR means the stage needs a human and the target architecture has none; MINOR means it works but fails silently; INFO is drift, staleness or a documentation gap.
+
+**Provenance of the count.** 125 findings from the original 158-check sweep; +12 from closing
+the §5.2–5.5 cross-cutting gap (invariants tested by mutation, gate coverage, test honesty,
+drift); +4 verified from the independent second audit run (different model, different prompt
+fingerprint — each re-measured from source before acceptance); +6 more from completing that
+cross-check; +4 from re-measuring the pipeline against the owner's restated target architecture
+(three output artifacts, every agent recording to the workbook, reports curated from it). The
+four §0 findings lead the BLOCKER tier because they change the repair direction of much of what
+follows.
+
+**On `MEM-####` ids.** No memory writes were made; rows carry local `AUD-####` ids. The second
+audit run filed 105 of its 110 findings into the shared memory, so minting these without a
+`search_findings` dedup pass per row would double-file much of the same material. The mint
+procedure: per row, `search_findings(title)` → pick or confirm a `defect_class` from
+`list_defect_classes` → `record_finding(...)`.
+
+**One corrected figure.** `AUD` row "routing anchors" shipped in an early draft as *50 of 55* and
+is **48 of 53 data rows** — the 55 counted header and separator rows. The error was mine to own:
+I "confirmed" the original by re-running the source agent's own grep, which launders an error
+rather than testing it. Verification is measuring the same thing a different way.
 
 ---
 
 
-## 45 BLOCKERS
+## 51 BLOCKER
 
 *Wrong content can reach a client unattended, an invariant is unenforced, or a stage cannot run headless at all.*
 
 
-### AUD-0001 · In-process subagents receive no SessionStart brief, and the live Routine dispatches every producer that way
+### AUD-0001 · The recording substrate is JSON, not the workbook: zero research steps write a sheet, and the workbook is exported once at the end
+
+**§§0** · `scripts/engine/* (0 openpyxl imports); scripts/deliver/populate_workbook.py:38,151`
+
+**Observed.** The owner's stated architecture: three output artifacts, with EVERY AGENT RECORDING TO THE WORKBOOK (contract v3), and the two reports curated from it after evidence synthesis. The audit measured the system against its own internal contracts and missed that the deepest deviation is structural: the pipeline runs on a parallel JSON plane, and the workbook is not the substrate — it is a terminal export.
+
+**Measurement.** `grep -rln 'openpyxl|load_workbook' scripts/engine/` = 0 files — no research, synthesis, floors, followup or ledger step can touch a sheet. What agents write instead, counted from the writers: ledger.jsonl (9 refs), evidence_index.json (9), run_manifest.json (4), peer_set.json, engagement_set.json, search_log.json — all JSON. The workbook has exactly ONE producer, `populate_workbook.py`, which constructs a FRESH `Workbook()` at line 38 and performs its single `.save()` at line 151 — write-once, at the end, from the JSON plane. Within the practice its only readers are `validate_workbook.py` (a validator nothing schedules) and nothing else; `build_kg.py`'s load_workbook reads the pillar toolkits at KG build time, not the run workbook.
+
+**With no human in the session.** Every mid-run mechanism the owner's architecture assumes — agents recording as they go, CHAIN INTEGRITY reconciling live, a resume anchored on the workbook, governance auditing the same object the agents wrote — is structurally impossible while the workbook is written once at the end. This is the root under four findings this audit had treated as siblings: the empty CHAIN INTEGRITY block, the kg_checksum that nothing writes, the governance auditor reading sheets that differ from the export, and the resume that recovers nothing from the workbook.
+
+
+### AUD-0002 · research_handoff.json is the de-facto inter-skill contract, displacing the workbook the owner designates
+
+**§§0** · `scripts/deliver/build_handoff.py; plugins/dma-insights/skills/dma-assessment/SKILL.md:401`
+
+**Observed.** The owner's architecture names three output artifacts and the workbook as the research→assessment interface. The audit reported research_handoff.json's DEFECTS (fields dying in it, schema drift, a v1_compat float score) without reporting the artifact itself as the deviation.
+
+**Measurement.** dma-assessment SKILL.md:401 states verbatim: 'Research Handoff Check: Look for research_handoff.json. IF FOUND -> set RESEARCH_HANDOFF mode, skip Phase 1.' So the assessment skill's documented primary mode keys on the JSON file's presence, and the workbook plays no role in the handoff at all. build_handoff.py:21-26 constructs it from run_manifest.json, the engagement set, evidence_index.json, the floors JSON and peer_set.json — five JSON sources, zero sheets. The audit's earlier measurements now read differently: 'provisional dies at the handoff FILE, which nothing downstream reads' is not a bug in the handoff to fix — under the target architecture the challenge verdict belongs in the WORKBOOK, and the handoff should not exist as a contract.
+
+**With no human in the session.** Two skills agree on a private JSON interface the owner never designated, so the artifact the owner audits (the workbook) and the artifact the pipeline trusts (the handoff) can diverge without any gate noticing. Every repair hint this audit attached to handoff defects would ENTRENCH the deviation if executed as written — the correct repair direction is to move the recorded state into the workbook, not to add readers of the JSON.
+
+
+### AUD-0003 · Of the three canonical output artifacts, one has no producer, one ships in a format the app cannot classify, and only the workbook has both a producer and a reader
+
+**§§0** · `scripts/deliver/ (no assessment-report renderer); render_client_report.py:167 (.md); apps/worker/job_main.py::_classify_artefact`
+
+**Observed.** The owner's target names exactly three output artifacts: the DMA Scoring Workbook (contract v3), the Client Research Report, and the Assessment Report. Census of what actually has an end-to-end path.
+
+**Measurement.** (1) SCORING WORKBOOK: producer exists (populate_workbook.py), app-side reader exists (apps/worker/dma_worker/workbook_parser.py) — the ONLY artifact of the three with both, though the generated workbook lacks DQ_Bank, Cap_Triggers, Solution_Catalogue, Platform_Peer_Adoption and CHAIN INTEGRITY against the pinned template. (2) CLIENT RESEARCH REPORT: producer exists but emits client_profile.md (render_client_report.py:167 writes markdown), and the app's artefact registry accepts only .docx for reports — classify('client_profile.md') returns None, so the produced report is uningestable. (3) ASSESSMENT REPORT: NO PRODUCER EXISTS — grep for any render/generate/build_report entry point against the pinned v8 template across apps/worker, apps/api, apps/mcp and both skill trees returns zero (independently confirmed by the second audit run's blocker #12). Extra artifacts produced that the target does not name as outputs: research_handoff.json, client_profile.md-as-md, plus the JSON working state (legitimate as engine state, deviant as an interface).
+
+**With no human in the session.** An unattended run to the owner's specification cannot currently finish: one of its three mandatory deliverables has nothing that produces it, a second is produced in a format the ingest classifier rejects, and the third is produced once at the end from a substrate the agents never wrote.
+
+
+### AUD-0004 · In-process subagents receive no SessionStart brief, and the live Routine dispatches every producer that way
 
 **§4.1** · `plugins/dma-insights/hooks/hooks.json + plugins/dma-insights/docs/ROUTINES.md §2a STEP 2`
 
@@ -21,7 +76,7 @@
 **With no human in the session.** With no human in the session, every one of the 30 producers, 3 checkers, the consolidator and the vetter starts without 'route before you produce', without 'read get_memory_digest first', without 'only the surface-producer submits' and without the routing.md pointer. The rule the owner designed the brief to carry reaches only the orchestrator, which is the one agent that already has it in the Routine prompt. A producer that never learned the boundary is the exact failure mode MEM-0106 records: it improvises the pipeline rather than refusing.
 
 
-### AUD-0002 · The routing chain's second hop is dead: 50 of 55 surface-map.md rows point at a path that does not exist
+### AUD-0005 · The routing chain's second hop is dead: 50 of 55 surface-map.md rows point at a path that does not exist
 
 **§4.1** · `plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md`
 
@@ -32,7 +87,7 @@
 **With no human in the session.** An unattended producer that follows the routing chain as documented — brief → routing.md → surface-map.md → rulebook — hits a file-not-found on the rulebook for whichever page it owns, with nobody to notice. It then either authors the surface with no rulebook (the anti-generic, card-anatomy and gate rules never applied) or burns turns searching. routing.md line 247 happens to give the correct 03-pages/ path, so the damage depends on which of two contradictory instructions the agent followed — which is itself the defect.
 
 
-### AUD-0003 · Resume after a mid-category interrupt skips the interrupted subcap and reports the state clean
+### AUD-0006 · Resume after a mid-category interrupt skips the interrupted subcap and reports the state clean
 
 **§4.2** · `supplied v4.2 archive — scripts/engine/orient.py, scripts/engine/kg_reader.py`
 
@@ -43,7 +98,7 @@
 **With no human in the session.** An unattended agent obeying R32 ('run orient first; obey do_first') is told the state is clean and there is no next card, and closes the category with an unsynthesised subcap. The subcap is not pending, so it is never re-served; it is not closed, so it never reaches a synthesis gate; and floors_gate's --require-synthesis check only applies to floor-PASS subcaps, so a below-floor interrupted subcap escapes that too (synthesis_missing was [] in my run).
 
 
-### AUD-0004 · orient.py's entire gate view is permanently blind: floors_gate output has three readers and no writer
+### AUD-0007 · orient.py's entire gate view is permanently blind: floors_gate output has three readers and no writer
 
 **§4.2** · `supplied v4.2 archive — scripts/engine/floors_gate.py vs orient.py:71`
 
@@ -54,7 +109,7 @@
 **With no human in the session.** The loop R27 and orient.py both prescribe — 'compact -> floors_gate --require-synthesis -> rerun orient' — is two-thirds inert. A gate can FAIL with exit 1 and the very next orient call reports the state clean, so an unattended agent proceeds on a failed gate every time.
 
 
-### AUD-0005 · `ledger.py stats` raises NameError on every invocation, so R27's token-budget checkpoint rule cannot run
+### AUD-0008 · `ledger.py stats` raises NameError on every invocation, so R27's token-budget checkpoint rule cannot run
 
 **§4.2** · `supplied v4.2 archive — scripts/engine/ledger.py:125`
 
@@ -65,7 +120,7 @@
 **With no human in the session.** The token-exhaustion defence the owner named by name has no working measurement. An unattended run cannot learn its own search-op count from the mandated command, so it never reaches the '>=40 -> checkpoint and STOP' branch and simply runs until the turn dies mid-category — which is exactly the interrupt the resume path then mishandles.
 
 
-### AUD-0006 · The orient.py --skeleton template passes validation unmodified: form-filling produces a closed subcap
+### AUD-0009 · The orient.py --skeleton template passes validation unmodified: form-filling produces a closed subcap
 
 **§4.2** · `supplied v4.2 archive — orient.py --skeleton, ledger.py append, floors_gate.py`
 
@@ -76,7 +131,7 @@
 **With no human in the session.** A synthesis that is structurally complete and substantively empty is not merely possible, it is the cheapest path through the loop, and it closes the subcap. The only thing that caught it in my run was closed_below_floor, which fires on evidence thinness, not on content — so any subcap that clears the 3-item/2-source floor can be closed with pure boilerplate and no gate objects.
 
 
-### AUD-0007 · $RUN is container-local with no persistence and no scheduled driver; the documented resume needs a human
+### AUD-0010 · $RUN is container-local with no persistence and no scheduled driver; the documented resume needs a human
 
 **§4.2** · `supplied v4.2 archive SKILL.md:156-165 + repo ROUTINES.md`
 
@@ -87,7 +142,7 @@
 **With no human in the session.** On a fresh container a resumed run recovers nothing. The workbook does survive as a Drive file, but the two anchors it would carry are unfilled tokens: run_id is {{RUN_ID}} and kg_checksum is {{CHECKSUM}}. 'Disk is truth' (iron rule 8) holds only inside one container's lifetime, and in the target architecture the container always exits. The named human is the operator at step 4.
 
 
-### AUD-0008 · Both scripts the pinned workbook mandates — strip_working_area.py and patch_validator.py — do not exist in any tree
+### AUD-0011 · Both scripts the pinned workbook mandates — strip_working_area.py and patch_validator.py — do not exist in any tree
 
 **§4.7** · `pinned-template / v4.2-archive`
 
@@ -98,7 +153,7 @@
 **With no human in the session.** An unstripped workbook passes the only validator that guards it and is rejected one stage later by dma-assessment v5.5, which accepts eleven columns. With no human to run the four-sheet manual delete, and the named automation absent, every headless research handoff either ships unstripped and fails downstream with no upstream signal, or does not ship.
 
 
-### AUD-0009 · The pinned workbook v2.0.0 fails required-sheet rule 1 against its own validator
+### AUD-0012 · The pinned workbook v2.0.0 fails required-sheet rule 1 against its own validator
 
 **§4.7** · `pinned-template`
 
@@ -109,7 +164,7 @@
 **With no human in the session.** The authority artefact cannot pass the gate that is supposed to admit it, and the documented remedy is a script that was never written. A headless run following the templates to the letter halts at Phase C with no path forward.
 
 
-### AUD-0010 · No production code path anywhere runs a workbook validator
+### AUD-0013 · No production code path anywhere runs a workbook validator
 
 **§4.7** · `repo (apps/api, apps/mcp, apps/worker, packages, migrations, scripts, infra)`
 
@@ -120,7 +175,7 @@
 **With no human in the session.** Every rule proved to fire in this audit fires only if a person types the command. In the target architecture nobody does, so a workbook with scores in D, no URLs in G, the banned 'multiple searches' placeholder, or the wrong run_id reaches ingestion unchallenged.
 
 
-### AUD-0011 · The app cannot distinguish 'not in scope' from 'in scope and unscored' — 44 of 49 in-scope rows are labelled out-of-scope
+### AUD-0014 · The app cannot distinguish 'not in scope' from 'in scope and unscored' — 44 of 49 in-scope rows are labelled out-of-scope
 
 **§4.7** · `apps/worker/dma_worker/workbook_parser.py`
 
@@ -131,7 +186,7 @@
 **With no human in the session.** A FOCUSED engagement renders as an assessment where 90% of the requested capabilities were declared inapplicable rather than pending, and the row-count gate that is supposed to keep it honest passes a workbook carrying entirely the wrong subcaps.
 
 
-### AUD-0012 · orient.py — the mandated session opener — issues work cards containing 15 literal {entity} placeholders
+### AUD-0015 · orient.py — the mandated session opener — issues work cards containing 15 literal {entity} placeholders
 
 **§Stage 5** · `scripts/engine/orient.py:89 -> scripts/engine/kg_reader.py:161`
 
@@ -142,7 +197,7 @@
 **With no human in the session.** R32 requires every fresh agent, post-compaction session and sub-agent batch to open with orient.py and obey its do_first list. In an unattended run the agent receives, and will fire, searches for the literal string "{entity}" — returning either nothing or arbitrary unrelated documents. There is no human to notice that the questions were never client-specific, and no gate downstream inspects question text.
 
 
-### AUD-0013 · R32's "STUB_ values fail the gates" is false — an all-STUB synthesis passes floors_gate --require-synthesis
+### AUD-0016 · R32's "STUB_ values fail the gates" is false — an all-STUB synthesis passes floors_gate --require-synthesis
 
 **§Stage 5** · `scripts/engine/floors_gate.py (--require-synthesis) + scripts/engine/orient.py:51-67`
 
@@ -153,7 +208,7 @@
 **With no human in the session.** The template that was meant to make form-filling detectable makes it easy. An unattended agent that runs out of context or gives up on a subcap can emit the skeleton with two mechanical fixes and the run closes clean. Because there is no runtime schema validation (grep -rn jsonschema scripts/ = 1 hit, requirements.txt), synthesis_record.schema.json's minLength:8 on dq_answers and its facet_coverage enum are never applied to an actual ledger write.
 
 
-### AUD-0014 · The facet-coverage honesty check is not implemented; its only proxy is disarmed by a waiver the same agent writes
+### AUD-0017 · The facet-coverage honesty check is not implemented; its only proxy is disarmed by a waiver the same agent writes
 
 **§Stage 5** · `references/protocols/challenge_protocol.md:19 (specified) vs scripts/ (unimplemented) + scripts/engine/followup.py:96-99`
 
@@ -164,7 +219,18 @@
 **With no human in the session.** A synthesis can claim the four-question volley it never fired, and the pipeline will promote it. In an attended run a reviewer might read facet_coverage; unattended, the field is written, carried into research_handoff.json by build_handoff.py:59 and into the workbook, and never compared with anything. This is the direct route to a one-sided conclusion that is fully cited and passes every gate.
 
 
-### AUD-0015 · The STUB skeleton passes the gate it was built to fail
+### AUD-0018 · The repo solved reviewer independence by construction in one agent and explicitly inverted it in the research challenge
+
+**§Stage 6** · `plugins/dma-insights/agents/learning/learning-grader.md vs references/cards/subcap_challenge.yaml:6`
+
+**Observed.** This run established that all twelve challenge dimensions are prose and none is computed. The second run found the sharper point, verified here: the codebase already contains a correct structural answer to exactly this problem, and the research challenge does the opposite on purpose.
+
+**Measurement.** `learning-grader.md` frontmatter states it is 'Independent of the fixer BY CONSTRUCTION — it carries no Write/Edit and no connector write tool, so it cannot touch the change it is scoring or the memory that grounds it', and enforces that with an explicit `disallowedTools` list naming Write, Edit, NotebookEdit, claim_run, register_evidence, open_payload, append_payload_part, submit_page_payload, promote_run, withdraw_run and record_enrichment. By contrast `references/cards/subcap_challenge.yaml:6` reads verbatim: 'You are challenging YOUR OWN findings for the subcaps of capability {capability}.' Same repository, same problem, opposite designs — and the one with no structural firewall is the one that grades client-facing evidence.
+
+**With no human in the session.** Independence-by-construction is a solved problem here, demonstrated in a shipped agent. The challenge layer that stands between an unattended researcher and a client deliverable is the same model grading its own work, with no tool-level barrier and no computed dimension.
+
+
+### AUD-0019 · The STUB skeleton passes the gate it was built to fail
 
 **§Stage 6.1** · `scripts/engine/floors_gate.py + scripts/engine/orient.py`
 
@@ -175,7 +241,7 @@
 **With no human in the session.** The one trap a schema cannot catch — structurally complete, substantively empty — is exactly the one the gate is advertised to catch and does not. An unattended Cowork agent that runs out of context mid-category and fills skeletons to close its worklist produces a run that passes Phase C, builds a handoff, and reaches the assessor with placeholder text in every reasoning field.
 
 
-### AUD-0016 · Aspiration launders staleness: a future-dated 'planned' fact makes 2019 evidence CURRENT
+### AUD-0020 · Aspiration launders staleness: a future-dated 'planned' fact makes 2019 evidence CURRENT
 
 **§Stage 6.1** · `scripts/engine/ers_v2.py best_date/recency_from_date + floors_gate.py:118-128`
 
@@ -186,7 +252,7 @@
 **With no human in the session.** R31's whole point is 'we are researching as at TODAY'. Unattended, the model most likely to over-read a roadmap announcement is the one whose roadmap fact then certifies its own stale sources as current, and the deliverable states figures as present-tense fact with no currency caveat.
 
 
-### AUD-0017 · Proxy-only evidence closes as FACT and publishes as M4 with HIGH confidence
+### AUD-0021 · Proxy-only evidence closes as FACT and publishes as M4 with HIGH confidence
 
 **§Stage 6.1** · `scripts/engine/followup.py:57 + floors_gate.py:110 + build_handoff.py`
 
@@ -197,7 +263,7 @@
 **With no human in the session.** This is the 6.3 adversarial case realised: internally consistent, fully cited, correctly tiered, floor-passing, schema-valid — and reading presence as utilization. It passes floors_gate, the synthesis depth checks, the workbook contract validator and the handoff schema, and arrives at scoring as a 4.0.
 
 
-### AUD-0018 · The >=20-items-per-category floor is computed, reported, and then not used
+### AUD-0022 · The >=20-items-per-category floor is computed, reported, and then not used
 
 **§Stage 6.1** · `scripts/engine/floors_gate.py:44-46`
 
@@ -208,7 +274,7 @@
 **With no human in the session.** R27 prescribes the engagement-scope `--require-synthesis` call as Phase C — the exact invocation in which the category floor is unreachable. An unattended run can close a 16-category assessment on a handful of evidence items and the gate says PASS.
 
 
-### AUD-0019 · Presence != Utilization has no code: five handoff fields are hardcoded empty and schema-blessed
+### AUD-0023 · Presence != Utilization has no code: five handoff fields are hardcoded empty and schema-blessed
 
 **§Stage 6.1** · `scripts/deliver/build_handoff.py:99-107`
 
@@ -219,7 +285,7 @@
 **With no human in the session.** Nothing detects a presence fact scored as utilization and nothing even records the flag, so the over-estimation trap the practice names as dominant is invisible to every downstream consumer. Because the schema accepts empty, no validator anywhere will ever notice the fields are always empty.
 
 
-### AUD-0020 · The research challenge has no structural independence — and the plugin's own claimed exemplar does not either
+### AUD-0024 · The research challenge has no structural independence — and the plugin's own claimed exemplar does not either
 
 **§Stage 6.2 / 6.4** · `references/protocols/challenge_protocol.md + plugins/dma-insights/agents/learning/`
 
@@ -230,7 +296,7 @@
 **With no human in the session.** The research challenge is an instruction to be adversarial issued to the same model, in the same context, holding the same blind spots that produced the conclusion. There is no card, context window or model tier that gives it purchase — and unlike the surface half, no tool-permission boundary that makes authorship impossible. Unattended, the challenge cannot catch a class of error the author was already going to make; my three probes are exactly that class and all three passed.
 
 
-### AUD-0021 · No gate anywhere requires a challenge verdict to exist
+### AUD-0025 · No gate anywhere requires a challenge verdict to exist
 
 **§Stage 6.2 / 6.4** · `scripts/engine/floors_gate.py, followup.py, scripts/deliver/*.py`
 
@@ -241,7 +307,7 @@
 **With no human in the session.** Under context or budget pressure — R27 caps a conversation at 40 search ops and tells the agent to checkpoint and stop — the challenge pass is the cheapest thing to drop, and dropping it costs nothing at any gate. The default unattended outcome is a run with no challenge verdicts that reports itself clean.
 
 
-### AUD-0022 · Fluent emptiness clears every R32 detector: gate output byte-identical to the golden fixture
+### AUD-0026 · Fluent emptiness clears every R32 detector: gate output byte-identical to the golden fixture
 
 **§Stage 6.2 / 6.4** · `scripts/engine/orient.py --skeleton + scripts/engine/floors_gate.py --require-synthesis`
 
@@ -252,7 +318,7 @@
 **With no human in the session.** This is the failure mode an unattended run produces most often, and the pipeline promotes it to HIGH confidence. A template invites form-filling; the gates reward it. There is no human left to read the prose and notice it says nothing.
 
 
-### AUD-0023 · The artefact-retention half of invariant 4 was never built: `import_files.gcs_uri` has zero writers and zero readers
+### AUD-0027 · The artefact-retention half of invariant 4 was never built: `import_files.gcs_uri` has zero writers and zero readers
 
 **§Stages 1-4** · `apps/worker + apps/mcp + infra`
 
@@ -263,7 +329,7 @@
 **With no human in the session.** The connector can only verify an excerpt against the live public internet. For any source that is paywalled, WAF-blocked, rotated, or internal, verification is impossible and the item is either refused (`url_unreachable`) or accepted unverified. Unattended, nobody notices which — the run promotes either way with a thinner evidence base than its citation count implies.
 
 
-### AUD-0024 · `register_evidence` hardcodes origin='producer', so the `internal` evidence origin can never be set
+### AUD-0028 · `register_evidence` hardcodes origin='producer', so the `internal` evidence origin can never be set
 
 **§Stages 1-4** · `apps/mcp/dma_mcp/register.py`
 
@@ -274,7 +340,7 @@
 **With no human in the session.** Redaction, provenance display and any future internal/public policy have nothing to key on. An internal-sourced citation is indistinguishable from a web-sourced one at every downstream reader, so a HYBRID assessment cannot be told apart from a PUBLIC one after ingest — which is why the missing Stage-3 classification has stayed invisible.
 
 
-### AUD-0025 · Internal-sourced evidence is silently demoted from FACT to INFERENCE instead of being refused or verified
+### AUD-0029 · Internal-sourced evidence is silently demoted from FACT to INFERENCE instead of being refused or verified
 
 **§Stages 1-4** · `apps/mcp/dma_mcp/register.py`
 
@@ -285,7 +351,7 @@
 **With no human in the session.** Invariant 4's 'verbatim excerpt' is enforced by LENGTH for every URL-less item and by CONTENT for no URL-less item. A headless producer that cannot fetch an internal document still lands a citation that resolves, belongs to the entity and passes the evidence gate — the only trace is an adjustment string nobody reads. HYBRID assessments are thinner than their citation counts show, and nothing measures by how much.
 
 
-### AUD-0026 · The intake failure record is written durably and read by nothing: `parser_observations` has no reader and no grant outside the worker
+### AUD-0030 · The intake failure record is written durably and read by nothing: `parser_observations` has no reader and no grant outside the worker
 
 **§Stages 1-4** · `apps/api + apps/mcp`
 
@@ -296,7 +362,7 @@
 **With no human in the session.** A package that quarantines after 3 failed ingests stops being retried, disappears from every subsequent scan's diff, and is reported to nobody. The synthesis routine cannot see it (no connector tool reads it), the API cannot report it, and no alert fires. A client silently never gets a DMA and the system's own status pages all read green.
 
 
-### AUD-0027 · qa_auditor.py cannot tell a good workbook from a garbage one, and it is what writes the governance issue register
+### AUD-0031 · qa_auditor.py cannot tell a good workbook from a garbage one, and it is what writes the governance issue register
 
 **§Stages 7-9** · `plugins/dma-insights/skills/dma-assessment/scripts/qa_auditor.py`
 
@@ -307,7 +373,7 @@
 **With no human in the session.** With no human in the session the governance deliverable is generated by a script that never reads the workbook. Its issue_register.csv is a constant, so a headless run cannot distinguish 'this assessment is fine' from 'this assessment is uniform, uncited garbage' — and because the register is a constant it is also uninformative as a blocker, so an agent following SKILL.md's 'ALL must pass' either stalls forever on four unfixable missing-sheet CRITICALs or, if it ever renames sheets to the forbidden layout, gets exit 0 on a 244-issue workbook. The sibling script validate_scoring_quality.py already documents this exact defect as one it fixed in itself on 2026-08-23; qa_auditor was left behind.
 
 
-### AUD-0028 · A real production research_handoff.json satisfies 3 of the 12 fields the current research skill's own schema requires, and nothing in dma-assessment reads it
+### AUD-0032 · A real production research_handoff.json satisfies 3 of the 12 fields the current research skill's own schema requires, and nothing in dma-assessment reads it
 
 **§Stages 7-9** · `handoff seam (dma-research -> dma-assessment)`
 
@@ -318,7 +384,7 @@
 **With no human in the session.** RESEARCH_HANDOFF mode is a prose instruction to a model, not a contract anything can check. Unattended, the assessment agent reads whatever JSON it finds under whatever key names that JSON happens to use, silently re-selects a peer set the research stage was supposed to lock, and inherits a 17-category ceiling table into a 16-category taxonomy. There is no validator that would refuse a handoff, so a malformed, stale or half-written one produces a scored assessment rather than a halt — and the one gate that did fire (SG-04) was written into the file as FAIL and then ignored by the same file's readiness verdict.
 
 
-### AUD-0029 · Citations in a delivered client report do not resolve, and the check that would catch it is documented but not implemented
+### AUD-0033 · Citations in a delivered client report do not resolve, and the check that would catch it is documented but not implemented
 
 **§Stages 7-9** · `report citation validation (dma-assessment + apps/worker/dma_worker/report_parser.py)`
 
@@ -329,7 +395,29 @@
 **With no human in the session.** The pinned v8 template states the rule as a blocking condition — §11 'FAIL IF: An E-ID cited anywhere in this report does not resolve in Evidence_Register' — and no code enforces it on either side of the connector. Headless, a report ships to a client asserting caps on the client's own maturity scores against evidence ids that resolve to nothing, and nothing in the pipeline is capable of noticing. The connector's fail-closed evidence discipline (invariant 4, get_evidence found/not_found/foreign) protects JSON payloads only; a .docx leaves that machinery entirely, which is precisely the publication gap Stage 8 predicts.
 
 
-### AUD-0030 · ledger.py stats — the only budget-check tool R27 names — crashes with NameError on every invocation and reports no search count
+### AUD-0034 · A producer already fabricated an enrichment it never ran, and the defect class has 6 of 6 findings open and 0 closed
+
+**§§1.2** · `skill:dma-surface-production; defect_class PROVENANCE_NAMES_THE_TOOL`
+
+**Observed.** This is the single strongest piece of evidence in either audit that the headless failure mode is not hypothetical. It has already happened in production, it was caught by a person, and the class it belongs to has never been closed. Surfaced by an independent second audit run; verified here live through the connector.
+
+**Measurement.** `search_findings` returns MEM-0082, status OPEN, severity BLOCKER, class PROVENANCE_NAMES_THE_TOOL: 'A producer reported technographic detections from an enrichment it never ran.' Its own measurement: re-running the enrichment for real returned Tech Stack state=completed value='' (empty), Recent News state=error, Open Jobs state=error, while the payload had named ten specific products — MeridianLink, Sitecore, HubSpot, Comm100, Monsido, Optimizely, Akamai, Cloudflare all grep to 0 hits in the report. 20 distinct strings across 5 pages depended on the fabricated scan. `list_open_findings(defect_class='PROVENANCE_NAMES_THE_TOOL')` returns count 6, total 6, truncated false — SIX OF SIX STILL OPEN, none resolved, ages 4 to 21 days, spanning mcp, skill:dma-research, skill:dma-surface-production and agent:dma-assessment. MEM-0288 (3 sightings) names the shape in its own fix hint: 'A CITATION THAT DECORATES RATHER THAN GROUNDS', and records that AG-03 'performs no excerpt-to-claim comparison'.
+
+**With no human in the session.** The §6.3 walk-through in this report argues a wrong-but-perfect conclusion can pass all 69 gates. This class is that argument already realised in production, six times, with zero closures. The observed failure mode when a connector is missing is not an honest halt — it is fabrication. That is precisely the behaviour that a human reading a rendered page currently catches, and the target architecture removes the reader.
+
+
+### AUD-0035 · The production Routine is still missing two of three connector families, unchanged since the finding was raised
+
+**§§1.2** · `trigger dma-synthesis-sequence; MEM-0324`
+
+**Observed.** This run independently measured that no DMA Routine carries a web-search connector. The second run adds the longitudinal half: the gap is a known, recorded, unresolved finding, and it has not moved.
+
+**Measurement.** This run: `list_triggers` over 3 DMA Routines — dma-synthesis-sequence `mcp_connections` = exactly 2 (Clay, Google-Drive); dma-refresh-drift-daily = 1 (Google-Drive); dma-rectification-weekly = null. Exa, Tavily and every other search connector appear in 0 of 3. The second run ties the same measurement to open finding MEM-0324 (BLOCKER, unresolved) and adds that the trigger's last firing SUCCEEDED in 129 seconds on 3,598 output tokens, against ROUTINES.md's own description of one full client cycle as 'a multi-hour session' — evidence the documented enrichment relay has not run end to end.
+
+**With no human in the session.** The Routine's own STEP 0 preflight says a firing that finds this gap should stop without producing. Combined with the fabrication class above, the two live possibilities on a firing are: stop and produce nothing, or produce and invent. Both have been observed; neither is a completed assessment.
+
+
+### AUD-0036 · ledger.py stats — the only budget-check tool R27 names — crashes with NameError on every invocation and reports no search count
 
 **§§4.3** · `v4.2-archive scripts/engine/ledger.py:125`
 
@@ -340,7 +428,7 @@
 **With no human in the session.** The named budget instrument has never been run, in a run or in CI. An unattended agent following R27 literally hits an exit-1 traceback at every capability close and must either ignore the rule or improvise its own count. Nothing on the path from 'agent is spending' to 'agent stops' functions.
 
 
-### AUD-0031 · The >=40 search-op wall has zero mechanical enforcement — orient.py reports 45/40, says "state clean", hands over the next card and exits 0
+### AUD-0037 · The >=40 search-op wall has zero mechanical enforcement — orient.py reports 45/40, says "state clean", hands over the next card and exits 0
 
 **§§4.3** · `v4.2-archive scripts/engine/orient.py:25,95 and scripts/engine/floors_gate.py:208`
 
@@ -351,7 +439,7 @@
 **With no human in the session.** With no human watching, the run does not stop at the wall — it is not told it has reached one. It keeps volleying until the context blows or the harness kills it, mid-category, with a partially-worked subcap and no checkpoint written.
 
 
-### AUD-0032 · The scope-mode conversation budgets contradict the >=40 search-op cap by 1.5x-3.5x, in the skill's own numbers
+### AUD-0038 · The scope-mode conversation budgets contradict the >=40 search-op cap by 1.5x-3.5x, in the skill's own numbers
 
 **§§4.3** · `v4.2-archive SKILL.md:69-71, references/protocols/deep_search_protocol.md:394, references/protocols/cowork_project_prompt.md:37-38,112`
 
@@ -362,7 +450,7 @@
 **With no human in the session.** An unattended run planning against the scope table will be 2-3x over budget by the time anything notices, and nothing does notice (see the wall finding). The DQ census is exact — 851 of 851 briefs carry precisely 5 facets, 4,255 DQs — so the volley cost is not the uncertain term; the conversation bands are.
 
 
-### AUD-0033 · report_parser.py is bound to a superseded 12-section report; every v8 section from §3 on is stored under the wrong kind
+### AUD-0039 · report_parser.py is bound to a superseded 12-section report; every v8 section from §3 on is stored under the wrong kind
 
 **§§4.4** · `apps/worker/dma_worker/report_parser.py`
 
@@ -373,7 +461,7 @@
 **With no human in the session.** An unattended ingest of a v8 report silently writes 'Issue Impact and Cap Analysis' into document_sections as trend_analysis, 'Recommendations' as gap_prioritization and 'Workbook Traceability' as data_gaps_confidence. Nothing errors, nothing is empty, and the producer agent reading document_sections by kind gets the wrong nine sections back. The test that would catch it asserts the old contract, so CI stays green indefinitely.
 
 
-### AUD-0034 · Nothing in the repo or the skills resolves to the three pinned templates; the only renderers target two other, mutually incompatible structures
+### AUD-0040 · Nothing in the repo or the skills resolves to the three pinned templates; the only renderers target two other, mutually incompatible structures
 
 **§§4.4** · `plugins/dma-insights/skills/*, /tmp/dmar/dma-research/scripts/deliver/`
 
@@ -384,7 +472,7 @@
 **With no human in the session.** An unattended run cannot find the template it is required to use. It will either regenerate a skeleton from make_report_template.py (7 sections) or render the v6.3 shape, and in both cases the Client Profile ships without §1 Firmographics and §6 Client Priorities — the two sections the app has no other route to. Pinning the ids in the audit does not fix this; the pipeline still has no pointer.
 
 
-### AUD-0035 · Offering linkage is asserted, never resolved — and the referential store that would resolve it exists in the database with zero readers
+### AUD-0041 · Offering linkage is asserted, never resolved — and the referential store that would resolve it exists in the database with zero readers
 
 **§§4.4** · `kg/catalog/offering_map.json, migrations/versions/0004_catalogue_tier.py, migrations/ccg_loader/`
 
@@ -395,7 +483,7 @@
 **With no human in the session.** An unattended synthesis can name an offering that does not exist, misname one that does, or split one offering across two names, and no gate, test or type check fires. The same holds one level down for platform names: a card naming a platform the fit engine has never heard of falls through CG-30's None branch and ships unranked and unchallenged.
 
 
-### AUD-0036 · The category-grain peer store has no feeder: the pinned workbook removed Peer_Benchmarks and the missing-tab path records nothing
+### AUD-0042 · The category-grain peer store has no feeder: the pinned workbook removed Peer_Benchmarks and the missing-tab path records nothing
 
 **§§4.5** · `apps/worker/dma_worker/workbook_parser.py:1723 + pinned DMA Workbook (contract v3)`
 
@@ -406,7 +494,7 @@
 **With no human in the session.** Every go-forward run ingests zero peer rows and leaves no trace that it did. get_report_bundle hands the synthesis agent an empty peer_table; the agent, told by its own rulebook to read the cohort from Peer_Benchmarks, either invents a cohort or emits nulls, and no parser_observation exists for an operator to find months later. The failure is indistinguishable from a client that genuinely has no comparable peers.
 
 
-### AUD-0037 · Handoff_Lock — the peer-set immutability mechanism both templates depend on — exists nowhere in the repo or the workbook
+### AUD-0043 · Handoff_Lock — the peer-set immutability mechanism both templates depend on — exists nowhere in the repo or the workbook
 
 **§§4.5** · `pinned Client Profile v8 §4.1/§5.2/§8.1/§8.2, Assessment Report v8 §6.4`
 
@@ -417,7 +505,7 @@
 **With no human in the session.** Nothing binds the agent to a peer set. It can name one cohort on the techstack page and a different one on the overview strip within a single run, and both promote. The Client Profile's own §8 control says 'FAIL IF: A tab named below is absent from the workbook' — a blocking condition every current run meets, that nothing executes. Today the lock holds only because a person carries the names across three artefacts; remove the person and it holds not at all.
 
 
-### AUD-0038 · The pinned Assessment Report names 17 workbook input sheets and 0 of them exist in the pinned workbook
+### AUD-0044 · The pinned Assessment Report names 17 workbook input sheets and 0 of them exist in the pinned workbook
 
 **§§4.5** · `pinned Assessment Report v8 SECTION CONTROL blocks vs pinned DMA Workbook contract v3`
 
@@ -428,7 +516,7 @@
 **With no human in the session.** A headless producer following the report template looks up Peer_Benchmarks, Pillar_Rollup and Handoff_Lock, finds nothing, and has no instruction for what to do next — the template states no fallback for a missing input sheet. Whatever it writes into {{MEDIAN}} is then unsourced by construction, and §11 Workbook Traceability points the reader at 'Peer_Benchmarks, Platform_Peer_Adoption' to verify a claim in a workbook that has neither.
 
 
-### AUD-0039 · AG-01 accepts a self-REJECTED recommendation, so the template's one hard rule is enforced by nothing
+### AUD-0045 · AG-01 accepts a self-REJECTED recommendation, so the template's one hard rule is enforced by nothing
 
 **§§4.6** · `apps/mcp/dma_mcp/validation2.py:3438-3445 (AG-01)`
 
@@ -439,7 +527,7 @@
 **With no human in the session.** A synthesis agent that argues itself out of a recommendation and records REJECT still promotes it. The verdict field is the cheapest possible way to satisfy the only rebuttal gate, so the incentive under automation runs the wrong way: writing any string passes, and writing the honest one has no consequence. With no reviewer, a recommendation the producer itself judged unsound reaches the client surface.
 
 
-### AUD-0040 · 'Stale metric in the impact table' is unenforceable: dma_impact[].current is invisible to the CG-07 grain lock
+### AUD-0046 · 'Stale metric in the impact table' is unenforceable: dma_impact[].current is invisible to the CG-07 grain lock
 
 **§§4.6** · `apps/mcp/dma_mcp/validation2.py:3349-3380 (CG-07) vs platform_recommendations.dma_impact`
 
@@ -450,7 +538,7 @@
 **With no human in the session.** The one probe of the seven that is pure arithmetic against a table the connector already holds is not run. A recommendation can assert any 'current' score it likes for any cell and promote — so the impact table, which is what a client reads to size the opportunity, is the least-checked number on the platform page. Nothing downstream recomputes it either, so the error is permanent in the serving tier.
 
 
-### AUD-0041 · Invariant 1's gate is a literal-import regex; three evasions to a live inference endpoint pass it
+### AUD-0047 · Invariant 1's gate is a literal-import regex; three evasions to a live inference endpoint pass it
 
 **§§5.2** · `scripts/gate_a_no_inference_imports.py:18`
 
@@ -461,7 +549,7 @@
 **With no human in the session.** The invariant that keeps inference out of the serving path is enforced against a spelling, not against a behaviour. A request-time model call reaching api.anthropic.com over plain urllib passes CI green. With no human reading latency graphs or bills, nothing else in the repo would notice.
 
 
-### AUD-0042 · Invariant 7 is violated, and the unsanctioned colour resolver is the one that wins — 50 call sites to 1
+### AUD-0048 · Invariant 7 is violated, and the unsanctioned colour resolver is the one that wins — 50 call sites to 1
 
 **§§5.2** · `apps/web/lib/bands.js vs apps/web/proto/data.js:13-33`
 
@@ -472,7 +560,7 @@
 **With no human in the session.** The invariant exists so that a band word and a fill can never drift apart. Today the module the charter blesses is the one nobody renders from, and the module every client sees is governed by nothing. Any future edit to either resolver diverges silently, and the only detector the charter relies on is a person looking at a page.
 
 
-### AUD-0043 · The production colour resolver paints a grey swatch for a null score, violating invariants 6 and 9
+### AUD-0049 · The production colour resolver paints a grey swatch for a null score, violating invariants 6 and 9
 
 **§§5.2** · `apps/web/proto/data.js:21 (maturityHex) vs apps/web/lib/bands.js:17`
 
@@ -483,7 +571,7 @@
 **With no human in the session.** A cell that was never scored renders as a filled swatch rather than as an absence. Invariant 7's own rule is that fill means maturity and nothing else — so the one visual signal a reader is told to trust is exactly the one being fabricated. Unattended, no score is ever confirmed by a person, so a cell with no evidence and a cell with grey fill are indistinguishable on the surface a client reads.
 
 
-### AUD-0044 · The acceptance ledger claims CI enforces invariant 7; nothing does, and the module it names is not the one that ships
+### AUD-0050 · The acceptance ledger claims CI enforces invariant 7; nothing does, and the module it names is not the one that ships
 
 **§§5.2** · `apps/web/tests/acceptance/ACCEPTANCE.md:285; inventory.json:328; gate_e_ratchet.json:170`
 
@@ -494,7 +582,7 @@
 **With no human in the session.** Gate E's coverage arithmetic reports 0 unaccounted surfaces partly on the strength of a row that is not enforced anywhere. An unattended agent, or a reviewer, reading the acceptance ledger to decide what still needs work is told this one is done. False assurance is more expensive than a known gap, because nothing will ever be scheduled to close it.
 
 
-### AUD-0045 · The 836 subcap count is hardcoded into coverage maths: a complete v7.0 run reports 101.8% coverage and negative gaps
+### AUD-0051 · The 836 subcap count is hardcoded into coverage maths: a complete v7.0 run reports 101.8% coverage and negative gaps
 
 **§§5.5** · `plugins/dma-insights/skills/dma-research/scripts/merge_evidence.py:185; plugins/dma-insights/skills/dma-assessment/scripts/validate_contracts.py:133-141`
 
@@ -505,12 +593,23 @@
 **With no human in the session.** A coverage gate that reports over 100% cannot fail, so 15 subcapabilities go unresearched while the run reports itself complete — the exact failure the count adjudication was meant to close. And every correct assessment emits a warning about a category that was deliberately killed, training any reader, human or agent, to ignore that warning channel.
 
 
-## 76 MAJOR
+## 80 MAJOR
 
 *The stage needs a human, and the target architecture has none.*
 
 
-### AUD-0046 · 1-gates.md, the designated 'reading a verdict' file, is missing 37 of the connector's 69 gate ids — including CG-30
+### AUD-0052 · The reports are rendered from the JSON plane, never curated from the workbook — which is the mechanism behind the unresolved citations
+
+**§§0** · `scripts/deliver/render_client_report.py:39-46`
+
+**Observed.** The owner's architecture: assessment and client research reports are CURATED from the workbook after evidence synthesis. The measured reality is that the report renderer never opens the workbook.
+
+**Measurement.** render_client_report.py's complete input set, read from its own source at lines 39-46: evidence_index.json, run_manifest.json, context.json (silently degrading to {}), solution objectives JSON, floors JSON. Sheets read: 0. `grep -nE 'xlsx|workbook|load_workbook' scripts/deliver/render_client_report.py` on the data path = 0 hits. Nothing anywhere asserts report ≡ workbook. This is the mechanism behind the already-measured S8-03 defect: on a real delivered report, 6 of 21 distinct cited E-ids did not resolve in the delivered evidence register — the report and the register are produced from DIFFERENT SUBSTRATES with no join, so nothing could have caught it.
+
+**With no human in the session.** A curated report and a recording workbook can disagree about the same assessment and both ship. The owner's design makes that impossible by construction (one substrate); the current design makes it undetectable by construction (two substrates, no reconciler).
+
+
+### AUD-0053 · 1-gates.md, the designated 'reading a verdict' file, is missing 37 of the connector's 69 gate ids — including CG-30
 
 **§4.1** · `plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md vs apps/mcp/dma_mcp/gates.py`
 
@@ -521,7 +620,7 @@
 **With no human in the session.** A repair is still routable because the verdict carries its own JSON path, so this is not a hop failure — but an unattended repairer sent to 1-gates.md for 37 of 69 gates learns nothing about what it violated and repairs by guessing at the rule. The `explain_gate` connector tool would answer, yet routing.md contains zero gate references and never names it: `grep -cE 'CG-|AG-|SG-|ET-|explain_gate|1-gates' 05-lifecycle/routing.md` = 0.
 
 
-### AUD-0047 · Nothing reprints the brief after compaction, resume or fork, and compaction has no destination file at all
+### AUD-0054 · Nothing reprints the brief after compaction, resume or fork, and compaction has no destination file at all
 
 **§4.1** · `plugins/dma-insights/scripts/hooks/session_brief.py`
 
@@ -532,7 +631,7 @@
 **With no human in the session.** A synthesis firing that produces six pages will compact. After it does, the routing rule, the memory rule and the 'only the surface-producer promotes' rule are whatever the summariser chose to keep, with no reprint and no recovery file. The docstring's assumption — 'resumes and compaction continuations already carry the brief in context' — is asserted, not tested: zero tests in the repo exercise it (`grep -rn session_brief plugins/dma-insights/scripts/tests/` returns only a static file-presence check in test_doctor_checks.py).
 
 
-### AUD-0048 · The dispatch preamble re-asserts connectors and output format but never routing
+### AUD-0055 · The dispatch preamble re-asserts connectors and output format but never routing
 
 **§4.1** · `plugins/dma-insights/scripts/agent_run.py PREAMBLE (lines 45-59)`
 
@@ -543,7 +642,7 @@
 **With no human in the session.** On the RECOVERY-MODE path — which the Routine mandates whenever plugin_version.py reports UPDATED_MID_SESSION, i.e. every stale-container firing — every stage goes through agent_run.py. There the SessionStart hook does fire, so routing survives by luck of the fresh process, not by design. On the primary Agent-tool path neither the hook nor the preamble carries it, and there is no third carrier.
 
 
-### AUD-0049 · The real entry document of an unattended run is a ~40,000-character Routine prompt stored outside the repo, not the 377-byte brief
+### AUD-0056 · The real entry document of an unattended run is a ~40,000-character Routine prompt stored outside the repo, not the 377-byte brief
 
 **§4.1** · `plugins/dma-insights/docs/ROUTINES.md §2a (dma-synthesis-sequence-a)`
 
@@ -554,7 +653,7 @@
 **With no human in the session.** The entry document that actually governs an unattended firing is not version-controlled, not tested, and only detectable-as-drifted by a diff no job runs. If someone edits the Routine in the UI, the repo cannot tell. The 50-word brief the audit treats as the entry document is a supplement to it, and — per finding 1 — the supplement reaches only the session that already had the larger prompt.
 
 
-### AUD-0050 · Hooks bind once at session start, so a self-provisioning or stale-plugin firing can never have run the brief
+### AUD-0057 · Hooks bind once at session start, so a self-provisioning or stale-plugin firing can never have run the brief
 
 **§4.1** · `plugins/dma-insights/docs/ROUTINES.md §2a STEP -1 / STEP 0`
 
@@ -565,7 +664,7 @@
 **With no human in the session.** On exactly the firings that most need a routing rule — a cold container, a restored snapshot with an ancient plugin — the brief is absent or stale, and no error is raised because a SessionStart hook that never ran produces no output to miss. The doctor and plugin_version.py check the disk; neither can observe whether this session's hooks bound.
 
 
-### AUD-0051 · Two of five traced tasks are unreachable from the brief: reviewer-rejected card (3+ hops) and resume-after-compaction (no destination)
+### AUD-0058 · Two of five traced tasks are unreachable from the brief: reviewer-rejected card (3+ hops) and resume-after-compaction (no destination)
 
 **§4.1** · `plugins/dma-insights/skills/dma-surface-production/05-lifecycle/routing.md`
 
@@ -576,7 +675,7 @@
 **With no human in the session.** Reviewer Accept/Reject is the mechanism by which a human's judgement re-enters the pipeline — and it is the one repair channel the routing table cannot resolve. Unattended, a rejected card either does not get repaired or gets repaired by re-producing the whole insights page, which is precisely the cost the two-tier routing exists to prevent.
 
 
-### AUD-0052 · CHAIN INTEGRITY computes no verdicts, and two of its seven checks read sheets that do not exist
+### AUD-0059 · CHAIN INTEGRITY computes no verdicts, and two of its seven checks read sheets that do not exist
 
 **§4.2** · `pinned DMA Workbook (Sheet 18IoJD5jn9aIe3E_F2omxqIZrjnHQwfR2pD0-_nUe5zc), Coverage!A23:D31`
 
@@ -587,7 +686,7 @@
 **With no human in the session.** 'Counts are formulas, so they cannot flatter the run' is true of four rows only. Two report zero synthesis and zero negative findings on every run forever, one always reports exactly 5, and no verdict is ever rendered — so even a human opening the workbook sees seven template tokens rather than seven answers. Nobody and nothing reads it either way.
 
 
-### AUD-0053 · The catalogue-hash lock the Client Profile template asserts is built nowhere
+### AUD-0060 · The catalogue-hash lock the Client Profile template asserts is built nowhere
 
 **§4.2** · `pinned Client Profile Research Template v8 + repo`
 
@@ -598,7 +697,7 @@
 **With no human in the session.** The second of the two anti-drift locks does not exist. A catalogue that moves between the research stage and the assessment stage produces no refusal — the assessment scores against whatever it has. It also removes the only remaining place a run could say BLOCKED: the template's 'Handoff status {{READY | BLOCKED}}' is sourced from Gate_Log, which is not a tab in the one workbook.
 
 
-### AUD-0054 · The v4.2 validator rejects the pinned template workbook, and the migration script the template prescribes does not exist
+### AUD-0061 · The v4.2 validator rejects the pinned template workbook, and the migration script the template prescribes does not exist
 
 **§4.2** · `supplied v4.2 archive scripts/deliver/validate_workbook.py:19 vs pinned DMA Workbook`
 
@@ -609,7 +708,7 @@
 **With no human in the session.** The run_id equality anchor — the one error the template says nothing downstream can recover from — is never reached on the real artefact, because the validator aborts on the sheet set first. And the fix the template names has not been written, so there is no path from the pinned template to a passing validation.
 
 
-### AUD-0055 · The counts rule the Client Profile states is enforced by nothing, and the live skills still carry the wrong literals
+### AUD-0062 · The counts rule the Client Profile states is enforced by nothing, and the live skills still carry the wrong literals
 
 **§4.2** · `repo — plugins/dma-insights/skills/**`
 
@@ -620,7 +719,7 @@
 **With no human in the session.** An unattended run reading dma-assessment's own SKILL.md line 152 sees 'Pillar (4) -> Category (17) -> Capability (144) -> Subcapability (~836)' and will size its work, its gates and its coverage percentages against a taxonomy that no longer exists. The rule that would end this at the document layer reaches neither a renderer nor the skills.
 
 
-### AUD-0056 · No stuck-state detection exists for a research run; the watchdog that exists watches only synthesis
+### AUD-0063 · No stuck-state detection exists for a research run; the watchdog that exists watches only synthesis
 
 **§4.2** · `repo scripts/synthesis_watchdog.py vs supplied v4.2 archive`
 
@@ -631,7 +730,7 @@
 **With no human in the session.** The research stage — the stage that owns $RUN, the ledger, orient.py, the checksum halt and CHAIN INTEGRITY — has no way to announce that it has stopped. A hard halt from kg_reader guard exits 1 into a session nobody is watching, and a turn that dies mid-category leaves no artefact that says so. The synthesis stage's watchdog is the proof the pattern is understood; it was simply never extended to the stage this section is about.
 
 
-### AUD-0057 · Validator rule 2 does not catch an added column, and rule 5 is vacuous on a blank Evidence_IDs cell
+### AUD-0064 · Validator rule 2 does not catch an added column, and rule 5 is vacuous on a blank Evidence_IDs cell
 
 **§4.7** · `v4.2-archive/scripts/deliver/validate_workbook.py`
 
@@ -642,7 +741,7 @@
 **With no human in the session.** The two rules that would have caught the unstripped working area and a mostly-unresearched workbook are the two that do not fire. A run with 10% coverage and 22 extra columns is certified clean at the only gate that inspects the file.
 
 
-### AUD-0058 · research_handoff.json does not carry triangulation, why_it_matters or dma_impact — the strip does delete analysis the validator will not notice
+### AUD-0065 · research_handoff.json does not carry triangulation, why_it_matters or dma_impact — the strip does delete analysis the validator will not notice
 
 **§4.7** · `v4.2-archive/scripts/deliver/build_handoff.py`
 
@@ -653,7 +752,7 @@
 **With no human in the session.** Strip the working area as instructed and three gate-required analytical fields per subcap are destroyed with no surviving copy, and nothing downstream reports their absence — research_synthesis simply lands without them, or null entirely (48 of 49 records here).
 
 
-### AUD-0059 · Two disjoint workbook production paths; nothing generates the pinned template's shape
+### AUD-0066 · Two disjoint workbook production paths; nothing generates the pinned template's shape
 
 **§4.7** · `v4.2-archive vs pinned-template`
 
@@ -664,7 +763,7 @@
 **With no human in the session.** 'The workbook' names two incompatible artefacts. A synthesis agent handed the pinned template and a validator built for the generator's output cannot pass; an agent handed the generator's output cannot answer any template section that reads DQ_Bank or the working area. Chain join 1 (DQ_Bank -> SubCap_ID) has nothing to join to in any generated run.
 
 
-### AUD-0060 · Chain join 2 is silently broken at the app boundary: SubCap_IDs is never read into evidence rows
+### AUD-0067 · Chain join 2 is silently broken at the app boundary: SubCap_IDs is never read into evidence rows
 
 **§4.7** · `apps/worker/dma_worker/workbook_parser.py (parse_research_workbook)`
 
@@ -675,7 +774,7 @@
 **With no human in the session.** Every fact ingested from a contract-v3 research workbook arrives unlinked to any capability. The workbook's stated failure for this join — 'a cited id resolving to no row opens an empty drawer under the client's name' — happens by construction on every run, and the parser's own not-recognised-column reporting does not name it.
 
 
-### AUD-0061 · Client Profile §8.1 routes 13 tabs to two workbooks; 13 of 13 are absent from the one workbook that exists
+### AUD-0068 · Client Profile §8.1 routes 13 tabs to two workbooks; 13 of 13 are absent from the one workbook that exists
 
 **§4.7** · `pinned-template (Client Profile v8 vs DMA Workbook v3)`
 
@@ -686,7 +785,7 @@
 **With no human in the session.** The pinned Client Profile cannot render against the pinned workbook by its own rules, and the report's AI-and-data overlay — present in every pillar — has no store. The 'one workbook, not two' settlement is not reflected in the profile, which still routes to {{RESEARCH_WORKBOOK}} and {{SCORING_WORKBOOK}} as separate files.
 
 
-### AUD-0062 · None of the three pinned template Drive ids resolves anywhere in the repo or the archive
+### AUD-0069 · None of the three pinned template Drive ids resolves anywhere in the repo or the archive
 
 **§4.7** · `repo / plugins`
 
@@ -697,7 +796,7 @@
 **With no human in the session.** A headless producer cannot fetch the workbook, the client profile or the report template it is required to use. Pinning the ids in the audit does not fix the pipeline; the resolution step does not exist in code.
 
 
-### AUD-0063 · Installed skill drift: diagnostic_questions.md claims ~836 questions and holds 71, on the retired 17-category taxonomy including the killed P1C5
+### AUD-0070 · Installed skill drift: diagnostic_questions.md claims ~836 questions and holds 71, on the retired 17-category taxonomy including the killed P1C5
 
 **§4.7** · `plugins/dma-insights/skills/dma-research (installed v2.3)`
 
@@ -708,7 +807,7 @@
 **With no human in the session.** When the pillar XLSX toolkits are unavailable this file is the declared fallback. A headless run falling back gets 8.5% of the claimed coverage, in a closed-question form the assessment scale cannot consume, against a taxonomy that includes a category resolved as NOT_COMPARABLE.
 
 
-### AUD-0064 · Installed skill drift: capability_criteria.md holds 85 = 17 x 5 on the retired category count, and its fifth level is M5
+### AUD-0071 · Installed skill drift: capability_criteria.md holds 85 = 17 x 5 on the retired category count, and its fifth level is M5
 
 **§4.7** · `plugins/dma-insights/skills/dma-assessment/references/capability_criteria.md`
 
@@ -719,7 +818,18 @@
 **With no human in the session.** The scoring rubric an unattended assessment reads is keyed to a taxonomy with one extra category and one extra maturity level. Every P1C5 criterion scores a category that resolves NOT_COMPARABLE across versions, and any M5 the rubric admits has no band to render into — invariant 6 says band_t is a four-value enum.
 
 
-### AUD-0065 · The contradicts-probe detector cannot recognise the shipped contradicts query, and nothing tells the agent how to tag it
+### AUD-0072 · Production candidate selection dedupes by entity, contradicting the connector's own tested request-grain rule
+
+**§Stage 2** · `scripts/synthesis_queue.py:76-77; run_gate.py:372-378`
+
+**Observed.** Surfaced by the second run and verified here from source. The queue that actually picks work collapses at a different grain from the one the connector tests.
+
+**Measurement.** `synthesis_queue.py:76-77` is `def _key(run): return run.get('display_id') or run.get('run_id')` — `display_id` is the ENTITY identifier, so two distinct requests for the same institution collapse to one candidate. `run_gate.py:372-378` carries an identical fallback key. The connector's own request-grain rule is tested separately, so the two disagree with no reconciler; this run separately measured `list_pending_runs` at 282 pending with 101 duplicate_requests and 109 surplus_runs.
+
+**With no human in the session.** A second, legitimately different request for an institution already in the queue is silently absorbed. Unattended, nothing reports the absorption, and the requester — who does not exist as an entity anywhere in the schema — is never told.
+
+
+### AUD-0073 · The contradicts-probe detector cannot recognise the shipped contradicts query, and nothing tells the agent how to tag it
 
 **§Stage 5** · `scripts/engine/floors_gate.py (csearch) + scripts/engine/followup.py:60-62`
 
@@ -730,7 +840,7 @@
 **With no human in the session.** The one per-subcap mechanical requirement that the load-bearing facet was actually probed is decoupled from the artefact it is supposed to police. Unattended, it produces false FAILs for honest work (which will be waived away) and false PASSes for dishonest work, so its signal is noise either way.
 
 
-### AUD-0066 · Query fidelity: two of the five MECE facets have no pre-built query at all, and no query can reach the temporal arc the works DQ demands
+### AUD-0074 · Query fidelity: two of the five MECE facets have no pre-built query at all, and no query can reach the temporal arc the works DQ demands
 
 **§Stage 5** · `scripts/build/build_kg.py:93-107 (ARCH_QUERY/NEGATIVE_Q) + scripts/build/dq_generator.py:76-137`
 
@@ -741,7 +851,7 @@
 **With no human in the session.** Exactly the failure mode §5.3 predicts: evidence returned by a presence-shaped query is mapped back to a subcap whose DQ asked about consequences, corroboration or a fifteen-year arc, then cited. The citation resolves, the excerpt is verbatim, the tier is right — and the ceiling is wrong. No gate in the chain checks responsiveness, only resolution. Worked examples: P1C1.3.AM2 ESG Investing — works DQ asks 'since when ... earliest signal ... stalls', query is '"{entity}" ESG Investing annual review'; P1C2.6.4 Board Cyber Oversight — value DQ asks about accountability discipline and capital-allocation precision, no query touches either; P3C4.2.3 BCP Plan Development — corroborates DQ asks for independent regulators/analysts, zero corroboration query exists; P1C4.4.2 Multi-Channel Communications — the extracted keyword is 'slack multi-channel', putting a vendor name into q.negative and q.utilization, which G10 never scans because G10 reads question text only.
 
 
-### AUD-0067 · map-fact cannot distinguish a capability fact from an unrelated sentence, and never abstains
+### AUD-0075 · map-fact cannot distinguish a capability fact from an unrelated sentence, and never abstains
 
 **§Stage 5** · `scripts/build/semantic_index.py:75-93 (query) via scripts/engine/kg_reader.py map-fact`
 
@@ -752,7 +862,7 @@
 **With no human in the session.** R26 makes map-fact the B-I mapping mechanism and R27 requires cross-category facts be BANKED via map-fact without --category. A headless agent has no threshold to apply and no abstain verdict to receive, so systematic mis-mapping is multiplied across the taxonomy by R11's one-fetch-many-facts rule. Mis-mapped facts count toward the >=3-item subcap floor and the >=20-item category minimum, so they also inflate floors_gate into a PASS.
 
 
-### AUD-0068 · The R22 anti-clone guard as specified does not exist; the build-time namesake measures queries and cannot block
+### AUD-0076 · The R22 anti-clone guard as specified does not exist; the build-time namesake measures queries and cannot block
 
 **§Stage 5** · `scripts/build/validate_kg.py:39-46,161-164,187 vs references/protocols/safeguard_gates.md:58`
 
@@ -763,7 +873,7 @@
 **With no human in the session.** Category-level evidence smearing — one document cited across every sibling row to satisfy the >=3-item floor — is the cheapest way for an unattended agent to close a category, and it is the specific failure R22 was written to catch. Nothing computes it, nothing records it, nothing exits non-zero, so the category closes and the smear travels into the handoff as legitimately floor-passing evidence.
 
 
-### AUD-0069 · A sub-vertical overlay and its base siblings both enter the engagement set; the binder validates neither --sv nor --scope
+### AUD-0077 · A sub-vertical overlay and its base siblings both enter the engagement set; the binder validates neither --sv nor --scope
 
 **§Stage 5** · `scripts/build/build_kg.py:411-413 + scripts/engine/kg_reader.py:30-63,93`
 
@@ -774,7 +884,7 @@
 **With no human in the session.** Two costs, both invisible unattended. Duplicate research on a variant and its base burns the conversation budget R27 is built to protect and produces two ceilings for one capability that no reconciliation step compares. And because a garbled or unclassified SV silently yields a 686-subcap generic engagement with exit 0, an upstream classification failure produces a plausible-looking run rather than a halt.
 
 
-### AUD-0070 · Zero-evidence subcaps are handed off as ceiling_band 'M2', and category ceilings become float scores
+### AUD-0078 · Zero-evidence subcaps are handed off as ceiling_band 'M2', and category ceilings become float scores
 
 **§Stage 6.1** · `scripts/deliver/build_handoff.py:9-14,100`
 
@@ -785,7 +895,7 @@
 **With no human in the session.** Violates the 'computed or null, never a default that looks like data' discipline in the app's own charter. dma-assessment cannot distinguish 'we researched this and it reads M2' from 'we never looked'; unattended, most subcaps are the second kind.
 
 
-### AUD-0071 · Absence detection is a 6-alternative regex with 29% recall and a 100% false-positive rate on the probe set
+### AUD-0079 · Absence detection is a 6-alternative regex with 29% recall and a 100% false-positive rate on the probe set
 
 **§Stage 6.1** · `scripts/engine/floors_gate.py absence_undeclared`
 
@@ -796,7 +906,7 @@
 **With no human in the session.** An absence claim published with no absence_claimed flag, no proxy_log and no proxy escalation, on the strength of one verb choice. Unattended there is no reviewer to notice that 'lacks a CDO' is the same claim as 'has no CDO'.
 
 
-### AUD-0072 · Negative-finding ladders are self-attested; a 2-rung ladder is published as a '4-rung ladder'
+### AUD-0080 · Negative-finding ladders are self-attested; a 2-rung ladder is published as a '4-rung ladder'
 
 **§Stage 6.1** · `scripts/engine/floors_gate.py:102-112 + scripts/deliver/render_client_report.py:110`
 
@@ -807,7 +917,7 @@
 **With no human in the session.** Writing a negative is the cheapest way to close a subcap: it raises the pass rate, escapes closed_below_floor, and prints to the client as a verified 4-rung search. Unattended, that is the path of least resistance for every subcap where evidence is hard to find.
 
 
-### AUD-0073 · The R28 fishing gate keys on a field the pipeline does not set, and accepts a one-character reason
+### AUD-0081 · The R28 fishing gate keys on a field the pipeline does not set, and accepts a one-character reason
 
 **§Stage 6.1** · `scripts/engine/floors_gate.py:80`
 
@@ -818,7 +928,7 @@
 **With no human in the session.** An unattended run that fetches a 90-page annual report, extracts one convenient fact and moves on is never flagged — and if it ever were, the single character 'x' clears it.
 
 
-### AUD-0074 · The challenge layer is never required to exist, and a FAILED provisional challenge still reports HIGH confidence
+### AUD-0082 · The challenge layer is never required to exist, and a FAILED provisional challenge still reports HIGH confidence
 
 **§Stage 6.1** · `scripts/engine/floors_gate.py (no verdict reader) + build_handoff.py:50-53`
 
@@ -829,7 +939,7 @@
 **With no human in the session.** R19's self-challenge is optional in practice: skipping it costs nothing, and running it and failing costs a band but not the confidence label. Downstream a failed challenge is indistinguishable from an unfinished one.
 
 
-### AUD-0075 · Cited evidence ids are never resolved — the archive's own golden fixture cites a non-existent item
+### AUD-0083 · Cited evidence ids are never resolved — the archive's own golden fixture cites a non-existent item
 
 **§Stage 6.2 / 6.4** · `scripts/engine/floors_gate.py:133-141 (evidence_analysis_missing)`
 
@@ -840,7 +950,7 @@
 **With no human in the session.** The live app's invariant 4 is fail-closed evidence: every cited id must resolve, belong to this entity and run, and carry a verbatim excerpt, with `foreign` halting production. The research skill that FEEDS it has no counterpart — a citation is a string. An unattended run can hand the connector a workbook whose synthesis cites ids that never existed, and the honesty of the app's gate depends entirely on those ids happening to be re-registered downstream.
 
 
-### AUD-0076 · The no-evidence default fabricates M2 — 45 of 49 subcaps in the golden run
+### AUD-0084 · The no-evidence default fabricates M2 — 45 of 49 subcaps in the golden run
 
 **§Stage 6.2 / 6.4** · `scripts/deliver/build_handoff.py:9-15 band_from_hints`
 
@@ -851,7 +961,7 @@
 **With no human in the session.** This is the app's invariant 9 violated at the source — a default that looks like data. It also inverts the stated conservatism: the challenge may only shift a band DOWN (schema min -2 max 0), but the pipeline's own no-evidence path asserts M2 UP from nothing. A category whose floor pass rate is 4% still reports an M3 ceiling into the scoring stage.
 
 
-### AUD-0077 · orient.py reports 'state clean' over interrupted subcaps — the re-hydration command's one imperative list is wrong
+### AUD-0085 · orient.py reports 'state clean' over interrupted subcaps — the re-hydration command's one imperative list is wrong
 
 **§Stage 6.2 / 6.4** · `scripts/engine/orient.py:88-96`
 
@@ -862,7 +972,7 @@
 **With no human in the session.** CORRECTS the 4.2 lead: the skip is not in the worklist, it is in orient.py's translation of it. A container that dies mid-category resumes, is told the state is clean and given no card, and proceeds to close. Recovery depends on floors_gate at category close catching the subcap as synthesis_missing or FLOOR_FAILED — which it does only if the subcap happens to be above or below floor in the right way, and never within the batch loop the protocol tells the agent to trust.
 
 
-### AUD-0078 · R23's checksum halt is uninvokable as documented, and nothing surfaces a stalled research run
+### AUD-0086 · R23's checksum halt is uninvokable as documented, and nothing surfaces a stalled research run
 
 **§Stage 6.2 / 6.4** · `scripts/engine/kg_reader.py guard + SKILL.md:158`
 
@@ -873,7 +983,7 @@
 **With no human in the session.** A KG rebuild between sessions silently changes the taxonomy under a resuming run and nothing notices; and any hard halt the skill does hit is a silent stall — no routine, no lease, no timeout, no alert, in a repo whose four declared routines are all app-side Cloud Run Job triggers.
 
 
-### AUD-0079 · The research skill's durable record is unreadable by the app it feeds
+### AUD-0087 · The research skill's durable record is unreadable by the app it feeds
 
 **§Stage 6.2 / 6.4** · `apps/worker/dma_worker/classification.py ARTEFACT_REGISTRY vs the archive's output taxonomy`
 
@@ -884,7 +994,7 @@
 **With no human in the session.** Everything the challenge layer records — verdicts, provisional flags, conflict registers, per-subcap syntheses — stops on the container's disk or inside a spreadsheet tab nothing parses. In an unattended chain, the reasoning discipline leaves no trace on any surface a client or an AE ever sees, and no trace the app could audit after the fact.
 
 
-### AUD-0080 · open_conflict renders under 'HIGH confidence' because the report filter keys on the wrong field
+### AUD-0088 · open_conflict renders under 'HIGH confidence' because the report filter keys on the wrong field
 
 **§Stage 6.2 / 6.4** · `scripts/deliver/render_client_report.py:79-80,158`
 
@@ -895,7 +1005,7 @@
 **With no human in the session.** The one client-visible disclosure the resolution loop promises — 'never exit via silence' — is silent whenever the conflicted claim is labelled FACT, which is the common case since the conflict is about scope, not existence. With no human reading the appendix, an unresolved conflict is published as a priority finding.
 
 
-### AUD-0081 · `run_seq` is allocated by an unguarded read-modify-write with no unique constraint
+### AUD-0089 · `run_seq` is allocated by an unguarded read-modify-write with no unique constraint
 
 **§Stages 1-4** · `apps/worker/dma_worker/persist.py`
 
@@ -906,7 +1016,7 @@
 **With no human in the session.** Any second run-creating writer — the Slack/Routine front door the target architecture calls for — silently mints two runs at the same run_seq for one entity. Every downstream reader that orders or picks by run_seq (intake_status._governing, synthesis_queue, run_gate G4) then chooses arbitrarily, and duplicate synthesis of the same assessment becomes undetectable.
 
 
-### AUD-0082 · The live overview page renders an evidence-mode badge from a field the API never sends
+### AUD-0090 · The live overview page renders an evidence-mode badge from a field the API never sends
 
 **§Stages 1-4** · `apps/web`
 
@@ -917,7 +1027,7 @@
 **With no human in the session.** Every promoted client's overview shows the label 'EVIDENCE ·' with nothing after it. Eight render tests pass because they hand-feed the field the API cannot produce, and Gate C cannot see it because an undefined renders as blank rather than an em dash — the exact 'passing test is not proof' shape the audit's evidence rules warn about.
 
 
-### AUD-0083 · `01_evidence/` — the richest evidence store in every package — is classified and then dropped by the ingest
+### AUD-0091 · `01_evidence/` — the richest evidence store in every package — is classified and then dropped by the ingest
 
 **§Stages 1-4** · `apps/worker`
 
@@ -928,7 +1038,7 @@
 **With no human in the session.** The app depends on a session-side compensator (plugins/dma-insights/scripts/evidence_normalize.py) running inside a Claude routine on the routine's own Drive credential to recover what the server-side scan cannot read. If that session does not run, or runs without Drive, the evidence tier degrades to whatever the two workbooks happen to carry — and the app reports the result as a complete ingest.
 
 
-### AUD-0084 · The internal-vs-public contradiction record exists in the corpus and has no destination in the schema
+### AUD-0092 · The internal-vs-public contradiction record exists in the corpus and has no destination in the schema
 
 **§Stages 1-4** · `apps/worker + migrations`
 
@@ -939,7 +1049,7 @@
 **With no human in the session.** When internal evidence contradicts public evidence — the single most decision-relevant thing a HYBRID assessment can find — the finding is recorded by the practice, shipped in the package, and discarded at the app boundary with no observation and no error. Nothing downstream can know a contradiction was ever adjudicated.
 
 
-### AUD-0085 · secrets.md understates the one credential a headless firing holds: full `auth/drive` scope, not read-only
+### AUD-0093 · secrets.md understates the one credential a headless firing holds: full `auth/drive` scope, not read-only
 
 **§Stages 1-4** · `plugins/dma-insights`
 
@@ -950,7 +1060,7 @@
 **With no human in the session.** Every fired routine session holds create/overwrite/trash power over all 180 client package folders, including the source workbooks the ingest treats as immutable — and the document that exists to say where every secret lives and what it can do says the opposite. An unattended session that mis-targets a push destroys package data whose bytes are retained nowhere else (see the gcs_uri finding).
 
 
-### AUD-0086 · `PENDING_REVIEW` entities have no resolution path in code
+### AUD-0094 · `PENDING_REVIEW` entities have no resolution path in code
 
 **§Stages 1-4** · `apps/worker + apps/api + apps/mcp`
 
@@ -961,7 +1071,7 @@
 **With no human in the session.** A package that ships no manifest lands a PENDING_REVIEW entity that the synthesis gate refuses forever. There is no tool, endpoint or job to clear it, so the client is permanently stalled and the only signal is a finding in a session transcript. Named human and step: the owner, editing entity status by hand against a DB nothing else can write.
 
 
-### AUD-0087 · Files the routine writes back to Drive carry internal-audience content and are outside every redaction check
+### AUD-0095 · Files the routine writes back to Drive carry internal-audience content and are outside every redaction check
 
 **§Stages 1-4** · `plugins/dma-insights/scripts/drive_fetch.py + apps/mcp/dma_mcp/bundle.py`
 
@@ -972,7 +1082,7 @@
 **With no human in the session.** Serve-time redaction is sound and payload-only; the unattended architecture then writes internal reasoning, tiers, ERS codes and cross-client ledgers into Drive folders on every firing, where no rule, gate or checker in the repo looks. Sharing a client folder shares the internal projection with it.
 
 
-### AUD-0088 · Caps and the +/-0.8 uncertainty cap decorate; nothing binds a served number
+### AUD-0096 · Caps and the +/-0.8 uncertainty cap decorate; nothing binds a served number
 
 **§Stages 7-9** · `apps/mcp/dma_mcp (gates.py, validation2.py) + packages/shared/contracts_data.json`
 
@@ -983,7 +1093,7 @@
 **With no human in the session.** A regulatory matter that is supposed to cap a cell at M3 transits ingestion, validation, promotion and rendering without ever constraining the number the client reads. Unattended there is no human comparing the cap chip to the heatmap tile, so the only two things that could catch it — a gate or a constraint — are both absent, and the page renders a score above its own stated ceiling as compliant. The +/-0.8 rule has the same shape: a producer emitting a point estimate at +/-1.4 passes every gate.
 
 
-### AUD-0089 · Peer medians are stored producer assertions on the serving tier, never reconciled with peer_scores; at subcap grain the column has no writer at all
+### AUD-0097 · Peer medians are stored producer assertions on the serving tier, never reconciled with peer_scores; at subcap grain the column has no writer at all
 
 **§Stages 7-9** · `apps/mcp/dma_mcp/writer_spec.json + apps/worker/dma_worker/persist.py + serving_subcaps`
 
@@ -994,7 +1104,7 @@
 **With no human in the session.** Two representations of the same number with no reconciliation between them. The peer comparison a client forms on the overview strip is whatever the producing agent typed, and nothing can check it against the peer scores the run actually ingested even though get_report_bundle hands the agent that table. Unattended, a hallucinated or stale peer median promotes cleanly, and the H4 grid — the surface that is supposed to show a per-cell comparison — serves NULL forever because the column it reads was never wired.
 
 
-### AUD-0090 · The three 'surviving mutants' in staged.py are killed by a test the mutation pair does not run
+### AUD-0098 · The three 'surviving mutants' in staged.py are killed by a test the mutation pair does not run
 
 **§Stages 7-9** · `apps/web/tests/acceptance/mutation_pairs.json + scripts/mutation_check.py`
 
@@ -1005,7 +1115,7 @@
 **With no human in the session.** The mutation harness is the repo's stated defence against vacuous tests, and its one-test-per-target binding makes it report false survivors. Headless that is worse than noise: a rectifier acting on 'three surviving mutants in get_staged_payload' would write tests that already exist, and the same binding rule means a target whose only real coverage lives in an unnamed file could equally be reported as fully covered when it is not. The failure mode is symmetric and silent in both directions.
 
 
-### AUD-0091 · verify_deployed.py --quick reports a pass when it could read nothing, and deploy.sh cannot fail on the verdict
+### AUD-0099 · verify_deployed.py --quick reports a pass when it could read nothing, and deploy.sh cannot fail on the verdict
 
 **§Stages 7-9** · `scripts/verify_deployed.py + infra/deploy.sh`
 
@@ -1016,7 +1126,7 @@
 **With no human in the session.** The charter's 'not done until live in prod' rests on this comparison. In an unattended deploy where the credential has expired, the SDK is missing, or Artifact Registry is unreachable, --quick returns green and the full mode's red is swallowed by the non-fatal call, so the release reports success with the bytes unverified — which is exactly the class of failure (shipped defect 13, four render fixes reported live against an older revision) the script was written to end. The production comparison itself is BLOCKED here: unblocking needs the gcloud SDK plus a service account with roles/run.viewer and roles/artifactregistry.reader on digital-maturity-assessor, then the full mode.
 
 
-### AUD-0092 · Nothing marks a DMA finished, and no line in the repo notices
+### AUD-0100 · Nothing marks a DMA finished, and no line in the repo notices
 
 **§Stages 7-9** · `run_status_t / apps/mcp/dma_mcp/promote.py / apps/api/dma_api/cadence.py`
 
@@ -1027,7 +1137,7 @@
 **With no human in the session.** With no human deciding 'we are done with this client', finality is whatever the last unattended session happened to leave behind. A run that promoted with a disclosed SG failure, a thin page, or an open rejection sits in exactly the same state as one that is genuinely finished, and no query can separate them. Combined with the retention design there is no point at which an autonomous loop should stop working a run — so either it stops arbitrarily, or it never stops.
 
 
-### AUD-0093 · The never-cat rule is unenforced although the enforcement slot exists and is already used — one violation costs 116k-592k tokens
+### AUD-0101 · The never-cat rule is unenforced although the enforcement slot exists and is already used — one violation costs 116k-592k tokens
 
 **§§4.3** · `v4.2-archive SKILL.md:56 (R27); live plugins/dma-insights/hooks/hooks.json + scripts/hooks/`
 
@@ -1038,7 +1148,7 @@
 **With no human in the session.** A single reflexive `cat` on the pack an agent is working — the most natural debugging move under pressure — consumes 58% of the context in one tool call and ends the conversation's usefulness. The fix is one regex in an already-wired PreToolUse Bash hook.
 
 
-### AUD-0094 · The batched challenge's ~150-250 tok/subcap budget is reachable only by emitting a verdict that does no work — and a ZERO-dimension verdict validates
+### AUD-0102 · The batched challenge's ~150-250 tok/subcap budget is reachable only by emitting a verdict that does no work — and a ZERO-dimension verdict validates
 
 **§§4.3** · `v4.2-archive templates/schemas/challenge_verdict.schema.json, references/cards/subcap_challenge.yaml, references/protocols/challenge_protocol.md:6`
 
@@ -1049,7 +1159,7 @@
 **With no human in the session.** Batching does dilute scrutiny, and the budget is the incentive to dilute it: the only way to land inside 150-250 tok/subcap is the empty all-PASS verdict, which validates. An unattended run's adversarial pass can be structurally complete and substantively absent, and no gate can tell.
 
 
-### AUD-0095 · The G9 token gate is a ratchet re-fitted to each build, and the spec documents thresholds 29% below what the code enforces
+### AUD-0103 · The G9 token gate is a ratchet re-fitted to each build, and the spec documents thresholds 29% below what the code enforces
 
 **§§4.3** · `v4.2-archive scripts/build/validate_kg.py:177-178 vs references/specs/research_brief_spec.md:77 and CHANGELOG.md:162,181,200`
 
@@ -1060,7 +1170,7 @@
 **With no human in the session.** The mechanism works but the number is not a budget — it is a record of the last build. Nothing constrains catalogue growth, so the per-subcap cost that drives every downstream conversation estimate can drift upward indefinitely while CI stays green, and the spec a maintainer reads is 29% out of date.
 
 
-### AUD-0096 · R25's funnel token math (+25-32% / +11% / +3%) has no code, test or dataset behind it, and the dud-sweep floor case is refuted arithmetically
+### AUD-0104 · R25's funnel token math (+25-32% / +11% / +3%) has no code, test or dataset behind it, and the dud-sweep floor case is refuted arithmetically
 
 **§§4.3** · `v4.2-archive SKILL.md:58, CHANGELOG.md:176, scripts/build/validate_kg.py:175-176`
 
@@ -1071,7 +1181,7 @@
 **With no human in the session.** The headline saving is plausible but unverified and unverifiable here — no Exa, no Tavily, no web-search connector on any of the 3 live Routines — so an unattended run's whole scope plan rests on a number nobody has measured since before the mechanism was built. The floor claim is worse than unverified: it is wrong in sign, so the funnel is a guaranteed small loss on exactly the categories where evidence is thinnest.
 
 
-### AUD-0097 · Nothing connects the research token budget to the reports' blocking word minimums, and no line of code anywhere measures a word count
+### AUD-0105 · Nothing connects the research token budget to the reports' blocking word minimums, and no line of code anywhere measures a word count
 
 **§§4.3** · `pinned templates 142FoFcgs2-... (Client Profile v8) and 1FPr7wNuo2-... (Assessment Report v8); live repo and v4.2 archive`
 
@@ -1082,7 +1192,7 @@
 **With no human in the session.** A run that exhausts its budget mid-research still owes 500-800 words of executive summary and 700-1,100 of strategic intelligence. It does not stop before writing — there is no stop (see the wall finding) — and it is not caught after writing, because nothing counts words. It writes thin and ships. The Client Profile's own Surface Alignment note records this failure already realised: 57 of 138 clients shipped with no focus areas at all and 53 shipped machine scoring text where a client quote belonged.
 
 
-### AUD-0098 · None of the §4.3 optimisation apparatus exists in the live system; the installed dma-research is v2.3 with no knowledge graph
+### AUD-0106 · None of the §4.3 optimisation apparatus exists in the live system; the installed dma-research is v2.3 with no knowledge graph
 
 **§§4.3** · `live plugins/dma-insights/skills/dma-research/ vs supplied v4.2 archive`
 
@@ -1093,7 +1203,7 @@
 **With no human in the session.** Fixing any finding in this section against the installed skill is impossible — the code is not there. The prerequisite for all of §4.3 is landing the v4.2 archive into plugins/dma-insights/skills/dma-research/, after which the wall, the never-cat guard and the report word-count check are each a small addition to machinery that already exists.
 
 
-### AUD-0099 · Thirteen workbook sheets named as INPUTS by the two templates are absent from the pinned contract-v3 workbook, leaving §3.2 and §3.3 with no source at all
+### AUD-0107 · Thirteen workbook sheets named as INPUTS by the two templates are absent from the pinned contract-v3 workbook, leaving §3.2 and §3.3 with no source at all
 
 **§§4.4** · `pinned DMA Workbook (contract v3) vs both report templates`
 
@@ -1104,7 +1214,7 @@
 **With no human in the session.** An unattended run asked to produce §3.2 has nothing to read. Under the template's own instruction it must write UNDETERMINED on every row, which turns a subsection designed to give the client a date into a column of UNDETERMINEDs — or, more likely, the agent invents horizons from the severity thresholds it can see in the assessment skill's issue-register template, unchecked. §3.3's aggregate is unreconcilable either way.
 
 
-### AUD-0100 · The Client Profile's three source-of-truth declarations have no code path, and the five gates its H1 contract names do not exist
+### AUD-0108 · The Client Profile's three source-of-truth declarations have no code path, and the five gates its H1 contract names do not exist
 
 **§§4.4** · `apps/worker/dma_worker/classification.py, apps/worker/job_main.py, packages/shared/contracts_data.json`
 
@@ -1115,7 +1225,7 @@
 **With no human in the session.** Every quality rule the template writes for the three surfaces it owns — page numbers, admissible quotes, an explicit-absence leadership roster — is enforceable only by the agent's own compliance. Unattended, a focus area with a null page and a machine-generated quote submits, validates and promotes.
 
 
-### AUD-0101 · The template's own 57-of-138 and 53 figures cannot be re-measured against the live corpus, because the live corpus has zero served pages
+### AUD-0109 · The template's own 57-of-138 and 53 figures cannot be re-measured against the live corpus, because the live corpus has zero served pages
 
 **§§4.4** · `connector (list_pending_runs / get_client_state) vs apps/dma-insights/startup-data`
 
@@ -1126,7 +1236,7 @@
 **With no human in the session.** The 57-of-138 figure is carried forward verbatim in both the pinned template and plugins/dma-insights/skills/dma-surface-production/03-pages/1-heatmap.md:119 as if it were a live measurement of the current system. It is a measurement of a corpus the live system does not contain. Unattended, nobody will notice that the number describes a different app, and the page-number failure (93 of 93 on the only corpus that exists) is the one the connector explicitly permits.
 
 
-### AUD-0102 · Neither report degrades a peer figure, so app and report can print different medians for the same client with no reconciliation
+### AUD-0110 · Neither report degrades a peer figure, so app and report can print different medians for the same client with no reconciliation
 
 **§§4.5** · `pinned Assessment Report v8 §§1.2-1.4, 4.1, 4.2, 5.N, 6.1, 6.2, 7.1 vs packages/shared/contracts_data.json overview.scores`
 
@@ -1137,7 +1247,7 @@
 **With no human in the session.** A client reads 'peer median 2.88' on the dashboard and a different 2.6 in the .docx, and no artefact says why. The prompt's own sentence is the exact failure mode and it is unmitigated: a median silently computed from three peers reads identically to one computed from ten, in a document that has no field in which to say so.
 
 
-### AUD-0103 · AG-04 enforces the named-peer sourcing burden on 1 of 12 contract sections that name a peer
+### AUD-0111 · AG-04 enforces the named-peer sourcing burden on 1 of 12 contract sections that name a peer
 
 **§§4.5** · `apps/mcp/dma_mcp/validation2.py:296 _check_peer_research`
 
@@ -1148,7 +1258,7 @@
 **With no human in the session.** The one discipline that stops a verdict being manufactured beside a real institution's name covers the tech register and nothing else. An agent can assert on the conversation-starters surface that a named competitor did a dated thing, with no source and no date requirement, and it promotes.
 
 
-### AUD-0104 · AG-04 does not enforce two of §6.5's four rules: dropped unknowns and the omitted share
+### AUD-0112 · AG-04 does not enforce two of §6.5's four rules: dropped unknowns and the omitted share
 
 **§§4.5** · `apps/mcp/dma_mcp/validation2.py:296 + apps/web/proto/live-adapter.jsx:160`
 
@@ -1159,7 +1269,7 @@
 **With no human in the session.** 'Two of five deployed with three unknown is not forty per cent adoption' is exactly the claim the gate exists to prevent, and the gate accepts the 100%-from-two version of it. The 0.0 case is worse: it prints an established zero where the truth is that nothing was established, which is the asserted-absence failure §6.5 spends a whole sub-table forbidding.
 
 
-### AUD-0105 · source_cell is contractually mandatory for every workbook peer figure and is enforced nowhere
+### AUD-0113 · source_cell is contractually mandatory for every workbook peer figure and is enforced nowhere
 
 **§§4.5** · `packages/shared/contracts_data.json heatmap.workbook_scores; apps/mcp/dma_mcp/`
 
@@ -1170,7 +1280,18 @@
 **With no human in the session.** The single control tying a served peer median back to a checkable workbook location is an unvalidated free-text string. With Peer_Benchmarks gone, an agent that emits peer_median with source_cell 'Peer_Benchmarks!D4' promotes a figure whose stated provenance points at a sheet that does not exist, and no gate, test or reviewer step catches it.
 
 
-### AUD-0106 · An unscanned estate is over-recommended by up to 28 fit points, because incumbent_covers has no 'we never looked' state
+### AUD-0114 · AG-04 does not cover every payload location that names a peer
+
+**§§4.5** · `apps/mcp/dma_mcp — AG-04; contracts_data.json platform.starters.peer_reference`
+
+**Observed.** This run measured that AG-04 passes a payload which simply drops the peers it could not establish. The second run found a second hole: a payload field that names a peer and no gate reads at all.
+
+**Measurement.** `grep -rn peer_reference apps/mcp/dma_mcp/*.py` returns 0 hits, while a JSON scan of the contract finds `platform.starters.peer_reference` among the 12 of 42 sections carrying a peer* field. So AG-04's coverage is partial by location as well as weak by predicate: a conversation starter can name a peer institution with zero mechanical check on whether that peer was ever established.
+
+**With no human in the session.** A client-facing conversation starter can assert what a named competitor runs, with no gate examining the claim, in a system whose peer set has no lock and whose workbook ships no peer sheet at all.
+
+
+### AUD-0115 · An unscanned estate is over-recommended by up to 28 fit points, because incumbent_covers has no 'we never looked' state
 
 **§§4.6** · `packages/shared/platform_fit.py:228 (Cell.incumbent_covers) + apps/mcp/dma_mcp/fit.py:293,351-357`
 
@@ -1181,7 +1302,7 @@
 **With no human in the session.** Coverage of the technology register is the single largest uncontrolled input to the ranking, and it is the input most likely to be thin on an automated run with no Exa/Tavily/web-search connector (established in P1). Every client whose estate was only partly scanned gets its incumbent-held layers ranked as net-new ground, and the run-level honesty note stays silent because the register is not fully empty — it is just incomplete.
 
 
-### AUD-0107 · An omitted readiness reads GREEN, defeating the engine's own stated amber default and the multiplicative safety property
+### AUD-0116 · An omitted readiness reads GREEN, defeating the engine's own stated amber default and the multiplicative safety property
 
 **§§4.6** · `apps/mcp/dma_mcp/fit.py:82-83 and apps/mcp/dma_mcp/validation2.py:1481 vs packages/shared/platform_fit.py:116-119`
 
@@ -1192,7 +1313,7 @@
 **With no human in the session.** The multiplicative shape was chosen to make the measured '95 of 470 cards scored hot with every prerequisite failing' defect impossible. Omitting the readiness field restores exactly that path: a card that establishes nothing about its prerequisites keeps the full 1.00 multiplier and can cross the 80 hot band. Under automation, omission is the default failure mode of an incomplete producer run, so the cheapest thing to write is the one that scores highest.
 
 
-### AUD-0108 · alignment_quote is worth 0.20 of the composite and is documented as 'never gated'
+### AUD-0117 · alignment_quote is worth 0.20 of the composite and is documented as 'never gated'
 
 **§§4.6** · `packages/shared/abbreviations.py:93-100 (EXCERPT_FIELDS) + platform_fit.py:246,493`
 
@@ -1203,7 +1324,7 @@
 **With no human in the session.** A producer that cannot find a stated objective has two options — omit alignment and lose up to 20 points to impact_fallback, or invent a quote and keep them. Nothing distinguishes the two outcomes downstream, so the unattended path rewards fabrication with the largest single score movement available on the page, and the fabricated sentence is then rendered to the client as the client's own words.
 
 
-### AUD-0109 · Client Profile §6.4's counter-evidence pass exists in no code, while §6.2 from the same section did land — so this is an omission, not a boundary
+### AUD-0118 · Client Profile §6.4's counter-evidence pass exists in no code, while §6.2 from the same section did land — so this is an omission, not a boundary
 
 **§§4.6** · `pinned Client Profile Doc §6.4 vs packages/shared/contracts_data.json heatmap.focus_areas`
 
@@ -1214,7 +1335,7 @@
 **With no human in the session.** H1 focus areas are the surface §6 feeds, and the app treats the Client Profile as source of truth for every verbatim quote. Without §6.4 nothing asks whether a stated priority was paused, completed or replaced, or whether the quote is the client's framing or a vendor's — so a superseded priority (which the template itself calls 'one of the most valuable findings this research can produce') ships as current. This is the same absent-disconfirmation shape as the platform rebuttal, on a second surface.
 
 
-### AUD-0110 · KPI baseline and readiness backing cells are contract-required, DB-typed, frontend-rendered — and validated by nothing
+### AUD-0119 · KPI baseline and readiness backing cells are contract-required, DB-typed, frontend-rendered — and validated by nothing
 
 **§§4.6** · `apps/mcp/dma_mcp/validation*.py vs migrations/versions/0008_serving_tier.py:418-419`
 
@@ -1225,7 +1346,18 @@
 **With no human in the session.** A recommendation can promote with an aspirational baseline, no as_of and no evidence id, and with a readiness verdict asserting MET behind an empty backing_cells array. The readiness drilldown then renders a verdict a reader cannot trace. Combined with 4.6-09's green-by-silence default, readiness is unchecked at both ends: the multiplier defaults favourably and the contract behind it is never inspected.
 
 
-### AUD-0111 · The gate registry holds 69, the routing table's own gate reference documents 32 of them
+### AUD-0120 · No alert policy or notification channel exists for a stuck or quarantined ingest
+
+**§§5.1** · `apps/worker/job_main.py:220-223; infra/provision.sh:66`
+
+**Observed.** This run established the observability picture qualitatively — one real alert channel, firing on run completion rather than on wrongness. The second run supplies the infrastructure half.
+
+**Measurement.** Quarantine is a print-only log line at `job_main.py:220-223`. `infra/provision.sh:66` grants `roles/monitoring.metricWriter` — the permission to write metrics — but a search for an alert policy or notification channel returns 0 hits. So metrics can be written and nothing is configured to read them or page anyone. The only real notification path remains the 3 Routines' own push/email on run COMPLETION.
+
+**With no human in the session.** A package that quarantines after repeated failed ingest attempts produces a log line in a Cloud Run Job, with no alert policy, no channel and no scheduled reader. The six-state intake machine is sound and nobody is subscribed to it.
+
+
+### AUD-0121 · The gate registry holds 69, the routing table's own gate reference documents 32 of them
 
 **§§5.3** · `apps/mcp/dma_mcp/gates.py registry; plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md`
 
@@ -1236,7 +1368,7 @@
 **With no human in the session.** An unattended producer told to read 1-gates.md before repairing a verdict finds 32 of the 69 gates that can refuse it. For the other 37 the refusal names a gate the documentation does not define, so the repair is guesswork against a rule the agent cannot read.
 
 
-### AUD-0112 · explain_gate's threshold history is structurally present and empty everywhere measured
+### AUD-0122 · explain_gate's threshold history is structurally present and empty everywhere measured
 
 **§§5.3** · `apps/mcp/dma_mcp/gates.py:1053-1089`
 
@@ -1247,7 +1379,7 @@
 **With no human in the session.** 'Direction of movement visible' is the stated purpose of the field, and it is empty on every gate. An agent deciding whether a threshold was recently tightened — the question that separates a real defect from a moved goalpost — gets an empty list that is indistinguishable from a gate whose threshold never moved.
 
 
-### AUD-0113 · Ten production refusals sat unrepaired for four days while the Routine that must read them fired twice
+### AUD-0123 · Ten production refusals sat unrepaired for four days while the Routine that must read them fired twice
 
 **§§5.3** · `apps/mcp/dma_mcp — rejection ledger; dma-synthesis-sequence Routine prompt`
 
@@ -1258,7 +1390,7 @@
 **With no human in the session.** This is not a hypothetical about autonomy — it is autonomy already running and already not working. A Routine whose prompt tells it to read open rejections first fired twice against a queue of ten and left every one at attempts=1. Whatever mechanism is supposed to turn a refusal into a repair does not exist, and the absence produced no signal for four days.
 
 
-### AUD-0114 · Gate M is the only gate with a test that CI never runs — and it exists because a client shipped with 85% unURLed evidence
+### AUD-0124 · Gate M is the only gate with a test that CI never runs — and it exists because a client shipped with 85% unURLed evidence
 
 **§§5.3** · `scripts/gate_m_evidence_url_and_span.py; .github/workflows/ci.yml`
 
@@ -1269,7 +1401,7 @@
 **With no human in the session.** The one control written specifically to stop unURLed evidence reaching a client runs only when a developer runs its unit test. In an unattended pipeline the incident it was built to prevent recurs with nothing in the path to catch it.
 
 
-### AUD-0115 · identifiers.find_fabricated() was built to reject client-supplied evidence ids and is called nowhere in production
+### AUD-0125 · identifiers.find_fabricated() was built to reject client-supplied evidence ids and is called nowhere in production
 
 **§§5.3** · `apps/mcp/dma_mcp/identifiers.py:57`
 
@@ -1280,7 +1412,7 @@
 **With no human in the session.** The detector for a fabricated evidence id is unit-tested and unreachable. ET-02 catches an invented mint id by a different route, but the purpose-built check that invariant 10 implies is not in the path an unattended submission travels.
 
 
-### AUD-0116 · The suite baseline is off by one and the prompt's single-venv instrument cannot run the suites at all
+### AUD-0126 · The suite baseline is off by one and the prompt's single-venv instrument cannot run the suites at all
 
 **§§5.4** · `apps/api (fastapi 0.115.* / starlette<0.47) vs apps/mcp (mcp 2.0.* / starlette 1.6.0)`
 
@@ -1291,7 +1423,7 @@
 **With no human in the session.** The +1 is benign; the dependency split is not. An unattended agent following the documented instrument builds one venv, watches API collection die with a TypeError, and has no instruction distinguishing 'the repo is broken' from 'the instrument is wrong'. And a skip count the baseline does not record cannot be checked for growth.
 
 
-### AUD-0117 · One of the twelve skips is conditioned on the current data shape, hiding an untested behaviour
+### AUD-0127 · One of the twelve skips is conditioned on the current data shape, hiding an untested behaviour
 
 **§§5.4** · `apps/mcp/tests/test_gap_false_positives.py:89`
 
@@ -1302,7 +1434,7 @@
 **With no human in the session.** The moment an overview section ships unwrapped — the exact case the test exists to catch — the test does not fail, it disappears. A skip that is conditioned on the data being well-formed cannot detect the data becoming malformed.
 
 
-### AUD-0118 · Three mutation survivors in the chunked read-back path are reported as 'ok'
+### AUD-0128 · Three mutation survivors in the chunked read-back path are reported as 'ok'
 
 **§§5.4** · `scripts/mutation_check.py; apps/mcp/dma_mcp/staged.py:210,216`
 
@@ -1313,7 +1445,7 @@
 **With no human in the session.** Those boundaries govern the chunked read-back of an oversized staged section — the documented route out of the 1.36 MB cell_evidence loss. A survivor on '>' vs '>=' there means an off-by-one in part boundaries is unpinned, and the harness that exists to say so says ok.
 
 
-### AUD-0119 · No gate predicate has a mutation pair, and the readiness-silence path has zero test coverage
+### AUD-0129 · No gate predicate has a mutation pair, and the readiness-silence path has zero test coverage
 
 **§§5.4** · `apps/web/tests/acceptance/mutation_pairs.json; apps/mcp/dma_mcp/validation2.py:1482`
 
@@ -1324,7 +1456,7 @@
 **With no human in the session.** The single cheapest defect in the audit — silence coerced to green, raising max reachable fit from 62.0 to 99.0 — sits on a line no test touches and no mutation pair guards. It could be corrected or re-broken and nothing would go red either way.
 
 
-### AUD-0120 · Seven of twelve architecture gates run in CI with no test file, so a silently-broken gate reads as a pass
+### AUD-0130 · Seven of twelve architecture gates run in CI with no test file, so a silently-broken gate reads as a pass
 
 **§§5.4** · `scripts/gate_{a,b,c,d,e,f,k}_*.py; scripts/tests/`
 
@@ -1335,7 +1467,7 @@
 **With no human in the session.** A gate with no test cannot be distinguished from a gate that passes because it is broken. Gate A's three evasions produced 'Gate A passed', rc=0 — exactly what a correctly-functioning Gate A prints. Seven of twelve gates are in that position, and CI reports all of them green.
 
 
-### AUD-0121 · One generated-artefact freshness check across thirty CI steps
+### AUD-0131 · One generated-artefact freshness check across thirty CI steps
 
 **§§5.5** · `.github/workflows/ci.yml:41`
 
@@ -1351,7 +1483,7 @@
 *Works, but fails silently.*
 
 
-### AUD-0122 · 17 of 47 agent manifests hardcode an absolute /home/user/Accelerate path instead of ${CLAUDE_PLUGIN_ROOT}
+### AUD-0132 · 17 of 47 agent manifests hardcode an absolute /home/user/Accelerate path instead of ${CLAUDE_PLUGIN_ROOT}
 
 **§4.1** · `plugins/dma-insights/agents/** (production/platform/*, enrichment/*, production/overview/*)`
 
@@ -1362,7 +1494,7 @@
 **With no human in the session.** An agent whose required-reading list resolves to a missing file produces without its rulebook and, per the repo's own MEM-0111 lesson, does not report that it had nothing to read — it returns a verdict that looks like work. agent_run.py's _MIN_VERDICT guard catches an empty return, not a confidently wrong one.
 
 
-### AUD-0123 · fcntl id-minting is per-host, but the real exposure is that $RUN cannot be shared at all
+### AUD-0133 · fcntl id-minting is per-host, but the real exposure is that $RUN cannot be shared at all
 
 **§4.2** · `supplied v4.2 archive — scripts/engine/ledger.py:32-54`
 
@@ -1373,7 +1505,7 @@
 **With no human in the session.** The 'parallel-safe' claim in R34 is true today only because parallelism across hosts is impossible for a research run, and that impossibility is the durability defect in another guise. Any future move to distributed research dispatch voids the id guarantee silently — duplicate E-ids would be minted, and ledger.compact's last-write-per-id rule would overwrite evidence rather than error (it flags collisions only when the url differs).
 
 
-### AUD-0124 · The behavioural-drift loop is populated and read, but closes only through a human-merged PR
+### AUD-0134 · The behavioural-drift loop is populated and read, but closes only through a human-merged PR
 
 **§4.2** · `repo — apps/mcp/dma_mcp/memory.py, plugins/dma-insights/skills/dma-rectifier, ROUTINES.md 2b`
 
@@ -1384,7 +1516,7 @@
 **With no human in the session.** Drift across runs is detected and triaged unattended, and then stops. Seventeen refinements that did not hold are visible in a 90-day window, and every correction for them waits on a person opening GitHub. The measurement layer of the learning loop is headless; the actuation layer is not.
 
 
-### AUD-0125 · DQ_Bank holds eight facets per subcap, not five — the template's own prose and its chain-integrity check disagree with its data
+### AUD-0135 · DQ_Bank holds eight facets per subcap, not five — the template's own prose and its chain-integrity check disagree with its data
 
 **§4.7** · `pinned-template`
 
@@ -1395,7 +1527,7 @@
 **With no human in the session.** A producer that trusts the stated count budgets five questions per subcap and silently skips 2,553 AI-overlay questions — the exact material Assessment Report §5.N's AI-and-data overlay needs. The template's own integrity check would flag a correctly built bank as wrong.
 
 
-### AUD-0126 · Assessment Report §6.5 names no source at all for its peer deployment rows
+### AUD-0136 · Assessment Report §6.5 names no source at all for its peer deployment rows
 
 **§4.7** · `pinned-template (Assessment Report v8)`
 
@@ -1406,7 +1538,7 @@
 **With no human in the session.** The section cannot be filled from stored data and cannot be filled by searching. It renders empty or is fabricated, and the peer-deployment discipline it encodes ('two of five deployed with three unknown is not forty per cent adoption') has no data to discipline.
 
 
-### AUD-0127 · G7 tests the first word, not open-endedness, and runs only at build time
+### AUD-0137 · G7 tests the first word, not open-endedness, and runs only at build time
 
 **§Stage 5** · `scripts/build/validate_kg.py:66-83`
 
@@ -1417,7 +1549,7 @@
 **With no human in the session.** Low blast radius today because the shipped corpus is genuinely open-question — this is a latent hole, not an active defect. It matters only if a rebuild, a curation override, or a runtime rewrite introduces a closed question, at which point nothing in the engagement path would catch it and the evidence space for that subcap collapses to a confirm/deny.
 
 
-### AUD-0128 · build_handoff.py hardcodes safeguard_gates, tech_utilization, critical_unknowns and org_capability_proxies to empty
+### AUD-0138 · build_handoff.py hardcodes safeguard_gates, tech_utilization, critical_unknowns and org_capability_proxies to empty
 
 **§Stage 5** · `scripts/deliver/build_handoff.py:102-107`
 
@@ -1428,7 +1560,7 @@
 **With no human in the session.** Even where a Stage-5 safeguard did fire, its outcome cannot reach dma-assessment — the handoff field is a constant. Any downstream consumer reading safeguard_gates will read 'no gates fired' whether or not any did. This is Stage 7/8 territory and should be confirmed by whoever owns the handoff seam, but it means Stage 5's gate results terminate at the skill boundary.
 
 
-### AUD-0129 · followup.py's counter-evidence branch is dead: the code tests direction=='counter', the schema allows 'challenges'
+### AUD-0139 · followup.py's counter-evidence branch is dead: the code tests direction=='counter', the schema allows 'challenges'
 
 **§Stage 6.1** · `scripts/engine/followup.py:52,59,60,74,79`
 
@@ -1439,7 +1571,7 @@
 **With no human in the session.** One of the two ways the follow-up engine notices one-sided research is inert, and no test covers it because the golden fixture only ever writes direction 'supports'.
 
 
-### AUD-0130 · `scripts/ingestion_status.py` cannot run without gcloud, and gcloud is absent from every fired routine container
+### AUD-0140 · `scripts/ingestion_status.py` cannot run without gcloud, and gcloud is absent from every fired routine container
 
 **§Stages 1-4** · `scripts/`
 
@@ -1450,7 +1582,7 @@
 **With no human in the session.** The two scripts that answer 'is anything stuck in intake' are unavailable to the exact sessions that would need to ask. The one that does work (the watchdog) covers only claimed synthesis and explicitly excludes unclaimed runs — including the orphan it reported, dfaa4936 'mercury', banked 1/6 with no claim and no owner.
 
 
-### AUD-0131 · The rejection ledger is wired but has no unattended consumer
+### AUD-0141 · The rejection ledger is wired but has no unattended consumer
 
 **§Stages 7-9** · `apps/mcp/dma_mcp/rejections.py + scripts/`
 
@@ -1461,7 +1593,7 @@
 **With no human in the session.** The queue is the only durable trace a refusal leaves once a session ends, and it is pull-only. Unattended, twelve open rejections on a client look exactly like zero until something calls the tool; the `looping` counter that would show 'this is the fourth attempt at the same reason' is computed and never read on a schedule. The mechanism is sound — what is absent is the reader.
 
 
-### AUD-0132 · Grain reconciles payload-against-served at 0.05, but never grain-against-grain
+### AUD-0142 · Grain reconciles payload-against-served at 0.05, but never grain-against-grain
 
 **§Stages 7-9** · `apps/mcp/dma_mcp/validation2.py::_served_figures / CG-07`
 
@@ -1472,7 +1604,7 @@
 **With no human in the session.** The sub-vertical pillar weights the assessment applies (e.g. Commercial Lending P1 0.20 / P2 0.20 / P3 0.35 / P4 0.25) are not the unweighted mean the connector derives, so the two arithmetics differ by construction — and where the workbook states both, neither is checked against the other. Headless, an assessment whose pillar rollup was computed with the wrong weight set promotes silently as long as each individual figure matches the row it was read from.
 
 
-### AUD-0133 · The work card exceeds its stated <=~750 tok in 790 of 851 cases under the invocation the protocol prescribes, and nothing gates card size
+### AUD-0143 · The work card exceeds its stated <=~750 tok in 790 of 851 cases under the invocation the protocol prescribes, and nothing gates card size
 
 **§§4.3** · `v4.2-archive scripts/engine/kg_reader.py work_card() / SKILL.md:56 / cowork_project_prompt.md:72`
 
@@ -1483,7 +1615,7 @@
 **With no human in the session.** Minor per card, systematic in aggregate: at 794 tok x 686 subcaps the card stream alone is ~545k tokens for a T1_CORE run, ~6% above what every conversation-count estimate assumed. Unlike the brief budgets, no gate would catch further drift.
 
 
-### AUD-0134 · offering_map's maturity_lift uses an M1-M5 scale that the charter forbids, and the same column is defined in the live database
+### AUD-0144 · offering_map's maturity_lift uses an M1-M5 scale that the charter forbids, and the same column is defined in the live database
 
 **§§4.4** · `kg/catalog/offering_map.json, migrations/versions/0004_catalogue_tier.py:180`
 
@@ -1494,7 +1626,7 @@
 **With no human in the session.** If §6 Zennify Relevance is ever rendered as its spec describes, an M5 reaches a client-facing document from a system whose band scheme has four levels and no M5. Nothing checks the string.
 
 
-### AUD-0135 · The archive renderer's insight-card floor is 3 where the template's blocking minimum is 8
+### AUD-0145 · The archive renderer's insight-card floor is 3 where the template's blocking minimum is 8
 
 **§§4.4** · `/tmp/dmar/dma-research/scripts/deliver/render_client_report.py:53`
 
@@ -1505,7 +1637,7 @@
 **With no human in the session.** A profile with three insight cards passes the only gate that exists and fails the template's blocking minimum, and the failure is invisible because nothing reads the template at render time.
 
 
-### AUD-0136 · ET-09's peer allow-list is fed by the same empty table, so legitimate peers who are also corpus clients read as foreign-entity contamination
+### AUD-0146 · ET-09's peer allow-list is fed by the same empty table, so legitimate peers who are also corpus clients read as foreign-entity contamination
 
 **§§4.5** · `apps/mcp/dma_mcp/validation2.py:573 _foreign_entity_names`
 
@@ -1516,7 +1648,7 @@
 **With no human in the session.** A correctly named peer that happens to be another Zennify client trips an identity gate designed to catch cross-client contamination. The producer sees a blocking reason about a foreign entity for a peer it was told to name, with no way to whitelist it, and the likely repair is to drop a legitimate peer from the cohort.
 
 
-### AUD-0137 · platform.recommendations' contract never declares r_layer, yet AG-01 blocks on it
+### AUD-0147 · platform.recommendations' contract never declares r_layer, yet AG-01 blocks on it
 
 **§§4.6** · `packages/shared/contracts_data.json platform.recommendations vs validation2.py:78-84`
 
@@ -1527,7 +1659,7 @@
 **With no human in the session.** A producer following the contract for platform.recommendations — which CLAUDE.md calls law and says never to invent a field for — will omit r_layer and be refused by a gate the contract never told it about. Under automation this is a silent submit-repair loop with no instruction available to resolve it, and the writer_spec note actively misleads anyone who goes looking.
 
 
-### AUD-0138 · The recommendation and roadmap dependency chains are ungated; only the platform chain reaches the sequencer
+### AUD-0148 · The recommendation and roadmap dependency chains are ungated; only the platform chain reaches the sequencer
 
 **§§4.6** · `packages/shared/platform_fit.py:595-630 (_sequence) vs platform_recommendations.dependencies / platform_roadmap.depends_on`
 
@@ -1543,7 +1675,7 @@
 *Drift, staleness, documentation gap.*
 
 
-### AUD-0139 · No size ceiling exists anywhere, and the only real harness limit is 14 characters away from being hit
+### AUD-0149 · No size ceiling exists anywhere, and the only real harness limit is 14 characters away from being hit
 
 **§4.1** · `plugins/dma-insights/scripts/audit_skills.py + SKILL.md frontmatter`
 
@@ -1554,7 +1686,7 @@
 **With no human in the session.** No unattended consequence today — but the ceiling that does exist is undefended. A rectifier adding one clause to the dma-surface-production description (the skill's own SKILL.md invites description tuning) pushes it past 1024, and the failure surfaces as a skill that silently stops being offered rather than as a test going red.
 
 
-### AUD-0140 · Working tree carries an unrestored mutation from a sibling audit agent
+### AUD-0150 · Working tree carries an unrestored mutation from a sibling audit agent
 
 **§Stage 6.1** · `apps/worker/dma_worker/workbook_parser.py`
 
@@ -1565,7 +1697,7 @@
 **With no human in the session.** A can-it-fail mutation left in place will corrupt any other agent's measurement of the worker parser and, if committed, silently disables workbook ingestion. I did not restore it in case a sibling agent is mid-test; the parent should confirm and run `git checkout apps/worker/dma_worker/workbook_parser.py`.
 
 
-### AUD-0141 · The greenfield and incumbent terms read the STAGING submissions table while claiming to read the promoted register
+### AUD-0151 · The greenfield and incumbent terms read the STAGING submissions table while claiming to read the promoted register
 
 **§§4.6** · `apps/mcp/dma_mcp/fit.py:189-238 (_register_staged)`
 
@@ -1585,16 +1717,25 @@
 | 4.1 | 10 | 2 |
 | 4.2 | 12 | 5 |
 | 4.7 | 14 | 4 |
+| Stage 2 | 1 | 0 |
 | Stage 5 | 10 | 3 |
+| Stage 6 | 1 | 1 |
 | Stage 6.1 | 12 | 5 |
 | Stage 6.2 / 6.4 | 9 | 3 |
 | Stages 1-4 | 12 | 4 |
 | Stages 7-9 | 10 | 3 |
+| §0 | 4 | 3 |
+| §1.2 | 2 | 2 |
 | §4.3 | 10 | 3 |
 | §4.4 | 8 | 3 |
-| §4.5 | 8 | 3 |
+| §4.5 | 9 | 3 |
 | §4.6 | 10 | 2 |
+| §5.1 | 1 | 0 |
 | §5.2 | 4 | 4 |
 | §5.3 | 5 | 0 |
 | §5.4 | 5 | 0 |
 | §5.5 | 2 | 1 |
+
+The areas with the most BLOCKERs are the ones where a mechanism **exists, runs, and reports
+success** — worse than the areas where nothing runs at all, because a green exit code is read by
+an unattended agent as permission to continue.
