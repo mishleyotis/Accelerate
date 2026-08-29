@@ -25,11 +25,21 @@ def new_run(tmp_path, *, n: int = 6, run_id: str = "R-TEST-1"):
 
 
 def bank_evidence(wb, subcap, n=3, *, tier="T2", published="2025-06-01"):
+    """Rows from TWO source identities, because the syntheses built on them
+    claim 'two independent sources agree' — and since single_source_fact
+    became a blocking gate term, a FACT resting on one host is refused. The
+    third row is the independent second (the NCUA call report the fixture
+    synthesis already cites in prose)."""
     out = []
     for i in range(n):
+        second = i == n - 1 and n > 1
         out.append(L.append_evidence(
-            wb, source_name=f"Annual Report 2025 p{i+1}",
-            source_url=f"https://acme.example/ar25#p{i+1}", tier=tier,
+            wb,
+            source_name=("NCUA Call Report 2025 — digital channel volumes"
+                         if second else f"Annual Report 2025 p{i+1}"),
+            source_url=(f"https://ncua.example/callreport/2025#{subcap}"
+                        if second else f"https://acme.example/ar25#p{i+1}"),
+            tier=tier,
             excerpt=("Alkami digital banking went live in Q3 2024 and reached "
                      f"47 percent member adoption within ninety days, restated "
                      f"at {50+i} percent in the 2025 report."),

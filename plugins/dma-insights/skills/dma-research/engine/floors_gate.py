@@ -71,6 +71,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "dq_gaps": [], "unresolved_citations": [], "absence_undeclared": [],
         "closed_below_floor": [], "synthesis_missing": [], "boilerplate": [],
         "claim_unsupported": [], "contradicts_unprobed": [],
+        "single_source_fact": [],
         "ladder_overstated": [], "evidence_smear": [], "challenge_missing": [],
         "challenge_not_independent": [],
         "timeline_missing": [], "followups_outstanding": [],
@@ -117,6 +118,24 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         bad = Q.claim_label_supported(r)
         if bad:
             findings["claim_unsupported"].append({"subcap": cell, "why": bad})
+
+        # Nothing rests on one document's say-so (functional_language.md § 4):
+        # a FACT whose whole evidence base resolves to ONE source identity is
+        # a single-source claim wearing the strongest label. Identity is the
+        # registered URL's host, falling back to the source name — two pages
+        # of the same annual report are one source, however many rows they
+        # fill.
+        if str(r.get("Claim_Label") or "").strip().upper() == "FACT":
+            idents = set()
+            for e in eids:
+                row_e = register.get(e) or {}
+                url = str(row_e.get("Source_URL") or "").strip()
+                host = url.split("//")[-1].split("/")[0].lower() if url else ""
+                idents.add(host or str(row_e.get("Source_Name") or "").strip().lower())
+            idents.discard("")
+            if len(idents) < 2:
+                findings["single_source_fact"].append(
+                    {"subcap": cell, "distinct_sources": sorted(idents)})
 
         if Q.claims_absence(r.get("Dominant_Claim")):
             declared = str(r.get("Absence_Claimed") or "").upper() in \
@@ -174,7 +193,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     blocking = [k for k in (
         "unresolved_citations", "boilerplate", "claim_unsupported",
         "absence_undeclared", "evidence_smear", "challenge_missing",
-        "challenge_not_independent",
+        "challenge_not_independent", "single_source_fact",
         "synthesis_missing", "dq_gaps",
     ) if findings[k]]
     if not category_floor_met:

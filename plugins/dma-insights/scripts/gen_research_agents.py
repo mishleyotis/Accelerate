@@ -18,6 +18,18 @@ The category NAMES are declared here rather than scraped from a reference
 document: dma-assessment/references/capability_criteria.md carries the same
 sixteen, and test_research_agents.py asserts the two agree — a disagreement
 is a taxonomy drift finding, not something this generator papers over.
+
+BUDGET, calibrated 2026-08-29 on a live 6-subcap P1C1 slice (real web
+research, sonnet): effort stays MEDIUM — the run's quality gates all held
+(0 ungrounded figures, 0 accusatory phrasings, honest laddered absences,
+everything consolidated), so thoroughness is enforced structurally by the
+refusals and the floors gate, not bought with thinking tokens; the depth
+work (challenge, consolidation, verification) belongs to the opus tier by
+design. maxTurns is 200 because one dispatch covers one search-op-ceiling
+window (~7 subcaps at ~31 measured turns/subcap ≈ 217 before the batching
+guidance in RESEARCH-PROTOCOL.md § Budget, which exists because turn count
+— not search count — was the measured cost driver: 24.5M cached-input
+tokens over 188 turns for six subcaps).
 """
 from __future__ import annotations
 
@@ -79,7 +91,7 @@ category; it never scores, never challenges its own synthesis, never \
 submits and never promotes.
 model: sonnet
 effort: medium
-maxTurns: 150
+maxTurns: 200
 skills:
   - dma-research
 tools: {tools}
