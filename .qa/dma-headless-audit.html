@@ -171,7 +171,7 @@ completeness without it is asking to be believed rather than checked.</p>
   <div><span class="n">2</span><span class="l">blocked</span></div>
   <div><span class="n">158</span><span class="l">checks</span></div>
   <div><span class="n good">0</span><span class="l">failing the measurement gate</span></div>
-  <div><span class="n">147</span><span class="l">findings</span></div>
+  <div><span class="n">151</span><span class="l">findings</span></div>
 </div>
 <h3>Verdict distribution across completed checks</h3>
 <div class="vgrid"><div class="vch"><span class="n">97</span><span class="l">PRESENT–DEFECTIVE</span></div><div class="vch"><span class="n">29</span><span class="l">ABSENT–UNNOTICED</span></div><div class="vch"><span class="n">26</span><span class="l">PRESENT–SOUND</span></div><div class="vch"><span class="n">4</span><span class="l">PRESENT–HUMAN-DEPENDENT</span></div><div class="vch"><span class="n">0</span><span class="l">ABSENT–BY–DESIGN</span></div></div>
@@ -201,6 +201,79 @@ names, <code>ledger.py stats</code>, raises <code>NameError</code> on every invo
 <strong>Three:</strong> at least one gate must check whether a conclusion is <em>right</em> rather
 than whether it is <em>internally consistent</em> — see §4.</p>
 </div>
+</section>
+
+<section id="d2b">
+<span class="lab">§0 · The owner's target, restated</span>
+<h2>Two data planes, and the agents write to the wrong one</h2>
+<p>After this audit was first assembled, the owner restated the target architecture in one
+diagram: a request arrives (Slack, or a typed Routine) → a Routine fires headless → the
+assessment runs end to end → everything publishes to the DMAI app — the six surfaces, the
+governance issue register, and <strong>exactly three output artifacts</strong>: the DMA Scoring
+Workbook (contract v3) that <em>every agent records to</em>, and the Client Research Report and
+Assessment Report <em>curated from it</em> after evidence synthesis.</p>
+<p>This audit had measured the system against its own internal contracts. Re-measured against the
+owner's target, the deepest finding changes shape: it is not that individual mechanisms are
+defective — it is that <strong>the pipeline runs on a parallel JSON plane the owner never
+designated, and the workbook the owner designates is a terminal export nothing reasons over.</strong></p>
+
+<h3>The census, measured</h3>
+<div class="scroll"><table>
+<tr><th>Target says</th><th>Measured reality</th></tr>
+<tr><td><strong>Every agent records to the workbook</strong></td>
+<td><code>grep -rln 'openpyxl|load_workbook' scripts/engine/</code> = <b>0 files</b>. No research,
+synthesis, floors, follow-up or ledger step can touch a sheet. Agents record to
+<code>ledger.jsonl</code> (9 refs), <code>evidence_index.json</code> (9),
+<code>run_manifest.json</code>, <code>peer_set.json</code> — all JSON. The workbook has
+<b>one producer</b>, <code>populate_workbook.py</code>, which constructs a fresh
+<code>Workbook()</code> at line 38 and performs its <b>single <code>.save()</code> at line 151</b>
+— write-once, at the end, from the JSON plane.</td></tr>
+<tr><td><strong>The reports are curated from the workbook</strong></td>
+<td><code>render_client_report.py:39-46</code> reads five inputs — <code>evidence_index.json</code>,
+<code>run_manifest.json</code>, <code>context.json</code>, objectives JSON, floors JSON.
+<b>Sheets read: 0.</b> Nothing anywhere asserts report ≡ workbook — which is the mechanism behind
+the measured 6-of-21 unresolved report citations: report and register come from
+<em>different substrates with no join</em>.</td></tr>
+<tr><td><strong>The workbook is the research→assessment interface</strong></td>
+<td><code>dma-assessment SKILL.md:401</code>, verbatim: <em>"Look for
+<code>research_handoff.json</code>. IF FOUND → set RESEARCH_HANDOFF mode, skip Phase 1."</em>
+The de-facto contract between the two skills is a JSON file the target never names. The
+workbook plays no role in the handoff at all.</td></tr>
+<tr><td><strong>Three output artifacts</strong></td>
+<td><b>Scoring Workbook</b>: producer + app-side reader both exist — the only one of the three
+with an end-to-end path, though the generated file lacks <code>DQ_Bank</code>,
+<code>Cap_Triggers</code>, <code>Solution_Catalogue</code>, <code>Platform_Peer_Adoption</code>
+and CHAIN INTEGRITY against the pinned template. <b>Client Research Report</b>: produced as
+<code>client_profile.md</code> — and <code>classify('client_profile.md')</code> returns
+<b>None</b>, so the app cannot ingest its own deliverable. <b>Assessment Report</b>:
+<b>no producer exists</b> — zero render entry points against the pinned v8 template in either
+tree. Extra artifacts the target does not name: <code>research_handoff.json</code> as an
+interface, the report as .md.</td></tr>
+</table></div>
+
+<div class="verdict">
+<p><strong>Why this reframe matters more than any single defect.</strong> Four findings this audit
+had treated as siblings — the empty CHAIN INTEGRITY block, the <code>kg_checksum</code> nothing
+writes, the governance auditor reading sheets that differ from the export, the resume that
+recovers nothing from the workbook — are all <em>the same finding</em>: mid-run mechanisms that
+assume a live recording substrate cannot work against a workbook that is written once at the end.
+Fix the substrate and the four become possible; fix the four individually and they remain
+scaffolding around an export.</p>
+<p><strong>And it inverts several repair directions.</strong> Where this report earlier said
+"provisional dies at the handoff file, which nothing downstream reads", the repair implied by the
+sentence — make consumers read the handoff — would <em>entrench</em> the deviation. Under the
+target, the challenge verdict belongs in the workbook, the assessment skill reads the workbook,
+and <code>research_handoff.json</code> stops being a contract. The same inversion applies to every
+finding whose repair hint adds a reader of the JSON plane.</p>
+</div>
+
+<h3>What this does not change</h3>
+<p>The gate findings stand unchanged — internal-relation checking, the readiness coercion, the
+domain-counting corroboration, the prose instance-detectors are properties of the connector, not
+of the substrate. The front-of-pipeline absences (no front door, no evidence-mode field, no
+internal-document ingest) stand unchanged. And the publication-gap owner decision on invariant 2
+becomes <em>sharper</em>, not different: the three artifacts the owner requires published to the
+app are exactly the files the connector's 33 JSON-only tools cannot carry.</p>
 </section>
 
 <section id="d3">
@@ -269,7 +342,7 @@ the generalising step is gone.</p>
 
 <section id="d5">
 <span class="lab">Deliverable 5 · Headless blockers</span>
-<h2>48 blockers</h2>
+<h2>51 blockers</h2>
 <p class="note" style="margin-bottom:22px">Severity is calibrated for autonomous operation: a
 blocker means wrong content can reach a client unattended, an invariant is unenforced, or a stage
 cannot run headless at all.</p>
@@ -482,6 +555,27 @@ cannot run headless at all.</p>
 <p class="obs">A real assessment report cites 21 distinct evidence ids; 6 of them resolve to nothing because the register file that held them, batch1_entity_profile.json, is named in the run&#x27;s own handoff files_generated and does not exist in the package or anywhere in the owner&#x27;s Drive. Not one of the 44 citation occurrences uses the mandated `(E-xxx, Source, Tier, Date)` form; the form actually used is `(Source: E-010, Tier 2)`, with the id in the Source slot and no date at all. The two unresolved ids that matter most are E-010</p>
 <p class="msr"><span class="k">measurement</span>Report: Drive 19KXpzMRD5Ik9GFKJYz-6Sy8GiQJzkPBwkYPc1QHP2YY, 62,330 chars. Regex over the full text: 44 E-id occurrences / 21 distinct; canonical `(E-xxx, Source, Tier, Date)` = 0 of 44; a Tier within 70 chars = 21 of 44; a date = 4 of 44; both = 1 of 44. Register: Drive 1GRguNOhs1bHxH0t0BCg8j4nj2RUrd4Jw holds E-027..E-066 = 40 items. Resolution 15 of 21 = 71.4%; unresolved 6 of 21 = E-001, E-002, E-003, E-005, E-010, E-016. Folder 01_evidence (Drive 1_sP4vk35Pu136SGgL7QYkJtaOm6UvASz) lists 6 files and batch1_entity</p>
 <p class="hl"><span class="k">with no human in the session</span>The pinned v8 template states the rule as a blocking condition — §11 &#x27;FAIL IF: An E-ID cited anywhere in this report does not resolve in Evidence_Register&#x27; — and no code enforces it on either side of the connector. Headless, a report ships to a client asserting caps on the client&#x27;s own maturity scores against evidence ids that resolve to nothing, and nothing in the pipeline is </p>
+</article>
+<article class="fx fx-blocker">
+<header><span class="sev">BLOCKER</span><span class="sec">§§0</span></header>
+<h4>The recording substrate is JSON, not the workbook: zero research steps write a sheet, and the workbook is exported once at the end</h4>
+<p class="obs">The owner&#x27;s stated architecture: three output artifacts, with EVERY AGENT RECORDING TO THE WORKBOOK (contract v3), and the two reports curated from it after evidence synthesis. The audit measured the system against its own internal contracts and missed that the deepest deviation is structural: the pipeline runs on a parallel JSON plane, and the workbook is not the substrate — it is a terminal export.</p>
+<p class="msr"><span class="k">measurement</span>`grep -rln &#x27;openpyxl|load_workbook&#x27; scripts/engine/` = 0 files — no research, synthesis, floors, followup or ledger step can touch a sheet. What agents write instead, counted from the writers: ledger.jsonl (9 refs), evidence_index.json (9), run_manifest.json (4), peer_set.json, engagement_set.json, search_log.json — all JSON. The workbook has exactly ONE producer, `populate_workbook.py`, which constructs a FRESH `Workbook()` at line 38 and performs its single `.save()` at line 151 — write-once, at the end, from the</p>
+<p class="hl"><span class="k">with no human in the session</span>Every mid-run mechanism the owner&#x27;s architecture assumes — agents recording as they go, CHAIN INTEGRITY reconciling live, a resume anchored on the workbook, governance auditing the same object the agents wrote — is structurally impossible while the workbook is written once at the end. This is the root under four findings this audit had treated as siblings: the empty CHAIN INTEG</p>
+</article>
+<article class="fx fx-blocker">
+<header><span class="sev">BLOCKER</span><span class="sec">§§0</span></header>
+<h4>research_handoff.json is the de-facto inter-skill contract, displacing the workbook the owner designates</h4>
+<p class="obs">The owner&#x27;s architecture names three output artifacts and the workbook as the research→assessment interface. The audit reported research_handoff.json&#x27;s DEFECTS (fields dying in it, schema drift, a v1_compat float score) without reporting the artifact itself as the deviation.</p>
+<p class="msr"><span class="k">measurement</span>dma-assessment SKILL.md:401 states verbatim: &#x27;Research Handoff Check: Look for research_handoff.json. IF FOUND -&gt; set RESEARCH_HANDOFF mode, skip Phase 1.&#x27; So the assessment skill&#x27;s documented primary mode keys on the JSON file&#x27;s presence, and the workbook plays no role in the handoff at all. build_handoff.py:21-26 constructs it from run_manifest.json, the engagement set, evidence_index.json, the floors JSON and peer_set.json — five JSON sources, zero sheets. The audit&#x27;s earlier measurements now read differently: &#x27;</p>
+<p class="hl"><span class="k">with no human in the session</span>Two skills agree on a private JSON interface the owner never designated, so the artifact the owner audits (the workbook) and the artifact the pipeline trusts (the handoff) can diverge without any gate noticing. Every repair hint this audit attached to handoff defects would ENTRENCH the deviation if executed as written — the correct repair direction is to move the recorded state</p>
+</article>
+<article class="fx fx-blocker">
+<header><span class="sev">BLOCKER</span><span class="sec">§§0</span></header>
+<h4>Of the three canonical output artifacts, one has no producer, one ships in a format the app cannot classify, and only the workbook has both a producer and a reader</h4>
+<p class="obs">The owner&#x27;s target names exactly three output artifacts: the DMA Scoring Workbook (contract v3), the Client Research Report, and the Assessment Report. Census of what actually has an end-to-end path.</p>
+<p class="msr"><span class="k">measurement</span>(1) SCORING WORKBOOK: producer exists (populate_workbook.py), app-side reader exists (apps/worker/dma_worker/workbook_parser.py) — the ONLY artifact of the three with both, though the generated workbook lacks DQ_Bank, Cap_Triggers, Solution_Catalogue, Platform_Peer_Adoption and CHAIN INTEGRITY against the pinned template. (2) CLIENT RESEARCH REPORT: producer exists but emits client_profile.md (render_client_report.py:167 writes markdown), and the app&#x27;s artefact registry accepts only .docx for reports — classify(&#x27;cl</p>
+<p class="hl"><span class="k">with no human in the session</span>An unattended run to the owner&#x27;s specification cannot currently finish: one of its three mandatory deliverables has nothing that produces it, a second is produced in a format the ingest classifier rejects, and the third is produced once at the end from a substrate the agents never wrote.</p>
 </article>
 <article class="fx fx-blocker">
 <header><span class="sev">BLOCKER</span><span class="sec">§§1.2</span></header>
@@ -1078,7 +1172,7 @@ reconciled them. Only the second is cheap.</p>
 
 <section id="d12">
 <span class="lab">Deliverable 12 · Findings, worst first</span>
-<h2>79 major</h2>
+<h2>80 major</h2>
 <p class="note" style="margin-bottom:22px">Major means the stage needs a human, and the target
 architecture has none.</p>
 <article class="fx fx-major">
@@ -1416,6 +1510,13 @@ architecture has none.</p>
 <p class="obs">run_status_t has seven values and none of them means &#x27;this assessment is complete and correct&#x27;. PROMOTED is the end of the road and is explicitly revisable — retention exists so a single page can be re-promoted at any time, and promote is documented as &#x27;the ONLY way back from withdrawal&#x27;. SUPERSEDED and WITHDRAWN both mean &#x27;no longer serving&#x27;, not &#x27;done&#x27;. runs.completed_at is not a lifecycle marker either: it is the assessment&#x27;s stated completion date parsed out of the manifest at ingest, falling back to the date t</p>
 <p class="msr"><span class="k">measurement</span>`select unnest(enum_range(null::run_status_t))` -&gt; INGESTED, CLAIMED, SYNTHESISING, STAGED, PROMOTED, SUPERSEDED, WITHDRAWN (7 values). Status writers across the whole live tree: 3 — promote.py:370 (SUPERSEDED), promote.py:378 (PROMOTED), withdraw.py:89 (WITHDRAWN). `grep -rniE &#x27;terminal state|final state|run is final|marks .* final&#x27; apps/api apps/mcp apps/worker packages migrations docs/text scripts` = 0 hits. apps/worker/dma_worker/persist.py:92 `_stated_completed_at` docstring confirms completed_at&#x27;s ingest-time</p>
 <p class="hl"><span class="k">with no human in the session</span>With no human deciding &#x27;we are done with this client&#x27;, finality is whatever the last unattended session happened to leave behind. A run that promoted with a disclosed SG failure, a thin page, or an open rejection sits in exactly the same state as one that is genuinely finished, and no query can separate them. Combined with the retention design there is no point at which an auto</p>
+</article>
+<article class="fx fx-major">
+<header><span class="sev">MAJOR</span><span class="sec">§§0</span></header>
+<h4>The reports are rendered from the JSON plane, never curated from the workbook — which is the mechanism behind the unresolved citations</h4>
+<p class="obs">The owner&#x27;s architecture: assessment and client research reports are CURATED from the workbook after evidence synthesis. The measured reality is that the report renderer never opens the workbook.</p>
+<p class="msr"><span class="k">measurement</span>render_client_report.py&#x27;s complete input set, read from its own source at lines 39-46: evidence_index.json, run_manifest.json, context.json (silently degrading to {}), solution objectives JSON, floors JSON. Sheets read: 0. `grep -nE &#x27;xlsx|workbook|load_workbook&#x27; scripts/deliver/render_client_report.py` on the data path = 0 hits. Nothing anywhere asserts report ≡ workbook. This is the mechanism behind the already-measured S8-03 defect: on a real delivered report, 6 of 21 distinct cited E-ids did not resolve in the d</p>
+<p class="hl"><span class="k">with no human in the session</span>A curated report and a recording workbook can disagree about the same assessment and both ship. The owner&#x27;s design makes that impossible by construction (one substrate); the current design makes it undetectable by construction (two substrates, no reconciler).</p>
 </article>
 <article class="fx fx-major">
 <header><span class="sev">MAJOR</span><span class="sec">§§4.3</span></header>

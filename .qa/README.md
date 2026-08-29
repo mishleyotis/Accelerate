@@ -10,7 +10,7 @@ Prompt fingerprint `52ca18a5a10ae0b675387d0ad058d3dc6de4d5a0fd90246ca3c3e4acd588
 | Checks | **158** — 156 `DONE`, 2 `BLOCKED`, 0 `NOT_APPLICABLE` |
 | `DONE` rows failing the 30-char measurement gate | **0** |
 | Phase reached | **P5** (deliverable), all phases closed in order |
-| Findings | **141** — 45 BLOCKER, 76 MAJOR, 17 MINOR, 3 INFO |
+| Findings | **151** — 51 BLOCKER, 80 MAJOR, 17 MINOR, 3 INFO |
 | Verdicts | 99 PRESENT–DEFECTIVE · 29 ABSENT–UNNOTICED · 26 PRESENT–SOUND · 4 PRESENT–HUMAN-DEPENDENT · **0 ABSENT–BY–DESIGN** |
 | Deliverable items | **15 of 15** |
 | Repo state | **unchanged** — `cdea0e1`, working tree clean, verified byte-identical |
@@ -30,7 +30,7 @@ navigation index at the top. 294 KB, self-contained, light and dark.
 |---|---|
 | `.qa/ledger.jsonl` | Append-only. 514 rows, 162 unique ids — **collapse last-row-per-id** to read final state. Every `DONE` row carries a re-runnable measurement. |
 | `.qa/audit-prompt.md` + `prompt.sha256` | The prompt this was run against, and its fingerprint. |
-| `.qa/artifacts/findings.jsonl` | 141 findings: title, severity, component, observed, measurement, headless consequence. |
+| `.qa/artifacts/findings.jsonl` | 151 findings: title, severity, component, observed, measurement, headless consequence. |
 
 ## Consolidated deliverables
 
@@ -44,7 +44,7 @@ navigation index at the top. 294 KB, self-contained, light and dark.
 | `.qa/artifacts/s6.3-wrong-but-perfect.md` | 8 part C — the eight-leg walk-through, every gate the wrong conclusion passes |
 | `.qa/artifacts/d9-owner-checks.md` | 9 — the seven owner-specified checks, in order, each with its measurement |
 | `.qa/artifacts/d11-absent-unnoticed.md` | 11 — the 29-row register of gaps nothing records |
-| `.qa/artifacts/d12-findings-worst-first.md` | 12 — all 141 findings worst-first, with `AUD-####` ids |
+| `.qa/artifacts/d12-findings-worst-first.md` | 12 — all 151 findings worst-first, with `AUD-####` ids |
 | `.qa/artifacts/d13-refuted-leads.md` | 13 — every `[LEAD]` disproved, and how |
 | `.qa/artifacts/d14-could-not-determine.md` | 14 — with the access that would settle each |
 | `.qa/artifacts/d15-build-first.md` | 15 — the three things to build first, and the argument for that order |
@@ -53,6 +53,20 @@ navigation index at the top. 294 KB, self-contained, light and dark.
 | *(report section `#apxc`)* | Cross-check — reconciliation against an independent second audit run |
 | `.qa/artifacts/d16-second-pass-verification.md` | Method — what a second pass changed, including two of my own errors |
 | `.qa/artifacts/refutations.txt` | Raw refutation log |
+
+## The owner's target, restated — the reframe that governs the rest
+
+After assembly the owner restated the goal: **three output artifacts** (DMA Scoring Workbook
+contract v3, Client Research Report, Assessment Report), **every agent recording to the
+workbook**, the reports **curated from it** after evidence synthesis, all published to the app.
+Report section `#d2b` measures the pipeline against that target: zero engine scripts can touch a
+sheet (the workbook is written once, at the end, by one producer); the reports read five JSON
+files and zero sheets; the de-facto research→assessment contract is `research_handoff.json`
+(dma-assessment SKILL.md:401 switches on its presence) — an artifact the target does not name;
+and of the three canonical artifacts, only the workbook has both a producer and an app-side
+reader, the client report ships as `.md` the classifier rejects, and **no Assessment Report
+renderer exists at all**. Repair hints that add readers of the JSON plane would entrench the
+deviation; the repair direction under the target is to move recorded state into the workbook.
 
 ## Cross-checked against an independent second run
 
@@ -74,7 +88,7 @@ averaged away.
 ## Two things to know before acting on this
 
 **No memory writes were made** — note that the second run recorded 105 of its 110 findings, so a dedup pass is now mandatory before minting these. The prompt authorises writing findings to the findings memory,
-and minting `MEM-####` ids is that write. It was not done: recording 141 rows is a write to the
+and minting `MEM-####` ids is that write. It was not done: recording 151 rows is a write to the
 production store (`{open: 275, resolved: 51, all: 326}`), several findings duplicate rows already
 there, and the standing instruction in this session narrowed the deliverable to the report. The
 findings carry local `AUD-####` ids instead. To mint them, run the list through
