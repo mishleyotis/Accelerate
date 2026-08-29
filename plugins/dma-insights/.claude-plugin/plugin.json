@@ -1,10 +1,10 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "0.9.12",
-  "description": "The six Digital Maturity Assessment skills, 47 DMA agents and the remote DMA Insights MCP connector (33 tools) as one installable unit. A session that loses its connector binding — a continued session after a token reset included — revives it with mcp_raw.py revive: identity, server and banked run state in one verdict, and a standing authorization to finish an unpromoted claimed run through the bridge instead of declaring the tools lost.",
+  "version": "1.0.0",
+  "description": "The six Digital Maturity Assessment skills, 47 DMA agents, the remote DMA Insights MCP connector (33 tools), and the research ENGINE that makes a run finish unattended: the scoring workbook is the substrate every step writes to, not an export produced once at the end, and the three deliverables \u2014 workbook, Assessment Report, Client Research Profile \u2014 each have a producer and a reader. See docs/END-TO-END.md for the run, and scripts/aud_ledger.py for what is closed and what is not.",
   "author": {
-    "name": "Zennify — DMA Insights build"
+    "name": "Zennify \u2014 DMA Insights build"
   },
   "license": "UNLICENSED",
   "keywords": [

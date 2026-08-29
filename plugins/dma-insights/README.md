@@ -5,13 +5,27 @@
 > claude.ai's custom-connector dialog (docs/CONNECTORS.md § DMA Insights
 > in claude.ai; access contract in docs/DECISIONS.md D8).
 
-The six Digital Maturity Assessment skills, fourteen DMA agents — five
-producers, three pipeline QA, four standing QA/maintenance — two operator
-commands, the submit/verdict hooks and the remote DMA Insights MCP
+The six Digital Maturity Assessment skills, the 47 DMA agents, two operator
+commands, the session/submit/verdict hooks and the remote DMA Insights MCP
 connector, as one installable plugin.
 
+**The research engine lives in `skills/dma-research/engine/`, and the
+workbook is its substrate.** Every research step appends to the scoring
+workbook as it happens; the gate, the handoff, both reports, the app's
+ingest and the governance audit all read that same object. Before it, no
+research step could touch a sheet and the workbook was written once at the
+end from a parallel JSON plane — which made the resume, the live chain
+integrity and the mid-run audit structurally impossible.
+
+`docs/END-TO-END.md` is the run: every command, what refuses and why, and
+what each stage hands the next. `scripts/aud_ledger.py` is the record of
+what the headless-readiness audit found and what became of it — including
+what is still open.
+
 ```
-skills/    dma-research · dma-assessment · dma-governance
+skills/    dma-research (+ engine/: the workbook substrate, the gate,
+                         the validator, the two report renderers)
+           dma-assessment · dma-governance
            dma-surface-production · dma-first-call-deck · dma-rectifier
 agents/    surface-producer (conductor; the only one that submits/promotes)
            overview-surface-producer · heatmap-surface-producer
@@ -21,11 +35,18 @@ agents/    surface-producer (conductor; the only one that submits/promotes)
            rectifier
 hooks/     precheck_submit (refuses a doomed submit before the network)
            verdict_watch (nudges the memory when a gate refuses twice)
-           session_brief (the routing and memory rules, at session start)
+           session_brief (the routing and memory rules — at session start
+                          on all five sources, AND to every subagent via
+                          SubagentStart, which is the channel the live
+                          Routine actually dispatches producers through)
+           deny_bulk_read (the never-cat rule, enforced rather than written)
 commands/  /dma-insights:doctor          is this install able to do the work?
            /dma-insights:setup-routines  reconcile the scheduled routines
 scripts/   dma-deps · mcp_auth_headers.sh · doctor.py · setup_routines.py
-           audit_skills.py · hooks/ · tests/
+           audit_skills.py (broken-reference ceiling: 0)
+           check_taxonomy_drift.py (counts come from the catalogue)
+           gen_gates_md.py (the gate census, generated from the registry)
+           hooks/ · tests/
            (no bin/: claude.ai-hosted plugins may not ship PATH-added
             executables — invoke dma-deps by path)
 routines.json  the scheduled routines this product requires, declared
