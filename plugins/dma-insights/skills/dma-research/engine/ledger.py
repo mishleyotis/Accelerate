@@ -30,6 +30,7 @@ if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
     __package__ = "engine"
 
 import datetime as _dt
+import json
 import re
 
 from . import contract as C
@@ -171,6 +172,22 @@ def recency_band(published: str | None, wb: RunWorkbook | None = None) -> str:
 
 # ── search ───────────────────────────────────────────────────────────────
 
+def _ops_since_checkpoint(wb: RunWorkbook) -> int:
+    """Searches fired since the last recorded checkpoint.
+
+    Read from the workbook's own metadata rather than by importing runstate,
+    which imports this module — the count is a plain integer and does not
+    justify a cycle. A run that has never checkpointed measures from zero,
+    which is correct: its whole history is one conversation.
+    """
+    done = len(wb.rows("Search_Log"))
+    try:
+        mark = json.loads(wb.metadata().get("checkpoint") or "{}")
+        return max(0, done - int(mark.get("search_ops") or 0))
+    except (ValueError, TypeError):
+        return done
+
+
 def append_search(wb: RunWorkbook, *, subcap: str | None, facet: str | None,
                   query: str, tool: str, hits: int, kept: int,
                   outcome: str = "") -> int:
@@ -180,6 +197,32 @@ def append_search(wb: RunWorkbook, *, subcap: str | None, facet: str | None,
     reads a real number rather than an agent's recollection of one."""
     if facet is not None and facet not in C.DQ_FACETS:
         raise LedgerRefusal(f"facet {facet!r} is not in {C.DQ_FACETS}")
+    # THE CEILING IS A WALL, NOT A NUMBER IN A REPORT.
+    #
+    # SEARCH_OP_CEILING has been the rule since R27 — "a conversation that
+    # has fired this many searches must checkpoint and stop" — and it was
+    # enforced by `stats()` returning `checkpoint_required` and orient.py
+    # printing it first. AUD-0037 already recorded that shape once: the
+    # count was reported and walked past. On 2026-08-30 a live run was
+    # measured at 73 ops against the cap of 40, which is the same finding
+    # recurring at 183% of the limit.
+    #
+    # Reported and ignored is the failure mode; refusing is the fix. The
+    # window is measured from the last checkpoint rather than from run
+    # start, because the ceiling is per CONVERSATION — a long run must be
+    # able to checkpoint and legitimately continue, which is exactly the
+    # context-preserving behaviour the ceiling exists to force.
+    since = _ops_since_checkpoint(wb)
+    if since >= SEARCH_OP_CEILING:
+        raise LedgerRefusal(
+            f"search-op ceiling reached: {since} since the last checkpoint, "
+            f"cap {SEARCH_OP_CEILING}. Checkpoint and stop — "
+            f"`runstate.checkpoint(wb, '<where you got to>')` records the "
+            f"position in the workbook and resets the window, and a fresh "
+            f"conversation resumes from it. This is the wall that keeps a "
+            f"run from spending its context on searches it will not "
+            f"remember; walking past it is how a run loses the reasoning "
+            f"the searches were for.")
     if "{entity}" in (query or "") or "{" in (query or "") and "}" in (query or ""):
         # AUD-0015: orient issued work cards containing 15 literal {entity}
         # placeholders and nothing warned, so an unattended agent fired

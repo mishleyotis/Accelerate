@@ -140,8 +140,36 @@ _BLOCKED_MARKERS = (
 # 64 manifests carry `tools:` and `disallowedTools:` and those are
 # enforced independently. This list only removes the permission-prompt
 # layer that a scheduled container has nobody to answer.
+#: The claude.ai connector namespaces the ROSTER declares. Measured across
+#: the 64 agent manifests on 2026-08-30: Exa 60, Google_Drive 63, Tavily 59,
+#: Clay 36, Quartr 35, Vibe_Prospecting 6, Indeed 6.
+#:
+#: They were absent from ALLOWED, and in `--permission-mode dontAsk`
+#: everything not pre-approved is DENIED rather than asked. So every
+#: enrichment call a dispatched child made was refused silently — the
+#: MEM-0111 starvation shape, aimed squarely at enrichment, which is why a
+#: live run showed "enrichment connectors not being called by the agents".
+#:
+#: Granting a namespace here is NOT the same as the connector being bound:
+#: binding is the harness's business and a Routine-attached connector may
+#: still be absent from a headless child. This removes the permission
+#: barrier, which is the half this repository controls. The agent's own
+#: front matter still decides which of these it may touch — the 64
+#: manifests carry `tools:` and `disallowedTools:` and those are enforced
+#: independently, so a producer banned from Clay stays banned.
+CONNECTOR_NAMESPACES = (
+    "mcp__Clay",
+    "mcp__Exa",
+    "mcp__Tavily",
+    "mcp__Vibe_Prospecting",     # Explorium — the technographic source
+    "mcp__Indeed",
+    "mcp__Quartr",
+    "mcp__Google_Drive",
+)
+
 ALLOWED = ",".join([
     "mcp__plugin_dma-insights_connector",   # the connector namespace
+    *CONNECTOR_NAMESPACES,                  # enrichment, per the roster
     "Bash", "Read", "Glob", "Grep",         # the four local checkers
     "Write", "Edit",                        # denied per-agent where wrong
     "TodoWrite", "Skill", "WebSearch", "WebFetch",
