@@ -40,15 +40,26 @@ def test_an_intake_routine_exists_and_is_live():
     assert "LIVE" in head and "trig_" in head, head
 
 
-def test_the_intake_prompt_stops_at_the_question():
+def test_the_intake_prompt_stops_at_the_question_when_it_is_a_question():
     """A headless firing cannot answer AskUserQuestion, and a run bound on a
-    guess researches the wrong 851 cells to completion. The prompt must say
-    so, not merely imply it."""
+    guess researches the wrong 851 cells to completion.
+
+    REVISED 2026-08-30 (owner: "the run should bind to unambiguous
+    subvertical"). The rule is no longer "always stop" — it is "stop where
+    there is something to decide". An UNAMBIGUOUS census binds itself
+    through `preflight autobind`; an ambiguous one still refuses, and the
+    prompt must carry BOTH halves or a reader will apply the wrong one.
+    """
     body = _fenced(_sections()["2g"])
     assert body, "§2g carries no fenced prompt"
-    assert "binding_question.asked is false" in body
-    assert "THAT REFUSAL IS THE CORRECT OUTCOME" in body
+    assert "preflight autobind" in body, (
+        "the prompt no longer names the command that binds an unambiguous "
+        "census, so every firing still stops and the change is inert")
+    assert "Where it is ambiguous it REFUSES" in body
     assert "must not invent an answer" in body
+    assert "recomputes unambiguity" in body, (
+        "the prompt must say that hand-writing auto_bound does not work, "
+        "because that is the shortcut a stuck firing will otherwise reach for")
     # and it must not wander into the watchdog's job
     assert "Revive a stalled run" in body
 

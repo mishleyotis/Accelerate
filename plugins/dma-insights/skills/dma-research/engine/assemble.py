@@ -50,7 +50,8 @@ import sys
 from pathlib import Path
 
 from . import contract as C
-from . import completeness, runstate, techscan, validator
+from . import completeness
+from . import prelim, runstate, techscan, validator
 from .workbook import RunWorkbook, _split_ids
 
 #: The four final outputs, as (key, glob pattern, app classifier kind).
@@ -69,6 +70,14 @@ MACHINE_EXTRAS = (
     ("run_manifest", "run_manifest.json"),
     ("evidence_index", "01_evidence/evidence_index.json"),
     ("techscan_json", "technographic_scan.json"),
+    # The run's own dated events, for the served C1 timeline. Until
+    # 2026-08-30 Entity_Timeline had a writer, a completeness gate and NO
+    # READER anywhere in the shipped system — no report section named it, no
+    # package extra carried it, the app had zero references to it — while
+    # the surface it was gathered for was produced entirely by re-searching
+    # in the synthesis session. A tab with a writer, a gate and no reader is
+    # the most expensive shape there is.
+    ("entity_timeline", "01_evidence/entity_timeline.json"),
 )
 
 
@@ -80,6 +89,48 @@ def folder_name(entity_name: str) -> str:
     """'<Entity> - DMA', the intake tree's own convention."""
     name = str(entity_name or "").strip()
     return name if name.endswith("- DMA") else f"{name} - DMA"
+
+
+# ── the timeline the served C1 surface reads ─────────────────────────────
+
+def timeline_doc(wb: RunWorkbook) -> dict:
+    """The run's dated events, in the vocabulary `context.timeline` filters on.
+
+    The run's own events are stronger ground for C1 than a re-search: they
+    were gathered under PRELIM against this register, every one carries a
+    citation the gate refused it without, and they are dated. This is the
+    file that makes them reachable.
+    """
+    md = wb.metadata()
+    events = []
+    for r in wb.rows("Entity_Timeline"):
+        if not str(r.get("Event_Date") or "").strip():
+            continue
+        events.append({
+            "date": str(r.get("Event_Date"))[:10],
+            "title": r.get("Title"),
+            "body": r.get("Body") or None,
+            "kind": r.get("Kind"),
+            "signal": r.get("Signal"),
+            "maturity_effect": r.get("Maturity_Effect") or None,
+            "claim_label": r.get("Claim_Label") or None,
+            "subcap_ids": _split_ids(r.get("SubCap_IDs")),
+            "e_ids": _split_ids(r.get("Evidence_IDs")),
+        })
+    events.sort(key=lambda e: e["date"])
+    return {"artefact": "entity_timeline", "run_id": md.get("run_id"),
+            "entity_id": md.get("entity_id"),
+            "entity_name": md.get("entity_name"),
+            "generated_at": _utcnow(),
+            "vocabulary": {"signal": list(C.TIMELINE_SIGNALS),
+                           "kind": list(C.TIMELINE_KINDS)},
+            "events": events,
+            # An empty timeline is a STATE, and C1 must be able to tell it
+            # from a timeline nobody gathered.
+            "not_run": (None if events else
+                        "PRELIM recorded no dated event for this entity; see "
+                        "the run's empty_sheet_reasons for the ladder behind "
+                        "that")}
 
 
 # ── the evidence index the app reads (AUD-0091's other half) ─────────────
@@ -142,6 +193,101 @@ def default_folder_root(run: runstate.Run) -> Path:
     return Path(run.root).parent
 
 
+#: Where a superseded package is kept, INSIDE the client folder that already
+#: exists. Never a second client folder: `runs.source_folder_id` keys on the
+#: folder, and renaming or forking it orphans every run that came before.
+ARCHIVE_DIR = "_superseded"
+
+
+def _archive_existing(dest: Path, wb) -> dict:
+    """Move a previous run's package aside before this one is written.
+
+    THE DEFECT THIS CLOSES, measured 2026-08-30. `folder_name()` is a pure
+    function of the entity name and `default_folder_root()` is the shared run
+    root, so two runs of the same client resolved to ONE directory — and
+    nothing noticed. `open_folder` reported `created: false` and overwrote
+    `run_manifest.json` with the second run's identity; `package` copied the
+    second run's deliverables in beside the first's and overwrote all three
+    fixed-name machine extras. The deliverables themselves carry the
+    reference date, so a second run on a different date left TWO scoring
+    workbooks in one folder, and the app's package scan keeps exactly one
+    artefact per kind — chosen by rank and then by iteration order. The
+    client folder became a mix of two runs with an arbitrary winner.
+
+    THE SHAPE IS THE ONE THIS SYSTEM ALREADY USES. Server-side, an entity has
+    N runs, exactly one active, and promotion demotes its predecessor to
+    SUPERSEDED and RETAINS it (the charter's own default). This mirrors that
+    on the folder: the CURRENT package is at the folder root, where every
+    reader already looks, and each previous one moves whole into
+    `_superseded/<run_id>/`. Nothing is deleted, the folder keeps its name
+    and its id, and a reader who wants the history knows where it is.
+    """
+    md = wb.metadata()
+    prior = dest / "run_manifest.json"
+    if not prior.is_file():
+        return {"archived": None, "reason": "no previous package here"}
+    try:
+        was = json.loads(prior.read_text())
+    except ValueError:
+        was = {}
+    prior_run = str(was.get("run_id") or "").strip()
+    if not prior_run or prior_run == str(md.get("run_id") or ""):
+        # Same run re-opening its own folder: idempotent, not a supersede.
+        return {"archived": None, "reason": "same run"}
+
+    stamp = str(was.get("opened_at") or was.get("generated_at") or "")[:10]
+    home = dest / ARCHIVE_DIR / (f"{prior_run}_{stamp}" if stamp else prior_run)
+    if home.exists():
+        return {"archived": str(home), "reason": "already archived"}
+    home.mkdir(parents=True, exist_ok=True)
+    moved = []
+    for item in sorted(dest.iterdir()):
+        if item.name == ARCHIVE_DIR:
+            continue
+        shutil.move(str(item), str(home / item.name))
+        moved.append(item.name)
+    (home / "SUPERSEDED.json").write_text(json.dumps({
+        "run_id": prior_run,
+        "superseded_by": md.get("run_id"),
+        "superseded_at": _utcnow(),
+        "entity_name": was.get("entity_name"),
+        "note": ("This package was the client folder's current one until the "
+                 "run named in superseded_by assembled. It is RETAINED, per "
+                 "the charter's default for superseded runs, and it is here "
+                 "rather than in a second client folder because "
+                 "runs.source_folder_id keys on the folder itself."),
+    }, indent=2, default=str))
+    return {"archived": str(home), "run_id": prior_run, "moved": moved}
+
+
+def _dest_folder(run: runstate.Run, md: dict, entity: str, out_root) -> Path:
+    """Where this run's client folder IS — recorded, not recomputed.
+
+    THE DEFECT THIS CLOSES, found by the stress walk on 2026-08-30.
+    `open_folder` writes `client_folder` into the workbook and calls the
+    folder "the run's public identity"; `package` then recomputed the same
+    path from `out_root or default_folder_root(run)` and never read what was
+    recorded. Give the two different roots — which the CLI allows, since
+    `--out` is per-command — and the run ends with TWO `<Entity> - DMA`
+    directories: the manifest, the evidence and the supersession archive in
+    one, the four deliverables in the other. `runs.source_folder_id` keys on
+    a folder, so the app scans one of them and the other is orphaned, which
+    is AUD-0170 with the halves swapped.
+
+    An EXPLICIT `out_root` still wins: a caller naming a destination means
+    it. And the recorded path is honoured only when its parent exists,
+    because `client_folder` is an absolute path in the container that wrote
+    it — a run resumed on a fresh container must fall back to the default
+    root rather than chase a directory that is not there.
+    """
+    if out_root:
+        return Path(out_root) / folder_name(entity)
+    recorded = str(md.get("client_folder") or "").strip()
+    if recorded and Path(recorded).parent.is_dir():
+        return Path(recorded)
+    return default_folder_root(run) / folder_name(entity)
+
+
 def open_folder(run: runstate.Run, out_root=None, *, push: bool = True) -> dict:
     """Create '<Entity> - DMA' NOW, at run start, and say so in the workbook.
 
@@ -162,9 +308,12 @@ def open_folder(run: runstate.Run, out_root=None, *, push: bool = True) -> dict:
     wb = run.open()
     md = wb.metadata()
     entity = str(md.get("entity_name") or run.run_id)
-    dest = Path(out_root or default_folder_root(run)) / folder_name(entity)
+    dest = _dest_folder(run, md, entity, out_root)
     created = not dest.exists()
     dest.mkdir(parents=True, exist_ok=True)
+    # A SECOND run for this client does not get a second folder — it
+    # supersedes the one that is here, and the one that is here is kept.
+    superseded = _archive_existing(dest, wb)
     (dest / "01_evidence").mkdir(exist_ok=True)
 
     opened = str(md.get("client_folder_opened_at") or "").strip() or _utcnow()
@@ -178,7 +327,8 @@ def open_folder(run: runstate.Run, out_root=None, *, push: bool = True) -> dict:
     wb.set_metadata("client_folder_opened_at", opened)
 
     out = {"folder": str(dest), "entity": entity, "created": created,
-           "status": "IN_PROGRESS", "opened_at": opened}
+           "status": "IN_PROGRESS", "opened_at": opened,
+           "superseded": superseded}
     out["pushed"] = _push_one(mpath, entity, "run_manifest.json") if push \
         else {"outcome": "NOT_RUN", "reason": "push disabled by caller"}
     return out
@@ -212,13 +362,23 @@ def package(run: runstate.Run, out_root, *, push: bool = False) -> dict:
     wb = run.open()
     md = wb.metadata()
     entity = str(md.get("entity_name") or run.run_id)
-    dest = Path(out_root or default_folder_root(run)) / folder_name(entity)
+    dest = _dest_folder(run, md, entity, out_root)
 
     # A workbook that validates and carries nothing is the Golden 1 shape.
     # The package is where it would reach a client, so it is refused here.
     try:
         completeness.require(wb)
     except completeness.CompletenessRefusal as e:
+        raise SystemExit(f"REFUSED: {e}") from None
+
+    # And PRELIM. `prelim.require_complete` described itself as "the gate
+    # orient calls" and NOTHING called it — not orient, not handoff, not
+    # here — so a package could ship with the institution unprofiled and the
+    # client research report written over the hole. The package is the last
+    # point where that is still cheap to say.
+    try:
+        prelim.require_complete(wb)
+    except prelim.PrelimRefusal as e:
         raise SystemExit(f"REFUSED: {e}") from None
 
     missing = []
@@ -248,6 +408,8 @@ def package(run: runstate.Run, out_root, *, push: bool = False) -> dict:
         json.dumps(manifest_doc(wb, status="COMPLETE"), indent=2, default=str))
     (dest / "01_evidence" / "evidence_index.json").write_text(
         json.dumps(evidence_index_doc(wb), indent=2, default=str))
+    (dest / "01_evidence" / "entity_timeline.json").write_text(
+        json.dumps(timeline_doc(wb), indent=2, default=str))
     ts_json = run.deliverables / techscan.JSON_NAME
     if ts_json.exists():
         shutil.copy2(ts_json, dest / techscan.JSON_NAME)

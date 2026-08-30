@@ -42,6 +42,7 @@ if __package__ in (None, ""):  # noqa: E402
 import argparse
 import datetime as _dt
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -56,8 +57,10 @@ _MIN_LADDER = 60
 #: The signal vocabulary an Entity_Timeline row may carry. Tokens, not prose,
 #: for the same reason every other vocabulary in this engine is a token: a
 #: free-text signal cannot be counted, filtered or reconciled downstream.
-TIMELINE_SIGNALS = ("INVESTMENT", "DIVESTMENT", "LEADERSHIP", "PLATFORM",
-                    "REGULATORY", "MERGER", "INCIDENT", "LAUNCH", "PARTNERSHIP")
+#: Both vocabularies live in the contract, because both are the APP's and a
+#: second copy here is the drift this engine has paid for before.
+TIMELINE_SIGNALS = C.TIMELINE_SIGNALS
+TIMELINE_KINDS = C.TIMELINE_KINDS
 
 #: The sections, what closes each, and why the run needs it. `key` is the
 #: `--section` argument; `section_id` is what lands in Report_Narrative.
@@ -92,6 +95,15 @@ SECTIONS = {
         heading="Technology baseline",
         why="the platforms already visible from outside, so category "
             "researchers recognise a system instead of re-discovering it"),
+}
+
+#: The workbook tab a PRELIM section owns. Declaring the section declares
+#: the tab, with the SAME ladder — one reason, in one place, at the stricter
+#: of the two floors.
+OWNS_SHEET = {
+    "timeline": "Entity_Timeline",
+    "peers": "Peer_Benchmarks",
+    "tech_baseline": "Tech_Register",
 }
 
 #: PRELIM sections that must be RESEARCHED and may not be declared away.
@@ -163,7 +175,8 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
     return {"section": key, "status": "OPEN",
             "detail": f"{sheet} has {n} row(s), {need} required",
             "fix": (f"engine.prelim {verb} …" if kind != "tech"
-                    else "engine.cli techscan record …")}
+                    else "engine.cli techscan clay-plan / "
+                         "import-explorium / record --provider …")}
 
 
 def state(wb: RunWorkbook) -> dict:
@@ -273,16 +286,58 @@ def declare(wb: RunWorkbook, section: str, ladder: str,
         wb.update_row("Report_Narrative", "Section_ID", spec["section_id"], row)
     else:
         wb.append("Report_Narrative", row)
-    return {"section": section, "status": "DECLARED", "ladder_chars": len(text)}
+    # A PRELIM section that OWNS a tab declares that tab too, with the same
+    # ladder. Until 2026-08-30 there were two independent declarations at
+    # two layers — PRELIM's 60-character ladder and completeness's
+    # 40-character reason — with nothing cross-checking them, so a run could
+    # declare the timeline absent in one place and be asked for it again in
+    # the other, or satisfy the weaker one and never meet the stronger.
+    sheet = OWNS_SHEET.get(section)
+    tab = None
+    if sheet:
+        from . import completeness as K
+        if sheet not in K.NEVER_EMPTY and not [
+                r for r in wb.rows(sheet) if any(_clean(v)
+                                                 for v in r.values())]:
+            tab = K.declare(wb, sheet, text)["sheet"]
+    return {"section": section, "status": "DECLARED",
+            "ladder_chars": len(text), "sheet_declared": tab}
 
 
 def timeline(wb: RunWorkbook, *, date: str, event: str, signal: str,
+             kind: str | None = None, body: str = "",
+             maturity_effect: str = "", claim_label: str = "REPORTED",
              subcaps: list[str] | None = None,
              evidence: list[str] | None = None) -> dict:
+    """One dated event, in the vocabulary the served C1 surface filters on.
+
+    `signal` is the DIRECTION (POSITIVE/NEUTRAL/NEGATIVE) and `kind` is the
+    CLASS — two different questions that were one column until 2026-08-30,
+    which is why this tab could not feed the surface it was gathered for. A
+    caller passing one of the nine old event classes as `signal` is bridged
+    to its class rather than refused, and told so.
+    """
     sig = _clean(signal).upper()
+    k = _clean(kind).upper()
+    bridged = None
+    if sig not in TIMELINE_SIGNALS and sig in C.TIMELINE_KIND_BRIDGE:
+        # An old-vocabulary caller: the word it passed is a CLASS.
+        bridged, k, sig = sig, k or C.TIMELINE_KIND_BRIDGE[sig], "NEUTRAL"
     if sig not in TIMELINE_SIGNALS:
         raise PrelimRefusal(
-            f"signal {sig!r} is not one of {', '.join(TIMELINE_SIGNALS)}")
+            f"signal {sig!r} is not one of {', '.join(TIMELINE_SIGNALS)}. "
+            f"The signal is the event's DIRECTION for maturity; its CLASS is "
+            f"--kind, one of {', '.join(TIMELINE_KINDS)}.")
+    if not k:
+        raise PrelimRefusal(
+            f"a timeline row needs a --kind, one of "
+            f"{', '.join(TIMELINE_KINDS)}. D5 FILTERS on it, so an event "
+            f"without one renders on a page no filter can reach.")
+    if k not in TIMELINE_KINDS:
+        raise PrelimRefusal(
+            f"kind {k!r} is not one of {', '.join(TIMELINE_KINDS)}. A "
+            f"near-miss is not a synonym — 'TECHNOLOGY' for PLATFORM and "
+            f"'CAPABILITY' for DATA are events no filter can reach.")
     d = _clean(date)
     if not d or len(d) < 4:
         raise PrelimRefusal(
@@ -300,10 +355,23 @@ def timeline(wb: RunWorkbook, *, date: str, event: str, signal: str,
             "a timeline row cites nothing. Every dated claim about a named "
             "institution carries its source or it does not ship.")
     wb.append("Entity_Timeline", {
-        "Event_Date": d, "Event": _clean(event), "Signal": sig,
+        "Event_Date": d, "Title": _clean(event), "Body": _clean(body),
+        "Kind": k, "Signal": sig,
+        "Maturity_Effect": _clean(maturity_effect),
+        "Claim_Label": _clean(claim_label).upper() or "REPORTED",
         "SubCap_IDs": ", ".join(subcaps or []),
         "Evidence_IDs": ", ".join(eids)})
-    return {"date": d, "signal": sig, "evidence": eids}
+    return {"date": d, "signal": sig, "kind": k, "evidence": eids,
+            "bridged_from": bridged}
+
+
+_CATEGORY_RE = re.compile(r"^(P\d+C\d+)")
+
+
+def _category_of(subcap: str) -> str | None:
+    """`P1C1.3.CU1` -> `P1C1`. The grain the app's peer parser requires."""
+    m = _CATEGORY_RE.match(str(subcap or "").strip())
+    return m.group(1) if m else None
 
 
 def peers(wb: RunWorkbook, names: list[str], *, rule: str,
@@ -328,14 +396,37 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
             "posture — because a peer set with no stated rule is a peer set "
             "chosen to flatter.")
     locked = wb.lock_peer_set(clean, basis=basis)
-    for name in clean:
+    # CATEGORY GRAIN, not peer grain. The app's parser reads this tab by
+    # matching the first column against a category id and discards every row
+    # that does not — so the previous shape (one row per peer, Category_ID
+    # blank) meant a run could do its peer work correctly and still land in
+    # the app with zero peer scores, indistinguishable from a run that
+    # declared the tab empty. The peer SET is frozen in Handoff_Lock, which
+    # is where a set belongs; this tab is the per-category grid the medians
+    # are later filled into.
+    cats: list[str] = []
+    for cell in wb.selected_subcaps():
+        cid = _category_of(cell)
+        if cid and cid not in cats:
+            cats.append(cid)
+    if not cats:
+        raise PrelimRefusal(
+            "this run has no selected subcapability, so there is no category "
+            "for a peer comparison to be at. Select the scope first.")
+    names = ", ".join(clean)
+    for cid in cats:
         wb.append("Peer_Benchmarks", {
-            "Category_ID": "", "Category_Name": "", "Entity_Score": "",
-            "Peer_Median": "", "Peer_P25": "", "Peer_P75": "",
-            "Peer_N": len(clean), "Peer_Basis": f"{basis}: {_clean(rule)}",
-            "Source_Cell": "", "Peer_Names": name, "Peer_Scores": "",
+            # Category_Name is left for the assessment stage, which is where
+            # a category acquires a rendered label; the parser stores None
+            # for a blank and never invents one.
+            "Category_ID": cid, "Category_Name": "",
+            "Entity_Score": "", "Peer_Median": "", "Peer_P25": "",
+            "Peer_P75": "", "Peer_N": len(clean),
+            "Peer_Basis": f"{basis}: {_clean(rule)}",
+            "Source_Cell": "", "Peer_Names": names, "Peer_Scores": "",
             "As_Of": _utcnow()[:10]})
-    return {"peers": clean, "locked": locked, "rule": _clean(rule)}
+    return {"peers": clean, "locked": locked, "rule": _clean(rule),
+            "categories": cats}
 
 
 def complete(wb: RunWorkbook) -> dict:
@@ -377,7 +468,16 @@ def main(argv=None) -> int:
     t = common(sub.add_parser("timeline"))
     t.add_argument("--date", required=True); t.add_argument("--event",
                                                             required=True)
-    t.add_argument("--signal", required=True, choices=TIMELINE_SIGNALS)
+    t.add_argument("--signal", required=True, choices=TIMELINE_SIGNALS,
+                   help="the event's DIRECTION for maturity")
+    t.add_argument("--kind", choices=TIMELINE_KINDS,
+                   help="the event's CLASS, which the C1 surface filters on")
+    t.add_argument("--body", default="",
+                   help="what happened, in a sentence or two")
+    t.add_argument("--maturity-effect", default="",
+                   help="the consequence for maturity, with one clause of "
+                        "reasoning")
+    t.add_argument("--claim-label", default="REPORTED")
     t.add_argument("--subcap", action="append", default=[])
     t.add_argument("--evidence", action="append", default=[])
 
@@ -418,7 +518,11 @@ def main(argv=None) -> int:
             print(json.dumps(declare(wb, a.section, a.ladder), indent=2))
         elif a.cmd == "timeline":
             print(json.dumps(timeline(wb, date=a.date, event=a.event,
-                                      signal=a.signal, subcaps=a.subcap,
+                                      signal=a.signal, kind=a.kind,
+                                      body=a.body,
+                                      maturity_effect=a.maturity_effect,
+                                      claim_label=a.claim_label,
+                                      subcaps=a.subcap,
                                       evidence=a.evidence), indent=2))
         elif a.cmd == "peers":
             print(json.dumps(peers(wb, a.peer, rule=a.rule, basis=a.basis),

@@ -137,10 +137,27 @@ def test_artefact_classification_matches_the_shipped_corpus():
              segs=("Client - DMA", "02_research_workbook")) == ("research", 1)
 
     # reports: the assessment report beats a bare report.docx; the research
-    # Client Profile is a different artefact and never the report
+    # Client Profile is a different artefact and never the report — but it
+    # IS an artefact. It used to return None, which meant all eight of its
+    # sections reached no table in the app while four page packs named it as
+    # their source of truth. `classification.py` in this same service had
+    # been classifying it as `client_profile` priority 3 the whole time:
+    # classified, recorded, then dropped.
     assert c("DMA_Assessment_Report_BCU_20260330.docx") == ("report", 0)
     assert c("Report.docx") == ("report", 1)
-    assert c("DMA_Client_Profile_BCU_20260330.docx") is None
+    assert c("DMA_Client_Profile_BCU_20260330.docx") == ("profile", 0)
+    assert c("Client_Profile_Research_Acme_2026-08-30.docx") == ("profile", 0)
+    # and the profile is never mistaken FOR the report
+    assert c("Client_Profile_Research_Acme_2026-08-30.docx") != ("report", 2)
+
+    # a superseded package, archived inside the client folder when a second
+    # run opened it, is not a candidate for anything: the scan reads the
+    # whole tree at any depth and keeps one artefact per kind, so an
+    # archived workbook could otherwise be chosen over the current one
+    assert c("DMA_Scoring_Workbook_X.xlsx",
+             segs=("Client - DMA", "_superseded", "R-OLD_2026-01-15")) is None
+    assert c("DMA_Assessment_Report_X.docx",
+             segs=("Client - DMA", "_superseded", "R-OLD")) is None
 
 
 def test_workbook_alone_is_ingestable_and_best_candidate_wins():

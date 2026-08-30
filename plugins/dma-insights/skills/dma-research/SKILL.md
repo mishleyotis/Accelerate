@@ -36,7 +36,14 @@ NOTED → CONSOLIDATED | BLOCKED) and consolidated into the workbook through the
 ledger's own refusals, with Drive backup then verified cleanup (cleanup refuses while
 anything is NOTED or BLOCKED). Technographic detections land on the `Tech_Register`
 sheet (`engine/techscan.py`; layers OPS·CUST·DATA·INFRA, statuses
-CONFIRMED·INFERRED·CLAIMED·ABSENT) and render as the fourth deliverable. The
+CONFIRMED·INFERRED·CLAIMED·ABSENT) and render as the fourth deliverable.
+Every row names the PROVIDER(S) that saw it, and the two the app's own
+techstack contract declares — Explorium and Clay — are the spine rather than
+whatever a web search surfaced; a row whose only providers are brokers may
+not wear CONFIRMED. The tech-stack drilldown's own fields are captured here
+too: `DMA_Impact` per row and a `Tech_Peer_Deployments` sheet whose third
+state, `unknown`, keeps a peer nobody could settle out of the coverage
+denominator. The
 `research-conductor` gates every category, renders the four deliverables, and
 assembles, verifies and ships the `<Entity> - DMA` client folder (scoring workbook,
 research report, assessment report, technographic scan + `run_manifest.json` and

@@ -1541,6 +1541,15 @@ _STAT_ALIASES = {
     "delta_vs_median": "delta", "delta": "delta", "vs_median": "delta",
     "gap": "delta", "priority": "priority", "subcap_count": "subcap_count",
     "pillar": "pillar", "level": "level", "confidence": "confidence",
+    # The research engine's own fixed-width tab (contract v4). Its peers ride
+    # as a PAIRED LIST in two columns rather than as one column per peer,
+    # because `contract.SHEETS` compares the header row as an ordered tuple
+    # and a dynamic-width sheet cannot be expressed there. Named here so
+    # they are read as statistics rather than mistaken for five institutions
+    # called Peer_Names, Peer_Scores, Peer_N, Source_Cell and As_Of.
+    "peer_names": "peer_names", "peer_scores": "peer_scores",
+    "peer_n": "peer_n", "source_cell": "note", "as_of": "note",
+    "peer_basis": "note",
 }
 
 
@@ -1619,6 +1628,36 @@ def _is_subject_column(header: str, keys: set) -> bool:
         return False
     n = _norm(header)
     return n in keys or (_SCORE_SUFFIX.sub("", n) or n) in keys
+
+
+def _paired_peers(names, scores, num, obs=None):
+    """Peers carried as two parallel lists in one row.
+
+    The research engine writes a FIXED-WIDTH Peer_Benchmarks (its contract
+    compares the header as an ordered tuple, so it cannot grow a column per
+    peer). It puts the cohort in `Peer_Names` and their figures in
+    `Peer_Scores`, comma-separated and positional. A name with no figure
+    yet is a real peer with a null score — which is what a frozen cohort
+    looks like before the assessment stage fills it — and is kept, exactly
+    as an unscored peer COLUMN is kept.
+    """
+    ns = [n.strip() for n in str(names or "").split(",") if n.strip()]
+    if not ns:
+        return []
+    vs = [v.strip() for v in str(scores or "").split(",") if v.strip()]
+    if vs and len(vs) != len(ns):
+        # Positional lists that disagree in length cannot be zipped without
+        # guessing which peer got which score, and a mis-attributed peer
+        # score is worse than none.
+        if obs is not None:
+            obs.append(Observation("peer_paired_list_mismatch", None, {
+                "tab": "Peer_Benchmarks", "names": len(ns), "scores": len(vs),
+                "reason": "Peer_Names and Peer_Scores are positional lists of "
+                          "different lengths; the scores were dropped and the "
+                          "peers kept unscored rather than mis-attributed"}))
+        vs = []
+    return [(n, num(vs[i]) if i < len(vs) else None)
+            for i, n in enumerate(ns)]
 
 
 def _stat_key(header: str):
@@ -1951,13 +1990,16 @@ def parse_peer_benchmarks(path: str, obs: list | None = None,
             # Reading row[1] positionally put a peer's SCORE in the name
             # field whenever the tab has no Category_Name column.
             cat_name = col("category_name", row)
+            peers = [(name, num(row[i]) if i < len(row) else None)
+                     for i, name in peer_cols]
+            peers += _paired_peers(col("peer_names", row),
+                                   col("peer_scores", row), num, obs)
             out.append({
                 "category_id": cat,
                 "category_name": (str(cat_name).strip() or None) if cat_name is not None else None,
                 "entity_score": num(col("entity_score", row)),
                 "stated_median": num(col("median", row)),
-                "peers": [(name, num(row[i]) if i < len(row) else None)
-                          for i, name in peer_cols],
+                "peers": peers,
             })
         return out
     finally:

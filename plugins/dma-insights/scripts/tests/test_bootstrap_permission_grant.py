@@ -249,16 +249,57 @@ def derived_grants() -> list:
     return [l for l in r.stdout.split() if l]
 
 
+def _servers(grants) -> set:
+    return {g[len("mcp__"):g.rindex("__")] for g in grants}
+
+
 def test_every_enrichment_connector_the_docs_require_is_granted():
     """CONNECTORS.md is the authority on which connectors the routines need;
-    a grant list that does not cover it is a firing that stops on a prompt."""
+    a grant list that does not cover it is a firing that stops on a prompt.
+
+    Coverage is per SERVER, not per wildcard: a server the hook classifies is
+    granted by exact read tool name instead, which is a narrower grant and a
+    better one."""
     grants = derived_grants()
     required = ["Clay", "Exa", "Tavily", "Vibe_Prospecting", "Indeed"]
-    missing = [n for n in required if f"mcp__{n}__*" not in grants]
+    missing = [n for n in required if n not in _servers(grants)]
     assert not missing, (
         f"CONNECTORS.md names these as the enrichment set and they are not "
         f"granted: {missing}. An unattended firing stops on the first call "
         f"to one of them.")
+
+
+def test_no_classified_server_is_granted_by_wildcard():
+    """The defect this replaced. `mcp__<Server>__*` approves the writes too,
+    settings win without the hook being consulted, and the hook's read/write
+    split is overruled silently. It was already true of Google Drive —
+    `trash_file` and `share_file` granted by a wildcard the hook refuses —
+    and naming ONE Slack tool in a design document was about to extend it to
+    `slack_send_message`, because this list is read out of the tree and a doc
+    is part of the tree."""
+    import sys as _sys
+    _sys.path.insert(0, str(HERE.parent / "hooks"))
+    import autoapprove_connector as _aac
+
+    bad = [g for g in derived_grants()
+           if g.endswith("__*")
+           and g[len("mcp__"):g.rindex("__")] in _aac.SERVER_SURFACES]
+    assert not bad, f"wildcard overrules the hook's own read/write split: {bad}"
+
+
+def test_every_granted_tool_is_one_the_hook_would_also_approve():
+    """Settings and hook are two answers to one question, and the moment they
+    differ the broader one wins without anybody being told."""
+    import sys as _sys
+    _sys.path.insert(0, str(HERE.parent / "hooks"))
+    import autoapprove_connector as _aac
+
+    disagree = [g for g in derived_grants()
+                if not g.endswith("__*") and g not in _aac.QUALIFIED_TOOLS
+                and not g.startswith(_aac.PREFIX)]
+    assert not disagree, (
+        f"granted in user settings and NOT on the hook's read allowlist: "
+        f"{disagree}")
 
 
 def test_the_connector_itself_is_always_granted():
@@ -287,6 +328,9 @@ def test_the_set_is_derived_rather_than_a_typed_list():
     stop tracking the agents' allow-lists and drift silently. Pinned by
     checking that a server named ONLY in an agent file still comes out."""
     grants = derived_grants()
-    assert "mcp__Quartr__*" in grants, (
-        "Quartr appears only in agent allow-lists — its presence is the "
-        "evidence that the list is read out of the tree, not typed")
+    assert "mcp__Exa__*" in grants, (
+        "Exa appears only in agent allow-lists — its presence is the "
+        "evidence that the list is read out of the tree, not typed. (Quartr "
+        "was this witness until 2026-08-30; it is now granted by exact read "
+        "name because the hook classifies it, so it can no longer show that "
+        "an UNCLASSIFIED server is picked up from the tree.)")

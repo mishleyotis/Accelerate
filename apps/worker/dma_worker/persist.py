@@ -739,15 +739,23 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                VALUES (%s,%s,%s,%s)""",
             (run_id, rec["rec_id"], json.dumps(rec["payload"]), artefact_id))
 
-    # The twelve structured report sections, at subsection grain. `page`
-    # comes through as-parsed (None from a .docx — computed or null).
+    # The structured report sections, at subsection grain. `page` comes
+    # through as-parsed (None from a .docx — computed or null).
+    #
+    # A section names ITS OWN artefact where it can. A package carries two
+    # reports now — the assessment report and the client research profile —
+    # and attributing both to one `report_artefact_id` would make the
+    # profile's sections claim to come from a document they are not in.
+    # `report_artefact_id` stays the fallback, so a caller that parsed one
+    # report and passed one id behaves exactly as before.
     for sec in (sections or []):
         cur.execute(
             """INSERT INTO document_sections
                  (run_id, section_kind, pillar_id, heading, body, page, artefact_id)
                VALUES (%s,%s,%s,%s,%s,%s,%s)""",
             (run_id, sec.section_kind, sec.pillar_id, sec.heading, sec.body,
-             sec.page, report_artefact_id))
+             sec.page,
+             getattr(sec, "artefact_id", None) or report_artefact_id))
 
     # Manifest-vs-workbook figure check: the workbook (priority 1) wins;
     # a material disagreement is an observation, never silently reconciled.

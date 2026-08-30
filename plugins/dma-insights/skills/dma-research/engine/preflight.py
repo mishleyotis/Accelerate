@@ -272,10 +272,110 @@ def _check_census(doc: dict, problems: list[str]) -> dict:
             "verdicts": verdicts}
 
 
+#: THE ONE CASE THAT NEED NOT BE ASKED (owner, 2026-08-30: "the run should
+#: bind to unambiguous subvertical").
+#:
+#: The question exists because a run bound to the wrong sub-vertical
+#: researches the wrong 851 cells to completion, and a multi-LOB entity is a
+#: judgment nobody should make on the owner's behalf. Where the census leaves
+#: exactly ONE reading, there is no judgment left to make and the question is
+#: ceremony that costs a scheduled firing its whole purpose.
+#:
+#: "Unambiguous" is deliberately narrow, and every clause is load-bearing:
+#:
+#:   one ACCEPT          — the thing being decided has one answer;
+#:   at least one REJECT — the census actually CONSIDERED alternatives. A
+#:                         census listing a single candidate and accepting it
+#:                         is not unanimity, it is a census that never looked,
+#:                         and it is exactly what a thin research pass emits;
+#:   at most one MATERIAL line of business — scope is the owner's call, and
+#:                         two material LOBs is the multi-LOB case whatever
+#:                         the candidate list says.
+#:
+#: check() RE-DERIVES this from the census every time. It never trusts
+#: `auto_bound`, because a flag a caller can write is a flag a caller can
+#: write on an ambiguous entity.
+def unambiguous_binding(doc: dict) -> tuple:
+    """(ok, sub_vertical, why) — the census's own reading, recomputed."""
+    cands = list((doc.get("lob_census") or {}).get("candidates") or [])
+    accepted = [_clean(c.get("sub_vertical")).upper() for c in cands
+                if _clean(c.get("verdict")).upper() == "ACCEPT"]
+    rejected = [c for c in cands
+                if _clean(c.get("verdict")).upper() == "REJECT"]
+    material = [l for l in ((doc.get("lob_census") or {}).get(
+        "lines_of_business") or []) if l.get("material")]
+    if len(accepted) != 1:
+        return False, "", (
+            f"{len(accepted)} sub-verticals are ACCEPTed; exactly one is "
+            f"required to bind without asking")
+    if not rejected:
+        return False, "", (
+            "no candidate was REJECTed, so the census considered no "
+            "alternative — a single accepted candidate is not unanimity "
+            "when nothing else was weighed")
+    if len(material) > 1:
+        return False, "", (
+            f"{len(material)} MATERIAL lines of business — scope across "
+            f"more than one is the owner's decision, not the census's")
+    return True, accepted[0], (
+        f"one ACCEPT ({accepted[0]}) against {len(rejected)} REJECT(s), "
+        f"{len(material)} material line(s) of business")
+
+
+def _auto_bound(doc: dict, key: str, q: dict, problems: list[str]):
+    """An unasked question that the record may nonetheless satisfy.
+
+    Returns the resolved value, or None to mean "still needs a human".
+    Two cases only, and both are re-derived here rather than believed:
+
+    BINDING — the census leaves exactly one reading (unambiguous_binding).
+
+    MODE — and ONLY to PUBLIC. A request that arrives in a Slack channel
+    carries no engagement letter, so public-only is what it actually has.
+    Auto-binding the most RESTRICTIVE mode can only ever under-claim: it
+    withholds evidence the run might have been entitled to, which is a cost
+    in depth. Auto-binding INTERNAL would claim access nobody granted, which
+    is the harm the gate exists to prevent — so that direction is refused
+    here no matter what the document says.
+    """
+    if not q.get("auto_bound"):
+        return None
+    if key == "binding_question":
+        ok, sv, why = unambiguous_binding(doc)
+        if not ok:
+            problems.append(
+                f"binding_question.auto_bound is true and the census is "
+                f"ambiguous: {why}. The flag is not the authority — this "
+                f"check recomputes it. Ask the engagement owner.")
+            return ""
+        claimed = _clean(q.get("answer_sub_vertical")).upper()
+        if claimed and claimed != sv:
+            problems.append(
+                f"binding_question.auto_bound names {claimed} and the census "
+                f"accepts {sv}")
+            return ""
+        return sv
+    if key == "mode_question":
+        mode = _clean(q.get("answer_mode")).upper()
+        if mode != "PUBLIC":
+            problems.append(
+                f"mode_question.auto_bound is true for "
+                f"{mode or 'an empty mode'}. Only PUBLIC may be bound "
+                f"without a human: it is the most restrictive mode and can "
+                f"only under-claim. Anything granting internal access is "
+                f"the engagement owner's to confirm.")
+            return ""
+        return "PUBLIC"
+    return None
+
+
 def _check_question(doc: dict, key: str, field: str, vocabulary: tuple,
                     what: str, problems: list[str]) -> str:
     q = doc.get(key) or {}
     if not q.get("asked"):
+        auto = _auto_bound(doc, key, q, problems)
+        if auto is not None:
+            return auto
         problems.append(
             f"{key}.asked is false. Put {what} to the engagement owner with "
             f"AskUserQuestion, then record the question, the options and the "
@@ -564,6 +664,16 @@ def main(argv=None) -> int:
     c.add_argument("--file", required=True)
     c.add_argument("--json", action="store_true")
 
+    b = sub.add_parser(
+        "autobind",
+        help="bind an UNAMBIGUOUS census without asking, and say so on the "
+             "record")
+    b.add_argument("--file", required=True)
+    b.add_argument("--mode", default="PUBLIC", choices=["PUBLIC"],
+                   help="only PUBLIC may be auto-bound: it is the most "
+                        "restrictive mode, so it can only under-claim")
+    b.add_argument("--json", action="store_true")
+
     r = sub.add_parser("record", help="write it into the run's workbook")
     r.add_argument("--run", required=True)
     r.add_argument("--root")
@@ -577,6 +687,59 @@ def main(argv=None) -> int:
         print(f"preflight skeleton -> {a.out}\n"
               f"Fill it, then: python3 -m engine.preflight check --file {a.out}")
         return 0
+    if a.cmd == "autobind":
+        try:
+            doc = load(a.file)
+        except PreflightRefusal as e:
+            print(f"REFUSED: {e}", file=sys.stderr)
+            return 2
+        ok, sv, why = unambiguous_binding(doc)
+        if not ok:
+            print(f"REFUSED: the census is ambiguous — {why}. This is the "
+                  f"case AskUserQuestion exists for; it is not a tie for the "
+                  f"agent to break.", file=sys.stderr)
+            return 2
+        stamp = _utcnow() if "_utcnow" in globals() else ""
+        doc["binding_question"] = {
+            **(doc.get("binding_question") or {}),
+            "asked": False, "auto_bound": True, "tool": "unambiguous_binding",
+            "question": "Which sub-vertical does this entity bind to?",
+            "options": sorted(
+                _clean(c.get("sub_vertical")).upper()
+                for c in (doc.get("lob_census") or {}).get("candidates") or []),
+            "answer": f"AUTO-BOUND: {why}",
+            "answer_sub_vertical": sv,
+            "answered_by": "lob_census (no human asked — census unambiguous)",
+            "answered_at": stamp,
+        }
+        doc["mode_question"] = {
+            **(doc.get("mode_question") or {}),
+            "asked": False, "auto_bound": True, "tool": "intake_default",
+            "question": "Which evidence mode does this engagement grant?",
+            "options": ["PUBLIC"],
+            "answer": "AUTO-BOUND: PUBLIC — a request with no engagement "
+                      "letter grants no internal access",
+            "answer_mode": a.mode,
+            "answered_by": "intake default (most restrictive mode)",
+            "answered_at": stamp,
+        }
+        binding = dict(doc.get("binding") or {})
+        binding["sub_vertical"] = sv
+        binding["evidence_mode"] = a.mode
+        binding.setdefault("scope_mode", "FULL")
+        doc["binding"] = binding
+        Path(a.file).write_text(json.dumps(doc, indent=2))
+        rep = check(doc)
+        out = {"auto_bound": True, "sub_vertical": sv,
+               "evidence_mode": a.mode, "why": why,
+               "check_ok": rep["ok"], "problems": rep["problems"]}
+        print(json.dumps(out, indent=2) if a.json else
+              f"AUTO-BOUND {sv} / {a.mode} — {why}\n"
+              f"  check: {'OK' if rep['ok'] else 'still refused'}"
+              + ("" if rep["ok"] else
+                 "\n  - " + "\n  - ".join(rep["problems"])))
+        return 0 if rep["ok"] else 2
+
     if a.cmd == "check":
         try:
             doc = load(a.file)

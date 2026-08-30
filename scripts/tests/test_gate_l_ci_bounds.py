@@ -145,3 +145,68 @@ def test_the_install_is_proved_by_launching_not_by_stat():
     assert "Prove Chromium launches" in text
     assert "chromium.launch(" in text
     assert "chromium will not launch here" in text
+
+
+# ── the skip ceiling's own diagnostic ────────────────────────────────────
+#
+# The ceiling step counts skips and, when it overruns, prints the reasons so
+# the failure names itself. On 2026-08-30 it overran and printed a header
+# with nothing under it: the invocation carried `-rs -rf`, and a second -r
+# REPLACES the first rather than adding to it, so ^SKIPPED lines were never
+# emitted and the grep beneath them could never match. Which three tests had
+# started skipping had to be found by reproducing the whole suite locally.
+#
+# A diagnostic that is present and empty is worse than one that is absent,
+# because the absent one gets noticed. This pins the flag that makes it real.
+
+def _pytest_lines() -> list[str]:
+    """Whole invocations, with backslash continuations folded back in.
+
+    The ceiling's own command is written across three lines, so reading the
+    file line-wise finds the word `pytest` on a line carrying none of its
+    flags — a check that would pass while measuring nothing.
+    """
+    joined, buf = [], ""
+    for raw in CI.read_text(encoding="utf-8").splitlines():
+        ln = raw.strip()
+        if buf:
+            buf += " " + ln.rstrip("\\").strip()
+            if not ln.endswith("\\"):
+                joined.append(buf)
+                buf = ""
+            continue
+        if "python -m pytest" in ln or "python3 -m pytest" in ln:
+            if ln.endswith("\\"):
+                buf = ln.rstrip("\\").strip()
+            else:
+                joined.append(ln)
+    if buf:
+        joined.append(buf)
+    return joined
+
+
+def test_a_pytest_invocation_never_carries_two_r_flags():
+    """The defect in general form. `-rs -rf` looks additive and is not."""
+    for ln in _pytest_lines():
+        rs = [w for w in ln.split() if w.startswith("-r") and w != "-r"]
+        assert len(rs) <= 1, (
+            f"two -r flags in one invocation — the second replaces the "
+            f"first, so one of them does nothing: {ln}")
+
+
+def test_the_ceiling_step_reports_skips_as_well_as_failures():
+    """The specific one: the step that greps ^SKIPPED must ask for them."""
+    text = CI.read_text(encoding="utf-8")
+    assert "grep '^SKIPPED'" in text, (
+        "the ceiling step no longer prints the reasons it overran on")
+    counting = [ln for ln in _pytest_lines() if "plugins/dma-insights" in ln
+                or "tests/skills/" in ln]
+    assert counting, "the ceiling's own pytest invocation was not found"
+    for ln in counting:
+        flags = "".join(w[2:] for w in ln.split() if w.startswith("-r"))
+        assert "s" in flags, (
+            f"the ceiling greps for ^SKIPPED and this invocation does not "
+            f"ask pytest for skip reasons: {ln}")
+        assert "f" in flags, (
+            f"the report step greps for FAILED and this invocation does not "
+            f"ask pytest for failure lines: {ln}")

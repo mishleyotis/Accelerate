@@ -29,13 +29,16 @@ def _run_with_scan(tmp_path, n=3, prelim=False):
                     method="public_document",
                     basis="named live in the 2025 annual report with an "
                           "adoption figure",
+                    providers=["clay", "exa"],
                     subcaps=[cells[0]], evidence_ids=eids,
                     source_urls=["https://acme.example/ar25"])
     techscan.record(wb, product="Snowflake", vendor="Snowflake",
                     layer="DATA", status="INFERRED", method="job_posting",
+                    providers=["indeed"],
                     basis="two 2026 postings name Snowflake administration")
     techscan.record(wb, product="nCino", vendor="nCino", layer="OPS",
                     status="ABSENT", method="technographic_scan",
+                    providers=["explorium"],
                     basis="scan of acme.example plus 4 searches for nCino "
                           "deployment returned 0 hits")
     return run, wb, cells
@@ -48,10 +51,12 @@ def test_layer_and_status_vocabulary(tmp_path):
     with pytest.raises(ScanRefused, match="L2-L5"):
         techscan.record(wb, product="X", vendor="Y", layer="L3",
                         status="CONFIRMED", method="public_document",
+                        providers=["web"],
                         basis="a fifteen character basis clause")
     with pytest.raises(ScanRefused, match="status"):
         techscan.record(wb, product="X", vendor="Y", layer="OPS",
                         status="MAYBE", method="public_document",
+                        providers=["web"],
                         basis="a fifteen character basis clause")
 
 
@@ -61,10 +66,12 @@ def test_confirmed_requires_resolvable_evidence(tmp_path):
     with pytest.raises(ScanRefused, match="CONFIRMED requires evidence"):
         techscan.record(wb, product="Q2", vendor="Q2", layer="CUST",
                         status="CONFIRMED", method="vendor_announcement",
+                        providers=["web"],
                         basis="the vendor's own press release names Acme")
     with pytest.raises(ScanRefused, match="do not resolve"):
         techscan.record(wb, product="Q2", vendor="Q2", layer="CUST",
                         status="CONFIRMED", method="vendor_announcement",
+                        providers=["web"],
                         basis="the vendor's own press release names Acme",
                         evidence_ids=["E-999"])
 
@@ -76,7 +83,7 @@ def test_absent_must_state_the_search_that_establishes_it(tmp_path):
     with pytest.raises(ScanRefused, match="AUD-0115"):
         techscan.record(wb, product="Salesforce", vendor="Salesforce",
                         layer="CUST", status="ABSENT",
-                        method="technographic_scan",
+                        method="technographic_scan", providers=["explorium"],
                         basis="we did not see it anywhere around")
 
 
@@ -114,7 +121,8 @@ def _full_package(tmp_path):
     for cell in cells:
         synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
     wb.append("Entity_Timeline", {
-        "Event_Date": "2024-09-01", "Event": "Alkami go-live",
+        "Event_Date": "2024-09-01", "Title": "Alkami go-live",
+        "Kind": "PLATFORM", "Signal": "POSITIVE",
         "Signal": "EXPANSION", "SubCap_IDs": ", ".join(cells),
         "Evidence_IDs": "E-001"})
     floors_gate.run(wb, CAT, qa_dir=run.qa_dir)

@@ -46,12 +46,40 @@ def _tools(rel: str) -> tuple[str, str]:
 
 
 def _section_table(key: str) -> str:
+    """The full anatomy, not the heading.
+
+    The 2026-08-30 audit found this table printing `sec.heading` under a
+    column headed "what it must argue", with the seven apparatus bullets
+    below it byte-identical for all sixteen sections — so nothing anywhere
+    told a producer what a section CONTAINS, which sheets it reads, whether
+    it may ship uncited, or which app surface it feeds. Every field of
+    `Section` is rendered here now, and `--check` fails the build when the
+    spec moves and the agents do not.
+    """
     spec = RS.SPECS[key]
-    rows = ["| § | kind | floor | what it must argue |",
-            "|---|---|---|---|"]
+    rows = ["| § | heading | floor | reads | cites | feeds |",
+            "|---|---|---|---|---|---|"]
     for sec in spec.sections:
-        rows.append(f"| {sec.id} | `{sec.kind}` | {sec.min_words}w | "
-                    f"{sec.heading} |")
+        floor = (f"{sec.min_words}w"
+                 + (f" · {RS.INSIGHT_CARD_MIN}+ cards × "
+                    f"{RS.CARD_MIN_WORDS}w" if sec.kind == "insight_card"
+                    else f" · 1+ × {RS.CARD_MIN_WORDS}w"
+                    if sec.kind in RS.CARD_KINDS else ""))
+        rows.append(
+            f"| {sec.id} | {sec.heading} | {floor} | "
+            f"{', '.join(f'`{i}`' for i in sec.inputs)} | "
+            f"{'required' if sec.requires_citation else 'not required'} | "
+            f"{', '.join(f'`{x}`' for x in sec.surfaces) or '—'} |")
+    rows.append("")
+    rows.append("**The blocks each section is written in**, in order. A body "
+                "missing one, or carrying them out of order, is refused: they "
+                "become real Heading2s in the .docx, which is the grain the "
+                "app parses and scopes its vectors at.")
+    rows.append("")
+    for sec in spec.sections:
+        if sec.blocks:
+            rows.append(f"- **§{sec.id}** — "
+                        + "  ·  ".join(f"`## {b}`" for b in sec.blocks))
     return "\n".join(rows)
 
 
@@ -93,15 +121,31 @@ engine.cli narrative write --run <R> --root <ROOT> \\
     --report {key} --section <N> --json section.json --actor {name}
 ```
 
+A section whose kind is `insight_card`, `finding` or `recommendation` is a
+**list**, not a passage: each item is its own row and needs its own
+`--card <id>`. Without one the write is refused — and before that refusal
+existed, every write to such a section overwrote the last, so §5 held one
+row against a blocking minimum of eight and the floor was arithmetically
+unreachable through the only sanctioned writer.
+
+`engine.cli narrative contract --report {key}` prints each section's blocks,
+inputs, citation rule and the surfaces it feeds. Read it before you write.
+
 `section.json` carries `Body` plus the argument apparatus. Every field below
 is REFUSED when it is missing or hollow, and the refusal names what is
 wrong — an unattended session can act on it:
 
-- **`Body`** — the prose, at the section's word floor. Mark every claim the
-  evidence does not carry on its own with `[INF]`, in place.
+- **`Body`** — the prose, at the section's word floor, **written in that
+  section's declared blocks**: a line `## <block>` for each, in the order the
+  table above gives them. They are not decoration. The app parses a report at
+  Heading2 grain and scopes its vectors from tokens inside those headings, so
+  a section written as one undivided passage arrives as a single row
+  belonging to no pillar. Mark every claim the evidence does not carry on its
+  own with `[INF]`, in place.
 - **`Evidence_IDs`** — ids from THIS run's register. Fail-closed: an id that
   does not resolve refuses the write, because this is the artefact a client
-  reads.
+  reads. The five sections marked *not required* above describe the RUN
+  rather than the client and may ship uncited; every other one may not.
 - **`Weighing`** — what was weighed AGAINST the conclusion and why the
   balance fell where it did. A weighing with one side is a summary and is
   refused as one. Name the reading you rejected.

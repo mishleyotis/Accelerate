@@ -74,6 +74,29 @@ _TITLE_KINDS = (
     (r"evidence\s+(and|sources?|base)|citations?|sources?\s+cited",
      "evidence_sources"),
     (r"\bfinding", "findings"),
+
+    # ── the CLIENT RESEARCH PROFILE's own six ────────────────────────────
+    #
+    # Added 2026-08-30, when the profile became ingestable at all. Measured
+    # over the real rendered document, six of its eight sections resolved to
+    # `unmapped:*` — which is the parser being honest rather than wrong, but
+    # an `unmapped:` kind is one no consumer can ask for by name. These are
+    # LAST in the list on purpose: every pattern above is the assessment
+    # report's and matches first, so nothing here can change how a section
+    # of that report is kinded.
+    #
+    # The profile's kinds arrive namespaced (`client_research:`), because
+    # its "Evidence base" and the assessment report's "Evidence and its
+    # limits" both resolve to `evidence_sources` and its "Negative findings"
+    # resolves to `findings` — one key would otherwise carry two documents'
+    # answers with no way to tell which said what.
+    (r"entity\s+and\s+scope", "entity_and_scope"),
+    (r"what\s+we\s+searched", "search_scope"),
+    (r"capability\s+picture", "capability_picture"),
+    (r"insight\s+cards?", "insight_cards"),
+    (r"technology\s+and\s+utilisation|technology\s+and\s+utilization",
+     "technology_utilisation"),
+    (r"where\s+each\s+artefact|artefact\s+index", "artefact_index"),
 )
 _TITLE_RES = [(re.compile(rx, re.I), kind) for rx, kind in _TITLE_KINDS]
 
@@ -134,6 +157,14 @@ class ReportSection:
     heading: str
     body: str
     page: None = None
+    #: Which artefact this section came out of. A package has TWO reports —
+    #: the assessment report and the client research profile — and
+    #: `persist_package` used to attribute every section to one
+    #: `report_artefact_id`, because only one report was ever ingested. With
+    #: both landing, a section that cannot name its own document is a
+    #: provenance hole: `get_report_bundle` does not project artefact_id at
+    #: all, so a consumer could not tell the two apart even in principle.
+    artefact_id: str | None = None
 
 
 def _para_text(p) -> str:

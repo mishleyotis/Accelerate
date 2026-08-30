@@ -1,0 +1,200 @@
+Channel: #deal-desk (C0AD83KJ4DU)
+
+=== Message from Assessment and Research Request (B0ACUPDCMGF) at 2026-08-28 23:50:17 EAT ===
+Message TS: 1787950217.210239
+*Account Full Name*
+REV Federal Credit Union
+*Website*
+<https://www.revfcu.com/>
+*Additional Context*
+Client has marketing cloud but no CRM. Opportunity to implement CRM and Data Cloud
+*Submitter*
+<@U061X1XFD5F|Kevin Murray>
+*Priority*
+High (need in 48 hours)
+
+<@U09TL2S4LLS|Mishley Otiende> Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder
+Thread: 1 replies (latest: 2026-08-28 23:50:24 EAT)
+
+=== Message from Assessment and Research Request (B0ACUPDCMGF) at 2026-08-28 23:49:29 EAT ===
+Message TS: 1787950169.545159
+*Account Full Name*
+Bank of Travelers Rest
+*Website*
+<https://www.bankoftravelersrest.com/>
+*Additional Context*
+FSC and MuleSoft opportunity -integrating with FISERV
+*Submitter*
+<@U061X1XFD5F|Kevin Murray>
+*Priority*
+High (need in 48 hours)
+
+<@U09TL2S4LLS|Mishley Otiende> Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder
+Thread: 1 replies (latest: 2026-08-28 23:49:34 EAT)
+
+=== Message from Assessment and Research Request (B0ACUPDCMGF) at 2026-08-28 21:19:14 EAT ===
+Message TS: 1787941154.878369
+*Account Full Name*
+GoEasy
+*Website*
+<https://www.goeasy.com/>
+*Additional Context*
+They are just getting ready to conclude an 18 months salesforce FSC rollout.
+*Submitter*
+<@U04DFMWGTJ4|Andrew Walters>
+*Priority*
+High (need in 48 hours)
+
+<@U09TL2S4LLS|Mishley Otiende> Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder
+
+=== Message from Hubbl Readout Request (B0ANFBBJ5D3) at 2026-08-20 20:28:10 EAT ===
+Message TS: 1787246890.228319
+New Hubbl readout request
+
+*Submitter*
+<@U0AGL0TD0C8|Melissa Hanning>
+*Account Name*
+MidFirst Bank
+*Link to Scan Export CSV Files Gdrive Folder*
+<https://drive.google.com/drive/folders/1q4nPwotVC7caOdVFVqCdBrZ8KAku0Tqv>
+*Priority*
+Urgent (24 hours)
+*Notes*
+
+
+<@U0AD7BHF73Q|Richard Odhiambo> please create the hubbl readout and scope item assessment, place the files in the folder linked above
+Thread: 1 replies (latest: 2026-08-21 19:08:58 EAT)
+
+=== Message from Assessment and Research Request (B0ACUPDCMGF) at 2026-08-20 00:14:44 EAT ===
+Message TS: 1787174084.964729
+*Account Full Name*
+Momentum financial
+*Website*
+ttps://<www.mfsg.com/>
+*Additional Context*
+
+*Submitter*
+<@U04DFMWGTJ4|Andrew Walters>
+*Priority*
+High (need in 48 hours)
+
+<@U09TL2S4LLS|Mishley Otiende> Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder
+Thread: 1 replies (latest: 2026-08-25 00:28:20 EAT)
+
+=== Message from Assessment and Research Request (B0ACUPDCMGF) at 2026-08-13 21:04:35 EAT ===
+Message TS: 1786644275.998269
+*Account Full Name*
+Richwood Bank
+*Website*
+<https://richwoodbank.com/>
+*Additional Context*
+need this for an RFP response due this month
+*Submitter*
+<@U0AGL0TD0C8|Melissa Hanning>
+*Priority*
+High (need in 48 hours)
+
+<@U09TL2S4LLS|Mishley Otiende> Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder
+Thread: 3 replies (latest: 2026-08-21 19:23:37 EAT)
+
+=== Message from Hubbl Readout Request (B0ANFBBJ5D3) at 2026-08-13 20:34:12 EAT ===
+Message TS: 1786642452.343509
+New Hubbl readout request
+
+*Submitter*
+<@U0AGL0TD0C8|Melissa Hanning>
+*Account Name*
+CalPrivate Bank
+*Link to Scan Export CSV Files Gdrive Folder*
+<https://drive.google.com/drive/folders/1ca_NgGtSyaCBtaoGGy566ooQjVgSX1AH>
+*Priority*
+Urgent (24 hours)
+*Notes*
+need this urgently for an RFP that is due in 1 week.
+
+<@U0AD7BHF73Q|Richard Odhiambo> please create the hubbl readout and scope item assessment, place the files in the folder linked above
+Thread: 1 replies (latest: 2026-08-14 14:51:04 EAT)
+
+=== Message from Assessment and Research Request (B0ACUPDCMGF) at 2026-08-13 00:03:47 EAT ===
+Message TS: 1786568627.683899
+*Account Full Name*
+Logix Federal Credit Union
+*Website*
+<https://www.logixbanking.com/>
+*Additional Context*
+
+*Submitter*
+<@U0AGL0TD0C8|Melissa Hanning>
+*Priority*
+High (need in 48 hours)
+
+<@U09TL2S4LLS|Mishley Otiende> Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder
+Thread: 1 replies (latest: 2026-08-14 00:43:37 EAT)
+
+=== Message from Assessment and Research Request (B0ACUPDCMGF) at 2026-08-12 01:31:52 EAT ===
+Message TS: 1786487512.966999
+*Account Full Name*
+Gulf Coast Business Credit
+*Website*
+<https://gulfcoastbc.com/>
+*Additional Context*
+Resubmitting as my initial request error'd out.
+
+Gulf Coast Business Credit (GCBC) is a specialty finance division of Gulf Coast Bank & Trust Co., offering accounts receivable financing and asset-based lending solutions.
+*Submitter*
+<@U091CP6NA0Y|Lauren Slen>
+*Priority*
+High (need in 48 hours)
+
+<@U09TL2S4LLS|Mishley Otiende> Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder
+Thread: 1 replies (latest: 2026-08-14 00:43:37 EAT)
+
+=== Message from Assessment and Research Request (B0ACUPDCMGF) at 2026-08-04 07:01:32 EAT ===
+Message TS: 1785816092.538459
+*Account Full Name*
+TGS Insurance Agency
+*Website*
+<https://tgsinsurance.com/>
+*Additional Context*
+this is a merger between TGS and InsureOne.
+*Submitter*
+<@U07R68JF5FG|Gio Spiteri>
+*Priority*
+Urgent (need in 24 hours)
+
+<@U09TL2S4LLS|Mishley Otiende> Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder
+Thread: 5 replies (latest: 2026-08-06 19:11:37 EAT)
+
+=== Message from Assessment and Research Request (B0ACUPDCMGF) at 2026-07-31 23:37:57 EAT ===
+Message TS: 1785530277.543159
+*Account Full Name*
+Westland Insurance
+*Website*
+<https://www.westlandinsurance.ca/>
+*Additional Context*
+Current salesforce customer. But low adoption. They use <https://www.acturis.com/>  as their broker management system
+*Submitter*
+<@U04DFMWGTJ4|Andrew Walters>
+*Priority*
+High (need in 48 hours)
+
+<@U09TL2S4LLS|Mishley Otiende> Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder
+Thread: 3 replies (latest: 2026-08-07 18:29:54 EAT)
+
+=== Message from Hubbl Readout Request (B0ANFBBJ5D3) at 2026-07-31 19:30:48 EAT ===
+Message TS: 1785515448.489229
+New Hubbl readout request
+
+*Submitter*
+<@U04DFMWGTJ4|Andrew Walters>
+*Account Name*
+Penderfund
+*Link to Scan Export CSV Files Gdrive Folder*
+<https://drive.google.com/drive/folders/1DdKnbVVT5XJiuounFsoVduc9n-GNX9Yh>
+*Priority*
+High (1-2 business days)
+*Notes*
+
+
+<@U0AD7BHF73Q|Richard Odhiambo> please create the hubbl readout and scope item assessment, place the files in the folder linked above
+Thread: 1 replies (latest: 2026-08-03 22:07:45 EAT)

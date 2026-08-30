@@ -4,6 +4,7 @@ The three rules the audit found inert — added columns, blank Evidence_IDs,
 and row identity — each get a test that FIRES them, because a rule with only
 a happy-path test is how they stayed inert."""
 import json
+import pathlib
 import shutil
 
 import openpyxl
@@ -101,6 +102,96 @@ def test_rule4_fires_when_the_assessment_stage_has_no_scores(tmp_path):
     run, wb = _good_run(tmp_path, n=2)
     fails = validator.validate(wb.path, expect_scores=True)
     assert any(f["rule"] == 4 for f in fails)
+
+
+def test_rule4_reads_the_stage_off_the_file_when_no_caller_says(tmp_path):
+    """`expect_scores` used to default to False, and `assemble.package`
+    passed the default — so every package this engine built was validated
+    with research semantics, an assessment one included. `None` means read
+    the workbook's own recorded stage."""
+    run, wb = _good_run(tmp_path, n=2)
+    wb.set_metadata("stage", "assessment")
+    fails = validator.validate(wb.path)          # no expect_scores at all
+    assert any(f["rule"] == 4 for f in fails), \
+        "an assessment-stage workbook with an empty column D must fail rule 4"
+
+
+def test_validate_takes_a_PATH_and_never_a_run_workbook(tmp_path):
+    """The regression that broke the only route to a strip.
+
+    `validate` opens the file with openpyxl on purpose — rules 1 and 2 judge
+    a file that may not BE a valid run workbook. Reading the stage through
+    `RunWorkbook.metadata()` therefore raised AttributeError inside
+    `handoff.build`, and `strip` refuses without a handoff, so a run could
+    finish research and never hand off.
+    """
+    run, wb = _good_run(tmp_path, n=2)
+    assert validator.validate(str(wb.path)) == []
+    assert validator.validate(wb.path) == []
+    with pytest.raises((TypeError, AttributeError, OSError, ValueError)):
+        validator.validate(wb)                   # the RunWorkbook itself
+
+
+def test_a_pillar_the_run_never_selected_is_not_asked_for_a_score(tmp_path):
+    """The regression the stage key introduced and the stress walk caught.
+
+    A run's scope is a SELECTION; most runs do not cover all four pillars, so
+    three of the four pillar sheets carry no rows at all. Rule 4 demanded a
+    score in every sheet at the assessment stage, which made the assessment
+    stage unreachable for those runs — the package refused with 'no scores
+    present' for pillars nobody had ever been asked to research. No unit test
+    saw it because `expect_scores` defaulted to False until the stage key
+    existed, so the branch had never run against a real selection.
+    """
+    run, wb = _good_run(tmp_path, n=2)
+    for cell in wb.selected_subcaps():
+        wb.set_scoring(cell, {"Score": 3})
+    wb.set_metadata("stage", "assessment")
+
+    scored = {C.PILLAR_SHEET_OF[c.split("C")[0]] if hasattr(
+        C, "PILLAR_SHEET_OF") else "P1_Subcap_Scoring"
+        for c in wb.selected_subcaps()}
+    assert len(scored) < len(C.PILLAR_SHEETS), \
+        "this test needs a selection that does NOT cover all four pillars"
+
+    fails = validator.validate(wb.path)
+    rule4 = [f for f in fails if f["rule"] == 4]
+    assert not rule4, (
+        f"an unselected pillar was asked for a score: "
+        f"{[f['detail'] for f in rule4]}")
+
+
+def test_a_selected_pillar_with_no_score_still_fails_at_the_assessment_stage(
+        tmp_path):
+    """The other direction, which is what rule 4 is actually for."""
+    run, wb = _good_run(tmp_path, n=2)
+    wb.set_metadata("stage", "assessment")
+    fails = [f for f in validator.validate(wb.path) if f["rule"] == 4]
+    assert fails and "in scope and none scored" in fails[0]["detail"], fails
+
+
+def test_the_command_line_has_no_opinion_unless_it_is_given_one(tmp_path):
+    """`--expect-scores` was `store_true`, so ABSENT meant `False`, and False
+    is not "no opinion" — it is the caller asserting the research stage.
+    Passed straight through, the command line hard-coded research semantics
+    for every workbook it was ever pointed at."""
+    import subprocess
+    import sys
+
+    from engine import validator as V
+
+    run, wb = _good_run(tmp_path, n=2)
+    wb.set_metadata("stage", "assessment")
+    script = str(pathlib.Path(V.__file__))
+    r = subprocess.run([sys.executable, script, "--workbook", str(wb.path)],
+                       capture_output=True, text=True, timeout=120)
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "rule 4" in r.stdout, r.stdout
+
+    r2 = subprocess.run([sys.executable, script, "--workbook", str(wb.path),
+                         "--no-expect-scores"],
+                        capture_output=True, text=True, timeout=120)
+    assert r2.returncode == 0, r2.stdout + r2.stderr
 
 
 # ── rule 5 · AUD-0064, the vacuous branch ────────────────────────────────

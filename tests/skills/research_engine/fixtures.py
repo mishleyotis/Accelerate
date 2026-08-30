@@ -207,13 +207,21 @@ def close_prelim(run, *, entity="Acme Credit Union"):
               "platform. Both roles predate the current programme, so the "
               "institution is not standing up digital ownership for the "
               "first time."))
-    for d, ev, sig in (("2024-06-06", "Core digital banking platform selected",
-                        "PLATFORM"),
-                       ("2025-03-12", "AI credit decisioning went live",
-                        "LAUNCH"),
-                       ("2025-09-08", "Credit-offer engine centralised",
-                        "INVESTMENT")):
-        prelim.timeline(wb, date=d, event=ev, signal=sig, evidence=[eid])
+    # Signal is the DIRECTION, kind is the CLASS — the two questions the C1
+    # surface asks separately and the tab used to answer with one column.
+    for d, ev, sig, kind, effect in (
+            ("2024-06-06", "Core digital banking platform selected",
+             "POSITIVE", "PLATFORM",
+             "ADVANCED — the core stops being the constraint on channel work"),
+            ("2025-03-12", "AI credit decisioning went live",
+             "POSITIVE", "DATA",
+             "ADVANCED — decisioning moves from manual to modelled"),
+            ("2025-09-08", "Credit-offer engine centralised",
+             "NEUTRAL", "STRATEGY",
+             "UNCHANGED — a consolidation with no stated capability effect")):
+        prelim.timeline(wb, date=d, event=ev, signal=sig, kind=kind,
+                        body=f"{ev}, as reported in the run's register.",
+                        maturity_effect=effect, evidence=[eid])
     prelim.peers(wb, ["Peer Alpha CU", "Peer Beta CU", "Peer Gamma CU"],
                  basis="inferred",
                  rule=("US credit unions in the 15-25bn asset band with a "
@@ -224,6 +232,7 @@ def close_prelim(run, *, entity="Acme Credit Union"):
                     method="public_document",
                     basis="named as the digital banking platform in the 2025 "
                           "call report",
+                    providers=["clay", "web"],
                     subcaps=[], evidence_ids=[eid],
                     source_urls=["https://ncua.example/callreport/2025"],
                     as_of="2025-12-31")
@@ -257,6 +266,24 @@ def make_shippable(wb):
                     "Mode_Fit": "BOTH", "Internal_Sources": "",
                     "Public_Sources": "annual report; regulator filing",
                     "Weight_Pct": ""})
+    if not [r for r in wb.rows("Tech_Peer_Deployments") if any(r.values())]:
+        # T3's peer card. Fill it where there is a product to compare, and
+        # DECLARE it where there is not — "no register rows, so no peer
+        # deployment to examine" is a true sentence, and the gate exists to
+        # make a run say one or the other rather than ship a blank card.
+        from engine import techscan
+        tech = [r for r in wb.rows("Tech_Register") if r.get("TS_ID")]
+        if tech:
+            techscan.peer_record(
+                wb, ts_id=str(tech[0]["TS_ID"]), peer="Peer Alpha CU",
+                deployed=True,
+                basis="the peer's own newsroom names the platform live",
+                source_url="https://peer-alpha.example/news/core-live")
+        else:
+            completeness.declare(
+                wb, "Tech_Peer_Deployments",
+                "the technology register carries no rows, so there is no "
+                "product whose peer deployment could be examined")
     return completeness.check(wb)
 
 

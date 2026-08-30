@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Where each standing goal actually stands, measured from primary sources.
 
-WHY THIS EXISTS. The owner's standing goal has five parts, and the answer to
-"is it done" kept living in a chat transcript. A transcript is not evidence:
-it cannot be re-run, it goes stale the moment anything changes, and a session
-that resumes on a fresh container has no access to it. This walks the same
-sources a person would and prints a verdict per part.
+WHY THIS EXISTS. The owner's standing goal has several parts, and the answer
+to "is it done" kept living in a chat transcript. A transcript is not
+evidence: it cannot be re-run, it goes stale the moment anything changes, and
+a session that resumes on a fresh container has no access to it. This walks
+the same sources a person would and prints a verdict per part. The last part
+is production readiness across all eight lanes (2026-08-30), delegated whole
+to `plugins/dma-insights/scripts/readiness.py` — including its refusal to
+count an unmeasured lane as a passing one.
 
     python3 scripts/goal_status.py [--offline]
 
@@ -358,6 +361,64 @@ def check_model(offline: bool) -> None:
             "satisfies 'everything on sonnet' by flattening the switching")
 
 
+# ── 7 · readiness across every lane ──────────────────────────────────────
+
+def check_readiness(offline: bool) -> None:
+    """The eight readiness lanes, asked as one question.
+
+    The mapping is deliberate and it is NOT re-derived here. `readiness.py`
+    declares what each lane's verdict is a property of — the checkout, the
+    container this ran on, or the live system — and only a REPOSITORY-scoped
+    blocker is a standing-goal failure. A stale install on an ad-hoc
+    container is a real blocker and is somebody's problem; it is not this
+    checkout failing a goal, and reporting it as one would teach a reader to
+    stop believing the row. Everything else lands as OPEN or UNKNOWN with the
+    lanes named, which is this tool's whole discipline: an unrun check must
+    never read as a passing one.
+    """
+    triggers = ROOT / ".qa" / "triggers.json"
+    argv = [sys.executable,
+            str(ROOT / "plugins" / "dma-insights" / "scripts" /
+                "readiness.py"), "--json"]
+    if offline:
+        # `--offline` means what it means everywhere else in this tool: the
+        # connector lane reaches the LIVE service, so it reports
+        # NOT_MEASURABLE_HERE rather than being quietly counted either way.
+        argv.append("--offline")
+    if triggers.exists():
+        argv += ["--triggers", str(triggers)]
+    r = subprocess.run(argv, capture_output=True, text=True, cwd=ROOT,
+                       timeout=1800)
+    try:
+        doc = json.loads(r.stdout)
+    except json.JSONDecodeError:
+        report("readiness · every lane, with the unmeasured ones named",
+               UNKNOWN,
+               f"readiness.py printed no JSON: "
+               f"{(r.stderr or r.stdout).strip()[:200]}")
+        return
+    ready = [x["lane"] for x in doc["ready"]]
+    blocked = [x["lane"] for x in doc["blocked"]]
+    repo_blocked = [x["lane"] for x in doc["blocked_in_repository"]]
+    unmeasured = [x["lane"] for x in doc["unmeasured"]]
+    detail = (f"READY {ready or '—'} · BLOCKED {blocked or '—'} · "
+              f"NOT MEASURABLE HERE {unmeasured or '—'} · "
+              f"{len(doc['standing_open'])} standing item(s) no script can "
+              f"close (plugins/dma-insights/docs/PRODUCTION-READINESS.md)")
+    if repo_blocked:
+        report("readiness · every lane, with the unmeasured ones named",
+               FAIL, f"this checkout blocks {repo_blocked}. {detail}")
+    elif blocked:
+        report("readiness · every lane, with the unmeasured ones named",
+               OPEN, f"blocked outside the checkout: {blocked}. {detail}")
+    elif unmeasured:
+        report("readiness · every lane, with the unmeasured ones named",
+               UNKNOWN, detail)
+    else:
+        report("readiness · every lane, with the unmeasured ones named",
+               OK, detail)
+
+
 #: The name each check is known by, for when the check itself cannot say.
 #: Asserted against what the passing path actually prints, so a part renamed
 #: in its report cannot leave a crash filed under a name nobody looks for.
@@ -369,6 +430,7 @@ PART = {
     "check_corpus": "corpus",
     "check_headless": "headless",
     "check_model": "model",
+    "check_readiness": "readiness",
 }
 
 
@@ -376,7 +438,8 @@ def main() -> int:
     offline = "--offline" in sys.argv
     print("Standing goal status — measured, not remembered\n")
     for fn in (check_routines, check_gate_produces, check_failure_rate,
-               check_backlog, check_corpus, check_headless, check_model):
+               check_backlog, check_corpus, check_headless, check_model,
+               check_readiness):
         try:
             fn(offline)
         except Exception as e:                               # noqa: BLE001

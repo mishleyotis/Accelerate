@@ -20,12 +20,15 @@ verbatim to the module that owns it (its --help lists the subcommands):
     kg …        engine.kg        build / route / show / verify
     fuse …      engine.retrieval fuse / plan   (RRF + BM25 + query variants)
     memory …    engine.memory    note / status / consolidate / backup / cleanup
-    techscan …  engine.techscan  record / render / status
+    techscan …  engine.techscan  record / render / status /
+                                 import-explorium / clay-plan
     assemble …  engine.assemble  open / package / verify / contract
     preflight … engine.preflight init / check / record   (the binding basis)
     prelim …    engine.prelim    state / narrate / timeline / peers /
                                  declare / complete   (the PRELIM phase)
     registry …  engine.registry  log / beat / close / list / push / pull
+    grains …    engine.grains    show / recompute / recommendations / stage
+                                 (the assessment stage's three scored tabs)
     complete …  engine.completeness check   (every tab populated or stated)
     narrative … engine.narrative  state / write / review / contract
                                  (the report sections, as arguments)
@@ -63,7 +66,7 @@ from . import (assemble, contract, floors_gate, handoff, ledger, orient,
 #: argparse so the family's own --help answers, not this wrapper's.
 _FAMILIES = ("kg", "fuse", "memory", "techscan", "assemble", "preflight",
              "prelim", "registry", "complete", "narrative", "ers",
-             "cost", "template")
+             "cost", "template", "grains")
 
 
 def _family_main(name: str):
@@ -75,6 +78,8 @@ def _family_main(name: str):
         from . import memory as m
     elif name == "techscan":
         from . import techscan as m
+    elif name == "grains":
+        from . import grains as m
     elif name == "preflight":
         from . import preflight as m
     elif name == "prelim":
@@ -143,6 +148,20 @@ def main(argv=None) -> int:
                         "(default: beside the run tree)")
     s.add_argument("--no-push", action="store_true",
                    help="do not push the opened folder to the intake Drive")
+    # WHERE THE REQUEST CAME FROM. The firing that starts a run is not the
+    # firing that finishes it — often days and certainly containers apart —
+    # so the thread to answer travels in the workbook or it is lost. The
+    # automated intake passes all three; the manual path passes none, and
+    # empty means "no thread to answer", which is a state and not a gap.
+    s.add_argument("--slack-channel", default="",
+                   help="the channel the request was posted in")
+    s.add_argument("--slack-thread-ts", default="",
+                   help="the request message's ts — the thread the completion "
+                        "reply goes back to. Take it from `slack_intake.py "
+                        "triage`; a ts typed by hand answers a thread nobody "
+                        "asked in")
+    s.add_argument("--requested-by", default="",
+                   help="the Slack user id that submitted the request")
 
     o = common(sub.add_parser("orient")); o.add_argument("--category")
     q = common(sub.add_parser("search"))
@@ -223,6 +242,14 @@ def main(argv=None) -> int:
                              sv_basis=b["sv_basis"],
                              mode_basis=b["mode_basis"],
                              lob_census=b["lob_census"])
+        # Recorded before anything else touches the workbook: a run that
+        # dies in preflight.record still knows which thread was waiting.
+        wb = run.open()
+        for key, val in (("slack_channel", a.slack_channel),
+                         ("slack_thread_ts", a.slack_thread_ts),
+                         ("requested_by", a.requested_by)):
+            if val:
+                wb.set_metadata(key, val)
         recorded = preflight.record(run, pf["doc"], pf["report"])
         out = {"run": run.run_id, "workbook": str(run.workbook_path),
                "selected": len(run.open().selected_subcaps()),
@@ -233,7 +260,10 @@ def main(argv=None) -> int:
                            "lob_census": b["lob_census"],
                            "preflight_sha": b["preflight_sha"]},
                "preflight": {"revenue_lines": recorded["revenue_lines"],
-                             "evidence_banked": recorded["evidence_banked"]}}
+                             "evidence_banked": recorded["evidence_banked"]},
+               "request": {"slack_channel": a.slack_channel,
+                           "slack_thread_ts": a.slack_thread_ts,
+                           "requested_by": a.requested_by}}
         if a.no_folder:
             out["client_folder"] = {
                 "outcome": "NOT_RUN",

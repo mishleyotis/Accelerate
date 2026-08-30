@@ -70,11 +70,80 @@ class RunWorkbook:
             raise WorkbookError(
                 f"{self.path} does not exist — use RunWorkbook.create()")
         self._wb = openpyxl.load_workbook(self.path)
+        notes = self._upgrade_shape()
         missing = [s for s in C.REQUIRED_SHEETS if s not in self._wb.sheetnames]
         if missing:
             raise WorkbookError(
                 f"{self.path} is not a contract-{C.WORKBOOK_CONTRACT} workbook; "
                 f"missing sheets: {', '.join(missing)}")
+        if notes:
+            self._record_upgrade(notes)
+
+    # ── shape upgrade: expand, migrate, contract ─────────────────────────
+
+    def _upgrade_shape(self) -> list[str]:
+        """Bring an earlier-contract workbook up to the current shape.
+
+        A run's workbook lives in the client's Drive folder for as long as
+        the engagement does, so a contract bump that REFUSED every workbook
+        written before it would strand every open run — the engine would
+        have a shape nothing in the field could satisfy. Additive changes
+        are therefore migrated in place, on open, once.
+
+        Sheets are REWRITTEN in contract order rather than having columns
+        appended, because `contract.verify` compares the header row as an
+        ordered tuple: a column inserted in the middle of the contract (as
+        `Providers` was) cannot be reconciled by appending. Values move by
+        NAME, so nothing is read positionally and a new column arrives
+        empty, which is a readable state.
+        """
+        notes = []
+        for name, cols in C.SHEETS.items():
+            if name not in self._wb.sheetnames:
+                self._wb.create_sheet(name).append(list(cols))
+                notes.append(f"added sheet {name}")
+                continue
+            ws = self._wb[name]
+            head = [str(c.value).strip() if c.value is not None else ""
+                    for c in next(ws.iter_rows(min_row=1, max_row=1), ())]
+            if tuple(h for h in head if h) == tuple(cols):
+                continue
+            body = [{head[i]: r[i] for i in range(min(len(head), len(r)))}
+                    for r in ws.iter_rows(min_row=2, values_only=True)
+                    if any(c is not None for c in r)]
+            added = [c for c in cols if c not in head]
+            dropped = [h for h in head if h and h not in cols]
+            idx = self._wb.sheetnames.index(name)
+            del self._wb[name]
+            new = self._wb.create_sheet(name, idx)
+            new.append(list(cols))
+            for row in body:
+                new.append([row.get(c) for c in cols])
+            notes.append(
+                f"{name}: " + ", ".join(
+                    ([f"added {', '.join(added)}"] if added else [])
+                    + ([f"no longer in contract: {', '.join(dropped)}"]
+                       if dropped else [])
+                    + ([f"reordered to contract order"]
+                       if not added and not dropped else []))
+                + f" ({len(body)} row(s) moved by name)")
+        return notes
+
+    def _record_upgrade(self, notes: list[str]) -> None:
+        """Say so, in the workbook, where the next reader will see it."""
+        stamp = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        for note in notes:
+            self.append("00_README",
+                        {"Key": f"shape_upgraded_{stamp}", "Value": note},
+                        save=False)
+        # The lock recorded the contract this workbook was BUILT under. It is
+        # now this one, and an upgrade that left the lock behind would read
+        # as undetected drift to `verify_handoff_lock` — which is exactly the
+        # signal that must stay meaningful for real drift.
+        for row in self._wb["Handoff_Lock"].iter_rows(min_row=2):
+            if str(row[0].value) == "workbook_contract":
+                row[1].value = C.WORKBOOK_CONTRACT
+        self.save()
 
     # ── construction ─────────────────────────────────────────────────────
 
@@ -188,6 +257,35 @@ class RunWorkbook:
                 return r
         raise WorkbookError(f"{sheet}: no row where {key_col} == {key!r}")
 
+    def update_row_where(self, sheet: str, match: dict, values: dict,
+                         *, save: bool | None = None) -> int:
+        """Set named cells on the row matching EVERY key in `match`.
+
+        `update_row` keys on one column, which is a silent corruption for
+        any sheet whose row identity is composite. Report_Narrative is
+        exactly that: both reports number their sections "1"–"8", so
+        rewriting the research profile's §1 walked the sheet, found the
+        assessment's §1 first, and overwrote it — relabelling the victim as
+        belonging to the other report, because the values dict carries
+        `Report` too.
+        """
+        cols = list(C.SHEETS[sheet])
+        unknown = [k for k in list(values) + list(match) if k not in cols]
+        if unknown:
+            raise WorkbookError(f"{sheet}: no such column(s) {unknown}")
+        ws = self._sheet(sheet)
+        idx = {k: cols.index(k) + 1 for k in match}
+        for r in range(2, ws.max_row + 1):
+            if all(str(ws.cell(row=r, column=i).value or "").strip()
+                   == str(match[k] or "").strip() for k, i in idx.items()):
+                for k, v in values.items():
+                    ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
+                self._touch()
+                if save if save is not None else self.autosave:
+                    self.save()
+                return r
+        raise WorkbookError(f"{sheet}: no row where {match!r}")
+
     # ── metadata, and the two anti-drift anchors ─────────────────────────
 
     _TOKENISH = ("{{", "}}", "TODO", "TBD")
@@ -226,6 +324,10 @@ class RunWorkbook:
             "reference_date": reference_date,
             "engine_version": C.ENGINE_VERSION,
             "workbook_contract": C.WORKBOOK_CONTRACT,
+            # RESEARCH until something scores it. Column D is empty at this
+            # stage by contract rule 4, and the three grain tabs the
+            # assessment fills are NOT_APPLICABLE until it does.
+            "stage": "research",
             "evidence_mode": evidence_mode,
             # The binding provenance. Which sub-vertical the entity was bound
             # to and which evidence mode the engagement runs under are the
@@ -254,6 +356,15 @@ class RunWorkbook:
             "prelim_status": "OPEN",
             "prelim_completed_at": "",
             "empty_sheet_reasons": "",
+            # The Slack request this run answers, when it came from one.
+            # `engine.cli start --slack-channel/--slack-thread-ts/
+            # --requested-by` fills them; the automated intake always does
+            # and the manual path never does. Empty is the manual run, not a
+            # missing field — the completion reply reads slack_thread_ts and
+            # posts nowhere when it is blank, which is correct.
+            "slack_channel": "",
+            "slack_thread_ts": "",
+            "requested_by": "",
         }
         for k in ("run_id", "entity_name", "entity_id", "reference_date"):
             v = str(vals[k])

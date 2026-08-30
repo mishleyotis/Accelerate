@@ -245,10 +245,18 @@ TECHSTACK_RULEBOOK = (ROOT / "plugins" / "dma-insights" / "skills"
                       / "dma-surface-production" / "03-pages" / "rulebooks"
                       / "techstack.md")
 
-#: The sentence that was wrong, in the three places it was written. It said
-#: the connector needed a Secret Manager key that does not exist, so a
-#: producer reading it recorded NOT_RUN for a source that answers.
-STALE = "no live API"
+#: The two phrasings that were wrong. Both said the connector needed a Secret
+#: Manager key that does not exist, so a producer reading either recorded
+#: NOT_RUN for a source that answers. `wired, not live` is also a legitimate
+#: STATUS VOCABULARY word, so the check below only fires when a stale phrase
+#: and Explorium appear on the SAME LINE.
+STALE = ("no live api", "wired, not live", "not reachable from any",
+         "no explorium mcp server", "not reachable from anywhere")
+
+#: Any of these in the file means the correction is present and the stale
+#: phrase is being quoted rather than taught.
+CORRECTION_MARKERS = ("CORRECTED", "corrected", "Vibe Prospecting",
+                      "producer session", "producer-session")
 
 
 def test_explorium_is_not_described_as_dark_anywhere():
@@ -257,18 +265,40 @@ def test_explorium_is_not_described_as_dark_anywhere():
     Baxter, Axos and Logix. The connector authenticates at the SESSION — there
     is no key — and it is already in the routine's auto-approve list.
 
-    Every file that said otherwise was telling a producer to record NOT_RUN
-    for the source that would have taken its register past the fifteen-product
-    floor. This pins the correction in all three places at once, because the
-    same sentence had been copied into all three and correcting two of them
-    would leave the third teaching the old lesson.
+    Every file that says otherwise is telling a producer to record NOT_RUN for
+    the source that would have taken its register past the fifteen-product
+    floor.
+
+    2026-08-30: this used to check THREE named files. The audit found three
+    MORE still teaching the old lesson — the enrichment specialist, the
+    enrichment planner and the exclusion auditor — none of them in that
+    tuple. A correction pinned to a hand-kept list is a correction that
+    drifts, so the scan is now the whole plugin and the list is gone.
     """
+    # `scripts/` too. The role table that GRANTS the connector lives there,
+    # and it carried the retracted story in the very entry that granted it —
+    # out of scope of a scan rooted at the plugin, so the next reader would
+    # have taken the comment as doctrine and the grant as a mistake to
+    # revert.
+    plugin = ROOT / "plugins" / "dma-insights"
+    files = [f for r in (plugin, ROOT / "scripts")
+             for pat in ("*.md", "*.json", "*.py") for f in r.rglob(pat)]
     bad = []
-    for path in (SOURCES, TECHSTACK_RULEBOOK,
-                 AGENTS / "techstack/techstack-register-producer.md"):
-        text = path.read_text(encoding="utf-8")
-        if STALE in text and "CORRECTED" not in text and "corrected" not in text:
-            bad.append(str(path.relative_to(ROOT)))
+    for path in files:
+        if "/dist/" in str(path) or "/node_modules/" in str(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+        if "explorium" not in text.lower():
+            continue
+        if any(m in text for m in CORRECTION_MARKERS):
+            continue
+        for line in text.splitlines():
+            low = line.lower()
+            if "explorium" in low and any(x in low for x in STALE):
+                bad.append(f"{path.relative_to(ROOT)}: {line.strip()[:90]}")
     assert bad == [], (
         "a file still says the Explorium connector has no live API without "
         "carrying the correction. A producer reading it records NOT_RUN for a "

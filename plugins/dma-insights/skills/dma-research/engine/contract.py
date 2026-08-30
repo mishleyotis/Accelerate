@@ -320,7 +320,41 @@ EVIDENCE_COLUMNS = (
     "Conflict",
 )
 
-TIMELINE_COLUMNS = ("Event_Date", "Event", "Signal", "SubCap_IDs", "Evidence_IDs")
+#: The digital-evolution timeline (C1 on the served CONTEXT page).
+#:
+#: WIDENED 2026-08-30, and the widening is the app's vocabulary rather than a
+#: preference. The tab carried one `Signal` column drawn from a nine-token
+#: EVENT-CLASS list, while `context.timeline` needs BOTH a three-token
+#: DIRECTION (`signal`) and an eight-token CLASS (`kind`) — plus the body,
+#: the maturity effect and the claim label it renders. A run's own dated
+#: events are stronger ground for C1 than a re-search, and they could not
+#: reach it: the vocabularies did not map and the tab had no reader at all.
+TIMELINE_COLUMNS = ("Event_Date", "Title", "Body", "Kind", "Signal",
+                    "Maturity_Effect", "Claim_Label", "SubCap_IDs",
+                    "Evidence_IDs")
+
+#: The event's DIRECTION for maturity — what D5 clusters on. The consequence
+#: sentence belongs in Maturity_Effect, not here.
+TIMELINE_SIGNALS = ("POSITIVE", "NEUTRAL", "NEGATIVE")
+
+#: The event's CLASS — what D5 filters on. These are the app's eight, exactly:
+#: a near-miss ('TECHNOLOGY' for PLATFORM, 'CAPABILITY' for DATA) is not a
+#: synonym, it is an event no filter can reach. Measured on a served run, 4
+#: of 11 events carried a kind outside the eight and were invisible on a page
+#: that rendered them.
+TIMELINE_KINDS = ("PLATFORM", "LEADERSHIP", "M&A", "REGULATORY", "CHANNEL",
+                  "DATA", "SECURITY", "STRATEGY")
+
+#: The nine event classes the tab used to carry, and where each lands in the
+#: app's eight. Kept as a MAP rather than deleted: a run pinned to an earlier
+#: engine wrote these words, and a bridge is how a reader of that workbook
+#: still gets a filterable event.
+TIMELINE_KIND_BRIDGE = {
+    "INVESTMENT": "STRATEGY", "DIVESTMENT": "STRATEGY",
+    "LEADERSHIP": "LEADERSHIP", "PLATFORM": "PLATFORM",
+    "REGULATORY": "REGULATORY", "MERGER": "M&A", "INCIDENT": "SECURITY",
+    "LAUNCH": "CHANNEL", "PARTNERSHIP": "STRATEGY",
+}
 
 #: The technographic register — the research-stage record behind the fourth
 #: deliverable (the Technographic Scan). Vocabulary is the CHARTER's, not the
@@ -328,14 +362,84 @@ TIMELINE_COLUMNS = ("Event_Date", "Event", "Signal", "SubCap_IDs", "Evidence_IDs
 #: with CLAIMED present and required per row.
 TECH_REGISTER_COLUMNS = (
     "TS_ID", "Product", "Vendor", "Layer", "Status", "Evidence_Level",
-    "Detection_Basis", "Detection_Method", "SubCap_IDs", "Evidence_IDs",
-    "Source_URLs", "As_Of",
+    "Detection_Basis", "Detection_Method", "Providers", "SubCap_IDs",
+    "Evidence_IDs", "Source_URLs", "As_Of", "DMA_Impact",
 )
 TECH_LAYERS = ("OPS", "CUST", "DATA", "INFRA")
 TECH_STATUS = ("CONFIRMED", "INFERRED", "CLAIMED", "ABSENT")
 #: How a detection was made — the scan must say, per row.
 TECH_METHODS = ("technographic_scan", "public_document", "job_posting",
                 "vendor_announcement", "internal_document", "client_stated")
+
+#: WHO produced the row. The deployed app's techstack facet declares its
+#: sources as exactly {explorium, clay} (apps/api/dma_api/computed.py, and
+#: the mcp server's `record_enrichment` source vocabulary), so a register
+#: assembled from whatever a web search happened to surface is an estate the
+#: app cannot reconcile against its own contract. `Providers` is REQUIRED per
+#: row and is a list, because a row is often seen by more than one — and
+#: which ones is exactly the question `Status` turns on.
+TECH_PROVIDERS = ("clay", "explorium", "indeed", "exa", "tavily", "web",
+                  "drive", "internal", "client")
+
+#: The two data brokers. A broker asserts a deployment with no primary
+#: source behind it, which is the definition of CLAIMED — so a row whose
+#: ONLY providers are brokers may not wear CONFIRMED however many brokers
+#: agree, because two brokers reselling one crawl is one observation.
+TECH_BROKERS = ("clay", "explorium")
+
+#: T3, the drilldown. A register row answers "what do they run"; the detail
+#: page a click opens answers "so what" — and it has three content cards, two
+#: of which render from nothing the research run used to capture. The
+#: 2026-08-30 audit measured the last real run at 0 of 32 rows carrying a
+#: peer deployment and 0 of 32 impacts naming a pathway, which is why the
+#: drawer opened onto its own empty states.
+#:
+#: `DMA_Impact` (on Tech_Register) is the 40–90 word answer to "what does
+#: this product do to the assessment", and it belongs to the research run
+#: because that is where the subcap evidence is. Peer deployments get their
+#: own sheet because they are one-to-many per product, and a many packed
+#: into one cell is the shape nothing can query.
+TECH_PEER_COLUMNS = (
+    "TS_ID", "Peer", "Deployed", "Basis", "Source_URL", "As_Of",
+)
+
+#: THE ASSESSMENT STAGE'S THREE, and the column names are the APP's own —
+#: the same technique PEER_BENCHMARK_COLUMNS uses, so a workbook this engine
+#: writes is readable by the parser that already exists. All three are read
+#: today (`parse_grain_summaries`, `parse_recommendations`), both land
+#: server-side, and both already back live gates: the 0.05 grain tolerance
+#: reads the stated grains, and CG-39 reads `recommendations_raw`. None of
+#: them was ever WRITTEN, so every engine package landed with zero
+#: recommendations and both stated grains absent.
+#:
+#: They are ASSESSMENT-stage sheets. Column D is empty at the research stage
+#: by contract rule 4, so a research workbook cannot honestly fill a score
+#: grain — and declaring them required at every stage would give every
+#: research run three tabs it can never fill, which is the same defect
+#: facing the other way.
+#:
+#: `Pillar` is the anchor the parser looks for, and `Score` has NO aliases at
+#: grain level: a grain whose score column is missing is dropped wholesale.
+PILLAR_SUMMARY_COLUMNS = (
+    "Pillar", "Pillar_Name", "Score", "Weight_Pct", "Peer_Median",
+)
+
+#: `Category_ID` is the anchor; `Pillar` lets the parser skip deriving it
+#: from the id prefix. `Priority_Tier` is a string and `Priority_Score` a
+#: number, which is why they are two columns rather than one.
+CATEGORY_DETAIL_COLUMNS = (
+    "Category_ID", "Category_Name", "Pillar", "Score", "Peer_Median",
+    "Priority_Score", "Priority_Tier",
+)
+
+#: The Recommendations tab. Its header row is recognised when at least TWO
+#: of its cells are in the parser's 29-token vocabulary — these are seven of
+#: them — and the FIRST column becomes the rec_id, which is why `Rec_ID`
+#: leads. A row whose first cell is blank is skipped as a spacer.
+RECOMMENDATIONS_COLUMNS = (
+    "Rec_ID", "Title", "Category_ID", "Priority", "Horizon", "Owner",
+    "Rationale",
+)
 
 COVERAGE_COLUMNS = (
     "Category_ID", "Selected", "Researched", "Items", "Floor_Pass",
@@ -458,6 +562,14 @@ REPORT_NARRATIVE_COLUMNS = (
     # The independent verdict. Written by an actor that did not author the
     # section, exactly as a synthesis challenge is.
     "Review_Verdict", "Review_Actor", "Review_At",
+    # WHICH CARD, for the three sections that are a LIST rather than a
+    # passage — insight cards, findings, recommendations. Until 2026-08-30
+    # `narrative.write` overwrote a section's single row on every write, so
+    # the eight-card blocking minimum the same module enforces was
+    # arithmetically unreachable: the writer could not produce what the
+    # checker demanded. Blank on a prose section; the card's own id on a
+    # list one, and (Report, Section_ID, Card_ID) is the row's identity.
+    "Card_ID",
 )
 
 #: `Kind` vocabulary for a Report_Narrative row.
@@ -474,6 +586,11 @@ RUN_METADATA_KEYS = (
     "catalogue_version", "catalogue_hash", "taxonomy_pillars",
     "taxonomy_categories", "taxonomy_capabilities", "taxonomy_cells",
     "subcaps_selected", "reference_date", "engine_version", "workbook_contract",
+    # WHICH STAGE this workbook is at — `research` or `assessment`. Recorded
+    # rather than inferred from the emptiness of column D, because a sheet
+    # that is required at one stage and meaningless at the other cannot be
+    # gated against a stage nobody wrote down. See STAGES / SHEET_STAGE.
+    "stage",
     "evidence_mode", "sv_basis", "mode_basis", "lob_census", "kg_checksum",
     "created_at", "last_written_at", "checkpoint",
     # The binding preflight's digest. `sv_basis` and `mode_basis` are
@@ -484,6 +601,21 @@ RUN_METADATA_KEYS = (
     # The client folder, opened at run start rather than assembled at the
     # end: a run that stops early must still be findable in the intake tree.
     "client_folder", "client_folder_opened_at",
+    # WHERE THE REQUEST CAME FROM, so the answer can go back to it.
+    #
+    # Assessment requests arrive in a Slack thread (#deal-desk) and are
+    # finished when somebody replies IN THAT THREAD with the folder link. The
+    # run that answers a request is started by one firing and finished by
+    # another — often days later, certainly in another container — so the
+    # thread has to travel with the run or the completion reply has nowhere
+    # to go and the requester is left watching a thread that never closes.
+    #
+    # Additive: a run started any other way simply carries neither, and
+    # `slack_thread_ts` empty means "there is no thread to answer", which is
+    # the manual path and not a defect. No contract bump — the Run_Metadata
+    # sheet is key/value rows, so an older workbook is missing a row rather
+    # than the wrong shape.
+    "slack_channel", "slack_thread_ts", "requested_by",
     # PRELIM: the preliminary research pass that grounds the Client Research
     # Profile. Category dispatch refuses while it is open.
     "prelim_status", "prelim_completed_at",
@@ -492,7 +624,58 @@ RUN_METADATA_KEYS = (
     "empty_sheet_reasons",
 )
 
-WORKBOOK_CONTRACT = "v3"
+# ── THE STAGE, which nothing recorded ────────────────────────────────────
+#
+# Measured 2026-08-30: there was no stage key ANYWHERE. `RUN_METADATA_KEYS`
+# had none, `_write_metadata` wrote none, and the app INFERRED it from the
+# emptiness of column D —
+#
+#     "stage": "research — column D is empty by contract" if not scores
+#              else "assessment"
+#
+# — while the engine side made it a CLI opinion: `validator.validate` takes
+# `expect_scores=False` unless `--expect-scores` is passed, and
+# `assemble.package` calls it with the default, hard-coding research
+# semantics for every package it ever builds.
+#
+# Inference is fine for a reader and useless for a GATE. A sheet that is
+# required at one stage and meaningless at the other cannot be expressed
+# against a stage nobody wrote down, and `REQUIRED_SHEETS = tuple(SHEETS)`
+# made every declared sheet required at every stage. So the stage is a
+# recorded fact now, and the inference stays as the app's fallback for the
+# workbooks written before it.
+STAGES = ("research", "assessment")
+
+#: Sheets that belong to ONE stage. Everything not named here belongs to
+#: both. A sheet out of its stage is NOT_APPLICABLE — neither populated nor
+#: an omission, because there is nothing at this stage that could fill it.
+SHEET_STAGE = {
+    "Pillar_Summary": "assessment",
+    "Category_Detail": "assessment",
+    "Recommendations": "assessment",
+}
+
+
+def stage_of(metadata: dict) -> str:
+    """The workbook's stage: recorded if it says, inferred if it is older.
+
+    The inference is the app's own — scores present means assessment — and
+    it is here so a v4 workbook upgraded in place reads correctly rather
+    than reading as an assessment workbook with three empty tabs.
+    """
+    got = str((metadata or {}).get("stage") or "").strip().lower()
+    return got if got in STAGES else "research"
+
+
+#: v5 (2026-08-30) is v4 plus the assessment stage's three scored tabs
+#: (Pillar_Summary, Category_Detail, Recommendations) and the `stage` key
+#: that says which of them apply. v4 (2026-08-30) is v3 plus the two things
+#: the techstack drilldown renders
+#: from: `Tech_Register.Providers` / `.DMA_Impact` and the
+#: `Tech_Peer_Deployments` sheet. Additive, and `RunWorkbook` upgrades a v3
+#: workbook in place on open rather than refusing it — expand, migrate,
+#: contract, the same discipline the database side uses.
+WORKBOOK_CONTRACT = "v5"
 ENGINE_VERSION = "5.0.0"
 
 SHEETS = {
@@ -505,6 +688,10 @@ SHEETS = {
     "Evidence_Detail": EVIDENCE_COLUMNS,
     "Entity_Timeline": TIMELINE_COLUMNS,
     "Tech_Register": TECH_REGISTER_COLUMNS,
+    "Tech_Peer_Deployments": TECH_PEER_COLUMNS,
+    "Pillar_Summary": PILLAR_SUMMARY_COLUMNS,
+    "Category_Detail": CATEGORY_DETAIL_COLUMNS,
+    "Recommendations": RECOMMENDATIONS_COLUMNS,
     "Coverage": COVERAGE_COLUMNS,
     "Search_Log": SEARCH_LOG_COLUMNS,
     "Gate_Log": GATE_LOG_COLUMNS,

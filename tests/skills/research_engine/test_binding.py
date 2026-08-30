@@ -180,3 +180,218 @@ def test_the_wrong_subverticals_variants_never_enter_the_run(tmp_path):
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── the request the run is answering ──
+#
+# A run is started by one firing and finished by another, days later and in
+# another container. The Slack thread the requester is watching is therefore
+# not in anyone's memory when the completion reply is due — it is in the
+# workbook or it is gone, and a request whose thread is lost stays open
+# forever while its assessment sits delivered in a folder nobody was told
+# about.
+#
+# Added 2026-08-30 with the keys themselves. The first version of that change
+# added them to RUN_METADATA_KEYS and nothing else: the sheet writer reads
+# every key out of a literal dict, so every new run raised KeyError and 226
+# tests went red at once. The lesson in the pair below is that a metadata key
+# is three things — declared, defaulted, and fillable — and two of them are
+# silent when missing.
+
+def test_a_run_carries_the_slack_request_it_answers(tmp_path):
+    pf = preflight_file(tmp_path)
+    r = subprocess.run(
+        [sys.executable, "-m", "engine.cli", "start", "--run", "R-BIND-SLACK",
+         "--root", str(tmp_path / "run"), "--entity", "Acme CU",
+         "--entity-id", "acme-cu", "--reference-date", "2026-08-29",
+         "--preflight", str(pf), "--no-folder",
+         "--slack-channel", "C0AD83KJ4DU",
+         "--slack-thread-ts", "1756400000.123456",
+         "--requested-by", "U09TL2S4LLS"],
+        cwd=ENGINE, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert json.loads(r.stdout)["request"] == {
+        "slack_channel": "C0AD83KJ4DU",
+        "slack_thread_ts": "1756400000.123456",
+        "requested_by": "U09TL2S4LLS"}
+    md = runstate.locate("R-BIND-SLACK", root=tmp_path / "run").open().metadata()
+    assert md["slack_thread_ts"] == "1756400000.123456", (
+        "the thread the completion reply must answer did not survive into "
+        "the workbook, so the firing that promotes this run — another "
+        "container, days later — has nowhere to post")
+    assert md["slack_channel"] == "C0AD83KJ4DU"
+    assert md["requested_by"] == "U09TL2S4LLS"
+
+
+def test_a_manual_run_carries_the_keys_empty_rather_than_absent(tmp_path):
+    """The manual path names a client and no thread. Empty is a state the
+    reply step reads and declines to post on; a MISSING key is a KeyError in
+    whatever opens the workbook next."""
+    pf = preflight_file(tmp_path)
+    r = subprocess.run(
+        [sys.executable, "-m", "engine.cli", "start", "--run", "R-BIND-MANUAL",
+         "--root", str(tmp_path / "run"), "--entity", "Acme CU",
+         "--entity-id", "acme-cu", "--reference-date", "2026-08-29",
+         "--preflight", str(pf), "--no-folder"],
+        cwd=ENGINE, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    md = runstate.locate("R-BIND-MANUAL", root=tmp_path / "run").open().metadata()
+    for k in ("slack_channel", "slack_thread_ts", "requested_by"):
+        assert k in md, f"Run_Metadata is missing {k} entirely"
+        # openpyxl reads a blank cell back as None, which is how every other
+        # deliberately-empty key on this sheet already reads. Both spellings
+        # are the same state — "there is no thread to answer" — and the
+        # property that matters is that reading it is not a KeyError.
+        assert not md[k], f"{k} should be empty on a manual run, got {md[k]!r}"
+
+
+def test_every_declared_metadata_key_is_written_by_a_new_run(tmp_path):
+    """The general form of the defect, so the next added key cannot repeat
+    it: the contract's key list and the sheet a new run writes are the same
+    set, checked here rather than discovered by a KeyError in production."""
+    from engine import contract as C
+    run = runstate.start(
+        run_id="R-BIND-KEYS", entity_name="Acme CU", entity_id="acme-cu",
+        sub_vertical="CU", scope_mode="T1_CORE",
+        reference_date="2026-08-29", root=tmp_path / "runk",
+        evidence_mode="PUBLIC", sv_basis=BASIS_SV, mode_basis=BASIS_MODE)
+    written = set(run.open().metadata())
+    missing = [k for k in C.RUN_METADATA_KEYS if k not in written]
+    assert not missing, (
+        f"declared in RUN_METADATA_KEYS and not written by a new run: "
+        f"{missing}. A key that is declared but never written is read as a "
+        f"KeyError by everything downstream")
+
+
+# ── the unambiguous census binds itself ──────────────────────────────────
+#
+# owner, 2026-08-30: "the run should bind to unambiguous subvertical."
+#
+# The question exists because a run bound to the wrong sub-vertical
+# researches the wrong 851 cells to completion. Where the census leaves one
+# reading there is no judgment left to make, and the question is ceremony
+# that costs a scheduled firing its whole purpose — the intake could prepare
+# a binding and never start one.
+#
+# What must NOT become possible is an agent writing `auto_bound: true` over
+# an ambiguous entity, so check() recomputes unambiguity from the census
+# every time and never reads the flag as authority. These test that.
+
+from engine import preflight as PF                            # noqa: E402
+
+
+def _census(accepts, rejects=("IC",), material=1):
+    return {
+        "lines_of_business": [
+            {"lob": f"Line {i}",
+             "basis": "10-K segment disclosure, FY2025 revenue table",
+             "material": True}
+            for i in range(material)],
+        "candidates": (
+            [{"sub_vertical": s, "verdict": "ACCEPT",
+              "reason": "charter and revenue lines both say so"}
+             for s in accepts]
+            + [{"sub_vertical": s, "verdict": "REJECT",
+                "reason": "no revenue line implies this business"}
+               for s in rejects]),
+    }
+
+
+def test_one_accept_against_a_real_reject_is_unambiguous():
+    ok, sv, why = PF.unambiguous_binding({"lob_census": _census(["CU"])})
+    assert ok and sv == "CU"
+    assert "material" in why
+
+
+def test_two_accepts_are_never_unambiguous():
+    ok, sv, why = PF.unambiguous_binding(
+        {"lob_census": _census(["CU", "RB"])})
+    assert not ok and not sv
+    assert "2 sub-verticals are ACCEPTed" in why
+
+
+def test_a_census_that_rejected_nothing_is_not_unanimity():
+    """The thin-research case: one candidate, accepted, nothing else weighed.
+    That is a census that never looked, and it must not bind itself."""
+    ok, sv, why = PF.unambiguous_binding(
+        {"lob_census": _census(["CU"], rejects=())})
+    assert not ok
+    assert "no candidate was REJECTed" in why
+
+
+def test_two_material_lines_of_business_are_the_owners_call():
+    ok, sv, why = PF.unambiguous_binding(
+        {"lob_census": _census(["CU"], material=2)})
+    assert not ok
+    assert "MATERIAL" in why
+
+
+def test_autobind_fills_the_record_and_the_check_passes(tmp_path):
+    """End to end through the real CLI, because the record it writes is what
+    a later reader has to be able to audit."""
+    pf = preflight_file(tmp_path)
+    doc = json.loads(pf.read_text())
+    doc["lob_census"] = _census(["CU"])
+    doc["binding_question"] = {"asked": False}
+    doc["mode_question"] = {"asked": False}
+    doc["binding"] = {"sub_vertical": "", "evidence_mode": "",
+                      "scope_mode": "T1_CORE"}
+    pf.write_text(json.dumps(doc))
+    r = subprocess.run(
+        [sys.executable, "-m", "engine.preflight", "autobind",
+         "--file", str(pf), "--json"],
+        cwd=ENGINE, capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+    out = json.loads(r.stdout)
+    assert out["auto_bound"] and out["sub_vertical"] == "CU"
+    assert out["evidence_mode"] == "PUBLIC"
+    assert out["check_ok"], out["problems"]
+    back = json.loads(pf.read_text())
+    q = back["binding_question"]
+    assert q["asked"] is False and q["auto_bound"] is True
+    assert "AUTO-BOUND" in q["answer"]
+    assert "no human asked" in q["answered_by"]
+
+
+def test_autobind_refuses_an_ambiguous_census(tmp_path):
+    pf = preflight_file(tmp_path)
+    doc = json.loads(pf.read_text())
+    doc["lob_census"] = _census(["CU", "RB"])
+    pf.write_text(json.dumps(doc))
+    r = subprocess.run(
+        [sys.executable, "-m", "engine.preflight", "autobind", "--file",
+         str(pf)], cwd=ENGINE, capture_output=True, text=True)
+    assert r.returncode != 0
+    assert "ambiguous" in r.stderr and "AskUserQuestion" in r.stderr
+
+
+def test_the_flag_is_not_the_authority(tmp_path):
+    """THE ONE THAT MATTERS. A hand-written auto_bound over an ambiguous
+    census must not pass: check() recomputes rather than believing."""
+    pf = preflight_file(tmp_path)
+    doc = json.loads(pf.read_text())
+    doc["lob_census"] = _census(["CU", "RB"])          # ambiguous
+    doc["binding_question"] = {"asked": False, "auto_bound": True,
+                               "answer_sub_vertical": "CU"}
+    doc["binding"]["sub_vertical"] = "CU"
+    rep = PF.check(doc)
+    assert not rep["ok"]
+    assert any("the flag is not the authority" in p.lower()
+               for p in rep["problems"]), rep["problems"]
+
+
+def test_only_public_may_be_auto_bound(tmp_path):
+    """Auto-binding INTERNAL would claim access nobody granted — which is
+    the harm the gate exists to prevent, so that direction stays closed."""
+    pf = preflight_file(tmp_path)
+    doc = json.loads(pf.read_text())
+    doc["lob_census"] = _census(["CU"])
+    doc["binding_question"] = {"asked": False, "auto_bound": True}
+    doc["mode_question"] = {"asked": False, "auto_bound": True,
+                            "answer_mode": "INTERNAL"}
+    doc["binding"] = {"sub_vertical": "CU", "evidence_mode": "INTERNAL",
+                      "scope_mode": "FULL"}
+    rep = PF.check(doc)
+    assert not rep["ok"]
+    assert any("Only PUBLIC may be bound without a human" in p
+               for p in rep["problems"]), rep["problems"]

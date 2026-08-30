@@ -108,6 +108,28 @@ def _clean(v) -> str:
     return " ".join(str(v or "").split())
 
 
+def _clean_body(v) -> str:
+    """Trim a body WITHOUT flattening it.
+
+    `_clean` collapses every run of whitespace, newlines included, which is
+    right for the one-line apparatus fields and wrong for Body: a section's
+    `## ` block headings are line-anchored, so flattening the body deletes
+    the structure the same module then refuses the body for lacking.
+    """
+    lines = [ln.rstrip() for ln in str(v or "").replace("\r\n", "\n")
+             .replace("\r", "\n").split("\n")]
+    out, blanks = [], 0
+    for ln in lines:
+        if ln.strip():
+            blanks = 0
+            out.append(ln)
+        else:
+            blanks += 1
+            if blanks < 2:
+                out.append("")
+    return "\n".join(out).strip()
+
+
 def _words(text: str) -> int:
     return len([w for w in re.split(r"\s+", _clean(text)) if w])
 
@@ -202,21 +224,81 @@ def render_accuracy(acc: dict) -> str:
 
 # ── writing a section ────────────────────────────────────────────────────
 
+#: A block subheading in a Body, as the producer writes it and as
+#: `reports.render` promotes it to a real Heading2.
+BLOCK_RE = re.compile(r"^\s*##\s+(.+?)\s*$", re.M)
+
+
+def blocks_in(body: str) -> list[str]:
+    return [m.strip() for m in BLOCK_RE.findall(body or "")]
+
+
+def _check_blocks(sec, body: str) -> list[str]:
+    """The section's declared anatomy, present and in order.
+
+    Not a formatting preference. The app parses a report at Heading2 grain
+    and scopes its vectors from tokens in those headings, so a section
+    written as one undivided passage arrives as a single preamble row that
+    belongs to no pillar — which is what every section did until the blocks
+    existed.
+    """
+    if not sec.blocks:
+        return []
+    got = blocks_in(body)
+    lower = [g.lower() for g in got]
+    missing = [b for b in sec.blocks if b.lower() not in lower]
+    if missing:
+        return [f"the body is missing the block heading(s) "
+                f"{', '.join(repr(m) for m in missing)}. §{sec.id} is written "
+                f"as {len(sec.blocks)} blocks, each introduced by a line "
+                f"`## <block>`: "
+                + " · ".join(sec.blocks)]
+    order = [lower.index(b.lower()) for b in sec.blocks]
+    if order != sorted(order):
+        return [f"the block headings are out of order. §{sec.id} runs "
+                + " → ".join(sec.blocks)
+                + f", and this body runs " + " → ".join(got)]
+    return []
+
+
 def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
-          actor: str) -> dict:
-    """Write one section, or refuse and say which field is not an argument."""
+          actor: str, card: str | None = None) -> dict:
+    """Write one section — or one CARD of a list section — or refuse and say
+    which field is not an argument."""
     spec, sec = section_spec(report, section_id)
     if not _clean(actor):
         raise NarrativeRefusal("every section records its author; --actor is "
                                "how the review can refuse a self-review")
-    body = _clean(record.get("Body"))
+    body = _clean_body(record.get("Body"))
     problems: list[str] = []
 
-    if _words(body) < sec.min_words:
+    is_card = sec.kind in RS.CARD_KINDS
+    card_id = _clean(card or record.get("Card_ID"))
+    if is_card and not card_id:
+        raise NarrativeRefusal(
+            f"§{sec.id} '{sec.heading}' is a list of {sec.kind.replace('_', ' ')}s, "
+            f"not a passage — each one is its own row and needs its own "
+            f"--card id. Without one, every write would overwrite the last, "
+            f"which is exactly how this section came to hold one row against "
+            f"a blocking minimum of {RS.INSIGHT_CARD_MIN}.")
+    if card_id and not is_card:
+        raise NarrativeRefusal(
+            f"§{sec.id} '{sec.heading}' is one passage; --card does not "
+            f"apply to it. Its structure is its blocks: "
+            + " · ".join(sec.blocks or ("(none declared)",)))
+
+    floor = sec.card_min_words if is_card else sec.min_words
+    if _words(body) < floor:
         problems.append(
-            f"Body is {_words(body)} words; §{sec.id} '{sec.heading}' "
-            f"requires {sec.min_words}. The floor is the section's job "
-            f"description, not a style preference.")
+            f"Body is {_words(body)} words; "
+            + (f"each {sec.kind.replace('_', ' ')} of §{sec.id} requires "
+               f"{floor}, and the section as a whole requires "
+               f"{sec.min_words} across its cards"
+               if is_card else
+               f"§{sec.id} '{sec.heading}' requires {sec.min_words}")
+            + ". The floor is the section's job description, not a style "
+              "preference.")
+    problems += _check_blocks(sec, body)
 
     eids = [e for e in _split_ids(record.get("Evidence_IDs")) if e]
     register = wb.evidence_index()
@@ -226,10 +308,18 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
             f"Evidence_IDs {', '.join(unknown)} do not resolve in this run's "
             f"register. Invariant 4 is fail-closed and a report section is "
             f"not exempt — it is the artefact a client reads.")
-    if not eids:
+    if not eids and sec.requires_citation:
         problems.append(
             "Evidence_IDs is empty. A section of a client-facing report that "
             "cites nothing is the shape of a hallucination, whatever it says.")
+    elif not eids:
+        # `requires_citation=False` is a real property of five sections —
+        # the scope statements and the artefact index describe the RUN, not
+        # the client, and there is nothing about the client for them to
+        # cite. The renderer honoured that; the writer did not, and refused
+        # all sixteen. A spec field that only half the pipeline reads is a
+        # contradiction, not a safeguard.
+        pass
 
     weighing = _clean(record.get("Weighing"))
     if len(weighing) < MIN_WEIGHING:
@@ -319,17 +409,26 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
         # Written blank on purpose: the verdict is somebody else's, and a
         # section that arrives pre-approved is the defect this prevents.
         "Review_Verdict": "", "Review_Actor": "", "Review_At": "",
+        "Card_ID": card_id,
     }
-    have = rows_for(wb, report).get(str(sec.id))
+    key = {"Report": report, "Section_ID": str(sec.id), "Card_ID": card_id}
+    have = any(_clean(r.get("Card_ID")) == card_id
+               for r in all_rows_for(wb, report).get(str(sec.id), []))
     if have:
-        # Re-writing a section CLEARS its verdict: the thing that was
-        # reviewed no longer exists.
-        wb.update_row("Report_Narrative", "Section_ID", str(sec.id), row)
+        # Re-writing CLEARS the verdict: the thing that was reviewed no
+        # longer exists. Keyed on the composite — Section_ID alone matched
+        # the OTHER report's §N first and silently relabelled it.
+        wb.update_row_where("Report_Narrative", key, row)
     else:
         wb.append("Report_Narrative", row)
-    return {"report": report, "section": str(sec.id), "words": acc["words"],
-            "accuracy": acc, "inferences": len(tags),
-            "absence_claimed": absence_claimed}
+    n = len(all_rows_for(wb, report).get(str(sec.id), []))
+    return {"report": report, "section": str(sec.id), "card": card_id or None,
+            "words": acc["words"], "accuracy": acc, "inferences": len(tags),
+            "absence_claimed": absence_claimed,
+            "cards_in_section": n if is_card else None,
+            "section_words": sum(_words(_clean(r.get("Body")))
+                                 for r in all_rows_for(wb, report)
+                                 .get(str(sec.id), []))}
 
 
 def review(wb: RunWorkbook, report: str, section_id: str, *, verdict: str,
@@ -409,14 +508,29 @@ def state(wb: RunWorkbook, report: str | None = None) -> dict:
     for key in reports:
         spec = RS.SPECS[key]
         have = rows_for(wb, key)
+        every = all_rows_for(wb, key)
         secs = []
         for sec in spec.sections:
             r = have.get(str(sec.id))
+            rows = every.get(str(sec.id), [])
+            # A LIST section is measured across its cards: its word floor is
+            # for the whole list (what a reader meets, and what the renderer
+            # concatenates), and its card count is a floor of its own.
             body = _clean(r.get("Body")) if r else ""
+            sec_words = sum(_words(_clean(x.get("Body"))) for x in rows)
+            cards = len(rows) if sec.kind in RS.CARD_KINDS else None
+            card_floor = (RS.INSIGHT_CARD_MIN
+                          if sec.kind == "insight_card" else
+                          1 if sec.kind in RS.CARD_KINDS else 0)
             if not r or not body:
                 st, detail = "OPEN", "not written"
-            elif _words(body) < sec.min_words:
-                st, detail = "SHORT", (f"{_words(body)} of {sec.min_words} "
+            elif cards is not None and cards < card_floor:
+                st, detail = "SHORT", (
+                    f"{cards} of {card_floor} "
+                    f"{sec.kind.replace('_', ' ')}s "
+                    f"({sec_words} of {sec.min_words} words)")
+            elif sec_words < sec.min_words:
+                st, detail = "SHORT", (f"{sec_words} of {sec.min_words} "
                                        f"words")
             elif not _clean(r.get("Review_Verdict")):
                 st, detail = "UNREVIEWED", (
@@ -432,6 +546,12 @@ def state(wb: RunWorkbook, report: str | None = None) -> dict:
                     f"{_clean(r.get('Review_Actor'))}")
             secs.append({"section": str(sec.id), "heading": sec.heading,
                          "kind": sec.kind, "min_words": sec.min_words,
+                         "words": sec_words, "cards": cards,
+                         "card_floor": card_floor or None,
+                         "blocks": list(sec.blocks),
+                         "surfaces": list(sec.surfaces),
+                         "inputs": list(sec.inputs),
+                         "requires_citation": sec.requires_citation,
                          "status": st, "detail": detail,
                          "fix": (f"engine.narrative write --report {key} "
                                  f"--section {sec.id}") if st in
@@ -440,8 +560,7 @@ def state(wb: RunWorkbook, report: str | None = None) -> dict:
                                  f"--section {sec.id}") if st == "UNREVIEWED"
                                 else None})
         open_ = [s["section"] for s in secs if s["status"] != "READY"]
-        words = sum(_words(_clean((have.get(str(s.id)) or {}).get("Body")))
-                    for s in spec.sections)
+        words = sum(s["words"] for s in secs)
         out["reports"][key] = {
             "title": spec.title, "sections": secs, "open": open_,
             "words": words, "min_words": spec.min_words,
@@ -485,6 +604,10 @@ def main(argv=None) -> int:
     w.add_argument("--section", required=True)
     w.add_argument("--json", required=True, help="the section record")
     w.add_argument("--actor", required=True)
+    w.add_argument("--card", help="required on a LIST section (insight "
+                                  "cards, findings, recommendations): the "
+                                  "card's own id, which is what makes it a "
+                                  "row of its own rather than an overwrite")
 
     r = common(sub.add_parser("review"))
     r.add_argument("--report", required=True, choices=sorted(RS.SPECS))
@@ -507,6 +630,18 @@ def main(argv=None) -> int:
             for sec in spec.sections:
                 print(f"  §{sec.id:<3} {sec.kind:<14} {sec.min_words:>4}w  "
                       f"{sec.heading}")
+                if sec.blocks:
+                    print(f"        blocks   : "
+                          + "  ##  ".join(sec.blocks))
+                print(f"        reads    : {', '.join(sec.inputs)}")
+                print(f"        feeds    : "
+                      + (", ".join(sec.surfaces) or "no app surface"))
+                if sec.kind in RS.CARD_KINDS:
+                    floor = (RS.INSIGHT_CARD_MIN
+                             if sec.kind == "insight_card" else 1)
+                    print(f"        a LIST   : {floor}+ rows, one per card, "
+                          f"each {RS.CARD_MIN_WORDS}+ words "
+                          f"(engine.narrative write --card <id>)")
         print("\nevery section also requires: Weighing (names the other "
               "side), Absence_Basis (a ladder, when the body asserts an "
               "absence), Assumptions, Bias_Notes, Inference_Tags (matching "
@@ -538,7 +673,7 @@ def main(argv=None) -> int:
         if a.cmd == "write":
             rec = json.loads(Path(a.json).read_text())
             print(json.dumps(write(wb, a.report, a.section, rec,
-                                   actor=a.actor), indent=2))
+                                   actor=a.actor, card=a.card), indent=2))
             return 0
         dims = (json.loads(a.dimensions) if a.dimensions
                 else {d: "PASS" for d in REVIEW_DIMENSIONS})

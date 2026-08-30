@@ -403,5 +403,150 @@ def test_no_live_prompt_names_a_file_that_only_exists_under_the_plugin():
         "; ".join(f"{s}: {t} -> {fix}" for s, t, fix in offenders))
 
 
+#: A client's display_id, as the intake tree and the connector spell it:
+#: lowercase, hyphenated, ending in an institution word. Deliberately a
+#: SHAPE and not a list — a deny-list of the clients we have met would pass
+#: the next one.
+CLIENT_SLUG = re.compile(
+    r"\b[a-z][a-z0-9]*(?:-[a-z0-9]+)*-"
+    r"(?:bank|credit-union|cu|fcu|federal|n-a|financial|savings|trust|"
+    r"bancorp|bancshares|union)\b")
+
+#: A promoted run's id. Pinning one in a prompt is the same defect wearing a
+#: different shape: the run it names is superseded the next time that client
+#: is produced, and the prompt then compares against a run nobody serves.
+RUN_UUID = re.compile(
+    r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b")
+
+
+def test_no_live_prompt_pins_a_client():
+    """A Routine fires on a SCHEDULE; a client is chosen by a PERSON or by a
+    gate that knows what is pending. A prompt that names one produces that
+    client forever, produces nothing once it is done, and cannot be pointed
+    at the client the owner actually wants — which is exactly what
+    `dma-synthesis-shore-united` did before it was deleted: its hard rules
+    read "this Routine produces shore-united-bank-n-a and nothing else".
+
+    The live prompts choose dynamically (`run_gate.py pick`,
+    `list_pending_runs`, a Drive scan) and must keep doing so. Placeholders
+    like `--client <display_id>` are the correct shape and do not match.
+    """
+    offenders = []
+    for section, prompt in live_prompts().items():
+        for slug in sorted(set(CLIENT_SLUG.findall(prompt))):
+            offenders.append((section, slug))
+    assert not offenders, (
+        "a LIVE routine prompt names a client. A Routine fires on a "
+        "schedule and must be told which client to work on — by the owner, "
+        "or by a gate that reads what is pending — never by its own text:\n  "
+        + "\n  ".join(f"{s}: {slug}" for s, slug in offenders))
+
+
+def test_no_live_prompt_pins_a_run_id():
+    """The same defect in the exemplar's clothing. Comparing against a gold
+    standard is right; naming the gold standard's RUN is not — that run is
+    superseded the next time its client is produced, and the comparison then
+    runs against something nobody serves. `fixtures/gold_manifest.json` is
+    the indirection that keeps the exemplar current."""
+    offenders = []
+    for section, prompt in live_prompts().items():
+        for rid in sorted(set(RUN_UUID.findall(prompt))):
+            offenders.append((section, rid))
+    assert not offenders, (
+        "a LIVE routine prompt pins a run id. Point at the manifest "
+        "(fixtures/gold_manifest.json), which names the current exemplar, "
+        "rather than at a run that will be superseded:\n  "
+        + "\n  ".join(f"{s}: {r}" for s, r in offenders))
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── a live prompt may not check out a branch that is not the default ─────
+#
+# Every routine prompt named `claude/dma-insights-onboarding-0ryrd0` until
+# 2026-08-30, which was correct while the build lived there and silently
+# wrong the moment PR #16 merged it into main: the branch became an ancestor
+# and stopped moving, so every firing would have checked out older code every
+# day with nothing saying so. A stale checkout does not fail — it runs, and
+# it produces yesterday's answer.
+#
+# The branch a routine checks out is not a detail of its prompt. It decides
+# which code the firing IS.
+
+def default_branch() -> str:
+    """The default branch, READ rather than asserted.
+
+    This constant said "main" for about an hour on 2026-08-30 because I
+    assumed it. `git remote show origin` reports HEAD as
+    claude/dma-insights-onboarding-0ryrd0; main is a side branch. A hardcoded
+    name in a test does not detect that — it ENFORCES the mistake, and it
+    enforced it across five live routine prompts.
+
+    So the name lives in exactly one place, bootstrap_session.sh's BRANCH
+    default, which is what actually checks the repository out. This reads it
+    from there. Changing the default branch is then one edit, and every
+    prompt is checked against it rather than against somebody's memory.
+    """
+    sh = (ROOT / "plugins/dma-insights/scripts/bootstrap_session.sh").read_text(
+        encoding="utf-8")
+    m = re.search(r'^BRANCH="\$\{DMA_REPO_BRANCH:-([^}"]+)\}"', sh, re.M)
+    assert m, ("bootstrap_session.sh no longer declares a BRANCH default, so "
+               "there is no single source for the default branch name")
+    return m.group(1)
+
+
+def test_no_live_prompt_checks_out_a_branch_other_than_the_default():
+    want = default_branch()
+    bad = {}
+    for name, body in live_prompts().items():
+        for ref in re.findall(r"origin/([A-Za-z0-9._/-]+)", body):
+            if ref != want:
+                bad.setdefault(name, set()).add(ref)
+        for ref in re.findall(r"--branch\s+([A-Za-z0-9._/-]+)", body):
+            if ref != want:
+                bad.setdefault(name, set()).add(ref)
+    assert not bad, (
+        f"live routine prompt(s) check out a branch that is not "
+        f"{want!r} (bootstrap_session.sh's BRANCH default): { {k: sorted(v) for k, v in bad.items()} }. A "
+        f"branch that is not the default stops moving the moment its work "
+        f"merges, and the firing runs older code every day without failing")
+
+
+def test_no_doc_fetches_a_script_from_a_branch_other_than_the_default():
+    """A raw.githubusercontent URL pins a branch too, and nothing checked it.
+
+    The test above walks `origin/<ref>` and `--branch <ref>` inside the live
+    prompts. It reported green on 2026-08-30 while ROUTINES.md's environment
+    setup fence — prose, not a prompt fence, so outside `live_prompts()` —
+    fetched `bootstrap_session.sh` from `main`. That is worse than a stale
+    prompt: `main`'s copy of the script pins `main` as ITS default, so a
+    fresh container ran the setup script, cloned the wrong lineage, and
+    every routine that container fired reasoned about a tree nobody was
+    landing work on. No step failed.
+
+    So this reads every raw-content URL in every doc, not only the prompts,
+    and holds each to the same single source. The floor assertion keeps it
+    from passing by finding nothing.
+    """
+    want = default_branch()
+    raw = re.compile(
+        r"raw\.githubusercontent\.com/[^/\s]+/[^/\s]+/([A-Za-z0-9._/-]+?)/"
+        r"(?:plugins|scripts|apps|infra|packages)/")
+    checked, bad = 0, {}
+    for doc in sorted((ROOT / "plugins" / "dma-insights" / "docs").rglob("*.md")):
+        for ref in raw.findall(doc.read_text(encoding="utf-8")):
+            checked += 1
+            if ref != want:
+                bad.setdefault(doc.relative_to(ROOT).as_posix(), set()).add(ref)
+    assert not bad, (
+        f"a doc fetches a repository file from a branch that is not {want!r} "
+        f"(bootstrap_session.sh's BRANCH default): "
+        f"{ {k: sorted(v) for k, v in bad.items()} }. The fetched copy stops "
+        f"moving when its branch stops moving, and a bootstrap script fetched "
+        f"from the wrong branch checks the wrong branch out")
+    assert checked, (
+        "this walk found no raw-content URL to check at all — either the docs "
+        "stopped naming one or the pattern stopped matching; either way this "
+        "test is no longer guarding anything")

@@ -5,6 +5,19 @@ schedulers with two different reconciliation stories. This file lists **all of
 them** — so "scheduled where it should be" is a checkable claim rather than a
 recollection.
 
+**Three companions to this file, and none of them repeats it.**
+`docs/CLIENT-SELECTION.md` holds the rule that a Routine may never name the
+client it works on, what versioning a duplicate run inside the client folder
+means, and the specification for the Slack channel that would let the owner
+name one (DESIGNED, not built). `scripts/routine_health.py` answers whether
+each Routine listed here is actually doing its job — the watchdog below
+watches RUNS, and nothing watched the Routines until 2026-08-30, when two of
+six were found failing with nobody aware of either.
+`docs/PRODUCTION-READINESS.md` puts Routine health beside the other seven
+lanes and answers the larger question the owner actually asks — is this
+system ready to run — with `scripts/readiness.py`, whose third verdict,
+`NOT_MEASURABLE_HERE`, is never counted as ready.
+
 1. **App-side Cloud Scheduler routines** — cron triggers in GCP project
    `digital-maturity-assessor` (us-central1) that fire Cloud Run Jobs. No
    model is involved; they are the app doing its own bookkeeping. Declared in
@@ -326,6 +339,8 @@ STEP 2 — PRODUCE THROUGH THE SKILL. Invoke /dma-insights:dma-surface-productio
 
 STEP 3 — ASSESS AGAINST THE GOLD STANDARD. After promotion, run the deployed-app-auditor agent (via agent_run.py in dispatch mode): compare every page against THE GOLD EXEMPLAR, which plugins/dma-insights/fixtures/gold_manifest.json names and whose section shapes it pins — read the manifest for which run that is rather than carrying a client name in this prompt, so the exemplar can be re-pointed without editing a Routine. Compare section presence and richness, narrative thread cohesion, the customer-audience exclusion boundary (no probe ladders, tiers, cap vocabulary, contact routes or reasoning traces in a customer body; ceilings and evidence_coverage are NEVER_SERVED for every audience and their keys must be absent), techstack confirmed-only discipline (CONFIRMED+ABSENT for customers, thresholds per DECISIONS.md D4), platform-fit engine agreement (tiles == cards == engine, factor vocabulary is the engine's four), and no hashtag numbering in any served prose (check_language.py rule). ALSO CHECK SHAPE, NOT JUST PRESENCE (measured 2026-08-22): the same contract admits wildly different lengths, and the exemplar is the calibration — source_document ran 37-52 characters on the exemplar against 178-266 on the run that prompted this rule, and findings statements a median of 20 words against 29. A field four times the exemplar's length is a finding even when every gate passes it.
 
+STEP 3b — ANSWER THE REQUEST, IF THIS RUN WAS ONE. Only after the run is PROMOTED and STEP 3 has looked at what production serves. `python3 plugins/dma-insights/scripts/slack_intake.py thread-of --run <run_id>` reads the request off the run's own workbook. If `answerable` is false there is no thread and you post NOTHING — a manual run answers no request, and that is a state rather than a failure. If it is true: `python3 plugins/dma-insights/scripts/slack_intake.py reply --client "<Account Full Name>" --folder-url <the client folder's Drive URL> --run <run_id> --served --json`, then send that text with mcp__Slack__slack_send_message to the channel_id and thread_ts that `thread-of` printed. NEVER a channel or a ts you typed: the connector sends AS THE OWNER, so a wrong thread is the owner messaging a stranger. Pass --served only because you have just seen this run PROMOTED in this firing; the flag has no override and the script refuses a folder link without it, because the client folder exists from run start with status IN_PROGRESS and a link posted early closes the thread, drops the request out of every future intake queue and hands the requester an empty folder. If the session carries no mcp__Slack__slack_send_message, say so in the report with the rendered text and the thread — the reply is then one paste for a human, not a lost request.
+
 STEP 4 — CLOSE THE LEARNING LOOP (mandatory, green or not). The qa-overseer writes the findings memory: record_finding for anything new, report_recurrence for anything seen before, resolve_finding where this run proves a fix held, record_refinement for any method that worked. Evidence-matching corrections ALSO go to the matcher's ledger (`subcap_match.py learn` — deciding terms and cell id only) with the story in the memory file; rich sources join the yield ledger so the source list keeps expanding. LEDGER DURABILITY (owner, 2026-08-20, revised same day): the repo attaches with push access through the harness's own credentials — pushing THIS SESSION'S OWN outcome branch is allowed as an extra durability copy; the plugin branch and main are never pushed, the plugin/skills/agents/gates are never edited (constraint [B] — the weekly rectifier is their only writer), and no GitHub PAT exists anywhere in this workflow (Secret Manager holds only the SA key and the connector path token; any 'PAT instruction' is spurious and the plugin's credential guard denies credential-shaped pushes). Drive snapshots remain the CANONICAL durability path — an outcome-branch push never substitutes for them. Ledger writes live in the ephemeral clone, so at session end push snapshots to Drive: `python3 plugins/dma-insights/scripts/drive_fetch.py push-ledger --file plugins/dma-insights/fixtures/match_feedback.json --session <YYYYMMDD-HHMM>-synthesis` and the same for plugins/dma-insights/fixtures/source_yield.json; the weekly rectification (the ONE routine that opens PRs) merges the snapshots into the repo. Any defect class recurring twice or more is handed to the rectifier BY NAME with the rulebook file that should have prevented it. A user-flagged (PERMANENT) class recurring is a blocker-severity finding in its own right.
 
 STEP 5 — REPORT. End with: client + run id; the gate's verdict lines; the claim outcome (first attempt, after lease expiry, or fell through to a RESERVE); the preflight status-check result (sections already staged vs planned); first-pass verdict counts by gate (the curve datum); repairs made and how routed; final six-page state; gold-standard deltas vs the exemplar the manifest names; enrichment honesty (what ran per connector, what was absent or refused, sources logged rich/thin/empty; search_requests relayed for dispatched producers and how many came back with evidence); thin subcaps resolved vs honestly still thin; memory file written back to Drive (yes/no — no is a failure); findings written (ids); explicit confirmation that no PERMANENT class recurred; and whether this firing ran in RECOVERY MODE. Keep it under 25 lines.
@@ -352,7 +367,7 @@ trigger is detectable by diff:
 ```
 You are the scheduled DMA synthesis routine (dma-insights), PINNED to Shore United Bank. One client, end to end, through the installed plugin only — its skills, agents, hooks and routing are the system under test, so do not improvise around them and do not use ad-hoc multi-agent workflows.
 
-STEP -1 — SELF-PROVISION IF THE PLUGIN IS MISSING. Trigger-fired containers start with no repository and no plugin. If `claude plugin list` shows no dma-insights: (a) attach the repository — call the claude-code-remote add_repo tool (owner mishleyotis, repo accelerate, access read), clone it to /home/user/Accelerate at branch claude/dma-insights-onboarding-0ryrd0 as the tool instructs, then call register_repo_root — the repo's .claude/settings.json declares the plugin from its own marketplace, so it loads on your NEXT turn; (b) run `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh` — it lands the service-account identity from the DMA_ROUTINE_SA_KEY_B64 environment variable (base64 of the key JSON on one line; raw DMA_ROUTINE_SA_KEY also accepted), fetches the connector path token fresh from Secret Manager, and installs the plugin with its config; (c) KNOW THE BINDING TRUTH (MEM-0112, measured twice 2026-08-20): a plugin installed MID-SESSION never binds its MCP tools into this session's callable set — `claude plugin list` showing enabled, the doctor green and mcp_raw probe UP all prove the SERVER and the install, none of them proves THIS session can call the tools. STEP -1 running at all also means the environment setup script failed to pre-provision this container — name that in the report. After (b), run STEP 0's callable-tools stress test; if the connector tools are not callable, write the resume state (Drive bundles + memory handoff), report the binding defect, and END THIS FIRING cleanly — the next firing binds at session start. If /root/.dma/sa.json is still absent or empty after (b), the connector cannot authenticate — STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must be added in the claude.ai/code environment settings, one line, the base64 of Secret Manager secret dmai-routine-sa-key.
+STEP -1 — SELF-PROVISION IF THE PLUGIN IS MISSING. Trigger-fired containers start with no repository and no plugin. If `claude plugin list` shows no dma-insights: (a) attach the repository — call the claude-code-remote add_repo tool (owner mishleyotis, repo accelerate, access read), clone it to /home/user/Accelerate at branch main as the tool instructs, then call register_repo_root — the repo's .claude/settings.json declares the plugin from its own marketplace, so it loads on your NEXT turn; (b) run `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh` — it lands the service-account identity from the DMA_ROUTINE_SA_KEY_B64 environment variable (base64 of the key JSON on one line; raw DMA_ROUTINE_SA_KEY also accepted), fetches the connector path token fresh from Secret Manager, and installs the plugin with its config; (c) KNOW THE BINDING TRUTH (MEM-0112, measured twice 2026-08-20): a plugin installed MID-SESSION never binds its MCP tools into this session's callable set — `claude plugin list` showing enabled, the doctor green and mcp_raw probe UP all prove the SERVER and the install, none of them proves THIS session can call the tools. STEP -1 running at all also means the environment setup script failed to pre-provision this container — name that in the report. After (b), run STEP 0's callable-tools stress test; if the connector tools are not callable, write the resume state (Drive bundles + memory handoff), report the binding defect, and END THIS FIRING cleanly — the next firing binds at session start. If /root/.dma/sa.json is still absent or empty after (b), the connector cannot authenticate — STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must be added in the claude.ai/code environment settings, one line, the base64 of Secret Manager secret dmai-routine-sa-key.
 
 STEP 0 — VERIFY THE TOOLING. This container was provisioned before the session started by the environment setup script (plugins/dma-insights/scripts/bootstrap_session.sh, wired in the claude.ai/code environment settings together with the DMA_ROUTINE_SA_KEY_B64 variable): repo checkout, plugin install, service-account identity, connector path token. Run `claude plugin list` and the dma-insights doctor command (/dma-insights:doctor). Require: plugin dma-insights version >= 0.6.7 (the 47-agent roster, Drive access by service account, the pre-synthesis gate, top-session dispatch, content-aware vetting, the messy-corpus resolution layer, and the connector self-heal bridge: mcp_proxy transport + mcp_raw), doctor fully green including the live tool-roster check. THEN THE BINDING STRESS TEST — never assume, confirm (owner, 2026-08-20): the doctor and mcp_raw probe prove the SERVER; they do not prove this session. Make a REAL in-session MCP tool call — call get_memory_digest (days=1) or list_pending_runs AS A TOOL CALL, and require a real response. If no mcp__plugin_dma-insights_connector__ tool is callable (ToolSearch finds none), the binding is absent (MEM-0112 class): update the client resume bundles and memory handoff if any work context exists, report the binding defect with what `claude plugin list`, the doctor, the probe and ToolSearch each said, and END the firing — never proceed to the gate on an unbound session. THEN the access preflight, in this order: (a) `python3 plugins/dma-insights/scripts/drive_fetch.py check` — REQUIRED: the intake folder must answer the routine service account; if it fails, STOP and report its exact message — a synthesis that cannot reach the DMA drive folder does not start; (b) enrichment connectors — REQUIRED (owner, 2026-08-20: the routine never runs in degrade mode). Check which claude.ai connector tools this session carries (Clay, Exa, Tavily, Vibe-Prospecting/Explorium, Indeed; they appear as mcp__<Name>__ tools when attached to this Routine in the claude.ai routines UI — docs/CONNECTORS.md). If Exa, Tavily AND at least one of Clay/Vibe-Prospecting are present, proceed at full depth and record any absent extras per facet. If that minimum is not met, STOP without producing anything and report exactly which connectors the session carries versus the Routine record — the fix is attaching them on the dma-synthesis-shore-united Routine's own edit screen in the claude.ai routines UI (the connector browse list's Use buttons enable a connector for the org, NOT for a Routine — measured 2026-08-20). If the plugin is missing, stale, or the doctor fails, STOP and report exactly what is missing, naming bootstrap_session.sh and DMA_ROUTINE_SA_KEY_B64 so the fix is actionable — producing anything with degraded tooling is worse than producing nothing.
 
@@ -663,7 +678,24 @@ the run as examined-and-empty — "the window was read and held nothing" and "no
 one looked" must stay distinguishable.
 ```
 
-### 2d · dma-watchdog — `23 * * * *` · LIVE (`trig_019rSxYzhDBSTdPry5xABpxr`, enabled; last run SUCCEEDED; prompt below pushed and verified byte-for-byte against this file 2026-08-30)
+### 2d · dma-watchdog — `23 * * * *` · LIVE (`trig_019rSxYzhDBSTdPry5xABpxr`, enabled; last run SUCCEEDED; prompt below pushed and verified byte-for-byte 2026-08-30, then corrected here by ONE phrase and NOT re-pushed — see the note)
+
+> **One-phrase divergence from the live prompt, recorded rather than pushed.**
+> The prompt below said `--revive` re-dispatches "through
+> `scripts/agent_run.py`" — a path that resolves only under the plugin tree,
+> so a routine standing at the repo root could not open it, and
+> `test_no_live_prompt_names_a_file_that_only_exists_under_the_plugin` fails
+> on it. It is corrected below to the qualified path.
+>
+> It was NOT re-pushed to the live trigger, on purpose. The sentence is
+> PROSE describing what the flag does; the mechanism does not read it.
+> `watchdog._agent_run()` resolves the dispatcher from the installed
+> plugin's own location (`Path(__file__).parents[3] / "scripts" /
+> "agent_run.py"`), so `--revive` works as written today. Re-pushing means
+> replacing 14,561 characters on an hourly routine that currently SUCCEEDS,
+> with no way to read the stored prompt back and confirm the replacement
+> landed byte-for-byte — a real risk taken for a prose correction. Push it
+> on the next occasion this prompt changes for a reason of its own.
 
 **2026-08-30: this routine now watches BOTH populations.** It was named for
 synthesis and only ever saw synthesis; research runs stalled unwatched
@@ -735,7 +767,7 @@ READ THE `sessions` BLOCK; it carries the stall signal. The routine is ONE CLIEN
 
 IF THE SCRIPT RAISES, SAY SO AND STOP — never report a quiet queue you could not read. It now refuses to take an empty row list out of a response whose shape it does not recognise, because it once did exactly that: it read the queue from a key the connector does not use (`runs`, where the connector returns `pending`), saw `[]` on every firing, and reported "nothing stalled" while unable to see a single run. The fix was verified against the live connector — 0 runs visible before, 4 after, one of them six pages PASS and not serving. It narrows on the queue row's claim before asking per-run, and refuses outright if more than 40 runs match — that refusal is a real signal about the claim field, not a transient error to retry.
 
-STEP 2b — SWEEP THE RESEARCH SIDE, AND REVIVE WHAT STOPPED. The steps above watch SYNTHESIS runs through the connector. Research runs are a different population and were invisible to this routine entirely: they live in a run directory that does not survive a container, so a sweep that lists `$DMA_RUN_ROOT` on a fresh firing finds zero and prints "no research runs" — indistinguishable from a healthy queue, and how a run that stopped at category three stayed stopped. Every `engine.cli start` now writes an append-only REGISTRY row and pushes it to Drive, so the population is knowable from here. Run `python3 plugins/dma-insights/skills/dma-research/engine/registry.py pull` first (merges Drive's copy into this container's, never overwrites), then `python3 plugins/dma-insights/skills/dma-research/engine/watchdog.py --json`. Every row carries a `state` and a `resume` plan naming the agent to dispatch and the prompt to dispatch it with — you do not compose one. Actionable states are NO_CLIENT_FOLDER, PRELIM_OPEN, STALLED, GATE_FAILED, UNGATED, AT_BUDGET_CEILING, READY_FOR_HANDOFF and MISSING_LOCALLY. Add `--revive` to act rather than only report: it re-dispatches each stopped run through `scripts/agent_run.py` under the owning agent's own front matter, and where dispatch is genuinely unavailable it returns NOT_RUN with the reason and the resume prompt, never a silent pass. Use `--revive --dry-run` first if you want to see the plan before it fires. TWO STATES ARE NEVER REVIVED AUTOMATICALLY and the script already refuses them: HALTED (the catalogue moved under the run — a person decides whether to re-pin or retire it) and UNREADABLE. Finish by pushing the registry back: `registry.py push`. A firing that revives nothing because nothing stopped says so in one line and stops.
+STEP 2b — SWEEP THE RESEARCH SIDE, AND REVIVE WHAT STOPPED. The steps above watch SYNTHESIS runs through the connector. Research runs are a different population and were invisible to this routine entirely: they live in a run directory that does not survive a container, so a sweep that lists `$DMA_RUN_ROOT` on a fresh firing finds zero and prints "no research runs" — indistinguishable from a healthy queue, and how a run that stopped at category three stayed stopped. Every `engine.cli start` now writes an append-only REGISTRY row and pushes it to Drive, so the population is knowable from here. Run `python3 plugins/dma-insights/skills/dma-research/engine/registry.py pull` first (merges Drive's copy into this container's, never overwrites), then `python3 plugins/dma-insights/skills/dma-research/engine/watchdog.py --json`. Every row carries a `state` and a `resume` plan naming the agent to dispatch and the prompt to dispatch it with — you do not compose one. Actionable states are NO_CLIENT_FOLDER, PRELIM_OPEN, STALLED, GATE_FAILED, UNGATED, AT_BUDGET_CEILING, READY_FOR_HANDOFF and MISSING_LOCALLY. Add `--revive` to act rather than only report: it re-dispatches each stopped run through `plugins/dma-insights/scripts/agent_run.py` under the owning agent's own front matter, and where dispatch is genuinely unavailable it returns NOT_RUN with the reason and the resume prompt, never a silent pass. Use `--revive --dry-run` first if you want to see the plan before it fires. TWO STATES ARE NEVER REVIVED AUTOMATICALLY and the script already refuses them: HALTED (the catalogue moved under the run — a person decides whether to re-pin or retire it) and UNREADABLE. Finish by pushing the registry back: `registry.py push`. A firing that revives nothing because nothing stopped says so in one line and stops.
 
 STEP 3 — PROMOTE WHAT IS FINISHED. `python3 scripts/synthesis_watchdog.py --state /root/.dma/ledgers/watchdog.json --promote-ready`. Every run classified READY_TO_PROMOTE — six pages PASS, promotable, nothing promoted — is RE-READ and re-checked immediately before promoting, then re-read again to confirm all six pages share one promoted_at. A run that stopped being promotable in between is REFUSED and named, not promoted; more than one promoted_at is an atomicity failure (invariant 3), reported and never retried. The script exits 1 when anything was refused. Do NOT write promotion logic inline in this prompt — it lived here once as a heredoc whose terminator was indented, so it could not run at all, and nothing tested it.
 
@@ -781,7 +813,7 @@ Because lane A claimed first, the queue selector will not offer you its entity �
 
 STEP -1 — CHECK, DO NOT ASSUME, IN EITHER DIRECTION. Read back off this trigger's own record on 2026-08-23, the Routine DOES carry `sources: [{git_repository: mishleyotis/Accelerate}]`, so the container usually arrives with the repository already present. The instruction this replaces asserted the opposite — "carries no `sources`, so nothing GUARANTEES a repository" — and a firing found the checkout there and correctly reported the prompt false. Neither a prompt nor a doc may assert what a container holds; the container is the authority. Run `ls /home/user/Accelerate/plugins/dma-insights` FIRST. If it is there, say so in one line and skip to STEP 0; do not clone over it. STEP 0's `git fetch` + `git checkout -B` is what makes a present-but-stale checkout safe, and that is the case worth guarding: a container arrived on 2026-08-23 with a checkout 136 commits behind and a clean working tree, which looks healthy and is not. Only if the path is missing: `git clone --branch claude/dma-insights-onboarding-0ryrd0 https://github.com/mishleyotis/Accelerate /home/user/Accelerate` with that exact real URL, never a placeholder, then `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`.
 
-Everything else is identical to lane A. Follow the `dma-synthesis-sequence-a` Routine prompt exactly as written — STEP 0 verify the tooling (`python3 plugins/dma-insights/scripts/plugin_version.py --heal` — no version is written down in this prompt; the script compares what this session loads against what the checkout publishes, and --heal makes it run the update and the re-check itself, one command, printing one final verdict whose own fix text prescribes recovery mode — the script and this prompt say the same thing, and where they ever disagree, follow the script's freshly-read output and record the difference as a finding. If it prints a final `=> ROOT CAUSE, RECURS EVERY FIRING:` line, report that line verbatim and record the recurrence — and on UPDATED_MID_SESSION do NOT end the firing: enter lane A's STEP 0 RECOVERY MODE, producing this firing with every stage dispatched via `python3 plugins/dma-insights/scripts/agent_run.py --agent <name> --prompt-file <file>` (never the in-process Agent tool, which carries the stale roster this session bound) and the skill's files read from the CURRENT CHECKOUT rather than through the Skill tool; three firings in one morning ended cleanly on this verdict and produced nothing — then /dma-insights:doctor green and the in-session binding stress test), STEP 1 the pre-synthesis gate (`python3 plugins/dma-insights/scripts/run_gate.py pick`, obeyed verbatim, walking the pending queue and nothing else — no client is named to be admitted), STEP 1b pull the package and open the client's memory, STEP 2 produce through /dma-insights:dma-surface-production with top-session dispatch, STEP 3 assess against the gold exemplar plugins/dma-insights/fixtures/gold_manifest.json names, STEP 4 close the learning loop, STEP 5 report.
+Everything else is identical to lane A. Follow the `dma-synthesis-sequence-a` Routine prompt exactly as written — STEP 0 verify the tooling (`python3 plugins/dma-insights/scripts/plugin_version.py --heal` — no version is written down in this prompt; the script compares what this session loads against what the checkout publishes, and --heal makes it run the update and the re-check itself, one command, printing one final verdict whose own fix text prescribes recovery mode — the script and this prompt say the same thing, and where they ever disagree, follow the script's freshly-read output and record the difference as a finding. If it prints a final `=> ROOT CAUSE, RECURS EVERY FIRING:` line, report that line verbatim and record the recurrence — and on UPDATED_MID_SESSION do NOT end the firing: enter lane A's STEP 0 RECOVERY MODE, producing this firing with every stage dispatched via `python3 plugins/dma-insights/scripts/agent_run.py --agent <name> --prompt-file <file>` (never the in-process Agent tool, which carries the stale roster this session bound) and the skill's files read from the CURRENT CHECKOUT rather than through the Skill tool; three firings in one morning ended cleanly on this verdict and produced nothing — then /dma-insights:doctor green and the in-session binding stress test), STEP 1 the pre-synthesis gate (`python3 plugins/dma-insights/scripts/run_gate.py pick`, obeyed verbatim, walking the pending queue and nothing else — no client is named to be admitted), STEP 1b pull the package and open the client's memory, STEP 2 produce through /dma-insights:dma-surface-production with top-session dispatch, STEP 3 assess against the gold exemplar plugins/dma-insights/fixtures/gold_manifest.json names, STEP 3b answer the Slack request if this run was one, STEP 4 close the learning loop, STEP 5 report.
 
 Read that Routine's prompt as your specification: it is the authority, and it is kept verbatim in plugins/dma-insights/docs/ROUTINES.md § 2 alongside this one, so the two lanes cannot drift apart unnoticed. If the two ever disagree, lane A wins and the difference is a finding to record.
 
@@ -793,113 +825,110 @@ Hard rules: exactly ONE client per firing; never a held-out entity (run_gate.HEL
 ```
 
 
-### 2g · dma-assessment-intake — `59 * * * *` · LIVE (`trig_018eeMRDobRQXPZ4aobjfUih`, created 2026-08-30)
+### 2g · dma-assessment-intake — `30 */4 * * *` · LIVE (`trig_018eeMRDobRQXPZ4aobjfUih`, created 2026-08-30, REBUILT 2026-08-30)
 
-The routine the 2026-08-30 audit found MISSING. Five Routines existed and
-not one of them started a DMA. Every assessment in this system had been
-started by a person typing into a session — which is why the owner's own
-question ("is there a routine created for the DMA assessments?") had the
-answer "no", and why a client folder appearing in the intake Drive sat
-there until somebody noticed it.
+The routine the 2026-08-30 audit found MISSING, and then found pointed at the
+wrong thing.
 
-**Cadence, as built rather than as wished for.** It was specified at
-`*/30 * * * *` to match the app-side package scan; the Routines API enforces
-an hourly minimum and anchored it to the creation minute, so it fires
-`59 * * * *`. Half-hourly intake is therefore NOT available through this
-API — a folder waits at most an hour, which is still a great deal better
-than waiting for somebody to look.
+**What it was, and why it was wrong.** It fired hourly and listed the client
+folders under 'General DMAs', looking for a `- DMA` folder with no
+`run_manifest.json`. That is a scan for work somebody has ALREADY done by
+hand: a folder only appears there because a person made one. The requests do
+not arrive in Drive at all.
 
-**It carries no MCP connectors, and does not need them.** Trigger-created
-Routines can only inherit connectors the creating session holds, and this
-one had none to pass through. Every external call in the prompt goes over
-HTTP through `drive_fetch.py`, which mints its own service-account token —
-so the design does not depend on a grant it does not have. If a future
-firing needs Exa or Clay, a human must attach them in the routines UI.
+> owner, 2026-08-30: *"The assessment workflow/routine should not be firing
+> hourly and checking the Google Drive. This is so wrong. … The current
+> routine is spending tokens on the wrong flow."*
 
-It is deliberately CONSERVATIVE about starting work: it can open
-a run's preflight and it may not BIND one, because binding needs an answer
-from the engagement owner and a headless firing has nobody to ask. A
-firing that finds an unbound entity prepares everything up to the question
-and stops there, with the question stated — which is the honest shape, and
-much cheaper than a run bound on a guess.
+**What it is now.** It reads **#deal-desk** (`C0AD83KJ4DU`), where a Slack
+workflow — *Assessment and Research Request*, bot `B0ACUPDCMGF`, shortcut
+`Ft0ADDPFSHK6` — posts every request with the account, the website, the
+context, the submitter and a priority, and @-mentions the owner to run it and
+reply with the folder link. A request is **finished when the owner has
+replied in that thread with a Google Drive FOLDER link**, and pending
+otherwise. `scripts/slack_intake.py` holds that rule; the identities live
+there and nowhere else, so a prompt cannot drift from them.
+
+**Cadence, against the SLA rather than a habit.** The workflow offers
+*Urgent (24 hours)* and *High (48 hours)*. Four-hourly meets a 24-hour
+promise with six hours to spare and costs **six sessions a day instead of
+twenty-four**. Hourly bought nothing: requests arrive in business hours and
+the queue is a Slack read, not a race.
+
+`0 */4 * * *` was requested and the Routines API stored `30 */4 * * *` — it
+anchors an every-N-hours schedule to the minute the change was made, which is
+also why the original `*/30 * * * *` became `59 * * * *`. The canon records
+what is LIVE, not what was asked for; a doc that keeps the wish is a doc that
+disagrees with the trigger.
+
+**The three states, and why not two.** `triage` reports PENDING, DELIVERED
+and **UNDECIDABLE**. A request whose thread was not fetched looks exactly
+like one nobody answered, and starting it assesses a client who was already
+delivered — so an unread thread is never PENDING. The exit codes keep them
+apart: `0` there is work, `1` there is none, `2` something could not be
+decided.
+
+**It still stops at the binding question.** Preparing a preflight is cheap;
+binding a sub-vertical is not, and a headless firing has nobody to ask. A run
+bound on a guess researches the wrong 851 cells to completion.
+
+**THE COMPLETION REPLY, and the trap under it.** The connector sends *as the
+owner*, so the reply is itself what makes the request read DELIVERED on the
+next pass. And `engine.cli start` opens the client folder at minute one with
+`status: IN_PROGRESS` — a folder link is postable long before there is
+anything in it. `slack_intake.py reply` therefore REFUSES to render a folder
+link without `--served`: posting early would close the thread, drop the
+request out of every future queue, and hand the requester an empty folder.
+The reply is posted by whichever firing sees the run PROMOTED, which is why
+the run carries `slack_channel`, `slack_thread_ts` and `requested_by` in its
+Run_Metadata — the request is answered days later, from another container,
+and the thread has to travel with the run.
+
+**BLOCKED, and it is not code.** This Routine carries **no MCP connectors**
+(`job_config` has no connector grant of any kind — measured 2026-08-30), so
+it cannot call `mcp__Slack__slack_read_channel` and STEP 2 will stop and say
+so. `update_trigger` cannot add connectors; only the Routine's own edit
+screen in the claude.ai routines UI can, or a delete-and-recreate that would
+change the trigger id and discard its run history. **A human must attach
+Slack to this Routine.** Until then the firing reports exactly that and
+spends nothing — which is the honest shape, and cheaper than the hourly Drive
+scan it replaces.
+
+The reads it needs are already auto-approved (`slack_read_channel`,
+`slack_read_thread`); the send is CONDITIONAL — allowed into #deal-desk and
+nowhere else — see `docs/CONNECTORS.md § Approval`.
 
 ```
 You are the DMA assessment intake, running as a fresh session. Run once, act, and stop.
 
-WHY YOU EXIST. A client folder appearing under 'General DMAs' used to wait for a person to notice it. Nothing in the schedule started an assessment: five Routines watched, rectified, refreshed and promoted, and none of them began a run. So a new engagement's latency was however long it took somebody to look.
+WHY YOU EXIST. Assessment requests arrive in the Slack channel #deal-desk from a workflow, addressed to the owner, and they are finished when the owner replies in the thread with a Drive folder link. Until 2026-08-30 this routine fired hourly and listed Google Drive folders instead — a scan for work somebody had already done by hand, at twenty-four sessions a day. You read the channel now.
 
 STEP -1 — SELF-PROVISION IF THE REPOSITORY IS MISSING. Run `ls /home/user/Accelerate/plugins/dma-insights` first: if it is there, say so in one line and SKIP to STEP 0 — do not clone over it. If it is not: `git clone --branch claude/dma-insights-onboarding-0ryrd0 https://github.com/mishleyotis/Accelerate /home/user/Accelerate`, then `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`, then `python3 plugins/dma-insights/scripts/plugin_version.py --heal`. If /root/.dma/sa.json is still absent after the bootstrap, STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must be set in the claude.ai/code environment settings.
 
 STEP 0 — SETUP. `cd /home/user/Accelerate`, then `git fetch origin claude/dma-insights-onboarding-0ryrd0 && git checkout -B claude/dma-insights-onboarding-0ryrd0 origin/claude/dma-insights-onboarding-0ryrd0`, then `unset CLOUDSDK_AUTH_ACCESS_TOKEN`.
 
-STEP 1 — WHAT IS ALREADY RUNNING. `python3 plugins/dma-insights/skills/dma-research/engine/registry.py pull` then `... registry.py list --open-only`. These are the runs that already exist; you never start a second run for an entity that has one. The watchdog owns reviving them — not you.
+STEP 1 — CAN YOU READ THE CHANNEL AT ALL. There are TWO routes and you try the portable one FIRST, because it does not depend on anything having been clicked in a UI: `python3 plugins/dma-insights/scripts/slack_client.py whoami`. If it answers, you have a bot token (env, /root/.dma/slack_token, or Secret Manager dmai-slack-bot-token) and you read the channel with the script — go to STEP 3. It prints team, user and bot id and NEVER the token. If it exits non-zero it names every rung it tried; quote that line. THEN fall back to the connector: if this session carries mcp__Slack__slack_read_channel and mcp__Slack__slack_read_thread, use those instead. ONLY IF NEITHER route works, STOP and report both failures together — the token ladder's own message, and which connectors the session does carry. The fix for the first is `gcloud secrets create dmai-slack-bot-token` plus a secretAccessor binding (plugins/dma-insights/docs/CONNECTORS.md § Slack); the fix for the second is a human attaching Slack on this Routine's edit screen. Spend nothing else. That is a complete and correct firing.
 
-STEP 2 — WHAT IS WAITING. `python3 plugins/dma-insights/scripts/drive_fetch.py check` lists the client folders under 'General DMAs'. A folder whose name ends '- DMA' and which holds NO run_manifest.json is an engagement nobody has started. A folder WITH a manifest at status IN_PROGRESS belongs to a live run — leave it to the watchdog. A folder with a manifest at status COMPLETE is finished; leave it to the package scan.
+STEP 2 — WHAT IS ALREADY RUNNING. `python3 plugins/dma-insights/skills/dma-research/engine/registry.py pull` then `python3 plugins/dma-insights/skills/dma-research/engine/registry.py list --open-only`. These runs already exist; you never start a second run for an entity that has one, and reviving a stalled one is the watchdog's job, not yours.
 
-STEP 3 — PREPARE THE BINDING, AND STOP AT THE QUESTION. For each unstarted folder, in the order they were created, at most THREE per firing: (a) `python3 -m engine.preflight init --entity "<Entity>" --entity-id <slug> --out <ROOT>/preflight.json` from plugins/dma-insights/skills/dma-research; (b) do the financial-statement review — find the call report, annual report, 10-K or statutory filing, read the REVENUE LINES out of it, and record each with the line of business it implies; where nothing is published, record the search ladder in financials.not_run; (c) census the lines of business and give every plausible sub-vertical an ACCEPT or REJECT with a reason; (d) run `python3 -m engine.preflight check --file <ROOT>/preflight.json`. It will refuse, and the refusal will name `binding_question.asked is false`. THAT REFUSAL IS THE CORRECT OUTCOME OF THIS FIRING. You have no AskUserQuestion in a trigger-fired session and you must not invent an answer: a run bound to the wrong sub-vertical researches the wrong 851 cells to completion, which costs vastly more than waiting.
+STEP 3 — READ THE CHANNEL. WITH A BOT TOKEN, one command does all of it: `python3 plugins/dma-insights/scripts/slack_intake.py fetch` writes /tmp/deal_desk.txt and one /tmp/threads/thread_<ts>.txt per thread the channel names, and prints how many it named against how many it fetched. Exit 3 means at least one thread failed — those stay UNDECIDABLE downstream, which is the safe reading, and the report says which. WITH THE CONNECTOR INSTEAD: call mcp__Slack__slack_read_channel on channel_id C0AD83KJ4DU with limit 50 and save the response VERBATIM to /tmp/deal_desk.txt — verbatim because the parser reads that rendered format and a reformatted transcript is a transcript of something else — then `python3 plugins/dma-insights/scripts/slack_intake.py threads --transcript /tmp/deal_desk.txt` for the exact channel_id and message_ts pairs, and mcp__Slack__slack_read_thread for each into /tmp/threads/thread_<ts>.txt. Either route produces the SAME transcript shape, so STEP 4 does not care which ran. Never type a message_ts by hand.
 
-STEP 4 — HAND THE QUESTION OVER. Push the prepared preflight where the engagement owner will find it: `python3 plugins/dma-insights/scripts/drive_fetch.py push-package --client "<Entity>" --file <ROOT>/preflight.json --name preflight.json`. Then report, per entity: the revenue lines you read and their sources, the LOB census, the sub-vertical candidates with their verdicts, and the exact question that needs answering — the sub-vertical and scope in one, the evidence mode in the other. Name the command that starts the run once the answer is recorded: `engine.cli start --preflight <ROOT>/preflight.json …`.
+STEP 4 — TRIAGE. `python3 plugins/dma-insights/scripts/slack_intake.py triage --transcript /tmp/deal_desk.txt --threads /tmp/threads --json`. PENDING is work. DELIVERED is done — the owner already replied with the folder link. UNDECIDABLE means a thread you did not fetch: go back to STEP 3 and fetch it rather than guessing, because a request that reads pending when it was delivered starts a second assessment of a finished client. Exit code 2 means at least one is still undecidable.
 
-STEP 5 — COST AND SCHEDULE, STATED BEFORE ANYTHING IS SPENT. For each prepared entity run `python3 -m engine.cost estimate --sv <candidate> --scope FULL` and `python3 -m engine.cost schedule --sv <candidate> --scope FULL`, and report both. A run projected over $5/pillar is reported as over budget WITH the figure — never started quietly and discovered later.
+STEP 5 — PREPARE THE BINDING, AND STOP AT THE QUESTION. For each PENDING request, newest priority first, at most TWO per firing: (a) `python3 -m engine.preflight init --entity "<Account Full Name>" --entity-id <entity_id from triage> --out <ROOT>/preflight.json` from plugins/dma-insights/skills/dma-research; (b) do the financial-statement review — find the call report, annual report, 10-K or statutory filing, read the REVENUE LINES out of it, and record each with the line of business it implies; where nothing is published, record the search ladder in financials.not_run; (c) census the lines of business and give every plausible sub-vertical an ACCEPT or REJECT with a reason; (d) `python3 -m engine.preflight autobind --file <ROOT>/preflight.json --json`. Where the census leaves ONE reading — exactly one ACCEPT, at least one REJECT, at most one material line of business — it binds that sub-vertical and PUBLIC evidence mode, records that nobody was asked and why, and the run may START (owner, 2026-08-30). Where it is ambiguous it REFUSES, and that refusal is the correct outcome: you have no AskUserQuestion in a trigger-fired session and you must not invent an answer, because a run bound to the wrong sub-vertical researches the wrong 851 cells to completion. Never hand-write `auto_bound` to get past it — `preflight check` recomputes unambiguity from the census and refuses the flag on its own.
 
-REPORTING. If nothing was waiting, say so in one line and stop. Report only when you prepared a preflight, found a folder you could not read, or projected a run over budget.
+STEP 6 — HAND THE QUESTION OVER, AND CARRY THE THREAD. `python3 plugins/dma-insights/scripts/drive_fetch.py push-package --client "<Account Full Name>" --file <ROOT>/preflight.json --name preflight.json`. In your report, for each prepared entity, state: the Slack message_ts it came from, the submitter, the priority, the revenue lines you read with their sources, the LOB census, the sub-vertical candidates with verdicts, and the exact question that needs answering. Name the command that starts the run once the answer is recorded, and name it WITH the thread on it: `python3 -m engine.cli start --entity "<Account Full Name>" --entity-id <entity_id> --reference-date <YYYY-MM-DD> --preflight <ROOT>/preflight.json --slack-channel C0AD83KJ4DU --slack-thread-ts <message_ts from triage> --requested-by <submitter id>`. Those three land in Run_Metadata and are the only reason the firing that finally sees this run PROMOTED — another container, days later — can find the thread to answer. Take the ts from triage; never type one.
 
-NEVER: bind a sub-vertical without a recorded human answer. Start a run for an entity the registry already lists. Revive a stalled run (that is the watchdog's). Edit the repository. Push anything to a client folder other than the preflight you prepared.
+STEP 7 — COST, STATED BEFORE ANYTHING IS SPENT. For each prepared entity run `python3 -m engine.cost estimate --sv <candidate> --scope FULL` and `python3 -m engine.cost schedule --sv <candidate> --scope FULL`, and report both. A run projected over $5/pillar is reported as over budget WITH the figure.
+
+DO NOT POST ANYTHING TO SLACK IN THIS FIRING. You prepare; you do not deliver. The completion reply carries a folder link, and a folder link posted before the assessment is served closes the thread, drops the request out of every future queue and hands the requester an empty folder. `python3 plugins/dma-insights/scripts/slack_intake.py reply` refuses to render one without --served, and only a firing that has seen the run PROMOTED may pass it.
+
+REPORTING. If nothing is pending, say so in one line and stop. Report only when you prepared a preflight, could not decide a request, projected a run over budget, or found the Slack connector missing.
+
+NEVER: bind a sub-vertical without a recorded human answer. Start a run for an entity the registry already lists. Revive a stalled run — that is the watchdog's, and two routines reviving one run is two containers writing one workbook. Treat an unread thread as pending. Pick up a request from any workflow other than the Assessment and Research Request one — the Hubbl Readout Request posts in the same channel, in a similar shape, for a different person's queue. Post a Drive folder link before the assessment is served. Edit the repository.
 ```
 
 ---
-
-## 2f · Reconciliation record — 2026-08-30
-
-All five Claude-session Routines are LIVE and enabled; the `DELETED 2026-08-29` headings above were stale canon from the window in which they were rebuilt. Measured against `list_triggers` on 2026-08-30:
-
-| routine | trigger | cron | last run |
-|---|---|---|---|
-| dma-watchdog | `trig_019rSxYzhDBSTdPry5xABpxr` | `23 * * * *` | SUCCEEDED |
-| dma-synthesis-sequence-a | `trig_011Qkj9VgeRgktdhgaZxkeut` | `8 */12 * * *` | SUCCEEDED |
-| dma-synthesis-sequence-b | `trig_01NXSfaTVuWEubFAcA4mbbeL` | `18 */12 * * *` | PENDING |
-| dma-refresh-drift-daily | `trig_01VKBE7qFTcLKmu8zWtDByxN` | `0 15 * * *` | PENDING |
-| dma-rectification-weekly | `trig_01S7BM4VGDRQKzjfFN49Cejw` | `0 13 * * 1` | **FAILED** |
-
-The watchdog's live prompt was replaced with §2d's fenced block (STEP 2b added) and then read back and diffed: identical, 14,540 characters. Two items stay OPEN for a person, because neither can be closed from an API:
-
-- **lane B carries no claude.ai connectors.** Exa/Tavily/Clay must be re-attached on its edit screen in the routines UI.
-- **dma-rectification-weekly's last run FAILED.** Its next firing is Monday; the failure has not been diagnosed here.
-
-## 3 · The reconciliation rule
-
-**Scheduler routines reconcile mechanically.**
-`plugins/dma-insights/routines.json` is the declaration;
-`plugins/dma-insights/scripts/setup_routines.py` is the reconciler (dry-run
-by default, `--apply` to act, exit 1 while a mandatory routine is missing);
-`/dma-insights:setup-routines` is the report-first wrapper. Run it after any
-deploy that touches `infra/deploy.sh`'s scheduler section, and whenever a
-routine is suspected of not firing — a paused job, a drifted schedule and a
-duplicate all look like nothing at all from inside the app, and the reconciler
-is the only thing that asks.
-
-**Since 2026-08-29 there are no session routines to reconcile, and the thing
-that did the reconciling was one of them.** Section 2's diff was carried by
-the weekly rectifier's STEP 8, so deleting all five removed both the subjects
-and the checker in one act. That is worth stating plainly rather than leaving
-the paragraph below to read as live: while section 2 is empty the diff is
-trivially satisfied, and the moment a routine is recreated the diff has no
-owner until one is given to it. `/dma-insights:doctor` still has no routine
-check. Whoever rebuilds the schedule from `routines-archive/` inherits that
-gap and should close it in the same change.
-
-**Session routines have no reconciler today — reconciliation is manual.**
-This file is their declaration; the check is `list_triggers` (CCR) diffed
-against section 2 — name, cron, enabled state, fresh-session mode, **model**,
-and the prompt itself, which is why 2a's live prompt is quoted verbatim. The
-`/dma-insights:doctor` command checks plugin, identity, token audience and
-connector reachability and has **no routine check yet**; when it grows one,
-it should perform exactly this diff. Until then the diff belongs to the
-weekly rectification session's checklist (its prompt's STEP 8 states it), so
-the gap is examined at least weekly by the one routine whose job is noticing
-what quietly stopped holding. A missing, paused or drifted trigger found by
-that diff is a finding like any other: recorded, measured, and closed by a
-refinement — not silently re-created.
 
 ### Model, and why it is in the diff
 

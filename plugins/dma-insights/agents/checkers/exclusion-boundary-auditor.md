@@ -366,7 +366,9 @@ roster through the `leadership` facet (`clay`, producer-session only). Ratings
 reach `overview.sentiment` through the `sentiment` facet — and that whole
 section is withheld from the customer, so its enrichment is internal by
 construction. Detections reach the register through the `techstack` facet, whose
-`explorium` pathway is *wired, not live*. Each of those facets writes an
+`explorium` pathway is *live in a producer session* (the Vibe Prospecting
+MCP connector, no key) and *not live at ingest* (no Secret Manager key) —
+two paths, and a NOT_RUN that names the wrong one is not an honest NOT_RUN. Each of those facets writes an
 `enrichment_status` block, and **every one of those blocks is customer-stripped**:
 on the reference run, `overview.firmographics`, `overview.leadership`,
 `overview.sentiment`, `overview.thought_leadership` and `techstack.techstack`

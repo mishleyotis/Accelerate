@@ -373,6 +373,13 @@ _DELIBERATELY_PROMPTING = {
     # scheduled session a write nobody sanctioned.
     "add-company-data-points": "writes to the user's Clay workspace",
     "add-contact-data-points": "writes to the user's Clay workspace",
+    # `slack_send_message` was here until 2026-08-30 with the reason "the
+    # channel that would use it is specified and not built". The channel IS
+    # built now — the assessment intake reads #deal-desk and replies in the
+    # request's thread — so the obligation that entry recorded has been
+    # discharged, and the tool moved to CONDITIONAL_TOOLS: allowed into that
+    # one channel, still prompting everywhere else. Leaving it here would
+    # have made this table say a thing that is no longer true.
 }
 
 
@@ -409,6 +416,11 @@ def test_every_mcp_tool_the_plugin_names_is_allowed_or_deliberately_not():
             # promote on — so they are answered for, not left prompting.
             continue
         if full.rsplit("__", 1)[1] in _DELIBERATELY_PROMPTING:
+            continue
+        if full in aac.CONDITIONAL_TOOLS:
+            # Allowed on an ARGUMENT rather than a name. It is answered for —
+            # see test_the_conditional_send_is_scoped_to_one_channel, which
+            # proves both halves of the claim.
             continue
         unexplained[full] = sorted(where)[0]
     assert not unexplained, (
@@ -461,3 +473,224 @@ def test_the_guarded_pair_is_answered_by_its_own_hooks_not_left_prompting():
         assert tool in pre, f"{tool} has no PreToolUse entry of its own"
         assert script in pre, f"{script} is not wired for {tool}"
         assert (HOOKS / script).exists(), f"{script} is missing from the plugin"
+
+
+# ── the SESSION's roster, not just the tools this repo writes down ───────
+#
+# The scan above reads the plugin's own markdown, so it can only ever see
+# tools this repository mentions. Measured 2026-08-30, the owner's actual
+# complaint was the other kind — "I do not constantly have to approve tool
+# calls" is mostly Slack, Salesforce, Google Admin, Auctor and GitHub, none of
+# which this plugin names anywhere. Feeding the real hook the 86 tools one
+# session carried: 16 approved, 70 prompting, and not one of the 70 had ever
+# been ruled on.
+
+import importlib.util as _ilu                                # noqa: E402
+
+_AUDIT = _ilu.spec_from_file_location(
+    "audit_autoapprove", _PLUGIN / "scripts" / "audit_autoapprove.py")
+AA = _ilu.module_from_spec(_AUDIT)
+_AUDIT.loader.exec_module(AA)
+
+
+def test_every_tool_on_the_measured_roster_has_a_decision():
+    """ALLOWED, WITHHELD or GUARDED. `UNCLASSIFIED` means a tool sits on a
+    server this hook already knows and nobody ever ruled on it — so it
+    prompts on every call, forever, and no one is told."""
+    out = AA.audit(AA.read_roster())
+    assert out["total"] > 100, "the roster looks truncated"
+    assert not out["unclassified"], out["unclassified"]
+    assert not out["unknown_server"], out["unknown_server"]
+
+
+def test_the_roster_is_mostly_approved():
+    """The point of the exercise. A roster where most calls still prompt is
+    the state the owner reported, whatever the classification says."""
+    out = AA.audit(AA.read_roster())
+    assert len(out["allowed"]) > out["total"] / 2, (
+        f"only {len(out['allowed'])} of {out['total']} approved")
+
+
+def test_read_and_withheld_never_overlap():
+    for server, surface in aac.SERVER_SURFACES.items():
+        clash = surface["read"] & surface["withheld"]
+        assert not clash, f"{server}: {clash} is both allowed and refused"
+    assert not (aac.QUALIFIED_TOOLS & aac.WITHHELD_TOOLS)
+
+
+#: Verbs that mean a call CHANGES something, matched as whole TOKENS. A read
+#: allowlist is one careless addition away from carrying a write, and the
+#: addition would look exactly like every other line in the table.
+#:
+#: Tokens, not substrings: the first version matched `request_` inside
+#: `pull_request_read` and called a read a write. A lint that cries wolf gets
+#: widened until it says nothing, so `request` is not here at all — it is a
+#: noun in every name this session carries — while `run` is absent for the
+#: same reason (`get_check_run`).
+_WRITE_VERBS = frozenset({
+    "create", "update", "delete", "remove", "add", "send", "post", "push",
+    "merge", "archive", "suspend", "trash", "share", "write", "export",
+    "save", "move", "schedule", "enable", "disable", "offboard", "swap",
+    "trigger", "fork", "resolve", "unresolve", "subscribe", "unsubscribe",
+})
+
+
+def _tokens(name: str) -> list[str]:
+    """Split on `_`, `-`, and camelCase — `listRecentSobjectRecords` and
+    `list_recent_files` have to tokenise the same way or half this session's
+    connectors slip past the lint on spelling alone."""
+    spaced = _re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", name)
+    return [t for t in _re.split(r"[_\-]+", spaced.lower()) if t]
+
+
+def test_nothing_on_the_read_allowlist_looks_like_a_write():
+    """A name-shape lint, deliberately blunt. It cannot prove a tool is
+    read-only — only its server can — but every write this session's
+    connectors expose is named for what it does, and a blunt check that fires
+    on the next careless addition beats a subtle one that does not exist."""
+    offenders = []
+    for server, surface in aac.SERVER_SURFACES.items():
+        for tool in surface["read"]:
+            if set(_tokens(tool)) & _WRITE_VERBS:
+                offenders.append(f"mcp__{server}__{tool}")
+    assert not offenders, (
+        f"these are auto-approved and named like writes: {offenders}. If one "
+        f"really is read-only, say so where it is listed; do not widen the "
+        f"lint.")
+
+
+def test_the_lint_would_actually_catch_a_write_smuggled_into_a_read_set():
+    """A lint nobody has seen fire is a lint nobody should trust."""
+    for name in ("create_file", "slack_send_message", "auctor_update_space",
+                 "createSobjectRecord", "bulk_offboard_users",
+                 "merge_pull_request", "trash_file"):
+        assert set(_tokens(name)) & _WRITE_VERBS, name
+    for name in ("pull_request_read", "get_check_run", "soqlQuery",
+                 "listRecentSobjectRecords", "list_saved_items",
+                 "pmo_retrieve_grounding_bundle", "get_file_permissions"):
+        assert not (set(_tokens(name)) & _WRITE_VERBS), name
+
+
+def test_the_writes_this_session_carries_are_all_still_refused():
+    for t in ("mcp__Slack__slack_send_message_draft",
+              "mcp__Salesforce_Prod__deleteSobjectRecord",
+              "mcp__Salesforce_Prod__createSobjectRecord",
+              "mcp__GAdmin_MCP__suspend_user",
+              "mcp__GAdmin_MCP__bulk_offboard_users",
+              "mcp__Google_Drive__trash_file",
+              "mcp__Google_Drive__share_file",
+              "mcp__github__merge_pull_request",
+              "mcp__github__push_files",
+              "mcp__Auctor_MCP__auctor_update_space"):
+        assert not _is_allowed(t), f"{t} must keep its prompt"
+
+
+def test_the_reads_this_session_carries_are_allowed():
+    for t in ("mcp__Slack__slack_read_channel",
+              "mcp__Slack__slack_search_public",
+              "mcp__Salesforce_Prod__soqlQuery",
+              "mcp__GAdmin_MCP__list_users",
+              "mcp__Google_Drive__get_file_permissions",
+              "mcp__github__pull_request_read",
+              "mcp__github__get_job_logs",
+              "mcp__Auctor_MCP__auctor_list_spaces",
+              "mcp__Grace_PMO__pmo_retrieve_grounding_bundle",
+              "mcp__Indeed__get_resume"):
+        assert _is_allowed(t), f"{t} still prompts"
+
+
+def test_the_audit_runs_the_real_hook_rather_than_re_deriving_it():
+    """A checker that re-implements the rule it checks agrees with itself by
+    construction and proves nothing."""
+    src = (_PLUGIN / "scripts" / "audit_autoapprove.py").read_text()
+    assert "subprocess.run([sys.executable, HOOK]" in src, src[:200]
+
+
+def test_strict_fails_on_an_unclassified_tool_on_a_known_server(tmp_path):
+    roster = tmp_path / "r.txt"
+    roster.write_text("# a tool nobody ruled on\n"
+                      "mcp__Slack__slack_invent_a_new_verb\n")
+    assert AA.main(["--roster", str(roster), "--strict"]) == 1
+
+
+def test_strict_passes_when_every_tool_is_ruled_on(tmp_path):
+    roster = tmp_path / "r.txt"
+    roster.write_text("mcp__Slack__slack_read_channel\n"
+                      "mcp__Slack__slack_send_message\n"
+                      "mcp__plugin_dma-insights_connector__promote_run\n")
+    assert AA.main(["--roster", str(roster), "--strict"]) == 0
+
+
+# ── the conditional send: one channel, and only one ─────────────────────
+#
+# The assessment intake reads #deal-desk for requests and replies in the
+# request's own thread when the assessment is delivered. That reply is a SEND,
+# and a scheduled session has nobody to answer its prompt — the failure this
+# whole file exists to prevent. Blanket-approving it would hand every agent in
+# every firing the ability to post anywhere in the workspace, so the decision
+# reads the ARGUMENT instead.
+
+def _decide(tool, args=None):
+    """The REAL hook, with a real PreToolUse event."""
+    event = {"tool_name": tool, "hook_event_name": "PreToolUse"}
+    if args is not None:
+        event["tool_input"] = args
+    r = subprocess.run([sys.executable, str(HOOKS / "autoapprove_connector.py")],
+                       input=json.dumps(event), capture_output=True,
+                       text=True, timeout=60)
+    if not r.stdout.strip():
+        return None
+    return json.loads(r.stdout)["hookSpecificOutput"]["permissionDecision"]
+
+
+def test_the_conditional_send_is_scoped_to_one_channel():
+    tool = "mcp__Slack__slack_send_message"
+    assert _decide(tool, {"channel_id": aac.DEAL_DESK_CHANNEL_ID,
+                          "message": "done"}) == "allow"
+    assert _decide(tool, {"channel_id": "C0SOMEWHEREELSE",
+                          "message": "done"}) is None
+    assert _decide(tool, {"message": "no channel at all"}) is None
+    assert _decide(tool) is None, "no arguments at all must not allow"
+
+
+def test_an_out_of_scope_send_is_not_DENIED_only_undecided():
+    """A deny would also block a person driving an interactive session. This
+    hook exists to spare an unattended session a prompt, not to take a
+    decision away from someone who is there to make it."""
+    assert _decide("mcp__Slack__slack_send_message",
+                   {"channel_id": "C0SOMEWHEREELSE", "message": "x"}) is None
+
+
+def test_a_conditional_tool_is_never_in_a_read_set_or_the_settings_grant():
+    """The trap. `bootstrap_session.sh` derives user-scope permissions.allow
+    from the read sets, and a settings grant is honoured WITHOUT the hook
+    being consulted — so a conditional tool in a read set would be approved
+    everywhere and its channel check would exist and never run."""
+    for tool in aac.CONDITIONAL_TOOLS:
+        assert tool not in aac.QUALIFIED_TOOLS, tool
+        assert tool not in aac.WITHHELD_TOOLS, tool
+        assert aac.suffix_of(tool) not in aac.ENRICHMENT_TOOLS \
+            if hasattr(aac, "suffix_of") else True
+
+    src = (_PLUGIN / "scripts" / "bootstrap_session.sh").read_text()
+    assert "CONDITIONAL_TOOLS" in src, (
+        "the grant derivation must exclude conditional tools explicitly, or "
+        "moving one into a read set silently un-scopes it")
+
+
+def test_the_channel_constant_agrees_with_the_intake_script():
+    """Two files naming one channel is how a rule starts applying to the
+    wrong room. The hook cannot import from scripts/ — it runs standalone
+    from the installed plugin — so the constants are pinned to each other
+    here instead."""
+    sys.path.insert(0, str(_PLUGIN / "scripts"))
+    import slack_intake
+
+    assert aac.DEAL_DESK_CHANNEL_ID == slack_intake.DEAL_DESK_CHANNEL_ID
+
+
+def test_every_conditional_tool_states_why_and_what_it_is_scoped_to():
+    for tool, rule in aac.CONDITIONAL_TOOLS.items():
+        assert rule["why"].strip(), tool
+        assert rule["scope"].strip(), tool
+        assert callable(rule["test"]), tool

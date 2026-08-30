@@ -37,7 +37,24 @@
   "lifecycle": "python3 plugins/dma-insights/scripts/stress_run_lifecycle.py",
   "coverage": "python3 plugins/dma-insights/scripts/audit_coverage.py --strict",
   "report_tier": "python3 -m pytest tests/skills/research_engine/test_report_and_scan_tier.py -q",
-  "routines": "python3 -m pytest plugins/dma-insights/scripts/tests/test_routines_canon.py -q"
+  "routines": "python3 -m pytest plugins/dma-insights/scripts/tests/test_routines_canon.py -q",
+  "readiness": "python3 -m pytest plugins/dma-insights/scripts/tests/test_readiness.py -q",
+  "validator": "python3 -m pytest tests/skills/research_engine/test_validator_and_handoff.py -q",
+  "reports": "python3 -m pytest tests/skills/research_engine/test_report_structure.py tests/skills/research_engine/test_profile_reaches_the_app.py -q",
+  "workbook": "python3 -m pytest tests/skills/research_engine/test_tabs_reach_the_app.py tests/skills/research_engine/test_assessment_grains.py tests/skills/research_engine/test_client_folder_versioning.py -q",
+  "techstack": "python3 -m pytest tests/skills/research_engine/test_techscan_providers.py -q",
+  "ledger": "python3 -m pytest scripts/tests/test_aud_ledger_vocabulary.py -q",
+  "approvals": "python3 plugins/dma-insights/scripts/audit_autoapprove.py --strict",
+  "schema": "bash infra/local/up.sh && python3 -m pytest tests/schema/ -q",
+  "stage_walk": "python3 plugins/dma-insights/scripts/stress_stage_and_supersede.py",
+  "chain": "python3 plugins/dma-insights/scripts/audit_chain.py --strict",
+  "intake": "python3 -m pytest plugins/dma-insights/scripts/tests/test_slack_intake.py -q",
+  "watchdog_prompt": "python3 -m pytest scripts/tests/test_synthesis_watchdog.py -q",
+  "binding": "python3 -m pytest tests/skills/research_engine/test_binding.py -q",
+  "ci_flags": "python3 -m pytest scripts/tests/test_gate_l_ci_bounds.py -q",
+  "routine_branch": "python3 -m pytest scripts/tests/test_routine_prompt_commands.py -q",
+  "slack_auth": "python3 -m pytest plugins/dma-insights/scripts/tests/test_slack_client.py -q",
+  "autobind": "python3 -m pytest tests/skills/research_engine/test_binding.py -q"
  },
  "findings": [
   {
@@ -1884,6 +1901,479 @@
     "coverage"
    ],
    "note": "engine/template.py diffs a local copy against contract.SHEETS — shape only, since the template's rows are placeholders by design. The CONTRACT is authoritative; the check exists to make divergence visible while somebody can still decide which side is wrong."
+  },
+  {
+   "id": "AUD-0158",
+   "sev": "BLOCKER",
+   "area": "techstack",
+   "title": "The technographic scan named no provider, so a register built from web hits could not be reconciled against the app's declared sources",
+   "target": "apps/api computed.py declares the techstack facet's sources as exactly {explorium, clay}; Tech_Register captured neither, and Detection_Method read `technographic_scan` whether Explorium, Clay or a search produced the row",
+   "disposition": "FIXED",
+   "checks": [
+    "coverage"
+   ],
+   "note": "contract v4 adds Tech_Register.Providers (required, a list) with TECH_PROVIDERS and TECH_BROKERS. A row whose only providers are brokers may not wear CONFIRMED — two brokers reselling one crawl is one observation. `techscan status` prints by_provider, broker_share and providers_never_run, which is the owner's requirement as a number rather than an intention."
+  },
+  {
+   "id": "AUD-0159",
+   "sev": "BLOCKER",
+   "area": "techstack",
+   "title": "Explorium was unreachable from the research tier and three agent files still taught the retracted 'no live API' story",
+   "target": "the scanner's own charter said it did not carry Clay, Explorium or Indeed; the correction of 2026-08-23 was pinned in three files while three more taught the old lesson",
+   "disposition": "FIXED",
+   "checks": [
+    "coverage"
+   ],
+   "note": "Explorium has THREE doors and only one needs a key: the Vibe Prospecting MCP connector (session-authenticated, already in the auto-approve list, measured at 392/357/147 technologies across three clients), the ingest scan (no Secret Manager key, genuinely dark), and an owner-supplied export that `engine.techscan import-explorium` parses in the five shapes the app's own package parser has met. The correction check is now a scan of the whole plugin rather than a hand-kept tuple."
+  },
+  {
+   "id": "AUD-0160",
+   "sev": "BLOCKER",
+   "area": "techstack",
+   "title": "The T3 drilldown opened onto three empty states: its fields were contract-optional, unenforced, and never captured upstream",
+   "target": "the click handler, route, component, adapter and serving path were all wired; dma_impact / peer_coverage / peer_deployments were the hole",
+   "disposition": "MITIGATED",
+   "checks": [
+    "coverage"
+   ],
+   "note": "The research run now CAPTURES what the drawer renders: Tech_Register.DMA_Impact at the served contract's own 40-90 word band, a Tech_Peer_Deployments sheet at (TS_ID, Peer) grain, peer_coverage COMPUTED from it, and a second Clay pass over the peers frozen in Peer_Benchmarks. What remains open and is the OWNER'S call: for the customer audience `items[*].dma_impact` is stripped unconditionally by redaction.py's default-deny, so that card is blank by policy however well it is written — the rule names the submit-time gate that would replace it as the real fix, and building that gate is a decision about a measured leak (sell copy on 51 of 51 rows of one client), not a defect to route around."
+  },
+  {
+   "id": "AUD-0161",
+   "sev": "BLOCKER",
+   "area": "reports",
+   "title": "The eight-card floor was unreachable through the only sanctioned writer, and one report's section N overwrote the other's",
+   "target": "narrative.write updated rather than appended when a row for the section existed, and keyed the update on Section_ID alone across two specs that both number 1..8",
+   "disposition": "FIXED",
+   "checks": [
+    "reports"
+   ],
+   "note": "A list section (insight_card, finding, recommendation) now requires --card and appends per card; the update is keyed on the composite (Report, Section_ID, Card_ID) through the new RunWorkbook.update_row_where. `narrative.state` measures a list section across its cards and against its card floor. A test writes all sixteen sections through the real writer and renders both reports — a path no test had ever exercised."
+  },
+  {
+   "id": "AUD-0162",
+   "sev": "MAJOR",
+   "area": "reports",
+   "title": "No section's internal structure was specified anywhere, and no map said which app surface a section feeds",
+   "target": "Section carried a heading, a floor and its inputs; the generated agent tables printed the heading under a column headed 'what it must argue'",
+   "disposition": "FIXED",
+   "checks": [
+    "reports"
+   ],
+   "note": "Section gains `blocks` (the ordered subheadings a body must carry, refused when missing or out of order) and `surfaces` (the payload sections it feeds). reports.render promotes each block to a real Heading2, which is the grain the app parses and embed.py scopes on — the pillar blocks carry the parenthesised (P1)..(P4) token the regex already looks for. gen_report_agents renders all of it, and --check fails the build on drift."
+  },
+  {
+   "id": "AUD-0163",
+   "sev": "BLOCKER",
+   "area": "workbook",
+   "title": "Peer_Benchmarks was written at peer grain and the app's parser discards every row that is not at category grain",
+   "target": "prelim.peers wrote one row per peer with Category_ID blank; workbook_parser keeps only rows whose first column is a category id",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook"
+   ],
+   "note": "The peer SET stays frozen in Handoff_Lock, where a set belongs; the tab is now the per-category grid, one row per in-scope category. The app's parser learned the engine's paired Peer_Names/Peer_Scores lists (a fixed-width contract cannot grow a column per peer) and refuses to zip lists of different lengths rather than mis-attribute a score. A test walks a peer set from prelim.peers through the real parser."
+  },
+  {
+   "id": "AUD-0164",
+   "sev": "BLOCKER",
+   "area": "workbook",
+   "title": "Two completeness verdicts were true by construction and a forged declaration was quieter than a missing one",
+   "target": "`start` writes a Report_Narrative row unconditionally; `create` seeds a pillar row per selected cell with NO_EVIDENCE/NOT_RUN, and the gate counted rows",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook"
+   ],
+   "note": "A pillar sheet is measured on rows that carry RESEARCH (a dominant claim, or evidence that is not NO_EVIDENCE), so a freshly created run reads SHORT rather than POPULATED. Report_Narrative reports its section coverage instead of a bare row count, and defers the blocking to narrative.require_ready rather than duplicating it. A NEVER_EMPTY sheet named in empty_sheet_reasons is ILLEGAL_DECLARATION and blocks — writing around a refusal should be louder than tripping it, not quieter. Gate_Log joins NEVER_EMPTY: two assessment sections read it as their only input."
+  },
+  {
+   "id": "AUD-0165",
+   "sev": "BLOCKER",
+   "area": "workbook",
+   "title": "Entity_Timeline had a writer, a gate and no reader anywhere in the shipped system",
+   "target": "no report section named it, no package extra carried it, the app had zero references to it — while the C1 surface it was gathered for was produced by re-searching in the synthesis session",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook"
+   ],
+   "note": "Carried, not dropped: 01_evidence/entity_timeline.json is a machine extra, and the tab now speaks the served surface's TWO vocabularies — a three-token direction (Signal) and an eight-token class (Kind) — plus the body, maturity effect and claim label C1 renders. The nine old event classes are BRIDGED rather than refused, because a run pinned to an earlier engine wrote those words and its events still have to filter. A PRELIM declaration now declares the tab it owns with the same ladder, at the stricter of the two floors, and prelim.require_complete — which described itself as the gate orient calls and was called by nothing — gates package assembly."
+  },
+  {
+   "id": "AUD-0166",
+   "sev": "MAJOR",
+   "area": "workbook",
+   "title": "The app reads three tabs the research contract does not define: Recommendations, Pillar_Summary, Category_Detail",
+   "target": "apps/worker workbook_parser parse_grain_summaries and the Recommendations reader",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook"
+   ],
+   "note": "Filed NOT_THIS_ENGINE on 2026-08-30 and OVERRULED by the owner the same day: the three tabs belong to the assessment stage, and the stage is now a recorded fact rather than an inference, so they can be required where they apply and forbidden where they do not. The reasoning that filed it stands and is why the fix took a stage key: adding them to contract.SHEETS unconditionally would have given every research workbook three tabs it is forbidden to fill, which is the same defect facing the other way. AUD-0173 is the fix."
+  },
+  {
+   "id": "AUD-0167",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "The live watchdog prompt named a revive path that resolves only under the plugin tree, and no verification scope was running the test that catches it",
+   "target": "docs/ROUTINES.md §2d, the LIVE dma-watchdog prompt (trig_019rSxYzhDBSTdPry5xABpxr); scripts/tests/test_routine_prompt_commands.py",
+   "disposition": "MITIGATED",
+   "checks": [
+    "routines"
+   ],
+   "note": "Two defects, one fix and one deliberate non-fix. The prompt said --revive dispatches 'through scripts/agent_run.py', which a routine standing at the repo root cannot open; the canon now names the qualified path. It was NOT re-pushed to the live trigger: the sentence is prose, the mechanism does not read it (watchdog._agent_run resolves from the installed plugin's own location), and re-pushing means replacing 14,561 characters on an hourly routine that currently SUCCEEDS with no way to read the stored prompt back and confirm it landed. The divergence is recorded in the canon's own §2d heading so it cannot pass as byte-for-byte agreement. The SECOND defect is why it survived: this test lives in scripts/tests/, which PR #15's verification scope (tests/ + plugins/dma-insights/scripts/tests/) did not include — it failed identically at the merge base. Verification now runs tests/, plugins/dma-insights/scripts/tests/, scripts/tests/ and the four app suites."
+  },
+  {
+   "id": "AUD-0168",
+   "sev": "BLOCKER",
+   "area": "techstack",
+   "title": "A register row could promote with no ts_id, render as a live button, and route to a page reporting it does not exist",
+   "target": "ET-03 checked the SHAPE of a minted id `if isinstance(v, str)`, so an absent or null one was invisible; the serving column is nullable, promote inserts None, and the web rendered every row as an unconditional button",
+   "disposition": "FIXED",
+   "checks": [
+    "techstack"
+   ],
+   "note": "Fixed at the SUBMIT gate, not the column. `_check_minted_row_ids` refuses a row of any of the five minted-id lists (ts_id, ic_id, f_id, fa_id, wn_id) that carries no id, and bypasses on a declared empty_state. Putting it on the column instead — ALTER COLUMN ts_id SET NOT NULL — would re-arm exactly the trap migration 0050 removed: a section that legitimately promotes empty writes one envelope-only row with every item column NULL, and the insert would abort the whole promote with a driver error naming a column instead of a verdict naming a path. 0050 says it in as many words: 'The gate is the enforcement; the NOT NULL was belt-and-braces that only ever bit the one row the gate does not describe.' The unique index does not help either — Postgres treats NULLs as distinct without NULLS NOT DISTINCT, so a null row is unroutable, not unwritable. Render side: an unroutable row is now a non-interactive card with a title saying why, because to a reader a click that dead-ends and a drilldown that was never built are the same thing."
+  },
+  {
+   "id": "AUD-0169",
+   "sev": "BLOCKER",
+   "area": "reports",
+   "title": "The Client Research Profile is written, validated, rendered — and structurally uningestable by the app",
+   "target": "apps/worker/job_main.py `_RPT_DECOYS = ('profile', 'template')` returns None for every .docx whose name contains 'profile', and report_spec's own filename is Client_Profile_Research_{entity}_{date}.docx",
+   "disposition": "FIXED",
+   "checks": [
+    "reports"
+   ],
+   "note": "RAISED, NOT FIXED — it is a distinct piece of app-side ingest work and naming it is more useful than a half-done version. All eight sections of one of the two reports reach no table in the app, while page packs name 'Client Profile DOCX' as the source of truth for firmographics, the leadership roster, focus-area verbatim quotes and the financial series — data the producer then fetches out of Drive by hand because the app holds none of it. The recipe: give the profile its own artefact slot in `_classify_artefact` (matching `client[_ ]profile.*\\.docx$`, as classification.py already does), download it beside the report in job_main, parse it with report_key='client_research', extend _TITLE_KINDS for its six unmapped headings, and namespace the stored kind by report so an assessment `evidence_sources` row and a profile one stay distinguishable in document_sections. CLOSED by AUD-0171 on 2026-08-30: the decoy is gone, the profile is classified, downloaded, parsed and namespaced `client_research:`, and test_profile_reaches_the_app.py walks the REAL rendered document from the engine's renderer to the rows the app would store. Left OPEN beside its own fix for half a day, which is the same shape of silence it was filed about."
+  },
+  {
+   "id": "AUD-0170",
+   "sev": "BLOCKER",
+   "area": "workbook",
+   "title": "A second run for the same client silently merged into the first run's folder, locally and on Drive",
+   "target": "assemble.folder_name is a pure function of the entity name and default_folder_root is the shared run root, so two runs resolved to ONE directory",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook"
+   ],
+   "note": "open_folder reported created:false and overwrote run_manifest.json with the second run's identity; package copied the second run's deliverables in beside the first's and overwrote all three fixed-name machine extras; and because deliverable filenames carry the reference date, a second run on a different date left TWO scoring workbooks in one folder — from which the app's scan keeps exactly one artefact per kind, chosen by rank then iteration order. The folder became a mix of two runs with an arbitrary winner. Now the previous package moves whole into `_superseded/<run_id>/` with a SUPERSEDED.json naming what replaced it, the current one stays at the root where every reader looks, and the folder keeps its name because runs.source_folder_id keys on it. This mirrors the versioning the system already does server-side (one active run per entity, predecessor demoted to SUPERSEDED and RETAINED) rather than inventing a second scheme. The archive is excluded from the app's scan by path segment, so retention cannot create the ambiguity it exists to remove."
+  },
+  {
+   "id": "AUD-0171",
+   "sev": "BLOCKER",
+   "area": "reports",
+   "title": "The Client Research Profile is now ingestable: classified, downloaded, parsed, namespaced",
+   "target": "job_main._RPT_DECOYS carried 'profile', so _classify_artefact returned None for the spec's own filename",
+   "disposition": "FIXED",
+   "checks": [
+    "reports"
+   ],
+   "note": "Closes AUD-0169. The profile has its own artefact slot matching the pattern classification.py was ALREADY using for it (client_profile, priority 3) — classified, recorded, then dropped, the AUD-0091 shape. It is downloaded beside the report, parsed, and its section kinds are namespaced `client_research:` because both reports produce evidence_sources and both produce a findings-shaped section. Measured over the real rendered document: 51 rows across 8 sections, six of which resolved to `unmapped:*` until the profile's own six patterns were added LAST in the table, after every assessment-report pattern, so nothing there could move. A ReportSection now names its own artefact_id, because persist_package attributed every section to one report_artefact_id — right while one report was ingested, a provenance hole the moment two were."
+  },
+  {
+   "id": "AUD-0172",
+   "sev": "BLOCKER",
+   "area": "workbook",
+   "title": "There was no stage key anywhere, so a sheet could not be required at one stage and meaningless at the other",
+   "target": "RUN_METADATA_KEYS had none, _write_metadata wrote none; the app inferred the stage from the emptiness of column D and the engine made it a CLI opinion (expect_scores, defaulted False by assemble.package)",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook"
+   ],
+   "note": "Contract v5 records `stage` (research | assessment) and SHEET_STAGE names the sheets that belong to one. An out-of-stage sheet reads OUT_OF_STAGE and does not block; a research workbook carrying assessment rows reads AHEAD_OF_STAGE and DOES block, because that is a figure the stage says cannot have been struck. `stage_of` falls back to the app's own inference so an upgraded workbook does not read as an assessment with three empty tabs."
+  },
+  {
+   "id": "AUD-0173",
+   "sev": "BLOCKER",
+   "area": "workbook",
+   "title": "The three tabs the app reads and the engine never wrote now exist at the assessment stage",
+   "target": "parse_grain_summaries and parse_recommendations read Pillar_Summary, Category_Detail and Recommendations; both land server-side; both back live gates (the 0.05 grain tolerance, CG-39). Nothing wrote them",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook"
+   ],
+   "note": "Closes AUD-0166, which was filed NOT_THIS_ENGINE and which the owner has now decided belongs to the assessment stage. Columns are the app's own header spellings, the same technique PEER_BENCHMARK_COLUMNS documents. `engine.grains recompute` states both grains and `engine.grains recommendations` projects the assessment report's §7 rows into the tab — projected, never authored, because the recommendations already exist as Report_Narrative cards. Both refuse at the research stage. The assessment report's §3 now reads the STATED grains rather than only the subcap sheets, because H4's grain lock forbids re-deriving a pillar figure by averaging subcaps. Tests round-trip both through the app's real parsers."
+  },
+  {
+   "id": "AUD-0174",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "Two of six live Routines were unhealthy and nothing watched Routine health",
+   "target": "list_triggers 2026-08-30: dma-rectification-weekly FAILED six days, dma-refresh-drift-daily ABANDONED and BLOCKED fifteen hours",
+   "disposition": "MITIGATED",
+   "checks": [
+    "routines"
+   ],
+   "note": "The watchdog watches RUNS; nothing watched ROUTINES. routine_health.py reads a list_triggers response and reports a verdict with the next move. NEITHER cause is a code defect this repo can fix: the FAILED one hit an individual spend limit (five_hour rate limit, rejected — raised at claude.ai/settings/usage), and the ABANDONED one is BLOCKED on a connector permission prompt that the plugin's own hook ALLOWS — verified by running the hook against that exact tool name — which means the hook did not run: a stale install, and a session cannot heal it because hooks bind once at session start. Both are the owner's to clear; the checker is what makes them visible next time."
+  },
+  {
+   "id": "AUD-0175",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "No owner-names-the-client channel exists at all",
+   "target": "run_gate.py pick has no --client; its one human lever --prefer is documented as never passed by any routine; no Slack surface exists anywhere in the repo",
+   "disposition": "FIXED",
+   "checks": [
+    "routines"
+   ],
+   "note": "The owner's report ('routines have clients hardcoded') describes a defect already repaired in the live prompts — every live Routine chooses dynamically and the only pinned one was deleted 2026-08-20 — but the gap BEHIND the report is real and different: the owner can stop a Routine and can edit a stored prompt, and cannot say 'do this client next' through any interface that exists. docs/CLIENT-SELECTION.md specifies the channel against the interfaces that do exist — three Slack commands, a request file in the intake tree beside the client folders, one `--requests` flag on run_gate.py pick, and a threaded reply — and marks every section LIVE or NOT BUILT. Building it is the owner's call on scope. CLOSED 2026-08-30. The channel exists: `slack_intake.py` reads #deal-desk and decides PENDING / DELIVERED / UNDECIDABLE over the transcript, and `slack_intake.py request --client \"<name>\"` is the owner's direct lever, emitting a record in the same shape as a Slack-borne one so nothing downstream can tell them apart. The answer was a READER, not a new interface — the requests were already arriving and nothing read them. What remains is AUD-0190, the connector grant on the Routine, which is a different finding and not this one."
+  },
+  {
+   "id": "AUD-0176",
+   "sev": "BLOCKER",
+   "area": "engine",
+   "title": "Reading the new stage key through RunWorkbook broke the only route from research to a strip",
+   "target": "validator.validate line 78: C.stage_of(wb.metadata()) on the openpyxl Workbook that validate() deliberately opens",
+   "disposition": "FIXED",
+   "checks": [
+    "validator",
+    "e2e"
+   ],
+   "note": "Introduced by AUD-0173's own change and caught by the end-to-end walk, which is why that walk exists. `validate` opens the file with openpyxl ON PURPOSE — rules 1 and 2 judge a file that may not BE a valid run workbook, so RunWorkbook's accessors cannot be assumed. `wb.metadata()` therefore raised AttributeError inside `handoff.build`, and `strip` refuses without a handoff: a run could finish every category and never hand off. Fixed with one `_metadata(wb)` reader on the raw workbook, which also absorbs the copy `_rule7_run_id` was carrying — the third copy was how the fourth got written wrong. Two regression tests: the stage is read off the FILE when no caller states it, and validate takes a path and never a RunWorkbook. A SECOND half was found in the same module: `--expect-scores` was `action=\"store_true\"`, so ABSENT meant False, and False is not 'no opinion' — it is the caller asserting the research stage. Passed straight through, the command line hard-coded research semantics for every workbook it was ever pointed at, which is the same defect the stage key exists to remove, one layer up. Now BooleanOptionalAction with default None: omit to read the recorded stage, pass --no-expect-scores to assert research."
+  },
+  {
+   "id": "AUD-0177",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "Nothing reported whether the system as a whole was ready, and a lane nobody measured read as a lane that passed",
+   "target": "eight independent readiness lanes across seven scripts, each with its own exit code and no composition; 'production ready' answerable only as prose",
+   "disposition": "FIXED",
+   "checks": [
+    "readiness"
+   ],
+   "note": "Every green report this project has been wrong about was green because something never looked — the doctor counting the checkout's files on a stale container, the classified profile nothing read, two unhealthy Routines nobody was told about. So readiness.py reports THREE verdicts, not two: READY, BLOCKED and NOT_MEASURABLE_HERE, and the third is never counted as ready. It re-derives nothing — every lane shells out to the check that owns it — and a container with no credential downgrades the connector lane to unmeasured rather than reporting a serving deployment as broken. The standing items no script can close (spend limit, stale-install provisioning, the unbuilt owner-names-the-client channel, connector grants) travel with the answer, each naming its owner and the document that specifies it. `--strict` exits non-zero on an unmeasured lane, which is what CI should use. Two defects in the first draft of the checker itself, both found by running it: the detail line took the LAST THREE lines of each check's output, so a fifteen-row doctor report came back described by whichever rows sorted last; and the credential downgrade was keyed on that whole output, so a STALE INSTALL — a row the install lane already owns — was reported as 'no live credential path from this container', a check inventing a reason for its own verdict. The gist is now the FAILING rows, and the downgrade requires every failing row to be about obtaining a credential. Lanes also declare a SCOPE (repository / container / external) so `goal_status.py` can fail the standing goal on a checkout defect without failing it on a stale install in whatever container happened to run the check — read from readiness.py rather than re-derived, so two readers of one answer cannot disagree about it."
+  },
+  {
+   "id": "AUD-0178",
+   "sev": "MAJOR",
+   "area": "qa",
+   "title": "The findings ledger had drifted out of the vocabulary its own tool reads, and every mode of that tool had been dying on it",
+   "target": "14 findings filed sev BLOCKING against SEV_ORDER = {BLOCKER, MAJOR, MINOR, INFO}; one disposition NOT_THIS_ENGINE; three check names (reports, workbook, techstack) cited by findings with no command in the checks map",
+   "disposition": "FIXED",
+   "checks": [
+    "ledger"
+   ],
+   "note": "Found by running `aud_ledger.py --md`, which nothing does on a schedule: KeyError: 'BLOCKING' out of the summary, --open, --verify and --md alike, with .qa/AUD-DISPOSITIONS.md stale behind it for as long as the drift lasted. The third drift is the serious one — a finding citing a check name with no command would have been reported by --verify as proved while running nothing, which is the acceptance-ledger shape AUD-0050 caught. Severities normalised to the one vocabulary, the three commands written down, AUD-0166 reconciled to FIXED (its NOT_THIS_ENGINE call was overruled by the owner and AUD-0173 is the fix), AUD-0169 closed against AUD-0171 which had been sitting FIXED beside it. `load()` now refuses an unreadable ledger with a message naming the rows instead of a KeyError naming a dictionary, and a test pins the vocabulary, the citations and the currency of the generated markdown."
+  },
+  {
+   "id": "AUD-0179",
+   "sev": "BLOCKER",
+   "area": "routines",
+   "title": "70 of the 86 MCP tools a session attaches prompted on every call, and not one of them had ever been ruled on",
+   "target": "hooks/autoapprove_connector.py: ENRICHMENT_TOOLS + one entry in QUALIFIED_TOOLS; no entry anywhere for Slack, Salesforce_Prod, Salesforce_Docs, GAdmin_MCP, Auctor_MCP, Grace_PMO or github",
+   "disposition": "FIXED",
+   "checks": [
+    "approvals"
+   ],
+   "note": "Owner, 2026-08-30: 'check that all MCP connector tools are usually autoapproved for all runs; I do not constantly have to approve tool calls.' Measured by feeding the REAL hook the 86 tools one session carried: 16 approved, 70 prompting. The hook had only ever learned the ENRICHMENT connectors, because those are what stopped a scheduled firing; every other attached server had never been looked at. The existing guard could not have caught it — it scans the PLUGIN's markdown, and the plugin names none of those servers. SERVER_SURFACES now splits each stable-segment server into `read` (auto-approved) and `withheld` (refused ON THE RECORD, listed rather than omitted, because an absent tool cannot be told apart from one nobody thought about); WITHHELD_SUFFIXES does the same for the opaque-UUID connectors. audit_autoapprove.py runs the real hook per tool — never a re-implementation, which would agree with itself by construction — and reports ALLOWED / WITHHELD / GUARDED / UNCLASSIFIED. Now 124 of 184 approved, 58 refused, 2 guarded, 0 unclassified. A token-based lint refuses a write smuggled into a read set, and has a test proving it fires."
+  },
+  {
+   "id": "AUD-0180",
+   "sev": "BLOCKER",
+   "area": "routines",
+   "title": "The settings grant was a server wildcard, so it silently overruled every write the hook refuses",
+   "target": "bootstrap_session.sh GRANTS: `mcp__<Server>__*` derived by grepping the plugin tree, written into user-scope permissions.allow",
+   "disposition": "FIXED",
+   "checks": [
+    "approvals"
+   ],
+   "note": "Two mechanisms answer one question and the broader one wins without anybody being told. `mcp__Google_Drive__*` had been granting `trash_file` and `share_file` — both refused by the hook — for as long as the wildcard existed. The list is read out of the plugin TREE, and a doc is part of the tree, so naming `mcp__Slack__slack_send_message` once in CLIENT-SELECTION.md §3.5 was about to grant every Slack tool including sends, in the same change that deliberately withheld that one. The grant is now derived from the hook's own table: a classified server is granted by EXACT read tool name, an unclassified one keeps the wildcard because no finer record of it exists, and the connector keeps its prefix wildcard. Every classified server is granted whether or not the tree names it, so the settings half survives a session whose hooks bound from a stale install. Two tests: no classified server is wildcarded, and every granted tool is one the hook would also approve."
+  },
+  {
+   "id": "AUD-0181",
+   "sev": "BLOCKER",
+   "area": "qa",
+   "title": "47 invariant tests had been ERRORING, not failing, and the suite line said 4332 passed",
+   "target": "tests/schema/ — band boundaries strict-less-than on the raw score, no fifth value in the band enum, every generated column STORED, the api role denied on staging, a null published_date banding UNVERIFIED and never CURRENT, the active-run partial unique under concurrent insert — all against pg8000 with no PostgreSQL anywhere in the environment",
+   "disposition": "FIXED",
+   "checks": [
+    "schema"
+   ],
+   "note": "An ERROR is not a FAILURE and it is not a PASS: it is the test never running, and a summary line reporting '4332 passed, 22 errors' reads as healthy. Those 22 cover charter invariants 6, 7 and 9 and the role matrix — the ones this repository calls non-negotiable. `infra/local/up.sh` brings up PostgreSQL 16 with pgvector, the IAM-parity login roles the migrations' grants are written against, and alembic to head; it prefers docker-compose where a daemon exists and falls back to the system PostgreSQL where it does not, because this environment has the docker CLI and no daemon and a checker must handle that rather than assume it away. Measured after: 35 passed, 12 skipped, 0 errors. The 12 are the catalogue tests, which skip honestly — they assert real counts (851 cells, 16 categories, the v5->v7 resolution) that only the real workbooks carry, and the routine service account has no storage.objects.list on the catalogue-staging bucket. A readiness `schema` lane now probes for a live database and reports NOT_MEASURABLE_HERE rather than READY when there is none."
+  },
+  {
+   "id": "AUD-0182",
+   "sev": "BLOCKER",
+   "area": "engine",
+   "title": "The assessment stage was unreachable for every run whose scope is not all four pillars",
+   "target": "validator._rule4_scores: at the assessment stage it demanded a score in EVERY pillar sheet, including sheets with no rows",
+   "disposition": "FIXED",
+   "checks": [
+    "validator",
+    "stage_walk"
+   ],
+   "note": "Introduced by the stage key (AUD-0172) and found by walking a real run through `assemble package`, not by any unit test: `expect_scores` defaulted to False until the stage existed, so the branch had never once run against a real selection. A run's scope is a SELECTION and most runs do not cover all four pillars, so three of the four sheets carry no rows — and the package refused with 'no scores present' naming pillars nobody had been asked to research. A sheet with rows and no scores is still the failure the rule is for; a sheet with no rows is a pillar out of scope."
+  },
+  {
+   "id": "AUD-0183",
+   "sev": "BLOCKER",
+   "area": "engine",
+   "title": "package recomputed the client folder instead of reading the one open_folder had recorded, so a run could end with two of them",
+   "target": "assemble.package: dest = out_root or default_folder_root(run), while open_folder writes wb.client_folder and calls the folder 'the run's public identity'",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook",
+    "stage_walk"
+   ],
+   "note": "Found by the stress walk on 2026-08-30, and it is AUD-0170 with the halves swapped: there the two runs shared one folder and should not have, here one run had two folders and should not have. `--out` is per-command on the CLI, so opening at one root and packaging at another leaves the manifest, the evidence and the supersession archive in one `<Entity> - DMA` and the four deliverables in another. `runs.source_folder_id` keys on a folder, so the app scans one and orphans the other. Both now go through `_dest_folder`, which honours an explicit --out first, then the RECORDED folder, and only then the default root — and the recorded path is honoured only when its parent exists, because it is absolute in the container that wrote it and a run resumed elsewhere must not chase a directory that is not there."
+  },
+  {
+   "id": "AUD-0184",
+   "sev": "MAJOR",
+   "area": "qa",
+   "title": "Nothing walked the last ten changes end to end, and both defects above sat behind passing unit tests",
+   "target": "the stage key, the three grains, the profile ingest, the folder supersession — each with tests, none with a walk",
+   "disposition": "FIXED",
+   "checks": [
+    "stage_walk"
+   ],
+   "note": "`stress_stage_and_supersede.py` walks 19 steps through the REAL command line and the APP's own parsers: a v3 workbook upgrading in place, every assessment-stage refusal at the research stage, AHEAD_OF_STAGE blocking, the stage flipping only on real scores, both stated grains read back by parse_grain_summaries, the recommendations projected and read by parse_recommendations, all sixteen report sections written and independently reviewed, both reports and the scan rendered, the completeness gate satisfied the way a conductor satisfies it, a package assembled, a SECOND run superseding it whole into _superseded/<run_id>/ with the folder keeping its name, the archive invisible to the app's scan, and the retained profile still classifying and parsing to kinds a consumer can name. Two production-blocking defects fell out of it immediately (AUD-0182, AUD-0183), both of which every unit test had passed over, because each half worked alone."
+  },
+  {
+   "id": "AUD-0185",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "Nothing checked the chain BETWEEN the pieces — only the chains inside a run",
+   "target": "audit_coverage.py walks tabs, sections, deliverables and derived fields; no check walked intake -> research -> enrichment cadence -> workbook -> reports -> package -> vetting -> synthesis -> promotion -> served surface",
+   "disposition": "FIXED",
+   "checks": [
+    "chain"
+   ],
+   "note": "Every expensive defect this repository has met is the same shape: a link whose two halves both work, both have tests, and are not joined. classification.py classified the profile and _classify_artefact dropped it; open_folder recorded the folder and package recomputed it; Entity_Timeline had a writer, a gate and no reader; the three scored tabs had a reader, two live gates and no writer. audit_chain.py asserts each of eleven links has an OWNER, a GATE and a READER, and reports a HOLE naming which is missing. It checks EXISTENCE, which is what a script can do honestly — the walks prove behaviour and routine_health.py proves the Routines fire — and its own tests pin that it FAILS when a role goes missing and that a predicate which RAISES is a hole rather than a pass, which is the AUD-0181 mistake one level up. Measured 2026-08-30: 11 of 11 links whole."
+  },
+  {
+   "id": "AUD-0186",
+   "sev": "BLOCKER",
+   "area": "routines",
+   "title": "The assessment intake fired hourly against Google Drive, which is not where assessment requests arrive",
+   "target": "dma-assessment-intake (trig_018eeMRDobRQXPZ4aobjfUih, 59 * * * *) listed client folders under 'General DMAs' looking for one with no run_manifest.json",
+   "disposition": "FIXED",
+   "checks": [
+    "intake",
+    "routines"
+   ],
+   "note": "Owner, 2026-08-30: 'The assessment workflow/routine should not be firing hourly and checking the Google Drive. This is so wrong. … The current routine is spending tokens on the wrong flow.' A folder only appears under General DMAs because a person made one, so the scan looked for work already done by hand — twenty-four sessions a day for it. The requests arrive in Slack: #deal-desk (C0AD83KJ4DU), from the 'Assessment and Research Request' workflow (bot B0ACUPDCMGF, shortcut Ft0ADDPFSHK6), carrying account, website, context, submitter and priority. `slack_intake.py` reads the channel into a queue and the routine now fires 30 */4 * * * — four-hourly meets the workflow's own 24-hour Urgent SLA with six hours to spare, at six sessions a day instead of twenty-four."
+  },
+  {
+   "id": "AUD-0187",
+   "sev": "BLOCKER",
+   "area": "routines",
+   "title": "Delivery is the OWNER's reply carrying a FOLDER link, and an unread thread must never read as pending",
+   "target": "the three states of a request, and every way the obvious two-state rule gets one wrong",
+   "disposition": "FIXED",
+   "checks": [
+    "intake"
+   ],
+   "note": "Each clause of the rule is doing work, and the recordings under scripts/tests/slack/ are the proof: the real Richwood thread has an owner reply reading 'Let me retrieve it from my desktop' (so 'the owner replied' is wrong); the real REV thread's only reply is a colleague's FYI (so 'somebody replied' is wrong); the Hubbl workflow posts a Drive folder link in its OWN request in the same channel for a different person's queue (so 'there is a Drive link' is wrong, and shape-matching would admit that whole queue). The third state is the one that matters: a request whose thread was not fetched looks exactly like one nobody answered, and starting it assesses a client who was already delivered — so it reads UNDECIDABLE, and the exit codes keep 'nothing pending' apart from 'could not tell'. A resubmitted request (which really happened) supersedes rather than duplicating."
+  },
+  {
+   "id": "AUD-0188",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "The completion reply would have marked every request delivered the moment a run started",
+   "target": "the connector sends AS the owner, and engine.cli start opens the client folder at minute one with status IN_PROGRESS",
+   "disposition": "FIXED",
+   "checks": [
+    "intake"
+   ],
+   "note": "Two facts that are harmless apart and dangerous together. The Slack connector posts as U09TL2S4LLS, so the routine's own reply is exactly what the triage reads as DELIVERED. And the client folder — hence a postable folder link — exists from run start, days before there is anything in it. A reply posted then would close the thread, drop the request out of every future queue, and hand the requester an empty folder. `slack_intake.py reply` refuses to render a folder link without --served, with no override. The run carries slack_channel, slack_thread_ts and requested_by so the firing that finally sees it PROMOTED can answer the right thread from another container days later."
+  },
+  {
+   "id": "AUD-0189",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "A third approval disposition: allowed on an ARGUMENT, because blanket-approving a Slack send hands every firing a voice",
+   "target": "autoapprove_connector.py could only allow or stay silent, by tool NAME; the intake's completion reply needs one channel",
+   "disposition": "FIXED",
+   "checks": [
+    "approvals"
+   ],
+   "note": "Moving slack_send_message into a read set would have done two wrong things at once: failed the write-verb lint, and — because bootstrap_session.sh derives user-scope permissions.allow from the read sets, and a settings grant is honoured WITHOUT the hook being consulted — written an unconditional grant that approved the send everywhere while the channel check existed and never ran. So CONDITIONAL_TOOLS reads the call's own channel_id from tool_input, which the event has always carried and this hook had never looked at. An out-of-scope send draws NO decision rather than a deny, so a person in an interactive session can still send wherever they meant to. audit_autoapprove.py learned the verdict and probes BOTH halves — the scoped call must be allowed and the unscoped one must not — because a conditional record that only proves the allow half reads as narrow for a rule that is not."
+  },
+  {
+   "id": "AUD-0190",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "The intake Routine carries no MCP connectors, so it cannot read the channel it now depends on",
+   "target": "trig_018eeMRDobRQXPZ4aobjfUih job_config: no connector grant of any kind; dma-synthesis-sequence-a has connectors but not Slack",
+   "disposition": "OPEN",
+   "checks": [
+    "routines"
+   ],
+   "note": "Measured 2026-08-30 from the live trigger record. update_trigger cannot add connectors — only the Routine's own edit screen in the claude.ai routines UI can, or a delete-and-recreate that would change the trigger id and discard its run history, which is not a thing to do to somebody's account uninvited. The prompt's STEP 1 checks for the Slack tools and, finding none, stops and reports exactly what must be attached and where — one cheap honest firing rather than a silent failure or an invented queue. OPEN because a human must attach Slack; no change to this repository can."
+  },
+  {
+   "id": "AUD-0191",
+   "sev": "MAJOR",
+   "area": "tests",
+   "title": "Four watchdog-prompt checks found ROUTINES.md by title, and the routine was renamed — three turned into skips, one into a pass",
+   "target": "scripts/tests/test_synthesis_watchdog.py: _watchdog_prompt() and test_the_routine_prompt_carries_no_inline_heredoc searched for the literal '### 2d · DMA synthesis watchdog'",
+   "disposition": "FIXED",
+   "checks": [
+    "watchdog_prompt"
+   ],
+   "note": "The routine is called `dma-watchdog` now, so the literal matched nothing. Three checks answered that by skipping and one by returning — and a bare return is a pass, so it was the more dangerous of the two. Nothing was verifying the watchdog's prompt: not the flags it names, not the heredoc it must not carry. Found 2026-08-30 by CI's skip ceiling (15 against 12), which is the only thing in the repository that could have found it. All four now address the section by its id ('### 2d · ') and fail rather than skip, and a new test_the_watchdog_section_is_still_findable fails when the section moves again. 55 pass, 0 skip, where 52 passed and 3 skipped. The ceiling stays 12."
+  },
+  {
+   "id": "AUD-0192",
+   "sev": "BLOCKER",
+   "area": "engine",
+   "title": "Three keys were added to RUN_METADATA_KEYS and to nothing else, so every new run raised KeyError",
+   "target": "engine/workbook.py:369 writes `vals[k]` for k in C.RUN_METADATA_KEYS, and `vals` is a literal dict that did not carry slack_channel, slack_thread_ts or requested_by",
+   "disposition": "FIXED",
+   "checks": [
+    "binding",
+    "engine"
+   ],
+   "note": "226 tests across tests/skills/research_engine/ went red at once — every one that starts a run. Found 2026-08-30 by running the CI suite list locally, not by CI, because the change was still uncommitted; had it been pushed it would have taken the build down whole. A metadata key is three things — declared, defaulted and fillable — and only the declaration is loud when it is missing. All three now default to empty in the sheet writer, `engine.cli start` takes --slack-channel/--slack-thread-ts/--requested-by, and test_every_declared_metadata_key_is_written_by_a_new_run compares the declared set against the written one so the next added key cannot repeat this."
+  },
+  {
+   "id": "AUD-0193",
+   "sev": "MAJOR",
+   "area": "ci",
+   "title": "The skip-ceiling's own diagnostic printed a header and no reasons, every time",
+   "target": ".github/workflows/ci.yml: `-q -rs -rf` — the second -r replaces the first, so ^SKIPPED lines were never emitted and the ceiling's `grep '^SKIPPED'` matched nothing",
+   "disposition": "FIXED",
+   "checks": [
+    "ci_flags"
+   ],
+   "note": "Measured 2026-08-30 on the build that overran the ceiling: it printed `--- the reasons, most common first ---` and then nothing, so which three tests had started skipping had to be found by reproducing the whole suite locally. Now `-rfs`, one flag, both letters. A diagnostic that is present and empty is worse than one that is absent: the absent one is noticed. Pinned by two guards in test_gate_l_ci_bounds.py: no pytest invocation in the workflow carries two -r flags, and the ceiling's own invocation asks for both letters it greps for. Both fold backslash continuations first — reading the file line-wise finds `pytest` on a line carrying none of its flags, which is a check that passes while measuring nothing. Verified by reverting the flag and watching the first guard fail."
+  },
+  {
+   "id": "AUD-0194",
+   "sev": "BLOCKER",
+   "area": "routines",
+   "title": "Every routine checked out a branch that stopped moving the moment its work merged",
+   "target": "ROUTINES.md (14 references), bootstrap_session.sh BRANCH default, plugin_version.py SETUP_CURL — all naming claude/dma-insights-onboarding-0ryrd0",
+   "disposition": "FIXED",
+   "checks": [
+    "routine_branch"
+   ],
+   "note": "Correct while the build lived on that branch and silently wrong from the minute PR #16 merged it into main: the branch became an ancestor and stopped moving, so every scheduled firing would have cloned older code every day with nothing failing. A stale checkout does not error — it runs, and it produces yesterday's answer. The intake would have been the visible case: the Slack queue is on main and that branch has none of it, so STEP 3 would have called a script that is not there. bootstrap_session.sh had carried the instruction in a comment since it was written — 'after the merge, flip this default to main' — which is exactly the kind of note that is never read at the moment it applies. All 14 prompt references, the bootstrap default and the setup curl line now name main, and test_no_live_prompt_checks_out_a_branch_other_than_the_default fails on any live prompt naming another, verified by planting one."
+  },
+  {
+   "id": "AUD-0195",
+   "sev": "MAJOR",
+   "area": "connectors",
+   "title": "Slack was reachable only through a per-Routine UI attachment, so a script could never read the channel and one Routine never could",
+   "target": "slack_intake.py could only parse a transcript somebody else fetched; dma-assessment-intake carries no connector (AUD-0190)",
+   "disposition": "FIXED",
+   "checks": [
+    "slack_auth"
+   ],
+   "note": "Three measured non-portabilities, not one: the intake Routine cannot read its own channel and no API call can attach a connector; a SCRIPT can never call a connector tool, so the read half and the decide half could only ever be tested apart; and every new Routine or container starts blind until somebody clicks a UI. scripts/slack_client.py reads a bot token by the same three-rung ladder as gcp_token.path_token (env, file, Secret Manager) and calls the Web API directly. Secret Manager is reached over REST with an access token minted in pure Python, because gcloud is ABSENT from the routine image — a ladder whose last rung shells out to gcloud has no last rung where it matters. The client RENDERS the API's JSON into the connector's own text shape, so one parser and one set of recorded fixtures serve both routes; test_slack_client.py proves it by running the real parser over rendered output and asserting the same verdicts the recordings assert. The token is never echoed on any path, and test_no_source_file_carries_a_literal_bot_token fails the build if one is ever committed. The connector route still works and was not removed. OWNER STEP REMAINS: create the secret and grant secretAccessor — this session is blocked from handling credential material, so no live auth.test was run from here."
+  },
+  {
+   "id": "AUD-0196",
+   "sev": "MAJOR",
+   "area": "engine",
+   "title": "Every binding needed a human answer, including the ones with nothing to decide",
+   "target": "preflight.check required binding_question.asked on every run, so a trigger-fired intake could prepare a binding and never start one",
+   "disposition": "FIXED",
+   "checks": [
+    "autobind"
+   ],
+   "note": "Owner, 2026-08-30: 'the run should bind to unambiguous subvertical.' unambiguous_binding() requires exactly one ACCEPT, AT LEAST ONE REJECT and at most one material line of business — the reject clause is the load-bearing one, because a census listing a single candidate and accepting it is not unanimity, it is a census that never looked, and that is exactly what a thin research pass emits. check() RE-DERIVES this every call and never reads auto_bound as authority, so a hand-written flag over a multi-LOB entity is refused; that is the test that matters. Evidence mode auto-binds only to PUBLIC: the most restrictive mode can only under-claim, while auto-binding INTERNAL would claim access nobody granted, which is the harm the gate exists to prevent. The record keeps asked:false beside auto_bound:true and the census counts, so an auto-bind is always distinguishable from a human answer."
   }
  ]
 }
