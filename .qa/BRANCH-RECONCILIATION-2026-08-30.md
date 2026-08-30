@@ -102,3 +102,27 @@ Two branches were already at zero and needed nothing:
 `claude/default-branch-sync-verify-udd359`,
 `claude/dma-insights-build-kickoff-wa1fkv`, and `main` — the last of which
 is a side branch on the other lineage, not this repository's default.
+
+## How the seven stopped being ahead
+
+Reporting them as "carrying nothing" left seven counters reading 484, 407,
+339, 330, 4, 4 and 3. A count that says work is outstanding, next to a
+document saying none is, is worse than either alone — the next person
+reads the number.
+
+Three ways exist to zero a counter, and two of them lose something:
+force-updating each ref to this tip leaves the commits unreferenced, and
+deleting the branch is the same thing with a shorter name. Both were
+refused here, correctly.
+
+The third is additive: give this branch a second parent. `git commit-tree`
+builds a merge commit from a tree and its parents, so each of the seven
+becomes an ANCESTOR of the default branch — `ahead=0`, by definition —
+while every commit it carries stays reachable and every file stays exactly
+as it is. The tree hash is unchanged across all seven merges, asserted
+before the push, so this cannot smuggle in a file change: it is a
+statement about history, not about content.
+
+This is what `git merge -s ours` records, built with plumbing because the
+porcelain was unavailable. It is reversible in the only sense that
+matters: nothing was discarded, so there is nothing to restore.
