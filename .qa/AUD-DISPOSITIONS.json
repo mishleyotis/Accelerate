@@ -1992,6 +1992,18 @@
     "workbook"
    ],
    "note": "OPEN, and deliberately not closed here. All three are SCORED artefacts \u2014 the stated pillar and category grains carry cap logic, weighting and analyst override, and column D is empty at the research stage by contract rule 4. Adding them to contract.SHEETS would give every research workbook three tabs it can never honestly fill, which is the same defect facing the other way. They belong to the assessment stage, which this engine does not produce. Raised for the owner rather than resolved silently."
+  },
+  {
+   "id": "AUD-0167",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "The live watchdog prompt named a revive path that resolves only under the plugin tree, and no verification scope was running the test that catches it",
+   "target": "docs/ROUTINES.md \u00a72d, the LIVE dma-watchdog prompt (trig_019rSxYzhDBSTdPry5xABpxr); scripts/tests/test_routine_prompt_commands.py",
+   "disposition": "MITIGATED",
+   "checks": [
+    "routines"
+   ],
+   "note": "Two defects, one fix and one deliberate non-fix. The prompt said --revive dispatches 'through scripts/agent_run.py', which a routine standing at the repo root cannot open; the canon now names the qualified path. It was NOT re-pushed to the live trigger: the sentence is prose, the mechanism does not read it (watchdog._agent_run resolves from the installed plugin's own location), and re-pushing means replacing 14,561 characters on an hourly routine that currently SUCCEEDS with no way to read the stored prompt back and confirm it landed. The divergence is recorded in the canon's own \u00a72d heading so it cannot pass as byte-for-byte agreement. The SECOND defect is why it survived: this test lives in scripts/tests/, which PR #15's verification scope (tests/ + plugins/dma-insights/scripts/tests/) did not include \u2014 it failed identically at the merge base. Verification now runs tests/, plugins/dma-insights/scripts/tests/, scripts/tests/ and the four app suites."
   }
  ]
 }

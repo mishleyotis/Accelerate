@@ -663,7 +663,24 @@ the run as examined-and-empty — "the window was read and held nothing" and "no
 one looked" must stay distinguishable.
 ```
 
-### 2d · dma-watchdog — `23 * * * *` · LIVE (`trig_019rSxYzhDBSTdPry5xABpxr`, enabled; last run SUCCEEDED; prompt below pushed and verified byte-for-byte against this file 2026-08-30)
+### 2d · dma-watchdog — `23 * * * *` · LIVE (`trig_019rSxYzhDBSTdPry5xABpxr`, enabled; last run SUCCEEDED; prompt below pushed and verified byte-for-byte 2026-08-30, then corrected here by ONE phrase and NOT re-pushed — see the note)
+
+> **One-phrase divergence from the live prompt, recorded rather than pushed.**
+> The prompt below said `--revive` re-dispatches "through
+> `scripts/agent_run.py`" — a path that resolves only under the plugin tree,
+> so a routine standing at the repo root could not open it, and
+> `test_no_live_prompt_names_a_file_that_only_exists_under_the_plugin` fails
+> on it. It is corrected below to the qualified path.
+>
+> It was NOT re-pushed to the live trigger, on purpose. The sentence is
+> PROSE describing what the flag does; the mechanism does not read it.
+> `watchdog._agent_run()` resolves the dispatcher from the installed
+> plugin's own location (`Path(__file__).parents[3] / "scripts" /
+> "agent_run.py"`), so `--revive` works as written today. Re-pushing means
+> replacing 14,561 characters on an hourly routine that currently SUCCEEDS,
+> with no way to read the stored prompt back and confirm the replacement
+> landed byte-for-byte — a real risk taken for a prose correction. Push it
+> on the next occasion this prompt changes for a reason of its own.
 
 **2026-08-30: this routine now watches BOTH populations.** It was named for
 synthesis and only ever saw synthesis; research runs stalled unwatched
@@ -735,7 +752,7 @@ READ THE `sessions` BLOCK; it carries the stall signal. The routine is ONE CLIEN
 
 IF THE SCRIPT RAISES, SAY SO AND STOP — never report a quiet queue you could not read. It now refuses to take an empty row list out of a response whose shape it does not recognise, because it once did exactly that: it read the queue from a key the connector does not use (`runs`, where the connector returns `pending`), saw `[]` on every firing, and reported "nothing stalled" while unable to see a single run. The fix was verified against the live connector — 0 runs visible before, 4 after, one of them six pages PASS and not serving. It narrows on the queue row's claim before asking per-run, and refuses outright if more than 40 runs match — that refusal is a real signal about the claim field, not a transient error to retry.
 
-STEP 2b — SWEEP THE RESEARCH SIDE, AND REVIVE WHAT STOPPED. The steps above watch SYNTHESIS runs through the connector. Research runs are a different population and were invisible to this routine entirely: they live in a run directory that does not survive a container, so a sweep that lists `$DMA_RUN_ROOT` on a fresh firing finds zero and prints "no research runs" — indistinguishable from a healthy queue, and how a run that stopped at category three stayed stopped. Every `engine.cli start` now writes an append-only REGISTRY row and pushes it to Drive, so the population is knowable from here. Run `python3 plugins/dma-insights/skills/dma-research/engine/registry.py pull` first (merges Drive's copy into this container's, never overwrites), then `python3 plugins/dma-insights/skills/dma-research/engine/watchdog.py --json`. Every row carries a `state` and a `resume` plan naming the agent to dispatch and the prompt to dispatch it with — you do not compose one. Actionable states are NO_CLIENT_FOLDER, PRELIM_OPEN, STALLED, GATE_FAILED, UNGATED, AT_BUDGET_CEILING, READY_FOR_HANDOFF and MISSING_LOCALLY. Add `--revive` to act rather than only report: it re-dispatches each stopped run through `scripts/agent_run.py` under the owning agent's own front matter, and where dispatch is genuinely unavailable it returns NOT_RUN with the reason and the resume prompt, never a silent pass. Use `--revive --dry-run` first if you want to see the plan before it fires. TWO STATES ARE NEVER REVIVED AUTOMATICALLY and the script already refuses them: HALTED (the catalogue moved under the run — a person decides whether to re-pin or retire it) and UNREADABLE. Finish by pushing the registry back: `registry.py push`. A firing that revives nothing because nothing stopped says so in one line and stops.
+STEP 2b — SWEEP THE RESEARCH SIDE, AND REVIVE WHAT STOPPED. The steps above watch SYNTHESIS runs through the connector. Research runs are a different population and were invisible to this routine entirely: they live in a run directory that does not survive a container, so a sweep that lists `$DMA_RUN_ROOT` on a fresh firing finds zero and prints "no research runs" — indistinguishable from a healthy queue, and how a run that stopped at category three stayed stopped. Every `engine.cli start` now writes an append-only REGISTRY row and pushes it to Drive, so the population is knowable from here. Run `python3 plugins/dma-insights/skills/dma-research/engine/registry.py pull` first (merges Drive's copy into this container's, never overwrites), then `python3 plugins/dma-insights/skills/dma-research/engine/watchdog.py --json`. Every row carries a `state` and a `resume` plan naming the agent to dispatch and the prompt to dispatch it with — you do not compose one. Actionable states are NO_CLIENT_FOLDER, PRELIM_OPEN, STALLED, GATE_FAILED, UNGATED, AT_BUDGET_CEILING, READY_FOR_HANDOFF and MISSING_LOCALLY. Add `--revive` to act rather than only report: it re-dispatches each stopped run through `plugins/dma-insights/scripts/agent_run.py` under the owning agent's own front matter, and where dispatch is genuinely unavailable it returns NOT_RUN with the reason and the resume prompt, never a silent pass. Use `--revive --dry-run` first if you want to see the plan before it fires. TWO STATES ARE NEVER REVIVED AUTOMATICALLY and the script already refuses them: HALTED (the catalogue moved under the run — a person decides whether to re-pin or retire it) and UNREADABLE. Finish by pushing the registry back: `registry.py push`. A firing that revives nothing because nothing stopped says so in one line and stops.
 
 STEP 3 — PROMOTE WHAT IS FINISHED. `python3 scripts/synthesis_watchdog.py --state /root/.dma/ledgers/watchdog.json --promote-ready`. Every run classified READY_TO_PROMOTE — six pages PASS, promotable, nothing promoted — is RE-READ and re-checked immediately before promoting, then re-read again to confirm all six pages share one promoted_at. A run that stopped being promotable in between is REFUSED and named, not promoted; more than one promoted_at is an atomicity failure (invariant 3), reported and never retried. The script exits 1 when anything was refused. Do NOT write promotion logic inline in this prompt — it lived here once as a heredoc whose terminator was indented, so it could not run at all, and nothing tested it.
 
