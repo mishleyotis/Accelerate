@@ -260,3 +260,172 @@ def test_the_recorded_fixtures_still_parse():
                     SI._load_threads(str(FIX)), since_days=99999,
                     now=SI.datetime(2026, 8, 30, tzinfo=SI.timezone.utc))
     assert got["requests"], "the recorded channel stopped parsing"
+
+
+# ── a cosmetic lookup may not decide whether the read happens ────────────
+#
+# Measured 2026-08-30 on a live `dma-assessment-intake` firing: the bot token
+# carried `channels:history` and not `channels:read`, and the whole intake
+# ended having read NOTHING — "Slack unreadable" — because `fetch_channel`
+# asked `conversations.info` for the channel's DISPLAY NAME first, and that
+# call needs the scope the token lacked. Every message in the channel was
+# reachable with the scopes already granted.
+#
+# The name goes in one header line that nothing parses. So it degrades to the
+# id, and the substantive call proceeds. These tests pin both halves of that:
+# the label may degrade, the messages may not.
+
+def _slack_granting(*scopes):
+    """A fake Slack that grants exactly `scopes` and refuses the rest the way
+    Slack really does — ok:false, which `call` turns into a SlackError."""
+    granted, needs = set(scopes), {
+        "conversations.info": "channels:read",
+        "conversations.history": "channels:history",
+        "users.info": "users:read",
+    }
+
+    def _call(method, params, *, token=None, **kw):
+        need = needs[method]
+        if need not in granted:
+            raise SC.SlackError(
+                f"{method}: missing_scope — needed: {need}, provided: "
+                f"{', '.join(sorted(granted)) or 'none'}")
+        if method == "conversations.info":
+            return {"ok": True, "channel": {"name": "deal-desk"}}
+        if method == "conversations.history":
+            return {"ok": True, "messages": [_request_msg(
+                "1787950217.210239", "REV Federal Credit Union",
+                "https://www.revfcu.com/", "Marketing cloud, no CRM",
+                "<@U061X1XFD5F|Kevin Murray>", "High (need in 48 hours)")]}
+        return {"ok": True, "user": {"real_name": "Kevin Murray"}}
+    return _call
+
+
+def _requests_in(text):
+    return SI.triage(text, {}, since_days=99999,
+                     now=SI.datetime(2026, 8, 30,
+                                     tzinfo=SI.timezone.utc))["requests"]
+
+
+def test_a_refused_channel_name_does_not_stop_the_read(monkeypatch):
+    """THE DEFECT. With only `channels:history`, the queue still reads."""
+    monkeypatch.setattr(SC, "call", _slack_granting("channels:history"))
+    got = _requests_in(SC.fetch_channel("C0AD83KJ4DU", token="x"))
+    assert len(got) == 1, (
+        "a token holding channels:history read no requests — the cosmetic "
+        "name lookup is deciding whether the substantive one runs again")
+    assert got[0]["account"] == "REV Federal Credit Union"
+
+
+def test_the_id_stands_in_for_the_refused_name(monkeypatch):
+    monkeypatch.setattr(SC, "call", _slack_granting("channels:history"))
+    head = SC.fetch_channel("C0AD83KJ4DU", token="x").splitlines()[0]
+    assert "C0AD83KJ4DU" in head, head
+
+
+def test_the_real_name_is_used_when_the_scope_is_there(monkeypatch):
+    """The degradation must not become the only behaviour: a token that CAN
+    read the name still gets the friendlier header."""
+    monkeypatch.setattr(SC, "call",
+                        _slack_granting("channels:read", "channels:history"))
+    head = SC.fetch_channel("C0AD83KJ4DU", token="x").splitlines()[0]
+    assert "#deal-desk" in head, head
+
+
+def test_the_note_names_the_scope_and_never_the_token(monkeypatch, capsys):
+    """An operator reading the log must learn what to grant, and the token
+    must not appear in the note — the file's standing rule."""
+    monkeypatch.setattr(SC, "call", _slack_granting("channels:history"))
+    SC.fetch_channel("C0AD83KJ4DU", token="xoxb-SECRET-VALUE")
+    err = capsys.readouterr().err
+    assert "channels:read" in err and "channels:history" in err, err
+    assert "SECRET" not in err, "the note echoed the token"
+
+
+def test_a_refused_history_is_still_a_failure(monkeypatch):
+    """Only the LABEL degrades. If the messages cannot be read, saying so is
+    the whole job — a transcript with no messages and no error is the queue
+    defect this client exists to prevent."""
+    monkeypatch.setattr(SC, "call", _slack_granting("channels:read"))
+    with pytest.raises(SC.SlackError) as e:
+        SC.fetch_channel("C0AD83KJ4DU", token="x")
+    assert "conversations.history" in str(e.value)
+
+
+# ── the workflow really posts rich_text, and rich_text carries STYLE ─────
+#
+# `tests/slack/rich_text_request.json` is a VERBATIM recording of a real
+# Assessment and Research Request message, pulled from `conversations.history`
+# on 2026-08-30. It is here because the hand-built `_request_msg` above is a
+# `section` block with mrkdwn already in its `text` — which is what the
+# CONNECTOR hands over, and is not what the API returns. The workflow posts
+# ONE `rich_text` block whose field labels are bold RUNS, and the renderer
+# was dropping both the bold markers and the run boundaries.
+#
+# The result, measured against the live #deal-desk the same day: every
+# request came back with account, website, submitter and priority empty and
+# a verdict of UNDECIDABLE — "the request carries no *Account Full Name*" —
+# on messages that plainly carried one. The queue read as unanswerable
+# noise. Fixtures built by hand could not catch it because they were built
+# in the shape that already worked.
+
+RICH = json.loads((FIX / "rich_text_request.json").read_text())
+
+
+def test_the_recorded_rich_text_request_parses():
+    """THE DEFECT, against the bytes Slack actually returned."""
+    text = SC.render_channel("C0AD83KJ4DU", "deal-desk", [RICH],
+                             {"U09TL2S4LLS": "Mishley Otiende",
+                              "U061X1XFD5F": "Kevin Murray"})
+    got = SI.triage(text, {}, since_days=99999,
+                    now=SI.datetime(2026, 8, 30, tzinfo=SI.timezone.utc))
+    assert len(got["requests"]) == 1, (
+        "a real workflow message rendered into something the parser finds no "
+        "request in — the API route and the connector route have drifted")
+    r = got["requests"][0]
+    assert r["account"] == "REV Federal Credit Union"
+    assert r["website"] == "https://www.revfcu.com/"
+    assert r["priority"].startswith("High")
+    assert "marketing cloud" in r["context"]
+
+
+def test_a_bold_run_becomes_a_label_on_its_own_line():
+    """The mechanism, stated so a future edit cannot quietly undo it:
+    `_field` looks for the LINE `*Label*`, and a bold run is how the API
+    says that."""
+    body = SC._body(RICH, {})
+    for label in ("Account Full Name", "Website", "Additional Context",
+                  "Submitter", "Priority"):
+        assert f"\n*{label}*\n" in f"\n{body}\n", (
+            f"*{label}* is not a line by itself in the rendered body")
+
+
+def test_inline_runs_are_not_split_across_lines():
+    """Slack emits explicit "\\n" runs where a line really breaks. Joining
+    the runs with newlines instead put a blank line between every label and
+    its value, which is what broke the parse."""
+    body = SC._body(RICH, {})
+    assert "*Account Full Name*\nREV Federal Credit Union" in body, body
+
+
+def test_a_mention_renders_with_its_display_name_when_known():
+    """The footer boundary in slack_intake reads `<@Uxxx|Name>`, so the two
+    routes must agree on that form."""
+    body = SC._body(RICH, {"U09TL2S4LLS": "Mishley Otiende"})
+    assert "<@U09TL2S4LLS|Mishley Otiende>" in body
+    assert "<@U061X1XFD5F>" in body, "an unknown id stays a bare mention"
+
+
+def test_the_mentions_are_collected_for_name_resolution():
+    """`_users` was fed authors only, so the two ids that decide a request —
+    the submitter and the assignee — were never resolved."""
+    assert SC._mentions(RICH) >= {"U09TL2S4LLS", "U061X1XFD5F"}
+
+
+def test_the_assignee_footer_survives_the_round_trip():
+    """It must still be there and still be recognisable, or `_field` loses
+    the boundary that stops Priority swallowing it."""
+    body = SC._body(RICH, {"U09TL2S4LLS": "Mishley Otiende"})
+    assert "Please run the maturity assessment" in body
+    assert "<@U09TL2S4LLS|Mishley Otiende> Please run" in body, (
+        "the mention and the sentence after it are one line in Slack")

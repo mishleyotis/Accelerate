@@ -121,12 +121,19 @@ fail closed at install time and read as a Slack problem.
 
 ### Scopes the bot needs
 
-| scope | what stops working without it |
-|---|---|
-| `channels:history` | `conversations.history` — the queue cannot be read |
-| `channels:read` | `conversations.info` — the channel name in the transcript |
-| `chat:write` | the completion reply |
-| `users:read` | display names on replies (degrades to bare ids, not fatal) |
+Two of the four are load-bearing and two are cosmetic. The distinction is
+not editorial: measured 2026-08-30 on a live `dma-assessment-intake` firing,
+a token holding `channels:history` but not `channels:read` read **nothing**,
+because the transcript's header name was fetched before the messages were.
+A cosmetic lookup must never decide whether the substantive one runs, so
+both cosmetic scopes now degrade in place and the read proceeds.
+
+| scope | what stops working without it | required? |
+|---|---|---|
+| `channels:history` | `conversations.history` — the queue cannot be read | **yes** |
+| `chat:write` | the completion reply | **yes** |
+| `channels:read` | `conversations.info` — the channel NAME in the header line; nothing parses it, so it degrades to the channel id and a note goes to stderr | no |
+| `users:read` | display names on replies; degrades to bare ids, which is what the parser reads anyway | no |
 
 Private channel instead of public → `groups:history` + `groups:read`.
 **The bot must also be in the channel**: `/invite @<app>` in `#deal-desk`.

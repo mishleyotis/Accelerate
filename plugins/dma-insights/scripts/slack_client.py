@@ -44,6 +44,7 @@ import argparse
 import base64
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
@@ -237,7 +238,89 @@ def _author(msg: dict, names: dict) -> tuple:
     return names.get(uid, uid), uid
 
 
-def _body(msg: dict) -> str:
+#: mrkdwn markers for the styles a `rich_text` run can carry. `bold` is the
+#: load-bearing one: every field label the parser finds is a bold run, and
+#: `_field` looks for the LINE `*Label*`.
+_STYLE_MARK = (("bold", "*"), ("italic", "_"), ("strike", "~"))
+
+_MENTION_RE = re.compile(r"<@(U[A-Z0-9]+)")
+
+
+def _mentions(msg: dict) -> set:
+    """User ids this message MENTIONS, so their names can be resolved too.
+
+    `_users` was fed message AUTHORS only. But the two mentions that decide
+    a request — the Submitter field's value and the workflow's assignee
+    footer — are mentions, not authors, so they rendered as bare `<@Uxxx>`
+    while the connector renders `<@Uxxx|Display Name>`. Two renderings of
+    one channel is exactly the drift this client exists to prevent, and the
+    footer boundary in `slack_intake._FOOTER` reads that form.
+    """
+    out = set(_MENTION_RE.findall(msg.get("text") or ""))
+    for b in msg.get("blocks") or []:
+        if b.get("type") == "section":
+            for t in ([(b.get("text") or {}).get("text")]
+                      + [f.get("text") for f in b.get("fields") or []]):
+                out |= set(_MENTION_RE.findall(t or ""))
+        for el in b.get("elements") or []:
+            for sub in [el] + list(el.get("elements") or []):
+                for deep in [sub] + list(sub.get("elements") or []):
+                    if deep.get("type") == "user" and deep.get("user_id"):
+                        out.add(deep["user_id"])
+    return out
+
+
+def _run(sub: dict, names: dict) -> str:
+    """One inline run of a `rich_text` element, back in mrkdwn."""
+    kind = sub.get("type")
+    if kind == "text":
+        s = sub.get("text") or ""
+        core, style = s.strip(), sub.get("style") or {}
+        if core:
+            for key, mark in _STYLE_MARK:
+                if style.get(key):
+                    core = f"{mark}{core}{mark}"
+            # markers go INSIDE the surrounding whitespace, so a bold label
+            # still starts its own line and `^\*Label\*$` still matches.
+            s = s[:len(s) - len(s.lstrip())] + core + s[len(s.rstrip()):]
+        return s
+    if kind == "user" and sub.get("user_id"):
+        uid = sub["user_id"]
+        nm = names.get(uid)
+        return f"<@{uid}|{nm}>" if nm and nm != uid else f"<@{uid}>"
+    if kind == "link" and sub.get("url"):
+        label = sub.get("text")
+        return f"<{sub['url']}|{label}>" if label else f"<{sub['url']}>"
+    if kind == "emoji" and sub.get("name"):
+        return f":{sub['name']}:"
+    if kind == "channel" and sub.get("channel_id"):
+        return f"<#{sub['channel_id']}>"
+    if kind == "usergroup" and sub.get("usergroup_id"):
+        return f"<!subteam^{sub['usergroup_id']}>"
+    return sub.get("text") or ""
+
+
+def _inline(el: dict, names: dict) -> str:
+    """A `rich_text` element as ONE line — its runs CONCATENATED.
+
+    Concatenated, not newline-joined. The runs are inline spans of a single
+    line and Slack already emits explicit "\n" text runs wherever the line
+    really breaks, so joining them with newlines put a blank line between
+    every field label and its value: `*Account Full Name*` stopped being a
+    line by itself, `_field` matched nothing, and EVERY request parsed with
+    account, website, submitter and priority empty — measured 2026-08-30
+    against the live #deal-desk, where all six requests read UNDECIDABLE
+    with "carries no *Account Full Name*" while every one of them had one.
+
+    A list element nests sections; those are separate lines.
+    """
+    subs = el.get("elements") or []
+    if any(x.get("elements") for x in subs):
+        return "\n".join(_inline(x, names) for x in subs)
+    return "".join(_run(x, names) for x in subs)
+
+
+def _body(msg: dict, names: dict | None = None) -> str:
     """The message text, with the workflow's field blocks preserved.
 
     A Slack workflow posts its fields as BLOCKS, and `text` on such a message
@@ -245,6 +328,7 @@ def _body(msg: dict) -> str:
     every `*Account Full Name*` the parser reads. The block walk below is
     what makes an API-fetched transcript parse the same as a connector one.
     """
+    names = names or {}
     parts = []
     for b in msg.get("blocks") or []:
         if b.get("type") == "section":
@@ -256,13 +340,9 @@ def _body(msg: dict) -> str:
                     parts.append(f["text"])
         elif b.get("type") == "rich_text":
             for el in b.get("elements") or []:
-                for sub in el.get("elements") or []:
-                    if sub.get("type") == "text" and sub.get("text"):
-                        parts.append(sub["text"])
-                    elif sub.get("type") == "user" and sub.get("user_id"):
-                        parts.append(f"<@{sub['user_id']}>")
-                    elif sub.get("type") == "link" and sub.get("url"):
-                        parts.append(f"<{sub['url']}>")
+                rendered = _inline(el, names)
+                if rendered.strip():
+                    parts.append(rendered)
     if not parts and msg.get("text"):
         parts.append(msg["text"])
     return "\n".join(p.rstrip() for p in parts).strip()
@@ -279,7 +359,7 @@ def render_channel(channel_id: str, channel_name: str, messages: list,
         out.append(f"=== Message from {who} ({wid}) at {_when(m.get('ts'))} "
                    f"UTC ===")
         out.append(f"Message TS: {m.get('ts')}")
-        body = _body(m)
+        body = _body(m, names)
         if body:
             out.append(body)
         n = int(m.get("reply_count") or 0)
@@ -297,7 +377,7 @@ def render_thread(parent: dict, replies: list, names: dict) -> str:
            f"From: {who} ({wid})",
            f"Time: {_when(parent.get('ts'))} UTC",
            f"Message TS: {parent.get('ts')}"]
-    body = _body(parent)
+    body = _body(parent, names)
     if body:
         out.append(body)
     out.append("")
@@ -308,7 +388,7 @@ def render_thread(parent: dict, replies: list, names: dict) -> str:
                 f"From: {rwho} ({rid})",
                 f"Time: {_when(r.get('ts'))} UTC",
                 f"Message TS: {r.get('ts')}"]
-        rbody = _body(r)
+        rbody = _body(r, names)
         if rbody:
             out.append(rbody)
         reacts = ", ".join(
@@ -324,12 +404,40 @@ def render_thread(parent: dict, replies: list, names: dict) -> str:
 def fetch_channel(channel_id: str, limit: int = 50,
                   token: str | None = None) -> str:
     tok = token or bot_token()
-    info = call("conversations.info", {"channel": channel_id}, token=tok)
-    name = ((info.get("channel") or {}).get("name")) or channel_id
+    # THE CHANNEL'S NAME IS A LABEL. It goes in the transcript's header line
+    # and nothing parses it — `render_channel` already falls back to the id,
+    # and slack_intake reads message rows, never the header.
+    #
+    # But it is fetched with `conversations.info`, which requires
+    # `channels:read`, while the messages come from `conversations.history`,
+    # which requires `channels:history`. Measured 2026-08-30 on a live
+    # intake firing: the bot token carried `channels:history` and NOT
+    # `channels:read`, so `call()` raised on the label and the firing ended
+    # having read nothing — reporting the channel unreadable when every
+    # message in it was reachable with the scopes already granted.
+    #
+    # A cosmetic lookup may not decide whether the substantive one runs. The
+    # id is a perfectly good header, so a refused name degrades to it and
+    # the read proceeds.
+    try:
+        info = call("conversations.info", {"channel": channel_id}, token=tok)
+        name = ((info.get("channel") or {}).get("name")) or channel_id
+    except SlackError as e:
+        print(f"note: channel name unavailable ({e}); using the id as the "
+              f"header. Add `channels:read` for a friendlier transcript — "
+              f"the messages below need only `channels:history`.",
+              file=sys.stderr)
+        name = channel_id
     hist = call("conversations.history",
                 {"channel": channel_id, "limit": limit}, token=tok)
     msgs = hist.get("messages") or []
-    names = _users({m.get("user") for m in msgs}, tok)
+    # AUTHORS *and* MENTIONS. The connector renders a mention as
+    # `<@Uxxx|Display Name>`, and `slack_intake._FOOTER` reads that
+    # form to find where the workflow's assignee footer starts. Ids
+    # repeat heavily across a channel, so `_users` dedupes this to a
+    # handful of lookups.
+    names = _users({m.get("user") for m in msgs}
+                   | {u for m in msgs for u in _mentions(m)}, tok)
     return render_channel(channel_id, name, msgs, names)
 
 
@@ -341,7 +449,13 @@ def fetch_thread(channel_id: str, ts: str, token: str | None = None) -> str:
     if not msgs:
         raise SlackError(f"conversations.replies returned no parent for {ts}")
     parent, replies = msgs[0], msgs[1:]
-    names = _users({m.get("user") for m in msgs}, tok)
+    # AUTHORS *and* MENTIONS. The connector renders a mention as
+    # `<@Uxxx|Display Name>`, and `slack_intake._FOOTER` reads that
+    # form to find where the workflow's assignee footer starts. Ids
+    # repeat heavily across a channel, so `_users` dedupes this to a
+    # handful of lookups.
+    names = _users({m.get("user") for m in msgs}
+                   | {u for m in msgs for u in _mentions(m)}, tok)
     return render_thread(parent, replies, names)
 
 
