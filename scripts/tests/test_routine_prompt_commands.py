@@ -461,3 +461,34 @@ def test_no_live_prompt_pins_a_run_id():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── a live prompt may not check out a branch that is not the default ─────
+#
+# Every routine prompt named `claude/dma-insights-onboarding-0ryrd0` until
+# 2026-08-30, which was correct while the build lived there and silently
+# wrong the moment PR #16 merged it into main: the branch became an ancestor
+# and stopped moving, so every firing would have checked out older code every
+# day with nothing saying so. A stale checkout does not fail — it runs, and
+# it produces yesterday's answer.
+#
+# The branch a routine checks out is not a detail of its prompt. It decides
+# which code the firing IS.
+
+DEFAULT_BRANCH = "main"
+
+
+def test_no_live_prompt_checks_out_a_branch_other_than_the_default():
+    bad = {}
+    for name, body in live_prompts().items():
+        for ref in re.findall(r"origin/([A-Za-z0-9._/-]+)", body):
+            if ref != DEFAULT_BRANCH:
+                bad.setdefault(name, set()).add(ref)
+        for ref in re.findall(r"--branch\s+([A-Za-z0-9._/-]+)", body):
+            if ref != DEFAULT_BRANCH:
+                bad.setdefault(name, set()).add(ref)
+    assert not bad, (
+        f"live routine prompt(s) check out a branch that is not "
+        f"{DEFAULT_BRANCH!r}: { {k: sorted(v) for k, v in bad.items()} }. A "
+        f"branch that is not the default stops moving the moment its work "
+        f"merges, and the firing runs older code every day without failing")
