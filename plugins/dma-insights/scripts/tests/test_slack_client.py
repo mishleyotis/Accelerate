@@ -196,11 +196,22 @@ def test_a_failure_names_every_rung_and_prints_no_value(monkeypatch,
     assert "xoxb" not in msg
 
 
-def test_no_source_file_carries_a_literal_bot_token():
-    """The permanent one. A token in the repository is a token to rotate,
-    and this is the check that says so before a commit does."""
+def test_no_source_file_carries_a_literal_credential():
+    """The permanent one. A credential in the repository is a credential to
+    rotate, and this is the check that says so before a commit does.
+
+    Widened 2026-08-30 beyond Slack: the project also handles a Google OAuth
+    client (GOCSPX-…) wired into the MCP gate as dmai-oauth-client-secret,
+    and a scanner that only knew one vendor's prefix would have watched the
+    wrong door. Shapes, not values — nothing secret is written here.
+    """
     import re
     root = HERE.parents[2]
+    # Slack only. The repository-wide scanner (scripts/scan_secrets.py) owns
+    # every other vendor's shape AND the exclusions that keep the legacy
+    # snapshot's deliberate FAKE fixtures from reading as leaks — a second
+    # scanner without those exclusions reports the same placeholders forever
+    # and teaches everyone to ignore it.
     pat = re.compile(r"xox[baprs]-[0-9]{6,}-[0-9]{6,}-")
     bad = []
     for p in root.rglob("*"):
