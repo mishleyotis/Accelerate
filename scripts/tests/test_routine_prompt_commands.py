@@ -403,5 +403,61 @@ def test_no_live_prompt_names_a_file_that_only_exists_under_the_plugin():
         "; ".join(f"{s}: {t} -> {fix}" for s, t, fix in offenders))
 
 
+#: A client's display_id, as the intake tree and the connector spell it:
+#: lowercase, hyphenated, ending in an institution word. Deliberately a
+#: SHAPE and not a list — a deny-list of the clients we have met would pass
+#: the next one.
+CLIENT_SLUG = re.compile(
+    r"\b[a-z][a-z0-9]*(?:-[a-z0-9]+)*-"
+    r"(?:bank|credit-union|cu|fcu|federal|n-a|financial|savings|trust|"
+    r"bancorp|bancshares|union)\b")
+
+#: A promoted run's id. Pinning one in a prompt is the same defect wearing a
+#: different shape: the run it names is superseded the next time that client
+#: is produced, and the prompt then compares against a run nobody serves.
+RUN_UUID = re.compile(
+    r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b")
+
+
+def test_no_live_prompt_pins_a_client():
+    """A Routine fires on a SCHEDULE; a client is chosen by a PERSON or by a
+    gate that knows what is pending. A prompt that names one produces that
+    client forever, produces nothing once it is done, and cannot be pointed
+    at the client the owner actually wants — which is exactly what
+    `dma-synthesis-shore-united` did before it was deleted: its hard rules
+    read "this Routine produces shore-united-bank-n-a and nothing else".
+
+    The live prompts choose dynamically (`run_gate.py pick`,
+    `list_pending_runs`, a Drive scan) and must keep doing so. Placeholders
+    like `--client <display_id>` are the correct shape and do not match.
+    """
+    offenders = []
+    for section, prompt in live_prompts().items():
+        for slug in sorted(set(CLIENT_SLUG.findall(prompt))):
+            offenders.append((section, slug))
+    assert not offenders, (
+        "a LIVE routine prompt names a client. A Routine fires on a "
+        "schedule and must be told which client to work on — by the owner, "
+        "or by a gate that reads what is pending — never by its own text:\n  "
+        + "\n  ".join(f"{s}: {slug}" for s, slug in offenders))
+
+
+def test_no_live_prompt_pins_a_run_id():
+    """The same defect in the exemplar's clothing. Comparing against a gold
+    standard is right; naming the gold standard's RUN is not — that run is
+    superseded the next time its client is produced, and the comparison then
+    runs against something nobody serves. `fixtures/gold_manifest.json` is
+    the indirection that keeps the exemplar current."""
+    offenders = []
+    for section, prompt in live_prompts().items():
+        for rid in sorted(set(RUN_UUID.findall(prompt))):
+            offenders.append((section, rid))
+    assert not offenders, (
+        "a LIVE routine prompt pins a run id. Point at the manifest "
+        "(fixtures/gold_manifest.json), which names the current exemplar, "
+        "rather than at a run that will be superseded:\n  "
+        + "\n  ".join(f"{s}: {r}" for s, r in offenders))
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
