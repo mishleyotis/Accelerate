@@ -475,20 +475,40 @@ if __name__ == "__main__":
 # The branch a routine checks out is not a detail of its prompt. It decides
 # which code the firing IS.
 
-DEFAULT_BRANCH = "main"
+def default_branch() -> str:
+    """The default branch, READ rather than asserted.
+
+    This constant said "main" for about an hour on 2026-08-30 because I
+    assumed it. `git remote show origin` reports HEAD as
+    claude/dma-insights-onboarding-0ryrd0; main is a side branch. A hardcoded
+    name in a test does not detect that — it ENFORCES the mistake, and it
+    enforced it across five live routine prompts.
+
+    So the name lives in exactly one place, bootstrap_session.sh's BRANCH
+    default, which is what actually checks the repository out. This reads it
+    from there. Changing the default branch is then one edit, and every
+    prompt is checked against it rather than against somebody's memory.
+    """
+    sh = (ROOT / "plugins/dma-insights/scripts/bootstrap_session.sh").read_text(
+        encoding="utf-8")
+    m = re.search(r'^BRANCH="\$\{DMA_REPO_BRANCH:-([^}"]+)\}"', sh, re.M)
+    assert m, ("bootstrap_session.sh no longer declares a BRANCH default, so "
+               "there is no single source for the default branch name")
+    return m.group(1)
 
 
 def test_no_live_prompt_checks_out_a_branch_other_than_the_default():
+    want = default_branch()
     bad = {}
     for name, body in live_prompts().items():
         for ref in re.findall(r"origin/([A-Za-z0-9._/-]+)", body):
-            if ref != DEFAULT_BRANCH:
+            if ref != want:
                 bad.setdefault(name, set()).add(ref)
         for ref in re.findall(r"--branch\s+([A-Za-z0-9._/-]+)", body):
-            if ref != DEFAULT_BRANCH:
+            if ref != want:
                 bad.setdefault(name, set()).add(ref)
     assert not bad, (
         f"live routine prompt(s) check out a branch that is not "
-        f"{DEFAULT_BRANCH!r}: { {k: sorted(v) for k, v in bad.items()} }. A "
+        f"{want!r} (bootstrap_session.sh's BRANCH default): { {k: sorted(v) for k, v in bad.items()} }. A "
         f"branch that is not the default stops moving the moment its work "
         f"merges, and the firing runs older code every day without failing")

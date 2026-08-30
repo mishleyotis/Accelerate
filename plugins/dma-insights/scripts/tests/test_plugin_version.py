@@ -469,7 +469,7 @@ def test_session_start_is_read_from_the_process_not_guessed(monkeypatch):
 def _prov(tmp_path, **fields):
     rec = {"bootstrap_ran_at": "2026-08-24T09:11:02Z",
            "repo_dir": "/home/user/Accelerate",
-           "branch": "main",
+           "branch": "claude/dma-insights-onboarding-0ryrd0",
            "checkout_current": True, "checkout_state": "reset",
            "checkout_note": "", "plugin_installed": "0.8.1",
            "plugin_expected": "0.8.1"}
@@ -530,7 +530,7 @@ def test_a_stale_checkout_is_named_as_the_cause(tmp_path):
                               checkout_note="local modifications"))
     assert p["state"] == "stale_checkout"
     assert p["recurs"] is True
-    assert "origin/main" in p["fix"]
+    assert "origin/claude/dma-insights-onboarding-0ryrd0" in p["fix"]
 
 
 def test_a_healthy_record_does_not_claim_recurrence(tmp_path):

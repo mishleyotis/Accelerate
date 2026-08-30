@@ -306,7 +306,7 @@ def installed(state_path: Path | None = None) -> dict:
 #: without anyone going to look it up.
 SETUP_CURL = (
     "curl -sfL https://raw.githubusercontent.com/mishleyotis/Accelerate/"
-    "main/plugins/dma-insights/scripts/"
+    "claude/dma-insights-onboarding-0ryrd0/plugins/dma-insights/scripts/"
     "bootstrap_session.sh | bash")
 
 

@@ -10,7 +10,7 @@
 # ENVIRONMENT SETUP SCRIPT (claude.ai/code -> environment settings), which
 # executes before the session begins. Wire it there as:
 #
-#   curl -sfL https://raw.githubusercontent.com/mishleyotis/Accelerate/main/plugins/dma-insights/scripts/bootstrap_session.sh | bash
+#   curl -sfL https://raw.githubusercontent.com/mishleyotis/Accelerate/claude/dma-insights-onboarding-0ryrd0/plugins/dma-insights/scripts/bootstrap_session.sh | bash
 #
 # and set ONE environment variable in the same settings screen:
 #
@@ -46,11 +46,14 @@ log() { echo "dma-bootstrap: $*"; }
 
 REPO_DIR="${DMA_REPO_DIR:-/home/user/Accelerate}"
 REPO_URL="https://github.com/mishleyotis/Accelerate"
-# Flipped to main 2026-08-30, when PR #16 merged the build onto the
-# default branch. The working branch it used to name is now an ancestor
-# of main and will drift; a routine that keeps checking one out runs
-# older code every day without anything saying so.
-BRANCH="${DMA_REPO_BRANCH:-main}"
+# THE REPOSITORY'S DEFAULT BRANCH, and the single place it is written
+# down. `git remote show origin` reports it as HEAD; main is NOT it.
+# Briefly flipped to main on 2026-08-30 on the mistaken belief that main
+# was the default — it is not, and pointing five live routines at a
+# non-default branch is the same drift that mistake was trying to fix,
+# aimed the other way. scripts/tests/test_routine_prompt_commands.py
+# now READS this line rather than carrying its own copy of the name.
+BRANCH="${DMA_REPO_BRANCH:-claude/dma-insights-onboarding-0ryrd0}"
 MCP_URL="${DMA_MCP_HOST:-https://dmai-mcp-dukrne5v4a-uc.a.run.app}"
 KEY_FILE="${DMA_SA_KEY_FILE:-/root/.dma/sa.json}"
 PROJECT="digital-maturity-assessor"
