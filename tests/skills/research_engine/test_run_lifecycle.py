@@ -25,8 +25,8 @@ sys.path.insert(0, str(ENGINE))
 
 from engine import (assemble, completeness, orient, prelim,  # noqa: E402
                     registry, runstate, watchdog)
-from fixtures import (close_prelim, make_shippable, new_run,  # noqa: E402
-                      small_selection)
+from fixtures import (bank_evidence, close_prelim, good_synthesis,  # noqa: E402
+                      make_shippable, new_run, small_selection, synthesise)
 
 
 # ── 1 · the client folder exists from the first minute ───────────────────
@@ -118,7 +118,28 @@ def test_an_undated_timeline_row_is_refused(tmp_path):
     wb = run.open()
     with pytest.raises(prelim.PrelimRefusal, match="needs a date"):
         prelim.timeline(wb, date="", event="something happened",
-                        signal="LAUNCH", evidence=[])
+                        signal="POSITIVE", kind="CHANNEL", evidence=[])
+
+
+def test_the_timeline_speaks_the_surfaces_own_two_vocabularies(tmp_path):
+    """C1 asks two questions — the event's DIRECTION and its CLASS — and the
+    tab answered with one column drawn from a nine-token list that mapped to
+    neither. An event whose kind is outside the app's eight renders on a page
+    no filter can reach; measured on a served run, 4 of 11 were."""
+    from engine import contract as C
+    wb = new_run(tmp_path, prelim=False).open()
+    with pytest.raises(prelim.PrelimRefusal, match="near-miss is not a"):
+        prelim.timeline(wb, date="2025-01-01", event="x", signal="POSITIVE",
+                        kind="TECHNOLOGY", evidence=[])
+    with pytest.raises(prelim.PrelimRefusal, match="DIRECTION"):
+        prelim.timeline(wb, date="2025-01-01", event="x", signal="UPWARD",
+                        kind="PLATFORM", evidence=[])
+    # an old-vocabulary caller is BRIDGED, not refused: a run pinned to an
+    # earlier engine wrote those words and its events still have to filter
+    out = prelim.timeline.__doc__
+    assert "bridged" in out.lower()
+    assert C.TIMELINE_KIND_BRIDGE["MERGER"] == "M&A"
+    assert set(C.TIMELINE_SIGNALS) == {"POSITIVE", "NEUTRAL", "NEGATIVE"}
 
 
 # ── 4 · the workbook has content, not just shape ─────────────────────────
@@ -183,7 +204,46 @@ def test_an_out_of_scope_pillar_is_not_an_empty_tab(tmp_path):
     out = completeness.check(new_run(tmp_path).open())
     verdicts = {r["sheet"]: r["verdict"] for r in out["sheets"]}
     assert verdicts["P2_Subcap_Scoring"] == "OUT_OF_SCOPE"
-    assert verdicts["P1_Subcap_Scoring"] == "POPULATED"
+
+
+def test_a_seeded_pillar_sheet_is_not_a_researched_one(tmp_path):
+    """The audit of 2026-08-30 found this verdict true by construction:
+    `create` seeds a row per selected cell with NO_EVIDENCE / NOT_RUN in it,
+    and the gate counted rows — so a pillar read POPULATED before a single
+    search had run, which is the one thing the gate exists to catch."""
+    wb = new_run(tmp_path).open()
+    row = next(r for r in completeness.check(wb)["sheets"]
+               if r["sheet"] == "P1_Subcap_Scoring")
+    assert row["verdict"] == "SHORT", row
+    assert "carry research" in row["detail"] and "seeded" in row["detail"]
+
+    # and it turns over when research actually lands
+    cells = wb.selected_subcaps()
+    for cell in cells:
+        eids = bank_evidence(wb, cell)
+        synthesise(wb, cell, good_synthesis(cell, eids))
+    row = next(r for r in completeness.check(wb)["sheets"]
+               if r["sheet"] == "P1_Subcap_Scoring")
+    assert row["verdict"] == "POPULATED", row
+
+
+def test_a_forged_declaration_is_louder_than_a_missing_one(tmp_path):
+    """`declare` refuses a NEVER_EMPTY sheet; the metadata key it writes can
+    still be set by hand, and the check honoured it — so writing around the
+    refusal declared away the evidence register itself."""
+    import json as _json
+    wb = new_run(tmp_path).open()
+    wb.set_metadata("empty_sheet_reasons", _json.dumps(
+        {"Provenance": "a plausible sentence, written around the refusal, "
+                       "long enough to clear the filler floor"}))
+    # empty the sheet the forged reason names
+    ws = wb._sheet("Provenance")
+    ws.delete_rows(2, ws.max_row)
+    wb.save()
+    row = next(r for r in completeness.check(wb)["sheets"]
+               if r["sheet"] == "Provenance")
+    assert row["verdict"] == "ILLEGAL_DECLARATION", row
+    assert "written around the refusal" in row["detail"]
 
 
 # ── 5 · the watchdog logs new DMAs and revives stopped ones ──────────────

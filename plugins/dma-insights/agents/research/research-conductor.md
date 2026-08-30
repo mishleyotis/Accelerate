@@ -96,7 +96,7 @@ workbook is the substrate: anything not written there did not happen.
    | `leadership` | `engine.prelim narrate --section leadership` | who owns digital, and whether the role exists at all |
    | `timeline` | `engine.prelim timeline` x3+ | dated events, so "modernising since 2022" is a row somebody can check |
    | `peers` | `engine.prelim peers --peer ... --rule ...` | the comparison set, frozen BEFORE any score exists |
-   | `tech_baseline` | `engine.cli techscan record` x1+ | the platforms already visible, so researchers recognise a system instead of re-discovering it |
+   | `tech_baseline` | `engine.cli techscan clay-plan` then `import-explorium` / `record --provider …` x1+ | the platforms already visible, so researchers recognise a system instead of re-discovering it. Explorium and Clay are the contracted sources — `techscan status` names any that never ran |
 
    Every narrative section must CITE registered evidence — an uncited
    paragraph about a named institution is refused, because the research

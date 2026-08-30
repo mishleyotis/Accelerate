@@ -64,15 +64,33 @@ _BANNED_RE = re.compile(
 #: without them, so there is no reason that could excuse a blank.
 NEVER_EMPTY = ("00_README", "DQ_Bank", "Evidence_Detail", "Coverage",
                "Search_Log", "Provenance", "Handoff_Lock", "Run_Metadata",
-               "REF_Method")
+               "REF_Method",
+               # Added 2026-08-30. Gate_Log was declarable while two
+               # assessment-report sections read it as their only input, so
+               # a declared-away Gate_Log took §2 and §8 down with it. A run
+               # that gated nothing records a NOT_RUN gate row with the
+               # reason — `ledger.append_gate` already requires one — which
+               # is the disclosure the SG discipline mandates everywhere
+               # else.
+               "Gate_Log")
 
 #: Sheets filled by a phase, with the command that fills each. A refusal
 #: that names the fix is one an unattended session can act on.
 FILLED_BY = {
-    "Entity_Timeline": "engine.prelim timeline --date … --event … --signal …",
+    "Entity_Timeline": ("engine.prelim timeline --date … --event … "
+                        "--signal POSITIVE|NEUTRAL|NEGATIVE --kind …"),
     "Peer_Benchmarks": "engine.prelim peers --peer … --rule …",
-    "Tech_Register": "engine.cli techscan record …",
-    "Report_Narrative": "engine.prelim narrate --section … --body …",
+    "Tech_Register": ("engine.cli techscan clay-plan, then "
+                      "import-explorium / record --provider …"),
+    "Tech_Peer_Deployments": ("engine.cli techscan peer-record --ts … "
+                              "--peer … --deployed|--not-deployed|--unknown "
+                              "--basis …"),
+    # TWO different things live in this tab and they have different
+    # commands. Naming only the first told an unattended session to write
+    # PRELIM rows when what was missing was a report section.
+    "Report_Narrative": ("engine.prelim narrate --section … --body … "
+                         "(the PRELIM rows); engine.narrative write --report "
+                         "… --section … (the sixteen report sections)"),
     "Gate_Log": "engine.cli gate --category … --require-synthesis",
     "Challenge_Log": "the finding-challenger, via record_challenge",
     "Evidence_Detail": "engine.cli evidence …",
@@ -136,6 +154,47 @@ def declare(wb: RunWorkbook, sheet: str, reason: str) -> dict:
     return {"sheet": sheet, "reason": have[sheet], "declared": len(have)}
 
 
+#: The smallest row count that means the work behind a tab actually
+#: happened. A plain `n > 0` was vacuous for the timeline, whose own PRELIM
+#: section declares a three-event floor that the tab did not inherit.
+CONTENT_FLOORS = {
+    "Entity_Timeline": (
+        3, "PRELIM's own floor for a timeline that says anything"),
+}
+
+
+def _report_sections(wb: RunWorkbook) -> tuple[int, int]:
+    """(written report sections, sections the two specs declare).
+
+    Report_Narrative holds two different things — the six PRELIM rows and
+    the sixteen report sections — and `engine.cli start` writes one of the
+    PRELIM rows unconditionally. So the tab can never be empty, and a bare
+    row count said POPULATED over sixteen unwritten sections. It is not
+    BLOCKED here (that is `narrative.require_ready`, which the renderer
+    calls, and duplicating a gate is how two gates drift apart) — but the
+    verdict says what is actually in the tab, which is the whole job of a
+    completeness report.
+    """
+    from . import report_spec as RS
+    want = {(k, str(sec.id)) for k, spec in RS.SPECS.items()
+            for sec in spec.sections}
+    got = {(_clean(r.get("Report")), _clean(r.get("Section_ID")))
+           for r in wb.rows("Report_Narrative")}
+    return len(want & got), len(want)
+
+
+def _researched(wb: RunWorkbook, sheet: str) -> int:
+    """Rows on a pillar sheet that carry RESEARCH, not just a seed."""
+    n = 0
+    for r in wb.rows(sheet):
+        if not _clean(r.get("SubCap_ID")):
+            continue
+        eids = _clean(r.get("Evidence_IDs"))
+        if _clean(r.get("Dominant_Claim")) or (eids and eids != C.NO_EVIDENCE):
+            n += 1
+    return n
+
+
 def _rowcount(wb: RunWorkbook, sheet: str) -> int:
     return len([r for r in wb.rows(sheet)
                 if any(_clean(v) for v in r.values())])
@@ -159,16 +218,57 @@ def check(wb: RunWorkbook) -> dict:
                                        f"in this run's scope"})
                 continue
             want = len([s for s in selected if s.startswith(pillar)])
-            verdict = "POPULATED" if n >= want else "SHORT"
-            detail = f"{n} of {want} selected subcap row(s)"
+            # SEEDED IS NOT RESEARCHED. `create` writes a row per selected
+            # cell with NO_EVIDENCE / NOT_RUN in it, and a plain row count is
+            # therefore satisfied before a single search has run. Count the
+            # rows that carry research instead.
+            done = _researched(wb, sheet)
+            verdict = "POPULATED" if done >= want else "SHORT"
+            detail = (f"{done} of {want} selected subcap row(s) carry "
+                      f"research ({n} row(s) present, the rest seeded)")
             rows.append({"sheet": sheet, "rows": n, "verdict": verdict,
                          "detail": detail})
             if verdict == "SHORT":
                 blocking.append(f"{sheet}: {detail}")
             continue
+        floor, why = CONTENT_FLOORS.get(sheet, (0, ""))
+        # Only for a tab that has SOME rows. A tab with none falls through
+        # to the declaration path, where an empty timeline is a disclosure
+        # with a ladder; a HALF-filled one cannot be declared away and is
+        # what this floor is for.
+        if n and floor and n < floor:
+            # A row count is not content. `engine.cli start` writes one
+            # Report_Narrative row unconditionally, so that tab could never
+            # be empty and its check could never fire — a POPULATED verdict
+            # on sixteen unwritten sections. These floors are the smallest
+            # count that means the work happened.
+            detail = f"{n} of {floor} row(s) — {why}"
+            rows.append({"sheet": sheet, "rows": n, "verdict": "SHORT",
+                         "detail": detail})
+            blocking.append(f"{sheet}: {detail}")
+            continue
         if n > 0:
+            detail = f"{n} row(s)"
+            if sheet == "Report_Narrative":
+                done, want = _report_sections(wb)
+                detail = (f"{n} row(s) — {done} of {want} report section(s) "
+                          f"written; the PRELIM rows are the rest. "
+                          f"`engine.narrative state` is the blocking gate on "
+                          f"the sections, and the renderer calls it.")
             rows.append({"sheet": sheet, "rows": n, "verdict": "POPULATED",
-                         "detail": f"{n} row(s)"})
+                         "detail": detail})
+            continue
+        if sheet in declared and sheet in NEVER_EMPTY:
+            # `declare` refuses these; the metadata key can still be written
+            # by hand. A forged declaration is worse than a missing one and
+            # must read that way, not quieter.
+            detail = (f"{sheet} is in NEVER_EMPTY and cannot be declared "
+                      f"empty, but empty_sheet_reasons carries a reason for "
+                      f"it: {declared[sheet]!r}. That key was written around "
+                      f"the refusal. " + FILLED_BY.get(sheet, ""))
+            rows.append({"sheet": sheet, "rows": 0,
+                         "verdict": "ILLEGAL_DECLARATION", "detail": detail})
+            blocking.append(f"{sheet}: {detail}")
             continue
         if sheet in declared and not _is_filler(declared[sheet]):
             rows.append({"sheet": sheet, "rows": 0, "verdict": "DECLARED_EMPTY",

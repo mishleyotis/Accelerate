@@ -210,7 +210,9 @@ def main():
           "independently challenged", n_ok == 47, f"{n_ok}/47")
 
     wb.append("Entity_Timeline", {
-        "Event_Date": "2024-06-01", "Event": "Digital programme go-live",
+        "Event_Date": "2024-06-01",
+        "Title": "Digital programme go-live",
+        "Kind": "PLATFORM", "Signal": "POSITIVE",
         "Signal": "EXPANSION", "SubCap_IDs": first, "Evidence_IDs": "E-0001"})
     wb.save()
 

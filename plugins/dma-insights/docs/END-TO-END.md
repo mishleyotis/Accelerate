@@ -280,7 +280,7 @@ python3 -m engine.completeness check --run $RUN
 
 The validator checks SHAPE, and a sheet with correct headers and no rows
 passes it — which is how the Golden 1 workbook validated clean while six of
-its nineteen tabs were empty. This checks content: every tab is populated,
+its tabs were empty. This checks content: every tab is populated,
 or carries a recorded reason in `Run_Metadata.empty_sheet_reasons`
 (`engine.completeness declare --sheet … --reason "…"`). An empty tab with a
 reason is a disclosure; an empty tab without one blocks the handoff and the

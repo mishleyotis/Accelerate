@@ -294,7 +294,9 @@ def test_a_good_run_reaches_a_passing_gate(tmp_path):
                         tool="web_search", hits=0, kept=0, outcome="no hits")
         synthesise(wb, cell, good_synthesis(cell, eids))
     wb.append("Entity_Timeline", {
-        "Event_Date": "2024-09-01", "Event": "Alkami digital banking go-live",
+        "Event_Date": "2024-09-01",
+        "Title": "Alkami digital banking go-live",
+        "Kind": "PLATFORM", "Signal": "POSITIVE",
         "Signal": "EXPANSION", "SubCap_IDs": ", ".join(wb.selected_subcaps()),
         "Evidence_IDs": "E-001"})
     v = floors_gate.run(wb, CAT, require_synthesis=True, qa_dir=run.qa_dir)

@@ -834,7 +834,12 @@ function adaptTechStack(techstack) {
     layer: t.layer,
     status: t.status,
     evidence_level: t.evidence_level,
-    since: null,
+    // `as_of` is the date the ROW is about — when the product was
+    // established in the estate. It has been promoted, stored (a DATE column
+    // since migration 0027) and served for some time; this adapter dropped
+    // it, so the detail header showed the date the CITATION was written
+    // instead, and the two are different facts.
+    since: t.as_of || null,
     // `source` is the row's right rail: SHORT source-kind chips ("Press
     // release", "Job posting"), rendered as badges. The whole detection-basis
     // SENTENCE was being put here, so every register row grew a grey badge

@@ -267,15 +267,20 @@ def main(argv=None) -> int:
                         "the current programme, so the institution is not "
                         "standing up digital ownership for the first time."
               ).returncode == 0
-    for d, e_, sig in (("2024-06-06", "Core digital banking platform selected",
-                        "PLATFORM"),
-                       ("2025-03-12", "AI credit decisioning went live",
-                        "LAUNCH"),
-                       ("2025-09-08", "Credit-offer engine centralised",
-                        "INVESTMENT")):
+    # `--signal` is the event's DIRECTION and `--kind` its CLASS: the served
+    # C1 surface clusters on one and filters on the other, and the tab used
+    # to answer both with a single column drawn from a nine-token list that
+    # mapped to neither.
+    for d, e_, sig, kind in (
+            ("2024-06-06", "Core digital banking platform selected",
+             "POSITIVE", "PLATFORM"),
+            ("2025-03-12", "AI credit decisioning went live",
+             "POSITIVE", "DATA"),
+            ("2025-09-08", "Credit-offer engine centralised",
+             "NEUTRAL", "STRATEGY")):
         ok &= run("engine.prelim", "timeline", "--run", run_id, "--root",
                   str(root), "--date", d, "--event", e_, "--signal", sig,
-                  "--evidence", eid2).returncode == 0
+                  "--kind", kind, "--evidence", eid2).returncode == 0
     ok &= run("engine.prelim", "peers", "--run", run_id, "--root", str(root),
               "--peer", "Peer Alpha CU", "--peer", "Peer Beta CU",
               "--rule", "US credit unions in the 5-15bn asset band with a "
@@ -285,6 +290,11 @@ def main(argv=None) -> int:
               str(root), "--product", "Alkami Digital Banking",
               "--vendor", "Alkami", "--layer", "CUST", "--status", "CONFIRMED",
               "--method", "public_document", "--evidence", eid2,
+              # Both contracted providers, and the row is CONFIRMED only
+              # because a non-broker saw it too: a broker-only CONFIRMED is
+              # refused, because two brokers reselling one crawl is one
+              # observation.
+              "--provider", "clay", "--provider", "web",
               "--basis", "named as the digital banking platform in the 2025 "
                          "call report").returncode == 0
     check("every PRELIM section closes through the real commands", ok)
@@ -308,10 +318,20 @@ def main(argv=None) -> int:
             str(root), expect=1)
     check("...and completeness still blocks it, naming every empty tab",
           r.returncode == 1 and "DQ_Bank" in r.stdout, r.stdout[-300:])
+    # Challenge_Log, not Gate_Log: a run that gated nothing records a
+    # NOT_RUN gate row with its reason, so Gate_Log is NEVER_EMPTY and its
+    # refusal is a different one.
     r = run("engine.completeness", "declare", "--run", run_id, "--root",
-            str(root), "--sheet", "Gate_Log", "--reason", "n/a", expect=1)
+            str(root), "--sheet", "Challenge_Log", "--reason", "n/a",
+            expect=1)
     check("a filler reason for an empty tab is refused",
           r.returncode == 1 and "filler" in r.stderr, r.stderr[-200:])
+    r = run("engine.completeness", "declare", "--run", run_id, "--root",
+            str(root), "--sheet", "Gate_Log", "--reason",
+            "this stress walk records no gate at all", expect=1)
+    check("a sheet the run cannot exist without may not be declared away",
+          r.returncode == 1 and "cannot be declared empty" in r.stderr,
+          r.stderr[-200:])
     r = run("engine.completeness", "declare", "--run", run_id, "--root",
             str(root), "--sheet", "Challenge_Log",
             "--reason", "this stress walk stops before any synthesis, so no "

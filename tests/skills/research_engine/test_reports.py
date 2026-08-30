@@ -39,7 +39,8 @@ def _run_with_content(tmp_path, n=8):
     for cell in wb.selected_subcaps():
         synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
     wb.append("Entity_Timeline", {
-        "Event_Date": "2024-09-01", "Event": "Alkami go-live",
+        "Event_Date": "2024-09-01", "Title": "Alkami go-live",
+        "Kind": "PLATFORM", "Signal": "POSITIVE",
         "Signal": "EXPANSION", "SubCap_IDs": wb.selected_subcaps()[0],
         "Evidence_IDs": "E-001"})
     from engine import floors_gate

@@ -20,7 +20,8 @@ verbatim to the module that owns it (its --help lists the subcommands):
     kg …        engine.kg        build / route / show / verify
     fuse …      engine.retrieval fuse / plan   (RRF + BM25 + query variants)
     memory …    engine.memory    note / status / consolidate / backup / cleanup
-    techscan …  engine.techscan  record / render / status
+    techscan …  engine.techscan  record / render / status /
+                                 import-explorium / clay-plan
     assemble …  engine.assemble  open / package / verify / contract
     preflight … engine.preflight init / check / record   (the binding basis)
     prelim …    engine.prelim    state / narrate / timeline / peers /

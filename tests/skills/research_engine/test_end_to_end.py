@@ -91,7 +91,8 @@ def finished_run(tmp_path_factory):
     for cat in CATS:
         wb.append("Entity_Timeline", {
             "Event_Date": "2024-09-01",
-            "Event": "Alkami digital banking go-live",
+            "Title": "Alkami digital banking go-live",
+            "Kind": "PLATFORM", "Signal": "POSITIVE",
             "Signal": "EXPANSION",
             "SubCap_IDs": ", ".join(
                 c for c in wb.selected_subcaps() if c.startswith(cat)),

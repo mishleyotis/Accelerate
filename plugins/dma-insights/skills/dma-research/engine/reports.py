@@ -161,6 +161,40 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section) -> list[dict]:
     return out
 
 
+#: A section's declared block, as `narrative.write` requires it in the body.
+_BLOCK_LINE = re.compile(r"^\s*##\s+(.+?)\s*$")
+
+
+def _emit_body(doc, body: str) -> None:
+    """Write a section body, promoting its `## ` block lines to Heading2.
+
+    The blocks are not decoration. The app parses a report at Heading2
+    grain (`report_parser`) and scopes its vectors from tokens inside those
+    headings (`embed._PILLAR_TOKEN`), so a section rendered as one
+    undivided run of paragraphs arrives as a single row belonging to no
+    pillar — which is what every section did before `Section.blocks`
+    existed. Promoting them here is what makes the declared anatomy real in
+    the artefact rather than only in the workbook.
+    """
+    buf: list[str] = []
+
+    def flush():
+        if buf:
+            doc.add_paragraph("\n".join(buf).strip())
+            buf.clear()
+
+    for line in (body or "").splitlines():
+        m = _BLOCK_LINE.match(line)
+        if m:
+            flush()
+            doc.add_heading(m.group(1), level=2)
+        elif not line.strip():
+            flush()
+        else:
+            buf.append(line)
+    flush()
+
+
 def _table(title, cols, rows) -> dict:
     text = " ".join(str(c) for r in rows for c in r if c is not None)
     return {"title": title, "cols": cols, "rows": rows,
@@ -272,8 +306,7 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
         sec = b["section"]
         doc.add_heading(f"{sec.id}. {sec.heading}", level=1)
         if b["body"]:
-            for para in b["body"].split("\n\n"):
-                doc.add_paragraph(para.strip())
+            _emit_body(doc, b["body"])
         elif force:
             _warn(doc, f"NO SOURCE — §{sec.id} has no narrative in "
                        f"Report_Narrative and its inputs are "

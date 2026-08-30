@@ -37,16 +37,27 @@ something the workbook does not carry, say so in the section's
 
 ## The sections you own
 
-| § | kind | floor | what it must argue |
-|---|---|---|---|
-| 1 | `section` | 350w | Executive summary |
-| 2 | `section` | 250w | Method, scope and limits |
-| 3 | `section` | 700w | Maturity by pillar |
-| 4 | `section` | 300w | Evidence and its limits |
-| 5 | `finding` | 500w | Findings |
-| 6 | `section` | 250w | Peer position |
-| 7 | `recommendation` | 500w | Recommendations |
-| 8 | `section` | 200w | What would change this assessment |
+| § | heading | floor | reads | cites | feeds |
+|---|---|---|---|---|---|
+| 1 | Executive summary | 350w | `Report_Narrative`, `Coverage` | required | `overview.exec_summary` |
+| 2 | Method, scope and limits | 250w | `Run_Metadata`, `Coverage`, `Gate_Log` | not required | `heatmap.safeguard_gates` |
+| 3 | Maturity by pillar | 700w | `P1_Subcap_Scoring`, `P2_Subcap_Scoring`, `P3_Subcap_Scoring`, `P4_Subcap_Scoring` | required | `heatmap.workbook_scores`, `overview.scores` |
+| 4 | Evidence and its limits | 300w | `Evidence_Detail`, `Coverage` | required | `overview.evidence_coverage`, `heatmap.evidence` |
+| 5 | Findings | 500w · 1+ × 60w | `Report_Narrative` | required | `overview.findings`, `insights.insights` |
+| 6 | Peer position | 250w | `Report_Narrative`, `Peer_Benchmarks` | required | `overview.scores`, `heatmap.workbook_scores` |
+| 7 | Recommendations | 500w · 1+ × 60w | `Report_Narrative` | required | `platform.recommendations`, `platform.roadmap`, `overview.opportunity` |
+| 8 | What would change this assessment | 200w | `Gate_Log`, `Coverage` | not required | `heatmap.evidence_age`, `overview.ceilings` |
+
+**The blocks each section is written in**, in order. A body missing one, or carrying them out of order, is refused: they become real Heading2s in the .docx, which is the grain the app parses and scopes its vectors at.
+
+- **§1** — `## Situation`  ·  `## Complication`  ·  `## Question`  ·  `## Answer`
+- **§2** — `## How this was assessed`  ·  `## What was in scope`  ·  `## What the method cannot see`
+- **§3** — `## Strategy and governance (P1)`  ·  `## Customer experience (P2)`  ·  `## Operations (P3)`  ·  `## Data and technology (P4)`
+- **§4** — `## What the assessment rests on`  ·  `## Tier and recency profile`  ·  `## What the evidence cannot settle`
+- **§5** — `## Finding`  ·  `## Consequence`  ·  `## What would change this`
+- **§6** — `## The peer set, and how it was chosen`  ·  `## Where the client leads`  ·  `## Where the client trails`
+- **§7** — `## Recommendation`  ·  `## Root cause`  ·  `## Prerequisites`  ·  `## How we would know it worked`
+- **§8** — `## What would move a score`  ·  `## What could not be verified`  ·  `## How to refresh this`
 
 ## Writing one
 
@@ -55,15 +66,31 @@ engine.cli narrative write --run <R> --root <ROOT> \
     --report assessment --section <N> --json section.json --actor report-assessment-producer
 ```
 
+A section whose kind is `insight_card`, `finding` or `recommendation` is a
+**list**, not a passage: each item is its own row and needs its own
+`--card <id>`. Without one the write is refused — and before that refusal
+existed, every write to such a section overwrote the last, so §5 held one
+row against a blocking minimum of eight and the floor was arithmetically
+unreachable through the only sanctioned writer.
+
+`engine.cli narrative contract --report assessment` prints each section's blocks,
+inputs, citation rule and the surfaces it feeds. Read it before you write.
+
 `section.json` carries `Body` plus the argument apparatus. Every field below
 is REFUSED when it is missing or hollow, and the refusal names what is
 wrong — an unattended session can act on it:
 
-- **`Body`** — the prose, at the section's word floor. Mark every claim the
-  evidence does not carry on its own with `[INF]`, in place.
+- **`Body`** — the prose, at the section's word floor, **written in that
+  section's declared blocks**: a line `## <block>` for each, in the order the
+  table above gives them. They are not decoration. The app parses a report at
+  Heading2 grain and scopes its vectors from tokens inside those headings, so
+  a section written as one undivided passage arrives as a single row
+  belonging to no pillar. Mark every claim the evidence does not carry on its
+  own with `[INF]`, in place.
 - **`Evidence_IDs`** — ids from THIS run's register. Fail-closed: an id that
   does not resolve refuses the write, because this is the artefact a client
-  reads.
+  reads. The five sections marked *not required* above describe the RUN
+  rather than the client and may ship uncited; every other one may not.
 - **`Weighing`** — what was weighed AGAINST the conclusion and why the
   balance fell where it did. A weighing with one side is a summary and is
   refused as one. Name the reading you rejected.

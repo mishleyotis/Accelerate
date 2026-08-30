@@ -33,18 +33,26 @@ from fixtures import bank_evidence, new_run        # noqa: E402
 def _section(**over) -> dict:
     """A section that passes every check, so each test can break exactly one."""
     rec = {
+        # The blocks are §1's declared anatomy, and the writer refuses a body
+        # without them: they become real Heading2s in the .docx, which is the
+        # grain the app parses and scopes its vectors at.
         "Body": (
+            "## Who this is\n"
             "Acme Credit Union is a state-chartered, federally insured credit "
             "union assessed under the CU sub-vertical in PUBLIC evidence "
             "mode. Its digital banking platform went live in the third "
             "quarter of 2024 and member adoption is reported at 47 percent "
-            "within ninety days of launch. The scope of this profile is the "
+            "within ninety days of launch.\n\n"
+            "## What was in scope\n"
+            "The scope of this profile is the "
             "retail estate the call report describes. No public evidence "
             "names a documented cadence for reviewing the digital strategy "
             "itself. [INF] That silence more likely reflects the disclosure "
             "habits of a member-owned institution than an absence of "
             "internal practice, and it is carried forward as an open "
-            "question rather than as a finding. Every claim here rests on a "
+            "question rather than as a finding.\n\n"
+            "## What was out of scope, and what that bounds\n"
+            "Every claim here rests on a "
             "source a reader can reopen, and the ceiling on each is set by "
             "what a public-evidence engagement can reach rather than by what "
             "the institution does internally. The profile is written to be "
@@ -82,6 +90,33 @@ def _section(**over) -> dict:
     rec.update(over)
     return rec
 
+
+def _for_section(rec: dict, report: str, section: str) -> dict:
+    """The same record, wearing another section's declared block anatomy.
+
+    `narrative.write` refuses a body that does not carry its section's
+    blocks in order, so a test that moves to a different section has to
+    move its subheadings too. The prose is deliberately unchanged: these
+    tests are about the refusals, not about the writing.
+    """
+    from engine import report_spec as RS
+    sec = RS.SPECS[report].section(section)
+    rec = dict(rec)
+    prose = [ln for ln in rec["Body"].splitlines()
+             if ln.strip() and not ln.strip().startswith("##")]
+    if not sec.blocks:
+        rec["Body"] = "\n".join(prose)
+        return rec
+    per = max(1, len(prose) // len(sec.blocks))
+    out, i = [], 0
+    for n, block in enumerate(sec.blocks):
+        out.append(f"## {block}")
+        chunk = prose[i:i + per] if n < len(sec.blocks) - 1 else prose[i:]
+        out.extend(chunk or ["Nothing further is recorded for this block."])
+        out.append("")
+        i += per
+    rec["Body"] = "\n".join(out).strip()
+    return rec
 
 def _ready_run(tmp_path):
     run = new_run(tmp_path, n=6)
@@ -155,10 +190,25 @@ def test_unnamed_assumptions_and_bias_are_refused(tmp_path):
 
 
 def test_a_section_that_cites_nothing_is_refused(tmp_path):
+    """§3 'Evidence base' is about the client, and requires_citation is True."""
     _, wb, _ = _ready_run(tmp_path)
     with pytest.raises(N.NarrativeRefusal, match="hallucination"):
-        N.write(wb, "client_research", "1", _section(Evidence_IDs=""),
+        N.write(wb, "client_research", "3",
+                _for_section(_section(Evidence_IDs=""), "client_research", "3"),
                 actor="report-research-producer")
+
+
+def test_a_section_the_spec_exempts_may_ship_uncited(tmp_path):
+    """`requires_citation=False` was honoured by the RENDERER and ignored by
+    the WRITER, which refused an empty Evidence_IDs on all sixteen sections.
+    §1 describes the run, not the client — there is nothing about the client
+    for it to cite, and a spec field only half the pipeline reads is a
+    contradiction rather than a safeguard."""
+    _, wb, _ = _ready_run(tmp_path)
+    assert RS.SPECS["client_research"].section("1").requires_citation is False
+    out = N.write(wb, "client_research", "1", _section(Evidence_IDs=""),
+                  actor="report-research-producer")
+    assert out["section"] == "1"
 
 
 def test_an_unresolvable_citation_is_refused(tmp_path):
@@ -326,6 +376,7 @@ def test_the_scan_json_matches_the_apps_own_parser(tmp_path):
                     layer="CUST", status="CONFIRMED",
                     method="public_document",
                     basis="named live in the 2025 annual report",
+                    providers=["clay", "web"],
                     subcaps=[cell], evidence_ids=eids,
                     source_urls=["https://acme.example/ar25"])
     techscan.render(wb, run.deliverables)

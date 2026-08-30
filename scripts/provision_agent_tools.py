@@ -78,6 +78,24 @@ EXTERNAL = {
                 "mcp__Clay__get-task-context",
                 "mcp__Clay__add-contact-data-points",
                 "mcp__Clay__add-company-data-points"],
+    # Explorium, through the Vibe Prospecting connector. It is authenticated
+    # AT THE SESSION — no key, no Secret Manager — and the plugin's own
+    # auto-approve hook already allowlists exactly these three tool names
+    # (scripts/hooks/autoapprove_connector.py). Measured 2026-08-23 on three
+    # promoted clients it returned 392 / 357 / 147 named technologies, so a
+    # producer recording NOT_RUN for this facet was recording it for a source
+    # it could reach. Grant it; a session that has not attached the connector
+    # finds the tool absent and says NOT_RUN with that reason, which is the
+    # honest failure rather than a silent web fallback.
+    "explorium": ["mcp__Vibe_Prospecting__match-business",
+                  "mcp__Vibe_Prospecting__enrich-business",
+                  "mcp__Vibe_Prospecting__fetch-entities"],
+    # Job postings are the highest-yield public signal for the DATA and
+    # INFRA layers — a stack a client never announces is still named in the
+    # roles it hires for. `get_resume` is deliberately absent: a named
+    # person's resume is not estate evidence and is not ours to read.
+    "indeed":  ["mcp__Indeed__search_jobs", "mcp__Indeed__get_job_details",
+                "mcp__Indeed__get_company_data"],
     "quartr":  ["mcp__Quartr__search", "mcp__Quartr__read_transcript",
                 "mcp__Quartr__list_conferences", "mcp__Quartr__get_conference"],
     "drive":   ["mcp__Google_Drive__search_files",
@@ -116,8 +134,28 @@ ROLES = {
     # confirmed by a person, and an agent that cannot ask cannot start one.
     # Owns the technographic scan as a deliverable rather than as a side
     # effect. Writes only Tech_Register, through the engine CLI.
+    #
+    # It carries EXPLORIUM, CLAY and INDEED, and that is the point rather
+    # than a convenience. The deployed app's techstack facet names its
+    # sources as exactly {explorium, clay} (apps/api computed.py; the mcp
+    # server's `record_enrichment` source vocabulary), so a scan assembled
+    # from whatever a web search happened to surface produces an estate the
+    # app cannot reconcile against its own contract.
+    #
+    # Explorium has THREE doors and only one needs a key. The Vibe
+    # Prospecting MCP connector is authenticated AT THE SESSION and answers —
+    # measured 2026-08-23 at 392 / 357 / 147 named technologies across three
+    # promoted clients — which is why it is granted here. The INGEST scan is
+    # a DIFFERENT path and does need a Secret Manager key it does not have
+    # (apps/worker/dma_worker/enrichment.py); its darkness says nothing about
+    # the connector, and conflating the two cost every run its technographics
+    # once already. Where the connector is not attached, an export the owner
+    # drops in the client folder is the third door and
+    # `engine.techscan import-explorium` parses it. Every row is recorded
+    # with the provider that produced it; none of them can be implied.
     "research/technographic-scanner": dict(
-        writes=(), extra=[], external=["exa", "tavily", "drive"],
+        writes=(), extra=[],
+        external=["explorium", "clay", "indeed", "exa", "tavily", "drive"],
         research=True),
     "research/research-conductor": dict(
         writes=(), extra=["Agent", "AskUserQuestion"], external=["drive"],

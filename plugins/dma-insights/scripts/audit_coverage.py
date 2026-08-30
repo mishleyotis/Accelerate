@@ -48,6 +48,16 @@ def _agent_bodies() -> dict[str, str]:
             for p in sorted(AGENTS.rglob("*.md"))}
 
 
+def _research_tier() -> set[str]:
+    """Every agent UNDER agents/research, by directory rather than by name.
+
+    Keyed on the name prefix `research-`, this missed the one agent whose
+    whole job is calling the enrichment connectors — `technographic-scanner`
+    — so the audit reported Clay and Indeed ABSENT from the research tier on
+    the very day they were granted to it."""
+    return {p.stem for p in (AGENTS / "research").rglob("*.md")}
+
+
 def _engine_sources() -> dict[str, str]:
     return {p.stem: p.read_text(errors="replace")
             for p in sorted((SKILL / "engine").glob("*.py"))}
@@ -189,18 +199,25 @@ def audit_connectors(bodies) -> list[dict]:
     The production tier carries Clay and Quartr; the research tier was
     provisioned separately. A connector named in a protocol the tier cannot
     call is a documented capability nobody has."""
-    want = {"Clay": "mcp__Clay__", "Exa": "mcp__Exa__",
-            "Tavily": "mcp__Tavily__", "Quartr": "mcp__Quartr__",
-            "Indeed": "mcp__Indeed__", "Drive": "mcp__Google_Drive__"}
-    research = {n: b for n, b in bodies.items()
-                if n.startswith("research-")}
+    want = {"Clay": "mcp__Clay__", "Explorium": "mcp__Vibe_Prospecting__",
+            "Exa": "mcp__Exa__", "Tavily": "mcp__Tavily__",
+            "Quartr": "mcp__Quartr__", "Indeed": "mcp__Indeed__",
+            "Drive": "mcp__Google_Drive__"}
+    #: The deployed app declares the techstack facet's sources as exactly
+    #: {explorium, clay} (apps/api/dma_api/computed.py, and the connector's
+    #: `record_enrichment` source vocabulary). A research tier that cannot
+    #: reach them produces an estate the app cannot reconcile against its own
+    #: contract, so these two are REQUIRED and the rest are not.
+    contracted = {"Clay", "Explorium"}
+    tier = _research_tier()
+    research = {n: b for n, b in bodies.items() if n in tier}
     out = []
     for label, prefix in want.items():
         have = sorted(n for n, b in research.items() if prefix in b)
         out.append({"artefact": f"connector:{label} (research tier)",
-                    "required": False,
+                    "required": label in contracted,
                     "filled_by": prefix, "owners": have,
-                    "state": "REACHABLE" if have else "ABSENT"})
+                    "state": "REACHABLE" if have else "HOLE"})
     return out
 
 
