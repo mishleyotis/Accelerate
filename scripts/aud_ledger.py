@@ -31,7 +31,45 @@ DISPOSITIONS = ("FIXED", "DESIGNED_OUT", "MITIGATED", "OPEN")
 
 
 def load() -> dict:
-    return json.loads(LEDGER.read_text())
+    doc = json.loads(LEDGER.read_text())
+    _refuse_unknown_vocabulary(doc)
+    return doc
+
+
+def _refuse_unknown_vocabulary(doc) -> None:
+    """A ledger its own tool cannot read is not a record.
+
+    Fourteen rows were filed `BLOCKING` against a SEV_ORDER that knows only
+    `BLOCKER`, and every one of `--md`, `--verify` and the default summary
+    died on a KeyError naming a dictionary — for weeks, because nothing runs
+    this on a schedule and a traceback in a reporting tool looks like a tool
+    problem rather than a data one. The vocabularies are small and closed;
+    say which row broke them, and say it before doing any work.
+    """
+    bad_sev = sorted({r["sev"] for r in doc["findings"]
+                      if r["sev"] not in SEV_ORDER})
+    bad_disp = sorted({r["disposition"] for r in doc["findings"]
+                       if r["disposition"] not in DISPOSITIONS})
+    named = {r["id"] for r in doc["findings"]
+             if r["sev"] not in SEV_ORDER
+             or r["disposition"] not in DISPOSITIONS}
+    missing = sorted({c for r in doc["findings"] for c in r.get("checks", ())
+                      if c not in doc.get("checks", {})})
+    problems = []
+    if bad_sev:
+        problems.append(f"severity {bad_sev} is not one of "
+                        f"{sorted(SEV_ORDER)}")
+    if bad_disp:
+        problems.append(f"disposition {bad_disp} is not one of "
+                        f"{list(DISPOSITIONS)}")
+    if missing:
+        problems.append(f"check name(s) {missing} have no command in the "
+                        f"ledger's `checks` map, so --verify would silently "
+                        f"prove nothing")
+    if problems:
+        raise SystemExit("the ledger is unreadable by its own tool: "
+                         + "; ".join(problems)
+                         + f" — rows: {sorted(named) or 'see above'}")
 
 
 def summary(doc) -> int:

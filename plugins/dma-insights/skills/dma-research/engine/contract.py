@@ -403,6 +403,44 @@ TECH_PEER_COLUMNS = (
     "TS_ID", "Peer", "Deployed", "Basis", "Source_URL", "As_Of",
 )
 
+#: THE ASSESSMENT STAGE'S THREE, and the column names are the APP's own —
+#: the same technique PEER_BENCHMARK_COLUMNS uses, so a workbook this engine
+#: writes is readable by the parser that already exists. All three are read
+#: today (`parse_grain_summaries`, `parse_recommendations`), both land
+#: server-side, and both already back live gates: the 0.05 grain tolerance
+#: reads the stated grains, and CG-39 reads `recommendations_raw`. None of
+#: them was ever WRITTEN, so every engine package landed with zero
+#: recommendations and both stated grains absent.
+#:
+#: They are ASSESSMENT-stage sheets. Column D is empty at the research stage
+#: by contract rule 4, so a research workbook cannot honestly fill a score
+#: grain — and declaring them required at every stage would give every
+#: research run three tabs it can never fill, which is the same defect
+#: facing the other way.
+#:
+#: `Pillar` is the anchor the parser looks for, and `Score` has NO aliases at
+#: grain level: a grain whose score column is missing is dropped wholesale.
+PILLAR_SUMMARY_COLUMNS = (
+    "Pillar", "Pillar_Name", "Score", "Weight_Pct", "Peer_Median",
+)
+
+#: `Category_ID` is the anchor; `Pillar` lets the parser skip deriving it
+#: from the id prefix. `Priority_Tier` is a string and `Priority_Score` a
+#: number, which is why they are two columns rather than one.
+CATEGORY_DETAIL_COLUMNS = (
+    "Category_ID", "Category_Name", "Pillar", "Score", "Peer_Median",
+    "Priority_Score", "Priority_Tier",
+)
+
+#: The Recommendations tab. Its header row is recognised when at least TWO
+#: of its cells are in the parser's 29-token vocabulary — these are seven of
+#: them — and the FIRST column becomes the rec_id, which is why `Rec_ID`
+#: leads. A row whose first cell is blank is skipped as a spacer.
+RECOMMENDATIONS_COLUMNS = (
+    "Rec_ID", "Title", "Category_ID", "Priority", "Horizon", "Owner",
+    "Rationale",
+)
+
 COVERAGE_COLUMNS = (
     "Category_ID", "Selected", "Researched", "Items", "Floor_Pass",
     "Floor_Pass_Pct", "Synthesised", "Verdict",
@@ -548,6 +586,11 @@ RUN_METADATA_KEYS = (
     "catalogue_version", "catalogue_hash", "taxonomy_pillars",
     "taxonomy_categories", "taxonomy_capabilities", "taxonomy_cells",
     "subcaps_selected", "reference_date", "engine_version", "workbook_contract",
+    # WHICH STAGE this workbook is at — `research` or `assessment`. Recorded
+    # rather than inferred from the emptiness of column D, because a sheet
+    # that is required at one stage and meaningless at the other cannot be
+    # gated against a stage nobody wrote down. See STAGES / SHEET_STAGE.
+    "stage",
     "evidence_mode", "sv_basis", "mode_basis", "lob_census", "kg_checksum",
     "created_at", "last_written_at", "checkpoint",
     # The binding preflight's digest. `sv_basis` and `mode_basis` are
@@ -566,12 +609,58 @@ RUN_METADATA_KEYS = (
     "empty_sheet_reasons",
 )
 
-#: v4 (2026-08-30) is v3 plus the two things the techstack drilldown renders
+# ── THE STAGE, which nothing recorded ────────────────────────────────────
+#
+# Measured 2026-08-30: there was no stage key ANYWHERE. `RUN_METADATA_KEYS`
+# had none, `_write_metadata` wrote none, and the app INFERRED it from the
+# emptiness of column D —
+#
+#     "stage": "research — column D is empty by contract" if not scores
+#              else "assessment"
+#
+# — while the engine side made it a CLI opinion: `validator.validate` takes
+# `expect_scores=False` unless `--expect-scores` is passed, and
+# `assemble.package` calls it with the default, hard-coding research
+# semantics for every package it ever builds.
+#
+# Inference is fine for a reader and useless for a GATE. A sheet that is
+# required at one stage and meaningless at the other cannot be expressed
+# against a stage nobody wrote down, and `REQUIRED_SHEETS = tuple(SHEETS)`
+# made every declared sheet required at every stage. So the stage is a
+# recorded fact now, and the inference stays as the app's fallback for the
+# workbooks written before it.
+STAGES = ("research", "assessment")
+
+#: Sheets that belong to ONE stage. Everything not named here belongs to
+#: both. A sheet out of its stage is NOT_APPLICABLE — neither populated nor
+#: an omission, because there is nothing at this stage that could fill it.
+SHEET_STAGE = {
+    "Pillar_Summary": "assessment",
+    "Category_Detail": "assessment",
+    "Recommendations": "assessment",
+}
+
+
+def stage_of(metadata: dict) -> str:
+    """The workbook's stage: recorded if it says, inferred if it is older.
+
+    The inference is the app's own — scores present means assessment — and
+    it is here so a v4 workbook upgraded in place reads correctly rather
+    than reading as an assessment workbook with three empty tabs.
+    """
+    got = str((metadata or {}).get("stage") or "").strip().lower()
+    return got if got in STAGES else "research"
+
+
+#: v5 (2026-08-30) is v4 plus the assessment stage's three scored tabs
+#: (Pillar_Summary, Category_Detail, Recommendations) and the `stage` key
+#: that says which of them apply. v4 (2026-08-30) is v3 plus the two things
+#: the techstack drilldown renders
 #: from: `Tech_Register.Providers` / `.DMA_Impact` and the
 #: `Tech_Peer_Deployments` sheet. Additive, and `RunWorkbook` upgrades a v3
 #: workbook in place on open rather than refusing it — expand, migrate,
 #: contract, the same discipline the database side uses.
-WORKBOOK_CONTRACT = "v4"
+WORKBOOK_CONTRACT = "v5"
 ENGINE_VERSION = "5.0.0"
 
 SHEETS = {
@@ -585,6 +674,9 @@ SHEETS = {
     "Entity_Timeline": TIMELINE_COLUMNS,
     "Tech_Register": TECH_REGISTER_COLUMNS,
     "Tech_Peer_Deployments": TECH_PEER_COLUMNS,
+    "Pillar_Summary": PILLAR_SUMMARY_COLUMNS,
+    "Category_Detail": CATEGORY_DETAIL_COLUMNS,
+    "Recommendations": RECOMMENDATIONS_COLUMNS,
     "Coverage": COVERAGE_COLUMNS,
     "Search_Log": SEARCH_LOG_COLUMNS,
     "Gate_Log": GATE_LOG_COLUMNS,

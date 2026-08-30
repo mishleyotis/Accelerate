@@ -37,14 +37,20 @@
   "lifecycle": "python3 plugins/dma-insights/scripts/stress_run_lifecycle.py",
   "coverage": "python3 plugins/dma-insights/scripts/audit_coverage.py --strict",
   "report_tier": "python3 -m pytest tests/skills/research_engine/test_report_and_scan_tier.py -q",
-  "routines": "python3 -m pytest plugins/dma-insights/scripts/tests/test_routines_canon.py -q"
+  "routines": "python3 -m pytest plugins/dma-insights/scripts/tests/test_routines_canon.py -q",
+  "readiness": "python3 -m pytest plugins/dma-insights/scripts/tests/test_readiness.py -q",
+  "validator": "python3 -m pytest tests/skills/research_engine/test_validator_and_handoff.py -q",
+  "reports": "python3 -m pytest tests/skills/research_engine/test_report_structure.py tests/skills/research_engine/test_profile_reaches_the_app.py -q",
+  "workbook": "python3 -m pytest tests/skills/research_engine/test_tabs_reach_the_app.py tests/skills/research_engine/test_assessment_grains.py tests/skills/research_engine/test_client_folder_versioning.py -q",
+  "techstack": "python3 -m pytest tests/skills/research_engine/test_techscan_providers.py -q",
+  "ledger": "python3 -m pytest scripts/tests/test_aud_ledger_vocabulary.py -q"
  },
  "findings": [
   {
    "id": "AUD-0001",
    "sev": "BLOCKER",
    "title": "The recording substrate is JSON, not the workbook: zero research steps write a sheet, and the workbook is exported once at the end",
-   "area": "\u00a7\u00a70",
+   "area": "§§0",
    "target": "scripts/engine/* (0 openpyxl imports); scripts/deliver/populate_workbook.py:38,151",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -57,7 +63,7 @@
    "id": "AUD-0002",
    "sev": "BLOCKER",
    "title": "research_handoff.json is the de-facto inter-skill contract, displacing the workbook the owner designates",
-   "area": "\u00a7\u00a70",
+   "area": "§§0",
    "target": "scripts/deliver/build_handoff.py; plugins/dma-insights/skills/dma-assessment/SKILL.md:401",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -70,7 +76,7 @@
    "id": "AUD-0003",
    "sev": "BLOCKER",
    "title": "Of the three canonical output artifacts, one has no producer, one ships in a format the app cannot classify, and only the workbook has both a producer and a reader",
-   "area": "\u00a7\u00a70",
+   "area": "§§0",
    "target": "scripts/deliver/ (no assessment-report renderer); render_client_report.py:167 (.md); apps/worker/job_main.py::_classify_artefact",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -82,8 +88,8 @@
    "id": "AUD-0004",
    "sev": "BLOCKER",
    "title": "In-process subagents receive no SessionStart brief, and the live Routine dispatches every producer that way",
-   "area": "\u00a74.1",
-   "target": "plugins/dma-insights/hooks/hooks.json + plugins/dma-insights/docs/ROUTINES.md \u00a72a STEP 2",
+   "area": "§4.1",
+   "target": "plugins/dma-insights/hooks/hooks.json + plugins/dma-insights/docs/ROUTINES.md §2a STEP 2",
    "disposition": "FIXED",
    "checks": [
     "routing"
@@ -94,7 +100,7 @@
    "id": "AUD-0005",
    "sev": "BLOCKER",
    "title": "The routing chain's second hop is dead: 50 of 55 surface-map.md rows point at a path that does not exist",
-   "area": "\u00a74.1",
+   "area": "§4.1",
    "target": "plugins/dma-insights/skills/dma-surface-production/05-lifecycle/surface-map.md",
    "disposition": "FIXED",
    "checks": [
@@ -107,8 +113,8 @@
    "id": "AUD-0006",
    "sev": "BLOCKER",
    "title": "Resume after a mid-category interrupt skips the interrupted subcap and reports the state clean",
-   "area": "\u00a74.2",
-   "target": "supplied v4.2 archive \u2014 scripts/engine/orient.py, scripts/engine/kg_reader.py",
+   "area": "§4.2",
+   "target": "supplied v4.2 archive — scripts/engine/orient.py, scripts/engine/kg_reader.py",
    "disposition": "DESIGNED_OUT",
    "checks": [
     "engine"
@@ -119,8 +125,8 @@
    "id": "AUD-0007",
    "sev": "BLOCKER",
    "title": "orient.py's entire gate view is permanently blind: floors_gate output has three readers and no writer",
-   "area": "\u00a74.2",
-   "target": "supplied v4.2 archive \u2014 scripts/engine/floors_gate.py vs orient.py:71",
+   "area": "§4.2",
+   "target": "supplied v4.2 archive — scripts/engine/floors_gate.py vs orient.py:71",
    "disposition": "DESIGNED_OUT",
    "checks": [
     "engine"
@@ -131,8 +137,8 @@
    "id": "AUD-0008",
    "sev": "BLOCKER",
    "title": "`ledger.py stats` raises NameError on every invocation, so R27's token-budget checkpoint rule cannot run",
-   "area": "\u00a74.2",
-   "target": "supplied v4.2 archive \u2014 scripts/engine/ledger.py:125",
+   "area": "§4.2",
+   "target": "supplied v4.2 archive — scripts/engine/ledger.py:125",
    "disposition": "DESIGNED_OUT",
    "checks": [
     "engine"
@@ -143,8 +149,8 @@
    "id": "AUD-0009",
    "sev": "BLOCKER",
    "title": "The orient.py --skeleton template passes validation unmodified: form-filling produces a closed subcap",
-   "area": "\u00a74.2",
-   "target": "supplied v4.2 archive \u2014 orient.py --skeleton, ledger.py append, floors_gate.py",
+   "area": "§4.2",
+   "target": "supplied v4.2 archive — orient.py --skeleton, ledger.py append, floors_gate.py",
    "disposition": "DESIGNED_OUT",
    "checks": [
     "engine"
@@ -155,7 +161,7 @@
    "id": "AUD-0010",
    "sev": "BLOCKER",
    "title": "$RUN is container-local with no persistence and no scheduled driver; the documented resume needs a human",
-   "area": "\u00a74.2",
+   "area": "§4.2",
    "target": "supplied v4.2 archive SKILL.md:156-165 + repo ROUTINES.md",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -166,8 +172,8 @@
   {
    "id": "AUD-0011",
    "sev": "BLOCKER",
-   "title": "Both scripts the pinned workbook mandates \u2014 strip_working_area.py and patch_validator.py \u2014 do not exist in any tree",
-   "area": "\u00a74.7",
+   "title": "Both scripts the pinned workbook mandates — strip_working_area.py and patch_validator.py — do not exist in any tree",
+   "area": "§4.7",
    "target": "pinned-template / v4.2-archive",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -179,7 +185,7 @@
    "id": "AUD-0012",
    "sev": "BLOCKER",
    "title": "The pinned workbook v2.0.0 fails required-sheet rule 1 against its own validator",
-   "area": "\u00a74.7",
+   "area": "§4.7",
    "target": "pinned-template",
    "disposition": "MITIGATED",
    "checks": [
@@ -191,7 +197,7 @@
    "id": "AUD-0013",
    "sev": "BLOCKER",
    "title": "No production code path anywhere runs a workbook validator",
-   "area": "\u00a74.7",
+   "area": "§4.7",
    "target": "repo (apps/api, apps/mcp, apps/worker, packages, migrations, scripts, infra)",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -203,8 +209,8 @@
   {
    "id": "AUD-0014",
    "sev": "BLOCKER",
-   "title": "The app cannot distinguish 'not in scope' from 'in scope and unscored' \u2014 44 of 49 in-scope rows are labelled out-of-scope",
-   "area": "\u00a74.7",
+   "title": "The app cannot distinguish 'not in scope' from 'in scope and unscored' — 44 of 49 in-scope rows are labelled out-of-scope",
+   "area": "§4.7",
    "target": "apps/worker/dma_worker/workbook_parser.py",
    "disposition": "FIXED",
    "checks": [
@@ -216,8 +222,8 @@
   {
    "id": "AUD-0015",
    "sev": "BLOCKER",
-   "title": "orient.py \u2014 the mandated session opener \u2014 issues work cards containing 15 literal {entity} placeholders",
-   "area": "\u00a7Stage 5",
+   "title": "orient.py — the mandated session opener — issues work cards containing 15 literal {entity} placeholders",
+   "area": "§Stage 5",
    "target": "scripts/engine/orient.py:89 -> scripts/engine/kg_reader.py:161",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -228,8 +234,8 @@
   {
    "id": "AUD-0016",
    "sev": "BLOCKER",
-   "title": "R32's \"STUB_ values fail the gates\" is false \u2014 an all-STUB synthesis passes floors_gate --require-synthesis",
-   "area": "\u00a7Stage 5",
+   "title": "R32's \"STUB_ values fail the gates\" is false — an all-STUB synthesis passes floors_gate --require-synthesis",
+   "area": "§Stage 5",
    "target": "scripts/engine/floors_gate.py (--require-synthesis) + scripts/engine/orient.py:51-67",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -241,7 +247,7 @@
    "id": "AUD-0017",
    "sev": "BLOCKER",
    "title": "The facet-coverage honesty check is not implemented; its only proxy is disarmed by a waiver the same agent writes",
-   "area": "\u00a7Stage 5",
+   "area": "§Stage 5",
    "target": "references/protocols/challenge_protocol.md:19 (specified) vs scripts/ (unimplemented) + scripts/engine/followup.py:96-99",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -253,7 +259,7 @@
    "id": "AUD-0018",
    "sev": "BLOCKER",
    "title": "The repo solved reviewer independence by construction in one agent and explicitly inverted it in the research challenge",
-   "area": "\u00a7Stage 6",
+   "area": "§Stage 6",
    "target": "plugins/dma-insights/agents/learning/learning-grader.md vs references/cards/subcap_challenge.yaml:6",
    "disposition": "OPEN",
    "checks": [],
@@ -263,7 +269,7 @@
    "id": "AUD-0019",
    "sev": "BLOCKER",
    "title": "The STUB skeleton passes the gate it was built to fail",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "scripts/engine/floors_gate.py + scripts/engine/orient.py",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -275,7 +281,7 @@
    "id": "AUD-0020",
    "sev": "BLOCKER",
    "title": "Aspiration launders staleness: a future-dated 'planned' fact makes 2019 evidence CURRENT",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "scripts/engine/ers_v2.py best_date/recency_from_date + floors_gate.py:118-128",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -287,7 +293,7 @@
    "id": "AUD-0021",
    "sev": "BLOCKER",
    "title": "Proxy-only evidence closes as FACT and publishes as M4 with HIGH confidence",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "scripts/engine/followup.py:57 + floors_gate.py:110 + build_handoff.py",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -299,7 +305,7 @@
    "id": "AUD-0022",
    "sev": "BLOCKER",
    "title": "The >=20-items-per-category floor is computed, reported, and then not used",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "scripts/engine/floors_gate.py:44-46",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -311,7 +317,7 @@
    "id": "AUD-0023",
    "sev": "BLOCKER",
    "title": "Presence != Utilization has no code: five handoff fields are hardcoded empty and schema-blessed",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "scripts/deliver/build_handoff.py:99-107",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -322,8 +328,8 @@
   {
    "id": "AUD-0024",
    "sev": "BLOCKER",
-   "title": "The research challenge has no structural independence \u2014 and the plugin's own claimed exemplar does not either",
-   "area": "\u00a7Stage 6.2 / 6.4",
+   "title": "The research challenge has no structural independence — and the plugin's own claimed exemplar does not either",
+   "area": "§Stage 6.2 / 6.4",
    "target": "references/protocols/challenge_protocol.md + plugins/dma-insights/agents/learning/",
    "disposition": "OPEN",
    "checks": [],
@@ -333,7 +339,7 @@
    "id": "AUD-0025",
    "sev": "BLOCKER",
    "title": "No gate anywhere requires a challenge verdict to exist",
-   "area": "\u00a7Stage 6.2 / 6.4",
+   "area": "§Stage 6.2 / 6.4",
    "target": "scripts/engine/floors_gate.py, followup.py, scripts/deliver/*.py",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -345,7 +351,7 @@
    "id": "AUD-0026",
    "sev": "BLOCKER",
    "title": "Fluent emptiness clears every R32 detector: gate output byte-identical to the golden fixture",
-   "area": "\u00a7Stage 6.2 / 6.4",
+   "area": "§Stage 6.2 / 6.4",
    "target": "scripts/engine/orient.py --skeleton + scripts/engine/floors_gate.py --require-synthesis",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -357,7 +363,7 @@
    "id": "AUD-0027",
    "sev": "BLOCKER",
    "title": "The artefact-retention half of invariant 4 was never built: `import_files.gcs_uri` has zero writers and zero readers",
-   "area": "\u00a7Stages 1-4",
+   "area": "§Stages 1-4",
    "target": "apps/worker + apps/mcp + infra",
    "disposition": "OPEN",
    "checks": [],
@@ -367,7 +373,7 @@
    "id": "AUD-0028",
    "sev": "BLOCKER",
    "title": "`register_evidence` hardcodes origin='producer', so the `internal` evidence origin can never be set",
-   "area": "\u00a7Stages 1-4",
+   "area": "§Stages 1-4",
    "target": "apps/mcp/dma_mcp/register.py",
    "disposition": "FIXED",
    "checks": [
@@ -379,7 +385,7 @@
    "id": "AUD-0029",
    "sev": "BLOCKER",
    "title": "Internal-sourced evidence is silently demoted from FACT to INFERENCE instead of being refused or verified",
-   "area": "\u00a7Stages 1-4",
+   "area": "§Stages 1-4",
    "target": "apps/mcp/dma_mcp/register.py",
    "disposition": "FIXED",
    "checks": [
@@ -391,7 +397,7 @@
    "id": "AUD-0030",
    "sev": "BLOCKER",
    "title": "The intake failure record is written durably and read by nothing: `parser_observations` has no reader and no grant outside the worker",
-   "area": "\u00a7Stages 1-4",
+   "area": "§Stages 1-4",
    "target": "apps/api + apps/mcp",
    "disposition": "FIXED",
    "checks": [
@@ -403,7 +409,7 @@
    "id": "AUD-0031",
    "sev": "BLOCKER",
    "title": "qa_auditor.py cannot tell a good workbook from a garbage one, and it is what writes the governance issue register",
-   "area": "\u00a7Stages 7-9",
+   "area": "§Stages 7-9",
    "target": "plugins/dma-insights/skills/dma-assessment/scripts/qa_auditor.py",
    "disposition": "OPEN",
    "checks": [],
@@ -413,7 +419,7 @@
    "id": "AUD-0032",
    "sev": "BLOCKER",
    "title": "A real production research_handoff.json satisfies 3 of the 12 fields the current research skill's own schema requires, and nothing in dma-assessment reads it",
-   "area": "\u00a7Stages 7-9",
+   "area": "§Stages 7-9",
    "target": "handoff seam (dma-research -> dma-assessment)",
    "disposition": "FIXED",
    "checks": [
@@ -425,7 +431,7 @@
    "id": "AUD-0033",
    "sev": "BLOCKER",
    "title": "Citations in a delivered client report do not resolve, and the check that would catch it is documented but not implemented",
-   "area": "\u00a7Stages 7-9",
+   "area": "§Stages 7-9",
    "target": "report citation validation (dma-assessment + apps/worker/dma_worker/report_parser.py)",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -438,7 +444,7 @@
    "id": "AUD-0034",
    "sev": "BLOCKER",
    "title": "A producer already fabricated an enrichment it never ran, and the defect class has 6 of 6 findings open and 0 closed",
-   "area": "\u00a7\u00a71.2",
+   "area": "§§1.2",
    "target": "skill:dma-surface-production; defect_class PROVENANCE_NAMES_THE_TOOL",
    "disposition": "OPEN",
    "checks": [],
@@ -448,7 +454,7 @@
    "id": "AUD-0035",
    "sev": "BLOCKER",
    "title": "The production Routine is still missing two of three connector families, unchanged since the finding was raised",
-   "area": "\u00a7\u00a71.2",
+   "area": "§§1.2",
    "target": "trigger dma-synthesis-sequence; MEM-0324",
    "disposition": "OPEN",
    "checks": [],
@@ -457,8 +463,8 @@
   {
    "id": "AUD-0036",
    "sev": "BLOCKER",
-   "title": "ledger.py stats \u2014 the only budget-check tool R27 names \u2014 crashes with NameError on every invocation and reports no search count",
-   "area": "\u00a7\u00a74.3",
+   "title": "ledger.py stats — the only budget-check tool R27 names — crashes with NameError on every invocation and reports no search count",
+   "area": "§§4.3",
    "target": "v4.2-archive scripts/engine/ledger.py:125",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -469,8 +475,8 @@
   {
    "id": "AUD-0037",
    "sev": "BLOCKER",
-   "title": "The >=40 search-op wall has zero mechanical enforcement \u2014 orient.py reports 45/40, says \"state clean\", hands over the next card and exits 0",
-   "area": "\u00a7\u00a74.3",
+   "title": "The >=40 search-op wall has zero mechanical enforcement — orient.py reports 45/40, says \"state clean\", hands over the next card and exits 0",
+   "area": "§§4.3",
    "target": "v4.2-archive scripts/engine/orient.py:25,95 and scripts/engine/floors_gate.py:208",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -482,7 +488,7 @@
    "id": "AUD-0038",
    "sev": "BLOCKER",
    "title": "The scope-mode conversation budgets contradict the >=40 search-op cap by 1.5x-3.5x, in the skill's own numbers",
-   "area": "\u00a7\u00a74.3",
+   "area": "§§4.3",
    "target": "v4.2-archive SKILL.md:69-71, references/protocols/deep_search_protocol.md:394, references/protocols/cowork_project_prompt.md:37-38,112",
    "disposition": "OPEN",
    "checks": [],
@@ -491,8 +497,8 @@
   {
    "id": "AUD-0039",
    "sev": "BLOCKER",
-   "title": "report_parser.py is bound to a superseded 12-section report; every v8 section from \u00a73 on is stored under the wrong kind",
-   "area": "\u00a7\u00a74.4",
+   "title": "report_parser.py is bound to a superseded 12-section report; every v8 section from §3 on is stored under the wrong kind",
+   "area": "§§4.4",
    "target": "apps/worker/dma_worker/report_parser.py",
    "disposition": "FIXED",
    "checks": [
@@ -504,7 +510,7 @@
    "id": "AUD-0040",
    "sev": "BLOCKER",
    "title": "Nothing in the repo or the skills resolves to the three pinned templates; the only renderers target two other, mutually incompatible structures",
-   "area": "\u00a7\u00a74.4",
+   "area": "§§4.4",
    "target": "plugins/dma-insights/skills/*, /tmp/dmar/dma-research/scripts/deliver/",
    "disposition": "OPEN",
    "checks": [],
@@ -513,8 +519,8 @@
   {
    "id": "AUD-0041",
    "sev": "BLOCKER",
-   "title": "Offering linkage is asserted, never resolved \u2014 and the referential store that would resolve it exists in the database with zero readers",
-   "area": "\u00a7\u00a74.4",
+   "title": "Offering linkage is asserted, never resolved — and the referential store that would resolve it exists in the database with zero readers",
+   "area": "§§4.4",
    "target": "kg/catalog/offering_map.json, migrations/versions/0004_catalogue_tier.py, migrations/ccg_loader/",
    "disposition": "OPEN",
    "checks": [],
@@ -524,7 +530,7 @@
    "id": "AUD-0042",
    "sev": "BLOCKER",
    "title": "The category-grain peer store has no feeder: the pinned workbook removed Peer_Benchmarks and the missing-tab path records nothing",
-   "area": "\u00a7\u00a74.5",
+   "area": "§§4.5",
    "target": "apps/worker/dma_worker/workbook_parser.py:1723 + pinned DMA Workbook (contract v3)",
    "disposition": "FIXED",
    "checks": [
@@ -536,9 +542,9 @@
   {
    "id": "AUD-0043",
    "sev": "BLOCKER",
-   "title": "Handoff_Lock \u2014 the peer-set immutability mechanism both templates depend on \u2014 exists nowhere in the repo or the workbook",
-   "area": "\u00a7\u00a74.5",
-   "target": "pinned Client Profile v8 \u00a74.1/\u00a75.2/\u00a78.1/\u00a78.2, Assessment Report v8 \u00a76.4",
+   "title": "Handoff_Lock — the peer-set immutability mechanism both templates depend on — exists nowhere in the repo or the workbook",
+   "area": "§§4.5",
+   "target": "pinned Client Profile v8 §4.1/§5.2/§8.1/§8.2, Assessment Report v8 §6.4",
    "disposition": "FIXED",
    "checks": [
     "engine"
@@ -549,7 +555,7 @@
    "id": "AUD-0044",
    "sev": "BLOCKER",
    "title": "The pinned Assessment Report names 17 workbook input sheets and 0 of them exist in the pinned workbook",
-   "area": "\u00a7\u00a74.5",
+   "area": "§§4.5",
    "target": "pinned Assessment Report v8 SECTION CONTROL blocks vs pinned DMA Workbook contract v3",
    "disposition": "MITIGATED",
    "checks": [
@@ -561,7 +567,7 @@
    "id": "AUD-0045",
    "sev": "BLOCKER",
    "title": "AG-01 accepts a self-REJECTED recommendation, so the template's one hard rule is enforced by nothing",
-   "area": "\u00a7\u00a74.6",
+   "area": "§§4.6",
    "target": "apps/mcp/dma_mcp/validation2.py:3438-3445 (AG-01)",
    "disposition": "FIXED",
    "checks": [
@@ -573,7 +579,7 @@
    "id": "AUD-0046",
    "sev": "BLOCKER",
    "title": "'Stale metric in the impact table' is unenforceable: dma_impact[].current is invisible to the CG-07 grain lock",
-   "area": "\u00a7\u00a74.6",
+   "area": "§§4.6",
    "target": "apps/mcp/dma_mcp/validation2.py:3349-3380 (CG-07) vs platform_recommendations.dma_impact",
    "disposition": "FIXED",
    "checks": [
@@ -585,7 +591,7 @@
    "id": "AUD-0047",
    "sev": "BLOCKER",
    "title": "Invariant 1's gate is a literal-import regex; three evasions to a live inference endpoint pass it",
-   "area": "\u00a7\u00a75.2",
+   "area": "§§5.2",
    "target": "scripts/gate_a_no_inference_imports.py:18",
    "disposition": "FIXED",
    "checks": [
@@ -596,8 +602,8 @@
   {
    "id": "AUD-0048",
    "sev": "BLOCKER",
-   "title": "Invariant 7 is violated, and the unsanctioned colour resolver is the one that wins \u2014 50 call sites to 1",
-   "area": "\u00a7\u00a75.2",
+   "title": "Invariant 7 is violated, and the unsanctioned colour resolver is the one that wins — 50 call sites to 1",
+   "area": "§§5.2",
    "target": "apps/web/lib/bands.js vs apps/web/proto/data.js:13-33",
    "disposition": "FIXED",
    "checks": [
@@ -609,7 +615,7 @@
    "id": "AUD-0049",
    "sev": "BLOCKER",
    "title": "The production colour resolver paints a grey swatch for a null score, violating invariants 6 and 9",
-   "area": "\u00a7\u00a75.2",
+   "area": "§§5.2",
    "target": "apps/web/proto/data.js:21 (maturityHex) vs apps/web/lib/bands.js:17",
    "disposition": "FIXED",
    "checks": [
@@ -621,7 +627,7 @@
    "id": "AUD-0050",
    "sev": "BLOCKER",
    "title": "The acceptance ledger claims CI enforces invariant 7; nothing does, and the module it names is not the one that ships",
-   "area": "\u00a7\u00a75.2",
+   "area": "§§5.2",
    "target": "apps/web/tests/acceptance/ACCEPTANCE.md:285; inventory.json:328; gate_e_ratchet.json:170",
    "disposition": "FIXED",
    "checks": [
@@ -633,7 +639,7 @@
    "id": "AUD-0051",
    "sev": "BLOCKER",
    "title": "The 836 subcap count is hardcoded into coverage maths: a complete v7.0 run reports 101.8% coverage and negative gaps",
-   "area": "\u00a7\u00a75.5",
+   "area": "§§5.5",
    "target": "plugins/dma-insights/skills/dma-research/scripts/merge_evidence.py:185; plugins/dma-insights/skills/dma-assessment/scripts/validate_contracts.py:133-141",
    "disposition": "FIXED",
    "checks": [
@@ -644,8 +650,8 @@
   {
    "id": "AUD-0052",
    "sev": "MAJOR",
-   "title": "The reports are rendered from the JSON plane, never curated from the workbook \u2014 which is the mechanism behind the unresolved citations",
-   "area": "\u00a7\u00a70",
+   "title": "The reports are rendered from the JSON plane, never curated from the workbook — which is the mechanism behind the unresolved citations",
+   "area": "§§0",
    "target": "scripts/deliver/render_client_report.py:39-46",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -657,8 +663,8 @@
   {
    "id": "AUD-0053",
    "sev": "MAJOR",
-   "title": "1-gates.md, the designated 'reading a verdict' file, is missing 37 of the connector's 69 gate ids \u2014 including CG-30",
-   "area": "\u00a74.1",
+   "title": "1-gates.md, the designated 'reading a verdict' file, is missing 37 of the connector's 69 gate ids — including CG-30",
+   "area": "§4.1",
    "target": "plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md vs apps/mcp/dma_mcp/gates.py",
    "disposition": "FIXED",
    "checks": [
@@ -671,7 +677,7 @@
    "id": "AUD-0054",
    "sev": "MAJOR",
    "title": "Nothing reprints the brief after compaction, resume or fork, and compaction has no destination file at all",
-   "area": "\u00a74.1",
+   "area": "§4.1",
    "target": "plugins/dma-insights/scripts/hooks/session_brief.py",
    "disposition": "FIXED",
    "checks": [
@@ -683,7 +689,7 @@
    "id": "AUD-0055",
    "sev": "MAJOR",
    "title": "The dispatch preamble re-asserts connectors and output format but never routing",
-   "area": "\u00a74.1",
+   "area": "§4.1",
    "target": "plugins/dma-insights/scripts/agent_run.py PREAMBLE (lines 45-59)",
    "disposition": "FIXED",
    "checks": [
@@ -695,8 +701,8 @@
    "id": "AUD-0056",
    "sev": "MAJOR",
    "title": "The real entry document of an unattended run is a ~40,000-character Routine prompt stored outside the repo, not the 377-byte brief",
-   "area": "\u00a74.1",
-   "target": "plugins/dma-insights/docs/ROUTINES.md \u00a72a (dma-synthesis-sequence-a)",
+   "area": "§4.1",
+   "target": "plugins/dma-insights/docs/ROUTINES.md §2a (dma-synthesis-sequence-a)",
    "disposition": "OPEN",
    "checks": [],
    "note": "not addressed in this pass."
@@ -705,8 +711,8 @@
    "id": "AUD-0057",
    "sev": "MAJOR",
    "title": "Hooks bind once at session start, so a self-provisioning or stale-plugin firing can never have run the brief",
-   "area": "\u00a74.1",
-   "target": "plugins/dma-insights/docs/ROUTINES.md \u00a72a STEP -1 / STEP 0",
+   "area": "§4.1",
+   "target": "plugins/dma-insights/docs/ROUTINES.md §2a STEP -1 / STEP 0",
    "disposition": "FIXED",
    "checks": [
     "routing"
@@ -717,7 +723,7 @@
    "id": "AUD-0058",
    "sev": "MAJOR",
    "title": "Two of five traced tasks are unreachable from the brief: reviewer-rejected card (3+ hops) and resume-after-compaction (no destination)",
-   "area": "\u00a74.1",
+   "area": "§4.1",
    "target": "plugins/dma-insights/skills/dma-surface-production/05-lifecycle/routing.md",
    "disposition": "FIXED",
    "checks": [
@@ -729,7 +735,7 @@
    "id": "AUD-0059",
    "sev": "MAJOR",
    "title": "CHAIN INTEGRITY computes no verdicts, and two of its seven checks read sheets that do not exist",
-   "area": "\u00a74.2",
+   "area": "§4.2",
    "target": "pinned DMA Workbook (Sheet 18IoJD5jn9aIe3E_F2omxqIZrjnHQwfR2pD0-_nUe5zc), Coverage!A23:D31",
    "disposition": "MITIGATED",
    "checks": [
@@ -741,7 +747,7 @@
    "id": "AUD-0060",
    "sev": "MAJOR",
    "title": "The catalogue-hash lock the Client Profile template asserts is built nowhere",
-   "area": "\u00a74.2",
+   "area": "§4.2",
    "target": "pinned Client Profile Research Template v8 + repo",
    "disposition": "MITIGATED",
    "checks": [
@@ -753,7 +759,7 @@
    "id": "AUD-0061",
    "sev": "MAJOR",
    "title": "The v4.2 validator rejects the pinned template workbook, and the migration script the template prescribes does not exist",
-   "area": "\u00a74.2",
+   "area": "§4.2",
    "target": "supplied v4.2 archive scripts/deliver/validate_workbook.py:19 vs pinned DMA Workbook",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -765,8 +771,8 @@
    "id": "AUD-0062",
    "sev": "MAJOR",
    "title": "The counts rule the Client Profile states is enforced by nothing, and the live skills still carry the wrong literals",
-   "area": "\u00a74.2",
-   "target": "repo \u2014 plugins/dma-insights/skills/**",
+   "area": "§4.2",
+   "target": "repo — plugins/dma-insights/skills/**",
    "disposition": "FIXED",
    "checks": [
     "drift",
@@ -778,7 +784,7 @@
    "id": "AUD-0063",
    "sev": "MAJOR",
    "title": "No stuck-state detection exists for a research run; the watchdog that exists watches only synthesis",
-   "area": "\u00a74.2",
+   "area": "§4.2",
    "target": "repo scripts/synthesis_watchdog.py vs supplied v4.2 archive",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -790,7 +796,7 @@
    "id": "AUD-0064",
    "sev": "MAJOR",
    "title": "Validator rule 2 does not catch an added column, and rule 5 is vacuous on a blank Evidence_IDs cell",
-   "area": "\u00a74.7",
+   "area": "§4.7",
    "target": "v4.2-archive/scripts/deliver/validate_workbook.py",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -801,8 +807,8 @@
   {
    "id": "AUD-0065",
    "sev": "MAJOR",
-   "title": "research_handoff.json does not carry triangulation, why_it_matters or dma_impact \u2014 the strip does delete analysis the validator will not notice",
-   "area": "\u00a74.7",
+   "title": "research_handoff.json does not carry triangulation, why_it_matters or dma_impact — the strip does delete analysis the validator will not notice",
+   "area": "§4.7",
    "target": "v4.2-archive/scripts/deliver/build_handoff.py",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -814,7 +820,7 @@
    "id": "AUD-0066",
    "sev": "MAJOR",
    "title": "Two disjoint workbook production paths; nothing generates the pinned template's shape",
-   "area": "\u00a74.7",
+   "area": "§4.7",
    "target": "v4.2-archive vs pinned-template",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -826,7 +832,7 @@
    "id": "AUD-0067",
    "sev": "MAJOR",
    "title": "Chain join 2 is silently broken at the app boundary: SubCap_IDs is never read into evidence rows",
-   "area": "\u00a74.7",
+   "area": "§4.7",
    "target": "apps/worker/dma_worker/workbook_parser.py (parse_research_workbook)",
    "disposition": "FIXED",
    "checks": [
@@ -838,8 +844,8 @@
   {
    "id": "AUD-0068",
    "sev": "MAJOR",
-   "title": "Client Profile \u00a78.1 routes 13 tabs to two workbooks; 13 of 13 are absent from the one workbook that exists",
-   "area": "\u00a74.7",
+   "title": "Client Profile §8.1 routes 13 tabs to two workbooks; 13 of 13 are absent from the one workbook that exists",
+   "area": "§4.7",
    "target": "pinned-template (Client Profile v8 vs DMA Workbook v3)",
    "disposition": "MITIGATED",
    "checks": [
@@ -851,7 +857,7 @@
    "id": "AUD-0069",
    "sev": "MAJOR",
    "title": "None of the three pinned template Drive ids resolves anywhere in the repo or the archive",
-   "area": "\u00a74.7",
+   "area": "§4.7",
    "target": "repo / plugins",
    "disposition": "MITIGATED",
    "checks": [
@@ -863,7 +869,7 @@
    "id": "AUD-0070",
    "sev": "MAJOR",
    "title": "Installed skill drift: diagnostic_questions.md claims ~836 questions and holds 71, on the retired 17-category taxonomy including the killed P1C5",
-   "area": "\u00a74.7",
+   "area": "§4.7",
    "target": "plugins/dma-insights/skills/dma-research (installed v2.3)",
    "disposition": "FIXED",
    "checks": [
@@ -876,7 +882,7 @@
    "id": "AUD-0071",
    "sev": "MAJOR",
    "title": "Installed skill drift: capability_criteria.md holds 85 = 17 x 5 on the retired category count, and its fifth level is M5",
-   "area": "\u00a74.7",
+   "area": "§4.7",
    "target": "plugins/dma-insights/skills/dma-assessment/references/capability_criteria.md",
    "disposition": "FIXED",
    "checks": [
@@ -889,7 +895,7 @@
    "id": "AUD-0072",
    "sev": "MAJOR",
    "title": "Production candidate selection dedupes by entity, contradicting the connector's own tested request-grain rule",
-   "area": "\u00a7Stage 2",
+   "area": "§Stage 2",
    "target": "scripts/synthesis_queue.py:76-77; run_gate.py:372-378",
    "disposition": "FIXED",
    "checks": [
@@ -901,7 +907,7 @@
    "id": "AUD-0073",
    "sev": "MAJOR",
    "title": "The contradicts-probe detector cannot recognise the shipped contradicts query, and nothing tells the agent how to tag it",
-   "area": "\u00a7Stage 5",
+   "area": "§Stage 5",
    "target": "scripts/engine/floors_gate.py (csearch) + scripts/engine/followup.py:60-62",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -913,7 +919,7 @@
    "id": "AUD-0074",
    "sev": "MAJOR",
    "title": "Query fidelity: two of the five MECE facets have no pre-built query at all, and no query can reach the temporal arc the works DQ demands",
-   "area": "\u00a7Stage 5",
+   "area": "§Stage 5",
    "target": "scripts/build/build_kg.py:93-107 (ARCH_QUERY/NEGATIVE_Q) + scripts/build/dq_generator.py:76-137",
    "disposition": "OPEN",
    "checks": [],
@@ -923,7 +929,7 @@
    "id": "AUD-0075",
    "sev": "MAJOR",
    "title": "map-fact cannot distinguish a capability fact from an unrelated sentence, and never abstains",
-   "area": "\u00a7Stage 5",
+   "area": "§Stage 5",
    "target": "scripts/build/semantic_index.py:75-93 (query) via scripts/engine/kg_reader.py map-fact",
    "disposition": "OPEN",
    "checks": [],
@@ -933,7 +939,7 @@
    "id": "AUD-0076",
    "sev": "MAJOR",
    "title": "The R22 anti-clone guard as specified does not exist; the build-time namesake measures queries and cannot block",
-   "area": "\u00a7Stage 5",
+   "area": "§Stage 5",
    "target": "scripts/build/validate_kg.py:39-46,161-164,187 vs references/protocols/safeguard_gates.md:58",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -945,7 +951,7 @@
    "id": "AUD-0077",
    "sev": "MAJOR",
    "title": "A sub-vertical overlay and its base siblings both enter the engagement set; the binder validates neither --sv nor --scope",
-   "area": "\u00a7Stage 5",
+   "area": "§Stage 5",
    "target": "scripts/build/build_kg.py:411-413 + scripts/engine/kg_reader.py:30-63,93",
    "disposition": "FIXED",
    "checks": [
@@ -957,7 +963,7 @@
    "id": "AUD-0078",
    "sev": "MAJOR",
    "title": "Zero-evidence subcaps are handed off as ceiling_band 'M2', and category ceilings become float scores",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "scripts/deliver/build_handoff.py:9-14,100",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -969,7 +975,7 @@
    "id": "AUD-0079",
    "sev": "MAJOR",
    "title": "Absence detection is a 6-alternative regex with 29% recall and a 100% false-positive rate on the probe set",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "scripts/engine/floors_gate.py absence_undeclared",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -981,7 +987,7 @@
    "id": "AUD-0080",
    "sev": "MAJOR",
    "title": "Negative-finding ladders are self-attested; a 2-rung ladder is published as a '4-rung ladder'",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "scripts/engine/floors_gate.py:102-112 + scripts/deliver/render_client_report.py:110",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -993,7 +999,7 @@
    "id": "AUD-0081",
    "sev": "MAJOR",
    "title": "The R28 fishing gate keys on a field the pipeline does not set, and accepts a one-character reason",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "scripts/engine/floors_gate.py:80",
    "disposition": "OPEN",
    "checks": [],
@@ -1003,7 +1009,7 @@
    "id": "AUD-0082",
    "sev": "MAJOR",
    "title": "The challenge layer is never required to exist, and a FAILED provisional challenge still reports HIGH confidence",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "scripts/engine/floors_gate.py (no verdict reader) + build_handoff.py:50-53",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -1014,8 +1020,8 @@
   {
    "id": "AUD-0083",
    "sev": "MAJOR",
-   "title": "Cited evidence ids are never resolved \u2014 the archive's own golden fixture cites a non-existent item",
-   "area": "\u00a7Stage 6.2 / 6.4",
+   "title": "Cited evidence ids are never resolved — the archive's own golden fixture cites a non-existent item",
+   "area": "§Stage 6.2 / 6.4",
    "target": "scripts/engine/floors_gate.py:133-141 (evidence_analysis_missing)",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -1026,8 +1032,8 @@
   {
    "id": "AUD-0084",
    "sev": "MAJOR",
-   "title": "The no-evidence default fabricates M2 \u2014 45 of 49 subcaps in the golden run",
-   "area": "\u00a7Stage 6.2 / 6.4",
+   "title": "The no-evidence default fabricates M2 — 45 of 49 subcaps in the golden run",
+   "area": "§Stage 6.2 / 6.4",
    "target": "scripts/deliver/build_handoff.py:9-15 band_from_hints",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -1038,8 +1044,8 @@
   {
    "id": "AUD-0085",
    "sev": "MAJOR",
-   "title": "orient.py reports 'state clean' over interrupted subcaps \u2014 the re-hydration command's one imperative list is wrong",
-   "area": "\u00a7Stage 6.2 / 6.4",
+   "title": "orient.py reports 'state clean' over interrupted subcaps — the re-hydration command's one imperative list is wrong",
+   "area": "§Stage 6.2 / 6.4",
    "target": "scripts/engine/orient.py:88-96",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -1051,7 +1057,7 @@
    "id": "AUD-0086",
    "sev": "MAJOR",
    "title": "R23's checksum halt is uninvokable as documented, and nothing surfaces a stalled research run",
-   "area": "\u00a7Stage 6.2 / 6.4",
+   "area": "§Stage 6.2 / 6.4",
    "target": "scripts/engine/kg_reader.py guard + SKILL.md:158",
    "disposition": "OPEN",
    "checks": [],
@@ -1061,7 +1067,7 @@
    "id": "AUD-0087",
    "sev": "MAJOR",
    "title": "The research skill's durable record is unreadable by the app it feeds",
-   "area": "\u00a7Stage 6.2 / 6.4",
+   "area": "§Stage 6.2 / 6.4",
    "target": "apps/worker/dma_worker/classification.py ARTEFACT_REGISTRY vs the archive's output taxonomy",
    "disposition": "OPEN",
    "checks": [],
@@ -1071,7 +1077,7 @@
    "id": "AUD-0088",
    "sev": "MAJOR",
    "title": "open_conflict renders under 'HIGH confidence' because the report filter keys on the wrong field",
-   "area": "\u00a7Stage 6.2 / 6.4",
+   "area": "§Stage 6.2 / 6.4",
    "target": "scripts/deliver/render_client_report.py:79-80,158",
    "disposition": "OPEN",
    "checks": [],
@@ -1081,7 +1087,7 @@
    "id": "AUD-0089",
    "sev": "MAJOR",
    "title": "`run_seq` is allocated by an unguarded read-modify-write with no unique constraint",
-   "area": "\u00a7Stages 1-4",
+   "area": "§Stages 1-4",
    "target": "apps/worker/dma_worker/persist.py",
    "disposition": "FIXED",
    "checks": [
@@ -1093,7 +1099,7 @@
    "id": "AUD-0090",
    "sev": "MAJOR",
    "title": "The live overview page renders an evidence-mode badge from a field the API never sends",
-   "area": "\u00a7Stages 1-4",
+   "area": "§Stages 1-4",
    "target": "apps/web",
    "disposition": "OPEN",
    "checks": [],
@@ -1102,8 +1108,8 @@
   {
    "id": "AUD-0091",
    "sev": "MAJOR",
-   "title": "`01_evidence/` \u2014 the richest evidence store in every package \u2014 is classified and then dropped by the ingest",
-   "area": "\u00a7Stages 1-4",
+   "title": "`01_evidence/` — the richest evidence store in every package — is classified and then dropped by the ingest",
+   "area": "§Stages 1-4",
    "target": "apps/worker",
    "disposition": "FIXED",
    "checks": [
@@ -1115,7 +1121,7 @@
    "id": "AUD-0092",
    "sev": "MAJOR",
    "title": "The internal-vs-public contradiction record exists in the corpus and has no destination in the schema",
-   "area": "\u00a7Stages 1-4",
+   "area": "§Stages 1-4",
    "target": "apps/worker + migrations",
    "disposition": "OPEN",
    "checks": [],
@@ -1125,7 +1131,7 @@
    "id": "AUD-0093",
    "sev": "MAJOR",
    "title": "secrets.md understates the one credential a headless firing holds: full `auth/drive` scope, not read-only",
-   "area": "\u00a7Stages 1-4",
+   "area": "§Stages 1-4",
    "target": "plugins/dma-insights",
    "disposition": "FIXED",
    "checks": [
@@ -1137,7 +1143,7 @@
    "id": "AUD-0094",
    "sev": "MAJOR",
    "title": "`PENDING_REVIEW` entities have no resolution path in code",
-   "area": "\u00a7Stages 1-4",
+   "area": "§Stages 1-4",
    "target": "apps/worker + apps/api + apps/mcp",
    "disposition": "OPEN",
    "checks": [],
@@ -1147,7 +1153,7 @@
    "id": "AUD-0095",
    "sev": "MAJOR",
    "title": "Files the routine writes back to Drive carry internal-audience content and are outside every redaction check",
-   "area": "\u00a7Stages 1-4",
+   "area": "§Stages 1-4",
    "target": "plugins/dma-insights/scripts/drive_fetch.py + apps/mcp/dma_mcp/bundle.py",
    "disposition": "OPEN",
    "checks": [],
@@ -1157,7 +1163,7 @@
    "id": "AUD-0096",
    "sev": "MAJOR",
    "title": "Caps and the +/-0.8 uncertainty cap decorate; nothing binds a served number",
-   "area": "\u00a7Stages 7-9",
+   "area": "§Stages 7-9",
    "target": "apps/mcp/dma_mcp (gates.py, validation2.py) + packages/shared/contracts_data.json",
    "disposition": "OPEN",
    "checks": [],
@@ -1167,7 +1173,7 @@
    "id": "AUD-0097",
    "sev": "MAJOR",
    "title": "Peer medians are stored producer assertions on the serving tier, never reconciled with peer_scores; at subcap grain the column has no writer at all",
-   "area": "\u00a7Stages 7-9",
+   "area": "§Stages 7-9",
    "target": "apps/mcp/dma_mcp/writer_spec.json + apps/worker/dma_worker/persist.py + serving_subcaps",
    "disposition": "OPEN",
    "checks": [],
@@ -1177,7 +1183,7 @@
    "id": "AUD-0098",
    "sev": "MAJOR",
    "title": "The three 'surviving mutants' in staged.py are killed by a test the mutation pair does not run",
-   "area": "\u00a7Stages 7-9",
+   "area": "§Stages 7-9",
    "target": "apps/web/tests/acceptance/mutation_pairs.json + scripts/mutation_check.py",
    "disposition": "OPEN",
    "checks": [],
@@ -1187,7 +1193,7 @@
    "id": "AUD-0099",
    "sev": "MAJOR",
    "title": "verify_deployed.py --quick reports a pass when it could read nothing, and deploy.sh cannot fail on the verdict",
-   "area": "\u00a7Stages 7-9",
+   "area": "§Stages 7-9",
    "target": "scripts/verify_deployed.py + infra/deploy.sh",
    "disposition": "OPEN",
    "checks": [],
@@ -1197,7 +1203,7 @@
    "id": "AUD-0100",
    "sev": "MAJOR",
    "title": "Nothing marks a DMA finished, and no line in the repo notices",
-   "area": "\u00a7Stages 7-9",
+   "area": "§Stages 7-9",
    "target": "run_status_t / apps/mcp/dma_mcp/promote.py / apps/api/dma_api/cadence.py",
    "disposition": "OPEN",
    "checks": [],
@@ -1206,8 +1212,8 @@
   {
    "id": "AUD-0101",
    "sev": "MAJOR",
-   "title": "The never-cat rule is unenforced although the enforcement slot exists and is already used \u2014 one violation costs 116k-592k tokens",
-   "area": "\u00a7\u00a74.3",
+   "title": "The never-cat rule is unenforced although the enforcement slot exists and is already used — one violation costs 116k-592k tokens",
+   "area": "§§4.3",
    "target": "v4.2-archive SKILL.md:56 (R27); live plugins/dma-insights/hooks/hooks.json + scripts/hooks/",
    "disposition": "FIXED",
    "checks": [
@@ -1218,8 +1224,8 @@
   {
    "id": "AUD-0102",
    "sev": "MAJOR",
-   "title": "The batched challenge's ~150-250 tok/subcap budget is reachable only by emitting a verdict that does no work \u2014 and a ZERO-dimension verdict validates",
-   "area": "\u00a7\u00a74.3",
+   "title": "The batched challenge's ~150-250 tok/subcap budget is reachable only by emitting a verdict that does no work — and a ZERO-dimension verdict validates",
+   "area": "§§4.3",
    "target": "v4.2-archive templates/schemas/challenge_verdict.schema.json, references/cards/subcap_challenge.yaml, references/protocols/challenge_protocol.md:6",
    "disposition": "OPEN",
    "checks": [],
@@ -1229,7 +1235,7 @@
    "id": "AUD-0103",
    "sev": "MAJOR",
    "title": "The G9 token gate is a ratchet re-fitted to each build, and the spec documents thresholds 29% below what the code enforces",
-   "area": "\u00a7\u00a74.3",
+   "area": "§§4.3",
    "target": "v4.2-archive scripts/build/validate_kg.py:177-178 vs references/specs/research_brief_spec.md:77 and CHANGELOG.md:162,181,200",
    "disposition": "OPEN",
    "checks": [],
@@ -1239,7 +1245,7 @@
    "id": "AUD-0104",
    "sev": "MAJOR",
    "title": "R25's funnel token math (+25-32% / +11% / +3%) has no code, test or dataset behind it, and the dud-sweep floor case is refuted arithmetically",
-   "area": "\u00a7\u00a74.3",
+   "area": "§§4.3",
    "target": "v4.2-archive SKILL.md:58, CHANGELOG.md:176, scripts/build/validate_kg.py:175-176",
    "disposition": "OPEN",
    "checks": [],
@@ -1249,7 +1255,7 @@
    "id": "AUD-0105",
    "sev": "MAJOR",
    "title": "Nothing connects the research token budget to the reports' blocking word minimums, and no line of code anywhere measures a word count",
-   "area": "\u00a7\u00a74.3",
+   "area": "§§4.3",
    "target": "pinned templates 142FoFcgs2-... (Client Profile v8) and 1FPr7wNuo2-... (Assessment Report v8); live repo and v4.2 archive",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -1260,8 +1266,8 @@
   {
    "id": "AUD-0106",
    "sev": "MAJOR",
-   "title": "None of the \u00a74.3 optimisation apparatus exists in the live system; the installed dma-research is v2.3 with no knowledge graph",
-   "area": "\u00a7\u00a74.3",
+   "title": "None of the §4.3 optimisation apparatus exists in the live system; the installed dma-research is v2.3 with no knowledge graph",
+   "area": "§§4.3",
    "target": "live plugins/dma-insights/skills/dma-research/ vs supplied v4.2 archive",
    "disposition": "FIXED",
    "checks": [
@@ -1272,8 +1278,8 @@
   {
    "id": "AUD-0107",
    "sev": "MAJOR",
-   "title": "Thirteen workbook sheets named as INPUTS by the two templates are absent from the pinned contract-v3 workbook, leaving \u00a73.2 and \u00a73.3 with no source at all",
-   "area": "\u00a7\u00a74.4",
+   "title": "Thirteen workbook sheets named as INPUTS by the two templates are absent from the pinned contract-v3 workbook, leaving §3.2 and §3.3 with no source at all",
+   "area": "§§4.4",
    "target": "pinned DMA Workbook (contract v3) vs both report templates",
    "disposition": "MITIGATED",
    "checks": [
@@ -1285,7 +1291,7 @@
    "id": "AUD-0108",
    "sev": "MAJOR",
    "title": "The Client Profile's three source-of-truth declarations have no code path, and the five gates its H1 contract names do not exist",
-   "area": "\u00a7\u00a74.4",
+   "area": "§§4.4",
    "target": "apps/worker/dma_worker/classification.py, apps/worker/job_main.py, packages/shared/contracts_data.json",
    "disposition": "OPEN",
    "checks": [],
@@ -1295,7 +1301,7 @@
    "id": "AUD-0109",
    "sev": "MAJOR",
    "title": "The template's own 57-of-138 and 53 figures cannot be re-measured against the live corpus, because the live corpus has zero served pages",
-   "area": "\u00a7\u00a74.4",
+   "area": "§§4.4",
    "target": "connector (list_pending_runs / get_client_state) vs apps/dma-insights/startup-data",
    "disposition": "OPEN",
    "checks": [],
@@ -1305,8 +1311,8 @@
    "id": "AUD-0110",
    "sev": "MAJOR",
    "title": "Neither report degrades a peer figure, so app and report can print different medians for the same client with no reconciliation",
-   "area": "\u00a7\u00a74.5",
-   "target": "pinned Assessment Report v8 \u00a7\u00a71.2-1.4, 4.1, 4.2, 5.N, 6.1, 6.2, 7.1 vs packages/shared/contracts_data.json overview.scores",
+   "area": "§§4.5",
+   "target": "pinned Assessment Report v8 §§1.2-1.4, 4.1, 4.2, 5.N, 6.1, 6.2, 7.1 vs packages/shared/contracts_data.json overview.scores",
    "disposition": "OPEN",
    "checks": [],
    "note": "not addressed in this pass."
@@ -1315,7 +1321,7 @@
    "id": "AUD-0111",
    "sev": "MAJOR",
    "title": "AG-04 enforces the named-peer sourcing burden on 1 of 12 contract sections that name a peer",
-   "area": "\u00a7\u00a74.5",
+   "area": "§§4.5",
    "target": "apps/mcp/dma_mcp/validation2.py:296 _check_peer_research",
    "disposition": "OPEN",
    "checks": [],
@@ -1324,8 +1330,8 @@
   {
    "id": "AUD-0112",
    "sev": "MAJOR",
-   "title": "AG-04 does not enforce two of \u00a76.5's four rules: dropped unknowns and the omitted share",
-   "area": "\u00a7\u00a74.5",
+   "title": "AG-04 does not enforce two of §6.5's four rules: dropped unknowns and the omitted share",
+   "area": "§§4.5",
    "target": "apps/mcp/dma_mcp/validation2.py:296 + apps/web/proto/live-adapter.jsx:160",
    "disposition": "OPEN",
    "checks": [],
@@ -1335,7 +1341,7 @@
    "id": "AUD-0113",
    "sev": "MAJOR",
    "title": "source_cell is contractually mandatory for every workbook peer figure and is enforced nowhere",
-   "area": "\u00a7\u00a74.5",
+   "area": "§§4.5",
    "target": "packages/shared/contracts_data.json heatmap.workbook_scores; apps/mcp/dma_mcp/",
    "disposition": "OPEN",
    "checks": [],
@@ -1345,8 +1351,8 @@
    "id": "AUD-0114",
    "sev": "MAJOR",
    "title": "AG-04 does not cover every payload location that names a peer",
-   "area": "\u00a7\u00a74.5",
-   "target": "apps/mcp/dma_mcp \u2014 AG-04; contracts_data.json platform.starters.peer_reference",
+   "area": "§§4.5",
+   "target": "apps/mcp/dma_mcp — AG-04; contracts_data.json platform.starters.peer_reference",
    "disposition": "OPEN",
    "checks": [],
    "note": "not addressed in this pass."
@@ -1355,7 +1361,7 @@
    "id": "AUD-0115",
    "sev": "MAJOR",
    "title": "An unscanned estate is over-recommended by up to 28 fit points, because incumbent_covers has no 'we never looked' state",
-   "area": "\u00a7\u00a74.6",
+   "area": "§§4.6",
    "target": "packages/shared/platform_fit.py:228 (Cell.incumbent_covers) + apps/mcp/dma_mcp/fit.py:293,351-357",
    "disposition": "OPEN",
    "checks": [],
@@ -1365,7 +1371,7 @@
    "id": "AUD-0116",
    "sev": "MAJOR",
    "title": "An omitted readiness reads GREEN, defeating the engine's own stated amber default and the multiplicative safety property",
-   "area": "\u00a7\u00a74.6",
+   "area": "§§4.6",
    "target": "apps/mcp/dma_mcp/fit.py:82-83 and apps/mcp/dma_mcp/validation2.py:1481 vs packages/shared/platform_fit.py:116-119",
    "disposition": "OPEN",
    "checks": [],
@@ -1375,7 +1381,7 @@
    "id": "AUD-0117",
    "sev": "MAJOR",
    "title": "alignment_quote is worth 0.20 of the composite and is documented as 'never gated'",
-   "area": "\u00a7\u00a74.6",
+   "area": "§§4.6",
    "target": "packages/shared/abbreviations.py:93-100 (EXCERPT_FIELDS) + platform_fit.py:246,493",
    "disposition": "OPEN",
    "checks": [],
@@ -1384,9 +1390,9 @@
   {
    "id": "AUD-0118",
    "sev": "MAJOR",
-   "title": "Client Profile \u00a76.4's counter-evidence pass exists in no code, while \u00a76.2 from the same section did land \u2014 so this is an omission, not a boundary",
-   "area": "\u00a7\u00a74.6",
-   "target": "pinned Client Profile Doc \u00a76.4 vs packages/shared/contracts_data.json heatmap.focus_areas",
+   "title": "Client Profile §6.4's counter-evidence pass exists in no code, while §6.2 from the same section did land — so this is an omission, not a boundary",
+   "area": "§§4.6",
+   "target": "pinned Client Profile Doc §6.4 vs packages/shared/contracts_data.json heatmap.focus_areas",
    "disposition": "OPEN",
    "checks": [],
    "note": "not addressed in this pass."
@@ -1394,8 +1400,8 @@
   {
    "id": "AUD-0119",
    "sev": "MAJOR",
-   "title": "KPI baseline and readiness backing cells are contract-required, DB-typed, frontend-rendered \u2014 and validated by nothing",
-   "area": "\u00a7\u00a74.6",
+   "title": "KPI baseline and readiness backing cells are contract-required, DB-typed, frontend-rendered — and validated by nothing",
+   "area": "§§4.6",
    "target": "apps/mcp/dma_mcp/validation*.py vs migrations/versions/0008_serving_tier.py:418-419",
    "disposition": "OPEN",
    "checks": [],
@@ -1405,7 +1411,7 @@
    "id": "AUD-0120",
    "sev": "MAJOR",
    "title": "No alert policy or notification channel exists for a stuck or quarantined ingest",
-   "area": "\u00a7\u00a75.1",
+   "area": "§§5.1",
    "target": "apps/worker/job_main.py:220-223; infra/provision.sh:66",
    "disposition": "OPEN",
    "checks": [],
@@ -1415,7 +1421,7 @@
    "id": "AUD-0121",
    "sev": "MAJOR",
    "title": "The gate registry holds 69, the routing table's own gate reference documents 32 of them",
-   "area": "\u00a7\u00a75.3",
+   "area": "§§5.3",
    "target": "apps/mcp/dma_mcp/gates.py registry; plugins/dma-insights/skills/dma-surface-production/05-lifecycle/1-gates.md",
    "disposition": "FIXED",
    "checks": [
@@ -1428,7 +1434,7 @@
    "id": "AUD-0122",
    "sev": "MAJOR",
    "title": "explain_gate's threshold history is structurally present and empty everywhere measured",
-   "area": "\u00a7\u00a75.3",
+   "area": "§§5.3",
    "target": "apps/mcp/dma_mcp/gates.py:1053-1089",
    "disposition": "OPEN",
    "checks": [],
@@ -1438,8 +1444,8 @@
    "id": "AUD-0123",
    "sev": "MAJOR",
    "title": "Ten production refusals sat unrepaired for four days while the Routine that must read them fired twice",
-   "area": "\u00a7\u00a75.3",
-   "target": "apps/mcp/dma_mcp \u2014 rejection ledger; dma-synthesis-sequence Routine prompt",
+   "area": "§§5.3",
+   "target": "apps/mcp/dma_mcp — rejection ledger; dma-synthesis-sequence Routine prompt",
    "disposition": "OPEN",
    "checks": [],
    "note": "not addressed in this pass."
@@ -1447,8 +1453,8 @@
   {
    "id": "AUD-0124",
    "sev": "MAJOR",
-   "title": "Gate M is the only gate with a test that CI never runs \u2014 and it exists because a client shipped with 85% unURLed evidence",
-   "area": "\u00a7\u00a75.3",
+   "title": "Gate M is the only gate with a test that CI never runs — and it exists because a client shipped with 85% unURLed evidence",
+   "area": "§§5.3",
    "target": "scripts/gate_m_evidence_url_and_span.py; .github/workflows/ci.yml",
    "disposition": "OPEN",
    "checks": [],
@@ -1458,7 +1464,7 @@
    "id": "AUD-0125",
    "sev": "MAJOR",
    "title": "identifiers.find_fabricated() was built to reject client-supplied evidence ids and is called nowhere in production",
-   "area": "\u00a7\u00a75.3",
+   "area": "§§5.3",
    "target": "apps/mcp/dma_mcp/identifiers.py:57",
    "disposition": "FIXED",
    "checks": [
@@ -1470,7 +1476,7 @@
    "id": "AUD-0126",
    "sev": "MAJOR",
    "title": "The suite baseline is off by one and the prompt's single-venv instrument cannot run the suites at all",
-   "area": "\u00a7\u00a75.4",
+   "area": "§§5.4",
    "target": "apps/api (fastapi 0.115.* / starlette<0.47) vs apps/mcp (mcp 2.0.* / starlette 1.6.0)",
    "disposition": "OPEN",
    "checks": [],
@@ -1480,7 +1486,7 @@
    "id": "AUD-0127",
    "sev": "MAJOR",
    "title": "One of the twelve skips is conditioned on the current data shape, hiding an untested behaviour",
-   "area": "\u00a7\u00a75.4",
+   "area": "§§5.4",
    "target": "apps/mcp/tests/test_gap_false_positives.py:89",
    "disposition": "OPEN",
    "checks": [],
@@ -1490,7 +1496,7 @@
    "id": "AUD-0128",
    "sev": "MAJOR",
    "title": "Three mutation survivors in the chunked read-back path are reported as 'ok'",
-   "area": "\u00a7\u00a75.4",
+   "area": "§§5.4",
    "target": "scripts/mutation_check.py; apps/mcp/dma_mcp/staged.py:210,216",
    "disposition": "OPEN",
    "checks": [],
@@ -1500,7 +1506,7 @@
    "id": "AUD-0129",
    "sev": "MAJOR",
    "title": "No gate predicate has a mutation pair, and the readiness-silence path has zero test coverage",
-   "area": "\u00a7\u00a75.4",
+   "area": "§§5.4",
    "target": "apps/web/tests/acceptance/mutation_pairs.json; apps/mcp/dma_mcp/validation2.py:1482",
    "disposition": "OPEN",
    "checks": [],
@@ -1510,7 +1516,7 @@
    "id": "AUD-0130",
    "sev": "MAJOR",
    "title": "Seven of twelve architecture gates run in CI with no test file, so a silently-broken gate reads as a pass",
-   "area": "\u00a7\u00a75.4",
+   "area": "§§5.4",
    "target": "scripts/gate_{a,b,c,d,e,f,k}_*.py; scripts/tests/",
    "disposition": "OPEN",
    "checks": [],
@@ -1520,7 +1526,7 @@
    "id": "AUD-0131",
    "sev": "MAJOR",
    "title": "One generated-artefact freshness check across thirty CI steps",
-   "area": "\u00a7\u00a75.5",
+   "area": "§§5.5",
    "target": ".github/workflows/ci.yml:41",
    "disposition": "FIXED",
    "checks": [
@@ -1532,7 +1538,7 @@
    "id": "AUD-0132",
    "sev": "MINOR",
    "title": "17 of 47 agent manifests hardcode an absolute /home/user/Accelerate path instead of ${CLAUDE_PLUGIN_ROOT}",
-   "area": "\u00a74.1",
+   "area": "§4.1",
    "target": "plugins/dma-insights/agents/** (production/platform/*, enrichment/*, production/overview/*)",
    "disposition": "FIXED",
    "checks": [
@@ -1544,8 +1550,8 @@
    "id": "AUD-0133",
    "sev": "MINOR",
    "title": "fcntl id-minting is per-host, but the real exposure is that $RUN cannot be shared at all",
-   "area": "\u00a74.2",
-   "target": "supplied v4.2 archive \u2014 scripts/engine/ledger.py:32-54",
+   "area": "§4.2",
+   "target": "supplied v4.2 archive — scripts/engine/ledger.py:32-54",
    "disposition": "DESIGNED_OUT",
    "checks": [
     "engine"
@@ -1556,8 +1562,8 @@
    "id": "AUD-0134",
    "sev": "MINOR",
    "title": "The behavioural-drift loop is populated and read, but closes only through a human-merged PR",
-   "area": "\u00a74.2",
-   "target": "repo \u2014 apps/mcp/dma_mcp/memory.py, plugins/dma-insights/skills/dma-rectifier, ROUTINES.md 2b",
+   "area": "§4.2",
+   "target": "repo — apps/mcp/dma_mcp/memory.py, plugins/dma-insights/skills/dma-rectifier, ROUTINES.md 2b",
    "disposition": "OPEN",
    "checks": [],
    "note": "not addressed in this pass."
@@ -1565,8 +1571,8 @@
   {
    "id": "AUD-0135",
    "sev": "MINOR",
-   "title": "DQ_Bank holds eight facets per subcap, not five \u2014 the template's own prose and its chain-integrity check disagree with its data",
-   "area": "\u00a74.7",
+   "title": "DQ_Bank holds eight facets per subcap, not five — the template's own prose and its chain-integrity check disagree with its data",
+   "area": "§4.7",
    "target": "pinned-template",
    "disposition": "MITIGATED",
    "checks": [
@@ -1577,8 +1583,8 @@
   {
    "id": "AUD-0136",
    "sev": "MINOR",
-   "title": "Assessment Report \u00a76.5 names no source at all for its peer deployment rows",
-   "area": "\u00a74.7",
+   "title": "Assessment Report §6.5 names no source at all for its peer deployment rows",
+   "area": "§4.7",
    "target": "pinned-template (Assessment Report v8)",
    "disposition": "MITIGATED",
    "checks": [
@@ -1590,7 +1596,7 @@
    "id": "AUD-0137",
    "sev": "MINOR",
    "title": "G7 tests the first word, not open-endedness, and runs only at build time",
-   "area": "\u00a7Stage 5",
+   "area": "§Stage 5",
    "target": "scripts/build/validate_kg.py:66-83",
    "disposition": "OPEN",
    "checks": [],
@@ -1600,7 +1606,7 @@
    "id": "AUD-0138",
    "sev": "MINOR",
    "title": "build_handoff.py hardcodes safeguard_gates, tech_utilization, critical_unknowns and org_capability_proxies to empty",
-   "area": "\u00a7Stage 5",
+   "area": "§Stage 5",
    "target": "scripts/deliver/build_handoff.py:102-107",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -1612,7 +1618,7 @@
    "id": "AUD-0139",
    "sev": "MINOR",
    "title": "followup.py's counter-evidence branch is dead: the code tests direction=='counter', the schema allows 'challenges'",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "scripts/engine/followup.py:52,59,60,74,79",
    "disposition": "OPEN",
    "checks": [],
@@ -1622,7 +1628,7 @@
    "id": "AUD-0140",
    "sev": "MINOR",
    "title": "`scripts/ingestion_status.py` cannot run without gcloud, and gcloud is absent from every fired routine container",
-   "area": "\u00a7Stages 1-4",
+   "area": "§Stages 1-4",
    "target": "scripts/",
    "disposition": "OPEN",
    "checks": [],
@@ -1632,7 +1638,7 @@
    "id": "AUD-0141",
    "sev": "MINOR",
    "title": "The rejection ledger is wired but has no unattended consumer",
-   "area": "\u00a7Stages 7-9",
+   "area": "§Stages 7-9",
    "target": "apps/mcp/dma_mcp/rejections.py + scripts/",
    "disposition": "OPEN",
    "checks": [],
@@ -1642,7 +1648,7 @@
    "id": "AUD-0142",
    "sev": "MINOR",
    "title": "Grain reconciles payload-against-served at 0.05, but never grain-against-grain",
-   "area": "\u00a7Stages 7-9",
+   "area": "§Stages 7-9",
    "target": "apps/mcp/dma_mcp/validation2.py::_served_figures / CG-07",
    "disposition": "OPEN",
    "checks": [],
@@ -1652,7 +1658,7 @@
    "id": "AUD-0143",
    "sev": "MINOR",
    "title": "The work card exceeds its stated <=~750 tok in 790 of 851 cases under the invocation the protocol prescribes, and nothing gates card size",
-   "area": "\u00a7\u00a74.3",
+   "area": "§§4.3",
    "target": "v4.2-archive scripts/engine/kg_reader.py work_card() / SKILL.md:56 / cowork_project_prompt.md:72",
    "disposition": "FIXED",
    "checks": [
@@ -1664,7 +1670,7 @@
    "id": "AUD-0144",
    "sev": "MINOR",
    "title": "offering_map's maturity_lift uses an M1-M5 scale that the charter forbids, and the same column is defined in the live database",
-   "area": "\u00a7\u00a74.4",
+   "area": "§§4.4",
    "target": "kg/catalog/offering_map.json, migrations/versions/0004_catalogue_tier.py:180",
    "disposition": "FIXED",
    "checks": [
@@ -1676,7 +1682,7 @@
    "id": "AUD-0145",
    "sev": "MINOR",
    "title": "The archive renderer's insight-card floor is 3 where the template's blocking minimum is 8",
-   "area": "\u00a7\u00a74.4",
+   "area": "§§4.4",
    "target": "/tmp/dmar/dma-research/scripts/deliver/render_client_report.py:53",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -1688,7 +1694,7 @@
    "id": "AUD-0146",
    "sev": "MINOR",
    "title": "ET-09's peer allow-list is fed by the same empty table, so legitimate peers who are also corpus clients read as foreign-entity contamination",
-   "area": "\u00a7\u00a74.5",
+   "area": "§§4.5",
    "target": "apps/mcp/dma_mcp/validation2.py:573 _foreign_entity_names",
    "disposition": "OPEN",
    "checks": [],
@@ -1698,7 +1704,7 @@
    "id": "AUD-0147",
    "sev": "MINOR",
    "title": "platform.recommendations' contract never declares r_layer, yet AG-01 blocks on it",
-   "area": "\u00a7\u00a74.6",
+   "area": "§§4.6",
    "target": "packages/shared/contracts_data.json platform.recommendations vs validation2.py:78-84",
    "disposition": "OPEN",
    "checks": [],
@@ -1708,7 +1714,7 @@
    "id": "AUD-0148",
    "sev": "MINOR",
    "title": "The recommendation and roadmap dependency chains are ungated; only the platform chain reaches the sequencer",
-   "area": "\u00a7\u00a74.6",
+   "area": "§§4.6",
    "target": "packages/shared/platform_fit.py:595-630 (_sequence) vs platform_recommendations.dependencies / platform_roadmap.depends_on",
    "disposition": "OPEN",
    "checks": [],
@@ -1718,7 +1724,7 @@
    "id": "AUD-0149",
    "sev": "INFO",
    "title": "No size ceiling exists anywhere, and the only real harness limit is 14 characters away from being hit",
-   "area": "\u00a74.1",
+   "area": "§4.1",
    "target": "plugins/dma-insights/scripts/audit_skills.py + SKILL.md frontmatter",
    "disposition": "OPEN",
    "checks": [],
@@ -1728,7 +1734,7 @@
    "id": "AUD-0150",
    "sev": "INFO",
    "title": "Working tree carries an unrestored mutation from a sibling audit agent",
-   "area": "\u00a7Stage 6.1",
+   "area": "§Stage 6.1",
    "target": "apps/worker/dma_worker/workbook_parser.py",
    "disposition": "OPEN",
    "checks": [],
@@ -1738,7 +1744,7 @@
    "id": "AUD-0151",
    "sev": "INFO",
    "title": "The greenfield and incumbent terms read the STAGING submissions table while claiming to read the promoted register",
-   "area": "\u00a7\u00a74.6",
+   "area": "§§4.6",
    "target": "apps/mcp/dma_mcp/fit.py:189-238 (_register_staged)",
    "disposition": "OPEN",
    "checks": [],
@@ -1787,7 +1793,7 @@
   {
    "id": "REQ-0004",
    "sev": "BLOCKER",
-   "title": "The workbook validates while six of nineteen tabs are empty \u2014 the validator checks shape, and nothing checked content",
+   "title": "The workbook validates while six of nineteen tabs are empty — the validator checks shape, and nothing checked content",
    "area": "lifecycle",
    "target": "engine/validator.py rules 1-2 pass a sheet with correct headers and no rows; REF_Method was a declared sheet with no writer at all",
    "disposition": "DESIGNED_OUT",
@@ -1814,7 +1820,7 @@
    "id": "AUD-0152",
    "sev": "BLOCKER",
    "area": "coverage",
-   "title": "ERS is a contract column with a full calculator and nothing joining them \u2014 empty in every run ever produced",
+   "title": "ERS is a contract column with a full calculator and nothing joining them — empty in every run ever produced",
    "target": "engine/ledger.py:append_evidence took ers as an optional caller argument defaulting to None; no caller passed one; scripts/calculate_ers.py ran over an evidence_index.json projection no stage feeds. Golden 1: 20 rows, 20 empty cells",
    "disposition": "DESIGNED_OUT",
    "checks": [
@@ -1883,11 +1889,11 @@
    "checks": [
     "coverage"
    ],
-   "note": "engine/template.py diffs a local copy against contract.SHEETS \u2014 shape only, since the template's rows are placeholders by design. The CONTRACT is authoritative; the check exists to make divergence visible while somebody can still decide which side is wrong."
+   "note": "engine/template.py diffs a local copy against contract.SHEETS — shape only, since the template's rows are placeholders by design. The CONTRACT is authoritative; the check exists to make divergence visible while somebody can still decide which side is wrong."
   },
   {
    "id": "AUD-0158",
-   "sev": "BLOCKING",
+   "sev": "BLOCKER",
    "area": "techstack",
    "title": "The technographic scan named no provider, so a register built from web hits could not be reconciled against the app's declared sources",
    "target": "apps/api computed.py declares the techstack facet's sources as exactly {explorium, clay}; Tech_Register captured neither, and Detection_Method read `technographic_scan` whether Explorium, Clay or a search produced the row",
@@ -1895,11 +1901,11 @@
    "checks": [
     "coverage"
    ],
-   "note": "contract v4 adds Tech_Register.Providers (required, a list) with TECH_PROVIDERS and TECH_BROKERS. A row whose only providers are brokers may not wear CONFIRMED \u2014 two brokers reselling one crawl is one observation. `techscan status` prints by_provider, broker_share and providers_never_run, which is the owner's requirement as a number rather than an intention."
+   "note": "contract v4 adds Tech_Register.Providers (required, a list) with TECH_PROVIDERS and TECH_BROKERS. A row whose only providers are brokers may not wear CONFIRMED — two brokers reselling one crawl is one observation. `techscan status` prints by_provider, broker_share and providers_never_run, which is the owner's requirement as a number rather than an intention."
   },
   {
    "id": "AUD-0159",
-   "sev": "BLOCKING",
+   "sev": "BLOCKER",
    "area": "techstack",
    "title": "Explorium was unreachable from the research tier and three agent files still taught the retracted 'no live API' story",
    "target": "the scanner's own charter said it did not carry Clay, Explorium or Indeed; the correction of 2026-08-23 was pinned in three files while three more taught the old lesson",
@@ -1911,7 +1917,7 @@
   },
   {
    "id": "AUD-0160",
-   "sev": "BLOCKING",
+   "sev": "BLOCKER",
    "area": "techstack",
    "title": "The T3 drilldown opened onto three empty states: its fields were contract-optional, unenforced, and never captured upstream",
    "target": "the click handler, route, component, adapter and serving path were all wired; dma_impact / peer_coverage / peer_deployments were the hole",
@@ -1919,11 +1925,11 @@
    "checks": [
     "coverage"
    ],
-   "note": "The research run now CAPTURES what the drawer renders: Tech_Register.DMA_Impact at the served contract's own 40-90 word band, a Tech_Peer_Deployments sheet at (TS_ID, Peer) grain, peer_coverage COMPUTED from it, and a second Clay pass over the peers frozen in Peer_Benchmarks. What remains open and is the OWNER'S call: for the customer audience `items[*].dma_impact` is stripped unconditionally by redaction.py's default-deny, so that card is blank by policy however well it is written \u2014 the rule names the submit-time gate that would replace it as the real fix, and building that gate is a decision about a measured leak (sell copy on 51 of 51 rows of one client), not a defect to route around."
+   "note": "The research run now CAPTURES what the drawer renders: Tech_Register.DMA_Impact at the served contract's own 40-90 word band, a Tech_Peer_Deployments sheet at (TS_ID, Peer) grain, peer_coverage COMPUTED from it, and a second Clay pass over the peers frozen in Peer_Benchmarks. What remains open and is the OWNER'S call: for the customer audience `items[*].dma_impact` is stripped unconditionally by redaction.py's default-deny, so that card is blank by policy however well it is written — the rule names the submit-time gate that would replace it as the real fix, and building that gate is a decision about a measured leak (sell copy on 51 of 51 rows of one client), not a defect to route around."
   },
   {
    "id": "AUD-0161",
-   "sev": "BLOCKING",
+   "sev": "BLOCKER",
    "area": "reports",
    "title": "The eight-card floor was unreachable through the only sanctioned writer, and one report's section N overwrote the other's",
    "target": "narrative.write updated rather than appended when a row for the section existed, and keyed the update on Section_ID alone across two specs that both number 1..8",
@@ -1931,7 +1937,7 @@
    "checks": [
     "reports"
    ],
-   "note": "A list section (insight_card, finding, recommendation) now requires --card and appends per card; the update is keyed on the composite (Report, Section_ID, Card_ID) through the new RunWorkbook.update_row_where. `narrative.state` measures a list section across its cards and against its card floor. A test writes all sixteen sections through the real writer and renders both reports \u2014 a path no test had ever exercised."
+   "note": "A list section (insight_card, finding, recommendation) now requires --card and appends per card; the update is keyed on the composite (Report, Section_ID, Card_ID) through the new RunWorkbook.update_row_where. `narrative.state` measures a list section across its cards and against its card floor. A test writes all sixteen sections through the real writer and renders both reports — a path no test had ever exercised."
   },
   {
    "id": "AUD-0162",
@@ -1943,11 +1949,11 @@
    "checks": [
     "reports"
    ],
-   "note": "Section gains `blocks` (the ordered subheadings a body must carry, refused when missing or out of order) and `surfaces` (the payload sections it feeds). reports.render promotes each block to a real Heading2, which is the grain the app parses and embed.py scopes on \u2014 the pillar blocks carry the parenthesised (P1)..(P4) token the regex already looks for. gen_report_agents renders all of it, and --check fails the build on drift."
+   "note": "Section gains `blocks` (the ordered subheadings a body must carry, refused when missing or out of order) and `surfaces` (the payload sections it feeds). reports.render promotes each block to a real Heading2, which is the grain the app parses and embed.py scopes on — the pillar blocks carry the parenthesised (P1)..(P4) token the regex already looks for. gen_report_agents renders all of it, and --check fails the build on drift."
   },
   {
    "id": "AUD-0163",
-   "sev": "BLOCKING",
+   "sev": "BLOCKER",
    "area": "workbook",
    "title": "Peer_Benchmarks was written at peer grain and the app's parser discards every row that is not at category grain",
    "target": "prelim.peers wrote one row per peer with Category_ID blank; workbook_parser keeps only rows whose first column is a category id",
@@ -1959,7 +1965,7 @@
   },
   {
    "id": "AUD-0164",
-   "sev": "BLOCKING",
+   "sev": "BLOCKER",
    "area": "workbook",
    "title": "Two completeness verdicts were true by construction and a forged declaration was quieter than a missing one",
    "target": "`start` writes a Report_Narrative row unconditionally; `create` seeds a pillar row per selected cell with NO_EVIDENCE/NOT_RUN, and the gate counted rows",
@@ -1967,19 +1973,19 @@
    "checks": [
     "workbook"
    ],
-   "note": "A pillar sheet is measured on rows that carry RESEARCH (a dominant claim, or evidence that is not NO_EVIDENCE), so a freshly created run reads SHORT rather than POPULATED. Report_Narrative reports its section coverage instead of a bare row count, and defers the blocking to narrative.require_ready rather than duplicating it. A NEVER_EMPTY sheet named in empty_sheet_reasons is ILLEGAL_DECLARATION and blocks \u2014 writing around a refusal should be louder than tripping it, not quieter. Gate_Log joins NEVER_EMPTY: two assessment sections read it as their only input."
+   "note": "A pillar sheet is measured on rows that carry RESEARCH (a dominant claim, or evidence that is not NO_EVIDENCE), so a freshly created run reads SHORT rather than POPULATED. Report_Narrative reports its section coverage instead of a bare row count, and defers the blocking to narrative.require_ready rather than duplicating it. A NEVER_EMPTY sheet named in empty_sheet_reasons is ILLEGAL_DECLARATION and blocks — writing around a refusal should be louder than tripping it, not quieter. Gate_Log joins NEVER_EMPTY: two assessment sections read it as their only input."
   },
   {
    "id": "AUD-0165",
-   "sev": "BLOCKING",
+   "sev": "BLOCKER",
    "area": "workbook",
    "title": "Entity_Timeline had a writer, a gate and no reader anywhere in the shipped system",
-   "target": "no report section named it, no package extra carried it, the app had zero references to it \u2014 while the C1 surface it was gathered for was produced by re-searching in the synthesis session",
+   "target": "no report section named it, no package extra carried it, the app had zero references to it — while the C1 surface it was gathered for was produced by re-searching in the synthesis session",
    "disposition": "FIXED",
    "checks": [
     "workbook"
    ],
-   "note": "Carried, not dropped: 01_evidence/entity_timeline.json is a machine extra, and the tab now speaks the served surface's TWO vocabularies \u2014 a three-token direction (Signal) and an eight-token class (Kind) \u2014 plus the body, maturity effect and claim label C1 renders. The nine old event classes are BRIDGED rather than refused, because a run pinned to an earlier engine wrote those words and its events still have to filter. A PRELIM declaration now declares the tab it owns with the same ladder, at the stricter of the two floors, and prelim.require_complete \u2014 which described itself as the gate orient calls and was called by nothing \u2014 gates package assembly."
+   "note": "Carried, not dropped: 01_evidence/entity_timeline.json is a machine extra, and the tab now speaks the served surface's TWO vocabularies — a three-token direction (Signal) and an eight-token class (Kind) — plus the body, maturity effect and claim label C1 renders. The nine old event classes are BRIDGED rather than refused, because a run pinned to an earlier engine wrote those words and its events still have to filter. A PRELIM declaration now declares the tab it owns with the same ladder, at the stricter of the two floors, and prelim.require_complete — which described itself as the gate orient calls and was called by nothing — gates package assembly."
   },
   {
    "id": "AUD-0166",
@@ -1987,27 +1993,27 @@
    "area": "workbook",
    "title": "The app reads three tabs the research contract does not define: Recommendations, Pillar_Summary, Category_Detail",
    "target": "apps/worker workbook_parser parse_grain_summaries and the Recommendations reader",
-   "disposition": "NOT_THIS_ENGINE",
+   "disposition": "FIXED",
    "checks": [
     "workbook"
    ],
-   "note": "OPEN, and deliberately not closed here. All three are SCORED artefacts \u2014 the stated pillar and category grains carry cap logic, weighting and analyst override, and column D is empty at the research stage by contract rule 4. Adding them to contract.SHEETS would give every research workbook three tabs it can never honestly fill, which is the same defect facing the other way. They belong to the assessment stage, which this engine does not produce. Raised for the owner rather than resolved silently."
+   "note": "Filed NOT_THIS_ENGINE on 2026-08-30 and OVERRULED by the owner the same day: the three tabs belong to the assessment stage, and the stage is now a recorded fact rather than an inference, so they can be required where they apply and forbidden where they do not. The reasoning that filed it stands and is why the fix took a stage key: adding them to contract.SHEETS unconditionally would have given every research workbook three tabs it is forbidden to fill, which is the same defect facing the other way. AUD-0173 is the fix."
   },
   {
    "id": "AUD-0167",
    "sev": "MAJOR",
    "area": "routines",
    "title": "The live watchdog prompt named a revive path that resolves only under the plugin tree, and no verification scope was running the test that catches it",
-   "target": "docs/ROUTINES.md \u00a72d, the LIVE dma-watchdog prompt (trig_019rSxYzhDBSTdPry5xABpxr); scripts/tests/test_routine_prompt_commands.py",
+   "target": "docs/ROUTINES.md §2d, the LIVE dma-watchdog prompt (trig_019rSxYzhDBSTdPry5xABpxr); scripts/tests/test_routine_prompt_commands.py",
    "disposition": "MITIGATED",
    "checks": [
     "routines"
    ],
-   "note": "Two defects, one fix and one deliberate non-fix. The prompt said --revive dispatches 'through scripts/agent_run.py', which a routine standing at the repo root cannot open; the canon now names the qualified path. It was NOT re-pushed to the live trigger: the sentence is prose, the mechanism does not read it (watchdog._agent_run resolves from the installed plugin's own location), and re-pushing means replacing 14,561 characters on an hourly routine that currently SUCCEEDS with no way to read the stored prompt back and confirm it landed. The divergence is recorded in the canon's own \u00a72d heading so it cannot pass as byte-for-byte agreement. The SECOND defect is why it survived: this test lives in scripts/tests/, which PR #15's verification scope (tests/ + plugins/dma-insights/scripts/tests/) did not include \u2014 it failed identically at the merge base. Verification now runs tests/, plugins/dma-insights/scripts/tests/, scripts/tests/ and the four app suites."
+   "note": "Two defects, one fix and one deliberate non-fix. The prompt said --revive dispatches 'through scripts/agent_run.py', which a routine standing at the repo root cannot open; the canon now names the qualified path. It was NOT re-pushed to the live trigger: the sentence is prose, the mechanism does not read it (watchdog._agent_run resolves from the installed plugin's own location), and re-pushing means replacing 14,561 characters on an hourly routine that currently SUCCEEDS with no way to read the stored prompt back and confirm it landed. The divergence is recorded in the canon's own §2d heading so it cannot pass as byte-for-byte agreement. The SECOND defect is why it survived: this test lives in scripts/tests/, which PR #15's verification scope (tests/ + plugins/dma-insights/scripts/tests/) did not include — it failed identically at the merge base. Verification now runs tests/, plugins/dma-insights/scripts/tests/, scripts/tests/ and the four app suites."
   },
   {
    "id": "AUD-0168",
-   "sev": "BLOCKING",
+   "sev": "BLOCKER",
    "area": "techstack",
    "title": "A register row could promote with no ts_id, render as a live button, and route to a page reporting it does not exist",
    "target": "ET-03 checked the SHAPE of a minted id `if isinstance(v, str)`, so an absent or null one was invisible; the serving column is nullable, promote inserts None, and the web rendered every row as an unconditional button",
@@ -2015,19 +2021,128 @@
    "checks": [
     "techstack"
    ],
-   "note": "Fixed at the SUBMIT gate, not the column. `_check_minted_row_ids` refuses a row of any of the five minted-id lists (ts_id, ic_id, f_id, fa_id, wn_id) that carries no id, and bypasses on a declared empty_state. Putting it on the column instead \u2014 ALTER COLUMN ts_id SET NOT NULL \u2014 would re-arm exactly the trap migration 0050 removed: a section that legitimately promotes empty writes one envelope-only row with every item column NULL, and the insert would abort the whole promote with a driver error naming a column instead of a verdict naming a path. 0050 says it in as many words: 'The gate is the enforcement; the NOT NULL was belt-and-braces that only ever bit the one row the gate does not describe.' The unique index does not help either \u2014 Postgres treats NULLs as distinct without NULLS NOT DISTINCT, so a null row is unroutable, not unwritable. Render side: an unroutable row is now a non-interactive card with a title saying why, because to a reader a click that dead-ends and a drilldown that was never built are the same thing."
+   "note": "Fixed at the SUBMIT gate, not the column. `_check_minted_row_ids` refuses a row of any of the five minted-id lists (ts_id, ic_id, f_id, fa_id, wn_id) that carries no id, and bypasses on a declared empty_state. Putting it on the column instead — ALTER COLUMN ts_id SET NOT NULL — would re-arm exactly the trap migration 0050 removed: a section that legitimately promotes empty writes one envelope-only row with every item column NULL, and the insert would abort the whole promote with a driver error naming a column instead of a verdict naming a path. 0050 says it in as many words: 'The gate is the enforcement; the NOT NULL was belt-and-braces that only ever bit the one row the gate does not describe.' The unique index does not help either — Postgres treats NULLs as distinct without NULLS NOT DISTINCT, so a null row is unroutable, not unwritable. Render side: an unroutable row is now a non-interactive card with a title saying why, because to a reader a click that dead-ends and a drilldown that was never built are the same thing."
   },
   {
    "id": "AUD-0169",
-   "sev": "BLOCKING",
+   "sev": "BLOCKER",
    "area": "reports",
-   "title": "The Client Research Profile is written, validated, rendered \u2014 and structurally uningestable by the app",
+   "title": "The Client Research Profile is written, validated, rendered — and structurally uningestable by the app",
    "target": "apps/worker/job_main.py `_RPT_DECOYS = ('profile', 'template')` returns None for every .docx whose name contains 'profile', and report_spec's own filename is Client_Profile_Research_{entity}_{date}.docx",
-   "disposition": "OPEN",
+   "disposition": "FIXED",
    "checks": [
     "reports"
    ],
-   "note": "RAISED, NOT FIXED \u2014 it is a distinct piece of app-side ingest work and naming it is more useful than a half-done version. All eight sections of one of the two reports reach no table in the app, while page packs name 'Client Profile DOCX' as the source of truth for firmographics, the leadership roster, focus-area verbatim quotes and the financial series \u2014 data the producer then fetches out of Drive by hand because the app holds none of it. The recipe: give the profile its own artefact slot in `_classify_artefact` (matching `client[_ ]profile.*\\.docx$`, as classification.py already does), download it beside the report in job_main, parse it with report_key='client_research', extend _TITLE_KINDS for its six unmapped headings, and namespace the stored kind by report so an assessment `evidence_sources` row and a profile one stay distinguishable in document_sections."
+   "note": "RAISED, NOT FIXED — it is a distinct piece of app-side ingest work and naming it is more useful than a half-done version. All eight sections of one of the two reports reach no table in the app, while page packs name 'Client Profile DOCX' as the source of truth for firmographics, the leadership roster, focus-area verbatim quotes and the financial series — data the producer then fetches out of Drive by hand because the app holds none of it. The recipe: give the profile its own artefact slot in `_classify_artefact` (matching `client[_ ]profile.*\\.docx$`, as classification.py already does), download it beside the report in job_main, parse it with report_key='client_research', extend _TITLE_KINDS for its six unmapped headings, and namespace the stored kind by report so an assessment `evidence_sources` row and a profile one stay distinguishable in document_sections. CLOSED by AUD-0171 on 2026-08-30: the decoy is gone, the profile is classified, downloaded, parsed and namespaced `client_research:`, and test_profile_reaches_the_app.py walks the REAL rendered document from the engine's renderer to the rows the app would store. Left OPEN beside its own fix for half a day, which is the same shape of silence it was filed about."
+  },
+  {
+   "id": "AUD-0170",
+   "sev": "BLOCKER",
+   "area": "workbook",
+   "title": "A second run for the same client silently merged into the first run's folder, locally and on Drive",
+   "target": "assemble.folder_name is a pure function of the entity name and default_folder_root is the shared run root, so two runs resolved to ONE directory",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook"
+   ],
+   "note": "open_folder reported created:false and overwrote run_manifest.json with the second run's identity; package copied the second run's deliverables in beside the first's and overwrote all three fixed-name machine extras; and because deliverable filenames carry the reference date, a second run on a different date left TWO scoring workbooks in one folder — from which the app's scan keeps exactly one artefact per kind, chosen by rank then iteration order. The folder became a mix of two runs with an arbitrary winner. Now the previous package moves whole into `_superseded/<run_id>/` with a SUPERSEDED.json naming what replaced it, the current one stays at the root where every reader looks, and the folder keeps its name because runs.source_folder_id keys on it. This mirrors the versioning the system already does server-side (one active run per entity, predecessor demoted to SUPERSEDED and RETAINED) rather than inventing a second scheme. The archive is excluded from the app's scan by path segment, so retention cannot create the ambiguity it exists to remove."
+  },
+  {
+   "id": "AUD-0171",
+   "sev": "BLOCKER",
+   "area": "reports",
+   "title": "The Client Research Profile is now ingestable: classified, downloaded, parsed, namespaced",
+   "target": "job_main._RPT_DECOYS carried 'profile', so _classify_artefact returned None for the spec's own filename",
+   "disposition": "FIXED",
+   "checks": [
+    "reports"
+   ],
+   "note": "Closes AUD-0169. The profile has its own artefact slot matching the pattern classification.py was ALREADY using for it (client_profile, priority 3) — classified, recorded, then dropped, the AUD-0091 shape. It is downloaded beside the report, parsed, and its section kinds are namespaced `client_research:` because both reports produce evidence_sources and both produce a findings-shaped section. Measured over the real rendered document: 51 rows across 8 sections, six of which resolved to `unmapped:*` until the profile's own six patterns were added LAST in the table, after every assessment-report pattern, so nothing there could move. A ReportSection now names its own artefact_id, because persist_package attributed every section to one report_artefact_id — right while one report was ingested, a provenance hole the moment two were."
+  },
+  {
+   "id": "AUD-0172",
+   "sev": "BLOCKER",
+   "area": "workbook",
+   "title": "There was no stage key anywhere, so a sheet could not be required at one stage and meaningless at the other",
+   "target": "RUN_METADATA_KEYS had none, _write_metadata wrote none; the app inferred the stage from the emptiness of column D and the engine made it a CLI opinion (expect_scores, defaulted False by assemble.package)",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook"
+   ],
+   "note": "Contract v5 records `stage` (research | assessment) and SHEET_STAGE names the sheets that belong to one. An out-of-stage sheet reads OUT_OF_STAGE and does not block; a research workbook carrying assessment rows reads AHEAD_OF_STAGE and DOES block, because that is a figure the stage says cannot have been struck. `stage_of` falls back to the app's own inference so an upgraded workbook does not read as an assessment with three empty tabs."
+  },
+  {
+   "id": "AUD-0173",
+   "sev": "BLOCKER",
+   "area": "workbook",
+   "title": "The three tabs the app reads and the engine never wrote now exist at the assessment stage",
+   "target": "parse_grain_summaries and parse_recommendations read Pillar_Summary, Category_Detail and Recommendations; both land server-side; both back live gates (the 0.05 grain tolerance, CG-39). Nothing wrote them",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook"
+   ],
+   "note": "Closes AUD-0166, which was filed NOT_THIS_ENGINE and which the owner has now decided belongs to the assessment stage. Columns are the app's own header spellings, the same technique PEER_BENCHMARK_COLUMNS documents. `engine.grains recompute` states both grains and `engine.grains recommendations` projects the assessment report's §7 rows into the tab — projected, never authored, because the recommendations already exist as Report_Narrative cards. Both refuse at the research stage. The assessment report's §3 now reads the STATED grains rather than only the subcap sheets, because H4's grain lock forbids re-deriving a pillar figure by averaging subcaps. Tests round-trip both through the app's real parsers."
+  },
+  {
+   "id": "AUD-0174",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "Two of six live Routines were unhealthy and nothing watched Routine health",
+   "target": "list_triggers 2026-08-30: dma-rectification-weekly FAILED six days, dma-refresh-drift-daily ABANDONED and BLOCKED fifteen hours",
+   "disposition": "MITIGATED",
+   "checks": [
+    "routines"
+   ],
+   "note": "The watchdog watches RUNS; nothing watched ROUTINES. routine_health.py reads a list_triggers response and reports a verdict with the next move. NEITHER cause is a code defect this repo can fix: the FAILED one hit an individual spend limit (five_hour rate limit, rejected — raised at claude.ai/settings/usage), and the ABANDONED one is BLOCKED on a connector permission prompt that the plugin's own hook ALLOWS — verified by running the hook against that exact tool name — which means the hook did not run: a stale install, and a session cannot heal it because hooks bind once at session start. Both are the owner's to clear; the checker is what makes them visible next time."
+  },
+  {
+   "id": "AUD-0175",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "No owner-names-the-client channel exists at all",
+   "target": "run_gate.py pick has no --client; its one human lever --prefer is documented as never passed by any routine; no Slack surface exists anywhere in the repo",
+   "disposition": "OPEN",
+   "checks": [
+    "routines"
+   ],
+   "note": "The owner's report ('routines have clients hardcoded') describes a defect already repaired in the live prompts — every live Routine chooses dynamically and the only pinned one was deleted 2026-08-20 — but the gap BEHIND the report is real and different: the owner can stop a Routine and can edit a stored prompt, and cannot say 'do this client next' through any interface that exists. docs/CLIENT-SELECTION.md specifies the channel against the interfaces that do exist — three Slack commands, a request file in the intake tree beside the client folders, one `--requests` flag on run_gate.py pick, and a threaded reply — and marks every section LIVE or NOT BUILT. Building it is the owner's call on scope."
+  },
+  {
+   "id": "AUD-0176",
+   "sev": "BLOCKER",
+   "area": "engine",
+   "title": "Reading the new stage key through RunWorkbook broke the only route from research to a strip",
+   "target": "validator.validate line 78: C.stage_of(wb.metadata()) on the openpyxl Workbook that validate() deliberately opens",
+   "disposition": "FIXED",
+   "checks": [
+    "validator",
+    "e2e"
+   ],
+   "note": "Introduced by AUD-0173's own change and caught by the end-to-end walk, which is why that walk exists. `validate` opens the file with openpyxl ON PURPOSE — rules 1 and 2 judge a file that may not BE a valid run workbook, so RunWorkbook's accessors cannot be assumed. `wb.metadata()` therefore raised AttributeError inside `handoff.build`, and `strip` refuses without a handoff: a run could finish every category and never hand off. Fixed with one `_metadata(wb)` reader on the raw workbook, which also absorbs the copy `_rule7_run_id` was carrying — the third copy was how the fourth got written wrong. Two regression tests: the stage is read off the FILE when no caller states it, and validate takes a path and never a RunWorkbook. A SECOND half was found in the same module: `--expect-scores` was `action=\"store_true\"`, so ABSENT meant False, and False is not 'no opinion' — it is the caller asserting the research stage. Passed straight through, the command line hard-coded research semantics for every workbook it was ever pointed at, which is the same defect the stage key exists to remove, one layer up. Now BooleanOptionalAction with default None: omit to read the recorded stage, pass --no-expect-scores to assert research."
+  },
+  {
+   "id": "AUD-0177",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "Nothing reported whether the system as a whole was ready, and a lane nobody measured read as a lane that passed",
+   "target": "eight independent readiness lanes across seven scripts, each with its own exit code and no composition; 'production ready' answerable only as prose",
+   "disposition": "FIXED",
+   "checks": [
+    "readiness"
+   ],
+   "note": "Every green report this project has been wrong about was green because something never looked — the doctor counting the checkout's files on a stale container, the classified profile nothing read, two unhealthy Routines nobody was told about. So readiness.py reports THREE verdicts, not two: READY, BLOCKED and NOT_MEASURABLE_HERE, and the third is never counted as ready. It re-derives nothing — every lane shells out to the check that owns it — and a container with no credential downgrades the connector lane to unmeasured rather than reporting a serving deployment as broken. The standing items no script can close (spend limit, stale-install provisioning, the unbuilt owner-names-the-client channel, connector grants) travel with the answer, each naming its owner and the document that specifies it. `--strict` exits non-zero on an unmeasured lane, which is what CI should use. Two defects in the first draft of the checker itself, both found by running it: the detail line took the LAST THREE lines of each check's output, so a fifteen-row doctor report came back described by whichever rows sorted last; and the credential downgrade was keyed on that whole output, so a STALE INSTALL — a row the install lane already owns — was reported as 'no live credential path from this container', a check inventing a reason for its own verdict. The gist is now the FAILING rows, and the downgrade requires every failing row to be about obtaining a credential. Lanes also declare a SCOPE (repository / container / external) so `goal_status.py` can fail the standing goal on a checkout defect without failing it on a stale install in whatever container happened to run the check — read from readiness.py rather than re-derived, so two readers of one answer cannot disagree about it."
+  },
+  {
+   "id": "AUD-0178",
+   "sev": "MAJOR",
+   "area": "qa",
+   "title": "The findings ledger had drifted out of the vocabulary its own tool reads, and every mode of that tool had been dying on it",
+   "target": "14 findings filed sev BLOCKING against SEV_ORDER = {BLOCKER, MAJOR, MINOR, INFO}; one disposition NOT_THIS_ENGINE; three check names (reports, workbook, techstack) cited by findings with no command in the checks map",
+   "disposition": "FIXED",
+   "checks": [
+    "ledger"
+   ],
+   "note": "Found by running `aud_ledger.py --md`, which nothing does on a schedule: KeyError: 'BLOCKING' out of the summary, --open, --verify and --md alike, with .qa/AUD-DISPOSITIONS.md stale behind it for as long as the drift lasted. The third drift is the serious one — a finding citing a check name with no command would have been reported by --verify as proved while running nothing, which is the acceptance-ledger shape AUD-0050 caught. Severities normalised to the one vocabulary, the three commands written down, AUD-0166 reconciled to FIXED (its NOT_THIS_ENGINE call was overruled by the owner and AUD-0173 is the fix), AUD-0169 closed against AUD-0171 which had been sitting FIXED beside it. `load()` now refuses an unreadable ledger with a message naming the rows instead of a KeyError naming a dictionary, and a test pins the vocabulary, the citations and the currency of the generated markdown."
   }
  ]
 }

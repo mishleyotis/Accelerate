@@ -16,6 +16,7 @@ identifiers it prints are pinned here against the document it reads.
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
 import subprocess
 import sys
@@ -381,3 +382,91 @@ def test_the_check_states_why_walking_past_a_failure_is_correct():
     assert "lawley" in src, (
         "the measurement names the package lane B refused, which is what "
         "makes this evidence rather than an assertion")
+
+
+# ── readiness: which blocked lanes are this checkout's problem ──────────
+
+def _readiness(monkeypatch, doc):
+    """Run check_readiness against a canned readiness.py answer."""
+    class R:
+        returncode = 0
+        stdout = json.dumps(doc)
+        stderr = ""
+
+    monkeypatch.setattr(GS.subprocess, "run", lambda *a, **k: R())
+    GS.results.clear()
+    GS.check_readiness(offline=True)
+    assert len(GS.results) == 1, GS.results
+    return GS.results[0]
+
+
+def _lane(name, verdict, scope):
+    return {"lane": name, "what": "w", "scope": scope, "verdict": verdict,
+            "detail": "d", "fix": "f"}
+
+
+def _doc(lanes):
+    return {"lanes": lanes,
+            "ready": [x for x in lanes if x["verdict"] == "READY"],
+            "blocked": [x for x in lanes if x["verdict"] == "BLOCKED"],
+            "unmeasured": [x for x in lanes
+                           if x["verdict"] == "NOT_MEASURABLE_HERE"],
+            "blocked_in_repository": [
+                x for x in lanes
+                if x["verdict"] == "BLOCKED" and x["scope"] == "repository"],
+            "standing_open": [{"item": "i", "detail": "d", "owner": "o",
+                               "specified_in": "docs/x.md"}]}
+
+
+def test_a_repository_blocker_fails_the_standing_goal(monkeypatch):
+    part, state, detail = _readiness(monkeypatch, _doc([
+        _lane("coverage", "BLOCKED", "repository"),
+        _lane("skills", "READY", "repository")]))
+    assert state == GS.FAIL
+    assert "coverage" in detail
+
+
+def test_a_container_blocker_is_open_not_a_goal_failure(monkeypatch):
+    """A stale install is real and is somebody's problem. It is not this
+    checkout failing a goal, and reporting it as one teaches a reader to
+    stop believing the row."""
+    part, state, detail = _readiness(monkeypatch, _doc([
+        _lane("install", "BLOCKED", "container"),
+        _lane("coverage", "READY", "repository")]))
+    assert state == GS.OPEN
+    assert "install" in detail
+
+
+def test_unmeasured_lanes_are_unknown_and_are_named(monkeypatch):
+    part, state, detail = _readiness(monkeypatch, _doc([
+        _lane("coverage", "READY", "repository"),
+        _lane("routines", "NOT_MEASURABLE_HERE", "external")]))
+    assert state == GS.UNKNOWN
+    assert "routines" in detail
+
+
+def test_every_lane_green_is_the_only_pass(monkeypatch):
+    part, state, _d = _readiness(monkeypatch, _doc([
+        _lane("coverage", "READY", "repository"),
+        _lane("routines", "READY", "external")]))
+    assert state == GS.OK
+
+
+def test_readiness_that_prints_no_json_is_unknown_not_green(monkeypatch):
+    class R:
+        returncode = 2
+        stdout = "Traceback (most recent call last):"
+        stderr = "boom"
+
+    monkeypatch.setattr(GS.subprocess, "run", lambda *a, **k: R())
+    GS.results.clear()
+    GS.check_readiness(offline=True)
+    assert GS.results[0][1] == GS.UNKNOWN, GS.results
+
+
+def test_the_standing_items_are_carried_into_the_line(monkeypatch):
+    _p, _s, detail = _readiness(monkeypatch, _doc([
+        _lane("coverage", "READY", "repository")]))
+    assert "standing item" in detail
+    assert "PRODUCTION-READINESS.md" in detail
+

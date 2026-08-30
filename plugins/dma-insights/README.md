@@ -22,6 +22,16 @@ what each stage hands the next. `scripts/aud_ledger.py` is the record of
 what the headless-readiness audit found and what became of it — including
 what is still open.
 
+`docs/PRODUCTION-READINESS.md` answers "is this ready" the only way that
+survives a handover: `scripts/readiness.py` composes eight lanes and reports
+three verdicts, the third being NOT_MEASURABLE_HERE, which is never counted
+as ready. `docs/ROUTINES.md` is the complete inventory of scheduled work and
+`scripts/routine_health.py` says whether each Routine is doing its job;
+`docs/CLIENT-SELECTION.md` holds the rule that a Routine may never name the
+client it works on, how a duplicate run is versioned inside the folder that
+already exists, and the specification for the channel through which the owner
+would name one — marked, section by section, LIVE or NOT BUILT.
+
 ```
 skills/    dma-research (+ engine/: the workbook substrate, the gate,
                          the validator, the two report renderers)

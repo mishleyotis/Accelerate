@@ -5,6 +5,19 @@ schedulers with two different reconciliation stories. This file lists **all of
 them** — so "scheduled where it should be" is a checkable claim rather than a
 recollection.
 
+**Three companions to this file, and none of them repeats it.**
+`docs/CLIENT-SELECTION.md` holds the rule that a Routine may never name the
+client it works on, what versioning a duplicate run inside the client folder
+means, and the specification for the Slack channel that would let the owner
+name one (DESIGNED, not built). `scripts/routine_health.py` answers whether
+each Routine listed here is actually doing its job — the watchdog below
+watches RUNS, and nothing watched the Routines until 2026-08-30, when two of
+six were found failing with nobody aware of either.
+`docs/PRODUCTION-READINESS.md` puts Routine health beside the other seven
+lanes and answers the larger question the owner actually asks — is this
+system ready to run — with `scripts/readiness.py`, whose third verdict,
+`NOT_MEASURABLE_HERE`, is never counted as ready.
+
 1. **App-side Cloud Scheduler routines** — cron triggers in GCP project
    `digital-maturity-assessor` (us-central1) that fire Cloud Run Jobs. No
    model is involved; they are the app doing its own bookkeeping. Declared in

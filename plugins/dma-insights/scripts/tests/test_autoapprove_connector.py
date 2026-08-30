@@ -373,6 +373,15 @@ _DELIBERATELY_PROMPTING = {
     # scheduled session a write nobody sanctioned.
     "add-company-data-points": "writes to the user's Clay workspace",
     "add-contact-data-points": "writes to the user's Clay workspace",
+    # Named ONLY by docs/CLIENT-SELECTION.md §3.5, as the reply path of a
+    # Slack channel that is specified and NOT BUILT. A send publishes to an
+    # external surface: it reaches people, it is not retractable, and no
+    # Routine calls it today, so the prompt costs no firing. Whoever builds
+    # §3 has to make that approval deliberately, in the same change that
+    # builds the sender — inheriting a blanket allow from a document that
+    # merely NAMES the tool is how an unattended session acquires a voice.
+    "slack_send_message": "publishes to an external surface; the channel that "
+                          "would use it is specified and not built",
 }
 
 

@@ -27,6 +27,8 @@ verbatim to the module that owns it (its --help lists the subcommands):
     prelim …    engine.prelim    state / narrate / timeline / peers /
                                  declare / complete   (the PRELIM phase)
     registry …  engine.registry  log / beat / close / list / push / pull
+    grains …    engine.grains    show / recompute / recommendations / stage
+                                 (the assessment stage's three scored tabs)
     complete …  engine.completeness check   (every tab populated or stated)
     narrative … engine.narrative  state / write / review / contract
                                  (the report sections, as arguments)
@@ -64,7 +66,7 @@ from . import (assemble, contract, floors_gate, handoff, ledger, orient,
 #: argparse so the family's own --help answers, not this wrapper's.
 _FAMILIES = ("kg", "fuse", "memory", "techscan", "assemble", "preflight",
              "prelim", "registry", "complete", "narrative", "ers",
-             "cost", "template")
+             "cost", "template", "grains")
 
 
 def _family_main(name: str):
@@ -76,6 +78,8 @@ def _family_main(name: str):
         from . import memory as m
     elif name == "techscan":
         from . import techscan as m
+    elif name == "grains":
+        from . import grains as m
     elif name == "preflight":
         from . import preflight as m
     elif name == "prelim":

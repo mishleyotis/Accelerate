@@ -57,7 +57,7 @@ class Failure(dict):
 
 
 def validate(path, *, run_id: str | None = None,
-             expect_scores: bool = False) -> list[Failure]:
+             expect_scores: bool | None = None) -> list[Failure]:
     """Every rule, against one workbook. An empty list is a pass."""
     path = Path(path)
     wb = openpyxl.load_workbook(path, data_only=True)
@@ -68,13 +68,43 @@ def validate(path, *, run_id: str | None = None,
             return fails            # nothing else is meaningful without sheets
         fails += _rule2_headers(wb)
         fails += _rule3_rows(wb)
-        fails += _rule4_scores(wb, expect_scores)
+        # THE STAGE DECIDES, and it is recorded now. `expect_scores` was a
+        # caller's opinion defaulted to False, and `assemble.package` passed
+        # the default — hard-coding research semantics into every package it
+        # ever built, including an assessment one. `None` means "read the
+        # workbook's own stage"; an explicit True/False still wins, because
+        # `--expect-scores` is how a caller checks a workbook whose stage
+        # they are testing rather than trusting.
+        want = (C.stage_of(_metadata(wb)) == "assessment"
+                if expect_scores is None else expect_scores)
+        fails += _rule4_scores(wb, want)
         fails += _rule5_evidence_and_urls(wb)
         fails += _rule6_placeholders(wb)
         fails += _rule7_run_id(wb, run_id)
     finally:
         wb.close()
     return fails
+
+
+def _metadata(wb) -> dict:
+    """Run_Metadata as a dict, read off the RAW openpyxl workbook.
+
+    `validate` opens the file with openpyxl rather than through
+    `RunWorkbook`, deliberately: rules 1 and 2 exist to judge a file that may
+    not BE a valid run workbook, and RunWorkbook's accessors assume the shape
+    under test. So the two columns are read directly. Every caller is after
+    rule 1's early return, so the sheet is known to exist.
+
+    One reader, not two: `_rule7_run_id` carried its own copy of this loop,
+    and the stage read added a third by calling `wb.metadata()` on an
+    openpyxl workbook, which has no such method — an AttributeError inside
+    the handoff builder, which is the only path to a strip.
+    """
+    md = {}
+    for r in wb["Run_Metadata"].iter_rows(min_row=2, values_only=True):
+        if r and r[0]:
+            md[str(r[0])] = r[1]
+    return md
 
 
 # ── rule 1 · the sheet set ───────────────────────────────────────────────
@@ -253,11 +283,7 @@ def _rule6_placeholders(wb) -> list[Failure]:
 # ── rule 7 · run_id equality, and the catalogue lock ─────────────────────
 
 def _rule7_run_id(wb, run_id: str | None) -> list[Failure]:
-    md = {}
-    ws = wb["Run_Metadata"]
-    for r in ws.iter_rows(min_row=2, values_only=True):
-        if r and r[0]:
-            md[str(r[0])] = r[1]
+    md = _metadata(wb)
     out = []
     have = str(md.get("run_id") or "").strip()
     if not have:
@@ -293,8 +319,17 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--workbook", required=True)
     ap.add_argument("--run-id")
-    ap.add_argument("--expect-scores", action="store_true",
-                    help="assessment stage: column D must be POPULATED")
+    # BooleanOptionalAction with default None, NOT store_true. store_true
+    # defaults to False, and False is not "no opinion" — it is the caller
+    # asserting the RESEARCH stage. Passed straight through, that made the
+    # command line hard-code research semantics for every workbook it was
+    # ever pointed at, which is the same defect the stage key exists to
+    # remove, one layer up. Absent now means "read the workbook's own stage".
+    ap.add_argument("--expect-scores", action=argparse.BooleanOptionalAction,
+                    default=None,
+                    help="assessment stage: column D must be POPULATED. "
+                         "Omit to read the workbook's recorded stage; pass "
+                         "--no-expect-scores to assert the research stage.")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
     fails = validate(a.workbook, run_id=a.run_id, expect_scores=a.expect_scores)

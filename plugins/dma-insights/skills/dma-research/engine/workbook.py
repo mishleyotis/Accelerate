@@ -324,6 +324,10 @@ class RunWorkbook:
             "reference_date": reference_date,
             "engine_version": C.ENGINE_VERSION,
             "workbook_contract": C.WORKBOOK_CONTRACT,
+            # RESEARCH until something scores it. Column D is empty at this
+            # stage by contract rule 4, and the three grain tabs the
+            # assessment fills are NOT_APPLICABLE until it does.
+            "stage": "research",
             "evidence_mode": evidence_mode,
             # The binding provenance. Which sub-vertical the entity was bound
             # to and which evidence mode the engagement runs under are the

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import tempfile
 import traceback
@@ -57,7 +58,23 @@ def _connect():
 _WB_DECOYS = ("research", "techstack", "tech_stack", "tech stack",
               "technology_stack", "technology stack", "explorium", "toolkit",
               "weight", "appendix", "template", "tracker")
-_RPT_DECOYS = ("profile", "template")
+_RPT_DECOYS = ("template",)
+
+#: The folder a superseded package is archived into, INSIDE the client
+#: folder. Kept in sync with `assemble.ARCHIVE_DIR` on the engine side; the
+#: two are one name and this comment is the only place that says so.
+ARCHIVE_SEGMENT = "_superseded"
+
+#: The Client Research Profile, in the spelling `classification.py` already
+#: uses for it (priority 3). One artefact, one pattern, two classifiers that
+#: now agree.
+_PROFILE_RE = re.compile(r"client[_ ]profile.*\.docx$", re.I)
+
+#: Every section kind from the client research profile wears this prefix.
+#: The two reports' heading vocabularies overlap — both produce
+#: `evidence_sources`, both produce `findings` — so without it a consumer
+#: reading `document_sections` gets two documents' answers under one key.
+PROFILE_KIND_PREFIX = "client_research:"
 
 
 def _classify_artefact(f):
@@ -65,6 +82,16 @@ def _classify_artefact(f):
     folder holds more than one candidate of a kind: the canonical name beats
     a variant, and a scoring workbook beats an assessment workbook."""
     name = f.name.lower()
+    # A SUPERSEDED package, kept inside the client folder rather than in a
+    # second one. The engine archives a previous run there when a new run
+    # opens the same folder (assemble.ARCHIVE_DIR), because
+    # `runs.source_folder_id` keys on the folder and forking it would orphan
+    # every run before this one. The scan reads the whole tree at any depth
+    # and keeps ONE artefact per kind, so without this an archived workbook
+    # is a candidate to be chosen over the current one — the retention would
+    # have created the very ambiguity it exists to remove.
+    if any(seg.strip().lower() == ARCHIVE_SEGMENT for seg in f.path_segments):
+        return None
     if name.endswith(".json") and "manifest" in name:
         # run_manifest.json canonical; L1_run_manifest.json / MANIFEST.json seen.
         return "manifest", (0 if name == "run_manifest.json" else 1)
@@ -109,8 +136,24 @@ def _classify_artefact(f):
             return "workbook", 2
         return None
     if name.endswith(".docx"):
+        # THE CLIENT RESEARCH PROFILE, and it is its own artefact rather than
+        # a decoy. `_RPT_DECOYS` used to carry "profile", so every .docx whose
+        # name contained it returned None — and the engine's own filename for
+        # this report is `Client_Profile_Research_<entity>_<date>.docx`. All
+        # eight of its sections therefore reached no table in the app, while
+        # four page packs named "Client Profile DOCX" as their source of
+        # truth for firmographics, the leadership roster, focus-area quotes
+        # and the financial series.
+        #
+        # Worse, the OTHER classifier in this same service already recognised
+        # it — `classification.ARTEFACT_REGISTRY` matches it as
+        # `client_profile` priority 3 and the scanner writes that into
+        # `import_files.classified_kind`. Classified, recorded, then dropped:
+        # the AUD-0091 shape this codebase names by number.
+        if _PROFILE_RE.search(name):
+            return "profile", 0
         if any(d in name for d in _RPT_DECOYS):
-            return None              # the research Client Profile is a different artefact
+            return None
         if "assessment_report" in name or "assessment report" in name:
             return "report", 0
         if name == "report.docx":
@@ -176,7 +219,8 @@ def _requeue(conn, parts, folder, reason):
     """Blank the stored checksums of this package's artefacts so the next
     scan classifies them as CHANGED and retries. Rows are kept (FKs from
     document_sections / parser_observations may point at them)."""
-    ids = [parts[k].file_id for k in ("manifest", "workbook", "report")
+    ids = [parts[k].file_id
+           for k in ("manifest", "workbook", "report", "profile")
            if k in parts]
     cur = conn.cursor()
     for fid in ids:
@@ -276,6 +320,32 @@ def _ingest_one(conn, token, folder, parts, remint=False):
             # Heading1 under its own name and says so, instead of
             # under whichever numbered kind the count reached.
             sections = parse_report(rp, companion)
+            for sec in sections:
+                sec.artefact_id = parts["report"].file_id
+
+        # THE SECOND REPORT. Both are client-facing artefacts of the same
+        # run, and until 2026-08-30 only one of them was ever read. Its
+        # sections are NAMESPACED by report because the two vocabularies
+        # overlap head-on — the profile's "Evidence base" and the assessment
+        # report's "Evidence and its limits" both resolve to
+        # `evidence_sources`, and its "Negative findings and what they bound"
+        # resolves to `findings` — so an un-namespaced merge would put two
+        # documents' answers under one key with no way to tell which said
+        # what. `document_sections.section_kind` is plain TEXT with no enum
+        # and no unique constraint, so the prefix is storable; `embed.py`
+        # binds the kind and never reads it, and `bundle.py` passes it
+        # through, so neither consumer breaks on the longer name.
+        if "profile" in parts:
+            pp = os.path.join(td, "client_profile.docx")
+            with open(pp, "wb") as fh:
+                fh.write(drive.download(token, parts["profile"].file_id))
+            profile_sections = parse_report(pp, companion)
+            for sec in profile_sections:
+                sec.section_kind = f"{PROFILE_KIND_PREFIX}{sec.section_kind}"
+                sec.artefact_id = parts["profile"].file_id
+            sections = list(sections) + profile_sections
+            print(f"ingest: {folder} client profile — "
+                  f"{len(profile_sections)} section(s)")
 
         research = {}
         evidence_index: list = []

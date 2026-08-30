@@ -82,6 +82,12 @@ FILLED_BY = {
     "Peer_Benchmarks": "engine.prelim peers --peer … --rule …",
     "Tech_Register": ("engine.cli techscan clay-plan, then "
                       "import-explorium / record --provider …"),
+    "Pillar_Summary": ("the ASSESSMENT stage's rollup — "
+                       "engine.cli grains recompute"),
+    "Category_Detail": ("the ASSESSMENT stage's rollup — "
+                        "engine.cli grains recompute"),
+    "Recommendations": ("projected from the assessment report's §7 rows — "
+                        "engine.cli grains recommendations"),
     "Tech_Peer_Deployments": ("engine.cli techscan peer-record --ts … "
                               "--peer … --deployed|--not-deployed|--unknown "
                               "--basis …"),
@@ -208,8 +214,30 @@ def check(wb: RunWorkbook) -> dict:
     pillars_in_scope = {s.split("C")[0] for s in selected if s}
     rows, blocking, disclosed = [], [], []
 
+    stage = C.stage_of(md)
     for sheet in C.SHEETS:
         n = _rowcount(wb, sheet)
+        # A sheet that belongs to the OTHER stage is neither populated nor
+        # an omission: there is nothing at this stage that could fill it.
+        # The three scored grains are the case — column D is empty at the
+        # research stage by contract rule 4, so a research run asked for a
+        # Pillar_Summary would be asked for something it is forbidden to
+        # produce. A row that arrives anyway is reported, because a research
+        # workbook carrying assessment scores is a different problem.
+        want_stage = C.SHEET_STAGE.get(sheet)
+        if want_stage and want_stage != stage:
+            rows.append({
+                "sheet": sheet, "rows": n,
+                "verdict": "OUT_OF_STAGE" if not n else "AHEAD_OF_STAGE",
+                "detail": (f"belongs to the {want_stage} stage; this "
+                           f"workbook is at {stage}"
+                           if not n else
+                           f"{n} row(s) on a {want_stage}-stage sheet in a "
+                           f"{stage}-stage workbook — the stage says this "
+                           f"cannot have been produced yet")})
+            if n:
+                blocking.append(f"{sheet}: {rows[-1]['detail']}")
+            continue
         if sheet in PILLAR_SHEETS:
             pillar = sheet.split("_")[0]
             if pillar not in pillars_in_scope:

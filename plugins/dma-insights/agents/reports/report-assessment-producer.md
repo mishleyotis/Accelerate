@@ -41,11 +41,11 @@ something the workbook does not carry, say so in the section's
 |---|---|---|---|---|---|
 | 1 | Executive summary | 350w | `Report_Narrative`, `Coverage` | required | `overview.exec_summary` |
 | 2 | Method, scope and limits | 250w | `Run_Metadata`, `Coverage`, `Gate_Log` | not required | `heatmap.safeguard_gates` |
-| 3 | Maturity by pillar | 700w | `P1_Subcap_Scoring`, `P2_Subcap_Scoring`, `P3_Subcap_Scoring`, `P4_Subcap_Scoring` | required | `heatmap.workbook_scores`, `overview.scores` |
+| 3 | Maturity by pillar | 700w | `Pillar_Summary`, `Category_Detail`, `P1_Subcap_Scoring`, `P2_Subcap_Scoring`, `P3_Subcap_Scoring`, `P4_Subcap_Scoring` | required | `heatmap.workbook_scores`, `overview.scores` |
 | 4 | Evidence and its limits | 300w | `Evidence_Detail`, `Coverage` | required | `overview.evidence_coverage`, `heatmap.evidence` |
 | 5 | Findings | 500w · 1+ × 60w | `Report_Narrative` | required | `overview.findings`, `insights.insights` |
-| 6 | Peer position | 250w | `Report_Narrative`, `Peer_Benchmarks` | required | `overview.scores`, `heatmap.workbook_scores` |
-| 7 | Recommendations | 500w · 1+ × 60w | `Report_Narrative` | required | `platform.recommendations`, `platform.roadmap`, `overview.opportunity` |
+| 6 | Peer position | 250w | `Report_Narrative`, `Peer_Benchmarks`, `Category_Detail` | required | `overview.scores`, `heatmap.workbook_scores` |
+| 7 | Recommendations | 500w · 1+ × 60w | `Report_Narrative`, `Recommendations` | required | `platform.recommendations`, `platform.roadmap`, `overview.opportunity` |
 | 8 | What would change this assessment | 200w | `Gate_Log`, `Coverage` | not required | `heatmap.evidence_age`, `overview.ceilings` |
 
 **The blocks each section is written in**, in order. A body missing one, or carrying them out of order, is refused: they become real Heading2s in the .docx, which is the grain the app parses and scopes its vectors at.

@@ -175,7 +175,14 @@ ASSESSMENT = ReportSpec(
                         "What the method cannot see"),
                 surfaces=("heatmap.safeguard_gates",)),
         Section("3", "Maturity by pillar", 700,
-                ("P1_Subcap_Scoring", "P2_Subcap_Scoring",
+                # The STATED grains, not the subcap sheets alone: H4's grain
+                # lock forbids re-deriving a pillar or category figure by
+                # averaging its subcaps, because cap logic, weighting and
+                # analyst override are applied when the figure is struck.
+                # The section reads what was stated and the 0.05 tolerance
+                # catches the two drifting apart.
+                ("Pillar_Summary", "Category_Detail",
+                 "P1_Subcap_Scoring", "P2_Subcap_Scoring",
                  "P3_Subcap_Scoring", "P4_Subcap_Scoring"),
                 blocks=("Strategy and governance (P1)",
                         "Customer experience (P2)",
@@ -193,12 +200,17 @@ ASSESSMENT = ReportSpec(
                         "What would change this"),
                 surfaces=("overview.findings", "insights.insights")),
         Section("6", "Peer position", 250, ("Report_Narrative",
-                                            "Peer_Benchmarks"),
+                                            "Peer_Benchmarks",
+                                            "Category_Detail"),
                 blocks=("The peer set, and how it was chosen",
                         "Where the client leads",
                         "Where the client trails"),
                 surfaces=("overview.scores", "heatmap.workbook_scores")),
-        Section("7", "Recommendations", 500, ("Report_Narrative",),
+        Section("7", "Recommendations", 500,
+                # Report_Narrative is where they are WRITTEN; Recommendations
+                # is the tab they are projected into for the app, and naming
+                # both keeps the section's inputs honest about the round trip.
+                ("Report_Narrative", "Recommendations"),
                 kind="recommendation",
                 blocks=("Recommendation", "Root cause", "Prerequisites",
                         "How we would know it worked"),
