@@ -188,6 +188,19 @@ def check_taxonomy():
                 "v5.0 recognition carries a lineage marker and is allowed")
 
 
+def check_approvals():
+    code, out = _run([sys.executable,
+                      f"{PLUGIN}/scripts/audit_autoapprove.py", "--strict"])
+    return lane("approvals",
+                "every MCP tool a session attaches is either auto-approved or "
+                "refused on the record — nothing prompts by omission",
+                code, out,
+                "audit_autoapprove.py names each UNCLASSIFIED tool; rule on "
+                "it in SERVER_SURFACES, read or withheld. A scheduled firing "
+                "has nobody to answer a prompt, so a tool nobody ruled on is "
+                "a firing that stops")
+
+
 def check_install():
     code, out = _run([sys.executable, f"{PLUGIN}/scripts/plugin_version.py"])
     return lane("install",
@@ -307,7 +320,7 @@ def check_lifecycle(run):
 def assess(triggers=None, tests=False, lifecycle=False,
            offline=False) -> dict:
     lanes = [check_coverage(), check_skills(), check_taxonomy(),
-             check_install(), check_connector(offline),
+             check_approvals(), check_install(), check_connector(offline),
              check_routines(triggers),
              check_tests(tests), check_lifecycle(lifecycle)]
     return {

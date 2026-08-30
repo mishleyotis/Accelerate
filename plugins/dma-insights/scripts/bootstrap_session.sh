@@ -380,15 +380,55 @@ JSON
 # and the docs say "Vibe-Prospecting", "Google-Drive", "PDF-Viewer" with
 # HYPHENS, while the tool names carry UNDERSCORES. A rule written the way the
 # docs read matches nothing and fails silently.
+#
+# A SERVER WILDCARD IS COARSER THAN THE HOOK, AND FOR A CLASSIFIED SERVER IT
+# OVERRULES IT (measured 2026-08-30). `autoapprove_connector.SERVER_SURFACES`
+# splits each stable-segment server into the reads it approves and the writes
+# it deliberately refuses; `mcp__<Server>__*` in user settings approves BOTH,
+# silently, and settings win without the hook ever being consulted. That was
+# already true of Google Drive — `trash_file` and `share_file` granted by a
+# wildcard the hook refuses — and naming one Slack tool in a design document
+# was about to extend it to `slack_send_message`, because this list is read
+# out of the tree and a doc is part of the tree.
+#
+# So: a server the hook CLASSIFIES is granted by EXACT READ TOOL NAME, from
+# the hook's own table, and the two cannot disagree. A server it does not
+# classify keeps the wildcard, because no finer record of it exists and an
+# ungranted enrichment call stops a firing on a prompt nobody can answer.
 GRANTS="$(
-  {
-    grep -rhoE "mcp__[A-Za-z0-9_-]+__" \
-      "$REPO_DIR/plugins/dma-insights/agents" \
-      "$REPO_DIR/plugins/dma-insights/skills" \
-      "$REPO_DIR/plugins/dma-insights/docs" 2>/dev/null
-    printf 'mcp__Vibe_Prospecting__\nmcp__Indeed__\n'
-    printf 'mcp__plugin_dma-insights_connector__\n'
-  } | sort -u | sed 's/$/*/'
+  DMA_TREE="$REPO_DIR/plugins/dma-insights" python3 - <<'PY'
+import os, pathlib, re, sys
+
+tree = pathlib.Path(os.environ["DMA_TREE"])
+sys.path.insert(0, str(tree / "scripts" / "hooks"))
+import autoapprove_connector as aac
+
+seen = set()
+pat = re.compile(r"mcp__([A-Za-z0-9_-]+)__")
+for sub in ("agents", "skills", "docs"):
+    for f in (tree / sub).rglob("*"):
+        if f.is_file():
+            try:
+                seen |= set(pat.findall(f.read_text(errors="ignore")))
+            except OSError:
+                pass
+# Required of the TOP session by CONNECTORS.md, so they appear in no agent
+# allow-list to be read out of.
+seen |= {"Vibe_Prospecting", "Indeed", "plugin_dma-insights_connector"}
+
+out = []
+# Every classified server, whether or not the tree names it: the hook already
+# rules on Slack, Salesforce, Google Admin, Auctor and GitHub, and a settings
+# grant that agrees with it costs nothing and survives a session whose hooks
+# bound from a stale install.
+for server in sorted(seen | set(aac.SERVER_SURFACES)):
+    if server in aac.SERVER_SURFACES:
+        out += [f"mcp__{server}__{t}"
+                for t in sorted(aac.SERVER_SURFACES[server]["read"])]
+    else:
+        out.append(f"mcp__{server}__*")
+print("\n".join(out))
+PY
 )"
 CLAUDE_SETTINGS="${HOME:-/root}/.claude/settings.json"
 GRANT_OUT="$(mktemp)"

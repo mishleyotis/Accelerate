@@ -41,6 +41,7 @@ def _stub(monkeypatch, table):
 
 
 ALL_GREEN = {"audit_coverage.py": (0, "0 holes"),
+             "audit_autoapprove.py": (0, "124/184 auto-approved"),
              "audit_skills.py": (0, "99/99 scripts"),
              "check_taxonomy_drift.py": (0, "0 stale"),
              "plugin_version.py": (0, "OK"),
@@ -239,6 +240,17 @@ def test_a_stale_install_does_not_read_as_a_repository_defect(monkeypatch,
     assert out["blocked"], "it still blocks"
     assert not out["blocked_in_repository"], \
         "and it is not the checkout's defect"
+
+
+def test_a_tool_nobody_ruled_on_blocks_the_approvals_lane(monkeypatch,
+                                                          tmp_path):
+    """A scheduled firing has nobody to answer a prompt, so an MCP tool in
+    neither the read nor the withheld set is a firing that stops — and it
+    stops silently, which is why it is a lane rather than a warning."""
+    _stub(monkeypatch, {**ALL_GREEN,
+                        "audit_autoapprove.py": (1, "1 UNCLASSIFIED")})
+    out = R.assess(triggers=str(tmp_path / "t.json"))
+    assert [r["lane"] for r in out["blocked_in_repository"]] == ["approvals"]
 
 
 def test_a_coverage_hole_is_a_repository_defect(monkeypatch, tmp_path):

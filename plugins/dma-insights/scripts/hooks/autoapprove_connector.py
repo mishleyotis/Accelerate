@@ -175,8 +175,171 @@ ENRICHMENT_TOOLS = frozenset({
 #
 # Anything added here must be READ-ONLY, like the list above, and must name a
 # server segment that is stable rather than a per-attachment UUID.
-QUALIFIED_TOOLS = frozenset({
-    "mcp__Quartr__search",
+#
+# ── the stable-segment servers, split read from write ────────────────────
+#
+# Measured 2026-08-30, owner: "check that all MCP connector tools are usually
+# autoapproved for all runs; I do not constantly have to approve tool calls."
+# Running THIS hook against the 86 MCP tools actually attached to a session
+# found 16 approved and 70 prompting. The list above had only ever learned the
+# ENRICHMENT connectors, because those are what stopped a scheduled firing;
+# every other attached server — Slack, Salesforce, Google Admin, Auctor,
+# GitHub, Grace — had never been looked at, and each prompts on every call.
+#
+# These servers attach under a STABLE, human-named segment, so the full tool
+# name can be written down exactly and the suffix rule's hazard (a common word
+# allowed on every connector ever attached) does not apply.
+#
+# `read` is auto-approved. `withheld` is NOT, and is LISTED rather than
+# omitted: a tool that is simply absent is indistinguishable from one nobody
+# thought about, and that difference is this file's whole subject. Everything
+# withheld writes, publishes, deletes, spends, or runs code somebody else
+# authored. Nothing is withheld for being merely sensitive to READ — a read is
+# a read, and the owner asked not to be prompted for them.
+#
+# A tool on one of these servers that is in NEITHER set fails the roster
+# check, which is how a newly attached tool becomes visible instead of
+# silently prompting forever.
+SERVER_SURFACES = {
+    "Quartr": {
+        # Transcripts and filings. `search` is here rather than in the suffix
+        # list because the bare word would allow `search` on every connector.
+        "read": {"search", "list_conferences", "get_conference",
+                 "read_transcript", "list_saved_items"},
+        "withheld": {"save_item", "write_workspace", "move_saved_items",
+                     "remove_saved_item"},
+    },
+    "Google_Drive": {
+        # The routine's own writes go through drive_fetch.py on the service
+        # account, never through this connector. `get_file_permissions` was
+        # excluded while this list meant "enrichment"; it is a READ, and the
+        # owner's ask is broader than enrichment now.
+        "read": {"search_files", "read_file_content", "download_file_content",
+                 "get_file_metadata", "list_recent_files",
+                 "get_file_permissions"},
+        "withheld": {"create_file", "update_file", "share_file", "trash_file",
+                     "copy_file"},
+    },
+    "Slack": {
+        # Reading a channel is research. SENDING is publication: it reaches
+        # people and it is not retractable, which is why the reply path
+        # specified in docs/CLIENT-SELECTION.md §3.5 must be approved by
+        # whoever builds the sender, in that same change.
+        "read": {"slack_read_canvas", "slack_read_channel",
+                 "slack_read_thread", "slack_read_user_profile",
+                 "slack_search_channels", "slack_search_public",
+                 "slack_search_public_and_private", "slack_search_users"},
+        "withheld": {"slack_send_message", "slack_send_message_draft",
+                     "slack_schedule_message", "slack_create_canvas",
+                     "slack_update_canvas"},
+    },
+    "Salesforce_Prod": {
+        # Reads against the production CRM. Every mutation stays prompting —
+        # a create, an update or a delete in production is exactly the class
+        # of call a person should still be asked about.
+        "read": {"find", "getObjectSchema", "getRelatedRecords",
+                 "getUserInfo", "listRecentSobjectRecords", "soqlQuery"},
+        "withheld": {"createSobjectRecord", "updateSobjectRecord",
+                     "deleteSobjectRecord", "updateRelatedRecord",
+                     "deleteRelatedRecord"},
+    },
+    "Salesforce_Docs": {
+        "read": {"salesforce_docs_fetch", "salesforce_docs_search"},
+        "withheld": set(),
+    },
+    "GAdmin_MCP": {
+        # The directory is readable; the directory is not editable. Every
+        # withheld entry changes a real person's access.
+        "read": {"get_user", "list_users", "list_group_members",
+                 "list_groups_for_user", "list_license_assignments",
+                 "list_org_units"},
+        "withheld": {"add_user_to_group", "remove_user_from_group",
+                     "remove_user_from_all_groups", "suspend_user",
+                     "archive_user", "move_user_to_org_unit",
+                     "bulk_offboard_users", "licensing_bulk_swap"},
+    },
+    "Auctor_MCP": {
+        "read": {"auctor_get_artifact", "auctor_get_plan_item",
+                 "auctor_get_plan_item_by_key", "auctor_get_space",
+                 "auctor_get_user", "auctor_list_artifacts",
+                 "auctor_list_plan_items", "auctor_list_plan_types",
+                 "auctor_list_spaces", "auctor_list_statuses",
+                 "auctor_list_templates", "auctor_list_users"},
+        "withheld": {"auctor_create_artifact", "auctor_create_plan_item",
+                     "auctor_create_space", "auctor_update_artifact",
+                     "auctor_update_plan_item", "auctor_update_space"},
+    },
+    "Grace_PMO": {
+        "read": {"pmo_retrieve_grounding_bundle"},
+        "withheld": set(),
+    },
+    "Indeed": {
+        # The other three are already allowed by suffix; get_resume was not,
+        # and it is a read like the rest.
+        "read": {"search_jobs", "get_job_details", "get_company_data",
+                 "get_resume"},
+        "withheld": set(),
+    },
+    "github": {
+        # Reading a repository, a PR, a check run or a log is how any review
+        # or CI diagnosis starts. Everything that changes the repository or
+        # the conversation on it stays prompting, `merge_pull_request` most
+        # of all.
+        "read": {"get_me", "get_file_contents", "get_commit", "get_tag",
+                 "get_label", "get_latest_release", "get_release_by_tag",
+                 "get_check_run", "get_job_logs", "get_team_members",
+                 "get_teams", "list_branches", "list_commits", "list_issues",
+                 "list_issue_fields", "list_issue_types",
+                 "list_pull_requests", "list_releases", "list_tags",
+                 "list_repository_collaborators", "issue_read",
+                 "pull_request_read", "actions_list", "actions_get",
+                 "search_code", "search_commits", "search_issues",
+                 "search_pull_requests", "search_repositories",
+                 "search_users"},
+        "withheld": {"create_branch", "create_or_update_file", "delete_file",
+                     "push_files", "create_pull_request", "create_repository",
+                     "fork_repository", "merge_pull_request",
+                     "update_pull_request", "update_pull_request_branch",
+                     "enable_pr_auto_merge", "disable_pr_auto_merge",
+                     "issue_write", "sub_issue_write", "add_issue_comment",
+                     "add_comment_to_pending_review",
+                     "add_reply_to_pull_request_comment",
+                     "pull_request_review_write", "request_copilot_review",
+                     "resolve_review_thread", "unresolve_review_thread",
+                     "actions_run_trigger", "run_secret_scanning",
+                     "subscribe_pr_activity", "unsubscribe_pr_activity"},
+    },
+}
+
+#: Read-only tools allowed by their FULL name, derived from the table above so
+#: the allowlist and the read/write split cannot drift apart.
+QUALIFIED_TOOLS = frozenset(
+    f"mcp__{server}__{tool}"
+    for server, surface in SERVER_SURFACES.items()
+    for tool in surface["read"])
+
+#: The other half, kept so "not approved" is a decision on the record rather
+#: than an absence. Nothing reads this at runtime; the roster check does.
+WITHHELD_TOOLS = frozenset(
+    f"mcp__{server}__{tool}"
+    for server, surface in SERVER_SURFACES.items()
+    for tool in surface["withheld"])
+
+#: The same record for the connectors matched BY SUFFIX, whose server segment
+#: is a per-attachment UUID that no full name can pin. `ENRICHMENT_TOOLS` says
+#: what is approved on them; without this, everything else on those servers was
+#: merely absent, and absent does not distinguish "we decided against it" from
+#: "nobody looked". Each of these was already argued for in the comments above
+#: — this is where the argument becomes checkable.
+WITHHELD_SUFFIXES = frozenset({
+    # Clay — writes into the user's own workspace.
+    "add-company-data-points", "add-contact-data-points",
+    # Clay — a workspace subroutine is user-authored and can do anything.
+    "run_subroutine", "run_subroutine_direct",
+    # Vibe Prospecting / Explorium — sends data outward.
+    "export-to-csv",
+    # Quartr, under an opaque segment: the writes its named entry withholds.
+    "save_item", "write_workspace", "move_saved_items", "remove_saved_item",
 })
 
 ENRICHMENT_REASON = (

@@ -25,6 +25,53 @@ Trigger-fired sessions receive exactly the connectors attached to their
 Routine in the UI — attachment is per-Routine and one-time, never
 per-session (the org's API cannot attach them; the UI can).
 
+## Approval — reads go through, writes still ask
+
+**Attached is not the same as callable.** A tool a session carries and is not
+allowed to call fails exactly like one it never bound: the session stops on
+*"Waiting on permission: …"*, and a scheduled container has nobody to answer.
+Two mechanisms decide, and they must agree.
+
+| mechanism | where | what it covers |
+|---|---|---|
+| `hooks/autoapprove_connector.py` | inside the plugin, so it travels with it and needs no environment wiring | the decision of record, per tool |
+| `permissions.allow` in **user** settings | written by `bootstrap_session.sh` before session start | the same decision, restated so it survives a session whose hooks bound from a stale install |
+
+The rule is one line: **a read is auto-approved; a write, a publication, a
+deletion, a spend, or code somebody else authored still asks.**
+
+- Servers with a **stable segment** (Slack, Salesforce, Google Admin, Auctor,
+  GitHub, Google Drive, Quartr, Indeed, Grace) are split tool by tool in
+  `SERVER_SURFACES` — `read` is approved, `withheld` is refused **on the
+  record**. Listed, not omitted: a tool that is simply absent cannot be told
+  apart from one nobody thought about.
+- Servers whose segment is a **per-attachment UUID** (the claude.ai enrichment
+  connectors) cannot be named exactly, so they are matched by tool-name suffix
+  — `ENRICHMENT_TOOLS` approved, `WITHHELD_SUFFIXES` refused.
+- The DMA connector's own 33 tools are approved by prefix, except
+  `submit_page_payload` and `promote_run`, which stand aside for their own
+  precheck hooks.
+
+**A server wildcard in settings is coarser than the hook and overrules it.**
+`mcp__<Server>__*` approves the writes too, silently, without the hook being
+consulted. So the grant is derived from the hook's own table: a classified
+server is granted by **exact read tool name**, and only an unclassified one
+gets a wildcard. This was a live defect until 2026-08-30 — Google Drive's
+`trash_file` and `share_file` were granted by a wildcard the hook refuses.
+
+Ask the question rather than trusting this table:
+
+```
+python3 plugins/dma-insights/scripts/audit_autoapprove.py --strict
+```
+
+It runs the **real hook** against `scripts/tests/mcp_roster.txt`, one
+subprocess per tool, and reports `ALLOWED · WITHHELD · GUARDED ·
+UNCLASSIFIED`. `UNCLASSIFIED` is the finding: a tool on a server the hook
+already knows that nobody ever ruled on, prompting on every call forever.
+Measured 2026-08-30 before the split existed: **16 of 86 approved.** After:
+124 of 184, 58 refused on the record, 2 guarded, **0 unclassified**.
+
 ## Preflight (STEP 0 of every synthesis firing)
 
 1. `drive_fetch.py check` — REQUIRED: the intake folder answers the SA.

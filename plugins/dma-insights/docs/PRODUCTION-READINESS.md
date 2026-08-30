@@ -64,6 +64,7 @@ it changes in one place.
 | `coverage` | does every workbook tab, report section, deliverable and derived field have an owner that writes it? | `audit_coverage.py --strict` |
 | `skills` | does every bundled script answer `--help`, and does every reference into the skill tree resolve? | `audit_skills.py` |
 | `taxonomy` | any stale catalogue literal, any fifth maturity band the charter says must not exist? | `check_taxonomy_drift.py` |
+| `approvals` | is every MCP tool a session attaches either auto-approved or refused on the record — nothing prompting by omission? | `audit_autoapprove.py --strict` |
 | `install` | is what this session LOADS what the checkout PUBLISHES? | `plugin_version.py` |
 | `connector` | is the MCP deployment reachable, does the token audience match the URL, does the service enforce the token? | `doctor.py` |
 | `routines` | did every enabled Routine's last firing succeed? | `routine_health.py --strict` |
@@ -83,7 +84,7 @@ teaches a reader to stop believing the row.
 
 | lane | scope |
 |---|---|
-| `coverage` `skills` `taxonomy` `tests` `lifecycle` | repository |
+| `coverage` `skills` `taxonomy` `approvals` `tests` `lifecycle` | repository |
 | `install` `connector` | container |
 | `routines` | external |
 
@@ -119,6 +120,7 @@ against this checkout. Re-run it; do not quote it.
 | `coverage` | **READY** | no artefact required by a contract lacks a writer |
 | `skills` | **READY** | every bundled script answers `--help`; no dead reference into the skill tree |
 | `taxonomy` | **READY** | no stale catalogue literal against v7.0 |
+| `approvals` | **READY** | 124 of 184 attached MCP tools auto-approved, 58 refused on the record, 2 guarded by their own precheck, **0 unclassified**. It was 16 of 86 before the read/write split existed |
 | `lifecycle` | **READY** | all five requirements walked through the real command line, in order |
 | `tests` | READY *(run separately)* | `4288 passed, 142 skipped` plus 22 `pg8000` errors, which are this container having no PostgreSQL — `tests/schema/` needs a live database |
 | `install` | **BLOCKED** *(container)* | 0.9.12 loaded against 1.9.0 published; 47 agents dispatched against 68 carried. The live defect, met in the container measuring it |

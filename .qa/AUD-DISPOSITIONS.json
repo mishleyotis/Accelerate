@@ -43,7 +43,8 @@
   "reports": "python3 -m pytest tests/skills/research_engine/test_report_structure.py tests/skills/research_engine/test_profile_reaches_the_app.py -q",
   "workbook": "python3 -m pytest tests/skills/research_engine/test_tabs_reach_the_app.py tests/skills/research_engine/test_assessment_grains.py tests/skills/research_engine/test_client_folder_versioning.py -q",
   "techstack": "python3 -m pytest tests/skills/research_engine/test_techscan_providers.py -q",
-  "ledger": "python3 -m pytest scripts/tests/test_aud_ledger_vocabulary.py -q"
+  "ledger": "python3 -m pytest scripts/tests/test_aud_ledger_vocabulary.py -q",
+  "approvals": "python3 plugins/dma-insights/scripts/audit_autoapprove.py --strict"
  },
  "findings": [
   {
@@ -2143,6 +2144,30 @@
     "ledger"
    ],
    "note": "Found by running `aud_ledger.py --md`, which nothing does on a schedule: KeyError: 'BLOCKING' out of the summary, --open, --verify and --md alike, with .qa/AUD-DISPOSITIONS.md stale behind it for as long as the drift lasted. The third drift is the serious one — a finding citing a check name with no command would have been reported by --verify as proved while running nothing, which is the acceptance-ledger shape AUD-0050 caught. Severities normalised to the one vocabulary, the three commands written down, AUD-0166 reconciled to FIXED (its NOT_THIS_ENGINE call was overruled by the owner and AUD-0173 is the fix), AUD-0169 closed against AUD-0171 which had been sitting FIXED beside it. `load()` now refuses an unreadable ledger with a message naming the rows instead of a KeyError naming a dictionary, and a test pins the vocabulary, the citations and the currency of the generated markdown."
+  },
+  {
+   "id": "AUD-0179",
+   "sev": "BLOCKER",
+   "area": "routines",
+   "title": "70 of the 86 MCP tools a session attaches prompted on every call, and not one of them had ever been ruled on",
+   "target": "hooks/autoapprove_connector.py: ENRICHMENT_TOOLS + one entry in QUALIFIED_TOOLS; no entry anywhere for Slack, Salesforce_Prod, Salesforce_Docs, GAdmin_MCP, Auctor_MCP, Grace_PMO or github",
+   "disposition": "FIXED",
+   "checks": [
+    "approvals"
+   ],
+   "note": "Owner, 2026-08-30: 'check that all MCP connector tools are usually autoapproved for all runs; I do not constantly have to approve tool calls.' Measured by feeding the REAL hook the 86 tools one session carried: 16 approved, 70 prompting. The hook had only ever learned the ENRICHMENT connectors, because those are what stopped a scheduled firing; every other attached server had never been looked at. The existing guard could not have caught it — it scans the PLUGIN's markdown, and the plugin names none of those servers. SERVER_SURFACES now splits each stable-segment server into `read` (auto-approved) and `withheld` (refused ON THE RECORD, listed rather than omitted, because an absent tool cannot be told apart from one nobody thought about); WITHHELD_SUFFIXES does the same for the opaque-UUID connectors. audit_autoapprove.py runs the real hook per tool — never a re-implementation, which would agree with itself by construction — and reports ALLOWED / WITHHELD / GUARDED / UNCLASSIFIED. Now 124 of 184 approved, 58 refused, 2 guarded, 0 unclassified. A token-based lint refuses a write smuggled into a read set, and has a test proving it fires."
+  },
+  {
+   "id": "AUD-0180",
+   "sev": "BLOCKER",
+   "area": "routines",
+   "title": "The settings grant was a server wildcard, so it silently overruled every write the hook refuses",
+   "target": "bootstrap_session.sh GRANTS: `mcp__<Server>__*` derived by grepping the plugin tree, written into user-scope permissions.allow",
+   "disposition": "FIXED",
+   "checks": [
+    "approvals"
+   ],
+   "note": "Two mechanisms answer one question and the broader one wins without anybody being told. `mcp__Google_Drive__*` had been granting `trash_file` and `share_file` — both refused by the hook — for as long as the wildcard existed. The list is read out of the plugin TREE, and a doc is part of the tree, so naming `mcp__Slack__slack_send_message` once in CLIENT-SELECTION.md §3.5 was about to grant every Slack tool including sends, in the same change that deliberately withheld that one. The grant is now derived from the hook's own table: a classified server is granted by EXACT read tool name, an unclassified one keeps the wildcard because no finer record of it exists, and the connector keeps its prefix wildcard. Every classified server is granted whether or not the tree names it, so the settings half survives a session whose hooks bound from a stale install. Two tests: no classified server is wildcarded, and every granted tool is one the hook would also approve."
   }
  ]
 }
