@@ -233,6 +233,16 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
            *, force: bool = False) -> dict:
     curated = curate(wb, spec)
     problems = check(wb, curated)
+    # Every section carries an INDEPENDENT verdict, or the report does not
+    # render. AUD-0153: the renderer refused a MISSING section and accepted
+    # an unreviewed one, so a report could ship on prose nobody had
+    # adversarially read.
+    if not force:
+        from . import narrative as N
+        try:
+            N.require_ready(wb, spec.key)
+        except N.NarrativeRefusal as e:
+            problems = list(problems) + [str(e)]
     if problems and not force:
         raise ReportRefused(
             f"REFUSED: {spec.title} is not renderable yet —\n  "

@@ -7,7 +7,7 @@ from docx import Document
 from engine import ledger as L, report_spec as RS, reports
 from engine.reports import ReportRefused
 
-from fixtures import CAT, bank_evidence, good_synthesis, new_run, synthesise
+from fixtures import sign_off_sections, CAT, bank_evidence, good_synthesis, new_run, synthesise
 
 LOREM = ("Acme Credit Union runs member-facing digital banking on Alkami, "
          "live since Q3 2024, with adoption measured at 47 percent within "
@@ -54,6 +54,7 @@ def test_both_reports_render_to_docx(tmp_path):
     out = []
     for spec in RS.SPECS.values():
         _narrate(wb, spec)
+        sign_off_sections(wb)
         out.append(reports.render(wb, spec, run.deliverables))
     assert all(r["path"].endswith(".docx") for r in out)
     assert all(Document(r["path"]).paragraphs for r in out)
@@ -69,6 +70,7 @@ def test_the_filenames_are_the_ones_the_app_classifies(tmp_path):
     run, wb = _run_with_content(tmp_path)
     for spec in RS.SPECS.values():
         _narrate(wb, spec)
+        sign_off_sections(wb)
         r = reports.render(wb, spec, run.deliverables)
         c = classify(r["path"].rsplit("/", 1)[-1])
         assert c is not None, f"{r['path']} is unclassifiable"
@@ -89,6 +91,7 @@ def test_the_citation_list_at_the_back_resolves_to_the_register(tmp_path):
     run, wb = _run_with_content(tmp_path)
     spec = RS.SPECS["assessment"]
     _narrate(wb, spec)
+    sign_off_sections(wb)
     r = reports.render(wb, spec, run.deliverables)
     assert r["unresolved"] == []
     text = "\n".join(p.text for p in Document(r["path"]).paragraphs)
@@ -132,6 +135,7 @@ def test_the_coverage_table_is_read_from_the_workbook_at_render_time(tmp_path):
     run, wb = _run_with_content(tmp_path)
     spec = RS.SPECS["assessment"]
     _narrate(wb, spec)
+    sign_off_sections(wb)
     r = reports.render(wb, spec, run.deliverables)
     doc = Document(r["path"])
     cov = wb.coverage()[0]
@@ -147,6 +151,7 @@ def test_changing_the_workbook_changes_the_report(tmp_path):
     run, wb = _run_with_content(tmp_path)
     spec = RS.SPECS["assessment"]
     _narrate(wb, spec)
+    sign_off_sections(wb)
     before = reports.render(wb, spec, run.deliverables)["citations"]
     L.append_evidence(wb, source_name="NCUA call report 2025",
                       source_url="https://ncua.example/cr25", tier="T1",
@@ -196,6 +201,7 @@ def test_a_focused_engagement_states_its_scope_instead_of_refusing(tmp_path):
     run, wb = _run_with_content(tmp_path)
     spec = RS.SPECS["assessment"]
     _narrate(wb, spec)
+    sign_off_sections(wb)
     r = reports.render(wb, spec, run.deliverables)
     text = "\n".join(p.text for p in Document(r["path"]).paragraphs)
     assert "Not in this engagement's scope" in text

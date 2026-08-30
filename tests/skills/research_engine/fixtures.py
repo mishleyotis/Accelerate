@@ -258,3 +258,34 @@ def make_shippable(wb):
                     "Public_Sources": "annual report; regulator filing",
                     "Weight_Pct": ""})
     return completeness.check(wb)
+
+
+def sign_off_sections(wb, actor="report-validator"):
+    """Give every WRITTEN report section an independent verdict.
+
+    The renderer refuses an unreviewed section (AUD-0153: it refused a
+    MISSING one and accepted an unread one, so a report could ship on prose
+    nobody had adversarially read). Tests that exercise the RENDERER still
+    need real verdicts, so this runs the real review path — a different
+    actor, every dimension by name, a note over the rubber-stamp floor —
+    rather than writing the column directly.
+    """
+    from engine import narrative as N
+    signed = 0
+    for row in wb.rows("Report_Narrative"):
+        report = str(row.get("Report") or "").strip()
+        sid = str(row.get("Section_ID") or "").strip()
+        if report not in N.RS.SPECS or not str(row.get("Body") or "").strip():
+            continue
+        if str(row.get("Author") or "").strip().lower() == actor.lower():
+            continue                       # cannot review its own work
+        try:
+            N.review(wb, report, sid, verdict="PASS", actor=actor,
+                     dimensions={d: "PASS" for d in N.REVIEW_DIMENSIONS},
+                     note=("Fixture sign-off: citations resolve, the weighing "
+                           "names a rejected reading, and any absence carries "
+                           "its ladder."))
+            signed += 1
+        except N.NarrativeRefusal:
+            continue                       # not a spec section; leave it
+    return signed

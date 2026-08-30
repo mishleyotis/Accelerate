@@ -27,6 +27,11 @@ verbatim to the module that owns it (its --help lists the subcommands):
                                  declare / complete   (the PRELIM phase)
     registry …  engine.registry  log / beat / close / list / push / pull
     complete …  engine.completeness check   (every tab populated or stated)
+    narrative … engine.narrative  state / write / review / contract
+                                 (the report sections, as arguments)
+    ers …       engine.ers       recompute / show / explain / formula
+    cost …      engine.cost      model / estimate / budget / schedule
+    template …  engine.template  id / check   (contract vs the Drive template)
 
 Every subcommand reads and writes the SAME workbook. There is no second
 substrate to fall out of step with, which is the whole point (AUD-0001).
@@ -57,7 +62,8 @@ from . import (assemble, contract, floors_gate, handoff, ledger, orient,
 #: family name -> the module whose main() owns it. Dispatched BEFORE
 #: argparse so the family's own --help answers, not this wrapper's.
 _FAMILIES = ("kg", "fuse", "memory", "techscan", "assemble", "preflight",
-             "prelim", "registry", "complete")
+             "prelim", "registry", "complete", "narrative", "ers",
+             "cost", "template")
 
 
 def _family_main(name: str):
@@ -77,6 +83,14 @@ def _family_main(name: str):
         from . import registry as m
     elif name == "complete":
         from . import completeness as m
+    elif name == "narrative":
+        from . import narrative as m
+    elif name == "ers":
+        from . import ers as m
+    elif name == "cost":
+        from . import cost as m
+    elif name == "template":
+        from . import template as m
     else:
         from . import assemble as m
     return m.main

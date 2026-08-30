@@ -114,8 +114,25 @@ ROLES = {
     # AskUserQuestion is load-bearing, not a convenience: the binding
     # preflight REFUSES a run whose sub-vertical and evidence mode were not
     # confirmed by a person, and an agent that cannot ask cannot start one.
+    # Owns the technographic scan as a deliverable rather than as a side
+    # effect. Writes only Tech_Register, through the engine CLI.
+    "research/technographic-scanner": dict(
+        writes=(), extra=[], external=["exa", "tavily", "drive"],
+        research=True),
     "research/research-conductor": dict(
         writes=(), extra=["Agent", "AskUserQuestion"], external=["drive"],
+        research=True),
+    # The report tier. Producers write sections through the engine CLI
+    # (Bash) and read the finished run; the validator writes nothing at all,
+    # because `engine.narrative review` refuses a verdict from a section's
+    # own author and an agent that could edit what it judges would be
+    # working around that rule rather than under it.
+    "reports/report-research-producer": dict(
+        writes=(), extra=[], external=["drive"], research=True),
+    "reports/report-assessment-producer": dict(
+        writes=(), extra=[], external=["drive"], research=True),
+    "reports/report-validator": dict(
+        writes=(), extra=[], external=["exa", "tavily", "drive"],
         research=True),
     "learning/learning-testgen": dict(
         writes=(), extra=["Write", "Edit"], external=[], research=False),

@@ -34,7 +34,10 @@
   "suites": "python3 -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ scripts/tests/ plugins/dma-insights/scripts/tests/ tests/skills/ -q",
   "queue": "python3 -m pytest scripts/tests/test_synthesis_queue.py -q",
   "report_parser": "python3 -m pytest apps/worker/tests/test_report_parser.py -q",
-  "lifecycle": "python3 plugins/dma-insights/scripts/stress_run_lifecycle.py"
+  "lifecycle": "python3 plugins/dma-insights/scripts/stress_run_lifecycle.py",
+  "coverage": "python3 plugins/dma-insights/scripts/audit_coverage.py --strict",
+  "report_tier": "python3 -m pytest tests/skills/research_engine/test_report_and_scan_tier.py -q",
+  "routines": "python3 -m pytest plugins/dma-insights/scripts/tests/test_routines_canon.py -q"
  },
  "findings": [
   {
@@ -1806,6 +1809,81 @@
     "engine"
    ],
    "note": "engine/registry.py: append-only run registry written at every start and round-tripped through Drive, so a fresh container sees the population. watchdog.sweep reads it (MISSING_LOCALLY carries the recovery command); every row carries a resume plan naming the agent and prompt; --revive dispatches through agent_run.py. HALTED and UNREADABLE are never revived automatically."
+  },
+  {
+   "id": "AUD-0152",
+   "sev": "BLOCKER",
+   "area": "coverage",
+   "title": "ERS is a contract column with a full calculator and nothing joining them — empty in every run ever produced",
+   "target": "engine/ledger.py:append_evidence took ers as an optional caller argument defaulting to None; no caller passed one; scripts/calculate_ers.py ran over an evidence_index.json projection no stage feeds. Golden 1: 20 rows, 20 empty cells",
+   "disposition": "DESIGNED_OUT",
+   "checks": [
+    "coverage",
+    "engine"
+   ],
+   "note": "engine/ers.py computes it at the write and RECOMPUTES across the register (corroboration is a property of the register). Specificity reads the RRF consensus and BM25 fit where 02_search carries them and SAYS SO when it falls back; corroboration counts source IDENTITIES, not rows, matching single_source_fact."
+  },
+  {
+   "id": "AUD-0153",
+   "sev": "BLOCKER",
+   "area": "coverage",
+   "title": "All sixteen report sections have no owner: the renderer refuses a missing section and nothing writes one",
+   "target": "engine/report_spec.py declares 8+8 sections; Report_Narrative was written only by prelim/preflight PRELIM-* rows. Measured by scripts/audit_coverage.py",
+   "disposition": "DESIGNED_OUT",
+   "checks": [
+    "coverage",
+    "report_tier"
+   ],
+   "note": "engine/narrative.py makes a section a RECORD (Weighing, Absence_Basis, Assumptions, Bias_Notes, Inference_Tags, computed Accuracy_Basis) with an independent Review_Verdict; report-research-producer, report-assessment-producer and report-validator generated from the spec by gen_report_agents.py --check so a new section fails the build until it has an owner. The renderer now refuses an unreviewed section."
+  },
+  {
+   "id": "AUD-0154",
+   "sev": "MAJOR",
+   "area": "coverage",
+   "title": "The technographic scan is a side effect of category researchers with no owning agent",
+   "target": "techscan.record called opportunistically by 16 researchers; no agent works the four layers deliberately, so layers_never_looked_at could not be honest",
+   "disposition": "DESIGNED_OUT",
+   "checks": [
+    "coverage",
+    "report_tier"
+   ],
+   "note": "agents/research/technographic-scanner.md owns it: four layers worked deliberately, status earned by evidence kind, connector gaps emitted as search_requests rather than fabricated. Its JSON is asserted against the app's own parse_technographic_scan."
+  },
+  {
+   "id": "AUD-0155",
+   "sev": "BLOCKER",
+   "area": "cost",
+   "title": "Nothing in the engine knew what a run cost; the $5/pillar ceiling was a hope",
+   "target": "Golden 1 measured: $6.45 for six subcaps, 76% of it cache reads (130K re-read on each of 188 turns). A 690-cell engagement projects to ~$741 against a $20 target",
+   "disposition": "MITIGATED",
+   "checks": [
+    "engine"
+   ],
+   "note": "engine/cost.py prices a run from the rate card and states four levers with their arithmetic: capability grain (x0.20), turn discipline (x0.26), context hygiene (x0.50), model tiering (x0.65, a PLACEHOLDER and labelled as one) -> $12.46 against $20. MITIGATED not DESIGNED_OUT: three levers are arithmetic, the fourth is unmeasured, and none is enforced by the harness yet."
+  },
+  {
+   "id": "AUD-0156",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "No routine starts a DMA assessment: five Routines watch, rectify, refresh and promote, and none begins a run",
+   "target": "list_triggers 2026-08-30: dma-watchdog, sequence-a, sequence-b, refresh-drift-daily, rectification-weekly",
+   "disposition": "FIXED",
+   "checks": [
+    "routines"
+   ],
+   "note": "dma-assessment-intake (trig_018eeMRDobRQXPZ4aobjfUih, 59 * * * *) prepares the binding for unstarted client folders and STOPS at the AskUserQuestion, which a headless firing cannot answer. Half-hourly was specified and the API enforces an hourly minimum; the canon records the built cadence, not the wished-for one."
+  },
+  {
+   "id": "AUD-0157",
+   "sev": "MAJOR",
+   "area": "coverage",
+   "title": "Template adherence was unverifiable: the template's identifier appeared nowhere in the plugin",
+   "target": "the read-only-template rule is real, and nothing compared the built shape against the maintained one",
+   "disposition": "DESIGNED_OUT",
+   "checks": [
+    "coverage"
+   ],
+   "note": "engine/template.py diffs a local copy against contract.SHEETS — shape only, since the template's rows are placeholders by design. The CONTRACT is authoritative; the check exists to make divergence visible while somebody can still decide which side is wrong."
   }
  ]
 }

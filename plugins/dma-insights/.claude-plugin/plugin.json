@@ -1,8 +1,8 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "1.5.0",
-  "description": "The six Digital Maturity Assessment skills, 64 DMA agents — 16 category-clustered researchers and their conductor — the remote DMA Insights MCP connector (33 tools), and the research ENGINE that makes a run finish unattended: a binding preflight the engagement owner answers, a PRELIM phase that gates category dispatch, a completeness gate on every workbook tab, and a watchdog that revives a run that stopped. See docs/END-TO-END.md.",
+  "version": "1.7.0",
+  "description": "The six Digital Maturity Assessment skills, 68 DMA agents — 16 category researchers, a technographic scanner, two report producers and a report validator — the remote MCP connector (33 tools), and the research ENGINE: a binding preflight the engagement owner answers, a PRELIM phase that gates dispatch, ERS computed from RRF retrieval, report sections written as arguments with independent review, a measured cost model, and a watchdog that revives a stopped run.",
   "author": {
     "name": "Zennify — DMA Insights build"
   },
@@ -79,6 +79,9 @@
     "./agents/qa/adversarial-verifier.md",
     "./agents/qa/deployed-app-auditor.md",
     "./agents/qa/qa-overseer.md",
+    "./agents/reports/report-assessment-producer.md",
+    "./agents/reports/report-research-producer.md",
+    "./agents/reports/report-validator.md",
     "./agents/research/categories/research-p1c1-producer.md",
     "./agents/research/categories/research-p1c2-producer.md",
     "./agents/research/categories/research-p1c3-producer.md",
@@ -95,6 +98,7 @@
     "./agents/research/categories/research-p4c2-producer.md",
     "./agents/research/categories/research-p4c3-producer.md",
     "./agents/research/categories/research-p4c4-producer.md",
-    "./agents/research/research-conductor.md"
+    "./agents/research/research-conductor.md",
+    "./agents/research/technographic-scanner.md"
   ]
 }

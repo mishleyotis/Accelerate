@@ -58,6 +58,7 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
                     tier: str, excerpt: str, subcaps, published: str | None = None,
                     claim_type: str = "FACT", origin: str = "public",
                     ers: float | None = None, anchor_quote: str | None = None,
+                    run=None,
                     access_status: str = "OK", conflict: str | None = None,
                     fact_id: str = "F1") -> str:
     """Register one fact and return its server-shaped id.
@@ -98,13 +99,30 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
     eid = wb.next_evidence_id()
     wb.append("Evidence_Detail", {
         "E_ID": eid, "Fact_ID": fact_id, "Source_Name": source_name,
-        "Source_URL": source_url, "Tier": tier, "ERS": ers,
+        "Source_URL": source_url, "Tier": tier, "ERS": None,
         "Date_Published": published, "Recency": recency_band(published, wb),
         "Claim_Type": claim_type, "Fact_Count": 1,
         "SubCap_IDs": ", ".join(cells), "Excerpt": text,
         "Anchor_Quote": anchor_quote or text, "Retrieved_At": _utcnow(),
         "Origin": origin, "Access_Status": access_status, "Conflict": conflict,
     })
+    # ERS is COMPUTED, not supplied. AUD-0152: the column existed, a full
+    # calculator existed, and nothing joined them — twenty rows, twenty
+    # empty cells, in every run ever produced. Recomputed across the whole
+    # register because corroboration is a property of the register: a row
+    # banked first is re-scored when its second source arrives.
+    if ers is not None:
+        # An explicitly supplied score is IGNORED, on the same principle the
+        # connector applies (invariant 10). Saying so beats silence.
+        wb.append("Provenance", {
+            "SubCap_ID": "", "Step": "ers_supplied_ignored",
+            "Actor": "ledger", "At": _utcnow(),
+            "Detail": f"{eid}: caller passed ERS={ers}; the score is computed "
+                      f"server-side from tier, recency, specificity and "
+                      f"corroboration"}, save=False)
+    from . import ers as _ers
+    _ers.recompute(wb, run)
+
     for cell in cells:
         row = wb.scoring_row(cell) or {}
         have = [i for i in _split_ids(row.get("Evidence_IDs"))

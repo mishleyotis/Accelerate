@@ -23,7 +23,7 @@ sys.path.insert(0, str(REPO / "apps" / "worker"))
 from engine import contract as C, ledger as L, report_spec as RS   # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from fixtures import (close_prelim, make_shippable,  # noqa: E402
-                      synthesise)
+                      sign_off_sections, synthesise)
 from engine import floors_gate, runstate                           # noqa: E402
 
 
@@ -100,6 +100,7 @@ def finished_run(tmp_path_factory):
         assert v["gate"] == "PASS", (cat, v["blocking"])
 
     _narrate(wb)
+    sign_off_sections(wb)   # the renderer refuses unreviewed prose
     make_shippable(wb)
     return run
 
