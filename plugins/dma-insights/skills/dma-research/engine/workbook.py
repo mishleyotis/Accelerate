@@ -356,6 +356,15 @@ class RunWorkbook:
             "prelim_status": "OPEN",
             "prelim_completed_at": "",
             "empty_sheet_reasons": "",
+            # The Slack request this run answers, when it came from one.
+            # `engine.cli start --slack-channel/--slack-thread-ts/
+            # --requested-by` fills them; the automated intake always does
+            # and the manual path never does. Empty is the manual run, not a
+            # missing field — the completion reply reads slack_thread_ts and
+            # posts nowhere when it is blank, which is correct.
+            "slack_channel": "",
+            "slack_thread_ts": "",
+            "requested_by": "",
         }
         for k in ("run_id", "entity_name", "entity_id", "reference_date"):
             v = str(vals[k])

@@ -357,15 +357,22 @@ jobs:
       - name: Unit tests, and a suite that skips silently fails
         run: |
           set -o pipefail
-          # `-rf` beside `-rs`: `-q` alone prints NO "FAILED ..." lines, and
+          # `-rfs`, ONE flag: `-q` alone prints NO "FAILED ..." lines, and
           # the report step below greps for exactly those. Measured
           # 2026-08-20 — a red build's own summary showed only SKIPPED
           # reasons, so finding which three tests failed took three round
           # trips through a log whose tail is Postgres teardown noise. The
           # check now names its failures where the check is read.
+          #
+          # It was `-rs -rf` until 2026-08-30, and a second -r REPLACES the
+          # first rather than adding to it — so only failures were ever
+          # reported and the ceiling's own "--- the reasons ---" grep for
+          # ^SKIPPED matched nothing, every time. The build that overran the
+          # ceiling printed the header and then no reasons, which is how a
+          # diagnostic fails: not by being absent, by being empty.
           python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
                  scripts/tests/ plugins/dma-insights/scripts/tests/ \
-                 tests/skills/ infra/jobs/tests/ -q -rs -rf 2>&1 | tee /tmp/pytest.txt
+                 tests/skills/ infra/jobs/tests/ -q -rfs 2>&1 | tee /tmp/pytest.txt
           n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
           # Ceiling raised 11 -> 12 on 2026-08-22 for exactly one test:
           # test_evidence_verbatim.py::test_the_real_package_yields_real_excerpts,
@@ -375,6 +382,17 @@ jobs:
           # rule it exercises is also covered by unit tests in the same file
           # that DO run here. Raise this number only with the same kind of
           # note; the ratchet is the point.
+          #
+          # It caught one on 2026-08-30, which is the whole argument for it:
+          # 15 against a ceiling of 12. The three extra were
+          # test_synthesis_watchdog.py's prompt checks, which found the
+          # watchdog's section in ROUTINES.md by its TITLE. The routine was
+          # renamed to `dma-watchdog`, the literal stopped matching, and
+          # three checks turned themselves into skips — silently, while the
+          # suite stayed green. A fourth in the same file did not even skip:
+          # it returned, and a bare return is a pass. All four now find the
+          # section by its id and fail if it moves. The ceiling stays 12;
+          # the answer to a skip is almost never a bigger number.
           echo "skipped: ${n:-0} (ceiling 12)"
           if [ "${n:-0}" -gt 12 ]; then
             echo "--- the reasons, most common first ---"

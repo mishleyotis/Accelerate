@@ -180,3 +180,84 @@ def test_the_wrong_subverticals_variants_never_enter_the_run(tmp_path):
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── the request the run is answering ──
+#
+# A run is started by one firing and finished by another, days later and in
+# another container. The Slack thread the requester is watching is therefore
+# not in anyone's memory when the completion reply is due — it is in the
+# workbook or it is gone, and a request whose thread is lost stays open
+# forever while its assessment sits delivered in a folder nobody was told
+# about.
+#
+# Added 2026-08-30 with the keys themselves. The first version of that change
+# added them to RUN_METADATA_KEYS and nothing else: the sheet writer reads
+# every key out of a literal dict, so every new run raised KeyError and 226
+# tests went red at once. The lesson in the pair below is that a metadata key
+# is three things — declared, defaulted, and fillable — and two of them are
+# silent when missing.
+
+def test_a_run_carries_the_slack_request_it_answers(tmp_path):
+    pf = preflight_file(tmp_path)
+    r = subprocess.run(
+        [sys.executable, "-m", "engine.cli", "start", "--run", "R-BIND-SLACK",
+         "--root", str(tmp_path / "run"), "--entity", "Acme CU",
+         "--entity-id", "acme-cu", "--reference-date", "2026-08-29",
+         "--preflight", str(pf), "--no-folder",
+         "--slack-channel", "C0AD83KJ4DU",
+         "--slack-thread-ts", "1756400000.123456",
+         "--requested-by", "U09TL2S4LLS"],
+        cwd=ENGINE, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert json.loads(r.stdout)["request"] == {
+        "slack_channel": "C0AD83KJ4DU",
+        "slack_thread_ts": "1756400000.123456",
+        "requested_by": "U09TL2S4LLS"}
+    md = runstate.locate("R-BIND-SLACK", root=tmp_path / "run").open().metadata()
+    assert md["slack_thread_ts"] == "1756400000.123456", (
+        "the thread the completion reply must answer did not survive into "
+        "the workbook, so the firing that promotes this run — another "
+        "container, days later — has nowhere to post")
+    assert md["slack_channel"] == "C0AD83KJ4DU"
+    assert md["requested_by"] == "U09TL2S4LLS"
+
+
+def test_a_manual_run_carries_the_keys_empty_rather_than_absent(tmp_path):
+    """The manual path names a client and no thread. Empty is a state the
+    reply step reads and declines to post on; a MISSING key is a KeyError in
+    whatever opens the workbook next."""
+    pf = preflight_file(tmp_path)
+    r = subprocess.run(
+        [sys.executable, "-m", "engine.cli", "start", "--run", "R-BIND-MANUAL",
+         "--root", str(tmp_path / "run"), "--entity", "Acme CU",
+         "--entity-id", "acme-cu", "--reference-date", "2026-08-29",
+         "--preflight", str(pf), "--no-folder"],
+        cwd=ENGINE, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    md = runstate.locate("R-BIND-MANUAL", root=tmp_path / "run").open().metadata()
+    for k in ("slack_channel", "slack_thread_ts", "requested_by"):
+        assert k in md, f"Run_Metadata is missing {k} entirely"
+        # openpyxl reads a blank cell back as None, which is how every other
+        # deliberately-empty key on this sheet already reads. Both spellings
+        # are the same state — "there is no thread to answer" — and the
+        # property that matters is that reading it is not a KeyError.
+        assert not md[k], f"{k} should be empty on a manual run, got {md[k]!r}"
+
+
+def test_every_declared_metadata_key_is_written_by_a_new_run(tmp_path):
+    """The general form of the defect, so the next added key cannot repeat
+    it: the contract's key list and the sheet a new run writes are the same
+    set, checked here rather than discovered by a KeyError in production."""
+    from engine import contract as C
+    run = runstate.start(
+        run_id="R-BIND-KEYS", entity_name="Acme CU", entity_id="acme-cu",
+        sub_vertical="CU", scope_mode="T1_CORE",
+        reference_date="2026-08-29", root=tmp_path / "runk",
+        evidence_mode="PUBLIC", sv_basis=BASIS_SV, mode_basis=BASIS_MODE)
+    written = set(run.open().metadata())
+    missing = [k for k in C.RUN_METADATA_KEYS if k not in written]
+    assert not missing, (
+        f"declared in RUN_METADATA_KEYS and not written by a new run: "
+        f"{missing}. A key that is declared but never written is read as a "
+        f"KeyError by everything downstream")

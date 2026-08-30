@@ -278,21 +278,16 @@ def test_promotion_is_opt_in():
 def test_the_routine_prompt_carries_no_inline_heredoc():
     """THE DEFECT ITSELF. If a heredoc reappears in the watchdog's prompt in
     ROUTINES.md, this fails — the logic belongs in a tested script."""
-    from pathlib import Path
-    doc = Path(__file__).resolve().parents[2] / \
-        "plugins/dma-insights/docs/ROUTINES.md"
-    if not doc.is_file():
-        return
-    text = doc.read_text(encoding="utf-8")
     # Scope to the FENCED PROMPT, not the prose around it: the section
     # explains the defect and therefore quotes the very strings this guards
     # against. Checking the surrounding prose would fail on its own
     # documentation, which is a test measuring the wrong thing.
-    i = text.find("### 2d · DMA synthesis watchdog")
-    if i < 0:
-        return
-    start = text.index("```", i) + 3
-    block = text[start:text.index("\n```", start)]
+    #
+    # This used to find the section by title and `return` when it could not —
+    # a bare return is a PASS, so the rename to `dma-watchdog` made this
+    # check vacuous without even the skip that gave the three below away.
+    block = _watchdog_prompt()
+    assert block, "the watchdog's prompt is not in ROUTINES.md"
     assert "<<'PY'" not in block, (
         "the watchdog prompt has an inline heredoc again; promotion logic "
         "belongs in synthesis_watchdog.py --promote-ready, where it is tested")
@@ -310,6 +305,16 @@ def test_the_routine_prompt_carries_no_inline_heredoc():
 # nothing type-checks them, so the flags they name are checked here.
 
 
+#: The watchdog's section in ROUTINES.md, found by its SECTION ID rather than
+#: by its title. Until 2026-08-30 this matched the literal
+#: "### 2d · DMA synthesis watchdog"; the routine was renamed to
+#: `dma-watchdog` and the literal stopped matching, so every assertion below
+#: turned into a skip and three real checks silently stopped running for as
+#: long as nobody counted skips. CI's skip ceiling is what found it. A title
+#: is prose and will be rewritten again; the id is the address.
+_WATCHDOG_SECTION = "### 2d · "
+
+
 def _watchdog_prompt() -> str:
     from pathlib import Path
     doc = Path(__file__).resolve().parents[2] / \
@@ -317,11 +322,25 @@ def _watchdog_prompt() -> str:
     if not doc.is_file():
         return ""
     t = doc.read_text(encoding="utf-8")
-    i = t.find("### 2d · DMA synthesis watchdog")
+    i = t.find(_WATCHDOG_SECTION)
     if i < 0:
         return ""
     start = t.index("```", i) + 3
     return t[start:t.index("\n```", start)]
+
+
+def test_the_watchdog_section_is_still_findable():
+    """The guard the two tests below cannot be: they read the prompt, and a
+    prompt that cannot be found reads exactly like a prompt with nothing
+    wrong in it. This one fails when the section moves."""
+    prompt = _watchdog_prompt()
+    assert prompt, (
+        f"no fenced block under `{_WATCHDOG_SECTION}` in ROUTINES.md — the "
+        f"watchdog routine's section has been renumbered or its prompt "
+        f"unfenced, and every check that reads that prompt is now vacuous")
+    assert "synthesis_watchdog.py" in prompt, (
+        f"the block under `{_WATCHDOG_SECTION}` does not name "
+        f"synthesis_watchdog.py, so it is not the watchdog's prompt")
 
 
 def _flags_for(script: str, sub: str) -> set:
@@ -343,11 +362,11 @@ def _flags_for(script: str, sub: str) -> set:
 def test_every_flag_the_watchdog_prompt_names_exists(script, sub):
     import re
     prompt = _watchdog_prompt()
-    if not prompt:
-        pytest.skip("watchdog prompt not in ROUTINES.md")
+    assert prompt, "watchdog prompt not in ROUTINES.md"
     defined = _flags_for(script, sub)
-    if not defined:
-        pytest.skip(f"could not read {script} {sub} --help")
+    assert defined, (
+        f"`{script} {sub} --help` printed no flags, so the prompt's cannot "
+        f"be checked — the script is broken, not the check")
     name = script.rsplit("/", 1)[-1]
     for line in re.findall(rf"{re.escape(name)}\s+{re.escape(sub)}([^`\n]*)",
                            prompt):
@@ -363,8 +382,7 @@ def test_the_watchdog_prompt_names_only_real_watchdog_flags():
     import subprocess
     from pathlib import Path
     prompt = _watchdog_prompt()
-    if not prompt:
-        pytest.skip("watchdog prompt not in ROUTINES.md")
+    assert prompt, "watchdog prompt not in ROUTINES.md"
     root = Path(__file__).resolve().parents[2]
     r = subprocess.run(["python3", str(root / "scripts/synthesis_watchdog.py"),
                         "--help"], capture_output=True, text=True, timeout=60)

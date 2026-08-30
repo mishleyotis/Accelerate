@@ -48,7 +48,9 @@
   "schema": "bash infra/local/up.sh && python3 -m pytest tests/schema/ -q",
   "stage_walk": "python3 plugins/dma-insights/scripts/stress_stage_and_supersede.py",
   "chain": "python3 plugins/dma-insights/scripts/audit_chain.py --strict",
-  "intake": "python3 -m pytest plugins/dma-insights/scripts/tests/test_slack_intake.py -q"
+  "intake": "python3 -m pytest plugins/dma-insights/scripts/tests/test_slack_intake.py -q",
+  "watchdog_prompt": "python3 -m pytest scripts/tests/test_synthesis_watchdog.py -q",
+  "binding": "python3 -m pytest tests/skills/research_engine/test_binding.py -q"
  },
  "findings": [
   {
@@ -2295,6 +2297,41 @@
     "routines"
    ],
    "note": "Measured 2026-08-30 from the live trigger record. update_trigger cannot add connectors — only the Routine's own edit screen in the claude.ai routines UI can, or a delete-and-recreate that would change the trigger id and discard its run history, which is not a thing to do to somebody's account uninvited. The prompt's STEP 1 checks for the Slack tools and, finding none, stops and reports exactly what must be attached and where — one cheap honest firing rather than a silent failure or an invented queue. OPEN because a human must attach Slack; no change to this repository can."
+  },
+  {
+   "id": "AUD-0191",
+   "sev": "MAJOR",
+   "area": "tests",
+   "title": "Four watchdog-prompt checks found ROUTINES.md by title, and the routine was renamed — three turned into skips, one into a pass",
+   "target": "scripts/tests/test_synthesis_watchdog.py: _watchdog_prompt() and test_the_routine_prompt_carries_no_inline_heredoc searched for the literal '### 2d · DMA synthesis watchdog'",
+   "disposition": "FIXED",
+   "checks": [
+    "watchdog_prompt"
+   ],
+   "note": "The routine is called `dma-watchdog` now, so the literal matched nothing. Three checks answered that by skipping and one by returning — and a bare return is a pass, so it was the more dangerous of the two. Nothing was verifying the watchdog's prompt: not the flags it names, not the heredoc it must not carry. Found 2026-08-30 by CI's skip ceiling (15 against 12), which is the only thing in the repository that could have found it. All four now address the section by its id ('### 2d · ') and fail rather than skip, and a new test_the_watchdog_section_is_still_findable fails when the section moves again. 55 pass, 0 skip, where 52 passed and 3 skipped. The ceiling stays 12."
+  },
+  {
+   "id": "AUD-0192",
+   "sev": "BLOCKER",
+   "area": "engine",
+   "title": "Three keys were added to RUN_METADATA_KEYS and to nothing else, so every new run raised KeyError",
+   "target": "engine/workbook.py:369 writes `vals[k]` for k in C.RUN_METADATA_KEYS, and `vals` is a literal dict that did not carry slack_channel, slack_thread_ts or requested_by",
+   "disposition": "FIXED",
+   "checks": [
+    "binding",
+    "engine"
+   ],
+   "note": "226 tests across tests/skills/research_engine/ went red at once — every one that starts a run. Found 2026-08-30 by running the CI suite list locally, not by CI, because the change was still uncommitted; had it been pushed it would have taken the build down whole. A metadata key is three things — declared, defaulted and fillable — and only the declaration is loud when it is missing. All three now default to empty in the sheet writer, `engine.cli start` takes --slack-channel/--slack-thread-ts/--requested-by, and test_every_declared_metadata_key_is_written_by_a_new_run compares the declared set against the written one so the next added key cannot repeat this."
+  },
+  {
+   "id": "AUD-0193",
+   "sev": "MAJOR",
+   "area": "ci",
+   "title": "The skip-ceiling's own diagnostic printed a header and no reasons, every time",
+   "target": ".github/workflows/ci.yml: `-q -rs -rf` — the second -r replaces the first, so ^SKIPPED lines were never emitted and the ceiling's `grep '^SKIPPED'` matched nothing",
+   "disposition": "FIXED",
+   "checks": [],
+   "note": "Measured 2026-08-30 on the build that overran the ceiling: it printed `--- the reasons, most common first ---` and then nothing, so which three tests had started skipping had to be found by reproducing the whole suite locally. Now `-rfs`, one flag, both letters. A diagnostic that is present and empty is worse than one that is absent: the absent one is noticed."
   }
  ]
 }

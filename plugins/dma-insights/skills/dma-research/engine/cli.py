@@ -148,6 +148,20 @@ def main(argv=None) -> int:
                         "(default: beside the run tree)")
     s.add_argument("--no-push", action="store_true",
                    help="do not push the opened folder to the intake Drive")
+    # WHERE THE REQUEST CAME FROM. The firing that starts a run is not the
+    # firing that finishes it — often days and certainly containers apart —
+    # so the thread to answer travels in the workbook or it is lost. The
+    # automated intake passes all three; the manual path passes none, and
+    # empty means "no thread to answer", which is a state and not a gap.
+    s.add_argument("--slack-channel", default="",
+                   help="the channel the request was posted in")
+    s.add_argument("--slack-thread-ts", default="",
+                   help="the request message's ts — the thread the completion "
+                        "reply goes back to. Take it from `slack_intake.py "
+                        "triage`; a ts typed by hand answers a thread nobody "
+                        "asked in")
+    s.add_argument("--requested-by", default="",
+                   help="the Slack user id that submitted the request")
 
     o = common(sub.add_parser("orient")); o.add_argument("--category")
     q = common(sub.add_parser("search"))
@@ -228,6 +242,14 @@ def main(argv=None) -> int:
                              sv_basis=b["sv_basis"],
                              mode_basis=b["mode_basis"],
                              lob_census=b["lob_census"])
+        # Recorded before anything else touches the workbook: a run that
+        # dies in preflight.record still knows which thread was waiting.
+        wb = run.open()
+        for key, val in (("slack_channel", a.slack_channel),
+                         ("slack_thread_ts", a.slack_thread_ts),
+                         ("requested_by", a.requested_by)):
+            if val:
+                wb.set_metadata(key, val)
         recorded = preflight.record(run, pf["doc"], pf["report"])
         out = {"run": run.run_id, "workbook": str(run.workbook_path),
                "selected": len(run.open().selected_subcaps()),
@@ -238,7 +260,10 @@ def main(argv=None) -> int:
                            "lob_census": b["lob_census"],
                            "preflight_sha": b["preflight_sha"]},
                "preflight": {"revenue_lines": recorded["revenue_lines"],
-                             "evidence_banked": recorded["evidence_banked"]}}
+                             "evidence_banked": recorded["evidence_banked"]},
+               "request": {"slack_channel": a.slack_channel,
+                           "slack_thread_ts": a.slack_thread_ts,
+                           "requested_by": a.requested_by}}
         if a.no_folder:
             out["client_folder"] = {
                 "outcome": "NOT_RUN",
