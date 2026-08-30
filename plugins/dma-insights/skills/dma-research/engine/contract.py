@@ -601,6 +601,21 @@ RUN_METADATA_KEYS = (
     # The client folder, opened at run start rather than assembled at the
     # end: a run that stops early must still be findable in the intake tree.
     "client_folder", "client_folder_opened_at",
+    # WHERE THE REQUEST CAME FROM, so the answer can go back to it.
+    #
+    # Assessment requests arrive in a Slack thread (#deal-desk) and are
+    # finished when somebody replies IN THAT THREAD with the folder link. The
+    # run that answers a request is started by one firing and finished by
+    # another — often days later, certainly in another container — so the
+    # thread has to travel with the run or the completion reply has nowhere
+    # to go and the requester is left watching a thread that never closes.
+    #
+    # Additive: a run started any other way simply carries neither, and
+    # `slack_thread_ts` empty means "there is no thread to answer", which is
+    # the manual path and not a defect. No contract bump — the Run_Metadata
+    # sheet is key/value rows, so an older workbook is missing a row rather
+    # than the wrong shape.
+    "slack_channel", "slack_thread_ts", "requested_by",
     # PRELIM: the preliminary research pass that grounds the Client Research
     # Profile. Category dispatch refuses while it is open.
     "prelim_status", "prelim_completed_at",

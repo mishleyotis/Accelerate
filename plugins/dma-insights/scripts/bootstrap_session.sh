@@ -423,8 +423,15 @@ out = []
 # bound from a stale install.
 for server in sorted(seen | set(aac.SERVER_SURFACES)):
     if server in aac.SERVER_SURFACES:
+        # A CONDITIONAL tool must never reach this list. A settings grant is
+        # honoured without the hook being consulted, so granting one here
+        # would approve it everywhere and leave its argument check running
+        # on nothing. Belt to the hook's braces: conditional tools are not
+        # in any `read` set today, and this makes that a rule rather than a
+        # coincidence somebody could undo.
         out += [f"mcp__{server}__{t}"
-                for t in sorted(aac.SERVER_SURFACES[server]["read"])]
+                for t in sorted(aac.SERVER_SURFACES[server]["read"])
+                if f"mcp__{server}__{t}" not in aac.CONDITIONAL_TOOLS]
     else:
         out.append(f"mcp__{server}__*")
 print("\n".join(out))

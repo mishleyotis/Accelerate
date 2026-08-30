@@ -373,15 +373,13 @@ _DELIBERATELY_PROMPTING = {
     # scheduled session a write nobody sanctioned.
     "add-company-data-points": "writes to the user's Clay workspace",
     "add-contact-data-points": "writes to the user's Clay workspace",
-    # Named ONLY by docs/CLIENT-SELECTION.md §3.5, as the reply path of a
-    # Slack channel that is specified and NOT BUILT. A send publishes to an
-    # external surface: it reaches people, it is not retractable, and no
-    # Routine calls it today, so the prompt costs no firing. Whoever builds
-    # §3 has to make that approval deliberately, in the same change that
-    # builds the sender — inheriting a blanket allow from a document that
-    # merely NAMES the tool is how an unattended session acquires a voice.
-    "slack_send_message": "publishes to an external surface; the channel that "
-                          "would use it is specified and not built",
+    # `slack_send_message` was here until 2026-08-30 with the reason "the
+    # channel that would use it is specified and not built". The channel IS
+    # built now — the assessment intake reads #deal-desk and replies in the
+    # request's thread — so the obligation that entry recorded has been
+    # discharged, and the tool moved to CONDITIONAL_TOOLS: allowed into that
+    # one channel, still prompting everywhere else. Leaving it here would
+    # have made this table say a thing that is no longer true.
 }
 
 
@@ -418,6 +416,11 @@ def test_every_mcp_tool_the_plugin_names_is_allowed_or_deliberately_not():
             # promote on — so they are answered for, not left prompting.
             continue
         if full.rsplit("__", 1)[1] in _DELIBERATELY_PROMPTING:
+            continue
+        if full in aac.CONDITIONAL_TOOLS:
+            # Allowed on an ARGUMENT rather than a name. It is answered for —
+            # see test_the_conditional_send_is_scoped_to_one_channel, which
+            # proves both halves of the claim.
             continue
         unexplained[full] = sorted(where)[0]
     assert not unexplained, (
@@ -569,7 +572,7 @@ def test_the_lint_would_actually_catch_a_write_smuggled_into_a_read_set():
 
 
 def test_the_writes_this_session_carries_are_all_still_refused():
-    for t in ("mcp__Slack__slack_send_message",
+    for t in ("mcp__Slack__slack_send_message_draft",
               "mcp__Salesforce_Prod__deleteSobjectRecord",
               "mcp__Salesforce_Prod__createSobjectRecord",
               "mcp__GAdmin_MCP__suspend_user",
@@ -616,3 +619,78 @@ def test_strict_passes_when_every_tool_is_ruled_on(tmp_path):
                       "mcp__Slack__slack_send_message\n"
                       "mcp__plugin_dma-insights_connector__promote_run\n")
     assert AA.main(["--roster", str(roster), "--strict"]) == 0
+
+
+# ── the conditional send: one channel, and only one ─────────────────────
+#
+# The assessment intake reads #deal-desk for requests and replies in the
+# request's own thread when the assessment is delivered. That reply is a SEND,
+# and a scheduled session has nobody to answer its prompt — the failure this
+# whole file exists to prevent. Blanket-approving it would hand every agent in
+# every firing the ability to post anywhere in the workspace, so the decision
+# reads the ARGUMENT instead.
+
+def _decide(tool, args=None):
+    """The REAL hook, with a real PreToolUse event."""
+    event = {"tool_name": tool, "hook_event_name": "PreToolUse"}
+    if args is not None:
+        event["tool_input"] = args
+    r = subprocess.run([sys.executable, str(HOOKS / "autoapprove_connector.py")],
+                       input=json.dumps(event), capture_output=True,
+                       text=True, timeout=60)
+    if not r.stdout.strip():
+        return None
+    return json.loads(r.stdout)["hookSpecificOutput"]["permissionDecision"]
+
+
+def test_the_conditional_send_is_scoped_to_one_channel():
+    tool = "mcp__Slack__slack_send_message"
+    assert _decide(tool, {"channel_id": aac.DEAL_DESK_CHANNEL_ID,
+                          "message": "done"}) == "allow"
+    assert _decide(tool, {"channel_id": "C0SOMEWHEREELSE",
+                          "message": "done"}) is None
+    assert _decide(tool, {"message": "no channel at all"}) is None
+    assert _decide(tool) is None, "no arguments at all must not allow"
+
+
+def test_an_out_of_scope_send_is_not_DENIED_only_undecided():
+    """A deny would also block a person driving an interactive session. This
+    hook exists to spare an unattended session a prompt, not to take a
+    decision away from someone who is there to make it."""
+    assert _decide("mcp__Slack__slack_send_message",
+                   {"channel_id": "C0SOMEWHEREELSE", "message": "x"}) is None
+
+
+def test_a_conditional_tool_is_never_in_a_read_set_or_the_settings_grant():
+    """The trap. `bootstrap_session.sh` derives user-scope permissions.allow
+    from the read sets, and a settings grant is honoured WITHOUT the hook
+    being consulted — so a conditional tool in a read set would be approved
+    everywhere and its channel check would exist and never run."""
+    for tool in aac.CONDITIONAL_TOOLS:
+        assert tool not in aac.QUALIFIED_TOOLS, tool
+        assert tool not in aac.WITHHELD_TOOLS, tool
+        assert aac.suffix_of(tool) not in aac.ENRICHMENT_TOOLS \
+            if hasattr(aac, "suffix_of") else True
+
+    src = (_PLUGIN / "scripts" / "bootstrap_session.sh").read_text()
+    assert "CONDITIONAL_TOOLS" in src, (
+        "the grant derivation must exclude conditional tools explicitly, or "
+        "moving one into a read set silently un-scopes it")
+
+
+def test_the_channel_constant_agrees_with_the_intake_script():
+    """Two files naming one channel is how a rule starts applying to the
+    wrong room. The hook cannot import from scripts/ — it runs standalone
+    from the installed plugin — so the constants are pinned to each other
+    here instead."""
+    sys.path.insert(0, str(_PLUGIN / "scripts"))
+    import slack_intake
+
+    assert aac.DEAL_DESK_CHANNEL_ID == slack_intake.DEAL_DESK_CHANNEL_ID
+
+
+def test_every_conditional_tool_states_why_and_what_it_is_scoped_to():
+    for tool, rule in aac.CONDITIONAL_TOOLS.items():
+        assert rule["why"].strip(), tool
+        assert rule["scope"].strip(), tool
+        assert callable(rule["test"]), tool

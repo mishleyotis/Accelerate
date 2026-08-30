@@ -229,7 +229,11 @@ SERVER_SURFACES = {
                  "slack_read_thread", "slack_read_user_profile",
                  "slack_search_channels", "slack_search_public",
                  "slack_search_public_and_private", "slack_search_users"},
-        "withheld": {"slack_send_message", "slack_send_message_draft",
+        # `slack_send_message` is NOT here: it is CONDITIONAL — allowed
+        # into #deal-desk and nowhere else — and a tool cannot be both
+        # withheld and conditionally allowed without one of the two records
+        # being a lie. See CONDITIONAL_TOOLS.
+        "withheld": {"slack_send_message_draft",
                      "slack_schedule_message", "slack_create_canvas",
                      "slack_update_canvas"},
     },
@@ -325,6 +329,56 @@ WITHHELD_TOOLS = frozenset(
     for server, surface in SERVER_SURFACES.items()
     for tool in surface["withheld"])
 
+#: A THIRD disposition: allowed only when an ARGUMENT says so.
+#:
+#: Added 2026-08-30, when the owner moved the assessment intake onto Slack:
+#: the routine reads #deal-desk for requests and, at completion, replies in
+#: the request's own thread with the folder link. That last step is a SEND,
+#: and a scheduled session has nobody to answer its prompt — the failure that
+#: made this hook exist (MEM-0118).
+#:
+#: Blanket-approving `slack_send_message` would hand every agent in every
+#: firing the ability to post anywhere in the workspace. So the decision reads
+#: the ARGUMENT: this one channel, and nothing else. The event carries it —
+#: `precheck_submit.py` and `deny_credential_ops.py` both read `tool_input`
+#: already; this hook simply had never looked.
+#:
+#: A conditional tool must NOT be listed in any server's `read` set, and the
+#: reason is load-bearing: `bootstrap_session.sh` derives user-scope
+#: `permissions.allow` entries from those read sets, and a settings grant is
+#: honoured WITHOUT the hook being consulted. A read-set entry would therefore
+#: approve the send everywhere and the channel check would exist and never
+#: run.
+#:
+#: The predicate returns True to allow. Anything else — a different channel, a
+#: missing argument, a malformed event — returns False, which prints NOTHING.
+#: Not a deny: a person driving an interactive session must still be able to
+#: send, and this hook exists to spare an unattended one a prompt, not to take
+#: a decision away from someone who is there to make it.
+#: #deal-desk. Declared here because a hook cannot import from `scripts/`
+#: (it runs standalone from the installed plugin), and pinned to
+#: `slack_intake.DEAL_DESK_CHANNEL_ID` by a test so the two cannot drift.
+DEAL_DESK_CHANNEL_ID = "C0AD83KJ4DU"
+
+
+def _to_deal_desk(args: dict) -> bool:
+    """True only for a send into #deal-desk. `channel_id` is the argument the
+    tool actually takes; `channel` is accepted because a caller who used the
+    other spelling should be refused a silent allow, not handed one."""
+    return (args.get("channel_id") or args.get("channel")) == \
+        DEAL_DESK_CHANNEL_ID
+
+
+CONDITIONAL_TOOLS = {
+    "mcp__Slack__slack_send_message": {
+        "why": ("the DMA intake replies in the request's own thread in "
+                "#deal-desk when the assessment is delivered; every other "
+                "destination still asks"),
+        "scope": f"channel_id == {DEAL_DESK_CHANNEL_ID} (#deal-desk)",
+        "test": _to_deal_desk,
+    },
+}
+
 #: The same record for the connectors matched BY SUFFIX, whose server segment
 #: is a per-attachment UUID that no full name can pin. `ENRICHMENT_TOOLS` says
 #: what is approved on them; without this, everything else on those servers was
@@ -370,6 +424,23 @@ def main() -> int:
         if tool in GUARDED:
             return 0
         return _allow(REASON)
+
+    # Allowed only when an ARGUMENT says so. Checked before the name rules
+    # because it is the strictest of the three: it is the only one that can
+    # say "this destination and no other".
+    cond = CONDITIONAL_TOOLS.get(tool)
+    if cond:
+        args = event.get("tool_input")
+        try:
+            ok = bool(cond["test"](args if isinstance(args, dict) else {}))
+        except Exception:                                    # noqa: BLE001
+            ok = False
+        if ok:
+            return _allow(f"{cond['why']}. Scoped: {cond['scope']}.")
+        # NOT a deny. No output leaves the call exactly as it would be
+        # without this hook, so a person in an interactive session can still
+        # send wherever they meant to.
+        return 0
 
     # A connector that attaches under a stable, nameable server segment, so
     # its full tool name can be written down exactly. This is checked BEFORE

@@ -823,113 +823,110 @@ Hard rules: exactly ONE client per firing; never a held-out entity (run_gate.HEL
 ```
 
 
-### 2g · dma-assessment-intake — `59 * * * *` · LIVE (`trig_018eeMRDobRQXPZ4aobjfUih`, created 2026-08-30)
+### 2g · dma-assessment-intake — `30 */4 * * *` · LIVE (`trig_018eeMRDobRQXPZ4aobjfUih`, created 2026-08-30, REBUILT 2026-08-30)
 
-The routine the 2026-08-30 audit found MISSING. Five Routines existed and
-not one of them started a DMA. Every assessment in this system had been
-started by a person typing into a session — which is why the owner's own
-question ("is there a routine created for the DMA assessments?") had the
-answer "no", and why a client folder appearing in the intake Drive sat
-there until somebody noticed it.
+The routine the 2026-08-30 audit found MISSING, and then found pointed at the
+wrong thing.
 
-**Cadence, as built rather than as wished for.** It was specified at
-`*/30 * * * *` to match the app-side package scan; the Routines API enforces
-an hourly minimum and anchored it to the creation minute, so it fires
-`59 * * * *`. Half-hourly intake is therefore NOT available through this
-API — a folder waits at most an hour, which is still a great deal better
-than waiting for somebody to look.
+**What it was, and why it was wrong.** It fired hourly and listed the client
+folders under 'General DMAs', looking for a `- DMA` folder with no
+`run_manifest.json`. That is a scan for work somebody has ALREADY done by
+hand: a folder only appears there because a person made one. The requests do
+not arrive in Drive at all.
 
-**It carries no MCP connectors, and does not need them.** Trigger-created
-Routines can only inherit connectors the creating session holds, and this
-one had none to pass through. Every external call in the prompt goes over
-HTTP through `drive_fetch.py`, which mints its own service-account token —
-so the design does not depend on a grant it does not have. If a future
-firing needs Exa or Clay, a human must attach them in the routines UI.
+> owner, 2026-08-30: *"The assessment workflow/routine should not be firing
+> hourly and checking the Google Drive. This is so wrong. … The current
+> routine is spending tokens on the wrong flow."*
 
-It is deliberately CONSERVATIVE about starting work: it can open
-a run's preflight and it may not BIND one, because binding needs an answer
-from the engagement owner and a headless firing has nobody to ask. A
-firing that finds an unbound entity prepares everything up to the question
-and stops there, with the question stated — which is the honest shape, and
-much cheaper than a run bound on a guess.
+**What it is now.** It reads **#deal-desk** (`C0AD83KJ4DU`), where a Slack
+workflow — *Assessment and Research Request*, bot `B0ACUPDCMGF`, shortcut
+`Ft0ADDPFSHK6` — posts every request with the account, the website, the
+context, the submitter and a priority, and @-mentions the owner to run it and
+reply with the folder link. A request is **finished when the owner has
+replied in that thread with a Google Drive FOLDER link**, and pending
+otherwise. `scripts/slack_intake.py` holds that rule; the identities live
+there and nowhere else, so a prompt cannot drift from them.
+
+**Cadence, against the SLA rather than a habit.** The workflow offers
+*Urgent (24 hours)* and *High (48 hours)*. Four-hourly meets a 24-hour
+promise with six hours to spare and costs **six sessions a day instead of
+twenty-four**. Hourly bought nothing: requests arrive in business hours and
+the queue is a Slack read, not a race.
+
+`0 */4 * * *` was requested and the Routines API stored `30 */4 * * *` — it
+anchors an every-N-hours schedule to the minute the change was made, which is
+also why the original `*/30 * * * *` became `59 * * * *`. The canon records
+what is LIVE, not what was asked for; a doc that keeps the wish is a doc that
+disagrees with the trigger.
+
+**The three states, and why not two.** `triage` reports PENDING, DELIVERED
+and **UNDECIDABLE**. A request whose thread was not fetched looks exactly
+like one nobody answered, and starting it assesses a client who was already
+delivered — so an unread thread is never PENDING. The exit codes keep them
+apart: `0` there is work, `1` there is none, `2` something could not be
+decided.
+
+**It still stops at the binding question.** Preparing a preflight is cheap;
+binding a sub-vertical is not, and a headless firing has nobody to ask. A run
+bound on a guess researches the wrong 851 cells to completion.
+
+**THE COMPLETION REPLY, and the trap under it.** The connector sends *as the
+owner*, so the reply is itself what makes the request read DELIVERED on the
+next pass. And `engine.cli start` opens the client folder at minute one with
+`status: IN_PROGRESS` — a folder link is postable long before there is
+anything in it. `slack_intake.py reply` therefore REFUSES to render a folder
+link without `--served`: posting early would close the thread, drop the
+request out of every future queue, and hand the requester an empty folder.
+The reply is posted by whichever firing sees the run PROMOTED, which is why
+the run carries `slack_channel`, `slack_thread_ts` and `requested_by` in its
+Run_Metadata — the request is answered days later, from another container,
+and the thread has to travel with the run.
+
+**BLOCKED, and it is not code.** This Routine carries **no MCP connectors**
+(`job_config` has no connector grant of any kind — measured 2026-08-30), so
+it cannot call `mcp__Slack__slack_read_channel` and STEP 2 will stop and say
+so. `update_trigger` cannot add connectors; only the Routine's own edit
+screen in the claude.ai routines UI can, or a delete-and-recreate that would
+change the trigger id and discard its run history. **A human must attach
+Slack to this Routine.** Until then the firing reports exactly that and
+spends nothing — which is the honest shape, and cheaper than the hourly Drive
+scan it replaces.
+
+The reads it needs are already auto-approved (`slack_read_channel`,
+`slack_read_thread`); the send is CONDITIONAL — allowed into #deal-desk and
+nowhere else — see `docs/CONNECTORS.md § Approval`.
 
 ```
 You are the DMA assessment intake, running as a fresh session. Run once, act, and stop.
 
-WHY YOU EXIST. A client folder appearing under 'General DMAs' used to wait for a person to notice it. Nothing in the schedule started an assessment: five Routines watched, rectified, refreshed and promoted, and none of them began a run. So a new engagement's latency was however long it took somebody to look.
+WHY YOU EXIST. Assessment requests arrive in the Slack channel #deal-desk from a workflow, addressed to the owner, and they are finished when the owner replies in the thread with a Drive folder link. Until 2026-08-30 this routine fired hourly and listed Google Drive folders instead — a scan for work somebody had already done by hand, at twenty-four sessions a day. You read the channel now.
 
 STEP -1 — SELF-PROVISION IF THE REPOSITORY IS MISSING. Run `ls /home/user/Accelerate/plugins/dma-insights` first: if it is there, say so in one line and SKIP to STEP 0 — do not clone over it. If it is not: `git clone --branch claude/dma-insights-onboarding-0ryrd0 https://github.com/mishleyotis/Accelerate /home/user/Accelerate`, then `bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh`, then `python3 plugins/dma-insights/scripts/plugin_version.py --heal`. If /root/.dma/sa.json is still absent after the bootstrap, STOP and report exactly that: DMA_ROUTINE_SA_KEY_B64 must be set in the claude.ai/code environment settings.
 
 STEP 0 — SETUP. `cd /home/user/Accelerate`, then `git fetch origin claude/dma-insights-onboarding-0ryrd0 && git checkout -B claude/dma-insights-onboarding-0ryrd0 origin/claude/dma-insights-onboarding-0ryrd0`, then `unset CLOUDSDK_AUTH_ACCESS_TOKEN`.
 
-STEP 1 — WHAT IS ALREADY RUNNING. `python3 plugins/dma-insights/skills/dma-research/engine/registry.py pull` then `... registry.py list --open-only`. These are the runs that already exist; you never start a second run for an entity that has one. The watchdog owns reviving them — not you.
+STEP 1 — CAN YOU READ THE CHANNEL AT ALL. Check whether this session carries mcp__Slack__slack_read_channel and mcp__Slack__slack_read_thread. If it does NOT, STOP and report exactly this: the Routine has no Slack connector attached, a scheduled session cannot attach one, update_trigger cannot add connectors, and a human must attach Slack on this Routine's own edit screen in the claude.ai routines UI. Report which connectors the session DOES carry. Spend nothing else. That is a complete and correct firing.
 
-STEP 2 — WHAT IS WAITING. `python3 plugins/dma-insights/scripts/drive_fetch.py check` lists the client folders under 'General DMAs'. A folder whose name ends '- DMA' and which holds NO run_manifest.json is an engagement nobody has started. A folder WITH a manifest at status IN_PROGRESS belongs to a live run — leave it to the watchdog. A folder with a manifest at status COMPLETE is finished; leave it to the package scan.
+STEP 2 — WHAT IS ALREADY RUNNING. `python3 plugins/dma-insights/skills/dma-research/engine/registry.py pull` then `python3 plugins/dma-insights/skills/dma-research/engine/registry.py list --open-only`. These runs already exist; you never start a second run for an entity that has one, and reviving a stalled one is the watchdog's job, not yours.
 
-STEP 3 — PREPARE THE BINDING, AND STOP AT THE QUESTION. For each unstarted folder, in the order they were created, at most THREE per firing: (a) `python3 -m engine.preflight init --entity "<Entity>" --entity-id <slug> --out <ROOT>/preflight.json` from plugins/dma-insights/skills/dma-research; (b) do the financial-statement review — find the call report, annual report, 10-K or statutory filing, read the REVENUE LINES out of it, and record each with the line of business it implies; where nothing is published, record the search ladder in financials.not_run; (c) census the lines of business and give every plausible sub-vertical an ACCEPT or REJECT with a reason; (d) run `python3 -m engine.preflight check --file <ROOT>/preflight.json`. It will refuse, and the refusal will name `binding_question.asked is false`. THAT REFUSAL IS THE CORRECT OUTCOME OF THIS FIRING. You have no AskUserQuestion in a trigger-fired session and you must not invent an answer: a run bound to the wrong sub-vertical researches the wrong 851 cells to completion, which costs vastly more than waiting.
+STEP 3 — READ THE CHANNEL. Call mcp__Slack__slack_read_channel on channel_id C0AD83KJ4DU with limit 50 and save the response VERBATIM to /tmp/deal_desk.txt — verbatim because the parser reads the connector's own rendered format, and a reformatted transcript is a transcript of something else. Then `python3 plugins/dma-insights/scripts/slack_intake.py threads --transcript /tmp/deal_desk.txt`, which prints the exact channel_id and message_ts pairs whose threads you must read. For each, call mcp__Slack__slack_read_thread with those values and save each response to /tmp/threads/thread_<ts>.txt. Never type a message_ts by hand.
 
-STEP 4 — HAND THE QUESTION OVER. Push the prepared preflight where the engagement owner will find it: `python3 plugins/dma-insights/scripts/drive_fetch.py push-package --client "<Entity>" --file <ROOT>/preflight.json --name preflight.json`. Then report, per entity: the revenue lines you read and their sources, the LOB census, the sub-vertical candidates with their verdicts, and the exact question that needs answering — the sub-vertical and scope in one, the evidence mode in the other. Name the command that starts the run once the answer is recorded: `engine.cli start --preflight <ROOT>/preflight.json …`.
+STEP 4 — TRIAGE. `python3 plugins/dma-insights/scripts/slack_intake.py triage --transcript /tmp/deal_desk.txt --threads /tmp/threads --json`. PENDING is work. DELIVERED is done — the owner already replied with the folder link. UNDECIDABLE means a thread you did not fetch: go back to STEP 3 and fetch it rather than guessing, because a request that reads pending when it was delivered starts a second assessment of a finished client. Exit code 2 means at least one is still undecidable.
 
-STEP 5 — COST AND SCHEDULE, STATED BEFORE ANYTHING IS SPENT. For each prepared entity run `python3 -m engine.cost estimate --sv <candidate> --scope FULL` and `python3 -m engine.cost schedule --sv <candidate> --scope FULL`, and report both. A run projected over $5/pillar is reported as over budget WITH the figure — never started quietly and discovered later.
+STEP 5 — PREPARE THE BINDING, AND STOP AT THE QUESTION. For each PENDING request, newest priority first, at most TWO per firing: (a) `python3 -m engine.preflight init --entity "<Account Full Name>" --entity-id <entity_id from triage> --out <ROOT>/preflight.json` from plugins/dma-insights/skills/dma-research; (b) do the financial-statement review — find the call report, annual report, 10-K or statutory filing, read the REVENUE LINES out of it, and record each with the line of business it implies; where nothing is published, record the search ladder in financials.not_run; (c) census the lines of business and give every plausible sub-vertical an ACCEPT or REJECT with a reason; (d) `python3 -m engine.preflight check --file <ROOT>/preflight.json`. It will refuse, naming `binding_question.asked is false`. THAT REFUSAL IS THE CORRECT OUTCOME. You have no AskUserQuestion in a trigger-fired session and you must not invent an answer: a run bound to the wrong sub-vertical researches the wrong 851 cells to completion.
 
-REPORTING. If nothing was waiting, say so in one line and stop. Report only when you prepared a preflight, found a folder you could not read, or projected a run over budget.
+STEP 6 — HAND THE QUESTION OVER, AND CARRY THE THREAD. `python3 plugins/dma-insights/scripts/drive_fetch.py push-package --client "<Account Full Name>" --file <ROOT>/preflight.json --name preflight.json`. In your report, for each prepared entity, state: the Slack message_ts it came from, the submitter, the priority, the revenue lines you read with their sources, the LOB census, the sub-vertical candidates with verdicts, and the exact question that needs answering. Name the command that starts the run once the answer is recorded, and say that the run must record slack_channel, slack_thread_ts and requested_by so the completion reply can find its way back to the thread.
 
-NEVER: bind a sub-vertical without a recorded human answer. Start a run for an entity the registry already lists. Revive a stalled run (that is the watchdog's). Edit the repository. Push anything to a client folder other than the preflight you prepared.
+STEP 7 — COST, STATED BEFORE ANYTHING IS SPENT. For each prepared entity run `python3 -m engine.cost estimate --sv <candidate> --scope FULL` and `python3 -m engine.cost schedule --sv <candidate> --scope FULL`, and report both. A run projected over $5/pillar is reported as over budget WITH the figure.
+
+DO NOT POST ANYTHING TO SLACK IN THIS FIRING. You prepare; you do not deliver. The completion reply carries a folder link, and a folder link posted before the assessment is served closes the thread, drops the request out of every future queue and hands the requester an empty folder. `python3 plugins/dma-insights/scripts/slack_intake.py reply` refuses to render one without --served, and only a firing that has seen the run PROMOTED may pass it.
+
+REPORTING. If nothing is pending, say so in one line and stop. Report only when you prepared a preflight, could not decide a request, projected a run over budget, or found the Slack connector missing.
+
+NEVER: bind a sub-vertical without a recorded human answer. Start a run for an entity the registry already lists. Revive a stalled run — that is the watchdog's, and two routines reviving one run is two containers writing one workbook. Treat an unread thread as pending. Pick up a request from any workflow other than the Assessment and Research Request one — the Hubbl Readout Request posts in the same channel, in a similar shape, for a different person's queue. Post a Drive folder link before the assessment is served. Edit the repository.
 ```
 
 ---
-
-## 2f · Reconciliation record — 2026-08-30
-
-All five Claude-session Routines are LIVE and enabled; the `DELETED 2026-08-29` headings above were stale canon from the window in which they were rebuilt. Measured against `list_triggers` on 2026-08-30:
-
-| routine | trigger | cron | last run |
-|---|---|---|---|
-| dma-watchdog | `trig_019rSxYzhDBSTdPry5xABpxr` | `23 * * * *` | SUCCEEDED |
-| dma-synthesis-sequence-a | `trig_011Qkj9VgeRgktdhgaZxkeut` | `8 */12 * * *` | SUCCEEDED |
-| dma-synthesis-sequence-b | `trig_01NXSfaTVuWEubFAcA4mbbeL` | `18 */12 * * *` | PENDING |
-| dma-refresh-drift-daily | `trig_01VKBE7qFTcLKmu8zWtDByxN` | `0 15 * * *` | PENDING |
-| dma-rectification-weekly | `trig_01S7BM4VGDRQKzjfFN49Cejw` | `0 13 * * 1` | **FAILED** |
-
-The watchdog's live prompt was replaced with §2d's fenced block (STEP 2b added) and then read back and diffed: identical, 14,540 characters. Two items stay OPEN for a person, because neither can be closed from an API:
-
-- **lane B carries no claude.ai connectors.** Exa/Tavily/Clay must be re-attached on its edit screen in the routines UI.
-- **dma-rectification-weekly's last run FAILED.** Its next firing is Monday; the failure has not been diagnosed here.
-
-## 3 · The reconciliation rule
-
-**Scheduler routines reconcile mechanically.**
-`plugins/dma-insights/routines.json` is the declaration;
-`plugins/dma-insights/scripts/setup_routines.py` is the reconciler (dry-run
-by default, `--apply` to act, exit 1 while a mandatory routine is missing);
-`/dma-insights:setup-routines` is the report-first wrapper. Run it after any
-deploy that touches `infra/deploy.sh`'s scheduler section, and whenever a
-routine is suspected of not firing — a paused job, a drifted schedule and a
-duplicate all look like nothing at all from inside the app, and the reconciler
-is the only thing that asks.
-
-**Since 2026-08-29 there are no session routines to reconcile, and the thing
-that did the reconciling was one of them.** Section 2's diff was carried by
-the weekly rectifier's STEP 8, so deleting all five removed both the subjects
-and the checker in one act. That is worth stating plainly rather than leaving
-the paragraph below to read as live: while section 2 is empty the diff is
-trivially satisfied, and the moment a routine is recreated the diff has no
-owner until one is given to it. `/dma-insights:doctor` still has no routine
-check. Whoever rebuilds the schedule from `routines-archive/` inherits that
-gap and should close it in the same change.
-
-**Session routines have no reconciler today — reconciliation is manual.**
-This file is their declaration; the check is `list_triggers` (CCR) diffed
-against section 2 — name, cron, enabled state, fresh-session mode, **model**,
-and the prompt itself, which is why 2a's live prompt is quoted verbatim. The
-`/dma-insights:doctor` command checks plugin, identity, token audience and
-connector reachability and has **no routine check yet**; when it grows one,
-it should perform exactly this diff. Until then the diff belongs to the
-weekly rectification session's checklist (its prompt's STEP 8 states it), so
-the gap is examined at least weekly by the one routine whose job is noticing
-what quietly stopped holding. A missing, paused or drifted trigger found by
-that diff is a finding like any other: recorded, measured, and closed by a
-refinement — not silently re-created.
 
 ### Model, and why it is in the diff
 
