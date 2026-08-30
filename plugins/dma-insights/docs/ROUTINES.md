@@ -262,7 +262,7 @@ triggers existed and were enabled. (b) and (c) were created 2026-08-19T21:24Z fr
 prompts; a firing that finds this paragraph disagreeing with `list_triggers`
 has found the drift section 3's manual reconciliation exists to catch.
 
-### 2a · dma-synthesis-sequence-a — every 12 hours · DELETED 2026-08-29
+### 2a · dma-synthesis-sequence-a — `8 */12 * * *` · LIVE (`trig_011Qkj9VgeRgktdhgaZxkeut`, enabled; last run SUCCEEDED, reconciled 2026-08-30)
 
 **Two lanes, not one session spawning another (owner, 2026-08-23; mechanism
 revised the same day).** The owner asked for two clients a cycle in two
@@ -371,7 +371,7 @@ STEP 5 — REPORT. End with: client + run id; the gate's verdict lines; the clai
 Hard rules: this Routine produces shore-united-bank-n-a and nothing else, one firing at a time; never BOK; never edit apps/ code; never write another client's memory file; never synthesize a run the gate did not emit; never produce without holding the claim; if package vetting fails or entity identity is PENDING_REVIEW unresolved, record the finding and stop rather than force a promote.
 ```
 
-### 2b · dma-rectification-weekly — Mondays 13:00 UTC · DELETED 2026-08-29
+### 2b · dma-rectification-weekly — `0 13 * * 1` · LIVE (`trig_01S7BM4VGDRQKzjfFN49Cejw`, enabled; **last run FAILED** — open, reconciled 2026-08-30)
 
 | | |
 |---|---|
@@ -543,7 +543,7 @@ examined-and-empty, and stop. Do not lower the threshold, do not scan for defect
 nobody sighted, and do not tidy anything. An empty week is the system working.
 ```
 
-### 2c · dma-refresh-drift-daily — daily 15:00 UTC · DELETED 2026-08-29
+### 2c · dma-refresh-drift-daily — `0 15 * * *` · LIVE (`trig_01VKBE7qFTcLKmu8zWtDByxN`, enabled; reconciled 2026-08-30)
 
 | | |
 |---|---|
@@ -663,7 +663,7 @@ the run as examined-and-empty — "the window was read and held nothing" and "no
 one looked" must stay distinguishable.
 ```
 
-### 2d · DMA watchdog — `23 * * * *` · DELETED 2026-08-29
+### 2d · dma-watchdog — `23 * * * *` · LIVE (`trig_019rSxYzhDBSTdPry5xABpxr`, enabled; last run SUCCEEDED; prompt below pushed and verified byte-for-byte against this file 2026-08-30)
 
 **2026-08-30: this routine now watches BOTH populations.** It was named for
 synthesis and only ever saw synthesis; research runs stalled unwatched
@@ -715,7 +715,7 @@ fresh container, so stall detection — which needs TWO observations — could
 never fire; the state now round-trips through Drive with the ledgers.
 
 ```
-You are the DMA Insights synthesis watchdog, running as a fresh session. Run once, act, and stop.
+You are the DMA Insights watchdog, running as a fresh session. You watch TWO populations: synthesis runs through the connector (STEPS 1-5) and research runs through the run registry (STEP 2b). Run once, act, and stop.
 
 WHY YOU EXIST. A synthesis producer fans work out to subagents and its turn ends. Dispatched subagents do not survive a turn boundary, so the verdicts never arrive and the session sits holding a live claim with nothing running inside it. From outside that is indistinguishable from a session thinking hard, and it stays that way until someone notices. The one time noticing took a while, the redo cost 2.1M output tokens. A safeguard living inside the stalled session would share its fate, so it lives here — and in its own session, not bound to any producer's.
 
@@ -752,7 +752,7 @@ NEVER: re-produce a page that get_run_progress already shows as PASS. Never star
 
 ---
 
-### 2e · dma-synthesis-sequence-b — every 12 hours at :18 · DELETED 2026-08-29
+### 2e · dma-synthesis-sequence-b — `18 */12 * * *` · LIVE (`trig_01NXSfaTVuWEubFAcA4mbbeL`, enabled; **carries no claude.ai connectors** — the API cannot attach them, so a human must re-attach Exa/Tavily/Clay on its edit screen or its preflight stops every firing by design; reconciled 2026-08-30)
 
 Lane B: the cycle's SECOND client. Created 2026-08-23 to replace a mechanism
 that could not run — see § 2a for why. It is not a different routine; it is
@@ -792,6 +792,23 @@ A CONTINUED SESSION THAT FINDS THE CONNECTOR TOOLS 'NOT PRESENT' IS IN A KNOWN, 
 Hard rules: exactly ONE client per firing; never a held-out entity (run_gate.HELD_OUT names them and the gate already subtracts them); never edit apps/ code; never edit the plugin, its skills, agents or gates (constraint [B] — the weekly rectifier is their only writer); never write another client's memory file; never synthesize a run the gate did not emit; never produce without holding the claim; if package vetting fails or entity identity is PENDING_REVIEW unresolved, record the finding and move to a RESERVE rather than force a promote. Begin your report by naming yourself lane B so the two firings are never confused in the record.
 ```
 
+
+## 2f · Reconciliation record — 2026-08-30
+
+All five Claude-session Routines are LIVE and enabled; the `DELETED 2026-08-29` headings above were stale canon from the window in which they were rebuilt. Measured against `list_triggers` on 2026-08-30:
+
+| routine | trigger | cron | last run |
+|---|---|---|---|
+| dma-watchdog | `trig_019rSxYzhDBSTdPry5xABpxr` | `23 * * * *` | SUCCEEDED |
+| dma-synthesis-sequence-a | `trig_011Qkj9VgeRgktdhgaZxkeut` | `8 */12 * * *` | SUCCEEDED |
+| dma-synthesis-sequence-b | `trig_01NXSfaTVuWEubFAcA4mbbeL` | `18 */12 * * *` | PENDING |
+| dma-refresh-drift-daily | `trig_01VKBE7qFTcLKmu8zWtDByxN` | `0 15 * * *` | PENDING |
+| dma-rectification-weekly | `trig_01S7BM4VGDRQKzjfFN49Cejw` | `0 13 * * 1` | **FAILED** |
+
+The watchdog's live prompt was replaced with §2d's fenced block (STEP 2b added) and then read back and diffed: identical, 14,540 characters. Two items stay OPEN for a person, because neither can be closed from an API:
+
+- **lane B carries no claude.ai connectors.** Exa/Tavily/Clay must be re-attached on its edit screen in the routines UI.
+- **dma-rectification-weekly's last run FAILED.** Its next firing is Monday; the failure has not been diagnosed here.
 
 ## 3 · The reconciliation rule
 
