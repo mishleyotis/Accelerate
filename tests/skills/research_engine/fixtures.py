@@ -43,6 +43,17 @@ def bank_evidence(wb, subcap, n=3, *, tier="T2", published="2025-06-01"):
     became a blocking gate term, a FACT resting on one host is refused. The
     third row is the independent second (the NCUA call report the fixture
     synthesis already cites in prose)."""
+    # EVIDENCE THAT NEVER CAME FROM A SEARCH IS EVIDENCE FROM NOWHERE.
+    # Until `category_never_searched` became a gate term (2026-08-30, from a
+    # live report that agents were closing subcaps without deep searches),
+    # this fixture banked rows and synthesised on them with an empty
+    # Search_Log — so every test workbook modelled the exact shape the gate
+    # now refuses, and one lifecycle test asserted PASS over it. A fixture
+    # that cannot pass an honest gate is a fixture teaching the wrong thing.
+    L.append_search(wb, subcap=subcap, facet="works",
+                    query=f"{subcap} capability evidence — fixture bank",
+                    tool="web_search", hits=n + 1, kept=n,
+                    outcome=f"kept {n}")
     out = []
     for i in range(n):
         second = i == n - 1 and n > 1

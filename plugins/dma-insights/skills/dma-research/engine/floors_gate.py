@@ -53,6 +53,19 @@ from .workbook import (RunWorkbook, FLOOR_ITEMS, FLOOR_CATEGORY_ITEMS,
                        _split_ids)
 
 
+#: Computed every run, and deliberately NOT blocking. Kept as a named set so
+#: the choice is reviewable: `advisory` in each verdict says which of these
+#: actually fired, so anyone arguing one should be promoted to blocking can
+#: see its real hit rate first instead of guessing.
+ADVISORY_TERMS = (
+    "closed_below_floor",
+    "contradicts_unprobed",
+    "followups_outstanding",
+    "ladder_overstated",
+    "timeline_missing",
+)
+
+
 def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         qa_dir: Path | None = None) -> dict:
     """Evaluate one category and RECORD the verdict in both places."""
@@ -75,8 +88,10 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "ladder_overstated": [], "evidence_smear": [], "challenge_missing": [],
         "challenge_not_independent": [],
         "timeline_missing": [], "followups_outstanding": [],
+        "absence_unsearched": [],
     }
     items = 0
+    searched_cells = 0
     for r in rows:
         cell = str(r["SubCap_ID"]).strip()
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
@@ -96,6 +111,32 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
                 {"subcap": cell, "items": len(eids), "floor": FLOOR_ITEMS})
         if require_synthesis and not synthesised:
             findings["synthesis_missing"].append(cell)
+
+        # YOU CANNOT REPORT THAT THERE IS NOTHING WITHOUT HAVING LOOKED.
+        #
+        # Reported 2026-08-30 against a live workbook: "the research agents
+        # have a huge issue of leaving most subcaps unresearched and just
+        # marking no evidence without doing deep searches."
+        #
+        # Nothing here could catch that. A subcap with zero evidence hit
+        # `closed_below_floor`, which is ADVISORY, and then `if not
+        # synthesised: continue` skipped every remaining check — absence
+        # declaration, DQ coverage, the contradicts probe, all of it. So a
+        # category passed on ~20 items contributed by a handful of worked
+        # subcaps while the rest were empty, and the verdict said PASS.
+        #
+        # An empty subcap is only honest if somebody searched for it. The
+        # Search_Log records every retrieval with its tool, in every evidence
+        # mode, so "no rows for this cell" means no one looked — which is a
+        # different claim from "we looked and found nothing", and only the
+        # second one may close a subcap.
+        cell_searches = [s for s in cat_searches
+                         if str(s.get("SubCap_ID") or "").strip() == cell]
+        if cell_searches:
+            searched_cells += 1
+        if not eids and not cell_searches:
+            findings["absence_unsearched"].append(cell)
+
         if not synthesised:
             continue
 
@@ -190,14 +231,41 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
                for t in wb.rows("Entity_Timeline")):
         findings["timeline_missing"].append(category)
 
+    # WHAT TOOLS ACTUALLY RAN FOR THIS CATEGORY. Search_Log carries a Tool
+    # per row, so this is measured, not recalled — and it is the answer to
+    # "were the enrichment connectors ever called before the category
+    # closed", which nothing here could previously answer at all.
+    tools_used = sorted({str(s.get("Tool") or "").strip()
+                         for s in cat_searches if str(s.get("Tool") or "").strip()})
+
     blocking = [k for k in (
         "unresolved_citations", "boilerplate", "claim_unsupported",
         "absence_undeclared", "evidence_smear", "challenge_missing",
         "challenge_not_independent", "single_source_fact",
-        "synthesis_missing", "dq_gaps",
+        "synthesis_missing", "dq_gaps", "absence_unsearched",
     ) if findings[k]]
     if not category_floor_met:
         blocking.append("category_items_below_floor")
+    # REPORTED 2026-08-30, from a live run in another account: "enrichment
+    # connectors not being called by the agents for enrichment purposes
+    # before close of a category". They were right, and no gate term could
+    # see it — `search_ops` was COMPUTED here and printed, and then not used,
+    # the same shape AUD-0022 records for the per-category item floor.
+    #
+    # A category with zero Search_Log rows performed no retrieval OF ANY
+    # KIND. That is mode-independent: the log records every retrieval with
+    # the tool that ran it, so an INTERNAL run reading only the client corpus
+    # still logs rows. Zero means the category was closed on recall, which no
+    # evidence mode permits.
+    #
+    # The floor is zero deliberately. A higher one would need calibration
+    # this run does not have, and a threshold invented here would be a
+    # number nobody measured — exactly the failure being fixed. What a
+    # non-zero-but-thin category gets instead is `tools_used` in the verdict,
+    # so "searched, but never through a connector" is visible to a reader
+    # even where it does not block.
+    if not cat_searches:
+        blocking.append("category_never_searched")
 
     verdict = "PASS" if not blocking else "FAIL"
     out = {
@@ -208,7 +276,21 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "category_floor_met": category_floor_met,
         "subcaps": len(rows),
         "search_ops": len(cat_searches),
+        "tools_used": tools_used,
+        "subcaps_searched": f"{searched_cells}/{len(rows)}",
         "blocking": sorted(blocking),
+        # FIVE TERMS ARE COMPUTED HERE AND DO NOT BLOCK. That is a deliberate
+        # calibration choice, not an oversight — but until now a reader could
+        # not tell the two apart, because a non-empty non-blocking finding
+        # looked exactly like an empty one from the verdict's summary. Naming
+        # them keeps the choice honest and reviewable: whoever decides one of
+        # these should block can see how often it fires first.
+        "advisory": sorted(k for k in ADVISORY_TERMS if findings.get(k)),
+        # The finding lists are spread FLAT, deliberately — `out["dq_gaps"]`,
+        # not `out["findings"]["dq_gaps"]`. Callers have guessed the nested
+        # shape and hit KeyError (reported 2026-08-30), so the key set is
+        # published here rather than left to be read out of the source.
+        "finding_keys": sorted(findings),
         **findings,
     }
 

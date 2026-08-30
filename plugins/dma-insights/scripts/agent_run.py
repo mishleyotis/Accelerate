@@ -31,16 +31,28 @@ Exit code is the child's. Output is the child's stdout, verbatim.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
+import json
 import os
 import re
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 AGENTS_DIR = HERE.parent / "agents"
 PLUGIN_PREFIX = "dma-insights"
 DEFAULT_TIMEOUT = 2400
+
+#: One lane per catalogue category, matching `engine.cost.PARALLEL_LANES`.
+#: That module divides projected wall clock by 16 and its own docstring says
+#: "parallelism is a property of the DISPATCH, not of the work" — and until
+#: --batch existed no dispatch this plugin ships could deliver more than one,
+#: so the estimate was dividing by a number nothing supplied. The two
+#: constants are pinned equal by a test; if they ever drift, the schedule is
+#: lying about the wall clock again.
+DEFAULT_LANES = 16
 
 PREAMBLE = """DISPATCH MODE — you are running as a headless session, not an
 in-process subagent. Two things differ from your usual footing:
@@ -112,6 +124,154 @@ _BLOCKED_MARKERS = (
 )
 
 
+# WHAT A DISPATCHED CHILD MAY DO, and why the list is this wide.
+#
+# Measured 2026-08-20 (MEM-0111, MEM-0112, both BLOCKER): this dispatched
+# with `--allowedTools=mcp__plugin_dma-insights_connector` alone, and in
+# dontAsk mode everything NOT pre-approved is DENIED rather than asked. So
+# the child lost Bash and Read too. One probe returned
+# `verified_this_session: []` with three tool families blocked; another
+# measured 0 of 4 connector-or-python capabilities available, which is 0
+# of the 4 mandatory local checkers runnable and 0 of 34 sections
+# producible. An agent with no tools does not report that it had no tools:
+# it returns an empty verdict, which reads as "looked and found nothing".
+#
+# The agent's OWN frontmatter still decides which tools it may use — the
+# 64 manifests carry `tools:` and `disallowedTools:` and those are
+# enforced independently. This list only removes the permission-prompt
+# layer that a scheduled container has nobody to answer.
+ALLOWED = ",".join([
+    "mcp__plugin_dma-insights_connector",   # the connector namespace
+    "Bash", "Read", "Glob", "Grep",         # the four local checkers
+    "Write", "Edit",                        # denied per-agent where wrong
+    "TodoWrite", "Skill", "WebSearch", "WebFetch",
+])
+
+#: Serialise nothing but the writing. Lanes run concurrently; their output
+#: must not interleave mid-line into one unreadable stream.
+_PRINT_LOCK = threading.Lock()
+
+
+def verdict_of(name: str, rc: int, out: str, err: str) -> tuple:
+    """(exit_code, note) for one finished dispatch.
+
+    The empty-verdict rule (MEM-0111) is applied HERE rather than inline in
+    main, so a lane in a batch is held to exactly the same standard as a
+    solo dispatch. A batch that graded its children more leniently than
+    `--agent` does would be the same defect one level up: sixteen empty
+    verdicts reading as sixteen categories that found nothing.
+    """
+    blocked = [m for m in _BLOCKED_MARKERS if m in out or m in err]
+    if rc == 0 and (len(out.strip()) < _MIN_VERDICT or blocked):
+        return 125, (
+            f"DISPATCH PRODUCED NOTHING: {name} exited 0 with "
+            f"{len(out.strip())} characters of output"
+            + (f" and reported {blocked[0]!r}" if blocked else "")
+            + ". A stage that could not run is not a stage that found "
+              "nothing — refusing rather than passing an empty verdict "
+              "upward. Check the child's tool grants and --add-dir scope.")
+    return rc, ""
+
+
+def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
+             allowed: str) -> dict:
+    """Run ONE agent to completion. Safe to call from several threads.
+
+    subprocess.run blocks the calling thread and nothing else, so N of these
+    in a thread pool are N real concurrent `claude -p` children. The work is
+    entirely I/O-bound waiting on those children, which is why threads are
+    the right primitive and the GIL is not in the way.
+    """
+    cmd = ["claude", "-p", "--agent", f"{PLUGIN_PREFIX}:{name}",
+           "--permission-mode", "dontAsk",
+           "--add-dir", "/root/.dma",
+           f"--allowedTools={allowed}", prompt]
+    try:
+        r = subprocess.run(cmd, cwd=repo_root, timeout=timeout,
+                           capture_output=True, text=True, env={**os.environ})
+    except subprocess.TimeoutExpired:
+        return {"agent": name, "code": 124, "stdout": "", "stderr": "",
+                "note": f"DISPATCH TIMEOUT: {name} exceeded {timeout}s — "
+                        f"treat as a failed stage, never as an empty verdict"}
+    except FileNotFoundError:
+        return {"agent": name, "code": 127, "stdout": "", "stderr": "",
+                "note": "DISPATCH FAILED: the claude CLI is not on PATH in "
+                        "this container"}
+    out, err = r.stdout or "", r.stderr or ""
+    code, note = verdict_of(name, r.returncode, out, err)
+    return {"agent": name, "code": code, "stdout": out, "stderr": err,
+            "note": note}
+
+
+def read_batch(path: Path) -> list:
+    """[{agent, prompt}] from a batch file, validated before anything runs.
+
+    A batch that is half-wrong should fail before it spends money on the
+    half that is right, so every row is checked — agent known, prompt
+    non-empty — and the first bad row raises.
+    """
+    rows = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(rows, list) or not rows:
+        raise SystemExit(f"{path}: expected a non-empty JSON array of "
+                         f"{{agent, prompt_file}} objects")
+    names, out = roster(), []
+    for i, row in enumerate(rows):
+        if not isinstance(row, dict):
+            raise SystemExit(f"{path}[{i}]: not an object")
+        name = str(row.get("agent", "")).removeprefix(f"{PLUGIN_PREFIX}:")
+        if name not in names:
+            raise SystemExit(f"{path}[{i}]: unknown agent {name!r} — a "
+                             f"guessed agent name is a route to nothing")
+        if row.get("prompt_file"):
+            text = Path(row["prompt_file"]).read_text(encoding="utf-8")
+        else:
+            text = str(row.get("prompt", ""))
+        if not text.strip():
+            raise SystemExit(f"{path}[{i}]: empty prompt for {name} — a "
+                             f"stage with no task is a no-op")
+        out.append({"agent": name, "prompt": text})
+    return out
+
+
+def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
+              allowed: str, out_dir: Path | None) -> int:
+    """Run every row, `lanes` at a time. Exit non-zero if ANY lane failed."""
+    results, done = [], 0
+    with concurrent.futures.ThreadPoolExecutor(max_workers=lanes) as pool:
+        futures = {pool.submit(dispatch, r["agent"], r["prompt"], timeout,
+                               repo_root, allowed): r["agent"]
+                   for r in rows}
+        for fut in concurrent.futures.as_completed(futures):
+            res = fut.result()
+            results.append(res)
+            done += 1
+            # Each lane's transcript goes to its OWN file: sixteen children
+            # writing one stream produces a transcript nobody can read, and
+            # the orchestrator needs each verdict whole to relay it.
+            if out_dir:
+                out_dir.mkdir(parents=True, exist_ok=True)
+                (out_dir / f"{res['agent']}.out").write_text(
+                    res["stdout"], encoding="utf-8")
+            with _PRINT_LOCK:
+                state = "ok" if res["code"] == 0 else f"FAILED({res['code']})"
+                print(f"[{done}/{len(rows)}] {res['agent']:34s} {state}",
+                      flush=True)
+                if res["note"]:
+                    print(f"    {res['note']}", file=sys.stderr, flush=True)
+    failed = [r for r in results if r["code"] != 0]
+    summary = {"lanes": lanes, "dispatched": len(rows),
+               "ok": len(results) - len(failed),
+               "failed": [{"agent": r["agent"], "code": r["code"]}
+                          for r in failed]}
+    print(json.dumps(summary, indent=2, sort_keys=True))
+    if failed:
+        print(f"\n{len(failed)} of {len(rows)} lane(s) failed. A batch is "
+              f"only as done as its worst lane — re-dispatch those before "
+              f"treating the stage as complete.", file=sys.stderr)
+        return 1
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--agent", help="agent name from the plugin roster")
@@ -122,6 +282,13 @@ def main(argv=None) -> int:
                     help="skip the dispatch-mode preamble (rarely right)")
     ap.add_argument("--list", action="store_true",
                     help="print the accepted roster and exit")
+    ap.add_argument("--batch", help="JSON array of {agent, prompt_file} — "
+                                    "dispatch them CONCURRENTLY")
+    ap.add_argument("--lanes", type=int, default=DEFAULT_LANES,
+                    help=f"how many run at once with --batch "
+                         f"(default {DEFAULT_LANES})")
+    ap.add_argument("--out-dir", help="with --batch: write each lane's "
+                                      "stdout to <agent>.out here")
     a = ap.parse_args(argv)
 
     names = roster()
@@ -129,8 +296,23 @@ def main(argv=None) -> int:
         for n in sorted(names):
             print(n)
         return 0
-    if not a.agent:
-        ap.error("--agent is required (or --list)")
+    if not a.agent and not a.batch:
+        ap.error("--agent or --batch is required (or --list)")
+    if a.agent and a.batch:
+        ap.error("--agent and --batch are mutually exclusive")
+
+    repo_root = HERE.parents[2]
+    if a.batch:
+        rows = read_batch(Path(a.batch))
+        if not a.no_preamble:
+            for r in rows:
+                r["prompt"] = PREAMBLE + r["prompt"]
+        lanes = max(1, min(a.lanes, len(rows)))
+        print(f"dispatching {len(rows)} agent(s), {lanes} at a time",
+              file=sys.stderr, flush=True)
+        return run_batch(rows, lanes, a.timeout, repo_root, ALLOWED,
+                         Path(a.out_dir) if a.out_dir else None)
+
     name = a.agent.removeprefix(f"{PLUGIN_PREFIX}:")
     if name not in names:
         close = [n for n in names if name in n or n in name]
@@ -149,71 +331,19 @@ def main(argv=None) -> int:
     if not a.no_preamble:
         prompt = PREAMBLE + prompt
 
-    repo_root = HERE.parents[2]
-    # WHAT A DISPATCHED CHILD MAY DO, and why the list is this wide.
-    #
-    # Measured 2026-08-20 (MEM-0111, MEM-0112, both BLOCKER): this dispatched
-    # with `--allowedTools=mcp__plugin_dma-insights_connector` alone, and in
-    # dontAsk mode everything NOT pre-approved is DENIED rather than asked. So
-    # the child lost Bash and Read too. One probe returned
-    # `verified_this_session: []` with three tool families blocked; another
-    # measured 0 of 4 connector-or-python capabilities available, which is 0
-    # of the 4 mandatory local checkers runnable and 0 of 34 sections
-    # producible. An agent with no tools does not report that it had no tools:
-    # it returns an empty verdict, which reads as "looked and found nothing".
-    #
-    # The agent's OWN frontmatter still decides which tools it may use — the
-    # 64 manifests carry `tools:` and `disallowedTools:` and those are
-    # enforced independently. This list only removes the permission-prompt
-    # layer that a scheduled container has nobody to answer.
-    ALLOWED = ",".join([
-        "mcp__plugin_dma-insights_connector",   # the connector namespace
-        "Bash", "Read", "Glob", "Grep",         # the four local checkers
-        "Write", "Edit",                        # denied per-agent where wrong
-        "TodoWrite", "Skill", "WebSearch", "WebFetch",
-    ])
     # THE PACKAGE IS NOT IN THE REPOSITORY. A child's working directory is the
     # checkout, so `/root/.dma/packages/<slug>` is out of scope and every read
     # of it is refused — measured verbatim: "ls in '/root/.dma/packages/...'
     # was blocked. For security, Claude Code may only list files in the
     # allowed working directories for this session: '/home/user/Accelerate'."
     # The package, the bundles and the client memory all live under /root/.dma.
-    cmd = ["claude", "-p", "--agent", f"{PLUGIN_PREFIX}:{name}",
-           "--permission-mode", "dontAsk",
-           "--add-dir", "/root/.dma",
-           f"--allowedTools={ALLOWED}", prompt]
-    try:
-        r = subprocess.run(cmd, cwd=repo_root, timeout=a.timeout,
-                           capture_output=True, text=True, env={**os.environ})
-    except subprocess.TimeoutExpired:
-        print(f"DISPATCH TIMEOUT: {name} exceeded {a.timeout}s — treat as a "
-              f"failed stage, never as an empty verdict", file=sys.stderr)
-        return 124
-    except FileNotFoundError:
-        print("DISPATCH FAILED: the claude CLI is not on PATH in this "
-              "container", file=sys.stderr)
-        return 127
-    out = r.stdout or ""
-    sys.stdout.write(out)
-    if r.stderr:
-        sys.stderr.write(r.stderr)
-    # AN EMPTY VERDICT IS A FAILED STAGE, NEVER A CLEAN ONE. This returned the
-    # child's exit code alone, and a child that produced nothing exits 0 — so
-    # a starved dispatch was indistinguishable from a stage that ran and found
-    # nothing to report. That is the whole defect MEM-0111 records, and it
-    # survives any permission fix, because the next thing to starve a child
-    # will be something else.
-    blocked = [m for m in _BLOCKED_MARKERS if m in out or m in (r.stderr or "")]
-    if r.returncode == 0 and (len(out.strip()) < _MIN_VERDICT or blocked):
-        print(f"\nDISPATCH PRODUCED NOTHING: {name} exited 0 with "
-              f"{len(out.strip())} characters of output"
-              + (f" and reported {blocked[0]!r}" if blocked else "")
-              + ". A stage that could not run is not a stage that found "
-                "nothing — refusing rather than passing an empty verdict "
-                "upward. Check the child's tool grants and --add-dir scope.",
-              file=sys.stderr)
-        return 125
-    return r.returncode
+    res = dispatch(name, prompt, a.timeout, repo_root, ALLOWED)
+    sys.stdout.write(res["stdout"])
+    if res["stderr"]:
+        sys.stderr.write(res["stderr"])
+    if res["note"]:
+        print(f"\n{res['note']}", file=sys.stderr)
+    return res["code"]
 
 
 if __name__ == "__main__":
