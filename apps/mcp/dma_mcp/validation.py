@@ -1517,6 +1517,8 @@ def validate_pass1(page: str, payload: dict) -> list:
                     "ET-03", name, f"{name}.e_ids[{i}]",
                     f"{e!r} is not an evidence id the recogniser accepts"))
         reasons.extend(_check_agent_ids(name, body))
+        reasons.extend(_check_minted_row_ids(
+            name, body, empty_declared=empty_declared))
         reasons.extend(_check_enum_fields(page, name, body))
         reasons.extend(_check_contract_vocabularies(page, name, body))
         reasons.extend(_check_date_fields(page, name, body))
@@ -1819,6 +1821,67 @@ def _check_enum_fields(page: str, section: str, body) -> list:
                 "CG-09", section, f"{section}.{jpath}",
                 f"{shown!r} is not a value of {spec['enum']} — this field is promoted "
                 f"into an enum column and takes one of {' │ '.join(spec['values'])}"))
+    return out
+
+
+#: The five item-grain lists whose rows are IDENTIFIED by a minted id, and
+#: the id each row must carry. Derived once from the contract's own item
+#: docs (`packages/shared/contracts_data.json`) rather than inferred per
+#: submission, because the failure this guards is a list where NO row has
+#: the id — nothing to infer from.
+MINTED_ROW_IDS = {
+    ("techstack", "items"): "ts_id",
+    ("insights", "cards"): "ic_id",
+    ("findings", "findings"): "f_id",
+    ("focus_areas", "focus_areas"): "fa_id",
+    ("why_now", "signals"): "wn_id",
+}
+
+
+def _check_minted_row_ids(section, body, empty_declared=False) -> list:
+    """Every row of a minted-id list carries its id.
+
+    ET-03 checks the SHAPE of a minted id `if isinstance(v, str)` — so an
+    absent or null id is not malformed, it is invisible, and nothing else
+    looked either: the serving column is nullable, the writer inserts None,
+    and the web renders the row as an unconditional button. A techstack row
+    promoted without a `ts_id` therefore routes to
+    `/clients/<id>/techstack/undefined` and the detail page reports
+    "Technology not found" — a click that looks live and dead-ends, which is
+    indistinguishable to a reader from a drilldown that was never built.
+
+    NOT enforced at the column. `ALTER COLUMN ts_id SET NOT NULL` would
+    re-arm exactly the trap migration 0050 removed: a section that
+    legitimately promotes empty writes one envelope-only row with every item
+    column NULL, and the insert would abort the whole promote with a driver
+    error naming a column instead of a verdict naming a path. 0050 states the
+    principle in as many words — "The gate is the enforcement; the NOT NULL
+    was belt-and-braces that only ever bit the one row the gate does not
+    describe." So it is enforced HERE, where a declared empty state is a
+    first-class answer.
+    """
+    out = []
+    if empty_declared:
+        return out
+    for (sec, field), key in MINTED_ROW_IDS.items():
+        if sec != section:
+            continue
+        rows = body.get(field)
+        if not isinstance(rows, list):
+            continue
+        for i, row in enumerate(rows):
+            if not isinstance(row, dict):
+                continue
+            v = row.get(key)
+            if not (isinstance(v, str) and v.strip()):
+                out.append(_reason(
+                    "ET-03", section, f"{section}.{field}[{i}].{key}",
+                    f"row {i} carries no {key}. The id is what the row is "
+                    f"addressed BY: without it the row serves, renders, and "
+                    f"routes to a page that reports it does not exist — a "
+                    f"click that looks live and dead-ends. Mint one, or "
+                    f"declare the section's empty_state if there is nothing "
+                    f"to list."))
     return out
 
 

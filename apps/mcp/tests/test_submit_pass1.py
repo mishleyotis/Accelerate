@@ -84,6 +84,42 @@ def test_id_pattern_discipline():
     assert "techstack.items[0].ts_id" in paths
 
 
+def test_a_row_with_no_minted_id_is_refused():
+    """ET-03 checked the SHAPE of a minted id `if isinstance(v, str)`, so an
+    ABSENT one was not malformed — it was invisible. Nothing else looked
+    either: the serving column is nullable, the writer inserts None, and the
+    web rendered the row as an unconditional button whose route read
+    `/techstack/undefined`. To a reader a click that dead-ends and a
+    drilldown that was never built are the same thing."""
+    payload = {"techstack": _min_section(
+        items=[{"vendor": "V", "product": "P", "layer": "DATA",
+                "status": "CONFIRMED"},
+               {"ts_id": None, "vendor": "W", "product": "Q",
+                "layer": "OPS", "status": "CLAIMED"},
+               {"ts_id": "TS-003", "vendor": "X", "product": "R",
+                "layer": "CUST", "status": "CLAIMED"}])}
+    paths = {r["path"] for r in validate_pass1("techstack", payload)
+             if r["gate_id"] == "ET-03"}
+    assert "techstack.items[0].ts_id" in paths
+    assert "techstack.items[1].ts_id" in paths, "null is absent, not valid"
+    assert "techstack.items[2].ts_id" not in paths
+
+
+def test_a_declared_empty_section_is_not_asked_for_row_ids():
+    """A section that legitimately promotes empty has said so honestly, and
+    this is where that stays a first-class answer: putting the constraint on
+    the COLUMN instead would re-arm the trap migration 0050 removed, where
+    the one envelope-only row aborts the whole promote with a driver error
+    naming a column instead of a verdict naming a path."""
+    payload = {"techstack": {
+        **ENVELOPE_OK, "narrative_thread": THREAD, "items": [],
+        "empty_state": {"reason": "no technology was established for this "
+                                  "entity", "sources_searched": ["a", "b"]}}}
+    paths = {r["path"] for r in validate_pass1("techstack", payload)
+             if r["gate_id"] == "ET-03"}
+    assert not any(p.endswith(".ts_id") for p in paths), paths
+
+
 def test_unknown_page_and_unknown_section():
     assert validate_pass1("nonsuch", {})[0]["gate_id"] == "CG-01"
     r = validate_pass1("insights", {"landscape": _min_section(tiles=[]),

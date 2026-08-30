@@ -2539,15 +2539,29 @@ function TechRow({ t, entity, run }) {
   const S = STATUS_STYLE[t.status] || STATUS_STYLE.CONFIRMED;
   const rail = techRowSources(t);
 
+  // A row with no ts_id has nowhere to go: the route would read
+  // `/techstack/undefined` and the detail page would report "Technology not
+  // found". Offering the click anyway is worse than not offering it — to a
+  // reader a dead click and an unbuilt drilldown look identical. The submit
+  // gate refuses such a row now (ET-03 on the minted row id), so this is the
+  // belt for runs promoted before it existed.
+  const routable = Boolean(t.id);
+  const Row = routable ? "button" : "div";
+
   return (
-    <button onClick={() => navigate(`/clients/${entity.id}/techstack/${t.id}`, { run: run.id })}
+    <Row
+      onClick={routable
+        ? () => navigate(`/clients/${entity.id}/techstack/${t.id}`, { run: run.id })
+        : undefined}
+      title={routable ? undefined
+        : "This row carries no id, so it has no detail page to open."}
       style={{
         background: S.bg, border: `1.5px solid ${S.bd}`, borderRadius: 8, padding: "10px 14px",
         textAlign: "left", display: "flex", gap: 12, alignItems: "flex-start",
-        cursor: "pointer", transition: "transform 120ms, box-shadow 120ms"
+        cursor: routable ? "pointer" : "default", transition: "transform 120ms, box-shadow 120ms"
       }}
-      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "var(--sh-md)"; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+      onMouseEnter={routable ? (e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "var(--sh-md)"; }) : undefined}
+      onMouseLeave={routable ? (e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }) : undefined}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className="row" style={{ flexWrap: "wrap" }}>
@@ -2622,7 +2636,7 @@ function TechRow({ t, entity, run }) {
           </span>
         ) : null}
       </div>
-    </button>
+    </Row>
   );
 }
 

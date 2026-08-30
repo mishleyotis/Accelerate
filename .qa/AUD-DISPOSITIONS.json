@@ -2004,6 +2004,30 @@
     "routines"
    ],
    "note": "Two defects, one fix and one deliberate non-fix. The prompt said --revive dispatches 'through scripts/agent_run.py', which a routine standing at the repo root cannot open; the canon now names the qualified path. It was NOT re-pushed to the live trigger: the sentence is prose, the mechanism does not read it (watchdog._agent_run resolves from the installed plugin's own location), and re-pushing means replacing 14,561 characters on an hourly routine that currently SUCCEEDS with no way to read the stored prompt back and confirm it landed. The divergence is recorded in the canon's own \u00a72d heading so it cannot pass as byte-for-byte agreement. The SECOND defect is why it survived: this test lives in scripts/tests/, which PR #15's verification scope (tests/ + plugins/dma-insights/scripts/tests/) did not include \u2014 it failed identically at the merge base. Verification now runs tests/, plugins/dma-insights/scripts/tests/, scripts/tests/ and the four app suites."
+  },
+  {
+   "id": "AUD-0168",
+   "sev": "BLOCKING",
+   "area": "techstack",
+   "title": "A register row could promote with no ts_id, render as a live button, and route to a page reporting it does not exist",
+   "target": "ET-03 checked the SHAPE of a minted id `if isinstance(v, str)`, so an absent or null one was invisible; the serving column is nullable, promote inserts None, and the web rendered every row as an unconditional button",
+   "disposition": "FIXED",
+   "checks": [
+    "techstack"
+   ],
+   "note": "Fixed at the SUBMIT gate, not the column. `_check_minted_row_ids` refuses a row of any of the five minted-id lists (ts_id, ic_id, f_id, fa_id, wn_id) that carries no id, and bypasses on a declared empty_state. Putting it on the column instead \u2014 ALTER COLUMN ts_id SET NOT NULL \u2014 would re-arm exactly the trap migration 0050 removed: a section that legitimately promotes empty writes one envelope-only row with every item column NULL, and the insert would abort the whole promote with a driver error naming a column instead of a verdict naming a path. 0050 says it in as many words: 'The gate is the enforcement; the NOT NULL was belt-and-braces that only ever bit the one row the gate does not describe.' The unique index does not help either \u2014 Postgres treats NULLs as distinct without NULLS NOT DISTINCT, so a null row is unroutable, not unwritable. Render side: an unroutable row is now a non-interactive card with a title saying why, because to a reader a click that dead-ends and a drilldown that was never built are the same thing."
+  },
+  {
+   "id": "AUD-0169",
+   "sev": "BLOCKING",
+   "area": "reports",
+   "title": "The Client Research Profile is written, validated, rendered \u2014 and structurally uningestable by the app",
+   "target": "apps/worker/job_main.py `_RPT_DECOYS = ('profile', 'template')` returns None for every .docx whose name contains 'profile', and report_spec's own filename is Client_Profile_Research_{entity}_{date}.docx",
+   "disposition": "OPEN",
+   "checks": [
+    "reports"
+   ],
+   "note": "RAISED, NOT FIXED \u2014 it is a distinct piece of app-side ingest work and naming it is more useful than a half-done version. All eight sections of one of the two reports reach no table in the app, while page packs name 'Client Profile DOCX' as the source of truth for firmographics, the leadership roster, focus-area verbatim quotes and the financial series \u2014 data the producer then fetches out of Drive by hand because the app holds none of it. The recipe: give the profile its own artefact slot in `_classify_artefact` (matching `client[_ ]profile.*\\.docx$`, as classification.py already does), download it beside the report in job_main, parse it with report_key='client_research', extend _TITLE_KINDS for its six unmapped headings, and namespace the stored kind by report so an assessment `evidence_sources` row and a profile one stay distinguishable in document_sections."
   }
  ]
 }
