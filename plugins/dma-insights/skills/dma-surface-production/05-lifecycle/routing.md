@@ -291,6 +291,38 @@ folder, and runs the memory backup-then-cleanup lifecycle. None of them
 touches the connector's write tools — a research run that is ready for
 surface production enters, like every package, through the package-vetter.
 
+## The report tier — the four deliverables' prose
+
+The 2026-08-30 coverage audit measured sixteen report sections with **no
+owner at all**: the renderer read `Report_Narrative` and refused a missing
+section, and nothing in the roster wrote one. Four agents close it, and the
+split is an independence rule rather than a taste.
+
+| what | agent | may review? |
+|---|---|---|
+| the Client Research Profile's 8 sections | `report-research-producer` | no |
+| the DMA Assessment Report's 8 sections | `report-assessment-producer` | no |
+| every section's verdict, and the whole-report adversarial pass | `report-validator` | **only** |
+| the technographic scan, as a deliverable rather than a side effect | `technographic-scanner` | n/a |
+
+A section is written through `engine.narrative write`, which refuses prose
+that is not an argument: it must state what was weighed AGAINST its own
+conclusion, the proxy ladder behind any absence it asserts, the assumptions
+it made and which way they cut, the bias it carries, and every inference
+tagged with what would confirm it. `Accuracy_Basis` is computed from the
+workbook — citation density, ERS mass, how many cited sources support a
+challenged subcap — never typed.
+
+`engine.narrative review` refuses a verdict from a section's own author by
+name, so the producer/validator split is enforced by the ledger and not by
+the manifest. The renderer refuses an unreviewed section, which is why the
+validator is on the critical path rather than beside it.
+
+The two producers are **independent of each other** and run in parallel; the
+validator runs per section as sections land, then once more over the whole
+report. Producers consume the finished research run and never re-run it —
+the same rule the surface producers follow.
+
 ## Two routes that used to dead-end
 
 Five tasks were traced from the session brief through this table. Three

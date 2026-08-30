@@ -16,15 +16,26 @@ sys.path.insert(0, str(HERE))
 import agent_run  # noqa: E402
 
 
-def test_the_roster_is_the_full_64():
+def test_the_roster_matches_the_manifest():
+    """Counted from the manifest, not written down. A hand-kept count is how
+    four new agents can exist and no dispatcher know about them — which is
+    the shape of the 2026-08-30 coverage audit's own finding."""
+    import json
+    manifest = json.loads(
+        (HERE.parent / ".claude-plugin" / "plugin.json").read_text())
     names = agent_run.roster()
-    assert len(names) == 64, (
-        "47 production/QA agents + the research-conductor + 16 "
-        "category researchers")
+    declared = {Path(a).stem for a in manifest["agents"]}
+    assert set(names) == declared, {
+        "in the roster only": sorted(set(names) - declared),
+        "in the manifest only": sorted(declared - set(names)),
+    }
     for required in ("finding-challenger", "page-consolidator",
                      "package-vetter", "surface-producer", "qa-overseer",
                      "overview-whynow-producer", "research-conductor",
-                     "research-p1c1-producer", "research-p4c4-producer"):
+                     "research-p1c1-producer", "research-p4c4-producer",
+                     # the 2026-08-30 report tier and the scan's owner
+                     "report-research-producer", "report-assessment-producer",
+                     "report-validator", "technographic-scanner"):
         assert required in names, required
 
 

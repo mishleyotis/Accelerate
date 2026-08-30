@@ -8,7 +8,8 @@ from engine import assemble, contract as C, techscan
 from engine.techscan import ScanRefused
 
 from fixtures import (CAT, bank_evidence, good_synthesis,  # noqa: E501
-                      make_shippable, new_run, synthesise)
+                      make_shippable, new_run,
+                      sign_off_sections, synthesise)
 
 EXCERPT = ("Alkami digital banking went live in Q3 2024 and reached 47 "
            "percent member adoption within ninety days of launch.")
@@ -132,6 +133,7 @@ def _full_package(tmp_path):
                     "Evidence_IDs": "E-001", "Author": "t",
                     "Written_At": "2026-08-29T00:00:00Z"}, save=False)
         wb.save()
+        sign_off_sections(wb)
         reports.render(wb, spec, run.deliverables)
     techscan.render(wb, run.deliverables)
     make_shippable(wb)      # every tab filled or stated — the package gate

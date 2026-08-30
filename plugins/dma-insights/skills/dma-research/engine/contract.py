@@ -425,9 +425,39 @@ DQ_BANK_COLUMNS = ("SubCap_ID", "Order", "Facet", "Probe_Tier", "Question",
 #: mechanism behind 6 of 21 cited ids not resolving in a delivered report.
 #: An agent writes its narrative HERE, beside the evidence it cites, and the
 #: renderer curates from the same sheets the gates read.
+#: One row per report section. The first eight columns are the PROSE; the
+#: rest are the ARGUMENT behind it, and they exist because the 2026-08-30
+#: audit asked four questions a body of text cannot answer on its own —
+#: how the argument was weighed, how an absence was confirmed rather than
+#: assumed, where an inference is doing work a fact is not, and what bias
+#: the author is aware of carrying. A section that cannot fill them is a
+#: section that was written rather than reasoned.
 REPORT_NARRATIVE_COLUMNS = (
     "Report", "Section_ID", "Heading", "Body", "Evidence_IDs", "Kind",
     "Author", "Written_At",
+    # How the claims in Body were weighed: the evidence mass behind them
+    # (ERS), what was weighed AGAINST them, and why the balance fell where
+    # it did. Not a restatement of Body — the reasoning Body concludes.
+    "Weighing",
+    # Every absence the section asserts, with the proxy ladder that
+    # establishes it. "We found no evidence of X" without a ladder is an
+    # admission about the search, not a finding about the client.
+    "Absence_Basis",
+    # What the author assumed, and which way each assumption cuts. Named,
+    # because an unnamed assumption reads as a fact.
+    "Assumptions",
+    # The section's own account of what would bias it — sub-vertical
+    # priors, source availability skew, the client's own publishing habits.
+    "Bias_Notes",
+    # Which statements are INFERENCE rather than fact, and what would
+    # confirm each. Tagged in-line as [INF] in Body and enumerated here.
+    "Inference_Tags",
+    # The measurable accuracy claim: citation density, ERS mass, share of
+    # claims that survived challenge. Computed, never asserted.
+    "Accuracy_Basis",
+    # The independent verdict. Written by an actor that did not author the
+    # section, exactly as a synthesis challenge is.
+    "Review_Verdict", "Review_Actor", "Review_At",
 )
 
 #: `Kind` vocabulary for a Report_Narrative row.
