@@ -7,14 +7,19 @@ from docx import Document
 from engine import assemble, contract as C, techscan
 from engine.techscan import ScanRefused
 
-from fixtures import CAT, bank_evidence, good_synthesis, new_run, synthesise
+from fixtures import (CAT, bank_evidence, good_synthesis,  # noqa: E501
+                      make_shippable, new_run, synthesise)
 
 EXCERPT = ("Alkami digital banking went live in Q3 2024 and reached 47 "
            "percent member adoption within ninety days of launch.")
 
 
-def _run_with_scan(tmp_path, n=3):
-    run = new_run(tmp_path, n=n)
+def _run_with_scan(tmp_path, n=3, prelim=False):
+    # prelim=False by default: PRELIM records a technology baseline of its
+    # own, and the register tests count the rows they write themselves. The
+    # PACKAGE tests pass prelim=True, because a package that ships without
+    # PRELIM is the shape requirement 3 was raised about.
+    run = new_run(tmp_path, n=n, prelim=prelim)
     wb = run.open()
     cells = wb.selected_subcaps()
     eids = bank_evidence(wb, cells[0])
@@ -89,7 +94,7 @@ def test_the_scan_renders_docx_and_json(tmp_path):
 
 
 def test_an_empty_register_refuses_unless_forced_and_then_says_not_run(tmp_path):
-    run = new_run(tmp_path, n=2)
+    run = new_run(tmp_path, n=2, prelim=False)     # an EMPTY register
     wb = run.open()
     with pytest.raises(ScanRefused, match="blank scan that looks like a "
                                           "clean scan"):
@@ -104,7 +109,7 @@ def test_an_empty_register_refuses_unless_forced_and_then_says_not_run(tmp_path)
 
 def _full_package(tmp_path):
     from engine import floors_gate, report_spec as RS, reports
-    run, wb, cells = _run_with_scan(tmp_path, n=8)
+    run, wb, cells = _run_with_scan(tmp_path, n=8, prelim=True)
     for cell in cells:
         synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
     wb.append("Entity_Timeline", {
@@ -129,6 +134,7 @@ def _full_package(tmp_path):
         wb.save()
         reports.render(wb, spec, run.deliverables)
     techscan.render(wb, run.deliverables)
+    make_shippable(wb)      # every tab filled or stated — the package gate
     return run, wb
 
 
@@ -152,7 +158,11 @@ def test_the_folder_name_is_the_intake_conventions(tmp_path):
 
 
 def test_a_missing_deliverable_refuses_and_names_the_producing_command(tmp_path):
-    run, wb, cells = _run_with_scan(tmp_path)
+    """A complete run MINUS one report: the refusal must name the renderer,
+    not stop at some earlier gate."""
+    run, wb = _full_package(tmp_path)
+    for stale in run.deliverables.glob("Client_Profile_Research_*.docx"):
+        stale.unlink()
     with pytest.raises(SystemExit, match="engine.cli report"):
         assemble.package(run, tmp_path / "packages")
 
@@ -172,7 +182,12 @@ def test_the_evidence_index_speaks_the_apps_own_aliases(tmp_path):
     rows = parse_evidence_index(str(ei), obs)
     assert rows, obs
     assert all(r["source_url"] for r in rows)
-    assert all(r["subcaps"] for r in rows)
+    # Every row that CLAIMS a subcap mapping carries it through the alias.
+    # Not every row claims one: PRELIM banks the institution profile, whose
+    # sources support the client, not a capability cell.
+    mapped = [r for r in rows if r["subcaps"]]
+    assert mapped, "no evidence row reached a subcap at all"
+    assert all(all(s.startswith("P") for s in r["subcaps"]) for r in mapped)
 
 
 def test_every_final_output_is_classified_by_the_app(tmp_path):

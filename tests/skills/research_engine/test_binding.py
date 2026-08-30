@@ -20,6 +20,8 @@ ENGINE = Path(__file__).resolve().parents[2].parent / (
 sys.path.insert(0, str(ENGINE))
 
 from engine import runstate  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fixtures import preflight_doc, preflight_file  # noqa: E402
 
 BASIS_SV = "NCUA-chartered federal credit union per charter 24680; single LOB"
 BASIS_MODE = "engagement letter 2026-08-01 grants public-only review"
@@ -87,31 +89,76 @@ def test_resume_reports_a_stated_binding(tmp_path):
     assert state["binding_stated"] is True
 
 
-def test_the_cli_requires_both_rationales(tmp_path):
+def test_the_cli_requires_the_preflight(tmp_path):
     """`engine.cli start` is the conductor's path, and the conductor is the
     one actor positioned to have done the preflight — so the CLI, not the
-    API, carries the hard requirement."""
+    API, carries the hard requirement.
+
+    It used to require two free-text rationales, which `vet_basis` could
+    only check for FILLER. A fluent sentence passed, which is the failure
+    that actually costs a run, so the requirement is now the preflight
+    DOCUMENT: a financial review, an LOB census, and a recorded human
+    answer."""
     r = subprocess.run(
         [sys.executable, "-m", "engine.cli", "start", "--run", "R-BIND-4",
          "--root", str(tmp_path), "--entity", "Acme CU", "--entity-id",
-         "acme-cu", "--sv", "CU", "--scope", "T1_CORE",
-         "--reference-date", "2026-08-29"],
+         "acme-cu", "--reference-date", "2026-08-29"],
         cwd=ENGINE, capture_output=True, text=True)
     assert r.returncode != 0
-    assert "--sv-basis" in r.stderr
+    assert "--preflight" in r.stderr
 
 
-def test_the_cli_start_records_and_echoes_the_binding(tmp_path):
+def test_an_unanswered_preflight_refuses_the_run(tmp_path):
+    from engine import preflight as P
+    pf = tmp_path / "pf.json"
+    doc = preflight_doc()
+    doc["binding_question"]["asked"] = False
+    pf.write_text(json.dumps(doc))
+    r = subprocess.run(
+        [sys.executable, "-m", "engine.cli", "start", "--run", "R-BIND-4b",
+         "--root", str(tmp_path / "run"), "--entity", "Acme CU",
+         "--entity-id", "acme-cu", "--reference-date", "2026-08-29",
+         "--preflight", str(pf), "--no-folder"],
+        cwd=ENGINE, capture_output=True, text=True)
+    assert r.returncode != 0
+    assert "binding_question.asked is false" in r.stderr
+    assert P.CONTRACT           # the contract name is stable for callers
+
+
+def test_the_cli_start_derives_the_binding_from_the_preflight(tmp_path):
+    """Nothing about the binding is typed on the command line any more."""
+    pf = preflight_file(tmp_path)
     r = subprocess.run(
         [sys.executable, "-m", "engine.cli", "start", "--run", "R-BIND-5",
-         "--root", str(tmp_path), "--entity", "Acme CU", "--entity-id",
-         "acme-cu", "--sv", "CU", "--scope", "T1_CORE",
-         "--reference-date", "2026-08-29",
-         "--sv-basis", BASIS_SV, "--mode-basis", BASIS_MODE],
+         "--root", str(tmp_path / "run"), "--entity", "Acme CU",
+         "--entity-id", "acme-cu", "--reference-date", "2026-08-29",
+         "--preflight", str(pf), "--folder-root", str(tmp_path / "client"),
+         "--no-push"],
         cwd=ENGINE, capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     out = json.loads(r.stdout)
-    assert out["binding"]["sv_basis"] == BASIS_SV
+    b = out["binding"]
+    assert b["sv"] == "CU" and out["evidence_mode"] == "PUBLIC"
+    # the basis RENDERS the file rather than restating a claim beside it
+    assert "engagement owner" in b["sv_basis"]
+    assert "revenue line(s) read from" in b["sv_basis"]
+    assert b["preflight_sha"]
+    # the financial statement became evidence, and the folder was opened
+    assert out["preflight"]["evidence_banked"] == ["E-001"]
+    assert (tmp_path / "client" / "Acme CU - DMA" / "run_manifest.json").is_file()
+    assert out["registry"]["event"] == "STARTED"
+
+
+def test_a_scope_flag_that_disagrees_with_the_preflight_is_refused(tmp_path):
+    pf = preflight_file(tmp_path)          # binds T1_CORE
+    r = subprocess.run(
+        [sys.executable, "-m", "engine.cli", "start", "--run", "R-BIND-5b",
+         "--root", str(tmp_path / "run2"), "--entity", "Acme CU",
+         "--entity-id", "acme-cu", "--reference-date", "2026-08-29",
+         "--preflight", str(pf), "--scope", "FULL", "--no-folder"],
+        cwd=ENGINE, capture_output=True, text=True)
+    assert r.returncode != 0
+    assert "disagrees with the preflight" in r.stderr
 
 
 def test_the_wrong_subverticals_variants_never_enter_the_run(tmp_path):

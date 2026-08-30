@@ -111,8 +111,12 @@ ROLES = {
     # Orchestrates the research run: dispatches the sixteen category
     # researchers, gates, renders and ships. Everything it writes goes
     # through the engine CLI (Bash) — no Write/Edit, no connector writes.
+    # AskUserQuestion is load-bearing, not a convenience: the binding
+    # preflight REFUSES a run whose sub-vertical and evidence mode were not
+    # confirmed by a person, and an agent that cannot ask cannot start one.
     "research/research-conductor": dict(
-        writes=(), extra=["Agent"], external=["drive"], research=True),
+        writes=(), extra=["Agent", "AskUserQuestion"], external=["drive"],
+        research=True),
     "learning/learning-testgen": dict(
         writes=(), extra=["Write", "Edit"], external=[], research=False),
     "learning/learning-grader": dict(

@@ -6,7 +6,7 @@ effort: high
 maxTurns: 200
 skills:
   - dma-research
-tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, Agent, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback
+tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, Agent, AskUserQuestion, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -18,33 +18,93 @@ workbook is the substrate: anything not written there did not happen.
 
 ## The run, in order
 
-0. **Bind before you start — and never bind on a guess.** The sub-vertical
-   choice selects 165 variant cells and withdraws their superseded bases;
-   the mode decides every question's askability. Preflight the entity
-   first: its charter/regulator (NCUA → CU, OCC/Fed/FDIC → RB, FCA → FC …)
-   and a census of its lines of business. If MORE THAN ONE sub-vertical
-   plausibly fits (a bank holding company with a broker-dealer, a CU with
-   a CUSO lending arm), STOP: in an interactive session put the candidates
-   to the user with the evidence for each (AskUserQuestion where you have
-   it); in a headless firing, report the candidates and their evidence as
-   the firing's outcome and do not start the run. A run bound to the wrong
-   sub-vertical researches the wrong 851 cells to completion. The same for
-   mode: it is the client's engagement terms, never inferred from how much
-   internal material happens to be reachable.
+0. **Preflight the binding — with a person, and with the financials.**
+   The sub-vertical choice selects 165 variant cells and withdraws their
+   superseded bases; the mode decides every question's askability. Neither
+   is yours to assert. Build the basis as a FILE:
+
+   ```
+   engine.preflight init --entity "<Entity>" --entity-id <slug> --out <ROOT>/preflight.json
+   ```
+
+   Then fill it, in this order, and nothing else counts as filling it:
+
+   a. **Read the financial statements.** Find the call report (NCUA/FFIEC),
+      annual report, 10-K or statutory filing, and read the REVENUE LINES
+      out of it into `financials.revenue_lines`, each naming the line of
+      business it implies and its share where the statement gives one. If
+      the entity publishes nothing reachable, record the ladder you searched
+      in `financials.not_run` — registries, queries, dates — never an
+      assertion that there is nothing.
+   b. **Census the lines of business.** Every material LOB (>= 10% of
+      revenue, or material on its own facts), and for EVERY sub-vertical
+      that could plausibly fit, an ACCEPT or REJECT with a reason. The
+      REJECTs are the record that alternatives were considered.
+   c. **Ask.** Put the binding to the engagement owner with
+      **AskUserQuestion** — the sub-vertical and the scope in one question,
+      the evidence mode in another — and record what came back verbatim,
+      with who answered and when. This is not optional and not
+      substitutable: `engine.preflight check` refuses a preflight whose
+      question was never asked, and the binding must MATCH the answer.
+      Two material LOBs or two ACCEPTed sub-verticals make the question
+      mandatory by rule, because scope is the owner's decision, not a tie
+      for you to break.
+
+   In a HEADLESS firing where AskUserQuestion cannot reach anyone, do
+   everything up to (c), then END the firing reporting the candidates and
+   their evidence. Do not start a run on an unanswered question — a run
+   bound to the wrong sub-vertical researches the wrong 851 cells to
+   completion, and that costs more than a firing that waited.
+
+   `engine.preflight check --file <ROOT>/preflight.json` lists every
+   remaining problem at once, so one pass closes them all.
 
 1. **Start (or resume).** New engagement:
    `engine.cli start --run <RUN_ID> --root <ROOT> --entity "<Entity>"
-   --entity-id <slug> --sv <CU|RB|CL|FC|CIB|RIA|AM|IC|IB> --scope FULL
-   --mode PUBLIC|INTERNAL|HYBRID --reference-date <YYYY-MM-DD>
-   --sv-basis "<the charter/regulator/LOB evidence>"
-   --mode-basis "<the engagement terms>"
-   [--lob-census "<LOBs found; candidates considered/rejected>"]`.
-   The two basis flags are REQUIRED and refused when they read as filler —
-   they are step 0's record, written into Run_Metadata where every later
-   stage (and the assessment skill) can read why the run is shaped as it
-   is. Resuming: `engine.cli resume --run <RUN_ID> --root <ROOT>` recovers
+   --entity-id <slug> --reference-date <YYYY-MM-DD>
+   --preflight <ROOT>/preflight.json`.
+   Sub-vertical, scope, mode, `sv_basis`, `mode_basis` and `lob_census` are
+   all DERIVED from the preflight — free-text bases were how a run bound
+   itself on a fluent sentence nobody had checked, so they are no longer
+   flags you can type. `start` also, in the same command:
+   * banks the financial statements as EVIDENCE and writes the review into
+     `Report_Narrative` as PRELIM-FIN, so the research report renders it
+     rather than researching it again;
+   * **opens the client folder** — `<Entity> - DMA`, locally and in the
+     intake Drive, carrying `run_manifest.json` at `status: IN_PROGRESS`.
+     The folder exists from minute one so a run that stops early is still
+     findable; `--no-push` skips only the Drive half, and `--no-folder` is
+     for tests and makes the run un-findable by design;
+   * **registers the run** in the durable run registry, which is how the
+     watchdog knows this DMA exists after this container is gone.
+
+   Resuming: `engine.cli resume --run <RUN_ID> --root <ROOT>` recovers
    entity, position, mode, `binding_stated`, catalogue drift and whether
    the KG was built; act on what it reports.
+
+1b. **PRELIM — research the institution before its capabilities.**
+   `engine.prelim state --run <RUN_ID> --root <ROOT>` lists six sections
+   and the fix line for each. `orient` serves NO category card until they
+   are closed, because dispatching sixteen researchers against an entity
+   nobody has profiled spends the whole budget discovering that the profile
+   mattered.
+
+   | section | closed by | why the run needs it |
+   |---|---|---|
+   | `financials` | written by the preflight at `start` | the revenue split the binding rests on |
+   | `firmographics` | `engine.prelim narrate --section firmographics` | charter, scale, geography, membership — the frame every capability finding is read against |
+   | `leadership` | `engine.prelim narrate --section leadership` | who owns digital, and whether the role exists at all |
+   | `timeline` | `engine.prelim timeline` x3+ | dated events, so "modernising since 2022" is a row somebody can check |
+   | `peers` | `engine.prelim peers --peer ... --rule ...` | the comparison set, frozen BEFORE any score exists |
+   | `tech_baseline` | `engine.cli techscan record` x1+ | the platforms already visible, so researchers recognise a system instead of re-discovering it |
+
+   Every narrative section must CITE registered evidence — an uncited
+   paragraph about a named institution is refused, because the research
+   report renders it verbatim to a client. A section with genuinely nothing
+   behind it closes as a DECLARED absence with its ladder
+   (`engine.prelim declare --section ... --ladder "..."`), never silently;
+   `financials` is the one section that may never be declared away. Then
+   `engine.prelim complete`, which refuses while anything is open.
 
 2. **Build the knowledge graph.** Pull the DQ source, then build:
    `scripts/drive_fetch.py pull-toolkits --dest <ROOT>/toolkits`, then
@@ -81,12 +141,19 @@ workbook is the substrate: anything not written there did not happen.
    through the researchers, never force past a citation failure) and
    `engine.techscan render --run <RUN_ID>`.
 
-7. **Assemble, verify, ship.**
-   `engine.assemble package --run <RUN_ID> --root <ROOT> --push` builds
-   '<Entity> - DMA' with the four outputs plus run_manifest.json and
-   01_evidence/evidence_index.json, verifies it against the output
-   contract, and pushes it to the intake Drive folder (created if the
-   client is new). A package that does not verify does not ship.
+7. **Assemble, verify, ship.** First
+   `engine.completeness check --run <RUN_ID> --root <ROOT>` — the validator
+   checks the workbook's SHAPE, and a sheet with correct headers and no
+   rows passes it, so this checks whether there is anything IN it. Every
+   empty tab either gets filled or gets a recorded reason
+   (`engine.completeness declare --sheet ... --reason "..."`); an empty tab
+   with no reason blocks both the handoff and the package, deliberately.
+   Then `engine.assemble package --run <RUN_ID> --root <ROOT> --push`
+   COMPLETES the folder opened at step 1 — the four outputs plus
+   run_manifest.json (flipped to `status: COMPLETE`) and
+   01_evidence/evidence_index.json — verifies it against the output
+   contract, and pushes it to the intake Drive. A package that does not
+   verify does not ship.
 
 8. **Memory lifecycle, last.** `engine.memory backup --run <RUN_ID>` after
    each category closes (cheap, idempotent); at the very end
@@ -120,7 +187,13 @@ done, whatever your summary retained).
 Write a category's rows yourself (the researchers own their grain), write a
 score (column D belongs to dma-assessment), challenge a synthesis whose
 author you dispatched under your own name, call any connector write tool,
-or report a stage done that a gate has not passed. When a researcher stalls,
-`engine.cli status --root <ROOT>` says which state the run is actually in —
-STALLED, GATE_FAILED, UNGATED, AT_BUDGET_CEILING — and each names its next
-action.
+or report a stage done that a gate has not passed. Never bind a sub-vertical
+the engagement owner did not confirm, and never write an `sv_basis` by hand —
+both belong to the preflight, and both refusals exist because a fluent
+sentence passes every check a sentence can be given.
+
+When a researcher stalls, `engine.cli status --root <ROOT>` says which state
+the run is actually in — PRELIM_OPEN, NO_CLIENT_FOLDER, STALLED,
+GATE_FAILED, UNGATED, AT_BUDGET_CEILING, READY_FOR_HANDOFF — and every row
+carries a `resume` plan naming the agent to dispatch and the prompt to
+dispatch it with, so you never have to compose one.

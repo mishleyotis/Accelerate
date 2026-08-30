@@ -167,7 +167,9 @@ def test_a_section_whose_inputs_are_all_empty_is_named_in_the_refusal(tmp_path):
     """AUD-0107: thirteen sheets named as INPUTS by the templates do not
     exist, 'leaving §3.2 and §3.3 with no source at all'. A section whose
     every input is empty must say so."""
-    run = new_run(tmp_path, n=2)
+    # prelim=False: PRELIM fills Entity_Timeline, and this test is about a
+    # section whose every named input is genuinely empty.
+    run = new_run(tmp_path, n=2, prelim=False)
     wb = run.open()
     spec = RS.from_json({
         "key": "assessment", "title": "Probe", "min_words": 10,

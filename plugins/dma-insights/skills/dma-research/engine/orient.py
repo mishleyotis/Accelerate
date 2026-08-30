@@ -40,6 +40,7 @@ from pathlib import Path
 from . import contract as C
 from . import floors_gate
 from . import ledger as L
+from . import prelim
 from . import runstate
 from .workbook import RunWorkbook
 
@@ -84,6 +85,24 @@ def orient(wb: RunWorkbook, category: str | None, *,
 
     do_first: list[str] = []
 
+    # 0. PRELIM outranks everything, including the budget wall — a run that
+    #    has not profiled the institution has nothing to spend the budget ON.
+    #    The Golden 1 calibration went start -> category worklist and finished
+    #    with Entity_Timeline, Tech_Register and Peer_Benchmarks empty,
+    #    because no phase had ever been asked to fill them.
+    prelim_state = prelim.state(wb)
+    if prelim_state["blocks_category_dispatch"]:
+        opens = prelim_state["open"]
+        if opens:
+            do_first.append(
+                "PRELIM is open — no category card will be served. "
+                f"{len(opens)} section(s) outstanding: {', '.join(opens)}. "
+                f"Run `engine.prelim state` for the fix line on each.")
+        else:
+            do_first.append(
+                "every PRELIM section is closed but PRELIM was never signed "
+                "off. Run `engine.prelim complete`.")
+
     # 1. The wall comes first, and it is an instruction, not a number.
     if budget["checkpoint_required"]:
         do_first.append(
@@ -124,7 +143,10 @@ def orient(wb: RunWorkbook, category: str | None, *,
     # handing over a new card is exactly what AUD-0006 and AUD-0037 measured.
     card = None
     blocked = None
-    if budget["checkpoint_required"]:
+    if prelim_state["blocks_category_dispatch"]:
+        blocked = ("PRELIM is open: "
+                   + (", ".join(prelim_state["open"]) or "not signed off"))
+    elif budget["checkpoint_required"]:
         blocked = "search-op ceiling reached"
     elif open_volleyed:
         blocked = f"{len(open_volleyed)} volleyed subcap(s) must be synthesised first"
@@ -139,10 +161,13 @@ def orient(wb: RunWorkbook, category: str | None, *,
         "open": {"volleyed": open_volleyed, "pending_count": len(open_pending)},
         "gate": gates if category else {c: g.get("gate") or g.get("verdict")
                                         for c, g in gates.items()},
+        "prelim": {k: prelim_state[k] for k in
+                   ("prelim_status", "open", "blocks_category_dispatch")},
         "do_first": do_first,
         "next_card": card,
         "next_card_withheld_because": blocked if card is None else None,
         "clean": not open_volleyed and not open_pending
+                 and not prelim_state["blocks_category_dispatch"]
                  and all(g.get("gate") == "PASS" for g in gates.values()),
     }
 

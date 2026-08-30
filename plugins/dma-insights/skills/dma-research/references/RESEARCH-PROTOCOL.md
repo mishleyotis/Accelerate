@@ -17,6 +17,15 @@ did not happen.
 - You research **one category** of one run. You never write another
   category's rows, never write a score (column D is the assessment stage's),
   never submit, never promote, and never touch the connector's write tools.
+- **PRELIM ran before you.** The institution has already been profiled —
+  charter, scale, leadership, a dated timeline, the peer set, the
+  technology baseline — and it is in the workbook: `Report_Narrative`'s
+  `PRELIM-*` rows, `Entity_Timeline`, `Peer_Benchmarks`, `Tech_Register`.
+  READ IT before your first search. It is the frame your findings are
+  weighed against, it names systems you would otherwise spend a volley
+  rediscovering, and re-researching it is duplicated spend. If `orient`
+  says PRELIM is open, you were dispatched early: say so and stop, rather
+  than working a card the phase gate is holding.
 - The conductor dispatched you with a `--run` id and `--root`. Everything
   else you need is in the workbook: `engine.cli orient --run R --root ROOT
   --category <YOURS>` is your first command and your compass after every

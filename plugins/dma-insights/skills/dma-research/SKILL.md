@@ -11,7 +11,7 @@ description: >
   subvertical classification, or any request to gather evidence before DMA scoring.
 ---
 
-# DMA Research Skill v2.4
+# DMA Research Skill v2.5
 
 This skill produces the **evidence foundation** for a Digital Maturity Assessment. It does
 NOT score — it researches. Output: a partially-filled scoring workbook with evidence columns
@@ -42,6 +42,44 @@ assembles, verifies and ships the `<Entity> - DMA` client folder (scoring workbo
 research report, assessment report, technographic scan + `run_manifest.json` and
 `01_evidence/evidence_index.json`) per `engine/assemble.py`'s output contract. The
 per-agent loop, budget and refusals live in `references/RESEARCH-PROTOCOL.md`.
+
+**v2.5 Changes — three phases before any category, and a watchdog that
+restarts.** The 2026-08-29 Golden 1 calibration finished a category cleanly
+and still produced no client folder, no institution profile and a workbook
+with six empty tabs, because nothing in the pipeline was responsible for
+any of those. Four gates and one registry close that:
+
+- **The binding preflight** (`engine/preflight.py`). The sub-vertical, the
+  scope and the evidence mode are no longer flags anyone types — they are
+  derived from a `preflight-v1` document carrying the financial-statement
+  review (revenue lines, each naming the line of business it implies), the
+  LOB census (an ACCEPT or REJECT with a reason per sub-vertical; every
+  material LOB examined) and the **AskUserQuestion** exchange in which the
+  engagement owner answered. The binding must match that answer. `cli start`
+  refuses without it. Free-text bases were how a run bound itself on a
+  fluent sentence nobody had checked.
+- **The client folder, at start** (`engine/assemble.py:open_folder`).
+  `<Entity> - DMA` is created locally and in the intake Drive when the run
+  begins, carrying `run_manifest.json` at `status: IN_PROGRESS`. A run that
+  stops early is still findable.
+- **PRELIM** (`engine/prelim.py`). Six sections — financials, firmographics,
+  leadership, timeline, peers, technology baseline — each closed by research
+  or by a declared absence with its ladder. `orient` serves no category card
+  until they are, and every narrative section must cite registered evidence
+  (bank institution-profile sources with `cli evidence --profile`).
+- **Completeness** (`engine/completeness.py`). Every workbook tab is
+  populated or carries a recorded reason; nine may never be declared empty.
+  Blocks the handoff and the package. The validator checks shape; this
+  checks content.
+- **The run registry and a reviving watchdog** (`engine/registry.py`,
+  `engine/watchdog.py --revive`). Every start writes an append-only registry
+  row, pushed to Drive, so a fresh container sees runs its disk has never
+  held. Every watchdog row carries a resume plan naming the agent and the
+  prompt, and `--revive` dispatches it through `scripts/agent_run.py`
+  instead of only reporting the stall.
+
+`scripts/stress_run_lifecycle.py` walks all five through the real command
+line in one pass.
 
 ## ⛔ ABSOLUTE RULES
 

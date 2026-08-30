@@ -446,6 +446,20 @@ RUN_METADATA_KEYS = (
     "subcaps_selected", "reference_date", "engine_version", "workbook_contract",
     "evidence_mode", "sv_basis", "mode_basis", "lob_census", "kg_checksum",
     "created_at", "last_written_at", "checkpoint",
+    # The binding preflight's digest. `sv_basis` and `mode_basis` are
+    # RENDERED from the preflight document this hashes, so a basis that
+    # drifts from the financial review and the recorded owner answer behind
+    # it is detectable rather than merely unlikely.
+    "preflight_sha",
+    # The client folder, opened at run start rather than assembled at the
+    # end: a run that stops early must still be findable in the intake tree.
+    "client_folder", "client_folder_opened_at",
+    # PRELIM: the preliminary research pass that grounds the Client Research
+    # Profile. Category dispatch refuses while it is open.
+    "prelim_status", "prelim_completed_at",
+    # Sheets that are legitimately empty for THIS run, each with the reason.
+    # The completeness gate reads this; an unlisted empty sheet blocks.
+    "empty_sheet_reasons",
 )
 
 WORKBOOK_CONTRACT = "v3"

@@ -244,6 +244,16 @@ class RunWorkbook:
             "created_at": _utcnow(),
             "last_written_at": _utcnow(),
             "checkpoint": "",
+            # Filled by the phases that own them, and EMPTY is a readable
+            # state rather than a missing key: an unopened client folder, an
+            # unrun preflight and an open PRELIM each have a gate that names
+            # them, so a blank here is a finding, not a crash.
+            "preflight_sha": "",
+            "client_folder": "",
+            "client_folder_opened_at": "",
+            "prelim_status": "OPEN",
+            "prelim_completed_at": "",
+            "empty_sheet_reasons": "",
         }
         for k in ("run_id", "entity_name", "entity_id", "reference_date"):
             v = str(vals[k])
@@ -358,7 +368,43 @@ class RunWorkbook:
             ("engine", C.ENGINE_VERSION),
         ):
             self.append("00_README", {"Key": k, "Value": v}, save=False)
+        self._write_ref_method()
         self.save()
+
+    def _write_ref_method(self) -> None:
+        """The method the workbook is read under, IN the workbook.
+
+        `REF_Method` was a declared sheet with no writer — the completeness
+        gate found it empty in every run ever produced, which is what that
+        gate is for. A reader who opens this file without the six design
+        docs beside it needs the vocabularies the columns are scored against;
+        rendering them from the contract means they cannot drift from it."""
+        bands = " · ".join(
+            f"<{i + 2} {b}" if i < 3 else f">={i + 1} {b}"
+            for i, b in enumerate(C.BANDS))
+        ladder = ", ".join(f"{n} <= {m}mo" for n, m in C.RECENCY_LADDER)
+        for k, v in (
+            ("catalogue", f"{C.taxonomy().version} — "
+                          f"{C.counts()['cells']} cells, "
+                          f"{C.counts()['categories']} categories, "
+                          f"{C.counts()['pillars']} pillars"),
+            ("catalogue_hash", C.catalogue_hash()),
+            ("bands", f"{bands} (strict less-than, on the RAW score before "
+                      f"display rounding; null score = no band)"),
+            ("evidence_tiers", " > ".join(t for t in C.TIERS
+                                          if t != C.NO_EVIDENCE)
+                               + f"; {C.NO_EVIDENCE} where none was found"),
+            ("recency", f"{ladder}, then {C.RECENCY_ARCHIVAL}; undated "
+                        f"evidence is {C.RECENCY_UNVERIFIED}, never current"),
+            ("claim_labels", ", ".join(C.CLAIM_LABELS)),
+            ("evidence_modes", ", ".join(C.ASSESSMENT_MODES)
+                               + " — decides which diagnostic questions are "
+                                 "answerable and which defer to discovery"),
+            ("challenge_dimensions", ", ".join(C.CHALLENGE_DIMENSIONS)),
+            ("scores", "written by the ASSESSMENT stage, never by research; "
+                       "a score present at research time is contract rule 4"),
+        ):
+            self.append("REF_Method", {"Key": k, "Value": v}, save=False)
 
     # ── the scoring rows ─────────────────────────────────────────────────
 

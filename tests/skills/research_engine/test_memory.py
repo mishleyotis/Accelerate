@@ -18,7 +18,10 @@ EXCERPT = ("Alkami digital banking went live in Q3 2024 and reached 47 "
 
 
 def _noted_run(tmp_path):
-    run = new_run(tmp_path, n=3)
+    # prelim=False: these tests count the evidence register that
+    # consolidation fills, and PRELIM banks the institution profile of its
+    # own. The subject here is the notebook -> ledger hop, not the run.
+    run = new_run(tmp_path, n=3, prelim=False)
     wb = run.open()
     cells = wb.selected_subcaps()
     return run, wb, cells

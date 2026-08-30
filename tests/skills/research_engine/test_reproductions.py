@@ -265,6 +265,11 @@ def test_the_two_anchors_can_never_ship_as_template_tokens(tmp_path):
 def test_every_step_lands_in_the_workbook_as_it_happens(tmp_path):
     run = new_run(tmp_path, n=2)
     wb = run.open()
+    # Measured AFTER PRELIM, which banks the institution profile of its own:
+    # this test is about the category loop's writes surviving a reopen, not
+    # about the run's total row count.
+    before_e = len(wb.rows("Evidence_Detail"))
+    before_s = len(wb.rows("Search_Log"))
     cell = wb.selected_subcaps()[0]
     L.append_search(wb, subcap=cell, facet="works", query='"Acme" x',
                     tool="web_search", hits=3, kept=1)
@@ -272,8 +277,8 @@ def test_every_step_lands_in_the_workbook_as_it_happens(tmp_path):
     synthesise(wb, cell, good_synthesis(cell, eids))
     # Reopened from disk by a DIFFERENT reader — the container-death test.
     fresh = RunWorkbook(run.workbook_path)
-    assert len(fresh.rows("Search_Log")) == 1
-    assert len(fresh.rows("Evidence_Detail")) == 3
+    assert len(fresh.rows("Search_Log")) == before_s + 1
+    assert len(fresh.rows("Evidence_Detail")) == before_e + 3
     assert fresh.scoring_row(cell)["Dominant_Claim"]
     assert fresh.coverage()[0]["Researched"] == 1
 

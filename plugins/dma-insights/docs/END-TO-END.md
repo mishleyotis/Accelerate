@@ -34,39 +34,117 @@ Everything below follows from it.
 
 ---
 
-## Stage 1 · Start the run
+## Stage 0 · Preflight the binding — with the financials, and with a person
 
 ```
 cd plugins/dma-insights/skills/dma-research
+python3 -m engine.preflight init --entity "Acme Credit Union" \
+        --entity-id acme-cu --out $ROOT/preflight.json
+# fill it, then:
+python3 -m engine.preflight check --file $ROOT/preflight.json
+```
+
+The binding used to be two free-text flags. `vet_basis` refused FILLER —
+`tbd`, `n/a`, anything under 20 characters — and accepted any fluent
+sentence, which is the failure that actually costs a run: the 2026-08-29
+Golden 1 calibration bound CU / FULL / PUBLIC on three strings the agent
+wrote to itself, having read no financial statement and asked nobody.
+
+So the basis is a DOCUMENT, and it carries three things a sentence cannot
+fake:
+
+1. **The financial-statement review.** Named statements with URLs, and the
+   revenue lines read out of them, each naming the line of business it
+   implies. An entity that publishes nothing records the search ladder in
+   `financials.not_run` — registries, queries, dates — never an assertion.
+2. **The LOB census.** Every material line of business (>= 10% of revenue),
+   and for every plausible sub-vertical an ACCEPT or REJECT with a reason.
+   A material LOB nobody examined is the multi-LOB trap: 165 variant cells
+   selected on the strength of the first business found.
+3. **The question, and the answer.** `AskUserQuestion` put to the engagement
+   owner, recorded verbatim with who answered and when. The binding must
+   MATCH the answer, and `check` refuses a preflight whose question was
+   never asked. This is the only check in the engine that cannot be
+   satisfied by reasoning harder — which is the point: an agent can talk
+   itself into a sub-vertical and it cannot talk itself into a recorded
+   human answer.
+
+Two material LOBs, or two ACCEPTed sub-verticals, make the question
+mandatory by rule. `check` prints every remaining problem at once so one
+pass closes them all.
+
+## Stage 1 · Start the run
+
+```
 python3 -m engine.cli start \
     --run   DMA-2026-ACME-001 \
     --entity "Acme Credit Union" --entity-id acme-cu \
-    --sv CU --scope FULL --mode PUBLIC \
-    --sv-basis  "NCUA-chartered federal credit union; single retail LOB" \
-    --mode-basis "engagement letter grants public-only review" \
-    --reference-date 2026-08-29
+    --reference-date 2026-08-29 \
+    --preflight $ROOT/preflight.json
 ```
 
-`--sv-basis` and `--mode-basis` are required and refused when they read as
-filler: the sub-vertical selects 165 variant cells and the mode decides
-every question's askability, so both choices carry their WHY into
-`Run_Metadata` (an entity with several plausible sub-verticals is the
-engagement owner's question — the conductor stops and asks rather than
-binding on a guess). Creates the run tree and the workbook, **with its
-metadata already resolved**. Two values are the anchors a resumed run reads and both are
+Sub-vertical, scope, evidence mode, `sv_basis`, `mode_basis` and
+`lob_census` are all **derived** from the preflight — they are no longer
+flags anyone can type. `start` does three further things in the same
+command:
+
+* **Banks the financial statements as evidence** and writes the review into
+  `Report_Narrative` as `PRELIM-FIN`, so the Client Research Profile renders
+  the review rather than researching the same statements again.
+* **Opens the client folder.** `<Entity> - DMA` is created locally and in
+  the intake Drive, carrying `run_manifest.json` at `status: IN_PROGRESS`.
+  Folder creation used to live in `package`, which runs at the END and
+  refuses until all four deliverables exist — so a run that stopped early
+  left nothing an operator could find. It exists from minute one now.
+* **Registers the run** in the append-only run registry, pushed to Drive.
+  That registry is how the watchdog knows this DMA exists after the
+  container is gone.
+
+Creates the run tree and the workbook, **with its metadata already
+resolved**. Two values are the anchors a resumed run reads and both are
 refused if they still look like a template placeholder: `run_id` and
 `catalogue_hash`. The audit found both shipping as `{{RUN_ID}}` and
 `{{CHECKSUM}}` (AUD-0010).
 
-* `--sv` and `--scope` are **validated**. An unknown sub-vertical or scope
-  mode refuses; it used to select 686 cells and exit 0, turning an upstream
-  classification failure into a plausible-looking run (AUD-0077).
+* The sub-vertical and scope are **validated**. An unknown value refuses; it
+  used to select 686 cells and exit 0, turning an upstream classification
+  failure into a plausible-looking run (AUD-0077).
 * The engagement set is **seeded as rows**. A seeded row is the scope
   declaration — which is how the app later tells "in scope, unscored" from
   "does not apply" (AUD-0014).
 * `Handoff_Lock` is written: catalogue version, catalogue hash, contract
   version. The assessment stage compares against it and refuses to score if
   the catalogue moved (AUD-0060).
+* `REF_Method` is written: the bands, tiers, recency ladder, claim labels
+  and challenge dimensions this workbook is read under, rendered from the
+  contract so they cannot drift from it.
+
+## Stage 1a · PRELIM — the institution, before its capabilities
+
+```
+python3 -m engine.prelim state --run $RUN --root $ROOT
+```
+
+Six sections, each closed by RESEARCH or by a DECLARED absence with its
+ladder, and `orient` serves **no category card** until they are:
+
+| section | closed by |
+|---|---|
+| `financials` | the preflight, at `start` (may never be declared away) |
+| `firmographics` | `engine.prelim narrate --section firmographics` |
+| `leadership` | `engine.prelim narrate --section leadership` |
+| `timeline` | `engine.prelim timeline` x3+ |
+| `peers` | `engine.prelim peers --peer … --rule …` (frozen before any score exists) |
+| `tech_baseline` | `engine.cli techscan record` x1+ |
+
+Golden 1 went straight from `start` to a category worklist: twenty evidence
+rows about six subcapabilities and nothing at all about the institution.
+`Entity_Timeline`, `Tech_Register` and `Peer_Benchmarks` were empty at the
+end because no phase had ever been asked to fill them, and the Client
+Research Profile — whose whole first half is the client — had no material to
+render from. Every narrative section must cite registered evidence: the
+report renders it verbatim to a client, and an uncited paragraph about a
+named institution is the shape of a hallucination.
 
 ## Stage 1b · Build the knowledge graph, then route by category
 
@@ -194,6 +272,21 @@ AUD-0061). A pre-v3 workbook is migrated by `patch_validator.py`, the script
 the template's own changelog prescribes and that existed in no tree
 (AUD-0011); it refuses rather than dropping a column it cannot map.
 
+## Stage 5b · Is there anything IN the workbook?
+
+```
+python3 -m engine.completeness check --run $RUN
+```
+
+The validator checks SHAPE, and a sheet with correct headers and no rows
+passes it — which is how the Golden 1 workbook validated clean while six of
+its nineteen tabs were empty. This checks content: every tab is populated,
+or carries a recorded reason in `Run_Metadata.empty_sheet_reasons`
+(`engine.completeness declare --sheet … --reason "…"`). An empty tab with a
+reason is a disclosure; an empty tab without one blocks the handoff and the
+package. Nine sheets may never be declared empty at all — the run does not
+exist without them.
+
 ## Stage 6 · Hand off, and report
 
 ```
@@ -291,17 +384,41 @@ REAL pillar toolkits, and passes only when each stage does the right thing
 floors gate, the L2 layer key, the blocked cleanup and the incomplete
 package is a refusal with a named reason. 20/20 measured 2026-08-29.
 
-## Stage 9 · Nothing is watching, so the run says when it has stopped
+## Stage 9 · A run that stops says so — and then gets restarted
 
 ```
+python3 -m engine.registry pull            # Drive's copy of the population
 python3 -m engine.cli status --root /home/claude/dma_output
+python3 -m engine.watchdog --revive        # act, don't just report
 ```
 
 `STALLED` · `HALTED` · `GATE_FAILED` · `UNGATED` · `AT_BUDGET_CEILING` ·
-`READY_FOR_HANDOFF` · `PROGRESSING`. The synthesis side had this and the
+`READY_FOR_HANDOFF` · `PRELIM_OPEN` · `NO_CLIENT_FOLDER` ·
+`MISSING_LOCALLY` · `PROGRESSING`. The synthesis side had this and the
 research side had nothing, so a turn that died mid-category left no artefact
 saying so (AUD-0063). `UNGATED` exists because running out of cards is not
 closure.
+
+Two later defects, both closed:
+
+* **It could not see a new DMA.** `sweep` listed `$DMA_RUN_ROOT`, a
+  directory that does not survive the container, so a scheduled firing found
+  zero runs and printed "no research runs" — indistinguishable from a
+  healthy queue. Every `start` now writes an append-only **registry** row
+  and pushes it to Drive; the sweep reads that, so a run this container has
+  never seen still appears, as `MISSING_LOCALLY`, carrying the command that
+  brings its workbook back.
+* **It could not restart anything.** Every state was a report. A watchdog
+  that detects a stall and takes no action has moved the stall from "nobody
+  noticed" to "somebody noticed and nothing happened". `--revive`
+  re-dispatches the stopped stage through `scripts/agent_run.py` under the
+  owning agent's own front matter; where dispatch is genuinely unavailable
+  it returns `NOT_RUN` with the reason and the resume prompt, never a silent
+  pass. `HALTED` (the catalogue moved) and `UNREADABLE` are never revived
+  automatically — those are decisions, not restarts.
+
+Every row carries a `resume` plan naming the agent and the prompt, so the
+hourly watchdog routine dispatches rather than composes.
 
 Resume needs no human:
 
