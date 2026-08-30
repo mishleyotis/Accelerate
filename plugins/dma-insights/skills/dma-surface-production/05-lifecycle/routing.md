@@ -240,8 +240,9 @@ rectifier's job and nobody else's.
 Surface production consumes a finished assessment package; the research
 tier is what produces one. A research engagement (an entity, a
 sub-vertical, an evidence mode) routes to **`research-conductor`**, which
-creates the run on the workbook substrate, builds the knowledge graph from
-the pillar toolkits, and dispatches one researcher per catalogue category —
+binds the run against a PREFLIGHT the engagement owner answered, opens the
+client folder, closes the PRELIM phase, builds the knowledge graph from the
+pillar toolkits, and dispatches one researcher per catalogue category —
 sixteen, generated from one template by `scripts/gen_research_agents.py`,
 each bound to its grain and nothing else. A repair that names a category
 (a FAILED floors gate, a challenged subcap) routes to that category's
@@ -267,9 +268,25 @@ smallest-true-unit rule as the per-surface producers above.
 | P4C3 Technology Architecture & Integration | `research-p4c3-producer` |
 | P4C4 Information Security & Cybersecurity | `research-p4c4-producer` |
 
+**Three phases run BEFORE any category is dispatched, and each is a gate
+rather than a habit:**
+
+| phase | what it is | what refuses without it |
+|---|---|---|
+| **preflight** | the financial-statement review, the LOB census, and the `AskUserQuestion` exchange that CONFIRMED the sub-vertical and the evidence mode | `engine.cli start` — sub-vertical, scope, mode and all three bases are DERIVED from the preflight, not typed |
+| **client folder** | `<Entity> - DMA` opened at START, `status: IN_PROGRESS`, pushed to intake | nothing; but the watchdog reports `NO_CLIENT_FOLDER`, because a run that stops early with no folder leaves an operator nothing to find |
+| **PRELIM** | firmographics, financials, leadership, timeline, peers, technology baseline — the institution, before its capabilities | `orient` serves NO category card while it is open |
+
+A request that reads as research but names no entity, or names one whose
+sub-vertical is genuinely ambiguous, is a QUESTION for the engagement
+owner, not a run to start on a guess. That is the one place in this
+pipeline where stopping to ask beats proceeding well.
+
 The researchers write only their own category, only through the engine CLI
 (the workbook's refusals are the write control); the conductor gates,
-renders the four deliverables, assembles and ships the `<Entity> - DMA`
+renders the four deliverables, checks that every workbook tab is populated
+or has a stated reason (`engine.completeness check` — the validator checks
+shape, that checks content), completes and ships the `<Entity> - DMA`
 folder, and runs the memory backup-then-cleanup lifecycle. None of them
 touches the connector's write tools — a research run that is ready for
 surface production enters, like every package, through the package-vetter.

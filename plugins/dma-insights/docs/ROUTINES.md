@@ -663,7 +663,16 @@ the run as examined-and-empty — "the window was read and held nothing" and "no
 one looked" must stay distinguishable.
 ```
 
-### 2d · DMA synthesis watchdog — `23 * * * *` · DELETED 2026-08-29
+### 2d · DMA watchdog — `23 * * * *` · DELETED 2026-08-29
+
+**2026-08-30: this routine now watches BOTH populations.** It was named for
+synthesis and only ever saw synthesis; research runs stalled unwatched
+because the only place they were recorded was a container-local directory.
+STEP 2b below adds the research sweep on top of the durable run registry,
+and — the substantive change — it REVIVES rather than reports. A watchdog
+that detects a stall and takes no action has moved the stall from "nobody
+noticed" to "somebody noticed and nothing happened", which is not the
+improvement it looks like.
 
 `trig_019rSxYzhDBSTdPry5xABpxr` (recreated 2026-08-29 from this fenced prompt after the 2026-08-23 trigger, trig_0157aWa8HMryS9nJcxVf9Scm, was found missing), fires a FRESH
 session every hour and carries no connectors — by design, since the
@@ -725,6 +734,8 @@ STEP 2 — WATCH. `python3 scripts/synthesis_watchdog.py --state /root/.dma/ledg
 READ THE `sessions` BLOCK; it carries the stall signal. The routine is ONE CLIENT PER SESSION, so a holder with `holds_more_than_one` true is either batching against that rule or leaking leases, and one with `no_pages_yet` true has submitted nothing across everything it holds. Both together is the stall signature — measured live on 2026-08-23, when one holder sat on three runs at 0 of 6 pages while a healthy producer held one at 6 of 6 and was about to promote it. Name any such holder, its runs and its expiry. Do NOT release its claim: a lease belongs to its holder until it lapses, and taking one from a session that is merely slow puts two producers on one client's six pages.
 
 IF THE SCRIPT RAISES, SAY SO AND STOP — never report a quiet queue you could not read. It now refuses to take an empty row list out of a response whose shape it does not recognise, because it once did exactly that: it read the queue from a key the connector does not use (`runs`, where the connector returns `pending`), saw `[]` on every firing, and reported "nothing stalled" while unable to see a single run. The fix was verified against the live connector — 0 runs visible before, 4 after, one of them six pages PASS and not serving. It narrows on the queue row's claim before asking per-run, and refuses outright if more than 40 runs match — that refusal is a real signal about the claim field, not a transient error to retry.
+
+STEP 2b — SWEEP THE RESEARCH SIDE, AND REVIVE WHAT STOPPED. The steps above watch SYNTHESIS runs through the connector. Research runs are a different population and were invisible to this routine entirely: they live in a run directory that does not survive a container, so a sweep that lists `$DMA_RUN_ROOT` on a fresh firing finds zero and prints "no research runs" — indistinguishable from a healthy queue, and how a run that stopped at category three stayed stopped. Every `engine.cli start` now writes an append-only REGISTRY row and pushes it to Drive, so the population is knowable from here. Run `python3 plugins/dma-insights/skills/dma-research/engine/registry.py pull` first (merges Drive's copy into this container's, never overwrites), then `python3 plugins/dma-insights/skills/dma-research/engine/watchdog.py --json`. Every row carries a `state` and a `resume` plan naming the agent to dispatch and the prompt to dispatch it with — you do not compose one. Actionable states are NO_CLIENT_FOLDER, PRELIM_OPEN, STALLED, GATE_FAILED, UNGATED, AT_BUDGET_CEILING, READY_FOR_HANDOFF and MISSING_LOCALLY. Add `--revive` to act rather than only report: it re-dispatches each stopped run through `scripts/agent_run.py` under the owning agent's own front matter, and where dispatch is genuinely unavailable it returns NOT_RUN with the reason and the resume prompt, never a silent pass. Use `--revive --dry-run` first if you want to see the plan before it fires. TWO STATES ARE NEVER REVIVED AUTOMATICALLY and the script already refuses them: HALTED (the catalogue moved under the run — a person decides whether to re-pin or retire it) and UNREADABLE. Finish by pushing the registry back: `registry.py push`. A firing that revives nothing because nothing stopped says so in one line and stops.
 
 STEP 3 — PROMOTE WHAT IS FINISHED. `python3 scripts/synthesis_watchdog.py --state /root/.dma/ledgers/watchdog.json --promote-ready`. Every run classified READY_TO_PROMOTE — six pages PASS, promotable, nothing promoted — is RE-READ and re-checked immediately before promoting, then re-read again to confirm all six pages share one promoted_at. A run that stopped being promotable in between is REFUSED and named, not promoted; more than one promoted_at is an atomicity failure (invariant 3), reported and never retried. The script exits 1 when anything was refused. Do NOT write promotion logic inline in this prompt — it lived here once as a heredoc whose terminator was indented, so it could not run at all, and nothing tested it.
 

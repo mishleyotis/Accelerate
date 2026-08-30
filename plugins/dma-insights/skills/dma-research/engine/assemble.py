@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Assemble the client DMA folder — the four deliverables, verified.
 
+    python3 -m engine.assemble open    --run R [--out DIR] [--no-push]
     python3 -m engine.assemble package --run R [--out DIR] [--push]
     python3 -m engine.assemble verify  --folder "<Entity> - DMA"
     python3 -m engine.assemble contract
@@ -49,7 +50,7 @@ import sys
 from pathlib import Path
 
 from . import contract as C
-from . import runstate, techscan, validator
+from . import completeness, runstate, techscan, validator
 from .workbook import RunWorkbook, _split_ids
 
 #: The four final outputs, as (key, glob pattern, app classifier kind).
@@ -107,9 +108,12 @@ def evidence_index_doc(wb: RunWorkbook) -> dict:
             "generated_at": _utcnow(), "items": items}
 
 
-def manifest_doc(wb: RunWorkbook) -> dict:
+def manifest_doc(wb: RunWorkbook, *, status: str = "COMPLETE",
+                 opened_at: str | None = None) -> dict:
     md = wb.metadata()
     return {
+        "status": status,
+        "opened_at": opened_at or md.get("client_folder_opened_at"),
         "run_id": md.get("run_id"),
         "institution": {"name": md.get("entity_name"),
                         "entity_id": md.get("entity_id"),
@@ -126,6 +130,76 @@ def manifest_doc(wb: RunWorkbook) -> dict:
     }
 
 
+# ── the folder exists from the first minute of the run ───────────────────
+
+def default_folder_root(run: runstate.Run) -> Path:
+    """Where the client folder lives locally: beside the run tree.
+
+    Beside, not inside: the run tree is working area that `strip` prunes and
+    the container discards, and the client folder is the deliverable. A
+    folder nested in the thing that gets cleaned up is a folder that gets
+    cleaned up."""
+    return Path(run.root).parent
+
+
+def open_folder(run: runstate.Run, out_root=None, *, push: bool = True) -> dict:
+    """Create '<Entity> - DMA' NOW, at run start, and say so in the workbook.
+
+    WHY AT START. The Golden 1 calibration finished a category, wrote twenty
+    evidence rows and six syntheses, and created no client folder — because
+    folder creation lived in `package`, which runs at the END and refuses
+    until all four deliverables exist. A run that stops early therefore
+    leaves NOTHING an operator can find: no folder in the intake Drive, no
+    manifest, no trace that the engagement was ever started. The folder is
+    the run's public identity, so it is created with the run and carries
+    `status: IN_PROGRESS` until `package` completes it.
+
+    Idempotent: re-opening an existing folder refreshes the manifest and
+    reports `created: false`. Pushing is best-effort and HONEST — a Drive
+    that could not be reached is reported NOT_RUN with the reason, never
+    silently skipped, because a folder that exists only in this container is
+    exactly the state this function exists to prevent."""
+    wb = run.open()
+    md = wb.metadata()
+    entity = str(md.get("entity_name") or run.run_id)
+    dest = Path(out_root or default_folder_root(run)) / folder_name(entity)
+    created = not dest.exists()
+    dest.mkdir(parents=True, exist_ok=True)
+    (dest / "01_evidence").mkdir(exist_ok=True)
+
+    opened = str(md.get("client_folder_opened_at") or "").strip() or _utcnow()
+    manifest = manifest_doc(wb, status="IN_PROGRESS", opened_at=opened)
+    manifest["deliverables_expected"] = [d[1] for d in DELIVERABLES]
+    manifest["deliverables_present"] = []
+    mpath = dest / "run_manifest.json"
+    mpath.write_text(json.dumps(manifest, indent=2, default=str))
+
+    wb.set_metadata("client_folder", str(dest))
+    wb.set_metadata("client_folder_opened_at", opened)
+
+    out = {"folder": str(dest), "entity": entity, "created": created,
+           "status": "IN_PROGRESS", "opened_at": opened}
+    out["pushed"] = _push_one(mpath, entity, "run_manifest.json") if push \
+        else {"outcome": "NOT_RUN", "reason": "push disabled by caller"}
+    return out
+
+
+def _push_one(local: Path, entity: str, remote: str) -> dict:
+    """One file to the client's intake folder, creating it if new."""
+    df = Path(__file__).resolve().parents[3] / "scripts" / "drive_fetch.py"
+    if not df.exists():
+        return {"outcome": "NOT_RUN",
+                "reason": "drive_fetch.py is not in this install"}
+    r = subprocess.run(
+        [sys.executable, str(df), "push-package", "--client", entity,
+         "--file", str(local), "--name", remote],
+        capture_output=True, text=True, timeout=600)
+    if r.returncode == 0:
+        return {"outcome": "RESOLVED", "detail": (r.stdout or "").strip()[-200:]}
+    return {"outcome": "FAILED",
+            "reason": (r.stderr or r.stdout or "").strip()[-300:]}
+
+
 # ── assembly ─────────────────────────────────────────────────────────────
 
 def package(run: runstate.Run, out_root, *, push: bool = False) -> dict:
@@ -138,7 +212,14 @@ def package(run: runstate.Run, out_root, *, push: bool = False) -> dict:
     wb = run.open()
     md = wb.metadata()
     entity = str(md.get("entity_name") or run.run_id)
-    dest = Path(out_root) / folder_name(entity)
+    dest = Path(out_root or default_folder_root(run)) / folder_name(entity)
+
+    # A workbook that validates and carries nothing is the Golden 1 shape.
+    # The package is where it would reach a client, so it is refused here.
+    try:
+        completeness.require(wb)
+    except completeness.CompletenessRefusal as e:
+        raise SystemExit(f"REFUSED: {e}") from None
 
     missing = []
     found: dict[str, Path] = {}
@@ -164,7 +245,7 @@ def package(run: runstate.Run, out_root, *, push: bool = False) -> dict:
     for key, p in found.items():
         shutil.copy2(p, dest / p.name)
     (dest / "run_manifest.json").write_text(
-        json.dumps(manifest_doc(wb), indent=2, default=str))
+        json.dumps(manifest_doc(wb, status="COMPLETE"), indent=2, default=str))
     (dest / "01_evidence" / "evidence_index.json").write_text(
         json.dumps(evidence_index_doc(wb), indent=2, default=str))
     ts_json = run.deliverables / techscan.JSON_NAME
@@ -268,6 +349,13 @@ def main(argv=None) -> int:
     p.add_argument("--push", action="store_true",
                    help="also push every file to the client's intake folder "
                         "on Drive (creates '<Entity> - DMA' there if new)")
+    o = sub.add_parser("open", help="create '<Entity> - DMA' NOW, at run "
+                                    "start, so a run that stops early is "
+                                    "still findable")
+    o.add_argument("--run", required=True)
+    o.add_argument("--root")
+    o.add_argument("--out")
+    o.add_argument("--no-push", action="store_true")
     v = sub.add_parser("verify")
     v.add_argument("--folder", required=True)
     sub.add_parser("contract")
@@ -286,7 +374,11 @@ def main(argv=None) -> int:
         print(json.dumps(out, indent=2))
         return 0 if out["complete"] else 1
     run = runstate.locate(a.run, Path(a.root) if a.root else None)
-    out = package(run, Path(a.out) if a.out else run.root.parent, push=a.push)
+    if a.cmd == "open":
+        print(json.dumps(open_folder(run, a.out, push=not a.no_push),
+                         indent=2, default=str))
+        return 0
+    out = package(run, Path(a.out) if a.out else None, push=a.push)
     print(json.dumps(out, indent=2, default=str))
     return 0 if out["verified"] else 1
 

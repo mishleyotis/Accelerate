@@ -17,8 +17,8 @@ from engine.workbook import WorkbookError
 from fixtures import CAT, bank_evidence, good_synthesis, new_run, synthesise
 
 
-def _good_run(tmp_path, n=8):
-    run = new_run(tmp_path, n=n)
+def _good_run(tmp_path, n=8, prelim=True):
+    run = new_run(tmp_path, n=n, prelim=prelim)
     wb = run.open()
     for cell in wb.selected_subcaps():
         synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
@@ -308,7 +308,9 @@ def test_a_peer_figure_must_declare_the_rung_it_came_from():
 def test_the_peer_set_locks_once_and_refuses_a_different_cohort(tmp_path):
     """AUD-0043: Handoff_Lock is the immutability mechanism both templates
     depend on and it existed in neither tree."""
-    run, wb = _good_run(tmp_path, n=2)
+    # prelim=False: PRELIM freezes a peer set of its own, and this test is
+    # about the lock refusing a SECOND, different cohort.
+    run, wb = _good_run(tmp_path, n=2, prelim=False)
     first = wb.lock_peer_set(["Alpha CU", "Beta CU"], basis="table")
     assert first["peer_n"] == 2 and first["already_locked"] is False
     again = wb.lock_peer_set(["Beta CU", "Alpha CU"], basis="table")
@@ -324,7 +326,7 @@ def test_a_peer_basis_outside_the_ladder_is_refused(tmp_path):
 
 
 def test_the_locked_set_reaches_the_handoff(tmp_path):
-    run, wb = _good_run(tmp_path, n=8)
+    run, wb = _good_run(tmp_path, n=8, prelim=False)
     wb.lock_peer_set(["Alpha CU", "Beta CU"], basis="recomputed")
     doc = handoff.build(wb, qa_dir=run.qa_dir, strict=False)
     lock = doc["_contract"]["handoff_lock"]

@@ -22,7 +22,8 @@ sys.path.insert(0, str(REPO / "apps" / "worker"))
 
 from engine import contract as C, ledger as L, report_spec as RS   # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from fixtures import synthesise                                    # noqa: E402
+from fixtures import (close_prelim, make_shippable,  # noqa: E402
+                      synthesise)
 from engine import floors_gate, runstate                           # noqa: E402
 
 
@@ -51,6 +52,13 @@ def finished_run(tmp_path_factory):
         run_id="E2E-1", entity_name="Acme Credit Union", entity_id="acme-cu",
         sub_vertical="CU", scope_mode="T1_CORE",
         reference_date="2026-08-29", root=root / "run", selected=selected)
+    # The three phases a real run does before any category: the binding
+    # preflight (which banks the financial review), the client folder, and
+    # PRELIM. Without them `orient` withholds every card and the handoff
+    # refuses a workbook with empty tabs — both correctly.
+    from engine import assemble as _asm
+    _asm.open_folder(run, root / "client", push=False)
+    close_prelim(run)
     wb = run.open()
 
     for i, cell in enumerate(wb.selected_subcaps()):
@@ -92,6 +100,7 @@ def finished_run(tmp_path_factory):
         assert v["gate"] == "PASS", (cat, v["blocking"])
 
     _narrate(wb)
+    make_shippable(wb)
     return run
 
 
@@ -160,11 +169,27 @@ def _narrate(wb):
 
 def test_the_workbook_carries_the_whole_run(finished_run):
     wb = finished_run.open()
-    assert len(wb.rows("Search_Log")) == 36
-    assert len(wb.rows("Evidence_Detail")) == 54
+    assert len(wb.rows("Search_Log")) == 36       # 18 subcaps x 2 volleys
+    assert len(wb.rows("Evidence_Detail")) == 56  # 18 x 3, + 2 profile rows
     assert len(wb.rows("Gate_Log")) == 2
     assert all(r["Dominant_Claim"] for r in wb.scoring_rows())
     assert wb.verify_handoff_lock() == []
+
+
+def test_the_run_carries_its_institution_not_only_its_capabilities(finished_run):
+    """Requirement 3, on the substrate: a run that profiled nobody has an
+    empty Entity_Timeline, Peer_Benchmarks and Tech_Register — the Golden 1
+    shape. These are the tabs PRELIM fills."""
+    wb = finished_run.open()
+    assert len(wb.rows("Entity_Timeline")) >= 3
+    assert len(wb.rows("Peer_Benchmarks")) >= 1
+    assert len(wb.rows("Tech_Register")) >= 1
+    prelim_rows = {r["Section_ID"] for r in wb.rows("Report_Narrative")
+                   if str(r.get("Section_ID") or "").startswith("PRELIM-")}
+    assert {"PRELIM-FIN", "PRELIM-FIRM", "PRELIM-LEAD"} <= prelim_rows
+    md = wb.metadata()
+    assert md["prelim_status"] == "COMPLETE"
+    assert md["preflight_sha"] and md["client_folder"]
 
 
 def test_the_run_validates_against_its_own_contract(finished_run):
@@ -256,9 +281,15 @@ def test_the_app_parses_the_workbook_and_keeps_every_linkage(finished_run):
     assert stage.detail["stage"].startswith("research")
 
     r = wp.parse_research_workbook(str(finished_run.workbook_path))
-    assert len(r["ledger"]) == 54
-    assert [x["e_id"] for x in r["ledger"] if not x["subcaps"]] == []
-    assert all(x["source_url"] and x["published_date"] for x in r["ledger"])
+    # 18 subcaps x 3 sources, plus the two PRELIM profile rows (the binding
+    # preflight's financial statement and the institution profile). Those
+    # two support the CLIENT, not a capability cell, so they carry no
+    # subcap — and the app tolerates that per row, which this pins.
+    ledger = r["ledger"]
+    assert len(ledger) == 56
+    unmapped = [x["e_id"] for x in ledger if not x["subcaps"]]
+    assert len(unmapped) == 2, unmapped
+    assert all(x["source_url"] and x["published_date"] for x in ledger)
 
 
 def test_the_report_the_app_reads_carries_the_workbooks_own_figures(finished_run):

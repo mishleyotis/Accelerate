@@ -51,7 +51,7 @@ import sys
 from pathlib import Path
 
 from . import contract as C
-from . import floors_gate, quality as Q, runstate, validator
+from . import completeness, floors_gate, quality as Q, runstate, validator
 from .workbook import RunWorkbook, FLOOR_ITEMS, _split_ids
 
 HANDOFF_NAME = "research_handoff.json"
@@ -66,6 +66,14 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
             "REFUSED: the workbook does not satisfy its own contract, so a "
             "handoff built from it would carry the defect forward:\n  "
             + "\n  ".join(str(f) for f in fails))
+    # The validator checks SHAPE; a sheet with correct headers and no rows
+    # passes it. Golden 1 shipped six empty tabs that way, so the handoff
+    # also asks whether there is anything IN the workbook.
+    if strict:
+        try:
+            completeness.require(wb)
+        except completeness.CompletenessRefusal as e:
+            raise SystemExit(f"REFUSED: {e}") from None
     md = wb.metadata()
     register = wb.evidence_index()
     tax = C.taxonomy()

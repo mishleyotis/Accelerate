@@ -1,10 +1,10 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "1.4.0",
-  "description": "The six Digital Maturity Assessment skills, 64 DMA agents \u2014 including the 16 category-clustered researchers and their conductor \u2014 the remote DMA Insights MCP connector (33 tools), and the research ENGINE that makes a run finish unattended: the scoring workbook is the substrate every step writes to, and the four deliverables (workbook, Assessment Report, Client Research Profile, Technographic Scan) each have a producer and a reader. See docs/END-TO-END.md and scripts/aud_ledger.py.",
+  "version": "1.5.0",
+  "description": "The six Digital Maturity Assessment skills, 64 DMA agents — 16 category-clustered researchers and their conductor — the remote DMA Insights MCP connector (33 tools), and the research ENGINE that makes a run finish unattended: a binding preflight the engagement owner answers, a PRELIM phase that gates category dispatch, a completeness gate on every workbook tab, and a watchdog that revives a run that stopped. See docs/END-TO-END.md.",
   "author": {
-    "name": "Zennify \u2014 DMA Insights build"
+    "name": "Zennify — DMA Insights build"
   },
   "license": "UNLICENSED",
   "keywords": [
