@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DMA Insights — Implementation Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap">
+<style>
+
+/* ─── ZENNIFY TOKEN MAP ──────────────────────────────────────── */
+:root {
+  --z-teal:      #27BBAF;   /* brand teal — headlines, accents     */
+  --z-teal-dark: #185F60;   /* dark teal  — sidebar, dark cards    */
+  --z-teal-mid:  #139F94;   /* accent green — icons, sub-labels    */
+  --z-mint:      #79E2BF;   /* mint — curve, highlight             */
+  --z-ice:       #E8F7F6;   /* ice — card tint, soft bg            */
+  --z-green:     #1C4A4D;   /* dark green — primary body text      */
+  --z-green2:    #1A4D4D;   /* dark teal variant 2                 */
+  --z-lavender:  #F2F4F9;   /* card fill — most common card color  */
+  --z-purple:    #8094C0;   /* eyebrow / caption                   */
+  --z-orange:    #FE9732;   /* accent orange — warnings            */
+  --z-orange-lt: #FFCB99;   /* light orange — Activating level     */
+  --z-gray-bg:   #F5F5F5;   /* light slide background              */
+  --z-gray-sep:  #E5E7EB;   /* separator                           */
+  --z-gray-body: #4A5568;   /* alt body text                       */
+  --z-gray-muted:#6B7280;   /* footnotes, muted                    */
+  --z-white:     #FFFFFF;
+  --z-navy:      #001E48;   /* featured offerings dark             */
+  /* Maturity */
+  --m1: #FFCB99; --m1t: #7C3C00;   /* Activating */
+  --m2: #62D7B8; --m2t: #0D4F3C;   /* Building   */
+  --m3: #27BBAF; --m3t: #FFFFFF;   /* Competing  */
+  --m4: #139F94; --m4t: #FFFFFF;   /* Differentiating */
+  /* Phase colours */
+  --ph0: #735BA1; --ph0-lt: #EDE9FE; --ph0-bd: #C4B5FD;
+  --ph1: #3D81F6; --ph1-lt: #EFF6FF; --ph1-bd: #BFDBFE;
+  --radius: 8px; --radius-lg: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;font-weight:400;font-size:14px;line-height:1.65;background:var(--z-gray-bg);color:var(--z-green);}
+
+/* ─── LAYOUT ─────────────────────────────────────────────────── */
+.shell{display:flex;min-height:100vh;}
+
+/* Sidebar */
+.sb{width:240px;flex-shrink:0;background:var(--z-teal-dark);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.sb-head{padding:20px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo{font-size:13px;font-weight:600;color:var(--z-teal);letter-spacing:.1em;text-transform:uppercase;}
+.sb-doc{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;}
+.sb-ver{font-size:10px;color:rgba(255,255,255,.2);margin-top:2px;font-family:'DM Mono',monospace;}
+.sb-grp{padding:14px 10px 2px;}
+.sb-grp-label{font-size:9px;font-weight:600;color:rgba(255,255,255,.22);letter-spacing:.14em;text-transform:uppercase;padding:0 6px;margin-bottom:4px;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;color:rgba(255,255,255,.48);font-size:12px;font-weight:400;transition:all .13s;}
+.sb-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.82);}
+.sb-item.on{background:rgba(39,187,175,.16);color:var(--z-teal);}
+.sb-item.ph0{color:rgba(196,181,253,.65);}
+.sb-item.ph0:hover{background:rgba(115,91,161,.12);color:#c4b5fd;}
+.sb-item.ph0.on{background:rgba(115,91,161,.2);color:#c4b5fd;}
+.sb-item.ph1{color:rgba(147,197,253,.65);}
+.sb-item.ph1:hover{background:rgba(61,129,246,.12);color:#93c5fd;}
+.sb-item.ph1.on{background:rgba(61,129,246,.2);color:#93c5fd;}
+.sb-tag{font-size:9px;font-family:'DM Mono',monospace;background:rgba(255,255,255,.07);border-radius:3px;padding:1px 5px;min-width:22px;text-align:center;}
+.sb-item.on .sb-tag{background:rgba(39,187,175,.25);color:var(--z-teal);}
+.sb-item.ph0.on .sb-tag{background:rgba(115,91,161,.25);color:#c4b5fd;}
+.sb-item.ph1.on .sb-tag{background:rgba(61,129,246,.25);color:#93c5fd;}
+.sb-foot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.2);}
+
+/* Main */
+.main{flex:1;min-width:0;}
+.topbar{background:var(--z-white);border-bottom:1px solid var(--z-gray-sep);padding:14px 36px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
+.tb-title{font-size:15px;font-weight:600;color:var(--z-green);}
+.tb-meta{font-size:11px;color:var(--z-gray-muted);}
+.content{padding:36px;max-width:980px;}
+.section{display:none;}
+.section.on{display:block;}
+
+/* ─── TYPOGRAPHY ─────────────────────────────────────────────── */
+h1{font-size:26px;font-weight:600;color:var(--z-green);letter-spacing:-.018em;line-height:1.2;margin-bottom:6px;}
+.eyebrow{font-size:11px;font-weight:400;color:var(--z-purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+h2{font-size:17px;font-weight:600;color:var(--z-green);margin:30px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--z-ice);}
+h3{font-size:14px;font-weight:600;color:var(--z-green);margin:20px 0 8px;}
+h4{font-size:13px;font-weight:500;color:var(--z-green2);margin:14px 0 6px;}
+p{color:var(--z-gray-body);line-height:1.75;margin-bottom:10px;}
+.lead{font-size:15px;font-weight:300;color:var(--z-gray-body);line-height:1.85;margin-bottom:22px;max-width:820px;}
+code{font-family:'DM Mono',monospace;font-size:11.5px;background:var(--z-lavender);padding:2px 5px;border-radius:4px;color:var(--z-teal-dark);}
+strong{font-weight:600;color:var(--z-green);}
+hr{border:none;border-top:1px solid var(--z-gray-sep);margin:24px 0;}
+
+/* ─── BADGES ─────────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.03em;white-space:nowrap;}
+.b-teal{background:var(--z-ice);color:var(--z-teal-dark);}
+.b-green{background:#D1FAE5;color:#065F46;}
+.b-amber{background:#FEF3C7;color:#92400E;}
+.b-red{background:#FEE2E2;color:#991B1B;}
+.b-gray{background:var(--z-lavender);color:var(--z-gray-body);}
+.b-navy{background:#E0E7FF;color:var(--z-navy);}
+.b-ph0{background:var(--ph0-lt);color:#5B21B6;}
+.b-ph1{background:var(--ph1-lt);color:#1D4ED8;}
+.b-p0{background:#FEE2E2;color:#991B1B;}
+.b-p1{background:#FFEDD5;color:#C2410C;}
+.b-p2{background:var(--z-lavender);color:var(--z-gray-body);}
+.b-new{background:var(--z-teal);color:var(--z-white);font-size:9px;}
+
+/* ─── CALL-OUT BOXES ─────────────────────────────────────────── */
+.callout{border-radius:var(--radius);padding:13px 16px;margin:12px 0;}
+.callout p{margin:0;font-size:13px;line-height:1.7;}
+.co-teal{background:var(--z-ice);border-left:3px solid var(--z-teal);}
+.co-teal p{color:var(--z-teal-dark);}
+.co-orange{background:#FFF7ED;border-left:3px solid var(--z-orange);}
+.co-orange p{color:#7C2D12;}
+.co-dark{background:var(--z-teal-dark);border-left:3px solid var(--z-mint);}
+.co-dark .co-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--z-mint);margin-bottom:5px;}
+.co-dark p{color:rgba(255,255,255,.78);}
+.co-ph0{background:var(--ph0-lt);border-left:3px solid var(--ph0);}
+.co-ph0 p{color:#4C1D95;}
+.co-ph1{background:var(--ph1-lt);border-left:3px solid var(--ph1);}
+.co-ph1 p{color:#1E3A8A;}
+
+/* ─── CARDS ─────────────────────────────────────────────────── */
+.card{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:12px;}
+.card-lav{background:var(--z-lavender);border:none;}
+.card-ice{background:var(--z-ice);border:none;}
+.card-dark{background:var(--z-teal-dark);border:none;color:var(--z-white);}
+.card-title{font-size:14px;font-weight:600;color:var(--z-green);}
+.card-dark .card-title{color:var(--z-white);}
+.card-sub{font-size:12px;color:var(--z-gray-muted);margin-top:2px;}
+.card-dark .card-sub{color:rgba(255,255,255,.45);}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+
+/* ─── GRIDS ─────────────────────────────────────────────────── */
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.g-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;}
+
+/* ─── PHASE BANNER ───────────────────────────────────────────── */
+.phase-banner{display:flex;gap:0;border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:18px 0;}
+.pb-col{flex:1;padding:18px 16px;}
+.pb-0{background:linear-gradient(135deg,rgba(115,91,161,.07),rgba(115,91,161,.03));}
+.pb-1{background:linear-gradient(135deg,rgba(61,129,246,.07),rgba(61,129,246,.03));}
+.pb-div{width:1px;background:var(--z-gray-sep);}
+.pb-eye{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.pb-0 .pb-eye{color:var(--ph0);}
+.pb-1 .pb-eye{color:var(--ph1);}
+.pb-h{font-size:14px;font-weight:600;color:var(--z-green);margin-bottom:5px;}
+.pb-desc{font-size:12px;color:var(--z-gray-body);line-height:1.7;margin-bottom:10px;}
+.pb-li{font-size:12px;color:var(--z-gray-body);line-height:1.8;list-style:none;}
+.pb-li li{display:flex;gap:6px;align-items:flex-start;}
+.pb-0 .pb-li li::before{content:'→';color:var(--ph0);font-weight:600;flex-shrink:0;}
+.pb-1 .pb-li li::before{content:'→';color:var(--ph1);font-weight:600;flex-shrink:0;}
+
+/* ─── FEATURE TABLE ──────────────────────────────────────────── */
+.ft{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+.ft th{background:var(--z-teal-dark);color:rgba(255,255,255,.82);padding:8px 11px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.ft th:first-child{border-radius:6px 0 0 6px;}
+.ft th:last-child{border-radius:0 6px 6px 0;}
+.ft td{padding:9px 11px;border-bottom:1px solid var(--z-lavender);vertical-align:top;}
+.ft tr:last-child td{border-bottom:none;}
+.ft tr:hover td{background:#FAFBFD;}
+.ft .fn{font-weight:600;color:var(--z-green);margin-bottom:2px;}
+.ft .fd{font-size:11px;color:var(--z-gray-muted);}
+
+/* ─── FLOW ───────────────────────────────────────────────────── */
+.flow{display:flex;flex-direction:column;}
+.f-row{display:flex;gap:13px;}
+.f-spine{display:flex;flex-direction:column;align-items:center;}
+.f-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.f-dot-teal{background:var(--z-teal);color:var(--z-white);}
+.f-dot-0{background:var(--ph0);color:var(--z-white);}
+.f-dot-1{background:var(--ph1);color:var(--z-white);}
+.f-line{flex:1;width:2px;min-height:12px;}
+.f-line-teal{background:var(--z-ice);}
+.f-line-0{background:var(--ph0-lt);}
+.f-line-1{background:var(--ph1-lt);}
+.f-body{flex:1;padding-bottom:16px;}
+.f-title{font-size:13px;font-weight:600;color:var(--z-green);margin-bottom:3px;}
+.f-desc{font-size:12px;color:var(--z-gray-muted);line-height:1.7;}
+.f-sub{background:var(--z-lavender);border-radius:var(--radius);padding:9px 12px;margin-top:7px;}
+.f-sub p{font-size:11px;color:var(--z-gray-body);margin:0;line-height:1.65;}
+
+/* ─── PERSONA CARDS ──────────────────────────────────────────── */
+.personas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0;}
+.persona{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);padding:16px;}
+.p-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;margin-bottom:10px;}
+.p-name{font-size:13px;font-weight:600;color:var(--z-green);}
+.p-role{font-size:11px;color:var(--z-gray-muted);margin-bottom:8px;}
+.p-desc{font-size:12px;color:var(--z-gray-body);line-height:1.7;}
+.p-missions{margin-top:10px;padding-top:10px;border-top:1px solid var(--z-lavender);}
+.p-m{font-size:11px;color:var(--z-gray-muted);padding:2px 0;display:flex;gap:6px;align-items:flex-start;}
+.p-m::before{content:'→';color:var(--z-teal);font-weight:700;flex-shrink:0;}
+
+/* ─── DASHBOARD BLOCKS ───────────────────────────────────────── */
+.db{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:16px 0;}
+.db-head{background:var(--z-teal-dark);padding:14px 18px;display:flex;align-items:center;gap:12px;}
+.db-num{width:28px;height:28px;border-radius:8px;background:rgba(39,187,175,.25);color:var(--z-teal);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.db-info{flex:1;}
+.db-title{font-size:14px;font-weight:600;color:var(--z-white);}
+.db-sub{font-size:11px;color:rgba(255,255,255,.38);margin-top:1px;}
+.db-body{padding:18px;}
+.db-desc{font-size:13px;color:var(--z-gray-body);margin-bottom:14px;line-height:1.75;}
+.db-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.db-feat{background:var(--z-lavender);border-radius:var(--radius);padding:10px 12px;}
+.db-ft{font-size:12px;font-weight:600;color:var(--z-green);margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+.db-fd{font-size:11px;color:var(--z-gray-muted);line-height:1.6;}
+
+/* ─── TABLES ─────────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+.tbl th{background:var(--z-teal-dark);color:rgba(255,255,255,.8);padding:8px 11px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.tbl th:first-child{border-radius:6px 0 0 6px;}
+.tbl th:last-child{border-radius:0 6px 6px 0;}
+.tbl td{padding:8px 11px;border-bottom:1px solid var(--z-lavender);vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#fafbfd;}
+.tk{color:var(--z-teal-mid);font-weight:600;font-family:'DM Mono',monospace;}
+.tv{color:var(--z-gray-body);}
+
+/* ─── CODE BLOCK ─────────────────────────────────────────────── */
+.code{background:var(--z-teal-dark);border-radius:var(--radius);padding:14px 16px;font-family:'DM Mono',monospace;font-size:11.5px;color:#e2e8f0;overflow-x:auto;margin:10px 0;line-height:1.75;}
+.code .kw{color:#60a5fa;}
+.code .str{color:#6ee7b7;}
+.code .cmt{color:#475569;}
+.code .key{color:#f0abfc;}
+.code .num{color:#fbbf24;}
+
+/* ─── HEATMAP DEMO ───────────────────────────────────────────── */
+.hm-wrap{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:10px 0;}
+.hm-bar{background:var(--z-lavender);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--z-gray-muted);border-bottom:1px solid var(--z-gray-sep);}
+.hm-grid{padding:12px;display:grid;grid-template-columns:88px repeat(8,1fr);gap:3px;}
+.hm-c{height:22px;border-radius:3px;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;}
+.hm-c:hover{transform:scale(1.1);z-index:1;}
+.hm-label{font-size:10px;color:var(--z-gray-muted);text-align:right;padding-right:8px;display:flex;align-items:center;justify-content:flex-end;}
+.hm-ch{font-size:9px;color:var(--z-gray-muted);text-align:center;display:flex;align-items:flex-end;justify-content:center;height:22px;}
+.m1s{background:#FFCB99;color:#7C3C00;}
+.m2s{background:#B0EDD3;color:#0D4F3C;}
+.m3s{background:#27BBAF;color:#fff;}
+.m4s{background:#139F94;color:#fff;}
+.m5s{background:#185F60;color:#fff;}
+.thin{outline:2px dashed #C25008;outline-offset:1px;}
+
+/* ─── MATURITY PILLS ─────────────────────────────────────────── */
+.m-legend{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;}
+.m-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+
+/* ─── ARTIFACT CARDS ─────────────────────────────────────────── */
+.art-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+.art{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;}
+.art-head{padding:9px 13px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+.art-body{padding:10px 13px;}
+.art-row{display:grid;grid-template-columns:88px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid var(--z-lavender);font-size:11px;}
+.art-row:last-child{border-bottom:none;}
+.art-k{color:var(--z-gray-muted);}
+.art-v{color:var(--z-gray-body);}
+.ah-doc{background:var(--z-ice);color:var(--z-teal-dark);}
+.ah-xlsx{background:#D1FAE5;color:#065F46;}
+.ah-json{background:#FEF3C7;color:#92400E;}
+.ah-zip{background:var(--ph0-lt);color:#5B21B6;}
+
+/* ─── DEDUP ──────────────────────────────────────────────────── */
+.dd-group{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);margin:10px 0;overflow:hidden;}
+.dd-head{background:var(--z-lavender);padding:8px 13px;font-size:12px;font-weight:600;color:var(--z-green);display:flex;align-items:center;gap:8px;}
+.dd-file{display:flex;align-items:center;gap:10px;padding:8px 13px;border-top:1px solid var(--z-lavender);font-size:12px;}
+.dd-name{flex:1;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--z-gray-body);}
+.dd-date{font-size:10px;color:var(--z-gray-muted);}
+.win{background:#F0FDF4;}
+.win .dd-name{color:var(--z-green);font-weight:500;}
+.lose .dd-name{text-decoration:line-through;color:var(--z-gray-muted);}
+
+/* ─── API ENDPOINTS ──────────────────────────────────────────── */
+.ep{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius);margin-bottom:6px;}
+.method{font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 6px;border-radius:3px;font-family:'DM Mono',monospace;flex-shrink:0;}
+.mget{background:#DBEAFE;color:#1E40AF;}
+.mpost{background:#D1FAE5;color:#065F46;}
+.mput{background:#FFEDD5;color:#C2410C;}
+.ep-path{font-family:'DM Mono',monospace;font-size:12px;color:var(--z-green);font-weight:500;}
+.ep-desc{font-size:11px;color:var(--z-gray-muted);margin-top:1px;}
+
+/* ─── CHECKLIST ──────────────────────────────────────────────── */
+.chk{list-style:none;font-size:13px;}
+.chk li{padding:4px 0;display:flex;gap:8px;align-items:flex-start;}
+.chk li::before{content:'✓';color:var(--z-teal);font-weight:700;flex-shrink:0;margin-top:1px;}
+.chk-x li::before{content:'✗';color:#DC2626;}
+
+/* ─── PLATFORM CHIPS ─────────────────────────────────────────── */
+.plat{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;border:1px solid;}
+.pl-sf{background:#E0F4FC;color:#005C82;border-color:#B8E4F5;}
+.pl-db{background:#FFF0EE;color:#9B1A08;border-color:#FFD0C9;}
+.pl-tbl{background:#FFF3E8;color:#7A3C00;border-color:#FFD9B0;}
+.pl-tw{background:#FFEEF0;color:#8B0012;border-color:#FFCCD1;}
+.pl-nc{background:#E8EEF8;color:#1B5298;border-color:#C5D4EE;}
+
+/* ─── STAT CARDS ─────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+.stat{background:var(--z-lavender);border-radius:var(--radius-lg);padding:16px 14px;}
+.stat-num{font-size:28px;font-weight:600;color:var(--z-teal);line-height:1;}
+.stat-label{font-size:12px;font-weight:500;color:var(--z-green);margin-top:4px;}
+.stat-desc{font-size:11px;color:var(--z-gray-muted);margin-top:4px;line-height:1.5;}
+
+/* ─── INSIGHT CARD DEMO ──────────────────────────────────────── */
+.ic{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:10px 0;}
+.ic-head{background:var(--z-teal-dark);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.ic-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--z-teal);}
+.ic-body{padding:0;}
+.ic-row{display:grid;grid-template-columns:72px 1fr;gap:10px;padding:9px 14px;border-bottom:1px solid var(--z-lavender);}
+.ic-row:last-child{border-bottom:none;}
+.ic-label{font-size:9px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--z-gray-muted);padding-top:2px;}
+.ic-text{font-size:12px;color:var(--z-gray-body);line-height:1.65;}
+
+/* SCOPE TABLE */
+.scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0;}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────── */
+@media(max-width:768px){.sb{display:none;}.personas,.stats,.g3{grid-template-columns:1fr;}.g2,.db-grid,.art-grid,.scope-grid{grid-template-columns:1fr;}.phase-banner{flex-direction:column;}}
+
+
+/* ─── v4.0 ADDITIONS ─────────────────────────────────────────── */
+.b-mcp{background:#EDE9FE;color:#5B21B6;}
+.b-gate{background:#E0F2FE;color:#075985;}
+.b-serv{background:#D1FAE5;color:#065F46;}
+.b-stage{background:#FEF3C7;color:#92400E;}
+.b-ing{background:#E0E7FF;color:#3730A3;}
+.b-none{background:var(--z-lavender);color:var(--z-gray-muted);font-style:italic;}
+.b-mono{font-family:'DM Mono',monospace;font-weight:500;letter-spacing:0;}
+
+
+/* Decision register */
+.dec{border:1px solid var(--z-gray-sep);border-left:3px solid var(--z-purple);
+  border-radius:var(--radius);padding:13px 16px;margin:10px 0;background:var(--z-white);}
+.dec-h{display:flex;align-items:center;gap:9px;margin-bottom:6px;flex-wrap:wrap;}
+.dec-id{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--z-purple);}
+.dec-t{font-size:13px;font-weight:600;color:var(--z-green);}
+.dec-b{font-size:12px;color:var(--z-gray-body);line-height:1.7;}
+.dec-b p{font-size:12px;margin:0 0 6px;}
+.dec-b p:last-child{margin-bottom:0;}
+.dec-why{background:var(--z-lavender);border-radius:6px;padding:8px 11px;margin-top:8px;
+  font-size:11px;color:var(--z-gray-body);line-height:1.65;}
+.dec-why b{color:var(--z-green);}
+
+/* Boundary / invariant rules — the hard statements */
+.rule{background:var(--z-teal-dark);border-radius:var(--radius);padding:12px 16px;margin:12px 0;}
+.rule p{color:#fff;font-size:12.5px;font-weight:500;margin:0;line-height:1.7;}
+.rule .rule-lbl{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--z-mint);margin-bottom:5px;}
+
+/* Tier ladder */
+.tier-row{display:grid;grid-template-columns:44px 1fr 62px 60px;gap:10px;align-items:center;
+  padding:7px 11px;border-bottom:1px solid var(--z-lavender);font-size:11.5px;}
+.tier-row:last-child{border-bottom:none;}
+.tier-n{font-family:'DM Mono',monospace;font-weight:600;font-size:11px;padding:3px 0;
+  text-align:center;border-radius:4px;}
+.t1{background:#065F46;color:#fff;} .t2{background:#059669;color:#fff;}
+.t3{background:#27BBAF;color:#fff;} .t4{background:#FE9732;color:#7C3C00;}
+.t5{background:#FEE2E2;color:#991B1B;}
+.tier-w{font-family:'DM Mono',monospace;color:var(--z-gray-muted);text-align:right;}
+.tier-c{font-family:'DM Mono',monospace;color:var(--z-teal-mid);font-weight:600;text-align:right;}
+
+/* Gate family cards */
+.gfam{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0;}
+.gf{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;}
+.gf-h{padding:9px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.gf-p{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;}
+.gf-b{padding:11px 13px;font-size:11.5px;color:var(--z-gray-body);line-height:1.65;}
+.gf-b .gf-k{color:var(--z-gray-muted);font-size:10px;letter-spacing:.06em;
+  text-transform:uppercase;display:block;margin-top:7px;margin-bottom:2px;}
+.gf-ag .gf-h{background:var(--z-ice);color:var(--z-teal-dark);}
+.gf-sg .gf-h{background:#FFF7ED;color:#7C2D12;}
+.gf-et .gf-h{background:var(--ph0-lt);color:#5B21B6;}
+.gf-cg .gf-h{background:var(--ph1-lt);color:#1D4ED8;}
+
+/* MCP tool cards */
+.tool{display:grid;grid-template-columns:190px 1fr;gap:12px;padding:9px 12px;
+  border:1px solid var(--z-gray-sep);border-radius:var(--radius);margin-bottom:6px;
+  background:var(--z-white);}
+.tool-n{font-family:'DM Mono',monospace;font-size:11.5px;font-weight:600;color:var(--z-teal-dark);}
+.tool-g{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--z-gray-muted);
+  margin-top:2px;}
+.tool-d{font-size:11.5px;color:var(--z-gray-body);line-height:1.65;}
+
+/* Pipeline / lifecycle strip */
+.pipe{display:flex;align-items:stretch;gap:0;margin:14px 0;border:1px solid var(--z-gray-sep);
+  border-radius:var(--radius-lg);overflow:hidden;}
+.pipe-s{flex:1;padding:12px 13px;border-right:1px solid var(--z-gray-sep);}
+.pipe-s:last-child{border-right:none;}
+.pipe-n{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--z-purple);margin-bottom:4px;}
+.pipe-t{font-size:12px;font-weight:600;color:var(--z-green);margin-bottom:3px;}
+.pipe-d{font-size:10.5px;color:var(--z-gray-muted);line-height:1.6;}
+.pipe-s.hot{background:var(--z-ice);}
+.pipe-s.cold{background:var(--z-lavender);}
+
+/* Schema column rows (backend schema doc) */
+.schema{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);
+  overflow:hidden;margin:12px 0;}
+.sch-h{background:var(--z-teal-dark);padding:9px 14px;display:flex;align-items:center;
+  justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.sch-n{font-family:'DM Mono',monospace;font-size:12.5px;font-weight:600;color:var(--z-teal);}
+.sch-s{font-size:10.5px;color:rgba(255,255,255,.45);}
+.sch-b{padding:2px 0;}
+.col{display:grid;grid-template-columns:210px 128px 58px 1fr;gap:9px;padding:6px 14px;
+  border-bottom:1px solid var(--z-lavender);font-size:11px;align-items:baseline;}
+.col:last-child{border-bottom:none;}
+.col-name{font-family:'DM Mono',monospace;font-weight:500;color:var(--z-green);}
+.col-type{font-family:'DM Mono',monospace;font-size:10px;color:var(--z-teal-mid);}
+.col-pk{font-size:8.5px;font-weight:700;letter-spacing:.05em;color:var(--z-purple);}
+.col-desc{color:var(--z-gray-muted);line-height:1.6;font-size:10.5px;}
+
+/* Count reconciliation */
+.count{display:grid;grid-template-columns:1fr 66px;gap:8px;padding:6px 12px;
+  border-bottom:1px solid var(--z-lavender);font-size:11.5px;}
+.count:last-of-type{border-bottom:2px solid var(--z-teal);}
+.count-v{font-family:'DM Mono',monospace;font-weight:600;color:var(--z-green);text-align:right;}
+.count-tot{display:grid;grid-template-columns:1fr 66px;gap:8px;padding:8px 12px;
+  font-size:12px;font-weight:600;color:var(--z-green);}
+.count-tot .count-v{color:var(--z-teal-mid);}
+
+/* Step cards (implementation plan) */
+.step{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);margin:12px 0;
+  overflow:hidden;}
+.step-h{background:var(--z-lavender);padding:10px 14px;display:flex;align-items:center;
+  gap:10px;flex-wrap:wrap;}
+.step-id{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--z-teal-dark);
+  background:var(--z-white);border-radius:4px;padding:2px 7px;}
+.step-t{font-size:13px;font-weight:600;color:var(--z-green);flex:1;}
+.step-b{padding:13px 15px;}
+.step-b p{font-size:12px;}
+.deliv{list-style:none;font-size:11.5px;margin:8px 0;}
+.deliv li{padding:3px 0;display:flex;gap:7px;align-items:flex-start;color:var(--z-gray-body);
+  line-height:1.6;}
+.deliv li::before{content:'▸';color:var(--z-teal);font-weight:700;flex-shrink:0;}
+
+/* Dependency / ordering note */
+.dep{font-size:10.5px;color:var(--z-gray-muted);background:var(--z-lavender);
+  border-radius:5px;padding:6px 10px;margin-top:8px;display:inline-block;}
+.dep b{color:var(--z-teal-dark);}
+
+/* Two-column compare */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--z-gray-sep);
+  border-radius:var(--radius-lg);overflow:hidden;margin:12px 0;}
+.cmp-c{padding:14px 16px;}
+.cmp-c:first-child{background:#FFF7ED;border-right:1px solid var(--z-gray-sep);}
+.cmp-c:last-child{background:#F0FDF4;}
+.cmp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:7px;}
+.cmp-c:first-child .cmp-l{color:#C2410C;}
+.cmp-c:last-child .cmp-l{color:#065F46;}
+.cmp-c ul{list-style:none;font-size:11.5px;line-height:1.75;color:var(--z-gray-body);}
+.cmp-c li{padding:2px 0;display:flex;gap:6px;align-items:flex-start;}
+.cmp-c:first-child li::before{content:'✗';color:#DC2626;font-weight:700;flex-shrink:0;}
+.cmp-c:last-child li::before{content:'✓';color:#059669;font-weight:700;flex-shrink:0;}
+
+.tbl td code, .ft td code{font-size:10.5px;padding:1px 4px;}
+.tbl .num, .ft .num{font-family:'DM Mono',monospace;text-align:right;color:var(--z-green);}
+.nowrap{white-space:nowrap;}
+.muted{color:var(--z-gray-muted);}
+.small{font-size:11px;}
+h2 .delta, h3 .delta{vertical-align:middle;margin-left:8px;}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="sb">
+  <div class="sb-head">
+    <div class="sb-logo">Zennify</div>
+    <div class="sb-doc">DMA Insights · Implementation Plan</div>
+    <div class="sb-ver">August 2026</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Plan</div>
+    <div class="sb-item on" onclick="go('s00')"><span class="sb-tag">00</span> Build sequence</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Foundations</div>
+    <div class="sb-item" onclick="go('sS')"><span class="sb-tag">S</span> Scaffolding</div>
+    <div class="sb-item" onclick="go('s0')"><span class="sb-tag">0</span> Infrastructure &amp; schema</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(196,181,253,.3)">The write path</div>
+    <div class="sb-item ph0" onclick="go('s1')"><span class="sb-tag">1</span> Ingest worker</div>
+    <div class="sb-item ph0" onclick="go('s2')"><span class="sb-tag">2</span> MCP connector</div>
+    <div class="sb-item ph0" onclick="go('s3')"><span class="sb-tag">3</span> Walking skeleton</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(147,197,253,.3)">The read path</div>
+    <div class="sb-item ph1" onclick="go('s4')"><span class="sb-tag">4</span> Read API</div>
+    <div class="sb-item ph1" onclick="go('s5')"><span class="sb-tag">5</span> Frontend &amp; global surfaces</div>
+    <div class="sb-item ph1" onclick="go('s6')"><span class="sb-tag">6</span> Seven dashboards</div>
+    <div class="sb-item ph1" onclick="go('s7')"><span class="sb-tag">7</span> Drilldown atlas</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Assurance</div>
+    <div class="sb-item" onclick="go('s8')"><span class="sb-tag">8</span> Gates &amp; corpus scanning</div>
+    <div class="sb-item" onclick="go('s9')"><span class="sb-tag">9</span> Hardening &amp; deployment</div>
+  </div>
+  <div class="sb-foot">© 2026 Zennify · Confidential</div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title" id="tb-title">00 — Build sequence</div>
+      <div class="tb-meta">DMA Insights · Implementation Plan · Claude Code edition</div>
+    </div>
+    <div style="display:flex;gap:7px;align-items:center"><span class="badge b-teal">Plan</span><span class="badge b-mcp">10 stages</span><span class="badge b-serv">62 surfaces scheduled</span></div>
+  </div>
+  <div class="content">
+
+<div id="s00" class="section on">
+
+<div class="eyebrow">Implementation plan</div>
+<h1 class="page-title">DMA Insights — build sequence <span style="font-size:14px;color:#735BA1;font-weight:500;">Claude Code edition</span></h1>
+<p class="lead">Ten stages, ordered by dependency rather than by layer. Nothing can be rendered until
+something has been promoted, and nothing can be promoted until the contract exists — so the MCP connector is
+infrastructure, not an integration step at the end.</p>
+
+<h2>Stage map</h2>
+<table class="ft">
+<tr><th style="width:52px">Stage</th><th>Delivers</th><th style="width:180px">Blocks</th></tr>
+<tr><td class="tk">S</td><td><div class="fn">Scaffolding</div><div class="fd">Repository, project instructions, environment, continuous integration.</div></td><td>everything</td></tr>
+<tr><td class="tk">0</td><td><div class="fn">Infrastructure and schema</div><div class="fd">Cloud project, database, all 89 tables, catalogue load.</div></td><td>everything</td></tr>
+<tr><td class="tk">1</td><td><div class="fn">Ingest worker</div><div class="fd">Drive to ingested tier, with source cells and retained artefact bytes.</div></td><td>stage 2 — no bundle without it</td></tr>
+<tr><td class="tk">2</td><td><div class="fn">MCP connector</div><div class="fd">12 tools, 34 contracts, validation, staging, atomic promotion.</div></td><td>stages 3–8</td></tr>
+<tr><td class="tk">3</td><td><div class="fn">Walking skeleton</div><div class="fd">One section synthesised in Cowork, promoted and on screen.</div></td><td>all breadth work</td></tr>
+<tr><td class="tk">4</td><td><div class="fn">Read API</div><div class="fd">One endpoint per page, redaction, envelope, corpus rollups.</div></td><td>stages 5–7</td></tr>
+<tr><td class="tk">5</td><td><div class="fn">Frontend foundation</div><div class="fd">Shell, tokens, auth, routing, and the 9 global surfaces.</div></td><td>stage 6</td></tr>
+<tr><td class="tk">6</td><td><div class="fn">Seven dashboards</div><div class="fd">All 38 client surfaces.</div></td><td>stage 7</td></tr>
+<tr><td class="tk">7</td><td><div class="fn">Drilldown atlas</div><div class="fd">Three shells, 15 panels, stacking.</div></td><td>—</td></tr>
+<tr><td class="tk">8</td><td><div class="fn">Gates and corpus scanning</div><div class="fd">Four families, ceilings, the ratchet.</div></td><td>—</td></tr>
+<tr><td class="tk">9</td><td><div class="fn">Hardening and deploy</div><div class="fd">Invariant tests, observability, production.</div></td><td>—</td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">The walking skeleton is stage 3 and it is not optional</div>
+  <p>One entity, one run, one section — synthesised by a Cowork agent, validated, promoted and rendered on
+  screen — before any breadth is built. Every architectural assumption in this plan is falsified or confirmed
+  by that one path, and every one of them is expensive to discover later.</p>
+</div>
+
+<div class="callout co-orange">
+  <p><strong>One sequencing trap worth naming.</strong> It is tempting to build the frontend early against
+  hand-written fixtures, because it is visible progress and parallelises well. Resist it until stage 3 has
+  landed. A frontend built against fixtures encodes the fixture author's assumptions about the payload shape,
+  and those assumptions are exactly what the contract exists to replace. Build the shell early; build the
+  surfaces against promoted data.</p>
+</div>
+
+<h2>Surface coverage — every surface has a stage</h2>
+<p>38 client surfaces, 9 global surfaces and 15 drilldowns. Nothing is
+left to “and then the rest of the UI”.</p>
+<table class="tbl">
+<tr><th style="width:90px">Stage</th><th style="width:110px">Count</th><th>Surfaces</th></tr>
+<tr><td class="tk">5</td><td class="num">9</td><td class="small">G1 · G2 · G3 · G4 · G5 · G6 · G7 · G8 · G9</td></tr>
+<tr><td class="tk">6.1</td><td class="num">13</td><td class="small">O1 · O2 · O3 · O4 · O5 · O6 · O7 · O8 · O9 · O10 · O11 · O1b · O12</td></tr><tr><td class="tk">6.2</td><td class="num">2</td><td class="small">I1 · T2</td></tr><tr><td class="tk">6.3</td><td class="num">5</td><td class="small">H4 · H1 · H2 · H6 · H9</td></tr><tr><td class="tk">6.4</td><td class="num">5</td><td class="small">P1 · P2 · P2b · P3 · P4</td></tr><tr><td class="tk">6.5</td><td class="num">6</td><td class="small">C1 · C2 · C3 · C4 · C5 · C6</td></tr><tr><td class="tk">6.6</td><td class="num">2</td><td class="small">T1 · T3</td></tr><tr><td class="tk">6.7</td><td class="num">5</td><td class="small">H3 · V1 · H5 · H7 · H8</td></tr>
+<tr><td class="tk">7</td><td class="num">15</td><td class="small">DD-1 · DD-2 · DD-3 · DD-4 · DD-5 · DD-6 · DD-7 · DD-8 · DD-9 · DD-10 · DD-11 · DD-12 · DD-13 · DD-14 · DD-15</td></tr>
+<tr style="border-top:2px solid var(--z-teal)"><td><strong>Total</strong></td>
+    <td class="num"><strong>62</strong></td><td></td></tr>
+</table>
+
+</div>
+<div id="sS" class="section">
+
+<div class="eyebrow">Stage S</div>
+<h1>Scaffolding</h1>
+
+<div class="step"><div class="step-h"><span class="step-id">S.1</span><span class="step-t">Repository and project instructions</span><span class="badge b-teal">Scaffold</span></div><div class="step-b"><p>Initialise the monorepo and write the instructions Claude Code reads at the start of every session. This file is the highest-leverage artefact in the repository: it is what stops a session re-deriving a decision that was already taken.</p><ul class="deliv"><li>Monorepo: <code>backend/</code>, <code>frontend/</code>, <code>infra/</code>, <code>etl/</code>, <code>docs/</code></li><li>The four design documents copied to <code>docs/</code> and referenced from the instructions</li><li>Branch protection; conventional commits</li></ul><h4>Verification</h4><ul class="chk"><li>The instructions file exists at the root and states the invariants verbatim</li><li>All four design documents are in <code>docs/</code></li></ul></div></div>
+
+<h3>Project instructions — the content that matters</h3>
+<div class="code"><span class="cmt"># DMA Insights — Claude Code project instructions</span>
+
+<span class="cmt">## The twelve invariants — breaking any of these is a breaking change</span>
+1  The app never calls a model at request time.
+2  All content writes go through the MCP connector.
+3  The API reads serving tables only.
+4  Promotion is atomic across all 6 pages.
+5  The synthesis agent creates 5 id classes and no others.
+6  Evidence ids are recognised by ONE pattern, in ONE module.
+7  The rank score is server-computed and bounded 1.0–5.0.
+8  A quoted figure and its named cell are the same cell, within 0.05.
+9  Every figure passes the identity gate before it renders.
+10 A derived value is computed or null — never a sentinel.
+11 Internal rungs are marked in the payload, not filtered in the frontend.
+12 A corpus ceiling only ever moves down.
+
+<span class="cmt">## Where content comes from</span>
+A synthesis agent in <span class="str">Claude Cowork</span> reads the ingested tier through the
+DMA Insights MCP connector, reasons, enriches, cites, writes every surface,
+submits page by page, and promotes. <span class="num">The deployed app does no reasoning.</span>
+<span class="num">If you are adding an inference client to backend/, you have misread this.</span>
+
+<span class="cmt">## Stack</span>
+Backend    Python 3.12 · FastAPI · SQLAlchemy 2.0 async · Alembic
+Frontend   Next.js 15 App Router · TypeScript
+Database   Cloud SQL PostgreSQL 16 · pgvector (BUILD TIME ONLY)
+Cache      Redis — ingest queue and claim leases ONLY
+Storage    Object storage — artefact bytes retained for excerpt verification
+Hosting    Cloud Run — 4 services (web · api · mcp · worker) + 2 jobs
+Auth       Google OIDC · RS256 JWT · httpOnly cookie · domain restricted
+
+<span class="cmt">## The counts, and what they mean</span>
+6    submission pages     promotion needs a PASS on every one
+34   payload sections     one per serving table
+38   client surfaces      across 7 dashboards
+9    global surfaces
+15   drilldowns           3 shells
+89   tables
+851  catalogue cells      NOT the per-run scored count
+12   MCP tools
+
+<span class="cmt">## Two counts that are NOT the same</span>
+catalogue_cells  851, fixed per catalogue version
+scored_cells     per run, smaller, varies — sub-vertical toggles exclude
+                 cells an institution cannot legally operate
+
+<span class="cmt">## Dashboards</span>
+D1 Overview · D2 Insights · D3 Heatmap · D4 Platform · D5 Context · D6 Tech stack · D7 Health
+<span class="num">D5 Context is INTERNAL ONLY. D7 Health is ANALYST ONLY.</span>
+
+<span class="cmt">## Conventions</span>
+API prefix        /api/v1/
+Python            snake_case modules · React components PascalCase
+Maturity palette  M1 #FFCB99 · M2 #B0EDD3 · M3 #27BBAF · M4 #139F94
+                  M5 #185F60 · no score #E5E7EB
+                  resolved through ONE module. No page computes a colour.
+Zennify brand     teal #27BBAF · dark #1C4A4D · purple #735BA1 · DM Sans</div>
+
+<div class="step"><div class="step-h"><span class="step-id">S.2</span><span class="step-t">Environment configuration</span><span class="badge b-teal">Scaffold</span></div><div class="step-b"><p>Every variable the four services need, with no secret in the repository. Note what is <em>absent</em>: there are no model names, no inference endpoints, no temperature, no cache time-to-live.</p><ul class="deliv"><li>An example environment file per service, committed; real values in a secret manager</li><li>Typed settings for the backend; typed environment access on the frontend</li><li>Database, cache, storage, OAuth, token and connector-credential configuration</li></ul><h4>Verification</h4><ul class="chk"><li>No secret is committed; a pre-commit hook scans for them</li><li>A service fails fast with a clear message on a missing required variable</li><li>No configuration key references an inference provider</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">S.3</span><span class="step-t">Continuous integration</span><span class="badge b-teal">Scaffold</span></div><div class="step-b"><p>Lint, type-check, test, build and deploy per service — plus two gates that exist specifically because of this architecture and would not appear in a conventional pipeline.</p><ul class="deliv"><li>Migrations run as a deploy step under the migration role</li><li><strong>Gate A — no inference import.</strong> The build fails if any backend module imports an inference client.</li><li><strong>Gate B — the ceiling ratchet.</strong> The build fails if any corpus gate threshold in the committed configuration is higher than in the previous commit.</li></ul><h4>Verification</h4><ul class="chk"><li>A branch adding an inference import fails CI</li><li>A branch raising a corpus ceiling fails CI and names the gate</li></ul><div class="dep"><b>Why Gate B belongs in CI:</b> the pressure to raise a ceiling arrives exactly when everyone is busy shipping. A check at the moment of the commit is the only one that reliably resists it.</div></div></div>
+
+</div>
+<div id="s0" class="section">
+
+<div class="eyebrow">Stage 0</div>
+<h1>Infrastructure and schema</h1>
+
+<div class="step"><div class="step-h"><span class="step-id">0.1</span><span class="step-t">Cloud project and identity</span><span class="badge b-ph0">Infra</span></div><div class="step-b"><p>One project, four service identities, least privilege throughout. The identity boundary carries real architectural weight: it is where the write-boundary invariant is enforced.</p><ul class="deliv"><li>Service identities for web, api, mcp, worker</li><li>The worker identity holds read-only delegation on the assessment tree</li><li>The connector identity holds the only credential that can write serving tables</li><li>Artefact registry, secret manager, monitoring and tracing</li></ul><h4>Verification</h4><ul class="chk"><li>The API identity cannot write beyond the two workflow tables</li><li>The worker identity has no access to serving or staging tables</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">0.2</span><span class="step-t">Database instance and roles</span><span class="badge b-ph0">Infra</span></div><div class="step-b"><p>Private networking, automated backups, point-in-time recovery. Four database roles matching the four services, created before any table exists so no table is ever created without its grants.</p><ul class="deliv"><li>PostgreSQL 16 with the vector and case-insensitive-text extensions</li><li>Roles for the API, connector, worker and migrations</li><li><strong>Default-deny grants:</strong> a new table grants nothing until a migration says so</li></ul><h4>Verification</h4><ul class="chk"><li>The API role returns a permission error on any staging select</li><li>Point-in-time recovery is verified by an actual restore, not by a console setting</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">0.3</span><span class="step-t">Deploy all 89 tables</span><span class="badge b-ph0">Schema</span></div><div class="step-b"><p>Migrations in tier order, so a foreign key never points at a table that does not yet exist. The enumerated types are created before the tables that use them.</p><ul class="deliv"><li>Enumerated types (22) → Auth (2) → Catalogue (21) → Ingested (13) → Ingest ops (3)</li><li>→ Staging (3) → Serving (33) → Control and audit (7) → Workflow (5)</li><li>All ten stored generated columns; all check constraints; both partial unique indexes</li><li>Per-role grants applied in the same migration that creates each table</li></ul><h4>Verification</h4><ul class="chk"><li>The table count in the application schema equals 89</li><li>Every generated column is stored, not virtual</li><li>An out-of-range rank score is rejected at insert</li><li>A null published date yields a null age, an unverified band and an undated status</li><li>Both partial unique indexes hold under concurrent insert</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">0.4</span><span class="step-t">Catalogue load</span><span class="badge b-ph0">Data</span></div><div class="step-b"><p>Load the capability catalogue — 851 cells across four pillars and 17 categories, plus the supporting tables, the alias bridge and the value chains. Every row is keyed on its version, so a bump adds rows rather than mutating them.</p><ul class="deliv"><li>Ingest into the 21 catalogue tables, keyed on identifier and version</li><li>A version row marked current; existing runs keep their pinned version</li><li>The alias bridge, populated for any known rename</li><li>The toggle cascade — what makes scored cells differ from catalogue cells</li><li>Value chains and their cell mappings, which the value-chain view reads</li></ul><h4>Verification</h4><ul class="chk"><li>Cell count equals 851; per pillar P1 205 · P2 292 · P3 164 · P4 190</li><li>Every cell resolves to a canonical name — none returns a raw code as its label</li><li>A renamed cell resolves through the alias bridge across a simulated bump</li><li>Every value-chain stage maps to at least one cell</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">0.5</span><span class="step-t">Cache, storage and jobs</span><span class="badge b-ph0">Infra</span></div><div class="step-b"><p>Scoped deliberately narrowly.</p><ul class="deliv"><li>Cache: the ingest job queue, and claim leases with a time-to-live</li><li>Buckets: artefacts (retained, for excerpt verification), exports, corpus packs</li><li>Cloud Run Jobs registered: corpus-gate-scanner · pack-exporter</li><li>Cloud SQL is Enterprise Plus with Managed Connection Pooling; svc_mcp pools in session mode, everything else transaction mode</li><li>Database auth is automatic IAM via the Cloud SQL Python Connector, with pool_recycle=1800 and pool_pre_ping — tokens live one hour and pooled connections must not outlive them</li><li>Response compression is FastAPI middleware; Cloud Run does not compress dynamic responses</li><li>Memorystore for Redis is reached over Direct VPC egress</li></ul><h4>Verification</h4><ul class="chk"><li>A claim lease expires and the run returns to unclaimed</li><li>Artefact bytes survive parse and are fetchable by the connector for excerpt verification</li></ul></div></div>
+
+</div>
+<div id="s1" class="section">
+
+<div class="eyebrow">Stage 1</div>
+<h1>Ingest worker</h1>
+<p class="lead">Built before the connector, because the connector's primary read tool returns the parsed
+package. No ingested run means no bundle, and nothing for a Cowork agent to synthesise against.</p>
+
+<div class="step"><div class="step-h"><span class="step-id">1.1</span><span class="step-t">Traversal and classification</span><span class="badge b-ph0">Worker</span></div><div class="step-b"><p>Scheduled traversal of the assessment tree, diffed against previous scans so re-running the scanner does not reprocess the corpus.</p><ul class="deliv"><li>Read-only Drive client with delegated access</li><li>Folder discovery, diffed against prior scans</li><li>Artefact classification against the registry, ranked by source priority</li><li>Every file recorded — including ones that were skipped</li></ul><h4>Verification</h4><ul class="chk"><li>A skipped folder appears in the audit with the rule that skipped it — a silently skipped folder is indistinguishable from a traversal bug</li><li>Re-running the scanner processes nothing new</li></ul></div></div><div class="step"><div class="step-h"><span class="step-id">1.2</span><span class="step-t">Entity resolution and deduplication</span><span class="badge b-ph0">Worker</span></div><div class="step-b"><p>The four-signal cascade, then test-case exclusion, then the four ordered dedup rules. Exclusion runs before resolution so a rehearsal folder never becomes an entity.</p><ul class="deliv"><li>Cascade: run manifest → request identifier → document header → folder name</li><li>Low confidence produces a pending-review entity, never an active one</li><li>Test-case detection, recorded with the rule that fired</li><li>Dedup: priority → completion date → parsed section count → stable tiebreak</li><li>The losing artefact is retained and marked, never deleted</li></ul><h4>Verification</h4><ul class="chk"><li>A test folder never produces an entity</li><li>Dedup is reproducible — the same inputs select the same winner twice</li><li>A low-confidence inference lands in pending review and does not appear in the directory</li></ul></div></div><div class="step"><div class="step-h"><span class="step-id">1.3</span><span class="step-t">Artefact parsing — and the two fields that cannot be backfilled</span><span class="badge b-ph0">Parser</span></div><div class="step-b"><p>Workbook, report, client profile and package files into the ingested tier.</p><ul class="deliv"><li>Workbook → score rows, <strong>with the source cell on every row</strong>, and all four grain ids</li><li>Report and client profile → document sections, with page numbers</li><li>Package files → evidence, issues, peers, recommendations, tech stack, fits, firmographics</li><li><strong>Artefact bytes retained in object storage</strong>, so an excerpt can be verified later</li><li>Every package excerpt verified against those bytes at parse time</li><li>Scored cells computed and stamped on the run</li><li>Parse observations for every disagreement, exclusion, skipped row and unparseable value</li></ul><h4>Verification</h4><ul class="chk"><li>Every score row carries a source cell and all four grain ids</li><li>A missing score is skipped, <strong>never defaulted to zero</strong> — a zero renders as the lowest maturity band and is indistinguishable from a real assessment of it</li><li>An excerpt absent from its artefact leaves the row unverified rather than linked</li><li>Scored cells is stamped and differs from catalogue cells where toggles applied</li></ul><div class="dep"><b>Neither field can be backfilled.</b> The originating workbook cell and the artefact bytes are only available at parse time.</div></div></div>
+<div class="step"><div class="step-h"><span class="step-id">1.4</span><span class="step-t">Embedding tier and centroids</span><span class="badge b-ph0">Vector</span></div><div class="step-b"><p>Built at ingest, because V4 needs the bundle embedded before the first submission arrives. Entirely inside the worker, off any request path.</p><ul class="deliv"><li>Local 384-dimension sentence-embedding model in the worker and connector images — CPU, deterministic, no network call</li><li>Sentence-window chunking at 60–120 tokens with 20% overlap; evidence excerpts are already the right size and pass through whole</li><li>L2 normalisation at write, so cosine becomes a dot product</li><li><code>bundle_embeddings</code> populated with scope, source reference and retained content — the content is what lets a flagged field be told what it matched</li><li><code>bundle_centroids</code> per scope: cell, category, pillar, run</li><li>HNSW index created once at migration (m=16, ef_construction=64); the graph grows incrementally as each run's vectors insert at ingest</li><li><code>embedding_model</code> pinned on every row</li></ul><h4>Verification</h4><ul class="chk"><li>A run produces 3,000–6,000 vectors and four scope levels of centroid</li><li>A centroid with fewer than five members is marked so the check abstains</li><li>An insert with the wrong dimension fails at INSERT with a readable message</li><li>Mixed embedding models in one run is rejected, not silently averaged</li><li>The attribution query returns three nearest chunks in single-digit milliseconds</li></ul><div class="dep"><b>Scoped centroids, not one global centroid.</b> An assessment corpus spans regulatory filings, technology detail and executive commentary; their mean points at nothing. Each claim is checked against the narrowest centroid that applies.</div></div></div>
+
+
+</div>
+<div id="s2" class="section">
+
+<div class="eyebrow">Stage 2</div>
+<h1>MCP connector</h1>
+<p class="lead">The contract, and the only writable boundary into served content. Everything downstream
+depends on it, which is why it is stage 2 rather than stage 8.</p>
+
+<div class="step"><div class="step-h"><span class="step-id">2.1</span><span class="step-t">Contract registry — all 34 sections</span><span class="badge b-mcp">MCP</span></div><div class="step-b"><p>Field tuples with per-field spec text. This registry is the single source of truth that the contract tool serves, the validator reads and the writers target — one definition, four consumers.</p><ul class="deliv"><li>Field tuple: required, type, item type, doc; nested specs under a sections key</li><li>All 34 sections across 6 pages, 32 of them required</li><li>Every list-of-object field carries its item schema in its doc text</li><li>The universal envelope on every section: produced-at, producer version, citations, internal-only paths, empty state</li></ul><h4>Verification</h4><ul class="chk"><li>Every section has a contract, and the count reconciles with the serving-table list</li><li>No list-of-object field lacks doc text</li><li>The contract tool returns doc text verbatim</li></ul><div class="dep"><b>The doc field is part of the contract, not documentation.</b> Required-type-items tells the agent nothing about item keys, so the shape would live only in the writers and the agent would guess — and a guess that type-checks promotes silently wrong content.</div></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">2.2</span><span class="step-t">Identifier authority</span><span class="badge b-mcp">MCP</span></div><div class="step-b"><p>One module, one compiled recogniser, imported everywhere and pinned by test at every call site.</p><ul class="deliv"><li>The recogniser plus find-ids and find-fabricated helpers</li><li>Four namespaces recognised: package, enrichment mint, connector, internal</li><li>Case-sensitive, no partial matches, order preserved</li><li>Agent-creatable id validation: exactly 5 classes, rejected otherwise</li><li>The connector boundary's copy pinned to the same compiled object</li></ul><h4>Verification</h4><ul class="chk"><li>A test asserts <em>object identity</em> of the compiled pattern at every call site, not equality</li><li>The mint namespace is matched</li><li>A payload attempting to mint an evidence id is rejected</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">2.3</span><span class="step-t">Read and discover tools</span><span class="badge b-mcp">MCP</span></div><div class="step-b"><p>Six tools, all idempotent and side-effect free.</p><ul class="deliv"><li><code>get_report_bundle</code> — the parsed package, with a source cell on every score and all four grain ids</li><li><code>get_page_contract</code> — shapes plus verbatim doc text</li><li><code>get_capability_catalogue</code> — the pinned catalogue, with the alias bridge and value chains</li><li><code>get_evidence</code> — a three-way split: found, not found, <strong>foreign</strong></li><li><code>get_run_progress</code> — per-page status and what is blocking</li><li><code>get_client_state</code> and <code>list_pending_runs</code> — served state, prior runs, and the claim</li></ul><h4>Verification</h4><ul class="chk"><li>Every score in the bundle carries a source cell</li><li>A foreign id is returned in its own bucket, not merged into not-found</li><li>Prior runs are returned so a rerun is not synthesised as though it were a first run</li></ul><div class="dep"><b>The three-way split is the point.</b> Not-found means fabricated or unregistered. Foreign — a real row belonging to another institution — must stop synthesis rather than be filtered out quietly, because its presence means the reasoning has drifted onto the wrong entity.</div></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">2.3b</span><span class="step-t">Enrichment intake</span><span class="badge b-mcp">MCP</span></div><div class="step-b"><p>The synthesis agent reaches the enrichment service directly; the application never calls it. What the application must do is accept the output as evidence and tier it correctly.</p><ul class="deliv"><li><code>register_evidence</code> accepts <code>origin=connector</code> and stamps it</li><li>Tier comes from the underlying source, never from the tool — a technographic scan registers at T1, and filing it at T4 caps the capability at L2.5</li><li>The source domain is identity-checked at registration, because enrichment resolves by domain and a holding company, a subsidiary and a same-named institution in another market all have one</li><li>A registered item with no traceable source URL is accepted as INFERENCE, never FACT</li></ul><h4>Verification</h4><ul class="chk"><li>A technographic scan registers at T1 and does not cap its cells</li><li>An enrichment row whose domain fails the identity check is quarantined, not stored</li><li>A value with no source URL cannot be registered as FACT</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">2.4</span><span class="step-t">Validation — two passes and four gate families</span><span class="badge b-mcp">MCP</span></div><div class="step-b"><p>Structural and editorial first; evidence second and separately, because checking an extraction against artefact bytes is database work of a different shape from format sweeps.</p><ul class="deliv"><li><strong>Pass 1:</strong> required fields, types, word budgets, forbidden registers, terminal punctuation, id resolution by pattern</li><li><strong>Pass 2:</strong> every id resolves and belongs to this entity and run; every excerpt verbatim against fetched bytes; every source domain identity-checked</li><li>Grain resolution: resolve each quoted label to a served cell, require agreement, round once</li><li>The identity gate: legal name, regulator, footprint, source domain, order of magnitude</li><li>All seven cross-surface reconciliation pairs</li><li><code>r_layer</code> present on every ranked or causal claim, with a verdict</li><li><code>empty_state.sources_searched</code> on every declared absence — an absence with no ladder is rejected</li><li><code>narrative_thread</code> present on each page lead section</li><li>Band words validated against the four-value domain, resolved from the RAW score</li><li>The citation stack V1–V4, with V4 abstaining when no embedding tier is available</li><li>Structured verdicts: gate id, JSON path, and a message naming the arithmetic</li><li>The gate registry populated across all four families</li></ul><h4>Verification</h4><ul class="chk"><li>A grain mismatch fails and the verdict names both figures and the path</li><li>A foreign source domain quarantines the field and emits a reason — no value is substituted</li><li>V4 abstains rather than failing closed when the embedding tier is unavailable</li><li>A verdict message is specific enough to repair from without re-reading the payload</li><li>All seven reconciliation pairs are asserted independently</li></ul><div class="dep"><b>Any evidence reason at all fails the submission.</b> An excerpt is either a copy of something a document says or it is not evidence. The check lives at submit so the agent can still repair the span.</div></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">2.5</span><span class="step-t">Write tools and the promote transaction</span><span class="badge b-mcp">MCP</span></div><div class="step-b"><p>Three write tools. The promotion is one transaction spanning 6 pages and 34 writers.</p><ul class="deliv"><li><code>register_evidence</code> — server allocates the id, computes the bounded rank score, dedups by content hash scoped to the entity, verifies the excerpt, identity-checks the domain</li><li><code>submit_page_payload</code> — validate, supersede the live row, stage, return the verdict</li><li><code>promote_run</code> — assert a pass on every page, then all 34 writers in one transaction</li><li>Claim leases with expiry, so a dead session does not block a run permanently</li><li>Idempotent re-promotion; supersession on resubmission</li></ul><h4>Verification</h4><ul class="chk"><li>A promote with one page missing writes nothing and returns the missing page</li><li>An injected writer failure rolls back all 34 writes</li><li>Re-promoting a promoted run is not an error</li><li>Registering the same source six times returns one id six times</li><li>Every promoted row carries a non-null producer version</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">2.6</span><span class="step-t">Inspect tools and the error taxonomy</span><span class="badge b-mcp">MCP</span></div><div class="step-b"><p>Three tools plus the structured error set. An error an agent cannot act on produces another failed attempt, so the taxonomy is part of the deliverable.</p><ul class="deliv"><li><code>get_validation_verdict</code>, <code>get_run_progress</code>, <code>explain_gate</code></li><li>Gate explanations carry threshold <em>history</em>, with a reason per change</li><li>All 10 structured error codes, each with a documented agent action</li></ul><h4>Verification</h4><ul class="chk"><li>Every error code the connector can emit appears in the documented table</li><li>Gate history shows direction of movement — a ceiling that only moved down is visible as such</li></ul></div></div>
+
+</div>
+<div id="s3" class="section">
+
+<div class="eyebrow">Stage 3</div>
+<h1>Walking skeleton</h1>
+<p class="lead">One entity, one run, one section — synthesised in Cowork, validated, promoted and rendered.
+Nothing else is built until this path works.</p>
+
+<div class="pipe">
+  <div class="pipe-s"><div class="pipe-n">1</div><div class="pipe-t">Ingest one package</div>
+    <div class="pipe-d">A real assessment folder, parsed, with source cells and retained bytes.</div></div>
+  <div class="pipe-s"><div class="pipe-n">2</div><div class="pipe-t">Connect Cowork</div>
+    <div class="pipe-d">The connector registered, the agent claiming the run and reading the bundle.</div></div>
+  <div class="pipe-s"><div class="pipe-n">3</div><div class="pipe-t">Synthesise one section</div>
+    <div class="pipe-d"><code>overview.scores</code> — the hero. Chosen deliberately.</div></div>
+  <div class="pipe-s"><div class="pipe-n">4</div><div class="pipe-t">Fail, then repair</div>
+    <div class="pipe-d">Submit with a known grain error and repair from the verdict alone.</div></div>
+  <div class="pipe-s hot"><div class="pipe-n">5</div><div class="pipe-t">Promote and render</div>
+    <div class="pipe-d">A minimal page reading the serving table and showing the hero.</div></div>
+</div>
+
+<div class="rule">
+  <div class="rule-lbl">Why overview.scores is the right first section</div>
+  <p>It exercises grain resolution, the peer-figure ladder, the composite rounding rule, the generated band
+  column and the cross-section reconciliation gate — five of the mechanisms most likely to be subtly wrong —
+  in one small payload.</p>
+</div>
+
+<h2>What this stage proves</h2>
+<table class="tbl">
+<tr><th style="width:400px">Assumption</th><th>Confirmed by</th></tr>
+<tr><td>The connector is reachable from a Cowork session with its own credential</td><td>A claim acquired and a bundle read end to end</td></tr>
+<tr><td>The contract is legible enough to synthesise against without reading the source</td><td>An agent producing from the contract tool alone</td></tr>
+<tr><td>A failing verdict is actionable</td><td>Repairing a grain error from the verdict without re-reading the payload</td></tr>
+<tr><td>Grain resolution actually resolves</td><td>A deliberate mismatch failing, and the correct pairing passing</td></tr>
+<tr><td>The promote transaction is atomic</td><td>An injected writer failure leaving nothing behind</td></tr>
+<tr><td>The serving table is readable in the shape the API needs</td><td>The hero rendering from a single indexed select</td></tr>
+<tr><td>Rounding happens once and the band is generated</td><td>A tie value rendering identically on the hero and the run row</td></tr>
+</table>
+
+<h2>Verification</h2>
+<ul class="chk">
+  <li>One run reaches promoted with one section and five explicitly empty pages.</li>
+  <li>The hero renders the composite, four pillar scores, peer deltas, posture and the framing sentence.</li>
+  <li>A deliberate grain error fails, and the verdict is sufficient to repair from.</li>
+  <li>The rendered composite equals the served value, and equals the run row.</li>
+  <li>No inference client appears anywhere in the request path.</li>
+</ul>
+
+<div class="callout co-orange">
+  <p><strong>Do not skip the deliberate failure.</strong> A validator tested only on valid payloads is a
+  validator whose error paths are untested — and the error path is where the synthesis agent lives. The
+  verdict has to be good enough to repair from on the first read, and the only way to know is to try.</p>
+</div>
+
+</div>
+<div id="s4" class="section">
+
+<div class="eyebrow">Stage 4</div>
+<h1>Read API</h1>
+
+<div class="step"><div class="step-h"><span class="step-id">4.1</span><span class="step-t">Scaffold and auth</span><span class="badge b-ph1">API</span></div><div class="step-b"><p>Application factory, async database session, structured logging. Google OIDC with domain restriction, token verification and a two-layer role gate.</p><ul class="deliv"><li>Health and readiness probes; middleware; structured JSON logging</li><li>OIDC callback, token issue and verification, httpOnly cookie</li><li>Role re-verified at the API on every request, never trusted from the frontend</li></ul><h4>Verification</h4><ul class="chk"><li>An AE token is refused on Context and Health by the API, not only by the router</li><li>A token from outside the Workspace domain is refused at the OAuth client</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">4.2</span><span class="step-t">Page endpoints</span><span class="badge b-ph1">API</span></div><div class="step-b"><p>One endpoint per page plus the platform-detail sub-route and Health. Sections are selected concurrently, so a section that failed to promote returns no row rather than nulling columns the serialiser must then interpret.</p><ul class="deliv"><li>6 page endpoints, the tech-stack detail sub-route, and Health</li><li>The response envelope: entity, run, audience, and per-section data with source and provenance</li><li>Data-source attribution per section: producer, parsed or empty</li><li>Evidence resolution, run history and version diff</li><li>Corpus endpoints: directory, dashboard, alerts, patterns, search</li><li>Admin endpoints: imports, import audit, users</li><li>Two write exceptions: annotations and alert actions, in workflow tables only</li></ul><h4>Verification</h4><ul class="chk"><li>A section with no promoted row returns an explicit empty state, not a null-filled object</li><li>The run history score column equals the Overview hero</li><li>Neither write exception touches a serving table</li><li>Health assembles from the four heatmap sections plus the runs table</li></ul><div class="dep"><b>One query for a count and its rows.</b> A header and its KPI counts drawn from different queries will eventually disagree.</div></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">4.4</span><span class="step-t">Run resolution, pinning and version diff</span><span class="badge b-ph1">API</span></div><div class="step-b"><p>Every page endpoint resolves a run before it reads a section. Getting this wrong is how numbers change under an open page.</p><ul class="deliv"><li>Slug → entity → active run, or the run pinned in the request</li><li>The envelope carries run id, sequence, active flag, promotion time, catalogue version and both cell counts</li><li>The diff resolver: direct comparison within a catalogue lineage; alias-bridged with the rename disclosed; degraded to category grain on a split or merge; not-comparable on a retirement</li><li>A composite compared across a catalogue bump is returned as approximate, with that stated</li><li><code>user_workspace</code> read to default the pin, written on navigation</li></ul><h4>Verification</h4><ul class="chk"><li>A pinned run is honoured and reported as not-active</li><li>A diff across a catalogue bump marks unbridgeable cells not-comparable rather than null</li><li>A cell that was retired renders as retired, never as a drop to zero</li><li>An entity with runs but none promoted returns a 404 naming both counts</li></ul><div class="dep"><b>Refuse rather than annotate.</b> A renamed cell compared naively reads as a capability that vanished; a split cell reads as a score that halved. The resolver declines the comparison and says why.</div></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">4.3</span><span class="step-t">Redaction layer</span><span class="badge b-ph1">API</span></div><div class="step-b"><p>Walk the internal-only paths and delete them before serialisation. The frontend receives an object that never contained the field.</p><ul class="deliv"><li>Path-walking redaction driven entirely by the payload's own marking</li><li>Customer audience: Context and Health return a locked state, not a partial page</li><li>Customer audience withholds the three internal Overview cards</li><li>Cohort-pattern entity ids stripped for <em>every</em> audience</li><li>Thin-evidence and quarantine markers retained for both audiences</li></ul><h4>Verification</h4><ul class="chk"><li>No path listed in any internal-only array appears in a customer response</li><li>Entity ids never appear in any response, at any audience</li><li>The assertion runs against serialised output, not against the code that hides fields</li></ul><div class="dep"><b>Honesty is not internal.</b> An assessment that states its own weaknesses is more credible than one that appears complete.</div></div></div>
+
+</div>
+<div id="s5" class="section">
+
+<div class="eyebrow">Stage 5</div>
+<h1>Frontend foundation and the global surfaces</h1>
+
+<div class="step"><div class="step-h"><span class="step-id">5.1</span><span class="step-t">Scaffold, tokens and the colour resolver</span><span class="badge b-ph1">Frontend</span></div><div class="step-b"><p>App Router, TypeScript, server-rendered. The token layer includes the one module that resolves score to band to colour — and no page computes a colour.</p><ul class="deliv"><li>Typed section shapes generated from the contract registry, so a contract change breaks the build</li><li>Zennify tokens: teal #27BBAF, dark #1C4A4D, purple #735BA1, DM Sans</li><li>The maturity resolver, matching the database's generated band column exactly</li><li>Typography, spacing, elevation and shape scales</li></ul><h4>Verification</h4><ul class="chk"><li>No component computes a colour from a score</li><li>The frontend resolver and the database band column agree for every score in a fixture run</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">5.2</span><span class="step-t">Shell, navigation and URL state</span><span class="badge b-ph1">Frontend</span></div><div class="step-b"><p>Sidebar, top bar, search, notifications, settings, and the seven-dashboard client shell.</p><ul class="deliv"><li>The full route structure — global, client, admin</li><li>URL-captured state: audience, heatmap view mode and grain, open panel and anchor, Health tab, insight grouping, filters</li><li>Keyboard navigation and focus management</li><li>Role-aware navigation: Context and Health hidden for an AE</li></ul><h4>Verification</h4><ul class="chk"><li>Every route is reachable and URL-addressable</li><li>A drilled-in heatmap state and an open panel both survive a refresh and are shareable</li><li>Context and Health are absent from an AE's navigation and refused by the API</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">5.3</span><span class="step-t">All 9 global surfaces</span><span class="badge b-ph1">Global</span></div><div class="step-b"><p>Built here rather than deferred, because several are how an analyst diagnoses a bad ingest and an admin recovers from one.</p><ul class="deliv"><li><strong>G1 Login</strong> — Google OIDC, Workspace domain restricted. Always the entry point until signed in.</li><li><strong>G2 Dashboard</strong> — Command centre: active assessments, open alerts, insight cards, average maturity, in-progress runs. Header and KPI counts come from one query.</li><li><strong>G3 Client directory</strong> — Card and table views with maturity, pillar strip, sub-vertical, source badge, open alerts and top platform fit.</li><li><strong>G4 Global alert dashboard</strong> — The corpus-wide thin-evidence queue plus the cross-entity pattern finder and the waived-alert register. Virtualised.</li><li><strong>G5 Prospecting</strong> — Search-first surface producing the customer-safe scorecard export. Empty until a query is entered.</li><li><strong>G6 Run history</strong> — Per-entity run list. The score column must equal the Overview hero ring.</li><li><strong>G7 Admin</strong> — Users and roles, settings and operations. Admin role required.</li><li><strong>G8 Import &amp; jobs</strong> — Ingest job status with a live stream, and the pending-review queue for low-confidence entity inferences.</li><li><strong>G9 Import audit</strong> — Every file seen, classified, excluded or deduplicated, with the rule that fired.</li></ul><h4>Verification</h4><ul class="chk"><li>A headline score in the directory uses its maturity band colour, not a fixed brand colour</li><li>An untiered entity renders as untiered, not a broken chip</li><li>Dashboard header and KPI counts come from one query and cannot disagree</li><li>The alert queue is interactive at corpus scale, with virtualisation active</li><li>Prospecting renders its search-to-begin state rather than an empty grid</li><li>The import audit shows every excluded file with the rule that fired</li><li>Run history's score column equals the Overview hero</li></ul></div></div>
+
+</div>
+<div id="s6" class="section">
+
+<div class="eyebrow">Stage 6</div>
+<h1>The seven dashboards</h1>
+<p class="lead">All 38 client surfaces, built against promoted data rather than fixtures. Each
+carries a data-source attribute, because a blank surface is otherwise indistinguishable from a broken one.</p>
+
+<div class="rule">
+  <div class="rule-lbl">Build each surface against its own contract</div>
+  <p>Every surface below has a full contract in the <strong>Surface Specification</strong>: what must be
+  presented, why it is shaped that way, its information-sources table naming the source of truth per field,
+  its synthesis prompt, and the gates asserted against it. Build from that document, not from this table —
+  this one is the schedule.</p>
+</div>
+
+<div class="callout co-teal">
+  <p><strong>Five surfaces are confidence instrumentation</strong> — O1b, O10 and O11 on the Overview, and Q3
+  and Q4 on Health. They tell the reader how much to trust everything else on the screen. If they flatter,
+  every other number in the document becomes unfalsifiable. Three rules bind all five: a derived status must
+  follow from a computed input; a percentage must render its denominator; and a threshold is either enforced
+  or it is not a threshold.</p>
+</div>
+
+<div class="step"><div class="step-h"><span class="step-id">6.1</span><span class="step-t">D1 · Overview</span><span class="badge b-ph1">D1</span></div><div class="step-b"><p>13 surfaces, reading 12 sections from <code>overview</code>.</p><table class="ft"><tr><th style="width:48px">ID</th><th style="width:210px">Surface</th><th style="width:180px">Reads</th><th>Component</th></tr><tr><td class="tk">O1</td><td><strong>Scores &amp; peer benchmarks</strong></td><td class="small"><code>overview.scores</code></td><td class="small muted">ScoreRing</td></tr><tr><td class="tk">O2</td><td><strong>Firmographics strip</strong></td><td class="small"><code>overview.firmographics</code></td><td class="small muted">ScoreRing inline strip</td></tr><tr><td class="tk">O3</td><td><strong>Why-now signals</strong></td><td class="small"><code>overview.why_now</code></td><td class="small muted">WhyNowStrip</td></tr><tr><td class="tk">O4</td><td><strong>Executive summary</strong></td><td class="small"><code>overview.exec_summary</code></td><td class="small muted">SCQACard</td></tr><tr><td class="tk">O5</td><td><strong>Opportunity surface tiles</strong></td><td class="small"><code>overview.opportunity</code></td><td class="small muted">OpportunitySurfaceStrip</td></tr><tr><td class="tk">O6</td><td><strong>Top findings</strong></td><td class="small"><code>overview.findings</code></td><td class="small muted">TopFindingsCard</td></tr><tr><td class="tk">O7</td><td><strong>Leadership panel</strong></td><td class="small"><code>overview.leadership</code></td><td class="small muted">LeadershipPanel</td></tr><tr><td class="tk">O8</td><td><strong>Financial trajectory</strong></td><td class="small"><code>overview.financial_series</code></td><td class="small muted">FinancialTrajectoryCard</td></tr><tr><td class="tk">O9</td><td><strong>Sentiment</strong></td><td class="small"><code>overview.sentiment</code></td><td class="small muted">SentimentCard</td></tr><tr><td class="tk">O10</td><td><strong>Evidence coverage</strong></td><td class="small"><code>overview.evidence_coverage</code></td><td class="small muted">CoverageByPillarCard</td></tr><tr><td class="tk">O11</td><td><strong>Evidence tier distribution</strong></td><td class="small"><code>overview.evidence_coverage</code></td><td class="small muted">EvidenceTierCard</td></tr><tr><td class="tk">O1b</td><td><strong>Capability ceiling &amp; uncertainty</strong></td><td class="small"><code>overview.ceilings</code></td><td class="small muted">CeilingEstimateCard</td></tr><tr><td class="tk">O12</td><td><strong>Thought leadership signal</strong></td><td class="small"><code>overview.thought_leadership</code></td><td class="small muted">ThoughtLeadershipPanel</td></tr></table></div></div><div class="step"><div class="step-h"><span class="step-id">6.2</span><span class="step-t">D2 · Insights</span><span class="badge b-ph1">D2</span></div><div class="step-b"><p>2 surfaces, reading 2 sections from <code>insights</code>.</p><table class="ft"><tr><th style="width:48px">ID</th><th style="width:210px">Surface</th><th style="width:180px">Reads</th><th>Component</th></tr><tr><td class="tk">I1</td><td><strong>Insight cards</strong></td><td class="small"><code>insights.insights</code></td><td class="small muted">ClientInsights</td></tr><tr><td class="tk">T2</td><td><strong>Technology landscape strip</strong></td><td class="small"><code>insights.landscape</code></td><td class="small muted">ClientInsights landscape card</td></tr></table></div></div><div class="step"><div class="step-h"><span class="step-id">6.3</span><span class="step-t">D3 · Heatmap</span><span class="badge b-ph1">D3</span></div><div class="step-b"><p>5 surfaces, reading 9 sections from <code>heatmap</code>.</p><table class="ft"><tr><th style="width:48px">ID</th><th style="width:210px">Surface</th><th style="width:180px">Reads</th><th>Component</th></tr><tr><td class="tk">H4</td><td><strong>Workbook grain scores</strong></td><td class="small"><code>heatmap.workbook_scores</code></td><td class="small muted">PillarHeatmap / CategoryHeatmap / SubcapHeatmap</td></tr><tr><td class="tk">H1</td><td><strong>Focus areas</strong></td><td class="small"><code>heatmap.focus_areas</code></td><td class="small muted">FocusAreaView + CustomizableKpiStrip</td></tr><tr><td class="tk">H2</td><td><strong>Cell evidence</strong></td><td class="small"><code>heatmap.cell_evidence</code></td><td class="small muted">SynthesisDrawer source</td></tr><tr><td class="tk">H6</td><td><strong>Evidence store</strong></td><td class="small"><code>heatmap.evidence</code></td><td class="small muted">EvidenceDrawer source</td></tr><tr><td class="tk">H9</td><td><strong>Value-chain view</strong></td><td class="small"><code>heatmap.value_chain</code></td><td class="small muted">ValueChainView</td></tr></table></div></div><div class="step"><div class="step-h"><span class="step-id">6.4</span><span class="step-t">D4 · Platform</span><span class="badge b-ph1">D4</span></div><div class="step-b"><p>5 surfaces, reading 5 sections from <code>platform</code>.</p><table class="ft"><tr><th style="width:48px">ID</th><th style="width:210px">Surface</th><th style="width:180px">Reads</th><th>Component</th></tr><tr><td class="tk">P1</td><td><strong>Platform fit &amp; story</strong></td><td class="small"><code>platform.platform_story</code></td><td class="small muted">ClientPlatform</td></tr><tr><td class="tk">P2</td><td><strong>Recommendations</strong></td><td class="small"><code>platform.recommendations</code></td><td class="small muted">ClientPlatform + RecommendationModal</td></tr><tr><td class="tk">P2b</td><td><strong>Conversation starters</strong></td><td class="small"><code>platform.starters</code></td><td class="small muted">ClientPlatform starters card</td></tr><tr><td class="tk">P3</td><td><strong>Transformation roadmap</strong></td><td class="small"><code>platform.roadmap</code></td><td class="small muted">TransformationRoadmap</td></tr><tr><td class="tk">P4</td><td><strong>Stair-step curve</strong></td><td class="small"><code>platform.stairstep</code></td><td class="small muted">StairstepCurve</td></tr></table></div></div><div class="step"><div class="step-h"><span class="step-id">6.5</span><span class="step-t">D5 · Context <span class="badge b-red">INTERNAL ONLY</span></span><span class="badge b-ph1">D5</span></div><div class="step-b"><p>6 surfaces, reading 5 sections from <code>context</code>.</p><table class="ft"><tr><th style="width:48px">ID</th><th style="width:210px">Surface</th><th style="width:180px">Reads</th><th>Component</th></tr><tr><td class="tk">C1</td><td><strong>Digital evolution timeline</strong></td><td class="small"><code>context.timeline</code></td><td class="small muted">InteractiveTimeline + EventDetail</td></tr><tr><td class="tk">C2</td><td><strong>Issue register &amp; Gantt</strong></td><td class="small"><code>context.issue_register</code></td><td class="small muted">InteractiveGantt + IssueDetail</td></tr><tr><td class="tk">C3</td><td><strong>Regulatory standing</strong></td><td class="small"><code>context.regulatory_standing</code></td><td class="small muted">ClientContext</td></tr><tr><td class="tk">C4</td><td><strong>Sentiment overview</strong></td><td class="small"><code>context.context_sentiment</code></td><td class="small muted">SentimentGridInteractive</td></tr><tr><td class="tk">C5</td><td><strong>Acquisition history</strong></td><td class="small"><code>context.acquisitions</code></td><td class="small muted">ClientContext</td></tr><tr><td class="tk">C6</td><td><strong>Financial trajectory</strong></td><td class="small"><code>overview.financial_series</code></td><td class="small muted">FinChartInteractive</td></tr></table></div></div><div class="step"><div class="step-h"><span class="step-id">6.6</span><span class="step-t">D6 · Tech stack</span><span class="badge b-ph1">D6</span></div><div class="step-b"><p>2 surfaces, reading 1 sections from <code>techstack</code>.</p><table class="ft"><tr><th style="width:48px">ID</th><th style="width:210px">Surface</th><th style="width:180px">Reads</th><th>Component</th></tr><tr><td class="tk">T1</td><td><strong>Technology stack register</strong></td><td class="small"><code>techstack.techstack</code></td><td class="small muted">ClientTechStack + TechRow</td></tr><tr><td class="tk">T3</td><td><strong>Platform detail</strong></td><td class="small"><code>techstack.techstack</code></td><td class="small muted">ClientTechStackDetail</td></tr></table></div></div><div class="step"><div class="step-h"><span class="step-id">6.7</span><span class="step-t">D7 · Health <span class="badge b-red">ANALYST ONLY</span></span><span class="badge b-ph1">D7</span></div><div class="step-b"><p>5 surfaces. Four read heatmap-page sections; version diff is derived from the runs table.</p><table class="ft"><tr><th style="width:48px">ID</th><th style="width:210px">Surface</th><th style="width:180px">Reads</th><th>Component</th></tr><tr><td class="tk">H3</td><td><strong>Thin-evidence alerts</strong></td><td class="small"><code>heatmap.alerts</code></td><td class="small muted">ClientHealth alerts tab</td></tr><tr><td class="tk">V1</td><td><strong>Version diff</strong></td><td class="small">—</td><td class="small muted">VersionDiff</td></tr><tr><td class="tk">H5</td><td><strong>Safeguard gates</strong></td><td class="small"><code>heatmap.safeguard_gates</code></td><td class="small muted">ClientHealth gates tab</td></tr><tr><td class="tk">H7</td><td><strong>Evidence age tracker</strong></td><td class="small"><code>heatmap.evidence_age</code></td><td class="small muted">ClientHealth age tab</td></tr><tr><td class="tk">H8</td><td><strong>Cross-entity patterns</strong></td><td class="small"><code>heatmap.cohort_patterns</code></td><td class="small muted">ClientHealth patterns tab</td></tr></table></div></div>
+
+<h2>Cross-dashboard verification</h2>
+<ul class="chk">
+  <li>The hero ring, the workbook rollup and the run-history score all render the same number.</li>
+  <li>O8 and C6 render identical financial figures, asserted by test.</li>
+  <li>The landscape strip's four counts sum to the tech-stack register and are recomputed from it.</li>
+  <li>Coverage is computed over the same cell set the heatmap serves.</li>
+  <li>Every alerted cell is one the same payload declared under-evidenced.</li>
+  <li>Every roadmap phase and stair-step step cites a recommendation the same payload describes.</li>
+  <li>No raw taxonomy code appears in any client-visible prose on any dashboard.</li>
+  <li>Every surface declares its data source; no surface renders blank without an empty state.</li>
+  <li>Customer view withholds Context and Health entirely, and the three internal Overview cards.</li>
+</ul>
+
+</div>
+<div id="s7" class="section">
+
+<div class="eyebrow">Stage 7</div>
+<h1>Drilldown atlas</h1>
+<p class="lead">15 panels across three shells. One shell is not an overlay at all, which is why
+an audit that probes the DOM for dialogs reports zero drilldowns on a page full of them.</p>
+
+<table class="ft">
+<tr><th style="width:160px">Shell</th><th style="width:250px">Geometry</th><th>Panels</th></tr>
+<tr><td><div class="fn">Drawer</div></td><td class="small">Right slide-in, z-index 95, 420–480px</td>
+<td class="small">DD-1 Synthesis, DD-2 Evidence</td></tr><tr><td><div class="fn">Modal</div></td><td class="small">Centred, z-index 80, 640–820px</td>
+<td class="small">DD-3 Insight, DD-4 Recommendation, DD-5 New run, DD-6 Intelligence panel</td></tr><tr><td><div class="fn">Inline expansion</div></td><td class="small">Expands in the document flow, no overlay</td>
+<td class="small">DD-7 Event detail, DD-8 Issue detail, DD-9 Finding expansion, DD-10 Focus area expansion, DD-11 Platform tile expansion, DD-12 Sentiment tile expansion, DD-13 Readiness gate expansion, DD-14 Acquisition expansion, DD-15 Ceiling rationale</td></tr>
+</table>
+
+<h2>The complete atlas</h2>
+<table class="ft">
+<tr><th style="width:62px">ID</th><th style="width:88px">Shell</th><th style="width:190px">Panel</th><th>Opens from</th></tr>
+<tr><td class="tk">DD-1</td><td><span class="badge b-gray">drawer</span></td><td><strong>Synthesis</strong></td><td class="small">a sub-capability row on the heatmap</td></tr><tr><td class="tk">DD-2</td><td><span class="badge b-gray">drawer</span></td><td><strong>Evidence</strong></td><td class="small">any evidence chip, anywhere in the app</td></tr><tr><td class="tk">DD-3</td><td><span class="badge b-gray">modal</span></td><td><strong>Insight</strong></td><td class="small">an insight card</td></tr><tr><td class="tk">DD-4</td><td><span class="badge b-gray">modal</span></td><td><strong>Recommendation</strong></td><td class="small">a recommendation row</td></tr><tr><td class="tk">DD-5</td><td><span class="badge b-gray">modal</span></td><td><strong>New run</strong></td><td class="small">the request-rerun control</td></tr><tr><td class="tk">DD-6</td><td><span class="badge b-gray">modal</span></td><td><strong>Intelligence panel</strong></td><td class="small">the Open Intelligence control</td></tr><tr><td class="tk">DD-7</td><td><span class="badge b-gray">inline</span></td><td><strong>Event detail</strong></td><td class="small">a timeline event</td></tr><tr><td class="tk">DD-8</td><td><span class="badge b-gray">inline</span></td><td><strong>Issue detail</strong></td><td class="small">an issue register row</td></tr><tr><td class="tk">DD-9</td><td><span class="badge b-gray">inline</span></td><td><strong>Finding expansion</strong></td><td class="small">a top-findings row</td></tr><tr><td class="tk">DD-10</td><td><span class="badge b-gray">inline</span></td><td><strong>Focus area expansion</strong></td><td class="small">a focus area card</td></tr><tr><td class="tk">DD-11</td><td><span class="badge b-gray">inline</span></td><td><strong>Platform tile expansion</strong></td><td class="small">a platform fit tile</td></tr><tr><td class="tk">DD-12</td><td><span class="badge b-gray">inline</span></td><td><strong>Sentiment tile expansion</strong></td><td class="small">a sentiment context tile</td></tr><tr><td class="tk">DD-13</td><td><span class="badge b-gray">inline</span></td><td><strong>Readiness gate expansion</strong></td><td class="small">a prerequisite gate row</td></tr><tr><td class="tk">DD-14</td><td><span class="badge b-gray">inline</span></td><td><strong>Acquisition expansion</strong></td><td class="small">an acquisition row</td></tr><tr><td class="tk">DD-15</td><td><span class="badge b-gray">inline</span></td><td><strong>Ceiling rationale</strong></td><td class="small">a capability ceiling row</td></tr>
+</table>
+
+<h2>Deliverables</h2>
+<ul class="deliv">
+  <li>All three shells, with focus trapping, escape handling and focus return to the trigger</li>
+  <li><strong>Stacking:</strong> the evidence drawer opens above an open modal or synthesis drawer, and
+  closing it returns to the panel beneath rather than orphaning it</li>
+  <li>Every panel renders from data already in the page response — <strong>a drilldown never fetches</strong></li>
+  <li>Panel state in the URL, so a drilldown is linkable and survives refresh</li>
+  <li>The four-tab insight modal: argument, evidence, capabilities, action</li>
+  <li>The recommendation modal, with provenance and its dependency map</li>
+  <li>The intelligence panel, context-loaded from the surface that opened it</li>
+</ul>
+
+<div class="rule">
+  <div class="rule-lbl">The synthesis drawer contract</div>
+  <p>The cell id, its name, its score and its confidence — all four from the same row, because grain lock is
+  the whole point of this panel. The peer ladder with entity, median and signed delta, all belonging to that
+  cell. Every linked evidence item with tier, claim class, recency, publisher and a verbatim excerpt. And the
+  synthesis, with the count of items it reasoned over printed beside it, computed from the citation array.</p>
+</div>
+
+<h2>Verification</h2>
+<ul class="chk">
+  <li>All 15 panels open, verified by clicking the trigger the component defines — never by DOM probe.</li>
+  <li>A drawer over a modal stacks correctly, and closing it returns to the modal.</li>
+  <li>No panel issues a network request on open.</li>
+  <li>The synthesis count equals the length of its citation array.</li>
+  <li>An evidence chip on a card with no linked evidence does not render at all, rather than rendering and
+  opening nothing.</li>
+  <li>Every inline expansion is reachable and linkable, and none matches an overlay selector.</li>
+</ul>
+
+</div>
+<div id="s8" class="section">
+
+<div class="eyebrow">Stage 8</div>
+<h1>Gates and corpus scanning</h1>
+
+<div class="gfam">
+<div class="gf gf-ag"><div class="gf-h"><span class="gf-p">AG-nn</span>
+<span class="badge b-teal">Analytical</span></div><div class="gf-b">Inside synthesis, per claim, before anything is emitted
+<span class="gf-k">On failure</span>The claim changes or is dropped — the agent's own discipline</div></div><div class="gf gf-sg"><div class="gf-h"><span class="gf-p">SG-nn</span>
+<span class="badge b-amber">Safeguard</span></div><div class="gf-b">At submit — and the results render to the client
+<span class="gf-k">On failure</span>Recorded and disclosed. Does not block promotion.</div></div><div class="gf gf-et"><div class="gf-h"><span class="gf-p">ET-nn</span>
+<span class="badge b-ph0">Enrichment trigger</span></div><div class="gf-b">During synthesis, to send the agent looking
+<span class="gf-k">On failure</span>Not a failure — a prompt to enrich</div></div><div class="gf gf-cg"><div class="gf-h"><span class="gf-p">CG-nn</span>
+<span class="badge b-ph1">Corpus</span></div><div class="gf-b">At build time, over the exported pack, corpus-wide
+<span class="gf-k">On failure</span>Fails the build</div></div>
+</div>
+
+<h2>Deliverables</h2>
+<ul class="deliv">
+  <li>The gate registry populated across all four families, with plain-language labels on every
+  client-visible gate</li>
+  <li>Gate results per run, including not-run with a required reason</li>
+  <li>The corpus gate scanner, running in continuous integration and nightly against the exported pack</li>
+  <li>Threshold history with a required reason per change</li>
+  <li>The ratchet: any upward movement in a committed corpus ceiling fails the build</li>
+  <li>Q3 Safeguard gates rendering the results in plain language on Health</li>
+</ul>
+
+<div class="rule">
+  <div class="rule-lbl">Ceilings must be rates, not counts</div>
+  <p>A fixed count passes at one corpus size and fails at the next on arithmetic alone, with no defect
+  introduced. And a ceiling set from an acceptance target rather than a measurement fails every build on day
+  one, for defects the build did not introduce — which is how a gate ends up disabled wholesale.</p>
+</div>
+
+<h2>Initial ceilings — set by measurement, not aspiration</h2>
+<table class="tbl">
+<tr><th style="width:260px">Gate</th><th>Asserts</th></tr>
+<tr><td>Workbook fidelity</td><td>Every served score and peer equals the cell it names; the hero and the run row agree</td></tr>
+<tr><td>Metric grain</td><td>No category average quoted under a sub-capability's name</td></tr>
+<tr><td>Firmographic integrity</td><td>No contradictory or contaminated firmographic</td></tr>
+<tr><td>Why-now provenance</td><td>Every signal is a dated, cited event</td></tr>
+<tr><td>Executive synthesis</td><td>Client facts outnumber score references</td></tr>
+<tr><td>Financial series</td><td>Three dated points, or an explicit sparse marker</td></tr>
+<tr><td>Insight integrity</td><td>No score-predicate openers; no dead cell links</td></tr>
+<tr><td>Focus grounding</td><td>Quotes are client prose, not machine text</td></tr>
+<tr><td>Evidence reach</td><td>Evidence reaches the scored cells</td></tr>
+<tr><td>Platform distinctiveness</td><td>Story, opportunity and narrative are client-specific</td></tr>
+<tr><td>Recommendation detail</td><td>Panel and roadmap agree; provenance present</td></tr>
+<tr><td>Timeline provenance</td><td>Every event cited</td></tr>
+<tr><td>Issue register</td><td>One row per matter; identity fields present</td></tr>
+<tr><td>Tech stack register</td><td>No service or category shipped as a product</td></tr>
+<tr><td>Surface completeness</td><td>Every contracted surface exported and rendering — target zero failures</td></tr>
+</table>
+
+<h2>Verification</h2>
+<ul class="chk">
+  <li>Every client-visible gate has a plain-language label; none renders as a bare code.</li>
+  <li>A gate that could not run reports not-run with a reason, never a default pass.</li>
+  <li>A failing safeguard gate is disclosed and does not block promotion.</li>
+  <li>A branch raising any corpus ceiling fails continuous integration and names the gate.</li>
+  <li>No bare G-number appears in any payload, log or rendered surface.</li>
+</ul>
+
+</div>
+<div id="s9" class="section">
+
+<div class="eyebrow">Stage 9</div>
+<h1>Hardening and deployment</h1>
+
+<div class="step"><div class="step-h"><span class="step-id">9.1</span><span class="step-t">Invariant tests</span><span class="badge b-teal">Test</span></div><div class="step-b"><p>One test per invariant, named after the invariant so a failure is self-describing. These carry more weight than unit coverage here, because the failures this system is designed against are cases where the code does exactly what it says and what it says is wrong.</p><ul class="deliv"><li>No backend module imports an inference client</li><li>The API database role holds no SELECT grant on any staging table</li><li>Promotion writes all 6 pages or none, verified by an injected writer failure</li><li>A payload minting an evidence id is rejected</li><li>A customer response contains no path listed in any internal-only array</li><li>Every promoted row carries a non-null producer version</li><li>Committed corpus ceilings are no higher than in the previous commit</li><li>The section registry, writer registry, serving-table list and surface register reconcile</li><li>The evidence recogniser is the same compiled object at every call site</li><li>No serving table contains a vector column — embeddings are never promoted</li><li>The writer registry is an ordered list and its order is stable across imports, because an unordered promote deadlocks under concurrency</li><li>V4 abstains and records NOT_RUN when no centroid exists, rather than failing closed</li><li>A re-promotion after a one-page fix rewrites every serving table and preserves the other pages</li><li>A read issued during a promotion sees the entire previous run, never a mixture</li><li>A catalogue load fails if any cell from the prior version is neither bridged nor explicitly retired</li></ul><div class="dep"><b>The reconciliation test is what prevents a specified surface being unauthorable.</b> Four registries that can drift; one test that asserts they have not.</div></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">9.2</span><span class="step-t">Rendering tests</span><span class="badge b-teal">Test</span></div><div class="step-b"><p>Assertions against rendered output rather than against the code that produces it — because the defect class here is a field nobody marked, and reading the marking code cannot find a field absent from it.</p><ul class="deliv"><li>All 38 client surfaces and 9 global surfaces render for a fixture run, each with a data-source attribute</li><li>All 15 drilldowns open by clicking the component's own trigger</li><li>A drawer stacks above a modal; closing it returns rather than orphaning</li><li>Customer view withholds Context and Health entirely, asserted on markup</li><li>The alert queue is interactive at corpus scale</li><li>Every empty state is a sentence naming what was searched, never an error string</li><li>Every heatmap view mode and grain transition is reachable and linkable</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">9.3</span><span class="step-t">Observability</span><span class="badge b-teal">Ops</span></div><div class="step-b"><p>Seven signals, one of which should page someone.</p><ul class="deliv"><li><strong>Page:</strong> a serving row with a null producer version — content reached a serving table without a promotion, which breaks the invariant everything rests on</li><li>Alert: any foreign-id rejection; any upward ceiling movement</li><li>Alert: identity quarantines above the corpus rate — a spike usually means one contaminated profile rather than many bad figures</li><li>Alert: repeated promotion failure on the same blocking page; ingest lag beyond a day; leases repeatedly expiring mid-synthesis</li><li>Structured logging and distributed tracing across the four services</li></ul></div></div>
+
+<div class="step"><div class="step-h"><span class="step-id">9.4</span><span class="step-t">Production</span><span class="badge b-teal">Deploy</span></div><div class="step-b"><p>Three environments, staged rollout, and one operational decision left open.</p><ul class="deliv"><li>Local (seeded fixture run) → staging (anonymised subset, production ceilings) → production</li><li>Migrations under the migration role as a deploy step</li><li>Scheduled traversal and the nightly corpus scan</li><li>Backup verification by actual restore</li><li><strong>Open:</strong> retention for superseded runs and verdicts. The contract requires only that a superseded run stays queryable long enough for the longitudinal surfaces to read across it.</li></ul><h4>Verification</h4><ul class="chk"><li>A restore from backup produces a working instance</li><li>A staged deploy can be rolled back without a schema rollback</li><li>Corpus gates run nightly and their results are visible on Health</li></ul></div></div>
+
+<h2>Cross-page consistency, before promotion</h2>
+<p>Each page passes its submission independently, so a contradiction <em>between</em> pages
+survives every per-page gate. One check runs across all six payloads and is the only thing that
+catches it.</p>
+<table class="tbl">
+<tr><th style="width:230px">Reconciles</th><th>Assertion</th></tr>
+<tr><td>Composite ↔ pillar means</td><td>The composite is the mean of the four pillar means, not a flat mean over cells</td></tr>
+<tr><td>Hero ↔ grid</td><td>Every pillar figure matches to two decimals</td></tr>
+<tr><td>Gap rows ↔ served scores</td><td>Within 0.05, per cell</td></tr>
+<tr><td>Roadmap ↔ recommendations</td><td>Every cited id resolves within the payload</td></tr>
+<tr><td>Landscape ↔ register</td><td>Four counts recomputed, never stored</td></tr>
+<tr><td>O8 ↔ C6</td><td>Identical — C6 renders O8's section</td></tr>
+<tr><td>Alerts ↔ cell evidence</td><td>Every alerted cell is one the payload declared thin</td></tr>
+<tr><td>Confidence ↔ evidence count</td><td>HIGH confidence is earned by three or more items</td></tr>
+<tr><td>Framing ↔ top finding</td><td>They name the same constraint</td></tr>
+<tr><td>Band words ↔ raw scores</td><td>Resolved before display rounding; no unreachable band</td></tr>
+</table>
+
+<h2>Definition of done</h2>
+<div class="card card-lav">
+<ul class="chk">
+  <li>All 89 tables deployed; the count reconciles with the enumeration.</li>
+  <li>All 12 connector tools implemented, with the documented error taxonomy.</li>
+  <li>All 34 sections have a contract, a writer, a serving table and a renderer.</li>
+  <li>All 38 client surfaces and 9 global surfaces render, each declaring its data source.</li>
+  <li>All 15 drilldowns open, with correct stacking.</li>
+  <li>One real client synthesised end to end in Cowork: every page passing, promoted, rendered, and the
+  customer view verified on rendered output.</li>
+  <li>All twelve invariant tests pass.</li>
+  <li>Corpus gates run in continuous integration with measured ceilings and a working downward ratchet.</li>
+  <li>No inference client anywhere in the deployed application.</li>
+  <li>All four version axes carried and asserted: run, catalogue, producer and contract.</li>
+  <li>A one-page fix re-promotes without re-synthesising the other pages.</li>
+  <li>A promotion mid-session does not change numbers under an open page.</li>
+  <li>Every surface built against its contract in the Surface Specification, not from the schedule table.</li>
+</ul>
+</div>
+
+<div class="rule">
+  <div class="rule-lbl">The last two checks, and the ones most likely to be skipped</div>
+  <p>Verify the customer view on rendered output rather than by reading the code, and verify the drilldowns by
+  clicking the triggers the components define rather than by probing the DOM for overlays. Both shortcuts
+  produce a clean result on a broken app — the first because an unmarked field is invisible to the code that
+  hides fields, the second because the inline expansions match no overlay selector.</p>
+</div>
+
+</div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+const titles = {
+  s00:"00 — Build sequence",
+  sS:"S — Scaffolding",
+  s0:"0 — Infrastructure & schema",
+  s1:"1 — Ingest worker",
+  s2:"2 — MCP connector",
+  s3:"3 — Walking skeleton",
+  s4:"4 — Read API",
+  s5:"5 — Frontend & global surfaces",
+  s6:"6 — Seven dashboards",
+  s7:"7 — Drilldown atlas",
+  s8:"8 — Gates & corpus scanning",
+  s9:"9 — Hardening & deployment"
+};
+function go(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(l => l.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.sb-item').forEach(l => {
+    if ((l.getAttribute('onclick')||'').includes("'"+id+"'")) l.classList.add('on');
+  });
+  document.getElementById('tb-title').textContent = titles[id]||id;
+  window.scrollTo(0,0);
+}
+</script>
+</body></html>

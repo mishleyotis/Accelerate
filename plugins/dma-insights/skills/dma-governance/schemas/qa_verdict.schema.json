@@ -1,0 +1,388 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "QA Verdict Schema",
+  "description": "Formal governance audit conclusion for a completed DMA assessment. Produced by Layer 2 (DMA Governance) to communicate pass/fail status and recommendations.",
+  "type": "object",
+  "required": [
+    "run_id",
+    "institution_name",
+    "audit_date",
+    "governance_skill_version",
+    "verdict",
+    "recommendation",
+    "issue_count_by_severity",
+    "check_results",
+    "distributional_flags",
+    "proof_verification",
+    "critic_resolution",
+    "narrative_audit_result",
+    "sign_off"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "References the assessed DMA run",
+      "pattern": "^DMA-[A-Z0-9]{4}-[0-9]{8}-[0-9]{4}$",
+      "examples": ["DMA-OZK1-20240115-0001"]
+    },
+    "institution_name": {
+      "type": "string",
+      "description": "Full name of assessed institution",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "audit_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of audit completion"
+    },
+    "governance_skill_version": {
+      "type": "string",
+      "description": "Version of dma-governance skill that performed audit",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "examples": ["2.0", "2.1"]
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "PASS_WITH_NOTES",
+        "FAIL"
+      ],
+      "description": "Overall audit conclusion"
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": [
+        "DELIVER",
+        "DELIVER_WITH_CAVEAT",
+        "FIX_AND_REAUDIT",
+        "ESCALATE_FOR_REVIEW"
+      ],
+      "description": "Recommended action based on verdict"
+    },
+    "issue_count_by_severity": {
+      "type": "object",
+      "description": "Count of issues found in this assessment, by severity",
+      "required": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+      "properties": {
+        "CRITICAL": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "open": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "fixed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": ["count", "open", "fixed"]
+        },
+        "HIGH": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "open": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "fixed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": ["count", "open", "fixed"]
+        },
+        "MEDIUM": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "open": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "fixed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": ["count", "open", "fixed"]
+        },
+        "LOW": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "open": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "fixed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": ["count", "open", "fixed"]
+        }
+      }
+    },
+    "check_results": {
+      "type": "object",
+      "description": "Results of core audit checks (G-series from quality_assurance.md)",
+      "properties": {
+        "G1_row_counts": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"],
+          "description": "Verify subcap counts match taxonomy"
+        },
+        "G2_rationale_quality": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"],
+          "description": "Check rationale length, structure, forbidden patterns"
+        },
+        "G3_evidence_traceability": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"],
+          "description": "Every score has evidence; every evidence used"
+        },
+        "G4_score_integrity": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"],
+          "description": "Bounds, precision, ceiling compliance, cap logging"
+        },
+        "G5_aggregation": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"],
+          "description": "Weight sums, calculation chain reconciliation"
+        },
+        "G6_cross_pillar_caps": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"],
+          "description": "Dependency cap triggering and application"
+        },
+        "G7_confidence_ers": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"],
+          "description": "Confidence vs. ERS alignment"
+        },
+        "G8_contradiction_log": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"],
+          "description": "All contradictions logged with resolutions"
+        }
+      },
+      "required": [
+        "G1_row_counts",
+        "G2_rationale_quality",
+        "G3_evidence_traceability",
+        "G4_score_integrity",
+        "G5_aggregation",
+        "G6_cross_pillar_caps",
+        "G7_confidence_ers",
+        "G8_contradiction_log"
+      ]
+    },
+    "distributional_flags": {
+      "type": "array",
+      "description": "Pattern-based anomalies detected (may not be failures, but flagged for attention)",
+      "items": {
+        "type": "object",
+        "required": ["flag_id", "description", "severity", "affected_pillar_or_metric"],
+        "properties": {
+          "flag_id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]{3}-[0-9]{3}$",
+            "examples": ["DIST-001", "DIST-002"]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "examples": [
+              "Score distribution in P2: 65% of subcaps scored 3.0 (exceeds 60% threshold)",
+              "Confidence distribution: 78% scored HIGH (exceeds 70% threshold, suggests overconfidence)"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["INFO", "CAUTION", "ALERT"],
+            "description": "Whether flag requires action"
+          },
+          "affected_pillar_or_metric": {
+            "type": "string",
+            "examples": ["P2", "EvidenceTier_Distribution", "CapApplication_Rate"]
+          },
+          "recommended_action": {
+            "type": "string",
+            "minLength": 5
+          }
+        }
+      }
+    },
+    "proof_verification": {
+      "type": "object",
+      "description": "Results of proof-carrying structure checks (PV-01, PV-02, PV-03)",
+      "required": ["PV01_structure_complete", "PV02_rule_links_valid", "PV03_counterclaim_documented"],
+      "properties": {
+        "PV01_structure_complete": {
+          "type": "string",
+          "enum": ["PASS", "PASS_WITH_WARNINGS", "FAIL"],
+          "description": "All rationales contain Claims, Evidence links, Rule links, Counterclaim, Constraints"
+        },
+        "PV02_rule_links_valid": {
+          "type": "string",
+          "enum": ["PASS", "FAIL"],
+          "description": "All RuleIDs exist and rules correctly applied"
+        },
+        "PV03_counterclaim_documented": {
+          "type": "string",
+          "enum": ["PASS", "PASS_WITH_WARNINGS", "FAIL"],
+          "description": "All scores include documented counterargument anticipation"
+        },
+        "proof_issues": {
+          "type": "array",
+          "description": "Specific subcaps with proof structure problems",
+          "items": {
+            "type": "object",
+            "properties": {
+              "subcap_id": {
+                "type": "string",
+                "pattern": "^P[1-4]C[1-5]$"
+              },
+              "issue_type": {
+                "type": "string",
+                "enum": [
+                  "MISSING_CLAIMS",
+                  "MISSING_EVIDENCE_LINKS",
+                  "MISSING_RULE_LINKS",
+                  "MISSING_COUNTERCLAIM",
+                  "INVALID_RULE_ID",
+                  "RULE_MISAPPLIED"
+                ]
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "critic_resolution": {
+      "type": "object",
+      "description": "Results of Critic Log consumption (CR-01)",
+      "required": ["CR01_findings_addressed"],
+      "properties": {
+        "CR01_findings_addressed": {
+          "type": "string",
+          "enum": ["PASS", "PASS_WITH_WARNINGS", "FAIL"],
+          "description": "All critic-flagged items addressed or accepted with rationale"
+        },
+        "critic_issues": {
+          "type": "array",
+          "description": "Critic findings that remain unaddressed",
+          "items": {
+            "type": "object",
+            "properties": {
+              "critic_finding_id": {
+                "type": "string",
+                "examples": ["CRI-P2C1-001"]
+              },
+              "finding_text": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["ADDRESSED", "ACCEPTED_WITH_RATIONALE", "UNADDRESSED"]
+              },
+              "resolution": {
+                "type": "string",
+                "description": "How the finding was addressed or why it was accepted"
+              }
+            }
+          }
+        }
+      }
+    },
+    "narrative_audit_result": {
+      "type": "string",
+      "enum": ["PASS", "PASS_WITH_NOTES", "FAIL"],
+      "description": "Result of narrative & report audit (Step 3 of Workflow A)"
+    },
+    "narrative_issues": {
+      "type": "array",
+      "description": "Specific narrative issues found",
+      "items": {
+        "type": "object",
+        "properties": {
+          "issue_type": {
+            "type": "string",
+            "enum": [
+              "MISSING_SECTION",
+              "PEER_PROXY_NOT_DISCLOSED",
+              "FORBIDDEN_LANGUAGE",
+              "SCORE_MISMATCH",
+              "MEDIAN_MISMATCH",
+              "N_A_NOT_DOCUMENTED",
+              "FIXED_DATE_RANGE"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string",
+            "examples": ["Section 2", "Section 6B", "Roadmap"]
+          }
+        }
+      }
+    },
+    "sign_off": {
+      "type": "object",
+      "description": "Audit sign-off and authorization",
+      "required": ["auditor_id", "auditor_name", "organization", "verdict_date", "is_approved"],
+      "properties": {
+        "auditor_id": {
+          "type": "string",
+          "description": "System user ID of auditor"
+        },
+        "auditor_name": {
+          "type": "string",
+          "description": "Full name of auditor"
+        },
+        "organization": {
+          "type": "string",
+          "description": "Organization conducting audit"
+        },
+        "verdict_date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of verdict finalization"
+        },
+        "is_approved": {
+          "type": "boolean",
+          "description": "Whether auditor approves this verdict"
+        },
+        "sign_off_notes": {
+          "type": "string",
+          "description": "Optional auditor notes on verdict",
+          "maxLength": 500
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

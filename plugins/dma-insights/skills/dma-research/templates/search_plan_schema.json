@@ -1,0 +1,136 @@
+{
+  "$schema": "dma_search_plan_v1",
+  "metadata": {
+    "entity_name": "",
+    "subvertical": "",
+    "plan_date": "",
+    "total_subcaps": 0,
+    "total_planned_queries": 0,
+    "estimated_search_calls": 0,
+    "estimated_fetch_calls": 0
+  },
+  "batch_1_entity_profiling": {
+    "regulatory_queries": [
+      {"query": "", "target": "entity_identification", "tier_target": "T1", "source_target": ""}
+    ],
+    "financial_queries": [
+      {"query": "", "target": "financial_baseline", "tier_target": "T1/T2", "source_target": ""}
+    ],
+    "classification_queries": [
+      {"query": "", "target": "subvertical_classification", "tier_target": "T1/T2", "source_target": ""}
+    ],
+    "enforcement_queries": [
+      {"query": "", "target": "issues_enforcement", "tier_target": "T1", "regulator": ""}
+    ],
+    "sentiment_queries": {
+      "customer": [
+        {"query": "", "target": "", "platform": ""}
+      ],
+      "employee": [
+        {"query": "", "target": "", "platform": ""}
+      ]
+    }
+  },
+  "subcap_query_plans": [
+    {
+      "subcap_id": "P1C1.1.1",
+      "subcap_name": "",
+      "capability": "",
+      "diagnostic_question": "",
+      "question_decomposition": {
+        "subject": "",
+        "verb": "",
+        "qualifier": "",
+        "evidence_target": "",
+        "negative_signal": ""
+      },
+      "cluster_id": "",
+      "cluster_shared_queries": [],
+      "tier_queries": {
+        "tier_1_direct": [
+          {"query": "", "rationale": "Direct capability search from diagnostic Q decomposition"}
+        ],
+        "tier_2_official_docs": [
+          {"query": "", "rationale": "Target high-tier document type", "doc_target": ""}
+        ],
+        "tier_3_keyword_variant": [
+          {"query": "", "rationale": "Synonym/alternative framing", "keywords": []}
+        ],
+        "tier_4_regulatory": [
+          {"query": "", "rationale": "Regulator-specific search", "regulator": ""}
+        ],
+        "tier_5_technology": [
+          {"query": "", "rationale": "Platform/vendor search", "platform_target": ""}
+        ],
+        "tier_6_sentiment": [
+          {"query": "", "rationale": "Sentiment/review source", "platform": ""}
+        ],
+        "tier_7_proxy": [
+          {"query": "", "rationale": "Proxy signal when direct evidence scarce", "proxy_type": ""}
+        ],
+        "tier_8_peer": [
+          {"query": "", "rationale": "Peer association search", "peer_context": ""}
+        ],
+        "tier_9_vendor_reverse": [
+          {"query": "", "rationale": "Vendor website search for entity mention", "vendor": ""}
+        ],
+        "tier_10_contradictory": [
+          {"query": "", "rationale": "Negative/failure search", "negative_target": ""}
+        ]
+      },
+      "expected_evidence_type": "",
+      "expected_tier_range": "",
+      "expected_difficulty": "LOW|MEDIUM|HIGH",
+      "notes": ""
+    }
+  ],
+  "cluster_definitions": [
+    {
+      "cluster_id": "P1C1-strategy-docs",
+      "capability": "P1C1",
+      "subcap_ids": ["P1C1.1.1", "P1C1.1.2", "P1C1.1.3"],
+      "shared_queries": [
+        {"query": "", "rationale": "Shared document source for strategy subcaps"}
+      ],
+      "rich_document_targets": ["annual report", "strategic plan", "investor deck"]
+    }
+  ],
+  "rich_document_fetch_plan": [
+    {
+      "document_type": "annual_report",
+      "expected_url_pattern": "",
+      "priority": "HIGH",
+      "expected_subcap_yield": 50,
+      "pillar_coverage": ["P1", "P2", "P3", "P4"],
+      "mining_instructions": "Extract all facts with dates/metrics. Map each to subcap IDs."
+    },
+    {
+      "document_type": "proxy_statement",
+      "expected_url_pattern": "",
+      "priority": "HIGH",
+      "expected_subcap_yield": 20,
+      "pillar_coverage": ["P1"],
+      "mining_instructions": "Board composition, committee charters, governance structure."
+    },
+    {
+      "document_type": "10K_filing",
+      "expected_url_pattern": "",
+      "priority": "HIGH",
+      "expected_subcap_yield": 40,
+      "pillar_coverage": ["P1", "P3", "P4"],
+      "mining_instructions": "Risk factors, technology disclosures, financial performance."
+    }
+  ],
+  "negative_search_plan": {
+    "per_capability_minimum": 1,
+    "queries_by_capability": {
+      "P1C1": [{"query": "", "target": "strategy failure/gap"}],
+      "P1C2": [{"query": "", "target": "governance weakness"}],
+      "P2C1": [{"query": "", "target": "marketing failure"}],
+      "P2C3": [{"query": "", "target": "service complaints"}],
+      "P3C3": [{"query": "", "target": "compliance violations"}],
+      "P4C3": [{"query": "", "target": "technology failures/outages"}],
+      "P4C4": [{"query": "", "target": "security breaches"}]
+    }
+  }
+}

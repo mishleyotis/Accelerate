@@ -1,0 +1,13 @@
+repos:
+  - repo: local
+    hooks:
+      - id: secret-scan
+        name: secret scan (S.2 — no secret is committed)
+        entry: python3 scripts/scan_secrets.py --staged
+        language: system
+        pass_filenames: false
+      - id: gate-a-no-inference-imports
+        name: Gate A — no inference import
+        entry: python3 scripts/gate_a_no_inference_imports.py
+        language: system
+        pass_filenames: false

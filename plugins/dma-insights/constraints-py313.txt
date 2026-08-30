@@ -1,0 +1,9 @@
+# CPython 3.13 constraints. The 3.11 pins publish no cp313 wheels.
+# Measured 2026-08-19 (pip download --python-version 313
+# --only-binary :all:): these are the oldest versions of each that ship a
+# cp313 wheel; the release below each (pandas 2.2.2, numpy 2.0.2,
+# pyarrow 17.0.0, matplotlib 3.9.1.post1) does not.
+pandas==2.2.3
+numpy==2.1.0
+pyarrow==18.0.0
+matplotlib==3.9.2

@@ -1,0 +1,160 @@
+{
+  "case_id": "GOLDEN_CASE_C",
+  "case_name": "Dependency Cap Triggering — Cascade from Governance Weakness",
+  "case_description": "Large regional bank assessed in HYBRID mode with governance weakness (P1C2 < 2.5) triggering cross-pillar dependency caps on P3 subcaps. Also tests cybersecurity breach cap cascade: P4C4 < 2.5 triggers cap on P4C1 (Data Governance), which may cascade to P2C4 (Personalization). Exercises the two-pass dependency cap algorithm fully.",
+  "case_status": "STUB — Evidence inventory and full expected outcomes to be populated before use in Workflow C regression testing",
+  "institution_profile": {
+    "institution_name": "Example Regional Bank (Dependency Case)",
+    "institution_size_tier": "Large_10B_to_50B",
+    "sub_vertical": "Regional_Bank",
+    "evidence_mode": "HYBRID",
+    "geography": "Southeast",
+    "key_characteristics": [
+      "$25B in assets",
+      "Multi-state presence (6 states)",
+      "Known governance weakness (recent board restructuring)",
+      "Disclosed cybersecurity breach 15 months ago",
+      "Strong P2 (customer experience) but constrained by governance"
+    ]
+  },
+  "evidence_inventory": {
+    "total_evidence_items": 80,
+    "evidence_items": [
+      {
+        "evidence_id": "E-401",
+        "source_name": "PLACEHOLDER — OCC Examination Report",
+        "source_type": "Regulatory Filing",
+        "tier": "T1",
+        "date_or_period": "12 months ago",
+        "fact_summary": "PLACEHOLDER — Examination cites governance deficiencies; MRA issued for board oversight of digital strategy",
+        "supports_capabilities": ["P1C2", "P1C1"],
+        "recency_age_months": 12,
+        "ers_score_expected": 4.5,
+        "note": "STUB: Full evidence item to be curated"
+      },
+      {
+        "evidence_id": "E-402",
+        "source_name": "PLACEHOLDER — Breach Disclosure (SEC 8-K)",
+        "source_type": "Regulatory Filing",
+        "tier": "T1",
+        "date_or_period": "15 months ago",
+        "fact_summary": "PLACEHOLDER — Bank disclosed material cybersecurity breach; customer PII exposed; remediation underway",
+        "supports_capabilities": ["P4C4"],
+        "recency_age_months": 15,
+        "ers_score_expected": 4.8,
+        "note": "STUB: Triggers breach <24mo cap on P4C4"
+      },
+      {
+        "evidence_id": "E-403",
+        "source_name": "PLACEHOLDER — Internal Board Minutes",
+        "source_type": "Internal Document",
+        "tier": "T4",
+        "date_or_period": "3 months ago",
+        "fact_summary": "PLACEHOLDER — Board recently restructured; digital committee formed but no meeting cadence established",
+        "supports_capabilities": ["P1C2"],
+        "recency_age_months": 3,
+        "ers_score_expected": 3.0,
+        "note": "STUB: Corroborates governance weakness"
+      }
+    ],
+    "note": "STUB: Remaining 77 evidence items to be curated covering all 4 pillars. Evidence pack should support P2 scores of 3.5–4.0 (strong CX) but P1C2 < 2.5 to trigger governance dependency cascade."
+  },
+  "dependency_cascade_test_cases": [
+    {
+      "cascade_id": "CASCADE-001",
+      "trigger": "P1C2 (Governance & Risk Appetite) scores < 2.5",
+      "trigger_evidence": "OCC MRA on board oversight (E-401) + nascent digital committee (E-403)",
+      "expected_p1c2_score_range": [1.8, 2.4],
+      "cap_effect": "ALL P3 subcaps capped at 3.0 (cross-pillar dependency rule)",
+      "log_expectation": "Caps_Applied_Log must contain CROSS_PILLAR entries for every P3 subcap"
+    },
+    {
+      "cascade_id": "CASCADE-002",
+      "trigger": "Cybersecurity breach <24 months ago",
+      "trigger_evidence": "SEC 8-K breach disclosure (E-402), 15 months old",
+      "expected_p4c4_score_range": [2.0, 2.4],
+      "cap_effect": "P4C4 subcaps capped at 3.0 (breach <24mo severity cap)",
+      "log_expectation": "Caps_Applied_Log must contain REGULATORY cap entries for P4C4 subcaps"
+    },
+    {
+      "cascade_id": "CASCADE-003",
+      "trigger": "P4C4 < 2.5 (from CASCADE-002) triggers dependency cap on P4C1",
+      "expected_p4c1_cap": 3.0,
+      "cap_effect": "P4C1 (Data Governance) subcaps capped at 3.0",
+      "log_expectation": "CROSS_PILLAR cap entry for P4C1 referencing P4C4 score"
+    },
+    {
+      "cascade_id": "CASCADE-004",
+      "trigger": "IF P4C1 < 2.5 after CASCADE-003 cap → cap on P2C4 (Personalization)",
+      "conditional": true,
+      "condition": "Only triggers if P4C1 raw score was near threshold and cap pushes it below 2.5",
+      "expected_p2c4_cap": 3.0,
+      "log_expectation": "If triggered: CROSS_PILLAR cap entry for P2C4 referencing P4C1 score",
+      "note": "This is the two-pass cascade test — second pass catches the downstream effect"
+    }
+  ],
+  "expected_outcomes": {
+    "overall_score_range": {
+      "min": 2.2,
+      "expected_mid": 2.5,
+      "max": 2.8
+    },
+    "rationale": "Strong CX and some operational maturity constrained by governance weakness and breach history. Cross-pillar caps significantly depress P3 and parts of P4. Overall score pulled down by cascading dependency effects.",
+    "expected_pillar_scores": {
+      "P1_expected_range": [2.0, 2.5],
+      "P1_rationale": "Governance weakness (P1C2 < 2.5) drags pillar down despite reasonable P1C1 strategy scores",
+      "P2_expected_range": [3.0, 3.8],
+      "P2_rationale": "Strong customer experience; may be partially capped by P2C4 cascade if P4C1 < 2.5",
+      "P3_expected_range": [2.2, 2.8],
+      "P3_rationale": "All subcaps capped at 3.0 by P1C2 governance dependency; actual operational scores may be higher but are constrained",
+      "P4_expected_range": [2.0, 2.6],
+      "P4_rationale": "Breach caps P4C4; cascade caps P4C1; technology portfolio otherwise mid-M3"
+    },
+    "expected_caps": {
+      "cross_pillar_caps": {
+        "count_minimum": 15,
+        "affected_capabilities": ["P3 (all subcaps)", "P4C1", "P2C4 (conditional)"],
+        "rationale": "Governance dependency is the primary constraint"
+      },
+      "severity_caps": {
+        "count": 1,
+        "affected": "P4C4 (breach <24mo)",
+        "rationale": "Material breach 15 months ago triggers severity cap"
+      }
+    }
+  },
+  "test_tolerances": {
+    "overall_score_tolerance": 0.5,
+    "pillar_score_tolerance": 0.5,
+    "category_score_tolerance": 0.3,
+    "cap_count_tolerance": 3,
+    "rationale": "Cascade interactions create some variance; tolerance reflects compounding uncertainty"
+  },
+  "regression_test_gate": {
+    "test_case_purpose": "Verify two-pass dependency cap algorithm executes correctly: (1) First pass applies P1C2→P3 and breach→P4C4 caps, (2) Second pass detects P4C4<2.5→P4C1 cascade and optional P4C1<2.5→P2C4 cascade, (3) Aggregation recalculates correctly after all caps applied",
+    "pass_criteria": [
+      "P1C2 scores within expected range (1.8–2.4)",
+      "ALL P3 subcaps have Final_Score ≤ 3.0 with CROSS_PILLAR cap logged",
+      "P4C4 has severity cap applied (breach <24mo)",
+      "P4C1 has CROSS_PILLAR cap from P4C4 dependency",
+      "Post-cap aggregation is mathematically correct (AG-01 through AG-12 pass)",
+      "Caps_Applied_Log contains ≥15 CROSS_PILLAR entries",
+      "If cascade to P2C4 fires: documented in log with correct cap value"
+    ]
+  },
+  "metadata": {
+    "case_created_date": "2025-03-01",
+    "case_updated_date": "2025-03-01",
+    "case_status": "STUB",
+    "case_owner": "DMA Governance & Regression Testing Team",
+    "use_in_workflows": ["Workflow C: Rubric Version Regression", "Training: Dependency Cap Scenarios"],
+    "compatibility": "DMA Assessment Skill v3.0+, DMA Governance Skill v2.0+",
+    "completion_todo": [
+      "Curate full 80-item evidence inventory across all tiers",
+      "Define exact expected subcap scores for all P3 and P4 capabilities",
+      "Validate cascade thresholds against current rubric version",
+      "Run baseline assessment to establish expected score ranges",
+      "Peer review by QA lead before promoting to ACTIVE status"
+    ]
+  }
+}

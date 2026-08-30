@@ -1,0 +1,1322 @@
+DMA Insights — Backend Schema
+
+Zennify
+DMA Insights · Backend Schema
+August 2026
+
+Overview
+01 Architecture & tiers
+02 Table inventory
+03 Auth
+
+Tier 1 · Ingested
+04 Ingested tier
+
+Tier 2 · Staging
+05 Staging tier
+
+Tier 3 · Serving
+06 Serving tier
+
+Vector & concurrency
+12 Vector tier
+13 Transactions & concurrency
+
+Supporting
+07 Control & audit
+08 Catalogue
+09 Constraints & indexes
+11 User state & lineage
+10 Query patterns & QA
+© 2026 Zennify · Confidential
+
+01 — Architecture & tiers
+DMA Insights · Backend Schema · PostgreSQL 16
+Schema89 tables3 tiers
+
+Backend schema
+
+# DMA Insights — database design
+
+PostgreSQL 16 on Cloud SQL. 89 tables across eight groups, arranged in three tiers with one direction of flow.
+
+Engine: PostgreSQL 16 · pgvector (build-time grounding only) · Redis 7 (ingest queue and claim leases only) · Python 3.12 + FastAPI · SQLAlchemy 2.0 async · Alembic · Cloud Run
+
+## Three tiers, one direction
+
+Tier 1
+Ingested
+Written by the package parser, at ingest. Read by the Cowork synthesis agent, through the report bundle. Mutability read-only after parse.
+
+Tier 2
+Staging
+Written by the connector, at submit. Read by the connector, at promote. Never by the API. Mutability superseded, never merged.
+
+Tier 3
+Serving
+Written by the connector, at promote, only. Read by the API, for every request. Mutability replaced atomically per run.
+
+The boundary the whole design rests on
+The API reads serving tables only. If a surface can render from a staging table, the boundary has been broken and unvalidated content can reach a client. This is enforced by database grant, not by code convention — the API role has no SELECT on any staging table, so the query fails in local integration tests rather than in code review.
+
+## Entity relationships
+
+```
+users ─────────────────────────────────────────────────────────────────┐
+  id · email · role (AE/ANALYST/ADMIN) · google_sub                    │
+                                                                       │
+INGESTED ───────────────────────────────────────────────────────────┐    │
+entities                                                          │    │
+  id · display_id · legal_name · trading_name · domain            │    │
+  sub_vertical · size_tier · primary_regulator · jurisdictions[]   │    │
+  │                                                               │    │
+  └── runs (1:N)                                                  │    │
+       id · request_id · ccg_catalog_version                       │    │
+       scored_cells · catalogue_cells · composite                  │    │
+       status · is_active · completed_at · promoted_at             │    │
+       │                                                          │    │
+       ├── subcap_scores       score · peer_median · peer_basis     │    │
+       │                       delta (gen) · source_cell            │    │
+       ├── peer_scores · evidence_index · evidence_subcap_links     │    │
+       ├── document_sections · issue_register_raw                   │    │
+       ├── recommendations_raw · techstack_raw                      │    │
+       └── platform_fits_raw · firmographics_raw · run_manifest     │    │
+                                                                   │    │
+STAGING ─────────────────────────────────────────────────────────┤    │
+run_claims             lease per run, with expiry                  │    │
+submissions            one live row per (run_id, page) — supersedes │    │
+submission_verdicts    every verdict, including superseded ones     │    │
+                                                                   │    │
+SERVING ─────────────────────────────────────────────────────────┤    │
+34 tables, one per section                                        │    │
+every row carries: run_id · entity_id · promoted_at                │    │
+                   producer_version · provenance · e_ids[]         │    │
+                   internal_only[] · empty_state · produced_at     │    │
+                                                                   │    │
+CONTROL & AUDIT ─────────────────────────────────────────────────┘    │
+gate_registry · gate_results · gate_threshold_history                   │
+identity_quarantine · evidence_dedup_audit · evidence_run_links         │
+audit_log                                                               │
+                                                                        │
+WORKFLOW ── annotations · alert_actions ───────────────────────────────┘
+CATALOGUE ─ 21 tables, versioned, with an alias bridge
+```
+
+Section 02
+
+# Table inventory
+
+Computed from the enumeration below, not asserted. The serving tier is the largest group because it holds one table per payload section.
+
+Count by group
+Ingested13
+Staging3
+Serving33
+Control & audit7
+Workflow5
+Auth2
+Ingest ops3
+Vector2
+Catalogue21
+Total89
+
+The reconciliation that must hold
+ 34 payload sections → 34 serving tables, of which 33 are dedicated and one is evidence_index, reused because heatmap.evidence promotes into the ingested evidence table rather than duplicating it. A test asserts this reconciles against the writer registry and the surface register.
+
+One table per section, deliberately
+ One-to-one keeps the writer simple, makes a partial write impossible to hide, and lets the API select exactly what a surface needs rather than filtering a wide polymorphic table at read time.
+
+## Full enumeration
+
+Group | Tables
+
+Ingested
+13 tables | entities · runs · run_manifest · subcap_scores · peer_scores · evidence_index · evidence_subcap_links · document_sections · issue_register_raw · recommendations_raw · techstack_raw · platform_fits_raw · firmographics_raw
+
+Staging
+3 tables | run_claims · submissions · submission_verdicts
+
+Serving
+33 tables | overview_scores · overview_firmographics · overview_why_now · overview_exec_summary · overview_opportunity · overview_findings · overview_leadership · overview_financial_series · overview_sentiment · overview_ceilings · overview_evidence_coverage · overview_thought_leadership · insight_cards · insights_landscape · heatmap_workbook_scores · heatmap_focus_areas · heatmap_cell_evidence · heatmap_value_chain · heatmap_alerts · heatmap_safeguard_gates · heatmap_evidence_age · heatmap_cohort_patterns · platform_story · platform_recommendations · platform_starters · platform_roadmap · platform_stairstep · context_timeline · context_issue_register · context_regulatory_standing · context_sentiment · context_acquisitions · techstack_items
+
+Control & audit
+7 tables | gate_registry · gate_results · gate_threshold_history · evidence_dedup_audit · evidence_run_links · identity_quarantine · audit_log
+
+Workflow
+5 tables | annotations · alert_actions · user_workspace · saved_searches · idempotency_keys
+
+Auth
+2 tables | users · session_log
+
+Ingest ops
+3 tables | import_scans · import_files · parser_observations
+
+Vector
+2 tables | bundle_embeddings · bundle_centroids
+
+Catalogue
+21 tables | ccg_versions · ccg_subcaps · ccg_aliases · ccg_l3_platforms · ccg_l4_features · ccg_maturity_descriptors · ccg_agents · ccg_constructs · ccg_products · ccg_offerings · ccg_data_products · ccg_offering_subcap_matrix · ccg_dataproduct_subcap_matrix · ccg_user_stories · ccg_cross_pillar_stories · ccg_theme_subcap_mapping · ccg_subcap_completeness · ccg_toggle_cascade · ccg_value_chains · ccg_vc_mapping · ccg_qa_gates
+
+Section 03
+
+# Auth
+
+Google OIDC to a server-side token exchange. The token lives in an httpOnly cookie; the role lives in a claim and is re-verified at the API on every request.
+
+users
+Authentication and authorisation
+
+idUUIDPKgen_random_uuid()
+emailCITEXTUQWorkspace address; domain restricted at the OAuth client
+google_subTEXTUQStable OIDC subject — the join key, not the email
+display_nameTEXTFrom the OIDC profile claim
+roleuser_role_tAE · ANALYST · ADMIN
+is_activeBOOLEANSoft disable without deleting audit history
+created_atTIMESTAMPTZDEFAULT now()
+last_seen_atTIMESTAMPTZUpdated on token refresh, not per request
+
+session_log
+Auth events
+
+idBIGSERIALPK
+user_idUUIDFK→ users.id
+eventTEXTlogin · logout · refresh · denied
+role_at_eventuser_role_tRole as it was, so a later change does not rewrite history
+ipINET
+user_agentTEXT
+occurred_atTIMESTAMPTZDEFAULT now()
+
+## Database roles
+
+Role | Grants
+
+svc_api | SELECT on serving, catalogue and workflow tables. INSERT on annotations and alert_actions. No grant of any kind on staging.
+
+svc_mcp | SELECT on ingested and catalogue. Full DML on staging, serving, control and audit. The only role that can write a serving table.
+
+svc_worker | Full DML on ingested and ingest-ops. SELECT on catalogue. No access to serving or staging.
+
+svc_migrate | DDL. Used by migrations at deploy, never by a running service.
+
+## The two-layer role gate
+
+Layer | Enforces | Is
+
+Route | The frontend does not render Context or Health for an AE | User experience
+
+API | The API refuses the request regardless of what the frontend did | The control
+
+Section 04
+
+# Ingested tier
+
+13 tables. Written once by the parser, read by the Cowork agent through the report bundle, and read-only from the moment the run is queued.
+
+entities
+One institution, many runsINGESTED
+
+idUUIDPK
+display_idTEXTUQURL slug and human-facing handle, derived from the name
+legal_nameTEXTAs the regulator's registry states it, not as the entity describes itself
+trading_nameTEXTWhere it differs — the identity gate resolves between them
+domainTEXTPrimary domain; the cheapest identity check in the system
+sub_verticalTEXTDrives the peer cohort and the toggle cascade
+size_tierTEXTDrives expectation adjustment, never evidence adjustment
+primary_regulatorTEXTFrom the regulator's registry. A mismatch is an identity error.
+jurisdictionsTEXT[]The fastest contamination check available
+statusentity_status_tACTIVE · PENDING_REVIEW · ARCHIVED · EXCLUDED
+inference_confidenceNUMERIC(3,2)From the four-signal cascade. Low confidence → PENDING_REVIEW
+owner_user_idUUIDFKAE ownership, from the ops sheet
+created_atTIMESTAMPTZ
+
+runs
+One assessment of one entity at one point in timeINGESTED
+
+idUUIDPK
+entity_idUUIDFK→ entities.id
+request_idTEXTBoth upstream formats are valid; accept both
+run_seqSMALLINT1, 2, 3 … per entity. The human-facing run number.
+ccg_catalog_versionTEXTFK→ ccg_versions. Pins every id resolution for this run.
+scored_cellsINTEGERHow many cells THIS run scored. Distinct from catalogue size.
+catalogue_cellsINTEGERDenormalised from the pinned version, so a denominator never needs a join
+compositeNUMERIC(4,2)Mean of the four pillar means, rounded ONCE
+statusrun_status_tINGESTED · CLAIMED · SYNTHESISING · STAGED · PROMOTED · SUPERSEDED
+is_activeBOOLEANExactly one TRUE per entity, by partial unique index
+completed_atTIMESTAMPTZWhen the assessment finished, not when it was ingested
+promoted_atTIMESTAMPTZNULL until promotion
+source_folder_idTEXTFor traceability back to the artefacts
+
+Two counts, two columns
+catalogue_cells is fixed per catalogue version. scored_cells varies by run, because sub-vertical toggles exclude cells an institution cannot legally operate. Coverage percentages render their denominator, so the denominator is stored rather than recomputed differently by two callers.
+
+subcap_scores
+The cell — the only grain that carries a scoreINGESTED
+
+idBIGSERIALPK
+run_idUUIDFK→ runs.id
+subcap_idTEXTResolved through the catalogue, never copied from prose
+capability_idTEXTGrain level 3 — the heatmap drills through it
+category_idTEXTGrain level 2
+pillar_idTEXTGrain level 1
+scoreNUMERIC(4,2)Read from the workbook. Never re-derived anywhere in this system.
+confidenceconfidence_tHIGH · MEDIUM · LOW
+peer_medianNUMERIC(4,2)NULL where the peer table lacks it — never imputed
+peer_nSMALLINTThe cohort size actually used. Floor of three.
+peer_basispeer_basis_ttable · recomputed · inferred · cannot_estimate
+proxy_disclosureTEXTRequired when peer_basis is a proxy
+deltaNUMERIC(4,2)GENSTORED GENERATED: score − peer_median. Computed, never restated.
+linked_evidence_countINTEGERMaintained by the linker
+is_thin_evidenceBOOLEANGENSTORED GENERATED: fewer than three linked items
+source_cellTEXTThe workbook cell this figure was read from. Grain lock depends on it.
+UNIQUE(run_id, subcap_id)UQOne score per cell per run
+
+evidence_index
+Evidence — also the serving table for heatmap.evidenceINGESTED
+
+e_idTEXTPKFour namespaces, one recogniser
+entity_idUUIDFKEvidence is entity-scoped. A foreign id must stop synthesis.
+originevidence_origin_tpackage · producer · connector · internal
+source_nameTEXT
+source_urlTEXT
+source_domainTEXTGENSTORED GENERATED from source_url. The identity check runs on it.
+excerptTEXTVerbatim, 50–500 chars. Verified against the fetched artefact at registration.
+claim_typeclaim_tFACT · INFERENCE · HYPOTHESIS · CEILING_ESTIMATE
+tiertier_tT1–T5. Five rungs, not eight.
+published_dateDATENULL is legal and produces UNVERIFIED, never CURRENT
+reference_dateDATEThe date age is computed against, pinned per run
+age_monthsINTEGERGENSTORED GENERATED. NULL when the date is absent.
+recency_bandrecency_tGENSTORED GENERATED from age_months at the four boundaries
+ersNUMERIC(3,2)Server-computed. CHECK bounded 1.0–5.0.
+specificitySMALLINTOne of the four rank-score factors
+corroborationSMALLINTCounted by distinct ORIGIN, not by document
+identity_okBOOLEANFALSE excludes the item from coverage and tier distribution
+identity_noteTEXTWhy, when identity_ok is FALSE
+content_hashTEXTGENSTORED GENERATED — the dedup key, scoped to the entity
+
+Four columns the database derives rather than the application. Source domain, age, recency band and content hash. A value the database can derive should not be writable, because two writers of one truth eventually disagree — and an age computed in application code is the one that ends up rendering as uncomputable beside a status of fresh.
+
+evidence_subcap_links
+Which item supports which cell — bidirectional in the interfaceINGESTED
+
+e_idTEXTFK→ evidence_index.e_id
+subcap_idTEXTThe cell it supports
+run_idUUIDFKScoped, because linkage can differ between runs
+link_basisTEXTWhy. Substance, not proximity.
+PRIMARY KEY(e_id, subcap_id, run_id)PK
+A cell whose every drawer is empty is a linking failure, not an evidence gap. Diagnose before enriching — enriching a linker bug adds evidence that also will not render.
+
+peer_scores
+The peer cohort tableINGESTED
+
+idBIGSERIALPK
+run_idUUIDFK
+peer_nameTEXT
+subcap_idTEXT
+pillar_idTEXTPillar-level peer medians feed the hero
+scoreNUMERIC(4,2)NULL is legal and triggers the recompute-at-lower-cohort ladder
+
+document_sections
+Parsed report structureINGESTED
+
+idBIGSERIALPK
+run_idUUIDFK
+section_kindTEXTOne of the twelve structured report sections
+pillar_idTEXTNULL for non-pillar sections
+headingTEXT
+bodyTEXT
+pageINTEGERSource page, so a focus-area quote can cite it
+artefact_idTEXTFK→ import_files. Which document this came from.
+Five further ingested tables follow the same shape and are elided for length: issue_register_raw, recommendations_raw, techstack_raw, platform_fits_raw and firmographics_raw. Each carries run_id, its package identifier, its payload columns and an artefact_id back to the file it was parsed from. run_manifest is one-to-one with the run.
+
+Section 05
+
+# Staging tier
+
+3 tables. Written by the connector at submit, read by the connector at promote, and invisible to the API by database grant.
+
+run_claims
+One Cowork session at a time, with a lease that expiresSTAGING
+
+run_idUUIDPK→ runs.id. One claim per run.
+held_byTEXTSession identifier
+claimed_atTIMESTAMPTZ
+expires_atTIMESTAMPTZSo a dead session cannot block a run permanently
+producer_versionTEXT
+
+submissions
+One live row per (run, page) — a resubmission supersedesSTAGING
+
+idUUIDPKThe submission_id returned to the agent
+run_idUUIDFK
+pagepage_toverview · insights · heatmap · platform · context · techstack
+payloadJSONBThe full page payload as submitted
+statussubmission_status_tPASS · FAIL
+provenanceprovenance_t
+producer_versionTEXT
+contract_versionTEXTThe payload shape this submission validated against
+submitted_byTEXTThe service credential, never a user
+submitted_atTIMESTAMPTZ
+superseded_atTIMESTAMPTZNULL while live
+superseded_byUUIDFK→ submissions.id
+promoted_atTIMESTAMPTZSet by promote_run
+```
+-- Exactly one live submission per (run, page)
+CREATE UNIQUE INDEX submissions_live_uq
+  ON submissions (run_id, page)
+  WHERE superseded_at IS NULL;
+```
+
+submission_verdicts
+Every verdict, including superseded onesSTAGING
+
+idBIGSERIALPK
+submission_idUUIDFK→ submissions.id
+statussubmission_status_t
+reasonsJSONB[{gate_id, section, path, message, severity}]
+warningsJSONBNon-blocking
+countsJSONB{sections, cited_claims, e_ids_used, new_mints}
+evaluated_atTIMESTAMPTZ
+
+Verdicts are never deleted
+Including failing ones, and including verdicts for superseded submissions. The path an agent took to a passing submission is the audit trail for how a surface came to say what it says — and it is the only way to tell a first-time pass from a fifth attempt.
+
+## The promote transaction
+
+```
+BEGIN;
+  -- 1. Assert a PASS row for every page. Otherwise 409, write nothing.
+  SELECT page FROM submissions
+   WHERE run_id = :run AND superseded_at IS NULL AND status = 'PASS';
+  -- must return all 6 pages
+
+  -- 2. Deactivate the previous active run for this entity.
+  UPDATE runs SET is_active = FALSE, status = 'SUPERSEDED'
+   WHERE entity_id = :entity AND is_active;
+
+  -- 3. Run WRITERS[section] for each of the 34 sections:
+  --    delete-then-insert per serving table, scoped to (run_id).
+  -- 4. Stamp promoted_at, producer_version and provenance on every row.
+  -- 5. Mark the staging rows promoted.
+
+  UPDATE runs SET is_active = TRUE, status = 'PROMOTED', promoted_at = now()
+   WHERE id = :run;
+COMMIT;
+```
+
+On any writer failure the transaction rolls back and nothing is written — there is no partial promote, so a client is never looking at a page from the new run beside a page from the old one. Re-promoting an already promoted run reaches the same state and is not an error.
+
+```
+-- Exactly one active run per entity
+CREATE UNIQUE INDEX runs_active_uq ON runs (entity_id) WHERE is_active;
+```
+
+Section 06
+
+# Serving tier
+
+34 tables, one per section. The only tier the API reads. Every row carries the same nine provenance columns without exception.
+
+## The universal envelope
+
+<every serving table>
+The nine columns every promoted row carriesSERVING
+
+run_idUUIDFKWhich assessment produced this row
+entity_idUUIDFKWhich client it belongs to — denormalised for the serving-side filter
+promoted_atTIMESTAMPTZNNWhen it began rendering
+producer_versionTEXTNNWhich synthesis produced it — a regression can be bisected
+provenanceprovenance_tanalyst · derived · producer
+e_idsTEXT[]Every citation behind the row, deduplicated
+internal_onlyTEXT[]JSON paths the serve layer strips for the Customer audience
+empty_stateJSONBNULL, or {kind, reason, sources_searched[], searched_on} — an absence with no recorded ladder is a research failure, not a finding
+r_layerJSONBOn any ranked or causal claim: {hypothesis, counter, domain_test, probes_run[], verdict, confidence}. The rejected runner-up is recorded beside the winner.
+narrative_threadTEXT45–75 words, on the page lead section only. Written last, from what was produced.
+produced_atTIMESTAMPTZWhen the agent produced it, distinct from promotion
+
+Provenance is not cosmetic. A deterministically composed recommendation must not present as an analyst recommendation, because an AE who quotes a synthetic recommendation as analyst judgement is exposed in the room.
+
+## The complete map
+
+Section | Serving table  | Surfaces | Renders on
+
+overview.scores | overview_scores | O1 |
+
+overview.firmographics | overview_firmographics | O2 |
+
+overview.why_now | overview_why_now | O3 |
+
+overview.exec_summary | overview_exec_summary | O4 |
+
+overview.opportunity | overview_opportunity | O5 |
+
+overview.findings | overview_findings | O6 |
+
+overview.leadership | overview_leadership | O7 |
+
+overview.financial_series | overview_financial_series | O8, C6 | D5
+
+overview.sentiment | overview_sentiment | O9 |
+
+overview.ceilings | overview_ceilings | O1b |
+
+overview.evidence_coverage | overview_evidence_coverage | O10, O11 |
+
+overview.thought_leadership | overview_thought_leadership | O12 |
+
+insights.insights | insight_cards | I1 |
+
+insights.landscape | insights_landscape | T2 |
+
+heatmap.workbook_scores | heatmap_workbook_scores | H4 |
+
+heatmap.focus_areas | heatmap_focus_areas | H1 |
+
+heatmap.cell_evidence | heatmap_cell_evidence | H2 |
+
+heatmap.evidence | evidence_index (ingested, reused) | H6 |
+
+heatmap.value_chain | heatmap_value_chain | H9 |
+
+heatmap.alerts | heatmap_alerts | H3 | D7
+
+heatmap.safeguard_gates | heatmap_safeguard_gates | H5 | D7
+
+heatmap.evidence_age | heatmap_evidence_age | H7 | D7
+
+heatmap.cohort_patterns | heatmap_cohort_patterns | H8 | D7
+
+platform.platform_story | platform_story | P1 |
+
+platform.recommendations | platform_recommendations | P2 |
+
+platform.starters | platform_starters | P2b |
+
+platform.roadmap | platform_roadmap | P3 |
+
+platform.stairstep | platform_stairstep | P4 |
+
+context.timeline | context_timeline | C1 |
+
+context.issue_register | context_issue_register | C2 |
+
+context.regulatory_standing | context_regulatory_standing | C3 |
+
+context.context_sentiment | context_sentiment | C4 |
+
+context.acquisitions | context_acquisitions | C5 |
+
+techstack.techstack | techstack_items | T1, T3 |
+
+Where the “renders on” column is blank, the surface renders on the dashboard matching its own page. The exceptions are the four heatmap sections that render on Health, and the Overview financial series which also renders on Context.
+
+## Four representative tables
+
+overview_scores
+O1 — the hero. One row per run.SERVING
+
+run_idUUIDPKThe hero is singular
+compositeNUMERIC(4,2)Mean of the four PILLAR means, rounded ONCE
+pillarsJSONB[{pillar_id, score, peer_median, delta, peer_n, peer_basis, proxy_disclosure}]
+postureposture_tLEADING · COMPETING · LAGGING · MIXED
+posture_basisbasis_tEVIDENCE · HYBRID · INFERRED
+framingTEXT18–32 words. States the gap, quantifies it, localises it.
+bandband_tGENSTORED GENERATED from composite. FOUR bands — the resolver has no branch above Differentiating, so M5 is unreachable. Boundaries are strict less-than on the RAW score.
+claim_labelclaim_t
+confidenceconfidence_t
+…plus the nine universal columns
+
+Authoritative for the hero
+This table is authoritative for the Overview hero; heatmap_workbook_scores is authoritative for the grid. A cross-section gate asserts they agree before either can promote, and the band is generated from the composite by the same function the frontend resolver uses.
+
+heatmap_evidence_age
+Q4 — where the derived-value rule is enforced in the schemaSERVING
+
+idBIGSERIALPK
+reference_dateDATENNPINNED and RENDERED. Age is meaningless without it.
+e_idTEXTFK
+titleTEXT
+source_domainTEXTWhere the identity check is cheapest to run
+published_or_asofDATENULL is legal
+age_monthsINTEGERGENSTORED GENERATED. NULL when the date is absent.
+bandage_band_tGENSTORED GENERATED from age_months
+statusage_status_tGENSTORED GENERATED from band ONLY
+identity_okBOOLEAN
+identity_noteTEXT
+…plus the nine universal columns
+Status follows band, band follows age, age follows a real date. All three are generated, so the chain cannot be broken by an application write.
+
+heatmap_cohort_patterns
+Q5 — the one surface that can leak between clientsSERVING
+
+idBIGSERIALPK
+sub_verticalTEXT
+category_idTEXT
+pattern_statementTEXT
+affected_countINTEGER
+cohort_sizeINTEGERCHECK at least five. Below that it is not published.
+share_pctNUMERIC(5,2)GENSTORED GENERATED: affected_count / cohort_size
+threshold_pctNUMERIC(5,2)Declared, and enforced
+below_thresholdBOOLEANGENSTORED GENERATED. A row below the threshold is labelled, not hidden.
+confidenceconfidence_tDerived from cohort size
+structural_explanationTEXT
+actionTEXT
+entity_idsUUID[]AUDIT ONLY. Always in internal_only. Stripped from every response.
+…plus the nine universal columns
+
+The one column that must never render
+entity_ids exists for audit and is stripped from every rendered response — internal and customer alike. This is the single surface where one client's data can reach another's view, so it emits counts and shares only. A test asserts the column never appears in a serialised response.
+
+techstack_items
+T1 and T3 — the layered registerSERVING
+
+idBIGSERIALPK
+ts_idTEXTAgent-assigned, unique within the run
+nameTEXT
+vendorTEXT
+layerstack_layer_tOPS · CUST · DATA · INFRA. Keys deliberately NOT L2–L5 — those collide with evidence levels L1–L4 on the same card.
+pillar_idTEXTWhich pillar absorbs a gap at this layer
+statusstack_status_tNNCONFIRMED · INFERRED · CLAIMED · ABSENT. Required — the landscape strip recomputes its four counts from this column.
+evidence_levelevidence_level_tL1–L4. Governs the verb the prose may use.
+detection_basisTEXTPRINTED on the detail page — a bare status invites certainty
+linked_subcap_idsTEXT[]The cells this item touches
+is_primary_gapBOOLEANMarks the primary gap layer
+…plus the nine universal columns
+The landscape strip's four counts are recomputed from this register at read time rather than stored, so two code paths cannot produce two numbers.
+
+Section 07
+
+# Control and audit
+
+7 tables that make a defect traceable after the fact rather than mysterious.
+
+gate_registry
+Every gate, its family, its threshold and its behaviour
+
+gate_idTEXTPKPrefixed by family. The prefix is part of the id.
+familygate_family_tanalytical · safeguard · enrichment · corpus
+nameTEXT
+plain_labelTEXTREQUIRED for safeguard gates: a human sentence, 8–18 words. A client reading a bare code learns nothing.
+what_it_checksTEXT
+why_it_existsTEXT
+threshold_kindTEXTper_client_rate · absolute · boolean
+threshold_valueNUMERICRates, not counts — a fixed count fails on arithmetic as the corpus grows
+on_failureTEXTblock · disclose · trigger · fail_build
+is_client_visibleBOOLEANTRUE only for the safeguard family
+
+Two different things share the safeguard-gates section
+The assessment applies caps — cap-log rows, uncertainty bands, QA holds, analyst overrides. The submission runs SG gates and produces pass, fail or not-run. Both render on the Health tab and both promote through heatmap.safeguard_gates, but they are stored separately because only one of them has a result.
+
+assessment_caps
+What the ASSESSMENT capped — promoted contentSERVING
+
+idBIGSERIALPK
+cap_idTEXTFrom the workbook's own cap log
+kindcap_kind_tcap · uncertainty_band · qa_hold · analyst_override
+ceilingTEXTThe level the cap imposes
+affected_categoriesTEXT[]
+rationaleTEXTThe stated reason. Never composed to explain a low score.
+…plus the nine universal columns
+
+gate_results
+The SG family results — per run, per gate, including not-run
+
+idBIGSERIALPK
+run_idUUIDFK
+gate_idTEXTFK
+resultgate_result_tPASS · FAIL · NOT_RUN. Never default to PASS.
+not_run_reasonTEXTREQUIRED when result is NOT_RUN
+detailJSONBThe measurement, so a client-visible gate can state a number
+evaluated_atTIMESTAMPTZ
+
+A gate that reports pass because it did not run is worse than one that reports fail
+Hence the third state, and hence the reason being required rather than optional. A failing safeguard gate is recorded and disclosed; it does not block promotion. The assessment ships with its weakness stated.
+
+gate_threshold_history
+Every threshold change, with its reason
+
+idBIGSERIALPK
+gate_idTEXTFK
+changed_fromNUMERIC
+changed_toNUMERICFor corpus gates, never greater than changed_from. Enforced in CI.
+reasonTEXTREQUIRED. A ceiling moved without a recorded reason is one nobody trusts.
+measured_at_n_clientsINTEGERThe corpus size the measurement was taken at
+changed_atTIMESTAMPTZ
+changed_byTEXT
+
+identity_quarantine
+Every figure that failed the identity gate
+
+idBIGSERIALPK
+run_idUUIDFK
+entity_idUUIDFK
+surface_idTEXTWhich of the 38 surfaces it would have appeared on
+field_pathTEXTThe JSON path within the section
+attempted_valueTEXTKept for diagnosis. NEVER rendered.
+failed_assertionTEXTlegal_name · regulator · footprint · source_domain · magnitude
+quarantine_reasonTEXTRendered as the provenance note beside the dash
+occurred_atTIMESTAMPTZ
+This table answers a question no other table can: which surfaces are incomplete because we refused to guess. An empty field with a quarantine row is a different thing from an empty field with none.
+
+evidence_dedup_audit
+Which branch fired, per registration
+
+idBIGSERIALPK
+e_idTEXTFK
+content_hashTEXT
+branchdedup_branch_tkept · dedup_same_entity · cross_entity_kept · duplicate_within_run · tier_upgrade
+matched_e_idTEXTThe existing row, where one was matched
+occurred_atTIMESTAMPTZ
+
+evidence_run_links
+Which runs an id appeared in, and on which surfaces
+
+e_idTEXTFK
+run_idUUIDFK
+surface_idsTEXT[]Powers the seen-in-N-runs chip and longitudinal continuity
+PRIMARY KEY(e_id, run_id)PK
+Plus audit_log, recording every state-changing operation with actor, action, target and before-and-after — including promotions, claim acquisitions and threshold changes.
+
+## Workflow tables — the two API write exceptions
+
+annotations
+A user's own note. Never content.
+
+idBIGSERIALPK
+user_idUUIDFK
+entity_idUUIDFK
+run_idUUIDFK
+anchor_kindTEXTinsight_card · finding · cell · recommendation · issue
+anchor_idTEXT
+bodyTEXT
+created_atTIMESTAMPTZ
+Joined at read time and rendered as an annotation marker. It never presents as synthesis output, and it never reaches a serving table.
+
+Section 08
+
+# Catalogue
+
+21 tables. Every row keyed on its version, so a bump adds rows rather than mutating them.
+
+ccg_versions
+Which catalogue a run was scored against
+
+versionTEXTPK
+loaded_atTIMESTAMPTZ
+cell_countINTEGER851 in the current version
+category_countINTEGER17
+is_currentBOOLEANExactly one TRUE. New runs pin to it; existing runs keep theirs.
+
+ccg_subcaps
+The cells
+
+subcap_idTEXTPKComposite with version
+versionTEXTPKPart of the key — a cell is only meaningful within a version
+capability_idTEXTGrain level 3
+category_idTEXTGrain level 2
+pillar_idTEXTGrain level 1
+nameTEXTThe CANONICAL name. Resolve through here; never copy a name from report prose.
+weightNUMERIC(5,4)
+l3_platform_areasTEXT[]
+l4_featuresTEXT[]
+
+ccg_aliases
+The bridge across version bumps
+
+from_subcap_idTEXTPK
+from_versionTEXTPK
+to_subcap_idTEXT
+to_versionTEXT
+reasonTEXTrenamed · split · merged · retired
+
+Why the alias bridge is necessary
+Every id resolution is pinned to the run's catalogue version. Without a bridge, a renamed cell silently stops resolving after a bump and its drilldown becomes a dead control — which looks like an evidence gap and is diagnosed as one. With a bridge, a renamed cell resolves and the rename is visible.
+
+ccg_value_chains
+The value-chain view's arrangement
+
+chain_idTEXTPK
+versionTEXTPK
+sub_verticalTEXTChains differ by sub-vertical
+nameTEXT
+stage_orderSMALLINTOrder is meaning
+With ccg_vc_mapping joining chain stages to cells, this is what lets the heatmap arrange the same scores along the institution's value chain rather than the catalogue's taxonomy.
+
+## The remaining catalogue tables
+
+All keyed on identifier and version: ccg_l3_platforms · ccg_l4_features · ccg_maturity_descriptors · ccg_agents · ccg_constructs · ccg_products · ccg_offerings · ccg_data_products · ccg_offering_subcap_matrix · ccg_dataproduct_subcap_matrix · ccg_user_stories · ccg_cross_pillar_stories · ccg_theme_subcap_mapping · ccg_subcap_completeness · ccg_toggle_cascade · ccg_vc_mapping · ccg_qa_gates.
+
+The toggle cascade is what makes scored cells differ from catalogue cells. An institution that cannot legally operate a given channel has the cells covering it toggled out of its runs. Capping such an entity for “lacking” that channel is a category error — and the cascade is where the system encodes that, rather than leaving it to the analyst to remember.
+
+## Catalogue volume
+
+Pillar | Name | Cells | Share
+
+P1 | Strategy & Governance | 205 | 24.1%
+
+P2 | Customer Experience | 292 | 34.3%
+
+P3 | Operations | 164 | 19.3%
+
+P4 | Data & Technology | 190 | 22.3%
+
+Total  | 17 categories  | 851 | 100.0%
+
+Section 09
+
+# Constraints, generated columns and indexes
+
+## Everything derivable is generated
+
+A value the database can derive should not be writable, because two writers of one truth eventually disagree.
+
+Column | Derived from | The defect it prevents
+
+evidence_index.age_months | published_date, reference_date | An age rendering as uncomputable
+
+evidence_index.recency_band | age_months at the four boundaries | Two band vocabularies over the same boundaries
+
+heatmap_evidence_age.status | band only | A status of fresh asserted over an uncomputable age
+
+evidence_index.source_domain | source_url | The cheapest identity check being skipped because nobody extracted the domain
+
+evidence_index.content_hash | url, claim_type, normalised excerpt | One annual report registered six times as six rows
+
+subcap_scores.delta | score, peer_median | A delta restated from the source rather than computed
+
+subcap_scores.is_thin_evidence | linked evidence count | A thin cell reading as complete
+
+overview_scores.band | composite | Two colour paths producing two palettes for one score
+
+heatmap_cohort_patterns.share_pct | affected_count, cohort_size | An asserted share drifting from its own numerator
+
+heatmap_cohort_patterns.below_threshold | share_pct, threshold_pct | A sub-threshold row displayed under a header declaring the threshold
+
+## The band domain is four values, not five
+
+```
+-- The resolver has four branches. Anything at or above 4.0 returns
+-- Differentiating, so a fifth enum value would be unreachable and would
+-- let a writer emit a band no renderer produces.
+CREATE TYPE band_t AS ENUM
+  ('Activating','Building','Competing','Differentiating');
+
+-- Generated from the RAW score, before display rounding. 2.97 displays
+-- as 3.0 and bands as Building; the two diverge at the boundary and the
+-- band must follow the raw value.
+ALTER TABLE overview_scores ADD COLUMN band band_t
+  GENERATED ALWAYS AS (
+    CASE WHEN composite IS NULL THEN NULL
+         WHEN composite < 2.0   THEN 'Activating'
+         WHEN composite < 3.0   THEN 'Building'
+         WHEN composite < 4.0   THEN 'Competing'
+         ELSE 'Differentiating' END) STORED;
+```
+
+One rule, two implementations, asserted equal
+The database generates the band and the frontend resolver renders the colour. Two implementations of one rule is exactly the shape that produced a directory rendering every score in brand teal, so a test asserts they agree for every score in a fixture run rather than trusting that both were written from the same table.
+
+## Check constraints that encode contract rules
+
+```
+-- The rank score cannot fall below the floor of its own scale.
+ALTER TABLE evidence_index
+  ADD CONSTRAINT ers_bounded CHECK (ers IS NULL OR ers BETWEEN 1.0 AND 5.0);
+
+-- Five tiers, not eight. A typed domain prevents the collision.
+CREATE TYPE tier_t AS ENUM ('T1','T2','T3','T4','T5');
+
+-- A cohort pattern below five entities is not published.
+ALTER TABLE heatmap_cohort_patterns
+  ADD CONSTRAINT cohort_min CHECK (cohort_size >= 5);
+
+-- NOT_RUN must state why. A silent NOT_RUN is a PASS in disguise.
+ALTER TABLE gate_results
+  ADD CONSTRAINT not_run_needs_reason
+  CHECK (result <> 'NOT_RUN' OR not_run_reason IS NOT NULL);
+
+-- Exactly one active run per entity, one live submission per page.
+CREATE UNIQUE INDEX runs_active_uq ON runs (entity_id) WHERE is_active;
+CREATE UNIQUE INDEX submissions_live_uq ON submissions (run_id, page)
+  WHERE superseded_at IS NULL;
+
+-- Every promoted row is attributable. This is the invariant that
+-- detects a write which bypassed a promotion. Applied to all
+-- serving tables.
+ALTER TABLE <serving_table>
+  ALTER COLUMN producer_version SET NOT NULL,
+  ALTER COLUMN promoted_at      SET NOT NULL;
+```
+
+## Indexes
+
+Index | Serves
+
+entities (display_id) unique | Every page request resolves the slug first
+
+runs (entity_id) WHERE is_active unique | The active-run lookup, and the invariant
+
+<serving> (run_id) on every serving table | The page query selects by run. This is the hot path.
+
+subcap_scores (run_id, subcap_id) unique | Grain resolution and the cell lookup
+
+subcap_scores (run_id, category_id) | Heatmap grain transitions
+
+evidence_subcap_links (subcap_id, run_id) | The synthesis drawer's evidence list
+
+evidence_index (entity_id, content_hash) unique | Registration dedup, scoped to the entity
+
+evidence_index (source_domain) | The identity check and the age tracker
+
+heatmap_alerts (entity_id, status, created_at DESC) | Cursor pagination on the corpus-wide queue
+
+ccg_subcaps (version, category_id) | Catalogue resolution and grain drilling
+
+submission_verdicts (submission_id) | Verdict re-read
+
+One index deliberately absent. There is no user-facing full-text or vector index on evidence excerpts. The embedding tier exists solely for the build-time grounding check, and adding a query surface over it would reintroduce a request-time model dependency the architecture removes on purpose. If semantic search arrives, it arrives as a decision, not as a side effect of an index someone added.
+
+## Enumerated types
+
+user_role_t · entity_status_t · run_status_t · page_t · submission_status_t · provenance_t · evidence_origin_t · tier_t · claim_t · recency_t · age_band_t · age_status_t · evidence_level_t · confidence_t · peer_basis_t · posture_t · basis_t · stack_layer_t · stack_status_t · alert_action_t · band_t · cap_kind_t · scope_t · gate_family_t · gate_result_t · dedup_branch_t.
+
+Enumerated types rather than text with a check, because the vocabulary collisions this system is designed against are exactly the kind a typed domain prevents. Adding a value is a migration, which is the right amount of friction for a vocabulary that must not fragment.
+
+Section 10
+
+# Query patterns and QA
+
+## The page query
+
+```
+-- One resolution, then one select per section, issued concurrently.
+-- No joins across sections: each is independently promoted and
+-- independently absent.
+
+WITH active AS (
+  SELECT r.id AS run_id, r.entity_id, r.scored_cells, r.catalogue_cells,
+         r.ccg_catalog_version, r.promoted_at, r.composite
+    FROM runs r
+    JOIN entities e ON e.id = r.entity_id
+   WHERE e.display_id = :display_id AND r.is_active
+)
+SELECT * FROM overview_scores        WHERE run_id = (SELECT run_id FROM active);
+SELECT * FROM overview_firmographics WHERE run_id = (SELECT run_id FROM active);
+-- … ten more for the Overview page
+```
+
+Concurrent single-table selects on an indexed key outperform one wide join and — more importantly — a section that failed to promote returns no row rather than nulling columns the serialiser then has to distinguish from a legitimately empty section.
+
+## The evidence drawer
+
+```
+SELECT ei.*,
+       -- bidirectional: the drawer renders chips that jump to the
+       -- other cells this item backs, so a wrong link is visible
+       -- from two directions
+       array_agg(esl.subcap_id) AS supports_subcap_ids,
+       (SELECT count(*) FROM evidence_run_links erl
+         WHERE erl.e_id = ei.e_id) AS seen_in_runs
+  FROM evidence_index ei
+  LEFT JOIN evidence_subcap_links esl
+         ON esl.e_id = ei.e_id AND esl.run_id = :run_id
+ WHERE ei.e_id = :e_id
+   AND ei.entity_id = :entity_id      ← the serving-side filter
+ GROUP BY ei.e_id;
+```
+
+The entity predicate is load-bearing
+Evidence dedup deliberately allows a cross-entity keep, because the same public document can legitimately be evidence for two institutions. That makes the serving-side filter the thing that stops one client's drawer opening another's row. It is not defensive coding; it is the mechanism.
+
+## Coverage — over the run's own denominator
+
+```
+SELECT s.pillar_id,
+       count(*)                                    AS cells_total,
+       count(*) FILTER (WHERE s.linked > 0)        AS cells_covered,
+       round(100.0 * count(*) FILTER (WHERE s.linked > 0)
+                   / nullif(count(*), 0), 1)       AS pct
+  FROM (
+    SELECT sc.subcap_id, sc.pillar_id,
+           (SELECT count(*) FROM evidence_subcap_links l
+             JOIN evidence_index ei ON ei.e_id = l.e_id
+            WHERE l.subcap_id = sc.subcap_id
+              AND l.run_id    = sc.run_id
+              AND ei.identity_ok) AS linked
+      FROM subcap_scores sc WHERE sc.run_id = :run_id
+  ) s
+ GROUP BY s.pillar_id;
+```
+
+Three things this encodes. Coverage counts linked evidence only — an item resolving to no cell counts nowhere. An item failing the identity check counts nowhere either. And the denominator is the run's own scored cells, over the same cell set the heatmap serves, because a coverage figure computed over a different denominator is a contradiction a reader can find by counting.
+
+## Three patterns that must not be used
+
+Anti-pattern | Why
+
+Reading a staging table to render anything | The boundary. Prevented by grant, but worth stating.
+
+Recomputing a score, delta, share, band or age in the API | Two writers of one truth. Every one is either promoted or generated.
+
+Two queries for a count and its rows | A header and its KPI counts from different queries will eventually disagree.
+
+## Requirement alignment
+
+Requirement | Satisfied by
+
+The API reads serving tables only | The API role holds no grant on staging — §03
+
+One serving table per section | 34 sections → 34 tables, reconciled by test — §02, §06
+
+Every serving row carries its provenance | The nine universal columns, two of them not-null — §06
+
+Promotion is atomic across all 6 pages | One transaction; a pass asserted per page before any write — §05
+
+Resubmission supersedes, never merges | Partial unique index on live submissions — §05
+
+The rank score is bounded | Check constraint — §09
+
+A derived value is computed or null | Ten stored generated columns — §09
+
+Status follows band follows age follows a real date | Three chained generated columns — §06
+
+One tier ladder, one recency vocabulary | Typed enumerations, generated from age — §04, §09
+
+Grain is checkable | subcap_scores.source_cell, persisted at parse — §04
+
+Every figure passes the identity gate | identity_quarantine, plus identity_ok excluding items from coverage — §04, §07
+
+Internal rungs marked in the payload | internal_only on every serving row — §06
+
+Cohort patterns emit counts and shares only | entity_ids always in internal-only; asserted by test — §06
+
+A corpus ceiling only ever moves down | gate_threshold_history, enforced in CI — §07
+
+Safeguard gates disclose, including not-run | Typed result with a required reason — §07
+
+Catalogue version pins every resolution | Composite keys on identifier and version; the alias bridge — §08
+
+Evidence dedup is idempotent by content | Generated content hash plus a unique index scoped to the entity — §04, §09
+
+Two cell counts, kept apart | scored_cells and catalogue_cells, both on the run — §04
+
+Four heatmap grain levels | Pillar, category, capability and sub-capability ids on every score row — §04
+
+The value-chain view | ccg_value_chains and ccg_vc_mapping — §08
+
+A reasoning verdict is recorded, not assumed | r_layer JSONB on every serving row — §06
+
+An absence carries the ladder that produced it | empty_state.sources_searched[] — §06
+
+A page carries its own thread | narrative_thread on the page lead section — §06
+
+Four bands, generated from the raw score | band_t and the generated column — §09
+
+Enrichment is evidence, tiered by its source | evidence_index.origin = 'connector' — §04
+
+## Schema QA checklist
+
+- All 89 tables created; the count matches the enumeration in §02.
+- All 33 dedicated serving tables carry the nine universal columns.
+- Producer version and promotion time are not-null on every serving table.
+- The API role returns a permission error on any staging select.
+- Every generated column is stored, not virtual — the read path must not recompute.
+- Both partial unique indexes hold under concurrent load.
+- A promote with one page missing writes nothing and returns the missing page.
+- An out-of-range rank score is rejected at insert.
+- A null published date yields a null age, an unverified band and an undated status.
+- The section registry, writer registry, serving-table list and surface register reconcile.
+
+Section 11
+
+# User state and lineage
+
+Four workflow tables hold everything that belongs to a person rather than to a run. Nothing here is content, and nothing here reaches a serving table.
+
+user_workspace
+Per user, per entity — what they were last doing
+
+user_idUUIDPK→ users.id
+entity_idUUIDPK→ entities.id
+last_run_idUUIDFKThe run this user was last reading. Defaults the URL pin.
+last_tabTEXTWhich dashboard they were on
+audience_prefTEXTinternal or customer, remembered per entity
+kpi_strip_configJSONBThe heatmap KPI strip is user-configurable; this is view preference, not content
+insight_groupingTEXTpriority · pillar · theme
+updated_atTIMESTAMPTZ
+
+saved_searches
+Prospecting queries a user wants back
+
+idBIGSERIALPK
+user_idUUIDFK
+nameTEXT
+queryJSONBThe full filter set, so the result is reproducible
+created_atTIMESTAMPTZ
+
+alert_actions
+Alert lifecycle — workflow state, not assessment content
+
+idBIGSERIALPK
+alert_idBIGINTFK→ heatmap_alerts.id
+user_idUUIDFK
+actionalert_action_tacknowledged · assigned · waived · resolved · reopened
+rationaleTEXTREQUIRED on waive. A waiver without a reason is indistinguishable from neglect.
+run_idUUIDFKWhich run the action was taken against
+occurred_atTIMESTAMPTZ
+
+Actions are attached to the run they were taken against
+An annotation or an alert disposition records its run_id. When a rerun supersedes that run the action does not migrate — it stays visible in that run's history. A cell that reopens in a later run produces a new alert row, and the reopening is itself a signal: the closure condition did not hold.
+
+## Run lineage queries
+
+```
+-- The active run for an entity. One row, by partial unique index.
+SELECT * FROM runs WHERE entity_id = :e AND is_active;
+
+-- Full lineage, newest first, for the run-history surface.
+SELECT id, run_seq, request_id, ccg_catalog_version, composite,
+       scored_cells, completed_at, promoted_at, status
+  FROM runs WHERE entity_id = :e ORDER BY run_seq DESC;
+
+-- Can these two runs be compared cell-by-cell?
+SELECT a.ccg_catalog_version = b.ccg_catalog_version AS direct
+  FROM runs a, runs b WHERE a.id = :run_a AND b.id = :run_b;
+
+-- If not, resolve each cell through the bridge. An unbridgeable cell
+-- is NOT_COMPARABLE, never a null that renders as a drop to zero.
+SELECT s.subcap_id, al.to_subcap_id, al.reason
+  FROM subcap_scores s
+  LEFT JOIN ccg_aliases al
+         ON al.from_subcap_id = s.subcap_id
+        AND al.from_version   = :ver_a
+        AND al.to_version     = :ver_b
+ WHERE s.run_id = :run_a;
+```
+
+## Retention of promoted staging rows
+
+Promotion retains its inputs
+Staging rows are marked promoted rather than deleted. That is what makes a single-page fix possible: a session re-claims a promoted run, resubmits one page, and promotion asserts a pass on every page — five from the retained rows, one from the new submission — then rewrites every serving table in one transaction. If promotion cleared its inputs, fixing one card would require re-synthesising every page.
+
+## What each event does to state
+
+Event | Serving | Staging | Workflow
+
+Ingest a new run | untouched | none yet | untouched
+
+Submit a page | untouched | one row supersedes | untouched
+
+Promote | all sections rewritten | marked promoted, retained | untouched
+
+Re-promote after a one-page fix | all sections rewritten | one row superseded, rest reused | untouched
+
+Supersede by a newer run | the old run's rows remain, queryable | retained | stays attached to its own run
+
+Catalogue bump | untouched | untouched | untouched
+
+Contract bump | untouched | changed sections invalidated if unpromoted | untouched
+
+Section 12
+
+# Vector tier
+
+Two tables, one index, one job: the V4 grounding check at submit. Nothing here is read by the serving path, and no vector is ever promoted.
+
+Why a vector column lives in this schema at all
+Text can satisfy every identifier check — cited ids that exist, belong to this entity and appear in the bundle — and still assert something the sources do not support. V4 asks whether the output is about the bundle. It runs inside the connector at submit, on a local deterministic embedding model, and the request path never touches it.
+
+bundle_embeddings
+The ingested corpus, chunked and embedded at ingestINGESTED
+
+idBIGSERIALPK
+run_idUUIDFK→ runs.id ON DELETE CASCADE. Embeddings die with their run.
+scope_kindscope_tcell · category · pillar · run
+scope_idTEXTP4C1.2.1 · P4C1 · P4 · NULL for run scope
+source_kindTEXTevidence · report_section · score_rationale
+source_refTEXTThe e_id or section id — traceability back to a real row
+chunk_indexSMALLINTSentence-window chunking, 60–120 tokens, 20% overlap
+contentTEXTRetained, so a flagged field can be told what it matched
+embeddingvector(384)NNL2-normalised at write, so cosine becomes a dot product
+embedding_modelTEXTNNPinned. A mixed-model index returns plausible nonsense.
+created_atTIMESTAMPTZ
+
+bundle_centroids
+One centroid per scope, per runINGESTED
+
+run_idUUIDPK→ runs.id
+scope_kindscope_tPK
+scope_idTEXTPK
+centroidvector(384)NNMean of the normalised members, renormalised
+member_nINTEGERNNBelow five the check abstains — a centroid of two is noise
+thresholdREALNNPer scope. Tightens as the scope narrows.
+
+## The index
+
+```
+-- HNSW, not IVFFlat. IVFFlat needs a training pass over a representative
+-- sample and degrades as rows are inserted after training — and this table
+-- grows one run at a time, indefinitely. HNSW is incremental and needs no
+-- training, at the cost of a larger index and a slower build. The build
+-- is created once at migration; the graph then grows incrementally as
+-- each run's vectors are inserted at ingest, off the critical path.
+CREATE INDEX bundle_emb_hnsw ON bundle_embeddings
+  USING hnsw (embedding vector_cosine_ops)
+  WITH (m = 16, ef_construction = 64);
+
+-- Every probe is run-scoped. This filter runs first, so the ANN search
+-- happens over a few thousand rows rather than the whole corpus.
+CREATE INDEX bundle_emb_run
+  ON bundle_embeddings (run_id, scope_kind, scope_id);
+
+-- Dimension guard. pgvector will not compare vectors of differing width,
+-- but this fails at INSERT with a readable message rather than at query.
+ALTER TABLE bundle_embeddings
+  ADD CONSTRAINT emb_dim_384 CHECK (vector_dims(embedding) = 384);
+```
+
+## The check, in SQL
+
+```
+-- Similarity of a submitted field against its scope centroid.
+-- <=> is cosine DISTANCE, so similarity is 1 minus it.
+SELECT 1 - (c.centroid <=> :q) AS similarity, c.threshold, c.member_n
+  FROM bundle_centroids c
+ WHERE c.run_id = :run AND c.scope_kind = :scope
+   AND c.scope_id IS NOT DISTINCT FROM :scope_id;
+
+-- On a flag: what IS this text closest to? A bare number is not
+-- actionable; three nearest chunks tell the agent what it drifted toward.
+SET LOCAL hnsw.ef_search = 100;
+SELECT source_kind, source_ref, left(content, 240) AS snippet,
+       1 - (embedding <=> :q) AS similarity
+  FROM bundle_embeddings
+ WHERE run_id = :run AND scope_kind = :scope
+   AND scope_id IS NOT DISTINCT FROM :scope_id
+ ORDER BY embedding <=> :q
+ LIMIT 3;
+```
+
+Scope | Threshold | Applies to
+
+cell | 0.62 | A cell synthesis, which should be tightly about its own evidence
+
+category | 0.58 | Focus areas and cell-group claims
+
+pillar | 0.55 | Platform claims and pillar-level findings
+
+run | 0.50 | The executive summary and framing sentence — legitimately synthetic
+
+Thresholds tighten as the scope narrows, because a claim about one cell has less licence to roam than a document-level summary. They move like any other gate ceiling: only upward, and never loosened to make a submission pass.
+
+Abstention is recorded, not silent. If the embedding tier is unavailable, if no centroid exists for the applicable scope, or if member_n is below five, V4 writes a NOT_RUN gate result with its reason. A gate that reports pass because it did not run is worse than one that reports fail.
+
+## Why pgvector and not a separate store
+
+Every query is run-scoped and joins back to relational rows — the evidence id, the source reference, the run. A dedicated vector database would mean a second system to keep consistent with the ingested tier, a second place a run can be half-deleted, and a network hop on the submit path. At roughly 4 to 7 million vectors and 10 to 20 GB across a 300-entity corpus, the scale does not demand it and the consistency cost is real.
+
+Revisit past roughly 50M vectors, or if user-facing semantic search returns — and the second is a product decision, not an infrastructure one.
+
+Section 13
+
+# Transactions and concurrency
+
+One long transaction, two partial unique indexes and an advisory lock carry the whole concurrency model. Isolation stays at read committed because atomicity, not serialisability, is what this design needs.
+
+## Why read committed is sufficient
+
+The failure serialisable isolation protects against is a read that interleaves with a write and sees an inconsistent mixture. Here the only write that touches serving data is the promote, and it is one transaction across every table — so a concurrent reader sees the entire previous run or the entire new one, never a mixture. Raising the isolation level would add serialisation failures and retry logic to buy a guarantee already held.
+
+## The promote transaction
+
+```
+BEGIN;  -- read committed
+
+  -- 1. Serialise promotes of THIS run at the database, not only at the
+  --    Redis lease. The lease is advisory and can expire mid-transaction;
+  --    this cannot.
+  SELECT id FROM runs WHERE id = :run FOR UPDATE;
+
+  -- 2. Assert a PASS on every page. Otherwise 409, having written nothing.
+  SELECT page FROM submissions
+   WHERE run_id = :run AND superseded_at IS NULL AND status = 'PASS';
+
+  -- 3. Deactivate the previous active run for this entity. A concurrent
+  --    promote of a DIFFERENT run of the same entity violates the partial
+  --    unique index and rolls back — which is the correct outcome.
+  UPDATE runs SET is_active = FALSE, status = 'SUPERSEDED'
+   WHERE entity_id = :entity AND is_active;
+
+  -- 4. Run WRITERS[section] for each of the 34 sections: delete-then-insert
+  --    per serving table, scoped to run_id.
+  -- 5. Stamp promoted_at, producer_version and provenance on every row.
+  -- 6. Mark the staging rows promoted — RETAINED, so a one-page fix can
+  --    re-promote without re-synthesising the other five.
+
+  UPDATE runs SET is_active = TRUE, status = 'PROMOTED', promoted_at = now()
+   WHERE id = :run;
+
+COMMIT;
+
+-- AFTER commit, never inside: REFRESH ... CONCURRENTLY cannot run in a
+-- transaction block, and it must not hold the promote open.
+REFRESH MATERIALIZED VIEW CONCURRENTLY corpus_rollup;
+```
+
+## Lock inventory
+
+Lock | Held by | Prevents
+
+SELECT … FOR UPDATE on the run row | promote, for its duration | Two promotes of one run interleaving their writers
+
+Partial unique on runs (entity_id) WHERE is_active | the index | Two active runs for one entity, however they arrive
+
+Partial unique on submissions (run_id, page) WHERE superseded_at IS NULL | the index | Two live submissions for one page
+
+Redis claim lease, with expiry | the synthesis session | Two Cowork sessions on one run. Advisory — expires so a dead session cannot block a run for ever
+
+Row locks from delete-then-insert | promote, per serving table | Nothing a reader notices — readers take no locks under MVCC
+
+Two layers, deliberately
+The Redis lease is the ergonomic guard: it gives a second session a clean refusal rather than a database error. The row lock is the correctness guard: it holds even when the lease has expired mid-transaction. Neither alone is enough — the lease can lapse, and the row lock gives an unhelpful message.
+
+## Lock ordering, and the deadlock that would otherwise happen
+
+The promote touches 34 tables. Two promotes for different entities acquiring those tables in different orders would deadlock. The writer registry is therefore an ordered list, not a mapping, and every promote walks it in the same order.
+
+```
+# WRITERS is a list, and the order is load-bearing rather than cosmetic.
+# A test asserts it is stable across imports, because a dict comprehension
+# somewhere upstream reordering it would produce an intermittent deadlock
+# that only appears under concurrent promotion.
+WRITERS: list[tuple[str, Writer]] = [
+    ("overview.scores",        write_overview_scores),
+    ("overview.firmographics", write_overview_firmographics),
+    ...                                  # 34 entries, fixed order
+]
+```
+
+## What a reader sees during a promote
+
+Moment | The reader sees
+
+Before COMMIT | The entire previous run. The transaction is invisible.
+
+At COMMIT | The entire new run, atomically.
+
+Mid-writer failure | The entire previous run. Rollback leaves nothing behind.
+
+Holding a pinned run id | The run they pinned, active or not, until they choose to move.
+
+Between commit and the rollup refresh | Fresh page content beside a directory count up to a few seconds old — the one acceptable staleness window, and why the rollup carries no per-section figures.
+
+## Retry policy
+
+Failure | Retry | Because
+
+Deadlock detected | Yes, up to 3 | Should not occur given ordered writers, but a retry is cheap and the alternative is a failed promote
+
+Unique violation on the active-run index | No | Another run of this entity promoted first. Re-resolve rather than retry — retrying would deactivate their work
+
+Lock timeout on the run row | Yes, with backoff | Another promote of the same run is in flight and will finish
+
+Statement timeout mid-writer | No | A writer exceeding 300 seconds is a bug, not contention. Fail loudly.

@@ -1,0 +1,421 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DMA Run Manifest Schema",
+  "description": "Standardized metadata and version information for a completed DMA assessment. Produced by Layer 1 (DMA Assessment Skill) and consumed by Layer 2 (DMA Governance). HYBRID v2.0: Merges assessment skill nested structure with governance-specific audit fields.",
+  "type": "object",
+  "required": [
+    "$schema",
+    "run_id",
+    "institution",
+    "assessment",
+    "versions",
+    "scores",
+    "evidence_metrics",
+    "scoring_metrics",
+    "confidence_distribution",
+    "qa",
+    "files_generated"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "run_manifest_v2",
+      "description": "Schema version identifier"
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Unique assessment identifier. Format: DMA-[INST_CODE]-[YYYYMMDD]-[SEQ]",
+      "pattern": "^DMA-[A-Z0-9]{2,6}-[0-9]{8}-[0-9]{4}$",
+      "examples": ["DMA-OZK-20240115-0001", "DMA-NFCU-20250301-0001"]
+    },
+    "institution": {
+      "type": "object",
+      "description": "Assessed institution identity",
+      "required": ["name", "id", "sub_vertical", "size_tier", "primary_regulator", "geography"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full legal name of assessed institution",
+          "minLength": 1,
+          "maxLength": 255,
+          "examples": ["OZK Bank", "Navy Federal Credit Union"]
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier (NCUA charter#, OCC charter#, or assigned)",
+          "minLength": 1,
+          "maxLength": 50,
+          "examples": ["NCUA-1234567", "OCC-0029374"]
+        },
+        "sub_vertical": {
+          "type": "string",
+          "enum": [
+            "Credit Unions",
+            "Regional Banks",
+            "Commercial Lending",
+            "CIB",
+            "Insurance Carriers",
+            "Insurance Brokerages",
+            "Wealth Managers / RIAs",
+            "Asset Management"
+          ],
+          "description": "Financial services sub-vertical. Values match assessment skill pillar weight table."
+        },
+        "size_tier": {
+          "type": "string",
+          "enum": ["Mega", "Large", "Medium", "Small", "Micro", "Nano"],
+          "description": "Institution asset size classification. Mega (>$50B), Large ($10B-$50B), Medium ($2B-$10B), Small ($500M-$2B), Micro ($100M-$500M), Nano (<$100M)."
+        },
+        "primary_regulator": {
+          "type": "string",
+          "description": "Primary regulatory body (e.g., NCUA, OCC, FDIC, Federal Reserve)",
+          "examples": ["NCUA", "OCC", "FDIC", "Federal Reserve"]
+        },
+        "geography": {
+          "type": "string",
+          "description": "HQ state/region",
+          "examples": ["Virginia", "Southeast US"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "assessment": {
+      "type": "object",
+      "description": "Assessment execution metadata",
+      "required": ["date", "evidence_mode", "assessor", "tool_version", "status"],
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Assessment completion date (ISO-8601 YYYY-MM-DD)",
+          "examples": ["2025-01-15"]
+        },
+        "evidence_mode": {
+          "type": "string",
+          "enum": ["PUBLIC", "INTERNAL", "HYBRID"],
+          "description": "Whether assessment used public, internal, or both evidence types"
+        },
+        "assessor": {
+          "type": "string",
+          "description": "Name or ID of the person/agent that ran the assessment",
+          "examples": ["Jane Smith", "claude-agent-001"]
+        },
+        "tool_version": {
+          "type": "string",
+          "description": "Claude model + skill version",
+          "examples": ["claude-opus-4-20250514 + DMA v5.0"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["IN_PROGRESS", "SCORING_COMPLETE", "REPORT_DRAFT", "AWAITING_REVIEW", "DELIVERED"],
+          "description": "Current phase of assessment lifecycle"
+        }
+      },
+      "additionalProperties": false
+    },
+    "versions": {
+      "type": "object",
+      "description": "Version tracking for all methodology components",
+      "required": ["rubric", "taxonomy", "template", "peer_methodology"],
+      "properties": {
+        "rubric": {
+          "type": "string",
+          "description": "Scoring methodology version",
+          "pattern": "^[0-9]+\\.[0-9]+$",
+          "examples": ["5.0"]
+        },
+        "taxonomy": {
+          "type": "string",
+          "description": "Capability taxonomy version",
+          "examples": ["5.0"]
+        },
+        "template": {
+          "type": "string",
+          "description": "Report template version",
+          "examples": ["5.0"]
+        },
+        "peer_methodology": {
+          "type": "string",
+          "description": "Peer benchmarking methodology version",
+          "examples": ["5.0"]
+        },
+        "governance_skill": {
+          "type": ["string", "null"],
+          "description": "Governance skill version (e.g., '2.1') or null if not yet audited",
+          "examples": ["2.1", null]
+        }
+      },
+      "additionalProperties": false
+    },
+    "scores": {
+      "type": "object",
+      "description": "Assessment scores at all aggregation levels",
+      "required": ["overall", "pillars", "categories"],
+      "properties": {
+        "overall": {
+          "type": "number",
+          "description": "Overall DMA maturity score (weighted average of pillars)",
+          "minimum": 1.0,
+          "maximum": 5.0,
+          "examples": [2.8, 3.5]
+        },
+        "pillars": {
+          "type": "object",
+          "description": "Pillar-level scores",
+          "required": ["P1", "P2", "P3", "P4"],
+          "properties": {
+            "P1": {
+              "type": "number", "minimum": 1.0, "maximum": 5.0,
+              "description": "Pillar 1: Strategy, Governance & Culture"
+            },
+            "P2": {
+              "type": "number", "minimum": 1.0, "maximum": 5.0,
+              "description": "Pillar 2: Member/Customer Experience"
+            },
+            "P3": {
+              "type": "number", "minimum": 1.0, "maximum": 5.0,
+              "description": "Pillar 3: Operations, Risk & Compliance"
+            },
+            "P4": {
+              "type": "number", "minimum": 1.0, "maximum": 5.0,
+              "description": "Pillar 4: Data, Analytics & Technology"
+            }
+          },
+          "additionalProperties": false
+        },
+        "categories": {
+          "type": "object",
+          "description": "Category-level scores (all 16 categories in v7.0)",
+          "required": ["P1C1","P1C2","P1C3","P1C4","P1C5","P2C1","P2C2","P2C3","P2C4","P3C1","P3C2","P3C3","P3C4","P4C1","P4C2","P4C3","P4C4"],
+          "patternProperties": {
+            "^P[1-4]C[1-5]$": {
+              "type": "number",
+              "minimum": 1.0,
+              "maximum": 5.0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence_metrics": {
+      "type": "object",
+      "description": "Evidence quality and coverage metrics",
+      "required": ["total_items", "tier_distribution", "avg_ers", "median_ers", "sources_per_subcap_avg", "single_source_subcap_count", "no_evidence_subcap_count", "document_count"],
+      "properties": {
+        "total_items": {
+          "type": "integer",
+          "description": "Total number of evidence items",
+          "minimum": 0
+        },
+        "tier_distribution": {
+          "type": "object",
+          "description": "Count of evidence items per tier",
+          "required": ["T1", "T2", "T3", "T4", "T5"],
+          "properties": {
+            "T1": {"type": "integer", "minimum": 0},
+            "T2": {"type": "integer", "minimum": 0},
+            "T3": {"type": "integer", "minimum": 0},
+            "T4": {"type": "integer", "minimum": 0},
+            "T5": {"type": "integer", "minimum": 0}
+          },
+          "additionalProperties": false
+        },
+        "avg_ers": {
+          "type": "number",
+          "description": "Average Evidence Rank Score across all items (2 decimal places)",
+          "minimum": 1.0,
+          "maximum": 5.0
+        },
+        "median_ers": {
+          "type": "number",
+          "description": "Median Evidence Rank Score",
+          "minimum": 1.0,
+          "maximum": 5.0
+        },
+        "sources_per_subcap_avg": {
+          "type": "number",
+          "description": "Average number of evidence sources per subcapability",
+          "minimum": 0
+        },
+        "single_source_subcap_count": {
+          "type": "integer",
+          "description": "Number of subcapabilities supported by only one source",
+          "minimum": 0
+        },
+        "no_evidence_subcap_count": {
+          "type": "integer",
+          "description": "Number of subcapabilities with no evidence",
+          "minimum": 0
+        },
+        "document_count": {
+          "type": "integer",
+          "description": "Number of unique documents processed",
+          "minimum": 0,
+          "examples": [3, 12, 25]
+        }
+      },
+      "additionalProperties": false
+    },
+    "scoring_metrics": {
+      "type": "object",
+      "description": "Scoring process metrics",
+      "required": ["caps_applied_count", "adjustments_applied_count", "dependency_caps_triggered", "contradictions_found", "contradictions_unresolved", "na_capabilities", "peer_count"],
+      "properties": {
+        "caps_applied_count": {
+          "type": "integer",
+          "description": "Total number of caps applied across all types",
+          "minimum": 0
+        },
+        "adjustments_applied_count": {
+          "type": "integer",
+          "description": "Total number of adjustment-ceilings (ADJ_ prefixed) applied",
+          "minimum": 0
+        },
+        "dependency_caps_triggered": {
+          "type": "integer",
+          "description": "Number of cross-pillar dependency caps triggered",
+          "minimum": 0
+        },
+        "contradictions_found": {
+          "type": "integer",
+          "description": "Total contradictions identified",
+          "minimum": 0
+        },
+        "contradictions_unresolved": {
+          "type": "integer",
+          "description": "Contradictions that could not be resolved",
+          "minimum": 0
+        },
+        "na_capabilities": {
+          "type": "array",
+          "description": "List of capability IDs marked N/A (>30% subcaps with no evidence)",
+          "items": {
+            "type": "string",
+            "pattern": "^P[1-4]C[1-5]$"
+          },
+          "examples": [["P1C5", "P4C2"]]
+        },
+        "peer_count": {
+          "type": "integer",
+          "description": "Number of peer institutions used for benchmarking",
+          "minimum": 1,
+          "maximum": 10,
+          "examples": [3, 5]
+        }
+      },
+      "additionalProperties": false
+    },
+    "confidence_distribution": {
+      "type": "object",
+      "description": "Count of subcapabilities at each confidence level",
+      "required": ["HIGH", "MEDIUM", "LOW"],
+      "properties": {
+        "HIGH": {"type": "integer", "minimum": 0, "description": "Count of subcaps with HIGH confidence"},
+        "MEDIUM": {"type": "integer", "minimum": 0, "description": "Count of subcaps with MEDIUM confidence"},
+        "LOW": {"type": "integer", "minimum": 0, "description": "Count of subcaps with LOW confidence"}
+      },
+      "additionalProperties": false
+    },
+    "qa": {
+      "type": "object",
+      "description": "Quality assurance results from Layer 1",
+      "required": ["verdict", "regression_tests", "issues_found", "critical_issues"],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": ["PASS", "PASS_WITH_NOTES", "FAIL"],
+          "description": "Layer 1 self-assessment QA verdict"
+        },
+        "regression_tests": {
+          "type": "string",
+          "description": "Regression test results summary",
+          "pattern": "^[0-8]/8 PASS$",
+          "examples": ["8/8 PASS", "7/8 PASS"]
+        },
+        "issues_found": {
+          "type": "object",
+          "description": "Count of issues by severity discovered during Layer 1 QA",
+          "required": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+          "properties": {
+            "CRITICAL": {"type": "integer", "minimum": 0},
+            "HIGH": {"type": "integer", "minimum": 0},
+            "MEDIUM": {"type": "integer", "minimum": 0},
+            "LOW": {"type": "integer", "minimum": 0}
+          },
+          "additionalProperties": false
+        },
+        "critical_issues": {
+          "type": "integer",
+          "description": "Shortcut: count of CRITICAL issues (must equal issues_found.CRITICAL)",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "skill_references_read": {
+      "type": "array",
+      "description": "All skill reference files that were read during assessment — enables audit of methodology coverage",
+      "items": {
+        "type": "string",
+        "enum": [
+          "analytical_framework.md",
+          "sub_verticals.md",
+          "capability_criteria.md",
+          "scoring_methodology.md",
+          "evidence_ranking.md",
+          "peer_benchmarking.md",
+          "priority_framework.md",
+          "communication_standards.md",
+          "report_template.md",
+          "quality_assurance.md",
+          "regression_tests.md",
+          "zennify_solutions.md",
+          "workbook_specification.md",
+          "qa_error_log.md",
+          "reasoning_chain_schema.md"
+        ]
+      },
+      "minItems": 10,
+      "maxItems": 15
+    },
+    "files_generated": {
+      "type": "array",
+      "description": "All output files generated by this assessment — enables audit completeness check",
+      "items": {
+        "type": "object",
+        "required": ["filename", "file_type", "path"],
+        "properties": {
+          "filename": {
+            "type": "string",
+            "examples": ["DMA_Scoring_Workbook_OZK_20250115.xlsx", "DMA_Assessment_Report_OZK_20250115.docx"]
+          },
+          "file_type": {
+            "type": "string",
+            "enum": ["xlsx", "docx", "csv", "json", "png", "md"]
+          },
+          "path": {
+            "type": "string",
+            "description": "Absolute path to output file"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "description": "File size in bytes"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "assessment_notes": {
+      "type": "string",
+      "description": "Optional notes on assessment methodology, limitations, or special conditions",
+      "maxLength": 1000
+    }
+  },
+  "additionalProperties": false
+}

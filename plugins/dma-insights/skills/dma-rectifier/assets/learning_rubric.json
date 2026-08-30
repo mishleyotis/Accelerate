@@ -1,0 +1,81 @@
+{
+  "name": "dma-insights learning rubric",
+  "version": 1,
+  "source": "plugins/dma-insights/docs/DECISIONS.md — D3 (2026-08-19 program round)",
+  "applies_to": "every learning note, rulebook refinement and fix, before the rectifier commits it",
+  "graded_by": "learning-grader",
+  "cases_by": "learning-testgen",
+  "threshold": 0.75,
+  "below_threshold": "not admitted — returns to the adversarial enrich-and-adjudicate loop with per-dimension scores as the work order",
+  "dimensions": [
+    {
+      "id": "root_cause",
+      "weight": 0.25,
+      "criterion": "root-cause correctness: the change repairs the mechanism that produced the finding, not the instance in front of it"
+    },
+    {
+      "id": "generalization",
+      "weight": 0.15,
+      "criterion": "the change binds every future run — the next submission is not free to regress"
+    },
+    {
+      "id": "evidence_weighing",
+      "weight": 0.15,
+      "criterion": "grounded in recorded findings with re-runnable measurements, weighed honestly — recurrences over first sightings, counts with denominators over impressions"
+    },
+    {
+      "id": "regression_coverage",
+      "weight": 0.15,
+      "criterion": "fails-before/passes-after: a check exists that fails on the state that produced the finding and passes on the fixed state, and runs unattended"
+    },
+    {
+      "id": "no_theater",
+      "weight": 0.1,
+      "criterion": "every check offered as evidence examined its subject and could have been red"
+    },
+    {
+      "id": "narrative_contribution",
+      "weight": 0.1,
+      "criterion": "contribution to the AE storyline — the change moves the learning curve the convergence thresholds measure"
+    },
+    {
+      "id": "non_regression",
+      "weight": 0.1,
+      "criterion": "nothing previously admitted breaks: the full regression corpus still passes and no existing check was weakened"
+    }
+  ],
+  "weights_sum": 1.0,
+  "anchors": [
+    {
+      "score": 0.3,
+      "label": "pre-fix tile state",
+      "quote": "the pre-fix tile state (MEM-0095 — two factor vocabularies for one number, no gate) — root-cause absent, regression coverage absent"
+    },
+    {
+      "score": 0.6,
+      "label": "hand-fixed tiles without CG-31",
+      "quote": "the hand-fixed tiles without CG-31 — target fixed, no regression coverage, fails 'generalization' (next submission free to regress)"
+    },
+    {
+      "score": 0.75,
+      "label": "CG-31 as landed",
+      "quote": "CG-31 as landed (apps/mcp/dma_mcp/validation2.py:1493, nine tests, legacy names refused BY NAME) — root cause, coverage, and non-regression all present"
+    }
+  ],
+  "convergence": {
+    "first_pass_promotion_clean": "0 blocking reasons",
+    "near_clean": "<=2 blocking reasons, none in a learned class, repaired without re-synthesis",
+    "learned_class_recurrence": "0 across the final two learned clients AND the held-out",
+    "user_flagged_recurrence": "0 anywhere, ever",
+    "declining_baseline": "Logix round-1 ~ dozens of owner reports across 5 rounds; Baxter re-promote under new gates = 80→47→21→1→0 reasons paid in one day (measured 2026-08-19)"
+  },
+  "anti_gaming": {
+    "duty": "flag any refinement that weakens detection, trivialises a test, or inflates its own coverage claim",
+    "effect": "any flag caps admitted at false regardless of the weighted total"
+  },
+  "case_generation": {
+    "volume_per_refinement": { "min": 5, "max": 15 },
+    "law": "every case must be able to FAIL — a case that cannot fail is rejected",
+    "negative_control": "at least one case per refinement carries fails_before=true: it fails on the pre-fix state and passes on the fixed state"
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "case_id": "GOLDEN_CASE_D",
+  "case_name": "Staleness Adjustment Application — Aged Evidence Handling",
+  "case_description": "Mega institution assessed in PUBLIC mode with strong evidence base (120+ items) but several key T1/T2 sources are >24 months old, triggering ADJ_STALENESS ceilings. Tests that staleness adjustments apply correctly (ceiling = min(raw, others) − 0.3), that non-stale evidence still scores normally, and that the assessment achieves high maturity where evidence is fresh. Also validates 0.1-increment precision scoring with quantitative metrics.",
+  "case_status": "STUB — Evidence inventory and full expected outcomes to be populated before use in Workflow C regression testing",
+  "institution_profile": {
+    "institution_name": "Example Mega Bank (Staleness Case)",
+    "institution_size_tier": "Mega_50B_Plus",
+    "sub_vertical": "Regional_Bank",
+    "evidence_mode": "PUBLIC",
+    "geography": "National",
+    "key_characteristics": [
+      "$105B in assets",
+      "Publicly traded (NYSE)",
+      "Strong digital presence with top-tier mobile app",
+      "Some regulatory filings are from prior examination cycle (>24 months)",
+      "Recent investor disclosures provide fresh T2 evidence on most capabilities"
+    ]
+  },
+  "evidence_inventory": {
+    "total_evidence_items": 120,
+    "evidence_items": [
+      {
+        "evidence_id": "E-501",
+        "source_name": "PLACEHOLDER — OCC Examination Report (Stale)",
+        "source_type": "Regulatory Filing",
+        "tier": "T1",
+        "date_or_period": "30 months ago",
+        "fact_summary": "PLACEHOLDER — Most recent full-scope OCC exam; rates risk management 'satisfactory', IT management 'satisfactory with room for improvement'",
+        "supports_capabilities": ["P1C2", "P3C1", "P3C3", "P4C4"],
+        "recency_age_months": 30,
+        "ers_score_expected": 4.0,
+        "note": "STUB: STALE — triggers ADJ_STALENESS on supported capabilities. ERS penalty applied for age."
+      },
+      {
+        "evidence_id": "E-502",
+        "source_name": "PLACEHOLDER — 10-K Annual Report (Fresh)",
+        "source_type": "SEC Filing",
+        "tier": "T2",
+        "date_or_period": "2 months ago",
+        "fact_summary": "PLACEHOLDER — Comprehensive digital strategy disclosure; mobile adoption at 68%; data governance framework described",
+        "supports_capabilities": ["P1C1", "P2C1", "P2C3", "P4C1"],
+        "recency_age_months": 2,
+        "ers_score_expected": 4.5,
+        "note": "STUB: FRESH — no staleness adjustment; strong T2 evidence"
+      },
+      {
+        "evidence_id": "E-503",
+        "source_name": "PLACEHOLDER — CFPB Examination Results (Stale)",
+        "source_type": "Regulatory Filing",
+        "tier": "T1",
+        "date_or_period": "28 months ago",
+        "fact_summary": "PLACEHOLDER — CFPB consumer compliance examination; no major findings but some MRAs on complaint handling",
+        "supports_capabilities": ["P3C2", "P3C3"],
+        "recency_age_months": 28,
+        "ers_score_expected": 3.8,
+        "note": "STUB: STALE — triggers ADJ_STALENESS on P3C2 and P3C3"
+      },
+      {
+        "evidence_id": "E-504",
+        "source_name": "PLACEHOLDER — App Store Metrics (Fresh)",
+        "source_type": "Third-Party Platform",
+        "tier": "T3",
+        "date_or_period": "Current",
+        "fact_summary": "PLACEHOLDER — Mobile app rating 4.6/5.0 (85,000 reviews); top 10 in finance category",
+        "supports_capabilities": ["P2C1", "P2C3"],
+        "recency_age_months": 0,
+        "ers_score_expected": 4.2,
+        "note": "STUB: FRESH — strong quantitative metric supporting 0.1-increment scoring"
+      }
+    ],
+    "note": "STUB: Remaining 116 evidence items to be curated. Mix should include: ~30% stale T1/T2 (>24mo) triggering adjustments on specific capabilities, ~70% fresh T2/T3/T4 supporting high-maturity scoring on other capabilities. Evidence pack should support precision scoring (0.1 increments) with quantitative metrics."
+  },
+  "staleness_test_cases": [
+    {
+      "staleness_id": "STALE-001",
+      "evidence_id": "E-501",
+      "age_months": 30,
+      "affected_capabilities": ["P1C2", "P3C1", "P3C3", "P4C4"],
+      "adjustment_type": "ADJ_STALENESS",
+      "expected_ceiling_formula": "min(raw_score, other_scores) − 0.3",
+      "log_expectation": "Caps_Applied_Log must contain ADJ_STALENESS entry with Trigger_Evidence = E-501"
+    },
+    {
+      "staleness_id": "STALE-002",
+      "evidence_id": "E-503",
+      "age_months": 28,
+      "affected_capabilities": ["P3C2", "P3C3"],
+      "adjustment_type": "ADJ_STALENESS",
+      "expected_ceiling_formula": "min(raw_score, other_scores) − 0.3",
+      "log_expectation": "Caps_Applied_Log must contain ADJ_STALENESS entry with Trigger_Evidence = E-503",
+      "note": "P3C3 affected by BOTH E-501 and E-503 staleness; adjustment should apply once using most restrictive ceiling"
+    },
+    {
+      "staleness_id": "STALE-003",
+      "evidence_id": "E-502",
+      "age_months": 2,
+      "affected_capabilities": ["P1C1", "P2C1", "P2C3", "P4C1"],
+      "adjustment_type": "NONE",
+      "expected_ceiling_formula": "N/A — no staleness adjustment (evidence is fresh)",
+      "log_expectation": "No ADJ_STALENESS entry for capabilities supported only by fresh evidence"
+    }
+  ],
+  "precision_scoring_test_cases": [
+    {
+      "precision_id": "PREC-001",
+      "description": "Mobile adoption at 68% with quantitative metric — should support 0.1-increment scoring",
+      "evidence_ids": ["E-502", "E-504"],
+      "capability": "P2C1",
+      "expected_score_precision": "0.1 increment (e.g., 4.1, 4.2, 4.3)",
+      "justification_requirement": "Rationale must cite specific quantitative metric justifying precision beyond 0.5 increment"
+    },
+    {
+      "precision_id": "PREC-002",
+      "description": "App rating 4.6/5.0 with large sample — should support 0.1-increment scoring",
+      "evidence_ids": ["E-504"],
+      "capability": "P2C3",
+      "expected_score_precision": "0.1 increment",
+      "justification_requirement": "Rationale must cite app rating + review count as quantitative basis"
+    }
+  ],
+  "expected_outcomes": {
+    "overall_score_range": {
+      "min": 3.5,
+      "expected_mid": 3.8,
+      "max": 4.2
+    },
+    "rationale": "Mega institution with strong evidence base achieves high maturity. Staleness adjustments depress specific capabilities (P3C1, P3C2, P3C3, P4C4) by 0.3 each. P2 scores highest with fresh quantitative evidence. Overall high M3 to M4.",
+    "expected_pillar_scores": {
+      "P1_expected_range": [3.5, 4.0],
+      "P1_rationale": "Strong strategy disclosure (fresh 10-K); P1C2 partially constrained by stale OCC exam but offset by fresh internal governance evidence",
+      "P2_expected_range": [3.8, 4.5],
+      "P2_rationale": "Strongest pillar; fresh T2/T3 evidence with quantitative metrics supporting precision scoring; minimal staleness impact",
+      "P3_expected_range": [3.0, 3.5],
+      "P3_rationale": "Stale T1 evidence (OCC exam 30mo, CFPB 28mo) triggers ADJ_STALENESS on multiple capabilities; reduces scores by ~0.3 each",
+      "P4_expected_range": [3.2, 3.8],
+      "P4_rationale": "Mixed: P4C4 affected by stale OCC exam (ADJ_STALENESS); P4C1 and P4C3 have fresh evidence supporting M3-M4 scores"
+    },
+    "expected_staleness_adjustments": {
+      "count_minimum": 3,
+      "affected_capabilities": ["P3C1", "P3C2", "P3C3", "P4C4"],
+      "score_reduction_per_adjustment": 0.3,
+      "rationale": "Each stale T1 source (>24mo) triggers ADJ_STALENESS ceiling = min(raw, others) − 0.3"
+    },
+    "expected_precision_scores": {
+      "count_minimum": 3,
+      "description": "At least 3 subcaps should use 0.1-increment precision scoring (e.g., 3.7, 4.1, 4.3) justified by quantitative metrics from evidence"
+    }
+  },
+  "test_tolerances": {
+    "overall_score_tolerance": 0.5,
+    "pillar_score_tolerance": 0.5,
+    "category_score_tolerance": 0.25,
+    "staleness_ceiling_tolerance": 0.01,
+    "rationale": "Tighter category tolerance reflects stronger evidence base; staleness ceiling is mathematical and should be near-exact"
+  },
+  "regression_test_gate": {
+    "test_case_purpose": "Verify assessment skill handles stale evidence correctly: (1) Identifies evidence >24 months as stale, (2) Applies ADJ_STALENESS ceiling formula correctly, (3) Logs all staleness adjustments in Caps_Applied_Log with Trigger_Evidence, (4) Does NOT apply staleness to capabilities with fresh-only evidence, (5) Supports 0.1-increment precision scoring with quantitative justification",
+    "pass_criteria": [
+      "Overall score falls within expected range (3.5–4.2)",
+      "ADJ_STALENESS applied to capabilities supported by stale evidence (≥3 adjustments)",
+      "ADJ_STALENESS ceiling = min(raw, others) − 0.3 (±0.01 tolerance)",
+      "No ADJ_STALENESS on capabilities with only fresh evidence",
+      "≥3 subcaps use 0.1-increment scoring with quantitative justification in rationale",
+      "Caps_Applied_Log entries for ADJ_STALENESS include Trigger_Evidence IDs",
+      "Post-adjustment aggregation is mathematically correct"
+    ]
+  },
+  "metadata": {
+    "case_created_date": "2025-03-01",
+    "case_updated_date": "2025-03-01",
+    "case_status": "STUB",
+    "case_owner": "DMA Governance & Regression Testing Team",
+    "use_in_workflows": ["Workflow C: Rubric Version Regression", "Training: Staleness and Precision Scenarios"],
+    "compatibility": "DMA Assessment Skill v3.0+, DMA Governance Skill v2.0+",
+    "completion_todo": [
+      "Curate full 120-item evidence inventory with controlled staleness distribution",
+      "Define exact stale vs. fresh evidence split per capability",
+      "Calculate expected ADJ_STALENESS ceilings for each affected capability",
+      "Identify 3+ subcaps where quantitative metrics justify 0.1-increment precision",
+      "Run baseline assessment to establish expected score ranges",
+      "Peer review by QA lead before promoting to ACTIVE status"
+    ]
+  }
+}

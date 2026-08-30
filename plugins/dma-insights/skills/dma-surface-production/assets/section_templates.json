@@ -1,0 +1,541 @@
+{
+  "overview": {
+    "scores": {
+      "composite": 0.0,
+      "pillars": [
+        {
+          "pillar_id": "P1",
+          "score": 0.0,
+          "peer_median": 0.0,
+          "delta": 0.0,
+          "peer_n": 0,
+          "peer_basis": "table|recomputed|inferred|cannot_estimate",
+          "proxy_disclosure": null
+        }
+      ],
+      "posture": "LEADING|COMPETING|LAGGING|MIXED",
+      "posture_basis": "EVIDENCE|HYBRID|INFERRED",
+      "framing": "<18-32 words>",
+      "claim_label": "FACT",
+      "confidence": "HIGH|MEDIUM|LOW",
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "firmographics": {
+      "<see 03-pages/2-overview.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "why_now": {
+      "<see 03-pages/2-overview.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "exec_summary": {
+      "<see 03-pages/2-overview.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "opportunity": {
+      "<see 03-pages/2-overview.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "findings": {
+      "<see 03-pages/2-overview.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "leadership": {
+      "<see 03-pages/2-overview.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "financial_series": {
+      "<see 03-pages/2-overview.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "sentiment": {
+      "<see 03-pages/2-overview.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "ceilings": {
+      "<see 03-pages/2-overview.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "evidence_coverage": {
+      "<see 03-pages/2-overview.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "thought_leadership": {
+      "<see 03-pages/2-overview.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    }
+  },
+  "insights": {
+    "insights": {
+      "<see 03-pages/3-insights.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "landscape": {
+      "<see 03-pages/3-insights.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    }
+  },
+  "heatmap": {
+    "workbook_scores": {
+      "<see 03-pages/1-heatmap.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "focus_areas": {
+      "<see 03-pages/1-heatmap.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "cell_evidence": {
+      "cells": [
+        {
+          "subcap_id": "PxCy.z.w",
+          "e_ids": [],
+          "items": [
+            {
+              "e_id": "",
+              "tier": "T1",
+              "claim_label": "FACT",
+              "recency": "CURRENT",
+              "source_title": "",
+              "publisher": "",
+              "excerpt": "<verbatim 50-500>"
+            }
+          ],
+          "reach_note": "",
+          "synthesis": "<40-90 words>",
+          "grounded_on": 0,
+          "provenance": "producer",
+          "thin": false
+        }
+      ],
+      "linking_stats": {
+        "cells_scored": 0,
+        "cells_linked": 0,
+        "rows_unlinkable": 0
+      },
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "evidence": {
+      "<see 03-pages/1-heatmap.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "value_chain": {
+      "<see 03-pages/1-heatmap.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "alerts": {
+      "<see 03-pages/1-heatmap.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "safeguard_gates": {
+      "caps": [
+        {
+          "cap_id": "",
+          "kind": "cap|uncertainty_band|qa_hold|analyst_override",
+          "ceiling": "",
+          "affected_categories": [],
+          "rationale": "",
+          "e_ids": []
+        }
+      ],
+      "gates": [
+        {
+          "gate_id": "SG-nn",
+          "plain_label": "<8-18 word human sentence>",
+          "result": "PASS|FAIL|NOT_RUN",
+          "detail": {},
+          "not_run_reason": null
+        }
+      ],
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "evidence_age": {
+      "<see 03-pages/1-heatmap.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "cohort_patterns": {
+      "threshold_pct": 60,
+      "patterns": [
+        {
+          "sub_vertical": "",
+          "category_id": "",
+          "pattern_statement": "",
+          "affected_count": 0,
+          "cohort_size": 5,
+          "share_pct": 0.0,
+          "below_threshold": false,
+          "confidence": "LOW|MEDIUM|HIGH",
+          "structural_explanation": null,
+          "action": "",
+          "entity_ids": [
+            "AUDIT ONLY - always in internal_only"
+          ]
+        }
+      ],
+      "insufficient_cohorts": [],
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    }
+  },
+  "platform": {
+    "platform_story": {
+      "<see 03-pages/4-platform.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "recommendations": {
+      "<see 03-pages/4-platform.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "starters": {
+      "<see 03-pages/4-platform.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "roadmap": {
+      "phases": [
+        {
+          "phase_id": "",
+          "phase": "",
+          "horizon": "next two quarters|this year|beyond",
+          "rec_ids": [],
+          "capabilities": [],
+          "depends_on": [],
+          "rationale": "<30-60 words>",
+          "provenance": "analyst|derived"
+        }
+      ],
+      "sequencing_basis": "prerequisites|undetermined",
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "stairstep": {
+      "<see 03-pages/4-platform.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    }
+  },
+  "context": {
+    "timeline": {
+      "<see 03-pages/5-context.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "issue_register": {
+      "<see 03-pages/5-context.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "regulatory_standing": {
+      "<see 03-pages/5-context.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "context_sentiment": {
+      "<see 03-pages/5-context.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    },
+    "acquisitions": {
+      "<see 03-pages/5-context.md>": null,
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    }
+  },
+  "techstack": {
+    "techstack": {
+      "items": [
+        {
+          "ts_id": "TS-nnn",
+          "vendor": "",
+          "product": "",
+          "layer": "OPS|CUST|DATA|INFRA",
+          "pillar_id": "P4",
+          "status": "CONFIRMED|INFERRED|CLAIMED|ABSENT",
+          "evidence_level": "L1|L2|L3|L4",
+          "detection_basis": "",
+          "as_of": "",
+          "linked_subcap_ids": [],
+          "e_ids": []
+        }
+      ],
+      "layers": [
+        {
+          "layer": "DATA",
+          "pillar_id": "P4",
+          "detected": 0,
+          "expected": 0,
+          "is_primary_gap": false
+        }
+      ],
+      "dropped": [
+        {
+          "candidate": "",
+          "reason": ""
+        }
+      ],
+      "produced_at": "<iso8601>",
+      "producer_version": "<skill@date>",
+      "e_ids": [
+        "<every id this section cites>"
+      ],
+      "internal_only": [
+        "<json paths the customer must not receive>"
+      ],
+      "empty_state": null
+    }
+  }
+}

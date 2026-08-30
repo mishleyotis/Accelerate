@@ -1,0 +1,201 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Issue Register Schema (CSV as JSON Array)",
+  "description": "Structured issue list from governance audit. Each row represents one finding requiring action or attention. Produced by Layer 2 (DMA Governance) in Workflow A, Step 6.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "issue_id",
+      "run_id",
+      "check_source",
+      "finding_category",
+      "severity",
+      "status",
+      "affected_element",
+      "finding_description",
+      "root_cause",
+      "fix_instructions",
+      "effort_estimate"
+    ],
+    "properties": {
+      "issue_id": {
+        "type": "string",
+        "description": "Unique issue identifier within this audit",
+        "pattern": "^ISS-[0-9]{3}$",
+        "examples": ["ISS-001", "ISS-042"]
+      },
+      "run_id": {
+        "type": "string",
+        "description": "References the DMA assessment run being audited",
+        "pattern": "^DMA-[A-Z0-9]{4}-[0-9]{8}-[0-9]{4}$"
+      },
+      "check_source": {
+        "type": "string",
+        "description": "Which audit workflow step and check discovered this issue",
+        "enum": [
+          "G1_row_counts",
+          "G2_rationale_quality",
+          "G3_evidence_traceability",
+          "G4_score_integrity",
+          "G5_aggregation",
+          "G6_cross_pillar_caps",
+          "G7_confidence_ers",
+          "G8_contradiction_log",
+          "DIST_score_distribution",
+          "DIST_confidence_distribution",
+          "DIST_evidence_distribution",
+          "DIST_cap_distribution",
+          "DIST_rationale_uniqueness",
+          "NARRATIVE_sections",
+          "NARRATIVE_peer_disclosure",
+          "NARRATIVE_language",
+          "NARRATIVE_score_match",
+          "NARRATIVE_na_documentation",
+          "REGRESSION_row_counts",
+          "REGRESSION_rationale_quality",
+          "REGRESSION_evidence_coverage",
+          "REGRESSION_aggregation",
+          "REGRESSION_cap_enforcement",
+          "REGRESSION_adjustment_ceiling",
+          "REGRESSION_dependency_caps",
+          "REGRESSION_report_content",
+          "PV01_structure_complete",
+          "PV02_rule_links_valid",
+          "PV03_counterclaim_documented",
+          "CR01_findings_addressed"
+        ]
+      },
+      "finding_category": {
+        "type": "string",
+        "description": "Broad category of issue",
+        "enum": [
+          "STRUCTURAL",
+          "CALCULATION",
+          "EVIDENCE",
+          "SCORING",
+          "DOCUMENTATION",
+          "NARRATIVE",
+          "PATTERN",
+          "PROOF_STRUCTURE",
+          "CRITIC_RESOLUTION"
+        ]
+      },
+      "severity": {
+        "type": "string",
+        "description": "Impact level of issue",
+        "enum": [
+          "CRITICAL",
+          "HIGH",
+          "MEDIUM",
+          "LOW",
+          "INFO"
+        ]
+      },
+      "status": {
+        "type": "string",
+        "description": "Current resolution status",
+        "enum": [
+          "OPEN",
+          "FIXED",
+          "ACKNOWLEDGED",
+          "DEFERRED",
+          "INVALID"
+        ]
+      },
+      "affected_element": {
+        "type": "string",
+        "description": "Which scorecard row, sheet, or component is affected",
+        "examples": [
+          "P2C3_subcap_row_47",
+          "Calculation_Chain_sheet",
+          "Report_Section_6B",
+          "Evidence_ID_E-042",
+          "Proof_structure_P1C2"
+        ]
+      },
+      "finding_description": {
+        "type": "string",
+        "description": "Detailed description of what is wrong",
+        "minLength": 20,
+        "maxLength": 500,
+        "examples": [
+          "P2C3 score 3.2 flagged: rationale contains only 2 evidence links (E12, E18) but G3 check detected 5 evidence items reference this subcap (E12, E18, E45, E67, E89). Three evidence items not cited.",
+          "Proof structure incomplete for P1C2: rationale missing Rule links. Claims present (C1-C3), Evidence links present (E23:F2), but RuleID field empty.",
+          "Critic finding CRI-P3C1-002 flagged: 'Fraud automation claim unsupported by evidence tier' — remains in Critic_Log but no resolution documented in rationale."
+        ]
+      },
+      "root_cause": {
+        "type": "string",
+        "description": "Analysis of why this issue exists",
+        "minLength": 10,
+        "maxLength": 400,
+        "examples": [
+          "Scorer focused on two highest-ERS evidence items and missed lower-tier corroborating evidence during evidence mapping",
+          "Proof template was incomplete in skill reference materials; scorer unaware of Rule link requirement",
+          "Critic tool flagged concern but scorer deferred resolution without documenting decision rationale"
+        ]
+      },
+      "fix_instructions": {
+        "type": "string",
+        "description": "Step-by-step fix instructions for Layer 1 re-run or manual correction",
+        "minLength": 20,
+        "maxLength": 600,
+        "examples": [
+          "Re-score P2C3: Map all 5 evidence items to rationale. Update Evidence_IDs cell to: E12:F2, E18:F3, E45:F1, E67:F4, E89:F5. Update rationale to cite all items per communication_standards.md",
+          "Update P1C2 rationale: Add Rule link field with RuleID = 'RULE_M3_GOVERNANCE_STRUCTURE' (from governance_criteria.md, line 247). Verify rule correctly applied to evidence.",
+          "Review Critic finding CRI-P3C1-002 in Critic_Log. Document resolution in P3C1 rationale: either (a) acknowledge concern and cite additional evidence, (b) refute with specific evidence, or (c) accept limitation with documented reasoning."
+        ]
+      },
+      "effort_estimate": {
+        "type": "string",
+        "description": "Estimated effort to fix (for prioritization)",
+        "enum": [
+          "MINIMAL",
+          "QUICK",
+          "MODERATE",
+          "SIGNIFICANT",
+          "MAJOR"
+        ]
+      },
+      "reference_docs": {
+        "type": "array",
+        "description": "Relevant skill reference documents or schema URLs",
+        "items": {
+          "type": "string",
+          "examples": [
+            "${CLAUDE_PLUGIN_ROOT}/skills/dma-assessment/references/evidence_ranking.md",
+            "${CLAUDE_PLUGIN_ROOT}/skills/dma-governance/references/audit_checks.md",
+            "communication_standards.md#inline_citation_format"
+          ]
+        }
+      },
+      "linked_issues": {
+        "type": "array",
+        "description": "Other issues (issue_ids) related to this one",
+        "items": {
+          "type": "string",
+          "pattern": "^ISS-[0-9]{3}$"
+        }
+      },
+      "discovery_date": {
+        "type": "string",
+        "format": "date-time",
+        "description": "ISO 8601 timestamp of issue discovery"
+      },
+      "resolution_date": {
+        "type": "string",
+        "format": "date-time",
+        "description": "ISO 8601 timestamp of issue resolution (if status = FIXED)"
+      },
+      "notes": {
+        "type": "string",
+        "description": "Additional context or auditor notes",
+        "maxLength": 300
+      }
+    },
+    "additionalProperties": false
+  },
+  "minItems": 0,
+  "maxItems": 500
+}

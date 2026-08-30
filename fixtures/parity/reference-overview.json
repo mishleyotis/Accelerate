@@ -1,0 +1,10 @@
+{
+  "_doc": "A reference client's overview, reduced to the shape Gate J compares. Not a real client: the fields are the ones the CLI has to walk, and the values are placeholders because Gate J never compares values.",
+  "entity": {"display_id": "reference-client"},
+  "sections": {
+    "scores": {"data": {"composite": 3.1, "pillars": [1, 2, 3, 4], "narrative_thread": "The reference carries a thread on every section."}},
+    "leadership": {"data": {"roster": [{"name": "A One"}, {"name": "B Two"}], "narrative_thread": "Two seats named."}},
+    "sentiment": {"data": {"bars": [{"source": "a"}], "themes": [{"theme": "t"}]}},
+    "ceilings": {"data": {"rows": [{"category_id": "P1C1"}]}}
+  }
+}

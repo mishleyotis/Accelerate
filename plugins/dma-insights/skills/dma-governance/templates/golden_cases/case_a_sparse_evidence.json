@@ -1,0 +1,264 @@
+{
+  "case_id": "GOLDEN_CASE_A",
+  "case_name": "Sparse Evidence — Public Mode, Small CU",
+  "case_description": "Small credit union (under $500M assets), assessed in PUBLIC mode with limited evidence availability. Tests how assessment handles sparse evidence and maintains appropriate score bounds with evidence caps.",
+  "institution_profile": {
+    "institution_name": "Example Credit Union",
+    "institution_size_tier": "Nano_Under_100M",
+    "sub_vertical": "Credit_Union",
+    "evidence_mode": "PUBLIC",
+    "geography": "Midwest",
+    "key_characteristics": [
+      "15,000 members",
+      "$85M in assets",
+      "Community-focused, limited digital presence",
+      "No published board documents or investor reports"
+    ]
+  },
+  "evidence_inventory": {
+    "total_evidence_items": 15,
+    "evidence_items": [
+      {
+        "evidence_id": "E-101",
+        "source_name": "NCUA Call Report",
+        "source_type": "Regulatory Filing",
+        "tier": "T1",
+        "date_or_period": "Most recent fiscal year",
+        "fact_summary": "Asset growth rate +2.3% YoY",
+        "supports_capabilities": ["P1C1", "P1C3"],
+        "recency_age_months": 8,
+        "ers_score_expected": 4.5
+      },
+      {
+        "evidence_id": "E-102",
+        "source_name": "CU Member App Store Rating",
+        "source_type": "Third-Party Platform",
+        "tier": "T3",
+        "date_or_period": "Current",
+        "fact_summary": "Mobile app rating 3.4/5.0 (127 reviews)",
+        "supports_capabilities": ["P2C1", "P2C3"],
+        "recency_age_months": 0,
+        "ers_score_expected": 3.2,
+        "note": "Limited data; small user base"
+      },
+      {
+        "evidence_id": "E-103",
+        "source_name": "CU Website Content Analysis",
+        "source_type": "Website",
+        "tier": "T5",
+        "date_or_period": "Current",
+        "fact_summary": "Website mentions 'online banking' and 'mobile app' but no details on maturity",
+        "supports_capabilities": ["P2C2"],
+        "recency_age_months": 0,
+        "ers_score_expected": 2.0,
+        "note": "Marketing claims; unverified"
+      },
+      {
+        "evidence_id": "E-104",
+        "source_name": "J.D. Power Member Satisfaction Survey",
+        "source_type": "Third-Party Survey",
+        "tier": "T3",
+        "date_or_period": "Published 3 years ago",
+        "fact_summary": "CU scored 72/100 on member satisfaction; industry median 75/100",
+        "supports_capabilities": ["P2C3"],
+        "recency_age_months": 36,
+        "ers_score_expected": 2.5,
+        "note": "Data is stale; small CU may not be in sample"
+      },
+      {
+        "evidence_id": "E-105",
+        "source_name": "NCUA Examination Report Summary",
+        "source_type": "Regulatory Document",
+        "tier": "T1",
+        "date_or_period": "2 years ago",
+        "fact_summary": "No material weaknesses or consent orders noted",
+        "supports_capabilities": ["P3C3"],
+        "recency_age_months": 24,
+        "ers_score_expected": 3.0
+      },
+      {
+        "evidence_id": "E-106",
+        "source_name": "Industry News Archive (Credit Union Journal)",
+        "source_type": "News Article",
+        "tier": "T3",
+        "date_or_period": "1 year ago",
+        "fact_summary": "CU announced partnership with fintech provider for payment processing",
+        "supports_capabilities": ["P4C3"],
+        "recency_age_months": 12,
+        "ers_score_expected": 2.5,
+        "note": "Limited detail; press release language"
+      },
+      {
+        "evidence_id": "E-107",
+        "source_name": "Public Federal Reserve Data",
+        "source_type": "Central Bank Report",
+        "tier": "T1",
+        "date_or_period": "Current",
+        "fact_summary": "CU has no public enforcement actions",
+        "supports_capabilities": ["P3C1"],
+        "recency_age_months": 0,
+        "ers_score_expected": 4.0
+      },
+      {
+        "evidence_id": "E-108",
+        "source_name": "CU Website Careers Section",
+        "source_type": "Website",
+        "tier": "T5",
+        "date_or_period": "Current",
+        "fact_summary": "Website mentions 'tech-forward culture' and '5 open IT positions'",
+        "supports_capabilities": ["P1C4"],
+        "recency_age_months": 0,
+        "ers_score_expected": 1.8,
+        "note": "Marketing claim; limited evidence of cultural maturity"
+      },
+      {
+        "evidence_id": "E-109",
+        "source_name": "LinkedIn Company Page",
+        "source_type": "Social Media",
+        "tier": "T5",
+        "date_or_period": "Current",
+        "fact_summary": "CU has 180 followers; no recent posts about digital initiatives",
+        "supports_capabilities": ["P2C1"],
+        "recency_age_months": 0,
+        "ers_score_expected": 1.5
+      },
+      {
+        "evidence_id": "E-110",
+        "source_name": "Vendor Comparison (Temenos RFP)",
+        "source_type": "Procurement Document",
+        "tier": "T4",
+        "date_or_period": "6 months ago",
+        "fact_summary": "CU issued RFP for core banking system replacement; considering Temenos vs. legacy upgrade",
+        "supports_capabilities": ["P4C3"],
+        "recency_age_months": 6,
+        "ers_score_expected": 2.8,
+        "note": "Internal procurement signal; suggests technology refresh discussion"
+      },
+      {
+        "evidence_id": "E-111",
+        "source_name": "Industry Analyst Report (Gartner)",
+        "source_type": "Third-Party Analysis",
+        "tier": "T3",
+        "date_or_period": "1 year ago",
+        "fact_summary": "Credit unions of this size average 40% digital adoption; CU not mentioned specifically",
+        "supports_capabilities": ["P2C1"],
+        "recency_age_months": 12,
+        "ers_score_expected": 2.0,
+        "note": "Industry benchmark only; not CU-specific"
+      },
+      {
+        "evidence_id": "E-112",
+        "source_name": "Complaint Database (CFPB Complaint Portal)",
+        "source_type": "Government Database",
+        "tier": "T1",
+        "date_or_period": "Past 12 months",
+        "fact_summary": "2 complaints filed; both resolved (payment dispute, billing error)",
+        "supports_capabilities": ["P2C3", "P3C2"],
+        "recency_age_months": 6,
+        "ers_score_expected": 3.5
+      },
+      {
+        "evidence_id": "E-113",
+        "source_name": "CU Member Forum (Reddit/Community)",
+        "source_type": "Social Media / User Community",
+        "tier": "T5",
+        "date_or_period": "Current",
+        "fact_summary": "Small subreddit with ~50 members; mixed sentiment on digital services (some praise, some complaints about stability)",
+        "supports_capabilities": ["P2C3"],
+        "recency_age_months": 0,
+        "ers_score_expected": 1.5,
+        "note": "Anecdotal; small, non-representative sample"
+      },
+      {
+        "evidence_id": "E-114",
+        "source_name": "Fintech Partnership Press Release",
+        "source_type": "Press Release",
+        "tier": "T5",
+        "date_or_period": "6 months ago",
+        "fact_summary": "CU announced 'embedded finance partnership' with [Partner]; no details on implementation status",
+        "supports_capabilities": ["P2C2"],
+        "recency_age_months": 6,
+        "ers_score_expected": 1.8
+      },
+      {
+        "evidence_id": "E-115",
+        "source_name": "Benchmarking Study (Independent Analyst)",
+        "source_type": "Third-Party Research",
+        "tier": "T3",
+        "date_or_period": "2 years ago",
+        "fact_summary": "Study ranked CU in bottom quartile for technology maturity (small CU cohort)",
+        "supports_capabilities": ["P4C3"],
+        "recency_age_months": 24,
+        "ers_score_expected": 2.0,
+        "note": "Stale data; potential selection bias in study population"
+      }
+    ]
+  },
+  "expected_outcomes": {
+    "overall_score_range": {
+      "min": 1.8,
+      "expected_mid": 2.2,
+      "max": 2.4
+    },
+    "rationale": "Small CU with limited PUBLIC evidence; sparse documentation expected. T1 evidence (regulatory) provides baseline score of ~2.0–2.5. T3/T4 evidence adds ~0.2–0.3 points where available. T5 evidence capped per policy. Multiple pillars expected to hit M1–M2 due to evidence constraints.",
+    "expected_pillar_scores": {
+      "P1_expected_range": [1.8, 2.2],
+      "P1_rationale": "Regulatory foundation (T1) present; no strategy disclosure or governance detail (limited evidence base)",
+      "P2_expected_range": [1.9, 2.3],
+      "P2_rationale": "App rating provides some CX data; rest is marketing claims (T5). Evidence caps expected on multiple capabilities.",
+      "P3_expected_range": [2.0, 2.4],
+      "P3_rationale": "Regulatory record clean (T1); limited compliance detail. Few operational KPIs available.",
+      "P4_expected_range": [1.7, 2.1],
+      "P4_rationale": "Minimal data; RFP signal suggests consideration but no implementation evidence. Heavy T5 content."
+    },
+    "expected_caps": {
+      "severity_caps": {
+        "count": 0,
+        "rationale": "No enforcement actions; no material weaknesses"
+      },
+      "evidence_caps": {
+        "count": 8,
+        "affected_capabilities": ["P2C1", "P2C2", "P2C4", "P4C1", "P4C2", "P4C4"],
+        "rationale": "T5-only or single-source evidence on multiple capabilities due to sparse availability"
+      },
+      "sentiment_caps": {
+        "count": 0,
+        "rationale": "App rating 3.4 above threshold for sentiment caps"
+      },
+      "cross_pillar_caps": {
+        "count": 1,
+        "affected": "P3→P2 (if P3C3 <2.5, cap P2C2)",
+        "rationale": "Depends on P3C3 score; governance constraints may affect onboarding"
+      }
+    },
+    "expected_n_a_capabilities": [
+      "P4C2",
+      "P4C4"
+    ],
+    "rationale_for_n_a": "Analytics (P4C2) and Cybersecurity (P4C4) have no evidence in public sources for small CU; mark N/A"
+  },
+  "test_tolerances": {
+    "overall_score_tolerance": 0.5,
+    "pillar_score_tolerance": 0.5,
+    "category_score_tolerance": 0.25,
+    "cap_application_tolerance": 2,
+    "rationale": "Sparse evidence makes precise scoring difficult; tolerance reflects expected variation"
+  },
+  "regression_test_gate": {
+    "test_case_purpose": "Verify assessment skill handles sparse evidence correctly: does not inflate scores beyond available evidence tier; applies evidence caps appropriately; marks N/A capabilities when >30% evidence missing",
+    "pass_criteria": [
+      "Overall score falls within expected range (1.8–2.4)",
+      "No capability scored above M3 without T1/T2 evidence",
+      "Evidence cap count ≥7 (most T5 capabilities capped)",
+      "N/A capabilities match expected list (P4C2, P4C4)",
+      "Rationales acknowledge sparse evidence; explain score implications"
+    ]
+  },
+  "metadata": {
+    "case_created_date": "2024-01-15",
+    "case_updated_date": "2024-01-15",
+    "case_owner": "DMA Governance & Regression Testing Team",
+    "use_in_workflows": ["Workflow C: Rubric Version Regression", "Training: Sparse Evidence Scenarios"],
+    "compatibility": "DMA Assessment Skill v3.0+"
+  }
+}

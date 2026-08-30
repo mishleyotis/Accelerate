@@ -1,0 +1,24 @@
+=== THREAD PARENT MESSAGE ===
+From: Assessment and Research Request (B0ACUPDCMGF)
+Time: 2026-08-28 23:50:17 EAT
+Message TS: 1787950217.210239
+*Account Full Name*
+REV Federal Credit Union
+*Website*
+<https://www.revfcu.com/>
+*Additional Context*
+Client has marketing cloud but no CRM. Opportunity to implement CRM and Data Cloud
+*Submitter*
+<@U061X1XFD5F|Kevin Murray>
+*Priority*
+High (need in 48 hours)
+
+<@U09TL2S4LLS|Mishley Otiende> Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder
+
+=== THREAD REPLIES (1 total) ===
+
+--- Reply 1 of 1 ---
+From: Kevin Murray <kevin.murray@zennify.com> (U061X1XFD5F)
+Time: 2026-08-28 23:50:24 EAT
+Message TS: 1787950224.942139
+FYI <@U04DFMWGTJ4|Andrew Walters>

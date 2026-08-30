@@ -1,0 +1,812 @@
+{
+ "_doc": "Traceability for the gold-standard exemplars quoted in agents/*.md. The notation gold:<client>/<page>.<section> means: the served payload section for that client's active run, internal audience \u2014 refetch with GET /v1/entities/<display_id>/<page>?audience=internal and take sections.<section>.data. This manifest pins each exemplar's sha256, size and top-level keys as fetched 2026-08-20, so a quoted example that drifts from the served truth is detectable without committing client payload bodies to a public repository.",
+ "fetched": "2026-08-20",
+ "audience": "internal",
+ "runs": {
+  "baxter": {
+   "display_id": "baxter-credit-union-bcu",
+   "run_id": "c1351d25-a612-4dbe-b498-127bccaf6810",
+   "ccg_catalog_version": "v5.0"
+  },
+  "logix": {
+   "display_id": "logix-federal-credit-union",
+   "run_id": "d7ed1d90",
+   "ccg_catalog_version": "v5.0"
+  }
+ },
+ "sections": {
+  "gold:baxter/context.acquisitions": {
+   "sha256": "5c9eb8753b0adef5e9a1e34cb4409e023f686c050263fa336632ac937d76e250",
+   "bytes": 1396,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/context.context_sentiment": {
+   "sha256": "a6713d3faccbffeef1d17b1b352b866fa301e8d5f9edcc1034a5297026a4639e",
+   "bytes": 5642,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/context.issue_register": {
+   "sha256": "62eefdd5f65ba40a944aa00a34ad5526da931a7789fba46e9908c0b73746c79a",
+   "bytes": 5626,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/context.regulatory_standing": {
+   "sha256": "c0828ea0e773f9d3cdc88f5e9439628f4418304e6f317e9e5b4c9202860ca38b",
+   "bytes": 2293,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/context.timeline": {
+   "sha256": "d48265ef6f17393d1fe9fdc845442c7a0346c1025cf5a8bdc8802dc3ff29e6de",
+   "bytes": 8860,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/heatmap.alerts": {
+   "sha256": "2cab02608a5939eed8772634cb0d2d138a7c74123efb8a9b0bd3e8b16312e826",
+   "bytes": 10251,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/heatmap.cell_evidence": {
+   "sha256": "e00e163356d53fee28d53d246f1db5feb1355d4c52e5c771a8a3abe6d0a47268",
+   "bytes": 1247052,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/heatmap.cohort_patterns": {
+   "sha256": "a79935a01c5bb718d19ff86313caf83077bb96de800cdc8923ca75f8eabaf0f9",
+   "bytes": 973,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/heatmap.evidence": {
+   "sha256": "b62cfbb01c206d1221032e040536191deb1d3f1922906f56471be9fec77a0467",
+   "bytes": 332,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/heatmap.evidence_age": {
+   "sha256": "925b9e883f46357b177696517fd95a5d76a7b0ede7bb14b45e4637e9db13f395",
+   "bytes": 21537,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/heatmap.focus_areas": {
+   "sha256": "1fbc74891de1fac372213214edf7b9ce2ecf2d9bbd9217601ba36e5306077799",
+   "bytes": 7889,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/heatmap.safeguard_gates": {
+   "sha256": "028c97f46355a99733d7d92a10a01d1b82c8689d8c37548f883f5e3c0c418954",
+   "bytes": 1710,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/heatmap.value_chain": {
+   "sha256": "f9dc16ff2cd1997faf1aeaa509253863af95ae004ed638577d0091a854a5e580",
+   "bytes": 20131,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/heatmap.workbook_scores": {
+   "sha256": "b9647e09a11c8a586fbd855ed01cfafd2607d6d6ab48fc5024da75057aaf761b",
+   "bytes": 3335,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/insights.insights": {
+   "sha256": "87a86a47ae2c05d9c89669df1571470f51020398d38f96d64e71ea93d031e124",
+   "bytes": 15343,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/insights.landscape": {
+   "sha256": "5e7d79955d46fde2aad25f97bf8aac3096502ab0acaf6e8d453d829dd3a79182",
+   "bytes": 1500,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/heatmap.alerts": {
+   "sha256": "1a0b4e0971ebaeebfc96b266186fe5b09dab4f336a9e254390b375cb50558dec",
+   "bytes": 34431,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/heatmap.cell_evidence": {
+   "sha256": "a32964d2b6051419a3e6cd4d065356e6bf4837b9fc64e5e70b8278f04e342d0d",
+   "bytes": 1441133,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/heatmap.cohort_patterns": {
+   "sha256": "d42c41a1702bccd832213ed5f6c37543190cb33e098bebb954f5f53e61bb24a7",
+   "bytes": 1288,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/heatmap.evidence": {
+   "sha256": "b62cfbb01c206d1221032e040536191deb1d3f1922906f56471be9fec77a0467",
+   "bytes": 332,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/heatmap.evidence_age": {
+   "sha256": "b948b137629952de281607916bb4fb1423bc32eca3e03eca203941d3431c05a3",
+   "bytes": 12536,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/heatmap.focus_areas": {
+   "sha256": "44b7da6616e2f5ae8dc63363b73b6506f16c47a2d864f7b44594bf0a70ca1267",
+   "bytes": 6454,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/heatmap.safeguard_gates": {
+   "sha256": "7d461caa280e6a64925ec7f65d9671140669a384117a3e23580f32cf01f79e15",
+   "bytes": 7031,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/heatmap.value_chain": {
+   "sha256": "1061b226a2d5e328aebf26484a3156e290d20339bad7f25d70e807d57b61bfca",
+   "bytes": 20638,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/heatmap.workbook_scores": {
+   "sha256": "4dbe2a284e7bd0d43218ab78359d9f3f83b9690f3857f1ea6903fd7055641811",
+   "bytes": 2936,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.ceilings": {
+   "sha256": "b1e1e5ce10f14d995721a03149007256d08b2730202c093aefcdbd72787529cc",
+   "bytes": 278,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.evidence_coverage": {
+   "sha256": "b1e1e5ce10f14d995721a03149007256d08b2730202c093aefcdbd72787529cc",
+   "bytes": 278,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.exec_summary": {
+   "sha256": "bdc2b457d793b22fa641d64026251f249ed64e17fe3d3e47d59cbfd9a137b3d4",
+   "bytes": 8661,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.financial_series": {
+   "sha256": "18192ec1442a40df077239ae15d5eeecd721e13f4c07657ad0c376c101f969b8",
+   "bytes": 2940,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.findings": {
+   "sha256": "ab5f64f14387ed9dcd7aa411688f40f7634683c8a0b338ebacb982efebc99628",
+   "bytes": 11312,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.firmographics": {
+   "sha256": "646175e7d04506fc660bec3d034b8e71ab658f6acc6a03630f80e22098164971",
+   "bytes": 6814,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.leadership": {
+   "sha256": "beb328bd50a6b5fded74c77a35a9a1cecf613a2f2412d822099fd9beab75adb3",
+   "bytes": 5748,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.opportunity": {
+   "sha256": "1bf054760c4abe85136d32d3c5627bde8092917f96e4f128a152a2ea899fc6f1",
+   "bytes": 17791,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.scores": {
+   "sha256": "5aa6c1eb64b954b6b75b58aa84bff2d861398b64b920bcb8688722e6d87e0145",
+   "bytes": 4316,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.sentiment": {
+   "sha256": "31e904c474039fc724fa7e9bc1bea2aa0fcbbf1001318a23e761fd9bf29fec0b",
+   "bytes": 4300,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.thought_leadership": {
+   "sha256": "f0a29026d54d52c26a0514e1162607bcd98067c111d8d39aebed961b724c7f65",
+   "bytes": 6233,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/overview.why_now": {
+   "sha256": "bfea7d045ee220b808f9d23cdd2d02a9f89384b5f73e2d176f3e1656d9cd3fa6",
+   "bytes": 6060,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/platform.platform_story": {
+   "sha256": "f315395279db1e69f920316a11662c58808851acf3dee692126da64d342de6e0",
+   "bytes": 37189,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/platform.recommendations": {
+   "sha256": "ef70700ec82f90fc30122fafb7f6bb3fd615874436a0fef6e4fbd7e716cacd4b",
+   "bytes": 14540,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/platform.roadmap": {
+   "sha256": "2f6cea7a41e259738a24ba3861637c11053acd1bafdf9b890ea8202274cf0740",
+   "bytes": 3024,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/platform.stairstep": {
+   "sha256": "d0a0a6d05f2f754cca0bc9a479bdf711332934cb29c98c710d056ae254816c5f",
+   "bytes": 3545,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/platform.starters": {
+   "sha256": "368d229a2e9d0adcf32dc76106483d5c5e9794d7a0f8992cf24f3ba91d1426e6",
+   "bytes": 7488,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:logix/techstack.techstack": {
+   "sha256": "98e7dfc4cc71cfc53b3653ef7e769ddb2e87ef8c52cf9a175fcb9235cfe8ca75",
+   "bytes": 37007,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.ceilings": {
+   "sha256": "b1e1e5ce10f14d995721a03149007256d08b2730202c093aefcdbd72787529cc",
+   "bytes": 278,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.evidence_coverage": {
+   "sha256": "b1e1e5ce10f14d995721a03149007256d08b2730202c093aefcdbd72787529cc",
+   "bytes": 278,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.exec_summary": {
+   "sha256": "b8e0f6d08cbdead1abbaaf6ead6cdd2fab60d6a6b933f125a8202b735f8fdfc9",
+   "bytes": 3218,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.financial_series": {
+   "sha256": "4af848ff38e43a19a11dbb5bf3253b76568d53931e1dad066db45e69f4db9ab5",
+   "bytes": 2483,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.findings": {
+   "sha256": "11d676a2f8f91ec7c74a48f2ae591816bbd5d7377be1cee44c890202884d75e1",
+   "bytes": 8228,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.firmographics": {
+   "sha256": "ec6900fe74634cc05bafbc390087d10ee08b8fbcaa9e51d14627ffba47a81021",
+   "bytes": 6101,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.leadership": {
+   "sha256": "0e63cfeb83d9bfe3b1f03ea9e9a370cc6b4ba023a3b68b7ea1670a533832fa27",
+   "bytes": 5565,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.opportunity": {
+   "sha256": "4f85b5cea9f8a337214aeb2f09b4a9fe7896d77cb3e67ee53cbb660eaff7dd69",
+   "bytes": 9848,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.scores": {
+   "sha256": "67440dad66bd86e5d9d995b2199264160ad2955265af0cdfa69d71d783d07a7b",
+   "bytes": 1820,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.sentiment": {
+   "sha256": "755f620a40eb040d8cc56245505f4f36780df11cdce6878c4bad72686a3a6cae",
+   "bytes": 9546,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.thought_leadership": {
+   "sha256": "fd5ff13736caf9f7d0d2369740f5e618598553c7bbfef56ee6ec9e703074b9e7",
+   "bytes": 5132,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/overview.why_now": {
+   "sha256": "814720ea53987ea04ace22232103cf2beabcaa62d12395cc0c7e0444861f4822",
+   "bytes": 7290,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/platform.platform_story": {
+   "sha256": "0c411d13730d78de58cc319c87f16578f03afcc8781081657ab93fada74ac7d2",
+   "bytes": 75793,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/platform.recommendations": {
+   "sha256": "a2afcad1799d6040f09490e9beca1c48181015b3ea67aefee959284fca59718c",
+   "bytes": 37211,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/platform.roadmap": {
+   "sha256": "08974a372d55afcdcaa56b3e6a0583fc5f5fd032acf08fbcb226c306e2bb5694",
+   "bytes": 2736,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/platform.stairstep": {
+   "sha256": "9bf9ec3557334be2bb424868c7c35c002826428eb350265073b0698384fad55b",
+   "bytes": 3549,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/platform.starters": {
+   "sha256": "ccb3e8e68481134280046cc4a68c88388adb7996f547e0d6756d88cb5c29ff14",
+   "bytes": 5725,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  },
+  "gold:baxter/techstack.techstack": {
+   "sha256": "b8a451f909edb7628c72cdf5777b8f7dcb7658cfe9ade53c5e0f5e719839e259",
+   "bytes": 73685,
+   "top_level_keys": [
+    "data",
+    "data_source",
+    "e_ids",
+    "empty_state",
+    "produced_at",
+    "producer_version",
+    "provenance"
+   ]
+  }
+ }
+}

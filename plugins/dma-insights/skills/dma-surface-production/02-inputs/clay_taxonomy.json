@@ -1,0 +1,102 @@
+{
+  "_doc": [
+    "CLAY TAXONOMY — the data point → surface → tier mapping, in one file.",
+    "",
+    "Two consumers render this and neither carries its own copy:",
+    "  scripts/clay_plan.py               the printed call plan and tier map",
+    "  02-inputs/2-clay-enrichment.md     its tier table, generated with",
+    "                                     `python3 scripts/clay_plan.py --tier-table`",
+    "",
+    "Until 2026-08-19 the script and the md each held the mapping and had",
+    "drifted in four measured places: a Headcount Growth row the md's tier",
+    "table lacked, the filing caveat on Annual Revenue and Latest Funding the",
+    "script lacked, the O3 mapping for Open Jobs the script lacked, and a C1",
+    "timeline mapping for Recent News the md never asserted. Each resolved to",
+    "the richer or conditional side, recorded here.",
+    "",
+    "The tier follows the underlying SOURCE, not the tool, and getting it",
+    "wrong changes the score. `data_points` order is load-bearing: STEP 2 and",
+    "STEP 4 of the printed plan list dataPoints in this order.",
+    "",
+    "`tier_condition`, where present, is part of the tier: the band holds only",
+    "when the condition does, and a value that fails it is an inference."
+  ],
+  "data_points": [
+    {
+      "name": "Tech Stack",
+      "route": "company",
+      "surfaces": ["T1 register"],
+      "tier": "T1",
+      "emphasis": true,
+      "note": "A machine technographic scan is T1, never T4. Filing it at T4 caps the capability at L2.5 and silently suppresses the score — the commonest misclassification in the corpus."
+    },
+    {
+      "name": "Annual Revenue",
+      "route": "company",
+      "surfaces": ["O2 firmographics"],
+      "tier": "T1-T2",
+      "tier_condition": "when a filing is behind it",
+      "note": "Filings and disclosures. For an entity that files nothing, this value is usually modelled and has no traceable source — that is an inference, not a T1 fact, and the tier follows the source as it does everywhere else."
+    },
+    {
+      "name": "Headcount Growth",
+      "route": "company",
+      "surfaces": ["O2 firmographics"],
+      "tier": "T2",
+      "note": "A capability-trajectory signal."
+    },
+    {
+      "name": "Recent News",
+      "route": "company",
+      "surfaces": ["O3 why-now", "C5 acquisitions"],
+      "tier": "T3",
+      "note": "Third-party analysis."
+    },
+    {
+      "name": "Open Jobs",
+      "route": "company",
+      "surfaces": ["O3 why-now", "P1 readiness"],
+      "tier": "T2-T3",
+      "note": "The posting is first-party; the aggregator is not. Hiring is the cheapest capability signal there is."
+    },
+    {
+      "name": "Latest Funding",
+      "route": "company",
+      "surfaces": ["O3 why-now", "O8 financial context"],
+      "tier": "T1-T2",
+      "tier_condition": "when a filing is behind it",
+      "note": "Filings and disclosures. For an entity that files nothing, this value is usually modelled and has no traceable source — that is an inference, not a T1 fact, and the tier follows the source as it does everywhere else."
+    },
+    {
+      "name": "Find Thought Leadership",
+      "route": "contact",
+      "surfaces": ["O12"],
+      "tier": "T2-T3",
+      "note": "T2 for a first-party publication or named conference; T3 for trade press."
+    },
+    {
+      "name": "Summarize Work History",
+      "route": "contact",
+      "surfaces": ["O7 tenure and trajectory"],
+      "tier": "T3",
+      "note": "Profile-derived."
+    }
+  ],
+  "custom_rule": {
+    "name": "Any Custom data point",
+    "tier": "Tier of whatever it returns — read the source before assigning",
+    "note": ""
+  },
+  "job_title_keywords": [
+    "Chief Executive", "Chief Information", "Chief Technology", "Chief Operating",
+    "Chief Risk", "Chief Data", "Chief Digital", "Head of Technology", "Head of Digital",
+    "EVP", "SVP Technology"
+  ],
+  "job_title_exclude_keywords": ["Intern", "Assistant", "Coordinator"],
+  "gaps": {
+    "leadership": "Custom: board and executive committee membership",
+    "techstack": "Custom: platform migrations announced in the last 24 months",
+    "thought": "Custom: conference appearances and published bylines",
+    "news": "Custom: regulatory filings and enforcement mentions"
+  }
+}

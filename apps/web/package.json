@@ -1,0 +1,23 @@
+{
+  "name": "dma-insights-web",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build:proto": "babel proto --presets @babel/preset-react --out-dir public/proto/js && node scripts/copy-vendor.js",
+    "build": "npm run build:proto && next build",
+    "start": "next start -p ${PORT:-3000}",
+    "test:web": "node --test tests/*.test.js",
+    "qa:gate": "bash scripts/qa-gate.sh"
+  },
+  "dependencies": {
+    "next": "14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.24.8",
+    "@babel/core": "7.25.2",
+    "@babel/preset-react": "7.24.7",
+    "playwright-core": "1.62.1"
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "case_id": "GOLDEN_CASE_B",
+  "case_name": "Contradictory Evidence — T1 vs T3 Conflicts",
+  "case_description": "Regional bank assessed in HYBRID mode with intentional contradictions between evidence tiers. Tests how assessment skill resolves conflicts: T1 vs T3, T2 vs T5, timing conflicts. Verifies contradiction_log completion and resolution rationale documentation.",
+  "institution_profile": {
+    "institution_name": "Example Regional Bank",
+    "institution_size_tier": "Large_10B_to_50B",
+    "sub_vertical": "Regional_Bank",
+    "evidence_mode": "HYBRID",
+    "geography": "Southeast",
+    "key_characteristics": [
+      "$22B in assets",
+      "850,000 customers",
+      "Multi-state presence (4 states)",
+      "Recent digital transformation initiative",
+      "Published investor relations materials"
+    ]
+  },
+  "contradictions_test_cases": [
+    {
+      "contradiction_id": "CONTR-001",
+      "metric": "Mobile App Adoption Rate",
+      "conflict_type": "T1 vs T3 — Quantification Mismatch",
+      "evidence_t1": {
+        "evidence_id": "E-201",
+        "source": "Bank's Own Call Report Submission (FFIEC)",
+        "fact": "Mobile logins: 45% of active users, trailing 12 months",
+        "tier": "T1",
+        "recency_months": 3
+      },
+      "evidence_t3": {
+        "evidence_id": "E-202",
+        "source": "J.D. Power Digital Banking Benchmarking Study",
+        "fact": "Bank's mobile adoption: 38% of customer base",
+        "tier": "T3",
+        "recency_months": 12
+      },
+      "contradiction_nature": "Call Report shows 45%; J.D. Power shows 38%. 7-point discrepancy. Likely due to: (1) different denominators (active users vs. total customers), (2) timing (3mo vs. 12mo ago), (3) methodology (logins vs. adoption)",
+      "resolution_rule": "T1 source (Call Report) takes precedence over T3 (analyst report). Call Report is audited, regulatory-mandated. Accept 45% as correct.",
+      "expected_resolution": {
+        "winning_fact": "45% mobile adoption (Call Report, T1)",
+        "reasoning": "T1 regulatory source trumps T3 analyst estimate",
+        "score_implication": "Score P2C3 onboarding using 45% metric, not 38%"
+      },
+      "supported_capabilities": ["P2C1", "P2C3"]
+    },
+    {
+      "contradiction_id": "CONTR-002",
+      "metric": "Data Governance Maturity",
+      "conflict_type": "T2 vs T5 — Claim Credibility Mismatch",
+      "evidence_t2": {
+        "evidence_id": "E-203",
+        "source": "Bank Annual Report (10-K SEC Filing)",
+        "fact": "Bank states: 'Data governance framework in place; board oversight established'",
+        "tier": "T2",
+        "recency_months": 3
+      },
+      "evidence_t5": {
+        "evidence_id": "E-204",
+        "source": "Bank Website, Solutions Page",
+        "fact": "Bank claims: 'Industry-leading data analytics and AI-powered insights'",
+        "tier": "T5",
+        "recency_months": 0
+      },
+      "evidence_internal": {
+        "evidence_id": "INT-AUDIT-042",
+        "source": "Internal Risk Management Audit (Provided by Bank)",
+        "fact": "Data governance found to have 'significant gaps'; only 60% of data elements classified; no automated discovery tool",
+        "tier": "T4",
+        "recency_months": 6
+      },
+      "contradiction_nature": "10-K (T2) claims governance 'in place'; website (T5) makes aggressive AI claims; internal audit (T4) documents 'significant gaps'. Three conflicting signals.",
+      "resolution_rule": "Precedence: T2 10-K > T4 internal > T5 website. 10-K is audited and regulatory filing; internal audit corroborates deficiencies; website is marketing.",
+      "expected_resolution": {
+        "winning_fact": "Data governance framework documented but with significant gaps (per 10-K claim corroborated by internal audit)",
+        "reasoning": "T2 is authoritative; T4 internal audit validates the limits of the framework",
+        "score_implication": "P4C1 Data Governance scores M2–M3 (framework exists but incomplete), not M4–M5 (internal audit disputes marketing claims)"
+      },
+      "supported_capabilities": ["P4C1", "P4C2"]
+    },
+    {
+      "contradiction_id": "CONTR-003",
+      "metric": "Compliance Issue Status",
+      "conflict_type": "Timing Conflict — Terminated vs Active",
+      "evidence_older": {
+        "evidence_id": "E-205",
+        "source": "CFPB Enforcement Database",
+        "fact": "Bank had consent order issued 2015; current status: TERMINATED (2019)",
+        "tier": "T1",
+        "recency_months": 60
+      },
+      "evidence_newer": {
+        "evidence_id": "E-206",
+        "source": "Bank Investor Presentation, Quarterly Update",
+        "fact": "Bank states: 'Resolved compliance matter from prior years; no outstanding regulatory actions'",
+        "tier": "T2",
+        "recency_months": 3
+      },
+      "evidence_conflicting": {
+        "evidence_id": "E-207",
+        "source": "News Archive, Regional Finance Publication",
+        "fact": "Article from 6 months ago: 'Bank facing scrutiny over AML procedures; regulators investigating'",
+        "tier": "T3",
+        "recency_months": 6
+      },
+      "contradiction_nature": "T1 source (CFPB DB) shows old issue terminated. T2 (bank's own statement) says no outstanding actions. T3 (news) suggests recent scrutiny. Which is current state?",
+      "resolution_rule": "Temporal hierarchy: Most recent credible source wins. T1 CFPB DB (updated in real-time, authoritative) is most reliable. If CFPB shows terminated, that's final status. News article (T3) may refer to prior matter or initial investigation.",
+      "expected_resolution": {
+        "winning_fact": "Consent order terminated (2019); currently no CFPB enforcement action",
+        "reasoning": "T1 regulatory source is authoritative on enforcement status; news article likely refers to same historical matter",
+        "score_implication": "Cap P3C3 Compliance at 3.5 (terminated action <24mo = S2 severity cap applies); do not score as if currently under enforcement (would be S3, cap 1.5)"
+      },
+      "supported_capabilities": ["P3C3"]
+    },
+    {
+      "contradiction_id": "CONTR-004",
+      "metric": "API Architecture Deployment",
+      "conflict_type": "T3 vs T4 — Pilot vs Production Status",
+      "evidence_t3": {
+        "evidence_id": "E-208",
+        "source": "Gartner Magic Quadrant Report (API Management)",
+        "fact": "Bank noted as 'growing vendor user' in Gartner ecosystem; implementing APIs for third-party integrations",
+        "tier": "T3",
+        "recency_months": 12
+      },
+      "evidence_t4": {
+        "evidence_id": "INT-TECH-015",
+        "source": "Internal Technology Roadmap (Provided by Bank)",
+        "fact": "API initiative: PILOT PHASE (launched Q3 2023); production rollout planned Q3 2024; currently 3 pilot APIs (payment processor, data aggregator, loan origination partner)",
+        "tier": "T4",
+        "recency_months": 3
+      },
+      "contradiction_nature": "Gartner (T3) implies production-level API ecosystem; internal docs (T4) reveal only pilot status with 3 APIs. Analyst view is overstated relative to reality.",
+      "resolution_rule": "For project status, internal documentation (T4) is more reliable than analyst commentary (T3). Pilot status is materially different from production deployment.",
+      "expected_resolution": {
+        "winning_fact": "APIs in PILOT: 3 live integrations; production rollout planned Q3 2024",
+        "reasoning": "Internal roadmap is authoritative for implementation status; analyst report reflects intended direction but overstates current state",
+        "score_implication": "P4C3 Technology Architecture: Score M2–M3 for current state (pilot), not M4 (production). Trend potential to M4 if pilot succeeds, but current evidence supports M3."
+      },
+      "supported_capabilities": ["P4C3"]
+    }
+  ],
+  "expected_outcomes": {
+    "overall_score_range": {
+      "min": 2.6,
+      "expected_mid": 3.0,
+      "max": 3.4
+    },
+    "rationale": "Regional bank with mature operations but conflicting signals on digital maturity. T1/T2 evidence base is solid (regulatory/official disclosure tier). Contradictions mostly resolve in favor of 'more mature but not fully production-ready' interpretation. Expected score: mid-M3 range.",
+    "expected_pillar_scores": {
+      "P1_expected": 3.2,
+      "P1_rationale": "Board governance documented in 10-K; stable regulatory status supports governance maturity M3–M4",
+      "P2_expected": 3.0,
+      "P2_rationale": "Mobile adoption at 45% (above median); API pilot indicates innovation consideration; expect M3",
+      "P3_expected": 3.2,
+      "P3_rationale": "Compliance: terminated enforcement (not current issue); no cap applies. Operational maturity mid-M3.",
+      "P4_expected": 2.7,
+      "P4_rationale": "Data governance documented but gapped (not AI-powered as claimed); APIs in pilot. Lower M3 / upper M2."
+    },
+    "contradiction_resolutions": {
+      "CONTR-001": {
+        "resolved_fact": "45% mobile adoption (T1 Call Report)",
+        "resolution_method": "T1 > T3; regulatory source authoritative"
+      },
+      "CONTR-002": {
+        "resolved_fact": "Data governance framework with significant gaps (T2 + T4 corroboration)",
+        "resolution_method": "Discount T5 marketing claims; T2 + T4 alignment provides credible picture"
+      },
+      "CONTR-003": {
+        "resolved_fact": "Enforcement terminated (2019); no current action",
+        "resolution_method": "T1 regulatory DB authoritative; news article context acceptable"
+      },
+      "CONTR-004": {
+        "resolved_fact": "APIs in pilot (3 live); production rollout Q3 2024",
+        "resolution_method": "T4 internal docs > T3 analyst commentary for implementation status"
+      }
+    }
+  },
+  "test_tolerances": {
+    "overall_score_tolerance": 0.4,
+    "pillar_score_tolerance": 0.4,
+    "category_score_tolerance": 0.3,
+    "contradiction_resolution_accuracy": "All 4 contradictions must be resolved per expected_resolutions above; ≥80% accuracy required"
+  },
+  "governance_audit_expectations": {
+    "contradiction_log_completeness": "All 4 contradictions must be documented in contradiction_log with: Fact_A (evidence ID E-201), Fact_B (evidence ID E-202), Contradiction_Type, Resolution rule applied, Winning Fact, Rationale",
+    "score_justification": "Rationales for P2C3, P4C1, P3C3, P4C3 must cite specific contradiction resolution: 'Resolved T1 vs T3 conflict on mobile adoption by accepting T1 regulatory data (45%)'",
+    "cr01_check": "CR-01 Critic findings addressed — If critic flagged 'marketing claims unsupported' on data governance, evidence should be present documenting this concern was anticipated"
+  },
+  "regression_test_gate": {
+    "test_case_purpose": "Verify assessment skill handles contradictory evidence correctly: (1) Applies precedence rules (T1>T3>T5), (2) Resolves timing conflicts, (3) Documents contradictions with clear winning facts, (4) Derives scores from resolved facts, not conflicting claims",
+    "pass_criteria": [
+      "Overall score within 2.6–3.4 range",
+      "All 4 contradictions documented in contradiction_log with resolution rules cited",
+      "Rationales for affected capabilities (P2C3, P4C1, P3C3, P4C3) mention contradiction resolution",
+      "Final scores align with RESOLVED facts (not discarded conflicting claims)",
+      "No scores inflated by unresolved marketing claims (P4C1 not M4+ on AI claim; P4C3 not M4 on production APIs)"
+    ]
+  },
+  "metadata": {
+    "case_created_date": "2024-01-15",
+    "case_updated_date": "2024-01-15",
+    "case_owner": "DMA Governance & Regression Testing Team",
+    "use_in_workflows": ["Workflow C: Rubric Version Regression", "Training: Contradiction Resolution", "Governance Audit: Contradiction_Log Validation"],
+    "compatibility": "DMA Assessment Skill v3.0+"
+  }
+}

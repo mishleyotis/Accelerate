@@ -1,0 +1,7 @@
+mcp==2.0.*
+uvicorn[standard]>=0.35
+pg8000==1.31.*
+cloud-sql-python-connector[pg8000]==1.12.*
+sentence-transformers==3.*
+torch==2.*
+pypdf==6.*

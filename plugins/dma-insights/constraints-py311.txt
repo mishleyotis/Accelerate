@@ -1,0 +1,18 @@
+# CPython 3.11 constraints: the measured working set (dma-deps check green,
+# 2026-08-19). The four scientific pins mirror
+# skills/dma-assessment/scripts/requirements.txt; the rest are the versions
+# the ranges in requirements.txt resolved to on this interpreter.
+pandas==2.0.3
+numpy==1.24.3
+pyarrow==12.0.0
+matplotlib==3.7.2
+rank-bm25==0.2.2
+pdfplumber==0.9.0
+pypdf==6.16.1
+cffi==2.1.1
+python-pptx==1.0.2
+Pillow==12.3.0
+openpyxl==3.1.5
+python-docx==1.2.0
+python-dateutil==2.9.0.post0
+lxml==6.1.1
