@@ -101,7 +101,7 @@ STANDING_OPEN = [
      "routines UI — update_trigger cannot add connectors, and a "
      "delete-and-recreate would change the trigger id and discard its run "
      "history",
-     "docs/CLIENT-SELECTION.md § 3.6"),
+     "docs/CLIENT-SELECTION.md § 3.7"),
     ("connector authorisation",
      "Atlassian, Zapier and Zennify_Brains require OAuth, and lane B "
      "(trig_01NXSfaTVuWEubFAcA4mbbeL) carries no claude.ai connectors. A "

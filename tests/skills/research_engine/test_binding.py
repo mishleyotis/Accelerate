@@ -261,3 +261,137 @@ def test_every_declared_metadata_key_is_written_by_a_new_run(tmp_path):
         f"declared in RUN_METADATA_KEYS and not written by a new run: "
         f"{missing}. A key that is declared but never written is read as a "
         f"KeyError by everything downstream")
+
+
+# ── the unambiguous census binds itself ──────────────────────────────────
+#
+# owner, 2026-08-30: "the run should bind to unambiguous subvertical."
+#
+# The question exists because a run bound to the wrong sub-vertical
+# researches the wrong 851 cells to completion. Where the census leaves one
+# reading there is no judgment left to make, and the question is ceremony
+# that costs a scheduled firing its whole purpose — the intake could prepare
+# a binding and never start one.
+#
+# What must NOT become possible is an agent writing `auto_bound: true` over
+# an ambiguous entity, so check() recomputes unambiguity from the census
+# every time and never reads the flag as authority. These test that.
+
+from engine import preflight as PF                            # noqa: E402
+
+
+def _census(accepts, rejects=("IC",), material=1):
+    return {
+        "lines_of_business": [
+            {"lob": f"Line {i}",
+             "basis": "10-K segment disclosure, FY2025 revenue table",
+             "material": True}
+            for i in range(material)],
+        "candidates": (
+            [{"sub_vertical": s, "verdict": "ACCEPT",
+              "reason": "charter and revenue lines both say so"}
+             for s in accepts]
+            + [{"sub_vertical": s, "verdict": "REJECT",
+                "reason": "no revenue line implies this business"}
+               for s in rejects]),
+    }
+
+
+def test_one_accept_against_a_real_reject_is_unambiguous():
+    ok, sv, why = PF.unambiguous_binding({"lob_census": _census(["CU"])})
+    assert ok and sv == "CU"
+    assert "material" in why
+
+
+def test_two_accepts_are_never_unambiguous():
+    ok, sv, why = PF.unambiguous_binding(
+        {"lob_census": _census(["CU", "RB"])})
+    assert not ok and not sv
+    assert "2 sub-verticals are ACCEPTed" in why
+
+
+def test_a_census_that_rejected_nothing_is_not_unanimity():
+    """The thin-research case: one candidate, accepted, nothing else weighed.
+    That is a census that never looked, and it must not bind itself."""
+    ok, sv, why = PF.unambiguous_binding(
+        {"lob_census": _census(["CU"], rejects=())})
+    assert not ok
+    assert "no candidate was REJECTed" in why
+
+
+def test_two_material_lines_of_business_are_the_owners_call():
+    ok, sv, why = PF.unambiguous_binding(
+        {"lob_census": _census(["CU"], material=2)})
+    assert not ok
+    assert "MATERIAL" in why
+
+
+def test_autobind_fills_the_record_and_the_check_passes(tmp_path):
+    """End to end through the real CLI, because the record it writes is what
+    a later reader has to be able to audit."""
+    pf = preflight_file(tmp_path)
+    doc = json.loads(pf.read_text())
+    doc["lob_census"] = _census(["CU"])
+    doc["binding_question"] = {"asked": False}
+    doc["mode_question"] = {"asked": False}
+    doc["binding"] = {"sub_vertical": "", "evidence_mode": "",
+                      "scope_mode": "T1_CORE"}
+    pf.write_text(json.dumps(doc))
+    r = subprocess.run(
+        [sys.executable, "-m", "engine.preflight", "autobind",
+         "--file", str(pf), "--json"],
+        cwd=ENGINE, capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+    out = json.loads(r.stdout)
+    assert out["auto_bound"] and out["sub_vertical"] == "CU"
+    assert out["evidence_mode"] == "PUBLIC"
+    assert out["check_ok"], out["problems"]
+    back = json.loads(pf.read_text())
+    q = back["binding_question"]
+    assert q["asked"] is False and q["auto_bound"] is True
+    assert "AUTO-BOUND" in q["answer"]
+    assert "no human asked" in q["answered_by"]
+
+
+def test_autobind_refuses_an_ambiguous_census(tmp_path):
+    pf = preflight_file(tmp_path)
+    doc = json.loads(pf.read_text())
+    doc["lob_census"] = _census(["CU", "RB"])
+    pf.write_text(json.dumps(doc))
+    r = subprocess.run(
+        [sys.executable, "-m", "engine.preflight", "autobind", "--file",
+         str(pf)], cwd=ENGINE, capture_output=True, text=True)
+    assert r.returncode != 0
+    assert "ambiguous" in r.stderr and "AskUserQuestion" in r.stderr
+
+
+def test_the_flag_is_not_the_authority(tmp_path):
+    """THE ONE THAT MATTERS. A hand-written auto_bound over an ambiguous
+    census must not pass: check() recomputes rather than believing."""
+    pf = preflight_file(tmp_path)
+    doc = json.loads(pf.read_text())
+    doc["lob_census"] = _census(["CU", "RB"])          # ambiguous
+    doc["binding_question"] = {"asked": False, "auto_bound": True,
+                               "answer_sub_vertical": "CU"}
+    doc["binding"]["sub_vertical"] = "CU"
+    rep = PF.check(doc)
+    assert not rep["ok"]
+    assert any("the flag is not the authority" in p.lower()
+               for p in rep["problems"]), rep["problems"]
+
+
+def test_only_public_may_be_auto_bound(tmp_path):
+    """Auto-binding INTERNAL would claim access nobody granted — which is
+    the harm the gate exists to prevent, so that direction stays closed."""
+    pf = preflight_file(tmp_path)
+    doc = json.loads(pf.read_text())
+    doc["lob_census"] = _census(["CU"])
+    doc["binding_question"] = {"asked": False, "auto_bound": True}
+    doc["mode_question"] = {"asked": False, "auto_bound": True,
+                            "answer_mode": "INTERNAL"}
+    doc["binding"] = {"sub_vertical": "CU", "evidence_mode": "INTERNAL",
+                      "scope_mode": "FULL"}
+    rep = PF.check(doc)
+    assert not rep["ok"]
+    assert any("Only PUBLIC may be bound without a human" in p
+               for p in rep["problems"]), rep["problems"]

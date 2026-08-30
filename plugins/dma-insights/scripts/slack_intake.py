@@ -503,6 +503,16 @@ def main(argv=None) -> int:
                         "marks the request delivered")
     y.add_argument("--json", action="store_true")
 
+    fch = sub.add_parser(
+        "fetch",
+        help="pull the channel and every thread it names STRAIGHT FROM "
+             "SLACK, with no connector — needs a bot token (slack_client.py)")
+    fch.add_argument("--channel", default=DEAL_DESK_CHANNEL_ID)
+    fch.add_argument("--limit", type=int, default=50)
+    fch.add_argument("--transcript", default="/tmp/deal_desk.txt")
+    fch.add_argument("--threads", default="/tmp/threads")
+    fch.add_argument("--since-days", type=int, default=5)
+
     w = sub.add_parser("thread-of",
                        help="the Slack thread a run is answering, read out "
                             "of its own workbook")
@@ -524,6 +534,33 @@ def main(argv=None) -> int:
               else f"INTAKE: PENDING {one['entity_id']} "
                    f"run={one['run_id']} \"{one['account']}\" (manual)")
         return 0
+
+    if a.cmd == "fetch":
+        import slack_client as SC                             # noqa: PLC0415
+        tok = SC.bot_token()
+        chan = SC.fetch_channel(a.channel, a.limit, token=tok)
+        Path(a.transcript).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.transcript).write_text(chan, encoding="utf-8")
+        rows = threads_to_read(chan, a.since_days, now)
+        Path(a.threads).mkdir(parents=True, exist_ok=True)
+        got, failed = [], []
+        for r in rows:
+            try:
+                body = SC.fetch_thread(r["channel_id"], r["ts"], token=tok)
+            except SC.SlackError as e:
+                failed.append({"ts": r["ts"], "error": str(e)})
+                continue
+            dest = Path(a.threads) / f"thread_{r['ts']}.txt"
+            dest.write_text(body, encoding="utf-8")
+            got.append(str(dest))
+        print(json.dumps({"transcript": a.transcript,
+                          "threads_named": len(rows),
+                          "threads_fetched": len(got),
+                          "failed": failed}, indent=1))
+        # A thread we could not fetch stays UNDECIDABLE downstream, which is
+        # the safe reading; a non-zero exit says the fetch was incomplete so
+        # a caller does not treat this as a full picture.
+        return 0 if not failed else 3
 
     if a.cmd == "thread-of":
         print(json.dumps(thread_of(a.run, a.root), indent=1))

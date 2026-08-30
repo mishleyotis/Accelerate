@@ -72,6 +72,101 @@ already knows that nobody ever ruled on, prompting on every call forever.
 Measured 2026-08-30 before the split existed: **16 of 86 approved.** After:
 124 of 184, 58 refused on the record, 2 guarded, **0 unclassified**.
 
+## Slack — a bot token, not a connector (PORTABLE, 2026-08-30)
+
+**Status: code LIVE; the secret is the owner's to provision.**
+
+Until 2026-08-30 the only route to `#deal-desk` was the claude.ai Slack
+**connector**, attached per Routine on its own edit screen. That is not
+portable in three measured ways:
+
+1. `dma-assessment-intake` carries no connector of any kind, so the queue
+   that decides which client to assess could not read its own channel
+   (AUD-0190). `update_trigger` cannot attach one; only a human can.
+2. **A script can never call a connector tool.** So the triage rule could be
+   tested over recorded fixtures and never over the live channel — the read
+   half and the decide half could drift with nothing to catch it.
+3. Every new Routine, every fresh container, every teammate's session starts
+   with no Slack until somebody clicks through a UI.
+
+A bot token in Secret Manager has none of those properties.
+`scripts/slack_client.py` reads it by the same three-rung ladder as the
+connector path token, works in any process carrying the service-account key,
+and is rotated without touching code.
+
+### There is no redirect URL, and that is a design decision
+
+The intake **polls**. It calls `conversations.history`, `conversations.replies`
+and `chat.postMessage` outbound, on a schedule. It subscribes to no Slack
+events, so there is:
+
+- no request URL for Slack to call,
+- no **OAuth redirect URL** — the app is installed once, to one workspace,
+  from its own **Install to Workspace** button, which uses Slack's own
+  `https://slack.com/oauth/v2/authorize` flow and hands back a bot token;
+- no **signing secret** to store, because nothing inbound needs verifying.
+
+If Slack's app-config screen insists on a redirect URL before it will let you
+install (it does on some workspace policies), use
+
+```
+https://slack.com/oauth/v2/authorize
+```
+
+as the OAuth entry and leave **Redirect URLs empty**; only a *distributed*
+app (one installable by other workspaces) needs its own callback endpoint,
+and this app is internal to one workspace. Do not invent a callback on the
+MCP service: there is no handler there, so a redirect pointed at it would
+fail closed at install time and read as a Slack problem.
+
+### Scopes the bot needs
+
+| scope | what stops working without it |
+|---|---|
+| `channels:history` | `conversations.history` — the queue cannot be read |
+| `channels:read` | `conversations.info` — the channel name in the transcript |
+| `chat:write` | the completion reply |
+| `users:read` | display names on replies (degrades to bare ids, not fatal) |
+
+Private channel instead of public → `groups:history` + `groups:read`.
+**The bot must also be in the channel**: `/invite @<app>` in `#deal-desk`.
+`not_in_channel` is the error that says you skipped this, and
+`slack_client.py` names the remedy in the message.
+
+### Provisioning (owner, once)
+
+```bash
+printf %s "$SLACK_BOT_TOKEN" | gcloud secrets create dmai-slack-bot-token \
+    --project=digital-maturity-assessor --data-file=- --replication-policy=automatic
+gcloud secrets add-iam-policy-binding dmai-slack-bot-token \
+    --project=digital-maturity-assessor \
+    --member="serviceAccount:<the routine service account>" \
+    --role=roles/secretmanager.secretAccessor
+```
+
+Rotation is `gcloud secrets versions add dmai-slack-bot-token --data-file=-`
+and nothing else — the ladder always reads `latest`.
+
+Verify without printing the secret:
+
+```bash
+python3 plugins/dma-insights/scripts/slack_client.py whoami
+python3 plugins/dma-insights/scripts/slack_intake.py fetch      # channel + threads
+python3 plugins/dma-insights/scripts/slack_intake.py triage --transcript /tmp/deal_desk.txt --threads /tmp/threads
+```
+
+`whoami` prints team, user and bot id — never the token. No code path in this
+repository prints it, and `test_no_source_file_carries_a_literal_bot_token`
+fails the build if one is ever committed.
+
+### The connector route still works
+
+Nothing was removed. A session that HAS the Slack connector may still read
+the channel with it and save the transcript; `slack_client.py` renders the
+API's JSON into that same text shape, so one parser and one set of fixtures
+serve both. `test_slack_client.py` proves it by running the real parser over
+rendered output and asserting the same verdicts the recordings assert.
+
 ## Preflight (STEP 0 of every synthesis firing)
 
 1. `drive_fetch.py check` — REQUIRED: the intake folder answers the SA.
