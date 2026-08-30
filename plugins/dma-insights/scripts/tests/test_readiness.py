@@ -213,12 +213,25 @@ def test_json_carries_the_buckets_and_the_standing_items(monkeypatch,
 
 def test_every_standing_item_names_an_owner_and_a_document_that_exists():
     """An open item with no owner is a worry, and an open item pointing at a
-    document that is not there is worse than none — it reads as specified."""
+    document that is not there is worse than none — it reads as specified.
+
+    A `doc` may carry a section — "docs/X.md § 3.6" — and when it does the
+    section is CHECKED, not decorated: a heading reference that has drifted
+    sends the owner to a 300-line document to find an item that moved, which
+    is the same unfindability as a missing file wearing a friendlier face.
+    """
     for item, detail, owner, doc in R.STANDING_OPEN:
         assert owner.strip(), item
         assert detail.strip(), item
-        path = pathlib.Path(R.PLUGIN) / doc
-        assert path.exists(), f"{item} points at a missing {doc}"
+        rel, _, section = doc.partition(" §")
+        path = pathlib.Path(R.PLUGIN) / rel.strip()
+        assert path.exists(), f"{item} points at a missing {rel.strip()}"
+        if section.strip():
+            heads = [ln for ln in path.read_text(encoding="utf-8").splitlines()
+                     if ln.startswith("#")]
+            assert any(section.strip() in ln for ln in heads), (
+                f"{item} points at § {section.strip()} of {rel.strip()}, and "
+                f"no heading there carries it")
 
 
 def test_every_lane_names_a_fix(monkeypatch, tmp_path):

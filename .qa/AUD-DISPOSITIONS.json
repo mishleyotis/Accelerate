@@ -2108,11 +2108,11 @@
    "area": "routines",
    "title": "No owner-names-the-client channel exists at all",
    "target": "run_gate.py pick has no --client; its one human lever --prefer is documented as never passed by any routine; no Slack surface exists anywhere in the repo",
-   "disposition": "OPEN",
+   "disposition": "FIXED",
    "checks": [
     "routines"
    ],
-   "note": "The owner's report ('routines have clients hardcoded') describes a defect already repaired in the live prompts — every live Routine chooses dynamically and the only pinned one was deleted 2026-08-20 — but the gap BEHIND the report is real and different: the owner can stop a Routine and can edit a stored prompt, and cannot say 'do this client next' through any interface that exists. docs/CLIENT-SELECTION.md specifies the channel against the interfaces that do exist — three Slack commands, a request file in the intake tree beside the client folders, one `--requests` flag on run_gate.py pick, and a threaded reply — and marks every section LIVE or NOT BUILT. Building it is the owner's call on scope."
+   "note": "The owner's report ('routines have clients hardcoded') describes a defect already repaired in the live prompts — every live Routine chooses dynamically and the only pinned one was deleted 2026-08-20 — but the gap BEHIND the report is real and different: the owner can stop a Routine and can edit a stored prompt, and cannot say 'do this client next' through any interface that exists. docs/CLIENT-SELECTION.md specifies the channel against the interfaces that do exist — three Slack commands, a request file in the intake tree beside the client folders, one `--requests` flag on run_gate.py pick, and a threaded reply — and marks every section LIVE or NOT BUILT. Building it is the owner's call on scope. CLOSED 2026-08-30. The channel exists: `slack_intake.py` reads #deal-desk and decides PENDING / DELIVERED / UNDECIDABLE over the transcript, and `slack_intake.py request --client \"<name>\"` is the owner's direct lever, emitting a record in the same shape as a Slack-borne one so nothing downstream can tell them apart. The answer was a READER, not a new interface — the requests were already arriving and nothing read them. What remains is AUD-0190, the connector grant on the Routine, which is a different finding and not this one."
   },
   {
    "id": "AUD-0176",

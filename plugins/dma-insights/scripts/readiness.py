@@ -83,12 +83,25 @@ STANDING_OPEN = [
      "the environment owner: bootstrap_session.sh must run before the "
      "session starts (claude.ai/code environment settings)",
      "docs/ROUTINES.md"),
-    ("owner-names-the-client channel",
-     "There is no interface through which the owner can say which client to "
-     "assess next: `run_gate.py pick` has no --client, and no Slack surface "
-     "exists. Specified against the interfaces that do exist; NOT BUILT.",
-     "whoever builds it — the contract is section 3 of the doc",
-     "docs/CLIENT-SELECTION.md"),
+    # Was "owner-names-the-client channel … NOT BUILT" until 2026-08-30. It
+    # is built: the requests were already arriving in #deal-desk from a
+    # Slack workflow and nothing read them, so the channel was a reader
+    # (`slack_intake.py`) rather than a new interface, and the manual lever
+    # is `slack_intake.py request --client`. What is left of that item is
+    # not the channel, it is the grant — which is why it sits here rather
+    # than being closed outright.
+    ("Slack on the intake Routine",
+     "dma-assessment-intake carries no MCP connectors at all — measured "
+     "2026-08-30 from its job_config, which has no connector grant of any "
+     "kind — so it cannot call slack_read_channel. The queue is built and "
+     "tested against recorded channel data; it cannot read the live "
+     "channel until somebody attaches Slack. Its STEP 1 checks and says so "
+     "rather than inventing a queue.",
+     "the account owner, on this Routine's own edit screen in the claude.ai "
+     "routines UI — update_trigger cannot add connectors, and a "
+     "delete-and-recreate would change the trigger id and discard its run "
+     "history",
+     "docs/CLIENT-SELECTION.md § 3.6"),
     ("connector authorisation",
      "Atlassian, Zapier and Zennify_Brains require OAuth, and lane B "
      "(trig_01NXSfaTVuWEubFAcA4mbbeL) carries no claude.ai connectors. A "
