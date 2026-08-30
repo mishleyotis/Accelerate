@@ -175,7 +175,7 @@ def main() -> int:
         except Exception as e:
             print(f"  {svc:10} COULD NOT READ — {e}")
             rows.append({"service": svc, "revision": "?", "built_at": "",
-                         "image": ""})
+                         "image": "", "unread": True})
     for r in rows:
         r["pending"] = changed_since(r["built_at"], SERVICES.get(r["service"], []))
         flag = (f"  <-- STALE: {len(r['pending'])} commit(s) since"
@@ -185,6 +185,21 @@ def main() -> int:
             print(f"       {line[:90]}")
 
     behind = [r for r in rows if r["pending"]]
+    # A service this could not read is NOT a service that is up to date.
+    # `changed_since("")` returns [] — no built_at, nothing to compare from —
+    # so an unread row landed in the same bucket as a current one and the
+    # quick path printed "No service has unshipped commits" and exited 0.
+    # Measured 2026-08-30 on a container with no gcloud: all three services
+    # reported COULD NOT READ, the exit code was 0, and production was six
+    # days and seven commits stale behind that pass. The docstring already
+    # said 2 means the comparison could not be made; only this path did not.
+    unread = [r for r in rows if r.get("unread")]
+    if unread:
+        print(f"\n{len(unread)} service(s) could not be read: "
+              f"{', '.join(r['service'] for r in unread)}. NOT a pass — "
+              "nothing was compared for them, and a service nobody could "
+              "read is exactly the one that goes stale unnoticed.")
+        return 2
     if a.quick:
         if behind:
             print(f"\n{len(behind)} service(s) have commits touching their own "
