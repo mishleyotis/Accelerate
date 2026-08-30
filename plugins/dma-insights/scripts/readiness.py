@@ -188,6 +188,61 @@ def check_taxonomy():
                 "v5.0 recognition carries a lineage marker and is allowed")
 
 
+def check_chain():
+    code, out = _run([sys.executable, f"{PLUGIN}/scripts/audit_chain.py",
+                      "--strict"])
+    return lane("chain",
+                "every hand-off from intake to a served surface has an "
+                "owner, a gate and a reader",
+                code, out,
+                "audit_chain.py names the missing role per link. This "
+                "product's most expensive failures were links whose two "
+                "halves both worked and were not joined")
+
+
+def _database_answers() -> str | None:
+    """The DSN if a local PostgreSQL answers, else None. Probed rather than
+    assumed: `tests/schema/` ERRORS without one, and 22 errors in a suite
+    line reading '4332 passed' is how a set of invariant tests goes unrun for
+    months while the summary looks healthy."""
+    dsn = os.environ.get(
+        "LOCAL_DATABASE_URL",
+        "postgresql+pg8000://postgres:local@localhost:5432/dma_insights")
+    probe = ("import pg8000.dbapi as d;"
+             "c=d.connect(user='postgres',password='local',host='localhost',"
+             "port=5432,database='dma_insights');c.close()")
+    code, _ = _run([sys.executable, "-c", probe], timeout=30)
+    return dsn if code == 0 else None
+
+
+def check_schema():
+    dsn = _database_answers()
+    if not dsn:
+        return lane("schema",
+                    "the charter's invariants are proved against a real "
+                    "PostgreSQL: four bands on the raw score with no fifth "
+                    "enum value, generated columns STORED, the api role "
+                    "denied on staging, undated evidence never CURRENT",
+                    None, "",
+                    "bash infra/local/up.sh — it uses docker-compose where a "
+                    "daemon exists and the system PostgreSQL 16 where it "
+                    "does not",
+                    unmeasured_reason=(
+                        "no local PostgreSQL answers, so tests/schema/ ERRORS "
+                        "rather than fails and every invariant in it is "
+                        "unproven."),
+                    scope=CONTAINER)
+    code, out = _run([sys.executable, "-m", "pytest", "tests/schema/", "-q",
+                      "--tb=line", "-p", "no:cacheprovider"], timeout=900)
+    return lane("schema",
+                "the charter's invariants are proved against a real "
+                "PostgreSQL",
+                code, out,
+                "the failing line names the invariant; the catalogue tests "
+                "SKIP until a catalogue is loaded, which is honest — they "
+                "assert real counts no synthetic fixture can carry")
+
+
 def check_approvals():
     code, out = _run([sys.executable,
                       f"{PLUGIN}/scripts/audit_autoapprove.py", "--strict"])
@@ -320,8 +375,9 @@ def check_lifecycle(run):
 def assess(triggers=None, tests=False, lifecycle=False,
            offline=False) -> dict:
     lanes = [check_coverage(), check_skills(), check_taxonomy(),
-             check_approvals(), check_install(), check_connector(offline),
-             check_routines(triggers),
+             check_chain(), check_approvals(), check_schema(),
+             check_install(),
+             check_connector(offline), check_routines(triggers),
              check_tests(tests), check_lifecycle(lifecycle)]
     return {
         "lanes": lanes,

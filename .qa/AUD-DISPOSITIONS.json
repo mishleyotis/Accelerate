@@ -44,7 +44,10 @@
   "workbook": "python3 -m pytest tests/skills/research_engine/test_tabs_reach_the_app.py tests/skills/research_engine/test_assessment_grains.py tests/skills/research_engine/test_client_folder_versioning.py -q",
   "techstack": "python3 -m pytest tests/skills/research_engine/test_techscan_providers.py -q",
   "ledger": "python3 -m pytest scripts/tests/test_aud_ledger_vocabulary.py -q",
-  "approvals": "python3 plugins/dma-insights/scripts/audit_autoapprove.py --strict"
+  "approvals": "python3 plugins/dma-insights/scripts/audit_autoapprove.py --strict",
+  "schema": "bash infra/local/up.sh && python3 -m pytest tests/schema/ -q",
+  "stage_walk": "python3 plugins/dma-insights/scripts/stress_stage_and_supersede.py",
+  "chain": "python3 plugins/dma-insights/scripts/audit_chain.py --strict"
  },
  "findings": [
   {
@@ -2168,6 +2171,68 @@
     "approvals"
    ],
    "note": "Two mechanisms answer one question and the broader one wins without anybody being told. `mcp__Google_Drive__*` had been granting `trash_file` and `share_file` — both refused by the hook — for as long as the wildcard existed. The list is read out of the plugin TREE, and a doc is part of the tree, so naming `mcp__Slack__slack_send_message` once in CLIENT-SELECTION.md §3.5 was about to grant every Slack tool including sends, in the same change that deliberately withheld that one. The grant is now derived from the hook's own table: a classified server is granted by EXACT read tool name, an unclassified one keeps the wildcard because no finer record of it exists, and the connector keeps its prefix wildcard. Every classified server is granted whether or not the tree names it, so the settings half survives a session whose hooks bound from a stale install. Two tests: no classified server is wildcarded, and every granted tool is one the hook would also approve."
+  },
+  {
+   "id": "AUD-0181",
+   "sev": "BLOCKER",
+   "area": "qa",
+   "title": "47 invariant tests had been ERRORING, not failing, and the suite line said 4332 passed",
+   "target": "tests/schema/ — band boundaries strict-less-than on the raw score, no fifth value in the band enum, every generated column STORED, the api role denied on staging, a null published_date banding UNVERIFIED and never CURRENT, the active-run partial unique under concurrent insert — all against pg8000 with no PostgreSQL anywhere in the environment",
+   "disposition": "FIXED",
+   "checks": [
+    "schema"
+   ],
+   "note": "An ERROR is not a FAILURE and it is not a PASS: it is the test never running, and a summary line reporting '4332 passed, 22 errors' reads as healthy. Those 22 cover charter invariants 6, 7 and 9 and the role matrix — the ones this repository calls non-negotiable. `infra/local/up.sh` brings up PostgreSQL 16 with pgvector, the IAM-parity login roles the migrations' grants are written against, and alembic to head; it prefers docker-compose where a daemon exists and falls back to the system PostgreSQL where it does not, because this environment has the docker CLI and no daemon and a checker must handle that rather than assume it away. Measured after: 35 passed, 12 skipped, 0 errors. The 12 are the catalogue tests, which skip honestly — they assert real counts (851 cells, 16 categories, the v5->v7 resolution) that only the real workbooks carry, and the routine service account has no storage.objects.list on the catalogue-staging bucket. A readiness `schema` lane now probes for a live database and reports NOT_MEASURABLE_HERE rather than READY when there is none."
+  },
+  {
+   "id": "AUD-0182",
+   "sev": "BLOCKER",
+   "area": "engine",
+   "title": "The assessment stage was unreachable for every run whose scope is not all four pillars",
+   "target": "validator._rule4_scores: at the assessment stage it demanded a score in EVERY pillar sheet, including sheets with no rows",
+   "disposition": "FIXED",
+   "checks": [
+    "validator",
+    "stage_walk"
+   ],
+   "note": "Introduced by the stage key (AUD-0172) and found by walking a real run through `assemble package`, not by any unit test: `expect_scores` defaulted to False until the stage existed, so the branch had never once run against a real selection. A run's scope is a SELECTION and most runs do not cover all four pillars, so three of the four sheets carry no rows — and the package refused with 'no scores present' naming pillars nobody had been asked to research. A sheet with rows and no scores is still the failure the rule is for; a sheet with no rows is a pillar out of scope."
+  },
+  {
+   "id": "AUD-0183",
+   "sev": "BLOCKER",
+   "area": "engine",
+   "title": "package recomputed the client folder instead of reading the one open_folder had recorded, so a run could end with two of them",
+   "target": "assemble.package: dest = out_root or default_folder_root(run), while open_folder writes wb.client_folder and calls the folder 'the run's public identity'",
+   "disposition": "FIXED",
+   "checks": [
+    "workbook",
+    "stage_walk"
+   ],
+   "note": "Found by the stress walk on 2026-08-30, and it is AUD-0170 with the halves swapped: there the two runs shared one folder and should not have, here one run had two folders and should not have. `--out` is per-command on the CLI, so opening at one root and packaging at another leaves the manifest, the evidence and the supersession archive in one `<Entity> - DMA` and the four deliverables in another. `runs.source_folder_id` keys on a folder, so the app scans one and orphans the other. Both now go through `_dest_folder`, which honours an explicit --out first, then the RECORDED folder, and only then the default root — and the recorded path is honoured only when its parent exists, because it is absolute in the container that wrote it and a run resumed elsewhere must not chase a directory that is not there."
+  },
+  {
+   "id": "AUD-0184",
+   "sev": "MAJOR",
+   "area": "qa",
+   "title": "Nothing walked the last ten changes end to end, and both defects above sat behind passing unit tests",
+   "target": "the stage key, the three grains, the profile ingest, the folder supersession — each with tests, none with a walk",
+   "disposition": "FIXED",
+   "checks": [
+    "stage_walk"
+   ],
+   "note": "`stress_stage_and_supersede.py` walks 19 steps through the REAL command line and the APP's own parsers: a v3 workbook upgrading in place, every assessment-stage refusal at the research stage, AHEAD_OF_STAGE blocking, the stage flipping only on real scores, both stated grains read back by parse_grain_summaries, the recommendations projected and read by parse_recommendations, all sixteen report sections written and independently reviewed, both reports and the scan rendered, the completeness gate satisfied the way a conductor satisfies it, a package assembled, a SECOND run superseding it whole into _superseded/<run_id>/ with the folder keeping its name, the archive invisible to the app's scan, and the retained profile still classifying and parsing to kinds a consumer can name. Two production-blocking defects fell out of it immediately (AUD-0182, AUD-0183), both of which every unit test had passed over, because each half worked alone."
+  },
+  {
+   "id": "AUD-0185",
+   "sev": "MAJOR",
+   "area": "routines",
+   "title": "Nothing checked the chain BETWEEN the pieces — only the chains inside a run",
+   "target": "audit_coverage.py walks tabs, sections, deliverables and derived fields; no check walked intake -> research -> enrichment cadence -> workbook -> reports -> package -> vetting -> synthesis -> promotion -> served surface",
+   "disposition": "FIXED",
+   "checks": [
+    "chain"
+   ],
+   "note": "Every expensive defect this repository has met is the same shape: a link whose two halves both work, both have tests, and are not joined. classification.py classified the profile and _classify_artefact dropped it; open_folder recorded the folder and package recomputed it; Entity_Timeline had a writer, a gate and no reader; the three scored tabs had a reader, two live gates and no writer. audit_chain.py asserts each of eleven links has an OWNER, a GATE and a READER, and reports a HOLE naming which is missing. It checks EXISTENCE, which is what a script can do honestly — the walks prove behaviour and routine_health.py proves the Routines fire — and its own tests pin that it FAILS when a role goes missing and that a predicate which RAISES is a hole rather than a pass, which is the AUD-0181 mistake one level up. Measured 2026-08-30: 11 of 11 links whole."
   }
  ]
 }

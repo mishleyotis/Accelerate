@@ -198,14 +198,24 @@ def _rule4_scores(wb, expect_scores: bool) -> list[Failure]:
     for sheet in C.PILLAR_SHEETS:
         ws = wb[sheet]
         col = C.PILLAR_COLUMNS.index("Score") + 1
-        scored = []
+        scored, rows = [], 0
         for r in range(2, ws.max_row + 1):
+            if str(ws.cell(row=r, column=1).value or "").strip():
+                rows += 1
             v = ws.cell(row=r, column=col).value
             if v is not None and str(v).strip() != "":
                 scored.append((ws.cell(row=r, column=1).value, v))
-        if expect_scores and not scored:
+        # A pillar with NO ROWS is a pillar the run never selected, and an
+        # unselected pillar has nothing to score. Demanding a score there
+        # made the assessment stage unreachable for every run whose scope is
+        # not all four pillars — which is most of them, and which no unit
+        # test caught because `expect_scores` defaulted to False until the
+        # stage key existed. A sheet that HAS rows and no scores is still the
+        # real failure this rule is for.
+        if expect_scores and rows and not scored:
             out.append(Failure(4, "scores",
-                               f"{sheet}: assessment stage, no scores present",
+                               f"{sheet}: assessment stage, {rows} row(s) in "
+                               f"scope and none scored",
                                sheet=sheet))
         if not expect_scores and scored:
             out.append(Failure(

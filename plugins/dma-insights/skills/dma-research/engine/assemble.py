@@ -260,6 +260,34 @@ def _archive_existing(dest: Path, wb) -> dict:
     return {"archived": str(home), "run_id": prior_run, "moved": moved}
 
 
+def _dest_folder(run: runstate.Run, md: dict, entity: str, out_root) -> Path:
+    """Where this run's client folder IS — recorded, not recomputed.
+
+    THE DEFECT THIS CLOSES, found by the stress walk on 2026-08-30.
+    `open_folder` writes `client_folder` into the workbook and calls the
+    folder "the run's public identity"; `package` then recomputed the same
+    path from `out_root or default_folder_root(run)` and never read what was
+    recorded. Give the two different roots — which the CLI allows, since
+    `--out` is per-command — and the run ends with TWO `<Entity> - DMA`
+    directories: the manifest, the evidence and the supersession archive in
+    one, the four deliverables in the other. `runs.source_folder_id` keys on
+    a folder, so the app scans one of them and the other is orphaned, which
+    is AUD-0170 with the halves swapped.
+
+    An EXPLICIT `out_root` still wins: a caller naming a destination means
+    it. And the recorded path is honoured only when its parent exists,
+    because `client_folder` is an absolute path in the container that wrote
+    it — a run resumed on a fresh container must fall back to the default
+    root rather than chase a directory that is not there.
+    """
+    if out_root:
+        return Path(out_root) / folder_name(entity)
+    recorded = str(md.get("client_folder") or "").strip()
+    if recorded and Path(recorded).parent.is_dir():
+        return Path(recorded)
+    return default_folder_root(run) / folder_name(entity)
+
+
 def open_folder(run: runstate.Run, out_root=None, *, push: bool = True) -> dict:
     """Create '<Entity> - DMA' NOW, at run start, and say so in the workbook.
 
@@ -280,7 +308,7 @@ def open_folder(run: runstate.Run, out_root=None, *, push: bool = True) -> dict:
     wb = run.open()
     md = wb.metadata()
     entity = str(md.get("entity_name") or run.run_id)
-    dest = Path(out_root or default_folder_root(run)) / folder_name(entity)
+    dest = _dest_folder(run, md, entity, out_root)
     created = not dest.exists()
     dest.mkdir(parents=True, exist_ok=True)
     # A SECOND run for this client does not get a second folder — it
@@ -334,7 +362,7 @@ def package(run: runstate.Run, out_root, *, push: bool = False) -> dict:
     wb = run.open()
     md = wb.metadata()
     entity = str(md.get("entity_name") or run.run_id)
-    dest = Path(out_root or default_folder_root(run)) / folder_name(entity)
+    dest = _dest_folder(run, md, entity, out_root)
 
     # A workbook that validates and carries nothing is the Golden 1 shape.
     # The package is where it would reach a client, so it is refused here.

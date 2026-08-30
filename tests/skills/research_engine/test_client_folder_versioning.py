@@ -124,3 +124,55 @@ def test_an_archived_package_is_invisible_to_the_apps_scan():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── one folder, not two: package must READ where the folder was opened ───
+
+def test_package_writes_into_the_folder_open_folder_actually_opened(tmp_path):
+    """Found by the stress walk, 2026-08-30.
+
+    `open_folder` writes `client_folder` into the workbook and calls the
+    folder "the run's public identity". `package` then recomputed the same
+    path from `out_root or default_folder_root(run)` and never read what was
+    recorded — so a run whose folder was opened at one root and packaged at
+    another ended with TWO `<Entity> - DMA` directories: the manifest, the
+    evidence and the supersession archive in one, the deliverables in the
+    other. `runs.source_folder_id` keys on a folder, so the app scans one and
+    the other is orphaned. That is AUD-0170 with the halves swapped, and no
+    unit test saw it because every test passed the same root to both.
+    """
+    run = _run(tmp_path, "R-SPLIT", "2026-03-01")
+    opened = assemble.open_folder(run, tmp_path / "client", push=False)
+    where = Path(opened["folder"] if isinstance(opened, dict)
+                 and "folder" in opened else opened["dest"])
+    assert where.parent == tmp_path / "client"
+
+    md = run.open().metadata()
+    dest = assemble._dest_folder(run, md, "Acme Credit Union", None)
+    assert dest == where, (
+        f"package would have written to {dest}, not {where}")
+
+
+def test_an_explicit_out_root_still_wins(tmp_path):
+    """A caller naming a destination means it — the recorded value is a
+    default, not an override."""
+    run = _run(tmp_path, "R-EXPLICIT", "2026-03-02")
+    assemble.open_folder(run, tmp_path / "client", push=False)
+    md = run.open().metadata()
+    dest = assemble._dest_folder(run, md, "Acme Credit Union",
+                                 tmp_path / "elsewhere")
+    assert dest.parent == tmp_path / "elsewhere"
+
+
+def test_a_recorded_folder_from_another_container_is_not_chased(tmp_path):
+    """`client_folder` is an absolute path in the container that wrote it. A
+    run resumed on a fresh container must fall back to the default root
+    rather than chase a directory that is not there — honouring a dead path
+    would put the package nowhere anyone looks."""
+    run = _run(tmp_path, "R-RESUMED", "2026-03-03")
+    wb = run.open()
+    wb.set_metadata("client_folder", "/nonexistent/container/Acme - DMA")
+    md = run.open().metadata()
+    dest = assemble._dest_folder(run, md, "Acme Credit Union", None)
+    assert not str(dest).startswith("/nonexistent"), dest
+    assert dest.name.endswith(" - DMA"), dest

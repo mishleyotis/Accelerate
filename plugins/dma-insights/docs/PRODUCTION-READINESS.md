@@ -64,7 +64,9 @@ it changes in one place.
 | `coverage` | does every workbook tab, report section, deliverable and derived field have an owner that writes it? | `audit_coverage.py --strict` |
 | `skills` | does every bundled script answer `--help`, and does every reference into the skill tree resolve? | `audit_skills.py` |
 | `taxonomy` | any stale catalogue literal, any fifth maturity band the charter says must not exist? | `check_taxonomy_drift.py` |
+| `chain` | does every hand-off from intake to a served surface have an owner, a gate and a reader? | `audit_chain.py --strict` |
 | `approvals` | is every MCP tool a session attaches either auto-approved or refused on the record — nothing prompting by omission? | `audit_autoapprove.py --strict` |
+| `schema` | are the charter's invariants PROVED against a real PostgreSQL — four bands on the raw score with no fifth enum value, generated columns STORED, the api role denied on staging, undated evidence never CURRENT? | `pytest tests/schema/` behind a live-DB probe |
 | `install` | is what this session LOADS what the checkout PUBLISHES? | `plugin_version.py` |
 | `connector` | is the MCP deployment reachable, does the token audience match the URL, does the service enforce the token? | `doctor.py` |
 | `routines` | did every enabled Routine's last firing succeed? | `routine_health.py --strict` |
@@ -84,8 +86,8 @@ teaches a reader to stop believing the row.
 
 | lane | scope |
 |---|---|
-| `coverage` `skills` `taxonomy` `approvals` `tests` `lifecycle` | repository |
-| `install` `connector` | container |
+| `coverage` `skills` `taxonomy` `chain` `approvals` `tests` `lifecycle` | repository |
+| `install` `connector` `schema` | container |
 | `routines` | external |
 
 Two lanes measure **this container** rather than production, and the script
@@ -101,6 +103,15 @@ says so rather than pretending otherwise:
   owns — into "no live credential path", because most of the doctor's
   *passing* rows contain the word `token`. That is a check inventing a reason
   for its own verdict, which is the failure this whole file refuses.
+- **`schema`.** `tests/schema/` needs a live PostgreSQL, and without one
+  it ERRORS rather than fails — 22 errors sitting inside a line that read
+  "4332 passed", for as long as nobody asked. The lane probes for a database
+  first: no database is `NOT_MEASURABLE_HERE` naming `infra/local/up.sh`,
+  never READY. The catalogue tests inside it SKIP until a catalogue is
+  loaded, and that is honest — they assert real counts (851 cells, 16
+  categories, the v5→v7 resolution) that only the real workbooks carry, so a
+  synthetic fixture would make them assert against themselves.
+
 - **`install`.** This one is NOT downgraded, deliberately. A stale install is
   not an artefact of where the check ran; it is the live defect that
   abandoned `dma-refresh-drift-daily`, and every trigger-fired session meets
@@ -120,7 +131,9 @@ against this checkout. Re-run it; do not quote it.
 | `coverage` | **READY** | no artefact required by a contract lacks a writer |
 | `skills` | **READY** | every bundled script answers `--help`; no dead reference into the skill tree |
 | `taxonomy` | **READY** | no stale catalogue literal against v7.0 |
+| `chain` | **READY** | 11 of 11 links whole — intake, deep research, enrichment cadence, workbook population, report finalization, package, vetting, synthesis, promotion, the served app, and the vetting of the result |
 | `approvals` | **READY** | 124 of 184 attached MCP tools auto-approved, 58 refused on the record, 2 guarded by their own precheck, **0 unclassified**. It was 16 of 86 before the read/write split existed |
+| `schema` | **READY** | 35 passed, 12 skipped against a live PostgreSQL 16 + pgvector 0.6.0. It read `22 errors` in every suite line before `infra/local/up.sh` existed — errors, not failures, which is why nobody could say which invariant was unproven |
 | `lifecycle` | **READY** | all five requirements walked through the real command line, in order |
 | `tests` | READY *(run separately)* | `4288 passed, 142 skipped` plus 22 `pg8000` errors, which are this container having no PostgreSQL — `tests/schema/` needs a live database |
 | `install` | **BLOCKED** *(container)* | 0.9.12 loaded against 1.9.0 published; 47 agents dispatched against 68 carried. The live defect, met in the container measuring it |
@@ -148,6 +161,26 @@ them.**
 | **Stale install on a trigger-fired container.** `dma-refresh-drift-daily` reaches a permission prompt the plugin's own auto-approve hook ALLOWS — verified by running the hook against that exact tool name — which means the hook did not RUN. A scheduled session has nobody to answer the prompt, and cannot heal its own bound hooks. | the environment owner: `bootstrap_session.sh` must run BEFORE the session starts (claude.ai/code environment settings, with `DMA_ROUTINE_SA_KEY_B64`) | `docs/ROUTINES.md` |
 | **Owner-names-the-client channel.** There is no interface through which the owner can say which client to assess next: `run_gate.py pick` has no `--client`, its one human lever `--prefer` is passed by nothing, and no Slack surface exists anywhere. **Specified, NOT BUILT.** | whoever builds it — the contract is section 3 of the doc | `docs/CLIENT-SELECTION.md` |
 | **Connector authorisation.** Atlassian, Zapier and Zennify_Brains need OAuth; lane B (`trig_01NXSfaTVuWEubFAcA4mbbeL`) carries no claude.ai connectors. A Routine that reaches its enrichment preflight without them stops without producing — by design, because the owner ruled the routine never runs in degrade mode. | the account owner, on **each Routine's own edit screen** in the claude.ai routines UI. The connector browse list's *Use* buttons enable a connector for the ORG, not for a Routine — measured 2026-08-20. | `docs/CONNECTORS.md` |
+
+---
+
+### The chain, and what a walk proves that existence cannot
+
+`audit_chain.py` proves each link is BUILT. Two walks prove the built links
+actually work together, through the real command line and the app's own
+parsers:
+
+| walk | what it pins |
+|---|---|
+| `stress_run_lifecycle.py` | the five lifecycle requirements, in the order a run meets them |
+| `stress_stage_and_supersede.py` | 19 steps: a v3 workbook upgrading in place, every assessment-stage refusal, the stage flipping only on real scores, both stated grains read back by the app's parser, the recommendations projected, all sixteen sections written and independently reviewed, both reports and the scan rendered, the completeness gate satisfied the way a conductor satisfies it, a package assembled, a SECOND run superseding it whole, the archive invisible to the scan, and the retained profile still parsing |
+
+The second walk was written on 2026-08-30 and found two production-blocking
+defects on its first run, both behind passing unit tests: the assessment
+stage was unreachable for any run whose scope is not all four pillars
+(AUD-0182), and `package` recomputed the client folder instead of reading the
+one `open_folder` had recorded, so a run could end with two of them
+(AUD-0183). That is what a walk is for.
 
 ---
 

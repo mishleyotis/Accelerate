@@ -34,14 +34,23 @@ def _stub(monkeypatch, table):
     (exit_code, output). A name absent from the table returns None, which is
     this file's word for 'never ran'."""
     def fake(argv, cwd=None, timeout=None):
-        name = next((pathlib.Path(a).name for a in argv
-                     if str(a).endswith(".py")), argv[-1])
+        # `-m pytest` carries no .py argument, so resolve the module name too
+        # — otherwise the fallback lands on the last flag and every pytest
+        # lane silently reports "never ran".
+        argv = [str(a) for a in argv]
+        if "-m" in argv:
+            name = argv[argv.index("-m") + 1]
+        else:
+            name = next((pathlib.Path(a).name for a in argv
+                         if a.endswith(".py")), argv[-1])
         return table.get(name, (None, "not stubbed"))
     monkeypatch.setattr(R, "_run", fake)
 
 
 ALL_GREEN = {"audit_coverage.py": (0, "0 holes"),
              "audit_autoapprove.py": (0, "124/184 auto-approved"),
+             "audit_chain.py": (0, "11/11 links whole"),
+             "pytest": (0, "35 passed, 12 skipped"),
              "audit_skills.py": (0, "99/99 scripts"),
              "check_taxonomy_drift.py": (0, "0 stale"),
              "plugin_version.py": (0, "OK"),
@@ -217,6 +226,37 @@ def test_every_lane_names_a_fix(monkeypatch, tmp_path):
     for row in R.assess(triggers=str(tmp_path / "t.json"))["lanes"]:
         assert row["fix"].strip(), row["lane"]
         assert row["what"].strip(), row["lane"]
+
+
+def test_a_link_with_no_reader_blocks_the_chain_lane(monkeypatch, tmp_path):
+    """A link whose two halves both work and are not joined is this
+    product's most expensive defect shape, four times over."""
+    _stub(monkeypatch, {**ALL_GREEN, "audit_chain.py": (1, "1 HOLE")})
+    out = R.assess(triggers=str(tmp_path / "t.json"))
+    assert [r["lane"] for r in out["blocked_in_repository"]] == ["chain"]
+
+
+# ── the schema lane: 22 errors are not 22 passes ─────────────────────────
+
+def test_without_a_database_the_schema_lane_is_unmeasured(monkeypatch):
+    """`tests/schema/` ERRORS without PostgreSQL rather than failing, and a
+    suite line reading '4332 passed, 22 errors' let a set of invariant tests
+    go unrun for months while the summary looked healthy."""
+    _stub(monkeypatch, ALL_GREEN)
+    monkeypatch.setattr(R, "_database_answers", lambda: None)
+    out = R.assess()
+    row = next(r for r in out["lanes"] if r["lane"] == "schema")
+    assert row["verdict"] == R.UNMEASURED
+    assert "up.sh" in row["fix"]
+    assert row["scope"] == R.CONTAINER
+
+
+def test_with_a_database_the_schema_lane_is_measured(monkeypatch, tmp_path):
+    _stub(monkeypatch, {**ALL_GREEN, "pytest": (1, "1 failed")})
+    monkeypatch.setattr(R, "_database_answers", lambda: "postgresql://x")
+    out = R.assess(triggers=str(tmp_path / "t.json"))
+    row = next(r for r in out["lanes"] if r["lane"] == "schema")
+    assert row["verdict"] == R.BLOCKED
 
 
 # ── scope: a blocked lane is not one thing ───────────────────────────────
