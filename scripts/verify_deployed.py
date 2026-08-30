@@ -141,8 +141,8 @@ def deployed_bundle(image_ref: str) -> dict:
                     if m.name.startswith(BUNDLE_IN_IMAGE) and m.name.endswith(".js"):
                         f = t.extractfile(m)
                         if f:
-                            out[m.name.rsplit("/", 1)[-1]] = hashlib.sha256(
-                                f.read()).hexdigest()
+                            out[m.name.rsplit("/", 1)[-1]] = module_hash(
+                                f.read())
         except Exception:
             pass
         finally:
@@ -152,10 +152,33 @@ def deployed_bundle(image_ref: str) -> dict:
     return out
 
 
+def module_hash(raw: bytes) -> str:
+    """sha256 of a compiled module, ignoring a trailing newline.
+
+    The two sides of this comparison are produced differently and that is
+    not going to change: the IMAGE runs `babel proto --out-dir
+    public/proto/js` at build time, and babel emits no final newline; the
+    REPOSITORY carries the same files committed, and normal tooling ends a
+    text file with one. Measured 2026-08-30 after a clean deploy — the
+    deployed bundle and the committed bundle differed on exactly two
+    modules, `\\n` against nothing, and this script printed "Production is
+    not serving HEAD" over a production that was serving it precisely.
+
+    A trailing newline cannot change what a browser parses, so it may not
+    change this verdict. Everything else still counts, byte for byte —
+    this strips ONE class of difference, the one that is provably not a
+    difference in what ships. The check earns its authority by being right
+    both ways: a false alarm here costs as much as the false pass fixed in
+    the same file today, because a verifier that cries wolf gets ignored
+    exactly when it finally has something to say.
+    """
+    return hashlib.sha256(raw.rstrip(b"\r\n")).hexdigest()
+
+
 def local_bundle() -> dict:
     if not BUNDLE_LOCAL.exists():
         return {}
-    return {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+    return {p.name: module_hash(p.read_bytes())
             for p in sorted(BUNDLE_LOCAL.glob("*.js"))}
 
 

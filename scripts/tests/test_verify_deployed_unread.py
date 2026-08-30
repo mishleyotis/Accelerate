@@ -90,3 +90,37 @@ def test_changed_since_still_returns_empty_for_a_missing_timestamp():
     load-bearing for a different reason and someone should re-read both.
     """
     assert _module().changed_since("", ["apps/web"]) == []
+
+
+def test_a_trailing_newline_does_not_flip_the_verdict():
+    """The image and the repo produce these files differently, permanently.
+
+    The image runs `babel proto --out-dir public/proto/js` at build time and
+    babel emits no final newline; the repository carries the same files
+    committed, and normal tooling ends a text file with one. Measured
+    2026-08-30 right after a clean deploy: two modules differed by exactly
+    `\\n` against nothing, and the script reported "Production is not serving
+    HEAD" over a production that was serving it precisely.
+    """
+    m = _module()
+    body = b"Object.assign(window, { arcShapeOf });"
+    assert m.module_hash(body) == m.module_hash(body + b"\n")
+    assert m.module_hash(body) == m.module_hash(body + b"\r\n")
+
+
+def test_every_other_difference_still_counts():
+    """The normalization is one class of byte, not a loosening.
+
+    A check that shrugs at real differences is worse than no check, so this
+    pins the boundary: whitespace INSIDE the file, a changed identifier, and
+    a truncation all still register.
+    """
+    m = _module()
+    body = b"Object.assign(window, { arcShapeOf });"
+    for other in (b"Object.assign(window, { arcShapeOf  });",   # inner space
+                  b"Object.assign(window, { arcShapeOfX });",   # renamed
+                  b"Object.assign(window, { arcShapeOf }",      # truncated
+                  b"\nObject.assign(window, { arcShapeOf });"): # leading NL
+        assert m.module_hash(body) != m.module_hash(other), (
+            f"{other!r} hashed the same as the original — the trailing-newline "
+            f"normalization has widened into something that hides real changes")
