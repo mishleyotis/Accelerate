@@ -173,7 +173,7 @@ START, so provisioning cannot be a step inside the routine. It is the
 `Default - full network access`), which must be wired once, by hand, as:
 
 ```
-curl -sfL https://raw.githubusercontent.com/mishleyotis/Accelerate/main/plugins/dma-insights/scripts/bootstrap_session.sh | bash
+curl -sfL https://raw.githubusercontent.com/mishleyotis/Accelerate/claude/dma-insights-onboarding-0ryrd0/plugins/dma-insights/scripts/bootstrap_session.sh | bash
 ```
 
 **The environment variable is the load-bearing half, and it is enough on

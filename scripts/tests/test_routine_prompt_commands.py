@@ -512,3 +512,41 @@ def test_no_live_prompt_checks_out_a_branch_other_than_the_default():
         f"{want!r} (bootstrap_session.sh's BRANCH default): { {k: sorted(v) for k, v in bad.items()} }. A "
         f"branch that is not the default stops moving the moment its work "
         f"merges, and the firing runs older code every day without failing")
+
+
+def test_no_doc_fetches_a_script_from_a_branch_other_than_the_default():
+    """A raw.githubusercontent URL pins a branch too, and nothing checked it.
+
+    The test above walks `origin/<ref>` and `--branch <ref>` inside the live
+    prompts. It reported green on 2026-08-30 while ROUTINES.md's environment
+    setup fence — prose, not a prompt fence, so outside `live_prompts()` —
+    fetched `bootstrap_session.sh` from `main`. That is worse than a stale
+    prompt: `main`'s copy of the script pins `main` as ITS default, so a
+    fresh container ran the setup script, cloned the wrong lineage, and
+    every routine that container fired reasoned about a tree nobody was
+    landing work on. No step failed.
+
+    So this reads every raw-content URL in every doc, not only the prompts,
+    and holds each to the same single source. The floor assertion keeps it
+    from passing by finding nothing.
+    """
+    want = default_branch()
+    raw = re.compile(
+        r"raw\.githubusercontent\.com/[^/\s]+/[^/\s]+/([A-Za-z0-9._/-]+?)/"
+        r"(?:plugins|scripts|apps|infra|packages)/")
+    checked, bad = 0, {}
+    for doc in sorted((ROOT / "plugins" / "dma-insights" / "docs").rglob("*.md")):
+        for ref in raw.findall(doc.read_text(encoding="utf-8")):
+            checked += 1
+            if ref != want:
+                bad.setdefault(doc.relative_to(ROOT).as_posix(), set()).add(ref)
+    assert not bad, (
+        f"a doc fetches a repository file from a branch that is not {want!r} "
+        f"(bootstrap_session.sh's BRANCH default): "
+        f"{ {k: sorted(v) for k, v in bad.items()} }. The fetched copy stops "
+        f"moving when its branch stops moving, and a bootstrap script fetched "
+        f"from the wrong branch checks the wrong branch out")
+    assert checked, (
+        "this walk found no raw-content URL to check at all — either the docs "
+        "stopped naming one or the pattern stopped matching; either way this "
+        "test is no longer guarding anything")
