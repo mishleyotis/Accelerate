@@ -43,7 +43,38 @@ from pathlib import Path
 from . import contract as C
 from .workbook import RunWorkbook
 
-RUN_ROOT = Path(os.environ.get("DMA_RUN_ROOT", "/home/claude/dma_output"))
+#: Where a production firing writes its runs. It must stay the default THERE:
+#: the registry beside it is how a later container finds a run that stopped,
+#: and moving it would orphan every run already registered.
+PRODUCTION_RUN_ROOT = Path("/home/claude/dma_output")
+
+
+def default_run_root() -> Path:
+    """`$DMA_RUN_ROOT`, else the production path when it EXISTS, else this
+    machine's own home.
+
+    `/home/claude/dma_output` was baked in unconditionally, and it is a path
+    that exists on exactly one kind of machine. A GitHub runner has no
+    `/home/claude` and cannot create one, so `engine.cli start` died with
+    `PermissionError: [Errno 13] Permission denied: '/home/claude'` — inside
+    `registry.log`, which is the step that makes a run findable from a later
+    container. The failure was invisible in development because the
+    development container HAS that directory, so the same command passed
+    here and failed in CI, which is the worst shape a defect can take.
+
+    Probing for the directory rather than reading `$HOME` keeps production
+    byte-identical: where `/home/claude` is there, this returns exactly what
+    it always returned.
+    """
+    env = os.environ.get("DMA_RUN_ROOT")
+    if env:
+        return Path(env)
+    if PRODUCTION_RUN_ROOT.parent.is_dir():
+        return PRODUCTION_RUN_ROOT
+    return Path.home() / "dma_output"
+
+
+RUN_ROOT = default_run_root()
 
 SUBDIRS = ("00_entity_profile", "01_evidence", "02_search", "07_qa",
            "09_deliverables")

@@ -14,6 +14,7 @@
      reads it, and a revive that re-dispatches.
 """
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -347,6 +348,69 @@ def test_a_finished_run_that_shipped_nothing_is_actionable(tmp_path):
     assert row["state"] == "READY_FOR_HANDOFF"
     assert row["state"] in watchdog.ACTIONABLE
     assert row["resume"]["agent"] == "research-conductor"
+
+
+# ── the run root must exist on the machine that is running ──────────────
+
+def test_the_default_run_root_is_not_a_path_only_one_machine_has(monkeypatch,
+                                                                  tmp_path):
+    """The CI failure of 2026-08-30, and the worst shape a defect can take:
+    it passed here and failed there.
+
+    `RUN_ROOT` defaulted to `/home/claude/dma_output` unconditionally. The
+    development container HAS that directory, so every local run wrote there
+    happily; a GitHub runner has no `/home/claude` and cannot create one, so
+    `engine.cli start` died with `PermissionError: '/home/claude'` inside
+    `registry.log` — the step that makes a run findable from a later
+    container, which is lifecycle requirement 5.
+    """
+    from engine import runstate
+
+    monkeypatch.delenv("DMA_RUN_ROOT", raising=False)
+    monkeypatch.setattr(runstate, "PRODUCTION_RUN_ROOT",
+                        tmp_path / "absent" / "dma_output")
+    got = runstate.default_run_root()
+    assert got == Path.home() / "dma_output", got
+    assert "absent" not in str(got)
+
+
+def test_production_keeps_its_run_root_byte_for_byte(monkeypatch, tmp_path):
+    """The registry beside the run root is how a stopped run is found again.
+    Moving it would orphan every run already registered, so where the
+    production directory IS there, nothing changes."""
+    from engine import runstate
+
+    monkeypatch.delenv("DMA_RUN_ROOT", raising=False)
+    present = tmp_path / "home" / "claude"
+    present.mkdir(parents=True)
+    monkeypatch.setattr(runstate, "PRODUCTION_RUN_ROOT",
+                        present / "dma_output")
+    assert runstate.default_run_root() == present / "dma_output"
+
+
+def test_the_environment_still_wins(monkeypatch, tmp_path):
+    from engine import runstate
+
+    monkeypatch.setenv("DMA_RUN_ROOT", str(tmp_path / "explicit"))
+    assert runstate.default_run_root() == tmp_path / "explicit"
+
+
+def test_start_registers_a_run_with_no_writable_production_home(tmp_path):
+    """The end-to-end shape of the same thing: `start` must complete on a
+    machine that has never heard of `/home/claude`."""
+    import subprocess
+
+    env = {**os.environ,
+           "DMA_RUN_ROOT": str(tmp_path / "runs"),
+           "DMA_RUN_REGISTRY": str(tmp_path / "runs" / "registry.jsonl")}
+    r = subprocess.run(
+        [sys.executable, "-c",
+         "import sys; sys.path.insert(0, %r);"
+         "from engine import runstate;"
+         "print(runstate.default_run_root())" % str(ENGINE)],
+        capture_output=True, text=True, env=env, timeout=120)
+    assert r.returncode == 0, r.stderr
+    assert str(tmp_path / "runs") in r.stdout, r.stdout
 
 
 if __name__ == "__main__":
