@@ -420,3 +420,61 @@ def test_the_workbook_can_record_the_thread_it_answers():
 
     for key in ("slack_channel", "slack_thread_ts", "requested_by"):
         assert key in C.RUN_METADATA_KEYS, key
+
+
+# ── thread-of: the thread comes off the run, never off a prompt ──────────
+#
+# The firing that promotes a run is not the firing that started it. Whatever
+# the promoting session knows about the request, it read out of the workbook
+# — so this is the join between the two halves of the queue, and the place a
+# retyped ts would send the owner's own account a message to a stranger.
+
+def _started_run(tmp_path, run_id, **request):
+    import subprocess
+    import sys
+    skill = HERE.parent / "skills" / "dma-research"
+    sys.path.insert(0, str(skill))
+    from engine import runstate                              # noqa: PLC0415
+    run = runstate.start(
+        run_id=run_id, entity_name="Acme CU", entity_id="acme-cu",
+        sub_vertical="CU", scope_mode="T1_CORE",
+        reference_date="2026-08-29", root=tmp_path / "runs",
+        evidence_mode="PUBLIC",
+        sv_basis="NCUA-chartered federal credit union per charter 24680",
+        mode_basis="engagement letter 2026-08-01 grants public-only review")
+    if request:
+        wb = run.open()
+        for k, v in request.items():
+            wb.set_metadata(k, v)
+    return run
+
+
+def test_thread_of_reads_the_request_off_the_run(tmp_path):
+    _started_run(tmp_path, "R-THREAD-1",
+                 slack_channel=SI.DEAL_DESK_CHANNEL_ID,
+                 slack_thread_ts="1756400000.123456",
+                 requested_by="U0EXAMPLE")
+    got = SI.thread_of("R-THREAD-1", str(tmp_path / "runs"))
+    assert got["answerable"] is True
+    assert got["slack_thread_ts"] == "1756400000.123456"
+    assert got["slack_channel"] == SI.DEAL_DESK_CHANNEL_ID
+    assert got["requested_by"] == "U0EXAMPLE"
+
+
+def test_a_run_with_no_thread_is_answerable_false_and_says_so(tmp_path):
+    """A manual run answers no request. The routine must be able to tell
+    that apart from a thread it failed to read — the first is nothing to do,
+    the second is a request left open forever."""
+    _started_run(tmp_path, "R-THREAD-2")
+    got = SI.thread_of("R-THREAD-2", str(tmp_path / "runs"))
+    assert got["answerable"] is False
+    assert "Post nothing" in got["why"]
+
+
+def test_thread_of_never_invents_a_channel(tmp_path):
+    """The channel is the run's, not the module's constant. A run recorded
+    against another channel must not be answered in #deal-desk."""
+    _started_run(tmp_path, "R-THREAD-3", slack_channel="C0OTHER",
+                 slack_thread_ts="1756400000.999999")
+    got = SI.thread_of("R-THREAD-3", str(tmp_path / "runs"))
+    assert got["slack_channel"] == "C0OTHER"

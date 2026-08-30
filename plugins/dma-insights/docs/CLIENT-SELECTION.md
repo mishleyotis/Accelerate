@@ -219,6 +219,31 @@ its `Run_Metadata`. The request is answered days later, from another
 container; the thread has to travel with the run or the answer has nowhere to
 go.
 
+**Where it is actually posted — ROUTINES.md § 2a, STEP 3b (LIVE).** The
+synthesis routines are the ones that see a promotion, so the reply belongs
+to them and not to the intake, whose every firing is by definition before
+the work is done. STEP 3b runs after STEP 3 has looked at what production
+serves, and it reads the thread rather than being told it:
+
+```
+slack_intake.py thread-of --run <run_id>   -> {channel, thread_ts, answerable}
+slack_intake.py reply --client "<Account>" --folder-url <url> --served --json
+mcp__Slack__slack_send_message              -> that channel_id and thread_ts
+```
+
+`answerable: false` means the run records no thread — a manual run, or one
+started before the intake carried it — and the routine posts **nothing**.
+That is a state, not a failure, and it is distinguishable from a thread the
+firing failed to read, which would leave a request open forever.
+
+The channel comes off the run, never off the module constant: a run recorded
+against another channel is not answered in `#deal-desk`. The connector sends
+as the owner, so a thread id typed by hand is the owner messaging a stranger
+— which is why nothing in either prompt types one.
+
+Lane B (`dma-synthesis-sequence-b`) reads lane A's prompt as its
+specification and inherits STEP 3b with the rest of it.
+
 **Approval.** This section previously recorded a standing obligation —
 *"whoever builds this must approve it in the same change that builds the
 sender"* — and that obligation is discharged here.

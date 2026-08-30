@@ -50,7 +50,8 @@
   "chain": "python3 plugins/dma-insights/scripts/audit_chain.py --strict",
   "intake": "python3 -m pytest plugins/dma-insights/scripts/tests/test_slack_intake.py -q",
   "watchdog_prompt": "python3 -m pytest scripts/tests/test_synthesis_watchdog.py -q",
-  "binding": "python3 -m pytest tests/skills/research_engine/test_binding.py -q"
+  "binding": "python3 -m pytest tests/skills/research_engine/test_binding.py -q",
+  "ci_flags": "python3 -m pytest scripts/tests/test_gate_l_ci_bounds.py -q"
  },
  "findings": [
   {
@@ -2330,8 +2331,10 @@
    "title": "The skip-ceiling's own diagnostic printed a header and no reasons, every time",
    "target": ".github/workflows/ci.yml: `-q -rs -rf` — the second -r replaces the first, so ^SKIPPED lines were never emitted and the ceiling's `grep '^SKIPPED'` matched nothing",
    "disposition": "FIXED",
-   "checks": [],
-   "note": "Measured 2026-08-30 on the build that overran the ceiling: it printed `--- the reasons, most common first ---` and then nothing, so which three tests had started skipping had to be found by reproducing the whole suite locally. Now `-rfs`, one flag, both letters. A diagnostic that is present and empty is worse than one that is absent: the absent one is noticed."
+   "checks": [
+    "ci_flags"
+   ],
+   "note": "Measured 2026-08-30 on the build that overran the ceiling: it printed `--- the reasons, most common first ---` and then nothing, so which three tests had started skipping had to be found by reproducing the whole suite locally. Now `-rfs`, one flag, both letters. A diagnostic that is present and empty is worse than one that is absent: the absent one is noticed. Pinned by two guards in test_gate_l_ci_bounds.py: no pytest invocation in the workflow carries two -r flags, and the ceiling's own invocation asks for both letters it greps for. Both fold backslash continuations first — reading the file line-wise finds `pytest` on a line carrying none of its flags, which is a check that passes while measuring nothing. Verified by reverting the flag and watching the first guard fail."
   }
  ]
 }

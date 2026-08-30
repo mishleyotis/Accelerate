@@ -416,6 +416,40 @@ def completion_reply(account: str, folder_url: str, *, served: bool,
                 FOLDER_LINK.search(text)) }
 
 
+# ── the thread this run is answering ─────────────────────────────────────
+
+def thread_of(run_id: str, root: str = "") -> dict:
+    """The Slack request a run was started for, read out of its workbook.
+
+    The firing that promotes a run is not the firing that started it — days
+    apart, certainly containers apart — so the thread is in Run_Metadata or
+    it is nowhere. It is read here rather than typed into a prompt for the
+    same reason `threads` prints the ts pairs: a thread id retyped by hand
+    answers a thread nobody asked in, and on the owner's own account that is
+    a message to a stranger.
+
+    Returns the fields with `answerable` saying whether there is a thread at
+    all. A manual run has none, and that is a state — not every run answers
+    a Slack request.
+    """
+    import sys as _sys
+    skill = Path(__file__).resolve().parent.parent / "skills" / "dma-research"
+    if str(skill) not in _sys.path:
+        _sys.path.insert(0, str(skill))
+    from engine import runstate                      # noqa: PLC0415
+    run = runstate.locate(run_id, Path(root) if root else None)
+    md = run.open().metadata()
+    got = {k: str(md.get(k) or "") for k in
+           ("slack_channel", "slack_thread_ts", "requested_by")}
+    got["run_id"] = run_id
+    got["answerable"] = bool(got["slack_thread_ts"] and got["slack_channel"])
+    if not got["answerable"]:
+        got["why"] = ("this run records no Slack thread, so it answers no "
+                      "request — a manual run, or one started before the "
+                      "intake carried the thread. Post nothing.")
+    return got
+
+
 # ── CLI ──────────────────────────────────────────────────────────────────
 
 def _read(p: str) -> str:
@@ -469,6 +503,12 @@ def main(argv=None) -> int:
                         "marks the request delivered")
     y.add_argument("--json", action="store_true")
 
+    w = sub.add_parser("thread-of",
+                       help="the Slack thread a run is answering, read out "
+                            "of its own workbook")
+    w.add_argument("--run", required=True)
+    w.add_argument("--root", default="")
+
     a = ap.parse_args(argv)
     now = (datetime.strptime(a.now, "%Y-%m-%d").replace(tzinfo=timezone.utc)
            if getattr(a, "now", None) else None)
@@ -483,6 +523,10 @@ def main(argv=None) -> int:
         print(json.dumps(one, indent=1) if a.json
               else f"INTAKE: PENDING {one['entity_id']} "
                    f"run={one['run_id']} \"{one['account']}\" (manual)")
+        return 0
+
+    if a.cmd == "thread-of":
+        print(json.dumps(thread_of(a.run, a.root), indent=1))
         return 0
 
     if a.cmd == "reply":
