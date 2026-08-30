@@ -57,6 +57,10 @@ from pathlib import Path
 
 from . import contract as C
 
+
+def C_COLS():
+    return C.SHEETS["Evidence_Detail"]
+
 #: The archive's weights (scripts/calculate_ers.py), kept verbatim so a
 #: score computed here is comparable with one computed there.
 W_TIER, W_RECENCY, W_SPECIFICITY, W_CORROBORATION = 0.35, 0.25, 0.20, 0.20
@@ -232,11 +236,23 @@ def recompute(wb, run=None) -> dict:
     for row in rows:
         url = _clean(row.get("Source_URL"))
         ranking = rank.get(R.normalise_url(url)) if url else None
-        s = score_row(row, rows, ranking)
-        wb.update_row("Evidence_Detail", "E_ID", str(row["E_ID"]),
-                      {"ERS": s["ers"]}, save=False)
-        scored.append(s)
-    wb.save()
+        scored.append(score_row(row, rows, ranking))
+
+    # ONE worksheet pass, one save. `update_row` scans the sheet per call,
+    # which made this O(n^2) on a path that runs at every evidence append —
+    # measured at ~0.3s per bank on a 24-row register, and every append pays
+    # it. The score is still recomputed across the whole register, because
+    # corroboration is a property of the register; only the WRITE is cheap.
+    by_id = {str(x["e_id"]): x["ers"] for x in scored}
+    if by_id:
+        ws = wb._sheet("Evidence_Detail")
+        cols = list(C_COLS())
+        idc, ersc = cols.index("E_ID") + 1, cols.index("ERS") + 1
+        for r_ in range(2, ws.max_row + 1):
+            eid = str(ws.cell(row=r_, column=idc).value or "").strip()
+            if eid in by_id:
+                ws.cell(row=r_, column=ersc, value=by_id[eid])
+        wb.save()
     vals = [s["ers"] for s in scored]
     return {
         "scored": len(scored),

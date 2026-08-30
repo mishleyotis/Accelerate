@@ -97,32 +97,34 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             f"evidence names cells outside this run's engagement set: {foreign}")
     eid = wb.next_evidence_id()
-    wb.append("Evidence_Detail", {
-        "E_ID": eid, "Fact_ID": fact_id, "Source_Name": source_name,
-        "Source_URL": source_url, "Tier": tier, "ERS": None,
-        "Date_Published": published, "Recency": recency_band(published, wb),
-        "Claim_Type": claim_type, "Fact_Count": 1,
-        "SubCap_IDs": ", ".join(cells), "Excerpt": text,
-        "Anchor_Quote": anchor_quote or text, "Retrieved_At": _utcnow(),
-        "Origin": origin, "Access_Status": access_status, "Conflict": conflict,
-    })
-    # ERS is COMPUTED, not supplied. AUD-0152: the column existed, a full
+    # ERS is COMPUTED, never supplied (AUD-0152: the column existed, a full
     # calculator existed, and nothing joined them — twenty rows, twenty
-    # empty cells, in every run ever produced. Recomputed across the whole
-    # register because corroboration is a property of the register: a row
-    # banked first is re-scored when its second source arrives.
+    # empty cells, in every run ever produced). Scored INLINE here so the
+    # append pays no second save; the cross-register pass that updates
+    # everyone else's corroboration runs at synthesis, where a second
+    # source actually changes a judgement.
+    from . import ers as _ers
+    _existing = [r for r in wb.rows("Evidence_Detail") if r.get("E_ID")]
+    _new = {"E_ID": eid, "Source_Name": source_name, "Source_URL": source_url,
+            "Tier": tier, "Recency": recency_band(published, wb),
+            "SubCap_IDs": ", ".join(cells), "Excerpt": text}
+    _score = _ers.score_row(_new, _existing + [_new])["ers"]
     if ers is not None:
-        # An explicitly supplied score is IGNORED, on the same principle the
-        # connector applies (invariant 10). Saying so beats silence.
         wb.append("Provenance", {
             "SubCap_ID": "", "Step": "ers_supplied_ignored",
             "Actor": "ledger", "At": _utcnow(),
             "Detail": f"{eid}: caller passed ERS={ers}; the score is computed "
                       f"server-side from tier, recency, specificity and "
                       f"corroboration"}, save=False)
-    from . import ers as _ers
-    _ers.recompute(wb, run)
-
+    wb.append("Evidence_Detail", {
+        "E_ID": eid, "Fact_ID": fact_id, "Source_Name": source_name,
+        "Source_URL": source_url, "Tier": tier, "ERS": _score,
+        "Date_Published": published, "Recency": recency_band(published, wb),
+        "Claim_Type": claim_type, "Fact_Count": 1,
+        "SubCap_IDs": ", ".join(cells), "Excerpt": text,
+        "Anchor_Quote": anchor_quote or text, "Retrieved_At": _utcnow(),
+        "Origin": origin, "Access_Status": access_status, "Conflict": conflict,
+    })
     for cell in cells:
         row = wb.scoring_row(cell) or {}
         have = [i for i in _split_ids(row.get("Evidence_IDs"))
@@ -404,6 +406,13 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     if actor:
         record_provenance(wb, subcap, "synthesis", actor)
     wb.recompute_coverage()
+    # The cross-register ERS pass lands HERE rather than at every append.
+    # Corroboration is a property of the whole register — a row banked first
+    # is under-scored until its second source arrives — but the moment that
+    # matters is when a judgement is written, not when a row is added. One
+    # pass per synthesis instead of one per evidence row.
+    from . import ers as _ers
+    _ers.recompute(wb)
     return {"subcap": subcap, "written": sorted(payload),
             "actor": actor}
 
