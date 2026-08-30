@@ -120,6 +120,48 @@ def containment(commit: str, target: str, index: dict | None = None) -> tuple:
     return total, missing, by_file
 
 
+def tree_containment(target: str, branch: str) -> tuple:
+    """Every substantive line the BRANCH TIP holds, tested against the target.
+
+    Pass 2 walks commits, which answers "was this commit absorbed". It does
+    not answer the question you actually have when deciding whether a branch
+    can go: does the branch's CURRENT tree hold a line this one does not? A
+    commit can read as a CANDIDATE because a later commit on its own branch
+    rewrote those lines — the intermediate version is genuinely absent here
+    and genuinely not lost. On 2026-08-30 that shape produced 155 "absent"
+    lines in one ledger file that the branch tip did not carry either.
+
+    So this compares tip to tip. It is also far cheaper on a long branch:
+    one pass over the differing files instead of one per commit. A file the
+    target lacks at that path is looked up by basename first, for the same
+    relocation reason as `containment`.
+    """
+    index = _tree_paths(target)
+    total = missing = 0
+    by_file: collections.Counter = collections.Counter()
+    changed = sh("git", "diff", "--name-only", "--diff-filter=AM",
+                 target, branch).splitlines()
+    for path in changed:
+        theirs = sh("git", "show", f"{branch}:{path}")
+        if not theirs:
+            continue
+        ours = sh("git", "show", f"{target}:{path}")
+        if not ours:
+            for alt in index.get(path.rsplit("/", 1)[-1], []):
+                ours = sh("git", "show", f"{target}:{alt}")
+                if ours:
+                    break
+        for line in theirs.splitlines():
+            s = line.strip()
+            if len(s) <= MIN_LEN or s.startswith(TRIVIAL_PREFIX):
+                continue
+            total += 1
+            if s not in ours:
+                missing += 1
+                by_file[path] += 1
+    return total, missing, by_file, len(changed)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("branches", nargs="+")
@@ -128,7 +170,38 @@ def main(argv=None) -> int:
     ap.add_argument("--threshold", type=int, default=100,
                     help="percent of added lines that must be present for a "
                          "commit to count as absorbed (default 100)")
+    ap.add_argument("--tree", action="store_true",
+                    help="compare BRANCH TIP to target tree instead of "
+                         "walking commits: does the branch hold a line this "
+                         "tree does not? Cheap on long branches, and immune "
+                         "to the intermediate-version false alarm")
     a = ap.parse_args(argv)
+
+    if a.tree:
+        rows = []
+        for branch in a.branches:
+            if not sh("git", "rev-parse", "--verify", branch).strip():
+                print(f"### {branch}: no such ref", file=sys.stderr)
+                rows.append((branch, None, 0))
+                continue
+            total, missing, by_file, nfiles = tree_containment(a.target, branch)
+            pct = 100 if not total else 100 * (total - missing) // total
+            print(f"### {branch}")
+            print(f"    {nfiles} file(s) differ; {total} substantive line(s) "
+                  f"on the branch tip, {pct}% present in {a.target}")
+            for path, n in by_file.most_common(12):
+                print(f"        {n:6d} absent in {path}")
+            rows.append((branch, missing, total))
+            print()
+        print("== summary (tip vs tip) ==")
+        for branch, missing, total in rows:
+            state = ("unreadable" if missing is None else
+                     "holds nothing this tree lacks" if missing == 0 else
+                     f"{missing} of {total} line(s) to read")
+            print(f"  {branch:52s} {state}")
+        print("\nA line absent here is EITHER lost work OR a deliberate "
+              "deletion. Read it before restoring it.")
+        return 0
 
     verdicts = []
     for branch in a.branches:
