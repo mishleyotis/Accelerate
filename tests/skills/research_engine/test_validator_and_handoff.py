@@ -228,12 +228,78 @@ def test_rule5_accepts_the_literal_no_evidence(tmp_path):
 
 
 # ── rule 6 ───────────────────────────────────────────────────────────────
+#
+# MEM-0467. Rule 6 had a test that FIRED it and none that did not, which is
+# the one asymmetry this file's docstring says it does not tolerate — and it
+# is exactly how an OVER-firing predicate stayed invisible. The rule tested
+# `token in cell`, unanchored, so every banned token that is also an ordinary
+# fragment of a URL path refused a real link: "n/a" lives inside
+# "linkedin.com/in/an·n/a·mills" and inside "kpmg.com/us/e·n/a·rticles".
+# On bank-of-travelers-rest that refused 12 of 12 cited URLs and returned
+# FAILS=2 on a workbook with no data defect in it.
+#
+# So both directions below, and the not-firing half is the half that matters:
+# every case marked False here PASSES the fixed predicate and five of them
+# FAIL the substring one.
 
-@pytest.mark.parametrize("bad", ["Multiple Searches", "see report", "N/A"])
-def test_rule6_fires_on_the_banned_placeholders_in_any_casing(tmp_path, bad):
+
+def _rule6_fires(wb, value) -> bool:
+    wb.set_scoring(wb.selected_subcaps()[0], {"Source_URLs": value})
+    return any(f["rule"] == 6 for f in validator.validate(wb.path))
+
+
+@pytest.mark.parametrize("bad", [
+    "Multiple Searches", "see report", "N/A",          # the original three
+    "n/a", "tbd", "various", "see above",              # the rest of the set
+    "Various", "See Above", "TBD",                     # mixed casing
+    "N/A.", "(TBD)",                                   # trivial punctuation
+    "n/a - nothing found",                             # token + prose
+    "https://real.example/x, n/a",                     # one bad entry of two
+])
+def test_rule6_fires_on_a_cell_that_is_a_placeholder(tmp_path, bad):
+    """The narrowing must not have weakened it: each of these still FAILS."""
     run, wb = _good_run(tmp_path, n=2)
-    wb.set_scoring(wb.selected_subcaps()[0], {"Source_URLs": bad})
-    assert any(f["rule"] == 6 for f in validator.validate(wb.path))
+    assert _rule6_fires(wb, bad), bad
+
+
+@pytest.mark.parametrize("good", [
+    # The two live BTR values. Both FAIL the pre-fix substring predicate.
+    "https://www.linkedin.com/in/anna-mills-344a81101/",
+    "https://kpmg.com/us/en/articles/2023/third-party-risk-management"
+    "-final-interagency-guidance-reg-alert.html",
+    # One per banned token, embedded in a path the way a real URL embeds it.
+    "https://x.example/multiple-searches",
+    "https://x.example/see-report-2024",
+    "https://x.example/various-rates",
+    "https://x.example/tbd-holdings/",
+    "https://x.example/see-above-all",
+    # A location need not carry a scheme to be a location.
+    "kpmg.com/us/en/articles/x",
+])
+def test_rule6_does_not_fire_on_a_cell_that_holds_a_link(tmp_path, good):
+    """A location is never a placeholder, however its characters spell."""
+    run, wb = _good_run(tmp_path, n=2)
+    assert not _rule6_fires(wb, good), good
+
+
+def test_rule6_reports_the_offending_value_not_the_token_that_matched(tmp_path):
+    """The old message printed "n/a" for a cell holding a LinkedIn URL, which
+    reads as a data defect and sends a conductor hunting one that is not
+    there. The reader needs the value that is wrong."""
+    run, wb = _good_run(tmp_path, n=2)
+    wb.set_scoring(wb.selected_subcaps()[0],
+                   {"Source_URLs": "https://real.example/x; TBD (pending)"})
+    detail = [f for f in validator.validate(wb.path) if f["rule"] == 6][0]["detail"]
+    assert "TBD (pending)" in detail, detail
+
+
+def test_rule6_predicate_is_directly_testable(tmp_path):
+    """The predicate is public so the matrix above can be argued about at the
+    unit it actually judges: one entry, not one workbook."""
+    assert validator.placeholder_entries(
+        "https://www.linkedin.com/in/anna-mills-344a81101/") == []
+    assert validator.placeholder_entries("https://real.example/x, n/a") == ["n/a"]
+    assert validator.placeholder_entries("") == []
 
 
 # ── rule 7 ───────────────────────────────────────────────────────────────
